@@ -1,0 +1,27 @@
+{
+  "extends": "@parcel/eslint-config-browser",
+  "overrides": [
+    {
+      "files": ["**/client/**"],
+      "settings": {
+        "import/resolver": "parcel"
+      }
+    },
+    {
+      "files": ["**/server/**"],
+      "settings": {
+        "import/resolver": "typescript"
+      }
+    },
+    {
+      "files": ["**/__tests__/**", "*.test.*"],
+      "settings": {
+        "import/resolver": {
+          "jest": {
+            "jestConfigFile": "./jest.config.js"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "parserOpts": {
+    "strictMode": true
+  },
+  "presets": [
+    "@babel/preset-env",
+    "@babel/preset-react",
+    "@emotion/babel-preset-css-prop"
+  ],
+  "plugins": [
+    ["@babel/plugin-transform-typescript", {"isTSX": true}],
+    ["@babel/plugin-proposal-decorators", {"legacy": true}],
+    ["@babel/plugin-proposal-class-properties", {"loose": true}],
+    "macros"
+  ]
+}

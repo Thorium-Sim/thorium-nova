@@ -1,0 +1,12 @@
+query IntrospectionQuery {
+  __schema {
+    mutationType {
+      name
+      description
+      fields {
+        name
+        description
+      }
+    }
+  }
+}

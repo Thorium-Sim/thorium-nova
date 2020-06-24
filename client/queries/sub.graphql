@@ -1,0 +1,14 @@
+fragment Coords on Coordinate {
+  x
+  y
+  z
+}
+subscription ObjectMovements {
+  objects {
+    id
+
+    Position {
+      ...Coords
+    }
+  }
+}

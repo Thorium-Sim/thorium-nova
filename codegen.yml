@@ -1,0 +1,17 @@
+overwrite: true
+schema: "http://localhost:3001/graphql"
+documents: "client/**/*.graphql"
+generates:
+  client/generated/queryHooks.tsx:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "./scripts/graphql-hooks-codegen.cjs"
+    config:
+      scalars:
+        DateTime: Date
+        JSON: "{[key: string]: any}"
+      onlyOperationTypes: true
+      avoidOptionals: true
+      preResolveTypes: true
+      skipTypename: true
