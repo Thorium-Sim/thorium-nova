@@ -1,4 +1,4 @@
-import express from "express";
+import express, {RequestHandler} from "express";
 import multer from "multer";
 import cors from "cors";
 import bodyParser from "body-parser";
@@ -31,7 +31,7 @@ export default async function setupServer() {
     folderPath: string,
   ) {}
 
-  server.post("/upload", upload.any(), async (req, res) => {
+  server.post("/upload", upload.any() as RequestHandler, async (req, res) => {
     if (Array.isArray(req.files)) {
       uploadAsset(req.files, req.body.name, req.body.folderPath);
       return res.end(JSON.stringify("success!"));
@@ -39,7 +39,10 @@ export default async function setupServer() {
     return res.end(JSON.stringify("failure"));
   });
 
-  server.use("/assets/", express.static(path.resolve("./assets")));
+  server.use(
+    "/assets/",
+    express.static(path.resolve("./assets")) as RequestHandler,
+  );
 
   return server;
 }

@@ -22,6 +22,7 @@ export default async function setupApollo(server: Application) {
   };
 
   const apollo = new ApolloServer(graphqlOptions);
+  // @ts-ignore
   apollo.applyMiddleware({app: (server as unknown) as Application});
 
   return apollo;

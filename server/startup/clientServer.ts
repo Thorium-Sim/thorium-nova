@@ -1,10 +1,10 @@
 import path from "path";
-import express, {Application} from "express";
+import express, {Application, RequestHandler} from "express";
 
 const staticPath = path.resolve(path.dirname(process.argv[1]), "..");
 
 export default async function setupClientServer(server: Application) {
-  server.use(express.static(staticPath));
+  server.use(express.static(staticPath) as RequestHandler);
 
   server.get("*", function (req, res) {
     res.sendFile(`${staticPath}/index.html`, function (err) {

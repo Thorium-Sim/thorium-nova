@@ -36,7 +36,6 @@
     "class-validator": "^0.12.2",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
-    "ecsy": "MozillaReality/ecsy#dev",
     "emotion-theming": "^10.0.27",
     "express": "^4.16.4",
     "graphql": "^14.0.0 || ^15.0.0",

@@ -22,8 +22,9 @@
       "c/*": ["client/*"],
       "shared/*": ["shared/*"],
       "*": ["test/*"]
-    }
+    },
+    "typeRoots": ["./node_modules/@types", "./types"]
   },
   "exclude": ["node_modules"],
-  "include": ["client", "server", "test", "types/*", "babel.config.js"]
+  "include": ["client", "server", "test", "babel.config.js"]
 }
