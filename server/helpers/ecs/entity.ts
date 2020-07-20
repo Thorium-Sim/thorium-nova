@@ -1,47 +1,10 @@
-/**
- * @module  ecs
- */
-
 import {fastSplice} from "./utils";
 import uniqid from "uniqid";
 import System from "./system";
-import {ECS} from "./ecs";
+import ECS from "./ecs";
 import {Field, ID, ObjectType} from "type-graphql";
-
-export type ComponentOmit<T> = Omit<T, "name" | "defaults" | "getDefaults">;
-
-abstract class Component {
-  static id: string;
-  static defaults: any;
-  static getDefaults?: Function;
-}
-
-@ObjectType()
-export class TimerComponent extends Component {
-  static id: "timer" = "timer";
-  static defaults: ComponentOmit<TimerComponent> = {
-    label: "Generic",
-    time: "00:05:00",
-    paused: false,
-  };
-
-  @Field()
-  label!: string;
-
-  @Field()
-  time: string = "00:00:00";
-
-  @Field()
-  paused: boolean = false;
-}
-console.log(TimerComponent);
-
-@ObjectType()
-class Components {
-  [name: string]: Record<string, any> | undefined;
-  @Field()
-  timer?: TimerComponent;
-}
+import Components from "s/components";
+import {Component} from "s/components/utils";
 
 /**
  * An entity.
@@ -54,7 +17,7 @@ class Entity {
   systemsDirty: boolean;
   @Field()
   components: Components;
-  ecs: ECS | null;
+  private ecs: ECS | null;
   constructor(id: string | null, components: Component[] = []) {
     /**
      * Unique identifier of the entity.
@@ -84,8 +47,7 @@ class Entity {
       // function. Secondly because the user may want to provide some kind
       // of logic in components initialization ALTHOUGH these kind of
       // initialization should be done in enter() handler
-      // @ts-ignore ts(2576) // Accessing static properties
-      console.log(component);
+
       // @ts-ignore ts(2576) // Accessing static properties
       if (component.getDefaults) {
         // @ts-ignore ts(2576)

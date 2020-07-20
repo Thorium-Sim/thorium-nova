@@ -11,13 +11,39 @@ import {
 import {UserInputError} from "apollo-server-errors";
 import uuid from "uniqid";
 import App from "../app";
+
+type OfflineStates =
+  | "blackout"
+  | "offline"
+  | "power"
+  | "lockdown"
+  | "maintenance"
+  | null;
 @ObjectType()
 export default class Client {
   @Field(type => ID)
   id: string;
 
+  @Field(type => ID, {nullable: true})
+  flightId: string | null = null;
+
+  @Field(type => ID, {nullable: true})
+  simulatorId: string | null = null;
+
+  @Field(type => ID, {nullable: true})
+  stationId: string | null = null;
+
+  @Field(type => String, {nullable: true})
+  loginName: string | null = null;
+
+  @Field(type => String, {nullable: true})
+  offlineState: OfflineStates = null;
+
   @Field()
-  connected: Boolean = false;
+  training: boolean = false;
+
+  @Field()
+  connected: boolean = false;
   constructor(params: Partial<Client> = {}) {
     this.id = params.id || uuid();
     this.connected = params.connected || false;
@@ -27,6 +53,45 @@ export default class Client {
   }
   disconnect() {
     this.connected = false;
+  }
+  setFlight(flightId: string | null) {
+    this.flightId = flightId;
+    const flight = App.activeFlight;
+    this.simulatorId = null;
+    this.stationId = null;
+    this.logout();
+    if (flight && flight.simulators.length === 1) {
+      this.simulatorId = flight.simulators[0].id;
+    }
+  }
+  setSimulator(simulatorId: string | null) {
+    this.simulatorId = simulatorId;
+    this.stationId = null;
+    this.logout();
+  }
+  setStation(stationId: string | null) {
+    this.stationId = stationId;
+  }
+  login(name: string) {
+    this.loginName = name;
+  }
+  logout() {
+    this.loginName = null;
+  }
+  setTraining(training: boolean) {
+    this.training = training;
+  }
+  setOfflineState(state: OfflineStates) {
+    this.offlineState = state;
+  }
+  reset(hardReset = false) {
+    this.setTraining(false);
+    this.logout();
+
+    this.setOfflineState(null);
+    if (hardReset) {
+      this.setFlight(null);
+    }
   }
 }
 
@@ -60,6 +125,17 @@ export class ClientResolver {
     let client = App.storage.clients.find(c => c.id === clientId);
 
     client?.disconnect();
+
+    return client;
+  }
+  @Mutation(returns => Client)
+  clientSetFlight(
+    @Arg("id", type => ID) clientId: string,
+    @Arg("id", type => ID) flightId: string,
+  ): Client | undefined {
+    let client = App.storage.clients.find(c => c.id === clientId);
+
+    client?.setFlight(flightId);
 
     return client;
   }

@@ -23,7 +23,7 @@ export default async function setupServer() {
 
   const server = express();
   server.use(bodyParser.json({limit: "20mb"}));
-  server.use("*", cors());
+  server.use("*", cors() as RequestHandler);
 
   function uploadAsset(
     files: Express.Multer.File[],

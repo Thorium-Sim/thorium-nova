@@ -5,3 +5,5 @@ dist
 yarn-error.log
 .env
 coverage
+data
+.DS_Store

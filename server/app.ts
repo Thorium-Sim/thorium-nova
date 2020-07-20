@@ -16,7 +16,11 @@ const storage = getStore<PersistentStorage>({
 
 class AppClass {
   storage: PersistentStorage = storage;
-  activeFlight: Flight | null = null;
+  activeFlight:
+    | (Flight & {
+        writeFile: (force?: boolean) => Promise<void>;
+      })
+    | null = null;
 
   httpOnly: boolean = false;
   port: number = process.env.NODE_ENV === "production" ? 4444 : 3001;
@@ -25,6 +29,10 @@ class AppClass {
     if (process.env.PORT && !isNaN(parseInt(process.env.PORT, 10)))
       this.port = parseInt(process.env.PORT, 10);
     this.httpOnly = process.env.HTTP_ONLY === "true";
+  }
+  snapshot() {
+    storage.writeFile(true);
+    this.activeFlight?.writeFile(true);
   }
 }
 

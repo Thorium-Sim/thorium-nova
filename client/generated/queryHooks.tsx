@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import * as GraphQLHooks from "c/helpers/graphqlHooks";
+import * as GraphQLHooks from "../helpers/graphqlHooks";
 export type Maybe<T> = T | null;
 export type Exact<T extends {[key: string]: any}> = {[K in keyof T]: T[K]};
 /** All built-in and custom scalars, mapped to their actual values */
@@ -73,6 +73,41 @@ export enum __DirectiveLocation {
   InputFieldDefinition = "INPUT_FIELD_DEFINITION",
 }
 
+export type TimerPauseMutationVariables = Exact<{
+  id: Scalars["ID"];
+  pause: Scalars["Boolean"];
+}>;
+
+export type TimerPauseMutation = {timerPause: Maybe<{id: string}>};
+
+export type TimerRemoveMutationVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type TimerRemoveMutation = {timerRemove: string};
+
+export type TimerCreateMutationVariables = Exact<{
+  time: Scalars["String"];
+  label: Scalars["String"];
+}>;
+
+export type TimerCreateMutation = {
+  timerCreate: {id: string; components: {timer: {label: string; time: string}}};
+};
+
+export type TimersSubscriptionVariables = Exact<{[key: string]: never}>;
+
+export type TimersSubscription = {
+  timers: Array<{
+    id: string;
+    components: {timer: {time: string; label: string}};
+  }>;
+};
+
+export type StartFlightMutationVariables = Exact<{[key: string]: never}>;
+
+export type StartFlightMutation = {flightStart: {id: string; name: string}};
+
 export type FlightQueryVariables = Exact<{[key: string]: never}>;
 
 export type FlightQuery = {flight: Maybe<{id: string; name: string}>};
@@ -87,13 +122,6 @@ export type IntrospectionQueryQuery = {
       fields: Maybe<Array<{name: string; description: Maybe<string>}>>;
     }>;
   };
-};
-
-export type StartFlightMutationVariables = Exact<{[key: string]: never}>;
-
-export type StartFlightMutation = {
-  addObject: string;
-  flightStart: {id: string; name: string};
 };
 
 export type CoordsFragment = {x: number; y: number; z: number};
@@ -113,6 +141,136 @@ export const CoordsFragmentDoc = gql`
     z
   }
 `;
+export const TimerPauseDocument = gql`
+  mutation TimerPause($id: ID!, $pause: Boolean!) {
+    timerPause(id: $id, pause: $pause) {
+      id
+    }
+  }
+`;
+export function useTimerPauseMutation(
+  baseOptions?: GraphQLHooks.MutationHookOptions<
+    TimerPauseMutation,
+    TimerPauseMutationVariables
+  >,
+) {
+  return GraphQLHooks.useMutation<
+    TimerPauseMutation,
+    TimerPauseMutationVariables
+  >(TimerPauseDocument, baseOptions);
+}
+export type TimerPauseMutationHookResult = ReturnType<
+  typeof useTimerPauseMutation
+>;
+export const TimerRemoveDocument = gql`
+  mutation TimerRemove($id: ID!) {
+    timerRemove(id: $id)
+  }
+`;
+export function useTimerRemoveMutation(
+  baseOptions?: GraphQLHooks.MutationHookOptions<
+    TimerRemoveMutation,
+    TimerRemoveMutationVariables
+  >,
+) {
+  return GraphQLHooks.useMutation<
+    TimerRemoveMutation,
+    TimerRemoveMutationVariables
+  >(TimerRemoveDocument, baseOptions);
+}
+export type TimerRemoveMutationHookResult = ReturnType<
+  typeof useTimerRemoveMutation
+>;
+export const TimerCreateDocument = gql`
+  mutation TimerCreate($time: String!, $label: String!) {
+    timerCreate(time: $time, label: $label) {
+      id
+      components {
+        timer {
+          label
+          time
+        }
+      }
+    }
+  }
+`;
+export function useTimerCreateMutation(
+  baseOptions?: GraphQLHooks.MutationHookOptions<
+    TimerCreateMutation,
+    TimerCreateMutationVariables
+  >,
+) {
+  return GraphQLHooks.useMutation<
+    TimerCreateMutation,
+    TimerCreateMutationVariables
+  >(TimerCreateDocument, baseOptions);
+}
+export type TimerCreateMutationHookResult = ReturnType<
+  typeof useTimerCreateMutation
+>;
+export const TimersDocument = gql`
+  subscription Timers {
+    timers {
+      id
+      components {
+        timer {
+          time
+          label
+        }
+      }
+    }
+  }
+`;
+export function useTimersSubscription(
+  baseOptions?: GraphQLHooks.SubscriptionHookOptions<
+    TimersSubscription,
+    TimersSubscriptionVariables
+  >,
+) {
+  return GraphQLHooks.useSubscription<
+    TimersSubscription,
+    TimersSubscriptionVariables
+  >(TimersDocument, baseOptions);
+}
+export function useTimersTSubscription(
+  baseOptions?: GraphQLHooks.SubscriptionHookOptions<
+    TimersSubscription,
+    TimersSubscriptionVariables
+  >,
+) {
+  return GraphQLHooks.useTSubscription<
+    TimersSubscription,
+    TimersSubscriptionVariables
+  >(TimersDocument, baseOptions);
+}
+export type TimersSubscriptionHookResult = ReturnType<
+  typeof useTimersSubscription
+>;
+export type TimersTSubscriptionHookResult = ReturnType<
+  typeof useTimersTSubscription
+>;
+export const StartFlightDocument = gql`
+  mutation StartFlight {
+    flightStart {
+      id
+      name
+    }
+  }
+`;
+export function useStartFlightMutation(
+  baseOptions?: GraphQLHooks.MutationHookOptions<
+    StartFlightMutation,
+    StartFlightMutationVariables
+  >,
+) {
+  return GraphQLHooks.useMutation<
+    StartFlightMutation,
+    StartFlightMutationVariables
+  >(StartFlightDocument, baseOptions);
+}
+export type StartFlightMutationHookResult = ReturnType<
+  typeof useStartFlightMutation
+>;
 export const FlightDocument = gql`
   query Flight {
     flight {
@@ -186,29 +344,6 @@ export type IntrospectionQueryQueryHookResult = ReturnType<
 >;
 export type IntrospectionQueryLazyQueryHookResult = ReturnType<
   typeof useIntrospectionQueryLazyQuery
->;
-export const StartFlightDocument = gql`
-  mutation StartFlight {
-    flightStart {
-      id
-      name
-    }
-    addObject
-  }
-`;
-export function useStartFlightMutation(
-  baseOptions?: GraphQLHooks.MutationHookOptions<
-    StartFlightMutation,
-    StartFlightMutationVariables
-  >,
-) {
-  return GraphQLHooks.useMutation<
-    StartFlightMutation,
-    StartFlightMutationVariables
-  >(StartFlightDocument, baseOptions);
-}
-export type StartFlightMutationHookResult = ReturnType<
-  typeof useStartFlightMutation
 >;
 export const ObjectMovementsDocument = gql`
   subscription ObjectMovements {

@@ -19,7 +19,6 @@
     "baseUrl": ".",
     "paths": {
       "s/*": ["server/*"],
-      "c/*": ["client/*"],
       "shared/*": ["shared/*"],
       "*": ["test/*"]
     },

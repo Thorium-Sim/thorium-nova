@@ -6,14 +6,18 @@ import {
   Arg,
   Mutation,
   ObjectType,
-  Subscription,
-  Root,
 } from "type-graphql";
 import uuid from "uniqid";
 import randomWords from "random-words";
-import {performance} from "perf_hooks";
+import fs from "fs/promises";
 
 import App from "../app";
+import ECS from "s/helpers/ecs/ecs";
+import Components from "s/components";
+import Entity from "s/helpers/ecs/entity";
+import getStore from "s/helpers/dataStore";
+import {appStoreDir} from "s/helpers/appPaths";
+import {TimerSystem} from "s/systems/TimerSystem";
 
 const INTERVAL = 1000 / 5;
 
@@ -25,76 +29,145 @@ export default class Flight {
   @Field()
   name: string;
 
-  lastTime: number = Math.round(performance.now());
-  ticks: number = 0;
-  constructor(params: Partial<Flight> = {}) {
+  @Field()
+  paused: boolean;
+
+  @Field()
+  date: Date;
+
+  ecs = new ECS();
+  constructor(
+    params: Partial<{
+      id: string;
+      name: string;
+      paused: boolean;
+      date: Date;
+      entities: {id: string; components: Components[]}[];
+    }> = {},
+  ) {
     this.id = params.id || uuid();
     this.name = params.name || randomWords(3).join("-");
+    this.paused = params.paused || false;
+    this.date = params.date || new Date();
+
+    params.entities?.forEach(f => {
+      const e = new Entity(f.id, f.components);
+      this.ecs.addEntity(e);
+    });
+
+    this.ecs.addSystem(new TimerSystem());
 
     this.run();
   }
   run = () => {
-    // Compute delta and elapsed time
-    const time = Math.round(performance.now());
-    const delta = time - this.lastTime;
-    this.ticks++;
     // Run all the systems
+    if (!this.paused) {
+      this.ecs.update();
+    }
 
-    this.lastTime = time;
     setTimeout(this.run, INTERVAL);
   };
+  setPaused(tf: boolean) {
+    this.paused = tf;
+  }
+  reset() {
+    // TODO: Flight Reset Handling
+  }
 
+  get simulators() {
+    return this.ecs.entities.filter(
+      f => f.components.isSimulator && f.components.flight?.id === this.id,
+    );
+  }
   serialize() {
     // Get all of the entities in the world and serialize them into objects
+    return {
+      id: this.id,
+      name: this.name,
+      entities: this.ecs.entities.map(e => ({
+        id: e.id,
+        components: e.components,
+      })),
+    };
   }
 }
 
-@ObjectType()
-export class Coordinate {
-  @Field()
-  x!: number;
-  @Field()
-  y!: number;
-  @Field()
-  z!: number;
-}
-
-@ObjectType()
-export class MovingObject {
-  @Field(type => ID)
-  id!: string;
-
-  @Field()
-  Position!: Coordinate;
-  @Field()
-  Velocity!: Coordinate;
-  @Field()
-  Acceleration!: Coordinate;
-}
-
-interface ObjectPayload {
-  flightId: string;
-  objects: MovingObject[];
-}
 @Resolver(Flight)
 export class FlightResolver {
   @Query(returns => Flight, {nullable: true})
   flight(): Flight | null {
     return App.activeFlight;
   }
+  @Query(returns => [Flight])
+  async flights(): Promise<Partial<Flight>[]> {
+    const files = await fs.readdir(`${appStoreDir}/flights/`);
+    const flightFiles = files.filter(f => f.includes(".flight"));
+    const flightData = await Promise.all(
+      flightFiles.map(async flightName => {
+        const raw = await fs.readFile(
+          `${appStoreDir}/flights/${flightName}`,
+          "utf-8",
+        );
+        const data = JSON.parse(raw);
+        return data as Flight;
+      }),
+    );
+
+    return flightData;
+  }
 
   @Mutation(returns => Flight)
-  flightStart(): Flight {
+  flightStart(
+    @Arg("flightName", type => String, {nullable: true})
+    flightName: string = randomWords(3).join("-"),
+  ): Flight {
     if (!App.activeFlight) {
-      App.activeFlight = new Flight();
+      const flight = getStore<Flight>({
+        class: Flight,
+        path: `${appStoreDir}/flights/${flightName}.flight`,
+        initialData: {name: flightName},
+      });
+      App.activeFlight = flight;
     }
     return App.activeFlight;
   }
 
-  @Subscription(returns => [MovingObject], {
-    topics: ["objects"],
-  })
-  objects(@Root() objectPayload: ObjectPayload): MovingObject[] {
-    return objectPayload.objects;
+  @Mutation(returns => Flight, {nullable: true})
+  flightPause(): Flight | null {
+    App.activeFlight?.setPaused(true);
+    return App.activeFlight;
+  }
+  @Mutation(returns => Flight, {nullable: true})
+  flightResume(): Flight | null {
+    App.activeFlight?.setPaused(false);
+    return App.activeFlight;
+  }
+  @Mutation(returns => Flight, {nullable: true})
+  flightReset(): Flight | null {
+    App.activeFlight?.reset();
+    return App.activeFlight;
+  }
+  @Mutation(returns => String, {nullable: true})
+  flightStop(): null {
+    // Save the flight, but don't delete it.
+    App.activeFlight?.setPaused(true);
+    App.activeFlight?.writeFile();
+    App.activeFlight = null;
+    return null;
+  }
+  @Mutation(returns => String, {nullable: true})
+  async flightDelete(
+    @Arg("flightName", type => String)
+    flightName: string,
+  ): Promise<null> {
+    if (App.activeFlight?.name === flightName) {
+      App.activeFlight = null;
+    }
+    try {
+      await fs.unlink(`${appStoreDir}/flights/${flightName}.flight`);
+    } catch {
+      // Do nothing; the file probably didn't exist.
+    }
+    return null;
   }
 }

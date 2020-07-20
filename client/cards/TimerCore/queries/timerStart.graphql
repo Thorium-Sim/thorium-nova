@@ -1,0 +1,11 @@
+mutation TimerCreate($time: String!, $label: String!) {
+  timerCreate(time: $time, label: $label) {
+    id
+    components {
+      timer {
+        label
+        time
+      }
+    }
+  }
+}

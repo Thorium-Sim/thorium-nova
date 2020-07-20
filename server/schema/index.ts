@@ -1,9 +1,19 @@
 import {ClientResolver} from "./client";
 import {EntityResolver} from "./ecs";
 import {FlightResolver} from "./flight";
+import {RootResolver} from "./root";
+import {TimerResolver} from "./timer";
 
-export const resolvers:
+type ResolverT =
   | readonly [Function, ...Function[]]
   | [Function, ...Function[]]
   | readonly [string, ...string[]]
-  | [string, ...string[]] = [ClientResolver, FlightResolver, EntityResolver];
+  | [string, ...string[]];
+
+export const resolvers: ResolverT = [
+  RootResolver,
+  ClientResolver,
+  FlightResolver,
+  EntityResolver,
+  TimerResolver,
+];

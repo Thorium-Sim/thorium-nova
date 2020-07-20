@@ -8,6 +8,7 @@ interface IStoreOptions {
   path?: string;
   indent?: number;
   class?: any;
+  initialData?: any;
   throttle?: number;
 }
 
@@ -53,6 +54,7 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
     class: classConstructor,
     indent = 2,
     throttle: throttleDuration = 1000 * 30,
+    initialData,
   } = options || {};
 
   // Load the data
@@ -60,7 +62,7 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
   try {
     _data = filePath
       ? JSON.parse(fsCallback.readFileSync(filePath, "utf8"))
-      : {};
+      : initialData;
   } catch (err) {
     if (err.code === "EACCES") {
       err.message +=
@@ -69,19 +71,35 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
     }
   }
 
+  if (!_data) {
+    _data = initialData;
+  }
+
   // Instantiate the object if it is a class
   // or just make a new object with the data inside
-  const dataObject: G = isClass(classConstructor)
-    ? new classConstructor(_data)
-    : {..._data};
+  let dataObject!: G & {
+    writeFile: (force?: boolean) => Promise<void>;
+    serialize?: Function;
+  };
+  if (isClass(classConstructor)) {
+    dataObject = new classConstructor(_data);
+    dataObject.writeFile = writeFile;
+  } else {
+    dataObject = {..._data, writeFile};
+  }
 
-  async function writeFile() {
+  async function writeFile(force = false) {
+    if (process.env.NODE_ENV !== "production" && force === false) return;
     if (!filePath) {
       console.info("TEST: Wrote file");
       return;
     }
     await fs.mkdir(path.dirname(filePath), {recursive: true});
-    const jsonData = json(dataObject, null, indent);
+    const jsonData = json(
+      dataObject.serialize ? dataObject.serialize() : dataObject,
+      null,
+      indent,
+    );
     await fs.writeFile(filePath, jsonData, {mode: 0o0600});
   }
 
@@ -111,5 +129,7 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
       return false;
     },
   };
-  return new Proxy(dataObject, handler) as G;
+  return new Proxy(dataObject, handler) as G & {
+    writeFile: (force?: boolean) => Promise<void>;
+  };
 }

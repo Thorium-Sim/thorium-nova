@@ -1,0 +1,5 @@
+mutation TimerPause($id: ID!, $pause: Boolean!) {
+  timerPause(id: $id, pause: $pause) {
+    id
+  }
+}

@@ -17,7 +17,7 @@ class GraphQLHooksVisitor extends visitorPluginCommon.ClientSideBaseVisitor {
     super(schema, fragments, rawConfig, {
       hooksImportFrom: visitorPluginCommon.getConfigValue(
         rawConfig.hooksImportFrom,
-        "c/helpers/graphqlHooks",
+        "../helpers/graphqlHooks",
       ),
     });
     this.imports = new Set();

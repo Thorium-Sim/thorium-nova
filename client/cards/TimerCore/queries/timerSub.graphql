@@ -1,0 +1,11 @@
+subscription Timers {
+  timers {
+    id
+    components {
+      timer {
+        time
+        label
+      }
+    }
+  }
+}

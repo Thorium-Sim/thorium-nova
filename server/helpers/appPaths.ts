@@ -24,7 +24,7 @@ if (process.env.NODE_ENV === "production") {
   assetDir = `${thoriumPath}/assets`;
 }
 
-let appStoreDir = "./snapshots/";
+export let appStoreDir = "./data/";
 
 if (process.env.NODE_ENV === "production") {
   appStoreDir = thoriumPath + "/";

@@ -3,5 +3,4 @@ mutation StartFlight {
     id
     name
   }
-  addObject
 }

@@ -1,9 +1,10 @@
 import React from "react";
 import {render} from "react-dom";
-import App from "./App";
+import ClientApp from "./App";
 import {initializeClient} from "./helpers/getClientId";
 import {GraphQLHooksProvider} from "./helpers/graphqlHooks";
 import client from "./helpers/graphqlClient";
+import {ThemeProvider} from "@chakra-ui/core";
 
 initializeClient();
 
@@ -20,7 +21,9 @@ window.thorium = window.thorium || {
 render(
   <React.StrictMode>
     <GraphQLHooksProvider client={client}>
-      <App />
+      <ThemeProvider>
+        <ClientApp />
+      </ThemeProvider>
     </GraphQLHooksProvider>
   </React.StrictMode>,
   document.getElementById("root"),

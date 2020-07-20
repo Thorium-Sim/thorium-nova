@@ -7,7 +7,7 @@ import System from "./system";
 import performance from "./performance";
 import {fastSplice} from "./utils";
 
-export class ECS {
+class ECS {
   /**
    * Store all entities of the ECS.
    */
@@ -166,4 +166,4 @@ export class ECS {
   }
 }
 
-export default new ECS();
+export default ECS;
