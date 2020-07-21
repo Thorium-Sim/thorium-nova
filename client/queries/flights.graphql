@@ -1,0 +1,7 @@
+query Flights {
+  flights {
+    id
+    name
+    date
+  }
+}

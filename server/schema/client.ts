@@ -7,10 +7,12 @@ import {
   Query,
   Arg,
   Mutation,
+  Ctx,
 } from "type-graphql";
 import {UserInputError} from "apollo-server-errors";
 import uuid from "uniqid";
 import App from "../app";
+import {GraphQLContext} from "s/helpers/graphqlContext";
 
 type OfflineStates =
   | "blackout"
@@ -98,8 +100,13 @@ export default class Client {
 @Resolver(Client)
 export class ClientResolver {
   @Query(returns => Client)
-  async client(@Arg("id", type => ID) id: string) {
-    const client = App.storage.clients.find(c => c.id === id);
+  async client(
+    @Arg("id", type => ID, {nullable: true}) id: string,
+    @Ctx() context: GraphQLContext,
+  ) {
+    const client = App.storage.clients.find(
+      c => c.id === id || c.id === context.clientId,
+    );
     if (client === undefined) {
       throw new UserInputError(id);
     }
@@ -107,10 +114,10 @@ export class ClientResolver {
   }
 
   @Mutation(returns => Client)
-  clientConnect(@Arg("id", type => ID) clientId: string): Client {
-    let client = App.storage.clients.find(c => c.id === clientId);
+  clientConnect(@Ctx() context: GraphQLContext): Client {
+    let client = App.storage.clients.find(c => c.id === context.clientId);
     if (!client) {
-      client = new Client({id: clientId});
+      client = new Client({id: context.clientId});
       App.storage.clients.push(client);
     }
     client.connect();
@@ -119,10 +126,8 @@ export class ClientResolver {
   }
 
   @Mutation(returns => Client)
-  clientDisconnect(
-    @Arg("id", type => ID) clientId: string,
-  ): Client | undefined {
-    let client = App.storage.clients.find(c => c.id === clientId);
+  clientDisconnect(@Ctx() context: GraphQLContext): Client | undefined {
+    let client = App.storage.clients.find(c => c.id === context.clientId);
 
     client?.disconnect();
 
@@ -130,10 +135,10 @@ export class ClientResolver {
   }
   @Mutation(returns => Client)
   clientSetFlight(
-    @Arg("id", type => ID) clientId: string,
+    @Ctx() context: GraphQLContext,
     @Arg("id", type => ID) flightId: string,
   ): Client | undefined {
-    let client = App.storage.clients.find(c => c.id === clientId);
+    let client = App.storage.clients.find(c => c.id === context.clientId);
 
     client?.setFlight(flightId);
 

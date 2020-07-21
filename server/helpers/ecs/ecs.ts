@@ -49,9 +49,8 @@ class ECS {
    * Remove an entity from the ecs by reference.
    */
   removeEntity(entity: Entity) {
-    let index = this.entities.indexOf(entity);
+    let index = this.entities.findIndex(e => e.id === entity.id);
     let entityRemoved = null;
-
     // if the entity is not found do nothing
     if (index !== -1) {
       entityRemoved = this.entities[index];
@@ -71,7 +70,7 @@ class ECS {
     for (let i = 0, entity; (entity = this.entities[i]); i += 1) {
       if (entity.id === entityId) {
         entity.dispose();
-        this.removeEntityIfDirty(entity);
+        this.removeEntity(entity);
 
         fastSplice(this.entities, i, 1);
 

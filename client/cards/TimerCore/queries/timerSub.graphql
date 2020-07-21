@@ -5,6 +5,7 @@ subscription Timers {
       timer {
         time
         label
+        paused
       }
     }
   }

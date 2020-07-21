@@ -1,6 +1,10 @@
 import React from "react";
 
 import randomWords from "random-words";
+import {
+  useClientConnectMutation,
+  useClientDisconnectMutation,
+} from "../generated/graphql";
 
 const key = "thorium_clientPersistentId";
 let clientId = sessionStorage.getItem(key);
@@ -94,14 +98,34 @@ function getClientList() {
   return clientList;
 }
 
-export function useClientId() {
-  const [clientId, setClientId] = React.useState("");
+export function useClientId(): [string, (id: string) => void] {
+  const [clientId, setClientIdFunc] = React.useState("");
   async function runGetClientId() {
     const clientId = await getClientId();
-    setClientId(clientId);
+    setClientIdFunc(clientId);
   }
   React.useEffect(() => {
     runGetClientId();
   }, []);
-  return clientId;
+  function doSetClientId(id: string) {
+    setClientIdFunc(id);
+    setClientId(id);
+  }
+  return [clientId, doSetClientId];
+}
+
+export function useClientRegistration() {
+  const [connect] = useClientConnectMutation();
+  const [disconnect] = useClientDisconnectMutation();
+  const [clientId] = useClientId();
+
+  React.useEffect(() => {
+    if (clientId) {
+      connect();
+
+      return () => {
+        disconnect();
+      };
+    }
+  }, [clientId]);
 }

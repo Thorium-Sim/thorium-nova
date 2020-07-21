@@ -2,9 +2,10 @@ import React from "react";
 import {render} from "react-dom";
 import ClientApp from "./App";
 import {initializeClient} from "./helpers/getClientId";
-import {GraphQLHooksProvider} from "./helpers/graphqlHooks";
+import {ThemeProvider, DarkMode} from "@chakra-ui/core";
+import Dialog from "./components/Dialog";
+import {ApolloProvider} from "@apollo/client";
 import client from "./helpers/graphqlClient";
-import {ThemeProvider} from "@chakra-ui/core";
 
 initializeClient();
 
@@ -20,11 +21,15 @@ window.thorium = window.thorium || {
 };
 render(
   <React.StrictMode>
-    <GraphQLHooksProvider client={client}>
+    <ApolloProvider client={client}>
       <ThemeProvider>
-        <ClientApp />
+        <DarkMode>
+          <Dialog>
+            <ClientApp />
+          </Dialog>
+        </DarkMode>
       </ThemeProvider>
-    </GraphQLHooksProvider>
+    </ApolloProvider>
   </React.StrictMode>,
   document.getElementById("root"),
 );

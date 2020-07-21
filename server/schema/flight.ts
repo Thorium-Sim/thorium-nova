@@ -6,6 +6,7 @@ import {
   Arg,
   Mutation,
   ObjectType,
+  Ctx,
 } from "type-graphql";
 import uuid from "uniqid";
 import randomWords from "random-words";
@@ -18,6 +19,7 @@ import Entity from "s/helpers/ecs/entity";
 import getStore from "s/helpers/dataStore";
 import {appStoreDir} from "s/helpers/appPaths";
 import {TimerSystem} from "s/systems/TimerSystem";
+import {GraphQLContext} from "s/helpers/graphqlContext";
 
 const INTERVAL = 1000 / 5;
 
@@ -48,7 +50,7 @@ export default class Flight {
     this.id = params.id || uuid();
     this.name = params.name || randomWords(3).join("-");
     this.paused = params.paused || false;
-    this.date = params.date || new Date();
+    this.date = params.date ? new Date(params.date) : new Date();
 
     params.entities?.forEach(f => {
       const e = new Entity(f.id, f.components);
@@ -75,15 +77,15 @@ export default class Flight {
   }
 
   get simulators() {
-    return this.ecs.entities.filter(
-      f => f.components.isSimulator && f.components.flight?.id === this.id,
-    );
+    return this.ecs.entities.filter(f => f.components.isSimulator);
   }
   serialize() {
     // Get all of the entities in the world and serialize them into objects
     return {
       id: this.id,
       name: this.name,
+      paused: this.paused,
+      date: this.date,
       entities: this.ecs.entities.map(e => ({
         id: e.id,
         components: e.components,
@@ -99,7 +101,7 @@ export class FlightResolver {
     return App.activeFlight;
   }
   @Query(returns => [Flight])
-  async flights(): Promise<Partial<Flight>[]> {
+  async flights(@Ctx() context: GraphQLContext): Promise<Partial<Flight>[]> {
     const files = await fs.readdir(`${appStoreDir}/flights/`);
     const flightFiles = files.filter(f => f.includes(".flight"));
     const flightData = await Promise.all(
@@ -109,7 +111,7 @@ export class FlightResolver {
           "utf-8",
         );
         const data = JSON.parse(raw);
-        return data as Flight;
+        return {...data, date: new Date(data.date)} as Flight;
       }),
     );
 

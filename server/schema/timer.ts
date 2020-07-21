@@ -74,6 +74,6 @@ export class TimerResolver {
     },
   })
   timers(@Root() payload: TimerPayload): Entity[] {
-    return payload.entities;
+    return payload.entities || [];
   }
 }

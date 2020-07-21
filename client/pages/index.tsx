@@ -1,0 +1,120 @@
+import React from "react";
+import {
+  Box,
+  Button,
+  Collapse,
+  Flex,
+  Grid,
+  Heading,
+  Link,
+  List,
+  ListItem,
+  Stack,
+} from "@chakra-ui/core";
+import QuoteOfTheDay from "../components/QuoteOfTheDay";
+import Credits from "../components/Credits";
+import {useClientId} from "../helpers/getClientId";
+import {usePrompt} from "../components/Dialog";
+import {Link as RouterLink} from "react-router-dom";
+import {useFlightsQuery} from "../generated/graphql";
+
+const ClientButton = () => {
+  const [clientId, setClientId] = useClientId();
+  const prompt = usePrompt();
+  return (
+    <Button
+      size="lg"
+      variantColor="orange"
+      variant="outline"
+      onClick={async () => {
+        const id = (await prompt({
+          header: "What is the new client ID?",
+          defaultValue: clientId,
+        })) as string;
+        if (id) {
+          setClientId(id);
+        }
+      }}
+    >
+      Client ID: {clientId}
+    </Button>
+  );
+};
+const Welcome = () => {
+  const [show, setShow] = React.useState(false);
+  const {data} = useFlightsQuery();
+  return (
+    <>
+      <Grid
+        templateColumns="1fr 1fr"
+        templateRows="1fr 1fr"
+        templateAreas={`"logo credits"
+    "button credits"`}
+        height="100%"
+        gap={16}
+      >
+        <Box m={16} gridArea="logo">
+          <Flex alignItems="flex-end" alignSelf="start">
+            <Box
+              as="img"
+              draggable={false}
+              // @ts-ignore 2322
+              src={require("url:../images/logo.svg")}
+              alt="Thorium Logo"
+              maxH={32}
+            ></Box>
+            <Heading as="h1" size="2xl" color="white" minWidth="12ch" ml={3}>
+              Thorium Nova
+            </Heading>
+          </Flex>
+          <Heading size="md" mt={2}>
+            {/* @ts-ignore */}
+            <Link as={RouterLink} color="purple.300" to="/releases">
+              Version {require("../../package.json").version}
+            </Link>
+          </Heading>
+        </Box>
+        <Stack gridArea="button" alignSelf="end" m={16} spacing={4} width={400}>
+          <Button size="lg" variantColor="blue" variant="outline">
+            Start a New Flight
+          </Button>
+          <Button
+            size="lg"
+            variantColor="teal"
+            variant="outline"
+            onClick={() => setShow(s => !s)}
+          >
+            Load a Saved Flight
+          </Button>
+          <Collapse isOpen={show}>
+            <List
+              maxHeight={200}
+              overflowY="auto"
+              border="solid 1px"
+              borderColor="whiteAlpha.500"
+            >
+              {data?.flights.map(f => (
+                <ListItem
+                  p={4}
+                  borderBottom="solid 1px"
+                  borderColor="whiteAlpha.500"
+                  key={f.id}
+                >
+                  <strong>{f.name}</strong>
+                  <br />
+                  <small>{new Date(f.date).toLocaleDateString()}</small>
+                </ListItem>
+              ))}
+            </List>
+          </Collapse>
+          <Button size="lg" variantColor="orange" variant="outline">
+            Join a Server
+          </Button>
+        </Stack>
+        <Credits></Credits>
+      </Grid>
+      <QuoteOfTheDay />
+    </>
+  );
+};
+export default Welcome;

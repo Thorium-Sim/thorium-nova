@@ -1,54 +1,30 @@
 import React from "react";
-import {ErrorBoundary} from "react-error-boundary";
-import {
-  BrowserRouter as Router,
-  Navigate,
-  Route,
-  Routes,
-} from "react-router-dom";
-import {useClientId} from "./helpers/getClientId";
+import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 import useEasterEgg from "./helpers/easterEgg";
-import {useStartFlightMutation} from "./generated/queryHooks";
-import {css} from "@emotion/core";
+import Layout from "./components/Layout";
+import {useClientRegistration} from "./helpers/getClientId";
+import Timer from "./cards/TimerCore";
 
-const Releases = React.lazy(() => import("./components/Releases"));
-
-const Fallback = () => {
-  return <h1>Error</h1>;
-};
+const Welcome = React.lazy(() => import("./pages/index"));
+const Releases = React.lazy(() => import("./pages/Releases"));
 
 const NoMatch = () => {
-  return <Navigate to="/" />;
+  return <h2>Hey There!</h2>;
 };
 
 const ClientApp: React.FC = () => {
-  const clientId = useClientId();
-  const startFlight = useStartFlightMutation();
   useEasterEgg();
-
-  const onReset = React.useCallback(() => {}, []);
+  useClientRegistration();
   return (
     <Router>
-      <React.Suspense fallback="Loading...">
-        <ErrorBoundary FallbackComponent={Fallback} onReset={onReset}>
-          <h1>How are you doing! Good!</h1>
-          <h2>Client ID: {clientId}</h2>
-          <button
-            css={css`
-              background-color: red;
-            `}
-            onClick={() => startFlight()}
-          >
-            Start Flight
-          </button>
-          <Routes>
-            {/* <Route path="/" element={<Welcome />} /> */}
-            <Route path="releases" element={<Releases />} />
-
-            <Route path="*" element={<NoMatch />} />
-          </Routes>
-        </ErrorBoundary>
-      </React.Suspense>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Welcome />} />
+          <Route path="releases" element={<Releases />} />
+          <Route path="timer" element={<Timer />} />
+          <Route path="*" element={<NoMatch />} />
+        </Routes>
+      </Layout>
     </Router>
   );
 };

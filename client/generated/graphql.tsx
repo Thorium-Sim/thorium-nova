@@ -1,5 +1,6 @@
 import gql from "graphql-tag";
-import * as GraphQLHooks from "../helpers/graphqlHooks";
+import * as ApolloReactCommon from "@apollo/client";
+import * as ApolloReactHooks from "@apollo/client";
 export type Maybe<T> = T | null;
 export type Exact<T extends {[key: string]: any}> = {[K in keyof T]: T[K]};
 /** All built-in and custom scalars, mapped to their actual values */
@@ -9,6 +10,8 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
+  DateTime: Date;
 };
 
 /** An enum describing what kind of type a given `__Type` is. */
@@ -78,13 +81,19 @@ export type TimerPauseMutationVariables = Exact<{
   pause: Scalars["Boolean"];
 }>;
 
-export type TimerPauseMutation = {timerPause: Maybe<{id: string}>};
+export type TimerPauseMutation = {
+  __typename?: "Mutation";
+  timerPause: Maybe<{__typename?: "Entity"; id: string}>;
+};
 
 export type TimerRemoveMutationVariables = Exact<{
   id: Scalars["ID"];
 }>;
 
-export type TimerRemoveMutation = {timerRemove: string};
+export type TimerRemoveMutation = {
+  __typename?: "Mutation";
+  timerRemove: string;
+};
 
 export type TimerCreateMutationVariables = Exact<{
   time: Scalars["String"];
@@ -92,55 +101,85 @@ export type TimerCreateMutationVariables = Exact<{
 }>;
 
 export type TimerCreateMutation = {
-  timerCreate: {id: string; components: {timer: {label: string; time: string}}};
+  __typename?: "Mutation";
+  timerCreate: {
+    __typename?: "Entity";
+    id: string;
+    components: {
+      __typename?: "Components";
+      timer: {__typename?: "TimerComponent"; label: string; time: string};
+    };
+  };
 };
 
 export type TimersSubscriptionVariables = Exact<{[key: string]: never}>;
 
 export type TimersSubscription = {
+  __typename?: "Subscription";
   timers: Array<{
+    __typename?: "Entity";
     id: string;
-    components: {timer: {time: string; label: string}};
+    components: {
+      __typename?: "Components";
+      timer: {
+        __typename?: "TimerComponent";
+        time: string;
+        label: string;
+        paused: boolean;
+      };
+    };
   }>;
+};
+
+export type ClientConnectMutationVariables = Exact<{[key: string]: never}>;
+
+export type ClientConnectMutation = {
+  __typename?: "Mutation";
+  clientConnect: {__typename?: "Client"; id: string; connected: boolean};
+};
+
+export type ClientDisconnectMutationVariables = Exact<{[key: string]: never}>;
+
+export type ClientDisconnectMutation = {
+  __typename?: "Mutation";
+  clientDisconnect: {__typename?: "Client"; id: string; connected: boolean};
 };
 
 export type StartFlightMutationVariables = Exact<{[key: string]: never}>;
 
-export type StartFlightMutation = {flightStart: {id: string; name: string}};
+export type StartFlightMutation = {
+  __typename?: "Mutation";
+  flightStart: {__typename?: "Flight"; id: string; name: string};
+};
 
-export type FlightQueryVariables = Exact<{[key: string]: never}>;
+export type FlightsQueryVariables = Exact<{[key: string]: never}>;
 
-export type FlightQuery = {flight: Maybe<{id: string; name: string}>};
+export type FlightsQuery = {
+  __typename?: "Query";
+  flights: Array<{__typename?: "Flight"; id: string; name: string; date: Date}>;
+};
 
-export type IntrospectionQueryQueryVariables = Exact<{[key: string]: never}>;
+export type IntrospectionQueryVariables = Exact<{[key: string]: never}>;
 
-export type IntrospectionQueryQuery = {
+export type IntrospectionQuery = {
+  __typename?: "Query";
   __schema: {
+    __typename?: "__Schema";
     mutationType: Maybe<{
+      __typename?: "__Type";
       name: Maybe<string>;
       description: Maybe<string>;
-      fields: Maybe<Array<{name: string; description: Maybe<string>}>>;
+      fields: Maybe<
+        Array<{
+          __typename?: "__Field";
+          name: string;
+          description: Maybe<string>;
+        }>
+      >;
     }>;
   };
 };
 
-export type CoordsFragment = {x: number; y: number; z: number};
-
-export type ObjectMovementsSubscriptionVariables = Exact<{
-  [key: string]: never;
-}>;
-
-export type ObjectMovementsSubscription = {
-  objects: Array<{id: string; Position: CoordsFragment}>;
-};
-
-export const CoordsFragmentDoc = gql`
-  fragment Coords on Coordinate {
-    x
-    y
-    z
-  }
-`;
 export const TimerPauseDocument = gql`
   mutation TimerPause($id: ID!, $pause: Boolean!) {
     timerPause(id: $id, pause: $pause) {
@@ -149,12 +188,12 @@ export const TimerPauseDocument = gql`
   }
 `;
 export function useTimerPauseMutation(
-  baseOptions?: GraphQLHooks.MutationHookOptions<
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
     TimerPauseMutation,
     TimerPauseMutationVariables
   >,
 ) {
-  return GraphQLHooks.useMutation<
+  return ApolloReactHooks.useMutation<
     TimerPauseMutation,
     TimerPauseMutationVariables
   >(TimerPauseDocument, baseOptions);
@@ -168,12 +207,12 @@ export const TimerRemoveDocument = gql`
   }
 `;
 export function useTimerRemoveMutation(
-  baseOptions?: GraphQLHooks.MutationHookOptions<
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
     TimerRemoveMutation,
     TimerRemoveMutationVariables
   >,
 ) {
-  return GraphQLHooks.useMutation<
+  return ApolloReactHooks.useMutation<
     TimerRemoveMutation,
     TimerRemoveMutationVariables
   >(TimerRemoveDocument, baseOptions);
@@ -195,12 +234,12 @@ export const TimerCreateDocument = gql`
   }
 `;
 export function useTimerCreateMutation(
-  baseOptions?: GraphQLHooks.MutationHookOptions<
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
     TimerCreateMutation,
     TimerCreateMutationVariables
   >,
 ) {
-  return GraphQLHooks.useMutation<
+  return ApolloReactHooks.useMutation<
     TimerCreateMutation,
     TimerCreateMutationVariables
   >(TimerCreateDocument, baseOptions);
@@ -216,29 +255,19 @@ export const TimersDocument = gql`
         timer {
           time
           label
+          paused
         }
       }
     }
   }
 `;
 export function useTimersSubscription(
-  baseOptions?: GraphQLHooks.SubscriptionHookOptions<
+  baseOptions?: ApolloReactHooks.SubscriptionHookOptions<
     TimersSubscription,
     TimersSubscriptionVariables
   >,
 ) {
-  return GraphQLHooks.useSubscription<
-    TimersSubscription,
-    TimersSubscriptionVariables
-  >(TimersDocument, baseOptions);
-}
-export function useTimersTSubscription(
-  baseOptions?: GraphQLHooks.SubscriptionHookOptions<
-    TimersSubscription,
-    TimersSubscriptionVariables
-  >,
-) {
-  return GraphQLHooks.useTSubscription<
+  return ApolloReactHooks.useSubscription<
     TimersSubscription,
     TimersSubscriptionVariables
   >(TimersDocument, baseOptions);
@@ -246,8 +275,49 @@ export function useTimersTSubscription(
 export type TimersSubscriptionHookResult = ReturnType<
   typeof useTimersSubscription
 >;
-export type TimersTSubscriptionHookResult = ReturnType<
-  typeof useTimersTSubscription
+export const ClientConnectDocument = gql`
+  mutation ClientConnect {
+    clientConnect {
+      id
+      connected
+    }
+  }
+`;
+export function useClientConnectMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    ClientConnectMutation,
+    ClientConnectMutationVariables
+  >,
+) {
+  return ApolloReactHooks.useMutation<
+    ClientConnectMutation,
+    ClientConnectMutationVariables
+  >(ClientConnectDocument, baseOptions);
+}
+export type ClientConnectMutationHookResult = ReturnType<
+  typeof useClientConnectMutation
+>;
+export const ClientDisconnectDocument = gql`
+  mutation ClientDisconnect {
+    clientDisconnect {
+      id
+      connected
+    }
+  }
+`;
+export function useClientDisconnectMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    ClientDisconnectMutation,
+    ClientDisconnectMutationVariables
+  >,
+) {
+  return ApolloReactHooks.useMutation<
+    ClientDisconnectMutation,
+    ClientDisconnectMutationVariables
+  >(ClientDisconnectDocument, baseOptions);
+}
+export type ClientDisconnectMutationHookResult = ReturnType<
+  typeof useClientDisconnectMutation
 >;
 export const StartFlightDocument = gql`
   mutation StartFlight {
@@ -258,12 +328,12 @@ export const StartFlightDocument = gql`
   }
 `;
 export function useStartFlightMutation(
-  baseOptions?: GraphQLHooks.MutationHookOptions<
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
     StartFlightMutation,
     StartFlightMutationVariables
   >,
 ) {
-  return GraphQLHooks.useMutation<
+  return ApolloReactHooks.useMutation<
     StartFlightMutation,
     StartFlightMutationVariables
   >(StartFlightDocument, baseOptions);
@@ -271,40 +341,41 @@ export function useStartFlightMutation(
 export type StartFlightMutationHookResult = ReturnType<
   typeof useStartFlightMutation
 >;
-export const FlightDocument = gql`
-  query Flight {
-    flight {
+export const FlightsDocument = gql`
+  query Flights {
+    flights {
       id
       name
+      date
     }
   }
 `;
-export function useFlightQuery(
-  baseOptions?: GraphQLHooks.QueryHookOptions<
-    FlightQuery,
-    FlightQueryVariables
+export function useFlightsQuery(
+  baseOptions?: ApolloReactHooks.QueryHookOptions<
+    FlightsQuery,
+    FlightsQueryVariables
   >,
 ) {
-  return GraphQLHooks.useQuery<FlightQuery, FlightQueryVariables>(
-    FlightDocument,
+  return ApolloReactHooks.useQuery<FlightsQuery, FlightsQueryVariables>(
+    FlightsDocument,
     baseOptions,
   );
 }
-export function useFlightLazyQuery(
-  baseOptions?: GraphQLHooks.LazyQueryHookOptions<
-    FlightQuery,
-    FlightQueryVariables
+export function useFlightsLazyQuery(
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
+    FlightsQuery,
+    FlightsQueryVariables
   >,
 ) {
-  return GraphQLHooks.useLazyQuery<FlightQuery, FlightQueryVariables>(
-    FlightDocument,
+  return ApolloReactHooks.useLazyQuery<FlightsQuery, FlightsQueryVariables>(
+    FlightsDocument,
     baseOptions,
   );
 }
-export type FlightQueryHookResult = ReturnType<typeof useFlightQuery>;
-export type FlightLazyQueryHookResult = ReturnType<typeof useFlightLazyQuery>;
-export const IntrospectionQueryDocument = gql`
-  query IntrospectionQuery {
+export type FlightsQueryHookResult = ReturnType<typeof useFlightsQuery>;
+export type FlightsLazyQueryHookResult = ReturnType<typeof useFlightsLazyQuery>;
+export const IntrospectionDocument = gql`
+  query Introspection {
     __schema {
       mutationType {
         name
@@ -317,70 +388,31 @@ export const IntrospectionQueryDocument = gql`
     }
   }
 `;
-export function useIntrospectionQueryQuery(
-  baseOptions?: GraphQLHooks.QueryHookOptions<
-    IntrospectionQueryQuery,
-    IntrospectionQueryQueryVariables
+export function useIntrospectionQuery(
+  baseOptions?: ApolloReactHooks.QueryHookOptions<
+    IntrospectionQuery,
+    IntrospectionQueryVariables
   >,
 ) {
-  return GraphQLHooks.useQuery<
-    IntrospectionQueryQuery,
-    IntrospectionQueryQueryVariables
-  >(IntrospectionQueryDocument, baseOptions);
+  return ApolloReactHooks.useQuery<
+    IntrospectionQuery,
+    IntrospectionQueryVariables
+  >(IntrospectionDocument, baseOptions);
 }
-export function useIntrospectionQueryLazyQuery(
-  baseOptions?: GraphQLHooks.LazyQueryHookOptions<
-    IntrospectionQueryQuery,
-    IntrospectionQueryQueryVariables
+export function useIntrospectionLazyQuery(
+  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
+    IntrospectionQuery,
+    IntrospectionQueryVariables
   >,
 ) {
-  return GraphQLHooks.useLazyQuery<
-    IntrospectionQueryQuery,
-    IntrospectionQueryQueryVariables
-  >(IntrospectionQueryDocument, baseOptions);
+  return ApolloReactHooks.useLazyQuery<
+    IntrospectionQuery,
+    IntrospectionQueryVariables
+  >(IntrospectionDocument, baseOptions);
 }
-export type IntrospectionQueryQueryHookResult = ReturnType<
-  typeof useIntrospectionQueryQuery
+export type IntrospectionQueryHookResult = ReturnType<
+  typeof useIntrospectionQuery
 >;
-export type IntrospectionQueryLazyQueryHookResult = ReturnType<
-  typeof useIntrospectionQueryLazyQuery
->;
-export const ObjectMovementsDocument = gql`
-  subscription ObjectMovements {
-    objects {
-      id
-      Position {
-        ...Coords
-      }
-    }
-  }
-  ${CoordsFragmentDoc}
-`;
-export function useObjectMovementsSubscription(
-  baseOptions?: GraphQLHooks.SubscriptionHookOptions<
-    ObjectMovementsSubscription,
-    ObjectMovementsSubscriptionVariables
-  >,
-) {
-  return GraphQLHooks.useSubscription<
-    ObjectMovementsSubscription,
-    ObjectMovementsSubscriptionVariables
-  >(ObjectMovementsDocument, baseOptions);
-}
-export function useObjectMovementsTSubscription(
-  baseOptions?: GraphQLHooks.SubscriptionHookOptions<
-    ObjectMovementsSubscription,
-    ObjectMovementsSubscriptionVariables
-  >,
-) {
-  return GraphQLHooks.useTSubscription<
-    ObjectMovementsSubscription,
-    ObjectMovementsSubscriptionVariables
-  >(ObjectMovementsDocument, baseOptions);
-}
-export type ObjectMovementsSubscriptionHookResult = ReturnType<
-  typeof useObjectMovementsSubscription
->;
-export type ObjectMovementsTSubscriptionHookResult = ReturnType<
-  typeof useObjectMovementsTSubscription
+export type IntrospectionLazyQueryHookResult = ReturnType<
+  typeof useIntrospectionLazyQuery
 >;

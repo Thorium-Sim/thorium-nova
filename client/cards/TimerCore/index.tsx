@@ -1,201 +1,97 @@
 import React from "react";
 import {Duration} from "luxon";
+import {
+  useTimersSubscription,
+  useTimerCreateMutation,
+  useTimerPauseMutation,
+  useTimerRemoveMutation,
+} from "../../generated/graphql";
+import {Box, Button, IconButton, List, ListItem} from "@chakra-ui/core";
+import {usePrompt} from "../../components/Dialog";
+import {css} from "@emotion/core";
 
-class Timer extends Component {
-  state = {
-    timer: "00:00:00",
-    sync:
-      (window.localStorage.getItem("thorium_syncTime") || "false") === "true",
-  };
-  componentDidMount() {
-    this.subscription = this.props.client
-      .subscribe({
-        query: TIMESYNC_SUB,
-        variables: {
-          simulatorId: this.props.simulator.id,
-        },
-      })
-      .subscribe({
-        next: ({data: {syncTime}}) => {
-          this.state.sync &&
-            this.setState(
-              {timer: syncTime.time, stopped: !syncTime.active},
-              () => {
-                clearTimeout(this.timer);
-                this.updateTimer();
-              },
-            );
-        },
-        error(err) {
-          console.error("err", err);
-        },
-      });
-  }
-  componentWillUnmount() {
-    this.subscription && this.subscription.unsubscribe();
-    clearTimeout(this.timer);
-  }
-  updateTimer = () => {
-    if (
-      this.state.stopped ||
-      this.state.timer === "00:00:00" ||
-      this.state.timer === "0:0:0"
-    ) {
-      return;
-    }
-    const [hours, minutes, seconds] = this.state.timer.split(":");
-    if (
-      isNaN(parseInt(hours)) ||
-      isNaN(parseInt(seconds)) ||
-      isNaN(parseInt(minutes))
-    ) {
-      this.setState({
-        timer: "00:00:00",
-      });
-      return;
-    }
-    const dur = Duration.fromObject({
-      hours: parseInt(hours),
-      minutes: parseInt(minutes),
-      seconds: parseInt(seconds),
-    })
-      .minus(1000)
-      .normalize()
-      .toFormat("hh:mm:ss");
-    this.setState({
-      timer: dur,
-    });
-    this.timer = setTimeout(this.updateTimer, 1000);
-  };
-  setTimer = () => {
-    const seconds = prompt("Enter the number of seconds:", 0);
-    if (!seconds && seconds !== 0) return;
-    const minutes = prompt("Enter the number of minutes:", 0);
-    if (!minutes && minutes !== 0) return;
-    const hours = prompt("Enter the number of hours:", 0);
-    if (!hours && hours !== 0) return;
+const Timer: React.FC = () => {
+  const {data} = useTimersSubscription();
+  const [create] = useTimerCreateMutation();
+  const [remove] = useTimerRemoveMutation();
+  const [pause] = useTimerPauseMutation();
 
-    clearTimeout(this.timer);
-    this.timer = null;
-    const mutation = gql`
-      mutation SyncTimer($time: String, $active: Boolean, $simulatorId: ID!) {
-        syncTimer(time: $time, active: $active, simulatorId: $simulatorId)
-      }
-    `;
-    this.state.sync &&
-      this.props.client.mutate({
-        mutation,
-        variables: {
-          time: `${hours}:${minutes}:${seconds}`,
-          active: true,
-          simulatorId: this.props.simulator.id,
-        },
-      });
-    this.setState(
-      {timer: `${hours}:${minutes}:${seconds}`, stopped: false},
-      () => {
-        this.updateTimer();
-      },
-    );
-  };
-  toggleTimer = () => {
-    const {stopped} = this.state;
-    if (stopped) {
-      this.setState(
-        {
-          stopped: false,
-        },
-        () => {
-          this.updateTimer();
-        },
-      );
-    } else {
-      clearTimeout(this.timer);
-      this.timer = null;
-      this.setState({
-        stopped: true,
-      });
-    }
-    const mutation = gql`
-      mutation SyncTimer($time: String, $active: Boolean, $simulatorId: ID!) {
-        syncTimer(time: $time, active: $active, simulatorId: $simulatorId)
-      }
-    `;
-    this.state.sync &&
-      this.props.client.mutate({
-        mutation,
-        variables: {
-          time: this.state.timer,
-          active: stopped,
-          simulatorId: this.props.simulator.id,
-        },
-      });
-  };
-  sendToSensors = () => {
-    const [hours, minutes, seconds] = this.state.timer.split(":");
-    const dur = Duration.fromObject({
-      hours: parseInt(hours),
-      minutes: parseInt(minutes),
-      seconds: parseInt(seconds),
-    }).normalize();
-    const data = `Estimated time to arrival calculated: Approximately ${
-      dur.hours > 0 ? `${dur.hours} hour${dur.hours === 1 ? "" : "s"}, ` : ""
-    }${
-      dur.minutes > 0
-        ? `${dur.minutes} minute${dur.minutes === 1 ? "" : "s"}, `
-        : ""
-    }${dur.seconds} second${dur.seconds === 1 ? "" : "s"} at current speed.`;
-    publish("sensorData", data);
-  };
-  render() {
-    const {timer, stopped} = this.state;
-    return (
-      <div className="core-timer" style={{display: "flex"}}>
-        <div
-          style={{
-            color: "black",
-            float: "left",
-            flex: 1,
-            backgroundColor: "rgb(251, 254, 61)",
-            border: "1px solid rgb(210, 203, 67)",
-            height: "16px",
-            whiteSpace: "pre",
-            textAlign: "center",
-          }}
-          onClick={this.setTimer}
-        >
-          {timer}
-        </div>
-        <Button
-          color={stopped ? "primary" : "danger"}
-          size="sm"
-          style={{height: "16px", float: "left", lineHeight: "12px"}}
-          onClick={this.toggleTimer}
-        >
-          {stopped ? "Start" : "Stop"}
-        </Button>
-        <Button
-          color={"success"}
-          size="sm"
-          style={{height: "16px", lineHeight: "12px"}}
-          onClick={this.sendToSensors}
-        >
-          Send to Sensors
-        </Button>
-        <label>
-          <input
-            type="checkbox"
-            checked={this.state.sync}
-            onChange={e => {
-              this.setState({sync: e.target.checked});
-              window.localStorage.setItem("thorium_syncTime", e.target.checked);
-            }}
-          />
-          Sync Cores
-        </label>
-      </div>
-    );
+  const prompt = usePrompt();
+
+  async function handleCreate() {
+    const label = (await prompt({
+      header: "What is the timer label?",
+      defaultValue: "Generic Timer",
+    })) as string;
+    const seconds = (await prompt({
+      header: "Enter the number of seconds:",
+      defaultValue: "0",
+    })) as string;
+    if (!seconds || isNaN(parseFloat(seconds))) return;
+
+    const minutes = (await prompt({
+      header: "Enter the number of minutes:",
+      defaultValue: "0",
+    })) as string;
+    if (!minutes || isNaN(parseFloat(minutes))) return;
+
+    const hours = (await prompt({
+      header: "Enter the number of hours:",
+      defaultValue: "0",
+    })) as string;
+    if (!hours || isNaN(parseFloat(hours))) return;
+
+    if (seconds + minutes + hours === "000") return;
+    const time = `${hours.padStart(2, "0")}:${minutes.padStart(
+      2,
+      "0",
+    )}:${seconds.padStart(2, "0")}`;
+
+    create({variables: {label, time}});
   }
-}
+  return (
+    <Box>
+      <List>
+        {data?.timers.map(t => (
+          <ListItem
+            key={t.id}
+            display="flex"
+            alignItems="center"
+            css={css`
+              font-variant-numeric: tabular-nums;
+            `}
+          >
+            {t.components.timer.label}: {t.components.timer.time}
+            <Button
+              size="xs"
+              ml={1}
+              variant="ghost"
+              variantColor={t.components.timer.paused ? "blue" : "orange"}
+              onClick={() =>
+                pause({
+                  variables: {id: t.id, pause: !t.components.timer.paused},
+                })
+              }
+            >
+              {t.components.timer.paused ? "Resume" : "Pause"}
+            </Button>
+            <IconButton
+              size="xs"
+              aria-label="Delete Timer"
+              icon="delete"
+              variant="ghost"
+              variantColor="red"
+              ml={1}
+              onClick={() => remove({variables: {id: t.id}})}
+            />
+          </ListItem>
+        ))}
+      </List>
+      <Button size="sm" variantColor="green" onClick={handleCreate}>
+        New Timer
+      </Button>
+    </Box>
+  );
+};
 
 export default Timer;

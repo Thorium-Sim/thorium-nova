@@ -15,6 +15,9 @@ function subtractTimer(timer: string) {
     .normalize()
     .toFormat("hh:mm:ss");
 
+  if (parseInt(seconds, 10) < 0) {
+    throw new Error("Seconds has gone negative");
+  }
   return dur;
 }
 export class TimerSystem extends System {
@@ -31,9 +34,19 @@ export class TimerSystem extends System {
       this.timeCount >= 1000 &&
       !entity.components.timer?.paused
     ) {
-      entity.components.timer.time = subtractTimer(
-        entity.components.timer.time,
-      );
+      try {
+        entity.components.timer.time = subtractTimer(
+          entity.components.timer.time,
+        );
+        if (entity.components.timer.time === "00:00:00") {
+          App.activeFlight?.ecs.removeEntityById(entity.id);
+        }
+      } catch (err) {
+        if (err?.message == "Seconds has gone negative") {
+          // Remove the entity
+          App.activeFlight?.ecs.removeEntityById(entity.id);
+        }
+      }
     }
   }
   postUpdate() {

@@ -1,0 +1,6 @@
+mutation ClientConnect {
+  clientConnect {
+    id
+    connected
+  }
+}

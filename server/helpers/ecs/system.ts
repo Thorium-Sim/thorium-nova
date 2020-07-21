@@ -37,7 +37,7 @@ class System {
    * @param  {Entity} entity Reference of the entity to remove.
    */
   removeEntity(entity: Entity) {
-    let index = this.entities.indexOf(entity);
+    let index = this.entities.findIndex(e => e.id === entity.id);
 
     if (index !== -1) {
       entity.removeSystem(this);

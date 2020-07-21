@@ -6,11 +6,24 @@ import {Field, ID, ObjectType} from "type-graphql";
 import Components from "s/components";
 import {Component} from "s/components/utils";
 
+// This proxy handler makes it so component values can be accessed directly from the
+// entity. It does not (yet?) allow for component values to be updated on the entity
+// except through reference.
+const handler: ProxyHandler<Entity> = {
+  get(target, key) {
+    // @ts-ignore
+    if (target[key]) return target[key];
+    // @ts-ignore
+    if (target.components[key]) return target.components[key];
+    return undefined;
+  },
+};
+
 /**
  * An entity.
  */
 @ObjectType()
-class Entity {
+class Entity extends Components {
   @Field(type => ID)
   id: string;
   systems: System[];
@@ -19,6 +32,7 @@ class Entity {
   components: Components;
   private ecs: ECS | null;
   constructor(id: string | null, components: Component[] = []) {
+    super();
     /**
      * Unique identifier of the entity.
      */
@@ -62,6 +76,8 @@ class Entity {
      * A reference to parent ECS class.
      */
     this.ecs = null;
+
+    return new Proxy(this, handler);
   }
   /**
    * Set the parent ecs reference.
@@ -108,7 +124,7 @@ class Entity {
    * performances. Be sure not to pass the same component reference to
    * many entities.
    */
-  addComponent(name: string, data: Object) {
+  addComponent(name: keyof Components, data: any) {
     this.components[name] = data || {};
     this.setSystemsDirty();
   }
@@ -117,7 +133,7 @@ class Entity {
    * simple set the component property to `undefined`. Therefore the
    * property is still enumerable after a call to removeComponent()
    */
-  removeComponent(name: string) {
+  removeComponent(name: keyof Components) {
     if (!this.components[name]) {
       return;
     }
@@ -134,7 +150,7 @@ class Entity {
    *   entity.updateComponent('kite', {angle: 90, pos: {y: 1}});
    *   // entity.component.pos is '{vel: 0, angle: 90, pos: {y: 1}}'
    */
-  updateComponent(name: string, data: Record<string, any>) {
+  updateComponent(name: keyof Components, data: Record<string, any>) {
     let component = this.components[name];
 
     if (!component) {
@@ -143,6 +159,7 @@ class Entity {
       let keys = Object.keys(data);
 
       for (let i = 0, key; (key = keys[i]); i += 1) {
+        // @ts-ignore
         component[key] = data[key];
       }
     }
@@ -153,7 +170,12 @@ class Entity {
   updateComponents(componentsData: Record<string, Record<string, any>>) {
     let components = Object.keys(componentsData);
 
-    for (let i = 0, component; (component = components[i]); i += 1) {
+    for (
+      let i = 0, component;
+      (component = components[i] as keyof Components);
+      i += 1
+    ) {
+      // @ts-ignore
       this.updateComponent(component, componentsData[component]);
     }
   }
@@ -161,9 +183,9 @@ class Entity {
    * Dispose the entity.
    */
   dispose() {
-    for (var i = 0, system; (system = this.systems[0]); i += 1) {
-      system.removeEntity(this);
-    }
+    this.systems.forEach(s => {
+      s.removeEntity(this);
+    });
   }
 }
 

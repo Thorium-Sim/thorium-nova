@@ -11,13 +11,14 @@
     "node": "^14"
   },
   "scripts": {
+    "start": "npm-run-all --parallel start:client start:server",
     "start:client": "NODE_ENV=development parcel serve client/index.html --port 3000 --open",
     "start:server": "ts-node-dev -r tsconfig-paths/register server/index.ts",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "test:debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --watch",
     "generate:graphql": "graphql-codegen --config codegen.yml",
-    "postgenerate:graphql": "npm run format",
+    "postgenerate:graphql": "prettier --write client/generated/graphql.tsx",
     "format": "prettier --write \"**/*.+(js|jsx|yml|yaml|css|less|scss|ts|tsx|md|mdx|graphql|vue)\""
   },
   "browserslist": [
@@ -27,6 +28,7 @@
     "last 1 safari version"
   ],
   "dependencies": {
+    "@apollo/client": "^3.0.2",
     "@babel/plugin-proposal-class-properties": "^7.10.1",
     "@chakra-ui/core": "^0.8.0",
     "@emotion/core": "^10.0.28",
@@ -40,7 +42,7 @@
     "dotenv": "^8.2.0",
     "emotion-theming": "^10.0.27",
     "express": "^4.16.4",
-    "graphql": "^14.0.0 || ^15.0.0",
+    "graphql": "^15.3.0",
     "history": "^5.0.0",
     "lodash.throttle": "^4.1.1",
     "luxon": "^1.24.1",
@@ -63,6 +65,7 @@
     "zustand": "^2.2.3"
   },
   "devDependencies": {
+    "@babel/core": "^7.10.5",
     "@babel/plugin-proposal-decorators": "^7.10.3",
     "@babel/plugin-transform-typescript": "^7.10.3",
     "@babel/preset-env": "^7.10.3",
@@ -73,6 +76,7 @@
     "@graphql-codegen/cli": "1.15.4",
     "@graphql-codegen/typescript": "1.15.4",
     "@graphql-codegen/typescript-operations": "1.15.4",
+    "@graphql-codegen/typescript-react-apollo": "^1.17.0",
     "@testing-library/jest-dom": "^5.10.1",
     "@testing-library/react": "^10.4.1",
     "@testing-library/user-event": "^12.0.7",
@@ -94,6 +98,7 @@
     "eslint-import-resolver-typescript": "^2.0.0",
     "jest": "^26.1.0",
     "jest-emotion": "^10.0.32",
+    "npm-run-all": "^4.1.5",
     "parcel": "^2.0.0-beta.1",
     "prettier": "^2.0.5",
     "ts-jest": "^26.1.1",

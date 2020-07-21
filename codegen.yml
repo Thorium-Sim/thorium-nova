@@ -2,11 +2,11 @@ overwrite: true
 schema: "http://localhost:3001/graphql"
 documents: "client/**/*.graphql"
 generates:
-  client/generated/queryHooks.tsx:
+  client/generated/graphql.tsx:
     plugins:
       - "typescript"
       - "typescript-operations"
-      - "./scripts/graphql-hooks-codegen.cjs"
+      - "typescript-react-apollo"
     config:
       scalars:
         DateTime: Date
@@ -14,4 +14,13 @@ generates:
       onlyOperationTypes: true
       avoidOptionals: true
       preResolveTypes: true
-      skipTypename: true
+      withComponent: false
+      withHOC: false
+      withHooks: true
+      withMutationFn: false
+      withRefetchFn: false
+      reactApolloVersion: 3
+      skipTypename: false
+      withResultType: false
+      withMutationOptionsType: false
+      addDocBlocks: false
