@@ -4,6 +4,4 @@ import TestFile from "./TestFile";
 
 test("it works", () => {
   const {debug, container} = render(<TestFile />);
-
-  debug();
 });

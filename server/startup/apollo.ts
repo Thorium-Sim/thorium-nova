@@ -3,6 +3,7 @@ import {Application} from "express";
 import {buildSchema} from "type-graphql";
 import {resolvers} from "../schema";
 import {pubsub} from "../helpers/pubsub";
+import App from "../app";
 
 export default async function setupApollo(server: Application) {
   const schema = await buildSchema({
@@ -15,10 +16,20 @@ export default async function setupApollo(server: Application) {
     introspection: true,
     playground: true,
     uploads: false,
-    context: ({req, connection}) => ({
-      clientId: req?.headers.clientid || connection?.context.clientId,
-      core: req?.headers.core,
-    }),
+    context: ({req, connection}) => {
+      const clientId = req?.headers.clientid || connection?.context.clientid;
+      const client = App.storage.clients.find(c => c.id === clientId);
+      const flight = App.activeFlight;
+      const ship = App.activeFlight?.ships.find(s => s.id === client?.shipId);
+
+      return {
+        clientId,
+        client,
+        flight,
+        ship,
+        core: !!req?.headers.core,
+      };
+    },
   };
 
   const apollo = new ApolloServer(graphqlOptions);

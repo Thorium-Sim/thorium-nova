@@ -1,10 +1,11 @@
+import Entity from "../entity";
 import System from "../system";
 
 function getFakeEntity() {
-  return {
+  return ({
     addSystem: jest.fn(),
     removeSystem: jest.fn(),
-  };
+  } as unknown) as Entity;
 }
 
 describe("System", () => {
@@ -14,7 +15,7 @@ describe("System", () => {
   });
 
   describe("addEntity()", () => {
-    let entity, system;
+    let entity: Entity, system: System;
 
     beforeEach(() => {
       entity = getFakeEntity();
@@ -43,8 +44,7 @@ describe("System", () => {
   });
 
   describe("removeEntity()", () => {
-    let entity, system;
-
+    let entity: Entity, system: System;
     beforeEach(() => {
       entity = getFakeEntity();
       system = new System();

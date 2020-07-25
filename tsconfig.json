@@ -18,8 +18,6 @@
     "jsx": "react",
     "baseUrl": ".",
     "paths": {
-      "s/*": ["server/*"],
-      "shared/*": ["shared/*"],
       "*": ["test/*"]
     },
     "typeRoots": ["./node_modules/@types", "./types"]

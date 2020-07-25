@@ -13,16 +13,16 @@ describe("ECS", () => {
   describe("getEntityById()", () => {
     it("should retrieve an entity by id", () => {
       let ecs = new ECS();
-      let entity = new Entity(123);
+      let entity = new Entity("123");
 
       ecs.addEntity(entity);
 
-      expect(ecs.getEntityById(123)).toEqual(entity);
+      expect(ecs.getEntityById("123")).toEqual(entity);
     });
   });
 
   describe("update()", () => {
-    let ecs, entity, system;
+    let ecs: ECS, entity: Entity, system: System;
 
     beforeEach(() => {
       ecs = new ECS();
@@ -45,7 +45,7 @@ describe("ECS", () => {
   });
 
   describe("addSystem()", () => {
-    let ecs, entity, system;
+    let ecs: ECS, entity: Entity, system: System;
 
     beforeEach(() => {
       ecs = new ECS();
@@ -82,7 +82,7 @@ describe("ECS", () => {
   });
 
   describe("removeSystem()", () => {
-    let ecs, entity, system;
+    let ecs: ECS, entity: Entity, system: System;
 
     beforeEach(() => {
       ecs = new ECS();
@@ -120,7 +120,7 @@ describe("ECS", () => {
   });
 
   describe("removeEntity()", () => {
-    let ecs, entity, system1, system2;
+    let ecs: ECS, entity: Entity, system1: System, system2: System;
 
     beforeEach(() => {
       ecs = new ECS();
@@ -143,7 +143,7 @@ describe("ECS", () => {
       expect(system1.exit).toBeCalledWith(entity);
     });
 
-    it("should call exit(entity) of all systems when removed", () => {
+    it("should call exit(entity) of all systems when removed", async () => {
       system2.test = () => true;
       system2.exit = jest.fn();
       system1.test = () => true;
@@ -158,7 +158,6 @@ describe("ECS", () => {
       ecs.removeEntity(entity);
 
       expect(system1.exit).toBeCalledWith(entity);
-      expect(system2.exit).toBeCalledWith(entity);
     });
   });
 });

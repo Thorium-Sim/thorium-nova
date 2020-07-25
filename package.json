@@ -43,6 +43,7 @@
     "emotion-theming": "^10.0.27",
     "express": "^4.16.4",
     "graphql": "^15.3.0",
+    "graphql-type-json": "^0.3.2",
     "history": "^5.0.0",
     "lodash.throttle": "^4.1.1",
     "luxon": "^1.24.1",
@@ -59,6 +60,7 @@
     "reflect-metadata": "^0.1.13",
     "showdown": "^1.9.1",
     "subscriptions-transport-ws": "^0.9.0",
+    "three": "^0.118.3",
     "ts-node-dev": "^1.0.0-pre.49",
     "type-graphql": "^1.0.0-rc.2",
     "uniqid": "^5.2.0",
@@ -105,8 +107,5 @@
     "ts-node": "^8.1.0",
     "tsconfig-paths": "^3.9.0",
     "typescript": "^3.9.5"
-  },
-  "alias": {
-    "shared": "./shared"
   }
 }

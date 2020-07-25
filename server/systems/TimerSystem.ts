@@ -1,8 +1,7 @@
-import Entity from "s/helpers/ecs/entity";
-import System from "s/helpers/ecs/system";
+import Entity from "../helpers/ecs/entity";
+import System from "../helpers/ecs/system";
 import {Duration} from "luxon";
-import {pubsub} from "s/helpers/pubsub";
-import App from "s/app";
+import {pubsub} from "../helpers/pubsub";
 
 function subtractTimer(timer: string) {
   const [hours = "0", minutes = "0", seconds = "0"] = timer.split(":");
@@ -39,12 +38,12 @@ export class TimerSystem extends System {
           entity.components.timer.time,
         );
         if (entity.components.timer.time === "00:00:00") {
-          App.activeFlight?.ecs.removeEntityById(entity.id);
+          this.ecs.removeEntityById(entity.id);
         }
       } catch (err) {
         if (err?.message == "Seconds has gone negative") {
           // Remove the entity
-          App.activeFlight?.ecs.removeEntityById(entity.id);
+          this.ecs.removeEntityById(entity.id);
         }
       }
     }
@@ -53,9 +52,7 @@ export class TimerSystem extends System {
     if (this.timeCount >= 1000) {
       this.timeCount = 0;
       pubsub.publish("timers", {
-        entities: App.activeFlight?.ecs.entities.filter(
-          e => e.components.timer,
-        ),
+        entities: this.ecs.entities.filter(e => e.components.timer),
       });
     }
   }

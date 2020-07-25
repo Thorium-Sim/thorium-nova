@@ -13,13 +13,13 @@ import randomWords from "random-words";
 import fs from "fs/promises";
 
 import App from "../app";
-import ECS from "s/helpers/ecs/ecs";
-import Components from "s/components";
-import Entity from "s/helpers/ecs/entity";
-import getStore from "s/helpers/dataStore";
-import {appStoreDir} from "s/helpers/appPaths";
-import {TimerSystem} from "s/systems/TimerSystem";
-import {GraphQLContext} from "s/helpers/graphqlContext";
+import ECS from "../helpers/ecs/ecs";
+import Components from "../components";
+import Entity from "../helpers/ecs/entity";
+import getStore from "../helpers/dataStore";
+import {appStoreDir} from "../helpers/appPaths";
+import {TimerSystem} from "../systems/TimerSystem";
+import {GraphQLContext} from "../helpers/graphqlContext";
 
 const INTERVAL = 1000 / 5;
 
@@ -76,8 +76,9 @@ export default class Flight {
     // TODO: Flight Reset Handling
   }
 
-  get simulators() {
-    return this.ecs.entities.filter(f => f.components.isSimulator);
+  @Field(type => Entity)
+  get ships() {
+    return this.ecs.entities.filter(f => f.components.isShip);
   }
   serialize() {
     // Get all of the entities in the world and serialize them into objects
@@ -130,6 +131,7 @@ export class FlightResolver {
         initialData: {name: flightName},
       });
       App.activeFlight = flight;
+      App.storage.activeFlightName = flight.name;
     }
     return App.activeFlight;
   }
@@ -155,6 +157,7 @@ export class FlightResolver {
     App.activeFlight?.setPaused(true);
     App.activeFlight?.writeFile();
     App.activeFlight = null;
+    App.storage.activeFlightName = null;
     return null;
   }
   @Mutation(returns => String, {nullable: true})
@@ -164,6 +167,7 @@ export class FlightResolver {
   ): Promise<null> {
     if (App.activeFlight?.name === flightName) {
       App.activeFlight = null;
+      App.storage.activeFlightName = null;
     }
     try {
       await fs.unlink(`${appStoreDir}/flights/${flightName}.flight`);

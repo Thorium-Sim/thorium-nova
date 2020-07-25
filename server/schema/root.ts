@@ -1,4 +1,4 @@
-import App from "s/app";
+import App from "../app";
 import {Mutation, Resolver} from "type-graphql";
 
 @Resolver()

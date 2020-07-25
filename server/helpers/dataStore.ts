@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import fsCallback from "fs";
 import path from "path";
 import throttle from "lodash.throttle";
@@ -109,7 +110,11 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
 
   const handler: ProxyHandler<any> = {
     get(target, key) {
-      if (typeof target[key] === "object" && target[key] !== null) {
+      if (
+        typeof target[key] === "object" &&
+        target[key] !== null &&
+        !(target[key] instanceof Date)
+      ) {
         return new Proxy(target[key], handler);
       } else {
         return target[key];

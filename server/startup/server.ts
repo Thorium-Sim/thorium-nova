@@ -31,6 +31,12 @@ export default async function setupServer() {
     folderPath: string,
   ) {}
 
+  if (process.env.NODE_ENV !== "production") {
+    server.get("/", (req, res) => {
+      res.redirect("/graphql");
+    });
+  }
+
   server.post("/upload", upload.any() as RequestHandler, async (req, res) => {
     if (Array.isArray(req.files)) {
       uploadAsset(req.files, req.body.name, req.body.folderPath);

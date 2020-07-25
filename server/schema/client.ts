@@ -12,7 +12,7 @@ import {
 import {UserInputError} from "apollo-server-errors";
 import uuid from "uniqid";
 import App from "../app";
-import {GraphQLContext} from "s/helpers/graphqlContext";
+import {GraphQLContext} from "../helpers/graphqlContext";
 
 type OfflineStates =
   | "blackout"
@@ -30,7 +30,7 @@ export default class Client {
   flightId: string | null = null;
 
   @Field(type => ID, {nullable: true})
-  simulatorId: string | null = null;
+  shipId: string | null = null;
 
   @Field(type => ID, {nullable: true})
   stationId: string | null = null;
@@ -59,15 +59,15 @@ export default class Client {
   setFlight(flightId: string | null) {
     this.flightId = flightId;
     const flight = App.activeFlight;
-    this.simulatorId = null;
+    this.shipId = null;
     this.stationId = null;
     this.logout();
-    if (flight && flight.simulators.length === 1) {
-      this.simulatorId = flight.simulators[0].id;
+    if (flight && flight.ships.length === 1) {
+      this.shipId = flight.ships[0].id;
     }
   }
-  setSimulator(simulatorId: string | null) {
-    this.simulatorId = simulatorId;
+  setShip(shipId: string | null) {
+    this.shipId = shipId;
     this.stationId = null;
     this.logout();
   }

@@ -1,3 +1,4 @@
+import ECS from "./ecs";
 import Entity from "./entity";
 
 import {fastSplice} from "./utils";
@@ -14,6 +15,7 @@ class System {
    */
   frequency: number;
 
+  ecs!: ECS;
   /**
    * Entities of the system.
    */
@@ -38,7 +40,6 @@ class System {
    */
   removeEntity(entity: Entity) {
     let index = this.entities.findIndex(e => e.id === entity.id);
-
     if (index !== -1) {
       entity.removeSystem(this);
       fastSplice(this.entities, index, 1);
@@ -49,7 +50,7 @@ class System {
   /**
    * Apply update to each entity of this system.
    */
-  updateAll(elapsed: number) {
+  updateAll(elapsed: number = 1) {
     this.preUpdate(elapsed);
 
     for (let i = 0, entity; (entity = this.entities[i]); i += 1) {

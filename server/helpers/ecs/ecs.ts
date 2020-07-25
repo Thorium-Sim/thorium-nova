@@ -92,6 +92,7 @@ class ECS {
    * Add a system to the ecs.
    */
   addSystem(system: System) {
+    system.ecs = this;
     this.systems.push(system);
 
     // iterate over all entities to eventually add system

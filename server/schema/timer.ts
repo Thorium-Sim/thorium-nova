@@ -1,11 +1,11 @@
-import App from "s/app";
-import {TimerComponent} from "s/components/timer";
-import Entity from "s/helpers/ecs/entity";
-import {pubsub} from "s/helpers/pubsub";
+import App from "../app";
+import {TimerComponent} from "../components/timer";
+import Entity from "../helpers/ecs/entity";
+import {pubsub} from "../helpers/pubsub";
 import {Arg, ID, Mutation, Resolver, Root, Subscription} from "type-graphql";
 import uniqid from "uniqid";
 
-interface TimerPayload {
+interface TimersPayload {
   entities: Entity[];
 }
 
@@ -60,6 +60,28 @@ export class TimerResolver {
 
     return "";
   }
+
+  @Subscription(returns => [Entity], {
+    topics: ({args, payload, context}) => {
+      const id = uniqid();
+      process.nextTick(() => {
+        pubsub.publish(id, {
+          entities: App.activeFlight?.ecs.entities.filter(
+            e => e.components.timer,
+          ),
+        });
+      });
+      return [id, "timers"];
+    },
+    nullable: true,
+  })
+  timer(
+    @Root() payload: TimersPayload,
+    @Arg("id", type => ID) id: string,
+  ): Entity | null {
+    return payload.entities.find(e => e.id === id) || null;
+  }
+
   @Subscription(returns => [Entity], {
     topics: ({args, payload, context}) => {
       const id = uniqid();
@@ -73,7 +95,7 @@ export class TimerResolver {
       return [id, "timers"];
     },
   })
-  timers(@Root() payload: TimerPayload): Entity[] {
+  timers(@Root() payload: TimersPayload): Entity[] {
     return payload.entities || [];
   }
 }

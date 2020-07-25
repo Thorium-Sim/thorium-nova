@@ -3,8 +3,14 @@ import uniqid from "uniqid";
 import System from "./system";
 import ECS from "./ecs";
 import {Field, ID, ObjectType} from "type-graphql";
-import Components from "s/components";
-import {Component} from "s/components/utils";
+import Components, {registeredComponents} from "../../components";
+import {Component} from "../../components/utils";
+
+function isEntity(e: any): e is Entity {
+  if (typeof e !== "object" || e === null) return false;
+  if (e.id && e.components && e.systems) return true;
+  return false;
+}
 
 // This proxy handler makes it so component values can be accessed directly from the
 // entity. It does not (yet?) allow for component values to be updated on the entity
@@ -31,12 +37,30 @@ class Entity extends Components {
   @Field()
   components: Components;
   private ecs: ECS | null;
-  constructor(id: string | null, components: Component[] = []) {
+  constructor(
+    id?: Partial<Entity> | string | null,
+    components: Component[] = [],
+  ) {
+    let initialData: Components = {};
+    if (isEntity(id)) {
+      initialData = id.components;
+      components = registeredComponents.reduce(
+        (list: Component[], component) => {
+          if (initialData[component.id]) {
+            return list.concat(component);
+          }
+          return list;
+        },
+        [],
+      );
+
+      id = id.id;
+    }
     super();
     /**
      * Unique identifier of the entity.
      */
-    this.id = id || uniqid();
+    this.id = (id as string | null) || uniqid();
 
     /**
      * Systems applied to the entity.
@@ -63,7 +87,12 @@ class Entity extends Components {
       // initialization should be done in enter() handler
 
       // @ts-ignore ts(2576) // Accessing static properties
-      if (component.getDefaults) {
+      if (initialData[component.id]) {
+        // @ts-ignore ts(2576)
+        this.components[component.id] = initialData[component.id];
+      }
+      // @ts-ignore ts(2576)
+      else if (component.getDefaults) {
         // @ts-ignore ts(2576)
         this.components[component.id] = component.getDefaults();
       } else {
@@ -124,7 +153,7 @@ class Entity extends Components {
    * performances. Be sure not to pass the same component reference to
    * many entities.
    */
-  addComponent(name: keyof Components, data: any) {
+  addComponent(name: keyof Components, data?: any) {
     this.components[name] = data || {};
     this.setSystemsDirty();
   }

@@ -33,7 +33,8 @@ const webSocketLink = new WebSocketLink({
   uri: websocketUrl,
   options: {
     reconnect: true,
-    connectionParams: () => getClientId().then(clientId => ({clientId})),
+    connectionParams: () =>
+      getClientId().then(clientId => ({clientid: clientId})),
   },
 });
 
@@ -63,7 +64,7 @@ const wsLink = ApolloLink.from([
 const headersMiddleware = setContext((operation, {headers}) => {
   const core = window.location.pathname.includes("/core");
   return getClientId().then(clientId => ({
-    headers: {...headers, clientId, core},
+    headers: {...headers, clientid: clientId, core},
   }));
 });
 
