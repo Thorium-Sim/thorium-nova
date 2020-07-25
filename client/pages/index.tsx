@@ -13,33 +13,9 @@ import {
 } from "@chakra-ui/core";
 import QuoteOfTheDay from "../components/QuoteOfTheDay";
 import Credits from "../components/Credits";
-import {useClientId} from "../helpers/getClientId";
-import {usePrompt} from "../components/Dialog";
 import {Link as RouterLink} from "react-router-dom";
 import {useFlightsQuery} from "../generated/graphql";
 
-const ClientButton = () => {
-  const [clientId, setClientId] = useClientId();
-  const prompt = usePrompt();
-  return (
-    <Button
-      size="lg"
-      variantColor="orange"
-      variant="outline"
-      onClick={async () => {
-        const id = (await prompt({
-          header: "What is the new client ID?",
-          defaultValue: clientId,
-        })) as string;
-        if (id) {
-          setClientId(id);
-        }
-      }}
-    >
-      Client ID: {clientId}
-    </Button>
-  );
-};
 const Welcome = () => {
   const [show, setShow] = React.useState(false);
   const {data} = useFlightsQuery();

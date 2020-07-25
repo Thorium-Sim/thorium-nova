@@ -92,7 +92,7 @@ const Dialog: React.FC = ({children}) => {
     <DialogContext.Provider value={openConfirm}>
       {children}
       {/* @ts-ignore */}
-      <Scale in={isOpen}>
+      <Scale in={isOpen} duration={process.env.NODE_ENV === "test" ? 0 : 250}>
         {/* @ts-ignore */}
         {styles => (
           <AlertDialog

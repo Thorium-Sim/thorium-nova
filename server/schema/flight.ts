@@ -66,7 +66,7 @@ export default class Flight {
     if (!this.paused) {
       this.ecs.update();
     }
-
+    if (process.env.NODE_ENV === "test") return;
     setTimeout(this.run, INTERVAL);
   };
   setPaused(tf: boolean) {
@@ -108,7 +108,7 @@ export class FlightResolver {
     const flightData = await Promise.all(
       flightFiles.map(async flightName => {
         const raw = await fs.readFile(
-          `${appStoreDir}/flights/${flightName}`,
+          `${appStoreDir}flights/${flightName}`,
           "utf-8",
         );
         const data = JSON.parse(raw);

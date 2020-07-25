@@ -15,7 +15,7 @@ export default class StationComplement {
 
   constructor(params: Partial<StationComplement>) {
     this.id = params.id || uuid();
-    this.name = params.name || "Bridge Complement";
+    this.name = params.name || "Station Complement";
     this.stations = [];
     params.stations?.forEach(station => {
       this.stations.push(new Station(station));

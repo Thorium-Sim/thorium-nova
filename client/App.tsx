@@ -3,7 +3,6 @@ import {Route, Routes} from "react-router-dom";
 import useEasterEgg from "./helpers/easterEgg";
 import Layout from "./components/Layout";
 import {useClientRegistration} from "./helpers/getClientId";
-import Timer from "./cards/TimerCore";
 
 const Welcome = React.lazy(() => import("./pages/index"));
 const Releases = React.lazy(() => import("./pages/Releases"));
@@ -20,7 +19,6 @@ const ClientApp: React.FC = () => {
       <Routes>
         <Route path="/" element={<Welcome />} />
         <Route path="releases" element={<Releases />} />
-        <Route path="timer" element={<Timer />} />
         <Route path="*" element={<NoMatch />} />
       </Routes>
     </Layout>

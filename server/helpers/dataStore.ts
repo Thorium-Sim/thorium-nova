@@ -61,9 +61,10 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
   // Load the data
   let _data;
   try {
-    _data = filePath
-      ? JSON.parse(fsCallback.readFileSync(filePath, "utf8"))
-      : initialData;
+    _data =
+      process.env.NODE_ENV !== "test" && filePath
+        ? JSON.parse(fsCallback.readFileSync(filePath, "utf8"))
+        : initialData;
   } catch (err) {
     if (err.code === "EACCES") {
       err.message +=
@@ -104,9 +105,12 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
     await fs.writeFile(filePath, jsonData, {mode: 0o0600});
   }
 
-  const writeThrottle = throttle(writeFile, throttleDuration, {
-    trailing: true,
-  });
+  const writeThrottle =
+    process.env.NODE_ENV === "test"
+      ? writeFile
+      : throttle(writeFile, throttleDuration, {
+          trailing: true,
+        });
 
   const handler: ProxyHandler<any> = {
     get(target, key) {

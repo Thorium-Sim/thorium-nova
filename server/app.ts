@@ -5,6 +5,7 @@ import Client from "./schema/client";
 import Flight from "./schema/flight";
 import fs from "fs/promises";
 import Entity from "./helpers/ecs/entity";
+import StationComplement from "./schema/stationComplement";
 
 type Writable<T> = T & {
   writeFile: (force?: boolean) => Promise<void>;
@@ -24,7 +25,13 @@ class PersistentStorage {
 
 interface Plugins {
   ships: Writable<Entity>[];
+  stationComplements: Writable<StationComplement>[];
 }
+
+const pluginClassMap = {
+  ships: Entity,
+  stationComplements: StationComplement,
+};
 
 const storage = getStore<PersistentStorage>({
   class: PersistentStorage,
@@ -39,30 +46,39 @@ class AppClass {
   httpOnly: boolean = false;
   port: number = process.env.NODE_ENV === "production" ? 4444 : 3001;
 
-  async init() {
+  constructor() {
+    this.plugins = {ships: [], stationComplements: []};
     if (process.env.PORT && !isNaN(parseInt(process.env.PORT, 10)))
       this.port = parseInt(process.env.PORT, 10);
     this.httpOnly = process.env.HTTP_ONLY === "true";
-
+  }
+  async init() {
     // Load in plugins from the filesystem
-    this.plugins = {ships: []};
-    try {
-      const plugins = await fs.readdir(`${appStoreDir}/ships`);
+    let pluginVariety: keyof Plugins;
 
-      for (let plugin of plugins) {
-        if ((await fs.lstat(`${appStoreDir}/ships/${plugin}`)).isDirectory()) {
-          this.plugins.ships.push(
-            getStore<Entity>({
-              class: Entity,
-              path: `${appStoreDir}/ships/${plugin}/data.json`,
-            }),
-          );
+    for (pluginVariety in this.plugins) {
+      try {
+        const plugins = await fs.readdir(`${appStoreDir}/${pluginVariety}`);
+
+        for (let plugin of plugins) {
+          if (
+            (
+              await fs.lstat(`${appStoreDir}/${pluginVariety}/${plugin}`)
+            ).isDirectory()
+          ) {
+            this.plugins[pluginVariety].push(
+              getStore<any>({
+                class: pluginClassMap[pluginVariety],
+                path: `${appStoreDir}/${pluginVariety}/${plugin}/data.json`,
+              }),
+            );
+          }
         }
+      } catch {
+        // The folder probably didn't exist, which means
+        // there are no ships anyway
+        await fs.mkdir(`${appStoreDir}/${pluginVariety}`);
       }
-    } catch {
-      // The folder probably didn't exist, which means
-      // there are no ships anyway
-      await fs.mkdir(`${appStoreDir}/ships`);
     }
 
     // Load the active flight, if applicable
@@ -86,7 +102,9 @@ class AppClass {
 
     let pluginVariety: keyof Plugins;
     for (pluginVariety in this.plugins) {
-      this.plugins[pluginVariety].forEach(p => p.writeFile(true));
+      this.plugins[pluginVariety].forEach((p: Writable<{}>) =>
+        p.writeFile(true),
+      );
     }
   }
 }

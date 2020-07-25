@@ -3,6 +3,8 @@ import uuid from "uniqid";
 
 @ObjectType()
 export class CardConfig {
+  @Field()
+  _empty!: string;
   constructor(params: Partial<CardConfig> = {}) {}
 }
 

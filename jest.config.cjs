@@ -1,7 +1,7 @@
 module.exports = {
   ...require("./test/jest.common.cjs"),
   collectCoverageFrom: [
-    "**/{client,server,shared}/**/*.{js,jsx,ts,tsx}",
+    "**/{client,shared}/**/*.{js,jsx,ts,tsx}",
     "!**/node_modules/**",
     "!**/__test__/**",
     "!**/*.test.*",
