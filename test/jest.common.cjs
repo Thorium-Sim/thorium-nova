@@ -5,5 +5,6 @@ module.exports = {
   moduleDirectories: ["node_modules", "./test"],
   moduleNameMapper: {
     "\\.css$": require.resolve("./styleMocker.js"),
+    "^url:": require.resolve("./styleMocker.js"),
   },
 };

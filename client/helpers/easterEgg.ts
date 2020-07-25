@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import useKonami from "react-use-konami";
 const synth = window.speechSynthesis;
 

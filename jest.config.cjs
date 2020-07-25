@@ -5,6 +5,9 @@ module.exports = {
     "!**/node_modules/**",
     "!**/__test__/**",
     "!**/*.test.*",
+    "!**/coverage/**",
+    "!**/generated/**",
+    "!**/unused/**",
   ],
   coverageThreshold: {
     global: {

@@ -10,6 +10,8 @@ import {
   AlertDialogFooter,
   Button,
   Input,
+  FormLabel,
+  FormControl,
 } from "@chakra-ui/core";
 
 interface DialogI {
@@ -110,13 +112,18 @@ const Dialog: React.FC = ({children}) => {
               <AlertDialogHeader>{header}</AlertDialogHeader>
               <AlertDialogBody>
                 {type === "prompt" ? (
-                  <Input
-                    ref={inputRef}
-                    value={input}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setInput(e.target.value)
-                    }
-                  />
+                  <FormControl>
+                    <FormLabel>
+                      Response
+                      <Input
+                        ref={inputRef}
+                        value={input}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setInput(e.target.value)
+                        }
+                      />
+                    </FormLabel>
+                  </FormControl>
                 ) : (
                   body
                 )}

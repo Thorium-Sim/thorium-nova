@@ -1,7 +1,7 @@
 import React from "react";
 import {StoreApi} from "zustand";
-import {TSubscriptionResponse} from "./graphqlHooks";
 import useAnimationFrame from "./useAnimationFrame";
+import {TSubscriptionResponse} from "./useTSubscription";
 
 function lerp(v0: number, v1: number, t: number) {
   return v0 * (1 - t) + v1 * t;

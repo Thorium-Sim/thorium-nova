@@ -1,5 +1,5 @@
 import React from "react";
-import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
+import {Route, Routes} from "react-router-dom";
 import useEasterEgg from "./helpers/easterEgg";
 import Layout from "./components/Layout";
 import {useClientRegistration} from "./helpers/getClientId";
@@ -16,16 +16,14 @@ const ClientApp: React.FC = () => {
   useEasterEgg();
   useClientRegistration();
   return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Welcome />} />
-          <Route path="releases" element={<Releases />} />
-          <Route path="timer" element={<Timer />} />
-          <Route path="*" element={<NoMatch />} />
-        </Routes>
-      </Layout>
-    </Router>
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Welcome />} />
+        <Route path="releases" element={<Releases />} />
+        <Route path="timer" element={<Timer />} />
+        <Route path="*" element={<NoMatch />} />
+      </Routes>
+    </Layout>
   );
 };
 

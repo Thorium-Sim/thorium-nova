@@ -1,11 +1,12 @@
+/* istanbul ignore file */
 import React from "react";
 import {render} from "react-dom";
 import ClientApp from "./App";
 import {initializeClient} from "./helpers/getClientId";
-import {ThemeProvider, DarkMode} from "@chakra-ui/core";
-import Dialog from "./components/Dialog";
 import {ApolloProvider} from "@apollo/client";
 import client from "./helpers/graphqlClient";
+import AppContext from "./helpers/appContext";
+import {BrowserRouter as Router} from "react-router-dom";
 
 initializeClient();
 
@@ -19,16 +20,15 @@ window.thorium = window.thorium || {
   sendMessage: args => {},
   clockSync: 0,
 };
+
 render(
   <React.StrictMode>
     <ApolloProvider client={client}>
-      <ThemeProvider>
-        <DarkMode>
-          <Dialog>
-            <ClientApp />
-          </Dialog>
-        </DarkMode>
-      </ThemeProvider>
+      <AppContext>
+        <Router>
+          <ClientApp></ClientApp>
+        </Router>
+      </AppContext>
     </ApolloProvider>
   </React.StrictMode>,
   document.getElementById("root"),
