@@ -34,6 +34,9 @@ if (process.env.NODE_ENV === "production") {
   appStoreDir = thoriumPath + "/";
 }
 
+fs.mkdirSync(appStoreDir, {recursive: true});
+fs.mkdirSync(assetDir, {recursive: true});
+
 const appStoreName =
   process.env.NODE_ENV === "production"
     ? /* istanbul ignore next */
