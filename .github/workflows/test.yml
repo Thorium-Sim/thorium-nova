@@ -1,0 +1,45 @@
+name: Test
+
+on: push
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - name: Cache node modules
+        uses: actions/cache@v1
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.config/yarn/global # npm cache files are stored in `~/.npm` on Linux/macOS
+          key:
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{
+            hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Install Dependencies
+        run: yarn
+      - name: Prettier Check
+        run: |
+          npm run format:different
+      - name: TypeScript Check
+        run: |
+          npm run typecheck
+      - name: ESLint
+        run: |
+          npm run lint
+      - name: Test
+        env:
+          SKIP_PREFLIGHT_CHECK: true
+        run: |
+          npm test

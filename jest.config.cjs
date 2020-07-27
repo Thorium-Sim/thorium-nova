@@ -1,7 +1,7 @@
 module.exports = {
   ...require("./test/jest.common.cjs"),
   collectCoverageFrom: [
-    "**/{client,shared}/**/*.{js,jsx,ts,tsx}",
+    "**/{client,server,shared}/**/*.{js,jsx,ts,tsx}",
     "!**/node_modules/**",
     "!**/__test__/**",
     "!**/*.test.*",
@@ -11,10 +11,10 @@ module.exports = {
   ],
   coverageThreshold: {
     global: {
-      statements: 80,
-      branches: 80,
-      functions: 80,
-      lines: 80,
+      statements: 75,
+      branches: 60,
+      functions: 60,
+      lines: 75,
     },
   },
   projects: ["./test/jest.client.cjs", "./test/jest.server.cjs"],

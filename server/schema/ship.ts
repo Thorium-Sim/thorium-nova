@@ -1,5 +1,5 @@
 import App from "../app";
-import {AlertLevelT} from "../components/alertLevel";
+import {AlertLevelComponent, AlertLevelT} from "../components/alertLevel";
 import Entity from "../helpers/ecs/entity";
 import {GraphQLContext} from "../helpers/graphqlContext";
 import {pubsub} from "../helpers/pubsub";
@@ -14,6 +14,11 @@ import {
   Subscription,
 } from "type-graphql";
 import uniqid from "uniqid";
+import {IsShipComponent} from "../components/isShip";
+import {ShipAssetsComponent} from "../components/shipAssets";
+import {TagsComponent} from "../components/tags";
+import {IdentityComponent} from "../components/identity";
+import {ThemeComponent} from "../components/theme";
 
 interface ShipPayload {
   ship: Entity;
@@ -42,18 +47,31 @@ export class ShipResolver {
   @Query(returns => Entity, {nullable: true, name: "ship"})
   shipQuery(
     @Ctx() context: GraphQLContext,
-    @Arg("id", {nullable: true}) id?: string,
+    @Arg("id", type => ID, {nullable: true}) id?: string,
   ): Entity | null {
-    return (
-      App.activeFlight?.ships.find(
-        s => s.id === id || s.id === context.ship?.id,
-      ) || null
-    );
+    return getShip(context, id);
   }
 
   @Query(returns => [Entity], {name: "ships"})
   shipsQuery(): Entity[] {
     return App.activeFlight?.ships || [];
+  }
+
+  @Mutation(returns => Entity, {nullable: true})
+  shipCreate(@Arg("name") name: string): Entity | null {
+    if (!App.activeFlight) return null;
+    const ship = new Entity(name, [
+      IsShipComponent,
+      AlertLevelComponent,
+      ShipAssetsComponent,
+      TagsComponent,
+      IdentityComponent,
+      ThemeComponent,
+    ]);
+    ship.updateComponent("identity", {name});
+    App.activeFlight.ecs.addEntity(ship);
+    publishShip(ship);
+    return ship;
   }
 
   @Mutation(returns => Entity)
@@ -111,9 +129,9 @@ export class ShipResolver {
   })
   ship(
     @Root() payload: ShipPayload,
-    @Arg("id", {nullable: true}) id: boolean,
+    @Arg("id", type => ID, {nullable: true}) id: string,
   ): Entity {
-    return payload.ship;
+    return payload?.ship;
   }
 
   @Subscription(returns => [Entity], {

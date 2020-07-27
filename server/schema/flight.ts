@@ -12,7 +12,7 @@ import uuid from "uniqid";
 import randomWords from "random-words";
 import fs from "fs/promises";
 
-import App from "../app";
+import App, {isWritableFlight} from "../app";
 import ECS from "../helpers/ecs/ecs";
 import Components from "../components";
 import Entity from "../helpers/ecs/entity";
@@ -155,7 +155,9 @@ export class FlightResolver {
   flightStop(): null {
     // Save the flight, but don't delete it.
     App.activeFlight?.setPaused(true);
-    App.activeFlight?.writeFile();
+    if (isWritableFlight(App.activeFlight)) {
+      App.activeFlight?.writeFile();
+    }
     App.activeFlight = null;
     App.storage.activeFlightName = null;
     return null;

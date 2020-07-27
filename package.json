@@ -19,7 +19,10 @@
     "test:debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --watch",
     "generate:graphql": "graphql-codegen --config codegen.yml",
     "postgenerate:graphql": "prettier --write client/generated/graphql.tsx",
-    "format": "prettier --write \"**/*.+(js|jsx|yml|yaml|css|less|scss|ts|tsx|md|mdx|graphql|vue)\""
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.+(js|jsx|yml|yaml|css|less|scss|ts|tsx|md|mdx|graphql|vue)\"",
+    "format:different": "prettier --list-different \"**/*.+(js|jsx|yml|yaml|css|less|scss|ts|tsx|md|mdx|graphql|vue)\""
   },
   "browserslist": [
     "maintained node versions",
@@ -96,9 +99,13 @@
     "@types/react-dom": "^16.9.8",
     "@types/uniqid": "^5.2.0",
     "babel-plugin-macros": "^2.8.0",
+    "eslint": "^7.5.0",
     "eslint-import-resolver-jest": "^3.0.0",
     "eslint-import-resolver-parcel": "^1.10.4",
     "eslint-import-resolver-typescript": "^2.0.0",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-react": "^7.20.4",
+    "eslint-plugin-react-hooks": "^4.0.8",
     "jest": "^26.1.0",
     "jest-emotion": "^10.0.32",
     "npm-run-all": "^4.1.5",

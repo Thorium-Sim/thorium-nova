@@ -33,6 +33,10 @@ const pluginClassMap = {
   stationComplements: StationComplement,
 };
 
+export function isWritableFlight(flight: any): flight is ActiveFlightT {
+  return !!flight?.writeFile;
+}
+
 const storage = getStore<PersistentStorage>({
   class: PersistentStorage,
   path: appStorePath,
@@ -40,7 +44,7 @@ const storage = getStore<PersistentStorage>({
 
 class AppClass {
   storage: Writable<PersistentStorage> = storage;
-  activeFlight: ActiveFlightT = null;
+  activeFlight: Flight | ActiveFlightT = null;
   plugins!: Plugins;
 
   httpOnly: boolean = false;
@@ -98,7 +102,9 @@ class AppClass {
   }
   snapshot() {
     this.storage.writeFile(true);
-    this.activeFlight?.writeFile(true);
+    if (isWritableFlight(this.activeFlight)) {
+      this.activeFlight?.writeFile(true);
+    }
 
     let pluginVariety: keyof Plugins;
     for (pluginVariety in this.plugins) {

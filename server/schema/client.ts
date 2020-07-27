@@ -56,45 +56,35 @@ export default class Client {
   disconnect() {
     this.connected = false;
   }
-  setFlight(flightId: string | null) {
-    this.flightId = flightId;
-    const flight = App.activeFlight;
-    this.shipId = null;
-    this.stationId = null;
-    this.logout();
-    if (flight && flight.ships.length === 1) {
-      this.shipId = flight.ships[0].id;
-    }
-  }
-  setShip(shipId: string | null) {
-    this.shipId = shipId;
-    this.stationId = null;
-    this.logout();
-  }
-  setStation(stationId: string | null) {
-    this.stationId = stationId;
-  }
-  login(name: string) {
-    this.loginName = name;
-  }
-  logout() {
-    this.loginName = null;
-  }
-  setTraining(training: boolean) {
-    this.training = training;
-  }
-  setOfflineState(state: OfflineStates) {
-    this.offlineState = state;
-  }
-  reset(hardReset = false) {
-    this.setTraining(false);
-    this.logout();
+  // setShip(shipId: string | null) {
+  //   this.shipId = shipId;
+  //   this.stationId = null;
+  //   this.logout();
+  // }
+  // setStation(stationId: string | null) {
+  //   this.stationId = stationId;
+  // }
+  // login(name: string) {
+  //   this.loginName = name;
+  // }
+  // logout() {
+  //   this.loginName = null;
+  // }
+  // setTraining(training: boolean) {
+  //   this.training = training;
+  // }
+  // setOfflineState(state: OfflineStates) {
+  //   this.offlineState = state;
+  // }
+  // reset(hardReset = false) {
+  //   this.setTraining(false);
+  //   this.logout();
 
-    this.setOfflineState(null);
-    if (hardReset) {
-      this.setFlight(null);
-    }
-  }
+  //   this.setOfflineState(null);
+  //   if (hardReset) {
+  //     this.setFlight(null);
+  //   }
+  // }
 }
 
 @Resolver(Client)
@@ -105,7 +95,7 @@ export class ClientResolver {
     @Ctx() context: GraphQLContext,
   ) {
     const client = App.storage.clients.find(
-      c => c.id === id || c.id === context.clientId,
+      c => c.id === id || (!id && c.id === context.clientId),
     );
     if (client === undefined) {
       throw new UserInputError(id);
@@ -130,17 +120,6 @@ export class ClientResolver {
     let client = App.storage.clients.find(c => c.id === context.clientId);
 
     client?.disconnect();
-
-    return client;
-  }
-  @Mutation(returns => Client)
-  clientSetFlight(
-    @Ctx() context: GraphQLContext,
-    @Arg("id", type => ID) flightId: string,
-  ): Client | undefined {
-    let client = App.storage.clients.find(c => c.id === context.clientId);
-
-    client?.setFlight(flightId);
 
     return client;
   }
