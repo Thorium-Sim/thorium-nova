@@ -1,5 +1,5 @@
+/* istanbul ignore file */
 import React from "react";
-import {Duration} from "luxon";
 import {
   useTimersSubscription,
   useTimerCreateMutation,

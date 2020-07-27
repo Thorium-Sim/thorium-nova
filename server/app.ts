@@ -62,18 +62,18 @@ class AppClass {
 
     for (pluginVariety in this.plugins) {
       try {
-        const plugins = await fs.readdir(`${appStoreDir}/${pluginVariety}`);
+        const plugins = await fs.readdir(`${appStoreDir}${pluginVariety}`);
 
         for (let plugin of plugins) {
           if (
             (
-              await fs.lstat(`${appStoreDir}/${pluginVariety}/${plugin}`)
+              await fs.lstat(`${appStoreDir}${pluginVariety}/${plugin}`)
             ).isDirectory()
           ) {
             this.plugins[pluginVariety].push(
               getStore<any>({
                 class: pluginClassMap[pluginVariety],
-                path: `${appStoreDir}/${pluginVariety}/${plugin}/data.json`,
+                path: `${appStoreDir}${pluginVariety}/${plugin}/data.json`,
               }),
             );
           }
@@ -81,7 +81,7 @@ class AppClass {
       } catch {
         // The folder probably didn't exist, which means
         // there are no ships anyway
-        await fs.mkdir(`${appStoreDir}/${pluginVariety}`);
+        await fs.mkdir(`${appStoreDir}${pluginVariety}`);
       }
     }
 
@@ -89,11 +89,11 @@ class AppClass {
     if (this.storage.activeFlightName) {
       try {
         await fs.access(
-          `${appStoreDir}/flights/${this.storage.activeFlightName}.flight`,
+          `${appStoreDir}flights/${this.storage.activeFlightName}.flight`,
         );
         App.activeFlight = getStore<Flight>({
           class: Flight,
-          path: `${appStoreDir}/flights/${this.storage.activeFlightName}.flight`,
+          path: `${appStoreDir}flights/${this.storage.activeFlightName}.flight`,
         });
       } catch {
         // Do nothing - trying to access failed, so we just won't load a flight
