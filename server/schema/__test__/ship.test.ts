@@ -226,35 +226,5 @@ describe("Ship Resolver", () => {
         App.activeFlight = null;
       };
     });
-    it("should subscribe to an individual ship", async () => {
-      const ship = await gqlCall({
-        query: `mutation CreateShip($name:String!){
-      shipCreate(name:$name) {
-        id
-        identity {
-          name
-        }
-        isShip {
-          value
-        }
-      }
-    }`,
-        variables: {name: "Test Ship"},
-      });
-      const id = ship.data?.shipCreate.id;
-
-      const sub = await gqlCall({
-        query: `subscription Ship($id:ID!){
-        ship(id:$id) {
-          id
-          alertLevel {
-            alertLevel
-          }
-        }
-      }`,
-        variables: {id},
-      });
-      console.log(sub);
-    });
   });
 });

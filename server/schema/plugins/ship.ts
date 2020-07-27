@@ -55,7 +55,7 @@ export class ShipPluginResolver {
     }
     const entity = getStore<Entity>({
       class: Entity,
-      path: `${appStoreDir}/ships/${name}/data.json`,
+      path: `${appStoreDir}ships/${name}/data.json`,
       initialData: new Entity(name, [
         IsShipComponent,
         AlertLevelComponent,

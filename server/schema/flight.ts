@@ -103,7 +103,7 @@ export class FlightResolver {
   }
   @Query(returns => [Flight])
   async flights(@Ctx() context: GraphQLContext): Promise<Partial<Flight>[]> {
-    const files = await fs.readdir(`${appStoreDir}/flights/`);
+    const files = await fs.readdir(`${appStoreDir}flights/`);
     const flightFiles = files.filter(f => f.includes(".flight"));
     const flightData = await Promise.all(
       flightFiles.map(async flightName => {
@@ -127,7 +127,7 @@ export class FlightResolver {
     if (!App.activeFlight) {
       const flight = getStore<Flight>({
         class: Flight,
-        path: `${appStoreDir}/flights/${flightName}.flight`,
+        path: `${appStoreDir}flights/${flightName}.flight`,
         initialData: {name: flightName},
       });
       App.activeFlight = flight;
@@ -172,7 +172,7 @@ export class FlightResolver {
       App.storage.activeFlightName = null;
     }
     try {
-      await fs.unlink(`${appStoreDir}/flights/${flightName}.flight`);
+      await fs.unlink(`${appStoreDir}flights/${flightName}.flight`);
     } catch {
       // Do nothing; the file probably didn't exist.
     }

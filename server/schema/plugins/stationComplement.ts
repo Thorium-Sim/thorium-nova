@@ -27,7 +27,7 @@ export class StationComplementPluginResolver {
     }
     const stationComplement = getStore<StationComplement>({
       class: StationComplement,
-      path: `${appStoreDir}/stationComplements/${name}/data.json`,
+      path: `${appStoreDir}stationComplements/${name}/data.json`,
       initialData: new StationComplement({name}),
     });
 
