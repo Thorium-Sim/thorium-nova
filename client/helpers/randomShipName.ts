@@ -7,7 +7,7 @@ import {concat, randomFromList} from "./utils";
 class NameGenerator {
   words = randomWords;
 
-  civilian1() {
+  civilian1 = () => {
     return `${randomFromList(this.words.adjectives)} ${randomFromList(
       concat(
         this.words.maleNames,
@@ -16,23 +16,23 @@ class NameGenerator {
         this.words.singularNouns,
         this.words.pluralNouns,
         this.words.pluralNouns,
-        this.words.nounsOfIndeteminateQuantity,
-        this.words.nounsOfIndeteminateQuantity,
+        this.words.nounsOfIndeterminateQuantity,
+        this.words.nounsOfIndeterminateQuantity,
       ),
     )}${randomFromList(this.words.sometimesASuccessor)}`;
-  }
-  civilian2() {
+  };
+  civilian2 = () => {
     return `${randomFromList(
       concat(
         this.words.adjectives,
         this.words.singularNouns,
-        this.words.nounsOfIndeteminateQuantity,
+        this.words.nounsOfIndeterminateQuantity,
       ),
     )} ${randomFromList(
       concat(this.words.singularNouns, this.words.pluralNouns),
     )}`;
-  }
-  civilian3() {
+  };
+  civilian3 = () => {
     return `${randomFromList(
       concat(
         this.words.maleNames,
@@ -45,50 +45,50 @@ class NameGenerator {
       concat(
         this.words.singularNouns,
         this.words.pluralNouns,
-        this.words.nounsOfIndeteminateQuantity,
+        this.words.nounsOfIndeterminateQuantity,
       ),
     )}`;
-  }
-  civilian4() {
+  };
+  civilian4 = () => {
     return `${randomFromList(
-      concat(this.words.pluralNouns, this.words.nounsOfIndeteminateQuantity),
+      concat(this.words.pluralNouns, this.words.nounsOfIndeterminateQuantity),
     )} and ${randomFromList(
-      concat(this.words.pluralNouns, this.words.nounsOfIndeteminateQuantity),
+      concat(this.words.pluralNouns, this.words.nounsOfIndeterminateQuantity),
     )}`;
-  }
-  civilian5() {
+  };
+  civilian5 = () => {
     return `${randomFromList(this.words.pluralQuantities)} ${randomFromList(
       this.words.pluralNouns,
     )}`;
-  }
+  };
 
-  civilian6() {
+  civilian6 = () => {
     return `${randomFromList(
       concat(this.words.femaleNames, this.words.genderNeutralTitles),
     )} ${randomFromList(
       concat(this.words.femaleNames, this.words.thingsYouCanBeOf()),
     )}`;
-  }
-  civilian7() {
+  };
+  civilian7 = () => {
     return `${randomFromList(
       concat(this.words.maleNames, this.words.femaleNames),
     )} the ${randomFromList(this.words.adjectives)}`;
-  }
-  civilian8() {
+  };
+  civilian8 = () => {
     return `${randomFromList(
       concat(this.words.singularNouns, this.words.adjectives),
     )} ${randomFromList(this.words.allTitles())}${randomFromList(
       this.words.sometimesASuccessor,
     )}`;
-  }
-  civilian9() {
+  };
+  civilian9 = () => {
     return `${randomFromList(
       concat(this.words.singularNouns, this.words.pluralNouns),
     )} ${randomFromList(this.words.thingsYouCanBeOf())}`;
-  }
-  civilian10() {
+  };
+  civilian10 = () => {
     return `${randomFromList(
-      this.words.nounsOfIndeteminateQuantity,
+      this.words.nounsOfIndeterminateQuantity,
     )} ${randomFromList(
       concat(
         this.words.singularNouns,
@@ -96,72 +96,75 @@ class NameGenerator {
         this.words.allTitles(),
       ),
     )}`;
-  }
-  civilian11() {
+  };
+  civilian11 = () => {
     return `${randomFromList(
       concat(
         this.words.adjectives,
-        this.words.nounsOfIndeteminateQuantity,
+        this.words.nounsOfIndeterminateQuantity,
         this.words.singularNouns,
         this.words.allTitles(),
         this.words.femaleNames,
       ),
     )}`;
-  }
-  civilian12() {
+  };
+  civilian12 = () => {
     return `${randomFromList(this.words.asianPrefixes)} ${randomFromList(
       this.words.asian,
     )}${randomFromList(this.words.asianSuffixes)}`;
-  }
-  civilian13() {
+  };
+  civilian13 = () => {
     return `${randomFromList(this.words.prefixes)}${randomFromList(
       this.words.suffixes,
     )}`;
-  }
-  civilian14() {
+  };
+  civilian14 = () => {
     return randomFromList(this.words.standaloneCivilianShipNames);
-  }
-  civilian15() {
+  };
+  civilian15 = () => {
     return `${randomFromList(
       concat(this.words.maleTitles, this.words.genderNeutralTitles),
     )} ${randomFromList(
       concat(this.words.maleNames, this.words.thingsYouCanBeOf()),
     )}`;
-  }
-  civilian() {
+  };
+  civilian = (): string | undefined => {
     const num = Math.floor(Math.random() * 15) + 1;
     const key = `civilian${num}` as keyof NameGenerator;
-    return this[key];
-  }
-  republicCapital() {
+    const prop = this[key];
+    if (typeof prop === "function") {
+      return prop() as string;
+    }
+  };
+  republicCapital = () => {
     return `R.N.S. ${randomFromList(this.words.republicCapital)}`;
-  }
-  republicSmall() {
+  };
+  republicSmall = () => {
     return `R.N.S. ${randomFromList(this.words.republicSmall)}`;
-  }
-  republicFighter() {
+  };
+  republicFighter = () => {
     return `${randomFromList(
       concat(this.words.color, this.words.greek),
     )} ${randomFromList(this.words.oneToTwelve)}`;
-  }
-  deep() {
+  };
+  deep = () => {
     return `D.S.S. ${randomFromList(this.words.deep)}`;
-  }
-  deepFighter() {
+  };
+  deepFighter = () => {
     return `${randomFromList(this.words.greek)} ${randomFromList(
       this.words.oneToTwelve,
     )}`;
-  }
-  militia() {
+  };
+  militia = () => {
     return `I.M.S. ${randomFromList(this.words.militia)}`;
-  }
-  freeWorldsCapital() {
+  };
+  freeWorldsCapital = () => {
     return `F.S. ${randomFromList(this.words.freeWorldsCapital)}`;
-  }
-  freeWorldsSmall() {
+  };
+  freeWorldsSmall = () => {
     return `F.S. ${randomFromList(this.words.freeWorldsSmall)}`;
-  }
-  freeWorldsFighter() {
+  };
+  freeWorldsFighter = () => {
     if (Math.random() < 0.5) {
       return `${randomFromList(this.words.phonetic)} ${randomFromList(
         this.words.digit,
@@ -171,23 +174,23 @@ class NameGenerator {
         this.words.oneToTwelve,
       )}`;
     }
-  }
-  syndicateCapital() {
+  };
+  syndicateCapital = () => {
     return `S.S. ${randomFromList(this.words.syndicateCapital)}`;
-  }
-  syndicateSmall() {
+  };
+  syndicateSmall = () => {
     return `F-${randomFromList(this.words.digit)}${randomFromList(
       this.words.digit,
     )}${randomFromList(this.words.letter)}${randomFromList(this.words.digit)}`;
-  }
-  syndicateFighter() {
+  };
+  syndicateFighter = () => {
     return `F-${randomFromList(this.words.digit)}${randomFromList(
       this.words.digit,
     )}${randomFromList(this.words.digit)}`;
-  }
+  };
 
   // Pirate Stuff
-  pirate1() {
+  pirate1 = () => {
     return `${randomFromList(
       concat(
         this.words.pirateAdjectivesThatDontWorkAsTitles,
@@ -200,8 +203,8 @@ class NameGenerator {
         this.words.badOutcomes,
       ),
     )}`;
-  }
-  pirate2() {
+  };
+  pirate2 = () => {
     return `${randomFromList(
       concat(
         this.words.pirateAdjectivesThatDontWorkAsTitles,
@@ -211,8 +214,8 @@ class NameGenerator {
     )} ${randomFromList(
       concat(this.words.sinisterNames, this.words.badOutcomes),
     )}`;
-  }
-  pirate3() {
+  };
+  pirate3 = () => {
     return `${randomFromList(this.words.sinisterNames)}'s ${randomFromList(
       concat(
         this.words.pirateNouns,
@@ -220,18 +223,18 @@ class NameGenerator {
         this.words.badOutcomes,
       ),
     )}`;
-  }
-  pirate4() {
+  };
+  pirate4 = () => {
     return `${randomFromList(this.words.sinisterNames)} the ${randomFromList(
       this.words.pirateAdjectivesThatWorkAsTitles,
     )}`;
-  }
-  pirate5() {
+  };
+  pirate5 = () => {
     return `${randomFromList(
       concat(this.words.pirateNouns, this.words.badPirateNouns),
     )} of ${randomFromList(this.words.badOutcomes)}`;
-  }
-  pirate6() {
+  };
+  pirate6 = () => {
     return `${randomFromList(
       concat(
         this.words.badOutcomes,
@@ -239,8 +242,8 @@ class NameGenerator {
         this.words.pirateAdjectivesThatDontWorkAsTitles,
       ),
     )} ${randomFromList(this.words.badPirateNouns)}`;
-  }
-  pirate7() {
+  };
+  pirate7 = () => {
     return randomFromList(
       concat(
         this.words.pirateNouns,
@@ -248,47 +251,53 @@ class NameGenerator {
         this.words.badOutcomes,
       ),
     );
-  }
-  pirate8() {
+  };
+  pirate8 = () => {
     return `${randomFromList(this.words.piratePrefixes)}${randomFromList(
       this.words.pirateSuffixes,
     )}`;
-  }
-  pirate9() {
+  };
+  pirate9 = () => {
     return `${randomFromList(this.words.pirateTitles)} ${randomFromList(
       this.words.pirateHonorifics,
     )}`;
-  }
-  pirate() {
+  };
+  pirate = (): string | undefined => {
     const num = Math.floor(Math.random() * 9) + 1;
     const key = `pirate${num}` as keyof NameGenerator;
-    return this[key];
-  }
-  bountyHunter1() {
+    const prop = this[key];
+    if (typeof prop === "function") {
+      return prop() as string;
+    }
+  };
+  bountyHunter1 = () => {
     return `${randomFromList(
       this.words.bountyHunterPrefixes1,
     )} ${randomFromList(this.words.bountyHunterSuffixes1)}`;
-  }
-  bountyHunter2() {
+  };
+  bountyHunter2 = () => {
     return `${randomFromList(
       this.words.bountyHunterPrefixes2,
     )} of ${randomFromList(this.words.bountyHunterSuffixes2)}`;
-  }
-  bountyHunter() {
+  };
+  bountyHunter = (): string | undefined => {
     const num = Math.floor(Math.random() * 2) + 1;
     const key = `pirate${num}` as keyof NameGenerator;
-    return this[key];
-  }
-  quarg() {
+    const prop = this[key];
+    if (typeof prop === "function") {
+      return prop() as string;
+    }
+  };
+  quarg = () => {
     return `${randomFromList(this.words.quargPrefixes)}${randomFromList(
       this.words.quargInterstitials,
     )}${randomFromList(this.words.quargSuffixes)}`;
-  }
-  pug() {
+  };
+  pug = () => {
     return `${randomFromList(this.words.pugPrefixes)}${randomFromList(
       this.words.pugInterstitials,
     )}${randomFromList(this.words.pugSuffixes)}`;
-  }
+  };
 }
 
 export default new NameGenerator();

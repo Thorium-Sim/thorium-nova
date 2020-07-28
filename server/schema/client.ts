@@ -13,6 +13,7 @@ import {UserInputError} from "apollo-server-errors";
 import uuid from "uniqid";
 import App from "../app";
 import {GraphQLContext} from "../helpers/graphqlContext";
+import Entity from "../helpers/ecs/entity";
 
 type OfflineStates =
   | "blackout"
@@ -27,13 +28,20 @@ export default class Client {
   id: string;
 
   @Field(type => ID, {nullable: true})
-  flightId: string | null = null;
-
-  @Field(type => ID, {nullable: true})
   shipId: string | null = null;
+
+  @Field(type => Entity, {nullable: true})
+  get ship() {
+    return App.activeFlight?.ships.find(s => s.id === this.shipId);
+  }
 
   @Field(type => ID, {nullable: true})
   stationId: string | null = null;
+
+  @Field(type => Entity, {nullable: true})
+  get station() {
+    return this.ship?.stations?.stations.find(s => s.id === this.stationId);
+  }
 
   @Field(type => String, {nullable: true})
   loginName: string | null = null;
@@ -56,20 +64,20 @@ export default class Client {
   disconnect() {
     this.connected = false;
   }
-  // setShip(shipId: string | null) {
-  //   this.shipId = shipId;
-  //   this.stationId = null;
-  //   this.logout();
-  // }
-  // setStation(stationId: string | null) {
-  //   this.stationId = stationId;
-  // }
-  // login(name: string) {
-  //   this.loginName = name;
-  // }
-  // logout() {
-  //   this.loginName = null;
-  // }
+  setShip(shipId: string | null) {
+    this.shipId = shipId;
+    this.stationId = null;
+    this.logout();
+  }
+  setStation(stationId: string | null) {
+    this.stationId = stationId;
+  }
+  login(name: string) {
+    this.loginName = name;
+  }
+  logout() {
+    this.loginName = null;
+  }
   // setTraining(training: boolean) {
   //   this.training = training;
   // }
@@ -82,7 +90,7 @@ export default class Client {
 
   //   this.setOfflineState(null);
   //   if (hardReset) {
-  //     this.setFlight(null);
+  //     this.setShip(null);
   //   }
   // }
 }
@@ -120,6 +128,67 @@ export class ClientResolver {
     let client = App.storage.clients.find(c => c.id === context.clientId);
 
     client?.disconnect();
+
+    return client;
+  }
+  @Mutation(returns => Client)
+  clientSetShip(
+    @Ctx() context: GraphQLContext,
+    @Arg("shipId", type => ID, {nullable: true}) shipId: string | null,
+    @Arg("clientId", type => ID, {nullable: true}) clientId: string | null,
+  ): Client | undefined {
+    // Validate that this ship is on the flight.
+    if (!App.activeFlight?.ships.find(s => s.id === shipId)) {
+      throw new UserInputError("Selected Ship is not present on the flight.");
+    }
+    let client = App.storage.clients.find(
+      c => c.id === clientId || c.id === context.clientId,
+    );
+
+    client?.setShip(shipId);
+
+    return client;
+  }
+  @Mutation(returns => Client)
+  clientSetStation(
+    @Ctx() context: GraphQLContext,
+    @Arg("stationId", type => ID, {nullable: true}) stationId: string | null,
+    @Arg("clientId", type => ID, {nullable: true}) clientId: string | null,
+  ): Client | undefined {
+    let client = App.storage.clients.find(
+      c => c.id === clientId || c.id === context.clientId,
+    );
+    if (!client?.shipId) {
+      throw new UserInputError(
+        "Client must be assigned to a ship before assigning a station.",
+      );
+    }
+    if (!client.ship?.stations?.stations.find(s => s.id === stationId)) {
+      throw new UserInputError(
+        "Selected Station is not present on the client's assigned ship.",
+      );
+    }
+
+    client?.setStation(stationId);
+
+    return client;
+  }
+  @Mutation(returns => Client)
+  clientLogin(
+    @Ctx() context: GraphQLContext,
+    @Arg("loginName", type => String, {nullable: true}) loginName: string,
+  ): Client | undefined {
+    let client = App.storage.clients.find(c => c.id === context.clientId);
+
+    client?.login(loginName);
+
+    return client;
+  }
+  @Mutation(returns => Client)
+  clientLogout(@Ctx() context: GraphQLContext): Client | undefined {
+    let client = App.storage.clients.find(c => c.id === context.clientId);
+
+    client?.logout();
 
     return client;
   }

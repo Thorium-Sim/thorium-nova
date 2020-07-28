@@ -15,7 +15,6 @@ describe("GraphQL Context", () => {
       Object {
         "client": Client {
           "connected": false,
-          "flightId": null,
           "id": "Test Client",
           "loginName": null,
           "offlineState": null,
@@ -39,7 +38,6 @@ describe("GraphQL Context", () => {
       Object {
         "client": Client {
           "connected": false,
-          "flightId": null,
           "id": "Test Client",
           "loginName": null,
           "offlineState": null,
