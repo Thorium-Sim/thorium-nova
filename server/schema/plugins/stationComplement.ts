@@ -10,7 +10,9 @@ export class StationComplementPluginResolver {
     nullable: true,
     name: "stationComplement",
   })
-  stationComplementQuery(@Arg("id") id: string): StationComplement | null {
+  stationComplementQuery(
+    @Arg("id", type => ID) id: string,
+  ): StationComplement | null {
     return App.plugins.stationComplements.find(s => s.id === id) || null;
   }
   @Query(returns => [StationComplement], {name: "stationComplements"})
@@ -22,7 +24,7 @@ export class StationComplementPluginResolver {
     @Arg("name")
     name: string,
   ): StationComplement {
-    if (App.plugins.stationComplements.find(s => s.id === name)) {
+    if (App.plugins.stationComplements.find(s => s.name === name)) {
       throw new Error("A station complement with that name already exists.");
     }
     const stationComplement = getStore<StationComplement>({

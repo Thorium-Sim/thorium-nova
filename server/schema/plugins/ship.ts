@@ -37,7 +37,7 @@ function publishShip(ship: Entity) {
 @Resolver()
 export class ShipPluginResolver {
   @Query(returns => Entity, {nullable: true, name: "templateShip"})
-  shipQuery(@Arg("id") id: string): Entity | null {
+  shipQuery(@Arg("id", type => ID) id: string): Entity | null {
     return App.plugins.ships.find(s => s.id === id) || null;
   }
 

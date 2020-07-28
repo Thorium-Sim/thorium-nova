@@ -11,10 +11,10 @@ module.exports = {
   ],
   coverageThreshold: {
     global: {
-      statements: 75,
-      branches: 55,
-      functions: 60,
-      lines: 75,
+      statements: 80,
+      branches: 60,
+      functions: 70,
+      lines: 80,
     },
   },
   projects: ["./test/jest.client.cjs", "./test/jest.server.cjs"],
