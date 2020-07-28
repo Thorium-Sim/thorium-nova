@@ -2,6 +2,7 @@ import {Box, CSSReset, PseudoBox} from "@chakra-ui/core";
 import {css, Global} from "@emotion/core";
 import React from "react";
 import {ErrorBoundary, FallbackProps} from "react-error-boundary";
+import {process} from "uniqid";
 
 const Fallback: React.FC<FallbackProps> = ({error}) => {
   return (
@@ -29,7 +30,7 @@ const Layout: React.FC = ({children}) => {
           }
         `}
       ></Global>
-      {/* <CSSReset /> */}
+      <CSSReset />
       <Box
         zIndex={0}
         position="absolute"

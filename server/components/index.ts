@@ -5,6 +5,7 @@ import {AlertLevelComponent} from "./alertLevel";
 import {IdentityComponent} from "./identity";
 import {TagsComponent} from "./tags";
 import {ThemeComponent} from "./theme";
+import {StationComplementComponent} from "./stationComplement";
 
 @ObjectType()
 export default class Components {
@@ -25,6 +26,9 @@ export default class Components {
 
   @Field()
   theme?: ThemeComponent;
+
+  @Field()
+  stations?: StationComplementComponent;
 }
 
 export const registeredComponents = [
