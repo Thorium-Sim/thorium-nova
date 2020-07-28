@@ -1,14 +1,13 @@
-import App from "../../app";
-import {AlertLevelComponent} from "../../components/alertLevel";
-import {IdentityComponent} from "../../components/identity";
-import {IsShipComponent} from "../../components/isShip";
-import {ShipAssetsComponent} from "../../components/shipAssets";
-import {TagsComponent} from "../../components/tags";
-import {ThemeComponent} from "../../components/theme";
-import {appStoreDir} from "../../helpers/appPaths";
-import getStore from "../../helpers/dataStore";
-import Entity from "../../helpers/ecs/entity";
-import {pubsub} from "../../helpers/pubsub";
+import App from "server/app";
+import {AlertLevelComponent} from "server/components/alertLevel";
+import {IdentityComponent} from "server/components/identity";
+import {IsShipComponent} from "server/components/isShip";
+import {ShipAssetsComponent} from "server/components/shipAssets";
+import {TagsComponent} from "server/components/tags";
+import {ThemeComponent} from "server/components/theme";
+import {appStoreDir} from "server/helpers/appPaths";
+import getStore from "server/helpers/dataStore";
+import Entity from "server/helpers/ecs/entity";
 import {
   Arg,
   ID,
@@ -19,6 +18,7 @@ import {
   Subscription,
 } from "type-graphql";
 import uniqid from "uniqid";
+import {pubsub} from "server/helpers/pubsub";
 
 interface ShipPayload {
   ship: Entity;

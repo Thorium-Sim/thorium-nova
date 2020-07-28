@@ -16,8 +16,10 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react",
+    "baseUrl": ".",
     "paths": {
-      "*": ["test/*"]
+      "*": ["test/*"],
+      "server/*": ["server/*"]
     },
     "typeRoots": ["./node_modules/@types", "./types"]
   },

@@ -9,4 +9,7 @@ module.exports = {
   testEnvironment: "jest-environment-node",
   testMatch: ["**/server/**/*.test.{js,ts}"],
   setupFilesAfterEnv: ["reflect-metadata"],
+  moduleNameMapper: {
+    "server/(.*)": "<rootDir>/server/$1",
+  },
 };
