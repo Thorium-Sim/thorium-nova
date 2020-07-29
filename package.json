@@ -13,7 +13,7 @@
   "scripts": {
     "start": "npm-run-all --parallel start:client start:server",
     "start:client": "NODE_ENV=development parcel serve client/index.html --port 3000 --open",
-    "start:server": "ts-node-dev -r tsconfig-paths/register server/index.ts",
+    "start:server": "ts-node-dev --trace-deprecation -r tsconfig-paths/register server/index.ts",
     "build:client": "parcel build client/index.html",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
@@ -49,6 +49,7 @@
     "express": "^4.16.4",
     "graphql": "^15.3.0",
     "graphql-type-json": "^0.3.2",
+    "graphql-upload": "^11.0.0",
     "history": "^5.0.0",
     "i18next": "^19.6.3",
     "i18next-browser-languagedetector": "^5.0.0",

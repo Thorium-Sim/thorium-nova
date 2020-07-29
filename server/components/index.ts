@@ -6,6 +6,7 @@ import {IdentityComponent} from "./identity";
 import {TagsComponent} from "./tags";
 import {ThemeComponent} from "./theme";
 import {StationComplementComponent} from "./stationComplement";
+import {ShipAssetsComponent} from "./shipAssets";
 
 @ObjectType()
 export default class Components {
@@ -14,6 +15,9 @@ export default class Components {
 
   @Field()
   isShip?: IsShipComponent;
+
+  @Field()
+  shipAssets?: ShipAssetsComponent;
 
   @Field()
   alertLevel?: AlertLevelComponent;
@@ -38,4 +42,5 @@ export const registeredComponents = [
   IdentityComponent,
   TagsComponent,
   ThemeComponent,
+  ShipAssetsComponent,
 ];

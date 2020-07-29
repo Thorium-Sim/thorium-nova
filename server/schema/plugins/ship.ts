@@ -19,6 +19,8 @@ import {
 } from "type-graphql";
 import uniqid from "uniqid";
 import {pubsub} from "server/helpers/pubsub";
+import fs from "fs";
+import {GraphQLUpload, FileUpload} from "graphql-upload";
 
 interface ShipPayload {
   ship: Entity;
@@ -26,6 +28,24 @@ interface ShipPayload {
 interface ShipsPayload {
   entities: Entity[];
 }
+
+/**
+ *
+ * Stuff that can be configured on a ship
+ * - Theme
+ * - UI Sound pack - includes ambiance
+ * - Name
+ * - Ship Assets
+ * - Tags
+ * - Systems (just add and remove systems)
+ * - Decks & Rooms (including maps)
+ * - Crew Count (composition is automatically generated for each flight)
+ * - Docked ships (referencing other ships and providing a count. Names are automatically generated.)
+ *
+ * Inventory is automatically generated and distributed to rooms based
+ * on the tags of the rooms, ship systems (torpedos, phaser heads, coolant, probes, etc.)
+ * and the needs of the damage reports.
+ */
 
 function publishShip(ship: Entity) {
   pubsub.publish("templateShip", {shipId: ship.id, ship});
@@ -93,6 +113,26 @@ export class ShipPluginResolver {
     const ship = App.plugins.ships.find(s => s.id === id) || null;
     if (!ship) throw new Error("Unable to find ship.");
     ship.updateComponent("theme", {value: theme});
+    publishShip(ship);
+    return ship;
+  }
+
+  @Mutation(returns => Entity)
+  async templateShipSetLogo(
+    @Arg("image", type => GraphQLUpload) image: FileUpload,
+    @Arg("id", type => ID) id: string,
+  ) {
+    const ship = App.plugins.ships.find(s => s.id === id) || null;
+    if (!ship) throw new Error("Unable to find ship.");
+    await new Promise((resolve, reject) => {
+      const assetPath = `${appStoreDir}ships/${ship.id}/${image.filename}`;
+      image
+        .createReadStream()
+        .pipe(fs.createWriteStream(assetPath))
+        .on("finish", () => resolve(true))
+        .on("error", () => reject(false));
+    });
+    ship.updateComponent("shipAssets", {logo: image.filename});
     publishShip(ship);
     return ship;
   }
