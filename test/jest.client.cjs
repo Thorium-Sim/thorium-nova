@@ -12,6 +12,7 @@ module.exports = {
   setupFilesAfterEnv: [
     "@testing-library/jest-dom/extend-expect",
     "<rootDir>/test/fetch.cjs",
+    "<rootDir>/test/i18n.cjs",
   ],
   snapshotSerializers: ["jest-emotion"],
 };

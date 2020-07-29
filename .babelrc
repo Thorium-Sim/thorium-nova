@@ -8,6 +8,14 @@
     "@emotion/babel-preset-css-prop"
   ],
   "plugins": [
+    [
+      "i18next-extract",
+      {
+        "outputPath": "locales/{{locale}}/{{ns}}.json",
+        "discardOldKeys": true,
+        "keyAsDefaultValue": ["en", "en_US"]
+      }
+    ],
     ["@babel/plugin-transform-typescript", {"isTSX": true}],
     ["@babel/plugin-proposal-decorators", {"legacy": true}],
     ["@babel/plugin-proposal-class-properties", {"loose": true}],

@@ -15,8 +15,10 @@ import QuoteOfTheDay from "../components/QuoteOfTheDay";
 import Credits from "../components/Credits";
 import {Link as RouterLink} from "react-router-dom";
 import {useFlightsQuery} from "../generated/graphql";
+import {Trans, useTranslation} from "react-i18next";
 
 const Welcome = () => {
+  const {t} = useTranslation("welcome");
   const [show, setShow] = React.useState(false);
   const {data} = useFlightsQuery();
   return (
@@ -46,13 +48,15 @@ const Welcome = () => {
           <Heading size="md" mt={2}>
             {/* @ts-ignore */}
             <Link as={RouterLink} color="purple.300" to="/releases">
-              Version {require("../../package.json").version}
+              {t("Version {{version}}", {
+                version: require("../../package.json").version,
+              })}
             </Link>
           </Heading>
         </Box>
         <Stack gridArea="button" alignSelf="end" m={16} spacing={4} width={400}>
           <Button size="lg" variantColor="blue" variant="outline">
-            Start a New Flight
+            {t(`Start a New Flight`)}
           </Button>
           <Button
             size="lg"
@@ -60,7 +64,7 @@ const Welcome = () => {
             variant="outline"
             onClick={() => setShow(s => !s)}
           >
-            Load a Saved Flight
+            {t(`Load a Saved Flight`)}
           </Button>
           <Collapse isOpen={show}>
             <List
@@ -84,7 +88,7 @@ const Welcome = () => {
             </List>
           </Collapse>
           <Button size="lg" variantColor="orange" variant="outline">
-            Join a Server
+            {t(`Join a Server`)}
           </Button>
         </Stack>
         <Credits></Credits>

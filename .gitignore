@@ -7,3 +7,4 @@ yarn-error.log
 coverage
 data
 .DS_Store
+build
