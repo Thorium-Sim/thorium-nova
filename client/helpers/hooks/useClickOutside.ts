@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function useOnClickOutside(
-  ref: React.RefObject<HTMLElement>|React.MutableRefObject<HTMLElement>,
+  ref: React.RefObject<HTMLElement> | React.MutableRefObject<HTMLElement>,
   handler: (event: MouseEvent) => void,
 ) {
   React.useEffect(

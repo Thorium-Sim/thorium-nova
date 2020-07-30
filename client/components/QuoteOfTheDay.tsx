@@ -96,7 +96,7 @@ const quotes = [
   "Can't Win 'Em All",
   "Extreme Problems call for Extreme Solutions",
   "An attempt at perspective",
-  "This is my time, and I control it."
+  "This is my time, and I control it.",
 ];
 
 const QuoteOfTheDay = () => {
