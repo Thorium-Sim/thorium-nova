@@ -4,4 +4,5 @@ import TestFile from "./TestFile";
 
 test("it works", () => {
   const {debug, container} = render(<TestFile />);
+  expect(true).toBeTruthy();
 });

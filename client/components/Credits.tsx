@@ -62,7 +62,7 @@ const Credits: React.FC = () => {
       // `}
     >
       {creditList.map(c => (
-        <Box key={c.header} mt={4}>
+        <Box key={c.header} mt={4} color="white">
           <Heading size="lg">{c.header}</Heading>
           <Heading size="md" mt="1">
             {c.content}

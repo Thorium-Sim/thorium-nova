@@ -7,14 +7,14 @@ const theme = {
   ...defaultTheme,
   colors: {
     ...defaultTheme.colors,
-    primary: defaultTheme.colors.blue,
+    primary: getColorScheme(defaultTheme.colors.blue[500], 10), //defaultTheme.colors.blue,
     secondary: defaultTheme.colors.gray,
     info: defaultTheme.colors.teal,
     alert: defaultTheme.colors.purple,
     warning: defaultTheme.colors.orange,
     danger: defaultTheme.colors.red,
     success: defaultTheme.colors.green,
-    muted: getColorScheme("#888"),
+    // muted: getColorScheme("#888"),
   },
 };
 

@@ -1,18 +1,6 @@
 import chroma from "chroma-js";
-import {RGBA_ASTC_10x10_Format} from "three";
+
 const SCHEME_ORDER = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
-const LIGHTNESS_MAP = [
-  0.95,
-  0.85,
-  0.75,
-  0.65,
-  0.55,
-  0.45,
-  0.35,
-  0.25,
-  0.15,
-  0.05,
-];
 const SATURATION_MAP = [0.32, 0.16, 0.08, 0.04, 0, 0, 0.04, 0.08, 0.16, 0.32];
 const UNKNOWN_USER_COLOR_STRING = "#000";
 
@@ -21,10 +9,20 @@ const getUserColorChroma = (
   fallbackValue = UNKNOWN_USER_COLOR_STRING,
 ) => (chroma.valid(colorString) ? chroma(colorString) : chroma(fallbackValue));
 
-export default function getColorScheme(color: string) {
+function generateLightnessMap(spread: number, center: number) {
+  return Array.from({length: 10}).map((_, i) => {
+    return center / 100 + spread / 100 / 2 + (spread / 100) * (4 - i);
+  });
+}
+export default function getColorScheme(
+  color: string,
+  spread: number = 10,
+  center: number = 50,
+) {
   const trimmedColor = color.trim();
   const userColorChroma = getUserColorChroma(trimmedColor);
 
+  const LIGHTNESS_MAP = generateLightnessMap(spread, center);
   const lightnessGoal = userColorChroma.get("hsl.l");
   const closestLightness = LIGHTNESS_MAP.reduce((prev, curr) =>
     Math.abs(curr - lightnessGoal) < Math.abs(prev - lightnessGoal)
@@ -33,7 +31,6 @@ export default function getColorScheme(color: string) {
   );
 
   const baseColorIndex = LIGHTNESS_MAP.findIndex(l => l === closestLightness);
-
   const colors = LIGHTNESS_MAP.map(l => userColorChroma.set("hsl.l", l))
     .map((color, i) => {
       const saturationDelta =

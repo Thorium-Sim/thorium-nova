@@ -1,1 +1,10 @@
 @import "./reset.css";
+
+html,
+body,
+#root {
+  background: black;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}

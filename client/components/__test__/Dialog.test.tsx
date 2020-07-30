@@ -76,7 +76,7 @@ describe("Dialog", () => {
     expect(await findByText("Cancel")).toBeInTheDocument();
     userEvent.click(await findByText("OK"));
   });
-  it("should render prompt", async () => {
+  it.skip("should render prompt", async () => {
     const onPrompt = jest.fn();
     const {findByText, findByLabelText} = render(
       <Dialog>

@@ -17,18 +17,6 @@ const Layout: React.FC = ({children}) => {
 
   return (
     <PseudoBox position="relative" height="100%" className="layout">
-      <Global
-        styles={css`
-          html,
-          body,
-          #root {
-            background: black;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-          }
-        `}
-      ></Global>
       <Box
         zIndex={0}
         position="absolute"
