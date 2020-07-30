@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Box,
-  Button,
   Collapse,
   Flex,
   Grid,
@@ -16,6 +15,7 @@ import Credits from "../components/Credits";
 import {Link as RouterLink} from "react-router-dom";
 import {useFlightsQuery} from "../generated/graphql";
 import {Trans, useTranslation} from "react-i18next";
+import Button from "../components/ui/button";
 
 const Welcome = () => {
   const {t} = useTranslation("welcome");
@@ -55,12 +55,12 @@ const Welcome = () => {
           </Heading>
         </Box>
         <Stack gridArea="button" alignSelf="end" m={16} spacing={4} width={400}>
-          <Button size="lg" variantColor="blue" variant="outline">
+          <Button size="lg" variantColor="primary" variant="outline">
             {t(`Start a New Flight`)}
           </Button>
           <Button
             size="lg"
-            variantColor="teal"
+            variantColor="info"
             variant="outline"
             onClick={() => setShow(s => !s)}
           >
@@ -87,7 +87,7 @@ const Welcome = () => {
               ))}
             </List>
           </Collapse>
-          <Button size="lg" variantColor="orange" variant="outline">
+          <Button size="lg" variantColor="warning" variant="outline">
             {t(`Join a Server`)}
           </Button>
         </Stack>
