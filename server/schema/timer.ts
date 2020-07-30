@@ -2,7 +2,15 @@ import App from "../app";
 import {TimerComponent} from "../components/timer";
 import Entity from "../helpers/ecs/entity";
 import {pubsub} from "../helpers/pubsub";
-import {Arg, ID, Mutation, Resolver, Root, Subscription} from "type-graphql";
+import {
+  Arg,
+  ID,
+  Mutation,
+  Query,
+  Resolver,
+  Root,
+  Subscription,
+} from "type-graphql";
 import uniqid from "uniqid";
 
 interface TimersPayload {
@@ -11,6 +19,20 @@ interface TimersPayload {
 
 @Resolver(Entity)
 export class TimerResolver {
+  @Query(returns => [Entity], {name: "timers"})
+  timersQuery() {
+    return App.activeFlight?.ecs.entities.filter(e => e.components.timer);
+  }
+  @Query(returns => Entity, {name: "timer"})
+  timerQuery(
+    @Arg("id", type => ID, {nullable: true}) id: string,
+  ): Entity | null {
+    return (
+      App.activeFlight?.ecs.entities.find(
+        e => e.components.timer && e.id === id,
+      ) || null
+    );
+  }
   @Mutation(returns => Entity)
   timerCreate(
     @Arg("label")
@@ -37,6 +59,7 @@ export class TimerResolver {
   ): Entity | undefined {
     const entity = App.activeFlight?.ecs.entities.find(e => e.id === id);
 
+    /* istanbul ignore else */
     if (entity?.components.timer) {
       entity.components.timer.paused = pause;
     }
@@ -53,7 +76,6 @@ export class TimerResolver {
     id: string,
   ): string | undefined {
     App.activeFlight?.ecs.removeEntityById(id);
-
     pubsub.publish("timers", {
       entities: App.activeFlight?.ecs.entities.filter(e => e.components.timer),
     });
@@ -61,6 +83,7 @@ export class TimerResolver {
     return "";
   }
 
+  /* istanbul ignore next */
   @Subscription(returns => [Entity], {
     topics: ({args, payload, context}) => {
       const id = uniqid();
@@ -79,9 +102,10 @@ export class TimerResolver {
     @Root() payload: TimersPayload,
     @Arg("id", type => ID) id: string,
   ): Entity | null {
-    return payload.entities.find(e => e.id === id) || null;
+    return payload?.entities.find(e => e.id === id) || null;
   }
 
+  /* istanbul ignore next */
   @Subscription(returns => [Entity], {
     topics: ({args, payload, context}) => {
       const id = uniqid();
@@ -96,6 +120,6 @@ export class TimerResolver {
     },
   })
   timers(@Root() payload: TimersPayload): Entity[] {
-    return payload.entities || [];
+    return payload?.entities || [];
   }
 }
