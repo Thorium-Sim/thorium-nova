@@ -1,0 +1,12 @@
+subscription TemplateShipAssets($id: ID!) {
+  templateShip(id: $id) {
+    id
+    shipAssets {
+      logo
+      model
+      side
+      top
+      vanity
+    }
+  }
+}

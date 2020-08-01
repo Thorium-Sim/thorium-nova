@@ -8,3 +8,7 @@ body,
   width: 100vw;
   overflow: hidden;
 }
+
+.dark-mode {
+  color: white;
+}

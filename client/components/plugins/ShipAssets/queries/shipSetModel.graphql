@@ -1,0 +1,23 @@
+mutation TemplateShipSetModel(
+  $id: ID!
+  $model: Upload!
+  $side: Upload!
+  $top: Upload!
+  $vanity: Upload!
+) {
+  templateShipSetModel(
+    id: $id
+    model: $model
+    side: $side
+    top: $top
+    vanity: $vanity
+  ) {
+    id
+    shipAssets {
+      model
+      side
+      top
+      vanity
+    }
+  }
+}

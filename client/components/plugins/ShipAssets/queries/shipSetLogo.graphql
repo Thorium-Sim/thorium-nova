@@ -1,0 +1,8 @@
+mutation TemplateShipSetLogo($id: ID!, $image: Upload!) {
+  templateShipSetLogo(id: $id, image: $image) {
+    id
+    shipAssets {
+      logo
+    }
+  }
+}

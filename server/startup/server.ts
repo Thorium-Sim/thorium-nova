@@ -47,7 +47,7 @@ export default async function setupServer() {
 
   server.use(
     "/assets/",
-    express.static(path.resolve("./assets")) as RequestHandler,
+    express.static(path.resolve("./data")) as RequestHandler,
   );
 
   return server;

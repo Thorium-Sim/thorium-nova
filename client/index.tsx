@@ -23,6 +23,21 @@ window.thorium = window.thorium || {
   clockSync: 0,
 };
 
+window.addEventListener(
+  "dragover",
+  function (e) {
+    e.preventDefault();
+  },
+  false,
+);
+window.addEventListener(
+  "drop",
+  function (e) {
+    e.preventDefault();
+  },
+  false,
+);
+
 render(
   <React.StrictMode>
     <ApolloProvider client={client}>

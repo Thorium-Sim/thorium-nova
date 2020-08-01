@@ -12,6 +12,8 @@ export type Scalars = {
   Float: number;
   /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
   DateTime: Date;
+  /** The `Upload` scalar type represents a file upload. */
+  Upload: any;
 };
 
 /** An enum describing what kind of type a given `__Type` is. */
@@ -129,6 +131,63 @@ export type TimersSubscription = {
       };
     };
   }>;
+};
+
+export type TemplateShipAssetsSubscriptionVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type TemplateShipAssetsSubscription = {
+  __typename?: "Subscription";
+  templateShip: Maybe<{
+    __typename?: "Entity";
+    id: string;
+    shipAssets: {
+      __typename?: "ShipAssetsComponent";
+      logo: string;
+      model: string;
+      side: string;
+      top: string;
+      vanity: string;
+    };
+  }>;
+};
+
+export type TemplateShipSetLogoMutationVariables = Exact<{
+  id: Scalars["ID"];
+  image: Scalars["Upload"];
+}>;
+
+export type TemplateShipSetLogoMutation = {
+  __typename?: "Mutation";
+  templateShipSetLogo: {
+    __typename?: "Entity";
+    id: string;
+    shipAssets: {__typename?: "ShipAssetsComponent"; logo: string};
+  };
+};
+
+export type TemplateShipSetModelMutationVariables = Exact<{
+  id: Scalars["ID"];
+  model: Scalars["Upload"];
+  side: Scalars["Upload"];
+  top: Scalars["Upload"];
+  vanity: Scalars["Upload"];
+}>;
+
+export type TemplateShipSetModelMutation = {
+  __typename?: "Mutation";
+  templateShipSetModel: {
+    __typename?: "Entity";
+    id: string;
+    shipAssets: {
+      __typename?: "ShipAssetsComponent";
+      model: string;
+      side: string;
+      top: string;
+      vanity: string;
+    };
+  };
 };
 
 export type ClientConnectMutationVariables = Exact<{[key: string]: never}>;
@@ -274,6 +333,97 @@ export function useTimersSubscription(
 }
 export type TimersSubscriptionHookResult = ReturnType<
   typeof useTimersSubscription
+>;
+export const TemplateShipAssetsDocument = gql`
+  subscription TemplateShipAssets($id: ID!) {
+    templateShip(id: $id) {
+      id
+      shipAssets {
+        logo
+        model
+        side
+        top
+        vanity
+      }
+    }
+  }
+`;
+export function useTemplateShipAssetsSubscription(
+  baseOptions?: ApolloReactHooks.SubscriptionHookOptions<
+    TemplateShipAssetsSubscription,
+    TemplateShipAssetsSubscriptionVariables
+  >,
+) {
+  return ApolloReactHooks.useSubscription<
+    TemplateShipAssetsSubscription,
+    TemplateShipAssetsSubscriptionVariables
+  >(TemplateShipAssetsDocument, baseOptions);
+}
+export type TemplateShipAssetsSubscriptionHookResult = ReturnType<
+  typeof useTemplateShipAssetsSubscription
+>;
+export const TemplateShipSetLogoDocument = gql`
+  mutation TemplateShipSetLogo($id: ID!, $image: Upload!) {
+    templateShipSetLogo(id: $id, image: $image) {
+      id
+      shipAssets {
+        logo
+      }
+    }
+  }
+`;
+export function useTemplateShipSetLogoMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    TemplateShipSetLogoMutation,
+    TemplateShipSetLogoMutationVariables
+  >,
+) {
+  return ApolloReactHooks.useMutation<
+    TemplateShipSetLogoMutation,
+    TemplateShipSetLogoMutationVariables
+  >(TemplateShipSetLogoDocument, baseOptions);
+}
+export type TemplateShipSetLogoMutationHookResult = ReturnType<
+  typeof useTemplateShipSetLogoMutation
+>;
+export const TemplateShipSetModelDocument = gql`
+  mutation TemplateShipSetModel(
+    $id: ID!
+    $model: Upload!
+    $side: Upload!
+    $top: Upload!
+    $vanity: Upload!
+  ) {
+    templateShipSetModel(
+      id: $id
+      model: $model
+      side: $side
+      top: $top
+      vanity: $vanity
+    ) {
+      id
+      shipAssets {
+        model
+        side
+        top
+        vanity
+      }
+    }
+  }
+`;
+export function useTemplateShipSetModelMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    TemplateShipSetModelMutation,
+    TemplateShipSetModelMutationVariables
+  >,
+) {
+  return ApolloReactHooks.useMutation<
+    TemplateShipSetModelMutation,
+    TemplateShipSetModelMutationVariables
+  >(TemplateShipSetModelDocument, baseOptions);
+}
+export type TemplateShipSetModelMutationHookResult = ReturnType<
+  typeof useTemplateShipSetModelMutation
 >;
 export const ClientConnectDocument = gql`
   mutation ClientConnect {

@@ -1,5 +1,10 @@
 import React from "react";
-import {ThemeProvider, DarkMode, theme as defaultTheme} from "@chakra-ui/core";
+import {
+  ThemeProvider,
+  DarkMode,
+  theme as defaultTheme,
+  Box,
+} from "@chakra-ui/core";
 import Dialog from "../components/Dialog";
 import getColorScheme from "./generateColorScheme";
 
@@ -17,7 +22,7 @@ const theme = {
     // muted: getColorScheme("#888"),
   },
 };
-
+console.log(theme);
 const AppContext: React.FC = ({children}) => {
   return (
     <ThemeProvider theme={theme}>

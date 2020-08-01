@@ -10,6 +10,7 @@ import getStore from "server/helpers/dataStore";
 import Entity from "server/helpers/ecs/entity";
 import {
   Arg,
+  FieldResolver,
   ID,
   Mutation,
   Query,
@@ -53,7 +54,20 @@ function publishShip(ship: Entity) {
     entities: App.activeFlight?.ships,
   });
 }
-
+function uploadAsset(file: FileUpload, pathPrefix: string, name?: string) {
+  return new Promise((resolve, reject) => {
+    const assetPath = `${pathPrefix}/${name || file.filename}`;
+    return file
+      .createReadStream()
+      .pipe(fs.createWriteStream(assetPath))
+      .on("finish", () => {
+        resolve();
+      })
+      .on("error", (error: Error) => {
+        reject(error);
+      });
+  });
+}
 @Resolver()
 export class ShipPluginResolver {
   @Query(returns => Entity, {nullable: true, name: "templateShip"})
@@ -76,7 +90,7 @@ export class ShipPluginResolver {
     const entity = getStore<Entity>({
       class: Entity,
       path: `${appStoreDir}ships/${name}/data.json`,
-      initialData: new Entity(name, [
+      initialData: new Entity(null, [
         IsShipComponent,
         AlertLevelComponent,
         ShipAssetsComponent,
@@ -88,7 +102,7 @@ export class ShipPluginResolver {
 
     App.plugins.ships.push(entity);
     entity.updateComponent("identity", {name});
-    // publishShip(entity);
+    publishShip(entity);
 
     return entity;
   }
@@ -124,20 +138,44 @@ export class ShipPluginResolver {
   ) {
     const ship = App.plugins.ships.find(s => s.id === id) || null;
     if (!ship) throw new Error("Unable to find ship.");
-    await new Promise((resolve, reject) => {
-      const assetPath = `${appStoreDir}ships/${ship.id}/${image.filename}`;
-      image
-        .createReadStream()
-        .pipe(fs.createWriteStream(assetPath))
-        .on("finish", () => resolve(true))
-        .on("error", () => reject(false));
-    });
-    ship.updateComponent("shipAssets", {logo: image.filename});
+    const pathPrefix = `${appStoreDir}ships/${ship.identity?.name || ship.id}`;
+    const splitName = image.filename.split(".");
+    const ext = splitName[splitName.length - 1];
+    await uploadAsset(image, pathPrefix, `logo.${ext}`);
+
+    ship.updateComponent("shipAssets", {logo: `logo.${ext}`});
     publishShip(ship);
     return ship;
   }
 
-  @Subscription(returns => [Entity], {
+  @Mutation(returns => Entity)
+  async templateShipSetModel(
+    @Arg("model", type => GraphQLUpload) model: FileUpload,
+    @Arg("side", type => GraphQLUpload) side: FileUpload,
+    @Arg("top", type => GraphQLUpload) top: FileUpload,
+    @Arg("vanity", type => GraphQLUpload) vanity: FileUpload,
+    @Arg("id", type => ID) id: string,
+  ) {
+    const ship = App.plugins.ships.find(s => s.id === id) || null;
+    if (!ship) throw new Error("Unable to find ship.");
+    const pathPrefix = `${appStoreDir}ships/${ship.identity?.name || ship.id}`;
+    await Promise.all([
+      uploadAsset(model, pathPrefix, "model.glb"),
+      uploadAsset(top, pathPrefix, "top.png"),
+      uploadAsset(side, pathPrefix, "side.png"),
+      uploadAsset(vanity, pathPrefix, "vanity.png"),
+    ]);
+    ship.updateComponent("shipAssets", {
+      model: "model.glb",
+      top: "top.png",
+      side: "side.png",
+      vanity: "vanity.png",
+    });
+    publishShip(ship);
+    return ship;
+  }
+
+  @Subscription(returns => Entity, {
     nullable: true,
     topics: ({args, payload}) => {
       const id = uniqid();
@@ -148,13 +186,16 @@ export class ShipPluginResolver {
           ship,
         });
       });
-      return [id, "ship"];
+      return [id, "templateShip"];
     },
     filter: ({args, payload}) => {
       return args.id === payload.shipId;
     },
   })
-  templateShip(@Root() payload: ShipPayload, @Arg("id") id: boolean): Entity {
+  templateShip(
+    @Root() payload: ShipPayload,
+    @Arg("id", type => ID) id: string,
+  ): Entity {
     return payload.ship;
   }
 
@@ -166,10 +207,54 @@ export class ShipPluginResolver {
           entities: App.plugins.ships,
         });
       });
-      return [id, "ships"];
+      return [id, "templateShips"];
     },
   })
   templateShips(@Root() payload: ShipsPayload): Entity[] {
     return payload.entities || [];
+  }
+}
+
+@Resolver(of => ShipAssetsComponent)
+export class ShipAssetsResolver {
+  @FieldResolver()
+  logo(@Root() self: ShipAssetsComponent & {entity: Entity}) {
+    return self.logo
+      ? `/assets/ships/${self.entity?.identity?.name || self.entity.id}/${
+          self.logo
+        }`
+      : "";
+  }
+  @FieldResolver()
+  model(@Root() self: ShipAssetsComponent & {entity: Entity}) {
+    return self.model
+      ? `/assets/ships/${self.entity?.identity?.name || self.entity.id}/${
+          self.model
+        }`
+      : "";
+  }
+  @FieldResolver()
+  top(@Root() self: ShipAssetsComponent & {entity: Entity}) {
+    return self.top
+      ? `/assets/ships/${self.entity?.identity?.name || self.entity.id}/${
+          self.top
+        }`
+      : "";
+  }
+  @FieldResolver()
+  side(@Root() self: ShipAssetsComponent & {entity: Entity}) {
+    return self.side
+      ? `/assets/ships/${self.entity?.identity?.name || self.entity.id}/${
+          self.side
+        }`
+      : "";
+  }
+  @FieldResolver()
+  vanity(@Root() self: ShipAssetsComponent & {entity: Entity}) {
+    return self.vanity
+      ? `/assets/ships/${self.entity?.identity?.name || self.entity.id}/${
+          self.vanity
+        }`
+      : "";
   }
 }

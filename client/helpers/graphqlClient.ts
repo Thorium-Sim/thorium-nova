@@ -13,6 +13,7 @@ import {getMainDefinition} from "@apollo/client/utilities";
 import {onError} from "@apollo/client/link/error";
 import {setContext} from "@apollo/client/link/context";
 import {getClientId} from "./getClientId";
+import {createUploadLink} from "apollo-upload-client";
 
 const hostname = window.location.hostname;
 const protocol = window.location.protocol;
@@ -81,12 +82,12 @@ const httpLink = ApolloLink.from([
     }
     if (networkError) console.error(`[Network error]:`, networkError);
   }),
-  new HttpLink({
+  (createUploadLink({
     uri: graphqlUrl,
     fetchOptions: {
       mode: "cors",
     },
-  }),
+  }) as unknown) as ApolloLink,
 ]);
 
 const link = split(
