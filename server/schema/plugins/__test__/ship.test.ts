@@ -1,4 +1,9 @@
 import {gqlCall} from "../../../helpers/gqlCall";
+import path from "path";
+// @ts-ignore
+import Upload from "graphql-upload/public/upload";
+
+const fs = jest.genMockFromModule("fs") as any;
 
 describe("Ship Plugin", () => {
   it("should query and get no results", async () => {
@@ -64,7 +69,6 @@ describe("Ship Plugin", () => {
         }
       }`,
     });
-
     expect(ship.errors?.[0].message).toEqual(
       "A ship with that name already exists.",
     );
@@ -156,6 +160,100 @@ describe("Ship Plugin", () => {
     );
     expect(rethemedShip.data?.templateShipSetTheme.theme.value).not.toEqual(
       newShip.data?.shipCreateTemplate.theme.value,
+    );
+  });
+  it("should properly add and query for ship assets", async () => {
+    const newShip = await gqlCall({
+      query: `mutation AddShip {
+        shipCreateTemplate(name:"Asset Ship") {
+          id
+          shipAssets {
+            logo
+            model
+            side
+            top
+            vanity
+          }
+        }
+      }`,
+    });
+    const id = newShip.data?.shipCreateTemplate.id;
+    expect(newShip.data?.shipCreateTemplate.shipAssets.logo).toBeFalsy();
+
+    const file = fs.createReadStream(path.resolve(__dirname, `./logo.svg`));
+
+    const upload = new Upload();
+    const assetChangePromise = gqlCall({
+      query: `mutation SetLogo($id:ID!, $image:Upload!) {
+        templateShipSetLogo(id:$id, image:$image) {
+          id
+          shipAssets {
+            logo
+            model
+            side
+            top
+            vanity
+          }
+        }
+      }`,
+      variables: {
+        id,
+        image: upload,
+      },
+    });
+    upload.resolve({
+      createReadStream: () => file,
+      stream: file,
+      filename: "logo.svg",
+      mimetype: `image/svg+xml`,
+    });
+
+    const assetChange = await assetChangePromise;
+    expect(assetChange.data?.templateShipSetLogo.shipAssets.logo).toEqual(
+      "/assets/ships/Asset Ship/logo.svg",
+    );
+
+    const modelUpload = new Upload();
+    const modelChangePromise = gqlCall({
+      query: `mutation SetModel($id:ID!, $model:Upload!, $top:Upload!, $side:Upload!, $vanity:Upload!) {
+        templateShipSetModel(id:$id, model:$model, top:$top, side:$side, vanity:$vanity) {
+          id
+          shipAssets {
+            logo
+            model
+            side
+            top
+            vanity
+          }
+        }
+      }`,
+      variables: {
+        id,
+        model: modelUpload,
+        top: modelUpload,
+        side: modelUpload,
+        vanity: modelUpload,
+      },
+    });
+    modelUpload.resolve({
+      createReadStream: () => file,
+      stream: file,
+      filename: "testFile",
+      mimetype: `image/svg+xml`,
+    });
+
+    const modelChange = await modelChangePromise;
+    expect(modelChange.data?.templateShipSetModel.shipAssets.model).toEqual(
+      "/assets/ships/Asset Ship/model.glb",
+    );
+    expect(modelChange.data?.templateShipSetModel.shipAssets.vanity).toEqual(
+      "/assets/ships/Asset Ship/vanity.png",
+    );
+    expect(modelChange.data?.templateShipSetModel.shipAssets.top).toEqual(
+      "/assets/ships/Asset Ship/top.png",
+    );
+    expect(modelChange.data?.templateShipSetModel.shipAssets.side).toEqual(
+      "/assets/ships/Asset Ship/side.png",
     );
   });
 });
