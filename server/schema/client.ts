@@ -14,6 +14,7 @@ import uuid from "uniqid";
 import App from "../app";
 import {GraphQLContext} from "../helpers/graphqlContext";
 import Entity from "../helpers/ecs/entity";
+import {ServerChannel} from "@geckos.io/server";
 
 type OfflineStates =
   | "blackout"
@@ -54,6 +55,8 @@ export default class Client {
 
   @Field()
   connected: boolean = false;
+
+  channel!: ServerChannel;
   constructor(params: Partial<Client> = {}) {
     this.id = params.id || uuid();
     this.connected = params.connected || false;

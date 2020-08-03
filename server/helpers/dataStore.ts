@@ -93,7 +93,6 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
   async function writeFile(force = false) {
     if (process.env.NODE_ENV !== "production" && force === false) return;
     if (!filePath) {
-      console.info("TEST: Wrote file");
       return;
     }
     await fs.mkdir(path.dirname(filePath), {recursive: true});

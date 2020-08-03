@@ -26,10 +26,7 @@ import InfoTip from "../../ui/infoTip";
 import {renderGLTFPreview} from "../../../helpers/generateGltfImage";
 import {readFile} from "../../../helpers/readFile";
 import {Link} from "react-router-dom";
-function stopPropagation(e: any) {
-  e.stopPropagation();
-  e.preventDefault();
-}
+
 const ShipAssets: React.FC<{onClose: () => void}> = ({onClose}) => {
   const toast = useToast();
   const {t} = useTranslation();
@@ -39,14 +36,14 @@ const ShipAssets: React.FC<{onClose: () => void}> = ({onClose}) => {
   });
   const [setLogo] = useTemplateShipSetLogoMutation();
   const [setModel] = useTemplateShipSetModelMutation();
-  console.log(data?.templateShip?.shipAssets);
+
   return (
     <Modal isOpen={true} onClose={onClose}>
       <ModalOverlay></ModalOverlay>
       <ModalContent width="100%" maxWidth="700px">
         <ModalHeader>
           <Heading as="h2" size="lg">
-            Ship Assets
+            {t`Ship Assets`}
           </Heading>
         </ModalHeader>
         <ModalCloseButton />

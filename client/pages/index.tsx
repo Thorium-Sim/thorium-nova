@@ -16,6 +16,7 @@ import {Link as RouterLink} from "react-router-dom";
 import {useFlightsQuery} from "../generated/graphql";
 import {Trans, useTranslation} from "react-i18next";
 import Button from "../components/ui/button";
+import getUDPChannel from "../helpers/udpClient";
 
 const Welcome = () => {
   const {t} = useTranslation("welcome");

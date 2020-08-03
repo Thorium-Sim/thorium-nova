@@ -1,3 +1,7 @@
+// The async nature of this makes it a little difficult to test
+// There are still tests in place, but this file won't count
+// towards coverage
+/* istanbul ignore file */
 import React from "react";
 import {
   useDisclosure,

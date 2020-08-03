@@ -22,7 +22,17 @@ describe("App", () => {
         },
         {
           request: {query: FlightsDocument, variables: {}},
-          result: {data: {flights: []}},
+          result: {
+            data: {
+              flights: [
+                {
+                  id: "test",
+                  name: "Test Flight",
+                  date: new Date("January 1, 1993"),
+                },
+              ],
+            },
+          },
         },
       ],
     });
@@ -32,6 +42,10 @@ describe("App", () => {
     expect(getByText("Load a Saved Flight")).toBeInTheDocument();
     expect(getByText("Join a Server")).toBeInTheDocument();
     expect(getByText("Alex Anderson 🚀")).toBeInTheDocument();
+    userEvent.click(getByText("Load a Saved Flight"));
+    expect(await findByText("Test Flight")).toBeInTheDocument();
+    expect(await findByText("1/1/1993")).toBeInTheDocument();
+
     const versionLink = getByText(
       `Version ${require("../../package.json").version}`,
     );

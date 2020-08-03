@@ -9,6 +9,7 @@ import AppContext from "./helpers/appContext";
 import {BrowserRouter as Router} from "react-router-dom";
 import "./helpers/i18n";
 import "./styles/global.css";
+import getChannel from "./helpers/udpClient";
 
 initializeClient();
 

@@ -6,5 +6,8 @@ module.exports = {
   moduleNameMapper: {
     "\\.css$": require.resolve("./styleMocker.js"),
     "^url:": require.resolve("./styleMocker.js"),
+    "^three/examples/jsm/loaders/GLTFLoader": require.resolve(
+      "./gltfLoader.js",
+    ),
   },
 };

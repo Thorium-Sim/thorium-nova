@@ -3,17 +3,23 @@ import {
   PerspectiveCamera,
   WebGLRenderer,
   HemisphereLight,
-  DirectionalLight,
   Vector3,
   Group,
   sRGBEncoding,
+  Camera,
 } from "three";
 import {GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
+let renderer: WebGLRenderer;
 
-const renderer = new WebGLRenderer({alpha: true});
-
-renderer.outputEncoding = sRGBEncoding;
-renderer.setPixelRatio(window.devicePixelRatio);
+/* istanbul ignore next */
+if (process.env.NODE_ENV !== "test") {
+  /* istanbul ignore next */
+  renderer = new WebGLRenderer({alpha: true});
+  /* istanbul ignore next */
+  renderer.outputEncoding = sRGBEncoding;
+  /* istanbul ignore next */
+  renderer.setPixelRatio(window.devicePixelRatio);
+}
 
 interface Options {
   size: {width: number; height: number};
@@ -30,13 +36,12 @@ interface Options {
 const defaultValues: Options = {
   size: {width: 200, height: 200},
 };
-export function renderGLTFPreview(
+
+export async function generateScene(
   assetPath: string,
   {size, camera: cameraOptions}: Options = defaultValues,
-): Promise<string> {
+): Promise<{scene: Scene; camera: Camera}> {
   return new Promise(resolve => {
-    renderer.setSize(size.width, size.height);
-
     const scene = new Scene();
     // scene.background = new Color(0x666666);
     const camera = new PerspectiveCamera(
@@ -58,23 +63,27 @@ export function renderGLTFPreview(
     hemiLight.position.set(0, 500, 0);
     scene.add(hemiLight);
 
-    const dirLight = new DirectionalLight(0xffffff, 0.5);
-    dirLight.position.set(-1, 0.75, 1);
-    dirLight.name = "dirlight";
-    // scene.add(dirLight);
-
     const objectGroup = new Group();
 
     scene.add(objectGroup);
-
     const loader = new GLTFLoader();
     loader.load(assetPath, gltf => {
       const obj = gltf.scene;
       scene.add(obj);
-      renderer.render(scene, camera);
-      resolve(renderer.domElement.toDataURL("image/png"));
+      resolve({scene, camera});
     });
   });
+}
+
+/* istanbul ignore next */
+export async function renderGLTFPreview(
+  assetPath: string,
+  options: Options = defaultValues,
+): Promise<string> {
+  const {scene, camera} = await generateScene(assetPath, options);
+  renderer?.setSize(options.size.width, options.size.height);
+  renderer?.render(scene, camera);
+  return renderer?.domElement.toDataURL("image/png");
 }
 
 const cache = {};

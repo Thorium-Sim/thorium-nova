@@ -1,30 +1,3 @@
 {
-  "Click or Drop files here": "Click or Drop files here",
-  "Model is uploading": {
-    " Please wait": {
-      "": {
-        "": {
-          "": ""
-        }
-      }
-    }
-  },
-  "Models should be in ": {
-    "glb format": {
-      " <1>Read about how to create compatible models": {
-        "</1>": "Models should be in .glb format. <1>Read about how to create compatible models.</1>"
-      },
-      " <2>Read about how to create compatible models": {
-        "</2>": "Models should be in .glb format. <2>Read about how to create compatible models.</2>"
-      },
-      " Top and side views are automatically generated from the model": {
-        " <1>Read about how to create compatible models": {
-          "</1>": "Models should be in .glb format. Top and side views are automatically generated from the model. <1>Read about how to create compatible models.</1>"
-        }
-      }
-    }
-  },
-  "Upload Complete": "Upload Complete",
-  "Upload Failed": "Upload Failed",
-  "Uploading": "Uploading"
+  "Click or Drop files here": "Click or Drop files here"
 }

@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+// Since this file depends on built assets, we won't include it in test coverage
 import path from "path";
 import express, {Application, RequestHandler} from "express";
 

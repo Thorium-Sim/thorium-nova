@@ -22,7 +22,7 @@ const ClientApp: React.FC = () => {
         <Route path="/" element={<Welcome />} />
         <Route path="releases" element={<Releases />} />
         <Route path="theme" element={<ThemeBuilder />} />
-        <Route path="test" element={<ShipAssets />} />
+        <Route path="test" element={<ShipAssets onClose={() => {}} />} />
         <Route path="*" element={<NoMatch />} />
       </Routes>
     </Layout>

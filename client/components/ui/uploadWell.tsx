@@ -9,18 +9,12 @@ const UploadWell: React.FC<
     accept?: string;
     onChange?: (files: FileList) => void;
   }
-> = ({
-  children,
-  disabled,
-  accept,
-  onChange = files => {
-    console.log(files[0]);
-  },
-  ...props
-}) => {
+> = ({children, disabled, accept, onChange = files => {}, ...props}) => {
   const [dragging, setDragging] = React.useState(false);
   const {t} = useTranslation();
 
+  // Drag and drop is hard to test
+  /* istanbul ignore next */
   function handleDragEnter(e: React.DragEvent) {
     if (disabled) return;
     e.preventDefault();
@@ -34,11 +28,13 @@ const UploadWell: React.FC<
       e.dataTransfer.dropEffect = "none";
     }
   }
+  /* istanbul ignore next */
   function handleDragExit(e: React.DragEvent) {
     e.preventDefault();
     e.stopPropagation();
     setDragging(false);
   }
+  /* istanbul ignore next */
   function handleDrop(e: React.DragEvent) {
     const acceptMatch = !accept || e.dataTransfer.items[0].type.match(accept);
 

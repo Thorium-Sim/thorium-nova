@@ -84,7 +84,7 @@ export class ShipPluginResolver {
     @Arg("name")
     name: string,
   ): Entity {
-    if (App.plugins.ships.find(s => s.id === name)) {
+    if (App.plugins.ships.find(s => s.identity?.name === name)) {
       throw new Error("A ship with that name already exists.");
     }
     const entity = getStore<Entity>({
@@ -114,6 +114,9 @@ export class ShipPluginResolver {
   ) {
     const ship = App.plugins.ships.find(s => s.id === id) || null;
     if (!ship) throw new Error("Unable to find ship.");
+    if (App.plugins.ships.find(s => s.id === name)) {
+      throw new Error("A ship with that name already exists.");
+    }
     ship.updateComponent("identity", {name});
     publishShip(ship);
     return ship;
