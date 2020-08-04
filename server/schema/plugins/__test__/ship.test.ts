@@ -1,7 +1,7 @@
 import {gqlCall} from "../../../helpers/gqlCall";
 import path from "path";
 // @ts-ignore
-import Upload from "graphql-upload/public/upload";
+import {Upload} from "graphql-upload";
 
 const fs = jest.genMockFromModule("fs") as any;
 
