@@ -4,6 +4,7 @@ import useEasterEgg from "./helpers/easterEgg";
 import Layout from "./components/Layout";
 import {useClientRegistration} from "./helpers/getClientId";
 import ShipAssets from "./components/plugins/ShipAssets";
+import Starmap from "./pages/starmap";
 
 const Welcome = React.lazy(() => import("./pages/index"));
 const Releases = React.lazy(() => import("./pages/Releases"));
@@ -23,6 +24,7 @@ const ClientApp: React.FC = () => {
         <Route path="releases" element={<Releases />} />
         <Route path="theme" element={<ThemeBuilder />} />
         <Route path="test" element={<ShipAssets onClose={() => {}} />} />
+        <Route path="starmap" element={<Starmap />} />
         <Route path="*" element={<NoMatch />} />
       </Routes>
     </Layout>
