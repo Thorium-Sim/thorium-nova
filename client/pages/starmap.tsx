@@ -74,9 +74,10 @@ const Scene = () => {
     <>
       <OrbitControls
         ref={orbitControls}
-        autoRotate
+        // autoRotate
+        enableDamping={false}
         maxDistance={500}
-        minDistance={30}
+        minDistance={1}
         rotateSpeed={0.5}
         mouseButtons={{
           LEFT: MOUSE.PAN,
@@ -86,11 +87,9 @@ const Scene = () => {
       />
       <ambientLight intensity={0.7} />
       <pointLight position={[10, 10, 10]} />
-      <Box position={[-1.2, 0, 0]} />
-      <Box position={[1.2, 0, 0]} />
-      <Star position={[0, 0, -100]} scale={[50, 50, 50]} />
       <SystemMarker
-        position={[5, 5, 5]}
+        position={[0, 0, 0]}
+        name="Alpha Centauri"
         onMouseDown={() => {
           if (orbitControls.current) orbitControls.current.enabled = false;
         }}
