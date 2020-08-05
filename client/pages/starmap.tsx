@@ -1,10 +1,11 @@
 import Nebula from "../components/starmap/Nebula";
 import {OrbitControls, PerspectiveCamera} from "drei";
 import React, {Suspense} from "react";
-import {Canvas, useFrame} from "react-three-fiber";
-import {Mesh, Object3D, Vector3} from "three";
+import {Canvas, useFrame, useThree} from "react-three-fiber";
+import {Mesh, MOUSE, Object3D, Vector3} from "three";
 import Star from "../components/starmap/star";
 import SystemMarker from "../components/starmap/SystemMarker";
+import Starfield from "../components/starmap/Starfield";
 
 function Box(props: {position: Vector3 | [number, number, number]}) {
   // This reference will give us direct access to the mesh
@@ -38,6 +39,73 @@ function Box(props: {position: Vector3 | [number, number, number]}) {
 
 const FAR = 1e27;
 
+const Scene = () => {
+  const orbitControls = React.useRef<OrbitControls>();
+  const frameCount = React.useRef(0);
+
+  useFrame((state, delta) => {
+    frameCount.current = (frameCount.current + delta) % 125.663;
+    if (orbitControls.current) {
+      orbitControls.current.autoRotateSpeed =
+        Math.sin(frameCount.current / 10) / 10;
+    }
+  });
+
+  const {camera} = useThree();
+  React.useEffect(() => {
+    if (orbitControls.current) {
+      var minPan = new Vector3(-300, -300, -300);
+      var maxPan = new Vector3(300, 300, 300);
+      var _v = new Vector3();
+
+      orbitControls.current.addEventListener?.("change", function () {
+        if (orbitControls.current?.target) {
+          const target = orbitControls.current.target as Vector3;
+          _v.copy(target);
+          target.clamp(minPan, maxPan);
+          _v.sub(target);
+          camera.position.sub(_v);
+        }
+      });
+    }
+  }, []);
+
+  return (
+    <>
+      <OrbitControls
+        ref={orbitControls}
+        autoRotate
+        maxDistance={500}
+        minDistance={30}
+        rotateSpeed={0.5}
+        mouseButtons={{
+          LEFT: MOUSE.PAN,
+          RIGHT: MOUSE.ROTATE,
+          MIDDLE: MOUSE.DOLLY,
+        }}
+      />
+      <ambientLight intensity={0.7} />
+      <pointLight position={[10, 10, 10]} />
+      <Box position={[-1.2, 0, 0]} />
+      <Box position={[1.2, 0, 0]} />
+      <Star position={[0, 0, -100]} scale={[50, 50, 50]} />
+      <SystemMarker
+        position={[5, 5, 5]}
+        onMouseDown={() => {
+          if (orbitControls.current) orbitControls.current.enabled = false;
+        }}
+        onMouseUp={() => {
+          if (orbitControls.current) orbitControls.current.enabled = true;
+        }}
+      />
+
+      <Starfield />
+      <Suspense fallback={null}>
+        <Nebula skyboxKey="c" />
+      </Suspense>
+    </>
+  );
+};
 const Starmap: React.FC = () => {
   return (
     <Canvas
@@ -50,23 +118,7 @@ const Starmap: React.FC = () => {
       concurrent
     >
       <Suspense fallback={null}>
-        <OrbitControls />
-        <ambientLight intensity={0.7} />
-        <pointLight position={[10, 10, 10]} />
-        <Box position={[-1.2, 0, 0]} />
-        <Box position={[1.2, 0, 0]} />
-        {/* <Star position={[0, 0, -100]} scale={[50, 50, 50]} /> */}
-        <SystemMarker position={[5, 5, 5]} />
-        <SystemMarker position={[-5, 5, 5]} />
-        <SystemMarker position={[5, -5, 5]} />
-        <SystemMarker position={[-5, -5, 5]} />
-        <SystemMarker position={[5, 5, -5]} />
-        <SystemMarker position={[-5, 5, -5]} />
-        <SystemMarker position={[5, -5, -5]} />
-        <SystemMarker position={[-5, -5, -5]} />
-        <Suspense fallback={null}>
-          <Nebula skyboxKey="c" />
-        </Suspense>
+        <Scene />
       </Suspense>
     </Canvas>
   );

@@ -5,9 +5,11 @@ import {useFrame} from "react-three-fiber";
 const size = 50;
 const lineWidth = 0.07;
 
-const SystemMarker: React.FC<{position: [number, number, number]}> = ({
-  position,
-}) => {
+const SystemMarker: React.FC<{
+  position: [number, number, number];
+  onMouseDown?: () => void;
+  onMouseUp?: () => void;
+}> = ({position, onMouseDown, onMouseUp}) => {
   const ctx = React.useMemo(() => {
     const canvas = document.createElement("canvas");
 
@@ -77,6 +79,8 @@ const SystemMarker: React.FC<{position: [number, number, number]}> = ({
       onPointerOut={() => {
         direction.current = -1;
       }}
+      onPointerDown={onMouseDown}
+      onPointerUp={onMouseUp}
     >
       <sprite scale={[0.07, 0.07, 0.07]}>
         <spriteMaterial
