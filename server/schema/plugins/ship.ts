@@ -61,7 +61,7 @@ function uploadAsset(file: FileUpload, pathPrefix: string, name?: string) {
     /* istanbul ignore else */
     if (!readStream && process.env.NODE_ENV === "test") {
       resolve();
-    } else {
+    } else if (!readStream) {
       reject("Error creating read stream");
     }
     /* istanbul ignore next */
@@ -89,7 +89,7 @@ export class ShipPluginResolver {
   @Mutation(returns => Entity)
   shipCreateTemplate(
     @Arg("name")
-    name: string,
+    name: string
   ): Entity {
     if (App.plugins.ships.find(s => s.identity?.name === name)) {
       throw new Error("A ship with that name already exists.");
@@ -117,7 +117,7 @@ export class ShipPluginResolver {
   @Mutation(returns => Entity)
   templateShipRename(
     @Arg("name") name: string,
-    @Arg("id", type => ID) id: string,
+    @Arg("id", type => ID) id: string
   ) {
     const ship = App.plugins.ships.find(s => s.id === id) || null;
     if (!ship) throw new Error("Unable to find ship.");
@@ -132,7 +132,7 @@ export class ShipPluginResolver {
   @Mutation(returns => Entity)
   templateShipSetTheme(
     @Arg("theme") theme: string,
-    @Arg("id", type => ID) id: string,
+    @Arg("id", type => ID) id: string
   ) {
     const ship = App.plugins.ships.find(s => s.id === id) || null;
     if (!ship) throw new Error("Unable to find ship.");
@@ -144,7 +144,7 @@ export class ShipPluginResolver {
   @Mutation(returns => Entity)
   async templateShipSetLogo(
     @Arg("image", type => GraphQLUpload) image: FileUpload,
-    @Arg("id", type => ID) id: string,
+    @Arg("id", type => ID) id: string
   ) {
     const ship = App.plugins.ships.find(s => s.id === id) || null;
     if (!ship) throw new Error("Unable to find ship.");
@@ -164,7 +164,7 @@ export class ShipPluginResolver {
     @Arg("side", type => GraphQLUpload) side: FileUpload,
     @Arg("top", type => GraphQLUpload) top: FileUpload,
     @Arg("vanity", type => GraphQLUpload) vanity: FileUpload,
-    @Arg("id", type => ID) id: string,
+    @Arg("id", type => ID) id: string
   ) {
     const ship = App.plugins.ships.find(s => s.id === id) || null;
     if (!ship) throw new Error("Unable to find ship.");
@@ -204,7 +204,7 @@ export class ShipPluginResolver {
   })
   templateShip(
     @Root() payload: ShipPayload,
-    @Arg("id", type => ID) id: string,
+    @Arg("id", type => ID) id: string
   ): Entity {
     return payload.ship;
   }
