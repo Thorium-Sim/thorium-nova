@@ -6,6 +6,7 @@ import {Mesh, MOUSE, Object3D, Vector3} from "three";
 import Star from "../components/starmap/star";
 import SystemMarker from "../components/starmap/SystemMarker";
 import Starfield from "../components/starmap/Starfield";
+import {configStoreApi} from "../components/starmap/configStore";
 
 function Box(props: {position: Vector3 | [number, number, number]}) {
   // This reference will give us direct access to the mesh
@@ -70,12 +71,25 @@ const Scene = () => {
     }
   }, []);
 
+  React.useEffect(() => {
+    configStoreApi.setState({
+      disableOrbitControls: () => {
+        if (orbitControls.current) {
+          orbitControls.current.enabled = false;
+        }
+      },
+      enableOrbitControls: () => {
+        if (orbitControls.current) {
+          orbitControls.current.enabled = true;
+        }
+      },
+    });
+  }, []);
   return (
     <>
       <OrbitControls
         ref={orbitControls}
-        // autoRotate
-        enableDamping={false}
+        autoRotate
         maxDistance={500}
         minDistance={1}
         rotateSpeed={0.5}
@@ -87,16 +101,9 @@ const Scene = () => {
       />
       <ambientLight intensity={0.7} />
       <pointLight position={[10, 10, 10]} />
-      <SystemMarker
-        position={[0, 0, 0]}
-        name="Alpha Centauri"
-        onMouseDown={() => {
-          if (orbitControls.current) orbitControls.current.enabled = false;
-        }}
-        onMouseUp={() => {
-          if (orbitControls.current) orbitControls.current.enabled = true;
-        }}
-      />
+      <SystemMarker position={[0, 0, 0]} name="Alpha Centauri" />
+      <SystemMarker position={[0, 2, 0]} name="Sol" />
+      <SystemMarker position={[0, 1, 0]} name="Rigel" />
 
       <Starfield />
       <Suspense fallback={null}>

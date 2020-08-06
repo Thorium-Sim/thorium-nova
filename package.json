@@ -40,6 +40,7 @@
     "@emotion/styled-base": "^10.0.31",
     "@geckos.io/client": "^1.6.1",
     "@geckos.io/server": "^1.6.1",
+    "@seregpie/three.text-texture": "^2.0.1",
     "apollo-server-express": "^2.15.0",
     "apollo-upload-client": "^14.1.1",
     "babel-plugin-transform-node-env-inline": "^0.4.3",

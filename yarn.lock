@@ -2942,6 +2942,11 @@
   dependencies:
     any-observable "^0.3.0"
 
+"@seregpie/three.text-texture@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@seregpie/three.text-texture/-/three.text-texture-2.0.1.tgz#2f0b1aaa429bfc84c8c5e3f7b0503d9faa2079ea"
+  integrity sha512-9uO/mP5PyGyl1LqrkObe9OOAwL/jp9rKjdphWf5gUH8LHDJuNy5GQCjr+nKqJG2lGID8gMNNnub1CSALl4BZHw==
+
 "@sinonjs/commons@^1.7.0":
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/@sinonjs/commons/-/commons-1.8.0.tgz#c8d68821a854c555bba172f3b06959a0039b236d"
