@@ -16,8 +16,16 @@ export default class BasePlugin {
   @Field()
   description: string;
 
-  @Field()
-  coverImage: string;
+  @Field(type => String)
+  get coverImage() {
+    return this._coverImage
+      ? `/assets/universes/${this.name}/${this._coverImage}`
+      : "";
+  }
+  set coverImage(value) {
+    this._coverImage = value;
+  }
+  _coverImage!: string;
 
   @Field(type => [String])
   tags: string[];

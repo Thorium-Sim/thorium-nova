@@ -15,6 +15,16 @@ import UniverseTemplate from "../universe";
 import uuid from "uniqid";
 import {FileUpload, GraphQLUpload} from "graphql-upload";
 import uploadAsset from "server/helpers/uploadAsset";
+import {PositionComponent} from "server/components/position";
+import {randomFromList} from "server/helpers/randomFromList";
+import systemNames from "server/generatorFixtures/systemNames";
+import Entity from "server/helpers/ecs/entity";
+import {IsStarComponent} from "server/components/isStar";
+import {IdentityComponent} from "server/components/identity";
+import {TagsComponent} from "server/components/tags";
+import {SizeComponent} from "server/components/size";
+import {TemperatureComponent} from "server/components/temperature";
+import {PlanetarySystemComponent} from "server/components/planetarySystem";
 
 function publish(universe: UniverseTemplate) {
   pubsub.publish("templateUniverses", {
@@ -97,6 +107,7 @@ export class UniversePluginResolver {
     const universe = getUniverse(id);
     universe.name = name;
     publish(universe);
+    return universe;
   }
 
   @Mutation(returns => UniverseTemplate)
@@ -109,6 +120,7 @@ export class UniversePluginResolver {
     const universe = getUniverse(id);
     universe.description = description;
     publish(universe);
+    return universe;
   }
 
   @Mutation(returns => UniverseTemplate)
@@ -121,6 +133,7 @@ export class UniversePluginResolver {
     const universe = getUniverse(id);
     universe.tags = tags;
     publish(universe);
+    return universe;
   }
 
   @Mutation(returns => UniverseTemplate)
@@ -137,6 +150,34 @@ export class UniversePluginResolver {
 
     universe.coverImage = `cover.${ext}`;
     publish(universe);
+    return universe;
+  }
+
+  @Mutation(returns => UniverseTemplate)
+  async universeTemplateAddStar(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("position", type => PositionComponent)
+    position: PositionComponent
+  ) {
+    const universe = getUniverse(id);
+    const starNames = universe.entities
+      .filter(s => s.isStar)
+      .map(s => s.identity?.name);
+    const availableNames = systemNames.filter(val => !starNames.includes(val));
+
+    const name = randomFromList(availableNames) || "Bob"; // If this happens, I'll laugh very hard.
+    const entity = new Entity(null, [
+      PositionComponent,
+      TagsComponent,
+      IdentityComponent,
+      PlanetarySystemComponent,
+    ]);
+    entity.updateComponent("identity", {name});
+    entity.updateComponent("position", position);
+    universe.entities.push(entity);
+    publish(universe);
+    return universe;
   }
 
   @Subscription(returns => UniverseTemplate, {

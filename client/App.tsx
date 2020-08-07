@@ -1,5 +1,5 @@
 import React from "react";
-import {Route, Routes} from "react-router-dom";
+import {Navigate, Route, Routes} from "react-router-dom";
 import useEasterEgg from "./helpers/easterEgg";
 import Layout from "./components/Layout";
 import {useClientRegistration} from "./helpers/getClientId";
@@ -22,7 +22,11 @@ const ClientApp: React.FC = () => {
         <Route path="releases" element={<Releases />} />
         <Route path="theme" element={<ThemeBuilder />} />
         <Route path="test" element={<ShipAssets onClose={() => {}} />} />
-        <Route path="starmap" element={<Starmap />} />
+        <Route
+          path="starmap"
+          element={<Navigate to="/config/universes" replace />}
+        />
+        <Route path="starmap/:starmapId" element={<Starmap />} />
         <Route path="*" element={<NoMatch />} />
       </Routes>
       <Routes>

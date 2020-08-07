@@ -26,7 +26,7 @@ const InfoTip: React.FC = ({children}) => {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        zIndex={1400}
+        zIndex={2400}
         boxShadow="2px 2px 10px rgba(0,0,0,0.5)"
         borderColor="transparent"
       >

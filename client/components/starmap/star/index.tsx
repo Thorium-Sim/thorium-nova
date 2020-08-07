@@ -22,7 +22,6 @@ const Star: React.FC<{color1: number}> = ({color1 = 0x224488, ...props}) => {
     texture.wrapT = RepeatWrapping;
     return texture;
   }, []);
-  console.log(texture);
   const uniforms = React.useMemo(() => getUniforms({map: texture}), []);
   const shader = React.useRef<Mesh>();
   const blocker = React.useRef<Mesh>();

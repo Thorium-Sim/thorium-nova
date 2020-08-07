@@ -3,14 +3,24 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  Image,
   Input,
   Textarea,
 } from "@chakra-ui/core";
 import React from "react";
 import {useTranslation} from "react-i18next";
+import InfoTip from "./infoTip";
+import TagInput from "./TagInput";
+import UploadWell from "./uploadWell";
 
 const PluginForm: React.FC<{
-  plugin?: {id: string; name: string; description: string; tags: string[]};
+  plugin?: {
+    id: string;
+    name: string;
+    description: string;
+    tags: string[];
+    coverImage: string;
+  };
   setName: (param: {variables: {id: string; name: string}}) => Promise<any>;
   setDescription: (param: {
     variables: {id: string; description: string};
@@ -21,7 +31,13 @@ const PluginForm: React.FC<{
   const {t} = useTranslation();
   const [error, setError] = React.useState(false);
   return (
-    <Box as="fieldset" disabled={!plugin} key={plugin?.id || ""} flex={1}>
+    <Box
+      as="fieldset"
+      disabled={!plugin}
+      key={plugin?.id || ""}
+      flex={1}
+      overflowY="auto"
+    >
       <FormControl pb={4} isInvalid={error}>
         <FormLabel width="100%">
           {t(`Name`)}
@@ -54,7 +70,47 @@ const PluginForm: React.FC<{
       <FormControl pb={4}>
         <FormLabel width="100%">
           {t(`Tags`)}
-          <Input defaultValue={plugin?.tags.join(", ")} />
+          <TagInput
+            tags={plugin?.tags || []}
+            onAdd={tag => {
+              if (plugin?.tags.includes(tag) || !plugin) return;
+              setTags({
+                variables: {id: plugin.id, tags: plugin.tags.concat(tag)},
+              });
+            }}
+            onRemove={tag => {
+              if (!plugin) return;
+              setTags({
+                variables: {
+                  id: plugin.id,
+                  tags: plugin.tags.filter(t => t !== tag),
+                },
+              });
+            }}
+          />
+        </FormLabel>
+      </FormControl>
+      <FormControl pb={4}>
+        <FormLabel>
+          {t(`Cover Image`)}{" "}
+          <InfoTip>{t`Used on the Thorium Plugin Store. Images should be square and at least 1024x1024 in size.`}</InfoTip>
+          <UploadWell
+            accept="image/*"
+            onChange={(files: FileList) => {
+              if (!plugin) return;
+              setCoverImage({variables: {id: plugin?.id, image: files[0]}});
+            }}
+          >
+            {plugin?.coverImage && (
+              <Image
+                src={`${plugin.coverImage}?${new Date().getTime()}`}
+                width="90%"
+                height="90%"
+                objectFit="cover"
+                alt="Cover Image"
+              />
+            )}
+          </UploadWell>
         </FormLabel>
       </FormControl>
       {children}

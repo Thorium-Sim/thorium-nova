@@ -1,21 +1,14 @@
 {
-  "Are you sure you want to permanently remove this universe plugin?": "Are you sure you want to permanently remove this universe plugin?",
-  "Back": "Back",
-  "Create Universe Plugin": "Create Universe Plugin",
+  "Add": "Add",
+  "Add Star": "Add Star",
+  "Cover Image": "Cover Image",
+  "Delete": "Delete",
+  "Delete Star": "Delete Star",
   "Description": "Description",
-  "Error Creating Universe Plugin": "Error Creating Universe Plugin",
-  "Error Removing Universe Plugin": "Error Removing Universe Plugin",
-  "Export": "Export",
-  "Import Universe Plugin": "Import Universe Plugin",
+  "Edit": "Edit",
+  "Edit Star": "Edit Star",
   "Name": "Name",
   "Name is required": "Name is required",
-  "Remove": "Remove",
-  "Search": "Search",
   "Tags": "Tags",
-  "This will delete all of its objects and assets": {
-    "": ""
-  },
-  "Universe Plugin Name": "Universe Plugin Name",
-  "Universe Plugins": "Universe Plugins",
-  "What is the name of the new universe plugin?": "What is the name of the new universe plugin?"
+  "Type and press return to add a tag": "Type and press return to add a tag"
 }
