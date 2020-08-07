@@ -20,8 +20,8 @@ import {
 } from "type-graphql";
 import uniqid from "uniqid";
 import {pubsub} from "server/helpers/pubsub";
-import fs from "fs";
 import {GraphQLUpload, FileUpload} from "graphql-upload";
+import uploadAsset from "server/helpers/uploadAsset";
 
 interface ShipPayload {
   ship: Entity;
@@ -54,27 +54,7 @@ function publishShip(ship: Entity) {
     entities: App.activeFlight?.ships,
   });
 }
-function uploadAsset(file: FileUpload, pathPrefix: string, name?: string) {
-  return new Promise((resolve, reject) => {
-    const assetPath = `${pathPrefix}/${name || file.filename}`;
-    const readStream = file.createReadStream();
-    /* istanbul ignore else */
-    if (!readStream && process.env.NODE_ENV === "test") {
-      resolve();
-    } else if (!readStream) {
-      reject("Error creating read stream");
-    }
-    /* istanbul ignore next */
-    return readStream
-      .pipe(fs.createWriteStream(assetPath))
-      .on("finish", () => {
-        resolve();
-      })
-      .on("error", (error: Error) => {
-        reject(error);
-      });
-  });
-}
+
 @Resolver()
 export class ShipPluginResolver {
   @Query(returns => Entity, {nullable: true, name: "templateShip"})

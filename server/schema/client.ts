@@ -41,7 +41,9 @@ export default class Client {
 
   @Field(type => Entity, {nullable: true})
   get station() {
-    return this.ship?.stations?.stations.find(s => s.id === this.stationId);
+    return this.ship?.stationComplement?.stations.find(
+      s => s.id === this.stationId
+    );
   }
 
   @Field(type => String, {nullable: true})
@@ -103,10 +105,10 @@ export class ClientResolver {
   @Query(returns => Client)
   async client(
     @Arg("id", type => ID, {nullable: true}) id: string,
-    @Ctx() context: GraphQLContext,
+    @Ctx() context: GraphQLContext
   ) {
     const client = App.storage.clients.find(
-      c => c.id === id || (!id && c.id === context.clientId),
+      c => c.id === id || (!id && c.id === context.clientId)
     );
     if (client === undefined) {
       throw new UserInputError(id);
@@ -138,14 +140,14 @@ export class ClientResolver {
   clientSetShip(
     @Ctx() context: GraphQLContext,
     @Arg("shipId", type => ID, {nullable: true}) shipId: string | null,
-    @Arg("clientId", type => ID, {nullable: true}) clientId: string | null,
+    @Arg("clientId", type => ID, {nullable: true}) clientId: string | null
   ): Client | undefined {
     // Validate that this ship is on the flight.
     if (!App.activeFlight?.ships.find(s => s.id === shipId)) {
       throw new UserInputError("Selected Ship is not present on the flight.");
     }
     let client = App.storage.clients.find(
-      c => c.id === clientId || c.id === context.clientId,
+      c => c.id === clientId || c.id === context.clientId
     );
 
     client?.setShip(shipId);
@@ -156,19 +158,21 @@ export class ClientResolver {
   clientSetStation(
     @Ctx() context: GraphQLContext,
     @Arg("stationId", type => ID, {nullable: true}) stationId: string | null,
-    @Arg("clientId", type => ID, {nullable: true}) clientId: string | null,
+    @Arg("clientId", type => ID, {nullable: true}) clientId: string | null
   ): Client | undefined {
     let client = App.storage.clients.find(
-      c => c.id === clientId || c.id === context.clientId,
+      c => c.id === clientId || c.id === context.clientId
     );
     if (!client?.shipId) {
       throw new UserInputError(
-        "Client must be assigned to a ship before assigning a station.",
+        "Client must be assigned to a ship before assigning a station."
       );
     }
-    if (!client.ship?.stations?.stations.find(s => s.id === stationId)) {
+    if (
+      !client.ship?.stationComplement?.stations.find(s => s.id === stationId)
+    ) {
       throw new UserInputError(
-        "Selected Station is not present on the client's assigned ship.",
+        "Selected Station is not present on the client's assigned ship."
       );
     }
 
@@ -179,7 +183,7 @@ export class ClientResolver {
   @Mutation(returns => Client)
   clientLogin(
     @Ctx() context: GraphQLContext,
-    @Arg("loginName", type => String, {nullable: true}) loginName: string,
+    @Arg("loginName", type => String, {nullable: true}) loginName: string
   ): Client | undefined {
     let client = App.storage.clients.find(c => c.id === context.clientId);
 

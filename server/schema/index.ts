@@ -3,6 +3,7 @@ import {EntityFieldResolver, EntityResolver} from "./ecs";
 import {FlightResolver} from "./flight";
 import {ShipAssetsResolver, ShipPluginResolver} from "./plugins/ship";
 import {StationComplementPluginResolver} from "./plugins/stationComplement";
+import {UniversePluginResolver} from "./plugins/universe";
 import {RootResolver} from "./root";
 import {ShipResolver} from "./ship";
 import {TimerResolver} from "./timer";
@@ -24,4 +25,5 @@ export const resolvers: ResolverT = [
   StationComplementPluginResolver,
   ShipAssetsResolver,
   EntityFieldResolver,
+  UniversePluginResolver,
 ];

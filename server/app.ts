@@ -6,9 +6,11 @@ import Flight from "./schema/flight";
 import fs from "fs/promises";
 import Entity from "./helpers/ecs/entity";
 import StationComplement from "./schema/stationComplement";
+import UniverseTemplate from "./schema/universe";
 
 type Writable<T> = T & {
   writeFile: (force?: boolean) => Promise<void>;
+  removeFile: (force?: boolean) => Promise<void>;
 };
 type ActiveFlightT = Writable<Flight> | null;
 
@@ -23,14 +25,16 @@ class PersistentStorage {
   }
 }
 
-interface Plugins {
+export interface Plugins {
   ships: Writable<Entity>[];
   stationComplements: Writable<StationComplement>[];
+  universes: Writable<UniverseTemplate>[];
 }
 
 const pluginClassMap = {
   ships: Entity,
   stationComplements: StationComplement,
+  universes: UniverseTemplate,
 };
 
 export function isWritableFlight(flight: any): flight is ActiveFlightT {
@@ -51,7 +55,7 @@ class AppClass {
   port: number = process.env.NODE_ENV === "production" ? 4444 : 3001;
 
   constructor() {
-    this.plugins = {ships: [], stationComplements: []};
+    this.plugins = {ships: [], stationComplements: [], universes: []};
     if (process.env.PORT && !isNaN(parseInt(process.env.PORT, 10)))
       this.port = parseInt(process.env.PORT, 10);
     this.httpOnly = process.env.HTTP_ONLY === "true";
@@ -74,7 +78,7 @@ class AppClass {
               getStore<any>({
                 class: pluginClassMap[pluginVariety],
                 path: `${appStoreDir}${pluginVariety}/${plugin}/data.json`,
-              }),
+              })
             );
           }
         }
@@ -89,7 +93,7 @@ class AppClass {
     if (this.storage.activeFlightName) {
       try {
         await fs.access(
-          `${appStoreDir}flights/${this.storage.activeFlightName}.flight`,
+          `${appStoreDir}flights/${this.storage.activeFlightName}.flight`
         );
         App.activeFlight = getStore<Flight>({
           class: Flight,
@@ -109,7 +113,7 @@ class AppClass {
     let pluginVariety: keyof Plugins;
     for (pluginVariety in this.plugins) {
       this.plugins[pluginVariety].forEach((p: Writable<{}>) =>
-        p.writeFile(true),
+        p.writeFile(true)
       );
     }
   }

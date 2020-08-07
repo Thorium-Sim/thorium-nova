@@ -7,12 +7,35 @@ import {TagsComponent} from "./tags";
 import {ThemeComponent} from "./theme";
 import {StationComplementComponent} from "./stationComplement";
 import {ShipAssetsComponent} from "./shipAssets";
+import {IsPlanetComponent} from "./isPlanet";
+import {IsStarComponent} from "./isStar";
+import {PlanetarySystemComponent} from "./planetarySystem";
+import {PositionComponent} from "./position";
+import {SatelliteComponent} from "./satellite";
+import {SizeComponent} from "./size";
+import {TemperatureComponent} from "./temperature";
 
 @ObjectType()
 export default class Components {
   @Field()
   timer?: TimerComponent;
 
+  @Field()
+  identity?: IdentityComponent;
+
+  @Field()
+  tags?: TagsComponent;
+
+  @Field()
+  position?: PositionComponent;
+
+  @Field()
+  size?: SizeComponent;
+
+  @Field()
+  temperature?: TemperatureComponent;
+
+  // Ship Entity Components
   @Field()
   isShip?: IsShipComponent;
 
@@ -23,16 +46,23 @@ export default class Components {
   alertLevel?: AlertLevelComponent;
 
   @Field()
-  identity?: IdentityComponent;
-
-  @Field()
-  tags?: TagsComponent;
-
-  @Field()
   theme?: ThemeComponent;
 
   @Field()
-  stations?: StationComplementComponent;
+  stationComplement?: StationComplementComponent;
+
+  // Stellar Objects Components
+  @Field()
+  planetarySystem?: PlanetarySystemComponent;
+
+  @Field()
+  isStar?: IsStarComponent;
+
+  @Field()
+  isPlanet?: IsPlanetComponent;
+
+  @Field()
+  satellite?: SatelliteComponent;
 }
 
 export const registeredComponents = [
@@ -43,4 +73,12 @@ export const registeredComponents = [
   TagsComponent,
   ThemeComponent,
   ShipAssetsComponent,
+  PositionComponent,
+  SizeComponent,
+  TemperatureComponent,
+  StationComplementComponent,
+  PlanetarySystemComponent,
+  IsStarComponent,
+  IsPlanetComponent,
+  SatelliteComponent,
 ];

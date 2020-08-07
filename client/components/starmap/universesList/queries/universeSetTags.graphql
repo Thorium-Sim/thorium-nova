@@ -1,0 +1,6 @@
+mutation UniverseSetTags($id: ID!, $tags: [String!]!) {
+  universeSetTags(id: $id, tags: $tags) {
+    id
+    tags
+  }
+}

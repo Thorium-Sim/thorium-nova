@@ -1,0 +1,6 @@
+mutation UniverseSetDescription($id: ID!, $description: String!) {
+  universeSetDescription(id: $id, description: $description) {
+    id
+    description
+  }
+}

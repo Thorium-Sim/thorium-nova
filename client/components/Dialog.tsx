@@ -33,7 +33,7 @@ const Dialog: React.FC = ({children}) => {
   const [header, setHeader] = React.useState("");
   const [body, setBody] = React.useState("");
   const [type, setType] = React.useState<"alert" | "confirm" | "prompt">(
-    "alert",
+    "alert"
   );
   const [input, setInput] = React.useState("");
 
@@ -57,7 +57,7 @@ const Dialog: React.FC = ({children}) => {
         resolveRef.current = resolve;
       });
     },
-    [isOpen, onOpen],
+    [isOpen, onOpen]
   );
 
   const [inputEl, setInputEl] = React.useState<HTMLInputElement>();
@@ -111,14 +111,14 @@ const Dialog: React.FC = ({children}) => {
             isOpen={true}
             closeOnOverlayClick={false}
           >
-            <AlertDialogOverlay opacity={styles.opacity} />
-            <AlertDialogContent {...styles}>
+            <AlertDialogOverlay opacity={styles.opacity} zIndex={2000} />
+            <AlertDialogContent {...styles} zIndex={2100}>
               <AlertDialogHeader>{header}</AlertDialogHeader>
               <AlertDialogBody>
                 {type === "prompt" ? (
                   <FormControl>
-                    <FormLabel>
-                      Response
+                    <FormLabel width="100%">
+                      {body || "Response"}
                       <Input
                         ref={inputRef}
                         value={input}

@@ -1,0 +1,10 @@
+subscription Universes {
+  universes {
+    id
+    name
+    author
+    description
+    coverImage
+    tags
+  }
+}

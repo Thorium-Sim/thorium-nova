@@ -49,6 +49,11 @@ function isClass(v: any) {
   return typeof v === "function" && /^\s*class\s+/.test(v.toString());
 }
 
+interface StoreObject {
+  writeFile: (force?: boolean) => Promise<void>;
+  removeFile: () => Promise<void>;
+  serialize?: Function;
+}
 export default function getStore<G extends object>(options?: IStoreOptions) {
   const {
     path: filePath,
@@ -79,15 +84,13 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
 
   // Instantiate the object if it is a class
   // or just make a new object with the data inside
-  let dataObject!: G & {
-    writeFile: (force?: boolean) => Promise<void>;
-    serialize?: Function;
-  };
+  let dataObject!: G & StoreObject;
   if (isClass(classConstructor)) {
     dataObject = new classConstructor(_data);
     dataObject.writeFile = writeFile;
+    dataObject.removeFile = removeFile;
   } else {
-    dataObject = {..._data, writeFile};
+    dataObject = {..._data, writeFile, removeFile};
   }
 
   async function writeFile(force = false) {
@@ -99,9 +102,19 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
     const jsonData = json(
       dataObject.serialize ? dataObject.serialize() : dataObject,
       null,
-      indent,
+      indent
     );
     await fs.writeFile(filePath, jsonData, {mode: 0o0600});
+  }
+
+  async function removeFile() {
+    if (!filePath) return;
+    const removePath = path.resolve("../", filePath);
+    try {
+      await fs.rmdir(removePath, {recursive: true});
+    } catch (err) {
+      console.error("Error removing file: ", filePath, err);
+    }
   }
 
   const writeThrottle =
@@ -137,7 +150,5 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
       return false;
     },
   };
-  return new Proxy(dataObject, handler) as G & {
-    writeFile: (force?: boolean) => Promise<void>;
-  };
+  return new Proxy(dataObject, handler) as G & StoreObject;
 }

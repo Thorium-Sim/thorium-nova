@@ -17,6 +17,7 @@ import {useFlightsQuery} from "../generated/graphql";
 import {Trans, useTranslation} from "react-i18next";
 import Button from "../components/ui/button";
 import getUDPChannel from "../helpers/udpClient";
+import {NavLink} from "react-router-dom";
 
 const Welcome = () => {
   const {t} = useTranslation("welcome");
@@ -90,6 +91,15 @@ const Welcome = () => {
           </Collapse>
           <Button size="lg" variantColor="warning" variant="outline">
             {t(`Join a Server`)}
+          </Button>
+          <Button
+            size="lg"
+            variantColor="alert"
+            variant="outline"
+            as={NavLink}
+            to="/config"
+          >
+            {t(`Configure Plugins`)}
           </Button>
         </Stack>
         <Credits></Credits>

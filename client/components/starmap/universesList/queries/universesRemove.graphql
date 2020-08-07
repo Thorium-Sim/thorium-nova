@@ -1,0 +1,3 @@
+mutation UniverseRemove($id: ID!) {
+  universeRemove(id: $id)
+}

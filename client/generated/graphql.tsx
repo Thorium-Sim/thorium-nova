@@ -190,6 +190,99 @@ export type TemplateShipSetModelMutation = {
   };
 };
 
+export type UniverseSetCoverImageMutationVariables = Exact<{
+  id: Scalars["ID"];
+  image: Scalars["Upload"];
+}>;
+
+export type UniverseSetCoverImageMutation = {
+  __typename?: "Mutation";
+  universeSetCoverImage: {
+    __typename?: "UniverseTemplate";
+    id: string;
+    coverImage: string;
+  };
+};
+
+export type UniverseSetDescriptionMutationVariables = Exact<{
+  id: Scalars["ID"];
+  description: Scalars["String"];
+}>;
+
+export type UniverseSetDescriptionMutation = {
+  __typename?: "Mutation";
+  universeSetDescription: {
+    __typename?: "UniverseTemplate";
+    id: string;
+    description: string;
+  };
+};
+
+export type UniverseSetTagsMutationVariables = Exact<{
+  id: Scalars["ID"];
+  tags: Array<Scalars["String"]>;
+}>;
+
+export type UniverseSetTagsMutation = {
+  __typename?: "Mutation";
+  universeSetTags: {
+    __typename?: "UniverseTemplate";
+    id: string;
+    tags: Array<string>;
+  };
+};
+
+export type UniverseCreateMutationVariables = Exact<{
+  name: Scalars["String"];
+}>;
+
+export type UniverseCreateMutation = {
+  __typename?: "Mutation";
+  universeCreate: {
+    __typename?: "UniverseTemplate";
+    id: string;
+    name: string;
+    author: string;
+    description: string;
+    coverImage: string;
+    tags: Array<string>;
+  };
+};
+
+export type UniverseRemoveMutationVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type UniverseRemoveMutation = {
+  __typename?: "Mutation";
+  universeRemove: string;
+};
+
+export type UniverseSetNameMutationVariables = Exact<{
+  id: Scalars["ID"];
+  name: Scalars["String"];
+}>;
+
+export type UniverseSetNameMutation = {
+  __typename?: "Mutation";
+  universeSetName: {__typename?: "UniverseTemplate"; id: string; name: string};
+};
+
+export type UniversesSubscriptionVariables = Exact<{[key: string]: never}>;
+
+export type UniversesSubscription = {
+  __typename?: "Subscription";
+  universes: Array<{
+    __typename?: "UniverseTemplate";
+    id: string;
+    name: string;
+    author: string;
+    description: string;
+    coverImage: string;
+    tags: Array<string>;
+  }>;
+};
+
 export type ClientConnectMutationVariables = Exact<{[key: string]: never}>;
 
 export type ClientConnectMutation = {
@@ -250,7 +343,7 @@ export function useTimerPauseMutation(
   baseOptions?: ApolloReactHooks.MutationHookOptions<
     TimerPauseMutation,
     TimerPauseMutationVariables
-  >,
+  >
 ) {
   return ApolloReactHooks.useMutation<
     TimerPauseMutation,
@@ -269,7 +362,7 @@ export function useTimerRemoveMutation(
   baseOptions?: ApolloReactHooks.MutationHookOptions<
     TimerRemoveMutation,
     TimerRemoveMutationVariables
-  >,
+  >
 ) {
   return ApolloReactHooks.useMutation<
     TimerRemoveMutation,
@@ -296,7 +389,7 @@ export function useTimerCreateMutation(
   baseOptions?: ApolloReactHooks.MutationHookOptions<
     TimerCreateMutation,
     TimerCreateMutationVariables
-  >,
+  >
 ) {
   return ApolloReactHooks.useMutation<
     TimerCreateMutation,
@@ -324,7 +417,7 @@ export function useTimersSubscription(
   baseOptions?: ApolloReactHooks.SubscriptionHookOptions<
     TimersSubscription,
     TimersSubscriptionVariables
-  >,
+  >
 ) {
   return ApolloReactHooks.useSubscription<
     TimersSubscription,
@@ -352,7 +445,7 @@ export function useTemplateShipAssetsSubscription(
   baseOptions?: ApolloReactHooks.SubscriptionHookOptions<
     TemplateShipAssetsSubscription,
     TemplateShipAssetsSubscriptionVariables
-  >,
+  >
 ) {
   return ApolloReactHooks.useSubscription<
     TemplateShipAssetsSubscription,
@@ -376,7 +469,7 @@ export function useTemplateShipSetLogoMutation(
   baseOptions?: ApolloReactHooks.MutationHookOptions<
     TemplateShipSetLogoMutation,
     TemplateShipSetLogoMutationVariables
-  >,
+  >
 ) {
   return ApolloReactHooks.useMutation<
     TemplateShipSetLogoMutation,
@@ -415,7 +508,7 @@ export function useTemplateShipSetModelMutation(
   baseOptions?: ApolloReactHooks.MutationHookOptions<
     TemplateShipSetModelMutation,
     TemplateShipSetModelMutationVariables
-  >,
+  >
 ) {
   return ApolloReactHooks.useMutation<
     TemplateShipSetModelMutation,
@@ -424,6 +517,165 @@ export function useTemplateShipSetModelMutation(
 }
 export type TemplateShipSetModelMutationHookResult = ReturnType<
   typeof useTemplateShipSetModelMutation
+>;
+export const UniverseSetCoverImageDocument = gql`
+  mutation UniverseSetCoverImage($id: ID!, $image: Upload!) {
+    universeSetCoverImage(id: $id, image: $image) {
+      id
+      coverImage
+    }
+  }
+`;
+export function useUniverseSetCoverImageMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    UniverseSetCoverImageMutation,
+    UniverseSetCoverImageMutationVariables
+  >
+) {
+  return ApolloReactHooks.useMutation<
+    UniverseSetCoverImageMutation,
+    UniverseSetCoverImageMutationVariables
+  >(UniverseSetCoverImageDocument, baseOptions);
+}
+export type UniverseSetCoverImageMutationHookResult = ReturnType<
+  typeof useUniverseSetCoverImageMutation
+>;
+export const UniverseSetDescriptionDocument = gql`
+  mutation UniverseSetDescription($id: ID!, $description: String!) {
+    universeSetDescription(id: $id, description: $description) {
+      id
+      description
+    }
+  }
+`;
+export function useUniverseSetDescriptionMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    UniverseSetDescriptionMutation,
+    UniverseSetDescriptionMutationVariables
+  >
+) {
+  return ApolloReactHooks.useMutation<
+    UniverseSetDescriptionMutation,
+    UniverseSetDescriptionMutationVariables
+  >(UniverseSetDescriptionDocument, baseOptions);
+}
+export type UniverseSetDescriptionMutationHookResult = ReturnType<
+  typeof useUniverseSetDescriptionMutation
+>;
+export const UniverseSetTagsDocument = gql`
+  mutation UniverseSetTags($id: ID!, $tags: [String!]!) {
+    universeSetTags(id: $id, tags: $tags) {
+      id
+      tags
+    }
+  }
+`;
+export function useUniverseSetTagsMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    UniverseSetTagsMutation,
+    UniverseSetTagsMutationVariables
+  >
+) {
+  return ApolloReactHooks.useMutation<
+    UniverseSetTagsMutation,
+    UniverseSetTagsMutationVariables
+  >(UniverseSetTagsDocument, baseOptions);
+}
+export type UniverseSetTagsMutationHookResult = ReturnType<
+  typeof useUniverseSetTagsMutation
+>;
+export const UniverseCreateDocument = gql`
+  mutation UniverseCreate($name: String!) {
+    universeCreate(name: $name) {
+      id
+      name
+      author
+      description
+      coverImage
+      tags
+    }
+  }
+`;
+export function useUniverseCreateMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    UniverseCreateMutation,
+    UniverseCreateMutationVariables
+  >
+) {
+  return ApolloReactHooks.useMutation<
+    UniverseCreateMutation,
+    UniverseCreateMutationVariables
+  >(UniverseCreateDocument, baseOptions);
+}
+export type UniverseCreateMutationHookResult = ReturnType<
+  typeof useUniverseCreateMutation
+>;
+export const UniverseRemoveDocument = gql`
+  mutation UniverseRemove($id: ID!) {
+    universeRemove(id: $id)
+  }
+`;
+export function useUniverseRemoveMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    UniverseRemoveMutation,
+    UniverseRemoveMutationVariables
+  >
+) {
+  return ApolloReactHooks.useMutation<
+    UniverseRemoveMutation,
+    UniverseRemoveMutationVariables
+  >(UniverseRemoveDocument, baseOptions);
+}
+export type UniverseRemoveMutationHookResult = ReturnType<
+  typeof useUniverseRemoveMutation
+>;
+export const UniverseSetNameDocument = gql`
+  mutation UniverseSetName($id: ID!, $name: String!) {
+    universeSetName(id: $id, name: $name) {
+      id
+      name
+    }
+  }
+`;
+export function useUniverseSetNameMutation(
+  baseOptions?: ApolloReactHooks.MutationHookOptions<
+    UniverseSetNameMutation,
+    UniverseSetNameMutationVariables
+  >
+) {
+  return ApolloReactHooks.useMutation<
+    UniverseSetNameMutation,
+    UniverseSetNameMutationVariables
+  >(UniverseSetNameDocument, baseOptions);
+}
+export type UniverseSetNameMutationHookResult = ReturnType<
+  typeof useUniverseSetNameMutation
+>;
+export const UniversesDocument = gql`
+  subscription Universes {
+    universes {
+      id
+      name
+      author
+      description
+      coverImage
+      tags
+    }
+  }
+`;
+export function useUniversesSubscription(
+  baseOptions?: ApolloReactHooks.SubscriptionHookOptions<
+    UniversesSubscription,
+    UniversesSubscriptionVariables
+  >
+) {
+  return ApolloReactHooks.useSubscription<
+    UniversesSubscription,
+    UniversesSubscriptionVariables
+  >(UniversesDocument, baseOptions);
+}
+export type UniversesSubscriptionHookResult = ReturnType<
+  typeof useUniversesSubscription
 >;
 export const ClientConnectDocument = gql`
   mutation ClientConnect {
@@ -437,7 +689,7 @@ export function useClientConnectMutation(
   baseOptions?: ApolloReactHooks.MutationHookOptions<
     ClientConnectMutation,
     ClientConnectMutationVariables
-  >,
+  >
 ) {
   return ApolloReactHooks.useMutation<
     ClientConnectMutation,
@@ -459,7 +711,7 @@ export function useClientDisconnectMutation(
   baseOptions?: ApolloReactHooks.MutationHookOptions<
     ClientDisconnectMutation,
     ClientDisconnectMutationVariables
-  >,
+  >
 ) {
   return ApolloReactHooks.useMutation<
     ClientDisconnectMutation,
@@ -481,7 +733,7 @@ export function useStartFlightMutation(
   baseOptions?: ApolloReactHooks.MutationHookOptions<
     StartFlightMutation,
     StartFlightMutationVariables
-  >,
+  >
 ) {
   return ApolloReactHooks.useMutation<
     StartFlightMutation,
@@ -504,22 +756,22 @@ export function useFlightsQuery(
   baseOptions?: ApolloReactHooks.QueryHookOptions<
     FlightsQuery,
     FlightsQueryVariables
-  >,
+  >
 ) {
   return ApolloReactHooks.useQuery<FlightsQuery, FlightsQueryVariables>(
     FlightsDocument,
-    baseOptions,
+    baseOptions
   );
 }
 export function useFlightsLazyQuery(
   baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
     FlightsQuery,
     FlightsQueryVariables
-  >,
+  >
 ) {
   return ApolloReactHooks.useLazyQuery<FlightsQuery, FlightsQueryVariables>(
     FlightsDocument,
-    baseOptions,
+    baseOptions
   );
 }
 export type FlightsQueryHookResult = ReturnType<typeof useFlightsQuery>;
@@ -542,7 +794,7 @@ export function useIntrospectionQuery(
   baseOptions?: ApolloReactHooks.QueryHookOptions<
     IntrospectionQuery,
     IntrospectionQueryVariables
-  >,
+  >
 ) {
   return ApolloReactHooks.useQuery<
     IntrospectionQuery,
@@ -553,7 +805,7 @@ export function useIntrospectionLazyQuery(
   baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
     IntrospectionQuery,
     IntrospectionQueryVariables
-  >,
+  >
 ) {
   return ApolloReactHooks.useLazyQuery<
     IntrospectionQuery,

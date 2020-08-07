@@ -1,0 +1,6 @@
+mutation UniverseSetName($id: ID!, $name: String!) {
+  universeSetName(id: $id, name: $name) {
+    id
+    name
+  }
+}

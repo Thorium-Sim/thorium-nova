@@ -45,15 +45,18 @@ const Scene = () => {
   const frameCount = React.useRef(0);
 
   useFrame((state, delta) => {
+    // Auto rotate, but at a very slow rate, so as to keep the
+    // starfield visible
     frameCount.current = (frameCount.current + delta) % 125.663;
     if (orbitControls.current) {
       orbitControls.current.autoRotateSpeed =
-        Math.sin(frameCount.current / 10) / 10;
+        Math.sin(frameCount.current / 100) / 100;
     }
   });
 
   const {camera} = useThree();
   React.useEffect(() => {
+    // Block the orbit controls from panning too far
     if (orbitControls.current) {
       var minPan = new Vector3(-300, -300, -300);
       var maxPan = new Vector3(300, 300, 300);

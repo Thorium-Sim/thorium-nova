@@ -8,6 +8,10 @@ const creditList = [
     content: "Alex Anderson 🚀",
   },
   {
+    header: "Strategy & Design",
+    content: "Crystal Anderson 💎",
+  },
+  {
     header: "Inspiration",
     content: "Victor Williamson 🎓",
   },
@@ -18,10 +22,6 @@ const creditList = [
   {
     header: "Technical Consultant",
     content: "Brent Anderson 🤓",
-  },
-  {
-    header: "Documentation & Training",
-    content: "Crystal Anderson 💎",
   },
   // {
   //   header: "Curve Frame Design",

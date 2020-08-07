@@ -1,0 +1,6 @@
+mutation UniverseSetCoverImage($id: ID!, $image: Upload!) {
+  universeSetCoverImage(id: $id, image: $image) {
+    id
+    coverImage
+  }
+}

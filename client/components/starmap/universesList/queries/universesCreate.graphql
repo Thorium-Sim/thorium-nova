@@ -1,0 +1,10 @@
+mutation UniverseCreate($name: String!) {
+  universeCreate(name: $name) {
+    id
+    name
+    author
+    description
+    coverImage
+    tags
+  }
+}

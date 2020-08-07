@@ -6,5 +6,6 @@ export default function buildSchema() {
   return buildTypeSchema({
     resolvers,
     pubSub: pubsub,
+    validate: false,
   });
 }
