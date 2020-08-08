@@ -1,7 +1,9 @@
-import {Texture} from "three";
+import {Color, Texture} from "three";
 
 export default function getUniforms({
   map,
+  color1 = 0x58b1f1,
+  color2 = 0xf6fcff,
   flare1 = 0.3,
   flare2 = 0.4,
   flare3 = 0.1,
@@ -10,6 +12,8 @@ export default function getUniforms({
   flare6 = 0.1,
 }: {
   map: Texture;
+  color1?: number;
+  color2?: number;
   flare1?: number;
   flare2?: number;
   flare3?: number;
@@ -100,19 +104,11 @@ export default function getUniforms({
 
     color1: {
       type: "c",
-      value: {
-        r: 0.34509803921568627,
-        g: 0.6941176470588235,
-        b: 0.9450980392156862,
-      },
+      value: new Color(color1),
     },
     color2: {
       type: "c",
-      value: {
-        r: 0.9647058823529412,
-        g: 0.9882352941176471,
-        b: 1,
-      },
+      value: new Color(color2),
     },
     flare1: {
       type: "f",

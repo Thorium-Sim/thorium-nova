@@ -1,81 +1,59 @@
 import React from "react";
-import nebulaGenerator from "./generateNebulaMap";
 import {
   MeshBasicMaterial,
   CanvasTexture,
   BackSide,
   sRGBEncoding,
   Color,
-  CubeTexture,
+  BoxBufferGeometry,
+  Mesh,
 } from "three";
-import useImage from "../../helpers/hooks/useImage";
+import uniqid from "uniqid";
+import {configStoreApi} from "./configStore";
+import {useFrame} from "react-three-fiber";
+
 const radius = 1000000;
 
-interface Textures {
-  front: any;
-  back: any;
-  top: any;
-  bottom: any;
-  left: any;
-  right: any;
+const nebulaWorker = new Worker("./generateNebulaMap.js");
+const promiseCache: {[key: string]: (value?: unknown) => void} = {};
+function onMessage(e: MessageEvent) {
+  promiseCache[e.data.id]?.();
+}
+nebulaWorker.onmessage = onMessage;
+
+async function generateNebula(skyboxKey: string) {
+  const textures = generateBlank();
+  await new Promise(resolve => {
+    const id = uniqid();
+    promiseCache[id] = resolve;
+    nebulaWorker.postMessage(
+      {seed: skyboxKey, textures: textures.offscreen, id},
+      Object.values(textures.offscreen)
+    );
+  });
+  return textures;
 }
 
-function drawIndividual(source: any, targetId: string, bg: HTMLImageElement) {
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = 2048;
-  var ctx = canvas.getContext("2d");
-  if (!ctx) return canvas;
-  ctx.save();
-  if (targetId === "texture-bottom") {
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.rotate((90 * Math.PI) / 180);
-    ctx.drawImage(source, -1024, -1024, 2048, 2048);
-    ctx.globalCompositeOperation = "lighten";
-    ctx.drawImage(bg, -1024, -1024, 2048, 2048);
-  } else if (targetId === "texture-top") {
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.rotate((-90 * Math.PI) / 180);
-    ctx.drawImage(source, -1024, -1024, 2048, 2048);
-    ctx.globalCompositeOperation = "lighten";
-    ctx.drawImage(bg, -1024, -1024, 2048, 2048);
-  } else {
-    ctx.globalCompositeOperation = "source-over";
-    ctx.drawImage(source, 0, 0, 2048, 2048);
-    ctx.globalCompositeOperation = "lighten";
-    ctx.drawImage(bg, 0, 0, 2048, 2048);
-  }
-  ctx.restore();
-  return canvas;
-}
-
-export function generateMaterials(skyboxKey: string, bg: HTMLImageElement) {
-  const textures = skyboxKey
-    ? (nebulaGenerator(skyboxKey || "c") as Textures)
-    : generateBlank();
+export async function generateTextures(skyboxKey: string) {
+  const textures = await generateNebula(skyboxKey);
   const maps: HTMLCanvasElement[] = [];
 
-  maps.push(drawIndividual(textures.front, "texture-front", bg));
-  maps.push(drawIndividual(textures.back, "texture-back", bg));
-  maps.push(drawIndividual(textures.top, "texture-top", bg));
-  maps.push(drawIndividual(textures.bottom, "texture-bottom", bg));
-  maps.push(drawIndividual(textures.left, "texture-left", bg));
-  maps.push(drawIndividual(textures.right, "texture-right", bg));
+  maps.push(textures.onscreen.front);
+  maps.push(textures.onscreen.back);
+  maps.push(textures.onscreen.top);
+  maps.push(textures.onscreen.bottom);
+  maps.push(textures.onscreen.left);
+  maps.push(textures.onscreen.right);
 
-  const tx = maps.map(m => new CanvasTexture(m));
-  const mats = tx.map(m => {
-    m.encoding = sRGBEncoding;
-    return new MeshBasicMaterial({
-      map: m,
-      side: BackSide,
-      color: new Color("#fff"),
-      depthTest: false,
-      depthWrite: false,
-    });
+  const tx = maps.map(m => {
+    const tx = new CanvasTexture(m);
+    tx.encoding = sRGBEncoding;
+    return tx;
   });
-  return mats;
+  return tx;
 }
 function generateBlank() {
-  return {
+  const canvases: {[key: string]: HTMLCanvasElement} = {
     front: document.createElement("canvas"),
     back: document.createElement("canvas"),
     top: document.createElement("canvas"),
@@ -83,22 +61,100 @@ function generateBlank() {
     left: document.createElement("canvas"),
     right: document.createElement("canvas"),
   };
+  const offscreen: {[key: string]: OffscreenCanvas} = {};
+  for (let canvas in canvases) {
+    canvases[canvas].width = canvases[canvas].height = 256;
+    offscreen[canvas] = canvases[canvas].transferControlToOffscreen();
+    offscreen[canvas].width = offscreen[canvas].height = 256;
+  }
+  return {onscreen: canvases, offscreen};
 }
 
-const Nebula = React.memo<{skyboxKey: string}>(function Nebula({skyboxKey}) {
-  const starsImage = useImage(require("url:./stars.jpg"));
-  const mats = React.useMemo(() => {
-    return generateMaterials(skyboxKey, starsImage);
-  }, [starsImage, skyboxKey]);
+const nebulaGeometry = new BoxBufferGeometry(1, 1, 1);
 
-  const geo = React.useRef();
+function Nebula() {
+  const skyboxKey = React.useRef("");
+  const primaryMesh = React.useRef<Mesh>();
+  const secondaryMesh = React.useRef<Mesh>();
+  const meshes = React.useRef({active: primaryMesh, inactive: secondaryMesh});
+  async function regenerateNebula(skyboxKey: string) {
+    const textures = await generateTextures(skyboxKey);
+    if (meshes.current.inactive.current && meshes.current.active.current) {
+      // Let's clean up any existing objects;
+      if (Array.isArray(meshes.current.inactive.current?.material)) {
+        meshes.current.inactive.current?.material?.forEach((m, i) => {
+          const mat = m as MeshBasicMaterial;
+          mat.map?.dispose();
+          mat.color.set(0xffffff);
+          mat.map = textures[i];
+          mat.transparent = true;
+          mat.needsUpdate = true;
+        });
+      }
+
+      meshes.current = {
+        active: meshes.current.inactive,
+        inactive: meshes.current.active,
+      };
+    }
+  }
+  useFrame((state, delta) => {
+    const key = configStoreApi.getState().skyboxKey;
+    if (skyboxKey.current !== key) {
+      skyboxKey.current = key;
+      regenerateNebula(key);
+    }
+    if (Array.isArray(primaryMesh.current?.material)) {
+      const primaryMat = primaryMesh.current
+        ?.material?.[0] as MeshBasicMaterial;
+      if (
+        primaryMesh.current === meshes.current.active.current &&
+        primaryMat.opacity < 1
+      ) {
+        primaryMesh.current?.material.forEach(mat => {
+          mat.opacity = Math.min(1, mat.opacity + delta / 3);
+        });
+      } else if (
+        primaryMesh.current === meshes.current.inactive.current &&
+        primaryMat.opacity > 0
+      ) {
+        primaryMesh.current?.material.forEach(mat => {
+          mat.opacity = Math.max(0, mat.opacity - delta / 3);
+        });
+      }
+    }
+  });
+
   return (
-    <group renderOrder={-100}>
-      <mesh scale={[radius, radius, radius]} material={mats} visible={true}>
-        <boxGeometry ref={geo} args={[1, 1, 1]} attach="geometry" />
+    <>
+      <mesh
+        ref={secondaryMesh}
+        geometry={nebulaGeometry}
+        scale={[radius + 10, radius + 10, radius + 10]}
+        renderOrder={-101}
+      >
+        <meshBasicMaterial attachArray="material" side={BackSide} />
+        <meshBasicMaterial attachArray="material" side={BackSide} />
+        <meshBasicMaterial attachArray="material" side={BackSide} />
+        <meshBasicMaterial attachArray="material" side={BackSide} />
+        <meshBasicMaterial attachArray="material" side={BackSide} />
+        <meshBasicMaterial attachArray="material" side={BackSide} />
       </mesh>
-    </group>
+      <mesh
+        ref={primaryMesh}
+        geometry={nebulaGeometry}
+        scale={[radius, radius, radius]}
+        renderOrder={-100}
+      >
+        <meshBasicMaterial attachArray="material" side={BackSide} />
+        <meshBasicMaterial attachArray="material" side={BackSide} />
+        <meshBasicMaterial attachArray="material" side={BackSide} />
+        <meshBasicMaterial attachArray="material" side={BackSide} />
+        <meshBasicMaterial attachArray="material" side={BackSide} />
+        <meshBasicMaterial attachArray="material" side={BackSide} />
+      </mesh>
+    </>
   );
-});
+}
 
 export default Nebula;

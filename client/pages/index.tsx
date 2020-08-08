@@ -97,7 +97,7 @@ const Welcome = () => {
             variantColor="alert"
             variant="outline"
             as={NavLink}
-            to="/config"
+            {...{to: "/config"}}
           >
             {t(`Configure Plugins`)}
           </Button>

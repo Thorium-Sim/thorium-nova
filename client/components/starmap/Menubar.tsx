@@ -5,6 +5,7 @@ import {Link, useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {Camera, Vector3} from "three";
 import {useUniverseAddStarMutation} from "../../generated/graphql";
+import {useConfigStore} from "./configStore";
 
 interface SceneRef {
   camera: () => Camera;
@@ -16,6 +17,8 @@ const Menubar: React.FC<{
   const {universeId} = useParams();
   const [addStar] = useUniverseAddStarMutation();
   const {t} = useTranslation();
+
+  const store = useConfigStore();
   return (
     <Box position="fixed" top={0} left={0} width="100vw" padding={2}>
       <Stack isInline spacing={2}>
@@ -45,10 +48,20 @@ const Menubar: React.FC<{
         >
           {t("Add")}
         </Button>
-        <Button variantColor="danger" variant="ghost" size="sm">
+        <Button
+          variantColor="danger"
+          variant="ghost"
+          size="sm"
+          disabled={!store.selectedObject}
+        >
           {t("Delete")}
         </Button>
-        <Button variantColor="primary" variant="ghost" size="sm">
+        <Button
+          variantColor="primary"
+          variant="ghost"
+          size="sm"
+          disabled={!store.selectedObject}
+        >
           {t("Edit")}
         </Button>
         <Input

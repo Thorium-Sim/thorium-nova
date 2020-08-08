@@ -4,6 +4,7 @@ import {useFrame} from "react-three-fiber";
 import {CanvasTexture, Group, Vector3} from "three";
 import {configStoreApi} from "../configStore";
 import useObjectDrag from "../hooks/useObjectDrag";
+import {useParams} from "react-router";
 
 const size = 50;
 const lineWidth = 0.07;
@@ -14,18 +15,20 @@ const SystemCircle: React.FC<{
   hoveringDirection: React.MutableRefObject<number>;
 }> = ({starId, parent, hoveringDirection}) => {
   const [setPosition] = useUniverseStarSetPositionMutation();
+  const {universeId} = useParams();
   const bind = useObjectDrag(parent, {
     onMouseUp: (position: Vector3) => {
       configStoreApi.getState().enableOrbitControls();
       setPosition({
         variables: {
-          id: configStoreApi.getState().universeId,
+          id: universeId,
           starId: starId,
           position,
         },
       });
     },
     onMouseDown: () => {
+      configStoreApi.setState({selectedObject: starId});
       configStoreApi.getState().disableOrbitControls();
     },
   });
@@ -40,10 +43,12 @@ const SystemCircle: React.FC<{
   }, []);
 
   function drawRadius(endArc = 360) {
+    const selectedObject = configStoreApi.getState().selectedObject;
+    const isSelected = starId === selectedObject;
     ctx.clearRect(0, 0, size, size);
 
     ctx.lineWidth = size / (1 / lineWidth);
-    ctx.strokeStyle = "rgba(0,255,255,0.2)";
+    ctx.strokeStyle = isSelected ? "white" : "rgba(0,255,255,0.2)";
     ctx.beginPath();
     ctx.arc(
       size / 2,
@@ -65,8 +70,18 @@ const SystemCircle: React.FC<{
     ctx.stroke();
   }
   const radius = React.useRef(0);
-
+  const selected = React.useRef(false);
   useFrame(() => {
+    const selectedObject = configStoreApi.getState().selectedObject;
+    const isSelected = starId === selectedObject;
+    if (isSelected) {
+      selected.current = true;
+    }
+    if (selected.current && !isSelected) {
+      selected.current = false;
+      drawRadius(radius.current - Math.PI / 2);
+      texture.needsUpdate = true;
+    }
     if (hoveringDirection.current === 0) return;
     radius.current += 0.5 * hoveringDirection.current;
     if (radius.current >= Math.PI * 2) {

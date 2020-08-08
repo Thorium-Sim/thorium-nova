@@ -1,359 +1,38 @@
 /* istanbul ignore file */
 import * as glm from "gl-matrix";
 import rng from "rng";
+import * as webgl from "./webgl";
 
-const webgl = {
-  /*...........................................................................*/
-  buildAttribs: function buildAttribs(gl, layout) {
-    var attribs = {};
-    for (var key in layout) {
-      attribs[key] = {
-        buffer: new webgl.GLBuffer(gl),
-        size: layout[key],
-      };
-    }
-    return attribs;
-  },
+const imageUrl = require("url:./stars.jpg");
+let img;
 
-  /*...........................................................................*/
-  getExtensions: function getExtensions(gl, extArray) {
-    var ext = {};
-    for (var i = 0; i < extArray.length; i++) {
-      var e = gl.getExtension(extArray[i]);
-      if (e === null) {
-        throw new Error("Extension " + extArray[i] + " not available.");
-      }
-      ext[extArray[i]] = e;
-    }
-    return ext;
-  },
+function $RefreshSig$() {}
 
-  /*...........................................................................*/
-  Framebuffer: function Framebuffer(gl, color, depth, ext) {
-    var self = this;
-
-    self.initialize = function () {
-      self.fb = gl.createFramebuffer();
-      self.bind();
-      if (color.length > 1) {
-        var drawBuffers = [];
-        for (var i = 0; i < color.length; i++) {
-          drawBuffers.push(ext["COLOR_ATTACHMENT" + i + "_WEBGL"]);
-        }
-        ext.drawBuffersWEBGL(drawBuffers);
-        for (let i = 0; i < color.length; i++) {
-          gl.framebufferTexture2D(
-            gl.FRAMEBUFFER,
-            ext["COLOR_ATTACHMENT" + i + "_WEBGL"],
-            gl.TEXTURE_2D,
-            color[i].texture,
-            0
-          );
-        }
-      } else {
-        gl.framebufferTexture2D(
-          gl.FRAMEBUFFER,
-          gl.COLOR_ATTACHMENT0,
-          gl.TEXTURE_2D,
-          color[0].texture,
-          0
-        );
-      }
-      if (depth !== undefined) {
-        gl.framebufferTexture2D(
-          gl.FRAMEBUFFER,
-          gl.DEPTH_ATTACHMENT,
-          gl.TEXTURE_2D,
-          depth.texture,
-          0
-        );
-      }
-    };
-
-    self.bind = function () {
-      gl.bindFramebuffer(gl.FRAMEBUFFER, self.fb);
-    };
-
-    self.initialize();
-  },
-
-  /*...........................................................................*/
-  Texture: function Texture(gl, index, data, width, height, options) {
-    options = options || {};
-    options.target = options.target || gl.TEXTURE_2D;
-    options.mag = options.mag || gl.NEAREST;
-    options.min = options.min || gl.NEAREST;
-    options.wraps = options.wraps || gl.CLAMP_TO_EDGE;
-    options.wrapt = options.wrapt || gl.CLAMP_TO_EDGE;
-    options.internalFormat = options.internalFormat || gl.RGBA;
-    options.format = options.format || gl.RGBA;
-    options.type = options.type || gl.UNSIGNED_BYTE;
-
-    var self = this;
-
-    self.initialize = function () {
-      self.index = index;
-      self.activate();
-      self.texture = gl.createTexture();
-      self.bind();
-      gl.texImage2D(
-        options.target,
-        0,
-        options.internalFormat,
-        options.format,
-        options.type,
-        data
-      );
-      gl.texParameteri(options.target, gl.TEXTURE_MAG_FILTER, options.mag);
-      gl.texParameteri(options.target, gl.TEXTURE_MIN_FILTER, options.min);
-      gl.texParameteri(options.target, gl.TEXTURE_WRAP_S, options.wraps);
-      gl.texParameteri(options.target, gl.TEXTURE_WRAP_T, options.wrapt);
-      if (options.mag !== gl.NEAREST || options.min !== gl.NEAREST) {
-        gl.generateMipmap(options.target);
-      }
-    };
-
-    self.bind = function () {
-      gl.bindTexture(options.target, self.texture);
-    };
-
-    self.activate = function () {
-      gl.activeTexture(gl.TEXTURE0 + self.index);
-    };
-
-    self.reset = function () {
-      self.activate();
-      self.bind();
-      gl.texImage2D(
-        options.target,
-        0,
-        options.internalFormat,
-        width,
-        height,
-        0,
-        options.format,
-        options.type,
-        data
-      );
-    };
-
-    self.initialize();
-  },
-
-  /*...........................................................................*/
-  GLBuffer: function GLBuffer(gl) {
-    var self = this;
-
-    self.initialize = function () {
-      self.buffer = gl.createBuffer();
-    };
-
-    self.bind = function () {
-      gl.bindBuffer(gl.ARRAY_BUFFER, self.buffer);
-    };
-
-    self.set = function (data) {
-      self.bind();
-      gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    };
-
-    self.initialize();
-  },
-
-  /*...........................................................................*/
-  Renderable: function Renderable(gl, program, buffers, primitiveCount) {
-    var self = this;
-
-    self.primitiveCount = primitiveCount;
-
-    self.initialize = function () {};
-
-    self.render = function () {
-      program.use();
-      for (let name in buffers) {
-        var buffer = buffers[name].buffer;
-        var size = buffers[name].size;
-        try {
-          var location = program.attribs[name].location;
-        } catch (e) {
-          console.error("Could not find location for", name);
-          throw e;
-        }
-        buffer.bind();
-        gl.enableVertexAttribArray(location);
-        gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
-      }
-      gl.drawArrays(gl.TRIANGLES, 0, 3 * primitiveCount);
-      for (let name in self.buffers) {
-        gl.disableVertexAttribArray(program.attributes[name].location);
-      }
-    };
-
-    self.initialize();
-  },
-
-  /*...........................................................................*/
-  InstancedRenderable: function InstancedRenderable(
-    gl,
-    program,
-    buffers,
-    primitiveCount,
-    instancedExt
-  ) {
-    var self = this;
-
-    self.initialize = function () {};
-
-    self.render = function () {
-      program.use();
-      for (let name in buffers) {
-        var buffer = buffers[name].buffer;
-        var size = buffers[name].size;
-        try {
-          var location = program.attribs[name].location;
-        } catch (e) {
-          console.error("Could not find location for", name);
-          throw e;
-        }
-        buffer.bind();
-        gl.enableVertexAttribArray(location);
-        gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
-        instancedExt.vertexAttribDivisorANGLE(location, buffers[name].divisor);
-      }
-      instancedExt.drawArraysInstancedANGLE(
-        gl.TRIANGLES,
-        0,
-        6 * 2 * 3,
-        primitiveCount
-      );
-      for (let name in self.buffers) {
-        gl.disableVertexAttribArray(program.attributes[name].location);
-      }
-    };
-
-    self.initialize();
-  },
-  /*...........................................................................*/
-  Program: function Program(gl, vertexSource, fragmentSource) {
-    var self = this;
-
-    self.initialize = function () {
-      self.program = self.compileProgram(vertexSource, fragmentSource);
-      self.attribs = self.gatherAttribs();
-      self.uniforms = self.gatherUniforms();
-    };
-
-    self.use = function () {
-      gl.useProgram(self.program);
-    };
-
-    self.compileProgram = function (vertexSource, fragmentSource) {
-      var vertexShader = self.compileShader(vertexSource, gl.VERTEX_SHADER);
-      var fragmentShader = self.compileShader(
-        fragmentSource,
-        gl.FRAGMENT_SHADER
-      );
-      var program = gl.createProgram();
-      gl.attachShader(program, vertexShader);
-      gl.attachShader(program, fragmentShader);
-      gl.linkProgram(program);
-      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        console.error(gl.getProgramInfoLog(program));
-        throw new Error("Failed to compile program.");
-      }
-      return program;
-    };
-
-    self.compileShader = function (source, type) {
-      var shader = gl.createShader(type);
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        var err = gl.getShaderInfoLog(shader);
-        var lineno = parseInt(err.split(":")[2], 10);
-        var split = source.split("\n");
-        for (var i in split) {
-          var q = parseInt(i, 10);
-          console.info(q + "  " + split[i]);
-
-          if (i === lineno - 1) {
-            console.warn(err);
-          }
-        }
-        let typeString = type === gl.VERTEX_SHADER ? "vertex" : "fragment";
-        throw new Error("Failed to compile " + typeString + " shader.");
-      }
-      return shader;
-    };
-
-    self.setUniform = function (name, type) {
-      var args = Array.prototype.slice.call(arguments, 2);
-      self.use(); // Make this idempotent. At the context level, perhaps?
-      try {
-        var location = self.uniforms[name].location;
-      } catch (e) {
-        console.error(name);
-        throw e;
-      }
-      gl["uniform" + type].apply(gl, [location].concat(args));
-    };
-
-    self.gatherUniforms = function () {
-      var uniforms = {};
-      var nUniforms = gl.getProgramParameter(self.program, gl.ACTIVE_UNIFORMS);
-      for (var i = 0; i < nUniforms; i++) {
-        var uniform = gl.getActiveUniform(self.program, i);
-        uniforms[uniform.name] = {
-          name: uniform.name,
-          location: gl.getUniformLocation(self.program, uniform.name),
-          type: uniform.type,
-          size: uniform.size,
-        };
-      }
-      return uniforms;
-    };
-
-    self.gatherAttribs = function () {
-      var attribs = {};
-      var nAttribs = gl.getProgramParameter(self.program, gl.ACTIVE_ATTRIBUTES);
-      for (var i = 0; i < nAttribs; i++) {
-        var attrib = gl.getActiveAttrib(self.program, i);
-        attribs[attrib.name] = {
-          name: attrib.name,
-          location: gl.getAttribLocation(self.program, attrib.name),
-          type: attrib.type,
-          size: attrib.size,
-        };
-      }
-      return attribs;
-    };
-
-    /*...........................................................................*/
-    self.initialize();
-  },
-
-  /*...........................................................................*/
+self.onmessage = e => {
+  generateTexture(e.data.seed, e.data.textures, e.data.id);
 };
 
-export default function generateTexture(seed) {
-  var self = {};
-  self.initialize = function () {
+let renderingContext = new OffscreenCanvas(256, 256);
+
+function generateTexture(seed, textures, id) {
+  const storage = {};
+  storage.initialize = function () {
     // Initialize the offscreen rendering canvas.
-    self.canvas = document.createElement("canvas");
+    storage.canvas = renderingContext;
 
     // Initialize the gl context.
-    self.gl = self.canvas.getContext("webgl");
-    self.gl.enable(self.gl.BLEND);
-    self.gl.blendFuncSeparate(
-      self.gl.SRC_ALPHA,
-      self.gl.ONE_MINUS_SRC_ALPHA,
-      self.gl.ZERO,
-      self.gl.ONE
+    storage.gl = storage.canvas.getContext("webgl");
+    storage.gl.enable(storage.gl.BLEND);
+    storage.gl.blendFuncSeparate(
+      storage.gl.SRC_ALPHA,
+      storage.gl.ONE_MINUS_SRC_ALPHA,
+      storage.gl.ZERO,
+      storage.gl.ONE
     );
 
     // Load the programs.
-    self.pNebula = loadProgram(
-      self.gl,
+    storage.pNebula = loadProgram(
+      storage.gl,
       `#version 100
       precision highp float;
       
@@ -416,16 +95,23 @@ export default function generateTexture(seed) {
     );
 
     // Create the nebula renderables.
-    self.rNebula = buildBox(self.gl, self.pNebula);
+    storage.rNebula = buildBox(storage.gl, storage.pNebula);
   };
 
-  self.render = function (params) {
-    // We'll be returning a map of direction to texture.
-    var textures = {};
-
+  storage.render = async function (params) {
+    if (!img) {
+      await fetch(imageUrl)
+        .then(r => r.blob())
+        .then(imgblob => {
+          return createImageBitmap(imgblob);
+        })
+        .then(res => {
+          img = res;
+        });
+    }
     // Handle changes to resolution.
-    self.canvas.width = self.canvas.height = params.resolution;
-    self.gl.viewport(0, 0, params.resolution, params.resolution);
+    storage.canvas.width = storage.canvas.height = params.resolution;
+    storage.gl.viewport(0, 0, params.resolution, params.resolution);
 
     // Initialize the nebula parameters.
     var rand = new rng.MT(hashcode(params.seed) + 2000);
@@ -485,42 +171,65 @@ export default function generateTexture(seed) {
     var keys = Object.keys(dirs);
     for (var i = 0; i < keys.length; i++) {
       // Clear the context.
-      self.gl.clearColor(0, 0, 0, 1);
-      self.gl.clear(self.gl.COLOR_BUFFER_BIT);
+      storage.gl.clearColor(0, 0, 0, 1);
+      storage.gl.clear(storage.gl.COLOR_BUFFER_BIT);
 
       // Look in the direction for this texture.
       var dir = dirs[keys[i]];
       glm.mat4.lookAt(view, [0, 0, 0], dir.target, dir.up);
 
       // Render the nebulae.
-      self.pNebula.use();
+      storage.pNebula.use();
       model = glm.mat4.create();
       for (let j = 0; j < nebulaParams.length; j++) {
         var p = nebulaParams[j];
-        self.pNebula.setUniform("uModel", "Matrix4fv", false, model);
-        self.pNebula.setUniform("uView", "Matrix4fv", false, view);
-        self.pNebula.setUniform("uProjection", "Matrix4fv", false, projection);
-        self.pNebula.setUniform("uScale", "1f", p.scale);
-        self.pNebula.setUniform("uColor", "3fv", p.color);
-        self.pNebula.setUniform("uIntensity", "1f", p.intensity);
-        self.pNebula.setUniform("uFalloff", "1f", p.falloff);
-        self.pNebula.setUniform("uOffset", "3fv", p.offset);
-        self.rNebula.render();
+        storage.pNebula.setUniform("uModel", "Matrix4fv", false, model);
+        storage.pNebula.setUniform("uView", "Matrix4fv", false, view);
+        storage.pNebula.setUniform(
+          "uProjection",
+          "Matrix4fv",
+          false,
+          projection
+        );
+        storage.pNebula.setUniform("uScale", "1f", p.scale);
+        storage.pNebula.setUniform("uColor", "3fv", p.color);
+        storage.pNebula.setUniform("uIntensity", "1f", p.intensity);
+        storage.pNebula.setUniform("uFalloff", "1f", p.falloff);
+        storage.pNebula.setUniform("uOffset", "3fv", p.offset);
+        storage.rNebula.render();
       }
 
       // Create the texture.
-      var c = document.createElement("canvas");
-      c.width = c.height = params.resolution;
+      var c = textures[keys[i]];
+      c.width = c.height = 2048;
       var ctx = c.getContext("2d");
-      ctx.drawImage(self.canvas, 0, 0);
-      textures[keys[i]] = c;
+      ctx.save();
+      if (keys[i] === "top") {
+        ctx.translate(c.width / 2, c.height / 2);
+        ctx.rotate((-90 * Math.PI) / 180);
+        ctx.drawImage(storage.canvas, -1024, -1024, 2048, 2048);
+        ctx.globalCompositeOperation = "lighten";
+        ctx.drawImage(img, -1024, -1024, 2048, 2048);
+      } else if (keys[i] === "bottom") {
+        ctx.translate(c.width / 2, c.height / 2);
+        ctx.rotate((90 * Math.PI) / 180);
+        ctx.drawImage(storage.canvas, -1024, -1024, 2048, 2048);
+        ctx.globalCompositeOperation = "lighten";
+        ctx.drawImage(img, -1024, -1024, 2048, 2048);
+      } else {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.drawImage(storage.canvas, 0, 0, 2048, 2048);
+        ctx.globalCompositeOperation = "lighten";
+        ctx.drawImage(img, 0, 0, 2048, 2048);
+      }
+      ctx.restore();
     }
 
-    return textures;
+    postMessage({id});
   };
 
-  self.initialize();
-  return self.render({seed, resolution: 256, nebulae: true});
+  storage.initialize();
+  return storage.render({seed, resolution: 256, nebulae: true});
 }
 
 function buildBox(gl, program) {

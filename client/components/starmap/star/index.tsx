@@ -13,7 +13,11 @@ import LensFlare from "./lensFlare";
 import {fragment, vertex} from "./shaders";
 import getUniforms from "./uniforms";
 
-const Star: React.FC<{color1: number}> = ({color1 = 0x224488, ...props}) => {
+const Star: React.FC<{color1: number; color2: number}> = ({
+  color1 = 0x224488,
+  color2 = 0xf6fcff,
+  ...props
+}) => {
   const filePath = require("url:./textures/01_Texture.jpg");
   const texture = React.useMemo(() => {
     const loader = new TextureLoader();
@@ -22,7 +26,10 @@ const Star: React.FC<{color1: number}> = ({color1 = 0x224488, ...props}) => {
     texture.wrapT = RepeatWrapping;
     return texture;
   }, []);
-  const uniforms = React.useMemo(() => getUniforms({map: texture}), []);
+  const uniforms = React.useMemo(
+    () => getUniforms({map: texture, color1, color2}),
+    []
+  );
   const shader = React.useRef<Mesh>();
   const blocker = React.useRef<Mesh>();
 
@@ -35,11 +42,9 @@ const Star: React.FC<{color1: number}> = ({color1 = 0x224488, ...props}) => {
     }
   });
 
-  const threeColor = React.useMemo(() => new Color("white"), []);
-
   return (
     <group {...props}>
-      <pointLight intensity={2} decay={2} color={threeColor} />{" "}
+      <pointLight intensity={2} decay={2} color={"white"} />{" "}
       <mesh ref={shader}>
         <circleBufferGeometry attach="geometry" args={[1, 8, 8]} />
         <shaderMaterial

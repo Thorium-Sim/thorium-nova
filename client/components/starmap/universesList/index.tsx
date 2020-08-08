@@ -154,7 +154,7 @@ const UniversesList = () => {
                         </div>
                         <Button
                           as={NavLink}
-                          to={`/starmap/${c.id}`}
+                          {...{to: `/starmap/${c.id}`}}
                           onClick={e => e.stopPropagation()}
                           variant="outline"
                           size="sm"
@@ -193,7 +193,7 @@ const UniversesList = () => {
                     {/* <Button variantColor="info">{t(`Export`)}</Button> */}
                     <Button
                       variantColor="danger"
-                      disabled={!universe}
+                      {...{disabled: !universe}}
                       onClick={handleRemove}
                     >
                       {t(`Remove`)}

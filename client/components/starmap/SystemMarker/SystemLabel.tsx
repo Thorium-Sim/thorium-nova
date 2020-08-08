@@ -3,11 +3,13 @@ import React from "react";
 import TextTexture from "@seregpie/three.text-texture";
 import {Sprite} from "three";
 import {useFrame} from "react-three-fiber";
+import {configStoreApi} from "../configStore";
 
 const SystemLabel: React.FC<{
+  starId: string;
   name: string;
   hoveringDirection: React.MutableRefObject<number>;
-}> = ({name, hoveringDirection}) => {
+}> = ({starId, name, hoveringDirection}) => {
   React.useEffect(() => {
     if (text.current) {
       text.current.material.opacity = 0.5;
@@ -27,16 +29,28 @@ const SystemLabel: React.FC<{
   }, [name]);
 
   const text = React.useRef<Sprite>();
-
+  const selected = React.useRef(false);
   useFrame(() => {
-    if (hoveringDirection.current !== 0 && text.current) {
-      text.current.material.opacity = Math.max(
-        0.5,
-        Math.min(
-          1,
-          text.current.material.opacity + 0.05 * hoveringDirection.current
-        )
-      );
+    const selectedObject = configStoreApi.getState().selectedObject;
+    const isSelected = starId === selectedObject;
+    if (text.current) {
+      if (isSelected) {
+        selected.current = true;
+        text.current.material.opacity = 1;
+        return;
+      }
+
+      if (hoveringDirection.current !== 0) {
+        text.current.material.opacity = Math.max(
+          0.5,
+          Math.min(
+            1,
+            text.current.material.opacity + 0.05 * hoveringDirection.current
+          )
+        );
+      } else if (selected.current) {
+        text.current.material.opacity = 0.5;
+      }
     }
   });
 

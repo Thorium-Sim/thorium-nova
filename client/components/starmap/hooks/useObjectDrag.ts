@@ -49,7 +49,7 @@ export default function useObjectDrag(
         }
       },
       onDragEnd: e => {
-        onMouseUp?.(intersection.current);
+        onMouseUp?.(obj.current.position);
       },
       onDrag: () => {
         raycaster.current.setFromCamera(mouse, camera);
@@ -61,7 +61,7 @@ export default function useObjectDrag(
         ) {
           obj.current?.position.copy(
             intersection.current
-              .sub(offset.current)
+              // .sub(offset.current)
               .applyMatrix4(inverseMatrix.current)
           );
         }

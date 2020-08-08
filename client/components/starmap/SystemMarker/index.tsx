@@ -15,20 +15,20 @@ const SystemMarker: React.FC<{
 
   useFrame(({camera, mouse}) => {
     const zoom = camera.position.distanceTo(group.current.position);
-    let zoomedScale = (zoom / 2) * 0.025;
+    let zoomedScale = (zoom / 2) * 0.015;
     group.current.scale.set(zoomedScale, zoomedScale, zoomedScale);
     group.current.quaternion.copy(camera.quaternion);
   });
 
   return (
     <>
-      <group position={position} ref={group} scale={[0.07, 0.07, 0.07]}>
+      <group position={position} ref={group}>
         <SystemCircle
           starId={id}
           hoveringDirection={direction}
           parent={group}
         />
-        <SystemLabel hoveringDirection={direction} name={name} />
+        <SystemLabel starId={id} hoveringDirection={direction} name={name} />
       </group>
     </>
   );
