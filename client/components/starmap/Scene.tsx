@@ -74,8 +74,8 @@ const Scene = React.forwardRef((props, ref) => {
         minDistance={1}
         rotateSpeed={0.5}
         mouseButtons={{
-          RIGHT: MOUSE.PAN,
-          LEFT: MOUSE.ROTATE,
+          LEFT: MOUSE.PAN,
+          RIGHT: MOUSE.ROTATE,
           MIDDLE: MOUSE.DOLLY,
         }}
       />

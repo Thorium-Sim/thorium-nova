@@ -4,8 +4,12 @@ import {FaArrowLeft, FaHome} from "react-icons/fa";
 import {Link, useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {Camera, Vector3} from "three";
-import {useUniverseAddStarMutation} from "../../generated/graphql";
+import {
+  useUniverseAddStarMutation,
+  useUnvierseStarRemoveMutation,
+} from "../../generated/graphql";
 import {useConfigStore} from "./configStore";
+import {useConfirm} from "../Dialog";
 
 interface SceneRef {
   camera: () => Camera;
@@ -16,7 +20,9 @@ const Menubar: React.FC<{
 }> = ({sceneRef}) => {
   const {universeId} = useParams();
   const [addStar] = useUniverseAddStarMutation();
+  const [removeStar] = useUnvierseStarRemoveMutation();
   const {t} = useTranslation();
+  const confirm = useConfirm();
 
   const store = useConfigStore();
   return (
@@ -53,6 +59,20 @@ const Menubar: React.FC<{
           variant="ghost"
           size="sm"
           disabled={!store.selectedObject}
+          onClick={async () => {
+            if (!store.selectedObject) return;
+            if (
+              !(await confirm({
+                header: t("Are you sure you want to remove this star?"),
+                body: t("It will remove all of the objects inside of it."),
+              }))
+            )
+              return;
+            removeStar({
+              variables: {id: universeId, starId: store.selectedObject},
+            });
+            store.selectedObject = null;
+          }}
         >
           {t("Delete")}
         </Button>

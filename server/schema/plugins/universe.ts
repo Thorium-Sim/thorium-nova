@@ -181,6 +181,21 @@ export class UniversePluginResolver {
   }
 
   @Mutation(returns => UniverseTemplate)
+  universeTemplateRemoveStar(
+    @Arg("id", type => ID) id: string,
+    @Arg("starId", type => ID) starId: string
+  ) {
+    const universe = getUniverse(id);
+    const star = universe.entities.find(s => s.id === starId);
+    star?.dispose();
+
+    universe.entities = universe.entities.filter(e => e.id !== starId);
+    publish(universe);
+
+    return universe;
+  }
+
+  @Mutation(returns => UniverseTemplate)
   async universeTemplateStarSetPosition(
     @Arg("id", type => ID)
     id: string,

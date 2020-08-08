@@ -11,6 +11,7 @@ import {
 import uniqid from "uniqid";
 import {configStoreApi} from "./configStore";
 import {useFrame} from "react-three-fiber";
+import sleep from "../../helpers/sleep";
 
 const radius = 1000000;
 
@@ -77,7 +78,12 @@ function Nebula() {
   const primaryMesh = React.useRef<Mesh>();
   const secondaryMesh = React.useRef<Mesh>();
   const meshes = React.useRef({active: primaryMesh, inactive: secondaryMesh});
+  const rendered = React.useRef(false);
   async function regenerateNebula(skyboxKey: string) {
+    if (!rendered.current) {
+      rendered.current = true;
+      sleep(1000).then(() => regenerateNebula(skyboxKey));
+    }
     const textures = await generateTextures(skyboxKey);
     if (meshes.current.inactive.current && meshes.current.active.current) {
       // Let's clean up any existing objects;
@@ -146,12 +152,36 @@ function Nebula() {
         scale={[radius, radius, radius]}
         renderOrder={-100}
       >
-        <meshBasicMaterial attachArray="material" side={BackSide} />
-        <meshBasicMaterial attachArray="material" side={BackSide} />
-        <meshBasicMaterial attachArray="material" side={BackSide} />
-        <meshBasicMaterial attachArray="material" side={BackSide} />
-        <meshBasicMaterial attachArray="material" side={BackSide} />
-        <meshBasicMaterial attachArray="material" side={BackSide} />
+        <meshBasicMaterial
+          attachArray="material"
+          side={BackSide}
+          color="black"
+        />
+        <meshBasicMaterial
+          attachArray="material"
+          side={BackSide}
+          color="black"
+        />
+        <meshBasicMaterial
+          attachArray="material"
+          side={BackSide}
+          color="black"
+        />
+        <meshBasicMaterial
+          attachArray="material"
+          side={BackSide}
+          color="black"
+        />
+        <meshBasicMaterial
+          attachArray="material"
+          side={BackSide}
+          color="black"
+        />
+        <meshBasicMaterial
+          attachArray="material"
+          side={BackSide}
+          color="black"
+        />
       </mesh>
     </>
   );

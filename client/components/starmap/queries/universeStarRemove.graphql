@@ -1,0 +1,8 @@
+mutation UnvierseStarRemove($id: ID!, $starId: ID!) {
+  universeTemplateRemoveStar(id: $id, starId: $starId) {
+    id
+    systems {
+      id
+    }
+  }
+}

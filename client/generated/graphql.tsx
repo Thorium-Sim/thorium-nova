@@ -202,7 +202,25 @@ export type UniverseAddStarMutationVariables = Exact<{
 
 export type UniverseAddStarMutation = {
   __typename?: "Mutation";
-  universeTemplateAddStar: {__typename?: "UniverseTemplate"; id: string};
+  universeTemplateAddStar: {
+    __typename?: "UniverseTemplate";
+    id: string;
+    systems: Array<{__typename?: "Entity"; id: string}>;
+  };
+};
+
+export type UnvierseStarRemoveMutationVariables = Exact<{
+  id: Scalars["ID"];
+  starId: Scalars["ID"];
+}>;
+
+export type UnvierseStarRemoveMutation = {
+  __typename?: "Mutation";
+  universeTemplateRemoveStar: {
+    __typename?: "UniverseTemplate";
+    id: string;
+    systems: Array<{__typename?: "Entity"; id: string}>;
+  };
 };
 
 export type UniverseStarSetPositionMutationVariables = Exact<{
@@ -580,6 +598,9 @@ export const UniverseAddStarDocument = gql`
   mutation UniverseAddStar($id: ID!, $position: PositionInput!) {
     universeTemplateAddStar(id: $id, position: $position) {
       id
+      systems {
+        id
+      }
     }
   }
 `;
@@ -596,6 +617,30 @@ export function useUniverseAddStarMutation(
 }
 export type UniverseAddStarMutationHookResult = ReturnType<
   typeof useUniverseAddStarMutation
+>;
+export const UnvierseStarRemoveDocument = gql`
+  mutation UnvierseStarRemove($id: ID!, $starId: ID!) {
+    universeTemplateRemoveStar(id: $id, starId: $starId) {
+      id
+      systems {
+        id
+      }
+    }
+  }
+`;
+export function useUnvierseStarRemoveMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UnvierseStarRemoveMutation,
+    UnvierseStarRemoveMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UnvierseStarRemoveMutation,
+    UnvierseStarRemoveMutationVariables
+  >(UnvierseStarRemoveDocument, baseOptions);
+}
+export type UnvierseStarRemoveMutationHookResult = ReturnType<
+  typeof useUnvierseStarRemoveMutation
 >;
 export const UniverseStarSetPositionDocument = gql`
   mutation UniverseStarSetPosition(
