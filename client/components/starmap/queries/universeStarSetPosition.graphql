@@ -1,0 +1,13 @@
+mutation UniverseStarSetPosition(
+  $id: ID!
+  $starId: ID!
+  $position: PositionInput!
+) {
+  universeTemplateStarSetPosition(
+    id: $id
+    starId: $starId
+    position: $position
+  ) {
+    id
+  }
+}

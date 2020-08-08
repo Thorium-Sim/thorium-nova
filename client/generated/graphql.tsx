@@ -1,8 +1,7 @@
-import gql from "graphql-tag";
-import * as ApolloReactCommon from "@apollo/client";
-import * as ApolloReactHooks from "@apollo/client";
+import * as Apollo from "@apollo/client";
 export type Maybe<T> = T | null;
-export type Exact<T extends {[key: string]: any}> = {[K in keyof T]: T[K]};
+export type Exact<T extends {[key: string]: unknown}> = {[K in keyof T]: T[K]};
+const gql = Apollo.gql;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -14,6 +13,12 @@ export type Scalars = {
   DateTime: Date;
   /** The `Upload` scalar type represents a file upload. */
   Upload: any;
+};
+
+export type PositionInput = {
+  x: Maybe<Scalars["Float"]>;
+  y: Maybe<Scalars["Float"]>;
+  z: Maybe<Scalars["Float"]>;
 };
 
 /** An enum describing what kind of type a given `__Type` is. */
@@ -190,6 +195,59 @@ export type TemplateShipSetModelMutation = {
   };
 };
 
+export type UniverseAddStarMutationVariables = Exact<{
+  id: Scalars["ID"];
+  position: PositionInput;
+}>;
+
+export type UniverseAddStarMutation = {
+  __typename?: "Mutation";
+  universeTemplateAddStar: {__typename?: "UniverseTemplate"; id: string};
+};
+
+export type UniverseStarSetPositionMutationVariables = Exact<{
+  id: Scalars["ID"];
+  starId: Scalars["ID"];
+  position: PositionInput;
+}>;
+
+export type UniverseStarSetPositionMutation = {
+  __typename?: "Mutation";
+  universeTemplateStarSetPosition: {
+    __typename?: "UniverseTemplate";
+    id: string;
+  };
+};
+
+export type UniverseSubscriptionVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type UniverseSubscription = {
+  __typename?: "Subscription";
+  universe: Maybe<{
+    __typename?: "UniverseTemplate";
+    id: string;
+    name: string;
+    systems: Array<{
+      __typename?: "Entity";
+      id: string;
+      identity: {
+        __typename?: "IdentityComponent";
+        name: string;
+        description: string;
+      };
+      tags: {__typename?: "TagsComponent"; tags: Array<string>};
+      position: {
+        __typename?: "PositionComponent";
+        x: number;
+        y: number;
+        z: number;
+      };
+    }>;
+  }>;
+};
+
 export type UniverseSetCoverImageMutationVariables = Exact<{
   id: Scalars["ID"];
   image: Scalars["Upload"];
@@ -340,15 +398,15 @@ export const TimerPauseDocument = gql`
   }
 `;
 export function useTimerPauseMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
+  baseOptions?: Apollo.MutationHookOptions<
     TimerPauseMutation,
     TimerPauseMutationVariables
   >
 ) {
-  return ApolloReactHooks.useMutation<
-    TimerPauseMutation,
-    TimerPauseMutationVariables
-  >(TimerPauseDocument, baseOptions);
+  return Apollo.useMutation<TimerPauseMutation, TimerPauseMutationVariables>(
+    TimerPauseDocument,
+    baseOptions
+  );
 }
 export type TimerPauseMutationHookResult = ReturnType<
   typeof useTimerPauseMutation
@@ -359,15 +417,15 @@ export const TimerRemoveDocument = gql`
   }
 `;
 export function useTimerRemoveMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
+  baseOptions?: Apollo.MutationHookOptions<
     TimerRemoveMutation,
     TimerRemoveMutationVariables
   >
 ) {
-  return ApolloReactHooks.useMutation<
-    TimerRemoveMutation,
-    TimerRemoveMutationVariables
-  >(TimerRemoveDocument, baseOptions);
+  return Apollo.useMutation<TimerRemoveMutation, TimerRemoveMutationVariables>(
+    TimerRemoveDocument,
+    baseOptions
+  );
 }
 export type TimerRemoveMutationHookResult = ReturnType<
   typeof useTimerRemoveMutation
@@ -386,15 +444,15 @@ export const TimerCreateDocument = gql`
   }
 `;
 export function useTimerCreateMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
+  baseOptions?: Apollo.MutationHookOptions<
     TimerCreateMutation,
     TimerCreateMutationVariables
   >
 ) {
-  return ApolloReactHooks.useMutation<
-    TimerCreateMutation,
-    TimerCreateMutationVariables
-  >(TimerCreateDocument, baseOptions);
+  return Apollo.useMutation<TimerCreateMutation, TimerCreateMutationVariables>(
+    TimerCreateDocument,
+    baseOptions
+  );
 }
 export type TimerCreateMutationHookResult = ReturnType<
   typeof useTimerCreateMutation
@@ -414,12 +472,12 @@ export const TimersDocument = gql`
   }
 `;
 export function useTimersSubscription(
-  baseOptions?: ApolloReactHooks.SubscriptionHookOptions<
+  baseOptions?: Apollo.SubscriptionHookOptions<
     TimersSubscription,
     TimersSubscriptionVariables
   >
 ) {
-  return ApolloReactHooks.useSubscription<
+  return Apollo.useSubscription<
     TimersSubscription,
     TimersSubscriptionVariables
   >(TimersDocument, baseOptions);
@@ -442,12 +500,12 @@ export const TemplateShipAssetsDocument = gql`
   }
 `;
 export function useTemplateShipAssetsSubscription(
-  baseOptions?: ApolloReactHooks.SubscriptionHookOptions<
+  baseOptions?: Apollo.SubscriptionHookOptions<
     TemplateShipAssetsSubscription,
     TemplateShipAssetsSubscriptionVariables
   >
 ) {
-  return ApolloReactHooks.useSubscription<
+  return Apollo.useSubscription<
     TemplateShipAssetsSubscription,
     TemplateShipAssetsSubscriptionVariables
   >(TemplateShipAssetsDocument, baseOptions);
@@ -466,12 +524,12 @@ export const TemplateShipSetLogoDocument = gql`
   }
 `;
 export function useTemplateShipSetLogoMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
+  baseOptions?: Apollo.MutationHookOptions<
     TemplateShipSetLogoMutation,
     TemplateShipSetLogoMutationVariables
   >
 ) {
-  return ApolloReactHooks.useMutation<
+  return Apollo.useMutation<
     TemplateShipSetLogoMutation,
     TemplateShipSetLogoMutationVariables
   >(TemplateShipSetLogoDocument, baseOptions);
@@ -505,18 +563,105 @@ export const TemplateShipSetModelDocument = gql`
   }
 `;
 export function useTemplateShipSetModelMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
+  baseOptions?: Apollo.MutationHookOptions<
     TemplateShipSetModelMutation,
     TemplateShipSetModelMutationVariables
   >
 ) {
-  return ApolloReactHooks.useMutation<
+  return Apollo.useMutation<
     TemplateShipSetModelMutation,
     TemplateShipSetModelMutationVariables
   >(TemplateShipSetModelDocument, baseOptions);
 }
 export type TemplateShipSetModelMutationHookResult = ReturnType<
   typeof useTemplateShipSetModelMutation
+>;
+export const UniverseAddStarDocument = gql`
+  mutation UniverseAddStar($id: ID!, $position: PositionInput!) {
+    universeTemplateAddStar(id: $id, position: $position) {
+      id
+    }
+  }
+`;
+export function useUniverseAddStarMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseAddStarMutation,
+    UniverseAddStarMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseAddStarMutation,
+    UniverseAddStarMutationVariables
+  >(UniverseAddStarDocument, baseOptions);
+}
+export type UniverseAddStarMutationHookResult = ReturnType<
+  typeof useUniverseAddStarMutation
+>;
+export const UniverseStarSetPositionDocument = gql`
+  mutation UniverseStarSetPosition(
+    $id: ID!
+    $starId: ID!
+    $position: PositionInput!
+  ) {
+    universeTemplateStarSetPosition(
+      id: $id
+      starId: $starId
+      position: $position
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseStarSetPositionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseStarSetPositionMutation,
+    UniverseStarSetPositionMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseStarSetPositionMutation,
+    UniverseStarSetPositionMutationVariables
+  >(UniverseStarSetPositionDocument, baseOptions);
+}
+export type UniverseStarSetPositionMutationHookResult = ReturnType<
+  typeof useUniverseStarSetPositionMutation
+>;
+export const UniverseDocument = gql`
+  subscription Universe($id: ID!) {
+    universe(id: $id) {
+      id
+      name
+      systems {
+        id
+        identity {
+          name
+          description
+        }
+        tags {
+          tags
+        }
+        position {
+          x
+          y
+          z
+        }
+      }
+    }
+  }
+`;
+export function useUniverseSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    UniverseSubscription,
+    UniverseSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    UniverseSubscription,
+    UniverseSubscriptionVariables
+  >(UniverseDocument, baseOptions);
+}
+export type UniverseSubscriptionHookResult = ReturnType<
+  typeof useUniverseSubscription
 >;
 export const UniverseSetCoverImageDocument = gql`
   mutation UniverseSetCoverImage($id: ID!, $image: Upload!) {
@@ -527,12 +672,12 @@ export const UniverseSetCoverImageDocument = gql`
   }
 `;
 export function useUniverseSetCoverImageMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
+  baseOptions?: Apollo.MutationHookOptions<
     UniverseSetCoverImageMutation,
     UniverseSetCoverImageMutationVariables
   >
 ) {
-  return ApolloReactHooks.useMutation<
+  return Apollo.useMutation<
     UniverseSetCoverImageMutation,
     UniverseSetCoverImageMutationVariables
   >(UniverseSetCoverImageDocument, baseOptions);
@@ -549,12 +694,12 @@ export const UniverseSetDescriptionDocument = gql`
   }
 `;
 export function useUniverseSetDescriptionMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
+  baseOptions?: Apollo.MutationHookOptions<
     UniverseSetDescriptionMutation,
     UniverseSetDescriptionMutationVariables
   >
 ) {
-  return ApolloReactHooks.useMutation<
+  return Apollo.useMutation<
     UniverseSetDescriptionMutation,
     UniverseSetDescriptionMutationVariables
   >(UniverseSetDescriptionDocument, baseOptions);
@@ -571,12 +716,12 @@ export const UniverseSetTagsDocument = gql`
   }
 `;
 export function useUniverseSetTagsMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
+  baseOptions?: Apollo.MutationHookOptions<
     UniverseSetTagsMutation,
     UniverseSetTagsMutationVariables
   >
 ) {
-  return ApolloReactHooks.useMutation<
+  return Apollo.useMutation<
     UniverseSetTagsMutation,
     UniverseSetTagsMutationVariables
   >(UniverseSetTagsDocument, baseOptions);
@@ -597,12 +742,12 @@ export const UniverseCreateDocument = gql`
   }
 `;
 export function useUniverseCreateMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
+  baseOptions?: Apollo.MutationHookOptions<
     UniverseCreateMutation,
     UniverseCreateMutationVariables
   >
 ) {
-  return ApolloReactHooks.useMutation<
+  return Apollo.useMutation<
     UniverseCreateMutation,
     UniverseCreateMutationVariables
   >(UniverseCreateDocument, baseOptions);
@@ -616,12 +761,12 @@ export const UniverseRemoveDocument = gql`
   }
 `;
 export function useUniverseRemoveMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
+  baseOptions?: Apollo.MutationHookOptions<
     UniverseRemoveMutation,
     UniverseRemoveMutationVariables
   >
 ) {
-  return ApolloReactHooks.useMutation<
+  return Apollo.useMutation<
     UniverseRemoveMutation,
     UniverseRemoveMutationVariables
   >(UniverseRemoveDocument, baseOptions);
@@ -638,12 +783,12 @@ export const UniverseSetNameDocument = gql`
   }
 `;
 export function useUniverseSetNameMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
+  baseOptions?: Apollo.MutationHookOptions<
     UniverseSetNameMutation,
     UniverseSetNameMutationVariables
   >
 ) {
-  return ApolloReactHooks.useMutation<
+  return Apollo.useMutation<
     UniverseSetNameMutation,
     UniverseSetNameMutationVariables
   >(UniverseSetNameDocument, baseOptions);
@@ -664,12 +809,12 @@ export const UniversesDocument = gql`
   }
 `;
 export function useUniversesSubscription(
-  baseOptions?: ApolloReactHooks.SubscriptionHookOptions<
+  baseOptions?: Apollo.SubscriptionHookOptions<
     UniversesSubscription,
     UniversesSubscriptionVariables
   >
 ) {
-  return ApolloReactHooks.useSubscription<
+  return Apollo.useSubscription<
     UniversesSubscription,
     UniversesSubscriptionVariables
   >(UniversesDocument, baseOptions);
@@ -686,12 +831,12 @@ export const ClientConnectDocument = gql`
   }
 `;
 export function useClientConnectMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
+  baseOptions?: Apollo.MutationHookOptions<
     ClientConnectMutation,
     ClientConnectMutationVariables
   >
 ) {
-  return ApolloReactHooks.useMutation<
+  return Apollo.useMutation<
     ClientConnectMutation,
     ClientConnectMutationVariables
   >(ClientConnectDocument, baseOptions);
@@ -708,12 +853,12 @@ export const ClientDisconnectDocument = gql`
   }
 `;
 export function useClientDisconnectMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
+  baseOptions?: Apollo.MutationHookOptions<
     ClientDisconnectMutation,
     ClientDisconnectMutationVariables
   >
 ) {
-  return ApolloReactHooks.useMutation<
+  return Apollo.useMutation<
     ClientDisconnectMutation,
     ClientDisconnectMutationVariables
   >(ClientDisconnectDocument, baseOptions);
@@ -730,15 +875,15 @@ export const StartFlightDocument = gql`
   }
 `;
 export function useStartFlightMutation(
-  baseOptions?: ApolloReactHooks.MutationHookOptions<
+  baseOptions?: Apollo.MutationHookOptions<
     StartFlightMutation,
     StartFlightMutationVariables
   >
 ) {
-  return ApolloReactHooks.useMutation<
-    StartFlightMutation,
-    StartFlightMutationVariables
-  >(StartFlightDocument, baseOptions);
+  return Apollo.useMutation<StartFlightMutation, StartFlightMutationVariables>(
+    StartFlightDocument,
+    baseOptions
+  );
 }
 export type StartFlightMutationHookResult = ReturnType<
   typeof useStartFlightMutation
@@ -753,23 +898,17 @@ export const FlightsDocument = gql`
   }
 `;
 export function useFlightsQuery(
-  baseOptions?: ApolloReactHooks.QueryHookOptions<
-    FlightsQuery,
-    FlightsQueryVariables
-  >
+  baseOptions?: Apollo.QueryHookOptions<FlightsQuery, FlightsQueryVariables>
 ) {
-  return ApolloReactHooks.useQuery<FlightsQuery, FlightsQueryVariables>(
+  return Apollo.useQuery<FlightsQuery, FlightsQueryVariables>(
     FlightsDocument,
     baseOptions
   );
 }
 export function useFlightsLazyQuery(
-  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
-    FlightsQuery,
-    FlightsQueryVariables
-  >
+  baseOptions?: Apollo.LazyQueryHookOptions<FlightsQuery, FlightsQueryVariables>
 ) {
-  return ApolloReactHooks.useLazyQuery<FlightsQuery, FlightsQueryVariables>(
+  return Apollo.useLazyQuery<FlightsQuery, FlightsQueryVariables>(
     FlightsDocument,
     baseOptions
   );
@@ -791,26 +930,26 @@ export const IntrospectionDocument = gql`
   }
 `;
 export function useIntrospectionQuery(
-  baseOptions?: ApolloReactHooks.QueryHookOptions<
+  baseOptions?: Apollo.QueryHookOptions<
     IntrospectionQuery,
     IntrospectionQueryVariables
   >
 ) {
-  return ApolloReactHooks.useQuery<
-    IntrospectionQuery,
-    IntrospectionQueryVariables
-  >(IntrospectionDocument, baseOptions);
+  return Apollo.useQuery<IntrospectionQuery, IntrospectionQueryVariables>(
+    IntrospectionDocument,
+    baseOptions
+  );
 }
 export function useIntrospectionLazyQuery(
-  baseOptions?: ApolloReactHooks.LazyQueryHookOptions<
+  baseOptions?: Apollo.LazyQueryHookOptions<
     IntrospectionQuery,
     IntrospectionQueryVariables
   >
 ) {
-  return ApolloReactHooks.useLazyQuery<
-    IntrospectionQuery,
-    IntrospectionQueryVariables
-  >(IntrospectionDocument, baseOptions);
+  return Apollo.useLazyQuery<IntrospectionQuery, IntrospectionQueryVariables>(
+    IntrospectionDocument,
+    baseOptions
+  );
 }
 export type IntrospectionQueryHookResult = ReturnType<
   typeof useIntrospectionQuery

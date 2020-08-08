@@ -1,4 +1,7 @@
+import {ApolloProvider, useApolloClient} from "@apollo/client";
+import {configStoreApi} from "../components/starmap/configStore";
 import React, {Suspense} from "react";
+import {useParams} from "react-router";
 import {Canvas} from "react-three-fiber";
 import {Camera} from "three";
 import Menubar from "../components/starmap/Menubar";
@@ -10,7 +13,12 @@ interface SceneRef {
   camera: () => Camera;
 }
 const Starmap: React.FC = () => {
+  const {universeId} = useParams();
+  React.useEffect(() => {
+    configStoreApi.setState({universeId});
+  }, []);
   const sceneRef = React.useRef<SceneRef>();
+  const client = useApolloClient();
   return (
     <Suspense fallback={null}>
       <Canvas
@@ -22,7 +30,9 @@ const Starmap: React.FC = () => {
         camera={{far: FAR}}
         concurrent
       >
-        <Scene ref={sceneRef} />
+        <ApolloProvider client={client}>
+          <Scene ref={sceneRef} />
+        </ApolloProvider>
       </Canvas>
       <Menubar sceneRef={sceneRef} />
     </Suspense>

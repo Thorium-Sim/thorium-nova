@@ -4,6 +4,7 @@ import {FaArrowLeft, FaHome} from "react-icons/fa";
 import {Link, useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {Camera, Vector3} from "three";
+import {useUniverseAddStarMutation} from "../../generated/graphql";
 
 interface SceneRef {
   camera: () => Camera;
@@ -13,6 +14,7 @@ const Menubar: React.FC<{
   sceneRef: React.MutableRefObject<SceneRef | undefined>;
 }> = ({sceneRef}) => {
   const {universeId} = useParams();
+  const [addStar] = useUniverseAddStarMutation();
   const {t} = useTranslation();
   return (
     <Box position="fixed" top={0} left={0} width="100vw" padding={2}>
@@ -38,6 +40,7 @@ const Menubar: React.FC<{
             if (!camera) return;
             const vec = new Vector3(0, 0, -30);
             vec.applyQuaternion(camera.quaternion);
+            addStar({variables: {id: universeId, position: vec}});
           }}
         >
           {t("Add")}

@@ -1,6 +1,7 @@
+import {useUniverseStarSetPositionMutation} from "../../../generated/graphql";
 import React from "react";
 import {useFrame} from "react-three-fiber";
-import {CanvasTexture, Group} from "three";
+import {CanvasTexture, Group, Vector3} from "three";
 import {configStoreApi} from "../configStore";
 import useObjectDrag from "../hooks/useObjectDrag";
 
@@ -8,18 +9,26 @@ const size = 50;
 const lineWidth = 0.07;
 
 const SystemCircle: React.FC<{
+  starId: string;
   parent: React.MutableRefObject<Group>;
   hoveringDirection: React.MutableRefObject<number>;
-}> = ({parent, hoveringDirection}) => {
-  const bind = useObjectDrag(
-    parent,
-    () => {
+}> = ({starId, parent, hoveringDirection}) => {
+  const [setPosition] = useUniverseStarSetPositionMutation();
+  const bind = useObjectDrag(parent, {
+    onMouseUp: (position: Vector3) => {
       configStoreApi.getState().enableOrbitControls();
+      setPosition({
+        variables: {
+          id: configStoreApi.getState().universeId,
+          starId: starId,
+          position,
+        },
+      });
     },
-    () => {
+    onMouseDown: () => {
       configStoreApi.getState().disableOrbitControls();
-    }
-  );
+    },
+  });
   const ctx = React.useMemo(() => {
     const canvas = document.createElement("canvas");
 

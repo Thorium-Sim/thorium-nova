@@ -5,9 +5,10 @@ import SystemLabel from "./SystemLabel";
 import SystemCircle from "./SystemCircle";
 
 const SystemMarker: React.FC<{
+  id: string;
   name: string;
   position: [number, number, number];
-}> = ({name, position}) => {
+}> = ({id, name, position}) => {
   const group = React.useRef<Group>(new Group());
 
   const direction = React.useRef(0);
@@ -22,7 +23,11 @@ const SystemMarker: React.FC<{
   return (
     <>
       <group position={position} ref={group} scale={[0.07, 0.07, 0.07]}>
-        <SystemCircle hoveringDirection={direction} parent={group} />
+        <SystemCircle
+          starId={id}
+          hoveringDirection={direction}
+          parent={group}
+        />
         <SystemLabel hoveringDirection={direction} name={name} />
       </group>
     </>

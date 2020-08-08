@@ -1,0 +1,5 @@
+mutation UniverseAddStar($id: ID!, $position: PositionInput!) {
+  universeTemplateAddStar(id: $id, position: $position) {
+    id
+  }
+}

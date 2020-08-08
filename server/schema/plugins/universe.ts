@@ -180,6 +180,22 @@ export class UniversePluginResolver {
     return universe;
   }
 
+  @Mutation(returns => UniverseTemplate)
+  async universeTemplateStarSetPosition(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("starId", type => ID)
+    starId: string,
+    @Arg("position", type => PositionComponent)
+    position: PositionComponent
+  ) {
+    const universe = getUniverse(id);
+    const star = universe.entities.find(s => s.id === starId);
+    if (!star) throw new Error("Star does not exist.");
+    star.updateComponent("position", position);
+    return universe;
+  }
+
   @Subscription(returns => UniverseTemplate, {
     nullable: true,
     topics: ({args, payload}) => {
@@ -194,7 +210,7 @@ export class UniversePluginResolver {
       return [id, "templateUniverse"];
     },
     filter: ({args, payload}) => {
-      return args.id === payload.shipId;
+      return args.id === payload.id;
     },
   })
   universe(

@@ -1,0 +1,21 @@
+subscription Universe($id: ID!) {
+  universe(id: $id) {
+    id
+    name
+    systems {
+      id
+      identity {
+        name
+        description
+      }
+      tags {
+        tags
+      }
+      position {
+        x
+        y
+        z
+      }
+    }
+  }
+}

@@ -3,9 +3,9 @@ import React, {Suspense} from "react";
 import {useFrame, useThree} from "react-three-fiber";
 import {MOUSE, Vector3} from "three";
 import {configStoreApi} from "./configStore";
+import Interstellar from "./Interstellar";
 import Nebula from "./Nebula";
 import Starfield from "./Starfield";
-import SystemMarker from "./SystemMarker";
 
 const FAR = 1e27;
 
@@ -80,10 +80,7 @@ const Scene = React.forwardRef((props, ref) => {
       />
       <ambientLight intensity={0.7} />
       <pointLight position={[10, 10, 10]} />
-      <SystemMarker position={[0, 0, 0]} name="Alpha Centauri" />
-      <SystemMarker position={[0, 2, 0]} name="Sol" />
-      <SystemMarker position={[0, 1, 0]} name="Rigel" />
-
+      <Interstellar />
       <Starfield />
       <Suspense fallback={null}>
         <Nebula skyboxKey="c" />

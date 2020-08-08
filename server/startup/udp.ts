@@ -24,7 +24,7 @@ export default function setupUDP(server: http.Server) {
       // emit the "chat message" data to all channels in the same room
       io.room(channel.roomId).emit(
         "chat message",
-        `${channel.userData.clientId}:${data}`,
+        `${channel.userData.clientId}:${data}`
       );
     });
   });
