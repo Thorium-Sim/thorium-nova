@@ -6,10 +6,11 @@ import {useTranslation} from "react-i18next";
 import {Camera, Vector3} from "three";
 import {
   useUniverseAddStarMutation,
-  useUnvierseStarRemoveMutation,
+  useUniverseStarRemoveMutation,
 } from "../../generated/graphql";
-import {useConfigStore} from "./configStore";
+import {configStoreApi, useConfigStore} from "./configStore";
 import {useConfirm} from "../Dialog";
+import {useHotkeys} from "react-hotkeys-hook";
 
 interface SceneRef {
   camera: () => Camera;
@@ -20,11 +21,37 @@ const Menubar: React.FC<{
 }> = ({sceneRef}) => {
   const {universeId} = useParams();
   const [addStar] = useUniverseAddStarMutation();
-  const [removeStar] = useUnvierseStarRemoveMutation();
+  const [removeStar] = useUniverseStarRemoveMutation();
   const {t} = useTranslation();
   const confirm = useConfirm();
 
   const store = useConfigStore();
+
+  useHotkeys("n", () => {
+    const camera = sceneRef.current?.camera();
+    if (!camera) return;
+    const vec = new Vector3(0, 0, -30);
+    vec.applyQuaternion(camera.quaternion).add(camera.position);
+    addStar({variables: {id: universeId, position: vec}});
+  });
+
+  async function deleteObject() {
+    const selectedObject = configStoreApi.getState().selectedObject;
+    if (!selectedObject) return;
+    // const doRemove = await confirm({
+    //   header: t("Are you sure you want to remove this star?"),
+    //   body: t("It will remove all of the objects inside of it."),
+    // });
+    // if (!doRemove) return;
+    removeStar({
+      variables: {id: universeId, starId: selectedObject},
+    });
+
+    configStoreApi.setState({selectedObject: null});
+  }
+  useHotkeys("backspace", () => {
+    deleteObject();
+  });
   return (
     <Box position="fixed" top={0} left={0} width="100vw" padding={2}>
       <Stack isInline spacing={2}>
@@ -59,20 +86,7 @@ const Menubar: React.FC<{
           variant="ghost"
           size="sm"
           disabled={!store.selectedObject}
-          onClick={async () => {
-            if (!store.selectedObject) return;
-            if (
-              !(await confirm({
-                header: t("Are you sure you want to remove this star?"),
-                body: t("It will remove all of the objects inside of it."),
-              }))
-            )
-              return;
-            removeStar({
-              variables: {id: universeId, starId: store.selectedObject},
-            });
-            store.selectedObject = null;
-          }}
+          onClick={deleteObject}
         >
           {t("Delete")}
         </Button>

@@ -10,6 +10,8 @@ export default class UniverseTemplate extends BasePlugin {
 
   @Field(type => [Entity])
   get systems() {
+    console.log(new Error("Lets take a look"));
+    console.log("Getting systems");
     return this.entities.filter(e => e.planetarySystem);
   }
   constructor(params: Partial<UniverseTemplate>) {

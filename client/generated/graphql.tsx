@@ -209,18 +209,14 @@ export type UniverseAddStarMutation = {
   };
 };
 
-export type UnvierseStarRemoveMutationVariables = Exact<{
+export type UniverseStarRemoveMutationVariables = Exact<{
   id: Scalars["ID"];
   starId: Scalars["ID"];
 }>;
 
-export type UnvierseStarRemoveMutation = {
+export type UniverseStarRemoveMutation = {
   __typename?: "Mutation";
-  universeTemplateRemoveStar: {
-    __typename?: "UniverseTemplate";
-    id: string;
-    systems: Array<{__typename?: "Entity"; id: string}>;
-  };
+  universeTemplateRemoveStar: string;
 };
 
 export type UniverseStarSetPositionMutationVariables = Exact<{
@@ -618,29 +614,24 @@ export function useUniverseAddStarMutation(
 export type UniverseAddStarMutationHookResult = ReturnType<
   typeof useUniverseAddStarMutation
 >;
-export const UnvierseStarRemoveDocument = gql`
-  mutation UnvierseStarRemove($id: ID!, $starId: ID!) {
-    universeTemplateRemoveStar(id: $id, starId: $starId) {
-      id
-      systems {
-        id
-      }
-    }
+export const UniverseStarRemoveDocument = gql`
+  mutation UniverseStarRemove($id: ID!, $starId: ID!) {
+    universeTemplateRemoveStar(id: $id, starId: $starId)
   }
 `;
-export function useUnvierseStarRemoveMutation(
+export function useUniverseStarRemoveMutation(
   baseOptions?: Apollo.MutationHookOptions<
-    UnvierseStarRemoveMutation,
-    UnvierseStarRemoveMutationVariables
+    UniverseStarRemoveMutation,
+    UniverseStarRemoveMutationVariables
   >
 ) {
   return Apollo.useMutation<
-    UnvierseStarRemoveMutation,
-    UnvierseStarRemoveMutationVariables
-  >(UnvierseStarRemoveDocument, baseOptions);
+    UniverseStarRemoveMutation,
+    UniverseStarRemoveMutationVariables
+  >(UniverseStarRemoveDocument, baseOptions);
 }
-export type UnvierseStarRemoveMutationHookResult = ReturnType<
-  typeof useUnvierseStarRemoveMutation
+export type UniverseStarRemoveMutationHookResult = ReturnType<
+  typeof useUniverseStarRemoveMutation
 >;
 export const UniverseStarSetPositionDocument = gql`
   mutation UniverseStarSetPosition(

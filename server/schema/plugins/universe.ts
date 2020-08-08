@@ -180,19 +180,17 @@ export class UniversePluginResolver {
     return universe;
   }
 
-  @Mutation(returns => UniverseTemplate)
+  @Mutation(returns => String)
   universeTemplateRemoveStar(
     @Arg("id", type => ID) id: string,
     @Arg("starId", type => ID) starId: string
   ) {
+    const time = Date.now();
     const universe = getUniverse(id);
-    const star = universe.entities.find(s => s.id === starId);
-    star?.dispose();
-
     universe.entities = universe.entities.filter(e => e.id !== starId);
     publish(universe);
-
-    return universe;
+    console.log("Got it", Date.now() - time);
+    return "";
   }
 
   @Mutation(returns => UniverseTemplate)
@@ -225,6 +223,7 @@ export class UniversePluginResolver {
       return [id, "templateUniverse"];
     },
     filter: ({args, payload}) => {
+      console.log("did filter");
       return args.id === payload.id;
     },
   })

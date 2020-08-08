@@ -127,6 +127,7 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
   const handler: ProxyHandler<any> = {
     get(target, key) {
       if (
+        Object.getOwnPropertyDescriptor(target, key) &&
         typeof target[key] === "object" &&
         target[key] !== null &&
         !(target[key] instanceof Date)
