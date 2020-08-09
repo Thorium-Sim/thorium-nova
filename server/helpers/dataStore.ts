@@ -49,6 +49,8 @@ function isClass(v: any) {
   return typeof v === "function" && /^\s*class\s+/.test(v.toString());
 }
 
+let isProxy = Symbol("isProxy");
+
 interface StoreObject {
   writeFile: (force?: boolean) => Promise<void>;
   removeFile: () => Promise<void>;
@@ -126,7 +128,9 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
 
   const handler: ProxyHandler<any> = {
     get(target, key) {
+      if (key === isProxy) return true;
       if (
+        !target[isProxy] &&
         Object.getOwnPropertyDescriptor(target, key) &&
         typeof target[key] === "object" &&
         target[key] !== null &&

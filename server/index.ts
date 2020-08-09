@@ -11,6 +11,7 @@ import setupUDP from "./startup/udp";
 export async function startUp() {
   try {
     await init();
+
     await App.init();
     const {bonjour: bj, service} = await bonjour(App.port, App.httpOnly);
     const server = await setupServer();
@@ -23,7 +24,7 @@ export async function startUp() {
       server,
       apollo,
       App.port,
-      App.httpOnly,
+      App.httpOnly
     );
     setupUDP(httpServer);
 

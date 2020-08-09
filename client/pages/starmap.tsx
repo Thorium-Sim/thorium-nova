@@ -1,7 +1,7 @@
 import {ApolloProvider, useApolloClient} from "@apollo/client";
 import {configStoreApi} from "../components/starmap/configStore";
 import React, {Suspense} from "react";
-import {BrowserRouter, useLocation, useNavigate, use} from "react-router-dom";
+import {BrowserRouter} from "react-router-dom";
 import {Canvas} from "react-three-fiber";
 import {Camera} from "three";
 import Menubar from "../components/starmap/Menubar";

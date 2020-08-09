@@ -10,7 +10,13 @@ type VariantColors =
   | "danger"
   | "info"
   | "muted";
-const Button: React.FC<ButtonProps & {variantColor: VariantColors}> = props => {
+interface ExtraButtonProps {
+  variantColor?: VariantColors;
+  disabled?: boolean;
+  active?: boolean;
+  to?: string;
+}
+const Button: React.FC<ButtonProps & ExtraButtonProps> = props => {
   return <ChakraButton {...props}></ChakraButton>;
 };
 

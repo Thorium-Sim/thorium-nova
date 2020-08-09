@@ -33,7 +33,7 @@ const PluginForm: React.FC<{
   return (
     <Box
       as="fieldset"
-      disabled={!plugin}
+      {...{disabled: !plugin}}
       key={plugin?.id || ""}
       flex={1}
       overflowY="auto"

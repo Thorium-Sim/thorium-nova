@@ -98,7 +98,7 @@ function generateTexture(seed, textures, id) {
     storage.rNebula = buildBox(storage.gl, storage.pNebula);
   };
 
-  storage.render = async function (params) {
+  async function render(params) {
     if (!img) {
       await fetch(imageUrl)
         .then(r => r.blob())
@@ -226,7 +226,7 @@ function generateTexture(seed, textures, id) {
     }
 
     postMessage({id});
-  };
+  }
 
   storage.initialize();
   return storage.render({seed, resolution: 256, nebulae: true});

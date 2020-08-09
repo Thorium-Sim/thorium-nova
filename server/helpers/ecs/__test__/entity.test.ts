@@ -39,12 +39,15 @@ describe("Entity", () => {
     let entity = new Entity({
       id: "test",
       components: {
-        identity: {name: "Testing!"},
+        identity: {name: "Testing!", description: "This is a test."},
       },
       systems: [],
     });
 
-    expect(entity.components.identity).toEqual({name: "Testing!"});
+    expect(entity.components.identity).toEqual({
+      name: "Testing!",
+      description: "This is a test.",
+    });
   });
 
   describe("addComponent()", () => {

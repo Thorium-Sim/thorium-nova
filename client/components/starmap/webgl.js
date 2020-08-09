@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 function $RefreshReg$() {}
 function $RefreshSig$() {}
 /*...........................................................................*/
@@ -170,12 +171,7 @@ export function Renderable(gl, program, buffers, primitiveCount) {
     for (let name in buffers) {
       var buffer = buffers[name].buffer;
       var size = buffers[name].size;
-      try {
-        var location = program.attribs[name].location;
-      } catch (e) {
-        console.log("Could not find location for", name);
-        throw e;
-      }
+      var location = program.attribs[name].location;
       buffer.bind();
       gl.enableVertexAttribArray(location);
       gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
@@ -206,12 +202,7 @@ export function InstancedRenderable(
     for (let name in buffers) {
       var buffer = buffers[name].buffer;
       var size = buffers[name].size;
-      try {
-        var location = program.attribs[name].location;
-      } catch (e) {
-        console.log("Could not find location for", name);
-        throw e;
-      }
+      var location = program.attribs[name].location;
       buffer.bind();
       gl.enableVertexAttribArray(location);
       gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
@@ -253,7 +244,6 @@ export class Program {
     this.gl.attachShader(program, fragmentShader);
     this.gl.linkProgram(program);
     if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
-      console.log(this.gl.getProgramInfoLog(program));
       throw "Failed to compile program.";
     }
     return program;
@@ -269,7 +259,6 @@ export class Program {
       var split = source.split("\n");
       for (var i in split) {
         var q = parseInt(i);
-        console.log(q + "  " + split[i]);
         if (i == lineno - 1) {
           console.warn(err);
         }
@@ -283,12 +272,8 @@ export class Program {
   setUniform(name, type) {
     var args = Array.prototype.slice.call(arguments, 2);
     this.use(); // Make this idempotent. At the context level, perhaps?
-    try {
-      var location = this.uniforms[name].location;
-    } catch (e) {
-      console.log(name);
-      throw e;
-    }
+
+    var location = this.uniforms[name].location;
     this.gl["uniform" + type].apply(this.gl, [location].concat(args));
   }
 

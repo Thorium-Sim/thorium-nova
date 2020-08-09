@@ -1,5 +1,5 @@
 import React from "react";
-import {Box, Button, Heading, Input, Stack} from "@chakra-ui/core";
+import {Box, Input, Stack} from "@chakra-ui/core";
 import {FaArrowLeft, FaHome} from "react-icons/fa";
 import {Link, useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
@@ -9,6 +9,8 @@ import {
   useUniverseStarRemoveMutation,
 } from "../../generated/graphql";
 import {configStoreApi, useConfigStore} from "./configStore";
+import Button from "../ui/button";
+
 import {useConfirm} from "../Dialog";
 import {useHotkeys} from "react-hotkeys-hook";
 

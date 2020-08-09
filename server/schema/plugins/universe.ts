@@ -189,7 +189,6 @@ export class UniversePluginResolver {
     const universe = getUniverse(id);
     universe.entities = universe.entities.filter(e => e.id !== starId);
     publish(universe);
-    console.log("Got it", Date.now() - time);
     return "";
   }
 
@@ -223,7 +222,6 @@ export class UniversePluginResolver {
       return [id, "templateUniverse"];
     },
     filter: ({args, payload}) => {
-      console.log("did filter");
       return args.id === payload.id;
     },
   })
