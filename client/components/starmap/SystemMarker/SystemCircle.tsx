@@ -1,4 +1,7 @@
-import {useUniverseStarSetPositionMutation} from "../../../generated/graphql";
+import {
+  UniverseSubscription,
+  useUniverseStarSetPositionMutation,
+} from "../../../generated/graphql";
 import React from "react";
 import {useFrame} from "react-three-fiber";
 import {CanvasTexture, Group, Vector3} from "three";
@@ -10,10 +13,10 @@ const size = 50;
 const lineWidth = 0.07;
 
 const SystemCircle: React.FC<{
-  starId: string;
+  star: NonNullable<UniverseSubscription["universe"]>["systems"][0];
   parent: React.MutableRefObject<Group>;
   hoveringDirection: React.MutableRefObject<number>;
-}> = ({starId, parent, hoveringDirection}) => {
+}> = ({star, parent, hoveringDirection}) => {
   const [setPosition] = useUniverseStarSetPositionMutation();
   const {universeId} = useParams();
   const bind = useObjectDrag(parent, {
@@ -22,13 +25,13 @@ const SystemCircle: React.FC<{
       setPosition({
         variables: {
           id: universeId,
-          starId: starId,
+          starId: star.id,
           position,
         },
       });
     },
     onMouseDown: () => {
-      configStoreApi.setState({selectedObject: starId});
+      configStoreApi.setState({selectedObject: star});
       configStoreApi.getState().disableOrbitControls();
     },
   });
@@ -44,7 +47,7 @@ const SystemCircle: React.FC<{
 
   function drawRadius(endArc = 360) {
     const selectedObject = configStoreApi.getState().selectedObject;
-    const isSelected = starId === selectedObject;
+    const isSelected = star.id === selectedObject?.id;
     ctx.clearRect(0, 0, size, size);
 
     ctx.lineWidth = size / (1 / lineWidth);
@@ -73,7 +76,7 @@ const SystemCircle: React.FC<{
   const selected = React.useRef(false);
   useFrame(() => {
     const selectedObject = configStoreApi.getState().selectedObject;
-    const isSelected = starId === selectedObject;
+    const isSelected = star.id === selectedObject?.id;
     if (isSelected) {
       selected.current = true;
     }

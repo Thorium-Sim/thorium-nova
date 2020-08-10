@@ -1,8 +1,7 @@
 import {useUniverseSubscription} from "../../generated/graphql";
-import React, {Suspense} from "react";
+import React from "react";
 import SystemMarker from "./SystemMarker";
-import {useLocation, useNavigate, useParams} from "react-router";
-import {configStoreApi} from "./configStore";
+import {useParams} from "react-router";
 import Starfield from "./Starfield";
 
 const Interstellar = () => {
@@ -21,6 +20,7 @@ const Interstellar = () => {
         <SystemMarker
           key={s.id}
           id={s.id}
+          star={s}
           position={[s.position.x, s.position.y, s.position.z]}
           name={s.identity.name}
         />

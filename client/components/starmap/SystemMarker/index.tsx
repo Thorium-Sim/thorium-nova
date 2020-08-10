@@ -1,14 +1,15 @@
 import React from "react";
-import {CanvasTexture, Group} from "three";
+import {Group} from "three";
 import {useFrame} from "react-three-fiber";
 import SystemLabel from "./SystemLabel";
 import SystemCircle from "./SystemCircle";
-
+import {UniverseSubscription} from "../../../generated/graphql";
 const SystemMarker: React.FC<{
   id: string;
+  star: NonNullable<UniverseSubscription["universe"]>["systems"][0];
   name: string;
   position: [number, number, number];
-}> = ({id, name, position}) => {
+}> = ({id, star, name, position}) => {
   const group = React.useRef<Group>(new Group());
 
   const direction = React.useRef(0);
@@ -24,11 +25,15 @@ const SystemMarker: React.FC<{
     <>
       <group position={position} ref={group}>
         <SystemCircle
-          starId={id}
+          star={star}
           hoveringDirection={direction}
           parent={group}
         />
-        <SystemLabel starId={id} hoveringDirection={direction} name={name} />
+        <SystemLabel
+          starId={star.id}
+          hoveringDirection={direction}
+          name={name}
+        />
       </group>
     </>
   );

@@ -193,6 +193,40 @@ export class UniversePluginResolver {
   }
 
   @Mutation(returns => UniverseTemplate)
+  async universeTemplateStarSetName(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("starId", type => ID)
+    starId: string,
+    @Arg("name", type => String)
+    name: string
+  ) {
+    const universe = getUniverse(id);
+    const star = universe.entities.find(s => s.id === starId);
+    if (!star) throw new Error("Star does not exist.");
+    star.updateComponent("identity", {name});
+    publish(universe);
+    return universe;
+  }
+  @Mutation(returns => UniverseTemplate)
+  async universeTemplateStarSetDescription(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("starId", type => ID)
+    starId: string,
+    @Arg("description", type => String)
+    description: string
+  ) {
+    const universe = getUniverse(id);
+    const star = universe.entities.find(s => s.id === starId);
+    if (!star) throw new Error("Star does not exist.");
+    star.updateComponent("identity", {description});
+    publish(universe);
+
+    return universe;
+  }
+
+  @Mutation(returns => UniverseTemplate)
   async universeTemplateStarSetPosition(
     @Arg("id", type => ID)
     id: string,

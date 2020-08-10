@@ -6,6 +6,7 @@ import {Canvas} from "react-three-fiber";
 import {Camera} from "three";
 import Menubar from "../components/starmap/Menubar";
 import Scene from "../components/starmap/Scene";
+import ConfigPalette from "../components/starmap/ConfigPalette";
 
 const FAR = 1e27;
 
@@ -15,6 +16,7 @@ interface SceneRef {
 const Starmap: React.FC = () => {
   const sceneRef = React.useRef<SceneRef>();
   const client = useApolloClient();
+
   return (
     <Suspense fallback={null}>
       <Canvas
@@ -36,6 +38,7 @@ const Starmap: React.FC = () => {
         </BrowserRouter>
       </Canvas>
       <Menubar sceneRef={sceneRef} />
+      <ConfigPalette />
     </Suspense>
   );
 };

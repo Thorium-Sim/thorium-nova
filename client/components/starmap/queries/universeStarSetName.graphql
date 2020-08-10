@@ -1,0 +1,5 @@
+mutation UniverseStarSetName($id: ID!, $starId: ID!, $name: String!) {
+  universeTemplateStarSetName(id: $id, starId: $starId, name: $name) {
+    id
+  }
+}

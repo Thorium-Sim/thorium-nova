@@ -1,0 +1,13 @@
+mutation UniverseStarSetDescription(
+  $id: ID!
+  $starId: ID!
+  $description: String!
+) {
+  universeTemplateStarSetDescription(
+    id: $id
+    starId: $starId
+    description: $description
+  ) {
+    id
+  }
+}

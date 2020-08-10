@@ -1,9 +1,12 @@
+import {UniverseSubscription} from "../../generated/graphql";
 import create from "zustand";
 
 export interface ConfigStore {
   disableOrbitControls: () => void;
   enableOrbitControls: () => void;
-  selectedObject: string | null;
+  selectedObject:
+    | NonNullable<UniverseSubscription["universe"]>["systems"][0]
+    | null;
   skyboxKey: string;
 }
 const store = create<ConfigStore>(set => ({

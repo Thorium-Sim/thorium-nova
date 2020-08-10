@@ -229,7 +229,7 @@ function generateTexture(seed, textures, id) {
   }
 
   storage.initialize();
-  return storage.render({seed, resolution: 256, nebulae: true});
+  return render({seed, resolution: 256, nebulae: true});
 }
 
 function buildBox(gl, program) {

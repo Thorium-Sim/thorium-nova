@@ -219,6 +219,31 @@ export type UniverseStarRemoveMutation = {
   universeTemplateRemoveStar: string;
 };
 
+export type UniverseStarSetDescriptionMutationVariables = Exact<{
+  id: Scalars["ID"];
+  starId: Scalars["ID"];
+  description: Scalars["String"];
+}>;
+
+export type UniverseStarSetDescriptionMutation = {
+  __typename?: "Mutation";
+  universeTemplateStarSetDescription: {
+    __typename?: "UniverseTemplate";
+    id: string;
+  };
+};
+
+export type UniverseStarSetNameMutationVariables = Exact<{
+  id: Scalars["ID"];
+  starId: Scalars["ID"];
+  name: Scalars["String"];
+}>;
+
+export type UniverseStarSetNameMutation = {
+  __typename?: "Mutation";
+  universeTemplateStarSetName: {__typename?: "UniverseTemplate"; id: string};
+};
+
 export type UniverseStarSetPositionMutationVariables = Exact<{
   id: Scalars["ID"];
   starId: Scalars["ID"];
@@ -632,6 +657,56 @@ export function useUniverseStarRemoveMutation(
 }
 export type UniverseStarRemoveMutationHookResult = ReturnType<
   typeof useUniverseStarRemoveMutation
+>;
+export const UniverseStarSetDescriptionDocument = gql`
+  mutation UniverseStarSetDescription(
+    $id: ID!
+    $starId: ID!
+    $description: String!
+  ) {
+    universeTemplateStarSetDescription(
+      id: $id
+      starId: $starId
+      description: $description
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseStarSetDescriptionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseStarSetDescriptionMutation,
+    UniverseStarSetDescriptionMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseStarSetDescriptionMutation,
+    UniverseStarSetDescriptionMutationVariables
+  >(UniverseStarSetDescriptionDocument, baseOptions);
+}
+export type UniverseStarSetDescriptionMutationHookResult = ReturnType<
+  typeof useUniverseStarSetDescriptionMutation
+>;
+export const UniverseStarSetNameDocument = gql`
+  mutation UniverseStarSetName($id: ID!, $starId: ID!, $name: String!) {
+    universeTemplateStarSetName(id: $id, starId: $starId, name: $name) {
+      id
+    }
+  }
+`;
+export function useUniverseStarSetNameMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseStarSetNameMutation,
+    UniverseStarSetNameMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseStarSetNameMutation,
+    UniverseStarSetNameMutationVariables
+  >(UniverseStarSetNameDocument, baseOptions);
+}
+export type UniverseStarSetNameMutationHookResult = ReturnType<
+  typeof useUniverseStarSetNameMutation
 >;
 export const UniverseStarSetPositionDocument = gql`
   mutation UniverseStarSetPosition(

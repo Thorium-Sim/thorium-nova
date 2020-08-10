@@ -16,6 +16,7 @@ const SystemLabel: React.FC<{
     }
   }, []);
 
+  console.log("Re-rendering");
   const textTexture = React.useMemo(() => {
     let texture = new TextTexture({
       fillStyle: "rgb(0,255,255)",
@@ -32,7 +33,7 @@ const SystemLabel: React.FC<{
   const selected = React.useRef(false);
   useFrame(() => {
     const selectedObject = configStoreApi.getState().selectedObject;
-    const isSelected = starId === selectedObject;
+    const isSelected = starId === selectedObject?.id;
     if (text.current) {
       if (isSelected) {
         selected.current = true;
