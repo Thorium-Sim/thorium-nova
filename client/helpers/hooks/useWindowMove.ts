@@ -3,10 +3,10 @@ import useMeasure from "./useMeasure";
 import useEventListener from "./useEventListener";
 
 type coords = {x: number; y: number};
-export default function useWindowMove([position, setPosition]: [
-  coords | null,
-  React.Dispatch<React.SetStateAction<coords | null>>
-]): [coords, (node: HTMLElement) => void, () => void, () => void] {
+export default function useWindowMove(
+  state: [coords | null, React.Dispatch<React.SetStateAction<coords | null>>]
+): [coords, (node: HTMLElement) => void, () => void, () => void] {
+  const [position, setPosition] = state;
   const [measureRef, dimensions, measure] = useMeasure();
   const isMouseDown = React.useRef(false);
 

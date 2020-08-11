@@ -31,7 +31,6 @@ export default function useSessionStorage<T>(
       window.sessionStorage.setItem(key, JSON.stringify(valueToStore));
     } catch (error) {
       // A more advanced implementation would handle the error case
-      console.error(error);
     }
   };
 

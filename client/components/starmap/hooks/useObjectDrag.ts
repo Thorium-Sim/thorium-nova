@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import React from "react";
 import {Matrix4, Object3D, Plane, Raycaster, Vector3} from "three";
 import {useThree} from "react-three-fiber";

@@ -46,7 +46,7 @@ const Menubar: React.FC<{
     // });
     // if (!doRemove) return;
     removeStar({
-      variables: {id: universeId, starId: selectedObject},
+      variables: {id: universeId, starId: selectedObject.id},
     });
 
     configStoreApi.setState({selectedObject: null});

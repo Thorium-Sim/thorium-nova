@@ -59,7 +59,7 @@ const PropertyPalette: React.FC<{onClose: () => void}> = ({
         onDoubleClick={() => setOpen(o => !o)}
       >
         <div></div>
-        <Heading fontSize="lg">Property Palette</Heading>
+        <Heading fontSize="lg">{t("Property Palette")}</Heading>
         <Flex justifySelf="end">
           <IconButton
             icon={FaMinus}
@@ -72,7 +72,7 @@ const PropertyPalette: React.FC<{onClose: () => void}> = ({
             icon={FaTimes}
             variant="ghost"
             size="xs"
-            aria-label={t(`Minimize`)}
+            aria-label={t(`Close`)}
             onClick={onClose}
           />
         </Flex>

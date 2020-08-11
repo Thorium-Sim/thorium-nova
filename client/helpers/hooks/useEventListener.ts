@@ -21,6 +21,7 @@ export default function useEventListener(
       // Make sure element supports addEventListener
       // On
       const isSupported = element && element.addEventListener;
+      /* istanbul ignore next */
       if (!isSupported) return;
 
       // Create event listener that calls handler function stored in ref

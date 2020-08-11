@@ -8,6 +8,7 @@ module.exports = {
     "!**/coverage/**",
     "!**/generated/**",
     "!**/unused/**",
+    "!**/components/starmap/**",
   ],
   coverageThreshold: {
     global: {
