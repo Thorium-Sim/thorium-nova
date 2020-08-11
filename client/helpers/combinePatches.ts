@@ -9,7 +9,7 @@ export default function combinePatches(state0: any, patches: Patch[]) {
     },
     function (p) {
       newPatches = p;
-    },
+    }
   );
   return newPatches;
 }

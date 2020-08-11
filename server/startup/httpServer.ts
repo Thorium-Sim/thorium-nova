@@ -13,7 +13,7 @@ export default async function setupHttpServer(
   server: Application,
   apollo: ApolloServer,
   port: number,
-  httpOnly: boolean,
+  httpOnly: boolean
 ) {
   let httpServer: http.Server;
 

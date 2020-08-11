@@ -90,7 +90,7 @@ describe("Client Resolver", () => {
       variables: {shipId: "Test Ship"},
     });
     expect(setShip.errors?.[0].message).toEqual(
-      "Selected Ship is not present on the flight.",
+      "Selected Ship is not present on the flight."
     );
   });
   it("should succeed to attach when a ship does exist.", async () => {

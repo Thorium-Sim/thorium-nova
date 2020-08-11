@@ -11,7 +11,7 @@ interface OptionsInterface {
 
 function render(
   ui: Parameters<typeof rtlRender>[0],
-  options?: Omit<RenderOptions, "queries"> & OptionsInterface,
+  options?: Omit<RenderOptions, "queries"> & OptionsInterface
 ) {
   const {mocks = [], initialRoutes = ["/"]} = options || {};
   const Wrapper: React.FC = ({children}) => {

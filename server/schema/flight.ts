@@ -45,7 +45,7 @@ export default class Flight {
       paused: boolean;
       date: Date;
       entities: {id: string; components: Components[]}[];
-    }> = {},
+    }> = {}
   ) {
     this.id = params.id || uuid();
     this.name = params.name || randomWords(3).join("-");
@@ -109,11 +109,11 @@ export class FlightResolver {
       flightFiles.map(async flightName => {
         const raw = await fs.readFile(
           `${appStoreDir}flights/${flightName}`,
-          "utf-8",
+          "utf-8"
         );
         const data = JSON.parse(raw);
         return {...data, date: new Date(data.date)} as Flight;
-      }),
+      })
     );
 
     return flightData;
@@ -122,7 +122,7 @@ export class FlightResolver {
   @Mutation(returns => Flight)
   flightStart(
     @Arg("flightName", type => String, {nullable: true})
-    flightName: string = randomWords(3).join("-"),
+    flightName: string = randomWords(3).join("-")
   ): Flight {
     if (!App.activeFlight) {
       const flight = getStore<Flight>({
@@ -165,7 +165,7 @@ export class FlightResolver {
   @Mutation(returns => String, {nullable: true})
   async flightDelete(
     @Arg("flightName", type => String)
-    flightName: string,
+    flightName: string
   ): Promise<null> {
     if (App.activeFlight?.name === flightName) {
       App.activeFlight = null;

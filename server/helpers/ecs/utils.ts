@@ -1,7 +1,7 @@
 export function fastSplice(
   array: unknown[],
   startIndex: number,
-  removeCount: number,
+  removeCount: number
 ) {
   let len = array.length;
   let removeLen = 0;

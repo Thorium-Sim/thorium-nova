@@ -44,7 +44,7 @@ const Timer: React.FC = () => {
     if (seconds + minutes + hours === "000") return;
     const time = `${hours.padStart(2, "0")}:${minutes.padStart(
       2,
-      "0",
+      "0"
     )}:${seconds.padStart(2, "0")}`;
 
     create({variables: {label, time}});

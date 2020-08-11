@@ -39,7 +39,7 @@ const defaultValues: Options = {
 
 export async function generateScene(
   assetPath: string,
-  {size, camera: cameraOptions}: Options = defaultValues,
+  {size, camera: cameraOptions}: Options = defaultValues
 ): Promise<{scene: Scene; camera: Camera}> {
   return new Promise(resolve => {
     const scene = new Scene();
@@ -48,7 +48,7 @@ export async function generateScene(
       cameraOptions?.fov ?? 45,
       size.width / size.height,
       0.1,
-      1000,
+      1000
     );
 
     camera.position.x = cameraOptions?.x ?? 0;
@@ -78,7 +78,7 @@ export async function generateScene(
 /* istanbul ignore next */
 export async function renderGLTFPreview(
   assetPath: string,
-  options: Options = defaultValues,
+  options: Options = defaultValues
 ): Promise<string> {
   const {scene, camera} = await generateScene(assetPath, options);
   renderer?.setSize(options.size.width, options.size.height);

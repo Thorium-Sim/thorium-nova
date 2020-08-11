@@ -48,7 +48,7 @@ const wsLink = ApolloLink.from([
       graphQLErrors.forEach(error => {
         const {message, locations, path} = error;
         console.error(
-          `[Subscription Error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
+          `[Subscription Error]: Message: ${message}, Location: ${locations}, Path: ${path}`
         );
         // Sentry.captureException(error);
       });
@@ -76,8 +76,8 @@ const httpLink = ApolloLink.from([
     if (graphQLErrors) {
       graphQLErrors.map(({message, locations, path}) =>
         console.error(
-          `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
-        ),
+          `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+        )
       );
     }
     if (networkError) console.error(`[Network error]:`, networkError);
@@ -100,7 +100,7 @@ const link = split(
     );
   },
   wsLink,
-  httpLink,
+  httpLink
 );
 
 const client = new ApolloClient({

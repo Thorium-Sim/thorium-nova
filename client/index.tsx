@@ -29,14 +29,14 @@ window.addEventListener(
   function (e) {
     e.preventDefault();
   },
-  false,
+  false
 );
 window.addEventListener(
   "drop",
   function (e) {
     e.preventDefault();
   },
-  false,
+  false
 );
 
 render(
@@ -49,5 +49,5 @@ render(
       </AppContext>
     </ApolloProvider>
   </React.StrictMode>,
-  document.getElementById("root"),
+  document.getElementById("root")
 );

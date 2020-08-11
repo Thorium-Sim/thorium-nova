@@ -17,8 +17,8 @@ class NameGenerator {
         this.words.pluralNouns,
         this.words.pluralNouns,
         this.words.nounsOfIndeterminateQuantity,
-        this.words.nounsOfIndeterminateQuantity,
-      ),
+        this.words.nounsOfIndeterminateQuantity
+      )
     )}${randomFromList(this.words.sometimesASuccessor)}`;
   };
   civilian2 = () => {
@@ -26,10 +26,10 @@ class NameGenerator {
       concat(
         this.words.adjectives,
         this.words.singularNouns,
-        this.words.nounsOfIndeterminateQuantity,
-      ),
+        this.words.nounsOfIndeterminateQuantity
+      )
     )} ${randomFromList(
-      concat(this.words.singularNouns, this.words.pluralNouns),
+      concat(this.words.singularNouns, this.words.pluralNouns)
     )}`;
   };
   civilian3 = () => {
@@ -39,62 +39,62 @@ class NameGenerator {
         this.words.femaleNames,
         this.words.maleNames,
         this.words.femaleNames,
-        this.words.allTitles(),
-      ),
+        this.words.allTitles()
+      )
     )}'s ${randomFromList(
       concat(
         this.words.singularNouns,
         this.words.pluralNouns,
-        this.words.nounsOfIndeterminateQuantity,
-      ),
+        this.words.nounsOfIndeterminateQuantity
+      )
     )}`;
   };
   civilian4 = () => {
     return `${randomFromList(
-      concat(this.words.pluralNouns, this.words.nounsOfIndeterminateQuantity),
+      concat(this.words.pluralNouns, this.words.nounsOfIndeterminateQuantity)
     )} and ${randomFromList(
-      concat(this.words.pluralNouns, this.words.nounsOfIndeterminateQuantity),
+      concat(this.words.pluralNouns, this.words.nounsOfIndeterminateQuantity)
     )}`;
   };
   civilian5 = () => {
     return `${randomFromList(this.words.pluralQuantities)} ${randomFromList(
-      this.words.pluralNouns,
+      this.words.pluralNouns
     )}`;
   };
 
   civilian6 = () => {
     return `${randomFromList(
-      concat(this.words.femaleNames, this.words.genderNeutralTitles),
+      concat(this.words.femaleNames, this.words.genderNeutralTitles)
     )} ${randomFromList(
-      concat(this.words.femaleNames, this.words.thingsYouCanBeOf()),
+      concat(this.words.femaleNames, this.words.thingsYouCanBeOf())
     )}`;
   };
   civilian7 = () => {
     return `${randomFromList(
-      concat(this.words.maleNames, this.words.femaleNames),
+      concat(this.words.maleNames, this.words.femaleNames)
     )} the ${randomFromList(this.words.adjectives)}`;
   };
   civilian8 = () => {
     return `${randomFromList(
-      concat(this.words.singularNouns, this.words.adjectives),
+      concat(this.words.singularNouns, this.words.adjectives)
     )} ${randomFromList(this.words.allTitles())}${randomFromList(
-      this.words.sometimesASuccessor,
+      this.words.sometimesASuccessor
     )}`;
   };
   civilian9 = () => {
     return `${randomFromList(
-      concat(this.words.singularNouns, this.words.pluralNouns),
+      concat(this.words.singularNouns, this.words.pluralNouns)
     )} ${randomFromList(this.words.thingsYouCanBeOf())}`;
   };
   civilian10 = () => {
     return `${randomFromList(
-      this.words.nounsOfIndeterminateQuantity,
+      this.words.nounsOfIndeterminateQuantity
     )} ${randomFromList(
       concat(
         this.words.singularNouns,
         this.words.pluralNouns,
-        this.words.allTitles(),
-      ),
+        this.words.allTitles()
+      )
     )}`;
   };
   civilian11 = () => {
@@ -104,18 +104,18 @@ class NameGenerator {
         this.words.nounsOfIndeterminateQuantity,
         this.words.singularNouns,
         this.words.allTitles(),
-        this.words.femaleNames,
-      ),
+        this.words.femaleNames
+      )
     )}`;
   };
   civilian12 = () => {
     return `${randomFromList(this.words.asianPrefixes)} ${randomFromList(
-      this.words.asian,
+      this.words.asian
     )}${randomFromList(this.words.asianSuffixes)}`;
   };
   civilian13 = () => {
     return `${randomFromList(this.words.prefixes)}${randomFromList(
-      this.words.suffixes,
+      this.words.suffixes
     )}`;
   };
   civilian14 = () => {
@@ -123,9 +123,9 @@ class NameGenerator {
   };
   civilian15 = () => {
     return `${randomFromList(
-      concat(this.words.maleTitles, this.words.genderNeutralTitles),
+      concat(this.words.maleTitles, this.words.genderNeutralTitles)
     )} ${randomFromList(
-      concat(this.words.maleNames, this.words.thingsYouCanBeOf()),
+      concat(this.words.maleNames, this.words.thingsYouCanBeOf())
     )}`;
   };
   civilian = (): string | undefined => {
@@ -144,7 +144,7 @@ class NameGenerator {
   };
   republicFighter = () => {
     return `${randomFromList(
-      concat(this.words.color, this.words.greek),
+      concat(this.words.color, this.words.greek)
     )} ${randomFromList(this.words.oneToTwelve)}`;
   };
   deep = () => {
@@ -152,7 +152,7 @@ class NameGenerator {
   };
   deepFighter = () => {
     return `${randomFromList(this.words.greek)} ${randomFromList(
-      this.words.oneToTwelve,
+      this.words.oneToTwelve
     )}`;
   };
   militia = () => {
@@ -167,11 +167,11 @@ class NameGenerator {
   freeWorldsFighter = () => {
     if (Math.random() < 0.5) {
       return `${randomFromList(this.words.phonetic)} ${randomFromList(
-        this.words.digit,
+        this.words.digit
       )}-${randomFromList(this.words.digit)}`;
     } else {
       return `${randomFromList(this.words.animal)} ${randomFromList(
-        this.words.oneToTwelve,
+        this.words.oneToTwelve
       )}`;
     }
   };
@@ -180,12 +180,12 @@ class NameGenerator {
   };
   syndicateSmall = () => {
     return `F-${randomFromList(this.words.digit)}${randomFromList(
-      this.words.digit,
+      this.words.digit
     )}${randomFromList(this.words.letter)}${randomFromList(this.words.digit)}`;
   };
   syndicateFighter = () => {
     return `F-${randomFromList(this.words.digit)}${randomFromList(
-      this.words.digit,
+      this.words.digit
     )}${randomFromList(this.words.digit)}`;
   };
 
@@ -194,14 +194,14 @@ class NameGenerator {
     return `${randomFromList(
       concat(
         this.words.pirateAdjectivesThatDontWorkAsTitles,
-        this.words.pirateAdjectivesThatWorkAsTitles,
-      ),
+        this.words.pirateAdjectivesThatWorkAsTitles
+      )
     )} ${randomFromList(
       concat(
         this.words.pirateNouns,
         this.words.badPirateNouns,
-        this.words.badOutcomes,
-      ),
+        this.words.badOutcomes
+      )
     )}`;
   };
   pirate2 = () => {
@@ -209,10 +209,10 @@ class NameGenerator {
       concat(
         this.words.pirateAdjectivesThatDontWorkAsTitles,
         this.words.pirateAdjectivesThatDontWorkBeforeSingularNouns,
-        this.words.pirateAdjectivesThatWorkAsTitles,
-      ),
+        this.words.pirateAdjectivesThatWorkAsTitles
+      )
     )} ${randomFromList(
-      concat(this.words.sinisterNames, this.words.badOutcomes),
+      concat(this.words.sinisterNames, this.words.badOutcomes)
     )}`;
   };
   pirate3 = () => {
@@ -220,18 +220,18 @@ class NameGenerator {
       concat(
         this.words.pirateNouns,
         this.words.badPirateNouns,
-        this.words.badOutcomes,
-      ),
+        this.words.badOutcomes
+      )
     )}`;
   };
   pirate4 = () => {
     return `${randomFromList(this.words.sinisterNames)} the ${randomFromList(
-      this.words.pirateAdjectivesThatWorkAsTitles,
+      this.words.pirateAdjectivesThatWorkAsTitles
     )}`;
   };
   pirate5 = () => {
     return `${randomFromList(
-      concat(this.words.pirateNouns, this.words.badPirateNouns),
+      concat(this.words.pirateNouns, this.words.badPirateNouns)
     )} of ${randomFromList(this.words.badOutcomes)}`;
   };
   pirate6 = () => {
@@ -239,8 +239,8 @@ class NameGenerator {
       concat(
         this.words.badOutcomes,
         this.words.pirateAdjectivesThatWorkAsTitles,
-        this.words.pirateAdjectivesThatDontWorkAsTitles,
-      ),
+        this.words.pirateAdjectivesThatDontWorkAsTitles
+      )
     )} ${randomFromList(this.words.badPirateNouns)}`;
   };
   pirate7 = () => {
@@ -248,18 +248,18 @@ class NameGenerator {
       concat(
         this.words.pirateNouns,
         this.words.badPirateNouns,
-        this.words.badOutcomes,
-      ),
+        this.words.badOutcomes
+      )
     );
   };
   pirate8 = () => {
     return `${randomFromList(this.words.piratePrefixes)}${randomFromList(
-      this.words.pirateSuffixes,
+      this.words.pirateSuffixes
     )}`;
   };
   pirate9 = () => {
     return `${randomFromList(this.words.pirateTitles)} ${randomFromList(
-      this.words.pirateHonorifics,
+      this.words.pirateHonorifics
     )}`;
   };
   pirate = (): string | undefined => {
@@ -272,12 +272,12 @@ class NameGenerator {
   };
   bountyHunter1 = () => {
     return `${randomFromList(
-      this.words.bountyHunterPrefixes1,
+      this.words.bountyHunterPrefixes1
     )} ${randomFromList(this.words.bountyHunterSuffixes1)}`;
   };
   bountyHunter2 = () => {
     return `${randomFromList(
-      this.words.bountyHunterPrefixes2,
+      this.words.bountyHunterPrefixes2
     )} of ${randomFromList(this.words.bountyHunterSuffixes2)}`;
   };
   bountyHunter = (): string | undefined => {
@@ -290,12 +290,12 @@ class NameGenerator {
   };
   quarg = () => {
     return `${randomFromList(this.words.quargPrefixes)}${randomFromList(
-      this.words.quargInterstitials,
+      this.words.quargInterstitials
     )}${randomFromList(this.words.quargSuffixes)}`;
   };
   pug = () => {
     return `${randomFromList(this.words.pugPrefixes)}${randomFromList(
-      this.words.pugInterstitials,
+      this.words.pugInterstitials
     )}${randomFromList(this.words.pugSuffixes)}`;
   };
 }

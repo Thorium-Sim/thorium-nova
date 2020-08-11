@@ -34,46 +34,46 @@ const ThemeBuilder = () => {
         primary: getColorScheme(
           themeColors.primary.color,
           themeColors.primary.spread,
-          themeColors.primary.center,
+          themeColors.primary.center
         ),
         secondary: getColorScheme(
           themeColors.secondary.color,
           themeColors.secondary.spread,
-          themeColors.secondary.center,
+          themeColors.secondary.center
         ),
         info: getColorScheme(
           themeColors.info.color,
           themeColors.info.spread,
-          themeColors.info.center,
+          themeColors.info.center
         ),
         alert: getColorScheme(
           themeColors.alert.color,
           themeColors.alert.spread,
-          themeColors.alert.center,
+          themeColors.alert.center
         ),
         warning: getColorScheme(
           themeColors.warning.color,
           themeColors.warning.spread,
-          themeColors.warning.center,
+          themeColors.warning.center
         ),
         danger: getColorScheme(
           themeColors.danger.color,
           themeColors.danger.spread,
-          themeColors.danger.center,
+          themeColors.danger.center
         ),
         success: getColorScheme(
           themeColors.success.color,
           themeColors.success.spread,
-          themeColors.success.center,
+          themeColors.success.center
         ),
         muted: getColorScheme(
           themeColors.muted.color,
           themeColors.muted.spread,
-          themeColors.muted.center,
+          themeColors.muted.center
         ),
       },
     }),
-    [themeColors],
+    [themeColors]
   );
   const schemes = [
     "primary",

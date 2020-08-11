@@ -39,7 +39,7 @@ class Entity extends Components {
   private ecs: ECS | null;
   constructor(
     id?: Partial<Entity> | string | null,
-    components: Component[] = [],
+    components: Component[] = []
   ) {
     let initialData: Components = {};
     if (isEntity(id)) {
@@ -51,7 +51,7 @@ class Entity extends Components {
           }
           return list;
         },
-        [],
+        []
       );
 
       id = id.id;

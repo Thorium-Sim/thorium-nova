@@ -54,12 +54,12 @@ const loadNamespace = debounce(
       })
       .catch(err => {
         console.error(
-          `Failed to load translation resource for ${lang}: ${namespace}: ${err.message}`,
+          `Failed to load translation resource for ${lang}: ${namespace}: ${err.message}`
         );
       });
   },
   500,
-  {leading: true, trailing: false},
+  {leading: true, trailing: false}
 );
 
 i18next.on("missingKey", function (lngs, namespace) {

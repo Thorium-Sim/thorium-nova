@@ -35,7 +35,7 @@ export class TimerSystem extends System {
     ) {
       try {
         entity.components.timer.time = subtractTimer(
-          entity.components.timer.time,
+          entity.components.timer.time
         );
         if (entity.components.timer.time === "00:00:00") {
           this.ecs.removeEntityById(entity.id);

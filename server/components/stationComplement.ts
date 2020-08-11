@@ -18,7 +18,7 @@ export class StationComplementComponent extends Component {
   get stationComplement() {
     return (
       App.plugins.stationComplements.find(
-        station => station.id === this.stationComplementId,
+        station => station.id === this.stationComplementId
       ) || null
     );
   }

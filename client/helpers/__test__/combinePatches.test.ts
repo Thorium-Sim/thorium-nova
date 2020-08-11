@@ -13,7 +13,7 @@ describe("combine patches", () => {
       },
       function (p) {
         patches.push(...p);
-      },
+      }
     );
     var state2 = produce(
       state1,
@@ -22,7 +22,7 @@ describe("combine patches", () => {
       },
       function (p) {
         patches.push(...p);
-      },
+      }
     );
     var state3 = produce(
       state2,
@@ -31,7 +31,7 @@ describe("combine patches", () => {
       },
       function (p) {
         patches.push(...p);
-      },
+      }
     );
     var state4 = produce(
       state3,
@@ -40,7 +40,7 @@ describe("combine patches", () => {
       },
       function (p) {
         patches.push(...p);
-      },
+      }
     );
 
     expect(patches).toMatchInlineSnapshot(`

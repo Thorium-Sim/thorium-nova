@@ -6,7 +6,7 @@ const UNKNOWN_USER_COLOR_STRING = "#000";
 
 const getUserColorChroma = (
   colorString: string,
-  fallbackValue = UNKNOWN_USER_COLOR_STRING,
+  fallbackValue = UNKNOWN_USER_COLOR_STRING
 ) => (chroma.valid(colorString) ? chroma(colorString) : chroma(fallbackValue));
 
 function generateLightnessMap(spread: number, center: number) {
@@ -17,7 +17,7 @@ function generateLightnessMap(spread: number, center: number) {
 export default function getColorScheme(
   color: string,
   spread: number = 10,
-  center: number = 50,
+  center: number = 50
 ) {
   const trimmedColor = color.trim();
   const userColorChroma = getUserColorChroma(trimmedColor);
@@ -27,7 +27,7 @@ export default function getColorScheme(
   const closestLightness = LIGHTNESS_MAP.reduce((prev, curr) =>
     Math.abs(curr - lightnessGoal) < Math.abs(prev - lightnessGoal)
       ? curr
-      : prev,
+      : prev
   );
 
   const baseColorIndex = LIGHTNESS_MAP.findIndex(l => l === closestLightness);

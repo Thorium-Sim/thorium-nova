@@ -70,7 +70,7 @@ describe("Ship Plugin", () => {
       }`,
     });
     expect(ship.errors?.[0].message).toEqual(
-      "A ship with that name already exists.",
+      "A ship with that name already exists."
     );
   });
   it("should properly rename a ship", async () => {
@@ -97,10 +97,10 @@ describe("Ship Plugin", () => {
       variables: {id, name: "New Name"},
     });
     expect(renamedShip.data?.templateShipRename.identity.name).toEqual(
-      "New Name",
+      "New Name"
     );
     expect(renamedShip.data?.templateShipRename.identity.name).not.toEqual(
-      newShip.data?.shipCreateTemplate.identity.name,
+      newShip.data?.shipCreateTemplate.identity.name
     );
   });
   it("should fail to rename a ship with an invalid ID", async () => {
@@ -156,10 +156,10 @@ describe("Ship Plugin", () => {
     });
 
     expect(rethemedShip.data?.templateShipSetTheme.theme.value).toEqual(
-      "New Theme",
+      "New Theme"
     );
     expect(rethemedShip.data?.templateShipSetTheme.theme.value).not.toEqual(
-      newShip.data?.shipCreateTemplate.theme.value,
+      newShip.data?.shipCreateTemplate.theme.value
     );
   });
   it("should properly add and query for ship assets", async () => {
@@ -210,7 +210,7 @@ describe("Ship Plugin", () => {
 
     const assetChange = await assetChangePromise;
     expect(assetChange.data?.templateShipSetLogo.shipAssets.logo).toEqual(
-      "/assets/ships/Asset Ship/logo.svg",
+      "/assets/ships/Asset Ship/logo.svg"
     );
 
     const modelUpload = new Upload();
@@ -244,16 +244,16 @@ describe("Ship Plugin", () => {
 
     const modelChange = await modelChangePromise;
     expect(modelChange.data?.templateShipSetModel.shipAssets.model).toEqual(
-      "/assets/ships/Asset Ship/model.glb",
+      "/assets/ships/Asset Ship/model.glb"
     );
     expect(modelChange.data?.templateShipSetModel.shipAssets.vanity).toEqual(
-      "/assets/ships/Asset Ship/vanity.png",
+      "/assets/ships/Asset Ship/vanity.png"
     );
     expect(modelChange.data?.templateShipSetModel.shipAssets.top).toEqual(
-      "/assets/ships/Asset Ship/top.png",
+      "/assets/ships/Asset Ship/top.png"
     );
     expect(modelChange.data?.templateShipSetModel.shipAssets.side).toEqual(
-      "/assets/ships/Asset Ship/side.png",
+      "/assets/ships/Asset Ship/side.png"
     );
   });
 });

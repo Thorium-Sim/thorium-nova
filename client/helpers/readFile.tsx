@@ -7,7 +7,7 @@ export async function readFile(file: File) {
         // convert image file to base64 string
         res(reader.result as string);
       },
-      false,
+      false
     );
 
     if (file) {

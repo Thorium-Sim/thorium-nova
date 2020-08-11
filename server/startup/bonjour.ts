@@ -3,7 +3,7 @@ import os from "os";
 
 export default async function setupBonjour(
   port: number = 4444,
-  httpOnly?: boolean,
+  httpOnly?: boolean
 ) {
   const bj = bonjour();
   const service = bj.publish({

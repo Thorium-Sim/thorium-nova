@@ -2,7 +2,7 @@ import {useRef, useLayoutEffect} from "react";
 
 const useAnimationFrame = (
   callback: (delta: number) => void,
-  active = true,
+  active = true
 ) => {
   const callbackRef = useRef(callback);
   const time = useRef(performance.now());

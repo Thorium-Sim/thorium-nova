@@ -41,7 +41,7 @@ type SubscriptionHookOptions<TData, TVariables = OperationVariables> = {
 
 function useOperationVariables<TVariables>(variablesInput?: TVariables) {
   const [variables, setVariables] = React.useState<TVariables | undefined>(
-    variablesInput,
+    variablesInput
   );
 
   React.useEffect(() => {
@@ -57,11 +57,11 @@ const serverInterval = 1000 / 5;
 
 export function useTSubscription<TData = any, TVariables = OperationVariables>(
   subscription: DocumentNode,
-  options?: SubscriptionHookOptions<TData, TVariables>,
+  options?: SubscriptionHookOptions<TData, TVariables>
 ): [
   UseStore<TSubscriptionResponse<TData>>,
   StoreApi<TSubscriptionResponse<TData>>,
-  Error[] | readonly GraphQLError[] | undefined,
+  Error[] | readonly GraphQLError[] | undefined
 ] {
   const [errors, setErrors] = React.useState<
     Error[] | readonly GraphQLError[] | undefined
@@ -73,7 +73,7 @@ export function useTSubscription<TData = any, TVariables = OperationVariables>(
         data: undefined,
         endTime: Date.now() + serverInterval,
       })),
-    [],
+    []
   );
 
   const variables = useOperationVariables(options?.variables);

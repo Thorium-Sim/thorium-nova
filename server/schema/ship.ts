@@ -47,7 +47,7 @@ export class ShipResolver {
   @Query(returns => Entity, {nullable: true, name: "ship"})
   shipQuery(
     @Ctx() context: GraphQLContext,
-    @Arg("id", type => ID, {nullable: true}) id?: string,
+    @Arg("id", type => ID, {nullable: true}) id?: string
   ): Entity | null {
     return getShip(context, id);
   }
@@ -78,7 +78,7 @@ export class ShipResolver {
   shipRename(
     @Ctx() context: GraphQLContext,
     @Arg("name") name: string,
-    @Arg("id", type => ID, {nullable: true}) id?: string,
+    @Arg("id", type => ID, {nullable: true}) id?: string
   ) {
     const ship = getShip(context, id);
     ship.updateComponent("identity", {name});
@@ -89,7 +89,7 @@ export class ShipResolver {
   shipSetTheme(
     @Ctx() context: GraphQLContext,
     @Arg("theme") theme: string,
-    @Arg("id", type => ID, {nullable: true}) id?: string,
+    @Arg("id", type => ID, {nullable: true}) id?: string
   ) {
     const ship = getShip(context, id);
     ship.updateComponent("theme", {value: theme});
@@ -100,7 +100,7 @@ export class ShipResolver {
   shipSetAlertLevel(
     @Ctx() context: GraphQLContext,
     @Arg("alertLevel") alertLevel: AlertLevelT,
-    @Arg("id", type => ID, {nullable: true}) id?: string,
+    @Arg("id", type => ID, {nullable: true}) id?: string
   ) {
     const ship = getShip(context, id);
     ship.updateComponent("alertLevel", {alertLevel});
@@ -113,7 +113,7 @@ export class ShipResolver {
     topics: ({args, payload, context}) => {
       const id = uniqid();
       const ship = App.activeFlight?.ships.find(
-        t => t.id === args.id || t.id === context.ship?.id,
+        t => t.id === args.id || t.id === context.ship?.id
       );
       process.nextTick(() => {
         pubsub.publish(id, {
@@ -129,7 +129,7 @@ export class ShipResolver {
   })
   ship(
     @Root() payload: ShipPayload,
-    @Arg("id", type => ID, {nullable: true}) id: string,
+    @Arg("id", type => ID, {nullable: true}) id: string
   ): Entity {
     return payload?.ship;
   }

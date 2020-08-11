@@ -64,7 +64,7 @@ describe("Station Complement plugin", () => {
       variables: {name: "New Complement"},
     });
     expect(create.errors?.[0].message).toEqual(
-      "A station complement with that name already exists.",
+      "A station complement with that name already exists."
     );
   });
 });

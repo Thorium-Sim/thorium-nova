@@ -54,7 +54,7 @@ describe("Dialog", () => {
     const {findByText} = render(
       <Dialog>
         <DialogTester />
-      </Dialog>,
+      </Dialog>
     );
     const alertButton = await findByText("Alert");
     userEvent.click(alertButton);
@@ -67,7 +67,7 @@ describe("Dialog", () => {
     const {findByText} = render(
       <Dialog>
         <DialogTester onConfirm={onConfirm} />
-      </Dialog>,
+      </Dialog>
     );
     const alertButton = await findByText("Confirm");
     userEvent.click(alertButton);
@@ -81,7 +81,7 @@ describe("Dialog", () => {
     const {findByText, findByLabelText} = render(
       <Dialog>
         <DialogTester onPrompt={onPrompt} />
-      </Dialog>,
+      </Dialog>
     );
     const alertButton = await findByText("Prompt");
     userEvent.click(alertButton);

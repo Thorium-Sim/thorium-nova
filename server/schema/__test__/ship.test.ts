@@ -23,7 +23,7 @@ describe("Ship Resolver", () => {
       }`,
       });
       expect(firstShip.errors?.[0].message).toEqual(
-        "ID is a required parameter",
+        "ID is a required parameter"
       );
       const ship = await gqlCall({
         query: `query Ship($id:ID!){
@@ -136,7 +136,7 @@ describe("Ship Resolver", () => {
         variables: {id, name: "Renamed Ship"},
       });
       expect(renamedShip.data?.shipRename.identity.name).toEqual(
-        "Renamed Ship",
+        "Renamed Ship"
       );
     });
     it("should update the theme of the ship", async () => {

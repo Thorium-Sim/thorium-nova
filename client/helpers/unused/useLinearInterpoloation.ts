@@ -16,14 +16,14 @@ function interpolate(t: number, entity: any, gameEntity: any) {
       Object.entries(entity.Position).map(([key, value]) => [
         key,
         lerp(gameEntity.Position[key], value as number, t),
-      ]),
+      ])
     ),
   };
 }
 const serverInterval = 1000 / 5;
 export default function useLinearInterpolation(
   storeApi: StoreApi<TSubscriptionResponse<any>>,
-  storeKey: string = "objects",
+  storeKey: string = "objects"
 ) {
   const previousGameState = React.useRef(storeApi.getState());
   const storedEndTime = React.useRef(previousGameState.current?.endTime);
@@ -37,13 +37,13 @@ export default function useLinearInterpolation(
 
     let t = Math.max(
       0,
-      Math.min(1, Math.abs(1 - (state.endTime - Date.now()) / serverInterval)),
+      Math.min(1, Math.abs(1 - (state.endTime - Date.now()) / serverInterval))
     );
     let newData;
     if (Array.isArray(state.data[storeKey])) {
       newData = state.data[storeKey].map((entity: any) => {
         const gameEntity = previousGameState.current.gameState[storeKey]?.find(
-          (s: any) => s.id === entity.id,
+          (s: any) => s.id === entity.id
         );
         return interpolate(t, entity, gameEntity);
       });
@@ -51,7 +51,7 @@ export default function useLinearInterpolation(
       newData = interpolate(
         t,
         state.data[storeKey],
-        previousGameState.current.data.gameState[storeKey],
+        previousGameState.current.data.gameState[storeKey]
       );
     }
     storeApi.setState({

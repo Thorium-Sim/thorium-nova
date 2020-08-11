@@ -13,7 +13,7 @@ const ColorPicker: React.FC<{
   const ref = React.useRef<HTMLDivElement>(null);
 
   const [isOpen, setIsOpen] = React.useState<{x: number; y: number} | false>(
-    false,
+    false
   );
   const [currentColor, setCurrentColor] = React.useState(color);
   useOnClickOutside(ref, () => setIsOpen(false));
@@ -72,7 +72,7 @@ const ColorPicker: React.FC<{
                         b: color.rgb.b,
                         a: color.rgb.a,
                       })
-                    : tc(color.hex).toHexString(),
+                    : tc(color.hex).toHexString()
                 )
               }
               onChangeComplete={color =>
@@ -91,12 +91,12 @@ const ColorPicker: React.FC<{
                         b: color.rgb.b,
                         a: color.rgb.a,
                       })
-                    : tc(color.hex).toHexString(),
+                    : tc(color.hex).toHexString()
                 )
               }
             />
           </div>,
-          document.body,
+          document.body
         )}
     </>
   );

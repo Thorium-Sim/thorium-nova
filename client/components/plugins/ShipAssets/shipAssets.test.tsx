@@ -24,7 +24,7 @@ describe("Ship Assets", () => {
             },
           },
         ],
-      },
+      }
     );
     expect(await findByText("Ship Assets")).toBeInTheDocument();
     expect(await findByText("Logo")).toBeInTheDocument();

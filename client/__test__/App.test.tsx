@@ -47,7 +47,7 @@ describe("App", () => {
     expect(await findByText("1/1/1993")).toBeInTheDocument();
 
     const versionLink = getByText(
-      `Version ${require("../../package.json").version}`,
+      `Version ${require("../../package.json").version}`
     );
     expect(versionLink).toBeInTheDocument();
     userEvent.click(versionLink);

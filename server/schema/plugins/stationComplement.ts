@@ -11,7 +11,7 @@ export class StationComplementPluginResolver {
     name: "stationComplement",
   })
   stationComplementQuery(
-    @Arg("id", type => ID) id: string,
+    @Arg("id", type => ID) id: string
   ): StationComplement | null {
     return App.plugins.stationComplements.find(s => s.id === id) || null;
   }
@@ -22,7 +22,7 @@ export class StationComplementPluginResolver {
   @Mutation(returns => StationComplement)
   stationComplementCreate(
     @Arg("name")
-    name: string,
+    name: string
   ): StationComplement {
     if (App.plugins.stationComplements.find(s => s.name === name)) {
       throw new Error("A station complement with that name already exists.");

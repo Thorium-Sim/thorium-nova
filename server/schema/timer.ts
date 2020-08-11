@@ -25,11 +25,11 @@ export class TimerResolver {
   }
   @Query(returns => Entity, {name: "timer"})
   timerQuery(
-    @Arg("id", type => ID, {nullable: true}) id: string,
+    @Arg("id", type => ID, {nullable: true}) id: string
   ): Entity | null {
     return (
       App.activeFlight?.ecs.entities.find(
-        e => e.components.timer && e.id === id,
+        e => e.components.timer && e.id === id
       ) || null
     );
   }
@@ -38,7 +38,7 @@ export class TimerResolver {
     @Arg("label")
     label: string,
     @Arg("time")
-    time: string,
+    time: string
   ): Entity {
     const entity = new Entity(null, [TimerComponent]);
     App.activeFlight?.ecs.addEntity(entity);
@@ -55,7 +55,7 @@ export class TimerResolver {
     @Arg("id", type => ID)
     id: string,
     @Arg("pause")
-    pause: boolean,
+    pause: boolean
   ): Entity | undefined {
     const entity = App.activeFlight?.ecs.entities.find(e => e.id === id);
 
@@ -73,7 +73,7 @@ export class TimerResolver {
   @Mutation(returns => String)
   timerRemove(
     @Arg("id", type => ID)
-    id: string,
+    id: string
   ): string | undefined {
     App.activeFlight?.ecs.removeEntityById(id);
     pubsub.publish("timers", {
@@ -90,7 +90,7 @@ export class TimerResolver {
       process.nextTick(() => {
         pubsub.publish(id, {
           entities: App.activeFlight?.ecs.entities.filter(
-            e => e.components.timer,
+            e => e.components.timer
           ),
         });
       });
@@ -100,7 +100,7 @@ export class TimerResolver {
   })
   timer(
     @Root() payload: TimersPayload,
-    @Arg("id", type => ID) id: string,
+    @Arg("id", type => ID) id: string
   ): Entity | null {
     return payload?.entities.find(e => e.id === id) || null;
   }
@@ -112,7 +112,7 @@ export class TimerResolver {
       process.nextTick(() => {
         pubsub.publish(id, {
           entities: App.activeFlight?.ecs.entities.filter(
-            e => e.components.timer,
+            e => e.components.timer
           ),
         });
       });
