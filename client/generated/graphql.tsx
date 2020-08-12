@@ -203,9 +203,20 @@ export type UniverseAddStarMutationVariables = Exact<{
 export type UniverseAddStarMutation = {
   __typename?: "Mutation";
   universeTemplateAddStar: {
-    __typename?: "UniverseTemplate";
+    __typename?: "Entity";
     id: string;
-    systems: Array<{__typename?: "Entity"; id: string}>;
+    identity: {
+      __typename?: "IdentityComponent";
+      name: string;
+      description: string;
+    };
+    tags: {__typename?: "TagsComponent"; tags: Array<string>};
+    position: {
+      __typename?: "PositionComponent";
+      x: number;
+      y: number;
+      z: number;
+    };
   };
 };
 
@@ -619,8 +630,17 @@ export const UniverseAddStarDocument = gql`
   mutation UniverseAddStar($id: ID!, $position: PositionInput!) {
     universeTemplateAddStar(id: $id, position: $position) {
       id
-      systems {
-        id
+      identity {
+        name
+        description
+      }
+      tags {
+        tags
+      }
+      position {
+        x
+        y
+        z
       }
     }
   }

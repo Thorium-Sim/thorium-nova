@@ -1,12 +1,15 @@
 import {ApolloProvider, useApolloClient} from "@apollo/client";
-import {configStoreApi} from "../components/starmap/configStore";
+import {
+  configStoreApi,
+  useConfigStore,
+} from "../components/starmap/configStore";
 import React, {Suspense} from "react";
-import {BrowserRouter} from "react-router-dom";
 import {Canvas} from "react-three-fiber";
 import {Camera} from "three";
 import Menubar from "../components/starmap/Menubar";
 import Scene from "../components/starmap/Scene";
 import ConfigPalette from "../components/starmap/ConfigPalette";
+import {useParams} from "react-router";
 
 const FAR = 1e27;
 
@@ -16,6 +19,11 @@ interface SceneRef {
 const Starmap: React.FC = () => {
   const sceneRef = React.useRef<SceneRef>();
   const client = useApolloClient();
+  const {universeId} = useParams();
+  const setUniverseId = useConfigStore(s => s.setUniverseId);
+  React.useEffect(() => {
+    setUniverseId(universeId);
+  }, [universeId]);
 
   return (
     <Suspense fallback={null}>
@@ -31,11 +39,9 @@ const Starmap: React.FC = () => {
           configStoreApi.setState({selectedObject: null});
         }}
       >
-        <BrowserRouter>
-          <ApolloProvider client={client}>
-            <Scene ref={sceneRef} />
-          </ApolloProvider>
-        </BrowserRouter>
+        <ApolloProvider client={client}>
+          <Scene ref={sceneRef} />
+        </ApolloProvider>
       </Canvas>
       <Menubar sceneRef={sceneRef} />
       <ConfigPalette />

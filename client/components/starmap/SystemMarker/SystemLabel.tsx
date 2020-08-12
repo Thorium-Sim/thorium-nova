@@ -16,7 +16,6 @@ const SystemLabel: React.FC<{
     }
   }, []);
 
-  console.log("Re-rendering");
   const textTexture = React.useMemo(() => {
     let texture = new TextTexture({
       fillStyle: "rgb(0,255,255)",

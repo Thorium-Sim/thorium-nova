@@ -1,11 +1,11 @@
 import {OrbitControls} from "drei";
 import React, {Suspense} from "react";
-import {Navigate, Route, Routes} from "react-router";
 import {useFrame, useThree} from "react-three-fiber";
-import {MOUSE, Vector3} from "three";
-import {configStoreApi} from "./configStore";
+import {Matrix4, MOUSE, Object3D, Quaternion, Vector3} from "three";
+import {configStoreApi, useConfigStore} from "./configStore";
 import Interstellar from "./Interstellar";
 import Nebula from "./Nebula";
+import Planetary from "./Planetary";
 import Star from "./star";
 
 const FAR = 1e27;
@@ -13,6 +13,8 @@ const FAR = 1e27;
 const Scene = React.forwardRef((props, ref) => {
   const orbitControls = React.useRef<OrbitControls>();
   const frameCount = React.useRef(0);
+  const universeId = useConfigStore(s => s.universeId);
+  const systemId = useConfigStore(s => s.systemId);
 
   useFrame((state, delta) => {
     // Auto rotate, but at a very slow rate, so as to keep the
@@ -70,24 +72,29 @@ const Scene = React.forwardRef((props, ref) => {
       <OrbitControls
         ref={orbitControls}
         autoRotate
-        maxDistance={500}
+        maxDistance={15000}
         minDistance={1}
         rotateSpeed={0.5}
-        mouseButtons={{
-          LEFT: MOUSE.PAN,
-          RIGHT: MOUSE.ROTATE,
-          MIDDLE: MOUSE.DOLLY,
-        }}
+        mouseButtons={
+          systemId
+            ? {
+                LEFT: MOUSE.ROTATE,
+                RIGHT: MOUSE.PAN,
+                MIDDLE: MOUSE.DOLLY,
+              }
+            : {
+                LEFT: MOUSE.PAN,
+                RIGHT: MOUSE.ROTATE,
+                MIDDLE: MOUSE.DOLLY,
+              }
+        }
       />
       <ambientLight intensity={0.7} />
       <pointLight position={[10, 10, 10]} />
-      <Routes>
-        <Route
-          path="starmap"
-          element={<Navigate to="/config/universes" replace />}
-        />
-        <Route path="starmap/:universeId" element={<Interstellar />} />
-      </Routes>
+      {universeId && !systemId && <Interstellar universeId={universeId} />}
+      {universeId && systemId && (
+        <Planetary universeId={universeId} systemId={systemId} />
+      )}
       <Suspense fallback={null}>
         <Nebula />
       </Suspense>

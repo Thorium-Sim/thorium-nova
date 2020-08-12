@@ -1,8 +1,17 @@
 mutation UniverseAddStar($id: ID!, $position: PositionInput!) {
   universeTemplateAddStar(id: $id, position: $position) {
     id
-    systems {
-      id
+    identity {
+      name
+      description
+    }
+    tags {
+      tags
+    }
+    position {
+      x
+      y
+      z
     }
   }
 }

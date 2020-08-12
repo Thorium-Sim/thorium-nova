@@ -1,12 +1,9 @@
 import {useUniverseSubscription} from "../../generated/graphql";
 import React from "react";
 import SystemMarker from "./SystemMarker";
-import {useParams} from "react-router";
 import Starfield from "./Starfield";
 
-const Interstellar = () => {
-  const {universeId} = useParams();
-
+const Interstellar: React.FC<{universeId: string}> = ({universeId}) => {
   const {data} = useUniverseSubscription({
     variables: {id: universeId},
     skip: !universeId,

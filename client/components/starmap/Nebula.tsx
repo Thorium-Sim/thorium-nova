@@ -131,6 +131,12 @@ function Nebula() {
     }
   });
 
+  // Always center the nebula on the camera
+  useFrame(({camera}) => {
+    primaryMesh.current?.position.copy(camera.position);
+    secondaryMesh.current?.position.copy(camera.position);
+  });
+
   return (
     <>
       <mesh

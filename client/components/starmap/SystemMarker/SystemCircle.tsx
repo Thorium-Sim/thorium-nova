@@ -5,9 +5,8 @@ import {
 import React from "react";
 import {useFrame} from "react-three-fiber";
 import {CanvasTexture, Group, Vector3} from "three";
-import {configStoreApi} from "../configStore";
+import {configStoreApi, useConfigStore} from "../configStore";
 import useObjectDrag from "../hooks/useObjectDrag";
-import {useParams} from "react-router";
 
 const size = 50;
 const lineWidth = 0.07;
@@ -18,7 +17,8 @@ const SystemCircle: React.FC<{
   hoveringDirection: React.MutableRefObject<number>;
 }> = ({star, parent, hoveringDirection}) => {
   const [setPosition] = useUniverseStarSetPositionMutation();
-  const {universeId} = useParams();
+  const universeId = useConfigStore(s => s.universeId);
+  const setSystemId = useConfigStore(s => s.setSystemId);
   const bind = useObjectDrag(parent, {
     onMouseUp: (position: Vector3) => {
       configStoreApi.getState().enableOrbitControls();
@@ -118,6 +118,9 @@ const SystemCircle: React.FC<{
       onPointerOut={() => {
         hoveringDirection.current = -1;
         document.body.style.cursor = "auto";
+      }}
+      onDoubleClick={() => {
+        setSystemId(star.id);
       }}
     >
       <planeBufferGeometry args={[4, 4, 4]} attach="geometry" />

@@ -83,15 +83,11 @@ class AppClass {
           }
         }
       } catch (Err) {
-        console.log(Err);
         // The folder probably didn't exist, which means
         // there are no plugins anyway
         try {
           await fs.mkdir(`${appStoreDir}${pluginVariety}`);
-        } catch (err) {
-          console.log("Whoops");
-          console.log(err);
-        }
+        } catch (err) {}
       }
     }
 

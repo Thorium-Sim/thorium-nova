@@ -153,7 +153,7 @@ export class UniversePluginResolver {
     return universe;
   }
 
-  @Mutation(returns => UniverseTemplate)
+  @Mutation(returns => Entity)
   async universeTemplateAddStar(
     @Arg("id", type => ID)
     id: string,
@@ -177,7 +177,7 @@ export class UniversePluginResolver {
     entity.updateComponent("position", position);
     universe.entities.push(entity);
     publish(universe);
-    return universe;
+    return entity;
   }
 
   @Mutation(returns => String)

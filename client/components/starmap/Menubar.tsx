@@ -1,7 +1,6 @@
 import React from "react";
 import {Box, Input, Stack} from "@chakra-ui/core";
 import {FaArrowLeft, FaHome} from "react-icons/fa";
-import {Link, useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {Camera, Vector3} from "three";
 import {
@@ -13,6 +12,7 @@ import Button from "../ui/button";
 
 import {useConfirm} from "../Dialog";
 import {useHotkeys} from "react-hotkeys-hook";
+import {Link} from "react-router-dom";
 
 interface SceneRef {
   camera: () => Camera;
@@ -21,20 +21,27 @@ interface SceneRef {
 const Menubar: React.FC<{
   sceneRef: React.MutableRefObject<SceneRef | undefined>;
 }> = ({sceneRef}) => {
-  const {universeId} = useParams();
   const [addStar] = useUniverseAddStarMutation();
   const [removeStar] = useUniverseStarRemoveMutation();
   const {t} = useTranslation();
   const confirm = useConfirm();
 
-  const store = useConfigStore();
+  const universeId = useConfigStore(store => store.universeId);
+  const systemId = useConfigStore(store => store.systemId);
+  const setSystemId = useConfigStore(store => store.setSystemId);
+  const selectedObject = useConfigStore(store => store.selectedObject);
 
   useHotkeys("n", () => {
     const camera = sceneRef.current?.camera();
     if (!camera) return;
-    const vec = new Vector3(0, 0, -30);
+    const vec = new Vector3(0, 0, -100);
     vec.applyQuaternion(camera.quaternion).add(camera.position);
-    addStar({variables: {id: universeId, position: vec}});
+    addStar({variables: {id: universeId, position: vec}}).then(res => {
+      if (res.data?.universeTemplateAddStar)
+        configStoreApi.setState({
+          selectedObject: res.data.universeTemplateAddStar,
+        });
+    });
   });
 
   async function deleteObject() {
@@ -60,15 +67,26 @@ const Menubar: React.FC<{
         <Button as={Link} to="/" variantColor="info" variant="ghost" size="sm">
           <FaHome />
         </Button>
-        <Button
-          as={Link}
-          to={`/config/universes/${universeId}`}
-          variantColor="info"
-          variant="ghost"
-          size="sm"
-        >
-          <FaArrowLeft />
-        </Button>
+        {systemId ? (
+          <Button
+            variant="ghost"
+            variantColor="info"
+            size="sm"
+            onClick={() => setSystemId("")}
+          >
+            <FaArrowLeft />
+          </Button>
+        ) : (
+          <Button
+            as={Link}
+            to={`/config/universes/${universeId}`}
+            variantColor="info"
+            variant="ghost"
+            size="sm"
+          >
+            <FaArrowLeft />
+          </Button>
+        )}
         <Button
           variantColor="success"
           variant="ghost"
@@ -78,7 +96,12 @@ const Menubar: React.FC<{
             if (!camera) return;
             const vec = new Vector3(0, 0, -30);
             vec.applyQuaternion(camera.quaternion);
-            addStar({variables: {id: universeId, position: vec}});
+            addStar({variables: {id: universeId, position: vec}}).then(res => {
+              if (res.data?.universeTemplateAddStar)
+                configStoreApi.setState({
+                  selectedObject: res.data.universeTemplateAddStar,
+                });
+            });
           }}
         >
           {t("Add")}
@@ -87,7 +110,7 @@ const Menubar: React.FC<{
           variantColor="danger"
           variant="ghost"
           size="sm"
-          disabled={!store.selectedObject}
+          disabled={!selectedObject}
           onClick={deleteObject}
         >
           {t("Delete")}
@@ -96,7 +119,7 @@ const Menubar: React.FC<{
           variantColor="primary"
           variant="ghost"
           size="sm"
-          disabled={!store.selectedObject}
+          disabled={!selectedObject}
         >
           {t("Edit")}
         </Button>

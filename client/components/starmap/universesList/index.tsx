@@ -2,12 +2,7 @@ import {
   Box,
   Button,
   ButtonGroup,
-  FormControl,
-  FormErrorMessage,
-  FormHelperText,
-  FormLabel,
   Grid,
-  Input,
   Modal,
   ModalCloseButton,
   ModalContent,
@@ -15,7 +10,6 @@ import {
   ModalHeader,
   ModalOverlay,
   Scale,
-  Textarea,
 } from "@chakra-ui/core";
 import sleep from "../../../helpers/sleep";
 import React from "react";

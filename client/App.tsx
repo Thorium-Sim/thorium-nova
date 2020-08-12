@@ -26,7 +26,7 @@ const ClientApp: React.FC = () => {
           path="starmap"
           element={<Navigate to="/config/universes" replace />}
         />
-        <Route path="starmap/:universeId" element={<Starmap />} />
+        <Route path="starmap/:universeId/*" element={<Starmap />} />
         <Route path="*" element={<NoMatch />} />
       </Routes>
       <Routes>

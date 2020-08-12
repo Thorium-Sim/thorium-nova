@@ -1,4 +1,4 @@
-import {FormControl, FormLabel, Input, Textarea} from "@chakra-ui/core";
+import {Button, FormControl, FormLabel, Input, Textarea} from "@chakra-ui/core";
 import {
   useUniverseStarSetNameMutation,
   useUniverseStarSetDescriptionMutation,
@@ -6,11 +6,13 @@ import {
 import React from "react";
 import PropertyPalette from "../ui/propertyPalette";
 import {configStoreApi, useConfigStore} from "./configStore";
-import {useParams} from "react-router";
 import throttle from "lodash.throttle";
+import {Vector3} from "three";
+import sleep from "../../helpers/sleep";
 
 const ConfigPalette: React.FC = () => {
-  const {universeId} = useParams();
+  const universeId = useConfigStore(store => store.universeId);
+  const setSystemId = useConfigStore(store => store.setSystemId);
   const selectedObject = useConfigStore(store => store.selectedObject);
   const [setName] = useUniverseStarSetNameMutation();
   const [setDescription] = useUniverseStarSetDescriptionMutation();
@@ -35,7 +37,6 @@ const ConfigPalette: React.FC = () => {
       }, 500),
     [starId]
   );
-  console.log(selectedObject);
   if (!selectedObject) return null;
   return (
     <PropertyPalette
@@ -63,6 +64,17 @@ const ConfigPalette: React.FC = () => {
         />
       </FormControl>
       {/* TODO: Include Faction here eventually... when we get factions */}
+      <Button
+        size="sm"
+        variantColor="primary"
+        mt={2}
+        width="100%"
+        onClick={async () => {
+          setSystemId(selectedObject.id);
+        }}
+      >
+        Enter System
+      </Button>
     </PropertyPalette>
   );
 };

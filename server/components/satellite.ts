@@ -15,6 +15,8 @@ export class SatelliteComponent extends Component {
     orbitalArc: 0,
     // Degrees up or down where the planet is vertically in its orbit
     orbitalInclination: 0,
+    // Degree to which the elliptical orbit is stretched
+    eccentricity: 0.02,
   };
 
   @Field()
@@ -28,6 +30,9 @@ export class SatelliteComponent extends Component {
 
   @Field()
   orbitalInclination: number = 0;
+
+  @Field()
+  eccentricity: number = 0.02;
 
   parentId?: string | null = null;
 

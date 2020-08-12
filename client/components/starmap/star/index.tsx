@@ -13,7 +13,7 @@ import LensFlare from "./lensFlare";
 import {fragment, vertex} from "./shaders";
 import getUniforms from "./uniforms";
 
-const Star: React.FC<{color1: number; color2: number}> = ({
+const Star: React.FC<{color1?: number; color2?: number}> = ({
   color1 = 0x224488,
   color2 = 0xf6fcff,
   ...props
@@ -31,11 +31,9 @@ const Star: React.FC<{color1: number; color2: number}> = ({
     []
   );
   const shader = React.useRef<Mesh>();
-  const blocker = React.useRef<Mesh>();
 
   useFrame(({camera}) => {
     shader.current?.quaternion.copy(camera.quaternion);
-    blocker.current?.quaternion.copy(camera.quaternion);
     if (shader.current) {
       const mat = shader.current.material as ShaderMaterial;
       mat.uniforms.time.value += 0.03;
