@@ -1,5 +1,5 @@
 mutation UniverseAddStar($id: ID!, $position: PositionInput!) {
-  universeTemplateAddStar(id: $id, position: $position) {
+  universeTemplateAddSystem(id: $id, position: $position) {
     id
     identity {
       name

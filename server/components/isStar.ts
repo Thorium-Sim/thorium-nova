@@ -5,15 +5,27 @@ import {Component, ComponentOmit} from "./utils";
 export class IsStarComponent extends Component {
   static id: "isStar" = "isStar";
   static defaults: ComponentOmit<IsStarComponent> = {
-    // Mass in comparison to Sol
     solarMass: 1,
-    // Age in years
     age: 4000000000,
+    spectralType: "G",
+    hue: 0,
+    isWhite: false,
   };
 
-  @Field()
+  @Field({description: "The mass of the star in comparison to the Sun"})
   solarMass: number = 1;
 
-  @Field()
+  @Field({description: "The age of the star in years"})
   age: number = 4000000000;
+
+  @Field({
+    description: "The spectral type of the star, one of O,B,G,K,A,MG,M,D",
+  })
+  spectralType: string = "G";
+
+  @Field({description: "The color hue of the star, based on the spectral type"})
+  hue: number = 0;
+
+  @Field({description: "Whether the star appears to be white"})
+  isWhite: boolean = false;
 }

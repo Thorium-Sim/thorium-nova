@@ -7,32 +7,34 @@ import {Component, ComponentOmit} from "./utils";
 export class SatelliteComponent extends Component {
   static id: "satellite" = "satellite";
   static defaults: ComponentOmit<SatelliteComponent> = {
-    // The tilt of the axis in degrees
     axialTilt: 23.5,
-    // Distance from the center of its orbit in kilometers
     distance: 149600000,
-    // Degrees where the planet currently is in its orbit
     orbitalArc: 0,
-    // Degrees up or down where the planet is vertically in its orbit
     orbitalInclination: 0,
-    // Degree to which the elliptical orbit is stretched
     eccentricity: 0.02,
+    showOrbit: true,
   };
 
-  @Field()
+  @Field({description: "The tilt of the axis in degrees"})
   axialTilt: number = 23.5;
 
-  @Field()
+  @Field({description: "Distance from the center of its orbit in kilometers"})
   distance: number = 149600000;
 
-  @Field()
+  @Field({description: "Degrees where the planet currently is in its orbit"})
   orbitalArc: number = 0;
 
-  @Field()
+  @Field({
+    description:
+      "Degrees up or down where the planet is vertically in its orbit",
+  })
   orbitalInclination: number = 0;
 
-  @Field()
+  @Field({description: "Degree to which the elliptical orbit is stretched"})
   eccentricity: number = 0.02;
+
+  @Field({description: "Whether the orbit should be visible on the starmap"})
+  showOrbit: boolean = true;
 
   parentId?: string | null = null;
 

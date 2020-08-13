@@ -3,7 +3,7 @@ mutation UniverseStarSetDescription(
   $starId: ID!
   $description: String!
 ) {
-  universeTemplateStarSetDescription(
+  universeTemplateSystemSetDescription(
     id: $id
     starId: $starId
     description: $description

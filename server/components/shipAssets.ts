@@ -16,7 +16,7 @@ export class ShipAssetsComponent extends Component {
     };
   }
 
-  @Field()
+  @Field({description: "GLB model of the ship."})
   model: string = "";
 
   // The side, top, and vanity views are automatically

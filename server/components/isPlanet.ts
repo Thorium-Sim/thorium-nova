@@ -11,9 +11,12 @@ export class IsPlanetComponent extends Component {
     // Star Trek planetary classification https://memory-alpha.fandom.com/wiki/Planetary_classification
     class: "M",
   };
-  @Field()
+  @Field({description: "The age in years"})
   age: number = 4000000000;
 
-  @Field()
+  @Field({
+    description:
+      "Star Trek planetary classification https://memory-alpha.fandom.com/wiki/Planetary_classification",
+  })
   class: string = "M";
 }

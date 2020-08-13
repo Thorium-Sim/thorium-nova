@@ -9,6 +9,6 @@ export class TemperatureComponent extends Component {
     temperature: 5800,
   };
 
-  @Field()
+  @Field({description: "Temperature in Kelvin (K)"})
   temperature: number = 5800;
 }

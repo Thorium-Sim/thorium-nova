@@ -13,6 +13,8 @@ export class AlertLevelComponent extends Component {
   @Field(type => String)
   alertLevel: AlertLevelT = "5";
 
-  @Field()
+  @Field({
+    description: "Whether the alert condition can be changed by the crew.",
+  })
   alertLevelLock: boolean = false;
 }

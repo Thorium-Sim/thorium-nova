@@ -37,9 +37,9 @@ const Menubar: React.FC<{
     const vec = new Vector3(0, 0, -100);
     vec.applyQuaternion(camera.quaternion).add(camera.position);
     addStar({variables: {id: universeId, position: vec}}).then(res => {
-      if (res.data?.universeTemplateAddStar)
+      if (res.data?.universeTemplateAddSystem)
         configStoreApi.setState({
-          selectedObject: res.data.universeTemplateAddStar,
+          selectedObject: res.data.universeTemplateAddSystem,
         });
     });
   });
@@ -47,11 +47,11 @@ const Menubar: React.FC<{
   async function deleteObject() {
     const selectedObject = configStoreApi.getState().selectedObject;
     if (!selectedObject) return;
-    // const doRemove = await confirm({
-    //   header: t("Are you sure you want to remove this star?"),
-    //   body: t("It will remove all of the objects inside of it."),
-    // });
-    // if (!doRemove) return;
+    const doRemove = await confirm({
+      header: t("Are you sure you want to remove this star?"),
+      body: t("It will remove all of the objects inside of it."),
+    });
+    if (!doRemove) return;
     removeStar({
       variables: {id: universeId, starId: selectedObject.id},
     });
@@ -97,9 +97,9 @@ const Menubar: React.FC<{
             const vec = new Vector3(0, 0, -30);
             vec.applyQuaternion(camera.quaternion);
             addStar({variables: {id: universeId, position: vec}}).then(res => {
-              if (res.data?.universeTemplateAddStar)
+              if (res.data?.universeTemplateAddSystem)
                 configStoreApi.setState({
-                  selectedObject: res.data.universeTemplateAddStar,
+                  selectedObject: res.data.universeTemplateAddSystem,
                 });
             });
           }}

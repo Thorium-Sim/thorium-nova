@@ -3,7 +3,7 @@ mutation UniverseStarSetPosition(
   $starId: ID!
   $position: PositionInput!
 ) {
-  universeTemplateStarSetPosition(
+  universeTemplateSystemSetPosition(
     id: $id
     starId: $starId
     position: $position

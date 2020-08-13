@@ -202,7 +202,7 @@ export type UniverseAddStarMutationVariables = Exact<{
 
 export type UniverseAddStarMutation = {
   __typename?: "Mutation";
-  universeTemplateAddStar: {
+  universeTemplateAddSystem: {
     __typename?: "Entity";
     id: string;
     identity: {
@@ -227,7 +227,7 @@ export type UniverseStarRemoveMutationVariables = Exact<{
 
 export type UniverseStarRemoveMutation = {
   __typename?: "Mutation";
-  universeTemplateRemoveStar: string;
+  universeTemplateRemoveSystem: string;
 };
 
 export type UniverseStarSetDescriptionMutationVariables = Exact<{
@@ -238,7 +238,7 @@ export type UniverseStarSetDescriptionMutationVariables = Exact<{
 
 export type UniverseStarSetDescriptionMutation = {
   __typename?: "Mutation";
-  universeTemplateStarSetDescription: {
+  universeTemplateSystemSetDescription: {
     __typename?: "UniverseTemplate";
     id: string;
   };
@@ -252,7 +252,7 @@ export type UniverseStarSetNameMutationVariables = Exact<{
 
 export type UniverseStarSetNameMutation = {
   __typename?: "Mutation";
-  universeTemplateStarSetName: {__typename?: "UniverseTemplate"; id: string};
+  universeTemplateSystemSetName: {__typename?: "UniverseTemplate"; id: string};
 };
 
 export type UniverseStarSetPositionMutationVariables = Exact<{
@@ -263,7 +263,7 @@ export type UniverseStarSetPositionMutationVariables = Exact<{
 
 export type UniverseStarSetPositionMutation = {
   __typename?: "Mutation";
-  universeTemplateStarSetPosition: {
+  universeTemplateSystemSetPosition: {
     __typename?: "UniverseTemplate";
     id: string;
   };
@@ -628,7 +628,7 @@ export type TemplateShipSetModelMutationHookResult = ReturnType<
 >;
 export const UniverseAddStarDocument = gql`
   mutation UniverseAddStar($id: ID!, $position: PositionInput!) {
-    universeTemplateAddStar(id: $id, position: $position) {
+    universeTemplateAddSystem(id: $id, position: $position) {
       id
       identity {
         name
@@ -661,7 +661,7 @@ export type UniverseAddStarMutationHookResult = ReturnType<
 >;
 export const UniverseStarRemoveDocument = gql`
   mutation UniverseStarRemove($id: ID!, $starId: ID!) {
-    universeTemplateRemoveStar(id: $id, starId: $starId)
+    universeTemplateRemoveSystem(id: $id, starId: $starId)
   }
 `;
 export function useUniverseStarRemoveMutation(
@@ -684,7 +684,7 @@ export const UniverseStarSetDescriptionDocument = gql`
     $starId: ID!
     $description: String!
   ) {
-    universeTemplateStarSetDescription(
+    universeTemplateSystemSetDescription(
       id: $id
       starId: $starId
       description: $description
@@ -709,7 +709,7 @@ export type UniverseStarSetDescriptionMutationHookResult = ReturnType<
 >;
 export const UniverseStarSetNameDocument = gql`
   mutation UniverseStarSetName($id: ID!, $starId: ID!, $name: String!) {
-    universeTemplateStarSetName(id: $id, starId: $starId, name: $name) {
+    universeTemplateSystemSetName(id: $id, starId: $starId, name: $name) {
       id
     }
   }
@@ -734,7 +734,7 @@ export const UniverseStarSetPositionDocument = gql`
     $starId: ID!
     $position: PositionInput!
   ) {
-    universeTemplateStarSetPosition(
+    universeTemplateSystemSetPosition(
       id: $id
       starId: $starId
       position: $position

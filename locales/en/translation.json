@@ -1,5 +1,9 @@
 {
   "Add": "Add",
+  "Are you sure you want to remove this star?": "Are you sure you want to remove this star?",
   "Delete": "Delete",
-  "Edit": "Edit"
+  "Edit": "Edit",
+  "It will remove all of the objects inside of it": {
+    "": ""
+  }
 }
