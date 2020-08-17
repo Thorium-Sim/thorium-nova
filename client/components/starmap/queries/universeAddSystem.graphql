@@ -1,4 +1,4 @@
-mutation UniverseAddStar($id: ID!, $position: PositionInput!) {
+mutation UniverseAddSystem($id: ID!, $position: PositionInput!) {
   universeTemplateAddSystem(id: $id, position: $position) {
     id
     identity {

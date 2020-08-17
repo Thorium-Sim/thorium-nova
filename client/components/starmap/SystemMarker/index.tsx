@@ -6,10 +6,10 @@ import SystemCircle from "./SystemCircle";
 import {UniverseSubscription} from "../../../generated/graphql";
 const SystemMarker: React.FC<{
   id: string;
-  star: NonNullable<UniverseSubscription["universe"]>["systems"][0];
+  system: NonNullable<UniverseSubscription["universe"]>["systems"][0];
   name: string;
   position: [number, number, number];
-}> = ({id, star, name, position}) => {
+}> = ({id, system, name, position}) => {
   const group = React.useRef<Group>(new Group());
 
   const direction = React.useRef(0);
@@ -25,12 +25,12 @@ const SystemMarker: React.FC<{
     <>
       <group position={position} ref={group}>
         <SystemCircle
-          star={star}
+          system={system}
           hoveringDirection={direction}
           parent={group}
         />
         <SystemLabel
-          starId={star.id}
+          systemId={system.id}
           hoveringDirection={direction}
           name={name}
         />

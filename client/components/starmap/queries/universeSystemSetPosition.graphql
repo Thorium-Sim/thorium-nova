@@ -1,11 +1,11 @@
-mutation UniverseStarSetPosition(
+mutation UniverseSystemSetPosition(
   $id: ID!
-  $starId: ID!
+  $systemId: ID!
   $position: PositionInput!
 ) {
   universeTemplateSystemSetPosition(
     id: $id
-    starId: $starId
+    systemId: $systemId
     position: $position
   ) {
     id

@@ -1,0 +1,5 @@
+mutation UniverseSystemSetName($id: ID!, $systemId: ID!, $name: String!) {
+  universeTemplateSystemSetName(id: $id, systemId: $systemId, name: $name) {
+    id
+  }
+}

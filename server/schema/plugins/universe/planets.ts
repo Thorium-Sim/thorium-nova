@@ -16,19 +16,19 @@ function randomFromRange({min, max}: range) {
 }
 
 @Resolver()
-export class UniversePluginStarsResolver {
+export class UniversePluginPlanetsResolver {
   @Mutation(returns => Entity)
-  async universeTemplateAddStar(
+  async universeTemplateAddPlanet(
     @Arg("id", type => ID)
     id: string,
     @Arg("systemId", type => ID)
     systemId: string,
-    @Arg("spectralType", type => String)
-    spectralType: string
+    @Arg("classification", type => String)
+    classification: string
   ) {
     const {universe, system} = getSystem(id, systemId);
-    const childrenStars = universe.entities.filter(
-      s => s.satellite?.parentId === systemId && s.isStar
+    const childrenPlanets = universe.entities.filter(
+      s => s.satellite?.parentId === systemId && s.isPlanet
     );
 
     const starType = starTypes.find(s => s.spectralType === spectralType);

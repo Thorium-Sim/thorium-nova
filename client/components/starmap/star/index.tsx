@@ -3,21 +3,22 @@ import {useFrame, useLoader} from "react-three-fiber";
 import {
   TextureLoader,
   RepeatWrapping,
-  AdditiveBlending,
   Mesh,
   ShaderMaterial,
-  MeshBasicMaterial,
   Color,
+  Vector3,
+  AdditiveBlending,
 } from "three";
 import LensFlare from "./lensFlare";
 import {fragment, vertex} from "./shaders";
 import getUniforms from "./uniforms";
 
-const Star: React.FC<{color1?: number; color2?: number}> = ({
-  color1 = 0x224488,
-  color2 = 0xf6fcff,
-  ...props
-}) => {
+const Star: React.FC<{
+  color1?: number | Color;
+  color2?: number | Color;
+  scale: Vector3 | [number, number, number];
+  position?: Vector3 | [number, number, number];
+}> = ({color1 = 0x224488, color2 = 0xf6fcff, ...props}) => {
   const filePath = require("url:./textures/01_Texture.jpg");
   const texture = React.useMemo(() => {
     const loader = new TextureLoader();
@@ -54,6 +55,10 @@ const Star: React.FC<{color1?: number; color2?: number}> = ({
           transparent
           depthTest={false}
         />
+      </mesh>
+      <mesh>
+        <sphereBufferGeometry attach="geometry" args={[0.5, 8, 16]} />
+        <meshBasicMaterial attach="material" color={0x000000} />
       </mesh>
     </group>
   );

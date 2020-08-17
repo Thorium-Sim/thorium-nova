@@ -1,11 +1,11 @@
-mutation UniverseStarSetDescription(
+mutation UniverseSystemSetDescription(
   $id: ID!
-  $starId: ID!
+  $systemId: ID!
   $description: String!
 ) {
   universeTemplateSystemSetDescription(
     id: $id
-    starId: $starId
+    systemId: $systemId
     description: $description
   ) {
     id

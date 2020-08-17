@@ -10497,14 +10497,6 @@ param-case@3.0.3, param-case@^3.0.3:
     dot-case "^3.0.3"
     tslib "^1.10.0"
 
-parcel-plugin-static-files-copy@^2.4.4:
-  version "2.4.4"
-  resolved "https://registry.yarnpkg.com/parcel-plugin-static-files-copy/-/parcel-plugin-static-files-copy-2.4.4.tgz#2cfa1b48ef858209e54c3096ac89cd0041e3d020"
-  integrity sha512-wQM4hLLHCBkvwvd3yzfKIk+SvrWs3lBilecofrMEpFPeL9+A6GH4ywTKl2oOHh5jH1MOjjPZ1BlbWTPEZp0Nag==
-  dependencies:
-    minimatch "3.0.4"
-    path "0.12.7"
-
 parcel@^2.0.0-beta.1:
   version "2.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/parcel/-/parcel-2.0.0-beta.1.tgz#7b23be0217da198f0e8f0d14f0107d8d938074dd"
@@ -10698,14 +10690,6 @@ path-type@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/path-type/-/path-type-4.0.0.tgz#84ed01c0a7ba380afe09d90a8c180dcd9d03043b"
   integrity sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==
-
-path@0.12.7:
-  version "0.12.7"
-  resolved "https://registry.yarnpkg.com/path/-/path-0.12.7.tgz#d4dc2a506c4ce2197eb481ebfcd5b36c0140b10f"
-  integrity sha1-1NwqUGxM4hl+tIHr/NWzbAFAsQ8=
-  dependencies:
-    process "^0.11.1"
-    util "^0.10.3"
 
 pbkdf2@^3.0.3:
   version "3.1.1"
@@ -11293,7 +11277,7 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-process@^0.11.1, process@^0.11.10:
+process@^0.11.10:
   version "0.11.10"
   resolved "https://registry.yarnpkg.com/process/-/process-0.11.10.tgz#7332300e840161bda3e69a1d1d91a7d4bc16f182"
   integrity sha1-czIwDoQBYb2j5podHZGn1LwW8YI=
@@ -12110,6 +12094,11 @@ rng@^0.2.2:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/rng/-/rng-0.2.2.tgz#df43e80d9bc82ad4430bcfef03f49c717e8b2e8c"
   integrity sha1-30PoDZvIKtRDC8/vA/SccX6LLow=
+
+roman-numerals@^0.3.2:
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/roman-numerals/-/roman-numerals-0.3.2.tgz#907ddf90c64e1b5dce8ed5e8fb0718318f2f26e6"
+  integrity sha1-kH3fkMZOG13OjtXo+wcYMY8vJuY=
 
 rsvp@^4.8.4:
   version "4.8.5"
@@ -13614,13 +13603,6 @@ util.promisify@^1.0.0, util.promisify@~1.0.0:
     es-abstract "^1.17.2"
     has-symbols "^1.0.1"
     object.getownpropertydescriptors "^2.1.0"
-
-util@^0.10.3:
-  version "0.10.4"
-  resolved "https://registry.yarnpkg.com/util/-/util-0.10.4.tgz#3aa0125bfe668a4672de58857d3ace27ecb76901"
-  integrity sha512-0Pm9hTQ3se5ll1XihRic3FDIku70C+iHUdT/W926rSgHV5QgXsYbKZN8MSC3tJtSkhuROzvsQjAaFENRXr+19A==
-  dependencies:
-    inherits "2.0.3"
 
 util@^0.12.0, util@^0.12.3:
   version "0.12.3"

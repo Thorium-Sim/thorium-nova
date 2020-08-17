@@ -10,6 +10,7 @@ export class IsStarComponent extends Component {
     spectralType: "G",
     hue: 0,
     isWhite: false,
+    radius: 1,
   };
 
   @Field({description: "The mass of the star in comparison to the Sun"})
@@ -28,4 +29,9 @@ export class IsStarComponent extends Component {
 
   @Field({description: "Whether the star appears to be white"})
   isWhite: boolean = false;
+
+  @Field({
+    description: "The radius of the star compared to the radius of the Sun",
+  })
+  radius: number = 1;
 }

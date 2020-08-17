@@ -85,6 +85,7 @@
     "react-use-konami": "^1.0.13",
     "reflect-metadata": "^0.1.13",
     "rng": "^0.2.2",
+    "roman-numerals": "^0.3.2",
     "showdown": "^1.9.1",
     "subscriptions-transport-ws": "^0.9.0",
     "three": "0.119.1",

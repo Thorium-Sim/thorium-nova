@@ -55,10 +55,10 @@ export default class Components {
   @Field()
   planetarySystem?: PlanetarySystemComponent;
 
-  @Field()
+  @Field({nullable: true})
   isStar?: IsStarComponent;
 
-  @Field()
+  @Field({nullable: true})
   isPlanet?: IsPlanetComponent;
 
   @Field()

@@ -4,8 +4,8 @@ import {FaArrowLeft, FaHome} from "react-icons/fa";
 import {useTranslation} from "react-i18next";
 import {Camera, Vector3} from "three";
 import {
-  useUniverseAddStarMutation,
-  useUniverseStarRemoveMutation,
+  useUniverseAddSystemMutation,
+  useUniverseSystemRemoveMutation,
 } from "../../generated/graphql";
 import {configStoreApi, useConfigStore} from "./configStore";
 import Button from "../ui/button";
@@ -21,8 +21,8 @@ interface SceneRef {
 const Menubar: React.FC<{
   sceneRef: React.MutableRefObject<SceneRef | undefined>;
 }> = ({sceneRef}) => {
-  const [addStar] = useUniverseAddStarMutation();
-  const [removeStar] = useUniverseStarRemoveMutation();
+  const [addSystem] = useUniverseAddSystemMutation();
+  const [removeSystem] = useUniverseSystemRemoveMutation();
   const {t} = useTranslation();
   const confirm = useConfirm();
 
@@ -36,7 +36,7 @@ const Menubar: React.FC<{
     if (!camera) return;
     const vec = new Vector3(0, 0, -100);
     vec.applyQuaternion(camera.quaternion).add(camera.position);
-    addStar({variables: {id: universeId, position: vec}}).then(res => {
+    addSystem({variables: {id: universeId, position: vec}}).then(res => {
       if (res.data?.universeTemplateAddSystem)
         configStoreApi.setState({
           selectedObject: res.data.universeTemplateAddSystem,
@@ -48,12 +48,12 @@ const Menubar: React.FC<{
     const selectedObject = configStoreApi.getState().selectedObject;
     if (!selectedObject) return;
     const doRemove = await confirm({
-      header: t("Are you sure you want to remove this star?"),
+      header: t("Are you sure you want to remove this planetary system?"),
       body: t("It will remove all of the objects inside of it."),
     });
     if (!doRemove) return;
-    removeStar({
-      variables: {id: universeId, starId: selectedObject.id},
+    removeSystem({
+      variables: {id: universeId, systemId: selectedObject.id},
     });
 
     configStoreApi.setState({selectedObject: null});
@@ -96,12 +96,14 @@ const Menubar: React.FC<{
             if (!camera) return;
             const vec = new Vector3(0, 0, -30);
             vec.applyQuaternion(camera.quaternion);
-            addStar({variables: {id: universeId, position: vec}}).then(res => {
-              if (res.data?.universeTemplateAddSystem)
-                configStoreApi.setState({
-                  selectedObject: res.data.universeTemplateAddSystem,
-                });
-            });
+            addSystem({variables: {id: universeId, position: vec}}).then(
+              res => {
+                if (res.data?.universeTemplateAddSystem)
+                  configStoreApi.setState({
+                    selectedObject: res.data.universeTemplateAddSystem,
+                  });
+              }
+            );
           }}
         >
           {t("Add")}

@@ -17,7 +17,7 @@ const Interstellar: React.FC<{universeId: string}> = ({universeId}) => {
         <SystemMarker
           key={s.id}
           id={s.id}
-          star={s}
+          system={s}
           position={[s.position.x, s.position.y, s.position.z]}
           name={s.identity.name}
         />

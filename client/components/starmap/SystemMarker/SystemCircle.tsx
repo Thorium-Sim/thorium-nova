@@ -1,6 +1,6 @@
 import {
   UniverseSubscription,
-  useUniverseStarSetPositionMutation,
+  useUniverseSystemSetPositionMutation,
 } from "../../../generated/graphql";
 import React from "react";
 import {useFrame} from "react-three-fiber";
@@ -12,11 +12,11 @@ const size = 50;
 const lineWidth = 0.07;
 
 const SystemCircle: React.FC<{
-  star: NonNullable<UniverseSubscription["universe"]>["systems"][0];
+  system: NonNullable<UniverseSubscription["universe"]>["systems"][0];
   parent: React.MutableRefObject<Group>;
   hoveringDirection: React.MutableRefObject<number>;
-}> = ({star, parent, hoveringDirection}) => {
-  const [setPosition] = useUniverseStarSetPositionMutation();
+}> = ({system, parent, hoveringDirection}) => {
+  const [setPosition] = useUniverseSystemSetPositionMutation();
   const universeId = useConfigStore(s => s.universeId);
   const setSystemId = useConfigStore(s => s.setSystemId);
   const bind = useObjectDrag(parent, {
@@ -25,13 +25,13 @@ const SystemCircle: React.FC<{
       setPosition({
         variables: {
           id: universeId,
-          starId: star.id,
+          systemId: system.id,
           position,
         },
       });
     },
     onMouseDown: () => {
-      configStoreApi.setState({selectedObject: star});
+      configStoreApi.setState({selectedObject: system});
       configStoreApi.getState().disableOrbitControls();
     },
   });
@@ -47,7 +47,7 @@ const SystemCircle: React.FC<{
 
   function drawRadius(endArc = 360) {
     const selectedObject = configStoreApi.getState().selectedObject;
-    const isSelected = star.id === selectedObject?.id;
+    const isSelected = system.id === selectedObject?.id;
     ctx.clearRect(0, 0, size, size);
 
     ctx.lineWidth = size / (1 / lineWidth);
@@ -76,7 +76,7 @@ const SystemCircle: React.FC<{
   const selected = React.useRef(false);
   useFrame(() => {
     const selectedObject = configStoreApi.getState().selectedObject;
-    const isSelected = star.id === selectedObject?.id;
+    const isSelected = system.id === selectedObject?.id;
     if (isSelected) {
       selected.current = true;
     }
@@ -120,7 +120,7 @@ const SystemCircle: React.FC<{
         document.body.style.cursor = "auto";
       }}
       onDoubleClick={() => {
-        setSystemId(star.id);
+        setSystemId(system.id);
       }}
     >
       <planeBufferGeometry args={[4, 4, 4]} attach="geometry" />

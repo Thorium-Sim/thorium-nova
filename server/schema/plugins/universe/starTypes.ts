@@ -112,8 +112,7 @@ export const starTypes = [
     solarMassRange: {min: 0.1, max: 1.4},
     ageRange: {min: 100000, max: 10000000000},
     radiusRange: {min: 0.008, max: 0.2},
-    hueRange: {min: 180, max: 181},
-    white: true,
+    hueRange: {min: 0, max: 1},
   }),
 ];
 

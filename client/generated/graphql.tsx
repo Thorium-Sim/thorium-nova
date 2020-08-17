@@ -195,12 +195,12 @@ export type TemplateShipSetModelMutation = {
   };
 };
 
-export type UniverseAddStarMutationVariables = Exact<{
+export type UniverseAddSystemMutationVariables = Exact<{
   id: Scalars["ID"];
   position: PositionInput;
 }>;
 
-export type UniverseAddStarMutation = {
+export type UniverseAddSystemMutation = {
   __typename?: "Mutation";
   universeTemplateAddSystem: {
     __typename?: "Entity";
@@ -217,55 +217,6 @@ export type UniverseAddStarMutation = {
       y: number;
       z: number;
     };
-  };
-};
-
-export type UniverseStarRemoveMutationVariables = Exact<{
-  id: Scalars["ID"];
-  starId: Scalars["ID"];
-}>;
-
-export type UniverseStarRemoveMutation = {
-  __typename?: "Mutation";
-  universeTemplateRemoveSystem: string;
-};
-
-export type UniverseStarSetDescriptionMutationVariables = Exact<{
-  id: Scalars["ID"];
-  starId: Scalars["ID"];
-  description: Scalars["String"];
-}>;
-
-export type UniverseStarSetDescriptionMutation = {
-  __typename?: "Mutation";
-  universeTemplateSystemSetDescription: {
-    __typename?: "UniverseTemplate";
-    id: string;
-  };
-};
-
-export type UniverseStarSetNameMutationVariables = Exact<{
-  id: Scalars["ID"];
-  starId: Scalars["ID"];
-  name: Scalars["String"];
-}>;
-
-export type UniverseStarSetNameMutation = {
-  __typename?: "Mutation";
-  universeTemplateSystemSetName: {__typename?: "UniverseTemplate"; id: string};
-};
-
-export type UniverseStarSetPositionMutationVariables = Exact<{
-  id: Scalars["ID"];
-  starId: Scalars["ID"];
-  position: PositionInput;
-}>;
-
-export type UniverseStarSetPositionMutation = {
-  __typename?: "Mutation";
-  universeTemplateSystemSetPosition: {
-    __typename?: "UniverseTemplate";
-    id: string;
   };
 };
 
@@ -296,6 +247,108 @@ export type UniverseSubscription = {
       };
     }>;
   }>;
+};
+
+export type UniverseSystemRemoveMutationVariables = Exact<{
+  id: Scalars["ID"];
+  systemId: Scalars["ID"];
+}>;
+
+export type UniverseSystemRemoveMutation = {
+  __typename?: "Mutation";
+  universeTemplateRemoveSystem: string;
+};
+
+export type UniverseSystemSetDescriptionMutationVariables = Exact<{
+  id: Scalars["ID"];
+  systemId: Scalars["ID"];
+  description: Scalars["String"];
+}>;
+
+export type UniverseSystemSetDescriptionMutation = {
+  __typename?: "Mutation";
+  universeTemplateSystemSetDescription: {
+    __typename?: "UniverseTemplate";
+    id: string;
+  };
+};
+
+export type UniverseSystemSetNameMutationVariables = Exact<{
+  id: Scalars["ID"];
+  systemId: Scalars["ID"];
+  name: Scalars["String"];
+}>;
+
+export type UniverseSystemSetNameMutation = {
+  __typename?: "Mutation";
+  universeTemplateSystemSetName: {__typename?: "UniverseTemplate"; id: string};
+};
+
+export type UniverseSystemSetPositionMutationVariables = Exact<{
+  id: Scalars["ID"];
+  systemId: Scalars["ID"];
+  position: PositionInput;
+}>;
+
+export type UniverseSystemSetPositionMutation = {
+  __typename?: "Mutation";
+  universeTemplateSystemSetPosition: {
+    __typename?: "UniverseTemplate";
+    id: string;
+  };
+};
+
+export type TemplateSystemSubscriptionVariables = Exact<{
+  id: Scalars["ID"];
+  systemId: Scalars["ID"];
+}>;
+
+export type TemplateSystemSubscription = {
+  __typename?: "Subscription";
+  templateUniverseSystem: {
+    __typename?: "PlanetarySystem";
+    id: string;
+    identity: {__typename?: "IdentityComponent"; name: string};
+    planetarySystem: {
+      __typename?: "PlanetarySystemComponent";
+      skyboxKey: string;
+    };
+    items: Array<{
+      __typename?: "Entity";
+      id: string;
+      identity: {
+        __typename?: "IdentityComponent";
+        name: string;
+        description: string;
+      };
+      tags: {__typename?: "TagsComponent"; tags: Array<string>};
+      isStar: Maybe<{
+        __typename?: "IsStarComponent";
+        age: number;
+        hue: number;
+        isWhite: boolean;
+        solarMass: number;
+        spectralType: string;
+        radius: number;
+      }>;
+      isPlanet: Maybe<{
+        __typename?: "IsPlanetComponent";
+        age: number;
+        class: string;
+        radius: number;
+      }>;
+      satellite: {
+        __typename?: "SatelliteComponent";
+        distance: number;
+        axialTilt: number;
+        showOrbit: boolean;
+        orbitalArc: number;
+        eccentricity: number;
+        orbitalInclination: number;
+      };
+      temperature: {__typename?: "TemperatureComponent"; temperature: number};
+    }>;
+  };
 };
 
 export type UniverseSetCoverImageMutationVariables = Exact<{
@@ -626,8 +679,8 @@ export function useTemplateShipSetModelMutation(
 export type TemplateShipSetModelMutationHookResult = ReturnType<
   typeof useTemplateShipSetModelMutation
 >;
-export const UniverseAddStarDocument = gql`
-  mutation UniverseAddStar($id: ID!, $position: PositionInput!) {
+export const UniverseAddSystemDocument = gql`
+  mutation UniverseAddSystem($id: ID!, $position: PositionInput!) {
     universeTemplateAddSystem(id: $id, position: $position) {
       id
       identity {
@@ -645,117 +698,19 @@ export const UniverseAddStarDocument = gql`
     }
   }
 `;
-export function useUniverseAddStarMutation(
+export function useUniverseAddSystemMutation(
   baseOptions?: Apollo.MutationHookOptions<
-    UniverseAddStarMutation,
-    UniverseAddStarMutationVariables
+    UniverseAddSystemMutation,
+    UniverseAddSystemMutationVariables
   >
 ) {
   return Apollo.useMutation<
-    UniverseAddStarMutation,
-    UniverseAddStarMutationVariables
-  >(UniverseAddStarDocument, baseOptions);
+    UniverseAddSystemMutation,
+    UniverseAddSystemMutationVariables
+  >(UniverseAddSystemDocument, baseOptions);
 }
-export type UniverseAddStarMutationHookResult = ReturnType<
-  typeof useUniverseAddStarMutation
->;
-export const UniverseStarRemoveDocument = gql`
-  mutation UniverseStarRemove($id: ID!, $starId: ID!) {
-    universeTemplateRemoveSystem(id: $id, starId: $starId)
-  }
-`;
-export function useUniverseStarRemoveMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    UniverseStarRemoveMutation,
-    UniverseStarRemoveMutationVariables
-  >
-) {
-  return Apollo.useMutation<
-    UniverseStarRemoveMutation,
-    UniverseStarRemoveMutationVariables
-  >(UniverseStarRemoveDocument, baseOptions);
-}
-export type UniverseStarRemoveMutationHookResult = ReturnType<
-  typeof useUniverseStarRemoveMutation
->;
-export const UniverseStarSetDescriptionDocument = gql`
-  mutation UniverseStarSetDescription(
-    $id: ID!
-    $starId: ID!
-    $description: String!
-  ) {
-    universeTemplateSystemSetDescription(
-      id: $id
-      starId: $starId
-      description: $description
-    ) {
-      id
-    }
-  }
-`;
-export function useUniverseStarSetDescriptionMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    UniverseStarSetDescriptionMutation,
-    UniverseStarSetDescriptionMutationVariables
-  >
-) {
-  return Apollo.useMutation<
-    UniverseStarSetDescriptionMutation,
-    UniverseStarSetDescriptionMutationVariables
-  >(UniverseStarSetDescriptionDocument, baseOptions);
-}
-export type UniverseStarSetDescriptionMutationHookResult = ReturnType<
-  typeof useUniverseStarSetDescriptionMutation
->;
-export const UniverseStarSetNameDocument = gql`
-  mutation UniverseStarSetName($id: ID!, $starId: ID!, $name: String!) {
-    universeTemplateSystemSetName(id: $id, starId: $starId, name: $name) {
-      id
-    }
-  }
-`;
-export function useUniverseStarSetNameMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    UniverseStarSetNameMutation,
-    UniverseStarSetNameMutationVariables
-  >
-) {
-  return Apollo.useMutation<
-    UniverseStarSetNameMutation,
-    UniverseStarSetNameMutationVariables
-  >(UniverseStarSetNameDocument, baseOptions);
-}
-export type UniverseStarSetNameMutationHookResult = ReturnType<
-  typeof useUniverseStarSetNameMutation
->;
-export const UniverseStarSetPositionDocument = gql`
-  mutation UniverseStarSetPosition(
-    $id: ID!
-    $starId: ID!
-    $position: PositionInput!
-  ) {
-    universeTemplateSystemSetPosition(
-      id: $id
-      starId: $starId
-      position: $position
-    ) {
-      id
-    }
-  }
-`;
-export function useUniverseStarSetPositionMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    UniverseStarSetPositionMutation,
-    UniverseStarSetPositionMutationVariables
-  >
-) {
-  return Apollo.useMutation<
-    UniverseStarSetPositionMutation,
-    UniverseStarSetPositionMutationVariables
-  >(UniverseStarSetPositionDocument, baseOptions);
-}
-export type UniverseStarSetPositionMutationHookResult = ReturnType<
-  typeof useUniverseStarSetPositionMutation
+export type UniverseAddSystemMutationHookResult = ReturnType<
+  typeof useUniverseAddSystemMutation
 >;
 export const UniverseDocument = gql`
   subscription Universe($id: ID!) {
@@ -793,6 +748,165 @@ export function useUniverseSubscription(
 }
 export type UniverseSubscriptionHookResult = ReturnType<
   typeof useUniverseSubscription
+>;
+export const UniverseSystemRemoveDocument = gql`
+  mutation UniverseSystemRemove($id: ID!, $systemId: ID!) {
+    universeTemplateRemoveSystem(id: $id, systemId: $systemId)
+  }
+`;
+export function useUniverseSystemRemoveMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseSystemRemoveMutation,
+    UniverseSystemRemoveMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseSystemRemoveMutation,
+    UniverseSystemRemoveMutationVariables
+  >(UniverseSystemRemoveDocument, baseOptions);
+}
+export type UniverseSystemRemoveMutationHookResult = ReturnType<
+  typeof useUniverseSystemRemoveMutation
+>;
+export const UniverseSystemSetDescriptionDocument = gql`
+  mutation UniverseSystemSetDescription(
+    $id: ID!
+    $systemId: ID!
+    $description: String!
+  ) {
+    universeTemplateSystemSetDescription(
+      id: $id
+      systemId: $systemId
+      description: $description
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseSystemSetDescriptionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseSystemSetDescriptionMutation,
+    UniverseSystemSetDescriptionMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseSystemSetDescriptionMutation,
+    UniverseSystemSetDescriptionMutationVariables
+  >(UniverseSystemSetDescriptionDocument, baseOptions);
+}
+export type UniverseSystemSetDescriptionMutationHookResult = ReturnType<
+  typeof useUniverseSystemSetDescriptionMutation
+>;
+export const UniverseSystemSetNameDocument = gql`
+  mutation UniverseSystemSetName($id: ID!, $systemId: ID!, $name: String!) {
+    universeTemplateSystemSetName(id: $id, systemId: $systemId, name: $name) {
+      id
+    }
+  }
+`;
+export function useUniverseSystemSetNameMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseSystemSetNameMutation,
+    UniverseSystemSetNameMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseSystemSetNameMutation,
+    UniverseSystemSetNameMutationVariables
+  >(UniverseSystemSetNameDocument, baseOptions);
+}
+export type UniverseSystemSetNameMutationHookResult = ReturnType<
+  typeof useUniverseSystemSetNameMutation
+>;
+export const UniverseSystemSetPositionDocument = gql`
+  mutation UniverseSystemSetPosition(
+    $id: ID!
+    $systemId: ID!
+    $position: PositionInput!
+  ) {
+    universeTemplateSystemSetPosition(
+      id: $id
+      systemId: $systemId
+      position: $position
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseSystemSetPositionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseSystemSetPositionMutation,
+    UniverseSystemSetPositionMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseSystemSetPositionMutation,
+    UniverseSystemSetPositionMutationVariables
+  >(UniverseSystemSetPositionDocument, baseOptions);
+}
+export type UniverseSystemSetPositionMutationHookResult = ReturnType<
+  typeof useUniverseSystemSetPositionMutation
+>;
+export const TemplateSystemDocument = gql`
+  subscription TemplateSystem($id: ID!, $systemId: ID!) {
+    templateUniverseSystem(id: $id, systemId: $systemId) {
+      id
+      identity {
+        name
+      }
+      planetarySystem {
+        skyboxKey
+      }
+      items {
+        id
+        identity {
+          name
+          description
+        }
+        tags {
+          tags
+        }
+        isStar {
+          age
+          hue
+          isWhite
+          solarMass
+          spectralType
+          radius
+        }
+        isPlanet {
+          age
+          class
+          radius
+        }
+        satellite {
+          distance
+          axialTilt
+          showOrbit
+          orbitalArc
+          eccentricity
+          orbitalInclination
+        }
+        temperature {
+          temperature
+        }
+      }
+    }
+  }
+`;
+export function useTemplateSystemSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    TemplateSystemSubscription,
+    TemplateSystemSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    TemplateSystemSubscription,
+    TemplateSystemSubscriptionVariables
+  >(TemplateSystemDocument, baseOptions);
+}
+export type TemplateSystemSubscriptionHookResult = ReturnType<
+  typeof useTemplateSystemSubscription
 >;
 export const UniverseSetCoverImageDocument = gql`
   mutation UniverseSetCoverImage($id: ID!, $image: Upload!) {

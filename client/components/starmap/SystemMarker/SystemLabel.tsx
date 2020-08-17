@@ -6,10 +6,10 @@ import {useFrame} from "react-three-fiber";
 import {configStoreApi} from "../configStore";
 
 const SystemLabel: React.FC<{
-  starId: string;
+  systemId: string;
   name: string;
   hoveringDirection: React.MutableRefObject<number>;
-}> = ({starId, name, hoveringDirection}) => {
+}> = ({systemId, name, hoveringDirection}) => {
   React.useEffect(() => {
     if (text.current) {
       text.current.material.opacity = 0.5;
@@ -32,7 +32,7 @@ const SystemLabel: React.FC<{
   const selected = React.useRef(false);
   useFrame(() => {
     const selectedObject = configStoreApi.getState().selectedObject;
-    const isSelected = starId === selectedObject?.id;
+    const isSelected = systemId === selectedObject?.id;
     if (text.current) {
       if (isSelected) {
         selected.current = true;

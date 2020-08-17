@@ -1,7 +1,7 @@
 import {Button, FormControl, FormLabel, Input, Textarea} from "@chakra-ui/core";
 import {
-  useUniverseStarSetNameMutation,
-  useUniverseStarSetDescriptionMutation,
+  useUniverseSystemSetNameMutation,
+  useUniverseSystemSetDescriptionMutation,
 } from "../../generated/graphql";
 import React from "react";
 import PropertyPalette from "../ui/propertyPalette";
@@ -14,28 +14,28 @@ const ConfigPalette: React.FC = () => {
   const universeId = useConfigStore(store => store.universeId);
   const setSystemId = useConfigStore(store => store.setSystemId);
   const selectedObject = useConfigStore(store => store.selectedObject);
-  const [setName] = useUniverseStarSetNameMutation();
-  const [setDescription] = useUniverseStarSetDescriptionMutation();
-  const starId = selectedObject?.id;
+  const [setName] = useUniverseSystemSetNameMutation();
+  const [setDescription] = useUniverseSystemSetDescriptionMutation();
+  const systemId = selectedObject?.id;
   const updateName = React.useMemo(
     () =>
       throttle((name: string) => {
-        if (!starId || !universeId) return;
+        if (!systemId || !universeId) return;
         setName({
-          variables: {id: universeId, starId, name},
+          variables: {id: universeId, systemId, name},
         });
       }, 500),
-    [starId]
+    [systemId]
   );
   const updateDescription = React.useMemo(
     () =>
       throttle((description: string) => {
-        if (!starId || !universeId) return;
+        if (!systemId || !universeId) return;
         setDescription({
-          variables: {id: universeId, starId, description},
+          variables: {id: universeId, systemId, description},
         });
       }, 500),
-    [starId]
+    [systemId]
   );
   if (!selectedObject) return null;
   return (

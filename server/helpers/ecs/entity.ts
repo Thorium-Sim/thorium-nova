@@ -21,6 +21,7 @@ const handler: ProxyHandler<Entity> = {
     if (target[key]) return target[key];
     // @ts-ignore
     if (target.components[key]) return target.components[key];
+    if (key === "isProxy") return true;
     return undefined;
   },
 };

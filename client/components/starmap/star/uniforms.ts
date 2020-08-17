@@ -12,8 +12,8 @@ export default function getUniforms({
   flare6 = 0.1,
 }: {
   map: Texture;
-  color1?: number;
-  color2?: number;
+  color1?: number | Color;
+  color2?: number | Color;
   flare1?: number;
   flare2?: number;
   flare3?: number;

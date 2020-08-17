@@ -1,5 +1,0 @@
-mutation UniverseStarSetName($id: ID!, $starId: ID!, $name: String!) {
-  universeTemplateSystemSetName(id: $id, starId: $starId, name: $name) {
-    id
-  }
-}

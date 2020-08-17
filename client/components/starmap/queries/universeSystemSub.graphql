@@ -1,0 +1,45 @@
+subscription TemplateSystem($id: ID!, $systemId: ID!) {
+  templateUniverseSystem(id: $id, systemId: $systemId) {
+    id
+    identity {
+      name
+    }
+    planetarySystem {
+      skyboxKey
+    }
+    items {
+      id
+      identity {
+        name
+        description
+      }
+      tags {
+        tags
+      }
+      isStar {
+        age
+        hue
+        isWhite
+        solarMass
+        spectralType
+        radius
+      }
+      isPlanet {
+        age
+        class
+        radius
+      }
+      satellite {
+        distance
+        axialTilt
+        showOrbit
+        orbitalArc
+        eccentricity
+        orbitalInclination
+      }
+      temperature {
+        temperature
+      }
+    }
+  }
+}
