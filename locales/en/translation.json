@@ -1,6 +1,9 @@
 {
   "Add": "Add",
+  "Add Planet": "Add Planet",
+  "Add Star": "Add Star",
   "Are you sure you want to remove this planetary system?": "Are you sure you want to remove this planetary system?",
+  "Cancel": "Cancel",
   "Delete": "Delete",
   "Edit": "Edit",
   "It will remove all of the objects inside of it": {

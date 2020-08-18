@@ -14,9 +14,9 @@ class Composition {
   concentration!: number;
 }
 @ObjectType()
-class AtmosphereComposition extends Component {
+export class AtmosphereCompositionComponent extends Component {
   static id: "atmosphereComposition" = "atmosphereComposition";
-  static defaults: ComponentOmit<AtmosphereComposition> = {
+  static defaults: ComponentOmit<AtmosphereCompositionComponent> = {
     composition: [],
   };
 

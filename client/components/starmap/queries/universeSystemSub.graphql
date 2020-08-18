@@ -26,7 +26,7 @@ subscription TemplateSystem($id: ID!, $systemId: ID!) {
       }
       isPlanet {
         age
-        class
+        classification
         radius
       }
       satellite {

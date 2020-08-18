@@ -81,6 +81,7 @@ class Entity extends Components {
 
     // components initialization
     for (let i = 0, component; (component = components[i]); i += 1) {
+      if (!component) continue;
       // if a getDefaults method is provided, use it. First because let the
       // runtime allocate the component is way more faster than using a copy
       // function. Secondly because the user may want to provide some kind

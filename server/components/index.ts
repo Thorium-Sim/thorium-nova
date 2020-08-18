@@ -14,7 +14,9 @@ import {PositionComponent} from "./position";
 import {SatelliteComponent} from "./satellite";
 import {SizeComponent} from "./size";
 import {TemperatureComponent} from "./temperature";
-
+import {AtmosphereCompositionComponent} from "./atmosphereComposition";
+import {RingsComponent} from "./rings";
+import {CloudsComponent} from "./clouds";
 @ObjectType()
 export default class Components {
   @Field()
@@ -63,6 +65,9 @@ export default class Components {
 
   @Field()
   satellite?: SatelliteComponent;
+
+  @Field()
+  atmosphereComposition?: AtmosphereCompositionComponent;
 }
 
 export const registeredComponents = [

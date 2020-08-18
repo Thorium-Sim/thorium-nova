@@ -1,0 +1,9 @@
+mutation UniverseAddStar($id: ID!, $systemId: ID!, $spectralType: String!) {
+  universeTemplateAddStar(
+    id: $id
+    systemId: $systemId
+    spectralType: $spectralType
+  ) {
+    id
+  }
+}

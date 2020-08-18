@@ -71,7 +71,7 @@ export class UniversePluginStarsResolver {
     });
     universe.entities.push(entity);
     publish(universe);
-    pubsub.publish("templateUniverseSystem", {system});
+    pubsub.publish("templateUniverseSystem", {id: system.id, system});
     return entity;
   }
 }

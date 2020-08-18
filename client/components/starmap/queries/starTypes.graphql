@@ -1,0 +1,8 @@
+query StarTypes {
+  starTypes {
+    id
+    name
+    spectralType
+    prevalence
+  }
+}

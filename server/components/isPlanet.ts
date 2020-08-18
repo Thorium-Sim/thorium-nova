@@ -48,11 +48,21 @@ export class IsPlanetComponent extends Component {
   })
   lifeforms: string = "Unknown";
 
-  @Field({
+  @Field(type => Number, {
     description:
       "Surface gravity calculated with the equation (G * Mplanet) / Rplanet^2 where G is the gravitational constant.",
   })
   get surfaceGravity() {
     return 0;
   }
+
+  @Field({
+    description: "The asset path for the clouds texture. Blank if no clouds",
+  })
+  cloudsMapAsset: string = "";
+
+  @Field({
+    description: "The asset path for the rings texture. Blank if no rings",
+  })
+  ringsMapAsset: string = "";
 }

@@ -1,11 +1,23 @@
 import React from "react";
-import {Box, Input, Stack} from "@chakra-ui/core";
+import {
+  Box,
+  Collapse,
+  Input,
+  Menu,
+  MenuButton,
+  MenuDivider,
+  MenuItem,
+  MenuList,
+  Stack,
+} from "@chakra-ui/core";
 import {FaArrowLeft, FaHome} from "react-icons/fa";
 import {useTranslation} from "react-i18next";
 import {Camera, Vector3} from "three";
 import {
   useUniverseAddSystemMutation,
   useUniverseSystemRemoveMutation,
+  useUniverseAddStarMutation,
+  useStarTypesQuery,
 } from "../../generated/graphql";
 import {configStoreApi, useConfigStore} from "./configStore";
 import Button from "../ui/button";
@@ -23,8 +35,11 @@ const Menubar: React.FC<{
 }> = ({sceneRef}) => {
   const [addSystem] = useUniverseAddSystemMutation();
   const [removeSystem] = useUniverseSystemRemoveMutation();
+  const [addStar] = useUniverseAddStarMutation();
+  const {data: starTypesData} = useStarTypesQuery();
   const {t} = useTranslation();
   const confirm = useConfirm();
+  const [showingAddOptions, setShowingAddOptions] = React.useState(false);
 
   const universeId = useConfigStore(store => store.universeId);
   const systemId = useConfigStore(store => store.systemId);
@@ -32,6 +47,7 @@ const Menubar: React.FC<{
   const selectedObject = useConfigStore(store => store.selectedObject);
 
   useHotkeys("n", () => {
+    if (systemId) return;
     const camera = sceneRef.current?.camera();
     if (!camera) return;
     const vec = new Vector3(0, 0, -100);
@@ -45,6 +61,7 @@ const Menubar: React.FC<{
   });
 
   async function deleteObject() {
+    if (systemId) return;
     const selectedObject = configStoreApi.getState().selectedObject;
     if (!selectedObject) return;
     const doRemove = await confirm({
@@ -61,6 +78,12 @@ const Menubar: React.FC<{
   useHotkeys("backspace", () => {
     deleteObject();
   });
+
+  React.useEffect(() => {
+    if (!systemId && showingAddOptions) {
+      setShowingAddOptions(false);
+    }
+  }, [systemId, showingAddOptions]);
   return (
     <Box position="fixed" top={0} left={0} width="100vw" padding={2}>
       <Stack isInline spacing={2}>
@@ -92,6 +115,10 @@ const Menubar: React.FC<{
           variant="ghost"
           size="sm"
           onClick={() => {
+            if (systemId) {
+              setShowingAddOptions(a => !a);
+              return;
+            }
             const camera = sceneRef.current?.camera();
             if (!camera) return;
             const vec = new Vector3(0, 0, -30);
@@ -133,6 +160,45 @@ const Menubar: React.FC<{
           maxWidth="300px"
         />
       </Stack>
+      <Collapse mt={4} isOpen={showingAddOptions}>
+        <Stack isInline spacing={2} mt={2}>
+          <Menu>
+            <MenuButton
+              as={Button}
+              rightIcon="chevron-down"
+              variantColor="warning"
+              size="sm"
+              width="auto"
+            >
+              {t("Add Star")}
+            </MenuButton>
+            <MenuList>
+              <MenuItem>{t("Cancel")}</MenuItem>
+              <MenuDivider />
+              {starTypesData?.starTypes.map(s => (
+                <MenuItem
+                  key={s.id}
+                  onClick={() =>
+                    addStar({
+                      variables: {
+                        id: universeId,
+                        systemId,
+                        spectralType: s.spectralType,
+                      },
+                    })
+                  }
+                >
+                  {s.spectralType} - {s.name} (
+                  {Math.round(s.prevalence * 1000) / 10}%)
+                </MenuItem>
+              ))}
+            </MenuList>
+          </Menu>
+          <Button variantColor="success" size="sm" width="auto">
+            {t("Add Planet")}
+          </Button>
+        </Stack>
+      </Collapse>
     </Box>
   );
 };

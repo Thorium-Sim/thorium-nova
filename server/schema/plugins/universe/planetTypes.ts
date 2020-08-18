@@ -72,7 +72,12 @@ export const planetTypes = [
     classification: "A",
     name: "Geothermal",
     ageRange: {min: 1000000, max: 2000000000},
-    atmosphericComposition: [],
+    atmosphericPressure:[
+
+    ],
+    atmosphericComposition: [
+      {hydrogen:}
+    ],
     habitable: false,
     lifeforms: ["None"],
     population: 0,

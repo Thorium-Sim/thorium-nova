@@ -195,6 +195,30 @@ export type TemplateShipSetModelMutation = {
   };
 };
 
+export type StarTypesQueryVariables = Exact<{[key: string]: never}>;
+
+export type StarTypesQuery = {
+  __typename?: "Query";
+  starTypes: Array<{
+    __typename?: "StarType";
+    id: string;
+    name: string;
+    spectralType: string;
+    prevalence: number;
+  }>;
+};
+
+export type UniverseAddStarMutationVariables = Exact<{
+  id: Scalars["ID"];
+  systemId: Scalars["ID"];
+  spectralType: Scalars["String"];
+}>;
+
+export type UniverseAddStarMutation = {
+  __typename?: "Mutation";
+  universeTemplateAddStar: {__typename?: "Entity"; id: string};
+};
+
 export type UniverseAddSystemMutationVariables = Exact<{
   id: Scalars["ID"];
   position: PositionInput;
@@ -334,7 +358,7 @@ export type TemplateSystemSubscription = {
       isPlanet: Maybe<{
         __typename?: "IsPlanetComponent";
         age: number;
-        class: string;
+        classification: string;
         radius: number;
       }>;
       satellite: {
@@ -679,6 +703,64 @@ export function useTemplateShipSetModelMutation(
 export type TemplateShipSetModelMutationHookResult = ReturnType<
   typeof useTemplateShipSetModelMutation
 >;
+export const StarTypesDocument = gql`
+  query StarTypes {
+    starTypes {
+      id
+      name
+      spectralType
+      prevalence
+    }
+  }
+`;
+export function useStarTypesQuery(
+  baseOptions?: Apollo.QueryHookOptions<StarTypesQuery, StarTypesQueryVariables>
+) {
+  return Apollo.useQuery<StarTypesQuery, StarTypesQueryVariables>(
+    StarTypesDocument,
+    baseOptions
+  );
+}
+export function useStarTypesLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    StarTypesQuery,
+    StarTypesQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<StarTypesQuery, StarTypesQueryVariables>(
+    StarTypesDocument,
+    baseOptions
+  );
+}
+export type StarTypesQueryHookResult = ReturnType<typeof useStarTypesQuery>;
+export type StarTypesLazyQueryHookResult = ReturnType<
+  typeof useStarTypesLazyQuery
+>;
+export const UniverseAddStarDocument = gql`
+  mutation UniverseAddStar($id: ID!, $systemId: ID!, $spectralType: String!) {
+    universeTemplateAddStar(
+      id: $id
+      systemId: $systemId
+      spectralType: $spectralType
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseAddStarMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseAddStarMutation,
+    UniverseAddStarMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseAddStarMutation,
+    UniverseAddStarMutationVariables
+  >(UniverseAddStarDocument, baseOptions);
+}
+export type UniverseAddStarMutationHookResult = ReturnType<
+  typeof useUniverseAddStarMutation
+>;
 export const UniverseAddSystemDocument = gql`
   mutation UniverseAddSystem($id: ID!, $position: PositionInput!) {
     universeTemplateAddSystem(id: $id, position: $position) {
@@ -876,7 +958,7 @@ export const TemplateSystemDocument = gql`
         }
         isPlanet {
           age
-          class
+          classification
           radius
         }
         satellite {
