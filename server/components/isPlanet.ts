@@ -14,6 +14,9 @@ export class IsPlanetComponent extends Component {
     terranMass: 1,
     habitable: false,
     lifeforms: "Unknown",
+    textureMapAsset: "/public/assets/textures/Terrestrial1.jpg",
+    cloudsMapAsset: "/public/assets/textures/Clouds1.png",
+    ringsMapAsset: "/public/assets/textures/rings1.png",
   };
   @Field({description: "The age in years"})
   age: number = 4000000000;
@@ -57,12 +60,17 @@ export class IsPlanetComponent extends Component {
   }
 
   @Field({
+    description: "The asset path for the sphere texture.",
+  })
+  textureMapAsset: string = "/public/assets/textures/Terrestrial1.jpg";
+
+  @Field({
     description: "The asset path for the clouds texture. Blank if no clouds",
   })
-  cloudsMapAsset: string = "";
+  cloudsMapAsset: string = "/public/assets/textures/Clouds1.png";
 
   @Field({
     description: "The asset path for the rings texture. Blank if no rings",
   })
-  ringsMapAsset: string = "";
+  ringsMapAsset: string = "/public/assets/textures/rings1.png";
 }

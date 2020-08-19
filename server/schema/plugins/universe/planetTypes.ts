@@ -1,5 +1,11 @@
 import {Field, ID, ObjectType} from "type-graphql";
 
+const possibleRingMaps = [
+  "/public/assets/textures/Clouds1.png",
+  "/public/assets/textures/Clouds1.png",
+  "/public/assets/textures/Clouds1.png",
+  "/public/assets/textures/Clouds1.png",
+];
 type range = {min: number; max: number};
 type atmosphericComposition = {component: string; concentration: number}[];
 @ObjectType()
@@ -40,10 +46,16 @@ class PlanetType {
   atmosphericComposition: atmosphericComposition;
   habitable: boolean;
   lifeforms: string[];
+
+  possibleTextureMaps: string[];
+
   // The likelihood the planet has rings.
   hasRings: number;
+  possibleRingMaps: string[];
+
   // The likelihood the planet has clouds.
   hasClouds: number;
+  possibleCloudMaps: string[];
 
   constructor(params: Omit<PlanetType, "id">) {
     this.id = params.name;
@@ -59,8 +71,11 @@ class PlanetType {
     this.atmosphericComposition = params.atmosphericComposition;
     this.habitable = params.habitable;
     this.lifeforms = params.lifeforms;
+    this.possibleTextureMaps = params.possibleTextureMaps;
     this.hasRings = params.hasRings;
+    this.possibleRingMaps = params.possibleRingMaps;
     this.hasClouds = params.hasClouds;
+    this.possibleCloudMaps = params.possibleCloudMaps;
   }
 }
 
@@ -72,12 +87,7 @@ export const planetTypes = [
     classification: "A",
     name: "Geothermal",
     ageRange: {min: 1000000, max: 2000000000},
-    atmosphericPressure:[
-
-    ],
-    atmosphericComposition: [
-      {hydrogen:}
-    ],
+    atmosphericComposition: [],
     habitable: false,
     lifeforms: ["None"],
     population: 0,
@@ -87,6 +97,13 @@ export const planetTypes = [
     terranMassRange: {min: 0.1, max: 1.2},
     hasClouds: 0,
     hasRings: 0,
+    possibleTextureMaps: [
+      "/public/assets/textures/planet_textureAuric.jpg",
+      "/public/assets/textures/planet_textureAcid.jpg",
+      "/public/assets/textures/mercurymap.jpg",
+    ],
+    possibleCloudMaps: [],
+    possibleRingMaps: [],
   }),
   new PlanetType({
     classification: "B",
@@ -102,6 +119,13 @@ export const planetTypes = [
     terranMassRange: {min: 0.1, max: 1.2},
     hasClouds: 0,
     hasRings: 0,
+
+    possibleTextureMaps: [
+      "/public/assets/textures/2k_mercury.jpg",
+      "/public/assets/textures/plutomap1k.jpg",
+    ],
+    possibleCloudMaps: [],
+    possibleRingMaps: [],
   }),
   new PlanetType({
     classification: "C",
@@ -117,6 +141,13 @@ export const planetTypes = [
     terranMassRange: {min: 0.1, max: 1},
     hasClouds: 0,
     hasRings: 0,
+    possibleTextureMaps: [
+      "/public/assets/textures/planet_textureDust.jpg",
+      "/public/assets/textures/planet_textureAzure.jpg",
+      "/public/assets/textures/planet_textureChondrite.jpg",
+    ],
+    possibleCloudMaps: [],
+    possibleRingMaps: [],
   }),
   new PlanetType({
     classification: "D",
@@ -132,6 +163,13 @@ export const planetTypes = [
     terranMassRange: {min: 0.01, max: 0.4},
     hasClouds: 0,
     hasRings: 0,
+    possibleTextureMaps: [
+      "/public/assets/textures/2k_moon.jpg",
+      "/public/assets/textures/Icy.jpg",
+      "/public/assets/textures/planet_textureBurnt.jpg",
+    ],
+    possibleCloudMaps: [],
+    possibleRingMaps: [],
   }),
   new PlanetType({
     classification: "E",
@@ -147,6 +185,13 @@ export const planetTypes = [
     terranMassRange: {min: 0.1, max: 1.5},
     hasClouds: 0,
     hasRings: 0,
+    possibleTextureMaps: [
+      "/public/assets/textures/planet_textureHot_light.jpg",
+      "/public/assets/textures/planet_textureHot.jpg",
+      "/public/assets/textures/Volcanic.jpg",
+    ],
+    possibleCloudMaps: [],
+    possibleRingMaps: [],
   }),
   new PlanetType({
     classification: "F",
@@ -162,6 +207,12 @@ export const planetTypes = [
     terranMassRange: {min: 0.1, max: 1.5},
     hasClouds: 0,
     hasRings: 0,
+    possibleTextureMaps: [
+      "/public/assets/textures/planet_textureCimmerian.jpg",
+      "/public/assets/textures/planet_textureCrimson.jpg",
+    ],
+    possibleCloudMaps: [],
+    possibleRingMaps: [],
   }),
   new PlanetType({
     classification: "G",
@@ -177,6 +228,12 @@ export const planetTypes = [
     terranMassRange: {min: 0.5, max: 1.5},
     hasClouds: 0,
     hasRings: 0,
+    possibleTextureMaps: [
+      "/public/assets/textures/planet_textureCarbide.jpg",
+      "/public/assets/textures/planet_textureChlorine.jpg",
+    ],
+    possibleCloudMaps: [],
+    possibleRingMaps: [],
   }),
   new PlanetType({
     classification: "H",
@@ -196,6 +253,15 @@ export const planetTypes = [
     terranMassRange: {min: 0.1, max: 1.5},
     hasClouds: 0.7,
     hasRings: 0,
+    possibleTextureMaps: [
+      "/public/assets/textures/2k_venus_atmosphere.jpg",
+      "/public/assets/textures/planet_textureDesertic.jpg",
+    ],
+    possibleCloudMaps: [
+      "/public/assets/textures/clouds_textureSoft.png",
+      "/public/assets/textures/Clouds1.png",
+    ],
+    possibleRingMaps: [],
   }),
   new PlanetType({
     classification: "I",
@@ -215,6 +281,19 @@ export const planetTypes = [
     terranMassRange: {min: 300, max: 1000},
     hasClouds: 0.4,
     hasRings: 0.8,
+    possibleTextureMaps: [
+      "/public/assets/textures/2k_saturn.jpg",
+      "/public/assets/textures/2k_jupiter.jpg",
+      "/public/assets/textures/planet_textureFluorescent.jpg",
+      "/public/assets/textures/planet_textureBlueGiant.jpg",
+    ],
+    possibleCloudMaps: [
+      "/public/assets/textures/clouds_textureGiant.png",
+      "/public/assets/textures/clouds_textureGiantSharp.png",
+      "/public/assets/textures/clouds_textureSwept.png",
+      "/public/assets/textures/Clouds4.png",
+    ],
+    possibleRingMaps,
   }),
   new PlanetType({
     classification: "J",
@@ -234,6 +313,21 @@ export const planetTypes = [
     terranMassRange: {min: 10, max: 100},
     hasClouds: 0.4,
     hasRings: 0.8,
+    possibleTextureMaps: [
+      "/public/assets/textures/2k_neptune.jpg",
+      "/public/assets/textures/2k_uranus.jpg",
+      "/public/assets/textures/Gaseous2.jpg",
+      "/public/assets/textures/Gaseous1.jpg",
+      "/public/assets/textures/Gaseous3.jpg",
+      "/public/assets/textures/Gaseous4.jpg",
+    ],
+    possibleCloudMaps: [
+      "/public/assets/textures/clouds_textureGiant.png",
+      "/public/assets/textures/clouds_textureGiantSharp.png",
+      "/public/assets/textures/clouds_textureSwept.png",
+      "/public/assets/textures/Clouds4.png",
+    ],
+    possibleRingMaps,
   }),
   new PlanetType({
     classification: "K",
@@ -249,6 +343,15 @@ export const planetTypes = [
     terranMassRange: {min: 0.1, max: 1.5},
     hasClouds: 0.4,
     hasRings: 0.2,
+    possibleTextureMaps: [
+      "/public/assets/textures/planet_textureAlkali.jpg",
+      "/public/assets/textures/planet_textureCyanic.jpg",
+    ],
+    possibleCloudMaps: [
+      "/public/assets/textures/Clouds1.png",
+      "/public/assets/textures/clouds_textureSoft.png",
+    ],
+    possibleRingMaps,
   }),
   new PlanetType({
     classification: "L",
@@ -264,6 +367,12 @@ export const planetTypes = [
     terranMassRange: {min: 0.1, max: 1.5},
     hasClouds: 0.4,
     hasRings: 0.3,
+    possibleTextureMaps: ["/public/assets/textures/Martian.jpg"],
+    possibleCloudMaps: [
+      "/public/assets/textures/Clouds1.png",
+      "/public/assets/textures/clouds_textureSoft.png",
+    ],
+    possibleRingMaps,
   }),
   new PlanetType({
     classification: "M",
@@ -279,6 +388,20 @@ export const planetTypes = [
     terranMassRange: {min: 0.5, max: 1.5},
     hasClouds: 1,
     hasRings: 0.5,
+    possibleTextureMaps: [
+      "/public/assets/textures/Terrestrial1.jpg",
+      "/public/assets/textures/Terrestrial2.jpg",
+      "/public/assets/textures/Terrestrial3.jpg",
+      "/public/assets/textures/Terrestrial4.jpg",
+    ],
+    possibleCloudMaps: [
+      "/public/assets/textures/Clouds1.png",
+      "/public/assets/textures/Clouds2.png",
+      "/public/assets/textures/Clouds3.png",
+      "/public/assets/textures/clouds_textureSoft.png",
+      "/public/assets/textures/clouds_textureMedium.png",
+    ],
+    possibleRingMaps,
   }),
   new PlanetType({
     classification: "N",
@@ -294,6 +417,18 @@ export const planetTypes = [
     terranMassRange: {min: 0.5, max: 1.5},
     hasClouds: 1,
     hasRings: 0.5,
+    possibleTextureMaps: [
+      "/public/assets/textures/Venusian.jpg",
+      "/public/assets/textures/2k_venus_surface.jpg",
+    ],
+    possibleCloudMaps: [
+      "/public/assets/textures/Clouds1.png",
+      "/public/assets/textures/Clouds2.png",
+      "/public/assets/textures/Clouds3.png",
+      "/public/assets/textures/clouds_textureSoft.png",
+      "/public/assets/textures/clouds_textureMedium.png",
+    ],
+    possibleRingMaps,
   }),
   new PlanetType({
     classification: "O",
@@ -309,6 +444,18 @@ export const planetTypes = [
     terranMassRange: {min: 0.5, max: 1.5},
     hasClouds: 1,
     hasRings: 0.5,
+    possibleTextureMaps: [
+      "/public/assets/textures/Tropical.jpg",
+      "/public/assets/textures/Swamp.jpg",
+    ],
+    possibleCloudMaps: [
+      "/public/assets/textures/Clouds1.png",
+      "/public/assets/textures/Clouds2.png",
+      "/public/assets/textures/Clouds3.png",
+      "/public/assets/textures/clouds_textureSoft.png",
+      "/public/assets/textures/clouds_textureMedium.png",
+    ],
+    possibleRingMaps,
   }),
   new PlanetType({
     classification: "P",
@@ -324,5 +471,17 @@ export const planetTypes = [
     terranMassRange: {min: 0.5, max: 1.5},
     hasClouds: 1,
     hasRings: 0.5,
+    possibleTextureMaps: [
+      "/public/assets/textures/Icy.jpg",
+      "/public/assets/textures/Alpine.jpg",
+    ],
+    possibleCloudMaps: [
+      "/public/assets/textures/Clouds1.png",
+      "/public/assets/textures/Clouds2.png",
+      "/public/assets/textures/Clouds3.png",
+      "/public/assets/textures/clouds_textureSoft.png",
+      "/public/assets/textures/clouds_textureMedium.png",
+    ],
+    possibleRingMaps,
   }),
 ];

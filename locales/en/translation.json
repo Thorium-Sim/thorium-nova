@@ -1,12 +1,24 @@
 {
-  "Add": "Add",
-  "Add Planet": "Add Planet",
-  "Add Star": "Add Star",
-  "Are you sure you want to remove this planetary system?": "Are you sure you want to remove this planetary system?",
-  "Cancel": "Cancel",
-  "Delete": "Delete",
-  "Edit": "Edit",
-  "It will remove all of the objects inside of it": {
-    "": ""
-  }
+  "Model is uploading": {
+    " Please wait": {
+      "": {
+        "": {
+          "": ""
+        }
+      }
+    }
+  },
+  "Models should be in ": {
+    "glb format": {
+      " Top and side views are automatically generated from the model": {
+        " <1>Read about how to create compatible models": {
+          "</1>": "Models should be in .glb format. Top and side views are automatically generated from the model. <1>Read about how to create compatible models.</1>"
+        }
+      }
+    }
+  },
+  "Type and press return to add a tag": "Type and press return to add a tag",
+  "Upload Complete": "Upload Complete",
+  "Upload Failed": "Upload Failed",
+  "Uploading": "Uploading"
 }

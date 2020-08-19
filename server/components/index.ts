@@ -15,8 +15,7 @@ import {SatelliteComponent} from "./satellite";
 import {SizeComponent} from "./size";
 import {TemperatureComponent} from "./temperature";
 import {AtmosphereCompositionComponent} from "./atmosphereComposition";
-import {RingsComponent} from "./rings";
-import {CloudsComponent} from "./clouds";
+import {PopulationComponent} from "./population";
 @ObjectType()
 export default class Components {
   @Field()
@@ -36,6 +35,9 @@ export default class Components {
 
   @Field()
   temperature?: TemperatureComponent;
+
+  @Field()
+  population?: PopulationComponent;
 
   // Ship Entity Components
   @Field()
@@ -86,4 +88,5 @@ export const registeredComponents = [
   IsStarComponent,
   IsPlanetComponent,
   SatelliteComponent,
+  PopulationComponent,
 ];

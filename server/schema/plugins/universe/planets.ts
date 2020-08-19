@@ -12,6 +12,7 @@ import {toRoman} from "roman-numerals";
 import {IsPlanetComponent} from "server/components/isPlanet";
 import getHabitableZone from "server/generatorFixtures/habitableZone";
 import {randomFromList} from "server/helpers/randomFromList";
+import {PopulationComponent} from "server/components/population";
 
 type range = {min: number; max: number};
 function randomFromRange({min, max}: range) {
@@ -92,6 +93,7 @@ export class UniversePluginPlanetsResolver {
       IsPlanetComponent,
       TemperatureComponent,
       SatelliteComponent,
+      PopulationComponent,
     ]);
     entity.updateComponent("identity", {name});
     entity.updateComponent("satellite", {
@@ -110,10 +112,23 @@ export class UniversePluginPlanetsResolver {
         Math.round(randomFromRange(planetType.terranMassRange) * 100) / 100,
       habitable: planetType.habitable,
       lifeforms: randomFromList(planetType.lifeforms),
-      cloudMapAsset: "",
-      ringsMapAsset: "",
+      textureMapAsset: randomFromList(planetType.possibleTextureMaps),
+      cloudMapAsset:
+        planetType.hasClouds <= Math.random()
+          ? randomFromList(planetType.possibleCloudMaps)
+          : "",
+      ringsMapAsset:
+        planetType.hasRings <= Math.random()
+          ? randomFromList(planetType.possibleRingMaps)
+          : "",
     });
 
+    entity.updateComponent("population", {
+      count:
+        typeof planetType.population === "number"
+          ? planetType.population
+          : Math.round(randomFromRange(planetType.population) / 1000) * 1000,
+    });
     entity.updateComponent("temperature", {
       temperature: Math.round(randomFromRange(planetType.temperatureRange)),
     });
