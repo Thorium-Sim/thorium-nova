@@ -1,0 +1,9 @@
+mutation UniverseAddPlanet($id: ID!, $parentId: ID!, $classification: String!) {
+  universeTemplateAddPlanet(
+    id: $id
+    systemId: $parentId
+    classification: $classification
+  ) {
+    id
+  }
+}

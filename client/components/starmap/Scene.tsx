@@ -89,7 +89,7 @@ const Scene = React.forwardRef((props, ref) => {
               }
         }
       />
-      <ambientLight intensity={0.7} />
+      <ambientLight intensity={0.2} />
       <pointLight position={[10, 10, 10]} />
       {universeId && !systemId && <Interstellar universeId={universeId} />}
       {universeId && systemId && (

@@ -27,5 +27,5 @@ const store = create<ConfigStore>(set => ({
   skyboxKey: "Pretty",
 }));
 
-export const useConfigStore = store[0];
-export const configStoreApi = store[1];
+export const useConfigStore = store;
+export const configStoreApi = store;

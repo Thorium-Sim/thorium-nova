@@ -1,7 +1,7 @@
+import {gql} from "@apollo/client";
 import * as Apollo from "@apollo/client";
 export type Maybe<T> = T | null;
 export type Exact<T extends {[key: string]: unknown}> = {[K in keyof T]: T[K]};
-const gql = Apollo.gql;
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -195,6 +195,18 @@ export type TemplateShipSetModelMutation = {
   };
 };
 
+export type PlanetTypesQueryVariables = Exact<{[key: string]: never}>;
+
+export type PlanetTypesQuery = {
+  __typename?: "Query";
+  planetTypes: Array<{
+    __typename?: "PlanetType";
+    id: string;
+    name: string;
+    classification: string;
+  }>;
+};
+
 export type StarTypesQueryVariables = Exact<{[key: string]: never}>;
 
 export type StarTypesQuery = {
@@ -206,6 +218,17 @@ export type StarTypesQuery = {
     spectralType: string;
     prevalence: number;
   }>;
+};
+
+export type UniverseAddPlanetMutationVariables = Exact<{
+  id: Scalars["ID"];
+  parentId: Scalars["ID"];
+  classification: Scalars["String"];
+}>;
+
+export type UniverseAddPlanetMutation = {
+  __typename?: "Mutation";
+  universeTemplateAddPlanet: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseAddStarMutationVariables = Exact<{
@@ -360,6 +383,12 @@ export type TemplateSystemSubscription = {
         age: number;
         classification: string;
         radius: number;
+        terranMass: number;
+        habitable: boolean;
+        lifeforms: string;
+        textureMapAsset: string;
+        cloudsMapAsset: string;
+        ringsMapAsset: string;
       }>;
       satellite: {
         __typename?: "SatelliteComponent";
@@ -371,6 +400,7 @@ export type TemplateSystemSubscription = {
         orbitalInclination: number;
       };
       temperature: {__typename?: "TemperatureComponent"; temperature: number};
+      population: Maybe<{__typename?: "PopulationComponent"; count: number}>;
     }>;
   };
 };
@@ -703,6 +733,41 @@ export function useTemplateShipSetModelMutation(
 export type TemplateShipSetModelMutationHookResult = ReturnType<
   typeof useTemplateShipSetModelMutation
 >;
+export const PlanetTypesDocument = gql`
+  query PlanetTypes {
+    planetTypes {
+      id
+      name
+      classification
+    }
+  }
+`;
+export function usePlanetTypesQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    PlanetTypesQuery,
+    PlanetTypesQueryVariables
+  >
+) {
+  return Apollo.useQuery<PlanetTypesQuery, PlanetTypesQueryVariables>(
+    PlanetTypesDocument,
+    baseOptions
+  );
+}
+export function usePlanetTypesLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    PlanetTypesQuery,
+    PlanetTypesQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<PlanetTypesQuery, PlanetTypesQueryVariables>(
+    PlanetTypesDocument,
+    baseOptions
+  );
+}
+export type PlanetTypesQueryHookResult = ReturnType<typeof usePlanetTypesQuery>;
+export type PlanetTypesLazyQueryHookResult = ReturnType<
+  typeof usePlanetTypesLazyQuery
+>;
 export const StarTypesDocument = gql`
   query StarTypes {
     starTypes {
@@ -735,6 +800,35 @@ export function useStarTypesLazyQuery(
 export type StarTypesQueryHookResult = ReturnType<typeof useStarTypesQuery>;
 export type StarTypesLazyQueryHookResult = ReturnType<
   typeof useStarTypesLazyQuery
+>;
+export const UniverseAddPlanetDocument = gql`
+  mutation UniverseAddPlanet(
+    $id: ID!
+    $parentId: ID!
+    $classification: String!
+  ) {
+    universeTemplateAddPlanet(
+      id: $id
+      systemId: $parentId
+      classification: $classification
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseAddPlanetMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseAddPlanetMutation,
+    UniverseAddPlanetMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseAddPlanetMutation,
+    UniverseAddPlanetMutationVariables
+  >(UniverseAddPlanetDocument, baseOptions);
+}
+export type UniverseAddPlanetMutationHookResult = ReturnType<
+  typeof useUniverseAddPlanetMutation
 >;
 export const UniverseAddStarDocument = gql`
   mutation UniverseAddStar($id: ID!, $systemId: ID!, $spectralType: String!) {
@@ -960,6 +1054,12 @@ export const TemplateSystemDocument = gql`
           age
           classification
           radius
+          terranMass
+          habitable
+          lifeforms
+          textureMapAsset
+          cloudsMapAsset
+          ringsMapAsset
         }
         satellite {
           distance
@@ -971,6 +1071,9 @@ export const TemplateSystemDocument = gql`
         }
         temperature {
           temperature
+        }
+        population {
+          count
         }
       }
     }

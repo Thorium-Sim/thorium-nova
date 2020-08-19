@@ -17,7 +17,9 @@ import {
   useUniverseAddSystemMutation,
   useUniverseSystemRemoveMutation,
   useUniverseAddStarMutation,
+  useUniverseAddPlanetMutation,
   useStarTypesQuery,
+  usePlanetTypesQuery,
 } from "../../generated/graphql";
 import {configStoreApi, useConfigStore} from "./configStore";
 import Button from "../ui/button";
@@ -36,7 +38,11 @@ const Menubar: React.FC<{
   const [addSystem] = useUniverseAddSystemMutation();
   const [removeSystem] = useUniverseSystemRemoveMutation();
   const [addStar] = useUniverseAddStarMutation();
+  const [addPlanet] = useUniverseAddPlanetMutation();
+
   const {data: starTypesData} = useStarTypesQuery();
+  const {data: planetTypesData} = usePlanetTypesQuery();
+
   const {t} = useTranslation();
   const confirm = useConfirm();
   const [showingAddOptions, setShowingAddOptions] = React.useState(false);
@@ -194,9 +200,38 @@ const Menubar: React.FC<{
               ))}
             </MenuList>
           </Menu>
-          <Button variantColor="success" size="sm" width="auto">
-            {t("Add Planet")}
-          </Button>
+          <Menu>
+            <MenuButton
+              ml={2}
+              as={Button}
+              rightIcon="chevron-down"
+              variantColor="success"
+              size="sm"
+              width="auto"
+            >
+              {t("Add Planet")}
+            </MenuButton>
+            <MenuList>
+              <MenuItem>{t("Cancel")}</MenuItem>
+              <MenuDivider />
+              {planetTypesData?.planetTypes.map(p => (
+                <MenuItem
+                  key={p.id}
+                  onClick={() =>
+                    addPlanet({
+                      variables: {
+                        id: universeId,
+                        parentId: systemId,
+                        classification: p.classification,
+                      },
+                    })
+                  }
+                >
+                  {p.classification} - {p.name}
+                </MenuItem>
+              ))}
+            </MenuList>
+          </Menu>
         </Stack>
       </Collapse>
     </Box>

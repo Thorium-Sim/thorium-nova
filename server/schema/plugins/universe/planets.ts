@@ -13,6 +13,7 @@ import {IsPlanetComponent} from "server/components/isPlanet";
 import getHabitableZone from "server/generatorFixtures/habitableZone";
 import {randomFromList} from "server/helpers/randomFromList";
 import {PopulationComponent} from "server/components/population";
+import {AU} from "./utils";
 
 type range = {min: number; max: number};
 function randomFromRange({min, max}: range) {
@@ -64,11 +65,14 @@ export class UniversePluginPlanetsResolver {
         );
         if (prev) {
           return {
-            min: Math.max(prev.min + habitableZone.min, minPlanetDistance),
-            max: Math.min(prev.max + habitableZone.max, maxPlanetDistance),
+            min: Math.max(prev.min + habitableZone.min * AU, minPlanetDistance),
+            max: Math.min(prev.max + habitableZone.max * AU, maxPlanetDistance),
           };
         }
-        return habitableZone;
+        return {
+          min: Math.max(habitableZone.min * AU, minPlanetDistance),
+          max: Math.min(habitableZone.max * AU, maxPlanetDistance),
+        };
       }, null) || {min: 52118000, max: 108550000};
 
     let distance = 0;

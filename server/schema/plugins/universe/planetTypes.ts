@@ -1,10 +1,10 @@
-import {Field, ID, ObjectType} from "type-graphql";
+import {Field, ID, ObjectType, Query, Resolver} from "type-graphql";
 
 const possibleRingMaps = [
-  "/public/assets/textures/Clouds1.png",
-  "/public/assets/textures/Clouds1.png",
-  "/public/assets/textures/Clouds1.png",
-  "/public/assets/textures/Clouds1.png",
+  "/public/assets/textures/rings1.png",
+  "/public/assets/textures/rings2.png",
+  "/public/assets/textures/rings3.png",
+  "/public/assets/textures/rings4.png",
 ];
 type range = {min: number; max: number};
 type atmosphericComposition = {component: string; concentration: number}[];
@@ -485,3 +485,13 @@ export const planetTypes = [
     possibleRingMaps,
   }),
 ];
+
+@Resolver()
+class PlanetTypeResolver {
+  @Query(returns => [PlanetType])
+  planetTypes(): PlanetType[] {
+    return planetTypes;
+  }
+}
+
+export default PlanetTypeResolver;

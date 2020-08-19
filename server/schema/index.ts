@@ -4,6 +4,8 @@ import {FlightResolver} from "./flight";
 import {ShipAssetsResolver, ShipPluginResolver} from "./plugins/ship";
 import {StationComplementPluginResolver} from "./plugins/stationComplement";
 import {UniversePluginBaseResolver} from "./plugins/universe";
+import {UniversePluginPlanetsResolver} from "./plugins/universe/planets";
+import PlanetTypeResolver from "./plugins/universe/planetTypes";
 import {UniversePluginStarsResolver} from "./plugins/universe/stars";
 import StarTypeResolver from "./plugins/universe/starTypes";
 import {
@@ -34,6 +36,8 @@ export const resolvers: ResolverT = [
   UniversePluginBaseResolver,
   UniversePluginSystemsResolver,
   StarTypeResolver,
+  PlanetTypeResolver,
   UniversePluginStarsResolver,
   PlanetarySystemResolver,
+  UniversePluginPlanetsResolver,
 ];

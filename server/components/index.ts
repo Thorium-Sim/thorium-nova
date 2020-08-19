@@ -36,7 +36,7 @@ export default class Components {
   @Field()
   temperature?: TemperatureComponent;
 
-  @Field()
+  @Field({nullable: true})
   population?: PopulationComponent;
 
   // Ship Entity Components

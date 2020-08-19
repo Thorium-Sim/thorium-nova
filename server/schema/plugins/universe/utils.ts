@@ -48,3 +48,6 @@ export function getSystem(id: string, systemId: string) {
     system: new PlanetarySystem({...system, universeId: universe.id}),
   };
 }
+
+// Astronomical units in KM
+export const AU = 149597870;

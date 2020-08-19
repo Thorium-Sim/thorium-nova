@@ -28,6 +28,12 @@ subscription TemplateSystem($id: ID!, $systemId: ID!) {
         age
         classification
         radius
+        terranMass
+        habitable
+        lifeforms
+        textureMapAsset
+        cloudsMapAsset
+        ringsMapAsset
       }
       satellite {
         distance
@@ -39,6 +45,9 @@ subscription TemplateSystem($id: ID!, $systemId: ID!) {
       }
       temperature {
         temperature
+      }
+      population {
+        count
       }
     }
   }

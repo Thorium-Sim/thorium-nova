@@ -43,7 +43,7 @@ const Star: React.FC<{
 
   return (
     <group {...props}>
-      <pointLight intensity={2} decay={2} color={"white"} />{" "}
+      <pointLight intensity={2} decay={2} color={"white"} castShadow />
       <mesh ref={shader}>
         <circleBufferGeometry attach="geometry" args={[1, 8, 8]} />
         <shaderMaterial
