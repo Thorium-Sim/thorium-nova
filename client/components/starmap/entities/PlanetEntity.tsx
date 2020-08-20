@@ -61,6 +61,7 @@ const PlanetEntity: React.FC<{
     textureMapAsset,
   } = entity.isPlanet;
   const size = 5 + 5 * (radius / 1000000);
+
   return (
     <OrbitContainer
       // Convert KM to Millions of KM

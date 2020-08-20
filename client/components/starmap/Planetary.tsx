@@ -4,6 +4,7 @@ import {useThree} from "react-three-fiber";
 import {Vector3} from "three";
 import StarEntity from "./entities/StarEntity";
 import PlanetEntity from "./entities/PlanetEntity";
+import Disc from "./Disc";
 
 // 1 unit = 1 million km
 const Planetary: React.FC<{universeId: string; systemId: string}> = ({
@@ -20,8 +21,20 @@ const Planetary: React.FC<{universeId: string; systemId: string}> = ({
     camera.lookAt(new Vector3(0, 0, 0));
   }, []);
 
+  const {habitableZoneInner = 0, habitableZoneOuter = 3} =
+    data?.templateUniverseSystem || {};
+
+  console.log(habitableZoneInner, habitableZoneOuter);
+  const scale = 1 / 1000000;
   return (
     <>
+      {data?.templateUniverseSystem.planetarySystem && (
+        <Disc
+          habitableZoneInner={habitableZoneInner}
+          habitableZoneOuter={habitableZoneOuter}
+          scale={[scale, scale, scale]}
+        />
+      )}
       {data?.templateUniverseSystem.items.map(e => {
         if (e.isStar) {
           return <StarEntity key={e.id} entity={e} />;

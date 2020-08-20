@@ -7,6 +7,8 @@ subscription TemplateSystem($id: ID!, $systemId: ID!) {
     planetarySystem {
       skyboxKey
     }
+    habitableZoneInner
+    habitableZoneOuter
     items {
       id
       identity {

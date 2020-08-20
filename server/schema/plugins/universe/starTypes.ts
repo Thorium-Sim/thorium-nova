@@ -99,7 +99,7 @@ export const starTypes = [
     temperatureRange: {min: 3300, max: 5300},
     solarMassRange: {min: 0.3, max: 10},
     ageRange: {min: 100000000, max: 2000000000},
-    radiusRange: {min: 20, max: 100},
+    radiusRange: {min: 0.01, max: 0.04},
     hueRange: {min: 0, max: 20},
     white: true,
   }),

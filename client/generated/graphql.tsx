@@ -355,6 +355,8 @@ export type TemplateSystemSubscription = {
   templateUniverseSystem: {
     __typename?: "PlanetarySystem";
     id: string;
+    habitableZoneInner: number;
+    habitableZoneOuter: number;
     identity: {__typename?: "IdentityComponent"; name: string};
     planetarySystem: {
       __typename?: "PlanetarySystemComponent";
@@ -1033,6 +1035,8 @@ export const TemplateSystemDocument = gql`
       planetarySystem {
         skyboxKey
       }
+      habitableZoneInner
+      habitableZoneOuter
       items {
         id
         identity {

@@ -9,7 +9,7 @@ import {Arg, ID, Mutation, Resolver} from "type-graphql";
 import {starTypes} from "./starTypes";
 import {getSystem, publish} from "./utils";
 
-const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const alphabet = "ABC";
 type range = {min: number; max: number};
 function randomFromRange({min, max}: range) {
   return Math.random() * (max - min) + min;
@@ -32,6 +32,9 @@ export class UniversePluginStarsResolver {
     );
 
     const starType = starTypes.find(s => s.spectralType === spectralType);
+    if (childrenStars.length >= 3) {
+      throw new Error(`Only 3 stars are allowed`);
+    }
 
     if (!starType) {
       throw new Error(`Invalid spectral type: ${spectralType}`);
@@ -41,6 +44,38 @@ export class UniversePluginStarsResolver {
     const name = `${system?.components?.identity?.name} ${
       alphabet[childrenStars.length]
     }`;
+
+    const radius =
+      Math.round(randomFromRange(starType.radiusRange) * 10000) / 10000;
+
+    // We need the radius of the sun to convert isStar.radius to kilometers
+    const SUN_RADIUS = 6;
+    // Calculate the distance of the star for binary systems
+    let distance = 0;
+    let orbitalArc = Math.random() * 360;
+    if (childrenStars.length === 1) {
+      const otherStar = childrenStars[0];
+      distance = (radius + (otherStar.isStar?.radius || 0)) * SUN_RADIUS;
+      orbitalArc = (otherStar.satellite?.orbitalArc || 0) + 180;
+      if (otherStar.satellite) {
+        otherStar.satellite.distance = distance;
+      }
+    }
+    if (childrenStars.length === 2) {
+      const star1 = childrenStars[0];
+      const star2 = childrenStars[1];
+      distance =
+        (radius + (star1.isStar?.radius || 0) + (star2.isStar?.radius || 0)) *
+        SUN_RADIUS;
+      orbitalArc = (star1.satellite?.orbitalArc || 0) + 120;
+      if (star1.satellite) {
+        star1.satellite.distance = distance;
+      }
+      if (star2.satellite) {
+        star2.satellite.orbitalArc = orbitalArc + 120;
+        star2.satellite.distance = distance;
+      }
+    }
 
     const entity = new Entity(null, [
       TagsComponent,
@@ -52,8 +87,8 @@ export class UniversePluginStarsResolver {
     entity.updateComponent("identity", {name});
     entity.updateComponent("satellite", {
       axialTilt: 0,
-      distance: 0,
-      orbitalArc: Math.random() * 360,
+      distance,
+      orbitalArc,
       eccentricity: 0,
       showOrbit: false,
       parentId: systemId,
@@ -64,7 +99,7 @@ export class UniversePluginStarsResolver {
       spectralType: starType.spectralType,
       hue: Math.round(randomFromRange(starType.hueRange)),
       isWhite: starType.white || false,
-      radius: Math.round(randomFromRange(starType.radiusRange) * 10000) / 10000,
+      radius,
     });
     entity.updateComponent("temperature", {
       temperature: Math.round(randomFromRange(starType.temperatureRange)),

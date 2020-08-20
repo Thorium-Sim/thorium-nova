@@ -3,7 +3,7 @@ import {StoreApi} from "zustand";
 import useAnimationFrame from "./useAnimationFrame";
 import {TSubscriptionResponse} from "./useTSubscription";
 
-function lerp(v0: number, v1: number, t: number) {
+export function lerp(v0: number, v1: number, t: number) {
   return v0 * (1 - t) + v1 * t;
 }
 

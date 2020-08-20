@@ -19,8 +19,9 @@ import {
   Root,
   Subscription,
 } from "type-graphql";
-import {getUniverse, PlanetarySystem, publish} from "./utils";
+import {AU, getUniverse, PlanetarySystem, publish} from "./utils";
 import uuid from "uniqid";
+import getHabitableZone from "server/generatorFixtures/habitableZone";
 
 @Resolver()
 export class UniversePluginSystemsResolver {
@@ -176,8 +177,54 @@ export class UniversePluginSystemsResolver {
   }
 }
 
+type range = {min: number; max: number};
+function calculateHabitableZone(stars: Entity[]) {
+  // Just less than the orbit of Neptune 🥶
+  const maxPlanetDistance = 4000000000;
+
+  // 1/5 the orbit of Mercury 🥵
+  const minPlanetDistance = 10000000;
+
+  // We'll use the habitable zone radius of the largest star
+  const biggestStar = stars.reduce((prev: Entity | null, next) => {
+    if (!prev || !prev.isStar) return next;
+    if (!next.isStar) return prev;
+    if (next.isStar.radius > prev.isStar.radius) return next;
+    return prev;
+  }, null);
+  if (!biggestStar?.isStar || !biggestStar.temperature)
+    return {min: minPlanetDistance, max: maxPlanetDistance};
+  const habitableZone = getHabitableZone(
+    biggestStar.isStar?.radius,
+    biggestStar.temperature?.temperature
+  );
+  return {
+    min: Math.max(habitableZone.min * AU, minPlanetDistance),
+    max: Math.min(habitableZone.max * AU, maxPlanetDistance),
+  };
+}
 @Resolver(of => PlanetarySystem)
 export class PlanetarySystemResolver {
+  @FieldResolver(type => Number)
+  habitableZoneInner(@Root() self: PlanetarySystem) {
+    const universe = getUniverse(self.universeId);
+    const stars = universe.entities.filter(
+      s => s.satellite?.parentId === self.id && s.isStar
+    );
+    const {min} = calculateHabitableZone(stars);
+    return min;
+  }
+
+  @FieldResolver(type => Number)
+  habitableZoneOuter(@Root() self: PlanetarySystem) {
+    const universe = getUniverse(self.universeId);
+    const stars = universe.entities.filter(
+      s => s.satellite?.parentId === self.id && s.isStar
+    );
+    const {max} = calculateHabitableZone(stars);
+    return max;
+  }
+
   @FieldResolver(type => [Entity])
   items(@Root() self: PlanetarySystem) {
     const universe = getUniverse(self.universeId);

@@ -55,25 +55,27 @@ export class UniversePluginPlanetsResolver {
     const minPlanetDistance = 10000000;
 
     // We'll do a messy thing with the habitable zone where we just the habitable zone values together
-    const habitableZone: range = universe.entities
-      .filter(s => s.satellite?.parentId === systemId && s.isStar)
-      .reduce((prev: range | null, next) => {
-        if (!next.isStar || !next.temperature) return prev;
-        const habitableZone = getHabitableZone(
-          next.isStar?.radius,
-          next.temperature?.temperature
-        );
-        if (prev) {
-          return {
-            min: Math.max(prev.min + habitableZone.min * AU, minPlanetDistance),
-            max: Math.min(prev.max + habitableZone.max * AU, maxPlanetDistance),
-          };
-        }
-        return {
-          min: Math.max(habitableZone.min * AU, minPlanetDistance),
-          max: Math.min(habitableZone.max * AU, maxPlanetDistance),
-        };
-      }, null) || {min: 52118000, max: 108550000};
+    const stars = universe.entities.filter(
+      s => s.satellite?.parentId === systemId && s.isStar
+    );
+
+    // We'll use the habitable zone radius of the largest star
+    const biggestStar = stars.reduce((prev: Entity | null, next) => {
+      if (!prev || !prev.isStar) return next;
+      if (!next.isStar) return prev;
+      if (next.isStar.radius > prev.isStar.radius) return next;
+      return prev;
+    }, null);
+    if (!biggestStar?.isStar || !biggestStar.temperature)
+      return {min: minPlanetDistance, max: maxPlanetDistance};
+    const tempZone = getHabitableZone(
+      biggestStar.isStar?.radius,
+      biggestStar.temperature?.temperature
+    );
+    const habitableZone = {
+      min: Math.max(tempZone.min * AU, minPlanetDistance),
+      max: Math.min(tempZone.max * AU, maxPlanetDistance),
+    };
 
     let distance = 0;
     const zone = randomFromList(planetType.systemZone);
