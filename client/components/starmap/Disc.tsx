@@ -72,7 +72,6 @@ const Disc: React.FC<{
   position?: any;
   scale?: any;
 }> = ({habitableZoneInner, habitableZoneOuter, ...props}) => {
-  console.log(habitableZoneInner, habitableZoneOuter);
   const geometry = React.useMemo(() => {
     const offset1: vec4 = [
       Math.max(0, lerp(habitableZoneInner, habitableZoneOuter, 0)),

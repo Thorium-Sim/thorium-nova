@@ -24,7 +24,6 @@ const Planetary: React.FC<{universeId: string; systemId: string}> = ({
   const {habitableZoneInner = 0, habitableZoneOuter = 3} =
     data?.templateUniverseSystem || {};
 
-  console.log(habitableZoneInner, habitableZoneOuter);
   const scale = 1 / 1000000;
   return (
     <>

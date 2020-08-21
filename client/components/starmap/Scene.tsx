@@ -1,7 +1,8 @@
-import {OrbitControls} from "drei";
+import {OrbitControls} from "./OrbitControls";
 import React, {Suspense} from "react";
 import {useFrame, useThree} from "react-three-fiber";
 import {Matrix4, MOUSE, Object3D, Quaternion, Vector3} from "three";
+import x from "uniqid";
 import {configStoreApi, useConfigStore} from "./configStore";
 import Interstellar from "./Interstellar";
 import Nebula from "./Nebula";
@@ -35,25 +36,6 @@ const Scene = React.forwardRef((props, ref) => {
   }));
 
   React.useEffect(() => {
-    // Block the orbit controls from panning too far
-    if (orbitControls.current) {
-      var minPan = new Vector3(-300, -300, -300);
-      var maxPan = new Vector3(300, 300, 300);
-      var _v = new Vector3();
-
-      orbitControls.current.addEventListener?.("change", function () {
-        if (orbitControls.current?.target) {
-          const target = orbitControls.current.target as Vector3;
-          _v.copy(target);
-          target.clamp(minPan, maxPan);
-          _v.sub(target);
-          camera.position.sub(_v);
-        }
-      });
-    }
-  }, []);
-
-  React.useEffect(() => {
     configStoreApi.setState({
       disableOrbitControls: () => {
         if (orbitControls.current) {
@@ -75,19 +57,11 @@ const Scene = React.forwardRef((props, ref) => {
         maxDistance={15000}
         minDistance={1}
         rotateSpeed={0.5}
-        mouseButtons={
-          systemId
-            ? {
-                LEFT: MOUSE.ROTATE,
-                RIGHT: MOUSE.PAN,
-                MIDDLE: MOUSE.DOLLY,
-              }
-            : {
-                LEFT: MOUSE.PAN,
-                RIGHT: MOUSE.ROTATE,
-                MIDDLE: MOUSE.DOLLY,
-              }
-        }
+        mouseButtons={{
+          LEFT: MOUSE.ROTATE,
+          RIGHT: MOUSE.PAN,
+          MIDDLE: MOUSE.DOLLY,
+        }}
       />
       <ambientLight intensity={0.2} />
       <pointLight position={[10, 10, 10]} />

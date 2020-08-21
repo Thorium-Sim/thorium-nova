@@ -74,6 +74,13 @@ const SystemCircle: React.FC<{
   }
   const radius = React.useRef(0);
   const selected = React.useRef(false);
+
+  const texture = React.useMemo(() => {
+    const texture = new CanvasTexture(ctx.canvas);
+    texture.needsUpdate = true;
+    return texture;
+  }, [ctx]);
+
   useFrame(() => {
     const selectedObject = configStoreApi.getState().selectedObject;
     const isSelected = system.id === selectedObject?.id;
@@ -102,11 +109,8 @@ const SystemCircle: React.FC<{
 
   React.useEffect(() => {
     drawRadius(radius.current - Math.PI / 2);
+    texture.needsUpdate = true;
   }, []);
-
-  const texture = React.useMemo(() => {
-    return new CanvasTexture(ctx.canvas);
-  }, [ctx]);
 
   return (
     <mesh

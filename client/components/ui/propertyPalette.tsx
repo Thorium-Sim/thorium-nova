@@ -32,7 +32,7 @@ const PropertyPalette: React.FC<{onClose: () => void}> = ({
       opacity={position.x === 0 && position.y === 0 ? 0 : 1}
       ref={measureRef}
       style={{transform: `translate(${position.x}px, ${position.y}px)`}}
-      bg="gray.700"
+      bg="rgba(45,55,72, 0.4)"
       position="fixed"
       minWidth={300}
       top={0}

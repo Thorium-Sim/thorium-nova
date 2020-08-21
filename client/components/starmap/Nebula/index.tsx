@@ -9,9 +9,9 @@ import {
   Mesh,
 } from "three";
 import uniqid from "uniqid";
-import {configStoreApi} from "./configStore";
+import {configStoreApi} from "../configStore";
 import {useFrame} from "react-three-fiber";
-import sleep from "../../helpers/sleep";
+import sleep from "../../../helpers/sleep";
 
 const radius = 1000000;
 

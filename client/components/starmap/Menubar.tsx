@@ -58,7 +58,9 @@ const Menubar: React.FC<{
     if (!camera) return;
     const vec = new Vector3(0, 0, -100);
     vec.applyQuaternion(camera.quaternion).add(camera.position);
-    addSystem({variables: {id: universeId, position: vec}}).then(res => {
+    addSystem({
+      variables: {id: useConfigStore.getState().universeId, position: vec},
+    }).then(res => {
       if (res.data?.universeTemplateAddSystem)
         configStoreApi.setState({
           selectedObject: res.data.universeTemplateAddSystem,
@@ -75,8 +77,12 @@ const Menubar: React.FC<{
       body: t("It will remove all of the objects inside of it."),
     });
     if (!doRemove) return;
+
     removeSystem({
-      variables: {id: universeId, systemId: selectedObject.id},
+      variables: {
+        id: useConfigStore.getState().universeId,
+        systemId: selectedObject.id,
+      },
     });
 
     configStoreApi.setState({selectedObject: null});

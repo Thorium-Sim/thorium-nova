@@ -66,6 +66,7 @@ const ConfigPalette: React.FC = () => {
       {/* TODO: Include Faction here eventually... when we get factions */}
       <Button
         size="sm"
+        variant="ghost"
         variantColor="primary"
         mt={2}
         width="100%"
