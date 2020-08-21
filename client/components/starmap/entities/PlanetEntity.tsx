@@ -1,59 +1,15 @@
-import {Line} from "drei";
 import React, {Suspense} from "react";
 import {useFrame, useLoader} from "react-three-fiber";
 import {CircleGeometry, Group, LineLoop, TextureLoader, Vector3} from "three";
 import {TemplateSystemSubscription} from "../../../generated/graphql";
+import {configStoreApi, useConfigStore} from "../configStore";
 import OrbitContainer from "../OrbitContainer";
 import SystemLabel from "../SystemMarker/SystemLabel";
 import {DEG_TO_RAD} from "../utils";
 import Clouds from "./Clouds";
 import Rings from "./Rings";
+import Selected from "./Selected";
 
-const Selected: React.FC = () => {
-  const geometry = React.useMemo(() => {
-    const geometry = new CircleGeometry(1.3, 32);
-    geometry.vertices.shift();
-
-    return geometry;
-  }, []);
-
-  const ref1 = React.useRef<LineLoop>();
-  const ref2 = React.useRef<LineLoop>();
-  useFrame(() => {
-    if (!ref1.current || !ref2.current) return;
-    ref1.current.rotation.x += 0.01;
-    ref1.current?.rotateY(0.02);
-
-    ref2.current.rotation.x += 0.005;
-    ref2.current?.rotateY(0.03);
-  });
-
-  return (
-    <>
-      <lineLoop ref={ref1} geometry={geometry}>
-        <lineBasicMaterial
-          color={0xfac79e}
-          transparent
-          opacity={0.5}
-          attach="material"
-        />
-      </lineLoop>
-      <lineLoop
-        ref={ref2}
-        geometry={geometry}
-        rotation={[Math.random(), Math.random(), Math.random()]}
-        scale={[1.1, 1.1, 1.1]}
-      >
-        <lineBasicMaterial
-          color={0xfafa9a}
-          transparent
-          opacity={0.5}
-          attach="material"
-        />
-      </lineLoop>
-    </>
-  );
-};
 const Sphere: React.FC<{texture: string}> = ({texture}) => {
   const map = useLoader(TextureLoader, texture);
 
@@ -72,7 +28,24 @@ const Planet: React.FC<{
   texture: string;
   axialTilt: number;
   name: string;
-}> = ({position, scale, clouds, rings, texture, axialTilt, name}) => {
+  selected: boolean;
+  onPointerOver?: (event: unknown) => void;
+  onPointerOut?: (event: unknown) => void;
+  onClick?: (event: unknown) => void;
+}> = ({
+  position,
+  scale,
+  clouds,
+  rings,
+  texture,
+  axialTilt,
+  name,
+
+  selected,
+  onPointerOver,
+  onPointerOut,
+  onClick,
+}) => {
   const group = React.useRef<Group>(new Group());
   useFrame(({camera, mouse}) => {
     const zoom = camera.position.distanceTo(group.current.position);
@@ -84,11 +57,17 @@ const Planet: React.FC<{
   return (
     <group position={position}>
       <Suspense fallback={null}>
-        <group scale={scale} rotation={[0, 0, axialTilt * DEG_TO_RAD]}>
+        <group
+          scale={scale}
+          rotation={[0, 0, axialTilt * DEG_TO_RAD]}
+          onPointerOver={onPointerOver}
+          onPointerOut={onPointerOut}
+          onClick={onClick}
+        >
           <Sphere texture={texture} />
           {rings && <Rings texture={rings} />}
           {clouds && <Clouds texture={clouds} />}
-          <Selected />
+          {selected && <Selected />}
         </group>
       </Suspense>
       <group ref={group}>
@@ -98,6 +77,66 @@ const Planet: React.FC<{
   <PlanetEntity key={`orbit-${i}`} {...s} />
 ))} */}
     </group>
+  );
+};
+
+const PlanetContainer: React.FC<{
+  name: string;
+
+  radius: number;
+  distance: number;
+  eccentricity: number;
+  orbitalArc: number;
+  orbitalInclination: number;
+  axialTilt: number;
+  showOrbit: boolean;
+  cloudsMapAsset: string;
+  ringsMapAsset: string;
+  textureMapAsset: string;
+  selected: boolean;
+  onPointerOver?: (event: unknown) => void;
+  onPointerOut?: (event: unknown) => void;
+  onClick?: (event: unknown) => void;
+}> = ({
+  name,
+  radius,
+  distance,
+  eccentricity,
+  orbitalArc,
+  orbitalInclination,
+  axialTilt,
+  showOrbit,
+  cloudsMapAsset,
+  ringsMapAsset,
+  textureMapAsset,
+  selected,
+  onPointerOver,
+  onPointerOut,
+  onClick,
+}) => {
+  const size = 20 + 5 * (radius / 1000000);
+  return (
+    <OrbitContainer
+      // Convert KM to Millions of KM
+      radius={distance / 1000000}
+      eccentricity={eccentricity}
+      orbitalArc={orbitalArc}
+      orbitalInclination={orbitalInclination}
+      showOrbit={showOrbit}
+    >
+      <Planet
+        name={name}
+        scale={[size, size, size]}
+        clouds={cloudsMapAsset}
+        rings={ringsMapAsset}
+        texture={textureMapAsset}
+        axialTilt={axialTilt}
+        selected={selected}
+        onPointerOver={onPointerOver}
+        onPointerOut={onPointerOut}
+        onClick={onClick}
+      />
+    </OrbitContainer>
   );
 };
 
@@ -119,27 +158,35 @@ const PlanetEntity: React.FC<{
     ringsMapAsset,
     textureMapAsset,
   } = entity.isPlanet;
-  const size = 20 + 5 * (radius / 1000000);
+
+  const selected = useConfigStore(
+    store => store.selectedObject?.id === entity.id
+  );
 
   return (
-    <OrbitContainer
-      // Convert KM to Millions of KM
-      radius={distance / 1000000}
+    <PlanetContainer
+      name={entity.identity.name}
+      distance={distance}
       eccentricity={eccentricity}
       orbitalArc={orbitalArc}
       orbitalInclination={orbitalInclination}
       showOrbit={showOrbit}
-    >
-      <Planet
-        name={entity.identity.name}
-        scale={[size, size, size]}
-        clouds={cloudsMapAsset}
-        rings={ringsMapAsset}
-        texture={textureMapAsset}
-        axialTilt={axialTilt}
-      />
-    </OrbitContainer>
+      axialTilt={axialTilt}
+      radius={radius}
+      cloudsMapAsset={cloudsMapAsset}
+      ringsMapAsset={ringsMapAsset}
+      textureMapAsset={textureMapAsset}
+      selected={selected}
+      onPointerOver={() => {
+        document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={() => {
+        document.body.style.cursor = "auto";
+      }}
+      onClick={() => {
+        configStoreApi.setState({selectedObject: entity});
+      }}
+    />
   );
 };
-
 export default PlanetEntity;

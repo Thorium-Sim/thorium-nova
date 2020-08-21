@@ -10,6 +10,7 @@ import {OrbitControls as OrbitControlsImpl} from "./OrbitControlsImpl";
 // @ts-ignore
 import mergeRefs from "react-merge-refs";
 import {Vector3} from "three";
+import {useConfigStore} from "../configStore";
 
 extend({OrbitControlsImpl});
 
@@ -37,8 +38,12 @@ export const OrbitControls = forwardRef(
       return () => controls.current?.removeEventListener("change", invalidate);
     }, [controls.current]);
 
-    const PAN_LIMIT = 8000;
+    const systemId = useConfigStore(store => store.systemId);
+    React.useEffect(() => {
+      controls.current?.reset();
+    }, [systemId]);
 
+    const PAN_LIMIT = 8000;
     React.useEffect(() => {
       // Block the orbit controls from panning too far
       if (controls.current) {
@@ -54,7 +59,6 @@ export const OrbitControls = forwardRef(
             camera.position.sub(_v);
           }
         }
-        console.log("Setting up listener");
         controls.current.addEventListener?.("change", lockPan);
         return () => controls.current?.removeEventListener("change", lockPan);
       }

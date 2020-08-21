@@ -9,6 +9,7 @@ import {
   Vector3,
   AdditiveBlending,
 } from "three";
+import Selected from "../entities/Selected";
 import LensFlare from "./lensFlare";
 import {fragment, vertex} from "./shaders";
 import getUniforms from "./uniforms";
@@ -16,7 +17,7 @@ import getUniforms from "./uniforms";
 const Star: React.FC<{
   color1?: number | Color;
   color2?: number | Color;
-  scale: Vector3 | [number, number, number];
+  scale?: Vector3 | [number, number, number];
   position?: Vector3 | [number, number, number];
 }> = ({color1 = 0x224488, color2 = 0xf6fcff, ...props}) => {
   const filePath = require("url:./textures/01_Texture.jpg");

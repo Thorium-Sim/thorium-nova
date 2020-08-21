@@ -3,7 +3,7 @@ import React from "react";
 import {useThree} from "react-three-fiber";
 import {Vector3} from "three";
 import StarEntity from "./entities/StarEntity";
-import PlanetEntity from "./entities/PlanetEntity";
+import PlanetContainer from "./entities/PlanetEntity";
 import Disc from "./Disc";
 
 // 1 unit = 1 million km
@@ -23,11 +23,11 @@ const Planetary: React.FC<{universeId: string; systemId: string}> = ({
 
   const {habitableZoneInner = 0, habitableZoneOuter = 3} =
     data?.templateUniverseSystem || {};
-
+  const hasStar = !!data?.templateUniverseSystem.items.find(s => s.isStar);
   const scale = 1 / 1000000;
   return (
     <>
-      {data?.templateUniverseSystem.planetarySystem && (
+      {hasStar && data?.templateUniverseSystem.planetarySystem && (
         <Disc
           habitableZoneInner={habitableZoneInner}
           habitableZoneOuter={habitableZoneOuter}
@@ -39,7 +39,7 @@ const Planetary: React.FC<{universeId: string; systemId: string}> = ({
           return <StarEntity key={e.id} entity={e} />;
         }
         if (e.isPlanet) {
-          return <PlanetEntity key={e.id} entity={e} />;
+          return <PlanetContainer key={e.id} entity={e} />;
         }
         return null;
       })}

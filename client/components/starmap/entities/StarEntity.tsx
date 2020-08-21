@@ -1,8 +1,10 @@
 import React from "react";
 import {Color} from "three";
 import {TemplateSystemSubscription} from "../../../generated/graphql";
+import {configStoreApi, useConfigStore} from "../configStore";
 import OrbitContainer from "../OrbitContainer";
 import Star from "../star";
+import Selected from "./Selected";
 
 const StarEntity: React.FC<{
   entity: TemplateSystemSubscription["templateUniverseSystem"]["items"][0];
@@ -23,6 +25,9 @@ const StarEntity: React.FC<{
     `hsl(${entity.isStar.hue + 20}, 100%, ${entity.isStar.isWhite ? 100 : 50}%)`
   );
 
+  const selected = useConfigStore(
+    store => store.selectedObject?.id === entity.id
+  );
   const size = 10 + 5 * entity.isStar.radius;
   return (
     <OrbitContainer
@@ -32,7 +37,21 @@ const StarEntity: React.FC<{
       orbitalInclination={orbitalInclination}
       showOrbit={showOrbit}
     >
-      <Star color1={color1} color2={color2} scale={[size, size, size]} />
+      <group
+        onPointerOver={() => {
+          document.body.style.cursor = "pointer";
+        }}
+        onPointerOut={() => {
+          document.body.style.cursor = "auto";
+        }}
+        onClick={() => {
+          configStoreApi.setState({selectedObject: entity});
+        }}
+        scale={[size, size, size]}
+      >
+        {selected && <Selected />}
+        <Star color1={color1} color2={color2} />
+      </group>
     </OrbitContainer>
   );
 };

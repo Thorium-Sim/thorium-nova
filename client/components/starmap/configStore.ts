@@ -1,4 +1,7 @@
-import {UniverseSubscription} from "../../generated/graphql";
+import {
+  TemplateSystemSubscription,
+  UniverseSubscription,
+} from "../../generated/graphql";
 import create from "zustand";
 import {Vector3} from "three";
 
@@ -11,6 +14,9 @@ export interface ConfigStore {
   systemId: string;
   selectedObject:
     | NonNullable<UniverseSubscription["universe"]>["systems"][0]
+    | NonNullable<
+        TemplateSystemSubscription["templateUniverseSystem"]["items"]
+      >[0]
     | null;
   zoomTarget: Vector3 | null;
   skyboxKey: string;
