@@ -1,9 +1,10 @@
 import {Line} from "drei";
 import React, {Suspense} from "react";
 import {useFrame, useLoader} from "react-three-fiber";
-import {CircleGeometry, LineLoop, TextureLoader, Vector3} from "three";
+import {CircleGeometry, Group, LineLoop, TextureLoader, Vector3} from "three";
 import {TemplateSystemSubscription} from "../../../generated/graphql";
 import OrbitContainer from "../OrbitContainer";
+import SystemLabel from "../SystemMarker/SystemLabel";
 import {DEG_TO_RAD} from "../utils";
 import Clouds from "./Clouds";
 import Rings from "./Rings";
@@ -70,7 +71,16 @@ const Planet: React.FC<{
   rings: string;
   texture: string;
   axialTilt: number;
-}> = ({position, scale, clouds, rings, texture, axialTilt}) => {
+  name: string;
+}> = ({position, scale, clouds, rings, texture, axialTilt, name}) => {
+  const group = React.useRef<Group>(new Group());
+  useFrame(({camera, mouse}) => {
+    const zoom = camera.position.distanceTo(group.current.position);
+    let zoomedScale = (zoom / 2) * 0.015;
+    group.current.scale.set(zoomedScale, zoomedScale, zoomedScale);
+    group.current.quaternion.copy(camera.quaternion);
+  });
+
   return (
     <group position={position}>
       <Suspense fallback={null}>
@@ -81,7 +91,9 @@ const Planet: React.FC<{
           <Selected />
         </group>
       </Suspense>
-
+      <group ref={group}>
+        <SystemLabel systemId="" name={name} hoveringDirection={{current: 0}} />
+      </group>
       {/* {satellites?.map((s, i) => (
   <PlanetEntity key={`orbit-${i}`} {...s} />
 ))} */}
@@ -107,7 +119,7 @@ const PlanetEntity: React.FC<{
     ringsMapAsset,
     textureMapAsset,
   } = entity.isPlanet;
-  const size = 5 + 5 * (radius / 1000000);
+  const size = 20 + 5 * (radius / 1000000);
 
   return (
     <OrbitContainer
@@ -119,6 +131,7 @@ const PlanetEntity: React.FC<{
       showOrbit={showOrbit}
     >
       <Planet
+        name={entity.identity.name}
         scale={[size, size, size]}
         clouds={cloudsMapAsset}
         rings={ringsMapAsset}

@@ -1,7 +1,7 @@
 import React from "react";
 // @ts-ignore
 import TextTexture from "@seregpie/three.text-texture";
-import {Sprite} from "three";
+import {AdditiveBlending, Sprite} from "three";
 import {useFrame} from "react-three-fiber";
 import {configStoreApi} from "../configStore";
 
@@ -63,9 +63,17 @@ const SystemLabel: React.FC<{
       position={[-spriteWidth * 2.5 - 2, 0, 0]}
       scale={[spriteWidth, scale, 1]}
       ref={text}
+      renderOrder={1000}
     >
       <planeBufferGeometry args={[4, 4, 4]} attach="geometry" />
-      <meshBasicMaterial attach="material" map={textTexture} transparent />
+      <meshBasicMaterial
+        attach="material"
+        map={textTexture}
+        transparent
+        blending={AdditiveBlending}
+        depthTest={false}
+        depthWrite={false}
+      />
     </mesh>
   );
 };
