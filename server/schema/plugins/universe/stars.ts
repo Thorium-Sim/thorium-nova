@@ -118,15 +118,15 @@ export class UniversePluginStarsResolver {
     const universe = getUniverse(id);
     const object = universe.entities.find(s => s.id === objectId);
     if (!object) return "";
-    const system = universe.entities.find(
-      s => s.id === object.satellite?.parentId
-    );
 
     removeUniverseObject(universe, objectId);
 
     publish(universe);
-    if (system) {
-      pubsub.publish("templateUniverseSystem", {id: system.id, system});
+    if (object.satellite?.parentId) {
+      const {system} = getSystem(id, object.satellite.parentId);
+      if (system) {
+        pubsub.publish("templateUniverseSystem", {id: system.id, system});
+      }
     }
 
     return "";
