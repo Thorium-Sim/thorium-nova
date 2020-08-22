@@ -5,9 +5,10 @@ import {TagsComponent} from "server/components/tags";
 import {TemperatureComponent} from "server/components/temperature";
 import Entity from "server/helpers/ecs/entity";
 import {pubsub} from "server/helpers/pubsub";
+import UniverseTemplate from "server/schema/universe";
 import {Arg, ID, Mutation, Resolver} from "type-graphql";
 import {starTypes} from "./starTypes";
-import {getSystem, publish} from "./utils";
+import {getSystem, getUniverse, publish, removeUniverseObject} from "./utils";
 
 const alphabet = "ABC";
 type range = {min: number; max: number};
@@ -108,5 +109,26 @@ export class UniversePluginStarsResolver {
     publish(universe);
     pubsub.publish("templateUniverseSystem", {id: system.id, system});
     return entity;
+  }
+  @Mutation(returns => String)
+  universeTemplateRemoveObject(
+    @Arg("id", type => ID) id: string,
+    @Arg("objectId", type => ID) objectId: string
+  ) {
+    const universe = getUniverse(id);
+    const object = universe.entities.find(s => s.id === objectId);
+    if (!object) return "";
+    const system = universe.entities.find(
+      s => s.id === object.satellite?.parentId
+    );
+
+    removeUniverseObject(universe, objectId);
+
+    publish(universe);
+    if (system) {
+      pubsub.publish("templateUniverseSystem", {id: system.id, system});
+    }
+
+    return "";
   }
 }

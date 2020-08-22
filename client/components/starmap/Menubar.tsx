@@ -15,7 +15,7 @@ import {useTranslation} from "react-i18next";
 import {Camera, Vector3} from "three";
 import {
   useUniverseAddSystemMutation,
-  useUniverseSystemRemoveMutation,
+  useUniverseObjectRemoveMutation,
   useUniverseAddStarMutation,
   useUniverseAddPlanetMutation,
   useStarTypesQuery,
@@ -36,7 +36,7 @@ const Menubar: React.FC<{
   sceneRef: React.MutableRefObject<SceneRef | undefined>;
 }> = ({sceneRef}) => {
   const [addSystem] = useUniverseAddSystemMutation();
-  const [removeSystem] = useUniverseSystemRemoveMutation();
+  const [removeObject] = useUniverseObjectRemoveMutation();
   const [addStar] = useUniverseAddStarMutation();
   const [addPlanet] = useUniverseAddPlanetMutation();
 
@@ -44,6 +44,14 @@ const Menubar: React.FC<{
   const {data: planetTypesData} = usePlanetTypesQuery();
 
   const {t} = useTranslation();
+
+  function getObjectType(object: any) {
+    if (object.planetarySystem) return t("planetary system");
+    if (object.isStar) return t("star");
+    if (object.isPlanet) return t("planet");
+    return t("object");
+  }
+
   const confirm = useConfirm();
   const [showingAddOptions, setShowingAddOptions] = React.useState(false);
 
@@ -69,19 +77,21 @@ const Menubar: React.FC<{
   });
 
   async function deleteObject() {
-    if (systemId) return;
     const selectedObject = configStoreApi.getState().selectedObject;
     if (!selectedObject) return;
+
     const doRemove = await confirm({
-      header: t("Are you sure you want to remove this planetary system?"),
+      header: t("Are you sure you want to remove this {{object}}?", {
+        object: getObjectType(selectedObject),
+      }),
       body: t("It will remove all of the objects inside of it."),
     });
     if (!doRemove) return;
 
-    removeSystem({
+    removeObject({
       variables: {
         id: useConfigStore.getState().universeId,
-        systemId: selectedObject.id,
+        objectId: selectedObject.id,
       },
     });
 

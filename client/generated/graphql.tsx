@@ -267,6 +267,16 @@ export type UniverseAddSystemMutation = {
   };
 };
 
+export type UniverseObjectRemoveMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+}>;
+
+export type UniverseObjectRemoveMutation = {
+  __typename?: "Mutation";
+  universeTemplateRemoveObject: string;
+};
+
 export type UniverseSubscriptionVariables = Exact<{
   id: Scalars["ID"];
 }>;
@@ -294,16 +304,6 @@ export type UniverseSubscription = {
       };
     }>;
   }>;
-};
-
-export type UniverseSystemRemoveMutationVariables = Exact<{
-  id: Scalars["ID"];
-  systemId: Scalars["ID"];
-}>;
-
-export type UniverseSystemRemoveMutation = {
-  __typename?: "Mutation";
-  universeTemplateRemoveSystem: string;
 };
 
 export type UniverseSystemSetDescriptionMutationVariables = Exact<{
@@ -890,6 +890,25 @@ export function useUniverseAddSystemMutation(
 export type UniverseAddSystemMutationHookResult = ReturnType<
   typeof useUniverseAddSystemMutation
 >;
+export const UniverseObjectRemoveDocument = gql`
+  mutation UniverseObjectRemove($id: ID!, $objectId: ID!) {
+    universeTemplateRemoveObject(id: $id, objectId: $objectId)
+  }
+`;
+export function useUniverseObjectRemoveMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseObjectRemoveMutation,
+    UniverseObjectRemoveMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseObjectRemoveMutation,
+    UniverseObjectRemoveMutationVariables
+  >(UniverseObjectRemoveDocument, baseOptions);
+}
+export type UniverseObjectRemoveMutationHookResult = ReturnType<
+  typeof useUniverseObjectRemoveMutation
+>;
 export const UniverseDocument = gql`
   subscription Universe($id: ID!) {
     universe(id: $id) {
@@ -926,25 +945,6 @@ export function useUniverseSubscription(
 }
 export type UniverseSubscriptionHookResult = ReturnType<
   typeof useUniverseSubscription
->;
-export const UniverseSystemRemoveDocument = gql`
-  mutation UniverseSystemRemove($id: ID!, $systemId: ID!) {
-    universeTemplateRemoveSystem(id: $id, systemId: $systemId)
-  }
-`;
-export function useUniverseSystemRemoveMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    UniverseSystemRemoveMutation,
-    UniverseSystemRemoveMutationVariables
-  >
-) {
-  return Apollo.useMutation<
-    UniverseSystemRemoveMutation,
-    UniverseSystemRemoveMutationVariables
-  >(UniverseSystemRemoveDocument, baseOptions);
-}
-export type UniverseSystemRemoveMutationHookResult = ReturnType<
-  typeof useUniverseSystemRemoveMutation
 >;
 export const UniverseSystemSetDescriptionDocument = gql`
   mutation UniverseSystemSetDescription(

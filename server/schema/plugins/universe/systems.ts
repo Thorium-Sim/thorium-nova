@@ -19,7 +19,13 @@ import {
   Root,
   Subscription,
 } from "type-graphql";
-import {AU, getUniverse, PlanetarySystem, publish} from "./utils";
+import {
+  AU,
+  getUniverse,
+  PlanetarySystem,
+  publish,
+  removeUniverseObject,
+} from "./utils";
 import uuid from "uniqid";
 import getHabitableZone from "server/generatorFixtures/habitableZone";
 
@@ -71,16 +77,8 @@ export class UniversePluginSystemsResolver {
     @Arg("id", type => ID) id: string,
     @Arg("systemId", type => ID) systemId: string
   ) {
-    const time = Date.now();
     const universe = getUniverse(id);
-    universe.entities = universe.entities.filter(e => {
-      if (e.id === systemId) {
-        return false;
-      }
-      // Remove all of the objects in the system
-      if (e.satellite?.parentId === systemId) return false;
-      return true;
-    });
+    removeUniverseObject(universe, systemId);
     publish(universe);
 
     return "";

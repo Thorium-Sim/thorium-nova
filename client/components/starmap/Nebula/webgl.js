@@ -1,4 +1,5 @@
 /* istanbul ignore file */
+// Stuff for the Parcel fash refresh
 function $RefreshReg$() {}
 function $RefreshSig$() {}
 /*...........................................................................*/

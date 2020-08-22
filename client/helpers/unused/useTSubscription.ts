@@ -60,13 +60,12 @@ export function useTSubscription<TData = any, TVariables = OperationVariables>(
   options?: SubscriptionHookOptions<TData, TVariables>
 ): [
   UseStore<TSubscriptionResponse<TData>>,
-  StoreApi<TSubscriptionResponse<TData>>,
   Error[] | readonly GraphQLError[] | undefined
 ] {
   const [errors, setErrors] = React.useState<
     Error[] | readonly GraphQLError[] | undefined
   >();
-  const [useStore, api] = React.useMemo(
+  const useStore = React.useMemo(
     () =>
       create<TSubscriptionResponse<TData>>(() => ({
         loading: true,
@@ -94,7 +93,7 @@ export function useTSubscription<TData = any, TVariables = OperationVariables>(
           if (errors) {
             setErrors(errors);
           } else {
-            api.setState(s => ({
+            useStore.setState(s => ({
               ...s,
               loading: false,
               data: data as TData,
@@ -108,7 +107,7 @@ export function useTSubscription<TData = any, TVariables = OperationVariables>(
         },
       });
     return () => unsubscribe.unsubscribe();
-  }, [api, document, variables, skip]);
+  }, [useStore, document, variables, skip]);
 
-  return [useStore, api, errors];
+  return [useStore, errors];
 }

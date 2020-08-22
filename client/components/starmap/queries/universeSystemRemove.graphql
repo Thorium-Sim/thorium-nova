@@ -1,3 +1,0 @@
-mutation UniverseSystemRemove($id: ID!, $systemId: ID!) {
-  universeTemplateRemoveSystem(id: $id, systemId: $systemId)
-}

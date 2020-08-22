@@ -51,3 +51,21 @@ export function getSystem(id: string, systemId: string) {
 
 // Astronomical units in KM
 export const AU = 149597870;
+
+export function removeUniverseObject(
+  universe: UniverseTemplate,
+  objectId: string
+) {
+  // Remove any other object inside this object.
+  universe.entities.forEach(o => {
+    if (o.satellite?.parentId === objectId) {
+      removeUniverseObject(universe, o.id);
+    }
+  });
+  universe.entities = universe.entities.filter(e => {
+    if (e.id === objectId) {
+      return false;
+    }
+    return true;
+  });
+}

@@ -1,0 +1,3 @@
+mutation UniverseObjectRemove($id: ID!, $objectId: ID!) {
+  universeTemplateRemoveObject(id: $id, objectId: $objectId)
+}
