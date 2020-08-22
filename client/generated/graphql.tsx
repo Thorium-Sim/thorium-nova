@@ -302,6 +302,10 @@ export type UniverseSubscription = {
         y: number;
         z: number;
       };
+      planetarySystem: {
+        __typename?: "PlanetarySystemComponent";
+        skyboxKey: string;
+      };
     }>;
   }>;
 };
@@ -345,6 +349,20 @@ export type UniverseSystemSetPositionMutation = {
   };
 };
 
+export type UniverseSystemSetSkyboxMutationVariables = Exact<{
+  id: Scalars["ID"];
+  systemId: Scalars["ID"];
+  skyboxKey: Scalars["String"];
+}>;
+
+export type UniverseSystemSetSkyboxMutation = {
+  __typename?: "Mutation";
+  universeTemplateSystemSetSkyboxKey: {
+    __typename?: "UniverseTemplate";
+    id: string;
+  };
+};
+
 export type TemplateSystemSubscriptionVariables = Exact<{
   id: Scalars["ID"];
   systemId: Scalars["ID"];
@@ -357,7 +375,11 @@ export type TemplateSystemSubscription = {
     id: string;
     habitableZoneInner: number;
     habitableZoneOuter: number;
-    identity: {__typename?: "IdentityComponent"; name: string};
+    identity: {
+      __typename?: "IdentityComponent";
+      name: string;
+      description: string;
+    };
     planetarySystem: {
       __typename?: "PlanetarySystemComponent";
       skyboxKey: string;
@@ -928,6 +950,9 @@ export const UniverseDocument = gql`
           y
           z
         }
+        planetarySystem {
+          skyboxKey
+        }
       }
     }
   }
@@ -1025,12 +1050,42 @@ export function useUniverseSystemSetPositionMutation(
 export type UniverseSystemSetPositionMutationHookResult = ReturnType<
   typeof useUniverseSystemSetPositionMutation
 >;
+export const UniverseSystemSetSkyboxDocument = gql`
+  mutation UniverseSystemSetSkybox(
+    $id: ID!
+    $systemId: ID!
+    $skyboxKey: String!
+  ) {
+    universeTemplateSystemSetSkyboxKey(
+      id: $id
+      systemId: $systemId
+      skyboxKey: $skyboxKey
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseSystemSetSkyboxMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseSystemSetSkyboxMutation,
+    UniverseSystemSetSkyboxMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseSystemSetSkyboxMutation,
+    UniverseSystemSetSkyboxMutationVariables
+  >(UniverseSystemSetSkyboxDocument, baseOptions);
+}
+export type UniverseSystemSetSkyboxMutationHookResult = ReturnType<
+  typeof useUniverseSystemSetSkyboxMutation
+>;
 export const TemplateSystemDocument = gql`
   subscription TemplateSystem($id: ID!, $systemId: ID!) {
     templateUniverseSystem(id: $id, systemId: $systemId) {
       id
       identity {
         name
+        description
       }
       planetarySystem {
         skyboxKey

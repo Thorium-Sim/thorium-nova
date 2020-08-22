@@ -16,6 +16,9 @@ subscription Universe($id: ID!) {
         y
         z
       }
+      planetarySystem {
+        skyboxKey
+      }
     }
   }
 }

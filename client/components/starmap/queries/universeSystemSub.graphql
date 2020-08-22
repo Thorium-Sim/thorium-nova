@@ -3,6 +3,7 @@ subscription TemplateSystem($id: ID!, $systemId: ID!) {
     id
     identity {
       name
+      description
     }
     planetarySystem {
       skyboxKey

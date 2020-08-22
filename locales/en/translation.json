@@ -1,17 +1,6 @@
 {
-  "Add": "Add",
-  "Add Planet": "Add Planet",
-  "Add Star": "Add Star",
-  "Are you sure you want to remove this planetary system?": "Are you sure you want to remove this planetary system?",
-  "Are you sure you want to remove this {{object}}?": "Are you sure you want to remove this {{object}}?",
-  "Cancel": "Cancel",
-  "Delete": "Delete",
-  "Edit": "Edit",
-  "It will remove all of the objects inside of it": {
-    "": ""
-  },
-  "object": "object",
-  "planet": "planet",
-  "planetary system": "planetary system",
-  "star": "star"
+  "Description": "Description",
+  "Name": "Name",
+  "Random String": "Random String",
+  "Skybox Key": "Skybox Key"
 }

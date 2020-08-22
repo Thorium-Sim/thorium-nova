@@ -2,6 +2,7 @@ import {useUniverseSubscription} from "../../generated/graphql";
 import React from "react";
 import SystemMarker from "./SystemMarker";
 import Starfield from "./Starfield";
+import {configStoreApi} from "./configStore";
 
 const Interstellar: React.FC<{universeId: string}> = ({universeId}) => {
   const {data} = useUniverseSubscription({
@@ -9,6 +10,9 @@ const Interstellar: React.FC<{universeId: string}> = ({universeId}) => {
     skip: !universeId,
   });
 
+  React.useEffect(() => {
+    configStoreApi.setState({skyboxKey: "blank"});
+  }, []);
   return (
     <React.Suspense fallback={null}>
       <Starfield />

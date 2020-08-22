@@ -1,0 +1,13 @@
+mutation UniverseSystemSetSkybox(
+  $id: ID!
+  $systemId: ID!
+  $skyboxKey: String!
+) {
+  universeTemplateSystemSetSkyboxKey(
+    id: $id
+    systemId: $systemId
+    skyboxKey: $skyboxKey
+  ) {
+    id
+  }
+}

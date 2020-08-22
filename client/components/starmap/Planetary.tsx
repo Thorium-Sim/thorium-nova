@@ -5,6 +5,7 @@ import {Vector3} from "three";
 import StarEntity from "./entities/StarEntity";
 import PlanetContainer from "./entities/PlanetEntity";
 import Disc from "./Disc";
+import {configStoreApi} from "./configStore";
 
 // 1 unit = 1 million km
 const Planetary: React.FC<{universeId: string; systemId: string}> = ({
@@ -20,6 +21,22 @@ const Planetary: React.FC<{universeId: string; systemId: string}> = ({
     camera.position.set(0, 200, 500);
     camera.lookAt(new Vector3(0, 0, 0));
   }, []);
+
+  const system = data?.templateUniverseSystem;
+  React.useEffect(() => {
+    configStoreApi.setState({currentSystem: system});
+    return () => {
+      configStoreApi.setState({currentSystem: null});
+    };
+  }, [system]);
+
+  const skyboxKey =
+    data?.templateUniverseSystem.planetarySystem.skyboxKey || "blank";
+  console.log(data?.templateUniverseSystem.planetarySystem.skyboxKey);
+  React.useEffect(() => {
+    console.log(skyboxKey);
+    configStoreApi.setState({skyboxKey});
+  }, [skyboxKey]);
 
   const {habitableZoneInner = 0, habitableZoneOuter = 3} =
     data?.templateUniverseSystem || {};

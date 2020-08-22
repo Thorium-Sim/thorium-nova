@@ -4,7 +4,6 @@ import {
   CanvasTexture,
   BackSide,
   sRGBEncoding,
-  Color,
   BoxBufferGeometry,
   Mesh,
 } from "three";
@@ -85,24 +84,26 @@ function Nebula() {
       sleep(1000).then(() => regenerateNebula(skyboxKey));
     }
     const textures = await generateTextures(skyboxKey);
-    if (meshes.current.inactive.current && meshes.current.active.current) {
-      // Let's clean up any existing objects;
-      if (Array.isArray(meshes.current.inactive.current?.material)) {
-        meshes.current.inactive.current?.material?.forEach((m, i) => {
-          const mat = m as MeshBasicMaterial;
-          mat.map?.dispose();
-          mat.color.set(0xffffff);
-          mat.map = textures[i];
-          mat.transparent = true;
-          mat.needsUpdate = true;
-        });
-      }
+    requestAnimationFrame(() => {
+      if (meshes.current.inactive.current && meshes.current.active.current) {
+        // Let's clean up any existing objects;
+        if (Array.isArray(meshes.current.inactive.current?.material)) {
+          meshes.current.inactive.current?.material?.forEach((m, i) => {
+            const mat = m as MeshBasicMaterial;
+            mat.map?.dispose();
+            mat.color.set(0xffffff);
+            mat.map = textures[i];
+            mat.transparent = true;
+            mat.needsUpdate = true;
+          });
+        }
 
-      meshes.current = {
-        active: meshes.current.inactive,
-        inactive: meshes.current.active,
-      };
-    }
+        meshes.current = {
+          active: meshes.current.inactive,
+          inactive: meshes.current.active,
+        };
+      }
+    });
   }
   useFrame((state, delta) => {
     const key = configStoreApi.getState().skyboxKey;

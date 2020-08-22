@@ -21,6 +21,7 @@ import {
 } from "type-graphql";
 import {
   AU,
+  getSystem,
   getUniverse,
   PlanetarySystem,
   publish,
@@ -93,9 +94,8 @@ export class UniversePluginSystemsResolver {
     @Arg("name", type => String)
     name: string
   ) {
-    const universe = getUniverse(id);
-    const system = universe.entities.find(s => s.id === systemId);
-    if (!system) throw new Error("System does not exist.");
+    const {universe, system} = getSystem(id, systemId);
+
     const oldName = system.components.identity?.name || "";
     system.updateComponent("identity", {name});
 
@@ -122,11 +122,26 @@ export class UniversePluginSystemsResolver {
     @Arg("description", type => String)
     description: string
   ) {
-    const universe = getUniverse(id);
-    const system = universe.entities.find(s => s.id === systemId);
-    if (!system) throw new Error("System does not exist.");
+    const {universe, system} = getSystem(id, systemId);
+
     system.updateComponent("identity", {description});
     publish(universe);
+
+    return universe;
+  }
+  @Mutation(returns => UniverseTemplate)
+  async universeTemplateSystemSetSkyboxKey(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("systemId", type => ID)
+    systemId: string,
+    @Arg("skyboxKey", type => String)
+    skyboxKey: string
+  ) {
+    const {universe, system} = getSystem(id, systemId);
+    system.updateComponent("planetarySystem", {skyboxKey});
+    publish(universe);
+    pubsub.publish("templateUniverseSystem", {id: system.id, system});
 
     return universe;
   }
@@ -140,9 +155,8 @@ export class UniversePluginSystemsResolver {
     @Arg("position", type => PositionComponent)
     position: PositionComponent
   ) {
-    const universe = getUniverse(id);
-    const system = universe.entities.find(s => s.id === systemId);
-    if (!system) throw new Error("System does not exist.");
+    const {universe, system} = getSystem(id, systemId);
+
     system.updateComponent("position", position);
     return universe;
   }
@@ -205,6 +219,7 @@ function calculateHabitableZone(stars: Entity[]) {
 export class PlanetarySystemResolver {
   @FieldResolver(type => Number)
   habitableZoneInner(@Root() self: PlanetarySystem) {
+    console.log(self);
     const universe = getUniverse(self.universeId);
     const stars = universe.entities.filter(
       s => s.satellite?.parentId === self.id && s.isStar

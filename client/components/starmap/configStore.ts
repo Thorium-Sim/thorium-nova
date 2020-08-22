@@ -17,9 +17,13 @@ export interface ConfigStore {
     | NonNullable<
         TemplateSystemSubscription["templateUniverseSystem"]["items"]
       >[0]
+    | NonNullable<TemplateSystemSubscription["templateUniverseSystem"]>
     | null;
   zoomTarget: Vector3 | null;
   skyboxKey: string;
+  currentSystem: NonNullable<
+    TemplateSystemSubscription["templateUniverseSystem"]
+  > | null;
 }
 const store = create<ConfigStore>(set => ({
   disableOrbitControls: () => {},
@@ -30,7 +34,8 @@ const store = create<ConfigStore>(set => ({
   systemId: "",
   selectedObject: null,
   zoomTarget: null,
-  skyboxKey: "Pretty",
+  skyboxKey: "blank",
+  currentSystem: null,
 }));
 
 export const useConfigStore = store;

@@ -36,7 +36,15 @@ const Starmap: React.FC = () => {
         camera={{fov: 45, far: FAR}}
         concurrent
         onPointerMissed={() => {
-          configStoreApi.setState({selectedObject: null});
+          configStoreApi.setState(state => {
+            if (
+              state.currentSystem &&
+              state.selectedObject !== state.currentSystem
+            ) {
+              return {selectedObject: state.currentSystem};
+            }
+            return {selectedObject: null};
+          });
         }}
       >
         <ApolloProvider client={client}>
