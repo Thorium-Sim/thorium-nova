@@ -32,9 +32,7 @@ const Planetary: React.FC<{universeId: string; systemId: string}> = ({
 
   const skyboxKey =
     data?.templateUniverseSystem.planetarySystem.skyboxKey || "blank";
-  console.log(data?.templateUniverseSystem.planetarySystem.skyboxKey);
   React.useEffect(() => {
-    console.log(skyboxKey);
     configStoreApi.setState({skyboxKey});
   }, [skyboxKey]);
 

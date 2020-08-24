@@ -37,8 +37,12 @@ export class PlanetarySystem extends Entity {
   }
 }
 
-export function getSystem(id: string, systemId: string) {
-  const universe = getUniverse(id);
+export function getSystem(
+  id: string,
+  systemId: string,
+  optimizeUniverse?: UniverseTemplate
+) {
+  const universe = optimizeUniverse || getUniverse(id);
   const system = universe.entities.find(s => s.id === systemId);
   if (!system) {
     throw new Error("System does not exist");
@@ -47,6 +51,21 @@ export function getSystem(id: string, systemId: string) {
     universe,
     system: new PlanetarySystem({...system, universeId: universe.id}),
   };
+}
+
+export function getSystemObject(id: string, objectId: string) {
+  const universe = getUniverse(id);
+  const object = universe.entities.find(s => s.id === objectId);
+  if (!object) {
+    throw new Error("Object does not exist");
+  }
+
+  if (!object.satellite?.parentId) {
+    throw new Error("System does not exist");
+  }
+  const {system} = getSystem(id, object.satellite.parentId, universe);
+
+  return {universe, object, system};
 }
 
 // Astronomical units in KM

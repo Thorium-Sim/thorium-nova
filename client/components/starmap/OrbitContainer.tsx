@@ -21,7 +21,7 @@ const OrbitLine: React.FC<{radiusX: number; radiusY: number}> = ({
 
     const geometry = new BufferGeometry().setFromPoints(points);
     return geometry;
-  }, []);
+  }, [radiusX, radiusY]);
 
   return (
     // @ts-ignore

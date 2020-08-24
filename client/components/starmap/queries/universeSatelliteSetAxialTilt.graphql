@@ -1,0 +1,13 @@
+mutation UniverseSatelliteSetAxialTilt(
+  $id: ID!
+  $objectId: ID!
+  $axialTilt: Float!
+) {
+  universeTemplateSatelliteSetAxialTilt(
+    id: $id
+    objectId: $objectId
+    axialTilt: $axialTilt
+  ) {
+    id
+  }
+}

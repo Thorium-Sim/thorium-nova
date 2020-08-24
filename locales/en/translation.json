@@ -1,6 +1,19 @@
 {
+  "Axial Tilt": "Axial Tilt",
+  "Basics": "Basics",
+  "Close": "Close",
   "Description": "Description",
+  "Eccentricity": "Eccentricity",
+  "Minimize": "Minimize",
   "Name": "Name",
+  "Orbit": "Orbit",
+  "Orbit Arc": "Orbit Arc",
+  "Orbit Radius": "Orbit Radius",
+  "Orbital Inclination": "Orbital Inclination",
+  "Planet Properties": "Planet Properties",
+  "Property Palette": "Property Palette",
   "Random String": "Random String",
-  "Skybox Key": "Skybox Key"
+  "Show Orbit Path": "Show Orbit Path",
+  "Skybox Key": "Skybox Key",
+  "Star Properties": "Star Properties"
 }

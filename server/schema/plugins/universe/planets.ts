@@ -105,8 +105,8 @@ export class UniversePluginPlanetsResolver {
     entity.updateComponent("satellite", {
       axialTilt: Math.round(randomFromRange({min: 0, max: 45}) * 10) / 10,
       distance,
-      orbitalArc: Math.random() * 360,
-      eccentricity: Math.random() * 0.2,
+      orbitalArc: Math.round(Math.random() * 360),
+      eccentricity: Math.round(Math.random() * 0.2 * 100) / 100,
       showOrbit: true,
       parentId: systemId,
     });

@@ -1,0 +1,13 @@
+mutation UniverseSatelliteSetShowOrbit(
+  $id: ID!
+  $objectId: ID!
+  $showOrbit: Boolean!
+) {
+  universeTemplateSatelliteSetShowOrbit(
+    id: $id
+    objectId: $objectId
+    showOrbit: $showOrbit
+  ) {
+    id
+  }
+}

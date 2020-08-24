@@ -219,7 +219,6 @@ function calculateHabitableZone(stars: Entity[]) {
 export class PlanetarySystemResolver {
   @FieldResolver(type => Number)
   habitableZoneInner(@Root() self: PlanetarySystem) {
-    console.log(self);
     const universe = getUniverse(self.universeId);
     const stars = universe.entities.filter(
       s => s.satellite?.parentId === self.id && s.isStar

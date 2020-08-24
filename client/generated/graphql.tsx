@@ -277,6 +277,75 @@ export type UniverseObjectRemoveMutation = {
   universeTemplateRemoveObject: string;
 };
 
+export type UniverseSatelliteSetAxialTiltMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  axialTilt: Scalars["Float"];
+}>;
+
+export type UniverseSatelliteSetAxialTiltMutation = {
+  __typename?: "Mutation";
+  universeTemplateSatelliteSetAxialTilt: {__typename?: "Entity"; id: string};
+};
+
+export type UniverseSatelliteSetDistanceMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  distance: Scalars["Float"];
+}>;
+
+export type UniverseSatelliteSetDistanceMutation = {
+  __typename?: "Mutation";
+  universeTemplateSatelliteSetDistance: {__typename?: "Entity"; id: string};
+};
+
+export type UniverseSatelliteSetEccentricityMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  eccentricity: Scalars["Float"];
+}>;
+
+export type UniverseSatelliteSetEccentricityMutation = {
+  __typename?: "Mutation";
+  universeTemplateSatelliteSetEccentricity: {__typename?: "Entity"; id: string};
+};
+
+export type UniverseSatelliteSetOrbitalArcMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  orbitalArc: Scalars["Float"];
+}>;
+
+export type UniverseSatelliteSetOrbitalArcMutation = {
+  __typename?: "Mutation";
+  universeTemplateSatelliteSetOrbitalArc: {__typename?: "Entity"; id: string};
+};
+
+export type UniverseSatelliteSetOrbitalInclinationMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  orbitalInclination: Scalars["Float"];
+}>;
+
+export type UniverseSatelliteSetOrbitalInclinationMutation = {
+  __typename?: "Mutation";
+  universeTemplateSatelliteSetOrbitalInclination: {
+    __typename?: "Entity";
+    id: string;
+  };
+};
+
+export type UniverseSatelliteSetShowOrbitMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  showOrbit: Scalars["Boolean"];
+}>;
+
+export type UniverseSatelliteSetShowOrbitMutation = {
+  __typename?: "Mutation";
+  universeTemplateSatelliteSetShowOrbit: {__typename?: "Entity"; id: string};
+};
+
 export type UniverseSubscriptionVariables = Exact<{
   id: Scalars["ID"];
 }>;
@@ -930,6 +999,180 @@ export function useUniverseObjectRemoveMutation(
 }
 export type UniverseObjectRemoveMutationHookResult = ReturnType<
   typeof useUniverseObjectRemoveMutation
+>;
+export const UniverseSatelliteSetAxialTiltDocument = gql`
+  mutation UniverseSatelliteSetAxialTilt(
+    $id: ID!
+    $objectId: ID!
+    $axialTilt: Float!
+  ) {
+    universeTemplateSatelliteSetAxialTilt(
+      id: $id
+      objectId: $objectId
+      axialTilt: $axialTilt
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseSatelliteSetAxialTiltMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseSatelliteSetAxialTiltMutation,
+    UniverseSatelliteSetAxialTiltMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseSatelliteSetAxialTiltMutation,
+    UniverseSatelliteSetAxialTiltMutationVariables
+  >(UniverseSatelliteSetAxialTiltDocument, baseOptions);
+}
+export type UniverseSatelliteSetAxialTiltMutationHookResult = ReturnType<
+  typeof useUniverseSatelliteSetAxialTiltMutation
+>;
+export const UniverseSatelliteSetDistanceDocument = gql`
+  mutation UniverseSatelliteSetDistance(
+    $id: ID!
+    $objectId: ID!
+    $distance: Float!
+  ) {
+    universeTemplateSatelliteSetDistance(
+      id: $id
+      objectId: $objectId
+      distance: $distance
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseSatelliteSetDistanceMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseSatelliteSetDistanceMutation,
+    UniverseSatelliteSetDistanceMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseSatelliteSetDistanceMutation,
+    UniverseSatelliteSetDistanceMutationVariables
+  >(UniverseSatelliteSetDistanceDocument, baseOptions);
+}
+export type UniverseSatelliteSetDistanceMutationHookResult = ReturnType<
+  typeof useUniverseSatelliteSetDistanceMutation
+>;
+export const UniverseSatelliteSetEccentricityDocument = gql`
+  mutation UniverseSatelliteSetEccentricity(
+    $id: ID!
+    $objectId: ID!
+    $eccentricity: Float!
+  ) {
+    universeTemplateSatelliteSetEccentricity(
+      id: $id
+      objectId: $objectId
+      eccentricity: $eccentricity
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseSatelliteSetEccentricityMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseSatelliteSetEccentricityMutation,
+    UniverseSatelliteSetEccentricityMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseSatelliteSetEccentricityMutation,
+    UniverseSatelliteSetEccentricityMutationVariables
+  >(UniverseSatelliteSetEccentricityDocument, baseOptions);
+}
+export type UniverseSatelliteSetEccentricityMutationHookResult = ReturnType<
+  typeof useUniverseSatelliteSetEccentricityMutation
+>;
+export const UniverseSatelliteSetOrbitalArcDocument = gql`
+  mutation UniverseSatelliteSetOrbitalArc(
+    $id: ID!
+    $objectId: ID!
+    $orbitalArc: Float!
+  ) {
+    universeTemplateSatelliteSetOrbitalArc(
+      id: $id
+      objectId: $objectId
+      orbitalArc: $orbitalArc
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseSatelliteSetOrbitalArcMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseSatelliteSetOrbitalArcMutation,
+    UniverseSatelliteSetOrbitalArcMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseSatelliteSetOrbitalArcMutation,
+    UniverseSatelliteSetOrbitalArcMutationVariables
+  >(UniverseSatelliteSetOrbitalArcDocument, baseOptions);
+}
+export type UniverseSatelliteSetOrbitalArcMutationHookResult = ReturnType<
+  typeof useUniverseSatelliteSetOrbitalArcMutation
+>;
+export const UniverseSatelliteSetOrbitalInclinationDocument = gql`
+  mutation UniverseSatelliteSetOrbitalInclination(
+    $id: ID!
+    $objectId: ID!
+    $orbitalInclination: Float!
+  ) {
+    universeTemplateSatelliteSetOrbitalInclination(
+      id: $id
+      objectId: $objectId
+      orbitalInclination: $orbitalInclination
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseSatelliteSetOrbitalInclinationMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseSatelliteSetOrbitalInclinationMutation,
+    UniverseSatelliteSetOrbitalInclinationMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseSatelliteSetOrbitalInclinationMutation,
+    UniverseSatelliteSetOrbitalInclinationMutationVariables
+  >(UniverseSatelliteSetOrbitalInclinationDocument, baseOptions);
+}
+export type UniverseSatelliteSetOrbitalInclinationMutationHookResult = ReturnType<
+  typeof useUniverseSatelliteSetOrbitalInclinationMutation
+>;
+export const UniverseSatelliteSetShowOrbitDocument = gql`
+  mutation UniverseSatelliteSetShowOrbit(
+    $id: ID!
+    $objectId: ID!
+    $showOrbit: Boolean!
+  ) {
+    universeTemplateSatelliteSetShowOrbit(
+      id: $id
+      objectId: $objectId
+      showOrbit: $showOrbit
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseSatelliteSetShowOrbitMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseSatelliteSetShowOrbitMutation,
+    UniverseSatelliteSetShowOrbitMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseSatelliteSetShowOrbitMutation,
+    UniverseSatelliteSetShowOrbitMutationVariables
+  >(UniverseSatelliteSetShowOrbitDocument, baseOptions);
+}
+export type UniverseSatelliteSetShowOrbitMutationHookResult = ReturnType<
+  typeof useUniverseSatelliteSetShowOrbitMutation
 >;
 export const UniverseDocument = gql`
   subscription Universe($id: ID!) {

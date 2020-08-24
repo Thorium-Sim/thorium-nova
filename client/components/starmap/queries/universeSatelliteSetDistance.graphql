@@ -1,0 +1,13 @@
+mutation UniverseSatelliteSetDistance(
+  $id: ID!
+  $objectId: ID!
+  $distance: Float!
+) {
+  universeTemplateSatelliteSetDistance(
+    id: $id
+    objectId: $objectId
+    distance: $distance
+  ) {
+    id
+  }
+}

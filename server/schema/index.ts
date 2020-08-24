@@ -6,6 +6,7 @@ import {StationComplementPluginResolver} from "./plugins/stationComplement";
 import {UniversePluginBaseResolver} from "./plugins/universe";
 import {UniversePluginPlanetsResolver} from "./plugins/universe/planets";
 import PlanetTypeResolver from "./plugins/universe/planetTypes";
+import {UniverseSatelliteResolver} from "./plugins/universe/satellite";
 import {UniversePluginStarsResolver} from "./plugins/universe/stars";
 import StarTypeResolver from "./plugins/universe/starTypes";
 import {
@@ -40,4 +41,5 @@ export const resolvers: ResolverT = [
   UniversePluginStarsResolver,
   PlanetarySystemResolver,
   UniversePluginPlanetsResolver,
+  UniverseSatelliteResolver,
 ];

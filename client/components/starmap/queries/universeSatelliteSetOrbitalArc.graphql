@@ -1,0 +1,13 @@
+mutation UniverseSatelliteSetOrbitalArc(
+  $id: ID!
+  $objectId: ID!
+  $orbitalArc: Float!
+) {
+  universeTemplateSatelliteSetOrbitalArc(
+    id: $id
+    objectId: $objectId
+    orbitalArc: $orbitalArc
+  ) {
+    id
+  }
+}

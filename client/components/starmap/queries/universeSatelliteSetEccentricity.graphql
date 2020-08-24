@@ -1,0 +1,13 @@
+mutation UniverseSatelliteSetEccentricity(
+  $id: ID!
+  $objectId: ID!
+  $eccentricity: Float!
+) {
+  universeTemplateSatelliteSetEccentricity(
+    id: $id
+    objectId: $objectId
+    eccentricity: $eccentricity
+  ) {
+    id
+  }
+}

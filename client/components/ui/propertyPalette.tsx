@@ -32,7 +32,7 @@ const PropertyPalette: React.FC<{onClose: () => void}> = ({
       opacity={position.x === 0 && position.y === 0 ? 0 : 1}
       ref={measureRef}
       style={{transform: `translate(${position.x}px, ${position.y}px)`}}
-      bg="rgba(45,55,72, 0.4)"
+      bg="rgba(45,55,72, 0.6)"
       position="fixed"
       minWidth={300}
       top={0}
@@ -45,10 +45,10 @@ const PropertyPalette: React.FC<{onClose: () => void}> = ({
         onMouseDown={mouseDown}
         borderBottomColor="whiteAlpha.400"
         borderBottomWidth={2}
-        bg="blackAlpha.300"
+        bg="blackAlpha.500"
         cursor="grab"
-        _hover={{bg: "blackAlpha.400"}}
-        _active={{bg: "blackAlpha.500", cursor: "grabbing"}}
+        _hover={{bg: "blackAlpha.700"}}
+        _active={{bg: "blackAlpha.600", cursor: "grabbing"}}
         height="40px"
         borderTopRightRadius={4}
         borderTopLeftRadius={4}
@@ -78,7 +78,7 @@ const PropertyPalette: React.FC<{onClose: () => void}> = ({
         </Flex>
       </PseudoBox>
       {open && (
-        <Box minHeight="200px" px={4} py={2}>
+        <Box minHeight="200px" maxHeight="400px" overflowY="auto" py={2}>
           {children}
         </Box>
       )}

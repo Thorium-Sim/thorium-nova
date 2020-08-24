@@ -1,0 +1,13 @@
+mutation UniverseSatelliteSetOrbitalInclination(
+  $id: ID!
+  $objectId: ID!
+  $orbitalInclination: Float!
+) {
+  universeTemplateSatelliteSetOrbitalInclination(
+    id: $id
+    objectId: $objectId
+    orbitalInclination: $orbitalInclination
+  ) {
+    id
+  }
+}
