@@ -66,17 +66,18 @@ export class UniversePluginPlanetsResolver {
       if (next.isStar.radius > prev.isStar.radius) return next;
       return prev;
     }, null);
-    if (!biggestStar?.isStar || !biggestStar.temperature)
-      return {min: minPlanetDistance, max: maxPlanetDistance};
-    const tempZone = getHabitableZone(
-      biggestStar.isStar?.radius,
-      biggestStar.temperature?.temperature
-    );
-    const habitableZone = {
-      min: Math.max(tempZone.min * AU, minPlanetDistance),
-      max: Math.min(tempZone.max * AU, maxPlanetDistance),
-    };
 
+    let habitableZone = {min: minPlanetDistance, max: maxPlanetDistance};
+    if (biggestStar?.isStar && biggestStar.temperature) {
+      const tempZone = getHabitableZone(
+        biggestStar.isStar?.radius,
+        biggestStar.temperature?.temperature
+      );
+      habitableZone = {
+        min: Math.max(tempZone.min * AU, minPlanetDistance),
+        max: Math.min(tempZone.max * AU, maxPlanetDistance),
+      };
+    }
     let distance = 0;
     const zone = randomFromList(planetType.systemZone);
     if (zone === "hot") {

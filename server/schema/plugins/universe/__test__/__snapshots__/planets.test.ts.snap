@@ -1,0 +1,385 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`universe planets creating planets should create planets of every class 1`] = `
+Object {
+  "isPlanet": Object {
+    "age": 1000500000,
+    "classification": "A",
+    "habitable": false,
+    "lifeforms": "None",
+    "radius": 2750,
+    "terranMass": 0.65,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 2155893221,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 1583,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 2`] = `
+Object {
+  "isPlanet": Object {
+    "age": 5000500000,
+    "classification": "B",
+    "habitable": false,
+    "lifeforms": "None",
+    "radius": 2750,
+    "terranMass": 0.65,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 77750170,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 415,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 3`] = `
+Object {
+  "isPlanet": Object {
+    "age": 510000000,
+    "classification": "C",
+    "habitable": false,
+    "lifeforms": "None",
+    "radius": 2750,
+    "terranMass": 0.55,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 2155893221,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 44,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 4`] = `
+Object {
+  "isPlanet": Object {
+    "age": 510000000,
+    "classification": "D",
+    "habitable": false,
+    "lifeforms": "None",
+    "radius": 275,
+    "terranMass": 0.21,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 228643390,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 273,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 5`] = `
+Object {
+  "isPlanet": Object {
+    "age": 1000500000,
+    "classification": "E",
+    "habitable": false,
+    "lifeforms": "None",
+    "radius": 6250,
+    "terranMass": 0.8,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 228643390,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 1122,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 6`] = `
+Object {
+  "isPlanet": Object {
+    "age": 2000000000,
+    "classification": "F",
+    "habitable": false,
+    "lifeforms": "None",
+    "radius": 6250,
+    "terranMass": 0.8,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 228643390,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 700,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 7`] = `
+Object {
+  "isPlanet": Object {
+    "age": 3500000000,
+    "classification": "G",
+    "habitable": false,
+    "lifeforms": "Primitive single-celled organisms",
+    "radius": 6250,
+    "terranMass": 1,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 228643390,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 500,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 8`] = `
+Object {
+  "isPlanet": Object {
+    "age": 7000000000,
+    "classification": "H",
+    "habitable": false,
+    "lifeforms": "Primitive single-celled organisms",
+    "radius": 5750,
+    "terranMass": 0.8,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 77750170,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 700,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 9`] = `
+Object {
+  "isPlanet": Object {
+    "age": 6000000000,
+    "classification": "I",
+    "habitable": false,
+    "lifeforms": "Floating single-celled lifeforms",
+    "radius": 2535000,
+    "terranMass": 650,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 2155893221,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 234,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 10`] = `
+Object {
+  "isPlanet": Object {
+    "age": 6000000000,
+    "classification": "J",
+    "habitable": false,
+    "lifeforms": "Floating single-celled lifeforms",
+    "radius": 47500,
+    "terranMass": 55,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 2155893221,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 234,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 11`] = `
+Object {
+  "isPlanet": Object {
+    "age": 7000000000,
+    "classification": "K",
+    "habitable": true,
+    "lifeforms": "Primitive single-celled organisms",
+    "radius": 3750,
+    "terranMass": 0.8,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 228643390,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 210,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 12`] = `
+Object {
+  "isPlanet": Object {
+    "age": 7000000000,
+    "classification": "L",
+    "habitable": true,
+    "lifeforms": "Hardy plant life",
+    "radius": 5000,
+    "terranMass": 0.8,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 228643390,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 240,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 13`] = `
+Object {
+  "isPlanet": Object {
+    "age": 6500000000,
+    "classification": "M",
+    "habitable": true,
+    "lifeforms": "Varied and extensive vegetation and animal life, humanoids",
+    "radius": 6250,
+    "terranMass": 1,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 228643390,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 296,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 14`] = `
+Object {
+  "isPlanet": Object {
+    "age": 6500000000,
+    "classification": "N",
+    "habitable": true,
+    "lifeforms": "Aquatic-based vegetation and animal life, humanoids",
+    "radius": 6250,
+    "terranMass": 1,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 228643390,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 543,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 15`] = `
+Object {
+  "isPlanet": Object {
+    "age": 6500000000,
+    "classification": "O",
+    "habitable": true,
+    "lifeforms": "Aquatic-based vegetation and animal life, humanoids",
+    "radius": 6250,
+    "terranMass": 1,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 228643390,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 297,
+  },
+}
+`;
+
+exports[`universe planets creating planets should create planets of every class 16`] = `
+Object {
+  "isPlanet": Object {
+    "age": 6500000000,
+    "classification": "P",
+    "habitable": true,
+    "lifeforms": "Hardy vegetation, animal life, humanoids",
+    "radius": 6250,
+    "terranMass": 1,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 228643390,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 263,
+  },
+}
+`;
