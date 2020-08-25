@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`universe stars creating planets should create planets of every class 1`] = `
+Object {
+  "isStar": Object {
+    "age": 10000000,
+    "hue": 245,
+    "isWhite": false,
+    "radius": 20,
+    "solarMass": 510,
+    "spectralType": "O",
+  },
+  "satellite": Object {
+    "axialTilt": 0,
+    "distance": 0,
+    "eccentricity": 0,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": false,
+  },
+  "temperature": Object {
+    "temperature": 30000,
+  },
+}
+`;
+
+exports[`universe stars creating planets should create planets of every class 2`] = `
+Object {
+  "isStar": Object {
+    "age": 40000000,
+    "hue": 223,
+    "isWhite": false,
+    "radius": 6.35,
+    "solarMass": 46.3,
+    "spectralType": "B",
+  },
+  "satellite": Object {
+    "axialTilt": 0,
+    "distance": 0,
+    "eccentricity": 0,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": false,
+  },
+  "temperature": Object {
+    "temperature": 30500,
+  },
+}
+`;
+
+exports[`universe stars creating planets should create planets of every class 3`] = `
+Object {
+  "isStar": Object {
+    "age": 10500000000,
+    "hue": 50,
+    "isWhite": false,
+    "radius": 1.15,
+    "solarMass": 1.1,
+    "spectralType": "G",
+  },
+  "satellite": Object {
+    "axialTilt": 0,
+    "distance": 0,
+    "eccentricity": 0,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": false,
+  },
+  "temperature": Object {
+    "temperature": 6350,
+  },
+}
+`;
+
+exports[`universe stars creating planets should create planets of every class 4`] = `
+Object {
+  "isStar": Object {
+    "age": 22500000000,
+    "hue": 30,
+    "isWhite": false,
+    "radius": 0.8,
+    "solarMass": 0.6,
+    "spectralType": "K",
+  },
+  "satellite": Object {
+    "axialTilt": 0,
+    "distance": 0,
+    "eccentricity": 0,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": false,
+  },
+  "temperature": Object {
+    "temperature": 4450,
+  },
+}
+`;
+
+exports[`universe stars creating planets should create planets of every class 5`] = `
+Object {
+  "isStar": Object {
+    "age": 1050000000,
+    "hue": 10,
+    "isWhite": false,
+    "radius": 60,
+    "solarMass": 5.1,
+    "spectralType": "MG",
+  },
+  "satellite": Object {
+    "axialTilt": 0,
+    "distance": 0,
+    "eccentricity": 0,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": false,
+  },
+  "temperature": Object {
+    "temperature": 4300,
+  },
+}
+`;
+
+exports[`universe stars creating planets should create planets of every class 6`] = `
+Object {
+  "isStar": Object {
+    "age": 5000050000,
+    "hue": 1,
+    "isWhite": false,
+    "radius": 0.104,
+    "solarMass": 0.7,
+    "spectralType": "M",
+  },
+  "satellite": Object {
+    "axialTilt": 0,
+    "distance": 0,
+    "eccentricity": 0,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": false,
+  },
+  "temperature": Object {
+    "temperature": 24000,
+  },
+}
+`;
+
+exports[`universe stars creating planets should create planets of every class 7`] = `
+Object {
+  "isStar": Object {
+    "age": 1050000000,
+    "hue": 10,
+    "isWhite": true,
+    "radius": 0.025,
+    "solarMass": 5.1,
+    "spectralType": "D",
+  },
+  "satellite": Object {
+    "axialTilt": 0,
+    "distance": 0,
+    "eccentricity": 0,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": false,
+  },
+  "temperature": Object {
+    "temperature": 4300,
+  },
+}
+`;

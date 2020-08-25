@@ -9,11 +9,9 @@ import {randomFromList} from "server/helpers/randomFromList";
 import UniverseTemplate from "server/schema/universe";
 import {
   Arg,
-  Field,
   FieldResolver,
   ID,
   Mutation,
-  ObjectType,
   Query,
   Resolver,
   Root,
