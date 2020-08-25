@@ -71,18 +71,6 @@ export class UniversePluginSystemsResolver {
     return entity;
   }
 
-  @Mutation(returns => String)
-  universeTemplateRemoveSystem(
-    @Arg("id", type => ID) id: string,
-    @Arg("systemId", type => ID) systemId: string
-  ) {
-    const universe = getUniverse(id);
-    removeUniverseObject(universe, systemId);
-    publish(universe);
-
-    return "";
-  }
-
   @Mutation(returns => UniverseTemplate)
   async universeTemplateSystemSetName(
     @Arg("id", type => ID)
@@ -228,6 +216,7 @@ export class PlanetarySystemResolver {
   @FieldResolver(type => Number)
   habitableZoneOuter(@Root() self: PlanetarySystem) {
     const universe = getUniverse(self.universeId);
+
     const stars = universe.entities.filter(
       s => s.satellite?.parentId === self.id && s.isStar
     );
