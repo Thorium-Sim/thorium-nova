@@ -23,9 +23,14 @@ export function isStar(
 }
 export function isPlanet(
   obj: any
-): obj is NonNullable<
-  TemplateSystemSubscription["templateUniverseSystem"]["items"][0]
-> {
+): obj is {
+  isPlanet: NonNullable<
+    TemplateSystemSubscription["templateUniverseSystem"]["items"][0]["isPlanet"]
+  >;
+  temperature: NonNullable<
+    TemplateSystemSubscription["templateUniverseSystem"]["items"][0]["temperature"]
+  >;
+} {
   return !!obj.isPlanet;
 }
 export function isSystem(

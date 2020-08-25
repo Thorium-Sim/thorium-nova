@@ -1,0 +1,13 @@
+mutation UniversePlanetSetTerranMass(
+  $id: ID!
+  $objectId: ID!
+  $terranMass: Float!
+) {
+  universeTemplatePlanetSetTerranMass(
+    id: $id
+    objectId: $objectId
+    terranMass: $terranMass
+  ) {
+    id
+  }
+}

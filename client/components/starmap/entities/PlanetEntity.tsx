@@ -114,7 +114,7 @@ const PlanetContainer: React.FC<{
   onPointerOut,
   onClick,
 }) => {
-  const size = 20 + 5 * (radius / 1000000);
+  const size = 5 + 100 * (radius / 1000000);
   return (
     <OrbitContainer
       // Convert KM to Millions of KM

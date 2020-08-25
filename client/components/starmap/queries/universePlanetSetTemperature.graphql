@@ -1,0 +1,13 @@
+mutation UniversePlanetSetTemperature(
+  $id: ID!
+  $objectId: ID!
+  $temperature: Float!
+) {
+  universeTemplatePlanetSetTemperature(
+    id: $id
+    objectId: $objectId
+    temperature: $temperature
+  ) {
+    id
+  }
+}

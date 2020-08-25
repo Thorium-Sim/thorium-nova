@@ -7,7 +7,7 @@ import Entity from "server/helpers/ecs/entity";
 import {pubsub} from "server/helpers/pubsub";
 import {Arg, ID, Mutation, Resolver} from "type-graphql";
 import {planetTypes} from "./planetTypes";
-import {getSystem, publish} from "./utils";
+import {getSystem, getSystemObject, objectPublish, publish} from "./utils";
 import {toRoman} from "roman-numerals";
 import {IsPlanetComponent} from "server/components/isPlanet";
 import getHabitableZone from "server/generatorFixtures/habitableZone";
@@ -142,5 +142,89 @@ export class UniversePluginPlanetsResolver {
     publish(universe);
     pubsub.publish("templateUniverseSystem", {id: system.id, system});
     return entity;
+  }
+  @Mutation(returns => Entity)
+  universeTemplatePlanetSetTemperature(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("temperature", {description: "The temperature of the star in Kelvin"})
+    temperature: number
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    object.updateComponent("temperature", {temperature});
+    return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  universeTemplatePlanetSetAge(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("age", {description: "The age of the planet in years"})
+    age: number
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    object.updateComponent("isPlanet", {age});
+    return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  universeTemplatePlanetSetRadius(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("radius", {description: "The radius of the planet in kilometers"})
+    radius: number
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    object.updateComponent("isPlanet", {radius});
+    return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  universeTemplatePlanetSetTerranMass(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("terranMass", {
+      description: "The mass of the planet compared to Earth",
+    })
+    terranMass: number
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    object.updateComponent("isPlanet", {terranMass});
+    return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  universeTemplatePlanetSetHabitable(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("habitable", {
+      description: "Whether the planet is habitable by humans.",
+    })
+    habitable: boolean
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    object.updateComponent("isPlanet", {habitable});
+    return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  universeTemplatePlanetSetLifeforms(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("lifeforms", {
+      description: "A text description of the lifeforms on the planet.",
+    })
+    lifeforms: string
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    object.updateComponent("isPlanet", {lifeforms});
+    return objectPublish(universe, object, system);
   }
 }

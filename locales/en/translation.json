@@ -1,23 +1,13 @@
 {
   "Age": "Age",
-  "Axial Tilt": "Axial Tilt",
   "Basics": "Basics",
-  "Description": "Description",
-  "Eccentricity": "Eccentricity",
-  "Hue": "Hue",
-  "Is White": "Is White",
-  "Name": "Name",
+  "Classification": "Classification",
+  "Habitable": "Habitable",
+  "Lifeforms": "Lifeforms",
   "Orbit": "Orbit",
-  "Orbit Arc": "Orbit Arc",
-  "Orbit Radius": "Orbit Radius",
-  "Orbital Inclination": "Orbital Inclination",
   "Planet Properties": "Planet Properties",
   "Radius": "Radius",
-  "Random String": "Random String",
-  "Show Orbit Path": "Show Orbit Path",
-  "Skybox Key": "Skybox Key",
-  "Solar Mass": "Solar Mass",
-  "Spectral Type": "Spectral Type",
   "Star Properties": "Star Properties",
-  "Temperature": "Temperature"
+  "Temperature": "Temperature",
+  "Terran Mass": "Terran Mass"
 }

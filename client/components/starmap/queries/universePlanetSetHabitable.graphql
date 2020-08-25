@@ -1,0 +1,13 @@
+mutation UniversePlanetSetHabitable(
+  $id: ID!
+  $objectId: ID!
+  $habitable: Boolean!
+) {
+  universeTemplatePlanetSetHabitable(
+    id: $id
+    objectId: $objectId
+    habitable: $habitable
+  ) {
+    id
+  }
+}

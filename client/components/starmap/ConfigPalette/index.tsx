@@ -29,8 +29,8 @@ const ConfigPalette: React.FC = () => {
       onClose={() => configStoreApi.setState({selectedObject: null})}
     >
       <Accordion>
-        <AccordionItem>
-          <AccordionHeader>
+        <AccordionItem border="none">
+          <AccordionHeader bg="gray.700">
             <Box flex="1" textAlign="left">
               {t("Basics")}
             </Box>
@@ -41,8 +41,8 @@ const ConfigPalette: React.FC = () => {
           </AccordionPanel>
         </AccordionItem>
         {hasOrbit(selectedObject) && (
-          <AccordionItem>
-            <AccordionHeader>
+          <AccordionItem border="none">
+            <AccordionHeader bg="gray.700">
               <Box flex="1" textAlign="left">
                 {t("Orbit")}
               </Box>
@@ -54,8 +54,8 @@ const ConfigPalette: React.FC = () => {
           </AccordionItem>
         )}
         {isStar(selectedObject) && (
-          <AccordionItem>
-            <AccordionHeader>
+          <AccordionItem border="none">
+            <AccordionHeader bg="gray.700">
               <Box flex="1" textAlign="left">
                 {t("Star Properties")}
               </Box>
@@ -67,8 +67,8 @@ const ConfigPalette: React.FC = () => {
           </AccordionItem>
         )}
         {isPlanet(selectedObject) && (
-          <AccordionItem>
-            <AccordionHeader>
+          <AccordionItem border="none">
+            <AccordionHeader bg="gray.700">
               <Box flex="1" textAlign="left">
                 {t("Planet Properties")}
               </Box>

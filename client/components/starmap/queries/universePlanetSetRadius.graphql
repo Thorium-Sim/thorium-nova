@@ -1,0 +1,9 @@
+mutation UniversePlanetSetRadius($id: ID!, $objectId: ID!, $radius: Float!) {
+  universeTemplatePlanetSetRadius(
+    id: $id
+    objectId: $objectId
+    radius: $radius
+  ) {
+    id
+  }
+}

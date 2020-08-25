@@ -277,6 +277,72 @@ export type UniverseObjectRemoveMutation = {
   universeTemplateRemoveObject: string;
 };
 
+export type UniversePlanetSetAgeMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  age: Scalars["Float"];
+}>;
+
+export type UniversePlanetSetAgeMutation = {
+  __typename?: "Mutation";
+  universeTemplatePlanetSetAge: {__typename?: "Entity"; id: string};
+};
+
+export type UniversePlanetSetHabitableMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  habitable: Scalars["Boolean"];
+}>;
+
+export type UniversePlanetSetHabitableMutation = {
+  __typename?: "Mutation";
+  universeTemplatePlanetSetHabitable: {__typename?: "Entity"; id: string};
+};
+
+export type UniversePlanetSetLifeformsMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  lifeforms: Scalars["String"];
+}>;
+
+export type UniversePlanetSetLifeformsMutation = {
+  __typename?: "Mutation";
+  universeTemplatePlanetSetLifeforms: {__typename?: "Entity"; id: string};
+};
+
+export type UniversePlanetSetRadiusMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  radius: Scalars["Float"];
+}>;
+
+export type UniversePlanetSetRadiusMutation = {
+  __typename?: "Mutation";
+  universeTemplatePlanetSetRadius: {__typename?: "Entity"; id: string};
+};
+
+export type UniversePlanetSetTemperatureMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  temperature: Scalars["Float"];
+}>;
+
+export type UniversePlanetSetTemperatureMutation = {
+  __typename?: "Mutation";
+  universeTemplatePlanetSetTemperature: {__typename?: "Entity"; id: string};
+};
+
+export type UniversePlanetSetTerranMassMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  terranMass: Scalars["Float"];
+}>;
+
+export type UniversePlanetSetTerranMassMutation = {
+  __typename?: "Mutation";
+  universeTemplatePlanetSetTerranMass: {__typename?: "Entity"; id: string};
+};
+
 export type UniverseSatelliteSetAxialTiltMutationVariables = Exact<{
   id: Scalars["ID"];
   objectId: Scalars["ID"];
@@ -1065,6 +1131,168 @@ export function useUniverseObjectRemoveMutation(
 }
 export type UniverseObjectRemoveMutationHookResult = ReturnType<
   typeof useUniverseObjectRemoveMutation
+>;
+export const UniversePlanetSetAgeDocument = gql`
+  mutation UniversePlanetSetAge($id: ID!, $objectId: ID!, $age: Float!) {
+    universeTemplatePlanetSetAge(id: $id, objectId: $objectId, age: $age) {
+      id
+    }
+  }
+`;
+export function useUniversePlanetSetAgeMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniversePlanetSetAgeMutation,
+    UniversePlanetSetAgeMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniversePlanetSetAgeMutation,
+    UniversePlanetSetAgeMutationVariables
+  >(UniversePlanetSetAgeDocument, baseOptions);
+}
+export type UniversePlanetSetAgeMutationHookResult = ReturnType<
+  typeof useUniversePlanetSetAgeMutation
+>;
+export const UniversePlanetSetHabitableDocument = gql`
+  mutation UniversePlanetSetHabitable(
+    $id: ID!
+    $objectId: ID!
+    $habitable: Boolean!
+  ) {
+    universeTemplatePlanetSetHabitable(
+      id: $id
+      objectId: $objectId
+      habitable: $habitable
+    ) {
+      id
+    }
+  }
+`;
+export function useUniversePlanetSetHabitableMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniversePlanetSetHabitableMutation,
+    UniversePlanetSetHabitableMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniversePlanetSetHabitableMutation,
+    UniversePlanetSetHabitableMutationVariables
+  >(UniversePlanetSetHabitableDocument, baseOptions);
+}
+export type UniversePlanetSetHabitableMutationHookResult = ReturnType<
+  typeof useUniversePlanetSetHabitableMutation
+>;
+export const UniversePlanetSetLifeformsDocument = gql`
+  mutation UniversePlanetSetLifeforms(
+    $id: ID!
+    $objectId: ID!
+    $lifeforms: String!
+  ) {
+    universeTemplatePlanetSetLifeforms(
+      id: $id
+      objectId: $objectId
+      lifeforms: $lifeforms
+    ) {
+      id
+    }
+  }
+`;
+export function useUniversePlanetSetLifeformsMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniversePlanetSetLifeformsMutation,
+    UniversePlanetSetLifeformsMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniversePlanetSetLifeformsMutation,
+    UniversePlanetSetLifeformsMutationVariables
+  >(UniversePlanetSetLifeformsDocument, baseOptions);
+}
+export type UniversePlanetSetLifeformsMutationHookResult = ReturnType<
+  typeof useUniversePlanetSetLifeformsMutation
+>;
+export const UniversePlanetSetRadiusDocument = gql`
+  mutation UniversePlanetSetRadius($id: ID!, $objectId: ID!, $radius: Float!) {
+    universeTemplatePlanetSetRadius(
+      id: $id
+      objectId: $objectId
+      radius: $radius
+    ) {
+      id
+    }
+  }
+`;
+export function useUniversePlanetSetRadiusMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniversePlanetSetRadiusMutation,
+    UniversePlanetSetRadiusMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniversePlanetSetRadiusMutation,
+    UniversePlanetSetRadiusMutationVariables
+  >(UniversePlanetSetRadiusDocument, baseOptions);
+}
+export type UniversePlanetSetRadiusMutationHookResult = ReturnType<
+  typeof useUniversePlanetSetRadiusMutation
+>;
+export const UniversePlanetSetTemperatureDocument = gql`
+  mutation UniversePlanetSetTemperature(
+    $id: ID!
+    $objectId: ID!
+    $temperature: Float!
+  ) {
+    universeTemplatePlanetSetTemperature(
+      id: $id
+      objectId: $objectId
+      temperature: $temperature
+    ) {
+      id
+    }
+  }
+`;
+export function useUniversePlanetSetTemperatureMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniversePlanetSetTemperatureMutation,
+    UniversePlanetSetTemperatureMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniversePlanetSetTemperatureMutation,
+    UniversePlanetSetTemperatureMutationVariables
+  >(UniversePlanetSetTemperatureDocument, baseOptions);
+}
+export type UniversePlanetSetTemperatureMutationHookResult = ReturnType<
+  typeof useUniversePlanetSetTemperatureMutation
+>;
+export const UniversePlanetSetTerranMassDocument = gql`
+  mutation UniversePlanetSetTerranMass(
+    $id: ID!
+    $objectId: ID!
+    $terranMass: Float!
+  ) {
+    universeTemplatePlanetSetTerranMass(
+      id: $id
+      objectId: $objectId
+      terranMass: $terranMass
+    ) {
+      id
+    }
+  }
+`;
+export function useUniversePlanetSetTerranMassMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniversePlanetSetTerranMassMutation,
+    UniversePlanetSetTerranMassMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniversePlanetSetTerranMassMutation,
+    UniversePlanetSetTerranMassMutationVariables
+  >(UniversePlanetSetTerranMassDocument, baseOptions);
+}
+export type UniversePlanetSetTerranMassMutationHookResult = ReturnType<
+  typeof useUniversePlanetSetTerranMassMutation
 >;
 export const UniverseSatelliteSetAxialTiltDocument = gql`
   mutation UniverseSatelliteSetAxialTilt(

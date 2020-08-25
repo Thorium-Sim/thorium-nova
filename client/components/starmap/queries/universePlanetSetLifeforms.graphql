@@ -1,0 +1,13 @@
+mutation UniversePlanetSetLifeforms(
+  $id: ID!
+  $objectId: ID!
+  $lifeforms: String!
+) {
+  universeTemplatePlanetSetLifeforms(
+    id: $id
+    objectId: $objectId
+    lifeforms: $lifeforms
+  ) {
+    id
+  }
+}
