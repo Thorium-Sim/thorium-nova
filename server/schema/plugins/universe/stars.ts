@@ -8,7 +8,14 @@ import {pubsub} from "server/helpers/pubsub";
 import UniverseTemplate from "server/schema/universe";
 import {Arg, ID, Mutation, Resolver} from "type-graphql";
 import {starTypes} from "./starTypes";
-import {getSystem, getUniverse, publish, removeUniverseObject} from "./utils";
+import {
+  getSystem,
+  getSystemObject,
+  getUniverse,
+  objectPublish,
+  publish,
+  removeUniverseObject,
+} from "./utils";
 
 const alphabet = "ABC";
 type range = {min: number; max: number};
@@ -130,5 +137,84 @@ export class UniversePluginStarsResolver {
     }
 
     return "";
+  }
+
+  @Mutation(returns => Entity)
+  universeTemplateStarSetSolarMass(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("solarMass")
+    solarMass: number
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    object.updateComponent("isStar", {solarMass});
+    return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  universeTemplateStarSetAge(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("age")
+    age: number
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    object.updateComponent("isStar", {age});
+    return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  universeTemplateStarSetHue(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("hue")
+    hue: number
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    object.updateComponent("isStar", {hue});
+    return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  universeTemplateStarSetIsWhite(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("isWhite")
+    isWhite: boolean
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    object.updateComponent("isStar", {isWhite});
+    return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  universeTemplateStarSetRadius(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("radius")
+    radius: number
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    object.updateComponent("isStar", {radius});
+    return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  universeTemplateStarSetTemperature(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("temperature", {description: "The temperature of the star in Kelvin"})
+    temperature: number
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    object.updateComponent("temperature", {temperature});
+    return objectPublish(universe, object, system);
   }
 }

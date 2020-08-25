@@ -88,3 +88,15 @@ export function removeUniverseObject(
     return true;
   });
 }
+
+export function objectPublish(
+  universe: UniverseTemplate,
+  object: Entity,
+  system?: Entity
+) {
+  publish(universe);
+  if (system) {
+    pubsub.publish("templateUniverseSystem", {id: system.id, system});
+  }
+  return object;
+}

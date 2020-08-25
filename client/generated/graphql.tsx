@@ -346,6 +346,72 @@ export type UniverseSatelliteSetShowOrbitMutation = {
   universeTemplateSatelliteSetShowOrbit: {__typename?: "Entity"; id: string};
 };
 
+export type UniverseStarSetAgeMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  age: Scalars["Float"];
+}>;
+
+export type UniverseStarSetAgeMutation = {
+  __typename?: "Mutation";
+  universeTemplateStarSetAge: {__typename?: "Entity"; id: string};
+};
+
+export type UniverseStarSetHueMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  hue: Scalars["Float"];
+}>;
+
+export type UniverseStarSetHueMutation = {
+  __typename?: "Mutation";
+  universeTemplateStarSetHue: {__typename?: "Entity"; id: string};
+};
+
+export type UniverseStarSetIsWhiteMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  isWhite: Scalars["Boolean"];
+}>;
+
+export type UniverseStarSetIsWhiteMutation = {
+  __typename?: "Mutation";
+  universeTemplateStarSetIsWhite: {__typename?: "Entity"; id: string};
+};
+
+export type UniverseStarSetRadiusMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  radius: Scalars["Float"];
+}>;
+
+export type UniverseStarSetRadiusMutation = {
+  __typename?: "Mutation";
+  universeTemplateStarSetRadius: {__typename?: "Entity"; id: string};
+};
+
+export type UniverseStarSetSolarMassMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  solarMass: Scalars["Float"];
+}>;
+
+export type UniverseStarSetSolarMassMutation = {
+  __typename?: "Mutation";
+  universeTemplateStarSetSolarMass: {__typename?: "Entity"; id: string};
+};
+
+export type UniverseStarSetTemperatureMutationVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+  temperature: Scalars["Float"];
+}>;
+
+export type UniverseStarSetTemperatureMutation = {
+  __typename?: "Mutation";
+  universeTemplateStarSetTemperature: {__typename?: "Entity"; id: string};
+};
+
 export type UniverseSubscriptionVariables = Exact<{
   id: Scalars["ID"];
 }>;
@@ -1173,6 +1239,160 @@ export function useUniverseSatelliteSetShowOrbitMutation(
 }
 export type UniverseSatelliteSetShowOrbitMutationHookResult = ReturnType<
   typeof useUniverseSatelliteSetShowOrbitMutation
+>;
+export const UniverseStarSetAgeDocument = gql`
+  mutation UniverseStarSetAge($id: ID!, $objectId: ID!, $age: Float!) {
+    universeTemplateStarSetAge(id: $id, objectId: $objectId, age: $age) {
+      id
+    }
+  }
+`;
+export function useUniverseStarSetAgeMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseStarSetAgeMutation,
+    UniverseStarSetAgeMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseStarSetAgeMutation,
+    UniverseStarSetAgeMutationVariables
+  >(UniverseStarSetAgeDocument, baseOptions);
+}
+export type UniverseStarSetAgeMutationHookResult = ReturnType<
+  typeof useUniverseStarSetAgeMutation
+>;
+export const UniverseStarSetHueDocument = gql`
+  mutation UniverseStarSetHue($id: ID!, $objectId: ID!, $hue: Float!) {
+    universeTemplateStarSetHue(id: $id, objectId: $objectId, hue: $hue) {
+      id
+    }
+  }
+`;
+export function useUniverseStarSetHueMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseStarSetHueMutation,
+    UniverseStarSetHueMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseStarSetHueMutation,
+    UniverseStarSetHueMutationVariables
+  >(UniverseStarSetHueDocument, baseOptions);
+}
+export type UniverseStarSetHueMutationHookResult = ReturnType<
+  typeof useUniverseStarSetHueMutation
+>;
+export const UniverseStarSetIsWhiteDocument = gql`
+  mutation UniverseStarSetIsWhite(
+    $id: ID!
+    $objectId: ID!
+    $isWhite: Boolean!
+  ) {
+    universeTemplateStarSetIsWhite(
+      id: $id
+      objectId: $objectId
+      isWhite: $isWhite
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseStarSetIsWhiteMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseStarSetIsWhiteMutation,
+    UniverseStarSetIsWhiteMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseStarSetIsWhiteMutation,
+    UniverseStarSetIsWhiteMutationVariables
+  >(UniverseStarSetIsWhiteDocument, baseOptions);
+}
+export type UniverseStarSetIsWhiteMutationHookResult = ReturnType<
+  typeof useUniverseStarSetIsWhiteMutation
+>;
+export const UniverseStarSetRadiusDocument = gql`
+  mutation UniverseStarSetRadius($id: ID!, $objectId: ID!, $radius: Float!) {
+    universeTemplateStarSetRadius(
+      id: $id
+      objectId: $objectId
+      radius: $radius
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseStarSetRadiusMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseStarSetRadiusMutation,
+    UniverseStarSetRadiusMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseStarSetRadiusMutation,
+    UniverseStarSetRadiusMutationVariables
+  >(UniverseStarSetRadiusDocument, baseOptions);
+}
+export type UniverseStarSetRadiusMutationHookResult = ReturnType<
+  typeof useUniverseStarSetRadiusMutation
+>;
+export const UniverseStarSetSolarMassDocument = gql`
+  mutation UniverseStarSetSolarMass(
+    $id: ID!
+    $objectId: ID!
+    $solarMass: Float!
+  ) {
+    universeTemplateStarSetSolarMass(
+      id: $id
+      objectId: $objectId
+      solarMass: $solarMass
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseStarSetSolarMassMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseStarSetSolarMassMutation,
+    UniverseStarSetSolarMassMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseStarSetSolarMassMutation,
+    UniverseStarSetSolarMassMutationVariables
+  >(UniverseStarSetSolarMassDocument, baseOptions);
+}
+export type UniverseStarSetSolarMassMutationHookResult = ReturnType<
+  typeof useUniverseStarSetSolarMassMutation
+>;
+export const UniverseStarSetTemperatureDocument = gql`
+  mutation UniverseStarSetTemperature(
+    $id: ID!
+    $objectId: ID!
+    $temperature: Float!
+  ) {
+    universeTemplateStarSetTemperature(
+      id: $id
+      objectId: $objectId
+      temperature: $temperature
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseStarSetTemperatureMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseStarSetTemperatureMutation,
+    UniverseStarSetTemperatureMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseStarSetTemperatureMutation,
+    UniverseStarSetTemperatureMutationVariables
+  >(UniverseStarSetTemperatureDocument, baseOptions);
+}
+export type UniverseStarSetTemperatureMutationHookResult = ReturnType<
+  typeof useUniverseStarSetTemperatureMutation
 >;
 export const UniverseDocument = gql`
   subscription Universe($id: ID!) {

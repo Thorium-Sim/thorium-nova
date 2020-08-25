@@ -33,12 +33,15 @@ const Star: React.FC<{
     []
   );
   const shader = React.useRef<Mesh>();
+  const material = React.useRef<any>();
 
   useFrame(({camera}) => {
     shader.current?.quaternion.copy(camera.quaternion);
     if (shader.current) {
       const mat = shader.current.material as ShaderMaterial;
       mat.uniforms.time.value += 0.03;
+      mat.uniforms.color1.value = color1;
+      mat.uniforms.color2.value = color2;
     }
   });
 
@@ -58,7 +61,7 @@ const Star: React.FC<{
         />
       </mesh>
       <mesh>
-        <sphereBufferGeometry attach="geometry" args={[0.5, 8, 16]} />
+        <sphereBufferGeometry attach="geometry" args={[0.5, 32, 32]} />
         <meshBasicMaterial attach="material" color={0x000000} />
       </mesh>
     </group>

@@ -1,0 +1,13 @@
+mutation UniverseStarSetSolarMass(
+  $id: ID!
+  $objectId: ID!
+  $solarMass: Float!
+) {
+  universeTemplateStarSetSolarMass(
+    id: $id
+    objectId: $objectId
+    solarMass: $solarMass
+  ) {
+    id
+  }
+}

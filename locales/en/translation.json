@@ -1,19 +1,23 @@
 {
+  "Age": "Age",
   "Axial Tilt": "Axial Tilt",
   "Basics": "Basics",
-  "Close": "Close",
   "Description": "Description",
   "Eccentricity": "Eccentricity",
-  "Minimize": "Minimize",
+  "Hue": "Hue",
+  "Is White": "Is White",
   "Name": "Name",
   "Orbit": "Orbit",
   "Orbit Arc": "Orbit Arc",
   "Orbit Radius": "Orbit Radius",
   "Orbital Inclination": "Orbital Inclination",
   "Planet Properties": "Planet Properties",
-  "Property Palette": "Property Palette",
+  "Radius": "Radius",
   "Random String": "Random String",
   "Show Orbit Path": "Show Orbit Path",
   "Skybox Key": "Skybox Key",
-  "Star Properties": "Star Properties"
+  "Solar Mass": "Solar Mass",
+  "Spectral Type": "Spectral Type",
+  "Star Properties": "Star Properties",
+  "Temperature": "Temperature"
 }

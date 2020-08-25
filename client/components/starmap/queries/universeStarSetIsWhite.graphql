@@ -1,0 +1,9 @@
+mutation UniverseStarSetIsWhite($id: ID!, $objectId: ID!, $isWhite: Boolean!) {
+  universeTemplateStarSetIsWhite(
+    id: $id
+    objectId: $objectId
+    isWhite: $isWhite
+  ) {
+    id
+  }
+}
