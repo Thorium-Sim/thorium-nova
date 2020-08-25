@@ -1,13 +1,27 @@
 {
-  "Age": "Age",
-  "Basics": "Basics",
-  "Classification": "Classification",
-  "Habitable": "Habitable",
-  "Lifeforms": "Lifeforms",
-  "Orbit": "Orbit",
-  "Planet Properties": "Planet Properties",
-  "Radius": "Radius",
-  "Star Properties": "Star Properties",
-  "Temperature": "Temperature",
-  "Terran Mass": "Terran Mass"
+  "Click or Drop files here": "Click or Drop files here",
+  "Close": "Close",
+  "Minimize": "Minimize",
+  "Model is uploading": {
+    " Please wait": {
+      "": {
+        "": {
+          "": ""
+        }
+      }
+    }
+  },
+  "Models should be in ": {
+    "glb format": {
+      " Top and side views are automatically generated from the model": {
+        " <1>Read about how to create compatible models": {
+          "</1>": "Models should be in .glb format. Top and side views are automatically generated from the model. <1>Read about how to create compatible models.</1>"
+        }
+      }
+    }
+  },
+  "Property Palette": "Property Palette",
+  "Upload Complete": "Upload Complete",
+  "Upload Failed": "Upload Failed",
+  "Uploading": "Uploading"
 }

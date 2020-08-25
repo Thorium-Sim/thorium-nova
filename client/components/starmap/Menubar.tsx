@@ -4,7 +4,8 @@ import {
   Collapse,
   Input,
   Menu,
-  MenuButton,
+  MenuButton as MenuButtonComp,
+  MenuButtonProps,
   MenuDivider,
   MenuItem,
   MenuList,
@@ -28,6 +29,9 @@ import {useConfirm} from "../Dialog";
 import {useHotkeys} from "react-hotkeys-hook";
 import {Link} from "react-router-dom";
 
+const MenuButton = MenuButtonComp as React.FC<
+  MenuButtonProps & {rightIcon: string; variantColor: string}
+>;
 interface SceneRef {
   camera: () => Camera;
 }

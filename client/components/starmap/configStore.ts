@@ -1,5 +1,6 @@
 import {
   TemplateSystemSubscription,
+  UniverseAddSystemMutation,
   UniverseSubscription,
 } from "../../generated/graphql";
 import create from "zustand";
@@ -18,6 +19,7 @@ export interface ConfigStore {
         TemplateSystemSubscription["templateUniverseSystem"]["items"]
       >[0]
     | NonNullable<TemplateSystemSubscription["templateUniverseSystem"]>
+    | NonNullable<UniverseAddSystemMutation["universeTemplateAddSystem"]>
     | null;
   zoomTarget: Vector3 | null;
   skyboxKey: string;

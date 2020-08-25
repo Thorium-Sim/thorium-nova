@@ -106,6 +106,7 @@ class AppClass {
       }
     }
   }
+  /* istanbul ignore next */
   snapshot() {
     this.storage.writeFile(true);
     if (isWritableFlight(this.activeFlight)) {
