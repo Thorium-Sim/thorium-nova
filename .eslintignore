@@ -1,3 +1,4 @@
 build
-*/components/starmap/generateNebulaMap.js
-*/components/starmap/webgl.js
+client/components/starmap/Nebula/generateNebulaMap.js
+client/components/starmap/Nebula/webgl.js
+scripts/copy-static.js

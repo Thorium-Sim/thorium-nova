@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 
+// eslint-disable-next-line
 async function copyDir(src, dest) {
   const entries = await fs.readdir(src, {withFileTypes: true});
   try {

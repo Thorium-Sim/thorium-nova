@@ -1,6 +1,8 @@
 /* istanbul ignore file */
 // Stuff for the Parcel fash refresh
+// eslint-disable-next-line
 function $RefreshReg$() {}
+// eslint-disable-next-line
 function $RefreshSig$() {}
 /*...........................................................................*/
 export function buildAttribs(gl, layout) {
@@ -259,6 +261,7 @@ export class Program {
       var lineno = parseInt(err.split(":")[2]);
       var split = source.split("\n");
       for (var i in split) {
+        // eslint-disable-next-line
         var q = parseInt(i);
         if (i == lineno - 1) {
           console.warn(err);
