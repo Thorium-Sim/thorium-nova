@@ -16,6 +16,7 @@ import BasicPalette from "./basic";
 import {hasOrbit, isPlanet, isStar} from "./utils";
 import StarPalette from "./star";
 import PlanetPalette from "./planet";
+import PlanetAssetsPalette from "./planetAssets";
 
 const ConfigPalette: React.FC = () => {
   const {t} = useTranslation();
@@ -66,8 +67,8 @@ const ConfigPalette: React.FC = () => {
             </AccordionPanel>
           </AccordionItem>
         )}
-        {isPlanet(selectedObject) && (
-          <AccordionItem border="none">
+        {isPlanet(selectedObject) && [
+          <AccordionItem border="none" key="properties">
             <AccordionHeader bg="gray.700">
               <Box flex="1" textAlign="left">
                 {t("Planet Properties")}
@@ -77,8 +78,19 @@ const ConfigPalette: React.FC = () => {
             <AccordionPanel>
               <PlanetPalette />
             </AccordionPanel>
-          </AccordionItem>
-        )}
+          </AccordionItem>,
+          <AccordionItem border="none" key="images">
+            <AccordionHeader bg="gray.700">
+              <Box flex="1" textAlign="left">
+                {t("Planet Images")}
+              </Box>
+              <AccordionIcon />
+            </AccordionHeader>
+            <AccordionPanel>
+              <PlanetAssetsPalette />
+            </AccordionPanel>
+          </AccordionItem>,
+        ]}
       </Accordion>
     </PropertyPalette>
   );

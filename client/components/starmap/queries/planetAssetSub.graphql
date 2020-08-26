@@ -1,0 +1,10 @@
+subscription UniversePlanetAssets($id: ID!, $objectId: ID!) {
+  templateUniverseObject(id: $id, objectId: $objectId) {
+    id
+    isPlanet {
+      textureMapAsset
+      cloudsMapAsset
+      ringsMapAsset
+    }
+  }
+}

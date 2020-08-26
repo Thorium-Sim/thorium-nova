@@ -5,15 +5,33 @@ import {TagsComponent} from "server/components/tags";
 import {TemperatureComponent} from "server/components/temperature";
 import Entity from "server/helpers/ecs/entity";
 import {pubsub} from "server/helpers/pubsub";
-import {Arg, ID, Mutation, Resolver} from "type-graphql";
+import {
+  Arg,
+  Ctx,
+  FieldResolver,
+  ID,
+  Mutation,
+  Resolver,
+  Root,
+} from "type-graphql";
 import {planetTypes} from "./planetTypes";
-import {getSystem, getSystemObject, objectPublish, publish} from "./utils";
+import {
+  getSystem,
+  getSystemObject,
+  getUniverse,
+  objectPublish,
+  publish,
+} from "./utils";
 import {toRoman} from "roman-numerals";
 import {IsPlanetComponent} from "server/components/isPlanet";
 import getHabitableZone from "server/generatorFixtures/habitableZone";
 import {randomFromList} from "server/helpers/randomFromList";
 import {PopulationComponent} from "server/components/population";
 import {AU} from "./utils";
+import {FileUpload, GraphQLUpload} from "graphql-upload";
+import {appStoreDir} from "server/helpers/appPaths";
+import uploadAsset from "server/helpers/uploadAsset";
+import {GraphQLContext} from "server/helpers/graphqlContext";
 
 type range = {min: number; max: number};
 function randomFromRange({min, max}: range) {
@@ -227,5 +245,166 @@ export class UniversePluginPlanetsResolver {
     const {universe, object, system} = getSystemObject(id, objectId);
     object.updateComponent("isPlanet", {lifeforms});
     return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  async universeTemplatePlanetSetTexture(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("image", type => GraphQLUpload) image: FileUpload
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    const pathPrefix = `${appStoreDir}universes/${
+      universe.name || universe.id
+    }`;
+    const splitName = image.filename.split(".");
+    const ext = splitName[splitName.length - 1];
+    const fileName = `planet-${object.id}-texture-${Math.round(
+      Math.random() * 1000
+    )}.${ext}`;
+    await uploadAsset(image, pathPrefix, fileName);
+    object.updateComponent("isPlanet", {
+      textureMapAsset: fileName,
+    });
+    return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  async universeTemplatePlanetSetClouds(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("image", type => GraphQLUpload) image: FileUpload
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    const pathPrefix = `${appStoreDir}universes/${
+      universe.name || universe.id
+    }`;
+    const splitName = image.filename.split(".");
+    const ext = splitName[splitName.length - 1];
+    const fileName = `planet-${object.id}-clouds-${Math.round(
+      Math.random() * 1000
+    )}.${ext}`;
+    await uploadAsset(image, pathPrefix, fileName);
+    object.updateComponent("isPlanet", {
+      cloudsMapAsset: fileName,
+    });
+    return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  async universeTemplatePlanetSetRings(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("image", type => GraphQLUpload) image: FileUpload
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    const pathPrefix = `${appStoreDir}universes/${
+      universe.name || universe.id
+    }`;
+    const splitName = image.filename.split(".");
+    const ext = splitName[splitName.length - 1];
+    const fileName = `planet-${object.id}-rings-${Math.round(
+      Math.random() * 1000
+    )}.${ext}`;
+    await uploadAsset(image, pathPrefix, fileName);
+    object.updateComponent("isPlanet", {
+      ringsMapAsset: fileName,
+    });
+    return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  async universeTemplatePlanetClearClouds(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    object.updateComponent("isPlanet", {
+      cloudsMapAsset: "",
+    });
+    return objectPublish(universe, object, system);
+  }
+  @Mutation(returns => Entity)
+  async universeTemplatePlanetClearRings(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string
+  ) {
+    const {universe, object, system} = getSystemObject(id, objectId);
+    object.updateComponent("isPlanet", {
+      ringsMapAsset: "",
+    });
+    return objectPublish(universe, object, system);
+  }
+}
+
+@Resolver(of => IsPlanetComponent)
+export class PlanetAssetsResolver {
+  @FieldResolver(type => String)
+  textureMapAsset(
+    @Root() self: IsPlanetComponent & {entity: Entity},
+    @Ctx() context: GraphQLContext
+  ) {
+    if (self.textureMapAsset.indexOf("/public") === 0)
+      return self.textureMapAsset;
+    if (!context.universeId) {
+      return "";
+    }
+    try {
+      const universe = getUniverse(context.universeId);
+      return self.textureMapAsset
+        ? `/assets/universes/${universe.name || universe.id}/${
+            self.textureMapAsset
+          }`
+        : "";
+    } catch (err) {
+      return "";
+    }
+  }
+  @FieldResolver(type => String)
+  cloudsMapAsset(
+    @Root() self: IsPlanetComponent & {entity: Entity},
+    @Ctx() context: GraphQLContext
+  ) {
+    if (self.cloudsMapAsset.indexOf("/public") === 0)
+      return self.cloudsMapAsset;
+    if (!context.universeId) {
+      return "";
+    }
+    try {
+      const universe = getUniverse(context.universeId);
+      return self.cloudsMapAsset
+        ? `/assets/universes/${universe.name || universe.id}/${
+            self.cloudsMapAsset
+          }`
+        : "";
+    } catch (err) {
+      return "";
+    }
+  }
+  @FieldResolver(type => String)
+  ringsMapAsset(
+    @Root() self: IsPlanetComponent & {entity: Entity},
+    @Ctx() context: GraphQLContext
+  ) {
+    if (self.ringsMapAsset.indexOf("/public") === 0) return self.ringsMapAsset;
+    if (!context.universeId) {
+      return "";
+    }
+    try {
+      const universe = getUniverse(context.universeId);
+      return self.ringsMapAsset
+        ? `/assets/universes/${universe.name || universe.id}/${
+            self.ringsMapAsset
+          }`
+        : "";
+    } catch (err) {
+      return "";
+    }
   }
 }

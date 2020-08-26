@@ -1,0 +1,5 @@
+mutation UniversePlanetSetRings($id: ID!, $objectId: ID!, $image: Upload!) {
+  universeTemplatePlanetSetRings(id: $id, objectId: $objectId, image: $image) {
+    id
+  }
+}

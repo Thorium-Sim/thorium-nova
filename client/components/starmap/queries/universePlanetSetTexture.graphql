@@ -1,0 +1,9 @@
+mutation UniversePlanetSetTexture($id: ID!, $objectId: ID!, $image: Upload!) {
+  universeTemplatePlanetSetTexture(
+    id: $id
+    objectId: $objectId
+    image: $image
+  ) {
+    id
+  }
+}

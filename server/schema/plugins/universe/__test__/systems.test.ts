@@ -135,7 +135,6 @@ describe("universe systems", () => {
       }`,
       variables: {id, systemId, position: {x: 1, y: 2, z: 3}},
     });
-    console.log(universe);
     const system = universe.data?.universeTemplateSystemSetPosition.systems.find(
       (s: {id: string}) => s.id === systemId
     );

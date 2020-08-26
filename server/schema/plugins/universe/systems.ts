@@ -9,6 +9,7 @@ import {randomFromList} from "server/helpers/randomFromList";
 import UniverseTemplate from "server/schema/universe";
 import {
   Arg,
+  Ctx,
   FieldResolver,
   ID,
   Mutation,
@@ -27,6 +28,7 @@ import {
 } from "./utils";
 import uuid from "uniqid";
 import getHabitableZone from "server/generatorFixtures/habitableZone";
+import {GraphQLContext} from "server/helpers/graphqlContext";
 
 @Resolver()
 export class UniversePluginSystemsResolver {
@@ -169,8 +171,11 @@ export class UniversePluginSystemsResolver {
     @Arg("id", type => ID)
     id: string,
     @Arg("systemId", type => ID)
-    systemId: string
+    systemId: string,
+    @Ctx()
+    context: GraphQLContext
   ): PlanetarySystem {
+    context.universeId = payload.system.universeId;
     return new PlanetarySystem(payload.system);
   }
 }

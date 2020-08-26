@@ -10,6 +10,9 @@ export interface GraphQLContext {
   flight?: Flight;
   ship?: Entity;
   core?: boolean;
+
+  // Universe Operations
+  universeId?: string;
 }
 
 export const getGraphQLContext = ({

@@ -10,16 +10,21 @@ import Clouds from "./Clouds";
 import Rings from "./Rings";
 import Selected from "./Selected";
 
-const Sphere: React.FC<{texture: string}> = ({texture}) => {
-  const map = useLoader(TextureLoader, texture);
-
-  return (
-    <mesh castShadow>
-      <sphereBufferGeometry args={[1, 32, 32]} attach="geometry" />
-      <meshPhysicalMaterial map={map} transparent attach="material" />
-    </mesh>
-  );
-};
+const Sphere: React.FC<{texture: string}> = React.memo(
+  ({texture}) => {
+    const map = useLoader(TextureLoader, `${texture}`);
+    return (
+      <mesh castShadow>
+        <sphereBufferGeometry args={[1, 32, 32]} attach="geometry" />
+        <meshPhysicalMaterial map={map} transparent attach="material" />
+      </mesh>
+    );
+  },
+  (prevProps, nextProps) => {
+    if (prevProps.texture === nextProps.texture) return true;
+    return false;
+  }
+);
 const Planet: React.FC<{
   position?: Vector3 | [number, number, number];
   scale: Vector3 | [number, number, number];

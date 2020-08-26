@@ -98,5 +98,10 @@ export function objectPublish(
   if (system) {
     pubsub.publish("templateUniverseSystem", {id: system.id, system});
   }
+  pubsub.publish("templateUniverseObject", {
+    id: object.id,
+    universeId: universe.id,
+    object,
+  });
   return object;
 }

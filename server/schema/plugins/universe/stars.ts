@@ -6,7 +6,16 @@ import {TemperatureComponent} from "server/components/temperature";
 import Entity from "server/helpers/ecs/entity";
 import {pubsub} from "server/helpers/pubsub";
 import UniverseTemplate from "server/schema/universe";
-import {Arg, ID, Mutation, Resolver} from "type-graphql";
+import {
+  Arg,
+  Ctx,
+  ID,
+  Mutation,
+  Query,
+  Resolver,
+  Root,
+  Subscription,
+} from "type-graphql";
 import {starTypes} from "./starTypes";
 import {
   getSystem,
@@ -16,6 +25,9 @@ import {
   publish,
   removeUniverseObject,
 } from "./utils";
+import uuid from "uniqid";
+import {string} from "prop-types";
+import {GraphQLContext} from "server/helpers/graphqlContext";
 
 const alphabet = "ABC";
 type range = {min: number; max: number};
@@ -117,6 +129,15 @@ export class UniversePluginStarsResolver {
     pubsub.publish("templateUniverseSystem", {id: system.id, system});
     return entity;
   }
+
+  @Query(returns => Entity)
+  universeTemplateObject(
+    @Arg("id", type => ID) id: string,
+    @Arg("objectId", type => ID) objectId: string
+  ) {
+    const {object} = getSystemObject(id, objectId);
+    return object;
+  }
   @Mutation(returns => String)
   universeTemplateRemoveObject(
     @Arg("id", type => ID) id: string,
@@ -138,7 +159,36 @@ export class UniversePluginStarsResolver {
 
     return "";
   }
-
+  @Subscription(returns => Entity, {
+    topics: ({args: {id, objectId}, payload}) => {
+      const subId = uuid();
+      process.nextTick(() => {
+        const universe = getUniverse(id);
+        const object = universe.entities.find(s => s.id === objectId);
+        pubsub.publish(subId, {
+          id: object?.id,
+          universeId: universe.id,
+          object,
+        });
+      });
+      return [subId, "templateUniverseObject"];
+    },
+    filter: ({payload, args: {id, objectId}}) => {
+      return payload.id === objectId;
+    },
+  })
+  templateUniverseObject(
+    @Root() payload: {universeId: string; object: Entity},
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Ctx()
+    context: GraphQLContext
+  ): Entity {
+    context.universeId = payload.universeId;
+    return payload.object;
+  }
   @Mutation(returns => Entity)
   universeTemplateStarSetSolarMass(
     @Arg("id", type => ID)
