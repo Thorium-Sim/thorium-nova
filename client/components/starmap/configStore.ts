@@ -6,6 +6,14 @@ import {
 import create from "zustand";
 import {Vector3} from "three";
 
+type StarmapObject =
+  | NonNullable<UniverseSubscription["universe"]>["systems"][0]
+  | NonNullable<
+      TemplateSystemSubscription["templateUniverseSystem"]["items"]
+    >[0]
+  | NonNullable<TemplateSystemSubscription["templateUniverseSystem"]>
+  | NonNullable<UniverseAddSystemMutation["universeTemplateAddSystem"]>
+  | null;
 export interface ConfigStore {
   disableOrbitControls: () => void;
   enableOrbitControls: () => void;
@@ -13,19 +21,16 @@ export interface ConfigStore {
   universeId: string;
   setSystemId: (s: string) => void;
   systemId: string;
-  selectedObject:
-    | NonNullable<UniverseSubscription["universe"]>["systems"][0]
-    | NonNullable<
-        TemplateSystemSubscription["templateUniverseSystem"]["items"]
-      >[0]
-    | NonNullable<TemplateSystemSubscription["templateUniverseSystem"]>
-    | NonNullable<UniverseAddSystemMutation["universeTemplateAddSystem"]>
-    | null;
+  selectedObject: StarmapObject;
   zoomTarget: Vector3 | null;
   skyboxKey: string;
   currentSystem: NonNullable<
     TemplateSystemSubscription["templateUniverseSystem"]
   > | null;
+  // Used for distance measurement
+  measuring: boolean;
+  hoveredPosition: Vector3 | null;
+  selectedPosition: Vector3 | null;
 }
 const store = create<ConfigStore>(set => ({
   disableOrbitControls: () => {},
@@ -38,6 +43,9 @@ const store = create<ConfigStore>(set => ({
   zoomTarget: null,
   skyboxKey: "blank",
   currentSystem: null,
+  measuring: false,
+  hoveredPosition: null,
+  selectedPosition: null,
 }));
 
 export const useConfigStore = store;

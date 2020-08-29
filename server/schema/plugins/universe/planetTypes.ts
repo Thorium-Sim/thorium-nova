@@ -9,7 +9,7 @@ const possibleRingMaps = [
 type range = {min: number; max: number};
 type atmosphericComposition = {component: string; concentration: number}[];
 @ObjectType()
-class PlanetType {
+export class PlanetType {
   @Field(type => ID)
   id: string;
   @Field()

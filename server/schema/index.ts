@@ -14,6 +14,7 @@ import {UniversePluginStarsResolver} from "./plugins/universe/stars";
 import StarTypeResolver from "./plugins/universe/starTypes";
 import {
   PlanetarySystemResolver,
+  SatelliteComponentResolver,
   UniversePluginSystemsResolver,
 } from "./plugins/universe/systems";
 import {RootResolver} from "./root";
@@ -46,4 +47,5 @@ export const resolvers: ResolverT = [
   UniversePluginPlanetsResolver,
   UniverseSatelliteResolver,
   PlanetAssetsResolver,
+  SatelliteComponentResolver,
 ];

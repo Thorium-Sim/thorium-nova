@@ -31,7 +31,10 @@ const SystemCircle: React.FC<{
       });
     },
     onMouseDown: () => {
-      configStoreApi.setState({selectedObject: system});
+      configStoreApi.setState({
+        selectedObject: system,
+        selectedPosition: parent.current.position,
+      });
       configStoreApi.getState().disableOrbitControls();
     },
   });
@@ -118,10 +121,14 @@ const SystemCircle: React.FC<{
       onPointerOver={() => {
         hoveringDirection.current = 1;
         document.body.style.cursor = "pointer";
+        useConfigStore.setState({
+          hoveredPosition: parent.current.position,
+        });
       }}
       onPointerOut={() => {
         hoveringDirection.current = -1;
         document.body.style.cursor = "auto";
+        useConfigStore.setState({hoveredPosition: null});
       }}
       onDoubleClick={() => {
         setSystemId(system.id);

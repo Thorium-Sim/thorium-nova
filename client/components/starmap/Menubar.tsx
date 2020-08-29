@@ -28,6 +28,7 @@ import Button from "../ui/button";
 import {useConfirm} from "../Dialog";
 import {useHotkeys} from "react-hotkeys-hook";
 import {Link} from "react-router-dom";
+import {isPlanet} from "./ConfigPalette/utils";
 
 const MenuButton = MenuButtonComp as React.FC<
   MenuButtonProps & {rightIcon: string; variantColor: string}
@@ -63,6 +64,8 @@ const Menubar: React.FC<{
   const systemId = useConfigStore(store => store.systemId);
   const setSystemId = useConfigStore(store => store.setSystemId);
   const selectedObject = useConfigStore(store => store.selectedObject);
+  const hoveredPosition = useConfigStore(store => store.hoveredPosition);
+  const measuring = useConfigStore(store => store.measuring);
 
   useHotkeys("n", () => {
     if (systemId) return;
@@ -99,7 +102,7 @@ const Menubar: React.FC<{
       },
     });
 
-    configStoreApi.setState({selectedObject: null});
+    configStoreApi.setState({selectedObject: null, selectedPosition: null});
   }
   useHotkeys("backspace", () => {
     deleteObject();
@@ -185,6 +188,21 @@ const Menubar: React.FC<{
           justifySelf="end"
           maxWidth="300px"
         />
+        <Button
+          size="sm"
+          variant="ghost"
+          variantColor="alert"
+          onClick={() =>
+            useConfigStore.setState(({measuring}) => ({
+              measuring: !measuring,
+            }))
+          }
+          isActive={measuring}
+          disabled={!selectedObject}
+        >
+          Measure Distances
+        </Button>
+        {}
       </Stack>
       <Collapse mt={4} isOpen={showingAddOptions}>
         <Stack isInline spacing={2} mt={2}>
@@ -252,6 +270,40 @@ const Menubar: React.FC<{
               ))}
             </MenuList>
           </Menu>
+          {isPlanet(selectedObject) && (
+            <Menu>
+              <MenuButton
+                ml={2}
+                as={Button}
+                rightIcon="chevron-down"
+                variantColor="info"
+                size="sm"
+                width="auto"
+              >
+                {t("Add Moon")}
+              </MenuButton>
+              <MenuList>
+                <MenuItem>{t("Cancel")}</MenuItem>
+                <MenuDivider />
+                {planetTypesData?.planetTypes.map(p => (
+                  <MenuItem
+                    key={p.id}
+                    onClick={() =>
+                      addPlanet({
+                        variables: {
+                          id: universeId,
+                          parentId: selectedObject.id,
+                          classification: p.classification,
+                        },
+                      })
+                    }
+                  >
+                    {p.classification} - {p.name}
+                  </MenuItem>
+                ))}
+              </MenuList>
+            </Menu>
+          )}
         </Stack>
       </Collapse>
     </Box>

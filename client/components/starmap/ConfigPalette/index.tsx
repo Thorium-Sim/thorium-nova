@@ -27,7 +27,9 @@ const ConfigPalette: React.FC = () => {
   return (
     <PropertyPalette
       key={selectedObject.id}
-      onClose={() => configStoreApi.setState({selectedObject: null})}
+      onClose={() =>
+        configStoreApi.setState({selectedObject: null, selectedPosition: null})
+      }
     >
       <Accordion>
         <AccordionItem border="none">

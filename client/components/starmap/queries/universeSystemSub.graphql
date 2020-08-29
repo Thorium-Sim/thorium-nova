@@ -1,3 +1,51 @@
+fragment Planet on Entity {
+  id
+  identity {
+    name
+    description
+  }
+  tags {
+    tags
+  }
+  isStar {
+    age
+    hue
+    isWhite
+    solarMass
+    spectralType
+    radius
+  }
+  isPlanet {
+    age
+    classification
+    radius
+    terranMass
+    habitable
+    lifeforms
+    textureMapAsset
+    cloudsMapAsset
+    ringsMapAsset
+  }
+  satellite {
+    ...SatelliteComponent
+  }
+  temperature {
+    temperature
+  }
+  population {
+    count
+  }
+}
+
+fragment SatelliteComponent on SatelliteComponent {
+  distance
+  axialTilt
+  showOrbit
+  orbitalArc
+  eccentricity
+  orbitalInclination
+}
+
 subscription TemplateSystem($id: ID!, $systemId: ID!) {
   templateUniverseSystem(id: $id, systemId: $systemId) {
     id
@@ -11,46 +59,12 @@ subscription TemplateSystem($id: ID!, $systemId: ID!) {
     habitableZoneInner
     habitableZoneOuter
     items {
-      id
-      identity {
-        name
-        description
-      }
-      tags {
-        tags
-      }
-      isStar {
-        age
-        hue
-        isWhite
-        solarMass
-        spectralType
-        radius
-      }
-      isPlanet {
-        age
-        classification
-        radius
-        terranMass
-        habitable
-        lifeforms
-        textureMapAsset
-        cloudsMapAsset
-        ringsMapAsset
-      }
+      ...Planet
       satellite {
-        distance
-        axialTilt
-        showOrbit
-        orbitalArc
-        eccentricity
-        orbitalInclination
-      }
-      temperature {
-        temperature
-      }
-      population {
-        count
+        ...SatelliteComponent
+        satellites {
+          ...Planet
+        }
       }
     }
   }

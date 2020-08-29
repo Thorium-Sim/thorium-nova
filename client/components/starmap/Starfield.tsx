@@ -54,7 +54,7 @@ function makeLineGeometry(pointList: Vector3[]) {
 
 const Starfield: React.FC<{count?: number; radius?: number}> = ({
   count = 1500,
-  radius = 17000,
+  radius = 1500,
 }) => {
   const presenceRatio = React.useRef(1);
   const skip = React.useRef(0);

@@ -18,17 +18,11 @@ import {
   Root,
   Subscription,
 } from "type-graphql";
-import {
-  AU,
-  getSystem,
-  getUniverse,
-  PlanetarySystem,
-  publish,
-  removeUniverseObject,
-} from "./utils";
+import {AU, getSystem, getUniverse, PlanetarySystem, publish} from "./utils";
 import uuid from "uniqid";
 import getHabitableZone from "server/generatorFixtures/habitableZone";
 import {GraphQLContext} from "server/helpers/graphqlContext";
+import {SatelliteComponent} from "server/components/satellite";
 
 @Resolver()
 export class UniversePluginSystemsResolver {
@@ -37,13 +31,16 @@ export class UniversePluginSystemsResolver {
     @Arg("id", type => ID)
     id: string,
     @Arg("systemId", type => ID)
-    systemId: string
+    systemId: string,
+    @Ctx()
+    context: GraphQLContext
   ) {
     const universe = getUniverse(id);
     const system = universe.entities.find(s => s.id === systemId);
     if (!system) {
       throw new Error("System does not exist");
     }
+    context.universeId = universe.id;
     return new PlanetarySystem({...system, universeId: universe.id});
   }
   @Mutation(returns => Entity)
@@ -233,5 +230,26 @@ export class PlanetarySystemResolver {
   items(@Root() self: PlanetarySystem) {
     const universe = getUniverse(self.universeId);
     return universe.entities.filter(s => s.satellite?.parentId === self.id);
+  }
+}
+
+@Resolver(of => SatelliteComponent)
+export class SatelliteComponentResolver {
+  @FieldResolver(type => [Entity], {nullable: true})
+  satellites(
+    @Root() self: SatelliteComponent & {entity: Entity},
+    @Ctx() ctx: GraphQLContext
+  ) {
+    if (!ctx.universeId) return [];
+    const universe = getUniverse(ctx.universeId);
+    return universe.entities.filter(
+      e => e.satellite?.parentId === self.entity.id
+    );
+  }
+  @FieldResolver(type => [Entity])
+  parent(@Root() self: SatelliteComponent, @Ctx() ctx: GraphQLContext) {
+    if (!ctx.universeId) return [];
+    const universe = getUniverse(ctx.universeId);
+    return universe.entities.find(e => e.id === self.parentId);
   }
 }

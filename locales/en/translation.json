@@ -1,35 +1,20 @@
 {
   "Add": "Add",
+  "Add Moon": "Add Moon",
   "Add Planet": "Add Planet",
   "Add Star": "Add Star",
   "Are you sure you want to remove this {{object}}?": "Are you sure you want to remove this {{object}}?",
   "Basics": "Basics",
   "Cancel": "Cancel",
-  "Clouds": "Clouds",
   "Delete": "Delete",
   "Edit": "Edit",
-  "Image aspect ratio should be 2x1, with the dimensions as powers of two, eg": {
-    " 512x256 or 2048x1024": " 512x256 or 2048x1024"
-  },
-  "Image should be a transparent PNG": {
-    " The aspect ratio should be 2x1, with the dimensions as powers of two, eg": {
-      " 512x256 or 2048x1024": " 512x256 or 2048x1024"
-    },
-    " Vertical lines in the image represent rings": {
-      "": ""
-    }
-  },
   "It will remove all of the objects inside of it": {
     "": ""
   },
   "Orbit": "Orbit",
   "Planet Images": "Planet Images",
   "Planet Properties": "Planet Properties",
-  "Remove Clouds": "Remove Clouds",
-  "Remove Rings": "Remove Rings",
-  "Rings": "Rings",
   "Star Properties": "Star Properties",
-  "Texture": "Texture",
   "object": "object",
   "planet": "planet",
   "planetary system": "planetary system",

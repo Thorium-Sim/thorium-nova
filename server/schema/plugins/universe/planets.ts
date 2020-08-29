@@ -14,7 +14,7 @@ import {
   Resolver,
   Root,
 } from "type-graphql";
-import {planetTypes} from "./planetTypes";
+import {planetTypes, PlanetType} from "./planetTypes";
 import {
   getSystem,
   getSystemObject,
@@ -36,6 +36,66 @@ import {GraphQLContext} from "server/helpers/graphqlContext";
 type range = {min: number; max: number};
 function randomFromRange({min, max}: range) {
   return Math.random() * (max - min) + min;
+}
+
+function createPlanet({
+  distance,
+  parentId,
+  planetType,
+  name,
+}: {
+  distance: number;
+  parentId: string;
+  planetType: PlanetType;
+  name: string;
+}) {
+  const entity = new Entity(null, [
+    TagsComponent,
+    IdentityComponent,
+    IsPlanetComponent,
+    TemperatureComponent,
+    SatelliteComponent,
+    PopulationComponent,
+  ]);
+  entity.updateComponent("identity", {name});
+  entity.updateComponent("satellite", {
+    axialTilt: Math.round(randomFromRange({min: 0, max: 45}) * 10) / 10,
+    distance,
+    orbitalArc: Math.round(Math.random() * 360),
+    eccentricity: Math.round(Math.random() * 0.2 * 100) / 100,
+    showOrbit: true,
+    parentId,
+  });
+  entity.updateComponent("isPlanet", {
+    age: Math.round(randomFromRange(planetType.ageRange)),
+    classification: planetType.classification,
+    radius: Math.round(randomFromRange(planetType.radiusRange)),
+    terranMass:
+      Math.round(randomFromRange(planetType.terranMassRange) * 100) / 100,
+    habitable: planetType.habitable,
+    lifeforms: randomFromList(planetType.lifeforms),
+    textureMapAsset: randomFromList(planetType.possibleTextureMaps),
+    cloudMapAsset:
+      planetType.hasClouds <= Math.random()
+        ? randomFromList(planetType.possibleCloudMaps)
+        : "",
+    ringsMapAsset:
+      planetType.hasRings <= Math.random()
+        ? randomFromList(planetType.possibleRingMaps)
+        : "",
+  });
+
+  entity.updateComponent("population", {
+    count:
+      typeof planetType.population === "number"
+        ? planetType.population
+        : Math.round(randomFromRange(planetType.population) / 1000) * 1000,
+  });
+  entity.updateComponent("temperature", {
+    temperature: Math.round(randomFromRange(planetType.temperatureRange)),
+  });
+
+  return entity;
 }
 
 @Resolver()
@@ -112,50 +172,69 @@ export class UniversePluginPlanetsResolver {
       );
     }
 
-    const entity = new Entity(null, [
-      TagsComponent,
-      IdentityComponent,
-      IsPlanetComponent,
-      TemperatureComponent,
-      SatelliteComponent,
-      PopulationComponent,
-    ]);
-    entity.updateComponent("identity", {name});
-    entity.updateComponent("satellite", {
-      axialTilt: Math.round(randomFromRange({min: 0, max: 45}) * 10) / 10,
+    const entity = createPlanet({
       distance,
-      orbitalArc: Math.round(Math.random() * 360),
-      eccentricity: Math.round(Math.random() * 0.2 * 100) / 100,
-      showOrbit: true,
+      name,
       parentId: systemId,
+      planetType,
     });
-    entity.updateComponent("isPlanet", {
-      age: Math.round(randomFromRange(planetType.ageRange)),
-      classification,
-      radius: Math.round(randomFromRange(planetType.radiusRange)),
-      terranMass:
-        Math.round(randomFromRange(planetType.terranMassRange) * 100) / 100,
-      habitable: planetType.habitable,
-      lifeforms: randomFromList(planetType.lifeforms),
-      textureMapAsset: randomFromList(planetType.possibleTextureMaps),
-      cloudMapAsset:
-        planetType.hasClouds <= Math.random()
-          ? randomFromList(planetType.possibleCloudMaps)
-          : "",
-      ringsMapAsset:
-        planetType.hasRings <= Math.random()
-          ? randomFromList(planetType.possibleRingMaps)
-          : "",
-    });
+    universe.entities.push(entity);
+    publish(universe);
+    pubsub.publish("templateUniverseSystem", {id: system.id, system});
+    return entity;
+  }
+  @Mutation(returns => Entity)
+  universeTemplateAddMoon(
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("objectId", type => ID)
+    objectId: string,
+    @Arg("classification", type => String)
+    classification: string
+  ) {
+    const {universe, system, object} = getSystemObject(id, objectId);
 
-    entity.updateComponent("population", {
-      count:
-        typeof planetType.population === "number"
-          ? planetType.population
-          : Math.round(randomFromRange(planetType.population) / 1000) * 1000,
-    });
-    entity.updateComponent("temperature", {
-      temperature: Math.round(randomFromRange(planetType.temperatureRange)),
+    const planetType = planetTypes.find(
+      s => s.classification === classification
+    );
+
+    if (!planetType) {
+      throw new Error(`Invalid planet classification: ${classification}`);
+    }
+
+    const childrenMoons = universe.entities.filter(
+      s => s.satellite?.parentId === objectId && s.isPlanet
+    );
+    const name = `${object?.components?.identity?.name} ${
+      [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "j",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+      ]?.[childrenMoons.length] || childrenMoons.length + 1
+    }`;
+
+    // These are random ranges loosely based on moons of Jupiter.
+    const distance = randomFromRange({min: 129000, max: 664000});
+    planetType.radiusRange = {min: 800, max: 1700};
+
+    const entity = createPlanet({
+      distance,
+      name,
+      parentId: objectId,
+      planetType,
     });
     universe.entities.push(entity);
     publish(universe);

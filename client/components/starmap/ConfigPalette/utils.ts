@@ -1,4 +1,7 @@
-import {TemplateSystemSubscription} from "../../../generated/graphql";
+import {
+  TemplateSystemSubscription,
+  UniverseSubscription,
+} from "../../../generated/graphql";
 
 export function hasOrbit(
   obj: any
@@ -31,10 +34,20 @@ export function isPlanet(
     TemplateSystemSubscription["templateUniverseSystem"]["items"][0]["temperature"]
   >;
 } {
-  return !!obj.isPlanet;
+  return !!obj?.isPlanet;
 }
+
 export function isSystem(
   obj: any
 ): obj is NonNullable<TemplateSystemSubscription["templateUniverseSystem"]> {
   return !!obj.planetarySystem;
+}
+export function hasPosition(
+  obj: any
+): obj is {
+  position: NonNullable<
+    UniverseSubscription["universe"]
+  >["systems"][0]["position"];
+} {
+  return !!obj?.position;
 }

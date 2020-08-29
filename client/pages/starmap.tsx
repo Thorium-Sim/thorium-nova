@@ -41,9 +41,12 @@ const Starmap: React.FC = () => {
               state.currentSystem &&
               state.selectedObject !== state.currentSystem
             ) {
-              return {selectedObject: state.currentSystem};
+              return {
+                selectedObject: state.currentSystem,
+                selectedPosition: null,
+              };
             }
-            return {selectedObject: null};
+            return {selectedObject: null, selectedPosition: null};
           });
         }}
       >

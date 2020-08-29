@@ -1,7 +1,11 @@
 import React, {Suspense} from "react";
 import {useFrame, useLoader} from "react-three-fiber";
 import {CircleGeometry, Group, LineLoop, TextureLoader, Vector3} from "three";
-import {TemplateSystemSubscription} from "../../../generated/graphql";
+import {
+  PlanetFragment,
+  SatelliteComponentFragment,
+  TemplateSystemSubscription,
+} from "../../../generated/graphql";
 import {configStoreApi, useConfigStore} from "../configStore";
 import OrbitContainer from "../OrbitContainer";
 import SystemLabel from "../SystemMarker/SystemLabel";
@@ -33,6 +37,7 @@ const Planet: React.FC<{
   texture: string;
   axialTilt: number;
   name: string;
+  satellites: PlanetFragment[];
   selected: boolean;
   onPointerOver?: (event: unknown) => void;
   onPointerOut?: (event: unknown) => void;
@@ -45,7 +50,7 @@ const Planet: React.FC<{
   texture,
   axialTilt,
   name,
-
+  satellites,
   selected,
   onPointerOver,
   onPointerOut,
@@ -78,9 +83,19 @@ const Planet: React.FC<{
       <group ref={group}>
         <SystemLabel systemId="" name={name} hoveringDirection={{current: 0}} />
       </group>
-      {/* {satellites?.map((s, i) => (
-  <PlanetEntity key={`orbit-${i}`} {...s} />
-))} */}
+      {satellites?.map((s, i) => (
+        <PlanetEntity
+          key={`orbit-${i}`}
+          isSatellite
+          entity={{
+            ...s,
+            satellite: {
+              ...s.satellite,
+              satellites: [],
+            },
+          }}
+        />
+      ))}
     </group>
   );
 };
@@ -95,6 +110,8 @@ const PlanetContainer: React.FC<{
   orbitalInclination: number;
   axialTilt: number;
   showOrbit: boolean;
+  satellites: PlanetFragment[];
+  isSatellite: boolean;
   cloudsMapAsset: string;
   ringsMapAsset: string;
   textureMapAsset: string;
@@ -111,6 +128,8 @@ const PlanetContainer: React.FC<{
   orbitalInclination,
   axialTilt,
   showOrbit,
+  satellites,
+  isSatellite,
   cloudsMapAsset,
   ringsMapAsset,
   textureMapAsset,
@@ -119,11 +138,11 @@ const PlanetContainer: React.FC<{
   onPointerOut,
   onClick,
 }) => {
-  const size = 5 + 100 * (radius / 1000000);
+  const size = (isSatellite ? 1 : 5) + 100 * (radius / 1000000);
   return (
     <OrbitContainer
       // Convert KM to Millions of KM
-      radius={distance / 1000000}
+      radius={(isSatellite ? 100 : 1) * (distance / 1000000)}
       eccentricity={eccentricity}
       orbitalArc={orbitalArc}
       orbitalInclination={orbitalInclination}
@@ -136,6 +155,7 @@ const PlanetContainer: React.FC<{
         rings={ringsMapAsset}
         texture={textureMapAsset}
         axialTilt={axialTilt}
+        satellites={satellites}
         selected={selected}
         onPointerOver={onPointerOver}
         onPointerOut={onPointerOut}
@@ -146,8 +166,9 @@ const PlanetContainer: React.FC<{
 };
 
 const PlanetEntity: React.FC<{
+  isSatellite: boolean;
   entity: TemplateSystemSubscription["templateUniverseSystem"]["items"][0];
-}> = ({entity}) => {
+}> = ({entity, isSatellite}) => {
   const {
     distance,
     eccentricity,
@@ -155,6 +176,7 @@ const PlanetEntity: React.FC<{
     orbitalInclination,
     showOrbit,
     axialTilt,
+    satellites,
   } = entity.satellite;
   if (!entity.isPlanet) return null;
   const {
@@ -178,6 +200,8 @@ const PlanetEntity: React.FC<{
       showOrbit={showOrbit}
       axialTilt={axialTilt}
       radius={radius}
+      satellites={satellites || []}
+      isSatellite={isSatellite}
       cloudsMapAsset={cloudsMapAsset}
       ringsMapAsset={ringsMapAsset}
       textureMapAsset={textureMapAsset}

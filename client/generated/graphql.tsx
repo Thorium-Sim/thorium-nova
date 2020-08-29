@@ -636,6 +636,51 @@ export type UniverseSystemSetSkyboxMutation = {
   };
 };
 
+export type PlanetFragment = {
+  __typename?: "Entity";
+  id: string;
+  identity: {
+    __typename?: "IdentityComponent";
+    name: string;
+    description: string;
+  };
+  tags: {__typename?: "TagsComponent"; tags: Array<string>};
+  isStar: Maybe<{
+    __typename?: "IsStarComponent";
+    age: number;
+    hue: number;
+    isWhite: boolean;
+    solarMass: number;
+    spectralType: string;
+    radius: number;
+  }>;
+  isPlanet: Maybe<{
+    __typename?: "IsPlanetComponent";
+    age: number;
+    classification: string;
+    radius: number;
+    terranMass: number;
+    habitable: boolean;
+    lifeforms: string;
+    textureMapAsset: string;
+    cloudsMapAsset: string;
+    ringsMapAsset: string;
+  }>;
+  satellite: {__typename?: "SatelliteComponent"} & SatelliteComponentFragment;
+  temperature: {__typename?: "TemperatureComponent"; temperature: number};
+  population: Maybe<{__typename?: "PopulationComponent"; count: number}>;
+};
+
+export type SatelliteComponentFragment = {
+  __typename?: "SatelliteComponent";
+  distance: number;
+  axialTilt: number;
+  showOrbit: boolean;
+  orbitalArc: number;
+  eccentricity: number;
+  orbitalInclination: number;
+};
+
 export type TemplateSystemSubscriptionVariables = Exact<{
   id: Scalars["ID"];
   systemId: Scalars["ID"];
@@ -657,48 +702,15 @@ export type TemplateSystemSubscription = {
       __typename?: "PlanetarySystemComponent";
       skyboxKey: string;
     };
-    items: Array<{
-      __typename?: "Entity";
-      id: string;
-      identity: {
-        __typename?: "IdentityComponent";
-        name: string;
-        description: string;
-      };
-      tags: {__typename?: "TagsComponent"; tags: Array<string>};
-      isStar: Maybe<{
-        __typename?: "IsStarComponent";
-        age: number;
-        hue: number;
-        isWhite: boolean;
-        solarMass: number;
-        spectralType: string;
-        radius: number;
-      }>;
-      isPlanet: Maybe<{
-        __typename?: "IsPlanetComponent";
-        age: number;
-        classification: string;
-        radius: number;
-        terranMass: number;
-        habitable: boolean;
-        lifeforms: string;
-        textureMapAsset: string;
-        cloudsMapAsset: string;
-        ringsMapAsset: string;
-      }>;
-      satellite: {
-        __typename?: "SatelliteComponent";
-        distance: number;
-        axialTilt: number;
-        showOrbit: boolean;
-        orbitalArc: number;
-        eccentricity: number;
-        orbitalInclination: number;
-      };
-      temperature: {__typename?: "TemperatureComponent"; temperature: number};
-      population: Maybe<{__typename?: "PopulationComponent"; count: number}>;
-    }>;
+    items: Array<
+      {
+        __typename?: "Entity";
+        satellite: {
+          __typename?: "SatelliteComponent";
+          satellites: Maybe<Array<{__typename?: "Entity"} & PlanetFragment>>;
+        } & SatelliteComponentFragment;
+      } & PlanetFragment
+    >;
   };
 };
 
@@ -844,6 +856,57 @@ export type IntrospectionQuery = {
   };
 };
 
+export const SatelliteComponentFragmentDoc = gql`
+  fragment SatelliteComponent on SatelliteComponent {
+    distance
+    axialTilt
+    showOrbit
+    orbitalArc
+    eccentricity
+    orbitalInclination
+  }
+`;
+export const PlanetFragmentDoc = gql`
+  fragment Planet on Entity {
+    id
+    identity {
+      name
+      description
+    }
+    tags {
+      tags
+    }
+    isStar {
+      age
+      hue
+      isWhite
+      solarMass
+      spectralType
+      radius
+    }
+    isPlanet {
+      age
+      classification
+      radius
+      terranMass
+      habitable
+      lifeforms
+      textureMapAsset
+      cloudsMapAsset
+      ringsMapAsset
+    }
+    satellite {
+      ...SatelliteComponent
+    }
+    temperature {
+      temperature
+    }
+    population {
+      count
+    }
+  }
+  ${SatelliteComponentFragmentDoc}
+`;
 export const TimerPauseDocument = gql`
   mutation TimerPause($id: ID!, $pause: Boolean!) {
     timerPause(id: $id, pause: $pause) {
@@ -1999,50 +2062,18 @@ export const TemplateSystemDocument = gql`
       habitableZoneInner
       habitableZoneOuter
       items {
-        id
-        identity {
-          name
-          description
-        }
-        tags {
-          tags
-        }
-        isStar {
-          age
-          hue
-          isWhite
-          solarMass
-          spectralType
-          radius
-        }
-        isPlanet {
-          age
-          classification
-          radius
-          terranMass
-          habitable
-          lifeforms
-          textureMapAsset
-          cloudsMapAsset
-          ringsMapAsset
-        }
+        ...Planet
         satellite {
-          distance
-          axialTilt
-          showOrbit
-          orbitalArc
-          eccentricity
-          orbitalInclination
-        }
-        temperature {
-          temperature
-        }
-        population {
-          count
+          ...SatelliteComponent
+          satellites {
+            ...Planet
+          }
         }
       }
     }
   }
+  ${PlanetFragmentDoc}
+  ${SatelliteComponentFragmentDoc}
 `;
 export function useTemplateSystemSubscription(
   baseOptions?: Apollo.SubscriptionHookOptions<
