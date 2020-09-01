@@ -1,0 +1,21 @@
+query UniverseGetObject($id: ID!, $objectId: ID!) {
+  universeTemplateObject(id: $id, objectId: $objectId) {
+    ...UniverseObject
+    satellite {
+      ...SatelliteComponent
+      satellites {
+        ...UniverseObject
+      }
+      parent {
+        id
+        entityType
+        satellite {
+          ...SatelliteComponent
+          parent {
+            id
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+fragment SatelliteComponent on SatelliteComponent {
+  distance
+  axialTilt
+  showOrbit
+  orbitalArc
+  eccentricity
+  orbitalInclination
+}

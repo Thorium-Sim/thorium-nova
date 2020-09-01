@@ -15,6 +15,14 @@ export type Scalars = {
   Upload: any;
 };
 
+export enum EntityTypes {
+  System = "system",
+  Planet = "planet",
+  Star = "star",
+  Ship = "ship",
+  Timer = "timer",
+}
+
 export type PositionInput = {
   x: Maybe<Scalars["Float"]>;
   y: Maybe<Scalars["Float"]>;
@@ -195,6 +203,53 @@ export type TemplateShipSetModelMutation = {
   };
 };
 
+export type SatelliteComponentFragment = {
+  __typename?: "SatelliteComponent";
+  distance: number;
+  axialTilt: number;
+  showOrbit: boolean;
+  orbitalArc: number;
+  eccentricity: number;
+  orbitalInclination: number;
+};
+
+export type UniverseObjectFragment = {
+  __typename?: "Entity";
+  id: string;
+  identity: {
+    __typename?: "IdentityComponent";
+    name: string;
+    description: string;
+  };
+  tags: {__typename?: "TagsComponent"; tags: Array<string>};
+  isStar: Maybe<{
+    __typename?: "IsStarComponent";
+    age: number;
+    hue: number;
+    isWhite: boolean;
+    solarMass: number;
+    spectralType: string;
+    radius: number;
+  }>;
+  isPlanet: Maybe<{
+    __typename?: "IsPlanetComponent";
+    age: number;
+    classification: string;
+    radius: number;
+    terranMass: number;
+    habitable: boolean;
+    lifeforms: string;
+    textureMapAsset: string;
+    cloudsMapAsset: string;
+    ringsMapAsset: string;
+  }>;
+  satellite: Maybe<
+    {__typename?: "SatelliteComponent"} & SatelliteComponentFragment
+  >;
+  temperature: {__typename?: "TemperatureComponent"; temperature: number};
+  population: Maybe<{__typename?: "PopulationComponent"; count: number}>;
+};
+
 export type UniversePlanetAssetsSubscriptionVariables = Exact<{
   id: Scalars["ID"];
   objectId: Scalars["ID"];
@@ -237,6 +292,17 @@ export type StarTypesQuery = {
     spectralType: string;
     prevalence: number;
   }>;
+};
+
+export type UniverseAddMoonMutationVariables = Exact<{
+  id: Scalars["ID"];
+  parentId: Scalars["ID"];
+  classification: Scalars["String"];
+}>;
+
+export type UniverseAddMoonMutation = {
+  __typename?: "Mutation";
+  universeTemplateAddMoon: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseAddPlanetMutationVariables = Exact<{
@@ -283,6 +349,66 @@ export type UniverseAddSystemMutation = {
       y: number;
       z: number;
     };
+  };
+};
+
+export type UniverseGetObjectQueryVariables = Exact<{
+  id: Scalars["ID"];
+  objectId: Scalars["ID"];
+}>;
+
+export type UniverseGetObjectQuery = {
+  __typename?: "Query";
+  universeTemplateObject: {
+    __typename?: "Entity";
+    satellite: Maybe<
+      {
+        __typename?: "SatelliteComponent";
+        satellites: Maybe<
+          Array<{__typename?: "Entity"} & UniverseObjectFragment>
+        >;
+        parent: Maybe<{
+          __typename?: "Entity";
+          id: string;
+          entityType: EntityTypes;
+          satellite: Maybe<
+            {
+              __typename?: "SatelliteComponent";
+              parent: Maybe<{__typename?: "Entity"; id: string}>;
+            } & SatelliteComponentFragment
+          >;
+        }>;
+      } & SatelliteComponentFragment
+    >;
+  } & UniverseObjectFragment;
+};
+
+export type UniverseGetSystemQueryVariables = Exact<{
+  id: Scalars["ID"];
+  systemId: Scalars["ID"];
+}>;
+
+export type UniverseGetSystemQuery = {
+  __typename?: "Query";
+  templateUniverseSystem: {
+    __typename?: "PlanetarySystem";
+    id: string;
+    identity: {
+      __typename?: "IdentityComponent";
+      name: string;
+      description: string;
+    };
+    tags: {__typename?: "TagsComponent"; tags: Array<string>};
+    position: {
+      __typename?: "PositionComponent";
+      x: number;
+      y: number;
+      z: number;
+    };
+    planetarySystem: Maybe<{
+      __typename?: "PlanetarySystemComponent";
+      skyboxKey: string;
+    }>;
   };
 };
 
@@ -484,6 +610,38 @@ export type UniverseSatelliteSetShowOrbitMutation = {
   universeTemplateSatelliteSetShowOrbit: {__typename?: "Entity"; id: string};
 };
 
+export type UniverseSearchQueryVariables = Exact<{
+  id: Scalars["ID"];
+  search: Scalars["String"];
+}>;
+
+export type UniverseSearchQuery = {
+  __typename?: "Query";
+  universeSearch: Array<{
+    __typename?: "Entity";
+    id: string;
+    entityType: EntityTypes;
+    identity: {
+      __typename?: "IdentityComponent";
+      name: string;
+      description: string;
+    };
+    planetarySystem: Maybe<{
+      __typename?: "PlanetarySystemComponent";
+      skyboxKey: string;
+    }>;
+    satellite: Maybe<{
+      __typename?: "SatelliteComponent";
+      parent: Maybe<{
+        __typename?: "Entity";
+        id: string;
+        entityType: EntityTypes;
+        identity: {__typename?: "IdentityComponent"; name: string};
+      }>;
+    }>;
+  }>;
+};
+
 export type UniverseStarSetAgeMutationVariables = Exact<{
   id: Scalars["ID"];
   objectId: Scalars["ID"];
@@ -575,10 +733,10 @@ export type UniverseSubscription = {
         y: number;
         z: number;
       };
-      planetarySystem: {
+      planetarySystem: Maybe<{
         __typename?: "PlanetarySystemComponent";
         skyboxKey: string;
-      };
+      }>;
     }>;
   }>;
 };
@@ -636,51 +794,6 @@ export type UniverseSystemSetSkyboxMutation = {
   };
 };
 
-export type PlanetFragment = {
-  __typename?: "Entity";
-  id: string;
-  identity: {
-    __typename?: "IdentityComponent";
-    name: string;
-    description: string;
-  };
-  tags: {__typename?: "TagsComponent"; tags: Array<string>};
-  isStar: Maybe<{
-    __typename?: "IsStarComponent";
-    age: number;
-    hue: number;
-    isWhite: boolean;
-    solarMass: number;
-    spectralType: string;
-    radius: number;
-  }>;
-  isPlanet: Maybe<{
-    __typename?: "IsPlanetComponent";
-    age: number;
-    classification: string;
-    radius: number;
-    terranMass: number;
-    habitable: boolean;
-    lifeforms: string;
-    textureMapAsset: string;
-    cloudsMapAsset: string;
-    ringsMapAsset: string;
-  }>;
-  satellite: {__typename?: "SatelliteComponent"} & SatelliteComponentFragment;
-  temperature: {__typename?: "TemperatureComponent"; temperature: number};
-  population: Maybe<{__typename?: "PopulationComponent"; count: number}>;
-};
-
-export type SatelliteComponentFragment = {
-  __typename?: "SatelliteComponent";
-  distance: number;
-  axialTilt: number;
-  showOrbit: boolean;
-  orbitalArc: number;
-  eccentricity: number;
-  orbitalInclination: number;
-};
-
 export type TemplateSystemSubscriptionVariables = Exact<{
   id: Scalars["ID"];
   systemId: Scalars["ID"];
@@ -698,18 +811,22 @@ export type TemplateSystemSubscription = {
       name: string;
       description: string;
     };
-    planetarySystem: {
+    planetarySystem: Maybe<{
       __typename?: "PlanetarySystemComponent";
       skyboxKey: string;
-    };
+    }>;
     items: Array<
       {
         __typename?: "Entity";
-        satellite: {
-          __typename?: "SatelliteComponent";
-          satellites: Maybe<Array<{__typename?: "Entity"} & PlanetFragment>>;
-        } & SatelliteComponentFragment;
-      } & PlanetFragment
+        satellite: Maybe<
+          {
+            __typename?: "SatelliteComponent";
+            satellites: Maybe<
+              Array<{__typename?: "Entity"} & UniverseObjectFragment>
+            >;
+          } & SatelliteComponentFragment
+        >;
+      } & UniverseObjectFragment
     >;
   };
 };
@@ -866,8 +983,8 @@ export const SatelliteComponentFragmentDoc = gql`
     orbitalInclination
   }
 `;
-export const PlanetFragmentDoc = gql`
-  fragment Planet on Entity {
+export const UniverseObjectFragmentDoc = gql`
+  fragment UniverseObject on Entity {
     id
     identity {
       name
@@ -1187,6 +1304,31 @@ export type StarTypesQueryHookResult = ReturnType<typeof useStarTypesQuery>;
 export type StarTypesLazyQueryHookResult = ReturnType<
   typeof useStarTypesLazyQuery
 >;
+export const UniverseAddMoonDocument = gql`
+  mutation UniverseAddMoon($id: ID!, $parentId: ID!, $classification: String!) {
+    universeTemplateAddMoon(
+      id: $id
+      objectId: $parentId
+      classification: $classification
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseAddMoonMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseAddMoonMutation,
+    UniverseAddMoonMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseAddMoonMutation,
+    UniverseAddMoonMutationVariables
+  >(UniverseAddMoonDocument, baseOptions);
+}
+export type UniverseAddMoonMutationHookResult = ReturnType<
+  typeof useUniverseAddMoonMutation
+>;
 export const UniverseAddPlanetDocument = gql`
   mutation UniverseAddPlanet(
     $id: ID!
@@ -1273,6 +1415,109 @@ export function useUniverseAddSystemMutation(
 }
 export type UniverseAddSystemMutationHookResult = ReturnType<
   typeof useUniverseAddSystemMutation
+>;
+export const UniverseGetObjectDocument = gql`
+  query UniverseGetObject($id: ID!, $objectId: ID!) {
+    universeTemplateObject(id: $id, objectId: $objectId) {
+      ...UniverseObject
+      satellite {
+        ...SatelliteComponent
+        satellites {
+          ...UniverseObject
+        }
+        parent {
+          id
+          entityType
+          satellite {
+            ...SatelliteComponent
+            parent {
+              id
+            }
+          }
+        }
+      }
+    }
+  }
+  ${UniverseObjectFragmentDoc}
+  ${SatelliteComponentFragmentDoc}
+`;
+export function useUniverseGetObjectQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    UniverseGetObjectQuery,
+    UniverseGetObjectQueryVariables
+  >
+) {
+  return Apollo.useQuery<
+    UniverseGetObjectQuery,
+    UniverseGetObjectQueryVariables
+  >(UniverseGetObjectDocument, baseOptions);
+}
+export function useUniverseGetObjectLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    UniverseGetObjectQuery,
+    UniverseGetObjectQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    UniverseGetObjectQuery,
+    UniverseGetObjectQueryVariables
+  >(UniverseGetObjectDocument, baseOptions);
+}
+export type UniverseGetObjectQueryHookResult = ReturnType<
+  typeof useUniverseGetObjectQuery
+>;
+export type UniverseGetObjectLazyQueryHookResult = ReturnType<
+  typeof useUniverseGetObjectLazyQuery
+>;
+export const UniverseGetSystemDocument = gql`
+  query UniverseGetSystem($id: ID!, $systemId: ID!) {
+    templateUniverseSystem(id: $id, systemId: $systemId) {
+      id
+      identity {
+        name
+        description
+      }
+      tags {
+        tags
+      }
+      position {
+        x
+        y
+        z
+      }
+      planetarySystem {
+        skyboxKey
+      }
+    }
+  }
+`;
+export function useUniverseGetSystemQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    UniverseGetSystemQuery,
+    UniverseGetSystemQueryVariables
+  >
+) {
+  return Apollo.useQuery<
+    UniverseGetSystemQuery,
+    UniverseGetSystemQueryVariables
+  >(UniverseGetSystemDocument, baseOptions);
+}
+export function useUniverseGetSystemLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    UniverseGetSystemQuery,
+    UniverseGetSystemQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    UniverseGetSystemQuery,
+    UniverseGetSystemQueryVariables
+  >(UniverseGetSystemDocument, baseOptions);
+}
+export type UniverseGetSystemQueryHookResult = ReturnType<
+  typeof useUniverseGetSystemQuery
+>;
+export type UniverseGetSystemLazyQueryHookResult = ReturnType<
+  typeof useUniverseGetSystemLazyQuery
 >;
 export const UniverseObjectRemoveDocument = gql`
   mutation UniverseObjectRemove($id: ID!, $objectId: ID!) {
@@ -1746,6 +1991,58 @@ export function useUniverseSatelliteSetShowOrbitMutation(
 export type UniverseSatelliteSetShowOrbitMutationHookResult = ReturnType<
   typeof useUniverseSatelliteSetShowOrbitMutation
 >;
+export const UniverseSearchDocument = gql`
+  query UniverseSearch($id: ID!, $search: String!) {
+    universeSearch(id: $id, search: $search) {
+      id
+      identity {
+        name
+        description
+      }
+      planetarySystem {
+        skyboxKey
+      }
+      entityType
+      satellite {
+        parent {
+          id
+          identity {
+            name
+          }
+          entityType
+        }
+      }
+    }
+  }
+`;
+export function useUniverseSearchQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    UniverseSearchQuery,
+    UniverseSearchQueryVariables
+  >
+) {
+  return Apollo.useQuery<UniverseSearchQuery, UniverseSearchQueryVariables>(
+    UniverseSearchDocument,
+    baseOptions
+  );
+}
+export function useUniverseSearchLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    UniverseSearchQuery,
+    UniverseSearchQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<UniverseSearchQuery, UniverseSearchQueryVariables>(
+    UniverseSearchDocument,
+    baseOptions
+  );
+}
+export type UniverseSearchQueryHookResult = ReturnType<
+  typeof useUniverseSearchQuery
+>;
+export type UniverseSearchLazyQueryHookResult = ReturnType<
+  typeof useUniverseSearchLazyQuery
+>;
 export const UniverseStarSetAgeDocument = gql`
   mutation UniverseStarSetAge($id: ID!, $objectId: ID!, $age: Float!) {
     universeTemplateStarSetAge(id: $id, objectId: $objectId, age: $age) {
@@ -2062,17 +2359,17 @@ export const TemplateSystemDocument = gql`
       habitableZoneInner
       habitableZoneOuter
       items {
-        ...Planet
+        ...UniverseObject
         satellite {
           ...SatelliteComponent
           satellites {
-            ...Planet
+            ...UniverseObject
           }
         }
       }
     }
   }
-  ${PlanetFragmentDoc}
+  ${UniverseObjectFragmentDoc}
   ${SatelliteComponentFragmentDoc}
 `;
 export function useTemplateSystemSubscription(

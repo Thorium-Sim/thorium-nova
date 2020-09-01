@@ -133,8 +133,10 @@ export class UniversePluginStarsResolver {
   @Query(returns => Entity)
   universeTemplateObject(
     @Arg("id", type => ID) id: string,
-    @Arg("objectId", type => ID) objectId: string
+    @Arg("objectId", type => ID) objectId: string,
+    @Ctx() ctx: GraphQLContext
   ) {
+    ctx.universeId = id;
     const {object} = getSystemObject(id, objectId);
     return object;
   }

@@ -1,11 +1,12 @@
 import {useTemplateSystemSubscription} from "../../generated/graphql";
 import React from "react";
 import {useThree} from "react-three-fiber";
-import {Vector3} from "three";
+import {MOUSE, Vector3} from "three";
 import StarEntity from "./entities/StarEntity";
 import PlanetContainer from "./entities/PlanetEntity";
 import Disc from "./Disc";
 import {configStoreApi} from "./configStore";
+import {OrbitControls} from "./OrbitControls";
 
 // 1 unit = 1 million km
 const Planetary: React.FC<{universeId: string; systemId: string}> = ({
@@ -13,7 +14,35 @@ const Planetary: React.FC<{universeId: string; systemId: string}> = ({
   systemId,
 }) => {
   const {camera} = useThree();
+  const orbitControls = React.useRef<OrbitControls>();
 
+  React.useEffect(() => {
+    configStoreApi.setState({
+      orbitControlsTrackPosition: (
+        position: Vector3,
+        distance: number = 50
+      ) => {
+        if (orbitControls.current) {
+          orbitControls.current.target0?.copy(position);
+          orbitControls.current.position0.copy(
+            position
+              .clone()
+              // We have to add some so our distance can be properly applied
+              // when the star is at 0,0,0
+              .addScalar(1)
+              .normalize()
+              .multiplyScalar(distance)
+              .add(position)
+              .add(new Vector3(0, 10, 0))
+          );
+          orbitControls.current.reset?.();
+        }
+      },
+    });
+
+    // Indicate the transition is complete
+    configStoreApi.getState().transitionPromise?.();
+  }, []);
   const {data} = useTemplateSystemSubscription({
     variables: {id: universeId, systemId},
   });
@@ -31,7 +60,7 @@ const Planetary: React.FC<{universeId: string; systemId: string}> = ({
   }, [system]);
 
   const skyboxKey =
-    data?.templateUniverseSystem.planetarySystem.skyboxKey || "blank";
+    data?.templateUniverseSystem.planetarySystem?.skyboxKey || "blank";
   React.useEffect(() => {
     configStoreApi.setState({skyboxKey});
   }, [skyboxKey]);
@@ -42,6 +71,16 @@ const Planetary: React.FC<{universeId: string; systemId: string}> = ({
   const scale = 1 / 1000000;
   return (
     <>
+      <OrbitControls
+        ref={orbitControls}
+        maxDistance={15000}
+        minDistance={1}
+        mouseButtons={{
+          LEFT: MOUSE.ROTATE,
+          RIGHT: MOUSE.PAN,
+          MIDDLE: MOUSE.DOLLY,
+        }}
+      />
       {hasStar && data?.templateUniverseSystem.planetarySystem && (
         <Disc
           habitableZoneInner={habitableZoneInner}

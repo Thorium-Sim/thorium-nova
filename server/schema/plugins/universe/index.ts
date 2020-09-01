@@ -4,6 +4,7 @@ import getStore from "server/helpers/dataStore";
 import {pubsub} from "server/helpers/pubsub";
 import {
   Arg,
+  Ctx,
   ID,
   Mutation,
   Query,
@@ -16,6 +17,9 @@ import uuid from "uniqid";
 import {FileUpload, GraphQLUpload} from "graphql-upload";
 import uploadAsset from "server/helpers/uploadAsset";
 import {getUniverse, publish} from "./utils";
+import Entity from "server/helpers/ecs/entity";
+import matchSorter from "match-sorter";
+import {GraphQLContext} from "server/helpers/graphqlContext";
 
 @Resolver()
 export class UniversePluginBaseResolver {
@@ -31,6 +35,43 @@ export class UniversePluginBaseResolver {
     return App.plugins.universes.find(s => s.id === id) || null;
   }
 
+  @Query(returns => [Entity])
+  universeSearch(
+    @Arg("id", type => ID) id: string,
+    @Arg("search", type => String) search: string,
+    @Ctx() ctx: GraphQLContext
+  ) {
+    const universe = getUniverse(id);
+    ctx.universeId = id;
+    const matchItems = matchSorter(
+      universe.entities
+        .filter(e => e.isStar || e.isPlanet || e.planetarySystem)
+        .map(m => ({
+          ...m,
+          name: m.identity?.name,
+          description: m.identity?.description,
+          temperature: m.temperature?.temperature,
+          spectralType: m.isStar?.spectralType,
+          classification: m.isPlanet?.classification,
+          mass: m.isStar?.solarMass || m.isPlanet?.terranMass,
+          population: m.population?.count,
+        })),
+      search,
+      {
+        keys: [
+          "name",
+          "description",
+          "temperature",
+          "spectralType",
+          "classification",
+          "mass",
+          "population",
+        ],
+      }
+    ).map(m => m.id);
+
+    return universe.entities.filter(e => matchItems.includes(e.id));
+  }
   @Mutation(returns => UniverseTemplate)
   universeCreate(
     @Arg("name")

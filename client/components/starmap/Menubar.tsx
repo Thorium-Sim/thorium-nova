@@ -19,6 +19,7 @@ import {
   useUniverseObjectRemoveMutation,
   useUniverseAddStarMutation,
   useUniverseAddPlanetMutation,
+  useUniverseAddMoonMutation,
   useStarTypesQuery,
   usePlanetTypesQuery,
 } from "../../generated/graphql";
@@ -29,6 +30,8 @@ import {useConfirm} from "../Dialog";
 import {useHotkeys} from "react-hotkeys-hook";
 import {Link} from "react-router-dom";
 import {isPlanet} from "./ConfigPalette/utils";
+import StarSearch from "./StarSearch";
+import {css} from "@emotion/core";
 
 const MenuButton = MenuButtonComp as React.FC<
   MenuButtonProps & {rightIcon: string; variantColor: string}
@@ -44,6 +47,7 @@ const Menubar: React.FC<{
   const [removeObject] = useUniverseObjectRemoveMutation();
   const [addStar] = useUniverseAddStarMutation();
   const [addPlanet] = useUniverseAddPlanetMutation();
+  const [addMoon] = useUniverseAddMoonMutation();
 
   const {data: starTypesData} = useStarTypesQuery();
   const {data: planetTypesData} = usePlanetTypesQuery();
@@ -64,7 +68,6 @@ const Menubar: React.FC<{
   const systemId = useConfigStore(store => store.systemId);
   const setSystemId = useConfigStore(store => store.setSystemId);
   const selectedObject = useConfigStore(store => store.selectedObject);
-  const hoveredPosition = useConfigStore(store => store.hoveredPosition);
   const measuring = useConfigStore(store => store.measuring);
 
   useHotkeys("n", () => {
@@ -102,7 +105,11 @@ const Menubar: React.FC<{
       },
     });
 
-    configStoreApi.setState({selectedObject: null, selectedPosition: null});
+    configStoreApi.setState({
+      selectedObject: null,
+      selectedPosition: null,
+      scaledSelectedPosition: null,
+    });
   }
   useHotkeys("backspace", () => {
     deleteObject();
@@ -114,8 +121,29 @@ const Menubar: React.FC<{
     }
   }, [systemId, showingAddOptions]);
   return (
-    <Box position="fixed" top={0} left={0} width="100vw" padding={2}>
-      <Stack isInline spacing={2}>
+    <Box
+      position="fixed"
+      top={0}
+      left={0}
+      width="100vw"
+      padding={2}
+      css={css`
+        pointer-events: none;
+        * {
+          pointer-events: all;
+        }
+      `}
+    >
+      <Stack
+        isInline
+        spacing={2}
+        css={css`
+          pointer-events: none;
+          * {
+            pointer-events: all;
+          }
+        `}
+      >
         <Button as={Link} to="/" variantColor="info" variant="ghost" size="sm">
           <FaHome />
         </Button>
@@ -181,13 +209,6 @@ const Menubar: React.FC<{
         >
           {t("Edit")}
         </Button>
-        <Input
-          size="sm"
-          type="search"
-          placeholder="Search..."
-          justifySelf="end"
-          maxWidth="300px"
-        />
         <Button
           size="sm"
           variant="ghost"
@@ -202,7 +223,7 @@ const Menubar: React.FC<{
         >
           Measure Distances
         </Button>
-        {}
+        <StarSearch />
       </Stack>
       <Collapse mt={4} isOpen={showingAddOptions}>
         <Stack isInline spacing={2} mt={2}>
@@ -289,7 +310,7 @@ const Menubar: React.FC<{
                   <MenuItem
                     key={p.id}
                     onClick={() =>
-                      addPlanet({
+                      addMoon({
                         variables: {
                           id: universeId,
                           parentId: selectedObject.id,

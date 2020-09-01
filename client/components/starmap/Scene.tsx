@@ -1,8 +1,7 @@
-import {OrbitControls} from "./OrbitControls";
 import React, {Suspense} from "react";
 import {useFrame, useThree} from "react-three-fiber";
-import {AdditiveBlending, Mesh, MOUSE, Vector3} from "three";
-import {configStoreApi, useConfigStore} from "./configStore";
+import {AdditiveBlending, Mesh, Vector3} from "three";
+import {useConfigStore} from "./configStore";
 import Interstellar from "./Interstellar";
 import Nebula from "./Nebula";
 import Planetary from "./Planetary";
@@ -24,8 +23,6 @@ function mergeRefs<T = any>(
     });
   };
 }
-
-const FAR = 1e27;
 
 function midPoint(vec1: Vector3, vec2: Vector3) {
   return new Vector3(
@@ -91,18 +88,29 @@ const TextLabel = React.forwardRef<Mesh, {text: string; position?: Vector3}>(
 const MeasureLine = () => {
   const selectedPosition = useConfigStore(store => store.selectedPosition);
   const hoveredPosition = useConfigStore(store => store.hoveredPosition);
+  const scaledSelectedPosition =
+    useConfigStore(store => store.scaledSelectedPosition) || selectedPosition;
+  const scaledHoveredPosition =
+    useConfigStore(store => store.scaledHoveredPosition) || hoveredPosition;
+
+  const systemId = useConfigStore(store => store.systemId);
   const hasMeasureLine = !!(
     selectedPosition &&
     hoveredPosition &&
-    selectedPosition.x !== hoveredPosition.x &&
-    selectedPosition.y !== hoveredPosition.y &&
-    selectedPosition.z !== hoveredPosition.z
+    !(
+      selectedPosition.x === hoveredPosition.x &&
+      selectedPosition.y === hoveredPosition.y &&
+      selectedPosition.z === hoveredPosition.z
+    )
   );
   const ref = React.useRef<Line2>(null);
   const orb = React.useRef<Mesh>(null);
   useFrame(() => {
     if (!hasMeasureLine) return;
-    const {selectedPosition, hoveredPosition} = useConfigStore.getState();
+    const {
+      scaledSelectedPosition: selectedPosition,
+      scaledHoveredPosition: hoveredPosition,
+    } = useConfigStore.getState();
     if (!hoveredPosition || !selectedPosition) return;
     const position = [
       selectedPosition.x,
@@ -125,12 +133,11 @@ const MeasureLine = () => {
       );
     }
   });
-
   if (!selectedPosition || !hoveredPosition || !hasMeasureLine) return null;
 
-  const distance = `${
-    Math.round(hoveredPosition.distanceTo(selectedPosition) * 100) / 100
-  } LY`;
+  const distanceValue =
+    Math.round(hoveredPosition.distanceTo(selectedPosition) * 100) / 100;
+  const distance = `${distanceValue} ${systemId ? "KM" : "LY"}`;
   return (
     <>
       <Line
@@ -147,21 +154,9 @@ const MeasureLine = () => {
   );
 };
 const Scene = React.forwardRef((props, ref) => {
-  const orbitControls = React.useRef<OrbitControls>();
-  const frameCount = React.useRef(0);
   const universeId = useConfigStore(s => s.universeId);
   const systemId = useConfigStore(s => s.systemId);
   const measuring = useConfigStore(s => s.measuring);
-
-  useFrame((state, delta) => {
-    // Auto rotate, but at a very slow rate, so as to keep the
-    // starfield visible
-    frameCount.current = (frameCount.current + delta) % 125.663;
-    if (orbitControls.current) {
-      orbitControls.current.autoRotateSpeed =
-        Math.sin(frameCount.current / 100) / 100;
-    }
-  });
 
   const {camera} = useThree();
 
@@ -171,40 +166,14 @@ const Scene = React.forwardRef((props, ref) => {
     },
   }));
 
-  React.useEffect(() => {
-    configStoreApi.setState({
-      disableOrbitControls: () => {
-        if (orbitControls.current) {
-          orbitControls.current.enabled = false;
-        }
-      },
-      enableOrbitControls: () => {
-        if (orbitControls.current) {
-          orbitControls.current.enabled = true;
-        }
-      },
-    });
-  }, []);
   return (
     <>
-      <OrbitControls
-        ref={orbitControls}
-        autoRotate
-        maxDistance={1300}
-        minDistance={1}
-        rotateSpeed={0.5}
-        mouseButtons={{
-          LEFT: MOUSE.ROTATE,
-          RIGHT: MOUSE.PAN,
-          MIDDLE: MOUSE.DOLLY,
-        }}
-      />
       <ambientLight intensity={0.2} />
       <pointLight position={[10, 10, 10]} />
       {universeId && !systemId && <Interstellar universeId={universeId} />}
-      {/* {universeId && systemId && (
+      {universeId && systemId && (
         <Planetary universeId={universeId} systemId={systemId} />
-      )} */}
+      )}
       <Suspense fallback={null}>
         <Nebula />
       </Suspense>

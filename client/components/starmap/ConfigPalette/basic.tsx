@@ -101,7 +101,7 @@ const BasicPalette: React.FC = () => {
                 id="skyboxKey"
                 flex={1}
                 ref={skyboxKeyRef}
-                defaultValue={selectedObject.planetarySystem.skyboxKey}
+                defaultValue={selectedObject.planetarySystem?.skyboxKey}
                 onBlur={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setSkyboxKey({
                     variables: {

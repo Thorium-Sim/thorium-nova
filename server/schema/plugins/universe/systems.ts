@@ -246,10 +246,10 @@ export class SatelliteComponentResolver {
       e => e.satellite?.parentId === self.entity.id
     );
   }
-  @FieldResolver(type => [Entity])
+  @FieldResolver(type => Entity, {nullable: true})
   parent(@Root() self: SatelliteComponent, @Ctx() ctx: GraphQLContext) {
-    if (!ctx.universeId) return [];
+    if (!ctx.universeId) return null;
     const universe = getUniverse(ctx.universeId);
-    return universe.entities.find(e => e.id === self.parentId);
+    return universe.entities.find(e => e.id === self.parentId) || null;
   }
 }

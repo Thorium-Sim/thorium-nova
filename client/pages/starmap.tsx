@@ -44,9 +44,14 @@ const Starmap: React.FC = () => {
               return {
                 selectedObject: state.currentSystem,
                 selectedPosition: null,
+                scaledSelectedPosition: null,
               };
             }
-            return {selectedObject: null, selectedPosition: null};
+            return {
+              selectedObject: null,
+              selectedPosition: null,
+              scaledSelectedPosition: null,
+            };
           });
         }}
       >

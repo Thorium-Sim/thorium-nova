@@ -429,7 +429,7 @@ export class PlanetAssetsResolver {
     @Root() self: IsPlanetComponent & {entity: Entity},
     @Ctx() context: GraphQLContext
   ) {
-    if (self.textureMapAsset.indexOf("/public") === 0)
+    if (self.textureMapAsset?.indexOf("/public") === 0)
       return self.textureMapAsset;
     if (!context.universeId) {
       return "";
@@ -450,7 +450,7 @@ export class PlanetAssetsResolver {
     @Root() self: IsPlanetComponent & {entity: Entity},
     @Ctx() context: GraphQLContext
   ) {
-    if (self.cloudsMapAsset.indexOf("/public") === 0)
+    if (self.cloudsMapAsset?.indexOf("/public") === 0)
       return self.cloudsMapAsset;
     if (!context.universeId) {
       return "";
@@ -471,7 +471,7 @@ export class PlanetAssetsResolver {
     @Root() self: IsPlanetComponent & {entity: Entity},
     @Ctx() context: GraphQLContext
   ) {
-    if (self.ringsMapAsset.indexOf("/public") === 0) return self.ringsMapAsset;
+    if (self.ringsMapAsset?.indexOf("/public") === 0) return self.ringsMapAsset;
     if (!context.universeId) {
       return "";
     }

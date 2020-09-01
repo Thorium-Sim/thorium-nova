@@ -1,0 +1,22 @@
+query UniverseSearch($id: ID!, $search: String!) {
+  universeSearch(id: $id, search: $search) {
+    id
+    identity {
+      name
+      description
+    }
+    planetarySystem {
+      skyboxKey
+    }
+    entityType
+    satellite {
+      parent {
+        id
+        identity {
+          name
+        }
+        entityType
+      }
+    }
+  }
+}

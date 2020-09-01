@@ -56,7 +56,7 @@ export default class Components {
   stationComplement?: StationComplementComponent;
 
   // Stellar Objects Components
-  @Field()
+  @Field({nullable: true})
   planetarySystem?: PlanetarySystemComponent;
 
   @Field({nullable: true})

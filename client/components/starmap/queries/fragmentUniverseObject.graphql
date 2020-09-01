@@ -1,0 +1,38 @@
+fragment UniverseObject on Entity {
+  id
+  identity {
+    name
+    description
+  }
+  tags {
+    tags
+  }
+  isStar {
+    age
+    hue
+    isWhite
+    solarMass
+    spectralType
+    radius
+  }
+  isPlanet {
+    age
+    classification
+    radius
+    terranMass
+    habitable
+    lifeforms
+    textureMapAsset
+    cloudsMapAsset
+    ringsMapAsset
+  }
+  satellite {
+    ...SatelliteComponent
+  }
+  temperature {
+    temperature
+  }
+  population {
+    count
+  }
+}
