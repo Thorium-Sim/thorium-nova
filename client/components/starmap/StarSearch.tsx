@@ -143,14 +143,6 @@ function StarSearch() {
   });
   return (
     <Box position="relative">
-      <label
-        {...getLabelProps()}
-        css={css`
-          display: none;
-        `}
-      >
-        {t("Choose an element:")}
-      </label>
       <Box display="inline-flex" {...getComboboxProps()}>
         <Input
           size="sm"
