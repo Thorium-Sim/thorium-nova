@@ -1,5 +1,5 @@
 import {Field, ObjectType} from "type-graphql";
-import {Component, ComponentOmit} from "./utils";
+import {Component, ComponentOmit} from "../utils";
 
 export type AlertLevelT = "1" | "2" | "3" | "4" | "5" | "p";
 @ObjectType()

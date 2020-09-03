@@ -1,38 +1,4 @@
 {
-  "Age": "Age",
-  "Axial Tilt": "Axial Tilt",
-  "Basics": "Basics",
-  "Classification": "Classification",
-  "Clouds": "Clouds",
-  "Description": "Description",
-  "Eccentricity": "Eccentricity",
-  "Habitable": "Habitable",
-  "Hue": "Hue",
-  "Image aspect ratio should be 2x1, with the dimensions as powers of two, eg": {
-    " 512x256 or 2048x1024": " 512x256 or 2048x1024"
-  },
-  "Image should be a transparent PNG": {
-    " The aspect ratio should be 2x1, with the dimensions as powers of two, eg": {
-      " 512x256 or 2048x1024": " 512x256 or 2048x1024"
-    },
-    " Vertical lines in the image represent rings": {
-      "": ""
-    }
-  },
-  "Is White": "Is White",
-  "Lifeforms": "Lifeforms",
-  "Name": "Name",
-  "Orbit": "Orbit",
-  "Orbit Arc": "Orbit Arc",
-  "Orbit Radius": "Orbit Radius",
-  "Orbital Inclination": "Orbital Inclination",
-  "Planet Images": "Planet Images",
-  "Planet Properties": "Planet Properties",
-  "Radius": "Radius",
-  "Random String": "Random String",
-  "Remove Clouds": "Remove Clouds",
-  "Remove Rings": "Remove Rings",
-  "Rings": "Rings",
   "Search": {
     "": {
       "": {
@@ -40,13 +6,5 @@
       }
     }
   },
-  "Show Orbit Path": "Show Orbit Path",
-  "Skybox Key": "Skybox Key",
-  "Solar Mass": "Solar Mass",
-  "Spectral Type": "Spectral Type",
-  "Star Properties": "Star Properties",
-  "Temperature": "Temperature",
-  "Terran Mass": "Terran Mass",
-  "Texture": "Texture",
   "toggle menu": "toggle menu"
 }

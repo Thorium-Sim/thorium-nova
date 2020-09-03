@@ -3,6 +3,7 @@ import {EntityFieldResolver, EntityResolver} from "./ecs";
 import {FlightResolver} from "./flight";
 import {ShipAssetsResolver, ShipPluginResolver} from "./plugins/ship";
 import {StationComplementPluginResolver} from "./plugins/stationComplement";
+import {SystemPluginBaseResolver} from "./plugins/systems";
 import {UniversePluginBaseResolver} from "./plugins/universe";
 import {
   PlanetAssetsResolver,
@@ -48,4 +49,5 @@ export const resolvers: ResolverT = [
   UniverseSatelliteResolver,
   PlanetAssetsResolver,
   SatelliteComponentResolver,
+  SystemPluginBaseResolver,
 ];

@@ -27,12 +27,14 @@ class PersistentStorage {
 
 export interface Plugins {
   ships: Writable<Entity>[];
+  systems: Writable<Entity>[];
   stationComplements: Writable<StationComplement>[];
   universes: Writable<UniverseTemplate>[];
 }
 
 const pluginClassMap = {
   ships: Entity,
+  systems: Entity,
   stationComplements: StationComplement,
   universes: UniverseTemplate,
 };
@@ -55,7 +57,12 @@ class AppClass {
   port: number = process.env.NODE_ENV === "production" ? 4444 : 3001;
 
   constructor() {
-    this.plugins = {ships: [], stationComplements: [], universes: []};
+    this.plugins = {
+      ships: [],
+      systems: [],
+      stationComplements: [],
+      universes: [],
+    };
     if (process.env.PORT && !isNaN(parseInt(process.env.PORT, 10)))
       this.port = parseInt(process.env.PORT, 10);
     this.httpOnly = process.env.HTTP_ONLY === "true";

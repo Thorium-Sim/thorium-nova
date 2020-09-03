@@ -1,12 +1,12 @@
 import {Field, ObjectType} from "type-graphql";
 import {TimerComponent} from "./timer";
 import {IsShipComponent} from "./isShip";
-import {AlertLevelComponent} from "./alertLevel";
+import {AlertLevelComponent} from "./ship/alertLevel";
 import {IdentityComponent} from "./identity";
 import {TagsComponent} from "./tags";
 import {ThemeComponent} from "./theme";
 import {StationComplementComponent} from "./stationComplement";
-import {ShipAssetsComponent} from "./shipAssets";
+import {ShipAssetsComponent} from "./ship/shipAssets";
 import {IsPlanetComponent} from "./isPlanet";
 import {IsStarComponent} from "./isStar";
 import {PlanetarySystemComponent} from "./planetarySystem";

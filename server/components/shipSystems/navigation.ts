@@ -1,0 +1,13 @@
+import {Field, ObjectType} from "type-graphql";
+import {Component, ComponentOmit} from "../utils";
+
+@ObjectType()
+export class NavigationComponent extends Component {
+  static id: "Navigation" = "Navigation";
+  static defaults: ComponentOmit<NavigationComponent> = {
+    value: true,
+  };
+
+  @Field()
+  value: true = true;
+}

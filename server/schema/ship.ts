@@ -1,5 +1,5 @@
 import App from "../app";
-import {AlertLevelComponent, AlertLevelT} from "../components/alertLevel";
+import {AlertLevelComponent, AlertLevelT} from "../components/ship/alertLevel";
 import Entity from "../helpers/ecs/entity";
 import {GraphQLContext} from "../helpers/graphqlContext";
 import {pubsub} from "../helpers/pubsub";
@@ -15,7 +15,7 @@ import {
 } from "type-graphql";
 import uniqid from "uniqid";
 import {IsShipComponent} from "../components/isShip";
-import {ShipAssetsComponent} from "../components/shipAssets";
+import {ShipAssetsComponent} from "../components/ship/shipAssets";
 import {TagsComponent} from "../components/tags";
 import {IdentityComponent} from "../components/identity";
 import {ThemeComponent} from "../components/theme";

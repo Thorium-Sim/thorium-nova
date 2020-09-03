@@ -8,7 +8,7 @@ import {
   Resolver,
   Root,
 } from "type-graphql";
-import {ShipAssetsComponent} from "server/components/shipAssets";
+import {ShipAssetsComponent} from "server/components/ship/shipAssets";
 import {SatelliteComponent} from "server/components/satellite";
 import {GraphQLContext} from "server/helpers/graphqlContext";
 

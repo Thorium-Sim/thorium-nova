@@ -1,7 +1,7 @@
 import App from "server/app";
 import Entity from "server/helpers/ecs/entity";
 import {Field, ObjectType} from "type-graphql";
-import {Component, ComponentOmit} from "./utils";
+import {Component, ComponentOmit} from "../utils";
 
 @ObjectType()
 export class ShipAssetsComponent extends Component {
