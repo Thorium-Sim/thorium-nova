@@ -11,18 +11,18 @@ export async function getPlanetId() {
   const id = universe.data?.universeCreate.id;
   const system = await gqlCall({
     query: `mutation CreateSystem($id:ID!) {
-    universeTemplateAddSystem(id:$id, position:{x:0,y:0,z:0}) {
+    pluginUniverseAddSystem(id:$id, position:{x:0,y:0,z:0}) {
       id
     }
   }`,
     variables: {id},
   });
 
-  const systemId = system.data?.universeTemplateAddSystem.id;
+  const systemId = system.data?.pluginUniverseAddSystem.id;
 
   const planet = await gqlCall({
     query: `mutation CreatePlanet($id:ID!,$systemId:ID!, $classification:String!) {
-      universeTemplateAddPlanet(id:$id, systemId:$systemId, classification:$classification) {
+      pluginUniverseAddPlanet(id:$id, systemId:$systemId, classification:$classification) {
         id
       }
     }`,
@@ -33,6 +33,6 @@ export async function getPlanetId() {
     },
   });
 
-  const planetId = planet.data?.universeTemplateAddPlanet.id;
+  const planetId = planet.data?.pluginUniverseAddPlanet.id;
   return {id, planetId};
 }

@@ -1,5 +1,5 @@
 mutation UniversePlanetSetAge($id: ID!, $objectId: ID!, $age: Float!) {
-  universeTemplatePlanetSetAge(id: $id, objectId: $objectId, age: $age) {
+  pluginUniversePlanetSetAge(id: $id, objectId: $objectId, age: $age) {
     id
   }
 }

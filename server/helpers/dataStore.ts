@@ -87,12 +87,22 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
   // Instantiate the object if it is a class
   // or just make a new object with the data inside
   let dataObject!: G & StoreObject;
-  if (isClass(classConstructor)) {
-    dataObject = new classConstructor(_data);
+  if (_data.length) {
+    if (isClass(classConstructor)) {
+      dataObject = _data.map((d: any) => new classConstructor(d));
+    } else {
+      dataObject = _data;
+    }
     dataObject.writeFile = writeFile;
     dataObject.removeFile = removeFile;
   } else {
-    dataObject = {..._data, writeFile, removeFile};
+    if (isClass(classConstructor)) {
+      dataObject = new classConstructor(_data);
+      dataObject.writeFile = writeFile;
+      dataObject.removeFile = removeFile;
+    } else {
+      dataObject = {..._data, writeFile, removeFile};
+    }
   }
 
   async function writeFile(force = false) {

@@ -18,7 +18,7 @@ import {planetTypes, PlanetType} from "./planetTypes";
 import {
   getSystem,
   getSystemObject,
-  getUniverse,
+  getPlugin,
   objectPublish,
   publish,
 } from "./utils";
@@ -101,7 +101,7 @@ function createPlanet({
 @Resolver()
 export class UniversePluginPlanetsResolver {
   @Mutation(returns => Entity)
-  async universeTemplateAddPlanet(
+  async pluginUniverseAddPlanet(
     @Arg("id", type => ID)
     id: string,
     @Arg("systemId", type => ID)
@@ -109,8 +109,8 @@ export class UniversePluginPlanetsResolver {
     @Arg("classification", type => String)
     classification: string
   ) {
-    const {universe, system} = getSystem(id, systemId);
-    const childrenPlanets = universe.entities.filter(
+    const {plugin, system} = getSystem(id, systemId);
+    const childrenPlanets = plugin.universe.filter(
       s => s.satellite?.parentId === systemId && s.isPlanet
     );
 
@@ -133,7 +133,7 @@ export class UniversePluginPlanetsResolver {
     const minPlanetDistance = 10000000;
 
     // We'll do a messy thing with the habitable zone where we just the habitable zone values together
-    const stars = universe.entities.filter(
+    const stars = plugin.universe.filter(
       s => s.satellite?.parentId === systemId && s.isStar
     );
 
@@ -178,13 +178,13 @@ export class UniversePluginPlanetsResolver {
       parentId: systemId,
       planetType,
     });
-    universe.entities.push(entity);
-    publish(universe);
-    pubsub.publish("templateUniverseSystem", {id: system.id, system});
+    plugin.universe.push(entity);
+    publish(plugin);
+    pubsub.publish("pluginUniverseSystem", {id: system.id, system});
     return entity;
   }
   @Mutation(returns => Entity)
-  universeTemplateAddMoon(
+  pluginUniverseAddMoon(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -192,7 +192,7 @@ export class UniversePluginPlanetsResolver {
     @Arg("classification", type => String)
     classification: string
   ) {
-    const {universe, system, object} = getSystemObject(id, objectId);
+    const {plugin, system, object} = getSystemObject(id, objectId);
 
     const planetType = planetTypes.find(
       s => s.classification === classification
@@ -202,7 +202,7 @@ export class UniversePluginPlanetsResolver {
       throw new Error(`Invalid planet classification: ${classification}`);
     }
 
-    const childrenMoons = universe.entities.filter(
+    const childrenMoons = plugin.universe.filter(
       s => s.satellite?.parentId === objectId && s.isPlanet
     );
     const name = `${object?.components?.identity?.name} ${
@@ -236,13 +236,13 @@ export class UniversePluginPlanetsResolver {
       parentId: objectId,
       planetType,
     });
-    universe.entities.push(entity);
-    publish(universe);
-    pubsub.publish("templateUniverseSystem", {id: system.id, system});
+    plugin.universe.push(entity);
+    publish(plugin);
+    pubsub.publish("pluginUniverseSystem", {id: system.id, system});
     return entity;
   }
   @Mutation(returns => Entity)
-  universeTemplatePlanetSetTemperature(
+  pluginUniversePlanetSetTemperature(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -250,12 +250,12 @@ export class UniversePluginPlanetsResolver {
     @Arg("temperature", {description: "The temperature of the star in Kelvin"})
     temperature: number
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("temperature", {temperature});
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplatePlanetSetAge(
+  pluginUniversePlanetSetAge(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -263,12 +263,12 @@ export class UniversePluginPlanetsResolver {
     @Arg("age", {description: "The age of the planet in years"})
     age: number
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("isPlanet", {age});
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplatePlanetSetRadius(
+  pluginUniversePlanetSetRadius(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -276,12 +276,12 @@ export class UniversePluginPlanetsResolver {
     @Arg("radius", {description: "The radius of the planet in kilometers"})
     radius: number
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("isPlanet", {radius});
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplatePlanetSetTerranMass(
+  pluginUniversePlanetSetTerranMass(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -291,12 +291,12 @@ export class UniversePluginPlanetsResolver {
     })
     terranMass: number
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("isPlanet", {terranMass});
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplatePlanetSetHabitable(
+  pluginUniversePlanetSetHabitable(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -306,12 +306,12 @@ export class UniversePluginPlanetsResolver {
     })
     habitable: boolean
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("isPlanet", {habitable});
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplatePlanetSetLifeforms(
+  pluginUniversePlanetSetLifeforms(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -321,22 +321,22 @@ export class UniversePluginPlanetsResolver {
     })
     lifeforms: string
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("isPlanet", {lifeforms});
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  async universeTemplatePlanetSetTexture(
+  async pluginUniversePlanetSetTexture(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
     objectId: string,
     @Arg("image", type => GraphQLUpload) image: FileUpload
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
-    const pathPrefix = `${appStoreDir}universes/${
-      universe.name || universe.id
-    }`;
+    const {plugin, object, system} = getSystemObject(id, objectId);
+    const pathPrefix = `${appStoreDir}plugins/${
+      plugin.name || plugin.id
+    }/assets`;
     const splitName = image.filename.split(".");
     const ext = splitName[splitName.length - 1];
     const fileName = `planet-${object.id}-texture-${Math.round(
@@ -346,20 +346,20 @@ export class UniversePluginPlanetsResolver {
     object.updateComponent("isPlanet", {
       textureMapAsset: fileName,
     });
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  async universeTemplatePlanetSetClouds(
+  async pluginUniversePlanetSetClouds(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
     objectId: string,
     @Arg("image", type => GraphQLUpload) image: FileUpload
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
-    const pathPrefix = `${appStoreDir}universes/${
-      universe.name || universe.id
-    }`;
+    const {plugin, object, system} = getSystemObject(id, objectId);
+    const pathPrefix = `${appStoreDir}plugins/${
+      plugin.name || plugin.id
+    }/assets`;
     const splitName = image.filename.split(".");
     const ext = splitName[splitName.length - 1];
     const fileName = `planet-${object.id}-clouds-${Math.round(
@@ -369,20 +369,20 @@ export class UniversePluginPlanetsResolver {
     object.updateComponent("isPlanet", {
       cloudsMapAsset: fileName,
     });
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  async universeTemplatePlanetSetRings(
+  async pluginUniversePlanetSetRings(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
     objectId: string,
     @Arg("image", type => GraphQLUpload) image: FileUpload
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
-    const pathPrefix = `${appStoreDir}universes/${
-      universe.name || universe.id
-    }`;
+    const {plugin, object, system} = getSystemObject(id, objectId);
+    const pathPrefix = `${appStoreDir}plugins/${
+      plugin.name || plugin.id
+    }/assets`;
     const splitName = image.filename.split(".");
     const ext = splitName[splitName.length - 1];
     const fileName = `planet-${object.id}-rings-${Math.round(
@@ -392,33 +392,33 @@ export class UniversePluginPlanetsResolver {
     object.updateComponent("isPlanet", {
       ringsMapAsset: fileName,
     });
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  async universeTemplatePlanetClearClouds(
+  async pluginUniversePlanetClearClouds(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
     objectId: string
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("isPlanet", {
       cloudsMapAsset: "",
     });
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  async universeTemplatePlanetClearRings(
+  async pluginUniversePlanetClearRings(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
     objectId: string
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("isPlanet", {
       ringsMapAsset: "",
     });
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
 }
 
@@ -431,13 +431,13 @@ export class PlanetAssetsResolver {
   ) {
     if (self.textureMapAsset?.indexOf("/public") === 0)
       return self.textureMapAsset;
-    if (!context.universeId) {
+    if (!context.pluginId) {
       return "";
     }
     try {
-      const universe = getUniverse(context.universeId);
+      const plugin = getPlugin(context.pluginId);
       return self.textureMapAsset
-        ? `/assets/universes/${universe.name || universe.id}/${
+        ? `/assets/plugins/${plugin.name || plugin.id}/assets/${
             self.textureMapAsset
           }`
         : "";
@@ -452,13 +452,13 @@ export class PlanetAssetsResolver {
   ) {
     if (self.cloudsMapAsset?.indexOf("/public") === 0)
       return self.cloudsMapAsset;
-    if (!context.universeId) {
+    if (!context.pluginId) {
       return "";
     }
     try {
-      const universe = getUniverse(context.universeId);
+      const plugin = getPlugin(context.pluginId);
       return self.cloudsMapAsset
-        ? `/assets/universes/${universe.name || universe.id}/${
+        ? `/assets/plugins/${plugin.name || plugin.id}/assets/${
             self.cloudsMapAsset
           }`
         : "";
@@ -472,13 +472,13 @@ export class PlanetAssetsResolver {
     @Ctx() context: GraphQLContext
   ) {
     if (self.ringsMapAsset?.indexOf("/public") === 0) return self.ringsMapAsset;
-    if (!context.universeId) {
+    if (!context.pluginId) {
       return "";
     }
     try {
-      const universe = getUniverse(context.universeId);
+      const plugin = getPlugin(context.pluginId);
       return self.ringsMapAsset
-        ? `/assets/universes/${universe.name || universe.id}/${
+        ? `/assets/plugins/${plugin.name || plugin.id}/assets/${
             self.ringsMapAsset
           }`
         : "";

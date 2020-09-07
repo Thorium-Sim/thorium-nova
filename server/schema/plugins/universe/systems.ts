@@ -6,7 +6,6 @@ import systemNames from "server/generatorFixtures/systemNames";
 import Entity from "server/helpers/ecs/entity";
 import {pubsub} from "server/helpers/pubsub";
 import {randomFromList} from "server/helpers/randomFromList";
-import UniverseTemplate from "server/schema/universe";
 import {
   Arg,
   Ctx,
@@ -18,7 +17,7 @@ import {
   Root,
   Subscription,
 } from "type-graphql";
-import {AU, getSystem, getUniverse, PlanetarySystem, publish} from "./utils";
+import {AU, getSystem, getPlugin, PlanetarySystem, publish} from "./utils";
 import uuid from "uniqid";
 import getHabitableZone from "server/generatorFixtures/habitableZone";
 import {GraphQLContext} from "server/helpers/graphqlContext";
@@ -26,8 +25,8 @@ import {SatelliteComponent} from "server/components/satellite";
 
 @Resolver()
 export class UniversePluginSystemsResolver {
-  @Query(returns => PlanetarySystem, {name: "templateUniverseSystem"})
-  templateUniverseSystemQuery(
+  @Query(returns => PlanetarySystem, {name: "pluginUniverseSystem"})
+  pluginUniverseSystemQuery(
     @Arg("id", type => ID)
     id: string,
     @Arg("systemId", type => ID)
@@ -35,23 +34,23 @@ export class UniversePluginSystemsResolver {
     @Ctx()
     context: GraphQLContext
   ) {
-    const universe = getUniverse(id);
-    const system = universe.entities.find(s => s.id === systemId);
+    const plugin = getPlugin(id);
+    const system = plugin.universe.find(s => s.id === systemId);
     if (!system) {
       throw new Error("System does not exist");
     }
-    context.universeId = universe.id;
-    return new PlanetarySystem({...system, universeId: universe.id});
+    context.pluginId = plugin.id;
+    return new PlanetarySystem({...system, pluginId: plugin.id});
   }
   @Mutation(returns => Entity)
-  async universeTemplateAddSystem(
+  async pluginUniverseAddSystem(
     @Arg("id", type => ID)
     id: string,
     @Arg("position", type => PositionComponent)
     position: PositionComponent
   ) {
-    const universe = getUniverse(id);
-    const starNames = universe.entities
+    const plugin = getPlugin(id);
+    const starNames = plugin.universe
       .filter(s => s.isStar)
       .map(s => s.identity?.name);
     const availableNames = systemNames.filter(val => !starNames.includes(val));
@@ -65,13 +64,13 @@ export class UniversePluginSystemsResolver {
     ]);
     entity.updateComponent("identity", {name});
     entity.updateComponent("position", position);
-    universe.entities.push(entity);
-    publish(universe);
+    plugin.universe.push(entity);
+    publish(plugin);
     return entity;
   }
 
-  @Mutation(returns => UniverseTemplate)
-  async universeTemplateSystemSetName(
+  @Mutation(returns => PlanetarySystem)
+  async pluginUniverseSystemSetName(
     @Arg("id", type => ID)
     id: string,
     @Arg("systemId", type => ID)
@@ -79,13 +78,13 @@ export class UniversePluginSystemsResolver {
     @Arg("name", type => String)
     name: string
   ) {
-    const {universe, system} = getSystem(id, systemId);
+    const {plugin, system} = getSystem(id, systemId);
 
     const oldName = system.components.identity?.name || "";
     system.updateComponent("identity", {name});
 
     // Update all of the stars in the system to match the new name
-    const stars = universe.entities.filter(
+    const stars = plugin.universe.filter(
       s =>
         s.components.satellite?.parentId === systemId &&
         s.components.identity?.name.includes(oldName)
@@ -95,11 +94,11 @@ export class UniversePluginSystemsResolver {
         name: star.components.identity?.name.replace(oldName, name),
       });
     });
-    publish(universe);
-    return universe;
+    publish(plugin);
+    return system;
   }
-  @Mutation(returns => UniverseTemplate)
-  async universeTemplateSystemSetDescription(
+  @Mutation(returns => PlanetarySystem)
+  async pluginUniverseSystemSetDescription(
     @Arg("id", type => ID)
     id: string,
     @Arg("systemId", type => ID)
@@ -107,15 +106,15 @@ export class UniversePluginSystemsResolver {
     @Arg("description", type => String)
     description: string
   ) {
-    const {universe, system} = getSystem(id, systemId);
+    const {plugin, system} = getSystem(id, systemId);
 
     system.updateComponent("identity", {description});
-    publish(universe);
+    publish(plugin);
 
-    return universe;
+    return system;
   }
-  @Mutation(returns => UniverseTemplate)
-  async universeTemplateSystemSetSkyboxKey(
+  @Mutation(returns => PlanetarySystem)
+  async pluginUniverseSystemSetSkyboxKey(
     @Arg("id", type => ID)
     id: string,
     @Arg("systemId", type => ID)
@@ -123,16 +122,16 @@ export class UniversePluginSystemsResolver {
     @Arg("skyboxKey", type => String)
     skyboxKey: string
   ) {
-    const {universe, system} = getSystem(id, systemId);
+    const {plugin, system} = getSystem(id, systemId);
     system.updateComponent("planetarySystem", {skyboxKey});
-    publish(universe);
-    pubsub.publish("templateUniverseSystem", {id: system.id, system});
+    publish(plugin);
+    pubsub.publish("pluginUniverseSystem", {id: system.id, system});
 
-    return universe;
+    return system;
   }
 
-  @Mutation(returns => UniverseTemplate)
-  async universeTemplateSystemSetPosition(
+  @Mutation(returns => PlanetarySystem)
+  async pluginUniverseSystemSetPosition(
     @Arg("id", type => ID)
     id: string,
     @Arg("systemId", type => ID)
@@ -140,30 +139,30 @@ export class UniversePluginSystemsResolver {
     @Arg("position", type => PositionComponent)
     position: PositionComponent
   ) {
-    const {universe, system} = getSystem(id, systemId);
+    const {plugin, system} = getSystem(id, systemId);
 
     system.updateComponent("position", position);
-    return universe;
+    return system;
   }
 
   @Subscription(returns => PlanetarySystem, {
     topics: ({args: {id, systemId}, payload}) => {
       const subId = uuid();
       process.nextTick(() => {
-        const universe = getUniverse(id);
-        const system = universe.entities.find(s => s.id === systemId);
+        const plugin = getPlugin(id);
+        const system = plugin.universe.find(s => s.id === systemId);
         pubsub.publish(subId, {
           id: system?.id,
-          system: {...system, universeId: universe.id},
+          system: {...system, pluginId: plugin.id},
         });
       });
-      return [subId, "templateUniverseSystem"];
+      return [subId, "pluginUniverseSystem"];
     },
     filter: ({payload, args: {id, systemId}}) => {
       return payload.id === systemId;
     },
   })
-  templateUniverseSystem(
+  pluginUniverseSystem(
     @Root() payload: {system: PlanetarySystem},
     @Arg("id", type => ID)
     id: string,
@@ -172,7 +171,7 @@ export class UniversePluginSystemsResolver {
     @Ctx()
     context: GraphQLContext
   ): PlanetarySystem {
-    context.universeId = payload.system.universeId;
+    context.pluginId = payload.system.pluginId;
     return new PlanetarySystem(payload.system);
   }
 }
@@ -207,8 +206,8 @@ function calculateHabitableZone(stars: Entity[]) {
 export class PlanetarySystemResolver {
   @FieldResolver(type => Number)
   habitableZoneInner(@Root() self: PlanetarySystem) {
-    const universe = getUniverse(self.universeId);
-    const stars = universe.entities.filter(
+    const plugin = getPlugin(self.pluginId);
+    const stars = plugin.universe.filter(
       s => s.satellite?.parentId === self.id && s.isStar
     );
     const {min} = calculateHabitableZone(stars);
@@ -217,9 +216,9 @@ export class PlanetarySystemResolver {
 
   @FieldResolver(type => Number)
   habitableZoneOuter(@Root() self: PlanetarySystem) {
-    const universe = getUniverse(self.universeId);
+    const plugin = getPlugin(self.pluginId);
 
-    const stars = universe.entities.filter(
+    const stars = plugin.universe.filter(
       s => s.satellite?.parentId === self.id && s.isStar
     );
     const {max} = calculateHabitableZone(stars);
@@ -228,8 +227,8 @@ export class PlanetarySystemResolver {
 
   @FieldResolver(type => [Entity])
   items(@Root() self: PlanetarySystem) {
-    const universe = getUniverse(self.universeId);
-    return universe.entities.filter(s => s.satellite?.parentId === self.id);
+    const plugin = getPlugin(self.pluginId);
+    return plugin.universe.filter(s => s.satellite?.parentId === self.id);
   }
 }
 
@@ -240,16 +239,16 @@ export class SatelliteComponentResolver {
     @Root() self: SatelliteComponent & {entity: Entity},
     @Ctx() ctx: GraphQLContext
   ) {
-    if (!ctx.universeId) return [];
-    const universe = getUniverse(ctx.universeId);
-    return universe.entities.filter(
+    if (!ctx.pluginId) return [];
+    const plugin = getPlugin(ctx.pluginId);
+    return plugin.universe.filter(
       e => e.satellite?.parentId === self.entity.id
     );
   }
   @FieldResolver(type => Entity, {nullable: true})
   parent(@Root() self: SatelliteComponent, @Ctx() ctx: GraphQLContext) {
-    if (!ctx.universeId) return null;
-    const universe = getUniverse(ctx.universeId);
-    return universe.entities.find(e => e.id === self.parentId) || null;
+    if (!ctx.pluginId) return null;
+    const plugin = getPlugin(ctx.pluginId);
+    return plugin.universe.find(e => e.id === self.parentId) || null;
   }
 }

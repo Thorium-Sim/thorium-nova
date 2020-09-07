@@ -1,5 +1,5 @@
 mutation UniversePlanetClearRings($id: ID!, $objectId: ID!) {
-  universeTemplatePlanetClearRings(id: $id, objectId: $objectId) {
+  pluginUniversePlanetClearRings(id: $id, objectId: $objectId) {
     id
   }
 }

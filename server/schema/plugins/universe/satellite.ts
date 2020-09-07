@@ -1,24 +1,20 @@
 import Entity from "server/helpers/ecs/entity";
 import {pubsub} from "server/helpers/pubsub";
-import UniverseTemplate from "server/schema/universe";
 import {Arg, ID, Mutation, Resolver} from "type-graphql";
+import BasePlugin from "../basePlugin";
 import {getSystemObject, publish} from "./utils";
 
-function satellitePublish(
-  universe: UniverseTemplate,
-  object: Entity,
-  system?: Entity
-) {
-  publish(universe);
+function satellitePublish(plugin: BasePlugin, object: Entity, system?: Entity) {
+  publish(plugin);
   if (system) {
-    pubsub.publish("templateUniverseSystem", {id: system.id, system});
+    pubsub.publish("pluginUniverseSystem", {id: system.id, system});
   }
   return object;
 }
 @Resolver()
 export class UniverseSatelliteResolver {
   @Mutation(returns => Entity)
-  universeTemplateSatelliteSetAxialTilt(
+  pluginUniverseSatelliteSetAxialTilt(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -26,12 +22,12 @@ export class UniverseSatelliteResolver {
     @Arg("axialTilt")
     axialTilt: number
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("satellite", {axialTilt});
-    return satellitePublish(universe, object, system);
+    return satellitePublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplateSatelliteSetDistance(
+  pluginUniverseSatelliteSetDistance(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -39,12 +35,12 @@ export class UniverseSatelliteResolver {
     @Arg("distance")
     distance: number
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("satellite", {distance});
-    return satellitePublish(universe, object, system);
+    return satellitePublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplateSatelliteSetOrbitalArc(
+  pluginUniverseSatelliteSetOrbitalArc(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -52,12 +48,12 @@ export class UniverseSatelliteResolver {
     @Arg("orbitalArc")
     orbitalArc: number
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("satellite", {orbitalArc});
-    return satellitePublish(universe, object, system);
+    return satellitePublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplateSatelliteSetOrbitalInclination(
+  pluginUniverseSatelliteSetOrbitalInclination(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -65,12 +61,12 @@ export class UniverseSatelliteResolver {
     @Arg("orbitalInclination")
     orbitalInclination: number
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("satellite", {orbitalInclination});
-    return satellitePublish(universe, object, system);
+    return satellitePublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplateSatelliteSetEccentricity(
+  pluginUniverseSatelliteSetEccentricity(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -78,12 +74,12 @@ export class UniverseSatelliteResolver {
     @Arg("eccentricity")
     eccentricity: number
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("satellite", {eccentricity});
-    return satellitePublish(universe, object, system);
+    return satellitePublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplateSatelliteSetShowOrbit(
+  pluginUniverseSatelliteSetShowOrbit(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -91,8 +87,8 @@ export class UniverseSatelliteResolver {
     @Arg("showOrbit")
     showOrbit: boolean
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("satellite", {showOrbit});
-    return satellitePublish(universe, object, system);
+    return satellitePublish(plugin, object, system);
   }
 }

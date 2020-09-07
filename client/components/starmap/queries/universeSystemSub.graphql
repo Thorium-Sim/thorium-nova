@@ -1,5 +1,5 @@
 subscription TemplateSystem($id: ID!, $systemId: ID!) {
-  templateUniverseSystem(id: $id, systemId: $systemId) {
+  pluginUniverseSystem(id: $id, systemId: $systemId) {
     id
     identity {
       name

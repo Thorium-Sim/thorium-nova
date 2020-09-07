@@ -1,5 +1,5 @@
 mutation UniverseAddSystem($id: ID!, $position: PositionInput!) {
-  universeTemplateAddSystem(id: $id, position: $position) {
+  pluginUniverseAddSystem(id: $id, position: $position) {
     id
     identity {
       name

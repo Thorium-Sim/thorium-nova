@@ -1,5 +1,5 @@
-mutation UniverseCreate($name: String!) {
-  universeCreate(name: $name) {
+mutation PluginCreate($name: String!) {
+  pluginCreate(name: $name) {
     id
     name
     author

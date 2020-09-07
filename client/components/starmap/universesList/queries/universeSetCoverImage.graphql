@@ -1,5 +1,5 @@
-mutation UniverseSetCoverImage($id: ID!, $image: Upload!) {
-  universeSetCoverImage(id: $id, image: $image) {
+mutation PluginSetCoverImage($id: ID!, $image: Upload!) {
+  pluginSetCoverImage(id: $id, image: $image) {
     id
     coverImage
   }

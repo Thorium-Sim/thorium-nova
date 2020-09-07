@@ -3,7 +3,7 @@ mutation UniversePlanetSetTerranMass(
   $objectId: ID!
   $terranMass: Float!
 ) {
-  universeTemplatePlanetSetTerranMass(
+  pluginUniversePlanetSetTerranMass(
     id: $id
     objectId: $objectId
     terranMass: $terranMass

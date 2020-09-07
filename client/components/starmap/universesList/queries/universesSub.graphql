@@ -1,5 +1,5 @@
-subscription Universes {
-  universes {
+subscription Plugins {
+  plugins {
     id
     name
     author

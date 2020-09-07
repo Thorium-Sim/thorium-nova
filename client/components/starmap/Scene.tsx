@@ -159,7 +159,6 @@ const Scene = React.forwardRef((props, ref) => {
   const measuring = useConfigStore(s => s.measuring);
 
   const {camera} = useThree();
-
   React.useImperativeHandle(ref, () => ({
     camera: () => {
       return camera;

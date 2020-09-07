@@ -3,7 +3,7 @@ mutation UniverseSatelliteSetOrbitalArc(
   $objectId: ID!
   $orbitalArc: Float!
 ) {
-  universeTemplateSatelliteSetOrbitalArc(
+  pluginUniverseSatelliteSetOrbitalArc(
     id: $id
     objectId: $objectId
     orbitalArc: $orbitalArc

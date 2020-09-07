@@ -3,7 +3,7 @@ mutation UniverseSatelliteSetDistance(
   $objectId: ID!
   $distance: Float!
 ) {
-  universeTemplateSatelliteSetDistance(
+  pluginUniverseSatelliteSetDistance(
     id: $id
     objectId: $objectId
     distance: $distance

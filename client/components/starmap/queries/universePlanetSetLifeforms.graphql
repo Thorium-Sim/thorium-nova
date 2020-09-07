@@ -3,7 +3,7 @@ mutation UniversePlanetSetLifeforms(
   $objectId: ID!
   $lifeforms: String!
 ) {
-  universeTemplatePlanetSetLifeforms(
+  pluginUniversePlanetSetLifeforms(
     id: $id
     objectId: $objectId
     lifeforms: $lifeforms

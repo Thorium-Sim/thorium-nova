@@ -51,7 +51,7 @@ const Planetary: React.FC<{universeId: string; systemId: string}> = ({
     camera.lookAt(new Vector3(0, 0, 0));
   }, []);
 
-  const system = data?.templateUniverseSystem;
+  const system = data?.pluginUniverseSystem;
   React.useEffect(() => {
     configStoreApi.setState({currentSystem: system});
     return () => {
@@ -60,14 +60,14 @@ const Planetary: React.FC<{universeId: string; systemId: string}> = ({
   }, [system]);
 
   const skyboxKey =
-    data?.templateUniverseSystem.planetarySystem?.skyboxKey || "blank";
+    data?.pluginUniverseSystem.planetarySystem?.skyboxKey || "blank";
   React.useEffect(() => {
     configStoreApi.setState({skyboxKey});
   }, [skyboxKey]);
 
   const {habitableZoneInner = 0, habitableZoneOuter = 3} =
-    data?.templateUniverseSystem || {};
-  const hasStar = !!data?.templateUniverseSystem.items.find(s => s.isStar);
+    data?.pluginUniverseSystem || {};
+  const hasStar = !!data?.pluginUniverseSystem.items.find(s => s.isStar);
   const scale = 1 / 1000000;
   return (
     <>
@@ -81,14 +81,14 @@ const Planetary: React.FC<{universeId: string; systemId: string}> = ({
           MIDDLE: MOUSE.DOLLY,
         }}
       />
-      {hasStar && data?.templateUniverseSystem.planetarySystem && (
+      {hasStar && data?.pluginUniverseSystem.planetarySystem && (
         <Disc
           habitableZoneInner={habitableZoneInner}
           habitableZoneOuter={habitableZoneOuter}
           scale={[scale, scale, scale]}
         />
       )}
-      {data?.templateUniverseSystem.items.map(e => {
+      {data?.pluginUniverseSystem.items.map(e => {
         if (e.isStar) {
           return <StarEntity key={e.id} entity={e} />;
         }

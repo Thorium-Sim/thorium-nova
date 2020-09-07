@@ -3,7 +3,7 @@ mutation UniverseSatelliteSetOrbitalInclination(
   $objectId: ID!
   $orbitalInclination: Float!
 ) {
-  universeTemplateSatelliteSetOrbitalInclination(
+  pluginUniverseSatelliteSetOrbitalInclination(
     id: $id
     objectId: $objectId
     orbitalInclination: $orbitalInclination

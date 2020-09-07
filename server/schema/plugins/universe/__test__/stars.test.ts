@@ -12,18 +12,18 @@ async function getStarId() {
   const id = universe.data?.universeCreate.id;
   const system = await gqlCall({
     query: `mutation CreateSystem($id:ID!) {
-    universeTemplateAddSystem(id:$id, position:{x:0,y:0,z:0}) {
+    pluginUniverseAddSystem(id:$id, position:{x:0,y:0,z:0}) {
       id
     }
   }`,
     variables: {id},
   });
 
-  const systemId = system.data?.universeTemplateAddSystem.id;
+  const systemId = system.data?.pluginUniverseAddSystem.id;
 
   const star = await gqlCall({
     query: `mutation CreateStar($id:ID!,$systemId:ID!, $spectralType:String!) {
-      universeTemplateAddStar(id:$id, systemId:$systemId, spectralType:$spectralType) {
+      pluginUniverseAddStar(id:$id, systemId:$systemId, spectralType:$spectralType) {
         id
       }
     }`,
@@ -34,7 +34,7 @@ async function getStarId() {
     },
   });
 
-  const starId = star.data?.universeTemplateAddStar.id;
+  const starId = star.data?.pluginUniverseAddStar.id;
   return {id, starId};
 }
 
@@ -60,19 +60,19 @@ describe("universe stars", () => {
       const id = universe.data?.universeCreate.id;
       const system = await gqlCall({
         query: `mutation CreateSystem($id:ID!) {
-        universeTemplateAddSystem(id:$id, position:{x:0,y:0,z:0}) {
+        pluginUniverseAddSystem(id:$id, position:{x:0,y:0,z:0}) {
           id
         }
       }`,
         variables: {id},
       });
 
-      const systemId = system.data?.universeTemplateAddSystem.id;
+      const systemId = system.data?.pluginUniverseAddSystem.id;
 
       for (let type of starTypes) {
         const star = await gqlCall({
           query: `mutation CreateStar($id:ID!, $systemId:ID!, $spectralType:String!) {
-          universeTemplateAddStar(id:$id,systemId:$systemId, spectralType:$spectralType) {
+          pluginUniverseAddStar(id:$id,systemId:$systemId, spectralType:$spectralType) {
             id
             isStar {
               solarMass
@@ -98,11 +98,11 @@ describe("universe stars", () => {
           variables: {id, systemId, spectralType: type},
         });
 
-        const {id: templateId, ...data} = star.data?.universeTemplateAddStar;
+        const {id: templateId, ...data} = star.data?.pluginUniverseAddStar;
         expect(data).toMatchSnapshot();
         await gqlCall({
           query: `mutation RemoveStar($id:ID!, $objectId:ID!) {
-            universeTemplateRemoveObject(id:$id, objectId:$objectId)
+            pluginUniverseRemoveObject(id:$id, objectId:$objectId)
           }`,
           variables: {id, objectId: templateId},
         });
@@ -113,7 +113,7 @@ describe("universe stars", () => {
     const {id, starId} = await getStarId();
     const star = await gqlCall({
       query: `mutation ChangeStar($id:ID!, $objectId:ID!, $solarMass:Float!) {
-        universeTemplateStarSetSolarMass(id:$id, objectId:$objectId, solarMass:$solarMass) {
+        pluginUniverseStarSetSolarMass(id:$id, objectId:$objectId, solarMass:$solarMass) {
           id 
           isStar {
             solarMass
@@ -122,15 +122,15 @@ describe("universe stars", () => {
       }`,
       variables: {id, objectId: starId, solarMass: 1337},
     });
-    expect(
-      star.data?.universeTemplateStarSetSolarMass.isStar.solarMass
-    ).toEqual(1337);
+    expect(star.data?.pluginUniverseStarSetSolarMass.isStar.solarMass).toEqual(
+      1337
+    );
   });
   it("should set the age", async () => {
     const {id, starId} = await getStarId();
     const star = await gqlCall({
       query: `mutation ChangeStar($id:ID!, $objectId:ID!, $age:Float!) {
-        universeTemplateStarSetAge(id:$id, objectId:$objectId, age:$age) {
+        pluginUniverseStarSetAge(id:$id, objectId:$objectId, age:$age) {
           id 
           isStar {
             age
@@ -139,13 +139,13 @@ describe("universe stars", () => {
       }`,
       variables: {id, objectId: starId, age: 1337},
     });
-    expect(star.data?.universeTemplateStarSetAge.isStar.age).toEqual(1337);
+    expect(star.data?.pluginUniverseStarSetAge.isStar.age).toEqual(1337);
   });
   it("should set the hue", async () => {
     const {id, starId} = await getStarId();
     const star = await gqlCall({
       query: `mutation ChangeStar($id:ID!, $objectId:ID!, $hue:Float!) {
-        universeTemplateStarSetHue(id:$id, objectId:$objectId, hue:$hue) {
+        pluginUniverseStarSetHue(id:$id, objectId:$objectId, hue:$hue) {
           id 
           isStar {
             hue
@@ -154,14 +154,14 @@ describe("universe stars", () => {
       }`,
       variables: {id, objectId: starId, hue: 1337},
     });
-    expect(star.data?.universeTemplateStarSetHue.isStar.hue).toEqual(1337);
+    expect(star.data?.pluginUniverseStarSetHue.isStar.hue).toEqual(1337);
   });
 
   it("should set the radius", async () => {
     const {id, starId} = await getStarId();
     const star = await gqlCall({
       query: `mutation ChangeStar($id:ID!, $objectId:ID!, $radius:Float!) {
-        universeTemplateStarSetRadius(id:$id, objectId:$objectId, radius:$radius) {
+        pluginUniverseStarSetRadius(id:$id, objectId:$objectId, radius:$radius) {
           id 
           isStar {
             radius
@@ -170,15 +170,13 @@ describe("universe stars", () => {
       }`,
       variables: {id, objectId: starId, radius: 1337},
     });
-    expect(star.data?.universeTemplateStarSetRadius.isStar.radius).toEqual(
-      1337
-    );
+    expect(star.data?.pluginUniverseStarSetRadius.isStar.radius).toEqual(1337);
   });
   it("should set the is white", async () => {
     const {id, starId} = await getStarId();
     const star = await gqlCall({
       query: `mutation ChangeStar($id:ID!, $objectId:ID!, $isWhite:Boolean!) {
-        universeTemplateStarSetIsWhite(id:$id, objectId:$objectId, isWhite:$isWhite) {
+        pluginUniverseStarSetIsWhite(id:$id, objectId:$objectId, isWhite:$isWhite) {
           id 
           isStar {
             isWhite
@@ -187,12 +185,12 @@ describe("universe stars", () => {
       }`,
       variables: {id, objectId: starId, isWhite: false},
     });
-    expect(star.data?.universeTemplateStarSetIsWhite.isStar.isWhite).toEqual(
+    expect(star.data?.pluginUniverseStarSetIsWhite.isStar.isWhite).toEqual(
       false
     );
     const star2 = await gqlCall({
       query: `mutation ChangeStar($id:ID!, $objectId:ID!, $isWhite:Boolean!) {
-        universeTemplateStarSetIsWhite(id:$id, objectId:$objectId, isWhite:$isWhite) {
+        pluginUniverseStarSetIsWhite(id:$id, objectId:$objectId, isWhite:$isWhite) {
           id 
           isStar {
             isWhite
@@ -201,7 +199,7 @@ describe("universe stars", () => {
       }`,
       variables: {id, objectId: starId, isWhite: true},
     });
-    expect(star2.data?.universeTemplateStarSetIsWhite.isStar.isWhite).toEqual(
+    expect(star2.data?.pluginUniverseStarSetIsWhite.isStar.isWhite).toEqual(
       true
     );
   });
@@ -209,7 +207,7 @@ describe("universe stars", () => {
     const {id, starId} = await getStarId();
     const star = await gqlCall({
       query: `mutation ChangeStar($id:ID!, $objectId:ID!, $temperature:Float!) {
-        universeTemplateStarSetTemperature(id:$id, objectId:$objectId, temperature:$temperature) {
+        pluginUniverseStarSetTemperature(id:$id, objectId:$objectId, temperature:$temperature) {
           id 
           temperature {
             temperature
@@ -219,7 +217,7 @@ describe("universe stars", () => {
       variables: {id, objectId: starId, temperature: 1337},
     });
     expect(
-      star.data?.universeTemplateStarSetTemperature.temperature.temperature
+      star.data?.pluginUniverseStarSetTemperature.temperature.temperature
     ).toEqual(1337);
   });
 });

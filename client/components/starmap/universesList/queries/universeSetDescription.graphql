@@ -1,5 +1,5 @@
-mutation UniverseSetDescription($id: ID!, $description: String!) {
-  universeSetDescription(id: $id, description: $description) {
+mutation PluginSetDescription($id: ID!, $description: String!) {
+  pluginSetDescription(id: $id, description: $description) {
     id
     description
   }

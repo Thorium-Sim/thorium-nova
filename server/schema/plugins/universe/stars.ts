@@ -5,7 +5,6 @@ import {TagsComponent} from "server/components/tags";
 import {TemperatureComponent} from "server/components/temperature";
 import Entity from "server/helpers/ecs/entity";
 import {pubsub} from "server/helpers/pubsub";
-import UniverseTemplate from "server/schema/universe";
 import {
   Arg,
   Ctx,
@@ -20,7 +19,7 @@ import {starTypes} from "./starTypes";
 import {
   getSystem,
   getSystemObject,
-  getUniverse,
+  getPlugin,
   objectPublish,
   publish,
   removeUniverseObject,
@@ -38,7 +37,7 @@ function randomFromRange({min, max}: range) {
 @Resolver()
 export class UniversePluginStarsResolver {
   @Mutation(returns => Entity)
-  async universeTemplateAddStar(
+  async pluginUniverseAddStar(
     @Arg("id", type => ID)
     id: string,
     @Arg("systemId", type => ID)
@@ -46,8 +45,8 @@ export class UniversePluginStarsResolver {
     @Arg("spectralType", type => String)
     spectralType: string
   ) {
-    const {universe, system} = getSystem(id, systemId);
-    const childrenStars = universe.entities.filter(
+    const {plugin, system} = getSystem(id, systemId);
+    const childrenStars = plugin.universe.filter(
       s => s.satellite?.parentId === systemId && s.isStar
     );
 
@@ -124,38 +123,38 @@ export class UniversePluginStarsResolver {
     entity.updateComponent("temperature", {
       temperature: Math.round(randomFromRange(starType.temperatureRange)),
     });
-    universe.entities.push(entity);
-    publish(universe);
-    pubsub.publish("templateUniverseSystem", {id: system.id, system});
+    plugin.universe.push(entity);
+    publish(plugin);
+    pubsub.publish("pluginUniverseSystem", {id: system.id, system});
     return entity;
   }
 
-  @Query(returns => Entity)
-  universeTemplateObject(
+  @Query(returns => Entity, {name: "pluginUniverseObject"})
+  pluginUniverseObjectQuery(
     @Arg("id", type => ID) id: string,
     @Arg("objectId", type => ID) objectId: string,
     @Ctx() ctx: GraphQLContext
   ) {
-    ctx.universeId = id;
+    ctx.pluginId = id;
     const {object} = getSystemObject(id, objectId);
     return object;
   }
   @Mutation(returns => String)
-  universeTemplateRemoveObject(
+  pluginUniverseRemoveObject(
     @Arg("id", type => ID) id: string,
     @Arg("objectId", type => ID) objectId: string
   ) {
-    const universe = getUniverse(id);
-    const object = universe.entities.find(s => s.id === objectId);
+    const plugin = getPlugin(id);
+    const object = plugin.universe.find(s => s.id === objectId);
     if (!object) return "";
 
-    removeUniverseObject(universe, objectId);
+    removeUniverseObject(plugin, objectId);
 
-    publish(universe);
+    publish(plugin);
     if (object.satellite?.parentId) {
       const {system} = getSystem(id, object.satellite.parentId);
       if (system) {
-        pubsub.publish("templateUniverseSystem", {id: system.id, system});
+        pubsub.publish("pluginUniverseSystem", {id: system.id, system});
       }
     }
 
@@ -165,22 +164,22 @@ export class UniversePluginStarsResolver {
     topics: ({args: {id, objectId}, payload}) => {
       const subId = uuid();
       process.nextTick(() => {
-        const universe = getUniverse(id);
-        const object = universe.entities.find(s => s.id === objectId);
+        const plugin = getPlugin(id);
+        const object = plugin.universe.find(s => s.id === objectId);
         pubsub.publish(subId, {
           id: object?.id,
-          universeId: universe.id,
+          pluginId: plugin.id,
           object,
         });
       });
-      return [subId, "templateUniverseObject"];
+      return [subId, "pluginUniverseObject"];
     },
     filter: ({payload, args: {id, objectId}}) => {
       return payload.id === objectId;
     },
   })
-  templateUniverseObject(
-    @Root() payload: {universeId: string; object: Entity},
+  pluginUniverseObject(
+    @Root() payload: {pluginId: string; object: Entity},
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -188,11 +187,11 @@ export class UniversePluginStarsResolver {
     @Ctx()
     context: GraphQLContext
   ): Entity {
-    context.universeId = payload.universeId;
+    context.pluginId = payload.pluginId;
     return payload.object;
   }
   @Mutation(returns => Entity)
-  universeTemplateStarSetSolarMass(
+  pluginUniverseStarSetSolarMass(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -200,12 +199,12 @@ export class UniversePluginStarsResolver {
     @Arg("solarMass")
     solarMass: number
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("isStar", {solarMass});
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplateStarSetAge(
+  pluginUniverseStarSetAge(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -213,12 +212,12 @@ export class UniversePluginStarsResolver {
     @Arg("age")
     age: number
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("isStar", {age});
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplateStarSetHue(
+  pluginUniverseStarSetHue(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -226,12 +225,12 @@ export class UniversePluginStarsResolver {
     @Arg("hue")
     hue: number
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("isStar", {hue});
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplateStarSetIsWhite(
+  pluginUniverseStarSetIsWhite(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -239,12 +238,12 @@ export class UniversePluginStarsResolver {
     @Arg("isWhite")
     isWhite: boolean
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("isStar", {isWhite});
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplateStarSetRadius(
+  pluginUniverseStarSetRadius(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -252,12 +251,12 @@ export class UniversePluginStarsResolver {
     @Arg("radius")
     radius: number
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("isStar", {radius});
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
   @Mutation(returns => Entity)
-  universeTemplateStarSetTemperature(
+  pluginUniverseStarSetTemperature(
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
@@ -265,8 +264,8 @@ export class UniversePluginStarsResolver {
     @Arg("temperature", {description: "The temperature of the star in Kelvin"})
     temperature: number
   ) {
-    const {universe, object, system} = getSystemObject(id, objectId);
+    const {plugin, object, system} = getSystemObject(id, objectId);
     object.updateComponent("temperature", {temperature});
-    return objectPublish(universe, object, system);
+    return objectPublish(plugin, object, system);
   }
 }

@@ -1,9 +1,8 @@
 subscription Universe($id: ID!) {
-  universe(id: $id) {
-    id
-    name
-    systems {
+  plugin(id: $id) {
+    universe {
       id
+      entityType
       identity {
         name
         description

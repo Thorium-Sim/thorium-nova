@@ -1,5 +1,5 @@
 mutation UniverseStarSetHue($id: ID!, $objectId: ID!, $hue: Float!) {
-  universeTemplateStarSetHue(id: $id, objectId: $objectId, hue: $hue) {
+  pluginUniverseStarSetHue(id: $id, objectId: $objectId, hue: $hue) {
     id
   }
 }

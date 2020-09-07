@@ -1,5 +1,5 @@
 mutation UniverseAddPlanet($id: ID!, $parentId: ID!, $classification: String!) {
-  universeTemplateAddPlanet(
+  pluginUniverseAddPlanet(
     id: $id
     systemId: $parentId
     classification: $classification

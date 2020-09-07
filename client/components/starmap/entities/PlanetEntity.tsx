@@ -199,7 +199,7 @@ const PlanetEntity: React.FC<{
   isSatellite?: boolean;
   origin?: Vector3;
   scaledOrigin?: Vector3;
-  entity: TemplateSystemSubscription["templateUniverseSystem"]["items"][0];
+  entity: TemplateSystemSubscription["pluginUniverseSystem"]["items"][0];
 }> = ({entity, origin, scaledOrigin = origin, isSatellite = false}) => {
   const selected = useConfigStore(
     store => store.selectedObject?.id === entity.id

@@ -1,5 +1,5 @@
 query UniverseSearch($id: ID!, $search: String!) {
-  universeSearch(id: $id, search: $search) {
+  pluginUniverseSearch(id: $id, search: $search) {
     id
     identity {
       name

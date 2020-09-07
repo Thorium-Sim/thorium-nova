@@ -257,7 +257,7 @@ export type UniversePlanetAssetsSubscriptionVariables = Exact<{
 
 export type UniversePlanetAssetsSubscription = {
   __typename?: "Subscription";
-  templateUniverseObject: {
+  pluginUniverseObject: {
     __typename?: "Entity";
     id: string;
     isPlanet: Maybe<{
@@ -302,7 +302,7 @@ export type UniverseAddMoonMutationVariables = Exact<{
 
 export type UniverseAddMoonMutation = {
   __typename?: "Mutation";
-  universeTemplateAddMoon: {__typename?: "Entity"; id: string};
+  pluginUniverseAddMoon: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseAddPlanetMutationVariables = Exact<{
@@ -313,7 +313,7 @@ export type UniverseAddPlanetMutationVariables = Exact<{
 
 export type UniverseAddPlanetMutation = {
   __typename?: "Mutation";
-  universeTemplateAddPlanet: {__typename?: "Entity"; id: string};
+  pluginUniverseAddPlanet: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseAddStarMutationVariables = Exact<{
@@ -324,7 +324,7 @@ export type UniverseAddStarMutationVariables = Exact<{
 
 export type UniverseAddStarMutation = {
   __typename?: "Mutation";
-  universeTemplateAddStar: {__typename?: "Entity"; id: string};
+  pluginUniverseAddStar: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseAddSystemMutationVariables = Exact<{
@@ -334,7 +334,7 @@ export type UniverseAddSystemMutationVariables = Exact<{
 
 export type UniverseAddSystemMutation = {
   __typename?: "Mutation";
-  universeTemplateAddSystem: {
+  pluginUniverseAddSystem: {
     __typename?: "Entity";
     id: string;
     identity: {
@@ -359,7 +359,7 @@ export type UniverseGetObjectQueryVariables = Exact<{
 
 export type UniverseGetObjectQuery = {
   __typename?: "Query";
-  universeTemplateObject: {
+  pluginUniverseObject: {
     __typename?: "Entity";
     satellite: Maybe<
       {
@@ -390,7 +390,7 @@ export type UniverseGetSystemQueryVariables = Exact<{
 
 export type UniverseGetSystemQuery = {
   __typename?: "Query";
-  templateUniverseSystem: {
+  pluginUniverseSystem: {
     __typename?: "PlanetarySystem";
     id: string;
     identity: {
@@ -419,7 +419,7 @@ export type UniverseObjectRemoveMutationVariables = Exact<{
 
 export type UniverseObjectRemoveMutation = {
   __typename?: "Mutation";
-  universeTemplateRemoveObject: string;
+  pluginUniverseRemoveObject: string;
 };
 
 export type UniversePlanetClearCloudsMutationVariables = Exact<{
@@ -429,7 +429,7 @@ export type UniversePlanetClearCloudsMutationVariables = Exact<{
 
 export type UniversePlanetClearCloudsMutation = {
   __typename?: "Mutation";
-  universeTemplatePlanetClearClouds: {__typename?: "Entity"; id: string};
+  pluginUniversePlanetClearClouds: {__typename?: "Entity"; id: string};
 };
 
 export type UniversePlanetClearRingsMutationVariables = Exact<{
@@ -439,7 +439,7 @@ export type UniversePlanetClearRingsMutationVariables = Exact<{
 
 export type UniversePlanetClearRingsMutation = {
   __typename?: "Mutation";
-  universeTemplatePlanetClearRings: {__typename?: "Entity"; id: string};
+  pluginUniversePlanetClearRings: {__typename?: "Entity"; id: string};
 };
 
 export type UniversePlanetSetAgeMutationVariables = Exact<{
@@ -450,7 +450,7 @@ export type UniversePlanetSetAgeMutationVariables = Exact<{
 
 export type UniversePlanetSetAgeMutation = {
   __typename?: "Mutation";
-  universeTemplatePlanetSetAge: {__typename?: "Entity"; id: string};
+  pluginUniversePlanetSetAge: {__typename?: "Entity"; id: string};
 };
 
 export type UniversePlanetSetCloudsMutationVariables = Exact<{
@@ -461,7 +461,7 @@ export type UniversePlanetSetCloudsMutationVariables = Exact<{
 
 export type UniversePlanetSetCloudsMutation = {
   __typename?: "Mutation";
-  universeTemplatePlanetSetClouds: {__typename?: "Entity"; id: string};
+  pluginUniversePlanetSetClouds: {__typename?: "Entity"; id: string};
 };
 
 export type UniversePlanetSetHabitableMutationVariables = Exact<{
@@ -472,7 +472,7 @@ export type UniversePlanetSetHabitableMutationVariables = Exact<{
 
 export type UniversePlanetSetHabitableMutation = {
   __typename?: "Mutation";
-  universeTemplatePlanetSetHabitable: {__typename?: "Entity"; id: string};
+  pluginUniversePlanetSetHabitable: {__typename?: "Entity"; id: string};
 };
 
 export type UniversePlanetSetLifeformsMutationVariables = Exact<{
@@ -483,7 +483,7 @@ export type UniversePlanetSetLifeformsMutationVariables = Exact<{
 
 export type UniversePlanetSetLifeformsMutation = {
   __typename?: "Mutation";
-  universeTemplatePlanetSetLifeforms: {__typename?: "Entity"; id: string};
+  pluginUniversePlanetSetLifeforms: {__typename?: "Entity"; id: string};
 };
 
 export type UniversePlanetSetRadiusMutationVariables = Exact<{
@@ -494,7 +494,7 @@ export type UniversePlanetSetRadiusMutationVariables = Exact<{
 
 export type UniversePlanetSetRadiusMutation = {
   __typename?: "Mutation";
-  universeTemplatePlanetSetRadius: {__typename?: "Entity"; id: string};
+  pluginUniversePlanetSetRadius: {__typename?: "Entity"; id: string};
 };
 
 export type UniversePlanetSetRingsMutationVariables = Exact<{
@@ -505,7 +505,7 @@ export type UniversePlanetSetRingsMutationVariables = Exact<{
 
 export type UniversePlanetSetRingsMutation = {
   __typename?: "Mutation";
-  universeTemplatePlanetSetRings: {__typename?: "Entity"; id: string};
+  pluginUniversePlanetSetRings: {__typename?: "Entity"; id: string};
 };
 
 export type UniversePlanetSetTemperatureMutationVariables = Exact<{
@@ -516,7 +516,7 @@ export type UniversePlanetSetTemperatureMutationVariables = Exact<{
 
 export type UniversePlanetSetTemperatureMutation = {
   __typename?: "Mutation";
-  universeTemplatePlanetSetTemperature: {__typename?: "Entity"; id: string};
+  pluginUniversePlanetSetTemperature: {__typename?: "Entity"; id: string};
 };
 
 export type UniversePlanetSetTerranMassMutationVariables = Exact<{
@@ -527,7 +527,7 @@ export type UniversePlanetSetTerranMassMutationVariables = Exact<{
 
 export type UniversePlanetSetTerranMassMutation = {
   __typename?: "Mutation";
-  universeTemplatePlanetSetTerranMass: {__typename?: "Entity"; id: string};
+  pluginUniversePlanetSetTerranMass: {__typename?: "Entity"; id: string};
 };
 
 export type UniversePlanetSetTextureMutationVariables = Exact<{
@@ -538,7 +538,7 @@ export type UniversePlanetSetTextureMutationVariables = Exact<{
 
 export type UniversePlanetSetTextureMutation = {
   __typename?: "Mutation";
-  universeTemplatePlanetSetTexture: {__typename?: "Entity"; id: string};
+  pluginUniversePlanetSetTexture: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseSatelliteSetAxialTiltMutationVariables = Exact<{
@@ -549,7 +549,7 @@ export type UniverseSatelliteSetAxialTiltMutationVariables = Exact<{
 
 export type UniverseSatelliteSetAxialTiltMutation = {
   __typename?: "Mutation";
-  universeTemplateSatelliteSetAxialTilt: {__typename?: "Entity"; id: string};
+  pluginUniverseSatelliteSetAxialTilt: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseSatelliteSetDistanceMutationVariables = Exact<{
@@ -560,7 +560,7 @@ export type UniverseSatelliteSetDistanceMutationVariables = Exact<{
 
 export type UniverseSatelliteSetDistanceMutation = {
   __typename?: "Mutation";
-  universeTemplateSatelliteSetDistance: {__typename?: "Entity"; id: string};
+  pluginUniverseSatelliteSetDistance: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseSatelliteSetEccentricityMutationVariables = Exact<{
@@ -571,7 +571,7 @@ export type UniverseSatelliteSetEccentricityMutationVariables = Exact<{
 
 export type UniverseSatelliteSetEccentricityMutation = {
   __typename?: "Mutation";
-  universeTemplateSatelliteSetEccentricity: {__typename?: "Entity"; id: string};
+  pluginUniverseSatelliteSetEccentricity: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseSatelliteSetOrbitalArcMutationVariables = Exact<{
@@ -582,7 +582,7 @@ export type UniverseSatelliteSetOrbitalArcMutationVariables = Exact<{
 
 export type UniverseSatelliteSetOrbitalArcMutation = {
   __typename?: "Mutation";
-  universeTemplateSatelliteSetOrbitalArc: {__typename?: "Entity"; id: string};
+  pluginUniverseSatelliteSetOrbitalArc: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseSatelliteSetOrbitalInclinationMutationVariables = Exact<{
@@ -593,7 +593,7 @@ export type UniverseSatelliteSetOrbitalInclinationMutationVariables = Exact<{
 
 export type UniverseSatelliteSetOrbitalInclinationMutation = {
   __typename?: "Mutation";
-  universeTemplateSatelliteSetOrbitalInclination: {
+  pluginUniverseSatelliteSetOrbitalInclination: {
     __typename?: "Entity";
     id: string;
   };
@@ -607,7 +607,7 @@ export type UniverseSatelliteSetShowOrbitMutationVariables = Exact<{
 
 export type UniverseSatelliteSetShowOrbitMutation = {
   __typename?: "Mutation";
-  universeTemplateSatelliteSetShowOrbit: {__typename?: "Entity"; id: string};
+  pluginUniverseSatelliteSetShowOrbit: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseSearchQueryVariables = Exact<{
@@ -617,7 +617,7 @@ export type UniverseSearchQueryVariables = Exact<{
 
 export type UniverseSearchQuery = {
   __typename?: "Query";
-  universeSearch: Array<{
+  pluginUniverseSearch: Array<{
     __typename?: "Entity";
     id: string;
     entityType: EntityTypes;
@@ -650,7 +650,7 @@ export type UniverseStarSetAgeMutationVariables = Exact<{
 
 export type UniverseStarSetAgeMutation = {
   __typename?: "Mutation";
-  universeTemplateStarSetAge: {__typename?: "Entity"; id: string};
+  pluginUniverseStarSetAge: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseStarSetHueMutationVariables = Exact<{
@@ -661,7 +661,7 @@ export type UniverseStarSetHueMutationVariables = Exact<{
 
 export type UniverseStarSetHueMutation = {
   __typename?: "Mutation";
-  universeTemplateStarSetHue: {__typename?: "Entity"; id: string};
+  pluginUniverseStarSetHue: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseStarSetIsWhiteMutationVariables = Exact<{
@@ -672,7 +672,7 @@ export type UniverseStarSetIsWhiteMutationVariables = Exact<{
 
 export type UniverseStarSetIsWhiteMutation = {
   __typename?: "Mutation";
-  universeTemplateStarSetIsWhite: {__typename?: "Entity"; id: string};
+  pluginUniverseStarSetIsWhite: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseStarSetRadiusMutationVariables = Exact<{
@@ -683,7 +683,7 @@ export type UniverseStarSetRadiusMutationVariables = Exact<{
 
 export type UniverseStarSetRadiusMutation = {
   __typename?: "Mutation";
-  universeTemplateStarSetRadius: {__typename?: "Entity"; id: string};
+  pluginUniverseStarSetRadius: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseStarSetSolarMassMutationVariables = Exact<{
@@ -694,7 +694,7 @@ export type UniverseStarSetSolarMassMutationVariables = Exact<{
 
 export type UniverseStarSetSolarMassMutation = {
   __typename?: "Mutation";
-  universeTemplateStarSetSolarMass: {__typename?: "Entity"; id: string};
+  pluginUniverseStarSetSolarMass: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseStarSetTemperatureMutationVariables = Exact<{
@@ -705,7 +705,7 @@ export type UniverseStarSetTemperatureMutationVariables = Exact<{
 
 export type UniverseStarSetTemperatureMutation = {
   __typename?: "Mutation";
-  universeTemplateStarSetTemperature: {__typename?: "Entity"; id: string};
+  pluginUniverseStarSetTemperature: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseSubscriptionVariables = Exact<{
@@ -714,13 +714,12 @@ export type UniverseSubscriptionVariables = Exact<{
 
 export type UniverseSubscription = {
   __typename?: "Subscription";
-  universe: Maybe<{
-    __typename?: "UniverseTemplate";
-    id: string;
-    name: string;
-    systems: Array<{
+  plugin: Maybe<{
+    __typename?: "BasePlugin";
+    universe: Array<{
       __typename?: "Entity";
       id: string;
+      entityType: EntityTypes;
       identity: {
         __typename?: "IdentityComponent";
         name: string;
@@ -749,8 +748,8 @@ export type UniverseSystemSetDescriptionMutationVariables = Exact<{
 
 export type UniverseSystemSetDescriptionMutation = {
   __typename?: "Mutation";
-  universeTemplateSystemSetDescription: {
-    __typename?: "UniverseTemplate";
+  pluginUniverseSystemSetDescription: {
+    __typename?: "PlanetarySystem";
     id: string;
   };
 };
@@ -763,7 +762,7 @@ export type UniverseSystemSetNameMutationVariables = Exact<{
 
 export type UniverseSystemSetNameMutation = {
   __typename?: "Mutation";
-  universeTemplateSystemSetName: {__typename?: "UniverseTemplate"; id: string};
+  pluginUniverseSystemSetName: {__typename?: "PlanetarySystem"; id: string};
 };
 
 export type UniverseSystemSetPositionMutationVariables = Exact<{
@@ -774,10 +773,7 @@ export type UniverseSystemSetPositionMutationVariables = Exact<{
 
 export type UniverseSystemSetPositionMutation = {
   __typename?: "Mutation";
-  universeTemplateSystemSetPosition: {
-    __typename?: "UniverseTemplate";
-    id: string;
-  };
+  pluginUniverseSystemSetPosition: {__typename?: "PlanetarySystem"; id: string};
 };
 
 export type UniverseSystemSetSkyboxMutationVariables = Exact<{
@@ -788,8 +784,8 @@ export type UniverseSystemSetSkyboxMutationVariables = Exact<{
 
 export type UniverseSystemSetSkyboxMutation = {
   __typename?: "Mutation";
-  universeTemplateSystemSetSkyboxKey: {
-    __typename?: "UniverseTemplate";
+  pluginUniverseSystemSetSkyboxKey: {
+    __typename?: "PlanetarySystem";
     id: string;
   };
 };
@@ -801,7 +797,7 @@ export type TemplateSystemSubscriptionVariables = Exact<{
 
 export type TemplateSystemSubscription = {
   __typename?: "Subscription";
-  templateUniverseSystem: {
+  pluginUniverseSystem: {
     __typename?: "PlanetarySystem";
     id: string;
     habitableZoneInner: number;
@@ -831,56 +827,52 @@ export type TemplateSystemSubscription = {
   };
 };
 
-export type UniverseSetCoverImageMutationVariables = Exact<{
+export type PluginSetCoverImageMutationVariables = Exact<{
   id: Scalars["ID"];
   image: Scalars["Upload"];
 }>;
 
-export type UniverseSetCoverImageMutation = {
+export type PluginSetCoverImageMutation = {
   __typename?: "Mutation";
-  universeSetCoverImage: {
-    __typename?: "UniverseTemplate";
+  pluginSetCoverImage: {
+    __typename?: "BasePlugin";
     id: string;
     coverImage: string;
   };
 };
 
-export type UniverseSetDescriptionMutationVariables = Exact<{
+export type PluginSetDescriptionMutationVariables = Exact<{
   id: Scalars["ID"];
   description: Scalars["String"];
 }>;
 
-export type UniverseSetDescriptionMutation = {
+export type PluginSetDescriptionMutation = {
   __typename?: "Mutation";
-  universeSetDescription: {
-    __typename?: "UniverseTemplate";
+  pluginSetDescription: {
+    __typename?: "BasePlugin";
     id: string;
     description: string;
   };
 };
 
-export type UniverseSetTagsMutationVariables = Exact<{
+export type PluginSetTagsMutationVariables = Exact<{
   id: Scalars["ID"];
   tags: Array<Scalars["String"]>;
 }>;
 
-export type UniverseSetTagsMutation = {
+export type PluginSetTagsMutation = {
   __typename?: "Mutation";
-  universeSetTags: {
-    __typename?: "UniverseTemplate";
-    id: string;
-    tags: Array<string>;
-  };
+  pluginSetTags: {__typename?: "BasePlugin"; id: string; tags: Array<string>};
 };
 
-export type UniverseCreateMutationVariables = Exact<{
+export type PluginCreateMutationVariables = Exact<{
   name: Scalars["String"];
 }>;
 
-export type UniverseCreateMutation = {
+export type PluginCreateMutation = {
   __typename?: "Mutation";
-  universeCreate: {
-    __typename?: "UniverseTemplate";
+  pluginCreate: {
+    __typename?: "BasePlugin";
     id: string;
     name: string;
     author: string;
@@ -890,31 +882,31 @@ export type UniverseCreateMutation = {
   };
 };
 
-export type UniverseRemoveMutationVariables = Exact<{
+export type PluginRemoveMutationVariables = Exact<{
   id: Scalars["ID"];
 }>;
 
-export type UniverseRemoveMutation = {
+export type PluginRemoveMutation = {
   __typename?: "Mutation";
-  universeRemove: string;
+  pluginRemove: string;
 };
 
-export type UniverseSetNameMutationVariables = Exact<{
+export type PluginSetNameMutationVariables = Exact<{
   id: Scalars["ID"];
   name: Scalars["String"];
 }>;
 
-export type UniverseSetNameMutation = {
+export type PluginSetNameMutation = {
   __typename?: "Mutation";
-  universeSetName: {__typename?: "UniverseTemplate"; id: string; name: string};
+  pluginSetName: {__typename?: "BasePlugin"; id: string; name: string};
 };
 
-export type UniversesSubscriptionVariables = Exact<{[key: string]: never}>;
+export type PluginsSubscriptionVariables = Exact<{[key: string]: never}>;
 
-export type UniversesSubscription = {
+export type PluginsSubscription = {
   __typename?: "Subscription";
-  universes: Array<{
-    __typename?: "UniverseTemplate";
+  plugins: Array<{
+    __typename?: "BasePlugin";
     id: string;
     name: string;
     author: string;
@@ -1212,7 +1204,7 @@ export type TemplateShipSetModelMutationHookResult = ReturnType<
 >;
 export const UniversePlanetAssetsDocument = gql`
   subscription UniversePlanetAssets($id: ID!, $objectId: ID!) {
-    templateUniverseObject(id: $id, objectId: $objectId) {
+    pluginUniverseObject(id: $id, objectId: $objectId) {
       id
       isPlanet {
         textureMapAsset
@@ -1306,7 +1298,7 @@ export type StarTypesLazyQueryHookResult = ReturnType<
 >;
 export const UniverseAddMoonDocument = gql`
   mutation UniverseAddMoon($id: ID!, $parentId: ID!, $classification: String!) {
-    universeTemplateAddMoon(
+    pluginUniverseAddMoon(
       id: $id
       objectId: $parentId
       classification: $classification
@@ -1335,7 +1327,7 @@ export const UniverseAddPlanetDocument = gql`
     $parentId: ID!
     $classification: String!
   ) {
-    universeTemplateAddPlanet(
+    pluginUniverseAddPlanet(
       id: $id
       systemId: $parentId
       classification: $classification
@@ -1360,7 +1352,7 @@ export type UniverseAddPlanetMutationHookResult = ReturnType<
 >;
 export const UniverseAddStarDocument = gql`
   mutation UniverseAddStar($id: ID!, $systemId: ID!, $spectralType: String!) {
-    universeTemplateAddStar(
+    pluginUniverseAddStar(
       id: $id
       systemId: $systemId
       spectralType: $spectralType
@@ -1385,7 +1377,7 @@ export type UniverseAddStarMutationHookResult = ReturnType<
 >;
 export const UniverseAddSystemDocument = gql`
   mutation UniverseAddSystem($id: ID!, $position: PositionInput!) {
-    universeTemplateAddSystem(id: $id, position: $position) {
+    pluginUniverseAddSystem(id: $id, position: $position) {
       id
       identity {
         name
@@ -1418,7 +1410,7 @@ export type UniverseAddSystemMutationHookResult = ReturnType<
 >;
 export const UniverseGetObjectDocument = gql`
   query UniverseGetObject($id: ID!, $objectId: ID!) {
-    universeTemplateObject(id: $id, objectId: $objectId) {
+    pluginUniverseObject(id: $id, objectId: $objectId) {
       ...UniverseObject
       satellite {
         ...SatelliteComponent
@@ -1471,7 +1463,7 @@ export type UniverseGetObjectLazyQueryHookResult = ReturnType<
 >;
 export const UniverseGetSystemDocument = gql`
   query UniverseGetSystem($id: ID!, $systemId: ID!) {
-    templateUniverseSystem(id: $id, systemId: $systemId) {
+    pluginUniverseSystem(id: $id, systemId: $systemId) {
       id
       identity {
         name
@@ -1521,7 +1513,7 @@ export type UniverseGetSystemLazyQueryHookResult = ReturnType<
 >;
 export const UniverseObjectRemoveDocument = gql`
   mutation UniverseObjectRemove($id: ID!, $objectId: ID!) {
-    universeTemplateRemoveObject(id: $id, objectId: $objectId)
+    pluginUniverseRemoveObject(id: $id, objectId: $objectId)
   }
 `;
 export function useUniverseObjectRemoveMutation(
@@ -1540,7 +1532,7 @@ export type UniverseObjectRemoveMutationHookResult = ReturnType<
 >;
 export const UniversePlanetClearCloudsDocument = gql`
   mutation UniversePlanetClearClouds($id: ID!, $objectId: ID!) {
-    universeTemplatePlanetClearClouds(id: $id, objectId: $objectId) {
+    pluginUniversePlanetClearClouds(id: $id, objectId: $objectId) {
       id
     }
   }
@@ -1561,7 +1553,7 @@ export type UniversePlanetClearCloudsMutationHookResult = ReturnType<
 >;
 export const UniversePlanetClearRingsDocument = gql`
   mutation UniversePlanetClearRings($id: ID!, $objectId: ID!) {
-    universeTemplatePlanetClearRings(id: $id, objectId: $objectId) {
+    pluginUniversePlanetClearRings(id: $id, objectId: $objectId) {
       id
     }
   }
@@ -1582,7 +1574,7 @@ export type UniversePlanetClearRingsMutationHookResult = ReturnType<
 >;
 export const UniversePlanetSetAgeDocument = gql`
   mutation UniversePlanetSetAge($id: ID!, $objectId: ID!, $age: Float!) {
-    universeTemplatePlanetSetAge(id: $id, objectId: $objectId, age: $age) {
+    pluginUniversePlanetSetAge(id: $id, objectId: $objectId, age: $age) {
       id
     }
   }
@@ -1603,11 +1595,7 @@ export type UniversePlanetSetAgeMutationHookResult = ReturnType<
 >;
 export const UniversePlanetSetCloudsDocument = gql`
   mutation UniversePlanetSetClouds($id: ID!, $objectId: ID!, $image: Upload!) {
-    universeTemplatePlanetSetClouds(
-      id: $id
-      objectId: $objectId
-      image: $image
-    ) {
+    pluginUniversePlanetSetClouds(id: $id, objectId: $objectId, image: $image) {
       id
     }
   }
@@ -1632,7 +1620,7 @@ export const UniversePlanetSetHabitableDocument = gql`
     $objectId: ID!
     $habitable: Boolean!
   ) {
-    universeTemplatePlanetSetHabitable(
+    pluginUniversePlanetSetHabitable(
       id: $id
       objectId: $objectId
       habitable: $habitable
@@ -1661,7 +1649,7 @@ export const UniversePlanetSetLifeformsDocument = gql`
     $objectId: ID!
     $lifeforms: String!
   ) {
-    universeTemplatePlanetSetLifeforms(
+    pluginUniversePlanetSetLifeforms(
       id: $id
       objectId: $objectId
       lifeforms: $lifeforms
@@ -1686,7 +1674,7 @@ export type UniversePlanetSetLifeformsMutationHookResult = ReturnType<
 >;
 export const UniversePlanetSetRadiusDocument = gql`
   mutation UniversePlanetSetRadius($id: ID!, $objectId: ID!, $radius: Float!) {
-    universeTemplatePlanetSetRadius(
+    pluginUniversePlanetSetRadius(
       id: $id
       objectId: $objectId
       radius: $radius
@@ -1711,11 +1699,7 @@ export type UniversePlanetSetRadiusMutationHookResult = ReturnType<
 >;
 export const UniversePlanetSetRingsDocument = gql`
   mutation UniversePlanetSetRings($id: ID!, $objectId: ID!, $image: Upload!) {
-    universeTemplatePlanetSetRings(
-      id: $id
-      objectId: $objectId
-      image: $image
-    ) {
+    pluginUniversePlanetSetRings(id: $id, objectId: $objectId, image: $image) {
       id
     }
   }
@@ -1740,7 +1724,7 @@ export const UniversePlanetSetTemperatureDocument = gql`
     $objectId: ID!
     $temperature: Float!
   ) {
-    universeTemplatePlanetSetTemperature(
+    pluginUniversePlanetSetTemperature(
       id: $id
       objectId: $objectId
       temperature: $temperature
@@ -1769,7 +1753,7 @@ export const UniversePlanetSetTerranMassDocument = gql`
     $objectId: ID!
     $terranMass: Float!
   ) {
-    universeTemplatePlanetSetTerranMass(
+    pluginUniversePlanetSetTerranMass(
       id: $id
       objectId: $objectId
       terranMass: $terranMass
@@ -1794,7 +1778,7 @@ export type UniversePlanetSetTerranMassMutationHookResult = ReturnType<
 >;
 export const UniversePlanetSetTextureDocument = gql`
   mutation UniversePlanetSetTexture($id: ID!, $objectId: ID!, $image: Upload!) {
-    universeTemplatePlanetSetTexture(
+    pluginUniversePlanetSetTexture(
       id: $id
       objectId: $objectId
       image: $image
@@ -1823,7 +1807,7 @@ export const UniverseSatelliteSetAxialTiltDocument = gql`
     $objectId: ID!
     $axialTilt: Float!
   ) {
-    universeTemplateSatelliteSetAxialTilt(
+    pluginUniverseSatelliteSetAxialTilt(
       id: $id
       objectId: $objectId
       axialTilt: $axialTilt
@@ -1852,7 +1836,7 @@ export const UniverseSatelliteSetDistanceDocument = gql`
     $objectId: ID!
     $distance: Float!
   ) {
-    universeTemplateSatelliteSetDistance(
+    pluginUniverseSatelliteSetDistance(
       id: $id
       objectId: $objectId
       distance: $distance
@@ -1881,7 +1865,7 @@ export const UniverseSatelliteSetEccentricityDocument = gql`
     $objectId: ID!
     $eccentricity: Float!
   ) {
-    universeTemplateSatelliteSetEccentricity(
+    pluginUniverseSatelliteSetEccentricity(
       id: $id
       objectId: $objectId
       eccentricity: $eccentricity
@@ -1910,7 +1894,7 @@ export const UniverseSatelliteSetOrbitalArcDocument = gql`
     $objectId: ID!
     $orbitalArc: Float!
   ) {
-    universeTemplateSatelliteSetOrbitalArc(
+    pluginUniverseSatelliteSetOrbitalArc(
       id: $id
       objectId: $objectId
       orbitalArc: $orbitalArc
@@ -1939,7 +1923,7 @@ export const UniverseSatelliteSetOrbitalInclinationDocument = gql`
     $objectId: ID!
     $orbitalInclination: Float!
   ) {
-    universeTemplateSatelliteSetOrbitalInclination(
+    pluginUniverseSatelliteSetOrbitalInclination(
       id: $id
       objectId: $objectId
       orbitalInclination: $orbitalInclination
@@ -1968,7 +1952,7 @@ export const UniverseSatelliteSetShowOrbitDocument = gql`
     $objectId: ID!
     $showOrbit: Boolean!
   ) {
-    universeTemplateSatelliteSetShowOrbit(
+    pluginUniverseSatelliteSetShowOrbit(
       id: $id
       objectId: $objectId
       showOrbit: $showOrbit
@@ -1993,7 +1977,7 @@ export type UniverseSatelliteSetShowOrbitMutationHookResult = ReturnType<
 >;
 export const UniverseSearchDocument = gql`
   query UniverseSearch($id: ID!, $search: String!) {
-    universeSearch(id: $id, search: $search) {
+    pluginUniverseSearch(id: $id, search: $search) {
       id
       identity {
         name
@@ -2045,7 +2029,7 @@ export type UniverseSearchLazyQueryHookResult = ReturnType<
 >;
 export const UniverseStarSetAgeDocument = gql`
   mutation UniverseStarSetAge($id: ID!, $objectId: ID!, $age: Float!) {
-    universeTemplateStarSetAge(id: $id, objectId: $objectId, age: $age) {
+    pluginUniverseStarSetAge(id: $id, objectId: $objectId, age: $age) {
       id
     }
   }
@@ -2066,7 +2050,7 @@ export type UniverseStarSetAgeMutationHookResult = ReturnType<
 >;
 export const UniverseStarSetHueDocument = gql`
   mutation UniverseStarSetHue($id: ID!, $objectId: ID!, $hue: Float!) {
-    universeTemplateStarSetHue(id: $id, objectId: $objectId, hue: $hue) {
+    pluginUniverseStarSetHue(id: $id, objectId: $objectId, hue: $hue) {
       id
     }
   }
@@ -2091,7 +2075,7 @@ export const UniverseStarSetIsWhiteDocument = gql`
     $objectId: ID!
     $isWhite: Boolean!
   ) {
-    universeTemplateStarSetIsWhite(
+    pluginUniverseStarSetIsWhite(
       id: $id
       objectId: $objectId
       isWhite: $isWhite
@@ -2116,11 +2100,7 @@ export type UniverseStarSetIsWhiteMutationHookResult = ReturnType<
 >;
 export const UniverseStarSetRadiusDocument = gql`
   mutation UniverseStarSetRadius($id: ID!, $objectId: ID!, $radius: Float!) {
-    universeTemplateStarSetRadius(
-      id: $id
-      objectId: $objectId
-      radius: $radius
-    ) {
+    pluginUniverseStarSetRadius(id: $id, objectId: $objectId, radius: $radius) {
       id
     }
   }
@@ -2145,7 +2125,7 @@ export const UniverseStarSetSolarMassDocument = gql`
     $objectId: ID!
     $solarMass: Float!
   ) {
-    universeTemplateStarSetSolarMass(
+    pluginUniverseStarSetSolarMass(
       id: $id
       objectId: $objectId
       solarMass: $solarMass
@@ -2174,7 +2154,7 @@ export const UniverseStarSetTemperatureDocument = gql`
     $objectId: ID!
     $temperature: Float!
   ) {
-    universeTemplateStarSetTemperature(
+    pluginUniverseStarSetTemperature(
       id: $id
       objectId: $objectId
       temperature: $temperature
@@ -2199,11 +2179,10 @@ export type UniverseStarSetTemperatureMutationHookResult = ReturnType<
 >;
 export const UniverseDocument = gql`
   subscription Universe($id: ID!) {
-    universe(id: $id) {
-      id
-      name
-      systems {
+    plugin(id: $id) {
+      universe {
         id
+        entityType
         identity {
           name
           description
@@ -2243,7 +2222,7 @@ export const UniverseSystemSetDescriptionDocument = gql`
     $systemId: ID!
     $description: String!
   ) {
-    universeTemplateSystemSetDescription(
+    pluginUniverseSystemSetDescription(
       id: $id
       systemId: $systemId
       description: $description
@@ -2268,7 +2247,7 @@ export type UniverseSystemSetDescriptionMutationHookResult = ReturnType<
 >;
 export const UniverseSystemSetNameDocument = gql`
   mutation UniverseSystemSetName($id: ID!, $systemId: ID!, $name: String!) {
-    universeTemplateSystemSetName(id: $id, systemId: $systemId, name: $name) {
+    pluginUniverseSystemSetName(id: $id, systemId: $systemId, name: $name) {
       id
     }
   }
@@ -2293,7 +2272,7 @@ export const UniverseSystemSetPositionDocument = gql`
     $systemId: ID!
     $position: PositionInput!
   ) {
-    universeTemplateSystemSetPosition(
+    pluginUniverseSystemSetPosition(
       id: $id
       systemId: $systemId
       position: $position
@@ -2322,7 +2301,7 @@ export const UniverseSystemSetSkyboxDocument = gql`
     $systemId: ID!
     $skyboxKey: String!
   ) {
-    universeTemplateSystemSetSkyboxKey(
+    pluginUniverseSystemSetSkyboxKey(
       id: $id
       systemId: $systemId
       skyboxKey: $skyboxKey
@@ -2347,7 +2326,7 @@ export type UniverseSystemSetSkyboxMutationHookResult = ReturnType<
 >;
 export const TemplateSystemDocument = gql`
   subscription TemplateSystem($id: ID!, $systemId: ID!) {
-    templateUniverseSystem(id: $id, systemId: $systemId) {
+    pluginUniverseSystem(id: $id, systemId: $systemId) {
       id
       identity {
         name
@@ -2386,75 +2365,75 @@ export function useTemplateSystemSubscription(
 export type TemplateSystemSubscriptionHookResult = ReturnType<
   typeof useTemplateSystemSubscription
 >;
-export const UniverseSetCoverImageDocument = gql`
-  mutation UniverseSetCoverImage($id: ID!, $image: Upload!) {
-    universeSetCoverImage(id: $id, image: $image) {
+export const PluginSetCoverImageDocument = gql`
+  mutation PluginSetCoverImage($id: ID!, $image: Upload!) {
+    pluginSetCoverImage(id: $id, image: $image) {
       id
       coverImage
     }
   }
 `;
-export function useUniverseSetCoverImageMutation(
+export function usePluginSetCoverImageMutation(
   baseOptions?: Apollo.MutationHookOptions<
-    UniverseSetCoverImageMutation,
-    UniverseSetCoverImageMutationVariables
+    PluginSetCoverImageMutation,
+    PluginSetCoverImageMutationVariables
   >
 ) {
   return Apollo.useMutation<
-    UniverseSetCoverImageMutation,
-    UniverseSetCoverImageMutationVariables
-  >(UniverseSetCoverImageDocument, baseOptions);
+    PluginSetCoverImageMutation,
+    PluginSetCoverImageMutationVariables
+  >(PluginSetCoverImageDocument, baseOptions);
 }
-export type UniverseSetCoverImageMutationHookResult = ReturnType<
-  typeof useUniverseSetCoverImageMutation
+export type PluginSetCoverImageMutationHookResult = ReturnType<
+  typeof usePluginSetCoverImageMutation
 >;
-export const UniverseSetDescriptionDocument = gql`
-  mutation UniverseSetDescription($id: ID!, $description: String!) {
-    universeSetDescription(id: $id, description: $description) {
+export const PluginSetDescriptionDocument = gql`
+  mutation PluginSetDescription($id: ID!, $description: String!) {
+    pluginSetDescription(id: $id, description: $description) {
       id
       description
     }
   }
 `;
-export function useUniverseSetDescriptionMutation(
+export function usePluginSetDescriptionMutation(
   baseOptions?: Apollo.MutationHookOptions<
-    UniverseSetDescriptionMutation,
-    UniverseSetDescriptionMutationVariables
+    PluginSetDescriptionMutation,
+    PluginSetDescriptionMutationVariables
   >
 ) {
   return Apollo.useMutation<
-    UniverseSetDescriptionMutation,
-    UniverseSetDescriptionMutationVariables
-  >(UniverseSetDescriptionDocument, baseOptions);
+    PluginSetDescriptionMutation,
+    PluginSetDescriptionMutationVariables
+  >(PluginSetDescriptionDocument, baseOptions);
 }
-export type UniverseSetDescriptionMutationHookResult = ReturnType<
-  typeof useUniverseSetDescriptionMutation
+export type PluginSetDescriptionMutationHookResult = ReturnType<
+  typeof usePluginSetDescriptionMutation
 >;
-export const UniverseSetTagsDocument = gql`
-  mutation UniverseSetTags($id: ID!, $tags: [String!]!) {
-    universeSetTags(id: $id, tags: $tags) {
+export const PluginSetTagsDocument = gql`
+  mutation PluginSetTags($id: ID!, $tags: [String!]!) {
+    pluginSetTags(id: $id, tags: $tags) {
       id
       tags
     }
   }
 `;
-export function useUniverseSetTagsMutation(
+export function usePluginSetTagsMutation(
   baseOptions?: Apollo.MutationHookOptions<
-    UniverseSetTagsMutation,
-    UniverseSetTagsMutationVariables
+    PluginSetTagsMutation,
+    PluginSetTagsMutationVariables
   >
 ) {
   return Apollo.useMutation<
-    UniverseSetTagsMutation,
-    UniverseSetTagsMutationVariables
-  >(UniverseSetTagsDocument, baseOptions);
+    PluginSetTagsMutation,
+    PluginSetTagsMutationVariables
+  >(PluginSetTagsDocument, baseOptions);
 }
-export type UniverseSetTagsMutationHookResult = ReturnType<
-  typeof useUniverseSetTagsMutation
+export type PluginSetTagsMutationHookResult = ReturnType<
+  typeof usePluginSetTagsMutation
 >;
-export const UniverseCreateDocument = gql`
-  mutation UniverseCreate($name: String!) {
-    universeCreate(name: $name) {
+export const PluginCreateDocument = gql`
+  mutation PluginCreate($name: String!) {
+    pluginCreate(name: $name) {
       id
       name
       author
@@ -2464,64 +2443,64 @@ export const UniverseCreateDocument = gql`
     }
   }
 `;
-export function useUniverseCreateMutation(
+export function usePluginCreateMutation(
   baseOptions?: Apollo.MutationHookOptions<
-    UniverseCreateMutation,
-    UniverseCreateMutationVariables
+    PluginCreateMutation,
+    PluginCreateMutationVariables
   >
 ) {
   return Apollo.useMutation<
-    UniverseCreateMutation,
-    UniverseCreateMutationVariables
-  >(UniverseCreateDocument, baseOptions);
+    PluginCreateMutation,
+    PluginCreateMutationVariables
+  >(PluginCreateDocument, baseOptions);
 }
-export type UniverseCreateMutationHookResult = ReturnType<
-  typeof useUniverseCreateMutation
+export type PluginCreateMutationHookResult = ReturnType<
+  typeof usePluginCreateMutation
 >;
-export const UniverseRemoveDocument = gql`
-  mutation UniverseRemove($id: ID!) {
-    universeRemove(id: $id)
+export const PluginRemoveDocument = gql`
+  mutation PluginRemove($id: ID!) {
+    pluginRemove(id: $id)
   }
 `;
-export function useUniverseRemoveMutation(
+export function usePluginRemoveMutation(
   baseOptions?: Apollo.MutationHookOptions<
-    UniverseRemoveMutation,
-    UniverseRemoveMutationVariables
+    PluginRemoveMutation,
+    PluginRemoveMutationVariables
   >
 ) {
   return Apollo.useMutation<
-    UniverseRemoveMutation,
-    UniverseRemoveMutationVariables
-  >(UniverseRemoveDocument, baseOptions);
+    PluginRemoveMutation,
+    PluginRemoveMutationVariables
+  >(PluginRemoveDocument, baseOptions);
 }
-export type UniverseRemoveMutationHookResult = ReturnType<
-  typeof useUniverseRemoveMutation
+export type PluginRemoveMutationHookResult = ReturnType<
+  typeof usePluginRemoveMutation
 >;
-export const UniverseSetNameDocument = gql`
-  mutation UniverseSetName($id: ID!, $name: String!) {
-    universeSetName(id: $id, name: $name) {
+export const PluginSetNameDocument = gql`
+  mutation PluginSetName($id: ID!, $name: String!) {
+    pluginSetName(id: $id, name: $name) {
       id
       name
     }
   }
 `;
-export function useUniverseSetNameMutation(
+export function usePluginSetNameMutation(
   baseOptions?: Apollo.MutationHookOptions<
-    UniverseSetNameMutation,
-    UniverseSetNameMutationVariables
+    PluginSetNameMutation,
+    PluginSetNameMutationVariables
   >
 ) {
   return Apollo.useMutation<
-    UniverseSetNameMutation,
-    UniverseSetNameMutationVariables
-  >(UniverseSetNameDocument, baseOptions);
+    PluginSetNameMutation,
+    PluginSetNameMutationVariables
+  >(PluginSetNameDocument, baseOptions);
 }
-export type UniverseSetNameMutationHookResult = ReturnType<
-  typeof useUniverseSetNameMutation
+export type PluginSetNameMutationHookResult = ReturnType<
+  typeof usePluginSetNameMutation
 >;
-export const UniversesDocument = gql`
-  subscription Universes {
-    universes {
+export const PluginsDocument = gql`
+  subscription Plugins {
+    plugins {
       id
       name
       author
@@ -2531,19 +2510,19 @@ export const UniversesDocument = gql`
     }
   }
 `;
-export function useUniversesSubscription(
+export function usePluginsSubscription(
   baseOptions?: Apollo.SubscriptionHookOptions<
-    UniversesSubscription,
-    UniversesSubscriptionVariables
+    PluginsSubscription,
+    PluginsSubscriptionVariables
   >
 ) {
   return Apollo.useSubscription<
-    UniversesSubscription,
-    UniversesSubscriptionVariables
-  >(UniversesDocument, baseOptions);
+    PluginsSubscription,
+    PluginsSubscriptionVariables
+  >(PluginsDocument, baseOptions);
 }
-export type UniversesSubscriptionHookResult = ReturnType<
-  typeof useUniversesSubscription
+export type PluginsSubscriptionHookResult = ReturnType<
+  typeof usePluginsSubscription
 >;
 export const ClientConnectDocument = gql`
   mutation ClientConnect {

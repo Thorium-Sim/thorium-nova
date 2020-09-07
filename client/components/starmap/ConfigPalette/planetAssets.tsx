@@ -29,7 +29,7 @@ const PlanetAssetsPalette: React.FC = () => {
   const [clearClouds] = useUniversePlanetClearCloudsMutation();
 
   const planet =
-    data?.templateUniverseObject.isPlanet && data.templateUniverseObject;
+    data?.pluginUniverseObject.isPlanet && data.pluginUniverseObject;
 
   if (!planet || !planet.isPlanet) return null;
   return (

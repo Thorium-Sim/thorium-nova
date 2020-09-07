@@ -3,7 +3,7 @@ mutation UniverseStarSetSolarMass(
   $objectId: ID!
   $solarMass: Float!
 ) {
-  universeTemplateStarSetSolarMass(
+  pluginUniverseStarSetSolarMass(
     id: $id
     objectId: $objectId
     solarMass: $solarMass

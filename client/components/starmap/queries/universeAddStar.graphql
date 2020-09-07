@@ -1,5 +1,5 @@
 mutation UniverseAddStar($id: ID!, $systemId: ID!, $spectralType: String!) {
-  universeTemplateAddStar(
+  pluginUniverseAddStar(
     id: $id
     systemId: $systemId
     spectralType: $spectralType

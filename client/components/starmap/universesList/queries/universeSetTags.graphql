@@ -1,5 +1,5 @@
-mutation UniverseSetTags($id: ID!, $tags: [String!]!) {
-  universeSetTags(id: $id, tags: $tags) {
+mutation PluginSetTags($id: ID!, $tags: [String!]!) {
+  pluginSetTags(id: $id, tags: $tags) {
     id
     tags
   }

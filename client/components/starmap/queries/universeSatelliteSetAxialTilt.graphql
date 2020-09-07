@@ -3,7 +3,7 @@ mutation UniverseSatelliteSetAxialTilt(
   $objectId: ID!
   $axialTilt: Float!
 ) {
-  universeTemplateSatelliteSetAxialTilt(
+  pluginUniverseSatelliteSetAxialTilt(
     id: $id
     objectId: $objectId
     axialTilt: $axialTilt

@@ -1,4 +1,29 @@
 {
+  "Are you sure you want to permanently remove this system plugin?": "Are you sure you want to permanently remove this system plugin?",
+  "Are you sure you want to permanently remove this universe plugin?": "Are you sure you want to permanently remove this universe plugin?",
+  "Back": "Back",
+  "Close": "Close",
+  "Clouds": "Clouds",
+  "Create Universe Plugin": "Create Universe Plugin",
+  "Error Creating System Plugin": "Error Creating System Plugin",
+  "Error Creating Universe Plugin": "Error Creating Universe Plugin",
+  "Error Removing Universe Plugin": "Error Removing Universe Plugin",
+  "Image aspect ratio should be 2x1, with the dimensions as powers of two, eg": {
+    " 512x256 or 2048x1024": " 512x256 or 2048x1024"
+  },
+  "Image should be a transparent PNG": {
+    " The aspect ratio should be 2x1, with the dimensions as powers of two, eg": {
+      " 512x256 or 2048x1024": " 512x256 or 2048x1024"
+    },
+    " Vertical lines in the image represent rings": {
+      "": ""
+    }
+  },
+  "Plugin Configuration": "Plugin Configuration",
+  "Remove": "Remove",
+  "Remove Clouds": "Remove Clouds",
+  "Remove Rings": "Remove Rings",
+  "Rings": "Rings",
   "Search": {
     "": {
       "": {
@@ -6,5 +31,16 @@
       }
     }
   },
+  "Ship Systems": "Ship Systems",
+  "System Plugin Name": "System Plugin Name",
+  "Texture": "Texture",
+  "This will delete all of its objects and assets": {
+    "": ""
+  },
+  "Universe Plugin Name": "Universe Plugin Name",
+  "Universe Plugins": "Universe Plugins",
+  "Universes": "Universes",
+  "What is the name of the new system plugin?": "What is the name of the new system plugin?",
+  "What is the name of the new universe plugin?": "What is the name of the new universe plugin?",
   "toggle menu": "toggle menu"
 }

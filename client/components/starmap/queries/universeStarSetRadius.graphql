@@ -1,5 +1,5 @@
 mutation UniverseStarSetRadius($id: ID!, $objectId: ID!, $radius: Float!) {
-  universeTemplateStarSetRadius(id: $id, objectId: $objectId, radius: $radius) {
+  pluginUniverseStarSetRadius(id: $id, objectId: $objectId, radius: $radius) {
     id
   }
 }

@@ -3,7 +3,7 @@ mutation UniverseSystemSetPosition(
   $systemId: ID!
   $position: PositionInput!
 ) {
-  universeTemplateSystemSetPosition(
+  pluginUniverseSystemSetPosition(
     id: $id
     systemId: $systemId
     position: $position

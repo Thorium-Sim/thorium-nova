@@ -4,14 +4,9 @@ import {appStoreDir, appStorePath} from "./helpers/appPaths";
 import Client from "./schema/client";
 import Flight from "./schema/flight";
 import fs from "fs/promises";
-import Entity from "./helpers/ecs/entity";
-import StationComplement from "./schema/stationComplement";
-import UniverseTemplate from "./schema/universe";
+import {Writable} from "./helpers/writable";
+import BasePlugin from "./schema/plugins/basePlugin";
 
-type Writable<T> = T & {
-  writeFile: (force?: boolean) => Promise<void>;
-  removeFile: (force?: boolean) => Promise<void>;
-};
 type ActiveFlightT = Writable<Flight> | null;
 
 class PersistentStorage {
@@ -25,20 +20,6 @@ class PersistentStorage {
   }
 }
 
-export interface Plugins {
-  ships: Writable<Entity>[];
-  systems: Writable<Entity>[];
-  stationComplements: Writable<StationComplement>[];
-  universes: Writable<UniverseTemplate>[];
-}
-
-const pluginClassMap = {
-  ships: Entity,
-  systems: Entity,
-  stationComplements: StationComplement,
-  universes: UniverseTemplate,
-};
-
 export function isWritableFlight(flight: any): flight is ActiveFlightT {
   return !!flight?.writeFile;
 }
@@ -51,51 +32,37 @@ const storage = getStore<PersistentStorage>({
 class AppClass {
   storage: Writable<PersistentStorage> = storage;
   activeFlight: Flight | ActiveFlightT = null;
-  plugins!: Plugins;
+  plugins!: BasePlugin[];
 
   httpOnly: boolean = false;
   port: number = process.env.NODE_ENV === "production" ? 4444 : 3001;
 
   constructor() {
-    this.plugins = {
-      ships: [],
-      systems: [],
-      stationComplements: [],
-      universes: [],
-    };
+    this.plugins = [];
     if (process.env.PORT && !isNaN(parseInt(process.env.PORT, 10)))
       this.port = parseInt(process.env.PORT, 10);
     this.httpOnly = process.env.HTTP_ONLY === "true";
   }
   async init() {
     // Load in plugins from the filesystem
-    let pluginVariety: keyof Plugins;
-
-    for (pluginVariety in this.plugins) {
-      try {
-        const plugins = await fs.readdir(`${appStoreDir}${pluginVariety}`);
-
-        for (let plugin of plugins) {
-          if (
-            (
-              await fs.lstat(`${appStoreDir}${pluginVariety}/${plugin}`)
-            ).isDirectory()
-          ) {
-            this.plugins[pluginVariety].push(
-              getStore<any>({
-                class: pluginClassMap[pluginVariety],
-                path: `${appStoreDir}${pluginVariety}/${plugin}/data.json`,
-              })
-            );
-          }
+    try {
+      const plugins = await fs.readdir(`${appStoreDir}plugins`);
+      for (let plugin of plugins) {
+        if ((await fs.lstat(`${appStoreDir}plugins/${plugin}`)).isDirectory()) {
+          this.plugins.push(
+            getStore<BasePlugin>({
+              class: BasePlugin,
+              path: `${appStoreDir}plugins/${plugin}/plugin.json`,
+            })
+          );
         }
-      } catch (Err) {
-        // The folder probably didn't exist, which means
-        // there are no plugins anyway
-        try {
-          await fs.mkdir(`${appStoreDir}${pluginVariety}`);
-        } catch (err) {}
       }
+    } catch (Err) {
+      // The folder probably didn't exist, which means
+      // there are no plugins anyway
+      try {
+        await fs.mkdir(`${appStoreDir}plugins`);
+      } catch (err) {}
     }
 
     // Load the active flight, if applicable
@@ -120,11 +87,8 @@ class AppClass {
       this.activeFlight?.writeFile(true);
     }
 
-    let pluginVariety: keyof Plugins;
-    for (pluginVariety in this.plugins) {
-      this.plugins[pluginVariety].forEach((p: Writable<{}>) =>
-        p.writeFile(true)
-      );
+    for (let plugin of this.plugins) {
+      plugin.save();
     }
   }
 }

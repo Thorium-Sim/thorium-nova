@@ -3,7 +3,7 @@ mutation UniverseSystemSetDescription(
   $systemId: ID!
   $description: String!
 ) {
-  universeTemplateSystemSetDescription(
+  pluginUniverseSystemSetDescription(
     id: $id
     systemId: $systemId
     description: $description

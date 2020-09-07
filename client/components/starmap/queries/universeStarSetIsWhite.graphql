@@ -1,5 +1,5 @@
 mutation UniverseStarSetIsWhite($id: ID!, $objectId: ID!, $isWhite: Boolean!) {
-  universeTemplateStarSetIsWhite(
+  pluginUniverseStarSetIsWhite(
     id: $id
     objectId: $objectId
     isWhite: $isWhite

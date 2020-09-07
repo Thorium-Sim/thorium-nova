@@ -3,7 +3,7 @@ mutation UniverseSatelliteSetShowOrbit(
   $objectId: ID!
   $showOrbit: Boolean!
 ) {
-  universeTemplateSatelliteSetShowOrbit(
+  pluginUniverseSatelliteSetShowOrbit(
     id: $id
     objectId: $objectId
     showOrbit: $showOrbit

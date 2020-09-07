@@ -1,5 +1,5 @@
 mutation UniversePlanetClearClouds($id: ID!, $objectId: ID!) {
-  universeTemplatePlanetClearClouds(id: $id, objectId: $objectId) {
+  pluginUniversePlanetClearClouds(id: $id, objectId: $objectId) {
     id
   }
 }

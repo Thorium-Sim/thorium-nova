@@ -63,10 +63,10 @@ function StarSearch() {
               if (res.data) {
                 useConfigStore.getState().setSystemId("");
                 useConfigStore.setState({
-                  selectedObject: res.data.templateUniverseSystem,
+                  selectedObject: res.data.pluginUniverseSystem,
                 });
                 requestAnimationFrame(() => {
-                  const {x, y, z} = res.data.templateUniverseSystem.position;
+                  const {x, y, z} = res.data.pluginUniverseSystem.position;
                   useConfigStore
                     .getState()
                     .orbitControlsTrackPosition(new Vector3(x, y, z));

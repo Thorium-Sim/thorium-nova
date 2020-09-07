@@ -7,12 +7,10 @@ import create from "zustand";
 import {Vector3} from "three";
 
 type StarmapObject =
-  | NonNullable<UniverseSubscription["universe"]>["systems"][0]
-  | NonNullable<
-      TemplateSystemSubscription["templateUniverseSystem"]["items"]
-    >[0]
-  | NonNullable<TemplateSystemSubscription["templateUniverseSystem"]>
-  | NonNullable<UniverseAddSystemMutation["universeTemplateAddSystem"]>
+  | NonNullable<UniverseSubscription["plugin"]>["universe"][0]
+  | NonNullable<TemplateSystemSubscription["pluginUniverseSystem"]["items"]>[0]
+  | NonNullable<TemplateSystemSubscription["pluginUniverseSystem"]>
+  | NonNullable<UniverseAddSystemMutation["pluginUniverseAddSystem"]>
   | null;
 export interface ConfigStore {
   disableOrbitControls: () => void;
@@ -30,7 +28,7 @@ export interface ConfigStore {
   zoomTarget: Vector3 | null;
   skyboxKey: string;
   currentSystem: NonNullable<
-    TemplateSystemSubscription["templateUniverseSystem"]
+    TemplateSystemSubscription["pluginUniverseSystem"]
   > | null;
   // Used for distance measurement
   measuring: boolean;

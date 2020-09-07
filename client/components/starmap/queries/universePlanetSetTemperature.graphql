@@ -3,7 +3,7 @@ mutation UniversePlanetSetTemperature(
   $objectId: ID!
   $temperature: Float!
 ) {
-  universeTemplatePlanetSetTemperature(
+  pluginUniversePlanetSetTemperature(
     id: $id
     objectId: $objectId
     temperature: $temperature

@@ -1,5 +1,5 @@
 query UniverseGetObject($id: ID!, $objectId: ID!) {
-  universeTemplateObject(id: $id, objectId: $objectId) {
+  pluginUniverseObject(id: $id, objectId: $objectId) {
     ...UniverseObject
     satellite {
       ...SatelliteComponent

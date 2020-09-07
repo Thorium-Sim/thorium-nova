@@ -11,26 +11,18 @@ import {
   ModalOverlay,
   Scale,
 } from "@chakra-ui/core";
-import sleep from "../../../helpers/sleep";
+import sleep from "../../helpers/sleep";
 import React from "react";
 import {FaEdit} from "react-icons/fa";
 import {useNavigate, useParams} from "react-router";
 import {Link as NavLink} from "react-router-dom";
-import SearchableList from "../../ui/SearchableList";
-import PluginForm from "../../ui/PluginForm";
-import {
-  useUniverseCreateMutation,
-  useUniverseRemoveMutation,
-  useUniverseSetCoverImageMutation,
-  useUniverseSetDescriptionMutation,
-  useUniverseSetNameMutation,
-  useUniverseSetTagsMutation,
-  useUniversesSubscription,
-} from "../../../generated/graphql";
-import {useAlert, useConfirm, usePrompt} from "../../../components/Dialog";
+import SearchableList from "../ui/SearchableList";
+import PluginForm from "../ui/PluginForm";
+import {} from "../../generated/graphql";
+import {useAlert, useConfirm, usePrompt} from "../Dialog";
 import {useTranslation} from "react-i18next";
 
-const UniversesList = () => {
+const SystemsList = () => {
   const {t} = useTranslation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -58,35 +50,35 @@ const UniversesList = () => {
 
   async function handleCreate() {
     const name = (await prompt({
-      header: t("Universe Plugin Name"),
-      body: t("What is the name of the new universe plugin?"),
+      header: t("System Plugin Name"),
+      body: t("What is the name of the new system plugin?"),
     })) as string;
     if (!name) return;
     try {
       const data = await create({variables: {name}});
       if (data.errors) {
         await alert({
-          header: t("Error Creating Universe Plugin"),
+          header: t("Error Creating System Plugin"),
           body: data.errors[0].message.replace("GraphQL Error:", ""),
         });
         return;
       }
-      navigate(`/config/universes/${data.data?.universeCreate.id}`);
+      navigate(`/config/systems/${data.data?.universeCreate.id}`);
     } catch (err) {
       await alert({
-        header: t("Error Creating Universe Plugin"),
+        header: t("Error Creating System Plugin"),
         body: err.message.replace("GraphQL Error:", ""),
       });
     }
   }
 
-  const universe = data?.universes.find(d => d.id === params.universeId);
+  const system = data?.systems.find(d => d.id === params.systemId);
   async function handleRemove() {
-    if (!universe) return;
+    if (!system) return;
     if (
       !(await confirm({
         header: t(
-          "Are you sure you want to permanently remove this universe plugin?"
+          "Are you sure you want to permanently remove this system plugin?"
         ),
         body: t("This will delete all of its objects and assets."),
       }))
@@ -217,4 +209,4 @@ const UniversesList = () => {
   );
 };
 
-export default UniversesList;
+export default SystemsList;

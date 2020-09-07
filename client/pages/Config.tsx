@@ -15,13 +15,15 @@ import {
 } from "@chakra-ui/core";
 import {css} from "@emotion/core";
 import React, {Suspense} from "react";
-import {FaStar} from "react-icons/fa";
+import {useTranslation} from "react-i18next";
+import {FaStar, FaTools} from "react-icons/fa";
 import {Route, Routes, useNavigate} from "react-router";
 import {NavLink} from "react-router-dom";
 
 const UniversesList = React.lazy(() =>
   import("../components/starmap/universesList")
 );
+const SystemsList = React.lazy(() => import("../components/systems"));
 
 const ConfigIcon: React.FC<{to: string}> = props => {
   return (
@@ -45,6 +47,7 @@ const ConfigIcon: React.FC<{to: string}> = props => {
 const sleep = (duration: number) =>
   new Promise(resolve => setTimeout(resolve, duration));
 const Config = () => {
+  const {t} = useTranslation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = React.useState(false);
   React.useEffect(() => {
@@ -69,7 +72,9 @@ const Config = () => {
               opacity={styles.opacity}
             />
             <ModalContent {...styles} maxWidth="960px">
-              <ModalHeader fontSize="4xl">Plugin Configuration</ModalHeader>
+              <ModalHeader fontSize="4xl">
+                {t("Plugin Configuration")}
+              </ModalHeader>
               <ModalCloseButton onClick={onClose} />
               <Grid
                 p={8}
@@ -79,12 +84,16 @@ const Config = () => {
               >
                 <ConfigIcon to="universes">
                   <Box as={FaStar} fontSize="6xl" mb={4} />
-                  <Heading fontSize="lg">Universes</Heading>
+                  <Heading fontSize="lg">{t("Universes")}</Heading>
+                </ConfigIcon>
+                <ConfigIcon to="systems">
+                  <Box as={FaTools} fontSize="6xl" mb={4} />
+                  <Heading fontSize="lg">{t("Ship Systems")}</Heading>
                 </ConfigIcon>
               </Grid>
               <ModalFooter>
                 <Button variantColor="blue" onClick={onClose}>
-                  Close
+                  {t("Close")}
                 </Button>
               </ModalFooter>
             </ModalContent>
@@ -95,6 +104,8 @@ const Config = () => {
         <Routes>
           <Route path="universes" element={<UniversesList />} />
           <Route path="universes/:universeId" element={<UniversesList />} />
+          <Route path="systems" element={<SystemsList />} />
+          <Route path="systems/:systemId" element={<SystemsList />} />
         </Routes>
       </Suspense>
     </>

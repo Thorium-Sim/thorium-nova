@@ -1,61 +1,58 @@
 import App from "server/app";
 import Entity from "server/helpers/ecs/entity";
 import {pubsub} from "server/helpers/pubsub";
-import UniverseTemplate from "server/schema/universe";
 import {Field, ObjectType} from "type-graphql";
+import BasePlugin from "../basePlugin";
 
-export function publish(universe: UniverseTemplate) {
-  pubsub.publish("templateUniverses", {
-    id: universe.id,
-    universes: App.plugins.universes,
-  });
-  pubsub.publish("templateUniverse", {
-    id: universe.id,
-    universe,
+export function publish(plugin: BasePlugin) {
+  pubsub.publish("pluginUniverse", {
+    id: plugin.id,
+    universe: plugin.universe,
   });
 }
-export function getUniverse(id: string) {
-  const universe = App.plugins.universes.find(u => u.id === id);
-  if (!universe) {
-    throw new Error("Unable to find that universe.");
+
+export function getPlugin(id: string) {
+  const plugin = App.plugins.find(u => u.id === id);
+  if (!plugin) {
+    throw new Error("Unable to find that plugin.");
   }
-  return universe;
+  return plugin;
 }
 
 @ObjectType()
 export class PlanetarySystem extends Entity {
-  universeId!: string;
+  pluginId!: string;
 
   @Field(type => [Entity], {
     description: "The objects that inhabit this system",
   })
   items: Entity[] = [];
 
-  constructor(params: Partial<PlanetarySystem> & {universeId: string}) {
+  constructor(params: Partial<PlanetarySystem> & {pluginId: string}) {
     super(params);
-    this.universeId = params.universeId;
+    this.pluginId = params.pluginId;
   }
 }
 
 export function getSystem(
   id: string,
   systemId: string,
-  optimizeUniverse?: UniverseTemplate
+  optimizePlugin?: BasePlugin
 ) {
-  const universe = optimizeUniverse || getUniverse(id);
-  const system = universe.entities.find(s => s.id === systemId);
+  const plugin = optimizePlugin || getPlugin(id);
+  const system = plugin.universe.find(s => s.id === systemId);
   if (!system) {
     throw new Error("System does not exist");
   }
   return {
-    universe,
-    system: new PlanetarySystem({...system, universeId: universe.id}),
+    plugin,
+    system: new PlanetarySystem({...system, pluginId: id}),
   };
 }
 
 export function getSystemObject(id: string, objectId: string) {
-  const universe = getUniverse(id);
-  const object = universe.entities.find(s => s.id === objectId);
+  const plugin = getPlugin(id);
+  const object = plugin.universe.find(s => s.id === objectId);
   if (!object) {
     throw new Error("Object does not exist");
   }
@@ -63,44 +60,40 @@ export function getSystemObject(id: string, objectId: string) {
   if (!object.satellite?.parentId) {
     throw new Error("System does not exist");
   }
-  const {system} = getSystem(id, object.satellite.parentId, universe);
+  const {system} = getSystem(id, object.satellite.parentId, plugin);
 
-  return {universe, object, system};
+  return {plugin, object, system};
 }
 
 // Astronomical units in KM
 export const AU = 149597870;
 
-export function removeUniverseObject(
-  universe: UniverseTemplate,
-  objectId: string
-) {
+export function removeUniverseObject(plugin: BasePlugin, objectId: string) {
   // Remove any other object inside this object.
-  universe.entities.forEach(o => {
+  plugin.universe.forEach(o => {
     if (o.satellite?.parentId === objectId) {
-      removeUniverseObject(universe, o.id);
+      removeUniverseObject(plugin, o.id);
     }
   });
-  universe.entities = universe.entities.filter(e => {
-    if (e.id === objectId) {
-      return false;
+  for (let i = plugin.universe.length - 1; i >= 0; i--) {
+    if (plugin.universe[i].id === objectId) {
+      plugin.universe.splice(i, 1);
     }
-    return true;
-  });
+  }
 }
 
 export function objectPublish(
-  universe: UniverseTemplate,
+  plugin: BasePlugin,
   object: Entity,
   system?: Entity
 ) {
-  publish(universe);
+  publish(plugin);
   if (system) {
-    pubsub.publish("templateUniverseSystem", {id: system.id, system});
+    pubsub.publish("pluginUniverseSystem", {id: system.id, system});
   }
-  pubsub.publish("templateUniverseObject", {
+  pubsub.publish("pluginUniverseObject", {
     id: object.id,
-    universeId: universe.id,
+    pluginId: plugin.id,
     object,
   });
   return object;

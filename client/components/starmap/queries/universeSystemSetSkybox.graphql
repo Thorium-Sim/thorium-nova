@@ -3,7 +3,7 @@ mutation UniverseSystemSetSkybox(
   $systemId: ID!
   $skyboxKey: String!
 ) {
-  universeTemplateSystemSetSkyboxKey(
+  pluginUniverseSystemSetSkyboxKey(
     id: $id
     systemId: $systemId
     skyboxKey: $skyboxKey

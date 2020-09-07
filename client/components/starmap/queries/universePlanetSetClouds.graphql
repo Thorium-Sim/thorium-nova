@@ -1,5 +1,5 @@
 mutation UniversePlanetSetClouds($id: ID!, $objectId: ID!, $image: Upload!) {
-  universeTemplatePlanetSetClouds(id: $id, objectId: $objectId, image: $image) {
+  pluginUniversePlanetSetClouds(id: $id, objectId: $objectId, image: $image) {
     id
   }
 }

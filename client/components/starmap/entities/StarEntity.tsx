@@ -8,7 +8,7 @@ import {getOrbitPosition} from "../utils";
 import Selected from "./Selected";
 
 const StarEntity: React.FC<{
-  entity: TemplateSystemSubscription["templateUniverseSystem"]["items"][0];
+  entity: TemplateSystemSubscription["pluginUniverseSystem"]["items"][0];
 }> = ({entity}) => {
   const selected = useConfigStore(
     store => store.selectedObject?.id === entity.id

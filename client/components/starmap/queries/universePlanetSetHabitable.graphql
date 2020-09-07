@@ -3,7 +3,7 @@ mutation UniversePlanetSetHabitable(
   $objectId: ID!
   $habitable: Boolean!
 ) {
-  universeTemplatePlanetSetHabitable(
+  pluginUniversePlanetSetHabitable(
     id: $id
     objectId: $objectId
     habitable: $habitable

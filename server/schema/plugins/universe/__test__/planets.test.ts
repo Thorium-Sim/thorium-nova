@@ -42,18 +42,18 @@ describe("universe planets", () => {
       const id = universe.data?.universeCreate.id;
       const system = await gqlCall({
         query: `mutation CreateSystem($id:ID!) {
-        universeTemplateAddSystem(id:$id, position:{x:0,y:0,z:0}) {
+        pluginUniverseAddSystem(id:$id, position:{x:0,y:0,z:0}) {
           id
         }
       }`,
         variables: {id},
       });
 
-      const systemId = system.data?.universeTemplateAddSystem.id;
+      const systemId = system.data?.pluginUniverseAddSystem.id;
 
       await gqlCall({
         query: `mutation CreateStar($id:ID!, $systemId:ID!) {
-        universeTemplateAddStar(id:$id,systemId:$systemId, spectralType:"G") {
+        pluginUniverseAddStar(id:$id,systemId:$systemId, spectralType:"G") {
           id
         }
       }`,
@@ -61,7 +61,7 @@ describe("universe planets", () => {
       });
       await gqlCall({
         query: `mutation CreateStar($id:ID!, $systemId:ID!) {
-        universeTemplateAddStar(id:$id,systemId:$systemId, spectralType:"G") {
+        pluginUniverseAddStar(id:$id,systemId:$systemId, spectralType:"G") {
           id
         }
       }`,
@@ -71,7 +71,7 @@ describe("universe planets", () => {
       for (let type of planetTypes) {
         const planet = await gqlCall({
           query: `mutation CreatePlanet($id:ID!,$systemId:ID!, $classification:String!) {
-            universeTemplateAddPlanet(id:$id, systemId:$systemId, classification:$classification) {
+            pluginUniverseAddPlanet(id:$id, systemId:$systemId, classification:$classification) {
             id
             isPlanet {
               classification
@@ -100,10 +100,7 @@ describe("universe planets", () => {
             classification: type,
           },
         });
-        const {
-          id: templateId,
-          ...data
-        } = planet.data?.universeTemplateAddPlanet;
+        const {id: templateId, ...data} = planet.data?.pluginUniverseAddPlanet;
         expect(data).toMatchSnapshot();
       }
     });
@@ -112,7 +109,7 @@ describe("universe planets", () => {
     const {id, planetId} = await getPlanetId();
     const planet = await gqlCall({
       query: `mutation ChangePlanet($id:ID!, $objectId:ID!, $temperature:Float!) {
-      universeTemplatePlanetSetTemperature(id:$id, objectId:$objectId, temperature:$temperature) {
+      pluginUniversePlanetSetTemperature(id:$id, objectId:$objectId, temperature:$temperature) {
         id 
         temperature {
           temperature
@@ -122,14 +119,14 @@ describe("universe planets", () => {
       variables: {id, objectId: planetId, temperature: 0},
     });
     expect(
-      planet.data?.universeTemplatePlanetSetTemperature.temperature.temperature
+      planet.data?.pluginUniversePlanetSetTemperature.temperature.temperature
     ).toEqual(0);
   });
   it("should modify the age of the planet", async () => {
     const {id, planetId} = await getPlanetId();
     const planet = await gqlCall({
       query: `mutation ChangePlanet($id:ID!, $objectId:ID!, $age:Float!) {
-      universeTemplatePlanetSetAge(id:$id, objectId:$objectId, age:$age) {
+      pluginUniversePlanetSetAge(id:$id, objectId:$objectId, age:$age) {
         id 
         isPlanet {
           age
@@ -138,15 +135,13 @@ describe("universe planets", () => {
     }`,
       variables: {id, objectId: planetId, age: 1337},
     });
-    expect(planet.data?.universeTemplatePlanetSetAge.isPlanet.age).toEqual(
-      1337
-    );
+    expect(planet.data?.pluginUniversePlanetSetAge.isPlanet.age).toEqual(1337);
   });
   it("should modify the radius of the planet", async () => {
     const {id, planetId} = await getPlanetId();
     const planet = await gqlCall({
       query: `mutation ChangePlanet($id:ID!, $objectId:ID!, $radius:Float!) {
-      universeTemplatePlanetSetRadius(id:$id, objectId:$objectId, radius:$radius) {
+      pluginUniversePlanetSetRadius(id:$id, objectId:$objectId, radius:$radius) {
         id 
         isPlanet {
           radius
@@ -155,15 +150,15 @@ describe("universe planets", () => {
     }`,
       variables: {id, objectId: planetId, radius: 1337},
     });
-    expect(
-      planet.data?.universeTemplatePlanetSetRadius.isPlanet.radius
-    ).toEqual(1337);
+    expect(planet.data?.pluginUniversePlanetSetRadius.isPlanet.radius).toEqual(
+      1337
+    );
   });
   it("should modify the terran mass of the planet", async () => {
     const {id, planetId} = await getPlanetId();
     const planet = await gqlCall({
       query: `mutation ChangePlanet($id:ID!, $objectId:ID!, $terranMass:Float!) {
-      universeTemplatePlanetSetTerranMass(id:$id, objectId:$objectId, terranMass:$terranMass) {
+      pluginUniversePlanetSetTerranMass(id:$id, objectId:$objectId, terranMass:$terranMass) {
         id 
         isPlanet {
           terranMass
@@ -173,14 +168,14 @@ describe("universe planets", () => {
       variables: {id, objectId: planetId, terranMass: 1337},
     });
     expect(
-      planet.data?.universeTemplatePlanetSetTerranMass.isPlanet.terranMass
+      planet.data?.pluginUniversePlanetSetTerranMass.isPlanet.terranMass
     ).toEqual(1337);
   });
   it("should modify the lifeforms of the planet", async () => {
     const {id, planetId} = await getPlanetId();
     const planet = await gqlCall({
       query: `mutation ChangePlanet($id:ID!, $objectId:ID!, $lifeforms:String!) {
-      universeTemplatePlanetSetLifeforms(id:$id, objectId:$objectId, lifeforms:$lifeforms) {
+      pluginUniversePlanetSetLifeforms(id:$id, objectId:$objectId, lifeforms:$lifeforms) {
         id 
         isPlanet {
           lifeforms
@@ -190,14 +185,14 @@ describe("universe planets", () => {
       variables: {id, objectId: planetId, lifeforms: "1337"},
     });
     expect(
-      planet.data?.universeTemplatePlanetSetLifeforms.isPlanet.lifeforms
+      planet.data?.pluginUniversePlanetSetLifeforms.isPlanet.lifeforms
     ).toEqual("1337");
   });
   it("should modify the habitable status of the planet", async () => {
     const {id, planetId} = await getPlanetId();
     const planet = await gqlCall({
       query: `mutation ChangePlanet($id:ID!, $objectId:ID!, $habitable:Boolean!) {
-      universeTemplatePlanetSetHabitable(id:$id, objectId:$objectId, habitable:$habitable) {
+      pluginUniversePlanetSetHabitable(id:$id, objectId:$objectId, habitable:$habitable) {
         id 
         isPlanet {
           habitable
@@ -207,11 +202,11 @@ describe("universe planets", () => {
       variables: {id, objectId: planetId, habitable: false},
     });
     expect(
-      planet.data?.universeTemplatePlanetSetHabitable.isPlanet.habitable
+      planet.data?.pluginUniversePlanetSetHabitable.isPlanet.habitable
     ).toEqual(false);
     const planet2 = await gqlCall({
       query: `mutation ChangePlanet($id:ID!, $objectId:ID!, $habitable:Boolean!) {
-      universeTemplatePlanetSetHabitable(id:$id, objectId:$objectId, habitable:$habitable) {
+      pluginUniversePlanetSetHabitable(id:$id, objectId:$objectId, habitable:$habitable) {
         id 
         isPlanet {
           habitable
@@ -221,7 +216,7 @@ describe("universe planets", () => {
       variables: {id, objectId: planetId, habitable: true},
     });
     expect(
-      planet2.data?.universeTemplatePlanetSetHabitable.isPlanet.habitable
+      planet2.data?.pluginUniversePlanetSetHabitable.isPlanet.habitable
     ).toEqual(true);
   });
 });

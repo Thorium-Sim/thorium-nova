@@ -1,5 +1,5 @@
-mutation UniverseSetName($id: ID!, $name: String!) {
-  universeSetName(id: $id, name: $name) {
+mutation PluginSetName($id: ID!, $name: String!) {
+  pluginSetName(id: $id, name: $name) {
     id
     name
   }

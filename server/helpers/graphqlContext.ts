@@ -11,8 +11,8 @@ export interface GraphQLContext {
   ship?: Entity;
   core?: boolean;
 
-  // Universe Operations
-  universeId?: string;
+  // Plugin Operations
+  pluginId?: string;
 }
 
 export const getGraphQLContext = ({
