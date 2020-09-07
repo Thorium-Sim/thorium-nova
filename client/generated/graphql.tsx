@@ -20,6 +20,7 @@ export enum EntityTypes {
   Planet = "planet",
   Star = "star",
   Ship = "ship",
+  Outfit = "outfit",
   Timer = "timer",
 }
 
@@ -147,12 +148,13 @@ export type TimersSubscription = {
 };
 
 export type TemplateShipAssetsSubscriptionVariables = Exact<{
+  pluginId: Scalars["ID"];
   id: Scalars["ID"];
 }>;
 
 export type TemplateShipAssetsSubscription = {
   __typename?: "Subscription";
-  templateShip: Maybe<{
+  pluginShip: Maybe<{
     __typename?: "Entity";
     id: string;
     shipAssets: {
@@ -168,12 +170,13 @@ export type TemplateShipAssetsSubscription = {
 
 export type TemplateShipSetLogoMutationVariables = Exact<{
   id: Scalars["ID"];
+  pluginId: Scalars["ID"];
   image: Scalars["Upload"];
 }>;
 
 export type TemplateShipSetLogoMutation = {
   __typename?: "Mutation";
-  templateShipSetLogo: {
+  pluginShipSetLogo: {
     __typename?: "Entity";
     id: string;
     shipAssets: {__typename?: "ShipAssetsComponent"; logo: string};
@@ -182,6 +185,7 @@ export type TemplateShipSetLogoMutation = {
 
 export type TemplateShipSetModelMutationVariables = Exact<{
   id: Scalars["ID"];
+  pluginId: Scalars["ID"];
   model: Scalars["Upload"];
   side: Scalars["Upload"];
   top: Scalars["Upload"];
@@ -190,7 +194,7 @@ export type TemplateShipSetModelMutationVariables = Exact<{
 
 export type TemplateShipSetModelMutation = {
   __typename?: "Mutation";
-  templateShipSetModel: {
+  pluginShipSetModel: {
     __typename?: "Entity";
     id: string;
     shipAssets: {
@@ -201,6 +205,95 @@ export type TemplateShipSetModelMutation = {
       vanity: string;
     };
   };
+};
+
+export type PluginCreateMutationVariables = Exact<{
+  name: Scalars["String"];
+}>;
+
+export type PluginCreateMutation = {
+  __typename?: "Mutation";
+  pluginCreate: {
+    __typename?: "BasePlugin";
+    id: string;
+    name: string;
+    author: string;
+    description: string;
+    coverImage: string;
+    tags: Array<string>;
+  };
+};
+
+export type PluginRemoveMutationVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type PluginRemoveMutation = {
+  __typename?: "Mutation";
+  pluginRemove: string;
+};
+
+export type PluginSetNameMutationVariables = Exact<{
+  id: Scalars["ID"];
+  name: Scalars["String"];
+}>;
+
+export type PluginSetNameMutation = {
+  __typename?: "Mutation";
+  pluginSetName: {__typename?: "BasePlugin"; id: string; name: string};
+};
+
+export type PluginSetCoverImageMutationVariables = Exact<{
+  id: Scalars["ID"];
+  image: Scalars["Upload"];
+}>;
+
+export type PluginSetCoverImageMutation = {
+  __typename?: "Mutation";
+  pluginSetCoverImage: {
+    __typename?: "BasePlugin";
+    id: string;
+    coverImage: string;
+  };
+};
+
+export type PluginSetDescriptionMutationVariables = Exact<{
+  id: Scalars["ID"];
+  description: Scalars["String"];
+}>;
+
+export type PluginSetDescriptionMutation = {
+  __typename?: "Mutation";
+  pluginSetDescription: {
+    __typename?: "BasePlugin";
+    id: string;
+    description: string;
+  };
+};
+
+export type PluginSetTagsMutationVariables = Exact<{
+  id: Scalars["ID"];
+  tags: Array<Scalars["String"]>;
+}>;
+
+export type PluginSetTagsMutation = {
+  __typename?: "Mutation";
+  pluginSetTags: {__typename?: "BasePlugin"; id: string; tags: Array<string>};
+};
+
+export type PluginsSubscriptionVariables = Exact<{[key: string]: never}>;
+
+export type PluginsSubscription = {
+  __typename?: "Subscription";
+  plugins: Array<{
+    __typename?: "BasePlugin";
+    id: string;
+    name: string;
+    author: string;
+    description: string;
+    coverImage: string;
+    tags: Array<string>;
+  }>;
 };
 
 export type SatelliteComponentFragment = {
@@ -714,28 +807,25 @@ export type UniverseSubscriptionVariables = Exact<{
 
 export type UniverseSubscription = {
   __typename?: "Subscription";
-  plugin: Maybe<{
-    __typename?: "BasePlugin";
-    universe: Array<{
-      __typename?: "Entity";
-      id: string;
-      entityType: EntityTypes;
-      identity: {
-        __typename?: "IdentityComponent";
-        name: string;
-        description: string;
-      };
-      tags: {__typename?: "TagsComponent"; tags: Array<string>};
-      position: {
-        __typename?: "PositionComponent";
-        x: number;
-        y: number;
-        z: number;
-      };
-      planetarySystem: Maybe<{
-        __typename?: "PlanetarySystemComponent";
-        skyboxKey: string;
-      }>;
+  pluginUniverse: Array<{
+    __typename?: "Entity";
+    id: string;
+    entityType: EntityTypes;
+    identity: {
+      __typename?: "IdentityComponent";
+      name: string;
+      description: string;
+    };
+    tags: {__typename?: "TagsComponent"; tags: Array<string>};
+    position: {
+      __typename?: "PositionComponent";
+      x: number;
+      y: number;
+      z: number;
+    };
+    planetarySystem: Maybe<{
+      __typename?: "PlanetarySystemComponent";
+      skyboxKey: string;
     }>;
   }>;
 };
@@ -825,95 +915,6 @@ export type TemplateSystemSubscription = {
       } & UniverseObjectFragment
     >;
   };
-};
-
-export type PluginSetCoverImageMutationVariables = Exact<{
-  id: Scalars["ID"];
-  image: Scalars["Upload"];
-}>;
-
-export type PluginSetCoverImageMutation = {
-  __typename?: "Mutation";
-  pluginSetCoverImage: {
-    __typename?: "BasePlugin";
-    id: string;
-    coverImage: string;
-  };
-};
-
-export type PluginSetDescriptionMutationVariables = Exact<{
-  id: Scalars["ID"];
-  description: Scalars["String"];
-}>;
-
-export type PluginSetDescriptionMutation = {
-  __typename?: "Mutation";
-  pluginSetDescription: {
-    __typename?: "BasePlugin";
-    id: string;
-    description: string;
-  };
-};
-
-export type PluginSetTagsMutationVariables = Exact<{
-  id: Scalars["ID"];
-  tags: Array<Scalars["String"]>;
-}>;
-
-export type PluginSetTagsMutation = {
-  __typename?: "Mutation";
-  pluginSetTags: {__typename?: "BasePlugin"; id: string; tags: Array<string>};
-};
-
-export type PluginCreateMutationVariables = Exact<{
-  name: Scalars["String"];
-}>;
-
-export type PluginCreateMutation = {
-  __typename?: "Mutation";
-  pluginCreate: {
-    __typename?: "BasePlugin";
-    id: string;
-    name: string;
-    author: string;
-    description: string;
-    coverImage: string;
-    tags: Array<string>;
-  };
-};
-
-export type PluginRemoveMutationVariables = Exact<{
-  id: Scalars["ID"];
-}>;
-
-export type PluginRemoveMutation = {
-  __typename?: "Mutation";
-  pluginRemove: string;
-};
-
-export type PluginSetNameMutationVariables = Exact<{
-  id: Scalars["ID"];
-  name: Scalars["String"];
-}>;
-
-export type PluginSetNameMutation = {
-  __typename?: "Mutation";
-  pluginSetName: {__typename?: "BasePlugin"; id: string; name: string};
-};
-
-export type PluginsSubscriptionVariables = Exact<{[key: string]: never}>;
-
-export type PluginsSubscription = {
-  __typename?: "Subscription";
-  plugins: Array<{
-    __typename?: "BasePlugin";
-    id: string;
-    name: string;
-    author: string;
-    description: string;
-    coverImage: string;
-    tags: Array<string>;
-  }>;
 };
 
 export type ClientConnectMutationVariables = Exact<{[key: string]: never}>;
@@ -1112,8 +1113,8 @@ export type TimersSubscriptionHookResult = ReturnType<
   typeof useTimersSubscription
 >;
 export const TemplateShipAssetsDocument = gql`
-  subscription TemplateShipAssets($id: ID!) {
-    templateShip(id: $id) {
+  subscription TemplateShipAssets($pluginId: ID!, $id: ID!) {
+    pluginShip(pluginId: $pluginId, id: $id) {
       id
       shipAssets {
         logo
@@ -1140,8 +1141,8 @@ export type TemplateShipAssetsSubscriptionHookResult = ReturnType<
   typeof useTemplateShipAssetsSubscription
 >;
 export const TemplateShipSetLogoDocument = gql`
-  mutation TemplateShipSetLogo($id: ID!, $image: Upload!) {
-    templateShipSetLogo(id: $id, image: $image) {
+  mutation TemplateShipSetLogo($id: ID!, $pluginId: ID!, $image: Upload!) {
+    pluginShipSetLogo(id: $id, pluginId: $pluginId, image: $image) {
       id
       shipAssets {
         logo
@@ -1166,13 +1167,15 @@ export type TemplateShipSetLogoMutationHookResult = ReturnType<
 export const TemplateShipSetModelDocument = gql`
   mutation TemplateShipSetModel(
     $id: ID!
+    $pluginId: ID!
     $model: Upload!
     $side: Upload!
     $top: Upload!
     $vanity: Upload!
   ) {
-    templateShipSetModel(
+    pluginShipSetModel(
       id: $id
+      pluginId: $pluginId
       model: $model
       side: $side
       top: $top
@@ -1201,6 +1204,165 @@ export function useTemplateShipSetModelMutation(
 }
 export type TemplateShipSetModelMutationHookResult = ReturnType<
   typeof useTemplateShipSetModelMutation
+>;
+export const PluginCreateDocument = gql`
+  mutation PluginCreate($name: String!) {
+    pluginCreate(name: $name) {
+      id
+      name
+      author
+      description
+      coverImage
+      tags
+    }
+  }
+`;
+export function usePluginCreateMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginCreateMutation,
+    PluginCreateMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginCreateMutation,
+    PluginCreateMutationVariables
+  >(PluginCreateDocument, baseOptions);
+}
+export type PluginCreateMutationHookResult = ReturnType<
+  typeof usePluginCreateMutation
+>;
+export const PluginRemoveDocument = gql`
+  mutation PluginRemove($id: ID!) {
+    pluginRemove(id: $id)
+  }
+`;
+export function usePluginRemoveMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginRemoveMutation,
+    PluginRemoveMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginRemoveMutation,
+    PluginRemoveMutationVariables
+  >(PluginRemoveDocument, baseOptions);
+}
+export type PluginRemoveMutationHookResult = ReturnType<
+  typeof usePluginRemoveMutation
+>;
+export const PluginSetNameDocument = gql`
+  mutation PluginSetName($id: ID!, $name: String!) {
+    pluginSetName(id: $id, name: $name) {
+      id
+      name
+    }
+  }
+`;
+export function usePluginSetNameMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginSetNameMutation,
+    PluginSetNameMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginSetNameMutation,
+    PluginSetNameMutationVariables
+  >(PluginSetNameDocument, baseOptions);
+}
+export type PluginSetNameMutationHookResult = ReturnType<
+  typeof usePluginSetNameMutation
+>;
+export const PluginSetCoverImageDocument = gql`
+  mutation PluginSetCoverImage($id: ID!, $image: Upload!) {
+    pluginSetCoverImage(id: $id, image: $image) {
+      id
+      coverImage
+    }
+  }
+`;
+export function usePluginSetCoverImageMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginSetCoverImageMutation,
+    PluginSetCoverImageMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginSetCoverImageMutation,
+    PluginSetCoverImageMutationVariables
+  >(PluginSetCoverImageDocument, baseOptions);
+}
+export type PluginSetCoverImageMutationHookResult = ReturnType<
+  typeof usePluginSetCoverImageMutation
+>;
+export const PluginSetDescriptionDocument = gql`
+  mutation PluginSetDescription($id: ID!, $description: String!) {
+    pluginSetDescription(id: $id, description: $description) {
+      id
+      description
+    }
+  }
+`;
+export function usePluginSetDescriptionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginSetDescriptionMutation,
+    PluginSetDescriptionMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginSetDescriptionMutation,
+    PluginSetDescriptionMutationVariables
+  >(PluginSetDescriptionDocument, baseOptions);
+}
+export type PluginSetDescriptionMutationHookResult = ReturnType<
+  typeof usePluginSetDescriptionMutation
+>;
+export const PluginSetTagsDocument = gql`
+  mutation PluginSetTags($id: ID!, $tags: [String!]!) {
+    pluginSetTags(id: $id, tags: $tags) {
+      id
+      tags
+    }
+  }
+`;
+export function usePluginSetTagsMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginSetTagsMutation,
+    PluginSetTagsMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginSetTagsMutation,
+    PluginSetTagsMutationVariables
+  >(PluginSetTagsDocument, baseOptions);
+}
+export type PluginSetTagsMutationHookResult = ReturnType<
+  typeof usePluginSetTagsMutation
+>;
+export const PluginsDocument = gql`
+  subscription Plugins {
+    plugins {
+      id
+      name
+      author
+      description
+      coverImage
+      tags
+    }
+  }
+`;
+export function usePluginsSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    PluginsSubscription,
+    PluginsSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    PluginsSubscription,
+    PluginsSubscriptionVariables
+  >(PluginsDocument, baseOptions);
+}
+export type PluginsSubscriptionHookResult = ReturnType<
+  typeof usePluginsSubscription
 >;
 export const UniversePlanetAssetsDocument = gql`
   subscription UniversePlanetAssets($id: ID!, $objectId: ID!) {
@@ -2179,25 +2341,23 @@ export type UniverseStarSetTemperatureMutationHookResult = ReturnType<
 >;
 export const UniverseDocument = gql`
   subscription Universe($id: ID!) {
-    plugin(id: $id) {
-      universe {
-        id
-        entityType
-        identity {
-          name
-          description
-        }
-        tags {
-          tags
-        }
-        position {
-          x
-          y
-          z
-        }
-        planetarySystem {
-          skyboxKey
-        }
+    pluginUniverse(id: $id, entityType: system) {
+      id
+      entityType
+      identity {
+        name
+        description
+      }
+      tags {
+        tags
+      }
+      position {
+        x
+        y
+        z
+      }
+      planetarySystem {
+        skyboxKey
       }
     }
   }
@@ -2364,165 +2524,6 @@ export function useTemplateSystemSubscription(
 }
 export type TemplateSystemSubscriptionHookResult = ReturnType<
   typeof useTemplateSystemSubscription
->;
-export const PluginSetCoverImageDocument = gql`
-  mutation PluginSetCoverImage($id: ID!, $image: Upload!) {
-    pluginSetCoverImage(id: $id, image: $image) {
-      id
-      coverImage
-    }
-  }
-`;
-export function usePluginSetCoverImageMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    PluginSetCoverImageMutation,
-    PluginSetCoverImageMutationVariables
-  >
-) {
-  return Apollo.useMutation<
-    PluginSetCoverImageMutation,
-    PluginSetCoverImageMutationVariables
-  >(PluginSetCoverImageDocument, baseOptions);
-}
-export type PluginSetCoverImageMutationHookResult = ReturnType<
-  typeof usePluginSetCoverImageMutation
->;
-export const PluginSetDescriptionDocument = gql`
-  mutation PluginSetDescription($id: ID!, $description: String!) {
-    pluginSetDescription(id: $id, description: $description) {
-      id
-      description
-    }
-  }
-`;
-export function usePluginSetDescriptionMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    PluginSetDescriptionMutation,
-    PluginSetDescriptionMutationVariables
-  >
-) {
-  return Apollo.useMutation<
-    PluginSetDescriptionMutation,
-    PluginSetDescriptionMutationVariables
-  >(PluginSetDescriptionDocument, baseOptions);
-}
-export type PluginSetDescriptionMutationHookResult = ReturnType<
-  typeof usePluginSetDescriptionMutation
->;
-export const PluginSetTagsDocument = gql`
-  mutation PluginSetTags($id: ID!, $tags: [String!]!) {
-    pluginSetTags(id: $id, tags: $tags) {
-      id
-      tags
-    }
-  }
-`;
-export function usePluginSetTagsMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    PluginSetTagsMutation,
-    PluginSetTagsMutationVariables
-  >
-) {
-  return Apollo.useMutation<
-    PluginSetTagsMutation,
-    PluginSetTagsMutationVariables
-  >(PluginSetTagsDocument, baseOptions);
-}
-export type PluginSetTagsMutationHookResult = ReturnType<
-  typeof usePluginSetTagsMutation
->;
-export const PluginCreateDocument = gql`
-  mutation PluginCreate($name: String!) {
-    pluginCreate(name: $name) {
-      id
-      name
-      author
-      description
-      coverImage
-      tags
-    }
-  }
-`;
-export function usePluginCreateMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    PluginCreateMutation,
-    PluginCreateMutationVariables
-  >
-) {
-  return Apollo.useMutation<
-    PluginCreateMutation,
-    PluginCreateMutationVariables
-  >(PluginCreateDocument, baseOptions);
-}
-export type PluginCreateMutationHookResult = ReturnType<
-  typeof usePluginCreateMutation
->;
-export const PluginRemoveDocument = gql`
-  mutation PluginRemove($id: ID!) {
-    pluginRemove(id: $id)
-  }
-`;
-export function usePluginRemoveMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    PluginRemoveMutation,
-    PluginRemoveMutationVariables
-  >
-) {
-  return Apollo.useMutation<
-    PluginRemoveMutation,
-    PluginRemoveMutationVariables
-  >(PluginRemoveDocument, baseOptions);
-}
-export type PluginRemoveMutationHookResult = ReturnType<
-  typeof usePluginRemoveMutation
->;
-export const PluginSetNameDocument = gql`
-  mutation PluginSetName($id: ID!, $name: String!) {
-    pluginSetName(id: $id, name: $name) {
-      id
-      name
-    }
-  }
-`;
-export function usePluginSetNameMutation(
-  baseOptions?: Apollo.MutationHookOptions<
-    PluginSetNameMutation,
-    PluginSetNameMutationVariables
-  >
-) {
-  return Apollo.useMutation<
-    PluginSetNameMutation,
-    PluginSetNameMutationVariables
-  >(PluginSetNameDocument, baseOptions);
-}
-export type PluginSetNameMutationHookResult = ReturnType<
-  typeof usePluginSetNameMutation
->;
-export const PluginsDocument = gql`
-  subscription Plugins {
-    plugins {
-      id
-      name
-      author
-      description
-      coverImage
-      tags
-    }
-  }
-`;
-export function usePluginsSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
-    PluginsSubscription,
-    PluginsSubscriptionVariables
-  >
-) {
-  return Apollo.useSubscription<
-    PluginsSubscription,
-    PluginsSubscriptionVariables
-  >(PluginsDocument, baseOptions);
-}
-export type PluginsSubscriptionHookResult = ReturnType<
-  typeof usePluginsSubscription
 >;
 export const ClientConnectDocument = gql`
   mutation ClientConnect {

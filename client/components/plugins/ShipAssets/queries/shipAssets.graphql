@@ -1,5 +1,5 @@
-subscription TemplateShipAssets($id: ID!) {
-  templateShip(id: $id) {
+subscription TemplateShipAssets($pluginId: ID!, $id: ID!) {
+  pluginShip(pluginId: $pluginId, id: $id) {
     id
     shipAssets {
       logo

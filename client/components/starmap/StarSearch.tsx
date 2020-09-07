@@ -20,11 +20,11 @@ function StarSearch() {
   const {t} = useTranslation();
   const universeId = useConfigStore(s => s.universeId);
   const [items, setItems] = React.useState<
-    UniverseSearchQuery["universeSearch"]
+    UniverseSearchQuery["pluginUniverseSearch"]
   >([]);
 
   const itemToString = (
-    item: UniverseSearchQuery["universeSearch"][0] | null
+    item: UniverseSearchQuery["pluginUniverseSearch"][0] | null
   ) => (item ? item.identity.name : "");
 
   const {
@@ -46,7 +46,7 @@ function StarSearch() {
             query: UniverseSearchDocument,
             variables: {id: universeId, search: inputValue},
           })
-          .then(res => setItems(res.data?.universeSearch || []));
+          .then(res => setItems(res.data?.pluginUniverseSearch || []));
       } else {
         setItems([]);
       }
@@ -83,8 +83,7 @@ function StarSearch() {
             })
             .then(res => {
               if (res.data) {
-                const parent =
-                  res.data.universeTemplateObject?.satellite?.parent;
+                const parent = res.data.pluginUniverseObject?.satellite?.parent;
                 let systemId = parent?.id;
                 let isSatellite = false;
                 if (parent?.entityType === EntityTypes.Planet) {
@@ -102,7 +101,7 @@ function StarSearch() {
                         orbitalArc,
                         orbitalInclination,
                         distance,
-                      } = res.data.universeTemplateObject.satellite;
+                      } = res.data.pluginUniverseObject.satellite;
                       const orbitRadius =
                         (isSatellite ? 100 : 1) * (distance / 1000000);
 
@@ -129,7 +128,7 @@ function StarSearch() {
                     });
                 }
                 useConfigStore.setState({
-                  selectedObject: res.data.universeTemplateObject,
+                  selectedObject: res.data.pluginUniverseObject,
                 });
               }
             });

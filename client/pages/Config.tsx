@@ -20,10 +20,9 @@ import {FaStar, FaTools} from "react-icons/fa";
 import {Route, Routes, useNavigate} from "react-router";
 import {NavLink} from "react-router-dom";
 
-const UniversesList = React.lazy(() =>
-  import("../components/starmap/universesList")
+const PluginsList = React.lazy(() =>
+  import("../components/plugins/pluginsList")
 );
-const SystemsList = React.lazy(() => import("../components/systems"));
 
 const ConfigIcon: React.FC<{to: string}> = props => {
   return (
@@ -100,14 +99,7 @@ const Config = () => {
           </Modal>
         )}
       </Scale>
-      <Suspense fallback={null}>
-        <Routes>
-          <Route path="universes" element={<UniversesList />} />
-          <Route path="universes/:universeId" element={<UniversesList />} />
-          <Route path="systems" element={<SystemsList />} />
-          <Route path="systems/:systemId" element={<SystemsList />} />
-        </Routes>
-      </Suspense>
+      <Suspense fallback={null}></Suspense>
     </>
   );
 };

@@ -56,7 +56,7 @@ export default class BasePlugin {
   @Field(type => String)
   get coverImage() {
     return this._coverImage
-      ? `/assets/universes/${this.name}/${this._coverImage}`
+      ? `/assets/plugins/${this.name}/${this._coverImage}`
       : "";
   }
   set coverImage(value) {
@@ -66,6 +66,14 @@ export default class BasePlugin {
 
   @Field(type => [String])
   tags: string[];
+
+  excludeFields: (keyof BasePlugin)[] = [
+    "ships",
+    "outfits",
+    "stationComplements",
+    "universe",
+    "excludeFields",
+  ];
 
   @Field(type => [Entity])
   ships: Writable<Entity[]>;
@@ -84,25 +92,29 @@ export default class BasePlugin {
     this.name = params.name || "New Plugin";
     this.author = params.author || "";
     this.description = params.description || "A great plugin";
-    this.coverImage = params.coverImage || "";
+    this.coverImage = params._coverImage || "";
     this.tags = params.tags || [];
 
     // Properties
     this.ships = getStore<Entity[]>({
       class: Entity,
       path: `${appStoreDir}plugins/${this.name}/ships.json`,
+      initialData: [],
     });
     this.outfits = getStore<Entity[]>({
       class: Entity,
       path: `${appStoreDir}plugins/${this.name}/outfits.json`,
+      initialData: [],
     });
     this.stationComplements = getStore<StationComplement[]>({
       class: StationComplement,
       path: `${appStoreDir}plugins/${this.name}/stationComplement.json`,
+      initialData: [],
     });
     this.universe = getStore<Entity[]>({
       class: Entity,
       path: `${appStoreDir}plugins/${this.name}/universe.json`,
+      initialData: [],
     });
   }
   async writeFile(force?: boolean) {}
@@ -110,6 +122,19 @@ export default class BasePlugin {
 
   save() {
     this.writeFile(true);
+  }
+  serialize() {
+    const data = {...this};
+    this.excludeFields.forEach(field => {
+      delete data[field];
+    });
+    this.excludeFields.forEach(field => {
+      const objects = this[field] as Writable<any[]>;
+      if (objects.length > 0) {
+        objects.writeFile?.(true);
+      }
+    });
+    return data;
   }
 }
 

@@ -5,8 +5,11 @@ export default function uploadAsset(
   file: FileUpload,
   pathPrefix: string,
   name?: string
-) {
-  return new Promise((resolve, reject) => {
+): Promise<void> {
+  return new Promise(async (resolve, reject) => {
+    // Ensure the asset path exists
+    await fs.promises.mkdir(pathPrefix, {recursive: true});
+
     const assetPath = `${pathPrefix}/${name || file.filename}`;
     const readStream = file.createReadStream();
     /* istanbul ignore else */

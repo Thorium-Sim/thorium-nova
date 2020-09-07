@@ -31,8 +31,9 @@ const ShipAssets: React.FC<{onClose: () => void}> = ({onClose}) => {
   const toast = useToast();
   const {t} = useTranslation();
   const id = "2cajg1l9kkda54e0y";
+  const pluginId = "test";
   const {data} = useTemplateShipAssetsSubscription({
-    variables: {id},
+    variables: {pluginId, id},
   });
   const [setLogo] = useTemplateShipSetLogoMutation();
   const [setModel] = useTemplateShipSetModelMutation();
@@ -64,13 +65,13 @@ const ShipAssets: React.FC<{onClose: () => void}> = ({onClose}) => {
               <UploadWell
                 accept="image/*"
                 onChange={(files: FileList) =>
-                  setLogo({variables: {id, image: files[0]}})
+                  setLogo({variables: {id, pluginId, image: files[0]}})
                 }
               >
-                {data?.templateShip?.shipAssets.logo && (
+                {data?.pluginShip?.shipAssets.logo && (
                   <Image
                     src={`${
-                      data?.templateShip?.shipAssets.logo
+                      data?.pluginShip?.shipAssets.logo
                     }?${new Date().getTime()}`}
                     width="90%"
                     height="90%"
@@ -128,6 +129,7 @@ const ShipAssets: React.FC<{onClose: () => void}> = ({onClose}) => {
                     await setModel({
                       variables: {
                         id,
+                        pluginId,
                         model: file,
                         top: await (await fetch(topSrc)).blob(),
                         side: await (await fetch(sideSrc)).blob(),
@@ -149,10 +151,10 @@ const ShipAssets: React.FC<{onClose: () => void}> = ({onClose}) => {
                   }
                 }}
               >
-                {data?.templateShip?.shipAssets.vanity && (
+                {data?.pluginShip?.shipAssets.vanity && (
                   <Image
                     src={`${
-                      data?.templateShip?.shipAssets.vanity
+                      data?.pluginShip?.shipAssets.vanity
                     }?${new Date().getTime()}`}
                     width="90%"
                     height="90%"
@@ -165,10 +167,10 @@ const ShipAssets: React.FC<{onClose: () => void}> = ({onClose}) => {
             <Box gridArea="top">
               <Heading as="h3" size="md">{t`Top View`}</Heading>
               <UploadWell disabled>
-                {data?.templateShip?.shipAssets.top && (
+                {data?.pluginShip?.shipAssets.top && (
                   <Image
                     src={`${
-                      data?.templateShip?.shipAssets.top
+                      data?.pluginShip?.shipAssets.top
                     }?${new Date().getTime()}`}
                     width="90%"
                     height="90%"
@@ -181,10 +183,10 @@ const ShipAssets: React.FC<{onClose: () => void}> = ({onClose}) => {
             <Box gridArea="side">
               <Heading as="h3" size="md">{t`Side View`}</Heading>
               <UploadWell disabled>
-                {data?.templateShip?.shipAssets.side && (
+                {data?.pluginShip?.shipAssets.side && (
                   <Image
                     src={`${
-                      data?.templateShip?.shipAssets.side
+                      data?.pluginShip?.shipAssets.side
                     }?${new Date().getTime()}`}
                     width="90%"
                     height="90%"

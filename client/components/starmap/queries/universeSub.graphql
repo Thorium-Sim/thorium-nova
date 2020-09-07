@@ -1,23 +1,21 @@
 subscription Universe($id: ID!) {
-  plugin(id: $id) {
-    universe {
-      id
-      entityType
-      identity {
-        name
-        description
-      }
-      tags {
-        tags
-      }
-      position {
-        x
-        y
-        z
-      }
-      planetarySystem {
-        skyboxKey
-      }
+  pluginUniverse(id: $id, entityType: system) {
+    id
+    entityType
+    identity {
+      name
+      description
+    }
+    tags {
+      tags
+    }
+    position {
+      x
+      y
+      z
+    }
+    planetarySystem {
+      skyboxKey
     }
   }
 }

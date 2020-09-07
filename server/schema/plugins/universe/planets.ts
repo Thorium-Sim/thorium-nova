@@ -339,7 +339,7 @@ export class UniversePluginPlanetsResolver {
     }/assets`;
     const splitName = image.filename.split(".");
     const ext = splitName[splitName.length - 1];
-    const fileName = `planet-${object.id}-texture-${Math.round(
+    const fileName = `planet-texture-${object.id}${Math.round(
       Math.random() * 1000
     )}.${ext}`;
     await uploadAsset(image, pathPrefix, fileName);
@@ -362,7 +362,7 @@ export class UniversePluginPlanetsResolver {
     }/assets`;
     const splitName = image.filename.split(".");
     const ext = splitName[splitName.length - 1];
-    const fileName = `planet-${object.id}-clouds-${Math.round(
+    const fileName = `planet-clouds-${object.id}${Math.round(
       Math.random() * 1000
     )}.${ext}`;
     await uploadAsset(image, pathPrefix, fileName);
@@ -385,7 +385,7 @@ export class UniversePluginPlanetsResolver {
     }/assets`;
     const splitName = image.filename.split(".");
     const ext = splitName[splitName.length - 1];
-    const fileName = `planet-${object.id}-rings-${Math.round(
+    const fileName = `planet-rings-${object.id}${Math.round(
       Math.random() * 1000
     )}.${ext}`;
     await uploadAsset(image, pathPrefix, fileName);

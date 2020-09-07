@@ -87,7 +87,7 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
   // Instantiate the object if it is a class
   // or just make a new object with the data inside
   let dataObject!: G & StoreObject;
-  if (_data.length) {
+  if (typeof _data?.length === "number") {
     if (isClass(classConstructor)) {
       dataObject = _data.map((d: any) => new classConstructor(d));
     } else {

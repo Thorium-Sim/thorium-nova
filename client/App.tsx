@@ -7,6 +7,7 @@ import ShipAssets from "./components/plugins/ShipAssets";
 import Starmap from "./pages/starmap";
 import NoMatch from "./pages/NotFound";
 import Config from "./pages/Config";
+import PluginList from "./components/plugins/pluginsList";
 
 const Welcome = React.lazy(() => import("./pages/index"));
 const Releases = React.lazy(() => import("./pages/Releases"));
@@ -31,7 +32,8 @@ const ClientApp: React.FC = () => {
         <Route path="*" element={<NoMatch />} />
       </Routes>
       <Routes>
-        <Route path="config/*" element={<Config />} />
+        <Route path="config" element={<PluginList />} />
+        <Route path="config/:pluginId" element={<PluginList />} />
       </Routes>
     </Layout>
   );

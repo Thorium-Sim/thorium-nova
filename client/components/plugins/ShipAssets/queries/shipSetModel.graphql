@@ -1,12 +1,14 @@
 mutation TemplateShipSetModel(
   $id: ID!
+  $pluginId: ID!
   $model: Upload!
   $side: Upload!
   $top: Upload!
   $vanity: Upload!
 ) {
-  templateShipSetModel(
+  pluginShipSetModel(
     id: $id
+    pluginId: $pluginId
     model: $model
     side: $side
     top: $top

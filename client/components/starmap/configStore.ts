@@ -7,7 +7,7 @@ import create from "zustand";
 import {Vector3} from "three";
 
 type StarmapObject =
-  | NonNullable<UniverseSubscription["plugin"]>["universe"][0]
+  | NonNullable<UniverseSubscription["pluginUniverse"]>[0]
   | NonNullable<TemplateSystemSubscription["pluginUniverseSystem"]["items"]>[0]
   | NonNullable<TemplateSystemSubscription["pluginUniverseSystem"]>
   | NonNullable<UniverseAddSystemMutation["pluginUniverseAddSystem"]>

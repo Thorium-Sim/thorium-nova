@@ -19,18 +19,18 @@ import {Link as NavLink} from "react-router-dom";
 import SearchableList from "../../ui/SearchableList";
 import PluginForm from "../../ui/PluginForm";
 import {
-  useUniverseCreateMutation,
-  useUniverseRemoveMutation,
-  useUniverseSetCoverImageMutation,
-  useUniverseSetDescriptionMutation,
-  useUniverseSetNameMutation,
-  useUniverseSetTagsMutation,
-  useUniversesSubscription,
+  usePluginCreateMutation,
+  usePluginRemoveMutation,
+  usePluginSetCoverImageMutation,
+  usePluginSetDescriptionMutation,
+  usePluginSetNameMutation,
+  usePluginSetTagsMutation,
+  usePluginsSubscription,
 } from "../../../generated/graphql";
-import {useAlert, useConfirm, usePrompt} from "../../../components/Dialog";
+import {useAlert, useConfirm, usePrompt} from "../../Dialog";
 import {useTranslation} from "react-i18next";
 
-const UniversesList = () => {
+const PluginList = () => {
   const {t} = useTranslation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = React.useState(false);
@@ -44,13 +44,13 @@ const UniversesList = () => {
   }
   const params = useParams();
 
-  const {data} = useUniversesSubscription();
-  const [create] = useUniverseCreateMutation();
-  const [remove] = useUniverseRemoveMutation();
-  const [setName] = useUniverseSetNameMutation();
-  const [setDescription] = useUniverseSetDescriptionMutation();
-  const [setTags] = useUniverseSetTagsMutation();
-  const [setCoverImage] = useUniverseSetCoverImageMutation();
+  const {data} = usePluginsSubscription();
+  const [create] = usePluginCreateMutation();
+  const [remove] = usePluginRemoveMutation();
+  const [setName] = usePluginSetNameMutation();
+  const [setDescription] = usePluginSetDescriptionMutation();
+  const [setTags] = usePluginSetTagsMutation();
+  const [setCoverImage] = usePluginSetCoverImageMutation();
 
   const alert = useAlert();
   const prompt = usePrompt();
@@ -58,53 +58,51 @@ const UniversesList = () => {
 
   async function handleCreate() {
     const name = (await prompt({
-      header: t("Universe Plugin Name"),
-      body: t("What is the name of the new universe plugin?"),
+      header: t("Plugin Name"),
+      body: t("What is the name of the new plugin?"),
     })) as string;
     if (!name) return;
     try {
       const data = await create({variables: {name}});
       if (data.errors) {
         await alert({
-          header: t("Error Creating Universe Plugin"),
+          header: t("Error Creating Plugin"),
           body: data.errors[0].message.replace("GraphQL Error:", ""),
         });
         return;
       }
-      navigate(`/config/universes/${data.data?.universeCreate.id}`);
+      navigate(`/config/${data.data?.pluginCreate.id}`);
     } catch (err) {
       await alert({
-        header: t("Error Creating Universe Plugin"),
+        header: t("Error Creating Plugin"),
         body: err.message.replace("GraphQL Error:", ""),
       });
     }
   }
 
-  const universe = data?.universes.find(d => d.id === params.universeId);
+  const plugin = data?.plugins.find(d => d.id === params.pluginId);
   async function handleRemove() {
-    if (!universe) return;
+    if (!plugin) return;
     if (
       !(await confirm({
-        header: t(
-          "Are you sure you want to permanently remove this universe plugin?"
-        ),
+        header: t("Are you sure you want to permanently remove this plugin?"),
         body: t("This will delete all of its objects and assets."),
       }))
     )
       return;
-    navigate("/config/universes");
+    navigate("/config/");
     try {
-      const data = await remove({variables: {id: universe.id}});
+      const data = await remove({variables: {id: plugin.id}});
       if (data.errors) {
         await alert({
-          header: t("Error Removing Universe Plugin"),
+          header: t("Error Removing Plugin"),
           body: data.errors[0].message.replace("GraphQL Error:", ""),
         });
         return;
       }
     } catch (err) {
       await alert({
-        header: t("Error Removing Universe Plugin"),
+        header: t("Error Removing Plugin"),
         body: err.message.replace("GraphQL Error:", ""),
       });
     }
@@ -124,22 +122,22 @@ const UniversesList = () => {
               flexDir="column"
               zIndex={1600}
             >
-              <ModalHeader fontSize="4xl">{t(`Universe Plugins`)}</ModalHeader>
+              <ModalHeader fontSize="4xl">{t(`Plugins`)}</ModalHeader>
               <ModalCloseButton onClick={onClose} />
               <Grid
                 templateColumns="1fr 2fr"
                 templateRows="1fr auto"
-                height="100%"
+                height="0"
                 px={4}
                 gap={4}
                 flex={1}
               >
                 <Box display="flex" flexDir="column">
                   <SearchableList
-                    items={data?.universes || []}
+                    items={data?.plugins || []}
                     searchKeys={["name", "author", "tags"]}
-                    selectedItem={params.universeId}
-                    setSelectedItem={id => navigate(`/config/universes/${id}`)}
+                    selectedItem={params.pluginId}
+                    setSelectedItem={id => navigate(`/config/${id}`)}
                     renderItem={c => (
                       <Box
                         key={c.id}
@@ -166,15 +164,13 @@ const UniversesList = () => {
                     )}
                   />
                 </Box>
-                <Box display="flex" flexDir="column">
-                  <PluginForm
-                    plugin={universe}
-                    setName={setName}
-                    setDescription={setDescription}
-                    setTags={setTags}
-                    setCoverImage={setCoverImage}
-                  ></PluginForm>
-                </Box>
+                <PluginForm
+                  plugin={plugin}
+                  setName={setName}
+                  setDescription={setDescription}
+                  setTags={setTags}
+                  setCoverImage={setCoverImage}
+                ></PluginForm>
                 <ButtonGroup>
                   {/* <Button
                     width="100%"
@@ -183,21 +179,21 @@ const UniversesList = () => {
                                         mt={2}
 
                   >
-                    {t(`Import Universe Plugin`)}
+                    {t(`Import Plugin`)}
                   </Button> */}
                   <Button
                     width="100%"
                     variantColor="success"
                     onClick={handleCreate}
                   >
-                    {t(`Create Universe Plugin`)}
+                    {t(`Create Plugin`)}
                   </Button>
                 </ButtonGroup>
                 <ButtonGroup>
                   {/* <Button variantColor="info">{t(`Export`)}</Button> */}
                   <Button
                     variantColor="danger"
-                    {...{disabled: !universe}}
+                    {...{disabled: !plugin}}
                     onClick={handleRemove}
                   >
                     {t(`Remove`)}
@@ -217,4 +213,4 @@ const UniversesList = () => {
   );
 };
 
-export default UniversesList;
+export default PluginList;

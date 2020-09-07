@@ -1,8 +1,6 @@
-import App from "../../app";
 import {Arg, ID, Mutation, Query, Resolver} from "type-graphql";
 import StationComplement from "../stationComplement";
-import getStore from "../../helpers/dataStore";
-import {appStoreDir} from "../../helpers/appPaths";
+import {getPlugin} from "./basePlugin";
 
 @Resolver()
 export class StationComplementPluginResolver {
@@ -11,29 +9,33 @@ export class StationComplementPluginResolver {
     name: "stationComplement",
   })
   stationComplementQuery(
-    @Arg("id", type => ID) id: string
+    @Arg("id", type => ID)
+    id: string,
+    @Arg("pluginId", type => ID) pluginId: string
   ): StationComplement | null {
-    return App.plugins.stationComplements.find(s => s.id === id) || null;
+    const plugin = getPlugin(pluginId);
+    return plugin.stationComplements.find(s => s.id === id) || null;
   }
   @Query(returns => [StationComplement], {name: "stationComplements"})
-  stationComplementsQuery(): StationComplement[] {
-    return App.plugins.stationComplements || [];
+  stationComplementsQuery(
+    @Arg("pluginId", type => ID) pluginId: string
+  ): StationComplement[] {
+    const plugin = getPlugin(pluginId);
+    return plugin.stationComplements || [];
   }
   @Mutation(returns => StationComplement)
   stationComplementCreate(
-    @Arg("name")
-    name: string
+    @Arg("pluginId", type => ID) pluginId: string,
+
+    @Arg("name") name: string
   ): StationComplement {
-    if (App.plugins.stationComplements.find(s => s.name === name)) {
+    const plugin = getPlugin(pluginId);
+    if (plugin.stationComplements.find(s => s.name === name)) {
       throw new Error("A station complement with that name already exists.");
     }
-    const stationComplement = getStore<StationComplement>({
-      class: StationComplement,
-      path: `${appStoreDir}stationComplements/${name}/data.json`,
-      initialData: new StationComplement({name}),
-    });
 
-    App.plugins.stationComplements.push(stationComplement);
+    const stationComplement = new StationComplement({name});
+    plugin.stationComplements.push(stationComplement);
 
     return stationComplement;
   }

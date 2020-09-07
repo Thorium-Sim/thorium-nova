@@ -79,9 +79,9 @@ const Menubar: React.FC<{
     addSystem({
       variables: {id: useConfigStore.getState().universeId, position: vec},
     }).then(res => {
-      if (res.data?.universeTemplateAddSystem)
+      if (res.data?.pluginUniverseAddSystem)
         configStoreApi.setState({
-          selectedObject: res.data.universeTemplateAddSystem,
+          selectedObject: res.data.pluginUniverseAddSystem,
         });
     });
   });
@@ -182,9 +182,9 @@ const Menubar: React.FC<{
             vec.applyQuaternion(camera.quaternion);
             addSystem({variables: {id: universeId, position: vec}}).then(
               res => {
-                if (res.data?.universeTemplateAddSystem)
+                if (res.data?.pluginUniverseAddSystem)
                   configStoreApi.setState({
-                    selectedObject: res.data.universeTemplateAddSystem,
+                    selectedObject: res.data.pluginUniverseAddSystem,
                   });
               }
             );

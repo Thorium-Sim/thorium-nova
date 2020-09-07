@@ -20,12 +20,23 @@ export class EntityResolver {
   }
 }
 
-enum EntityTypes {
+export enum EntityTypes {
   system = "system",
   planet = "planet",
   star = "star",
   ship = "ship",
+  outfit = "outfit",
   timer = "timer",
+}
+
+export function getEntityType(entity: Entity) {
+  if (entity.planetarySystem) return EntityTypes.system;
+  if (entity.isPlanet) return EntityTypes.planet;
+  if (entity.isStar) return EntityTypes.star;
+  if (entity.isShip) return EntityTypes.ship;
+  if (entity.timer) return EntityTypes.timer;
+  console.error(entity);
+  throw new Error("Unknown entity type for entity. Check the logs.");
 }
 
 registerEnumType(EntityTypes, {name: "EntityTypes"});
@@ -33,13 +44,7 @@ registerEnumType(EntityTypes, {name: "EntityTypes"});
 export class EntityFieldResolver {
   @FieldResolver(type => EntityTypes)
   entityType(@Root() entity: Entity): EntityTypes {
-    if (entity.planetarySystem) return EntityTypes.system;
-    if (entity.isPlanet) return EntityTypes.planet;
-    if (entity.isStar) return EntityTypes.star;
-    if (entity.isShip) return EntityTypes.ship;
-    if (entity.timer) return EntityTypes.timer;
-    console.error(entity);
-    throw new Error("Unknown entity type for entity. Check the logs.");
+    return getEntityType(entity);
   }
   @FieldResolver()
   shipAssets(@Root() entity: Entity): ShipAssetsComponent {

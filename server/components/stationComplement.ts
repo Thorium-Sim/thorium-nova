@@ -16,11 +16,12 @@ export class StationComplementComponent extends Component {
 
   @Field(type => StationComplement, {nullable: true})
   get stationComplement() {
-    return (
-      App.plugins.stationComplements.find(
-        station => station.id === this.stationComplementId
-      ) || null
-    );
+    return App.plugins.flatMap(
+      p =>
+        p.stationComplements.filter(
+          station => station.id === this.stationComplementId
+        ) || []
+    )[0];
   }
 
   @Field(type => [Station])

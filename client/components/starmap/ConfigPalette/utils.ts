@@ -45,9 +45,7 @@ export function isSystem(
 export function hasPosition(
   obj: any
 ): obj is {
-  position: NonNullable<
-    UniverseSubscription["plugin"]
-  >["universe"][0]["position"];
+  position: NonNullable<UniverseSubscription["pluginUniverse"]>[0]["position"];
 } {
   return !!obj?.position;
 }

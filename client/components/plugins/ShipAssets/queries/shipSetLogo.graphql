@@ -1,5 +1,5 @@
-mutation TemplateShipSetLogo($id: ID!, $image: Upload!) {
-  templateShipSetLogo(id: $id, image: $image) {
+mutation TemplateShipSetLogo($id: ID!, $pluginId: ID!, $image: Upload!) {
+  pluginShipSetLogo(id: $id, pluginId: $pluginId, image: $image) {
     id
     shipAssets {
       logo

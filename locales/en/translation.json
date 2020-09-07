@@ -1,29 +1,45 @@
 {
-  "Are you sure you want to permanently remove this system plugin?": "Are you sure you want to permanently remove this system plugin?",
-  "Are you sure you want to permanently remove this universe plugin?": "Are you sure you want to permanently remove this universe plugin?",
+  "Add": "Add",
+  "Add Moon": "Add Moon",
+  "Add Planet": "Add Planet",
+  "Add Star": "Add Star",
+  "Are you sure you want to permanently remove this plugin?": "Are you sure you want to permanently remove this plugin?",
+  "Are you sure you want to remove this {{object}}?": "Are you sure you want to remove this {{object}}?",
   "Back": "Back",
-  "Close": "Close",
-  "Clouds": "Clouds",
-  "Create Universe Plugin": "Create Universe Plugin",
-  "Error Creating System Plugin": "Error Creating System Plugin",
-  "Error Creating Universe Plugin": "Error Creating Universe Plugin",
-  "Error Removing Universe Plugin": "Error Removing Universe Plugin",
-  "Image aspect ratio should be 2x1, with the dimensions as powers of two, eg": {
-    " 512x256 or 2048x1024": " 512x256 or 2048x1024"
+  "Cancel": "Cancel",
+  "Cover Image": "Cover Image",
+  "Create Plugin": "Create Plugin",
+  "Delete": "Delete",
+  "Description": "Description",
+  "Edit": "Edit",
+  "Error Creating Plugin": "Error Creating Plugin",
+  "Error Removing Plugin": "Error Removing Plugin",
+  "It will remove all of the objects inside of it": {
+    "": ""
   },
-  "Image should be a transparent PNG": {
-    " The aspect ratio should be 2x1, with the dimensions as powers of two, eg": {
-      " 512x256 or 2048x1024": " 512x256 or 2048x1024"
-    },
-    " Vertical lines in the image represent rings": {
-      "": ""
+  "Model is uploading": {
+    " Please wait": {
+      "": {
+        "": {
+          "": ""
+        }
+      }
     }
   },
-  "Plugin Configuration": "Plugin Configuration",
+  "Models should be in ": {
+    "glb format": {
+      " Top and side views are automatically generated from the model": {
+        " <1>Read about how to create compatible models": {
+          "</1>": "Models should be in .glb format. Top and side views are automatically generated from the model. <1>Read about how to create compatible models.</1>"
+        }
+      }
+    }
+  },
+  "Name": "Name",
+  "Name is required": "Name is required",
+  "Plugin Name": "Plugin Name",
+  "Plugins": "Plugins",
   "Remove": "Remove",
-  "Remove Clouds": "Remove Clouds",
-  "Remove Rings": "Remove Rings",
-  "Rings": "Rings",
   "Search": {
     "": {
       "": {
@@ -31,16 +47,17 @@
       }
     }
   },
-  "Ship Systems": "Ship Systems",
-  "System Plugin Name": "System Plugin Name",
-  "Texture": "Texture",
+  "Tags": "Tags",
   "This will delete all of its objects and assets": {
     "": ""
   },
-  "Universe Plugin Name": "Universe Plugin Name",
-  "Universe Plugins": "Universe Plugins",
-  "Universes": "Universes",
-  "What is the name of the new system plugin?": "What is the name of the new system plugin?",
-  "What is the name of the new universe plugin?": "What is the name of the new universe plugin?",
+  "Upload Complete": "Upload Complete",
+  "Upload Failed": "Upload Failed",
+  "Uploading": "Uploading",
+  "What is the name of the new plugin?": "What is the name of the new plugin?",
+  "object": "object",
+  "planet": "planet",
+  "planetary system": "planetary system",
+  "star": "star",
   "toggle menu": "toggle menu"
 }

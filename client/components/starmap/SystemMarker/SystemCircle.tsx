@@ -12,7 +12,7 @@ const size = 50;
 const lineWidth = 0.07;
 
 const SystemCircle: React.FC<{
-  system: NonNullable<UniverseSubscription["universe"]>["systems"][0];
+  system: NonNullable<UniverseSubscription["pluginUniverse"]>[0];
   parent: React.MutableRefObject<Group>;
   hoveringDirection: React.MutableRefObject<number>;
 }> = ({system, parent, hoveringDirection}) => {

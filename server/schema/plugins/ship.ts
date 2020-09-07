@@ -6,7 +6,6 @@ import {ShipAssetsComponent} from "server/components/ship/shipAssets";
 import {TagsComponent} from "server/components/tags";
 import {ThemeComponent} from "server/components/theme";
 import {appStoreDir} from "server/helpers/appPaths";
-import getStore from "server/helpers/dataStore";
 import Entity from "server/helpers/ecs/entity";
 import {
   Arg,
@@ -22,12 +21,13 @@ import uniqid from "uniqid";
 import {pubsub} from "server/helpers/pubsub";
 import {GraphQLUpload, FileUpload} from "graphql-upload";
 import uploadAsset from "server/helpers/uploadAsset";
+import {getPlugin} from "./basePlugin";
 
 interface ShipPayload {
   ship: Entity;
 }
 interface ShipsPayload {
-  entities: Entity[];
+  ships: Entity[];
 }
 
 /**
@@ -57,37 +57,40 @@ function publishShip(ship: Entity) {
 
 @Resolver()
 export class ShipPluginResolver {
-  @Query(returns => Entity, {nullable: true, name: "templateShip"})
-  shipQuery(@Arg("id", type => ID) id: string): Entity | null {
-    return App.plugins.ships.find(s => s.id === id) || null;
+  @Query(returns => Entity, {nullable: true, name: "pluginShip"})
+  shipQuery(
+    @Arg("id", type => ID) id: string,
+    @Arg("pluginId", type => ID) pluginId: string
+  ): Entity | null {
+    const plugin = getPlugin(pluginId);
+    return plugin.ships.find(s => s.id === id) || null;
   }
 
-  @Query(returns => [Entity], {name: "templateShips"})
-  shipsQuery(): Entity[] {
-    return App.plugins.ships || [];
+  @Query(returns => [Entity], {name: "pluginShips"})
+  shipsQuery(@Arg("pluginId", type => ID) pluginId: string): Entity[] {
+    const plugin = getPlugin(pluginId);
+    return plugin?.ships || [];
   }
   @Mutation(returns => Entity)
-  shipCreateTemplate(
+  pluginShipCreate(
+    @Arg("pluginId", type => ID) pluginId: string,
     @Arg("name")
     name: string
   ): Entity {
-    if (App.plugins.ships.find(s => s.identity?.name === name)) {
+    const plugin = getPlugin(pluginId);
+    if (plugin.ships.find(s => s.identity?.name === name)) {
       throw new Error("A ship with that name already exists.");
     }
-    const entity = getStore<Entity>({
-      class: Entity,
-      path: `${appStoreDir}ships/${name}/data.json`,
-      initialData: new Entity(null, [
-        IsShipComponent,
-        AlertLevelComponent,
-        ShipAssetsComponent,
-        TagsComponent,
-        IdentityComponent,
-        ThemeComponent,
-      ]),
-    });
+    const entity = new Entity(null, [
+      IsShipComponent,
+      AlertLevelComponent,
+      ShipAssetsComponent,
+      TagsComponent,
+      IdentityComponent,
+      ThemeComponent,
+    ]);
 
-    App.plugins.ships.push(entity);
+    plugin.ships.push(entity);
     entity.updateComponent("identity", {name});
     publishShip(entity);
 
@@ -95,13 +98,15 @@ export class ShipPluginResolver {
   }
 
   @Mutation(returns => Entity)
-  templateShipRename(
+  pluginShipRename(
     @Arg("name") name: string,
-    @Arg("id", type => ID) id: string
+    @Arg("id", type => ID) id: string,
+    @Arg("pluginId", type => ID) pluginId: string
   ) {
-    const ship = App.plugins.ships.find(s => s.id === id) || null;
+    const plugin = getPlugin(pluginId);
+    const ship = plugin.ships.find(s => s.id === id) || null;
     if (!ship) throw new Error("Unable to find ship.");
-    if (App.plugins.ships.find(s => s.id === name)) {
+    if (plugin.ships.find(s => s.id === name)) {
       throw new Error("A ship with that name already exists.");
     }
     ship.updateComponent("identity", {name});
@@ -110,11 +115,13 @@ export class ShipPluginResolver {
   }
 
   @Mutation(returns => Entity)
-  templateShipSetTheme(
+  pluginShipSetTheme(
     @Arg("theme") theme: string,
-    @Arg("id", type => ID) id: string
+    @Arg("id", type => ID) id: string,
+    @Arg("pluginId", type => ID) pluginId: string
   ) {
-    const ship = App.plugins.ships.find(s => s.id === id) || null;
+    const plugin = getPlugin(pluginId);
+    const ship = plugin.ships.find(s => s.id === id) || null;
     if (!ship) throw new Error("Unable to find ship.");
     ship.updateComponent("theme", {value: theme});
     publishShip(ship);
@@ -122,13 +129,17 @@ export class ShipPluginResolver {
   }
 
   @Mutation(returns => Entity)
-  async templateShipSetLogo(
+  async pluginShipSetLogo(
     @Arg("image", type => GraphQLUpload) image: FileUpload,
-    @Arg("id", type => ID) id: string
+    @Arg("id", type => ID) id: string,
+    @Arg("pluginId", type => ID) pluginId: string
   ) {
-    const ship = App.plugins.ships.find(s => s.id === id) || null;
+    const plugin = getPlugin(pluginId);
+    const ship = plugin.ships.find(s => s.id === id) || null;
     if (!ship) throw new Error("Unable to find ship.");
-    const pathPrefix = `${appStoreDir}ships/${ship.identity?.name || ship.id}`;
+    const pathPrefix = `${appStoreDir}plugins/${
+      plugin.name || plugin.id
+    }/assets/${ship.identity?.name || ship.id}`;
     const splitName = image.filename.split(".");
     const ext = splitName[splitName.length - 1];
     await uploadAsset(image, pathPrefix, `logo.${ext}`);
@@ -139,16 +150,20 @@ export class ShipPluginResolver {
   }
 
   @Mutation(returns => Entity)
-  async templateShipSetModel(
+  async pluginShipSetModel(
     @Arg("model", type => GraphQLUpload) model: FileUpload,
     @Arg("side", type => GraphQLUpload) side: FileUpload,
     @Arg("top", type => GraphQLUpload) top: FileUpload,
     @Arg("vanity", type => GraphQLUpload) vanity: FileUpload,
-    @Arg("id", type => ID) id: string
+    @Arg("id", type => ID) id: string,
+    @Arg("pluginId", type => ID) pluginId: string
   ) {
-    const ship = App.plugins.ships.find(s => s.id === id) || null;
+    const plugin = getPlugin(pluginId);
+    const ship = plugin.ships.find(s => s.id === id) || null;
     if (!ship) throw new Error("Unable to find ship.");
-    const pathPrefix = `${appStoreDir}ships/${ship.identity?.name || ship.id}`;
+    const pathPrefix = `${appStoreDir}plugins/${
+      plugin.name || plugin.id
+    }/assets/${ship.identity?.name || ship.id}`;
     await Promise.all([
       uploadAsset(model, pathPrefix, "model.glb"),
       uploadAsset(top, pathPrefix, "top.png"),
@@ -169,22 +184,25 @@ export class ShipPluginResolver {
     nullable: true,
     topics: ({args, payload}) => {
       const id = uniqid();
-      const ship = App.plugins.ships.find(t => t.id === args.id);
+      const plugin = getPlugin(args.pluginId);
+      const ship = plugin.ships.find(t => t.id === args.id);
       process.nextTick(() => {
         pubsub.publish(id, {
+          pluginId: plugin.id,
           shipId: args.id,
           ship,
         });
       });
-      return [id, "templateShip"];
+      return [id, "pluginShip"];
     },
     filter: ({args, payload}) => {
       return args.id === payload.shipId;
     },
   })
-  templateShip(
+  pluginShip(
     @Root() payload: ShipPayload,
-    @Arg("id", type => ID) id: string
+    @Arg("id", type => ID) id: string,
+    @Arg("pluginId", type => ID) pluginId: string
   ): Entity {
     return payload.ship;
   }
@@ -192,16 +210,20 @@ export class ShipPluginResolver {
   @Subscription(returns => [Entity], {
     topics: ({args, payload}) => {
       const id = uniqid();
+      const plugin = getPlugin(args.pluginId);
       process.nextTick(() => {
         pubsub.publish(id, {
-          entities: App.plugins.ships,
+          ships: plugin.ships,
         });
       });
-      return [id, "templateShips"];
+      return [id, "pluginShips"];
     },
   })
-  templateShips(@Root() payload: ShipsPayload): Entity[] {
-    return payload.entities || [];
+  templateShips(
+    @Root() payload: ShipsPayload,
+    @Arg("pluginId", type => ID) pluginId: string
+  ): Entity[] {
+    return payload.ships || [];
   }
 }
 

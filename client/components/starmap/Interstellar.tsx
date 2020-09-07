@@ -1,4 +1,4 @@
-import {useUniverseSubscription} from "../../generated/graphql";
+import {EntityTypes, useUniverseSubscription} from "../../generated/graphql";
 import React from "react";
 import SystemMarker from "./SystemMarker";
 import Starfield from "./Starfield";
@@ -70,15 +70,17 @@ const Interstellar: React.FC<{universeId: string}> = ({universeId}) => {
       />
       <Starfield />
 
-      {data?.universe?.systems.map(s => (
-        <SystemMarker
-          key={s.id}
-          id={s.id}
-          system={s}
-          position={[s.position.x, s.position.y, s.position.z]}
-          name={s.identity.name}
-        />
-      ))}
+      {data?.pluginUniverse
+        .filter(u => u.entityType === EntityTypes.System)
+        .map(s => (
+          <SystemMarker
+            key={s.id}
+            id={s.id}
+            system={s}
+            position={[s.position.x, s.position.y, s.position.z]}
+            name={s.identity.name}
+          />
+        ))}
     </React.Suspense>
   );
 };

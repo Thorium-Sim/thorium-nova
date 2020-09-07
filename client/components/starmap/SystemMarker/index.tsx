@@ -6,7 +6,7 @@ import SystemCircle from "./SystemCircle";
 import {UniverseSubscription} from "../../../generated/graphql";
 const SystemMarker: React.FC<{
   id: string;
-  system: NonNullable<UniverseSubscription["universe"]>["systems"][0];
+  system: NonNullable<UniverseSubscription["plugin"]>["universe"][0];
   name: string;
   position: [number, number, number];
 }> = ({id, system, name, position}) => {
