@@ -9,25 +9,24 @@ import {
   Subscription,
 } from "type-graphql";
 import {TagsComponent} from "server/components/tags";
-import {IsSystemComponent} from "server/components/shipSystems/isSystem";
+import {IsOutfitComponent} from "server/components/outfits/isOutfit";
 import {IdentityComponent} from "server/components/identity";
-import {WarpEnginesComponent} from "server/components/shipSystems/warpEngines";
-import {NavigationComponent} from "server/components/shipSystems/navigation";
-import {JumpDriveComponent} from "server/components/shipSystems/jumpDrive";
-import {ImpulseEnginesComponent} from "server/components/shipSystems/impulseEngines";
-import {ThrustersComponent} from "server/components/shipSystems/thrusters";
-import {DamageComponent} from "server/components/shipSystems/damage";
-import {EfficiencyComponent} from "server/components/shipSystems/efficiency";
-import {PowerComponent} from "server/components/shipSystems/power";
+import {WarpEnginesComponent} from "server/components/outfits/warpEngines";
+import {NavigationComponent} from "server/components/outfits/navigation";
+import {JumpDriveComponent} from "server/components/outfits/jumpDrive";
+import {ImpulseEnginesComponent} from "server/components/outfits/impulseEngines";
+import {ThrustersComponent} from "server/components/outfits/thrusters";
+import {DamageComponent} from "server/components/outfits/damage";
+import {EfficiencyComponent} from "server/components/outfits/efficiency";
+import {PowerComponent} from "server/components/outfits/power";
 import {HeatComponent} from "server/components/heat";
 import {Component} from "server/components/utils";
 import Entity from "server/helpers/ecs/entity";
-import App from "server/app";
-import {getSystemPlugin, publish} from "./utils";
 import uuid from "uniqid";
 import {pubsub} from "server/helpers/pubsub";
+import BasePlugin, {getPlugin, publish} from "../basePlugin";
 
-enum SystemAbilities {
+enum OutfitAbilities {
   warpEngines,
   impulseEngines,
   thrusters,
@@ -35,15 +34,15 @@ enum SystemAbilities {
   jumpDrive,
   generic,
 }
-registerEnumType(SystemAbilities, {
-  name: "SystemAbilities",
+registerEnumType(OutfitAbilities, {
+  name: "OutfitAbilities",
 });
 
-function getSystemComponents(
-  ability: SystemAbilities
+function getOutfitComponents(
+  ability: OutfitAbilities
 ): {component: Component; defaultValue?: any}[] {
   switch (ability) {
-    case SystemAbilities.warpEngines:
+    case OutfitAbilities.warpEngines:
       return [
         {component: WarpEnginesComponent},
         {component: PowerComponent},
@@ -51,7 +50,7 @@ function getSystemComponents(
         {component: DamageComponent},
         {component: HeatComponent},
       ];
-    case SystemAbilities.impulseEngines:
+    case OutfitAbilities.impulseEngines:
       return [
         {component: ImpulseEnginesComponent},
         {component: PowerComponent},
@@ -59,7 +58,7 @@ function getSystemComponents(
         {component: DamageComponent},
         {component: HeatComponent},
       ];
-    case SystemAbilities.thrusters:
+    case OutfitAbilities.thrusters:
       return [
         {component: ThrustersComponent},
         {component: PowerComponent},
@@ -67,14 +66,14 @@ function getSystemComponents(
         {component: DamageComponent},
         {component: HeatComponent},
       ];
-    case SystemAbilities.navigation:
+    case OutfitAbilities.navigation:
       return [
         {component: NavigationComponent},
         {component: PowerComponent},
         {component: EfficiencyComponent},
         {component: DamageComponent},
       ];
-    case SystemAbilities.jumpDrive:
+    case OutfitAbilities.jumpDrive:
       return [
         {component: JumpDriveComponent},
         {component: PowerComponent},
@@ -82,71 +81,63 @@ function getSystemComponents(
         {component: DamageComponent},
         {component: HeatComponent},
       ];
-    case SystemAbilities.generic:
+    case OutfitAbilities.generic:
       return [{component: PowerComponent}, {component: DamageComponent}];
     default:
       return [];
   }
 }
 
-function systemPublish({
-  plugin,
-  system,
-}: {
-  plugin: SystemPlugin;
-  system: Entity;
-}) {
+function outfitPublish({plugin, outfit}: {plugin: BasePlugin; outfit: Entity}) {
   publish(plugin);
-  pubsub.publish("systemPluginSystems", {
+  pubsub.publish("pluginOutfits", {
     pluginId: plugin.id,
-    systems: plugin.systems,
+    outfits: plugin.outfits,
   });
-  pubsub.publish("systemPluginSystem", {
+  pubsub.publish("pluginOutfit", {
     pluginId: plugin.id,
-    id: system.id,
-    system,
+    id: outfit.id,
+    outfit: outfit,
   });
 }
 
 @Resolver()
-export class SystemPluginsSystemsResolver {
-  @Query(returns => [Entity], {name: "systemPluginSystems"})
-  systemPluginSystemsQuery(
-    @Arg("pluginId", type => ID) pluginId: string
-  ): Entity[] {
-    const plugin = getSystemPlugin(pluginId);
-    return plugin.systems;
+export class PluginOutfitResolver {
+  @Query(returns => [Entity], {name: "pluginOutfits"})
+  pluginOutfitsQuery(@Arg("pluginId", type => ID) pluginId: string): Entity[] {
+    const plugin = getPlugin(pluginId);
+    return plugin.outfits;
   }
   @Query(returns => Entity, {
-    name: "systemPluginSystem",
+    name: "pluginOutfit",
     nullable: true,
   })
-  systemPluginSystemQuery(
+  pluginOutfitQuery(
     @Arg("pluginId", type => ID) pluginId: string,
     @Arg("id", type => ID) id: string
   ): Entity | null {
-    const plugin = getSystemPlugin(pluginId);
-    return plugin.systems.find(s => s.id === id) || null;
+    const plugin = getPlugin(pluginId);
+    return plugin.outfits.find(s => s.id === id) || null;
   }
   @Mutation()
-  systemPluginAddSystem(
+  pluginAddOutfit(
     @Arg("pluginId", type => ID)
     pluginId: string,
     @Arg("name")
     name: string,
-    @Arg("ability", type => SystemAbilities)
-    ability: SystemAbilities
+    @Arg("ability", type => OutfitAbilities)
+    ability: OutfitAbilities
   ): Entity {
-    const plugin = getSystemPlugin(pluginId);
-    if (plugin?.systems.find(s => s.identity?.name === name)) {
-      throw new Error("A system with that name already exists.");
+    const plugin = getPlugin(pluginId);
+    if (plugin.outfits.find(s => s.identity?.name === name)) {
+      throw new Error("An outfit with that name already exists.");
     }
 
-    const components = getSystemComponents(ability);
+    const components = getOutfitComponents(ability);
     const entity = new Entity(null, [
       IdentityComponent,
       TagsComponent,
-      IsSystemComponent,
+      IsOutfitComponent,
       ...components.map(c => c.component),
     ]);
     entity.updateComponents(
@@ -158,9 +149,9 @@ export class SystemPluginsSystemsResolver {
       }, {})
     );
 
-    plugin.systems.push(entity);
+    plugin.outfits.push(entity);
 
-    systemPublish({plugin, system: entity});
+    outfitPublish({plugin, outfit: entity});
     return entity;
   }
 
@@ -168,50 +159,50 @@ export class SystemPluginsSystemsResolver {
     nullable: true,
     topics: ({args, payload}) => {
       const id = uuid();
-      const plugin = App.plugins.systems.find(t => t.id === args.pluginId);
-      const system = plugin?.systems.find(s => s.id === args.id);
+      const plugin = getPlugin(args.pluginId);
+      const outfit = plugin?.outfits.find(s => s.id === args.id);
 
       process.nextTick(() => {
         pubsub.publish(id, {
           id: args.id,
           pluginId: args.pluginId,
-          system,
+          outfit,
         });
       });
-      return [id, "systemPluginSystem"];
+      return [id, "pluginOutfit"];
     },
     filter: ({args, payload}) => {
       return args.id === payload.id && args.pluginId === payload.pluginId;
     },
   })
-  systemPluginSystem(
-    @Root() payload: {id: string; system: Entity},
+  pluginOutfit(
+    @Root() payload: {id: string; outfit: Entity},
     @Arg("pluginId", type => ID) pluginId: string,
     @Arg("id", type => ID) id: string
   ): Entity {
-    return payload.system;
+    return payload.outfit;
   }
 
   @Subscription(returns => [Entity], {
     topics: ({args, payload}) => {
       const id = uuid();
-      const plugin = App.plugins.systems.find(t => t.id === args.pluginId);
+      const plugin = getPlugin(args.pluginId);
       process.nextTick(() => {
         pubsub.publish(id, {
           pluginId: args.pluginId,
-          systems: plugin?.systems,
+          outfits: plugin?.outfits,
         });
       });
-      return [id, "systemPluginSystems"];
+      return [id, "pluginOutfits"];
     },
     filter({args, payload}) {
       return args.pluginId === payload.pluginId;
     },
   })
-  systemPluginSystems(
-    @Root() payload: {systems: Entity[]},
+  pluginOutfits(
+    @Root() payload: {outfits: Entity[]},
     @Arg("pluginId", type => ID) pluginId: string
   ): Entity[] {
-    return payload.systems || [];
+    return payload.outfits || [];
   }
 }

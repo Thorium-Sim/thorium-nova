@@ -159,7 +159,7 @@ const Menubar: React.FC<{
         ) : (
           <Button
             as={Link}
-            to={`/config/universes/${universeId}`}
+            to={`/config/${universeId}/edit`}
             variantColor="info"
             variant="ghost"
             size="sm"

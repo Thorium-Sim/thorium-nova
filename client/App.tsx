@@ -33,7 +33,7 @@ const ClientApp: React.FC = () => {
       </Routes>
       <Routes>
         <Route path="config" element={<PluginList />} />
-        <Route path="config/:pluginId" element={<PluginList />} />
+        <Route path="config/:pluginId/*" element={<PluginList />} />
       </Routes>
     </Layout>
   );

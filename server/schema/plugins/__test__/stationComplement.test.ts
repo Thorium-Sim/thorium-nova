@@ -2,9 +2,19 @@ import {gqlCall} from "../../../helpers/gqlCall";
 
 describe("Station Complement plugin", () => {
   it("should properly query station complements", async () => {
+    const plugin = await gqlCall({
+      query: `mutation CreateUniverse($name:String!) {
+        pluginCreate(name:$name) {
+          id
+          name
+        }
+      }`,
+      variables: {name: "My Universe"},
+    });
+    const pluginId = plugin.data?.pluginCreate.id;
     const empty = await gqlCall({
       query: `query StationComplement {
-    stationComplements {
+    stationComplements(pluginId:"${pluginId}") {
       id
       name
     }
@@ -13,7 +23,7 @@ describe("Station Complement plugin", () => {
     expect(empty.data?.stationComplements.length).toEqual(0);
     const create = await gqlCall({
       query: `mutation CreateComplement($name:String!) {
-    stationComplementCreate(name:$name) {
+    stationComplementCreate(pluginId:"${pluginId}", name:$name) {
       id
       name
     }
@@ -24,7 +34,7 @@ describe("Station Complement plugin", () => {
     expect(create.data?.stationComplementCreate.name).toEqual("New Complement");
     const full = await gqlCall({
       query: `query StationComplement {
-    stationComplements {
+    stationComplements(pluginId:"${pluginId}") {
       id
       name
     }
@@ -35,7 +45,7 @@ describe("Station Complement plugin", () => {
     const id = full.data?.stationComplements[0].id;
     const complement = await gqlCall({
       query: `query StationComplement($id:ID!) {
-    stationComplement(id:$id) {
+    stationComplement(id:$id, pluginId:"${pluginId}") {
       id
       name
     }
@@ -45,9 +55,19 @@ describe("Station Complement plugin", () => {
     expect(complement.data?.stationComplement.name).toEqual("New Complement");
   });
   it("should fail to create a new complement when one exists", async () => {
+    const plugin = await gqlCall({
+      query: `mutation CreateUniverse($name:String!) {
+        pluginCreate(name:$name) {
+          id
+          name
+        }
+      }`,
+      variables: {name: "My Plugin 2"},
+    });
+    const pluginId = plugin.data?.pluginCreate.id;
     await gqlCall({
       query: `mutation CreateComplement($name:String!) {
-    stationComplementCreate(name:$name) {
+    stationComplementCreate(name:$name, pluginId:"${pluginId}") {
       id
       name
     }
@@ -56,7 +76,7 @@ describe("Station Complement plugin", () => {
     });
     const create = await gqlCall({
       query: `mutation CreateComplement($name:String!) {
-    stationComplementCreate(name:$name) {
+    stationComplementCreate(name:$name, pluginId:"${pluginId}") {
       id
       name
     }

@@ -4,12 +4,12 @@ const savedMath = global.Math;
 async function getStarId() {
   const universe = await gqlCall({
     query: `mutation CreateUniverse {
-    universeCreate(name:"Test Universe${Math.random()}") {
+    pluginCreate(name:"Test Universe${Math.random()}") {
       id
     }
   }`,
   });
-  const id = universe.data?.universeCreate.id;
+  const id = universe.data?.pluginCreate.id;
   const system = await gqlCall({
     query: `mutation CreateSystem($id:ID!) {
     pluginUniverseAddSystem(id:$id, position:{x:0,y:0,z:0}) {
@@ -52,12 +52,12 @@ describe("universe stars", () => {
       const starTypes = ["O", "B", "G", "K", "MG", "M", "D"];
       const universe = await gqlCall({
         query: `mutation CreateUniverse {
-        universeCreate(name:"Test Universe") {
+        pluginCreate(name:"Test Universe") {
           id
         }
       }`,
       });
-      const id = universe.data?.universeCreate.id;
+      const id = universe.data?.pluginCreate.id;
       const system = await gqlCall({
         query: `mutation CreateSystem($id:ID!) {
         pluginUniverseAddSystem(id:$id, position:{x:0,y:0,z:0}) {

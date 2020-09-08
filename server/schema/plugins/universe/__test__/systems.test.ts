@@ -3,12 +3,12 @@ import {gqlCall} from "server/helpers/gqlCall";
 async function getSystem() {
   const universe = await gqlCall({
     query: `mutation CreateUniverse {
-    universeCreate(name:"Test Universe${Math.random()}") {
+    pluginCreate(name:"Test Universe${Math.random()}") {
       id
     }
   }`,
   });
-  const id = universe.data?.universeCreate.id;
+  const id = universe.data?.pluginCreate.id;
   const system = await gqlCall({
     query: `mutation CreateSystem($id:ID!) {
     pluginUniverseAddSystem(id:$id, position:{x:0,y:0,z:0}) {
@@ -56,23 +56,18 @@ describe("universe systems", () => {
   });
   it("should set the name of the system", async () => {
     const {id, systemId} = await getSystem();
-    const universe = await gqlCall({
+    const results = await gqlCall({
       query: `mutation ChangeSystem($id:ID!, $systemId:ID!, $name:String!) {
       pluginUniverseSystemSetName(id:$id, systemId:$systemId, name:$name) {
         id
-        systems {
-          id
-          identity {
-            name
-          }
+        identity {
+          name
         }
       }
     }`,
       variables: {id, systemId, name: "Test Name"},
     });
-    const system = universe.data?.pluginUniverseSystemSetName.systems.find(
-      (s: {id: string}) => s.id === systemId
-    );
+    const system = results.data?.pluginUniverseSystemSetName;
     expect(system.identity.name).toEqual("Test Name");
   });
   it("should set the description of the system", async () => {
@@ -81,19 +76,14 @@ describe("universe systems", () => {
       query: `mutation ChangeSystem($id:ID!, $systemId:ID!, $description:String!) {
       pluginUniverseSystemSetDescription(id:$id, systemId:$systemId, description:$description) {
         id
-        systems {
-          id
-          identity {
-            description
-          }
+        identity {
+          description
         }
       }
     }`,
       variables: {id, systemId, description: "Test Description"},
     });
-    const system = universe.data?.pluginUniverseSystemSetDescription.systems.find(
-      (s: {id: string}) => s.id === systemId
-    );
+    const system = universe.data?.pluginUniverseSystemSetDescription;
     expect(system.identity.description).toEqual("Test Description");
   });
   it("should set the skybox key of the system", async () => {
@@ -102,42 +92,32 @@ describe("universe systems", () => {
       query: `mutation ChangeSystem($id:ID!, $systemId:ID!, $skyboxKey:String!) {
       pluginUniverseSystemSetSkyboxKey(id:$id, systemId:$systemId, skyboxKey:$skyboxKey) {
         id
-        systems {
-          id
-          planetarySystem {
-            skyboxKey
-          }
+        planetarySystem {
+          skyboxKey
         }
       }
     }`,
       variables: {id, systemId, skyboxKey: "Test Key"},
     });
-    const system = universe.data?.pluginUniverseSystemSetSkyboxKey.systems.find(
-      (s: {id: string}) => s.id === systemId
-    );
+    const system = universe.data?.pluginUniverseSystemSetSkyboxKey;
     expect(system.planetarySystem.skyboxKey).toEqual("Test Key");
   });
   it("should set the position of the system", async () => {
     const {id, systemId} = await getSystem();
     const universe = await gqlCall({
       query: `mutation ChangeSystem($id:ID!, $systemId:ID!, $position:PositionInput!) {
-  pluginUniverseSystemSetPosition(id:$id, systemId:$systemId, position:$position) {
-      id
-      systems {
+        pluginUniverseSystemSetPosition(id:$id, systemId:$systemId, position:$position) {
           id
           position {
             x
             y
             z
           }
-          }
         }
       }`,
       variables: {id, systemId, position: {x: 1, y: 2, z: 3}},
     });
-    const system = universe.data?.pluginUniverseSystemSetPosition.systems.find(
-      (s: {id: string}) => s.id === systemId
-    );
+    const system = universe.data?.pluginUniverseSystemSetPosition;
     expect(system.position.x).toEqual(1);
     expect(system.position.y).toEqual(2);
     expect(system.position.z).toEqual(3);

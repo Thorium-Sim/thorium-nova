@@ -8,18 +8,18 @@ describe("Universe Plugin", () => {
   it("should query and get no results", async () => {
     const universes = await gqlCall({
       query: `query Universe {
-        templateUniverses {
+        plugins {
           id
           name
         }
       }`,
     });
-    expect(universes.data?.templateUniverses.length).toEqual(0);
+    expect(universes.data?.plugins.length).toEqual(0);
   });
   it("should create a universe", async () => {
     const universe = await gqlCall({
       query: `mutation CreateUniverse($name:String!) {
-        universeCreate(name:$name) {
+        pluginCreate(name:$name) {
           id
           name
         }
@@ -27,22 +27,22 @@ describe("Universe Plugin", () => {
       variables: {name: "My Universe"},
     });
 
-    expect(universe.data?.universeCreate.name).toEqual("My Universe");
-    const id = universe.data?.universeCreate.id;
+    expect(universe.data?.pluginCreate.name).toEqual("My Universe");
+    const id = universe.data?.pluginCreate.id;
     const universes = await gqlCall({
       query: `query Universe {
-        templateUniverses {
+        plugins {
           id
           name
         }
       }`,
     });
-    expect(universes.data?.templateUniverses.length).toEqual(1);
-    expect(universes.data?.templateUniverses[0].name).toEqual("My Universe");
+    expect(universes.data?.plugins.length).toEqual(1);
+    expect(universes.data?.plugins[0].name).toEqual("My Universe");
 
     const universeFail = await gqlCall({
       query: `mutation CreateUniverse($name:String!) {
-        universeCreate(name:$name) {
+        pluginCreate(name:$name) {
           id
           name
         }
@@ -50,12 +50,12 @@ describe("Universe Plugin", () => {
       variables: {name: "My Universe"},
     });
     expect(universeFail.errors?.[0].message).toEqual(
-      "A universe with that name already exists."
+      "A plugin with that name already exists."
     );
 
     await gqlCall({
       query: `mutation RemoveUniverse($id:ID!) {
-        universeRemove(id:$id)
+        pluginRemove(id:$id)
       }`,
       variables: {id},
     });
@@ -63,17 +63,17 @@ describe("Universe Plugin", () => {
   it("should remove a universe", async () => {
     const universe = await gqlCall({
       query: `mutation CreateUniverse($name:String!) {
-        universeCreate(name:$name) {
+        pluginCreate(name:$name) {
           id
           name
         }
       }`,
       variables: {name: "My Universe 2"},
     });
-    const id = universe.data?.universeCreate.id;
+    const id = universe.data?.pluginCreate.id;
     const queryUniverse = await gqlCall({
       query: `query Universe($id:ID!) {
-        templateUniverse(id:$id) {
+        plugin(id:$id) {
           id
           name
         }
@@ -81,40 +81,40 @@ describe("Universe Plugin", () => {
       variables: {id},
     });
 
-    expect(queryUniverse.data?.templateUniverse.name).toEqual("My Universe 2");
+    expect(queryUniverse.data?.plugin.name).toEqual("My Universe 2");
 
     await gqlCall({
       query: `mutation RemoveUniverse($id:ID!) {
-        universeRemove(id:$id)
+        pluginRemove(id:$id)
       }`,
       variables: {id},
     });
 
     const universes = await gqlCall({
       query: `query Universe {
-        templateUniverses {
+        plugins {
           id
           name
         }
       }`,
     });
-    expect(universes.data?.templateUniverses.length).toEqual(0);
+    expect(universes.data?.plugins.length).toEqual(0);
   });
   it("should fail to set a duplicate name", async () => {
     const universe = await gqlCall({
       query: `mutation CreateUniverse($name:String!) {
-        universeCreate(name:$name) {
+        pluginCreate(name:$name) {
           id
           name
         }
       }`,
       variables: {name: "My Universe"},
     });
-    const id = universe.data?.universeCreate.id;
+    const id = universe.data?.pluginCreate.id;
 
     const universeFail = await gqlCall({
       query: `mutation SetName($id:ID!, $name:String!) {
-        universeSetName(id:$id, name:$name) {
+        pluginSetName(id:$id, name:$name) {
           id
         }
       }`,
@@ -124,23 +124,23 @@ describe("Universe Plugin", () => {
       },
     });
     expect(universeFail.errors?.[0].message).toEqual(
-      "A universe with that name already exists."
+      "A plugin with that name already exists."
     );
   });
   it("should set name, description, and tags", async () => {
     const universe = await gqlCall({
       query: `mutation CreateUniverse($name:String!) {
-        universeCreate(name:$name) {
+        pluginCreate(name:$name) {
           id
           name
         }
       }`,
       variables: {name: "My Universe 3"},
     });
-    const id = universe.data?.universeCreate.id;
+    const id = universe.data?.pluginCreate.id;
     const queryUniverse = await gqlCall({
       query: `query Universe($id:ID!) {
-        templateUniverse(id:$id) {
+        plugin(id:$id) {
           id
           name
           description
@@ -149,21 +149,19 @@ describe("Universe Plugin", () => {
       }`,
       variables: {id},
     });
-    expect(queryUniverse.data?.templateUniverse.name).toEqual("My Universe 3");
-    expect(queryUniverse.data?.templateUniverse.description).toEqual(
-      "A great plugin"
-    );
-    expect(queryUniverse.data?.templateUniverse.tags.length).toEqual(0);
+    expect(queryUniverse.data?.plugin.name).toEqual("My Universe 3");
+    expect(queryUniverse.data?.plugin.description).toEqual("A great plugin");
+    expect(queryUniverse.data?.plugin.tags.length).toEqual(0);
 
     await gqlCall({
       query: `mutation SetName($id:ID!, $name:String!, $description:String!, $tags:[String!]!) {
-        universeSetName(id:$id, name:$name) {
+        pluginSetName(id:$id, name:$name) {
           id
         }
-        universeSetDescription(id:$id, description:$description) {
+        pluginSetDescription(id:$id, description:$description) {
           id
         }
-        universeSetTags(id:$id, tags:$tags) {
+        pluginSetTags(id:$id, tags:$tags) {
           id
         }
       }`,
@@ -177,7 +175,7 @@ describe("Universe Plugin", () => {
 
     const queryUniverse2 = await gqlCall({
       query: `query Universe($id:ID!) {
-        templateUniverse(id:$id) {
+        plugin(id:$id) {
           id
           name
           description
@@ -186,18 +184,18 @@ describe("Universe Plugin", () => {
       }`,
       variables: {id},
     });
-    expect(queryUniverse2.data?.templateUniverse.name).toEqual("A new name");
-    expect(queryUniverse2.data?.templateUniverse.description).toEqual(
+    expect(queryUniverse2.data?.plugin.name).toEqual("A new name");
+    expect(queryUniverse2.data?.plugin.description).toEqual(
       "A great description"
     );
-    expect(queryUniverse2.data?.templateUniverse.tags.length).toEqual(2);
-    expect(queryUniverse2.data?.templateUniverse.tags).toContain("tag1");
-    expect(queryUniverse2.data?.templateUniverse.tags).toContain("tag2");
+    expect(queryUniverse2.data?.plugin.tags.length).toEqual(2);
+    expect(queryUniverse2.data?.plugin.tags).toContain("tag1");
+    expect(queryUniverse2.data?.plugin.tags).toContain("tag2");
   });
   it("should properly add and query for a cover image", async () => {
     const universe = await gqlCall({
       query: `mutation CreateUniverse($name:String!) {
-        universeCreate(name:$name) {
+        pluginCreate(name:$name) {
           id
           name
           coverImage
@@ -205,15 +203,15 @@ describe("Universe Plugin", () => {
       }`,
       variables: {name: "My Universe 4"},
     });
-    const id = universe.data?.universeCreate.id;
-    expect(universe.data?.universeCreate.coverImage).toBeFalsy();
+    const id = universe.data?.pluginCreate.id;
+    expect(universe.data?.pluginCreate.coverImage).toBeFalsy();
 
     const file = fs.createReadStream(path.resolve(__dirname, `./logo.svg`));
 
     const upload = new Upload();
     const assetChangePromise = gqlCall({
       query: `mutation setCoverImage($id:ID!, $image:Upload!) {
-        universeSetCoverImage(id:$id, image:$image) {
+        pluginSetCoverImage(id:$id, image:$image) {
           id
           coverImage
         }
@@ -231,8 +229,8 @@ describe("Universe Plugin", () => {
     });
 
     const assetChange = await assetChangePromise;
-    expect(assetChange.data?.universeSetCoverImage.coverImage).toEqual(
-      "/assets/universes/My Universe 4/cover.svg"
+    expect(assetChange.data?.pluginSetCoverImage.coverImage).toEqual(
+      "/assets/plugins/My Universe 4/cover.svg"
     );
   });
 });

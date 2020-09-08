@@ -14,7 +14,7 @@ import {
 import sleep from "../../../helpers/sleep";
 import React from "react";
 import {FaEdit} from "react-icons/fa";
-import {useNavigate, useParams} from "react-router";
+import {Route, Routes, useNavigate, useParams} from "react-router";
 import {Link as NavLink} from "react-router-dom";
 import SearchableList from "../../ui/SearchableList";
 import PluginForm from "../../ui/PluginForm";
@@ -29,6 +29,9 @@ import {
 } from "../../../generated/graphql";
 import {useAlert, useConfirm, usePrompt} from "../../Dialog";
 import {useTranslation} from "react-i18next";
+import {css} from "@emotion/core";
+
+const Config = React.lazy(() => import("../../../pages/Config"));
 
 const PluginList = () => {
   const {t} = useTranslation();
@@ -40,7 +43,7 @@ const PluginList = () => {
   async function onClose() {
     setIsOpen(false);
     await sleep(250);
-    navigate("..");
+    navigate("/");
   }
   const params = useParams();
 
@@ -114,13 +117,18 @@ const PluginList = () => {
         {/* @ts-ignore */}
         {styles => (
           <Modal isOpen={true} size="full" scrollBehavior="inside">
-            <ModalOverlay opacity={styles.opacity} zIndex={1500} />
+            <ModalOverlay
+              opacity={styles.opacity}
+              css={css`
+                backdrop-filter: blur(50px);
+              `}
+            />
             <ModalContent
               {...styles}
               maxWidth="960px"
               display="flex"
               flexDir="column"
-              zIndex={1600}
+              pb={4}
             >
               <ModalHeader fontSize="4xl">{t(`Plugins`)}</ModalHeader>
               <ModalCloseButton onClick={onClose} />
@@ -153,7 +161,7 @@ const PluginList = () => {
                         </div>
                         <Button
                           as={NavLink}
-                          {...{to: `/starmap/${c.id}`}}
+                          {...{to: `/config/${c.id}/edit`}}
                           onClick={e => e.stopPropagation()}
                           variant="outline"
                           size="sm"
@@ -189,26 +197,33 @@ const PluginList = () => {
                     {t(`Create Plugin`)}
                   </Button>
                 </ButtonGroup>
-                <ButtonGroup>
-                  {/* <Button variantColor="info">{t(`Export`)}</Button> */}
-                  <Button
-                    variantColor="danger"
-                    {...{disabled: !plugin}}
-                    onClick={handleRemove}
-                  >
-                    {t(`Remove`)}
-                  </Button>
-                </ButtonGroup>
+                {plugin && (
+                  <ButtonGroup>
+                    {/* <Button variantColor="info">{t(`Export`)}</Button> */}
+                    <Button
+                      as={NavLink}
+                      {...{
+                        to: `/config/${plugin?.id}/edit`,
+                      }}
+                      variantColor="info"
+                    >
+                      {t(`Edit Plugin`)}
+                    </Button>
+                    <Button variantColor="danger" onClick={handleRemove}>
+                      {t(`Remove`)}
+                    </Button>
+                  </ButtonGroup>
+                )}
               </Grid>
-              <ModalFooter>
-                <Button variantColor="blue" onClick={onClose}>
-                  {t(`Back`)}
-                </Button>
-              </ModalFooter>
             </ModalContent>
           </Modal>
         )}
       </Scale>
+      <React.Suspense fallback={null}>
+        <Routes>
+          <Route path="edit" element={<Config />}></Route>
+        </Routes>
+      </React.Suspense>
     </>
   );
 };

@@ -49,8 +49,8 @@ interface ShipsPayload {
  */
 
 function publishShip(ship: Entity) {
-  pubsub.publish("templateShip", {shipId: ship.id, ship});
-  pubsub.publish("templateShips", {
+  pubsub.publish("pluginShip", {shipId: ship.id, ship});
+  pubsub.publish("pluginShips", {
     entities: App.activeFlight?.ships,
   });
 }
@@ -219,7 +219,7 @@ export class ShipPluginResolver {
       return [id, "pluginShips"];
     },
   })
-  templateShips(
+  pluginShips(
     @Root() payload: ShipsPayload,
     @Arg("pluginId", type => ID) pluginId: string
   ): Entity[] {

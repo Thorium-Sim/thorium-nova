@@ -13,16 +13,12 @@ import {
   PseudoBox,
   Scale,
 } from "@chakra-ui/core";
-import {css} from "@emotion/core";
-import React, {Suspense} from "react";
+import sleep from "../helpers/sleep";
+import React from "react";
 import {useTranslation} from "react-i18next";
 import {FaStar, FaTools} from "react-icons/fa";
-import {Route, Routes, useNavigate} from "react-router";
+import {useNavigate, useParams} from "react-router";
 import {NavLink} from "react-router-dom";
-
-const PluginsList = React.lazy(() =>
-  import("../components/plugins/pluginsList")
-);
 
 const ConfigIcon: React.FC<{to: string}> = props => {
   return (
@@ -43,19 +39,19 @@ const ConfigIcon: React.FC<{to: string}> = props => {
     ></PseudoBox>
   );
 };
-const sleep = (duration: number) =>
-  new Promise(resolve => setTimeout(resolve, duration));
+
 const Config = () => {
   const {t} = useTranslation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = React.useState(false);
+  const {pluginId} = useParams();
   React.useEffect(() => {
     setIsOpen(true);
   }, []);
   async function onClose() {
     setIsOpen(false);
     await sleep(250);
-    navigate("/");
+    navigate("..");
   }
   return (
     <>
@@ -64,13 +60,8 @@ const Config = () => {
         {/* @ts-ignore */}
         {styles => (
           <Modal isOpen={true} size="full">
-            <ModalOverlay
-              css={css`
-                backdrop-filter: blur(50px);
-              `}
-              opacity={styles.opacity}
-            />
-            <ModalContent {...styles} maxWidth="960px">
+            <ModalOverlay zIndex={1500} opacity={styles.opacity} />
+            <ModalContent {...styles} maxWidth="960px" zIndex={1600}>
               <ModalHeader fontSize="4xl">
                 {t("Plugin Configuration")}
               </ModalHeader>
@@ -81,7 +72,7 @@ const Config = () => {
                 justifyItems="center"
                 gap={10}
               >
-                <ConfigIcon to="universes">
+                <ConfigIcon to={`/starmap/${pluginId}`}>
                   <Box as={FaStar} fontSize="6xl" mb={4} />
                   <Heading fontSize="lg">{t("Universes")}</Heading>
                 </ConfigIcon>
@@ -90,16 +81,10 @@ const Config = () => {
                   <Heading fontSize="lg">{t("Ship Systems")}</Heading>
                 </ConfigIcon>
               </Grid>
-              <ModalFooter>
-                <Button variantColor="blue" onClick={onClose}>
-                  {t("Close")}
-                </Button>
-              </ModalFooter>
             </ModalContent>
           </Modal>
         )}
       </Scale>
-      <Suspense fallback={null}></Suspense>
     </>
   );
 };

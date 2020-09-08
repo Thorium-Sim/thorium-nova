@@ -148,7 +148,7 @@ function StarSearch() {
           type="search"
           justifySelf="end"
           maxWidth="300px"
-          {...getInputProps({type: "search", placeholder: t("Search...")})}
+          {...getInputProps({type: "search", placeholder: "Search..."})}
         />
         <Button
           size="sm"

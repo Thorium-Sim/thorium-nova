@@ -14,9 +14,9 @@ export default function uploadAsset(
     const readStream = file.createReadStream();
     /* istanbul ignore else */
     if (!readStream && process.env.NODE_ENV === "test") {
-      resolve();
+      return resolve();
     } else if (!readStream) {
-      reject("Error creating read stream");
+      return reject("Error creating read stream");
     }
     /* istanbul ignore next */
     return readStream

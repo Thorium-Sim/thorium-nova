@@ -12,7 +12,7 @@ describe("Ship Assets", () => {
           {
             request: {
               query: TemplateShipAssetsDocument,
-              variables: {id: "2cajg1l9kkda54e0y"},
+              variables: {pluginId: "test", id: "2cajg1l9kkda54e0y"},
             },
             result: {
               data: {

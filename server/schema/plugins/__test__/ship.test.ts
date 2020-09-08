@@ -7,165 +7,256 @@ const fs = jest.genMockFromModule("fs") as any;
 
 describe("Ship Plugin", () => {
   it("should query and get no results", async () => {
+    const plugin = await gqlCall({
+      query: `mutation CreateUniverse($name:String!) {
+        pluginCreate(name:$name) {
+          id
+          name
+        }
+      }`,
+      variables: {name: "My Plugin"},
+    });
+    const pluginId = plugin.data?.pluginCreate.id;
     const ships = await gqlCall({
-      query: `query Ships {
-      templateShips {
+      query: `query Ships($pluginId:ID!) {
+      pluginShips(pluginId:$pluginId) {
         id
         identity {
           name
         }
       }
     }`,
+      variables: {pluginId},
     });
-    expect(ships.data?.templateShips).toEqual([]);
+    expect(ships.data?.pluginShips).toEqual([]);
   });
   it("should query and get a template ship", async () => {
-    await gqlCall({
-      query: `mutation AddShip {
-        shipCreateTemplate(name:"Test Ship") {
+    const plugin = await gqlCall({
+      query: `mutation CreateUniverse($name:String!) {
+        pluginCreate(name:$name) {
+          id
+          name
+        }
+      }`,
+      variables: {name: "My Plugin 2"},
+    });
+    const pluginId = plugin.data?.pluginCreate.id;
+    const result = await gqlCall({
+      query: `mutation AddShip($pluginId:ID!) {
+        pluginShipCreate(name:"Test Ship", pluginId:$pluginId) {
           id
         }
       }`,
-    });
-    const ships = await gqlCall({
-      query: `query Ships {
-      templateShips {
-        id
-        identity {
-          name
-        }
-      }
-    }`,
+      variables: {pluginId},
     });
 
-    expect(ships.data?.templateShips[0].identity.name).toEqual("Test Ship");
-    const id = ships.data?.templateShips[0].id;
-    const ship = await gqlCall({
-      query: `query Ship($id:ID!) {
-      templateShip(id:$id) {
+    const ships = await gqlCall({
+      query: `query Ships($pluginId:ID!) {
+      pluginShips(pluginId:$pluginId) {
         id
         identity {
           name
         }
       }
     }`,
-      variables: {id},
+      variables: {pluginId},
     });
-    expect(ship.data?.templateShip.identity.name).toEqual("Test Ship");
+    expect(ships.data?.pluginShips[0].identity.name).toEqual("Test Ship");
+    const id = ships.data?.pluginShips[0].id;
+    const ship = await gqlCall({
+      query: `query Ship($id:ID!, $pluginId:ID!) {
+      pluginShip(id:$id, pluginId:$pluginId) {
+        id
+        identity {
+          name
+        }
+      }
+    }`,
+      variables: {id, pluginId},
+    });
+    expect(ship.data?.pluginShip.identity.name).toEqual("Test Ship");
   });
 
   it("should throw an error if a ship is created with the same name", async () => {
+    const plugin = await gqlCall({
+      query: `mutation CreateUniverse($name:String!) {
+        pluginCreate(name:$name) {
+          id
+          name
+        }
+      }`,
+      variables: {name: "My Plugin 3"},
+    });
+    const pluginId = plugin.data?.pluginCreate.id;
     await gqlCall({
-      query: `mutation AddShip {
-        shipCreateTemplate(name:"Same Name") {
+      query: `mutation AddShip($pluginId:ID!) {
+        pluginShipCreate(name:"Same Name", pluginId:$pluginId) {
           id
         }
       }`,
+      variables: {pluginId},
     });
     const ship = await gqlCall({
-      query: `mutation AddShip {
-        shipCreateTemplate(name:"Same Name") {
+      query: `mutation AddShip($pluginId:ID!) {
+        pluginShipCreate(name:"Same Name", pluginId:$pluginId) {
           id
         }
       }`,
+      variables: {pluginId},
     });
     expect(ship.errors?.[0].message).toEqual(
       "A ship with that name already exists."
     );
   });
   it("should properly rename a ship", async () => {
+    const plugin = await gqlCall({
+      query: `mutation CreateUniverse($name:String!) {
+        pluginCreate(name:$name) {
+          id
+          name
+        }
+      }`,
+      variables: {name: "My Plugin 4"},
+    });
+    const pluginId = plugin.data?.pluginCreate.id;
     const newShip = await gqlCall({
-      query: `mutation AddShip {
-        shipCreateTemplate(name:"Rename Ship") {
+      query: `mutation AddShip($pluginId:ID!) {
+        pluginShipCreate(name:"Rename Ship", pluginId:$pluginId) {
           id
           identity {
             name
           }
         }
       }`,
+      variables: {pluginId},
     });
-    const id = newShip.data?.shipCreateTemplate.id;
+    const id = newShip.data?.pluginShipCreate.id;
     const renamedShip = await gqlCall({
-      query: `mutation RenameShip($id:ID!, $name:String!) {
-          templateShipRename(id:$id, name:$name) {
+      query: `mutation RenameShip($pluginId:ID!, $id:ID!, $name:String!) {
+          pluginShipRename(id:$id, name:$name, pluginId:$pluginId) {
             id
             identity {
               name
             }
           }
         }`,
-      variables: {id, name: "New Name"},
+      variables: {id, name: "New Name", pluginId},
     });
-    expect(renamedShip.data?.templateShipRename.identity.name).toEqual(
+    expect(renamedShip.data?.pluginShipRename.identity.name).toEqual(
       "New Name"
     );
-    expect(renamedShip.data?.templateShipRename.identity.name).not.toEqual(
-      newShip.data?.shipCreateTemplate.identity.name
+    expect(renamedShip.data?.pluginShipRename.identity.name).not.toEqual(
+      newShip.data?.pluginShipCreate.identity.name
     );
   });
   it("should fail to rename a ship with an invalid ID", async () => {
+    const plugin = await gqlCall({
+      query: `mutation CreateUniverse($name:String!) {
+        pluginCreate(name:$name) {
+          id
+          name
+        }
+      }`,
+      variables: {name: "My Plugin 5"},
+    });
+    const pluginId = plugin.data?.pluginCreate.id;
+
     const renamedShip = await gqlCall({
-      query: `mutation RenameShip($id:ID!, $name:String!) {
-          templateShipRename(id:$id, name:$name) {
+      query: `mutation RenameShip($id:ID!, $name:String!, $pluginId:ID!) {
+          pluginShipRename(id:$id, name:$name, pluginId:$pluginId) {
             id
             identity {
               name
             }
           }
         }`,
-      variables: {id: "Not a real ship", name: "New Name"},
+      variables: {id: "Not a real ship", name: "New Name", pluginId},
     });
     expect(renamedShip.errors?.[0].message).toEqual("Unable to find ship.");
   });
   it("should fail to change the theme of a ship with an invalid ID", async () => {
+    const plugin = await gqlCall({
+      query: `mutation CreateUniverse($name:String!) {
+        pluginCreate(name:$name) {
+          id
+          name
+        }
+      }`,
+      variables: {name: "My Plugin 6"},
+    });
+    const pluginId = plugin.data?.pluginCreate.id;
+
     const rethemedShip = await gqlCall({
-      query: `mutation ReThemeShip($id:ID!, $theme:String!) {
-          templateShipSetTheme(id:$id, theme:$theme) {
+      query: `mutation ReThemeShip($id:ID!, $theme:String!, $pluginId:ID!) {
+          pluginShipSetTheme(id:$id, theme:$theme, pluginId:$pluginId) {
             id
             theme {
               value
             }
           }
         }`,
-      variables: {id: "Not a real ship", theme: "New Theme"},
+      variables: {id: "Not a real ship", theme: "New Theme", pluginId},
     });
     expect(rethemedShip.errors?.[0].message).toEqual("Unable to find ship.");
   });
   it("should properly change the theme of a ship", async () => {
+    const plugin = await gqlCall({
+      query: `mutation CreateUniverse($name:String!) {
+        pluginCreate(name:$name) {
+          id
+          name
+        }
+      }`,
+      variables: {name: "My Plugin 7"},
+    });
+    const pluginId = plugin.data?.pluginCreate.id;
+
     const newShip = await gqlCall({
-      query: `mutation AddShip {
-        shipCreateTemplate(name:"Retheme Ship") {
+      query: `mutation AddShip($pluginId:ID!) {
+        pluginShipCreate(name:"Retheme Ship",pluginId:$pluginId) {
           id
           theme {
             value
           }
         }
       }`,
+      variables: {pluginId},
     });
-    const id = newShip.data?.shipCreateTemplate.id;
+    const id = newShip.data?.pluginShipCreate.id;
     const rethemedShip = await gqlCall({
-      query: `mutation ReThemeShip($id:ID!, $theme:String!) {
-          templateShipSetTheme(id:$id, theme:$theme) {
+      query: `mutation ReThemeShip($id:ID!, $theme:String!, $pluginId:ID!) {
+          pluginShipSetTheme(id:$id, theme:$theme,pluginId:$pluginId) {
             id
             theme {
               value
             }
           }
         }`,
-      variables: {id, theme: "New Theme"},
+      variables: {id, theme: "New Theme", pluginId},
     });
 
-    expect(rethemedShip.data?.templateShipSetTheme.theme.value).toEqual(
+    expect(rethemedShip.data?.pluginShipSetTheme.theme.value).toEqual(
       "New Theme"
     );
-    expect(rethemedShip.data?.templateShipSetTheme.theme.value).not.toEqual(
-      newShip.data?.shipCreateTemplate.theme.value
+    expect(rethemedShip.data?.pluginShipSetTheme.theme.value).not.toEqual(
+      newShip.data?.pluginShipCreate.theme.value
     );
   });
   it("should properly add and query for ship assets", async () => {
+    const plugin = await gqlCall({
+      query: `mutation CreateUniverse($name:String!) {
+        pluginCreate(name:$name) {
+          id
+          name
+        }
+      }`,
+      variables: {name: "My Plugin 9"},
+    });
+    const pluginId = plugin.data?.pluginCreate.id;
+
     const newShip = await gqlCall({
-      query: `mutation AddShip {
-        shipCreateTemplate(name:"Asset Ship") {
+      query: `mutation AddShip($pluginId:ID!) {
+        pluginShipCreate(name:"Asset Ship", pluginId:$pluginId) {
           id
           shipAssets {
             logo
@@ -176,16 +267,17 @@ describe("Ship Plugin", () => {
           }
         }
       }`,
+      variables: {pluginId},
     });
-    const id = newShip.data?.shipCreateTemplate.id;
-    expect(newShip.data?.shipCreateTemplate.shipAssets.logo).toBeFalsy();
+    const id = newShip.data?.pluginShipCreate.id;
+    expect(newShip.data?.pluginShipCreate.shipAssets.logo).toBeFalsy();
 
     const file = fs.createReadStream(path.resolve(__dirname, `./logo.svg`));
 
     const upload = new Upload();
     const assetChangePromise = gqlCall({
-      query: `mutation SetLogo($id:ID!, $image:Upload!) {
-        templateShipSetLogo(id:$id, image:$image) {
+      query: `mutation SetLogo($id:ID!, $image:Upload!, $pluginId:ID!) {
+        pluginShipSetLogo(id:$id, image:$image, pluginId:$pluginId) {
           id
           shipAssets {
             logo
@@ -199,6 +291,7 @@ describe("Ship Plugin", () => {
       variables: {
         id,
         image: upload,
+        pluginId,
       },
     });
     upload.resolve({
@@ -209,14 +302,14 @@ describe("Ship Plugin", () => {
     });
 
     const assetChange = await assetChangePromise;
-    expect(assetChange.data?.templateShipSetLogo.shipAssets.logo).toEqual(
+    expect(assetChange.data?.pluginShipSetLogo.shipAssets.logo).toEqual(
       "/assets/ships/Asset Ship/logo.svg"
     );
 
     const modelUpload = new Upload();
     const modelChangePromise = gqlCall({
-      query: `mutation SetModel($id:ID!, $model:Upload!, $top:Upload!, $side:Upload!, $vanity:Upload!) {
-        templateShipSetModel(id:$id, model:$model, top:$top, side:$side, vanity:$vanity) {
+      query: `mutation SetModel($id:ID!, $model:Upload!, $top:Upload!, $side:Upload!, $vanity:Upload!, $pluginId:ID!) {
+        pluginShipSetModel(id:$id, model:$model, top:$top, side:$side, vanity:$vanity, pluginId:$pluginId) {
           id
           shipAssets {
             logo
@@ -233,6 +326,7 @@ describe("Ship Plugin", () => {
         top: modelUpload,
         side: modelUpload,
         vanity: modelUpload,
+        pluginId,
       },
     });
     modelUpload.resolve({
@@ -243,16 +337,16 @@ describe("Ship Plugin", () => {
     });
 
     const modelChange = await modelChangePromise;
-    expect(modelChange.data?.templateShipSetModel.shipAssets.model).toEqual(
+    expect(modelChange.data?.pluginShipSetModel.shipAssets.model).toEqual(
       "/assets/ships/Asset Ship/model.glb"
     );
-    expect(modelChange.data?.templateShipSetModel.shipAssets.vanity).toEqual(
+    expect(modelChange.data?.pluginShipSetModel.shipAssets.vanity).toEqual(
       "/assets/ships/Asset Ship/vanity.png"
     );
-    expect(modelChange.data?.templateShipSetModel.shipAssets.top).toEqual(
+    expect(modelChange.data?.pluginShipSetModel.shipAssets.top).toEqual(
       "/assets/ships/Asset Ship/top.png"
     );
-    expect(modelChange.data?.templateShipSetModel.shipAssets.side).toEqual(
+    expect(modelChange.data?.pluginShipSetModel.shipAssets.side).toEqual(
       "/assets/ships/Asset Ship/side.png"
     );
   });
