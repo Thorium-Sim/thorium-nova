@@ -1,0 +1,7 @@
+query OutfitAbilities {
+  outfitAbilities: __type(name: "OutfitAbilities") {
+    enumValues {
+      name
+    }
+  }
+}

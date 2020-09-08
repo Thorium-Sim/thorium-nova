@@ -7,8 +7,8 @@ export default async function setupBonjour(
 ) {
   const bj = bonjour();
   const service = bj.publish({
-    name: `Thorium-${os.hostname()}`,
-    type: "thorium-http",
+    name: `Thorium-Nova-${os.hostname()}`,
+    type: "thorium-nova-http",
     port: port,
     txt: {https: String(process.env.NODE_ENV === "production" && !httpOnly)},
   });

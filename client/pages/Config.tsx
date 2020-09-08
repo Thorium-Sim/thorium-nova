@@ -72,13 +72,13 @@ const Config = () => {
                 justifyItems="center"
                 gap={10}
               >
-                <ConfigIcon to={`/starmap/${pluginId}`}>
+                <ConfigIcon to={`/edit/${pluginId}/starmap`}>
                   <Box as={FaStar} fontSize="6xl" mb={4} />
                   <Heading fontSize="lg">{t("Universes")}</Heading>
                 </ConfigIcon>
-                <ConfigIcon to="systems">
+                <ConfigIcon to={`/edit/${pluginId}/outfits`}>
                   <Box as={FaTools} fontSize="6xl" mb={4} />
-                  <Heading fontSize="lg">{t("Ship Systems")}</Heading>
+                  <Heading fontSize="lg">{t("Outfits")}</Heading>
                 </ConfigIcon>
               </Grid>
             </ModalContent>

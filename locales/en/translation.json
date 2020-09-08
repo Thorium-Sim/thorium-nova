@@ -1,34 +1,8 @@
 {
-  "Add": "Add",
-  "Add Moon": "Add Moon",
-  "Add Planet": "Add Planet",
-  "Add Star": "Add Star",
-  "Are you sure you want to permanently remove this plugin?": "Are you sure you want to permanently remove this plugin?",
-  "Are you sure you want to remove this {{object}}?": "Are you sure you want to remove this {{object}}?",
-  "Cancel": "Cancel",
-  "Close": "Close",
-  "Create Plugin": "Create Plugin",
-  "Delete": "Delete",
-  "Edit": "Edit",
-  "Edit Plugin": "Edit Plugin",
-  "Error Creating Plugin": "Error Creating Plugin",
-  "Error Removing Plugin": "Error Removing Plugin",
-  "It will remove all of the objects inside of it": {
-    "": ""
-  },
+  "Add an Outfit": "Add an Outfit",
+  "New Outfit": "New Outfit",
+  "Outfits": "Outfits",
   "Plugin Configuration": "Plugin Configuration",
-  "Plugin Name": "Plugin Name",
-  "Plugins": "Plugins",
-  "Remove": "Remove",
   "Ship Systems": "Ship Systems",
-  "This will delete all of its objects and assets": {
-    "": ""
-  },
-  "Universes": "Universes",
-  "What is the name of the new plugin?": "What is the name of the new plugin?",
-  "object": "object",
-  "planet": "planet",
-  "planetary system": "planetary system",
-  "star": "star",
-  "toggle menu": "toggle menu"
+  "Universes": "Universes"
 }

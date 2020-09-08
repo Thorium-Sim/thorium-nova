@@ -24,6 +24,15 @@ export enum EntityTypes {
   Timer = "timer",
 }
 
+export enum OutfitAbilities {
+  WarpEngines = "warpEngines",
+  ImpulseEngines = "impulseEngines",
+  Thrusters = "thrusters",
+  Navigation = "navigation",
+  JumpDrive = "jumpDrive",
+  Generic = "generic",
+}
+
 export type PositionInput = {
   x: Maybe<Scalars["Float"]>;
   y: Maybe<Scalars["Float"]>;
@@ -144,6 +153,53 @@ export type TimersSubscription = {
         paused: boolean;
       };
     };
+  }>;
+};
+
+export type OutfitAbilitiesQueryVariables = Exact<{[key: string]: never}>;
+
+export type OutfitAbilitiesQuery = {
+  __typename?: "Query";
+  outfitAbilities: Maybe<{
+    __typename?: "__Type";
+    enumValues: Maybe<Array<{__typename?: "__EnumValue"; name: string}>>;
+  }>;
+};
+
+export type PluginAddOutfitMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  ability: OutfitAbilities;
+}>;
+
+export type PluginAddOutfitMutation = {
+  __typename?: "Mutation";
+  pluginAddOutfit: {
+    __typename?: "Entity";
+    id: string;
+    identity: {
+      __typename?: "IdentityComponent";
+      name: string;
+      description: string;
+    };
+  };
+};
+
+export type PluginOutfitsSubscriptionVariables = Exact<{
+  pluginId: Scalars["ID"];
+}>;
+
+export type PluginOutfitsSubscription = {
+  __typename?: "Subscription";
+  pluginOutfits: Array<{
+    __typename?: "Entity";
+    id: string;
+    identity: {
+      __typename?: "IdentityComponent";
+      name: string;
+      description: string;
+    };
+    isOutfit: {__typename?: "IsOutfitComponent"; outfitType: string};
+    tags: {__typename?: "TagsComponent"; tags: Array<string>};
   }>;
 };
 
@@ -1111,6 +1167,99 @@ export function useTimersSubscription(
 }
 export type TimersSubscriptionHookResult = ReturnType<
   typeof useTimersSubscription
+>;
+export const OutfitAbilitiesDocument = gql`
+  query OutfitAbilities {
+    outfitAbilities: __type(name: "OutfitAbilities") {
+      enumValues {
+        name
+      }
+    }
+  }
+`;
+export function useOutfitAbilitiesQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    OutfitAbilitiesQuery,
+    OutfitAbilitiesQueryVariables
+  >
+) {
+  return Apollo.useQuery<OutfitAbilitiesQuery, OutfitAbilitiesQueryVariables>(
+    OutfitAbilitiesDocument,
+    baseOptions
+  );
+}
+export function useOutfitAbilitiesLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    OutfitAbilitiesQuery,
+    OutfitAbilitiesQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    OutfitAbilitiesQuery,
+    OutfitAbilitiesQueryVariables
+  >(OutfitAbilitiesDocument, baseOptions);
+}
+export type OutfitAbilitiesQueryHookResult = ReturnType<
+  typeof useOutfitAbilitiesQuery
+>;
+export type OutfitAbilitiesLazyQueryHookResult = ReturnType<
+  typeof useOutfitAbilitiesLazyQuery
+>;
+export const PluginAddOutfitDocument = gql`
+  mutation PluginAddOutfit($pluginId: ID!, $ability: OutfitAbilities!) {
+    pluginAddOutfit(pluginId: $pluginId, ability: $ability) {
+      id
+      identity {
+        name
+        description
+      }
+    }
+  }
+`;
+export function usePluginAddOutfitMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginAddOutfitMutation,
+    PluginAddOutfitMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginAddOutfitMutation,
+    PluginAddOutfitMutationVariables
+  >(PluginAddOutfitDocument, baseOptions);
+}
+export type PluginAddOutfitMutationHookResult = ReturnType<
+  typeof usePluginAddOutfitMutation
+>;
+export const PluginOutfitsDocument = gql`
+  subscription PluginOutfits($pluginId: ID!) {
+    pluginOutfits(pluginId: $pluginId) {
+      id
+      identity {
+        name
+        description
+      }
+      isOutfit {
+        outfitType
+      }
+      tags {
+        tags
+      }
+    }
+  }
+`;
+export function usePluginOutfitsSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    PluginOutfitsSubscription,
+    PluginOutfitsSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    PluginOutfitsSubscription,
+    PluginOutfitsSubscriptionVariables
+  >(PluginOutfitsDocument, baseOptions);
+}
+export type PluginOutfitsSubscriptionHookResult = ReturnType<
+  typeof usePluginOutfitsSubscription
 >;
 export const TemplateShipAssetsDocument = gql`
   subscription TemplateShipAssets($pluginId: ID!, $id: ID!) {

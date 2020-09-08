@@ -16,6 +16,16 @@ import {SizeComponent} from "./size";
 import {TemperatureComponent} from "./temperature";
 import {AtmosphereCompositionComponent} from "./atmosphereComposition";
 import {PopulationComponent} from "./population";
+import {DamageComponent} from "./outfits/damage";
+import {EfficiencyComponent} from "./outfits/efficiency";
+import {IsOutfitComponent} from "./outfits/isOutfit";
+import {PowerComponent} from "./outfits/power";
+import {TrainingModeComponent} from "./outfits/trainingMode";
+import {ImpulseEnginesComponent} from "./outfits/impulseEngines";
+import {WarpEnginesComponent} from "./outfits/warpEngines";
+import {JumpDriveComponent} from "./outfits/jumpDrive";
+import {NavigationComponent} from "./outfits/navigation";
+import {ThrustersComponent} from "./outfits/thrusters";
 @ObjectType()
 export default class Components {
   @Field()
@@ -70,6 +80,38 @@ export default class Components {
 
   @Field()
   atmosphereComposition?: AtmosphereCompositionComponent;
+
+  // Outfits Components
+  @Field()
+  damage?: DamageComponent;
+
+  @Field()
+  efficiency?: EfficiencyComponent;
+
+  @Field()
+  isOutfit?: IsOutfitComponent;
+
+  @Field()
+  power?: PowerComponent;
+
+  @Field()
+  trainingMode?: TrainingModeComponent;
+
+  // Outfit Abilities
+  @Field()
+  warpEngines?: WarpEnginesComponent;
+
+  @Field()
+  impulseEngines?: ImpulseEnginesComponent;
+
+  @Field()
+  jumpDrive?: JumpDriveComponent;
+
+  @Field()
+  navigation?: NavigationComponent;
+
+  @Field()
+  thrusters?: ThrustersComponent;
 }
 
 export const registeredComponents = [
@@ -89,4 +131,7 @@ export const registeredComponents = [
   IsPlanetComponent,
   SatelliteComponent,
   PopulationComponent,
+  AtmosphereCompositionComponent,
+  DamageComponent,
+  EfficiencyComponent,
 ];

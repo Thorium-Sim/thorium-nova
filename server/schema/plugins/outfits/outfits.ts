@@ -25,15 +25,18 @@ import Entity from "server/helpers/ecs/entity";
 import uuid from "uniqid";
 import {pubsub} from "server/helpers/pubsub";
 import BasePlugin, {getPlugin, publish} from "../basePlugin";
+import {capitalCase} from "change-case";
 
 enum OutfitAbilities {
-  warpEngines,
-  impulseEngines,
-  thrusters,
-  navigation,
-  jumpDrive,
-  generic,
+  warpEngines = "warpEngines",
+  impulseEngines = "impulseEngines",
+  thrusters = "thrusters",
+  navigation = "navigation",
+  jumpDrive = "jumpDrive",
+  generic = "generic",
 }
+
+console.log(OutfitAbilities);
 registerEnumType(OutfitAbilities, {
   name: "OutfitAbilities",
 });
@@ -123,10 +126,10 @@ export class PluginOutfitResolver {
   pluginAddOutfit(
     @Arg("pluginId", type => ID)
     pluginId: string,
-    @Arg("name")
-    name: string,
     @Arg("ability", type => OutfitAbilities)
-    ability: OutfitAbilities
+    ability: OutfitAbilities,
+    @Arg("name", {nullable: true})
+    name: string = capitalCase(ability)
   ): Entity {
     const plugin = getPlugin(pluginId);
     if (plugin.outfits.find(s => s.identity?.name === name)) {

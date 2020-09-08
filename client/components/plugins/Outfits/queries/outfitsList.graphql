@@ -1,0 +1,15 @@
+subscription PluginOutfits($pluginId: ID!) {
+  pluginOutfits(pluginId: $pluginId) {
+    id
+    identity {
+      name
+      description
+    }
+    isOutfit {
+      outfitType
+    }
+    tags {
+      tags
+    }
+  }
+}

@@ -8,6 +8,7 @@ import Starmap from "./pages/starmap";
 import NoMatch from "./pages/NotFound";
 import Config from "./pages/Config";
 import PluginList from "./components/plugins/pluginsList";
+import OutfitsConfig from "./components/plugins/Outfits";
 
 const Welcome = React.lazy(() => import("./pages/index"));
 const Releases = React.lazy(() => import("./pages/Releases"));
@@ -24,11 +25,9 @@ const ClientApp: React.FC = () => {
         <Route path="releases" element={<Releases />} />
         <Route path="theme" element={<ThemeBuilder />} />
         <Route path="test" element={<ShipAssets onClose={() => {}} />} />
-        <Route
-          path="starmap"
-          element={<Navigate to="/config/universes" replace />}
-        />
-        <Route path="starmap/:universeId/*" element={<Starmap />} />
+        <Route path="edit/*" element={<Navigate to="/config" replace />} />
+        <Route path="edit/:universeId/starmap/*" element={<Starmap />} />
+        <Route path="edit/:pluginId/outfits/*" element={<OutfitsConfig />} />
         <Route path="*" element={<NoMatch />} />
       </Routes>
       <Routes>

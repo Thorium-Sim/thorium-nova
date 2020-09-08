@@ -1,0 +1,9 @@
+mutation PluginAddOutfit($pluginId: ID!, $ability: OutfitAbilities!) {
+  pluginAddOutfit(pluginId: $pluginId, ability: $ability) {
+    id
+    identity {
+      name
+      description
+    }
+  }
+}
