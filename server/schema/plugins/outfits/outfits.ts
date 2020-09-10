@@ -24,8 +24,9 @@ import {Component} from "server/components/utils";
 import Entity from "server/helpers/ecs/entity";
 import uuid from "uniqid";
 import {pubsub} from "server/helpers/pubsub";
-import BasePlugin, {getPlugin, publish} from "../basePlugin";
+import {getPlugin} from "../basePlugin";
 import {capitalCase} from "change-case";
+import {outfitPublish} from "./utils";
 
 enum OutfitAbilities {
   warpEngines = "warpEngines",
@@ -36,7 +37,6 @@ enum OutfitAbilities {
   generic = "generic",
 }
 
-console.log(OutfitAbilities);
 registerEnumType(OutfitAbilities, {
   name: "OutfitAbilities",
 });
@@ -47,6 +47,10 @@ function getOutfitComponents(
   switch (ability) {
     case OutfitAbilities.warpEngines:
       return [
+        {
+          component: IsOutfitComponent,
+          defaultValue: {outfitType: "warpEngines"},
+        },
         {component: WarpEnginesComponent},
         {component: PowerComponent},
         {component: EfficiencyComponent},
@@ -55,6 +59,10 @@ function getOutfitComponents(
       ];
     case OutfitAbilities.impulseEngines:
       return [
+        {
+          component: IsOutfitComponent,
+          defaultValue: {outfitType: "impulseEngines"},
+        },
         {component: ImpulseEnginesComponent},
         {component: PowerComponent},
         {component: EfficiencyComponent},
@@ -63,6 +71,7 @@ function getOutfitComponents(
       ];
     case OutfitAbilities.thrusters:
       return [
+        {component: IsOutfitComponent, defaultValue: {outfitType: "thrusters"}},
         {component: ThrustersComponent},
         {component: PowerComponent},
         {component: EfficiencyComponent},
@@ -71,6 +80,10 @@ function getOutfitComponents(
       ];
     case OutfitAbilities.navigation:
       return [
+        {
+          component: IsOutfitComponent,
+          defaultValue: {outfitType: "navigation"},
+        },
         {component: NavigationComponent},
         {component: PowerComponent},
         {component: EfficiencyComponent},
@@ -78,6 +91,7 @@ function getOutfitComponents(
       ];
     case OutfitAbilities.jumpDrive:
       return [
+        {component: IsOutfitComponent, defaultValue: {outfitType: "jumpDrive"}},
         {component: JumpDriveComponent},
         {component: PowerComponent},
         {component: EfficiencyComponent},
@@ -89,19 +103,6 @@ function getOutfitComponents(
     default:
       return [];
   }
-}
-
-function outfitPublish({plugin, outfit}: {plugin: BasePlugin; outfit: Entity}) {
-  publish(plugin);
-  pubsub.publish("pluginOutfits", {
-    pluginId: plugin.id,
-    outfits: plugin.outfits,
-  });
-  pubsub.publish("pluginOutfit", {
-    pluginId: plugin.id,
-    id: outfit.id,
-    outfit: outfit,
-  });
 }
 
 @Resolver()
@@ -140,7 +141,6 @@ export class PluginOutfitResolver {
     const entity = new Entity(null, [
       IdentityComponent,
       TagsComponent,
-      IsOutfitComponent,
       ...components.map(c => c.component),
     ]);
     entity.updateComponents(
@@ -151,7 +151,7 @@ export class PluginOutfitResolver {
         return prev;
       }, {})
     );
-
+    entity.updateComponent("identity", {name: capitalCase(ability)});
     plugin.outfits.push(entity);
 
     outfitPublish({plugin, outfit: entity});

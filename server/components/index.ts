@@ -26,6 +26,7 @@ import {WarpEnginesComponent} from "./outfits/warpEngines";
 import {JumpDriveComponent} from "./outfits/jumpDrive";
 import {NavigationComponent} from "./outfits/navigation";
 import {ThrustersComponent} from "./outfits/thrusters";
+import {HeatComponent} from "./heat";
 @ObjectType()
 export default class Components {
   @Field()
@@ -82,19 +83,22 @@ export default class Components {
   atmosphereComposition?: AtmosphereCompositionComponent;
 
   // Outfits Components
-  @Field()
+  @Field({nullable: true})
   damage?: DamageComponent;
 
-  @Field()
+  @Field({nullable: true})
   efficiency?: EfficiencyComponent;
 
   @Field()
   isOutfit?: IsOutfitComponent;
 
-  @Field()
+  @Field({nullable: true})
   power?: PowerComponent;
 
-  @Field()
+  @Field({nullable: true})
+  heat?: HeatComponent;
+
+  @Field({nullable: true})
   trainingMode?: TrainingModeComponent;
 
   // Outfit Abilities
@@ -134,4 +138,13 @@ export const registeredComponents = [
   AtmosphereCompositionComponent,
   DamageComponent,
   EfficiencyComponent,
+  PowerComponent,
+  IsOutfitComponent,
+  HeatComponent,
+  TrainingModeComponent,
+  WarpEnginesComponent,
+  ImpulseEnginesComponent,
+  JumpDriveComponent,
+  NavigationComponent,
+  ThrustersComponent,
 ];

@@ -1,0 +1,12 @@
+mutation PluginOutfitSetTags(
+  $pluginId: ID!
+  $outfitId: ID!
+  $tags: [String!]!
+) {
+  pluginOutfitSetTags(pluginId: $pluginId, outfitId: $outfitId, tags: $tags) {
+    id
+    tags {
+      tags
+    }
+  }
+}

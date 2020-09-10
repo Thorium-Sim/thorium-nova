@@ -1,0 +1,30 @@
+subscription PluginOutfit($pluginId: ID!, $outfitId: ID!) {
+  pluginOutfit(pluginId: $pluginId, id: $outfitId) {
+    id
+    identity {
+      name
+      description
+    }
+    isOutfit {
+      outfitType
+    }
+    tags {
+      tags
+    }
+    power {
+      value
+    }
+    damage {
+      value
+    }
+    efficiency {
+      value
+    }
+    heat {
+      value
+    }
+    trainingMode {
+      value
+    }
+  }
+}

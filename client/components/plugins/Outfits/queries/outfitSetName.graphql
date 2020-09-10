@@ -1,0 +1,8 @@
+mutation PluginOutfitSetName($pluginId: ID!, $outfitId: ID!, $name: String!) {
+  pluginOutfitSetName(pluginId: $pluginId, outfitId: $outfitId, name: $name) {
+    id
+    identity {
+      name
+    }
+  }
+}

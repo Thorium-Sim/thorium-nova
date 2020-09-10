@@ -3,13 +3,9 @@ subscription PluginOutfits($pluginId: ID!) {
     id
     identity {
       name
-      description
     }
     isOutfit {
       outfitType
-    }
-    tags {
-      tags
     }
   }
 }

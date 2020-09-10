@@ -1,4 +1,4 @@
-import {Box, Flex, Heading, Select} from "@chakra-ui/core";
+import {Box, Flex, Grid, Heading, Select} from "@chakra-ui/core";
 import SearchableList from "../../ui/SearchableList";
 import {
   useOutfitAbilitiesQuery,
@@ -9,9 +9,20 @@ import {
 import React from "react";
 import {useTranslation} from "react-i18next";
 import {capitalCase} from "change-case";
-import {useParams} from "react-router";
+import {
+  Outlet,
+  Route,
+  Routes,
+  useMatch,
+  useNavigate,
+  useParams,
+} from "react-router";
+import Menubar from "./Menubar";
+import SettingList from "./SettingList";
 
-const NewOutfitDropdown = () => {
+const NewOutfitDropdown: React.FC<{onAdd: (id: string) => void}> = ({
+  onAdd,
+}) => {
   const {t} = useTranslation();
   const {pluginId} = useParams();
   const {data} = useOutfitAbilitiesQuery();
@@ -23,6 +34,10 @@ const NewOutfitDropdown = () => {
         if (e.target.value !== "nothing") {
           add({
             variables: {pluginId, ability: e.target.value as OutfitAbilities},
+          }).then(res => {
+            if (res.data?.pluginAddOutfit.id) {
+              onAdd(res.data?.pluginAddOutfit.id);
+            }
           });
         }
       }}
@@ -36,29 +51,48 @@ const NewOutfitDropdown = () => {
     </Select>
   );
 };
-const OutfitsConfig: React.FC = () => {
+
+const OutfitsList: React.FC = () => {
   const {t} = useTranslation();
+  const navigate = useNavigate();
   const {pluginId} = useParams();
+  const match = useMatch("/edit/:pluginId/outfits/:outfitId/*");
+  const {outfitId} = match?.params || {};
   const {data} = usePluginOutfitsSubscription({variables: {pluginId}});
   return (
-    <Box p={8}>
+    <Flex p={8} py={12} height="100%" direction="column">
+      <Menubar />
       <Heading>{t(`Outfits`)}</Heading>
-      <Flex>
+      <Grid flex={1} templateColumns="1fr 1fr 2fr" gap={6}>
         <Flex direction="column">
-          <SearchableList
-            items={
-              data?.pluginOutfits.map(o => ({
-                id: o.id,
-                name: o.identity.name,
-                outfitType: o.isOutfit.outfitType,
-              })) || []
-            }
-          />
-          <NewOutfitDropdown />
+          <Box flex={1}>
+            <SearchableList
+              selectedItem={outfitId}
+              setSelectedItem={item => navigate(`${item}/basic`)}
+              items={
+                data?.pluginOutfits.map(o => ({
+                  id: o.id,
+                  label: o.identity.name,
+                  category: o.isOutfit.outfitType,
+                })) || []
+              }
+            />
+          </Box>
+          <NewOutfitDropdown onAdd={id => navigate(`${id}/basic`)} />
         </Flex>
-      </Flex>
-    </Box>
+        <Outlet />
+      </Grid>
+    </Flex>
   );
 };
 
+const OutfitsConfig = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<OutfitsList></OutfitsList>}>
+        <Route path=":outfitId/*" element={<SettingList />} />
+      </Route>
+    </Routes>
+  );
+};
 export default OutfitsConfig;

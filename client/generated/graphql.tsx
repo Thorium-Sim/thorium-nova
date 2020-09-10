@@ -184,13 +184,59 @@ export type PluginAddOutfitMutation = {
   };
 };
 
-export type PluginOutfitsSubscriptionVariables = Exact<{
+export type PluginOutfitSetDescriptionMutationVariables = Exact<{
   pluginId: Scalars["ID"];
+  outfitId: Scalars["ID"];
+  description: Scalars["String"];
 }>;
 
-export type PluginOutfitsSubscription = {
+export type PluginOutfitSetDescriptionMutation = {
+  __typename?: "Mutation";
+  pluginOutfitSetDescription: {
+    __typename?: "Entity";
+    id: string;
+    identity: {__typename?: "IdentityComponent"; description: string};
+  };
+};
+
+export type PluginOutfitSetNameMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  outfitId: Scalars["ID"];
+  name: Scalars["String"];
+}>;
+
+export type PluginOutfitSetNameMutation = {
+  __typename?: "Mutation";
+  pluginOutfitSetName: {
+    __typename?: "Entity";
+    id: string;
+    identity: {__typename?: "IdentityComponent"; name: string};
+  };
+};
+
+export type PluginOutfitSetTagsMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  outfitId: Scalars["ID"];
+  tags: Array<Scalars["String"]>;
+}>;
+
+export type PluginOutfitSetTagsMutation = {
+  __typename?: "Mutation";
+  pluginOutfitSetTags: {
+    __typename?: "Entity";
+    id: string;
+    tags: {__typename?: "TagsComponent"; tags: Array<string>};
+  };
+};
+
+export type PluginOutfitSubscriptionVariables = Exact<{
+  pluginId: Scalars["ID"];
+  outfitId: Scalars["ID"];
+}>;
+
+export type PluginOutfitSubscription = {
   __typename?: "Subscription";
-  pluginOutfits: Array<{
+  pluginOutfit: Maybe<{
     __typename?: "Entity";
     id: string;
     identity: {
@@ -200,6 +246,25 @@ export type PluginOutfitsSubscription = {
     };
     isOutfit: {__typename?: "IsOutfitComponent"; outfitType: string};
     tags: {__typename?: "TagsComponent"; tags: Array<string>};
+    power: Maybe<{__typename?: "PowerComponent"; value: boolean}>;
+    damage: Maybe<{__typename?: "DamageComponent"; value: boolean}>;
+    efficiency: Maybe<{__typename?: "EfficiencyComponent"; value: boolean}>;
+    heat: Maybe<{__typename?: "HeatComponent"; value: boolean}>;
+    trainingMode: Maybe<{__typename?: "TrainingModeComponent"; value: boolean}>;
+  }>;
+};
+
+export type PluginOutfitsSubscriptionVariables = Exact<{
+  pluginId: Scalars["ID"];
+}>;
+
+export type PluginOutfitsSubscription = {
+  __typename?: "Subscription";
+  pluginOutfits: Array<{
+    __typename?: "Entity";
+    id: string;
+    identity: {__typename?: "IdentityComponent"; name: string};
+    isOutfit: {__typename?: "IsOutfitComponent"; outfitType: string};
   }>;
 };
 
@@ -1230,9 +1295,93 @@ export function usePluginAddOutfitMutation(
 export type PluginAddOutfitMutationHookResult = ReturnType<
   typeof usePluginAddOutfitMutation
 >;
-export const PluginOutfitsDocument = gql`
-  subscription PluginOutfits($pluginId: ID!) {
-    pluginOutfits(pluginId: $pluginId) {
+export const PluginOutfitSetDescriptionDocument = gql`
+  mutation PluginOutfitSetDescription(
+    $pluginId: ID!
+    $outfitId: ID!
+    $description: String!
+  ) {
+    pluginOutfitSetDescription(
+      pluginId: $pluginId
+      outfitId: $outfitId
+      description: $description
+    ) {
+      id
+      identity {
+        description
+      }
+    }
+  }
+`;
+export function usePluginOutfitSetDescriptionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginOutfitSetDescriptionMutation,
+    PluginOutfitSetDescriptionMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginOutfitSetDescriptionMutation,
+    PluginOutfitSetDescriptionMutationVariables
+  >(PluginOutfitSetDescriptionDocument, baseOptions);
+}
+export type PluginOutfitSetDescriptionMutationHookResult = ReturnType<
+  typeof usePluginOutfitSetDescriptionMutation
+>;
+export const PluginOutfitSetNameDocument = gql`
+  mutation PluginOutfitSetName($pluginId: ID!, $outfitId: ID!, $name: String!) {
+    pluginOutfitSetName(pluginId: $pluginId, outfitId: $outfitId, name: $name) {
+      id
+      identity {
+        name
+      }
+    }
+  }
+`;
+export function usePluginOutfitSetNameMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginOutfitSetNameMutation,
+    PluginOutfitSetNameMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginOutfitSetNameMutation,
+    PluginOutfitSetNameMutationVariables
+  >(PluginOutfitSetNameDocument, baseOptions);
+}
+export type PluginOutfitSetNameMutationHookResult = ReturnType<
+  typeof usePluginOutfitSetNameMutation
+>;
+export const PluginOutfitSetTagsDocument = gql`
+  mutation PluginOutfitSetTags(
+    $pluginId: ID!
+    $outfitId: ID!
+    $tags: [String!]!
+  ) {
+    pluginOutfitSetTags(pluginId: $pluginId, outfitId: $outfitId, tags: $tags) {
+      id
+      tags {
+        tags
+      }
+    }
+  }
+`;
+export function usePluginOutfitSetTagsMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginOutfitSetTagsMutation,
+    PluginOutfitSetTagsMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginOutfitSetTagsMutation,
+    PluginOutfitSetTagsMutationVariables
+  >(PluginOutfitSetTagsDocument, baseOptions);
+}
+export type PluginOutfitSetTagsMutationHookResult = ReturnType<
+  typeof usePluginOutfitSetTagsMutation
+>;
+export const PluginOutfitDocument = gql`
+  subscription PluginOutfit($pluginId: ID!, $outfitId: ID!) {
+    pluginOutfit(pluginId: $pluginId, id: $outfitId) {
       id
       identity {
         name
@@ -1243,6 +1392,48 @@ export const PluginOutfitsDocument = gql`
       }
       tags {
         tags
+      }
+      power {
+        value
+      }
+      damage {
+        value
+      }
+      efficiency {
+        value
+      }
+      heat {
+        value
+      }
+      trainingMode {
+        value
+      }
+    }
+  }
+`;
+export function usePluginOutfitSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    PluginOutfitSubscription,
+    PluginOutfitSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    PluginOutfitSubscription,
+    PluginOutfitSubscriptionVariables
+  >(PluginOutfitDocument, baseOptions);
+}
+export type PluginOutfitSubscriptionHookResult = ReturnType<
+  typeof usePluginOutfitSubscription
+>;
+export const PluginOutfitsDocument = gql`
+  subscription PluginOutfits($pluginId: ID!) {
+    pluginOutfits(pluginId: $pluginId) {
+      id
+      identity {
+        name
+      }
+      isOutfit {
+        outfitType
       }
     }
   }

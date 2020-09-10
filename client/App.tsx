@@ -31,7 +31,7 @@ const ClientApp: React.FC = () => {
         <Route path="*" element={<NoMatch />} />
       </Routes>
       <Routes>
-        <Route path="config" element={<PluginList />} />
+        <Route path="config/*" element={<PluginList />} />
         <Route path="config/:pluginId/*" element={<PluginList />} />
       </Routes>
     </Layout>

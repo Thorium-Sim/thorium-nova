@@ -1,0 +1,16 @@
+mutation PluginOutfitSetDescription(
+  $pluginId: ID!
+  $outfitId: ID!
+  $description: String!
+) {
+  pluginOutfitSetDescription(
+    pluginId: $pluginId
+    outfitId: $outfitId
+    description: $description
+  ) {
+    id
+    identity {
+      description
+    }
+  }
+}

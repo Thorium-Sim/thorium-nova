@@ -1,8 +1,13 @@
 {
-  "Add an Outfit": "Add an Outfit",
+  "Basic": "Basic",
+  "Damage": "Damage",
+  "Description": "Description",
+  "Efficiency": "Efficiency",
+  "Heat": "Heat",
+  "Name": "Name",
+  "Name is required": "Name is required",
   "New Outfit": "New Outfit",
   "Outfits": "Outfits",
-  "Plugin Configuration": "Plugin Configuration",
-  "Ship Systems": "Ship Systems",
-  "Universes": "Universes"
+  "Power": "Power",
+  "Tags": "Tags"
 }

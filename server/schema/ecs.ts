@@ -11,6 +11,7 @@ import {
 import {ShipAssetsComponent} from "server/components/ship/shipAssets";
 import {SatelliteComponent} from "server/components/satellite";
 import {GraphQLContext} from "server/helpers/graphqlContext";
+import {IsOutfitComponent} from "server/components/outfits/isOutfit";
 
 @Resolver(Entity)
 export class EntityResolver {
@@ -52,10 +53,7 @@ export class EntityFieldResolver {
     return {...entity.shipAssets, entity};
   }
   @FieldResolver(type => SatelliteComponent, {nullable: true})
-  satellite(
-    @Root() entity: Entity,
-    @Ctx() ctx: GraphQLContext
-  ): SatelliteComponent | null {
+  satellite(@Root() entity: Entity): SatelliteComponent | null {
     if (!entity.satellite) return null;
     return ({...entity.satellite, entity} as unknown) as SatelliteComponent;
   }

@@ -54,7 +54,17 @@ class Entity extends Components {
         },
         []
       );
-
+      const componentIds = components.map((c: any) => c.id);
+      const missingFields = Object.keys(initialData).filter(
+        c => !componentIds.includes(c)
+      );
+      if (missingFields.length > 0) {
+        console.warn(
+          `\nRegistered Components is missing some components: ${missingFields.join(
+            ", "
+          )}`
+        );
+      }
       id = id.id;
     }
     super();
@@ -87,7 +97,7 @@ class Entity extends Components {
       // function. Secondly because the user may want to provide some kind
       // of logic in components initialization ALTHOUGH these kind of
       // initialization should be done in enter() handler
-
+      // @ts-ignore ts(2576) // Accessing static properties
       // @ts-ignore ts(2576) // Accessing static properties
       if (initialData[component.id]) {
         // @ts-ignore ts(2576)

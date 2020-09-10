@@ -3,7 +3,7 @@ import {Component, ComponentOmit} from "../utils";
 
 @ObjectType()
 export class NavigationComponent extends Component {
-  static id: "Navigation" = "Navigation";
+  static id: "navigation" = "navigation";
   static defaults: ComponentOmit<NavigationComponent> = {
     value: true,
   };
