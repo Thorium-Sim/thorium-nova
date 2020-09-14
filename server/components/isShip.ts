@@ -5,9 +5,9 @@ import {Component, ComponentOmit} from "./utils";
 export class IsShipComponent extends Component {
   static id: "isShip" = "isShip";
   static defaults: ComponentOmit<IsShipComponent> = {
-    value: true,
+    mass: 2000,
   };
 
-  @Field()
-  value: true = true;
+  @Field({description: "Mass in kilograms. Affects acceleration"})
+  mass: number = 2000;
 }
