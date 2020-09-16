@@ -27,6 +27,10 @@ import {JumpDriveComponent} from "./outfits/jumpDrive";
 import {NavigationComponent} from "./outfits/navigation";
 import {ThrustersComponent} from "./outfits/thrusters";
 import {HeatComponent} from "./heat";
+import {RotationComponent} from "./rotation";
+import {RotationVelocityComponent} from "./rotationVelocity";
+import {VelocityComponent} from "./velocity";
+import {DampenerComponent} from "./outfits/dampeners";
 @ObjectType()
 export default class Components {
   @Field()
@@ -40,6 +44,13 @@ export default class Components {
 
   @Field()
   position?: PositionComponent;
+  @Field()
+  velocity?: VelocityComponent;
+
+  @Field()
+  rotation?: RotationComponent;
+  @Field()
+  rotationVelocity?: RotationVelocityComponent;
 
   @Field()
   size?: SizeComponent;
@@ -116,6 +127,9 @@ export default class Components {
 
   @Field()
   thrusters?: ThrustersComponent;
+
+  @Field()
+  dampener?: DampenerComponent;
 }
 
 export const registeredComponents = [
@@ -147,4 +161,5 @@ export const registeredComponents = [
   JumpDriveComponent,
   NavigationComponent,
   ThrustersComponent,
+  DampenerComponent,
 ];
