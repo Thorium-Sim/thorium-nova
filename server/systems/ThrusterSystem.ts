@@ -24,8 +24,6 @@ export class ThrusterSystem extends System {
 
     const {
       direction,
-      directionVelocity,
-      directionMaxSpeed,
       directionThrust,
       rotationDelta,
       rotationMaxSpeed,
@@ -33,27 +31,11 @@ export class ThrusterSystem extends System {
       rotationVelocity,
     } = entity.thrusters;
 
-    let acceleration = {
+    entity.thrusters.directionAcceleration = {
       x: ((direction.x * directionThrust) / mass) * elapsed,
       y: ((direction.y * directionThrust) / mass) * elapsed,
       z: ((direction.z * directionThrust) / mass) * elapsed,
     };
-
-    directionVelocity.x = unitVelocity(
-      directionVelocity.x,
-      acceleration.x,
-      directionMaxSpeed * Math.abs(direction.x)
-    );
-    directionVelocity.y = unitVelocity(
-      directionVelocity.y,
-      acceleration.y,
-      directionMaxSpeed * Math.abs(direction.y)
-    );
-    directionVelocity.z = unitVelocity(
-      directionVelocity.z,
-      acceleration.z,
-      directionMaxSpeed * Math.abs(direction.z)
-    );
 
     // Do all the same things with rotation.
     const rotationAcceleration = {

@@ -8,7 +8,7 @@ export class ThrustersComponent extends Component {
   static defaults: ComponentOmit<ThrustersComponent> = {
     thrusting: false,
     direction: new Coordinates(),
-    directionVelocity: new Coordinates(),
+    directionAcceleration: new Coordinates(),
     directionMaxSpeed: 1,
     directionThrust: 1,
 
@@ -33,8 +33,10 @@ export class ThrustersComponent extends Component {
 
   @Field({description: "The currently applied direction thruster vector"})
   direction: Coordinates = new Coordinates();
-  @Field({description: "The current direction thruster velocity vector in m/s"})
-  directionVelocity: Coordinates = new Coordinates();
+  @Field({
+    description: "The current direction thruster acceleration vector in m/s/s",
+  })
+  directionAcceleration: Coordinates = new Coordinates();
   @Field({
     description:
       "The maximum speed which can be applied by direction thrusters in m/s",

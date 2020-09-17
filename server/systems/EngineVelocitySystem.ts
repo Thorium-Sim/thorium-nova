@@ -19,7 +19,7 @@ export class EngineVelocitySystem extends System {
 
     // Apply dampening, then apply engines
     const velocityVector = new Vector3(velocity.x, velocity.y, velocity.z);
-    const dampening = systems?.find(s => s.dampener)?.dampener?.dampening;
+    const dampening = entity.dampener?.dampening;
     if (dampening) {
       // Create an opposite vector
       const dampeningVector = new Vector3(
@@ -73,7 +73,19 @@ export class EngineVelocitySystem extends System {
         o.position.clampLength(0, warp.warpEngines.maxVelocity);
       }
     }
-    // TODO: Thrusters
+    // Thrusters
+    if (entity.thrusters?.directionAcceleration) {
+      // Measured in m/s/s, so divide by 1000
+      o.translateX(
+        entity.thrusters.directionAcceleration.x * elapsed * (1 / 1000)
+      );
+      o.translateY(
+        entity.thrusters.directionAcceleration.y * elapsed * (1 / 1000)
+      );
+      o.translateZ(
+        entity.thrusters.directionAcceleration.z * elapsed * (1 / 1000)
+      );
+    }
 
     entity.velocity.x = o.position.x;
     entity.velocity.y = o.position.y;

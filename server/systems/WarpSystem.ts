@@ -1,6 +1,5 @@
 import Entity from "server/helpers/ecs/entity";
 import System from "server/helpers/ecs/system";
-import {Quaternion, Vector3} from "three";
 
 export class WarpSystem extends System {
   test(entity: Entity) {
