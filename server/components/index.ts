@@ -31,6 +31,8 @@ import {RotationComponent} from "./rotation";
 import {RotationVelocityComponent} from "./rotationVelocity";
 import {VelocityComponent} from "./velocity";
 import {DampenerComponent} from "./outfits/dampeners";
+import {ShipAssignmentComponent} from "./ship/shipAssignment";
+import {ShipOutfitsComponent} from "./ship/shipOutfits";
 @ObjectType()
 export default class Components {
   @Field()
@@ -76,6 +78,12 @@ export default class Components {
 
   @Field()
   stationComplement?: StationComplementComponent;
+
+  @Field()
+  shipAssignment?: ShipAssignmentComponent;
+
+  @Field()
+  shipOutfits?: ShipOutfitsComponent;
 
   // Stellar Objects Components
   @Field({nullable: true})

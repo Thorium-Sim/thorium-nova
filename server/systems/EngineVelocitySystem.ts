@@ -11,7 +11,7 @@ export class EngineVelocitySystem extends System {
   update(entity: Entity, elapsed: number) {
     const systems = App.activeFlight?.ecs.entities.filter(
       s =>
-        s.isOutfit?.assignedShipId === entity.id &&
+        s.shipAssignment?.shipId === entity.id &&
         (s.warpEngines || s.impulseEngines || s.thrusters || s.dampener)
     );
     if (!entity.velocity || !entity.rotation || !entity.position) return;

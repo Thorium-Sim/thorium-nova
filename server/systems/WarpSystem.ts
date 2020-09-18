@@ -6,7 +6,7 @@ export class WarpSystem extends System {
     return !!(
       entity.components.warpEngines &&
       entity.components.isOutfit &&
-      entity.components.isOutfit.assignedShip
+      entity.components.shipAssignment?.shipId
     );
   }
   update(entity: Entity, elapsed: number) {

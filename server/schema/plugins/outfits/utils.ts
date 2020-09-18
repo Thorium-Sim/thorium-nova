@@ -24,7 +24,7 @@ export function getOutfit(options: {
   } else if (shipId && outfitType) {
     ship = App.activeFlight?.ships.find(s => s.id === shipId);
     outfit = App.activeFlight?.ecs.entities.find(
-      e => e[outfitType] && e.isOutfit?.assignedShipId === shipId
+      e => e[outfitType] && e.shipAssignment?.shipId === shipId
     );
   } else {
     throw new Error(

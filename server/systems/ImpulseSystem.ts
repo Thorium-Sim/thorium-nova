@@ -7,11 +7,11 @@ export class ImpulseSystem extends System {
     return !!(
       entity.components.impulseEngines &&
       entity.components.isOutfit &&
-      entity.components.isOutfit.assignedShip
+      entity.components.shipAssignment?.shipId
     );
   }
   update(entity: Entity, elapsed: number) {
-    const ship = entity.components.isOutfit?.assignedShip;
+    const ship = entity.components.shipAssignment?.ship;
     if (!ship || !ship.isShip || !entity.impulseEngines) return;
     const {mass} = ship.isShip;
 
