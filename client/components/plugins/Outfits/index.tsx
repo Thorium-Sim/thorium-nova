@@ -60,7 +60,7 @@ const OutfitsList: React.FC = () => {
   const {outfitId} = match?.params || {};
   const {data} = usePluginOutfitsSubscription({variables: {pluginId}});
   return (
-    <Flex p={8} py={12} height="100%" direction="column">
+    <Flex p={8} py={12} height="100%" direction="column" bg="blackAlpha.500">
       <Menubar />
       <Heading>{t(`Outfits`)}</Heading>
       <Grid flex={1} templateColumns="1fr 1fr 2fr" gap={6}>

@@ -19,6 +19,8 @@
     "": ""
   },
   "Max Destination Radius": "Max Destination Radius",
+  "New Outfit": "New Outfit",
+  "Outfits": "Outfits",
   "Power": "Power",
   "Rotation Max Speed": "Rotation Max Speed",
   "Rotation Thrust": "Rotation Thrust",
@@ -57,9 +59,11 @@
   "The thrust applied by rotation thrusters in kilo-Newtons, which affects rotation acceleration based on the mass of the ship": {
     " ": " "
   },
+  "Thrust": "Thrust",
   "Warp Factor Count": "Warp Factor Count",
   "object": "object",
   "planet": "planet",
   "planetary system": "planetary system",
-  "star": "star"
+  "star": "star",
+  "{{outfitName}} Sounds": "{{outfitName}} Sounds"
 }

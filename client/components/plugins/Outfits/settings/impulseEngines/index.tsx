@@ -91,22 +91,22 @@ export const OutfitImpulseEngines: React.FC<{outfit: OutfitDefinition}> = ({
           </FormControl>
           <FormControl pb={4}>
             <FormLabel width="100%">
-              {t(`Emergency Speed`)}
+              {t(`Thrust`)}
               <Input
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                defaultValue={impulseEngines.emergencySpeed}
+                defaultValue={impulseEngines.thrust}
                 placeholder="2000"
                 onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const speed = parseInt(e.target.value, 10);
-                  if (!isNaN(speed)) {
-                    setEmergencySpeed({
+                  const thrust = parseInt(e.target.value, 10);
+                  if (!isNaN(thrust)) {
+                    setThrust({
                       variables: {
                         pluginId,
                         outfitId: outfit.id,
                         shipId: null,
-                        speed,
+                        thrust,
                       },
                     });
                   }

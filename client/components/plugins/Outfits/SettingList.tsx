@@ -48,13 +48,24 @@ const SettingList: React.FC = props => {
           {t("Basic")}
         </ListGroupItem>
         {settingsComponent(outfit) ? (
-          <ListGroupItem
-            as={Link}
-            to="outfit"
-            selected={match?.params.setting === "outfit"}
-          >
-            {capitalCase(outfitType)}
-          </ListGroupItem>
+          <>
+            <ListGroupItem
+              as={Link}
+              to="outfit"
+              selected={match?.params.setting === "outfit"}
+            >
+              {capitalCase(outfitType)}
+            </ListGroupItem>
+            <ListGroupItem
+              as={Link}
+              to="sounds"
+              selected={match?.params.setting === "sounds"}
+            >
+              {t(`{{outfitName}} Sounds`, {
+                outfitName: capitalCase(outfitType),
+              })}
+            </ListGroupItem>
+          </>
         ) : null}
         {data.pluginOutfit?.power && (
           <ListGroupItem
