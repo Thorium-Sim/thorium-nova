@@ -14,7 +14,7 @@ export class PluginOutfitBasicResolver {
     @Arg("name", type => String)
     name: string
   ): Entity {
-    const {plugin, outfit} = getOutfit(pluginId, outfitId);
+    const {plugin, outfit} = getOutfit({pluginId, outfitId});
     outfit.updateComponent("identity", {name});
     outfitPublish({plugin, outfit});
     return outfit;
@@ -28,7 +28,7 @@ export class PluginOutfitBasicResolver {
     @Arg("description", type => String)
     description: string
   ): Entity {
-    const {plugin, outfit} = getOutfit(pluginId, outfitId);
+    const {plugin, outfit} = getOutfit({pluginId, outfitId});
     outfit.updateComponent("identity", {description});
     outfitPublish({plugin, outfit});
     return outfit;
@@ -42,7 +42,7 @@ export class PluginOutfitBasicResolver {
     @Arg("tags", type => [String])
     tags: string[]
   ): Entity {
-    const {plugin, outfit} = getOutfit(pluginId, outfitId);
+    const {plugin, outfit} = getOutfit({pluginId, outfitId});
     outfit.updateComponent("tags", {tags});
     outfitPublish({plugin, outfit});
     return outfit;

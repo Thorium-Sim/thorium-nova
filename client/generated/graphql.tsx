@@ -268,6 +268,40 @@ export type PluginOutfitsSubscription = {
   }>;
 };
 
+export type WarpEnginesSetWarpFactorCountMutationVariables = Exact<{
+  pluginId: Maybe<Scalars["ID"]>;
+  outfitId: Maybe<Scalars["ID"]>;
+  shipId: Maybe<Scalars["ID"]>;
+  count: Scalars["Int"];
+}>;
+
+export type WarpEnginesSetWarpFactorCountMutation = {
+  __typename?: "Mutation";
+  warpEngineSetWarpFactorCount: {__typename?: "Entity"; id: string};
+};
+
+export type WarpEnginesSubscriptionVariables = Exact<{
+  pluginId: Maybe<Scalars["ID"]>;
+  outfitId: Maybe<Scalars["ID"]>;
+  shipId: Maybe<Scalars["ID"]>;
+}>;
+
+export type WarpEnginesSubscription = {
+  __typename?: "Subscription";
+  warpEnginesOutfit: Maybe<{
+    __typename?: "Entity";
+    id: string;
+    warpEngines: {
+      __typename?: "WarpEnginesComponent";
+      warpFactorCount: number;
+      currentWarpFactor: number;
+      minSpeedMultiplier: number;
+      planetaryCruisingSpeed: number;
+      interstellarCruisingSpeed: number;
+    };
+  }>;
+};
+
 export type TemplateShipAssetsSubscriptionVariables = Exact<{
   pluginId: Scalars["ID"];
   id: Scalars["ID"];
@@ -1451,6 +1485,69 @@ export function usePluginOutfitsSubscription(
 }
 export type PluginOutfitsSubscriptionHookResult = ReturnType<
   typeof usePluginOutfitsSubscription
+>;
+export const WarpEnginesSetWarpFactorCountDocument = gql`
+  mutation WarpEnginesSetWarpFactorCount(
+    $pluginId: ID
+    $outfitId: ID
+    $shipId: ID
+    $count: Int!
+  ) {
+    warpEngineSetWarpFactorCount(
+      pluginId: $pluginId
+      outfitId: $outfitId
+      shipId: $shipId
+      count: $count
+    ) {
+      id
+    }
+  }
+`;
+export function useWarpEnginesSetWarpFactorCountMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    WarpEnginesSetWarpFactorCountMutation,
+    WarpEnginesSetWarpFactorCountMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    WarpEnginesSetWarpFactorCountMutation,
+    WarpEnginesSetWarpFactorCountMutationVariables
+  >(WarpEnginesSetWarpFactorCountDocument, baseOptions);
+}
+export type WarpEnginesSetWarpFactorCountMutationHookResult = ReturnType<
+  typeof useWarpEnginesSetWarpFactorCountMutation
+>;
+export const WarpEnginesDocument = gql`
+  subscription WarpEngines($pluginId: ID, $outfitId: ID, $shipId: ID) {
+    warpEnginesOutfit(
+      pluginId: $pluginId
+      outfitId: $outfitId
+      shipId: $shipId
+    ) {
+      id
+      warpEngines {
+        warpFactorCount
+        currentWarpFactor
+        minSpeedMultiplier
+        planetaryCruisingSpeed
+        interstellarCruisingSpeed
+      }
+    }
+  }
+`;
+export function useWarpEnginesSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    WarpEnginesSubscription,
+    WarpEnginesSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    WarpEnginesSubscription,
+    WarpEnginesSubscriptionVariables
+  >(WarpEnginesDocument, baseOptions);
+}
+export type WarpEnginesSubscriptionHookResult = ReturnType<
+  typeof useWarpEnginesSubscription
 >;
 export const TemplateShipAssetsDocument = gql`
   subscription TemplateShipAssets($pluginId: ID!, $id: ID!) {

@@ -75,7 +75,7 @@ function createPlanet({
     habitable: planetType.habitable,
     lifeforms: randomFromList(planetType.lifeforms),
     textureMapAsset: randomFromList(planetType.possibleTextureMaps),
-    cloudMapAsset:
+    cloudsMapAsset:
       planetType.hasClouds <= Math.random()
         ? randomFromList(planetType.possibleCloudMaps)
         : "",

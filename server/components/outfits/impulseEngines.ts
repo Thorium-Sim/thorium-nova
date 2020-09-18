@@ -1,5 +1,4 @@
 import {Field, ObjectType} from "type-graphql";
-import {Coordinates} from "../Coordinates";
 import {Component, ComponentOmit} from "../utils";
 
 @ObjectType()

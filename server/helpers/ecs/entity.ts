@@ -191,9 +191,12 @@ class Entity extends Components {
    *   entity.updateComponent('kite', {angle: 90, pos: {y: 1}});
    *   // entity.component.pos is '{vel: 0, angle: 90, pos: {y: 1}}'
    */
-  updateComponent(name: keyof Components, data: Record<string, any>) {
+  updateComponent(
+    name: keyof Components,
+    data: Partial<Components[typeof name]>
+  ) {
     let component = this.components[name];
-
+    if (!data) return;
     if (!component) {
       this.addComponent(name, data);
     } else {

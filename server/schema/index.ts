@@ -3,7 +3,11 @@ import {EntityFieldResolver, EntityResolver} from "./ecs";
 import {FlightResolver} from "./flight";
 import {PluginResolver} from "./plugins/basePlugin";
 import {PluginOutfitBasicResolver} from "./plugins/outfits/basic";
+import {ImpulseEnginesOutfitResolver} from "./plugins/outfits/impulseEngines";
+import {NavigationOutfitResolver} from "./plugins/outfits/navigation";
+import {ThrustersOutfitResolver} from "./plugins/outfits/thrusters";
 import {PluginOutfitResolver} from "./plugins/outfits/outfits";
+import {WarpEngineOutfitResolver} from "./plugins/outfits/warpEngines";
 import {ShipAssetsResolver, ShipPluginResolver} from "./plugins/ship";
 import {StationComplementPluginResolver} from "./plugins/stationComplement";
 import {UniversePluginResolver} from "./plugins/universe";
@@ -54,4 +58,8 @@ export const resolvers: ResolverT = [
   UniversePluginResolver,
   PluginOutfitResolver,
   PluginOutfitBasicResolver,
+  WarpEngineOutfitResolver,
+  ImpulseEnginesOutfitResolver,
+  NavigationOutfitResolver,
+  ThrustersOutfitResolver,
 ];

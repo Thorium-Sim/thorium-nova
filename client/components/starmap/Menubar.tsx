@@ -23,7 +23,7 @@ import {
   useStarTypesQuery,
   usePlanetTypesQuery,
 } from "../../generated/graphql";
-import {configStoreApi, useConfigStore} from "./configStore";
+import {ConfigStore, configStoreApi, useConfigStore} from "./configStore";
 import Button from "../ui/button";
 
 import {useConfirm} from "../Dialog";

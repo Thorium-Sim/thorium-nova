@@ -1,0 +1,15 @@
+mutation WarpEnginesSetWarpFactorCount(
+  $pluginId: ID
+  $outfitId: ID
+  $shipId: ID
+  $count: Int!
+) {
+  warpEngineSetWarpFactorCount(
+    pluginId: $pluginId
+    outfitId: $outfitId
+    shipId: $shipId
+    count: $count
+  ) {
+    id
+  }
+}

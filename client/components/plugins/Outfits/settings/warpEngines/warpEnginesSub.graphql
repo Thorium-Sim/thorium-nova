@@ -1,0 +1,12 @@
+subscription WarpEngines($pluginId: ID, $outfitId: ID, $shipId: ID) {
+  warpEnginesOutfit(pluginId: $pluginId, outfitId: $outfitId, shipId: $shipId) {
+    id
+    warpEngines {
+      warpFactorCount
+      currentWarpFactor
+      minSpeedMultiplier
+      planetaryCruisingSpeed
+      interstellarCruisingSpeed
+    }
+  }
+}

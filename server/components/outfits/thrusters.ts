@@ -19,7 +19,7 @@ export class ThrustersComponent extends Component {
   };
 
   @Field()
-  get thrusting() {
+  get thrusting(): boolean {
     return Boolean(
       this.direction.x ||
         this.direction.y ||

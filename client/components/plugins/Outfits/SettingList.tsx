@@ -3,10 +3,29 @@ import {Box} from "@chakra-ui/core";
 import ListGroupItem from "../../../components/ui/ListGroupItem";
 import {usePluginOutfitSubscription} from "../../../generated/graphql";
 import {Route, Routes, useMatch, useParams} from "react-router";
-import {capitalCase} from "change-case";
+import {pascalCase, capitalCase} from "change-case";
 import {useTranslation} from "react-i18next";
 import {Link} from "react-router-dom";
 import OutfitBasic from "./settings/basic";
+import {OutfitDefinition} from "./settings/outfitType";
+import * as OutfitSettings from "./settings";
+
+function settingsComponent(outfit: OutfitDefinition) {
+  const outfitType = outfit.isOutfit.outfitType;
+  const outfitName = `Outfit${pascalCase(
+    outfitType
+  )}` as keyof typeof OutfitSettings;
+  const Comp = OutfitSettings[outfitName];
+  if (!Comp) return null;
+  return Comp;
+}
+const OutfitSpecificSettings: React.FC<{outfit: OutfitDefinition}> = ({
+  outfit,
+}) => {
+  const Comp = settingsComponent(outfit);
+  if (!Comp) return null;
+  return <Comp outfit={outfit} />;
+};
 
 const SettingList: React.FC = props => {
   const {t} = useTranslation();
@@ -28,13 +47,15 @@ const SettingList: React.FC = props => {
         >
           {t("Basic")}
         </ListGroupItem>
-        <ListGroupItem
-          as={Link}
-          to="outfit"
-          selected={match?.params.setting === "outfit"}
-        >
-          {capitalCase(outfitType)}
-        </ListGroupItem>
+        {settingsComponent(outfit) ? (
+          <ListGroupItem
+            as={Link}
+            to="outfit"
+            selected={match?.params.setting === "outfit"}
+          >
+            {capitalCase(outfitType)}
+          </ListGroupItem>
+        ) : null}
         {data.pluginOutfit?.power && (
           <ListGroupItem
             as={Link}
@@ -78,7 +99,10 @@ const SettingList: React.FC = props => {
         <Route path="damage" element={<h1>Damage</h1>}></Route>
         <Route path="heat" element={<h1>Heat</h1>}></Route>
         <Route path="efficiency" element={<h1>Efficiency</h1>}></Route>
-        <Route path=":setting" element={<h1>Setting</h1>}></Route>
+        <Route
+          path=":setting"
+          element={<OutfitSpecificSettings outfit={outfit} />}
+        ></Route>
       </Routes>
     </>
   );

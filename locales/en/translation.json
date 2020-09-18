@@ -1,13 +1,17 @@
 {
-  "Basic": "Basic",
-  "Damage": "Damage",
-  "Description": "Description",
-  "Efficiency": "Efficiency",
-  "Heat": "Heat",
-  "Name": "Name",
-  "Name is required": "Name is required",
-  "New Outfit": "New Outfit",
-  "Outfits": "Outfits",
-  "Power": "Power",
-  "Tags": "Tags"
+  "Add": "Add",
+  "Add Moon": "Add Moon",
+  "Add Planet": "Add Planet",
+  "Add Star": "Add Star",
+  "Are you sure you want to remove this {{object}}?": "Are you sure you want to remove this {{object}}?",
+  "Cancel": "Cancel",
+  "Delete": "Delete",
+  "Edit": "Edit",
+  "It will remove all of the objects inside of it": {
+    "": ""
+  },
+  "object": "object",
+  "planet": "planet",
+  "planetary system": "planetary system",
+  "star": "star"
 }

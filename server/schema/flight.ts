@@ -103,7 +103,13 @@ export class FlightResolver {
   }
   @Query(returns => [Flight])
   async flights(@Ctx() context: GraphQLContext): Promise<Partial<Flight>[]> {
-    const files = await fs.readdir(`${appStoreDir}flights/`);
+    let files: string[];
+    try {
+      files = await fs.readdir(`${appStoreDir}flights/`);
+    } catch {
+      await fs.mkdir(`${appStoreDir}flights/`);
+      files = [];
+    }
     const flightFiles = files.filter(f => f.includes(".flight"));
     const flightData = await Promise.all(
       flightFiles.map(async flightName => {

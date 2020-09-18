@@ -1,3 +1,4 @@
+import App from "server/app";
 import Entity from "server/helpers/ecs/entity";
 import {Field, ObjectType} from "type-graphql";
 import {Component, ComponentOmit} from "../utils";
@@ -6,19 +7,27 @@ import {Component, ComponentOmit} from "../utils";
 export class NavigationComponent extends Component {
   static id: "navigation" = "navigation";
   static defaults: ComponentOmit<NavigationComponent> = {
+    destinationId: null,
     destination: null,
     locked: false,
     maxDestinationRadius: 2000,
   };
 
+  destinationId: string | null = null;
   @Field(type => Entity, {description: "The desired destination object."})
-  destination: Entity | null = null;
+  get destination(): Entity | null {
+    if (!this.destinationId) return null;
+    return (
+      App.activeFlight?.ecs.entities.find(e => e.id === this.destinationId) ||
+      null
+    );
+  }
   @Field({description: "Whether the course has been locked in."})
-  locked = false;
+  locked: boolean = false;
   @Field({
     description: "The maximum radius which destinations can be set in ly.",
   })
-  maxDestinationRadius = 2000;
+  maxDestinationRadius: number = 2000;
 }
 /**
  * Setting course has the following steps:
