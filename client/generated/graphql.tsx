@@ -24,6 +24,12 @@ export enum EntityTypes {
   Timer = "timer",
 }
 
+export type CoordinatesInput = {
+  x: Maybe<Scalars["Float"]>;
+  y: Maybe<Scalars["Float"]>;
+  z: Maybe<Scalars["Float"]>;
+};
+
 export enum OutfitAbilities {
   WarpEngines = "warpEngines",
   ImpulseEngines = "impulseEngines",
@@ -265,6 +271,162 @@ export type PluginOutfitsSubscription = {
     id: string;
     identity: {__typename?: "IdentityComponent"; name: string};
     isOutfit: {__typename?: "IsOutfitComponent"; outfitType: string};
+  }>;
+};
+
+export type ImpulseEnginesSetCruisingSpeedMutationVariables = Exact<{
+  pluginId: Maybe<Scalars["ID"]>;
+  outfitId: Maybe<Scalars["ID"]>;
+  shipId: Maybe<Scalars["ID"]>;
+  speed: Scalars["Float"];
+}>;
+
+export type ImpulseEnginesSetCruisingSpeedMutation = {
+  __typename?: "Mutation";
+  impulseEnginesSetCruisingSpeed: {__typename?: "Entity"; id: string};
+};
+
+export type ImpulseEnginesSetEmergencySpeedMutationVariables = Exact<{
+  pluginId: Maybe<Scalars["ID"]>;
+  outfitId: Maybe<Scalars["ID"]>;
+  shipId: Maybe<Scalars["ID"]>;
+  speed: Scalars["Float"];
+}>;
+
+export type ImpulseEnginesSetEmergencySpeedMutation = {
+  __typename?: "Mutation";
+  impulseEnginesSetEmergencySpeed: {__typename?: "Entity"; id: string};
+};
+
+export type ImpulseEnginesSetThrustMutationVariables = Exact<{
+  pluginId: Maybe<Scalars["ID"]>;
+  outfitId: Maybe<Scalars["ID"]>;
+  shipId: Maybe<Scalars["ID"]>;
+  thrust: Scalars["Float"];
+}>;
+
+export type ImpulseEnginesSetThrustMutation = {
+  __typename?: "Mutation";
+  impulseEnginesSetThrust: {__typename?: "Entity"; id: string};
+};
+
+export type ImpulseEnginesSubscriptionVariables = Exact<{
+  pluginId: Maybe<Scalars["ID"]>;
+  outfitId: Maybe<Scalars["ID"]>;
+  shipId: Maybe<Scalars["ID"]>;
+}>;
+
+export type ImpulseEnginesSubscription = {
+  __typename?: "Subscription";
+  impulseEnginesOutfit: Maybe<{
+    __typename?: "Entity";
+    id: string;
+    impulseEngines: {
+      __typename?: "ImpulseEnginesComponent";
+      cruisingSpeed: number;
+      emergencySpeed: number;
+      thrust: number;
+      targetSpeed: number;
+    };
+  }>;
+};
+
+export type NavigationSetDestinationRadiusMutationVariables = Exact<{
+  pluginId: Maybe<Scalars["ID"]>;
+  outfitId: Maybe<Scalars["ID"]>;
+  shipId: Maybe<Scalars["ID"]>;
+  radius: Scalars["Float"];
+}>;
+
+export type NavigationSetDestinationRadiusMutation = {
+  __typename?: "Mutation";
+  navigationSetMaxDestinationRadius: {__typename?: "Entity"; id: string};
+};
+
+export type NavigationOutfitSubscriptionVariables = Exact<{
+  pluginId: Maybe<Scalars["ID"]>;
+  outfitId: Maybe<Scalars["ID"]>;
+  shipId: Maybe<Scalars["ID"]>;
+}>;
+
+export type NavigationOutfitSubscription = {
+  __typename?: "Subscription";
+  navigationOutfit: Maybe<{
+    __typename?: "Entity";
+    id: string;
+    navigation: {
+      __typename?: "NavigationComponent";
+      maxDestinationRadius: number;
+    };
+  }>;
+};
+
+export type ThrustersSetDirectionMaxSpeedMutationVariables = Exact<{
+  pluginId: Maybe<Scalars["ID"]>;
+  outfitId: Maybe<Scalars["ID"]>;
+  shipId: Maybe<Scalars["ID"]>;
+  speed: Scalars["Float"];
+}>;
+
+export type ThrustersSetDirectionMaxSpeedMutation = {
+  __typename?: "Mutation";
+  thrustersSetDirectionMaxSpeed: {__typename?: "Entity"; id: string};
+};
+
+export type ThrustersSetDirectionThrustMutationVariables = Exact<{
+  pluginId: Maybe<Scalars["ID"]>;
+  outfitId: Maybe<Scalars["ID"]>;
+  shipId: Maybe<Scalars["ID"]>;
+  thrust: Scalars["Float"];
+}>;
+
+export type ThrustersSetDirectionThrustMutation = {
+  __typename?: "Mutation";
+  thrustersSetDirectionThrust: {__typename?: "Entity"; id: string};
+};
+
+export type ThrustersSetRotationMaxSpeedMutationVariables = Exact<{
+  pluginId: Maybe<Scalars["ID"]>;
+  outfitId: Maybe<Scalars["ID"]>;
+  shipId: Maybe<Scalars["ID"]>;
+  speed: Scalars["Float"];
+}>;
+
+export type ThrustersSetRotationMaxSpeedMutation = {
+  __typename?: "Mutation";
+  thrustersSetRotationMaxSpeed: {__typename?: "Entity"; id: string};
+};
+
+export type ThrustersSetRotationThrustMutationVariables = Exact<{
+  pluginId: Maybe<Scalars["ID"]>;
+  outfitId: Maybe<Scalars["ID"]>;
+  shipId: Maybe<Scalars["ID"]>;
+  thrust: Scalars["Float"];
+}>;
+
+export type ThrustersSetRotationThrustMutation = {
+  __typename?: "Mutation";
+  thrustersSetRotationThrust: {__typename?: "Entity"; id: string};
+};
+
+export type ThrustersSubscriptionVariables = Exact<{
+  pluginId: Maybe<Scalars["ID"]>;
+  outfitId: Maybe<Scalars["ID"]>;
+  shipId: Maybe<Scalars["ID"]>;
+}>;
+
+export type ThrustersSubscription = {
+  __typename?: "Subscription";
+  thrustersOutfit: Maybe<{
+    __typename?: "Entity";
+    id: string;
+    thrusters: {
+      __typename?: "ThrustersComponent";
+      directionMaxSpeed: number;
+      directionThrust: number;
+      rotationMaxSpeed: number;
+      rotationThrust: number;
+    };
   }>;
 };
 
@@ -1485,6 +1647,340 @@ export function usePluginOutfitsSubscription(
 }
 export type PluginOutfitsSubscriptionHookResult = ReturnType<
   typeof usePluginOutfitsSubscription
+>;
+export const ImpulseEnginesSetCruisingSpeedDocument = gql`
+  mutation ImpulseEnginesSetCruisingSpeed(
+    $pluginId: ID
+    $outfitId: ID
+    $shipId: ID
+    $speed: Float!
+  ) {
+    impulseEnginesSetCruisingSpeed(
+      pluginId: $pluginId
+      outfitId: $outfitId
+      shipId: $shipId
+      speed: $speed
+    ) {
+      id
+    }
+  }
+`;
+export function useImpulseEnginesSetCruisingSpeedMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ImpulseEnginesSetCruisingSpeedMutation,
+    ImpulseEnginesSetCruisingSpeedMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ImpulseEnginesSetCruisingSpeedMutation,
+    ImpulseEnginesSetCruisingSpeedMutationVariables
+  >(ImpulseEnginesSetCruisingSpeedDocument, baseOptions);
+}
+export type ImpulseEnginesSetCruisingSpeedMutationHookResult = ReturnType<
+  typeof useImpulseEnginesSetCruisingSpeedMutation
+>;
+export const ImpulseEnginesSetEmergencySpeedDocument = gql`
+  mutation ImpulseEnginesSetEmergencySpeed(
+    $pluginId: ID
+    $outfitId: ID
+    $shipId: ID
+    $speed: Float!
+  ) {
+    impulseEnginesSetEmergencySpeed(
+      pluginId: $pluginId
+      outfitId: $outfitId
+      shipId: $shipId
+      speed: $speed
+    ) {
+      id
+    }
+  }
+`;
+export function useImpulseEnginesSetEmergencySpeedMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ImpulseEnginesSetEmergencySpeedMutation,
+    ImpulseEnginesSetEmergencySpeedMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ImpulseEnginesSetEmergencySpeedMutation,
+    ImpulseEnginesSetEmergencySpeedMutationVariables
+  >(ImpulseEnginesSetEmergencySpeedDocument, baseOptions);
+}
+export type ImpulseEnginesSetEmergencySpeedMutationHookResult = ReturnType<
+  typeof useImpulseEnginesSetEmergencySpeedMutation
+>;
+export const ImpulseEnginesSetThrustDocument = gql`
+  mutation ImpulseEnginesSetThrust(
+    $pluginId: ID
+    $outfitId: ID
+    $shipId: ID
+    $thrust: Float!
+  ) {
+    impulseEnginesSetThrust(
+      pluginId: $pluginId
+      outfitId: $outfitId
+      shipId: $shipId
+      thrust: $thrust
+    ) {
+      id
+    }
+  }
+`;
+export function useImpulseEnginesSetThrustMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ImpulseEnginesSetThrustMutation,
+    ImpulseEnginesSetThrustMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ImpulseEnginesSetThrustMutation,
+    ImpulseEnginesSetThrustMutationVariables
+  >(ImpulseEnginesSetThrustDocument, baseOptions);
+}
+export type ImpulseEnginesSetThrustMutationHookResult = ReturnType<
+  typeof useImpulseEnginesSetThrustMutation
+>;
+export const ImpulseEnginesDocument = gql`
+  subscription ImpulseEngines($pluginId: ID, $outfitId: ID, $shipId: ID) {
+    impulseEnginesOutfit(
+      pluginId: $pluginId
+      outfitId: $outfitId
+      shipId: $shipId
+    ) {
+      id
+      impulseEngines {
+        cruisingSpeed
+        emergencySpeed
+        thrust
+        targetSpeed
+      }
+    }
+  }
+`;
+export function useImpulseEnginesSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    ImpulseEnginesSubscription,
+    ImpulseEnginesSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    ImpulseEnginesSubscription,
+    ImpulseEnginesSubscriptionVariables
+  >(ImpulseEnginesDocument, baseOptions);
+}
+export type ImpulseEnginesSubscriptionHookResult = ReturnType<
+  typeof useImpulseEnginesSubscription
+>;
+export const NavigationSetDestinationRadiusDocument = gql`
+  mutation NavigationSetDestinationRadius(
+    $pluginId: ID
+    $outfitId: ID
+    $shipId: ID
+    $radius: Float!
+  ) {
+    navigationSetMaxDestinationRadius(
+      pluginId: $pluginId
+      outfitId: $outfitId
+      shipId: $shipId
+      maxDestinationRadius: $radius
+    ) {
+      id
+    }
+  }
+`;
+export function useNavigationSetDestinationRadiusMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    NavigationSetDestinationRadiusMutation,
+    NavigationSetDestinationRadiusMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    NavigationSetDestinationRadiusMutation,
+    NavigationSetDestinationRadiusMutationVariables
+  >(NavigationSetDestinationRadiusDocument, baseOptions);
+}
+export type NavigationSetDestinationRadiusMutationHookResult = ReturnType<
+  typeof useNavigationSetDestinationRadiusMutation
+>;
+export const NavigationOutfitDocument = gql`
+  subscription NavigationOutfit($pluginId: ID, $outfitId: ID, $shipId: ID) {
+    navigationOutfit(
+      pluginId: $pluginId
+      outfitId: $outfitId
+      shipId: $shipId
+    ) {
+      id
+      navigation {
+        maxDestinationRadius
+      }
+    }
+  }
+`;
+export function useNavigationOutfitSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    NavigationOutfitSubscription,
+    NavigationOutfitSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    NavigationOutfitSubscription,
+    NavigationOutfitSubscriptionVariables
+  >(NavigationOutfitDocument, baseOptions);
+}
+export type NavigationOutfitSubscriptionHookResult = ReturnType<
+  typeof useNavigationOutfitSubscription
+>;
+export const ThrustersSetDirectionMaxSpeedDocument = gql`
+  mutation ThrustersSetDirectionMaxSpeed(
+    $pluginId: ID
+    $outfitId: ID
+    $shipId: ID
+    $speed: Float!
+  ) {
+    thrustersSetDirectionMaxSpeed(
+      pluginId: $pluginId
+      outfitId: $outfitId
+      shipId: $shipId
+      speed: $speed
+    ) {
+      id
+    }
+  }
+`;
+export function useThrustersSetDirectionMaxSpeedMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ThrustersSetDirectionMaxSpeedMutation,
+    ThrustersSetDirectionMaxSpeedMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ThrustersSetDirectionMaxSpeedMutation,
+    ThrustersSetDirectionMaxSpeedMutationVariables
+  >(ThrustersSetDirectionMaxSpeedDocument, baseOptions);
+}
+export type ThrustersSetDirectionMaxSpeedMutationHookResult = ReturnType<
+  typeof useThrustersSetDirectionMaxSpeedMutation
+>;
+export const ThrustersSetDirectionThrustDocument = gql`
+  mutation ThrustersSetDirectionThrust(
+    $pluginId: ID
+    $outfitId: ID
+    $shipId: ID
+    $thrust: Float!
+  ) {
+    thrustersSetDirectionThrust(
+      pluginId: $pluginId
+      outfitId: $outfitId
+      shipId: $shipId
+      thrust: $thrust
+    ) {
+      id
+    }
+  }
+`;
+export function useThrustersSetDirectionThrustMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ThrustersSetDirectionThrustMutation,
+    ThrustersSetDirectionThrustMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ThrustersSetDirectionThrustMutation,
+    ThrustersSetDirectionThrustMutationVariables
+  >(ThrustersSetDirectionThrustDocument, baseOptions);
+}
+export type ThrustersSetDirectionThrustMutationHookResult = ReturnType<
+  typeof useThrustersSetDirectionThrustMutation
+>;
+export const ThrustersSetRotationMaxSpeedDocument = gql`
+  mutation ThrustersSetRotationMaxSpeed(
+    $pluginId: ID
+    $outfitId: ID
+    $shipId: ID
+    $speed: Float!
+  ) {
+    thrustersSetRotationMaxSpeed(
+      pluginId: $pluginId
+      outfitId: $outfitId
+      shipId: $shipId
+      speed: $speed
+    ) {
+      id
+    }
+  }
+`;
+export function useThrustersSetRotationMaxSpeedMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ThrustersSetRotationMaxSpeedMutation,
+    ThrustersSetRotationMaxSpeedMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ThrustersSetRotationMaxSpeedMutation,
+    ThrustersSetRotationMaxSpeedMutationVariables
+  >(ThrustersSetRotationMaxSpeedDocument, baseOptions);
+}
+export type ThrustersSetRotationMaxSpeedMutationHookResult = ReturnType<
+  typeof useThrustersSetRotationMaxSpeedMutation
+>;
+export const ThrustersSetRotationThrustDocument = gql`
+  mutation ThrustersSetRotationThrust(
+    $pluginId: ID
+    $outfitId: ID
+    $shipId: ID
+    $thrust: Float!
+  ) {
+    thrustersSetRotationThrust(
+      pluginId: $pluginId
+      outfitId: $outfitId
+      shipId: $shipId
+      thrust: $thrust
+    ) {
+      id
+    }
+  }
+`;
+export function useThrustersSetRotationThrustMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ThrustersSetRotationThrustMutation,
+    ThrustersSetRotationThrustMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ThrustersSetRotationThrustMutation,
+    ThrustersSetRotationThrustMutationVariables
+  >(ThrustersSetRotationThrustDocument, baseOptions);
+}
+export type ThrustersSetRotationThrustMutationHookResult = ReturnType<
+  typeof useThrustersSetRotationThrustMutation
+>;
+export const ThrustersDocument = gql`
+  subscription Thrusters($pluginId: ID, $outfitId: ID, $shipId: ID) {
+    thrustersOutfit(pluginId: $pluginId, outfitId: $outfitId, shipId: $shipId) {
+      id
+      thrusters {
+        directionMaxSpeed
+        directionThrust
+        rotationMaxSpeed
+        rotationThrust
+      }
+    }
+  }
+`;
+export function useThrustersSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    ThrustersSubscription,
+    ThrustersSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    ThrustersSubscription,
+    ThrustersSubscriptionVariables
+  >(ThrustersDocument, baseOptions);
+}
+export type ThrustersSubscriptionHookResult = ReturnType<
+  typeof useThrustersSubscription
 >;
 export const WarpEnginesSetWarpFactorCountDocument = gql`
   mutation WarpEnginesSetWarpFactorCount(

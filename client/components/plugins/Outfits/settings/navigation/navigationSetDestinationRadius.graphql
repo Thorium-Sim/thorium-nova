@@ -1,0 +1,15 @@
+mutation NavigationSetDestinationRadius(
+  $pluginId: ID
+  $outfitId: ID
+  $shipId: ID
+  $radius: Float!
+) {
+  navigationSetMaxDestinationRadius(
+    pluginId: $pluginId
+    outfitId: $outfitId
+    shipId: $shipId
+    maxDestinationRadius: $radius
+  ) {
+    id
+  }
+}

@@ -1,0 +1,11 @@
+subscription Thrusters($pluginId: ID, $outfitId: ID, $shipId: ID) {
+  thrustersOutfit(pluginId: $pluginId, outfitId: $outfitId, shipId: $shipId) {
+    id
+    thrusters {
+      directionMaxSpeed
+      directionThrust
+      rotationMaxSpeed
+      rotationThrust
+    }
+  }
+}

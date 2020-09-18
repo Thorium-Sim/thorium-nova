@@ -10,7 +10,7 @@ export class NavigationComponent extends Component {
     destinationId: null,
     destination: null,
     locked: false,
-    maxDestinationRadius: 2000,
+    maxDestinationRadius: 0,
   };
 
   destinationId: string | null = null;

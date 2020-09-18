@@ -1,0 +1,8 @@
+subscription NavigationOutfit($pluginId: ID, $outfitId: ID, $shipId: ID) {
+  navigationOutfit(pluginId: $pluginId, outfitId: $outfitId, shipId: $shipId) {
+    id
+    navigation {
+      maxDestinationRadius
+    }
+  }
+}

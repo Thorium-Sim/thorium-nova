@@ -1,0 +1,15 @@
+mutation ThrustersSetRotationThrust(
+  $pluginId: ID
+  $outfitId: ID
+  $shipId: ID
+  $thrust: Float!
+) {
+  thrustersSetRotationThrust(
+    pluginId: $pluginId
+    outfitId: $outfitId
+    shipId: $shipId
+    thrust: $thrust
+  ) {
+    id
+  }
+}

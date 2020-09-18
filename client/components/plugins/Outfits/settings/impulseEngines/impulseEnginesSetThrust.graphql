@@ -1,0 +1,15 @@
+mutation ImpulseEnginesSetThrust(
+  $pluginId: ID
+  $outfitId: ID
+  $shipId: ID
+  $thrust: Float!
+) {
+  impulseEnginesSetThrust(
+    pluginId: $pluginId
+    outfitId: $outfitId
+    shipId: $shipId
+    thrust: $thrust
+  ) {
+    id
+  }
+}

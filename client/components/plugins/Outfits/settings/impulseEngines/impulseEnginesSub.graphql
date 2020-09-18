@@ -1,0 +1,15 @@
+subscription ImpulseEngines($pluginId: ID, $outfitId: ID, $shipId: ID) {
+  impulseEnginesOutfit(
+    pluginId: $pluginId
+    outfitId: $outfitId
+    shipId: $shipId
+  ) {
+    id
+    impulseEngines {
+      cruisingSpeed
+      emergencySpeed
+      thrust
+      targetSpeed
+    }
+  }
+}

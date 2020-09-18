@@ -1,0 +1,15 @@
+mutation ImpulseEnginesSetCruisingSpeed(
+  $pluginId: ID
+  $outfitId: ID
+  $shipId: ID
+  $speed: Float!
+) {
+  impulseEnginesSetCruisingSpeed(
+    pluginId: $pluginId
+    outfitId: $outfitId
+    shipId: $shipId
+    speed: $speed
+  ) {
+    id
+  }
+}
