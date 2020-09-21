@@ -27,6 +27,7 @@ import {
 import {RootResolver} from "./root";
 import {ShipResolver} from "./ship";
 import {TimerResolver} from "./timer";
+import {PluginShipBasicResolver} from "./plugins/ship/basic";
 
 type ResolverT =
   | readonly [Function, ...Function[]]
@@ -62,4 +63,5 @@ export const resolvers: ResolverT = [
   ImpulseEnginesOutfitResolver,
   NavigationOutfitResolver,
   ThrustersOutfitResolver,
+  PluginShipBasicResolver,
 ];

@@ -1,0 +1,8 @@
+subscription PluginShips($pluginId: ID!) {
+  pluginShips(pluginId: $pluginId) {
+    id
+    identity {
+      name
+    }
+  }
+}

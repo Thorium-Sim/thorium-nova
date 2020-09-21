@@ -38,7 +38,6 @@ const webSocketLink = new WebSocketLink({
     reconnect: true,
     connectionParams: () =>
       getClientId().then(clientId => {
-        console.log("GOt connection params");
         return {clientid: clientId};
       }),
   },

@@ -1,0 +1,5 @@
+mutation PluginShipCreate($pluginId: ID!, $name: String!) {
+  pluginShipCreate(pluginId: $pluginId, name: $name) {
+    id
+  }
+}

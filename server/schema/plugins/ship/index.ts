@@ -21,7 +21,7 @@ import uniqid from "uniqid";
 import {pubsub} from "server/helpers/pubsub";
 import {GraphQLUpload, FileUpload} from "graphql-upload";
 import uploadAsset from "server/helpers/uploadAsset";
-import {getPlugin} from "./basePlugin";
+import BasePlugin, {getPlugin} from "../basePlugin";
 
 interface ShipPayload {
   ship: Entity;
@@ -48,10 +48,11 @@ interface ShipsPayload {
  * and the needs of the damage reports.
  */
 
-function publishShip(ship: Entity) {
+function publishShip(plugin: BasePlugin, ship: Entity) {
   pubsub.publish("pluginShip", {shipId: ship.id, ship});
   pubsub.publish("pluginShips", {
-    entities: App.activeFlight?.ships,
+    pluginId: plugin.id,
+    ships: plugin.ships,
   });
 }
 
@@ -92,7 +93,7 @@ export class ShipPluginResolver {
 
     plugin.ships.push(entity);
     entity.updateComponent("identity", {name});
-    publishShip(entity);
+    publishShip(plugin, entity);
 
     return entity;
   }
@@ -110,7 +111,7 @@ export class ShipPluginResolver {
       throw new Error("A ship with that name already exists.");
     }
     ship.updateComponent("identity", {name});
-    publishShip(ship);
+    publishShip(plugin, ship);
     return ship;
   }
 
@@ -124,7 +125,7 @@ export class ShipPluginResolver {
     const ship = plugin.ships.find(s => s.id === id) || null;
     if (!ship) throw new Error("Unable to find ship.");
     ship.updateComponent("theme", {value: theme});
-    publishShip(ship);
+    publishShip(plugin, ship);
     return ship;
   }
 
@@ -145,7 +146,7 @@ export class ShipPluginResolver {
     await uploadAsset(image, pathPrefix, `logo.${ext}`);
 
     ship.updateComponent("shipAssets", {logo: `logo.${ext}`});
-    publishShip(ship);
+    publishShip(plugin, ship);
     return ship;
   }
 
@@ -176,7 +177,7 @@ export class ShipPluginResolver {
       side: "side.png",
       vanity: "vanity.png",
     });
-    publishShip(ship);
+    publishShip(plugin, ship);
     return ship;
   }
 
@@ -213,10 +214,14 @@ export class ShipPluginResolver {
       const plugin = getPlugin(args.pluginId);
       process.nextTick(() => {
         pubsub.publish(id, {
+          pluginId: plugin.id,
           ships: plugin.ships,
         });
       });
       return [id, "pluginShips"];
+    },
+    filter({args, payload}) {
+      return payload.pluginId === args.pluginId;
     },
   })
   pluginShips(

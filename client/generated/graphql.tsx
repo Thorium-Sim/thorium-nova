@@ -524,6 +524,29 @@ export type TemplateShipSetModelMutation = {
   };
 };
 
+export type PluginShipCreateMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  name: Scalars["String"];
+}>;
+
+export type PluginShipCreateMutation = {
+  __typename?: "Mutation";
+  pluginShipCreate: {__typename?: "Entity"; id: string};
+};
+
+export type PluginShipsSubscriptionVariables = Exact<{
+  pluginId: Scalars["ID"];
+}>;
+
+export type PluginShipsSubscription = {
+  __typename?: "Subscription";
+  pluginShips: Array<{
+    __typename?: "Entity";
+    id: string;
+    identity: {__typename?: "IdentityComponent"; name: string};
+  }>;
+};
+
 export type PluginCreateMutationVariables = Exact<{
   name: Scalars["String"];
 }>;
@@ -2137,6 +2160,51 @@ export function useTemplateShipSetModelMutation(
 }
 export type TemplateShipSetModelMutationHookResult = ReturnType<
   typeof useTemplateShipSetModelMutation
+>;
+export const PluginShipCreateDocument = gql`
+  mutation PluginShipCreate($pluginId: ID!, $name: String!) {
+    pluginShipCreate(pluginId: $pluginId, name: $name) {
+      id
+    }
+  }
+`;
+export function usePluginShipCreateMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginShipCreateMutation,
+    PluginShipCreateMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginShipCreateMutation,
+    PluginShipCreateMutationVariables
+  >(PluginShipCreateDocument, baseOptions);
+}
+export type PluginShipCreateMutationHookResult = ReturnType<
+  typeof usePluginShipCreateMutation
+>;
+export const PluginShipsDocument = gql`
+  subscription PluginShips($pluginId: ID!) {
+    pluginShips(pluginId: $pluginId) {
+      id
+      identity {
+        name
+      }
+    }
+  }
+`;
+export function usePluginShipsSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    PluginShipsSubscription,
+    PluginShipsSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    PluginShipsSubscription,
+    PluginShipsSubscriptionVariables
+  >(PluginShipsDocument, baseOptions);
+}
+export type PluginShipsSubscriptionHookResult = ReturnType<
+  typeof usePluginShipsSubscription
 >;
 export const PluginCreateDocument = gql`
   mutation PluginCreate($name: String!) {

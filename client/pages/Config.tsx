@@ -16,7 +16,7 @@ import {
 import sleep from "../helpers/sleep";
 import React from "react";
 import {useTranslation} from "react-i18next";
-import {FaStar, FaTools} from "react-icons/fa";
+import {FaStar, FaTools, FaRocket} from "react-icons/fa";
 import {useNavigate, useParams} from "react-router";
 import {NavLink} from "react-router-dom";
 
@@ -40,6 +40,8 @@ const ConfigIcon: React.FC<{to: string}> = props => {
   );
 };
 
+const noop = () => {};
+
 const Config = () => {
   const {t} = useTranslation();
   const navigate = useNavigate();
@@ -59,7 +61,7 @@ const Config = () => {
       <Scale in={isOpen}>
         {/* @ts-ignore */}
         {styles => (
-          <Modal isOpen={true} size="full">
+          <Modal isOpen={true} size="full" onClose={noop}>
             <ModalOverlay zIndex={1500} opacity={styles.opacity} />
             <ModalContent {...styles} maxWidth="960px" zIndex={1600}>
               <ModalHeader fontSize="4xl">
@@ -75,6 +77,10 @@ const Config = () => {
                 <ConfigIcon to={`/edit/${pluginId}/starmap`}>
                   <Box as={FaStar} fontSize="6xl" mb={4} />
                   <Heading fontSize="lg">{t("Universes")}</Heading>
+                </ConfigIcon>
+                <ConfigIcon to={`/edit/${pluginId}/ships`}>
+                  <Box as={FaRocket} fontSize="6xl" mb={4} />
+                  <Heading fontSize="lg">{t("Ships")}</Heading>
                 </ConfigIcon>
                 <ConfigIcon to={`/edit/${pluginId}/outfits`}>
                   <Box as={FaTools} fontSize="6xl" mb={4} />
