@@ -1,0 +1,14 @@
+query AllPluginOutfits {
+  allPluginOutfits {
+    id
+    pluginId
+    pluginName
+    identity {
+      name
+      description
+    }
+    isOutfit {
+      outfitType
+    }
+  }
+}

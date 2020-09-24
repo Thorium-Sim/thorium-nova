@@ -53,7 +53,7 @@ const UploadWell: React.FC<
       width="250px"
       boxShadow="inset 5px 5px 10px rgba(0,0,0,0.1), inset 10px 10px 10px rgba(0,0,0,0.1), inset -2px -2px 10px rgba(0,0,0,0.1)"
       borderRadius="20px"
-      bg={dragging ? "whiteAlpha.50" : "blackAlpha.50"}
+      bg={dragging ? "whiteAlpha.50" : "blackAlpha.500"}
       cursor={disabled ? "" : dragging ? "copy" : "pointer"}
       my={4}
       onDragEnter={handleDragEnter}

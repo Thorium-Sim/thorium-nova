@@ -1,0 +1,9 @@
+mutation PluginShipAddOutfit($pluginId: ID!, $shipId: ID!, $outfitId: ID!) {
+  pluginShipAddOutfit(
+    pluginId: $pluginId
+    shipId: $shipId
+    outfitId: $outfitId
+  ) {
+    id
+  }
+}

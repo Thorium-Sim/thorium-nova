@@ -1,0 +1,8 @@
+mutation PluginShipSetName($pluginId: ID!, $shipId: ID!, $name: String!) {
+  pluginShipSetName(pluginId: $pluginId, shipId: $shipId, name: $name) {
+    id
+    identity {
+      name
+    }
+  }
+}

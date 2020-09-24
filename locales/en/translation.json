@@ -1,13 +1,12 @@
 {
+  "Add System": "Add System",
   "Assets": "Assets",
+  "Assigned Systems": "Assigned Systems",
+  "Available Systems": "Available Systems",
   "Basic": "Basic",
-  "Error creating ship": {
-    "": ""
-  },
-  "New Ship": "New Ship",
+  "Exclude Other Plugins": "Exclude Other Plugins",
+  "Include Other Plugins": "Include Other Plugins",
   "Outfits": "Outfits",
-  "Plugin Configuration": "Plugin Configuration",
-  "Ships": "Ships",
-  "Universes": "Universes",
-  "What is the name of the new ship?": "What is the name of the new ship?"
+  "Remove System": "Remove System",
+  "Search": "Search"
 }

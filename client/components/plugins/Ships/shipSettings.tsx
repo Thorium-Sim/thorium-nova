@@ -5,7 +5,9 @@ import {usePluginShipsSubscription} from "../../../generated/graphql";
 import {Route, Routes, useMatch, useParams} from "react-router";
 import {useTranslation} from "react-i18next";
 import {Link} from "react-router-dom";
-import OutfitBasic from "./settings/basic";
+import ShipBasic from "./settings/basic";
+import ShipAssets from "../ShipAssets";
+import ShipOutfits from "./settings/outfits";
 
 const SettingList: React.FC = props => {
   const {t} = useTranslation();
@@ -39,9 +41,9 @@ const SettingList: React.FC = props => {
         </ListGroupItem>
       </Box>
       <Routes>
-        <Route path="basic" element={<h1>Ship</h1>}></Route>
-        <Route path="assets" element={<h1>Ship</h1>}></Route>
-        <Route path="outfits" element={<h1>Ship</h1>}></Route>
+        <Route path="basic" element={<ShipBasic />}></Route>
+        <Route path="assets" element={<ShipAssets />}></Route>
+        <Route path="outfits" element={<ShipOutfits />}></Route>
       </Routes>
     </>
   );

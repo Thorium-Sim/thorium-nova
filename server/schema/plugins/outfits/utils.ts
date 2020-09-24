@@ -87,3 +87,11 @@ export function updateOutfit({
   outfitPublish({plugin, ship, outfit});
   return outfit;
 }
+
+export function getAnyOutfit(outfitId: string) {
+  return App.plugins.flatMap(p => {
+    const outfit = p.outfits.find(o => o.id === outfitId);
+    if (outfit) return outfit;
+    return;
+  })[0];
+}

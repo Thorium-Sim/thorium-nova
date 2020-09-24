@@ -1,0 +1,12 @@
+subscription PluginShipBasic($pluginId: ID!, $shipId: ID!) {
+  pluginShip(pluginId: $pluginId, id: $shipId) {
+    id
+    identity {
+      name
+      description
+    }
+    tags {
+      tags
+    }
+  }
+}

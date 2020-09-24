@@ -170,4 +170,6 @@ export const registeredComponents = [
   NavigationComponent,
   ThrustersComponent,
   DampenerComponent,
+  ShipAssignmentComponent,
+  ShipOutfitsComponent,
 ];

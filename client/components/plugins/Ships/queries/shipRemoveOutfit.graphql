@@ -1,0 +1,9 @@
+mutation PluginShipRemoveOutfit($pluginId: ID!, $shipId: ID!, $outfitId: ID!) {
+  pluginShipRemoveOutfit(
+    pluginId: $pluginId
+    shipId: $shipId
+    outfitId: $outfitId
+  ) {
+    id
+  }
+}

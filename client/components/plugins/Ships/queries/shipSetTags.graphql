@@ -1,0 +1,8 @@
+mutation PluginShipSetTags($pluginId: ID!, $shipId: ID!, $tags: [String!]!) {
+  pluginShipSetTags(pluginId: $pluginId, shipId: $shipId, tags: $tags) {
+    id
+    tags {
+      tags
+    }
+  }
+}

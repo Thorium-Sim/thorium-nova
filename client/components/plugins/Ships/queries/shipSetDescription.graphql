@@ -1,0 +1,16 @@
+mutation PluginShipSetDescription(
+  $pluginId: ID!
+  $shipId: ID!
+  $description: String!
+) {
+  pluginShipSetDescription(
+    pluginId: $pluginId
+    shipId: $shipId
+    description: $description
+  ) {
+    id
+    identity {
+      description
+    }
+  }
+}

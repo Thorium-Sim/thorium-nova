@@ -1,0 +1,17 @@
+subscription PluginShipOutfits($pluginId: ID!, $shipId: ID!) {
+  pluginShip(pluginId: $pluginId, id: $shipId) {
+    id
+    shipOutfits {
+      outfitIds
+      outfits {
+        id
+        isOutfit {
+          outfitType
+        }
+        identity {
+          name
+        }
+      }
+    }
+  }
+}

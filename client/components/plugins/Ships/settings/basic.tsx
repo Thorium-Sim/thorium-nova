@@ -10,38 +10,42 @@ import TagInput from "../../../../components/ui/TagInput";
 import React from "react";
 import {useTranslation} from "react-i18next";
 import {
-  PluginOutfitSubscription,
-  usePluginOutfitSetDescriptionMutation,
-  usePluginOutfitSetNameMutation,
-  usePluginOutfitSetTagsMutation,
+  usePluginShipBasicSubscription,
+  usePluginShipSetDescriptionMutation,
+  usePluginShipSetNameMutation,
+  usePluginShipSetTagsMutation,
 } from "../../../../generated/graphql";
 import {useParams} from "react-router";
 
-const OutfitBasic: React.FC<{
-  outfit: NonNullable<PluginOutfitSubscription["pluginOutfit"]>;
-}> = ({outfit}) => {
+const ShipBasic: React.FC = () => {
   const {t} = useTranslation();
-  const {pluginId} = useParams();
-  const [setName] = usePluginOutfitSetNameMutation();
-  const [setDescription] = usePluginOutfitSetDescriptionMutation();
-  const [setTags] = usePluginOutfitSetTagsMutation();
+  const {pluginId, shipId} = useParams();
+  const {data} = usePluginShipBasicSubscription({
+    variables: {pluginId, shipId},
+  });
+  const [setName] = usePluginShipSetNameMutation();
+  const [setDescription] = usePluginShipSetDescriptionMutation();
+  const [setTags] = usePluginShipSetTagsMutation();
   const [error, setError] = React.useState(false);
+
+  const ship = data?.pluginShip;
+  if (!ship) return <div>Loading...</div>;
   return (
-    <Box as="fieldset" key={outfit.id} flex={1} overflowY="auto">
+    <Box as="fieldset" key={shipId} flex={1} overflowY="auto">
       <Box display="flex" flexWrap="wrap">
         <Box flex={1} pr={4}>
           <FormControl pb={4} isInvalid={error}>
             <FormLabel width="100%">
               {t(`Name`)}
               <Input
-                defaultValue={outfit.identity.name}
+                defaultValue={ship.identity.name}
                 onChange={() => setError(false)}
                 onBlur={(e: React.ChangeEvent<HTMLInputElement>) =>
                   e.target.value
                     ? setName({
                         variables: {
                           pluginId,
-                          outfitId: outfit.id,
+                          shipId,
                           name: e.target.value,
                         },
                       })
@@ -55,12 +59,12 @@ const OutfitBasic: React.FC<{
             <FormLabel width="100%">
               {t(`Description`)}
               <Textarea
-                defaultValue={outfit.identity.description}
+                defaultValue={ship.identity.description}
                 onBlur={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setDescription({
                     variables: {
                       pluginId,
-                      outfitId: outfit.id,
+                      shipId,
                       description: e.target.value,
                     },
                   })
@@ -72,14 +76,14 @@ const OutfitBasic: React.FC<{
             <FormLabel width="100%">
               {t(`Tags`)}
               <TagInput
-                tags={outfit.tags.tags}
+                tags={ship.tags.tags}
                 onAdd={tag => {
-                  if (outfit.tags.tags.includes(tag)) return;
+                  if (ship.tags.tags.includes(tag)) return;
                   setTags({
                     variables: {
                       pluginId,
-                      outfitId: outfit.id,
-                      tags: outfit.tags.tags.concat(tag),
+                      shipId,
+                      tags: ship.tags.tags.concat(tag),
                     },
                   });
                 }}
@@ -87,8 +91,8 @@ const OutfitBasic: React.FC<{
                   setTags({
                     variables: {
                       pluginId,
-                      outfitId: outfit.id,
-                      tags: outfit.tags.tags.filter(t => t !== tag),
+                      shipId,
+                      tags: ship.tags.tags.filter(t => t !== tag),
                     },
                   });
                 }}
@@ -101,4 +105,4 @@ const OutfitBasic: React.FC<{
   );
 };
 
-export default OutfitBasic;
+export default ShipBasic;

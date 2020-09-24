@@ -1,7 +1,9 @@
 import {
   Arg,
+  Field,
   ID,
   Mutation,
+  ObjectType,
   Query,
   registerEnumType,
   Resolver,
@@ -17,6 +19,15 @@ import {getPlugin} from "../basePlugin";
 import {capitalCase} from "change-case";
 import {outfitPublish} from "./utils";
 import {getOutfitComponents, OutfitAbilities} from "./getOutfitComponents";
+import App from "server/app";
+
+@ObjectType()
+class PluginEntity extends Entity {
+  @Field()
+  pluginId!: string;
+  @Field()
+  pluginName!: string;
+}
 
 @Resolver()
 export class PluginOutfitResolver {
@@ -24,6 +35,19 @@ export class PluginOutfitResolver {
   pluginOutfitsQuery(@Arg("pluginId", type => ID) pluginId: string): Entity[] {
     const plugin = getPlugin(pluginId);
     return plugin.outfits;
+  }
+  @Query(returns => [PluginEntity])
+  allPluginOutfits(): PluginEntity[] {
+    return App.plugins.reduce((prev: PluginEntity[], next) => {
+      return prev.concat(
+        next.outfits.map(n => {
+          const entity = n as PluginEntity;
+          entity.pluginId = next.id;
+          entity.pluginName = next.name;
+          return entity;
+        })
+      );
+    }, []);
   }
   @Query(returns => Entity, {
     name: "pluginOutfit",

@@ -9,6 +9,7 @@ import {appStoreDir} from "server/helpers/appPaths";
 import Entity from "server/helpers/ecs/entity";
 import {
   Arg,
+  Ctx,
   FieldResolver,
   ID,
   Mutation,
@@ -22,6 +23,7 @@ import {pubsub} from "server/helpers/pubsub";
 import {GraphQLUpload, FileUpload} from "graphql-upload";
 import uploadAsset from "server/helpers/uploadAsset";
 import BasePlugin, {getPlugin} from "../basePlugin";
+import {GraphQLContext} from "server/helpers/graphqlContext";
 
 interface ShipPayload {
   ship: Entity;
@@ -61,14 +63,22 @@ export class ShipPluginResolver {
   @Query(returns => Entity, {nullable: true, name: "pluginShip"})
   shipQuery(
     @Arg("id", type => ID) id: string,
-    @Arg("pluginId", type => ID) pluginId: string
+    @Arg("pluginId", type => ID) pluginId: string,
+    @Ctx() ctx: GraphQLContext
   ): Entity | null {
+    ctx.pluginId = pluginId;
+
     const plugin = getPlugin(pluginId);
     return plugin.ships.find(s => s.id === id) || null;
   }
 
   @Query(returns => [Entity], {name: "pluginShips"})
-  shipsQuery(@Arg("pluginId", type => ID) pluginId: string): Entity[] {
+  shipsQuery(
+    @Arg("pluginId", type => ID) pluginId: string,
+    @Ctx() ctx: GraphQLContext
+  ): Entity[] {
+    ctx.pluginId = pluginId;
+
     const plugin = getPlugin(pluginId);
     return plugin?.ships || [];
   }
@@ -79,7 +89,11 @@ export class ShipPluginResolver {
     name: string
   ): Entity {
     const plugin = getPlugin(pluginId);
-    if (plugin.ships.find(s => s.identity?.name === name)) {
+    if (
+      plugin.ships.find(
+        s => s.identity?.name.toLowerCase() === name.toLowerCase()
+      )
+    ) {
       throw new Error("A ship with that name already exists.");
     }
     const entity = new Entity(null, [
@@ -107,7 +121,11 @@ export class ShipPluginResolver {
     const plugin = getPlugin(pluginId);
     const ship = plugin.ships.find(s => s.id === id) || null;
     if (!ship) throw new Error("Unable to find ship.");
-    if (plugin.ships.find(s => s.id === name)) {
+    if (
+      plugin.ships.find(
+        s => s.identity?.name.toLowerCase() === name.toLowerCase()
+      )
+    ) {
       throw new Error("A ship with that name already exists.");
     }
     ship.updateComponent("identity", {name});
@@ -140,7 +158,7 @@ export class ShipPluginResolver {
     if (!ship) throw new Error("Unable to find ship.");
     const pathPrefix = `${appStoreDir}plugins/${
       plugin.name || plugin.id
-    }/assets/${ship.identity?.name || ship.id}`;
+    }/assets/ship/${ship.identity?.name || ship.id}`;
     const splitName = image.filename.split(".");
     const ext = splitName[splitName.length - 1];
     await uploadAsset(image, pathPrefix, `logo.${ext}`);
@@ -164,7 +182,8 @@ export class ShipPluginResolver {
     if (!ship) throw new Error("Unable to find ship.");
     const pathPrefix = `${appStoreDir}plugins/${
       plugin.name || plugin.id
-    }/assets/${ship.identity?.name || ship.id}`;
+    }/assets/ship/${ship.identity?.name || ship.id}`;
+
     await Promise.all([
       uploadAsset(model, pathPrefix, "model.glb"),
       uploadAsset(top, pathPrefix, "top.png"),
@@ -203,8 +222,11 @@ export class ShipPluginResolver {
   pluginShip(
     @Root() payload: ShipPayload,
     @Arg("id", type => ID) id: string,
-    @Arg("pluginId", type => ID) pluginId: string
+    @Arg("pluginId", type => ID) pluginId: string,
+    @Ctx() ctx: GraphQLContext
   ): Entity {
+    ctx.pluginId = pluginId;
+
     return payload.ship;
   }
 
@@ -226,52 +248,77 @@ export class ShipPluginResolver {
   })
   pluginShips(
     @Root() payload: ShipsPayload,
-    @Arg("pluginId", type => ID) pluginId: string
+    @Arg("pluginId", type => ID) pluginId: string,
+    @Ctx() ctx: GraphQLContext
   ): Entity[] {
+    ctx.pluginId = pluginId;
     return payload.ships || [];
   }
 }
 
+function getAssetBase(pluginId?: string) {
+  if (!pluginId) return "";
+  try {
+    const plugin = getPlugin(pluginId);
+    return `/assets/plugins/${plugin.name || plugin.id}/assets`;
+  } catch {
+    return "";
+  }
+}
+
+function getShipAsset(entity: Entity, pluginId?: string) {
+  const assetBase = getAssetBase(pluginId);
+  return `${assetBase}/ship/${entity?.identity?.name || entity.id}/`;
+}
+// TODO: Make sure renaming the ship properly moves the files to the correct locations.
 @Resolver(of => ShipAssetsComponent)
 export class ShipAssetsResolver {
   @FieldResolver()
-  logo(@Root() self: ShipAssetsComponent & {entity: Entity}) {
+  logo(
+    @Root() self: ShipAssetsComponent & {entity: Entity},
+    @Ctx() ctx: GraphQLContext
+  ) {
+    const {pluginId} = ctx;
     return self.logo
-      ? `/assets/ships/${self.entity?.identity?.name || self.entity.id}/${
-          self.logo
-        }`
+      ? `${getShipAsset(self.entity, pluginId)}${self.logo}`
       : "";
   }
   @FieldResolver()
-  model(@Root() self: ShipAssetsComponent & {entity: Entity}) {
+  model(
+    @Root() self: ShipAssetsComponent & {entity: Entity},
+    @Ctx() ctx: GraphQLContext
+  ) {
+    const {pluginId} = ctx;
     return self.model
-      ? `/assets/ships/${self.entity?.identity?.name || self.entity.id}/${
-          self.model
-        }`
+      ? `${getShipAsset(self.entity, pluginId)}${self.model}`
       : "";
   }
   @FieldResolver()
-  top(@Root() self: ShipAssetsComponent & {entity: Entity}) {
-    return self.top
-      ? `/assets/ships/${self.entity?.identity?.name || self.entity.id}/${
-          self.top
-        }`
-      : "";
+  top(
+    @Root() self: ShipAssetsComponent & {entity: Entity},
+    @Ctx() ctx: GraphQLContext
+  ) {
+    const {pluginId} = ctx;
+    return self.top ? `${getShipAsset(self.entity, pluginId)}${self.top}` : "";
   }
   @FieldResolver()
-  side(@Root() self: ShipAssetsComponent & {entity: Entity}) {
+  side(
+    @Root() self: ShipAssetsComponent & {entity: Entity},
+    @Ctx() ctx: GraphQLContext
+  ) {
+    const {pluginId} = ctx;
     return self.side
-      ? `/assets/ships/${self.entity?.identity?.name || self.entity.id}/${
-          self.side
-        }`
+      ? `${getShipAsset(self.entity, pluginId)}${self.side}`
       : "";
   }
   @FieldResolver()
-  vanity(@Root() self: ShipAssetsComponent & {entity: Entity}) {
+  vanity(
+    @Root() self: ShipAssetsComponent & {entity: Entity},
+    @Ctx() ctx: GraphQLContext
+  ) {
+    const {pluginId} = ctx;
     return self.vanity
-      ? `/assets/ships/${self.entity?.identity?.name || self.entity.id}/${
-          self.vanity
-        }`
+      ? `${getShipAsset(self.entity, pluginId)}${self.vanity}`
       : "";
   }
 }
