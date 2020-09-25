@@ -1,0 +1,815 @@
+"""Exposes a URL that specifies the behaviour of this scalar."""
+directive @specifiedBy(
+  """The URL that specifies the behaviour of this scalar."""
+  url: String!
+) on SCALAR
+
+type AlertLevelComponent {
+  alertLevel: String!
+
+  """Whether the alert condition can be changed by the crew."""
+  alertLevelLock: Boolean!
+}
+
+type AtmosphereCompositionComponent {
+  composition: [Composition!]!
+}
+
+type BasePlugin {
+  id: ID!
+  name: String!
+  author: String!
+  description: String!
+  coverImage: String!
+  tags: [String!]!
+  ships: [Entity!]!
+  outfits: [Entity!]!
+  stationComplements: [StationComplement!]!
+  universe: [Entity!]!
+}
+
+type Card {
+  id: ID!
+  name: String!
+  component: String!
+  config: CardConfig!
+  icon: String
+}
+
+type CardConfig {
+  _empty: String!
+}
+
+type Client {
+  id: ID!
+  shipId: ID
+  ship: Entity
+  stationId: ID
+  station: Entity
+  loginName: String
+  offlineState: String
+  training: Boolean!
+  connected: Boolean!
+}
+
+type Components {
+  timer: TimerComponent!
+  identity: IdentityComponent!
+  tags: TagsComponent!
+  position: PositionComponent!
+  velocity: VelocityComponent!
+  rotation: RotationComponent!
+  rotationVelocity: RotationVelocityComponent!
+  size: SizeComponent!
+  temperature: TemperatureComponent!
+  population: PopulationComponent
+  isShip: IsShipComponent!
+  shipAssets: ShipAssetsComponent!
+  alertLevel: AlertLevelComponent!
+  theme: ThemeComponent!
+  stationComplement: StationComplementComponent!
+  shipAssignment: ShipAssignmentComponent!
+  shipOutfits: ShipOutfitsComponent!
+  dampener: DampenerComponent!
+  planetarySystem: PlanetarySystemComponent
+  isStar: IsStarComponent
+  isPlanet: IsPlanetComponent
+  satellite: SatelliteComponent!
+  atmosphereComposition: AtmosphereCompositionComponent!
+  damage: DamageComponent
+  efficiency: EfficiencyComponent
+  isOutfit: IsOutfitComponent!
+  power: PowerComponent
+  heat: HeatComponent
+  trainingMode: TrainingModeComponent
+  warpEngines: WarpEnginesComponent!
+  impulseEngines: ImpulseEnginesComponent!
+  jumpDrive: JumpDriveComponent!
+  navigation: NavigationComponent!
+  thrusters: ThrustersComponent!
+}
+
+type Composition {
+  """A component of the atmosphere, like nitrogen, oxygen, etc."""
+  component: String!
+
+  """The concentration of the component as a percentage of the whole"""
+  concentration: Float!
+}
+
+type Coordinates {
+  x: Float!
+  y: Float!
+  z: Float!
+}
+
+input CoordinatesInput {
+  x: Float = 0
+  y: Float = 0
+  z: Float = 0
+}
+
+"""
+This component describes the damage that has been applied to this system, as well as necessary aspects of its repair.
+"""
+type DamageComponent {
+  value: Boolean!
+}
+
+type DampenerComponent {
+  """
+  The dampening factor. Affects how fast the ship slows down when engines are
+  turned off. Lower number means slow the ship down faster.
+  """
+  dampening: Float!
+}
+
+"""
+The javascript `Date` as string. Type represents date and time as the ISO Date string.
+"""
+scalar DateTime
+
+"""
+This component describes the efficiency of the ship system. Efficiency affects
+many things, like how much power is required; how much heat the system produces;
+the chance that it will randomly fail; and how well the system operates (engines
+thrusting at less than max speed)
+"""
+type EfficiencyComponent {
+  value: Boolean!
+}
+
+type Entity {
+  timer: TimerComponent!
+  identity: IdentityComponent!
+  tags: TagsComponent!
+  position: PositionComponent!
+  velocity: VelocityComponent!
+  rotation: RotationComponent!
+  rotationVelocity: RotationVelocityComponent!
+  size: SizeComponent!
+  temperature: TemperatureComponent!
+  population: PopulationComponent
+  isShip: IsShipComponent!
+  shipAssets: ShipAssetsComponent!
+  alertLevel: AlertLevelComponent!
+  theme: ThemeComponent!
+  stationComplement: StationComplementComponent!
+  shipAssignment: ShipAssignmentComponent!
+  shipOutfits: ShipOutfitsComponent!
+  dampener: DampenerComponent!
+  planetarySystem: PlanetarySystemComponent
+  isStar: IsStarComponent
+  isPlanet: IsPlanetComponent
+  satellite: SatelliteComponent
+  atmosphereComposition: AtmosphereCompositionComponent!
+  damage: DamageComponent
+  efficiency: EfficiencyComponent
+  isOutfit: IsOutfitComponent!
+  power: PowerComponent
+  heat: HeatComponent
+  trainingMode: TrainingModeComponent
+  warpEngines: WarpEnginesComponent!
+  impulseEngines: ImpulseEnginesComponent!
+  jumpDrive: JumpDriveComponent!
+  navigation: NavigationComponent!
+  thrusters: ThrustersComponent!
+  id: ID!
+  components: Components!
+  entityType: EntityTypes!
+}
+
+enum EntityTypes {
+  system
+  planet
+  star
+  ship
+  outfit
+  timer
+}
+
+type Flight {
+  id: ID!
+  name: String!
+  paused: Boolean!
+  date: DateTime!
+  ships: Entity!
+}
+
+type HeatComponent {
+  value: Boolean!
+}
+
+type IdentityComponent {
+  name: String!
+  description: String!
+}
+
+type ImpulseEnginesComponent {
+  """The max speed at full impulse in km/s."""
+  cruisingSpeed: Float!
+
+  """The max speed at emergency impulse in km/s."""
+  emergencySpeed: Float!
+
+  """
+  The force in kilo-newtons which impulse engines apply. If this is the same as
+  the mass of the ship, it will take about 5 seconds to accelerate to cruising speed.
+  """
+  thrust: Float!
+
+  """The desired speed of the ship in km/s."""
+  targetSpeed: Float!
+
+  """The forward acceleration of the ship in km/s."""
+  forwardAcceleration: Float!
+}
+
+type IsOutfitComponent {
+  outfitType: String!
+}
+
+type IsPlanetComponent {
+  """The age in years"""
+  age: Float!
+
+  """
+  Star Trek planetary classification https://memory-alpha.fandom.com/wiki/Planetary_classification
+  """
+  classification: String!
+
+  """Radius of the planet in kilometers. Earth's radius would be 6371"""
+  radius: Float!
+
+  """The mass of the planet compared to Earth."""
+  terranMass: Float!
+
+  """Whether the planet is habitable or not"""
+  habitable: Boolean!
+
+  """A description of the lifeforms on the planet"""
+  lifeforms: String!
+
+  """
+  Surface gravity calculated with the equation (G * Mplanet) / Rplanet^2 where G is the gravitational constant.
+  """
+  surfaceGravity: Float!
+
+  """The asset path for the sphere texture."""
+  textureMapAsset: String!
+
+  """The asset path for the clouds texture. Blank if no clouds"""
+  cloudsMapAsset: String!
+
+  """The asset path for the rings texture. Blank if no rings"""
+  ringsMapAsset: String!
+}
+
+type IsShipComponent {
+  """Mass in kilograms. Affects acceleration"""
+  mass: Float!
+}
+
+type IsStarComponent {
+  """The mass of the star in comparison to the Sun"""
+  solarMass: Float!
+
+  """The age of the star in years"""
+  age: Float!
+
+  """The spectral type of the star, one of O,B,G,K,A,MG,M,D"""
+  spectralType: String!
+
+  """The color hue of the star, based on the spectral type"""
+  hue: Float!
+
+  """Whether the star appears to be white"""
+  isWhite: Boolean!
+
+  """The radius of the star compared to the radius of the Sun"""
+  radius: Float!
+}
+
+type JumpDriveComponent {
+  value: Boolean!
+}
+
+type Mutation {
+  pluginCreate(name: String!): BasePlugin!
+  pluginRemove(id: ID!): String!
+  pluginSetName(name: String!, id: ID!): BasePlugin!
+  pluginSetDescription(description: String!, id: ID!): BasePlugin!
+  pluginSetTags(tags: [String!]!, id: ID!): BasePlugin!
+  pluginSetCoverImage(image: Upload!, id: ID!): BasePlugin!
+  clientConnect: Client!
+  clientDisconnect: Client!
+  clientSetShip(clientId: ID, shipId: ID): Client!
+  clientSetStation(clientId: ID, stationId: ID): Client!
+  clientLogin(loginName: String): Client!
+  clientLogout: Client!
+  flightStart(flightName: String): Flight!
+  flightPause: Flight
+  flightResume: Flight
+  flightReset: Flight
+  flightStop: String
+  flightDelete(flightName: String!): String
+  pluginOutfitSetName(name: String!, outfitId: ID!, pluginId: ID!): Entity!
+  pluginOutfitSetDescription(description: String!, outfitId: ID!, pluginId: ID!): Entity!
+  pluginOutfitSetTags(tags: [String!]!, outfitId: ID!, pluginId: ID!): Entity!
+  impulseEnginesSetCruisingSpeed(speed: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  impulseEnginesSetEmergencySpeed(speed: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  impulseEnginesSetThrust(thrust: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  impulseEnginesSetTargetSpeed(speed: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  navigationSetDestination(destination: ID!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  navigationSetLocked(locked: Boolean!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  navigationSetMaxDestinationRadius(maxDestinationRadius: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  thrustersSetDirection(direction: CoordinatesInput!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  thrustersSetDirectionMaxSpeed(speed: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  thrustersSetDirectionThrust(thrust: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  thrustersSetRotationDelta(rotation: CoordinatesInput!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  thrustersSetRotationMaxSpeed(speed: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  thrustersSetRotationThrust(thrust: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  pluginAddOutfit(name: String, ability: OutfitAbilities!, pluginId: ID!): Entity!
+  pluginOutfitRemove(outfitId: ID!, pluginId: ID!): String!
+  warpEngineSetInterstellarCruisingSpeed(speed: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  warpEngineSetPlanetaryCruisingSpeed(speed: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  warpEngineSetMinSpeedMultiplier(multiplier: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  warpEngineSetWarpFactorCount(count: Int!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  warpEngineSetCurrentWarpFactor(factor: Int!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  pluginShipCreate(name: String!, pluginId: ID!): Entity!
+  pluginShipRemove(shipId: ID!, pluginId: ID!): String!
+  pluginShipRename(pluginId: ID!, id: ID!, name: String!): Entity!
+  pluginShipSetTheme(pluginId: ID!, id: ID!, theme: String!): Entity!
+  pluginShipSetLogo(pluginId: ID!, id: ID!, image: Upload!): Entity!
+  pluginShipSetModel(pluginId: ID!, id: ID!, vanity: Upload!, top: Upload!, side: Upload!, model: Upload!): Entity!
+  stationComplementCreate(name: String!, pluginId: ID!): StationComplement!
+  pluginUniverseAddPlanet(classification: String!, systemId: ID!, id: ID!): Entity!
+  pluginUniverseAddMoon(classification: String!, objectId: ID!, id: ID!): Entity!
+  pluginUniversePlanetSetTemperature(
+    """The temperature of the star in Kelvin"""
+    temperature: Float!
+    objectId: ID!
+    id: ID!
+  ): Entity!
+  pluginUniversePlanetSetAge(
+    """The age of the planet in years"""
+    age: Float!
+    objectId: ID!
+    id: ID!
+  ): Entity!
+  pluginUniversePlanetSetRadius(
+    """The radius of the planet in kilometers"""
+    radius: Float!
+    objectId: ID!
+    id: ID!
+  ): Entity!
+  pluginUniversePlanetSetTerranMass(
+    """The mass of the planet compared to Earth"""
+    terranMass: Float!
+    objectId: ID!
+    id: ID!
+  ): Entity!
+  pluginUniversePlanetSetHabitable(
+    """Whether the planet is habitable by humans."""
+    habitable: Boolean!
+    objectId: ID!
+    id: ID!
+  ): Entity!
+  pluginUniversePlanetSetLifeforms(
+    """A text description of the lifeforms on the planet."""
+    lifeforms: String!
+    objectId: ID!
+    id: ID!
+  ): Entity!
+  pluginUniversePlanetSetTexture(image: Upload!, objectId: ID!, id: ID!): Entity!
+  pluginUniversePlanetSetClouds(image: Upload!, objectId: ID!, id: ID!): Entity!
+  pluginUniversePlanetSetRings(image: Upload!, objectId: ID!, id: ID!): Entity!
+  pluginUniversePlanetClearClouds(objectId: ID!, id: ID!): Entity!
+  pluginUniversePlanetClearRings(objectId: ID!, id: ID!): Entity!
+  pluginUniverseSatelliteSetAxialTilt(axialTilt: Float!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseSatelliteSetDistance(distance: Float!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseSatelliteSetOrbitalArc(orbitalArc: Float!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseSatelliteSetOrbitalInclination(orbitalInclination: Float!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseSatelliteSetEccentricity(eccentricity: Float!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseSatelliteSetShowOrbit(showOrbit: Boolean!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseAddStar(spectralType: String!, systemId: ID!, id: ID!): Entity!
+  pluginUniverseRemoveObject(objectId: ID!, id: ID!): String!
+  pluginUniverseStarSetSolarMass(solarMass: Float!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseStarSetAge(age: Float!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseStarSetHue(hue: Float!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseStarSetIsWhite(isWhite: Boolean!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseStarSetRadius(radius: Float!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseStarSetTemperature(
+    """The temperature of the star in Kelvin"""
+    temperature: Float!
+    objectId: ID!
+    id: ID!
+  ): Entity!
+  pluginUniverseAddSystem(position: PositionInput!, id: ID!): Entity!
+  pluginUniverseSystemSetName(name: String!, systemId: ID!, id: ID!): PlanetarySystem!
+  pluginUniverseSystemSetDescription(description: String!, systemId: ID!, id: ID!): PlanetarySystem!
+  pluginUniverseSystemSetSkyboxKey(skyboxKey: String!, systemId: ID!, id: ID!): PlanetarySystem!
+  pluginUniverseSystemSetPosition(position: PositionInput!, systemId: ID!, id: ID!): PlanetarySystem!
+  snapshot: String!
+  shipCreate(name: String!): Entity
+  shipRename(id: ID, name: String!): Entity!
+  shipSetTheme(id: ID, theme: String!): Entity!
+  shipSetAlertLevel(id: ID, alertLevel: String!): Entity!
+  timerCreate(time: String!, label: String!): Entity!
+  timerPause(pause: Boolean!, id: ID!): Entity
+  timerRemove(id: ID!): String!
+  pluginShipSetName(name: String!, shipId: ID!, pluginId: ID!): Entity!
+  pluginShipSetDescription(description: String!, shipId: ID!, pluginId: ID!): Entity!
+  pluginShipSetTags(tags: [String!]!, shipId: ID!, pluginId: ID!): Entity!
+  pluginShipAddOutfit(outfitId: ID!, shipId: ID!, pluginId: ID!): Entity!
+  pluginShipRemoveOutfit(outfitId: ID!, shipId: ID!, pluginId: ID!): Entity!
+  pluginShipSetMass(
+    """Mass in kilograms"""
+    mass: Float!
+    shipId: ID!
+    pluginId: ID!
+  ): Entity!
+  pluginShipSetSize(
+    """Length in kilometers"""
+    size: Float!
+    shipId: ID!
+    pluginId: ID!
+  ): Entity!
+}
+
+type NavigationComponent {
+  """The desired destination object."""
+  destination: Entity!
+
+  """Whether the course has been locked in."""
+  locked: Boolean!
+
+  """The maximum radius which destinations can be set in ly."""
+  maxDestinationRadius: Float!
+}
+
+enum OutfitAbilities {
+  warpEngines
+  impulseEngines
+  thrusters
+  navigation
+  jumpDrive
+  generic
+}
+
+type PlanetarySystem {
+  timer: TimerComponent!
+  identity: IdentityComponent!
+  tags: TagsComponent!
+  position: PositionComponent!
+  velocity: VelocityComponent!
+  rotation: RotationComponent!
+  rotationVelocity: RotationVelocityComponent!
+  size: SizeComponent!
+  temperature: TemperatureComponent!
+  population: PopulationComponent
+  isShip: IsShipComponent!
+  shipAssets: ShipAssetsComponent!
+  alertLevel: AlertLevelComponent!
+  theme: ThemeComponent!
+  stationComplement: StationComplementComponent!
+  shipAssignment: ShipAssignmentComponent!
+  shipOutfits: ShipOutfitsComponent!
+  dampener: DampenerComponent!
+  planetarySystem: PlanetarySystemComponent
+  isStar: IsStarComponent
+  isPlanet: IsPlanetComponent
+  satellite: SatelliteComponent
+  atmosphereComposition: AtmosphereCompositionComponent!
+  damage: DamageComponent
+  efficiency: EfficiencyComponent
+  isOutfit: IsOutfitComponent!
+  power: PowerComponent
+  heat: HeatComponent
+  trainingMode: TrainingModeComponent
+  warpEngines: WarpEnginesComponent!
+  impulseEngines: ImpulseEnginesComponent!
+  jumpDrive: JumpDriveComponent!
+  navigation: NavigationComponent!
+  thrusters: ThrustersComponent!
+  id: ID!
+  components: Components!
+  entityType: EntityTypes!
+
+  """The objects that inhabit this system"""
+  items: [Entity!]!
+  habitableZoneInner: Float!
+  habitableZoneOuter: Float!
+}
+
+type PlanetarySystemComponent {
+  """
+  A string key that is used to procedurally generate the nebula skybox background in this system.
+  """
+  skyboxKey: String!
+
+  """The inner radius of the habitable zone of the system."""
+  habitableZoneInner: Float!
+
+  """The outer radius of the habitable zone of the system."""
+  habitableZoneOuter: Float!
+}
+
+type PlanetType {
+  id: ID!
+  name: String!
+  classification: String!
+}
+
+type PluginEntity {
+  timer: TimerComponent!
+  identity: IdentityComponent!
+  tags: TagsComponent!
+  position: PositionComponent!
+  velocity: VelocityComponent!
+  rotation: RotationComponent!
+  rotationVelocity: RotationVelocityComponent!
+  size: SizeComponent!
+  temperature: TemperatureComponent!
+  population: PopulationComponent
+  isShip: IsShipComponent!
+  shipAssets: ShipAssetsComponent!
+  alertLevel: AlertLevelComponent!
+  theme: ThemeComponent!
+  stationComplement: StationComplementComponent!
+  shipAssignment: ShipAssignmentComponent!
+  shipOutfits: ShipOutfitsComponent!
+  dampener: DampenerComponent!
+  planetarySystem: PlanetarySystemComponent
+  isStar: IsStarComponent
+  isPlanet: IsPlanetComponent
+  satellite: SatelliteComponent
+  atmosphereComposition: AtmosphereCompositionComponent!
+  damage: DamageComponent
+  efficiency: EfficiencyComponent
+  isOutfit: IsOutfitComponent!
+  power: PowerComponent
+  heat: HeatComponent
+  trainingMode: TrainingModeComponent
+  warpEngines: WarpEnginesComponent!
+  impulseEngines: ImpulseEnginesComponent!
+  jumpDrive: JumpDriveComponent!
+  navigation: NavigationComponent!
+  thrusters: ThrustersComponent!
+  id: ID!
+  components: Components!
+  entityType: EntityTypes!
+  pluginId: String!
+  pluginName: String!
+}
+
+type PopulationComponent {
+  count: Float!
+}
+
+type PositionComponent {
+  x: Float!
+  y: Float!
+  z: Float!
+}
+
+input PositionInput {
+  x: Float = 0
+  y: Float = 0
+  z: Float = 0
+}
+
+type PowerComponent {
+  value: Boolean!
+}
+
+type Query {
+  plugins: [BasePlugin!]!
+  plugin(id: ID!): BasePlugin
+  client(id: ID): Client!
+  flight: Flight
+  flights: [Flight!]!
+  entities: [Entity!]!
+  impulseEnginesOutfit(shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  navigationOutfit(shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  thrustersOutfit(shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  pluginOutfits(pluginId: ID!): [Entity!]!
+  allPluginOutfits: [PluginEntity!]!
+  pluginOutfit(id: ID!, pluginId: ID!): Entity
+  warpEnginesOutfit(shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  pluginShip(pluginId: ID!, id: ID!): Entity
+  pluginShips(pluginId: ID!): [Entity!]!
+  stationComplement(pluginId: ID!, id: ID!): StationComplement
+  stationComplements(pluginId: ID!): [StationComplement!]!
+  pluginUniverseSearch(search: String!, id: ID!): [Entity!]!
+  planetTypes: [PlanetType!]!
+  starTypes: [StarType!]!
+  pluginUniverseObject(objectId: ID!, id: ID!): Entity!
+  pluginUniverseSystem(systemId: ID!, id: ID!): PlanetarySystem!
+  ship(id: ID): Entity
+  ships: [Entity!]!
+  timers: [Entity!]!
+  timer(id: ID): Entity!
+}
+
+type RotationComponent {
+  x: Float!
+  y: Float!
+  z: Float!
+  w: Float!
+}
+
+type RotationVelocityComponent {
+  x: Float!
+  y: Float!
+  z: Float!
+}
+
+type SatelliteComponent {
+  """The tilt of the axis in degrees"""
+  axialTilt: Float!
+
+  """Distance from the center of its orbit in kilometers"""
+  distance: Float!
+
+  """Degrees where the planet currently is in its orbit"""
+  orbitalArc: Float!
+
+  """Degrees up or down where the planet is vertically in its orbit"""
+  orbitalInclination: Float!
+
+  """Degree to which the elliptical orbit is stretched"""
+  eccentricity: Float!
+
+  """Whether the orbit should be visible on the starmap"""
+  showOrbit: Boolean!
+  parent: Entity
+  satellites: [Entity!]
+}
+
+type ShipAssetsComponent {
+  """GLB model of the ship."""
+  model: String!
+  side: String!
+  top: String!
+  vanity: String!
+  logo: String!
+}
+
+"""
+This component is used to assign other entities, like systems or crew members, to a ship.
+"""
+type ShipAssignmentComponent {
+  shipId: String!
+  ship: Entity
+}
+
+"""
+This component defines the outfits which are assigned to a ship. When a flight
+is started, the outfit IDs are converted into references to the actual outfit IDs
+"""
+type ShipOutfitsComponent {
+  outfitIds: [String!]!
+  outfits: [Entity!]!
+}
+
+type SizeComponent {
+  value: Float!
+}
+
+type StarType {
+  id: ID!
+  name: String!
+  spectralType: String!
+  prevalence: Float!
+}
+
+type Station {
+  id: ID!
+  name: String!
+  description: String!
+  tags: [String!]!
+  cards: [Card!]!
+}
+
+type StationComplement {
+  id: ID!
+  name: String!
+  stations: [Station!]!
+}
+
+type StationComplementComponent {
+  stationComplementId: String
+  stationComplement: StationComplement
+  stations: [Station!]!
+}
+
+type Subscription {
+  plugin(id: ID!): BasePlugin
+  plugins: [BasePlugin!]!
+  impulseEnginesOutfit(shipId: ID, outfitId: ID, pluginId: ID): Entity
+  navigationOutfit(shipId: ID, outfitId: ID, pluginId: ID): Entity
+  thrustersOutfit(shipId: ID, outfitId: ID, pluginId: ID): Entity
+  pluginOutfit(id: ID!, pluginId: ID!): Entity
+  pluginOutfits(pluginId: ID!): [Entity!]!
+  warpEnginesOutfit(shipId: ID, outfitId: ID, pluginId: ID): Entity
+  pluginShip(pluginId: ID!, id: ID!): Entity
+  pluginShips(pluginId: ID!): [Entity!]!
+  pluginUniverse(entityType: EntityTypes, id: ID!): [Entity!]!
+  pluginUniverseObject(objectId: ID!, id: ID!): Entity!
+  pluginUniverseSystem(systemId: ID!, id: ID!): PlanetarySystem!
+  ship(id: ID): [Entity!]
+  ships: [Entity!]!
+  timer(id: ID!): [Entity!]
+  timers: [Entity!]!
+}
+
+type TagsComponent {
+  tags: [String!]!
+}
+
+type TemperatureComponent {
+  """Temperature in Kelvin (K)"""
+  temperature: Float!
+}
+
+type ThemeComponent {
+  value: String!
+}
+
+type ThrustersComponent {
+  thrusting: Boolean!
+
+  """The currently applied direction thruster vector"""
+  direction: Coordinates!
+
+  """The current direction thruster acceleration vector in m/s/s"""
+  directionAcceleration: Coordinates!
+
+  """The maximum speed which can be applied by direction thrusters in m/s"""
+  directionMaxSpeed: Float!
+
+  """
+  The thrust applied by direction thrusters in kilo-newtons, which affects how
+  fast the ship accelerates based on the mass of the ship.
+  """
+  directionThrust: Float!
+
+  """The current vector of rotation being applied."""
+  rotationDelta: Coordinates!
+
+  """The current rotation velocity."""
+  rotationVelocity: Coordinates!
+
+  """The max rotation speed in rotations per minute."""
+  rotationMaxSpeed: Float!
+
+  """
+  The thrust applied by rotation thrusters in kilo-newtons, which affects how
+  fast the rotation accelerates based on the mass of the ship.
+  """
+  rotationThrust: Float!
+}
+
+type TimerComponent {
+  label: String!
+  time: String!
+  paused: Boolean!
+}
+
+type TrainingModeComponent {
+  value: Boolean!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+type VelocityComponent {
+  x: Float!
+  y: Float!
+  z: Float!
+}
+
+type WarpEnginesComponent {
+  """The cruising speed in interstellar space in km/s"""
+  interstellarCruisingSpeed: Float!
+
+  """The cruising speed in planetary system space in km/s"""
+  planetaryCruisingSpeed: Float!
+
+  """The min speed (warp 1) compared to the cruising speed"""
+  minSpeedMultiplier: Float!
+
+  """
+  How many warp factors there are between min and max inclusive. This does not
+  include emergency or destructive warp which are automatically extrapolated.
+  """
+  warpFactorCount: Float!
+
+  """The current warp factor. 0 is full stop."""
+  currentWarpFactor: Float!
+
+  """The forward acceleration of the ship in km/s."""
+  forwardAcceleration: Float!
+}
+

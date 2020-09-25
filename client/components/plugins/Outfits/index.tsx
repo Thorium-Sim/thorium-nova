@@ -1,10 +1,11 @@
-import {Box, Flex, Grid, Heading, Select} from "@chakra-ui/core";
+import {Box, Flex, Grid, Heading, IconButton, Select} from "@chakra-ui/core";
 import SearchableList from "../../ui/SearchableList";
 import {
   useOutfitAbilitiesQuery,
   usePluginOutfitsSubscription,
   usePluginAddOutfitMutation,
   OutfitAbilities,
+  usePluginOutfitRemoveMutation,
 } from "../../../generated/graphql";
 import React from "react";
 import {useTranslation} from "react-i18next";
@@ -19,6 +20,7 @@ import {
 } from "react-router";
 import Menubar from "./Menubar";
 import SettingList from "./SettingList";
+import {useConfirm} from "../../../components/Dialog";
 
 const NewOutfitDropdown: React.FC<{onAdd: (id: string) => void}> = ({
   onAdd,
@@ -59,6 +61,10 @@ const OutfitsList: React.FC = () => {
   const match = useMatch("/edit/:pluginId/outfits/:outfitId/*");
   const {outfitId} = match?.params || {};
   const {data} = usePluginOutfitsSubscription({variables: {pluginId}});
+  const [remove] = usePluginOutfitRemoveMutation();
+
+  const confirm = useConfirm();
+
   return (
     <Flex p={8} py={12} height="100%" direction="column" bg="blackAlpha.500">
       <Menubar />
@@ -76,6 +82,30 @@ const OutfitsList: React.FC = () => {
                   category: o.isOutfit.outfitType,
                 })) || []
               }
+              renderItem={c => (
+                <Flex key={c.id} alignItems="center">
+                  <Box flex={1}>{c.label}</Box>
+                  <IconButton
+                    icon="small-close"
+                    size="sm"
+                    aria-label={t("Remove Outfit")}
+                    variantColor="danger"
+                    onClick={async e => {
+                      e.preventDefault();
+                      if (
+                        await confirm({
+                          header: `Are you sure you want to delete ${c.label}?`,
+                          body:
+                            "This will also remove it from any ships that use it.",
+                        })
+                      ) {
+                        remove({variables: {pluginId, outfitId: c.id}});
+                        navigate(`/edit/${pluginId}/outfits`);
+                      }
+                    }}
+                  ></IconButton>
+                </Flex>
+              )}
             />
           </Box>
           <NewOutfitDropdown onAdd={id => navigate(`${id}/basic`)} />

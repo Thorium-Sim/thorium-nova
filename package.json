@@ -21,6 +21,7 @@
     "test:watch": "jest --watch",
     "test:debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --watch",
     "generate:graphql": "graphql-codegen --config codegen.yml",
+    "generate:schema": "npx get-graphql-schema http://localhost:3001/graphql > schema.graphql",
     "postgenerate:graphql": "prettier --write client/generated/graphql.tsx",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",

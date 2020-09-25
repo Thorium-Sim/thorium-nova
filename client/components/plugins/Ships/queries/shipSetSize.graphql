@@ -1,0 +1,5 @@
+mutation PluginShipSetSize($pluginId: ID!, $shipId: ID!, $size: Float!) {
+  pluginShipSetSize(pluginId: $pluginId, shipId: $shipId, size: $size) {
+    id
+  }
+}

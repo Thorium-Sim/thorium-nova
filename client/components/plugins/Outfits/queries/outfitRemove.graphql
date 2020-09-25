@@ -1,0 +1,3 @@
+mutation PluginOutfitRemove($pluginId: ID!, $outfitId: ID!) {
+  pluginOutfitRemove(pluginId: $pluginId, outfitId: $outfitId)
+}

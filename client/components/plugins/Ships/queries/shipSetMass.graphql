@@ -1,0 +1,5 @@
+mutation PluginShipSetMass($pluginId: ID!, $shipId: ID!, $mass: Float!) {
+  pluginShipSetMass(pluginId: $pluginId, shipId: $shipId, mass: $mass) {
+    id
+  }
+}

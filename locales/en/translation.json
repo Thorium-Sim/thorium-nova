@@ -1,12 +1,14 @@
 {
-  "Add System": "Add System",
   "Assets": "Assets",
-  "Assigned Systems": "Assigned Systems",
-  "Available Systems": "Available Systems",
   "Basic": "Basic",
-  "Exclude Other Plugins": "Exclude Other Plugins",
-  "Include Other Plugins": "Include Other Plugins",
+  "Mass": "Mass",
+  "Mass is required": "Mass is required",
+  "Mass must be a number greater than 0": "Mass must be a number greater than 0",
+  "New Outfit": "New Outfit",
   "Outfits": "Outfits",
-  "Remove System": "Remove System",
-  "Search": "Search"
+  "Physics": "Physics",
+  "Remove Outfit": "Remove Outfit",
+  "Remove Ship": "Remove Ship",
+  "Size": "Size",
+  "Size must be a number greater than 0": "Size must be a number greater than 0"
 }

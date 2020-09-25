@@ -190,6 +190,16 @@ export type PluginAddOutfitMutation = {
   };
 };
 
+export type PluginOutfitRemoveMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  outfitId: Scalars["ID"];
+}>;
+
+export type PluginOutfitRemoveMutation = {
+  __typename?: "Mutation";
+  pluginOutfitRemove: string;
+};
+
 export type PluginOutfitSetDescriptionMutationVariables = Exact<{
   pluginId: Scalars["ID"];
   outfitId: Scalars["ID"];
@@ -605,6 +615,31 @@ export type PluginShipOutfitsSubscription = {
   }>;
 };
 
+export type PluginShipPhysicsSubscriptionVariables = Exact<{
+  shipId: Scalars["ID"];
+  pluginId?: Maybe<Scalars["ID"]>;
+}>;
+
+export type PluginShipPhysicsSubscription = {
+  __typename?: "Subscription";
+  pluginShip: Maybe<{
+    __typename?: "Entity";
+    id: string;
+    isShip: {__typename?: "IsShipComponent"; mass: number};
+    size: {__typename?: "SizeComponent"; value: number};
+  }>;
+};
+
+export type PluginShipRemoveMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  shipId: Scalars["ID"];
+}>;
+
+export type PluginShipRemoveMutation = {
+  __typename?: "Mutation";
+  pluginShipRemove: string;
+};
+
 export type PluginShipRemoveOutfitMutationVariables = Exact<{
   pluginId: Scalars["ID"];
   shipId: Scalars["ID"];
@@ -631,6 +666,17 @@ export type PluginShipSetDescriptionMutation = {
   };
 };
 
+export type PluginShipSetMassMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  shipId: Scalars["ID"];
+  mass: Scalars["Float"];
+}>;
+
+export type PluginShipSetMassMutation = {
+  __typename?: "Mutation";
+  pluginShipSetMass: {__typename?: "Entity"; id: string};
+};
+
 export type PluginShipSetNameMutationVariables = Exact<{
   pluginId: Scalars["ID"];
   shipId: Scalars["ID"];
@@ -644,6 +690,17 @@ export type PluginShipSetNameMutation = {
     id: string;
     identity: {__typename?: "IdentityComponent"; name: string};
   };
+};
+
+export type PluginShipSetSizeMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  shipId: Scalars["ID"];
+  size: Scalars["Float"];
+}>;
+
+export type PluginShipSetSizeMutation = {
+  __typename?: "Mutation";
+  pluginShipSetSize: {__typename?: "Entity"; id: string};
 };
 
 export type PluginShipSetTagsMutationVariables = Exact<{
@@ -1641,6 +1698,25 @@ export function usePluginAddOutfitMutation(
 export type PluginAddOutfitMutationHookResult = ReturnType<
   typeof usePluginAddOutfitMutation
 >;
+export const PluginOutfitRemoveDocument = gql`
+  mutation PluginOutfitRemove($pluginId: ID!, $outfitId: ID!) {
+    pluginOutfitRemove(pluginId: $pluginId, outfitId: $outfitId)
+  }
+`;
+export function usePluginOutfitRemoveMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginOutfitRemoveMutation,
+    PluginOutfitRemoveMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginOutfitRemoveMutation,
+    PluginOutfitRemoveMutationVariables
+  >(PluginOutfitRemoveDocument, baseOptions);
+}
+export type PluginOutfitRemoveMutationHookResult = ReturnType<
+  typeof usePluginOutfitRemoveMutation
+>;
 export const PluginOutfitSetDescriptionDocument = gql`
   mutation PluginOutfitSetDescription(
     $pluginId: ID!
@@ -2439,6 +2515,52 @@ export function usePluginShipOutfitsSubscription(
 export type PluginShipOutfitsSubscriptionHookResult = ReturnType<
   typeof usePluginShipOutfitsSubscription
 >;
+export const PluginShipPhysicsDocument = gql`
+  subscription PluginShipPhysics($shipId: ID!, $pluginId: ID = "") {
+    pluginShip(id: $shipId, pluginId: $pluginId) {
+      id
+      isShip {
+        mass
+      }
+      size {
+        value
+      }
+    }
+  }
+`;
+export function usePluginShipPhysicsSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    PluginShipPhysicsSubscription,
+    PluginShipPhysicsSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    PluginShipPhysicsSubscription,
+    PluginShipPhysicsSubscriptionVariables
+  >(PluginShipPhysicsDocument, baseOptions);
+}
+export type PluginShipPhysicsSubscriptionHookResult = ReturnType<
+  typeof usePluginShipPhysicsSubscription
+>;
+export const PluginShipRemoveDocument = gql`
+  mutation PluginShipRemove($pluginId: ID!, $shipId: ID!) {
+    pluginShipRemove(pluginId: $pluginId, shipId: $shipId)
+  }
+`;
+export function usePluginShipRemoveMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginShipRemoveMutation,
+    PluginShipRemoveMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginShipRemoveMutation,
+    PluginShipRemoveMutationVariables
+  >(PluginShipRemoveDocument, baseOptions);
+}
+export type PluginShipRemoveMutationHookResult = ReturnType<
+  typeof usePluginShipRemoveMutation
+>;
 export const PluginShipRemoveOutfitDocument = gql`
   mutation PluginShipRemoveOutfit(
     $pluginId: ID!
@@ -2500,6 +2622,27 @@ export function usePluginShipSetDescriptionMutation(
 export type PluginShipSetDescriptionMutationHookResult = ReturnType<
   typeof usePluginShipSetDescriptionMutation
 >;
+export const PluginShipSetMassDocument = gql`
+  mutation PluginShipSetMass($pluginId: ID!, $shipId: ID!, $mass: Float!) {
+    pluginShipSetMass(pluginId: $pluginId, shipId: $shipId, mass: $mass) {
+      id
+    }
+  }
+`;
+export function usePluginShipSetMassMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginShipSetMassMutation,
+    PluginShipSetMassMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginShipSetMassMutation,
+    PluginShipSetMassMutationVariables
+  >(PluginShipSetMassDocument, baseOptions);
+}
+export type PluginShipSetMassMutationHookResult = ReturnType<
+  typeof usePluginShipSetMassMutation
+>;
 export const PluginShipSetNameDocument = gql`
   mutation PluginShipSetName($pluginId: ID!, $shipId: ID!, $name: String!) {
     pluginShipSetName(pluginId: $pluginId, shipId: $shipId, name: $name) {
@@ -2523,6 +2666,27 @@ export function usePluginShipSetNameMutation(
 }
 export type PluginShipSetNameMutationHookResult = ReturnType<
   typeof usePluginShipSetNameMutation
+>;
+export const PluginShipSetSizeDocument = gql`
+  mutation PluginShipSetSize($pluginId: ID!, $shipId: ID!, $size: Float!) {
+    pluginShipSetSize(pluginId: $pluginId, shipId: $shipId, size: $size) {
+      id
+    }
+  }
+`;
+export function usePluginShipSetSizeMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginShipSetSizeMutation,
+    PluginShipSetSizeMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginShipSetSizeMutation,
+    PluginShipSetSizeMutationVariables
+  >(PluginShipSetSizeDocument, baseOptions);
+}
+export type PluginShipSetSizeMutationHookResult = ReturnType<
+  typeof usePluginShipSetSizeMutation
 >;
 export const PluginShipSetTagsDocument = gql`
   mutation PluginShipSetTags($pluginId: ID!, $shipId: ID!, $tags: [String!]!) {

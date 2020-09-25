@@ -5,7 +5,6 @@ import {
   Mutation,
   ObjectType,
   Query,
-  registerEnumType,
   Resolver,
   Root,
   Subscription,
@@ -15,7 +14,7 @@ import {IdentityComponent} from "server/components/identity";
 import Entity from "server/helpers/ecs/entity";
 import uuid from "uniqid";
 import {pubsub} from "server/helpers/pubsub";
-import {getPlugin} from "../basePlugin";
+import {getPlugin, publish} from "../basePlugin";
 import {capitalCase} from "change-case";
 import {outfitPublish} from "./utils";
 import {getOutfitComponents, OutfitAbilities} from "./getOutfitComponents";
@@ -95,6 +94,28 @@ export class PluginOutfitResolver {
     return entity;
   }
 
+  @Mutation()
+  pluginOutfitRemove(
+    @Arg("pluginId", type => ID) pluginId: string,
+    @Arg("outfitId", type => ID)
+    outfitId: string
+  ): string {
+    const plugin = getPlugin(pluginId);
+    for (let i = 0; i < plugin.outfits.length; i++) {
+      if (plugin.outfits[i].id === outfitId) {
+        plugin.outfits.splice(i, 1);
+        break;
+      }
+    }
+    // TODO: Properly remove the outfit from any ships it is assigned to.
+
+    publish(plugin);
+    pubsub.publish("pluginOutfits", {
+      pluginId: plugin.id,
+      outfits: plugin.outfits,
+    });
+    return "";
+  }
   @Subscription(returns => Entity, {
     nullable: true,
     topics: ({args, payload}) => {

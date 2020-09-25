@@ -24,4 +24,5 @@ export class ShipOutfitsComponent extends Component {
   get outfits(): Entity[] {
     return this.outfitIds.map(o => getAnyOutfit(o)).filter(isOutfit);
   }
+  set outfits(val: Entity[]) {}
 }

@@ -24,6 +24,9 @@ import {GraphQLUpload, FileUpload} from "graphql-upload";
 import uploadAsset from "server/helpers/uploadAsset";
 import BasePlugin, {getPlugin} from "../basePlugin";
 import {GraphQLContext} from "server/helpers/graphqlContext";
+import {ShipOutfitsComponent} from "server/components/ship/shipOutfits";
+import {SizeComponent} from "server/components/size";
+import {DampenerComponent} from "server/components/outfits/dampeners";
 
 interface ShipPayload {
   ship: Entity;
@@ -103,6 +106,9 @@ export class ShipPluginResolver {
       TagsComponent,
       IdentityComponent,
       ThemeComponent,
+      ShipOutfitsComponent,
+      SizeComponent,
+      DampenerComponent,
     ]);
 
     plugin.ships.push(entity);
@@ -110,6 +116,27 @@ export class ShipPluginResolver {
     publishShip(plugin, entity);
 
     return entity;
+  }
+
+  @Mutation()
+  pluginShipRemove(
+    @Arg("pluginId", type => ID) pluginId: string,
+    @Arg("shipId", type => ID)
+    shipId: string
+  ): string {
+    const plugin = getPlugin(pluginId);
+    for (let i = 0; i < plugin.ships.length; i++) {
+      if (plugin.ships[i].id === shipId) {
+        plugin.ships.splice(i, 1);
+        break;
+      }
+    }
+    // TODO: Delete the associated files if they aren't associated with any other objects.
+    pubsub.publish("pluginShips", {
+      pluginId: plugin.id,
+      ships: plugin.ships,
+    });
+    return "";
   }
 
   @Mutation(returns => Entity)

@@ -1,0 +1,11 @@
+subscription PluginShipPhysics($shipId: ID!, $pluginId: ID = "") {
+  pluginShip(id: $shipId, pluginId: $pluginId) {
+    id
+    isShip {
+      mass
+    }
+    size {
+      value
+    }
+  }
+}

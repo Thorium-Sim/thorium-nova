@@ -85,6 +85,9 @@ export default class Components {
   @Field()
   shipOutfits?: ShipOutfitsComponent;
 
+  @Field()
+  dampener?: DampenerComponent;
+
   // Stellar Objects Components
   @Field({nullable: true})
   planetarySystem?: PlanetarySystemComponent;
@@ -135,9 +138,6 @@ export default class Components {
 
   @Field()
   thrusters?: ThrustersComponent;
-
-  @Field()
-  dampener?: DampenerComponent;
 }
 
 export const registeredComponents = [

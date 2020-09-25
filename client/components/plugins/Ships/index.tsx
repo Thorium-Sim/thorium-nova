@@ -1,4 +1,12 @@
-import {Box, Button, ButtonGroup, Flex, Grid, Heading} from "@chakra-ui/core";
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Flex,
+  Grid,
+  Heading,
+  IconButton,
+} from "@chakra-ui/core";
 import SearchableList from "../../../components/ui/SearchableList";
 import React from "react";
 import {
@@ -15,8 +23,9 @@ import ShipSettings from "./shipSettings";
 import {
   usePluginShipsSubscription,
   usePluginShipCreateMutation,
+  usePluginShipRemoveMutation,
 } from "../../../generated/graphql";
-import {useAlert, usePrompt} from "../../../components/Dialog";
+import {useAlert, useConfirm, usePrompt} from "../../../components/Dialog";
 
 const ShipsList: React.FC = () => {
   const {t} = useTranslation();
@@ -27,8 +36,9 @@ const ShipsList: React.FC = () => {
 
   const {data} = usePluginShipsSubscription({variables: {pluginId}});
   const [create] = usePluginShipCreateMutation();
-
+  const [remove] = usePluginShipRemoveMutation();
   const prompt = usePrompt();
+  const confirm = useConfirm();
   const alert = useAlert();
 
   return (
@@ -47,6 +57,28 @@ const ShipsList: React.FC = () => {
                   label: o.identity.name,
                 })) || []
               }
+              renderItem={c => (
+                <Flex key={c.id} alignItems="center">
+                  <Box flex={1}>{c.label}</Box>
+                  <IconButton
+                    icon="small-close"
+                    size="sm"
+                    aria-label={t("Remove Ship")}
+                    variantColor="danger"
+                    onClick={async e => {
+                      e.preventDefault();
+                      if (
+                        await confirm({
+                          header: `Are you sure you want to delete ${c.label}?`,
+                        })
+                      ) {
+                        remove({variables: {pluginId, shipId}});
+                        navigate(`/edit/${pluginId}/ships`);
+                      }
+                    }}
+                  ></IconButton>
+                </Flex>
+              )}
             />
           </Box>
           <Button
