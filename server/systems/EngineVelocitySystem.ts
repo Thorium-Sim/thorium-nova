@@ -1,4 +1,3 @@
-import App from "server/app";
 import Entity from "server/helpers/ecs/entity";
 import System from "server/helpers/ecs/system";
 import {Object3D, Quaternion, Vector3} from "three";
@@ -9,7 +8,9 @@ export class EngineVelocitySystem extends System {
     return !!(entity.components.isShip && entity.components.velocity);
   }
   update(entity: Entity, elapsed: number) {
-    const systems = App.activeFlight?.ecs.entities.filter(
+    const elapsedRatio = elapsed / 1000;
+
+    const systems = this.ecs.entities.filter(
       s =>
         s.shipAssignment?.shipId === entity.id &&
         (s.warpEngines || s.impulseEngines || s.thrusters || s.dampener)
@@ -23,9 +24,9 @@ export class EngineVelocitySystem extends System {
     if (dampening) {
       // Create an opposite vector
       const dampeningVector = new Vector3(
-        Math.sign(velocityVector.x) * -1 * dampening * elapsed,
-        Math.sign(velocityVector.y) * -1 * dampening * elapsed,
-        Math.sign(velocityVector.z) * -1 * dampening * elapsed
+        Math.sign(velocityVector.x) * -1 * dampening * elapsedRatio,
+        Math.sign(velocityVector.y) * -1 * dampening * elapsedRatio,
+        Math.sign(velocityVector.z) * -1 * dampening * elapsedRatio
       );
 
       // Add it to the velocity to reverse it a bit
@@ -60,7 +61,7 @@ export class EngineVelocitySystem extends System {
     // Impulse Engines
     const impulse = systems?.find(s => s.impulseEngines);
     if (impulse?.impulseEngines) {
-      o.translateY(impulse.impulseEngines.forwardAcceleration * elapsed);
+      o.translateY(impulse.impulseEngines.forwardAcceleration * elapsedRatio);
       if (impulse.impulseEngines.targetSpeed) {
         o.position.clampLength(0, impulse.impulseEngines.targetSpeed);
       }
@@ -68,7 +69,7 @@ export class EngineVelocitySystem extends System {
     // Warp Engines
     const warp = systems?.find(s => s.warpEngines);
     if (warp?.warpEngines) {
-      o.translateY(warp.warpEngines.forwardAcceleration * elapsed);
+      o.translateY(warp.warpEngines.forwardAcceleration * elapsedRatio);
       if (warp.warpEngines.maxVelocity) {
         o.position.clampLength(0, warp.warpEngines.maxVelocity);
       }
@@ -77,13 +78,13 @@ export class EngineVelocitySystem extends System {
     if (entity.thrusters?.directionAcceleration) {
       // Measured in m/s/s, so divide by 1000
       o.translateX(
-        entity.thrusters.directionAcceleration.x * elapsed * (1 / 1000)
+        entity.thrusters.directionAcceleration.x * elapsedRatio * (1 / 1000)
       );
       o.translateY(
-        entity.thrusters.directionAcceleration.y * elapsed * (1 / 1000)
+        entity.thrusters.directionAcceleration.y * elapsedRatio * (1 / 1000)
       );
       o.translateZ(
-        entity.thrusters.directionAcceleration.z * elapsed * (1 / 1000)
+        entity.thrusters.directionAcceleration.z * elapsedRatio * (1 / 1000)
       );
     }
 

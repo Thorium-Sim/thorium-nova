@@ -14,7 +14,7 @@ import {
   usePluginShipSetSizeMutation,
 } from "../../../../generated/graphql";
 import {useParams} from "react-router";
-
+// TODO: Add a thing to make it so you can calculate the time to accelerate to full impulse with certain masses.
 const ShipBasic: React.FC = () => {
   const {t} = useTranslation();
   const {pluginId, shipId} = useParams();

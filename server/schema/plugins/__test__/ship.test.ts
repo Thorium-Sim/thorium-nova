@@ -108,6 +108,48 @@ describe("Ship Plugin", () => {
       "A ship with that name already exists."
     );
   });
+  it("should remove a ship", async () => {
+    const plugin = await gqlCall({
+      query: `mutation CreateUniverse($name:String!) {
+          pluginCreate(name:$name) {
+            id
+            name
+          }
+        }`,
+      variables: {name: "My Plugin 10"},
+    });
+    const pluginId = plugin.data?.pluginCreate.id;
+    const newShip = await gqlCall({
+      query: `mutation AddShip($pluginId:ID!) {
+          pluginShipCreate(name:"Remove Ship", pluginId:$pluginId) {
+            id
+            identity {
+              name
+            }
+          }
+        }`,
+      variables: {pluginId},
+    });
+    const id = newShip.data?.pluginShipCreate.id;
+    const output = await gqlCall({
+      query: `mutation RemoveShip($pluginId:ID!, $id:ID!) {
+            pluginShipRemove(shipId:$id, pluginId:$pluginId)
+          }`,
+      variables: {id, pluginId},
+    });
+    const ships = await gqlCall({
+      query: `query Ship($pluginId:ID!) {
+        pluginShips(pluginId:$pluginId) {
+          id
+          identity {
+            name
+          }
+        }
+      }`,
+      variables: {pluginId},
+    });
+    expect(ships.data?.pluginShips.length).toEqual(0);
+  });
   it("should properly rename a ship", async () => {
     const plugin = await gqlCall({
       query: `mutation CreateUniverse($name:String!) {
@@ -303,7 +345,7 @@ describe("Ship Plugin", () => {
 
     const assetChange = await assetChangePromise;
     expect(assetChange.data?.pluginShipSetLogo.shipAssets.logo).toEqual(
-      "/assets/ships/Asset Ship/logo.svg"
+      "/ship/Asset Ship/logo.svg"
     );
 
     const modelUpload = new Upload();
@@ -338,16 +380,215 @@ describe("Ship Plugin", () => {
 
     const modelChange = await modelChangePromise;
     expect(modelChange.data?.pluginShipSetModel.shipAssets.model).toEqual(
-      "/assets/ships/Asset Ship/model.glb"
+      "/ship/Asset Ship/model.glb"
     );
     expect(modelChange.data?.pluginShipSetModel.shipAssets.vanity).toEqual(
-      "/assets/ships/Asset Ship/vanity.png"
+      "/ship/Asset Ship/vanity.png"
     );
     expect(modelChange.data?.pluginShipSetModel.shipAssets.top).toEqual(
-      "/assets/ships/Asset Ship/top.png"
+      "/ship/Asset Ship/top.png"
     );
     expect(modelChange.data?.pluginShipSetModel.shipAssets.side).toEqual(
-      "/assets/ships/Asset Ship/side.png"
+      "/ship/Asset Ship/side.png"
     );
+  });
+  it("should update the basic properties of the ship", async () => {
+    const plugin = await gqlCall({
+      query: `mutation CreateUniverse($name:String!) {
+        pluginCreate(name:$name) {
+          id
+          name
+        }
+      }`,
+      variables: {name: "My Ship Plugin 9"},
+    });
+    const pluginId = plugin.data?.pluginCreate.id;
+
+    const newShip = await gqlCall({
+      query: `mutation AddShip($pluginId:ID!) {
+        pluginShipCreate(name:"Asset Ship", pluginId:$pluginId) {
+          id
+          identity {
+            name
+            description
+          }
+          tags {
+            tags
+          }
+        }
+      }`,
+      variables: {pluginId},
+    });
+    const id = newShip.data?.pluginShipCreate.id;
+    expect(newShip.data?.pluginShipCreate.identity.name).toEqual("Asset Ship");
+    expect(newShip.data?.pluginShipCreate.identity.description).toEqual("");
+    expect(newShip.data?.pluginShipCreate.tags.tags.length).toEqual(0);
+    const updatedShip = await gqlCall({
+      query: `mutation Update($pluginId:ID!, $shipId:ID!) {
+        pluginShipSetDescription(description:"Ship description", pluginId:$pluginId, shipId:$shipId) {
+          id
+          identity {
+            name
+            description
+          }
+          tags {
+            tags
+          }
+        }
+        pluginShipSetName(name:"Named Ship", pluginId:$pluginId, shipId:$shipId) {
+          id
+          identity {
+            name
+            description
+          }
+          tags {
+            tags
+          }
+        }
+        pluginShipSetTags(tags:["Test"], pluginId:$pluginId, shipId:$shipId) {
+          id
+          identity {
+            name
+            description
+          }
+          tags {
+            tags
+          }
+        }
+      
+      }`,
+      variables: {pluginId, shipId: id},
+    });
+    expect(updatedShip.data?.pluginShipSetTags.identity.name).toEqual(
+      "Named Ship"
+    );
+    expect(updatedShip.data?.pluginShipSetTags.identity.description).toEqual(
+      "Ship description"
+    );
+    expect(updatedShip.data?.pluginShipSetTags.tags.tags.length).toEqual(1);
+    expect(updatedShip.data?.pluginShipSetTags.tags.tags[0]).toEqual("Test");
+  });
+  it("should update the physics properties", async () => {
+    const plugin = await gqlCall({
+      query: `mutation CreateUniverse($name:String!) {
+      pluginCreate(name:$name) {
+        id
+        name
+      }
+    }`,
+      variables: {name: "My Ship Plugin 1"},
+    });
+    const pluginId = plugin.data?.pluginCreate.id;
+
+    const newShip = await gqlCall({
+      query: `mutation AddShip($pluginId:ID!) {
+      pluginShipCreate(name:"Test Ship", pluginId:$pluginId) {
+        id
+        size{value}
+        isShip{mass}
+      }
+    }`,
+      variables: {pluginId},
+    });
+    const id = newShip.data?.pluginShipCreate.id;
+    expect(newShip.data?.pluginShipCreate.isShip.mass).toEqual(2000);
+    expect(newShip.data?.pluginShipCreate.size.value).toEqual(1);
+    const updatedShip = await gqlCall({
+      query: `mutation Update($pluginId:ID!, $shipId:ID!) {
+      pluginShipSetMass(mass:50, pluginId:$pluginId, shipId:$shipId) {
+        id
+        size{value}
+        isShip{mass}
+      }
+      pluginShipSetSize(size:51, pluginId:$pluginId, shipId:$shipId) {
+        id
+        size{value}
+        isShip{mass}
+      }
+    }`,
+      variables: {pluginId, shipId: id},
+    });
+    expect(updatedShip.data?.pluginShipSetSize.isShip.mass).toEqual(50);
+    expect(updatedShip.data?.pluginShipSetSize.size.value).toEqual(51);
+  });
+  it("should add and remove existing outfits", async () => {
+    const plugin = await gqlCall({
+      query: `mutation CreateUniverse($name:String!) {
+      pluginCreate(name:$name) {
+        id
+        name
+      }
+    }`,
+      variables: {name: "My Ship Plugin 2"},
+    });
+    const pluginId = plugin.data?.pluginCreate.id;
+
+    const newShip = await gqlCall({
+      query: `mutation AddShip($pluginId:ID!) {
+      pluginShipCreate(name:"Test Ship", pluginId:$pluginId) {
+        id
+        shipOutfits {
+          outfitIds
+        }
+      }
+    }`,
+      variables: {pluginId},
+    });
+    const id = newShip.data?.pluginShipCreate.id;
+    expect(newShip.data?.pluginShipCreate.shipOutfits.outfitIds.length).toEqual(
+      0
+    );
+    const newOutfit = await gqlCall({
+      query: `mutation AddOutfit($pluginId:ID!) {
+        pluginAddOutfit(pluginId:$pluginId,  ability:thrusters) {
+          id
+        }
+      }`,
+      variables: {pluginId},
+    });
+    const outfitId = newOutfit.data?.pluginAddOutfit.id;
+
+    const shipAddOutfit = await gqlCall({
+      query: `mutation ShipAddOutfit($pluginId:ID!, $shipId:ID!, $outfitId:ID!) {
+        pluginShipAddOutfit(pluginId:$pluginId, shipId:$shipId, outfitId:$outfitId) {
+          id
+          shipOutfits {
+            outfits {
+              id
+              isOutfit {
+                outfitType
+              }
+            }
+          }
+        }
+      }`,
+      variables: {shipId: id, pluginId, outfitId},
+    });
+    expect(
+      shipAddOutfit.data?.pluginShipAddOutfit.shipOutfits.outfits.length
+    ).toEqual(1);
+    expect(
+      shipAddOutfit.data?.pluginShipAddOutfit.shipOutfits.outfits[0].isOutfit
+        .outfitType
+    ).toEqual("thrusters");
+    const shipRemoveOutfit = await gqlCall({
+      query: `mutation ShipAddOutfit($pluginId:ID!, $shipId:ID!, $outfitId:ID!) {
+        pluginShipRemoveOutfit(pluginId:$pluginId, shipId:$shipId, outfitId:$outfitId) {
+          id
+          shipOutfits {
+            outfits {
+              id
+              isOutfit {
+                outfitType
+              }
+            }
+          }
+        }
+      }`,
+      variables: {shipId: id, pluginId, outfitId},
+    });
+    expect(
+      shipRemoveOutfit.data?.pluginShipRemoveOutfit.shipOutfits.outfits.length
+    ).toEqual(0);
   });
 });

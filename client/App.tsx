@@ -24,7 +24,6 @@ const ClientApp: React.FC = () => {
         <Route path="config/*" element={<Welcome />} />
         <Route path="releases" element={<Releases />} />
         <Route path="theme" element={<ThemeBuilder />} />
-        <Route path="test" element={<ShipAssets onClose={() => {}} />} />
         <Route path="edit/*" element={<Navigate to="/config" replace />} />
         <Route path="edit/:universeId/starmap/*" element={<Starmap />} />
         <Route path="edit/:pluginId/outfits/*" element={<OutfitsConfig />} />

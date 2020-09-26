@@ -101,15 +101,21 @@ class Entity extends Components {
       // @ts-ignore ts(2576) // Accessing static properties
       if (initialData[component.id]) {
         // @ts-ignore ts(2576)
-        this.components[component.id] = initialData[component.id];
+        this.components[component.id] = new component(
+          // @ts-ignore ts(2576)
+          initialData[component.id]
+        );
       }
       // @ts-ignore ts(2576)
       else if (component.getDefaults) {
         // @ts-ignore ts(2576)
-        this.components[component.id] = component.getDefaults();
+        this.components[component.id] = new component(component.getDefaults());
       } else {
         // @ts-ignore ts(2576)
-        this.components[component.id] = {...components[i].defaults};
+        this.components[component.id] = new component({
+          // @ts-ignore ts(2576)
+          ...components[i].defaults,
+        });
       }
     }
 

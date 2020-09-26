@@ -89,9 +89,11 @@ export function updateOutfit({
 }
 
 export function getAnyOutfit(outfitId: string) {
-  return App.plugins.flatMap(p => {
+  return App.plugins.reduce((acc: Entity[], p) => {
     const outfit = p.outfits.find(o => o.id === outfitId);
-    if (outfit) return outfit;
-    return;
-  })[0];
+    if (outfit) {
+      acc.push(outfit);
+    }
+    return acc;
+  }, [])[0];
 }

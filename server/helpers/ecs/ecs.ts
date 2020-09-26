@@ -144,9 +144,9 @@ class ECS {
    *
    * @method update
    */
-  update() {
+  update(testElapsed?: number) {
     let now = performance.now();
-    let elapsed = now - this.lastUpdate;
+    let elapsed = testElapsed ?? now - this.lastUpdate;
 
     for (let i = 0, system; (system = this.systems[i]); i += 1) {
       if (this.updateCounter % system.frequency > 0) {

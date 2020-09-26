@@ -3,8 +3,6 @@ import ECS from "../../helpers/ecs/ecs";
 import Entity from "../../helpers/ecs/entity";
 import {TimerSystem} from "../TimerSystem";
 
-const wait = (time: number) => new Promise(r => setTimeout(r, time));
-
 describe("TimerSystem", () => {
   let ecs: ECS;
   let timerSystem: TimerSystem;
@@ -21,8 +19,7 @@ describe("TimerSystem", () => {
     ecs.addSystem(timerSystem);
     ecs.addEntity(entity);
     ecs.update();
-    await wait(1000);
-    ecs.update();
+    ecs.update(1000);
     expect(entity.timer?.time).toEqual("00:04:59");
   });
   it("should handle when the timer ends", async () => {
@@ -31,9 +28,8 @@ describe("TimerSystem", () => {
     ecs.addSystem(timerSystem);
     ecs.addEntity(entity);
     ecs.update();
-    await wait(1000);
     expect(ecs.entities.length).toEqual(1);
-    ecs.update();
+    ecs.update(1000);
     expect(entity.timer?.time).toEqual("00:00:00");
     expect(ecs.entities.length).toEqual(0);
 
@@ -41,8 +37,7 @@ describe("TimerSystem", () => {
     ecs.addEntity(entity);
     ecs.update();
     expect(ecs.entities.length).toEqual(1);
-    await wait(1000);
-    ecs.update();
+    ecs.update(1000);
     expect(ecs.entities.length).toEqual(0);
   });
 });

@@ -77,7 +77,7 @@ describe("Ship Resolver", () => {
           name
         }
         isShip {
-          value
+          mass
         }
       }
     }`,
@@ -96,7 +96,7 @@ describe("Ship Resolver", () => {
           name
         }
         isShip {
-          value
+          mass
         }
       }
     }`,
@@ -114,7 +114,7 @@ describe("Ship Resolver", () => {
           name
         }
         isShip {
-          value
+          mass
         }
       }
     }`,
@@ -129,7 +129,7 @@ describe("Ship Resolver", () => {
           name
         }
         isShip {
-          value
+          mass
         }
       }
     }`,

@@ -33,7 +33,7 @@ export class ImpulseEnginesComponent extends Component {
   // In universe, this is because of the inertial dampeners which cause
   // the ship to not have any inertia, which in turn eliminates issues around
   // fuel usage and the time it takes to accelerate.
-  @Field({description: "The forward acceleration of the ship in km/s."})
+  @Field({description: "The forward acceleration of the ship in km/s^2."})
   forwardAcceleration: number = 0;
 }
 

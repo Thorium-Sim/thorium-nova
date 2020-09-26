@@ -1,14 +1,20 @@
 {
-  "Assets": "Assets",
-  "Basic": "Basic",
-  "Mass": "Mass",
-  "Mass is required": "Mass is required",
-  "Mass must be a number greater than 0": "Mass must be a number greater than 0",
-  "New Outfit": "New Outfit",
-  "Outfits": "Outfits",
-  "Physics": "Physics",
-  "Remove Outfit": "Remove Outfit",
-  "Remove Ship": "Remove Ship",
-  "Size": "Size",
-  "Size must be a number greater than 0": "Size must be a number greater than 0"
+  "Are you sure you want to permanently remove this plugin?": "Are you sure you want to permanently remove this plugin?",
+  "Create Plugin": "Create Plugin",
+  "Edit Plugin": "Edit Plugin",
+  "Error Creating Plugin": "Error Creating Plugin",
+  "Error Removing Plugin": "Error Removing Plugin",
+  "Plugin Name": "Plugin Name",
+  "Plugins": "Plugins",
+  "Remove": "Remove",
+  "The number of warp factors including the minimum speed and cruising speed": {
+    " Emergency and Destructive warp will be added automatically": {
+      "": ""
+    }
+  },
+  "This will delete all of its objects and assets": {
+    "": ""
+  },
+  "Warp Factor Count": "Warp Factor Count",
+  "What is the name of the new plugin?": "What is the name of the new plugin?"
 }

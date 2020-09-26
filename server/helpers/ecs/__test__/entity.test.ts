@@ -62,13 +62,13 @@ describe("Entity", () => {
   describe("updateComponent()", () => {
     it("should update an existing component", () => {
       let entity = new Entity();
-      entity.addComponent("identity", {foo: "bar"});
+      entity.addComponent("identity", {name: "bar"});
 
-      expect(entity.components.identity).toEqual({foo: "bar"});
+      expect(entity.components.identity).toEqual({name: "bar"});
 
-      entity.updateComponent("identity", {foo: "foo"});
+      entity.updateComponent("identity", {name: "foo"});
 
-      expect(entity.components.identity).toEqual({foo: "foo"});
+      expect(entity.components.identity).toEqual({name: "foo"});
     });
   });
 

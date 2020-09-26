@@ -79,7 +79,7 @@ export default class Components {
   @Field()
   stationComplement?: StationComplementComponent;
 
-  @Field()
+  @Field(type => ShipAssignmentComponent)
   shipAssignment?: ShipAssignmentComponent;
 
   @Field()

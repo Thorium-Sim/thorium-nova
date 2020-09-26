@@ -3,11 +3,15 @@ import React from "react";
 import {render} from "test-utils";
 import ShipAssets from ".";
 import userEvent from "@testing-library/user-event";
+import {Route, Routes} from "react-router";
 describe("Ship Assets", () => {
   it("should render", async () => {
     const {findByText, findAllByText} = render(
-      <ShipAssets onClose={() => {}} />,
+      <Routes>
+        <Route path="/test/:pluginId/:shipId" element={<ShipAssets />}></Route>
+      </Routes>,
       {
+        initialRoutes: ["/test/test/2cajg1l9kkda54e0y"],
         mocks: [
           {
             request: {
@@ -26,7 +30,6 @@ describe("Ship Assets", () => {
         ],
       }
     );
-    expect(await findByText("Ship Assets")).toBeInTheDocument();
     expect(await findByText("Logo")).toBeInTheDocument();
     expect(await findByText("Model")).toBeInTheDocument();
     expect(await findByText("Top View")).toBeInTheDocument();

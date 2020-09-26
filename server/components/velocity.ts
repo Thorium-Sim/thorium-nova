@@ -3,7 +3,7 @@ import {Component, ComponentOmit} from "./utils";
 
 @ObjectType()
 export class VelocityComponent extends Component {
-  static id: "Velocity" = "Velocity";
+  static id: "velocity" = "velocity";
   static defaults: ComponentOmit<VelocityComponent> = {
     x: 0,
     y: 0,
