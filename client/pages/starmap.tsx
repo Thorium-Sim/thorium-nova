@@ -31,7 +31,6 @@ const Starmap: React.FC = () => {
         onContextMenu={e => {
           e.preventDefault();
         }}
-        sRGB={true}
         gl={{antialias: true, logarithmicDepthBuffer: true, alpha: false}}
         camera={{fov: 45, far: FAR}}
         concurrent

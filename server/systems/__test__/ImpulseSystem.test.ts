@@ -53,7 +53,7 @@ describe("ImpulseSystem", () => {
       `0.016`
     );
     expect(ship.velocity).toMatchInlineSnapshot(`
-      VelocityComponent {
+      Object {
         "x": 0,
         "y": 0.000256,
         "z": 0,
@@ -64,7 +64,7 @@ describe("ImpulseSystem", () => {
       `1.000256`
     );
     expect(ship.velocity).toMatchInlineSnapshot(`
-      VelocityComponent {
+      Object {
         "x": 0,
         "y": 1.000512,
         "z": 0,
@@ -75,9 +75,21 @@ describe("ImpulseSystem", () => {
       `8.002048`
     );
     expect(ship.velocity).toMatchInlineSnapshot(`
-      VelocityComponent {
+      Object {
         "x": 0,
         "y": 33.008704,
+        "z": 0,
+      }
+    `);
+    entity.updateComponent("impulseEngines", {targetSpeed: 10});
+    ecs.update(50);
+    expect(entity.impulseEngines?.forwardAcceleration).toMatchInlineSnapshot(
+      `-1.7004352000000003`
+    );
+    expect(ship.velocity).toMatchInlineSnapshot(`
+      Object {
+        "x": 0,
+        "y": 10,
         "z": 0,
       }
     `);

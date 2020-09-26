@@ -25,7 +25,7 @@ function getQueryParams(document: DocumentNode) {
   const operationName = Object.keys(separateOperations(document))[0];
   return {query, operationName};
 }
-export interface TSubscriptionResponse<TData> {
+export interface TSubscriptionResponse<TData> extends Record<string | number | symbol, unknown> {
   loading?: boolean;
   data?: TData | null;
   gameState?: TData | null;

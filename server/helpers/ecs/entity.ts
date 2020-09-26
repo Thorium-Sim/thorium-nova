@@ -11,6 +11,9 @@ function isEntity(e: any): e is Entity {
   if (e.id && e.components && e.systems) return true;
   return false;
 }
+function isClass(v: any) {
+  return typeof v === "function" && /^\s*class\s+/.test(v.toString());
+}
 
 // This proxy handler makes it so component values can be accessed directly from the
 // entity. It does not (yet?) allow for component values to be updated on the entity
@@ -90,33 +93,34 @@ class Entity extends Components {
     this.components = {};
 
     // components initialization
-    for (let i = 0, component; (component = components[i]); i += 1) {
+    for (let i = 0, component:Component; (component = components[i]); i += 1) {
       if (!component) continue;
+      let data = {}
       // if a getDefaults method is provided, use it. First because let the
       // runtime allocate the component is way more faster than using a copy
       // function. Secondly because the user may want to provide some kind
       // of logic in components initialization ALTHOUGH these kind of
       // initialization should be done in enter() handler
-      // @ts-ignore ts(2576) // Accessing static properties
-      // @ts-ignore ts(2576) // Accessing static properties
+      // @ts-ignore ts(2576) // Accessing static properties      // @ts-ignore ts(2576) // Accessing static properties
       if (initialData[component.id]) {
-        // @ts-ignore ts(2576)
-        this.components[component.id] = new component(
-          // @ts-ignore ts(2576)
-          initialData[component.id]
-        );
+        // @ts-ignore ts(2576) // Accessing static properties
+        data = initialData[component.id]
       }
       // @ts-ignore ts(2576)
       else if (component.getDefaults) {
         // @ts-ignore ts(2576)
-        this.components[component.id] = new component(component.getDefaults());
+        data = (component.getDefaults());
       } else {
         // @ts-ignore ts(2576)
-        this.components[component.id] = new component({
+        data = ({
           // @ts-ignore ts(2576)
           ...components[i].defaults,
         });
       }
+
+      // @ts-ignore ts(2576)
+      this.components[component.id] = data;
+      
     }
 
     /**

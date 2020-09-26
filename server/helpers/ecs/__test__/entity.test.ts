@@ -35,7 +35,7 @@ describe("Entity", () => {
     expect(entity.components.identity).toEqual({foo: "bar"});
   });
 
-  it("should support default data", () => {
+  it.only("should support default data", () => {
     let entity = new Entity({
       id: "test",
       components: {
