@@ -331,9 +331,11 @@ export class UniversePluginPlanetsResolver {
     id: string,
     @Arg("objectId", type => ID)
     objectId: string,
-    @Arg("image", type => GraphQLUpload) image: FileUpload
+    @Arg("image", type => GraphQLUpload) image: FileUpload,
+    @Ctx() ctx: GraphQLContext
   ) {
     const {plugin, object, system} = getSystemObject(id, objectId);
+    ctx.pluginId = plugin.id;
     const pathPrefix = `${appStoreDir}plugins/${
       plugin.name || plugin.id
     }/assets`;
@@ -354,9 +356,11 @@ export class UniversePluginPlanetsResolver {
     id: string,
     @Arg("objectId", type => ID)
     objectId: string,
-    @Arg("image", type => GraphQLUpload) image: FileUpload
+    @Arg("image", type => GraphQLUpload) image: FileUpload,
+    @Ctx() ctx: GraphQLContext
   ) {
     const {plugin, object, system} = getSystemObject(id, objectId);
+    ctx.pluginId = plugin.id;
     const pathPrefix = `${appStoreDir}plugins/${
       plugin.name || plugin.id
     }/assets`;
@@ -377,9 +381,11 @@ export class UniversePluginPlanetsResolver {
     id: string,
     @Arg("objectId", type => ID)
     objectId: string,
-    @Arg("image", type => GraphQLUpload) image: FileUpload
+    @Arg("image", type => GraphQLUpload) image: FileUpload,
+    @Ctx() ctx: GraphQLContext
   ) {
     const {plugin, object, system} = getSystemObject(id, objectId);
+    ctx.pluginId = plugin.id;
     const pathPrefix = `${appStoreDir}plugins/${
       plugin.name || plugin.id
     }/assets`;
@@ -399,9 +405,11 @@ export class UniversePluginPlanetsResolver {
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
-    objectId: string
+    objectId: string,
+    @Ctx() ctx: GraphQLContext
   ) {
     const {plugin, object, system} = getSystemObject(id, objectId);
+    ctx.pluginId = plugin.id;
     object.updateComponent("isPlanet", {
       cloudsMapAsset: "",
     });
@@ -412,9 +420,11 @@ export class UniversePluginPlanetsResolver {
     @Arg("id", type => ID)
     id: string,
     @Arg("objectId", type => ID)
-    objectId: string
+    objectId: string,
+    @Ctx() ctx: GraphQLContext
   ) {
     const {plugin, object, system} = getSystemObject(id, objectId);
+    ctx.pluginId = plugin.id;
     object.updateComponent("isPlanet", {
       ringsMapAsset: "",
     });

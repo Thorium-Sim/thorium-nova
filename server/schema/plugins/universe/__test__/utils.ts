@@ -1,9 +1,10 @@
 import {gqlCall} from "server/helpers/gqlCall";
 
+let universeCount = 0;
 export async function getPlanetId() {
   const universe = await gqlCall({
     query: `mutation CreateUniverse {
-    pluginCreate(name:"Test Universe${Math.random()}") {
+    pluginCreate(name:"Test Universe${universeCount++}") {
       id
     }
   }`,
@@ -24,6 +25,9 @@ export async function getPlanetId() {
     query: `mutation CreatePlanet($id:ID!,$systemId:ID!, $classification:String!) {
       pluginUniverseAddPlanet(id:$id, systemId:$systemId, classification:$classification) {
         id
+        identity {
+          name
+        }
       }
     }`,
     variables: {
@@ -34,5 +38,5 @@ export async function getPlanetId() {
   });
 
   const planetId = planet.data?.pluginUniverseAddPlanet.id;
-  return {id, planetId};
+  return {id, planetId, planet: planet.data?.pluginUniverseAddPlanet};
 }

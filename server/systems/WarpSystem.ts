@@ -23,7 +23,7 @@ export class WarpSystem extends System {
 
     const cruisingSpeed = planetaryCruisingSpeed;
 
-    const minWarp = cruisingSpeed / minSpeedMultiplier;
+    const minWarp = cruisingSpeed * minSpeedMultiplier;
     let warpSpeed = 0;
     if (currentWarpFactor === 1) {
       warpSpeed = minWarp;

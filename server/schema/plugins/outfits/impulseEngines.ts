@@ -15,7 +15,7 @@ import {
 } from "type-graphql";
 import uuid from "uniqid";
 
-import {getOutfit, outfitPublish, updateOutfit} from "./utils";
+import {getOutfit, updateOutfit} from "./utils";
 
 @Resolver()
 export class ImpulseEnginesOutfitResolver {

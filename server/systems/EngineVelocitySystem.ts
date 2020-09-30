@@ -2,7 +2,7 @@ import Entity from "server/helpers/ecs/entity";
 import System from "server/helpers/ecs/system";
 import {Object3D, Quaternion, Vector3} from "three";
 
-const o = new Object3D();
+const velocityObject = new Object3D();
 export class EngineVelocitySystem extends System {
   test(entity: Entity) {
     return !!(entity.components.isShip && entity.components.velocity);
@@ -48,7 +48,7 @@ export class EngineVelocitySystem extends System {
     }
 
     // Use THREEJS to do some translation magic.
-    o.rotation.setFromQuaternion(
+    velocityObject.rotation.setFromQuaternion(
       new Quaternion(
         entity.rotation.x,
         entity.rotation.y,
@@ -56,40 +56,51 @@ export class EngineVelocitySystem extends System {
         entity.rotation.w
       )
     );
-    o.position.set(entity.velocity.x, entity.velocity.y, entity.velocity.z);
+    velocityObject.position.set(
+      entity.velocity.x,
+      entity.velocity.y,
+      entity.velocity.z
+    );
 
     // Impulse Engines
     const impulse = systems?.find(s => s.impulseEngines);
     if (impulse?.impulseEngines) {
-      o.translateY(impulse.impulseEngines.forwardAcceleration * elapsedRatio);
+      velocityObject.translateY(
+        impulse.impulseEngines.forwardAcceleration * elapsedRatio
+      );
       if (impulse.impulseEngines.targetSpeed) {
-        o.position.clampLength(0, impulse.impulseEngines.targetSpeed);
+        velocityObject.position.clampLength(
+          0,
+          impulse.impulseEngines.targetSpeed
+        );
       }
     }
     // Warp Engines
     const warp = systems?.find(s => s.warpEngines);
     if (warp?.warpEngines) {
-      o.translateY(warp.warpEngines.forwardAcceleration * elapsedRatio);
+      velocityObject.translateY(
+        warp.warpEngines.forwardAcceleration * elapsedRatio
+      );
       if (warp.warpEngines.maxVelocity) {
-        o.position.clampLength(0, warp.warpEngines.maxVelocity);
+        velocityObject.position.clampLength(0, warp.warpEngines.maxVelocity);
       }
     }
     // Thrusters
     if (entity.thrusters?.directionAcceleration) {
       // Measured in m/s/s, so divide by 1000
-      o.translateX(
+      velocityObject.translateX(
         entity.thrusters.directionAcceleration.x * elapsedRatio * (1 / 1000)
       );
-      o.translateY(
+      velocityObject.translateY(
         entity.thrusters.directionAcceleration.y * elapsedRatio * (1 / 1000)
       );
-      o.translateZ(
+      velocityObject.translateZ(
         entity.thrusters.directionAcceleration.z * elapsedRatio * (1 / 1000)
       );
     }
 
-    entity.velocity.x = o.position.x;
-    entity.velocity.y = o.position.y;
-    entity.velocity.z = o.position.z;
+    entity.velocity.x = velocityObject.position.x;
+    entity.velocity.y = velocityObject.position.y;
+    entity.velocity.z = velocityObject.position.z;
   }
 }

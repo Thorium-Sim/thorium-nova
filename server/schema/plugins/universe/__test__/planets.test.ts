@@ -1,6 +1,10 @@
 import {gqlCall} from "server/helpers/gqlCall";
 import {getPlanetId} from "./utils";
+import path from "path";
+// @ts-ignore
+import {Upload} from "graphql-upload";
 
+const fs = jest.genMockFromModule("fs") as any;
 const savedMath = global.Math;
 
 describe("universe planets", () => {
@@ -103,6 +107,42 @@ describe("universe planets", () => {
         const {id: templateId, ...data} = planet.data?.pluginUniverseAddPlanet;
         expect(data).toMatchSnapshot();
       }
+    });
+    it("should create a moon for a planet", async () => {
+      const {id, planetId} = await getPlanetId();
+      const planet = await gqlCall({
+        query: `mutation CreateMoon($id:ID!,$objectId:ID!, $classification:String!) {
+          pluginUniverseAddMoon(id:$id, objectId:$objectId, classification:$classification) {
+          id
+          isPlanet {
+            classification
+            age
+            radius
+            terranMass
+            habitable
+            lifeforms
+          }
+          satellite {
+            axialTilt
+            distance
+            orbitalArc
+            orbitalInclination
+            eccentricity
+            showOrbit
+          }
+          temperature {
+            temperature
+          }
+        }
+        }`,
+        variables: {
+          id,
+          objectId: planetId,
+          classification: "M",
+        },
+      });
+      const {id: templateId, ...data} = planet.data?.pluginUniverseAddMoon;
+      expect(data).toMatchSnapshot();
     });
   });
   it("should modify the temperature of the planet", async () => {
@@ -218,5 +258,133 @@ describe("universe planets", () => {
     expect(
       planet2.data?.pluginUniversePlanetSetHabitable.isPlanet.habitable
     ).toEqual(true);
+  });
+  it("should add a texture to a planet", async () => {
+    const {id, planetId} = await getPlanetId();
+    const file = fs.createReadStream(path.resolve(__dirname, `./upload.png`));
+    const upload = new Upload();
+    const planet = gqlCall({
+      query: `mutation ChangePlanet($id:ID!, $objectId:ID!, $image:Upload!) {
+        pluginUniversePlanetSetTexture(id:$id, objectId:$objectId, image:$image) {
+        id 
+        isPlanet {
+          textureMapAsset
+          cloudsMapAsset
+          ringsMapAsset
+        }
+      }
+    }`,
+      variables: {id, objectId: planetId, image: upload},
+    });
+
+    upload.resolve({
+      createReadStream: () => file,
+      stream: file,
+      filename: "upload.png",
+      mimetype: `image/png`,
+    });
+    expect(
+      (
+        await planet
+      ).data?.pluginUniversePlanetSetTexture.isPlanet.textureMapAsset.includes(
+        "assets/planet-texture-"
+      )
+    ).toBeTruthy();
+  });
+  it("should add and remove clouds from a planet", async () => {
+    const {id, planetId} = await getPlanetId();
+    const file = fs.createReadStream(path.resolve(__dirname, `./upload.png`));
+    const upload = new Upload();
+    const planet = gqlCall({
+      query: `mutation ChangePlanet($id:ID!, $objectId:ID!, $image:Upload!) {
+        pluginUniversePlanetSetClouds(id:$id, objectId:$objectId, image:$image) {
+        id 
+        isPlanet {
+          textureMapAsset
+          cloudsMapAsset
+          ringsMapAsset
+        }
+      }
+    }`,
+      variables: {id, objectId: planetId, image: upload},
+    });
+
+    upload.resolve({
+      createReadStream: () => file,
+      stream: file,
+      filename: "upload.png",
+      mimetype: `image/png`,
+    });
+    expect(
+      (
+        await planet
+      ).data?.pluginUniversePlanetSetClouds.isPlanet.cloudsMapAsset.includes(
+        "assets/planet-clouds-"
+      )
+    ).toBeTruthy();
+    const clearedAsset = await gqlCall({
+      query: `mutation ChangePlanet($id:ID!, $objectId:ID!) {
+        pluginUniversePlanetClearClouds(id:$id, objectId:$objectId) {
+        id 
+        isPlanet {
+          textureMapAsset
+          cloudsMapAsset
+          ringsMapAsset
+        }
+      }
+    }`,
+      variables: {id, objectId: planetId, image: upload},
+    });
+    expect(
+      clearedAsset.data?.pluginUniversePlanetClearClouds.isPlanet.cloudsMapAsset
+    ).toEqual("");
+  });
+  it("should add and remove rings from a planet", async () => {
+    const {id, planetId} = await getPlanetId();
+    const file = fs.createReadStream(path.resolve(__dirname, `./upload.png`));
+    const upload = new Upload();
+    const planet = gqlCall({
+      query: `mutation ChangePlanet($id:ID!, $objectId:ID!, $image:Upload!) {
+        pluginUniversePlanetSetRings(id:$id, objectId:$objectId, image:$image) {
+        id 
+        isPlanet {
+          textureMapAsset
+          cloudsMapAsset
+          ringsMapAsset
+        }
+      }
+    }`,
+      variables: {id, objectId: planetId, image: upload},
+    });
+
+    upload.resolve({
+      createReadStream: () => file,
+      stream: file,
+      filename: "upload.png",
+      mimetype: `image/png`,
+    });
+    expect(
+      (
+        await planet
+      ).data?.pluginUniversePlanetSetRings.isPlanet.ringsMapAsset.includes(
+        "assets/planet-rings-"
+      )
+    ).toBeTruthy();
+    const clearedAsset = await gqlCall({
+      query: `mutation ChangePlanet($id:ID!, $objectId:ID!) {
+        pluginUniversePlanetClearRings(id:$id, objectId:$objectId) {
+        id 
+        isPlanet {
+          textureMapAsset
+          cloudsMapAsset
+          ringsMapAsset
+        }
+      }
+    }`,
+      variables: {id, objectId: planetId, image: upload},
+    });
+    expect(
+      clearedAsset.data?.pluginUniversePlanetClearRings.isPlanet.ringsMapAsset
+    ).toEqual("");
   });
 });

@@ -1,0 +1,157 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`outfit Plugin getOutfitComponents should return the correct components for each outfit 1`] = `
+Array [
+  Object {
+    "component": [Function],
+    "defaultValue": Object {
+      "outfitType": "warpEngines",
+    },
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+]
+`;
+
+exports[`outfit Plugin getOutfitComponents should return the correct components for each outfit 2`] = `
+Array [
+  Object {
+    "component": [Function],
+    "defaultValue": Object {
+      "outfitType": "impulseEngines",
+    },
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+]
+`;
+
+exports[`outfit Plugin getOutfitComponents should return the correct components for each outfit 3`] = `
+Array [
+  Object {
+    "component": [Function],
+    "defaultValue": Object {
+      "outfitType": "thrusters",
+    },
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+]
+`;
+
+exports[`outfit Plugin getOutfitComponents should return the correct components for each outfit 4`] = `
+Array [
+  Object {
+    "component": [Function],
+    "defaultValue": Object {
+      "outfitType": "navigation",
+    },
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+]
+`;
+
+exports[`outfit Plugin getOutfitComponents should return the correct components for each outfit 5`] = `
+Array [
+  Object {
+    "component": [Function],
+    "defaultValue": Object {
+      "outfitType": "jumpDrive",
+    },
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+]
+`;
+
+exports[`outfit Plugin getOutfitComponents should return the correct components for each outfit 6`] = `
+Array [
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+]
+`;

@@ -36,7 +36,9 @@ export function getEntityType(entity: Entity) {
   if (entity.isStar) return EntityTypes.star;
   if (entity.isShip) return EntityTypes.ship;
   if (entity.timer) return EntityTypes.timer;
-  console.error(entity);
+  if (process.env.NODE_ENV !== "test") {
+    console.error(entity);
+  }
   throw new Error("Unknown entity type for entity. Check the logs.");
 }
 

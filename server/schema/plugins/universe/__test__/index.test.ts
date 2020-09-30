@@ -2,6 +2,7 @@ import {gqlCall} from "server/helpers/gqlCall";
 import path from "path";
 // @ts-ignore
 import {Upload} from "graphql-upload";
+import {getPlanetId} from "./utils";
 
 const fs = jest.genMockFromModule("fs") as any;
 describe("Universe Plugin", () => {
@@ -232,5 +233,24 @@ describe("Universe Plugin", () => {
     expect(assetChange.data?.pluginSetCoverImage.coverImage).toEqual(
       "/assets/plugins/My Universe 4/cover.svg"
     );
+  });
+  it("should search for a planet", async () => {
+    const {id, planetId, planet} = await getPlanetId();
+
+    const search = await gqlCall({
+      query: `query Search($id:ID!, $search:String!) {
+        pluginUniverseSearch(id:$id, search:$search) {
+          id
+          identity {
+            name
+          }
+        }
+      }`,
+      variables: {
+        id,
+        search: planet.identity.name,
+      },
+    });
+    expect(search.data?.pluginUniverseSearch[0]).toEqual(planet);
   });
 });

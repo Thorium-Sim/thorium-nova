@@ -1,5 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`universe planets creating planets should create a moon for a planet 1`] = `
+Object {
+  "isPlanet": Object {
+    "age": 6500000000,
+    "classification": "M",
+    "habitable": true,
+    "lifeforms": "Varied and extensive vegetation and animal life, humanoids",
+    "radius": 1250,
+    "terranMass": 1,
+  },
+  "satellite": Object {
+    "axialTilt": 22.5,
+    "distance": 396500,
+    "eccentricity": 0.1,
+    "orbitalArc": 180,
+    "orbitalInclination": 0,
+    "showOrbit": true,
+  },
+  "temperature": Object {
+    "temperature": 296,
+  },
+}
+`;
+
 exports[`universe planets creating planets should create planets of every class 1`] = `
 Object {
   "isPlanet": Object {
