@@ -86,16 +86,18 @@ export class EngineVelocitySystem extends System {
       }
     }
     // Thrusters
-    if (entity.thrusters?.directionAcceleration) {
+    const thrusters = systems?.find(s => s.thrusters);
+
+    if (thrusters?.thrusters?.directionAcceleration) {
       // Measured in m/s/s, so divide by 1000
       velocityObject.translateX(
-        entity.thrusters.directionAcceleration.x * elapsedRatio * (1 / 1000)
+        thrusters.thrusters.directionAcceleration.x * elapsedRatio * (1 / 1000)
       );
       velocityObject.translateY(
-        entity.thrusters.directionAcceleration.y * elapsedRatio * (1 / 1000)
+        thrusters.thrusters.directionAcceleration.y * elapsedRatio * (1 / 1000)
       );
       velocityObject.translateZ(
-        entity.thrusters.directionAcceleration.z * elapsedRatio * (1 / 1000)
+        thrusters.thrusters.directionAcceleration.z * elapsedRatio * (1 / 1000)
       );
     }
 

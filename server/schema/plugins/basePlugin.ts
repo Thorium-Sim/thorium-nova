@@ -87,7 +87,7 @@ export default class BasePlugin {
   @Field(type => [Entity])
   universe: Writable<Entity[]>;
 
-  constructor(params: Partial<BasePlugin>) {
+  constructor(params: Partial<BasePlugin> = {}) {
     this.id = params.id || uuid();
     this.name = params.name || "New Plugin";
     this.author = params.author || "";

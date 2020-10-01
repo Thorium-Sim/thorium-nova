@@ -7,6 +7,8 @@ export default function uploadAsset(
   name?: string
 ): Promise<void> {
   return new Promise(async (resolve, reject) => {
+    if (process.env.NODE_ENV === "test") return resolve();
+
     // Ensure the asset path exists
     await fs.promises.mkdir(pathPrefix, {recursive: true});
 

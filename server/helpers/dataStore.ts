@@ -106,6 +106,7 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
   }
 
   async function writeFile(force = false) {
+    if (process.env.NODE_ENV === "test") return;
     if (process.env.NODE_ENV !== "production" && force === false) return;
     if (!filePath) {
       return;

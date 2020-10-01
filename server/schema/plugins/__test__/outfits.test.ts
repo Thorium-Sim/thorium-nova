@@ -379,7 +379,6 @@ describe("outfit Plugin", () => {
       }`,
       variables: {pluginId, outfitId},
     });
-    console.log(outfit);
     expect(outfit.data?.warpEnginesOutfit.warpEngines).toMatchInlineSnapshot(`
       Object {
         "currentWarpFactor": 0,
@@ -425,7 +424,6 @@ describe("outfit Plugin", () => {
         factor: 3,
       },
     });
-    console.log(update);
     const engines = update.data?.warpEngineSetCurrentWarpFactor.warpEngines;
     expect(engines).toMatchInlineSnapshot(`
       Object {
