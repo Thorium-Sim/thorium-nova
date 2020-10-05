@@ -1,15 +1,13 @@
 import React from "react";
-import {Box, PseudoBox, PseudoBoxProps, Text} from "@chakra-ui/core";
 import {FaFileUpload} from "react-icons/fa";
 import {useTranslation} from "react-i18next";
+import {css} from "@emotion/core";
 
-const UploadWell: React.FC<
-  Omit<PseudoBoxProps, "onChange"> & {
-    disabled?: boolean;
-    accept?: string;
-    onChange?: (files: FileList) => void;
-  }
-> = ({children, disabled, accept, onChange = files => {}, ...props}) => {
+const UploadWell: React.FC<{
+  disabled?: boolean;
+  accept?: string;
+  onChange?: (files: FileList) => void;
+}> = ({children, disabled, accept, onChange = files => {}, ...props}) => {
   const [dragging, setDragging] = React.useState(false);
   const {t} = useTranslation();
 
@@ -46,41 +44,31 @@ const UploadWell: React.FC<
     }
   }
   return (
-    <PseudoBox
+    <label
       {...props}
-      as="label"
-      height="250px"
-      width="250px"
-      boxShadow="inset 5px 5px 10px rgba(0,0,0,0.1), inset 10px 10px 10px rgba(0,0,0,0.1), inset -2px -2px 10px rgba(0,0,0,0.1)"
-      borderRadius="20px"
-      bg={dragging ? "whiteAlpha.50" : "blackAlpha.500"}
-      cursor={disabled ? "" : dragging ? "copy" : "pointer"}
-      my={4}
+      css={css`
+        height: 250px;
+        width: 250px;
+        cursor: ${disabled ? "" : dragging ? "copy" : "pointer"};
+      `}
+      className={`shadow-inner rounded-lg ${
+        dragging ? "bg-whiteAlpha-50" : "bg-blackAlpha-500"
+      } my-4 flex items-center justify-center`}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragEnter}
       onDragLeave={handleDragExit}
       onDragEnd={handleDragExit}
       onDrop={handleDrop}
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
     >
       {disabled || children ? (
         children
       ) : (
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          flexDirection="column"
-          width="100%"
-          height="100%"
-        >
+        <div className="flex items-center content-center flex-col h-full w-full">
           <FaFileUpload size="5em" />
-          <Text textAlign="center" fontSize="2xl" mt={4}>
+          <p className="text-center text-2xl mt-4">
             {t(`Click or Drop files here`)}
-          </Text>
-        </Box>
+          </p>
+        </div>
       )}
       <input
         type="file"
@@ -94,7 +82,7 @@ const UploadWell: React.FC<
           }
         }}
       />
-    </PseudoBox>
+    </label>
   );
 };
 

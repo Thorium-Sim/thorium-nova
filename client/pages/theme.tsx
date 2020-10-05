@@ -1,19 +1,9 @@
-import {
-  Box,
-  Flex,
-  Heading,
-  ThemeProvider,
-  theme as defaultTheme,
-  Slider,
-  SliderTrack,
-  SliderFilledTrack,
-  SliderThumb,
-  Text,
-} from "@chakra-ui/core";
+import {ThemeProvider, theme as defaultTheme} from "@chakra-ui/core";
 import Button from "../components/ui/button";
 import React from "react";
 import ColorPicker from "../helpers/colorPicker";
 import getColorScheme from "../helpers/generateColorScheme";
+import {css} from "@emotion/core";
 
 const ThemeBuilder = () => {
   const [themeColors, setThemeColors] = React.useState({
@@ -87,15 +77,11 @@ const ThemeBuilder = () => {
   ];
   return (
     <ThemeProvider theme={theme}>
-      <Flex justifyContent="center" color="white">
-        <Box width="100%" maxWidth="960px" marginX={4} marginTop={10}>
-          <Heading as="h1" size="xl">
-            Theme Builder
-          </Heading>
-          <Heading as="h2" size="lg" marginTop={4}>
-            Colors
-          </Heading>
-          <Box marginLeft={4} marginTop={4}>
+      <div className="flex justify-center text-white">
+        <div className="w-full max-w-5xl mx-4 mt-10">
+          <h1 className="text-4xl font-bold">Theme Builder</h1>
+          <h2 className="text-2xl font-bold mt-4">Colors</h2>
+          <div className="ml-4 mt-4">
             {schemes.map(colorScheme => {
               const scheme = colorScheme as
                 | "primary"
@@ -107,84 +93,80 @@ const ThemeBuilder = () => {
                 | "success"
                 | "muted";
               return (
-                <Flex
+                <div
                   data-testid={`theme-${scheme}`}
                   key={scheme}
-                  alignItems="center"
-                  justifyContent="space-between"
-                  flexWrap="wrap"
+                  className="grid items-center"
+                  css={css`
+                    grid-template-columns: 1fr auto auto auto auto auto auto;
+                  `}
                 >
-                  <Flex flex={1} alignItems="center">
-                    <Heading as="h3" size="md" mr={4}>
-                      {scheme}
-                    </Heading>
-                    <ColorPicker
-                      color={themeColors[scheme].color}
-                      onChangeComplete={color =>
-                        typeof color === "string" &&
+                  <h3 className="mr-3 text-xl font-bold">{scheme}</h3>
+                  <ColorPicker
+                    color={themeColors[scheme].color}
+                    onChangeComplete={color =>
+                      typeof color === "string" &&
+                      setThemeColors(c => ({
+                        ...c,
+                        [scheme]: {...c[scheme], color},
+                      }))
+                    }
+                  />
+                  <div className="mx-4">
+                    <p>Lightness Spread</p>
+                    <input
+                      type="range"
+                      value={themeColors[scheme].spread}
+                      onChange={e =>
                         setThemeColors(c => ({
                           ...c,
-                          [scheme]: {...c[scheme], color},
+                          [scheme]: {...c[scheme], spread: e.target.value},
                         }))
                       }
+                      min={0.1}
+                      max={15}
+                      step={0.1}
                     />
-                    <Box mx={4}>
-                      <Text>Lightness Spread</Text>
-                      <Slider
-                        value={themeColors[scheme].spread}
-                        onChange={spread =>
-                          setThemeColors(c => ({
-                            ...c,
-                            [scheme]: {...c[scheme], spread},
-                          }))
-                        }
-                        min={0.1}
-                        max={15}
-                        step={0.1}
-                      >
-                        <SliderTrack />
-                        <SliderFilledTrack />
-                        <SliderThumb />
-                      </Slider>
-                    </Box>
-                    <Box mx={4}>
-                      <Text>Lightness Center</Text>
-                      <Slider
-                        value={themeColors[scheme].center}
-                        onChange={center =>
-                          setThemeColors(c => ({
-                            ...c,
-                            [scheme]: {...c[scheme], center},
-                          }))
-                        }
-                        min={0}
-                        max={100}
-                        step={1}
-                      >
-                        <SliderTrack />
-                        <SliderFilledTrack />
-                        <SliderThumb />
-                      </Slider>
-                    </Box>
-                  </Flex>
-                  <Button mx={1} variantColor={scheme}>
+                  </div>
+                  <div className="mx-4">
+                    <p>Lightness Center</p>
+                    <input
+                      type="range"
+                      value={themeColors[scheme].center}
+                      onChange={e =>
+                        setThemeColors(c => ({
+                          ...c,
+                          [scheme]: {...c[scheme], center: e.target.value},
+                        }))
+                      }
+                      min={0}
+                      max={100}
+                      step={1}
+                    />
+                  </div>
+                  <Button className="mx-1" variantColor={scheme}>
                     Test Button
                   </Button>
-                  <Button mx={1} variantColor={scheme} variant="outline">
+                  <Button
+                    className="mx-1"
+                    variantColor={scheme}
+                    variant="outline"
+                  >
                     Test Button
                   </Button>
-                  <Button mx={1} variantColor={scheme} variant="ghost">
+                  <Button
+                    className="mx-1"
+                    variantColor={scheme}
+                    variant="ghost"
+                  >
                     Test Button
                   </Button>
-                  <Button mx={1} variantColor={scheme} variant="link">
-                    Test Button
-                  </Button>
-                </Flex>
+                </div>
               );
             })}
-          </Box>
-        </Box>
-      </Flex>
+          </div>
+        </div>
+      </div>
     </ThemeProvider>
   );
 };

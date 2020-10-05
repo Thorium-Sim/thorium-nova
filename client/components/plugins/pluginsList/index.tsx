@@ -1,20 +1,7 @@
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Grid,
-  Modal,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Scale,
-} from "@chakra-ui/core";
 import sleep from "../../../helpers/sleep";
 import React from "react";
 import {FaEdit} from "react-icons/fa";
-import {Route, Routes, useNavigate, useParams} from "react-router";
+import {useNavigate, useParams} from "react-router";
 import {Link as NavLink} from "react-router-dom";
 import SearchableList from "../../ui/SearchableList";
 import PluginForm from "../../ui/PluginForm";
@@ -30,8 +17,8 @@ import {
 import {useAlert, useConfirm, usePrompt} from "../../Dialog";
 import {useTranslation} from "react-i18next";
 import {css} from "@emotion/core";
-
-const Config = React.lazy(() => import("../../../pages/Config"));
+import Button from "../../../components/ui/button";
+import ConfigLayout from "../../../components/ui/ConfigLayout";
 
 const PluginList = () => {
   const {t} = useTranslation();
@@ -111,76 +98,50 @@ const PluginList = () => {
     }
   }
   return (
-    <>
-      {/* @ts-ignore */}
-      <Scale in={isOpen}>
-        {/* @ts-ignore */}
-        {styles => (
-          <Modal isOpen={true} size="full" scrollBehavior="inside">
-            <ModalOverlay
-              opacity={styles.opacity}
-              css={css`
-                backdrop-filter: blur(50px);
-              `}
-            />
-            <ModalContent
-              {...styles}
-              maxWidth="960px"
-              display="flex"
-              flexDir="column"
-              pb={4}
-            >
-              <ModalHeader fontSize="4xl">{t(`Plugins`)}</ModalHeader>
-              <ModalCloseButton onClick={onClose} />
-              <Grid
-                templateColumns="1fr 2fr"
-                templateRows="1fr auto"
-                height="0"
-                px={4}
-                gap={4}
-                flex={1}
-              >
-                <Box display="flex" flexDir="column">
-                  <SearchableList
-                    items={data?.plugins || []}
-                    searchKeys={["name", "author", "tags"]}
-                    selectedItem={params.pluginId}
-                    setSelectedItem={id => navigate(`/config/${id}`)}
-                    renderItem={c => (
-                      <Box
-                        key={c.id}
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="center"
-                      >
-                        <div>
-                          {c.name}
-                          <div>
-                            <small>{c.author}</small>
-                          </div>
-                        </div>
-                        <Button
-                          as={NavLink}
-                          {...{to: `/config/${c.id}/edit`}}
-                          onClick={e => e.stopPropagation()}
-                          variant="outline"
-                          size="sm"
-                        >
-                          <FaEdit />
-                        </Button>
-                      </Box>
-                    )}
-                  />
-                </Box>
-                <PluginForm
-                  plugin={plugin}
-                  setName={setName}
-                  setDescription={setDescription}
-                  setTags={setTags}
-                  setCoverImage={setCoverImage}
-                ></PluginForm>
-                <ButtonGroup>
-                  {/* <Button
+    <ConfigLayout title={t(`Plugins`)}>
+      <div
+        className="grid h-0 px-4 gap-12 flex-1"
+        css={css`
+          grid-template-columns: 1fr 2fr;
+          grid-template-rows: 1fr auto;
+        `}
+      >
+        <div className="flex flex-col">
+          <SearchableList
+            items={data?.plugins || []}
+            searchKeys={["name", "author", "tags"]}
+            selectedItem={params.pluginId}
+            setSelectedItem={id => navigate(`/config/${id}`)}
+            renderItem={c => (
+              <div className="flex justify-between items-center" key={c.id}>
+                <div>
+                  {c.name}
+                  <div>
+                    <small>{c.author}</small>
+                  </div>
+                </div>
+                <Button
+                  as={NavLink}
+                  {...{to: `/config/${c.id}/edit`}}
+                  onClick={e => e.stopPropagation()}
+                  variant="outline"
+                  size="sm"
+                  className="text-gray-800"
+                >
+                  <FaEdit />
+                </Button>
+              </div>
+            )}
+          />
+        </div>
+        <PluginForm
+          plugin={plugin}
+          setName={setName}
+          setDescription={setDescription}
+          setTags={setTags}
+          setCoverImage={setCoverImage}
+        ></PluginForm>
+        {/* <Button
                     width="100%"
                     variantColor="info"
                     onClick={handleCreate}
@@ -189,42 +150,32 @@ const PluginList = () => {
                   >
                     {t(`Import Plugin`)}
                   </Button> */}
-                  <Button
-                    width="100%"
-                    variantColor="success"
-                    onClick={handleCreate}
-                  >
-                    {t(`Create Plugin`)}
-                  </Button>
-                </ButtonGroup>
-                {plugin && (
-                  <ButtonGroup>
-                    {/* <Button variantColor="info">{t(`Export`)}</Button> */}
-                    <Button
-                      as={NavLink}
-                      {...{
-                        to: `/config/${plugin?.id}/edit`,
-                      }}
-                      variantColor="info"
-                    >
-                      {t(`Edit Plugin`)}
-                    </Button>
-                    <Button variantColor="danger" onClick={handleRemove}>
-                      {t(`Remove`)}
-                    </Button>
-                  </ButtonGroup>
-                )}
-              </Grid>
-            </ModalContent>
-          </Modal>
+        <Button
+          className="w-full"
+          variantColor="success"
+          onClick={handleCreate}
+        >
+          {t(`Create Plugin`)}
+        </Button>
+        {plugin && (
+          <div className="space-x-4">
+            {/* <Button variantColor="info">{t(`Export`)}</Button> */}
+            <Button
+              as={NavLink}
+              {...{
+                to: `/config/${plugin?.id}/edit`,
+              }}
+              variantColor="info"
+            >
+              {t(`Edit Plugin`)}
+            </Button>
+            <Button variantColor="danger" onClick={handleRemove}>
+              {t(`Remove`)}
+            </Button>
+          </div>
         )}
-      </Scale>
-      <React.Suspense fallback={null}>
-        <Routes>
-          <Route path="edit" element={<Config />}></Route>
-        </Routes>
-      </React.Suspense>
-    </>
+      </div>
+    </ConfigLayout>
   );
 };
 

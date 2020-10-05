@@ -1,18 +1,15 @@
-import {Badge, Box, Input, PseudoBox} from "@chakra-ui/core";
 import React from "react";
 import {useTranslation} from "react-i18next";
 import {FaTimes} from "react-icons/fa";
+import Badge from "./Badge";
+import Input from "./Input";
 
 const Tag: React.FC<{tag: string; onClick: () => void}> = ({tag, onClick}) => {
   return (
-    <Badge display="flex" alignItems="center" mr={2}>
+    <Badge className="flex items-center mr-2">
       {tag}{" "}
-      <PseudoBox
-        as={FaTimes}
-        cursor="pointer"
-        borderRadius="50%"
-        _hover={{bg: "grey.700"}}
-        _active={{bg: "grey.800"}}
+      <FaTimes
+        className="cursor-pointer rounded-full hover:bg-gray-700 active:bg-gray-800"
         onClick={onClick}
       />
     </Badge>
@@ -27,18 +24,17 @@ const TagInput: React.FC<{
   const {t} = useTranslation();
   return (
     <>
-      <Box display="flex" flexWrap="wrap">
+      <div className="flex flex-wrap">
         {tags.map(t => (
           <Tag key={t} tag={t} onClick={() => onRemove(t)} />
         ))}
-      </Box>
+      </div>
 
       <Input
+        label=""
         placeholder={t(`Type and press return to add a tag`)}
         value={tagInput}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setTagInput(e.target.value)
-        }
+        onChange={text => setTagInput(text)}
         onBlur={() => {
           if (tagInput) {
             onAdd(tagInput);

@@ -22,6 +22,7 @@ const theme = {
     // muted: getColorScheme("#888"),
   },
 };
+
 const AppContext: React.FC = ({children}) => {
   return (
     <ThemeProvider theme={theme}>

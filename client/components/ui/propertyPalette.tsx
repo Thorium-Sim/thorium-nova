@@ -1,22 +1,18 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  IconButton,
-  PseudoBox,
-} from "@chakra-ui/core";
 import useWindowMove from "../../helpers/hooks/useWindowMove";
 import React from "react";
 import {FaMinus, FaTimes} from "react-icons/fa";
 import {useTranslation} from "react-i18next";
 import useSessionStorage from "../../helpers/hooks/useSessionStorage";
+import {css} from "@emotion/core";
+import Button from "./button";
 
 const PropertyPalette: React.FC<{onClose: () => void}> = ({
   children,
   onClose,
 }) => {
-  const [position, measureRef, mouseDown, remeasure] = useWindowMove(
+  const [position, measureRef, mouseDown, remeasure] = useWindowMove<
+    HTMLDivElement
+  >(
     useSessionStorage<{x: number; y: number} | null>(
       "nova_starmap_propertyPalette",
       null
@@ -28,61 +24,62 @@ const PropertyPalette: React.FC<{onClose: () => void}> = ({
   }, [open]);
   const {t} = useTranslation();
   return (
-    <Box
-      opacity={position.x === 0 && position.y === 0 ? 0 : 1}
+    <div
+      className="flex flex-col select-none fixed top-0 rounded-lg"
+      css={css`
+        opacity: ${position.x === 0 && position.y === 0 ? 0 : 1};
+        transform: translate(${position.x}px, ${position.y}px);
+        background-color: rgba(45, 55, 72, 0.6);
+        min-width: 300;
+      `}
       ref={measureRef}
-      style={{transform: `translate(${position.x}px, ${position.y}px)`}}
-      bg="rgba(45,55,72, 0.6)"
-      position="fixed"
-      minWidth={300}
-      top={0}
-      borderRadius={4}
-      display="flex"
-      flexDir="column"
-      userSelect="none"
     >
-      <PseudoBox
+      <div
         onMouseDown={mouseDown}
-        borderBottomColor="whiteAlpha.400"
-        borderBottomWidth={2}
-        bg="blackAlpha.500"
-        cursor="grab"
-        _hover={{bg: "blackAlpha.700"}}
-        _active={{bg: "blackAlpha.600", cursor: "grabbing"}}
-        height="40px"
-        borderTopRightRadius={4}
-        borderTopLeftRadius={4}
-        display="grid"
-        gridTemplateColumns="1fr auto 1fr"
-        alignItems="center"
-        px={2}
+        className="border-whiteAlpha-400 border-b-2 bg-blackAlpha-500 hover:bg-blackAlpha-700 active:bg-blackAlpha-600 rounded-t-lg items-center px-2 grid"
+        css={css`
+          cursor: grab;
+          &:active {
+            cursor: grabbing;
+          }
+          height: 40px;
+          grid-template-columns: 1fr auto 1fr;
+        `}
         onDoubleClick={() => setOpen(o => !o)}
       >
         <div></div>
-        <Heading fontSize="lg">{t("Property Palette")}</Heading>
-        <Flex justifySelf="end">
-          <IconButton
-            icon={FaMinus}
+        <h3 className="font-bold text-xl">{t("Property Palette")}</h3>
+        <div className="flex self-end">
+          <Button
             variant="ghost"
             size="xs"
             aria-label={t(`Minimize`)}
             onClick={() => setOpen(o => !o)}
-          />
-          <IconButton
-            icon={FaTimes}
+          >
+            <FaMinus />
+          </Button>
+          <Button
             variant="ghost"
             size="xs"
             aria-label={t(`Close`)}
             onClick={onClose}
-          />
-        </Flex>
-      </PseudoBox>
+          >
+            <FaTimes />
+          </Button>
+        </div>
+      </div>
       {open && (
-        <Box minHeight="200px" maxHeight="400px" overflowY="auto" py={2}>
+        <div
+          className="overflow-y-auto py-2"
+          css={css`
+            min-height: 200px;
+            max-height: 400px;
+          `}
+        >
           {children}
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 

@@ -1,54 +1,31 @@
 {
+  "Are you sure you want to permanently remove this plugin?": "Are you sure you want to permanently remove this plugin?",
+  "Assets": "Assets",
+  "Basic": "Basic",
   "Click or Drop files here": "Click or Drop files here",
-  "Cruising Speed": "Cruising Speed",
-  "Direction Max Speed": "Direction Max Speed",
-  "Direction Thrust": "Direction Thrust",
-  "Emergency Speed": "Emergency Speed",
-  "Max Destination Radius": "Max Destination Radius",
-  "New Outfit": "New Outfit",
+  "Close": "Close",
+  "Cover Image": "Cover Image",
+  "Create Plugin": "Create Plugin",
+  "Description": "Description",
+  "Edit Plugin": "Edit Plugin",
+  "Error Creating Plugin": "Error Creating Plugin",
+  "Error Removing Plugin": "Error Removing Plugin",
+  "Minimize": "Minimize",
+  "Name": "Name",
   "Outfits": "Outfits",
+  "Physics": "Physics",
   "Plugin Configuration": "Plugin Configuration",
-  "Remove Outfit": "Remove Outfit",
-  "Rotation Max Speed": "Rotation Max Speed",
-  "Rotation Thrust": "Rotation Thrust",
+  "Plugin Name": "Plugin Name",
+  "Plugins": "Plugins",
+  "Property Palette": "Property Palette",
+  "Remove": "Remove",
+  "Search": "Search",
   "Ships": "Ships",
-  "The engine thrust output in kilo-Newtons": {
-    " This affects how long it takes to accelerate to top speed": {
-      " If this is the same as the mass of the ship, it will take about 5 seconds to reach cruising speed": {
-        "": ""
-      }
-    }
+  "Tags": "Tags",
+  "This will delete all of its objects and assets": {
+    "": ""
   },
-  "The maximum cruising speed in km/s": {
-    " ": " "
-  },
-  "The maximum emergency speed in km/s": {
-    " ": " "
-  },
-  "The maximum radius which destinations can be set in lightyears": {
-    " 0 is unlimited radius": {
-      "": ""
-    }
-  },
-  "The maximum speed which can be applied by direction thrusters in meters/second": {
-    " ": " "
-  },
-  "The maximum speed which the ship can rotate in rotations per minute": {
-    " ": " "
-  },
-  "The number of warp factors including the minimum speed and cruising speed": {
-    " Emergency and Destructive warp will be added automatically": {
-      "": ""
-    }
-  },
-  "The thrust applied by direction thrusters in kilo-Newtons, which affects thruster acceleration based on the mass of the ship": {
-    " ": " "
-  },
-  "The thrust applied by rotation thrusters in kilo-Newtons, which affects rotation acceleration based on the mass of the ship": {
-    " ": " "
-  },
-  "Thrust": "Thrust",
   "Type and press return to add a tag": "Type and press return to add a tag",
   "Universes": "Universes",
-  "Warp Factor Count": "Warp Factor Count"
+  "What is the name of the new plugin?": "What is the name of the new plugin?"
 }

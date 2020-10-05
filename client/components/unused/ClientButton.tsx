@@ -1,15 +1,15 @@
 import React from "react";
-import {Button} from "@chakra-ui/core";
 import {useClientId} from "../../helpers/getClientId";
 import {usePrompt} from "../Dialog";
+import Button from "../ui/button";
 
-const ClientButton = () => {
+export const ClientButton = () => {
   const [clientId, setClientId] = useClientId();
   const prompt = usePrompt();
   return (
     <Button
       size="lg"
-      variantColor="orange"
+      variantColor="warning"
       variant="outline"
       onClick={async () => {
         const id = (await prompt({

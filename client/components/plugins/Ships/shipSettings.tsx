@@ -1,8 +1,6 @@
 import React from "react";
-import {Box} from "@chakra-ui/core";
 import ListGroupItem from "../../../components/ui/ListGroupItem";
-import {usePluginShipsSubscription} from "../../../generated/graphql";
-import {Route, Routes, useMatch, useParams} from "react-router";
+import {Route, Routes, useMatch} from "react-router";
 import {useTranslation} from "react-i18next";
 import {Link} from "react-router-dom";
 import ShipBasic from "./settings/basic";
@@ -17,7 +15,7 @@ const SettingList: React.FC = props => {
 
   return (
     <>
-      <Box>
+      <div>
         <ListGroupItem
           as={Link}
           to="basic"
@@ -46,7 +44,7 @@ const SettingList: React.FC = props => {
         >
           {t("Outfits")}
         </ListGroupItem>
-      </Box>
+      </div>
       <Routes>
         <Route path="basic" element={<ShipBasic />}></Route>
         <Route path="assets" element={<ShipAssets />}></Route>

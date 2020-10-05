@@ -2,21 +2,32 @@
 // There are still tests in place, but this file won't count
 // towards coverage
 /* istanbul ignore file */
-import React from "react";
+import {css} from "@emotion/core";
+import {useDialog} from "@react-aria/dialog";
+import {FocusScope} from "@react-aria/focus";
 import {
-  useDisclosure,
-  AlertDialog,
-  Scale,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogBody,
-  AlertDialogFooter,
-  Button,
-  Input,
-  FormLabel,
-  FormControl,
-} from "@chakra-ui/core";
+  OverlayContainer,
+  OverlayProps,
+  OverlayProvider,
+  useModal,
+  useOverlay,
+  usePreventScroll,
+} from "@react-aria/overlays";
+import {mergeRefs} from "../helpers/mergeRefs";
+import React from "react";
+import Button from "./ui/button";
+import {Input} from "@chakra-ui/core";
+import OtherInput from "./ui/Input";
+function useDisclosure() {
+  const [isOpen, setOpen] = React.useState(false);
+  const onOpen = React.useCallback(() => {
+    setOpen(true);
+  }, []);
+  const onClose = React.useCallback(() => {
+    setOpen(false);
+  }, []);
+  return {isOpen, onOpen, onClose};
+}
 
 interface DialogI {
   header: string;
@@ -60,18 +71,18 @@ const Dialog: React.FC = ({children}) => {
     [isOpen, onOpen]
   );
 
-  const [inputEl, setInputEl] = React.useState<HTMLInputElement>();
+  // const [inputEl, setInputEl] = React.useState<HTMLInputElement>();
 
-  const inputRef = React.useCallback(node => {
-    if (node !== null) {
-      setInputEl(node);
-    }
-  }, []);
-  React.useEffect(() => {
-    if (isOpen && type === "prompt" && inputEl) {
-      inputEl.setSelectionRange(0, inputEl.value.length);
-    }
-  }, [inputEl, isOpen, type]);
+  // const inputRef = React.useCallback(node => {
+  //   if (node !== null) {
+  //     setInputEl(node);
+  //   }
+  // }, []);
+  // React.useEffect(() => {
+  //   if (isOpen && type === "prompt" && inputEl) {
+  //     inputEl.setSelectionRange(0, inputEl.value.length);
+  //   }
+  // }, [inputEl, isOpen, type]);
 
   React.useEffect(() => {
     function handleReturn(e: KeyboardEvent) {
@@ -94,45 +105,32 @@ const Dialog: React.FC = ({children}) => {
 
   return (
     <DialogContext.Provider value={openConfirm}>
-      {children}
-      {/* @ts-ignore */}
-      <Scale in={isOpen} duration={process.env.NODE_ENV === "test" ? 0 : 250}>
-        {/* @ts-ignore */}
-        {styles => (
-          <AlertDialog
-            leastDestructiveRef={
-              type === "prompt" ? {current: inputEl || null} : btnRef
-            }
-            finalFocusRef={cancelRef}
-            onClose={() => {
-              resolveRef.current?.(false);
-              onClose();
-            }}
-            isOpen={true}
-            closeOnOverlayClick={false}
-          >
-            <AlertDialogOverlay opacity={styles.opacity} zIndex={2000} />
-            <AlertDialogContent {...styles} zIndex={2100}>
-              <AlertDialogHeader>{header}</AlertDialogHeader>
-              <AlertDialogBody>
-                {type === "prompt" ? (
-                  <FormControl>
-                    <FormLabel width="100%">
-                      {body || "Response"}
-                      <Input
-                        ref={inputRef}
-                        value={input}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setInput(e.target.value)
-                        }
-                      />
-                    </FormLabel>
-                  </FormControl>
-                ) : (
-                  body
-                )}
-              </AlertDialogBody>
-              <AlertDialogFooter>
+      <OverlayProvider className="h-full">
+        {children}
+
+        {isOpen && (
+          <OverlayContainer>
+            <ModalDialog
+              title={header}
+              isOpen
+              onClose={() => {
+                resolveRef.current?.(false);
+
+                onClose();
+              }}
+            >
+              {type === "prompt" ? (
+                <div>
+                  <OtherInput
+                    label={body || "Response"}
+                    value={input}
+                    onChange={e => setInput(e)}
+                  />
+                </div>
+              ) : (
+                body
+              )}
+              <div className="flex justify-end mt-4">
                 {type !== "alert" && (
                   <Button
                     ref={cancelRef}
@@ -147,9 +145,8 @@ const Dialog: React.FC = ({children}) => {
                 <Button
                   // @ts-ignore
                   autoFocus={type !== "prompt"}
-                  ref={btnRef}
-                  variantColor="blue"
-                  ml={3}
+                  variantColor="primary"
+                  className="ml-3"
                   onClick={() => {
                     resolveRef.current?.(type === "prompt" ? input : true);
                     onClose();
@@ -157,12 +154,59 @@ const Dialog: React.FC = ({children}) => {
                 >
                   OK
                 </Button>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+              </div>
+            </ModalDialog>
+          </OverlayContainer>
         )}
-      </Scale>
+      </OverlayProvider>
     </DialogContext.Provider>
+  );
+};
+
+const ModalDialog: React.FC<
+  {title: String; role?: "dialog" | "alertdialog"} & OverlayProps
+> = props => {
+  let {title, children} = props;
+
+  // Handle interacting outside the dialog and pressing
+  // the Escape key to close the modal.
+  let ref = React.useRef<HTMLDivElement>(null);
+  let {overlayProps} = useOverlay(props, ref);
+
+  // Prevent scrolling while the modal is open, and hide content
+  // outside the modal from screen readers.
+  usePreventScroll();
+  let {modalProps} = useModal();
+
+  // Get props for the dialog and its title
+  let {dialogProps, titleProps} = useDialog(props, ref);
+
+  return (
+    <div
+      css={css`
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 100;
+      `}
+      className="fixed top-0 left-0 bottom-0 right-0 flex justify-center items-start"
+    >
+      <FocusScope contain restoreFocus autoFocus>
+        <div
+          {...overlayProps}
+          {...dialogProps}
+          {...modalProps}
+          ref={ref}
+          css={css`
+            min-width: 32rem;
+          `}
+          className="mt-32 bg-gray-800 text-white p-10"
+        >
+          <h3 {...titleProps} className="mt-0 text-2xl">
+            {title}
+          </h3>
+          {children}
+        </div>
+      </FocusScope>
+    </div>
   );
 };
 

@@ -1,46 +1,19 @@
-import {
-  Box,
-  Button,
-  Grid,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  PseudoBox,
-  Scale,
-} from "@chakra-ui/core";
-import sleep from "../helpers/sleep";
 import React from "react";
+import sleep from "../helpers/sleep";
 import {useTranslation} from "react-i18next";
 import {FaStar, FaTools, FaRocket} from "react-icons/fa";
 import {useNavigate, useParams} from "react-router";
 import {NavLink} from "react-router-dom";
+import ConfigLayout from "../components/ui/ConfigLayout";
 
 const ConfigIcon: React.FC<{to: string}> = props => {
   return (
-    <PseudoBox
-      as={NavLink}
+    <NavLink
+      className="w-full h-64 shadow-inner rounded-lg transition-colors duration-300 bg-whiteAlpha-300 cursor-pointer hover:bg-whiteAlpha-500 flex justify-center items-center flex-col"
       {...props}
-      height="200px"
-      width="200px"
-      boxShadow="inset 5px 5px 10px rgba(0,0,0,0.1), inset 10px 10px 10px rgba(0,0,0,0.1), inset -2px -2px 10px rgba(0,0,0,0.1)"
-      borderRadius="20px"
-      bg={"blackAlpha.50"}
-      cursor={"pointer"}
-      _hover={{bg: "blackAlpha.300"}}
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      flexDirection="column"
-    ></PseudoBox>
+    ></NavLink>
   );
 };
-
-const noop = () => {};
 
 const Config = () => {
   const {t} = useTranslation();
@@ -56,42 +29,22 @@ const Config = () => {
     navigate("..");
   }
   return (
-    <>
-      {/* @ts-ignore */}
-      <Scale in={isOpen}>
-        {/* @ts-ignore */}
-        {styles => (
-          <Modal isOpen={true} size="full" onClose={noop}>
-            <ModalOverlay zIndex={1500} opacity={styles.opacity} />
-            <ModalContent {...styles} maxWidth="960px" zIndex={1600}>
-              <ModalHeader fontSize="4xl">
-                {t("Plugin Configuration")}
-              </ModalHeader>
-              <ModalCloseButton onClick={onClose} />
-              <Grid
-                p={8}
-                gridTemplateColumns="repeat(3,1fr)"
-                justifyItems="center"
-                gap={10}
-              >
-                <ConfigIcon to={`/edit/${pluginId}/starmap`}>
-                  <Box as={FaStar} fontSize="6xl" mb={4} />
-                  <Heading fontSize="lg">{t("Universes")}</Heading>
-                </ConfigIcon>
-                <ConfigIcon to={`/edit/${pluginId}/ships`}>
-                  <Box as={FaRocket} fontSize="6xl" mb={4} />
-                  <Heading fontSize="lg">{t("Ships")}</Heading>
-                </ConfigIcon>
-                <ConfigIcon to={`/edit/${pluginId}/outfits`}>
-                  <Box as={FaTools} fontSize="6xl" mb={4} />
-                  <Heading fontSize="lg">{t("Outfits")}</Heading>
-                </ConfigIcon>
-              </Grid>
-            </ModalContent>
-          </Modal>
-        )}
-      </Scale>
-    </>
+    <ConfigLayout title={t(`Plugin Configuration`)}>
+      <div className="p-8 grid grid-cols-3 grid-rows-3 gap-48 justify-center">
+        <ConfigIcon to={`/edit/${pluginId}/starmap`}>
+          <FaStar className="text-6xl mb-4" />
+          <p className="font-bold text-2xl">{t("Universes")}</p>
+        </ConfigIcon>
+        <ConfigIcon to={`/edit/${pluginId}/ships`}>
+          <FaRocket className="text-6xl mb-4" />
+          <p className="font-bold text-2xl">{t("Ships")}</p>
+        </ConfigIcon>
+        <ConfigIcon to={`/edit/${pluginId}/outfits`}>
+          <FaTools className="text-6xl mb-4" />
+          <p className="font-bold text-2xl">{t("Outfits")}</p>
+        </ConfigIcon>
+      </div>
+    </ConfigLayout>
   );
 };
 

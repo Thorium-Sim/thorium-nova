@@ -1,9 +1,9 @@
 import React from "react";
-import {Box, Input} from "@chakra-ui/core";
 import {capitalCase} from "change-case";
 import matchSorter from "match-sorter";
 import {useTranslation} from "react-i18next";
 import ListGroupItem from "./ListGroupItem";
+import Input from "./Input";
 
 interface SearchableListProps {
   items: ListItem[];
@@ -45,12 +45,11 @@ const SearchableList: React.FC<SearchableListProps> = ({
       <Input
         type="search"
         value={search}
+        label="Search"
         placeholder={t("Search")}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setSearch(e.target.value)
-        }
+        onChange={value => setSearch(value)}
       />
-      <Box flex={1} overflowY="auto">
+      <div className="flex-1 overflow-y-auto">
         {Object.entries(sortedIntoCategories)
           .concat()
           .sort(([a], [b]) => {
@@ -76,7 +75,7 @@ const SearchableList: React.FC<SearchableListProps> = ({
               ))}
             </React.Fragment>
           ))}
-      </Box>
+      </div>
     </>
   );
 };

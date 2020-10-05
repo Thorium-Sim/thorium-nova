@@ -9,20 +9,7 @@ import {Line} from "drei";
 import {Line2} from "three/examples/jsm/lines/Line2";
 // @ts-ignore
 import TextTexture from "@seregpie/three.text-texture";
-
-function mergeRefs<T = any>(
-  refs: Array<React.MutableRefObject<T> | React.LegacyRef<T>>
-): React.RefCallback<T> {
-  return value => {
-    refs.forEach(ref => {
-      if (typeof ref === "function") {
-        ref(value);
-      } else if (ref != null) {
-        (ref as React.MutableRefObject<T | null>).current = value;
-      }
-    });
-  };
-}
+import {mergeRefs} from "../../helpers/mergeRefs";
 
 function midPoint(vec1: Vector3, vec2: Vector3) {
   return new Vector3(
@@ -44,7 +31,7 @@ const TextLabel = React.forwardRef<Mesh, {text: string; position?: Vector3}>(
       });
       texture.redraw();
       return texture;
-    }, [name]);
+    }, [text]);
 
     const localRef = React.useRef<Mesh>();
     const scale = 0.8;

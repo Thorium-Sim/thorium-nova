@@ -1,7 +1,6 @@
 import React from "react";
 import {NavLink} from "react-router-dom";
 import lottie from "lottie-web";
-import {Box, Heading, Link} from "@chakra-ui/core";
 import {css} from "@emotion/core";
 
 const NoMatch = () => {
@@ -24,7 +23,7 @@ const NoMatch = () => {
     loadAnimation();
   }, []);
   return (
-    <Box maxWidth="960px" margin="0 auto">
+    <div className="mx-auto max-w-5xl">
       <div
         ref={container}
         css={css`
@@ -34,15 +33,18 @@ const NoMatch = () => {
           margin: 0 auto;
         `}
       ></div>
-      <Heading as="h1" size="2xl" textAlign="center">
+      <h1 className="text-5xl font-bold text-center">
         Uh Oh. We're a little lost.
-      </Heading>
-      <Heading as="h2" size="lg" textAlign="center">
-        <Link color="blue.200">
-          <NavLink to="/">Better head back home.</NavLink>
-        </Link>
-      </Heading>
-    </Box>
+      </h1>
+      <h2 className="text-2xl font-bold text-center">
+        <NavLink
+          to="/"
+          className="text-blue-300 hover:text-blue-500 transition-colors duration-300"
+        >
+          Better head back home.
+        </NavLink>
+      </h2>
+    </div>
   );
 };
 
