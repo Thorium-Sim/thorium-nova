@@ -93,9 +93,9 @@ class Entity extends Components {
     this.components = {};
 
     // components initialization
-    for (let i = 0, component:Component; (component = components[i]); i += 1) {
+    for (let i = 0, component: Component; (component = components[i]); i += 1) {
       if (!component) continue;
-      let data = {}
+      let data = {};
       // if a getDefaults method is provided, use it. First because let the
       // runtime allocate the component is way more faster than using a copy
       // function. Secondly because the user may want to provide some kind
@@ -104,23 +104,22 @@ class Entity extends Components {
       // @ts-ignore ts(2576) // Accessing static properties      // @ts-ignore ts(2576) // Accessing static properties
       if (initialData[component.id]) {
         // @ts-ignore ts(2576) // Accessing static properties
-        data = initialData[component.id]
+        data = initialData[component.id];
       }
       // @ts-ignore ts(2576)
       else if (component.getDefaults) {
         // @ts-ignore ts(2576)
-        data = (component.getDefaults());
+        data = component.getDefaults();
       } else {
         // @ts-ignore ts(2576)
-        data = ({
+        data = {
           // @ts-ignore ts(2576)
           ...components[i].defaults,
-        });
+        };
       }
 
       // @ts-ignore ts(2576)
       this.components[component.id] = data;
-      
     }
 
     /**

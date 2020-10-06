@@ -1,13 +1,19 @@
-"""Exposes a URL that specifies the behaviour of this scalar."""
+"""
+Exposes a URL that specifies the behaviour of this scalar.
+"""
 directive @specifiedBy(
-  """The URL that specifies the behaviour of this scalar."""
+  """
+  The URL that specifies the behaviour of this scalar.
+  """
   url: String!
 ) on SCALAR
 
 type AlertLevelComponent {
   alertLevel: String!
 
-  """Whether the alert condition can be changed by the crew."""
+  """
+  Whether the alert condition can be changed by the crew.
+  """
   alertLevelLock: Boolean!
 }
 
@@ -90,10 +96,14 @@ type Components {
 }
 
 type Composition {
-  """A component of the atmosphere, like nitrogen, oxygen, etc."""
+  """
+  A component of the atmosphere, like nitrogen, oxygen, etc.
+  """
   component: String!
 
-  """The concentration of the component as a percentage of the whole"""
+  """
+  The concentration of the component as a percentage of the whole
+  """
   concentration: Float!
 }
 
@@ -206,10 +216,14 @@ type IdentityComponent {
 }
 
 type ImpulseEnginesComponent {
-  """The max speed at full impulse in km/s."""
+  """
+  The max speed at full impulse in km/s.
+  """
   cruisingSpeed: Float!
 
-  """The max speed at emergency impulse in km/s."""
+  """
+  The max speed at emergency impulse in km/s.
+  """
   emergencySpeed: Float!
 
   """
@@ -218,10 +232,14 @@ type ImpulseEnginesComponent {
   """
   thrust: Float!
 
-  """The desired speed of the ship in km/s."""
+  """
+  The desired speed of the ship in km/s.
+  """
   targetSpeed: Float!
 
-  """The forward acceleration of the ship in km/s."""
+  """
+  The forward acceleration of the ship in km/s.
+  """
   forwardAcceleration: Float!
 }
 
@@ -230,7 +248,9 @@ type IsOutfitComponent {
 }
 
 type IsPlanetComponent {
-  """The age in years"""
+  """
+  The age in years
+  """
   age: Float!
 
   """
@@ -238,16 +258,24 @@ type IsPlanetComponent {
   """
   classification: String!
 
-  """Radius of the planet in kilometers. Earth's radius would be 6371"""
+  """
+  Radius of the planet in kilometers. Earth's radius would be 6371
+  """
   radius: Float!
 
-  """The mass of the planet compared to Earth."""
+  """
+  The mass of the planet compared to Earth.
+  """
   terranMass: Float!
 
-  """Whether the planet is habitable or not"""
+  """
+  Whether the planet is habitable or not
+  """
   habitable: Boolean!
 
-  """A description of the lifeforms on the planet"""
+  """
+  A description of the lifeforms on the planet
+  """
   lifeforms: String!
 
   """
@@ -255,38 +283,58 @@ type IsPlanetComponent {
   """
   surfaceGravity: Float!
 
-  """The asset path for the sphere texture."""
+  """
+  The asset path for the sphere texture.
+  """
   textureMapAsset: String!
 
-  """The asset path for the clouds texture. Blank if no clouds"""
+  """
+  The asset path for the clouds texture. Blank if no clouds
+  """
   cloudsMapAsset: String!
 
-  """The asset path for the rings texture. Blank if no rings"""
+  """
+  The asset path for the rings texture. Blank if no rings
+  """
   ringsMapAsset: String!
 }
 
 type IsShipComponent {
-  """Mass in kilograms. Affects acceleration"""
+  """
+  Mass in kilograms. Affects acceleration
+  """
   mass: Float!
 }
 
 type IsStarComponent {
-  """The mass of the star in comparison to the Sun"""
+  """
+  The mass of the star in comparison to the Sun
+  """
   solarMass: Float!
 
-  """The age of the star in years"""
+  """
+  The age of the star in years
+  """
   age: Float!
 
-  """The spectral type of the star, one of O,B,G,K,A,MG,M,D"""
+  """
+  The spectral type of the star, one of O,B,G,K,A,MG,M,D
+  """
   spectralType: String!
 
-  """The color hue of the star, based on the spectral type"""
+  """
+  The color hue of the star, based on the spectral type
+  """
   hue: Float!
 
-  """Whether the star appears to be white"""
+  """
+  Whether the star appears to be white
+  """
   isWhite: Boolean!
 
-  """The radius of the star compared to the radius of the Sun"""
+  """
+  The radius of the star compared to the radius of the Sun
+  """
   radius: Float!
 }
 
@@ -314,102 +362,281 @@ type Mutation {
   flightStop: String
   flightDelete(flightName: String!): String
   pluginOutfitSetName(name: String!, outfitId: ID!, pluginId: ID!): Entity!
-  pluginOutfitSetDescription(description: String!, outfitId: ID!, pluginId: ID!): Entity!
+  pluginOutfitSetDescription(
+    description: String!
+    outfitId: ID!
+    pluginId: ID!
+  ): Entity!
   pluginOutfitSetTags(tags: [String!]!, outfitId: ID!, pluginId: ID!): Entity!
-  impulseEnginesSetCruisingSpeed(speed: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  impulseEnginesSetEmergencySpeed(speed: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  impulseEnginesSetThrust(thrust: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  impulseEnginesSetTargetSpeed(speed: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  navigationSetDestination(destination: ID!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  navigationSetLocked(locked: Boolean!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  navigationSetMaxDestinationRadius(maxDestinationRadius: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  thrustersSetDirection(direction: CoordinatesInput!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  thrustersSetDirectionMaxSpeed(speed: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  thrustersSetDirectionThrust(thrust: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  thrustersSetRotationDelta(rotation: CoordinatesInput!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  thrustersSetRotationMaxSpeed(speed: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  thrustersSetRotationThrust(thrust: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  pluginAddOutfit(name: String, ability: OutfitAbilities!, pluginId: ID!): Entity!
+  impulseEnginesSetCruisingSpeed(
+    speed: Float!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  impulseEnginesSetEmergencySpeed(
+    speed: Float!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  impulseEnginesSetThrust(
+    thrust: Float!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  impulseEnginesSetTargetSpeed(
+    speed: Float!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  navigationSetDestination(
+    destination: ID!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  navigationSetLocked(
+    locked: Boolean!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  navigationSetMaxDestinationRadius(
+    maxDestinationRadius: Float!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  thrustersSetDirection(
+    direction: CoordinatesInput!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  thrustersSetDirectionMaxSpeed(
+    speed: Float!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  thrustersSetDirectionThrust(
+    thrust: Float!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  thrustersSetRotationDelta(
+    rotation: CoordinatesInput!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  thrustersSetRotationMaxSpeed(
+    speed: Float!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  thrustersSetRotationThrust(
+    thrust: Float!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  pluginAddOutfit(
+    name: String
+    ability: OutfitAbilities!
+    pluginId: ID!
+  ): Entity!
   pluginOutfitRemove(outfitId: ID!, pluginId: ID!): String!
-  warpEngineSetInterstellarCruisingSpeed(speed: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  warpEngineSetPlanetaryCruisingSpeed(speed: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  warpEngineSetMinSpeedMultiplier(multiplier: Float!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  warpEngineSetWarpFactorCount(count: Int!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
-  warpEngineSetCurrentWarpFactor(factor: Int!, shipId: ID, outfitId: ID, pluginId: ID): Entity!
+  warpEngineSetInterstellarCruisingSpeed(
+    speed: Float!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  warpEngineSetPlanetaryCruisingSpeed(
+    speed: Float!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  warpEngineSetMinSpeedMultiplier(
+    multiplier: Float!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  warpEngineSetWarpFactorCount(
+    count: Int!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
+  warpEngineSetCurrentWarpFactor(
+    factor: Int!
+    shipId: ID
+    outfitId: ID
+    pluginId: ID
+  ): Entity!
   pluginShipCreate(name: String!, pluginId: ID!): Entity!
   pluginShipRemove(shipId: ID!, pluginId: ID!): String!
   pluginShipRename(pluginId: ID!, id: ID!, name: String!): Entity!
   pluginShipSetTheme(pluginId: ID!, id: ID!, theme: String!): Entity!
   pluginShipSetLogo(pluginId: ID!, id: ID!, image: Upload!): Entity!
-  pluginShipSetModel(pluginId: ID!, id: ID!, vanity: Upload!, top: Upload!, side: Upload!, model: Upload!): Entity!
+  pluginShipSetModel(
+    pluginId: ID!
+    id: ID!
+    vanity: Upload!
+    top: Upload!
+    side: Upload!
+    model: Upload!
+  ): Entity!
   stationComplementCreate(name: String!, pluginId: ID!): StationComplement!
-  pluginUniverseAddPlanet(classification: String!, systemId: ID!, id: ID!): Entity!
-  pluginUniverseAddMoon(classification: String!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseAddPlanet(
+    classification: String!
+    systemId: ID!
+    id: ID!
+  ): Entity!
+  pluginUniverseAddMoon(
+    classification: String!
+    objectId: ID!
+    id: ID!
+  ): Entity!
   pluginUniversePlanetSetTemperature(
-    """The temperature of the star in Kelvin"""
+    """
+    The temperature of the star in Kelvin
+    """
     temperature: Float!
     objectId: ID!
     id: ID!
   ): Entity!
   pluginUniversePlanetSetAge(
-    """The age of the planet in years"""
+    """
+    The age of the planet in years
+    """
     age: Float!
     objectId: ID!
     id: ID!
   ): Entity!
   pluginUniversePlanetSetRadius(
-    """The radius of the planet in kilometers"""
+    """
+    The radius of the planet in kilometers
+    """
     radius: Float!
     objectId: ID!
     id: ID!
   ): Entity!
   pluginUniversePlanetSetTerranMass(
-    """The mass of the planet compared to Earth"""
+    """
+    The mass of the planet compared to Earth
+    """
     terranMass: Float!
     objectId: ID!
     id: ID!
   ): Entity!
   pluginUniversePlanetSetHabitable(
-    """Whether the planet is habitable by humans."""
+    """
+    Whether the planet is habitable by humans.
+    """
     habitable: Boolean!
     objectId: ID!
     id: ID!
   ): Entity!
   pluginUniversePlanetSetLifeforms(
-    """A text description of the lifeforms on the planet."""
+    """
+    A text description of the lifeforms on the planet.
+    """
     lifeforms: String!
     objectId: ID!
     id: ID!
   ): Entity!
-  pluginUniversePlanetSetTexture(image: Upload!, objectId: ID!, id: ID!): Entity!
+  pluginUniversePlanetSetTexture(
+    image: Upload!
+    objectId: ID!
+    id: ID!
+  ): Entity!
   pluginUniversePlanetSetClouds(image: Upload!, objectId: ID!, id: ID!): Entity!
   pluginUniversePlanetSetRings(image: Upload!, objectId: ID!, id: ID!): Entity!
   pluginUniversePlanetClearClouds(objectId: ID!, id: ID!): Entity!
   pluginUniversePlanetClearRings(objectId: ID!, id: ID!): Entity!
-  pluginUniverseSatelliteSetAxialTilt(axialTilt: Float!, objectId: ID!, id: ID!): Entity!
-  pluginUniverseSatelliteSetDistance(distance: Float!, objectId: ID!, id: ID!): Entity!
-  pluginUniverseSatelliteSetOrbitalArc(orbitalArc: Float!, objectId: ID!, id: ID!): Entity!
-  pluginUniverseSatelliteSetOrbitalInclination(orbitalInclination: Float!, objectId: ID!, id: ID!): Entity!
-  pluginUniverseSatelliteSetEccentricity(eccentricity: Float!, objectId: ID!, id: ID!): Entity!
-  pluginUniverseSatelliteSetShowOrbit(showOrbit: Boolean!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseSatelliteSetAxialTilt(
+    axialTilt: Float!
+    objectId: ID!
+    id: ID!
+  ): Entity!
+  pluginUniverseSatelliteSetDistance(
+    distance: Float!
+    objectId: ID!
+    id: ID!
+  ): Entity!
+  pluginUniverseSatelliteSetOrbitalArc(
+    orbitalArc: Float!
+    objectId: ID!
+    id: ID!
+  ): Entity!
+  pluginUniverseSatelliteSetOrbitalInclination(
+    orbitalInclination: Float!
+    objectId: ID!
+    id: ID!
+  ): Entity!
+  pluginUniverseSatelliteSetEccentricity(
+    eccentricity: Float!
+    objectId: ID!
+    id: ID!
+  ): Entity!
+  pluginUniverseSatelliteSetShowOrbit(
+    showOrbit: Boolean!
+    objectId: ID!
+    id: ID!
+  ): Entity!
   pluginUniverseAddStar(spectralType: String!, systemId: ID!, id: ID!): Entity!
   pluginUniverseRemoveObject(objectId: ID!, id: ID!): String!
-  pluginUniverseStarSetSolarMass(solarMass: Float!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseStarSetSolarMass(
+    solarMass: Float!
+    objectId: ID!
+    id: ID!
+  ): Entity!
   pluginUniverseStarSetAge(age: Float!, objectId: ID!, id: ID!): Entity!
   pluginUniverseStarSetHue(hue: Float!, objectId: ID!, id: ID!): Entity!
-  pluginUniverseStarSetIsWhite(isWhite: Boolean!, objectId: ID!, id: ID!): Entity!
+  pluginUniverseStarSetIsWhite(
+    isWhite: Boolean!
+    objectId: ID!
+    id: ID!
+  ): Entity!
   pluginUniverseStarSetRadius(radius: Float!, objectId: ID!, id: ID!): Entity!
   pluginUniverseStarSetTemperature(
-    """The temperature of the star in Kelvin"""
+    """
+    The temperature of the star in Kelvin
+    """
     temperature: Float!
     objectId: ID!
     id: ID!
   ): Entity!
   pluginUniverseAddSystem(position: PositionInput!, id: ID!): Entity!
-  pluginUniverseSystemSetName(name: String!, systemId: ID!, id: ID!): PlanetarySystem!
-  pluginUniverseSystemSetDescription(description: String!, systemId: ID!, id: ID!): PlanetarySystem!
-  pluginUniverseSystemSetSkyboxKey(skyboxKey: String!, systemId: ID!, id: ID!): PlanetarySystem!
-  pluginUniverseSystemSetPosition(position: PositionInput!, systemId: ID!, id: ID!): PlanetarySystem!
+  pluginUniverseSystemSetName(
+    name: String!
+    systemId: ID!
+    id: ID!
+  ): PlanetarySystem!
+  pluginUniverseSystemSetDescription(
+    description: String!
+    systemId: ID!
+    id: ID!
+  ): PlanetarySystem!
+  pluginUniverseSystemSetSkyboxKey(
+    skyboxKey: String!
+    systemId: ID!
+    id: ID!
+  ): PlanetarySystem!
+  pluginUniverseSystemSetPosition(
+    position: PositionInput!
+    systemId: ID!
+    id: ID!
+  ): PlanetarySystem!
   snapshot: String!
   shipCreate(name: String!): Entity
   shipRename(id: ID, name: String!): Entity!
@@ -419,18 +646,26 @@ type Mutation {
   timerPause(pause: Boolean!, id: ID!): Entity
   timerRemove(id: ID!): String!
   pluginShipSetName(name: String!, shipId: ID!, pluginId: ID!): Entity!
-  pluginShipSetDescription(description: String!, shipId: ID!, pluginId: ID!): Entity!
+  pluginShipSetDescription(
+    description: String!
+    shipId: ID!
+    pluginId: ID!
+  ): Entity!
   pluginShipSetTags(tags: [String!]!, shipId: ID!, pluginId: ID!): Entity!
   pluginShipAddOutfit(outfitId: ID!, shipId: ID!, pluginId: ID!): Entity!
   pluginShipRemoveOutfit(outfitId: ID!, shipId: ID!, pluginId: ID!): Entity!
   pluginShipSetMass(
-    """Mass in kilograms"""
+    """
+    Mass in kilograms
+    """
     mass: Float!
     shipId: ID!
     pluginId: ID!
   ): Entity!
   pluginShipSetSize(
-    """Length in kilometers"""
+    """
+    Length in kilometers
+    """
     size: Float!
     shipId: ID!
     pluginId: ID!
@@ -438,13 +673,19 @@ type Mutation {
 }
 
 type NavigationComponent {
-  """The desired destination object."""
+  """
+  The desired destination object.
+  """
   destination: Entity!
 
-  """Whether the course has been locked in."""
+  """
+  Whether the course has been locked in.
+  """
   locked: Boolean!
 
-  """The maximum radius which destinations can be set in ly."""
+  """
+  The maximum radius which destinations can be set in ly.
+  """
   maxDestinationRadius: Float!
 }
 
@@ -496,7 +737,9 @@ type PlanetarySystem {
   components: Components!
   entityType: EntityTypes!
 
-  """The objects that inhabit this system"""
+  """
+  The objects that inhabit this system
+  """
   items: [Entity!]!
   habitableZoneInner: Float!
   habitableZoneOuter: Float!
@@ -508,10 +751,14 @@ type PlanetarySystemComponent {
   """
   skyboxKey: String!
 
-  """The inner radius of the habitable zone of the system."""
+  """
+  The inner radius of the habitable zone of the system.
+  """
   habitableZoneInner: Float!
 
-  """The outer radius of the habitable zone of the system."""
+  """
+  The outer radius of the habitable zone of the system.
+  """
   habitableZoneOuter: Float!
 }
 
@@ -626,29 +873,43 @@ type RotationVelocityComponent {
 }
 
 type SatelliteComponent {
-  """The tilt of the axis in degrees"""
+  """
+  The tilt of the axis in degrees
+  """
   axialTilt: Float!
 
-  """Distance from the center of its orbit in kilometers"""
+  """
+  Distance from the center of its orbit in kilometers
+  """
   distance: Float!
 
-  """Degrees where the planet currently is in its orbit"""
+  """
+  Degrees where the planet currently is in its orbit
+  """
   orbitalArc: Float!
 
-  """Degrees up or down where the planet is vertically in its orbit"""
+  """
+  Degrees up or down where the planet is vertically in its orbit
+  """
   orbitalInclination: Float!
 
-  """Degree to which the elliptical orbit is stretched"""
+  """
+  Degree to which the elliptical orbit is stretched
+  """
   eccentricity: Float!
 
-  """Whether the orbit should be visible on the starmap"""
+  """
+  Whether the orbit should be visible on the starmap
+  """
   showOrbit: Boolean!
   parent: Entity
   satellites: [Entity!]
 }
 
 type ShipAssetsComponent {
-  """GLB model of the ship."""
+  """
+  GLB model of the ship.
+  """
   model: String!
   side: String!
   top: String!
@@ -729,7 +990,9 @@ type TagsComponent {
 }
 
 type TemperatureComponent {
-  """Temperature in Kelvin (K)"""
+  """
+  Temperature in Kelvin (K)
+  """
   temperature: Float!
 }
 
@@ -740,13 +1003,19 @@ type ThemeComponent {
 type ThrustersComponent {
   thrusting: Boolean!
 
-  """The currently applied direction thruster vector"""
+  """
+  The currently applied direction thruster vector
+  """
   direction: Coordinates!
 
-  """The current direction thruster acceleration vector in m/s/s"""
+  """
+  The current direction thruster acceleration vector in m/s/s
+  """
   directionAcceleration: Coordinates!
 
-  """The maximum speed which can be applied by direction thrusters in m/s"""
+  """
+  The maximum speed which can be applied by direction thrusters in m/s
+  """
   directionMaxSpeed: Float!
 
   """
@@ -755,13 +1024,19 @@ type ThrustersComponent {
   """
   directionThrust: Float!
 
-  """The current vector of rotation being applied."""
+  """
+  The current vector of rotation being applied.
+  """
   rotationDelta: Coordinates!
 
-  """The current rotation velocity."""
+  """
+  The current rotation velocity.
+  """
   rotationVelocity: Coordinates!
 
-  """The max rotation speed in rotations per minute."""
+  """
+  The max rotation speed in rotations per minute.
+  """
   rotationMaxSpeed: Float!
 
   """
@@ -781,7 +1056,9 @@ type TrainingModeComponent {
   value: Boolean!
 }
 
-"""The `Upload` scalar type represents a file upload."""
+"""
+The `Upload` scalar type represents a file upload.
+"""
 scalar Upload
 
 type VelocityComponent {
@@ -791,13 +1068,19 @@ type VelocityComponent {
 }
 
 type WarpEnginesComponent {
-  """The cruising speed in interstellar space in km/s"""
+  """
+  The cruising speed in interstellar space in km/s
+  """
   interstellarCruisingSpeed: Float!
 
-  """The cruising speed in planetary system space in km/s"""
+  """
+  The cruising speed in planetary system space in km/s
+  """
   planetaryCruisingSpeed: Float!
 
-  """The min speed (warp 1) compared to the cruising speed"""
+  """
+  The min speed (warp 1) compared to the cruising speed
+  """
   minSpeedMultiplier: Float!
 
   """
@@ -806,10 +1089,13 @@ type WarpEnginesComponent {
   """
   warpFactorCount: Float!
 
-  """The current warp factor. 0 is full stop."""
+  """
+  The current warp factor. 0 is full stop.
+  """
   currentWarpFactor: Float!
 
-  """The forward acceleration of the ship in km/s."""
+  """
+  The forward acceleration of the ship in km/s.
+  """
   forwardAcceleration: Float!
 }
-

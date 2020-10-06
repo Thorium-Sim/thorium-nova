@@ -12,7 +12,7 @@ type StarmapObject =
   | NonNullable<TemplateSystemSubscription["pluginUniverseSystem"]>
   | NonNullable<UniverseAddSystemMutation["pluginUniverseAddSystem"]>
   | null;
-export interface ConfigStore extends   Record<string | number | symbol, unknown>{
+export interface ConfigStore extends Record<string | number | symbol, unknown> {
   disableOrbitControls: () => void;
   enableOrbitControls: () => void;
   orbitControlsTrackPosition: (position: Vector3, distance?: number) => void;
