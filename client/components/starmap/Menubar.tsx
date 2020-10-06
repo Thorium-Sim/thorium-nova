@@ -218,7 +218,7 @@ const Menubar: React.FC<{
               measuring: !measuring,
             }))
           }
-          isActive={measuring}
+          active={measuring}
           disabled={!selectedObject}
         >
           Measure Distances

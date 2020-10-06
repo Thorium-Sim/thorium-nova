@@ -106,7 +106,6 @@ const MeasureLine = () => {
     ];
 
     if (ref.current) {
-      // @ts-expect-error
       ref.current.geometry.setPositions(
         [
           position,
