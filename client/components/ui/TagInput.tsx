@@ -6,7 +6,7 @@ import Input from "./Input";
 
 const Tag: React.FC<{tag: string; onClick: () => void}> = ({tag, onClick}) => {
   return (
-    <Badge className="flex items-center mr-2">
+    <Badge className="flex items-center mr-2" data-testid="tag-remove">
       {tag}{" "}
       <FaTimes
         className="cursor-pointer rounded-full hover:bg-gray-700 active:bg-gray-800"
@@ -16,10 +16,11 @@ const Tag: React.FC<{tag: string; onClick: () => void}> = ({tag, onClick}) => {
   );
 };
 const TagInput: React.FC<{
+  label: string;
   tags: string[];
   onRemove: (t: string) => void;
   onAdd: (t: string) => void;
-}> = ({tags = [], onRemove, onAdd}) => {
+}> = ({tags = [], onRemove, onAdd, label}) => {
   const [tagInput, setTagInput] = React.useState("");
   const {t} = useTranslation();
   return (
@@ -31,7 +32,7 @@ const TagInput: React.FC<{
       </div>
 
       <Input
-        label=""
+        label={label}
         placeholder={t(`Type and press return to add a tag`)}
         value={tagInput}
         onChange={text => setTagInput(text)}

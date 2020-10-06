@@ -12,7 +12,6 @@ const SettingList: React.FC = props => {
   const {t} = useTranslation();
 
   const match = useMatch("/edit/:pluginId/ships/:shipId/:setting");
-
   return (
     <>
       <div>

@@ -72,33 +72,29 @@ const ShipBasic: React.FC = () => {
               />
             </FormLabel>
           </FormControl>
-          <FormControl pb={4}>
-            <FormLabel width="100%">
-              {t(`Tags`)}
-              <TagInput
-                tags={ship.tags.tags}
-                onAdd={tag => {
-                  if (ship.tags.tags.includes(tag)) return;
-                  setTags({
-                    variables: {
-                      pluginId,
-                      shipId,
-                      tags: ship.tags.tags.concat(tag),
-                    },
-                  });
-                }}
-                onRemove={tag => {
-                  setTags({
-                    variables: {
-                      pluginId,
-                      shipId,
-                      tags: ship.tags.tags.filter(t => t !== tag),
-                    },
-                  });
-                }}
-              />
-            </FormLabel>
-          </FormControl>
+          <TagInput
+            label={t(`Tags`)}
+            tags={ship.tags.tags}
+            onAdd={tag => {
+              if (ship.tags.tags.includes(tag)) return;
+              setTags({
+                variables: {
+                  pluginId,
+                  shipId,
+                  tags: ship.tags.tags.concat(tag),
+                },
+              });
+            }}
+            onRemove={tag => {
+              setTags({
+                variables: {
+                  pluginId,
+                  shipId,
+                  tags: ship.tags.tags.filter(t => t !== tag),
+                },
+              });
+            }}
+          />
         </Box>
       </Box>
     </Box>

@@ -1,31 +1,5 @@
 {
-  "Are you sure you want to permanently remove this plugin?": "Are you sure you want to permanently remove this plugin?",
-  "Assets": "Assets",
-  "Basic": "Basic",
-  "Click or Drop files here": "Click or Drop files here",
-  "Close": "Close",
-  "Cover Image": "Cover Image",
-  "Create Plugin": "Create Plugin",
-  "Description": "Description",
-  "Edit Plugin": "Edit Plugin",
-  "Error Creating Plugin": "Error Creating Plugin",
-  "Error Removing Plugin": "Error Removing Plugin",
-  "Minimize": "Minimize",
-  "Name": "Name",
+  "New Outfit": "New Outfit",
   "Outfits": "Outfits",
-  "Physics": "Physics",
-  "Plugin Configuration": "Plugin Configuration",
-  "Plugin Name": "Plugin Name",
-  "Plugins": "Plugins",
-  "Property Palette": "Property Palette",
-  "Remove": "Remove",
-  "Search": "Search",
-  "Ships": "Ships",
-  "Tags": "Tags",
-  "This will delete all of its objects and assets": {
-    "": ""
-  },
-  "Type and press return to add a tag": "Type and press return to add a tag",
-  "Universes": "Universes",
-  "What is the name of the new plugin?": "What is the name of the new plugin?"
+  "Remove Outfit": "Remove Outfit"
 }

@@ -35,6 +35,8 @@ const PluginForm: React.FC<{
             className="pb-4"
             label={t(`Name`)}
             defaultValue={plugin?.name}
+            isInvalid={error}
+            invalidMessage={t("Name is required")}
             onChange={() => setError(false)}
             onBlur={(e: React.FocusEvent<Element>) => {
               const target = e.target as HTMLInputElement;
@@ -59,8 +61,8 @@ const PluginForm: React.FC<{
                 : setError(true);
             }}
           />
-          <label>{t("Tags")}</label>
           <TagInput
+            label={t("Tags")}
             tags={plugin?.tags || []}
             onAdd={tag => {
               if (plugin?.tags.includes(tag) || !plugin) return;

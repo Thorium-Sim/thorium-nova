@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import {ApolloProvider, useApolloClient} from "@apollo/client";
 import {
   configStoreApi,

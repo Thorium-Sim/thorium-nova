@@ -5,11 +5,11 @@ module.exports = {
     purgeLayersByDefault: true,
   },
   purge: [
-    "./src/**/*.html",
-    "./src/**/*.vue",
-    "./src/**/*.jsx",
-    "./src/**/*.tsx",
-    "./src/**/*.ts",
+    "./client/**/*.html",
+    "./client/**/*.js",
+    "./client/**/*.jsx",
+    "./client/**/*.tsx",
+    "./client/**/*.ts",
   ],
   theme: {
     extend: {

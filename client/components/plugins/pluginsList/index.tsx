@@ -23,15 +23,6 @@ import ConfigLayout from "../../../components/ui/ConfigLayout";
 const PluginList = () => {
   const {t} = useTranslation();
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = React.useState(false);
-  React.useEffect(() => {
-    setIsOpen(true);
-  }, []);
-  async function onClose() {
-    setIsOpen(false);
-    await sleep(250);
-    navigate("/");
-  }
   const params = useParams();
 
   const {data} = usePluginsSubscription();

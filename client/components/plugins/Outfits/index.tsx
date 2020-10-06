@@ -64,7 +64,6 @@ const OutfitsList: React.FC = () => {
   const [remove] = usePluginOutfitRemoveMutation();
 
   const confirm = useConfirm();
-
   return (
     <Flex p={8} py={12} height="100%" direction="column" bg="blackAlpha.500">
       <Menubar />

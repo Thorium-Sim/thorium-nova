@@ -68,7 +68,7 @@ const Welcome = () => {
             size="lg"
             variantColor="info"
             variant="outline"
-            onPress={() => setShow(s => !s)}
+            onClick={() => setShow(s => !s)}
           >
             {t(`Load a Saved Flight`)}
           </Button>

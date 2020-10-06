@@ -68,33 +68,29 @@ const OutfitBasic: React.FC<{
               />
             </FormLabel>
           </FormControl>
-          <FormControl pb={4}>
-            <FormLabel width="100%">
-              {t(`Tags`)}
-              <TagInput
-                tags={outfit.tags.tags}
-                onAdd={tag => {
-                  if (outfit.tags.tags.includes(tag)) return;
-                  setTags({
-                    variables: {
-                      pluginId,
-                      outfitId: outfit.id,
-                      tags: outfit.tags.tags.concat(tag),
-                    },
-                  });
-                }}
-                onRemove={tag => {
-                  setTags({
-                    variables: {
-                      pluginId,
-                      outfitId: outfit.id,
-                      tags: outfit.tags.tags.filter(t => t !== tag),
-                    },
-                  });
-                }}
-              />
-            </FormLabel>
-          </FormControl>
+          <TagInput
+            label={t("Tags")}
+            tags={outfit.tags.tags}
+            onAdd={tag => {
+              if (outfit.tags.tags.includes(tag)) return;
+              setTags({
+                variables: {
+                  pluginId,
+                  outfitId: outfit.id,
+                  tags: outfit.tags.tags.concat(tag),
+                },
+              });
+            }}
+            onRemove={tag => {
+              setTags({
+                variables: {
+                  pluginId,
+                  outfitId: outfit.id,
+                  tags: outfit.tags.tags.filter(t => t !== tag),
+                },
+              });
+            }}
+          />
         </Box>
       </Box>
     </Box>

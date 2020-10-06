@@ -13,11 +13,10 @@ import {
   useOverlay,
   usePreventScroll,
 } from "@react-aria/overlays";
-import {mergeRefs} from "../helpers/mergeRefs";
+
 import React from "react";
 import Button from "./ui/button";
-import {Input} from "@chakra-ui/core";
-import OtherInput from "./ui/Input";
+import Input from "./ui/Input";
 function useDisclosure() {
   const [isOpen, setOpen] = React.useState(false);
   const onOpen = React.useCallback(() => {
@@ -121,10 +120,10 @@ const Dialog: React.FC = ({children}) => {
             >
               {type === "prompt" ? (
                 <div>
-                  <OtherInput
+                  <Input
                     label={body || "Response"}
                     value={input}
-                    onChange={e => setInput(e)}
+                    onChange={(e: string) => setInput(e)}
                   />
                 </div>
               ) : (

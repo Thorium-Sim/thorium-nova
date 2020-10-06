@@ -10,6 +10,7 @@ module.exports = {
     "!**/unused/**",
     "!**/components/starmap/**",
   ],
+  coverageReporters: ["text", "html"],
   coverageThreshold: {
     global: {
       statements: 80,
