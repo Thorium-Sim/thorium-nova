@@ -12,6 +12,7 @@ export class WarpEnginesComponent extends Component {
     currentWarpFactor: 0,
     maxVelocity: 0,
     forwardAcceleration: 0,
+    forwardVelocity: 0,
   };
 
   @Field({description: "The cruising speed in interstellar space in km/s"})
@@ -34,6 +35,10 @@ export class WarpEnginesComponent extends Component {
   @Field({description: "The forward acceleration of the ship in km/s."})
   forwardAcceleration: number = 0;
 
+  @Field({
+    description: "The forward velocity of the ship caused by warp in km/s",
+  })
+  forwardVelocity: number = 0;
   // Stuff for spooling
   // TODO: Figure this out once the power distribution system is in place.
 }

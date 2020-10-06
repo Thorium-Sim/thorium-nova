@@ -13,7 +13,7 @@ export class EngineVelocitySystem extends System {
     const systems = this.ecs.entities.filter(
       s =>
         s.shipAssignment?.shipId === entity.id &&
-        (s.warpEngines || s.impulseEngines || s.thrusters || s.dampener)
+        (s.impulseEngines || s.thrusters || s.dampener)
     );
     if (!entity.velocity || !entity.rotation || !entity.position) return;
     const velocity = entity.velocity;
@@ -62,6 +62,8 @@ export class EngineVelocitySystem extends System {
       entity.velocity.z
     );
 
+    // Warp Engines are handled separately, with the WarpVelocityPosition system
+
     // Impulse Engines
     const impulse = systems?.find(s => s.impulseEngines);
     if (impulse?.impulseEngines) {
@@ -73,16 +75,6 @@ export class EngineVelocitySystem extends System {
           0,
           impulse.impulseEngines.targetSpeed
         );
-      }
-    }
-    // Warp Engines
-    const warp = systems?.find(s => s.warpEngines);
-    if (warp?.warpEngines) {
-      velocityObject.translateY(
-        warp.warpEngines.forwardAcceleration * elapsedRatio
-      );
-      if (warp.warpEngines.maxVelocity) {
-        velocityObject.position.clampLength(0, warp.warpEngines.maxVelocity);
       }
     }
     // Thrusters
