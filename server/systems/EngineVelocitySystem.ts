@@ -3,6 +3,7 @@ import System from "server/helpers/ecs/system";
 import {Object3D, Quaternion, Vector3} from "three";
 
 const velocityObject = new Object3D();
+const forwardVector = new Vector3();
 export class EngineVelocitySystem extends System {
   test(entity: Entity) {
     return !!(entity.components.isShip && entity.components.velocity);
@@ -64,16 +65,25 @@ export class EngineVelocitySystem extends System {
 
     // Warp Engines are handled separately, with the WarpVelocityPosition system
 
+    const forwardVelocity = velocityObject.position.dot(
+      forwardVector
+        .set(0, 1, 0)
+        .applyQuaternion(
+          new Quaternion(
+            entity.rotation.x,
+            entity.rotation.y,
+            entity.rotation.z,
+            entity.rotation.w
+          )
+        )
+    );
+
     // Impulse Engines
     const impulse = systems?.find(s => s.impulseEngines);
     if (impulse?.impulseEngines) {
-      velocityObject.translateY(
-        impulse.impulseEngines.forwardAcceleration * elapsedRatio
-      );
-      if (impulse.impulseEngines.targetSpeed) {
-        velocityObject.position.clampLength(
-          0,
-          impulse.impulseEngines.targetSpeed
+      if (forwardVelocity < impulse.impulseEngines.targetSpeed) {
+        velocityObject.translateY(
+          impulse.impulseEngines.forwardAcceleration * elapsedRatio
         );
       }
     }

@@ -10,6 +10,7 @@ import ECS from "../../helpers/ecs/ecs";
 import Entity from "../../helpers/ecs/entity";
 import {EngineVelocitySystem} from "../EngineVelocitySystem";
 import {ImpulseSystem} from "../ImpulseSystem";
+import {RotationSystem} from "../RotationSystem";
 
 describe("ImpulseSystem", () => {
   let ecs: ECS;
@@ -36,7 +37,7 @@ describe("ImpulseSystem", () => {
       RotationComponent,
     ]);
     entity.updateComponent("shipAssignment", {shipId: "test", ship});
-    entity.updateComponent("impulseEngines", {thrust: 2});
+    entity.updateComponent("impulseEngines", {thrust: 12500});
     ecs.addSystem(impulseSystem);
     ecs.addSystem(engineVelocitySystem);
     ecs.addEntity(entity);
@@ -50,48 +51,40 @@ describe("ImpulseSystem", () => {
     expect(entity.impulseEngines?.targetSpeed).toEqual(500);
     ecs.update(16);
     expect(entity.impulseEngines?.forwardAcceleration).toMatchInlineSnapshot(
-      `0.016`
+      `6.25`
     );
-    expect(ship.velocity).toMatchInlineSnapshot(`
-      Object {
-        "x": 0,
-        "y": 0.000256,
-        "z": 0,
-      }
-    `);
+    expect(ship.velocity?.y).toMatchInlineSnapshot(`0.1`);
     ecs.update(1000);
     expect(entity.impulseEngines?.forwardAcceleration).toMatchInlineSnapshot(
-      `1.000256`
+      `6.25`
     );
-    expect(ship.velocity).toMatchInlineSnapshot(`
-      Object {
-        "x": 0,
-        "y": 1.000512,
-        "z": 0,
-      }
-    `);
-    ecs.update(4000);
+    expect(ship.velocity?.y).toMatchInlineSnapshot(`6.35`);
+
+    ecs.update(30 * 1000);
+
     expect(entity.impulseEngines?.forwardAcceleration).toMatchInlineSnapshot(
-      `8.002048`
+      `6.25`
     );
-    expect(ship.velocity).toMatchInlineSnapshot(`
-      Object {
-        "x": 0,
-        "y": 33.008704,
-        "z": 0,
-      }
-    `);
+    expect(ship.velocity?.y).toMatchInlineSnapshot(`193.85`);
     entity.updateComponent("impulseEngines", {targetSpeed: 10});
     ecs.update(50);
     expect(entity.impulseEngines?.forwardAcceleration).toMatchInlineSnapshot(
-      `-1.7004352000000003`
+      `6.25`
     );
-    expect(ship.velocity).toMatchInlineSnapshot(`
-      Object {
-        "x": 0,
-        "y": 10,
-        "z": 0,
-      }
-    `);
+    // This should be equal to the snapshot above
+    expect(ship.velocity?.y).toMatchInlineSnapshot(`193.85`);
+    expect(entity.impulseEngines?.forwardAcceleration).toMatchInlineSnapshot(
+      `6.25`
+    );
+
+    // Test newtonian thrust reversal
+    entity.updateComponent("impulseEngines", {targetSpeed: 500});
+    ship.updateComponent("rotation", {x: -1, y: 0, z: 0, w: 0});
+    ecs.update(31 * 1000);
+    expect(entity.impulseEngines?.forwardAcceleration).toMatchInlineSnapshot(
+      `6.25`
+    );
+    // This should be very close to zero.
+    expect(ship.velocity?.y).toMatchInlineSnapshot(`0.09999999999999432`);
   });
 });

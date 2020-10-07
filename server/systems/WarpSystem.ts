@@ -45,7 +45,6 @@ export class WarpSystem extends System {
       // Rapidly slow the ship down so we don't cross too much space as we decelerate.
       if (warpSpeed === 0 && entity.warpEngines.forwardVelocity > minWarp) {
         entity.warpEngines.forwardVelocity = minWarp / HARD_BRAKE_CONST;
-        console.log(entity.warpEngines.forwardVelocity);
       }
       entity.warpEngines.forwardAcceleration =
         entity.warpEngines.forwardVelocity * SOFT_BRAKE_CONST * -1;
