@@ -55,7 +55,7 @@ describe("ThrusterSystem", () => {
     ecs.update(1000);
     expect(ship.velocity).toMatchInlineSnapshot(`
       Object {
-        "x": 0.0005,
+        "x": 0.0063,
         "y": 0,
         "z": 0,
       }
@@ -63,7 +63,7 @@ describe("ThrusterSystem", () => {
     ecs.update(2000);
     expect(ship.velocity).toMatchInlineSnapshot(`
       Object {
-        "x": 0.0025,
+        "x": 0.0188,
         "y": 0,
         "z": 0,
       }
@@ -77,15 +77,15 @@ describe("ThrusterSystem", () => {
     ecs.update(1000);
     expect(ship.velocity).toMatchInlineSnapshot(`
       Object {
-        "x": 0.0025,
-        "y": 0.0004741598817790377,
-        "z": 0.0007384602626041288,
+        "x": 0.0188,
+        "y": 0.0124,
+        "z": -0.0008,
       }
     `);
     expect(ship.rotation).toMatchInlineSnapshot(`
       Object {
-        "w": 0.7316888688738209,
-        "x": 0.6816387600233342,
+        "w": -0.9987613331112641,
+        "x": 0.04975740630107862,
         "y": 0,
         "z": 0,
       }
@@ -93,8 +93,8 @@ describe("ThrusterSystem", () => {
     ecs.update(10 * 1000);
     expect(ship.rotation).toMatchInlineSnapshot(`
       Object {
-        "w": 0.8154681470604999,
-        "x": 0.5788019532877502,
+        "w": 0.45297549766912815,
+        "x": 0.8915229657790122,
         "y": 0,
         "z": 0,
       }

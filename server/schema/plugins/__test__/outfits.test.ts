@@ -279,7 +279,7 @@ describe("outfit Plugin", () => {
           "z": 0,
         },
         "directionMaxSpeed": 1,
-        "directionThrust": 1,
+        "directionThrust": 12500,
         "rotationDelta": Object {
           "x": 0,
           "y": 0,

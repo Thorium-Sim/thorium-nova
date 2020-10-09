@@ -69,6 +69,7 @@ export class EngineVelocitySystem extends System {
         thrusters.thrusters.directionAcceleration.y * elapsedRatio * (1 / 1000);
       const accelZ =
         thrusters.thrusters.directionAcceleration.z * elapsedRatio * (1 / 1000);
+
       velocityObject.translateX(accelX);
       velocityObject.translateY(accelY);
       velocityObject.translateZ(accelZ);

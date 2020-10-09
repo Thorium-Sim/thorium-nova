@@ -1,14 +1,19 @@
 import Entity from "server/helpers/ecs/entity";
 import System from "server/helpers/ecs/system";
-import {Euler, Quaternion} from "three";
+import {Euler, Quaternion, Vector3} from "three";
 
+function unitVelocity(rv: number, dv: number) {
+  return Math.sign(rv + dv) === Math.sign(rv) || rv === 0 ? rv + dv : 0;
+}
+
+const rotationAcceleration = new Vector3();
 export class RotationSystem extends System {
   test(entity: Entity) {
     return !!(entity.components.isShip && entity.components.rotation);
   }
   update(entity: Entity, elapsed: number) {
     const elapsedRatio = elapsed / 1000;
-
+    const mass = entity.isShip?.mass || 1;
     const systems = this.ecs.entities.filter(
       s => s.shipAssignment?.shipId === entity.id && (s.thrusters || s.dampener)
     );
@@ -25,12 +30,58 @@ export class RotationSystem extends System {
     // Thrusters
     const thrusters = systems?.find(s => s.thrusters);
 
-    if (thrusters?.thrusters?.rotationVelocity) {
+    if (thrusters?.thrusters) {
+      const {
+        rotationDelta,
+        rotationMaxSpeed,
+        rotationThrust,
+        rotationVelocity,
+      } = thrusters.thrusters;
+
+      rotationAcceleration.set(
+        ((rotationDelta.x * rotationThrust) / mass) * elapsedRatio,
+        ((rotationDelta.y * rotationThrust) / mass) * elapsedRatio,
+        ((rotationDelta.z * rotationThrust) / mass) * elapsedRatio
+      );
+
+      rotationVelocity.x = rotationVelocity.x + rotationAcceleration.x;
+      rotationVelocity.y = rotationVelocity.y + rotationAcceleration.y;
+      rotationVelocity.z = rotationVelocity.z + rotationAcceleration.z;
+
+      const dampener = systems?.find(s => s.dampener);
+      const dampening = dampener?.dampener?.dampening;
+      if (dampening) {
+        const accelerationVector = rotationAcceleration
+          .normalize()
+          .sub(new Vector3(1, 1, 1))
+          .negate();
+        const offsetDampening = dampening / 100 + 1;
+        const dampeningRatio = (-1 / offsetDampening) * elapsedRatio;
+        const dampeningVector = new Vector3(
+          rotationVelocity.x * dampeningRatio,
+          rotationVelocity.y * dampeningRatio,
+          rotationVelocity.z * dampeningRatio
+        ).multiply(accelerationVector);
+
+        rotationVelocity.x = unitVelocity(
+          rotationVelocity.x,
+          dampeningVector.x
+        );
+        rotationVelocity.y = unitVelocity(
+          rotationVelocity.y,
+          dampeningVector.y
+        );
+        rotationVelocity.z = unitVelocity(
+          rotationVelocity.z,
+          dampeningVector.z
+        );
+      }
+
       const velocityQuaternion = new Quaternion().setFromEuler(
         new Euler(
-          thrusters.thrusters?.rotationVelocity.x * elapsedRatio,
-          thrusters.thrusters?.rotationVelocity.y * elapsedRatio,
-          thrusters.thrusters?.rotationVelocity.z * elapsedRatio
+          rotationVelocity.x * elapsedRatio,
+          rotationVelocity.y * elapsedRatio,
+          rotationVelocity.z * elapsedRatio
         )
       );
       quaternion.multiply(velocityQuaternion);

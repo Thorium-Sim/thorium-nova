@@ -14,7 +14,10 @@ export class ImpulseSystem extends System {
     if (!ship || !ship.isShip || !entity.impulseEngines) return;
     const {mass} = ship.isShip;
 
-    let acceleration = entity.impulseEngines.thrust / mass;
+    const {thrust, targetSpeed, cruisingSpeed} = entity.impulseEngines;
+    const appliedThrust = (targetSpeed / cruisingSpeed) * thrust;
+
+    let acceleration = appliedThrust / mass;
     if (!entity.impulseEngines.targetSpeed) {
       acceleration = 0;
     }
