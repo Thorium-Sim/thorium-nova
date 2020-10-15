@@ -74,6 +74,7 @@ export class UniversePluginResolver {
     @Arg("id", type => ID) id: string,
     @Arg("entityType", type => EntityTypes, {nullable: true}) entityType: string
   ): Entity[] {
+    if (!entityType) return payload.universe;
     return payload.universe?.filter(e => getEntityType(e) === entityType) || [];
   }
 }

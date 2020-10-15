@@ -1441,6 +1441,42 @@ export type TemplateSystemSubscription = {
   };
 };
 
+export type UniverseSystemSubscriptionVariables = Exact<{
+  systemId: Scalars["ID"];
+}>;
+
+export type UniverseSystemSubscription = {
+  __typename?: "Subscription";
+  universeSystem: {
+    __typename?: "ActivePlanetarySystem";
+    id: string;
+    habitableZoneInner: number;
+    habitableZoneOuter: number;
+    identity: {
+      __typename?: "IdentityComponent";
+      name: string;
+      description: string;
+    };
+    planetarySystem: Maybe<{
+      __typename?: "PlanetarySystemComponent";
+      skyboxKey: string;
+    }>;
+    items: Array<
+      {
+        __typename?: "Entity";
+        satellite: Maybe<
+          {
+            __typename?: "SatelliteComponent";
+            satellites: Maybe<
+              Array<{__typename?: "Entity"} & UniverseObjectFragment>
+            >;
+          } & SatelliteComponentFragment
+        >;
+      } & UniverseObjectFragment
+    >;
+  };
+};
+
 export type ClientConnectMutationVariables = Exact<{[key: string]: never}>;
 
 export type ClientConnectMutation = {
@@ -1455,11 +1491,27 @@ export type ClientDisconnectMutation = {
   clientDisconnect: {__typename?: "Client"; id: string; connected: boolean};
 };
 
-export type StartFlightMutationVariables = Exact<{[key: string]: never}>;
+export type FlightStartMutationVariables = Exact<{
+  name: Maybe<Scalars["String"]>;
+  plugins: Array<Scalars["ID"]>;
+}>;
 
-export type StartFlightMutation = {
+export type FlightStartMutation = {
   __typename?: "Mutation";
-  flightStart: {__typename?: "Flight"; id: string; name: string};
+  flightStart: {
+    __typename?: "Flight";
+    id: string;
+    name: string;
+    paused: boolean;
+    date: Date;
+  };
+};
+
+export type FlightQueryVariables = Exact<{[key: string]: never}>;
+
+export type FlightQuery = {
+  __typename?: "Query";
+  flight: Maybe<{__typename?: "Flight"; id: string}>;
 };
 
 export type FlightsQueryVariables = Exact<{[key: string]: never}>;
@@ -4056,6 +4108,47 @@ export function useTemplateSystemSubscription(
 export type TemplateSystemSubscriptionHookResult = ReturnType<
   typeof useTemplateSystemSubscription
 >;
+export const UniverseSystemDocument = gql`
+  subscription UniverseSystem($systemId: ID!) {
+    universeSystem(systemId: $systemId) {
+      id
+      identity {
+        name
+        description
+      }
+      planetarySystem {
+        skyboxKey
+      }
+      habitableZoneInner
+      habitableZoneOuter
+      items {
+        ...UniverseObject
+        satellite {
+          ...SatelliteComponent
+          satellites {
+            ...UniverseObject
+          }
+        }
+      }
+    }
+  }
+  ${UniverseObjectFragmentDoc}
+  ${SatelliteComponentFragmentDoc}
+`;
+export function useUniverseSystemSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    UniverseSystemSubscription,
+    UniverseSystemSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    UniverseSystemSubscription,
+    UniverseSystemSubscriptionVariables
+  >(UniverseSystemDocument, baseOptions);
+}
+export type UniverseSystemSubscriptionHookResult = ReturnType<
+  typeof useUniverseSystemSubscription
+>;
 export const ClientConnectDocument = gql`
   mutation ClientConnect {
     clientConnect {
@@ -4100,28 +4193,55 @@ export function useClientDisconnectMutation(
 export type ClientDisconnectMutationHookResult = ReturnType<
   typeof useClientDisconnectMutation
 >;
-export const StartFlightDocument = gql`
-  mutation StartFlight {
-    flightStart {
+export const FlightStartDocument = gql`
+  mutation FlightStart($name: String, $plugins: [ID!]!) {
+    flightStart(flightName: $name, plugins: $plugins) {
       id
       name
+      paused
+      date
     }
   }
 `;
-export function useStartFlightMutation(
+export function useFlightStartMutation(
   baseOptions?: Apollo.MutationHookOptions<
-    StartFlightMutation,
-    StartFlightMutationVariables
+    FlightStartMutation,
+    FlightStartMutationVariables
   >
 ) {
-  return Apollo.useMutation<StartFlightMutation, StartFlightMutationVariables>(
-    StartFlightDocument,
+  return Apollo.useMutation<FlightStartMutation, FlightStartMutationVariables>(
+    FlightStartDocument,
     baseOptions
   );
 }
-export type StartFlightMutationHookResult = ReturnType<
-  typeof useStartFlightMutation
+export type FlightStartMutationHookResult = ReturnType<
+  typeof useFlightStartMutation
 >;
+export const FlightDocument = gql`
+  query Flight {
+    flight {
+      id
+    }
+  }
+`;
+export function useFlightQuery(
+  baseOptions?: Apollo.QueryHookOptions<FlightQuery, FlightQueryVariables>
+) {
+  return Apollo.useQuery<FlightQuery, FlightQueryVariables>(
+    FlightDocument,
+    baseOptions
+  );
+}
+export function useFlightLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<FlightQuery, FlightQueryVariables>
+) {
+  return Apollo.useLazyQuery<FlightQuery, FlightQueryVariables>(
+    FlightDocument,
+    baseOptions
+  );
+}
+export type FlightQueryHookResult = ReturnType<typeof useFlightQuery>;
+export type FlightLazyQueryHookResult = ReturnType<typeof useFlightLazyQuery>;
 export const FlightsDocument = gql`
   query Flights {
     flights {

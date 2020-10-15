@@ -7,6 +7,9 @@ function unitVelocity(rv: number, dv: number) {
 }
 
 const rotationAcceleration = new Vector3();
+const rotationVelocityVector = new Vector3();
+const velocityEuler = new Euler();
+const velocityQuaternion = new Quaternion();
 export class RotationSystem extends System {
   test(entity: Entity) {
     return !!(entity.components.isShip && entity.components.rotation);
@@ -76,14 +79,17 @@ export class RotationSystem extends System {
           dampeningVector.z
         );
       }
-
-      const velocityQuaternion = new Quaternion().setFromEuler(
-        new Euler(
-          rotationVelocity.x * elapsedRatio,
-          rotationVelocity.y * elapsedRatio,
-          rotationVelocity.z * elapsedRatio
-        )
+      rotationVelocityVector.set(
+        rotationVelocity.x * elapsedRatio,
+        rotationVelocity.y * elapsedRatio,
+        rotationVelocity.z * elapsedRatio
       );
+      // .clampScalar(
+      //   -1 * rotationMaxSpeed * ((2 * Math.PI) / 60),
+      //   rotationMaxSpeed * ((2 * Math.PI) / 60)
+      // );
+      velocityEuler.setFromVector3(rotationVelocityVector);
+      velocityQuaternion.setFromEuler(velocityEuler);
       quaternion.multiply(velocityQuaternion);
     }
     entity.rotation.x = quaternion.x;

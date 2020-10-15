@@ -4,8 +4,11 @@ import {TemplateSystemSubscription} from "../../../generated/graphql";
 import {configStoreApi, useConfigStore} from "../configStore";
 import OrbitContainer from "../OrbitContainer";
 import Star from "../star";
+import LensFlare from "../star/lensFlare";
 import {getOrbitPosition} from "../utils";
 import Selected from "./Selected";
+
+const SUN_RADIUS = 696_340;
 
 const StarEntity: React.FC<{
   entity: TemplateSystemSubscription["pluginUniverseSystem"]["items"][0];
@@ -29,7 +32,9 @@ const StarEntity: React.FC<{
     `hsl(${entity.isStar.hue + 20}, 100%, ${entity.isStar.isWhite ? 100 : 50}%)`
   );
 
-  const size = 10 + 5 * entity.isStar.radius;
+  const size = configStoreApi().isViewscreen
+    ? entity.isStar.radius * SUN_RADIUS
+    : 10 + 5 * entity.isStar.radius;
   return (
     <OrbitContainer
       radius={distance}
@@ -40,6 +45,7 @@ const StarEntity: React.FC<{
     >
       <group
         onPointerOver={() => {
+          if (configStoreApi.getState().isViewscreen) return;
           document.body.style.cursor = "pointer";
           const position = getOrbitPosition({
             eccentricity,
@@ -53,6 +59,7 @@ const StarEntity: React.FC<{
           });
         }}
         onPointerOut={() => {
+          if (configStoreApi.getState().isViewscreen) return;
           document.body.style.cursor = "auto";
           useConfigStore.setState({
             hoveredPosition: null,
@@ -60,6 +67,7 @@ const StarEntity: React.FC<{
           });
         }}
         onClick={() => {
+          if (configStoreApi.getState().isViewscreen) return;
           const position = getOrbitPosition({
             eccentricity,
             orbitalArc,
@@ -74,7 +82,7 @@ const StarEntity: React.FC<{
         }}
         scale={[size, size, size]}
       >
-        {selected && <Selected />}
+        {selected && !configStoreApi.getState().isViewscreen && <Selected />}
         <Star color1={color1} color2={color2} />
       </group>
     </OrbitContainer>

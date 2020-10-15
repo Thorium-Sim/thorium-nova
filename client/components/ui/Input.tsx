@@ -6,12 +6,13 @@ const Input: React.FC<
   Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> &
     AriaTextFieldOptions & {
       label: string;
+      labelHidden?: boolean;
       isInvalid?: boolean;
       invalidMessage?: string;
     }
 > = props => {
   let elementId = useId();
-  let {label, isInvalid, invalidMessage} = props;
+  let {label, labelHidden = true, isInvalid, invalidMessage} = props;
   let ref = React.useRef<HTMLInputElement>(null);
   let {labelProps, inputProps} = useTextField(
     {...props, "aria-labelledby": elementId},
@@ -20,7 +21,13 @@ const Input: React.FC<
 
   return (
     <div className={`flex flex-col w-full ${props.className}`}>
-      <label {...labelProps} id={elementId}>
+      <label
+        {...labelProps}
+        id={elementId}
+        className={`${labelProps.className || ""} ${
+          labelHidden ? "hidden" : ""
+        }`}
+      >
         {label}
       </label>
       <input

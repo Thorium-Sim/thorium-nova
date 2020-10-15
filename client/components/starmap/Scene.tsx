@@ -144,6 +144,9 @@ const Scene = React.forwardRef((props, ref) => {
   const systemId = useConfigStore(s => s.systemId);
   const measuring = useConfigStore(s => s.measuring);
 
+  React.useEffect(() => {
+    useConfigStore.setState({isViewscreen: false});
+  }, []);
   const {camera} = useThree();
   React.useImperativeHandle(ref, () => ({
     camera: () => {

@@ -15,7 +15,7 @@ export class ThrustersComponent extends Component {
     rotationDelta: new Coordinates(),
     rotationVelocity: new Coordinates(),
     rotationMaxSpeed: 5,
-    rotationThrust: 12500,
+    rotationThrust: 200,
   };
 
   @Field()
@@ -50,7 +50,7 @@ export class ThrustersComponent extends Component {
 
   @Field({description: "The current vector of rotation being applied."})
   rotationDelta: Coordinates = new Coordinates();
-  @Field({description: "The current rotation velocity."})
+  @Field({description: "The current rotation velocity in radians per second."})
   rotationVelocity: Coordinates = new Coordinates();
   @Field({description: "The max rotation speed in rotations per minute."})
   rotationMaxSpeed: number = 5;

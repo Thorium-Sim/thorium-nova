@@ -49,7 +49,7 @@ const SearchableList: React.FC<SearchableListProps> = ({
         placeholder={t("Search")}
         onChange={value => setSearch(value)}
       />
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto select-none">
         {Object.entries(sortedIntoCategories)
           .concat()
           .sort(([a], [b]) => {
@@ -68,7 +68,9 @@ const SearchableList: React.FC<SearchableListProps> = ({
                 <ListGroupItem
                   key={c.id}
                   selected={c.id === selectedItem}
-                  onClick={() => setSelectedItem?.(c.id)}
+                  onClick={() => {
+                    setSelectedItem?.(c.id);
+                  }}
                 >
                   {renderItem ? renderItem(c) : c.label}
                 </ListGroupItem>

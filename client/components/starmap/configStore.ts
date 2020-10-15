@@ -39,6 +39,7 @@ export interface ConfigStore extends Record<string | number | symbol, unknown> {
   scaledSelectedPosition: Vector3 | null;
   hoveredPosition: Vector3 | null;
   selectedPosition: Vector3 | null;
+  isViewscreen: boolean;
 }
 const store = create<ConfigStore>(set => ({
   disableOrbitControls: () => {},
@@ -63,6 +64,7 @@ const store = create<ConfigStore>(set => ({
   scaledSelectedPosition: null,
   hoveredPosition: null,
   selectedPosition: null,
+  isViewscreen: false,
 }));
 
 export const useConfigStore = store;

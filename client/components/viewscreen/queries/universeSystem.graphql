@@ -1,0 +1,23 @@
+subscription UniverseSystem($systemId: ID!) {
+  universeSystem(systemId: $systemId) {
+    id
+    identity {
+      name
+      description
+    }
+    planetarySystem {
+      skyboxKey
+    }
+    habitableZoneInner
+    habitableZoneOuter
+    items {
+      ...UniverseObject
+      satellite {
+        ...SatelliteComponent
+        satellites {
+          ...UniverseObject
+        }
+      }
+    }
+  }
+}

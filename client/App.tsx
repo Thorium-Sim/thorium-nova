@@ -5,6 +5,8 @@ import Layout from "./components/Layout";
 import {useClientRegistration} from "./helpers/getClientId";
 import ShipAssets from "./components/plugins/ShipAssets";
 import NoMatch from "./pages/NotFound";
+import Viewscreen from "./components/viewscreen";
+import CustomFlight from "./components/flightConfig/customFlight";
 
 const Welcome = React.lazy(() => import("./pages/index"));
 const Releases = React.lazy(() => import("./pages/Releases"));
@@ -24,6 +26,8 @@ const ClientApp: React.FC = () => {
         <Route path="/" element={<Welcome />} />
         <Route path="releases" element={<Releases />} />
         <Route path="theme" element={<ThemeBuilder />} />
+        <Route path="flight" element={<Viewscreen />} />
+        <Route path="config/flight" element={<CustomFlight />} />
         <Route path="edit/:universeId/starmap/*" element={<Starmap />} />
         <Route path="edit/:pluginId/outfits/*" element={<OutfitsConfig />} />
         <Route path="edit/:pluginId/ships/*" element={<ShipsConfig />} />

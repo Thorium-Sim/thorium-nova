@@ -1,5 +1,5 @@
 import React from "react";
-import {useFrame, useLoader} from "react-three-fiber";
+import {useFrame} from "react-three-fiber";
 import {
   TextureLoader,
   RepeatWrapping,
@@ -9,7 +9,6 @@ import {
   Vector3,
   AdditiveBlending,
 } from "three";
-import Selected from "../entities/Selected";
 import LensFlare from "./lensFlare";
 import {fragment, vertex} from "./shaders";
 import getUniforms from "./uniforms";
@@ -33,7 +32,6 @@ const Star: React.FC<{
     []
   );
   const shader = React.useRef<Mesh>();
-  const material = React.useRef<any>();
 
   useFrame(({camera}) => {
     shader.current?.quaternion.copy(camera.quaternion);
@@ -64,6 +62,7 @@ const Star: React.FC<{
         <sphereBufferGeometry attach="geometry" args={[0.5, 32, 32]} />
         <meshBasicMaterial attach="material" color={0x000000} />
       </mesh>
+      <LensFlare />
     </group>
   );
 };

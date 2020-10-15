@@ -1,6 +1,5 @@
 import React from "react";
-import {useLoader} from "react-three-fiber";
-import {Color, PointLight, Texture, TextureLoader} from "three";
+import {TextureLoader} from "three";
 import {
   Lensflare,
   LensflareElement,
@@ -28,16 +27,8 @@ const LensFlare = () => {
 
     return lensflare;
   }, []);
-  const threeColor = React.useMemo(() => new Color("white"), []);
 
-  const light = React.useRef<PointLight>();
-
-  React.useEffect(() => {
-    if (light.current) {
-      light.current.add(lensFlare);
-    }
-  }, []);
-  return <pointLight ref={light} intensity={2} decay={2} color={threeColor} />;
+  return <primitive object={lensFlare} />;
 };
 
 export default LensFlare;

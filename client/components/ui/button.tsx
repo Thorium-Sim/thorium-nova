@@ -30,21 +30,34 @@ const Button = React.forwardRef(function Button(
     variantColor = "primary",
     as = "button",
     className,
+    disabled,
     ...extraProps
   } = props;
 
   if (variant === "ghost" || variant === "outline") {
-    className = `${className} text-${variantColor}-200 bg-transparent hover:bg-${variantColor}-hover active:bg-${variantColor}-active`;
+    className = `${className} text-${variantColor}-200 bg-transparent ${
+      disabled
+        ? ""
+        : `hover:bg-${variantColor}-hover active:bg-${variantColor}-active`
+    }`;
     if (variant === "outline") {
       className = `${className} border-solid border border-current`;
     }
   } else {
-    className = `${className} text-gray-800 bg-${variantColor}-200 hover:bg-${variantColor}-300 active:bg-${variantColor}-400`;
+    className = `${className} text-gray-800 bg-${variantColor}-200 ${
+      disabled
+        ? ""
+        : `hover:bg-${variantColor}-300 active:bg-${variantColor}-400`
+    }`;
+  }
+  if (disabled) {
+    className = `${className} cursor-not-allowed filter-disabled`;
   }
   return React.createElement(
     as,
     {
       ref,
+      disabled,
       ...extraProps,
       className: `rounded font-semibold text-lg inline-flex items-center justify-center transition-all duration-200 py-2 px-4 ${className}`,
     },

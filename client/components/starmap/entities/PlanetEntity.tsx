@@ -1,5 +1,6 @@
+import {scale} from "chroma-js";
 import React, {Suspense} from "react";
-import {useFrame, useLoader} from "react-three-fiber";
+import {useFrame, useLoader, useThree} from "react-three-fiber";
 import {
   CircleGeometry,
   Euler,
@@ -66,14 +67,15 @@ const Planet: React.FC<{
   onPointerOut,
   onClick,
 }) => {
-  const group = React.useRef<Group>(new Group());
+  const group = React.useRef<Group>();
   useFrame(({camera, mouse}) => {
-    const zoom = camera.position.distanceTo(position) + 500;
-    let zoomedScale = (zoom / 2) * 0.01;
-    group.current.scale.set(zoomedScale, zoomedScale, zoomedScale);
-    group.current.quaternion.copy(camera.quaternion);
+    if (group.current) {
+      const zoom = camera.position.distanceTo(position) + 500;
+      let zoomedScale = (zoom / 2) * 0.01;
+      group.current.scale.set(zoomedScale, zoomedScale, zoomedScale);
+      group.current.quaternion.copy(camera.quaternion);
+    }
   });
-
   return (
     <group position={scaledPosition}>
       <Suspense fallback={null}>
@@ -90,9 +92,15 @@ const Planet: React.FC<{
           {selected && <Selected />}
         </group>
       </Suspense>
-      <group ref={group}>
-        <SystemLabel systemId="" name={name} hoveringDirection={{current: 0}} />
-      </group>
+      {!configStoreApi.getState().isViewscreen && (
+        <group ref={group}>
+          <SystemLabel
+            systemId=""
+            name={name}
+            hoveringDirection={{current: 0}}
+          />
+        </group>
+      )}
       {satellites?.map((s, i) => (
         <PlanetEntity
           key={`orbit-${i}`}
@@ -152,8 +160,12 @@ const PlanetContainer: React.FC<{
   onPointerOut,
   onClick,
 }) => {
-  const size = (isSatellite ? 1 : 5) + 100 * (radius / 1000000);
-  const scaledRadius = (isSatellite ? 100 : 1) * (distance / 1000000);
+  const size = configStoreApi.getState().isViewscreen
+    ? radius
+    : (isSatellite ? 1 : 5) + 100 * (radius / 1000000);
+  const scaledRadius = configStoreApi.getState().isViewscreen
+    ? distance
+    : (isSatellite ? 100 : 1) * (distance / 1000000);
   const position = getOrbitPosition({
     radius: distance,
     eccentricity,
@@ -174,7 +186,7 @@ const PlanetContainer: React.FC<{
         eccentricity={eccentricity}
         orbitalArc={orbitalArc}
         orbitalInclination={orbitalInclination}
-        showOrbit={showOrbit}
+        showOrbit={configStoreApi.getState().isViewscreen ? false : showOrbit}
       ></OrbitContainer>
       <Planet
         name={name}
@@ -239,6 +251,7 @@ const PlanetEntity: React.FC<{
       textureMapAsset={textureMapAsset}
       selected={selected}
       onPointerOver={() => {
+        if (configStoreApi.getState().isViewscreen) return;
         const hoveredPosition = getOrbitPosition({
           eccentricity,
           orbitalArc,
@@ -259,6 +272,7 @@ const PlanetEntity: React.FC<{
         document.body.style.cursor = "pointer";
       }}
       onPointerOut={() => {
+        if (configStoreApi.getState().isViewscreen) return;
         document.body.style.cursor = "auto";
         useConfigStore.setState({
           hoveredPosition: null,
@@ -266,6 +280,7 @@ const PlanetEntity: React.FC<{
         });
       }}
       onClick={() => {
+        if (configStoreApi.getState().isViewscreen) return;
         configStoreApi.setState({
           selectedObject: entity,
           selectedPosition: getOrbitPosition({

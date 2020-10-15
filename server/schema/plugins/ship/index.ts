@@ -293,7 +293,8 @@ function getAssetBase(pluginId?: string) {
   }
 }
 
-function getShipAsset(entity: Entity, pluginId?: string) {
+function getShipAsset(entity?: Entity, pluginId?: string) {
+  if (!entity) return "";
   const assetBase = getAssetBase(pluginId);
   return `${assetBase}/ship/${entity?.identity?.name || entity.id}/`;
 }
@@ -301,51 +302,32 @@ function getShipAsset(entity: Entity, pluginId?: string) {
 @Resolver(of => ShipAssetsComponent)
 export class ShipAssetsResolver {
   @FieldResolver()
-  logo(
-    @Root() self: ShipAssetsComponent & {entity: Entity},
-    @Ctx() ctx: GraphQLContext
-  ) {
+  logo(@Root() self: ShipAssetsComponent, @Ctx() ctx: GraphQLContext) {
     const {pluginId} = ctx;
-    return self.logo
-      ? `${getShipAsset(self.entity, pluginId)}${self.logo}`
-      : "";
+    return self.logo ? `${getShipAsset(ctx.entity, pluginId)}${self.logo}` : "";
   }
   @FieldResolver()
-  model(
-    @Root() self: ShipAssetsComponent & {entity: Entity},
-    @Ctx() ctx: GraphQLContext
-  ) {
+  model(@Root() self: ShipAssetsComponent, @Ctx() ctx: GraphQLContext) {
     const {pluginId} = ctx;
     return self.model
-      ? `${getShipAsset(self.entity, pluginId)}${self.model}`
+      ? `${getShipAsset(ctx.entity, pluginId)}${self.model}`
       : "";
   }
   @FieldResolver()
-  top(
-    @Root() self: ShipAssetsComponent & {entity: Entity},
-    @Ctx() ctx: GraphQLContext
-  ) {
+  top(@Root() self: ShipAssetsComponent, @Ctx() ctx: GraphQLContext) {
     const {pluginId} = ctx;
-    return self.top ? `${getShipAsset(self.entity, pluginId)}${self.top}` : "";
+    return self.top ? `${getShipAsset(ctx.entity, pluginId)}${self.top}` : "";
   }
   @FieldResolver()
-  side(
-    @Root() self: ShipAssetsComponent & {entity: Entity},
-    @Ctx() ctx: GraphQLContext
-  ) {
+  side(@Root() self: ShipAssetsComponent, @Ctx() ctx: GraphQLContext) {
     const {pluginId} = ctx;
-    return self.side
-      ? `${getShipAsset(self.entity, pluginId)}${self.side}`
-      : "";
+    return self.side ? `${getShipAsset(ctx.entity, pluginId)}${self.side}` : "";
   }
   @FieldResolver()
-  vanity(
-    @Root() self: ShipAssetsComponent & {entity: Entity},
-    @Ctx() ctx: GraphQLContext
-  ) {
+  vanity(@Root() self: ShipAssetsComponent, @Ctx() ctx: GraphQLContext) {
     const {pluginId} = ctx;
     return self.vanity
-      ? `${getShipAsset(self.entity, pluginId)}${self.vanity}`
+      ? `${getShipAsset(ctx.entity, pluginId)}${self.vanity}`
       : "";
   }
 }

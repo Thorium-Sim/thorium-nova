@@ -1,6 +1,8 @@
-mutation StartFlight {
-  flightStart {
+mutation FlightStart($name: String, $plugins: [ID!]!) {
+  flightStart(flightName: $name, plugins: $plugins) {
     id
     name
+    paused
+    date
   }
 }

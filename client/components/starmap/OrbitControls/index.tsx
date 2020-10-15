@@ -9,7 +9,7 @@ import {
 import {OrbitControls as OrbitControlsImpl} from "./OrbitControlsImpl";
 // @ts-ignore
 import mergeRefs from "react-merge-refs";
-import {Vector3} from "three";
+import {Camera, Vector3} from "three";
 import {useConfigStore} from "../configStore";
 
 extend({OrbitControlsImpl});
@@ -18,15 +18,6 @@ export type OrbitControls = Overwrite<
   ReactThreeFiber.Object3DNode<OrbitControlsImpl, typeof OrbitControlsImpl>,
   {target?: Vector3}
 >;
-
-declare global {
-  namespace JSX {
-    // eslint-disable-next-line @typescript-eslint/interface-name-prefix
-    interface IntrinsicElements {
-      orbitControlsImpl: OrbitControls;
-    }
-  }
-}
 
 export const OrbitControls = forwardRef(
   (props: OrbitControls = {enableDamping: true}, ref) => {
@@ -63,11 +54,15 @@ export const OrbitControls = forwardRef(
         return () => controls.current?.removeEventListener("change", lockPan);
       }
     }, [controls.current, PAN_LIMIT]);
-
+    const args: [camera: Camera, canvas?: HTMLCanvasElement] = [
+      camera,
+      gl.domElement,
+    ];
     return (
       <orbitControlsImpl
         ref={mergeRefs([controls, ref])}
-        args={[camera, gl.domElement]}
+        // @ts-expect-error
+        args={args}
         enableDamping
         {...props}
       />
