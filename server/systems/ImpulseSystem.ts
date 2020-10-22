@@ -10,7 +10,9 @@ export class ImpulseSystem extends System {
     );
   }
   update(entity: Entity) {
-    const ship = entity.components.shipAssignment?.ship;
+    const ship = this.ecs.entities.find(
+      e => e.id === entity.components.shipAssignment?.shipId
+    );
     if (!ship || !ship.isShip || !entity.impulseEngines) return;
     const {mass} = ship.isShip;
 
@@ -21,7 +23,6 @@ export class ImpulseSystem extends System {
     if (!entity.impulseEngines.targetSpeed) {
       acceleration = 0;
     }
-
     entity.updateComponent("impulseEngines", {
       forwardAcceleration: acceleration,
     });

@@ -53,11 +53,11 @@ describe("ImpulseSystem", () => {
       VelocityComponent,
       RotationComponent,
     ]);
-    impulse.updateComponent("shipAssignment", {shipId: "test", ship});
+    impulse.updateComponent("shipAssignment", {shipId: "test"});
     impulse.updateComponent("impulseEngines", {thrust: 12500});
 
-    thrusters.updateComponent("shipAssignment", {shipId: "test", ship});
-    dampening.updateComponent("shipAssignment", {shipId: "test", ship});
+    thrusters.updateComponent("shipAssignment", {shipId: "test"});
+    dampening.updateComponent("shipAssignment", {shipId: "test"});
 
     ecs.addSystem(impulseSystem);
     ecs.addSystem(thrustersSystem);
@@ -73,19 +73,19 @@ describe("ImpulseSystem", () => {
     for (let i = 0; i < 60 * 5; i++) {
       ecs.update(16);
     }
-    expect(ship.velocity?.y).toMatchInlineSnapshot(`60`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`12.3217713`);
     impulse.updateComponent("impulseEngines", {targetSpeed: 10});
     ecs.update(100);
-    expect(ship.velocity?.y).toMatchInlineSnapshot(`54.0594`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`11.1017939`);
     for (let i = 0; i < 60 * 3; i++) {
       ecs.update(16);
     }
-    expect(ship.velocity?.y).toMatchInlineSnapshot(`9.9198`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`0.859563`);
     impulse.updateComponent("impulseEngines", {targetSpeed: 500});
     for (let i = 0; i < 60 * 11; i++) {
       ecs.update(16);
     }
-    expect(ship.velocity?.y).toMatchInlineSnapshot(`141.9198`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`12.424694`);
 
     ship.rotation.x = 0.7071067811865475;
     ship.rotation.w = 0.7071067811865475;
@@ -94,16 +94,16 @@ describe("ImpulseSystem", () => {
       ecs.update(16);
     }
     expect(ship.velocity?.x).toMatchInlineSnapshot(`0`);
-    expect(ship.velocity?.y).toMatchInlineSnapshot(`0.0035`);
-    expect(ship.velocity?.z).toMatchInlineSnapshot(`132`);
+    expect(ship.velocity?.y).toMatchInlineSnapshot(`-12.4246708`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`0.0003292`);
 
-    ship.velocity.y = 1500;
+    ship.velocity.z = 1500;
 
     impulse.updateComponent("impulseEngines", {targetSpeed: 0});
     for (let i = 0; i < 60 * 11; i++) {
       ecs.update(16);
     }
-    expect(ship.velocity?.y).toMatchInlineSnapshot(`0.0397`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`0.039719`);
 
     // Test the thrusters too
     ship.velocity.x = 0;
@@ -127,7 +127,7 @@ describe("ImpulseSystem", () => {
     for (let i = 0; i < 60 * 3; i++) {
       ecs.update(16);
     }
-    expect(ship.velocity.z).toMatchInlineSnapshot(`0.0031`);
+    expect(ship.velocity.z).toMatchInlineSnapshot(`0.0010161`);
 
     thrusters.updateComponent("thrusters", {
       rotationDelta: {x: 1, y: 0, z: 0},

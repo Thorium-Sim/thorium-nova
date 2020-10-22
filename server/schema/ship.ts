@@ -19,6 +19,7 @@ import {ShipAssetsComponent} from "../components/ship/shipAssets";
 import {TagsComponent} from "../components/tags";
 import {IdentityComponent} from "../components/identity";
 import {ThemeComponent} from "../components/theme";
+import {shipPublish} from "./plugins/ship/utils";
 
 interface ShipPayload {
   ship: Entity;
@@ -33,13 +34,6 @@ function getShip(context: GraphQLContext, id?: string) {
   const ship = App.activeFlight?.ships.find(s => s.id === shipId);
   if (!ship) throw new Error("Unable to find ship.");
   return ship;
-}
-
-function publishShip(ship: Entity) {
-  pubsub.publish("ship", {shipId: ship.id, ship});
-  pubsub.publish("ships", {
-    entities: App.activeFlight?.ships,
-  });
 }
 
 @Resolver()
@@ -57,7 +51,11 @@ export class ShipResolver {
     return App.activeFlight?.ships || [];
   }
 
-  @Mutation(returns => Entity, {nullable: true})
+  @Mutation(returns => Entity, {
+    nullable: true,
+    deprecationReason:
+      "Creates a raw ship. Can be manually assembled, instead of using a template ship, but typically just used for testing. Use 'shipSpawn' instead.",
+  })
   shipCreate(@Arg("name") name: string): Entity | null {
     if (!App.activeFlight) return null;
     const ship = new Entity(name, [
@@ -70,7 +68,7 @@ export class ShipResolver {
     ]);
     ship.updateComponent("identity", {name});
     App.activeFlight.ecs.addEntity(ship);
-    publishShip(ship);
+    shipPublish({ship});
     return ship;
   }
 
@@ -82,7 +80,7 @@ export class ShipResolver {
   ) {
     const ship = getShip(context, id);
     ship.updateComponent("identity", {name});
-    publishShip(ship);
+    shipPublish({ship});
     return ship;
   }
   @Mutation(returns => Entity)
@@ -93,7 +91,7 @@ export class ShipResolver {
   ) {
     const ship = getShip(context, id);
     ship.updateComponent("theme", {value: theme});
-    publishShip(ship);
+    shipPublish({ship, detailed: true});
     return ship;
   }
   @Mutation(returns => Entity)
@@ -104,48 +102,9 @@ export class ShipResolver {
   ) {
     const ship = getShip(context, id);
     ship.updateComponent("alertLevel", {alertLevel});
-    publishShip(ship);
+    // TODO: Send a notification to the message bus to let the crew know that
+    // another ship has gone to red alert.
+    shipPublish({ship, detailed: true});
     return ship;
-  }
-
-  @Subscription(returns => [Entity], {
-    nullable: true,
-    topics: ({args, payload, context}) => {
-      const id = uniqid();
-      const ship = App.activeFlight?.ships.find(
-        t => t.id === args.id || t.id === context.ship?.id
-      );
-      process.nextTick(() => {
-        pubsub.publish(id, {
-          shipId: args.id || context.ship?.id,
-          ship,
-        });
-      });
-      return [id, "ship"];
-    },
-    filter: ({args, payload, context}) => {
-      return args.id === payload.shipId || context.ship?.id === payload.shipId;
-    },
-  })
-  ship(
-    @Root() payload: ShipPayload,
-    @Arg("id", type => ID, {nullable: true}) id: string
-  ): Entity {
-    return payload?.ship;
-  }
-
-  @Subscription(returns => [Entity], {
-    topics: ({args, payload, context}) => {
-      const id = uniqid();
-      process.nextTick(() => {
-        pubsub.publish(id, {
-          entities: App.activeFlight?.ships,
-        });
-      });
-      return [id, "ships"];
-    },
-  })
-  ships(@Root() payload: ShipsPayload): Entity[] {
-    return payload.entities || [];
   }
 }

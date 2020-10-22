@@ -1,0 +1,16 @@
+subscription UniverseSystemShipsHot($systemId: ID!) {
+  universeSystemShipsHot(systemId: $systemId) {
+    id
+    position {
+      x
+      y
+      z
+    }
+    rotation {
+      x
+      y
+      z
+      w
+    }
+  }
+}

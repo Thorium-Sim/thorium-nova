@@ -13,6 +13,7 @@ import {HeatComponent} from "server/components/heat";
 import {Component} from "server/components/utils";
 import {registerEnumType} from "type-graphql";
 import {ShipAssignmentComponent} from "server/components/ship/shipAssignment";
+import {DampenerComponent} from "server/components/outfits/dampeners";
 
 export enum OutfitAbilities {
   warpEngines = "warpEngines",
@@ -20,6 +21,7 @@ export enum OutfitAbilities {
   thrusters = "thrusters",
   navigation = "navigation",
   jumpDrive = "jumpDrive",
+  inertialDampeners = "inertialDampeners",
   generic = "generic",
 }
 
@@ -83,6 +85,19 @@ export function getOutfitComponents(
       return [
         {component: IsOutfitComponent, defaultValue: {outfitType: "jumpDrive"}},
         {component: JumpDriveComponent},
+        {component: PowerComponent},
+        {component: EfficiencyComponent},
+        {component: DamageComponent},
+        {component: HeatComponent},
+        {component: ShipAssignmentComponent},
+      ];
+    case OutfitAbilities.inertialDampeners:
+      return [
+        {
+          component: IsOutfitComponent,
+          defaultValue: {outfitType: "inertialDampeners"},
+        },
+        {component: DampenerComponent},
         {component: PowerComponent},
         {component: EfficiencyComponent},
         {component: DamageComponent},

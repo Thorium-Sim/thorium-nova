@@ -91,7 +91,7 @@ function Nebula() {
           meshes.current.inactive.current?.material?.forEach((m, i) => {
             const mat = m as MeshBasicMaterial;
             mat.map?.dispose();
-            mat.color.set(0xffffff);
+            mat.color.set(0x555555);
             mat.map = textures[i];
             mat.transparent = true;
             mat.depthWrite = false;

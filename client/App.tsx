@@ -5,7 +5,6 @@ import Layout from "./components/Layout";
 import {useClientRegistration} from "./helpers/getClientId";
 import ShipAssets from "./components/plugins/ShipAssets";
 import NoMatch from "./pages/NotFound";
-import Viewscreen from "./components/viewscreen";
 import CustomFlight from "./components/flightConfig/customFlight";
 
 const Welcome = React.lazy(() => import("./pages/index"));
@@ -16,6 +15,7 @@ const PluginList = React.lazy(() => import("./components/plugins/pluginsList"));
 const OutfitsConfig = React.lazy(() => import("./components/plugins/Outfits"));
 const ShipsConfig = React.lazy(() => import("./components/plugins/Ships"));
 const Config = React.lazy(() => import("./pages/Config"));
+const Viewscreen = React.lazy(() => import("./components/viewscreen"));
 
 const ClientApp: React.FC = () => {
   useEasterEgg();

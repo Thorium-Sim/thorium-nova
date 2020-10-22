@@ -1,6 +1,14 @@
 {
-  "Activated Plugins": "Activated Plugins",
-  "Flight Name": "Flight Name",
-  "Search": "Search",
-  "Start Flight": "Start Flight"
+  "Are you sure you want to permanently remove this plugin?": "Are you sure you want to permanently remove this plugin?",
+  "Create Plugin": "Create Plugin",
+  "Edit Plugin": "Edit Plugin",
+  "Error Creating Plugin": "Error Creating Plugin",
+  "Error Removing Plugin": "Error Removing Plugin",
+  "Plugin Name": "Plugin Name",
+  "Plugins": "Plugins",
+  "Remove": "Remove",
+  "This will delete all of its objects and assets": {
+    "": ""
+  },
+  "What is the name of the new plugin?": "What is the name of the new plugin?"
 }

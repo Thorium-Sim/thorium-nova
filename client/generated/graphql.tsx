@@ -484,14 +484,14 @@ export type TemplateShipAssetsSubscription = {
   pluginShip: Maybe<{
     __typename?: "Entity";
     id: string;
-    shipAssets: {
+    shipAssets: Maybe<{
       __typename?: "ShipAssetsComponent";
       logo: string;
       model: string;
       side: string;
       top: string;
       vanity: string;
-    };
+    }>;
   }>;
 };
 
@@ -506,7 +506,7 @@ export type TemplateShipSetLogoMutation = {
   pluginShipSetLogo: {
     __typename?: "Entity";
     id: string;
-    shipAssets: {__typename?: "ShipAssetsComponent"; logo: string};
+    shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; logo: string}>;
   };
 };
 
@@ -524,13 +524,13 @@ export type TemplateShipSetModelMutation = {
   pluginShipSetModel: {
     __typename?: "Entity";
     id: string;
-    shipAssets: {
+    shipAssets: Maybe<{
       __typename?: "ShipAssetsComponent";
       model: string;
       side: string;
       top: string;
       vanity: string;
-    };
+    }>;
   };
 };
 
@@ -1439,6 +1439,59 @@ export type TemplateSystemSubscription = {
       } & UniverseObjectFragment
     >;
   };
+};
+
+export type UniverseSystemShipsSubscriptionVariables = Exact<{
+  systemId: Scalars["ID"];
+}>;
+
+export type UniverseSystemShipsSubscription = {
+  __typename?: "Subscription";
+  universeSystemShips: Array<{
+    __typename?: "Entity";
+    id: string;
+    identity: {__typename?: "IdentityComponent"; name: string};
+    position: {
+      __typename?: "PositionComponent";
+      x: number;
+      y: number;
+      z: number;
+    };
+    rotation: {
+      __typename?: "RotationComponent";
+      x: number;
+      y: number;
+      z: number;
+      w: number;
+    };
+    size: {__typename?: "SizeComponent"; value: number};
+    shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; model: string}>;
+  }>;
+};
+
+export type UniverseSystemShipsHotSubscriptionVariables = Exact<{
+  systemId: Scalars["ID"];
+}>;
+
+export type UniverseSystemShipsHotSubscription = {
+  __typename?: "Subscription";
+  universeSystemShipsHot: Array<{
+    __typename?: "Entity";
+    id: string;
+    position: {
+      __typename?: "PositionComponent";
+      x: number;
+      y: number;
+      z: number;
+    };
+    rotation: {
+      __typename?: "RotationComponent";
+      x: number;
+      y: number;
+      z: number;
+      w: number;
+    };
+  }>;
 };
 
 export type UniverseSystemSubscriptionVariables = Exact<{
@@ -4107,6 +4160,79 @@ export function useTemplateSystemSubscription(
 }
 export type TemplateSystemSubscriptionHookResult = ReturnType<
   typeof useTemplateSystemSubscription
+>;
+export const UniverseSystemShipsDocument = gql`
+  subscription UniverseSystemShips($systemId: ID!) {
+    universeSystemShips(systemId: $systemId) {
+      id
+      identity {
+        name
+      }
+      position {
+        x
+        y
+        z
+      }
+      rotation {
+        x
+        y
+        z
+        w
+      }
+      size {
+        value
+      }
+      shipAssets {
+        model
+      }
+    }
+  }
+`;
+export function useUniverseSystemShipsSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    UniverseSystemShipsSubscription,
+    UniverseSystemShipsSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    UniverseSystemShipsSubscription,
+    UniverseSystemShipsSubscriptionVariables
+  >(UniverseSystemShipsDocument, baseOptions);
+}
+export type UniverseSystemShipsSubscriptionHookResult = ReturnType<
+  typeof useUniverseSystemShipsSubscription
+>;
+export const UniverseSystemShipsHotDocument = gql`
+  subscription UniverseSystemShipsHot($systemId: ID!) {
+    universeSystemShipsHot(systemId: $systemId) {
+      id
+      position {
+        x
+        y
+        z
+      }
+      rotation {
+        x
+        y
+        z
+        w
+      }
+    }
+  }
+`;
+export function useUniverseSystemShipsHotSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    UniverseSystemShipsHotSubscription,
+    UniverseSystemShipsHotSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    UniverseSystemShipsHotSubscription,
+    UniverseSystemShipsHotSubscriptionVariables
+  >(UniverseSystemShipsHotDocument, baseOptions);
+}
+export type UniverseSystemShipsHotSubscriptionHookResult = ReturnType<
+  typeof useUniverseSystemShipsHotSubscription
 >;
 export const UniverseSystemDocument = gql`
   subscription UniverseSystem($systemId: ID!) {

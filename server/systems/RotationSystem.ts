@@ -47,9 +47,30 @@ export class RotationSystem extends System {
         ((rotationDelta.z * rotationThrust) / mass) * elapsedRatio
       );
 
-      rotationVelocity.x = rotationVelocity.x + rotationAcceleration.x;
-      rotationVelocity.y = rotationVelocity.y + rotationAcceleration.y;
-      rotationVelocity.z = rotationVelocity.z + rotationAcceleration.z;
+      const revolutionsPerSecond = rotationMaxSpeed / 60;
+      const maxRadiansPerSecond = revolutionsPerSecond * (Math.PI * 2);
+
+      rotationVelocity.x = Math.min(
+        maxRadiansPerSecond,
+        Math.max(
+          -1 * maxRadiansPerSecond,
+          rotationVelocity.x + rotationAcceleration.x
+        )
+      );
+      rotationVelocity.y = Math.min(
+        maxRadiansPerSecond,
+        Math.max(
+          -1 * maxRadiansPerSecond,
+          rotationVelocity.y + rotationAcceleration.y
+        )
+      );
+      rotationVelocity.z = Math.min(
+        maxRadiansPerSecond,
+        Math.max(
+          -1 * maxRadiansPerSecond,
+          rotationVelocity.z + rotationAcceleration.z
+        )
+      );
 
       const dampener = systems?.find(s => s.dampener);
       const dampening = dampener?.dampener?.dampening;
@@ -84,10 +105,6 @@ export class RotationSystem extends System {
         rotationVelocity.y * elapsedRatio,
         rotationVelocity.z * elapsedRatio
       );
-      // .clampScalar(
-      //   -1 * rotationMaxSpeed * ((2 * Math.PI) / 60),
-      //   rotationMaxSpeed * ((2 * Math.PI) / 60)
-      // );
       velocityEuler.setFromVector3(rotationVelocityVector);
       velocityQuaternion.setFromEuler(velocityEuler);
       quaternion.multiply(velocityQuaternion);

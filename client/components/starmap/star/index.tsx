@@ -12,7 +12,7 @@ import {
 import LensFlare from "./lensFlare";
 import {fragment, vertex} from "./shaders";
 import getUniforms from "./uniforms";
-
+import tc from "tinycolor2";
 const Star: React.FC<{
   color1?: number | Color;
   color2?: number | Color;
@@ -43,9 +43,22 @@ const Star: React.FC<{
     }
   });
 
+  const color = React.useMemo(() => {
+    if (typeof color1 === "number") {
+      const color = color1.toString(16);
+      return `#${color}`;
+    }
+    const color = color1.toArray();
+    return `rgb(${color[0] * 255},${color[1] * 255},${color[2] * 255})`;
+  }, [color1]);
   return (
     <group {...props}>
-      <pointLight intensity={1} decay={2} color={color1} castShadow />
+      <pointLight
+        intensity={0.2}
+        decay={2}
+        color={tc(color).brighten(90).toRgbString()}
+        castShadow
+      />
       <mesh ref={shader}>
         <circleBufferGeometry attach="geometry" args={[1, 8, 8]} />
         <shaderMaterial

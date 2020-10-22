@@ -286,7 +286,7 @@ describe("outfit Plugin", () => {
           "z": 0,
         },
         "rotationMaxSpeed": 5,
-        "rotationThrust": 1,
+        "rotationThrust": 200,
         "thrusting": false,
       }
     `);

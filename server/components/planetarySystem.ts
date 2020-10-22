@@ -16,7 +16,6 @@ export class PlanetarySystemComponent extends Component {
   })
   skyboxKey: string = "Random Key";
 
-  // TODO: Make these fields actually do something.
   @Field({description: "The inner radius of the habitable zone of the system."})
   habitableZoneInner: number = 0.9;
 

@@ -37,7 +37,7 @@ export class EngineVelocitySystem extends System {
     // Warp Engines are handled separately, with the WarpVelocityPosition system
 
     const forwardVelocity = velocityObject.position.dot(
-      forwardVector.set(0, 1, 0).applyQuaternion(shipRotationQuaternion)
+      forwardVector.set(0, 0, 1).applyQuaternion(shipRotationQuaternion)
     );
 
     accelerationVector.set(0, 0, 0);
@@ -54,8 +54,8 @@ export class EngineVelocitySystem extends System {
           elapsedRatio *
           (dampening ? (dampening + 1) * ACCELERATION_MASS_DAMPENING : 1);
 
-        velocityObject.translateY(impulseAccel);
-        accelerationVector.y = impulseAccel;
+        velocityObject.translateZ(impulseAccel);
+        accelerationVector.z = impulseAccel;
       }
     }
     // Thrusters
@@ -117,8 +117,11 @@ export class EngineVelocitySystem extends System {
           : 0;
     }
 
-    entity.velocity.x = Math.round(velocityObject.position.x * 10000) / 10000;
-    entity.velocity.y = Math.round(velocityObject.position.y * 10000) / 10000;
-    entity.velocity.z = Math.round(velocityObject.position.z * 10000) / 10000;
+    entity.velocity.x =
+      Math.round(velocityObject.position.x * 10000000) / 10000000;
+    entity.velocity.y =
+      Math.round(velocityObject.position.y * 10000000) / 10000000;
+    entity.velocity.z =
+      Math.round(velocityObject.position.z * 10000000) / 10000000;
   }
 }

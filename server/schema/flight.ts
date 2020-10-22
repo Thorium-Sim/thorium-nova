@@ -29,8 +29,9 @@ import {WarpVelocityPosition} from "server/systems/WarpVelocityPosition";
 import {EngineVelocitySystem} from "server/systems/EngineVelocitySystem";
 import {PositionVelocitySystem} from "server/systems/PositionVelocitySystem";
 import {getPlugin} from "./plugins/basePlugin";
+import {Networking} from "server/systems/Networking";
 
-const INTERVAL = 1000 / 5;
+const INTERVAL = 1000 / 60;
 
 @ObjectType()
 export default class Flight {
@@ -60,7 +61,7 @@ export default class Flight {
   ) {
     this.id = params.id || uuid();
     this.name = params.name || randomWords(3).join("-");
-    this.paused = params.paused || true;
+    this.paused = params.paused ?? true;
     this.date = params.date ? new Date(params.date) : new Date();
 
     this.activatePlugins();
@@ -79,6 +80,7 @@ export default class Flight {
     this.ecs.addSystem(new EngineVelocitySystem());
     this.ecs.addSystem(new WarpVelocityPosition());
     this.ecs.addSystem(new PositionVelocitySystem());
+    this.ecs.addSystem(new Networking());
 
     this.run();
   }
@@ -92,6 +94,9 @@ export default class Flight {
   };
   setPaused(tf: boolean) {
     this.paused = tf;
+    if (!tf) {
+      this.run();
+    }
   }
   reset() {
     // TODO: Flight Reset Handling

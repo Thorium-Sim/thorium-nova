@@ -108,7 +108,6 @@ export class ShipPluginResolver {
       ThemeComponent,
       ShipOutfitsComponent,
       SizeComponent,
-      DampenerComponent,
     ]);
 
     plugin.ships.push(entity);

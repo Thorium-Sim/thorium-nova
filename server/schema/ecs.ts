@@ -55,7 +55,11 @@ export class EntityFieldResolver {
     return getEntityType(entity);
   }
   @FieldResolver(type => ShipAssetsComponent, {nullable: true})
-  shipAssets(@Root() entity: Entity): ShipAssetsComponent | null {
+  shipAssets(
+    @Root() entity: Entity,
+    @Ctx() context: GraphQLContext
+  ): ShipAssetsComponent | null {
+    context.pluginId = entity.pluginId;
     return entity.shipAssets || null;
   }
   @FieldResolver(type => SatelliteComponent, {nullable: true})

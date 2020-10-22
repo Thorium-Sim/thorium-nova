@@ -6,11 +6,13 @@ export class ThrusterSystem extends System {
     return !!(
       entity.components.thrusters &&
       entity.components.isOutfit &&
-      entity.components.shipAssignment?.ship
+      entity.components.shipAssignment?.shipId
     );
   }
   update(entity: Entity, elapsed: number) {
-    const ship = entity.components.shipAssignment?.ship;
+    const ship = this.ecs.entities.find(
+      e => e.id === entity.components.shipAssignment?.shipId
+    );
     if (!ship || !ship.isShip || !entity.thrusters) return;
     const {mass} = ship.isShip;
 

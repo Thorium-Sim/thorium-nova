@@ -15,9 +15,11 @@ export class WarpSystem extends System {
   }
   update(entity: Entity, elapsed: number) {
     const elapsedRatio = elapsed / 1000;
-    if (!entity.warpEngines) return;
+    const ship = this.ecs.entities.find(
+      e => e.id === entity.components.shipAssignment?.shipId
+    );
+    if (!ship || !ship.isShip || !entity.warpEngines) return;
 
-    // TODO: Figure out if we are in interstellar or planetary space
     const {
       interstellarCruisingSpeed,
       planetaryCruisingSpeed,
@@ -26,7 +28,10 @@ export class WarpSystem extends System {
       currentWarpFactor,
     } = entity.warpEngines;
 
-    const cruisingSpeed = planetaryCruisingSpeed;
+    const cruisingSpeed =
+      ship.interstellarPosition?.systemId === null
+        ? interstellarCruisingSpeed
+        : planetaryCruisingSpeed;
 
     const minWarp = cruisingSpeed * minSpeedMultiplier;
 

@@ -47,8 +47,8 @@ describe("ImpulseSystem", () => {
       AutopilotComponent,
     ]);
 
-    thrusters.updateComponent("shipAssignment", {shipId: "test", ship});
-    dampening.updateComponent("shipAssignment", {shipId: "test", ship});
+    thrusters.updateComponent("shipAssignment", {shipId: "test"});
+    dampening.updateComponent("shipAssignment", {shipId: "test"});
 
     ecs.addSystem(autoRotateSystem);
     ecs.addSystem(thrustersSystem);
@@ -59,15 +59,15 @@ describe("ImpulseSystem", () => {
     if (!ship.velocity) throw new Error("Ship has no velocity component");
     if (!ship.rotation) throw new Error("Ship has no rotation component");
     ship.updateComponent("autopilot", {
-      desiredCoordinates: {x: 0, y: 0, z: 100},
+      desiredCoordinates: {x: 0, y: 100, z: 100},
     });
     ecs.update(16);
     expect(ship.rotation).toMatchInlineSnapshot(`
       Object {
-        "w": 0.99999999991808,
-        "x": 0.000012799999999650476,
-        "y": 0,
-        "z": 0,
+        "w": 0.9999999999231888,
+        "x": -0.00001239445544522721,
+        "y": -6.852923869652632e-20,
+        "z": 6.853093748277343e-20,
       }
     `);
     for (let i = 0; i < 60 * 50; i++) {
@@ -76,10 +76,10 @@ describe("ImpulseSystem", () => {
 
     expect(ship.rotation).toMatchInlineSnapshot(`
       Object {
-        "w": 0.8459444502884192,
-        "x": 0.5332710258641669,
-        "y": 0,
-        "z": 0,
+        "w": 0.938319881543513,
+        "x": -0.3457684194662159,
+        "y": -3.748300859877568e-17,
+        "z": 1.8056807210695425e-17,
       }
     `);
   });
