@@ -100,6 +100,7 @@ const quotes = [
   "All theory, dear friend, is grey, but the golden tree of life springs ever green.",
   // Ubuntu
   "I am what I am because of who we all are",
+  "What shall I build or write against the fall of night?",
 ];
 
 const QuoteOfTheDay = () => {
