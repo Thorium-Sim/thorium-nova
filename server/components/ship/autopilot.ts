@@ -16,10 +16,12 @@ export class AutopilotComponent extends Component {
     "yawController",
     "pitchController",
     "rollController",
+    "speedController",
     "excludeFields",
   ];
 
   yawController?: Controller;
   pitchController?: Controller;
   rollController?: Controller;
+  speedController?: Controller;
 }

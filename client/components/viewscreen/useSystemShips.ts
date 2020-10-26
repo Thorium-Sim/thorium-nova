@@ -19,6 +19,7 @@ export const useShipsStore = create<ShipMap>(() => ({}));
 export function useSystemShips() {
   const systemId = useConfigStore(store => store.systemId);
   const {data} = useUniverseSystemShipsSubscription({variables: {systemId}});
+  const [shipIds, setShipIds] = React.useState<string[]>([]);
   const ships = data?.universeSystemShips;
   React.useEffect(() => {
     const newState =
@@ -27,6 +28,7 @@ export function useSystemShips() {
         return prev;
       }, {}) || {};
     useShipsStore.setState(newState, true);
+    setShipIds(Object.keys(newState));
   }, [ships]);
 
   const client = useApolloClient();
@@ -43,6 +45,12 @@ export function useSystemShips() {
         })
         .subscribe({
           next({data}: {data: UniverseSystemShipsHotSubscription}) {
+            setShipIds(ids => {
+              if (data.universeSystemShipsHot.length !== ids.length) {
+                return data.universeSystemShipsHot.map(s => s.id);
+              }
+              return ids;
+            });
             useShipsStore.setState(store =>
               produce(store, draft => {
                 data.universeSystemShipsHot.forEach(ship => {
@@ -62,5 +70,6 @@ export function useSystemShips() {
         });
       return () => unsub.unsubscribe();
     }
-  }, [systemId]);
+  }, [systemId, setShipIds]);
+  return shipIds;
 }

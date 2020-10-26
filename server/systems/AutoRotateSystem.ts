@@ -1,13 +1,11 @@
 import Entity from "server/helpers/ecs/entity";
 import System from "server/helpers/ecs/system";
-import {Camera, Euler, Quaternion, Vector3, Matrix4} from "three";
+import {Quaternion, Vector3, Matrix4} from "three";
 import Controller from "node-pid-controller";
 let positionVec = new Vector3();
 let rotationQuat = new Quaternion();
-let rotationEuler = new Euler();
 let desiredDestination = new Vector3();
 let desiredRotationQuat = new Quaternion();
-let desiredRotationEuler = new Euler();
 let forward = new Vector3(0, 1, 0);
 let matrix = new Matrix4();
 
@@ -21,19 +19,24 @@ const getYawPitchRoll = (quat: Quaternion) => {
       2 * quat.y * quat.w - 2 * quat.x * quat.z,
       1 - 2 * quat.y * quat.y - 2 * quat.z * quat.z
     ) +
-    Math.PI / 4;
+    Math.PI * 4;
   const pitch =
     Math.atan2(
       2 * quat.x * quat.w - 2 * quat.y * quat.z,
       1 - 2 * quat.x * quat.x - 2 * quat.z * quat.z
     ) +
-    Math.PI / 4;
+    Math.PI * 4;
   const roll =
-    Math.asin(2 * quat.x * quat.y + 2 * quat.z * quat.w) + Math.PI / 4;
+    Math.asin(2 * quat.x * quat.y + 2 * quat.z * quat.w) + Math.PI * 4;
   return [yaw, pitch, roll];
 };
 
-// TODO: Make this behave better when rotating the opposite direction
+function getClosestAngle(current: number, target: number) {
+  if (Math.abs(target - (current + Math.PI * 2)) < Math.abs(target - current)) {
+    return current + Math.PI * 2;
+  }
+  return current;
+}
 export class AutoRotateSystem extends System {
   test(entity: Entity) {
     return !!(
@@ -57,11 +60,11 @@ export class AutoRotateSystem extends System {
       autopilot.desiredCoordinates?.z
     );
     positionVec.set(position.x, position.y, position.z);
+    const distance = positionVec.distanceTo(desiredDestination);
     matrix
       .lookAt(positionVec, desiredDestination, forward)
       .multiply(rotationMatrix);
     rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
-    rotationEuler.setFromQuaternion(rotationQuat);
     // Use the thrusters to adjust the rotation of the ship to point towards the desired destination.
     // First, determine the angle to the destination.
     desiredRotationQuat.setFromRotationMatrix(matrix);
@@ -100,11 +103,22 @@ export class AutoRotateSystem extends System {
     autopilot.rollController.target = desiredAngles[2];
 
     // Update controllers with the current rotation
-    let yawCorrection = autopilot.yawController.update(currentAngles[0]);
-    let pitchCorrection = autopilot.pitchController.update(currentAngles[1]);
-    let rollCorrection = autopilot.rollController.update(currentAngles[2]);
+    let yawCorrection = autopilot.yawController.update(
+      getClosestAngle(currentAngles[0], desiredAngles[0])
+    );
+    let pitchCorrection = autopilot.pitchController.update(
+      getClosestAngle(currentAngles[1], desiredAngles[1])
+    );
+    let rollCorrection = autopilot.rollController.update(
+      getClosestAngle(currentAngles[2], desiredAngles[2])
+    );
 
-    // // Set the thruster acceleration to those values
+    if (distance < 0.5) {
+      yawCorrection = 0;
+      pitchCorrection = 0;
+      rollCorrection = 0;
+    }
+    // Set the thruster acceleration to those values
     const thrusters = systems.find(s => s.thrusters);
     if (thrusters?.thrusters) {
       thrusters.updateComponent("thrusters", {

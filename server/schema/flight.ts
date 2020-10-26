@@ -21,6 +21,7 @@ import {appStoreDir} from "../helpers/appPaths";
 import {TimerSystem} from "../systems/TimerSystem";
 import {GraphQLContext} from "../helpers/graphqlContext";
 import {AutoRotateSystem} from "server/systems/AutoRotateSystem";
+import {AutoThrustSystem} from "server/systems/AutoThrustSystem";
 import {ThrusterSystem} from "server/systems/ThrusterSystem";
 import {RotationSystem} from "server/systems/RotationSystem";
 import {ImpulseSystem} from "server/systems/ImpulseSystem";
@@ -73,6 +74,7 @@ export default class Flight {
 
     this.ecs.addSystem(new TimerSystem());
     this.ecs.addSystem(new AutoRotateSystem());
+    this.ecs.addSystem(new AutoThrustSystem());
     this.ecs.addSystem(new ThrusterSystem());
     this.ecs.addSystem(new ImpulseSystem());
     this.ecs.addSystem(new WarpSystem());

@@ -70,12 +70,11 @@ const ViewscreenScene: React.FC = () => {
     }
   }, [planet, camera]);
 
-  useSystemShips();
-  const ships = useShipsStore();
+  const ids = useSystemShips();
   if (!system) return null;
   return (
     <>
-      <FlyControls movementSpeed={1} rollSpeed={Math.PI / 10} dragToLook />
+      <FlyControls movementSpeed={50} rollSpeed={Math.PI / 10} dragToLook />
       <mesh>
         <boxBufferGeometry args={[1, 2, 3]} attach="geometry" />
         <meshStandardMaterial color="rebeccapurple" attach="material" />
@@ -90,7 +89,7 @@ const ViewscreenScene: React.FC = () => {
         decay={2}
         position={[-10000000, -10000000, -1000000]}
       />
-      <ambientLight intensity={0.1} />
+      <ambientLight intensity={0.5} />
 
       {system.items.map(e => {
         if (e.isStar) {
@@ -101,13 +100,13 @@ const ViewscreenScene: React.FC = () => {
         }
         return null;
       })}
-      {Object.values(ships).map(ship => (
-        <Suspense key={ship.id} fallback={null}>
+      {ids.map(shipId => (
+        <Suspense key={shipId} fallback={null}>
           <ErrorBoundary
             FallbackComponent={() => <></>}
             onError={err => console.error(err)}
           >
-            <ShipEntity entity={ship} />
+            <ShipEntity entityId={shipId} />
           </ErrorBoundary>
         </Suspense>
       ))}
@@ -119,8 +118,10 @@ const ViewscreenScene: React.FC = () => {
 };
 
 const ShipEntity: React.FC<{
-  entity: UniverseSystemShipsSubscription["universeSystemShips"][0];
-}> = ({entity}) => {
+  entityId: string;
+}> = ({entityId}) => {
+  const entity = useShipsStore.getState()[entityId];
+  if (!entity) return null;
   const modelAsset = entity.shipAssets?.model;
   const model = useGLTFLoader(modelAsset || whiteImage, false);
 
@@ -182,7 +183,7 @@ const Viewscreen: React.FC = () => {
           e.preventDefault();
         }}
         gl={{antialias: true, logarithmicDepthBuffer: true, alpha: false}}
-        camera={{fov: 45, near: 0, far: FAR}}
+        camera={{fov: 45, near: 0.01, far: FAR}}
         concurrent
       >
         <ApolloProvider client={client}>

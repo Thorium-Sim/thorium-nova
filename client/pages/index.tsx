@@ -21,11 +21,11 @@ const Welcome = () => {
   const {data} = useFlightsQuery();
   const {data: activeFlightData} = useFlightQuery();
   const hasFlight = !!activeFlightData?.flight?.id;
-  React.useEffect(() => {
-    if (hasFlight) {
-      navigate("/flight");
-    }
-  }, [hasFlight, navigate]);
+  // React.useEffect(() => {
+  //   if (hasFlight) {
+  //     navigate("/flight");
+  //   }
+  // }, [hasFlight, navigate]);
   return (
     <>
       <div

@@ -54,7 +54,7 @@ const Star: React.FC<{
   return (
     <group {...props}>
       <pointLight
-        intensity={0.2}
+        intensity={0.8}
         decay={2}
         color={tc(color).brighten(90).toRgbString()}
         castShadow
