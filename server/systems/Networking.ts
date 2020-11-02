@@ -12,7 +12,7 @@ export class Networking extends System {
       const systemIds = ["ew1d9kfkfhc49g2"];
       systemIds.forEach(id => {
         pubsub.publish("universeSystemShipsHot", {
-          id,
+          systemId: id,
           ships: this.ecs.entities.filter(
             s => s.interstellarPosition?.systemId === id
           ),

@@ -13,9 +13,8 @@ const SUN_RADIUS = 696_340;
 const StarEntity: React.FC<{
   entity: TemplateSystemSubscription["pluginUniverseSystem"]["items"][0];
 }> = ({entity}) => {
-  const selected = useConfigStore(
-    store => store.selectedObject?.id === entity.id
-  );
+  // const selectedId = useConfigStore(store => store.selectedObject?.id);
+  const selected = false; //selectedId === entity.id;
   if (!entity.isStar || !entity.satellite) return null;
   const {
     distance,
@@ -32,9 +31,10 @@ const StarEntity: React.FC<{
     `hsl(${entity.isStar.hue + 20}, 100%, ${entity.isStar.isWhite ? 100 : 50}%)`
   );
 
-  const size = configStoreApi().isViewscreen
-    ? entity.isStar.radius * SUN_RADIUS
-    : 10 + 5 * entity.isStar.radius;
+  const size =
+    configStoreApi.getState().viewingMode === "editor"
+      ? 10 + 5 * entity.isStar.radius
+      : entity.isStar.radius * SUN_RADIUS;
   return (
     <OrbitContainer
       radius={distance}
@@ -45,7 +45,8 @@ const StarEntity: React.FC<{
     >
       <group
         onPointerOver={() => {
-          if (configStoreApi.getState().isViewscreen) return;
+          if (configStoreApi.getState().viewingMode === "viewscreen") return;
+          if (configStoreApi.getState().viewingMode === "core") return;
           document.body.style.cursor = "pointer";
           const position = getOrbitPosition({
             eccentricity,
@@ -59,7 +60,8 @@ const StarEntity: React.FC<{
           });
         }}
         onPointerOut={() => {
-          if (configStoreApi.getState().isViewscreen) return;
+          if (configStoreApi.getState().viewingMode === "viewscreen") return;
+          if (configStoreApi.getState().viewingMode === "core") return;
           document.body.style.cursor = "auto";
           useConfigStore.setState({
             hoveredPosition: null,
@@ -67,7 +69,8 @@ const StarEntity: React.FC<{
           });
         }}
         onClick={() => {
-          if (configStoreApi.getState().isViewscreen) return;
+          if (configStoreApi.getState().viewingMode === "viewscreen") return;
+          if (configStoreApi.getState().viewingMode === "core") return;
           const position = getOrbitPosition({
             eccentricity,
             orbitalArc,
@@ -82,8 +85,10 @@ const StarEntity: React.FC<{
         }}
         scale={[size, size, size]}
       >
-        {selected && !configStoreApi.getState().isViewscreen && <Selected />}
-        <Star color1={color1} color2={color2} />
+        {selected && configStoreApi.getState().viewingMode !== "viewscreen" && (
+          <Selected />
+        )}
+        <Star color1={color1} color2={color2} size={size} />
       </group>
     </OrbitContainer>
   );

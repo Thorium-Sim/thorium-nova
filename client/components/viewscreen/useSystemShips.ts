@@ -31,10 +31,12 @@ export function useSystemShips() {
     setShipIds(Object.keys(newState));
   }, [ships]);
 
+  // TODO: Implement Linear Interpolation
   const client = useApolloClient();
   React.useEffect(() => {
     if (window.location.protocol === "https:") {
       //|| window.location.host === "localhost") {
+      // TODO: Implement Geckos
     } else {
       const unsub = client
         .subscribe({

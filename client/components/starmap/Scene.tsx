@@ -145,7 +145,7 @@ const Scene = React.forwardRef((props, ref) => {
   const measuring = useConfigStore(s => s.measuring);
 
   React.useEffect(() => {
-    useConfigStore.setState({isViewscreen: false});
+    useConfigStore.setState({viewingMode: "editor"});
   }, []);
   const {camera} = useThree();
   React.useImperativeHandle(ref, () => ({
@@ -153,7 +153,6 @@ const Scene = React.forwardRef((props, ref) => {
       return camera;
     },
   }));
-
   return (
     <>
       <ambientLight intensity={0.2} />

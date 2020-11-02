@@ -16,6 +16,7 @@ const OutfitsConfig = React.lazy(() => import("./components/plugins/Outfits"));
 const ShipsConfig = React.lazy(() => import("./components/plugins/Ships"));
 const Config = React.lazy(() => import("./pages/Config"));
 const Viewscreen = React.lazy(() => import("./components/viewscreen"));
+const StarmapCore = React.lazy(() => import("./components/core"));
 
 const ClientApp: React.FC = () => {
   useEasterEgg();
@@ -27,6 +28,7 @@ const ClientApp: React.FC = () => {
         <Route path="releases" element={<Releases />} />
         <Route path="theme" element={<ThemeBuilder />} />
         <Route path="flight" element={<Viewscreen />} />
+        <Route path="flight/core" element={<StarmapCore />} />
         <Route path="config/flight" element={<CustomFlight />} />
         <Route path="edit/:universeId/starmap/*" element={<Starmap />} />
         <Route path="edit/:pluginId/outfits/*" element={<OutfitsConfig />} />

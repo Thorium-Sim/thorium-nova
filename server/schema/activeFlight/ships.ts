@@ -41,14 +41,16 @@ export class ActiveShipsResolver {
       );
       process.nextTick(() => {
         pubsub.publish(id, {
-          id: args.systemId,
+          systemId: args.systemId,
           ships,
         });
       });
-      return [id, "universeSystem"];
+      return [id, "universeSystemShips"];
     },
     filter: ({args, payload}) => {
-      if (args.systemId !== payload.id) return false;
+      console.log(args.systemId, payload.systemId);
+
+      if (args.systemId !== payload.systemId) return false;
       return true;
     },
     description:
@@ -68,14 +70,14 @@ export class ActiveShipsResolver {
       );
       process.nextTick(() => {
         pubsub.publish(id, {
-          id: args.systemId,
+          systemId: args.systemId,
           ships,
         });
       });
       return [id, "universeSystemShipsHot"];
     },
     filter: ({args, payload}) => {
-      if (args.systemId !== payload.id) return false;
+      if (args.systemId !== payload.systemId) return false;
       return true;
     },
     description:

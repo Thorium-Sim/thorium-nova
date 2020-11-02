@@ -59,7 +59,7 @@ const Button = React.forwardRef(function Button(
       ref,
       disabled,
       ...extraProps,
-      className: `rounded font-semibold text-lg inline-flex items-center justify-center transition-all duration-200 py-2 px-4 ${className}`,
+      className: `rounded font-semibold text-lg inline-flex items-center justify-center transition-all duration-200 py-2 px-4 select-none ${className}`,
     },
     children
   );

@@ -55,6 +55,7 @@ export function shipPublish({
     // Subscription for ships in the same solar system.
     if (!detailed) {
       const systemId = ship.interstellarPosition?.systemId;
+      console.log("publishing");
       pubsub.publish("universeSystemShips", {
         systemId,
         ships: App.activeFlight.ecs.entities.filter(
