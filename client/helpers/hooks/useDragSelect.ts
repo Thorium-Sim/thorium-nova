@@ -75,5 +75,5 @@ export default function useDragSelect<DOMElement extends HTMLElement>(
       setSelectionBounds?.(calculateCoordinates(position));
     }
   });
-  return [ref, dragPosition] as const;
+  return [ref, dragPosition, node] as const;
 }

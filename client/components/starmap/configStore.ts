@@ -40,7 +40,9 @@ export interface ConfigStore extends Record<string | number | symbol, unknown> {
   hoveredPosition: Vector3 | null;
   selectedPosition: Vector3 | null;
   viewingMode: "core" | "editor" | "viewscreen";
+  // Core
   cameraVerticalDistance: number;
+  orbitControlsSet: (input: {zoom?: number; position?: Vector3}) => void;
 }
 const store = create<ConfigStore>(set => ({
   disableOrbitControls: () => {},
@@ -66,7 +68,15 @@ const store = create<ConfigStore>(set => ({
   hoveredPosition: null,
   selectedPosition: null,
   viewingMode: "editor",
+  // Core
   cameraVerticalDistance: 0,
+  orbitControlsSet: ({
+    zoom,
+    position,
+  }: {
+    zoom?: number;
+    position?: Vector3;
+  }) => {},
 }));
 
 export const useConfigStore = store;
