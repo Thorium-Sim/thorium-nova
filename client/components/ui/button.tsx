@@ -1,5 +1,4 @@
 import React from "react";
-import {useButton} from "@react-aria/button";
 
 type VariantColors =
   | "primary"
@@ -31,6 +30,7 @@ const Button = React.forwardRef(function Button(
     as = "button",
     className,
     disabled,
+    size,
     ...extraProps
   } = props;
 
@@ -53,13 +53,30 @@ const Button = React.forwardRef(function Button(
   if (disabled) {
     className = `${className} cursor-not-allowed filter-disabled`;
   }
+  switch (size) {
+    case "xs":
+      className = `${className} min-w-1 text-xs py-1 px-1`;
+      break;
+    case "sm":
+      className = `${className} min-w-2 text-sm py-1 px-2`;
+      break;
+    default:
+    case "md":
+      className = `${className} min-w-3 text-base py-1 px-3`;
+      break;
+    case "lg":
+      className = `${className} min-w-4 text-lg py-1 px-4`;
+      break;
+  }
+  if (size === "xs") {
+  }
   return React.createElement(
     as,
     {
       ref,
       disabled,
       ...extraProps,
-      className: `rounded font-semibold text-lg inline-flex items-center justify-center transition-all duration-200 py-2 px-4 select-none ${className}`,
+      className: `rounded font-semibold text-lg inline-flex items-center justify-center transition-all duration-200 select-none ${className}`,
     },
     children
   );

@@ -43,6 +43,9 @@ export interface ConfigStore extends Record<string | number | symbol, unknown> {
   // Core
   cameraVerticalDistance: number;
   orbitControlsSet: (input: {zoom?: number; position?: Vector3}) => void;
+  includeAutopilotData: boolean;
+  compressYDimension: boolean;
+  hidePlanets: boolean;
 }
 const store = create<ConfigStore>(set => ({
   disableOrbitControls: () => {},
@@ -77,6 +80,9 @@ const store = create<ConfigStore>(set => ({
     zoom?: number;
     position?: Vector3;
   }) => {},
+  includeAutopilotData: true,
+  compressYDimension: true,
+  hidePlanets: false,
 }));
 
 export const useConfigStore = store;

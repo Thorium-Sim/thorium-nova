@@ -15,6 +15,13 @@ subscription UniverseSystemShips($systemId: ID!) {
       z
       w
     }
+    autopilot {
+      desiredCoordinates {
+        x
+        y
+        z
+      }
+    }
     size {
       value
     }

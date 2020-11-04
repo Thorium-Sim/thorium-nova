@@ -1,4 +1,7 @@
-subscription UniverseSystemShipsHot($systemId: ID!) {
+subscription UniverseSystemShipsHot(
+  $systemId: ID!
+  $autopilotIncluded: Boolean = false
+) {
   universeSystemShipsHot(systemId: $systemId) {
     id
     position {
@@ -11,6 +14,13 @@ subscription UniverseSystemShipsHot($systemId: ID!) {
       y
       z
       w
+    }
+    autopilot @include(if: $autopilotIncluded) {
+      desiredCoordinates {
+        x
+        y
+        z
+      }
     }
   }
 }

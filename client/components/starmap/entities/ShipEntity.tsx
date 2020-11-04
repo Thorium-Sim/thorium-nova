@@ -1,6 +1,6 @@
 import React from "react";
 import {useFrame} from "react-three-fiber";
-import {useGLTFLoader, useTextureLoader} from "drei";
+import {Line, useGLTFLoader, useTextureLoader} from "drei";
 import {
   Color,
   FrontSide,
@@ -16,6 +16,7 @@ import {useShipsStore} from "../../viewscreen/useSystemShips";
 import {whiteImage} from "../utils";
 import {useConfigStore} from "../configStore";
 import {useSelectedShips} from "../../viewscreen/useSelectedShips";
+import {Line2} from "three/examples/jsm/lines/Line2";
 
 const ShipSprite = ({id, color = "white"}: {id: string; color?: string}) => {
   const spriteMap = useTextureLoader(
@@ -76,14 +77,19 @@ const ShipEntity: React.FC<{
   const group = React.useRef<Group>();
   const shipMesh = React.useRef<Group>();
   const shipSprite = React.useRef<Group>();
+  const lineRef = React.useRef<Line2>(null);
 
   useFrame(({camera}) => {
     const ship = useShipsStore.getState()[entity.id];
+    const compressYDimension =
+      useConfigStore.getState().viewingMode === "core"
+        ? useConfigStore.getState().compressYDimension
+        : false;
     const scale = ship.size.value;
     shipMesh.current?.scale.set(scale, scale, scale);
     group.current?.position.set(
       ship.position.x,
-      useConfigStore.getState().viewingMode === "core" ? 0 : ship.position.y,
+      compressYDimension ? 0 : ship.position.y,
       ship.position.z
     );
     shipMesh.current?.quaternion.set(
@@ -109,15 +115,49 @@ const ShipEntity: React.FC<{
         shipMesh.current.visible = true;
       }
     }
+    // Autopilot Destination
+    if (lineRef.current && group.current) {
+      if (
+        useConfigStore.getState().includeAutopilotData &&
+        ship.autopilot.desiredCoordinates
+      ) {
+        lineRef.current.geometry.setPositions([
+          group.current.position.x,
+          group.current.position.y,
+          group.current.position.z,
+          ship.autopilot.desiredCoordinates.x,
+          ship.autopilot.desiredCoordinates.y,
+          ship.autopilot.desiredCoordinates.z,
+        ]);
+        lineRef.current.geometry.attributes.position.needsUpdate = true;
+        lineRef.current.visible = true;
+      } else {
+        lineRef.current.visible = false;
+      }
+    }
   });
+
   return (
-    <group ref={group}>
-      <group ref={shipSprite}>
-        <ShipSprite id={entity.id} />
-      </group>
-      <group ref={shipMesh}>
-        {/* <axesHelper args={[3]} /> */}
-        <primitive object={scene} rotation={[Math.PI / 2, Math.PI, 0]} />
+    <group>
+      <Line
+        ref={lineRef}
+        points={[
+          [1, 1, 1],
+          [2, 2, 2],
+        ]} // Array of points
+        color="white"
+        opacity={0.2}
+        transparent
+        lineWidth={0.25} // In pixels (default)
+      />
+      <group ref={group}>
+        <group ref={shipSprite}>
+          <ShipSprite id={entity.id} />
+        </group>
+        <group ref={shipMesh}>
+          {/* <axesHelper args={[3]} /> */}
+          <primitive object={scene} rotation={[Math.PI / 2, Math.PI, 0]} />
+        </group>
       </group>
     </group>
   );

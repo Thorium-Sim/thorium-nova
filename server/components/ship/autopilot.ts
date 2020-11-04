@@ -10,6 +10,7 @@ export class AutopilotComponent extends Component {
 
   @Field(type => Coordinates, {
     description: "The desired coordinates of the ship in the current stage.",
+    nullable: true,
   })
   desiredCoordinates?: Coordinates;
   excludeFields?: (keyof AutopilotComponent)[] = [

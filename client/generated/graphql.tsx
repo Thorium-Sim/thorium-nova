@@ -36,6 +36,7 @@ export enum OutfitAbilities {
   Thrusters = "thrusters",
   Navigation = "navigation",
   JumpDrive = "jumpDrive",
+  InertialDampeners = "inertialDampeners",
   Generic = "generic",
 }
 
@@ -1464,6 +1465,15 @@ export type UniverseSystemShipsSubscription = {
       z: number;
       w: number;
     };
+    autopilot: {
+      __typename?: "AutopilotComponent";
+      desiredCoordinates: {
+        __typename?: "Coordinates";
+        x: number;
+        y: number;
+        z: number;
+      };
+    };
     size: {__typename?: "SizeComponent"; value: number};
     shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; model: string}>;
   }>;
@@ -1471,6 +1481,7 @@ export type UniverseSystemShipsSubscription = {
 
 export type UniverseSystemShipsHotSubscriptionVariables = Exact<{
   systemId: Scalars["ID"];
+  autopilotIncluded?: Maybe<Scalars["Boolean"]>;
 }>;
 
 export type UniverseSystemShipsHotSubscription = {
@@ -1490,6 +1501,15 @@ export type UniverseSystemShipsHotSubscription = {
       y: number;
       z: number;
       w: number;
+    };
+    autopilot: {
+      __typename?: "AutopilotComponent";
+      desiredCoordinates: {
+        __typename?: "Coordinates";
+        x: number;
+        y: number;
+        z: number;
+      };
     };
   }>;
 };
@@ -4179,6 +4199,13 @@ export const UniverseSystemShipsDocument = gql`
         z
         w
       }
+      autopilot {
+        desiredCoordinates {
+          x
+          y
+          z
+        }
+      }
       size {
         value
       }
@@ -4203,7 +4230,10 @@ export type UniverseSystemShipsSubscriptionHookResult = ReturnType<
   typeof useUniverseSystemShipsSubscription
 >;
 export const UniverseSystemShipsHotDocument = gql`
-  subscription UniverseSystemShipsHot($systemId: ID!) {
+  subscription UniverseSystemShipsHot(
+    $systemId: ID!
+    $autopilotIncluded: Boolean = false
+  ) {
     universeSystemShipsHot(systemId: $systemId) {
       id
       position {
@@ -4216,6 +4246,13 @@ export const UniverseSystemShipsHotDocument = gql`
         y
         z
         w
+      }
+      autopilot @include(if: $autopilotIncluded) {
+        desiredCoordinates {
+          x
+          y
+          z
+        }
       }
     }
   }

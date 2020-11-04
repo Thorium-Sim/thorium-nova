@@ -7,11 +7,11 @@ import {configStoreApi, useConfigStore} from "../starmap/configStore";
 import StarEntity from "../starmap/entities/StarEntity";
 import PlanetEntity from "../starmap/entities/PlanetEntity";
 import {useSystemShips, useShipsStore} from "../viewscreen/useSystemShips";
-import {Event, MOUSE, PerspectiveCamera, Vector3} from "three";
+import {Event, Group, MOUSE, PerspectiveCamera, Vector3} from "three";
 import {ErrorBoundary} from "react-error-boundary";
 import {css} from "@emotion/core";
 import Button from "../ui/button";
-import {FaArrowLeft} from "react-icons/fa";
+import {FaArrowLeft, FaProjectDiagram} from "react-icons/fa";
 import {OrbitControls} from "./OrbitControls";
 import ShipEntity from "../starmap/entities/ShipEntity";
 import useDragSelect from "../../helpers/hooks/useDragSelect";
@@ -20,10 +20,15 @@ import {getSelectedObjects} from "./dragSelection";
 import {useSelectedShips} from "../viewscreen/useSelectedShips";
 import Slider from "../ui/Slider";
 import {MdCenterFocusWeak} from "react-icons/md";
+import {CgCompressV} from "react-icons/cg";
+import {GiRingedPlanet} from "react-icons/gi";
+import {Line, Loader} from "drei";
+import useEventListener from "client/helpers/hooks/useEventListener";
 const FAR = 1e27;
 
 const StarmapCorePlanetary: React.FC = () => {
   const systemId = useConfigStore(store => store.systemId);
+  const planetsGroup = React.useRef<Group>();
   React.useEffect(() => {
     configStoreApi.setState({systemId: "ew1d9kfkfhc49g2", viewingMode: "core"});
   }, []);
@@ -40,17 +45,29 @@ const StarmapCorePlanetary: React.FC = () => {
   }, [skyboxKey]);
   const ids = useSystemShips();
 
+  useFrame(() => {
+    if (planetsGroup.current) {
+      // Hide planets if that option is set
+      if (useConfigStore.getState().hidePlanets) {
+        planetsGroup.current.visible = false;
+      } else {
+        planetsGroup.current.visible = true;
+      }
+    }
+  });
   return (
     <>
-      {system?.items.map(e => {
-        if (e.isStar) {
-          return <StarEntity key={e.id} entity={e} />;
-        }
-        if (e.isPlanet) {
-          return <PlanetEntity key={e.id} entity={e} />;
-        }
-        return null;
-      })}
+      <group ref={planetsGroup}>
+        {system?.items.map(e => {
+          if (e.isStar) {
+            return <StarEntity key={e.id} entity={e} />;
+          }
+          if (e.isPlanet) {
+            return <PlanetEntity key={e.id} entity={e} />;
+          }
+          return null;
+        })}
+      </group>
       {ids.map(shipId => (
         <Suspense key={shipId} fallback={null}>
           <ErrorBoundary
@@ -64,13 +81,15 @@ const StarmapCorePlanetary: React.FC = () => {
     </>
   );
 };
-const ZOOM_MARGIN = 400;
 const StarmapCoreMenubar: React.FC<{
   canvasHeight: number;
   canvasWidth: number;
 }> = ({canvasHeight, canvasWidth}) => {
   const systemId = useConfigStore(store => store.systemId);
   const setSystemId = useConfigStore(store => store.setSystemId);
+  const autopilotData = useConfigStore(store => store.includeAutopilotData);
+  const compressYDimension = useConfigStore(store => store.compressYDimension);
+  const hidePlanets = useConfigStore(store => store.hidePlanets);
   const {selectedIds} = useSelectedShips();
   return (
     <div
@@ -139,6 +158,36 @@ const StarmapCoreMenubar: React.FC<{
         >
           <MdCenterFocusWeak />
         </Button>
+        <Button
+          variant={autopilotData ? "solid" : "ghost"}
+          variantColor="info"
+          size="sm"
+          onClick={() => {
+            useConfigStore.setState({includeAutopilotData: !autopilotData});
+          }}
+        >
+          <FaProjectDiagram />
+        </Button>
+        <Button
+          size="sm"
+          variant={compressYDimension ? "solid" : "ghost"}
+          onClick={() => {
+            useConfigStore.setState({compressYDimension: !compressYDimension});
+          }}
+          variantColor="primary"
+        >
+          <CgCompressV />
+        </Button>
+        <Button
+          size="sm"
+          variant={hidePlanets ? "solid" : "ghost"}
+          onClick={() => {
+            useConfigStore.setState({hidePlanets: !hidePlanets});
+          }}
+          variantColor="primary"
+        >
+          <GiRingedPlanet />
+        </Button>
       </div>
     </div>
   );
@@ -169,7 +218,6 @@ const StarmapCoreScene: React.FC = () => {
       orbitControlsSet: ({zoom, position}) => {
         if (controls.current) {
           if (zoom) {
-            console.log(zoom);
             camera.position.y = zoom;
           }
           if (position) {
@@ -187,6 +235,12 @@ const StarmapCoreScene: React.FC = () => {
     });
   }, []);
 
+  useEventListener("contextmenu", (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("Context menu");
+  });
+
   return (
     <>
       <ambientLight intensity={0.2} />
@@ -199,11 +253,12 @@ const StarmapCoreScene: React.FC = () => {
         maxDistance={30000000000}
         maxPolarAngle={Math.PI / 3}
         mouseButtons={{
-          LEFT: MOUSE.LEFT,
+          LEFT: MOUSE.PAN,
           MIDDLE: MOUSE.DOLLY,
-          RIGHT: MOUSE.PAN,
+          RIGHT: MOUSE.RIGHT,
         }}
       />
+
       {systemId && <StarmapCorePlanetary />}
       <Suspense fallback={null}>
         <Nebula />
@@ -294,6 +349,7 @@ const StarmapCore: React.FC = () => {
     <Suspense fallback={null}>
       <Canvas
         onContextMenu={e => {
+          debugger;
           e.preventDefault();
           e.stopPropagation();
         }}

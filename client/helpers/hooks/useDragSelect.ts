@@ -38,8 +38,15 @@ export default function useDragSelect<DOMElement extends HTMLElement>(
     };
   }
 
+  useEventListener("contextmenu", (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  });
   useEventListener("pointerdown", (e: MouseEvent) => {
-    if (e.button !== 0) return;
+    if (e.button !== 2) return;
+    e.preventDefault();
+    e.stopPropagation();
+
     if (e.target === node) {
       setInitialPosition({
         x: e.clientX - dimensions.left,

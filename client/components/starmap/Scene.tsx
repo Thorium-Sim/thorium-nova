@@ -23,10 +23,10 @@ const TextLabel = React.forwardRef<Mesh, {text: string; position?: Vector3}>(
   ({text, position = new Vector3()}, ref) => {
     const textTexture = React.useMemo(() => {
       let texture = new TextTexture({
-        fillStyle: "rgb(0,255,255)",
+        color: "rgb(0,255,255)",
         fontFamily: 'Electrolize, "Gill Sans", sans-serif',
         fontSize: 32,
-        align: "right",
+        alignment: "right",
         text,
       });
       texture.redraw();

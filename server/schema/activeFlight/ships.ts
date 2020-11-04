@@ -48,8 +48,6 @@ export class ActiveShipsResolver {
       return [id, "universeSystemShips"];
     },
     filter: ({args, payload}) => {
-      console.log(args.systemId, payload.systemId);
-
       if (args.systemId !== payload.systemId) return false;
       return true;
     },

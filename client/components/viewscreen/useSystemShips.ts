@@ -18,6 +18,7 @@ export const useShipsStore = create<ShipMap>(() => ({}));
 
 export function useSystemShips() {
   const systemId = useConfigStore(store => store.systemId);
+  const autopilotIncluded = useConfigStore(store => store.includeAutopilotData);
   const {data} = useUniverseSystemShipsSubscription({variables: {systemId}});
   const [shipIds, setShipIds] = React.useState<string[]>([]);
   const ships = data?.universeSystemShips;
@@ -43,6 +44,7 @@ export function useSystemShips() {
           query: UniverseSystemShipsHotDocument,
           variables: {
             systemId,
+            autopilotIncluded,
           },
         })
         .subscribe({
@@ -61,6 +63,9 @@ export function useSystemShips() {
                   }
                   if (draft[ship.id]?.rotation) {
                     draft[ship.id].rotation = ship.rotation;
+                  }
+                  if (draft[ship.id]?.autopilot) {
+                    draft[ship.id].autopilot = ship.autopilot;
                   }
                 });
               })
