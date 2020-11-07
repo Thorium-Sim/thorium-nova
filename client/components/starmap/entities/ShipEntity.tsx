@@ -1,15 +1,18 @@
 import React from "react";
-import {useFrame} from "react-three-fiber";
+import {useFrame, useThree} from "react-three-fiber";
 import {Line, useGLTFLoader, useTextureLoader} from "drei";
 import {
+  Plane,
   Color,
   FrontSide,
   Group,
   Mesh,
   MeshStandardMaterial,
   Object3D,
+  Raycaster,
   Sprite,
   Texture,
+  Vector2,
   Vector3,
 } from "three";
 import {useShipsStore} from "../../viewscreen/useSystemShips";
@@ -17,6 +20,12 @@ import {whiteImage} from "../utils";
 import {useConfigStore} from "../configStore";
 import {useSelectedShips} from "../../viewscreen/useSelectedShips";
 import {Line2} from "three/examples/jsm/lines/Line2";
+import {useDrag} from "react-use-gesture";
+import {
+  useShipsSetDesiredDestinationMutation,
+  useShipsSetPositionMutation,
+} from "client/generated/graphql";
+import {useTranslate2DTo3D} from "client/helpers/hooks/use2Dto3D";
 
 const ShipSprite = ({id, color = "white"}: {id: string; color?: string}) => {
   const spriteMap = useTextureLoader(
@@ -79,6 +88,9 @@ const ShipEntity: React.FC<{
   const shipSprite = React.useRef<Group>();
   const lineRef = React.useRef<Line2>(null);
 
+  const [setPosition] = useShipsSetPositionMutation();
+  const [setDestination] = useShipsSetDesiredDestinationMutation();
+
   useFrame(({camera}) => {
     const ship = useShipsStore.getState()[entity.id];
     const compressYDimension =
@@ -87,11 +99,27 @@ const ShipEntity: React.FC<{
         : false;
     const scale = ship.size.value;
     shipMesh.current?.scale.set(scale, scale, scale);
-    group.current?.position.set(
-      ship.position.x,
-      compressYDimension ? 0 : ship.position.y,
-      ship.position.z
-    );
+    const cachedPosition = useSelectedShips.getState().cachedPositions[
+      entity.id
+    ];
+    const offset = useConfigStore.getState().draggingMovement3D;
+    if (
+      useSelectedShips.getState().selectedIds.includes(entity.id) &&
+      cachedPosition &&
+      offset
+    ) {
+      group.current?.position.set(
+        cachedPosition.x + offset.x,
+        compressYDimension ? 0 : cachedPosition.y + offset.y,
+        cachedPosition.z + offset.z
+      );
+    } else {
+      group.current?.position.set(
+        ship.position.x,
+        compressYDimension ? 0 : ship.position.y,
+        ship.position.z
+      );
+    }
     shipMesh.current?.quaternion.set(
       ship.rotation.x,
       ship.rotation.y,
@@ -136,6 +164,66 @@ const ShipEntity: React.FC<{
       }
     }
   });
+  const to3D = useTranslate2DTo3D();
+  const {size, camera} = useThree();
+  const bind = useDrag(({dragging, movement, first}) => {
+    const offsetPosition = to3D(
+      movement[0] + size.width / 2,
+      movement[1] + size.height / 2
+    );
+
+    if (dragging === false) {
+      const positions = Object.values(useShipsStore.getState()).reduce(
+        (
+          prev: {id: string; position: {x: number; y: number; z: number}}[],
+          next
+        ) => {
+          if (useSelectedShips.getState().selectedIds.includes(next.id)) {
+            prev.push({
+              id: next.id,
+              position: {
+                x: next.position.x + (offsetPosition.x - camera.position.x),
+                y: useConfigStore.getState().yDimensionIndex,
+                z: next.position.z + (offsetPosition.z - camera.position.z),
+              },
+            });
+          }
+          return prev;
+        },
+        []
+      );
+      if (useConfigStore.getState().instantMoveObjects) {
+        setPosition({variables: {shipPositions: positions}});
+      } else {
+        setDestination({variables: {shipPositions: positions}});
+      }
+      useConfigStore.setState({draggingMovement3D: null});
+      useSelectedShips.setState({cachedPositions: {}});
+      return;
+    }
+
+    if (first) {
+      useSelectedShips.setState(({selectedIds}) => ({
+        cachedPositions: Object.values(useShipsStore.getState()).reduce(
+          (prev: {[id: string]: {x: number; y: number; z: number}}, next) => {
+            if (selectedIds.includes(next.id)) {
+              prev[next.id] = next.position;
+            }
+            return prev;
+          },
+          {}
+        ),
+      }));
+    }
+    useConfigStore.setState({
+      draggingMovement3D: {
+        x: offsetPosition.x - camera.position.x,
+        y: offsetPosition.y,
+        z: offsetPosition.z - camera.position.z,
+      },
+    });
+  }, {});
+  const functions = bind();
 
   return (
     <group>
@@ -150,7 +238,33 @@ const ShipEntity: React.FC<{
         transparent
         lineWidth={0.25} // In pixels (default)
       />
-      <group ref={group}>
+      <group
+        ref={group}
+        {...functions}
+        onPointerDown={e => {
+          if (e.metaKey || e.shiftKey) {
+            useSelectedShips.setState(({selectedIds}) => ({
+              selectedIds: selectedIds.includes(entity.id)
+                ? selectedIds.filter(e => e !== entity.id)
+                : selectedIds.concat(entity.id),
+            }));
+          } else {
+            if (!useSelectedShips.getState().selectedIds.includes(entity.id)) {
+              useSelectedShips.setState({selectedIds: [entity.id]});
+            }
+          }
+          useConfigStore.getState().disableOrbitControls();
+
+          document.addEventListener(
+            "mouseup",
+            () => {
+              useConfigStore.getState().enableOrbitControls();
+            },
+            {once: true}
+          );
+          functions.onPointerDown?.(e);
+        }}
+      >
         <group ref={shipSprite}>
           <ShipSprite id={entity.id} />
         </group>

@@ -5,7 +5,7 @@ import {useThree} from "react-three-fiber";
 import {useGesture} from "react-use-gesture";
 
 export default function useObjectDrag(
-  obj: React.MutableRefObject<Object3D>,
+  obj: React.MutableRefObject<Object3D | undefined>,
   {onMouseUp, onMouseDown}: {onMouseUp: any; onMouseDown: any}
 ) {
   const {mouse, camera} = useThree();
@@ -18,58 +18,54 @@ export default function useObjectDrag(
   const offset = React.useRef(new Vector3());
   const inverseMatrix = React.useRef(new Matrix4());
 
-  const bind = useGesture(
-    {
-      onMouseDown: e => {
-        e.stopPropagation();
-        onMouseDown?.(e);
-      },
-      onDragStart: e => {
-        e.event?.stopPropagation();
-        onMouseDown?.(e);
-        distance.current = camera.position.distanceTo(obj.current.position);
-        plane.current.setFromNormalAndCoplanarPoint(
-          camera.getWorldDirection(plane.current.normal),
-          worldPosition.current.setFromMatrixPosition(obj.current.matrixWorld)
-        );
-        if (
-          raycaster.current.ray.intersectPlane(
-            plane.current,
-            intersection.current
-          ) &&
-          obj.current.parent
-        ) {
-          inverseMatrix.current.getInverse(obj.current.parent.matrixWorld);
-          offset.current
-            .copy(intersection.current)
-            .sub(
-              worldPosition.current.setFromMatrixPosition(
-                obj.current.matrixWorld
-              )
-            );
-        }
-      },
-      onDragEnd: e => {
-        onMouseUp?.(obj.current.position);
-      },
-      onDrag: () => {
-        raycaster.current.setFromCamera(mouse, camera);
-        if (
-          raycaster.current.ray.intersectPlane(
-            plane.current,
-            intersection.current
-          )
-        ) {
-          obj.current?.position.copy(
-            intersection.current
-              // .sub(offset.current)
-              .applyMatrix4(inverseMatrix.current)
-          );
-        }
-      },
+  const bind = useGesture({
+    onMouseDown: e => {
+      onMouseDown?.(e);
     },
-    {eventOptions: {pointer: true}}
-  );
+    onDragStart: e => {
+      if (!obj.current) return;
+      e.event?.stopPropagation();
+      onMouseDown?.(e);
+      distance.current = camera.position.distanceTo(obj.current.position);
+      plane.current.setFromNormalAndCoplanarPoint(
+        camera.getWorldDirection(plane.current.normal),
+        worldPosition.current.setFromMatrixPosition(obj.current.matrixWorld)
+      );
+      if (
+        raycaster.current.ray.intersectPlane(
+          plane.current,
+          intersection.current
+        ) &&
+        obj.current.parent
+      ) {
+        inverseMatrix.current.getInverse(obj.current.parent.matrixWorld);
+        offset.current
+          .copy(intersection.current)
+          .sub(
+            worldPosition.current.setFromMatrixPosition(obj.current.matrixWorld)
+          );
+      }
+    },
+    onDragEnd: e => {
+      if (!obj.current) return;
+      onMouseUp?.(obj.current.position);
+    },
+    onDrag: () => {
+      raycaster.current.setFromCamera(mouse, camera);
+      if (
+        raycaster.current.ray.intersectPlane(
+          plane.current,
+          intersection.current
+        )
+      ) {
+        obj.current?.position.copy(
+          intersection.current
+            // .sub(offset.current)
+            .applyMatrix4(inverseMatrix.current)
+        );
+      }
+    },
+  });
 
   return bind;
 }

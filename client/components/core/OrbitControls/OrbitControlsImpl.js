@@ -618,7 +618,7 @@ class OrbitControls extends EventDispatcher {
 
       if (needsUpdate) {
         // prevent the browser from scrolling on cursor keys
-        event.preventDefault();
+        // event.preventDefault();
 
         scope.update();
       }
@@ -748,7 +748,7 @@ class OrbitControls extends EventDispatcher {
 
       // Prevent the browser from scrolling.
 
-      event.preventDefault();
+      // event.preventDefault();
 
       // Manually set the focus since calling preventDefault above
       // prevents the browser from setting it automatically.

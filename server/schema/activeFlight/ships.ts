@@ -2,8 +2,10 @@ import Entity from "server/helpers/ecs/entity";
 import {
   Arg,
   Ctx,
+  Field,
   FieldResolver,
   ID,
+  InputType,
   Mutation,
   Resolver,
   Root,
@@ -143,6 +145,38 @@ export class ActiveShipsResolver {
     shipPublish({ship: entity});
     return entity;
   }
+  @Mutation(returns => [Entity], {nullable: true})
+  shipsSetPosition(
+    @Arg("shipPositions", type => [ShipPosition]) shipPositions: ShipPosition[]
+  ) {
+    const ships = shipPositions.map(({id, position}) => {
+      const {ship} = getShip({shipId: id});
+      ship.updateComponent("position", position);
+      return ship;
+    });
+    shipPublish({ship: ships[0]});
+    return ships;
+  }
+  @Mutation(returns => [Entity], {nullable: true})
+  shipsSetDesiredDestination(
+    @Arg("shipPositions", type => [ShipPosition]) shipPositions: ShipPosition[]
+  ) {
+    const ships = shipPositions.map(({id, position}) => {
+      const {ship} = getShip({shipId: id});
+      ship.updateComponent("autopilot", {desiredCoordinates: position});
+      return ship;
+    });
+    shipPublish({ship: ships[0]});
+    return ships;
+  }
+}
+
+@InputType()
+class ShipPosition {
+  @Field(type => ID)
+  id!: string;
+  @Field(type => Coordinates)
+  position!: Coordinates;
 }
 
 @Resolver(of => InterstellarPositionComponent)

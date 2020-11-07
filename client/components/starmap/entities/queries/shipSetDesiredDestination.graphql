@@ -1,0 +1,5 @@
+mutation ShipsSetDesiredDestination($shipPositions: [ShipPosition!]!) {
+  shipsSetDesiredDestination(shipPositions: $shipPositions) {
+    id
+  }
+}

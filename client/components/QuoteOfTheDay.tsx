@@ -64,17 +64,21 @@ const quotes = [
   "I'm not crazy, I'm just colorful.",
   "What we do in life, echoes in eternity.",
   "Institutions have a future … but people have no future. People have only hope.",
+  // Klingon Proverbs
   "Destroying an empire to win a war is no victory. And ending a battle to save an empire is no defeat.",
   "Great people do not seek power; they have power thrust upon them.",
   "I am not afraid. I will not hide my face behind stone and mortar. I will stand before the wind and make it respect me.",
   "What are the tools you use to create memories?",
+  // Buffy
   "The one and only, the original, accept-no-substitute.",
   "The monkey's the only cookie animal that gets to wear clothes. You know that?",
   'Like is the hippo goin\', "Hey man. Where are my pants? I have my hippo dignity."',
   'The monkey\'s just, "I mock you with my monkey pants!"',
   "And then there's a big coup in the zoo.",
   "Man can't turn his back on what he came from. Besides, black is slimming.",
+  // The Good Place
   "It's not a joke; I'm a legit snack!",
+  // Natalie
   "Words are the threads that weave the tapestries of life.",
   "Salutations of the seasons be upon you.",
   "Little victories, my friends. Little victories.",
@@ -100,6 +104,11 @@ const quotes = [
   "All theory, dear friend, is grey, but the golden tree of life springs ever green.",
   // Ubuntu
   "I am what I am because of who we all are",
+  // Catch-22
+  "There was no telling what people might find out if they felt free to ask whatever questions they wanted to.",
+  "Just because you're paranoid doesn't mean they aren't after you.",
+  "He knew everything there was to know about literature, except how to enjoy it.",
+  "Insanity is contagious.",
 ];
 
 const QuoteOfTheDay = () => {

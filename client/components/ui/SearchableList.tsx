@@ -1,6 +1,6 @@
 import React from "react";
 import {capitalCase} from "change-case";
-import matchSorter from "match-sorter";
+import {matchSorter} from "match-sorter";
 import {useTranslation} from "react-i18next";
 import ListGroupItem from "./ListGroupItem";
 import Input from "./Input";

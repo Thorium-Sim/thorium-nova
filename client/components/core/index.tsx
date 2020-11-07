@@ -2,28 +2,28 @@ import React, {Suspense} from "react";
 import {Canvas, useFrame, useThree} from "react-three-fiber";
 import {ApolloProvider, useApolloClient} from "@apollo/client";
 import Nebula from "../starmap/Nebula";
-import {useUniverseSystemSubscription} from "../../generated/graphql";
+import {
+  useShipsSetDesiredDestinationMutation,
+  useUniverseSystemSubscription,
+} from "../../generated/graphql";
 import {configStoreApi, useConfigStore} from "../starmap/configStore";
 import StarEntity from "../starmap/entities/StarEntity";
 import PlanetEntity from "../starmap/entities/PlanetEntity";
 import {useSystemShips, useShipsStore} from "../viewscreen/useSystemShips";
-import {Event, Group, MOUSE, PerspectiveCamera, Vector3} from "three";
+import {Group, MOUSE, PerspectiveCamera, Vector3} from "three";
 import {ErrorBoundary} from "react-error-boundary";
-import {css} from "@emotion/core";
-import Button from "../ui/button";
-import {FaArrowLeft, FaProjectDiagram} from "react-icons/fa";
 import {OrbitControls} from "./OrbitControls";
 import ShipEntity from "../starmap/entities/ShipEntity";
 import useDragSelect from "../../helpers/hooks/useDragSelect";
 import styled from "@emotion/styled";
 import {getSelectedObjects} from "./dragSelection";
 import {useSelectedShips} from "../viewscreen/useSelectedShips";
-import Slider from "../ui/Slider";
-import {MdCenterFocusWeak} from "react-icons/md";
-import {CgCompressV} from "react-icons/cg";
-import {GiRingedPlanet} from "react-icons/gi";
-import {Line, Loader} from "drei";
+import {useRightClick} from "client/helpers/hooks/useRightClick";
+import {ZoomSlider} from "./ZoomSlider";
+import {StarmapCoreMenubar} from "./Menubar";
+import ContextMenu from "../ui/ContextMenu";
 import useEventListener from "client/helpers/hooks/useEventListener";
+import {useTranslate2DTo3D} from "client/helpers/hooks/use2Dto3D";
 const FAR = 1e27;
 
 const StarmapCorePlanetary: React.FC = () => {
@@ -81,123 +81,13 @@ const StarmapCorePlanetary: React.FC = () => {
     </>
   );
 };
-const StarmapCoreMenubar: React.FC<{
-  canvasHeight: number;
-  canvasWidth: number;
-}> = ({canvasHeight, canvasWidth}) => {
-  const systemId = useConfigStore(store => store.systemId);
-  const setSystemId = useConfigStore(store => store.setSystemId);
-  const autopilotData = useConfigStore(store => store.includeAutopilotData);
-  const compressYDimension = useConfigStore(store => store.compressYDimension);
-  const hidePlanets = useConfigStore(store => store.hidePlanets);
-  const {selectedIds} = useSelectedShips();
-  return (
-    <div
-      className="fixed top-0 left-0 w-screen p-2 pointer-events-none"
-      css={css`
-        * {
-          pointer-events: all;
-        }
-      `}
-    >
-      <div className="flex gap-2 pointer-events-none">
-        {systemId && (
-          <Button
-            variant="ghost"
-            variantColor="info"
-            size="sm"
-            onClick={() => setSystemId("")}
-          >
-            <FaArrowLeft />
-          </Button>
-        )}
-        <Button
-          variant="ghost"
-          variantColor="info"
-          size="sm"
-          disabled={selectedIds.length === 0}
-          onClick={() => {
-            const ships = useShipsStore.getState();
-            const selectedShips = selectedIds.map(id => ships[id]);
-            const [center, min, max] = selectedShips.reduce(
-              (prev, next, index, arr) => {
-                prev[0].x += next.position.x / arr.length;
-                prev[0].z += next.position.z / arr.length;
 
-                // min
-                prev[1].x =
-                  prev[1].x > next.position.x ? next.position.x : prev[1].x;
-                prev[1].z =
-                  prev[1].z > next.position.z ? next.position.z : prev[1].z;
-
-                // max
-                prev[2].x =
-                  prev[2].x < next.position.x ? next.position.x : prev[2].x;
-                prev[2].z =
-                  prev[2].z < next.position.z ? next.position.z : prev[2].z;
-                return prev;
-              },
-              [
-                new Vector3(),
-                new Vector3(Infinity, Infinity, Infinity),
-                new Vector3(-Infinity, -Infinity, -Infinity),
-              ]
-            );
-
-            const xDiff = 1 + Math.abs(max.x - min.x);
-            const zDiff = 1 + Math.abs(max.z - min.z);
-            const diff = xDiff > zDiff ? xDiff : zDiff;
-            const fov = 45 * (Math.PI / 180);
-            const zoom = (diff / 2 / (fov / 2)) * 1.25;
-
-            useConfigStore.getState().orbitControlsSet({
-              position: center,
-              zoom,
-            });
-          }}
-        >
-          <MdCenterFocusWeak />
-        </Button>
-        <Button
-          variant={autopilotData ? "solid" : "ghost"}
-          variantColor="info"
-          size="sm"
-          onClick={() => {
-            useConfigStore.setState({includeAutopilotData: !autopilotData});
-          }}
-        >
-          <FaProjectDiagram />
-        </Button>
-        <Button
-          size="sm"
-          variant={compressYDimension ? "solid" : "ghost"}
-          onClick={() => {
-            useConfigStore.setState({compressYDimension: !compressYDimension});
-          }}
-          variantColor="primary"
-        >
-          <CgCompressV />
-        </Button>
-        <Button
-          size="sm"
-          variant={hidePlanets ? "solid" : "ghost"}
-          onClick={() => {
-            useConfigStore.setState({hidePlanets: !hidePlanets});
-          }}
-          variantColor="primary"
-        >
-          <GiRingedPlanet />
-        </Button>
-      </div>
-    </div>
-  );
-};
 const CAMERA_Y = 30000000;
 const distanceVector = new Vector3();
 const StarmapCoreScene: React.FC = () => {
   const systemId = useConfigStore(store => store.systemId);
   const setSystemId = useConfigStore(store => store.setSystemId);
-  const {camera, mouse} = useThree();
+  const {camera} = useThree();
   const controls = React.useRef<OrbitControls>();
   React.useEffect(() => {
     camera.position.set(0, CAMERA_Y, 0);
@@ -212,9 +102,21 @@ const StarmapCoreScene: React.FC = () => {
       cameraVerticalDistance: distance,
     });
   });
+  const to3D = useTranslate2DTo3D();
 
   React.useEffect(() => {
     useConfigStore.setState({
+      translate2dTo3d: to3D,
+      disableOrbitControls: () => {
+        if (controls.current) {
+          controls.current.enabled = false;
+        }
+      },
+      enableOrbitControls: () => {
+        if (controls.current) {
+          controls.current.enabled = true;
+        }
+      },
       orbitControlsSet: ({zoom, position}) => {
         if (controls.current) {
           if (zoom) {
@@ -235,12 +137,6 @@ const StarmapCoreScene: React.FC = () => {
     });
   }, []);
 
-  useEventListener("contextmenu", (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log("Context menu");
-  });
-
   return (
     <>
       <ambientLight intensity={0.2} />
@@ -248,6 +144,7 @@ const StarmapCoreScene: React.FC = () => {
       <OrbitControls
         ref={controls}
         enableRotate={false}
+        enableKeys={false}
         zoomToCursor
         minDistance={0.5}
         maxDistance={30000000000}
@@ -288,42 +185,66 @@ const DragSelection = styled.div<{
 const startPoint = new Vector3();
 const endPoint = new Vector3();
 
-const zoomMin = 1;
-const zoomMax = 30000000000;
-function logslider(position: number, reverse?: boolean) {
-  // position will be between 0 and 100
-  var minP = 0;
-  var maxP = 100;
-
-  // The result should be between 100 an 10000000
-  var minV = Math.log(zoomMin);
-  var maxV = Math.log(zoomMax);
-
-  // calculate adjustment factor
-  var scale = (maxV - minV) / (maxP - minP);
-  if (reverse) return (Math.log(position) - minV) / scale + minP;
-  return Math.exp(minV + scale * (position - minP));
-}
-
-const ZoomSlider = () => {
-  const cameraZoom = useConfigStore(store => store.cameraVerticalDistance);
+const ContextMenuOption: React.FC<React.DetailedHTMLProps<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  HTMLButtonElement
+>> = ({children, ...props}) => {
   return (
-    <div
-      className={`pointer-events-none fixed bottom-0 right-0 w-64 py-6 px-4`}
+    <button
+      className="px-2 py-1  text-left cursor-pointer hover:bg-purple-700 hover:bg-opacity-50 focus:outline-none focus:shadow-outline transition-all"
+      {...props}
     >
-      <p>Zoom</p>
-      <Slider
-        min={0}
-        max={100}
-        step={0.1}
-        value={logslider(cameraZoom, true)}
-        onChange={e =>
-          useConfigStore
-            .getState()
-            .orbitControlsSet({zoom: logslider(parseFloat(e.target.value))})
-        }
-      />
-    </div>
+      {children}
+    </button>
+  );
+};
+const CanvasContextMenu = () => {
+  const contextMenuRef = React.useRef<HTMLDivElement>(null);
+  useEventListener("pointerdown", (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (contextMenuRef.current === target.parentElement) return;
+    useConfigStore.setState({contextMenuPosition: null});
+  });
+  const [setDestination] = useShipsSetDesiredDestinationMutation();
+
+  useRightClick(e => {
+    const selectedShips = useSelectedShips.getState().selectedIds;
+    if (selectedShips.length > 0) {
+      const position = useConfigStore
+        .getState()
+        .translate2dTo3d?.(e.clientX, e.clientY);
+      if (!position) return;
+      setDestination({
+        variables: {shipPositions: selectedShips.map(id => ({id, position}))},
+      });
+      return;
+    }
+    useConfigStore.setState({contextMenuPosition: {x: e.pageX, y: e.pageY}});
+  });
+  React.useEffect(() => {
+    // If the camera zooms in or out, hide the context menu.
+    const sub = useConfigStore.subscribe(
+      store => useConfigStore.setState({contextMenuPosition: null}),
+      store => store.cameraVerticalDistance
+    );
+    return () => sub();
+  }, []);
+  const contextMenuPosition = useConfigStore(
+    store => store.contextMenuPosition
+  );
+  if (!contextMenuPosition) return null;
+  return (
+    <ContextMenu {...contextMenuPosition}>
+      <div
+        ref={contextMenuRef}
+        className="text-white bg-opacity-50 bg-black border border-opacity-25 border-white rounded-sm  text-lg divide-y divide-purple-500 divide-opacity-25 flex flex-col"
+      >
+        <ContextMenuOption onClick={() => console.log("Spawn")}>
+          Spawn Here...
+        </ContextMenuOption>
+        <ContextMenuOption>Measure Distance</ContextMenuOption>
+      </div>
+    </ContextMenu>
   );
 };
 const StarmapCore: React.FC = () => {
@@ -349,9 +270,11 @@ const StarmapCore: React.FC = () => {
     <Suspense fallback={null}>
       <Canvas
         onContextMenu={e => {
-          debugger;
           e.preventDefault();
           e.stopPropagation();
+        }}
+        onPointerMissed={() => {
+          useSelectedShips.setState({selectedIds: [], cachedPositions: {}});
         }}
         gl={{antialias: true, logarithmicDepthBuffer: true, alpha: false}}
         camera={{fov: 45, near: 0.01, far: FAR}}
@@ -372,6 +295,7 @@ const StarmapCore: React.FC = () => {
         canvasHeight={node?.height || 0}
         canvasWidth={node?.width || 0}
       />
+      <CanvasContextMenu />
       {dragPosition && <DragSelection {...dragPosition}></DragSelection>}
       <ZoomSlider />
     </Suspense>

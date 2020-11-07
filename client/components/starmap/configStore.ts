@@ -46,6 +46,11 @@ export interface ConfigStore extends Record<string | number | symbol, unknown> {
   includeAutopilotData: boolean;
   compressYDimension: boolean;
   hidePlanets: boolean;
+  contextMenuPosition: null | {x: number; y: number};
+  yDimensionIndex: number;
+  draggingMovement3D: null | {x: number; y: number; z: number};
+  instantMoveObjects: boolean;
+  translate2dTo3d?: (x: number, y: number) => Vector3;
 }
 const store = create<ConfigStore>(set => ({
   disableOrbitControls: () => {},
@@ -83,6 +88,10 @@ const store = create<ConfigStore>(set => ({
   includeAutopilotData: true,
   compressYDimension: true,
   hidePlanets: false,
+  contextMenuPosition: null,
+  yDimensionIndex: 0,
+  draggingMovement3D: null,
+  instantMoveObjects: false,
 }));
 
 export const useConfigStore = store;

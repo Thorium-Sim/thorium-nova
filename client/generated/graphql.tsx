@@ -46,6 +46,11 @@ export type PositionInput = {
   z: Maybe<Scalars["Float"]>;
 };
 
+export type ShipPosition = {
+  id: Scalars["ID"];
+  position: CoordinatesInput;
+};
+
 /** An enum describing what kind of type a given `__Type` is. */
 export enum __TypeKind {
   /** Indicates this type is a scalar. */
@@ -821,6 +826,24 @@ export type PluginsSubscription = {
   }>;
 };
 
+export type ShipsSetDesiredDestinationMutationVariables = Exact<{
+  shipPositions: Array<ShipPosition>;
+}>;
+
+export type ShipsSetDesiredDestinationMutation = {
+  __typename?: "Mutation";
+  shipsSetDesiredDestination: Maybe<Array<{__typename?: "Entity"; id: string}>>;
+};
+
+export type ShipsSetPositionMutationVariables = Exact<{
+  shipPositions: Array<ShipPosition>;
+}>;
+
+export type ShipsSetPositionMutation = {
+  __typename?: "Mutation";
+  shipsSetPosition: Maybe<Array<{__typename?: "Entity"; id: string}>>;
+};
+
 export type SatelliteComponentFragment = {
   __typename?: "SatelliteComponent";
   distance: number;
@@ -1467,12 +1490,12 @@ export type UniverseSystemShipsSubscription = {
     };
     autopilot: {
       __typename?: "AutopilotComponent";
-      desiredCoordinates: {
+      desiredCoordinates: Maybe<{
         __typename?: "Coordinates";
         x: number;
         y: number;
         z: number;
-      };
+      }>;
     };
     size: {__typename?: "SizeComponent"; value: number};
     shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; model: string}>;
@@ -1504,12 +1527,12 @@ export type UniverseSystemShipsHotSubscription = {
     };
     autopilot: {
       __typename?: "AutopilotComponent";
-      desiredCoordinates: {
+      desiredCoordinates: Maybe<{
         __typename?: "Coordinates";
         x: number;
         y: number;
         z: number;
-      };
+      }>;
     };
   }>;
 };
@@ -3019,6 +3042,48 @@ export function usePluginsSubscription(
 }
 export type PluginsSubscriptionHookResult = ReturnType<
   typeof usePluginsSubscription
+>;
+export const ShipsSetDesiredDestinationDocument = gql`
+  mutation ShipsSetDesiredDestination($shipPositions: [ShipPosition!]!) {
+    shipsSetDesiredDestination(shipPositions: $shipPositions) {
+      id
+    }
+  }
+`;
+export function useShipsSetDesiredDestinationMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ShipsSetDesiredDestinationMutation,
+    ShipsSetDesiredDestinationMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ShipsSetDesiredDestinationMutation,
+    ShipsSetDesiredDestinationMutationVariables
+  >(ShipsSetDesiredDestinationDocument, baseOptions);
+}
+export type ShipsSetDesiredDestinationMutationHookResult = ReturnType<
+  typeof useShipsSetDesiredDestinationMutation
+>;
+export const ShipsSetPositionDocument = gql`
+  mutation ShipsSetPosition($shipPositions: [ShipPosition!]!) {
+    shipsSetPosition(shipPositions: $shipPositions) {
+      id
+    }
+  }
+`;
+export function useShipsSetPositionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ShipsSetPositionMutation,
+    ShipsSetPositionMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ShipsSetPositionMutation,
+    ShipsSetPositionMutationVariables
+  >(ShipsSetPositionDocument, baseOptions);
+}
+export type ShipsSetPositionMutationHookResult = ReturnType<
+  typeof useShipsSetPositionMutation
 >;
 export const UniversePlanetAssetsDocument = gql`
   subscription UniversePlanetAssets($id: ID!, $objectId: ID!) {

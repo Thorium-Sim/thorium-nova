@@ -45,7 +45,6 @@ export default function useDragSelect<DOMElement extends HTMLElement>(
   useEventListener("pointerdown", (e: MouseEvent) => {
     if (e.button !== 2) return;
     e.preventDefault();
-    e.stopPropagation();
 
     if (e.target === node) {
       setInitialPosition({
