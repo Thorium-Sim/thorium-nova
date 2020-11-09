@@ -1,11 +1,3 @@
-import {
-  Box,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Input,
-  Textarea,
-} from "@chakra-ui/core";
 import TagInput from "../../../../components/ui/TagInput";
 import React from "react";
 import {useTranslation} from "react-i18next";
@@ -14,8 +6,10 @@ import {
   usePluginShipSetDescriptionMutation,
   usePluginShipSetNameMutation,
   usePluginShipSetTagsMutation,
+  usePluginShipSetCategoryMutation,
 } from "../../../../generated/graphql";
 import {useParams} from "react-router";
+import Input from "client/components/ui/Input";
 
 const ShipBasic: React.FC = () => {
   const {t} = useTranslation();
@@ -25,42 +19,44 @@ const ShipBasic: React.FC = () => {
   });
   const [setName] = usePluginShipSetNameMutation();
   const [setDescription] = usePluginShipSetDescriptionMutation();
+  const [setCategory] = usePluginShipSetCategoryMutation();
   const [setTags] = usePluginShipSetTagsMutation();
   const [error, setError] = React.useState(false);
 
   const ship = data?.pluginShip;
   if (!ship) return <div>Loading...</div>;
   return (
-    <Box as="fieldset" key={shipId} flex={1} overflowY="auto">
-      <Box display="flex" flexWrap="wrap">
-        <Box flex={1} pr={4}>
-          <FormControl pb={4} isInvalid={error}>
-            <FormLabel width="100%">
-              {t(`Name`)}
+    <fieldset key={shipId} className="flex-1 overflow-y-auto">
+      <div className="flex flex-wrap">
+        <div className="flex-1 pr-4">
+          <div className="pb-4">
+            <Input
+              labelHidden={false}
+              isInvalid={error}
+              invalidMessage={t("Name is required")}
+              label={t(`Name`)}
+              defaultValue={ship.identity.name}
+              onChange={() => setError(false)}
+              onBlur={(e: any) =>
+                e.target.value
+                  ? setName({
+                      variables: {
+                        pluginId,
+                        shipId,
+                        name: e.target.value,
+                      },
+                    })
+                  : setError(true)
+              }
+            />
+          </div>
+          <div className="pb-4">
+            <label className="w-full">
               <Input
-                defaultValue={ship.identity.name}
-                onChange={() => setError(false)}
-                onBlur={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  e.target.value
-                    ? setName({
-                        variables: {
-                          pluginId,
-                          shipId,
-                          name: e.target.value,
-                        },
-                      })
-                    : setError(true)
-                }
-              />
-            </FormLabel>
-            <FormErrorMessage>{t(`Name is required`)}</FormErrorMessage>
-          </FormControl>
-          <FormControl pb={4}>
-            <FormLabel width="100%">
-              {t(`Description`)}
-              <Textarea
+                labelHidden={false}
+                label={t(`Description`)}
                 defaultValue={ship.identity.description}
-                onBlur={(e: React.ChangeEvent<HTMLInputElement>) =>
+                onBlur={(e: any) =>
                   setDescription({
                     variables: {
                       pluginId,
@@ -70,8 +66,27 @@ const ShipBasic: React.FC = () => {
                   })
                 }
               />
-            </FormLabel>
-          </FormControl>
+            </label>
+          </div>
+          <div className="pb-4">
+            <label className="w-full">
+              <Input
+                labelHidden={false}
+                label={t(`Category`)}
+                type="textarea"
+                defaultValue={ship.isShip.category}
+                onBlur={(e: any) =>
+                  setCategory({
+                    variables: {
+                      pluginId,
+                      shipId,
+                      category: e.target.value,
+                    },
+                  })
+                }
+              />
+            </label>
+          </div>
           <TagInput
             label={t(`Tags`)}
             tags={ship.tags.tags}
@@ -95,9 +110,9 @@ const ShipBasic: React.FC = () => {
               });
             }}
           />
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </fieldset>
   );
 };
 

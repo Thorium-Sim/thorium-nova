@@ -2,85 +2,20 @@ import React, {Suspense} from "react";
 import {Canvas, useFrame, useThree} from "react-three-fiber";
 import {ApolloProvider, useApolloClient} from "@apollo/client";
 import Nebula from "../starmap/Nebula";
-import {
-  useShipsSetDesiredDestinationMutation,
-  useUniverseSystemSubscription,
-} from "../../generated/graphql";
 import {configStoreApi, useConfigStore} from "../starmap/configStore";
-import StarEntity from "../starmap/entities/StarEntity";
-import PlanetEntity from "../starmap/entities/PlanetEntity";
-import {useSystemShips, useShipsStore} from "../viewscreen/useSystemShips";
-import {Group, MOUSE, PerspectiveCamera, Vector3} from "three";
-import {ErrorBoundary} from "react-error-boundary";
+import {useShipsStore} from "../viewscreen/useSystemShips";
+import {MOUSE, PerspectiveCamera, Vector3} from "three";
 import {OrbitControls} from "./OrbitControls";
-import ShipEntity from "../starmap/entities/ShipEntity";
 import useDragSelect from "../../helpers/hooks/useDragSelect";
 import styled from "@emotion/styled";
 import {getSelectedObjects} from "./dragSelection";
 import {useSelectedShips} from "../viewscreen/useSelectedShips";
-import {useRightClick} from "client/helpers/hooks/useRightClick";
 import {ZoomSlider} from "./ZoomSlider";
 import {StarmapCoreMenubar} from "./Menubar";
-import ContextMenu from "../ui/ContextMenu";
-import useEventListener from "client/helpers/hooks/useEventListener";
 import {useTranslate2DTo3D} from "client/helpers/hooks/use2Dto3D";
+import {StarmapCorePlanetary} from "./Planetary";
+import {CanvasContextMenu} from "./coreContextMenu";
 const FAR = 1e27;
-
-const StarmapCorePlanetary: React.FC = () => {
-  const systemId = useConfigStore(store => store.systemId);
-  const planetsGroup = React.useRef<Group>();
-  React.useEffect(() => {
-    configStoreApi.setState({systemId: "ew1d9kfkfhc49g2", viewingMode: "core"});
-  }, []);
-
-  const {data} = useUniverseSystemSubscription({
-    variables: {systemId},
-    skip: !systemId,
-  });
-  const system = data?.universeSystem;
-
-  const skyboxKey = system?.planetarySystem?.skyboxKey || "blank";
-  React.useEffect(() => {
-    configStoreApi.setState({skyboxKey});
-  }, [skyboxKey]);
-  const ids = useSystemShips();
-
-  useFrame(() => {
-    if (planetsGroup.current) {
-      // Hide planets if that option is set
-      if (useConfigStore.getState().hidePlanets) {
-        planetsGroup.current.visible = false;
-      } else {
-        planetsGroup.current.visible = true;
-      }
-    }
-  });
-  return (
-    <>
-      <group ref={planetsGroup}>
-        {system?.items.map(e => {
-          if (e.isStar) {
-            return <StarEntity key={e.id} entity={e} />;
-          }
-          if (e.isPlanet) {
-            return <PlanetEntity key={e.id} entity={e} />;
-          }
-          return null;
-        })}
-      </group>
-      {ids.map(shipId => (
-        <Suspense key={shipId} fallback={null}>
-          <ErrorBoundary
-            FallbackComponent={() => <></>}
-            onError={err => console.error(err)}
-          >
-            <ShipEntity entityId={shipId} />
-          </ErrorBoundary>
-        </Suspense>
-      ))}
-    </>
-  );
-};
 
 const CAMERA_Y = 30000000;
 const distanceVector = new Vector3();
@@ -185,68 +120,6 @@ const DragSelection = styled.div<{
 const startPoint = new Vector3();
 const endPoint = new Vector3();
 
-const ContextMenuOption: React.FC<React.DetailedHTMLProps<
-  React.ButtonHTMLAttributes<HTMLButtonElement>,
-  HTMLButtonElement
->> = ({children, ...props}) => {
-  return (
-    <button
-      className="px-2 py-1  text-left cursor-pointer hover:bg-purple-700 hover:bg-opacity-50 focus:outline-none focus:shadow-outline transition-all"
-      {...props}
-    >
-      {children}
-    </button>
-  );
-};
-const CanvasContextMenu = () => {
-  const contextMenuRef = React.useRef<HTMLDivElement>(null);
-  useEventListener("pointerdown", (e: MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (contextMenuRef.current === target.parentElement) return;
-    useConfigStore.setState({contextMenuPosition: null});
-  });
-  const [setDestination] = useShipsSetDesiredDestinationMutation();
-
-  useRightClick(e => {
-    const selectedShips = useSelectedShips.getState().selectedIds;
-    if (selectedShips.length > 0) {
-      const position = useConfigStore
-        .getState()
-        .translate2dTo3d?.(e.clientX, e.clientY);
-      if (!position) return;
-      setDestination({
-        variables: {shipPositions: selectedShips.map(id => ({id, position}))},
-      });
-      return;
-    }
-    useConfigStore.setState({contextMenuPosition: {x: e.pageX, y: e.pageY}});
-  });
-  React.useEffect(() => {
-    // If the camera zooms in or out, hide the context menu.
-    const sub = useConfigStore.subscribe(
-      store => useConfigStore.setState({contextMenuPosition: null}),
-      store => store.cameraVerticalDistance
-    );
-    return () => sub();
-  }, []);
-  const contextMenuPosition = useConfigStore(
-    store => store.contextMenuPosition
-  );
-  if (!contextMenuPosition) return null;
-  return (
-    <ContextMenu {...contextMenuPosition}>
-      <div
-        ref={contextMenuRef}
-        className="text-white bg-opacity-50 bg-black border border-opacity-25 border-white rounded-sm  text-lg divide-y divide-purple-500 divide-opacity-25 flex flex-col"
-      >
-        <ContextMenuOption onClick={() => console.log("Spawn")}>
-          Spawn Here...
-        </ContextMenuOption>
-        <ContextMenuOption>Measure Distance</ContextMenuOption>
-      </div>
-    </ContextMenu>
-  );
-};
 const StarmapCore: React.FC = () => {
   const client = useApolloClient();
   const cameraRef = React.useRef<PerspectiveCamera>();

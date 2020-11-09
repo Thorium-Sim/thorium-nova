@@ -9,6 +9,8 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+  JSON: {[key: string]: any};
   /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
   DateTime: Date;
   /** The `Upload` scalar type represents a file upload. */
@@ -584,6 +586,7 @@ export type PluginShipBasicSubscription = {
       name: string;
       description: string;
     };
+    isShip: {__typename?: "IsShipComponent"; category: string};
     tags: {__typename?: "TagsComponent"; tags: Array<string>};
   }>;
 };
@@ -655,6 +658,17 @@ export type PluginShipRemoveOutfitMutationVariables = Exact<{
 export type PluginShipRemoveOutfitMutation = {
   __typename?: "Mutation";
   pluginShipRemoveOutfit: {__typename?: "Entity"; id: string};
+};
+
+export type PluginShipSetCategoryMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  shipId: Scalars["ID"];
+  category: Scalars["String"];
+}>;
+
+export type PluginShipSetCategoryMutation = {
+  __typename?: "Mutation";
+  pluginShipSetCategory: {__typename?: "Entity"; id: string};
 };
 
 export type PluginShipSetDescriptionMutationVariables = Exact<{
@@ -1982,7 +1996,7 @@ export const PluginOutfitDocument = gql`
   }
 `;
 export function usePluginOutfitSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
+  baseOptions: Apollo.SubscriptionHookOptions<
     PluginOutfitSubscription,
     PluginOutfitSubscriptionVariables
   >
@@ -2009,7 +2023,7 @@ export const PluginOutfitsDocument = gql`
   }
 `;
 export function usePluginOutfitsSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
+  baseOptions: Apollo.SubscriptionHookOptions<
     PluginOutfitsSubscription,
     PluginOutfitsSubscriptionVariables
   >
@@ -2434,7 +2448,7 @@ export const TemplateShipAssetsDocument = gql`
   }
 `;
 export function useTemplateShipAssetsSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
+  baseOptions: Apollo.SubscriptionHookOptions<
     TemplateShipAssetsSubscription,
     TemplateShipAssetsSubscriptionVariables
   >
@@ -2589,6 +2603,9 @@ export const PluginShipBasicDocument = gql`
         name
         description
       }
+      isShip {
+        category
+      }
       tags {
         tags
       }
@@ -2596,7 +2613,7 @@ export const PluginShipBasicDocument = gql`
   }
 `;
 export function usePluginShipBasicSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
+  baseOptions: Apollo.SubscriptionHookOptions<
     PluginShipBasicSubscription,
     PluginShipBasicSubscriptionVariables
   >
@@ -2650,7 +2667,7 @@ export const PluginShipOutfitsDocument = gql`
   }
 `;
 export function usePluginShipOutfitsSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
+  baseOptions: Apollo.SubscriptionHookOptions<
     PluginShipOutfitsSubscription,
     PluginShipOutfitsSubscriptionVariables
   >
@@ -2677,7 +2694,7 @@ export const PluginShipPhysicsDocument = gql`
   }
 `;
 export function usePluginShipPhysicsSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
+  baseOptions: Apollo.SubscriptionHookOptions<
     PluginShipPhysicsSubscription,
     PluginShipPhysicsSubscriptionVariables
   >
@@ -2737,6 +2754,35 @@ export function usePluginShipRemoveOutfitMutation(
 }
 export type PluginShipRemoveOutfitMutationHookResult = ReturnType<
   typeof usePluginShipRemoveOutfitMutation
+>;
+export const PluginShipSetCategoryDocument = gql`
+  mutation PluginShipSetCategory(
+    $pluginId: ID!
+    $shipId: ID!
+    $category: String!
+  ) {
+    pluginShipSetCategory(
+      pluginId: $pluginId
+      shipId: $shipId
+      category: $category
+    ) {
+      id
+    }
+  }
+`;
+export function usePluginShipSetCategoryMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginShipSetCategoryMutation,
+    PluginShipSetCategoryMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginShipSetCategoryMutation,
+    PluginShipSetCategoryMutationVariables
+  >(PluginShipSetCategoryDocument, baseOptions);
+}
+export type PluginShipSetCategoryMutationHookResult = ReturnType<
+  typeof usePluginShipSetCategoryMutation
 >;
 export const PluginShipSetDescriptionDocument = gql`
   mutation PluginShipSetDescription(
@@ -2871,7 +2917,7 @@ export const PluginShipsDocument = gql`
   }
 `;
 export function usePluginShipsSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
+  baseOptions: Apollo.SubscriptionHookOptions<
     PluginShipsSubscription,
     PluginShipsSubscriptionVariables
   >
@@ -3098,7 +3144,7 @@ export const UniversePlanetAssetsDocument = gql`
   }
 `;
 export function useUniversePlanetAssetsSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
+  baseOptions: Apollo.SubscriptionHookOptions<
     UniversePlanetAssetsSubscription,
     UniversePlanetAssetsSubscriptionVariables
   >
@@ -3317,7 +3363,7 @@ export const UniverseGetObjectDocument = gql`
   ${SatelliteComponentFragmentDoc}
 `;
 export function useUniverseGetObjectQuery(
-  baseOptions?: Apollo.QueryHookOptions<
+  baseOptions: Apollo.QueryHookOptions<
     UniverseGetObjectQuery,
     UniverseGetObjectQueryVariables
   >
@@ -3367,7 +3413,7 @@ export const UniverseGetSystemDocument = gql`
   }
 `;
 export function useUniverseGetSystemQuery(
-  baseOptions?: Apollo.QueryHookOptions<
+  baseOptions: Apollo.QueryHookOptions<
     UniverseGetSystemQuery,
     UniverseGetSystemQueryVariables
   >
@@ -3883,7 +3929,7 @@ export const UniverseSearchDocument = gql`
   }
 `;
 export function useUniverseSearchQuery(
-  baseOptions?: Apollo.QueryHookOptions<
+  baseOptions: Apollo.QueryHookOptions<
     UniverseSearchQuery,
     UniverseSearchQueryVariables
   >
@@ -4084,7 +4130,7 @@ export const UniverseDocument = gql`
   }
 `;
 export function useUniverseSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
+  baseOptions: Apollo.SubscriptionHookOptions<
     UniverseSubscription,
     UniverseSubscriptionVariables
   >
@@ -4233,7 +4279,7 @@ export const TemplateSystemDocument = gql`
   ${SatelliteComponentFragmentDoc}
 `;
 export function useTemplateSystemSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
+  baseOptions: Apollo.SubscriptionHookOptions<
     TemplateSystemSubscription,
     TemplateSystemSubscriptionVariables
   >
@@ -4281,7 +4327,7 @@ export const UniverseSystemShipsDocument = gql`
   }
 `;
 export function useUniverseSystemShipsSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
+  baseOptions: Apollo.SubscriptionHookOptions<
     UniverseSystemShipsSubscription,
     UniverseSystemShipsSubscriptionVariables
   >
@@ -4323,7 +4369,7 @@ export const UniverseSystemShipsHotDocument = gql`
   }
 `;
 export function useUniverseSystemShipsHotSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
+  baseOptions: Apollo.SubscriptionHookOptions<
     UniverseSystemShipsHotSubscription,
     UniverseSystemShipsHotSubscriptionVariables
   >
@@ -4364,7 +4410,7 @@ export const UniverseSystemDocument = gql`
   ${SatelliteComponentFragmentDoc}
 `;
 export function useUniverseSystemSubscription(
-  baseOptions?: Apollo.SubscriptionHookOptions<
+  baseOptions: Apollo.SubscriptionHookOptions<
     UniverseSystemSubscription,
     UniverseSystemSubscriptionVariables
   >

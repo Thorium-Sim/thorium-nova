@@ -5,13 +5,15 @@ import {mergeRefs} from "client/helpers/mergeRefs";
 
 const Input = React.forwardRef<
   HTMLInputElement,
-  Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> &
+  Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange" | "onBlur"> &
     AriaTextFieldOptions & {
       label: string;
       labelHidden?: boolean;
       isInvalid?: boolean;
       invalidMessage?: string;
       inputSize?: "sm" | "md" | "lg";
+      onBlur?: any;
+      type?: string | "textarea";
     }
 >((props, outerRef) => {
   let elementId = useId();

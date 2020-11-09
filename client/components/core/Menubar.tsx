@@ -8,11 +8,62 @@ import {useSelectedShips} from "../viewscreen/useSelectedShips";
 import {MdCenterFocusWeak} from "react-icons/md";
 import {CgCompressV, CgMergeHorizontal} from "react-icons/cg";
 import {GiRingedPlanet, GiThreePointedShuriken} from "react-icons/gi";
+import {BsFillCaretDownFill} from "react-icons/bs";
 import {Vector3} from "three";
 import {Tooltip} from "../ui/Tooltip";
 import {useTranslation} from "react-i18next";
 import Input from "../ui/Input";
+import Portal from "@reach/portal";
+import useMeasure from "client/helpers/hooks/useMeasure";
+import useOnClickOutside from "client/helpers/hooks/useClickOutside";
+import SearchableList from "../ui/SearchableList";
 
+const SpawnMenu: React.FC = () => {
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  useOnClickOutside(menuRef, () => {
+    setMenuOpen(false);
+  });
+  const {t} = useTranslation();
+  const [dimensions, setDimensions] = React.useState<DOMRect>();
+  return (
+    <>
+      <Button
+        size="xs"
+        variant="outline"
+        variantColor="alert"
+        ref={buttonRef}
+        onClick={() => {
+          setMenuOpen(s => !s);
+          buttonRef.current &&
+            setDimensions(buttonRef.current.getBoundingClientRect());
+        }}
+      >
+        <Tooltip label={t("Configure spawnable item")}>
+          <span className="flex items-center">
+            {t("Configure Spawn...")} <BsFillCaretDownFill size="11" />
+          </span>
+        </Tooltip>
+      </Button>
+      {dimensions && menuOpen && (
+        <Portal>
+          <div
+            className="fixed top-0 left-0 border border-alert-200 bg-opacity-25 bg-alert-800 rounded-sm w-64 h-64 z-40"
+            css={css`
+              transform: translate(
+                ${dimensions.left}px,
+                ${dimensions.bottom + 2}px
+              );
+            `}
+          >
+            <SearchableList />
+          </div>
+        </Portal>
+      )}
+    </>
+  );
+};
 export const StarmapCoreMenubar: React.FC<{
   canvasHeight: number;
   canvasWidth: number;
@@ -27,6 +78,7 @@ export const StarmapCoreMenubar: React.FC<{
   const {selectedIds} = useSelectedShips();
   const {t} = useTranslation();
   const yInputRef = React.useRef<HTMLInputElement>(null);
+
   return (
     <div
       className="fixed top-0 left-0 w-screen p-2 pointer-events-none"
@@ -188,6 +240,7 @@ export const StarmapCoreMenubar: React.FC<{
             <GiThreePointedShuriken />
           </Button>
         </Tooltip>
+        <SpawnMenu />
       </div>
     </div>
   );

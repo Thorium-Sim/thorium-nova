@@ -55,17 +55,17 @@ const Button = React.forwardRef(function Button(
   }
   switch (size) {
     case "xs":
-      className = `${className} min-w-1 text-xs py-1 px-1`;
+      className = `${className} min-w-1 text-sm py-1 px-1`;
       break;
     case "sm":
-      className = `${className} min-w-2 text-sm py-1 px-2`;
+      className = `${className} min-w-2 text-base py-1 px-2`;
       break;
     default:
     case "md":
-      className = `${className} min-w-3 text-base py-1 px-3`;
+      className = `${className} min-w-3 text-lg py-1 px-3`;
       break;
     case "lg":
-      className = `${className} min-w-4 text-lg py-1 px-4`;
+      className = `${className} min-w-4 text-xl py-1 px-4`;
       break;
   }
   if (size === "xs") {
@@ -76,7 +76,7 @@ const Button = React.forwardRef(function Button(
       ref,
       disabled,
       ...extraProps,
-      className: `rounded font-semibold text-lg inline-flex items-center justify-center transition-all duration-200 select-none focus:outline-none focus:shadow-outline ${className}`,
+      className: `rounded font-semibold inline-flex items-center justify-center transition-all duration-200 select-none focus:outline-none focus:shadow-outline ${className}`,
     },
     children
   );

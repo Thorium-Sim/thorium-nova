@@ -5,6 +5,9 @@ subscription PluginShipBasic($pluginId: ID!, $shipId: ID!) {
       name
       description
     }
+    isShip {
+      category
+    }
     tags {
       tags
     }

@@ -34,6 +34,34 @@ export class PluginShipBasicResolver {
     return ship;
   }
   @Mutation()
+  pluginShipSetCategory(
+    @Arg("pluginId", type => ID)
+    pluginId: string,
+    @Arg("shipId", type => ID)
+    shipId: string,
+    @Arg("category", type => String)
+    category: string
+  ): Entity {
+    const {plugin, ship} = getShip({pluginId, shipId});
+    ship.updateComponent("isShip", {category});
+    shipPublish({plugin, ship});
+    return ship;
+  }
+  @Mutation()
+  pluginShipSetFactionAssignment(
+    @Arg("pluginId", type => ID)
+    pluginId: string,
+    @Arg("shipId", type => ID)
+    shipId: string,
+    @Arg("factionId", type => String)
+    factionId: string
+  ): Entity {
+    const {plugin, ship} = getShip({pluginId, shipId});
+    ship.updateComponent("factionAssignment", {factionId});
+    shipPublish({plugin, ship});
+    return ship;
+  }
+  @Mutation()
   pluginShipSetTags(
     @Arg("pluginId", type => ID)
     pluginId: string,

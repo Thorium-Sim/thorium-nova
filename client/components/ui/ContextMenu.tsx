@@ -1,7 +1,6 @@
 import {css} from "@emotion/core";
 import Portal from "@reach/portal";
 import React from "react";
-import {Tooltip} from "./Tooltip";
 
 const ContextMenu: React.FC<{x: number; y: number}> = ({children, x, y}) => {
   return (
@@ -18,3 +17,17 @@ const ContextMenu: React.FC<{x: number; y: number}> = ({children, x, y}) => {
   );
 };
 export default ContextMenu;
+
+export const ContextMenuOption: React.FC<React.DetailedHTMLProps<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  HTMLButtonElement
+>> = ({children, ...props}) => {
+  return (
+    <button
+      className="px-2 py-1  text-left cursor-pointer hover:bg-purple-700 hover:bg-opacity-50 focus:outline-none focus:shadow-outline transition-all"
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};

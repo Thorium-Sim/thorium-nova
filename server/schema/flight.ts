@@ -57,6 +57,7 @@ export default class Flight {
       name: string;
       paused: boolean;
       date: Date;
+      pluginIds: string[];
       entities: Partial<Entity>[];
     }> = {}
   ) {
@@ -64,7 +65,7 @@ export default class Flight {
     this.name = params.name || randomWords(3).join("-");
     this.paused = params.paused ?? true;
     this.date = params.date ? new Date(params.date) : new Date();
-
+    this.pluginIds = params.pluginIds || [];
     this.activatePlugins();
 
     params.entities?.forEach(f => {
@@ -119,9 +120,18 @@ export default class Flight {
     });
   }
 
-  @Field(type => Entity)
+  @Field(type => [Entity])
   get ships() {
     return this.ecs.entities.filter(f => f.components.isShip);
+  }
+  @Field(type => [Entity])
+  get availableShips() {
+    const allShips = this.pluginIds.reduce((prev: Entity[], next) => {
+      const plugin = App.plugins.find(f => f.id === next);
+      if (!plugin) return prev;
+      return prev.concat(plugin.ships);
+    }, []);
+    return allShips;
   }
   serialize() {
     // Get all of the entities in the world and serialize them into objects

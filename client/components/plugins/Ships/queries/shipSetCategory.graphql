@@ -1,0 +1,13 @@
+mutation PluginShipSetCategory(
+  $pluginId: ID!
+  $shipId: ID!
+  $category: String!
+) {
+  pluginShipSetCategory(
+    pluginId: $pluginId
+    shipId: $shipId
+    category: $category
+  ) {
+    id
+  }
+}

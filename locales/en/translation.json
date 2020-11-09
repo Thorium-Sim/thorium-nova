@@ -1,9 +1,22 @@
 {
+  "Category": "Category",
   "Compress Y Dimension": "Compress Y Dimension",
+  "Configure Spawn": {
+    "": {
+      "": {
+        "": ""
+      }
+    }
+  },
+  "Configure spawnable item": "Configure spawnable item",
+  "Description": "Description",
   "Focus On Selected Objects": "Focus On Selected Objects",
   "Hide Planets": "Hide Planets",
   "Instantly Move Objects": "Instantly Move Objects",
+  "Name": "Name",
+  "Name is required": "Name is required",
   "Set Y Dimension Index to Selected Position": "Set Y Dimension Index to Selected Position",
   "Show Autopilot Destinations": "Show Autopilot Destinations",
+  "Tags": "Tags",
   "Y Dimension Index": "Y Dimension Index"
 }

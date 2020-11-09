@@ -35,6 +35,8 @@ import {ShipAssignmentComponent} from "./ship/shipAssignment";
 import {ShipOutfitsComponent} from "./ship/shipOutfits";
 import {AutopilotComponent} from "./ship/autopilot";
 import {InterstellarPositionComponent} from "./ship/interstellarPosition";
+import {IsFactionComponent} from "./isFaction";
+import {FactionAssignmentComponent} from "./factionAssignment";
 @ObjectType()
 export default class Components {
   @Field()
@@ -146,6 +148,13 @@ export default class Components {
 
   @Field()
   thrusters?: ThrustersComponent;
+
+  // Factions
+  @Field()
+  isFaction?: IsFactionComponent;
+
+  @Field()
+  factionAssignment?: FactionAssignmentComponent;
 }
 
 export const registeredComponents = [
@@ -185,4 +194,6 @@ export const registeredComponents = [
   RotationComponent,
   VelocityComponent,
   RotationVelocityComponent,
+  IsFactionComponent,
+  FactionAssignmentComponent,
 ];
