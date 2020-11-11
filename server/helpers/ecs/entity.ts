@@ -136,6 +136,27 @@ class Entity extends Components {
 
     return new Proxy(this, handler);
   }
+  serialize() {
+    return {
+      id: this.id,
+      pluginId: this.pluginId,
+      components: Object.fromEntries(
+        Object.entries(this.components).map(([key, value]) => {
+          const updatedValue = {...value};
+          const excludeFields =
+            registeredComponents.find(c => c.id === key)?.excludeFields || [];
+          if (excludeFields) {
+            excludeFields.forEach((field: string) => {
+              delete updatedValue[field];
+            });
+          }
+
+          return [key, updatedValue];
+        })
+      ),
+      systems: [],
+    };
+  }
   /**
    * Set the parent ecs reference.
    *

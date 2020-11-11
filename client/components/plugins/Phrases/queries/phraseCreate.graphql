@@ -1,0 +1,6 @@
+mutation PhraseCreate($pluginId: ID!, $name: String!) {
+  phraseCreate(pluginId: $pluginId, name: $name) {
+    id
+    name
+  }
+}

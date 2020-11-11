@@ -32,6 +32,7 @@ import {Coordinates} from "server/components/Coordinates";
 import {IsOutfitComponent} from "server/components/outfits/isOutfit";
 import {RotationComponent} from "server/components/rotation";
 import {getAnyOutfit} from "../plugins/outfits/utils";
+import {getPhrase, parsePhrase} from "../phrases";
 
 @Resolver()
 export class ActiveShipsResolver {
@@ -118,6 +119,17 @@ export class ActiveShipsResolver {
     entity.pluginId = shipTemplate.pluginId;
 
     // TODO: Randomly generate a name for this ship based on the assigned faction.
+    let name = `${shipTemplate.identity?.name || ""} ${Math.round(
+      Math.random() * 1000000
+    )}`;
+    if (shipTemplate.isShip?.nameGeneratorPhrase) {
+      const phrase = getPhrase(shipTemplate.isShip?.nameGeneratorPhrase);
+      name = parsePhrase(phrase);
+    }
+    entity.updateComponent("identity", {name});
+    entity.updateComponent("factionAssignment", {
+      factionId: shipTemplate.factionAssignment?.factionId,
+    });
     entity.updateComponents(
       shipTemplate.components as Record<string, Record<string, any>>
     );

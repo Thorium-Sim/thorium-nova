@@ -17,6 +17,7 @@ import Portal from "@reach/portal";
 import useMeasure from "client/helpers/hooks/useMeasure";
 import useOnClickOutside from "client/helpers/hooks/useClickOutside";
 import SearchableList from "../ui/SearchableList";
+import {useAvailableShipsQuery} from "client/generated/graphql";
 
 const SpawnMenu: React.FC = () => {
   const [menuOpen, setMenuOpen] = React.useState(false);
@@ -27,6 +28,15 @@ const SpawnMenu: React.FC = () => {
   });
   const {t} = useTranslation();
   const [dimensions, setDimensions] = React.useState<DOMRect>();
+  const {data} = useAvailableShipsQuery();
+
+  const selectedSpawn = useConfigStore(store => store.shipSpawnTemplateId);
+  const selectedShip = data?.flight?.availableShips.find(
+    s => s.id === selectedSpawn
+  );
+  const [categoryType, setCategoryType] = React.useState<
+    "category" | "faction"
+  >("category");
   return (
     <>
       <Button
@@ -42,22 +52,54 @@ const SpawnMenu: React.FC = () => {
       >
         <Tooltip label={t("Configure spawnable item")}>
           <span className="flex items-center">
-            {t("Configure Spawn...")} <BsFillCaretDownFill size="11" />
+            {selectedShip
+              ? selectedShip.identity.name
+              : t("Configure Spawn...")}{" "}
+            <BsFillCaretDownFill size="11" />
           </span>
         </Tooltip>
       </Button>
       {dimensions && menuOpen && (
         <Portal>
           <div
-            className="fixed top-0 left-0 border border-alert-200 bg-opacity-25 bg-alert-800 rounded-sm w-64 h-64 z-40"
+            className="fixed top-0 left-0 border border-alert-200 bg-opacity-25 bg-alert-800 rounded-sm w-64 z-40"
             css={css`
+              height: 30rem;
               transform: translate(
                 ${dimensions.left}px,
                 ${dimensions.bottom + 2}px
               );
             `}
           >
-            <SearchableList />
+            <div className="flex justify-center gap-4">
+              <Button size="xs" onClick={() => setCategoryType("category")}>
+                Class
+              </Button>
+              <Button
+                size="xs"
+                onClick={() => setCategoryType("faction")}
+                variantColor="warning"
+              >
+                Faction
+              </Button>
+            </div>
+            <SearchableList
+              items={
+                data?.flight?.availableShips.map(s => ({
+                  id: s.id,
+                  label: s.identity.name,
+                  category:
+                    categoryType === "faction"
+                      ? s.factionAssignment?.faction?.identity.name || ""
+                      : s.isShip.category,
+                })) || []
+              }
+              selectedItem={selectedSpawn}
+              setSelectedItem={id => {
+                setMenuOpen(false);
+                useConfigStore.setState({shipSpawnTemplateId: id});
+              }}
+            />
           </div>
         </Portal>
       )}

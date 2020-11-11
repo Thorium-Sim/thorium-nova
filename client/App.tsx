@@ -14,6 +14,7 @@ const Starmap = React.lazy(() => import("./pages/starmap"));
 const PluginList = React.lazy(() => import("./components/plugins/pluginsList"));
 const OutfitsConfig = React.lazy(() => import("./components/plugins/Outfits"));
 const ShipsConfig = React.lazy(() => import("./components/plugins/Ships"));
+const PhrasesConfig = React.lazy(() => import("./components/plugins/Phrases"));
 const Config = React.lazy(() => import("./pages/Config"));
 const Viewscreen = React.lazy(() => import("./components/viewscreen"));
 const StarmapCore = React.lazy(() => import("./components/core"));
@@ -33,6 +34,7 @@ const ClientApp: React.FC = () => {
         <Route path="edit/:universeId/starmap/*" element={<Starmap />} />
         <Route path="edit/:pluginId/outfits/*" element={<OutfitsConfig />} />
         <Route path="edit/:pluginId/ships/*" element={<ShipsConfig />} />
+        <Route path="edit/:pluginId/phrases/*" element={<PhrasesConfig />} />
         <Route path="config" element={<PluginList />} />
         <Route path="config/:pluginId" element={<PluginList />} />
         <Route path="config/:pluginId/edit" element={<Config />}></Route>

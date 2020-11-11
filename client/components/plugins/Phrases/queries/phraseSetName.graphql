@@ -1,0 +1,6 @@
+mutation PhraseSetName($pluginId: ID!, $phraseId: ID!, $name: String!) {
+  phraseSetName(pluginId: $pluginId, phraseId: $phraseId, name: $name) {
+    id
+    name
+  }
+}

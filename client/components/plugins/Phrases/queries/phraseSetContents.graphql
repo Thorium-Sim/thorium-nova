@@ -1,0 +1,9 @@
+mutation PhraseSetUnits(
+  $pluginId: ID!
+  $phraseId: ID!
+  $units: [PhraseUnitInput!]!
+) {
+  phraseSetContents(pluginId: $pluginId, phraseId: $phraseId, units: $units) {
+    id
+  }
+}

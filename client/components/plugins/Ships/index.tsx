@@ -1,12 +1,3 @@
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Flex,
-  Grid,
-  Heading,
-  IconButton,
-} from "@chakra-ui/core";
 import SearchableList from "../../../components/ui/SearchableList";
 import React from "react";
 import {
@@ -26,6 +17,9 @@ import {
   usePluginShipRemoveMutation,
 } from "../../../generated/graphql";
 import {useAlert, useConfirm, usePrompt} from "../../../components/Dialog";
+import {css} from "@emotion/core";
+import Button from "client/components/ui/button";
+import {FaTimes} from "react-icons/fa";
 
 const ShipsList: React.FC = () => {
   const {t} = useTranslation();
@@ -41,12 +35,17 @@ const ShipsList: React.FC = () => {
   const confirm = useConfirm();
   const alert = useAlert();
   return (
-    <Flex p={8} py={12} height="100%" direction="column" bg="blackAlpha.500">
+    <div className="flex p-8 py-12 h-full flex-col bg-blackAlpha-500">
       <Menubar backLink />
-      <Heading>{t(`Ships`)}</Heading>
-      <Grid flex={1} templateColumns="1fr 1fr 2fr" gap={6} height="100%" pb={2}>
-        <Flex direction="column">
-          <Box flex={1}>
+      <h1 className="font-bold text-3xl">{t(`Ships`)}</h1>
+      <div
+        className="grid flex-1 gap-6 h-full pb-2"
+        css={css`
+          grid-template-columns: 1fr 1fr 2fr;
+        `}
+      >
+        <div className="flex flex-col">
+          <div className="flex-1">
             <SearchableList
               selectedItem={shipId}
               setSelectedItem={item => navigate(`${item}/basic`)}
@@ -54,13 +53,13 @@ const ShipsList: React.FC = () => {
                 data?.pluginShips.map(o => ({
                   id: o.id,
                   label: o.identity.name,
+                  category: o.isShip.category,
                 })) || []
               }
               renderItem={c => (
-                <Flex key={c.id} alignItems="center">
-                  <Box flex={1}>{c.label}</Box>
-                  <IconButton
-                    icon="small-close"
+                <div className="flex items-center">
+                  <div className="flex-1">{c.label}</div>
+                  <Button
                     size="sm"
                     aria-label={t("Remove Ship")}
                     variantColor="danger"
@@ -75,11 +74,13 @@ const ShipsList: React.FC = () => {
                         navigate(`/edit/${pluginId}/ships`);
                       }
                     }}
-                  ></IconButton>
-                </Flex>
+                  >
+                    <FaTimes />
+                  </Button>
+                </div>
               )}
             />
-          </Box>
+          </div>
           <Button
             onClick={async () => {
               const name = await prompt({
@@ -99,10 +100,10 @@ const ShipsList: React.FC = () => {
           >
             {t(`New Ship`)}
           </Button>
-        </Flex>
+        </div>
         <Outlet />
-      </Grid>
-    </Flex>
+      </div>
+    </div>
   );
 };
 

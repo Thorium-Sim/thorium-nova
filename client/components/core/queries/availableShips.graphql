@@ -1,0 +1,28 @@
+query AvailableShips {
+  flight {
+    id
+    availableShips {
+      id
+      isShip {
+        category
+      }
+      identity {
+        name
+      }
+      shipAssets {
+        vanity
+      }
+      factionAssignment {
+        faction {
+          id
+          identity {
+            name
+          }
+          isFaction {
+            color
+          }
+        }
+      }
+    }
+  }
+}

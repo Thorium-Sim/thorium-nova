@@ -4,5 +4,8 @@ subscription PluginShips($pluginId: ID!) {
     identity {
       name
     }
+    isShip {
+      category
+    }
   }
 }

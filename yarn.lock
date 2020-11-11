@@ -137,7 +137,7 @@
   resolved "https://registry.yarnpkg.com/@babel/compat-data/-/compat-data-7.12.5.tgz#f56db0c4bb1bbbf221b4e81345aab4141e7cb0e9"
   integrity sha512-DTsS7cxrsH3by8nqQSpFSyjSfSYl57D6Cf4q8dW3LK83tBKBDCkfcay1nYkXq1nIHXnpX8WMMb/O25HOy3h1zg==
 
-"@babel/core@^7.0.0", "@babel/core@^7.1.0", "@babel/core@^7.11.6", "@babel/core@^7.7.5":
+"@babel/core@^7.0.0", "@babel/core@^7.1.0", "@babel/core@^7.7.5":
   version "7.11.6"
   resolved "https://registry.yarnpkg.com/@babel/core/-/core-7.11.6.tgz#3a9455dc7387ff1bac45770650bc13ba04a15651"
   integrity sha512-Wpcv03AGnmkgm6uS6k8iwhIwTrcP0m17TL1n1sy7qD0qelDu4XNeW0dN0mHfa+Gei211yDaLoEe/VlbXQzM4Bg==
@@ -1759,7 +1759,7 @@
     core-js-pure "^3.0.0"
     regenerator-runtime "^0.13.4"
 
-"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.10.1", "@babel/runtime@^7.10.2", "@babel/runtime@^7.10.3", "@babel/runtime@^7.10.5", "@babel/runtime@^7.11.2", "@babel/runtime@^7.3.1", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.2", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.4", "@babel/runtime@^7.9.2":
+"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.10.2", "@babel/runtime@^7.10.3", "@babel/runtime@^7.10.5", "@babel/runtime@^7.11.2", "@babel/runtime@^7.3.1", "@babel/runtime@^7.5.5", "@babel/runtime@^7.6.2", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.4", "@babel/runtime@^7.9.2":
   version "7.11.2"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.11.2.tgz#f549c13c754cc40b87644b9fa9f09a6a95fe0736"
   integrity sha512-TeWkU52so0mPtDcaCTxNBI/IHiz0pZgr8VEFqXFtZWpYD08ZB6FaSwVAS8MKRQAP3bYKiVjwysOJgMFY28o6Tw==
@@ -4364,10 +4364,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/chroma-js@^2.0.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@types/chroma-js/-/chroma-js-2.1.0.tgz#612ce66f8eeb42e37ee90ce8c6da40d8845dc83c"
-  integrity sha512-2L+sToR0+0m/l8bTRF+Q5WkPuPpNjS2e+Zcs1xr1RRos3PJZHkrUJujZ+fwsKIfxA9NkqDKDhf8zlWCCm+rQhg==
+"@types/chroma-js@^2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@types/chroma-js/-/chroma-js-2.1.1.tgz#49023bdf33bd7f739274f590487b5afbaf0c37e2"
+  integrity sha512-xo1Vsq/+xdYibbh1805yk1a2j92EAH4zPPgzcEEUr650svspy74OihCmDv5+p7cElhtn88W0TwQHWbNDJngJ8w==
 
 "@types/codegen.macro@^3.0.0":
   version "3.0.0"
@@ -5564,14 +5564,15 @@ babel-plugin-emotion@^10.0.27:
     find-root "^1.1.0"
     source-map "^0.5.7"
 
-babel-plugin-i18next-extract@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/babel-plugin-i18next-extract/-/babel-plugin-i18next-extract-0.8.0.tgz#2c241fb4af277cdebd05d39f30954c04e0bd9df8"
-  integrity sha512-Aw/I0tbS3xaAjq65ElpZpXEPUw5cjMkAPlkHF+uyh/dep/7ukTWU7pkZggxnNSBWQQkBlal+uhgI8dznFPYskg==
+babel-plugin-i18next-extract@^0.8.1:
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/babel-plugin-i18next-extract/-/babel-plugin-i18next-extract-0.8.1.tgz#287be6199883813871d7a7bda3d3c1edab9be3ce"
+  integrity sha512-og3pcQ4X/e+WZ5H55fO78MAoc4i0eaSyxdh+RS/zYpzdm6yeLwI3PHg4jpF7uMnkdpYdgvBxn40Hf18/M6S6Xw==
   dependencies:
-    "@babel/core" "^7.11.6"
+    "@babel/core" "^7.12.3"
     "@babel/types" "7.9.6"
-    i18next "^19.7.0"
+    deepmerge "^4.2.2"
+    i18next "^19.8.3"
     json-stable-stringify "^1.0.1"
 
 babel-plugin-istanbul@^6.0.0:
@@ -9247,13 +9248,6 @@ i18next-browser-languagedetector@^6.0.1:
   integrity sha512-3H+OsNQn3FciomUU0d4zPFHsvJv4X66lBelXk9hnIDYDsveIgT7dWZ3/VvcSlpKk9lvCK770blRZ/CwHMXZqWw==
   dependencies:
     "@babel/runtime" "^7.5.5"
-
-i18next@^19.7.0:
-  version "19.8.1"
-  resolved "https://registry.yarnpkg.com/i18next/-/i18next-19.8.1.tgz#25a5cd3a96d7f7174096e94a042eb4179643358f"
-  integrity sha512-uDOyiSExuqIOoF1G5hzgyaPkds5RgOlLmklw/wR7vlsbmQ8lBuzjoV2qiL2H0jMp+xkdrHHjt0w00H0fuHpVWw==
-  dependencies:
-    "@babel/runtime" "^7.10.1"
 
 i18next@^19.8.3:
   version "19.8.3"
@@ -13242,10 +13236,10 @@ react-spring@^8.0.27:
     "@babel/runtime" "^7.3.1"
     prop-types "^15.5.8"
 
-react-three-fiber@^5.1.8:
-  version "5.1.8"
-  resolved "https://registry.yarnpkg.com/react-three-fiber/-/react-three-fiber-5.1.8.tgz#480997032f9b24b854e4970bd457ab18a120b1c4"
-  integrity sha512-jlN6PV8BrFehlpc1Bh/TRPmQ6jMfB6pl80OacwpM9moPCMFfQB7MODNaeuFaMsRRhYXqj90oqBfIJgsE0WKv6A==
+react-three-fiber@^5.1.9:
+  version "5.1.9"
+  resolved "https://registry.yarnpkg.com/react-three-fiber/-/react-three-fiber-5.1.9.tgz#58e9c8cfd6f4cf9ed735f6d7839f5d7a000f2ee6"
+  integrity sha512-Gw6sQ1CR5WceuVN6di+vormJCCEaJtKIqWsNxW+iaN77HPNdhICOwtHS96j8+3u/BB7j4nOl4rIBDE36+hk8qA==
   dependencies:
     "@babel/runtime" "^7.12.1"
     "@juggle/resize-observer" "^3.2.0"

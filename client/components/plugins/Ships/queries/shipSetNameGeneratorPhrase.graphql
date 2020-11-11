@@ -1,0 +1,13 @@
+mutation PluginShipSetNameGeneratorPhrase(
+  $pluginId: ID!
+  $shipId: ID!
+  $phraseId: ID
+) {
+  pluginShipSetNameGeneratorPhrase(
+    pluginId: $pluginId
+    shipId: $shipId
+    phraseId: $phraseId
+  ) {
+    id
+  }
+}

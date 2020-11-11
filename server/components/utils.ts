@@ -4,4 +4,5 @@ export abstract class Component {
   static id: string;
   static defaults: any;
   static getDefaults?: Function;
+  static excludeFields?: string[];
 }

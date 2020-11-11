@@ -1,0 +1,3 @@
+query PhraseParse($phraseId: ID!) {
+  phraseParse(phraseId: $phraseId)
+}

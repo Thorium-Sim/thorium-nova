@@ -13,12 +13,11 @@ export class AutopilotComponent extends Component {
     nullable: true,
   })
   desiredCoordinates?: Coordinates;
-  excludeFields?: (keyof AutopilotComponent)[] = [
+  static excludeFields?: (keyof AutopilotComponent)[] = [
     "yawController",
     "pitchController",
     "rollController",
     "speedController",
-    "excludeFields",
   ];
 
   yawController?: Controller;

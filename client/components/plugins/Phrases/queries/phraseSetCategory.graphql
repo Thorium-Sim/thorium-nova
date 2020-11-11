@@ -1,0 +1,10 @@
+mutation PhraseCategory($pluginId: ID!, $phraseId: ID!, $category: String!) {
+  phraseSetCategory(
+    pluginId: $pluginId
+    phraseId: $phraseId
+    category: $category
+  ) {
+    id
+    category
+  }
+}

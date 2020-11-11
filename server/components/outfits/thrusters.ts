@@ -15,7 +15,7 @@ export class ThrustersComponent extends Component {
     rotationDelta: new Coordinates(),
     rotationVelocity: new Coordinates(),
     rotationMaxSpeed: 5,
-    rotationThrust: 200,
+    rotationThrust: 12500,
   };
 
   @Field()

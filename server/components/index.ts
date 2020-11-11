@@ -153,7 +153,7 @@ export default class Components {
   @Field()
   isFaction?: IsFactionComponent;
 
-  @Field()
+  @Field({nullable: true})
   factionAssignment?: FactionAssignmentComponent;
 }
 

@@ -140,12 +140,8 @@ export default class Flight {
       name: this.name,
       paused: this.paused,
       date: this.date,
-      entities: this.ecs.entities.map(e => ({
-        id: e.id,
-        pluginId: e.pluginId,
-        components: e.components,
-        systems: [],
-      })),
+      pluginIds: this.pluginIds,
+      entities: this.ecs.entities.map(e => e.serialize()),
     };
   }
 }

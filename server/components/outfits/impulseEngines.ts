@@ -7,7 +7,7 @@ export class ImpulseEnginesComponent extends Component {
   static defaults: ComponentOmit<ImpulseEnginesComponent> = {
     cruisingSpeed: 1500,
     emergencySpeed: 2000,
-    thrust: 1,
+    thrust: 12500,
     targetSpeed: 0,
     forwardAcceleration: 0,
   };
@@ -19,7 +19,7 @@ export class ImpulseEnginesComponent extends Component {
   @Field({
     description: "The force in kilo-newtons which impulse engines apply.",
   })
-  thrust: number = 1;
+  thrust: number = 12500;
 
   @Field({description: "The desired speed of the ship in km/s."})
   targetSpeed: number = 0;

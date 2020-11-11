@@ -1,0 +1,9 @@
+mutation ShipSpawn(
+  $systemId: ID!
+  $templateId: ID!
+  $position: CoordinatesInput!
+) {
+  shipSpawn(systemId: $systemId, templateId: $templateId, position: $position) {
+    id
+  }
+}

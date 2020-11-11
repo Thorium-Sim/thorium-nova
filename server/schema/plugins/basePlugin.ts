@@ -19,6 +19,7 @@ import {appStoreDir} from "server/helpers/appPaths";
 import {pubsub} from "server/helpers/pubsub";
 import {FileUpload, GraphQLUpload} from "graphql-upload";
 import uploadAsset from "server/helpers/uploadAsset";
+import {Phrase} from "../phrases";
 
 export function getPlugin(id: string) {
   const plugin = App.plugins.find(u => u.id === id);
@@ -72,6 +73,8 @@ export default class BasePlugin {
     "outfits",
     "stationComplements",
     "universe",
+    "phrases",
+    "factions",
     "excludeFields",
   ];
 
@@ -86,6 +89,12 @@ export default class BasePlugin {
 
   @Field(type => [Entity])
   universe: Writable<Entity[]>;
+
+  @Field(type => [Entity])
+  factions: Writable<Entity[]>;
+
+  @Field(type => [Phrase])
+  phrases: Writable<Phrase[]>;
 
   constructor(params: Partial<BasePlugin> = {}) {
     this.id = params.id || uuid();
@@ -114,6 +123,16 @@ export default class BasePlugin {
     this.universe = getStore<Entity[]>({
       class: Entity,
       path: `${appStoreDir}plugins/${this.name}/universe.json`,
+      initialData: [],
+    });
+    this.factions = getStore<Entity[]>({
+      class: Entity,
+      path: `${appStoreDir}plugins/${this.name}/factions.json`,
+      initialData: [],
+    });
+    this.phrases = getStore<Phrase[]>({
+      class: Phrase,
+      path: `${appStoreDir}plugins/${this.name}/phrases.json`,
       initialData: [],
     });
   }

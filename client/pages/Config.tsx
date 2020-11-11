@@ -5,6 +5,7 @@ import {FaStar, FaTools, FaRocket} from "react-icons/fa";
 import {useNavigate, useParams} from "react-router";
 import {NavLink} from "react-router-dom";
 import ConfigLayout from "../components/ui/ConfigLayout";
+import {MdMessage} from "react-icons/md";
 
 const ConfigIcon: React.FC<{to: string}> = props => {
   return (
@@ -17,17 +18,7 @@ const ConfigIcon: React.FC<{to: string}> = props => {
 
 const Config = () => {
   const {t} = useTranslation();
-  const navigate = useNavigate();
-  const [isOpen, setIsOpen] = React.useState(false);
   const {pluginId} = useParams();
-  React.useEffect(() => {
-    setIsOpen(true);
-  }, []);
-  async function onClose() {
-    setIsOpen(false);
-    await sleep(250);
-    navigate("..");
-  }
   return (
     <ConfigLayout title={t(`Plugin Configuration`)}>
       <div className="p-8 grid grid-cols-3 grid-rows-3 gap-48 justify-center">
@@ -42,6 +33,10 @@ const Config = () => {
         <ConfigIcon to={`/edit/${pluginId}/outfits`}>
           <FaTools className="text-6xl mb-4" />
           <p className="font-bold text-2xl">{t("Outfits")}</p>
+        </ConfigIcon>
+        <ConfigIcon to={`/edit/${pluginId}/phrases`}>
+          <MdMessage className="text-6xl mb-4" />
+          <p className="font-bold text-2xl">{t("Phrases")}</p>
         </ConfigIcon>
       </div>
     </ConfigLayout>

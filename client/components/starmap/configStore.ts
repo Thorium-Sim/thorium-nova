@@ -51,6 +51,7 @@ export interface ConfigStore extends Record<string | number | symbol, unknown> {
   draggingMovement3D: null | {x: number; y: number; z: number};
   instantMoveObjects: boolean;
   translate2dTo3d?: (x: number, y: number) => Vector3;
+  shipSpawnTemplateId?: string;
 }
 const store = create<ConfigStore>(set => ({
   disableOrbitControls: () => {},

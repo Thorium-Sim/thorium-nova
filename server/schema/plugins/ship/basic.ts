@@ -1,6 +1,5 @@
 import Entity from "server/helpers/ecs/entity";
 import {Arg, ID, Mutation, Resolver} from "type-graphql";
-import {getPlugin} from "../basePlugin";
 import {getShip, shipPublish} from "./utils";
 
 @Resolver()
@@ -44,6 +43,20 @@ export class PluginShipBasicResolver {
   ): Entity {
     const {plugin, ship} = getShip({pluginId, shipId});
     ship.updateComponent("isShip", {category});
+    shipPublish({plugin, ship});
+    return ship;
+  }
+  @Mutation()
+  pluginShipSetNameGeneratorPhrase(
+    @Arg("pluginId", type => ID)
+    pluginId: string,
+    @Arg("shipId", type => ID)
+    shipId: string,
+    @Arg("phraseId", type => ID, {nullable: true})
+    phraseId: string
+  ): Entity {
+    const {plugin, ship} = getShip({pluginId, shipId});
+    ship.updateComponent("isShip", {nameGeneratorPhrase: phraseId});
     shipPublish({plugin, ship});
     return ship;
   }

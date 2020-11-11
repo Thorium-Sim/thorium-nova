@@ -112,11 +112,22 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
       return;
     }
     await fs.mkdir(path.dirname(filePath), {recursive: true});
-    const jsonData = json(
-      dataObject.serialize ? dataObject.serialize() : dataObject,
-      null,
-      indent
-    );
+
+    let jsonData = "{}";
+
+    if (Array.isArray(dataObject)) {
+      jsonData = json(
+        dataObject.map(o => (o.serialize ? o.serialize() : o)),
+        null,
+        indent
+      );
+    } else {
+      jsonData = json(
+        dataObject.serialize ? dataObject.serialize() : dataObject,
+        null,
+        indent
+      );
+    }
     await fs.writeFile(filePath, jsonData, {mode: 0o0600});
   }
 

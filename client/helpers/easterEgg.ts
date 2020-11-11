@@ -1,6 +1,7 @@
 /* istanbul ignore file */
 
-import useKonami from "react-use-konami";
+import {useKonami} from "./hooks/useKonami";
+
 const synth = window.speechSynthesis;
 
 /** A tribute to my dad **/

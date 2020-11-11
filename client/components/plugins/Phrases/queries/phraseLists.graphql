@@ -1,0 +1,12 @@
+subscription PhraseLists($pluginId: ID!) {
+  phrases(pluginId: $pluginId) {
+    id
+    name
+    category
+    units {
+      id
+      type
+      contents
+    }
+  }
+}

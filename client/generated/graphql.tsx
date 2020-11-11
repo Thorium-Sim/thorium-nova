@@ -17,6 +17,12 @@ export type Scalars = {
   Upload: any;
 };
 
+export enum PhraseTypes {
+  Word = "word",
+  Phrase = "phrase",
+  Space = "space",
+}
+
 export enum EntityTypes {
   System = "system",
   Planet = "planet",
@@ -25,6 +31,12 @@ export enum EntityTypes {
   Outfit = "outfit",
   Timer = "timer",
 }
+
+export type PhraseUnitInput = {
+  id: Maybe<Scalars["ID"]>;
+  type: Maybe<PhraseTypes>;
+  contents: Maybe<Array<Scalars["String"]>>;
+};
 
 export type CoordinatesInput = {
   x: Maybe<Scalars["Float"]>;
@@ -168,6 +180,43 @@ export type TimersSubscription = {
       };
     };
   }>;
+};
+
+export type AvailableShipsQueryVariables = Exact<{[key: string]: never}>;
+
+export type AvailableShipsQuery = {
+  __typename?: "Query";
+  flight: Maybe<{
+    __typename?: "Flight";
+    id: string;
+    availableShips: Array<{
+      __typename?: "Entity";
+      id: string;
+      isShip: {__typename?: "IsShipComponent"; category: string};
+      identity: {__typename?: "IdentityComponent"; name: string};
+      shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; vanity: string}>;
+      factionAssignment: Maybe<{
+        __typename?: "FactionAssignmentComponent";
+        faction: Maybe<{
+          __typename?: "Entity";
+          id: string;
+          identity: {__typename?: "IdentityComponent"; name: string};
+          isFaction: {__typename?: "IsFactionComponent"; color: string};
+        }>;
+      }>;
+    }>;
+  }>;
+};
+
+export type ShipSpawnMutationVariables = Exact<{
+  systemId: Scalars["ID"];
+  templateId: Scalars["ID"];
+  position: CoordinatesInput;
+}>;
+
+export type ShipSpawnMutation = {
+  __typename?: "Mutation";
+  shipSpawn: Maybe<{__typename?: "Entity"; id: string}>;
 };
 
 export type OutfitAbilitiesQueryVariables = Exact<{[key: string]: never}>;
@@ -482,6 +531,85 @@ export type WarpEnginesSubscription = {
   }>;
 };
 
+export type PhraseCreateMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  name: Scalars["String"];
+}>;
+
+export type PhraseCreateMutation = {
+  __typename?: "Mutation";
+  phraseCreate: {__typename?: "Phrase"; id: string; name: string};
+};
+
+export type PhraseListsSubscriptionVariables = Exact<{
+  pluginId: Scalars["ID"];
+}>;
+
+export type PhraseListsSubscription = {
+  __typename?: "Subscription";
+  phrases: Array<{
+    __typename?: "Phrase";
+    id: string;
+    name: string;
+    category: string;
+    units: Array<{
+      __typename?: "PhraseUnit";
+      id: Maybe<string>;
+      type: PhraseTypes;
+      contents: Array<string>;
+    }>;
+  }>;
+};
+
+export type PhraseParseQueryVariables = Exact<{
+  phraseId: Scalars["ID"];
+}>;
+
+export type PhraseParseQuery = {__typename?: "Query"; phraseParse: string};
+
+export type PhraseRemoveMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  id: Scalars["ID"];
+}>;
+
+export type PhraseRemoveMutation = {
+  __typename?: "Mutation";
+  phraseRemove: string;
+};
+
+export type PhraseCategoryMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  phraseId: Scalars["ID"];
+  category: Scalars["String"];
+}>;
+
+export type PhraseCategoryMutation = {
+  __typename?: "Mutation";
+  phraseSetCategory: {__typename?: "Phrase"; id: string; category: string};
+};
+
+export type PhraseSetUnitsMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  phraseId: Scalars["ID"];
+  units: Array<PhraseUnitInput>;
+}>;
+
+export type PhraseSetUnitsMutation = {
+  __typename?: "Mutation";
+  phraseSetContents: {__typename?: "Phrase"; id: string};
+};
+
+export type PhraseSetNameMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  phraseId: Scalars["ID"];
+  name: Scalars["String"];
+}>;
+
+export type PhraseSetNameMutation = {
+  __typename?: "Mutation";
+  phraseSetName: {__typename?: "Phrase"; id: string; name: string};
+};
+
 export type TemplateShipAssetsSubscriptionVariables = Exact<{
   pluginId: Scalars["ID"];
   id: Scalars["ID"];
@@ -586,7 +714,11 @@ export type PluginShipBasicSubscription = {
       name: string;
       description: string;
     };
-    isShip: {__typename?: "IsShipComponent"; category: string};
+    isShip: {
+      __typename?: "IsShipComponent";
+      category: string;
+      nameGeneratorPhrase: Maybe<string>;
+    };
     tags: {__typename?: "TagsComponent"; tags: Array<string>};
   }>;
 };
@@ -712,6 +844,17 @@ export type PluginShipSetNameMutation = {
   };
 };
 
+export type PluginShipSetNameGeneratorPhraseMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  shipId: Scalars["ID"];
+  phraseId: Maybe<Scalars["ID"]>;
+}>;
+
+export type PluginShipSetNameGeneratorPhraseMutation = {
+  __typename?: "Mutation";
+  pluginShipSetNameGeneratorPhrase: {__typename?: "Entity"; id: string};
+};
+
 export type PluginShipSetSizeMutationVariables = Exact<{
   pluginId: Scalars["ID"];
   shipId: Scalars["ID"];
@@ -748,6 +891,7 @@ export type PluginShipsSubscription = {
     __typename?: "Entity";
     id: string;
     identity: {__typename?: "IdentityComponent"; name: string};
+    isShip: {__typename?: "IsShipComponent"; category: string};
   }>;
 };
 
@@ -1798,6 +1942,93 @@ export function useTimersSubscription(
 export type TimersSubscriptionHookResult = ReturnType<
   typeof useTimersSubscription
 >;
+export const AvailableShipsDocument = gql`
+  query AvailableShips {
+    flight {
+      id
+      availableShips {
+        id
+        isShip {
+          category
+        }
+        identity {
+          name
+        }
+        shipAssets {
+          vanity
+        }
+        factionAssignment {
+          faction {
+            id
+            identity {
+              name
+            }
+            isFaction {
+              color
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+export function useAvailableShipsQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    AvailableShipsQuery,
+    AvailableShipsQueryVariables
+  >
+) {
+  return Apollo.useQuery<AvailableShipsQuery, AvailableShipsQueryVariables>(
+    AvailableShipsDocument,
+    baseOptions
+  );
+}
+export function useAvailableShipsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    AvailableShipsQuery,
+    AvailableShipsQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<AvailableShipsQuery, AvailableShipsQueryVariables>(
+    AvailableShipsDocument,
+    baseOptions
+  );
+}
+export type AvailableShipsQueryHookResult = ReturnType<
+  typeof useAvailableShipsQuery
+>;
+export type AvailableShipsLazyQueryHookResult = ReturnType<
+  typeof useAvailableShipsLazyQuery
+>;
+export const ShipSpawnDocument = gql`
+  mutation ShipSpawn(
+    $systemId: ID!
+    $templateId: ID!
+    $position: CoordinatesInput!
+  ) {
+    shipSpawn(
+      systemId: $systemId
+      templateId: $templateId
+      position: $position
+    ) {
+      id
+    }
+  }
+`;
+export function useShipSpawnMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ShipSpawnMutation,
+    ShipSpawnMutationVariables
+  >
+) {
+  return Apollo.useMutation<ShipSpawnMutation, ShipSpawnMutationVariables>(
+    ShipSpawnDocument,
+    baseOptions
+  );
+}
+export type ShipSpawnMutationHookResult = ReturnType<
+  typeof useShipSpawnMutation
+>;
 export const OutfitAbilitiesDocument = gql`
   query OutfitAbilities {
     outfitAbilities: __type(name: "OutfitAbilities") {
@@ -2433,6 +2664,179 @@ export function useWarpEnginesSubscription(
 export type WarpEnginesSubscriptionHookResult = ReturnType<
   typeof useWarpEnginesSubscription
 >;
+export const PhraseCreateDocument = gql`
+  mutation PhraseCreate($pluginId: ID!, $name: String!) {
+    phraseCreate(pluginId: $pluginId, name: $name) {
+      id
+      name
+    }
+  }
+`;
+export function usePhraseCreateMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PhraseCreateMutation,
+    PhraseCreateMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PhraseCreateMutation,
+    PhraseCreateMutationVariables
+  >(PhraseCreateDocument, baseOptions);
+}
+export type PhraseCreateMutationHookResult = ReturnType<
+  typeof usePhraseCreateMutation
+>;
+export const PhraseListsDocument = gql`
+  subscription PhraseLists($pluginId: ID!) {
+    phrases(pluginId: $pluginId) {
+      id
+      name
+      category
+      units {
+        id
+        type
+        contents
+      }
+    }
+  }
+`;
+export function usePhraseListsSubscription(
+  baseOptions: Apollo.SubscriptionHookOptions<
+    PhraseListsSubscription,
+    PhraseListsSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    PhraseListsSubscription,
+    PhraseListsSubscriptionVariables
+  >(PhraseListsDocument, baseOptions);
+}
+export type PhraseListsSubscriptionHookResult = ReturnType<
+  typeof usePhraseListsSubscription
+>;
+export const PhraseParseDocument = gql`
+  query PhraseParse($phraseId: ID!) {
+    phraseParse(phraseId: $phraseId)
+  }
+`;
+export function usePhraseParseQuery(
+  baseOptions: Apollo.QueryHookOptions<
+    PhraseParseQuery,
+    PhraseParseQueryVariables
+  >
+) {
+  return Apollo.useQuery<PhraseParseQuery, PhraseParseQueryVariables>(
+    PhraseParseDocument,
+    baseOptions
+  );
+}
+export function usePhraseParseLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    PhraseParseQuery,
+    PhraseParseQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<PhraseParseQuery, PhraseParseQueryVariables>(
+    PhraseParseDocument,
+    baseOptions
+  );
+}
+export type PhraseParseQueryHookResult = ReturnType<typeof usePhraseParseQuery>;
+export type PhraseParseLazyQueryHookResult = ReturnType<
+  typeof usePhraseParseLazyQuery
+>;
+export const PhraseRemoveDocument = gql`
+  mutation PhraseRemove($pluginId: ID!, $id: ID!) {
+    phraseRemove(pluginId: $pluginId, id: $id)
+  }
+`;
+export function usePhraseRemoveMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PhraseRemoveMutation,
+    PhraseRemoveMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PhraseRemoveMutation,
+    PhraseRemoveMutationVariables
+  >(PhraseRemoveDocument, baseOptions);
+}
+export type PhraseRemoveMutationHookResult = ReturnType<
+  typeof usePhraseRemoveMutation
+>;
+export const PhraseCategoryDocument = gql`
+  mutation PhraseCategory($pluginId: ID!, $phraseId: ID!, $category: String!) {
+    phraseSetCategory(
+      pluginId: $pluginId
+      phraseId: $phraseId
+      category: $category
+    ) {
+      id
+      category
+    }
+  }
+`;
+export function usePhraseCategoryMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PhraseCategoryMutation,
+    PhraseCategoryMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PhraseCategoryMutation,
+    PhraseCategoryMutationVariables
+  >(PhraseCategoryDocument, baseOptions);
+}
+export type PhraseCategoryMutationHookResult = ReturnType<
+  typeof usePhraseCategoryMutation
+>;
+export const PhraseSetUnitsDocument = gql`
+  mutation PhraseSetUnits(
+    $pluginId: ID!
+    $phraseId: ID!
+    $units: [PhraseUnitInput!]!
+  ) {
+    phraseSetContents(pluginId: $pluginId, phraseId: $phraseId, units: $units) {
+      id
+    }
+  }
+`;
+export function usePhraseSetUnitsMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PhraseSetUnitsMutation,
+    PhraseSetUnitsMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PhraseSetUnitsMutation,
+    PhraseSetUnitsMutationVariables
+  >(PhraseSetUnitsDocument, baseOptions);
+}
+export type PhraseSetUnitsMutationHookResult = ReturnType<
+  typeof usePhraseSetUnitsMutation
+>;
+export const PhraseSetNameDocument = gql`
+  mutation PhraseSetName($pluginId: ID!, $phraseId: ID!, $name: String!) {
+    phraseSetName(pluginId: $pluginId, phraseId: $phraseId, name: $name) {
+      id
+      name
+    }
+  }
+`;
+export function usePhraseSetNameMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PhraseSetNameMutation,
+    PhraseSetNameMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PhraseSetNameMutation,
+    PhraseSetNameMutationVariables
+  >(PhraseSetNameDocument, baseOptions);
+}
+export type PhraseSetNameMutationHookResult = ReturnType<
+  typeof usePhraseSetNameMutation
+>;
 export const TemplateShipAssetsDocument = gql`
   subscription TemplateShipAssets($pluginId: ID!, $id: ID!) {
     pluginShip(pluginId: $pluginId, id: $id) {
@@ -2605,6 +3009,7 @@ export const PluginShipBasicDocument = gql`
       }
       isShip {
         category
+        nameGeneratorPhrase
       }
       tags {
         tags
@@ -2861,6 +3266,35 @@ export function usePluginShipSetNameMutation(
 export type PluginShipSetNameMutationHookResult = ReturnType<
   typeof usePluginShipSetNameMutation
 >;
+export const PluginShipSetNameGeneratorPhraseDocument = gql`
+  mutation PluginShipSetNameGeneratorPhrase(
+    $pluginId: ID!
+    $shipId: ID!
+    $phraseId: ID
+  ) {
+    pluginShipSetNameGeneratorPhrase(
+      pluginId: $pluginId
+      shipId: $shipId
+      phraseId: $phraseId
+    ) {
+      id
+    }
+  }
+`;
+export function usePluginShipSetNameGeneratorPhraseMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PluginShipSetNameGeneratorPhraseMutation,
+    PluginShipSetNameGeneratorPhraseMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PluginShipSetNameGeneratorPhraseMutation,
+    PluginShipSetNameGeneratorPhraseMutationVariables
+  >(PluginShipSetNameGeneratorPhraseDocument, baseOptions);
+}
+export type PluginShipSetNameGeneratorPhraseMutationHookResult = ReturnType<
+  typeof usePluginShipSetNameGeneratorPhraseMutation
+>;
 export const PluginShipSetSizeDocument = gql`
   mutation PluginShipSetSize($pluginId: ID!, $shipId: ID!, $size: Float!) {
     pluginShipSetSize(pluginId: $pluginId, shipId: $shipId, size: $size) {
@@ -2912,6 +3346,9 @@ export const PluginShipsDocument = gql`
       id
       identity {
         name
+      }
+      isShip {
+        category
       }
     }
   }

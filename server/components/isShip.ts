@@ -7,6 +7,7 @@ export class IsShipComponent extends Component {
   static defaults: ComponentOmit<IsShipComponent> = {
     mass: 2000,
     category: "Cruiser",
+    nameGeneratorPhrase: null,
   };
   #category: string = "Cruiser";
   @Field({description: "Mass in kilograms. Affects acceleration"})
@@ -22,4 +23,6 @@ export class IsShipComponent extends Component {
   set category(cat) {
     this.#category = cat;
   }
+  @Field(type => String, {nullable: true})
+  nameGeneratorPhrase: string | null = null;
 }
