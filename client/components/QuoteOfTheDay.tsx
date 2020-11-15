@@ -110,6 +110,7 @@ const quotes = [
   "Just because you're paranoid doesn't mean they aren't after you.",
   "He knew everything there was to know about literature, except how to enjoy it.",
   "Insanity is contagious.",
+  "Brains are weird, man. Weird, and grey, and squishy.",
 ];
 
 const QuoteOfTheDay = () => {
