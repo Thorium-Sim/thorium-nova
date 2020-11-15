@@ -20,8 +20,19 @@ import getStore from "../helpers/dataStore";
 import {appStoreDir} from "../helpers/appPaths";
 import {TimerSystem} from "../systems/TimerSystem";
 import {GraphQLContext} from "../helpers/graphqlContext";
+import {AutoRotateSystem} from "server/systems/AutoRotateSystem";
+import {AutoThrustSystem} from "server/systems/AutoThrustSystem";
+import {ThrusterSystem} from "server/systems/ThrusterSystem";
+import {RotationSystem} from "server/systems/RotationSystem";
+import {ImpulseSystem} from "server/systems/ImpulseSystem";
+import {WarpSystem} from "server/systems/WarpSystem";
+import {WarpVelocityPosition} from "server/systems/WarpVelocityPosition";
+import {EngineVelocitySystem} from "server/systems/EngineVelocitySystem";
+import {PositionVelocitySystem} from "server/systems/PositionVelocitySystem";
+import {getPlugin} from "./plugins/basePlugin";
+import {Networking} from "server/systems/Networking";
 
-const INTERVAL = 1000 / 5;
+const INTERVAL = 1000 / 60;
 
 @ObjectType()
 export default class Flight {
@@ -37,6 +48,8 @@ export default class Flight {
   @Field()
   date: Date;
 
+  pluginIds: string[] = [];
+
   ecs = new ECS();
   constructor(
     params: Partial<{
@@ -44,20 +57,32 @@ export default class Flight {
       name: string;
       paused: boolean;
       date: Date;
-      entities: {id: string; components: Components[]}[];
+      entities: Partial<Entity>[];
     }> = {}
   ) {
     this.id = params.id || uuid();
     this.name = params.name || randomWords(3).join("-");
-    this.paused = params.paused || false;
+    this.paused = params.paused ?? true;
     this.date = params.date ? new Date(params.date) : new Date();
 
+    this.activatePlugins();
+
     params.entities?.forEach(f => {
-      const e = new Entity(f.id, f.components);
+      const e = new Entity({...f});
       this.ecs.addEntity(e);
     });
 
     this.ecs.addSystem(new TimerSystem());
+    this.ecs.addSystem(new AutoRotateSystem());
+    this.ecs.addSystem(new AutoThrustSystem());
+    this.ecs.addSystem(new ThrusterSystem());
+    this.ecs.addSystem(new ImpulseSystem());
+    this.ecs.addSystem(new WarpSystem());
+    this.ecs.addSystem(new RotationSystem());
+    this.ecs.addSystem(new EngineVelocitySystem());
+    this.ecs.addSystem(new WarpVelocityPosition());
+    this.ecs.addSystem(new PositionVelocitySystem());
+    this.ecs.addSystem(new Networking());
 
     this.run();
   }
@@ -71,9 +96,27 @@ export default class Flight {
   };
   setPaused(tf: boolean) {
     this.paused = tf;
+    if (!tf) {
+      this.run();
+    }
   }
   reset() {
     // TODO: Flight Reset Handling
+  }
+
+  activatePlugins(initialLoad?: boolean): void {
+    this.pluginIds.forEach(pluginId => {
+      const plugin = getPlugin(pluginId);
+      if (initialLoad) {
+        // TODO: Combine remix plugins with the base plugins.
+        // Create entities for the universe objects
+        plugin.universe.forEach(universeItem => {
+          App.activeFlight?.ecs.addEntity(
+            new Entity({...universeItem, pluginId: plugin.id})
+          );
+        });
+      }
+    });
   }
 
   @Field(type => Entity)
@@ -89,7 +132,9 @@ export default class Flight {
       date: this.date,
       entities: this.ecs.entities.map(e => ({
         id: e.id,
+        pluginId: e.pluginId,
         components: e.components,
+        systems: [],
       })),
     };
   }
@@ -128,16 +173,25 @@ export class FlightResolver {
   @Mutation(returns => Flight)
   flightStart(
     @Arg("flightName", type => String, {nullable: true})
-    flightName: string = randomWords(3).join("-")
+    flightName: string = randomWords(3).join("-"),
+    @Arg("plugins", type => [ID])
+    plugins: string[]
   ): Flight {
+    // When we start our flight, we need a list of plugins that will be active.
+    // If a mission is selected, all of the plugins referenced by that mission
+    // will also be activated. For custom flights, you just choose which plugins
+    // are active.
     if (!App.activeFlight) {
       const flight = getStore<Flight>({
         class: Flight,
         path: `${appStoreDir}flights/${flightName}.flight`,
-        initialData: {name: flightName},
+        initialData: {name: flightName, initialLoad: true},
       });
       App.activeFlight = flight;
       App.storage.activeFlightName = flight.name;
+
+      App.activeFlight.pluginIds = plugins;
+      App.activeFlight.activatePlugins(true);
     }
     return App.activeFlight;
   }

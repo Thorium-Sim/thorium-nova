@@ -57,7 +57,7 @@ const ShipAssets: React.FC = () => {
             setLogo({variables: {id: shipId, pluginId, image: files[0]}})
           }
         >
-          {data?.pluginShip?.shipAssets.logo && (
+          {data?.pluginShip?.shipAssets?.logo && (
             <Image
               src={`${
                 data?.pluginShip?.shipAssets.logo
@@ -140,7 +140,7 @@ const ShipAssets: React.FC = () => {
             }
           }}
         >
-          {data?.pluginShip?.shipAssets.vanity && (
+          {data?.pluginShip?.shipAssets?.vanity && (
             <Image
               src={`${
                 data?.pluginShip?.shipAssets.vanity
@@ -156,7 +156,7 @@ const ShipAssets: React.FC = () => {
       <Box gridArea="top">
         <Heading as="h3" size="md">{t`Top View`}</Heading>
         <UploadWell disabled>
-          {data?.pluginShip?.shipAssets.top && (
+          {data?.pluginShip?.shipAssets?.top && (
             <Image
               src={`${
                 data?.pluginShip?.shipAssets.top
@@ -172,7 +172,7 @@ const ShipAssets: React.FC = () => {
       <Box gridArea="side">
         <Heading as="h3" size="md">{t`Side View`}</Heading>
         <UploadWell disabled>
-          {data?.pluginShip?.shipAssets.side && (
+          {data?.pluginShip?.shipAssets?.side && (
             <Image
               src={`${
                 data?.pluginShip?.shipAssets.side

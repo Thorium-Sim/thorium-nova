@@ -1,0 +1,33 @@
+subscription UniverseSystemShips($systemId: ID!) {
+  universeSystemShips(systemId: $systemId) {
+    id
+    identity {
+      name
+    }
+    position {
+      x
+      y
+      z
+    }
+    rotation {
+      x
+      y
+      z
+      w
+    }
+    autopilot {
+      desiredCoordinates {
+        x
+        y
+        z
+      }
+    }
+    size {
+      value
+    }
+
+    shipAssets {
+      model
+    }
+  }
+}

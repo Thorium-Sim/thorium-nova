@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg
+  width="100%"
+  height="100%"
+  viewBox="0 0 32 32"
+  version="1.1"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xml:space="preserve"
+  style="
+    fill-rule: evenodd;
+    clip-rule: evenodd;
+    stroke-linejoin: round;
+    stroke-miterlimit: 1.41421;
+  "
+>
+  <g transform="matrix(2.2856,0,0,2.28566,-22.8552,-15.9996)">
+    <path d="M16,13L10,13L12,11L14,11L14,9L16,7L16,13Z" style="fill: #ffffff" />
+  </g>
+  <g
+    transform="matrix(-2.2856,-0.000466545,0.000466533,-2.28566,54.8506,48.0049)"
+  >
+    <path d="M16,13L10,13L12,11L14,11L14,9L16,7L16,13Z" style="fill: #ffffff" />
+  </g>
+  <g
+    transform="matrix(1.39948e-16,-2.28566,2.2856,1.39952e-16,-15.9998,54.8572)"
+  >
+    <path d="M16,13L10,13L12,11L14,11L14,9L16,7L16,13Z" style="fill: #ffffff" />
+  </g>
+  <g
+    transform="matrix(-4.19854e-16,2.28566,-2.2856,-4.19864e-16,47.997,-22.8552)"
+  >
+    <path d="M16,13L10,13L12,11L14,11L14,9L16,7L16,13Z" style="fill: #ffffff" />
+  </g>
+</svg>

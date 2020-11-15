@@ -3,6 +3,7 @@ import Entity from "../helpers/ecs/entity";
 import {
   Ctx,
   FieldResolver,
+  ID,
   Query,
   registerEnumType,
   Resolver,
@@ -11,7 +12,6 @@ import {
 import {ShipAssetsComponent} from "server/components/ship/shipAssets";
 import {SatelliteComponent} from "server/components/satellite";
 import {GraphQLContext} from "server/helpers/graphqlContext";
-import {IsOutfitComponent} from "server/components/outfits/isOutfit";
 
 @Resolver(Entity)
 export class EntityResolver {
@@ -45,14 +45,22 @@ export function getEntityType(entity: Entity) {
 registerEnumType(EntityTypes, {name: "EntityTypes"});
 @Resolver(of => Entity)
 export class EntityFieldResolver {
+  @FieldResolver(type => ID)
+  id(@Root() entity: Entity, @Ctx() context: GraphQLContext) {
+    context.entity = entity;
+    return entity.id;
+  }
   @FieldResolver(type => EntityTypes)
   entityType(@Root() entity: Entity): EntityTypes {
     return getEntityType(entity);
   }
-  @FieldResolver()
-  shipAssets(@Root() entity: Entity): ShipAssetsComponent {
-    // @ts-ignore
-    return {...entity.shipAssets, entity};
+  @FieldResolver(type => ShipAssetsComponent, {nullable: true})
+  shipAssets(
+    @Root() entity: Entity,
+    @Ctx() context: GraphQLContext
+  ): ShipAssetsComponent | null {
+    context.pluginId = entity.pluginId;
+    return entity.shipAssets || null;
   }
   @FieldResolver(type => SatelliteComponent, {nullable: true})
   satellite(@Root() entity: Entity): SatelliteComponent | null {

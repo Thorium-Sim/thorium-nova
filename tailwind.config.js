@@ -12,6 +12,14 @@ module.exports = {
     "./client/**/*.ts",
   ],
   theme: {
+    filter: {
+      // defaults to {}
+      none: "none",
+      grayscale: "grayscale(1)",
+      disabled: "grayscale(0.5) brightness(0.4)",
+      invert: "invert(1)",
+      sepia: "sepia(1)",
+    },
     extend: {
       colors: {
         whiteAlpha: {
@@ -140,5 +148,8 @@ module.exports = {
     },
   },
   variants: {},
-  plugins: [],
+  plugins: [
+    require("@tailwindcss/custom-forms"),
+    require("tailwindcss-filters"),
+  ],
 };

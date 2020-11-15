@@ -19,7 +19,8 @@
     "baseUrl": ".",
     "paths": {
       "*": ["test/*"],
-      "server/*": ["server/*"]
+      "server/*": ["server/*"],
+      "client/*": ["client/*"]
     },
     "typeRoots": ["./node_modules/@types", "./types"]
   },

@@ -5,7 +5,7 @@ import {Component, ComponentOmit} from "../utils";
 export class DampenerComponent extends Component {
   static id: "dampener" = "dampener";
   static defaults: ComponentOmit<DampenerComponent> = {
-    dampening: 10,
+    dampening: 1,
   };
 
   // This is applied based on the current velocity of the ship to slowly bring it
@@ -14,7 +14,7 @@ export class DampenerComponent extends Component {
     description:
       "The dampening factor. Affects how fast the ship slows down when engines are turned off. Lower number means slow the ship down faster.",
   })
-  dampening: number = 10;
+  dampening: number = 1;
 }
 
 /**

@@ -8,12 +8,7 @@ import Disc from "./Disc";
 import {configStoreApi} from "./configStore";
 import {OrbitControls} from "./OrbitControls";
 
-// 1 unit = 1 million km
-const Planetary: React.FC<{universeId: string; systemId: string}> = ({
-  universeId,
-  systemId,
-}) => {
-  const {camera} = useThree();
+export function useSetupOrbit() {
   const orbitControls = React.useRef<OrbitControls>();
 
   React.useEffect(() => {
@@ -43,6 +38,16 @@ const Planetary: React.FC<{universeId: string; systemId: string}> = ({
     // Indicate the transition is complete
     configStoreApi.getState().transitionPromise?.();
   }, []);
+  return orbitControls;
+}
+// 1 unit = 1 million km
+const Planetary: React.FC<{universeId: string; systemId: string}> = ({
+  universeId,
+  systemId,
+}) => {
+  const {camera} = useThree();
+
+  const orbitControls = useSetupOrbit();
   const {data} = useTemplateSystemSubscription({
     variables: {id: universeId, systemId},
   });

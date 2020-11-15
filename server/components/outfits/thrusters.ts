@@ -10,12 +10,12 @@ export class ThrustersComponent extends Component {
     direction: new Coordinates(),
     directionAcceleration: new Coordinates(),
     directionMaxSpeed: 1,
-    directionThrust: 1,
+    directionThrust: 12500,
 
     rotationDelta: new Coordinates(),
     rotationVelocity: new Coordinates(),
     rotationMaxSpeed: 5,
-    rotationThrust: 1,
+    rotationThrust: 200,
   };
 
   @Field()
@@ -46,11 +46,11 @@ export class ThrustersComponent extends Component {
     description:
       "The thrust applied by direction thrusters in kilo-newtons, which affects how fast the ship accelerates based on the mass of the ship.",
   })
-  directionThrust: number = 1;
+  directionThrust: number = 12500;
 
   @Field({description: "The current vector of rotation being applied."})
   rotationDelta: Coordinates = new Coordinates();
-  @Field({description: "The current rotation velocity."})
+  @Field({description: "The current rotation velocity in radians per second."})
   rotationVelocity: Coordinates = new Coordinates();
   @Field({description: "The max rotation speed in rotations per minute."})
   rotationMaxSpeed: number = 5;
@@ -58,5 +58,5 @@ export class ThrustersComponent extends Component {
     description:
       "The thrust applied by rotation thrusters in kilo-newtons, which affects how fast the rotation accelerates based on the mass of the ship.",
   })
-  rotationThrust: number = 1;
+  rotationThrust: number = 12500;
 }

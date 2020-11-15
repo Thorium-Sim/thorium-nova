@@ -22,6 +22,7 @@ import uuid from "uniqid";
 import getHabitableZone from "server/generatorFixtures/habitableZone";
 import {GraphQLContext} from "server/helpers/graphqlContext";
 import {SatelliteComponent} from "server/components/satellite";
+import App from "server/app";
 
 @Resolver()
 export class UniversePluginSystemsResolver {
@@ -177,11 +178,11 @@ export class UniversePluginSystemsResolver {
 }
 
 type range = {min: number; max: number};
-function calculateHabitableZone(stars: Entity[]) {
-  // Just less than the orbit of Neptune 🥶
+export function calculateHabitableZone(stars: Entity[]) {
+  // Just less than the orbit of Neptune 🥶 in KM
   const maxPlanetDistance = 4000000000;
 
-  // 1/5 the orbit of Mercury 🥵
+  // 1/5 the orbit of Mercury 🥵 in KM
   const minPlanetDistance = 10000000;
 
   // We'll use the habitable zone radius of the largest star
@@ -204,7 +205,9 @@ function calculateHabitableZone(stars: Entity[]) {
 }
 @Resolver(of => PlanetarySystem)
 export class PlanetarySystemResolver {
-  @FieldResolver(type => Number)
+  @FieldResolver(type => Number, {
+    description: "The inner radius of the habitable zone in kilometers",
+  })
   habitableZoneInner(@Root() self: PlanetarySystem) {
     const plugin = getPlugin(self.pluginId);
     const stars = plugin.universe.filter(
@@ -214,7 +217,9 @@ export class PlanetarySystemResolver {
     return min;
   }
 
-  @FieldResolver(type => Number)
+  @FieldResolver(type => Number, {
+    description: "The outer radius of the habitable zone in kilometers",
+  })
   habitableZoneOuter(@Root() self: PlanetarySystem) {
     const plugin = getPlugin(self.pluginId);
 
@@ -239,16 +244,28 @@ export class SatelliteComponentResolver {
     @Root() self: SatelliteComponent & {entity: Entity},
     @Ctx() ctx: GraphQLContext
   ) {
-    if (!ctx.pluginId) return [];
-    const plugin = getPlugin(ctx.pluginId);
-    return plugin.universe.filter(
+    let universeObjects: Entity[] = [];
+    if (ctx.pluginId) {
+      const plugin = getPlugin(ctx.pluginId);
+      universeObjects = plugin.universe;
+    }
+    if (universeObjects.length === 0) {
+      universeObjects = App.activeFlight?.ecs.entities || [];
+    }
+    return universeObjects.filter(
       e => e.satellite?.parentId === self.entity.id
     );
   }
   @FieldResolver(type => Entity, {nullable: true})
   parent(@Root() self: SatelliteComponent, @Ctx() ctx: GraphQLContext) {
-    if (!ctx.pluginId) return null;
-    const plugin = getPlugin(ctx.pluginId);
-    return plugin.universe.find(e => e.id === self.parentId) || null;
+    let universeObjects: Entity[] = [];
+    if (ctx.pluginId) {
+      const plugin = getPlugin(ctx.pluginId);
+      universeObjects = plugin.universe;
+    }
+    if (universeObjects.length === 0) {
+      universeObjects = App.activeFlight?.ecs.entities || [];
+    }
+    return universeObjects.find(e => e.id === self.parentId) || null;
   }
 }

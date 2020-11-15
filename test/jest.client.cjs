@@ -8,6 +8,7 @@ module.exports = {
   testMatch: ["**/client/**/*.test.{js,ts,tsx,jsx}"],
   transform: {
     "^.+\\.[t|j]sx?$": "babel-jest",
+    "^.+\\.[t|j]s?$": "babel-jest",
   },
   setupFilesAfterEnv: [
     "@testing-library/jest-dom/extend-expect",

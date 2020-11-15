@@ -36,6 +36,7 @@ const handler: ProxyHandler<Entity> = {
 class Entity extends Components {
   @Field(type => ID)
   id: string;
+  pluginId?: string;
   systems: System[];
   systemsDirty: boolean;
   @Field()
@@ -45,8 +46,15 @@ class Entity extends Components {
     id?: Partial<Entity> | string | null,
     components: Component[] = []
   ) {
+    super();
+
     let initialData: Components = {};
     if (isEntity(id)) {
+      /**
+       * A reference to the original plugin, used for getting assets
+       */
+      this.pluginId = id.pluginId;
+
       initialData = id.components;
       components = registeredComponents.reduce(
         (list: Component[], component) => {
@@ -70,7 +78,6 @@ class Entity extends Components {
       }
       id = id.id;
     }
-    super();
     /**
      * Unique identifier of the entity.
      */

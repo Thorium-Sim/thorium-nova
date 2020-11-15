@@ -1,0 +1,5 @@
+query Flight {
+  flight {
+    id
+  }
+}

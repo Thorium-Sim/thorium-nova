@@ -33,6 +33,8 @@ import {VelocityComponent} from "./velocity";
 import {DampenerComponent} from "./outfits/dampeners";
 import {ShipAssignmentComponent} from "./ship/shipAssignment";
 import {ShipOutfitsComponent} from "./ship/shipOutfits";
+import {AutopilotComponent} from "./ship/autopilot";
+import {InterstellarPositionComponent} from "./ship/interstellarPosition";
 @ObjectType()
 export default class Components {
   @Field()
@@ -87,6 +89,12 @@ export default class Components {
 
   @Field()
   dampener?: DampenerComponent;
+
+  @Field()
+  autopilot?: AutopilotComponent;
+
+  @Field()
+  interstellarPosition?: InterstellarPositionComponent;
 
   // Stellar Objects Components
   @Field({nullable: true})
@@ -172,4 +180,9 @@ export const registeredComponents = [
   DampenerComponent,
   ShipAssignmentComponent,
   ShipOutfitsComponent,
+  AutopilotComponent,
+  InterstellarPositionComponent,
+  RotationComponent,
+  VelocityComponent,
+  RotationVelocityComponent,
 ];

@@ -6,9 +6,10 @@ export class PositionVelocitySystem extends System {
     return !!(entity.components.position && entity.components.velocity);
   }
   update(entity: Entity, elapsed: number) {
+    const elapsedRatio = elapsed / 1000;
     if (!entity.velocity || !entity.position) return;
-    entity.position.x += entity.velocity.x * elapsed;
-    entity.position.y += entity.velocity.y * elapsed;
-    entity.position.z += entity.velocity.z * elapsed;
+    entity.position.x += entity.velocity.x * elapsedRatio;
+    entity.position.y += entity.velocity.y * elapsedRatio;
+    entity.position.z += entity.velocity.z * elapsedRatio;
   }
 }

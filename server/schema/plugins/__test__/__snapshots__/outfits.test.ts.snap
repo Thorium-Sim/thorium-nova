@@ -146,6 +146,35 @@ exports[`outfit Plugin getOutfitComponents should return the correct components 
 Array [
   Object {
     "component": [Function],
+    "defaultValue": Object {
+      "outfitType": "inertialDampeners",
+    },
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+  Object {
+    "component": [Function],
+  },
+]
+`;
+
+exports[`outfit Plugin getOutfitComponents should return the correct components for each outfit 7`] = `
+Array [
+  Object {
+    "component": [Function],
   },
   Object {
     "component": [Function],

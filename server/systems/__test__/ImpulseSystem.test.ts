@@ -36,7 +36,7 @@ describe("ImpulseSystem", () => {
       VelocityComponent,
       RotationComponent,
     ]);
-    entity.updateComponent("shipAssignment", {shipId: "test", ship});
+    entity.updateComponent("shipAssignment", {shipId: "test"});
     entity.updateComponent("impulseEngines", {thrust: 12500});
     ecs.addSystem(impulseSystem);
     ecs.addSystem(engineVelocitySystem);
@@ -51,30 +51,30 @@ describe("ImpulseSystem", () => {
     expect(entity.impulseEngines?.targetSpeed).toEqual(500);
     ecs.update(16);
     expect(entity.impulseEngines?.forwardAcceleration).toMatchInlineSnapshot(
-      `6.25`
+      `2.083333333333333`
     );
-    expect(ship.velocity?.y).toMatchInlineSnapshot(`0.1`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`0.0333333`);
     ecs.update(1000);
     expect(entity.impulseEngines?.forwardAcceleration).toMatchInlineSnapshot(
-      `6.25`
+      `2.083333333333333`
     );
-    expect(ship.velocity?.y).toMatchInlineSnapshot(`6.35`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`2.1166666`);
 
     ecs.update(30 * 1000);
 
     expect(entity.impulseEngines?.forwardAcceleration).toMatchInlineSnapshot(
-      `6.25`
+      `2.083333333333333`
     );
-    expect(ship.velocity?.y).toMatchInlineSnapshot(`193.85`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`64.6166666`);
     entity.updateComponent("impulseEngines", {targetSpeed: 10});
     ecs.update(50);
     expect(entity.impulseEngines?.forwardAcceleration).toMatchInlineSnapshot(
-      `6.25`
+      `0.04166666666666667`
     );
     // This should be equal to the snapshot above
-    expect(ship.velocity?.y).toMatchInlineSnapshot(`193.85`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`64.6166666`);
     expect(entity.impulseEngines?.forwardAcceleration).toMatchInlineSnapshot(
-      `6.25`
+      `0.04166666666666667`
     );
 
     // Test newtonian thrust reversal
@@ -82,9 +82,9 @@ describe("ImpulseSystem", () => {
     ship.updateComponent("rotation", {x: -1, y: 0, z: 0, w: 0});
     ecs.update(31 * 1000);
     expect(entity.impulseEngines?.forwardAcceleration).toMatchInlineSnapshot(
-      `6.25`
+      `2.083333333333333`
     );
     // This should be very close to zero.
-    expect(ship.velocity?.y).toMatchInlineSnapshot(`0.09999999999999432`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`0.0333333`);
   });
 });

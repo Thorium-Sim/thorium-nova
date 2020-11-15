@@ -92,6 +92,7 @@ export function getAnyOutfit(outfitId: string) {
   return App.plugins.reduce((acc: Entity[], p) => {
     const outfit = p.outfits.find(o => o.id === outfitId);
     if (outfit) {
+      outfit.pluginId = p.id;
       acc.push(outfit);
     }
     return acc;

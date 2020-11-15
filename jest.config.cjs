@@ -9,6 +9,7 @@ module.exports = {
     "!**/generated/**",
     "!**/unused/**",
     "!**/components/starmap/**",
+    "!**/components/viewscreen/**",
   ],
   coverageReporters: ["text", "html"],
   coverageThreshold: {

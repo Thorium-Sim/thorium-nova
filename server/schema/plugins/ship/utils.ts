@@ -13,10 +13,18 @@ export function getShip(options: {pluginId?: string; shipId: string}) {
     ship = plugin.ships.find(o => o.id === shipId);
   } else if (shipId) {
     ship = App.activeFlight?.ships.find(s => s.id === shipId);
-  } else {
-    throw new Error(
-      "Cannot query for ship. Either 'shipId' or both 'pluginId' are required."
-    );
+  }
+
+  if (!ship) {
+    ship = App.plugins.reduce((prev: Entity | undefined, next) => {
+      if (prev) return prev;
+      const ship = next.ships.find(s => s.id === shipId);
+      if (ship) {
+        ship.pluginId = next.id;
+        return ship;
+      }
+      return undefined;
+    }, undefined);
   }
   if (!ship) throw new Error("Cannot find ship.");
   return {plugin, ship};
@@ -25,9 +33,12 @@ export function getShip(options: {pluginId?: string; shipId: string}) {
 export function shipPublish({
   plugin,
   ship,
+  // Detailed represents minute details that don't matter to other ships
+  detailed,
 }: {
   plugin?: BasePlugin;
   ship: Entity;
+  detailed?: boolean;
 }) {
   if (plugin) {
     publish(plugin);
@@ -40,8 +51,20 @@ export function shipPublish({
       shipId: ship.id,
       ship,
     });
+  } else if (App.activeFlight) {
+    // Subscription for ships in the same solar system.
+    if (!detailed) {
+      const systemId = ship.interstellarPosition?.systemId;
+      pubsub.publish("universeSystemShips", {
+        systemId,
+        ships: App.activeFlight.ecs.entities.filter(
+          s => s.isShip && s.interstellarPosition?.systemId === systemId
+        ),
+      });
+    }
+    // TODO: Add mid-flight subscription update.
+    // TODO: Add subscription for player simulators
   }
-  // TODO: Add mid-flight subscription update.
 }
 
 export function updateShip({

@@ -10,15 +10,19 @@ export class ImpulseSystem extends System {
     );
   }
   update(entity: Entity) {
-    const ship = entity.components.shipAssignment?.ship;
+    const ship = this.ecs.entities.find(
+      e => e.id === entity.components.shipAssignment?.shipId
+    );
     if (!ship || !ship.isShip || !entity.impulseEngines) return;
     const {mass} = ship.isShip;
 
-    let acceleration = entity.impulseEngines.thrust / mass;
+    const {thrust, targetSpeed, cruisingSpeed} = entity.impulseEngines;
+    const appliedThrust = (targetSpeed / cruisingSpeed) * thrust;
+
+    let acceleration = appliedThrust / mass;
     if (!entity.impulseEngines.targetSpeed) {
       acceleration = 0;
     }
-
     entity.updateComponent("impulseEngines", {
       forwardAcceleration: acceleration,
     });

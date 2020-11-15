@@ -1,11 +1,13 @@
+import {useTextureLoader} from "drei";
 import React, {Suspense} from "react";
-import {useFrame, useLoader} from "react-three-fiber";
+import {useFrame, useLoader, useThree} from "react-three-fiber";
 import {
   CircleGeometry,
   Euler,
   Group,
   LineLoop,
   Quaternion,
+  Texture,
   TextureLoader,
   Vector3,
 } from "three";
@@ -37,6 +39,23 @@ const Sphere: React.FC<{texture: string}> = React.memo(
     return false;
   }
 );
+
+const PlanetSprite = ({color = "white"}) => {
+  const spriteMap = useTextureLoader("/public/assets/icons/Dot.svg") as Texture;
+  return (
+    <sprite>
+      <spriteMaterial
+        attach="material"
+        map={spriteMap}
+        color={color}
+        sizeAttenuation={false}
+      ></spriteMaterial>
+    </sprite>
+  );
+};
+const distanceVector = new Vector3();
+const SPRITE_SCALE_FACTOR = 50;
+
 const Planet: React.FC<{
   position: Vector3;
   scaledPosition: Vector3;
@@ -66,18 +85,51 @@ const Planet: React.FC<{
   onPointerOut,
   onClick,
 }) => {
-  const group = React.useRef<Group>(new Group());
+  const group = React.useRef<Group>();
+  const planetSprite = React.useRef<Group>();
+  const planetMesh = React.useRef<Group>();
+  let size = 0;
+  if ("x" in scale) {
+    size = scale.x;
+  } else {
+    size = scale[0];
+  }
   useFrame(({camera, mouse}) => {
-    const zoom = camera.position.distanceTo(position) + 500;
-    let zoomedScale = (zoom / 2) * 0.01;
-    group.current.scale.set(zoomedScale, zoomedScale, zoomedScale);
-    group.current.quaternion.copy(camera.quaternion);
+    if (group.current) {
+      const zoom = camera.position.distanceTo(position) + 500;
+      let zoomedScale = (zoom / 2) * 0.01;
+      group.current.scale.set(zoomedScale, zoomedScale, zoomedScale);
+      group.current.quaternion.copy(camera.quaternion);
+    }
+
+    const distance = camera.position.distanceTo(
+      distanceVector.set(camera.position.x, 0, camera.position.z)
+    );
+
+    if (planetSprite.current && planetMesh.current) {
+      if (size && distance / size > 100) {
+        planetSprite.current.visible = true;
+        planetMesh.current.visible = false;
+      } else {
+        planetSprite.current.visible = false;
+        planetMesh.current.visible = true;
+      }
+    }
   });
+  const planet = React.useRef<Group>();
+  const spriteScale = 1 / SPRITE_SCALE_FACTOR;
 
   return (
-    <group position={scaledPosition}>
+    <group position={scaledPosition} ref={planet}>
       <Suspense fallback={null}>
         <group
+          ref={planetSprite}
+          scale={[spriteScale, spriteScale, spriteScale]}
+        >
+          <PlanetSprite />
+        </group>
+        <group
+          ref={planetMesh}
           scale={scale}
           rotation={[0, 0, axialTilt * DEG_TO_RAD]}
           onPointerOver={onPointerOver}
@@ -90,9 +142,15 @@ const Planet: React.FC<{
           {selected && <Selected />}
         </group>
       </Suspense>
-      <group ref={group}>
-        <SystemLabel systemId="" name={name} hoveringDirection={{current: 0}} />
-      </group>
+      {configStoreApi.getState().viewingMode !== "viewscreen" && (
+        <group ref={group}>
+          <SystemLabel
+            systemId=""
+            name={name}
+            hoveringDirection={{current: 0}}
+          />
+        </group>
+      )}
       {satellites?.map((s, i) => (
         <PlanetEntity
           key={`orbit-${i}`}
@@ -152,8 +210,14 @@ const PlanetContainer: React.FC<{
   onPointerOut,
   onClick,
 }) => {
-  const size = (isSatellite ? 1 : 5) + 100 * (radius / 1000000);
-  const scaledRadius = (isSatellite ? 100 : 1) * (distance / 1000000);
+  const size =
+    configStoreApi.getState().viewingMode !== "editor"
+      ? radius
+      : (isSatellite ? 1 : 5) + 100 * (radius / 1000000);
+  const scaledRadius =
+    configStoreApi.getState().viewingMode !== "editor"
+      ? distance
+      : (isSatellite ? 100 : 1) * (distance / 1000000);
   const position = getOrbitPosition({
     radius: distance,
     eccentricity,
@@ -174,7 +238,11 @@ const PlanetContainer: React.FC<{
         eccentricity={eccentricity}
         orbitalArc={orbitalArc}
         orbitalInclination={orbitalInclination}
-        showOrbit={showOrbit}
+        showOrbit={
+          configStoreApi.getState().viewingMode === "viewscreen"
+            ? false
+            : showOrbit
+        }
       ></OrbitContainer>
       <Planet
         name={name}
@@ -239,6 +307,8 @@ const PlanetEntity: React.FC<{
       textureMapAsset={textureMapAsset}
       selected={selected}
       onPointerOver={() => {
+        if (configStoreApi.getState().viewingMode === "viewscreen") return;
+        if (configStoreApi.getState().viewingMode === "core") return;
         const hoveredPosition = getOrbitPosition({
           eccentricity,
           orbitalArc,
@@ -259,6 +329,8 @@ const PlanetEntity: React.FC<{
         document.body.style.cursor = "pointer";
       }}
       onPointerOut={() => {
+        if (configStoreApi.getState().viewingMode === "viewscreen") return;
+        if (configStoreApi.getState().viewingMode === "core") return;
         document.body.style.cursor = "auto";
         useConfigStore.setState({
           hoveredPosition: null,
@@ -266,6 +338,8 @@ const PlanetEntity: React.FC<{
         });
       }}
       onClick={() => {
+        if (configStoreApi.getState().viewingMode === "viewscreen") return;
+        if (configStoreApi.getState().viewingMode === "core") return;
         configStoreApi.setState({
           selectedObject: entity,
           selectedPosition: getOrbitPosition({

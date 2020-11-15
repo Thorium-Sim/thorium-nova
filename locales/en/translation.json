@@ -1,5 +1,9 @@
 {
-  "Close": "Close",
-  "Minimize": "Minimize",
-  "Property Palette": "Property Palette"
+  "Compress Y Dimension": "Compress Y Dimension",
+  "Focus On Selected Objects": "Focus On Selected Objects",
+  "Hide Planets": "Hide Planets",
+  "Instantly Move Objects": "Instantly Move Objects",
+  "Set Y Dimension Index to Selected Position": "Set Y Dimension Index to Selected Position",
+  "Show Autopilot Destinations": "Show Autopilot Destinations",
+  "Y Dimension Index": "Y Dimension Index"
 }

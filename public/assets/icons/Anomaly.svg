@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg
+  width="100%"
+  height="100%"
+  viewBox="0 0 32 32"
+  version="1.1"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xml:space="preserve"
+  style="
+    fill-rule: evenodd;
+    clip-rule: evenodd;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-miterlimit: 1.5;
+  "
+>
+  <g transform="matrix(1.46364,0,0,1.46456,-8.86409,-5.94134)">
+    <path
+      d="M16.5,16.324C16.607,16.881 16.316,17.531 15.786,17.521C14.73,17.501 14.445,16.262 14.456,15.145C14.467,13.962 15.225,12.678 16.57,12.623C18.201,12.557 19.617,13.904 19.69,16.188C19.772,18.785 18.818,21.405 15.977,21.579C12.507,21.791 10.389,18.827 10.372,14.934C10.352,10.477 13.622,8.523 16.006,8.424C19.457,8.281 23.511,10.391 23.577,15.909C23.65,21.927 20.747,25.335 15.881,25.487C9.24,25.693 6.468,21.246 6.455,15.007C6.441,7.627 12.071,4.352 16.546,4.385C21.445,4.421 27.974,8.352 27.532,16.628"
+      style="fill: none; stroke: #ffffff; stroke-width: 0.75px"
+    />
+  </g>
+</svg>

@@ -6,7 +6,6 @@ import {whiteImage} from "../utils";
 interface CloudsProps {
   texture: string;
 }
-
 const Clouds: React.FC<CloudsProps> = ({texture = whiteImage}) => {
   const clouds = useLoader(TextureLoader, texture);
   const ref = React.useRef<Mesh>(null);

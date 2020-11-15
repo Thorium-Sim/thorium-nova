@@ -12,7 +12,7 @@ import {configStoreApi} from "../configStore";
 import {useFrame} from "react-three-fiber";
 import sleep from "../../../helpers/sleep";
 
-const radius = 1000000;
+const radius = 1e20;
 
 const nebulaWorker = new Worker("./generateNebulaMap.js");
 const promiseCache: {[key: string]: (value?: unknown) => void} = {};
@@ -91,9 +91,10 @@ function Nebula() {
           meshes.current.inactive.current?.material?.forEach((m, i) => {
             const mat = m as MeshBasicMaterial;
             mat.map?.dispose();
-            mat.color.set(0xffffff);
+            mat.color.set(0x555555);
             mat.map = textures[i];
             mat.transparent = true;
+            mat.depthWrite = false;
             mat.needsUpdate = true;
           });
         }

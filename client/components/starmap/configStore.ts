@@ -39,6 +39,18 @@ export interface ConfigStore extends Record<string | number | symbol, unknown> {
   scaledSelectedPosition: Vector3 | null;
   hoveredPosition: Vector3 | null;
   selectedPosition: Vector3 | null;
+  viewingMode: "core" | "editor" | "viewscreen";
+  // Core
+  cameraVerticalDistance: number;
+  orbitControlsSet: (input: {zoom?: number; position?: Vector3}) => void;
+  includeAutopilotData: boolean;
+  compressYDimension: boolean;
+  hidePlanets: boolean;
+  contextMenuPosition: null | {x: number; y: number};
+  yDimensionIndex: number;
+  draggingMovement3D: null | {x: number; y: number; z: number};
+  instantMoveObjects: boolean;
+  translate2dTo3d?: (x: number, y: number) => Vector3;
 }
 const store = create<ConfigStore>(set => ({
   disableOrbitControls: () => {},
@@ -63,6 +75,23 @@ const store = create<ConfigStore>(set => ({
   scaledSelectedPosition: null,
   hoveredPosition: null,
   selectedPosition: null,
+  viewingMode: "editor",
+  // Core
+  cameraVerticalDistance: 0,
+  orbitControlsSet: ({
+    zoom,
+    position,
+  }: {
+    zoom?: number;
+    position?: Vector3;
+  }) => {},
+  includeAutopilotData: true,
+  compressYDimension: true,
+  hidePlanets: false,
+  contextMenuPosition: null,
+  yDimensionIndex: 0,
+  draggingMovement3D: null,
+  instantMoveObjects: false,
 }));
 
 export const useConfigStore = store;

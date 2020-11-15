@@ -36,7 +36,7 @@ describe("WarpSystem", () => {
       VelocityComponent,
       RotationComponent,
     ]);
-    entity.updateComponent("shipAssignment", {shipId: "test", ship});
+    entity.updateComponent("shipAssignment", {shipId: "test"});
     ecs.addSystem(warpSystem);
     ecs.addSystem(engineVelocitySystem);
     ecs.addSystem(warpVelocityPosition);
@@ -79,7 +79,7 @@ describe("WarpSystem", () => {
     expect(engines?.forwardVelocity).toMatchInlineSnapshot(
       `0.018183209660876158`
     );
-    const distanceTravelled = (ship.position?.y || 0) - (initialPosition || 0);
-    expect(distanceTravelled).toMatchInlineSnapshot(`11032.636654302478`);
+    const distanceTravelled = (ship.position?.z || 0) - (initialPosition || 0);
+    expect(distanceTravelled).toMatchInlineSnapshot(`92232878.0715343`);
   });
 });

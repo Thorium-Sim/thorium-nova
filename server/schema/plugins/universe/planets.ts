@@ -436,16 +436,17 @@ export class UniversePluginPlanetsResolver {
 export class PlanetAssetsResolver {
   @FieldResolver(type => String)
   textureMapAsset(
-    @Root() self: IsPlanetComponent & {entity: Entity},
+    @Root() self: IsPlanetComponent,
     @Ctx() context: GraphQLContext
   ) {
     if (self.textureMapAsset?.indexOf("/public") === 0)
       return self.textureMapAsset;
-    if (!context.pluginId) {
+    const pluginId = context.pluginId || context.entity?.pluginId;
+    if (!pluginId) {
       return "";
     }
     try {
-      const plugin = getPlugin(context.pluginId);
+      const plugin = getPlugin(pluginId);
       return self.textureMapAsset
         ? `/assets/plugins/${plugin.name || plugin.id}/assets/${
             self.textureMapAsset
@@ -457,16 +458,17 @@ export class PlanetAssetsResolver {
   }
   @FieldResolver(type => String)
   cloudsMapAsset(
-    @Root() self: IsPlanetComponent & {entity: Entity},
+    @Root() self: IsPlanetComponent,
     @Ctx() context: GraphQLContext
   ) {
     if (self.cloudsMapAsset?.indexOf("/public") === 0)
       return self.cloudsMapAsset;
-    if (!context.pluginId) {
+    const pluginId = context.pluginId || context.entity?.pluginId;
+    if (!pluginId) {
       return "";
     }
     try {
-      const plugin = getPlugin(context.pluginId);
+      const plugin = getPlugin(pluginId);
       return self.cloudsMapAsset
         ? `/assets/plugins/${plugin.name || plugin.id}/assets/${
             self.cloudsMapAsset
@@ -478,15 +480,16 @@ export class PlanetAssetsResolver {
   }
   @FieldResolver(type => String)
   ringsMapAsset(
-    @Root() self: IsPlanetComponent & {entity: Entity},
+    @Root() self: IsPlanetComponent,
     @Ctx() context: GraphQLContext
   ) {
     if (self.ringsMapAsset?.indexOf("/public") === 0) return self.ringsMapAsset;
-    if (!context.pluginId) {
+    const pluginId = context.pluginId || context.entity?.pluginId;
+    if (!pluginId) {
       return "";
     }
     try {
-      const plugin = getPlugin(context.pluginId);
+      const plugin = getPlugin(pluginId);
       return self.ringsMapAsset
         ? `/assets/plugins/${plugin.name || plugin.id}/assets/${
             self.ringsMapAsset

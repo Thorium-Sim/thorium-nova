@@ -36,7 +36,7 @@ export class WarpVelocityPosition extends System {
     );
     const warpEngines = systems.find(s => s.warpEngines);
     if (warpEngines && warpEngines.warpEngines?.forwardVelocity) {
-      velocityObject.translateY(warpEngines.warpEngines.forwardVelocity);
+      velocityObject.translateZ(warpEngines.warpEngines.forwardVelocity);
       entity.position.x += velocityObject.position.x * elapsedRatio;
       entity.position.y += velocityObject.position.y * elapsedRatio;
       entity.position.z += velocityObject.position.z * elapsedRatio;

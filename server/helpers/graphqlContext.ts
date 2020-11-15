@@ -13,6 +13,9 @@ export interface GraphQLContext {
 
   // Plugin Operations
   pluginId?: string;
+
+  // Entity Access for component resolvers
+  entity?: Entity;
 }
 
 export const getGraphQLContext = ({

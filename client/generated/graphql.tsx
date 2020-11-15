@@ -36,6 +36,7 @@ export enum OutfitAbilities {
   Thrusters = "thrusters",
   Navigation = "navigation",
   JumpDrive = "jumpDrive",
+  InertialDampeners = "inertialDampeners",
   Generic = "generic",
 }
 
@@ -43,6 +44,11 @@ export type PositionInput = {
   x: Maybe<Scalars["Float"]>;
   y: Maybe<Scalars["Float"]>;
   z: Maybe<Scalars["Float"]>;
+};
+
+export type ShipPosition = {
+  id: Scalars["ID"];
+  position: CoordinatesInput;
 };
 
 /** An enum describing what kind of type a given `__Type` is. */
@@ -484,14 +490,14 @@ export type TemplateShipAssetsSubscription = {
   pluginShip: Maybe<{
     __typename?: "Entity";
     id: string;
-    shipAssets: {
+    shipAssets: Maybe<{
       __typename?: "ShipAssetsComponent";
       logo: string;
       model: string;
       side: string;
       top: string;
       vanity: string;
-    };
+    }>;
   }>;
 };
 
@@ -506,7 +512,7 @@ export type TemplateShipSetLogoMutation = {
   pluginShipSetLogo: {
     __typename?: "Entity";
     id: string;
-    shipAssets: {__typename?: "ShipAssetsComponent"; logo: string};
+    shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; logo: string}>;
   };
 };
 
@@ -524,13 +530,13 @@ export type TemplateShipSetModelMutation = {
   pluginShipSetModel: {
     __typename?: "Entity";
     id: string;
-    shipAssets: {
+    shipAssets: Maybe<{
       __typename?: "ShipAssetsComponent";
       model: string;
       side: string;
       top: string;
       vanity: string;
-    };
+    }>;
   };
 };
 
@@ -818,6 +824,24 @@ export type PluginsSubscription = {
     coverImage: string;
     tags: Array<string>;
   }>;
+};
+
+export type ShipsSetDesiredDestinationMutationVariables = Exact<{
+  shipPositions: Array<ShipPosition>;
+}>;
+
+export type ShipsSetDesiredDestinationMutation = {
+  __typename?: "Mutation";
+  shipsSetDesiredDestination: Maybe<Array<{__typename?: "Entity"; id: string}>>;
+};
+
+export type ShipsSetPositionMutationVariables = Exact<{
+  shipPositions: Array<ShipPosition>;
+}>;
+
+export type ShipsSetPositionMutation = {
+  __typename?: "Mutation";
+  shipsSetPosition: Maybe<Array<{__typename?: "Entity"; id: string}>>;
 };
 
 export type SatelliteComponentFragment = {
@@ -1441,6 +1465,114 @@ export type TemplateSystemSubscription = {
   };
 };
 
+export type UniverseSystemShipsSubscriptionVariables = Exact<{
+  systemId: Scalars["ID"];
+}>;
+
+export type UniverseSystemShipsSubscription = {
+  __typename?: "Subscription";
+  universeSystemShips: Array<{
+    __typename?: "Entity";
+    id: string;
+    identity: {__typename?: "IdentityComponent"; name: string};
+    position: {
+      __typename?: "PositionComponent";
+      x: number;
+      y: number;
+      z: number;
+    };
+    rotation: {
+      __typename?: "RotationComponent";
+      x: number;
+      y: number;
+      z: number;
+      w: number;
+    };
+    autopilot: {
+      __typename?: "AutopilotComponent";
+      desiredCoordinates: Maybe<{
+        __typename?: "Coordinates";
+        x: number;
+        y: number;
+        z: number;
+      }>;
+    };
+    size: {__typename?: "SizeComponent"; value: number};
+    shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; model: string}>;
+  }>;
+};
+
+export type UniverseSystemShipsHotSubscriptionVariables = Exact<{
+  systemId: Scalars["ID"];
+  autopilotIncluded?: Maybe<Scalars["Boolean"]>;
+}>;
+
+export type UniverseSystemShipsHotSubscription = {
+  __typename?: "Subscription";
+  universeSystemShipsHot: Array<{
+    __typename?: "Entity";
+    id: string;
+    position: {
+      __typename?: "PositionComponent";
+      x: number;
+      y: number;
+      z: number;
+    };
+    rotation: {
+      __typename?: "RotationComponent";
+      x: number;
+      y: number;
+      z: number;
+      w: number;
+    };
+    autopilot: {
+      __typename?: "AutopilotComponent";
+      desiredCoordinates: Maybe<{
+        __typename?: "Coordinates";
+        x: number;
+        y: number;
+        z: number;
+      }>;
+    };
+  }>;
+};
+
+export type UniverseSystemSubscriptionVariables = Exact<{
+  systemId: Scalars["ID"];
+}>;
+
+export type UniverseSystemSubscription = {
+  __typename?: "Subscription";
+  universeSystem: {
+    __typename?: "ActivePlanetarySystem";
+    id: string;
+    habitableZoneInner: number;
+    habitableZoneOuter: number;
+    identity: {
+      __typename?: "IdentityComponent";
+      name: string;
+      description: string;
+    };
+    planetarySystem: Maybe<{
+      __typename?: "PlanetarySystemComponent";
+      skyboxKey: string;
+    }>;
+    items: Array<
+      {
+        __typename?: "Entity";
+        satellite: Maybe<
+          {
+            __typename?: "SatelliteComponent";
+            satellites: Maybe<
+              Array<{__typename?: "Entity"} & UniverseObjectFragment>
+            >;
+          } & SatelliteComponentFragment
+        >;
+      } & UniverseObjectFragment
+    >;
+  };
+};
+
 export type ClientConnectMutationVariables = Exact<{[key: string]: never}>;
 
 export type ClientConnectMutation = {
@@ -1455,11 +1587,27 @@ export type ClientDisconnectMutation = {
   clientDisconnect: {__typename?: "Client"; id: string; connected: boolean};
 };
 
-export type StartFlightMutationVariables = Exact<{[key: string]: never}>;
+export type FlightStartMutationVariables = Exact<{
+  name: Maybe<Scalars["String"]>;
+  plugins: Array<Scalars["ID"]>;
+}>;
 
-export type StartFlightMutation = {
+export type FlightStartMutation = {
   __typename?: "Mutation";
-  flightStart: {__typename?: "Flight"; id: string; name: string};
+  flightStart: {
+    __typename?: "Flight";
+    id: string;
+    name: string;
+    paused: boolean;
+    date: Date;
+  };
+};
+
+export type FlightQueryVariables = Exact<{[key: string]: never}>;
+
+export type FlightQuery = {
+  __typename?: "Query";
+  flight: Maybe<{__typename?: "Flight"; id: string}>;
 };
 
 export type FlightsQueryVariables = Exact<{[key: string]: never}>;
@@ -2895,6 +3043,48 @@ export function usePluginsSubscription(
 export type PluginsSubscriptionHookResult = ReturnType<
   typeof usePluginsSubscription
 >;
+export const ShipsSetDesiredDestinationDocument = gql`
+  mutation ShipsSetDesiredDestination($shipPositions: [ShipPosition!]!) {
+    shipsSetDesiredDestination(shipPositions: $shipPositions) {
+      id
+    }
+  }
+`;
+export function useShipsSetDesiredDestinationMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ShipsSetDesiredDestinationMutation,
+    ShipsSetDesiredDestinationMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ShipsSetDesiredDestinationMutation,
+    ShipsSetDesiredDestinationMutationVariables
+  >(ShipsSetDesiredDestinationDocument, baseOptions);
+}
+export type ShipsSetDesiredDestinationMutationHookResult = ReturnType<
+  typeof useShipsSetDesiredDestinationMutation
+>;
+export const ShipsSetPositionDocument = gql`
+  mutation ShipsSetPosition($shipPositions: [ShipPosition!]!) {
+    shipsSetPosition(shipPositions: $shipPositions) {
+      id
+    }
+  }
+`;
+export function useShipsSetPositionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ShipsSetPositionMutation,
+    ShipsSetPositionMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ShipsSetPositionMutation,
+    ShipsSetPositionMutationVariables
+  >(ShipsSetPositionDocument, baseOptions);
+}
+export type ShipsSetPositionMutationHookResult = ReturnType<
+  typeof useShipsSetPositionMutation
+>;
 export const UniversePlanetAssetsDocument = gql`
   subscription UniversePlanetAssets($id: ID!, $objectId: ID!) {
     pluginUniverseObject(id: $id, objectId: $objectId) {
@@ -4056,6 +4246,137 @@ export function useTemplateSystemSubscription(
 export type TemplateSystemSubscriptionHookResult = ReturnType<
   typeof useTemplateSystemSubscription
 >;
+export const UniverseSystemShipsDocument = gql`
+  subscription UniverseSystemShips($systemId: ID!) {
+    universeSystemShips(systemId: $systemId) {
+      id
+      identity {
+        name
+      }
+      position {
+        x
+        y
+        z
+      }
+      rotation {
+        x
+        y
+        z
+        w
+      }
+      autopilot {
+        desiredCoordinates {
+          x
+          y
+          z
+        }
+      }
+      size {
+        value
+      }
+      shipAssets {
+        model
+      }
+    }
+  }
+`;
+export function useUniverseSystemShipsSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    UniverseSystemShipsSubscription,
+    UniverseSystemShipsSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    UniverseSystemShipsSubscription,
+    UniverseSystemShipsSubscriptionVariables
+  >(UniverseSystemShipsDocument, baseOptions);
+}
+export type UniverseSystemShipsSubscriptionHookResult = ReturnType<
+  typeof useUniverseSystemShipsSubscription
+>;
+export const UniverseSystemShipsHotDocument = gql`
+  subscription UniverseSystemShipsHot(
+    $systemId: ID!
+    $autopilotIncluded: Boolean = false
+  ) {
+    universeSystemShipsHot(systemId: $systemId) {
+      id
+      position {
+        x
+        y
+        z
+      }
+      rotation {
+        x
+        y
+        z
+        w
+      }
+      autopilot @include(if: $autopilotIncluded) {
+        desiredCoordinates {
+          x
+          y
+          z
+        }
+      }
+    }
+  }
+`;
+export function useUniverseSystemShipsHotSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    UniverseSystemShipsHotSubscription,
+    UniverseSystemShipsHotSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    UniverseSystemShipsHotSubscription,
+    UniverseSystemShipsHotSubscriptionVariables
+  >(UniverseSystemShipsHotDocument, baseOptions);
+}
+export type UniverseSystemShipsHotSubscriptionHookResult = ReturnType<
+  typeof useUniverseSystemShipsHotSubscription
+>;
+export const UniverseSystemDocument = gql`
+  subscription UniverseSystem($systemId: ID!) {
+    universeSystem(systemId: $systemId) {
+      id
+      identity {
+        name
+        description
+      }
+      planetarySystem {
+        skyboxKey
+      }
+      habitableZoneInner
+      habitableZoneOuter
+      items {
+        ...UniverseObject
+        satellite {
+          ...SatelliteComponent
+          satellites {
+            ...UniverseObject
+          }
+        }
+      }
+    }
+  }
+  ${UniverseObjectFragmentDoc}
+  ${SatelliteComponentFragmentDoc}
+`;
+export function useUniverseSystemSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    UniverseSystemSubscription,
+    UniverseSystemSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    UniverseSystemSubscription,
+    UniverseSystemSubscriptionVariables
+  >(UniverseSystemDocument, baseOptions);
+}
+export type UniverseSystemSubscriptionHookResult = ReturnType<
+  typeof useUniverseSystemSubscription
+>;
 export const ClientConnectDocument = gql`
   mutation ClientConnect {
     clientConnect {
@@ -4100,28 +4421,55 @@ export function useClientDisconnectMutation(
 export type ClientDisconnectMutationHookResult = ReturnType<
   typeof useClientDisconnectMutation
 >;
-export const StartFlightDocument = gql`
-  mutation StartFlight {
-    flightStart {
+export const FlightStartDocument = gql`
+  mutation FlightStart($name: String, $plugins: [ID!]!) {
+    flightStart(flightName: $name, plugins: $plugins) {
       id
       name
+      paused
+      date
     }
   }
 `;
-export function useStartFlightMutation(
+export function useFlightStartMutation(
   baseOptions?: Apollo.MutationHookOptions<
-    StartFlightMutation,
-    StartFlightMutationVariables
+    FlightStartMutation,
+    FlightStartMutationVariables
   >
 ) {
-  return Apollo.useMutation<StartFlightMutation, StartFlightMutationVariables>(
-    StartFlightDocument,
+  return Apollo.useMutation<FlightStartMutation, FlightStartMutationVariables>(
+    FlightStartDocument,
     baseOptions
   );
 }
-export type StartFlightMutationHookResult = ReturnType<
-  typeof useStartFlightMutation
+export type FlightStartMutationHookResult = ReturnType<
+  typeof useFlightStartMutation
 >;
+export const FlightDocument = gql`
+  query Flight {
+    flight {
+      id
+    }
+  }
+`;
+export function useFlightQuery(
+  baseOptions?: Apollo.QueryHookOptions<FlightQuery, FlightQueryVariables>
+) {
+  return Apollo.useQuery<FlightQuery, FlightQueryVariables>(
+    FlightDocument,
+    baseOptions
+  );
+}
+export function useFlightLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<FlightQuery, FlightQueryVariables>
+) {
+  return Apollo.useLazyQuery<FlightQuery, FlightQueryVariables>(
+    FlightDocument,
+    baseOptions
+  );
+}
+export type FlightQueryHookResult = ReturnType<typeof useFlightQuery>;
+export type FlightLazyQueryHookResult = ReturnType<typeof useFlightLazyQuery>;
 export const FlightsDocument = gql`
   query Flights {
     flights {

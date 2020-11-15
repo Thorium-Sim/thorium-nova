@@ -15,18 +15,4 @@ export class ShipAssignmentComponent extends Component {
 
   @Field()
   shipId: string = "";
-
-  // Ship used for testing
-  _testShip!: Entity;
-
-  @Field(type => Entity, {nullable: true})
-  get ship(): Entity | null {
-    if (this._testShip) return this._testShip;
-    return App.activeFlight?.ships.find(s => s.id === this.shipId) || null;
-  }
-  set ship(ship: Entity | null) {
-    if (ship?.id === "test") {
-      this._testShip = ship;
-    }
-  }
 }

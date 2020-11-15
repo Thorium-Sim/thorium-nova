@@ -1,11 +1,9 @@
 import React from "react";
-import {useLoader} from "react-three-fiber";
-import {Color, PointLight, Texture, TextureLoader} from "three";
-import {
-  Lensflare,
-  LensflareElement,
-} from "three/examples/jsm/objects/Lensflare";
+import {TextureLoader} from "three";
+import {Lensflare, LensflareElement} from "./lensFlareImpl";
 
+// TODO: Create a secondary render loop just for the lens flare.
+// https://github.com/pmndrs/react-three-fiber/blob/master/recipes.md#heads-up-display-rendering-multiple-scenes
 const LensFlare = () => {
   const textureFlare0Path: string = require("url:./textures/lensflare0.png");
   const textureFlare1Path: string = require("url:./textures/lensflare2.png");
@@ -28,16 +26,8 @@ const LensFlare = () => {
 
     return lensflare;
   }, []);
-  const threeColor = React.useMemo(() => new Color("white"), []);
 
-  const light = React.useRef<PointLight>();
-
-  React.useEffect(() => {
-    if (light.current) {
-      light.current.add(lensFlare);
-    }
-  }, []);
-  return <pointLight ref={light} intensity={2} decay={2} color={threeColor} />;
+  return <primitive object={lensFlare} />;
 };
 
 export default LensFlare;

@@ -38,7 +38,7 @@ describe("ThrusterSystem", () => {
       VelocityComponent,
       RotationComponent,
     ]);
-    entity.updateComponent("shipAssignment", {shipId: "test", ship});
+    entity.updateComponent("shipAssignment", {shipId: "test"});
     ecs.addSystem(thrusterSystem);
     ecs.addSystem(rotationSystem);
     ecs.addSystem(engineVelocitySystem);
@@ -55,7 +55,7 @@ describe("ThrusterSystem", () => {
     ecs.update(1000);
     expect(ship.velocity).toMatchInlineSnapshot(`
       Object {
-        "x": 0.0005,
+        "x": 0.00625,
         "y": 0,
         "z": 0,
       }
@@ -63,7 +63,7 @@ describe("ThrusterSystem", () => {
     ecs.update(2000);
     expect(ship.velocity).toMatchInlineSnapshot(`
       Object {
-        "x": 0.0025,
+        "x": 0.01875,
         "y": 0,
         "z": 0,
       }
@@ -77,15 +77,15 @@ describe("ThrusterSystem", () => {
     ecs.update(1000);
     expect(ship.velocity).toMatchInlineSnapshot(`
       Object {
-        "x": 0.0025,
-        "y": 0.0004741598817790377,
-        "z": 0.0007384602626041288,
+        "x": 0.01875,
+        "y": 0.0121897,
+        "z": 0.002471,
       }
     `);
     expect(ship.rotation).toMatchInlineSnapshot(`
       Object {
-        "w": 0.7316888688738209,
-        "x": 0.6816387600233342,
+        "w": 0.9887710779360422,
+        "x": 0.14943813247359922,
         "y": 0,
         "z": 0,
       }
@@ -93,8 +93,8 @@ describe("ThrusterSystem", () => {
     ecs.update(10 * 1000);
     expect(ship.rotation).toMatchInlineSnapshot(`
       Object {
-        "w": 0.8154681470604999,
-        "x": 0.5788019532877502,
+        "w": -0.9310199382567351,
+        "x": 0.36496831995178025,
         "y": 0,
         "z": 0,
       }

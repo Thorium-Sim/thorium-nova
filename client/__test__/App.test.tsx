@@ -5,6 +5,7 @@ import userEvent from "@testing-library/user-event";
 import {
   ClientConnectDocument,
   ClientDisconnectDocument,
+  FlightDocument,
   FlightsDocument,
 } from "../generated/graphql";
 
@@ -31,6 +32,14 @@ describe("App", () => {
                   date: new Date("January 1, 1993"),
                 },
               ],
+            },
+          },
+        },
+        {
+          request: {query: FlightDocument, variables: {}},
+          result: {
+            data: {
+              flight: null,
             },
           },
         },

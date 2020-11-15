@@ -1,7 +1,7 @@
 import {Arg, Ctx, ID, Query, Resolver, Root, Subscription} from "type-graphql";
 import {getPlugin} from "./utils";
 import Entity from "server/helpers/ecs/entity";
-import matchSorter from "match-sorter";
+import {matchSorter} from "match-sorter";
 import {GraphQLContext} from "server/helpers/graphqlContext";
 import BasePlugin from "../basePlugin";
 import uuid from "uniqid";
@@ -74,6 +74,7 @@ export class UniversePluginResolver {
     @Arg("id", type => ID) id: string,
     @Arg("entityType", type => EntityTypes, {nullable: true}) entityType: string
   ): Entity[] {
+    if (!entityType) return payload.universe;
     return payload.universe?.filter(e => getEntityType(e) === entityType) || [];
   }
 }

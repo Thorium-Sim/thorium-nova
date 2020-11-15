@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-132,0)">
+        <g transform="matrix(1,0,0,1,-138,-36)">
+            <path d="M302,36C319.661,36 334,50.339 334,68C334,85.661 319.661,100 302,100C284.339,100 270,85.661 270,68C270,50.339 284.339,36 302,36ZM302,40C317.454,40 330,52.546 330,68C330,83.454 317.454,96 302,96C286.546,96 274,83.454 274,68C274,52.546 286.546,40 302,40ZM302,48C313.038,48 322,56.962 322,68C322,79.038 313.038,88 302,88C290.962,88 282,79.038 282,68C282,56.962 290.962,48 302,48ZM302,52C310.831,52 318,59.169 318,68C318,76.831 310.831,84 302,84C293.169,84 286,76.831 286,68C286,59.169 293.169,52 302,52ZM302,59C306.967,59 311,63.033 311,68C311,72.967 306.967,77 302,77C297.033,77 293,72.967 293,68C293,63.033 297.033,59 302,59Z" style="fill:white;"/>
+        </g>
+        <g id="Layer1">
+        </g>
+        <g id="Layer11" serif:id="Layer1">
+        </g>
+    </g>
+</svg>
