@@ -1,0 +1,13 @@
+mutation UniverseStarbaseSetPosition(
+  $pluginId: ID!
+  $shipId: ID!
+  $position: PositionInput!
+) {
+  pluginUniverseStarbaseSetPosition(
+    pluginId: $pluginId
+    shipId: $shipId
+    position: $position
+  ) {
+    id
+  }
+}

@@ -33,7 +33,84 @@ import {IsOutfitComponent} from "server/components/outfits/isOutfit";
 import {RotationComponent} from "server/components/rotation";
 import {getAnyOutfit} from "../plugins/outfits/utils";
 import {getPhrase, parsePhrase} from "../phrases";
+import cloneDeep from "lodash/cloneDeep";
 
+type FauxECS = {addEntity: (e: Entity) => void} | undefined;
+export function shipSpawn(
+  templateId: string,
+  systemId: string,
+  position: Coordinates,
+  ecs: FauxECS = App.activeFlight?.ecs,
+  name?: string
+) {
+  if (!ecs) return null;
+  const {ship: shipTemplate} = getShip({shipId: templateId});
+
+  const entity = new Entity(null, [
+    IsShipComponent,
+    AlertLevelComponent,
+    ShipAssetsComponent,
+    TagsComponent,
+    IdentityComponent,
+    ThemeComponent,
+    SizeComponent,
+    PositionComponent,
+    RotationComponent,
+    InterstellarPositionComponent,
+    AutopilotComponent,
+    VelocityComponent,
+    RotationVelocityComponent,
+    ShipOutfitsComponent,
+  ]);
+
+  entity.pluginId = shipTemplate.pluginId;
+
+  // TODO: Randomly generate a name for this ship based on the assigned faction.
+  let shipName = `${shipTemplate.identity?.name || ""} ${Math.round(
+    Math.random() * 1000000
+  )}`;
+  if (name) {
+    shipName = name;
+  } else {
+    if (shipTemplate.isShip?.nameGeneratorPhrase) {
+      const phrase = getPhrase(shipTemplate.isShip.nameGeneratorPhrase);
+      shipName = parsePhrase(phrase);
+    }
+  }
+
+  entity.updateComponent("identity", {name: shipName});
+  entity.updateComponent("factionAssignment", {
+    factionId: shipTemplate.factionAssignment?.factionId,
+  });
+  entity.updateComponents(
+    shipTemplate.components as Record<string, Record<string, any>>
+  );
+
+  ecs.addEntity(entity);
+  // Generate all of the outfits for this ship
+  const outfitIds = shipTemplate.components.shipOutfits?.outfitIds.map(o => {
+    const outfit = new Entity(null, [
+      IsOutfitComponent,
+      IdentityComponent,
+      TagsComponent,
+    ]);
+    const templateOutfit = getAnyOutfit(o);
+    outfit.pluginId = templateOutfit.pluginId;
+    outfit.updateComponents(
+      cloneDeep(
+        templateOutfit.components as Record<string, Record<string, any>>
+      )
+    );
+    outfit.updateComponent("shipAssignment", {shipId: entity.id});
+    ecs.addEntity(outfit);
+    return outfit.id;
+  });
+  entity.updateComponent("shipOutfits", {outfitIds});
+  entity.updateComponent("interstellarPosition", {systemId});
+  entity.updateComponent("position", position);
+  shipPublish({ship: entity});
+  return entity;
+}
 @Resolver()
 export class ActiveShipsResolver {
   @Subscription(returns => [Entity], {
@@ -96,66 +173,7 @@ export class ActiveShipsResolver {
     @Arg("systemId", type => ID) systemId: string,
     @Arg("position", type => Coordinates) position: Coordinates
   ): Entity | null {
-    if (!App.activeFlight) return null;
-    const {ship: shipTemplate} = getShip({shipId: templateId});
-
-    const entity = new Entity(null, [
-      IsShipComponent,
-      AlertLevelComponent,
-      ShipAssetsComponent,
-      TagsComponent,
-      IdentityComponent,
-      ThemeComponent,
-      SizeComponent,
-      PositionComponent,
-      RotationComponent,
-      InterstellarPositionComponent,
-      AutopilotComponent,
-      VelocityComponent,
-      RotationVelocityComponent,
-      ShipOutfitsComponent,
-    ]);
-
-    entity.pluginId = shipTemplate.pluginId;
-
-    // TODO: Randomly generate a name for this ship based on the assigned faction.
-    let name = `${shipTemplate.identity?.name || ""} ${Math.round(
-      Math.random() * 1000000
-    )}`;
-    if (shipTemplate.isShip?.nameGeneratorPhrase) {
-      const phrase = getPhrase(shipTemplate.isShip?.nameGeneratorPhrase);
-      name = parsePhrase(phrase);
-    }
-    entity.updateComponent("identity", {name});
-    entity.updateComponent("factionAssignment", {
-      factionId: shipTemplate.factionAssignment?.factionId,
-    });
-    entity.updateComponents(
-      shipTemplate.components as Record<string, Record<string, any>>
-    );
-
-    App.activeFlight.ecs.addEntity(entity);
-    // Generate all of the outfits for this ship
-    const outfitIds = shipTemplate.components.shipOutfits?.outfitIds.map(o => {
-      const outfit = new Entity(null, [
-        IsOutfitComponent,
-        IdentityComponent,
-        TagsComponent,
-      ]);
-      const templateOutfit = getAnyOutfit(o);
-      outfit.pluginId = templateOutfit.pluginId;
-      outfit.updateComponents(
-        templateOutfit.components as Record<string, Record<string, any>>
-      );
-      outfit.updateComponent("shipAssignment", {shipId: entity.id});
-      App.activeFlight?.ecs.addEntity(outfit);
-      return outfit.id;
-    });
-    entity.updateComponent("shipOutfits", {outfitIds});
-    entity.updateComponent("interstellarPosition", {systemId});
-    entity.updateComponent("position", position);
-    shipPublish({ship: entity});
-    return entity;
+    return shipSpawn(templateId, systemId, position);
   }
   @Mutation(returns => [Entity], {nullable: true})
   shipsSetPosition(

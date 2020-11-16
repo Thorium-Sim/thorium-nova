@@ -1,0 +1,16 @@
+query AllPluginShips($pluginIds: [ID!]!) {
+  allPluginShips(pluginIds: $pluginIds) {
+    id
+    plugin {
+      id
+      name
+    }
+    identity {
+      name
+      description
+    }
+    shipAssets {
+      vanity
+    }
+  }
+}

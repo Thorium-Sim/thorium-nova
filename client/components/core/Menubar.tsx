@@ -91,7 +91,7 @@ const SpawnMenu: React.FC = () => {
                   category:
                     categoryType === "faction"
                       ? s.factionAssignment?.faction?.identity.name || ""
-                      : s.isShip.category,
+                      : s.isShip?.category,
                 })) || []
               }
               selectedItem={selectedSpawn}
@@ -152,6 +152,7 @@ export const StarmapCoreMenubar: React.FC<{
               const selectedShips = selectedIds.map(id => ships[id]);
               const [center, min, max] = selectedShips.reduce(
                 (prev, next, index, arr) => {
+                  if (!next.position) return prev;
                   prev[0].x += next.position.x / arr.length;
                   prev[0].z += next.position.z / arr.length;
 
@@ -253,7 +254,7 @@ export const StarmapCoreMenubar: React.FC<{
               const center =
                 Math.round(
                   selectedShips.reduce((prev, next, index, arr) => {
-                    prev += next.position.y / arr.length;
+                    prev += (next.position?.y || 0) / arr.length;
                     return prev;
                   }, 0) * 100
                 ) / 100;

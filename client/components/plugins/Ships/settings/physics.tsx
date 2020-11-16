@@ -40,7 +40,7 @@ const ShipBasic: React.FC = () => {
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                defaultValue={ship.isShip.mass}
+                defaultValue={ship.isShip?.mass}
                 onChange={() => setMassError(false)}
                 onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                   if (
@@ -72,7 +72,7 @@ const ShipBasic: React.FC = () => {
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                defaultValue={ship.size.value}
+                defaultValue={ship.size?.value}
                 onChange={() => setSizeError(false)}
                 onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                   if (

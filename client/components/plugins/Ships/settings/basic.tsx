@@ -27,7 +27,6 @@ const ShipBasic: React.FC = () => {
   const [error, setError] = React.useState(false);
 
   const phrasesData = usePhraseListsSubscription({variables: {pluginId}});
-  const [setNameGenerator] = usePluginShipSetNameGeneratorPhraseMutation();
   const ship = data?.pluginShip;
 
   let elementId = useId();
@@ -68,38 +67,6 @@ const ShipBasic: React.FC = () => {
               }
             />
           </div>
-          <div className={`flex flex-col w-full pb-4`}>
-            {/* TODO: Add an i tooltip explaining that this is created from phrases, along with a link to the phrases config screen. */}
-            <label id={elementId}>Generated Name Source Phrase</label>
-            <select
-              aria-labelledby={elementId}
-              value={ship.isShip.nameGeneratorPhrase || "default"}
-              className={`w-full transition-all duration-200 outline-none px-4 h-10 rounded bg-whiteAlpha-100 border border-whiteAlpha-200 focus:border-primary-400 focus:shadow-outline`}
-              onChange={e =>
-                setNameGenerator({
-                  variables: {
-                    pluginId,
-                    shipId,
-                    phraseId:
-                      e.target.value === "default" ? null : e.target.value,
-                  },
-                })
-              }
-            >
-              <option value="default">Default</option>
-              {Object.entries(categorizedPhrases).map(([key, value]) => {
-                return (
-                  <optgroup label={key} key={key}>
-                    {value.map(opt => (
-                      <option value={opt.id} key={opt.id}>
-                        {opt.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                );
-              })}
-            </select>
-          </div>
           <div className="pb-4">
             <label className="w-full">
               <Input
@@ -124,7 +91,7 @@ const ShipBasic: React.FC = () => {
                 labelHidden={false}
                 label={t(`Category`)}
                 type="textarea"
-                defaultValue={ship.isShip.category}
+                defaultValue={ship.isShip?.category}
                 onBlur={(e: any) =>
                   setCategory({
                     variables: {

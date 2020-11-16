@@ -17,6 +17,7 @@ import {
   TemplateSystemSubscription,
 } from "../../../generated/graphql";
 import {configStoreApi, useConfigStore} from "../configStore";
+import {PLANETARY_SCALE} from "../constants";
 import OrbitContainer from "../OrbitContainer";
 import SystemLabel from "../SystemMarker/SystemLabel";
 import {DEG_TO_RAD, getOrbitPosition} from "../utils";
@@ -107,7 +108,11 @@ const Planet: React.FC<{
     );
 
     if (planetSprite.current && planetMesh.current) {
-      if (size && distance / size > 100) {
+      if (
+        size &&
+        distance / size > 100 &&
+        useConfigStore.getState().viewingMode === "core"
+      ) {
         planetSprite.current.visible = true;
         planetMesh.current.visible = false;
       } else {
@@ -213,11 +218,11 @@ const PlanetContainer: React.FC<{
   const size =
     configStoreApi.getState().viewingMode !== "editor"
       ? radius
-      : (isSatellite ? 1 : 5) + 100 * (radius / 1000000);
+      : (isSatellite ? 1 : 5) + 100 * (radius * PLANETARY_SCALE);
   const scaledRadius =
     configStoreApi.getState().viewingMode !== "editor"
       ? distance
-      : (isSatellite ? 100 : 1) * (distance / 1000000);
+      : (isSatellite ? 100 : 1) * (distance * PLANETARY_SCALE);
   const position = getOrbitPosition({
     radius: distance,
     eccentricity,
@@ -322,7 +327,7 @@ const PlanetEntity: React.FC<{
             eccentricity,
             orbitalArc,
             orbitalInclination,
-            radius: (orbitRadius / 1000000) * (isSatellite ? 100 : 1),
+            radius: orbitRadius * PLANETARY_SCALE * (isSatellite ? 100 : 1),
             origin: scaledOrigin,
           }),
         });
@@ -353,7 +358,7 @@ const PlanetEntity: React.FC<{
             eccentricity,
             orbitalArc,
             orbitalInclination,
-            radius: (orbitRadius / 1000000) * (isSatellite ? 100 : 1),
+            radius: orbitRadius * PLANETARY_SCALE * (isSatellite ? 100 : 1),
             origin: scaledOrigin,
           }),
         });

@@ -233,7 +233,13 @@ export class PlanetarySystemResolver {
   @FieldResolver(type => [Entity])
   items(@Root() self: PlanetarySystem) {
     const plugin = getPlugin(self.pluginId);
-    return plugin.universe.filter(s => s.satellite?.parentId === self.id);
+    return plugin.universe
+      .filter(s => s.satellite?.parentId === self.id)
+      .concat(
+        plugin.universe.filter(
+          s => s.interstellarPosition?.systemId === self.id
+        )
+      );
   }
 }
 

@@ -6,7 +6,7 @@ import {useGesture} from "react-use-gesture";
 
 export default function useObjectDrag(
   obj: React.MutableRefObject<Object3D | undefined>,
-  {onMouseUp, onMouseDown}: {onMouseUp: any; onMouseDown: any}
+  {onMouseUp, onMouseDown}: {onMouseUp?: any; onMouseDown?: any}
 ) {
   const {mouse, camera} = useThree();
   const raycaster = React.useRef(new Raycaster());

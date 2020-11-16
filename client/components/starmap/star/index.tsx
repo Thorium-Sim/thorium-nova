@@ -1,4 +1,4 @@
-import React from "react";
+import React, {Suspense} from "react";
 import {useFrame, useLoader} from "react-three-fiber";
 import {
   TextureLoader,
@@ -72,7 +72,11 @@ const Star: React.FC<{
       distanceVector.set(camera.position.x, 0, camera.position.z)
     );
     if (starSprite.current && starMesh.current) {
-      if (size && distance / size > 100) {
+      if (
+        size &&
+        distance / size > 100 &&
+        useConfigStore.getState().viewingMode === "core"
+      ) {
         starSprite.current.visible = true;
         starMesh.current.visible = false;
       } else {
@@ -100,7 +104,9 @@ const Star: React.FC<{
         castShadow
       />
       <group ref={starSprite} scale={[spriteScale, spriteScale, spriteScale]}>
-        <StarSprite color1={color1} />
+        <Suspense fallback={null}>
+          <StarSprite color1={color1} />
+        </Suspense>
       </group>
       <group ref={starMesh}>
         <mesh ref={shader} uuid="My star">
@@ -120,7 +126,7 @@ const Star: React.FC<{
           <meshBasicMaterial attach="material" color={0x000000} />
         </mesh>
       </group>
-      {useConfigStore.getState().viewingMode !== "core" && <LensFlare />}{" "}
+      {useConfigStore.getState().viewingMode !== "core" && <LensFlare />}
     </group>
   );
 };

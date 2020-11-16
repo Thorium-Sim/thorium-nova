@@ -25,7 +25,7 @@ const ClientApp: React.FC = () => {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<Welcome />} />
+        <Route path="/*" element={<Welcome />} />
         <Route path="releases" element={<Releases />} />
         <Route path="theme" element={<ThemeBuilder />} />
         <Route path="flight" element={<Viewscreen />} />

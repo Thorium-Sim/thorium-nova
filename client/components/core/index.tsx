@@ -129,7 +129,14 @@ const StarmapCore: React.FC = () => {
       const ships = Object.values(useShipsStore.getState());
       if (cameraRef.current) {
         const selectedIds = getSelectedObjects(
-          ships,
+          ships.filter(s => s.position) as {
+            id: string;
+            position: {
+              x: number;
+              y: number;
+              z: number;
+            };
+          }[],
           cameraRef.current,
           startPoint.set(x1 * 2 - 1, -(y1 * 2 - 1), 0.5),
           endPoint.set(x2 * 2 - 1, -(y2 * 2 - 1), 0.5)

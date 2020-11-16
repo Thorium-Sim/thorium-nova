@@ -5,7 +5,6 @@ import ECS from "./ecs";
 import {Field, ID, ObjectType} from "type-graphql";
 import Components, {registeredComponents} from "../../components";
 import {Component} from "../../components/utils";
-
 function isEntity(e: any): e is Entity {
   if (typeof e !== "object" || e === null) return false;
   if (e.id && e.components && e.systems) return true;

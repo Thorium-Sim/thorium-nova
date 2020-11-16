@@ -5,18 +5,17 @@ import {useTranslation} from "react-i18next";
 import ListGroupItem from "./ListGroupItem";
 import Input from "./Input";
 
-interface SearchableListProps {
-  items: ListItem[];
+interface SearchableListProps<L extends ListItem = ListItem> {
+  items: L[];
   selectedItem?: string | null;
   setSelectedItem?: (item: string) => void;
-  renderItem?: (item: ListItem) => JSX.Element;
+  renderItem?: (item: L) => JSX.Element;
   searchKeys?: string[];
 }
 interface ListItem {
   id: string;
   [key: string]: any;
 }
-
 const SearchableList: React.FC<SearchableListProps> = ({
   items,
   selectedItem,

@@ -12,6 +12,7 @@ import {
 import {ShipAssetsComponent} from "server/components/ship/shipAssets";
 import {SatelliteComponent} from "server/components/satellite";
 import {GraphQLContext} from "server/helpers/graphqlContext";
+import BasePlugin, {getPlugin} from "./plugins/basePlugin";
 
 @Resolver(Entity)
 export class EntityResolver {
@@ -49,6 +50,10 @@ export class EntityFieldResolver {
   id(@Root() entity: Entity, @Ctx() context: GraphQLContext) {
     context.entity = entity;
     return entity.id;
+  }
+  @FieldResolver(type => BasePlugin, {nullable: true})
+  plugin(@Root() entity: Entity) {
+    return entity.pluginId && getPlugin(entity.pluginId);
   }
   @FieldResolver(type => EntityTypes)
   entityType(@Root() entity: Entity): EntityTypes {

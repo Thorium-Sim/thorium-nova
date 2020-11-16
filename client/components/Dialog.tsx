@@ -13,20 +13,12 @@ import {
   useOverlay,
   usePreventScroll,
 } from "@react-aria/overlays";
+import {useDisclosure} from "client/helpers/hooks/useDisclosure";
 
 import React from "react";
 import Button from "./ui/button";
 import Input from "./ui/Input";
-function useDisclosure() {
-  const [isOpen, setOpen] = React.useState(false);
-  const onOpen = React.useCallback(() => {
-    setOpen(true);
-  }, []);
-  const onClose = React.useCallback(() => {
-    setOpen(false);
-  }, []);
-  return {isOpen, onOpen, onClose};
-}
+import {ModalDialog} from "./ui/ModalDialog";
 
 interface DialogI {
   header: string;
@@ -159,53 +151,6 @@ const Dialog: React.FC = ({children}) => {
         )}
       </OverlayProvider>
     </DialogContext.Provider>
-  );
-};
-
-const ModalDialog: React.FC<
-  {title: String; role?: "dialog" | "alertdialog"} & OverlayProps
-> = props => {
-  let {title, children} = props;
-
-  // Handle interacting outside the dialog and pressing
-  // the Escape key to close the modal.
-  let ref = React.useRef<HTMLDivElement>(null);
-  let {overlayProps} = useOverlay(props, ref);
-
-  // Prevent scrolling while the modal is open, and hide content
-  // outside the modal from screen readers.
-  usePreventScroll();
-  let {modalProps} = useModal();
-
-  // Get props for the dialog and its title
-  let {dialogProps, titleProps} = useDialog(props, ref);
-
-  return (
-    <div
-      css={css`
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 100;
-      `}
-      className="fixed top-0 left-0 bottom-0 right-0 flex justify-center items-start"
-    >
-      <FocusScope contain restoreFocus autoFocus>
-        <div
-          {...overlayProps}
-          {...dialogProps}
-          {...modalProps}
-          ref={ref}
-          css={css`
-            min-width: 32rem;
-          `}
-          className="mt-32 bg-gray-800 text-white p-10"
-        >
-          <h3 {...titleProps} className="mt-0 text-2xl">
-            {title}
-          </h3>
-          {children}
-        </div>
-      </FocusScope>
-    </div>
   );
 };
 

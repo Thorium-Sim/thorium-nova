@@ -1,0 +1,15 @@
+mutation UniverseAddStarbase(
+  $pluginId: ID!
+  $systemId: ID!
+  $shipId: ID!
+  $position: CoordinatesInput!
+) {
+  pluginUniverseAddStarbase(
+    pluginId: $pluginId
+    systemId: $systemId
+    shipId: $shipId
+    position: $position
+  ) {
+    id
+  }
+}

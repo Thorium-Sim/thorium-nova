@@ -53,7 +53,7 @@ const ShipsList: React.FC = () => {
                 data?.pluginShips.map(o => ({
                   id: o.id,
                   label: o.identity.name,
-                  category: o.isShip.category,
+                  category: o.isShip?.category,
                 })) || []
               }
               renderItem={c => (

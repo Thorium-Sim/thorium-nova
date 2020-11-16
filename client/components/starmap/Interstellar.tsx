@@ -77,7 +77,11 @@ const Interstellar: React.FC<{universeId: string}> = ({universeId}) => {
             key={s.id}
             id={s.id}
             system={s}
-            position={[s.position.x, s.position.y, s.position.z]}
+            position={[
+              s.position?.x || 0,
+              s.position?.y || 0,
+              s.position?.z || 0,
+            ]}
             name={s.identity.name}
           />
         ))}

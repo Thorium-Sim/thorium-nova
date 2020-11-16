@@ -26,8 +26,28 @@ fragment UniverseObject on Entity {
     cloudsMapAsset
     ringsMapAsset
   }
+  isShip {
+    category
+  }
+  size {
+    value
+  }
+  shipAssets {
+    model
+  }
   satellite {
     ...SatelliteComponent
+  }
+  position {
+    x
+    y
+    z
+  }
+  rotation {
+    x
+    y
+    z
+    w
   }
   temperature {
     temperature

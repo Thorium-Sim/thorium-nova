@@ -13257,11 +13257,6 @@ react-use-gesture@^8.0.0:
   resolved "https://registry.yarnpkg.com/react-use-gesture/-/react-use-gesture-8.0.0.tgz#0ce80c602625816b39bf5d3171b9efd29d70eb69"
   integrity sha512-Xn4gWYn7GZPTPj1GL8gi8SvI4CJX77ia8tCkKIt7m2hBuXgHeNeRR9QwRiuPZy6xgtLBddPk5O5PLccNxuwFWA==
 
-react-use-konami@^1.0.13:
-  version "1.0.13"
-  resolved "https://registry.yarnpkg.com/react-use-konami/-/react-use-konami-1.0.13.tgz#8d77f0bea95fca049e042cdf62dcdf02fae1d793"
-  integrity sha512-9FLw3157RbZN6uJG6H7dVTJjCeQwlh+QuJxT1yIdKKICfNvin5a0awIA5oiOdiFOvyDZClePl8xGXLs6xI/cYQ==
-
 react-use-measure@^2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/react-use-measure/-/react-use-measure-2.0.3.tgz#7b56ae3ca19ccf62326933678625a8ff6b3f90a3"

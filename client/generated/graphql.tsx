@@ -38,6 +38,16 @@ export type PhraseUnitInput = {
   contents: Maybe<Array<Scalars["String"]>>;
 };
 
+export type FlightStartSimulator = {
+  shipId: Scalars["String"];
+  shipName: Scalars["String"];
+  crewCount: Maybe<Scalars["Float"]>;
+  stationSet: Maybe<Scalars["String"]>;
+  crewCaptain: Maybe<Scalars["Boolean"]>;
+  flightDirector: Scalars["Boolean"];
+  missionId: Maybe<Scalars["String"]>;
+};
+
 export type CoordinatesInput = {
   x: Maybe<Scalars["Float"]>;
   y: Maybe<Scalars["Float"]>;
@@ -192,7 +202,7 @@ export type AvailableShipsQuery = {
     availableShips: Array<{
       __typename?: "Entity";
       id: string;
-      isShip: {__typename?: "IsShipComponent"; category: string};
+      isShip: Maybe<{__typename?: "IsShipComponent"; category: string}>;
       identity: {__typename?: "IdentityComponent"; name: string};
       shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; vanity: string}>;
       factionAssignment: Maybe<{
@@ -217,6 +227,25 @@ export type ShipSpawnMutationVariables = Exact<{
 export type ShipSpawnMutation = {
   __typename?: "Mutation";
   shipSpawn: Maybe<{__typename?: "Entity"; id: string}>;
+};
+
+export type AllPluginShipsQueryVariables = Exact<{
+  pluginIds: Array<Scalars["ID"]>;
+}>;
+
+export type AllPluginShipsQuery = {
+  __typename?: "Query";
+  allPluginShips: Array<{
+    __typename?: "Entity";
+    id: string;
+    plugin: Maybe<{__typename?: "BasePlugin"; id: string; name: string}>;
+    identity: {
+      __typename?: "IdentityComponent";
+      name: string;
+      description: string;
+    };
+    shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; vanity: string}>;
+  }>;
 };
 
 export type OutfitAbilitiesQueryVariables = Exact<{[key: string]: never}>;
@@ -714,11 +743,11 @@ export type PluginShipBasicSubscription = {
       name: string;
       description: string;
     };
-    isShip: {
+    isShip: Maybe<{
       __typename?: "IsShipComponent";
       category: string;
       nameGeneratorPhrase: Maybe<string>;
-    };
+    }>;
     tags: {__typename?: "TagsComponent"; tags: Array<string>};
   }>;
 };
@@ -766,8 +795,8 @@ export type PluginShipPhysicsSubscription = {
   pluginShip: Maybe<{
     __typename?: "Entity";
     id: string;
-    isShip: {__typename?: "IsShipComponent"; mass: number};
-    size: {__typename?: "SizeComponent"; value: number};
+    isShip: Maybe<{__typename?: "IsShipComponent"; mass: number}>;
+    size: Maybe<{__typename?: "SizeComponent"; value: number}>;
   }>;
 };
 
@@ -891,7 +920,7 @@ export type PluginShipsSubscription = {
     __typename?: "Entity";
     id: string;
     identity: {__typename?: "IdentityComponent"; name: string};
-    isShip: {__typename?: "IsShipComponent"; category: string};
+    isShip: Maybe<{__typename?: "IsShipComponent"; category: string}>;
   }>;
 };
 
@@ -1042,10 +1071,29 @@ export type UniverseObjectFragment = {
     cloudsMapAsset: string;
     ringsMapAsset: string;
   }>;
+  isShip: Maybe<{__typename?: "IsShipComponent"; category: string}>;
+  size: Maybe<{__typename?: "SizeComponent"; value: number}>;
+  shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; model: string}>;
   satellite: Maybe<
     {__typename?: "SatelliteComponent"} & SatelliteComponentFragment
   >;
-  temperature: {__typename?: "TemperatureComponent"; temperature: number};
+  position: Maybe<{
+    __typename?: "PositionComponent";
+    x: number;
+    y: number;
+    z: number;
+  }>;
+  rotation: Maybe<{
+    __typename?: "RotationComponent";
+    x: number;
+    y: number;
+    z: number;
+    w: number;
+  }>;
+  temperature: Maybe<{
+    __typename?: "TemperatureComponent";
+    temperature: number;
+  }>;
   population: Maybe<{__typename?: "PopulationComponent"; count: number}>;
 };
 
@@ -1142,12 +1190,12 @@ export type UniverseAddSystemMutation = {
       description: string;
     };
     tags: {__typename?: "TagsComponent"; tags: Array<string>};
-    position: {
+    position: Maybe<{
       __typename?: "PositionComponent";
       x: number;
       y: number;
       z: number;
-    };
+    }>;
   };
 };
 
@@ -1198,12 +1246,12 @@ export type UniverseGetSystemQuery = {
       description: string;
     };
     tags: {__typename?: "TagsComponent"; tags: Array<string>};
-    position: {
+    position: Maybe<{
       __typename?: "PositionComponent";
       x: number;
       y: number;
       z: number;
-    };
+    }>;
     planetarySystem: Maybe<{
       __typename?: "PlanetarySystemComponent";
       skyboxKey: string;
@@ -1441,6 +1489,17 @@ export type UniverseSearchQuery = {
   }>;
 };
 
+export type UniverseStarbaseSetPositionMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  shipId: Scalars["ID"];
+  position: PositionInput;
+}>;
+
+export type UniverseStarbaseSetPositionMutation = {
+  __typename?: "Mutation";
+  pluginUniverseStarbaseSetPosition: {__typename?: "Entity"; id: string};
+};
+
 export type UniverseStarSetAgeMutationVariables = Exact<{
   id: Scalars["ID"];
   objectId: Scalars["ID"];
@@ -1523,17 +1582,29 @@ export type UniverseSubscription = {
       description: string;
     };
     tags: {__typename?: "TagsComponent"; tags: Array<string>};
-    position: {
+    position: Maybe<{
       __typename?: "PositionComponent";
       x: number;
       y: number;
       z: number;
-    };
+    }>;
     planetarySystem: Maybe<{
       __typename?: "PlanetarySystemComponent";
       skyboxKey: string;
     }>;
   }>;
+};
+
+export type UniverseAddStarbaseMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  systemId: Scalars["ID"];
+  shipId: Scalars["ID"];
+  position: CoordinatesInput;
+}>;
+
+export type UniverseAddStarbaseMutation = {
+  __typename?: "Mutation";
+  pluginUniverseAddStarbase: {__typename?: "Entity"; id: string};
 };
 
 export type UniverseSystemSetDescriptionMutationVariables = Exact<{
@@ -1633,19 +1704,19 @@ export type UniverseSystemShipsSubscription = {
     __typename?: "Entity";
     id: string;
     identity: {__typename?: "IdentityComponent"; name: string};
-    position: {
+    position: Maybe<{
       __typename?: "PositionComponent";
       x: number;
       y: number;
       z: number;
-    };
-    rotation: {
+    }>;
+    rotation: Maybe<{
       __typename?: "RotationComponent";
       x: number;
       y: number;
       z: number;
       w: number;
-    };
+    }>;
     autopilot: {
       __typename?: "AutopilotComponent";
       desiredCoordinates: Maybe<{
@@ -1655,7 +1726,7 @@ export type UniverseSystemShipsSubscription = {
         z: number;
       }>;
     };
-    size: {__typename?: "SizeComponent"; value: number};
+    size: Maybe<{__typename?: "SizeComponent"; value: number}>;
     shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; model: string}>;
   }>;
 };
@@ -1670,19 +1741,19 @@ export type UniverseSystemShipsHotSubscription = {
   universeSystemShipsHot: Array<{
     __typename?: "Entity";
     id: string;
-    position: {
+    position: Maybe<{
       __typename?: "PositionComponent";
       x: number;
       y: number;
       z: number;
-    };
-    rotation: {
+    }>;
+    rotation: Maybe<{
       __typename?: "RotationComponent";
       x: number;
       y: number;
       z: number;
       w: number;
-    };
+    }>;
     autopilot: {
       __typename?: "AutopilotComponent";
       desiredCoordinates: Maybe<{
@@ -1748,6 +1819,7 @@ export type ClientDisconnectMutation = {
 export type FlightStartMutationVariables = Exact<{
   name: Maybe<Scalars["String"]>;
   plugins: Array<Scalars["ID"]>;
+  simulators: Array<FlightStartSimulator>;
 }>;
 
 export type FlightStartMutation = {
@@ -1835,8 +1907,28 @@ export const UniverseObjectFragmentDoc = gql`
       cloudsMapAsset
       ringsMapAsset
     }
+    isShip {
+      category
+    }
+    size {
+      value
+    }
+    shipAssets {
+      model
+    }
     satellite {
       ...SatelliteComponent
+    }
+    position {
+      x
+      y
+      z
+    }
+    rotation {
+      x
+      y
+      z
+      w
     }
     temperature {
       temperature
@@ -2028,6 +2120,52 @@ export function useShipSpawnMutation(
 }
 export type ShipSpawnMutationHookResult = ReturnType<
   typeof useShipSpawnMutation
+>;
+export const AllPluginShipsDocument = gql`
+  query AllPluginShips($pluginIds: [ID!]!) {
+    allPluginShips(pluginIds: $pluginIds) {
+      id
+      plugin {
+        id
+        name
+      }
+      identity {
+        name
+        description
+      }
+      shipAssets {
+        vanity
+      }
+    }
+  }
+`;
+export function useAllPluginShipsQuery(
+  baseOptions: Apollo.QueryHookOptions<
+    AllPluginShipsQuery,
+    AllPluginShipsQueryVariables
+  >
+) {
+  return Apollo.useQuery<AllPluginShipsQuery, AllPluginShipsQueryVariables>(
+    AllPluginShipsDocument,
+    baseOptions
+  );
+}
+export function useAllPluginShipsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    AllPluginShipsQuery,
+    AllPluginShipsQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<AllPluginShipsQuery, AllPluginShipsQueryVariables>(
+    AllPluginShipsDocument,
+    baseOptions
+  );
+}
+export type AllPluginShipsQueryHookResult = ReturnType<
+  typeof useAllPluginShipsQuery
+>;
+export type AllPluginShipsLazyQueryHookResult = ReturnType<
+  typeof useAllPluginShipsLazyQuery
 >;
 export const OutfitAbilitiesDocument = gql`
   query OutfitAbilities {
@@ -4393,6 +4531,35 @@ export type UniverseSearchQueryHookResult = ReturnType<
 export type UniverseSearchLazyQueryHookResult = ReturnType<
   typeof useUniverseSearchLazyQuery
 >;
+export const UniverseStarbaseSetPositionDocument = gql`
+  mutation UniverseStarbaseSetPosition(
+    $pluginId: ID!
+    $shipId: ID!
+    $position: PositionInput!
+  ) {
+    pluginUniverseStarbaseSetPosition(
+      pluginId: $pluginId
+      shipId: $shipId
+      position: $position
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseStarbaseSetPositionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseStarbaseSetPositionMutation,
+    UniverseStarbaseSetPositionMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseStarbaseSetPositionMutation,
+    UniverseStarbaseSetPositionMutationVariables
+  >(UniverseStarbaseSetPositionDocument, baseOptions);
+}
+export type UniverseStarbaseSetPositionMutationHookResult = ReturnType<
+  typeof useUniverseStarbaseSetPositionMutation
+>;
 export const UniverseStarSetAgeDocument = gql`
   mutation UniverseStarSetAge($id: ID!, $objectId: ID!, $age: Float!) {
     pluginUniverseStarSetAge(id: $id, objectId: $objectId, age: $age) {
@@ -4579,6 +4746,37 @@ export function useUniverseSubscription(
 }
 export type UniverseSubscriptionHookResult = ReturnType<
   typeof useUniverseSubscription
+>;
+export const UniverseAddStarbaseDocument = gql`
+  mutation UniverseAddStarbase(
+    $pluginId: ID!
+    $systemId: ID!
+    $shipId: ID!
+    $position: CoordinatesInput!
+  ) {
+    pluginUniverseAddStarbase(
+      pluginId: $pluginId
+      systemId: $systemId
+      shipId: $shipId
+      position: $position
+    ) {
+      id
+    }
+  }
+`;
+export function useUniverseAddStarbaseMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UniverseAddStarbaseMutation,
+    UniverseAddStarbaseMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    UniverseAddStarbaseMutation,
+    UniverseAddStarbaseMutationVariables
+  >(UniverseAddStarbaseDocument, baseOptions);
+}
+export type UniverseAddStarbaseMutationHookResult = ReturnType<
+  typeof useUniverseAddStarbaseMutation
 >;
 export const UniverseSystemSetDescriptionDocument = gql`
   mutation UniverseSystemSetDescription(
@@ -4905,8 +5103,12 @@ export type ClientDisconnectMutationHookResult = ReturnType<
   typeof useClientDisconnectMutation
 >;
 export const FlightStartDocument = gql`
-  mutation FlightStart($name: String, $plugins: [ID!]!) {
-    flightStart(flightName: $name, plugins: $plugins) {
+  mutation FlightStart(
+    $name: String
+    $plugins: [ID!]!
+    $simulators: [FlightStartSimulator!]!
+  ) {
+    flightStart(flightName: $name, plugins: $plugins, simulators: $simulators) {
       id
       name
       paused

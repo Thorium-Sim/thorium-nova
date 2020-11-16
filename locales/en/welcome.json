@@ -1,7 +1,9 @@
 {
   "Configure Plugins": "Configure Plugins",
+  "Custom Flight": "Custom Flight",
   "Join a Server": "Join a Server",
   "Load a Saved Flight": "Load a Saved Flight",
+  "Quick Start": "Quick Start",
   "Start a New Flight": "Start a New Flight",
   "Version {{version}}": "Version {{version}}"
 }

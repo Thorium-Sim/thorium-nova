@@ -24,7 +24,7 @@ import {Phrase} from "../phrases";
 export function getPlugin(id: string) {
   const plugin = App.plugins.find(u => u.id === id);
   if (!plugin) {
-    throw new Error("Unable to find that plugin.");
+    throw new Error(`Unable to find that plugin: ${id}`);
   }
   return plugin;
 }

@@ -147,7 +147,10 @@ module.exports = {
       },
     },
   },
-  variants: {},
+  variants: {
+    backgroundColor: ["hover", "focus", "active", "checked"],
+    color: ["hover", "focus", "active", "checked"],
+  },
   plugins: [
     require("@tailwindcss/custom-forms"),
     require("tailwindcss-filters"),

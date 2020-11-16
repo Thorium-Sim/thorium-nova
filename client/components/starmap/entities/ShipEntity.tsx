@@ -97,35 +97,39 @@ const ShipEntity: React.FC<{
       useConfigStore.getState().viewingMode === "core"
         ? useConfigStore.getState().compressYDimension
         : false;
-    const scale = ship.size.value;
+    const scale = ship.size?.value || 1;
     shipMesh.current?.scale.set(scale, scale, scale);
     const cachedPosition = useSelectedShips.getState().cachedPositions[
       entity.id
     ];
     const offset = useConfigStore.getState().draggingMovement3D;
-    if (
-      useSelectedShips.getState().selectedIds.includes(entity.id) &&
-      cachedPosition &&
-      offset
-    ) {
-      group.current?.position.set(
-        cachedPosition.x + offset.x,
-        compressYDimension ? 0 : cachedPosition.y + offset.y,
-        cachedPosition.z + offset.z
-      );
-    } else {
-      group.current?.position.set(
-        ship.position.x,
-        compressYDimension ? 0 : ship.position.y,
-        ship.position.z
+    if (ship.position) {
+      if (
+        useSelectedShips.getState().selectedIds.includes(entity.id) &&
+        cachedPosition &&
+        offset
+      ) {
+        group.current?.position.set(
+          cachedPosition.x + offset.x,
+          compressYDimension ? 0 : cachedPosition.y + offset.y,
+          cachedPosition.z + offset.z
+        );
+      } else {
+        group.current?.position.set(
+          ship.position.x,
+          compressYDimension ? 0 : ship.position.y,
+          ship.position.z
+        );
+      }
+    }
+    if (ship.rotation) {
+      shipMesh.current?.quaternion.set(
+        ship.rotation.x,
+        ship.rotation.y,
+        ship.rotation.z,
+        ship.rotation.w
       );
     }
-    shipMesh.current?.quaternion.set(
-      ship.rotation.x,
-      ship.rotation.y,
-      ship.rotation.z,
-      ship.rotation.w
-    );
     // camera.position.set(ship.position.x, ship.position.y, ship.position.z);
     // camera.quaternion
     //   .set(ship.rotation.x, ship.rotation.y, ship.rotation.z, ship.rotation.w)
@@ -179,14 +183,16 @@ const ShipEntity: React.FC<{
           next
         ) => {
           if (useSelectedShips.getState().selectedIds.includes(next.id)) {
-            prev.push({
-              id: next.id,
-              position: {
-                x: next.position.x + (offsetPosition.x - camera.position.x),
-                y: useConfigStore.getState().yDimensionIndex,
-                z: next.position.z + (offsetPosition.z - camera.position.z),
-              },
-            });
+            if (next.position) {
+              prev.push({
+                id: next.id,
+                position: {
+                  x: next.position.x + (offsetPosition.x - camera.position.x),
+                  y: useConfigStore.getState().yDimensionIndex,
+                  z: next.position.z + (offsetPosition.z - camera.position.z),
+                },
+              });
+            }
           }
           return prev;
         },
@@ -207,7 +213,9 @@ const ShipEntity: React.FC<{
         cachedPositions: Object.values(useShipsStore.getState()).reduce(
           (prev: {[id: string]: {x: number; y: number; z: number}}, next) => {
             if (selectedIds.includes(next.id)) {
-              prev[next.id] = next.position;
+              if (next.position) {
+                prev[next.id] = next.position;
+              }
             }
             return prev;
           },

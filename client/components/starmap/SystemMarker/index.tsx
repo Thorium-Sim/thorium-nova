@@ -15,10 +15,12 @@ const SystemMarker: React.FC<{
   const direction = React.useRef(0);
 
   useFrame(({camera, mouse}) => {
-    const zoom = camera.position.distanceTo(group.current.position);
+    const zoom = group.current?.position
+      ? camera.position.distanceTo(group.current?.position)
+      : 1;
     let zoomedScale = (zoom / 2) * 0.015;
-    group.current.scale.set(zoomedScale, zoomedScale, zoomedScale);
-    group.current.quaternion.copy(camera.quaternion);
+    group.current?.scale.set(zoomedScale, zoomedScale, zoomedScale);
+    group.current?.quaternion.copy(camera.quaternion);
   });
 
   return (

@@ -11,7 +11,7 @@ let matrix = new Matrix4();
 
 const C_PROPORTION = 10;
 const C_INTEGRAL = 0.1;
-const C_DERIVATIVE = 0.8;
+const C_DERIVATIVE = 25;
 
 export class AutoThrustSystem extends System {
   test(entity: Entity) {
@@ -43,12 +43,12 @@ export class AutoThrustSystem extends System {
     desiredRotationQuat.setFromRotationMatrix(matrix);
 
     if (!(autopilot.speedController instanceof Controller)) {
-      autopilot.speedController = new Controller(
-        C_PROPORTION,
-        C_INTEGRAL,
-        C_DERIVATIVE,
-        1000 / 60 / 1000
-      );
+      autopilot.speedController = new Controller({
+        k_p: C_PROPORTION,
+        k_d: C_DERIVATIVE,
+        k_i: C_INTEGRAL,
+        i_max: 1,
+      });
     }
     autopilot.speedController.target = 1;
     const distance = positionVec.distanceTo(desiredDestination);
@@ -58,11 +58,14 @@ export class AutoThrustSystem extends System {
 
     if (impulseEngines?.impulseEngines) {
       if (rotationDifference <= 30 * (Math.PI / 180)) {
+        const controllerOutput = autopilot.speedController.update(
+          -1 * Math.min(impulseEngines.impulseEngines.cruisingSpeed, distance)
+        );
         let desiredSpeed = Math.min(
           impulseEngines.impulseEngines.cruisingSpeed,
-          Math.max(0, -1 * autopilot.speedController.update(distance))
+          Math.max(0, controllerOutput)
         );
-        if (distance < 0.5) {
+        if (distance < 5) {
           desiredSpeed = 0;
         }
         impulseEngines.updateComponent("impulseEngines", {

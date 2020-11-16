@@ -20,7 +20,7 @@ const SystemLabel: React.FC<{
     let texture = new TextTexture({
       color: "rgb(0,255,255)",
       fontFamily: 'Electrolize, "Gill Sans", sans-serif',
-      fontSize: 32,
+      fontSize: 128,
       alignment: "right",
       text: name,
     });
@@ -54,18 +54,20 @@ const SystemLabel: React.FC<{
     }
   });
 
-  const scale = 0.8;
-  const spriteWidth =
-    (textTexture.image.width / textTexture.image.height) * scale;
-
+  // const scale = 1/textTexture.height;
+  const scale = 3 / 128;
+  const spriteWidth = textTexture.width / textTexture.height;
   return (
     <mesh
-      position={[-spriteWidth * 2.5 - 2, 0, 0]}
-      scale={[spriteWidth, scale, 1]}
+      scale={[scale, scale, scale]}
+      position={[-spriteWidth * 2.7 - 2, 0, 0]}
       ref={text}
       renderOrder={1000}
     >
-      <planeBufferGeometry args={[4, 4, 4]} attach="geometry" />
+      <planeBufferGeometry
+        args={[textTexture.width, textTexture.height, 1]}
+        attach="geometry"
+      />
       <meshBasicMaterial
         attach="material"
         map={textTexture}

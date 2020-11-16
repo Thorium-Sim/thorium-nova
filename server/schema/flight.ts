@@ -7,6 +7,7 @@ import {
   Mutation,
   ObjectType,
   Ctx,
+  InputType,
 } from "type-graphql";
 import uuid from "uniqid";
 import randomWords from "random-words";
@@ -31,6 +32,7 @@ import {EngineVelocitySystem} from "server/systems/EngineVelocitySystem";
 import {PositionVelocitySystem} from "server/systems/PositionVelocitySystem";
 import {getPlugin} from "./plugins/basePlugin";
 import {Networking} from "server/systems/Networking";
+import {ActiveShipsResolver} from "./activeFlight/ships";
 
 const INTERVAL = 1000 / 60;
 
@@ -146,6 +148,24 @@ export default class Flight {
   }
 }
 
+@InputType()
+class FlightStartSimulator {
+  @Field()
+  shipId!: string;
+  @Field()
+  shipName!: string;
+  @Field({nullable: true})
+  crewCount?: number;
+  @Field({nullable: true})
+  stationSet?: string;
+  @Field({nullable: true})
+  crewCaptain?: boolean;
+  @Field()
+  flightDirector!: boolean;
+  @Field({nullable: true})
+  missionId?: string;
+}
+
 @Resolver(Flight)
 export class FlightResolver {
   @Query(returns => Flight, {nullable: true})
@@ -181,7 +201,9 @@ export class FlightResolver {
     @Arg("flightName", type => String, {nullable: true})
     flightName: string = randomWords(3).join("-"),
     @Arg("plugins", type => [ID])
-    plugins: string[]
+    plugins: string[],
+    @Arg("simulators", type => [FlightStartSimulator])
+    simulators: FlightStartSimulator[]
   ): Flight {
     // When we start our flight, we need a list of plugins that will be active.
     // If a mission is selected, all of the plugins referenced by that mission
@@ -198,6 +220,8 @@ export class FlightResolver {
 
       App.activeFlight.pluginIds = plugins;
       App.activeFlight.activatePlugins(true);
+
+      // Generate the ships for the simulators.
     }
     return App.activeFlight;
   }

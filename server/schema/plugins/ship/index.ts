@@ -85,6 +85,17 @@ export class ShipPluginResolver {
     const plugin = getPlugin(pluginId);
     return plugin?.ships || [];
   }
+  @Query(returns => [Entity])
+  allPluginShips(
+    @Arg("pluginIds", type => [ID]) pluginIds: string[],
+    @Ctx() ctx: GraphQLContext
+  ): Entity[] {
+    return pluginIds.reduce((prev: Entity[], pluginId) => {
+      ctx.pluginId = pluginId;
+      const plugin = getPlugin(pluginId);
+      return plugin?.ships ? prev.concat(plugin.ships) : prev;
+    }, []);
+  }
   @Mutation(returns => Entity)
   pluginShipCreate(
     @Arg("pluginId", type => ID) pluginId: string,
@@ -232,6 +243,9 @@ export class ShipPluginResolver {
       const id = uniqid();
       const plugin = getPlugin(args.pluginId);
       const ship = plugin.ships.find(t => t.id === args.id);
+      if (ship) {
+        ship.pluginId = args.pluginId;
+      }
       process.nextTick(() => {
         pubsub.publish(id, {
           pluginId: plugin.id,
@@ -260,10 +274,14 @@ export class ShipPluginResolver {
     topics: ({args, payload}) => {
       const id = uniqid();
       const plugin = getPlugin(args.pluginId);
+
       process.nextTick(() => {
         pubsub.publish(id, {
           pluginId: plugin.id,
-          ships: plugin.ships,
+          ships: plugin.ships.map(s => {
+            s.pluginId = plugin.id;
+            return s;
+          }),
         });
       });
       return [id, "pluginShips"];

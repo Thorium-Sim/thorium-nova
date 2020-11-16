@@ -25,7 +25,7 @@ const TextLabel = React.forwardRef<Mesh, {text: string; position?: Vector3}>(
       let texture = new TextTexture({
         color: "rgb(0,255,255)",
         fontFamily: 'Electrolize, "Gill Sans", sans-serif',
-        fontSize: 32,
+        fontSize: 128,
         alignment: "right",
         text,
       });
@@ -34,19 +34,14 @@ const TextLabel = React.forwardRef<Mesh, {text: string; position?: Vector3}>(
     }, [text]);
 
     const localRef = React.useRef<Mesh>();
-    const scale = 0.8;
-    const spriteWidth =
-      (textTexture.image.width / textTexture.image.height) * scale;
+    const scale = 3 / 128;
+    const spriteWidth = textTexture.width / textTexture.height;
 
     useFrame(({camera, mouse}) => {
       if (localRef.current) {
         const zoom = camera.position.distanceTo(localRef.current?.position);
-        let zoomedScale = (zoom / 2) * 0.015;
-        localRef.current.scale.set(
-          zoomedScale * spriteWidth,
-          zoomedScale * scale,
-          zoomedScale
-        );
+        let zoomedScale = (zoom / 2) * 0.0003;
+        localRef.current.scale.set(zoomedScale, zoomedScale, zoomedScale);
         localRef.current.quaternion.copy(camera.quaternion);
       }
     });
@@ -54,12 +49,15 @@ const TextLabel = React.forwardRef<Mesh, {text: string; position?: Vector3}>(
     return (
       <mesh
         ref={mergeRefs([localRef, ref])}
-        position={[-spriteWidth * 2.5 - 2 + position.x, position.y, position.z]}
+        position={[-spriteWidth * 2.7 - 2 + position.x, position.y, position.z]}
         userData={{spriteWidth}}
-        scale={[spriteWidth, scale, 1]}
+        scale={[scale, scale, scale]}
         renderOrder={1000}
       >
-        <planeBufferGeometry args={[4, 4, 4]} attach="geometry" />
+        <planeBufferGeometry
+          args={[textTexture.width, textTexture.height, 1]}
+          attach="geometry"
+        />
         <meshBasicMaterial
           attach="material"
           map={textTexture}
@@ -75,10 +73,6 @@ const TextLabel = React.forwardRef<Mesh, {text: string; position?: Vector3}>(
 const MeasureLine = () => {
   const selectedPosition = useConfigStore(store => store.selectedPosition);
   const hoveredPosition = useConfigStore(store => store.hoveredPosition);
-  const scaledSelectedPosition =
-    useConfigStore(store => store.scaledSelectedPosition) || selectedPosition;
-  const scaledHoveredPosition =
-    useConfigStore(store => store.scaledHoveredPosition) || hoveredPosition;
 
   const systemId = useConfigStore(store => store.systemId);
   const hasMeasureLine = !!(
@@ -123,7 +117,9 @@ const MeasureLine = () => {
 
   const distanceValue =
     Math.round(hoveredPosition.distanceTo(selectedPosition) * 100) / 100;
-  const distance = `${distanceValue} ${systemId ? "KM" : "LY"}`;
+  const distance = `${distanceValue.toLocaleString()} ${
+    systemId ? "KM" : "LY"
+  }`;
   return (
     <>
       <Line

@@ -63,7 +63,7 @@ const UploadWell: React.FC<{
       {disabled || children ? (
         children
       ) : (
-        <div className="flex items-center content-center flex-col h-full w-full">
+        <div className="flex items-center justify-center flex-col h-full w-full">
           <FaFileUpload size="5em" />
           <p className="text-center text-2xl mt-4">
             {t(`Click or Drop files here`)}

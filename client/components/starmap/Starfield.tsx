@@ -225,14 +225,16 @@ const Starfield: React.FC<{count?: number; radius?: number}> = ({
   const previousModelViewMatrix = React.useRef(getModelViewMatrix());
   useFrame((state, delta) => {
     const mat = mesh.current?.material as ShaderMaterial;
-    mat.uniforms.previousModelViewMatrix.value.copy(
-      previousModelViewMatrix.current
-    );
-    mat.uniforms.time.value = time.current;
-    time.current += delta;
-    mat.uniforms.deltaTime.value = delta;
-    mat.uniforms.intensity.value = presenceRatio.current;
-    previousModelViewMatrix.current = getModelViewMatrix();
+    if (mat) {
+      mat.uniforms.previousModelViewMatrix.value.copy(
+        previousModelViewMatrix.current
+      );
+      mat.uniforms.time.value = time.current;
+      time.current += delta;
+      mat.uniforms.deltaTime.value = delta;
+      mat.uniforms.intensity.value = presenceRatio.current;
+      previousModelViewMatrix.current = getModelViewMatrix();
+    }
     skip.current--;
     if (mesh.current) mesh.current.visible = true;
   });

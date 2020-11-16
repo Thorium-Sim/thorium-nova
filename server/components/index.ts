@@ -48,30 +48,30 @@ export default class Components {
   @Field()
   tags?: TagsComponent;
 
-  @Field()
+  @Field({nullable: true})
   position?: PositionComponent;
   @Field()
   velocity?: VelocityComponent;
 
-  @Field()
+  @Field({nullable: true})
   rotation?: RotationComponent;
   @Field()
   rotationVelocity?: RotationVelocityComponent;
 
-  @Field()
+  @Field({nullable: true})
   size?: SizeComponent;
 
-  @Field()
+  @Field({nullable: true})
   temperature?: TemperatureComponent;
 
   @Field(type => PopulationComponent, {nullable: true})
   population?: PopulationComponent;
 
   // Ship Entity Components
-  @Field()
+  @Field({nullable: true})
   isShip?: IsShipComponent;
 
-  @Field()
+  @Field({nullable: true})
   shipAssets?: ShipAssetsComponent;
 
   @Field()

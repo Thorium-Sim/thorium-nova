@@ -1,23 +1,26 @@
 import React from "react";
 import QuoteOfTheDay from "../components/QuoteOfTheDay";
 import Credits from "../components/Credits";
-import {Link as RouterLink, useNavigate} from "react-router-dom";
 import {
-  useFlightQuery,
-  useFlightsQuery,
-  useFlightStartMutation,
-} from "../generated/graphql";
+  Link as RouterLink,
+  Route,
+  Routes,
+  useMatch,
+  useNavigate,
+} from "react-router-dom";
+import {useFlightQuery, useFlightsQuery} from "../generated/graphql";
 import {useTranslation} from "react-i18next";
 import Button from "../components/ui/button";
 import {NavLink} from "react-router-dom";
 import {css} from "@emotion/core";
-import {css as simpleCSS} from "emotion";
-import {Transition} from "@headlessui/react";
+import QuickStartConfig from "client/components/flightConfig/quickStart";
 
 const Welcome = () => {
   const {t} = useTranslation("welcome");
   const [show, setShow] = React.useState(false);
   const navigate = useNavigate();
+  const match = useMatch("/config/flight/quick");
+  console.log(match);
   const {data} = useFlightsQuery();
   const {data: activeFlightData} = useFlightQuery();
   const hasFlight = !!activeFlightData?.flight?.id;
@@ -77,9 +80,18 @@ const Welcome = () => {
             variantColor="primary"
             variant="outline"
             as={NavLink}
+            to="/config/flight/quick"
+          >
+            {t(`Quick Start`)}
+          </Button>
+          <Button
+            size="lg"
+            variantColor="secondary"
+            variant="outline"
+            as={NavLink}
             to="/config/flight"
           >
-            {t(`Start a New Flight`)}
+            {t(`Custom Flight`)}
           </Button>
           <Button
             size="lg"
@@ -126,6 +138,9 @@ const Welcome = () => {
         <Credits></Credits>
       </div>
       <QuoteOfTheDay />
+      <Routes>
+        <Route path="config/flight/quick" element={<QuickStartConfig />} />
+      </Routes>
     </>
   );
 };

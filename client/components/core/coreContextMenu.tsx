@@ -27,7 +27,16 @@ export const CanvasContextMenu = () => {
         .translate2dTo3d?.(e.clientX, e.clientY);
       if (!position) return;
       setDestination({
-        variables: {shipPositions: selectedShips.map(id => ({id, position}))},
+        variables: {
+          shipPositions: selectedShips.map(id => ({
+            id,
+            position: {
+              x: position.x,
+              y: useConfigStore.getState().yDimensionIndex,
+              z: position.z,
+            },
+          })),
+        },
       });
       return;
     }

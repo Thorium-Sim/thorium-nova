@@ -39,6 +39,7 @@ import {
   InterstellarPositionComponentResolver,
 } from "./activeFlight/ships";
 import {PhrasesResolver} from "./phrases";
+import {UniversePluginStarbasesResolver} from "./plugins/universe/starbases";
 
 type ResolverT =
   | readonly [Function, ...Function[]]
@@ -64,6 +65,7 @@ export const resolvers: ResolverT = [
   PlanetarySystemResolver,
   UniversePluginPlanetsResolver,
   UniverseSatelliteResolver,
+  UniversePluginStarbasesResolver,
   PlanetAssetsResolver,
   SatelliteComponentResolver,
   PluginResolver,

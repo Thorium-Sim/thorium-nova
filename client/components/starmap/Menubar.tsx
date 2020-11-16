@@ -11,7 +11,7 @@ import {
   MenuList,
   Stack,
 } from "@chakra-ui/core";
-import {FaArrowLeft, FaHome} from "react-icons/fa";
+import {FaArrowLeft, FaChevronDown, FaHome} from "react-icons/fa";
 import {useTranslation} from "react-i18next";
 import {Camera, Vector3} from "three";
 import {
@@ -22,6 +22,8 @@ import {
   useUniverseAddMoonMutation,
   useStarTypesQuery,
   usePlanetTypesQuery,
+  usePluginShipsSubscription,
+  useUniverseAddStarbaseMutation,
 } from "../../generated/graphql";
 import {ConfigStore, configStoreApi, useConfigStore} from "./configStore";
 import Button from "../ui/button";
@@ -32,9 +34,14 @@ import {Link} from "react-router-dom";
 import {isPlanet} from "./ConfigPalette/utils";
 import StarSearch from "./StarSearch";
 import {css} from "@emotion/core";
+import useOnClickOutside from "client/helpers/hooks/useClickOutside";
+import {Tooltip} from "../ui/Tooltip";
+import Portal from "@reach/portal";
+import SearchableList from "../ui/SearchableList";
+import {PLANETARY_SCALE} from "./constants";
 
 const MenuButton = MenuButtonComp as React.FC<
-  MenuButtonProps & {rightIcon: string; variantColor: string}
+  MenuButtonProps & {variantColor: string}
 >;
 interface SceneRef {
   camera: () => Camera;
@@ -211,14 +218,13 @@ const Menubar: React.FC<{
         </Button>
         <Button
           size="sm"
-          variant="ghost"
+          variant={measuring ? "solid" : "ghost"}
           variantColor="alert"
           onClick={() =>
             useConfigStore.setState(({measuring}) => ({
               measuring: !measuring,
             }))
           }
-          active={measuring}
           disabled={!selectedObject}
         >
           Measure Distances
@@ -229,13 +235,13 @@ const Menubar: React.FC<{
         <Stack isInline spacing={2} mt={2}>
           <Menu>
             <MenuButton
+              className="ml-2"
               as={Button}
-              rightIcon="chevron-down"
               variantColor="warning"
               size="sm"
               width="auto"
             >
-              {t("Add Star")}
+              {t("Add Star")} <FaChevronDown />
             </MenuButton>
             <MenuList>
               <MenuItem>{t("Cancel")}</MenuItem>
@@ -261,14 +267,13 @@ const Menubar: React.FC<{
           </Menu>
           <Menu>
             <MenuButton
-              ml={2}
+              className="ml-2"
               as={Button}
-              rightIcon="chevron-down"
               variantColor="success"
               size="sm"
               width="auto"
             >
-              {t("Add Planet")}
+              {t("Add Planet")} <FaChevronDown />
             </MenuButton>
             <MenuList>
               <MenuItem>{t("Cancel")}</MenuItem>
@@ -294,14 +299,13 @@ const Menubar: React.FC<{
           {isPlanet(selectedObject) && (
             <Menu>
               <MenuButton
-                ml={2}
+                className="ml-2"
                 as={Button}
-                rightIcon="chevron-down"
                 variantColor="info"
                 size="sm"
                 width="auto"
               >
-                {t("Add Moon")}
+                {t("Add Moon")} <FaChevronDown />
               </MenuButton>
               <MenuList>
                 <MenuItem>{t("Cancel")}</MenuItem>
@@ -325,9 +329,95 @@ const Menubar: React.FC<{
               </MenuList>
             </Menu>
           )}
+          <StarbaseSpawnMenu sceneRef={sceneRef} />
         </Stack>
       </Collapse>
     </Box>
+  );
+};
+
+const StarbaseSpawnMenu: React.FC<{
+  sceneRef: React.MutableRefObject<SceneRef | undefined>;
+}> = ({sceneRef}) => {
+  const universeId = useConfigStore(store => store.universeId);
+  const systemId = useConfigStore(store => store.systemId);
+
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  useOnClickOutside(menuRef, () => {
+    setMenuOpen(false);
+  });
+  const {t} = useTranslation();
+  const [dimensions, setDimensions] = React.useState<DOMRect>();
+  const {data} = usePluginShipsSubscription({
+    variables: {pluginId: universeId},
+    skip: !universeId,
+  });
+  const [addStarbase] = useUniverseAddStarbaseMutation();
+  return (
+    <>
+      <Button
+        className="ml-2"
+        variantColor="alert"
+        size="sm"
+        ref={buttonRef}
+        onClick={() => {
+          setMenuOpen(s => !s);
+          buttonRef.current &&
+            setDimensions(buttonRef.current.getBoundingClientRect());
+        }}
+      >
+        <Tooltip label={t("Configure spawnable item")}>
+          <span className="flex items-center">
+            {t("Add Starbase")} <FaChevronDown />
+          </span>
+        </Tooltip>
+      </Button>
+      {dimensions && menuOpen && (
+        <Portal>
+          <div
+            className="fixed top-0 left-0 border border-alert-200 bg-opacity-25 bg-alert-800 rounded-sm w-64 z-40"
+            css={css`
+              height: 30rem;
+              transform: translate(
+                ${dimensions.left}px,
+                ${dimensions.bottom + 2}px
+              );
+            `}
+          >
+            <SearchableList
+              items={
+                data?.pluginShips.map(s => ({
+                  id: s.id,
+                  label: s.identity.name,
+                  category: s.isShip?.category,
+                })) || []
+              }
+              setSelectedItem={id => {
+                setMenuOpen(false);
+                // TODO: Spawn ship in starmap
+                if (!systemId) return;
+                const camera = sceneRef.current?.camera();
+                if (!camera) return;
+                const vec = new Vector3(0, 0, -100);
+                vec.applyQuaternion(camera.quaternion).add(camera.position);
+                addStarbase({
+                  variables: {
+                    pluginId: universeId,
+                    systemId,
+                    shipId: id,
+                    position: vec.multiplyScalar(1 / PLANETARY_SCALE),
+                  },
+                }).then(res => {
+                  // TODO: Automatically select the newly created starbase
+                });
+              }}
+            />
+          </div>
+        </Portal>
+      )}
+    </>
   );
 };
 

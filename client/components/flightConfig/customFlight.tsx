@@ -10,19 +10,35 @@ import Input from "../ui/Input";
 import randomWords from "random-words";
 import Button from "../ui/button";
 import {useNavigate} from "react-router";
+import useLocalStorage from "client/helpers/hooks/useLocalStorage";
 
 const CustomFlight = () => {
   const {t} = useTranslation();
   const {data} = usePluginsSubscription();
-  const [[checked], setChecked] = React.useState(() => [new Set<string>()]);
+  const [checked, setChecked] = useLocalStorage<string[]>(
+    "selectedPlugins",
+    []
+  );
   const [startFlight] = useFlightStartMutation();
   const navigate = useNavigate();
   const [flightName, setFlightName] = React.useState(() =>
     randomWords(3).join("-")
   );
+  const plugins = data?.plugins;
+  React.useEffect(() => {
+    setChecked(ids => {
+      const defaultPlugin = plugins?.find(p =>
+        p.name.includes("Thorium Default")
+      );
+      if (ids.length === 0 && defaultPlugin) {
+        return [defaultPlugin.id];
+      }
+      return ids;
+    });
+  }, [plugins]);
   return (
     <ConfigLayout title={t`Custom Flight`}>
-      <div className="flex h-full">
+      <div className="flex h-full gap-8">
         <div className="flex flex-col flex-1">
           <h3 className="font-bold text-2xl">{t("Flight Name")}</h3>
           <Input
@@ -36,12 +52,11 @@ const CustomFlight = () => {
           <SearchableList
             selectedItem={null}
             setSelectedItem={id => {
-              if (checked.has(id)) {
-                checked.delete(id);
+              if (checked.includes(id)) {
+                setChecked(ids => ids.filter(i => i !== id));
               } else {
-                checked.add(id);
+                setChecked(ids => ids.concat(id));
               }
-              setChecked([checked]);
             }}
             items={
               data?.plugins.map(p => ({
@@ -65,7 +80,7 @@ const CustomFlight = () => {
                   //     return [checked];
                   //   })
                   // }
-                  checked={checked.has(c.id)}
+                  checked={checked.includes(c.id)}
                 ></input>{" "}
                 <span className="ml-2">{c.label}</span>
               </div>
@@ -73,7 +88,17 @@ const CustomFlight = () => {
           ></SearchableList>
         </div>
         {/* TODO: Add ship spawning */}
-        <div className="flex-1"></div>
+        <div className="flex-1">
+          <h3 className="font-bold text-2xl">{t("Player Ships")}</h3>
+          <Button
+            variantColor="success"
+            variant="outline"
+            className="text-xl w-full"
+            onClick={async () => {}}
+          >
+            {t("Add Player Ship")}
+          </Button>
+        </div>
         <div className="flex-1"></div>
         <div className="flex-1 flex flex-col">
           <div className="flex-1"></div>
@@ -81,7 +106,7 @@ const CustomFlight = () => {
             variantColor="success"
             variant="outline"
             className="text-3xl w-full self-end "
-            disabled={checked.size === 0}
+            disabled={checked.length === 0}
             onClick={async () => {
               await startFlight({
                 variables: {
