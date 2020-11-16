@@ -104,11 +104,13 @@ const quotes = [
   "All theory, dear friend, is grey, but the golden tree of life springs ever green.",
   // Ubuntu
   "I am what I am because of who we all are",
+  "What shall I build or write against the fall of night?",
   // Catch-22
   "There was no telling what people might find out if they felt free to ask whatever questions they wanted to.",
   "Just because you're paranoid doesn't mean they aren't after you.",
   "He knew everything there was to know about literature, except how to enjoy it.",
   "Insanity is contagious.",
+  "Brains are weird, man. Weird, and grey, and squishy.",
 ];
 
 const QuoteOfTheDay = () => {
