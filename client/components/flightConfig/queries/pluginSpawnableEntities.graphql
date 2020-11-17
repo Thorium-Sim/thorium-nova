@@ -1,0 +1,25 @@
+query UniverseObjects($pluginIds: [ID!]!) {
+  pluginUniverseGetPersistentObjects(pluginIds: $pluginIds) {
+    id
+    identity {
+      name
+    }
+    entityType
+    satellite {
+      parent {
+        id
+        identity {
+          name
+        }
+      }
+    }
+    interstellarPosition {
+      system {
+        id
+        identity {
+          name
+        }
+      }
+    }
+  }
+}

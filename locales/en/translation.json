@@ -1,28 +1,30 @@
 {
-  "Add": "Add",
-  "Add Moon": "Add Moon",
-  "Add Planet": "Add Planet",
-  "Add Star": "Add Star",
-  "Add Starbase": "Add Starbase",
-  "Are you sure you want to remove this {{object}}?": "Are you sure you want to remove this {{object}}?",
-  "Back": "Back",
-  "Cancel": "Cancel",
+  "Are you sure you want to end this flight?": "Are you sure you want to end this flight?",
+  "Are you sure you want to reset this flight?": "Are you sure you want to reset this flight?",
+  "Compress Y Dimension": "Compress Y Dimension",
+  "Configure Spawn": {
+    "": {
+      "": {
+        "": ""
+      }
+    }
+  },
   "Configure spawnable item": "Configure spawnable item",
-  "Crew Count": "Crew Count",
-  "Crew count includes captain": "Crew count includes captain",
-  "Delete": "Delete",
-  "Edit": "Edit",
-  "Flight Quick Start": "Flight Quick Start",
-  "It will remove all of the objects inside of it": {
+  "End": "End",
+  "Flight Lobby": "Flight Lobby",
+  "Focus On Selected Objects": "Focus On Selected Objects",
+  "Hide Planets": "Hide Planets",
+  "Instantly Move Objects": "Instantly Move Objects",
+  "Pause": "Pause",
+  "Reset": "Reset",
+  "Resume": "Resume",
+  "Set Y Dimension Index to Selected Position": "Set Y Dimension Index to Selected Position",
+  "Show Autopilot Destinations": "Show Autopilot Destinations",
+  "The state of this flight will be stored and can be accessed later": {
     "": ""
   },
-  "Next": "Next",
-  "Ship Name": "Ship Name",
-  "Ship Selection": "Ship Selection",
-  "Start Flight": "Start Flight",
-  "Use Flight Director controls": "Use Flight Director controls",
-  "object": "object",
-  "planet": "planet",
-  "planetary system": "planetary system",
-  "star": "star"
+  "This flight will revert to the point right after it was created": {
+    "": ""
+  },
+  "Y Dimension Index": "Y Dimension Index"
 }

@@ -1,4 +1,4 @@
-query Flight {
+query ActiveFlight {
   flight {
     id
   }

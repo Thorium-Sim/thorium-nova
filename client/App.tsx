@@ -1,9 +1,8 @@
 import React from "react";
-import {Navigate, Route, Routes} from "react-router-dom";
+import {Route, Routes} from "react-router-dom";
 import useEasterEgg from "./helpers/easterEgg";
 import Layout from "./components/Layout";
 import {useClientRegistration} from "./helpers/getClientId";
-import ShipAssets from "./components/plugins/ShipAssets";
 import NoMatch from "./pages/NotFound";
 import CustomFlight from "./components/flightConfig/customFlight";
 
@@ -18,6 +17,7 @@ const PhrasesConfig = React.lazy(() => import("./components/plugins/Phrases"));
 const Config = React.lazy(() => import("./pages/Config"));
 const Viewscreen = React.lazy(() => import("./components/viewscreen"));
 const StarmapCore = React.lazy(() => import("./components/core"));
+const FlightLobby = React.lazy(() => import("./components/flightLobby"));
 
 const ClientApp: React.FC = () => {
   useEasterEgg();
@@ -28,8 +28,9 @@ const ClientApp: React.FC = () => {
         <Route path="/*" element={<Welcome />} />
         <Route path="releases" element={<Releases />} />
         <Route path="theme" element={<ThemeBuilder />} />
-        <Route path="flight" element={<Viewscreen />} />
+        <Route path="flight" element={<FlightLobby />} />
         <Route path="flight/core" element={<StarmapCore />} />
+        <Route path="flight/:shipId/viewscreen" element={<Viewscreen />} />
         <Route path="config/flight" element={<CustomFlight />} />
         <Route path="edit/:universeId/starmap/*" element={<Starmap />} />
         <Route path="edit/:pluginId/outfits/*" element={<OutfitsConfig />} />

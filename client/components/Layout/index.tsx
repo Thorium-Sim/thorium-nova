@@ -29,7 +29,7 @@ const Layout: React.FC = ({children}) => {
         height="100%"
       ></Box>
       <Box zIndex={1} position="absolute" top="0" height="100%" width="100%">
-        <React.Suspense fallback="Loading...">
+        <React.Suspense fallback={null}>
           <ErrorBoundary FallbackComponent={Fallback} onReset={onReset}>
             {children}
           </ErrorBoundary>

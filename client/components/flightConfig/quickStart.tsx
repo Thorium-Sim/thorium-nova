@@ -1,6 +1,12 @@
 import {css} from "@emotion/core";
+import Portal from "@reach/portal";
 import {OverlayContainer, OverlayProvider} from "@react-aria/overlays";
-import {useAllPluginShipsQuery} from "client/generated/graphql";
+import {capitalCase} from "change-case";
+import {
+  useAllPluginShipsQuery,
+  useFlightStartMutation,
+  useUniverseObjectsQuery,
+} from "client/generated/graphql";
 import useLocalStorage from "client/helpers/hooks/useLocalStorage";
 import {useLocalStorageReducer} from "client/helpers/hooks/useLocalStorageReducer";
 import React from "react";
@@ -46,6 +52,8 @@ interface FlightConfigState {
   flightDirector: boolean;
   shipId?: string;
   shipName?: string;
+  missionId?: string;
+  startingPointId?: string;
 }
 
 type FlightConfigAction =
@@ -54,7 +62,9 @@ type FlightConfigAction =
   | {type: "crewCaptain"; captain: boolean}
   | {type: "hasFlightDirector"; flightDirector: boolean}
   | {type: "shipId"; shipId: string | undefined}
-  | {type: "shipName"; name: string};
+  | {type: "shipName"; name: string}
+  | {type: "missionId"; missionId: string | undefined}
+  | {type: "startingPointId"; startingPointId: string | undefined};
 
 function quickStartReducer(
   state: FlightConfigState,
@@ -73,6 +83,10 @@ function quickStartReducer(
       return {...state, shipId: action.shipId};
     case "shipName":
       return {...state, shipName: action.name};
+    case "missionId":
+      return {...state, missionId: action.missionId};
+    case "startingPointId":
+      return {...state, startingPointId: action.startingPointId};
 
     default:
       return state;
@@ -95,7 +109,9 @@ function stepReducer(
 const QuickStartConfig = () => {
   const navigate = useNavigate();
   const {t} = useTranslation();
-  const [step, stepDispatch] = React.useReducer(stepReducer, "crew");
+  const [plugins] = useLocalStorage<string[]>("selectedPlugins", []);
+
+  const [step, stepDispatch] = React.useReducer(stepReducer, "mission");
   const [state, dispatch] = useLocalStorageReducer<
     typeof quickStartReducer,
     FlightConfigState
@@ -108,6 +124,26 @@ const QuickStartConfig = () => {
     },
     "flightConfig"
   );
+
+  const [startFlight] = useFlightStartMutation({
+    variables: {
+      name: null,
+      plugins,
+      simulators: [
+        {
+          shipId: state.shipId || "",
+          shipName: state.shipName || "Player Ship",
+          crewCaptain: state.crewCaptain,
+          flightDirector: state.flightDirector,
+          crewCount: state.crewCount,
+          stationSet: null,
+          missionId:
+            state.missionId === "sandbox" ? null : state.missionId || null,
+          startingPointId: state.startingPointId || null,
+        },
+      ],
+    },
+  });
   return (
     <div className="quick start modal">
       <QuickStartModal isOpen={true} onClose={() => navigate("/")}>
@@ -152,7 +188,14 @@ const QuickStartConfig = () => {
             <Button
               variantColor="success"
               className="ml-3"
-              onClick={async () => {}}
+              onClick={async () => {
+                await startFlight();
+                navigate("/flight");
+              }}
+              disabled={
+                !state.missionId ||
+                (state.missionId === "sandbox" && !state.startingPointId)
+              }
             >
               {t("Start Flight")}
             </Button>
@@ -163,11 +206,113 @@ const QuickStartConfig = () => {
   );
 };
 
+const MissionItem: React.FC<{
+  state: FlightConfigState;
+  dispatch: React.Dispatch<FlightConfigAction>;
+}> = ({state, dispatch}) => {
+  const {t} = useTranslation();
+  const [plugins] = useLocalStorage<string[]>("selectedPlugins", []);
+  const [dimensions, setDimensions] = React.useState<DOMRect>();
+  const [menuOpen, setMenuOpen] = React.useState(false);
+
+  const {data} = useUniverseObjectsQuery({
+    variables: {
+      pluginIds: plugins,
+    },
+  });
+  const startingPoint = data?.pluginUniverseGetPersistentObjects.find(
+    o => o.id === state.startingPointId
+  );
+  React.useEffect(() => {
+    if (state.startingPointId) {
+      if (!startingPoint) {
+        dispatch({type: "startingPointId", startingPointId: undefined});
+      }
+    }
+  }, [state.startingPointId, startingPoint]);
+  const buttonRef = React.useRef<HTMLButtonElement>();
+  return (
+    <li
+      className={`border border-whiteAlpha-300 p-4 transition-all duration-75 rounded-lg cursor-pointer ${
+        state.missionId === "sandbox"
+          ? "bg-whiteAlpha-200"
+          : "bg-blackAlpha-100"
+      }`}
+      onClick={() => dispatch({type: "missionId", missionId: "sandbox"})}
+    >
+      <p className="text-lg font-bold block">{t("Sandbox Mode")}</p>
+      <p className="py-4">
+        {t(
+          "Designed for sight-seeing, off-the-cuff missions, or writing a new mission from scratch."
+        )}
+      </p>
+      <p className="font-bold">Starting Point:</p>
+      <Button
+        variantColor="alert"
+        variant="outline"
+        ref={buttonRef}
+        onClick={() => {
+          setMenuOpen(s => !s);
+          buttonRef.current &&
+            setDimensions(buttonRef.current.getBoundingClientRect());
+        }}
+      >
+        {startingPoint
+          ? startingPoint.identity.name
+          : t("Choose a starting location")}
+      </Button>
+      {dimensions && menuOpen && (
+        <Portal>
+          <div
+            className="fixed top-0 left-0 border border-alert-200 bg-opacity-25 bg-alert-800 rounded-sm w-64"
+            css={css`
+              z-index: 100;
+              height: 20rem;
+              transform: translate(
+                ${dimensions.left}px,
+                ${dimensions.bottom + 2}px
+              );
+            `}
+          >
+            <SearchableList
+              items={
+                data?.pluginUniverseGetPersistentObjects.map(s => ({
+                  id: s.id,
+                  label: s.identity.name,
+                  category: capitalCase(s.entityType),
+                })) || []
+              }
+              selectedItem={state.startingPointId}
+              setSelectedItem={id => {
+                setMenuOpen(false);
+                dispatch({type: "startingPointId", startingPointId: id});
+              }}
+            />
+          </div>
+        </Portal>
+      )}
+    </li>
+  );
+};
 const MissionConfig: React.FC<{
   state: FlightConfigState;
   dispatch: React.Dispatch<FlightConfigAction>;
 }> = ({state, dispatch}) => {
-  return <div>TODO: Add mission selection.</div>;
+  const {t} = useTranslation();
+
+  return (
+    <div>
+      <h4 className="text-3xl font-bold">{t("Mission Selection")}</h4>
+      <ul
+        css={css`
+          max-height: 600px;
+        `}
+        className="overflow-y-auto flex flex-col space-y-4"
+      >
+        <MissionItem state={state} dispatch={dispatch} />
+      </ul>
+    </div>
+  );
 };
 const ShipConfig: React.FC<{
   state: FlightConfigState;

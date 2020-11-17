@@ -15,6 +15,7 @@ import {EntityTypes, getEntityType} from "../ecs";
 import {calculateHabitableZone} from "server/schema/plugins/universe/systems";
 import uuid from "uniqid";
 import {pubsub} from "server/helpers/pubsub";
+import {getPlugin} from "../plugins/basePlugin";
 
 @ObjectType()
 export class ActivePlanetarySystem extends Entity {
@@ -69,6 +70,26 @@ export class UniverseResolver {
         e => getEntityType(e) === EntityTypes.system
       ) || []
     );
+  }
+  @Query(type => [Entity])
+  pluginUniverseGetPersistentObjects(
+    @Arg("pluginIds", type => [ID], {nullable: true}) pluginIds: string[] | null
+  ): Entity[] {
+    const validEntityTypes = [EntityTypes.ship, EntityTypes.planet];
+    if (!pluginIds)
+      return (
+        App.activeFlight?.ecs.entities?.filter(e =>
+          validEntityTypes.includes(getEntityType(e))
+        ) || []
+      );
+    const entities = pluginIds.reduce((prev: Entity[], next) => {
+      const plugin = getPlugin(next);
+
+      return prev.concat(
+        plugin.universe.filter(u => validEntityTypes.includes(getEntityType(u)))
+      );
+    }, []);
+    return entities;
   }
   @Query(type => ActivePlanetarySystem, {
     name: "universeSystem",

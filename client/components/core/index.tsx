@@ -148,36 +148,38 @@ const StarmapCore: React.FC = () => {
 
   return (
     <Suspense fallback={null}>
-      <Canvas
-        onContextMenu={e => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-        onPointerMissed={() => {
-          useSelectedShips.setState({selectedIds: [], cachedPositions: {}});
-        }}
-        gl={{antialias: true, logarithmicDepthBuffer: true, alpha: false}}
-        camera={{fov: 45, near: 0.01, far: FAR}}
-        concurrent
-        onCreated={({gl, camera}) => {
-          ref(gl.domElement);
-          cameraRef.current = camera as PerspectiveCamera;
-        }}
-      >
-        <ApolloProvider client={client}>
-          <Suspense fallback={null}>
-            <StarmapCoreScene />
-          </Suspense>
-        </ApolloProvider>
-      </Canvas>
+      <div className="relative h-full">
+        <Canvas
+          onContextMenu={e => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onPointerMissed={() => {
+            useSelectedShips.setState({selectedIds: [], cachedPositions: {}});
+          }}
+          gl={{antialias: true, logarithmicDepthBuffer: true, alpha: false}}
+          camera={{fov: 45, near: 0.01, far: FAR}}
+          concurrent
+          onCreated={({gl, camera}) => {
+            ref(gl.domElement);
+            cameraRef.current = camera as PerspectiveCamera;
+          }}
+        >
+          <ApolloProvider client={client}>
+            <Suspense fallback={null}>
+              <StarmapCoreScene />
+            </Suspense>
+          </ApolloProvider>
+        </Canvas>
 
-      <StarmapCoreMenubar
-        canvasHeight={node?.height || 0}
-        canvasWidth={node?.width || 0}
-      />
-      <CanvasContextMenu />
-      {dragPosition && <DragSelection {...dragPosition}></DragSelection>}
-      <ZoomSlider />
+        <StarmapCoreMenubar
+          canvasHeight={node?.height || 0}
+          canvasWidth={node?.width || 0}
+        />
+        <CanvasContextMenu />
+        {dragPosition && <DragSelection {...dragPosition}></DragSelection>}
+        <ZoomSlider />
+      </div>
     </Suspense>
   );
 };

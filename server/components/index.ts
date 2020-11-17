@@ -37,6 +37,8 @@ import {AutopilotComponent} from "./ship/autopilot";
 import {InterstellarPositionComponent} from "./ship/interstellarPosition";
 import {IsFactionComponent} from "./isFaction";
 import {FactionAssignmentComponent} from "./factionAssignment";
+import {IsPlayerShipComponent} from "./playerShip/isPlayerShip";
+import {HasFlightDirectorComponent} from "./playerShip/hasFlightDirector";
 @ObjectType()
 export default class Components {
   @Field()
@@ -95,7 +97,7 @@ export default class Components {
   @Field()
   autopilot?: AutopilotComponent;
 
-  @Field()
+  @Field({nullable: true})
   interstellarPosition?: InterstellarPositionComponent;
 
   // Stellar Objects Components
@@ -155,6 +157,13 @@ export default class Components {
 
   @Field({nullable: true})
   factionAssignment?: FactionAssignmentComponent;
+
+  // Player Ship
+  @Field()
+  isPlayerShip?: IsPlayerShipComponent;
+
+  @Field()
+  hasFlightDirector?: HasFlightDirectorComponent;
 }
 
 export const registeredComponents = [
@@ -196,4 +205,6 @@ export const registeredComponents = [
   RotationVelocityComponent,
   IsFactionComponent,
   FactionAssignmentComponent,
+  IsPlayerShipComponent,
+  HasFlightDirectorComponent,
 ];

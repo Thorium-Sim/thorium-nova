@@ -123,7 +123,7 @@ export const StarmapCoreMenubar: React.FC<{
 
   return (
     <div
-      className="fixed top-0 left-0 w-screen p-2 pointer-events-none"
+      className="absolute top-0 left-0 w-screen p-2 pointer-events-none"
       css={css`
         * {
           pointer-events: all;

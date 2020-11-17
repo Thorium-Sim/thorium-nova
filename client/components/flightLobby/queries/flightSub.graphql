@@ -1,0 +1,18 @@
+subscription Flight {
+  flight {
+    id
+    name
+    paused
+    date
+    playerShips {
+      id
+      identity {
+        name
+      }
+      shipAssets {
+        logo
+        vanity
+      }
+    }
+  }
+}

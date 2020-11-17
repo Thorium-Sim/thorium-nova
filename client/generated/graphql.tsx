@@ -38,20 +38,26 @@ export type PhraseUnitInput = {
   contents: Maybe<Array<Scalars["String"]>>;
 };
 
-export type FlightStartSimulator = {
-  shipId: Scalars["String"];
-  shipName: Scalars["String"];
-  crewCount: Maybe<Scalars["Float"]>;
-  stationSet: Maybe<Scalars["String"]>;
-  crewCaptain: Maybe<Scalars["Boolean"]>;
-  flightDirector: Scalars["Boolean"];
-  missionId: Maybe<Scalars["String"]>;
-};
-
 export type CoordinatesInput = {
   x: Maybe<Scalars["Float"]>;
   y: Maybe<Scalars["Float"]>;
   z: Maybe<Scalars["Float"]>;
+};
+
+export type ShipPosition = {
+  id: Scalars["ID"];
+  position: CoordinatesInput;
+};
+
+export type FlightStartSimulator = {
+  shipId: Scalars["ID"];
+  shipName: Scalars["String"];
+  crewCount: Maybe<Scalars["Float"]>;
+  stationSet: Maybe<Scalars["ID"]>;
+  crewCaptain: Maybe<Scalars["Boolean"]>;
+  flightDirector: Scalars["Boolean"];
+  missionId: Maybe<Scalars["ID"]>;
+  startingPointId: Maybe<Scalars["ID"]>;
 };
 
 export enum OutfitAbilities {
@@ -68,11 +74,6 @@ export type PositionInput = {
   x: Maybe<Scalars["Float"]>;
   y: Maybe<Scalars["Float"]>;
   z: Maybe<Scalars["Float"]>;
-};
-
-export type ShipPosition = {
-  id: Scalars["ID"];
-  position: CoordinatesInput;
 };
 
 /** An enum describing what kind of type a given `__Type` is. */
@@ -229,6 +230,36 @@ export type ShipSpawnMutation = {
   shipSpawn: Maybe<{__typename?: "Entity"; id: string}>;
 };
 
+export type UniverseObjectsQueryVariables = Exact<{
+  pluginIds: Array<Scalars["ID"]>;
+}>;
+
+export type UniverseObjectsQuery = {
+  __typename?: "Query";
+  pluginUniverseGetPersistentObjects: Array<{
+    __typename?: "Entity";
+    id: string;
+    entityType: EntityTypes;
+    identity: {__typename?: "IdentityComponent"; name: string};
+    satellite: Maybe<{
+      __typename?: "SatelliteComponent";
+      parent: Maybe<{
+        __typename?: "Entity";
+        id: string;
+        identity: {__typename?: "IdentityComponent"; name: string};
+      }>;
+    }>;
+    interstellarPosition: Maybe<{
+      __typename?: "InterstellarPositionComponent";
+      system: Maybe<{
+        __typename?: "Entity";
+        id: string;
+        identity: {__typename?: "IdentityComponent"; name: string};
+      }>;
+    }>;
+  }>;
+};
+
 export type AllPluginShipsQueryVariables = Exact<{
   pluginIds: Array<Scalars["ID"]>;
 }>;
@@ -245,6 +276,57 @@ export type AllPluginShipsQuery = {
       description: string;
     };
     shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; vanity: string}>;
+  }>;
+};
+
+export type FlightStopMutationVariables = Exact<{[key: string]: never}>;
+
+export type FlightStopMutation = {
+  __typename?: "Mutation";
+  flightStop: Maybe<string>;
+};
+
+export type FlightPauseMutationVariables = Exact<{[key: string]: never}>;
+
+export type FlightPauseMutation = {
+  __typename?: "Mutation";
+  flightPause: Maybe<{__typename?: "Flight"; id: string}>;
+};
+
+export type FlightResetMutationVariables = Exact<{[key: string]: never}>;
+
+export type FlightResetMutation = {
+  __typename?: "Mutation";
+  flightReset: Maybe<{__typename?: "Flight"; id: string}>;
+};
+
+export type FlightResumeMutationVariables = Exact<{[key: string]: never}>;
+
+export type FlightResumeMutation = {
+  __typename?: "Mutation";
+  flightResume: Maybe<{__typename?: "Flight"; id: string}>;
+};
+
+export type FlightSubscriptionVariables = Exact<{[key: string]: never}>;
+
+export type FlightSubscription = {
+  __typename?: "Subscription";
+  flight: Maybe<{
+    __typename?: "Flight";
+    id: string;
+    name: string;
+    paused: boolean;
+    date: Date;
+    playerShips: Array<{
+      __typename?: "Entity";
+      id: string;
+      identity: {__typename?: "IdentityComponent"; name: string};
+      shipAssets: Maybe<{
+        __typename?: "ShipAssetsComponent";
+        logo: string;
+        vanity: string;
+      }>;
+    }>;
   }>;
 };
 
@@ -1833,9 +1915,9 @@ export type FlightStartMutation = {
   };
 };
 
-export type FlightQueryVariables = Exact<{[key: string]: never}>;
+export type ActiveFlightQueryVariables = Exact<{[key: string]: never}>;
 
-export type FlightQuery = {
+export type ActiveFlightQuery = {
   __typename?: "Query";
   flight: Maybe<{__typename?: "Flight"; id: string}>;
 };
@@ -2121,6 +2203,61 @@ export function useShipSpawnMutation(
 export type ShipSpawnMutationHookResult = ReturnType<
   typeof useShipSpawnMutation
 >;
+export const UniverseObjectsDocument = gql`
+  query UniverseObjects($pluginIds: [ID!]!) {
+    pluginUniverseGetPersistentObjects(pluginIds: $pluginIds) {
+      id
+      identity {
+        name
+      }
+      entityType
+      satellite {
+        parent {
+          id
+          identity {
+            name
+          }
+        }
+      }
+      interstellarPosition {
+        system {
+          id
+          identity {
+            name
+          }
+        }
+      }
+    }
+  }
+`;
+export function useUniverseObjectsQuery(
+  baseOptions: Apollo.QueryHookOptions<
+    UniverseObjectsQuery,
+    UniverseObjectsQueryVariables
+  >
+) {
+  return Apollo.useQuery<UniverseObjectsQuery, UniverseObjectsQueryVariables>(
+    UniverseObjectsDocument,
+    baseOptions
+  );
+}
+export function useUniverseObjectsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    UniverseObjectsQuery,
+    UniverseObjectsQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<
+    UniverseObjectsQuery,
+    UniverseObjectsQueryVariables
+  >(UniverseObjectsDocument, baseOptions);
+}
+export type UniverseObjectsQueryHookResult = ReturnType<
+  typeof useUniverseObjectsQuery
+>;
+export type UniverseObjectsLazyQueryHookResult = ReturnType<
+  typeof useUniverseObjectsLazyQuery
+>;
 export const AllPluginShipsDocument = gql`
   query AllPluginShips($pluginIds: [ID!]!) {
     allPluginShips(pluginIds: $pluginIds) {
@@ -2166,6 +2303,122 @@ export type AllPluginShipsQueryHookResult = ReturnType<
 >;
 export type AllPluginShipsLazyQueryHookResult = ReturnType<
   typeof useAllPluginShipsLazyQuery
+>;
+export const FlightStopDocument = gql`
+  mutation FlightStop {
+    flightStop
+  }
+`;
+export function useFlightStopMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    FlightStopMutation,
+    FlightStopMutationVariables
+  >
+) {
+  return Apollo.useMutation<FlightStopMutation, FlightStopMutationVariables>(
+    FlightStopDocument,
+    baseOptions
+  );
+}
+export type FlightStopMutationHookResult = ReturnType<
+  typeof useFlightStopMutation
+>;
+export const FlightPauseDocument = gql`
+  mutation FlightPause {
+    flightPause {
+      id
+    }
+  }
+`;
+export function useFlightPauseMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    FlightPauseMutation,
+    FlightPauseMutationVariables
+  >
+) {
+  return Apollo.useMutation<FlightPauseMutation, FlightPauseMutationVariables>(
+    FlightPauseDocument,
+    baseOptions
+  );
+}
+export type FlightPauseMutationHookResult = ReturnType<
+  typeof useFlightPauseMutation
+>;
+export const FlightResetDocument = gql`
+  mutation FlightReset {
+    flightReset {
+      id
+    }
+  }
+`;
+export function useFlightResetMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    FlightResetMutation,
+    FlightResetMutationVariables
+  >
+) {
+  return Apollo.useMutation<FlightResetMutation, FlightResetMutationVariables>(
+    FlightResetDocument,
+    baseOptions
+  );
+}
+export type FlightResetMutationHookResult = ReturnType<
+  typeof useFlightResetMutation
+>;
+export const FlightResumeDocument = gql`
+  mutation FlightResume {
+    flightResume {
+      id
+    }
+  }
+`;
+export function useFlightResumeMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    FlightResumeMutation,
+    FlightResumeMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    FlightResumeMutation,
+    FlightResumeMutationVariables
+  >(FlightResumeDocument, baseOptions);
+}
+export type FlightResumeMutationHookResult = ReturnType<
+  typeof useFlightResumeMutation
+>;
+export const FlightDocument = gql`
+  subscription Flight {
+    flight {
+      id
+      name
+      paused
+      date
+      playerShips {
+        id
+        identity {
+          name
+        }
+        shipAssets {
+          logo
+          vanity
+        }
+      }
+    }
+  }
+`;
+export function useFlightSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    FlightSubscription,
+    FlightSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    FlightSubscription,
+    FlightSubscriptionVariables
+  >(FlightDocument, baseOptions);
+}
+export type FlightSubscriptionHookResult = ReturnType<
+  typeof useFlightSubscription
 >;
 export const OutfitAbilitiesDocument = gql`
   query OutfitAbilities {
@@ -5130,31 +5383,41 @@ export function useFlightStartMutation(
 export type FlightStartMutationHookResult = ReturnType<
   typeof useFlightStartMutation
 >;
-export const FlightDocument = gql`
-  query Flight {
+export const ActiveFlightDocument = gql`
+  query ActiveFlight {
     flight {
       id
     }
   }
 `;
-export function useFlightQuery(
-  baseOptions?: Apollo.QueryHookOptions<FlightQuery, FlightQueryVariables>
+export function useActiveFlightQuery(
+  baseOptions?: Apollo.QueryHookOptions<
+    ActiveFlightQuery,
+    ActiveFlightQueryVariables
+  >
 ) {
-  return Apollo.useQuery<FlightQuery, FlightQueryVariables>(
-    FlightDocument,
+  return Apollo.useQuery<ActiveFlightQuery, ActiveFlightQueryVariables>(
+    ActiveFlightDocument,
     baseOptions
   );
 }
-export function useFlightLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<FlightQuery, FlightQueryVariables>
+export function useActiveFlightLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    ActiveFlightQuery,
+    ActiveFlightQueryVariables
+  >
 ) {
-  return Apollo.useLazyQuery<FlightQuery, FlightQueryVariables>(
-    FlightDocument,
+  return Apollo.useLazyQuery<ActiveFlightQuery, ActiveFlightQueryVariables>(
+    ActiveFlightDocument,
     baseOptions
   );
 }
-export type FlightQueryHookResult = ReturnType<typeof useFlightQuery>;
-export type FlightLazyQueryHookResult = ReturnType<typeof useFlightLazyQuery>;
+export type ActiveFlightQueryHookResult = ReturnType<
+  typeof useActiveFlightQuery
+>;
+export type ActiveFlightLazyQueryHookResult = ReturnType<
+  typeof useActiveFlightLazyQuery
+>;
 export const FlightsDocument = gql`
   query Flights {
     flights {

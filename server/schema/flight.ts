@@ -8,6 +8,8 @@ import {
   ObjectType,
   Ctx,
   InputType,
+  Subscription,
+  Root,
 } from "type-graphql";
 import uuid from "uniqid";
 import randomWords from "random-words";
@@ -32,7 +34,10 @@ import {EngineVelocitySystem} from "server/systems/EngineVelocitySystem";
 import {PositionVelocitySystem} from "server/systems/PositionVelocitySystem";
 import {getPlugin} from "./plugins/basePlugin";
 import {Networking} from "server/systems/Networking";
-import {ActiveShipsResolver} from "./activeFlight/ships";
+import {ActiveShipsResolver, shipSpawn} from "./activeFlight/ships";
+import {getOrbitPosition} from "server/helpers/getOrbitPosition";
+import {object} from "prop-types";
+import {pubsub} from "server/helpers/pubsub";
 
 const INTERVAL = 1000 / 60;
 
@@ -123,6 +128,11 @@ export default class Flight {
   }
 
   @Field(type => [Entity])
+  get playerShips() {
+    return this.ecs.entities.filter(
+      f => f.components.isShip && f.components.isPlayerShip
+    );
+  }
   get ships() {
     return this.ecs.entities.filter(f => f.components.isShip);
   }
@@ -150,26 +160,28 @@ export default class Flight {
 
 @InputType()
 class FlightStartSimulator {
-  @Field()
+  @Field(type => ID)
   shipId!: string;
   @Field()
   shipName!: string;
   @Field({nullable: true})
   crewCount?: number;
-  @Field({nullable: true})
+  @Field(type => ID, {nullable: true})
   stationSet?: string;
   @Field({nullable: true})
   crewCaptain?: boolean;
   @Field()
   flightDirector!: boolean;
-  @Field({nullable: true})
+  @Field(type => ID, {nullable: true})
   missionId?: string;
+  @Field(type => ID, {nullable: true})
+  startingPointId?: string;
 }
 
 @Resolver(Flight)
 export class FlightResolver {
-  @Query(returns => Flight, {nullable: true})
-  flight(): Flight | null {
+  @Query(returns => Flight, {nullable: true, name: "flight"})
+  flightQuery(): Flight | null {
     return App.activeFlight;
   }
   @Query(returns => [Flight])
@@ -222,23 +234,89 @@ export class FlightResolver {
       App.activeFlight.activatePlugins(true);
 
       // Generate the ships for the simulators.
+      simulators.forEach(
+        ({
+          flightDirector,
+          shipId,
+          shipName,
+          crewCaptain,
+          crewCount,
+          missionId,
+          startingPointId,
+          stationSet,
+        }) => {
+          const startingObject = App.activeFlight?.ecs.entities.find(
+            o => o.id === startingPointId
+          );
+          let startingSystemId =
+            startingObject?.satellite?.parentId ||
+            startingObject?.interstellarPosition?.systemId;
+          while (true) {
+            if (!startingSystemId) {
+              flight.removeFile();
+              App.activeFlight = null;
+              throw new Error(
+                "Cannot start flight: Ship starting position not found."
+              );
+            }
+            const startingSystem = App.activeFlight?.ecs.entities.find(
+              o => o.id === startingSystemId
+            );
+            if (startingSystem?.planetarySystem) break;
+            startingSystemId = startingSystem?.satellite?.parentId;
+          }
+          const objectPosition = startingObject?.position ||
+            (startingObject?.satellite &&
+              getOrbitPosition({
+                ...startingObject.satellite,
+                radius: startingObject.satellite.distance,
+              })) || {
+              x: -0.5 * Math.random() * 100000000,
+              y: -0.5 * Math.random() * 10000,
+              z: -0.5 * Math.random() * 100000000,
+            };
+          const ship = shipSpawn(
+            shipId,
+            startingSystemId,
+            objectPosition,
+            App.activeFlight?.ecs,
+            shipName
+          );
+          if (!ship) {
+            flight.removeFile();
+            App.activeFlight = null;
+            throw new Error("Cannot start flight: Error creating ship.");
+          }
+          ship.addComponent("isPlayerShip");
+          if (flightDirector) {
+            ship?.addComponent("hasFlightDirector");
+          }
+
+          // TODO: Take care of the station set shindig.
+          // TODO: Take care of the mission shindig.
+        }
+      );
     }
+    pubsub.publish("flight", {});
     return App.activeFlight;
   }
 
   @Mutation(returns => Flight, {nullable: true})
   flightPause(): Flight | null {
     App.activeFlight?.setPaused(true);
+    pubsub.publish("flight", {});
     return App.activeFlight;
   }
   @Mutation(returns => Flight, {nullable: true})
   flightResume(): Flight | null {
     App.activeFlight?.setPaused(false);
+    pubsub.publish("flight", {});
     return App.activeFlight;
   }
   @Mutation(returns => Flight, {nullable: true})
   flightReset(): Flight | null {
     App.activeFlight?.reset();
+    pubsub.publish("flight", {});
     return App.activeFlight;
   }
   @Mutation(returns => String, {nullable: true})
@@ -250,6 +328,7 @@ export class FlightResolver {
     }
     App.activeFlight = null;
     App.storage.activeFlightName = null;
+    pubsub.publish("flight", {});
     return null;
   }
   @Mutation(returns => String, {nullable: true})
@@ -266,6 +345,20 @@ export class FlightResolver {
     } catch {
       // Do nothing; the file probably didn't exist.
     }
+    pubsub.publish("flight", {});
     return null;
+  }
+  @Subscription(returns => Flight, {
+    nullable: true,
+    topics: () => {
+      const id = uuid();
+      process.nextTick(() => {
+        pubsub.publish(id, {});
+      });
+      return [id, "flight"];
+    },
+  })
+  flight(): Flight | null {
+    return App.activeFlight;
   }
 }

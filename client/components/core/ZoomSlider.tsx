@@ -24,7 +24,7 @@ export const ZoomSlider = () => {
 
   return (
     <div
-      className={`pointer-events-none fixed bottom-0 right-0 w-64 py-6 px-4`}
+      className={`pointer-events-none absolute bottom-0 right-0 w-64 py-6 px-4`}
     >
       <p>Zoom</p>
       <Slider
