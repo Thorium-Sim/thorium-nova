@@ -1,30 +1,22 @@
 {
-  "Are you sure you want to end this flight?": "Are you sure you want to end this flight?",
-  "Are you sure you want to reset this flight?": "Are you sure you want to reset this flight?",
-  "Compress Y Dimension": "Compress Y Dimension",
-  "Configure Spawn": {
-    "": {
-      "": {
-        "": ""
-      }
-    }
-  },
-  "Configure spawnable item": "Configure spawnable item",
-  "End": "End",
-  "Flight Lobby": "Flight Lobby",
-  "Focus On Selected Objects": "Focus On Selected Objects",
-  "Hide Planets": "Hide Planets",
-  "Instantly Move Objects": "Instantly Move Objects",
-  "Pause": "Pause",
-  "Reset": "Reset",
-  "Resume": "Resume",
-  "Set Y Dimension Index to Selected Position": "Set Y Dimension Index to Selected Position",
-  "Show Autopilot Destinations": "Show Autopilot Destinations",
-  "The state of this flight will be stored and can be accessed later": {
+  "Back": "Back",
+  "Cancel": "Cancel",
+  "Choose a starting location": "Choose a starting location",
+  "Crew Count": "Crew Count",
+  "Crew count includes captain": "Crew count includes captain",
+  "Designed for sight-seeing, off-the-cuff missions, or writing a new mission from scratch": {
     "": ""
   },
-  "This flight will revert to the point right after it was created": {
-    "": ""
-  },
-  "Y Dimension Index": "Y Dimension Index"
+  "Flight Quick Start": "Flight Quick Start",
+  "Mass": "Mass",
+  "Mass must be a number greater than 0": "Mass must be a number greater than 0",
+  "Mission Selection": "Mission Selection",
+  "Next": "Next",
+  "Sandbox Mode": "Sandbox Mode",
+  "Ship Name": "Ship Name",
+  "Ship Selection": "Ship Selection",
+  "Size": "Size",
+  "Size must be a number greater than 0": "Size must be a number greater than 0",
+  "Start Flight": "Start Flight",
+  "Use Flight Director controls": "Use Flight Director controls"
 }

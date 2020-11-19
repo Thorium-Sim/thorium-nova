@@ -93,8 +93,9 @@ const ShipBasic: React.FC = () => {
               />
             </FormLabel>
             <FormHelperText>
-              This is the scale of the ship in meters. This determines the size
-              of the model on the viewscreen and the hit box for collisions.
+              This is the scale of the ship in kilometers. This determines the
+              size of the model on the viewscreen and the hit box for
+              collisions.
             </FormHelperText>
             <FormErrorMessage>
               {t(`Size must be a number greater than 0`)}

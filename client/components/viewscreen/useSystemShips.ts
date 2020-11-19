@@ -48,7 +48,8 @@ export function useSystemShips() {
           },
         })
         .subscribe({
-          next({data}: {data: UniverseSystemShipsHotSubscription}) {
+          next({data}: {data?: UniverseSystemShipsHotSubscription}) {
+            if (!data) return;
             setShipIds(ids => {
               if (data.universeSystemShipsHot.length !== ids.length) {
                 return data.universeSystemShipsHot.map(s => s.id);

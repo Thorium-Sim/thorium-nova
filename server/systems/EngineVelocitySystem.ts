@@ -39,7 +39,6 @@ export class EngineVelocitySystem extends System {
     const forwardVelocity = velocityObject.position.dot(
       forwardVector.set(0, 0, 1).applyQuaternion(shipRotationQuaternion)
     );
-
     accelerationVector.set(0, 0, 0);
 
     // Use dampening to increase the acceleration of the ship at impulse
@@ -74,9 +73,9 @@ export class EngineVelocitySystem extends System {
       velocityObject.translateY(accelY);
       velocityObject.translateZ(accelZ);
 
-      accelerationVector.x = Math.abs(accelX);
+      accelerationVector.x = Math.abs(accelerationVector.x + accelX);
       accelerationVector.y = Math.abs(accelerationVector.y + accelY);
-      accelerationVector.z = Math.abs(accelZ);
+      accelerationVector.z = Math.abs(accelerationVector.z + accelZ);
     }
 
     accelerationVector
@@ -84,6 +83,8 @@ export class EngineVelocitySystem extends System {
       .normalize()
       .sub(new Vector3(1, 1, 1))
       .negate();
+
+    // TODO: Fix acceleration and dampening to make it so it's consistent when traveling at a diagonal.
 
     // Apply dampening
     if (dampening) {

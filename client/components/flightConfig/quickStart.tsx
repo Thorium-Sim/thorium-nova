@@ -111,7 +111,7 @@ const QuickStartConfig = () => {
   const {t} = useTranslation();
   const [plugins] = useLocalStorage<string[]>("selectedPlugins", []);
 
-  const [step, stepDispatch] = React.useReducer(stepReducer, "mission");
+  const [step, stepDispatch] = React.useReducer(stepReducer, "crew");
   const [state, dispatch] = useLocalStorageReducer<
     typeof quickStartReducer,
     FlightConfigState

@@ -38,6 +38,7 @@ import {ActiveShipsResolver, shipSpawn} from "./activeFlight/ships";
 import {getOrbitPosition} from "server/helpers/getOrbitPosition";
 import {object} from "prop-types";
 import {pubsub} from "server/helpers/pubsub";
+import {Vector3} from "three";
 
 const INTERVAL = 1000 / 60;
 
@@ -265,20 +266,50 @@ export class FlightResolver {
             if (startingSystem?.planetarySystem) break;
             startingSystemId = startingSystem?.satellite?.parentId;
           }
+          let origin = new Vector3();
+          if (startingObject?.satellite?.parentId) {
+            const parent = App.activeFlight?.ecs.entities.find(
+              e => e.id === startingObject.satellite?.parentId
+            );
+            if (parent?.satellite) {
+              origin = getOrbitPosition({
+                ...parent.satellite,
+                radius: parent.satellite.distance,
+              });
+            }
+          }
           const objectPosition = startingObject?.position ||
             (startingObject?.satellite &&
               getOrbitPosition({
                 ...startingObject.satellite,
                 radius: startingObject.satellite.distance,
+                origin,
               })) || {
               x: -0.5 * Math.random() * 100000000,
               y: -0.5 * Math.random() * 10000,
               z: -0.5 * Math.random() * 100000000,
             };
+          // TODO: Once docking gets sorted out, make it so the ship can start out docked with a starbase.
+          // Add a bit to the position based on the scale of the object.
+          // Both of these units are in kilometers
+          const startObjectScale =
+            startingObject?.isPlanet?.radius ||
+            startingObject?.size?.value ||
+            1;
+          const distanceVector = new Vector3(
+            startObjectScale * 2 + (Math.random() - 0.5) * startObjectScale,
+            0,
+            startObjectScale * 2 + (Math.random() - 0.5) * startObjectScale
+          );
+          const position = new Vector3(
+            objectPosition.x + distanceVector.x,
+            objectPosition.y,
+            objectPosition.z + distanceVector.z
+          );
           const ship = shipSpawn(
             shipId,
             startingSystemId,
-            objectPosition,
+            position,
             App.activeFlight?.ecs,
             shipName
           );
