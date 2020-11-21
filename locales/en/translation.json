@@ -1,22 +1,50 @@
 {
-  "Back": "Back",
+  "Add": "Add",
+  "Add Moon": "Add Moon",
+  "Add Planet": "Add Planet",
+  "Add Star": "Add Star",
+  "Add Starbase": "Add Starbase",
+  "Are you sure you want to remove this {{object}}?": "Are you sure you want to remove this {{object}}?",
   "Cancel": "Cancel",
-  "Choose a starting location": "Choose a starting location",
-  "Crew Count": "Crew Count",
-  "Crew count includes captain": "Crew count includes captain",
-  "Designed for sight-seeing, off-the-cuff missions, or writing a new mission from scratch": {
+  "Configure spawnable item": "Configure spawnable item",
+  "Cruising Speed": "Cruising Speed",
+  "Delete": "Delete",
+  "Description": "Description",
+  "Edit": "Edit",
+  "Emergency Speed": "Emergency Speed",
+  "It will remove all of the objects inside of it": {
     "": ""
   },
-  "Flight Quick Start": "Flight Quick Start",
-  "Mass": "Mass",
-  "Mass must be a number greater than 0": "Mass must be a number greater than 0",
-  "Mission Selection": "Mission Selection",
-  "Next": "Next",
-  "Sandbox Mode": "Sandbox Mode",
-  "Ship Name": "Ship Name",
-  "Ship Selection": "Ship Selection",
-  "Size": "Size",
-  "Size must be a number greater than 0": "Size must be a number greater than 0",
-  "Start Flight": "Start Flight",
-  "Use Flight Director controls": "Use Flight Director controls"
+  "Name": "Name",
+  "Outfits": "Outfits",
+  "Phrases": "Phrases",
+  "Plugin Configuration": "Plugin Configuration",
+  "Random String": "Random String",
+  "Ships": "Ships",
+  "Skybox Key": "Skybox Key",
+  "The engine thrust output in kilo-Newtons": {
+    " This affects how long it takes to accelerate to top speed": {
+      " If this is the same as the mass of the ship, it will take about 5 seconds to reach cruising speed": {
+        "": ""
+      }
+    }
+  },
+  "The maximum cruising speed in km/s": {
+    " ": " "
+  },
+  "The maximum emergency speed in km/s": {
+    " ": " "
+  },
+  "The number of warp factors including the minimum speed and cruising speed": {
+    " Emergency and Destructive warp will be added automatically": {
+      "": ""
+    }
+  },
+  "Thrust": "Thrust",
+  "Universes": "Universes",
+  "Warp Factor Count": "Warp Factor Count",
+  "object": "object",
+  "planet": "planet",
+  "planetary system": "planetary system",
+  "star": "star"
 }

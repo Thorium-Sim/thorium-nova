@@ -11,6 +11,7 @@ module.exports = {
     "./client/**/*.tsx",
     "./client/**/*.ts",
   ],
+  darkMode: "class", // or 'media' or 'class'
   theme: {
     filter: {
       // defaults to {}

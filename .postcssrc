@@ -1,7 +1,0 @@
-{
-  "plugins": {
-    "tailwindcss": {},
-    "autoprefixer": {},
-    "postcss-import": {}
-  }
-}

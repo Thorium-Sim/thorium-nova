@@ -391,13 +391,13 @@ const CrewConfig: React.FC<{
         </div>
         <div className="flex flex-col items-center justify-around flex-1">
           <button
-            className="text-6xl cursor-pointer hover:text-whiteAlpha-800 active:text-whiteAlpha-500 focus:outline-none focus:shadow-outline rounded-full appearance-none"
+            className="text-6xl cursor-pointer hover:text-whiteAlpha-800 active:text-whiteAlpha-500 focus:outline-none focus:ring rounded-full appearance-none"
             onClick={() => dispatch({type: "increaseCrewCount"})}
           >
             <FaArrowUp />
           </button>
           <button
-            className="text-6xl cursor-pointer hover:text-whiteAlpha-800 active:text-whiteAlpha-500 focus:outline-none focus:shadow-outline rounded-full appearance-none"
+            className="text-6xl cursor-pointer hover:text-whiteAlpha-800 active:text-whiteAlpha-500 focus:outline-none focus:ring rounded-full appearance-none"
             onClick={() => dispatch({type: "decreaseCrewCount"})}
           >
             <FaArrowDown />

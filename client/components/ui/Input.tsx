@@ -42,7 +42,7 @@ const Input = React.forwardRef<
           inputSize === "sm" ? "h-6" : inputSize === "lg" ? "h-12" : "h-10"
         } rounded ${
           isInvalid ? "border-red-500" : "border-whiteAlpha-50"
-        } bg-whiteAlpha-100 border focus:border-primary-400 focus:shadow-outline`}
+        } bg-whiteAlpha-100 border focus:border-primary-400 focus:ring`}
         ref={combinedRef}
       />
       {isInvalid && <p className="text-red-500">{invalidMessage}</p>}
