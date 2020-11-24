@@ -1,10 +1,10 @@
+import {StationComplementComponent} from "server/components/stationComplement";
 import {Arg, ID, Mutation, Query, Resolver} from "type-graphql";
-import StationComplement from "../stationComplement";
 import {getPlugin} from "./basePlugin";
 
 @Resolver()
 export class StationComplementPluginResolver {
-  @Query(returns => StationComplement, {
+  @Query(returns => StationComplementComponent, {
     nullable: true,
     name: "stationComplement",
   })
@@ -12,29 +12,29 @@ export class StationComplementPluginResolver {
     @Arg("id", type => ID)
     id: string,
     @Arg("pluginId", type => ID) pluginId: string
-  ): StationComplement | null {
+  ): StationComplementComponent | null {
     const plugin = getPlugin(pluginId);
     return plugin.stationComplements.find(s => s.id === id) || null;
   }
-  @Query(returns => [StationComplement], {name: "stationComplements"})
+  @Query(returns => [StationComplementComponent], {name: "stationComplements"})
   stationComplementsQuery(
     @Arg("pluginId", type => ID) pluginId: string
-  ): StationComplement[] {
+  ): StationComplementComponent[] {
     const plugin = getPlugin(pluginId);
     return plugin.stationComplements || [];
   }
-  @Mutation(returns => StationComplement)
+  @Mutation(returns => StationComplementComponent)
   stationComplementCreate(
     @Arg("pluginId", type => ID) pluginId: string,
 
     @Arg("name") name: string
-  ): StationComplement {
+  ): StationComplementComponent {
     const plugin = getPlugin(pluginId);
     if (plugin.stationComplements.find(s => s.name === name)) {
       throw new Error("A station complement with that name already exists.");
     }
 
-    const stationComplement = new StationComplement({name});
+    const stationComplement = new StationComplementComponent({name});
     plugin.stationComplements.push(stationComplement);
 
     return stationComplement;

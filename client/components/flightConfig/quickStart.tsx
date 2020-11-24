@@ -136,7 +136,7 @@ const QuickStartConfig = () => {
           crewCaptain: state.crewCaptain,
           flightDirector: state.flightDirector,
           crewCount: state.crewCount,
-          stationSet: null,
+          stationComplementId: null,
           missionId:
             state.missionId === "sandbox" ? null : state.missionId || null,
           startingPointId: state.startingPointId || null,

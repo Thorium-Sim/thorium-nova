@@ -69,7 +69,6 @@ const wsLink = ApolloLink.from([
 const headersMiddleware = setContext((operation, {headers}) => {
   const core = window.location.pathname.includes("/core");
   return getClientId().then(clientId => {
-    console.log(clientId);
     return {
       headers: {...headers, clientid: clientId, core},
     };

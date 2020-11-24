@@ -36,6 +36,8 @@ import {shipSpawn} from "./activeFlight/ships";
 import {getOrbitPosition} from "server/helpers/getOrbitPosition";
 import {pubsub} from "server/helpers/pubsub";
 import {Vector3} from "three";
+import {createStationComplement} from "server/helpers/createStationComplement";
+import {StationComplementComponent} from "server/components/stationComplement";
 
 const INTERVAL = 1000 / 60;
 
@@ -165,7 +167,7 @@ class FlightStartSimulator {
   @Field({nullable: true})
   crewCount?: number;
   @Field(type => ID, {nullable: true})
-  stationSet?: string;
+  stationComplementId?: string;
   @Field({nullable: true})
   crewCaptain?: boolean;
   @Field()
@@ -241,7 +243,7 @@ export class FlightResolver {
           crewCount,
           missionId,
           startingPointId,
-          stationSet,
+          stationComplementId,
         }) => {
           const startingObject = App.activeFlight?.ecs.entities.find(
             o => o.id === startingPointId
@@ -319,8 +321,28 @@ export class FlightResolver {
           if (flightDirector) {
             ship?.addComponent("hasFlightDirector");
           }
-
-          // TODO: Take care of the station set shindig.
+          // Create a station set based on the simulator parameters
+          let stationComplement: StationComplementComponent | null = null;
+          if (stationComplementId) {
+            stationComplement = App.plugins.reduce(
+              (prev: StationComplementComponent | null, plugin) => {
+                if (prev) return prev;
+                const stationComplement = plugin.stationComplements.find(
+                  s => s.id === stationComplementId
+                );
+                return stationComplement || null;
+              },
+              null
+            );
+          }
+          if (!stationComplement) {
+            stationComplement = createStationComplement(
+              crewCount,
+              crewCaptain,
+              ship
+            );
+          }
+          ship.addComponent("stationComplement", stationComplement);
           // TODO: Take care of the mission shindig.
         }
       );

@@ -13,13 +13,13 @@ import uuid from "uniqid";
 import App from "server/app";
 import {Writable} from "server/helpers/writable";
 import Entity from "server/helpers/ecs/entity";
-import StationComplement from "../stationComplement";
 import getStore from "server/helpers/dataStore";
 import {appStoreDir} from "server/helpers/appPaths";
 import {pubsub} from "server/helpers/pubsub";
 import {FileUpload, GraphQLUpload} from "graphql-upload";
 import uploadAsset from "server/helpers/uploadAsset";
 import {Phrase} from "../phrases";
+import {StationComplementComponent} from "server/components/stationComplement";
 
 export function getPlugin(id: string) {
   const plugin = App.plugins.find(u => u.id === id);
@@ -84,8 +84,8 @@ export default class BasePlugin {
   @Field(type => [Entity])
   outfits: Writable<Entity[]>;
 
-  @Field(type => [StationComplement])
-  stationComplements: Writable<StationComplement[]>;
+  @Field(type => [StationComplementComponent])
+  stationComplements: Writable<StationComplementComponent[]>;
 
   @Field(type => [Entity])
   universe: Writable<Entity[]>;
@@ -115,8 +115,8 @@ export default class BasePlugin {
       path: `${appStoreDir}plugins/${this.name}/outfits.json`,
       initialData: [],
     });
-    this.stationComplements = getStore<StationComplement[]>({
-      class: StationComplement,
+    this.stationComplements = getStore<StationComplementComponent[]>({
+      class: StationComplementComponent,
       path: `${appStoreDir}plugins/${this.name}/stationComplement.json`,
       initialData: [],
     });

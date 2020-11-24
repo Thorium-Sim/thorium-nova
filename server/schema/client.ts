@@ -50,7 +50,7 @@ export default class Client {
       s => s.id === this.stationId
     );
   }
-
+  // TODO: If logged into Thoriumsim.com, include that user's profile picture here
   @Field(type => String, {nullable: true})
   loginName: string | null = null;
 

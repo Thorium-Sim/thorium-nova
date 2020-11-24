@@ -78,11 +78,6 @@ const ShipStarmapEntity: React.FC<{
     },
     onMouseUp: (position: Vector3) => {
       configStoreApi.getState().enableOrbitControls();
-      console.log(
-        entity.position,
-        position,
-        position.clone().multiplyScalar(1 / PLANETARY_SCALE)
-      );
       setPosition({
         variables: {
           pluginId: useConfigStore.getState().universeId,
