@@ -1,13 +1,13 @@
 /* istanbul ignore file */
 import React from "react";
 
-import randomWords from "random-words";
+import uuid from "uniqid";
 import {
   useClientConnectMutation,
   useClientDisconnectMutation,
 } from "../generated/graphql";
 
-const key = "thorium_clientPersistentId";
+const key = "nova_clientPersistentId";
 let clientId = sessionStorage.getItem(key);
 let windows: string[] = [];
 let broadcastChannel: BroadcastChannel;
@@ -60,7 +60,7 @@ export async function getClientId() {
         }
       }
       if (!clientId) {
-        const newClientId = randomWords(3).join("-");
+        const newClientId = uuid();
         setClient(newClientId);
         clientList.push(newClientId);
         localStorage.setItem(key, JSON.stringify(clientList));
@@ -91,9 +91,7 @@ function getClientList() {
   }
 
   if (clientList.length === 0) {
-    clientList = [
-      localStorage.getItem("thorium_clientId") || randomWords(3).join("-"),
-    ];
+    clientList = [localStorage.getItem("thorium_clientId") || uuid()];
     localStorage.setItem(key, JSON.stringify(clientList));
   }
   return clientList;

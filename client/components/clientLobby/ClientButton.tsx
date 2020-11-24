@@ -1,27 +1,34 @@
 import React from "react";
 import {useClientId} from "../../helpers/getClientId";
+import {
+  useClientQuery,
+  useClientSetNameMutation,
+} from "client/generated/graphql";
 import {usePrompt} from "../Dialog";
 import Button from "../ui/button";
 
 export const ClientButton = () => {
   const [clientId, setClientId] = useClientId();
   const prompt = usePrompt();
+  const {data} = useClientQuery();
+  const [setName] = useClientSetNameMutation();
+  if (!data) return null;
   return (
     <Button
       size="lg"
       variantColor="warning"
       variant="outline"
       onClick={async () => {
-        const id = (await prompt({
-          header: "What is the new client ID?",
-          defaultValue: clientId,
+        const name = (await prompt({
+          header: "What is the new client name?",
+          defaultValue: data.client.name,
         })) as string;
-        if (id) {
-          setClientId(id);
+        if (name) {
+          setName({variables: {id: clientId, name}});
         }
       }}
     >
-      Client ID: {clientId}
+      Client Name: {data.client.name}
     </Button>
   );
 };

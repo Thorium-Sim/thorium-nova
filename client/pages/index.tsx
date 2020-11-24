@@ -16,6 +16,7 @@ import {NavLink} from "react-router-dom";
 import {css} from "@emotion/core";
 import QuickStartConfig from "client/components/flightConfig/quickStart";
 import NoMatch from "./NotFound";
+import {ClientButton} from "client/components/clientLobby/ClientButton";
 
 const Welcome = () => {
   const {t} = useTranslation("welcome");
@@ -77,6 +78,7 @@ const Welcome = () => {
                   })}
                 </RouterLink>
               </h2>
+              <ClientButton />
             </div>
             <div className="flex flex-col self-end m-16 space-y-4 max-w-lg">
               <Button

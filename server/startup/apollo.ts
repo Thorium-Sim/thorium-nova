@@ -17,7 +17,7 @@ export default async function setupApollo(server: Application) {
     uploads: false,
   };
   const apollo = new ApolloServer(graphqlOptions);
-  server.use(graphqlUploadExpress()); // New!
+  server.use(graphqlUploadExpress());
   // @ts-ignore
   apollo.applyMiddleware({app: (server as unknown) as Application});
 

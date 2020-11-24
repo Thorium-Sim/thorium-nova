@@ -193,6 +193,23 @@ export type TimersSubscription = {
   }>;
 };
 
+export type ClientQueryVariables = Exact<{[key: string]: never}>;
+
+export type ClientQuery = {
+  __typename?: "Query";
+  client: {__typename?: "Client"; id: string; name: string};
+};
+
+export type ClientSetNameMutationVariables = Exact<{
+  id: Maybe<Scalars["ID"]>;
+  name: Scalars["String"];
+}>;
+
+export type ClientSetNameMutation = {
+  __typename?: "Mutation";
+  clientSetName: {__typename?: "Client"; id: string; name: string};
+};
+
 export type AvailableShipsQueryVariables = Exact<{[key: string]: never}>;
 
 export type AvailableShipsQuery = {
@@ -2115,6 +2132,54 @@ export function useTimersSubscription(
 }
 export type TimersSubscriptionHookResult = ReturnType<
   typeof useTimersSubscription
+>;
+export const ClientDocument = gql`
+  query Client {
+    client {
+      id
+      name
+    }
+  }
+`;
+export function useClientQuery(
+  baseOptions?: Apollo.QueryHookOptions<ClientQuery, ClientQueryVariables>
+) {
+  return Apollo.useQuery<ClientQuery, ClientQueryVariables>(
+    ClientDocument,
+    baseOptions
+  );
+}
+export function useClientLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<ClientQuery, ClientQueryVariables>
+) {
+  return Apollo.useLazyQuery<ClientQuery, ClientQueryVariables>(
+    ClientDocument,
+    baseOptions
+  );
+}
+export type ClientQueryHookResult = ReturnType<typeof useClientQuery>;
+export type ClientLazyQueryHookResult = ReturnType<typeof useClientLazyQuery>;
+export const ClientSetNameDocument = gql`
+  mutation ClientSetName($id: ID, $name: String!) {
+    clientSetName(id: $id, name: $name) {
+      id
+      name
+    }
+  }
+`;
+export function useClientSetNameMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ClientSetNameMutation,
+    ClientSetNameMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ClientSetNameMutation,
+    ClientSetNameMutationVariables
+  >(ClientSetNameDocument, baseOptions);
+}
+export type ClientSetNameMutationHookResult = ReturnType<
+  typeof useClientSetNameMutation
 >;
 export const AvailableShipsDocument = gql`
   query AvailableShips {

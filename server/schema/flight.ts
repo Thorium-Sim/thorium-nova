@@ -9,7 +9,6 @@ import {
   Ctx,
   InputType,
   Subscription,
-  Root,
 } from "type-graphql";
 import uuid from "uniqid";
 import randomWords from "random-words";
@@ -17,7 +16,6 @@ import fs from "fs/promises";
 
 import App, {isWritableFlight} from "../app";
 import ECS from "../helpers/ecs/ecs";
-import Components from "../components";
 import Entity from "../helpers/ecs/entity";
 import getStore from "../helpers/dataStore";
 import {appStoreDir} from "../helpers/appPaths";
@@ -34,9 +32,8 @@ import {EngineVelocitySystem} from "server/systems/EngineVelocitySystem";
 import {PositionVelocitySystem} from "server/systems/PositionVelocitySystem";
 import {getPlugin} from "./plugins/basePlugin";
 import {Networking} from "server/systems/Networking";
-import {ActiveShipsResolver, shipSpawn} from "./activeFlight/ships";
+import {shipSpawn} from "./activeFlight/ships";
 import {getOrbitPosition} from "server/helpers/getOrbitPosition";
-import {object} from "prop-types";
 import {pubsub} from "server/helpers/pubsub";
 import {Vector3} from "three";
 
@@ -327,6 +324,7 @@ export class FlightResolver {
           // TODO: Take care of the mission shindig.
         }
       );
+      App.startBonjour();
     }
     pubsub.publish("flight", {});
     return App.activeFlight;
@@ -359,6 +357,7 @@ export class FlightResolver {
     }
     App.activeFlight = null;
     App.storage.activeFlightName = null;
+    App.stopBonjour();
     pubsub.publish("flight", {});
     return null;
   }

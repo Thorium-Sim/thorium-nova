@@ -14,6 +14,7 @@ import uuid from "uniqid";
 import App from "../app";
 import {GraphQLContext} from "../helpers/graphqlContext";
 import Entity from "../helpers/ecs/entity";
+import {randomNameGenerator} from "../helpers/randomNameGenerator";
 import {ServerChannel} from "@geckos.io/server";
 
 type OfflineStates =
@@ -23,10 +24,14 @@ type OfflineStates =
   | "lockdown"
   | "maintenance"
   | null;
+
 @ObjectType()
 export default class Client {
   @Field(type => ID)
   id: string;
+
+  @Field(type => String)
+  name: string;
 
   @Field(type => ID, {nullable: true})
   shipId: string | null = null;
@@ -61,6 +66,7 @@ export default class Client {
   channel!: ServerChannel;
   constructor(params: Partial<Client> = {}) {
     this.id = params.id || uuid();
+    this.name = params.name || randomNameGenerator();
     this.connected = params.connected || false;
   }
   connect() {
@@ -196,6 +202,20 @@ export class ClientResolver {
     let client = App.storage.clients.find(c => c.id === context.clientId);
 
     client?.logout();
+
+    return client;
+  }
+  @Mutation(returns => Client)
+  clientSetName(
+    @Arg("id", type => ID, {nullable: true}) id: string | null,
+    @Arg("name", type => String) name: string,
+    @Ctx() context: GraphQLContext
+  ): Client | undefined {
+    let client = App.storage.clients.find(
+      c => c.id === (id || context.clientId)
+    );
+    if (!client) throw new Error("Cannot find client record.");
+    client.name = name;
 
     return client;
   }

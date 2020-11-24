@@ -1,11 +1,8 @@
 import init from "./startup/init";
-import bonjour from "./startup/bonjour";
 import setupServer from "./startup/server";
 import setupClientServer from "./startup/clientServer";
 import App from "./app";
 import setupApollo from "./startup/apollo";
-import setupHttpServer from "./startup/httpServer";
-import setupUDP from "./startup/udp";
 
 // We should change this so it can be dynamically set
 export async function startUp() {
@@ -13,28 +10,14 @@ export async function startUp() {
     await init();
 
     await App.init();
-    const {bonjour: bj, service} = await bonjour(App.port, App.httpOnly);
-    const server = await setupServer();
-    /* istanbul ignore next */
-    if (process.env.NODE_ENV === "production") {
-      await setupClientServer(server);
-    }
-    const apollo = await setupApollo(server);
-    const httpServer = await setupHttpServer(
-      server,
-      apollo,
-      App.port,
-      App.httpOnly
-    );
-    setupUDP(httpServer);
+
+    const httpServer = App.startHttpServer();
 
     return {
       App,
-      server,
-      apollo,
+      server: App.servers.express,
+      apollo: App.servers.apollo,
       httpServer,
-      bonjour: bj,
-      bonjourService: service,
     };
   } catch (err) {
     /* istanbul ignore next */

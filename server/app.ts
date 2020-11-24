@@ -6,6 +6,16 @@ import Flight from "./schema/flight";
 import fs from "fs/promises";
 import {Writable} from "./helpers/writable";
 import BasePlugin from "./schema/plugins/basePlugin";
+import setupBonjour from "./startup/bonjour";
+import type bonjour from "bonjour";
+import type {Express} from "express";
+import type {ApolloServer} from "apollo-server-express";
+import type {Server} from "http";
+import setupHttpServer from "./startup/httpServer";
+import setupUDP from "./startup/udp";
+import setupServer from "./startup/server";
+import setupClientServer from "./startup/clientServer";
+import setupApollo from "./startup/apollo";
 
 type ActiveFlightT = Writable<Flight> | null;
 
@@ -34,8 +44,16 @@ class AppClass {
   activeFlight: Flight | ActiveFlightT = null;
   plugins!: BasePlugin[];
 
+  // Server Stuff
   httpOnly: boolean = false;
   port: number = process.env.NODE_ENV === "production" ? 4444 : 3001;
+
+  bonjour: bonjour.Service | null = null;
+  servers: {
+    express?: Express;
+    apollo?: ApolloServer;
+    httpServer?: Server;
+  } = {};
 
   constructor() {
     this.plugins = [];
@@ -75,10 +93,52 @@ class AppClass {
           class: Flight,
           path: `${appStoreDir}flights/${this.storage.activeFlightName}.flight`,
         });
+        this.startBonjour();
       } catch {
         // Do nothing - trying to access failed, so we just won't load a flight
       }
     }
+  }
+  async startHttpServer() {
+    if (!this.servers.express) {
+      const server = await setupServer();
+      /* istanbul ignore next */
+      if (process.env.NODE_ENV === "production") {
+        await setupClientServer(server);
+      }
+      this.servers.express = server;
+    }
+    if (!this.servers.apollo) {
+      if (!this.servers.express) {
+        throw new Error(
+          "Express server didn't start up. This should never happen."
+        );
+      }
+      this.servers.apollo = await setupApollo(this.servers.express);
+    }
+
+    if (!this.servers.express || !this.servers.apollo) return;
+    this.servers.httpServer = await setupHttpServer(
+      this.servers.express,
+      this.servers.apollo,
+      this.port,
+      this.httpOnly
+    );
+    setupUDP(this.servers.httpServer);
+    return this.servers.httpServer;
+  }
+  stopHttpServer() {
+    this.servers.httpServer?.close();
+    this.servers.httpServer = undefined;
+  }
+  startBonjour() {
+    if (this.bonjour) return;
+    const {service} = setupBonjour(this.port, this.httpOnly);
+    this.bonjour = service;
+  }
+  stopBonjour() {
+    this.bonjour?.stop();
+    this.bonjour = null;
   }
   /* istanbul ignore next */
   snapshot() {

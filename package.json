@@ -12,7 +12,7 @@
   "scripts": {
     "start": "npm-run-all --parallel start:client start:server",
     "start:client": "NODE_ENV=development parcel serve client/index.html --port 3000 --open",
-    "start:server": "ts-node-dev --trace-deprecation -r tsconfig-paths/register server/index.ts",
+    "start:server": "ts-node-dev --trace-deprecation --trace-warnings -r tsconfig-paths/register server/index.ts",
     "build": "npm-run-all build:client",
     "build:client": "parcel build client/index.html",
     "prebuild:client": "NODE_ENV=production npm run generate:tailwind",

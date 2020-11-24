@@ -1,0 +1,6 @@
+mutation ClientSetName($id: ID, $name: String!) {
+  clientSetName(id: $id, name: $name) {
+    id
+    name
+  }
+}
