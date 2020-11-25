@@ -2,7 +2,7 @@ const path = require("path");
 
 module.exports = {
   rootDir: path.join(__dirname, ".."),
-  moduleDirectories: ["node_modules", "./test"],
+  moduleDirectories: ["node_modules", "./test", "<rootDir>"],
   moduleNameMapper: {
     "^server/(.*)$": "<rootDir>/server/$1",
     "^client/(.*)$": "<rootDir>/client/$1",

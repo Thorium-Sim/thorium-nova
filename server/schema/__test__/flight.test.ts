@@ -4,7 +4,7 @@ describe("Flight Resolver", () => {
   it("should create a new flight", async () => {
     const flight = await gqlCall({
       query: `mutation Flights {
-    flightStart(flightName:"Test Flight",plugins:[]) {
+    flightStart(flightName:"Test Flight",plugins:[], simulators:[]) {
       id
       name
     }

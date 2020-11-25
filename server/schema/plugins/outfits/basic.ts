@@ -5,7 +5,7 @@ import {getOutfit, outfitPublish} from "./utils";
 
 @Resolver()
 export class PluginOutfitBasicResolver {
-  @Mutation()
+  @Mutation(type => Entity)
   pluginOutfitSetName(
     @Arg("pluginId", type => ID)
     pluginId: string,
@@ -19,7 +19,7 @@ export class PluginOutfitBasicResolver {
     outfitPublish({plugin, outfit});
     return outfit;
   }
-  @Mutation()
+  @Mutation(type => Entity)
   pluginOutfitSetDescription(
     @Arg("pluginId", type => ID)
     pluginId: string,
@@ -33,7 +33,7 @@ export class PluginOutfitBasicResolver {
     outfitPublish({plugin, outfit});
     return outfit;
   }
-  @Mutation()
+  @Mutation(type => Entity)
   pluginOutfitSetTags(
     @Arg("pluginId", type => ID)
     pluginId: string,

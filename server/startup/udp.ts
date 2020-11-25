@@ -3,10 +3,10 @@
 
 import geckos, {ServerChannel, Data} from "@geckos.io/server";
 import http from "http";
-import App from "../app";
+import type AppType from "../app";
 
 export interface GeckoChannel {}
-export default function setupUDP(server: http.Server) {
+export default function setupUDP(App: typeof AppType, server: http.Server) {
   const io = geckos();
   io.addServer(server);
   io.onConnection((channel: ServerChannel) => {

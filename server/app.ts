@@ -13,9 +13,6 @@ import type {ApolloServer} from "apollo-server-express";
 import type {Server} from "http";
 import setupHttpServer from "./startup/httpServer";
 import setupUDP from "./startup/udp";
-import setupServer from "./startup/server";
-import setupClientServer from "./startup/clientServer";
-import setupApollo from "./startup/apollo";
 
 type ActiveFlightT = Writable<Flight> | null;
 
@@ -100,23 +97,6 @@ class AppClass {
     }
   }
   async startHttpServer() {
-    if (!this.servers.express) {
-      const server = await setupServer();
-      /* istanbul ignore next */
-      if (process.env.NODE_ENV === "production") {
-        await setupClientServer(server);
-      }
-      this.servers.express = server;
-    }
-    if (!this.servers.apollo) {
-      if (!this.servers.express) {
-        throw new Error(
-          "Express server didn't start up. This should never happen."
-        );
-      }
-      this.servers.apollo = await setupApollo(this.servers.express);
-    }
-
     if (!this.servers.express || !this.servers.apollo) return;
     this.servers.httpServer = await setupHttpServer(
       this.servers.express,
@@ -124,7 +104,7 @@ class AppClass {
       this.port,
       this.httpOnly
     );
-    setupUDP(this.servers.httpServer);
+    setupUDP(this, this.servers.httpServer);
     return this.servers.httpServer;
   }
   stopHttpServer() {

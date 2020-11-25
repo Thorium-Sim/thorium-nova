@@ -3,10 +3,8 @@ import {startUp} from "..";
 describe("server", () => {
   it("properly boots up", async () => {
     const res = await startUp();
-    const {server, apollo, httpServer, bonjour, bonjourService} = res || {};
+    const {server, apollo, httpServer} = res || {};
     expect(server).toBeTruthy();
-    bonjourService?.stop(() => {});
-    bonjour?.destroy();
 
     expect(httpServer).toBeTruthy();
     apollo?.stop();

@@ -18,6 +18,7 @@ export class FactionAssignmentComponent extends Component {
 
   @Field(type => Entity, {nullable: true})
   get faction(): Entity | null {
+    return null;
     return getAnyFaction(this.factionId) || null;
   }
   set faction(fac) {}

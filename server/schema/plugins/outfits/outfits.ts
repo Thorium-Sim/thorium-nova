@@ -20,14 +20,6 @@ import {outfitPublish} from "./utils";
 import {getOutfitComponents, OutfitAbilities} from "./getOutfitComponents";
 import App from "server/app";
 
-@ObjectType()
-class PluginEntity extends Entity {
-  @Field()
-  pluginId!: string;
-  @Field()
-  pluginName!: string;
-}
-
 @Resolver()
 export class PluginOutfitResolver {
   @Query(returns => [Entity], {name: "pluginOutfits"})
@@ -35,12 +27,12 @@ export class PluginOutfitResolver {
     const plugin = getPlugin(pluginId);
     return plugin.outfits;
   }
-  @Query(returns => [PluginEntity])
-  allPluginOutfits(): PluginEntity[] {
-    return App.plugins.reduce((prev: PluginEntity[], next) => {
+  @Query(returns => [Entity])
+  allPluginOutfits(): Entity[] {
+    return App.plugins.reduce((prev: Entity[], next) => {
       return prev.concat(
         next.outfits.map(n => {
-          const entity = n as PluginEntity;
+          const entity = n as Entity;
           entity.pluginId = next.id;
           entity.pluginName = next.name;
           return entity;
@@ -59,7 +51,7 @@ export class PluginOutfitResolver {
     const plugin = getPlugin(pluginId);
     return plugin.outfits.find(s => s.id === id) || null;
   }
-  @Mutation()
+  @Mutation(type => Entity)
   pluginAddOutfit(
     @Arg("pluginId", type => ID)
     pluginId: string,
@@ -94,7 +86,7 @@ export class PluginOutfitResolver {
     return entity;
   }
 
-  @Mutation()
+  @Mutation(type => Entity)
   pluginOutfitRemove(
     @Arg("pluginId", type => ID) pluginId: string,
     @Arg("outfitId", type => ID)

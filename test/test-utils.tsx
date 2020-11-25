@@ -1,6 +1,6 @@
 import React from "react";
 import {render as rtlRender, RenderOptions} from "@testing-library/react";
-import {MockedProvider, MockedResponse} from "@apollo/react-testing";
+import {MockedProvider, MockedResponse} from "@apollo/client/testing";
 import {MemoryRouter as Router} from "react-router-dom";
 import AppContext from "../client/helpers/appContext";
 
@@ -16,7 +16,6 @@ function render(
   const {mocks = [], initialRoutes = ["/"]} = options || {};
   const Wrapper: React.FC = ({children}) => {
     return (
-      // @ts-ignore
       <MockedProvider mocks={mocks} addTypename={false}>
         <AppContext>
           <Router initialEntries={initialRoutes}>{children}</Router>

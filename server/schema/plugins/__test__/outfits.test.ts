@@ -157,7 +157,7 @@ describe("outfit Plugin", () => {
         "cruisingSpeed": 1500,
         "emergencySpeed": 2000,
         "targetSpeed": 0,
-        "thrust": 1,
+        "thrust": 12500,
       }
     `);
     const update = await gqlCall({
@@ -286,7 +286,7 @@ describe("outfit Plugin", () => {
           "z": 0,
         },
         "rotationMaxSpeed": 5,
-        "rotationThrust": 200,
+        "rotationThrust": 12500,
         "thrusting": false,
       }
     `);

@@ -108,12 +108,12 @@ const CustomFlight = () => {
             className="text-3xl w-full self-end "
             disabled={checked.length === 0}
             onClick={async () => {
-              await startFlight({
-                variables: {
-                  name: flightName || null,
-                  plugins: Array.from(checked),
-                },
-              });
+              // await startFlight({
+              //   variables: {
+              //     name: flightName || null,
+              //     plugins: Array.from(checked),
+              //   },
+              // });
               navigate("/flight");
             }}
           >

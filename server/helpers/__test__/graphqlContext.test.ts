@@ -4,7 +4,7 @@ import {getGraphQLContext} from "../graphqlContext";
 
 describe("GraphQL Context", () => {
   it("should generate context from request headers", () => {
-    const client = new Client({id: "Test Client"});
+    const client = new Client({id: "Test Client", name: "Test Client"});
     App.storage.clients.push(client);
     expect(
       getGraphQLContext({
@@ -17,6 +17,7 @@ describe("GraphQL Context", () => {
           "connected": false,
           "id": "Test Client",
           "loginName": null,
+          "name": "Test Client",
           "offlineState": null,
           "shipId": null,
           "stationId": null,
@@ -40,6 +41,7 @@ describe("GraphQL Context", () => {
           "connected": false,
           "id": "Test Client",
           "loginName": null,
+          "name": "Test Client",
           "offlineState": null,
           "shipId": null,
           "stationId": null,

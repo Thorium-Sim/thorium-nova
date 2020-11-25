@@ -11,7 +11,24 @@ export async function startUp() {
 
     await App.init();
 
-    const httpServer = App.startHttpServer();
+    if (!App.servers.express) {
+      const server = await setupServer();
+      /* istanbul ignore next */
+      if (process.env.NODE_ENV === "production") {
+        await setupClientServer(server);
+      }
+      App.servers.express = server;
+    }
+    if (!App.servers.apollo) {
+      if (!App.servers.express) {
+        throw new Error(
+          "Express server didn't start up. This should never happen."
+        );
+      }
+      App.servers.apollo = await setupApollo(App.servers.express);
+    }
+
+    const httpServer = await App.startHttpServer();
 
     return {
       App,
