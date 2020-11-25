@@ -13,6 +13,14 @@ subscription Flight {
         logo
         vanity
       }
+      stationComplement {
+        id
+        name
+        stations {
+          id
+          name
+        }
+      }
     }
   }
 }

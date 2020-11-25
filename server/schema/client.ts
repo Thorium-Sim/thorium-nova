@@ -8,6 +8,8 @@ import {
   Arg,
   Mutation,
   Ctx,
+  Subscription,
+  Root,
 } from "type-graphql";
 import {UserInputError} from "apollo-server-errors";
 import uuid from "uniqid";
@@ -16,6 +18,8 @@ import {GraphQLContext} from "../helpers/graphqlContext";
 import Entity from "../helpers/ecs/entity";
 import {randomNameGenerator} from "../helpers/randomNameGenerator";
 import {ServerChannel} from "@geckos.io/server";
+import {pubsub} from "server/helpers/pubsub";
+import Station from "./station";
 
 type OfflineStates =
   | "blackout"
@@ -44,7 +48,7 @@ export default class Client {
   @Field(type => ID, {nullable: true})
   stationId: string | null = null;
 
-  @Field(type => Entity, {nullable: true})
+  @Field(type => Station, {nullable: true})
   get station() {
     return this.ship?.stationComplement?.stations.find(
       s => s.id === this.stationId
@@ -108,8 +112,8 @@ export default class Client {
 
 @Resolver(Client)
 export class ClientResolver {
-  @Query(returns => Client)
-  async client(
+  @Query(returns => Client, {name: "client"})
+  async clientQuery(
     @Arg("id", type => ID, {nullable: true}) id: string,
     @Ctx() context: GraphQLContext
   ) {
@@ -130,7 +134,10 @@ export class ClientResolver {
       App.storage.clients.push(client);
     }
     client.connect();
-
+    pubsub.publish("clients", {clients: App.storage.clients});
+    if (client) {
+      pubsub.publish("client", {client, clientId: client.id});
+    }
     return client;
   }
 
@@ -139,7 +146,10 @@ export class ClientResolver {
     let client = App.storage.clients.find(c => c.id === context.clientId);
 
     client?.disconnect();
-
+    pubsub.publish("clients", {clients: App.storage.clients});
+    if (client) {
+      pubsub.publish("client", {client, clientId: client.id});
+    }
     return client;
   }
   @Mutation(returns => Client)
@@ -149,15 +159,18 @@ export class ClientResolver {
     @Arg("clientId", type => ID, {nullable: true}) clientId: string | null
   ): Client | undefined {
     // Validate that this ship is on the flight.
-    if (!App.activeFlight?.ships.find(s => s.id === shipId)) {
+    if (shipId && !App.activeFlight?.ships.find(s => s.id === shipId)) {
       throw new UserInputError("Selected Ship is not present on the flight.");
     }
-    let client = App.storage.clients.find(
-      c => c.id === clientId || c.id === context.clientId
+    let client = App.storage.clients.find(c =>
+      clientId ? c.id === clientId : c.id === context.clientId
     );
 
     client?.setShip(shipId);
-
+    pubsub.publish("clients", {clients: App.storage.clients});
+    if (client) {
+      pubsub.publish("client", {client, clientId: client.id});
+    }
     return client;
   }
   @Mutation(returns => Client)
@@ -166,16 +179,17 @@ export class ClientResolver {
     @Arg("stationId", type => ID, {nullable: true}) stationId: string | null,
     @Arg("clientId", type => ID, {nullable: true}) clientId: string | null
   ): Client | undefined {
-    let client = App.storage.clients.find(
-      c => c.id === clientId || c.id === context.clientId
+    let client = App.storage.clients.find(c =>
+      clientId ? c.id === clientId : c.id === context.clientId
     );
-    if (!client?.shipId) {
+    if (!client?.shipId && stationId) {
       throw new UserInputError(
         "Client must be assigned to a ship before assigning a station."
       );
     }
     if (
-      !client.ship?.stationComplement?.stations.find(s => s.id === stationId)
+      stationId &&
+      !client?.ship?.stationComplement?.stations.find(s => s.id === stationId)
     ) {
       throw new UserInputError(
         "Selected Station is not present on the client's assigned ship."
@@ -183,7 +197,10 @@ export class ClientResolver {
     }
 
     client?.setStation(stationId);
-
+    pubsub.publish("clients", {clients: App.storage.clients});
+    if (client) {
+      pubsub.publish("client", {client, clientId: client.id});
+    }
     return client;
   }
   @Mutation(returns => Client)
@@ -195,6 +212,10 @@ export class ClientResolver {
 
     client?.login(loginName);
 
+    pubsub.publish("clients", {clients: App.storage.clients});
+    if (client) {
+      pubsub.publish("client", {client, clientId: client.id});
+    }
     return client;
   }
   @Mutation(returns => Client)
@@ -203,6 +224,10 @@ export class ClientResolver {
 
     client?.logout();
 
+    pubsub.publish("clients", {clients: App.storage.clients});
+    if (client) {
+      pubsub.publish("client", {client, clientId: client.id});
+    }
     return client;
   }
   @Mutation(returns => Client)
@@ -217,6 +242,43 @@ export class ClientResolver {
     if (!client) throw new Error("Cannot find client record.");
     client.name = name;
 
+    pubsub.publish("clients", {clients: App.storage.clients});
+    pubsub.publish("client", {client, clientId: client.id});
     return client;
+  }
+  @Subscription(returns => Client, {
+    topics: ({args: {clientId}}) => {
+      const id = uuid();
+      process.nextTick(() => {
+        pubsub.publish(id, {
+          clientId,
+          client: App.storage.clients.find(c => c.id === clientId),
+        });
+      });
+      return [id, "client"];
+    },
+    filter: ({payload, args: {clientId}}) => {
+      return payload.clientId === clientId;
+    },
+  })
+  async client(
+    @Root() payload: {client: Client},
+    @Arg("clientId", type => ID, {nullable: true}) clientId: string | null
+  ) {
+    return payload.client;
+  }
+  @Subscription(returns => [Client], {
+    topics: () => {
+      const id = uuid();
+      process.nextTick(() => {
+        pubsub.publish(id, {
+          clients: App.storage.clients.filter(c => c.connected),
+        });
+      });
+      return [id, "clients"];
+    },
+  })
+  async clients(@Root() payload: {clients: Client[]}) {
+    return payload.clients;
   }
 }

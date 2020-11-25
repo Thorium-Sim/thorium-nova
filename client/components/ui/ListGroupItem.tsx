@@ -8,7 +8,17 @@ const ListGroupItem: React.FC<{
   disabled?: boolean;
   size?: "small";
   to?: string;
-}> = ({onClick, selected, disabled, size, as: asProp = "div", ...props}) => {
+  className?: string;
+  style?: any;
+}> = ({
+  onClick,
+  selected,
+  disabled,
+  size,
+  as: asProp = "div",
+  className,
+  ...props
+}) => {
   const elementName = typeof asProp === "string" ? (asProp as any) : asProp;
   const Element = styled(elementName)`
     & + .list-group-item {
@@ -26,7 +36,7 @@ const ListGroupItem: React.FC<{
 
   return (
     <Element
-      className={`block w-full border border-solid border-blackAlpha-50 px-${
+      className={`${className} select-none block w-full border border-solid border-blackAlpha-50 px-${
         size === "small" ? 2 : 4
       } py-${size === "small" ? 1 : 2} ${size === "small" ? "text-sm" : ""} ${
         disabled ? "text-gray-400 pointer-events-none" : "pointer-events-auto"

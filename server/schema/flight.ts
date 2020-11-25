@@ -222,6 +222,7 @@ export class FlightResolver {
     // will also be activated. For custom flights, you just choose which plugins
     // are active.
     if (!App.activeFlight) {
+      flightName = flightName || randomWords(3).join("-");
       const flight = getStore<Flight>({
         class: Flight,
         path: `${appStoreDir}flights/${flightName}.flight`,
@@ -336,11 +337,12 @@ export class FlightResolver {
             );
           }
           if (!stationComplement) {
-            stationComplement = createStationComplement(
+            stationComplement = createStationComplement({
               crewCount,
+              flightDirector,
               crewCaptain,
-              ship
-            );
+              ship,
+            });
           }
           ship.addComponent("stationComplement", stationComplement);
           // TODO: Take care of the mission shindig.

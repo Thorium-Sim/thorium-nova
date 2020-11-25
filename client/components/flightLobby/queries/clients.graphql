@@ -1,0 +1,8 @@
+subscription Clients {
+  clients {
+    id
+    name
+    stationId
+    shipId
+  }
+}

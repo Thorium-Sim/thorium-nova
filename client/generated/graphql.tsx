@@ -53,7 +53,7 @@ export type FlightStartSimulator = {
   shipId: Scalars["ID"];
   shipName: Scalars["String"];
   crewCount: Maybe<Scalars["Float"]>;
-  stationSet: Maybe<Scalars["ID"]>;
+  stationComplementId: Maybe<Scalars["ID"]>;
   crewCaptain: Maybe<Scalars["Boolean"]>;
   flightDirector: Scalars["Boolean"];
   missionId: Maybe<Scalars["ID"]>;
@@ -296,6 +296,35 @@ export type AllPluginShipsQuery = {
   }>;
 };
 
+export type ClientAssignShipMutationVariables = Exact<{
+  clientId: Scalars["ID"];
+  shipId: Maybe<Scalars["ID"]>;
+  stationId: Maybe<Scalars["ID"]>;
+}>;
+
+export type ClientAssignShipMutation = {
+  __typename?: "Mutation";
+  clientSetShip: {__typename?: "Client"; id: string; shipId: Maybe<string>};
+  clientSetStation: {
+    __typename?: "Client";
+    id: string;
+    stationId: Maybe<string>;
+  };
+};
+
+export type ClientsSubscriptionVariables = Exact<{[key: string]: never}>;
+
+export type ClientsSubscription = {
+  __typename?: "Subscription";
+  clients: Array<{
+    __typename?: "Client";
+    id: string;
+    name: string;
+    stationId: Maybe<string>;
+    shipId: Maybe<string>;
+  }>;
+};
+
 export type FlightStopMutationVariables = Exact<{[key: string]: never}>;
 
 export type FlightStopMutation = {
@@ -343,6 +372,12 @@ export type FlightSubscription = {
         logo: string;
         vanity: string;
       }>;
+      stationComplement: {
+        __typename?: "StationComplementComponent";
+        id: string;
+        name: string;
+        stations: Array<{__typename?: "Station"; id: string; name: string}>;
+      };
     }>;
   }>;
 };
@@ -2369,6 +2404,56 @@ export type AllPluginShipsQueryHookResult = ReturnType<
 export type AllPluginShipsLazyQueryHookResult = ReturnType<
   typeof useAllPluginShipsLazyQuery
 >;
+export const ClientAssignShipDocument = gql`
+  mutation ClientAssignShip($clientId: ID!, $shipId: ID, $stationId: ID) {
+    clientSetShip(clientId: $clientId, shipId: $shipId) {
+      id
+      shipId
+    }
+    clientSetStation(clientId: $clientId, stationId: $stationId) {
+      id
+      stationId
+    }
+  }
+`;
+export function useClientAssignShipMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ClientAssignShipMutation,
+    ClientAssignShipMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ClientAssignShipMutation,
+    ClientAssignShipMutationVariables
+  >(ClientAssignShipDocument, baseOptions);
+}
+export type ClientAssignShipMutationHookResult = ReturnType<
+  typeof useClientAssignShipMutation
+>;
+export const ClientsDocument = gql`
+  subscription Clients {
+    clients {
+      id
+      name
+      stationId
+      shipId
+    }
+  }
+`;
+export function useClientsSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    ClientsSubscription,
+    ClientsSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    ClientsSubscription,
+    ClientsSubscriptionVariables
+  >(ClientsDocument, baseOptions);
+}
+export type ClientsSubscriptionHookResult = ReturnType<
+  typeof useClientsSubscription
+>;
 export const FlightStopDocument = gql`
   mutation FlightStop {
     flightStop
@@ -2466,6 +2551,14 @@ export const FlightDocument = gql`
         shipAssets {
           logo
           vanity
+        }
+        stationComplement {
+          id
+          name
+          stations {
+            id
+            name
+          }
         }
       }
     }

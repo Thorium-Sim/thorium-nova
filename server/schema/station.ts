@@ -13,6 +13,9 @@ export default class Station {
   @Field()
   description: string;
 
+  @Field()
+  layout: string;
+
   @Field(type => [String])
   tags: string[];
 
@@ -24,6 +27,7 @@ export default class Station {
     this.name = params.name || "Station";
     this.description = params.description || "";
     this.tags = params.tags || [];
+    this.layout = params.layout || "Default";
     this.cards = [];
     params.cards?.forEach(c => this.cards.push(new Card(c)));
   }

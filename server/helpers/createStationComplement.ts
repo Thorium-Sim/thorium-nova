@@ -70,11 +70,17 @@ const stationNames = [
     "Medical",
   ],
 ];
-export function createStationComplement(
-  crewCount: number = 6,
-  crewCaptain: boolean = true,
-  ship: Entity
-) {
+export function createStationComplement({
+  crewCount = 6,
+  crewCaptain = true,
+  ship,
+  flightDirector = true,
+}: {
+  crewCount?: number;
+  crewCaptain?: boolean;
+  ship: Entity;
+  flightDirector?: boolean;
+}) {
   // No station set; lets create a new one.
   let stationCount = crewCount - (crewCaptain ? 1 : 0);
   // TODO: Finish this up.
@@ -83,6 +89,25 @@ export function createStationComplement(
   //  - What ship systems are assigned to the ship
   const stationComplement = new StationComplementComponent({
     stations: [
+      flightDirector &&
+        new Station({
+          name: "Flight Director",
+          cards: [
+            new Card({
+              name: "Core",
+              component: "Core",
+            }),
+          ],
+        }),
+      new Station({
+        name: "Viewscreen",
+        cards: [
+          new Card({
+            name: "Viewscreen",
+            component: "Viewscreen",
+          }),
+        ],
+      }),
       new Station({
         name: "Development",
         cards: [
@@ -92,7 +117,11 @@ export function createStationComplement(
           }),
         ],
       }),
-    ],
+    ].filter(function removeStation(
+      station: boolean | Station
+    ): station is Station {
+      return Boolean(station);
+    }),
   });
   return stationComplement;
 }

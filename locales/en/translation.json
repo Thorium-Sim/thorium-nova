@@ -1,18 +1,31 @@
 {
-  "Back": "Back",
-  "Cancel": "Cancel",
-  "Choose a starting location": "Choose a starting location",
-  "Crew Count": "Crew Count",
-  "Crew count includes captain": "Crew count includes captain",
-  "Designed for sight-seeing, off-the-cuff missions, or writing a new mission from scratch": {
-    "": ""
+  "Age": "Age",
+  "Axial Tilt": "Axial Tilt",
+  "Cruising Speed": "Cruising Speed",
+  "Eccentricity": "Eccentricity",
+  "Emergency Speed": "Emergency Speed",
+  "Hue": "Hue",
+  "Is White": "Is White",
+  "Orbit Arc": "Orbit Arc",
+  "Orbit Radius": "Orbit Radius",
+  "Orbital Inclination": "Orbital Inclination",
+  "Radius": "Radius",
+  "Show Orbit Path": "Show Orbit Path",
+  "Solar Mass": "Solar Mass",
+  "Spectral Type": "Spectral Type",
+  "Temperature": "Temperature",
+  "The engine thrust output in kilo-Newtons": {
+    " This affects how long it takes to accelerate to top speed": {
+      " If this is the same as the mass of the ship, it will take about 5 seconds to reach cruising speed": {
+        "": ""
+      }
+    }
   },
-  "Flight Quick Start": "Flight Quick Start",
-  "Mission Selection": "Mission Selection",
-  "Next": "Next",
-  "Sandbox Mode": "Sandbox Mode",
-  "Ship Name": "Ship Name",
-  "Ship Selection": "Ship Selection",
-  "Start Flight": "Start Flight",
-  "Use Flight Director controls": "Use Flight Director controls"
+  "The maximum cruising speed in km/s": {
+    " ": " "
+  },
+  "The maximum emergency speed in km/s": {
+    " ": " "
+  },
+  "Thrust": "Thrust"
 }

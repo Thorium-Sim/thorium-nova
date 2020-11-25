@@ -27,11 +27,7 @@ const Welcome = () => {
   const {data} = useFlightsQuery();
   const {data: activeFlightData} = useActiveFlightQuery();
   const hasFlight = !!activeFlightData?.flight?.id;
-  // React.useEffect(() => {
-  //   if (hasFlight) {
-  //     navigate("/flight");
-  //   }
-  // }, [hasFlight, navigate]);
+
   return (
     <>
       {(match || location.pathname === "/") && (
@@ -81,65 +77,81 @@ const Welcome = () => {
               <ClientButton />
             </div>
             <div className="flex flex-col self-end m-16 space-y-4 max-w-lg">
-              <Button
-                size="lg"
-                variantColor="primary"
-                variant="outline"
-                as={NavLink}
-                to="/config/flight/quick"
-              >
-                {t(`Quick Start`)}
-              </Button>
-              <Button
-                size="lg"
-                variantColor="secondary"
-                variant="outline"
-                as={NavLink}
-                to="/config/flight"
-              >
-                {t(`Custom Flight`)}
-              </Button>
-              <Button
-                size="lg"
-                variantColor="info"
-                variant="outline"
-                onClick={() => setShow(s => !s)}
-              >
-                {t(`Load a Saved Flight`)}
-              </Button>
-              {show && (
-                <ul className="list-none max-h-full overflow-y-auto border-solid border border-whiteAlpha-500">
-                  {data?.flights.length ? (
-                    data.flights.map(f => (
-                      <li
-                        className="p-4 border-b border-solid border-whiteAlpha-500"
-                        key={f.id}
-                      >
-                        <strong>{f.name}</strong>
-                        <br />
-                        <small>{new Date(f.date).toLocaleDateString()}</small>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="p-4 border-b border-solid border-whiteAlpha-500">
-                      No Saved Flights
-                    </li>
+              {hasFlight ? (
+                <Button
+                  size="lg"
+                  variantColor="primary"
+                  variant="outline"
+                  as={NavLink}
+                  to="/flight"
+                >
+                  {t(`Go To Flight Lobby`)}
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    size="lg"
+                    variantColor="primary"
+                    variant="outline"
+                    as={NavLink}
+                    to="/config/flight/quick"
+                  >
+                    {t(`Quick Start`)}
+                  </Button>
+                  <Button
+                    size="lg"
+                    variantColor="secondary"
+                    variant="outline"
+                    as={NavLink}
+                    to="/config/flight"
+                  >
+                    {t(`Custom Flight`)}
+                  </Button>
+                  <Button
+                    size="lg"
+                    variantColor="info"
+                    variant="outline"
+                    onClick={() => setShow(s => !s)}
+                  >
+                    {t(`Load a Saved Flight`)}
+                  </Button>
+                  {show && (
+                    <ul className="list-none max-h-full overflow-y-auto border-solid border border-whiteAlpha-500">
+                      {data?.flights.length ? (
+                        data.flights.map(f => (
+                          <li
+                            className="p-4 border-b border-solid border-whiteAlpha-500"
+                            key={f.id}
+                          >
+                            <strong>{f.name}</strong>
+                            <br />
+                            <small>
+                              {new Date(f.date).toLocaleDateString()}
+                            </small>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="p-4 border-b border-solid border-whiteAlpha-500">
+                          No Saved Flights
+                        </li>
+                      )}
+                    </ul>
                   )}
-                </ul>
-              )}
 
-              <Button size="lg" variantColor="warning" variant="outline">
-                {t(`Join a Server`)}
-              </Button>
-              <Button
-                size="lg"
-                variantColor="alert"
-                variant="outline"
-                as={NavLink}
-                {...{to: "/config"}}
-              >
-                {t(`Configure Plugins`)}
-              </Button>
+                  <Button size="lg" variantColor="warning" variant="outline">
+                    {t(`Join a Server`)}
+                  </Button>
+                  <Button
+                    size="lg"
+                    variantColor="alert"
+                    variant="outline"
+                    as={NavLink}
+                    {...{to: "/config"}}
+                  >
+                    {t(`Configure Plugins`)}
+                  </Button>
+                </>
+              )}
             </div>
             <Credits></Credits>
           </div>

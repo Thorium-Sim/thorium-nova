@@ -1,0 +1,10 @@
+mutation ClientAssignShip($clientId: ID!, $shipId: ID, $stationId: ID) {
+  clientSetShip(clientId: $clientId, shipId: $shipId) {
+    id
+    shipId
+  }
+  clientSetStation(clientId: $clientId, stationId: $stationId) {
+    id
+    stationId
+  }
+}
