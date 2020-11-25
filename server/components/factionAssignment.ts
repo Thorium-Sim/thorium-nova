@@ -1,5 +1,4 @@
 import Entity from "server/helpers/ecs/entity";
-import {getAnyFaction} from "server/schema/faction";
 import {Field, ObjectType} from "type-graphql";
 import {Component, ComponentOmit} from "./utils";
 
@@ -19,7 +18,6 @@ export class FactionAssignmentComponent extends Component {
   @Field(type => Entity, {nullable: true})
   get faction(): Entity | null {
     return null;
-    return getAnyFaction(this.factionId) || null;
   }
   set faction(fac) {}
 }

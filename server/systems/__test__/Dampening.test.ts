@@ -73,19 +73,19 @@ describe("ImpulseSystem", () => {
     for (let i = 0; i < 60 * 5; i++) {
       ecs.update(16);
     }
-    expect(ship.velocity?.z).toMatchInlineSnapshot(`12.3217713`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`60`);
     impulse.updateComponent("impulseEngines", {targetSpeed: 10});
     ecs.update(100);
-    expect(ship.velocity?.z).toMatchInlineSnapshot(`11.1017939`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`54.0594059`);
     for (let i = 0; i < 60 * 3; i++) {
       ecs.update(16);
     }
-    expect(ship.velocity?.z).toMatchInlineSnapshot(`0.859563`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`9.9197335`);
     impulse.updateComponent("impulseEngines", {targetSpeed: 500});
     for (let i = 0; i < 60 * 11; i++) {
       ecs.update(16);
     }
-    expect(ship.velocity?.z).toMatchInlineSnapshot(`12.424694`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`141.9197335`);
 
     ship.rotation.x = 0.7071067811865475;
     ship.rotation.w = 0.7071067811865475;
@@ -94,8 +94,8 @@ describe("ImpulseSystem", () => {
       ecs.update(16);
     }
     expect(ship.velocity?.x).toMatchInlineSnapshot(`0`);
-    expect(ship.velocity?.y).toMatchInlineSnapshot(`-12.4246708`);
-    expect(ship.velocity?.z).toMatchInlineSnapshot(`0.0003292`);
+    expect(ship.velocity?.y).toMatchInlineSnapshot(`-6.1124985`);
+    expect(ship.velocity?.z).toMatchInlineSnapshot(`0.0037577`);
 
     ship.velocity.z = 1500;
 
@@ -145,15 +145,15 @@ describe("ImpulseSystem", () => {
     }
     expect(ship.rotation).toMatchInlineSnapshot(`
       Object {
-        "w": 0.8376007294464258,
-        "x": 0.5462829102496372,
+        "w": 0.31751072415973985,
+        "x": 0.9482546810027009,
         "y": 0,
         "z": 0,
       }
     `);
     expect(thrusters.thrusters?.rotationVelocity).toMatchInlineSnapshot(`
       Coordinates {
-        "x": 0.479999999999998,
+        "x": 0.5235987755982988,
         "y": 0,
         "z": 0,
       }
@@ -166,15 +166,15 @@ describe("ImpulseSystem", () => {
     }
     expect(ship.rotation).toMatchInlineSnapshot(`
       Object {
-        "w": 0.7485234666973284,
-        "x": 0.6631083017150454,
+        "w": 0.1619864700155866,
+        "x": 0.9867929790649436,
         "y": 0,
         "z": 0,
       }
     `);
     expect(thrusters.thrusters?.rotationVelocity).toMatchInlineSnapshot(`
       Coordinates {
-        "x": 0.1841373438582811,
+        "x": 0.20086268288774853,
         "y": 0,
         "z": 0,
       }
