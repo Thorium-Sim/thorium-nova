@@ -7,12 +7,9 @@ import {
   usePluginShipSetNameMutation,
   usePluginShipSetTagsMutation,
   usePluginShipSetCategoryMutation,
-  usePhraseListsSubscription,
-  usePluginShipSetNameGeneratorPhraseMutation,
 } from "../../../../generated/graphql";
 import {useParams} from "react-router";
 import Input from "client/components/ui/Input";
-import {useId} from "@react-aria/utils";
 
 const ShipBasic: React.FC = () => {
   const {t} = useTranslation();
@@ -26,20 +23,7 @@ const ShipBasic: React.FC = () => {
   const [setTags] = usePluginShipSetTagsMutation();
   const [error, setError] = React.useState(false);
 
-  const phrasesData = usePhraseListsSubscription({variables: {pluginId}});
   const ship = data?.pluginShip;
-
-  let elementId = useId();
-  const categorizedPhrases =
-    phrasesData.data?.phrases.reduce(
-      (prev: {[key: string]: typeof next[]}, next) => {
-        prev[next.category] = prev[next.category]
-          ? prev[next.category].concat(next)
-          : [next];
-        return prev;
-      },
-      {}
-    ) || {};
 
   if (!ship) return <div>Loading...</div>;
   return (

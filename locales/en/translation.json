@@ -1,7 +1,45 @@
 {
-  "Activated Plugins": "Activated Plugins",
-  "Add Player Ship": "Add Player Ship",
-  "Flight Name": "Flight Name",
-  "Player Ships": "Player Ships",
-  "Start Flight": "Start Flight"
+  "Add": "Add",
+  "Add Moon": "Add Moon",
+  "Add Planet": "Add Planet",
+  "Add Star": "Add Star",
+  "Add Starbase": "Add Starbase",
+  "Are you sure you want to remove this {{object}}?": "Are you sure you want to remove this {{object}}?",
+  "Basics": "Basics",
+  "Cancel": "Cancel",
+  "Compress Y Dimension": "Compress Y Dimension",
+  "Configure Spawn": {
+    "": {
+      "": {
+        "": ""
+      }
+    }
+  },
+  "Configure spawnable item": "Configure spawnable item",
+  "Delete": "Delete",
+  "Edit": "Edit",
+  "Focus On Selected Objects": "Focus On Selected Objects",
+  "Hide Planets": "Hide Planets",
+  "Instantly Move Objects": "Instantly Move Objects",
+  "It will remove all of the objects inside of it": {
+    "": ""
+  },
+  "Max Destination Radius": "Max Destination Radius",
+  "Orbit": "Orbit",
+  "Planet Images": "Planet Images",
+  "Planet Properties": "Planet Properties",
+  "Set Y Dimension Index to Selected Position": "Set Y Dimension Index to Selected Position",
+  "Show Autopilot Destinations": "Show Autopilot Destinations",
+  "Star Properties": "Star Properties",
+  "The maximum radius which destinations can be set in lightyears": {
+    " 0 is unlimited radius": {
+      "": ""
+    }
+  },
+  "Y Dimension Index": "Y Dimension Index",
+  "object": "object",
+  "planet": "planet",
+  "planetary system": "planetary system",
+  "star": "star",
+  "toggle menu": "toggle menu"
 }

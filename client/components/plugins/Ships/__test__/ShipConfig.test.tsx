@@ -4,13 +4,14 @@ import {
   PluginShipCreateDocument,
   PluginShipOutfitsDocument,
   PluginShipsDocument,
+  PluginShipSetCategoryDocument,
   PluginShipSetDescriptionDocument,
   PluginShipSetNameDocument,
   PluginShipSetTagsDocument,
 } from "../../../../generated/graphql";
 import React from "react";
 import {Route, Routes} from "react-router";
-import {fireEvent, render} from "test-utils";
+import {render} from "test-utils";
 import ShipsConfig from "../index";
 import userEvent from "@testing-library/user-event";
 
@@ -69,6 +70,10 @@ const baseMocks = [
             name: "Another Ship",
             description: "Description",
           },
+          isShip: {
+            category: "Cruiser",
+            nameGeneratorPhrase: null,
+          },
           tags: {
             tags: [],
           },
@@ -87,6 +92,56 @@ const baseMocks = [
           identity: {
             name: "Test Ship",
             description: "Description",
+          },
+          isShip: {
+            category: "Cruiser",
+            nameGeneratorPhrase: null,
+          },
+          tags: {
+            tags: ["Test Tag"],
+          },
+        },
+      },
+    },
+  },
+  {
+    request: {
+      query: PluginShipBasicDocument,
+      variables: {pluginId: "testPlugin", shipId: "2"},
+    },
+    result: {
+      data: {
+        pluginShip: {
+          identity: {
+            name: "Another Ship",
+            description: "Description",
+          },
+          isShip: {
+            category: "Cruiser",
+            nameGeneratorPhrase: null,
+          },
+          tags: {
+            tags: [],
+          },
+        },
+      },
+    },
+  },
+  {
+    request: {
+      query: PluginShipBasicDocument,
+      variables: {pluginId: "testPlugin", shipId: "1"},
+    },
+    result: {
+      data: {
+        pluginShip: {
+          identity: {
+            name: "Test Ship",
+            description: "Description",
+          },
+          isShip: {
+            category: "Cruiser",
+            nameGeneratorPhrase: null,
           },
           tags: {
             tags: ["Test Tag"],
@@ -221,6 +276,23 @@ describe("Ship Config", () => {
                   tags: {
                     tags: [],
                   },
+                },
+              },
+            },
+          },
+          {
+            request: {
+              query: PluginShipSetCategoryDocument,
+              variables: {
+                pluginId: "testPlugin",
+                shipId: "1",
+                category: "Cruiser",
+              },
+            },
+            result: {
+              data: {
+                pluginShipSetCategory: {
+                  id: "1",
                 },
               },
             },

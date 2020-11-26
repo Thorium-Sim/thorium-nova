@@ -8,7 +8,7 @@ import {usePrompt} from "../Dialog";
 import Button from "../ui/button";
 
 export const ClientButton = () => {
-  const [clientId, setClientId] = useClientId();
+  const [clientId] = useClientId();
   const prompt = usePrompt();
   const {data} = useClientQuery();
   const [setName] = useClientSetNameMutation();
