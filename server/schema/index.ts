@@ -42,6 +42,7 @@ import {PhrasesResolver} from "./phrases";
 import {UniversePluginStarbasesResolver} from "./plugins/universe/starbases";
 import {EffectResolver} from "./effects";
 import {AlertLevelResolver} from "./components/alertLevel";
+import {ThemesResolver} from "./plugins/themes";
 
 type ResolverT =
   | readonly [Function, ...Function[]]
@@ -88,4 +89,5 @@ export const resolvers: ResolverT = [
   PhrasesResolver,
   EffectResolver,
   AlertLevelResolver,
+  ThemesResolver,
 ];

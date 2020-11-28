@@ -2,17 +2,14 @@ import React from "react";
 import {useFrame, useThree} from "react-three-fiber";
 import {Line, useGLTFLoader, useTextureLoader} from "drei";
 import {
-  Plane,
   Color,
   FrontSide,
   Group,
   Mesh,
   MeshStandardMaterial,
   Object3D,
-  Raycaster,
   Sprite,
   Texture,
-  Vector2,
   Vector3,
 } from "three";
 import {useShipsStore} from "../../viewscreen/useSystemShips";
@@ -28,9 +25,7 @@ import {
 import {useTranslate2DTo3D} from "client/helpers/hooks/use2Dto3D";
 
 const ShipSprite = ({id, color = "white"}: {id: string; color?: string}) => {
-  const spriteMap = useTextureLoader(
-    "/public/assets/icons/Pyramid.svg"
-  ) as Texture;
+  const spriteMap = useTextureLoader("/assets/icons/Pyramid.svg") as Texture;
   const scale = 1 / 50;
   const ref = React.useRef<Sprite>();
   useFrame(() => {
@@ -58,7 +53,6 @@ const ShipEntity: React.FC<{
   entityId: string;
 }> = ({entityId}) => {
   const entity = useShipsStore.getState()[entityId];
-  if (!entity) return null;
   const modelAsset = entity.shipAssets?.model;
   const model = useGLTFLoader(modelAsset || whiteImage, false);
 

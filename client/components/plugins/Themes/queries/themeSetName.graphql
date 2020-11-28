@@ -1,0 +1,6 @@
+mutation ThemeSetName($pluginId: ID!, $themeId: ID!, $name: String!) {
+  themeSetName(themeId: $themeId, pluginId: $pluginId, name: $name) {
+    id
+    name
+  }
+}

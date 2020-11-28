@@ -20,13 +20,6 @@ if (process.env.THORIUM_PATH) {
   }
 }
 
-export let assetDir = path.resolve("./assets");
-
-/* istanbul ignore next */
-if (process.env.NODE_ENV === "production") {
-  assetDir = `${thoriumPath}/assets`;
-}
-
 export let appStoreDir = "./data/";
 
 /* istanbul ignore next */
@@ -35,7 +28,6 @@ if (process.env.NODE_ENV === "production") {
 }
 
 fs.mkdirSync(appStoreDir, {recursive: true});
-fs.mkdirSync(assetDir, {recursive: true});
 
 const appStoreName =
   process.env.NODE_ENV === "production"

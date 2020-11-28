@@ -21,9 +21,7 @@ import {useTextureLoader} from "drei";
 const distanceVector = new Vector3();
 
 const StarSprite = ({color1}: {color1?: number | Color}) => {
-  const spriteMap = useTextureLoader(
-    "/public/assets/icons/Star.svg"
-  ) as Texture;
+  const spriteMap = useTextureLoader("/assets/icons/Star.svg") as Texture;
 
   return (
     <sprite>
@@ -43,7 +41,7 @@ const Star: React.FC<{
   size?: number;
   position?: Vector3 | [number, number, number];
 }> = ({color1 = 0x224488, color2 = 0xf6fcff, size, ...props}) => {
-  const filePath = require("url:./textures/01_Texture.jpg");
+  const filePath = require("./textures/01_Texture.jpg");
   const texture = React.useMemo(() => {
     const loader = new TextureLoader();
     const texture = loader.load(filePath);

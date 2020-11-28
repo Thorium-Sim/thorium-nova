@@ -110,7 +110,7 @@ export function useClientId(): [string, (id: string) => void] {
     if (!storedClientId) {
       runGetClientId();
     }
-    () => {
+    return () => {
       unmounted.current = true;
     };
   }, [storedClientId]);
@@ -134,5 +134,5 @@ export function useClientRegistration() {
         disconnect();
       };
     }
-  }, [clientId]);
+  }, [clientId, connect, disconnect]);
 }

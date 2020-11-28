@@ -1,0 +1,3 @@
+mutation ThemeRemove($pluginId: ID!, $themeId: ID!) {
+  themeRemove(id: $themeId, pluginId: $pluginId)
+}

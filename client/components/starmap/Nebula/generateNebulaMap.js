@@ -3,7 +3,7 @@ import * as glm from "gl-matrix";
 import rng from "rng";
 import * as webgl from "./webgl";
 
-const imageUrl = require("url:./stars.jpg");
+const imageUrl = require("./stars.jpg");
 let img;
 
 function $RefreshSig$() {}

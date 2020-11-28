@@ -26,36 +26,36 @@ function makeDiscGeometry(t: any, n: any, i: any, r: any = 128) {
       r > m;
       m++
     ) {
-      var v = 3 * (d + m),
-        g = (2 * Math.PI * m) / r;
-      (l[v] = f * Math.cos(g)),
-        (l[v + 1] = 0),
-        (l[v + 2] = f * Math.sin(g)),
-        (c[v] = p.r),
-        (c[v + 1] = p.g),
-        (c[v + 2] = p.b);
+      var v = 3 * (d + m);
+      const g = (2 * Math.PI * m) / r;
+      l[v] = f * Math.cos(g);
+      l[v + 1] = 0;
+      l[v + 2] = f * Math.sin(g);
+      c[v] = p.r;
+      c[v + 1] = p.g;
+      c[v + 2] = p.b;
     }
-  for (var h = 0; h < n.length - 1; h++) {
-    var d = h * r,
+  for (let h = 0; h < n.length - 1; h++) {
+    let d = h * r,
       y = d + r - 1,
       b = d,
       x = 6 * d;
-    (u[x] = y),
-      (u[x + 1] = y + r),
-      (u[x + 2] = b + r),
-      (u[x + 3] = y),
-      (u[x + 4] = b + r),
-      (u[x + 5] = b);
-    for (var m = 1; r > m; m++) {
-      var y = d + m - 1,
-        b = y + 1,
-        x = 6 * (d + m);
-      (u[x] = y),
-        (u[x + 1] = y + r),
-        (u[x + 2] = b + r),
-        (u[x + 3] = y),
-        (u[x + 4] = b + r),
-        (u[x + 5] = b);
+    u[x] = y;
+    u[x + 1] = y + r;
+    u[x + 2] = b + r;
+    u[x + 3] = y;
+    u[x + 4] = b + r;
+    u[x + 5] = b;
+    for (let m = 1; r > m; m++) {
+      let y = d + m - 1;
+      let b = y + 1;
+      let x = 6 * (d + m);
+      u[x] = y;
+      u[x + 1] = y + r;
+      u[x + 2] = b + r;
+      u[x + 3] = y;
+      u[x + 4] = b + r;
+      u[x + 5] = b;
     }
   }
   return (

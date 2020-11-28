@@ -1,4 +1,3 @@
-import {Box, Flex, Grid, Heading, IconButton} from "@chakra-ui/core";
 import SearchableList from "../../../components/ui/SearchableList";
 import React from "react";
 import {
@@ -19,7 +18,6 @@ import {
   usePhraseSetNameMutation,
   usePhraseSetUnitsMutation,
   usePhraseCategoryMutation,
-  usePhraseParseLazyQuery,
   PhraseParseDocument,
 } from "../../../generated/graphql";
 import {useAlert, useConfirm, usePrompt} from "../../../components/Dialog";
@@ -69,7 +67,7 @@ const PhrasesList: React.FC = () => {
               })
             ) {
               remove({variables: {pluginId, id: c.id}});
-              navigate(`/edit/${pluginId}/ships`);
+              navigate(`/edit/${pluginId}/phrases`);
             }
           }}
         >

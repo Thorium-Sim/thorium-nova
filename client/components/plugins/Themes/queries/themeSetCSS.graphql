@@ -1,0 +1,11 @@
+mutation ThemeSetCSS(
+  $pluginId: ID!
+  $themeId: ID!
+  $css: String!
+  $less: String!
+) {
+  themeSetCSS(pluginId: $pluginId, themeId: $themeId, css: $css, less: $less) {
+    id
+    rawLESS
+  }
+}

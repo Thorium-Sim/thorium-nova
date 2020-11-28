@@ -1,0 +1,6 @@
+mutation ThemeCreate($pluginId: ID!, $name: String!) {
+  themeCreate(pluginId: $pluginId, name: $name) {
+    id
+    name
+  }
+}

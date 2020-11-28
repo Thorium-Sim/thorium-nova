@@ -78,8 +78,8 @@ const StationLayout = () => {
   const {data: alertLevelData} = useShipAlertLevelSubscription();
   const alertLevel =
     alertLevelData?.shipAlertLevel?.alertLevel.alertLevel || "5";
-  const cardIcon = `/public/assets/cardIcons/${card.name}.svg`;
-  const stationLogo = `/public/assets/stationLogos/${station.name}.svg`;
+  const cardIcon = `/assets/cardIcons/${card.name}.svg`;
+  const stationLogo = `/assets/stationLogos/${station.name}.svg`;
   return (
     <div
       className={`client-layout alertLevel-${alertLevel}`}

@@ -20,6 +20,7 @@ import {FileUpload, GraphQLUpload} from "graphql-upload";
 import uploadAsset from "server/helpers/uploadAsset";
 import {Phrase} from "../phrases";
 import {StationComplementComponent} from "server/components/stationComplement";
+import {Theme} from "./themes";
 
 export function getPlugin(id: string) {
   const plugin = App.plugins.find(u => u.id === id);
@@ -74,6 +75,7 @@ export default class BasePlugin {
     "stationComplements",
     "universe",
     "phrases",
+    "themes",
     "factions",
     "excludeFields",
   ];
@@ -95,6 +97,9 @@ export default class BasePlugin {
 
   @Field(type => [Phrase])
   phrases: Writable<Phrase[]>;
+
+  @Field(type => [Theme])
+  themes: Writable<Theme[]>;
 
   constructor(params: Partial<BasePlugin> = {}) {
     this.id = params.id || uuid();
@@ -133,6 +138,11 @@ export default class BasePlugin {
     this.phrases = getStore<Phrase[]>({
       class: Phrase,
       path: `${appStoreDir}plugins/${this.name}/phrases.json`,
+      initialData: [],
+    });
+    this.themes = getStore<Theme[]>({
+      class: Theme,
+      path: `${appStoreDir}plugins/${this.name}/themes.json`,
       initialData: [],
     });
   }

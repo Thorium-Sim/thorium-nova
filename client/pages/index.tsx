@@ -17,6 +17,7 @@ import {css} from "@emotion/core";
 import QuickStartConfig from "client/components/flightConfig/quickStart";
 import NoMatch from "./NotFound";
 import {ClientButton} from "client/components/clientLobby/ClientButton";
+import Logo from "../images/logo.svg";
 
 const Welcome = () => {
   const {t} = useTranslation("welcome");
@@ -49,7 +50,7 @@ const Welcome = () => {
               <div className="flex items-end self-start">
                 <img
                   draggable={false}
-                  src={require("url:../images/logo.svg")}
+                  src={Logo}
                   alt="Thorium Logo"
                   css={css`
                     max-height: 8rem;

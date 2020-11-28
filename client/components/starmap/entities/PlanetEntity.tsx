@@ -42,7 +42,7 @@ const Sphere: React.FC<{texture: string}> = React.memo(
 );
 
 const PlanetSprite = ({color = "white"}) => {
-  const spriteMap = useTextureLoader("/public/assets/icons/Dot.svg") as Texture;
+  const spriteMap = useTextureLoader("/assets/icons/Dot.svg") as Texture;
   return (
     <sprite>
       <spriteMaterial

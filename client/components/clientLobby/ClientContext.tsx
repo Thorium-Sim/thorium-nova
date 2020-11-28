@@ -55,7 +55,7 @@ export const SampleClientContextProvider: FC = ({children}) => {
     id: "Test Ship",
     identity: {name: "USS Testing"},
     shipAssets: {
-      logo: "/public/logo.svg",
+      logo: "/logo.svg",
       model: "",
       side: "",
       top: "",

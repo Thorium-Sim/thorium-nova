@@ -26,7 +26,7 @@ const Layout: React.FC = ({children}) => {
               rgba(0, 0, 0, 0) 60%,
               rgba(0, 0, 0, 1) 100%
             ),
-            url(${require("url:./background.jpg")});
+            url(${require("./background.jpg").default});
         `}
       ></div>
       <div className="z-1 absolute top-0 w-full h-full">

@@ -254,7 +254,7 @@ export type ClientStationSubscription = {
       id: string;
       name: string;
       layout: string;
-      logo: string;
+      logo: Maybe<string>;
       cards: Array<{
         __typename?: "Card";
         id: string;
@@ -1121,6 +1121,64 @@ export type PluginShipsSubscription = {
     id: string;
     identity: {__typename?: "IdentityComponent"; name: string};
     isShip: Maybe<{__typename?: "IsShipComponent"; category: string}>;
+  }>;
+};
+
+export type ThemeCreateMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  name: Scalars["String"];
+}>;
+
+export type ThemeCreateMutation = {
+  __typename?: "Mutation";
+  themeCreate: {__typename?: "Theme"; id: string; name: string};
+};
+
+export type ThemeRemoveMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  themeId: Scalars["ID"];
+}>;
+
+export type ThemeRemoveMutation = {
+  __typename?: "Mutation";
+  themeRemove: string;
+};
+
+export type ThemeSetCssMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  themeId: Scalars["ID"];
+  css: Scalars["String"];
+  less: Scalars["String"];
+}>;
+
+export type ThemeSetCssMutation = {
+  __typename?: "Mutation";
+  themeSetCSS: {__typename?: "Theme"; id: string; rawLESS: string};
+};
+
+export type ThemeSetNameMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  themeId: Scalars["ID"];
+  name: Scalars["String"];
+}>;
+
+export type ThemeSetNameMutation = {
+  __typename?: "Mutation";
+  themeSetName: {__typename?: "Theme"; id: string; name: string};
+};
+
+export type ThemesSubscriptionVariables = Exact<{
+  pluginId: Scalars["ID"];
+}>;
+
+export type ThemesSubscription = {
+  __typename?: "Subscription";
+  themes: Array<{
+    __typename?: "Theme";
+    id: string;
+    name: string;
+    rawLESS: string;
+    uploadedImages: Array<string>;
   }>;
 };
 
@@ -4057,6 +4115,125 @@ export function usePluginShipsSubscription(
 }
 export type PluginShipsSubscriptionHookResult = ReturnType<
   typeof usePluginShipsSubscription
+>;
+export const ThemeCreateDocument = gql`
+  mutation ThemeCreate($pluginId: ID!, $name: String!) {
+    themeCreate(pluginId: $pluginId, name: $name) {
+      id
+      name
+    }
+  }
+`;
+export function useThemeCreateMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ThemeCreateMutation,
+    ThemeCreateMutationVariables
+  >
+) {
+  return Apollo.useMutation<ThemeCreateMutation, ThemeCreateMutationVariables>(
+    ThemeCreateDocument,
+    baseOptions
+  );
+}
+export type ThemeCreateMutationHookResult = ReturnType<
+  typeof useThemeCreateMutation
+>;
+export const ThemeRemoveDocument = gql`
+  mutation ThemeRemove($pluginId: ID!, $themeId: ID!) {
+    themeRemove(id: $themeId, pluginId: $pluginId)
+  }
+`;
+export function useThemeRemoveMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ThemeRemoveMutation,
+    ThemeRemoveMutationVariables
+  >
+) {
+  return Apollo.useMutation<ThemeRemoveMutation, ThemeRemoveMutationVariables>(
+    ThemeRemoveDocument,
+    baseOptions
+  );
+}
+export type ThemeRemoveMutationHookResult = ReturnType<
+  typeof useThemeRemoveMutation
+>;
+export const ThemeSetCssDocument = gql`
+  mutation ThemeSetCSS(
+    $pluginId: ID!
+    $themeId: ID!
+    $css: String!
+    $less: String!
+  ) {
+    themeSetCSS(
+      pluginId: $pluginId
+      themeId: $themeId
+      css: $css
+      less: $less
+    ) {
+      id
+      rawLESS
+    }
+  }
+`;
+export function useThemeSetCssMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ThemeSetCssMutation,
+    ThemeSetCssMutationVariables
+  >
+) {
+  return Apollo.useMutation<ThemeSetCssMutation, ThemeSetCssMutationVariables>(
+    ThemeSetCssDocument,
+    baseOptions
+  );
+}
+export type ThemeSetCssMutationHookResult = ReturnType<
+  typeof useThemeSetCssMutation
+>;
+export const ThemeSetNameDocument = gql`
+  mutation ThemeSetName($pluginId: ID!, $themeId: ID!, $name: String!) {
+    themeSetName(themeId: $themeId, pluginId: $pluginId, name: $name) {
+      id
+      name
+    }
+  }
+`;
+export function useThemeSetNameMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ThemeSetNameMutation,
+    ThemeSetNameMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ThemeSetNameMutation,
+    ThemeSetNameMutationVariables
+  >(ThemeSetNameDocument, baseOptions);
+}
+export type ThemeSetNameMutationHookResult = ReturnType<
+  typeof useThemeSetNameMutation
+>;
+export const ThemesDocument = gql`
+  subscription Themes($pluginId: ID!) {
+    themes(pluginId: $pluginId) {
+      id
+      name
+      rawLESS
+      uploadedImages
+    }
+  }
+`;
+export function useThemesSubscription(
+  baseOptions: Apollo.SubscriptionHookOptions<
+    ThemesSubscription,
+    ThemesSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    ThemesSubscription,
+    ThemesSubscriptionVariables
+  >(ThemesDocument, baseOptions);
+}
+export type ThemesSubscriptionHookResult = ReturnType<
+  typeof useThemesSubscription
 >;
 export const PluginCreateDocument = gql`
   mutation PluginCreate($name: String!) {
