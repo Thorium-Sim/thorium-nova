@@ -98,19 +98,27 @@ function getClientList() {
 }
 
 export function useClientId(): [string, (id: string) => void] {
-  const [clientId, setClientIdFunc] = React.useState("");
+  const [storedClientId, setClientIdFunc] = React.useState(clientId || "");
+  const unmounted = React.useRef(false);
   async function runGetClientId() {
     const clientId = await getClientId();
-    setClientIdFunc(clientId);
+    if (!unmounted.current) {
+      setClientIdFunc(clientId);
+    }
   }
   React.useEffect(() => {
-    runGetClientId();
-  }, []);
+    if (!storedClientId) {
+      runGetClientId();
+    }
+    () => {
+      unmounted.current = true;
+    };
+  }, [storedClientId]);
   function doSetClientId(id: string) {
     setClientIdFunc(id);
     setClientId(id);
   }
-  return [clientId, doSetClientId];
+  return [storedClientId, doSetClientId];
 }
 
 export function useClientRegistration() {

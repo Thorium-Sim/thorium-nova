@@ -1,5 +1,4 @@
-import {Box, PseudoBox} from "@chakra-ui/core";
-import {css, Global} from "@emotion/core";
+import {css} from "@emotion/core";
 import React from "react";
 import {ErrorBoundary, FallbackProps} from "react-error-boundary";
 
@@ -16,26 +15,28 @@ const Layout: React.FC = ({children}) => {
   const onReset = React.useCallback(() => {}, []);
 
   return (
-    <PseudoBox position="relative" height="100%" className="layout">
-      <Box
-        zIndex={0}
-        position="absolute"
-        top="0"
-        backgroundPosition="center"
-        backgroundSize="cover"
-        backgroundImage={`linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 40%,rgba(0,0,0,0) 60%, rgba(0,0,0,1) 100%), url(${require("url:./background.jpg")})`}
-        opacity={0.7}
-        width="100%"
-        height="100%"
-      ></Box>
-      <Box zIndex={1} position="absolute" top="0" height="100%" width="100%">
+    <div className="layout relative h-full">
+      <div
+        className="z-0 absolute top-0 bg-center bg-cover opacity-70 w-full h-full"
+        css={css`
+          background-image: linear-gradient(
+              135deg,
+              rgba(0, 0, 0, 1) 0%,
+              rgba(0, 0, 0, 0) 40%,
+              rgba(0, 0, 0, 0) 60%,
+              rgba(0, 0, 0, 1) 100%
+            ),
+            url(${require("url:./background.jpg")});
+        `}
+      ></div>
+      <div className="z-1 absolute top-0 w-full h-full">
         <React.Suspense fallback={null}>
           <ErrorBoundary FallbackComponent={Fallback} onReset={onReset}>
             {children}
           </ErrorBoundary>
         </React.Suspense>
-      </Box>
-    </PseudoBox>
+      </div>
+    </div>
   );
 };
 

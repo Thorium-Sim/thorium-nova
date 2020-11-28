@@ -18,5 +18,4 @@ async function copyDir(src, dest) {
   }
 }
 
-copyDir("./public", `./build/public`);
 copyDir("./public", `./dist/public`);

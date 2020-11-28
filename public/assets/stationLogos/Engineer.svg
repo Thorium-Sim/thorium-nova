@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg
+  width="100%"
+  height="100%"
+  viewBox="0 0 513 512"
+  version="1.1"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xml:space="preserve"
+  xmlns:serif="http://www.serif.com/"
+  style="
+    fill-rule: evenodd;
+    clip-rule: evenodd;
+    stroke-linejoin: round;
+    stroke-miterlimit: 2;
+  "
+>
+  <g transform="matrix(1,0,0,1,-1122,0)">
+    <g id="Engineering" transform="matrix(13.4737,0,0,16,610.37,-960)">
+      <g transform="matrix(0.0455536,0,0,0.038361,-4.95296,66.1796)">
+        <path
+          style="fill: currentColor"
+          d="M1616,429.115L1574.78,479.733L1388.33,156.792L1298.42,311.959L1220.81,356.766L1397.35,50.41L1616,429.115ZM1127.23,479.733L1104,418.729L1476.9,418.729L1387.48,263.278L1387.48,173.665L1564.52,479.733L1127.23,479.733ZM1322.65,32.267L1387.09,42.653L1200.64,365.594L1379.98,365.878L1457.58,410.685L1104,410.973L1322.65,32.267Z"
+        />
+      </g>
+    </g>
+  </g>
+</svg>

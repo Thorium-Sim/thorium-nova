@@ -15,7 +15,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react",
+    // TODO: Set up a separate TSConfig that uses the production JSX
+    "jsx": "react-jsxdev",
     "baseUrl": ".",
     "paths": {
       "*": ["test/*"],

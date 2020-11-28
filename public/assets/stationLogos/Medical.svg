@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg
+  width="100%"
+  height="100%"
+  viewBox="0 0 513 512"
+  version="1.1"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xml:space="preserve"
+  xmlns:serif="http://www.serif.com/"
+  style="
+    fill-rule: evenodd;
+    clip-rule: evenodd;
+    stroke-linejoin: round;
+    stroke-miterlimit: 2;
+  "
+>
+  <g transform="matrix(1,0,0,1,-1684,0)">
+    <g id="Medical" transform="matrix(13.4737,0,0,16,1172.37,-960)">
+      <g
+        transform="matrix(0.0403041,0.0339403,-0.0403041,0.0339403,-11.1139,1.26353)"
+      >
+        <path
+          style="fill: currentColor"
+          d="M2031.33,85.333L2116.67,170.667L2031.33,256L2116.67,341.333L2031.33,426.667L1946,341.333L1860.67,426.667L1775.33,341.333L1860.67,256L1775.33,170.667L1860.67,85.333L1946,170.667L2031.33,85.333Z"
+        />
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,7 +1,7 @@
 import React from "react";
 import sleep from "../helpers/sleep";
 import {useTranslation} from "react-i18next";
-import {FaStar, FaTools, FaRocket} from "react-icons/fa";
+import {FaStar, FaTools, FaRocket, FaPaintBrush} from "react-icons/fa";
 import {useNavigate, useParams} from "react-router";
 import {NavLink} from "react-router-dom";
 import ConfigLayout from "../components/ui/ConfigLayout";
@@ -37,6 +37,10 @@ const Config = () => {
         <ConfigIcon to={`/edit/${pluginId}/phrases`}>
           <MdMessage className="text-6xl mb-4" />
           <p className="font-bold text-2xl">{t("Phrases")}</p>
+        </ConfigIcon>
+        <ConfigIcon to={`/edit/${pluginId}/themes`}>
+          <FaPaintBrush className="text-6xl mb-4" />
+          <p className="font-bold text-2xl">{t("Themes")}</p>
         </ConfigIcon>
       </div>
     </ConfigLayout>

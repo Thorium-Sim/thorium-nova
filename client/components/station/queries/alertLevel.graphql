@@ -1,0 +1,8 @@
+subscription ShipAlertLevel {
+  shipAlertLevel {
+    id
+    alertLevel {
+      alertLevel
+    }
+  }
+}

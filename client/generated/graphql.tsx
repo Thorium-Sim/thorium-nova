@@ -76,6 +76,32 @@ export type PositionInput = {
   z: Maybe<Scalars["Float"]>;
 };
 
+export type EffectConfigInput = {
+  message: Maybe<Scalars["String"]>;
+  voice: Maybe<Scalars["String"]>;
+  duration: Maybe<Scalars["Float"]>;
+};
+
+export enum EffectOptions {
+  Flash = "flash",
+  Spark = "spark",
+  Reload = "reload",
+  Speak = "speak",
+  Message = "message",
+  Sound = "sound",
+  Blackout = "blackout",
+  Online = "online",
+  Offline = "offline",
+  Power = "power",
+  Lockdown = "lockdown",
+  Maintenance = "maintenance",
+  Shutdown = "shutdown",
+  Restart = "restart",
+  Sleep = "sleep",
+  Quit = "quit",
+  Beep = "beep",
+}
+
 /** An enum describing what kind of type a given `__Type` is. */
 export enum __TypeKind {
   /** Indicates this type is a scalar. */
@@ -198,6 +224,46 @@ export type ClientQueryVariables = Exact<{[key: string]: never}>;
 export type ClientQuery = {
   __typename?: "Query";
   client: {__typename?: "Client"; id: string; name: string};
+};
+
+export type ClientStationSubscriptionVariables = Exact<{[key: string]: never}>;
+
+export type ClientStationSubscription = {
+  __typename?: "Subscription";
+  client: {
+    __typename?: "Client";
+    id: string;
+    loginName: Maybe<string>;
+    offlineState: Maybe<string>;
+    training: boolean;
+    ship: Maybe<{
+      __typename?: "Entity";
+      id: string;
+      identity: {__typename?: "IdentityComponent"; name: string};
+      shipAssets: Maybe<{
+        __typename?: "ShipAssetsComponent";
+        model: string;
+        side: string;
+        top: string;
+        vanity: string;
+        logo: string;
+      }>;
+    }>;
+    station: Maybe<{
+      __typename?: "Station";
+      id: string;
+      name: string;
+      layout: string;
+      logo: string;
+      cards: Array<{
+        __typename?: "Card";
+        id: string;
+        name: string;
+        component: string;
+        icon: Maybe<string>;
+      }>;
+    }>;
+  };
 };
 
 export type ClientSetNameMutationVariables = Exact<{
@@ -849,7 +915,7 @@ export type AllPluginOutfitsQueryVariables = Exact<{[key: string]: never}>;
 export type AllPluginOutfitsQuery = {
   __typename?: "Query";
   allPluginOutfits: Array<{
-    __typename?: "PluginEntity";
+    __typename?: "Entity";
     id: string;
     pluginId: string;
     pluginName: string;
@@ -1828,6 +1894,33 @@ export type TemplateSystemSubscription = {
   };
 };
 
+export type ShipAlertLevelSubscriptionVariables = Exact<{[key: string]: never}>;
+
+export type ShipAlertLevelSubscription = {
+  __typename?: "Subscription";
+  shipAlertLevel: Maybe<{
+    __typename?: "Entity";
+    id: string;
+    alertLevel: {__typename?: "AlertLevelComponent"; alertLevel: string};
+  }>;
+};
+
+export type EffectsSubscriptionVariables = Exact<{[key: string]: never}>;
+
+export type EffectsSubscription = {
+  __typename?: "Subscription";
+  effect: {
+    __typename?: "Effect";
+    effect: string;
+    config: Maybe<{
+      __typename?: "EffectConfig";
+      message: Maybe<string>;
+      voice: Maybe<string>;
+      duration: Maybe<number>;
+    }>;
+  };
+};
+
 export type UniverseSystemShipsSubscriptionVariables = Exact<{
   systemId: Scalars["ID"];
 }>;
@@ -2194,6 +2287,55 @@ export function useClientLazyQuery(
 }
 export type ClientQueryHookResult = ReturnType<typeof useClientQuery>;
 export type ClientLazyQueryHookResult = ReturnType<typeof useClientLazyQuery>;
+export const ClientStationDocument = gql`
+  subscription ClientStation {
+    client {
+      id
+      loginName
+      offlineState
+      training
+      ship {
+        id
+        identity {
+          name
+        }
+        shipAssets {
+          model
+          side
+          top
+          vanity
+          logo
+        }
+      }
+      station {
+        id
+        name
+        layout
+        logo
+        cards {
+          id
+          name
+          component
+          icon
+        }
+      }
+    }
+  }
+`;
+export function useClientStationSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    ClientStationSubscription,
+    ClientStationSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    ClientStationSubscription,
+    ClientStationSubscriptionVariables
+  >(ClientStationDocument, baseOptions);
+}
+export type ClientStationSubscriptionHookResult = ReturnType<
+  typeof useClientStationSubscription
+>;
 export const ClientSetNameDocument = gql`
   mutation ClientSetName($id: ID, $name: String!) {
     clientSetName(id: $id, name: $name) {
@@ -5337,6 +5479,56 @@ export function useTemplateSystemSubscription(
 }
 export type TemplateSystemSubscriptionHookResult = ReturnType<
   typeof useTemplateSystemSubscription
+>;
+export const ShipAlertLevelDocument = gql`
+  subscription ShipAlertLevel {
+    shipAlertLevel {
+      id
+      alertLevel {
+        alertLevel
+      }
+    }
+  }
+`;
+export function useShipAlertLevelSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    ShipAlertLevelSubscription,
+    ShipAlertLevelSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    ShipAlertLevelSubscription,
+    ShipAlertLevelSubscriptionVariables
+  >(ShipAlertLevelDocument, baseOptions);
+}
+export type ShipAlertLevelSubscriptionHookResult = ReturnType<
+  typeof useShipAlertLevelSubscription
+>;
+export const EffectsDocument = gql`
+  subscription Effects {
+    effect {
+      effect
+      config {
+        message
+        voice
+        duration
+      }
+    }
+  }
+`;
+export function useEffectsSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    EffectsSubscription,
+    EffectsSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    EffectsSubscription,
+    EffectsSubscriptionVariables
+  >(EffectsDocument, baseOptions);
+}
+export type EffectsSubscriptionHookResult = ReturnType<
+  typeof useEffectsSubscription
 >;
 export const UniverseSystemShipsDocument = gql`
   subscription UniverseSystemShips($systemId: ID!) {

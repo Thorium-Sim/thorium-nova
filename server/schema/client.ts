@@ -247,18 +247,34 @@ export class ClientResolver {
     return client;
   }
   @Subscription(returns => Client, {
-    topics: ({args: {clientId}}) => {
+    topics: ({
+      args: {clientId},
+      context,
+    }: {
+      args: {clientId: string};
+      context: GraphQLContext;
+    }) => {
       const id = uuid();
       process.nextTick(() => {
         pubsub.publish(id, {
-          clientId,
-          client: App.storage.clients.find(c => c.id === clientId),
+          clientId: clientId || context.clientId,
+          client: App.storage.clients.find(
+            c => c.id === (clientId || context.clientId)
+          ),
         });
       });
       return [id, "client"];
     },
-    filter: ({payload, args: {clientId}}) => {
-      return payload.clientId === clientId;
+    filter: ({
+      payload,
+      args: {clientId},
+      context,
+    }: {
+      context: GraphQLContext;
+      payload: {clientId: string};
+      args: {clientId: string | null};
+    }) => {
+      return payload.clientId === (clientId || context.clientId);
     },
   })
   async client(

@@ -86,7 +86,7 @@ export class PluginOutfitResolver {
     return entity;
   }
 
-  @Mutation(type => Entity)
+  @Mutation(type => String)
   pluginOutfitRemove(
     @Arg("pluginId", type => ID) pluginId: string,
     @Arg("outfitId", type => ID)

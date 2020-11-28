@@ -1,0 +1,10 @@
+subscription Effects {
+  effect {
+    effect
+    config {
+      message
+      voice
+      duration
+    }
+  }
+}

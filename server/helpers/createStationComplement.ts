@@ -109,7 +109,7 @@ export function createStationComplement({
         ],
       }),
       new Station({
-        name: "Development",
+        name: "Command",
         cards: [
           new Card({
             name: "Pilot",

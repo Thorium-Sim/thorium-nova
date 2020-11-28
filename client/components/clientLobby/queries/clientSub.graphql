@@ -1,0 +1,34 @@
+subscription ClientStation {
+  client {
+    id
+    loginName
+    offlineState
+    training
+    ship {
+      id
+      identity {
+        name
+      }
+      shipAssets {
+        model
+        side
+        top
+        vanity
+        logo
+      }
+    }
+    station {
+      id
+      name
+      layout
+      logo
+      cards {
+        id
+        name
+        component
+
+        icon
+      }
+    }
+  }
+}

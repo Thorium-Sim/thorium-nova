@@ -137,7 +137,7 @@ const FlightLobby = () => {
           variantColor="success"
           disabled={!myClient?.stationId}
           as={NavLink}
-          to="/flight/station"
+          to="/client"
         >
           {t("Go to Station")}
         </Button>
