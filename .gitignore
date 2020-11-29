@@ -9,3 +9,4 @@ data
 .DS_Store
 build
 client/styles/output.css
+.eslintcache

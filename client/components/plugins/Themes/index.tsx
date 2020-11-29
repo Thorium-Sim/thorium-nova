@@ -10,7 +10,15 @@ import {
   useThemeSetNameMutation,
   useThemesSubscription,
 } from "client/generated/graphql";
-import {createContext, Fragment, useCallback, useEffect, useRef} from "react";
+import {
+  createContext,
+  Fragment,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {useTranslation} from "react-i18next";
 import {FaPen, FaTimes} from "react-icons/fa";
 import {
@@ -22,7 +30,10 @@ import {
   useParams,
 } from "react-router";
 import Menubar from "../Outfits/Menubar";
-import * as monaco from "monaco-editor";
+import less from "less";
+import MonacoEditor from "react-monaco-editor";
+import {SampleClientContextProvider} from "client/components/clientLobby/ClientContext";
+import StationViewer from "client/components/station";
 
 const ThemesContext = createContext<ThemesSubscription["themes"]>([]);
 const ThemeConfig = () => {
@@ -37,11 +48,10 @@ const ThemeConfig = () => {
   const [remove] = useThemeRemoveMutation();
   const [create] = useThemeCreateMutation();
   const [rename] = useThemeSetNameMutation();
-  const [setCss] = useThemeSetCssMutation();
   const confirm = useConfirm();
   const prompt = usePrompt();
   const alert = useAlert();
-  const setSelectedItem = useCallback(item => navigate(`${item}`), []);
+  const setSelectedItem = useCallback(item => navigate(`${item}`), [navigate]);
 
   const renderItem = useCallback(
     c => (
@@ -84,7 +94,7 @@ const ThemeConfig = () => {
         </Button>
       </div>
     ),
-    [pluginId]
+    [confirm, navigate, pluginId, prompt, remove, rename, t]
   );
 
   const themes = data?.themes;
@@ -136,54 +146,76 @@ const ThemeConfig = () => {
   );
 };
 
+const useCodeContents = () => {
+  const [codeContents, setCodeContents] = useState<string>("");
+  const [cssCode, setCssCode] = useState<string>("");
+
+  const themes = useContext(ThemesContext);
+  const {pluginId, themeId} = useParams();
+
+  const theme = themes.find(t => t.id === themeId);
+
+  const lessCode = theme?.rawLESS;
+  useEffect(() => {
+    setCodeContents(code => (code ? code : lessCode || ""));
+  }, [lessCode]);
+
+  useEffect(() => {
+    async function processLessCode() {
+      try {
+        const rendered = await less.render(`#theme-container {
+          ${codeContents}
+        }`);
+        setCssCode(rendered.css);
+      } catch {
+        // Do nothing.
+      }
+    }
+    processLessCode();
+  }, [codeContents]);
+  return [codeContents, setCodeContents, cssCode] as const;
+};
 const ThemeSettings = () => {
   const {pluginId, themeId} = useParams();
-  const editor = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (editor.current) {
-      monaco.editor.create(editor.current, {
-        minimap: {enabled: false},
-        selectOnLineNumbers: true,
-        language: "css",
-        theme: "vs-dark",
-        value: `.test {
-  background-color:red;
-}`,
-      });
-    }
-  }, []);
+  const [setCss] = useThemeSetCssMutation();
+  const [code, setCode, cssCode] = useCodeContents();
   return (
     <Fragment>
       <fieldset key={themeId} className="w-full">
         <div
-          className="border border-white w-full bg-black"
+          className="border border-white w-full bg-black overflow-hidden relative"
           css={css`
             width: 768px;
             height: 432px;
           `}
-        ></div>
-        <div
-          ref={editor}
-          css={css`
-            width: 768px;
-            height: 432px;
-          `}
-        />
-        {/* <Editor
+        >
+          <div
+            css={css`
+              width: 1920px;
+              height: 1080px;
+              left: 0;
+              top: 0;
+              transform: scale(0.4) translate(-75%, -75%);
+            `}
+            id="theme-container"
+          >
+            <style dangerouslySetInnerHTML={{__html: cssCode}}></style>
+            <SampleClientContextProvider>
+              <StationViewer />
+            </SampleClientContextProvider>
+          </div>
+        </div>
+        <MonacoEditor
           width="768"
           height="432"
           language="less"
           theme="vs-dark"
-          value={`.test {
-            background-color:red;
-        }`}
-          options={{
-            selectOnLineNumbers: true,
-            minimap: {
-              enabled: false,
-            },
+          defaultValue={code}
+          options={{minimap: {enabled: false}}}
+          onChange={newCode => {
+            setCode(newCode);
           }}
-        /> */}
+        />
       </fieldset>
     </Fragment>
   );

@@ -70,7 +70,9 @@ const SVGImageLoader: React.FC<{url: string; className: string}> = ({
       <div className={className} dangerouslySetInnerHTML={{__html: data}} />
     );
   }
-  return <img draggable="false" aria-hidden className={className} src={url} />;
+  return (
+    <img draggable="false" alt="" aria-hidden className={className} src={url} />
+  );
 };
 const StationLayout = () => {
   const {ship, client, station} = useClientData();
