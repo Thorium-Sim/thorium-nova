@@ -14,7 +14,6 @@ import {Tooltip} from "../ui/Tooltip";
 import {useTranslation} from "react-i18next";
 import Input from "../ui/Input";
 import Portal from "@reach/portal";
-import useMeasure from "client/helpers/hooks/useMeasure";
 import useOnClickOutside from "client/helpers/hooks/useClickOutside";
 import SearchableList from "../ui/SearchableList";
 import {useAvailableShipsQuery} from "client/generated/graphql";

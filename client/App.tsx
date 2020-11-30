@@ -5,7 +5,6 @@ import Layout from "./components/Layout";
 import {useClientRegistration} from "./helpers/getClientId";
 import NoMatch from "./pages/NotFound";
 import CustomFlight from "./components/flightConfig/customFlight";
-import {ErrorBoundary} from "react-error-boundary";
 
 const Welcome = React.lazy(() => import("./pages/index"));
 const Releases = React.lazy(() => import("./pages/Releases"));

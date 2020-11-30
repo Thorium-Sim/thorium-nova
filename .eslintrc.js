@@ -9,7 +9,6 @@ module.exports = {
     },
     {
       files: ["**/__tests__/**", "*.test.*"],
-      plugins: ["react-app/jest"],
       settings: {
         "import/resolver": {
           jest: {

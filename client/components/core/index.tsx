@@ -21,14 +21,14 @@ const CAMERA_Y = 30000000;
 const distanceVector = new Vector3();
 const StarmapCoreScene: React.FC = () => {
   const systemId = useConfigStore(store => store.systemId);
-  const setSystemId = useConfigStore(store => store.setSystemId);
+  // const setSystemId = useConfigStore(store => store.setSystemId);
   const {camera} = useThree();
   const controls = React.useRef<OrbitControls>();
   React.useEffect(() => {
     camera.position.set(0, CAMERA_Y, 0);
     controls.current?.saveState?.();
     configStoreApi.setState({systemId: "ew1d9kfkfhc49g2", viewingMode: "core"});
-  }, []);
+  }, [camera]);
   useFrame(({camera}) => {
     const distance = camera.position.distanceTo(
       distanceVector.set(camera.position.x, 0, camera.position.z)
@@ -70,7 +70,7 @@ const StarmapCoreScene: React.FC = () => {
         }
       },
     });
-  }, []);
+  }, [camera, to3D]);
 
   return (
     <>

@@ -1,5 +1,4 @@
 import {IsShipComponent} from "server/components/isShip";
-import {ImpulseEnginesComponent} from "server/components/outfits/impulseEngines";
 import {IsOutfitComponent} from "server/components/outfits/isOutfit";
 import {ThrustersComponent} from "server/components/outfits/thrusters";
 import {PositionComponent} from "server/components/position";

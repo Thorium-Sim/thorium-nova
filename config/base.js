@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-'use strict';
+
 
 // This file contains the minimum ESLint configuration required for Create
 // React App support, and is used as the `baseConfig` for `eslint-loader`
@@ -14,21 +14,20 @@
 module.exports = {
   root: true,
 
-  parser: 'babel-eslint',
+  parser: "babel-eslint",
 
-  plugins: ['react'],
+  plugins: ["react"],
 
   env: {
     browser: true,
     commonjs: true,
     es6: true,
-    jest: true,
     node: true,
   },
 
   parserOptions: {
     ecmaVersion: 2018,
-    sourceType: 'module',
+    sourceType: "module",
     ecmaFeatures: {
       jsx: true,
     },
@@ -36,12 +35,12 @@ module.exports = {
 
   settings: {
     react: {
-      version: 'detect',
+      version: "detect",
     },
   },
 
   rules: {
-    'react/jsx-uses-vars': 'warn',
-    'react/jsx-uses-react': 'warn',
+    "react/jsx-uses-vars": "warn",
+    "react/jsx-uses-react": "warn",
   },
 };

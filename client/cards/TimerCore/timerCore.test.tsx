@@ -1,8 +1,7 @@
-import {TimerCreateDocument, TimersDocument} from "../../generated/graphql";
+import {TimersDocument} from "../../generated/graphql";
 import React from "react";
-import {act, render} from "test-utils";
+import {render} from "test-utils";
 import Timer from ".";
-import userEvent from "@testing-library/user-event";
 
 describe("Timer Core", () => {
   it("should render existing timers", async () => {

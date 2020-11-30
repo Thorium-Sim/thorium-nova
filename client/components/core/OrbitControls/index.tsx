@@ -19,15 +19,17 @@ export type OrbitControls = Overwrite<
   {target?: Vector3}
 >;
 
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const OrbitControls = forwardRef(
   (props: OrbitControls = {enableDamping: true}, ref) => {
     const controls = useRef<OrbitControlsImpl>();
     const {camera, gl, invalidate} = useThree();
     useFrame(() => controls.current?.update());
     useEffect(() => {
-      controls.current?.addEventListener("change", invalidate);
-      return () => controls.current?.removeEventListener("change", invalidate);
-    }, [controls.current]);
+      const controlRef = controls.current;
+      controlRef?.addEventListener("change", invalidate);
+      return () => controlRef?.removeEventListener("change", invalidate);
+    }, [invalidate]);
 
     const systemId = useConfigStore(store => store.systemId);
     React.useEffect(() => {

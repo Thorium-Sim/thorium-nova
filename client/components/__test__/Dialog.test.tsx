@@ -85,7 +85,6 @@ describe("Dialog", () => {
     );
     const alertButton = await findByText("Prompt");
     userEvent.click(alertButton);
-    const promptHeader = await findByText("Prompt Header");
     expect(await findByText("Cancel")).toBeInTheDocument();
     const input = await findByLabelText("Response");
     userEvent.clear(input);

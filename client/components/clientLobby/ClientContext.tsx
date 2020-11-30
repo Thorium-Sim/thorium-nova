@@ -45,7 +45,13 @@ export const SampleClientContextProvider: FC = ({children}) => {
     cards: [
       {
         id: "Card 1",
-        name: "Test Card 1",
+        name: "Short",
+        component: "Login",
+        icon: null,
+      },
+      {
+        id: "Card 2",
+        name: "Exceptionally Long Card Name",
         component: "Login",
         icon: null,
       },

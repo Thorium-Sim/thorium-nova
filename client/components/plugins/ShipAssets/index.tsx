@@ -1,16 +1,8 @@
 import {
   Box,
-  Button,
   Grid,
   Heading,
   Image,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   useToast,
   Link as StyleLink,
 } from "@chakra-ui/core";

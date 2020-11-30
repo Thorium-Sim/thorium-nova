@@ -2,17 +2,7 @@
 // There are still tests in place, but this file won't count
 // towards coverage
 /* istanbul ignore file */
-import {css} from "@emotion/core";
-import {useDialog} from "@react-aria/dialog";
-import {FocusScope} from "@react-aria/focus";
-import {
-  OverlayContainer,
-  OverlayProps,
-  OverlayProvider,
-  useModal,
-  useOverlay,
-  usePreventScroll,
-} from "@react-aria/overlays";
+import {OverlayContainer, OverlayProvider} from "@react-aria/overlays";
 import {useDisclosure} from "client/helpers/hooks/useDisclosure";
 
 import React from "react";
@@ -39,7 +29,6 @@ const Dialog: React.FC = ({children}) => {
   );
   const [input, setInput] = React.useState("");
 
-  const btnRef = React.useRef<HTMLButtonElement>(null);
   const cancelRef = React.useRef<HTMLButtonElement>(null);
 
   const resolveRef = React.useRef<(tf: boolean | string) => void>();

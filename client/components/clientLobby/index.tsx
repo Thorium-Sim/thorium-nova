@@ -1,4 +1,3 @@
-import {Button} from "@chakra-ui/core";
 import {css} from "@emotion/core";
 import {
   useClientAssignShipMutation,
@@ -58,7 +57,6 @@ const StationList: React.FC<{
   clientData: ReturnType<typeof useClientsSubscription>["data"];
 }> = ({p, clientData}) => {
   const [assignShip] = useClientAssignShipMutation();
-  const {t} = useTranslation();
   const [clientId] = useClientId();
 
   return (

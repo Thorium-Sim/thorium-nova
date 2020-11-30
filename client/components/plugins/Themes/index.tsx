@@ -16,7 +16,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useRef,
   useState,
 } from "react";
 import {useTranslation} from "react-i18next";
@@ -34,6 +33,7 @@ import less from "less";
 import MonacoEditor from "react-monaco-editor";
 import {SampleClientContextProvider} from "client/components/clientLobby/ClientContext";
 import StationViewer from "client/components/station";
+import debounce from "lodash.debounce";
 
 const ThemesContext = createContext<ThemesSubscription["themes"]>([]);
 const ThemeConfig = () => {
@@ -147,38 +147,108 @@ const ThemeConfig = () => {
 };
 
 const useCodeContents = () => {
-  const [codeContents, setCodeContents] = useState<string>("");
+  const [codeContents, setCodeContents] = useState<string | null>(null);
   const [cssCode, setCssCode] = useState<string>("");
 
   const themes = useContext(ThemesContext);
   const {pluginId, themeId} = useParams();
-
+  const [setCss, {loading}] = useThemeSetCssMutation();
   const theme = themes.find(t => t.id === themeId);
-
   const lessCode = theme?.rawLESS;
+
   useEffect(() => {
+    async function setCss() {
+      const rendered = await less.render(`#theme-container {
+        ${lessCode}
+      }`);
+      setCssCode(cssCode => (cssCode ? cssCode : rendered.css));
+    }
+    setCss();
     setCodeContents(code => (code ? code : lessCode || ""));
   }, [lessCode]);
 
-  useEffect(() => {
-    async function processLessCode() {
-      try {
-        const rendered = await less.render(`#theme-container {
-          ${codeContents}
-        }`);
-        setCssCode(rendered.css);
-      } catch {
-        // Do nothing.
-      }
+  const saveCss = debounce(async function saveCss(codeContents: string) {
+    try {
+      const rendered = await less.render(`#theme-container {
+        ${codeContents}
+      }`);
+      setCssCode(rendered.css);
+      setCss({
+        variables: {
+          pluginId,
+          themeId,
+          less: codeContents,
+          css: rendered.css,
+        },
+      });
+    } catch {
+      // Do nothing.
     }
-    processLessCode();
-  }, [codeContents]);
-  return [codeContents, setCodeContents, cssCode] as const;
+  }, 500);
+
+  return [codeContents, saveCss, cssCode, loading] as const;
 };
+
+const defaultStyles = `
+.card-frame {
+    
+}
+.card-frame-ship-name {
+    
+}
+.card-frame-ship-logo {
+    
+}
+.card-frame-ship-logo-image {
+    
+}
+.card-frame-station-name {
+    
+}
+.card-frame-station-logo {
+    
+}
+.card-frame-station-logo-image {
+    
+}
+.card-frame-card-name {
+    
+}
+.card-frame-card-icon {
+    
+}
+.card-frame-card-icon-image {
+    
+}
+.card-frame-login-name {
+    
+}
+.card-frame-login-profile {
+    
+}
+.card-area {
+    
+}
+.card-switcher-holder {
+    
+}
+.card-switcher {
+    
+}
+.card-switcher-button {
+    
+}
+.card-switcher-button-icon {
+    
+}
+.card-switcher-button-name {
+    
+}`;
+
 const ThemeSettings = () => {
-  const {pluginId, themeId} = useParams();
-  const [setCss] = useThemeSetCssMutation();
-  const [code, setCode, cssCode] = useCodeContents();
+  const {themeId} = useParams();
+  const [code, setCode, cssCode, loading] = useCodeContents();
+  if (!code && code !== "") return null;
   return (
     <Fragment>
       <fieldset key={themeId} className="w-full">
@@ -197,7 +267,6 @@ const ThemeSettings = () => {
               top: 0;
               transform: scale(0.4) translate(-75%, -75%);
             `}
-            id="theme-container"
           >
             <style dangerouslySetInnerHTML={{__html: cssCode}}></style>
             <SampleClientContextProvider>
@@ -216,6 +285,7 @@ const ThemeSettings = () => {
             setCode(newCode);
           }}
         />
+        {loading ? "Saving..." : ""}
       </fieldset>
     </Fragment>
   );
@@ -224,7 +294,7 @@ const ThemeRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<ThemeConfig />}>
-        <Route path=":phraseId/*" element={<ThemeSettings />} />
+        <Route path=":themeId/*" element={<ThemeSettings />} />
       </Route>
     </Routes>
   );

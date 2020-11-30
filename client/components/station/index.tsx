@@ -6,6 +6,7 @@ import {CardSwitcher} from "./CardSwitcher";
 import {Effects} from "./Effects";
 import {CardArea} from "./CardArea";
 import {css} from "@emotion/core";
+import {SVGImageLoader} from "./SvgImageLoader";
 const StationViewer: FC = () => {
   const {client, station} = useClientData();
   // TODO: Include sound player here
@@ -46,45 +47,18 @@ function useManageCard() {
   return [card, changeCard] as const;
 }
 
-const SVGImageLoader: React.FC<{url: string; className: string}> = ({
-  url,
-  className,
-}) => {
-  const [data, setData] = useState<string | null>(null);
-  useEffect(() => {
-    async function loadSvg() {
-      const res = await fetch(url);
-      if (!res.ok) return;
-      const data = await res.text();
-      if (data.includes("<svg")) {
-        setData(data);
-      }
-    }
-    if (url.endsWith(".svg")) {
-      loadSvg();
-    }
-  }, [url]);
-  if (!data && url.endsWith(".svg")) return null;
-  if (data) {
-    return (
-      <div className={className} dangerouslySetInnerHTML={{__html: data}} />
-    );
-  }
-  return (
-    <img draggable="false" alt="" aria-hidden className={className} src={url} />
-  );
-};
 const StationLayout = () => {
   const {ship, client, station} = useClientData();
   const [card, changeCard] = useManageCard();
   const {data: alertLevelData} = useShipAlertLevelSubscription();
   const alertLevel =
     alertLevelData?.shipAlertLevel?.alertLevel.alertLevel || "5";
-  const cardIcon = `/assets/cardIcons/${card.name}.svg`;
+  const cardIcon = `/assets/cardIcons/${card.component}.svg`;
   const stationLogo = `/assets/stationLogos/${station.name}.svg`;
   return (
     <div
-      className={`client-layout alertLevel-${alertLevel}`}
+      id="theme-container"
+      className={`alertLevel-${alertLevel} h-full`}
       css={css`
         --ship-name-width: ${ship.identity.name.length}ch;
         --station-name-width: ${station.name.length}ch;
@@ -127,6 +101,16 @@ const StationLayout = () => {
             src={card.icon || cardIcon}
           /> */}
         </div>
+        <div className="doodad-1 absolute"></div>
+        <div className="doodad-2 absolute"></div>
+        <div className="doodad-3 absolute"></div>
+        <div className="doodad-4 absolute"></div>
+        <div className="doodad-5 absolute"></div>
+        <div className="doodad-6 absolute"></div>
+        <div className="doodad-7 absolute"></div>
+        <div className="doodad-8 absolute"></div>
+        <div className="doodad-9 absolute"></div>
+        <div className="doodad-10 absolute"></div>
         <div className="card-area relative">
           <CardArea card={card} />
         </div>

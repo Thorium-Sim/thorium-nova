@@ -1,4 +1,5 @@
 build
+**/OrbitControlsImpl.js
 client/components/starmap/Nebula/generateNebulaMap.js
 client/components/starmap/Nebula/webgl.js
 scripts/copy-static.js
