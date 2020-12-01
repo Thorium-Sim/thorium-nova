@@ -1,0 +1,6 @@
+mutation ThemeAssetRemove($pluginId: ID!, $themeId: ID!, $image: String!) {
+  themeRemoveImage(pluginId: $pluginId, themeId: $themeId, image: $image) {
+    id
+    uploadedImages
+  }
+}

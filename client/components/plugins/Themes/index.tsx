@@ -8,18 +8,23 @@ import {
   useThemeRemoveMutation,
   useThemeSetCssMutation,
   useThemeSetNameMutation,
+  useThemeAssetRemoveMutation,
+  useThemeAssetUploadMutation,
   useThemesSubscription,
 } from "client/generated/graphql";
 import {
   createContext,
+  Dispatch,
+  FC,
   Fragment,
+  SetStateAction,
   useCallback,
   useContext,
   useEffect,
   useState,
 } from "react";
 import {useTranslation} from "react-i18next";
-import {FaPen, FaTimes} from "react-icons/fa";
+import {FaBan, FaPen, FaTimes} from "react-icons/fa";
 import {
   Outlet,
   Route,
@@ -34,6 +39,11 @@ import MonacoEditor from "react-monaco-editor";
 import {SampleClientContextProvider} from "client/components/clientLobby/ClientContext";
 import StationViewer from "client/components/station";
 import debounce from "lodash.debounce";
+import ListGroupItem from "client/components/ui/ListGroupItem";
+import InfoTip from "client/components/ui/infoTip";
+import {useClipboard} from "@chakra-ui/core";
+import Input from "client/components/ui/Input";
+import useLocalStorage from "client/helpers/hooks/useLocalStorage";
 
 const ThemesContext = createContext<ThemesSubscription["themes"]>([]);
 const ThemeConfig = () => {
@@ -132,14 +142,7 @@ const ThemeConfig = () => {
           </Button>
         </div>
         <ThemesContext.Provider value={themes}>
-          <div
-            className="flex"
-            css={css`
-              flex: 2;
-            `}
-          >
-            <Outlet />
-          </div>
+          <Outlet />
         </ThemesContext.Provider>
       </div>
     </div>
@@ -248,46 +251,207 @@ const defaultStyles = `
 const ThemeSettings = () => {
   const {themeId} = useParams();
   const [code, setCode, cssCode, loading] = useCodeContents();
+  const [shipName, setShipName] = useLocalStorage(
+    "theme-ship-name",
+    "USS Testing"
+  );
+  const [stationName, setStationName] = useLocalStorage(
+    "theme-station-name",
+    "Command"
+  );
   if (!code && code !== "") return null;
   return (
     <Fragment>
-      <fieldset key={themeId} className="w-full">
-        <div
-          className="border border-white w-full bg-black overflow-hidden relative"
-          css={css`
-            width: 768px;
-            height: 432px;
-          `}
-        >
+      <div
+        className="flex gap-4"
+        css={css`
+          flex: 2;
+        `}
+      >
+        <fieldset key={themeId}>
           <div
+            className="border border-white w-full bg-black overflow-hidden relative"
             css={css`
-              width: 1920px;
-              height: 1080px;
-              left: 0;
-              top: 0;
-              transform: scale(0.4) translate(-75%, -75%);
+              width: 768px;
+              height: 432px;
             `}
           >
-            <style dangerouslySetInnerHTML={{__html: cssCode}}></style>
-            <SampleClientContextProvider>
-              <StationViewer />
-            </SampleClientContextProvider>
+            <div
+              css={css`
+                width: 1920px;
+                height: 1080px;
+                left: 0;
+                top: 0;
+                transform: scale(0.4) translate(-75%, -75%);
+              `}
+            >
+              <style dangerouslySetInnerHTML={{__html: cssCode}}></style>
+              <SampleClientContextProvider
+                shipName={shipName}
+                stationName={stationName}
+              >
+                <StationViewer />
+              </SampleClientContextProvider>
+            </div>
           </div>
-        </div>
-        <MonacoEditor
-          width="768"
-          height="432"
-          language="less"
-          theme="vs-dark"
-          defaultValue={code}
-          options={{minimap: {enabled: false}}}
-          onChange={newCode => {
-            setCode(newCode);
-          }}
+          <MonacoEditor
+            width="768"
+            height="432"
+            language="less"
+            theme="vs-dark"
+            defaultValue={code}
+            options={{minimap: {enabled: false}}}
+            onChange={newCode => {
+              setCode(newCode);
+            }}
+          />
+          {loading ? "Saving..." : ""}
+        </fieldset>
+        <ThemeAssetUpload
+          shipName={shipName}
+          setShipName={setShipName}
+          stationName={stationName}
+          setStationName={setStationName}
         />
-        {loading ? "Saving..." : ""}
-      </fieldset>
+      </div>
     </Fragment>
+  );
+};
+
+const ThemeAssetUpload: FC<{
+  shipName: string;
+  setShipName: Dispatch<SetStateAction<string>>;
+  stationName: string;
+  setStationName: Dispatch<SetStateAction<string>>;
+}> = ({shipName, setShipName, stationName, setStationName}) => {
+  const {themeId, pluginId} = useParams();
+  const themes = useContext(ThemesContext);
+  const theme = themes.find(t => t.id === themeId);
+  const [dragging, setDragging] = useState(false);
+  const {t} = useTranslation();
+  const [upload] = useThemeAssetUploadMutation();
+  async function onChange(files: FileList) {
+    await Promise.all(
+      Array.from(files).map(image =>
+        upload({variables: {themeId, pluginId, image}})
+      )
+    );
+  }
+
+  const accept = "image/*";
+  // Drag and drop is hard to test
+  /* istanbul ignore next */
+  function handleDragEnter(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    const acceptMatch = !accept || e.dataTransfer.items[0].type.match(accept);
+    if (e.dataTransfer.items?.length === 1 && acceptMatch) {
+      setDragging(true);
+      e.dataTransfer.dropEffect = "copy";
+    } else {
+      setDragging(false);
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
+  /* istanbul ignore next */
+  function handleDragExit(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(false);
+  }
+  /* istanbul ignore next */
+  function handleDrop(e: React.DragEvent) {
+    const acceptMatch = !accept || e.dataTransfer.items[0].type.match(accept);
+
+    if (!acceptMatch) return;
+    setDragging(false);
+    const files = e.dataTransfer.files;
+    if (files?.length === 1) {
+      onChange(files);
+    }
+  }
+
+  return (
+    <div className="flex-1 flex flex-col h-full">
+      <h3 className="font-bold text-4xl">
+        Theme Assets{" "}
+        <InfoTip>
+          {t("Click on an asset to copy the asset URL to your clipboard.")}
+        </InfoTip>
+      </h3>
+      <div
+        className="flex-1 relative overflow-y-auto"
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragEnter}
+        onDragLeave={handleDragExit}
+        onDragEnd={handleDragExit}
+        onDrop={handleDrop}
+      >
+        {dragging && (
+          <div className="absolute h-full w-full bg-blackAlpha-500 flex items-center justify-center pointer-events-none">
+            <span className="font-bold text-4xl">
+              {t("Drag file to upload.")}
+            </span>
+          </div>
+        )}
+        {theme?.uploadedImages.map(image => {
+          return <UploadedImage image={image} key={image} />;
+        })}
+      </div>
+      <div className="space-y-2">
+        <Button className="w-full">{t("Upload Asset")}</Button>
+        <Button className="w-full" variantColor="info">
+          {t("Insert Template Code")}
+        </Button>
+        <Input
+          label="Ship Name"
+          labelHidden={false}
+          value={shipName}
+          onChange={e => setShipName(e)}
+        ></Input>
+        <Input
+          label="Station Name"
+          labelHidden={false}
+          value={stationName}
+          onChange={e => setStationName(e)}
+        ></Input>
+      </div>
+    </div>
+  );
+};
+
+const UploadedImage: React.FC<{image: string}> = ({image}) => {
+  const {themeId, pluginId} = useParams();
+
+  const [remove] = useThemeAssetRemoveMutation();
+  const confirm = useConfirm();
+  const {hasCopied, onCopy} = useClipboard(image);
+  const {t} = useTranslation();
+
+  return (
+    <ListGroupItem key={image} className="flex items-center" onClick={onCopy}>
+      <img src={image} className="max-h-8" alt="Theme Asset" />
+      <span className=" mx-2 flex-1 overflow-x-hidden overflow-ellipsis">
+        {hasCopied
+          ? t("Copied!")
+          : image.split("/")[image.split("/").length - 1]}
+      </span>
+      <Button
+        variantColor="danger"
+        onClick={async () => {
+          if (
+            await confirm({
+              header: "Are you sure you want to remove this asset?",
+              body: "The file will be deleted permanently.",
+            })
+          ) {
+            remove({variables: {themeId, pluginId, image}});
+          }
+        }}
+      >
+        <FaBan />
+      </Button>
+    </ListGroupItem>
   );
 };
 const ThemeRoutes = () => {

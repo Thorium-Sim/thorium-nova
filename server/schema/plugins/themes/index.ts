@@ -1,5 +1,8 @@
+import {FileUpload, GraphQLUpload} from "graphql-upload";
 import App from "server/app";
+import {appStoreDir} from "server/helpers/appPaths";
 import {pubsub} from "server/helpers/pubsub";
+import uploadAsset from "server/helpers/uploadAsset";
 import {
   Arg,
   Field,
@@ -13,6 +16,7 @@ import {
 } from "type-graphql";
 import uuid from "uniqid";
 import {getPlugin} from "../basePlugin";
+import fs from "fs/promises";
 
 @ObjectType()
 export class Theme {
@@ -103,6 +107,46 @@ export class ThemesResolver {
     theme.processedCSS = css;
     theme.rawLESS = less;
     pubsub.publish("themes", {pluginId, themes: plugin.themes});
+    return theme;
+  }
+  @Mutation(returns => Theme)
+  async themeUploadImage(
+    @Arg("pluginId", type => ID) pluginId: string,
+    @Arg("themeId", type => ID) themeId: string,
+    @Arg("image", type => GraphQLUpload) image: FileUpload
+  ) {
+    const plugin = getPlugin(pluginId);
+    const theme = plugin.themes.find(p => p.id === themeId);
+    if (!theme) throw new Error("Cannot find theme");
+
+    const pathPrefix = `plugins/${plugin.name || plugin.id}/assets/theme/${
+      theme.name || theme.id
+    }`;
+    await uploadAsset(image, `${appStoreDir}${pathPrefix}`);
+    theme.uploadedImages.push(`/assets/${pathPrefix}/${image.filename}`);
+    theme.uploadedImages = theme.uploadedImages.filter(
+      (a, i, arr) => arr.indexOf(a) === i
+    );
+    pubsub.publish("themes", {pluginId, themes: plugin.themes});
+
+    return theme;
+  }
+  @Mutation(returns => Theme)
+  async themeRemoveImage(
+    @Arg("pluginId", type => ID) pluginId: string,
+    @Arg("themeId", type => ID) themeId: string,
+    @Arg("image", type => String) image: string
+  ) {
+    const plugin = getPlugin(pluginId);
+    const theme = plugin.themes.find(p => p.id === themeId);
+    if (!theme) throw new Error("Cannot find theme");
+
+    try {
+      await fs.unlink(image.replace("/assets/", appStoreDir));
+      theme.uploadedImages = theme.uploadedImages.filter(f => f !== image);
+    } catch {
+      // Do nothing
+    }
     return theme;
   }
   @Subscription(returns => [Theme], {

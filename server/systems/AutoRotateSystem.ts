@@ -46,7 +46,6 @@ export class AutoRotateSystem extends System {
     );
   }
   update(entity: Entity, elapsed: number) {
-    const elapsedRatio = elapsed / 1000;
     const {position, rotation, autopilot} = entity.components;
     if (!position || !rotation || !autopilot?.desiredCoordinates) return;
 

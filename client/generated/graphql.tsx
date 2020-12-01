@@ -1144,6 +1144,21 @@ export type ThemeRemoveMutation = {
   themeRemove: string;
 };
 
+export type ThemeAssetRemoveMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  themeId: Scalars["ID"];
+  image: Scalars["String"];
+}>;
+
+export type ThemeAssetRemoveMutation = {
+  __typename?: "Mutation";
+  themeRemoveImage: {
+    __typename?: "Theme";
+    id: string;
+    uploadedImages: Array<string>;
+  };
+};
+
 export type ThemeSetCssMutationVariables = Exact<{
   pluginId: Scalars["ID"];
   themeId: Scalars["ID"];
@@ -1165,6 +1180,21 @@ export type ThemeSetNameMutationVariables = Exact<{
 export type ThemeSetNameMutation = {
   __typename?: "Mutation";
   themeSetName: {__typename?: "Theme"; id: string; name: string};
+};
+
+export type ThemeAssetUploadMutationVariables = Exact<{
+  pluginId: Scalars["ID"];
+  themeId: Scalars["ID"];
+  image: Scalars["Upload"];
+}>;
+
+export type ThemeAssetUploadMutation = {
+  __typename?: "Mutation";
+  themeUploadImage: {
+    __typename?: "Theme";
+    id: string;
+    uploadedImages: Array<string>;
+  };
 };
 
 export type ThemesSubscriptionVariables = Exact<{
@@ -4157,6 +4187,28 @@ export function useThemeRemoveMutation(
 export type ThemeRemoveMutationHookResult = ReturnType<
   typeof useThemeRemoveMutation
 >;
+export const ThemeAssetRemoveDocument = gql`
+  mutation ThemeAssetRemove($pluginId: ID!, $themeId: ID!, $image: String!) {
+    themeRemoveImage(pluginId: $pluginId, themeId: $themeId, image: $image) {
+      id
+      uploadedImages
+    }
+  }
+`;
+export function useThemeAssetRemoveMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ThemeAssetRemoveMutation,
+    ThemeAssetRemoveMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ThemeAssetRemoveMutation,
+    ThemeAssetRemoveMutationVariables
+  >(ThemeAssetRemoveDocument, baseOptions);
+}
+export type ThemeAssetRemoveMutationHookResult = ReturnType<
+  typeof useThemeAssetRemoveMutation
+>;
 export const ThemeSetCssDocument = gql`
   mutation ThemeSetCSS(
     $pluginId: ID!
@@ -4210,6 +4262,28 @@ export function useThemeSetNameMutation(
 }
 export type ThemeSetNameMutationHookResult = ReturnType<
   typeof useThemeSetNameMutation
+>;
+export const ThemeAssetUploadDocument = gql`
+  mutation ThemeAssetUpload($pluginId: ID!, $themeId: ID!, $image: Upload!) {
+    themeUploadImage(pluginId: $pluginId, themeId: $themeId, image: $image) {
+      id
+      uploadedImages
+    }
+  }
+`;
+export function useThemeAssetUploadMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ThemeAssetUploadMutation,
+    ThemeAssetUploadMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ThemeAssetUploadMutation,
+    ThemeAssetUploadMutationVariables
+  >(ThemeAssetUploadDocument, baseOptions);
+}
+export type ThemeAssetUploadMutationHookResult = ReturnType<
+  typeof useThemeAssetUploadMutation
 >;
 export const ThemesDocument = gql`
   subscription Themes($pluginId: ID!) {

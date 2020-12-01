@@ -8,7 +8,6 @@ import CustomFlight from "./components/flightConfig/customFlight";
 
 const Welcome = React.lazy(() => import("./pages/index"));
 const Releases = React.lazy(() => import("./pages/Releases"));
-const ThemeBuilder = React.lazy(() => import("./pages/theme"));
 const Starmap = React.lazy(() => import("./pages/starmap"));
 const PluginList = React.lazy(() => import("./components/plugins/pluginsList"));
 const OutfitsConfig = React.lazy(() => import("./components/plugins/Outfits"));
@@ -31,7 +30,6 @@ const MainApp: React.FC = () => {
       <Routes>
         <Route path="/*" element={<Welcome />} />
         <Route path="releases" element={<Releases />} />
-        <Route path="theme" element={<ThemeBuilder />} />
         <Route path="flight" element={<FlightLobby />} />
         <Route path="client" element={<ClientLobby />} />
         <Route path="flight/core" element={<StarmapCore />} />

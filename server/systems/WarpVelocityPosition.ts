@@ -1,6 +1,6 @@
 import Entity from "server/helpers/ecs/entity";
 import System from "server/helpers/ecs/system";
-import {Object3D, Quaternion, Vector3} from "three";
+import {Object3D, Quaternion} from "three";
 
 const velocityObject = new Object3D();
 export class WarpVelocityPosition extends System {

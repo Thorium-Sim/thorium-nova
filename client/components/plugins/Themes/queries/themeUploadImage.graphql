@@ -1,0 +1,6 @@
+mutation ThemeAssetUpload($pluginId: ID!, $themeId: ID!, $image: Upload!) {
+  themeUploadImage(pluginId: $pluginId, themeId: $themeId, image: $image) {
+    id
+    uploadedImages
+  }
+}

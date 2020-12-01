@@ -1,10 +1,19 @@
 {
+  "Click on an asset to copy the asset URL to your clipboard": {
+    "": ""
+  },
+  "Copied!": "Copied!",
+  "Drag file to upload": {
+    "": ""
+  },
   "Error creating theme": {
     "": ""
   },
+  "Insert Template Code": "Insert Template Code",
   "New Theme": "New Theme",
   "Remove Theme": "Remove Theme",
   "Rename Theme": "Rename Theme",
   "Themes": "Themes",
+  "Upload Asset": "Upload Asset",
   "What is the name of the new theme?": "What is the name of the new theme?"
 }

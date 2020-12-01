@@ -46,6 +46,7 @@
   "alias": {
     "client": "./client"
   },
+  "proxy": "http://localhost:3001",
   "madge": {
     "fontSize": "10px",
     "graphVizOptions": {

@@ -28,7 +28,6 @@ const ShipAssets: React.FC = () => {
   });
   const [setLogo] = useTemplateShipSetLogoMutation();
   const [setModel] = useTemplateShipSetModelMutation();
-
   return (
     <Grid
       templateColumns="repeat(2,1fr)"

@@ -36,10 +36,13 @@ const ClientContextProvider: FC = () => {
   return <ClientLobby />;
 };
 
-export const SampleClientContextProvider: FC = ({children}) => {
+export const SampleClientContextProvider: FC<{
+  shipName?: string;
+  stationName?: string;
+}> = ({children, shipName = "USS Testing", stationName = "Command"}) => {
   const station = {
     id: "Test Station",
-    name: "Command",
+    name: stationName,
     layout: "",
     logo: "",
     cards: [
@@ -59,7 +62,7 @@ export const SampleClientContextProvider: FC = ({children}) => {
   };
   const ship = {
     id: "Test Ship",
-    identity: {name: "USS Testing"},
+    identity: {name: shipName},
     shipAssets: {
       logo: "/logo.svg",
       model: "",

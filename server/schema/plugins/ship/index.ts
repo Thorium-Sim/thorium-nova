@@ -26,7 +26,6 @@ import BasePlugin, {getPlugin} from "../basePlugin";
 import {GraphQLContext} from "server/helpers/graphqlContext";
 import {ShipOutfitsComponent} from "server/components/ship/shipOutfits";
 import {SizeComponent} from "server/components/size";
-import {DampenerComponent} from "server/components/outfits/dampeners";
 
 interface ShipPayload {
   ship: Entity;

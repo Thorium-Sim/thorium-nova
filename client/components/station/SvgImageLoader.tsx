@@ -16,7 +16,6 @@ export const SVGImageLoader: React.FC<{url: string; className: string}> = memo(
         loadSvg();
       }
     }, [url]);
-    console.log(data, url);
     if (data) {
       return (
         <div className={className} dangerouslySetInnerHTML={{__html: data}} />

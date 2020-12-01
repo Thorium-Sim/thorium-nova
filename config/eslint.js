@@ -5,8 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-
-
 // Inspired by https://github.com/airbnb/javascript but less opinionated.
 
 // We use eslint-loader so even warnings are very visible.
@@ -99,7 +97,7 @@ module.exports = {
     "array-callback-return": "warn",
     "default-case": ["warn", {commentPattern: "^no default$"}],
     "dot-location": ["warn", "property"],
-    eqeqeq: ["warn", "smart"],
+    eqeqeq: ["off"],
     "new-parens": "warn",
     "no-array-constructor": "warn",
     "no-caller": "warn",
