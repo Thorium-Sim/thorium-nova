@@ -202,6 +202,7 @@
     "babel-preset-react-app": "^10.0.0",
     "canvas": "^2.6.1",
     "case-sensitive-paths-webpack-plugin": "^2.3.0",
+    "comlink-loader": "^2.0.0",
     "css-loader": "^4.3.0",
     "eslint": "^7.14.0",
     "eslint-config-react-app": "^6.0.0",

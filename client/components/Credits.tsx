@@ -1,5 +1,5 @@
 import {Box, Heading} from "@chakra-ui/core";
-import {keyframes, css} from "@emotion/core";
+import {keyframes} from "@emotion/core";
 import React from "react";
 
 const creditList = [
@@ -41,13 +41,13 @@ const creditList = [
   // },
 ];
 
-const scrollKeyframes = keyframes`
-from {
-transform :translateY(100%);
-}
-to {
-  transform:translateY(calc(-100% - 50vh));
-}`;
+// const scrollKeyframes = keyframes`
+// from {
+// transform :translateY(100%);
+// }
+// to {
+//   transform:translateY(calc(-100% - 50vh));
+// }`;
 
 const Credits: React.FC = () => {
   return (

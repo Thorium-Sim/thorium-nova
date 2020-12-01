@@ -228,7 +228,7 @@ module.exports = {
     "import/first": "error",
     "import/no-amd": "error",
     "import/no-anonymous-default-export": "off",
-    "import/no-webpack-loader-syntax": "error",
+    "import/no-webpack-loader-syntax": "off",
 
     // https://github.com/yannickcr/eslint-plugin-react/tree/master/docs/rules
     "react/forbid-foreign-prop-types": ["warn", {allowInPropTypes: true}],

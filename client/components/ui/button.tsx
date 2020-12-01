@@ -76,7 +76,9 @@ const Button = React.forwardRef(function Button(
       ref,
       disabled,
       ...extraProps,
-      className: `rounded font-semibold inline-flex items-center justify-center transition-all duration-200 select-none focus:outline-none focus:ring ${className}`,
+      className: `rounded font-semibold inline-flex items-center justify-center transition-all duration-200 select-none focus:outline-none focus:ring button ${variant} ${variantColor} ${size} ${
+        disabled ? "disabled" : ""
+      }  ${className}`,
     },
     children
   );

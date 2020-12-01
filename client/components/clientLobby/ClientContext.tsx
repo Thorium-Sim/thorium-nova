@@ -49,7 +49,7 @@ export const SampleClientContextProvider: FC<{
       {
         id: "Card 1",
         name: "Short",
-        component: "Login",
+        component: "UITester",
         icon: null,
       },
       {

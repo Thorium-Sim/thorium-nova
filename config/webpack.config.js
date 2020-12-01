@@ -1,5 +1,3 @@
-
-
 const fs = require("fs");
 const path = require("path");
 const webpack = require("webpack");
@@ -50,9 +48,6 @@ const imageInlineSizeLimit = parseInt(
 
 // Check if TypeScript is setup
 const useTypeScript = fs.existsSync(paths.appTsConfig);
-
-// Get the path to the uncompiled service worker (if it exists).
-const swSrc = paths.swSrc;
 
 // style files regexes
 const cssRegex = /\.css$/;
@@ -339,6 +334,17 @@ module.exports = function (webpackEnv) {
       rules: [
         // Disable require.ensure as it's not a standard language feature.
         {parser: {requireEnsure: false}},
+        {
+          test: /\.comlink\.(js|ts)$/i,
+          use: [
+            {
+              loader: "comlink-loader",
+              options: {
+                singleton: true,
+              },
+            },
+          ],
+        },
         {
           // "oneOf" will traverse all following loaders until one will
           // match the requirements. When no loader matches it will fall

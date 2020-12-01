@@ -34,7 +34,6 @@ import {
   useParams,
 } from "react-router";
 import Menubar from "../Outfits/Menubar";
-import less from "less";
 import MonacoEditor from "react-monaco-editor";
 import {SampleClientContextProvider} from "client/components/clientLobby/ClientContext";
 import StationViewer from "client/components/station";
@@ -44,6 +43,8 @@ import InfoTip from "client/components/ui/infoTip";
 import {useClipboard} from "@chakra-ui/core";
 import Input from "client/components/ui/Input";
 import useLocalStorage from "client/helpers/hooks/useLocalStorage";
+import {processLess} from "./processTheme.comlink";
+import {AssetPreview} from "./AssetPreview";
 
 const ThemesContext = createContext<ThemesSubscription["themes"]>([]);
 const ThemeConfig = () => {
@@ -161,10 +162,9 @@ const useCodeContents = () => {
 
   useEffect(() => {
     async function setCss() {
-      const rendered = await less.render(`#theme-container {
-        ${lessCode}
-      }`);
-      setCssCode(cssCode => (cssCode ? cssCode : rendered.css));
+      const css = await processLess(lessCode);
+
+      setCssCode(cssCode => (cssCode ? cssCode : css));
     }
     setCss();
     setCodeContents(code => (code ? code : lessCode || ""));
@@ -172,22 +172,20 @@ const useCodeContents = () => {
 
   const saveCss = debounce(async function saveCss(codeContents: string) {
     try {
-      const rendered = await less.render(`#theme-container {
-        ${codeContents}
-      }`);
-      setCssCode(rendered.css);
+      const css = await processLess(codeContents);
+      setCssCode(css);
       setCss({
         variables: {
           pluginId,
           themeId,
           less: codeContents,
-          css: rendered.css,
+          css: css,
         },
       });
     } catch {
       // Do nothing.
     }
-  }, 500);
+  }, 1000);
 
   return [codeContents, saveCss, cssCode, loading] as const;
 };
@@ -259,6 +257,7 @@ const ThemeSettings = () => {
     "theme-station-name",
     "Command"
   );
+  const [alertLevel, setAlertLevel] = useLocalStorage("theme-alert-level", "5");
   if (!code && code !== "") return null;
   return (
     <Fragment>
@@ -274,6 +273,11 @@ const ThemeSettings = () => {
             css={css`
               width: 768px;
               height: 432px;
+              z-index: 4;
+              transition: transform 0.4s ease;
+              &:hover {
+                transform: scale(2) translate(0%, 25%);
+              }
             `}
           >
             <div
@@ -290,7 +294,7 @@ const ThemeSettings = () => {
                 shipName={shipName}
                 stationName={stationName}
               >
-                <StationViewer />
+                <StationViewer alertLevel={alertLevel} />
               </SampleClientContextProvider>
             </div>
           </div>
@@ -312,6 +316,8 @@ const ThemeSettings = () => {
           setShipName={setShipName}
           stationName={stationName}
           setStationName={setStationName}
+          alertLevel={alertLevel}
+          setAlertLevel={setAlertLevel}
         />
       </div>
     </Fragment>
@@ -323,7 +329,16 @@ const ThemeAssetUpload: FC<{
   setShipName: Dispatch<SetStateAction<string>>;
   stationName: string;
   setStationName: Dispatch<SetStateAction<string>>;
-}> = ({shipName, setShipName, stationName, setStationName}) => {
+  alertLevel: string;
+  setAlertLevel: Dispatch<SetStateAction<string>>;
+}> = ({
+  shipName,
+  setShipName,
+  stationName,
+  setStationName,
+  alertLevel,
+  setAlertLevel,
+}) => {
   const {themeId, pluginId} = useParams();
   const themes = useContext(ThemesContext);
   const theme = themes.find(t => t.id === themeId);
@@ -338,7 +353,7 @@ const ThemeAssetUpload: FC<{
     );
   }
 
-  const accept = "image/*";
+  const accept = "image/*, font/*,.ttf,.eot,.woff,.woff2";
   // Drag and drop is hard to test
   /* istanbul ignore next */
   function handleDragEnter(e: React.DragEvent) {
@@ -399,7 +414,21 @@ const ThemeAssetUpload: FC<{
         })}
       </div>
       <div className="space-y-2">
-        <Button className="w-full">{t("Upload Asset")}</Button>
+        <Button className="w-full" as="label">
+          {t("Upload Asset")}
+          <input
+            type="file"
+            hidden
+            accept={accept}
+            multiple={false}
+            value={""}
+            onChange={e => {
+              if (e.target?.files?.length === 1) {
+                onChange(e.target.files);
+              }
+            }}
+          />
+        </Button>
         <Button className="w-full" variantColor="info">
           {t("Insert Template Code")}
         </Button>
@@ -415,6 +444,21 @@ const ThemeAssetUpload: FC<{
           value={stationName}
           onChange={e => setStationName(e)}
         ></Input>
+        <label>
+          Alert Level
+          <select
+            value={alertLevel}
+            onChange={e => setAlertLevel(e.target.value)}
+            className="bg-blackAlpha-500 border border-whiteAlpha-500 ml-4 w-32"
+          >
+            <option>5</option>
+            <option>4</option>
+            <option>3</option>
+            <option>2</option>
+            <option>1</option>
+            <option>p</option>
+          </select>
+        </label>
       </div>
     </div>
   );
@@ -430,7 +474,7 @@ const UploadedImage: React.FC<{image: string}> = ({image}) => {
 
   return (
     <ListGroupItem key={image} className="flex items-center" onClick={onCopy}>
-      <img src={image} className="max-h-8" alt="Theme Asset" />
+      <AssetPreview url={image} className="max-h-8" />
       <span className=" mx-2 flex-1 overflow-x-hidden overflow-ellipsis">
         {hasCopied
           ? t("Copied!")

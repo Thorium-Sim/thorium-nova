@@ -142,11 +142,13 @@ export class ThemesResolver {
     if (!theme) throw new Error("Cannot find theme");
 
     try {
-      await fs.unlink(image.replace("/assets/", appStoreDir));
       theme.uploadedImages = theme.uploadedImages.filter(f => f !== image);
+      await fs.unlink(image.replace("/assets/", appStoreDir));
     } catch {
       // Do nothing
     }
+    pubsub.publish("themes", {pluginId, themes: plugin.themes});
+
     return theme;
   }
   @Subscription(returns => [Theme], {

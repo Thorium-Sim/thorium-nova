@@ -7,7 +7,7 @@ import {Effects} from "./Effects";
 import {CardArea} from "./CardArea";
 import {css} from "@emotion/core";
 import {SVGImageLoader} from "./SvgImageLoader";
-const StationViewer: FC = () => {
+const StationViewer: FC<{alertLevel?: string}> = ({alertLevel}) => {
   const {client, station} = useClientData();
   // TODO: Include sound player here
   // TODO: Include some kind of alert toast notification thing here
@@ -18,7 +18,7 @@ const StationViewer: FC = () => {
         <Viewscreen />
       )}
       {client.offlineState !== "Blackout" && station.name !== "Viewscreen" && (
-        <StationLayout />
+        <StationLayout alertLevel={alertLevel} />
       )}
     </div>
   );
@@ -47,12 +47,14 @@ function useManageCard() {
   return [card, changeCard] as const;
 }
 
-const StationLayout = () => {
+const StationLayout: React.FC<{alertLevel?: string}> = ({
+  alertLevel: alertLevelProp = "5",
+}) => {
   const {ship, client, station} = useClientData();
   const [card, changeCard] = useManageCard();
   const {data: alertLevelData} = useShipAlertLevelSubscription();
   const alertLevel =
-    alertLevelData?.shipAlertLevel?.alertLevel.alertLevel || "5";
+    alertLevelData?.shipAlertLevel?.alertLevel.alertLevel || alertLevelProp;
   const cardIcon = `/assets/cardIcons/${card.component}.svg`;
   const stationLogo = `/assets/stationLogos/${station.name}.svg`;
   return (
