@@ -2,31 +2,13 @@ import App from "../app";
 import {AlertLevelComponent, AlertLevelT} from "../components/ship/alertLevel";
 import Entity from "../helpers/ecs/entity";
 import {GraphQLContext} from "../helpers/graphqlContext";
-import {pubsub} from "../helpers/pubsub";
-import {
-  Arg,
-  Ctx,
-  ID,
-  Mutation,
-  Query,
-  Resolver,
-  Root,
-  Subscription,
-} from "type-graphql";
-import uniqid from "uniqid";
+import {Arg, Ctx, ID, Mutation, Query, Resolver} from "type-graphql";
 import {IsShipComponent} from "../components/isShip";
 import {ShipAssetsComponent} from "../components/ship/shipAssets";
 import {TagsComponent} from "../components/tags";
 import {IdentityComponent} from "../components/identity";
 import {ThemeComponent} from "../components/theme";
 import {shipPublish} from "./plugins/ship/utils";
-
-interface ShipPayload {
-  ship: Entity;
-}
-interface ShipsPayload {
-  entities: Entity[];
-}
 
 function getShip(context: GraphQLContext, id?: string) {
   const shipId = id || context.ship?.id;

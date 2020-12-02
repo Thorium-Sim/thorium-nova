@@ -13,6 +13,7 @@ import {
   useThemesSubscription,
 } from "client/generated/graphql";
 import {
+  Component,
   createContext,
   Dispatch,
   FC,
@@ -429,9 +430,6 @@ const ThemeAssetUpload: FC<{
             }}
           />
         </Button>
-        <Button className="w-full" variantColor="info">
-          {t("Insert Template Code")}
-        </Button>
         <Input
           label="Ship Name"
           labelHidden={false}
@@ -507,5 +505,4 @@ const ThemeRoutes = () => {
     </Routes>
   );
 };
-
 export default ThemeRoutes;

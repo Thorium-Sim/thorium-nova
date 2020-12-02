@@ -1,5 +1,4 @@
 import {IdentityComponent} from "server/components/identity";
-import {IsStarComponent} from "server/components/isStar";
 import {SatelliteComponent} from "server/components/satellite";
 import {TagsComponent} from "server/components/tags";
 import {TemperatureComponent} from "server/components/temperature";
@@ -440,7 +439,7 @@ export class PlanetAssetsResolver {
     @Ctx() context: GraphQLContext
   ) {
     if (self.textureMapAsset?.indexOf("/public") === 0)
-      return self.textureMapAsset;
+      return self.textureMapAsset.replace("/public", "");
     const pluginId = context.pluginId || context.entity?.pluginId;
     if (!pluginId) {
       return "";
@@ -462,7 +461,7 @@ export class PlanetAssetsResolver {
     @Ctx() context: GraphQLContext
   ) {
     if (self.cloudsMapAsset?.indexOf("/public") === 0)
-      return self.cloudsMapAsset;
+      return self.cloudsMapAsset.replace("/public", "");
     const pluginId = context.pluginId || context.entity?.pluginId;
     if (!pluginId) {
       return "";
@@ -483,7 +482,8 @@ export class PlanetAssetsResolver {
     @Root() self: IsPlanetComponent,
     @Ctx() context: GraphQLContext
   ) {
-    if (self.ringsMapAsset?.indexOf("/public") === 0) return self.ringsMapAsset;
+    if (self.ringsMapAsset?.indexOf("/public") === 0)
+      return self.ringsMapAsset.replace("/public", "");
     const pluginId = context.pluginId || context.entity?.pluginId;
     if (!pluginId) {
       return "";

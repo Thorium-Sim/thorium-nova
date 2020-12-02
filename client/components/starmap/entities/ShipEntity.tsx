@@ -13,7 +13,6 @@ import {
   Vector3,
 } from "three";
 import {useShipsStore} from "../../viewscreen/useSystemShips";
-import {whiteImage} from "../utils";
 import {useConfigStore} from "../configStore";
 import {useSelectedShips} from "../../viewscreen/useSelectedShips";
 import {Line2} from "three/examples/jsm/lines/Line2";
@@ -48,13 +47,19 @@ const ShipSprite = ({id, color = "white"}: {id: string; color?: string}) => {
   );
 };
 
+const ShipEntityWrapper: React.FC<{entityId: string}> = ({entityId}) => {
+  const entity = useShipsStore.getState()[entityId];
+  if (!entity) return null;
+  return <ShipEntity entityId={entityId} />;
+};
+
 const distanceVector = new Vector3();
 const ShipEntity: React.FC<{
   entityId: string;
 }> = ({entityId}) => {
   const entity = useShipsStore.getState()[entityId];
-  const modelAsset = entity.shipAssets?.model;
-  const model = useGLTFLoader(modelAsset || whiteImage, false);
+  const modelAsset = entity?.shipAssets?.model;
+  const model = useGLTFLoader(modelAsset || "", false);
 
   const scene = React.useMemo(() => {
     const scene: Group = model.scene.clone(true);
@@ -279,4 +284,4 @@ const ShipEntity: React.FC<{
   );
 };
 
-export default ShipEntity;
+export default ShipEntityWrapper;

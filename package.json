@@ -94,6 +94,7 @@
     "chroma-js": "^2.1.0",
     "class-validator": "^0.12.2",
     "codegen.macro": "^4.0.0",
+    "comlink": "^4.3.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "downshift": "^6.0.5",
@@ -246,7 +247,8 @@
     "url-loader": "^4.1.1",
     "webpack": "^4.44.2",
     "webpack-dev-server": "^3.11.0",
-    "webpack-manifest-plugin": "^2.2.0"
+    "webpack-manifest-plugin": "^2.2.0",
+    "worker-loader": "^3.0.5"
   },
   "volta": {
     "node": "14.10.1",

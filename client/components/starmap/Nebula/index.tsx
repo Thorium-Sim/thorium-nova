@@ -11,10 +11,12 @@ import uniqid from "uniqid";
 import {configStoreApi} from "../configStore";
 import {useFrame} from "react-three-fiber";
 import sleep from "../../../helpers/sleep";
-
+// @ts-expect-error
+import NebulaWorker from "worker-loader!./generateNebulaMap.js";
 const radius = 1e20;
 
-const nebulaWorker = new Worker("./generateNebulaMap.js");
+const nebulaWorker = new NebulaWorker();
+
 const promiseCache: {[key: string]: (value?: unknown) => void} = {};
 function onMessage(e: MessageEvent) {
   promiseCache[e.data.id]?.();

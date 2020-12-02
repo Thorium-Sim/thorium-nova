@@ -41,7 +41,7 @@ const Star: React.FC<{
   size?: number;
   position?: Vector3 | [number, number, number];
 }> = ({color1 = 0x224488, color2 = 0xf6fcff, size, ...props}) => {
-  const filePath = require("./textures/01_Texture.jpg");
+  const filePath = require("./textures/01_Texture.jpg").default;
   const texture = React.useMemo(() => {
     const loader = new TextureLoader();
     const texture = loader.load(filePath);
