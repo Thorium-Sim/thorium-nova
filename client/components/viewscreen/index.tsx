@@ -2,8 +2,11 @@ import React, {Suspense} from "react";
 import {Canvas, useThree} from "react-three-fiber";
 import {ApolloProvider, useApolloClient} from "@apollo/client";
 import Nebula from "../starmap/Nebula";
-import {useUniverseSystemSubscription} from "../../generated/graphql";
-import {configStoreApi, useConfigStore} from "../starmap/configStore";
+import {
+  useUniverseSystemSubscription,
+  useViewscreenPlayerShipSubscription,
+} from "../../generated/graphql";
+import {configStoreApi} from "../starmap/configStore";
 import StarEntity from "../starmap/entities/StarEntity";
 import PlanetEntity from "../starmap/entities/PlanetEntity";
 import {getOrbitPosition} from "../starmap/utils";
@@ -11,17 +14,20 @@ import {FlyControls} from "drei";
 import {useSystemShips} from "./useSystemShips";
 import {ErrorBoundary} from "react-error-boundary";
 import ShipEntity from "../starmap/entities/ShipEntity";
+import {PlayerShipIdProvider} from "./PlayerShipContext";
 
 const FAR = 1e27;
 
 const ViewscreenScene: React.FC = () => {
-  const systemId = useConfigStore(store => store.systemId);
+  const {data: playerData} = useViewscreenPlayerShipSubscription();
+  const systemId =
+    playerData?.playerShip.interstellarPosition?.system?.id || "";
   React.useEffect(() => {
     configStoreApi.setState({
-      systemId: "ew1d9kfkfhc49g2",
+      systemId,
       viewingMode: "viewscreen",
     });
-  }, []);
+  }, [systemId]);
 
   const {data} = useUniverseSystemSubscription({
     variables: {systemId},
@@ -86,16 +92,18 @@ const ViewscreenScene: React.FC = () => {
         }
         return null;
       })}
-      {ids.map(shipId => (
-        <Suspense key={shipId} fallback={null}>
-          <ErrorBoundary
-            FallbackComponent={() => <></>}
-            onError={err => console.error(err)}
-          >
-            <ShipEntity entityId={shipId} />
-          </ErrorBoundary>
-        </Suspense>
-      ))}
+      <PlayerShipIdProvider shipId={playerData?.playerShip.id || ""}>
+        {ids.map(shipId => (
+          <Suspense key={shipId} fallback={null}>
+            <ErrorBoundary
+              FallbackComponent={() => <></>}
+              onError={err => console.error(err)}
+            >
+              <ShipEntity entityId={shipId} />
+            </ErrorBoundary>
+          </Suspense>
+        ))}
+      </PlayerShipIdProvider>
       <Suspense fallback={null}>
         <Nebula />
       </Suspense>
@@ -108,6 +116,7 @@ const Viewscreen: React.FC = () => {
   return (
     <Suspense fallback={null}>
       <Canvas
+        className="pointer-events-none"
         onContextMenu={e => {
           e.preventDefault();
         }}

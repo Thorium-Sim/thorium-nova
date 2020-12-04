@@ -9,6 +9,9 @@ subscription ClientStation {
       identity {
         name
       }
+      theme {
+        value
+      }
       shipAssets {
         model
         side

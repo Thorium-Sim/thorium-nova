@@ -135,7 +135,7 @@
     "react-monaco-editor": "^0.40.0",
     "react-router": "^6.0.0-beta.0",
     "react-router-dom": "^6.0.0-beta.0",
-    "react-spring": "^8.0.27",
+    "react-spring": "^9.0.0-rc.3",
     "react-three-fiber": "^5.3.3",
     "react-use-gesture": "^8.0.1",
     "reflect-metadata": "^0.1.13",

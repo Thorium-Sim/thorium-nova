@@ -1,0 +1,6 @@
+query Theme($themeId: ID!) {
+  theme(themeId: $themeId) {
+    id
+    processedCSS
+  }
+}

@@ -1,19 +1,26 @@
 {
-  "Click on an asset to copy the asset URL to your clipboard": {
+  "Are you sure you want to end this flight?": "Are you sure you want to end this flight?",
+  "Are you sure you want to reset this flight?": "Are you sure you want to reset this flight?",
+  "Assign Client": "Assign Client",
+  "End": "End",
+  "Flight Lobby": "Flight Lobby",
+  "Go to Station": "Go to Station",
+  "Pause": "Pause",
+  "Reset": "Reset",
+  "Resume": "Resume",
+  "Station Error": "Station Error",
+  "The state of this flight will be stored and can be accessed later": {
     "": ""
   },
-  "Copied!": "Copied!",
-  "Drag file to upload": {
+  "This flight will revert to the point right after it was created": {
     "": ""
   },
-  "Error creating theme": {
-    "": ""
-  },
-  "Insert Template Code": "Insert Template Code",
-  "New Theme": "New Theme",
-  "Remove Theme": "Remove Theme",
-  "Rename Theme": "Rename Theme",
-  "Themes": "Themes",
-  "Upload Asset": "Upload Asset",
-  "What is the name of the new theme?": "What is the name of the new theme?"
+  "Unassigned Clients": "Unassigned Clients",
+  "Your station has experienced an error": {
+    " A diagnostic must be performed to restore this station to functionality": {
+      " Please contact a computer specialist": {
+        "": ""
+      }
+    }
+  }
 }

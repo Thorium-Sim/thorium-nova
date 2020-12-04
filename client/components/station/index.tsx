@@ -1,5 +1,15 @@
-import {useShipAlertLevelSubscription} from "client/generated/graphql";
-import {FC, useCallback, useEffect, useRef, useState} from "react";
+import {
+  useShipAlertLevelSubscription,
+  useThemeQuery,
+} from "client/generated/graphql";
+import {
+  ComponentPropsWithoutRef,
+  ComponentType,
+  FC,
+  useCallback,
+  useRef,
+  useState,
+} from "react";
 import {useClientData} from "../clientLobby/ClientContext";
 import Viewscreen from "../viewscreen";
 import {CardSwitcher} from "./CardSwitcher";
@@ -7,6 +17,10 @@ import {Effects} from "./Effects";
 import {CardArea} from "./CardArea";
 import {css} from "@emotion/core";
 import {SVGImageLoader} from "./SvgImageLoader";
+import {RiPictureInPictureLine} from "react-icons/ri";
+import {usePip} from "client/helpers/hooks/usePip";
+import {animated} from "react-spring";
+import {FaTimes} from "react-icons/fa";
 const StationViewer: FC<{alertLevel?: string}> = ({alertLevel}) => {
   const {client, station} = useClientData();
   // TODO: Include sound player here
@@ -53,10 +67,15 @@ const StationLayout: React.FC<{alertLevel?: string}> = ({
   const {ship, client, station} = useClientData();
   const [card, changeCard] = useManageCard();
   const {data: alertLevelData} = useShipAlertLevelSubscription();
+  const {data: themeData} = useThemeQuery({
+    variables: {themeId: ship.theme.value},
+  });
   const alertLevel =
     alertLevelData?.shipAlertLevel?.alertLevel.alertLevel || alertLevelProp;
   const cardIcon = `/assets/cardIcons/${card.component}.svg`;
   const stationLogo = `/assets/stationLogos/${station.name}.svg`;
+
+  if (!themeData?.theme.processedCSS) return null;
   return (
     <div
       id="theme-container"
@@ -68,6 +87,9 @@ const StationLayout: React.FC<{alertLevel?: string}> = ({
         --login-name-width: ${client.loginName?.length || 0}ch;
       `}
     >
+      <style
+        dangerouslySetInnerHTML={{__html: themeData?.theme.processedCSS || ""}}
+      />
       <CardSwitcher cardId={card.id} changeCard={changeCard} />
       <div className="card-frame">
         <div className="card-frame-ship-name">{ship.identity.name}</div>
@@ -118,8 +140,81 @@ const StationLayout: React.FC<{alertLevel?: string}> = ({
         </div>
       </div>
       {/* TODO: Figure out what you are going to do with widgets. WOOF. */}
-      {/* <Widgets /> */}
+      <div
+        className="widgets"
+        css={css`
+          position: absolute;
+          bottom: 2rem;
+          right: calc(2rem + 50px);
+        `}
+      >
+        <Widget icon={RiPictureInPictureLine} component={ViewscreenWidget} />
+      </div>
     </div>
+  );
+};
+
+const Widget: FC<{
+  icon: ComponentType<ComponentPropsWithoutRef<typeof RiPictureInPictureLine>>;
+  component: ComponentType<{close: () => void}>;
+}> = ({icon: Icon, component: Component}) => {
+  const [open, setOpen] = useState(true);
+  return (
+    <div
+      className="widget"
+      css={css`
+        & > svg {
+          height: 1.5rem;
+          width: 1.5rem;
+          cursor: pointer;
+        }
+      `}
+    >
+      <Icon onClick={() => setOpen(true)} className="widget-icon" />
+      {open && <Component close={() => setOpen(false)} />}
+    </div>
+  );
+};
+
+const ViewscreenWidget: FC<{close: () => void}> = ({close}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [props, styles] = usePip(ref);
+  return (
+    <animated.div
+      className="widget-body"
+      ref={ref}
+      {...props()}
+      style={{...styles}}
+      css={css`
+        z-index: 100;
+        min-width: 10rem;
+        min-height: 10rem;
+        background-color: #333;
+        pointer-events: all;
+        cursor: grab;
+        &:active {
+          cursor: grabbing;
+        }
+        &:hover .close-button {
+          opacity: 1;
+        }
+      `}
+    >
+      <div
+        css={css`
+          width: 640px;
+          height: 360px;
+          pointer-events: none;
+        `}
+        className="relative "
+      >
+        <Viewscreen />
+      </div>
+      <FaTimes
+        className="close-button absolute p-1 text-2xl top-1 right-1 rounded-full bg-whiteAlpha-200 text-white hover:bg-whiteAlpha-300 cursor-pointer transition-opacity opacity-0"
+        onClick={close}
+      ></FaTimes>
+    </animated.div>
   );
 };
 export default StationViewer;

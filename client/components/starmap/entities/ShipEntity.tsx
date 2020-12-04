@@ -8,6 +8,7 @@ import {
   Mesh,
   MeshStandardMaterial,
   Object3D,
+  Quaternion,
   Sprite,
   Texture,
   Vector3,
@@ -22,6 +23,7 @@ import {
   useShipsSetPositionMutation,
 } from "client/generated/graphql";
 import {useTranslate2DTo3D} from "client/helpers/hooks/use2Dto3D";
+import {usePlayerShipId} from "client/components/viewscreen/PlayerShipContext";
 
 const ShipSprite = ({id, color = "white"}: {id: string; color?: string}) => {
   const spriteMap = useTextureLoader("/assets/icons/Pyramid.svg") as Texture;
@@ -53,6 +55,7 @@ const ShipEntityWrapper: React.FC<{entityId: string}> = ({entityId}) => {
   return <ShipEntity entityId={entityId} />;
 };
 
+const forwardQuaternion = new Quaternion(0, 1, 0, 0);
 const distanceVector = new Vector3();
 const ShipEntity: React.FC<{
   entityId: string;
@@ -60,6 +63,7 @@ const ShipEntity: React.FC<{
   const entity = useShipsStore.getState()[entityId];
   const modelAsset = entity?.shipAssets?.model;
   const model = useGLTFLoader(modelAsset || "", false);
+  const shipId = usePlayerShipId();
 
   const scene = React.useMemo(() => {
     const scene: Group = model.scene.clone(true);
@@ -129,16 +133,25 @@ const ShipEntity: React.FC<{
         ship.rotation.w
       );
     }
-    // camera.position.set(ship.position.x, ship.position.y, ship.position.z);
-    // camera.quaternion
-    //   .set(ship.rotation.x, ship.rotation.y, ship.rotation.z, ship.rotation.w)
-    //   .multiply(new Quaternion(0, 1, 0, 0));
+    if (shipId === entityId && ship.position && ship.rotation) {
+      camera.position.set(ship.position.x, ship.position.y, ship.position.z);
+      camera.quaternion
+        .set(ship.rotation.x, ship.rotation.y, ship.rotation.z, ship.rotation.w)
+        .multiply(forwardQuaternion);
+    }
 
     const distance = camera.position.distanceTo(
       distanceVector.set(camera.position.x, 0, camera.position.z)
     );
     if (shipSprite.current && shipMesh.current) {
-      if (scale && distance / scale > 100) {
+      if (shipId === entityId) {
+        shipMesh.current.visible = false;
+        shipSprite.current.visible = true;
+      } else if (
+        scale &&
+        distance / scale > 100 &&
+        useConfigStore.getState().viewingMode !== "viewscreen"
+      ) {
         shipSprite.current.visible = true;
         shipMesh.current.visible = false;
       } else {

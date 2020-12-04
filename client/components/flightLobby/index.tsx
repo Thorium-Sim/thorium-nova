@@ -123,13 +123,12 @@ const FlightLobby = () => {
       navigate("/");
     }
   }, [data?.flight, loading, navigate]);
-
   // TODO: Add a menubar with features only available to the game host.
   // Things like pause/unpause, stop flight, and reset flight
   const {t} = useTranslation();
   return (
     <div className="p-8 py-12 h-full flex flex-col bg-blackAlpha-500">
-      <FlightMenubar paused={data?.flight?.paused || true} />
+      <FlightMenubar paused={data?.flight?.paused ?? true} />
       <div className="flex justify-between">
         <h2 className="font-bold text-4xl">{t("Flight Lobby")}</h2>
         <Button

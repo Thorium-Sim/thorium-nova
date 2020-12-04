@@ -63,6 +63,9 @@ export const SampleClientContextProvider: FC<{
   const ship = {
     id: "Test Ship",
     identity: {name: shipName},
+    theme: {
+      value: "default",
+    },
     shipAssets: {
       logo: "/logo.svg",
       model: "",

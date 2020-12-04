@@ -240,6 +240,7 @@ export type ClientStationSubscription = {
       __typename?: "Entity";
       id: string;
       identity: {__typename?: "IdentityComponent"; name: string};
+      theme: {__typename?: "ThemeComponent"; value: string};
       shipAssets: Maybe<{
         __typename?: "ShipAssetsComponent";
         model: string;
@@ -2009,6 +2010,15 @@ export type EffectsSubscription = {
   };
 };
 
+export type ThemeQueryVariables = Exact<{
+  themeId: Scalars["ID"];
+}>;
+
+export type ThemeQuery = {
+  __typename?: "Query";
+  theme: {__typename?: "Theme"; id: string; processedCSS: string};
+};
+
 export type UniverseSystemShipsSubscriptionVariables = Exact<{
   systemId: Scalars["ID"];
 }>;
@@ -2114,6 +2124,22 @@ export type UniverseSystemSubscription = {
         >;
       } & UniverseObjectFragment
     >;
+  };
+};
+
+export type ViewscreenPlayerShipSubscriptionVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type ViewscreenPlayerShipSubscription = {
+  __typename?: "Subscription";
+  playerShip: {
+    __typename?: "Entity";
+    id: string;
+    interstellarPosition: Maybe<{
+      __typename?: "InterstellarPositionComponent";
+      system: Maybe<{__typename?: "Entity"; id: string}>;
+    }>;
   };
 };
 
@@ -2386,6 +2412,9 @@ export const ClientStationDocument = gql`
         id
         identity {
           name
+        }
+        theme {
+          value
         }
         shipAssets {
           model
@@ -5781,6 +5810,32 @@ export function useEffectsSubscription(
 export type EffectsSubscriptionHookResult = ReturnType<
   typeof useEffectsSubscription
 >;
+export const ThemeDocument = gql`
+  query Theme($themeId: ID!) {
+    theme(themeId: $themeId) {
+      id
+      processedCSS
+    }
+  }
+`;
+export function useThemeQuery(
+  baseOptions: Apollo.QueryHookOptions<ThemeQuery, ThemeQueryVariables>
+) {
+  return Apollo.useQuery<ThemeQuery, ThemeQueryVariables>(
+    ThemeDocument,
+    baseOptions
+  );
+}
+export function useThemeLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<ThemeQuery, ThemeQueryVariables>
+) {
+  return Apollo.useLazyQuery<ThemeQuery, ThemeQueryVariables>(
+    ThemeDocument,
+    baseOptions
+  );
+}
+export type ThemeQueryHookResult = ReturnType<typeof useThemeQuery>;
+export type ThemeLazyQueryHookResult = ReturnType<typeof useThemeLazyQuery>;
 export const UniverseSystemShipsDocument = gql`
   subscription UniverseSystemShips($systemId: ID!) {
     universeSystemShips(systemId: $systemId) {
@@ -5911,6 +5966,32 @@ export function useUniverseSystemSubscription(
 }
 export type UniverseSystemSubscriptionHookResult = ReturnType<
   typeof useUniverseSystemSubscription
+>;
+export const ViewscreenPlayerShipDocument = gql`
+  subscription ViewscreenPlayerShip {
+    playerShip {
+      id
+      interstellarPosition {
+        system {
+          id
+        }
+      }
+    }
+  }
+`;
+export function useViewscreenPlayerShipSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    ViewscreenPlayerShipSubscription,
+    ViewscreenPlayerShipSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    ViewscreenPlayerShipSubscription,
+    ViewscreenPlayerShipSubscriptionVariables
+  >(ViewscreenPlayerShipDocument, baseOptions);
+}
+export type ViewscreenPlayerShipSubscriptionHookResult = ReturnType<
+  typeof useViewscreenPlayerShipSubscription
 >;
 export const ClientConnectDocument = gql`
   mutation ClientConnect {

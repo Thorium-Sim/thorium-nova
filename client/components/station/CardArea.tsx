@@ -6,6 +6,7 @@ import {ComponentType, Fragment, LazyExoticComponent, Suspense} from "react";
 import {ErrorBoundary} from "react-error-boundary";
 import {useTranslation} from "react-i18next";
 import {Transition} from "@headlessui/react";
+import Viewscreen from "../viewscreen";
 const CardError = () => {
   const {t} = useTranslation();
   return (
@@ -23,7 +24,7 @@ const CardError = () => {
 export const CardArea: React.FC<{
   card: ReturnType<typeof useClientData>["station"]["cards"][0];
 }> = ({card}) => {
-  const {client, ship, station} = useClientData();
+  const {client, station} = useClientData();
 
   if (!client.loginName) {
     // Return the Login card

@@ -34,6 +34,7 @@ import {RotationComponent} from "server/components/rotation";
 import {getAnyOutfit} from "../plugins/outfits/utils";
 import {getPhrase, parsePhrase} from "../phrases";
 import cloneDeep from "lodash/cloneDeep";
+import {GraphQLContext} from "server/helpers/graphqlContext";
 
 type FauxECS = {addEntity: (e: Entity) => void} | undefined;
 export function shipSpawn(
@@ -113,6 +114,40 @@ export function shipSpawn(
 }
 @Resolver()
 export class ActiveShipsResolver {
+  @Subscription(returns => Entity, {
+    topics: ({context}: {context: GraphQLContext}) => {
+      const id = uuid();
+      const ship = App.activeFlight?.ecs.entities.find(
+        s => s.id === context.client?.shipId
+      );
+      if (ship) {
+        process.nextTick(() => {
+          pubsub.publish(id, {
+            shipId: ship.id,
+            ship,
+          });
+        });
+      }
+      return [id, "playerShip"];
+    },
+    filter: ({
+      context,
+      payload,
+    }: {
+      context: GraphQLContext;
+      payload: {shipId: string};
+    }) => {
+      if (context.client?.shipId !== payload.shipId) return false;
+      return true;
+    },
+    description: "Provides subscription updates for a player ship.",
+  })
+  playerShip(
+    @Root() payload: {id: string; ship: Entity},
+    @Ctx() context: GraphQLContext
+  ): Entity {
+    return payload.ship;
+  }
   @Subscription(returns => [Entity], {
     topics: ({args, payload}) => {
       const id = uuid();

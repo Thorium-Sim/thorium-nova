@@ -1,0 +1,10 @@
+subscription ViewscreenPlayerShip {
+  playerShip {
+    id
+    interstellarPosition {
+      system {
+        id
+      }
+    }
+  }
+}

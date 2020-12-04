@@ -12,7 +12,7 @@ import {configStoreApi} from "../configStore";
 import {useFrame} from "react-three-fiber";
 import sleep from "../../../helpers/sleep";
 // @ts-expect-error
-import NebulaWorker from "worker-loader!./generateNebulaMap.js";
+import NebulaWorker from "worker-loader?filename=static/nebulaWorker.worker.js!./generateNebulaMap.js";
 const radius = 1e20;
 
 const nebulaWorker = new NebulaWorker();

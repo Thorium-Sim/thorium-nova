@@ -4,11 +4,10 @@ import {Lensflare, LensflareElement} from "./lensFlareImpl";
 
 // TODO: Create a secondary render loop just for the lens flare.
 // https://github.com/pmndrs/react-three-fiber/blob/master/recipes.md#heads-up-display-rendering-multiple-scenes
+const textureFlare0Path: string = require("./textures/lensflare0.png").default;
+const textureFlare1Path: string = require("./textures/lensflare2.png").default;
+const textureFlare2Path: string = require("./textures/lensflare3.png").default;
 const LensFlare = () => {
-  const textureFlare0Path: string = require("./textures/lensflare0.png");
-  const textureFlare1Path: string = require("./textures/lensflare2.png");
-  const textureFlare2Path: string = require("./textures/lensflare3.png");
-
   const lensFlare = React.useMemo(() => {
     const lensflare = new Lensflare();
     var textureLoader = new TextureLoader();

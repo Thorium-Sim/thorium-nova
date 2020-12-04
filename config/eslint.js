@@ -124,7 +124,7 @@ module.exports = {
     "no-label-var": "warn",
     "no-labels": ["warn", {allowLoop: true, allowSwitch: false}],
     "no-lone-blocks": "warn",
-    "no-loop-func": "warn",
+    "no-loop-func": "off",
     "no-mixed-operators": [
       "warn",
       {
