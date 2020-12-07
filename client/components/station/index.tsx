@@ -1,6 +1,7 @@
 import {
   useShipAlertLevelSubscription,
   useThemeQuery,
+  useLogoutMutation,
 } from "client/generated/graphql";
 import {
   ComponentPropsWithoutRef,
@@ -17,7 +18,7 @@ import {Effects} from "./Effects";
 import {CardArea} from "./CardArea";
 import {css} from "@emotion/core";
 import {SVGImageLoader} from "./SvgImageLoader";
-import {RiPictureInPictureLine} from "react-icons/ri";
+import {RiLogoutCircleRLine, RiPictureInPictureLine} from "react-icons/ri";
 import {usePip} from "client/helpers/hooks/usePip";
 import {animated} from "react-spring";
 import {FaTimes} from "react-icons/fa";
@@ -70,6 +71,7 @@ const StationLayout: React.FC<{alertLevel?: string}> = ({
   const {data: themeData} = useThemeQuery({
     variables: {themeId: ship.theme.value},
   });
+  const [logout] = useLogoutMutation();
   const alertLevel =
     alertLevelData?.shipAlertLevel?.alertLevel.alertLevel || alertLevelProp;
   const cardIcon = `/assets/cardIcons/${card.component}.svg`;
@@ -135,13 +137,20 @@ const StationLayout: React.FC<{alertLevel?: string}> = ({
         <div className="doodad-8 absolute"></div>
         <div className="doodad-9 absolute"></div>
         <div className="doodad-10 absolute"></div>
-        <div className="card-area relative">
+        <div
+          className="card-area relative"
+          css={css`
+            & > div {
+              height: 100%;
+              width: 100%;
+            }
+          `}
+        >
           <CardArea card={card} />
         </div>
       </div>
-      {/* TODO: Figure out what you are going to do with widgets. WOOF. */}
       <div
-        className="widgets"
+        className="widgets flex space-x-2"
         css={css`
           position: absolute;
           bottom: 2rem;
@@ -149,16 +158,39 @@ const StationLayout: React.FC<{alertLevel?: string}> = ({
         `}
       >
         <Widget icon={RiPictureInPictureLine} component={ViewscreenWidget} />
+        <ClickWidget icon={RiLogoutCircleRLine} onClick={() => logout()} />
       </div>
     </div>
   );
 };
 
+type IconType = ComponentType<
+  ComponentPropsWithoutRef<typeof RiPictureInPictureLine>
+>;
+const ClickWidget: FC<{icon: IconType; onClick: () => void}> = ({
+  icon: Icon,
+  onClick,
+}) => {
+  return (
+    <div
+      className="widget"
+      css={css`
+        & > svg {
+          height: 1.5rem;
+          width: 1.5rem;
+          cursor: pointer;
+        }
+      `}
+    >
+      <Icon onClick={onClick} className="widget-icon" />
+    </div>
+  );
+};
 const Widget: FC<{
-  icon: ComponentType<ComponentPropsWithoutRef<typeof RiPictureInPictureLine>>;
+  icon: IconType;
   component: ComponentType<{close: () => void}>;
 }> = ({icon: Icon, component: Component}) => {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   return (
     <div
       className="widget"

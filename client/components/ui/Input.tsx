@@ -14,6 +14,7 @@ const Input = React.forwardRef<
       inputSize?: "sm" | "md" | "lg";
       onBlur?: any;
       type?: string | "textarea";
+      fixed?: boolean;
     }
 >((props, outerRef) => {
   let elementId = useId();
@@ -26,7 +27,11 @@ const Input = React.forwardRef<
   );
 
   return (
-    <div className={`flex flex-col w-full ${props.className}`}>
+    <div
+      className={`flex flex-col ${props.fixed ? "" : "w-full"} ${
+        props.className
+      }`}
+    >
       <label
         {...labelProps}
         id={elementId}

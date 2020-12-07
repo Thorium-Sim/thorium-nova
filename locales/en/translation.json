@@ -1,21 +1,5 @@
 {
-  "Are you sure you want to end this flight?": "Are you sure you want to end this flight?",
-  "Are you sure you want to reset this flight?": "Are you sure you want to reset this flight?",
-  "Assign Client": "Assign Client",
-  "End": "End",
-  "Flight Lobby": "Flight Lobby",
-  "Go to Station": "Go to Station",
-  "Pause": "Pause",
-  "Reset": "Reset",
-  "Resume": "Resume",
   "Station Error": "Station Error",
-  "The state of this flight will be stored and can be accessed later": {
-    "": ""
-  },
-  "This flight will revert to the point right after it was created": {
-    "": ""
-  },
-  "Unassigned Clients": "Unassigned Clients",
   "Your station has experienced an error": {
     " A diagnostic must be performed to restore this station to functionality": {
       " Please contact a computer specialist": {

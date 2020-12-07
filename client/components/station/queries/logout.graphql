@@ -1,0 +1,6 @@
+mutation Logout {
+  clientLogout {
+    id
+    loginName
+  }
+}

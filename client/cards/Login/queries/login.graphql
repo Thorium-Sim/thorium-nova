@@ -1,0 +1,6 @@
+mutation ClientLogin($loginName: String!) {
+  clientLogin(loginName: $loginName) {
+    id
+    loginName
+  }
+}

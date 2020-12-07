@@ -164,6 +164,15 @@ export enum __DirectiveLocation {
   InputFieldDefinition = "INPUT_FIELD_DEFINITION",
 }
 
+export type ClientLoginMutationVariables = Exact<{
+  loginName: Scalars["String"];
+}>;
+
+export type ClientLoginMutation = {
+  __typename?: "Mutation";
+  clientLogin: {__typename?: "Client"; id: string; loginName: Maybe<string>};
+};
+
 export type TimerPauseMutationVariables = Exact<{
   id: Scalars["ID"];
   pause: Scalars["Boolean"];
@@ -2010,6 +2019,13 @@ export type EffectsSubscription = {
   };
 };
 
+export type LogoutMutationVariables = Exact<{[key: string]: never}>;
+
+export type LogoutMutation = {
+  __typename?: "Mutation";
+  clientLogout: {__typename?: "Client"; id: string; loginName: Maybe<string>};
+};
+
 export type ThemeQueryVariables = Exact<{
   themeId: Scalars["ID"];
 }>;
@@ -2280,6 +2296,28 @@ export const UniverseObjectFragmentDoc = gql`
   }
   ${SatelliteComponentFragmentDoc}
 `;
+export const ClientLoginDocument = gql`
+  mutation ClientLogin($loginName: String!) {
+    clientLogin(loginName: $loginName) {
+      id
+      loginName
+    }
+  }
+`;
+export function useClientLoginMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ClientLoginMutation,
+    ClientLoginMutationVariables
+  >
+) {
+  return Apollo.useMutation<ClientLoginMutation, ClientLoginMutationVariables>(
+    ClientLoginDocument,
+    baseOptions
+  );
+}
+export type ClientLoginMutationHookResult = ReturnType<
+  typeof useClientLoginMutation
+>;
 export const TimerPauseDocument = gql`
   mutation TimerPause($id: ID!, $pause: Boolean!) {
     timerPause(id: $id, pause: $pause) {
@@ -5810,6 +5848,26 @@ export function useEffectsSubscription(
 export type EffectsSubscriptionHookResult = ReturnType<
   typeof useEffectsSubscription
 >;
+export const LogoutDocument = gql`
+  mutation Logout {
+    clientLogout {
+      id
+      loginName
+    }
+  }
+`;
+export function useLogoutMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    LogoutMutation,
+    LogoutMutationVariables
+  >
+) {
+  return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(
+    LogoutDocument,
+    baseOptions
+  );
+}
+export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export const ThemeDocument = gql`
   query Theme($themeId: ID!) {
     theme(themeId: $themeId) {
