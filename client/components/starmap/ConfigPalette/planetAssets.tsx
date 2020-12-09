@@ -3,7 +3,6 @@ import UploadWell from "../../ui/uploadWell";
 import React from "react";
 import {useTranslation} from "react-i18next";
 import {useConfigStore} from "../configStore";
-import {isPlanet} from "./utils";
 import InfoTip from "../../ui/infoTip";
 import {
   useUniversePlanetClearRingsMutation,

@@ -229,7 +229,7 @@ const MissionItem: React.FC<{
         dispatch({type: "startingPointId", startingPointId: undefined});
       }
     }
-  }, [state.startingPointId, startingPoint]);
+  }, [state.startingPointId, startingPoint, dispatch]);
   const buttonRef = React.useRef<HTMLButtonElement>();
   return (
     <li
@@ -328,7 +328,7 @@ const ShipConfig: React.FC<{
     if (!pluginShips?.find(s => s.id === state.shipId)) {
       dispatch({type: "shipId", shipId: undefined});
     }
-  }, [pluginShips, state.shipId]);
+  }, [dispatch, pluginShips, state.shipId]);
 
   if (!pluginShips)
     return <div>No ships are present in the selected plugins.</div>;

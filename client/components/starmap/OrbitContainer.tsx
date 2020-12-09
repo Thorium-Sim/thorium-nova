@@ -1,6 +1,6 @@
 import React from "react";
-import {BufferGeometry, EllipseCurve, Vector3} from "three";
-import {DEG_TO_RAD, getOrbitPosition} from "./utils";
+import {BufferGeometry, EllipseCurve} from "three";
+import {DEG_TO_RAD} from "./utils";
 const OrbitLine: React.FC<{radiusX: number; radiusY: number}> = ({
   radiusX,
   radiusY,

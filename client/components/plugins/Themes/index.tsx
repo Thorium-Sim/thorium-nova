@@ -13,7 +13,6 @@ import {
   useThemesSubscription,
 } from "client/generated/graphql";
 import {
-  Component,
   createContext,
   Dispatch,
   FC,
@@ -191,61 +190,61 @@ const useCodeContents = () => {
   return [codeContents, saveCss, cssCode, loading] as const;
 };
 
-const defaultStyles = `
-.card-frame {
-    
-}
-.card-frame-ship-name {
-    
-}
-.card-frame-ship-logo {
-    
-}
-.card-frame-ship-logo-image {
-    
-}
-.card-frame-station-name {
-    
-}
-.card-frame-station-logo {
-    
-}
-.card-frame-station-logo-image {
-    
-}
-.card-frame-card-name {
-    
-}
-.card-frame-card-icon {
-    
-}
-.card-frame-card-icon-image {
-    
-}
-.card-frame-login-name {
-    
-}
-.card-frame-login-profile {
-    
-}
-.card-area {
-    
-}
-.card-switcher-holder {
-    
-}
-.card-switcher {
-    
-}
-.card-switcher-button {
-    
-}
-.card-switcher-button-icon {
-    
-}
-.card-switcher-button-name {
-    
-}`;
+// const defaultStyles = `
+// .card-frame {
+
+// }
+// .card-frame-ship-name {
+
+// }
+// .card-frame-ship-logo {
+
+// }
+// .card-frame-ship-logo-image {
+
+// }
+// .card-frame-station-name {
+
+// }
+// .card-frame-station-logo {
+
+// }
+// .card-frame-station-logo-image {
+
+// }
+// .card-frame-card-name {
+
+// }
+// .card-frame-card-icon {
+
+// }
+// .card-frame-card-icon-image {
+
+// }
+// .card-frame-login-name {
+
+// }
+// .card-frame-login-profile {
+
+// }
+// .card-area {
+
+// }
+// .card-switcher-holder {
+
+// }
+// .card-switcher {
+
+// }
+// .card-switcher-button {
+
+// }
+// .card-switcher-button-icon {
+
+// }
+// .card-switcher-button-name {
+
+// }`;
 
 const ThemeSettings = () => {
   const {themeId} = useParams();

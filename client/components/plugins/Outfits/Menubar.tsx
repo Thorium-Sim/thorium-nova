@@ -3,7 +3,6 @@ import {FaArrowLeft, FaHome} from "react-icons/fa";
 import Button from "../../ui/button";
 
 import {Link, useParams} from "react-router-dom";
-import {css} from "@emotion/core";
 
 const Menubar: React.FC<{backLink?: boolean}> = ({backLink}) => {
   const {pluginId} = useParams();

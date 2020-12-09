@@ -1,5 +1,5 @@
 import {
-  useFlightStartMutation,
+  // useFlightStartMutation,
   usePluginsSubscription,
 } from "../../generated/graphql";
 import React from "react";
@@ -19,7 +19,7 @@ const CustomFlight = () => {
     "selectedPlugins",
     []
   );
-  const [startFlight] = useFlightStartMutation();
+  // const [startFlight] = useFlightStartMutation();
   const navigate = useNavigate();
   const [flightName, setFlightName] = React.useState(() =>
     randomWords(3).join("-")
@@ -35,7 +35,7 @@ const CustomFlight = () => {
       }
       return ids;
     });
-  }, [plugins]);
+  }, [plugins, setChecked]);
   return (
     <ConfigLayout title={t`Custom Flight`}>
       <div className="flex h-full gap-8">

@@ -1,5 +1,5 @@
 import {Box, Heading} from "@chakra-ui/core";
-import {keyframes} from "@emotion/core";
+// import {keyframes} from "@emotion/core";
 import React from "react";
 
 const creditList = [

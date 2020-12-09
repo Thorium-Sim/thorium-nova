@@ -39,7 +39,7 @@ const BasicPalette: React.FC = () => {
           variables: {id: universeId, systemId: objectId, name},
         });
       }, 500),
-    [objectId]
+    [objectId, setName, universeId]
   );
   const updateDescription = React.useMemo(
     () =>
@@ -49,7 +49,7 @@ const BasicPalette: React.FC = () => {
           variables: {id: universeId, systemId: objectId, description},
         });
       }, 500),
-    [objectId]
+    [objectId, setDescription, universeId]
   );
 
   const skyboxKeyRef = React.useRef<HTMLInputElement>(null);

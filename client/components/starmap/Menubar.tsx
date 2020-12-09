@@ -2,7 +2,6 @@ import React from "react";
 import {
   Box,
   Collapse,
-  Input,
   Menu,
   MenuButton as MenuButtonComp,
   MenuButtonProps,
@@ -25,7 +24,7 @@ import {
   usePluginShipsSubscription,
   useUniverseAddStarbaseMutation,
 } from "../../generated/graphql";
-import {ConfigStore, configStoreApi, useConfigStore} from "./configStore";
+import {configStoreApi, useConfigStore} from "./configStore";
 import Button from "../ui/button";
 
 import {useConfirm} from "../Dialog";

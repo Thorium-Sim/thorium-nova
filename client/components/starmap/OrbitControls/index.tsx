@@ -14,20 +14,21 @@ import {useConfigStore} from "../configStore";
 
 extend({OrbitControlsImpl});
 
-export type OrbitControls = Overwrite<
+export type OrbitControlsType = Overwrite<
   ReactThreeFiber.Object3DNode<OrbitControlsImpl, typeof OrbitControlsImpl>,
   {target?: Vector3}
 >;
 
 export const OrbitControls = forwardRef(
-  (props: OrbitControls = {enableDamping: true}, ref) => {
+  (props: OrbitControlsType = {enableDamping: true}, ref) => {
     const controls = useRef<OrbitControlsImpl>();
     const {camera, gl, invalidate} = useThree();
     useFrame(() => controls.current?.update());
     useEffect(() => {
-      controls.current?.addEventListener("change", invalidate);
-      return () => controls.current?.removeEventListener("change", invalidate);
-    }, [controls.current]);
+      const myControls = controls.current;
+      myControls?.addEventListener("change", invalidate);
+      return () => myControls?.removeEventListener("change", invalidate);
+    }, [invalidate]);
 
     const systemId = useConfigStore(store => store.systemId);
     React.useEffect(() => {
@@ -50,10 +51,11 @@ export const OrbitControls = forwardRef(
             camera.position.sub(_v);
           }
         }
-        controls.current.addEventListener?.("change", lockPan);
-        return () => controls.current?.removeEventListener("change", lockPan);
+        const myControls = controls.current;
+        myControls.addEventListener?.("change", lockPan);
+        return () => myControls?.removeEventListener("change", lockPan);
       }
-    }, [controls.current, PAN_LIMIT]);
+    }, [PAN_LIMIT, camera.position]);
     const args: [camera: Camera, canvas?: HTMLCanvasElement] = [
       camera,
       gl.domElement,

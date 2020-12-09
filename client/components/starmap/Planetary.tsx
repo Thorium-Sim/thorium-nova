@@ -1,6 +1,5 @@
 import {
   TemplateSystemSubscription,
-  UniverseStarSetIsWhiteDocument,
   useTemplateSystemSubscription,
   useUniverseStarbaseSetPositionMutation,
 } from "../../generated/graphql";
@@ -20,7 +19,7 @@ import StarEntity from "./entities/StarEntity";
 import PlanetContainer from "./entities/PlanetEntity";
 import Disc from "./Disc";
 import {configStoreApi, useConfigStore} from "./configStore";
-import {OrbitControls} from "./OrbitControls";
+import {OrbitControls, OrbitControlsType} from "./OrbitControls";
 import {PLANETARY_SCALE} from "./constants";
 import {useGLTFLoader} from "drei";
 import {whiteImage} from "./utils";
@@ -138,7 +137,7 @@ const ShipStarmapEntity: React.FC<{
 };
 
 export function useSetupOrbit() {
-  const orbitControls = React.useRef<OrbitControls>();
+  const orbitControls = React.useRef<OrbitControlsType>();
 
   React.useEffect(() => {
     configStoreApi.setState({
@@ -193,7 +192,7 @@ const Planetary: React.FC<{universeId: string; systemId: string}> = ({
   React.useEffect(() => {
     camera.position.set(0, 200, 500);
     camera.lookAt(new Vector3(0, 0, 0));
-  }, []);
+  }, [camera]);
 
   const system = data?.pluginUniverseSystem;
   React.useEffect(() => {

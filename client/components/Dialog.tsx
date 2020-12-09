@@ -146,8 +146,12 @@ const Dialog: React.FC = ({children}) => {
 export function useConfirm() {
   const dialog = React.useContext(DialogContext);
 
-  return ({header, body}: {header: string; body?: string}) =>
-    dialog({header, body, type: "confirm"});
+  return React.useCallback(
+    ({header, body}: {header: string; body?: string}) => {
+      return dialog({header, body, type: "confirm"});
+    },
+    [dialog]
+  );
 }
 export function usePrompt() {
   const dialog = React.useContext(DialogContext);

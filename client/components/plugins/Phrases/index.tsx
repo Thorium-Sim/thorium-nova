@@ -47,7 +47,9 @@ const PhrasesList: React.FC = () => {
   const prompt = usePrompt();
   const confirm = useConfirm();
   const alert = useAlert();
-  const setSelectedItem = React.useCallback(item => navigate(`${item}`), []);
+  const setSelectedItem = React.useCallback(item => navigate(`${item}`), [
+    navigate,
+  ]);
   const renderItem = React.useCallback(
     c => (
       <div className="flex items-center">
@@ -75,7 +77,7 @@ const PhrasesList: React.FC = () => {
         </Button>
       </div>
     ),
-    [pluginId]
+    [confirm, navigate, pluginId, remove, t]
   );
   return (
     <div className="flex p-8 py-12 h-full flex-col bg-blackAlpha-500 overflow-y-hidden">
@@ -256,7 +258,7 @@ const SamplePhrase = React.memo<{phraseId?: string; simple?: boolean}>(
           ).data.phraseParse
         );
       },
-      [phraseId]
+      [client, phraseId]
     );
     React.useEffect(() => {
       getPhrase();
