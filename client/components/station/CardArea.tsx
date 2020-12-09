@@ -2,10 +2,17 @@ import Login from "client/cards/Login";
 import Offline from "client/cards/Offline";
 import {useClientData} from "../clientLobby/ClientContext";
 import * as Cards from "client/cards";
-import {ComponentType, Fragment, LazyExoticComponent, Suspense} from "react";
+import {
+  ComponentType,
+  Fragment,
+  LazyExoticComponent,
+  Suspense,
+  useState,
+} from "react";
 import {ErrorBoundary} from "react-error-boundary";
 import {useTranslation} from "react-i18next";
 import {Transition} from "@headlessui/react";
+import {CardProps} from "./CardProps";
 
 const CardError = () => {
   const {t} = useTranslation();
@@ -21,28 +28,30 @@ const CardError = () => {
   );
 };
 
+const transitionProps = {
+  className: "w-full h-full absolute",
+  enter: "card-transition-enter",
+  enterFrom: "card-transition-enter-from",
+  enterTo: "card-transition-enter-to",
+  leave: "card-transition-leave pointer-events-none",
+  leaveFrom: "card-transition-leave-from",
+  leaveTo: "card-transition-leave-to",
+};
+
 export const CardArea: React.FC<{
   card: ReturnType<typeof useClientData>["station"]["cards"][0];
 }> = ({card}) => {
   const {client, station} = useClientData();
-
-  const allCards = Cards as Record<string, LazyExoticComponent<ComponentType>>;
+  const allCards = Cards as Record<
+    string,
+    LazyExoticComponent<ComponentType<CardProps>>
+  >;
 
   const CardComponents = station.cards.map(card => ({
     ...card,
     CardComponent: allCards[card.component],
   }));
 
-  const transitionProps = {
-    className: "w-full h-full absolute",
-    enter: "card-transition-enter",
-    enterFrom: "card-transition-enter-from",
-    enterTo: "card-transition-enter-to",
-    leave: "card-transition-leave pointer-events-none",
-    leaveFrom: "card-transition-leave-from",
-    leaveTo: "card-transition-leave-to",
-  };
-  const allowCard = Boolean(client.loginName) && !client.offlineState;
   return (
     <Fragment>
       <Transition show={!client.loginName} {...transitionProps}>
@@ -52,14 +61,45 @@ export const CardArea: React.FC<{
         <Offline />
       </Transition>
       {CardComponents.map(({CardComponent, id}) => (
-        <Transition key={id} show={allowCard && card.id === id}>
-          <Suspense fallback={null}>
-            <ErrorBoundary fallback={<CardError />}>
-              <CardComponent />
-            </ErrorBoundary>
-          </Suspense>
-        </Transition>
+        <CardRenderer
+          key={id}
+          CardComponent={CardComponent}
+          id={id}
+          currentCardId={card.id}
+        />
       ))}
     </Fragment>
+  );
+};
+
+const CardRenderer = ({
+  CardComponent,
+  id,
+  currentCardId,
+}: {
+  CardComponent: ComponentType<CardProps>;
+  id: string;
+  currentCardId: string;
+}) => {
+  const {client} = useClientData();
+  const allowCard = Boolean(client.loginName) && !client.offlineState;
+  const [cardLoaded, setCardLoaded] = useState(false);
+  const show = allowCard && currentCardId === id;
+  return (
+    <Transition
+      key={id}
+      show={show}
+      {...transitionProps}
+      // TODO: Replace this with the afterEnter and beforeEnter callbacks once the next version of headlessui is released.
+      onTransitionEnd={() => {
+        setCardLoaded(show ? true : false);
+      }}
+    >
+      <Suspense fallback={null}>
+        <ErrorBoundary fallback={<CardError />}>
+          <CardComponent cardLoaded={cardLoaded} />
+        </ErrorBoundary>
+      </Suspense>
+    </Transition>
   );
 };

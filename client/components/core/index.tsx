@@ -178,10 +178,19 @@ const StarmapCore: React.FC = () => {
         />
         <CanvasContextMenu />
         {dragPosition && <DragSelection {...dragPosition}></DragSelection>}
-        <ZoomSlider />
+        <ZoomSliderWrapper />
       </div>
     </Suspense>
   );
 };
 
+const ZoomSliderWrapper = () => {
+  const cameraZoom = useConfigStore(store => store.cameraVerticalDistance);
+  return (
+    <ZoomSlider
+      value={cameraZoom}
+      setValue={val => useConfigStore.getState().orbitControlsSet({zoom: val})}
+    />
+  );
+};
 export default StarmapCore;
