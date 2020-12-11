@@ -17,12 +17,11 @@ import {css} from "@emotion/core";
 import QuickStartConfig from "client/components/flightConfig/quickStart";
 import NoMatch from "./NotFound";
 import {ClientButton} from "client/components/clientLobby/ClientButton";
-import Logo from "../images/logo.svg";
+const {ReactComponent: Logo} = require("../images/logo.svg");
 
 const Welcome = () => {
   const {t} = useTranslation("welcome");
   const [show, setShow] = React.useState(false);
-  const navigate = useNavigate();
   const location = useLocation();
   const match = useMatch("/config/flight/quick");
   const {data} = useFlightsQuery();

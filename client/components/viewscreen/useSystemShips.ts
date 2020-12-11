@@ -16,8 +16,7 @@ type ShipMap = Record<
 >;
 export const useShipsStore = create<ShipMap>(() => ({}));
 
-export function useSystemShips() {
-  const systemId = useConfigStore(store => store.systemId);
+export function useSystemShips(systemId: string) {
   const autopilotIncluded = useConfigStore(store => store.includeAutopilotData);
   const {data} = useUniverseSystemShipsSubscription({variables: {systemId}});
   const [shipIds, setShipIds] = React.useState<string[]>([]);

@@ -1,4 +1,4 @@
-import React, {Suspense} from "react";
+import React, {memo, Suspense} from "react";
 import {useFrame} from "react-three-fiber";
 import {useUniverseSystemSubscription} from "../../generated/graphql";
 import {configStoreApi, useConfigStore} from "../starmap/configStore";
@@ -9,7 +9,7 @@ import {Group} from "three";
 import {ErrorBoundary} from "react-error-boundary";
 import ShipEntity from "../starmap/entities/ShipEntity";
 
-export const StarmapCorePlanetary: React.FC = () => {
+export const StarmapCorePlanetary: React.FC = memo(() => {
   const systemId = useConfigStore(store => store.systemId);
   const planetsGroup = React.useRef<Group>();
   React.useEffect(() => {
@@ -26,7 +26,7 @@ export const StarmapCorePlanetary: React.FC = () => {
   React.useEffect(() => {
     configStoreApi.setState({skyboxKey});
   }, [skyboxKey]);
-  const ids = useSystemShips();
+  const ids = useSystemShips(systemId);
 
   useFrame(() => {
     if (planetsGroup.current) {
@@ -63,4 +63,4 @@ export const StarmapCorePlanetary: React.FC = () => {
       ))}
     </>
   );
-};
+});

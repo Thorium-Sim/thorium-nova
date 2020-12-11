@@ -3,14 +3,12 @@ import {FC, useMemo, useRef} from "react";
 import {Object3DNode, useFrame} from "react-three-fiber";
 import {EllipseCurve, Group, Mesh, OrthographicCamera} from "three";
 import type {Line2} from "three/examples/jsm/lines/Line2";
-import {useSpring, animated as a} from "react-spring/three";
 
-const AnimatedText = a(Text);
 const FONT_URL = require("./Teko-Light.ttf").default;
 
-export const Circle: FC<
-  {radius?: number; tilted?: boolean} & Object3DNode<any, any>
-> = ({radius = 1, tilted}) => {
+export const Circle: FC<{radius?: number} & Object3DNode<any, any>> = ({
+  radius = 1,
+}) => {
   const points = useMemo(() => {
     const curve = new EllipseCurve(
       0,
@@ -30,10 +28,6 @@ export const Circle: FC<
   const groupRef = useRef<Group>(null);
   const lineRef = useRef<Line2>(null);
   const textRef = useRef<Mesh>(null);
-
-  const {rotation} = useSpring({
-    rotation: tilted ? [Math.PI / 3, 0, 0] : [0, 0, 0],
-  });
 
   useFrame(props => {
     const camera = props.camera as OrthographicCamera;
@@ -64,21 +58,20 @@ export const Circle: FC<
     }
   });
   return (
-    <group ref={groupRef}>
-      <AnimatedText
+    <group ref={groupRef} rotation={[-Math.PI / 2, 0, 0]}>
+      <Text
         color="#333" // default
         anchorX="center" // default
         anchorY="bottom-baseline" // default
         fontSize={0.075}
         font={FONT_URL}
         position={[0, radius * 1.03, 0]}
-        rotation={(rotation as unknown) as [number, number, number]}
         ref={textRef}
       >
         {radius < 1
           ? (radius * 1000).toLocaleString() + "m"
           : radius.toLocaleString() + "km"}
-      </AnimatedText>
+      </Text>
       <Line
         ref={lineRef}
         points={points} // Array of points

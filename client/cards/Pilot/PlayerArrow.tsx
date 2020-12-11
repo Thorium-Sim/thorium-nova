@@ -25,12 +25,7 @@ export const Arrow: FC<Object3DNode<any, any>> = props => {
     ref.current?.scale.setScalar(dx * 0.1);
   });
   return (
-    <mesh
-      ref={ref}
-      rotation={[Math.PI / 2, 0, 0]}
-      scale={[0.3, 0.3, 0.3]}
-      {...props}
-    >
+    <mesh ref={ref} rotation={[0, 0, 0]} scale={[0.3, 0.3, 0.3]} {...props}>
       <geometry vertices={arrowVertices} faces={arrowFaces} attach="geometry" />
       <meshBasicMaterial wireframe color={0xffffff} attach="material" />
     </mesh>

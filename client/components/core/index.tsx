@@ -1,4 +1,4 @@
-import React, {Suspense} from "react";
+import React, {Suspense, useCallback} from "react";
 import {Canvas, useFrame, useThree} from "react-three-fiber";
 import {ApolloProvider, useApolloClient} from "@apollo/client";
 import Nebula from "../starmap/Nebula";
@@ -145,6 +145,13 @@ const StarmapCore: React.FC = () => {
       }
     }
   );
+  const onCreated = useCallback(
+    ({gl, camera}) => {
+      ref(gl.domElement);
+      cameraRef.current = camera as PerspectiveCamera;
+    },
+    [ref]
+  );
 
   return (
     <Suspense fallback={null}>
@@ -160,10 +167,7 @@ const StarmapCore: React.FC = () => {
           gl={{antialias: true, logarithmicDepthBuffer: true, alpha: false}}
           camera={{fov: 45, near: 0.01, far: FAR}}
           concurrent
-          onCreated={({gl, camera}) => {
-            ref(gl.domElement);
-            cameraRef.current = camera as PerspectiveCamera;
-          }}
+          onCreated={onCreated}
         >
           <ApolloProvider client={client}>
             <Suspense fallback={null}>

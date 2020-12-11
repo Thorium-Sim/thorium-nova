@@ -1,0 +1,10 @@
+subscription FlightPlayerShip {
+  playerShip {
+    id
+    interstellarPosition {
+      system {
+        id
+      }
+    }
+  }
+}

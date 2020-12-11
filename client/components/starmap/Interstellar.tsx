@@ -3,7 +3,7 @@ import React from "react";
 import SystemMarker from "./SystemMarker";
 import Starfield from "./Starfield";
 import {configStoreApi} from "./configStore";
-import {OrbitControls} from "./OrbitControls";
+import {OrbitControls, OrbitControlsType} from "./OrbitControls";
 import {useFrame} from "react-three-fiber";
 import {MOUSE, Vector3} from "three";
 
@@ -13,7 +13,7 @@ const Interstellar: React.FC<{universeId: string}> = ({universeId}) => {
     skip: !universeId,
   });
 
-  const orbitControls = React.useRef<OrbitControls>();
+  const orbitControls = React.useRef<OrbitControlsType>();
   const frameCount = React.useRef(0);
 
   useFrame((state, delta) => {

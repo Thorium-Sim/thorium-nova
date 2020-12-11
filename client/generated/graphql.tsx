@@ -173,6 +173,22 @@ export type ClientLoginMutation = {
   clientLogin: {__typename?: "Client"; id: string; loginName: Maybe<string>};
 };
 
+export type FlightPlayerShipSubscriptionVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type FlightPlayerShipSubscription = {
+  __typename?: "Subscription";
+  playerShip: {
+    __typename?: "Entity";
+    id: string;
+    interstellarPosition: Maybe<{
+      __typename?: "InterstellarPositionComponent";
+      system: Maybe<{__typename?: "Entity"; id: string}>;
+    }>;
+  };
+};
+
 export type TimerPauseMutationVariables = Exact<{
   id: Scalars["ID"];
   pause: Scalars["Boolean"];
@@ -2317,6 +2333,32 @@ export function useClientLoginMutation(
 }
 export type ClientLoginMutationHookResult = ReturnType<
   typeof useClientLoginMutation
+>;
+export const FlightPlayerShipDocument = gql`
+  subscription FlightPlayerShip {
+    playerShip {
+      id
+      interstellarPosition {
+        system {
+          id
+        }
+      }
+    }
+  }
+`;
+export function useFlightPlayerShipSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    FlightPlayerShipSubscription,
+    FlightPlayerShipSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    FlightPlayerShipSubscription,
+    FlightPlayerShipSubscriptionVariables
+  >(FlightPlayerShipDocument, baseOptions);
+}
+export type FlightPlayerShipSubscriptionHookResult = ReturnType<
+  typeof useFlightPlayerShipSubscription
 >;
 export const TimerPauseDocument = gql`
   mutation TimerPause($id: ID!, $pause: Boolean!) {

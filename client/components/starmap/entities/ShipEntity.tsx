@@ -26,6 +26,7 @@ import {useTranslate2DTo3D} from "client/helpers/hooks/use2Dto3D";
 import {usePlayerShipId} from "client/components/viewscreen/PlayerShipContext";
 
 const ShipSprite = ({id, color = "white"}: {id: string; color?: string}) => {
+  // TODO: Replace with a ship icon
   const spriteMap = useTextureLoader("/assets/icons/Pyramid.svg") as Texture;
   const scale = 1 / 50;
   const ref = React.useRef<Sprite>();

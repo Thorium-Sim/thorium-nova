@@ -62,7 +62,7 @@ const ViewscreenScene: React.FC = () => {
     }
   }, [planet, camera]);
 
-  const ids = useSystemShips();
+  const ids = useSystemShips(systemId);
   if (!system) return null;
   return (
     <>

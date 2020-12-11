@@ -38,7 +38,7 @@ export const ZoomSlider = ({
         min={0}
         max={100}
         step={step}
-        value={logslider(value, true)}
+        value={logslider(value, true) || 0}
         onChange={e => setValue(logslider(parseFloat(e.target.value)))}
       />
     </div>

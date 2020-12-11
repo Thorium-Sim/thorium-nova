@@ -86,7 +86,7 @@ const store = create<ConfigStore>(set => ({
     zoom?: number;
     position?: Vector3;
   }) => {},
-  includeAutopilotData: true,
+  includeAutopilotData: false,
   compressYDimension: true,
   hidePlanets: false,
   contextMenuPosition: null,

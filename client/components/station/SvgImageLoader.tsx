@@ -1,34 +1,26 @@
-import {useState, useEffect, memo} from "react";
+import {useState, useEffect, memo, ComponentPropsWithoutRef} from "react";
 
-export const SVGImageLoader: React.FC<{url: string; className: string}> = memo(
-  ({url, className}) => {
-    const [data, setData] = useState<string | null>(null);
-    useEffect(() => {
-      async function loadSvg() {
-        const res = await fetch(url);
-        if (!res.ok) return;
-        const data = await res.text();
-        if (data.includes("<svg")) {
-          setData(data);
-        }
+export const SVGImageLoader: React.FC<
+  {url: string} & ComponentPropsWithoutRef<"img">
+> = memo(({url, alt, ...props}) => {
+  const [data, setData] = useState<string | null>(null);
+  useEffect(() => {
+    async function loadSvg() {
+      const res = await fetch(url);
+      if (!res.ok) return;
+      const data = await res.text();
+      if (data.includes("<svg")) {
+        setData(data);
       }
-      if (url.endsWith(".svg")) {
-        loadSvg();
-      }
-    }, [url]);
-    if (data) {
-      return (
-        <div className={className} dangerouslySetInnerHTML={{__html: data}} />
-      );
     }
+    if (url.endsWith(".svg")) {
+      loadSvg();
+    }
+  }, [url]);
+  if (data) {
     return (
-      <img
-        draggable="false"
-        alt=""
-        aria-hidden
-        className={className}
-        src={url}
-      />
+      <div role="img" {...props} dangerouslySetInnerHTML={{__html: data}} />
     );
   }
-);
+  return <img draggable="false" alt={alt} aria-hidden {...props} src={url} />;
+});

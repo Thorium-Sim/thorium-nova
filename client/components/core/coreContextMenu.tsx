@@ -20,6 +20,7 @@ export const CanvasContextMenu = () => {
   const [setDestination] = useShipsSetDesiredDestinationMutation();
   const [shipSpawn] = useShipSpawnMutation();
   useRightClick(e => {
+    e.preventDefault();
     const selectedShips = useSelectedShips.getState().selectedIds;
     if (selectedShips.length > 0) {
       const position = useConfigStore
