@@ -56,7 +56,22 @@ const ForwardVelocity = () => {
   const {data: velocityData} = usePlayerForwardVelocitySubscription();
   const ship = velocityData?.playerShipHot;
   if (!ship) return null;
-  return <div>{ship.forwardVelocity.toLocaleString()} km/s</div>;
+  return (
+    <div className="forward-velocity text-2xl w-full p-2 text-center bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded">
+      <div>Forward Velocity:</div>
+      <div className="font-bold text-4xl m-2 tabular-nums">
+        {ship.forwardVelocity > 1
+          ? `${ship.forwardVelocity.toLocaleString(undefined, {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            })} km/s`
+          : `${(ship.forwardVelocity * 1000).toLocaleString(undefined, {
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            })} m/s`}
+      </div>
+    </div>
+  );
 };
 const KNOB_HEIGHT = 44;
 const BUTTON_OFFSET = 0.8;
@@ -111,7 +126,6 @@ const Impulse = () => {
   );
 
   useEffect(() => {
-    console.log(downRef.current);
     if (downRef.current) return;
     set({
       y:
@@ -125,52 +139,74 @@ const Impulse = () => {
   }, [targetSpeed, cruisingSpeed, emergencySpeed, set, measurement.height]);
   if (!impulse) return null;
   return (
-    <div className="select-none">
-      <ForwardVelocity />
+    <div className="select-none flex-1">
       <div>
-        <p>{impulse.impulseEngines.cruisingSpeed}</p>
-        <p>{impulse.impulseEngines.emergencySpeed}</p>
-        <p>{impulse.impulseEngines.targetSpeed}</p>
-      </div>
-      <div className="flex">
-        <div className="flex flex-col justify-around text-right mr-4">
-          <Button
-            onClick={() => callback.current(emergencySpeed)}
-            variantColor="danger"
-          >
-            {t("Emergency")}
-          </Button>
-          <Button
-            onClick={() => callback.current(cruisingSpeed)}
-            variantColor="warning"
-          >
-            {t("Full")}
-          </Button>
-          <Button onClick={() => callback.current((cruisingSpeed * 3) / 4)}>
-            {t("3/4")}
-          </Button>
-          <Button onClick={() => callback.current((cruisingSpeed * 1) / 2)}>
-            {t("1/2")}
-          </Button>
-          <Button onClick={() => callback.current((cruisingSpeed * 1) / 4)}>
-            {t("1/4")}
-          </Button>
-          <Button onClick={() => callback.current(0)} variantColor="muted">
-            {t("Full Stop")}
-          </Button>
+        <ForwardVelocity />
+        <div className="target-velocity text-2xl w-full p-2 text-center bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded mt-4">
+          <div>Target Velocity:</div>
+
+          <p className="font-bold text-4xl m-2 tabular-nums">
+            {impulse.impulseEngines.targetSpeed > 1
+              ? `${impulse.impulseEngines.targetSpeed.toLocaleString(
+                  undefined,
+                  {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  }
+                )} km/s`
+              : `${(impulse.impulseEngines.targetSpeed * 1000).toLocaleString(
+                  undefined,
+                  {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  }
+                )} m/s`}
+          </p>
         </div>
-        <div
-          ref={ref}
-          css={css`
-            min-height: 20rem;
-          `}
-          className="h-0 relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end"
-        >
-          <a.div
-            {...bind()}
-            style={{transform: y?.to(y => `translate3d(0px,${y}px,0)`)}}
-            className="z-10 w-10 h-10 rounded-full border-blackAlpha-500 border-2 bg-gray-500 shadow-md cursor-pointer"
-          ></a.div>
+        {/* TODO: Include heat indicator here eventually. */}
+        <p className="text-xl mt-4">Impulse Speed:</p>
+
+        <div className="flex">
+          <div className="flex flex-1 flex-col justify-around text-right mr-8">
+            <Button
+              onClick={() => callback.current(emergencySpeed)}
+              variantColor="danger"
+            >
+              {t("Emergency")}
+            </Button>
+            <Button
+              onClick={() => callback.current(cruisingSpeed)}
+              variantColor="warning"
+            >
+              {t("Full")}
+            </Button>
+            <Button onClick={() => callback.current((cruisingSpeed * 3) / 4)}>
+              {t("3/4")}
+            </Button>
+            <Button onClick={() => callback.current((cruisingSpeed * 1) / 2)}>
+              {t("1/2")}
+            </Button>
+            <Button onClick={() => callback.current((cruisingSpeed * 1) / 4)}>
+              {t("1/4")}
+            </Button>
+            <Button onClick={() => callback.current(0)} variantColor="muted">
+              {t("Full Stop")}
+            </Button>
+          </div>
+
+          <div
+            ref={ref}
+            css={css`
+              min-height: 20rem;
+            `}
+            className="h-0 relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end"
+          >
+            <a.div
+              {...bind()}
+              style={{transform: y?.to(y => `translate3d(0px,${y}px,0)`)}}
+              className="z-10 w-10 h-10 rounded-full border-blackAlpha-500 border-2 bg-gray-500 shadow-md cursor-pointer"
+            ></a.div>
+          </div>
         </div>
       </div>
     </div>
@@ -184,24 +220,62 @@ const Pilot: FC<CardProps> = ({cardLoaded}) => {
   const [zoomValue, setZoomValue] = useLocalStorage("thorium_pilot_zoom", 100);
   const [dimensions, setDimensions] = useState({width: 0, height: 0});
   const client = useApolloClient();
-
+  const {t} = useTranslation();
   return (
     <div className="card-pilot h-full grid grid-cols-4 gap-4">
-      <div>
+      <div className="flex flex-col mb-6">
+        <Impulse />
+        <div
+          css={css`
+            input[type="range"]::-webkit-slider-thumb {
+              -webkit-appearance: none;
+
+              height: 2.5rem;
+              width: 2.5rem;
+              border-radius: 9999px;
+              border: 2px solid rgba(0, 0, 0, 0.36);
+              --tw-bg-opacity: 1;
+              background-color: rgba(107, 114, 128, var(--tw-bg-opacity));
+
+              margin-top: 0px;
+              cursor: pointer;
+              /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+              --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+              box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+                var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+            }
+            input[type="range"]::-webkit-slider-runnable-track {
+              width: 100%;
+              height: calc(2.5rem + 4px);
+              cursor: pointer;
+              box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+              background: rgba(0, 0, 0, 0.36);
+              border-radius: 9999px;
+              border: 2px rgba(255, 255, 255, 0.36) solid;
+            }
+
+            input[type="range"]:focus::-webkit-slider-runnable-track {
+              background: rgba(255, 255, 255, 0.05);
+            }
+          `}
+        >
+          <p className="text-xl">Zoom:</p>
+          <ZoomSlider
+            value={zoomValue}
+            setValue={setZoomValue}
+            zoomMin={dimensions.width / (zoomMax * 2)}
+            zoomMax={dimensions.width / (zoomMin * 2)}
+            step={0.01}
+          />
+        </div>
         <Button
+          size="lg"
+          className="w-full"
           onClick={() => setTilt(t => (t == 0 ? 0.5 : t === 0.5 ? 1 : 0))}
         >
-          Tilt
+          {t("Tilt Sensor View")}
         </Button>
-
-        <ZoomSlider
-          value={zoomValue}
-          setValue={setZoomValue}
-          zoomMin={dimensions.width / (zoomMax * 2)}
-          zoomMax={dimensions.width / (zoomMin * 2)}
-          step={0.01}
-        />
-        <Impulse />
       </div>
       <div className="h-full col-start-2 col-end-4 flex items-center justify-center">
         <div className="h-full relative">

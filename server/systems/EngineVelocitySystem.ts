@@ -126,13 +126,7 @@ export class EngineVelocitySystem extends System {
 
       velocityObject.position.add(oppositeAcceleration);
     }
-    if (entity.isPlayerShip) {
-      console.log(
-        oppositeAcceleration.x,
-        accelerationVector.x,
-        velocityObject.position.x
-      );
-    }
+
     entity.velocity.x =
       Math.round(velocityObject.position.x * 10000000) / 10000000;
     entity.velocity.y =
