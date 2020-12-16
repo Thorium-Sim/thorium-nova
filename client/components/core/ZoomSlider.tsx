@@ -30,17 +30,12 @@ export const ZoomSlider = ({
   }
 
   return (
-    <div
-      className={`pointer-events-none absolute bottom-0 right-0 w-64 py-6 px-4`}
-    >
-      <p>Zoom</p>
-      <Slider
-        min={0}
-        max={100}
-        step={step}
-        value={logslider(value, true) || 0}
-        onChange={e => setValue(logslider(parseFloat(e.target.value)))}
-      />
-    </div>
+    <Slider
+      min={0}
+      max={100}
+      step={step}
+      value={logslider(value, true) || 0}
+      onChange={e => setValue(logslider(parseFloat(e.target.value)))}
+    />
   );
 };

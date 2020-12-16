@@ -1,4 +1,4 @@
-import {Box, Button, Flex, Grid, Heading, IconButton} from "@chakra-ui/core";
+import {Box, Button, Flex, Heading, IconButton} from "@chakra-ui/core";
 import SearchableList from "../../../../components/ui/SearchableList";
 import React from "react";
 import {useTranslation} from "react-i18next";

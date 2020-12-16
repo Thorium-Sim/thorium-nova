@@ -189,6 +189,62 @@ export type FlightPlayerShipSubscription = {
   };
 };
 
+export type PlayerForwardVelocitySubscriptionVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type PlayerForwardVelocitySubscription = {
+  __typename?: "Subscription";
+  playerShipHot: {__typename?: "Entity"; id: string; forwardVelocity: number};
+};
+
+export type PlayerImpulseSubscriptionVariables = Exact<{[key: string]: never}>;
+
+export type PlayerImpulseSubscription = {
+  __typename?: "Subscription";
+  impulseEnginesOutfit: Maybe<{
+    __typename?: "Entity";
+    id: string;
+    impulseEngines: {
+      __typename?: "ImpulseEnginesComponent";
+      cruisingSpeed: number;
+      emergencySpeed: number;
+      targetSpeed: number;
+    };
+  }>;
+};
+
+export type PlayerSetImpulseMutationVariables = Exact<{
+  speed: Scalars["Float"];
+}>;
+
+export type PlayerSetImpulseMutation = {
+  __typename?: "Mutation";
+  impulseEnginesSetTargetSpeed: {__typename?: "Entity"; id: string};
+};
+
+export type ThrustersSetDirectionMutationVariables = Exact<{
+  x?: Maybe<Scalars["Float"]>;
+  y?: Maybe<Scalars["Float"]>;
+  z?: Maybe<Scalars["Float"]>;
+}>;
+
+export type ThrustersSetDirectionMutation = {
+  __typename?: "Mutation";
+  thrustersSetDirection: {__typename?: "Entity"; id: string};
+};
+
+export type ThrustersSetRotationDeltaMutationVariables = Exact<{
+  x?: Maybe<Scalars["Float"]>;
+  y?: Maybe<Scalars["Float"]>;
+  z?: Maybe<Scalars["Float"]>;
+}>;
+
+export type ThrustersSetRotationDeltaMutation = {
+  __typename?: "Mutation";
+  thrustersSetRotationDelta: {__typename?: "Entity"; id: string};
+};
+
 export type TimerPauseMutationVariables = Exact<{
   id: Scalars["ID"];
   pause: Scalars["Boolean"];
@@ -2359,6 +2415,121 @@ export function useFlightPlayerShipSubscription(
 }
 export type FlightPlayerShipSubscriptionHookResult = ReturnType<
   typeof useFlightPlayerShipSubscription
+>;
+export const PlayerForwardVelocityDocument = gql`
+  subscription PlayerForwardVelocity {
+    playerShipHot {
+      id
+      forwardVelocity
+    }
+  }
+`;
+export function usePlayerForwardVelocitySubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    PlayerForwardVelocitySubscription,
+    PlayerForwardVelocitySubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    PlayerForwardVelocitySubscription,
+    PlayerForwardVelocitySubscriptionVariables
+  >(PlayerForwardVelocityDocument, baseOptions);
+}
+export type PlayerForwardVelocitySubscriptionHookResult = ReturnType<
+  typeof usePlayerForwardVelocitySubscription
+>;
+export const PlayerImpulseDocument = gql`
+  subscription PlayerImpulse {
+    impulseEnginesOutfit {
+      id
+      impulseEngines {
+        cruisingSpeed
+        emergencySpeed
+        targetSpeed
+      }
+    }
+  }
+`;
+export function usePlayerImpulseSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    PlayerImpulseSubscription,
+    PlayerImpulseSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    PlayerImpulseSubscription,
+    PlayerImpulseSubscriptionVariables
+  >(PlayerImpulseDocument, baseOptions);
+}
+export type PlayerImpulseSubscriptionHookResult = ReturnType<
+  typeof usePlayerImpulseSubscription
+>;
+export const PlayerSetImpulseDocument = gql`
+  mutation PlayerSetImpulse($speed: Float!) {
+    impulseEnginesSetTargetSpeed(speed: $speed) {
+      id
+    }
+  }
+`;
+export function usePlayerSetImpulseMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PlayerSetImpulseMutation,
+    PlayerSetImpulseMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PlayerSetImpulseMutation,
+    PlayerSetImpulseMutationVariables
+  >(PlayerSetImpulseDocument, baseOptions);
+}
+export type PlayerSetImpulseMutationHookResult = ReturnType<
+  typeof usePlayerSetImpulseMutation
+>;
+export const ThrustersSetDirectionDocument = gql`
+  mutation ThrustersSetDirection($x: Float = 0, $y: Float = 0, $z: Float = 0) {
+    thrustersSetDirection(direction: {x: $x, y: $y, z: $z}) {
+      id
+    }
+  }
+`;
+export function useThrustersSetDirectionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ThrustersSetDirectionMutation,
+    ThrustersSetDirectionMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ThrustersSetDirectionMutation,
+    ThrustersSetDirectionMutationVariables
+  >(ThrustersSetDirectionDocument, baseOptions);
+}
+export type ThrustersSetDirectionMutationHookResult = ReturnType<
+  typeof useThrustersSetDirectionMutation
+>;
+export const ThrustersSetRotationDeltaDocument = gql`
+  mutation ThrustersSetRotationDelta(
+    $x: Float = 0
+    $y: Float = 0
+    $z: Float = 0
+  ) {
+    thrustersSetRotationDelta(rotation: {x: $x, y: $y, z: $z}) {
+      id
+    }
+  }
+`;
+export function useThrustersSetRotationDeltaMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ThrustersSetRotationDeltaMutation,
+    ThrustersSetRotationDeltaMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    ThrustersSetRotationDeltaMutation,
+    ThrustersSetRotationDeltaMutationVariables
+  >(ThrustersSetRotationDeltaDocument, baseOptions);
+}
+export type ThrustersSetRotationDeltaMutationHookResult = ReturnType<
+  typeof useThrustersSetRotationDeltaMutation
 >;
 export const TimerPauseDocument = gql`
   mutation TimerPause($id: ID!, $pause: Boolean!) {

@@ -1,0 +1,5 @@
+mutation ThrustersSetDirection($x: Float = 0, $y: Float = 0, $z: Float = 0) {
+  thrustersSetDirection(direction: {x: $x, y: $y, z: $z}) {
+    id
+  }
+}

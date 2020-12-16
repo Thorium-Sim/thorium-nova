@@ -1,0 +1,10 @@
+subscription PlayerImpulse {
+  impulseEnginesOutfit {
+    id
+    impulseEngines {
+      cruisingSpeed
+      emergencySpeed
+      targetSpeed
+    }
+  }
+}

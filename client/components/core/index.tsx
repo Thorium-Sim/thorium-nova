@@ -191,10 +191,17 @@ const StarmapCore: React.FC = () => {
 const ZoomSliderWrapper = () => {
   const cameraZoom = useConfigStore(store => store.cameraVerticalDistance);
   return (
-    <ZoomSlider
-      value={cameraZoom}
-      setValue={val => useConfigStore.getState().orbitControlsSet({zoom: val})}
-    />
+    <div
+      className={`pointer-events-none absolute bottom-0 right-0 w-64 py-6 px-4`}
+    >
+      <p>Zoom</p>
+      <ZoomSlider
+        value={cameraZoom}
+        setValue={val =>
+          useConfigStore.getState().orbitControlsSet({zoom: val})
+        }
+      />
+    </div>
   );
 };
 export default StarmapCore;

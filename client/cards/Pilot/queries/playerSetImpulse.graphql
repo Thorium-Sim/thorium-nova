@@ -1,0 +1,5 @@
+mutation PlayerSetImpulse($speed: Float!) {
+  impulseEnginesSetTargetSpeed(speed: $speed) {
+    id
+  }
+}

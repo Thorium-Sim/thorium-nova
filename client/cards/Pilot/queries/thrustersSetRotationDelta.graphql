@@ -1,0 +1,9 @@
+mutation ThrustersSetRotationDelta(
+  $x: Float = 0
+  $y: Float = 0
+  $z: Float = 0
+) {
+  thrustersSetRotationDelta(rotation: {x: $x, y: $y, z: $z}) {
+    id
+  }
+}

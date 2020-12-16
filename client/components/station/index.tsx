@@ -94,7 +94,9 @@ const StationLayout: React.FC<{alertLevel?: string}> = ({
       />
       <CardSwitcher cardId={card.id} changeCard={changeCard} />
       <div className="card-frame">
-        <div className="card-frame-ship-name">{ship.identity.name}</div>
+        <div className="card-frame-ship-name select-none">
+          {ship.identity.name}
+        </div>
         {ship.shipAssets?.logo && (
           <div className="card-frame-ship-logo">
             <SVGImageLoader
@@ -103,21 +105,25 @@ const StationLayout: React.FC<{alertLevel?: string}> = ({
             />
           </div>
         )}
-        <div className="card-frame-station-name">{station.name}</div>
+        <div className="card-frame-station-name select-none">
+          {station.name}
+        </div>
         <div className="card-frame-station-logo">
           <SVGImageLoader
             className="card-frame-station-logo-image"
             url={station.logo || stationLogo}
           />
         </div>
-        <div className="card-frame-card-name">{card.name}</div>
+        <div className="card-frame-card-name select-none">{card.name}</div>
         <div className="card-frame-card-icon">
           <SVGImageLoader
             className="card-frame-card-icon-image"
             url={card.icon || cardIcon}
           />
         </div>
-        <div className="card-frame-login-name">{client.loginName}</div>
+        <div className="card-frame-login-name select-none">
+          {client.loginName}
+        </div>
         {/* TODO: Add this once we get Thoriumsim.com accounts */}
         <div className="card-frame-login-profile">
           {/* <img

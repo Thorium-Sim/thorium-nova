@@ -1,6 +1,4 @@
-import Entity from "../helpers/ecs/entity";
 import System from "../helpers/ecs/system";
-import {Duration} from "luxon";
 import {pubsub} from "../helpers/pubsub";
 
 export class Networking extends System {
@@ -8,8 +6,19 @@ export class Networking extends System {
   lastUpdate = Date.now();
   preUpdate(elapsed: number) {
     if (Date.now() - this.lastUpdate > 1000 / Networking.updatesPerSecond) {
-      // TODO: Publish for all of the systems inhabited by player ships
-      const systemIds = ["ew1d9kfkfhc49g2"];
+      const playerShips = this.ecs.entities.filter(
+        e => e.isShip && e.isPlayerShip
+      );
+      playerShips.forEach(e => {
+        pubsub.publish("playerShipHot", {
+          shipId: e.id,
+          ship: e,
+        });
+      });
+
+      const systemIds = playerShips
+        .map(e => e.interstellarPosition?.systemId)
+        .filter((a, i, arr) => a && arr.indexOf(a) === i);
       systemIds.forEach(id => {
         pubsub.publish("universeSystemShipsHot", {
           systemId: id,
@@ -18,6 +27,7 @@ export class Networking extends System {
           ),
         });
       });
+
       this.lastUpdate = Date.now();
     }
   }

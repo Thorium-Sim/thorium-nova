@@ -6,7 +6,7 @@ const velocityObject = new Object3D();
 const forwardVector = new Vector3();
 const shipRotationQuaternion = new Quaternion();
 const accelerationVector = new Vector3();
-
+const oppositeAcceleration = new Vector3();
 const ACCELERATION_MASS_DAMPENING = 3;
 export class EngineVelocitySystem extends System {
   test(entity: Entity) {
@@ -73,51 +73,66 @@ export class EngineVelocitySystem extends System {
       velocityObject.translateY(accelY);
       velocityObject.translateZ(accelZ);
 
-      accelerationVector.x = Math.abs(accelerationVector.x + accelX);
-      accelerationVector.y = Math.abs(accelerationVector.y + accelY);
-      accelerationVector.z = Math.abs(accelerationVector.z + accelZ);
+      accelerationVector.x = accelerationVector.x + accelX;
+      accelerationVector.y = accelerationVector.y + accelY;
+      accelerationVector.z = accelerationVector.z + accelZ;
     }
 
-    accelerationVector
-      .applyQuaternion(shipRotationQuaternion)
-      .normalize()
-      .sub(new Vector3(1, 1, 1))
-      .negate();
-
-    // TODO: Fix acceleration and dampening to make it so it's consistent when traveling at a diagonal.
+    // This needs a bit of fixing.
+    // The issue at hand is that I'm only dampening on three axes: x,y,z
+    // But what really needs to happen is a dampening on six axes: x,y,z,-x,-y,-z.
+    // If I were to turn my ship around using the yaw thrusters, the system as it currently stands
+    //  would require me to apply acceleration only using my engines, and not rely on the
+    // inertial dampeners at all. That is not ideal.
+    // Instead, it should only ignore the velocity of the ship going in a specific direction. So
+    // if my acceleration is positive z, but my velocity is negative z, it should add to my positive
+    // acceleration so the velocity gets back to zero as quickly as possible. I think
+    // this will fix a number of issues that have been experienced.
 
     // Apply dampening
     if (dampening) {
       // Create an opposite vector, but eliminate anything that is not part of the acceleration
       const offsetDampening = dampening / 100 + 1;
-      const dampeningRatio = (-1 / offsetDampening) * elapsedRatio;
-      const dampeningVector = new Vector3(
-        velocityObject.position.x * dampeningRatio,
-        velocityObject.position.y * dampeningRatio,
-        velocityObject.position.z * dampeningRatio
-      ).multiply(accelerationVector);
+      const dampeningRatio = (1 / offsetDampening) * elapsedRatio;
+      accelerationVector.applyQuaternion(shipRotationQuaternion);
+      oppositeAcceleration
+        .set(
+          Math.abs(accelerationVector.x),
+          Math.abs(accelerationVector.y),
+          Math.abs(accelerationVector.z)
+        )
+        .normalize()
+        .subScalar(1)
+        .multiplyScalar(dampeningRatio);
 
-      // Add it to the velocity to reverse it a bit
-      velocityObject.position.add(dampeningVector);
+      oppositeAcceleration.x =
+        velocityObject.position.x *
+        (Math.sign(accelerationVector.x) ===
+        Math.sign(velocityObject.position.x)
+          ? 0
+          : oppositeAcceleration.x);
+      oppositeAcceleration.y =
+        velocityObject.position.y *
+        (Math.sign(accelerationVector.y) ===
+        Math.sign(velocityObject.position.y)
+          ? 0
+          : oppositeAcceleration.y);
+      oppositeAcceleration.z =
+        velocityObject.position.z *
+        (Math.sign(accelerationVector.z) ===
+        Math.sign(velocityObject.position.z)
+          ? 0
+          : oppositeAcceleration.z);
 
-      // If we ever cross 0 with our reversing, just set the value to 0
-      velocityObject.position.x =
-        Math.sign(velocity.x) === Math.sign(velocityObject.position.x) ||
-        velocity.x === 0
-          ? velocityObject.position.x
-          : 0;
-      velocityObject.position.y =
-        Math.sign(velocity.y) === Math.sign(velocityObject.position.y) ||
-        velocity.y === 0
-          ? velocityObject.position.y
-          : 0;
-      velocityObject.position.z =
-        Math.sign(velocity.z) === Math.sign(velocityObject.position.z) ||
-        velocity.z === 0
-          ? velocityObject.position.z
-          : 0;
+      velocityObject.position.add(oppositeAcceleration);
     }
-
+    if (entity.isPlayerShip) {
+      console.log(
+        oppositeAcceleration.x,
+        accelerationVector.x,
+        velocityObject.position.x
+      );
+    }
     entity.velocity.x =
       Math.round(velocityObject.position.x * 10000000) / 10000000;
     entity.velocity.y =

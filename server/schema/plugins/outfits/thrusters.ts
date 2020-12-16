@@ -3,9 +3,11 @@ import App from "server/app";
 import Components from "server/components";
 import {Coordinates} from "server/components/Coordinates";
 import Entity from "server/helpers/ecs/entity";
+import {GraphQLContext} from "server/helpers/graphqlContext";
 import {pubsub} from "server/helpers/pubsub";
 import {
   Arg,
+  Ctx,
   ID,
   Int,
   Mutation,
@@ -39,12 +41,13 @@ export class ThrustersOutfitResolver {
     @Arg("pluginId", type => ID, {nullable: true}) pluginId: string,
     @Arg("outfitId", type => ID, {nullable: true}) outfitId: string,
     @Arg("shipId", type => ID, {nullable: true}) shipId: string,
-    @Arg("direction", type => Coordinates) direction: Coordinates
+    @Arg("direction", type => Coordinates) direction: Coordinates,
+    @Ctx() context: GraphQLContext
   ) {
     return updateOutfit({
       pluginId,
       outfitId,
-      shipId,
+      shipId: shipId || context.client?.ship?.id,
       outfitType: "thrusters",
       update: {direction},
     });
@@ -69,12 +72,13 @@ export class ThrustersOutfitResolver {
     @Arg("pluginId", type => ID, {nullable: true}) pluginId: string,
     @Arg("outfitId", type => ID, {nullable: true}) outfitId: string,
     @Arg("shipId", type => ID, {nullable: true}) shipId: string,
-    @Arg("thrust") thrust: number
+    @Arg("thrust") thrust: number,
+    @Ctx() context: GraphQLContext
   ) {
     return updateOutfit({
       pluginId,
       outfitId,
-      shipId,
+      shipId: shipId || context.client?.ship?.id,
       outfitType: "thrusters",
       update: {directionThrust: thrust},
     });
@@ -84,12 +88,13 @@ export class ThrustersOutfitResolver {
     @Arg("pluginId", type => ID, {nullable: true}) pluginId: string,
     @Arg("outfitId", type => ID, {nullable: true}) outfitId: string,
     @Arg("shipId", type => ID, {nullable: true}) shipId: string,
-    @Arg("rotation", type => Coordinates) rotation: Coordinates
+    @Arg("rotation", type => Coordinates) rotation: Coordinates,
+    @Ctx() context: GraphQLContext
   ) {
     return updateOutfit({
       pluginId,
       outfitId,
-      shipId,
+      shipId: shipId || context.client?.ship?.id,
       outfitType: "thrusters",
       update: {rotationDelta: rotation},
     });

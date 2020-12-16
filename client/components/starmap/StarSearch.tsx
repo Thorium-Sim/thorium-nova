@@ -1,4 +1,4 @@
-import {Box, Button, Input, List, ListItem, PseudoBox} from "@chakra-ui/core";
+import {Box, Button, Input, List, ListItem} from "@chakra-ui/core";
 import {
   EntityTypes,
   UniverseSearchDocument,
@@ -9,7 +9,6 @@ import {
 import {useCombobox} from "downshift";
 import React from "react";
 import {useTranslation} from "react-i18next";
-import {css} from "@emotion/core";
 import {useConfigStore} from "./configStore";
 import {useApolloClient} from "@apollo/client";
 import {Vector3} from "three";
@@ -30,7 +29,6 @@ function StarSearch() {
   const {
     isOpen,
     getToggleButtonProps,
-    getLabelProps,
     getMenuProps,
     highlightedIndex,
     getItemProps,

@@ -72,6 +72,9 @@ export default class Client {
     this.id = params.id || uuid();
     this.name = params.name || randomNameGenerator();
     this.connected = params.connected || false;
+    this.shipId = params.shipId || null;
+    this.stationId = params.stationId || null;
+    this.loginName = params.loginName || null;
   }
   connect() {
     this.connected = true;

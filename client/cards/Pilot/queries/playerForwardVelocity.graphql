@@ -1,0 +1,6 @@
+subscription PlayerForwardVelocity {
+  playerShipHot {
+    id
+    forwardVelocity
+  }
+}

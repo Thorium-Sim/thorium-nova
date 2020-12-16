@@ -2,8 +2,8 @@ import Entity from "server/helpers/ecs/entity";
 import System from "server/helpers/ecs/system";
 import {Euler, Quaternion, Vector3} from "three";
 
-function unitVelocity(rv: number, dv: number) {
-  return Math.sign(rv + dv) === Math.sign(rv) || rv === 0 ? rv + dv : 0;
+function oppositeVectorUnit(vectorUnit: number) {
+  return (Math.sign(vectorUnit) || -1) * (Math.abs(vectorUnit) - 1);
 }
 
 const rotationAcceleration = new Vector3();
@@ -75,30 +75,24 @@ export class RotationSystem extends System {
       const dampener = systems?.find(s => s.dampener);
       const dampening = dampener?.dampener?.dampening;
       if (dampening) {
-        const accelerationVector = rotationAcceleration
-          .normalize()
-          .sub(new Vector3(1, 1, 1))
-          .negate();
-        const offsetDampening = dampening / 100 + 1;
-        const dampeningRatio = (-1 / offsetDampening) * elapsedRatio;
+        rotationAcceleration.normalize();
+        const oppositeAcceleration = new Vector3(
+          oppositeVectorUnit(rotationAcceleration.x),
+          oppositeVectorUnit(rotationAcceleration.y),
+          oppositeVectorUnit(rotationAcceleration.z)
+        );
+        const offsetDampening = (dampening + 1) / 50;
+        const dampeningRatio = (1 / offsetDampening) * elapsedRatio;
         const dampeningVector = new Vector3(
           rotationVelocity.x * dampeningRatio,
           rotationVelocity.y * dampeningRatio,
           rotationVelocity.z * dampeningRatio
-        ).multiply(accelerationVector);
-
-        rotationVelocity.x = unitVelocity(
-          rotationVelocity.x,
-          dampeningVector.x
-        );
-        rotationVelocity.y = unitVelocity(
-          rotationVelocity.y,
-          dampeningVector.y
-        );
-        rotationVelocity.z = unitVelocity(
-          rotationVelocity.z,
-          dampeningVector.z
-        );
+        )
+          .negate()
+          .multiply(oppositeAcceleration);
+        rotationVelocity.x += dampeningVector.x;
+        rotationVelocity.y += dampeningVector.y;
+        rotationVelocity.z += dampeningVector.z;
       }
       rotationVelocityVector.set(
         rotationVelocity.x * elapsedRatio,

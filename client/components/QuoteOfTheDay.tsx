@@ -111,6 +111,8 @@ const quotes = [
   "He knew everything there was to know about literature, except how to enjoy it.",
   "Insanity is contagious.",
   "Brains are weird, man. Weird, and grey, and squishy.",
+  "You are entitled to your own opinion, but you are not entitled to your own facts.",
+  "It is not incumbent on you to complete the task, but neither are you free to desist from it.",
 ];
 
 const QuoteOfTheDay = () => {

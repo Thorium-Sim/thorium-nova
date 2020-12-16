@@ -13,6 +13,7 @@ import {ShipAssetsComponent} from "server/components/ship/shipAssets";
 import {SatelliteComponent} from "server/components/satellite";
 import {GraphQLContext} from "server/helpers/graphqlContext";
 import BasePlugin, {getPlugin} from "./plugins/basePlugin";
+import {Object3D, Quaternion, Vector3} from "three";
 
 @Resolver(Entity)
 export class EntityResolver {
@@ -43,6 +44,10 @@ export function getEntityType(entity: Entity) {
   throw new Error("Unknown entity type for entity. Check the logs.");
 }
 
+const shipRotationQuaternion = new Quaternion();
+const forwardVector = new Vector3();
+const velocityObject = new Object3D();
+
 registerEnumType(EntityTypes, {name: "EntityTypes"});
 @Resolver(of => Entity)
 export class EntityFieldResolver {
@@ -71,5 +76,17 @@ export class EntityFieldResolver {
   satellite(@Root() entity: Entity): SatelliteComponent | null {
     if (!entity.satellite) return null;
     return ({...entity.satellite, entity} as unknown) as SatelliteComponent;
+  }
+  @FieldResolver(type => Number)
+  forwardVelocity(@Root() entity: Entity): number {
+    const {velocity, rotation} = entity;
+    if (!velocity || !rotation) return 0;
+    shipRotationQuaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
+    velocityObject.rotation.setFromQuaternion(shipRotationQuaternion);
+    velocityObject.position.set(velocity.x, velocity.y, velocity.z);
+    const forwardVelocity = velocityObject.position.dot(
+      forwardVector.set(0, 0, 1).applyQuaternion(shipRotationQuaternion)
+    );
+    return forwardVelocity;
   }
 }

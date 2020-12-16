@@ -148,6 +148,41 @@ export class ActiveShipsResolver {
   ): Entity {
     return payload.ship;
   }
+  @Subscription(returns => Entity, {
+    topics: ({context}: {context: GraphQLContext}) => {
+      const id = uuid();
+      const ship = App.activeFlight?.ecs.entities.find(
+        s => s.id === context.client?.shipId
+      );
+      if (ship) {
+        process.nextTick(() => {
+          pubsub.publish(id, {
+            shipId: ship.id,
+            ship,
+          });
+        });
+      }
+      return [id, "playerShipHot"];
+    },
+    filter: ({
+      context,
+      payload,
+    }: {
+      context: GraphQLContext;
+      payload: {shipId: string};
+    }) => {
+      if (context.client?.shipId !== payload.shipId) return false;
+      return true;
+    },
+    description:
+      "Provides more frequent subscription updates for a player ship.",
+  })
+  playerShipHot(
+    @Root() payload: {id: string; ship: Entity},
+    @Ctx() context: GraphQLContext
+  ): Entity {
+    return payload.ship;
+  }
   @Subscription(returns => [Entity], {
     topics: ({args, payload}) => {
       const id = uuid();
