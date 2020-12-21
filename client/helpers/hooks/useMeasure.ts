@@ -71,7 +71,7 @@ function useMeasure<Element extends HTMLElement = HTMLElement>(): [
         window.removeEventListener("scroll", measure);
       };
     }
-  }, [node]);
+  }, [node, measure]);
 
   return [ref, dimensions, measure, node];
 }
