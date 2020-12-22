@@ -1,19 +1,9 @@
 import {useTextureLoader} from "drei";
 import React, {Suspense} from "react";
-import {useFrame, useLoader, useThree} from "react-three-fiber";
-import {
-  CircleGeometry,
-  Euler,
-  Group,
-  LineLoop,
-  Quaternion,
-  Texture,
-  TextureLoader,
-  Vector3,
-} from "three";
+import {useFrame, useLoader} from "react-three-fiber";
+import {Group, Texture, TextureLoader, Vector3} from "three";
 import {
   UniverseObjectFragment,
-  SatelliteComponentFragment,
   TemplateSystemSubscription,
 } from "../../../generated/graphql";
 import {configStoreApi, useConfigStore} from "../configStore";
@@ -57,7 +47,7 @@ const PlanetSprite = ({color = "white"}) => {
 const distanceVector = new Vector3();
 const SPRITE_SCALE_FACTOR = 50;
 
-const Planet: React.FC<{
+export const Planet: React.FC<{
   position: Vector3;
   scaledPosition: Vector3;
   scale: Vector3 | [number, number, number];
@@ -66,11 +56,12 @@ const Planet: React.FC<{
   texture: string;
   axialTilt: number;
   name: string;
-  satellites: UniverseObjectFragment[];
   selected: boolean;
   onPointerOver?: (event: unknown) => void;
   onPointerOut?: (event: unknown) => void;
   onClick?: (event: unknown) => void;
+  showSprite?: boolean;
+  isSatellite?: boolean;
 }> = ({
   position,
   scaledPosition = position,
@@ -80,11 +71,13 @@ const Planet: React.FC<{
   texture,
   axialTilt,
   name,
-  satellites,
   selected,
   onPointerOver,
   onPointerOut,
   onClick,
+  children,
+  showSprite,
+  isSatellite,
 }) => {
   const group = React.useRef<Group>();
   const planetSprite = React.useRef<Group>();
@@ -111,7 +104,7 @@ const Planet: React.FC<{
       if (
         size &&
         distance / size > 100 &&
-        useConfigStore.getState().viewingMode === "core"
+        (useConfigStore.getState().viewingMode === "core" || showSprite)
       ) {
         planetSprite.current.visible = true;
         planetMesh.current.visible = false;
@@ -121,58 +114,45 @@ const Planet: React.FC<{
       }
     }
   });
-  const planet = React.useRef<Group>();
   const spriteScale = 1 / SPRITE_SCALE_FACTOR;
 
   return (
-    <group position={scaledPosition} ref={planet}>
-      <Suspense fallback={null}>
-        <group
-          ref={planetSprite}
-          scale={[spriteScale, spriteScale, spriteScale]}
-        >
-          <PlanetSprite />
-        </group>
-        <group
-          ref={planetMesh}
-          scale={scale}
-          rotation={[0, 0, axialTilt * DEG_TO_RAD]}
-          onPointerOver={onPointerOver}
-          onPointerOut={onPointerOut}
-          onClick={onClick}
-        >
-          <Sphere texture={texture} />
-          {rings && <Rings texture={rings} />}
-          {clouds && <Clouds texture={clouds} />}
-          {selected && <Selected />}
-        </group>
-      </Suspense>
-      {configStoreApi.getState().viewingMode !== "viewscreen" && (
+    <group position={scaledPosition}>
+      <group
+        onPointerOver={onPointerOver}
+        onPointerOut={onPointerOut}
+        onClick={onClick}
+      >
+        <Suspense fallback={null}>
+          <group
+            ref={planetSprite}
+            scale={[spriteScale, spriteScale, spriteScale]}
+          >
+            <PlanetSprite />
+          </group>
+          <group
+            ref={planetMesh}
+            scale={scale}
+            rotation={[0, 0, axialTilt * DEG_TO_RAD]}
+          >
+            <Sphere texture={texture} />
+            {rings && <Rings texture={rings} />}
+            {clouds && <Clouds texture={clouds} />}
+            {selected && <Selected />}
+          </group>
+        </Suspense>
+      </group>
+      {configStoreApi.getState().viewingMode !== "viewscreen" && !isSatellite && (
         <group ref={group}>
           <SystemLabel
             systemId=""
             name={name}
             hoveringDirection={{current: 0}}
+            scale={5 / 128}
           />
         </group>
       )}
-      {satellites?.map((s, i) => (
-        <PlanetEntity
-          key={`orbit-${i}`}
-          isSatellite
-          origin={position}
-          scaledOrigin={scaledPosition}
-          entity={{
-            ...s,
-            satellite: s.satellite
-              ? {
-                  ...s.satellite,
-                  satellites: [],
-                }
-              : null,
-          }}
-        />
-      ))}
+      {children}
     </group>
   );
 };
@@ -258,12 +238,30 @@ const PlanetContainer: React.FC<{
         rings={ringsMapAsset}
         texture={textureMapAsset}
         axialTilt={axialTilt}
-        satellites={satellites}
         selected={selected}
+        isSatellite={isSatellite}
         onPointerOver={onPointerOver}
         onPointerOut={onPointerOut}
         onClick={onClick}
-      />
+      >
+        {satellites?.map((s, i) => (
+          <PlanetEntity
+            key={`orbit-${i}`}
+            isSatellite
+            origin={position}
+            scaledOrigin={scaledPosition}
+            entity={{
+              ...s,
+              satellite: s.satellite
+                ? {
+                    ...s.satellite,
+                    satellites: [],
+                  }
+                : null,
+            }}
+          />
+        ))}
+      </Planet>
     </>
   );
 };

@@ -1,4 +1,4 @@
-import {useReducer, useEffect, useCallback, Reducer, ReducerState} from "react";
+import {useReducer, useEffect, useCallback, Reducer} from "react";
 
 export function useLocalStorageReducer<R extends Reducer<I, any>, I>(
   reducer: R,
@@ -20,9 +20,10 @@ export function useLocalStorageReducer<R extends Reducer<I, any>, I>(
 
   const hookVars = useReducer(reducer, null, init);
 
+  const hookyHook = hookVars[0];
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(hookVars[0]));
-  }, [storageKey, hookVars[0]]);
+    localStorage.setItem(storageKey, JSON.stringify(hookyHook));
+  }, [storageKey, hookyHook]);
 
   return hookVars;
 }

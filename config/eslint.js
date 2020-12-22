@@ -116,7 +116,7 @@ module.exports = {
     "no-extend-native": "warn",
     "no-extra-bind": "warn",
     "no-extra-label": "warn",
-    "no-fallthrough": "warn",
+    "no-fallthrough": "off",
     "no-func-assign": "warn",
     "no-implied-eval": "warn",
     "no-invalid-regexp": "warn",

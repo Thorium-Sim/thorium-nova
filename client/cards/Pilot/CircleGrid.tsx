@@ -1,14 +1,7 @@
 import {useShipsStore} from "client/components/viewscreen/useSystemShips";
 import {Fragment, memo, useRef} from "react";
 import {useFrame} from "react-three-fiber";
-import {
-  Euler,
-  Group,
-  Mesh,
-  OrthographicCamera,
-  Quaternion,
-  Vector3,
-} from "three";
+import {Group, OrthographicCamera, Quaternion} from "three";
 import {Circle} from "./DistanceCircle";
 import {Arrow} from "./PlayerArrow";
 import {useSpring} from "react-spring/three";
@@ -21,10 +14,6 @@ const cameraQuaternionMultiplier = new Quaternion(
   0.7071067811865476
 );
 const forwardQuaternion = new Quaternion(0, 1, 0, 0);
-window.Mesh = Mesh;
-window.Vector3 = Vector3;
-window.Euler = Euler;
-window.Quaternion = Quaternion;
 export const CircleGrid = memo(
   ({
     tilt,

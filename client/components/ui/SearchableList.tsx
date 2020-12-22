@@ -27,7 +27,7 @@ const SearchableList: React.FC<SearchableListProps> = ({
   const [search, setSearch] = React.useState<string>("");
   const filteredObjects = React.useMemo(
     () => matchSorter(items, search, {keys: searchKeys}),
-    [items, search]
+    [items, search, searchKeys]
   );
   const sortedIntoCategories = filteredObjects.reduce(
     (prev: {[key: string]: ListItem[]}, next: ListItem) => {

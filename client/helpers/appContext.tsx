@@ -1,12 +1,8 @@
 import React from "react";
-import {
-  ThemeProvider,
-  DarkMode,
-  theme as defaultTheme,
-  Box,
-} from "@chakra-ui/core";
+import {ThemeProvider, DarkMode, theme as defaultTheme} from "@chakra-ui/core";
 import Dialog from "../components/Dialog";
 import getColorScheme from "./generateColorScheme";
+import {SingletonHooksContainer} from "react-singleton-hook";
 
 const theme = {
   ...defaultTheme,
@@ -26,6 +22,7 @@ const theme = {
 const AppContext: React.FC = ({children}) => {
   return (
     <ThemeProvider theme={theme}>
+      <SingletonHooksContainer />
       <DarkMode>
         <Dialog>{children}</Dialog>
       </DarkMode>

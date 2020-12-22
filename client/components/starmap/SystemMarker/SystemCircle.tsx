@@ -2,7 +2,7 @@ import {
   UniverseSubscription,
   useUniverseSystemSetPositionMutation,
 } from "../../../generated/graphql";
-import React from "react";
+import React, {useCallback} from "react";
 import {useFrame} from "react-three-fiber";
 import {CanvasTexture, Group, Vector3} from "three";
 import {configStoreApi, useConfigStore} from "../configStore";
@@ -49,33 +49,36 @@ const SystemCircle: React.FC<{
     return ctx;
   }, []);
 
-  function drawRadius(endArc = 360) {
-    const selectedObject = configStoreApi.getState().selectedObject;
-    const isSelected = system.id === selectedObject?.id;
-    ctx.clearRect(0, 0, size, size);
+  const drawRadius = useCallback(
+    function drawRadius(endArc = 360) {
+      const selectedObject = configStoreApi.getState().selectedObject;
+      const isSelected = system.id === selectedObject?.id;
+      ctx.clearRect(0, 0, size, size);
 
-    ctx.lineWidth = size / (1 / lineWidth);
-    ctx.strokeStyle = isSelected ? "white" : "rgba(0,255,255,0.2)";
-    ctx.beginPath();
-    ctx.arc(
-      size / 2,
-      size / 2,
-      size / 2 - size / (1 / lineWidth),
-      0,
-      Math.PI * 2
-    );
-    ctx.stroke();
-    ctx.strokeStyle = "cyan";
-    ctx.beginPath();
-    ctx.arc(
-      size / 2,
-      size / 2,
-      size / 2 - size / (1 / lineWidth),
-      -Math.PI / 2,
-      endArc
-    );
-    ctx.stroke();
-  }
+      ctx.lineWidth = size / (1 / lineWidth);
+      ctx.strokeStyle = isSelected ? "white" : "rgba(0,255,255,0.2)";
+      ctx.beginPath();
+      ctx.arc(
+        size / 2,
+        size / 2,
+        size / 2 - size / (1 / lineWidth),
+        0,
+        Math.PI * 2
+      );
+      ctx.stroke();
+      ctx.strokeStyle = "cyan";
+      ctx.beginPath();
+      ctx.arc(
+        size / 2,
+        size / 2,
+        size / 2 - size / (1 / lineWidth),
+        -Math.PI / 2,
+        endArc
+      );
+      ctx.stroke();
+    },
+    [ctx, system.id]
+  );
   const radius = React.useRef(0);
   const selected = React.useRef(false);
 
@@ -114,7 +117,7 @@ const SystemCircle: React.FC<{
   React.useEffect(() => {
     drawRadius(radius.current - Math.PI / 2);
     texture.needsUpdate = true;
-  }, []);
+  }, [drawRadius, texture]);
 
   return (
     <mesh

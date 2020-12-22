@@ -17,7 +17,7 @@ export const PilotContacts = memo(({tilted}: {tilted: boolean}) => {
     skip: !systemId,
   });
   const system = data?.universeSystem;
-  const shipIds = useSystemShips(systemId || "");
+  const shipIds = useSystemShips();
   if (!flightPlayerData?.playerShip) return null;
   return (
     <group>

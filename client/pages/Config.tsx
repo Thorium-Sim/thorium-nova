@@ -1,8 +1,7 @@
 import React from "react";
-import sleep from "../helpers/sleep";
 import {useTranslation} from "react-i18next";
 import {FaStar, FaTools, FaRocket, FaPaintBrush} from "react-icons/fa";
-import {useNavigate, useParams} from "react-router";
+import {useParams} from "react-router";
 import {NavLink} from "react-router-dom";
 import ConfigLayout from "../components/ui/ConfigLayout";
 import {MdMessage} from "react-icons/md";

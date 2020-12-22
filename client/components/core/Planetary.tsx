@@ -26,7 +26,7 @@ export const StarmapCorePlanetary: React.FC = memo(() => {
   React.useEffect(() => {
     configStoreApi.setState({skyboxKey});
   }, [skyboxKey]);
-  const ids = useSystemShips(systemId);
+  const ids = useSystemShips();
 
   useFrame(() => {
     if (planetsGroup.current) {

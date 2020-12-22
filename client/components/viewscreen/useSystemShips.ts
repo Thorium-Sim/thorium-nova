@@ -5,10 +5,12 @@ import {
   useUniverseSystemShipsSubscription,
   UniverseSystemShipsHotDocument,
   UniverseSystemShipsHotSubscription,
+  useFlightPlayerShipSubscription,
 } from "../../generated/graphql";
 import create from "zustand";
 import {useApolloClient} from "@apollo/client";
 import produce from "immer";
+import {singletonHook} from "react-singleton-hook";
 
 type ShipMap = Record<
   string,
@@ -16,9 +18,15 @@ type ShipMap = Record<
 >;
 export const useShipsStore = create<ShipMap>(() => ({}));
 
-export function useSystemShips(systemId: string) {
+export const useSystemShips = singletonHook([], function useSystemShipsHook() {
+  const {data: flightPlayerData} = useFlightPlayerShipSubscription();
+  const systemId =
+    flightPlayerData?.playerShip.interstellarPosition?.system?.id;
   const autopilotIncluded = useConfigStore(store => store.includeAutopilotData);
-  const {data} = useUniverseSystemShipsSubscription({variables: {systemId}});
+  const {data} = useUniverseSystemShipsSubscription({
+    variables: {systemId: systemId || ""},
+    skip: !systemId,
+  });
   const [shipIds, setShipIds] = React.useState<string[]>([]);
   const ships = data?.universeSystemShips;
   React.useEffect(() => {
@@ -34,6 +42,7 @@ export function useSystemShips(systemId: string) {
   // TODO: Implement Linear Interpolation
   const client = useApolloClient();
   React.useEffect(() => {
+    if (!systemId) return;
     if (window.location.protocol === "https:") {
       //|| window.location.host === "localhost") {
       // TODO: Implement Geckos
@@ -77,6 +86,6 @@ export function useSystemShips(systemId: string) {
         });
       return () => unsub.unsubscribe();
     }
-  }, [systemId, setShipIds]);
+  }, [systemId, setShipIds, autopilotIncluded, client]);
   return shipIds;
-}
+});

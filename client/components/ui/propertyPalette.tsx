@@ -10,9 +10,12 @@ const PropertyPalette: React.FC<{onClose: () => void}> = ({
   children,
   onClose,
 }) => {
-  const [position, measureRef, mouseDown, remeasure] = useWindowMove<
-    HTMLDivElement
-  >(
+  const [
+    position,
+    measureRef,
+    mouseDown,
+    remeasure,
+  ] = useWindowMove<HTMLDivElement>(
     useSessionStorage<{x: number; y: number} | null>(
       "nova_starmap_propertyPalette",
       null
@@ -21,7 +24,7 @@ const PropertyPalette: React.FC<{onClose: () => void}> = ({
   const [open, setOpen] = React.useState(true);
   React.useEffect(() => {
     remeasure();
-  }, [open]);
+  }, [open, remeasure]);
   const {t} = useTranslation();
   return (
     <div

@@ -1,21 +1,11 @@
 {
-  "1/2": "1/2",
-  "1/4": "1/4",
-  "3/4": "3/4",
-  "Aft": "Aft",
-  "Down": "Down",
-  "Emergency": "Emergency",
-  "Fore": "Fore",
-  "Full": "Full",
-  "Full Stop": "Full Stop",
-  "Pitch Down": "Pitch Down",
-  "Pitch Up": "Pitch Up",
-  "Port": "Port",
-  "Port Roll": "Port Roll",
-  "Port Yaw": "Port Yaw",
-  "Starboard": "Starboard",
-  "Starboard Roll": "Starboard Roll",
-  "Starboard Yaw": "Starboard Yaw",
+  "Station Error": "Station Error",
   "Tilt Sensor View": "Tilt Sensor View",
-  "Up": "Up"
+  "Your station has experienced an error": {
+    " A diagnostic must be performed to restore this station to functionality": {
+      " Please contact a computer specialist": {
+        "": ""
+      }
+    }
+  }
 }

@@ -7,7 +7,6 @@ import {
   Routes,
   useLocation,
   useMatch,
-  useNavigate,
 } from "react-router-dom";
 import {useActiveFlightQuery, useFlightsQuery} from "../generated/graphql";
 import {useTranslation} from "react-i18next";

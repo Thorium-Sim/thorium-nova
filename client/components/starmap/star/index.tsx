@@ -1,5 +1,5 @@
 import React, {Suspense} from "react";
-import {useFrame, useLoader} from "react-three-fiber";
+import {useFrame} from "react-three-fiber";
 import {
   TextureLoader,
   RepeatWrapping,
@@ -40,7 +40,16 @@ const Star: React.FC<{
   color2?: number | Color;
   size?: number;
   position?: Vector3 | [number, number, number];
-}> = ({color1 = 0x224488, color2 = 0xf6fcff, size, ...props}) => {
+  noLensFlare?: boolean;
+  showSprite?: boolean;
+}> = ({
+  color1 = 0x224488,
+  color2 = 0xf6fcff,
+  size,
+  noLensFlare,
+  showSprite,
+  ...props
+}) => {
   const filePath = require("./textures/01_Texture.jpg").default;
   const texture = React.useMemo(() => {
     const loader = new TextureLoader();
@@ -48,10 +57,10 @@ const Star: React.FC<{
     texture.wrapS = RepeatWrapping;
     texture.wrapT = RepeatWrapping;
     return texture;
-  }, []);
+  }, [filePath]);
   const uniforms = React.useMemo(
     () => getUniforms({map: texture, color1, color2}),
-    []
+    [color1, color2, texture]
   );
   const shader = React.useRef<Mesh>();
   const starMesh = React.useRef<Group>();
@@ -73,7 +82,7 @@ const Star: React.FC<{
       if (
         size &&
         distance / size > 100 &&
-        useConfigStore.getState().viewingMode === "core"
+        (useConfigStore.getState().viewingMode === "core" || showSprite)
       ) {
         starSprite.current.visible = true;
         starMesh.current.visible = false;
@@ -124,7 +133,9 @@ const Star: React.FC<{
           <meshBasicMaterial attach="material" color={0x000000} />
         </mesh>
       </group>
-      {useConfigStore.getState().viewingMode !== "core" && <LensFlare />}
+      {useConfigStore.getState().viewingMode !== "core" && !noLensFlare && (
+        <LensFlare />
+      )}
     </group>
   );
 };

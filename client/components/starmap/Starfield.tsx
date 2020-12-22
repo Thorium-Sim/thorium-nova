@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useCallback} from "react";
 import {useFrame, useThree} from "react-three-fiber";
 import {
   Matrix4,
@@ -11,7 +11,6 @@ import {
   AdditiveBlending,
   BufferGeometry,
   BufferAttribute,
-  Camera,
 } from "three";
 
 function makeLineGeometry(pointList: Vector3[]) {
@@ -75,16 +74,19 @@ const Starfield: React.FC<{count?: number; radius?: number}> = ({
       pointList.push(point.clone());
     }
     return makeLineGeometry(pointList);
-  }, []);
+  }, [count, radius]);
 
   const {camera} = useThree();
-  function getModelViewMatrix() {
-    if (!mesh.current) return new Matrix4();
-    return new Matrix4().multiplyMatrices(
-      camera.matrixWorldInverse,
-      mesh.current.matrixWorld
-    );
-  }
+  const getModelViewMatrix = useCallback(
+    function getModelViewMatrix() {
+      if (!mesh.current) return new Matrix4();
+      return new Matrix4().multiplyMatrices(
+        camera.matrixWorldInverse,
+        mesh.current.matrixWorld
+      );
+    },
+    [camera]
+  );
 
   const material = React.useMemo(() => {
     function makeStarfieldMaterial(
@@ -219,7 +221,7 @@ const Starfield: React.FC<{count?: number; radius?: number}> = ({
       color1: "#877f76",
       color2: "#96b4cf",
     });
-  }, []);
+  }, [getModelViewMatrix]);
 
   const time = React.useRef(0);
   const previousModelViewMatrix = React.useRef(getModelViewMatrix());

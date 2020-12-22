@@ -90,9 +90,11 @@ const CardRenderer = ({
       key={id}
       show={show}
       {...transitionProps}
-      // TODO: Replace this with the afterEnter and beforeEnter callbacks once the next version of headlessui is released.
-      onTransitionEnd={() => {
-        setCardLoaded(show ? true : false);
+      beforeEnter={() => {
+        setCardLoaded(false);
+      }}
+      afterEnter={() => {
+        setCardLoaded(true);
       }}
     >
       <Suspense fallback={null}>

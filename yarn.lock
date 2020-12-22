@@ -2515,11 +2515,6 @@
   resolved "https://registry.yarnpkg.com/@graphql-typed-document-node/core/-/core-3.1.0.tgz#0eee6373e11418bfe0b5638f654df7a4ca6a3950"
   integrity sha512-wYn6r8zVZyQJ6rQaALBEln5B1pzxb9shV5Ef97kTvn6yVGrqyXVnDqnU24MXnFubR+rZjBY9NWuxX3FB2sTsjg==
 
-"@headlessui/react@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@headlessui/react/-/react-0.2.0.tgz#a31f90892d736243ba91c1474f534b3256d0c538"
-  integrity sha512-YV+vF+QhTRcspydPdHF3ZXe+FkOiJpRdqMjjFIIX9bSdT2O2T7GurgKQdGgamNUM+B99MZBOTRqxS8Dlh485eg==
-
 "@iarna/toml@^2.2.5":
   version "2.2.5"
   resolved "https://registry.yarnpkg.com/@iarna/toml/-/toml-2.2.5.tgz#b32366c89b43c6f8cefbdefac778b9c828e3ba8c"
@@ -14098,6 +14093,11 @@ react-router@6.0.0-beta.0, react-router@^6.0.0-beta.0:
   integrity sha512-VgMdfpVcmFQki/LZuLh8E/MNACekDetz4xqft+a6fBZvvJnVqKbLqebF7hyoawGrV1HcO5tVaUang2Og4W2j1Q==
   dependencies:
     prop-types "^15.7.2"
+
+react-singleton-hook@^3.0.142:
+  version "3.0.142"
+  resolved "https://registry.yarnpkg.com/react-singleton-hook/-/react-singleton-hook-3.0.142.tgz#7212d0441748a67e97edeb41f1d425ff433c192c"
+  integrity sha512-ONYk/LftfsF7j8dCP7AE3Pz5gwJdj2eVM8wnvyEq2ypAG7zVKtwSvAqu7xmrg65qrCLfef9+b8DMThEU0GJJVw==
 
 react-spring@^8.0.27:
   version "8.0.27"

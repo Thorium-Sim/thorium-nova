@@ -530,17 +530,16 @@ class OrbitControls extends EventDispatcher {
     var updateMouse3D = (function () {
       var v = new Vector3();
       var v1 = new Vector3();
-
+      var element =
+        scope.domElement === document
+          ? scope.domElement.body
+          : scope.domElement;
+      const dims = element.getBoundingClientRect();
       return function updateMouse3D(event) {
-        var element =
-          scope.domElement === document
-            ? scope.domElement.body
-            : scope.domElement;
-
         if (scope.object.isPerspectiveCamera) {
           v.set(
-            (event.clientX / element.clientWidth) * 2 - 1,
-            -(event.clientY / element.clientHeight) * 2 + 1,
+            ((event.clientX - dims.left) / element.clientWidth) * 2 - 1,
+            -((event.clientY - dims.top) / element.clientHeight) * 2 + 1,
             0.5
           );
 

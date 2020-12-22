@@ -86,7 +86,7 @@ export async function renderGLTFPreview(
   return renderer?.domElement.toDataURL("image/png");
 }
 
-const cache = {};
+// const cache = {};
 
 // function useGLTFPreview(assetPath) {
 //   if (cache[assetPath] && cache[assetPath].then) throw cache[assetPath];

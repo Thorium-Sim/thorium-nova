@@ -24,7 +24,7 @@ const Starmap: React.FC = () => {
   const setUniverseId = useConfigStore(s => s.setUniverseId);
   React.useEffect(() => {
     setUniverseId(universeId);
-  }, [universeId]);
+  }, [setUniverseId, universeId]);
 
   return (
     <Suspense fallback={null}>

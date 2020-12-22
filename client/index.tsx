@@ -10,7 +10,6 @@ import {BrowserRouter as Router} from "react-router-dom";
 import "./helpers/i18n";
 import "./styles/global.css";
 import "./styles/output.css";
-import getChannel from "./helpers/udpClient";
 
 initializeClient();
 

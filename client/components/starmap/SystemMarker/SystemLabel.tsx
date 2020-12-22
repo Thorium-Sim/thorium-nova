@@ -8,8 +8,9 @@ import {configStoreApi} from "../configStore";
 const SystemLabel: React.FC<{
   systemId: string;
   name: string;
+  scale?: number;
   hoveringDirection: React.MutableRefObject<number>;
-}> = ({systemId, name, hoveringDirection}) => {
+}> = ({systemId, scale = 3 / 128, name, hoveringDirection}) => {
   React.useEffect(() => {
     if (text.current) {
       text.current.material.opacity = 0.5;
@@ -30,7 +31,7 @@ const SystemLabel: React.FC<{
 
   const text = React.useRef<Sprite>();
   const selected = React.useRef(false);
-  useFrame(() => {
+  useFrame(({camera}) => {
     const selectedObject = configStoreApi.getState().selectedObject;
     const isSelected = systemId === selectedObject?.id;
     if (text.current) {
@@ -54,13 +55,11 @@ const SystemLabel: React.FC<{
     }
   });
 
-  // const scale = 1/textTexture.height;
-  const scale = 3 / 128;
   const spriteWidth = textTexture.width / textTexture.height;
   return (
     <mesh
       scale={[scale, scale, scale]}
-      position={[-spriteWidth * 2.7 - 2, 0, 0]}
+      position={[-spriteWidth * (115 * scale) - 2, 0, 0]}
       ref={text}
       renderOrder={1000}
     >

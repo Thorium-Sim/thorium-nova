@@ -4,7 +4,6 @@ import {TemplateSystemSubscription} from "../../../generated/graphql";
 import {configStoreApi, useConfigStore} from "../configStore";
 import OrbitContainer from "../OrbitContainer";
 import Star from "../star";
-import LensFlare from "../star/lensFlare";
 import {getOrbitPosition} from "../utils";
 import Selected from "./Selected";
 
@@ -22,7 +21,6 @@ const StarEntity: React.FC<{
     orbitalArc,
     orbitalInclination,
     showOrbit,
-    axialTilt,
   } = entity.satellite;
   const color1 = new Color(
     `hsl(${entity.isStar.hue}, 100%, ${entity.isStar.isWhite ? 100 : 50}%)`

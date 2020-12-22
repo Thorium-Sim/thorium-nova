@@ -12,9 +12,9 @@ import {getSelectedObjects} from "./dragSelection";
 import {useSelectedShips} from "../viewscreen/useSelectedShips";
 import {ZoomSlider} from "./ZoomSlider";
 import {StarmapCoreMenubar} from "./Menubar";
-import {useTranslate2DTo3D} from "client/helpers/hooks/use2Dto3D";
 import {StarmapCorePlanetary} from "./Planetary";
 import {CanvasContextMenu} from "./coreContextMenu";
+import {useSetupOrbitControls} from "client/helpers/useSetupOrbitControls";
 const FAR = 1e27;
 
 const CAMERA_Y = 30000000;
@@ -37,40 +37,8 @@ const StarmapCoreScene: React.FC = () => {
       cameraVerticalDistance: distance,
     });
   });
-  const to3D = useTranslate2DTo3D();
 
-  React.useEffect(() => {
-    useConfigStore.setState({
-      translate2dTo3d: to3D,
-      disableOrbitControls: () => {
-        if (controls.current) {
-          controls.current.enabled = false;
-        }
-      },
-      enableOrbitControls: () => {
-        if (controls.current) {
-          controls.current.enabled = true;
-        }
-      },
-      orbitControlsSet: ({zoom, position}) => {
-        if (controls.current) {
-          if (zoom) {
-            camera.position.y = zoom;
-          }
-          if (position) {
-            camera.position.x = position.x;
-            camera.position.z = position.z;
-            if (controls.current.target) {
-              controls.current.target.x = position.x;
-              controls.current.target.y = 0;
-              controls.current.target.z = position.z;
-            }
-          }
-          controls.current?.saveState?.();
-        }
-      },
-    });
-  }, [camera, to3D]);
+  useSetupOrbitControls(controls);
 
   return (
     <>

@@ -100,7 +100,7 @@ const PluginForm: React.FC<{
                     height: 90%auto;
                     object-fit: cover;
                   `}
-                  alt="Cover Image"
+                  alt="Cover"
                 />
               )}
             </UploadWell>
