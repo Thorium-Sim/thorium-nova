@@ -12,10 +12,11 @@ import {
 } from "react";
 import {Canvas, useFrame, useThree} from "react-three-fiber";
 import {Color, MOUSE, Sprite, Vector3, Texture, Group} from "three";
-import useLocalStorage from "client/helpers/hooks/useLocalStorage";
 import {
   useFlightPlayerShipSubscription,
   useUniverseSystemSubscription,
+  useNavEntityQuery,
+  useWaypointAddMutation,
 } from "client/generated/graphql";
 import {useConfigStore} from "client/components/starmap/configStore";
 import {getOrbitPosition} from "client/components/starmap/utils";
@@ -23,7 +24,6 @@ import Star from "client/components/starmap/star";
 import OrbitContainer from "client/components/starmap/OrbitContainer";
 import Nebula from "client/components/starmap/Nebula";
 import {Planet} from "client/components/starmap/entities/PlanetEntity";
-import {useTranslate2DTo3D} from "client/helpers/hooks/use2Dto3D";
 import Button from "client/components/ui/button";
 import {publish, subscribe} from "client/helpers/pubsub";
 import {
@@ -37,12 +37,41 @@ import {useTextureLoader} from "drei";
 import SystemLabel from "client/components/starmap/SystemMarker/SystemLabel";
 import Input from "client/components/ui/Input";
 import {useSetupOrbitControls} from "client/helpers/useSetupOrbitControls";
+import create from "zustand";
+import {persist} from "zustand/middleware";
+import {useTranslation} from "react-i18next";
+
+interface NavigationStore extends Record<string, unknown> {
+  selectedObjectId: string | null;
+}
+const useNavigationStore = create<NavigationStore>(
+  persist(
+    (set, get) => ({
+      selectedObjectId: "5ax0v1ywrkgasq7t4",
+    }),
+    {
+      name: "thorium-navigation-store", // unique name
+    }
+  )
+);
+
 const SUN_RADIUS = 696_340;
 
 type EntityType = NonNullable<
   ReturnType<typeof useUniverseSystemSubscription>["data"]
 >["universeSystem"]["items"][0];
 
+const itemEvents = (entity: {id: string}) => ({
+  onPointerOver: () => {
+    document.body.style.cursor = "pointer";
+  },
+  onPointerOut: () => {
+    document.body.style.cursor = "auto";
+  },
+  onClick: () => {
+    useNavigationStore.setState({selectedObjectId: entity.id});
+  },
+});
 const NavigationShipEntity = ({
   entityId,
   playerId,
@@ -62,9 +91,6 @@ const NavigationShipEntity = ({
 
     if (!ship) return;
     if (ship.position) {
-      // Since the sensor grid needs to be oriented at 0,0,0
-      // to properly tilt, we reposition the contacts relative
-      // to the player ship's position.
       sprite.current?.position.set(
         ship.position.x,
         ship.position.y,
@@ -85,10 +111,10 @@ const NavigationShipEntity = ({
         group.current.quaternion.copy(camera.quaternion);
       }
     }
-    // sprite.current?.scale.setScalar(dx * 3 * scale);
   });
+  if (!entity) return null;
   return (
-    <group>
+    <group {...itemEvents(entity)}>
       <sprite ref={sprite}>
         <spriteMaterial
           attach="material"
@@ -132,42 +158,7 @@ const NavigationStarEntity: FC<{entity: EntityType}> = ({entity}) => {
       orbitalInclination={orbitalInclination}
       showOrbit={showOrbit}
     >
-      <group
-        onPointerOver={() => {
-          document.body.style.cursor = "pointer";
-          const position = getOrbitPosition({
-            eccentricity,
-            orbitalArc,
-            orbitalInclination,
-            radius: distance,
-          });
-          useConfigStore.setState({
-            hoveredPosition: position,
-            scaledHoveredPosition: position,
-          });
-        }}
-        onPointerOut={() => {
-          document.body.style.cursor = "auto";
-          useConfigStore.setState({
-            hoveredPosition: null,
-            scaledHoveredPosition: null,
-          });
-        }}
-        onClick={() => {
-          const position = getOrbitPosition({
-            eccentricity,
-            orbitalArc,
-            orbitalInclination,
-            radius: distance,
-          });
-          // configStoreApi.setState({
-          //   selectedObject: entity,
-          //   selectedPosition: position,
-          //   scaledSelectedPosition: position,
-          // });
-        }}
-        scale={[size, size, size]}
-      >
+      <group {...itemEvents(entity)} scale={[size, size, size]}>
         {/* {selected && configStoreApi.getState().viewingMode !== "viewscreen" && (
       <Selected />
     )} */}
@@ -205,7 +196,6 @@ const NavigationPlanetEntity: FC<{
     textureMapAsset,
   } = entity.isPlanet;
 
-  const orbitRadius = distance;
   const position = getOrbitPosition({
     radius: distance,
     eccentricity,
@@ -234,53 +224,9 @@ const NavigationPlanetEntity: FC<{
         axialTilt={axialTilt}
         selected={false}
         showSprite
+        showMesh={false}
         isSatellite={isSatellite}
-        onPointerOver={() => {
-          const hoveredPosition = getOrbitPosition({
-            eccentricity,
-            orbitalArc,
-            orbitalInclination,
-            radius: orbitRadius,
-            origin,
-          });
-          // useConfigStore.setState({
-          //   hoveredPosition,
-          //   scaledHoveredPosition: getOrbitPosition({
-          //     eccentricity,
-          //     orbitalArc,
-          //     orbitalInclination,
-          //     radius: orbitRadius * PLANETARY_SCALE * (isSatellite ? 100 : 1),
-          //     origin: scaledOrigin,
-          //   }),
-          // });
-          document.body.style.cursor = "pointer";
-        }}
-        onPointerOut={() => {
-          document.body.style.cursor = "auto";
-          useConfigStore.setState({
-            hoveredPosition: null,
-            scaledHoveredPosition: null,
-          });
-        }}
-        onClick={() => {
-          // configStoreApi.setState({
-          //   selectedObject: entity,
-          //   selectedPosition: getOrbitPosition({
-          //     eccentricity,
-          //     orbitalArc,
-          //     orbitalInclination,
-          //     radius: orbitRadius,
-          //     origin,
-          //   }),
-          //   scaledSelectedPosition: getOrbitPosition({
-          //     eccentricity,
-          //     orbitalArc,
-          //     orbitalInclination,
-          //     radius: orbitRadius * PLANETARY_SCALE * (isSatellite ? 100 : 1),
-          //     origin: scaledOrigin,
-          //   }),
-          // });
-        }}
+        {...itemEvents(entity)}
       >
         {satellites?.map((s, i) => (
           <NavigationPlanetEntity
@@ -303,6 +249,55 @@ const NavigationPlanetEntity: FC<{
   );
 };
 
+const NavigationWaypointEntity = ({entity}: {entity: EntityType}) => {
+  const color = "rgb(230,153,0)";
+  const spriteMap = useTextureLoader(
+    require("./Waypoint.svg").default
+  ) as Texture;
+  const strokeMap = useTextureLoader(
+    require("./WaypointStroke.svg").default
+  ) as Texture;
+  const group = useRef<Group>();
+  const scale = 1 / 10;
+
+  useFrame(({camera}) => {
+    if (!entity) return;
+    if (entity.position) {
+      group.current?.position.set(
+        entity.position.x,
+        entity.position.y,
+        entity.position.z
+      );
+      let zoom = 0;
+      if (group.current) {
+        zoom = camera.position.distanceTo(group.current.position) + 500;
+        let zoomedScale = (zoom / 2) * scale;
+        group.current.scale.set(zoomedScale, zoomedScale, zoomedScale);
+      }
+    }
+  });
+  if (!entity) return null;
+  return (
+    <group ref={group} renderOrder={100}>
+      <sprite renderOrder={101} position={[0, 0, -0.5]}>
+        <spriteMaterial
+          attach="material"
+          map={spriteMap}
+          color={color}
+          sizeAttenuation={true}
+        ></spriteMaterial>
+      </sprite>
+      <sprite renderOrder={100} position={[0, 0, -0.5]}>
+        <spriteMaterial
+          attach="material"
+          map={strokeMap}
+          color={"rgb(110,73,0)"}
+          sizeAttenuation={true}
+        ></spriteMaterial>
+      </sprite>
+    </group>
+  );
+};
 const NavigationPlanetary: FC<{systemId?: string}> = ({systemId}) => {
   const {data: flightPlayerData} = useFlightPlayerShipSubscription();
   const {data} = useUniverseSystemSubscription({
@@ -328,10 +323,25 @@ const NavigationPlanetary: FC<{systemId?: string}> = ({systemId}) => {
     <group>
       {system?.items.map(e => {
         if (e.isStar) {
-          return <NavigationStarEntity key={e.id} entity={e} />;
+          return (
+            <Suspense fallback={null}>
+              <NavigationStarEntity key={e.id} entity={e} />
+            </Suspense>
+          );
         }
         if (e.isPlanet) {
-          return <NavigationPlanetEntity key={e.id} entity={e} />;
+          return (
+            <Suspense fallback={null}>
+              <NavigationPlanetEntity key={e.id} entity={e} />
+            </Suspense>
+          );
+        }
+        if (e.isWaypoint) {
+          return (
+            <Suspense fallback={null}>
+              <NavigationWaypointEntity key={e.id} entity={e} />
+            </Suspense>
+          );
         }
         return null;
       })}
@@ -367,6 +377,8 @@ const NavigationCanvas = memo(() => {
   const playerShipId = flightPlayerData?.playerShip.id || "";
   const recenter = useCallback(
     function recenter() {
+      // TODO: Make it so the camera follows the position of the ship until
+      // the screen is panned again.
       const playerShip = useShipsStore.getState()[playerShipId];
       if (!playerShip) return;
       camera.position.set(
@@ -418,23 +430,148 @@ const NavigationCanvas = memo(() => {
 const FAR = 1e27;
 const CAMERA_Y = 30000000;
 
+const StarCanvas = ({hue, isWhite}: {hue: number; isWhite: boolean}) => {
+  const color1 = new Color(`hsl(${hue}, 100%, ${isWhite ? 100 : 50}%)`);
+  const color2 = new Color(`hsl(${hue + 20}, 100%, ${isWhite ? 100 : 50}%)`);
+  return (
+    <Canvas camera={{position: [0, 0, 1.2]}}>
+      <Star color1={color1} color2={color2} size={1} noLensFlare showSprite />
+    </Canvas>
+  );
+};
+const PlanetGroup = ({
+  cloudsMapAsset,
+  ringsMapAsset,
+  textureMapAsset,
+}: {
+  cloudsMapAsset: string;
+  ringsMapAsset: string;
+  textureMapAsset: string;
+}) => {
+  const planetRef = useRef<Group>();
+  useFrame(() => {
+    if (planetRef.current) {
+      planetRef.current.rotateY(0.002);
+    }
+  });
+  return (
+    <group ref={planetRef}>
+      <Planet
+        name=""
+        scale={[1, 1, 1]}
+        clouds={cloudsMapAsset}
+        texture={textureMapAsset}
+        rings={""}
+        axialTilt={12}
+        selected={false}
+        isSatellite={true}
+      />
+    </group>
+  );
+};
+const PlanetCanvas = (props: {
+  cloudsMapAsset: string;
+  ringsMapAsset: string;
+  textureMapAsset: string;
+}) => {
+  return (
+    <Canvas camera={{position: [0, 0, 1.8]}}>
+      <ambientLight intensity={0.1} />
+      <pointLight position={[10, 10, 10]} />
+      <PlanetGroup {...props} />
+    </Canvas>
+  );
+};
 const Navigation: FC<CardProps> = ({cardLoaded}) => {
   const client = useApolloClient();
-
+  const selectedObjectId = useNavigationStore(store => store.selectedObjectId);
+  const {data, loading} = useNavEntityQuery({
+    variables: {id: selectedObjectId || ""},
+    skip: !selectedObjectId,
+  });
+  const object = data?.entity;
+  const {t} = useTranslation();
+  const [addWaypoint] = useWaypointAddMutation();
   return (
     <div className="relative card-navigation h-full w-full border border-whiteAlpha-500 bg-black">
-      <div className="h-full p-4 absolute z-10">
+      <div className="h-full w-full p-4 absolute z-10 flex justify-between pointer-events-none">
         <div className="w-72 h-full flex flex-col space-y-2">
-          <Input label="Search" placeholder="Search..." />
+          <Input
+            label="Search"
+            placeholder="Search..."
+            className="pointer-events-auto"
+          />
           <div className="flex-1"></div>
           <ZoomSliderComp />
-          <Button className="w-full">Interstellar View</Button>
+          <Button className="w-full pointer-events-auto">
+            Interstellar View
+          </Button>
           <Button
-            className="w-full"
+            className="w-full pointer-events-auto"
             variantColor="warning"
             onClick={() => publish("navigation_recenter")}
           >
             Recenter
+          </Button>
+        </div>
+        <div className="w-96 min-h-48 h-full flex flex-col gap-2">
+          <div className="w-full p-4 border-2 border-whiteAlpha-500 bg-blackAlpha-500 rounded">
+            {cardLoaded && object ? (
+              <Fragment>
+                <div className="float-left w-24 h-24 mx-2 border border-whiteAlpha-500 rounded">
+                  {object.isPlanet ? (
+                    <PlanetCanvas {...object.isPlanet} />
+                  ) : object.isStar ? (
+                    <StarCanvas
+                      hue={object.isStar.hue}
+                      isWhite={object.isStar.isWhite}
+                    />
+                  ) : object.isShip ? (
+                    <img
+                      draggable="false"
+                      alt={object.identity.name}
+                      src={object.shipAssets?.vanity}
+                    />
+                  ) : null}
+                </div>
+                <h3 className="text-2xl">{object.identity.name}</h3>
+                <h4 className="text-xl">
+                  {object.isPlanet
+                    ? `Class ${object.isPlanet.classification} Planet`
+                    : object.isStar
+                    ? `Class ${object.isStar.spectralType} Star`
+                    : object.isShip
+                    ? `${
+                        object.isShip.shipClass
+                          ? `${object.isShip.shipClass} Class `
+                          : ""
+                      }${object.isShip.category}`
+                    : ""}
+                </h4>
+              </Fragment>
+            ) : loading ? (
+              <h3 className="text-2xl">{t("Accessing...")}</h3>
+            ) : (
+              <h3 className="text-2xl">{t("No Object Selected")}</h3>
+            )}
+          </div>
+          <Button
+            color="info"
+            className="w-full pointer-events-auto"
+            disabled={!object}
+            onClick={() =>
+              object &&
+              addWaypoint({
+                variables: {
+                  shipId: null,
+                  systemId: null,
+                  position: null,
+                  objectId: object.id,
+                },
+              })
+            }
+          >
+            {t("Add Waypoint")}
           </Button>
         </div>
       </div>
@@ -444,6 +581,9 @@ const Navigation: FC<CardProps> = ({cardLoaded}) => {
             camera={{fov: 45, near: 0.01, far: FAR, position: [0, CAMERA_Y, 0]}}
             gl={{antialias: true, logarithmicDepthBuffer: true}}
             concurrent
+            onPointerMissed={() =>
+              useNavigationStore.setState({selectedObjectId: null})
+            }
           >
             <ApolloProvider client={client}>
               <Suspense fallback={null}>
@@ -461,7 +601,7 @@ const ZoomSliderComp = () => {
   const cameraZoom = useConfigStore(store => store.cameraVerticalDistance);
 
   return (
-    <ZoomStyleWrapper>
+    <ZoomStyleWrapper className="pointer-events-auto">
       <p className="text-xl">Zoom:</p>
       <ZoomSlider
         value={cameraZoom}

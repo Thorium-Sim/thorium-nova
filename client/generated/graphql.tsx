@@ -173,6 +173,95 @@ export type ClientLoginMutation = {
   clientLogin: {__typename?: "Client"; id: string; loginName: Maybe<string>};
 };
 
+export type WaypointAddMutationVariables = Exact<{
+  shipId: Maybe<Scalars["ID"]>;
+  systemId: Maybe<Scalars["ID"]>;
+  objectId: Maybe<Scalars["ID"]>;
+  position: Maybe<CoordinatesInput>;
+}>;
+
+export type WaypointAddMutation = {
+  __typename?: "Mutation";
+  waypointSpawn: {
+    __typename?: "Entity";
+    id: string;
+    identity: {__typename?: "IdentityComponent"; name: string};
+  };
+};
+
+export type NavEntityQueryVariables = Exact<{
+  id: Scalars["ID"];
+}>;
+
+export type NavEntityQuery = {
+  __typename?: "Query";
+  entity: Maybe<{
+    __typename?: "Entity";
+    id: string;
+    entityType: EntityTypes;
+    identity: {__typename?: "IdentityComponent"; name: string};
+    position: Maybe<{
+      __typename?: "PositionComponent";
+      x: number;
+      y: number;
+      z: number;
+    }>;
+    factionAssignment: Maybe<{
+      __typename?: "FactionAssignmentComponent";
+      faction: Maybe<{
+        __typename?: "Entity";
+        id: string;
+        identity: {__typename?: "IdentityComponent"; name: string};
+        isFaction: {
+          __typename?: "IsFactionComponent";
+          logo: string;
+          color: string;
+        };
+      }>;
+    }>;
+    size: Maybe<{__typename?: "SizeComponent"; value: number}>;
+    isShip: Maybe<{
+      __typename?: "IsShipComponent";
+      mass: number;
+      category: string;
+      registry: Maybe<string>;
+      shipClass: Maybe<string>;
+    }>;
+    shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; vanity: string}>;
+    isStar: Maybe<{
+      __typename?: "IsStarComponent";
+      spectralType: string;
+      hue: number;
+      isWhite: boolean;
+    }>;
+    isPlanet: Maybe<{
+      __typename?: "IsPlanetComponent";
+      classification: string;
+      textureMapAsset: string;
+      cloudsMapAsset: string;
+      ringsMapAsset: string;
+    }>;
+    satellite: Maybe<{
+      __typename?: "SatelliteComponent";
+      distance: number;
+      orbitalArc: number;
+      orbitalInclination: number;
+      eccentricity: number;
+      parent: Maybe<{
+        __typename?: "Entity";
+        id: string;
+        satellite: Maybe<{
+          __typename?: "SatelliteComponent";
+          distance: number;
+          orbitalArc: number;
+          orbitalInclination: number;
+          eccentricity: number;
+        }>;
+      }>;
+    }>;
+  }>;
+};
+
 export type FlightPlayerShipSubscriptionVariables = Exact<{
   [key: string]: never;
 }>;
@@ -1429,6 +1518,7 @@ export type UniverseObjectFragment = {
     spectralType: string;
     radius: number;
   }>;
+  isWaypoint: {__typename?: "IsWaypointComponent"; assignedShipId: string};
   isPlanet: Maybe<{
     __typename?: "IsPlanetComponent";
     age: number;
@@ -2325,6 +2415,9 @@ export const UniverseObjectFragmentDoc = gql`
       spectralType
       radius
     }
+    isWaypoint {
+      assignedShipId
+    }
     isPlanet {
       age
       classification
@@ -2389,6 +2482,129 @@ export function useClientLoginMutation(
 }
 export type ClientLoginMutationHookResult = ReturnType<
   typeof useClientLoginMutation
+>;
+export const WaypointAddDocument = gql`
+  mutation WaypointAdd(
+    $shipId: ID
+    $systemId: ID
+    $objectId: ID
+    $position: CoordinatesInput
+  ) {
+    waypointSpawn(
+      shipId: $shipId
+      systemId: $systemId
+      objectId: $objectId
+      position: $position
+    ) {
+      id
+      identity {
+        name
+      }
+    }
+  }
+`;
+export function useWaypointAddMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    WaypointAddMutation,
+    WaypointAddMutationVariables
+  >
+) {
+  return Apollo.useMutation<WaypointAddMutation, WaypointAddMutationVariables>(
+    WaypointAddDocument,
+    baseOptions
+  );
+}
+export type WaypointAddMutationHookResult = ReturnType<
+  typeof useWaypointAddMutation
+>;
+export const NavEntityDocument = gql`
+  query NavEntity($id: ID!) {
+    entity(id: $id) {
+      id
+      identity {
+        name
+      }
+      position {
+        x
+        y
+        z
+      }
+      entityType
+      factionAssignment {
+        faction {
+          id
+          identity {
+            name
+          }
+          isFaction {
+            logo
+            color
+          }
+        }
+      }
+      size {
+        value
+      }
+      isShip {
+        mass
+        category
+        registry
+        shipClass
+      }
+      shipAssets {
+        vanity
+      }
+      isStar {
+        spectralType
+        hue
+        isWhite
+      }
+      isPlanet {
+        classification
+        textureMapAsset
+        cloudsMapAsset
+        ringsMapAsset
+      }
+      satellite {
+        distance
+        orbitalArc
+        orbitalInclination
+        eccentricity
+        parent {
+          id
+          satellite {
+            distance
+            orbitalArc
+            orbitalInclination
+            eccentricity
+          }
+        }
+      }
+    }
+  }
+`;
+export function useNavEntityQuery(
+  baseOptions: Apollo.QueryHookOptions<NavEntityQuery, NavEntityQueryVariables>
+) {
+  return Apollo.useQuery<NavEntityQuery, NavEntityQueryVariables>(
+    NavEntityDocument,
+    baseOptions
+  );
+}
+export function useNavEntityLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    NavEntityQuery,
+    NavEntityQueryVariables
+  >
+) {
+  return Apollo.useLazyQuery<NavEntityQuery, NavEntityQueryVariables>(
+    NavEntityDocument,
+    baseOptions
+  );
+}
+export type NavEntityQueryHookResult = ReturnType<typeof useNavEntityQuery>;
+export type NavEntityLazyQueryHookResult = ReturnType<
+  typeof useNavEntityLazyQuery
 >;
 export const FlightPlayerShipDocument = gql`
   subscription FlightPlayerShip {

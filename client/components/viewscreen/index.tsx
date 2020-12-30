@@ -15,6 +15,7 @@ import {useSystemShips} from "./useSystemShips";
 import {ErrorBoundary} from "react-error-boundary";
 import ShipEntity from "../starmap/entities/ShipEntity";
 import {PlayerShipIdProvider} from "./PlayerShipContext";
+import {WaypointEntity} from "client/cards/Pilot/PilotContacts";
 
 const FAR = 1e27;
 
@@ -39,28 +40,6 @@ const ViewscreenScene: React.FC = () => {
   React.useEffect(() => {
     configStoreApi.setState({skyboxKey});
   }, [skyboxKey]);
-
-  const {camera} = useThree();
-  // Center on the planet at first
-  const planet = system?.items.find(e => e.isPlanet);
-  React.useEffect(() => {
-    if (planet?.satellite && planet.isPlanet) {
-      const planetPosition = getOrbitPosition({
-        ...planet.satellite,
-        radius: planet.satellite.distance,
-      });
-      const position = getOrbitPosition({
-        ...planet.satellite,
-        radius: planet.satellite.distance + planet.isPlanet.radius * 4,
-      });
-      camera.position.set(
-        position.x + 300,
-        position.y + 3000,
-        position.z + 30000
-      );
-      camera.lookAt(planetPosition);
-    }
-  }, [planet, camera]);
 
   const ids = useSystemShips();
   if (!system) return null;
@@ -89,6 +68,16 @@ const ViewscreenScene: React.FC = () => {
         }
         if (e.isPlanet) {
           return <PlanetEntity key={e.id} entity={e} />;
+        }
+        if (e.isWaypoint) {
+          return (
+            <WaypointEntity
+              key={e.id}
+              entity={e}
+              playerId={playerData?.playerShip.id || ""}
+              viewscreen
+            />
+          );
         }
         return null;
       })}

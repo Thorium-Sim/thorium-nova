@@ -34,8 +34,9 @@ const ShipBasic: React.FC = () => {
             <Input
               labelHidden={false}
               isInvalid={error}
-              invalidMessage={t("Name is required")}
-              label={t(`Name`)}
+              invalidMessage={t("Class is required")}
+              label={t(`Ship Class`)}
+              placeholder="Galaxy"
               defaultValue={ship.identity.name}
               onChange={() => setError(false)}
               onBlur={(e: any) =>

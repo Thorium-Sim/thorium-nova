@@ -1,4 +1,5 @@
 import {useClientData} from "client/components/clientLobby/ClientContext";
+import {Fragment} from "react";
 
 const Offline: React.FC = () => {
   const {client} = useClientData();
@@ -26,16 +27,16 @@ const Offline: React.FC = () => {
     },
   };
   if (!client.offlineState) return null;
-  const message = messages[client.offlineState];
+  const message = messages[client.offlineState] || {};
   return (
     <div className="card-offline">
       {client.offlineState === "blackout" ? (
         <div className="blackout-back fixed z-50 top-0 w-full h-full" />
       ) : (
-        <>
+        <Fragment>
           <p className="offline-title">{message.title}</p>
           <p className="offline-message">{message.message}</p>
-        </>
+        </Fragment>
       )}
     </div>
   );

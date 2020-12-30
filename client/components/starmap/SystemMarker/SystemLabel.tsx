@@ -8,9 +8,16 @@ import {configStoreApi} from "../configStore";
 const SystemLabel: React.FC<{
   systemId: string;
   name: string;
+  color?: string;
   scale?: number;
   hoveringDirection: React.MutableRefObject<number>;
-}> = ({systemId, scale = 3 / 128, name, hoveringDirection}) => {
+}> = ({
+  systemId,
+  color = "rgb(0,255,255)",
+  scale = 3 / 128,
+  name,
+  hoveringDirection,
+}) => {
   React.useEffect(() => {
     if (text.current) {
       text.current.material.opacity = 0.5;
@@ -19,7 +26,7 @@ const SystemLabel: React.FC<{
 
   const textTexture = React.useMemo(() => {
     let texture = new TextTexture({
-      color: "rgb(0,255,255)",
+      color,
       fontFamily: 'Electrolize, "Gill Sans", sans-serif',
       fontSize: 128,
       alignment: "right",
@@ -27,7 +34,7 @@ const SystemLabel: React.FC<{
     });
     texture.redraw();
     return texture;
-  }, [name]);
+  }, [name, color]);
 
   const text = React.useRef<Sprite>();
   const selected = React.useRef(false);

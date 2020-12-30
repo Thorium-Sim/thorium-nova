@@ -61,13 +61,13 @@ const ShipsList: React.FC = () => {
                   <div className="flex-1">{c.label}</div>
                   <Button
                     size="sm"
-                    aria-label={t("Remove Ship")}
+                    aria-label={t("Remove Ship Class")}
                     variantColor="danger"
                     onClick={async e => {
                       e.preventDefault();
                       if (
                         await confirm({
-                          header: `Are you sure you want to delete ${c.label}?`,
+                          header: `Are you sure you want to delete "${c.label}"?`,
                         })
                       ) {
                         remove({variables: {pluginId, shipId}});
@@ -84,13 +84,13 @@ const ShipsList: React.FC = () => {
           <Button
             onClick={async () => {
               const name = await prompt({
-                header: t("What is the name of the new ship?"),
+                header: t("What is the name of the new ship class?"),
               });
               if (!name || typeof name !== "string") return;
               const response = await create({variables: {name, pluginId}});
               if (response?.errors?.[0].message) {
                 await alert({
-                  header: t("Error creating ship."),
+                  header: t("Error creating ship class."),
                   body: response?.errors?.[0].message,
                 });
                 return;
@@ -98,7 +98,7 @@ const ShipsList: React.FC = () => {
               navigate(`${response.data?.pluginShipCreate.id}/basic`);
             }}
           >
-            {t(`New Ship`)}
+            {t(`New Ship Class`)}
           </Button>
         </div>
         <Outlet />

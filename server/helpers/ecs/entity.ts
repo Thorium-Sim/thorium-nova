@@ -231,8 +231,8 @@ class Entity extends Components {
    *   entity.updateComponent('kite', {angle: 90, pos: {y: 1}});
    *   // entity.component.pos is '{vel: 0, angle: 90, pos: {y: 1}}'
    */
-  updateComponent(
-    name: keyof Components,
+  updateComponent<T extends keyof Components>(
+    name: T,
     data: Partial<Components[typeof name]>
   ) {
     let component = this.components[name];

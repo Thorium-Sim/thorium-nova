@@ -1,6 +1,7 @@
 import App from "../app";
 import Entity from "../helpers/ecs/entity";
 import {
+  Arg,
   Ctx,
   FieldResolver,
   ID,
@@ -20,6 +21,10 @@ export class EntityResolver {
   @Query(returns => [Entity])
   async entities() {
     return App.activeFlight?.ecs.entities;
+  }
+  @Query(returns => Entity, {nullable: true})
+  async entity(@Arg("id", type => ID) id: string) {
+    return App.activeFlight?.ecs.entities.find(e => e.id === id);
   }
 }
 

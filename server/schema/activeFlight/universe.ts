@@ -2,6 +2,7 @@ import App from "server/app";
 import Entity from "server/helpers/ecs/entity";
 import {
   Arg,
+  Ctx,
   Field,
   FieldResolver,
   ID,
@@ -16,6 +17,7 @@ import {calculateHabitableZone} from "server/schema/plugins/universe/systems";
 import uuid from "uniqid";
 import {pubsub} from "server/helpers/pubsub";
 import {getPlugin} from "../plugins/basePlugin";
+import {GraphQLContext} from "server/helpers/graphqlContext";
 
 @ObjectType()
 export class ActivePlanetarySystem extends Entity {
@@ -25,10 +27,6 @@ export class ActivePlanetarySystem extends Entity {
     description: "The objects that inhabit this system",
   })
   items: Entity[] = [];
-
-  constructor(params: Partial<ActivePlanetarySystem>) {
-    super(params);
-  }
 }
 
 @Resolver(of => ActivePlanetarySystem)
@@ -54,10 +52,24 @@ export class ActivePlanetarySystemResolver extends Entity {
   }
 
   @FieldResolver(type => [Entity])
-  items(@Root() self: ActivePlanetarySystem) {
-    return App.activeFlight?.ecs.entities.filter(
-      s => s.satellite?.parentId === self.id
-    );
+  items(
+    @Arg("shipId", {
+      nullable: true,
+      description:
+        "If you want to get waypoints for a specific ship, you can set this variable.",
+    })
+    shipId: string,
+    @Root() self: ActivePlanetarySystem,
+    @Ctx() context: GraphQLContext
+  ) {
+    return App.activeFlight?.ecs.entities.filter(s => {
+      return (
+        s.satellite?.parentId === self.id ||
+        (s.isWaypoint &&
+          s.interstellarPosition?.systemId === self.id &&
+          s.isWaypoint.assignedShipId === (shipId || context.client?.shipId))
+      );
+    });
   }
 }
 

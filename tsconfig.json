@@ -26,5 +26,5 @@
     "typeRoots": ["./node_modules/@types", "./types"]
   },
   "exclude": ["node_modules"],
-  "include": ["client", "server", "test", "babel.config.js", "public/webgl.js", "public/generateNebulaMap.js"]
+  "include": ["client", "server", "test", "babel.config.js", "public/webgl.js", "public/workers/generateNebulaMap.js", "public/processTheme.worker.js"]
 }

@@ -43,9 +43,24 @@ import InfoTip from "client/components/ui/infoTip";
 import {useClipboard} from "@chakra-ui/core";
 import Input from "client/components/ui/Input";
 import useLocalStorage from "client/helpers/hooks/useLocalStorage";
-import {processLess} from "./processTheme.comlink";
+// @ts-expect-error
+import ProcessLessWorker from "worker-loader?filename=static/processTheme.worker.js!./processTheme.worker.js";
 import {AssetPreview} from "./AssetPreview";
+import uuid from "uniqid";
 
+const promiseCache: Record<string, (value: string) => void> = {};
+
+const lessWorker = new ProcessLessWorker();
+lessWorker.onmessage = function OnMessage(e: MessageEvent) {
+  promiseCache[e.data.id]?.(e.data.less);
+};
+async function processLess(css: string): Promise<string> {
+  const id = uuid();
+  return new Promise(resolve => {
+    promiseCache[id] = resolve;
+    lessWorker.postMessage({id, css});
+  });
+}
 const ThemesContext = createContext<ThemesSubscription["themes"]>([]);
 const ThemeConfig = () => {
   const {pluginId} = useParams();
@@ -162,8 +177,7 @@ const useCodeContents = () => {
 
   useEffect(() => {
     async function setCss() {
-      const css = await processLess(lessCode);
-
+      const css = await processLess(lessCode || "");
       setCssCode(cssCode => (cssCode ? cssCode : css));
     }
     setCss();

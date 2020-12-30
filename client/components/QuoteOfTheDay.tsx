@@ -16,8 +16,8 @@ const quotes = [
   "The man who has no imagination has no wings.",
   "Life before death. Strength before weakness. Journey before destination.",
   "We are the ones we have been waiting for.",
-  "I am burdened with glorious purpose.",
   "While you live, shine; have no grief at all. Life exists only for a short while and Time demands his due.",
+  "I am burdened with glorious purpose.",
   "The hardest choices require the strongest wills.",
   "Like a snowflake in a blizzard...",
   "Fun isn’t something one considers when balancing the universe. But this… does put a smile on my face.",
@@ -28,11 +28,13 @@ const quotes = [
   "While others sleep, you dream.",
   "Time is an illusion. Lunchtime doubly so.",
   "I may not have gone where I intended to go, but I think I have ended up where I needed to be.",
+  // Douglas Adams
   "Don't Panic.",
   "I'd far rather be happy than right any day.",
   "For a moment, nothing happened. Then, after a second or so, nothing continued to happen.",
   "Reality is frequently inaccurate.",
   "It is a mistake to think you can solve any major problems just with potatoes.",
+  // AI Generated Ship Names
   "Dangerous But Not Unbearably So",
   "So much for subtlety",
   "Just as likely to still be an intergalactic jellyfish.",
@@ -114,6 +116,8 @@ const quotes = [
   "You are entitled to your own opinion, but you are not entitled to your own facts.",
   "It is not incumbent on you to complete the task, but neither are you free to desist from it.",
   "May you live in interesting times.",
+  // Will Durant
+  "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
 ];
 
 const QuoteOfTheDay = () => {

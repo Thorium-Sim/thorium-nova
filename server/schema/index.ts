@@ -43,6 +43,7 @@ import {UniversePluginStarbasesResolver} from "./plugins/universe/starbases";
 import {EffectResolver} from "./effects";
 import {AlertLevelResolver} from "./components/alertLevel";
 import {ThemesResolver} from "./plugins/themes";
+import {WaypointsResolver} from "./activeFlight/waypoints";
 
 type ResolverT =
   | readonly [Function, ...Function[]]
@@ -90,4 +91,5 @@ export const resolvers: ResolverT = [
   EffectResolver,
   AlertLevelResolver,
   ThemesResolver,
+  WaypointsResolver,
 ];

@@ -13603,11 +13603,6 @@ postcss@^8.1.6:
     nanoid "^3.1.16"
     source-map "^0.6.1"
 
-prando@^5.1.2:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/prando/-/prando-5.1.2.tgz#1c7f9b8f543bf335d44a2aadcaa1b3163f3b8fb8"
-  integrity sha512-PaJxPMw8UugKUeUq27oZ8dqW2CgysXf2MjmlyCcRq+Es8Bcxgac7+nO6/tRGKmLOnUG1GPbAATNAZmzwD1hbIA==
-
 precinct@^6.3.1:
   version "6.3.1"
   resolved "https://registry.yarnpkg.com/precinct/-/precinct-6.3.1.tgz#8ad735a8afdfc48b56ed39c9ad3bf999b6b928dc"

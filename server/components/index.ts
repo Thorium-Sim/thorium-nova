@@ -39,6 +39,7 @@ import {IsFactionComponent} from "./isFaction";
 import {FactionAssignmentComponent} from "./factionAssignment";
 import {IsPlayerShipComponent} from "./playerShip/isPlayerShip";
 import {HasFlightDirectorComponent} from "./playerShip/hasFlightDirector";
+import {IsWaypointComponent} from "./isWaypoint";
 @ObjectType()
 export default class Components {
   @Field()
@@ -164,6 +165,9 @@ export default class Components {
 
   @Field()
   hasFlightDirector?: HasFlightDirectorComponent;
+
+  @Field({nullable: true})
+  isWaypoint?: IsWaypointComponent;
 }
 
 export const registeredComponents = [
@@ -207,4 +211,5 @@ export const registeredComponents = [
   FactionAssignmentComponent,
   IsPlayerShipComponent,
   HasFlightDirectorComponent,
+  IsWaypointComponent,
 ];

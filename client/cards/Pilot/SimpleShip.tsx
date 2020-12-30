@@ -134,6 +134,7 @@ export const ShipEntity = ({
       }
     }
     sprite.current?.scale.setScalar(dx * 3 * scale);
+
     mesh.current?.scale.setScalar(dx * 3);
     if (playerShip.rotation) {
       mesh.current?.quaternion.set(

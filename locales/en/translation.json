@@ -1,11 +1,11 @@
 {
-  "Station Error": "Station Error",
-  "Tilt Sensor View": "Tilt Sensor View",
-  "Your station has experienced an error": {
-    " A diagnostic must be performed to restore this station to functionality": {
-      " Please contact a computer specialist": {
+  "Accessing": {
+    "": {
+      "": {
         "": ""
       }
     }
-  }
+  },
+  "Add Waypoint": "Add Waypoint",
+  "No Object Selected": "No Object Selected"
 }

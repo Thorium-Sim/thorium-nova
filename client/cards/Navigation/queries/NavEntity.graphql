@@ -1,0 +1,64 @@
+query NavEntity($id: ID!) {
+  entity(id: $id) {
+    id
+    identity {
+      name
+    }
+    position {
+      x
+      y
+      z
+    }
+    entityType
+    factionAssignment {
+      faction {
+        id
+        identity {
+          name
+        }
+        isFaction {
+          logo
+          color
+        }
+      }
+    }
+    size {
+      value
+    }
+    isShip {
+      mass
+      category
+      registry
+      shipClass
+    }
+    shipAssets {
+      vanity
+    }
+    isStar {
+      spectralType
+      hue
+      isWhite
+    }
+    isPlanet {
+      classification
+      textureMapAsset
+      cloudsMapAsset
+      ringsMapAsset
+    }
+    satellite {
+      distance
+      orbitalArc
+      orbitalInclination
+      eccentricity
+      parent {
+        id
+        satellite {
+          distance
+          orbitalArc
+          orbitalInclination
+          eccentricity
+        }
+      }
+    }
+  }
+}

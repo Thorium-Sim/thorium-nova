@@ -35,6 +35,7 @@ import {getAnyOutfit} from "../plugins/outfits/utils";
 import {getPhrase, parsePhrase} from "../phrases";
 import cloneDeep from "lodash/cloneDeep";
 import {GraphQLContext} from "server/helpers/graphqlContext";
+import rng from "rng";
 
 type FauxECS = {addEntity: (e: Entity) => void} | undefined;
 export function shipSpawn(
@@ -79,7 +80,14 @@ export function shipSpawn(
     }
   }
 
+  const shipClass = entity.identity?.name;
+  const registryPrefix = entity.isShip?.registry || "";
+  const registryRng = new rng.MT(shipName);
+  const registry = registryPrefix
+    ? `${registryPrefix}${registryRng.range(1000, 9999)}`
+    : "";
   entity.updateComponent("identity", {name: shipName});
+  entity.updateComponent("isShip", {shipClass, registry});
   entity.updateComponent("factionAssignment", {
     factionId: shipTemplate.factionAssignment?.factionId,
   });

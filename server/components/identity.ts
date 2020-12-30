@@ -1,4 +1,4 @@
-import {Field, InputType, ObjectType} from "type-graphql";
+import {Field, ObjectType} from "type-graphql";
 import {Component, ComponentOmit} from "./utils";
 
 @ObjectType()
@@ -12,6 +12,9 @@ export class IdentityComponent extends Component {
   @Field()
   name: string = "Entity";
 
-  @Field()
+  @Field({
+    description:
+      "Should only be used for information provided by the Flight Director",
+  })
   description: string = "";
 }

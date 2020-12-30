@@ -7,11 +7,24 @@ export class IsShipComponent extends Component {
   static defaults: ComponentOmit<IsShipComponent> = {
     mass: 2000,
     category: "Cruiser",
+    shipClass: "Astra Battleship",
+    registry: "NCC-",
     nameGeneratorPhrase: null,
   };
   private _category: string = "Cruiser";
   @Field({description: "Mass in kilograms. Affects acceleration"})
   mass: number = 2000;
+  @Field({
+    nullable: true,
+    description: "The class of the ship. This only applies to spawned ships.",
+  })
+  shipClass: string = "Astra Battleship";
+  @Field({
+    nullable: true,
+    description:
+      "The registry number of the ship. For ship templates, it is a prefix; for spawned ships, it is the fully generated number, based on a hash of the ship's name.",
+  })
+  registry: string = "NCC-";
 
   @Field(type => String, {
     description:

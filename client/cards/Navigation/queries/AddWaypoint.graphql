@@ -1,0 +1,18 @@
+mutation WaypointAdd(
+  $shipId: ID
+  $systemId: ID
+  $objectId: ID
+  $position: CoordinatesInput
+) {
+  waypointSpawn(
+    shipId: $shipId
+    systemId: $systemId
+    objectId: $objectId
+    position: $position
+  ) {
+    id
+    identity {
+      name
+    }
+  }
+}

@@ -335,17 +335,6 @@ module.exports = function (webpackEnv) {
         // Disable require.ensure as it's not a standard language feature.
         {parser: {requireEnsure: false}},
         {
-          test: /\.comlink\.(js|ts)$/i,
-          use: [
-            {
-              loader: "comlink-loader",
-              options: {
-                singleton: true,
-              },
-            },
-          ],
-        },
-        {
           // "oneOf" will traverse all following loaders until one will
           // match the requirements. When no loader matches it will fall
           // back to the "file" loader at the end of the loader list.

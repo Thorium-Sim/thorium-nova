@@ -23,7 +23,7 @@ export class Networking extends System {
         pubsub.publish("universeSystemShipsHot", {
           systemId: id,
           ships: this.ecs.entities.filter(
-            s => s.interstellarPosition?.systemId === id
+            s => s.isShip && s.interstellarPosition?.systemId === id
           ),
         });
       });

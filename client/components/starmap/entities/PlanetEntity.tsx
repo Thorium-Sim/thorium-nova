@@ -48,8 +48,8 @@ const distanceVector = new Vector3();
 const SPRITE_SCALE_FACTOR = 50;
 
 export const Planet: React.FC<{
-  position: Vector3;
-  scaledPosition: Vector3;
+  position?: Vector3;
+  scaledPosition?: Vector3;
   scale: Vector3 | [number, number, number];
   clouds: string;
   rings: string;
@@ -61,9 +61,10 @@ export const Planet: React.FC<{
   onPointerOut?: (event: unknown) => void;
   onClick?: (event: unknown) => void;
   showSprite?: boolean;
+  showMesh?: boolean;
   isSatellite?: boolean;
 }> = ({
-  position,
+  position = new Vector3(),
   scaledPosition = position,
   scale,
   clouds,
@@ -77,6 +78,7 @@ export const Planet: React.FC<{
   onClick,
   children,
   showSprite,
+  showMesh = true,
   isSatellite,
 }) => {
   const group = React.useRef<Group>();
@@ -108,7 +110,7 @@ export const Planet: React.FC<{
       ) {
         planetSprite.current.visible = true;
         planetMesh.current.visible = false;
-      } else {
+      } else if (showMesh) {
         planetSprite.current.visible = false;
         planetMesh.current.visible = true;
       }

@@ -15,6 +15,9 @@ fragment UniverseObject on Entity {
     spectralType
     radius
   }
+  isWaypoint {
+    assignedShipId
+  }
   isPlanet {
     age
     classification
