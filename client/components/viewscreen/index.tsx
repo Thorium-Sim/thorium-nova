@@ -1,5 +1,5 @@
 import React, {Suspense} from "react";
-import {Canvas, useThree} from "react-three-fiber";
+import {Canvas} from "react-three-fiber";
 import {ApolloProvider, useApolloClient} from "@apollo/client";
 import Nebula from "../starmap/Nebula";
 import {
@@ -9,13 +9,13 @@ import {
 import {configStoreApi} from "../starmap/configStore";
 import StarEntity from "../starmap/entities/StarEntity";
 import PlanetEntity from "../starmap/entities/PlanetEntity";
-import {getOrbitPosition} from "../starmap/utils";
 import {FlyControls} from "drei";
 import {useSystemShips} from "./useSystemShips";
 import {ErrorBoundary} from "react-error-boundary";
 import ShipEntity from "../starmap/entities/ShipEntity";
 import {PlayerShipIdProvider} from "./PlayerShipContext";
 import {WaypointEntity} from "client/cards/Pilot/PilotContacts";
+import Fuzz from "./fuzz";
 
 const FAR = 1e27;
 
@@ -46,10 +46,6 @@ const ViewscreenScene: React.FC = () => {
   return (
     <>
       <FlyControls movementSpeed={50} rollSpeed={Math.PI / 10} dragToLook />
-      <mesh>
-        <boxBufferGeometry args={[1, 2, 3]} attach="geometry" />
-        <meshStandardMaterial color="rebeccapurple" attach="material" />
-      </mesh>
       <pointLight
         intensity={0.2}
         decay={2}
@@ -61,7 +57,7 @@ const ViewscreenScene: React.FC = () => {
         position={[-10000000, -10000000, -1000000]}
       />
       <ambientLight intensity={0.5} />
-
+      <Fuzz />
       {system.items.map(e => {
         if (e.isStar) {
           return <StarEntity key={e.id} entity={e} />;

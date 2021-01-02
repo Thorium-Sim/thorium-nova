@@ -95,6 +95,14 @@ const Pilot: FC<CardProps> = ({cardLoaded}) => {
         >
           {t("Tilt Sensor View")}
         </Button>
+        <Button
+          size="lg"
+          className="w-full mt-2"
+          variantColor="warning"
+          onClick={() => {}}
+        >
+          {t("Lock On Course")}
+        </Button>
       </div>
       <div className="h-full col-start-2 col-end-4 flex items-center justify-center">
         <div className="h-full relative">

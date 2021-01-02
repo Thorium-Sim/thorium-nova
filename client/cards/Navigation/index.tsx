@@ -47,7 +47,7 @@ interface NavigationStore extends Record<string, unknown> {
 const useNavigationStore = create<NavigationStore>(
   persist(
     (set, get) => ({
-      selectedObjectId: "5ax0v1ywrkgasq7t4",
+      selectedObjectId: null,
     }),
     {
       name: "thorium-navigation-store", // unique name
@@ -123,14 +123,14 @@ const NavigationShipEntity = ({
           sizeAttenuation={true}
         ></spriteMaterial>
       </sprite>
-      <group ref={group} scale={[0.2, 0.2, 0.2]}>
+      {/* <group ref={group} scale={[0.2, 0.2, 0.2]}>
         <SystemLabel
           systemId=""
           name={entity.identity.name}
           hoveringDirection={{current: 0}}
           scale={5 / 128}
         />
-      </group>
+      </group> */}
     </group>
   );
 };

@@ -1,11 +1,4 @@
 {
-  "Accessing": {
-    "": {
-      "": {
-        "": ""
-      }
-    }
-  },
-  "Add Waypoint": "Add Waypoint",
-  "No Object Selected": "No Object Selected"
+  "Lock On Course": "Lock On Course",
+  "Tilt Sensor View": "Tilt Sensor View"
 }

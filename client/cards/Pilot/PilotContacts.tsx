@@ -115,7 +115,7 @@ export const WaypointEntity = ({
 
               screenPosition.setZ(0).normalize();
               const angle = Math.atan2(screenPosition.y, screenPosition.x);
-
+              console.log(zDistance);
               screenPosition
                 .multiply(sizeVector.set(size.width, size.height, 0))
                 .setZ(-zDistance)

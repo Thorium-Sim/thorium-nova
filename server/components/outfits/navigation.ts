@@ -25,7 +25,7 @@ export class NavigationComponent extends Component {
   @Field({description: "Whether the course has been locked in."})
   locked: boolean = false;
   @Field({
-    description: "The maximum radius which destinations can be set in ly.",
+    description: "The maximum radius to which destinations can be set in ly.",
   })
   maxDestinationRadius: number = 2000;
 }
