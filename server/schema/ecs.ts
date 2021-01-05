@@ -86,9 +86,18 @@ export class EntityFieldResolver {
   forwardVelocity(@Root() entity: Entity): number {
     const {velocity, rotation} = entity;
     if (!velocity || !rotation) return 0;
+    const warpEngines = entity.ecs?.entities.find(
+      e => e.warpEngines && e.shipAssignment?.shipId === entity.id
+    );
+    const warpVelocity = warpEngines?.warpEngines?.forwardVelocity || 0;
     shipRotationQuaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
     velocityObject.rotation.setFromQuaternion(shipRotationQuaternion);
-    velocityObject.position.set(velocity.x, velocity.y, velocity.z);
+    velocityObject.position.set(
+      velocity.x,
+      velocity.y,
+      velocity.z + warpVelocity
+    );
+
     const forwardVelocity = velocityObject.position.dot(
       forwardVector.set(0, 0, 1).applyQuaternion(shipRotationQuaternion)
     );

@@ -312,6 +312,38 @@ export type PlayerSetImpulseMutation = {
   impulseEnginesSetTargetSpeed: {__typename?: "Entity"; id: string};
 };
 
+export type PlayerSetWarpMutationVariables = Exact<{
+  factor: Scalars["Int"];
+}>;
+
+export type PlayerSetWarpMutation = {
+  __typename?: "Mutation";
+  warpEngineSetCurrentWarpFactor: {
+    __typename?: "Entity";
+    id: string;
+    warpEngines: {
+      __typename?: "WarpEnginesComponent";
+      currentWarpFactor: number;
+    };
+  };
+};
+
+export type PlayerWarpSubscriptionVariables = Exact<{[key: string]: never}>;
+
+export type PlayerWarpSubscription = {
+  __typename?: "Subscription";
+  warpEnginesOutfit: Maybe<{
+    __typename?: "Entity";
+    id: string;
+    warpEngines: {
+      __typename?: "WarpEnginesComponent";
+      warpFactorCount: number;
+      currentWarpFactor: number;
+      maxVelocity: number;
+    };
+  }>;
+};
+
 export type ThrustersSetDirectionMutationVariables = Exact<{
   x?: Maybe<Scalars["Float"]>;
   y?: Maybe<Scalars["Float"]>;
@@ -541,7 +573,11 @@ export type ClientAssignShipMutationVariables = Exact<{
 
 export type ClientAssignShipMutation = {
   __typename?: "Mutation";
-  clientSetShip: {__typename?: "Client"; id: string; shipId: Maybe<string>};
+  clientSetShip: Maybe<{
+    __typename?: "Client";
+    id: string;
+    shipId: Maybe<string>;
+  }>;
   clientSetStation: {
     __typename?: "Client";
     id: string;
@@ -1518,7 +1554,10 @@ export type UniverseObjectFragment = {
     spectralType: string;
     radius: number;
   }>;
-  isWaypoint: {__typename?: "IsWaypointComponent"; assignedShipId: string};
+  isWaypoint: Maybe<{
+    __typename?: "IsWaypointComponent";
+    assignedShipId: string;
+  }>;
   isPlanet: Maybe<{
     __typename?: "IsPlanetComponent";
     age: number;
@@ -2700,6 +2739,56 @@ export function usePlayerSetImpulseMutation(
 }
 export type PlayerSetImpulseMutationHookResult = ReturnType<
   typeof usePlayerSetImpulseMutation
+>;
+export const PlayerSetWarpDocument = gql`
+  mutation PlayerSetWarp($factor: Int!) {
+    warpEngineSetCurrentWarpFactor(factor: $factor) {
+      id
+      warpEngines {
+        currentWarpFactor
+      }
+    }
+  }
+`;
+export function usePlayerSetWarpMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PlayerSetWarpMutation,
+    PlayerSetWarpMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    PlayerSetWarpMutation,
+    PlayerSetWarpMutationVariables
+  >(PlayerSetWarpDocument, baseOptions);
+}
+export type PlayerSetWarpMutationHookResult = ReturnType<
+  typeof usePlayerSetWarpMutation
+>;
+export const PlayerWarpDocument = gql`
+  subscription PlayerWarp {
+    warpEnginesOutfit {
+      id
+      warpEngines {
+        warpFactorCount
+        currentWarpFactor
+        maxVelocity
+      }
+    }
+  }
+`;
+export function usePlayerWarpSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    PlayerWarpSubscription,
+    PlayerWarpSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    PlayerWarpSubscription,
+    PlayerWarpSubscriptionVariables
+  >(PlayerWarpDocument, baseOptions);
+}
+export type PlayerWarpSubscriptionHookResult = ReturnType<
+  typeof usePlayerWarpSubscription
 >;
 export const ThrustersSetDirectionDocument = gql`
   mutation ThrustersSetDirection($x: Float = 0, $y: Float = 0, $z: Float = 0) {

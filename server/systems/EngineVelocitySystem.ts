@@ -55,6 +55,11 @@ export class EngineVelocitySystem extends System {
 
         velocityObject.translateZ(impulseAccel);
         accelerationVector.z = impulseAccel;
+      } else if (
+        Math.abs(forwardVelocity - impulse.impulseEngines.targetSpeed) < 1
+      ) {
+        accelerationVector.z = 1;
+        velocityObject.position.setZ(impulse.impulseEngines.targetSpeed);
       }
     }
     // Thrusters
@@ -89,6 +94,8 @@ export class EngineVelocitySystem extends System {
     // acceleration so the velocity gets back to zero as quickly as possible. I think
     // this will fix a number of issues that have been experienced.
 
+    if (entity.isPlayerShip) {
+    }
     // Apply dampening
     if (dampening) {
       // Create an opposite vector, but eliminate anything that is not part of the acceleration

@@ -24,8 +24,7 @@ export class WarpSystem extends System {
       interstellarCruisingSpeed,
       planetaryCruisingSpeed,
       minSpeedMultiplier,
-      warpFactorCount,
-      currentWarpFactor,
+      maxVelocity,
     } = entity.warpEngines;
 
     const cruisingSpeed =
@@ -36,14 +35,9 @@ export class WarpSystem extends System {
     const minWarp = cruisingSpeed * minSpeedMultiplier;
 
     // Calculate max warp speed based on the factor and the number of warp factors
-    let warpSpeed = 0;
-    if (currentWarpFactor === 1) {
-      warpSpeed = minWarp;
-    } else if (currentWarpFactor > 1) {
-      warpSpeed =
-        (cruisingSpeed - minWarp) *
-        ((currentWarpFactor - 1) / (warpFactorCount - 1));
-    }
+    const warpSpeed = maxVelocity;
+    entity.warpEngines.forwardVelocity =
+      entity.warpEngines.forwardVelocity ?? 0;
 
     if (entity.warpEngines.forwardVelocity > warpSpeed) {
       // Slow the ship down

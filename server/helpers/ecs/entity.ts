@@ -44,7 +44,7 @@ class Entity extends Components {
   systemsDirty: boolean;
   @Field()
   components: Components;
-  private ecs: ECS | null;
+  ecs: ECS | null;
   constructor(
     id?: Partial<Entity> | string | null,
     components: Component[] = []

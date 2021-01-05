@@ -1,0 +1,8 @@
+mutation PlayerSetWarp($factor: Int!) {
+  warpEngineSetCurrentWarpFactor(factor: $factor) {
+    id
+    warpEngines {
+      currentWarpFactor
+    }
+  }
+}

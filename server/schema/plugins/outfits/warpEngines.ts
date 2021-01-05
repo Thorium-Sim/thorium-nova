@@ -1,9 +1,11 @@
 import {number} from "prop-types";
 import App from "server/app";
 import Entity from "server/helpers/ecs/entity";
+import {GraphQLContext} from "server/helpers/graphqlContext";
 import {pubsub} from "server/helpers/pubsub";
 import {
   Arg,
+  Ctx,
   ID,
   Int,
   Mutation,
@@ -105,32 +107,73 @@ export class WarpEngineOutfitResolver {
     @Arg("pluginId", type => ID, {nullable: true}) pluginId: string,
     @Arg("outfitId", type => ID, {nullable: true}) outfitId: string,
     @Arg("shipId", type => ID, {nullable: true}) shipId: string,
-    @Arg("factor", type => Int) factor: number
+    @Arg("factor", type => Int) factor: number,
+    @Ctx() context: GraphQLContext
   ) {
     const {outfit, ship, plugin} = getOutfit({
       pluginId,
       outfitId,
-      shipId,
+      shipId: shipId || context.client?.shipId || "",
       outfitType: "warpEngines",
     });
-    outfit.updateComponent("warpEngines", {currentWarpFactor: factor});
+    if (!outfit) throw new Error("Unable to find outfit.");
+    if (!outfit.warpEngines)
+      throw new Error("Outfit is not a warp engines outfit");
+    if (!ship) throw new Error("Outfit is not assigned to a ship.");
+    const {
+      interstellarCruisingSpeed,
+      planetaryCruisingSpeed,
+      minSpeedMultiplier,
+      warpFactorCount,
+    } = outfit.warpEngines;
+
+    const cruisingSpeed =
+      ship.interstellarPosition?.systemId === null
+        ? interstellarCruisingSpeed
+        : planetaryCruisingSpeed;
+
+    const minWarp = cruisingSpeed * minSpeedMultiplier;
+
+    // Calculate max warp speed based on the factor and the number of warp factors
+    let warpSpeed = 0;
+    if (factor === 1) {
+      warpSpeed = minWarp;
+    } else if (factor > 1) {
+      warpSpeed =
+        (cruisingSpeed - minWarp) * ((factor - 1) / (warpFactorCount - 1));
+    }
+
+    outfit.updateComponent("warpEngines", {
+      currentWarpFactor: factor,
+      maxVelocity: warpSpeed,
+    });
     outfitPublish({plugin, ship, outfit});
     return outfit;
   }
   @Subscription(returns => Entity, {
     nullable: true,
-    topics: ({args, payload}) => {
+    topics: ({
+      args,
+      payload,
+      context,
+    }: {
+      args: {pluginId?: string; outfitId?: string; shipId?: string};
+      payload: {pluginId?: string; outfitId?: string; shipId?: string};
+      context: GraphQLContext;
+    }) => {
       const id = uuid();
+      const shipId = args.shipId || context.client?.shipId || "";
+
       const {outfit} = getOutfit({
         pluginId: args.pluginId,
         outfitId: args.outfitId,
-        shipId: args.shipId,
+        shipId,
         outfitType: "warpEngines",
       });
 
       process.nextTick(() => {
         pubsub.publish(id, {
-          shipId: args.shipId,
+          shipId,
           pluginId: args.pluginId,
           outfitId: args.outfitId,
           outfit,
@@ -138,15 +181,26 @@ export class WarpEngineOutfitResolver {
       });
       return [id, "warpEnginesOutfit"];
     },
-    filter: ({args, payload}) => {
+    filter: ({
+      args,
+      payload,
+      context,
+    }: {
+      args: {pluginId?: string; outfitId?: string; shipId?: string};
+      payload: {pluginId?: string; outfitId?: string; shipId?: string};
+      context: GraphQLContext;
+    }) => {
       if (args.pluginId && args.outfitId) {
         return (
           payload.pluginId === args.pluginId &&
           payload.outfitId === args.outfitId
         );
       }
-      if (args.shipId) {
-        return payload.shipId === args.shipId;
+      if (args.shipId || context.client?.shipId) {
+        return (
+          payload.shipId === args.shipId ||
+          payload.shipId === context.client?.shipId
+        );
       }
       return false;
     },

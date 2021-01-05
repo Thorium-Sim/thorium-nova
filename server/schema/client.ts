@@ -155,7 +155,7 @@ export class ClientResolver {
     }
     return client;
   }
-  @Mutation(returns => Client)
+  @Mutation(returns => Client, {nullable: true})
   clientSetShip(
     @Ctx() context: GraphQLContext,
     @Arg("shipId", type => ID, {nullable: true}) shipId: string | null,
@@ -174,6 +174,7 @@ export class ClientResolver {
     if (client) {
       pubsub.publish("client", {client, clientId: client.id});
     }
+    console.log(client);
     return client;
   }
   @Mutation(returns => Client)

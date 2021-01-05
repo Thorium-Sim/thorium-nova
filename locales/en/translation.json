@@ -1,4 +1,15 @@
 {
-  "Lock On Course": "Lock On Course",
-  "Tilt Sensor View": "Tilt Sensor View"
+  "1/2": "1/2",
+  "1/4": "1/4",
+  "3/4": "3/4",
+  "Emergency": "Emergency",
+  "Emergency Warp": "Emergency Warp",
+  "Full": "Full",
+  "Full Stop": "Full Stop",
+  "Warp 1": "Warp 1",
+  "Warp 2": "Warp 2",
+  "Warp 3": "Warp 3",
+  "Warp 4": "Warp 4",
+  "Warp 5": "Warp 5",
+  "Warp {{warpFactor}}": "Warp {{warpFactor}}"
 }

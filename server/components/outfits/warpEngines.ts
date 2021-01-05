@@ -30,6 +30,7 @@ export class WarpEnginesComponent extends Component {
   @Field({description: "The current warp factor. 0 is full stop."})
   currentWarpFactor: number = 0;
 
+  @Field({description: "The current warp speed in km/s"})
   maxVelocity: number = 0;
 
   @Field({description: "The forward acceleration of the ship in km/s."})

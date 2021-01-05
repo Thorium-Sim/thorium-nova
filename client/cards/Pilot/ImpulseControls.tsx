@@ -4,6 +4,8 @@ import {
   usePlayerForwardVelocitySubscription,
   usePlayerImpulseSubscription,
   usePlayerSetImpulseMutation,
+  usePlayerWarpSubscription,
+  usePlayerSetWarpMutation,
 } from "client/generated/graphql";
 import {useTranslation} from "react-i18next";
 import {css} from "@emotion/core";
@@ -12,6 +14,26 @@ import {useDrag} from "react-use-gesture";
 import throttle from "lodash.throttle";
 import useMeasure from "client/helpers/hooks/useMeasure";
 
+const C_IN_METERS = 299792458;
+function formatSpeed(speed: number) {
+  if (Math.abs(speed) > C_IN_METERS / 1000 / 2) {
+    return `${(speed / (C_IN_METERS / 1000)).toLocaleString(undefined, {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    })} C`;
+  }
+  if (Math.abs(speed) > 1) {
+    return `${speed.toLocaleString(undefined, {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    })} km/s`;
+  }
+
+  return `${(speed * 1000).toLocaleString(undefined, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })} m/s`;
+}
 const ForwardVelocity = () => {
   const {data: velocityData} = usePlayerForwardVelocitySubscription();
   const ship = velocityData?.playerShipHot;
@@ -20,15 +42,7 @@ const ForwardVelocity = () => {
     <div className="forward-velocity text-xl w-full py-2 text-center bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded">
       <div>Forward Velocity:</div>
       <div className="font-bold text-3xl my-2 tabular-nums">
-        {ship.forwardVelocity > 1
-          ? `${ship.forwardVelocity.toLocaleString(undefined, {
-              minimumFractionDigits: 1,
-              maximumFractionDigits: 1,
-            })} km/s`
-          : `${(ship.forwardVelocity * 1000).toLocaleString(undefined, {
-              minimumFractionDigits: 1,
-              maximumFractionDigits: 1,
-            })} m/s`}
+        {formatSpeed(ship.forwardVelocity)}
       </div>
     </div>
   );
@@ -37,8 +51,10 @@ const ForwardVelocity = () => {
 const KNOB_HEIGHT = 44;
 const BUTTON_OFFSET = 0.8;
 export const Impulse = ({cardLoaded = true}) => {
+  const {data: warpData} = usePlayerWarpSubscription();
   const {data: impulseData} = usePlayerImpulseSubscription();
   const [setImpulse] = usePlayerSetImpulseMutation();
+  const [setWarp] = usePlayerSetWarpMutation();
   const impulse = impulseData?.impulseEnginesOutfit;
   const downRef = useRef(false);
   const {t} = useTranslation();
@@ -50,6 +66,9 @@ export const Impulse = ({cardLoaded = true}) => {
   const callback = useRef(
     throttle((speed: number) => {
       setImpulse({variables: {speed}});
+      if (speed === 0) {
+        setWarp({variables: {factor: 0}});
+      }
     }, 100)
   );
   const targetSpeed = impulse?.impulseEngines.targetSpeed || 0;
@@ -110,6 +129,15 @@ export const Impulse = ({cardLoaded = true}) => {
   ]);
 
   if (!impulse) return null;
+
+  const warpFactorCount =
+    warpData?.warpEnginesOutfit?.warpEngines.warpFactorCount || 5;
+
+  console.log(warpData?.warpEnginesOutfit?.warpEngines.maxVelocity);
+  const targetVelocity =
+    impulse.impulseEngines.targetSpeed ||
+    warpData?.warpEnginesOutfit?.warpEngines.maxVelocity ||
+    0;
   return (
     <div className="select-none flex-1">
       <div>
@@ -119,67 +147,100 @@ export const Impulse = ({cardLoaded = true}) => {
             <div>Target Velocity:</div>
 
             <p className="font-bold text-3xl my-2 tabular-nums">
-              {impulse.impulseEngines.targetSpeed > 1
-                ? `${impulse.impulseEngines.targetSpeed.toLocaleString(
-                    undefined,
-                    {
-                      minimumFractionDigits: 1,
-                      maximumFractionDigits: 1,
-                    }
-                  )} km/s`
-                : `${(impulse.impulseEngines.targetSpeed * 1000).toLocaleString(
-                    undefined,
-                    {
-                      minimumFractionDigits: 1,
-                      maximumFractionDigits: 1,
-                    }
-                  )} m/s`}
+              {formatSpeed(targetVelocity)}
             </p>
           </div>
         </div>
         {/* TODO: Include heat indicator here eventually. */}
-        <p className="text-xl mt-4">Impulse Speed:</p>
 
-        <div className="flex">
-          <div className="flex flex-1 flex-col justify-around text-right mr-8">
-            <Button
-              onClick={() => callback.current(emergencySpeed)}
-              variantColor="danger"
-            >
-              {t("Emergency")}
-            </Button>
-            <Button
-              onClick={() => callback.current(cruisingSpeed)}
-              variantColor="warning"
-            >
-              {t("Full")}
-            </Button>
-            <Button onClick={() => callback.current((cruisingSpeed * 3) / 4)}>
-              {t("3/4")}
-            </Button>
-            <Button onClick={() => callback.current((cruisingSpeed * 1) / 2)}>
-              {t("1/2")}
-            </Button>
-            <Button onClick={() => callback.current((cruisingSpeed * 1) / 4)}>
-              {t("1/4")}
-            </Button>
-            <Button onClick={() => callback.current(0)} variantColor="muted">
-              {t("Full Stop")}
-            </Button>
+        <div className="flex  mt-4">
+          <div className="flex-1">
+            <p className="text-xl">Impulse Speed:</p>
+            <div className="flex">
+              <div className="flex flex-1 flex-col justify-around text-right mr-4">
+                <Button
+                  onClick={() => callback.current(emergencySpeed)}
+                  variantColor="danger"
+                >
+                  {t("Emergency")}
+                </Button>
+                <Button
+                  onClick={() => callback.current(cruisingSpeed)}
+                  variantColor="warning"
+                >
+                  {t("Full")}
+                </Button>
+                <Button
+                  onClick={() => callback.current((cruisingSpeed * 3) / 4)}
+                >
+                  {t("3/4")}
+                </Button>
+                <Button
+                  onClick={() => callback.current((cruisingSpeed * 1) / 2)}
+                >
+                  {t("1/2")}
+                </Button>
+                <Button
+                  onClick={() => callback.current((cruisingSpeed * 1) / 4)}
+                >
+                  {t("1/4")}
+                </Button>
+                <Button
+                  onClick={() => callback.current(0)}
+                  variantColor="muted"
+                >
+                  {t("Full Stop")}
+                </Button>
+              </div>
+              <div
+                ref={ref}
+                css={css`
+                  min-height: 20rem;
+                `}
+                className="h-0 relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end"
+              >
+                <a.div
+                  {...bind()}
+                  style={{transform: y?.to(y => `translate3d(0px,${y}px,0)`)}}
+                  className="z-10 w-10 h-10 rounded-full border-blackAlpha-500 border-2 bg-gray-500 shadow-md cursor-pointer"
+                ></a.div>
+              </div>
+            </div>
           </div>
 
-          <div
-            ref={ref}
-            css={css`
-              min-height: 20rem;
-            `}
-            className="h-0 relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end"
-          >
-            <a.div
-              {...bind()}
-              style={{transform: y?.to(y => `translate3d(0px,${y}px,0)`)}}
-              className="z-10 w-10 h-10 rounded-full border-blackAlpha-500 border-2 bg-gray-500 shadow-md cursor-pointer"
-            ></a.div>
+          <div className="flex flex-1 flex-col justify-around ml-6">
+            <p className="text-xl">Warp Speed:</p>
+            <div className="flex flex-col justify-around h-full">
+              <Button
+                className="danger"
+                onClick={() =>
+                  setWarp({variables: {factor: warpFactorCount + 1}})
+                }
+              >
+                {t("Emergency Warp")}
+              </Button>
+              {Array.from({
+                length: warpFactorCount,
+              }).map((_, i, arr) => {
+                const warpFactor = arr.length - i;
+                return (
+                  <Button
+                    key={`warp-${warpFactor}`}
+                    active={
+                      warpFactor ===
+                      warpData?.warpEnginesOutfit?.warpEngines.currentWarpFactor
+                    }
+                    className={i === 0 ? "warning" : ""}
+                    onClick={() => setWarp({variables: {factor: warpFactor}})}
+                  >
+                    {t("Warp {{warpFactor}}", {warpFactor})}
+                  </Button>
+                );
+              })}
+              <Button variantColor="muted" onClick={() => callback.current(0)}>
+                {t("Full Stop")}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

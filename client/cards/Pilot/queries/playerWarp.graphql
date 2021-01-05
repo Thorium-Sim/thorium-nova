@@ -1,0 +1,10 @@
+subscription PlayerWarp {
+  warpEnginesOutfit {
+    id
+    warpEngines {
+      warpFactorCount
+      currentWarpFactor
+      maxVelocity
+    }
+  }
+}
