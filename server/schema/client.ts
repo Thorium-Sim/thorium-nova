@@ -174,7 +174,6 @@ export class ClientResolver {
     if (client) {
       pubsub.publish("client", {client, clientId: client.id});
     }
-    console.log(client);
     return client;
   }
   @Mutation(returns => Client)

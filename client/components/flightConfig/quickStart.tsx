@@ -264,7 +264,7 @@ const MissionItem: React.FC<{
       {dimensions && menuOpen && (
         <Portal>
           <div
-            className="fixed top-0 left-0 border border-alert-200 bg-opacity-25 bg-alert-800 rounded-sm w-64"
+            className="fixed top-0 left-0 border border-alert-200 bg-opacity-25 bg-alert-800 rounded-sm w-64 flex flex-col"
             css={css`
               z-index: 100;
               height: 20rem;

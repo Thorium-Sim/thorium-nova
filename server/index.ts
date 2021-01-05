@@ -25,7 +25,9 @@ export async function startUp() {
           "Express server didn't start up. This should never happen."
         );
       }
-      App.servers.apollo = await setupApollo(App.servers.express);
+      const {apollo, schema} = await setupApollo(App.servers.express);
+      App.servers.apollo = apollo;
+      App.schema = schema;
     }
 
     const httpServer = await App.startHttpServer();

@@ -2,14 +2,41 @@
   "1/2": "1/2",
   "1/4": "1/4",
   "3/4": "3/4",
+  "Are you sure you want to end this flight?": "Are you sure you want to end this flight?",
+  "Are you sure you want to reset this flight?": "Are you sure you want to reset this flight?",
+  "Assign Client": "Assign Client",
+  "Back": "Back",
+  "Cancel": "Cancel",
+  "Choose a starting location": "Choose a starting location",
+  "Crew Count": "Crew Count",
+  "Crew count includes captain": "Crew count includes captain",
+  "Designed for sight-seeing, off-the-cuff missions, or writing a new mission from scratch": {
+    "": ""
+  },
   "Emergency": "Emergency",
   "Emergency Warp": "Emergency Warp",
+  "End": "End",
+  "Flight Lobby": "Flight Lobby",
+  "Flight Quick Start": "Flight Quick Start",
   "Full": "Full",
   "Full Stop": "Full Stop",
-  "Warp 1": "Warp 1",
-  "Warp 2": "Warp 2",
-  "Warp 3": "Warp 3",
-  "Warp 4": "Warp 4",
-  "Warp 5": "Warp 5",
+  "Go to Station": "Go to Station",
+  "Mission Selection": "Mission Selection",
+  "Next": "Next",
+  "Pause": "Pause",
+  "Reset": "Reset",
+  "Resume": "Resume",
+  "Sandbox Mode": "Sandbox Mode",
+  "Ship Name": "Ship Name",
+  "Ship Selection": "Ship Selection",
+  "Start Flight": "Start Flight",
+  "The state of this flight will be stored and can be accessed later": {
+    "": ""
+  },
+  "This flight will revert to the point right after it was created": {
+    "": ""
+  },
+  "Unassigned Clients": "Unassigned Clients",
+  "Use Flight Director controls": "Use Flight Director controls",
   "Warp {{warpFactor}}": "Warp {{warpFactor}}"
 }

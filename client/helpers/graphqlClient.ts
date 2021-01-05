@@ -7,12 +7,12 @@ import {
   InMemoryCache,
   split,
 } from "@apollo/client";
-import {WebSocketLink} from "@apollo/client/link/ws";
 import {getMainDefinition} from "@apollo/client/utilities";
 import {onError} from "@apollo/client/link/error";
 import {setContext} from "@apollo/client/link/context";
 import {getClientId} from "./getClientId";
 import {createUploadLink} from "apollo-upload-client";
+import {WebSocketLink} from "./WebsocketLink";
 
 const hostname = window.location.hostname;
 const protocol = window.location.protocol;
@@ -32,14 +32,11 @@ const websocketUrl =
       }/graphql`;
 
 const webSocketLink = new WebSocketLink({
-  uri: websocketUrl,
-  options: {
-    reconnect: true,
-    connectionParams: () =>
-      getClientId().then(clientId => {
-        return {clientid: clientId};
-      }),
-  },
+  url: websocketUrl,
+  connectionParams: () =>
+    getClientId().then(clientId => {
+      return {clientid: clientId};
+    }),
 });
 
 const wsLink = ApolloLink.from([

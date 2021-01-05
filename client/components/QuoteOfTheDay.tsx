@@ -118,6 +118,13 @@ const quotes = [
   "May you live in interesting times.",
   // Will Durant
   "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
+  // Ms Frizzle
+  "Take chances, make mistakes, and get messy.",
+  "The best way to know is to do.",
+  "Looks can be deceiving. Oftentimes what is isn’t, and what isn’t is.",
+  "If you keep asking questions, you’ll keep getting answers.",
+  "If you don’t look, you’ll never see. And what you don’t see can be very hard to find.",
+  "Where the road ends, adventure begins!",
 ];
 
 const QuoteOfTheDay = () => {

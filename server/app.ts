@@ -13,6 +13,7 @@ import type {ApolloServer} from "apollo-server-express";
 import type {Server} from "http";
 import setupHttpServer from "./startup/httpServer";
 import setupUDP from "./startup/udp";
+import {GraphQLSchema} from "graphql";
 
 type ActiveFlightT = Writable<Flight> | null;
 
@@ -46,6 +47,7 @@ class AppClass {
   port: number = process.env.NODE_ENV === "production" ? 4444 : 3001;
 
   bonjour: bonjour.Service | null = null;
+  schema?: GraphQLSchema;
   servers: {
     express?: Express;
     apollo?: ApolloServer;
@@ -97,10 +99,11 @@ class AppClass {
     }
   }
   async startHttpServer() {
-    if (!this.servers.express || !this.servers.apollo) return;
+    if (!this.servers.express || !this.servers.apollo || !this.schema) return;
     this.servers.httpServer = await setupHttpServer(
       this.servers.express,
       this.servers.apollo,
+      this.schema,
       this.port,
       this.httpOnly
     );

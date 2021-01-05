@@ -379,6 +379,12 @@ export class FlightResolver {
     if (isWritableFlight(App.activeFlight)) {
       App.activeFlight?.writeFile();
     }
+    App.storage.clients.forEach(c => {
+      c.setShip(null);
+      c.setStation(null);
+      pubsub.publish("client", {client: c, clientId: c.id});
+    });
+    pubsub.publish("clients", {clients: App.storage.clients});
     App.activeFlight = null;
     App.storage.activeFlightName = null;
     App.stopBonjour();

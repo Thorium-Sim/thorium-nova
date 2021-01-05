@@ -438,8 +438,8 @@ export class PlanetAssetsResolver {
     @Root() self: IsPlanetComponent,
     @Ctx() context: GraphQLContext
   ) {
-    if (self.textureMapAsset?.indexOf("/public") === 0)
-      return self.textureMapAsset.replace("/public", "");
+    if (self.textureMapAsset?.indexOf("/assets/textures") === 0)
+      return self.textureMapAsset;
     const pluginId = context.pluginId || context.entity?.pluginId;
     if (!pluginId) {
       return "";
@@ -460,8 +460,8 @@ export class PlanetAssetsResolver {
     @Root() self: IsPlanetComponent,
     @Ctx() context: GraphQLContext
   ) {
-    if (self.cloudsMapAsset?.indexOf("/public") === 0)
-      return self.cloudsMapAsset.replace("/public", "");
+    if (self.cloudsMapAsset?.indexOf("/assets/textures") === 0)
+      return self.cloudsMapAsset;
     const pluginId = context.pluginId || context.entity?.pluginId;
     if (!pluginId) {
       return "";
@@ -482,8 +482,8 @@ export class PlanetAssetsResolver {
     @Root() self: IsPlanetComponent,
     @Ctx() context: GraphQLContext
   ) {
-    if (self.ringsMapAsset?.indexOf("/public") === 0)
-      return self.ringsMapAsset.replace("/public", "");
+    if (self.ringsMapAsset?.indexOf("/assets/textures") === 0)
+      return self.ringsMapAsset;
     const pluginId = context.pluginId || context.entity?.pluginId;
     if (!pluginId) {
       return "";

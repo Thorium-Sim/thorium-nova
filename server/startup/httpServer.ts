@@ -3,15 +3,20 @@ import https from "https";
 import fs from "fs/promises";
 import url from "url";
 import path from "path";
-
+import ws from "ws";
 import {Application} from "express";
 import {ApolloServer} from "apollo-server-express";
 import {thoriumPath} from "../helpers/appPaths";
 import ipAddress from "../helpers/ipAddress";
+import {GraphQLSchema} from "graphql";
+import {useServer} from "graphql-ws/lib/use/ws";
+import {execute, subscribe} from "graphql";
+import {getGraphQLContext} from "server/helpers/graphqlContext";
 
 export default async function setupHttpServer(
   server: Application,
   apollo: ApolloServer,
+  schema: GraphQLSchema,
   port: number,
   httpOnly: boolean
 ) {
@@ -49,7 +54,11 @@ export default async function setupHttpServer(
   } else {
     httpServer = http.createServer(server);
   }
-  apollo.installSubscriptionHandlers(httpServer);
+
+  const wsServer = new ws.Server({
+    server: httpServer,
+    path: "/graphql",
+  });
 
   function printUrl({isWs = false} = {}) {
     return `${isWs ? "ws" : "http"}${isHttps ? "s" : ""}://${ipAddress}${
@@ -60,12 +69,25 @@ export default async function setupHttpServer(
   const serverMessage = `
 Client Server running on ${printUrl()}/client
 Access the Flight Director on ${printUrl()}
-GraphQL Server running on ${printUrl()}/graphql
-🚀 Subscriptions ready at ${printUrl({isWs: true})}${apollo.subscriptionsPath}`;
+GraphQL Server running on ${printUrl()}/graphql`;
 
   try {
     httpServer.listen(port, () => {
       console.info(serverMessage);
+      // Set up graphql-ws
+      useServer(
+        {
+          schema,
+          execute,
+          subscribe,
+          context: ctx => {
+            return getGraphQLContext({
+              connection: {context: ctx.connectionParams},
+            });
+          },
+        },
+        wsServer
+      );
     });
   } catch (err) {
     console.error("That didn't work...", err);

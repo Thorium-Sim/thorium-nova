@@ -133,7 +133,6 @@ export const Impulse = ({cardLoaded = true}) => {
   const warpFactorCount =
     warpData?.warpEnginesOutfit?.warpEngines.warpFactorCount || 5;
 
-  console.log(warpData?.warpEnginesOutfit?.warpEngines.maxVelocity);
   const targetVelocity =
     impulse.impulseEngines.targetSpeed ||
     warpData?.warpEnginesOutfit?.warpEngines.maxVelocity ||
@@ -229,6 +228,8 @@ export const Impulse = ({cardLoaded = true}) => {
                     active={
                       warpFactor ===
                       warpData?.warpEnginesOutfit?.warpEngines.currentWarpFactor
+                        ? true
+                        : undefined
                     }
                     className={i === 0 ? "warning" : ""}
                     onClick={() => setWarp({variables: {factor: warpFactor}})}

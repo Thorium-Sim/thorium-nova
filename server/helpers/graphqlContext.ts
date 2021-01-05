@@ -21,7 +21,10 @@ export interface GraphQLContext {
 export const getGraphQLContext = ({
   req,
   connection,
-}: ExpressContext): GraphQLContext => {
+}: {
+  req?: ExpressContext["req"];
+  connection?: Pick<NonNullable<ExpressContext["connection"]>, "context">;
+}): GraphQLContext => {
   const clientId = req?.headers.clientid || connection?.context.clientid;
   const client = App.storage.clients.find(c => c.id === clientId);
   const flight = App.activeFlight || undefined;
