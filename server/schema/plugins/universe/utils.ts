@@ -4,13 +4,12 @@ import {pubsub} from "server/helpers/pubsub";
 import {Field, ObjectType} from "type-graphql";
 import BasePlugin from "../basePlugin";
 
-export function publish(plugin: BasePlugin) {
+export function publishPluginUniverse(plugin: BasePlugin) {
   pubsub.publish("pluginUniverse", {
     id: plugin.id,
     universe: plugin.universe,
   });
 }
-
 export function getPlugin(id: string) {
   const plugin = App.plugins.find(u => u.id === id);
   if (!plugin) {
@@ -87,7 +86,7 @@ export function objectPublish(
   object: Entity,
   system?: Entity
 ) {
-  publish(plugin);
+  publishPluginUniverse(plugin);
   if (system) {
     pubsub.publish("pluginUniverseSystem", {id: system.id, system});
   }

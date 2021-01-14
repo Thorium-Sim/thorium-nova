@@ -21,7 +21,7 @@ import {
   getSystemObject,
   getPlugin,
   objectPublish,
-  publish,
+  publishPluginUniverse,
   removeUniverseObject,
 } from "./utils";
 import uuid from "uniqid";
@@ -124,7 +124,7 @@ export class UniversePluginStarsResolver {
       temperature: Math.round(randomFromRange(starType.temperatureRange)),
     });
     plugin.universe.push(entity);
-    publish(plugin);
+    publishPluginUniverse(plugin);
     pubsub.publish("pluginUniverseSystem", {id: system.id, system});
     return entity;
   }
@@ -150,7 +150,7 @@ export class UniversePluginStarsResolver {
 
     removeUniverseObject(plugin, objectId);
 
-    publish(plugin);
+    publishPluginUniverse(plugin);
     if (object.satellite?.parentId) {
       const {system} = getSystem(id, object.satellite.parentId);
       if (system) {

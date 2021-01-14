@@ -1,4 +1,4 @@
-import React, {useCallback} from "react";
+import React from "react";
 import {useFrame, useThree} from "react-three-fiber";
 import {
   Matrix4,
@@ -11,6 +11,7 @@ import {
   AdditiveBlending,
   BufferGeometry,
   BufferAttribute,
+  Camera,
 } from "three";
 
 function makeLineGeometry(pointList: Vector3[]) {
@@ -51,6 +52,14 @@ function makeLineGeometry(pointList: Vector3[]) {
   return geometry;
 }
 
+function getModelViewMatrix(mesh: Mesh | undefined, camera: Camera) {
+  if (!mesh) return new Matrix4();
+  return new Matrix4().multiplyMatrices(
+    camera.matrixWorldInverse,
+    mesh.matrixWorld
+  );
+}
+
 const Starfield: React.FC<{count?: number; radius?: number}> = ({
   count = 1500,
   radius = 1500,
@@ -77,17 +86,6 @@ const Starfield: React.FC<{count?: number; radius?: number}> = ({
   }, [count, radius]);
 
   const {camera} = useThree();
-  const getModelViewMatrix = useCallback(
-    function getModelViewMatrix() {
-      if (!mesh.current) return new Matrix4();
-      return new Matrix4().multiplyMatrices(
-        camera.matrixWorldInverse,
-        mesh.current.matrixWorld
-      );
-    },
-    [camera]
-  );
-
   const material = React.useMemo(() => {
     function makeStarfieldMaterial(
       input: {color1?: string; color2?: string} = {}
@@ -143,7 +141,7 @@ const Starfield: React.FC<{count?: number; radius?: number}> = ({
         },
         previousModelViewMatrix: {
           type: "m4",
-          value: getModelViewMatrix(),
+          value: getModelViewMatrix(mesh.current, camera),
         },
       };
       const material = new ShaderMaterial({
@@ -221,10 +219,10 @@ const Starfield: React.FC<{count?: number; radius?: number}> = ({
       color1: "#877f76",
       color2: "#96b4cf",
     });
-  }, [getModelViewMatrix]);
+  }, [camera]);
 
   const time = React.useRef(0);
-  const previousModelViewMatrix = React.useRef(getModelViewMatrix());
+  const previousModelViewMatrix = React.useRef(new Matrix4());
   useFrame((state, delta) => {
     const mat = mesh.current?.material as ShaderMaterial;
     if (mat) {
@@ -235,12 +233,14 @@ const Starfield: React.FC<{count?: number; radius?: number}> = ({
       time.current += delta;
       mat.uniforms.deltaTime.value = delta;
       mat.uniforms.intensity.value = presenceRatio.current;
-      previousModelViewMatrix.current = getModelViewMatrix();
+      previousModelViewMatrix.current = getModelViewMatrix(
+        mesh.current,
+        state.camera
+      );
     }
     skip.current--;
     if (mesh.current) mesh.current.visible = true;
   });
-
   return (
     <mesh
       ref={mesh}

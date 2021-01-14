@@ -19,7 +19,7 @@ import {
   getSystemObject,
   getPlugin,
   objectPublish,
-  publish,
+  publishPluginUniverse,
 } from "./utils";
 import {toRoman} from "roman-numerals";
 import {IsPlanetComponent} from "server/components/isPlanet";
@@ -178,7 +178,7 @@ export class UniversePluginPlanetsResolver {
       planetType,
     });
     plugin.universe.push(entity);
-    publish(plugin);
+    publishPluginUniverse(plugin);
     pubsub.publish("pluginUniverseSystem", {id: system.id, system});
     return entity;
   }
@@ -236,7 +236,7 @@ export class UniversePluginPlanetsResolver {
       planetType,
     });
     plugin.universe.push(entity);
-    publish(plugin);
+    publishPluginUniverse(plugin);
     pubsub.publish("pluginUniverseSystem", {id: system.id, system});
     return entity;
   }

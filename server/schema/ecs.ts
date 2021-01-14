@@ -35,6 +35,7 @@ export enum EntityTypes {
   ship = "ship",
   outfit = "outfit",
   timer = "timer",
+  waypoint = "waypoint",
 }
 
 export function getEntityType(entity: Entity) {
@@ -43,6 +44,8 @@ export function getEntityType(entity: Entity) {
   if (entity.isStar) return EntityTypes.star;
   if (entity.isShip) return EntityTypes.ship;
   if (entity.timer) return EntityTypes.timer;
+  if (entity.isOutfit) return EntityTypes.outfit;
+  if (entity.isWaypoint) return EntityTypes.waypoint;
   if (process.env.NODE_ENV !== "test") {
     console.error(entity);
   }

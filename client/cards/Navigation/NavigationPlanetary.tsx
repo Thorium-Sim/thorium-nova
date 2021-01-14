@@ -107,22 +107,22 @@ export const NavigationPlanetary: FC<{
       {system?.items.map(e => {
         if (e.isStar) {
           return (
-            <Suspense fallback={null}>
-              <NavigationStarEntity key={e.id} entity={e} />
+            <Suspense fallback={null} key={e.id}>
+              <NavigationStarEntity entity={e} />
             </Suspense>
           );
         }
         if (e.isPlanet) {
           return (
-            <Suspense fallback={null}>
-              <NavigationPlanetEntity key={e.id} entity={e} />
+            <Suspense fallback={null} key={e.id}>
+              <NavigationPlanetEntity entity={e} />
             </Suspense>
           );
         }
         if (e.isWaypoint) {
           return (
-            <Suspense fallback={null}>
-              <NavigationWaypointEntity key={e.id} entity={e} />
+            <Suspense fallback={null} key={e.id}>
+              <NavigationWaypointEntity entity={e} />
             </Suspense>
           );
         }

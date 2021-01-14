@@ -2,23 +2,25 @@ import {
   UniverseSubscription,
   useUniverseSystemSetPositionMutation,
 } from "../../../generated/graphql";
-import React, {useCallback} from "react";
-import {useFrame} from "react-three-fiber";
+import * as React from "react";
+import {useCallback} from "react";
+import {MeshProps, useFrame} from "react-three-fiber";
 import {CanvasTexture, Group, Vector3} from "three";
 import {configStoreApi, useConfigStore} from "../configStore";
 import useObjectDrag from "../hooks/useObjectDrag";
+import {ReactEventHandlers} from "react-use-gesture/dist/types";
 
 const size = 50;
 const lineWidth = 0.07;
-
-const SystemCircle: React.FC<{
-  system: NonNullable<UniverseSubscription["pluginUniverse"]>[0];
-  parent: React.MutableRefObject<Group>;
-  hoveringDirection: React.MutableRefObject<number>;
-}> = ({system, parent, hoveringDirection}) => {
+export const DraggableSystemCircle: React.FC<
+  {
+    hoveringDirection: React.MutableRefObject<number>;
+    system: NonNullable<UniverseSubscription["pluginUniverse"]>[0];
+    parentObject: React.MutableRefObject<Group>;
+  } & MeshProps
+> = ({parentObject: parent, hoveringDirection, system, ...props}) => {
   const [setPosition] = useUniverseSystemSetPositionMutation();
   const universeId = useConfigStore(s => s.universeId);
-  const setSystemId = useConfigStore(s => s.setSystemId);
   const bind = useObjectDrag(parent, {
     onMouseUp: (position: Vector3) => {
       configStoreApi.getState().enableOrbitControls();
@@ -39,6 +41,41 @@ const SystemCircle: React.FC<{
       configStoreApi.getState().disableOrbitControls();
     },
   });
+  const setSystemId = useConfigStore(s => s.setSystemId);
+
+  return (
+    <SystemCircle
+      system={system}
+      hoveringDirection={hoveringDirection}
+      {...bind()}
+      {...props}
+      onPointerOver={e => {
+        props?.onPointerOver?.(e);
+        useConfigStore.setState({
+          hoveredPosition: parent.current.position,
+          scaledHoveredPosition: parent.current.position,
+        });
+      }}
+      onPointerOut={e => {
+        props?.onPointerOut?.(e);
+        useConfigStore.setState({
+          hoveredPosition: null,
+          scaledHoveredPosition: null,
+        });
+      }}
+      onDoubleClick={() => {
+        setSystemId(system.id);
+      }}
+    />
+  );
+};
+
+const SystemCircle: React.FC<
+  {
+    system: NonNullable<UniverseSubscription["pluginUniverse"]>[0];
+    hoveringDirection: React.MutableRefObject<number>;
+  } & MeshProps
+> = ({system, hoveringDirection, ...props}) => {
   const ctx = React.useMemo(() => {
     const canvas = document.createElement("canvas");
 
@@ -120,28 +157,7 @@ const SystemCircle: React.FC<{
   }, [drawRadius, texture]);
 
   return (
-    <mesh
-      {...bind()}
-      onPointerOver={() => {
-        hoveringDirection.current = 1;
-        document.body.style.cursor = "pointer";
-        useConfigStore.setState({
-          hoveredPosition: parent.current.position,
-          scaledHoveredPosition: parent.current.position,
-        });
-      }}
-      onPointerOut={() => {
-        hoveringDirection.current = -1;
-        document.body.style.cursor = "auto";
-        useConfigStore.setState({
-          hoveredPosition: null,
-          scaledHoveredPosition: null,
-        });
-      }}
-      onDoubleClick={() => {
-        setSystemId(system.id);
-      }}
-    >
+    <mesh {...props}>
       <planeBufferGeometry args={[4, 4, 4]} attach="geometry" />
       <meshBasicMaterial attach="material" map={texture} transparent />
     </mesh>

@@ -2,6 +2,10 @@ import {gql} from "@apollo/client";
 import * as Apollo from "@apollo/client";
 export type Maybe<T> = T | null;
 export type Exact<T extends {[key: string]: unknown}> = {[K in keyof T]: T[K]};
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> &
+  {[SubKey in K]?: Maybe<T[SubKey]>};
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> &
+  {[SubKey in K]: Maybe<T[SubKey]>};
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -189,6 +193,33 @@ export type WaypointAddMutation = {
   };
 };
 
+export type FlightUniverseSubscriptionVariables = Exact<{[key: string]: never}>;
+
+export type FlightUniverseSubscription = {
+  __typename?: "Subscription";
+  flightUniverse: Array<{
+    __typename?: "Entity";
+    id: string;
+    entityType: EntityTypes;
+    identity: {
+      __typename?: "IdentityComponent";
+      name: string;
+      description: string;
+    };
+    tags: {__typename?: "TagsComponent"; tags: Array<string>};
+    position: Maybe<{
+      __typename?: "PositionComponent";
+      x: number;
+      y: number;
+      z: number;
+    }>;
+    planetarySystem: Maybe<{
+      __typename?: "PlanetarySystemComponent";
+      skyboxKey: string;
+    }>;
+  }>;
+};
+
 export type NavEntityQueryVariables = Exact<{
   id: Scalars["ID"];
 }>;
@@ -228,6 +259,10 @@ export type NavEntityQuery = {
       shipClass: Maybe<string>;
     }>;
     shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; vanity: string}>;
+    planetarySystem: Maybe<{
+      __typename?: "PlanetarySystemComponent";
+      skyboxKey: string;
+    }>;
     isStar: Maybe<{
       __typename?: "IsStarComponent";
       spectralType: string;
@@ -519,7 +554,7 @@ export type ShipSpawnMutation = {
 };
 
 export type UniverseObjectsQueryVariables = Exact<{
-  pluginIds: Array<Scalars["ID"]>;
+  pluginIds: Array<Scalars["ID"]> | Scalars["ID"];
 }>;
 
 export type UniverseObjectsQuery = {
@@ -549,7 +584,7 @@ export type UniverseObjectsQuery = {
 };
 
 export type AllPluginShipsQueryVariables = Exact<{
-  pluginIds: Array<Scalars["ID"]>;
+  pluginIds: Array<Scalars["ID"]> | Scalars["ID"];
 }>;
 
 export type AllPluginShipsQuery = {
@@ -728,7 +763,7 @@ export type PluginOutfitSetNameMutation = {
 export type PluginOutfitSetTagsMutationVariables = Exact<{
   pluginId: Scalars["ID"];
   outfitId: Scalars["ID"];
-  tags: Array<Scalars["String"]>;
+  tags: Array<Scalars["String"]> | Scalars["String"];
 }>;
 
 export type PluginOutfitSetTagsMutation = {
@@ -1029,7 +1064,7 @@ export type PhraseCategoryMutation = {
 export type PhraseSetUnitsMutationVariables = Exact<{
   pluginId: Scalars["ID"];
   phraseId: Scalars["ID"];
-  units: Array<PhraseUnitInput>;
+  units: Array<PhraseUnitInput> | PhraseUnitInput;
 }>;
 
 export type PhraseSetUnitsMutation = {
@@ -1307,7 +1342,7 @@ export type PluginShipSetSizeMutation = {
 export type PluginShipSetTagsMutationVariables = Exact<{
   pluginId: Scalars["ID"];
   shipId: Scalars["ID"];
-  tags: Array<Scalars["String"]>;
+  tags: Array<Scalars["String"]> | Scalars["String"];
 }>;
 
 export type PluginShipSetTagsMutation = {
@@ -1487,7 +1522,7 @@ export type PluginSetDescriptionMutation = {
 
 export type PluginSetTagsMutationVariables = Exact<{
   id: Scalars["ID"];
-  tags: Array<Scalars["String"]>;
+  tags: Array<Scalars["String"]> | Scalars["String"];
 }>;
 
 export type PluginSetTagsMutation = {
@@ -1511,7 +1546,7 @@ export type PluginsSubscription = {
 };
 
 export type ShipsSetDesiredDestinationMutationVariables = Exact<{
-  shipPositions: Array<ShipPosition>;
+  shipPositions: Array<ShipPosition> | ShipPosition;
 }>;
 
 export type ShipsSetDesiredDestinationMutation = {
@@ -1520,7 +1555,7 @@ export type ShipsSetDesiredDestinationMutation = {
 };
 
 export type ShipsSetPositionMutationVariables = Exact<{
-  shipPositions: Array<ShipPosition>;
+  shipPositions: Array<ShipPosition> | ShipPosition;
 }>;
 
 export type ShipsSetPositionMutation = {
@@ -2378,8 +2413,8 @@ export type ClientDisconnectMutation = {
 
 export type FlightStartMutationVariables = Exact<{
   name: Maybe<Scalars["String"]>;
-  plugins: Array<Scalars["ID"]>;
-  simulators: Array<FlightStartSimulator>;
+  plugins: Array<Scalars["ID"]> | Scalars["ID"];
+  simulators: Array<FlightStartSimulator> | FlightStartSimulator;
 }>;
 
 export type FlightStartMutation = {
@@ -2558,6 +2593,43 @@ export function useWaypointAddMutation(
 export type WaypointAddMutationHookResult = ReturnType<
   typeof useWaypointAddMutation
 >;
+export const FlightUniverseDocument = gql`
+  subscription FlightUniverse {
+    flightUniverse(entityType: system) {
+      id
+      entityType
+      identity {
+        name
+        description
+      }
+      tags {
+        tags
+      }
+      position {
+        x
+        y
+        z
+      }
+      planetarySystem {
+        skyboxKey
+      }
+    }
+  }
+`;
+export function useFlightUniverseSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    FlightUniverseSubscription,
+    FlightUniverseSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    FlightUniverseSubscription,
+    FlightUniverseSubscriptionVariables
+  >(FlightUniverseDocument, baseOptions);
+}
+export type FlightUniverseSubscriptionHookResult = ReturnType<
+  typeof useFlightUniverseSubscription
+>;
 export const NavEntityDocument = gql`
   query NavEntity($id: ID!) {
     entity(id: $id) {
@@ -2594,6 +2666,9 @@ export const NavEntityDocument = gql`
       }
       shipAssets {
         vanity
+      }
+      planetarySystem {
+        skyboxKey
       }
       isStar {
         spectralType

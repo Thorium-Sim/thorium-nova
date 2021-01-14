@@ -34,6 +34,9 @@ query NavEntity($id: ID!) {
     shipAssets {
       vanity
     }
+    planetarySystem {
+      skyboxKey
+    }
     isStar {
       spectralType
       hue

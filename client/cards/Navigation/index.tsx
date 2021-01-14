@@ -9,7 +9,9 @@ import {Canvas, useFrame} from "react-three-fiber";
 import {Color, Group, MOUSE} from "three";
 import {
   useFlightPlayerShipSubscription,
+  useFlightUniverseSubscription,
   useNavEntityQuery,
+  useUniverseSubscription,
   useWaypointAddMutation,
 } from "client/generated/graphql";
 import Star from "client/components/starmap/star";
@@ -24,10 +26,13 @@ import {useTranslation} from "react-i18next";
 import {NavigationPlanetary} from "./NavigationPlanetary";
 import {CAMERA_Y, useNavigationStore} from "./utils";
 import Starfield from "client/components/starmap/Starfield";
+import SystemMarker from "client/components/starmap/SystemMarker";
 
-const NavigationInterstellar = () => {
+const NavigationInterstellar = memo(() => {
   const orbitControls = useRef<OrbitControlsType>();
   const frameCount = useRef(0);
+
+  const {data, error} = useFlightUniverseSubscription();
 
   useFrame((state, delta) => {
     // Auto rotate, but at a very slow rate, so as to keep the
@@ -38,6 +43,7 @@ const NavigationInterstellar = () => {
         Math.sin(frameCount.current / 100) / 100;
     }
   });
+  console.log(data, error);
   return (
     <Suspense fallback={null}>
       <OrbitControls
@@ -53,9 +59,25 @@ const NavigationInterstellar = () => {
         }}
       />
       <Starfield />
+      {data?.flightUniverse.map(s => (
+        <SystemMarker
+          key={s.id}
+          system={s}
+          position={[
+            s.position?.x || 0,
+            s.position?.y || 0,
+            s.position?.z || 0,
+          ]}
+          name={s.identity.name}
+          onPointerDown={() => {
+            useNavigationStore.setState({selectedObjectId: s.id});
+          }}
+          onDoubleClick={() => useNavigationStore.setState({systemId: s.id})}
+        />
+      ))}
     </Suspense>
   );
-};
+});
 
 const NavigationCanvas = memo(() => {
   const {data: flightPlayerData} = useFlightPlayerShipSubscription();
@@ -186,22 +208,24 @@ const Navigation: FC<CardProps> = ({cardLoaded}) => {
           <div className="w-full p-4 border-2 border-whiteAlpha-500 bg-blackAlpha-500 rounded">
             {cardLoaded && object ? (
               <Fragment>
-                <div className="float-left w-24 h-24 mx-2 border border-whiteAlpha-500 rounded">
-                  {object.isPlanet ? (
-                    <PlanetCanvas {...object.isPlanet} />
-                  ) : object.isStar ? (
-                    <StarCanvas
-                      hue={object.isStar.hue}
-                      isWhite={object.isStar.isWhite}
-                    />
-                  ) : object.isShip ? (
-                    <img
-                      draggable="false"
-                      alt={object.identity.name}
-                      src={object.shipAssets?.vanity}
-                    />
-                  ) : null}
-                </div>
+                {object.planetarySystem ? null : (
+                  <div className="float-left w-24 h-24 mx-2 border border-whiteAlpha-500 rounded">
+                    {object.isPlanet ? (
+                      <PlanetCanvas {...object.isPlanet} />
+                    ) : object.isStar ? (
+                      <StarCanvas
+                        hue={object.isStar.hue}
+                        isWhite={object.isStar.isWhite}
+                      />
+                    ) : object.isShip ? (
+                      <img
+                        draggable="false"
+                        alt={object.identity.name}
+                        src={object.shipAssets?.vanity}
+                      />
+                    ) : null}
+                  </div>
+                )}
                 <h3 className="text-2xl">{object.identity.name}</h3>
                 <h4 className="text-xl">
                   {object.isPlanet
@@ -214,6 +238,8 @@ const Navigation: FC<CardProps> = ({cardLoaded}) => {
                           ? `${object.isShip.shipClass} Class `
                           : ""
                       }${object.isShip.category}`
+                    : object.planetarySystem
+                    ? "Planetary System"
                     : ""}
                 </h4>
               </Fragment>
@@ -223,24 +249,39 @@ const Navigation: FC<CardProps> = ({cardLoaded}) => {
               <h3 className="text-2xl">{t("No Object Selected")}</h3>
             )}
           </div>
-          <Button
-            color="info"
-            className="w-full pointer-events-auto"
-            disabled={!object}
-            onClick={() =>
-              object &&
-              addWaypoint({
-                variables: {
-                  shipId: null,
-                  systemId: null,
-                  position: null,
-                  objectId: object.id,
-                },
-              })
-            }
-          >
-            {t("Add Waypoint")}
-          </Button>
+          {object?.planetarySystem ? (
+            <Button
+              color="info"
+              className="w-full pointer-events-auto"
+              onClick={() =>
+                useNavigationStore.setState({
+                  systemId: object.id,
+                  selectedObjectId: null,
+                })
+              }
+            >
+              {t("Enter System")}
+            </Button>
+          ) : (
+            <Button
+              color="info"
+              className="w-full pointer-events-auto"
+              disabled={!object}
+              onClick={() =>
+                object &&
+                addWaypoint({
+                  variables: {
+                    shipId: null,
+                    systemId: null,
+                    position: null,
+                    objectId: object.id,
+                  },
+                })
+              }
+            >
+              {t("Add Waypoint")}
+            </Button>
+          )}
         </div>
       </div>
       {cardLoaded && (

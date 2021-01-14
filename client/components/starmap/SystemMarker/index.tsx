@@ -1,15 +1,18 @@
 import React from "react";
 import {Group} from "three";
-import {useFrame} from "react-three-fiber";
+import {MeshProps, useFrame} from "react-three-fiber";
 import SystemLabel from "./SystemLabel";
-import SystemCircle from "./SystemCircle";
+import SystemCircle, {DraggableSystemCircle} from "./SystemCircle";
 import {UniverseSubscription} from "../../../generated/graphql";
-const SystemMarker: React.FC<{
-  id: string;
-  system: NonNullable<UniverseSubscription["pluginUniverse"]>[0];
-  name: string;
-  position: [number, number, number];
-}> = ({id, system, name, position}) => {
+const SystemMarker: React.FC<
+  {
+    system: NonNullable<UniverseSubscription["pluginUniverse"]>[0];
+    name: string;
+    position: [number, number, number];
+    draggable?: boolean;
+    onPointerDown?: () => void;
+  } & MeshProps
+> = ({system, name, position, draggable, ...props}) => {
   const group = React.useRef<Group>(new Group());
 
   const direction = React.useRef(0);
@@ -26,11 +29,40 @@ const SystemMarker: React.FC<{
   return (
     <>
       <group position={position} ref={group}>
-        <SystemCircle
-          system={system}
-          hoveringDirection={direction}
-          parent={group}
-        />
+        {draggable ? (
+          <DraggableSystemCircle
+            system={system}
+            hoveringDirection={direction}
+            parentObject={group}
+            {...props}
+            onPointerOver={e => {
+              props?.onPointerOver?.(e);
+              direction.current = 1;
+              document.body.style.cursor = "pointer";
+            }}
+            onPointerOut={e => {
+              props?.onPointerOut?.(e);
+              direction.current = -1;
+              document.body.style.cursor = "auto";
+            }}
+          />
+        ) : (
+          <SystemCircle
+            system={system}
+            hoveringDirection={direction}
+            {...props}
+            onPointerOver={e => {
+              props?.onPointerOver?.(e);
+              direction.current = 1;
+              document.body.style.cursor = "pointer";
+            }}
+            onPointerOut={e => {
+              props?.onPointerOut?.(e);
+              direction.current = -1;
+              document.body.style.cursor = "auto";
+            }}
+          />
+        )}
         <SystemLabel
           systemId={system.id}
           hoveringDirection={direction}

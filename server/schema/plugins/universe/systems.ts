@@ -17,7 +17,13 @@ import {
   Root,
   Subscription,
 } from "type-graphql";
-import {AU, getSystem, getPlugin, PlanetarySystem, publish} from "./utils";
+import {
+  AU,
+  getSystem,
+  getPlugin,
+  PlanetarySystem,
+  publishPluginUniverse,
+} from "./utils";
 import uuid from "uniqid";
 import getHabitableZone from "server/generatorFixtures/habitableZone";
 import {GraphQLContext} from "server/helpers/graphqlContext";
@@ -66,7 +72,7 @@ export class UniversePluginSystemsResolver {
     entity.updateComponent("identity", {name});
     entity.updateComponent("position", position);
     plugin.universe.push(entity);
-    publish(plugin);
+    publishPluginUniverse(plugin);
     return entity;
   }
 
@@ -95,7 +101,7 @@ export class UniversePluginSystemsResolver {
         name: star.components.identity?.name.replace(oldName, name),
       });
     });
-    publish(plugin);
+    publishPluginUniverse(plugin);
     return system;
   }
   @Mutation(returns => PlanetarySystem)
@@ -110,7 +116,7 @@ export class UniversePluginSystemsResolver {
     const {plugin, system} = getSystem(id, systemId);
 
     system.updateComponent("identity", {description});
-    publish(plugin);
+    publishPluginUniverse(plugin);
 
     return system;
   }
@@ -125,7 +131,7 @@ export class UniversePluginSystemsResolver {
   ) {
     const {plugin, system} = getSystem(id, systemId);
     system.updateComponent("planetarySystem", {skyboxKey});
-    publish(plugin);
+    publishPluginUniverse(plugin);
     pubsub.publish("pluginUniverseSystem", {id: system.id, system});
 
     return system;

@@ -83,6 +83,7 @@ const Interstellar: React.FC<{universeId: string}> = ({universeId}) => {
               s.position?.z || 0,
             ]}
             name={s.identity.name}
+            draggable
           />
         ))}
     </React.Suspense>

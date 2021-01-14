@@ -77,4 +77,30 @@ export class UniversePluginResolver {
     if (!entityType) return payload.universe;
     return payload.universe?.filter(e => getEntityType(e) === entityType) || [];
   }
+
+  @Subscription(returns => [Entity], {
+    topics: ({args, payload}) => {
+      const id = uuid();
+      let universe = App.activeFlight?.ecs.entities.filter(
+        e => getEntityType(e) === args.entityType
+      );
+      process.nextTick(() => {
+        pubsub.publish(id, {
+          entityType: args.entityType || "none",
+          universe,
+        });
+      });
+      return [id, "flightUniverse"];
+    },
+    filter: ({args, payload}) => {
+      if (args.entityType !== payload.entityType) return false;
+      return true;
+    },
+  })
+  flightUniverse(
+    @Root() payload: {id: string; universe: Entity[]},
+    @Arg("entityType", type => EntityTypes) entityType: string
+  ): Entity[] {
+    return payload.universe;
+  }
 }

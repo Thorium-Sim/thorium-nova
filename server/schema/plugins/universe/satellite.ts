@@ -2,10 +2,10 @@ import Entity from "server/helpers/ecs/entity";
 import {pubsub} from "server/helpers/pubsub";
 import {Arg, ID, Mutation, Resolver} from "type-graphql";
 import BasePlugin from "../basePlugin";
-import {getSystemObject, publish} from "./utils";
+import {getSystemObject, publishPluginUniverse} from "./utils";
 
 function satellitePublish(plugin: BasePlugin, object: Entity, system?: Entity) {
-  publish(plugin);
+  publishPluginUniverse(plugin);
   if (system) {
     pubsub.publish("pluginUniverseSystem", {id: system.id, system});
   }

@@ -6,7 +6,7 @@ import {pubsub} from "server/helpers/pubsub";
 import {shipSpawn} from "server/schema/activeFlight/ships";
 import {Arg, ID, Mutation, Resolver} from "type-graphql";
 import {getPlugin} from "../basePlugin";
-import {getSystem, publish} from "./utils";
+import {getSystem, publishPluginUniverse} from "./utils";
 
 @Resolver()
 export class UniversePluginStarbasesResolver {
@@ -31,7 +31,7 @@ export class UniversePluginStarbasesResolver {
     };
     const entity = shipSpawn(shipId, systemId, position, fauxEcs);
     entities.forEach(e => plugin.universe.push(e));
-    publish(plugin);
+    publishPluginUniverse(plugin);
     pubsub.publish("pluginUniverseSystem", {id: system.id, system});
     return entity;
   }

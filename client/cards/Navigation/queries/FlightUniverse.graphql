@@ -1,0 +1,21 @@
+subscription FlightUniverse {
+  flightUniverse(entityType: system) {
+    id
+    entityType
+    identity {
+      name
+      description
+    }
+    tags {
+      tags
+    }
+    position {
+      x
+      y
+      z
+    }
+    planetarySystem {
+      skyboxKey
+    }
+  }
+}

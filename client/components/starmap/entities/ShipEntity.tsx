@@ -3,7 +3,6 @@ import {useFrame, useThree} from "react-three-fiber";
 import {Line, useGLTF, useTexture} from "drei";
 import {
   Color,
-  Euler,
   FrontSide,
   Group,
   Mesh,
@@ -257,6 +256,7 @@ const ShipEntity: React.FC<{
         ]} // Array of points
         color="white"
         opacity={0.2}
+        stencilMask
         transparent
         lineWidth={0.25} // In pixels (default)
       />
