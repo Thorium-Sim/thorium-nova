@@ -42,32 +42,32 @@ export class RotationSystem extends System {
       } = thrusters.thrusters;
 
       rotationAcceleration.set(
-        ((rotationDelta.x * rotationThrust) / mass) * elapsedRatio,
-        ((rotationDelta.y * rotationThrust) / mass) * elapsedRatio,
-        ((rotationDelta.z * rotationThrust) / mass) * elapsedRatio
+        ((rotationDelta.x * rotationThrust) / (mass * 20)) * elapsedRatio,
+        ((rotationDelta.y * rotationThrust) / (mass * 20)) * elapsedRatio,
+        ((rotationDelta.z * rotationThrust) / (mass * 20)) * elapsedRatio
       );
 
       const revolutionsPerSecond = rotationMaxSpeed / 60;
       const maxRadiansPerSecond = revolutionsPerSecond * (Math.PI * 2);
 
       rotationVelocity.x = Math.min(
-        maxRadiansPerSecond,
+        maxRadiansPerSecond * Math.abs(rotationDelta.x),
         Math.max(
-          -1 * maxRadiansPerSecond,
+          -1 * maxRadiansPerSecond * Math.abs(rotationDelta.x),
           rotationVelocity.x + rotationAcceleration.x
         )
       );
       rotationVelocity.y = Math.min(
-        maxRadiansPerSecond,
+        maxRadiansPerSecond * Math.abs(rotationDelta.y),
         Math.max(
-          -1 * maxRadiansPerSecond,
+          -1 * maxRadiansPerSecond * Math.abs(rotationDelta.y),
           rotationVelocity.y + rotationAcceleration.y
         )
       );
       rotationVelocity.z = Math.min(
-        maxRadiansPerSecond,
+        maxRadiansPerSecond * Math.abs(rotationDelta.z),
         Math.max(
-          -1 * maxRadiansPerSecond,
+          -1 * maxRadiansPerSecond * Math.abs(rotationDelta.z),
           rotationVelocity.z + rotationAcceleration.z
         )
       );

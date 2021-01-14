@@ -7,7 +7,7 @@ import {
   useFlightPlayerShipSubscription,
   useUniverseSystemSubscription,
 } from "client/generated/graphql";
-import {useTextureLoader} from "drei";
+import {useTexture} from "drei";
 import {Fragment, memo, Suspense, useRef} from "react";
 import {ErrorBoundary} from "react-error-boundary";
 import {useFrame} from "react-three-fiber";
@@ -45,10 +45,10 @@ export const WaypointEntity = ({
   playerId: string;
   viewscreen?: boolean;
 }) => {
-  const spriteMap = useTextureLoader(
+  const spriteMap = useTexture(
     require("../Navigation/Waypoint.svg").default
   ) as Texture;
-  const strokeMap = useTextureLoader(
+  const strokeMap = useTexture(
     require("../Navigation/WaypointStroke.svg").default
   ) as Texture;
 
@@ -78,7 +78,7 @@ export const WaypointEntity = ({
         let showOutOfBoundsArrow = playerVector.distanceTo(waypointVector) > dx;
         group.current?.scale.setScalar(dx * 3 * scale);
         if (viewscreen) {
-          const scale = 0.05;
+          const scale = 0.03;
           group.current?.scale.setScalar(scale);
           frustum.setFromProjectionMatrix(
             matrix.multiplyMatrices(

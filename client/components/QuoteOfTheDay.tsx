@@ -125,6 +125,8 @@ const quotes = [
   "If you keep asking questions, you’ll keep getting answers.",
   "If you don’t look, you’ll never see. And what you don’t see can be very hard to find.",
   "Where the road ends, adventure begins!",
+  // Soren Kierkegaard
+  "Life can only be understood backwards; but it must be lived forwards.",
 ];
 
 const QuoteOfTheDay = () => {

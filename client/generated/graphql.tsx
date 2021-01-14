@@ -340,6 +340,8 @@ export type PlayerWarpSubscription = {
       warpFactorCount: number;
       currentWarpFactor: number;
       maxVelocity: number;
+      interstellarCruisingSpeed: number;
+      planetaryCruisingSpeed: number;
     };
   }>;
 };
@@ -2772,6 +2774,8 @@ export const PlayerWarpDocument = gql`
         warpFactorCount
         currentWarpFactor
         maxVelocity
+        interstellarCruisingSpeed
+        planetaryCruisingSpeed
       }
     }
   }

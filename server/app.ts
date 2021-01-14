@@ -26,6 +26,9 @@ class PersistentStorage {
     this.thoriumId = params.thoriumId || randomWords(5).join("-");
     this.activeFlightName = params.activeFlightName || null;
   }
+  serialize() {
+    return {...this, clients: this.clients.map(c => c.serialize())};
+  }
 }
 
 export function isWritableFlight(flight: any): flight is ActiveFlightT {

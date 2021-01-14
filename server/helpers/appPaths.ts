@@ -1,4 +1,3 @@
-import path from "path";
 import fs from "fs";
 import os from "os";
 
@@ -8,7 +7,7 @@ if (!fs.existsSync(`${os.homedir()}/Documents`)) {
   fs.mkdirSync(`${os.homedir()}/Documents`);
 }
 
-export let thoriumPath = `${os.homedir()}/Documents/thorium`;
+export let thoriumPath = `${os.homedir()}/Documents/thorium-nova`;
 /* istanbul ignore next */
 if (process.env.THORIUM_PATH) {
   const testPath = String(process.env.THORIUM_PATH).replace("~", os.homedir());

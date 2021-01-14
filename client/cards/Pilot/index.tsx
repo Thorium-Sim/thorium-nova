@@ -75,7 +75,7 @@ const Pilot: FC<CardProps> = ({cardLoaded}) => {
     });
   });
   return (
-    <div className="card-pilot h-full grid grid-cols-4 gap-4">
+    <div className="card-pilot h-full grid grid-cols-4 gap-4 select-none">
       <div className="flex flex-col mb-6">
         <Impulse cardLoaded={cardLoaded} />
         <ZoomStyleWrapper>

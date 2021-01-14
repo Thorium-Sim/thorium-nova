@@ -9,15 +9,15 @@ import {
 import {configStoreApi} from "../starmap/configStore";
 import StarEntity from "../starmap/entities/StarEntity";
 import PlanetEntity from "../starmap/entities/PlanetEntity";
-import {FlyControls} from "drei";
 import {useSystemShips} from "./useSystemShips";
 import {ErrorBoundary} from "react-error-boundary";
 import ShipEntity from "../starmap/entities/ShipEntity";
 import {PlayerShipIdProvider} from "./PlayerShipContext";
 import {WaypointEntity} from "client/cards/Pilot/PilotContacts";
 import Fuzz from "./fuzz";
+import WarpStars from "./WarpStars";
 
-const FAR = 1e27;
+const FAR = 1e12;
 
 const ViewscreenScene: React.FC = () => {
   const {data: playerData} = useViewscreenPlayerShipSubscription();
@@ -42,10 +42,10 @@ const ViewscreenScene: React.FC = () => {
   }, [skyboxKey]);
 
   const ids = useSystemShips();
+
   if (!system) return null;
   return (
     <>
-      <FlyControls movementSpeed={50} rollSpeed={Math.PI / 10} dragToLook />
       <pointLight
         intensity={0.2}
         decay={2}
@@ -58,6 +58,10 @@ const ViewscreenScene: React.FC = () => {
       />
       <ambientLight intensity={0.5} />
       <Fuzz />
+      <WarpStars
+        isInSystem={!!systemId}
+        shipId={playerData?.playerShip.id || ""}
+      />
       {system.items.map(e => {
         if (e.isStar) {
           return <StarEntity key={e.id} entity={e} />;
@@ -105,7 +109,7 @@ const Viewscreen: React.FC = () => {
         onContextMenu={e => {
           e.preventDefault();
         }}
-        gl={{antialias: true, logarithmicDepthBuffer: true, alpha: false}}
+        gl={{antialias: false, logarithmicDepthBuffer: true, alpha: false}}
         camera={{fov: 45, near: 0.01, far: FAR}}
         concurrent
       >

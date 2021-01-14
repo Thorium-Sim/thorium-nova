@@ -14,7 +14,7 @@ let channel: ClientChannel;
 export default async function getUDPChannel() {
   if (!channel) {
     const clientId = await getClientId();
-    channel = geckos({port}); // default port is 9208
+    channel = geckos({port});
 
     channel.onConnect(error => {
       if (error) {

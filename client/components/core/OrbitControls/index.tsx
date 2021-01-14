@@ -19,16 +19,32 @@ export type OrbitControls = Overwrite<
   {target?: Vector3}
 >;
 
+const noop = () => {};
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const OrbitControls = forwardRef(
-  (props: OrbitControls = {enableDamping: true}, ref) => {
+  (
+    props: OrbitControls & {onPanDrag?: (event: Event) => void} = {
+      enableDamping: true,
+    },
+    ref
+  ) => {
     const controls = useRef<OrbitControlsImpl>();
     const {camera, gl, invalidate} = useThree();
     useFrame(() => controls.current?.update());
+    const panHandler = useRef<any>(props.onPanDrag || noop);
+    useEffect(() => {
+      if (props.onPanDrag) {
+        panHandler.current = props.onPanDrag;
+      }
+    }, [props.onPanDrag]);
     useEffect(() => {
       const controlRef = controls.current;
       controlRef?.addEventListener("change", invalidate);
-      return () => controlRef?.removeEventListener("change", invalidate);
+      controlRef?.addEventListener("panDrag", panHandler.current);
+      return () => {
+        controlRef?.removeEventListener("change", invalidate);
+        controlRef?.removeEventListener("panDrag", panHandler.current);
+      };
     }, [invalidate]);
 
     const systemId = useConfigStore(store => store.systemId);

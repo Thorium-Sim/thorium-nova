@@ -238,6 +238,9 @@ class OrbitControls extends EventDispatcher {
         // min(camera displacement, camera rotation in radians)^2 > EPS
         // using small-angle approximation cos(x/2) = 1 - x^2 / 8
 
+        if (zoomChanged) scope.dispatchEvent(zoomChangeEvent);
+        if (lastPosition.distanceToSquared(scope.object.position) > EPS)
+          scope.dispatchEvent(panChangeEvent);
         if (
           zoomChanged ||
           lastPosition.distanceToSquared(scope.object.position) > EPS ||
@@ -280,6 +283,9 @@ class OrbitControls extends EventDispatcher {
 
     var scope = this;
 
+    var panDragEvent = {type: "panDrag"};
+    var zoomChangeEvent = {type: "zoomChange"};
+    var panChangeEvent = {type: "panChange"};
     var changeEvent = {type: "change"};
     var startEvent = {type: "start"};
     var endEvent = {type: "end"};
@@ -744,6 +750,7 @@ class OrbitControls extends EventDispatcher {
 
     function onMouseDown(event) {
       if (scope.enabled === false) return;
+      scope.dispatchEvent(panDragEvent);
 
       // Prevent the browser from scrolling.
 
@@ -922,6 +929,7 @@ class OrbitControls extends EventDispatcher {
 
     function onTouchStart(event) {
       if (scope.enabled === false) return;
+      scope.dispatchEvent(panDragEvent);
 
       event.preventDefault();
 

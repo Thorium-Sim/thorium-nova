@@ -1,7 +1,6 @@
 import {useEffect, useRef} from "react";
 import Button from "client/components/ui/button";
 import {
-  usePlayerForwardVelocitySubscription,
   usePlayerImpulseSubscription,
   usePlayerSetImpulseMutation,
   usePlayerWarpSubscription,
@@ -13,6 +12,10 @@ import {useSpring, animated as a} from "react-spring";
 import {useDrag} from "react-use-gesture";
 import throttle from "lodash.throttle";
 import useMeasure from "client/helpers/hooks/useMeasure";
+import {
+  useForwardVelocityStore,
+  usePlayerForwardVelocity,
+} from "client/components/viewscreen/usePlayerForwardVelocity";
 
 const C_IN_METERS = 299792458;
 function formatSpeed(speed: number) {
@@ -35,14 +38,13 @@ function formatSpeed(speed: number) {
   })} m/s`;
 }
 const ForwardVelocity = () => {
-  const {data: velocityData} = usePlayerForwardVelocitySubscription();
-  const ship = velocityData?.playerShipHot;
-  if (!ship) return null;
+  usePlayerForwardVelocity();
+  const {forwardVelocity} = useForwardVelocityStore();
   return (
     <div className="forward-velocity text-xl w-full py-2 text-center bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded">
       <div>Forward Velocity:</div>
       <div className="font-bold text-3xl my-2 tabular-nums">
-        {formatSpeed(ship.forwardVelocity)}
+        {formatSpeed(forwardVelocity)}
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import uuid from "uniqid";
 interface PubsubTopics {
   navigation_recenter: null;
   navigation_zoom: number;
+  navigation_change_system: string | null;
 }
 type Topics = {
   [p in keyof PubsubTopics]?: {

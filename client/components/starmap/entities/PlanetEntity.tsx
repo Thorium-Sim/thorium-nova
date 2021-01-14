@@ -1,4 +1,4 @@
-import {useTextureLoader} from "drei";
+import {useTexture} from "drei";
 import React, {Suspense} from "react";
 import {useFrame, useLoader} from "react-three-fiber";
 import {Group, Texture, TextureLoader, Vector3} from "three";
@@ -32,7 +32,7 @@ const Sphere: React.FC<{texture: string}> = React.memo(
 );
 
 const PlanetSprite = ({color = "white"}) => {
-  const spriteMap = useTextureLoader("/assets/icons/Dot.svg") as Texture;
+  const spriteMap = useTexture("/assets/icons/Dot.svg") as Texture;
   return (
     <sprite>
       <spriteMaterial

@@ -6,6 +6,7 @@ import {
   useClientConnectMutation,
   useClientDisconnectMutation,
 } from "../generated/graphql";
+import getUDPChannel from "./udpClient";
 
 const key = "nova_clientPersistentId";
 let clientId = sessionStorage.getItem(key);
@@ -15,7 +16,7 @@ if (window.BroadcastChannel) {
   broadcastChannel = new BroadcastChannel("thorium_clientCount");
 }
 // This client ID implementation works as follows:
-export function initializeClient() {
+export async function initializeClient() {
   if (window.BroadcastChannel) {
     broadcastChannel.onmessage = function (ev) {
       if (ev.data === "clientPing") {
@@ -26,7 +27,8 @@ export function initializeClient() {
         if (!windows.includes(ev.data)) windows.push(ev.data);
       }
     };
-    getClientId();
+    const clientId = await getClientId();
+    getUDPChannel();
   }
 }
 

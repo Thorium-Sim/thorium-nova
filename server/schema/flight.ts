@@ -27,7 +27,7 @@ import {ThrusterSystem} from "server/systems/ThrusterSystem";
 import {RotationSystem} from "server/systems/RotationSystem";
 import {ImpulseSystem} from "server/systems/ImpulseSystem";
 import {WarpSystem} from "server/systems/WarpSystem";
-import {WarpVelocityPosition} from "server/systems/WarpVelocityPosition";
+import {EngineVelocityPosition} from "server/systems/EngineVelocityPosition";
 import {EngineVelocitySystem} from "server/systems/EngineVelocitySystem";
 import {PositionVelocitySystem} from "server/systems/PositionVelocitySystem";
 import {getPlugin} from "./plugins/basePlugin";
@@ -88,7 +88,7 @@ export default class Flight {
     this.ecs.addSystem(new WarpSystem());
     this.ecs.addSystem(new RotationSystem());
     this.ecs.addSystem(new EngineVelocitySystem());
-    this.ecs.addSystem(new WarpVelocityPosition());
+    this.ecs.addSystem(new EngineVelocityPosition());
     this.ecs.addSystem(new PositionVelocitySystem());
     this.ecs.addSystem(new Networking());
 

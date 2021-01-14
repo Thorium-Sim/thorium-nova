@@ -1,60 +1,21 @@
-import {useTextureLoader} from "drei";
+import {useTexture} from "drei";
 import React from "react";
-import {useFrame, useThree} from "react-three-fiber";
-import {Spherical, Sprite, Texture, Vector3, MathUtils} from "three";
+import {useFrame} from "react-three-fiber";
+import {Sprite, Texture} from "three";
+import {getSphericalPositionWithBias} from "./getSphericalPositionWithBias";
+import {
+  useForwardVelocityStore,
+  usePlayerForwardVelocity,
+} from "./usePlayerForwardVelocity";
 
-// From https://karthikkaranth.me/blog/generating-random-points-in-a-sphere/
-function randomPointInSphere(radius: number = 1) {
-  var u = Math.random();
-  var v = Math.random();
-  var theta = u * 2.0 * Math.PI;
-  var phi = Math.acos(2.0 * v - 1.0);
-  var r = Math.cbrt(Math.random()) * radius;
-  var sinTheta = Math.sin(theta);
-  var cosTheta = Math.cos(theta);
-  var sinPhi = Math.sin(phi);
-  var cosPhi = Math.cos(phi);
-  var x = r * sinPhi * cosTheta;
-  var y = r * sinPhi * sinTheta;
-  var z = r * cosPhi;
-  return [x, y, z] as const;
-}
-
-// From http://wip.davidlochhead.xyz/update/2017/10/12/random-position-on-the-surface-of-a-sphere.html
-const spherical = new Spherical();
-const vec3 = new Vector3();
-function getSphericalPositionWithBias(radius = 1, bias = 0.5) {
-  spherical.radius = radius;
-  spherical.phi = getRndBias(0, Math.PI, Math.PI / 2, bias); // Phi is between 0 - PI
-  spherical.theta = MathUtils.randFloat(0, Math.PI * 2); // Theta is between 0 - 2 PI
-  vec3.setFromSpherical(spherical);
-
-  return [vec3.x, vec3.y, vec3.z] as const;
-}
-function getRndBias(min: number, max: number, bias: number, influence: number) {
-  const rnd = Math.random() * (max - min) + min; // random in range
-  const mix = Math.random() * influence; // random mixer
-  return rnd * (1 - mix) + bias * mix; // mix full range and bias
-}
 const Fuzz: React.FC = () => {
-  const spriteMap = useTextureLoader(require("./fuzz.png").default) as Texture;
+  const spriteMap = useTexture(require("./fuzz.png").default) as Texture;
   const spriteRef = React.useRef<Sprite>();
-  const {camera} = useThree();
-  const cameraMovementRef = React.useRef(camera.position.clone());
-  const movementRef = React.useRef<number[]>([]);
+  usePlayerForwardVelocity();
   useFrame(({camera}) => {
-    const children = spriteRef.current?.children as Sprite[];
-    const movement = camera.position.distanceTo(cameraMovementRef.current);
-    if (movement !== 0) {
-      movementRef.current.unshift(movement);
-      movementRef.current = movementRef.current.slice(0, 30);
-    }
-    const averageMovement = movementRef.current.reduce(
-      (prev, next, i, arr) => prev + next / arr.length,
-      0
-    );
-    cameraMovementRef.current.copy(camera.position);
-    const cameraOpacity = Math.max(0, Math.min(1, averageMovement));
+    const children = (spriteRef.current?.children as Sprite[]) || [];
+    const {forwardVelocity} = useForwardVelocityStore.getState();
+    const cameraOpacity = Math.max(0, Math.min(1, forwardVelocity));
     for (let i = 0; i < children.length; i++) {
       const c = children[i];
 
@@ -80,6 +41,11 @@ const Fuzz: React.FC = () => {
           Math.max(0, distance - c.position.distanceTo(camera.position))
         ) /
           (distance * 0.1));
+      if (c.material.opacity < 0.05) {
+        c.visible = false;
+      } else {
+        c.visible = true;
+      }
     }
   });
   const scale = 5;

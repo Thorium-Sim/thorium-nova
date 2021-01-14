@@ -16,12 +16,12 @@ import {fragment, vertex} from "./shaders";
 import getUniforms from "./uniforms";
 import tc from "tinycolor2";
 import {useConfigStore} from "../configStore";
-import {useTextureLoader} from "drei";
+import {useTexture} from "drei";
 
 const distanceVector = new Vector3();
 
 const StarSprite = ({color1}: {color1?: number | Color}) => {
-  const spriteMap = useTextureLoader("/assets/icons/Star.svg") as Texture;
+  const spriteMap = useTexture("/assets/icons/Star.svg") as Texture;
 
   return (
     <sprite>

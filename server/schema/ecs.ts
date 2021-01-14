@@ -86,21 +86,29 @@ export class EntityFieldResolver {
   forwardVelocity(@Root() entity: Entity): number {
     const {velocity, rotation} = entity;
     if (!velocity || !rotation) return 0;
-    const warpEngines = entity.ecs?.entities.find(
-      e => e.warpEngines && e.shipAssignment?.shipId === entity.id
+    const systems = entity.ecs?.entities.filter(
+      e =>
+        (e.warpEngines || e.impulseEngines) &&
+        e.shipAssignment?.shipId === entity.id
     );
+    const warpEngines = systems?.find(e => e.warpEngines);
+    const impulseEngines = systems?.find(e => e.impulseEngines);
+
     const warpVelocity = warpEngines?.warpEngines?.forwardVelocity || 0;
     shipRotationQuaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
     velocityObject.rotation.setFromQuaternion(shipRotationQuaternion);
-    velocityObject.position.set(
-      velocity.x,
-      velocity.y,
-      velocity.z + warpVelocity
-    );
+    velocityObject.position.set(velocity.x, velocity.y, velocity.z);
 
-    const forwardVelocity = velocityObject.position.dot(
-      forwardVector.set(0, 0, 1).applyQuaternion(shipRotationQuaternion)
-    );
+    // Warp engines override impulse engines
+    const impulseVelocity = warpVelocity
+      ? 0
+      : impulseEngines?.impulseEngines?.forwardVelocity || 0;
+    const forwardVelocity =
+      velocityObject.position.dot(
+        forwardVector.set(0, 0, 1).applyQuaternion(shipRotationQuaternion)
+      ) +
+      warpVelocity +
+      impulseVelocity;
     return forwardVelocity;
   }
 }

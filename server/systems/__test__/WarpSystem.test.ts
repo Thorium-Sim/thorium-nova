@@ -9,16 +9,16 @@ import ECS from "../../helpers/ecs/ecs";
 import Entity from "../../helpers/ecs/entity";
 import {EngineVelocitySystem} from "../EngineVelocitySystem";
 import {WarpSystem} from "../WarpSystem";
-import {WarpVelocityPosition} from "../WarpVelocityPosition";
+import {EngineVelocityPosition} from "../EngineVelocityPosition";
 describe("WarpSystem", () => {
   let ecs: ECS;
   let warpSystem: WarpSystem;
   let engineVelocitySystem: EngineVelocitySystem;
-  let warpVelocityPosition: WarpVelocityPosition;
+  let warpVelocityPosition: EngineVelocityPosition;
   beforeEach(() => {
     ecs = new ECS();
     engineVelocitySystem = new EngineVelocitySystem();
-    warpVelocityPosition = new WarpVelocityPosition();
+    warpVelocityPosition = new EngineVelocityPosition();
     warpSystem = new WarpSystem();
   });
   it("should initialize properly", () => {

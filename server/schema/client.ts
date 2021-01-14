@@ -76,6 +76,11 @@ export default class Client {
     this.stationId = params.stationId || null;
     this.loginName = params.loginName || null;
   }
+  serialize() {
+    // Remove the transient channel data
+    const {channel, ...data} = this;
+    return data;
+  }
   connect() {
     this.connected = true;
   }

@@ -1,15 +1,20 @@
 import {useConfigStore} from "client/components/starmap/configStore";
 import {MutableRefObject, useEffect} from "react";
 import {useThree} from "react-three-fiber";
+import {Vector3} from "three";
+import {UseStore} from "zustand";
 import {useTranslate2DTo3D} from "./hooks/use2Dto3D";
 
-export function useSetupOrbitControls(controls: MutableRefObject<any>) {
+export function useSetupOrbitControls(
+  controls: MutableRefObject<any>,
+  store: UseStore<any> = useConfigStore
+) {
   const {camera} = useThree();
 
   const to3D = useTranslate2DTo3D();
 
   useEffect(() => {
-    useConfigStore.setState({
+    store.setState({
       translate2dTo3d: to3D,
       disableOrbitControls: () => {
         if (controls.current) {
@@ -21,7 +26,13 @@ export function useSetupOrbitControls(controls: MutableRefObject<any>) {
           controls.current.enabled = true;
         }
       },
-      orbitControlsSet: ({zoom, position}) => {
+      orbitControlsSet: ({
+        zoom,
+        position,
+      }: {
+        zoom?: number;
+        position?: Vector3;
+      }) => {
         if (controls.current) {
           if (zoom) {
             camera.position.y = zoom;

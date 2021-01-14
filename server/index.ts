@@ -31,7 +31,6 @@ export async function startUp() {
     }
 
     const httpServer = await App.startHttpServer();
-
     return {
       App,
       server: App.servers.express,

@@ -5,6 +5,8 @@ subscription PlayerWarp {
       warpFactorCount
       currentWarpFactor
       maxVelocity
+      interstellarCruisingSpeed
+      planetaryCruisingSpeed
     }
   }
 }

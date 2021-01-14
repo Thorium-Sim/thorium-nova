@@ -10,6 +10,7 @@ export class ImpulseEnginesComponent extends Component {
     thrust: 12500,
     targetSpeed: 0,
     forwardAcceleration: 0,
+    forwardVelocity: 0,
   };
 
   @Field({description: "The max speed at full impulse in km/s."})
@@ -26,4 +27,6 @@ export class ImpulseEnginesComponent extends Component {
 
   @Field({description: "The forward acceleration of the ship in km/s^2."})
   forwardAcceleration: number = 0;
+  @Field({description: "The forward velocity of the ship in km/s."})
+  forwardVelocity: number = 0;
 }

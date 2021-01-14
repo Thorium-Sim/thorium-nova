@@ -1,5 +1,5 @@
 import {useShipsStore} from "client/components/viewscreen/useSystemShips";
-import {Line, useGLTFLoader, useTextureLoader} from "drei";
+import {Line, useGLTF, useTexture} from "drei";
 import {Fragment, useMemo, useRef} from "react";
 import {useFrame} from "react-three-fiber";
 import {
@@ -33,8 +33,8 @@ export const ShipEntity = ({
   const entity = useShipsStore.getState()[entityId];
 
   const modelAsset = entity?.shipAssets?.model;
-
-  const model = useGLTFLoader(modelAsset || "", false);
+  // TODO: Use useGLTF.preload outside of this to preload the asset
+  const model = useGLTF(modelAsset || "", false);
 
   const scene = useMemo(() => {
     const scene: Group = model.scene.clone(true);
@@ -53,7 +53,7 @@ export const ShipEntity = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelAsset]);
   // TODO: Replace with a ship icon.
-  const spriteMap = useTextureLoader("/assets/icons/Pyramid.svg") as Texture;
+  const spriteMap = useTexture("/assets/icons/Pyramid.svg") as Texture;
   const scale = 1 / 50;
   const mesh = useRef<Mesh>(null);
   const line = useRef<Line2>(null);

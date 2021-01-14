@@ -62,9 +62,15 @@ export class WarpSystem extends System {
     ) {
       entity.warpEngines.forwardVelocity +=
         entity.warpEngines.forwardAcceleration * elapsedRatio;
+    } else if (
+      entity.warpEngines.forwardVelocity +
+        entity.warpEngines.forwardAcceleration * elapsedRatio >
+      entity.warpEngines.maxVelocity
+    ) {
+      entity.warpEngines.forwardVelocity = entity.warpEngines.maxVelocity;
     }
 
-    if (entity.warpEngines.forwardVelocity < 0.000000001) {
+    if (entity.warpEngines.forwardVelocity < 0.0000001) {
       entity.warpEngines.forwardVelocity = 0;
       if (warpSpeed === 0) {
         entity.warpEngines.forwardAcceleration = 0;

@@ -170,15 +170,14 @@ export class WarpEngineOutfitResolver {
         shipId,
         outfitType: "warpEngines",
       });
-
-      process.nextTick(() => {
+      setTimeout(() => {
         pubsub.publish(id, {
           shipId,
           pluginId: args.pluginId,
           outfitId: args.outfitId,
           outfit,
         });
-      });
+      }, 100);
       return [id, "warpEnginesOutfit"];
     },
     filter: ({

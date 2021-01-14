@@ -58,7 +58,7 @@ export default class BasePlugin {
   @Field(type => String)
   get coverImage() {
     return this._coverImage
-      ? `/assets/plugins/${this.name}/${this._coverImage}`
+      ? (`/assets/plugins/${this.name}/${this._coverImage}` as string)
       : "";
   }
   set coverImage(value) {

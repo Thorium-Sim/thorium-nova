@@ -1,8 +1,9 @@
 import React from "react";
 import {useFrame, useThree} from "react-three-fiber";
-import {Line, useGLTFLoader, useTextureLoader} from "drei";
+import {Line, useGLTF, useTexture} from "drei";
 import {
   Color,
+  Euler,
   FrontSide,
   Group,
   Mesh,
@@ -27,7 +28,7 @@ import {usePlayerShipId} from "client/components/viewscreen/PlayerShipContext";
 
 const ShipSprite = ({id, color = "white"}: {id: string; color?: string}) => {
   // TODO: Replace with a ship icon
-  const spriteMap = useTextureLoader("/assets/icons/Pyramid.svg") as Texture;
+  const spriteMap = useTexture("/assets/icons/Pyramid.svg") as Texture;
   const scale = 1 / 50;
   const ref = React.useRef<Sprite>();
   useFrame(() => {
@@ -63,7 +64,7 @@ const ShipEntity: React.FC<{
 }> = ({entityId}) => {
   const entity = useShipsStore.getState()[entityId];
   const modelAsset = entity?.shipAssets?.model;
-  const model = useGLTFLoader(modelAsset || "", false);
+  const model = useGLTF(modelAsset || "", false);
   const shipId = usePlayerShipId();
 
   const scene = React.useMemo(() => {
