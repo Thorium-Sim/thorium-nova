@@ -55,7 +55,7 @@ export const NavigationPlanetEntity: FC<{
         axialTilt={axialTilt}
         selected={false}
         showSprite
-        showMesh={false}
+        wireframe={true}
         isSatellite={isSatellite}
         {...itemEvents(entity)}
       >

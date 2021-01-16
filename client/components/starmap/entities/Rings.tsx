@@ -11,9 +11,10 @@ import {whiteImage} from "../utils";
 
 interface RingsProps {
   texture: string;
+  wireframe?: boolean;
 }
 
-const Rings: React.FC<RingsProps> = ({texture = whiteImage}) => {
+const Rings: React.FC<RingsProps> = ({texture = whiteImage, wireframe}) => {
   const rings = useLoader(TextureLoader, texture);
   const geo = React.useMemo(() => {
     const geometry = new RingBufferGeometry(1.5, 3, 64);
@@ -33,11 +34,12 @@ const Rings: React.FC<RingsProps> = ({texture = whiteImage}) => {
       receiveShadow
     >
       <meshPhongMaterial
-        map={rings}
+        map={wireframe ? undefined : rings}
         color={0xffffff}
         side={DoubleSide}
         transparent
         opacity={0.8}
+        wireframe={wireframe}
         attach="material"
       />
     </mesh>

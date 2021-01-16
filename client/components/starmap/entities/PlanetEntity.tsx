@@ -15,13 +15,18 @@ import Clouds from "./Clouds";
 import Rings from "./Rings";
 import Selected from "./Selected";
 
-const Sphere: React.FC<{texture: string}> = React.memo(
-  ({texture}) => {
+const Sphere: React.FC<{texture: string; wireframe?: boolean}> = React.memo(
+  ({texture, wireframe}) => {
     const map = useLoader(TextureLoader, `${texture}`);
     return (
       <mesh castShadow>
         <sphereBufferGeometry args={[1, 32, 32]} attach="geometry" />
-        <meshPhysicalMaterial map={map} transparent attach="material" />
+        <meshPhysicalMaterial
+          map={wireframe ? undefined : map}
+          wireframe={wireframe}
+          transparent
+          attach="material"
+        />
       </mesh>
     );
   },
@@ -63,6 +68,7 @@ export const Planet: React.FC<{
   showSprite?: boolean;
   showMesh?: boolean;
   isSatellite?: boolean;
+  wireframe?: boolean;
 }> = ({
   position = new Vector3(),
   scaledPosition = position,
@@ -79,6 +85,7 @@ export const Planet: React.FC<{
   children,
   showSprite,
   showMesh = true,
+  wireframe,
   isSatellite,
 }) => {
   const group = React.useRef<Group>();
@@ -137,9 +144,9 @@ export const Planet: React.FC<{
             scale={scale}
             rotation={[0, 0, axialTilt * DEG_TO_RAD]}
           >
-            <Sphere texture={texture} />
-            {rings && <Rings texture={rings} />}
-            {clouds && <Clouds texture={clouds} />}
+            <Sphere texture={texture} wireframe={wireframe} />
+            {rings && <Rings texture={rings} wireframe={wireframe} />}
+            {clouds && !wireframe && <Clouds texture={clouds} />}
             {selected && <Selected />}
           </group>
         </Suspense>
