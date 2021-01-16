@@ -75,7 +75,6 @@ const Interstellar: React.FC<{universeId: string}> = ({universeId}) => {
         .map(s => (
           <SystemMarker
             key={s.id}
-            id={s.id}
             system={s}
             position={[
               s.position?.x || 0,

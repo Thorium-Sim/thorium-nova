@@ -34,6 +34,7 @@ export enum EntityTypes {
   Ship = "ship",
   Outfit = "outfit",
   Timer = "timer",
+  Waypoint = "waypoint",
 }
 
 export type PhraseUnitInput = {
@@ -2306,6 +2307,10 @@ export type UniverseSystemShipsSubscription = {
       }>;
     };
     size: Maybe<{__typename?: "SizeComponent"; value: number}>;
+    interstellarPosition: Maybe<{
+      __typename?: "InterstellarPositionComponent";
+      system: Maybe<{__typename?: "Entity"; id: string}>;
+    }>;
     shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; model: string}>;
   }>;
 };
@@ -6518,6 +6523,11 @@ export const UniverseSystemShipsDocument = gql`
       }
       size {
         value
+      }
+      interstellarPosition {
+        system {
+          id
+        }
       }
       shipAssets {
         model

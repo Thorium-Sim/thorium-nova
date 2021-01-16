@@ -25,7 +25,11 @@ subscription UniverseSystemShips($systemId: ID!) {
     size {
       value
     }
-
+    interstellarPosition {
+      system {
+        id
+      }
+    }
     shipAssets {
       model
     }

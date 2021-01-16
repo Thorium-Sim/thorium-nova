@@ -34,6 +34,7 @@ export const useNavigationStore = create<NavigationStore>(
     }),
     {
       name: "thorium-navigation-store", // unique name
+      getStorage: () => sessionStorage,
     }
   )
 );
