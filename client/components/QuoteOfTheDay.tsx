@@ -127,6 +127,8 @@ const quotes = [
   "Where the road ends, adventure begins!",
   // Soren Kierkegaard
   "Life can only be understood backwards; but it must be lived forwards.",
+  // Swyx
+  "Small minds discuss tactics, average minds discuss strategy, great minds discuss inevitability",
 ];
 
 const QuoteOfTheDay = () => {

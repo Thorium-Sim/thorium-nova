@@ -29,21 +29,28 @@ export const NavigationPlanetary: FC<{
   const recenter = useCallback(
     function recenter() {
       const playerShip = useShipsStore.getState()[playerShipId];
-      if (!playerShip) return;
-      camera.position.set(
-        playerShip.position?.x || 0,
-        camera.position.y,
-        playerShip.position?.z || 0
-      );
-      controls.current?.target?.set(
-        playerShip.position?.x || 0,
-        0,
-        playerShip.position?.z || 0
-      );
+      if (
+        !playerShip ||
+        playerShip.interstellarPosition?.system?.id !== systemId
+      ) {
+        camera.position.set(0, camera.position.y, 0);
+        controls.current?.target?.set(0, 0, 0);
+      } else {
+        camera.position.set(
+          playerShip.position?.x || 0,
+          camera.position.y,
+          playerShip.position?.z || 0
+        );
+        controls.current?.target?.set(
+          playerShip.position?.x || 0,
+          0,
+          playerShip.position?.z || 0
+        );
+      }
       controls.current?.saveState?.();
       recentering.current = true;
     },
-    [camera, playerShipId]
+    [camera, playerShipId, systemId]
   );
   useEffect(() => {
     const unsub = subscribe("navigation_change_system", systemId => {
@@ -135,10 +142,7 @@ export const NavigationPlanetary: FC<{
               FallbackComponent={() => <Fragment></Fragment>}
               onError={err => console.error(err)}
             >
-              <NavigationShipEntity
-                entityId={shipId}
-                playerId={flightPlayerData.playerShip.id}
-              />
+              <NavigationShipEntity entityId={shipId} />
             </ErrorBoundary>
           </Suspense>
         );

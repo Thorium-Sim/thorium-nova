@@ -3,16 +3,13 @@ import {useShipsStore} from "client/components/viewscreen/useSystemShips";
 import {useTexture} from "drei";
 import {Group, Sprite, Texture} from "three";
 import {useFrame} from "react-three-fiber";
-import {itemEvents} from "./utils";
+import {itemEvents, useNavigationStore} from "./utils";
 
-export const NavigationShipEntity = ({
-  entityId,
-  playerId,
+const NavigationShipEntityModel = ({
+  entity,
 }: {
-  entityId: string;
-  playerId?: string;
+  entity: ReturnType<typeof useShipsStore["getState"]>[string];
 }) => {
-  const entity = useShipsStore.getState()[entityId];
   // TODO: Replace with a ship icon.
   const spriteMap = useTexture("/assets/icons/Pyramid.svg") as Texture;
   const scale = 1 / 20;
@@ -20,7 +17,7 @@ export const NavigationShipEntity = ({
   const group = useRef<Group>();
 
   useFrame(({camera}) => {
-    const ship = useShipsStore.getState()[entityId];
+    const ship = useShipsStore.getState()[entity.id];
 
     if (!ship) return;
     if (ship.position) {
@@ -66,4 +63,17 @@ export const NavigationShipEntity = ({
       </group> */}
     </group>
   );
+};
+
+export const NavigationShipEntity = ({
+  entityId,
+}: {
+  entityId: string;
+  playerId?: string;
+}) => {
+  const entity = useShipsStore.getState()[entityId];
+  const systemId = useNavigationStore(state => state.systemId);
+  if (entity.interstellarPosition?.system?.id !== systemId) return null;
+
+  return <NavigationShipEntityModel entity={entity} />;
 };

@@ -15,9 +15,6 @@ import useAnimationFrame from "client/helpers/unused/useAnimationFrame";
 import {lerp} from "client/helpers/lerp";
 import {Quaternion} from "three";
 
-const prevRotation = new Quaternion();
-const nextRotation = new Quaternion();
-
 type ShipMap = Record<
   string,
   UniverseSystemShipsSubscription["universeSystemShips"][0]
@@ -106,8 +103,14 @@ export const useSystemShips = singletonHook([], function useSystemShipsHook() {
     );
   });
   const client = useApolloClient();
+  const lastSystemId = useRef(systemId);
+
   React.useEffect(() => {
     if (!systemId) return;
+    if (systemId !== lastSystemId.current) {
+      lastSystemId.current = systemId;
+      setShipIds([]);
+    }
     if (window.location.protocol === "https:") {
       //|| window.location.host === "localhost") {
       // TODO: Implement Geckos

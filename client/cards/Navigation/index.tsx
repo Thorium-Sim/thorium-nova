@@ -11,7 +11,6 @@ import {
   useFlightPlayerShipSubscription,
   useFlightUniverseSubscription,
   useNavEntityQuery,
-  useUniverseSubscription,
   useWaypointAddMutation,
 } from "client/generated/graphql";
 import Star from "client/components/starmap/star";
@@ -87,7 +86,15 @@ const NavigationCanvas = memo(() => {
   const systemId = useNavigationStore(state => state.systemId);
 
   useEffect(() => {
-    useNavigationStore.setState({playerShipId, playerShipSystemId});
+    const stateUpdate: {
+      playerShipId: string;
+      playerShipSystemId: string | null;
+      systemId?: string | null;
+    } = {playerShipId, playerShipSystemId};
+    if (!useNavigationStore.getState().systemId) {
+      stateUpdate.systemId = playerShipSystemId;
+    }
+    useNavigationStore.setState(stateUpdate);
   }, [playerShipId, playerShipSystemId]);
 
   if (!flightPlayerData?.playerShip) return null;
