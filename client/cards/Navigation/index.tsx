@@ -51,7 +51,6 @@ const NavigationInterstellar = memo(
           Math.sin(frameCount.current / 100) / 100;
       }
     });
-    console.log("Rendering");
     useSetupOrbitControls(orbitControls, useNavigationStore);
     const {x, y, z} = initialPosition || {};
     const {camera} = useThree();

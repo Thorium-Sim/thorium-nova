@@ -65,7 +65,9 @@ export const Tooltip = ({
           />
         </Portal>
       )}
+      {/* @ts-ignore Expression produces a union too complex to represent */}
       <TooltipPopup
+        // @ts-ignore
         {...tooltip}
         label={label}
         aria-label={ariaLabel}

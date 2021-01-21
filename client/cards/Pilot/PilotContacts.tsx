@@ -216,7 +216,6 @@ export const PilotContacts = memo(({tilted}: {tilted: boolean}) => {
         }
         return null;
       })}
-      {/* For some reason, the player ship isn't appearing. Figure out why and fix it. */}
       {shipIds.map(shipId => {
         return (
           <Suspense key={shipId} fallback={null}>

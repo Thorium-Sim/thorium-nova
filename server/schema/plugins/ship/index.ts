@@ -312,7 +312,6 @@ function getAssetBase(pluginId?: string) {
 function getShipAsset(entity?: Entity, pluginId?: string) {
   if (!entity) return "";
   const assetBase = getAssetBase(pluginId);
-  console.log(entity);
   return `${assetBase}/ship/${entity?.identity?.name || entity.id}/`;
 }
 // TODO: Make sure renaming the ship properly moves the files to the correct locations.
