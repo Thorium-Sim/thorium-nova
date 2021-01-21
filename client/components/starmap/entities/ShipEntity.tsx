@@ -13,7 +13,7 @@ import {
   Texture,
   Vector3,
 } from "three";
-import {useShipsStore} from "../../viewscreen/useSystemShips";
+import {useSystemShipsStore} from "../../viewscreen/useSystemShips";
 import {useConfigStore} from "../configStore";
 import {useSelectedShips} from "../../viewscreen/useSelectedShips";
 import {Line2} from "three/examples/jsm/lines/Line2";
@@ -51,7 +51,7 @@ const ShipSprite = ({id, color = "white"}: {id: string; color?: string}) => {
 };
 
 const ShipEntityWrapper: React.FC<{entityId: string}> = ({entityId}) => {
-  const entity = useShipsStore.getState()[entityId];
+  const entity = useSystemShipsStore.getState()[entityId];
   if (!entity) return null;
   return <ShipEntity entityId={entityId} />;
 };
@@ -61,7 +61,7 @@ const distanceVector = new Vector3();
 const ShipEntity: React.FC<{
   entityId: string;
 }> = ({entityId}) => {
-  const entity = useShipsStore.getState()[entityId];
+  const entity = useSystemShipsStore.getState()[entityId];
   const modelAsset = entity?.shipAssets?.model;
   const model = useGLTF(modelAsset || "", false);
   const shipId = usePlayerShipId();
@@ -96,7 +96,7 @@ const ShipEntity: React.FC<{
   const [setDestination] = useShipsSetDesiredDestinationMutation();
 
   useFrame(({camera}) => {
-    const ship = useShipsStore.getState()[entity.id];
+    const ship = useSystemShipsStore.getState()[entity.id];
     const compressYDimension =
       useConfigStore.getState().viewingMode === "core"
         ? useConfigStore.getState().compressYDimension
@@ -190,7 +190,7 @@ const ShipEntity: React.FC<{
     );
 
     if (dragging === false) {
-      const positions = Object.values(useShipsStore.getState()).reduce(
+      const positions = Object.values(useSystemShipsStore.getState()).reduce(
         (
           prev: {id: string; position: {x: number; y: number; z: number}}[],
           next
@@ -223,7 +223,7 @@ const ShipEntity: React.FC<{
 
     if (first) {
       useSelectedShips.setState(({selectedIds}) => ({
-        cachedPositions: Object.values(useShipsStore.getState()).reduce(
+        cachedPositions: Object.values(useSystemShipsStore.getState()).reduce(
           (prev: {[id: string]: {x: number; y: number; z: number}}, next) => {
             if (selectedIds.includes(next.id)) {
               if (next.position) {

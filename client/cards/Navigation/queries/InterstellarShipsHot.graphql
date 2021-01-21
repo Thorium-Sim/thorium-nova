@@ -1,0 +1,30 @@
+subscription UniverseInterstellarShipsHot($shipId: ID) {
+  universeInterstellarShipsHot(shipId: $shipId) {
+    id
+    identity {
+      name
+    }
+    position {
+      x
+      y
+      z
+    }
+    rotation {
+      x
+      y
+      z
+      w
+    }
+    size {
+      value
+    }
+    interstellarPosition {
+      system {
+        id
+      }
+    }
+    shipAssets {
+      model
+    }
+  }
+}

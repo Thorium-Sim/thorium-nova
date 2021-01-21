@@ -1,6 +1,6 @@
 import React from "react";
 import {useConfigStore} from "../starmap/configStore";
-import {useShipsStore} from "../viewscreen/useSystemShips";
+import {useSystemShipsStore} from "../viewscreen/useSystemShips";
 import {css} from "@emotion/core";
 import Button from "../ui/button";
 import {FaArrowLeft, FaProjectDiagram} from "react-icons/fa";
@@ -147,7 +147,7 @@ export const StarmapCoreMenubar: React.FC<{
             size="sm"
             disabled={selectedIds.length === 0}
             onClick={() => {
-              const ships = useShipsStore.getState();
+              const ships = useSystemShipsStore.getState();
               const selectedShips = selectedIds.map(id => ships[id]);
               const [center, min, max] = selectedShips.reduce(
                 (prev, next, index, arr) => {
@@ -248,7 +248,7 @@ export const StarmapCoreMenubar: React.FC<{
           <Button
             size="sm"
             onClick={() => {
-              const ships = useShipsStore.getState();
+              const ships = useSystemShipsStore.getState();
               const selectedShips = selectedIds.map(id => ships[id]);
               const center =
                 Math.round(

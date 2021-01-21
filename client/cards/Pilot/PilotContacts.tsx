@@ -1,6 +1,6 @@
 import {DEG_TO_RAD} from "client/components/starmap/utils";
 import {
-  useShipsStore,
+  useSystemShipsStore,
   useSystemShips,
 } from "client/components/viewscreen/useSystemShips";
 import {
@@ -19,7 +19,6 @@ import {
   Texture,
   Vector3,
   Matrix4,
-  DoubleSide,
   PerspectiveCamera,
   Camera,
 } from "three";
@@ -62,7 +61,7 @@ export const WaypointEntity = ({
     const camera = props.camera as OrthographicCamera;
     const dx = (camera.right - camera.left) / (2 * camera.zoom);
 
-    const playerShip = useShipsStore.getState()[playerId];
+    const playerShip = useSystemShipsStore.getState()[playerId];
     if (playerShip?.position) {
       playerVector.set(
         playerShip.position.x,
@@ -217,13 +216,11 @@ export const PilotContacts = memo(({tilted}: {tilted: boolean}) => {
         }
         return null;
       })}
+      {/* For some reason, the player ship isn't appearing. Figure out why and fix it. */}
       {shipIds.map(shipId => {
         return (
           <Suspense key={shipId} fallback={null}>
-            <ErrorBoundary
-              FallbackComponent={() => <Fragment></Fragment>}
-              onError={err => console.error(err)}
-            >
+            <ErrorBoundary FallbackComponent={fallback} onError={onError}>
               <ShipEntity
                 entityId={shipId}
                 playerId={flightPlayerData.playerShip.id}
@@ -236,3 +233,6 @@ export const PilotContacts = memo(({tilted}: {tilted: boolean}) => {
     </group>
   );
 });
+
+const onError = err => console.error(err);
+const fallback = () => <Fragment></Fragment>;

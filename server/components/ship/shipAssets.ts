@@ -8,6 +8,7 @@ export class ShipAssetsComponent extends Component {
   static id: "shipAssets" = "shipAssets";
   static getDefaults(): ComponentOmit<ShipAssetsComponent> {
     return {
+      entity: null!,
       model: "",
       side: "",
       top: "",
@@ -15,6 +16,7 @@ export class ShipAssetsComponent extends Component {
       vanity: "",
     };
   }
+  entity!: Entity;
 
   @Field({description: "GLB model of the ship."})
   model: string = "";

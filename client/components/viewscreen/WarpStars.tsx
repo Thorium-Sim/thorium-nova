@@ -18,7 +18,7 @@ import {
   useForwardVelocityStore,
   usePlayerForwardVelocity,
 } from "./usePlayerForwardVelocity";
-import {useShipsStore} from "./useSystemShips";
+import {useSystemShipsStore} from "./useSystemShips";
 
 const STAR_COUNT = 10000;
 const FORWARD_DISTANCE = 5000;
@@ -65,7 +65,7 @@ const WarpStars = React.memo(
 
     usePlayerForwardVelocity();
     useFrame(({camera}) => {
-      const entity = useShipsStore.getState()[shipId];
+      const entity = useSystemShipsStore.getState()[shipId];
       if (!entity) return;
       const rotation = entity.rotation;
       const {forwardVelocity} = useForwardVelocityStore.getState();

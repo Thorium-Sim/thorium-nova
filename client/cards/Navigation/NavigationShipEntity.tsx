@@ -1,14 +1,22 @@
 import {useRef} from "react";
-import {useShipsStore} from "client/components/viewscreen/useSystemShips";
+import {useSystemShipsStore} from "client/components/viewscreen/useSystemShips";
 import {useTexture} from "drei";
 import {Group, Sprite, Texture} from "three";
 import {useFrame} from "react-three-fiber";
 import {itemEvents, useNavigationStore} from "./utils";
+import {useInterstellarShipsStore} from "client/components/viewscreen/useInterstellarShips";
 
 const NavigationShipEntityModel = ({
   entity,
+  store,
+  interstellar,
 }: {
-  entity: ReturnType<typeof useShipsStore["getState"]>[string];
+  entity: Omit<
+    ReturnType<typeof useSystemShipsStore["getState"]>[string],
+    "autopilot"
+  >;
+  store: typeof useSystemShipsStore | typeof useInterstellarShipsStore;
+  interstellar?: boolean;
 }) => {
   // TODO: Replace with a ship icon.
   const spriteMap = useTexture("/assets/icons/Pyramid.svg") as Texture;
@@ -17,7 +25,7 @@ const NavigationShipEntityModel = ({
   const group = useRef<Group>();
 
   useFrame(({camera}) => {
-    const ship = useShipsStore.getState()[entity.id];
+    const ship = store.getState()[entity.id];
 
     if (!ship) return;
     if (ship.position) {
@@ -28,7 +36,9 @@ const NavigationShipEntityModel = ({
       );
       let zoom = 0;
       if (sprite.current) {
-        zoom = camera.position.distanceTo(sprite.current.position) + 500;
+        zoom =
+          camera.position.distanceTo(sprite.current.position) +
+          (interstellar ? 1 : 500);
         let zoomedScale = (zoom / 2) * scale;
         sprite.current.scale.set(zoomedScale, zoomedScale, zoomedScale);
       }
@@ -65,15 +75,36 @@ const NavigationShipEntityModel = ({
   );
 };
 
-export const NavigationShipEntity = ({
+export const NavigationSystemShipEntity = ({
   entityId,
 }: {
   entityId: string;
   playerId?: string;
 }) => {
-  const entity = useShipsStore.getState()[entityId];
+  const entity = useSystemShipsStore.getState()[entityId];
   const systemId = useNavigationStore(state => state.systemId);
   if (entity.interstellarPosition?.system?.id !== systemId) return null;
 
-  return <NavigationShipEntityModel entity={entity} />;
+  return (
+    <NavigationShipEntityModel entity={entity} store={useSystemShipsStore} />
+  );
+};
+
+export const NavigationInterstellarShipEntity = ({
+  entityId,
+}: {
+  entityId: string;
+  playerId?: string;
+}) => {
+  const entity = useInterstellarShipsStore.getState()[entityId];
+  if (!entity) return null;
+  if (entity?.interstellarPosition?.system?.id) return null;
+
+  return (
+    <NavigationShipEntityModel
+      entity={entity}
+      store={useInterstellarShipsStore}
+      interstellar
+    />
+  );
 };

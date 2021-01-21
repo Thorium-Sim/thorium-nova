@@ -1,4 +1,4 @@
-import {useShipsStore} from "client/components/viewscreen/useSystemShips";
+import {useSystemShipsStore} from "client/components/viewscreen/useSystemShips";
 import {Fragment, memo, useRef} from "react";
 import {useFrame} from "react-three-fiber";
 import {Group, OrthographicCamera, Quaternion} from "three";
@@ -31,7 +31,7 @@ export const CircleGrid = memo(
       onChange: value => (tiltRef.current = value.tilt),
     });
     useFrame(props => {
-      const playerShip = useShipsStore.getState()[playerShipId];
+      const playerShip = useSystemShipsStore.getState()[playerShipId];
       if (playerShip?.position && playerShip?.rotation && circleGroup.current) {
         circleGroup.current.position.set(0, 0, 0);
         circleGroup.current.quaternion

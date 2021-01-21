@@ -38,6 +38,7 @@ import {pubsub} from "server/helpers/pubsub";
 import {Vector3} from "three";
 import {createStationComplement} from "server/helpers/createStationComplement";
 import {StationComplementComponent} from "server/components/stationComplement";
+import {InterstellarTransitionSystem} from "server/systems/InterstellarTransitionSystem";
 
 const INTERVAL = 1000 / 60;
 
@@ -80,6 +81,7 @@ export default class Flight {
       this.ecs.addEntity(e);
     });
 
+    this.ecs.addSystem(new InterstellarTransitionSystem());
     this.ecs.addSystem(new TimerSystem());
     this.ecs.addSystem(new AutoRotateSystem());
     this.ecs.addSystem(new AutoThrustSystem());

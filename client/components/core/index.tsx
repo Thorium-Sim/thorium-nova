@@ -3,7 +3,7 @@ import {Canvas, useFrame, useThree} from "react-three-fiber";
 import {ApolloProvider, useApolloClient} from "@apollo/client";
 import Nebula from "../starmap/Nebula";
 import {configStoreApi, useConfigStore} from "../starmap/configStore";
-import {useShipsStore} from "../viewscreen/useSystemShips";
+import {useSystemShipsStore} from "../viewscreen/useSystemShips";
 import {MOUSE, PerspectiveCamera, Vector3} from "three";
 import {OrbitControls} from "./OrbitControls";
 import useDragSelect from "../../helpers/hooks/useDragSelect";
@@ -94,7 +94,7 @@ const StarmapCore: React.FC = () => {
 
   const [ref, dragPosition, node] = useDragSelect<HTMLCanvasElement>(
     ({x1, x2, y1, y2}) => {
-      const ships = Object.values(useShipsStore.getState());
+      const ships = Object.values(useSystemShipsStore.getState());
       if (cameraRef.current) {
         const selectedIds = getSelectedObjects(
           ships.filter(s => s.position) as {

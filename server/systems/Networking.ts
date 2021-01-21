@@ -14,6 +14,9 @@ export class Networking extends System {
           shipId: e.id,
           ship: e,
         });
+        pubsub.publish("universeInterstellarShipsHot", {
+          shipId: e.id,
+        });
       });
 
       const systemIds = playerShips

@@ -102,10 +102,12 @@ class Entity extends Components {
      */
     this.components = {};
 
+    const entityProxy = new Proxy(this, handler);
+
     // components initialization
     for (let i = 0, component: Component; (component = components[i]); i += 1) {
       if (!component) continue;
-      let data = {};
+      let data = {entityId: this.id, entity: entityProxy};
       // if a getDefaults method is provided, use it. First because let the
       // runtime allocate the component is way more faster than using a copy
       // function. Secondly because the user may want to provide some kind
@@ -127,7 +129,8 @@ class Entity extends Components {
           ...components[i].defaults,
         };
       }
-
+      data.entityId = entityProxy.id;
+      data.entity = entityProxy;
       // @ts-ignore ts(2576)
       this.components[component.id] = data;
     }
@@ -137,7 +140,7 @@ class Entity extends Components {
      */
     this.ecs = null;
 
-    return new Proxy(this, handler);
+    return entityProxy;
   }
   serialize() {
     return {
@@ -148,6 +151,9 @@ class Entity extends Components {
           const updatedValue = {...value};
           const excludeFields =
             registeredComponents.find(c => c.id === key)?.excludeFields || [];
+          excludeFields.push("entity");
+          excludeFields.push("entityId");
+
           if (excludeFields) {
             excludeFields.forEach((field: string) => {
               delete updatedValue[field];
@@ -206,7 +212,10 @@ class Entity extends Components {
    * many entities.
    */
   addComponent(name: keyof Components, data?: any) {
-    this.components[name] = data || {};
+    let compData = data || {};
+    compData.entity = this;
+    compData.entityId = this.id;
+    this.components[name] = compData;
     this.setSystemsDirty();
   }
   /**

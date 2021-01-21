@@ -1,11 +1,9 @@
 import {ApolloProvider, useApolloClient} from "@apollo/client";
-import {
-  OrbitControls,
-  OrbitControlsType,
-} from "client/components/starmap/OrbitControls";
+import {OrbitControls} from "client/components/core/OrbitControls";
+
 import {CardProps} from "client/components/station/CardProps";
 import {FC, Fragment, memo, Suspense, useEffect, useRef} from "react";
-import {Canvas, useFrame} from "react-three-fiber";
+import {Canvas, useFrame, useThree} from "react-three-fiber";
 import {Color, Group, MOUSE} from "three";
 import {
   useFlightPlayerShipSubscription,
@@ -26,57 +24,95 @@ import {NavigationPlanetary} from "./NavigationPlanetary";
 import {CAMERA_Y, useNavigationStore} from "./utils";
 import Starfield from "client/components/starmap/Starfield";
 import SystemMarker from "client/components/starmap/SystemMarker";
+import {useInterstellarShips} from "client/components/viewscreen/useInterstellarShips";
+import {ErrorBoundary} from "react-error-boundary";
+import {NavigationInterstellarShipEntity} from "./NavigationShipEntity";
+import {useSetupOrbitControls} from "client/helpers/useSetupOrbitControls";
 
-const NavigationInterstellar = memo(() => {
-  const orbitControls = useRef<OrbitControlsType>();
-  const frameCount = useRef(0);
+const NavigationInterstellar = memo(
+  ({
+    initialPosition,
+  }: {
+    initialPosition?: {x: number; y: number; z: number} | null;
+  }) => {
+    const orbitControls = useRef<OrbitControls>();
+    const frameCount = useRef(0);
 
-  const {data, error} = useFlightUniverseSubscription();
+    const {data} = useFlightUniverseSubscription();
 
-  useFrame((state, delta) => {
-    // Auto rotate, but at a very slow rate, so as to keep the
-    // starfield visible
-    frameCount.current = (frameCount.current + delta) % 125.663;
-    if (orbitControls.current) {
-      orbitControls.current.autoRotateSpeed =
-        Math.sin(frameCount.current / 100) / 100;
-    }
-  });
-  console.log(data, error);
-  return (
-    <Suspense fallback={null}>
-      <OrbitControls
-        ref={orbitControls}
-        autoRotate
-        maxDistance={1300}
-        minDistance={1}
-        rotateSpeed={0.5}
-        mouseButtons={{
-          LEFT: MOUSE.ROTATE,
-          RIGHT: MOUSE.PAN,
-          MIDDLE: MOUSE.DOLLY,
-        }}
-      />
-      <Starfield />
-      {data?.flightUniverse.map(s => (
-        <SystemMarker
-          key={s.id}
-          system={s}
-          position={[
-            s.position?.x || 0,
-            s.position?.y || 0,
-            s.position?.z || 0,
-          ]}
-          name={s.identity.name}
-          onPointerDown={() => {
-            useNavigationStore.setState({selectedObjectId: s.id});
+    const shipIds = useInterstellarShips();
+
+    useFrame((state, delta) => {
+      // Auto rotate, but at a very slow rate, so as to keep the
+      // starfield visible
+      frameCount.current = (frameCount.current + delta) % 125.663;
+      if (orbitControls.current) {
+        orbitControls.current.autoRotateSpeed =
+          Math.sin(frameCount.current / 100) / 100;
+      }
+    });
+    console.log("Rendering");
+    useSetupOrbitControls(orbitControls, useNavigationStore);
+    const {x, y, z} = initialPosition || {};
+    const {camera} = useThree();
+    useEffect(() => {
+      if (x && y && z && orbitControls.current) {
+        orbitControls.current.reset?.();
+        camera.position.set(x, y + 10, z);
+        orbitControls.current?.target?.set(x, y, z);
+        orbitControls.current?.saveState?.();
+      }
+    }, [x, y, z, camera]);
+    return (
+      <Suspense fallback={null}>
+        <OrbitControls
+          ref={orbitControls}
+          zoomToCursor
+          autoRotate
+          maxDistance={1300}
+          minDistance={1}
+          rotateSpeed={0.5}
+          screenSpacePanning
+          mouseButtons={{
+            LEFT: MOUSE.PAN,
+            MIDDLE: MOUSE.DOLLY,
+            RIGHT: MOUSE.RIGHT,
           }}
-          onDoubleClick={() => useNavigationStore.setState({systemId: s.id})}
         />
-      ))}
-    </Suspense>
-  );
-});
+
+        <Starfield />
+        {data?.flightUniverse.map(s => (
+          <SystemMarker
+            key={s.id}
+            system={s}
+            position={[
+              s.position?.x || 0,
+              s.position?.y || 0,
+              s.position?.z || 0,
+            ]}
+            name={s.identity.name}
+            onPointerDown={() => {
+              useNavigationStore.setState({selectedObjectId: s.id});
+            }}
+            onDoubleClick={() => useNavigationStore.setState({systemId: s.id})}
+          />
+        ))}
+        {shipIds.map(shipId => {
+          return (
+            <Suspense key={shipId} fallback={null}>
+              <ErrorBoundary
+                FallbackComponent={() => <Fragment></Fragment>}
+                onError={err => console.error(err)}
+              >
+                <NavigationInterstellarShipEntity entityId={shipId} />
+              </ErrorBoundary>
+            </Suspense>
+          );
+        })}
+      </Suspense>
+    );
+  }
+);
 
 const NavigationCanvas = memo(() => {
   const {data: flightPlayerData} = useFlightPlayerShipSubscription();
@@ -86,15 +122,11 @@ const NavigationCanvas = memo(() => {
   const systemId = useNavigationStore(state => state.systemId);
 
   useEffect(() => {
-    const stateUpdate: {
-      playerShipId: string;
-      playerShipSystemId: string | null;
-      systemId?: string | null;
-    } = {playerShipId, playerShipSystemId};
-    if (!useNavigationStore.getState().systemId) {
-      stateUpdate.systemId = playerShipSystemId;
-    }
-    useNavigationStore.setState(stateUpdate);
+    useNavigationStore.setState({
+      playerShipId,
+      playerShipSystemId,
+      systemId: playerShipSystemId,
+    });
   }, [playerShipId, playerShipSystemId]);
 
   if (!flightPlayerData?.playerShip) return null;
@@ -104,12 +136,23 @@ const NavigationCanvas = memo(() => {
       <pointLight position={[10, 10, 10]} />
 
       {systemId && (
-        <NavigationPlanetary systemId={systemId} playerShipId={playerShipId} />
+        <NavigationPlanetary
+          systemId={systemId}
+          playerShipId={playerShipId}
+          flightPlayerData={flightPlayerData}
+        />
       )}
-      {!systemId && <NavigationInterstellar />}
+      {!systemId && (
+        <NavigationInterstellar
+          initialPosition={
+            flightPlayerData.playerShip.interstellarPosition?.system?.position
+          }
+        />
+      )}
     </Fragment>
   );
 });
+NavigationCanvas.displayName = "Navigation Canvas";
 
 const FAR = 1e27;
 

@@ -40,6 +40,7 @@ import {FactionAssignmentComponent} from "./factionAssignment";
 import {IsPlayerShipComponent} from "./playerShip/isPlayerShip";
 import {HasFlightDirectorComponent} from "./playerShip/hasFlightDirector";
 import {IsWaypointComponent} from "./isWaypoint";
+import {IsStaticComponent} from "./isStatic";
 @ObjectType()
 export default class Components {
   @Field()
@@ -100,6 +101,9 @@ export default class Components {
 
   @Field({nullable: true})
   interstellarPosition?: InterstellarPositionComponent;
+
+  @Field({nullable: true})
+  isStatic?: IsStaticComponent;
 
   // Stellar Objects Components
   @Field({nullable: true})
@@ -212,4 +216,5 @@ export const registeredComponents = [
   IsPlayerShipComponent,
   HasFlightDirectorComponent,
   IsWaypointComponent,
+  IsStaticComponent,
 ];

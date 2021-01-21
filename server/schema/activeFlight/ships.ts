@@ -36,6 +36,7 @@ import {getPhrase, parsePhrase} from "../phrases";
 import cloneDeep from "lodash/cloneDeep";
 import {GraphQLContext} from "server/helpers/graphqlContext";
 import rng from "rng";
+import {distance3d} from "server/helpers/distance3d";
 
 type FauxECS = {addEntity: (e: Entity) => void} | undefined;
 export function shipSpawn(
@@ -244,6 +245,46 @@ export class ActiveShipsResolver {
     @Arg("systemId", type => ID) id: string
   ): Entity[] {
     return payload.ships;
+  }
+  @Subscription(returns => [Entity], {
+    topics: ({args, payload, context}) => {
+      const id = uuid();
+      const shipId = args.shipId || context.client?.shipId;
+
+      process.nextTick(() => {
+        pubsub.publish(id, {
+          shipId,
+        });
+      });
+      return [id, "universeInterstellarShipsHot"];
+    },
+    filter: ({args, payload, context}) => {
+      const shipId = args.shipId || context.client?.shipId;
+
+      if (shipId !== payload.shipId) return false;
+      return true;
+    },
+    description: "Provides high-rate updates for ships in interstellar space.",
+  })
+  universeInterstellarShipsHot(
+    @Root() payload: {id: string; ships: Entity[]},
+    @Arg("shipId", type => ID, {nullable: true}) shipIdArg: string,
+    // TODO: Have this be the sensor range of the ship
+    @Arg("radius", type => Number, {nullable: true}) radius: number = 0.1,
+    @Ctx() context: GraphQLContext
+  ): Entity[] {
+    const shipId = shipIdArg || context.client?.shipId;
+    const ship = App.activeFlight?.ecs.entities.find(s => s.id === shipId);
+    const ships =
+      App.activeFlight?.ecs.entities.filter(
+        e =>
+          e?.isShip &&
+          !e?.interstellarPosition?.systemId &&
+          e.position &&
+          ship?.position &&
+          distance3d(e.position, ship.position) <= radius
+      ) || [];
+    return ships;
   }
   @Mutation(returns => Entity, {nullable: true})
   shipSpawn(

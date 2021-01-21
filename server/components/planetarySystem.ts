@@ -10,6 +10,7 @@ export class PlanetarySystemComponent extends Component {
     skyboxKey: "Random Key",
   };
 
+  // Note: When used with Planetary System components, position represents lightyears; otherwise it represents kilometers
   @Field({
     description:
       "A string key that is used to procedurally generate the nebula skybox background in this system.",

@@ -1,5 +1,5 @@
 import {DEG_TO_RAD, getOrbitPosition} from "client/components/starmap/utils";
-import {useShipsStore} from "client/components/viewscreen/useSystemShips";
+import {useSystemShipsStore} from "client/components/viewscreen/useSystemShips";
 import {useUniverseSystemSubscription} from "client/generated/graphql";
 import {memo, useMemo, useRef} from "react";
 import {useFrame} from "react-three-fiber";
@@ -49,7 +49,7 @@ export const PlanetaryEntity = memo(
   ({entity, playerId}: {entity: EntityType; playerId: string}) => {
     const ref = useRef<Group>();
     useFrame(() => {
-      const playerShip = useShipsStore.getState()[playerId];
+      const playerShip = useSystemShipsStore.getState()[playerId];
       if (
         !playerShip?.position ||
         (!entity.isPlanet && !entity.isStar) ||

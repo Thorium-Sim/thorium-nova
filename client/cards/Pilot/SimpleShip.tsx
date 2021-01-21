@@ -1,4 +1,4 @@
-import {useShipsStore} from "client/components/viewscreen/useSystemShips";
+import {useSystemShipsStore} from "client/components/viewscreen/useSystemShips";
 import {Line, useGLTF, useTexture} from "drei";
 import {Fragment, useMemo, useRef} from "react";
 import {useFrame} from "react-three-fiber";
@@ -30,8 +30,7 @@ export const ShipEntity = ({
   playerId?: string;
   tilted?: boolean;
 }) => {
-  const entity = useShipsStore.getState()[entityId];
-
+  const entity = useSystemShipsStore.getState()[entityId];
   const modelAsset = entity?.shipAssets?.model;
   // TODO: Use useGLTF.preload outside of this to preload the asset
   const model = useGLTF(modelAsset || "", false);
@@ -62,10 +61,9 @@ export const ShipEntity = ({
   useFrame(props => {
     const camera = props.camera as OrthographicCamera;
     const dx = (camera.right - camera.left) / (2 * camera.zoom);
-    const ship = useShipsStore.getState()[entityId];
-    const playerShip = useShipsStore.getState()[playerId || ""];
+    const ship = useSystemShipsStore.getState()[entityId];
+    const playerShip = useSystemShipsStore.getState()[playerId || ""];
     const playerPosition = playerShip.position || zeroVector;
-
     if (!ship) return;
     if (shipRef.current) {
       if (ship.size?.value && dx / ship.size.value < 50) {
@@ -168,6 +166,7 @@ export const ShipEntity = ({
               [0, 0, 0],
               [0, 0, 0],
             ]}
+            stencilMask={false}
             color={"white"}
             lineWidth={1}
           ></Line>

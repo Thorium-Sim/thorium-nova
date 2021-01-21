@@ -4,6 +4,7 @@ import {Component, ComponentOmit} from "./utils";
 @ObjectType()
 @InputType("PositionInput")
 export class PositionComponent extends Component {
+  // Note: When used with Planetary System components, position represents lightyears; otherwise it represents kilometers
   static id: "position" = "position";
   static defaults: ComponentOmit<PositionComponent> = {
     x: 0,

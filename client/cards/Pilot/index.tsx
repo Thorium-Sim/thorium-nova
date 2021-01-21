@@ -111,7 +111,7 @@ const Pilot: FC<CardProps> = ({cardLoaded}) => {
             {cardLoaded && (
               <Canvas
                 camera={{
-                  position: [0, 100000, 0],
+                  position: [0, 300000, 0],
                   far: 200000,
                   zoom: 165,
                 }}

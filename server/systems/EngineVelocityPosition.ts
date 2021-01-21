@@ -3,6 +3,7 @@ import System from "server/helpers/ecs/system";
 import {Object3D, Quaternion} from "three";
 
 const velocityObject = new Object3D();
+const KM_TO_LY = 1 / 9460730777119.56;
 export class EngineVelocityPosition extends System {
   test(entity: Entity) {
     return !!(
@@ -14,7 +15,9 @@ export class EngineVelocityPosition extends System {
   }
   update(entity: Entity, elapsed: number) {
     const elapsedRatio = elapsed / 1000;
-
+    const interstellarMultiplier = entity.interstellarPosition?.systemId
+      ? 1
+      : KM_TO_LY;
     const systems = this.ecs.entities.filter(
       s =>
         s.shipAssignment?.shipId === entity.id &&
@@ -36,12 +39,16 @@ export class EngineVelocityPosition extends System {
     const impulseEngines = systems.find(s => s.impulseEngines);
     // Warp engines override impulse engines
     if (warpEngines && warpEngines.warpEngines?.forwardVelocity) {
-      velocityObject.translateZ(warpEngines.warpEngines.forwardVelocity);
+      velocityObject.translateZ(
+        warpEngines.warpEngines.forwardVelocity * interstellarMultiplier
+      );
     } else if (
       impulseEngines &&
       impulseEngines.impulseEngines?.forwardVelocity
     ) {
-      velocityObject.translateZ(impulseEngines.impulseEngines.forwardVelocity);
+      velocityObject.translateZ(
+        impulseEngines.impulseEngines.forwardVelocity * interstellarMultiplier
+      );
     }
 
     entity.position.x += velocityObject.position.x * elapsedRatio;

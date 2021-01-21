@@ -221,6 +221,38 @@ export type FlightUniverseSubscription = {
   }>;
 };
 
+export type UniverseInterstellarShipsHotSubscriptionVariables = Exact<{
+  shipId: Maybe<Scalars["ID"]>;
+}>;
+
+export type UniverseInterstellarShipsHotSubscription = {
+  __typename?: "Subscription";
+  universeInterstellarShipsHot: Array<{
+    __typename?: "Entity";
+    id: string;
+    identity: {__typename?: "IdentityComponent"; name: string};
+    position: Maybe<{
+      __typename?: "PositionComponent";
+      x: number;
+      y: number;
+      z: number;
+    }>;
+    rotation: Maybe<{
+      __typename?: "RotationComponent";
+      x: number;
+      y: number;
+      z: number;
+      w: number;
+    }>;
+    size: Maybe<{__typename?: "SizeComponent"; value: number}>;
+    interstellarPosition: Maybe<{
+      __typename?: "InterstellarPositionComponent";
+      system: Maybe<{__typename?: "Entity"; id: string}>;
+    }>;
+    shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; model: string}>;
+  }>;
+};
+
 export type NavEntityQueryVariables = Exact<{
   id: Scalars["ID"];
 }>;
@@ -309,7 +341,16 @@ export type FlightPlayerShipSubscription = {
     id: string;
     interstellarPosition: Maybe<{
       __typename?: "InterstellarPositionComponent";
-      system: Maybe<{__typename?: "Entity"; id: string}>;
+      system: Maybe<{
+        __typename?: "Entity";
+        id: string;
+        position: Maybe<{
+          __typename?: "PositionComponent";
+          x: number;
+          y: number;
+          z: number;
+        }>;
+      }>;
     }>;
   };
 };
@@ -2635,6 +2676,52 @@ export function useFlightUniverseSubscription(
 export type FlightUniverseSubscriptionHookResult = ReturnType<
   typeof useFlightUniverseSubscription
 >;
+export const UniverseInterstellarShipsHotDocument = gql`
+  subscription UniverseInterstellarShipsHot($shipId: ID) {
+    universeInterstellarShipsHot(shipId: $shipId) {
+      id
+      identity {
+        name
+      }
+      position {
+        x
+        y
+        z
+      }
+      rotation {
+        x
+        y
+        z
+        w
+      }
+      size {
+        value
+      }
+      interstellarPosition {
+        system {
+          id
+        }
+      }
+      shipAssets {
+        model
+      }
+    }
+  }
+`;
+export function useUniverseInterstellarShipsHotSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    UniverseInterstellarShipsHotSubscription,
+    UniverseInterstellarShipsHotSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    UniverseInterstellarShipsHotSubscription,
+    UniverseInterstellarShipsHotSubscriptionVariables
+  >(UniverseInterstellarShipsHotDocument, baseOptions);
+}
+export type UniverseInterstellarShipsHotSubscriptionHookResult = ReturnType<
+  typeof useUniverseInterstellarShipsHotSubscription
+>;
 export const NavEntityDocument = gql`
   query NavEntity($id: ID!) {
     entity(id: $id) {
@@ -2734,6 +2821,11 @@ export const FlightPlayerShipDocument = gql`
       interstellarPosition {
         system {
           id
+          position {
+            x
+            y
+            z
+          }
         }
       }
     }

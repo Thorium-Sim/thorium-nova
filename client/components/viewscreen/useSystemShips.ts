@@ -19,7 +19,7 @@ type ShipMap = Record<
   string,
   UniverseSystemShipsSubscription["universeSystemShips"][0]
 >;
-export const useShipsStore = create<ShipMap>(() => ({}));
+export const useSystemShipsStore = create<ShipMap>(() => ({}));
 let rotationOutput: [number, number, number, number] = [0, 0, 0, 1];
 
 export const useSystemShips = singletonHook([], function useSystemShipsHook() {
@@ -39,7 +39,7 @@ export const useSystemShips = singletonHook([], function useSystemShipsHook() {
         prev[next.id] = next;
         return prev;
       }, {}) || {};
-    useShipsStore.setState(newState, true);
+    useSystemShipsStore.setState(newState, true);
     setShipIds(Object.keys(newState));
   }, [ships]);
   const previousState = useRef<ShipMap>();
@@ -49,7 +49,7 @@ export const useSystemShips = singletonHook([], function useSystemShipsHook() {
   const averageInterval = useRef(1000 / 30);
   useAnimationFrame(() => {
     const t = (Date.now() - timeStamp.current) / averageInterval.current;
-    useShipsStore.setState(
+    useSystemShipsStore.setState(
       store =>
         produce(store, draft => {
           for (let shipId in draft) {
@@ -132,7 +132,7 @@ export const useSystemShips = singletonHook([], function useSystemShipsHook() {
               }
               return ids;
             });
-            previousState.current = useShipsStore.getState();
+            previousState.current = useSystemShipsStore.getState();
             nextState.current = produce(previousState.current, draft => {
               data.universeSystemShipsHot.forEach(ship => {
                 if (draft[ship.id]?.position) {

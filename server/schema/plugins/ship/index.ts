@@ -312,6 +312,7 @@ function getAssetBase(pluginId?: string) {
 function getShipAsset(entity?: Entity, pluginId?: string) {
   if (!entity) return "";
   const assetBase = getAssetBase(pluginId);
+  console.log(entity);
   return `${assetBase}/ship/${entity?.identity?.name || entity.id}/`;
 }
 // TODO: Make sure renaming the ship properly moves the files to the correct locations.
@@ -319,31 +320,35 @@ function getShipAsset(entity?: Entity, pluginId?: string) {
 export class ShipAssetsResolver {
   @FieldResolver()
   logo(@Root() self: ShipAssetsComponent, @Ctx() ctx: GraphQLContext) {
-    const {pluginId} = ctx;
-    return self.logo ? `${getShipAsset(ctx.entity, pluginId)}${self.logo}` : "";
+    const {pluginId} = self.entity;
+    return self.logo
+      ? `${getShipAsset(self.entity, pluginId)}${self.logo}`
+      : "";
   }
   @FieldResolver()
   model(@Root() self: ShipAssetsComponent, @Ctx() ctx: GraphQLContext) {
-    const {pluginId} = ctx;
+    const {pluginId} = self.entity;
     return self.model
-      ? `${getShipAsset(ctx.entity, pluginId)}${self.model}`
+      ? `${getShipAsset(self.entity, pluginId)}${self.model}`
       : "";
   }
   @FieldResolver()
   top(@Root() self: ShipAssetsComponent, @Ctx() ctx: GraphQLContext) {
-    const {pluginId} = ctx;
-    return self.top ? `${getShipAsset(ctx.entity, pluginId)}${self.top}` : "";
+    const {pluginId} = self.entity;
+    return self.top ? `${getShipAsset(self.entity, pluginId)}${self.top}` : "";
   }
   @FieldResolver()
   side(@Root() self: ShipAssetsComponent, @Ctx() ctx: GraphQLContext) {
-    const {pluginId} = ctx;
-    return self.side ? `${getShipAsset(ctx.entity, pluginId)}${self.side}` : "";
+    const {pluginId} = self.entity;
+    return self.side
+      ? `${getShipAsset(self.entity, pluginId)}${self.side}`
+      : "";
   }
   @FieldResolver()
   vanity(@Root() self: ShipAssetsComponent, @Ctx() ctx: GraphQLContext) {
-    const {pluginId} = ctx;
+    const {pluginId} = self.entity;
     return self.vanity
-      ? `${getShipAsset(ctx.entity, pluginId)}${self.vanity}`
+      ? `${getShipAsset(self.entity, pluginId)}${self.vanity}`
       : "";
   }
 }

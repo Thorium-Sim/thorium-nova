@@ -128,7 +128,7 @@ const quotes = [
   // Soren Kierkegaard
   "Life can only be understood backwards; but it must be lived forwards.",
   // Swyx
-  "Small minds discuss tactics, average minds discuss strategy, great minds discuss inevitability",
+  "Small minds discuss tactics, average minds discuss strategy, great minds discuss destiny",
 ];
 
 const QuoteOfTheDay = () => {

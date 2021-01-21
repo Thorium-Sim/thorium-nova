@@ -4,6 +4,11 @@ subscription FlightPlayerShip {
     interstellarPosition {
       system {
         id
+        position {
+          x
+          y
+          z
+        }
       }
     }
   }

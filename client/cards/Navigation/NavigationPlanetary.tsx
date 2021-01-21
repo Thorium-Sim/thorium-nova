@@ -2,18 +2,18 @@ import {FC, Fragment, Suspense, useCallback, useEffect, useRef} from "react";
 import {useFrame, useThree} from "react-three-fiber";
 import {MOUSE, Vector3} from "three";
 import {
-  useFlightPlayerShipSubscription,
+  FlightPlayerShipSubscription,
   useUniverseSystemSubscription,
 } from "client/generated/graphql";
 import {OrbitControls} from "client/components/core/OrbitControls";
 import {subscribe} from "client/helpers/pubsub";
-import {useShipsStore} from "client/components/viewscreen/useSystemShips";
+import {useSystemShipsStore} from "client/components/viewscreen/useSystemShips";
 import {useSetupOrbitControls} from "client/helpers/useSetupOrbitControls";
 import {useSystemShips} from "client/components/viewscreen/useSystemShips";
 import {ErrorBoundary} from "react-error-boundary";
 import {NavigationStarEntity} from "./NavigationStarEntity";
 import {NavigationPlanetEntity} from "./NavigationPlanetEntity";
-import {NavigationShipEntity} from "./NavigationShipEntity";
+import {NavigationSystemShipEntity} from "./NavigationShipEntity";
 import {NavigationWaypointEntity} from "./NavigationWaypointEntity";
 import {useNavigationStore} from "./utils";
 
@@ -21,14 +21,15 @@ const distanceVector = new Vector3();
 export const NavigationPlanetary: FC<{
   systemId?: string;
   playerShipId: string;
-}> = ({systemId, playerShipId}) => {
+  flightPlayerData: FlightPlayerShipSubscription;
+}> = ({systemId, playerShipId, flightPlayerData}) => {
   const {camera} = useThree();
   const recentering = useRef(false);
   const controls = useRef<OrbitControls>();
 
   const recenter = useCallback(
     function recenter() {
-      const playerShip = useShipsStore.getState()[playerShipId];
+      const playerShip = useSystemShipsStore.getState()[playerShipId];
       if (
         !playerShip ||
         playerShip.interstellarPosition?.system?.id !== systemId
@@ -36,6 +37,8 @@ export const NavigationPlanetary: FC<{
         camera.position.set(0, camera.position.y, 0);
         controls.current?.target?.set(0, 0, 0);
       } else {
+        // TODO: When recentering when the ship isn't present,
+        // zoom to see the entire solar system
         camera.position.set(
           playerShip.position?.x || 0,
           camera.position.y,
@@ -75,7 +78,6 @@ export const NavigationPlanetary: FC<{
   });
   useSetupOrbitControls(controls, useNavigationStore);
 
-  const {data: flightPlayerData} = useFlightPlayerShipSubscription();
   const {data} = useUniverseSystemSubscription({
     variables: {systemId: systemId || ""},
     skip: !systemId,
@@ -142,7 +144,7 @@ export const NavigationPlanetary: FC<{
               FallbackComponent={() => <Fragment></Fragment>}
               onError={err => console.error(err)}
             >
-              <NavigationShipEntity entityId={shipId} />
+              <NavigationSystemShipEntity entityId={shipId} />
             </ErrorBoundary>
           </Suspense>
         );
