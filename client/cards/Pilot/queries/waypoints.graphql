@@ -1,0 +1,23 @@
+subscription Waypoints {
+  playerShipWaypoints {
+    id
+    identity {
+      name
+    }
+    position {
+      x
+      y
+      z
+    }
+    interstellarPosition {
+      system {
+        id
+        position {
+          x
+          y
+          z
+        }
+      }
+    }
+  }
+}

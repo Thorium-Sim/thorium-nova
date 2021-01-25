@@ -445,6 +445,36 @@ export type ThrustersSetRotationDeltaMutation = {
   thrustersSetRotationDelta: {__typename?: "Entity"; id: string};
 };
 
+export type WaypointsSubscriptionVariables = Exact<{[key: string]: never}>;
+
+export type WaypointsSubscription = {
+  __typename?: "Subscription";
+  playerShipWaypoints: Array<{
+    __typename?: "Entity";
+    id: string;
+    identity: {__typename?: "IdentityComponent"; name: string};
+    position: Maybe<{
+      __typename?: "PositionComponent";
+      x: number;
+      y: number;
+      z: number;
+    }>;
+    interstellarPosition: Maybe<{
+      __typename?: "InterstellarPositionComponent";
+      system: Maybe<{
+        __typename?: "Entity";
+        id: string;
+        position: Maybe<{
+          __typename?: "PositionComponent";
+          x: number;
+          y: number;
+          z: number;
+        }>;
+      }>;
+    }>;
+  }>;
+};
+
 export type TimerPauseMutationVariables = Exact<{
   id: Scalars["ID"];
   pause: Scalars["Boolean"];
@@ -2350,7 +2380,16 @@ export type UniverseSystemShipsSubscription = {
     size: Maybe<{__typename?: "SizeComponent"; value: number}>;
     interstellarPosition: Maybe<{
       __typename?: "InterstellarPositionComponent";
-      system: Maybe<{__typename?: "Entity"; id: string}>;
+      system: Maybe<{
+        __typename?: "Entity";
+        id: string;
+        position: Maybe<{
+          __typename?: "PositionComponent";
+          x: number;
+          y: number;
+          z: number;
+        }>;
+      }>;
     }>;
     shipAssets: Maybe<{__typename?: "ShipAssetsComponent"; model: string}>;
   }>;
@@ -3011,6 +3050,45 @@ export function useThrustersSetRotationDeltaMutation(
 }
 export type ThrustersSetRotationDeltaMutationHookResult = ReturnType<
   typeof useThrustersSetRotationDeltaMutation
+>;
+export const WaypointsDocument = gql`
+  subscription Waypoints {
+    playerShipWaypoints {
+      id
+      identity {
+        name
+      }
+      position {
+        x
+        y
+        z
+      }
+      interstellarPosition {
+        system {
+          id
+          position {
+            x
+            y
+            z
+          }
+        }
+      }
+    }
+  }
+`;
+export function useWaypointsSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    WaypointsSubscription,
+    WaypointsSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    WaypointsSubscription,
+    WaypointsSubscriptionVariables
+  >(WaypointsDocument, baseOptions);
+}
+export type WaypointsSubscriptionHookResult = ReturnType<
+  typeof useWaypointsSubscription
 >;
 export const TimerPauseDocument = gql`
   mutation TimerPause($id: ID!, $pause: Boolean!) {
@@ -6619,6 +6697,11 @@ export const UniverseSystemShipsDocument = gql`
       interstellarPosition {
         system {
           id
+          position {
+            x
+            y
+            z
+          }
         }
       }
       shipAssets {

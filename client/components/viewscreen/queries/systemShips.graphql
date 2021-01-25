@@ -28,6 +28,11 @@ subscription UniverseSystemShips($systemId: ID!) {
     interstellarPosition {
       system {
         id
+        position {
+          x
+          y
+          z
+        }
       }
     }
     shipAssets {

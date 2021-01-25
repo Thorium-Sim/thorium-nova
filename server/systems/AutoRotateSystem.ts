@@ -8,6 +8,7 @@ let desiredDestination = new Vector3();
 let desiredRotationQuat = new Quaternion();
 let forward = new Vector3(0, 1, 0);
 let matrix = new Matrix4();
+const rotationMatrix = new Matrix4().makeRotationY(Math.PI);
 
 const C_PROPORTION = 1;
 const C_INTEGRAL = 0;
@@ -52,7 +53,6 @@ export class AutoRotateSystem extends System {
     const systems = this.ecs.entities.filter(
       s => s.shipAssignment?.shipId === entity.id && s.thrusters
     );
-    const rotationMatrix = new Matrix4().makeRotationY(Math.PI);
     desiredDestination.set(
       autopilot.desiredCoordinates?.x,
       autopilot.desiredCoordinates?.y,

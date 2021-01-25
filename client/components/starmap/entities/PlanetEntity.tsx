@@ -38,6 +38,7 @@ const Sphere: React.FC<{texture: string; wireframe?: boolean}> = React.memo(
 
 const PlanetSprite = ({color = "white"}) => {
   const spriteMap = useTexture("/assets/icons/Dot.svg") as Texture;
+
   return (
     <sprite>
       <spriteMaterial

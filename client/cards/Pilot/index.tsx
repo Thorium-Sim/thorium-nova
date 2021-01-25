@@ -79,7 +79,7 @@ const Pilot: FC<CardProps> = ({cardLoaded}) => {
       <div className="flex flex-col mb-6">
         <Impulse cardLoaded={cardLoaded} />
         <ZoomStyleWrapper>
-          <p className="text-xl">Zoom:</p>
+          <p className="text-xl">{t("Zoom:")}</p>
           <ZoomSlider
             value={zoomValue}
             setValue={setZoomValue}

@@ -5,6 +5,7 @@ import {
   Ctx,
   ID,
   Mutation,
+  Query,
   Resolver,
   Root,
   Subscription,
@@ -159,11 +160,14 @@ function getObjectSystem(obj: Entity): Entity | null {
 }
 @Resolver()
 export class WaypointsResolver {
-  @Subscription(returns => Entity, {
+  @Subscription(returns => [Entity], {
     topics: ({context}: {context: GraphQLContext}) => {
       const id = uuid();
       const waypoints = App.activeFlight?.ecs.entities.filter(
-        s => s.isWaypoint?.assignedShipId === context.client?.shipId
+        s =>
+          s.isWaypoint &&
+          context.client?.shipId &&
+          s.isWaypoint?.assignedShipId === context.client?.shipId
       );
       if (context.client?.shipId) {
         process.nextTick(() => {
@@ -191,6 +195,19 @@ export class WaypointsResolver {
     @Ctx() context: GraphQLContext
   ) {
     return payload.waypoints;
+  }
+  @Query(returns => [Entity], {name: "playerShipWaypoints"})
+  playerShipWaypointsQuery(
+    @Arg("shipId", type => ID, {nullable: true}) shipId: string | null,
+    @Ctx() context: GraphQLContext
+  ) {
+    const waypoints = App.activeFlight?.ecs.entities.filter(
+      s =>
+        s.isWaypoint &&
+        context.client?.shipId &&
+        s.isWaypoint?.assignedShipId === (context.client?.shipId || shipId)
+    );
+    return waypoints;
   }
   @Mutation(returns => Entity)
   waypointSpawn(
