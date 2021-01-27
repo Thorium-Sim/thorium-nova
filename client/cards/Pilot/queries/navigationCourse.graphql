@@ -1,0 +1,14 @@
+subscription NavigationCourse {
+  navigationOutfit {
+    id
+    navigation {
+      locked
+      destination {
+        id
+        identity {
+          name
+        }
+      }
+    }
+  }
+}

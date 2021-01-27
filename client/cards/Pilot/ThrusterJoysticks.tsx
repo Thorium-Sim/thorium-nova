@@ -9,7 +9,7 @@ import {FC} from "react";
 import {useTranslation} from "react-i18next";
 import {animated as a} from "react-spring/web";
 
-export const Thrusters = () => {
+export const Thrusters: FC = ({children}) => {
   const [direction] = useThrustersSetDirectionMutation();
   const [rotation] = useThrustersSetRotationDeltaMutation();
   const {t} = useTranslation();
@@ -17,60 +17,81 @@ export const Thrusters = () => {
     <div
       className="relative grid grid-flow-col gap-4"
       css={css`
-        grid-template-columns: calc(2.5rem + 4px) 1fr;
-        grid-template-rows: auto calc(2.5rem + 4px) calc(2.5rem + 4px) 1fr;
+        grid-template-columns: 1fr calc(2.5rem + 4px) 8fr;
+        grid-template-rows: auto calc(2.5rem + 4px) auto 1fr;
+        grid-template-areas:
+          "nothing1 nothing1 rotation"
+          "nothing1 nothing1 yaw"
+          "nothing2 forward direction"
+          "nothing2 control control";
       `}
     >
-      <div></div>
-      <div></div>
-      <div></div>
-
-      <DirectionSlider />
-      <div>
-        <Joystick onDrag={({x, y}) => rotation({variables: {z: x, x: y}})}>
-          <p className="select-none pointer-events-none absolute bottom-1">
-            {t("Pitch Down")}
-          </p>
-          <p className="select-none pointer-events-none absolute top-1">
-            {t("Pitch Up")}
-          </p>
-          <p className="select-none pointer-events-none absolute right-1">
-            {t("Starboard Roll")}
-          </p>
-          <p className="select-none pointer-events-none absolute left-1">
-            {t("Port Roll")}
-          </p>
-        </Joystick>
-      </div>
-      <YawSlider />
-      <div></div>
-      <div>
-        <Joystick onDrag={({x, y}) => direction({variables: {y: -y, x: -x}})}>
-          <p className="select-none pointer-events-none absolute bottom-1">
-            {t("Down")}
-          </p>
-          <p className="select-none pointer-events-none absolute top-1">
-            {t("Up")}
-          </p>
-          <p className="select-none pointer-events-none absolute right-1">
-            {t("Starboard")}
-          </p>
-          <p className="select-none pointer-events-none absolute left-1">
-            {t("Port")}
-          </p>
-        </Joystick>
+      <Joystick
+        onDrag={({x, y}) => rotation({variables: {z: x, x: y}})}
+        css={css`
+          grid-area: rotation;
+        `}
+      >
+        <p className="select-none pointer-events-none absolute bottom-1">
+          {t("Pitch Down")}
+        </p>
+        <p className="select-none pointer-events-none absolute top-1">
+          {t("Pitch Up")}
+        </p>
+        <p className="select-none pointer-events-none absolute right-1">
+          {t("Starboard Roll")}
+        </p>
+        <p className="select-none pointer-events-none absolute left-1">
+          {t("Port Roll")}
+        </p>
+      </Joystick>
+      <YawSlider
+        css={css`
+          grid-area: yaw;
+        `}
+      />
+      <Joystick
+        onDrag={({x, y}) => direction({variables: {y: -y, x: -x}})}
+        css={css`
+          grid-area: direction;
+        `}
+      >
+        <p className="select-none pointer-events-none absolute bottom-1">
+          {t("Down")}
+        </p>
+        <p className="select-none pointer-events-none absolute top-1">
+          {t("Up")}
+        </p>
+        <p className="select-none pointer-events-none absolute right-1">
+          {t("Starboard")}
+        </p>
+        <p className="select-none pointer-events-none absolute left-1">
+          {t("Port")}
+        </p>
+      </Joystick>
+      <DirectionSlider
+        css={css`
+          grid-area: forward;
+        `}
+      />
+      <div
+        css={css`
+          grid-area: control;
+        `}
+      >
+        {children}
       </div>
     </div>
   );
 };
-const Joystick: FC<{onDrag: (dir: {x: number; y: number}) => void}> = ({
-  children,
-  onDrag,
-}) => {
+const Joystick: FC<{
+  onDrag: (dir: {x: number; y: number}) => void;
+  className?: string;
+}> = ({children, className, onDrag}) => {
   const [xy, bind, containerRef] = useJoystick({axisSnap: true, onDrag});
 
   return (
-    <div className="relative">
+    <div className={`relative ${className}`}>
       <Spacer fillWidth />
       <div
         ref={containerRef}
@@ -86,7 +107,7 @@ const Joystick: FC<{onDrag: (dir: {x: number; y: number}) => void}> = ({
     </div>
   );
 };
-const YawSlider = () => {
+const YawSlider = ({className}: {className?: string}) => {
   const [rotation] = useThrustersSetRotationDeltaMutation();
   const {t} = useTranslation();
 
@@ -97,7 +118,7 @@ const YawSlider = () => {
   return (
     <div
       ref={containerRef}
-      className="w-full relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-center"
+      className={`w-full relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-center ${className}`}
     >
       <a.div
         {...bind()}
@@ -113,7 +134,7 @@ const YawSlider = () => {
     </div>
   );
 };
-const DirectionSlider = () => {
+const DirectionSlider = ({className}: {className?: string}) => {
   const [direction] = useThrustersSetDirectionMutation();
   const [xy, bind, containerRef] = useJoystick({
     axis: "y",
@@ -124,7 +145,7 @@ const DirectionSlider = () => {
   return (
     <div
       ref={containerRef}
-      className="h-full relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-center"
+      className={`h-full relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-center ${className}`}
     >
       <a.div
         {...bind()}

@@ -31,7 +31,7 @@ const Sphere: React.FC<{texture: string; wireframe?: boolean}> = React.memo(
     );
   },
   (prevProps, nextProps) => {
-    if (prevProps.texture === nextProps.texture) return true;
+    if (prevProps?.texture === nextProps?.texture) return true;
     return false;
   }
 );

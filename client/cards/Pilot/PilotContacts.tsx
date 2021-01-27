@@ -1,5 +1,9 @@
 import {DEG_TO_RAD} from "client/components/starmap/utils";
 import {
+  useInterstellarShips,
+  useInterstellarShipsStore,
+} from "client/components/viewscreen/useInterstellarShips";
+import {
   useSystemShipsStore,
   useSystemShips,
 } from "client/components/viewscreen/useSystemShips";
@@ -24,10 +28,11 @@ import {
   Camera,
 } from "three";
 import {getWaypointRelativePosition} from "./getWaypointRelativePosition";
-import {pilotStore, useGetFacingWaypoint} from "./PilotStore";
+import {usePilotStore, useGetFacingWaypoint} from "./PilotStore";
 import {PlanetaryEntity} from "./SimplePlanet";
 import {ShipEntity} from "./SimpleShip";
 
+const LY_IN_KM = 9_460_730_472_580.8;
 type WaypointType = NonNullable<
   ReturnType<typeof useWaypointsSubscription>["data"]
 >["playerShipWaypoints"][0];
@@ -65,7 +70,9 @@ export const WaypointEntity = ({
     const camera = props.camera as OrthographicCamera;
     const dx = (camera.right - camera.left) / (2 * camera.zoom);
 
-    const playerShip = useSystemShipsStore.getState()[playerId];
+    const playerShip =
+      useSystemShipsStore.getState()[playerId] ||
+      useInterstellarShipsStore.getState()[playerId];
     if (playerShip?.position) {
       playerVector.set(
         playerShip.position.x,
@@ -74,6 +81,11 @@ export const WaypointEntity = ({
       );
       getWaypointRelativePosition(entity, playerShip, waypointVector);
 
+      if (!playerShip.interstellarPosition?.system) {
+        // We're in interstellar space; multiply the positions
+        playerVector.multiplyScalar(LY_IN_KM);
+        waypointVector.multiplyScalar(LY_IN_KM);
+      }
       let showOutOfBoundsArrow = playerVector.distanceTo(waypointVector) > dx;
       group.current?.scale.setScalar(dx * 3 * scale);
       if (viewscreen) {
@@ -139,7 +151,9 @@ export const WaypointEntity = ({
             if (sprite.current && stroke.current) {
               sprite.current.material.rotation = angle + Math.PI / 2;
               stroke.current.material.rotation = angle + Math.PI / 2;
-              if (pilotStore.getState().facingWaypoints.includes(entity.id)) {
+              if (
+                usePilotStore.getState().facingWaypoints.includes(entity.id)
+              ) {
                 sprite.current.material.color.setRGB(0, 0.5, 1);
               } else {
                 sprite.current.material.color.setRGB(0.9, 0.6, 0);
@@ -194,9 +208,9 @@ export const PilotContacts = memo(({tilted}: {tilted: boolean}) => {
     skip: !systemId,
   });
   const {data: waypointsData} = useWaypointsSubscription();
-
   const system = data?.universeSystem;
   const shipIds = useSystemShips();
+  const interstellarShips = useInterstellarShips();
   useGetFacingWaypoint({
     waypoints: waypointsData?.playerShipWaypoints,
     playerId: flightPlayerData?.playerShip.id || "",
@@ -223,7 +237,7 @@ export const PilotContacts = memo(({tilted}: {tilted: boolean}) => {
         }
         return null;
       })}
-      {shipIds.map(shipId => {
+      {shipIds.concat(interstellarShips).map(shipId => {
         return (
           <Suspense key={shipId} fallback={null}>
             <ErrorBoundary FallbackComponent={fallback} onError={onError}>

@@ -16,6 +16,7 @@ import {
   useForwardVelocityStore,
   usePlayerForwardVelocity,
 } from "client/components/viewscreen/usePlayerForwardVelocity";
+import {Card} from "client/components/ui/Card";
 
 const C_IN_METERS = 299792458;
 function formatSpeed(speed: number) {
@@ -41,12 +42,12 @@ const ForwardVelocity = () => {
   usePlayerForwardVelocity();
   const {forwardVelocity} = useForwardVelocityStore();
   return (
-    <div className="forward-velocity text-xl w-full py-2 text-center bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded">
+    <Card className="forward-velocity" centered>
       <div>Forward Velocity:</div>
       <div className="font-bold text-3xl my-2 tabular-nums">
         {formatSpeed(forwardVelocity)}
       </div>
-    </div>
+    </Card>
   );
 };
 
@@ -144,13 +145,13 @@ export const Impulse = ({cardLoaded = true}) => {
       <div>
         <div className="flex flex-col gap-2">
           <ForwardVelocity />
-          <div className="target-velocity text-xl w-full py-2 text-center bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded">
+          <Card className="target-velocity" centered>
             <div>Target Velocity:</div>
 
             <p className="font-bold text-3xl my-2 tabular-nums">
               {formatSpeed(targetVelocity)}
             </p>
-          </div>
+          </Card>
         </div>
         {/* TODO: Include heat indicator here eventually. */}
 

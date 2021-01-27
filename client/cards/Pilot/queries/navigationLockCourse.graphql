@@ -1,0 +1,5 @@
+mutation NavigationLockCourse($destinationWaypointId: ID!) {
+  navigationSetDestination(destinationWaypointId: $destinationWaypointId) {
+    id
+  }
+}

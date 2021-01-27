@@ -1,5 +1,5 @@
 import {CardProps} from "client/components/station/CardProps";
-import {FC, Suspense, useEffect, useState} from "react";
+import {FC, Fragment, Suspense, useEffect, useState} from "react";
 import {Canvas, useThree} from "react-three-fiber";
 import Button from "client/components/ui/button";
 import {ZoomSlider} from "client/components/core/ZoomSlider";
@@ -13,6 +13,13 @@ import {useTranslation} from "react-i18next";
 import {useWheel} from "react-use-gesture";
 import {Impulse} from "./ImpulseControls";
 import {ZoomStyleWrapper} from "./ZoomStyleWrapper";
+import {usePilotStore} from "./PilotStore";
+import {Card} from "client/components/ui/Card";
+import {
+  useNavigationCourseSubscription,
+  useNavigationLockCourseMutation,
+  useNavigationUnlockCourseMutation,
+} from "client/generated/graphql";
 
 // Both of these are in kilometers
 const zoomMax = 11000;
@@ -57,6 +64,48 @@ function logslider(
   return Math.exp(minV + scale * (position - minP));
 }
 
+const LockOnButton = () => {
+  const {t} = useTranslation();
+  const waypoint = usePilotStore(store => store.facingWaypoints?.[0]);
+  const [unlockCourse] = useNavigationUnlockCourseMutation();
+  const [lockCourse] = useNavigationLockCourseMutation();
+  const {data} = useNavigationCourseSubscription();
+  const navigation = data?.navigationOutfit?.navigation;
+  if (!navigation) return null;
+  return (
+    <Fragment>
+      <Card centered>
+        <div>{t(`Current Course:`)}</div>
+        <div className="font-bold text-3xl my-2">
+          {navigation?.destination?.identity?.name || t("No Course Set")}
+        </div>
+      </Card>
+      {navigation.locked ? (
+        <Button
+          size="lg"
+          className="w-full mt-2"
+          variantColor="danger"
+          onClick={() => unlockCourse()}
+        >
+          {t("Unlock Course")}
+        </Button>
+      ) : (
+        <Button
+          size="lg"
+          className="w-full mt-2"
+          variantColor="warning"
+          disabled={!waypoint}
+          onClick={() =>
+            lockCourse({variables: {destinationWaypointId: waypoint}})
+          }
+        >
+          {t("Lock On Course")}
+        </Button>
+      )}
+    </Fragment>
+  );
+};
+
 const Pilot: FC<CardProps> = ({cardLoaded}) => {
   const {ship} = useClientData();
   const [tilt, setTilt] = useState(0);
@@ -78,31 +127,8 @@ const Pilot: FC<CardProps> = ({cardLoaded}) => {
     <div className="card-pilot h-full grid grid-cols-4 gap-4 select-none">
       <div className="flex flex-col mb-6">
         <Impulse cardLoaded={cardLoaded} />
-        <ZoomStyleWrapper>
-          <p className="text-xl">{t("Zoom:")}</p>
-          <ZoomSlider
-            value={zoomValue}
-            setValue={setZoomValue}
-            zoomMin={dimensions.width / (zoomMax * 2)}
-            zoomMax={dimensions.width / (zoomMin * 2)}
-            step={0.01}
-          />
-        </ZoomStyleWrapper>
-        <Button
-          size="lg"
-          className="w-full"
-          onClick={() => setTilt(t => (t == 0 ? 0.5 : t === 0.5 ? 1 : 0))}
-        >
-          {t("Tilt Sensor View")}
-        </Button>
-        <Button
-          size="lg"
-          className="w-full mt-2"
-          variantColor="warning"
-          onClick={() => {}}
-        >
-          {t("Lock On Course")}
-        </Button>
+
+        <LockOnButton></LockOnButton>
       </div>
       <div className="h-full col-start-2 col-end-4 flex items-center justify-center">
         <div className="h-full relative">
@@ -137,7 +163,25 @@ const Pilot: FC<CardProps> = ({cardLoaded}) => {
           <Spacer />
         </div>
       </div>
-      <Thrusters />
+      <Thrusters>
+        <ZoomStyleWrapper>
+          <p className="text-xl">{t("Zoom:")}</p>
+          <ZoomSlider
+            value={zoomValue}
+            setValue={setZoomValue}
+            zoomMin={dimensions.width / (zoomMax * 2)}
+            zoomMax={dimensions.width / (zoomMin * 2)}
+            step={0.01}
+          />
+        </ZoomStyleWrapper>
+        <Button
+          size="lg"
+          className="w-full"
+          onClick={() => setTilt(t => (t == 0 ? 0.5 : t === 0.5 ? 1 : 0))}
+        >
+          {t("Tilt Sensor View")}
+        </Button>
+      </Thrusters>
     </div>
   );
 };

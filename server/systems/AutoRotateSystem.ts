@@ -46,19 +46,73 @@ export class AutoRotateSystem extends System {
       entity.components.autopilot
     );
   }
+
   update(entity: Entity, elapsed: number) {
     const {position, rotation, autopilot} = entity.components;
-    if (!position || !rotation || !autopilot?.desiredCoordinates) return;
-
+    if (
+      !position ||
+      !rotation ||
+      !autopilot?.rotationAutopilot ||
+      !autopilot?.desiredCoordinates
+    ) {
+      return;
+    }
     const systems = this.ecs.entities.filter(
       s => s.shipAssignment?.shipId === entity.id && s.thrusters
     );
-    desiredDestination.set(
-      autopilot.desiredCoordinates?.x,
-      autopilot.desiredCoordinates?.y,
-      autopilot.desiredCoordinates?.z
+    // Get the current system the ship is in and the autopilot desired system
+    const autopilotDesiredSystem = this.ecs.entities.find(
+      e => e.id === autopilot.desiredInterstellarSystemId
     );
-    positionVec.set(position.x, position.y, position.z);
+    const shipSystem = this.ecs.entities.find(
+      e => e.id === entity.interstellarPosition?.systemId
+    );
+    if (
+      autopilotDesiredSystem?.id === entity.interstellarPosition?.systemId ||
+      (!autopilotDesiredSystem && !entity.interstellarPosition?.systemId)
+    ) {
+      // Within the system or within interstellar space.
+      if (autopilot.desiredCoordinates) {
+        desiredDestination.set(
+          autopilot.desiredCoordinates?.x,
+          autopilot.desiredCoordinates?.y,
+          autopilot.desiredCoordinates?.z
+        );
+      }
+      positionVec.set(position.x, position.y, position.z);
+    } else if (!autopilotDesiredSystem) {
+      // From within a system to some random point in interstellar space
+      if (autopilot.desiredCoordinates) {
+        desiredDestination.set(
+          autopilot.desiredCoordinates?.x,
+          autopilot.desiredCoordinates?.y,
+          autopilot.desiredCoordinates?.z
+        );
+      }
+      if (shipSystem?.position) {
+        positionVec.set(
+          shipSystem.position.x,
+          shipSystem.position.y,
+          shipSystem.position.z
+        );
+      }
+    } else {
+      // From within one system to within another system
+      if (autopilotDesiredSystem.position) {
+        desiredDestination.set(
+          autopilotDesiredSystem.position.x,
+          autopilotDesiredSystem.position.y,
+          autopilotDesiredSystem.position.z
+        );
+      }
+      if (shipSystem?.position) {
+        positionVec.set(
+          shipSystem.position.x,
+          shipSystem.position.y,
+          shipSystem.position.z
+        );
+      }
+    }
     const distance = positionVec.distanceTo(desiredDestination);
     matrix
       .lookAt(positionVec, desiredDestination, forward)

@@ -355,6 +355,45 @@ export type FlightPlayerShipSubscription = {
   };
 };
 
+export type NavigationCourseSubscriptionVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type NavigationCourseSubscription = {
+  __typename?: "Subscription";
+  navigationOutfit: Maybe<{
+    __typename?: "Entity";
+    id: string;
+    navigation: {
+      __typename?: "NavigationComponent";
+      locked: boolean;
+      destination: Maybe<{
+        __typename?: "Entity";
+        id: string;
+        identity: {__typename?: "IdentityComponent"; name: string};
+      }>;
+    };
+  }>;
+};
+
+export type NavigationLockCourseMutationVariables = Exact<{
+  destinationWaypointId: Scalars["ID"];
+}>;
+
+export type NavigationLockCourseMutation = {
+  __typename?: "Mutation";
+  navigationSetDestination: {__typename?: "Entity"; id: string};
+};
+
+export type NavigationUnlockCourseMutationVariables = Exact<{
+  [key: string]: never;
+}>;
+
+export type NavigationUnlockCourseMutation = {
+  __typename?: "Mutation";
+  navigationUnlockDestination: {__typename?: "Entity"; id: string};
+};
+
 export type PlayerForwardVelocitySubscriptionVariables = Exact<{
   [key: string]: never;
 }>;
@@ -2883,6 +2922,78 @@ export function useFlightPlayerShipSubscription(
 }
 export type FlightPlayerShipSubscriptionHookResult = ReturnType<
   typeof useFlightPlayerShipSubscription
+>;
+export const NavigationCourseDocument = gql`
+  subscription NavigationCourse {
+    navigationOutfit {
+      id
+      navigation {
+        locked
+        destination {
+          id
+          identity {
+            name
+          }
+        }
+      }
+    }
+  }
+`;
+export function useNavigationCourseSubscription(
+  baseOptions?: Apollo.SubscriptionHookOptions<
+    NavigationCourseSubscription,
+    NavigationCourseSubscriptionVariables
+  >
+) {
+  return Apollo.useSubscription<
+    NavigationCourseSubscription,
+    NavigationCourseSubscriptionVariables
+  >(NavigationCourseDocument, baseOptions);
+}
+export type NavigationCourseSubscriptionHookResult = ReturnType<
+  typeof useNavigationCourseSubscription
+>;
+export const NavigationLockCourseDocument = gql`
+  mutation NavigationLockCourse($destinationWaypointId: ID!) {
+    navigationSetDestination(destinationWaypointId: $destinationWaypointId) {
+      id
+    }
+  }
+`;
+export function useNavigationLockCourseMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    NavigationLockCourseMutation,
+    NavigationLockCourseMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    NavigationLockCourseMutation,
+    NavigationLockCourseMutationVariables
+  >(NavigationLockCourseDocument, baseOptions);
+}
+export type NavigationLockCourseMutationHookResult = ReturnType<
+  typeof useNavigationLockCourseMutation
+>;
+export const NavigationUnlockCourseDocument = gql`
+  mutation NavigationUnlockCourse {
+    navigationUnlockDestination {
+      id
+    }
+  }
+`;
+export function useNavigationUnlockCourseMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    NavigationUnlockCourseMutation,
+    NavigationUnlockCourseMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    NavigationUnlockCourseMutation,
+    NavigationUnlockCourseMutationVariables
+  >(NavigationUnlockCourseDocument, baseOptions);
+}
+export type NavigationUnlockCourseMutationHookResult = ReturnType<
+  typeof useNavigationUnlockCourseMutation
 >;
 export const PlayerForwardVelocityDocument = gql`
   subscription PlayerForwardVelocity {

@@ -6,6 +6,7 @@ import {Circle} from "./DistanceCircle";
 import {Arrow} from "./PlayerArrow";
 import {useSpring} from "react-spring/three";
 import {PilotContacts} from "./PilotContacts";
+import {useInterstellarShipsStore} from "client/components/viewscreen/useInterstellarShips";
 
 const cameraQuaternionMultiplier = new Quaternion(
   0.7071067811865476,
@@ -31,7 +32,9 @@ export const CircleGrid = memo(
       onChange: value => (tiltRef.current = value.tilt),
     });
     useFrame(props => {
-      const playerShip = useSystemShipsStore.getState()[playerShipId];
+      const playerShip =
+        useSystemShipsStore.getState()[playerShipId] ||
+        useInterstellarShipsStore.getState()[playerShipId];
       if (playerShip?.position && playerShip?.rotation && circleGroup.current) {
         circleGroup.current.position.set(0, 0, 0);
         circleGroup.current.quaternion

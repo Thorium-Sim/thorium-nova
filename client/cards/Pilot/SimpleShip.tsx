@@ -1,3 +1,4 @@
+import {useInterstellarShipsStore} from "client/components/viewscreen/useInterstellarShips";
 import {useSystemShipsStore} from "client/components/viewscreen/useSystemShips";
 import {Line, useGLTF, useTexture} from "drei";
 import {Fragment, useMemo, useRef} from "react";
@@ -30,7 +31,9 @@ export const ShipEntity = ({
   playerId?: string;
   tilted?: boolean;
 }) => {
-  const entity = useSystemShipsStore.getState()[entityId];
+  const entity =
+    useSystemShipsStore.getState()[entityId] ||
+    useInterstellarShipsStore.getState()[entityId];
   const modelAsset = entity?.shipAssets?.model;
   // TODO: Use useGLTF.preload outside of this to preload the asset
   const model = useGLTF(modelAsset || "", false);
@@ -61,9 +64,14 @@ export const ShipEntity = ({
   useFrame(props => {
     const camera = props.camera as OrthographicCamera;
     const dx = (camera.right - camera.left) / (2 * camera.zoom);
-    const ship = useSystemShipsStore.getState()[entityId];
-    const playerShip = useSystemShipsStore.getState()[playerId || ""];
-    const playerPosition = playerShip.position || zeroVector;
+    const ship =
+      useSystemShipsStore.getState()[entityId] ||
+      useInterstellarShipsStore.getState()[entityId];
+    const playerShip =
+      useSystemShipsStore.getState()[playerId || ""] ||
+      useInterstellarShipsStore.getState()[playerId || ""];
+
+    const playerPosition = playerShip?.position || zeroVector;
     if (!ship) return;
     if (shipRef.current) {
       if (ship.size?.value && dx / ship.size.value < 50) {

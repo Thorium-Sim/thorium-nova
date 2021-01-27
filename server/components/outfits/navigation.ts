@@ -7,21 +7,26 @@ import {Component, ComponentOmit} from "../utils";
 export class NavigationComponent extends Component {
   static id: "navigation" = "navigation";
   static defaults: ComponentOmit<NavigationComponent> = {
-    destinationId: null,
+    destinationWaypointId: null,
     destination: null,
     locked: false,
     maxDestinationRadius: 0,
   };
 
-  destinationId: string | null = null;
-  @Field(type => Entity, {description: "The desired destination object."})
+  destinationWaypointId: string | null = null;
+  @Field(type => Entity, {
+    description: "The desired destination waypoint.",
+    nullable: true,
+  })
   get destination(): Entity | null {
-    if (!this.destinationId) return null;
+    if (!this.destinationWaypointId) return null;
     return (
-      App.activeFlight?.ecs.entities.find(e => e.id === this.destinationId) ||
-      null
+      App.activeFlight?.ecs.entities.find(
+        e => e.id === this.destinationWaypointId
+      ) || null
     );
   }
+  set destination(a: Entity | null) {}
   @Field({description: "Whether the course has been locked in."})
   locked: boolean = false;
   @Field({

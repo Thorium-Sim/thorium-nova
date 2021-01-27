@@ -8,7 +8,6 @@ import {MeshProps, useFrame} from "react-three-fiber";
 import {CanvasTexture, Group, Vector3} from "three";
 import {configStoreApi, useConfigStore} from "../configStore";
 import useObjectDrag from "../hooks/useObjectDrag";
-import {ReactEventHandlers} from "react-use-gesture/dist/types";
 
 const size = 50;
 const lineWidth = 0.07;
