@@ -2,6 +2,7 @@ import express, {RequestHandler} from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import path from "path";
+import fs from "fs";
 
 export default async function setupServer() {
   const server = express();

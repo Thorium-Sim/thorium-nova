@@ -16,7 +16,7 @@ import {fragment, vertex} from "./shaders";
 import getUniforms from "./uniforms";
 import tc from "tinycolor2";
 import {useConfigStore} from "../configStore";
-import {useTexture} from "drei";
+import {useTexture} from "@react-three/drei";
 
 const distanceVector = new Vector3();
 

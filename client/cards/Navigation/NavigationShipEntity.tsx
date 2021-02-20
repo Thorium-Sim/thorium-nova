@@ -1,6 +1,6 @@
 import {useRef} from "react";
 import {useSystemShipsStore} from "client/components/viewscreen/useSystemShips";
-import {useTexture} from "drei";
+import {useTexture} from "@react-three/drei";
 import {Group, Sprite, Texture} from "three";
 import {useFrame} from "react-three-fiber";
 import {itemEvents, useNavigationStore} from "./utils";
@@ -83,6 +83,7 @@ export const NavigationSystemShipEntity = ({
 }) => {
   const entity = useSystemShipsStore.getState()[entityId];
   const systemId = useNavigationStore(state => state.systemId);
+  if (!entity) return null;
   if (entity.interstellarPosition?.system?.id !== systemId) return null;
 
   return (
@@ -102,7 +103,12 @@ export const NavigationInterstellarShipEntity = ({
 
   return (
     <NavigationShipEntityModel
-      entity={entity}
+      entity={
+        entity as Omit<
+          ReturnType<typeof useSystemShipsStore["getState"]>[string],
+          "autopilot"
+        >
+      }
       store={useInterstellarShipsStore}
       interstellar
     />

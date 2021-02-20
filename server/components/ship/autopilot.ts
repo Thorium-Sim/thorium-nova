@@ -26,11 +26,13 @@ export class AutopilotComponent extends Component {
   desiredInterstellarSystemId?: string | null;
 
   @Field(type => Boolean, {
+    nullable: true,
     description: "Whether the rotation autopilot is on.",
   })
   rotationAutopilot: boolean = true;
 
   @Field(type => Boolean, {
+    nullable: true,
     description: "Whether the forward movement autopilot is on.",
   })
   forwardAutopilot: boolean = true;
@@ -39,11 +41,13 @@ export class AutopilotComponent extends Component {
     "yawController",
     "pitchController",
     "rollController",
-    "speedController",
+    "impulseController",
+    "warpController",
   ];
 
   yawController?: Controller;
   pitchController?: Controller;
   rollController?: Controller;
-  speedController?: Controller;
+  impulseController?: Controller;
+  warpController?: Controller;
 }

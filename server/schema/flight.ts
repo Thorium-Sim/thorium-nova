@@ -149,6 +149,7 @@ export default class Flight {
   }
   serialize() {
     // Get all of the entities in the world and serialize them into objects
+
     return {
       id: this.id,
       name: this.name,

@@ -16,8 +16,10 @@ import {ZoomStyleWrapper} from "./ZoomStyleWrapper";
 import {usePilotStore} from "./PilotStore";
 import {Card} from "client/components/ui/Card";
 import {
+  useFlightPlayerShipSubscription,
   useNavigationCourseSubscription,
   useNavigationLockCourseMutation,
+  useNavigationSetAutopilotActivationMutation,
   useNavigationUnlockCourseMutation,
 } from "client/generated/graphql";
 
@@ -71,6 +73,8 @@ const LockOnButton = () => {
   const [lockCourse] = useNavigationLockCourseMutation();
   const {data} = useNavigationCourseSubscription();
   const navigation = data?.navigationOutfit?.navigation;
+  const {data: flightPlayerData} = useFlightPlayerShipSubscription();
+  const [setAutopilot] = useNavigationSetAutopilotActivationMutation();
   if (!navigation) return null;
   return (
     <Fragment>
@@ -102,6 +106,25 @@ const LockOnButton = () => {
           {t("Lock On Course")}
         </Button>
       )}
+      <Button
+        size="lg"
+        variantColor="danger"
+        className="w-full mt-2"
+        disabled={!navigation.locked}
+        onClick={() =>
+          setAutopilot({
+            variables: {
+              isActive: flightPlayerData?.playerShip.autopilot?.forwardAutopilot
+                ? false
+                : true,
+            },
+          })
+        }
+      >
+        {flightPlayerData?.playerShip.autopilot?.forwardAutopilot
+          ? t("Deactivate Autopilot")
+          : t("Activate Autopilot")}
+      </Button>
     </Fragment>
   );
 };
@@ -110,6 +133,7 @@ const Pilot: FC<CardProps> = ({cardLoaded}) => {
   const {ship} = useClientData();
   const [tilt, setTilt] = useState(0);
   // TODO: Replace with flight localstorage
+
   const [zoomValue, setZoomValue] = useLocalStorage("thorium_pilot_zoom", 100);
   const [dimensions, setDimensions] = useState({width: 0, height: 0});
   const client = useApolloClient();

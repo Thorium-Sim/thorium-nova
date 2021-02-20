@@ -41,6 +41,11 @@ fragment UniverseObject on Entity {
   satellite {
     ...SatelliteComponent
   }
+  interstellarPosition {
+    system {
+      id
+    }
+  }
   position {
     x
     y

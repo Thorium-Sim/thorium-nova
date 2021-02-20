@@ -7,6 +7,7 @@ import {
   ID,
   InputType,
   Mutation,
+  Query,
   Resolver,
   Root,
   Subscription,
@@ -123,6 +124,13 @@ export function shipSpawn(
 }
 @Resolver()
 export class ActiveShipsResolver {
+  @Query(returns => Entity, {name: "playerShip", nullable: true})
+  playerShipQuery(@Ctx() context: GraphQLContext) {
+    const ship = App.activeFlight?.ecs.entities.find(
+      s => s.id === context.client?.shipId
+    );
+    return ship;
+  }
   @Subscription(returns => Entity, {
     topics: ({context}: {context: GraphQLContext}) => {
       const id = uuid();
@@ -157,6 +165,7 @@ export class ActiveShipsResolver {
   ): Entity {
     return payload.ship;
   }
+
   @Subscription(returns => Entity, {
     topics: ({context}: {context: GraphQLContext}) => {
       const id = uuid();

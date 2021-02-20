@@ -14,7 +14,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
+    "outDir": "build",
     // TODO: Set up a separate TSConfig that uses the production JSX
     "jsx": "react-jsxdev",
     "baseUrl": ".",
@@ -26,5 +26,13 @@
     "typeRoots": ["./node_modules/@types", "./types"]
   },
   "exclude": ["node_modules"],
-  "include": ["client", "server", "test", "babel.config.js", "public/webgl.js", "public/workers/generateNebulaMap.js", "public/processTheme.worker.js"]
+  "include": [
+    "client",
+    "server",
+    "test",
+    "babel.config.js",
+    "public/webgl.js",
+    "public/workers/generateNebulaMap.js",
+    "public/processTheme.worker.js"
+  ]
 }

@@ -1,6 +1,6 @@
 import {useInterstellarShipsStore} from "client/components/viewscreen/useInterstellarShips";
 import {useSystemShipsStore} from "client/components/viewscreen/useSystemShips";
-import {Line, useGLTF, useTexture} from "drei";
+import {Line, useGLTF, useTexture} from "@react-three/drei";
 import {Fragment, useMemo, useRef} from "react";
 import {useFrame} from "react-three-fiber";
 import {
@@ -39,7 +39,7 @@ export const ShipEntity = ({
   const model = useGLTF(modelAsset || "", false);
 
   const scene = useMemo(() => {
-    const scene: Group = model.scene.clone(true);
+    const scene: Object3D = model.scene.clone(true);
     if (scene.traverse) {
       scene.traverse(function (object: Object3D | Mesh) {
         if ("material" in object) {
@@ -174,7 +174,6 @@ export const ShipEntity = ({
               [0, 0, 0],
               [0, 0, 0],
             ]}
-            stencilMask={false}
             color={"white"}
             lineWidth={1}
           ></Line>

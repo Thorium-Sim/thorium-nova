@@ -1,0 +1,5 @@
+mutation NavigationSetAutopilotActivation($isActive: Boolean!) {
+  navigationSetThrustAutopilot(isActive: $isActive) {
+    id
+  }
+}

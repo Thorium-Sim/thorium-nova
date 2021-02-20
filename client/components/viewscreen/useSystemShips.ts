@@ -55,48 +55,51 @@ export const useSystemShips = singletonHook([], function useSystemShipsHook() {
           for (let shipId in draft) {
             const ship = draft[shipId];
             if (!ship) continue;
+            try {
+              ship.position = {
+                x: lerp(
+                  previousState.current?.[shipId].position?.x ?? 0,
+                  nextState.current?.[shipId].position?.x ?? 0,
+                  t
+                ),
+                y: lerp(
+                  previousState.current?.[shipId].position?.y ?? 0,
+                  nextState.current?.[shipId].position?.y ?? 0,
+                  t
+                ),
+                z: lerp(
+                  previousState.current?.[shipId].position?.z ?? 0,
+                  nextState.current?.[shipId].position?.z ?? 0,
+                  t
+                ),
+              };
 
-            ship.position = {
-              x: lerp(
-                previousState.current?.[shipId].position?.x ?? 0,
-                nextState.current?.[shipId].position?.x ?? 0,
+              const prevArray = [
+                previousState.current?.[shipId].rotation?.x ?? 0,
+                previousState.current?.[shipId].rotation?.y ?? 0,
+                previousState.current?.[shipId].rotation?.z ?? 0,
+                previousState.current?.[shipId].rotation?.w ?? 1,
+              ];
+              const nextArray = [
+                nextState.current?.[shipId].rotation?.x ?? 0,
+                nextState.current?.[shipId].rotation?.y ?? 0,
+                nextState.current?.[shipId].rotation?.z ?? 0,
+                nextState.current?.[shipId].rotation?.w ?? 1,
+              ];
+              Quaternion.slerpFlat(
+                rotationOutput,
+                0,
+                prevArray,
+                0,
+                nextArray,
+                0,
                 t
-              ),
-              y: lerp(
-                previousState.current?.[shipId].position?.y ?? 0,
-                nextState.current?.[shipId].position?.y ?? 0,
-                t
-              ),
-              z: lerp(
-                previousState.current?.[shipId].position?.z ?? 0,
-                nextState.current?.[shipId].position?.z ?? 0,
-                t
-              ),
-            };
-
-            const prevArray = [
-              previousState.current?.[shipId].rotation?.x ?? 0,
-              previousState.current?.[shipId].rotation?.y ?? 0,
-              previousState.current?.[shipId].rotation?.z ?? 0,
-              previousState.current?.[shipId].rotation?.w ?? 1,
-            ];
-            const nextArray = [
-              nextState.current?.[shipId].rotation?.x ?? 0,
-              nextState.current?.[shipId].rotation?.y ?? 0,
-              nextState.current?.[shipId].rotation?.z ?? 0,
-              nextState.current?.[shipId].rotation?.w ?? 1,
-            ];
-            Quaternion.slerpFlat(
-              rotationOutput,
-              0,
-              prevArray,
-              0,
-              nextArray,
-              0,
-              t
-            );
-            const [x, y, z, w] = rotationOutput;
-            ship.rotation = {x, y, z, w};
+              );
+              const [x, y, z, w] = rotationOutput;
+              ship.rotation = {x, y, z, w};
+            } catch {
+              // Swallow it, it'll likely work in the next frame
+            }
           }
         }),
       true

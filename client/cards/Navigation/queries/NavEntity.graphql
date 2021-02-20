@@ -25,6 +25,16 @@ query NavEntity($id: ID!) {
     size {
       value
     }
+    interstellarPosition {
+      system {
+        id
+        position {
+          x
+          y
+          z
+        }
+      }
+    }
     isShip {
       mass
       category

@@ -11,5 +11,9 @@ subscription FlightPlayerShip {
         }
       }
     }
+    autopilot {
+      forwardAutopilot
+      rotationAutopilot
+    }
   }
 }

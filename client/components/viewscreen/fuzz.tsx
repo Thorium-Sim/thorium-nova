@@ -1,4 +1,4 @@
-import {useTexture} from "drei";
+import {useTexture} from "@react-three/drei";
 import React from "react";
 import {useFrame} from "react-three-fiber";
 import {Sprite, Texture} from "three";

@@ -5,7 +5,7 @@ import {useConfigStore} from "./configStore";
 import Interstellar from "./Interstellar";
 import Nebula from "./Nebula";
 import Planetary from "./Planetary";
-import {Line} from "drei";
+import {Line as LineMesh} from "@react-three/drei";
 import {Line2} from "three/examples/jsm/lines/Line2";
 // @ts-ignore
 import TextTexture from "@seregpie/three.text-texture";
@@ -122,7 +122,7 @@ const MeasureLine = () => {
   }`;
   return (
     <>
-      <Line
+      <LineMesh
         ref={ref}
         points={[[0, 0, 0]]}
         color="#0088ff"

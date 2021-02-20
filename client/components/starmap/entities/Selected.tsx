@@ -4,8 +4,10 @@ import {CircleGeometry, LineLoop} from "three";
 
 const Selected: React.FC = React.memo(() => {
   const geometry = React.useMemo(() => {
-    const geometry = new CircleGeometry(1.3, 32);
-    geometry.vertices.shift();
+    const geometry = new CircleGeometry(1.3, 32) as CircleGeometry & {
+      vertices: number[];
+    };
+    // geometry.vertices.shift();
 
     return geometry;
   }, []);

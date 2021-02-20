@@ -6,6 +6,9 @@ import {FC, Fragment, memo, Suspense, useEffect, useRef} from "react";
 import {Canvas, useFrame, useThree} from "react-three-fiber";
 import {Color, Group, MOUSE} from "three";
 import {
+  NavEntityQuery,
+  UniverseInterstellarShipsHotSubscription,
+  UniverseSystemShipsSubscription,
   useFlightPlayerShipSubscription,
   useFlightUniverseSubscription,
   useNavEntityQuery,
@@ -24,10 +27,16 @@ import {NavigationPlanetary} from "./NavigationPlanetary";
 import {CAMERA_Y, useNavigationStore} from "./utils";
 import Starfield from "client/components/starmap/Starfield";
 import SystemMarker from "client/components/starmap/SystemMarker";
-import {useInterstellarShips} from "client/components/viewscreen/useInterstellarShips";
+import {
+  useInterstellarShips,
+  useInterstellarShipsStore,
+} from "client/components/viewscreen/useInterstellarShips";
 import {ErrorBoundary} from "react-error-boundary";
 import {NavigationInterstellarShipEntity} from "./NavigationShipEntity";
 import {useSetupOrbitControls} from "client/helpers/useSetupOrbitControls";
+import {useSystemShipsStore} from "client/components/viewscreen/useSystemShips";
+import useAnimationFrame from "client/helpers/unused/useAnimationFrame";
+import {getOrbitPosition} from "client/components/starmap/utils";
 
 const NavigationInterstellar = memo(
   ({
@@ -207,6 +216,182 @@ const PlanetCanvas = (props: {
     </Canvas>
   );
 };
+
+export function distance3d(
+  coord2: {x: number; y: number; z: number},
+  coord1: {x: number; y: number; z: number}
+) {
+  const {x: x1, y: y1, z: z1} = coord1;
+  let {x: x2, y: y2, z: z2} = coord2;
+  return Math.sqrt((x2 -= x1) * x2 + (y2 -= y1) * y2 + (z2 -= z1) * z2);
+}
+
+function getDistance(
+  object: NavEntityQuery["entity"],
+  playerShip:
+    | UniverseSystemShipsSubscription["universeSystemShips"][0]
+    | UniverseInterstellarShipsHotSubscription["universeInterstellarShipsHot"][0]
+) {
+  if (
+    object?.planetarySystem &&
+    object.position &&
+    playerShip.interstellarPosition &&
+    playerShip.position
+  ) {
+    // Distance to planetary systems
+    if (
+      playerShip.interstellarPosition?.system &&
+      "position" in playerShip.interstellarPosition.system &&
+      playerShip.interstellarPosition.system.position
+    ) {
+      return `${distance3d(
+        object.position,
+        playerShip.interstellarPosition.system.position
+      ).toFixed(1)} LY`;
+    } else {
+      return `${distance3d(object.position, playerShip.position).toFixed(
+        1
+      )} LY`;
+    }
+  }
+  // Distance from one system to another system's objects
+  if (
+    playerShip.interstellarPosition?.system &&
+    playerShip.interstellarPosition.system.id !==
+      object?.interstellarPosition?.system?.id &&
+    object?.interstellarPosition?.system?.position &&
+    "position" in playerShip.interstellarPosition.system &&
+    playerShip.interstellarPosition.system.position
+  ) {
+    return `${distance3d(
+      object.interstellarPosition.system.position,
+      playerShip.interstellarPosition.system.position
+    ).toFixed(1)} LY`;
+  }
+  // Distance from interstellar to planetary objects
+  if (
+    !playerShip.interstellarPosition?.system &&
+    playerShip.position &&
+    object?.interstellarPosition?.system?.position
+  ) {
+    return `${distance3d(
+      object.interstellarPosition.system.position,
+      playerShip.position
+    ).toFixed(1)} LY`;
+  }
+  // Distance from one planetary object to another
+  if (
+    playerShip.interstellarPosition?.system?.id ===
+      object?.interstellarPosition?.system?.id &&
+    playerShip.position
+  ) {
+    // A ship
+    let position = object?.position;
+    if (!position && object?.satellite) {
+      // A satellite
+      const {
+        distance,
+        eccentricity,
+        orbitalArc,
+        orbitalInclination,
+      } = object.satellite;
+      position = getOrbitPosition({
+        radius: distance,
+        eccentricity,
+        orbitalArc,
+        orbitalInclination,
+      });
+    }
+    if (position) {
+      let distance = distance3d(position, playerShip.position);
+      if (distance > 100) {
+        distance = Math.round(distance);
+      }
+      if (distance < 1) {
+        return `${(distance * 1000).toLocaleString()} M`;
+      }
+      return `${distance.toLocaleString()} KM`;
+    }
+  }
+  return "Unknown";
+}
+const ObjectDetails = ({
+  cardLoaded,
+  loading,
+  object,
+}: {
+  cardLoaded: boolean;
+  loading: boolean;
+  object: NavEntityQuery["entity"] | undefined;
+}) => {
+  const {t} = useTranslation();
+  const {data: playerShipData} = useFlightPlayerShipSubscription();
+  const distanceRef = useRef<HTMLSpanElement>(null);
+  useAnimationFrame(() => {
+    if (distanceRef.current && object) {
+      const playerShip = playerShipData?.playerShip.interstellarPosition?.system
+        ?.id
+        ? useSystemShipsStore.getState()[playerShipData.playerShip.id]
+        : useInterstellarShipsStore.getState()[
+            playerShipData?.playerShip.id || ""
+          ];
+      const distance = getDistance(object, playerShip);
+      distanceRef.current.innerText = distance;
+    }
+  });
+
+  return (
+    <div className="w-full p-2 border-2 border-whiteAlpha-500 bg-blackAlpha-500 rounded">
+      {cardLoaded && object ? (
+        <Fragment>
+          {object.planetarySystem ? null : (
+            <div className="float-left w-24 h-24 mr-2 border border-whiteAlpha-500 rounded">
+              {object.isPlanet ? (
+                <PlanetCanvas {...object.isPlanet} />
+              ) : object.isStar ? (
+                <StarCanvas
+                  hue={object.isStar.hue}
+                  isWhite={object.isStar.isWhite}
+                />
+              ) : object.isShip ? (
+                <img
+                  draggable="false"
+                  alt={object.identity.name}
+                  src={object.shipAssets?.vanity}
+                />
+              ) : null}
+            </div>
+          )}
+          <h3 className="text-2xl">{object.identity.name}</h3>
+          <h4 className="text-xl">
+            {object.isPlanet
+              ? `Class ${object.isPlanet.classification} Planet`
+              : object.isStar
+              ? `Class ${object.isStar.spectralType} Star`
+              : object.isShip
+              ? `${
+                  object.isShip.shipClass
+                    ? `${object.isShip.shipClass} Class `
+                    : ""
+                }${object.isShip.category}`
+              : object.planetarySystem
+              ? "Planetary System"
+              : ""}
+          </h4>
+          {playerShipData?.playerShip ? (
+            <h4 className="text-xl">
+              <strong>Distance:</strong> <span ref={distanceRef}></span>
+            </h4>
+          ) : null}
+        </Fragment>
+      ) : loading ? (
+        <h3 className="text-2xl">{t("Accessing...")}</h3>
+      ) : (
+        <h3 className="text-2xl">{t("No Object Selected")}</h3>
+      )}
+    </div>
+  );
+};
 const Navigation: FC<CardProps> = ({cardLoaded}) => {
   const client = useApolloClient();
   const selectedObjectId = useNavigationStore(store => store.selectedObjectId);
@@ -253,51 +438,12 @@ const Navigation: FC<CardProps> = ({cardLoaded}) => {
             Recenter
           </Button>
         </div>
-        <div className="w-96 min-h-48 h-full flex flex-col gap-2">
-          <div className="w-full p-4 border-2 border-whiteAlpha-500 bg-blackAlpha-500 rounded">
-            {cardLoaded && object ? (
-              <Fragment>
-                {object.planetarySystem ? null : (
-                  <div className="float-left w-24 h-24 mx-2 border border-whiteAlpha-500 rounded">
-                    {object.isPlanet ? (
-                      <PlanetCanvas {...object.isPlanet} />
-                    ) : object.isStar ? (
-                      <StarCanvas
-                        hue={object.isStar.hue}
-                        isWhite={object.isStar.isWhite}
-                      />
-                    ) : object.isShip ? (
-                      <img
-                        draggable="false"
-                        alt={object.identity.name}
-                        src={object.shipAssets?.vanity}
-                      />
-                    ) : null}
-                  </div>
-                )}
-                <h3 className="text-2xl">{object.identity.name}</h3>
-                <h4 className="text-xl">
-                  {object.isPlanet
-                    ? `Class ${object.isPlanet.classification} Planet`
-                    : object.isStar
-                    ? `Class ${object.isStar.spectralType} Star`
-                    : object.isShip
-                    ? `${
-                        object.isShip.shipClass
-                          ? `${object.isShip.shipClass} Class `
-                          : ""
-                      }${object.isShip.category}`
-                    : object.planetarySystem
-                    ? "Planetary System"
-                    : ""}
-                </h4>
-              </Fragment>
-            ) : loading ? (
-              <h3 className="text-2xl">{t("Accessing...")}</h3>
-            ) : (
-              <h3 className="text-2xl">{t("No Object Selected")}</h3>
-            )}
-          </div>
+        <div className="w-1/4 min-h-48 h-full flex flex-col gap-2">
+          <ObjectDetails
+            loading={loading}
+            cardLoaded={cardLoaded}
+            object={object}
+          />
           {object?.planetarySystem ? (
             <Button
               color="info"

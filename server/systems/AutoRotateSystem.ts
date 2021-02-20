@@ -2,13 +2,14 @@ import Entity from "server/helpers/ecs/entity";
 import System from "server/helpers/ecs/system";
 import {Quaternion, Vector3, Matrix4} from "three";
 import Controller from "node-pid-controller";
+import {autopilotGetCoordinates} from "server/helpers/ecsSystems/autopilotGetCoordinates";
 let positionVec = new Vector3();
 let rotationQuat = new Quaternion();
 let desiredDestination = new Vector3();
 let desiredRotationQuat = new Quaternion();
-let forward = new Vector3(0, 1, 0);
+let up = new Vector3(0, 1, 0);
 let matrix = new Matrix4();
-const rotationMatrix = new Matrix4().makeRotationY(Math.PI);
+const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
 
 const C_PROPORTION = 1;
 const C_INTEGRAL = 0;
@@ -61,63 +62,18 @@ export class AutoRotateSystem extends System {
       s => s.shipAssignment?.shipId === entity.id && s.thrusters
     );
     // Get the current system the ship is in and the autopilot desired system
-    const autopilotDesiredSystem = this.ecs.entities.find(
-      e => e.id === autopilot.desiredInterstellarSystemId
+    autopilotGetCoordinates(
+      this.ecs.entities,
+      entity,
+      desiredDestination,
+      positionVec
     );
-    const shipSystem = this.ecs.entities.find(
-      e => e.id === entity.interstellarPosition?.systemId
-    );
-    if (
-      autopilotDesiredSystem?.id === entity.interstellarPosition?.systemId ||
-      (!autopilotDesiredSystem && !entity.interstellarPosition?.systemId)
-    ) {
-      // Within the system or within interstellar space.
-      if (autopilot.desiredCoordinates) {
-        desiredDestination.set(
-          autopilot.desiredCoordinates?.x,
-          autopilot.desiredCoordinates?.y,
-          autopilot.desiredCoordinates?.z
-        );
-      }
-      positionVec.set(position.x, position.y, position.z);
-    } else if (!autopilotDesiredSystem) {
-      // From within a system to some random point in interstellar space
-      if (autopilot.desiredCoordinates) {
-        desiredDestination.set(
-          autopilot.desiredCoordinates?.x,
-          autopilot.desiredCoordinates?.y,
-          autopilot.desiredCoordinates?.z
-        );
-      }
-      if (shipSystem?.position) {
-        positionVec.set(
-          shipSystem.position.x,
-          shipSystem.position.y,
-          shipSystem.position.z
-        );
-      }
-    } else {
-      // From within one system to within another system
-      if (autopilotDesiredSystem.position) {
-        desiredDestination.set(
-          autopilotDesiredSystem.position.x,
-          autopilotDesiredSystem.position.y,
-          autopilotDesiredSystem.position.z
-        );
-      }
-      if (shipSystem?.position) {
-        positionVec.set(
-          shipSystem.position.x,
-          shipSystem.position.y,
-          shipSystem.position.z
-        );
-      }
-    }
+
     const distance = positionVec.distanceTo(desiredDestination);
-    matrix
-      .lookAt(positionVec, desiredDestination, forward)
-      .multiply(rotationMatrix);
     rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
+    up.set(0, 1, 0).applyQuaternion(rotationQuat);
+
+    matrix.lookAt(positionVec, desiredDestination, up).multiply(rotationMatrix);
     // Use the thrusters to adjust the rotation of the ship to point towards the desired destination.
     // First, determine the angle to the destination.
     desiredRotationQuat.setFromRotationMatrix(matrix);
@@ -166,7 +122,7 @@ export class AutoRotateSystem extends System {
       getClosestAngle(currentAngles[2], desiredAngles[2])
     );
 
-    if (distance < 0.5) {
+    if (distance < 1) {
       yawCorrection = 0;
       pitchCorrection = 0;
       rollCorrection = 0;

@@ -1,4 +1,4 @@
-import {useTexture} from "drei";
+import {useTexture} from "@react-three/drei";
 import React, {Suspense} from "react";
 import {useFrame, useLoader} from "react-three-fiber";
 import {Group, Texture, TextureLoader, Vector3} from "three";

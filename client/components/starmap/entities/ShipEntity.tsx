@@ -1,6 +1,6 @@
 import React from "react";
 import {useFrame, useThree} from "react-three-fiber";
-import {Line, useGLTF, useTexture} from "drei";
+import {Line, useGLTF, useTexture} from "@react-three/drei";
 import {
   Color,
   FrontSide,
@@ -8,7 +8,6 @@ import {
   Mesh,
   MeshStandardMaterial,
   Object3D,
-  Quaternion,
   Sprite,
   Texture,
   Vector3,
@@ -56,7 +55,6 @@ const ShipEntityWrapper: React.FC<{entityId: string}> = ({entityId}) => {
   return <ShipEntity entityId={entityId} />;
 };
 
-const forwardQuaternion = new Quaternion(0, 1, 0, 0);
 const distanceVector = new Vector3();
 const ShipEntity: React.FC<{
   entityId: string;
@@ -67,7 +65,7 @@ const ShipEntity: React.FC<{
   const shipId = usePlayerShipId();
 
   const scene = React.useMemo(() => {
-    const scene: Group = model.scene.clone(true);
+    const scene: Object3D = model.scene.clone(true);
     if (scene.traverse) {
       scene.traverse(function (object: Object3D | Mesh) {
         if ("material" in object) {
@@ -133,12 +131,6 @@ const ShipEntity: React.FC<{
         ship.rotation.z,
         ship.rotation.w
       );
-    }
-    if (shipId === entityId && ship.position && ship.rotation) {
-      camera.position.set(ship.position.x, ship.position.y, ship.position.z);
-      camera.quaternion
-        .set(ship.rotation.x, ship.rotation.y, ship.rotation.z, ship.rotation.w)
-        .multiply(forwardQuaternion);
     }
 
     const distance = camera.position.distanceTo(
@@ -256,7 +248,6 @@ const ShipEntity: React.FC<{
         ]} // Array of points
         color="white"
         opacity={0.2}
-        stencilMask
         transparent
         lineWidth={0.25} // In pixels (default)
       />

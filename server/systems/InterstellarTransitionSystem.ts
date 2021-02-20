@@ -4,7 +4,7 @@ import System from "server/helpers/ecs/system";
 import {getOrbitPosition} from "server/helpers/getOrbitPosition";
 import {pubsub} from "server/helpers/pubsub";
 import {outfitPublish} from "server/schema/plugins/outfits/utils";
-import {Vector3} from "three";
+import {Matrix4, Quaternion, Vector3} from "three";
 
 const MIN_SYSTEM_SIZE = 10_000;
 const SYSTEM_PADDING = 1.05;
@@ -42,6 +42,12 @@ function getMaxDistance(entities: Entity[], systemId: string) {
 const direction = new Vector3();
 const systemPosition = new Vector3();
 const shipPosition = new Vector3();
+const desiredDestination = new Vector3();
+let desiredRotationQuat = new Quaternion();
+let up = new Vector3(0, 1, 0);
+let matrix = new Matrix4();
+const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
+let rotationQuat = new Quaternion();
 
 export class InterstellarTransitionSystem extends System {
   test(entity: Entity) {
@@ -54,6 +60,9 @@ export class InterstellarTransitionSystem extends System {
     );
     if (system) {
       // Transition from inside a solar system to interstellar space.
+      // If the entity's destination is inside the current solar system, don't leave it
+      const {autopilot} = entity;
+      if (system.id === autopilot?.desiredInterstellarSystemId) return;
       // Check if the ship is on the outskirts of the solar system
       const maxDistance =
         getMaxDistance(this.ecs.entities, system.id) * SYSTEM_PADDING;
@@ -125,7 +134,8 @@ export class InterstellarTransitionSystem extends System {
           entity.position,
           destinationSystem.position
         );
-        if (distance < 0.001) {
+        // 1/100th of a lightyear
+        if (distance < 0.01) {
           entity.updateComponent("interstellarPosition", {
             systemId: destinationSystem.id,
           });
@@ -155,7 +165,30 @@ export class InterstellarTransitionSystem extends System {
             y: direction.y,
             z: direction.z,
           });
+          // Also set the rotation to the destination to be spot-on to the destination
+          if (
+            destinationWaypoint?.isWaypoint?.attachedObjectId !==
+              destinationSystem.id &&
+            destinationWaypoint?.position
+          ) {
+            desiredDestination.set(
+              destinationWaypoint?.position.x,
+              destinationWaypoint?.position.y,
+              destinationWaypoint?.position.z
+            );
 
+            up.set(0, 1, 0);
+            matrix
+              .lookAt(direction, desiredDestination, up)
+              .multiply(rotationMatrix);
+            desiredRotationQuat.setFromRotationMatrix(matrix);
+            entity.updateComponent("rotation", {
+              x: desiredRotationQuat.x,
+              y: desiredRotationQuat.y,
+              z: desiredRotationQuat.z,
+              w: desiredRotationQuat.w,
+            });
+          }
           pubsub.publish("universeSystemShips", {
             systemId: destinationSystem.id,
             ships: this.ecs.entities.filter(

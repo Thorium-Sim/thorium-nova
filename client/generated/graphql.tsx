@@ -284,6 +284,19 @@ export type NavEntityQuery = {
       }>;
     }>;
     size: Maybe<{__typename?: "SizeComponent"; value: number}>;
+    interstellarPosition: Maybe<{
+      __typename?: "InterstellarPositionComponent";
+      system: Maybe<{
+        __typename?: "Entity";
+        id: string;
+        position: Maybe<{
+          __typename?: "PositionComponent";
+          x: number;
+          y: number;
+          z: number;
+        }>;
+      }>;
+    }>;
     isShip: Maybe<{
       __typename?: "IsShipComponent";
       mass: number;
@@ -330,6 +343,15 @@ export type NavEntityQuery = {
   }>;
 };
 
+export type NavigationSetAutopilotActivationMutationVariables = Exact<{
+  isActive: Scalars["Boolean"];
+}>;
+
+export type NavigationSetAutopilotActivationMutation = {
+  __typename?: "Mutation";
+  navigationSetThrustAutopilot: {__typename?: "Entity"; id: string};
+};
+
 export type FlightPlayerShipSubscriptionVariables = Exact<{
   [key: string]: never;
 }>;
@@ -352,6 +374,11 @@ export type FlightPlayerShipSubscription = {
         }>;
       }>;
     }>;
+    autopilot: {
+      __typename?: "AutopilotComponent";
+      forwardAutopilot: boolean;
+      rotationAutopilot: boolean;
+    };
   };
 };
 
@@ -1724,6 +1751,10 @@ export type UniverseObjectFragment = {
   satellite: Maybe<
     {__typename?: "SatelliteComponent"} & SatelliteComponentFragment
   >;
+  interstellarPosition: Maybe<{
+    __typename?: "InterstellarPositionComponent";
+    system: Maybe<{__typename?: "Entity"; id: string}>;
+  }>;
   position: Maybe<{
     __typename?: "PositionComponent";
     x: number;
@@ -2641,6 +2672,11 @@ export const UniverseObjectFragmentDoc = gql`
     satellite {
       ...SatelliteComponent
     }
+    interstellarPosition {
+      system {
+        id
+      }
+    }
     position {
       x
       y
@@ -2828,6 +2864,16 @@ export const NavEntityDocument = gql`
       size {
         value
       }
+      interstellarPosition {
+        system {
+          id
+          position {
+            x
+            y
+            z
+          }
+        }
+      }
       isShip {
         mass
         category
@@ -2892,6 +2938,27 @@ export type NavEntityQueryHookResult = ReturnType<typeof useNavEntityQuery>;
 export type NavEntityLazyQueryHookResult = ReturnType<
   typeof useNavEntityLazyQuery
 >;
+export const NavigationSetAutopilotActivationDocument = gql`
+  mutation NavigationSetAutopilotActivation($isActive: Boolean!) {
+    navigationSetThrustAutopilot(isActive: $isActive) {
+      id
+    }
+  }
+`;
+export function useNavigationSetAutopilotActivationMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    NavigationSetAutopilotActivationMutation,
+    NavigationSetAutopilotActivationMutationVariables
+  >
+) {
+  return Apollo.useMutation<
+    NavigationSetAutopilotActivationMutation,
+    NavigationSetAutopilotActivationMutationVariables
+  >(NavigationSetAutopilotActivationDocument, baseOptions);
+}
+export type NavigationSetAutopilotActivationMutationHookResult = ReturnType<
+  typeof useNavigationSetAutopilotActivationMutation
+>;
 export const FlightPlayerShipDocument = gql`
   subscription FlightPlayerShip {
     playerShip {
@@ -2905,6 +2972,10 @@ export const FlightPlayerShipDocument = gql`
             z
           }
         }
+      }
+      autopilot {
+        forwardAutopilot
+        rotationAutopilot
       }
     }
   }

@@ -1,4 +1,4 @@
-import {Line, Text} from "drei";
+import {Line, Text} from "@react-three/drei";
 import {FC, useMemo, useRef} from "react";
 import {Object3DNode, useFrame} from "react-three-fiber";
 import {EllipseCurve, Group, Mesh, OrthographicCamera} from "three";

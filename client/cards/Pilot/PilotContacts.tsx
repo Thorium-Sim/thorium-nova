@@ -12,7 +12,7 @@ import {
   useUniverseSystemSubscription,
   useWaypointsSubscription,
 } from "client/generated/graphql";
-import {useTexture} from "drei";
+import {useTexture} from "@react-three/drei";
 import {Fragment, memo, Suspense, useRef} from "react";
 import {ErrorBoundary} from "react-error-boundary";
 import {useFrame} from "react-three-fiber";
@@ -33,7 +33,7 @@ import {PlanetaryEntity} from "./SimplePlanet";
 import {ShipEntity} from "./SimpleShip";
 
 const LY_IN_KM = 9_460_730_472_580.8;
-type WaypointType = NonNullable<
+export type WaypointType = NonNullable<
   ReturnType<typeof useWaypointsSubscription>["data"]
 >["playerShipWaypoints"][0];
 

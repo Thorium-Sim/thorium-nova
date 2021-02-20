@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import {AriaTextFieldOptions, useTextField} from "@react-aria/textfield";
 import {useId} from "@react-aria/utils";
 import {mergeRefs} from "client/helpers/mergeRefs";
@@ -42,7 +42,7 @@ const Input = React.forwardRef<
         {label}
       </label>
       <input
-        {...inputProps}
+        {...(inputProps as React.InputHTMLAttributes<HTMLInputElement>)}
         className={`w-full transition-all duration-200 outline-none px-4 py-3 ${
           inputSize === "sm" ? "h-6" : inputSize === "lg" ? "h-12" : "h-10"
         } rounded ${

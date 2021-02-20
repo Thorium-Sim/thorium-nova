@@ -1,7 +1,7 @@
 import {useRef} from "react";
 import {useFrame} from "react-three-fiber";
 import {Texture, Group} from "three";
-import {useTexture} from "drei";
+import {useTexture} from "@react-three/drei";
 import type {EntityType} from "./utils";
 
 export const NavigationWaypointEntity = ({entity}: {entity: EntityType}) => {

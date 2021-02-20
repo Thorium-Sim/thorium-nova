@@ -21,7 +21,7 @@ import Disc from "./Disc";
 import {configStoreApi, useConfigStore} from "./configStore";
 import {OrbitControls, OrbitControlsType} from "./OrbitControls";
 import {PLANETARY_SCALE} from "./constants";
-import {useGLTF} from "drei";
+import {useGLTF} from "@react-three/drei";
 import {whiteImage} from "./utils";
 import Selected from "./entities/Selected";
 import useObjectDrag from "./hooks/useObjectDrag";
@@ -32,7 +32,7 @@ const ShipStarmapEntity: React.FC<{
   const modelAsset = entity.shipAssets?.model;
   const model = useGLTF(modelAsset || whiteImage, false);
   const scene = React.useMemo(() => {
-    const scene: Group = model.scene.clone(true);
+    const scene: Object3D = model.scene.clone(true);
     if (scene.traverse) {
       scene.traverse(function (object: Object3D | Mesh) {
         if ("material" in object) {

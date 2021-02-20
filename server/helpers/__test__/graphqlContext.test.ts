@@ -9,7 +9,6 @@ describe("GraphQL Context", () => {
     expect(
       getGraphQLContext({
         req: {headers: {clientid: "Test Client"}} as any,
-        res: {} as any,
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -32,7 +31,6 @@ describe("GraphQL Context", () => {
     expect(
       getGraphQLContext({
         req: undefined as any,
-        res: {} as any,
         connection: {context: {clientid: "Test Client"}} as any,
       })
     ).toMatchInlineSnapshot(`

@@ -148,18 +148,16 @@ class Entity extends Components {
       pluginId: this.pluginId,
       components: Object.fromEntries(
         Object.entries(this.components).map(([key, value]) => {
-          const updatedValue = {...value};
           const excludeFields =
             registeredComponents.find(c => c.id === key)?.excludeFields || [];
           excludeFields.push("entity");
           excludeFields.push("entityId");
 
-          if (excludeFields) {
-            excludeFields.forEach((field: string) => {
-              delete updatedValue[field];
-            });
-          }
-
+          const updatedValue = Object.fromEntries(
+            Object.entries(value).filter(
+              ([key]) => !excludeFields.includes(key)
+            )
+          );
           return [key, updatedValue];
         })
       ),

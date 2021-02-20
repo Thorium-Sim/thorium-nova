@@ -14,6 +14,7 @@ import {
 } from "three";
 import {randomPointInSphere} from "./getRandomPointInSphere";
 import {getSphericalPositionWithBias} from "./getSphericalPositionWithBias";
+import {useInterstellarShipsStore} from "./useInterstellarShips";
 import {
   useForwardVelocityStore,
   usePlayerForwardVelocity,
@@ -22,6 +23,7 @@ import {useSystemShipsStore} from "./useSystemShips";
 
 const STAR_COUNT = 10000;
 const FORWARD_DISTANCE = 5000;
+const LY_IN_KM = 9_460_730_472_580.8;
 
 const StarPosition = new Vector3();
 const StarQuaternion = new Quaternion().setFromEuler(
@@ -65,7 +67,10 @@ const WarpStars = React.memo(
 
     usePlayerForwardVelocity();
     useFrame(({camera}) => {
-      const entity = useSystemShipsStore.getState()[shipId];
+      const entity = (isInSystem
+        ? useSystemShipsStore
+        : useInterstellarShipsStore
+      ).getState()[shipId];
       if (!entity) return;
       const rotation = entity.rotation;
       const {forwardVelocity} = useForwardVelocityStore.getState();
@@ -88,7 +93,9 @@ const WarpStars = React.memo(
           .subVectors(shipPosition, mesh.position)
           .negate()
 
-          .divideScalar(maxPossibleVelocity / 5000);
+          .divideScalar(
+            maxPossibleVelocity / (isInSystem ? 5000 : LY_IN_KM * 5000)
+          );
         mesh.position.copy(shipPosition);
       }
       for (let i = 0; i < STAR_COUNT; i++) {
@@ -112,15 +119,17 @@ const WarpStars = React.memo(
         StarColor.setHSL(hue / 360, 1, 0.9);
         mesh.setColorAt(i, StarColor);
       }
-      mesh.material.opacity = Math.min(
-        0.9,
-        Math.max(0, (forwardVelocity / maxPossibleVelocity) * 50)
-      );
+      if (!Array.isArray(mesh.material)) {
+        mesh.material.opacity = Math.min(
+          0.9,
+          Math.max(0, (forwardVelocity / maxPossibleVelocity) * 50)
+        );
 
-      if (mesh.material.opacity > 0.1) {
-        mesh.visible = true;
-      } else {
-        mesh.visible = false;
+        if (mesh.material.opacity > 0.1) {
+          mesh.visible = true;
+        } else {
+          mesh.visible = false;
+        }
       }
       mesh.instanceMatrix.needsUpdate = true;
       if (mesh.instanceColor) {

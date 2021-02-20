@@ -56,6 +56,7 @@ interface StoreObject {
   removeFile: () => Promise<void>;
   serialize?: Function;
 }
+let handleList: (string | number | symbol)[] = [];
 export default function getStore<G extends object>(options?: IStoreOptions) {
   const {
     path: filePath,
@@ -106,29 +107,31 @@ export default function getStore<G extends object>(options?: IStoreOptions) {
   }
 
   async function writeFile(force = false) {
-    if (process.env.NODE_ENV === "test") return;
-    if (process.env.NODE_ENV !== "production" && force === false) return;
-    if (!filePath) {
-      return;
-    }
-    await fs.mkdir(path.dirname(filePath), {recursive: true});
+    try {
+      if (process.env.NODE_ENV === "test") return;
+      if (process.env.NODE_ENV !== "production" && force === false) return;
+      if (!filePath) {
+        return;
+      }
+      await fs.mkdir(path.dirname(filePath), {recursive: true});
 
-    let jsonData = "{}";
+      let jsonData = "{}";
 
-    if (Array.isArray(dataObject)) {
-      jsonData = json(
-        dataObject.map(o => (o.serialize ? o.serialize() : o)),
-        null,
-        indent
-      );
-    } else {
-      jsonData = json(
-        dataObject.serialize ? dataObject.serialize() : dataObject,
-        null,
-        indent
-      );
-    }
-    await fs.writeFile(filePath, jsonData, {mode: 0o0600});
+      if (Array.isArray(dataObject)) {
+        jsonData = json(
+          dataObject.map(o => (o.serialize ? o.serialize() : o)),
+          null,
+          indent
+        );
+      } else {
+        jsonData = json(
+          dataObject.serialize ? dataObject.serialize() : dataObject,
+          null,
+          indent
+        );
+      }
+      await fs.writeFile(filePath, jsonData, {mode: 0o0600});
+    } catch (e) {}
   }
 
   async function removeFile() {

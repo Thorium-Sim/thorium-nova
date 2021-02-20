@@ -94,6 +94,26 @@ export class NavigationOutfitResolver {
     });
   }
   @Mutation(returns => Entity)
+  navigationSetThrustAutopilot(
+    @Arg("shipId", type => ID, {nullable: true}) shipId: string,
+    @Arg("isActive", type => Boolean) isActive: boolean,
+    @Ctx() context: GraphQLContext
+  ) {
+    const ship = App.activeFlight?.ecs.entities.find(
+      s => s.id === (shipId || context.client?.shipId)
+    );
+    if (!ship) throw new Error("Unable to find ship.");
+    ship.updateComponent("autopilot", {
+      forwardAutopilot: isActive,
+    });
+    // We specifically won't clear out the impulse and warp because
+    // we want the ship to maintain its current speed.
+    if (ship.isPlayerShip) {
+      pubsub.publish("playerShip", {shipId: ship.id, ship});
+    }
+    return ship;
+  }
+  @Mutation(returns => Entity)
   navigationSetMaxDestinationRadius(
     @Arg("pluginId", type => ID, {nullable: true}) pluginId: string,
     @Arg("outfitId", type => ID, {nullable: true}) outfitId: string,

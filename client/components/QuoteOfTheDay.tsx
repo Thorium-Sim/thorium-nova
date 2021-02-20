@@ -129,6 +129,8 @@ const quotes = [
   "Life can only be understood backwards; but it must be lived forwards.",
   // Swyx
   "Small minds discuss tactics, average minds discuss strategy, great minds discuss destiny",
+  // Something about yeast not feeling pain?
+  "Ow! My very being!",
 ];
 
 const QuoteOfTheDay = () => {

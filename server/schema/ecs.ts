@@ -15,6 +15,7 @@ import {SatelliteComponent} from "server/components/satellite";
 import {GraphQLContext} from "server/helpers/graphqlContext";
 import BasePlugin, {getPlugin} from "./plugins/basePlugin";
 import {Object3D, Quaternion, Vector3} from "three";
+import {InterstellarPositionComponent} from "server/components/ship/interstellarPosition";
 
 @Resolver(Entity)
 export class EntityResolver {
@@ -84,6 +85,28 @@ export class EntityFieldResolver {
   satellite(@Root() entity: Entity): SatelliteComponent | null {
     if (!entity.satellite) return null;
     return ({...entity.satellite, entity} as unknown) as SatelliteComponent;
+  }
+  // This allows easy access of the interstellar position of satellite entities, like Planets.
+  @FieldResolver(type => InterstellarPositionComponent, {nullable: true})
+  interstellarPosition(
+    @Root() entity: Entity
+  ): InterstellarPositionComponent | null {
+    if (!entity.satellite) {
+      return entity.interstellarPosition || null;
+    }
+    let testEntity = entity;
+    // Go through all of the satellite parents until we find the planetary system.
+    for (let i = 3; i >= 0; i++) {
+      if (testEntity.planetarySystem) {
+        return {systemId: testEntity.id};
+      }
+      const nextParent = App.activeFlight?.ecs.entities.find(
+        e => e.id === testEntity.satellite?.parentId
+      );
+      if (!nextParent) return null;
+      testEntity = nextParent;
+    }
+    return null;
   }
   @FieldResolver(type => Number)
   forwardVelocity(@Root() entity: Entity): number {
