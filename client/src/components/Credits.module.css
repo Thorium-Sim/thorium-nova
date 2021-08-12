@@ -1,0 +1,22 @@
+.credits {
+  --fade-distance: 2rem;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0px,
+    #fff var(--fade-distance, 10px),
+    #fff calc(100% - var(--fade-distance, 10px)),
+    transparent 100%
+  );
+}
+.all-credits {
+  animation: scroll-up var(--credits-duration, 3s) linear infinite;
+}
+.all-credits:hover {
+  animation-play-state: paused;
+}
+
+@keyframes scroll-up {
+  to {
+    transform: translateY(calc(-50% - 1rem));
+  }
+}

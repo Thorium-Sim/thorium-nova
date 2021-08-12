@@ -1,0 +1,23 @@
+{
+  "name": "electron",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "",
+    "start": "electron-esbuild dev",
+    "build": "electron-esbuild build"
+  },
+  "keywords": [],
+  "author": "Alex Anderson",
+  "devDependencies": {
+    "@types/bonjour": "^3.5.9",
+    "electron": "^13.2.1",
+    "electron-esbuild": "^2.0.0"
+  },
+  "dependencies": {
+    "bonjour": "^3.5.0",
+    "electron-better-ipc": "^2.0.1",
+    "electron-store": "^8.0.0",
+    "electron-util": "^0.17.0"
+  }
+}

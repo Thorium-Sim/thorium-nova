@@ -1,0 +1,23 @@
+module.exports = {
+  extends: ["react-app", "typescript", "typescript/react", "prettier"],
+  rules: {
+    "prefer-const": 0,
+    "@typescript-eslint/no-explicit-any": 0,
+    "@typescript-eslint/ban-types": 0,
+    "@typescript-eslint/no-inferrable-types": 0,
+    "@typescript-eslint/explicit-module-boundary-types": 0,
+    "@typescript-eslint/no-unused-vars": 0,
+    "@typescript-eslint/no-non-null-assertion": 0,
+    "no-empty": 0,
+    "no-empty-pattern": 0,
+    "@typescript-eslint/no-empty-function": 0,
+    "css-rcurlyexpected": 0,
+    "react/react-in-jsx-scope": 0,
+    "react/prop-types": 0,
+    "react/no-unescaped-entities": 0,
+    "no-useless-computed-key": 0,
+    "no-constant-condition": 0,
+    "no-loop-func": 0,
+    "no-inner-declarations": 0,
+  },
+};

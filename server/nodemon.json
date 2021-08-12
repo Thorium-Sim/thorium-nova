@@ -1,0 +1,10 @@
+{
+  "watch": [
+    "src",
+    "../client/src/cards/**/data.ts",
+    "../client/src/utils/cardData.ts"
+  ],
+  "ignore": ["src/**/*.test.ts"],
+  "ext": "ts,tsx,mjs,js,json",
+  "exec": "node -r ts-eager/register src/index.ts"
+}

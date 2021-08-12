@@ -1,0 +1,5 @@
+mainConfig:
+  type: esbuild
+  path: esbuild.main.config.ts
+  src: main/electron.ts
+  output: ../dist

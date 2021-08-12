@@ -1,0 +1,127 @@
+{
+  "name": "thorium-nova",
+  "version": "0.0.0-development",
+  "description": "Spaceship Simulator Controls Platform",
+  "keywords": [],
+  "author": "Alex Anderson",
+  "license": "Apache 2.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Thorium-Sim/thorium-nova.git"
+  },
+  "main": "dist/electron.js",
+  "scripts": {
+    "dev": "concurrently --kill-others --names \"client,server\" -c \"blue.bold,magenta.bold\" \"npm run dev --workspace=client\" \"npm run dev --workspace=server\"",
+    "build": "concurrently --names \"client,server\" -c \"blue.bold,magenta.bold\" \"npm run build --workspace=client\" \"npm run build --workspace=server\"",
+    "start": "NODE_ENV=production node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.+(js|jsx|yml|yaml|css|less|scss|ts|tsx|md|mdx|graphql|vue)\"",
+    "format:different": "prettier --list-different \"**/*.+(js|jsx|yml|yaml|css|less|scss|ts|tsx|md|mdx|graphql|vue)\"",
+    "semantic-release": "semantic-release",
+    "package": "electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "us.fyreworks.thorium-nova",
+    "productName": "Thorium Nova",
+    "electronVersion": "13.1.9",
+    "files": [
+      "dist/**/*",
+      "resources/**/*",
+      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!**/node_modules/*.d.ts",
+      "!**/node_modules/.bin",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!.editorconfig",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}",
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+    ],
+    "asar": false,
+    "directories": {
+      "output": "./packages",
+      "buildResources": "./electron/resources"
+    },
+    "publish": {
+      "provider": "github"
+    },
+    "afterSign": "electron-builder-notarize",
+    "mac": {
+      "category": "public.app-category.entertainment",
+      "icon": "./nova.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": true,
+      "fileAssociations": [
+        {
+          "ext": "flight",
+          "name": "Thorium Nova Flight",
+          "icon": "./nova-doc.icns"
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": true
+    },
+    "win": {
+      "target": [
+        "zip",
+        "portable",
+        "nsis"
+      ],
+      "icon": "./nova.ico",
+      "fileAssociations": [
+        {
+          "ext": "flight",
+          "name": "Thorium Nova Flight",
+          "description": "A saved flight for Thorium Nova.",
+          "icon": "./nova-doc.ico"
+        }
+      ],
+      "protocols": {
+        "name": "Thorium Flight URL",
+        "schemes": [
+          "flight"
+        ]
+      }
+    },
+    "linux": {
+      "category": "Utility"
+    }
+  },
+  "workspaces": [
+    "shared",
+    "client",
+    "server",
+    "electron"
+  ],
+  "volta": {
+    "node": "16.6.2",
+    "npm": "7.20.6"
+  },
+  "devDependencies": {
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/exec": "^5.0.0",
+    "@semantic-release/git": "^9.0.0",
+    "@types/jest": "^27.0.1",
+    "concurrently": "^6.2.1",
+    "electron": "file:electron",
+    "electron-builder": "^22.11.7",
+    "electron-builder-notarize": "^1.2.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-react-app": "^6.0.0",
+    "eslint-config-typescript": "^3.0.0",
+    "eslint-plugin-prettier": "^3.4.1",
+    "prettier": "^2.3.2",
+    "semantic-release": "^17.4.5"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

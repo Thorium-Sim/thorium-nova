@@ -1,0 +1,6 @@
+dist
+packages
+node_modules
+.DS_Store
+server/data/*
+tsconfig.tsbuildinfo

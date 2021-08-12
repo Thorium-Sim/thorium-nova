@@ -1,0 +1,24 @@
+{
+  "name": "shared",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "keywords": [],
+  "author": "Alex Anderson",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@geckos.io/client": "^2.0.0",
+    "@geckos.io/server": "^2.0.0",
+    "fast-json-patch": "^3.1.0",
+    "lodash.throttle": "^4.1.1",
+    "pure-rand": "^5.0.0",
+    "react": "^17.0.2"
+  },
+  "scripts": {
+    "build": "",
+    "dev": ""
+  },
+  "devDependencies": {
+    "@types/lodash.throttle": "^4.1.6"
+  }
+}

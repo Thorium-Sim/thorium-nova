@@ -1,0 +1,830 @@
+body {
+  font-family: "Gill Sans", system-ui, -apple-system, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}
+.alert {
+  @apply flex items-center justify-between p-4 rounded-box bg-neutral text-neutral-content bg-opacity-50;
+  &-sm {
+    @apply p-2;
+  }
+  &-info {
+    @apply bg-opacity-30 bg-info text-info-content;
+  }
+  &-success {
+    @apply bg-opacity-30 bg-success text-success-content;
+  }
+  &-warning {
+    @apply bg-opacity-30 bg-warning text-warning-content;
+  }
+  &-error {
+    @apply bg-opacity-30 bg-error text-error-content;
+  }
+  &-alert {
+    @apply bg-opacity-30 bg-alert text-error-content;
+  }
+}
+.badge {
+  @apply bg-neutral border border-neutral text-neutral-content rounded-badge;
+  &-primary {
+    @apply bg-primary border-primary text-primary-content;
+  }
+  &-secondary {
+    @apply bg-secondary border-secondary text-secondary-content;
+  }
+  &-accent {
+    @apply bg-accent border-accent text-accent-content;
+  }
+
+  &-ghost {
+    @apply bg-base-200 border-base-200 text-base-content;
+  }
+
+  &-outline {
+    @apply bg-transparent text-base-content border-current border-opacity-50;
+    &.badge-primary {
+      @apply text-primary;
+    }
+    &.badge-secondary {
+      @apply text-secondary;
+    }
+    &.badge-accent {
+      @apply text-accent;
+    }
+  }
+
+  &-info {
+    @apply bg-opacity-10 bg-info border-transparent text-info;
+  }
+  &-success {
+    @apply bg-opacity-10 bg-success border-transparent text-success;
+  }
+  &-warning {
+    @apply bg-opacity-10 bg-warning border-transparent text-warning;
+  }
+  &-error {
+    @apply bg-opacity-10 bg-error border-transparent text-error;
+  }
+}
+.btn {
+  &,
+  &-md {
+    @apply px-4 leading-loose h-10 text-base min-h-[2.5rem];
+  }
+  &-xs {
+    @apply px-2 text-xs leading-relaxed h-6 min-h-6;
+  }
+  &-sm {
+    @apply px-3 leading-8 h-8 text-sm min-h-8;
+  }
+  &-lg {
+    @apply px-6 leading-loose h-12 text-lg min-h-12;
+  }
+  @apply font-semibold;
+  border-width: var(--border-btn, 1px);
+  animation: button-pop var(--animation-btn, 0.25s) ease-out;
+  &:active:hover,
+  &:active:focus {
+    animation: none;
+  }
+  &:active:hover,
+  &:active:focus {
+    transform: scale(var(--btn-focus-scale, 0.95));
+  }
+
+  /* default btn */
+  & {
+    @apply bg-neutral border-neutral text-neutral-content;
+    &:hover,
+    &-active {
+      @apply bg-neutral-focus border-neutral-focus;
+    }
+    &:focus-visible {
+      @apply ring-2 ring-neutral;
+    }
+  }
+  /* brand colors */
+  &-primary {
+    @apply bg-primary border-primary text-primary-content;
+    &:hover,
+    &.btn-active {
+      @apply bg-primary-focus border-primary-focus;
+    }
+    &:focus-visible {
+      @apply ring-2 ring-primary;
+    }
+  }
+  &-secondary {
+    @apply bg-secondary border-secondary text-secondary-content;
+    &:hover,
+    &.btn-active {
+      @apply bg-secondary-focus border-secondary-focus;
+    }
+    &:focus-visible {
+      @apply ring-2 ring-secondary;
+    }
+  }
+  &-accent {
+    @apply bg-accent border-accent text-accent-content;
+    &:hover,
+    &.btn-active {
+      @apply bg-accent-focus border-accent-focus;
+    }
+    &:focus-visible {
+      @apply ring-2 ring-accent;
+    }
+  }
+
+  /* btn with state colors */
+  &-info {
+    @apply bg-info border-info text-base-200;
+    &:hover,
+    &.btn-active {
+      @apply bg-info border-info;
+    }
+    &:focus-visible {
+      @apply ring-2 ring-info;
+    }
+  }
+  &-success {
+    @apply bg-success border-success text-success-content;
+    &:hover,
+    &.btn-active {
+      @apply bg-success border-success;
+    }
+    &:focus-visible {
+      @apply ring-2 ring-success;
+    }
+  }
+  &-warning {
+    @apply bg-warning border-warning text-warning-content;
+    &:hover,
+    &.btn-active {
+      @apply bg-warning border-warning;
+    }
+    &:focus-visible {
+      @apply ring-2 ring-warning;
+    }
+  }
+  &-error {
+    @apply bg-error border-error text-error-content;
+    &:hover,
+    &.btn-active {
+      @apply bg-error border-error;
+    }
+    &:focus-visible {
+      @apply ring-2 ring-error;
+    }
+  }
+  &-alert {
+    @apply bg-alert border-alert text-alert-content;
+    &:hover,
+    &.btn-active {
+      @apply bg-alert border-alert;
+    }
+    &:focus-visible {
+      @apply ring-2 ring-alert;
+    }
+  }
+
+  /* glass */
+  &.glass {
+    &:hover,
+    &.btn-active {
+      --glass-opacity: 25%;
+      --glass-border-opacity: 15%;
+    }
+    &:focus-visible {
+      box-shadow: 0 0 0 2px currentColor;
+    }
+  }
+
+  /* btn variants */
+  &-ghost {
+    @apply bg-transparent text-current border border-transparent;
+    &:hover,
+    &.btn-active {
+      @apply bg-base-content bg-opacity-20 border-opacity-0;
+    }
+    &:focus-visible {
+      box-shadow: 0 0 0 2px currentColor;
+    }
+  }
+  &-link {
+    @apply bg-transparent border-transparent text-primary;
+    &:hover,
+    &.btn-active {
+      @apply underline bg-transparent border-transparent;
+    }
+    &:focus-visible {
+      box-shadow: 0 0 0 2px currentColor;
+    }
+  }
+
+  /* outline */
+  &-outline {
+    @apply bg-black bg-opacity-50 text-base-content border-current;
+    &:hover {
+      @apply bg-base-content border-base-content text-base-100;
+    }
+    &.btn-primary {
+      @apply text-primary;
+      &:hover {
+        @apply bg-primary-focus text-primary-content border-primary-focus;
+      }
+    }
+    &.btn-secondary {
+      @apply text-secondary;
+      &:hover {
+        @apply bg-secondary-focus text-secondary-content border-secondary-focus;
+      }
+    }
+    &.btn-accent {
+      @apply text-accent;
+      &:hover {
+        @apply bg-accent-focus text-accent-content border-accent-focus;
+      }
+    }
+    &.btn-info {
+      @apply text-info;
+      &:hover {
+        @apply bg-info-focus text-info-content border-info-focus;
+      }
+    }
+    &.btn-success {
+      @apply text-success;
+      &:hover {
+        @apply bg-success-focus text-success-content border-success-focus;
+      }
+    }
+    &.btn-warning {
+      @apply text-warning;
+      &:hover {
+        @apply bg-warning-focus text-warning-content border-warning-focus;
+      }
+    }
+    &.btn-error {
+      @apply text-error;
+      &:hover {
+        @apply bg-error-focus text-error-content border-error-focus;
+      }
+    }
+    &.btn-alert {
+      @apply text-alert;
+      &:hover {
+        @apply bg-alert-focus text-alert-content border-alert-focus;
+      }
+    }
+  }
+
+  /* disabled */
+  &-disabled,
+  &[disabled] {
+    @apply bg-neutral border-opacity-0 bg-opacity-20 text-base-content text-opacity-20;
+  }
+
+  /* loading */
+  &.loading {
+    &.btn-square:before,
+    &.btn-circle:before {
+      @apply mr-0;
+    }
+    &.btn-xl:before,
+    &.btn-lg:before {
+      @apply h-5 w-5;
+    }
+    &.btn-sm:before,
+    &.btn-xs:before {
+      @apply h-3 w-3;
+    }
+  }
+}
+.btn-group {
+  & > .btn:not(:first-child) {
+    @apply rounded-l-none -ml-px;
+  }
+  & > .btn:not(:last-child) {
+    @apply rounded-r-none;
+  }
+  & > input[type="radio"]:checked.btn,
+  & > .btn-active {
+    @apply bg-primary border-primary text-primary-content;
+    &:focus-visible {
+      @apply ring-2 ring-primary-highlight;
+    }
+  }
+  & > .btn:not(:first-child) {
+    @apply rounded-l-none -ml-px;
+  }
+  & > .btn:not(:last-child) {
+    @apply rounded-r-none;
+  }
+}
+
+@keyframes button-pop {
+  0% {
+    transform: scale(var(--btn-focus-scale, 0.95));
+  }
+  40% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.divider {
+  @apply my-4 h-4;
+  &:before,
+  &:after {
+    @apply h-0.5 bg-base-content;
+    --tw-bg-opacity: var(--tw-border-opacity, 0.1);
+  }
+  &:not(:empty) {
+    &:before {
+      @apply mr-4;
+    }
+    &:after {
+      @apply ml-4;
+    }
+  }
+}
+
+.input {
+  @apply h-10 text-neutral-content bg-neutral rounded-btn border border-opacity-0 border-neutral-focus;
+  &-md {
+    @apply px-4 h-10 text-sm leading-loose;
+  }
+  &-lg {
+    @apply px-6 h-12 text-lg leading-loose;
+  }
+  &-sm {
+    @apply px-3 h-8 text-sm leading-8;
+  }
+  &-xs {
+    @apply px-2 h-6 text-xs leading-relaxed;
+  }
+
+  &-bordered {
+    @apply border-opacity-20;
+  }
+  &:focus {
+    @apply ring-2 ring-neutral-highlight;
+  }
+  &-ghost {
+    @apply bg-opacity-5;
+    &:focus {
+      @apply bg-opacity-100 text-base-content;
+      box-shadow: none;
+    }
+  }
+  &-primary {
+    @apply border-primary;
+    &:focus {
+      @apply ring-2 ring-primary-highlight;
+    }
+  }
+  &-secondary {
+    @apply border-secondary;
+    &:focus {
+      @apply ring-2 ring-secondary-highlight;
+    }
+  }
+  &-accent {
+    @apply border-accent;
+    &:focus {
+      @apply ring-2 ring-accent-highlight;
+    }
+  }
+  &-info {
+    @apply border-info;
+    &:focus {
+      @apply ring-2 ring-info-highlight;
+    }
+  }
+  &-success {
+    @apply border-success;
+    &:focus {
+      @apply ring-2 ring-success-highlight;
+    }
+  }
+  &-warning {
+    @apply border-warning;
+    &:focus {
+      @apply ring-2 ring-warning-highlight;
+    }
+  }
+  &-error {
+    @apply border-error;
+    &:focus {
+      @apply ring-2 ring-error-highlight;
+    }
+  }
+  &-alert {
+    @apply border-alert;
+    &:focus {
+      @apply ring-2 ring-alert-highlight;
+    }
+  }
+  &-disabled,
+  &[disabled] {
+    @apply cursor-not-allowed bg-base-200 border-base-200 text-opacity-20 placeholder-base-content placeholder-opacity-20;
+  }
+}
+
+.textarea {
+  @apply bg-neutral rounded-btn border border-opacity-0 border-neutral-content;
+  &-bordered {
+    @apply border-opacity-20;
+  }
+  &:focus {
+    @apply ring-2 ring-neutral-highlight;
+  }
+  &-ghost {
+    @apply bg-opacity-5;
+    &:focus {
+      @apply bg-opacity-100 text-base-content;
+      box-shadow: none;
+    }
+  }
+  &-primary {
+    @apply border-primary;
+    &:focus {
+      @apply ring-2 ring-primary-highlight;
+    }
+  }
+  &-secondary {
+    @apply border-secondary;
+    &:focus {
+      @apply ring-2 ring-secondary-highlight;
+    }
+  }
+  &-accent {
+    @apply border-accent;
+    &:focus {
+      @apply ring-2 ring-accent-highlight;
+    }
+  }
+  &-info {
+    @apply border-info;
+    &:focus {
+      @apply ring-2 ring-info-highlight;
+    }
+  }
+  &-success {
+    @apply border-success;
+    &:focus {
+      @apply ring-2 ring-success-highlight;
+    }
+  }
+  &-warning {
+    @apply border-warning;
+    &:focus {
+      @apply ring-2 ring-warning-highlight;
+    }
+  }
+  &-error {
+    @apply border-error;
+    &:focus {
+      @apply ring-2 ring-error-highlight;
+    }
+  }
+  &-alert {
+    @apply border-alert;
+    &:focus {
+      @apply ring-2 ring-alert-highlight;
+    }
+  }
+  &-disabled,
+  &[disabled] {
+    @apply cursor-not-allowed bg-base-200 border-base-200 text-opacity-20 placeholder-base-content placeholder-opacity-20;
+  }
+}
+
+.progress {
+  @apply rounded-sm h-2;
+  &::-moz-progress-bar {
+    @apply bg-neutral;
+  }
+  &-primary::-moz-progress-bar {
+    @apply bg-primary;
+  }
+  &-secondary::-moz-progress-bar {
+    @apply bg-secondary;
+  }
+  &-accent::-moz-progress-bar {
+    @apply bg-accent;
+  }
+  &-info::-moz-progress-bar {
+    @apply bg-info;
+  }
+  &-success::-moz-progress-bar {
+    @apply bg-success;
+  }
+  &-warning::-moz-progress-bar {
+    @apply bg-warning;
+  }
+  &-error::-moz-progress-bar {
+    @apply bg-error;
+  }
+  &::-webkit-progress-bar {
+    @apply bg-neutral bg-opacity-20 rounded-box;
+  }
+  &::-webkit-progress-value {
+    @apply rounded-sm bg-neutral-focus;
+  }
+  &-primary::-webkit-progress-value {
+    @apply bg-primary;
+  }
+  &-secondary::-webkit-progress-value {
+    @apply bg-secondary;
+  }
+  &-accent::-webkit-progress-value {
+    @apply bg-accent;
+  }
+  &-info::-webkit-progress-value {
+    @apply bg-info;
+  }
+  &-success::-webkit-progress-value {
+    @apply bg-success;
+  }
+  &-warning::-webkit-progress-value {
+    @apply bg-warning;
+  }
+  &-error::-webkit-progress-value {
+    @apply bg-error;
+  }
+}
+.radial-dial {
+  @apply flex flex-col items-center;
+}
+.radial-indicator {
+  position: relative;
+  background: conic-gradient(
+    var(--radial-color, #fff000) 0%,
+    var(--radial-color, #fff000) var(--end-angle, 0%),
+    transparent var(--end-angle, 0%),
+    transparent 100%
+  );
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.radial-indicator:before {
+  content: attr(data-value) " ";
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  left: 20%;
+  top: 20%;
+  position: absolute;
+  background-color: #333;
+  border-radius: 50%;
+}
+
+.faded-scroll-x {
+  @apply w-full flex overflow-x-auto overflow-y-hidden;
+  & > * {
+    flex-shrink: 0;
+  }
+  mask-image: linear-gradient(
+    to right,
+    transparent 0px,
+    #fff var(--fade-distance, 10px),
+    #fff calc(100% - var(--fade-distance, 10px)),
+    transparent 100%
+  );
+}
+.faded-scroll-y {
+  @apply h-full flex flex-col overflow-x-hidden overflow-y-auto;
+  & > * {
+    flex-shrink: 0;
+  }
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0px,
+    #fff var(--fade-distance, 10px),
+    #fff calc(100% - var(--fade-distance, 10px)),
+    transparent 100%
+  );
+}
+
+::-webkit-scrollbar {
+  @apply w-2 h-2 p-1;
+}
+
+::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.4);
+}
+
+input[type="range"].slider {
+  -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+  width: 100%; /* Specific width is required for Firefox. */
+  background: transparent; /* Otherwise white in Chrome */
+  pointer-events: auto;
+
+  &:focus {
+    outline: none; /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 1rem;
+    width: 1rem;
+    border-radius: 9999px;
+    background-color: #fff;
+    cursor: pointer;
+    margin-top: -5px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+  }
+  &::-moz-range-thumb {
+    -webkit-appearance: none;
+    height: 1rem;
+    width: 1rem;
+    border-radius: 9999px;
+    background-color: #fff;
+    cursor: pointer;
+    margin-top: -5px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+  }
+  &::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 0.5rem;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.08);
+    @apply border-neutral-highlight border border-solid border-opacity-50;
+    border-radius: 9999px;
+  }
+  &::-moz-range-track {
+    width: 100%;
+    height: 0.5rem;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.08);
+    @apply border-neutral-highlight border border-solid border-opacity-50;
+    border-radius: 9999px;
+  }
+  &:focus::-webkit-slider-runnable-track {
+    @apply bg-neutral;
+  }
+  &:focus::-moz-range-track {
+    @apply bg-neutral;
+  }
+  &-primary {
+    &::-webkit-slider-runnable-track {
+      @apply border-primary-highlight border-opacity-50;
+    }
+    &::-moz-range-track {
+      @apply border-primary-highlight border-opacity-50;
+    }
+    &:focus::-webkit-slider-runnable-track {
+      @apply bg-primary bg-opacity-50;
+    }
+    &:focus::-moz-range-track {
+      @apply bg-primary bg-opacity-50;
+    }
+  }
+  &-secondary {
+    &::-webkit-slider-runnable-track {
+      @apply border-secondary-highlight border-opacity-50;
+    }
+    &::-moz-range-track {
+      @apply border-secondary-highlight border-opacity-50;
+    }
+    &:focus::-webkit-slider-runnable-track {
+      @apply bg-secondary bg-opacity-50;
+    }
+    &:focus::-moz-range-track {
+      @apply bg-secondary bg-opacity-50;
+    }
+  }
+  &-accent {
+    &::-webkit-slider-runnable-track {
+      @apply border-accent-highlight border-opacity-50;
+    }
+    &::-moz-range-track {
+      @apply border-accent-highlight border-opacity-50;
+    }
+    &:focus::-webkit-slider-runnable-track {
+      @apply bg-accent bg-opacity-50;
+    }
+    &:focus::-moz-range-track {
+      @apply bg-accent bg-opacity-50;
+    }
+  }
+  &-info {
+    &::-webkit-slider-runnable-track {
+      @apply border-info-highlight border-opacity-50;
+    }
+    &::-moz-range-track {
+      @apply border-info-highlight border-opacity-50;
+    }
+    &:focus::-webkit-slider-runnable-track {
+      @apply bg-info bg-opacity-50;
+    }
+    &:focus::-moz-range-track {
+      @apply bg-info bg-opacity-50;
+    }
+  }
+  &-success {
+    &::-webkit-slider-runnable-track {
+      @apply border-success-highlight border-opacity-50;
+    }
+    &::-moz-range-track {
+      @apply border-success-highlight border-opacity-50;
+    }
+    &:focus::-webkit-slider-runnable-track {
+      @apply bg-success bg-opacity-50;
+    }
+    &:focus::-moz-range-track {
+      @apply bg-success bg-opacity-50;
+    }
+  }
+  &-warning {
+    &::-webkit-slider-runnable-track {
+      @apply border-warning-highlight border-opacity-50;
+    }
+    &::-moz-range-track {
+      @apply border-warning-highlight border-opacity-50;
+    }
+    &:focus::-webkit-slider-runnable-track {
+      @apply bg-warning bg-opacity-50;
+    }
+    &:focus::-moz-range-track {
+      @apply bg-warning bg-opacity-50;
+    }
+  }
+  &-error {
+    &::-webkit-slider-runnable-track {
+      @apply border-error-highlight border-opacity-50;
+    }
+    &::-moz-range-track {
+      @apply border-error-highlight border-opacity-50;
+    }
+    &:focus::-webkit-slider-runnable-track {
+      @apply bg-error bg-opacity-50;
+    }
+    &:focus::-moz-range-track {
+      @apply bg-error bg-opacity-50;
+    }
+  }
+  &-alert {
+    &::-webkit-slider-runnable-track {
+      @apply border-alert-highlight border-opacity-50;
+    }
+    &::-moz-range-track {
+      @apply border-alert-highlight border-opacity-50;
+    }
+    &:focus::-webkit-slider-runnable-track {
+      @apply bg-alert bg-opacity-50;
+    }
+    &:focus::-moz-range-track {
+      @apply bg-alert bg-opacity-50;
+    }
+  }
+}
+
+.list-group-item {
+  @apply select-none block w-full border border-solid bg-black border-white border-opacity-50 pointer-events-auto cursor-pointer;
+  @apply px-4 py-2;
+  &.list-group-item-small {
+    @apply px-2 py-1 text-sm;
+  }
+  &:hover {
+    @apply bg-opacity-50;
+  }
+  &.selected {
+    @apply bg-opacity-40 bg-white;
+  }
+  &:disabled,
+  &.disabled {
+    @apply text-gray-400 pointer-events-none;
+  }
+  & + .list-group-item {
+    @apply border-t-0;
+  }
+  &:first-of-type {
+    @apply rounded-t-md;
+  }
+  &:last-of-type {
+    @apply rounded-b-md;
+  }
+}
+
+.animate-spin-step {
+  animation: spin-step 1s steps(8, end) infinite;
+}
+
+@keyframes spin-step {
+  to {
+    transform: rotate(360deg);
+  }
+}
