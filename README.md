@@ -1,6 +1,3 @@
-![Thorium](resources/github-banner.png)
-
-![Test](https://github.com/Thorium-Sim/thorium-sim/workflows/Test/badge.svg?branch=main)
 [![Discord](https://img.shields.io/discord/390968011605147648.svg)](https://discord.gg/UvxTQZz)
 [![All Contributors](https://img.shields.io/badge/all_contributors-0-orange.svg?style=flat-square)](#contributors)
 ![Version](https://img.shields.io/github/package-json/v/thorium-sim/thorium-nova)
@@ -15,7 +12,7 @@ _Want to help contribute? Check out the
 
 This is the main repository for Thorium Nova, a multiplayer real-time bridge
 simulator game. To learn more about what Thorium Nova is, check out
-https://nova.thoriumsim.com.
+https://thoriumsim.com.
 
 ## Project Vision
 
