@@ -172,6 +172,8 @@ const quotes = [
   "Free advice is seldom cheap.",
   // Chaucer
   "See yonder, lo, the Galaxy which men calleth the Milky Way, for it is white.",
+  // Dickens
+  "The Sun himself is weak when he first rises, and gathers strength and courage as the day gets on.",
 ];
 
 const QuoteOfTheDay = () => {
