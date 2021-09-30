@@ -21,12 +21,29 @@ The best way to get started with contributing is to ask! The
 [Thorium Discord Server](https://discord.gg/BxwXaUB) is the best place to learn
 what is happening and to ask where you can contribute.
 
-### Community Standup and Development Update Meetings
+### Participate on Discord and Github
 
-The Thorium community hosts regular meetings in the Discord server. Anyone is
-welcome to join, listen in as we discuss progress and make plans, and provide
-thoughts and suggestions about the project. This is a great way to contribute
-ideas and feedback.
+A lot of discussion about Thorium Nova development happens on the
+[Discord Server](https://discord.gg/BxwXaUB). This is a great place to ask
+questions, find ways to help, provide feedback, make suggestions, and comment on
+other proposals.
+
+You're also welcome to comment on
+[Github issues](https://github.com/Thorium-Sim/thorium-nova/issues) and
+[discussion topics](https://github.com/Thorium-Sim/thorium-nova/discussions/new).
+Add comments saying that you are in favor of or against proposals, give
+suggestions, or make your own proposals. Proposals can be anything from
+suggesting a feature enhancement to changing the course of the entire project.
+The project is entirely community run, which means you can have a say in what
+happens with the project.
+
+One thing to remember, though, is not all ideas will make it into the finished
+product. Remember, we're trying to make a great game for our all of users, and
+not every feature idea accomplishes that goal. If your idea is rejected, don't
+be discouraged! Try to modify your idea based on the feedback you got, suggest
+new ideas, or contribute in other ways. Even rejected ideas are good
+contributions, because they help us know better what users want and serve as a
+record of possible things we could work on in the future.
 
 <!--
 Eventually, we'll include this, once issues start regularly coming in from regular users.
@@ -85,7 +102,7 @@ There are also several other projects that are outside of the core Thorium Nova
 project which people can assist with. They include development of
 thoriumsim.com, working on the issue tracker, building the plugin store,
 creating an automated Discord bot, etc. Reach out on Discord in the
-[#development](https://discord.gg/F3adencb7d) channel if you are interested in
+[#development](https://discord.gg/Xg2TuT9uxm) channel if you are interested in
 working on any of these projects.
 
 Any work should have a corresponding issue. Don't start working on an issue
@@ -108,7 +125,7 @@ to figure out how the lore of the universe, including sci-fi technologies,
 equate to the crew controls. Of course, these interviews and feedback need to be
 recorded somehow (video or written text) so others can take advantage of the
 results. These results should be uploaded to Google Drive and announced on
-Discord in the [#design](#) channel.
+Discord in the [#design](https://discord.gg/uHMYWxWUAh) channel.
 
 Designers might also be asked to create mockups or wireframes of screens to get
 feedback from users about how that screen works. Those designs can also be used
@@ -269,13 +286,16 @@ the issue can be closed.
 
 This will require that anyone interested in working on issues create a Github
 account. They're free, and will give you the ability to contribute to
-discussions in the Thorium Nova repo.
+discussions in the Thorium Nova repo. Also, discussion about art or assets of
+any kind can happen in the [#art channel](https://discord.gg/V5uWkR63rd) on
+Discord.
 
 ## Writing and Documentation
 
 There is a lot of writing that goes into Thorium Nova. This includes the in-app
 documentation for users, on-screen tutorials for players, and eventually story
-and mission writing.
+and mission writing. Discussion about writing and documentation happens on the
+[#documentation channel](https://discord.gg/MZqyCGBHeW) on Discord.
 
 Writers might also be invited to write pieces for the regular Thorium email
 newsletter and Thorium blog.
