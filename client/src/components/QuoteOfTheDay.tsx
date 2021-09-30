@@ -174,6 +174,11 @@ const quotes = [
   "See yonder, lo, the Galaxy which men calleth the Milky Way, for it is white.",
   // Dickens
   "The Sun himself is weak when he first rises, and gathers strength and courage as the day gets on.",
+  // The Rainbow Connection
+  "What's so amazing that keeps us star gazing? And what do we think we might see?",
+  "We know that it's probably magic.",
+  "Have you been half asleep and have you heard voices? I've heard them calling my name.",
+  "I've heard it too many times to ignore it. It's something that I'm supposed to be.",
 ];
 
 const QuoteOfTheDay = () => {
