@@ -1,10 +1,9 @@
 ---
 name: Asset request
 about: Request some kind of asset
-title: ''
+title: ""
 labels: Asset
-assignees: ''
-
+assignees: ""
 ---
 
 **What kind of asset are you requesting? (Check one with an x)**

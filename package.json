@@ -15,13 +15,15 @@
     "dev": "concurrently --kill-others --names \"client,server\" -c \"blue.bold,magenta.bold\" \"npm run dev --workspace=client\" \"npm run dev --workspace=server\"",
     "build": "concurrently --names \"client,server\" -c \"blue.bold,magenta.bold\" \"npm run build --workspace=client\" \"npm run build --workspace=server\"",
     "start": "NODE_ENV=production node dist/index.js",
+    "test": "echo \"No Test Runner Yet\"",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.+(js|jsx|yml|yaml|css|less|scss|ts|tsx|md|mdx|graphql|vue)\"",
     "format:different": "prettier --list-different \"**/*.+(js|jsx|yml|yaml|css|less|scss|ts|tsx|md|mdx|graphql|vue)\"",
     "semantic-release": "semantic-release",
     "package": "electron-builder --dir",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "electron-builder install-app-deps",
+    "validate": "concurrently --names \"lint,format,typecheck,test\" -c \"yellow.bold,magenta.bold,blue.bold,green.bold\" \"npm run lint\" \"npm run format:different\" \"npm run typecheck\" \"npm run test\""
   },
   "build": {
     "appId": "us.fyreworks.thorium-nova",

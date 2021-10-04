@@ -1,5 +1,3 @@
-/*global global */
-
 let perf: Performance | null = null,
   start = Date.now();
 
