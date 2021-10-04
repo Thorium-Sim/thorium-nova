@@ -98,7 +98,7 @@ export default function getStore<G extends object>(options?: IStoreOptions<G>) {
     _data = filePath
       ? JSON.parse(fsCallback.readFileSync(filePath, "utf8"))
       : initialData;
-  } catch (err) {
+  } catch (err: any) {
     if (err.code === "EACCES") {
       err.message +=
         "\ndata-store does not have permission to load this file\n";
@@ -163,7 +163,7 @@ export default function getStore<G extends object>(options?: IStoreOptions<G>) {
         );
       }
       await fs.writeFile(filePath, jsonData, {mode: 0o0600});
-    } catch (e) {
+    } catch (e: any) {
       e.message = "db-fs: Error writing file:\n" + e.message;
       throw e;
     }
@@ -173,7 +173,7 @@ export default function getStore<G extends object>(options?: IStoreOptions<G>) {
     if (!filePath) return;
     try {
       await fs.unlink(filePath);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error removing file: ", filePath, err);
     }
   }

@@ -16,7 +16,8 @@
   },
   "scripts": {
     "build": "",
-    "dev": ""
+    "dev": "",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/lodash.throttle": "^4.1.6"
