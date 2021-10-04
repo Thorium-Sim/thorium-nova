@@ -5,12 +5,12 @@ repository mostly includes code contributions, there are many other ways
 community members can contribute. Contributions may include:
 
 1. Joining and participating in the the Discord Community
-1. Requesting features and reporting bugs
-1. Conducting design or user research
-1. Contributing code
-1. Creating art or assets
-1. Writing documentation
-1. Working with others.
+2. Requesting features and reporting bugs
+3. Conducting design or user research
+4. Contributing code
+5. Creating art or assets
+6. Writing documentation
+7. Working with others.
 
 Before contributing, make sure you read the project README.md and agree to abide
 by the Code of Conduct.
@@ -138,60 +138,26 @@ Thorium Nova is built using [TypeScript](http://typescriptlang.org),
 [git](https://guides.github.com/activities/hello-world/). Before contributing
 code, make sure you are familiar with these technologies.
 
-### Git Flow & Versioning
+### A Primer on Git
 
-Thorium Nova uses a
-[git flow](https://nvie.com/posts/a-successful-git-branching-model/) model for
-branching and managing releases. The main code branch is `develop`. Any time you
-want to make a change to Thorium Nova, create a branch from `develop`, make your
-changes, and create a pull request back to `develop`. After review, your branch
-will be merged in using a "Squash and Merge" strategy.
+Git is what we use to organize and share the code for Thorium Nova. If you've
+never used git before,
+[check out this guide for absolute beginners](https://www.freecodecamp.org/news/an-introduction-to-git-for-absolute-beginners-86fa1d32ff71/).
 
-Thorium Nova uses [semantic versioning](https://semver.org), which means
-bug-only releases are a patch (0.0.X) release, feature releases are a minor
-(0.X.0) release, and breaking changes are a major (X.0.0) release. Most people
-assume a major release means exciting new features; however, major changes
-actually mean the developers made a mistake with the way they originally
-designed the program, and fixing that mistake means breaking the way people use
-old versions.
+### Running Thorium Nova from Source
 
-Thorium Nova also uses
-[conventional commit](https://www.conventionalcommits.org/en/v1.0.0/) messages
-to generate a changelog for each new version. While it's recommended you use a
-conventional commit message as your pull request name, it's not required. If you
-don't, a conventional commit message will be added when your pull request is
-merged.
-
-Periodically, the code in `develop` is merged into `main`. Any time code is
-merged into `main`, a new version is released automatically.
-
-### Getting Started
-
-Thorium Nova is built with Node.js and React, and uses NPM for package
-management. It also uses [Git](https://git-scm.com) for version control. I
-recommend using [Volta](https://volta.sh) to manage your Node and NPM versions,
-since it will automatically install the correct version when you work on Thorium
-Nova. I also recommend using the [VS Code](https://code.visualstudio.com)
-editor. Thorium Nova will automatically recommend extensions for VS Code that
-will help you during development.
+I recommend using [Volta](https://volta.sh) to manage your Node and NPM
+versions, since it will automatically install the correct version when you work
+on Thorium Nova. I also recommend using the
+[VS Code](https://code.visualstudio.com) editor. Thorium Nova will automatically
+recommend extensions for VS Code that will help you during development.
 
 You'll first need to get a copy of Thorium Nova's codebase from Github. You can
-do that by running this command:
+do that by running this command after installing git:
 
 ```bash
 git clone https://github.com/Thorium-Sim/thorium-nova.git
 ```
-
-You can then install dependencies and make changes. However, you won't be able
-to push code to the Thorium Nova repo without being given contributor rights.
-Send a message on [Discord](https://discord.gg/BxwXaUB) with your Github
-username to request access.
-
-Once you have contribution access, you will also have the ability to merge your
-own pull request, once it has been reviewed. This also means you can push
-directly to the `develop` branch. Please don't do this. 😁 Also note that only
-project maintainers have the ability to push code to `main` and trigger a
-release.
 
 Once the project has been cloned, you can install dependencies using NPM and
 start the project.
@@ -204,6 +170,19 @@ npm run dev
 This will automatically start the client and development servers and open up the
 UI in your web browser. If it doesn't automatically open, you can open it
 yourself by going to http://localhost:3000.
+
+You can then make changes. However, you won't be able to push code to the
+Thorium Nova repo without being given contributor rights. Send a message on
+[Discord](https://discord.gg/BxwXaUB) with your Github username to request
+access. You are also welcome to follow a
+[fork and pull process](https://reflectoring.io/github-fork-and-pull/) if that's
+what you'd prefer.
+
+Once you have contribution access, you will also have the ability to merge your
+own pull request, once it has been reviewed. This also means you can push
+directly to the `develop` branch. Please don't do this unless you need to. 😁
+Also note that only Core Team members have the ability to push code to `main`
+and trigger a release.
 
 Check the ARCHITECTURE.md document for more details on the project structure,
 development tools, and development practice.
@@ -221,10 +200,12 @@ git checkout -b :your branch name:
 npm install
 ```
 
-From there, you can start making your changes, committing as you go, and opening
+From there, you can start making your changes, committing as you go and opening
 a pull request when you are ready for your code to be reviewed. Remember, you
-can have your code reviewed before you finish your feature. Consider opening a
-pull request early and asking for feedback on what you are doing.
+can have your code reviewed before you finish your feature. It is strongly
+encouraged for you to open a pull request as soon as you make your first commit,
+mark it as a "draft" pull request in Github, and ask for feedback on what you
+are doing.
 
 ### Pull Request Review Guidelines
 
@@ -266,9 +247,36 @@ pull request description.
   important for bug fix pull requests.
 
 Once your pull request is reviewed and any feedback is addressed, it is ready to
-merge. You can merge your own pull request once it has been given approval. If
-your pull request isn't being reviewed in a timely manner, feel free to ask for
-a review on [Discord](https://discord.gg/BxwXaUB).
+merge. You can merge your own pull request once it has been given approval and
+you have commit access. If your pull request isn't being reviewed in a timely
+manner, feel free to ask for a review on [Discord](https://discord.gg/BxwXaUB).
+
+### A Note About Git Flow & Versioning
+
+Thorium Nova uses a
+[git flow](https://nvie.com/posts/a-successful-git-branching-model/) model for
+branching and managing releases. The main code branch is `develop`. Any time you
+want to make a change to Thorium Nova, create a branch from `develop`, make your
+changes, and create a pull request back to `develop`. After review, your branch
+will be merged in using a "Squash and Merge" strategy.
+
+Thorium Nova uses [semantic versioning](https://semver.org), which means
+bug-only releases are a patch (0.0.X) release, feature releases are a minor
+(0.X.0) release, and breaking changes are a major (X.0.0) release. Most people
+assume a major release means exciting new features; however, major changes
+actually mean the developers made a mistake with the way they originally
+designed the program, and fixing that mistake means breaking the way people use
+old versions.
+
+Thorium Nova also uses
+[conventional commit](https://www.conventionalcommits.org/en/v1.0.0/) messages
+to generate a changelog for each new version. While it's recommended you use a
+conventional commit message as your pull request name, it's not required. If you
+don't, a conventional commit message will be added when your pull request is
+merged.
+
+Periodically, the code in `develop` is merged into `main`. Any time code is
+merged into `main`, a new version is released automatically.
 
 ## Art and Assets
 
@@ -343,6 +351,9 @@ receive items as a thank you for their contributions. If Thorium Nova becomes
 commercially successful, there will be a discussion of how to fairly share
 profit among Thorium Nova contributors.
 
-Any donations made to Thorium Nova through Patreon or otherwise are intended to
-be used for development of Thorium Nova, but all funds are used at the sole
-discretion of Fyreworks LLC.
+[Thorium Nova now collects donations](https://opencollective.com/thorium-sim)
+through a service called Open Collective. This allows the project to continue to
+receive community donations without needing to worry about a privately held
+company controlling the funds. Instead, anyone can propose a use for funds, and
+Core Team members can vote on that proposal and dispense the funds. See the
+[governance document](GOVERNANCE.md) for more information.
