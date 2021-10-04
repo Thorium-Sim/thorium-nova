@@ -178,9 +178,12 @@ export default function getStore<G extends object>(options?: IStoreOptions<G>) {
     }
   }
 
-  const writeThrottle = throttle(writeFile, throttleDuration, {
-    trailing: true,
-  });
+  const writeThrottle =
+    process.env.NODE_ENV === "test"
+      ? writeFile
+      : throttle(writeFile, throttleDuration, {
+          trailing: true,
+        });
 
   const handler: ProxyHandler<any> = {
     get(target, key) {

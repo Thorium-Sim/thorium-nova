@@ -58,14 +58,12 @@ class Entity {
       // if nothing was passed simply use the default generator
       this.id = DefaultUIDGenerator.next();
     }
-
     /**
      * Systems applied to the entity.
      *
      * @property {Array[System]} systems
      */
     this.systems = [];
-
     /**
      * Indicate a change in components (a component was removed or added)
      * which require to re-compute entity eligibility to all systems.
@@ -73,14 +71,12 @@ class Entity {
      * @property {Boolean} systemsDirty
      */
     this.systemsDirty = false;
-
     /**
      * Components of the entity stored as key-value pairs.
      *
      * @property {Object} components
      */
     this.components = {} as Components;
-
     // components initialization
     for (let component in components) {
       // Initialize with a function. First because it lets the
@@ -91,16 +87,14 @@ class Entity {
       const componentClass = Object.values(allComponents).find(
         c => c.id === component
       ) as any;
-
       const data = components[component as ComponentIDs];
+
       let componentData =
         data instanceof componentClass
           ? data
-          : new componentClass(Object.assign(componentClass.default, data));
-
+          : new componentClass({...componentClass.defaults, ...data});
       this.components[component as ComponentIDs] = componentData;
     }
-
     /**
      * A reference to parent ECS class.
      * @property {ECS} ecs
