@@ -1,10 +1,9 @@
 ---
 name: Asset request
 about: Request some kind of asset
-title: ''
+title: ""
 labels: Asset
-assignees: ''
-
+assignees: ""
 ---
 
 **What kind of asset are you requesting? (Check one with an x)**
@@ -16,6 +15,6 @@ assignees: ''
 - [ ] 3D Model
 - [ ] Sound Effect
 - [ ] Music
-- [x] Other
+- [ ] Other
 
 **Describe the asset you want in as much detail as possible**

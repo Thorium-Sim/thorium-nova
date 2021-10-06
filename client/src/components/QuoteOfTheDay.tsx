@@ -172,6 +172,20 @@ const quotes = [
   "Free advice is seldom cheap.",
   // Chaucer
   "See yonder, lo, the Galaxy which men calleth the Milky Way, for it is white.",
+  // Dickens
+  "The Sun himself is weak when he first rises, and gathers strength and courage as the day gets on.",
+  // The Rainbow Connection
+  "What's so amazing that keeps us star gazing? And what do we think we might see?",
+  "We know that it's probably magic.",
+  "Have you been half asleep and have you heard voices? I've heard them calling my name.",
+  "I've heard it too many times to ignore it. It's something that I'm supposed to be.",
+  // Mark Twain quotes
+  "History doesn't repeat itself, but it does rhyme.",
+  "The two most important days in your life are the day you are born and the day you find out why.",
+  "Whenever you find yourself on the side of the majority, it is time to pause and reflect.",
+  "Truth is stranger than fiction, but it is because Fiction is obliged to stick to possibilities; Truth isn't.",
+  // Poe
+  "All that we see or seem is but a dream within a dream.",
 ];
 
 const QuoteOfTheDay = () => {

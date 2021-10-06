@@ -1,4 +1,4 @@
-import {readFile, access} from "fs/promises";
+import {readFile, access, rmdir} from "fs/promises";
 import getStore, {setBasePath} from "./index";
 interface TestStore {
   a: number;
@@ -6,10 +6,13 @@ interface TestStore {
   c: number[];
 }
 const wait = (time = 1000) => new Promise(resolve => setTimeout(resolve, time));
+afterAll(async () => {
+  await rmdir("./dbTest");
+});
 describe("db", () => {
   it("should load default values", () => {
     const data = getStore<{test: boolean; hey: number; string: string}>({
-      path: "./test",
+      path: "./test.json",
       initialData: {
         test: true,
         hey: 123,

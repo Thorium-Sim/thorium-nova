@@ -16,7 +16,7 @@ export class StationComplementComponent extends Component {
   stations: Station[];
 
   constructor(params: Partial<StationComplementComponent>) {
-    super();
+    super(params);
     this.id = params.id || uniqid("stc-");
     this.name = params.name || "Station Complement";
     this.stations = [];

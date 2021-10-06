@@ -17,7 +17,7 @@ describe("Entity", () => {
   it("should support getDefault components", () => {
     let entity = new Entity(0, {identity: {name: "bar"}});
 
-    expect(entity.components.identity).toEqual({name: "bar"});
+    expect(entity.components.identity?.name).toEqual("bar");
   });
 
   it("should support default data", () => {
@@ -34,11 +34,12 @@ describe("Entity", () => {
   });
 
   describe("addComponent()", () => {
-    it("should add a void object when a name is passed", () => {
+    it("should add a default object when a component name is passed", () => {
       let entity = new Entity();
+      expect(entity.components.identity).toEqual(undefined);
       entity.addComponent("identity");
-
-      expect(entity.components.identity).toEqual({});
+      expect(entity.components.identity?.name).toEqual("Entity");
+      expect(entity.components.identity?.description).toEqual("");
     });
   });
 
@@ -47,11 +48,11 @@ describe("Entity", () => {
       let entity = new Entity();
       entity.addComponent("identity", {name: "bar"});
 
-      expect(entity.components.identity).toEqual({name: "bar"});
+      expect(entity.components.identity?.name).toEqual("bar");
 
       entity.updateComponent("identity", {name: "foo"});
 
-      expect(entity.components.identity).toEqual({name: "foo"});
+      expect(entity.components.identity?.name).toEqual("foo");
     });
   });
 
@@ -60,11 +61,11 @@ describe("Entity", () => {
       let entity = new Entity();
       entity.addComponent("identity", {name: "bar"});
 
-      expect(entity.components.identity).toEqual({name: "bar"});
+      expect(entity.components.identity?.name).toEqual("bar");
 
       entity.updateComponents({identity: {name: "foo"}});
 
-      expect(entity.components.identity).toEqual({name: "foo"});
+      expect(entity.components.identity?.name).toEqual("foo");
     });
   });
 });
