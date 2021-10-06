@@ -13,7 +13,7 @@
   "main": "dist/electron.js",
   "scripts": {
     "dev": "concurrently --kill-others --names \"client,server\" -c \"blue.bold,magenta.bold\" \"npm run dev --workspace=client\" \"npm run dev --workspace=server\"",
-    "build": "concurrently --names \"client,server\" -c \"blue.bold,magenta.bold\" \"npm run build --workspace=client\" \"npm run build --workspace=server\"",
+    "build": "concurrently --names \"client,server,electron\" -c \"blue.bold,magenta.bold,green.bold\" \"npm run build --workspace=client\" \"npm run build --workspace=server\" \"npm run build --workspace=electron\"",
     "start": "NODE_ENV=production node dist/index.js",
     "test": "echo \"No Test Runner Yet\"",
     "typecheck": "tsc --noEmit",
