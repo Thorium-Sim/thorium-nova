@@ -15,6 +15,6 @@ assignees: ""
 - [ ] 3D Model
 - [ ] Sound Effect
 - [ ] Music
-- [x] Other
+- [ ] Other
 
 **Describe the asset you want in as much detail as possible**
