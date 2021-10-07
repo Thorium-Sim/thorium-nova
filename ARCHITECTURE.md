@@ -45,7 +45,8 @@ This project uses a number of tools to maintain code quality.
   changelog generation. When code is merged into `main`, Semantic Release will
   gather up all of the commits since the last release to generate the changelog.
   It will also take care of building and deploying the release artifacts.
-- Still need to figure out how I'm going to do automated tests.
+- **Jest** - Automated unit testing for the client, server, and shared project
+  folders.
 
 All of these tools will validate the code for every pull request, and pull
 requests won't be merged until they are all passing. Using an IDE like VS Code
@@ -55,12 +56,32 @@ code.
 
 ## Logical Structure
 
+### Database
+
+Thorium Nova uses a filesystem-based database, where the data for each saved
+flight is stored in its own JSON encoded file. When changes are made to the
+datastore variable created with the `db-fs` package, it automatically knows to
+persist the changes to the filesystem database. It uses a throttle to limit the
+number of filesystem writes to once every 30 seconds max.
+
 ### Entity-Component-System
 
-Thorium Nova uses Entity-Component-System (ECS) for managing its game state on
-the server. Component definitions are shared between the server and the client
-so both can take advantage of TypeScript Intellisense. Systems are defined on
-the server and operate on the list of entities once ever game frame.
+Thorium Nova uses
+[Entity-Component-System](https://en.wikipedia.org/wiki/Entity_component_system)
+(ECS) for managing its game state on the server. An Entity is a single instance
+of something in the game simulation. Entities are assigned components which add
+attributes and identities to the components. For example, the `identity`
+component assigns a name and description to entities, while the `isShip`
+component identifies an entity as a ship.
+
+Systems are classes that define the behavior of entities that have certain
+components. For example, the "VelocityPosition" system only operates on entities
+that have the `velocity` and `position` components, and changes the `position`
+based on the `velocity`.
+
+Component definitions are shared between the server and the client so both can
+take advantage of TypeScript Intellisense. Systems are defined on the server and
+operate on the list of relevant entities once ever game frame.
 
 ### Clients
 
@@ -80,12 +101,13 @@ A Flight is a single instance of a game, usually coupled with a specific crew
 and flight director. The flight runs the ECS world, encapsulates the game state
 for the flight, and executes any systems in the simulation. Flights also contain
 a list of all of the game inputs which happened during the flight, along with
-the timestamp and game tick in which they happened. This makes it possible to
-replay events of the flight, or rewind a certain amount of time
+the timestamp and game tick in which they happened. This should make it possible
+to replay events of the flight, or rewind a certain amount of time by replaying
+events
 
-When a flight is started or resumed, it starts up the HTTP server, which allows
-other clients to connect and start playing. A single server can only ever have
-one flight running at a time.
+When a flight is started or loaded from a save file, it starts up the HTTP
+server, which allows other clients to connect and start playing. A single server
+can only ever have one flight running at a time.
 
 ### Ships & Stations
 

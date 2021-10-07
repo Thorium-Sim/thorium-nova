@@ -14,6 +14,34 @@ This is the main repository for Thorium Nova, a multiplayer real-time bridge
 simulator game. To learn more about what Thorium Nova is, check out
 https://thoriumsim.com.
 
+## Development Quick Start
+
+I recommend using [Volta](https://volta.sh) to manage your Node and NPM
+versions, since it will automatically install the correct version when you work
+on Thorium Nova. If you're on Windows, I also recommend
+[using WSL](https://docs.microsoft.com/en-us/windows/wsl/install), although
+others have had success in Windows.
+
+First
+[install git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and
+run this command to download the code:
+
+```bash
+git clone https://github.com/Thorium-Sim/thorium-nova.git
+```
+
+Once the project has been cloned, you can install dependencies using NPM and
+start the project.
+
+```bash
+npm install
+npm run dev
+```
+
+This will automatically start the client and development servers and open up the
+UI in your web browser. If it doesn't automatically open, you can open it
+yourself by going to http://localhost:3000.
+
 ## Project Vision
 
 Thorium Nova is a platform for creating powerful narrative experiences in a
