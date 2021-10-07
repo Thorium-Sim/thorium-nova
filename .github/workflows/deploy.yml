@@ -5,15 +5,15 @@ on:
       - main
 
 jobs:
-  test:
-    runs-on: ubuntu-18.04
+  build:
+    runs-on: ubuntu-20.04
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16
       - name: Install Dependencies
         run: npm install
       - name: Release
@@ -30,7 +30,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        os: [macos-10.15, ubuntu-18.04, windows-2019]
+        os: [macos-10.15, ubuntu-20.04, windows-2019]
 
     steps:
       - name: Check out Git repository
@@ -40,19 +40,19 @@ jobs:
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16
       - name: Download production artifacts
         uses: actions/download-artifact@v2
         with:
           name: build
           path: build
-      # - name: Install Snapcraft
-      #   uses: samuelmeuli/action-snapcraft@v1
-      #   # Only install Snapcraft on Ubuntu
-      #   if: startsWith(matrix.os, 'ubuntu')
-      #   with:
-      #     # Log in to Snap Store
-      #     snapcraft_token: ${{ secrets.snapcraft_token }}
+      - name: Install Snapcraft
+        uses: samuelmeuli/action-snapcraft@v1
+        # Only install Snapcraft on Ubuntu
+        if: startsWith(matrix.os, 'ubuntu')
+        with:
+          # Log in to Snap Store
+          snapcraft_token: ${{ secrets.snapcraft_token }}
       - name: Prepare for app notarization
         if: startsWith(matrix.os, 'macos')
         # Import Apple API key for app notarization on macOS

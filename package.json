@@ -46,7 +46,7 @@
       "!**/{appveyor.yml,.travis.yml,circle.yml}",
       "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
     ],
-    "asar": false,
+    "asar": true,
     "directories": {
       "output": "./packages",
       "buildResources": "./electron/resources"
@@ -59,6 +59,7 @@
       "category": "public.app-category.entertainment",
       "icon": "./nova.icns",
       "hardenedRuntime": true,
+      "entitlements": "./electron/resources/entitlements.mac.plist",
       "gatekeeperAssess": true,
       "fileAssociations": [
         {
