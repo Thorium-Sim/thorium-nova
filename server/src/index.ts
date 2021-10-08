@@ -61,7 +61,7 @@ export async function startServer() {
 
     const app = buildHTTPServer({
       isHeadless,
-      staticRoot: path.join(process.cwd(), "dist/public/"),
+      staticRoot: path.join(process.cwd(), "public/"),
     });
     const UDP_START = parseInt(process.env.UDP_START || "50000", 10);
     const UDP_RANGE = parseInt(process.env.UDP_RANGE || "200", 10);
