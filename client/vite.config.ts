@@ -2,47 +2,43 @@ import {defineConfig} from "vite";
 import reactRefresh from "@vitejs/plugin-react-refresh";
 import tsconfigPaths from "vite-tsconfig-paths";
 import reactJsx from "vite-react-jsx";
-
-function releasesPlugin() {
-  return {
-    name: "releases",
-    async transform(src, id: string) {
-      const fs = await import("fs/promises");
-      const path = await import("path");
-      const {default: markdown} = await import("markdown-it");
-      const releaseNotes = await fs.readFile(
-        path.resolve("../ARCHITECTURE.md"),
-        "utf8"
-      );
-      const html = markdown().render(releaseNotes);
-      if (id.endsWith("release-notes.json")) {
-        return {
-          code: `export default {data:\`${html}\`}`,
-          map: null,
-        };
-      }
-    },
-  };
-}
+import releasesPlugin from "./vite-plugins/releases";
+import mdx from "vite-plugin-mdx";
+import remarkFrontmatter from "remark-frontmatter";
+import remarkPrism from "remark-prism";
+import {remarkMdxImages} from "remark-mdx-images";
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [reactRefresh(), tsconfigPaths(), reactJsx(), releasesPlugin()],
-  build: {
-    outDir: "../dist/public",
-    emptyOutDir: false,
-  },
-  base: "",
-  server: {
-    open: true,
-    proxy: {
-      // "/components": "http://localhost:3001/components",
+export default defineConfig(async () => {
+  const options = {
+    // See https://mdxjs.com/advanced/plugins
+    remarkPlugins: [remarkMdxImages, remarkFrontmatter, remarkPrism],
+    rehypePlugins: [
+      (await import("rehype-slug")).default,
+      (await import("rehype-autolink-headings")).default,
+    ],
+  };
+  return {
+    plugins: [
+      reactRefresh(),
+      tsconfigPaths(),
+      reactJsx(),
+      releasesPlugin(),
+      mdx(options),
+    ],
+    build: {
+      outDir: "../dist/public",
+      emptyOutDir: false,
     },
-    fs: {
-      strict: false,
+    base: "/",
+    server: {
+      open: true,
+      fs: {
+        strict: false,
 
-      // Allow serving files from one level up to the project root
-      allow: [".."],
+        // Allow serving files from one level up to the project root
+        allow: [".."],
+      },
     },
-  },
+  };
 });
