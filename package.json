@@ -24,7 +24,7 @@
     "format:different": "prettier --list-different \"**/*.+(js|jsx|yml|yaml|css|less|scss|ts|tsx|md|mdx|graphql|vue)\"",
     "semantic-release": "semantic-release",
     "package": "electron-builder --dir",
-    "postinstall": "electron-builder install-app-deps",
+    "postinstall": "concurrently \"electron-builder install-app-deps\" \"patch-package\"",
     "validate": "concurrently --names \"lint,format,typecheck,test\" -c \"yellow.bold,magenta.bold,blue.bold,green.bold\" \"npm run lint\" \"npm run format:different\" \"npm run typecheck\" \"CI=true npm run test\""
   },
   "build": {
@@ -132,6 +132,7 @@
     "jest": "^27.2.4",
     "jest-watch-select-projects": "^2.0.0",
     "jest-watch-typeahead": "^1.0.0",
+    "patch-package": "^6.4.7",
     "prettier": "^2.4.1",
     "semantic-release": "^18.0.0"
   },
