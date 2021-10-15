@@ -1,11 +1,9 @@
 import {useEffect} from "react";
-import {InputReturns} from "server/src/utils/types";
 import {proxy, useSnapshot} from "valtio";
 import {
   GetSubscriptionReturns,
   DataCardNames,
   SubscriptionNames,
-  SubscriptionReturn,
   CardDataFunctions,
 } from "../utils/cardData";
 import {useCardContext} from "./CardContext";
@@ -19,6 +17,7 @@ type CardProxy = {
 };
 
 const cardProxy = proxy<Partial<CardProxy>>({});
+let loadingPromises: Record<string, (value: unknown) => void> = {};
 
 type CardData =
   | string
@@ -51,6 +50,7 @@ export function useCardDataSubscribe() {
           let actualKeyName = key as keyof typeof cardProxy[typeof data.card];
           cardProxy[data.card]![actualKeyName] = data.data[actualKeyName];
         });
+        loadingPromises[data.card]?.(null);
       });
       return () => {
         channelConnected = false;
@@ -61,7 +61,11 @@ export function useCardDataSubscribe() {
 export default function useCardData<CardName extends DataCardNames>() {
   const {cardName} = useCardContext() as {cardName: CardName};
   const data = useSnapshot(cardProxy);
-  const cardData = data[cardName] as any;
+  const cardData = (data[cardName] || {}) as any;
+  if (!data[cardName])
+    throw new Promise(res => {
+      loadingPromises[cardName] = res;
+    });
 
   return cardData as Required<CardProxy[CardName]>;
 }
@@ -69,6 +73,10 @@ export default function useCardData<CardName extends DataCardNames>() {
 export function useClientData() {
   const data = useSnapshot(cardProxy);
   const cardData = data.allData!;
-  if (!cardData) throw new Promise(res => setTimeout(res, 100));
+  if (!cardData) {
+    throw new Promise(res => {
+      loadingPromises.allData = res;
+    });
+  }
   return cardData;
 }

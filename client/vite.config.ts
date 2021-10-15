@@ -7,6 +7,7 @@ import mdx from "vite-plugin-mdx";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkPrism from "remark-prism";
 import {remarkMdxImages} from "remark-mdx-images";
+import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => {
@@ -29,6 +30,9 @@ export default defineConfig(async () => {
     build: {
       outDir: "../dist/public",
       emptyOutDir: false,
+    },
+    define: {
+      "process.env.USER_PATH": `"${path.resolve(process.cwd(), "..")}"`,
     },
     base: "/",
     server: {

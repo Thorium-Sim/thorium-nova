@@ -1,0 +1,5 @@
+---
+title: Inputs
+---
+
+# Inputs
