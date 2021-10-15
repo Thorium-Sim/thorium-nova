@@ -11,53 +11,8 @@ import {WelcomeButtons} from "./components/WelcomeButtons";
 import {FlightLobby} from "./components/FlightLobby";
 import {DocLayout, routes as docRoutes} from "./docs";
 
-// const Dot = () => {};
-// const CardData = () => {
-//   const data = useCardData<"Clients">();
-//   const client = useClientData();
-//   const {SI} = useThorium();
-
-//   useAnimationFrame(() => {
-//     const entities = SI.calcInterpolation("x y z", "entities")?.state as {
-//       id: string;
-//       x: number;
-//       y: number;
-//     }[];
-//     entities?.forEach(d => {
-//       const el = document.getElementById(`dot-${d.id}`);
-//       if (!el) return;
-//       el.style.display = "block";
-//       el.style.transform = `translate(${d.x + window.innerWidth / 2}px, ${
-//         d.y + window.innerHeight / 2
-//       }px)`;
-//     });
-//   });
-//   return (
-//     <div>
-//       <pre className="text-left text-white">
-//         Data: {JSON.stringify(data, null, 2)}
-//       </pre>
-//       <pre className="text-left text-white">
-//         Data: {JSON.stringify(client, null, 2)}
-//       </pre>
-//       <div className="fixed inset-0 z-10 pointer-events-none">
-//         {client?.dots?.map(d => {
-//           return (
-//             <div
-//               key={d.id}
-//               id={`dot-${d.id}`}
-//               style={{display: "none", backgroundColor: d.color}}
-//               className="w-8 h-8 absolute rounded-full"
-//             />
-//           );
-//         })}
-//       </div>
-//     </div>
-//   );
-// };
-
 const MainPage = () => {
-  const {netSend} = useThorium();
+  // const {netSend} = useThorium();
   return (
     <div className="welcome h-full p-12 grid grid-cols-2 grid-rows-2">
       <WelcomeLogo />
