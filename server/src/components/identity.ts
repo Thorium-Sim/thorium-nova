@@ -1,8 +1,11 @@
 import {Component} from "./utils";
 
 export class IdentityComponent extends Component {
-  static id: "identity" = "identity";
+  static id = "identity" as const;
 
+  /**
+   * The name of the entity.
+   */
   name: string = "Entity";
 
   /**
