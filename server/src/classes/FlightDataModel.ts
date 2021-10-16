@@ -3,6 +3,7 @@ import uniqid from "@thorium/uniqid";
 import randomWords from "@thorium/random-words";
 import {ServerDataModel} from "./ServerDataModel";
 import systems from "../systems";
+import {FlightClient} from "./Client";
 
 export class FlightDataModel {
   static INTERVAL = 1000 / 60;
@@ -11,6 +12,7 @@ export class FlightDataModel {
   date: number;
   paused: boolean;
   ecs!: ECS;
+  clients: Record<string, FlightClient> = {};
   pluginIds: string[] = [];
   private initEntities: Entity[];
   serverDataModel: ServerDataModel;
@@ -28,6 +30,12 @@ export class FlightDataModel {
     this.pluginIds = params.pluginIds || [];
     this.serverDataModel = params.serverDataModel;
     this.initEntities = params.entities || [];
+    this.clients = Object.fromEntries(
+      Object.entries(params.clients || {}).map(([id, client]) => [
+        id,
+        new FlightClient(client),
+      ])
+    );
   }
   run = () => {
     // Run all the systems
@@ -105,6 +113,12 @@ export class FlightDataModel {
       date: this.date,
       pluginIds: this.pluginIds,
       entities: this.ecs.entities.map(e => e.serialize()),
+      flightClients: Object.fromEntries(
+        Object.entries(this.clients).map(([id, client]) => [
+          id,
+          client.serialize(),
+        ])
+      ),
     };
   }
 }
