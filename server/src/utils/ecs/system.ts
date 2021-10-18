@@ -85,7 +85,7 @@ class System {
    * Abstract method to subclass. Should return true if the entity is eligible
    * to the system, false otherwise.
    */
-  test(_entity: Entity) {
+  test(_entity: Entity): boolean {
     return false;
   }
   /**
