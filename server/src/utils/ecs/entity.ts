@@ -176,7 +176,7 @@ class Entity {
       c => c.id === name
     ) as any;
     let componentData =
-      data instanceof componentClass
+      (data as any) instanceof componentClass
         ? data
         : new componentClass(Object.assign(componentClass.defaults, data));
 
