@@ -1,0 +1,78 @@
+---
+title: ECS Components
+---
+
+import DevLink from "../DevLink";
+
+# ECS Components
+
+ECS Components are the building blocks of entities. They define the data
+structures can be assigned to entities to make them more than just an ID.
+
+## Defining Components
+
+Components should extend from the `Component` class defined in
+"<DevLink>/server/src/components/utils.ts</DevLink>" and be placed inside the
+`/server/src/components` folder or a sub-folder. Every component should includ a
+static `id` which is a literal string type. Using `as const` here is helpful.
+
+Components should contain as many properties for that component that are
+exclusive to that component. Properties should be defined with a type and either
+include a default value or be listed as optional. This helps with type safety
+and auto-complete.
+
+If a property might be useful to have on many kinds of entities, it should be
+split out into its own component. Good judgement should be applied here. It
+makes sense to have a separate `heat` component so engine entities, reactor
+entities, and phaser entities can all use the single component. However, using
+that same `heat` component for a star might not make as much sense, since we
+likely won't simulate variations in star heat.
+
+Here's an example of the identity component, which includes two properties.
+Notice the JSDoc comments which can be useful for knowing more context about the
+property. For example, a comment can be added explaining the temperature scale
+used for heat.
+
+```ts
+// /server/src/components/identity.ts
+import {Component} from "./utils";
+
+export class IdentityComponent extends Component {
+  static id = "identity" as const;
+
+  /**
+   * The name of the entity.
+   */
+  name: string = "Entity";
+
+  /**
+   * Should only be used for information provided by the Flight Director
+   */
+  description?: string = "";
+}
+```
+
+There are two kinds of components: regular components with properties, as we saw
+above, and flag component, which have no properties and only exist to identify
+groups of entities.
+
+## Flag Components
+
+Flags are often used by Systems to know whether an entity should be included in
+that system's update function. They can also be used by subscriptions and
+DataStream filters to find entities that should be sent to the client. An
+important example of a flag component is `isPlayerShip`, which identifies ships
+that are being controlled by a human player.
+
+```ts
+import {Component, ComponentOmit} from "./utils";
+
+export class IsPlayerShipComponent extends Component {
+  static id: "isPlayerShip" = "isPlayerShip";
+  static defaults: ComponentOmit<IsPlayerShipComponent> = {
+    value: true,
+  };
+
+  value: true = true;
+}
+```
