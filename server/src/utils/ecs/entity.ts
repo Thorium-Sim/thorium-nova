@@ -170,13 +170,13 @@ class Entity {
    */
   addComponent<Name extends keyof Components, Data extends Components[Name]>(
     name: Name,
-    data?: Data
+    data?: Partial<Data>
   ) {
     const componentClass = Object.values(allComponents).find(
       c => c.id === name
     ) as any;
     let componentData =
-      data instanceof componentClass
+      (data as any) instanceof componentClass
         ? data
         : new componentClass(Object.assign(componentClass.defaults, data));
 
@@ -213,7 +213,7 @@ class Entity {
    */
   updateComponent<Name extends keyof Components, Data extends Components[Name]>(
     name: Name,
-    data: Data
+    data: Partial<Data>
   ) {
     let component = this.components[name];
 
