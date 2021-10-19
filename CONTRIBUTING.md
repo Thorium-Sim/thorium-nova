@@ -70,9 +70,9 @@ If there is an existing issue that you want to learn more about or have
 suggestions about, add a comment to the issue on Github with your questions or
 thoughts.
 
-Check out the [roadmap](https://github.com/Thorium-Sim/thorium-nova/projects/1)
-to know what features are coming, what we are working on, and what we have
-recently completed.
+Check out the [roadmap](https://github.com/orgs/Thorium-Sim/projects/2) to know
+what features are coming, what we are working on, and what we have recently
+completed.
 
 ### Technical Documentation
 
@@ -86,8 +86,8 @@ an issue or submit a pull request!
 A handful of issues are labeled
 [Help Wanted](https://github.com/Thorium-Sim/thorium-nova/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
 and are a good place to start. You can also check the
-[roadmap](https://github.com/Thorium-Sim/thorium-nova/projects/1) for tasks that
-are planned, but not yet assigned to anyone.
+[roadmap](https://github.com/orgs/Thorium-Sim/projects/2) for tasks that are
+planned, but not yet assigned to anyone.
 
 There are also issue labels for different kinds of contribution. Here are links
 to those:

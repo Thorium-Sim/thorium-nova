@@ -16,6 +16,10 @@ https://thoriumsim.com.
 
 ## Development Quick Start
 
+Check out the [project roadmap](https://github.com/orgs/Thorium-Sim/projects/2)
+for tasks that are planned, but not yet assigned to anyone. Add a comment to an
+issue to ask to have that issue assigned to you.
+
 I recommend using [Volta](https://volta.sh) to manage your Node and NPM
 versions, since it will automatically install the correct version when you work
 on Thorium Nova. If you're on Windows, I also recommend
