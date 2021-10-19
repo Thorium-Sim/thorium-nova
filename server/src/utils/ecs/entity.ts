@@ -173,7 +173,9 @@ class Entity {
       c => c.id === name
     ) as any;
     let componentData =
-      (data as any) instanceof componentClass ? data : new componentClass().init(data);
+      (data as any) instanceof componentClass
+        ? data
+        : new componentClass().init(data);
 
     this.components[name] = componentData;
     this.setSystemsDirty();
