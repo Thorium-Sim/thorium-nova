@@ -136,10 +136,12 @@ export class ServerClient extends BaseClient {
     // TODO: September 1, 2021 Set up net requests through the data channel
   }
   get cards() {
-    // TODO Aug 28, 2021 Populate this list with the list of cards assigned to the client.
+    // TODO Aug 28, 2021 Populate this list with the dynamic list of cards assigned to the client.
     // Also, there needs to be some way to unsubscribe and re-subscribe whenever the client's
     // ship, station, or cards change.
     const cards: (keyof typeof cardSubscriptions)[] = ["Clients", "Flights"];
+
+    // This is required for the data that is passed to every connected client;
     cards.push("allData");
 
     return cards;
@@ -162,6 +164,7 @@ export class ServerClient extends BaseClient {
         typeof cardSubscriptions[typeof card]
       >;
       const keys = Object.keys(cardSubs) as SubscriptionNames[];
+      const initialData: Record<string, any> = {};
       for (let sub of keys) {
         // This listener will be called whenever `pubsub.publish(sub, payload)` is called.
         const listener = async (payload: any, context: DataContext) => {
@@ -182,20 +185,19 @@ export class ServerClient extends BaseClient {
             })
           );
         };
-        setTimeout(async () => {
-          // Send initial data to the client. Need a delay for
-          // the client to register.
-          const data = await cardSubs[sub].fetch(this.clientContext);
-          socket.socket.send(
-            JSON.stringify({
-              type: "cardData",
-              data: {card, data: {[sub]: data}},
-            })
-          );
-        }, 100);
-
+        initialData[sub] = await cardSubs[sub].fetch(this.clientContext);
         subscriptionList.push({trigger: sub, listener});
       }
+      setTimeout(async () => {
+        // Send initial data to the client. Need a delay for
+        // the client to register.
+        socket.socket.send(
+          JSON.stringify({
+            type: "cardData",
+            data: {card, data: initialData},
+          })
+        );
+      }, 100);
     }
     this.subscriptionListeners = await Promise.all(
       subscriptionList.map(async sub => {
