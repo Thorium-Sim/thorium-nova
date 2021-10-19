@@ -76,3 +76,84 @@ export class IsPlayerShipComponent extends Component {
   value: true = true;
 }
 ```
+
+## Component Catalog
+
+This is a catalog of all of the components, along with what their properties and
+purpose is.
+
+### Identity
+
+**Purpose:** Provides a name and description for an entity.
+
+**Properties:**
+
+- name (_string_): The name of the entity.
+- description (_string_): A description of the entity.
+
+### IsPlayerShip
+
+**Purpose:** Flag component. Identifies entities that are controlled by a human
+player.
+
+### IsShip
+
+**Purpose:** Identifies entities that are ships.
+
+**Properties:**
+
+- mass (_number_): The mass of the ship in kilograms.
+
+- shipClass (_string_): The class of the ship.
+
+- registry (_string_): The registry number of the ship.
+
+### Position
+
+**Purpose:** Provides the position of an entity in 3D space.
+
+**Properties:**
+
+- x (_number_): The x coordinate of the entity.
+- y (_number_): The y coordinate of the entity.
+- z (_number_): The z coordinate of the entity.
+
+### Velocity
+
+**Purpose:** Provides the velocity of an entity in 3D space.
+
+**Properties:**
+
+- x (_number_): The x unit velocity of the entity.
+- y (_number_): The y unit velocity of the entity.
+- z (_number_): The z unit velocity of the entity.
+
+### Rotation
+
+**Purpose:** Provides the rotation of an entity in 3D space using a quaternion.
+
+**Properties:**
+
+- x (_number_): The x component of the quaternion.
+- y (_number_): The y component of the quaternion.
+- z (_number_): The z component of the quaternion.
+- w (_number_): The w component of the quaternion.
+
+### Color
+
+**Purpose:** Provides the color of an entity. Should be CSS-compatible.
+
+**Properties:**
+
+- color (_string_): The color of the entity.
+
+### Timer
+
+**Purpose:** Provides the necessary properties for an entity to be used as a
+countdown timer.
+
+**Properties:**
+
+- time (_string_): The time in HH:MM:SS format that the timer has remaining.
+- paused (_boolean_): Whether the timer is paused or not.
+- label (_string_): The label of the timer.
