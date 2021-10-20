@@ -138,7 +138,7 @@ const TOC = function TOC({
       }
     });
     setCurrent(parentHeading);
-  }, [pathname]);
+  }, [pathname, docRef]);
   if (!current) return null;
   return (
     <div className="toc">
