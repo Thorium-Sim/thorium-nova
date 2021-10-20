@@ -263,4 +263,15 @@ export class FlightClient extends BaseClient {
     this.offlineState = params.offlineState || null;
     this.training = params.training || false;
   }
+  serialize() {
+    return {
+      id: this.id,
+      flightId: this.flightId,
+      shipId: this.shipId,
+      stationId: this.stationId,
+      loginName: this.loginName,
+      offlineState: this.offlineState,
+      training: this.training,
+    };
+  }
 }

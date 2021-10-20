@@ -1,16 +1,11 @@
-import {Component, ComponentOmit} from "./utils";
+import {Component} from "./utils";
 
 export class VelocityComponent extends Component {
   static id: "velocity" = "velocity";
-  static defaults: ComponentOmit<VelocityComponent> = {
-    x: 0,
-    y: 0,
-    z: 0,
-  };
 
-  x!: number;
+  x: number = 0;
 
-  y!: number;
+  y: number = 0;
 
-  z!: number;
+  z: number = 0;
 }

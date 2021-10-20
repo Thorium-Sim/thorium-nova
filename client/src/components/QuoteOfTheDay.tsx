@@ -186,6 +186,8 @@ const quotes = [
   "Truth is stranger than fiction, but it is because Fiction is obliged to stick to possibilities; Truth isn't.",
   // Poe
   "All that we see or seem is but a dream within a dream.",
+  // Kirk in space
+  "I hope I never recover from this.",
 ];
 
 const QuoteOfTheDay = () => {

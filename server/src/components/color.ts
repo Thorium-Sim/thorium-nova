@@ -1,10 +1,7 @@
-import {Component, ComponentOmit} from "./utils";
+import {Component} from "./utils";
 
 export class ColorComponent extends Component {
   static id: "color" = "color";
-  static defaults: ComponentOmit<ColorComponent> = {
-    color: "hsl(0,100%,50%)",
-  };
 
-  color!: string;
+  color: string = "hsl(0,100%,50%)";
 }

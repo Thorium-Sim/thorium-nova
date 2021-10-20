@@ -6,7 +6,10 @@ type ComponentKeys = keyof AllComponents;
 export type ComponentIDs = AllComponents[ComponentKeys]["id"];
 
 export type ComponentProperties = {
-  [P in ComponentKeys as AllComponents[P]["id"]]: AllComponents[P]["defaults"];
+  [P in ComponentKeys as AllComponents[P]["id"]]: Omit<
+    InstanceType<AllComponents[P]>,
+    "init"
+  >;
 };
 
 export {allComponents as components};

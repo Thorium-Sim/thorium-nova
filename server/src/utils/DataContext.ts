@@ -5,6 +5,8 @@ import {FlightDataModel} from "../classes/FlightDataModel";
 /**
  * An instance of this class is available in every input and subscription handler
  * You can use getters to provide convenient computed data
+ *
+ * Be sure to update the docs page any time you modify the properties of this class
  */
 
 export class DataContext {
@@ -29,5 +31,15 @@ export class DataContext {
   }
   get client() {
     return this.database.server.clients[this.clientId];
+  }
+  get flightClient() {
+    if (!this.database.flight) return null;
+    if (!this.database.flight.clients[this.clientId]) {
+      this.database.flight.clients[this.clientId] = new FlightClient({
+        id: this.clientId,
+        flightId: this.database.flight.id,
+      });
+    }
+    return this.database.flight.clients[this.clientId];
   }
 }
