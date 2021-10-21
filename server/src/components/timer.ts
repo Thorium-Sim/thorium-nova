@@ -1,16 +1,11 @@
-import {Component, ComponentOmit} from "./utils";
+import {Component} from "./utils";
 
 export class TimerComponent extends Component {
   static id: "timer" = "timer";
-  static defaults: ComponentOmit<TimerComponent> = {
-    label: "Generic",
-    time: "00:05:00",
-    paused: false,
-  };
 
-  label!: string;
+  label: string = "Generic";
 
-  time!: string;
+  time: string = "00:05:00";
 
-  paused!: boolean;
+  paused: boolean = false;
 }

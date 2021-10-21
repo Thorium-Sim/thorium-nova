@@ -1,0 +1,114 @@
+---
+title: ECS Systems
+---
+
+# ECS Systems
+
+ECS Systems are what actually run the simulations and provide the behaviors to
+the entity components. Systems are extended from the base `System` class and
+exported from "<DevLink>/server/src/systems/index.ts</DevLink>" in the specific
+order that they are supposed to run. The base `System` class is designed to keep
+a cache of the entities associated with it so it doesn't have to iterate over
+the entire entity list every time it runs.
+
+The intention is to extend any of the several abstract methods provided by the
+`System` class. These include `test`, `preUpdate`, `update`, `postUpdate`,
+`enter`, and `exit`.
+
+## `test(entity:Entity):boolean`
+
+This is called whenever a system is added to the ECS world, whenever an entity
+is added, or whenever a component is added or removed from an entity. It should
+return `true` if the system should operate on the entity and `false` if it
+should not.
+
+## `preUpdate(elapsed:number)`
+
+Called once every update before any entities are updated. It is passed the
+amount of time that elapsed since the last update.
+
+## `update(entity:Entity, elapsed:number)`
+
+Called for every entity associated with this system. This is where the bulk of
+the logic should be. Any mutations to entities should happen here.
+
+## `postUpdate(elapsed:number)`
+
+Called once every update after all of the entities have been updated. It is
+passed the amount of time that elapsed since the last update. This is where any
+`pubsub.publish` calls should be placed.
+
+## `enter(entity:Entity)`
+
+Called whenever an entity is added to the system.
+
+## `exit(entity:Entity)`
+
+Called whenever an entity is removed from the system.
+
+## Example
+
+This code can be found in
+"<DevLink>/server/src/systems/TimerSystem.ts</DevLink>"
+
+```ts
+import {Duration} from "luxon";
+import {Entity, System} from "../utils/ecs";
+import {pubsub} from "../utils/pubsub";
+
+export class TimerSystem extends System {
+  timeCount = 0;
+  test(entity: Entity) {
+    return !!entity.components.timer;
+  }
+  preUpdate(elapsed: number) {
+    this.timeCount += elapsed;
+  }
+  update(entity: Entity, elapsed: number) {
+    if (
+      entity.components.timer &&
+      this.timeCount >= 1000 &&
+      !entity.components.timer?.paused
+    ) {
+      try {
+        entity.components.timer.time = subtractTimer(
+          entity.components.timer.time
+        );
+        if (entity.components.timer.time === "00:00:00") {
+          this.ecs.removeEntityById(entity.id);
+        }
+      } catch (err) {
+        if (err?.message === "Seconds has gone negative") {
+          // Remove the entity
+          this.ecs.removeEntityById(entity.id);
+        }
+      }
+    }
+  }
+  postUpdate() {
+    if (this.timeCount >= 1000) {
+      this.timeCount = 0;
+      pubsub.publish("timers", {
+        entities: this.ecs.entities.filter(e => e.components.timer),
+      });
+    }
+  }
+}
+
+function subtractTimer(timer: string) {
+  const [hours = "0", minutes = "0", seconds = "0"] = timer.split(":");
+  const dur = Duration.fromObject({
+    hours: parseInt(hours, 10),
+    minutes: parseInt(minutes, 10),
+    seconds: parseInt(seconds, 10),
+  })
+    .minus(1000)
+    .normalize()
+    .toFormat("hh:mm:ss");
+
+  if (parseInt(seconds, 10) < 0) {
+    throw new Error("Seconds has gone negative");
+  }
+  return dur;
+}
+```

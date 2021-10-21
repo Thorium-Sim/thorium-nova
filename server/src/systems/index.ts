@@ -4,6 +4,7 @@
  */
 import {DataStreamSystem} from "./DataStreamSystem";
 import {RandomMovementSystem} from "./RandomMovementSystem";
+import {TimerSystem} from "./TimerSystem";
 
-const systems = [RandomMovementSystem, DataStreamSystem];
+const systems = [TimerSystem, RandomMovementSystem, DataStreamSystem];
 export default systems;

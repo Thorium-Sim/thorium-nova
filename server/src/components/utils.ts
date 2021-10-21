@@ -1,16 +1,10 @@
-export type ComponentOmit<T> = Omit<
-  T,
-  "id" | "defaults" | "getDefaults" | "serialize"
->;
-
 export abstract class Component {
   static id: string;
-  static defaults: any;
-  static getDefaults?: Function;
-  static serialize(component: Component): any {
+  static serialize(component: Omit<Component, "init">): any {
     return component;
   }
-  constructor(params: any) {
+  init(params: any = {}) {
     Object.assign(this, params);
+    return this;
   }
 }

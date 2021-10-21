@@ -1,16 +1,15 @@
-import {Component, ComponentOmit} from "./utils";
+import {Component} from "./utils";
 
 export class IdentityComponent extends Component {
-  static id: "identity" = "identity";
-  static defaults: ComponentOmit<IdentityComponent> = {
-    name: "Entity",
-    description: "",
-  };
+  static id = "identity" as const;
 
-  name!: string;
+  /**
+   * The name of the entity.
+   */
+  name: string = "Entity";
 
   /**
    * Should only be used for information provided by the Flight Director
    */
-  description?: string;
+  description?: string = "";
 }

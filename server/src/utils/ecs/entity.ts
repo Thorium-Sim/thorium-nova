@@ -88,11 +88,8 @@ class Entity {
         c => c.id === component
       ) as any;
       const data = components[component as ComponentIDs];
-
       let componentData =
-        data instanceof componentClass
-          ? data
-          : new componentClass({...componentClass.defaults, ...data});
+        data instanceof componentClass ? data : new componentClass().init(data);
       this.components[component as ComponentIDs] = componentData;
     }
     /**
@@ -170,7 +167,7 @@ class Entity {
    */
   addComponent<Name extends keyof Components, Data extends Components[Name]>(
     name: Name,
-    data?: Data
+    data?: Partial<Data>
   ) {
     const componentClass = Object.values(allComponents).find(
       c => c.id === name
@@ -178,7 +175,7 @@ class Entity {
     let componentData =
       (data as any) instanceof componentClass
         ? data
-        : new componentClass(Object.assign(componentClass.defaults, data));
+        : new componentClass().init(data);
 
     this.components[name] = componentData;
     this.setSystemsDirty();
@@ -213,7 +210,7 @@ class Entity {
    */
   updateComponent<Name extends keyof Components, Data extends Components[Name]>(
     name: Name,
-    data: Data
+    data: Partial<Data>
   ) {
     let component = this.components[name];
 
