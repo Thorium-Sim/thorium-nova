@@ -2,13 +2,17 @@ import * as React from "react";
 import {NavLink, Outlet, useLocation} from "react-router-dom";
 import "prismjs/themes/prism-tomorrow.css";
 import Menubar from "@thorium/ui/Menubar";
+import {Index} from "flexsearch";
 import "./docs.css";
+
+const docIndex = new Index();
 
 const ROUTES = import.meta.globEager("/src/docs/**/*.{tsx,jsx,md,mdx}");
 
 type Route = {
   path: string;
   component: React.ComponentType;
+  content: string;
   section: string;
   frontmatter: {
     title: string;
@@ -32,12 +36,19 @@ export const routes = Object.keys(ROUTES)
     return {
       path: path.toLowerCase().replace(/\s/g, "-"),
       component: ROUTES[route].default,
+      content: ROUTES[route].content,
       section: routeParts[0],
       frontmatter: ROUTES[route].frontmatter,
     };
   })
   .filter(isRoute);
 
+routes.forEach(route => {
+  docIndex.add(
+    JSON.stringify({...route.frontmatter, path: route.path}),
+    route.content
+  );
+});
 type Heading = {
   title: string;
   id: string;
