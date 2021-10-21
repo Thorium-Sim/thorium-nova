@@ -1,11 +1,83 @@
 import * as React from "react";
-import {NavLink, Outlet, useLocation} from "react-router-dom";
+import {Link, NavLink, Outlet, useLocation} from "react-router-dom";
 import "prismjs/themes/prism-tomorrow.css";
 import Menubar from "@thorium/ui/Menubar";
+import {Popover, Transition} from "@headlessui/react";
 import {Index} from "flexsearch";
 import "./docs.css";
 
 const docIndex = new Index();
+
+function Search() {
+  const [results, setResults] = React.useState<{title: string; path: string}[]>(
+    []
+  );
+  return (
+    <div className="search mb-4">
+      <Popover className="relative">
+        <>
+          <input
+            type="text"
+            placeholder="Search"
+            className="input input-lg input-bordered input-ghost w-full !h-8 py-0 focus:!text-white"
+            onFocus={e => {
+              const value = e.target.value;
+              if (value.length > 2) {
+                const results = docIndex
+                  .search(value)
+                  .map(id => (typeof id === "string" ? JSON.parse(id) : id));
+                setResults(results);
+              }
+            }}
+            onChange={e => {
+              const value = e.target.value;
+              if (value.length > 2) {
+                const results = docIndex
+                  .search(value)
+                  .map(id => (typeof id === "string" ? JSON.parse(id) : id));
+                setResults(results);
+              } else {
+                setResults([]);
+              }
+            }}
+          />
+          <Transition
+            as={React.Fragment}
+            enter="transition ease-out duration-200"
+            enterFrom="opacity-0 translate-y-1"
+            enterTo="opacity-100 translate-y-0"
+            leave="transition ease-in duration-150"
+            leaveFrom="opacity-100 translate-y-0"
+            leaveTo="opacity-0 translate-y-1"
+            show={results.length > 0}
+          >
+            <Popover.Panel
+              static
+              className="absolute z-10 w-64 px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-3xl"
+            >
+              <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
+                <div className="relative bg-black/50 p-7">
+                  {results.map(item => (
+                    <Link
+                      onClick={() => {
+                        setResults([]);
+                      }}
+                      key={item.path}
+                      to={item.path}
+                      className="flex items-center px-2 py-1 m-1 transition duration-150 ease-in-out rounded-lg hover:bg-gray-800 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
+                    >
+                      <p className="font-medium text-gray-50">{item.title}</p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </Popover.Panel>
+          </Transition>
+        </>
+      </Popover>
+    </div>
+  );
+}
 
 const ROUTES = import.meta.globEager("/src/docs/**/*.{tsx,jsx,md,mdx}");
 
@@ -235,6 +307,7 @@ export const DocLayout = () => {
           </div>
         </article>
         <aside className="flex-1 overflow-y-auto px-4 py-8 text-white w-full max-w-sm bg-black/60 backdrop-filter backdrop-blur">
+          <Search />
           <TOC
             pathname={location.pathname}
             docRef={docRef}
