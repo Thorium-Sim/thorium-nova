@@ -9,7 +9,9 @@ import Credits from "./components/Credits";
 import {WelcomeLogo} from "./components/WelcomeLogo";
 import {WelcomeButtons} from "./components/WelcomeButtons";
 import {FlightLobby} from "./components/FlightLobby";
-import {DocLayout, routes as docRoutes} from "./docs";
+
+const DocLayout = lazy(() => import("./docs"));
+const Config = lazy(() => import("./pages/Config"));
 
 const MainPage = () => {
   // const {netSend} = useThorium();
@@ -62,11 +64,8 @@ function AppRoutes() {
       />
       <Route path="/components" element={<ComponentDemo />} />
       <Route path="/releases" element={<Releases />} />
-      <Route path="/docs" element={<DocLayout />}>
-        {docRoutes.map(({path, component: Component = Fragment}) => (
-          <Route key={path} path={path} element={<Component />} />
-        ))}
-      </Route>
+      <Route path="/docs/*" element={<DocLayout />}></Route>
+      <Route path="/config/*" element={<Config />}></Route>
       <Route path="*" element={<NoMatch />} />
     </Routes>
   );
