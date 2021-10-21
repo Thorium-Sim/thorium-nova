@@ -5,6 +5,7 @@ import {BrowserRouter as Router} from "react-router-dom";
 import useEasterEgg from "../hooks/useEasterEgg";
 import {ErrorBoundary, FallbackProps} from "react-error-boundary";
 import bg from "../images/background.jpg";
+import {FaSpinner} from "react-icons/fa";
 
 const Fallback: React.FC<FallbackProps> = ({error}) => {
   return (
@@ -42,7 +43,13 @@ export default function AppContext({children}: {children: ReactNode}) {
   return (
     <StrictMode>
       <Layout>
-        <Suspense fallback={null}>
+        <Suspense
+          fallback={
+            <div className="h-screen w-full flex justify-center items-center">
+              <FaSpinner className="animate-spin-step text-4xl text-white" />
+            </div>
+          }
+        >
           <ErrorBoundary FallbackComponent={Fallback}>
             <AlertDialog>
               <ThoriumProvider>
