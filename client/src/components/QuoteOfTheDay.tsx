@@ -188,6 +188,8 @@ const quotes = [
   "All that we see or seem is but a dream within a dream.",
   // Kirk in space
   "I hope I never recover from this.",
+  // Ike
+  "Plans are useless, but planning is indispensable.",
 ];
 
 const QuoteOfTheDay = () => {

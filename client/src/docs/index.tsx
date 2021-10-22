@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Link, NavLink, Outlet, useLocation} from "react-router-dom";
+import {Link, NavLink, Outlet, Route, Routes, useLocation} from "react-router-dom";
 import "prismjs/themes/prism-tomorrow.css";
 import Menubar from "@thorium/ui/Menubar";
 import {Popover, Transition} from "@headlessui/react";
@@ -238,7 +238,7 @@ const TOC = function TOC({
     </div>
   );
 };
-export const DocLayout = () => {
+export default function DocLayout() {
   const orderedRoutes = Object.entries(
     routes.reduce((acc: Record<string, Route[]>, route) => {
       if (!acc[route.section]) {
@@ -283,7 +283,7 @@ export const DocLayout = () => {
                         route.frontmatter && (
                           <li key={route.path}>
                             <NavLink
-                              to={route.path}
+                              to={`/docs/${route.path}`}
                               className={({isActive}) =>
                                 isActive ? "font-semibold" : ""
                               }
@@ -303,7 +303,11 @@ export const DocLayout = () => {
             className="prose prose-lg mx-auto max-w-screen-lg my-16 bg-black/80 p-8 rounded-lg backdrop-filter backdrop-blur"
             ref={docRef}
           >
-            <Outlet />
+            <Routes>
+              {routes.map(({path, component: Component = React.Fragment}) => (
+                <Route key={path} path={path} element={<Component />} />
+              ))}
+            </Routes>
           </div>
         </article>
         <aside className="flex-1 overflow-y-auto px-4 py-8 text-white w-full max-w-sm bg-black/60 backdrop-filter backdrop-blur">
@@ -317,4 +321,4 @@ export const DocLayout = () => {
       </div>
     </div>
   );
-};
+}
