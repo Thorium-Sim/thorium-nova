@@ -19,7 +19,7 @@ const Fallback: React.FC<FallbackProps> = ({error}) => {
 const Layout = ({children}: {children: ReactNode}) => {
   return (
     <div
-      className="z-0 absolute top-0 bg-center bg-cover w-full h-full"
+      className="z-0 absolute top-0 bg-center bg-cover w-full h-full text-white"
       style={{
         backgroundImage: `linear-gradient(
   135deg,

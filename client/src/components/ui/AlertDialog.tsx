@@ -124,7 +124,7 @@ export const AlertDialog: React.FC = ({children}) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <div className="z-10 bg-white text-blueGray-900 dark:bg-blueGray-900 dark:text-blueGray-100 rounded max-w-sm w-full mx-auto p-4 shadow-lg">
+              <div className="z-10 alert-dialog bg-gray-900 text-gray-50 rounded max-w-sm w-full mx-auto p-4 shadow-lg">
                 <Dialog.Title className="text-2xl mb-2">{header}</Dialog.Title>
                 {type === "prompt" ? (
                   <div>
@@ -133,7 +133,7 @@ export const AlertDialog: React.FC = ({children}) => {
                       <input
                         {...inputProps}
                         ref={inputEl}
-                        className="w-full px-2 py-1 text-blueGray-900 bg-blueGray-300 dark:text-blueGray-100 dark:bg-blueGray-700 rounded mt-2 ring-0 focus:ring-2 focus:ring-blue-600 focus:outline-none transition-shadow"
+                        className="input block w-full"
                         value={input}
                         onChange={e => setInput(e.currentTarget.value)}
                       />
