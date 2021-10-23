@@ -6,7 +6,7 @@ import "./docs.css";
 
 const ROUTES = import.meta.globEager("/src/docs/**/*.{tsx,jsx,md,mdx}");
 
-type Route = {
+type RouteType = {
   path: string;
   component: React.ComponentType;
   section: string;
@@ -15,7 +15,7 @@ type Route = {
     order: number;
   };
 };
-function isRoute(route: any): route is Route {
+function isRoute(route: any): route is RouteType {
   if (!route) return false;
   return route.path && route.component;
 }
@@ -157,7 +157,7 @@ const TOC = function TOC({
 };
 export default function DocLayout() {
   const orderedRoutes = Object.entries(
-    routes.reduce((acc: Record<string, Route[]>, route) => {
+    routes.reduce((acc: Record<string, RouteType[]>, route) => {
       if (!acc[route.section]) {
         acc[route.section] = [];
       }
