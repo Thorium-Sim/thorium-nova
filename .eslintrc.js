@@ -19,5 +19,7 @@ module.exports = {
     "no-constant-condition": 0,
     "no-loop-func": 0,
     "no-inner-declarations": 0,
+    "no-throw-literal": 0,
+    "no-prototype-builtins": 0,
   },
 };

@@ -1,7 +1,6 @@
 import {Fragment, lazy} from "react";
 import {Routes, Route} from "react-router-dom";
 import AppContext from "./context/AppContext";
-import {useThorium} from "./context/ThoriumContext";
 import {useCardDataSubscribe} from "./context/useCardData";
 
 import QuoteOfTheDay from "./components/QuoteOfTheDay";
@@ -14,6 +13,7 @@ const DocLayout = lazy(() => import("./docs"));
 
 const MainPage = () => {
   // const {netSend} = useThorium();
+
   return (
     <div className="welcome h-full p-12 grid grid-cols-2 grid-rows-2">
       <WelcomeLogo />

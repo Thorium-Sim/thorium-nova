@@ -31,9 +31,7 @@ export function useCardDataSubscribe() {
     if (socket) {
       // Since Geckos doesn't let you turn off event listeners, we use channelConnected
       // to ignore channel messages any type this effect runs again.
-      let channelConnected = true;
-      socket.on("cardData", (data: CardData) => {
-        if (!channelConnected) return;
+      const handleCardData = (data: CardData) => {
         if (typeof data !== "object") {
           throw new Error(`cardData data must be an object. Got "${data}"`);
         }
@@ -51,9 +49,10 @@ export function useCardDataSubscribe() {
           cardProxy[data.card]![actualKeyName] = data.data[actualKeyName];
         });
         loadingPromises[data.card]?.(null);
-      });
+      };
+      socket.on("cardData", handleCardData);
       return () => {
-        channelConnected = false;
+        socket.off("cardData", handleCardData);
       };
     }
   }, [socket]);
