@@ -20,6 +20,12 @@ jobs:
           node-version: 16
       - name: Install Dependencies
         run: npm install
-      - name: Validate
+      - name: Lint
         run: |
-          npm run validate
+          npm run lint
+      - name: TypeCheck
+        run: |
+          npm run typecheck
+      - name: Test
+        run: |
+          npm run test
