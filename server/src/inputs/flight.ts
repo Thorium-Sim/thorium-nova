@@ -84,7 +84,7 @@ export const flightInputs = {
       context.server.activeFlightName = null;
     }
     try {
-      await fs.unlink(`${thoriumPath}flights/${flightName}.flight`);
+      await fs.unlink(`${thoriumPath}/flights/${flightName}.flight`);
     } catch {
       // Do nothing; the file probably didn't exist.
     }
