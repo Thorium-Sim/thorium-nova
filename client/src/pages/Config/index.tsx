@@ -6,6 +6,8 @@ import Menubar from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
 import TagInput from "@thorium/ui/TagInput";
 import UploadWell from "@thorium/ui/UploadWell";
+import {useNetSend} from "client/src/context/ThoriumContext";
+import {useNetRequest} from "client/src/context/useNetRequest";
 import {useState} from "react";
 import {FaEdit} from "react-icons/fa";
 import {NavLink, useNavigate, useParams} from "react-router-dom";
@@ -21,7 +23,8 @@ const setDescription = (params: any) => {};
 const setTags = (params: any) => {};
 export default function Config() {
   const [error, setError] = useState(false);
-
+  const data = useNetRequest("pluginsList");
+  const netSend = useNetSend();
   const navigate = useNavigate();
   const params = useParams();
   const prompt = usePrompt();
@@ -37,19 +40,22 @@ export default function Config() {
               className="w-full btn-sm btn-success"
               onClick={async () => {
                 const name = await prompt({header: "Enter plugin name"});
-                console.log(name);
+                if (typeof name !== "string") return;
+                const id = await netSend("pluginCreate", {name});
+                navigate(`/config/${id}/edit`);
               }}
             >
               New Plugin
             </Button>
 
             <SearchableList
-              items={[
-                {
-                  id: "1",
-                  name: "Thorium Default",
-                },
-              ]}
+              items={data.map(d => ({
+                id: d.id,
+                name: d.name,
+                description: d.description,
+                tags: d.tags,
+                author: d.author,
+              }))}
               searchKeys={["name", "author", "tags"]}
               selectedItem={params.pluginId || null}
               setSelectedItem={id => navigate(`/config/${id}`)}
@@ -71,7 +77,7 @@ export default function Config() {
               )}
             />
           </div>
-          <div className="w-96">
+          <div className="w-96 space-y-4">
             <Input
               className="pb-4"
               label="Plugin Name"

@@ -24,9 +24,20 @@ type SecondParam<Func extends (...args: any) => any> = Func extends (
 ) => any
   ? R
   : never;
+type ThirdParam<Func extends (...args: any) => any> = Func extends (
+  first: any,
+  second: any,
+  third: infer R,
+  ...args: any
+) => any
+  ? R
+  : never;
 type AnyFunc = (...args: any) => any;
 export type InputParams<Inputs extends Record<string, AnyFunc>> = {
   [Property in keyof Inputs]: SecondParam<Inputs[Property]>;
+};
+export type RequestPublishParams<Requests extends Record<string, AnyFunc>> = {
+  [Property in keyof Requests]: ThirdParam<Requests[Property]>;
 };
 export type InputReturns<Inputs extends Record<string, AnyFunc>> = {
   [Property in keyof Inputs]: ReturnType<Inputs[Property]>;
