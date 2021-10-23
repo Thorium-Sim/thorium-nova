@@ -22,11 +22,6 @@ const TagInput: React.FC<{
   const [tagInput, setTagInput] = React.useState("");
   return (
     <>
-      <div className="flex flex-wrap">
-        {tags.map(t => (
-          <Tag key={t} tag={t} onClick={() => onRemove(t)} />
-        ))}
-      </div>
       <div className="form-control">
         <label className="label">{label}</label>
         <input
@@ -63,6 +58,11 @@ const TagInput: React.FC<{
             }
           }}
         />
+      </div>
+      <div className="flex flex-wrap">
+        {tags.map(t => (
+          <Tag key={t} tag={t} onClick={() => onRemove(t)} />
+        ))}
       </div>
     </>
   );

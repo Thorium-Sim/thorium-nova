@@ -1,4 +1,4 @@
-import {ReactNode, StrictMode, Suspense} from "react";
+import {ReactNode, StrictMode, Suspense, useEffect, useReducer} from "react";
 import {ThoriumProvider} from "./ThoriumContext";
 import {AlertDialog} from "@thorium/ui/AlertDialog";
 import {BrowserRouter as Router} from "react-router-dom";
@@ -35,6 +35,19 @@ url(${bg})`,
     </div>
   );
 };
+const LoadingSpinner = () => {
+  const [show, toggleShow] = useReducer(() => true, false);
+  useEffect(() => {
+    const timeout = setTimeout(toggleShow, 500);
+    return () => clearTimeout(timeout);
+  }, []);
+  if (!show) return null;
+  return (
+    <div className="h-screen w-full flex justify-center items-center">
+      <FaSpinner className="animate-spin-step text-4xl text-white" />
+    </div>
+  );
+};
 /**
  * A component to contain all of the context and wrapper components for the app.
  */
@@ -43,21 +56,15 @@ export default function AppContext({children}: {children: ReactNode}) {
   return (
     <StrictMode>
       <Layout>
-        <Suspense
-          fallback={
-            <div className="h-screen w-full flex justify-center items-center">
-              <FaSpinner className="animate-spin-step text-4xl text-white" />
-            </div>
-          }
-        >
-          <ErrorBoundary FallbackComponent={Fallback}>
+        <ErrorBoundary FallbackComponent={Fallback}>
+          <Suspense fallback={<LoadingSpinner />}>
             <AlertDialog>
               <ThoriumProvider>
                 <Router>{children}</Router>
               </ThoriumProvider>
             </AlertDialog>
-          </ErrorBoundary>
-        </Suspense>
+          </Suspense>
+        </ErrorBoundary>
       </Layout>
     </StrictMode>
   );
