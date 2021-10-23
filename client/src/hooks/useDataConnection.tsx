@@ -1,9 +1,14 @@
 import {ClientChannel} from "@geckos.io/client";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {loadDataChannel, loadWebSocket} from "../utils/dataChannel";
-import {NetResponseData} from "../context/ThoriumContext";
 import uniqid from "@thorium/uniqid";
 import {ClientSocket} from "../utils/clientSocket";
+
+export type NetResponseData =
+  | string
+  | number
+  | Object
+  | {requestId: string; response?: any; error?: string};
 
 export function useDataConnection() {
   const [channel, setChannel] = useState<ClientChannel>(null!);

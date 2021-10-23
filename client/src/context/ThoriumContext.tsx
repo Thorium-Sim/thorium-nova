@@ -29,10 +29,6 @@ interface IThoriumContext {
   ): Promise<Return>;
 }
 
-type NetResponseError = {
-  message: string;
-};
-
 const Reconnecting = () => {
   return (
     <div className="fixed inset-0 z-30 bg-black bg-opacity-70 flex flex-col items-center justify-center space-y-8">
@@ -68,11 +64,6 @@ const Disconnected = () => {
     </div>
   );
 };
-export type NetResponseData =
-  | string
-  | number
-  | Object
-  | {requestId: string; response?: any; error?: NetResponseError};
 
 const SI = new SnapshotInterpolation(serverFPS);
 export function ThoriumProvider({children}: {children: ReactNode}) {
@@ -108,3 +99,7 @@ export function useThorium() {
   if (!ctx) throw new Error("Thorium Context has not been initialized.");
   return ctx;
 }
+
+export const useNetSend = () => {
+  return useThorium().netSend;
+};

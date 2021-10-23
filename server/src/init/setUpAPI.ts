@@ -13,6 +13,7 @@ import {FlightDataModel} from "../classes/FlightDataModel";
 
 const NETSEND_PATH = "/netSend";
 const NETREQUEST_PATH = "/netRequest";
+const CARDREQUEST_PATH = "/cardRequest/:card/:subscription";
 
 function checkBody(body: any, clientId: string) {
   if (typeof body !== "object") throw new Error("Body must be a JSON object");
@@ -54,11 +55,21 @@ function checkBodyRequest(
       "Invalid event input. It must be a JSON body with a `card` property."
     );
   if (!cardSubscriptions[bodyObject.card])
-    throw new Error(`Invalid card name: ${bodyObject.card}`);
+    throw new Error(
+      `Invalid card name: ${bodyObject.card}. Valid cards are ${Object.keys(
+        cardSubscriptions
+      )
+        .map(c => `'${c}'`)
+        .join(", ")}`
+    );
   const cardSubs = cardSubscriptions[bodyObject.card];
   if (!(bodyObject.subscription in cardSubs))
     throw new Error(
-      `Invalid subscription for card '${bodyObject.card}': ${bodyObject.subscription}`
+      `Invalid subscription for card '${bodyObject.card}': ${
+        bodyObject.subscription
+      }. Valid subscriptions are ${Object.keys(cardSubs)
+        .map(s => `'${s}'`)
+        .join(", ")}`
     );
 }
 export function setUpAPI(
@@ -102,15 +113,14 @@ export function setUpAPI(
   // This maps all card data to a single HTTP endpoint.
   // In the future, this could be split into separate
   // HTTP endpoints
-  app.post(NETREQUEST_PATH, async (req, reply) => {
-    const body = req.body;
+  app.get(CARDREQUEST_PATH, async (req, reply) => {
     const clientId =
       req.headers.authorization?.replace("Bearer ", "").replace("bearer", "") ||
       "";
     try {
-      checkBodyRequest(body, clientId);
-      const cardSubs = cardSubscriptions[body.card] as any;
-      const subscription = body.subscription;
+      checkBodyRequest(req.params, clientId);
+      const cardSubs = cardSubscriptions[req.params.card] as any;
+      const subscription = req.params.subscription;
       const clientContext = new DataContext(clientId, database);
       const data = await cardSubs[subscription].fetch(clientContext);
       return data;
@@ -123,4 +133,6 @@ export function setUpAPI(
       }
     }
   });
+
+  app.get(NETREQUEST_PATH, async (req, reply) => {});
 }
