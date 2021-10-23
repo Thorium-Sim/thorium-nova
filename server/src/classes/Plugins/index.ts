@@ -46,4 +46,12 @@ export default class BasePlugin {
     const data = {...this};
     return data;
   }
+  duplicate(name: string) {
+    const data = this.serialize();
+    data.name = name;
+    data.id = uniqid();
+    // TODO October 23: Properly duplicate all of the files associated with this plugin
+    // in the file system
+    return new BasePlugin(data);
+  }
 }
