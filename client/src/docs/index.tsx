@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Link, NavLink, Outlet, Route, Routes, useLocation} from "react-router-dom";
+import {Link, NavLink, Route, Routes, useLocation} from "react-router-dom";
 import "prismjs/themes/prism-tomorrow.css";
 import Menubar from "@thorium/ui/Menubar";
 import {Popover, Transition} from "@headlessui/react";
