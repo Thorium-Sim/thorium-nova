@@ -1,14 +1,14 @@
 import uniqid from "@thorium/uniqid";
 import {pubsub} from "server/src/utils/pubsub";
 
-// export function publish(plugin: BasePlugin) {
-//   pubsub.publish("plugins", {
-//     id: plugin.id,
-//   });
-//   pubsub.publish("plugin", {
-//     id: plugin.id,
-//   });
-// }
+export function pluginPublish(plugin: BasePlugin) {
+  pubsub.publish("pluginsList", {
+    id: plugin.id,
+  });
+  pubsub.publish("plugin", {
+    pluginId: plugin.id,
+  });
+}
 
 export default class BasePlugin {
   id: string;
