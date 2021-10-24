@@ -10,7 +10,6 @@ import {
   SubscriptionNames,
 } from "client/src/utils/cardData";
 import {FlightDataModel} from "../classes/FlightDataModel";
-
 const NETSEND_PATH = "/netSend";
 const NETREQUEST_PATH = "/netRequest";
 const CARDREQUEST_PATH = "/cardRequest/:card/:subscription";
@@ -34,7 +33,9 @@ function checkBodyInput(
     );
   if (!(bodyObject.input in inputs)) {
     throw new Error(
-      `Invalid event input. "${bodyObject.input}" is not a valid input name.`
+      `Invalid event input. "${String(
+        bodyObject.input
+      )}" is not a valid input name.`
     );
   }
 }
@@ -83,7 +84,39 @@ export function setUpAPI(
   // In the future, this could be changed to make it so each of
   // these is its own API endpoint.
   app.post(NETSEND_PATH, async (req, reply) => {
-    const body = req.body;
+    let body = req.body as any;
+
+    // For file uploads, we need to process the body differently
+    if (req.isMultipart()) {
+      let currentBody = body as Record<
+        string,
+        {fieldname: string; value: string; filename?: string}
+      >;
+      body = {};
+      let fileParams = {} as any;
+      for (const part in currentBody) {
+        let key = currentBody[part].fieldname;
+        let value = currentBody[part].value;
+        let filename = currentBody[part].filename;
+        let fieldname = currentBody[part].fieldname;
+        if (value === "undefined") continue;
+        if (!value) continue;
+        // If this part is a file, store it separately to combine
+        // with the body later
+        if (filename) {
+          fileParams[fieldname] = value;
+        } else {
+          // Params are JSON strings, so we need to parse them
+          if (key === "params") {
+            body = {...body, ...JSON.parse(value)};
+          } else {
+            body[key] = value;
+          }
+        }
+      }
+      body = {...body, ...fileParams};
+    }
+    console.log(body);
     const clientId =
       req.headers.authorization?.replace("Bearer ", "").replace("bearer", "") ||
       "";
@@ -102,7 +135,7 @@ export function setUpAPI(
       if (err instanceof Error) {
         message = err.message;
       }
-      console.error(`Error in input ${input}: ${message}`);
+      console.error(`Error in input ${String(input)}: ${message}`);
       return reply
         .code(400)
         .header("content-type", "application/json")

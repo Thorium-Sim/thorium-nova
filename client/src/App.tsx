@@ -12,8 +12,6 @@ import {FlightLobby} from "./components/FlightLobby";
 const DocLayout = lazy(() => import("./docs"));
 
 const MainPage = () => {
-  // const {netSend} = useThorium();
-
   return (
     <div className="welcome h-full p-12 grid grid-cols-2 grid-rows-2">
       <WelcomeLogo />
