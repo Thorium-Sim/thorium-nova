@@ -19,14 +19,6 @@ interface IThoriumContext {
   SI: SnapshotInterpolation;
   channel: ClientChannel;
   socket: ClientSocket;
-  netSend<
-    InputName extends AllInputNames,
-    Params extends AllInputParams[InputName],
-    Return extends AllInputReturns[InputName]
-  >(
-    type: InputName,
-    params?: Params
-  ): Promise<Return>;
 }
 
 const Reconnecting = () => {
@@ -67,7 +59,7 @@ const Disconnected = () => {
 
 const SI = new SnapshotInterpolation(serverFPS);
 export function ThoriumProvider({children}: {children: ReactNode}) {
-  const {channel, socket, reconnectionState, netSend} = useDataConnection();
+  const {channel, socket, reconnectionState} = useDataConnection();
 
   useEffect(() => {
     channel?.onRaw(snapshot => {
@@ -81,10 +73,9 @@ export function ThoriumProvider({children}: {children: ReactNode}) {
     return {
       channel,
       socket,
-      netSend,
       SI,
     };
-  }, [channel, socket, netSend]);
+  }, [channel, socket]);
 
   return (
     <ThoriumContext.Provider value={value}>
@@ -99,7 +90,3 @@ export function useThorium() {
   if (!ctx) throw new Error("Thorium Context has not been initialized.");
   return ctx;
 }
-
-export const useNetSend = () => {
-  return useThorium().netSend;
-};
