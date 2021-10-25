@@ -8,6 +8,7 @@ const Input = (
     invalidMessage?: string;
     fixed?: boolean;
     labelProps?: React.LabelHTMLAttributes<HTMLLabelElement>;
+    as?: "input" | "textarea";
   }
 ) => {
   let {
@@ -17,6 +18,7 @@ const Input = (
     invalidMessage,
     fixed,
     labelProps,
+    as = "input",
     ...inputProps
   } = props;
 
@@ -30,12 +32,12 @@ const Input = (
       >
         {label}
       </label>
-      <input
-        {...(inputProps as React.InputHTMLAttributes<HTMLInputElement>)}
-        className={`w-full input ${inputProps.className} ${
+      {React.createElement(as, {
+        ...(inputProps as React.InputHTMLAttributes<HTMLInputElement>),
+        className: `w-full input ${inputProps.className} ${
           isInvalid ? "border-red-500" : ""
-        } `}
-      />
+        } `,
+      })}
       {isInvalid && <p className="text-red-500">{invalidMessage}</p>}
     </div>
   );

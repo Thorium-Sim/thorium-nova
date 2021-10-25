@@ -4,27 +4,29 @@ import Button from "./Button";
 
 const Tag: React.FC<{tag: string; onClick: () => void}> = ({tag, onClick}) => {
   return (
-    <Button className="badge" data-testid="tag-remove">
+    <button className="badge" data-testid="tag-remove">
       {tag}{" "}
       <FaTimes
         className="cursor-pointer rounded-full hover:bg-gray-700 active:bg-gray-800"
         onClick={onClick}
       />
-    </Button>
+    </button>
   );
 };
 const TagInput: React.FC<{
   label: string;
   tags: string[];
+  disabled?: boolean;
   onRemove: (t: string) => void;
   onAdd: (t: string) => void;
-}> = ({tags = [], onRemove, onAdd, label}) => {
+}> = ({tags = [], onRemove, onAdd, label, disabled}) => {
   const [tagInput, setTagInput] = React.useState("");
   return (
     <>
       <div className="form-control">
         <label className="label">{label}</label>
         <input
+          disabled={disabled}
           className="input"
           placeholder="Type and press return to add a tag"
           value={tagInput}

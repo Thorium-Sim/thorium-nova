@@ -30,16 +30,16 @@ export const subscriptions = {
     async fetch(context: DataContext) {
       let files: string[];
       try {
-        files = await fs.readdir(`${thoriumPath}flights/`);
+        files = await fs.readdir(`${thoriumPath}/flights/`);
       } catch {
-        await fs.mkdir(`${thoriumPath}flights/`);
+        await fs.mkdir(`${thoriumPath}/flights/`);
         files = [];
       }
       const flightFiles = files.filter(f => f.includes(".flight"));
       const flightData = await Promise.all(
         flightFiles.map(async flightName => {
           const raw = await fs.readFile(
-            `${thoriumPath}flights/${flightName}`,
+            `${thoriumPath}/flights/${flightName}`,
             "utf-8"
           );
           const data = JSON.parse(raw);
