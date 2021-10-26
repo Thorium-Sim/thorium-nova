@@ -15,16 +15,10 @@ export default class BasePlugin {
   name: string;
   author: string;
   description: string;
+  coverImage: string;
   assetPath(asset: string) {
-    return asset ? `/plugins/${this.name}/${asset}` : "";
+    return asset ? `/plugins/${this.name}/assets/${asset}` : "";
   }
-  get coverImage() {
-    return this.assetPath(this._coverImage);
-  }
-  set coverImage(value) {
-    this._coverImage = value;
-  }
-  _coverImage!: string;
 
   tags: string[];
 
@@ -33,7 +27,7 @@ export default class BasePlugin {
     this.name = params.name || "New Plugin";
     this.author = params.author || "";
     this.description = params.description || "A great plugin";
-    this.coverImage = params._coverImage || "";
+    this.coverImage = params.coverImage || "";
     this.tags = params.tags || [];
   }
   async writeFile(force?: boolean) {}

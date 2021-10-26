@@ -116,7 +116,6 @@ export function setUpAPI(
       }
       body = {...body, ...fileParams};
     }
-    console.log(body);
     const clientId =
       req.headers.authorization?.replace("Bearer ", "").replace("bearer", "") ||
       "";

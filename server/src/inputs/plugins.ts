@@ -1,6 +1,9 @@
 import BasePlugin from "../classes/Plugins";
 import {DataContext} from "../utils/DataContext";
 import {pubsub} from "../utils/pubsub";
+import fs from "fs/promises";
+import path from "path";
+import {thoriumPath} from "../utils/appPaths";
 
 function getPlugin(context: DataContext, pluginId: string): BasePlugin {
   const plugin = context.server.plugins.find(plugin => plugin.id === pluginId);
@@ -63,5 +66,26 @@ export const pluginInputs = {
     plugin.tags = params.tags;
     pubsub.publish("pluginsList");
     pubsub.publish("plugin", {pluginId: plugin.id});
+  },
+  async pluginSetCoverImage(
+    context: DataContext,
+    params: {pluginId: string; coverImage: File | string}
+  ) {
+    const plugin = getPlugin(context, params.pluginId);
+    // coverImage will be a string pointing to a temporary file
+    // move it into place.
+    if (plugin && typeof params.coverImage === "string") {
+      const ext = path.extname(params.coverImage);
+      const coverImagePath = path.join(
+        thoriumPath,
+        plugin.assetPath(`coverImage${ext}`)
+      );
+
+      await fs.mkdir(path.dirname(coverImagePath), {recursive: true});
+      await fs.rename(params.coverImage, coverImagePath);
+      plugin.coverImage = plugin.assetPath(`coverImage${ext}`);
+      pubsub.publish("pluginsList");
+      pubsub.publish("plugin", {pluginId: plugin.id});
+    }
   },
 };

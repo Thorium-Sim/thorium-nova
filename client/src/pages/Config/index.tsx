@@ -6,8 +6,8 @@ import Menubar from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
 import TagInput from "@thorium/ui/TagInput";
 import UploadWell from "@thorium/ui/UploadWell";
-import {useNetSend} from "client/src/context/ThoriumContext";
 import {useNetRequest} from "client/src/context/useNetRequest";
+import {useNetSend} from "client/src/context/useNetSend";
 import {useState} from "react";
 import {FaEdit} from "react-icons/fa";
 import {NavLink, useMatch, useNavigate, useParams} from "react-router-dom";
@@ -174,17 +174,20 @@ export default function Config() {
               <UploadWell
                 accept="image/*"
                 onChange={(files: FileList) => {
-                  // if (!plugin) return;
-                  // setCoverImage({variables: {id: plugin?.id, image: files[0]}});
+                  if (!plugin) return;
+                  netSend("pluginSetCoverImage", {
+                    pluginId: plugin.id,
+                    coverImage: files[0],
+                  });
                 }}
               >
-                {/* {plugin?.coverImage && (
-                <img
-                  src={`${plugin.coverImage}?${new Date().getTime()}`}
-                  className="w-[90%] h-[90%] object-cover"
-                  alt="Cover"
-                />
-              )} */}
+                {plugin?.coverImage && (
+                  <img
+                    src={`${plugin.coverImage}?${new Date().getTime()}`}
+                    className="w-[90%] h-[90%] object-cover"
+                    alt="Cover"
+                  />
+                )}
               </UploadWell>
             </label>
           </div>
