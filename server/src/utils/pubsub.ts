@@ -4,6 +4,11 @@ import {
   SubscriptionReturn,
 } from "client/src/utils/cardData";
 import {EventEmitter} from "events";
+import {
+  AllRequestNames,
+  AllRequestPublishParams,
+  AllRequestReturns,
+} from "../netRequests";
 import {DataContext} from "./DataContext";
 
 class PubSub {
@@ -19,17 +24,17 @@ class PubSub {
   }
 
   public publish<
-    TriggerName extends SubscriptionNames,
-    Payload extends SubscriptionParams[TriggerName]
+    TriggerName extends SubscriptionNames | AllRequestNames,
+    Payload extends (SubscriptionParams & AllRequestPublishParams)[TriggerName]
   >(triggerName: TriggerName, payload?: Payload): Promise<void> {
     this.ee.emit(triggerName, payload);
     return Promise.resolve();
   }
 
   public subscribe<
-    TriggerName extends SubscriptionNames,
-    Payload extends SubscriptionParams[TriggerName],
-    Return extends SubscriptionReturn[TriggerName]
+    TriggerName extends SubscriptionNames | AllRequestNames,
+    Payload extends (SubscriptionParams & AllRequestPublishParams)[TriggerName],
+    Return extends (SubscriptionReturn & AllRequestReturns)[TriggerName]
   >(
     triggerName: TriggerName,
     onMessage: (payload: Payload, context: DataContext) => Return,

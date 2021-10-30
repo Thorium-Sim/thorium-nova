@@ -4,6 +4,7 @@ import staticServe from "fastify-static";
 import cors from "fastify-cors";
 import path from "path";
 import {promises as fs} from "fs";
+import {thoriumPath} from "../utils/appPaths";
 
 export default function buildHTTPServer({
   staticRoot = path.join(__dirname, "public"),
@@ -30,6 +31,11 @@ export default function buildHTTPServer({
   });
 
   app.register(staticServe, {root: `${staticRoot}/assets`, prefix: "/assets"});
+  app.register(staticServe, {
+    root: `${thoriumPath}/plugins`,
+    prefix: "/plugins",
+    decorateReply: false,
+  });
 
   app.get("/*", async (_req, reply) => {
     // Return a slightly different index.html for headless servers.

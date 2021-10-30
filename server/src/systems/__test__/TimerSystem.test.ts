@@ -1,7 +1,7 @@
 import {ECS, Entity} from "server/src/utils/ecs";
 import {TimerSystem} from "../TimerSystem";
 
-const server = {clients: {}, activeFlightName: "", thoriumId: ""};
+const server = {clients: {}, activeFlightName: "", thoriumId: "", plugins: []};
 describe("TimerSystem", () => {
   let ecs: ECS;
   let timerSystem: TimerSystem;

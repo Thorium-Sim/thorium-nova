@@ -6,6 +6,7 @@ import useEasterEgg from "../hooks/useEasterEgg";
 import {ErrorBoundary, FallbackProps} from "react-error-boundary";
 import bg from "../images/background.jpg";
 import {FaSpinner} from "react-icons/fa";
+import {NetRequestData} from "./useNetRequest";
 
 const Fallback: React.FC<FallbackProps> = ({error}) => {
   return (
@@ -60,6 +61,7 @@ export default function AppContext({children}: {children: ReactNode}) {
           <Suspense fallback={<LoadingSpinner />}>
             <AlertDialog>
               <ThoriumProvider>
+                <NetRequestData />
                 <Router>{children}</Router>
               </ThoriumProvider>
             </AlertDialog>
