@@ -10,7 +10,7 @@ import {useNetRequest} from "client/src/context/useNetRequest";
 import {useNetSend} from "client/src/context/useNetSend";
 import {useState} from "react";
 import {FaEdit} from "react-icons/fa";
-import {NavLink, useMatch, useNavigate, useParams} from "react-router-dom";
+import {NavLink, useMatch, useNavigate} from "react-router-dom";
 
 export default function Config() {
   const [error, setError] = useState(false);

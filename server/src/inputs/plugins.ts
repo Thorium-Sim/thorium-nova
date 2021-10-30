@@ -10,6 +10,7 @@ function getPlugin(context: DataContext, pluginId: string): BasePlugin {
   if (!plugin) throw new Error("Plugin not found");
   return plugin;
 }
+
 export const pluginInputs = {
   pluginCreate(context: DataContext, params: {name: string}) {
     const plugin = new BasePlugin(params);
