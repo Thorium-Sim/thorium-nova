@@ -10,6 +10,7 @@ import {WelcomeButtons} from "./components/WelcomeButtons";
 import {FlightLobby} from "./components/FlightLobby";
 
 const DocLayout = lazy(() => import("./docs"));
+const Config = lazy(() => import("./pages/Config"));
 
 const MainPage = () => {
   return (
@@ -62,6 +63,7 @@ function AppRoutes() {
       <Route path="/components" element={<ComponentDemo />} />
       <Route path="/releases" element={<Releases />} />
       <Route path="/docs/*" element={<DocLayout />}></Route>
+      <Route path="/config/*" element={<Config />}></Route>
       <Route path="*" element={<NoMatch />} />
     </Routes>
   );

@@ -1,6 +1,5 @@
 import {ServerChannel} from "@geckos.io/server";
 import {OfflineStates, UnionToIntersection} from "../utils/types";
-import uniqid from "@thorium/uniqid";
 import randomWords from "@thorium/random-words";
 import {DataContext} from "../utils/DataContext";
 import inputs, {AllInputNames} from "../inputs";
@@ -15,12 +14,17 @@ import {Entity} from "../utils/ecs";
 import {SnapshotInterpolation} from "@geckos.io/snapshot-interpolation";
 import {encode} from "@msgpack/msgpack";
 import {SocketStream} from "fastify-websocket";
+import requests, {AllRequestNames} from "../netRequests";
 class BaseClient {
   constructor(public id: string) {}
 }
 
 type NetSendData = {inputName: AllInputNames; params: any; requestId: string};
-
+type NetRequestData = {
+  requestName: AllRequestNames;
+  params: any;
+  requestId: string;
+};
 const channels: Record<string, ServerChannel> = {};
 const sockets: Record<string, SocketStream> = {};
 /**
@@ -69,21 +73,32 @@ export class ServerClient extends BaseClient {
     this.clientContext = new DataContext(this.id, database);
 
     sockets[this.id] = connection;
-    await this.initNetSend(connection);
-    await this.initNetRequest(connection);
+    await this.initRequests(connection);
     await this.initSubscriptions(connection);
   }
-  private async initNetSend(socket: SocketStream) {
+  private async initRequests(socket: SocketStream) {
     if (!socket)
       throw new Error(
         "NetSend cannot be initialized before the socket is established."
       );
+    const netRequestList: {
+      [requestId: string]: {
+        params: any;
+        requestName: AllRequestNames;
+        subscriptionId: number;
+      };
+    } = {};
+    socket.socket.on("close", () => {
+      for (let requestId in netRequestList) {
+        pubsub.unsubscribe(netRequestList[requestId]?.subscriptionId);
+      }
+    });
     // Set up the whole netSend process for calling input functions
     socket.socket.on("message", async data => {
       try {
-        if (typeof data === "string") {
-          const messageData = JSON.parse(data);
-          if (messageData.type === "netSend") {
+        const messageData = JSON.parse(data.toString());
+        switch (messageData.type) {
+          case "netSend": {
             const {inputName, params, requestId} =
               messageData.data as NetSendData;
             try {
@@ -118,22 +133,95 @@ export class ServerClient extends BaseClient {
                 })
               );
             }
+            break;
+          }
+          case "netRequest": {
+            const {requestName, params, requestId} =
+              messageData.data as NetRequestData;
+
+            function handleNetRequestError(err: unknown) {
+              if (err === null) return;
+              let message = err;
+              if (err instanceof Error) {
+                message = err.message;
+              }
+              console.error(`Error in input ${requestName}: ${message}`);
+              if (err instanceof Error) console.error(err.stack);
+              socket.socket.send(
+                JSON.stringify({
+                  type: "netRequestData",
+                  data: {
+                    requestId: requestId,
+                    error: message,
+                  },
+                })
+              );
+              pubsub.unsubscribe(netRequestList[requestId]?.subscriptionId);
+              delete netRequestList[requestId];
+            }
+
+            try {
+              const requestFunction = requests[requestName];
+              // Create the subscription
+              const subscriptionId = await pubsub.subscribe(
+                requestName,
+                (payload: any, context: DataContext) => {
+                  try {
+                    const data = requestFunction(context, params, payload);
+                    socket.socket.send(
+                      JSON.stringify({
+                        type: "netRequestData",
+                        data: {
+                          requestId: requestId,
+                          response: data,
+                        },
+                      })
+                    );
+                    return data;
+                  } catch (err) {
+                    handleNetRequestError(err);
+                  }
+                },
+                this.clientContext
+              );
+              netRequestList[requestId] = {
+                params,
+                requestName,
+                subscriptionId,
+              };
+              // Collect and send the initial data
+              const response =
+                (await requestFunction(this.clientContext, params, null)) || {};
+
+              socket.socket.send(
+                JSON.stringify({
+                  type: "netRequestData",
+                  data: {
+                    requestId: requestId,
+                    response,
+                  },
+                })
+              );
+            } catch (err) {
+              handleNetRequestError(err);
+            }
+            break;
+          }
+          case "netRequestEnd": {
+            const {requestId} = messageData.data as {requestId: string};
+            pubsub.unsubscribe(netRequestList[requestId]?.subscriptionId);
+            delete netRequestList[requestId];
+            break;
           }
         }
       } catch (err) {
         throw new Error(
-          `Client ${this.id} sent invalid NetSend data:${
+          `Client ${this.id} sent invalid request data:${
             typeof data === "object" ? JSON.stringify(data) : data
           }`
         );
       }
-      if (typeof data === "object" && "inputName" in data) {
-      } else {
-      }
     });
-  }
-  private async initNetRequest(channel: SocketStream) {
-    // TODO: September 1, 2021 Set up net requests through the data channel
   }
   get cards() {
     // TODO Aug 28, 2021 Populate this list with the dynamic list of cards assigned to the client.

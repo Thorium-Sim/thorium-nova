@@ -2,7 +2,7 @@ import ECS from "../ecs";
 import Entity from "../entity";
 import System from "../system";
 
-const server = {clients: {}, activeFlightName: "", thoriumId: ""};
+const server = {clients: {}, activeFlightName: "", thoriumId: "", plugins: []};
 describe("ECS", () => {
   it("should initialize", () => {
     let ecs = new ECS(server);

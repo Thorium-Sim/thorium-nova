@@ -9,6 +9,7 @@ import {pipeline} from "stream/promises";
 import {MultipartFile} from "fastify-multipart";
 import os from "os";
 import uniqid from "@thorium/uniqid";
+import {thoriumPath} from "../utils/appPaths";
 
 export default function buildHTTPServer({
   staticRoot = path.join(__dirname, "public"),
@@ -60,6 +61,11 @@ export default function buildHTTPServer({
   });
 
   app.register(staticServe, {root: `${staticRoot}/assets`, prefix: "/assets"});
+  app.register(staticServe, {
+    root: `${thoriumPath}/plugins`,
+    prefix: "/plugins",
+    decorateReply: false,
+  });
 
   app.get("/*", async (_req, reply) => {
     // Return a slightly different index.html for headless servers.

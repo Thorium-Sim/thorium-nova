@@ -25,6 +25,7 @@ export async function startServer() {
       clients: {},
       thoriumId: randomWords(3).join("-"),
       activeFlightName: null,
+      plugins: [],
     },
     serialize: ({clients, ...data}) => ({
       ...data,
