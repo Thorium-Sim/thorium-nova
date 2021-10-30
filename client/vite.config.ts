@@ -43,6 +43,9 @@ export default defineConfig(async () => {
         // Allow serving files from one level up to the project root
         allow: [".."],
       },
+      proxy: {
+        "/netSend": "http://localhost:3001",
+      },
     },
   };
 });
