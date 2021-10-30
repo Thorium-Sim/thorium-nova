@@ -8,6 +8,9 @@ import Credits from "./components/Credits";
 import {WelcomeLogo} from "./components/WelcomeLogo";
 import {WelcomeButtons} from "./components/WelcomeButtons";
 import {FlightLobby} from "./components/FlightLobby";
+import {FaCamera} from "react-icons/fa";
+import Button from "@thorium/ui/Button";
+import {useNetSend} from "./context/useNetSend";
 
 const DocLayout = lazy(() => import("./docs"));
 const Config = lazy(() => import("./pages/Config"));
@@ -55,17 +58,34 @@ const Releases = lazy(() => import("./pages/Releases"));
 function AppRoutes() {
   useCardDataSubscribe();
   return (
-    <Routes>
-      <Route
-        path="/"
-        element={window.isHeadless ? <FlightLobby /> : <MainPage />}
-      />
-      <Route path="/components" element={<ComponentDemo />} />
-      <Route path="/releases" element={<Releases />} />
-      <Route path="/docs/*" element={<DocLayout />}></Route>
-      <Route path="/config/*" element={<Config />}></Route>
-      <Route path="*" element={<NoMatch />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route
+          path="/"
+          element={window.isHeadless ? <FlightLobby /> : <MainPage />}
+        />
+        <Route path="/components" element={<ComponentDemo />} />
+        <Route path="/releases" element={<Releases />} />
+        <Route path="/docs/*" element={<DocLayout />}></Route>
+        <Route path="/config/*" element={<Config />}></Route>
+        <Route path="*" element={<NoMatch />} />
+      </Routes>
+      <Snapshot />
+    </>
+  );
+}
+function Snapshot() {
+  const netSend = useNetSend();
+  if (process.env.NODE_ENV === "production") return null;
+  return (
+    <Button
+      className="btn-circle fixed bottom-2 left-2 btn-ghost"
+      onClick={() => {
+        netSend("serverSnapshot");
+      }}
+    >
+      <FaCamera />
+    </Button>
   );
 }
 function App() {

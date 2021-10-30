@@ -145,7 +145,7 @@ export class ServerClient extends BaseClient {
               if (err instanceof Error) {
                 message = err.message;
               }
-              console.error(`Error in input ${requestName}: ${message}`);
+              console.error(`Error in request ${requestName}: ${message}`);
               if (err instanceof Error) console.error(err.stack);
               socket.socket.send(
                 JSON.stringify({

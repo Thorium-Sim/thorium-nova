@@ -1,4 +1,4 @@
-import createStore, {setBasePath, StoreObject} from "@thorium/db-fs";
+import {setBasePath} from "@thorium/db-fs";
 import {databaseName, thoriumPath} from "./utils/appPaths";
 import buildHTTPServer from "./init/httpServer";
 import path from "path";
@@ -7,37 +7,19 @@ import {ServerDataModel} from "./classes/ServerDataModel";
 import randomWords from "@thorium/random-words";
 import {applyDataChannel} from "./init/dataChannel";
 import chalk from "chalk";
-import getStore from "@thorium/db-fs";
 import {FlightDataModel} from "./classes/FlightDataModel";
 
 setBasePath(thoriumPath);
-
 const isHeadless = !process.env.FORK;
 
 export async function startServer() {
   // Create the primary database
   // This is for any user data that is persisted between flights
   // but that isn't part of a plugin. Not much goes in here.
-  const serverModel = createStore<ServerDataModel>({
-    path: databaseName,
-    class: ServerDataModel,
-    initialData: {
-      clients: {},
-      thoriumId: randomWords(3).join("-"),
-      activeFlightName: null,
-      plugins: [],
-    },
-    serialize: ({clients, ...data}) => ({
-      ...data,
-      // We don't want to serialize and store the Geckos channels, so we remove
-      // them from the clients.
-      clients: Object.fromEntries(
-        Object.entries(clients).map(([clientId, client]) => {
-          return [clientId, client.serialize()];
-        })
-      ),
-    }),
-  });
+  const serverModel = new ServerDataModel(
+    {thoriumId: randomWords(3).join("-"), activeFlightName: null},
+    {path: databaseName}
+  );
 
   // If a flight is in progress, load it.
   // This helps in situations where the server is shut
@@ -45,11 +27,15 @@ export async function startServer() {
   let flight = null;
   if (serverModel.activeFlightName) {
     const flightName = serverModel.activeFlightName;
-    flight = getStore<Partial<FlightDataModel> & {initialLoad?: boolean}>({
-      class: FlightDataModel,
-      path: `/flights/${flightName}.flight`,
-      initialData: {name: flightName, initialLoad: true},
-    }) as unknown as FlightDataModel;
+    flight = new FlightDataModel(
+      {
+        name: flightName,
+        initialLoad: true,
+        entities: [],
+        serverDataModel: serverModel,
+      },
+      {path: `/flights/${flightName}.flight`}
+    );
   }
 
   const database = {server: serverModel, flight};
