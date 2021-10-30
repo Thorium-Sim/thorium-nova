@@ -14,6 +14,7 @@ function publish(pluginId: string) {
   pubsub.publish("pluginsList");
   pubsub.publish("plugin", {pluginId});
 }
+
 export const pluginInputs = {
   pluginCreate(context: DataContext, params: {name: string}) {
     const plugin = new BasePlugin(params, context.server);
