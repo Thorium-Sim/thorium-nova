@@ -192,7 +192,6 @@ export class ServerClient extends BaseClient {
               // Collect and send the initial data
               const response =
                 (await requestFunction(this.clientContext, params, null)) || {};
-
               socket.socket.send(
                 JSON.stringify({
                   type: "netRequestData",
@@ -203,7 +202,20 @@ export class ServerClient extends BaseClient {
                 })
               );
             } catch (err) {
-              handleNetRequestError(err);
+              if (err === null) {
+                // Send null for the first request, to indicate there is no data
+                socket.socket.send(
+                  JSON.stringify({
+                    type: "netRequestData",
+                    data: {
+                      requestId: requestId,
+                      response: null,
+                    },
+                  })
+                );
+              } else {
+                handleNetRequestError(err);
+              }
             }
             break;
           }

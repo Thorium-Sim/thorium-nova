@@ -58,7 +58,7 @@ export function useNetRequest<
   const {socket} = useThorium();
   if (!socket) throw new Promise(() => {});
 
-  if (!data[requestId]) {
+  if (!data[requestId] && data[requestId] !== null) {
     if (!netRequestPromises[requestId]) {
       socket.send("netRequest", {requestName, params, requestId});
     }
