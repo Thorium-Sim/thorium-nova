@@ -48,7 +48,6 @@ export default class BasePlugin extends FSDataStore {
   get pluginPath() {
     return `/plugins/${this.name}`;
   }
-
   tags: string[];
   constructor(params: Partial<BasePlugin> = {}, server: ServerDataModel) {
     const name = generateIncrementedName(
