@@ -13,6 +13,7 @@
   "author": "Alex Anderson",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/busboy": "^0.3.1",
     "@types/luxon": "^2.0.5",
     "@types/node": "^16.10.2",
     "@types/three": "^0.132.2",
@@ -27,6 +28,7 @@
     "fastify": "^3.22.0",
     "fastify-cookie": "^5.3.1",
     "fastify-cors": "^6.0.2",
+    "fastify-multipart": "^5.0.2",
     "fastify-static": "^4.2.3",
     "fastify-websocket": "^4.0.0",
     "luxon": "^2.0.2",
