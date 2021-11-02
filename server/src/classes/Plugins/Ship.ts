@@ -3,8 +3,9 @@ import type BasePlugin from "./index";
 import {Aspect} from "./Aspect";
 import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
 import path from "path";
+import {thoriumPath} from "server/src/utils/appPaths";
 
-type ShipCategories = "Cruiser" | "Frigate" | "Scout" | "Shuttle";
+export type ShipCategories = "Cruiser" | "Frigate" | "Scout" | "Shuttle";
 
 export default class ShipPlugin extends Aspect {
   apiVersion = "ships/v1" as const;
@@ -28,6 +29,10 @@ export default class ShipPlugin extends Aspect {
      * The path to the 3D model. Must be in GLB or GLTF format. See the docs for instructions on how to position your model.
      */
     model: string;
+    /**
+     * The vanity (pretty) view of the ship as a PNG. Usually auto-generated from the model.
+     */
+    vanity: string;
     /**
      * The top view of the ship as a PNG. Usually auto-generated from the model.
      */
@@ -66,6 +71,7 @@ export default class ShipPlugin extends Aspect {
     this.assets = params.assets || {
       logo: "",
       model: "",
+      vanity: "",
       topView: "",
       sideView: "",
     };
@@ -83,21 +89,18 @@ export default class ShipPlugin extends Aspect {
       name.trim() || this.name,
       this.plugin.aspects.ships.map(ship => ship.name)
     );
-    console.log(this.path);
-    // await fs.rename(
-    //   `${thoriumPath}/plugins/${this.name}`,
-    //   `${thoriumPath}/plugins/${newName}`
-    // );
-    // this.id = newName;
-    // this.name = newName;
-    // this.path = `/plugins/${newName}/manifest.yml`;
+    const shipPath = path.dirname(this.path);
+    const newShipPath = path.join(shipPath, "..", newName);
 
-    // // Also rename the cover image
-    // const coverImage = path.basename(this.coverImage);
-    // this.coverImage = this.assetPath(coverImage);
-    // // TODO October 29, 2021: Rename all of the assets associated with
-    // // aspects of this plugin too.
+    await fs.rename(
+      `${thoriumPath}/${shipPath}`,
+      `${thoriumPath}/${newShipPath}`
+    );
+    this.path = path.join(newShipPath, "manifest.yml");
+    this.name = newName;
 
-    // await this.writeFile(true);
+    // Assets should automatically be renamed by virtue of
+    // being relative links.
+    await this.writeFile(true);
   }
 }
