@@ -1,5 +1,13 @@
-import uniqid from "@thorium/uniqid";
 import {pubsub} from "server/src/utils/pubsub";
+import type {ServerDataModel} from "../ServerDataModel";
+import {generateIncrementedName} from "../../utils/generateIncrementedName";
+import ShipPlugin from "./Ship";
+import {thoriumPath} from "server/src/utils/appPaths";
+import {parse} from "yaml";
+import fs from "fs/promises";
+import {YAMLSemanticError} from "yaml/util";
+import {FSDataStore} from "@thorium/db-fs";
+import path from "path";
 
 export function pluginPublish(plugin: BasePlugin) {
   pubsub.publish("pluginsList", {
@@ -10,7 +18,17 @@ export function pluginPublish(plugin: BasePlugin) {
   });
 }
 
-export default class BasePlugin {
+interface Aspects {
+  ships: ShipPlugin[];
+}
+// Storing the server here so it doesn't get
+// serialized with the plugin.
+let storedServer: ServerDataModel;
+// Same with plugin aspects. By storing them in a WeakMap,
+// they'll be keyed to the plugin, but will automatically
+// be garbage collected if the plugin is ever deleted.
+let pluginAspects = new WeakMap<BasePlugin, Aspects>();
+export default class BasePlugin extends FSDataStore {
   id: string;
   name: string;
   author: string;
@@ -19,33 +37,104 @@ export default class BasePlugin {
   assetPath(asset: string) {
     return asset ? `/plugins/${this.name}/assets/${asset}` : "";
   }
-
   tags: string[];
-
-  constructor(params: Partial<BasePlugin> = {}) {
-    this.id = params.id || uniqid();
-    this.name = params.name || "New Plugin";
+  constructor(params: Partial<BasePlugin> = {}, server: ServerDataModel) {
+    const name = generateIncrementedName(
+      params.name || "New Plugin",
+      server.plugins.map(p => p.name)
+    );
+    super(params, {
+      path: `/plugins/${name}/manifest.yml`,
+    });
+    this.id = params.id || name;
+    this.name = name;
     this.author = params.author || "";
     this.description = params.description || "A great plugin";
     this.coverImage = params.coverImage || "";
     this.tags = params.tags || [];
-  }
-  async writeFile(force?: boolean) {}
-  async removeFile(force?: boolean) {}
+    storedServer = server;
 
-  save() {
-    this.writeFile(true);
+    this.loadAspects();
   }
-  serialize() {
-    const data = {...this};
-    return data;
+  get server() {
+    return storedServer;
+  }
+  get aspects(): Aspects {
+    let aspects = pluginAspects.get(this);
+    if (!aspects) {
+      aspects = {
+        ships: [],
+      };
+      pluginAspects.set(this, aspects);
+    }
+    return aspects;
+  }
+  async loadAspects() {
+    this.aspects.ships = await BasePlugin.loadAspect(this, "ships", ShipPlugin);
+  }
+  async rename(name: string) {
+    if (name.trim() === this.name) return;
+    const newName = generateIncrementedName(
+      name.trim() || this.name,
+      this.server.plugins.map(p => p.name)
+    );
+    await fs.rename(
+      `${thoriumPath}/plugins/${this.name}`,
+      `${thoriumPath}/plugins/${newName}`
+    );
+    this.id = newName;
+    this.name = newName;
+    this.path = `/plugins/${newName}/manifest.yml`;
+
+    // Also rename the cover image
+    const coverImage = path.basename(this.coverImage);
+    this.coverImage = this.assetPath(coverImage);
+    // TODO October 29, 2021: Rename all of the assets associated with
+    // aspects of this plugin too.
+
+    await this.writeFile(true);
   }
   duplicate(name: string) {
-    const data = this.serialize();
+    const data = {...this};
     data.name = name;
-    data.id = uniqid();
+    data.id = generateIncrementedName(
+      name,
+      this.server.plugins.map(p => p.name)
+    );
     // TODO October 23: Properly duplicate all of the files associated with this plugin
     // in the file system
-    return new BasePlugin(data);
+    return new BasePlugin(data, this.server);
+  }
+  static async loadAspect<T>(
+    plugin: BasePlugin,
+    aspectName: string,
+    aspect: {
+      new (
+        manifest: {name: string} & Record<string, any>,
+        plugin: BasePlugin
+      ): T;
+    }
+  ) {
+    const objectGlob = `${thoriumPath}/plugins/${plugin.id}/${aspectName}/*/manifest.yml`;
+    const {globby} = await import("globby");
+    const aspectPaths = await globby(objectGlob);
+    let aspects: T[] = [];
+    for (const aspectPath of aspectPaths) {
+      try {
+        const manifest = parse(await fs.readFile(aspectPath, "utf8"));
+        aspects.push(new aspect(manifest, plugin));
+      } catch (err) {
+        if (err instanceof YAMLSemanticError) {
+          console.error(
+            `Error parsing ${aspectPath
+              .replace(`${thoriumPath}/plugins/`, "")
+              .replace("/manifast.yml", "")} on line ${
+              err.source?.rangeAsLinePos?.start.line
+            }: ${err.message}`
+          );
+        }
+      }
+    }
+    return aspects;
   }
 }

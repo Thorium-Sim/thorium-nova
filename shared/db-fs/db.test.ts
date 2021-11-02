@@ -1,5 +1,5 @@
-import {readFile, access, rmdir} from "fs/promises";
-import getStore, {setBasePath} from "./index";
+import {readFile, access, rm} from "fs/promises";
+import {FSDataStore, FSDataStoreOptions, setBasePath} from "./index";
 interface TestStore {
   a: number;
   b: string;
@@ -7,65 +7,63 @@ interface TestStore {
 }
 const wait = (time = 1000) => new Promise(resolve => setTimeout(resolve, time));
 afterAll(async () => {
-  await rmdir("./dbTest");
+  await rm("./dbTest", {recursive: true, force: true});
 });
 describe("db", () => {
-  it("should load default values", () => {
-    const data = getStore<{test: boolean; hey: number; string: string}>({
-      path: "./test.json",
-      initialData: {
-        test: true,
-        hey: 123,
-        string: "Hello!",
-      },
-    });
-    expect(data.hey).toEqual(123);
-    expect(data.test).toEqual(true);
-    expect(data.string).toEqual("Hello!");
-  });
-  it("creates a database file", async () => {
-    const store = getStore<TestStore>({
-      path: "./testDb.json",
-      initialData: {a: 3, b: "hello", c: [1, 2, 3]},
-      safeMode: false,
-    });
-    store.a = 8;
-    await store.writeFile(true);
-    expect(await readFile("./testDb.json", "utf-8")).toMatchInlineSnapshot(`
-      "{
-        \\"a\\": 8,
-        \\"b\\": \\"hello\\",
-        \\"c\\": [
-          1,
-          2,
-          3
-        ]
-      }"
-    `);
-    await store.removeFile();
-  });
-  it("should work with a base path", async () => {
+  it("should work with the class constructor", async () => {
     setBasePath("./dbTest");
-    const store = getStore<TestStore>({
-      initialData: {a: 3, b: "hello", c: [1, 2, 3]},
-      throttle: 10,
-      safeMode: false,
-    });
-    store.a = 10;
+    class Data extends FSDataStore {
+      a: number = 10;
+      b: string = "hello";
+    }
+    const test = new Data(
+      {},
+      {path: "class.yml", safeMode: false, throttle: 10}
+    );
+    expect(test.a).toEqual(10);
+    expect(test.b).toEqual("hello");
+    test.a = 20;
+    test.b = "world";
     await wait(500);
-    expect(await readFile("./dbTest/db.json", "utf-8")).toMatchInlineSnapshot(`
-      "{
-        \\"a\\": 10,
-        \\"b\\": \\"hello\\",
-        \\"c\\": [
-          1,
-          2,
-          3
-        ]
-      }"
-    `);
+    expect(await readFile("./dbTest/class.yml", "utf-8")).toEqual(`a: 20
+b: world
+`);
+    await test.removeFile();
+  });
+  it("should load saved data with the class constructor", async () => {
+    setBasePath("./dbTest");
 
-    await store.removeFile();
-    expect(access).rejects.toThrow();
+    class Data extends FSDataStore {
+      a!: number;
+      b!: string;
+    }
+    const test = new Data(
+      {a: 10, b: "hello"},
+      {path: "classReload.yml", safeMode: false, throttle: 10}
+    );
+    expect(test.a).toEqual(10);
+    expect(test.b).toEqual("hello");
+    await wait(500);
+    const test2 = new Data(
+      {a: 10, b: "hello"},
+      {path: "classReload.yml", safeMode: false, throttle: 10}
+    );
+    expect(test2.a).toEqual(10);
+    expect(test2.b).toEqual("hello");
+
+    test2.a = 20;
+    test2.b = "world";
+    await test2.writeFile(true);
+    const test3 = new Data(
+      {
+        a: 30,
+        b: "universe",
+      },
+      {path: "classReload.yml", safeMode: false, throttle: 10}
+    );
+    expect(test3.a).toEqual(20);
+    expect(test3.b).toEqual("world");
+
+    await test3.removeFile();
   });
 });

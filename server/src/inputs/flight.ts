@@ -1,16 +1,9 @@
 import {DataContext} from "../utils/DataContext";
 import {FlightDataModel} from "../classes/FlightDataModel";
 import randomWords from "@thorium/random-words";
-import getStore, {StoreObject} from "@thorium/db-fs";
 import {pubsub} from "../utils/pubsub";
 import {thoriumPath} from "../utils/appPaths";
 import fs from "fs/promises";
-
-function isWritableFlight(
-  flight: any
-): flight is FlightDataModel & StoreObject {
-  return !!flight?.writeFile;
-}
 
 export const flightInputs = {
   flightStart: (
@@ -28,13 +21,15 @@ export const flightInputs = {
     if (context.flight) return context.flight;
 
     flightName = flightName || randomWords(3).join("-");
-    context.flight = getStore<
-      Partial<FlightDataModel> & {initialLoad?: boolean}
-    >({
-      class: FlightDataModel,
-      path: `/flights/${flightName}.flight`,
-      initialData: {name: flightName, initialLoad: true},
-    }) as unknown as FlightDataModel;
+    context.flight = new FlightDataModel(
+      {
+        name: flightName,
+        initialLoad: true,
+        entities: [],
+        serverDataModel: context.server,
+      },
+      {path: `/flights/${flightName}.flight`}
+    );
     context.flight.initEcs(context.server);
     context.flight.pluginIds = plugins;
     // TODO September 1, 2021 - We can uncomment this when the plugin system is done
@@ -65,9 +60,8 @@ export const flightInputs = {
     // Save the flight, but don't delete it.
     if (!context.flight) return null;
     context.flight.paused = false;
-    if (isWritableFlight(context.flight)) {
-      context.flight.writeFile();
-    }
+
+    context.flight.writeFile();
 
     context.flight = null;
     context.server.activeFlightName = null;

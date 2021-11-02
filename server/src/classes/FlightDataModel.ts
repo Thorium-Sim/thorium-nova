@@ -4,8 +4,9 @@ import randomWords from "@thorium/random-words";
 import {ServerDataModel} from "./ServerDataModel";
 import systems from "../systems";
 import {FlightClient} from "./Client";
+import {FSDataStore, FSDataStoreOptions} from "@thorium/db-fs";
 
-export class FlightDataModel {
+export class FlightDataModel extends FSDataStore {
   static INTERVAL = 1000 / 60;
   id: string;
   name: string;
@@ -21,8 +22,10 @@ export class FlightDataModel {
       serverDataModel: ServerDataModel;
       initialLoad?: boolean;
       entities: Entity[];
-    }
+    },
+    storeOptions: FSDataStoreOptions = {}
   ) {
+    super(storeOptions);
     this.id = params.id || uniqid("fli-");
     this.name = params.name || randomWords(3).join("-");
     this.paused = params.paused ?? true;

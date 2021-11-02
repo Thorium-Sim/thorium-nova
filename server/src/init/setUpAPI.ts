@@ -1,4 +1,3 @@
-import {StoreObject} from "@thorium/db-fs";
 import {ServerDataModel} from "../classes/ServerDataModel";
 import {DataContext} from "../utils/DataContext";
 import type buildHTTPServer from "./httpServer";
@@ -75,7 +74,7 @@ function checkBodyRequest(
 export function setUpAPI(
   app: ReturnType<typeof buildHTTPServer>,
   database: {
-    server: ServerDataModel & StoreObject;
+    server: ServerDataModel;
     flight: FlightDataModel | null;
   }
 ) {
@@ -134,6 +133,8 @@ export function setUpAPI(
         message = err.message;
       }
       console.error(`Error in input ${String(input)}: ${message}`);
+      if (err instanceof Error && process.env.NODE_ENV !== "production")
+        console.error(err.stack);
       return reply
         .code(400)
         .header("content-type", "application/json")

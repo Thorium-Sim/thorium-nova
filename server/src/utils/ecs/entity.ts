@@ -104,8 +104,9 @@ class Entity {
       components: Object.fromEntries(
         Object.entries(this.components).map(([key, comp]) => {
           let newValue =
-            allComponents[key as keyof typeof allComponents]?.serialize(comp) ||
-            comp;
+            allComponents[key as keyof typeof allComponents]?.serialize(
+              comp as any
+            ) || comp;
           return [key, newValue];
         })
       ),
@@ -231,10 +232,7 @@ class Entity {
     let components = Object.keys(componentsData) as K[];
 
     for (let i = 0, component; (component = components[i] as K); i += 1) {
-      this.updateComponent(
-        component,
-        (componentsData[component] || {}) as Components[K]
-      );
+      this.updateComponent(component, (componentsData[component] || {}) as any);
     }
   }
   /**

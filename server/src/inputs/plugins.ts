@@ -10,21 +10,23 @@ function getPlugin(context: DataContext, pluginId: string): BasePlugin {
   if (!plugin) throw new Error("Plugin not found");
   return plugin;
 }
+function publish(pluginId: string) {
+  pubsub.publish("pluginsList");
+  pubsub.publish("plugin", {pluginId});
+}
 
 export const pluginInputs = {
   pluginCreate(context: DataContext, params: {name: string}) {
-    const plugin = new BasePlugin(params);
+    const plugin = new BasePlugin(params, context.server);
     context.server.plugins.push(plugin);
-    pubsub.publish("pluginsList");
-    pubsub.publish("plugin", {pluginId: plugin.id});
-    return plugin.id;
+    publish(plugin.id);
+    return {pluginId: plugin.id};
   },
   pluginDelete(context: DataContext, params: {pluginId: string}) {
     const plugin = getPlugin(context, params.pluginId);
-    plugin.removeFile(true);
+    plugin.removeFile();
     context.server.plugins.splice(context.server.plugins.indexOf(plugin), 1);
-    pubsub.publish("pluginsList");
-    pubsub.publish("plugin", {pluginId: plugin.id});
+    publish(plugin.id);
   },
   pluginDuplicate(
     context: DataContext,
@@ -34,19 +36,18 @@ export const pluginInputs = {
 
     const pluginCopy = plugin.duplicate(params.name);
     context.server.plugins.push(pluginCopy);
-    pubsub.publish("pluginsList");
-    pubsub.publish("plugin", {pluginId: pluginCopy.id});
-    return pluginCopy.id;
+    publish(plugin.id);
+    return {pluginId: pluginCopy.id};
   },
-  pluginSetName(
+  async pluginSetName(
     context: DataContext,
     params: {pluginId: string; name: string}
   ) {
     const plugin = getPlugin(context, params.pluginId);
+    await plugin.rename(params.name);
 
-    plugin.name = params.name;
-    pubsub.publish("pluginsList");
-    pubsub.publish("plugin", {pluginId: plugin.id});
+    publish(plugin.id);
+    return {pluginId: plugin.id};
   },
   pluginSetDescription(
     context: DataContext,
@@ -55,8 +56,7 @@ export const pluginInputs = {
     const plugin = getPlugin(context, params.pluginId);
 
     plugin.description = params.description;
-    pubsub.publish("pluginsList");
-    pubsub.publish("plugin", {pluginId: plugin.id});
+    publish(plugin.id);
   },
   pluginSetTags(
     context: DataContext,
@@ -65,8 +65,7 @@ export const pluginInputs = {
     const plugin = getPlugin(context, params.pluginId);
 
     plugin.tags = params.tags;
-    pubsub.publish("pluginsList");
-    pubsub.publish("plugin", {pluginId: plugin.id});
+    publish(plugin.id);
   },
   async pluginSetCoverImage(
     context: DataContext,
@@ -85,8 +84,7 @@ export const pluginInputs = {
       await fs.mkdir(path.dirname(coverImagePath), {recursive: true});
       await fs.rename(params.coverImage, coverImagePath);
       plugin.coverImage = plugin.assetPath(`coverImage${ext}`);
-      pubsub.publish("pluginsList");
-      pubsub.publish("plugin", {pluginId: plugin.id});
+      publish(plugin.id);
     }
   },
 };

@@ -2,192 +2,31 @@
 import fsCallback from "fs";
 import path from "path";
 import throttle from "lodash.throttle";
+import {stringify, parse} from "yaml";
 
 const fs = fsCallback.promises;
+let isProxy = Symbol("isProxy");
 
 let basePath = "./";
 export function setBasePath(path: string) {
   basePath = path;
 }
-interface GenericClass {
-  [key: string]: any;
-  new (...params: any[]): object;
-}
-interface IStoreOptions<T> {
+
+export interface FSDataStoreOptions {
   path?: string;
-  indent?: number;
-  class?: GenericClass;
-  initialData?: T;
   throttle?: number;
   safeMode?: boolean;
-  serialize?: (data: T) => Object;
 }
+export abstract class FSDataStore {
+  #path: string;
+  #throttle: number;
+  #safeMode: boolean;
+  #writeThrottle: () => void;
 
-type SecondParam<F extends (...param: any[]) => any> = F extends (
-  arg1: any,
-  arg2: infer P,
-  ...args: any[]
-) => any
-  ? P
-  : never;
-// A helper to make sure we don't parse any janky JSON
-// It works, which is why there are so many "any"s
-function json(
-  data: any,
-  replacer: SecondParam<typeof JSON.stringify> = null,
-  space: number
-) {
-  function stringify(
-    obj: any,
-    replacer: SecondParam<typeof JSON.stringify>,
-    spaces: number
-  ) {
-    return JSON.stringify(obj, serializer(replacer), spaces);
-  }
-
-  function serializer(replacer: any) {
-    let stack: any = [],
-      keys: any = [];
-
-    const cycleReplacer = function (_key: string, value: any) {
-      if (stack[0] === value) return "[Circular ~]";
-      return (
-        "[Circular ~." + keys.slice(0, stack.indexOf(value)).join(".") + "]"
-      );
-    };
-
-    return function (this: any, key: any, value: any) {
-      if (stack.length > 0) {
-        let thisPos = stack.indexOf(this);
-        ~thisPos ? stack.splice(thisPos + 1) : stack.push(this);
-        ~thisPos ? keys.splice(thisPos, Infinity, key) : keys.push(key);
-        if (~stack.indexOf(value)) value = cycleReplacer.call(this, key, value);
-      } else stack.push(value);
-
-      return replacer == null ? value : replacer.call(this, key, value);
-    };
-  }
-  return stringify(data, replacer, space);
-}
-
-function isClass(v: any): v is GenericClass {
-  return typeof v === "function" && /^\s*class\s+/.test(v.toString());
-}
-
-let isProxy = Symbol("isProxy");
-
-export interface StoreObject {
-  writeFile: (force?: boolean) => Promise<void>;
-  removeFile: () => Promise<void>;
-  serialize?: Function;
-}
-export default function getStore<G extends object>(options?: IStoreOptions<G>) {
-  const {
-    path: inputPath = "db.json",
-    class: classConstructor,
-    indent = 2,
-    throttle: throttleDuration = 1000 * 30,
-    initialData,
-    safeMode,
-    serialize = (d: G) => d,
-  } = options || {};
-  let filePath = path.join(basePath, inputPath);
-  // Load the data
-  let _data;
-  try {
-    _data = filePath
-      ? JSON.parse(fsCallback.readFileSync(filePath, "utf8"))
-      : initialData;
-  } catch (err: any) {
-    if (err.code === "EACCES") {
-      err.message +=
-        "\ndata-store does not have permission to load this file\n";
-      throw err;
-    }
-  }
-
-  if (!_data) {
-    _data = initialData;
-  }
-
-  // Instantiate the object if it is a class
-  // or just make a new object with the data inside
-  let dataObject!: G & StoreObject;
-  if (typeof _data?.length === "number") {
-    if (isClass(classConstructor)) {
-      dataObject = _data.map((d: any) => new classConstructor(d));
-    } else {
-      dataObject = _data;
-    }
-    dataObject.writeFile = writeFile;
-    dataObject.removeFile = removeFile;
-  } else {
-    if (isClass(classConstructor)) {
-      dataObject = new classConstructor(_data) as typeof dataObject;
-      dataObject.writeFile = writeFile;
-      dataObject.removeFile = removeFile;
-    } else {
-      dataObject = {..._data, writeFile, removeFile};
-    }
-  }
-
-  async function writeFile(force = false) {
-    try {
-      if (safeMode && force === false) return;
-      if (
-        (!safeMode &&
-          process.env.NODE_ENV !== "production" &&
-          process.env.NODE_ENV !== "test" &&
-          force === false) ||
-        (safeMode !== false && process.env.NODE_ENV === "test")
-      )
-        return;
-      if (!filePath) {
-        return;
-      }
-      await fs.mkdir(path.dirname(filePath), {recursive: true});
-
-      let jsonData = "{}";
-
-      if (Array.isArray(dataObject)) {
-        jsonData = json(
-          dataObject.map(o => (o.serialize ? o.serialize() : serialize(o))),
-          null,
-          indent
-        );
-      } else {
-        jsonData = json(
-          dataObject.serialize ? dataObject.serialize() : serialize(dataObject),
-          null,
-          indent
-        );
-      }
-      await fs.writeFile(filePath, jsonData, {mode: 0o0600});
-    } catch (e: any) {
-      e.message = "db-fs: Error writing file:\n" + e.message;
-      throw e;
-    }
-  }
-
-  async function removeFile() {
-    if (!filePath) return;
-    try {
-      await fs.unlink(filePath);
-    } catch (err: any) {
-      console.error("Error removing file: ", filePath, err);
-    }
-  }
-
-  const writeThrottle =
-    process.env.NODE_ENV === "test"
-      ? writeFile
-      : throttle(writeFile, throttleDuration, {
-          trailing: true,
-        });
-
-  const handler: ProxyHandler<any> = {
-    get(target, key) {
+  #handler: ProxyHandler<any> = {
+    get: (target, key) => {
       if (key === isProxy) return true;
+      if (key === "mapKey") return target[key];
       if (
         !target[isProxy] &&
         Object.getOwnPropertyDescriptor(target, key) &&
@@ -195,25 +34,111 @@ export default function getStore<G extends object>(options?: IStoreOptions<G>) {
         target[key] !== null &&
         !(target[key] instanceof Date)
       ) {
-        return new Proxy(target[key], handler);
+        return new Proxy(target[key], this.#handler);
       } else {
         return target[key];
       }
     },
-    set(target, name, value) {
-      target[name] = value;
+    set: (target, key, value) => {
+      target[key] = value;
 
-      writeThrottle();
+      this.#writeThrottle();
       return true;
     },
-    deleteProperty(target, prop) {
-      if (prop in target) {
-        delete target[prop];
-        writeThrottle();
+    deleteProperty: (target, key) => {
+      if (key in target) {
+        delete target[key];
+        this.#writeThrottle();
         return true;
       }
       return false;
     },
   };
-  return new Proxy(dataObject, handler) as G & StoreObject;
+  constructor(initialData: unknown, options: FSDataStoreOptions = {}) {
+    this.#path = options.path || "db.json";
+    this.#throttle = options.throttle || 1000 * 30;
+    this.#safeMode = options.safeMode || false;
+    this.#writeThrottle =
+      process.env.NODE_ENV === "test"
+        ? this.writeFile
+        : throttle(this.writeFile, this.#throttle, {
+            trailing: true,
+          });
+
+    let data;
+    try {
+      data = this.filePath
+        ? parse(fsCallback.readFileSync(this.filePath, "utf8"))
+        : initialData;
+    } catch (err: any) {
+      if (err.code === "EACCES") {
+        err.message +=
+          "\ndata-store does not have permission to load this file\n";
+        throw err;
+      }
+    }
+    if (!data) {
+      data = initialData;
+    }
+    for (const key in data) {
+      (initialData as any)[key] = data[key];
+    }
+    Object.assign(this, data);
+    const proxy = new Proxy(this, this.#handler);
+    return proxy;
+  }
+  get filePath() {
+    return path.join(basePath, this.#path);
+  }
+  get safeMode() {
+    return this.#safeMode;
+  }
+  serialize(): any {
+    return this;
+  }
+  get path() {
+    return this.#path;
+  }
+  set path(newPath: string) {
+    this.#path = newPath;
+  }
+  async writeFile(force = false) {
+    try {
+      if (this.safeMode && force === false) return;
+      if (
+        (!this.safeMode &&
+          process.env.NODE_ENV !== "production" &&
+          process.env.NODE_ENV !== "test" &&
+          force === false) ||
+        (this.safeMode !== false && process.env.NODE_ENV === "test")
+      )
+        return;
+      if (!this.filePath) {
+        return;
+      }
+      await fs.mkdir(path.dirname(this.filePath), {recursive: true});
+      let data = stringify(this.serialize());
+
+      await fs.writeFile(this.filePath, data, {mode: 0o0600});
+    } catch (e: any) {
+      e.message = "db-fs: Error writing file:\n" + e.message;
+      throw e;
+    }
+  }
+  async moveFile(newPath: string) {
+    if (!this.filePath) return;
+    try {
+      await fs.rename(this.filePath, newPath);
+    } catch (err: any) {
+      console.error("Error moving file: ", this.filePath, err);
+    }
+  }
+  async removeFile() {
+    if (!this.filePath) return;
+    try {
+      await fs.unlink(this.filePath);
+    } catch (err: any) {
+      console.error("Error removing file: ", this.filePath, err);
+    }
+  }
 }

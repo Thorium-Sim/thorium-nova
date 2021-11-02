@@ -29,8 +29,8 @@ fs.mkdirSync(thoriumPath, {recursive: true});
 export const databaseName =
   process.env.NODE_ENV === "production"
     ? /* istanbul ignore next */
-      "db.json"
+      "db.yml"
     : process.env.NODE_ENV === "test"
-    ? "db-test.json"
+    ? "db-test.yml"
     : /* istanbul ignore next */
-      "db-dev.json";
+      "db-dev.yml";
