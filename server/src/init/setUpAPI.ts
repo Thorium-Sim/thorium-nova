@@ -5,7 +5,6 @@ import type buildHTTPServer from "./httpServer";
 import inputs, {AllInputNames} from "../inputs";
 import {
   cardSubscriptions,
-  AllSubscriptions,
   DataCardNames,
   SubscriptionNames,
 } from "client/src/utils/cardData";
@@ -116,7 +115,6 @@ export function setUpAPI(
       }
       body = {...body, ...fileParams};
     }
-    console.log(body);
     const clientId =
       req.headers.authorization?.replace("Bearer ", "").replace("bearer", "") ||
       "";

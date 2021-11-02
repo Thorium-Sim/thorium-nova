@@ -3,12 +3,12 @@ import cookies from "fastify-cookie";
 import staticServe from "fastify-static";
 import cors from "fastify-cors";
 import path from "path";
+import {thoriumPath} from "../utils/appPaths";
 import {promises as fs, createWriteStream} from "fs";
 import {pipeline} from "stream";
 import uniqid from "@thorium/uniqid";
 import os from "os";
 import multipart, {MultipartFile} from "fastify-multipart";
-import {thoriumPath} from "../utils/appPaths";
 
 export default function buildHTTPServer({
   staticRoot = path.join(__dirname, "public"),

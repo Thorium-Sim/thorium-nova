@@ -45,6 +45,7 @@ export default defineConfig(async () => {
       },
       proxy: {
         "/netSend": "http://localhost:3001",
+        "/plugins": "http://localhost:3001",
       },
     },
   };
