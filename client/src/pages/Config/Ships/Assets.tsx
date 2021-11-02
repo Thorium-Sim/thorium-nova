@@ -89,10 +89,10 @@ export function Assets() {
                 color: "success",
               });
               render();
-            } catch (err) {
+            } catch (err: unknown) {
               toast({
                 title: "Upload Failed",
-                body: err.message,
+                body: err instanceof Error ? err.message : "",
                 color: "error",
               });
             }
