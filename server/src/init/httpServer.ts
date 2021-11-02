@@ -5,11 +5,10 @@ import cors from "fastify-cors";
 import path from "path";
 import {thoriumPath} from "../utils/appPaths";
 import {promises as fs, createWriteStream} from "fs";
-import multipart from "fastify-multipart";
-import {pipeline} from "stream/promises";
-import {MultipartFile} from "fastify-multipart";
-import os from "os";
+import {pipeline} from "stream";
 import uniqid from "@thorium/uniqid";
+import os from "os";
+import multipart, {MultipartFile} from "fastify-multipart";
 
 export default function buildHTTPServer({
   staticRoot = path.join(__dirname, "public"),
@@ -38,9 +37,12 @@ export default function buildHTTPServer({
           value: [],
         } as any);
       // @ts-expect-error We need to put this value on.
-      part.fields["filepath"].value.push(filepath);
+      part.fields[`filepath-${part.fieldname}`].value.push(filepath);
     } else {
-      part.fields["filepath"] = {...part, value: filepath} as any;
+      part.fields[`filepath-${part.fieldname}`] = {
+        ...part,
+        value: filepath,
+      } as any;
     }
     await pipeline(part.file, createWriteStream(filepath));
   }
