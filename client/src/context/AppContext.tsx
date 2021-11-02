@@ -6,6 +6,7 @@ import useEasterEgg from "../hooks/useEasterEgg";
 import {ErrorBoundary, FallbackProps} from "react-error-boundary";
 import bg from "../images/background.jpg";
 import {FaSpinner} from "react-icons/fa";
+import ToastContainer from "./ToastContext";
 import {NetRequestData} from "./useNetRequest";
 
 const Fallback: React.FC<FallbackProps> = ({error}) => {
@@ -64,6 +65,7 @@ export default function AppContext({children}: {children: ReactNode}) {
                 <NetRequestData />
                 <Router>{children}</Router>
               </ThoriumProvider>
+              <ToastContainer />
             </AlertDialog>
           </Suspense>
         </ErrorBoundary>
