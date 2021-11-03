@@ -18,11 +18,11 @@ immediately should be selected in the client UI.
 ## Defining Inputs
 
 Inputs are defined in the `/server/src/inputs` folder. Files in that folder
-export a single object where each key is the name of the input and the value is
-the function executed when that input is received. The function, which can be an
-`async` function, includes [`DataContext`](/docs/datacontext) as the first
-parameter. The second parameter is the `params` which can be sent from the
-client.
+include an export of a single object where each key is the name of the input and
+the value is the function executed when that input is received. The function,
+which can be an `async` function, includes [`DataContext`](/docs/datacontext) as
+the first parameter. The second parameter is the `params` which can be sent from
+the client.
 
 It is _very important_ that the `params` object be given a TypeScript type
 annotation. That annotation makes it much easier to know how each input is
@@ -90,7 +90,7 @@ const ClientButton = () => {
         });
         if (typeof name === "string") {
           const result = await netSend("clientSetName", {name});
-          alert(`The client's name was set to "${result.name}".`);
+          alert("The client's name was set to " + result.name);
         }
       }}
     >
@@ -164,12 +164,12 @@ export const pluginInputs = {
       const coverImagePath = path.join(
         thoriumPath,
         plugin.pluginPath,
-        `assets/coverImage${ext}`
+        "assets/coverImage" + ext
       );
 
       await fs.mkdir(path.dirname(coverImagePath), {recursive: true});
       await fs.rename(params.coverImage, coverImagePath);
-      plugin.coverImage = `${plugin.pluginPath}/assets/coverImage${ext}`;
+      plugin.coverImage = plugin.pluginPath + "/assets/coverImage" + ext;
       pubsub.publish("plugin", {pluginId: plugin.id});
     }
   },
@@ -196,7 +196,7 @@ const PluginCoverImage = () => {
     >
       {plugin?.coverImage && (
         <img
-          src={`${plugin.coverImage}?${new Date().getTime()}`}
+          src={plugin.coverImage + "?" + new Date().getTime()`}
           className="w-[90%] h-[90%] object-cover"
           alt="Cover"
         />
