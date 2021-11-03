@@ -1,4 +1,3 @@
-import {useNetSend} from "client/src/context/useNetSend";
 import {useParams, Link} from "react-router-dom";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {useReducer} from "react";
@@ -7,10 +6,10 @@ import UploadWell from "@thorium/ui/UploadWell";
 import {readFile} from "client/src/utils/readFile";
 import {renderGLTFPreview} from "client/src/utils/generateGltfImage";
 import {toast} from "client/src/context/ToastContext";
+import {netSend} from "client/src/context/netSend";
 
 export function Assets() {
   const {pluginId, shipId} = useParams() as {pluginId: string; shipId: string};
-  const netSend = useNetSend();
   const data = useNetRequest("pluginShips", {pluginId});
   const ship = data.find(d => d.name === shipId);
   const [, render] = useReducer(() => ({}), {});

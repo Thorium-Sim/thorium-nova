@@ -1,6 +1,5 @@
 import {useConfirm, usePrompt} from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
-import {useNetSend} from "client/src/context/useNetSend";
 import {
   Navigate,
   Outlet,
@@ -10,6 +9,7 @@ import {
 } from "react-router-dom";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {SettingsList} from "./SettingsList";
+import {netSend} from "client/src/context/netSend";
 
 export const ShipLayout = () => {
   const {pathname} = useLocation();
@@ -17,7 +17,6 @@ export const ShipLayout = () => {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const prompt = usePrompt();
-  const netSend = useNetSend();
   const data = useNetRequest("pluginShip", {pluginId, shipId});
   if (!shipId || !data) return <Navigate to={`/config/${pluginId}/ships`} />;
   if (

@@ -10,7 +10,7 @@ import {WelcomeButtons} from "./components/WelcomeButtons";
 import {FlightLobby} from "./components/FlightLobby";
 import {FaCamera} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
-import {useNetSend} from "./context/useNetSend";
+import {netSend} from "./context/netSend";
 
 const DocLayout = lazy(() => import("./docs"));
 const Config = lazy(() => import("./pages/Config"));
@@ -75,7 +75,6 @@ function AppRoutes() {
   );
 }
 function Snapshot() {
-  const netSend = useNetSend();
   if (process.env.NODE_ENV === "production") return null;
   return (
     <Button

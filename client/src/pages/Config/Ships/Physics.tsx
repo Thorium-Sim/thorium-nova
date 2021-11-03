@@ -1,8 +1,8 @@
-import {useNetSend} from "client/src/context/useNetSend";
 import {Navigate, useParams} from "react-router-dom";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {useState} from "react";
 import Input from "@thorium/ui/Input";
+import {netSend} from "client/src/context/netSend";
 
 export function Physics() {
   const [massError, setMassError] = useState(false);
@@ -12,7 +12,6 @@ export function Physics() {
     pluginId: string;
     shipId: string;
   };
-  const netSend = useNetSend();
   const data = useNetRequest("pluginShips", {pluginId});
   const ship = data.find(d => d.name === shipId);
   if (!ship) return <Navigate to={`/config/${pluginId}/ships`} />;

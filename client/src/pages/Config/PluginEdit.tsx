@@ -7,7 +7,7 @@ import SearchableList from "@thorium/ui/SearchableList";
 import TagInput from "@thorium/ui/TagInput";
 import UploadWell from "@thorium/ui/UploadWell";
 import {useNetRequest} from "client/src/context/useNetRequest";
-import {useNetSend} from "client/src/context/useNetSend";
+import {netSend} from "client/src/context/netSend";
 import {useEffect, useState} from "react";
 import {FaEdit} from "react-icons/fa";
 import {Link, NavLink, useNavigate, useParams} from "react-router-dom";
@@ -15,7 +15,6 @@ import {Link, NavLink, useNavigate, useParams} from "react-router-dom";
 export default function PluginEdit() {
   const [error, setError] = useState(false);
   const data = useNetRequest("pluginsList");
-  const netSend = useNetSend();
   const navigate = useNavigate();
   const {pluginId} = useParams();
   const prompt = usePrompt();

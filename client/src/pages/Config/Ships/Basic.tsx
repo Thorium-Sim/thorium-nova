@@ -1,13 +1,12 @@
-import {useNetSend} from "client/src/context/useNetSend";
 import {Navigate, useParams, useNavigate} from "react-router-dom";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {useState} from "react";
 import Input from "@thorium/ui/Input";
 import TagInput from "@thorium/ui/TagInput";
+import {netSend} from "client/src/context/netSend";
 
 export function Basic() {
   const {pluginId, shipId} = useParams() as {pluginId: string; shipId: string};
-  const netSend = useNetSend();
   const data = useNetRequest("pluginShips", {pluginId});
   const ship = data.find(d => d.name === shipId);
   const [error, setError] = useState(false);

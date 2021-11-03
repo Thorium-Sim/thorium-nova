@@ -4,13 +4,12 @@ import {useClientData} from "../context/useCardData";
 import {usePrompt} from "@thorium/ui/AlertDialog";
 import {FaSpinner} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
-import {useNetSend} from "../context/useNetSend";
+import {netSend} from "../context/netSend";
 
 export function FlightLobby() {
   const prompt = usePrompt();
   const navigate = useNavigate();
   const clientData = useClientData();
-  const netSend = useNetSend();
   return (
     <div className="flex flex-col justify-center items-center h-full  filter drop-shadow-lg space-y-8">
       <h1 className="text-6xl text-white font-bold">

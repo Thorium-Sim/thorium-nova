@@ -2,16 +2,15 @@ import {usePrompt} from "@thorium/ui/AlertDialog";
 import Menubar from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
 import Button from "@thorium/ui/Button";
-import {useNetSend} from "client/src/context/useNetSend";
 import {Outlet, useParams, useNavigate} from "react-router-dom";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {Fragment} from "react";
+import {netSend} from "client/src/context/netSend";
 
 export function ShipList() {
   const {pluginId, shipId} = useParams() as {pluginId: string; shipId?: string};
   const navigate = useNavigate();
   const prompt = usePrompt();
-  const netSend = useNetSend();
   const data = useNetRequest("pluginShips", {pluginId});
   const ship = data.find(d => d.name === shipId);
   return (
