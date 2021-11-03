@@ -18,7 +18,7 @@ export function FlightLobby() {
       <FaSpinner className="animate-spin-step text-4xl text-white" />
       <div className="flex items-center gap-4">
         <h2 className="text-4xl text-white font-bold">My Client Name:</h2>
-        <div
+        <button
           className="btn btn-primary"
           onClick={async () => {
             const name = await prompt({
@@ -30,7 +30,7 @@ export function FlightLobby() {
           }}
         >
           {clientData?.client.name || ""}
-        </div>
+        </button>
       </div>
       <Button
         className="btn btn-primary btn-lg"
