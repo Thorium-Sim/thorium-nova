@@ -19,12 +19,10 @@ export function useNetSend(): <
       if (value instanceof File) {
         body.append(key, value);
         params[key] = {} as any;
-      }
-      if (value instanceof Blob) {
+      } else if (value instanceof Blob) {
         body.append(key, value, `blob-${count++}`);
         params[key] = {} as any;
-      }
-      if (value instanceof FileList) {
+      } else if (value instanceof FileList) {
         for (let i = 0; i < value.length; i++) {
           body.append(`${key}[]`, value[i]);
         }

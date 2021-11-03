@@ -83,7 +83,6 @@ export function setUpAPI(
   // these is its own API endpoint.
   app.post(NETSEND_PATH, async (req, reply) => {
     let body = req.body as any;
-
     // For file uploads, we need to process the body differently
     if (req.isMultipart()) {
       let currentBody = body as Record<

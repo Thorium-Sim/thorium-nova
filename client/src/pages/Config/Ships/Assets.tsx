@@ -24,7 +24,17 @@ export function Assets() {
             best.
           </InfoTip>
         </h3>
-        <UploadWell accept="image/*" onChange={files => {}}>
+        <UploadWell
+          accept="image/*"
+          onChange={async files => {
+            await netSend("pluginShipSetLogo", {
+              pluginId,
+              shipId,
+              logo: files[0],
+            });
+            render();
+          }}
+        >
           {ship?.assets.logo && (
             <img
               src={`${ship.assets.logo}?${new Date().getTime()}`}
