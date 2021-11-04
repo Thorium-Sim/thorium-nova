@@ -3,3 +3,4 @@ export {flightInputs} from "./flight";
 export {serverInputs} from "./server";
 export {dotsInputs} from "./dots";
 export {pluginInputs} from "./plugins";
+export {shipsPluginInputs} from "./plugins/ships";

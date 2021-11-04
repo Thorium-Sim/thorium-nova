@@ -33,9 +33,20 @@ export default class BasePlugin extends FSDataStore {
   name: string;
   author: string;
   description: string;
-  coverImage: string;
-  assetPath(asset: string) {
-    return asset ? `/plugins/${this.name}/assets/${asset}` : "";
+  _coverImage: string;
+  get coverImage() {
+    // Allow images from the internet
+    if (this._coverImage.startsWith("http")) return this._coverImage;
+    // Allow absolute paths
+    if (this._coverImage.startsWith("/")) return this._coverImage;
+    // Otherwise, resolve and return the relative path
+    return `${this.pluginPath}/assets/${this._coverImage}`;
+  }
+  set coverImage(coverImage: string) {
+    this._coverImage = coverImage;
+  }
+  get pluginPath() {
+    return `/plugins/${this.name}`;
   }
   tags: string[];
   constructor(params: Partial<BasePlugin> = {}, server: ServerDataModel) {
@@ -50,7 +61,7 @@ export default class BasePlugin extends FSDataStore {
     this.name = name;
     this.author = params.author || "";
     this.description = params.description || "A great plugin";
-    this.coverImage = params.coverImage || "";
+    this._coverImage = params.coverImage || "";
     this.tags = params.tags || [];
     storedServer = server;
 
@@ -72,6 +83,14 @@ export default class BasePlugin extends FSDataStore {
   async loadAspects() {
     this.aspects.ships = await BasePlugin.loadAspect(this, "ships", ShipPlugin);
   }
+  toJSON() {
+    const {_coverImage, ...data} = this;
+    return {...data, coverImage: this.coverImage};
+  }
+  serialize() {
+    const {_coverImage, ...data} = this;
+    return {...data, coverImage: _coverImage};
+  }
   async rename(name: string) {
     if (name.trim() === this.name) return;
     const newName = generateIncrementedName(
@@ -88,11 +107,21 @@ export default class BasePlugin extends FSDataStore {
 
     // Also rename the cover image
     const coverImage = path.basename(this.coverImage);
-    this.coverImage = this.assetPath(coverImage);
+    this.coverImage = `${this.pluginPath}/assets/${coverImage}`;
     // TODO October 29, 2021: Rename all of the assets associated with
     // aspects of this plugin too.
 
     await this.writeFile(true);
+  }
+  async writeFile(force: boolean = false) {
+    await super.writeFile(force);
+    if (force) {
+      for (let aspect in this.aspects) {
+        for (let aspectInstance of this.aspects[aspect as keyof Aspects]) {
+          await aspectInstance.writeFile(force);
+        }
+      }
+    }
   }
   duplicate(name: string) {
     const data = {...this};

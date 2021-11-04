@@ -138,6 +138,9 @@ export abstract class FSDataStore {
     try {
       await fs.unlink(this.filePath);
     } catch (err: any) {
+      if (err?.code === "ENOENT") {
+        return;
+      }
       console.error("Error removing file: ", this.filePath, err);
     }
   }

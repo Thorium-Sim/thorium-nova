@@ -1,4 +1,4 @@
-import {DataContext} from "../utils/DataContext";
+import {DataContext} from "../../utils/DataContext";
 
 export const pluginsRequest = {
   pluginsList(context: DataContext) {
