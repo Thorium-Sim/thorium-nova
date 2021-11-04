@@ -34,15 +34,15 @@ const ConfigList = () => {
         <div className="flex flex-wrap gap-[10vw] justify-center">
           <ConfigIcon disabled to={`/config/${pluginId}/starmap`}>
             <FaStar className="text-6xl mb-4" />
-            <p className="font-bold text-2xl">Universes</p>
+            <p className="font-bold text-2xl">Universe</p>
           </ConfigIcon>
           <ConfigIcon to={`/config/${pluginId}/ships`}>
             <FaRocket className="text-6xl mb-4" />
             <p className="font-bold text-2xl">Ships</p>
           </ConfigIcon>
-          <ConfigIcon disabled to={`/config/${pluginId}/outfits`}>
+          <ConfigIcon disabled to={`/config/${pluginId}/systems`}>
             <FaTools className="text-6xl mb-4" />
-            <p className="font-bold text-2xl">Outfits</p>
+            <p className="font-bold text-2xl">Ship Systems</p>
           </ConfigIcon>
           <ConfigIcon disabled to={`/config/${pluginId}/phrases`}>
             <MdMessage className="text-6xl mb-4" />

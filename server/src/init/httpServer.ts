@@ -5,7 +5,7 @@ import cors from "fastify-cors";
 import path from "path";
 import {thoriumPath} from "../utils/appPaths";
 import {promises as fs, createWriteStream} from "fs";
-import {pipeline} from "stream";
+import {pipeline} from "stream/promises";
 import uniqid from "@thorium/uniqid";
 import os from "os";
 import multipart, {MultipartFile} from "fastify-multipart";
