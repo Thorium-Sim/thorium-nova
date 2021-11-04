@@ -10,6 +10,11 @@ export const clientInputs = {
     context.server.clients[context.clientId].name = params.name;
     pubsub.publish("clientList");
     pubsub.publish("client", {clientId: context.clientId});
+
+    return {
+      clientId: context.clientId,
+      name: params.name,
+    };
   },
   clientDisconnect: (context: DataContext, params: {nothing: "hi"}) => {
     return "goodbye" as const;

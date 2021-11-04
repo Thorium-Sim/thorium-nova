@@ -63,7 +63,7 @@ function Search() {
                         setResults([]);
                       }}
                       key={item.path}
-                      to={item.path}
+                      to={`/docs/${item.path}`}
                       className="flex items-center px-2 py-1 m-1 transition duration-150 ease-in-out rounded-lg hover:bg-gray-800 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50"
                     >
                       <p className="font-medium text-gray-50">{item.title}</p>
