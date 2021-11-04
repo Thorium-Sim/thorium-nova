@@ -93,6 +93,7 @@ export class ServerClient extends BaseClient {
         pubsub.unsubscribe(netRequestList[requestId]?.subscriptionId);
       }
     });
+
     // Set up the whole netSend process for calling input functions
     socket.socket.on("message", async data => {
       try {
@@ -234,6 +235,13 @@ export class ServerClient extends BaseClient {
         );
       }
     });
+
+    // Send a message to the client indicating that the connection is open
+    socket.socket.send(
+      JSON.stringify({
+        type: "ready",
+      })
+    );
   }
   get cards() {
     // TODO Aug 28, 2021 Populate this list with the dynamic list of cards assigned to the client.

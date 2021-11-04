@@ -35,6 +35,7 @@ export default class BasePlugin extends FSDataStore {
   description: string;
   _coverImage: string;
   get coverImage() {
+    if (!this._coverImage) return "";
     // Allow images from the internet
     if (this._coverImage.startsWith("http")) return this._coverImage;
     // Allow absolute paths

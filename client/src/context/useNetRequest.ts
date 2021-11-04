@@ -1,4 +1,4 @@
-import {useEffect} from "react";
+import {useCallback, useEffect, useReducer} from "react";
 import {
   AllRequestNames,
   AllRequestParams,
@@ -56,12 +56,38 @@ export function useNetRequest<
   const requestId = stableValueHash({requestName, params});
   const data = useSnapshot(netRequestProxy);
   const {socket} = useThorium();
+  const [ready, resetReady] = useReducer(() => ({}), {});
   if (!socket) throw new Promise(() => {});
 
-  if (!data[requestId] && data[requestId] !== null) {
+  const setUpRequest = useCallback(() => {
     if (!netRequestPromises[requestId]) {
       socket.send("netRequest", {requestName, params, requestId});
     }
+  }, [params, requestId, requestName, socket]);
+
+  const takeDownRequest = useCallback(() => {
+    socket.send("netRequestEnd", {requestId});
+    delete netRequestPromises[requestId];
+  }, [requestId, socket]);
+
+  useEffect(() => {
+    const handleReady = () => {
+      resetReady();
+      delete data[requestId];
+    };
+    socket.on("ready", handleReady);
+    return () => {
+      socket.off("ready", handleReady);
+    };
+  }, [socket, requestId, data]);
+
+  useEffect(() => {
+    setUpRequest();
+    return () => takeDownRequest();
+  }, [setUpRequest, takeDownRequest, ready]);
+
+  if (!data[requestId] && data[requestId] !== null) {
+    setUpRequest();
     throw new Promise(res => {
       netRequestPromises[requestId] = res;
     });
