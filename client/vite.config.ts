@@ -33,6 +33,10 @@ export default defineConfig(async () => {
     },
     define: {
       "process.env.USER_PATH": `"${path.resolve(process.cwd(), "..")}"`,
+      "process.env.THORIUMSIM_URL":
+        process.env.NODE_ENV === "production"
+          ? `"https://thoriumsim.com"`
+          : `"http://localhost:8000"`,
     },
     base: "/",
     server: {
