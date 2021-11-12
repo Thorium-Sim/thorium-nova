@@ -190,6 +190,12 @@ const quotes = [
   "I hope I never recover from this.",
   // Ike
   "Plans are useless, but planning is indispensable.",
+  // Alex
+  "I feel like we’re drowning in ambition.",
+  // Gilmore
+  "It Takes A Remarkable Person To Inspire All Of This.",
+  "That Was A Once In A Lifetime Experience - Only If You Want It To Be.",
+  "We're Almost There, But Nowhere Near It. All That Matters Is That We're Going.",
 ];
 
 const QuoteOfTheDay = () => {
