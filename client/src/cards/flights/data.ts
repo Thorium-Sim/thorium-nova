@@ -6,7 +6,7 @@ export const subscriptions = {
       return params?.flights;
     },
     fetch: (context: DataContext) => {
-      return Object.values(context.server.clients).map(c => c.serialize());
+      return Object.values(context.server.clients);
     },
   },
 };

@@ -48,7 +48,7 @@ export class ServerClient extends BaseClient {
     // how it will always be when the server starts up.
     this.connected = false;
   }
-  public serialize() {
+  public toJSON() {
     const {clientContext, subscriptionListeners, SI, ...data} = this;
     return data;
   }
@@ -371,7 +371,7 @@ export class FlightClient extends BaseClient {
     this.offlineState = params.offlineState || null;
     this.training = params.training || false;
   }
-  serialize() {
+  toJSON() {
     return {
       id: this.id,
       flightId: this.flightId,

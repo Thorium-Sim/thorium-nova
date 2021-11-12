@@ -36,17 +36,8 @@ export class ServerDataModel extends FSDataStore {
       this.plugins.push(new BasePlugin({name}, this));
     });
   };
-  serialize() {
+  toJSON() {
     const {plugins, ...data} = this;
-    return {
-      ...data,
-      // We don't want to serialize and store the Geckos channels, so we remove
-      // them from the clients.
-      clients: Object.fromEntries(
-        Object.entries(this.clients).map(([clientId, client]) => {
-          return [clientId, client.serialize()];
-        })
-      ),
-    };
+    return data;
   }
 }

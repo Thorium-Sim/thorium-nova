@@ -35,26 +35,26 @@ export const flightInputs = {
     // TODO September 1, 2021 - We can uncomment this when the plugin system is done
     // context.flight.activatePlugins(true)
     pubsub.publish("flight");
-    return context.flight.serialize();
+    return context.flight;
   },
   flightPause(context: DataContext) {
     if (context.flight) {
       context.flight.paused = true;
     }
     pubsub.publish("flight");
-    return context.flight?.serialize();
+    return context.flight;
   },
   flightResume(context: DataContext) {
     if (context.flight) {
       context.flight.paused = false;
     }
     pubsub.publish("flight");
-    return context.flight?.serialize();
+    return context.flight;
   },
   flightReset(context: DataContext) {
     context.flight?.reset();
     pubsub.publish("flight");
-    return context.flight?.serialize();
+    return context.flight;
   },
   flightStop(context: DataContext): null {
     // Save the flight, but don't delete it.

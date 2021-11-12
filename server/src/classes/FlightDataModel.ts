@@ -5,6 +5,7 @@ import {ServerDataModel} from "./ServerDataModel";
 import systems from "../systems";
 import {FlightClient} from "./Client";
 import {FSDataStore, FSDataStoreOptions} from "@thorium/db-fs";
+import ShipPlugin from "./Plugins/Ship";
 
 export class FlightDataModel extends FSDataStore {
   static INTERVAL = 1000 / 60;
@@ -97,17 +98,17 @@ export class FlightDataModel extends FSDataStore {
    * Ships that are available for spawning in the universe, based on the flight's plugins.
    */
   // TODO September 1, 2021 - We can uncomment this when the plugin system is done
-  // get availableShips() {
-  //   const allShips = this.pluginIds.reduce((prev: Entity[], next) => {
-  //     const plugin = this.serverDataModel.plugins.find(
-  //       plugin => plugin.id === next
-  //     );
-  //     if (!plugin) return prev;
-  //     return prev.concat(plugin.ships);
-  //   }, []);
-  //   return allShips;
-  // }
-  serialize() {
+  get availableShips() {
+    const allShips = this.pluginIds.reduce((prev: ShipPlugin[], next) => {
+      const plugin = this.serverDataModel.plugins.find(
+        plugin => plugin.id === next
+      );
+      if (!plugin) return prev;
+      return prev.concat(plugin.aspects.ships);
+    }, []);
+    return allShips;
+  }
+  toJSON() {
     // Get all of the entities in the world and serialize them into objects
     return {
       id: this.id,
@@ -115,12 +116,9 @@ export class FlightDataModel extends FSDataStore {
       paused: this.paused,
       date: this.date,
       pluginIds: this.pluginIds,
-      entities: this.ecs.entities.map(e => e.serialize()),
+      entities: this.ecs.entities,
       flightClients: Object.fromEntries(
-        Object.entries(this.clients).map(([id, client]) => [
-          id,
-          client.serialize(),
-        ])
+        Object.entries(this.clients).map(([id, client]) => [id, client])
       ),
     };
   }

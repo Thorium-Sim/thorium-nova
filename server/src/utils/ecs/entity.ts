@@ -98,7 +98,7 @@ class Entity {
      */
     this.ecs = null;
   }
-  serialize() {
+  toJSON() {
     return {
       id: this.id,
       components: Object.fromEntries(
