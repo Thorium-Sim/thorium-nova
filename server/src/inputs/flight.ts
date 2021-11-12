@@ -34,6 +34,8 @@ export const flightInputs = {
     context.flight.pluginIds = plugins;
     // TODO September 1, 2021 - We can uncomment this when the plugin system is done
     // context.flight.activatePlugins(true)
+
+    context.server.activeFlightName = flightName;
     pubsub.publish("flight");
     return context.flight;
   },

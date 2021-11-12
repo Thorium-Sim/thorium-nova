@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import {thoriumPath} from "server/src/utils/appPaths";
 import type {FlightDataModel} from "server/src/classes/FlightDataModel";
 import {Entity} from "server/src/utils/ecs";
-
+import {parse} from "yaml";
 // This file is used for any subscriptions which all clients
 // make, regardless of what cards they have.
 export const subscriptions = {
@@ -42,7 +42,7 @@ export const subscriptions = {
             `${thoriumPath}/flights/${flightName}`,
             "utf-8"
           );
-          const data = JSON.parse(raw);
+          const data = parse(raw);
           return {...data, date: new Date(data.date)} as FlightDataModel;
         })
       );

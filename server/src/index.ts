@@ -36,6 +36,7 @@ export async function startServer() {
       },
       {path: `/flights/${flightName}.flight`}
     );
+    flight.initEcs(serverModel);
   }
 
   const database = {server: serverModel, flight};
