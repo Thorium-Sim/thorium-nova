@@ -36,11 +36,14 @@ run this command to download the code:
 git clone https://github.com/Thorium-Sim/thorium-nova.git
 ```
 
-Once the project has been cloned, you can install dependencies using NPM and
-start the project.
+Once the project has been cloned, you can install dependencies using NPM. You
+will also want to install the default plugin, which has the configuration and
+assets for the game itself. Once you've done these two things, you can start the
+project.
 
 ```bash
 npm install
+npm run init:plugin
 npm run dev
 ```
 
