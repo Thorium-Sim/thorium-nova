@@ -8,10 +8,11 @@ Any data coming from the server to the client is published to a channel which
 the client subscribes to. This page serves as a reference for all existing
 pubsub channels.
 
-Pubsub channels are first described by the _subscriber_, meaning the client.
-This is done through the `/client/src/cards/{cardName}/data.ts` files, and most
-importantly the `/client/src/cards/dataList.ts` file that exports them. More
-information on defining card data subscriptions can be found in the
+Pubsub channels are first described by the _subscriber_, meaning the client. For
+card loaders, this is done through the `/client/src/cards/{cardName}/data.ts`
+files, and most importantly the `/client/src/cards/dataList.ts` file that
+exports them. For net requests, this is done through `/server/src/requests`.
+More information on defining card data subscriptions can be found in the
 [documentation page on cards](card-creation).
 
 Once the data subscription has been defined, that pubsub channel can be used by

@@ -14,6 +14,8 @@ This is the main repository for Thorium Nova, a multiplayer real-time bridge
 simulator game. To learn more about what Thorium Nova is, check out
 https://thoriumsim.com.
 
+![Statistics about this repo](https://repobeats.axiom.co/api/embed/f960db96438e7daa257bdeb628c97c3be694fbec.svg "Repobeats analytics image")
+
 ## Development Quick Start
 
 Check out the [project roadmap](https://github.com/orgs/Thorium-Sim/projects/2)

@@ -76,4 +76,4 @@ Also important is the UI for building plugins. This plugin-building UI should be
 built into Thorium Nova as much as possible and accessible from the in-game UI.
 Plugin writers should be able to see the existing plugins, modify a plugin, save
 and export their plugin, and maybe some day publish their plugin to
-https://thoriumsim.com.
+[https://thoriumsim.com](https://thoriumsim.com).
