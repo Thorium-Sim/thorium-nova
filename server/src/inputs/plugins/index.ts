@@ -4,7 +4,6 @@ import fs from "fs/promises";
 import path from "path";
 import {thoriumPath} from "../../utils/appPaths";
 import {getPlugin, publish} from "./utils";
-import {pubsub} from "server/src/utils/pubsub";
 
 export const pluginInputs = {
   pluginCreate(context: DataContext, params: {name: string}) {
@@ -30,42 +29,26 @@ export const pluginInputs = {
     publish(plugin.id);
     return {pluginId: pluginCopy.id};
   },
-  async pluginSetName(
+  async pluginUpdate(
     context: DataContext,
-    params: {pluginId: string; name: string}
+    params: {
+      pluginId: string;
+      name?: string;
+      description?: string;
+      tags?: string[];
+      coverImage?: File | string;
+      active?: boolean;
+    }
   ) {
     const plugin = getPlugin(context, params.pluginId);
-    await plugin.rename(params.name);
+    if (params.description) {
+      plugin.description = params.description;
+    }
 
-    publish(plugin.id);
-    return {pluginId: plugin.id};
-  },
-  pluginSetDescription(
-    context: DataContext,
-    params: {pluginId: string; description: string}
-  ) {
-    const plugin = getPlugin(context, params.pluginId);
-
-    plugin.description = params.description;
-    pubsub.publish("plugin", {pluginId: plugin.id});
-  },
-  pluginSetTags(
-    context: DataContext,
-    params: {pluginId: string; tags: string[]}
-  ) {
-    const plugin = getPlugin(context, params.pluginId);
-
-    plugin.tags = params.tags;
-    pubsub.publish("plugin", {pluginId: plugin.id});
-  },
-  async pluginSetCoverImage(
-    context: DataContext,
-    params: {pluginId: string; coverImage: File | string}
-  ) {
-    const plugin = getPlugin(context, params.pluginId);
-    // coverImage will be a string pointing to a temporary file
-    // move it into place.
-    if (plugin && typeof params.coverImage === "string") {
+    if (params.tags) {
+      plugin.tags = params.tags;
+    }
+    if (typeof params.coverImage === "string") {
       const ext = path.extname(params.coverImage);
       const coverImagePath = path.join(
         thoriumPath,
@@ -76,7 +59,14 @@ export const pluginInputs = {
       await fs.mkdir(path.dirname(coverImagePath), {recursive: true});
       await fs.rename(params.coverImage, coverImagePath);
       plugin.coverImage = `${plugin.pluginPath}/assets/coverImage${ext}`;
-      pubsub.publish("plugin", {pluginId: plugin.id});
     }
+    if (params.active !== undefined) {
+      plugin.active = params.active;
+    }
+    if (params.name) {
+      await plugin.rename(params.name);
+    }
+    publish(plugin.id);
+    return {pluginId: plugin.id};
   },
 };

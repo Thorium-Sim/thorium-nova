@@ -34,7 +34,7 @@ export function Physics() {
                   parseFloat(e.target.value) <= 0
                 )
                   return setMassError(true);
-                await netSend("pluginShipSetMass", {
+                await netSend("pluginShipUpdate", {
                   pluginId,
                   shipId,
                   mass: parseFloat(e.target.value),
@@ -60,7 +60,7 @@ export function Physics() {
                   parseFloat(e.target.value) <= 0
                 )
                   return setLengthError(true);
-                await netSend("pluginShipSetLength", {
+                await netSend("pluginShipUpdate", {
                   pluginId,
                   shipId,
                   length: e.target.value,

@@ -87,7 +87,7 @@ export default function PluginEdit() {
                 const target = e.target as HTMLInputElement;
                 if (!plugin) return;
                 if (target.value) {
-                  const {pluginId} = await netSend("pluginSetName", {
+                  const {pluginId} = await netSend("pluginUpdate", {
                     name: target.value,
                     pluginId: plugin.id,
                   });
@@ -107,7 +107,7 @@ export default function PluginEdit() {
               onBlur={(e: React.FocusEvent<Element>) => {
                 const target = e.target as HTMLInputElement;
                 plugin &&
-                  netSend("pluginSetDescription", {
+                  netSend("pluginUpdate", {
                     description: target.value,
                     pluginId: plugin.id,
                   });
@@ -119,14 +119,14 @@ export default function PluginEdit() {
               disabled={!plugin}
               onAdd={tag => {
                 if (plugin?.tags.includes(tag) || !plugin) return;
-                netSend("pluginSetTags", {
+                netSend("pluginUpdate", {
                   tags: [...plugin.tags, tag],
                   pluginId: plugin.id,
                 });
               }}
               onRemove={tag => {
                 if (!plugin) return;
-                netSend("pluginSetTags", {
+                netSend("pluginUpdate", {
                   tags: plugin.tags.filter(t => t !== tag),
                   pluginId: plugin.id,
                 });
@@ -193,7 +193,7 @@ export default function PluginEdit() {
                 accept="image/*"
                 onChange={(files: FileList) => {
                   if (!plugin) return;
-                  netSend("pluginSetCoverImage", {
+                  netSend("pluginUpdate", {
                     pluginId: plugin.id,
                     coverImage: files[0],
                   });
