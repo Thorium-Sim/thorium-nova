@@ -8,6 +8,8 @@ import fs from "fs/promises";
 import {YAMLSemanticError} from "yaml/util";
 import {FSDataStore} from "@thorium/db-fs";
 import path from "path";
+import StationComplementPlugin from "./StationComplement";
+import {loadFolderYaml} from "server/src/utils/loadFolderYaml";
 
 export function pluginPublish(plugin: BasePlugin) {
   pubsub.publish("pluginsList", {
@@ -20,6 +22,7 @@ export function pluginPublish(plugin: BasePlugin) {
 
 interface Aspects {
   ships: ShipPlugin[];
+  stationComplements: StationComplementPlugin[];
 }
 // Storing the server here so it doesn't get
 // serialized with the plugin.
@@ -76,6 +79,7 @@ export default class BasePlugin extends FSDataStore {
     if (!aspects) {
       aspects = {
         ships: [],
+        stationComplements: [],
       };
       pluginAspects.set(this, aspects);
     }
@@ -83,6 +87,12 @@ export default class BasePlugin extends FSDataStore {
   }
   async loadAspects() {
     this.aspects.ships = await BasePlugin.loadAspect(this, "ships", ShipPlugin);
+
+    this.aspects.stationComplements = await BasePlugin.loadAspect(
+      this,
+      "stationComplements",
+      StationComplementPlugin
+    );
   }
   toJSON() {
     const {_coverImage, ...data} = this;
