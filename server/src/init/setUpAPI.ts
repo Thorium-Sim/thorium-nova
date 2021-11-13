@@ -2,6 +2,7 @@ import {ServerDataModel} from "../classes/ServerDataModel";
 import {DataContext} from "../utils/DataContext";
 import type buildHTTPServer from "./httpServer";
 import inputs, {AllInputNames} from "../inputs";
+import requests, {AllRequestNames} from "../netRequests";
 import {
   cardSubscriptions,
   DataCardNames,
@@ -37,7 +38,25 @@ function checkBodyInput(
     );
   }
 }
-function checkBodyRequest(
+function checkBodyNetRequest(
+  body: any,
+  clientId: string
+): asserts body is {request: AllRequestNames} {
+  checkBody(body, clientId);
+  const bodyObject = (body || {}) as object | {request: AllRequestNames};
+  if (!("request" in bodyObject))
+    throw new Error(
+      "Invalid event input. It must be a JSON body with a `request` property."
+    );
+  if (!(bodyObject.request in requests)) {
+    throw new Error(
+      `Invalid request name. "${String(
+        bodyObject.request
+      )}" is not a valid request name.`
+    );
+  }
+}
+function checkBodyCardRequest(
   body: any,
   clientId: string
 ): asserts body is {
@@ -149,7 +168,7 @@ export function setUpAPI(
       req.headers.authorization?.replace("Bearer ", "").replace("bearer", "") ||
       "";
     try {
-      checkBodyRequest(req.params, clientId);
+      checkBodyCardRequest(req.params, clientId);
       const cardSubs = cardSubscriptions[req.params.card] as any;
       const subscription = req.params.subscription;
       const clientContext = new DataContext(clientId, database);
@@ -165,5 +184,33 @@ export function setUpAPI(
     }
   });
 
-  app.get(NETREQUEST_PATH, async (req, reply) => {});
+  app.post(NETREQUEST_PATH, async (req, reply) => {
+    let body = req.body as any;
+    const clientId =
+      req.headers.authorization?.replace("Bearer ", "").replace("bearer", "") ||
+      "";
+    checkBodyNetRequest(body, clientId);
+    const clientContext = new DataContext(clientId, database);
+    const {request, ...params} = body;
+    try {
+      const requestFunction = requests[request];
+      const response =
+        (await requestFunction(clientContext, params as any, null)) || {};
+
+      // Send the result back to the client, regardless of what it is.
+      return response;
+    } catch (err) {
+      let message = err;
+      if (err instanceof Error) {
+        message = err.message;
+      }
+      console.error(`Error in request ${String(request)}: ${message}`);
+      if (err instanceof Error && process.env.NODE_ENV !== "production")
+        console.error(err.stack);
+      return reply
+        .code(400)
+        .header("content-type", "application/json")
+        .send(JSON.stringify({error: message}));
+    }
+  });
 }

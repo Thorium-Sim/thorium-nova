@@ -40,6 +40,9 @@ export abstract class Aspect extends FSDataStore {
   get assetPath() {
     return path.join(path.dirname(this.path), "assets");
   }
+  get pluginName() {
+    return this.plugin.name;
+  }
   /**
    * Used for messages sent to the client. We transform the asset
    * path to make sure it works with the client.
@@ -58,6 +61,7 @@ export abstract class Aspect extends FSDataStore {
     const {plugin, ...data} = this;
     return {
       ...data,
+      pluginName: this.pluginName,
       assets: transformedAssets,
     };
   }
