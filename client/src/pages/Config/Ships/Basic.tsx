@@ -27,7 +27,7 @@ export function Basic() {
               onChange={() => setError(false)}
               onBlur={async (e: any) => {
                 if (!e.target.value) return setError(true);
-                const {shipId: newId} = await netSend("pluginShipSetName", {
+                const {shipId: newId} = await netSend("pluginShipUpdate", {
                   pluginId,
                   shipId,
                   name: e.target.value,
@@ -43,7 +43,7 @@ export function Basic() {
                 label="Description"
                 defaultValue={ship.description}
                 onBlur={(e: any) =>
-                  netSend("pluginShipSetDescription", {
+                  netSend("pluginShipUpdate", {
                     pluginId,
                     shipId,
                     description: e.target.value,
@@ -60,7 +60,7 @@ export function Basic() {
                 type="textarea"
                 defaultValue={ship.category}
                 onBlur={(e: any) =>
-                  netSend("pluginShipSetCategory", {
+                  netSend("pluginShipUpdate", {
                     pluginId,
                     shipId,
                     category: e.target.value,
@@ -74,7 +74,7 @@ export function Basic() {
             tags={ship.tags}
             onAdd={tag => {
               if (ship.tags.includes(tag)) return;
-              netSend("pluginShipSetTags", {
+              netSend("pluginShipUpdate", {
                 pluginId,
                 shipId,
                 tags: [...ship.tags, tag],
@@ -82,7 +82,7 @@ export function Basic() {
             }}
             onRemove={tag => {
               if (!ship.tags.includes(tag)) return;
-              netSend("pluginShipSetTags", {
+              netSend("pluginShipUpdate", {
                 pluginId,
                 shipId,
                 tags: ship.tags.filter(t => t !== tag),

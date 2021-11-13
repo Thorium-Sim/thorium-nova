@@ -32,6 +32,7 @@ export default class BasePlugin extends FSDataStore {
   name: string;
   author: string;
   description: string;
+  active: boolean = true;
   _coverImage: string;
   get coverImage() {
     if (!this._coverImage) return "";
@@ -63,6 +64,7 @@ export default class BasePlugin extends FSDataStore {
     this.description = params.description || "A great plugin";
     this._coverImage = params.coverImage || "";
     this.tags = params.tags || [];
+    this.active = params.active ?? true;
     storedServer = server;
 
     this.loadAspects();

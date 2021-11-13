@@ -26,7 +26,7 @@ export function Assets() {
         <UploadWell
           accept="image/*"
           onChange={async files => {
-            await netSend("pluginShipSetLogo", {
+            await netSend("pluginShipUpdate", {
               pluginId,
               shipId,
               logo: files[0],
@@ -85,7 +85,7 @@ export function Assets() {
                   },
                 }),
               ]);
-              await netSend("pluginShipSetModel", {
+              await netSend("pluginShipUpdate", {
                 pluginId,
                 shipId,
                 model: file,
