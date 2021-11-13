@@ -1,9 +1,6 @@
-import {promises as fs} from "fs";
 import type BasePlugin from "./index";
 import {Aspect} from "./Aspect";
 import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
-import path from "path";
-import {thoriumPath} from "server/src/utils/appPaths";
 
 export type ShipCategories = "Cruiser" | "Frigate" | "Scout" | "Shuttle";
 
@@ -78,29 +75,5 @@ export default class ShipPlugin extends Aspect {
     this.mass = params.mass || 700000000;
     this.length = params.length || 350;
     this.shipSystems = params.shipSystems || [];
-  }
-  async removeFile() {
-    await super.removeFile();
-    await fs.rm(path.dirname(this.path), {recursive: true, force: true});
-  }
-  async rename(name: string) {
-    if (name.trim() === this.name) return;
-    const newName = generateIncrementedName(
-      name.trim() || this.name,
-      this.plugin.aspects.ships.map(ship => ship.name)
-    );
-    const shipPath = path.dirname(this.path);
-    const newShipPath = path.join(shipPath, "..", newName);
-
-    await fs.rename(
-      `${thoriumPath}/${shipPath}`,
-      `${thoriumPath}/${newShipPath}`
-    );
-    this.path = path.join(newShipPath, "manifest.yml");
-    this.name = newName;
-
-    // Assets should automatically be renamed by virtue of
-    // being relative links.
-    await this.writeFile(true);
   }
 }
