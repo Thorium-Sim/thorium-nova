@@ -55,8 +55,9 @@ export abstract class Aspect extends FSDataStore {
         }
       })
     );
+    const {plugin, ...data} = this;
     return {
-      ...this,
+      ...data,
       assets: transformedAssets,
     };
   }

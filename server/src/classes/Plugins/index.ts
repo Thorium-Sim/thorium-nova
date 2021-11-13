@@ -3,9 +3,7 @@ import type {ServerDataModel} from "../ServerDataModel";
 import {generateIncrementedName} from "../../utils/generateIncrementedName";
 import ShipPlugin from "./Ship";
 import {thoriumPath} from "server/src/utils/appPaths";
-import {parse} from "yaml";
 import fs from "fs/promises";
-import {YAMLSemanticError} from "yaml/util";
 import {FSDataStore} from "@thorium/db-fs";
 import path from "path";
 import StationComplementPlugin from "./StationComplement";
@@ -156,25 +154,11 @@ export default class BasePlugin extends FSDataStore {
     }
   ) {
     const objectGlob = `${thoriumPath}/plugins/${plugin.id}/${aspectName}/*/manifest.yml`;
-    const {globby} = await import("globby");
-    const aspectPaths = await globby(objectGlob);
-    let aspects: T[] = [];
-    for (const aspectPath of aspectPaths) {
-      try {
-        const manifest = parse(await fs.readFile(aspectPath, "utf8"));
-        aspects.push(new aspect(manifest, plugin));
-      } catch (err) {
-        if (err instanceof YAMLSemanticError) {
-          console.error(
-            `Error parsing ${aspectPath
-              .replace(`${thoriumPath}/plugins/`, "")
-              .replace("/manifast.yml", "")} on line ${
-              err.source?.rangeAsLinePos?.start.line
-            }: ${err.message}`
-          );
-        }
-      }
-    }
-    return aspects;
+    const data = await loadFolderYaml<{name: string} & Record<string, any>>(
+      objectGlob
+    );
+    return data.map(aspectData => {
+      return new aspect(aspectData, plugin);
+    });
   }
 }
