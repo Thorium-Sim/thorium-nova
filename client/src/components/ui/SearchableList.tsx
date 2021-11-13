@@ -22,20 +22,23 @@ interface ListItem<ID extends string | number = string> {
   id: ID;
   [key: string]: any;
 }
-function SearchableList<ID extends string | number>({
+function SearchableList<
+  ID extends string | number,
+  Item extends ListItem<ID> = {id: ID; label: string; category: string}
+>({
   items,
   selectedItem,
   setSelectedItem,
   renderItem,
-  searchKeys = ["label", "category"],
-}: SearchableListProps<ID>) {
+  searchKeys = ["label", "category"] as OnlyString<keyof Item>[],
+}: SearchableListProps<ID, Item>) {
   const [search, setSearch] = useState<string>("");
   const filteredObjects = useMemo(
     () => matchSorter(items, search, {keys: searchKeys}),
     [items, search, searchKeys]
   );
   const sortedIntoCategories = filteredObjects.reduce(
-    (prev: {[key: string]: ListItem<ID>[]}, next: ListItem<ID>) => {
+    (prev: {[key: string]: Item[]}, next: Item) => {
       const cat = next.category || "";
       prev[cat] = prev[cat] || [];
       prev[cat].push(next);
