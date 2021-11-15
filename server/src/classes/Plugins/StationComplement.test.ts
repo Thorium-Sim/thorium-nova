@@ -25,9 +25,6 @@ describe("StationComplementPlugin", () => {
     expect(stationComplement).toBeInstanceOf(StationComplementPlugin);
     expect(stationComplement.name).toBe("New Station Complement");
     expect(stationComplement.stationCount).toBe(0);
-    await fs.rm(path.resolve(path.join(".", plugin.path, "..")), {
-      recursive: true,
-    });
   });
   it("should load test yaml", async () => {
     const plugin = new Plugin({name: "Test Plugin"}, {
