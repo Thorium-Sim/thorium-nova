@@ -53,6 +53,7 @@ export default function PluginEdit() {
                 description: d.description,
                 tags: d.tags,
                 author: d.author,
+                active: d.active,
               }))}
               searchKeys={["name", "author", "tags"]}
               selectedItem={pluginId || null}
@@ -61,6 +62,11 @@ export default function PluginEdit() {
                 <div className="flex justify-between items-center" key={c.id}>
                   <div>
                     {c.name}
+                    {c.active ? (
+                      ""
+                    ) : (
+                      <span className="text-red-600"> (inactive)</span>
+                    )}
                     <div>
                       <small>{c.author}</small>
                     </div>
@@ -132,6 +138,29 @@ export default function PluginEdit() {
                 });
               }}
             />
+            {plugin?.active ? (
+              <Button
+                className="w-full btn-outline btn-warning"
+                disabled={!pluginId}
+                onClick={async () => {
+                  if (!pluginId) return;
+                  netSend("pluginUpdate", {pluginId, active: false});
+                }}
+              >
+                Deactivate Plugin
+              </Button>
+            ) : (
+              <Button
+                className="w-full btn-outline btn-success"
+                disabled={!pluginId}
+                onClick={async () => {
+                  if (!pluginId) return;
+                  netSend("pluginUpdate", {pluginId, active: true});
+                }}
+              >
+                Activate Plugin
+              </Button>
+            )}
             <Button
               className="w-full btn-outline btn-error"
               disabled={!pluginId}

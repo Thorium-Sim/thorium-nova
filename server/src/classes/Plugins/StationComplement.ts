@@ -6,13 +6,13 @@ import {Aspect} from "./Aspect";
 export default class StationComplementPlugin extends Aspect {
   apiVersion = "stations/v1" as const;
   kind = "stationComplements" as const;
-  name: string;
-  hasShipMap: boolean;
-  stations: Station[] = [];
+  name!: string;
+  hasShipMap!: boolean;
+  stations!: Station[];
   get stationCount() {
     return this.stations.length;
   }
-  assets = {};
+  assets!: Record<string, string>;
   constructor(params: Partial<StationComplementPlugin>, plugin: BasePlugin) {
     const name = generateIncrementedName(
       params.name || "New Station Complement",
@@ -20,9 +20,10 @@ export default class StationComplementPlugin extends Aspect {
     );
     super({name, ...params}, {kind: "stationComplements"}, plugin);
 
-    this.name = name;
-    this.hasShipMap = params.hasShipMap || false;
-    this.stations = params.stations || [];
+    this.stations = this.stations || params.stations || [];
+    this.hasShipMap = this.hasShipMap || params.hasShipMap || false;
+    this.assets = this.assets || params.assets || {};
+
     this.assets = this.stations.reduce((assets, station) => {
       const cardIcons = station.cards.reduce(
         (icons: Record<string, string>, card) => {
@@ -33,6 +34,7 @@ export default class StationComplementPlugin extends Aspect {
         },
         {}
       );
+
       return {
         ...assets,
         [`${station.name}-logo`]: station.logo,
