@@ -14,11 +14,12 @@
 <!--- You can reference an issue by saying "Refs #123" or close an issue when this pull request is merged by saying "Closes #123"
 <!--- Please link to the issue here: -->
 
-## How Has This Been Tested?
+## How do you know the changes work correctly?
 
-<!--- Please describe in detail how you tested your changes. -->
-<!--- Include details of your testing environment, and the tests you ran to -->
-<!--- see how your change affects other areas of the code, etc. -->
+<!-- Either describe the automated tests that you wrote -->
+<!-- Or describe the steps that someone else can take to -->
+<!-- check if your change does what it is supposed to -->
+<!-- Eg. provide a test plan the reviewer can follow -->
 
 ## Screenshots (if appropriate):
 

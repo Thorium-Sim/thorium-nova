@@ -2,7 +2,7 @@ import {FSDataStore, FSDataStoreOptions} from "@thorium/db-fs";
 import {thoriumPath} from "../utils/appPaths";
 import {ServerClient} from "./Client";
 import BasePlugin from "./Plugins";
-
+import fg from "fast-glob";
 export class ServerDataModel extends FSDataStore {
   clients!: Record<string, ServerClient>;
   thoriumId!: string;
@@ -28,8 +28,7 @@ export class ServerDataModel extends FSDataStore {
     this.#loadPlugins();
   }
   #loadPlugins = async () => {
-    const {globby} = await import("globby");
-    const plugins = await globby(`${thoriumPath}/plugins/*/manifest.yml`);
+    const plugins = await fg(`${thoriumPath}/plugins/*/manifest.yml`);
     const pluginRegex = new RegExp(`${thoriumPath}/plugins/(.*)/manifest.yml`);
     plugins.forEach(plugin => {
       const name = pluginRegex.exec(plugin)![1];
