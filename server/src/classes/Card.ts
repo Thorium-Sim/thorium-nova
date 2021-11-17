@@ -1,18 +1,15 @@
 import uniqid from "@thorium/uniqid";
 type CardConfig = unknown;
 export class Card {
-  id: string;
-
   name: string;
 
   component: string;
 
-  config: CardConfig;
+  config?: CardConfig;
 
-  icon: string | null;
+  icon?: string | null;
 
   constructor(params: Partial<Card>) {
-    this.id = params.id || uniqid("crd-");
     this.name = params.name || "Card";
     this.component = params.component || "Card";
     this.config = params.config;
