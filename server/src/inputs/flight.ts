@@ -6,6 +6,7 @@ import {thoriumPath} from "../utils/appPaths";
 import fs from "fs/promises";
 import {spawnShip} from "../spawners/ship";
 import type ShipPlugin from "../classes/Plugins/Ship";
+
 interface FlightStartShips {
   shipTemplate: {pluginId: string; shipId: string};
   shipName: string;

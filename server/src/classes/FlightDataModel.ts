@@ -3,7 +3,7 @@ import uniqid from "@thorium/uniqid";
 import randomWords from "@thorium/random-words";
 import {ServerDataModel} from "./ServerDataModel";
 import systems from "../systems";
-import {FlightClient} from "./Client";
+import {FlightClient} from "./FlightClient";
 import {FSDataStore, FSDataStoreOptions} from "@thorium/db-fs";
 import ShipPlugin from "./Plugins/Ship";
 
