@@ -11,6 +11,7 @@ import {FlightLobby} from "./components/FlightLobby";
 import {FaCamera} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
 import {netSend} from "./context/netSend";
+import LoginButton from "./components/LoginButton";
 
 const DocLayout = lazy(() => import("./docs"));
 const Config = lazy(() => import("./pages/Config"));
@@ -20,33 +21,10 @@ const MainPage = () => {
     <div className="welcome h-full p-12 grid grid-cols-2 grid-rows-2">
       <WelcomeLogo />
       <Credits className="row-start-2 col-start-2" />
-      {/* <div>
-        <Button
-          onClick={() =>
-            netSend("flightStart", {flightName: "Test", plugins: []})
-          }
-          className="btn"
-        >
-          Start Flight
-        </Button>
-        <Button
-          onClick={() => netSend("flightResume")}
-          className="btn btn-success"
-        >
-          Resume Flight
-        </Button>
-        <Button
-          onClick={() => netSend("dotCreate")}
-          className="btn btn-success"
-        >
-          Add Dot
-        </Button>
-      </div>
-      <CardProvider cardName="clients">
-        <CardData />
-      </CardProvider> */}
+
       <WelcomeButtons className="col-start-1 row-start-2" />
       <QuoteOfTheDay />
+      <LoginButton />
     </div>
   );
 };
