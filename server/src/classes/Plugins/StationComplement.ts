@@ -42,4 +42,10 @@ export default class StationComplementPlugin extends Aspect {
       };
     }, {});
   }
+  toJSON() {
+    return {
+      ...super.toJSON(),
+      stationCount: this.stationCount,
+    };
+  }
 }
