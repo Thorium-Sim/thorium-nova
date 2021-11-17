@@ -1,5 +1,5 @@
 import {Entity} from "server/src/utils/ecs";
-import {DataContext} from "./DataContext";
+import type {DataContext} from "./DataContext";
 export {DataContext};
 export type UnionToIntersection<U> = (
   U extends U ? (x: U) => 0 : never
