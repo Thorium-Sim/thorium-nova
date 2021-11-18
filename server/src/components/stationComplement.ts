@@ -9,6 +9,8 @@ export class StationComplementComponent extends Component {
 
   name: string = "Station Complement";
 
+  hasShipMap: boolean = false;
+
   stations: Station[] = [];
 
   init(params: Partial<StationComplementComponent>) {

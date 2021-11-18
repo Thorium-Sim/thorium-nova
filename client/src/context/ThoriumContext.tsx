@@ -1,16 +1,12 @@
 import {ClientChannel} from "@geckos.io/client";
 import {createContext, ReactNode, useContext, useEffect, useMemo} from "react";
-import type {
-  AllInputNames,
-  AllInputParams,
-  AllInputReturns,
-} from "@thorium/inputs";
 import {useDataConnection} from "../hooks/useDataConnection";
 import {FaSpinner} from "react-icons/fa";
 import {SnapshotInterpolation, Types} from "@geckos.io/snapshot-interpolation";
 import {decode} from "@msgpack/msgpack";
 import {ClientSocket} from "../utils/clientSocket";
 import Button from "@thorium/ui/Button";
+import {ThoriumAccountContextProvider} from "./ThoriumAccountContext";
 const serverFPS = 3;
 
 const ThoriumContext = createContext<IThoriumContext | null>(null);
@@ -79,7 +75,7 @@ export function ThoriumProvider({children}: {children: ReactNode}) {
 
   return (
     <ThoriumContext.Provider value={value}>
-      {children}
+      <ThoriumAccountContextProvider>{children}</ThoriumAccountContextProvider>
       {reconnectionState === "reconnecting" && <Reconnecting />}
       {reconnectionState === "disconnected" && <Disconnected />}
     </ThoriumContext.Provider>

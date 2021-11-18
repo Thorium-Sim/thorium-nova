@@ -2,7 +2,8 @@ import uuid from "@thorium/uniqid";
 import {Card} from "./Card";
 
 export default class Station {
-  id: string;
+  apiVersion = "stations/v1" as const;
+  kind = "stations" as const;
 
   name: string;
 
@@ -10,19 +11,18 @@ export default class Station {
 
   logo: string;
 
-  layout: string;
+  theme: string;
 
   tags: string[];
 
   cards: Card[];
 
   constructor(params: Partial<Station>) {
-    this.id = params.id || uuid("sta-");
     this.name = params.name || "Station";
     this.description = params.description || "";
     this.tags = params.tags || [];
     this.logo = params.logo || "";
-    this.layout = params.layout || "Default";
+    this.theme = params.theme || "Default";
     this.cards = [];
     params.cards?.forEach(c => this.cards.push(new Card(c)));
   }
