@@ -355,7 +355,7 @@ export class ServerClient extends BaseClient {
  */
 export class FlightClient extends BaseClient {
   flightId: string;
-  shipId: string | null;
+  shipId: number | null;
   stationId: string | null;
   loginName: string;
   offlineState: OfflineStates | null;
