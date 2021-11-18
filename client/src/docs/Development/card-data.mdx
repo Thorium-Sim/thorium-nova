@@ -52,34 +52,36 @@ the client's ship alert status.
 Cards themselvse define their subscriptions in a file called `data.ts` inside
 the card's folder.
 
-All `data.ts` files **must** export a `subscriptions` object. The properties of
-this object represent different subscription channel names. These channel names
-are used by the `pubsub.publish` function to signal that the data has changed
-and trigger a subscription publish. Calling `pubsub.publish` usually happens in
-an input definition, but it could happen in an infrequently triggered ECS
-System.
+All `data.ts` files **must** export a on object called `subscriptions`. The
+properties of this object represent different subscription channel names. These
+channel names are used by the `pubsub.publish` function to signal that the data
+has changed and trigger a subscription publish. Calling `pubsub.publish` usually
+happens in an input definition, but it could happen in an infrequently triggered
+ECS System.
 
-Each of the channel name properties on the `subscriptions` object has two
-methods: `filter` and `fetch`.
+Each of the channel name properties on the `subscriptions` exports a single
+function which both determines whether a client should receive data and also
+collects and returns the data that should be sent. The function takes two
+parameters: `context` which is an instance of [DataContext](datacontext) for
+that particular client, and `params`, being whatever values are passed to
+`pubsub.publish` in addition to the channel name. The second `params` parameter
+should always have a type annotation on it. This is automatically picked up by
+the `pubsub.publish` function.
 
-#### `filter`
+#### Subscription Filters
 
-This function is optional. This function makes sure that subscriptions are only
-fired for the clients that need them. For example, two clients on two different
-player ships might both be subscribed to the 'phasers' channel, but when one of
-the ships charges their phasers, only the client on that ship should get the
-subscription update.
+Subscription filters are optional. The idea is to makes sure that subscriptions
+are only fired for the clients that need them. For example, two clients on two
+different player ships might both be subscribed to the 'phasers' channel, but
+when one of the ships charges their phasers, only the client on that ship should
+get the subscription update.
 
-When `filter` is defined, it is called for every client subscribed to this
-channel. It's called with two arguments: `params`, being whatever values are
-passed to `pubsub.publish` in addition to the channel name, and `context` which
-is an instance of [DataContext](datacontext) for that particular client.
-
-The first `params` parameter should always have a type annotation on it. This is
-automatically picked up by the `pubsub.publish` function.
-
-If this function returns `true`, the subscription will be fired. Otherwise, it
-will ignore the subscription for that client.
+To determine whether a client should receive data, the subscription function
+should check the `params` parameter against data in the database and about the
+client, like which ship the client is assigned to. If it determines that the
+publish should not go to that client, it should throw `null`. This stops the
+rest of the data handler from running and indicates that the client shouldn't
+receive that update.
 
 Like the example above, it's most commonly used for filtering based on the ship
 the client is assigned to, though it could filter based on any other criteria.
@@ -87,45 +89,39 @@ the client is assigned to, though it could filter based on any other criteria.
 ```ts
 // /client/src/cards/WeaponsControl/subscriptions.ts
 export const subscriptions = {
-  phasers: {
-    filter: (params: {shipId: string}, context: DataContext) => {
-      return context.ship.id === params.shipId;
-    },
+  phasers: (context: DataContext, params: {shipId: string}) => {
+    if (context.ship.id !== params.shipId) throw null;
     // ...
   },
 };
 ```
 
-When `filter` is omitted, every client subscribed to that channel will recieve
+If it never throws `null`, every client subscribed to that channel will receive
 every publish.
 
-#### `fetch`
+#### Fetching Data
 
-This function is required. This is the function that collects the data that is
-needed for the card to operate. Since it is called both when the card first
-loads _and_ when any subscription publishes happen, it needs to be stateless.
-That means it does not have access to the argument passed in to
-`pubsub.publish`.
+After filtering the subscription, the function collects the data that is needed
+for the card to operate. Since it is called both when the card first loads _and_
+when any subscription publishes happen, it needs to be stateless. That means it
+should not access the argument passed in to `pubsub.publish` to collect data.
 
-`fetch` only has one parameter: an instance of [DataContext](datacontext) for
-the client running the card. Whatever it returns is sent to the client and made
-available with the [useCardData](#usecarddata) hook. This most likely means
-finding specific entities associated with the ship the client is assigned to.
+Whatever the function returns is sent to the client and made available with the
+[useCardData](#usecarddata) hook. This most likely means finding specific
+entities associated with the ship the client is assigned to.
 
 ```ts
 // /client/src/cards/WeaponsControl/subscriptions.ts
 export const subscriptions = {
-  phasers: {
+  phasers: (context: DataContext) => {
     // ...
-    fetch: (context: DataContext) => {
-      const phaserSystems = context.flight.ecs.entities.filter(
-        entity =>
-          !!entity.components.phasers &&
-          entity.components.shipAssignment.shipId === context.ship.id
-      );
+    const phaserSystems = context.flight.ecs.entities.filter(
+      entity =>
+        !!entity.components.phasers &&
+        entity.components.shipAssignment.shipId === context.ship.id
+    );
 
-      return phaserSystems;
-    },
+    return phaserSystems;
   },
 };
 ```
@@ -140,7 +136,7 @@ that `pubsub.publish` is being called any time the relevant data changes on the
 server.
 
 The `params` object passed to `pubsub.publish` should include as many values as
-possible to give the `filter` function as much information as is needed to
+possible to give the subscription function as much information as is needed to
 determine if the subscription should go to the client.
 
 ## Data Streams

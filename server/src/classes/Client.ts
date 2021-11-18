@@ -276,24 +276,25 @@ export class ServerClient extends BaseClient {
       for (let sub of keys) {
         // This listener will be called whenever `pubsub.publish(sub, payload)` is called.
         const listener = async (payload: any, context: DataContext) => {
-          const subFunctions = cardSubs[sub] as SubRecord;
-          if (
-            subFunctions.filter &&
-            !(await subFunctions.filter?.(payload, context))
-          ) {
-            return;
-          }
+          const subFunction = cardSubs[sub] as SubRecord;
 
-          const data = await cardSubs[sub].fetch(context);
-          // Send the data to the client, keyed by card
-          socket.socket.send(
-            JSON.stringify({
-              type: "cardData",
-              data: {card, data: {[sub]: data}},
-            })
-          );
+          try {
+            const data = await subFunction(context, payload);
+
+            // Send the data to the client, keyed by card
+            socket.socket.send(
+              JSON.stringify({
+                type: "cardData",
+                data: {card, data: {[sub]: data}},
+              })
+            );
+          } catch (err) {
+            if (err === null) return;
+            throw err;
+          }
         };
-        initialData[sub] = await cardSubs[sub].fetch(this.clientContext);
+
+        initialData[sub] = await cardSubs[sub](this.clientContext);
         subscriptionList.push({trigger: sub, listener});
       }
       setTimeout(async () => {

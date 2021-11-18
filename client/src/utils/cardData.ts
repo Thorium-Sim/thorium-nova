@@ -1,4 +1,4 @@
-import {UnionToIntersection} from "server/src/utils/types";
+import {DataContext, UnionToIntersection} from "server/src/utils/types";
 import * as allData from "../cards/dataList";
 
 // @ts-expect-error The default value duplicates everything else. No need to include it.
@@ -21,19 +21,19 @@ export const cardDataStreams = Object.fromEntries(
     })
 );
 
-type FirstParam<Func extends (...args: any) => any> = Func extends (
-  first: infer R,
+type SecondParam<Func extends (...args: any) => any> = Func extends (
+  first: any,
+  second: infer R,
   ...args: any
 ) => any
   ? R
   : never;
-type AnyFunc = (...args: any) => any;
-export type SubRecord = {fetch: AnyFunc; filter?: AnyFunc};
+export type SubRecord = (context: DataContext, params?: any) => any;
 export type GetSubscriptionParams<Subs extends Record<string, SubRecord>> = {
-  [Property in keyof Subs]: FirstParam<NonNullable<Subs[Property]["filter"]>>;
+  [Property in keyof Subs]: SecondParam<Subs[Property]>;
 };
 export type GetSubscriptionReturns<Subs extends Record<string, SubRecord>> = {
-  [Property in keyof Subs]: ReturnType<Subs[Property]["fetch"]>;
+  [Property in keyof Subs]: ReturnType<Subs[Property]>;
 };
 
 export type CardDataFunctions = typeof allData;
