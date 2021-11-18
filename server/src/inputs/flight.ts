@@ -6,12 +6,13 @@ import {thoriumPath} from "../utils/appPaths";
 import fs from "fs/promises";
 import {spawnShip} from "../spawners/ship";
 import type ShipPlugin from "../classes/Plugins/Ship";
+import type StationComplementPlugin from "../classes/Plugins/StationComplement";
 
 interface FlightStartShips {
   shipTemplate: {pluginId: string; shipId: string};
   shipName: string;
   crewCount: number;
-  stationComplementName?: {pluginId: string; stationId: string};
+  stationComplement?: {pluginId: string; stationId: string};
   // TODO November 15, 2021 - Implement the mission once missions
   // are actually a thing
   missionName?: {pluginId: string; missionId: string};
@@ -76,8 +77,51 @@ export const flightInputs = {
       });
       shipEntity.addComponent("isPlayerShip");
 
-      // TODO November 16, 2021 - Implement the station complement component
-      // once the other pull requests have been merged.
+      // First see if there is a station complement
+      // that matches the specific one that was passed in
+      let stationComplement = activePlugins.reduce(
+        (acc: StationComplementPlugin | null, plugin) => {
+          if (acc) return acc;
+          if (
+            ship.stationComplement &&
+            plugin.id !== ship.stationComplement.pluginId
+          )
+            return acc;
+          if (ship.stationComplement) {
+            return (
+              plugin.aspects.stationComplements.find(
+                pluginStationComplement =>
+                  pluginStationComplement.name ===
+                  ship.stationComplement?.stationId
+              ) || null
+            );
+          }
+          return null;
+        },
+        null
+      );
+      // No station complement? Find the one that best fits from the default plugin
+      if (!stationComplement) {
+        stationComplement = activePlugins.reduce(
+          (acc: StationComplementPlugin | null, plugin) => {
+            if (acc) return acc;
+            if (!plugin.default) return acc;
+            // TODO November 18, 2021 - Check to see if the ship is a big ship or a little ship
+            // and assign the appropriate station complement based on that.
+            return (
+              plugin.aspects.stationComplements.find(
+                pluginStationComplement =>
+                  pluginStationComplement.stationCount === ship.crewCount
+              ) || null
+            );
+          },
+          null
+        );
+      }
+
+      shipEntity.addComponent("stationComplement", {
+        stations: stationComplement?.stations || [],
+      });
       context.flight.ecs.addEntity(shipEntity);
     }
     context.server.activeFlightName = flightName;

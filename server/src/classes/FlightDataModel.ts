@@ -97,7 +97,6 @@ export class FlightDataModel extends FSDataStore {
   /**
    * Ships that are available for spawning in the universe, based on the flight's plugins.
    */
-  // TODO September 1, 2021 - We can uncomment this when the plugin system is done
   get availableShips() {
     const allShips = this.pluginIds.reduce((prev: ShipPlugin[], next) => {
       const plugin = this.serverDataModel.plugins.find(
