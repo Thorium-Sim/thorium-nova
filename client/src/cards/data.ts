@@ -18,8 +18,8 @@ export const subscriptions = {
   flight(context: DataContext) {
     const flight = context.flight;
     if (!flight) return null;
-    const {id, date, name, paused} = flight;
-    return {id, date, name, paused};
+    const {date, name, paused} = flight;
+    return {date, name, paused};
   },
   flights: async (context: DataContext) => {
     let files: string[];
