@@ -15,6 +15,7 @@ import {SnapshotInterpolation} from "@geckos.io/snapshot-interpolation";
 import {encode} from "@msgpack/msgpack";
 import {SocketStream} from "fastify-websocket";
 import requests, {AllRequestNames} from "../netRequests";
+import {randomNameGenerator} from "../utils/randomNameGenerator";
 class BaseClient {
   constructor(public id: string) {}
 }
@@ -43,7 +44,7 @@ export class ServerClient extends BaseClient {
 
   constructor(params: {id: string} & Partial<ServerClient>) {
     super(params.id);
-    this.name = params.name || randomWords(3).join("-");
+    this.name = params.name || randomNameGenerator();
     // The client starts disconnected since that's
     // how it will always be when the server starts up.
     this.connected = false;
