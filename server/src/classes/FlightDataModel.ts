@@ -9,14 +9,13 @@ import ShipPlugin from "./Plugins/Ship";
 
 export class FlightDataModel extends FSDataStore {
   static INTERVAL = 1000 / 60;
-  id: string;
-  name: string;
-  date: number;
-  paused: boolean;
+  name!: string;
+  date!: number;
+  paused!: boolean;
   ecs!: ECS;
   clients: Record<string, FlightClient> = {};
   pluginIds: string[] = [];
-  private initEntities: Entity[];
+  private entities!: Entity[];
   serverDataModel: ServerDataModel;
   constructor(
     params: Partial<FlightDataModel> & {
@@ -27,13 +26,12 @@ export class FlightDataModel extends FSDataStore {
     storeOptions: FSDataStoreOptions = {}
   ) {
     super(storeOptions);
-    this.id = params.id || uniqid("fli-");
-    this.name = params.name || randomWords(3).join("-");
-    this.paused = params.paused ?? true;
-    this.date = Number(params.date ? new Date(params.date) : new Date());
-    this.pluginIds = params.pluginIds || [];
+    this.name ??= params.name || randomWords(3).join("-");
+    this.paused ??= params.paused ?? true;
+    this.date ??= Number(params.date ? new Date(params.date) : new Date());
+    this.pluginIds ??= params.pluginIds || [];
     this.serverDataModel = params.serverDataModel;
-    this.initEntities = params.entities || [];
+    this.entities ??= params.entities || [];
     this.clients = Object.fromEntries(
       Object.entries(params.clients || {}).map(([id, client]) => [
         id,
@@ -54,7 +52,7 @@ export class FlightDataModel extends FSDataStore {
     systems.forEach(Sys => {
       this.ecs.addSystem(new Sys());
     });
-    this.initEntities.forEach(({id, components}) => {
+    this.entities.forEach(({id, components}) => {
       const e = new Entity(id, components);
       this.ecs.addEntity(e);
     });
@@ -111,13 +109,12 @@ export class FlightDataModel extends FSDataStore {
   toJSON() {
     // Get all of the entities in the world and serialize them into objects
     return {
-      id: this.id,
       name: this.name,
       paused: this.paused,
       date: this.date,
       pluginIds: this.pluginIds,
       entities: this.ecs.entities,
-      flightClients: Object.fromEntries(
+      clients: Object.fromEntries(
         Object.entries(this.clients).map(([id, client]) => [id, client])
       ),
     };

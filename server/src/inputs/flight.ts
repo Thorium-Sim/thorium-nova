@@ -39,6 +39,23 @@ export const flightInputs = {
     pubsub.publish("flight");
     return context.flight;
   },
+  flightLoad(context: DataContext, params: {flightName: string}) {
+    if (context.flight) return context.flight;
+
+    context.flight = new FlightDataModel(
+      {
+        entities: [],
+        initialLoad: false,
+        serverDataModel: context.server,
+      },
+      {path: `/flights/${params.flightName}.flight`}
+    );
+    context.flight.initEcs(context.server);
+
+    context.server.activeFlightName = params.flightName;
+    pubsub.publish("flight");
+    return context.flight;
+  },
   flightPause(context: DataContext) {
     if (context.flight) {
       context.flight.paused = true;
