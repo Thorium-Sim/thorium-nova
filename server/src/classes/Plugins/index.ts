@@ -34,7 +34,8 @@ export default class BasePlugin extends FSDataStore {
   name: string;
   author: string;
   description: string;
-  active: boolean = true;
+  default: boolean;
+  active: boolean;
   _coverImage: string;
   get coverImage() {
     if (!this._coverImage) return "";
@@ -67,6 +68,7 @@ export default class BasePlugin extends FSDataStore {
     this._coverImage = params.coverImage || "";
     this.tags = params.tags || [];
     this.active = params.active ?? true;
+    this.default = params.default ?? false;
     storedServer = server;
 
     this.loadAspects();
@@ -119,9 +121,6 @@ export default class BasePlugin extends FSDataStore {
     // Also rename the cover image
     const coverImage = path.basename(this.coverImage);
     this.coverImage = `${this.pluginPath}/assets/${coverImage}`;
-    // TODO October 29, 2021: Rename all of the assets associated with
-    // aspects of this plugin too.
-
     await this.writeFile(true);
   }
   async writeFile(force: boolean = false) {

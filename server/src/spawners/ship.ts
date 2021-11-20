@@ -1,5 +1,5 @@
 import {Entity} from "../utils/ecs";
-import ShipPlugin from "../classes/Plugins/Ship";
+import type ShipPlugin from "../classes/Plugins/Ship";
 
 /*
 AlertLevelComponent,
@@ -17,7 +17,6 @@ interface Coordinates {
 export function spawnShip(
   template: Partial<ShipPlugin>,
   params: {
-    isPlayer?: boolean;
     name?: string;
     description?: string;
     registry?: string;
@@ -32,9 +31,6 @@ export function spawnShip(
     name: params.name || template.name,
     description: template.description,
   });
-  if (params.isPlayer) {
-    entity.addComponent("isPlayerShip");
-  }
   entity.addComponent("tags", {
     tags: (template.tags ?? []).concat(params.tags ?? []),
   });

@@ -1,5 +1,5 @@
 import {ServerChannel} from "@geckos.io/server";
-import {OfflineStates, UnionToIntersection} from "../utils/types";
+import type {UnionToIntersection} from "../utils/types";
 import randomWords from "@thorium/random-words";
 import {DataContext} from "../utils/DataContext";
 import inputs, {AllInputNames} from "../inputs";
@@ -15,10 +15,8 @@ import {SnapshotInterpolation} from "@geckos.io/snapshot-interpolation";
 import {encode} from "@msgpack/msgpack";
 import {SocketStream} from "fastify-websocket";
 import requests, {AllRequestNames} from "../netRequests";
+import {BaseClient} from "./BaseClient";
 import {randomNameGenerator} from "../utils/randomNameGenerator";
-class BaseClient {
-  constructor(public id: string) {}
-}
 
 type NetSendData = {inputName: AllInputNames; params: any; requestId: string};
 type NetRequestData = {
@@ -193,7 +191,8 @@ export class ServerClient extends BaseClient {
               };
               // Collect and send the initial data
               const response =
-                (await requestFunction(this.clientContext, params, null)) || {};
+                (await requestFunction(this.clientContext, params, null!)) ||
+                {};
               socket.socket.send(
                 JSON.stringify({
                   type: "netRequestData",
@@ -347,41 +346,5 @@ export class ServerClient extends BaseClient {
       });
     const snapshot = this.SI.snapshot.create({entities});
     channels[this.id].raw.emit(encode(snapshot));
-  }
-}
-
-/**
- * Properties which are associated between a flight and a client.
- * These properties are stored on the flight and then merged
- * back to the client when the flight is in progress.
- */
-export class FlightClient extends BaseClient {
-  flightId: string;
-  shipId: string | null;
-  stationId: string | null;
-  loginName: string;
-  offlineState: OfflineStates | null;
-  training: boolean;
-  constructor(params: {id: string} & Partial<FlightClient>) {
-    super(params.id);
-    if (!params.flightId)
-      throw new Error("Error creating flight client: FlightID is required");
-    this.flightId = params.flightId;
-    this.shipId = params.shipId || null;
-    this.stationId = params.stationId || null;
-    this.loginName = params.loginName || "";
-    this.offlineState = params.offlineState || null;
-    this.training = params.training || false;
-  }
-  toJSON() {
-    return {
-      id: this.id,
-      flightId: this.flightId,
-      shipId: this.shipId,
-      stationId: this.stationId,
-      loginName: this.loginName,
-      offlineState: this.offlineState,
-      training: this.training,
-    };
   }
 }

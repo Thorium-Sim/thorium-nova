@@ -1,6 +1,7 @@
-import {FlightClient, ServerClient} from "../classes/Client";
-import {ServerDataModel} from "../classes/ServerDataModel";
-import {FlightDataModel} from "../classes/FlightDataModel";
+import {ServerClient} from "../classes/Client";
+import {FlightClient} from "../classes/FlightClient";
+import type {ServerDataModel} from "../classes/ServerDataModel";
+import type {FlightDataModel} from "../classes/FlightDataModel";
 
 /**
  * An instance of this class is available in every input and subscription handler
