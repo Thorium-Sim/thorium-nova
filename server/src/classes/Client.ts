@@ -15,6 +15,7 @@ import {SnapshotInterpolation} from "@geckos.io/snapshot-interpolation";
 import {encode} from "@msgpack/msgpack";
 import {SocketStream} from "fastify-websocket";
 import requests, {AllRequestNames} from "../netRequests";
+import {randomNameGenerator} from "../utils/randomNameGenerator";
 class BaseClient {
   constructor(public id: string) {}
 }
@@ -43,7 +44,7 @@ export class ServerClient extends BaseClient {
 
   constructor(params: {id: string} & Partial<ServerClient>) {
     super(params.id);
-    this.name = params.name || randomWords(3).join("-");
+    this.name = params.name || randomNameGenerator();
     // The client starts disconnected since that's
     // how it will always be when the server starts up.
     this.connected = false;
@@ -276,24 +277,25 @@ export class ServerClient extends BaseClient {
       for (let sub of keys) {
         // This listener will be called whenever `pubsub.publish(sub, payload)` is called.
         const listener = async (payload: any, context: DataContext) => {
-          const subFunctions = cardSubs[sub] as SubRecord;
-          if (
-            subFunctions.filter &&
-            !(await subFunctions.filter?.(payload, context))
-          ) {
-            return;
-          }
+          const subFunction = cardSubs[sub] as SubRecord;
 
-          const data = await cardSubs[sub].fetch(context);
-          // Send the data to the client, keyed by card
-          socket.socket.send(
-            JSON.stringify({
-              type: "cardData",
-              data: {card, data: {[sub]: data}},
-            })
-          );
+          try {
+            const data = await subFunction(context, payload);
+
+            // Send the data to the client, keyed by card
+            socket.socket.send(
+              JSON.stringify({
+                type: "cardData",
+                data: {card, data: {[sub]: data}},
+              })
+            );
+          } catch (err) {
+            if (err === null) return;
+            throw err;
+          }
         };
-        initialData[sub] = await cardSubs[sub].fetch(this.clientContext);
+
+        initialData[sub] = await cardSubs[sub](this.clientContext);
         subscriptionList.push({trigger: sub, listener});
       }
       setTimeout(async () => {

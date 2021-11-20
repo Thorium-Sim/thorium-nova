@@ -38,7 +38,7 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
             >
               {client.flights.length ? (
                 client.flights.map(f => (
-                  <li className="list-group-item" key={f.id}>
+                  <li className="list-group-item" key={f.name}>
                     <strong>{f.name}</strong>
                     <br />
                     <small>{new Date(f.date).toLocaleDateString()}</small>
