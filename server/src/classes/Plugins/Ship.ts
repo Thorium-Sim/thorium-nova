@@ -72,7 +72,7 @@ export default class ShipPlugin extends Aspect {
       topView: "",
       sideView: "",
     };
-    this.mass = params.mass || 700000000;
+    this.mass = params.mass || 700_000_000;
     this.length = params.length || 350;
     this.shipSystems = params.shipSystems || [];
   }

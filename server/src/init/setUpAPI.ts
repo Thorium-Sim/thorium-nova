@@ -195,7 +195,7 @@ export function setUpAPI(
     try {
       const requestFunction = requests[request];
       const response =
-        (await requestFunction(clientContext, params as any, null)) || {};
+        (await requestFunction(clientContext, params as any, null!)) || {};
 
       // Send the result back to the client, regardless of what it is.
       return response;
