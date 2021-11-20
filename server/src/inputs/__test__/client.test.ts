@@ -1,5 +1,6 @@
-import {FlightClient, ServerClient} from "server/src/classes/Client";
+import {ServerClient} from "server/src/classes/Client";
 import type {ServerDataModel} from "server/src/classes/ServerDataModel";
+import {FlightClient} from "server/src/classes/FlightClient";
 import {ECS, Entity} from "server/src/utils/ecs";
 import {clientInputs} from "../client";
 import systems from "../../systems";

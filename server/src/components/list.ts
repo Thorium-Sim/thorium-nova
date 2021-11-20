@@ -12,4 +12,3 @@ export {StationComplementComponent} from "./stationComplement";
 export {RotationVelocityComponent} from "./rotationVelocity";
 export {SizeComponent} from "./size";
 export {TagsComponent} from "./tags";
-export {StationComplementComponent} from "./stationComplement";
