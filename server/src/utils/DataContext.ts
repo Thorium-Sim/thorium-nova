@@ -38,7 +38,7 @@ export class DataContext {
     if (!this.database.flight.clients[this.clientId]) {
       this.database.flight.clients[this.clientId] = new FlightClient({
         id: this.clientId,
-        flightId: this.database.flight.id,
+        flightId: this.database.flight.name,
       });
     }
     return this.database.flight.clients[this.clientId];

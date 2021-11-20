@@ -195,20 +195,26 @@ periodically by an infrequent update triggered by an ECS System.
 
 Low-frequency data is sent over WebSockets. Cards define which publishes they
 will subscribe to by including a file called "subscriptions.ts". This file
-exports a map where the keys are subscription names. The value is an object that
-has a "fetch" function and optionally a "filter" function. If present, the
-"filter" function is called with the parameters passed to the publish function,
-and returns a boolean which lets the subscription handler know whether it should
-handle the data or not.
+exports a map where the keys are subscription names. The value is a function
+which is called with the data context and optionally any publish parameters.The
+function can optionally throw `null` based on the publish parameters to let the
+subscription handler know whether it should send the data to the client or not.
 
 For example, a client might not care to receive updates about another player's
-ship. The "fetch" subscription handler can then collect additional data
-deterministically from the database. Whatever the "fetch" subscription handler
-ends up being sent back to the client. Having a separate "filter" and "fetch"
-function makes it possible to send initial data when the card first connects.
+ship. The first part of the subscription handler checks to see if the publish
+params includes the ID of the clients ship. If it does not, the subscription
+handler throws `null` and that client doesn't get that update. Otherwise, the
+subscription handler collect additional data deterministically from the
+database. Whatever the subscription handler ends up being sent back to the
+client.
+
+This means that the data collection process can't depend on publish parameters,
+since those don't exist when the client first connects and fetches initial data.
+If someone tries to do this, it should become apparent that it doesn't work by
+errors which are thrown when the client first connects.
 
 The benefit of this approach is the data fetching for a card is collocated with
-the card itself. The extra "subscriptions.ts" file makes it friendly with server
+the card itself. The extra "data.ts" file makes it friendly with server
 auto-restart without making the server restart every time any card file is
 changed.
 
