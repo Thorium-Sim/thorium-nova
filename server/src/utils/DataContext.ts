@@ -34,13 +34,16 @@ export class DataContext {
     return this.database.server.clients[this.clientId];
   }
   get flightClient() {
+    return this.findFlightClient(this.clientId);
+  }
+  findFlightClient(clientId: string) {
     if (!this.database.flight) return null;
-    if (!this.database.flight.clients[this.clientId]) {
-      this.database.flight.clients[this.clientId] = new FlightClient({
-        id: this.clientId,
+    if (!this.database.flight.clients[clientId]) {
+      this.database.flight.clients[clientId] = new FlightClient({
+        id: clientId,
         flightId: this.database.flight.name,
       });
     }
-    return this.database.flight.clients[this.clientId];
+    return this.database.flight.clients[clientId];
   }
 }

@@ -8,7 +8,7 @@ export {PositionComponent} from "./position";
 export {VelocityComponent} from "./velocity";
 export {RotationComponent} from "./rotation";
 export {ColorComponent} from "./color";
+export {StationComplementComponent} from "./stationComplement";
 export {RotationVelocityComponent} from "./rotationVelocity";
 export {SizeComponent} from "./size";
 export {TagsComponent} from "./tags";
-export {StationComplementComponent} from "./stationComplement";
