@@ -136,7 +136,7 @@ describe("Client input", () => {
 
     const ship = mockDataContext.flight.ecs.addEntity(
       new Entity(1, {
-        isShip: {shipClass: "Test", category: "Test", registry: ""},
+        isShip: {shipClass: "Test", category: "Test", registry: "", assets: {}},
         stationComplement: {
           stations: [
             {
