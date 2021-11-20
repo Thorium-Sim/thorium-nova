@@ -16,17 +16,8 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
         </NavLink>
       ) : (
         <>
-          <NavLink
-            className="btn btn-primary btn-outline"
-            to="/config/flight/quick"
-          >
-            Quick Start
-          </NavLink>
-          <NavLink
-            className="btn btn-secondary btn-outline"
-            to="/config/flight"
-          >
-            Custom Flight
+          <NavLink className="btn btn-primary btn-outline" to="/flight/quick">
+            Start Flight
           </NavLink>
           <Disclosure>
             <Disclosure.Button className="btn btn-info btn-outline">

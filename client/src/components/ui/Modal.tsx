@@ -1,4 +1,4 @@
-import {useState, Fragment, ReactNode} from "react";
+import {Fragment, ReactNode} from "react";
 import {Dialog, Transition} from "@headlessui/react";
 import {HiX} from "react-icons/hi";
 import Button from "./Button";
@@ -32,7 +32,7 @@ export default function Modal({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
+            <Dialog.Overlay className="fixed inset-0 bg-black opacity-50" />
           </Transition.Child>
           {/* This element is to trick the browser into centering the modal contents. */}
           <span
@@ -51,21 +51,18 @@ export default function Modal({
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div className="inline-block align-bottom bg-gray-900/50 backdrop-filter backdrop-blur text-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
               <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
                 <Button
                   type="button"
-                  className="bg-white rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="btn btn-ghost"
                   onClick={() => setIsOpen(false)}
                 >
                   <span className="sr-only">Close</span>
                   <HiX className="h-6 w-6" aria-hidden="true" />
                 </Button>
               </div>
-              <Dialog.Title
-                as="h3"
-                className="text-lg leading-6 font-medium text-gray-900"
-              >
+              <Dialog.Title as="h3" className="text-4xl leading-6 font-medium">
                 {title}
               </Dialog.Title>
               {children}

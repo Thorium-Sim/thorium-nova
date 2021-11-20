@@ -1,5 +1,5 @@
-import {Fragment, lazy} from "react";
-import {Routes, Route} from "react-router-dom";
+import {lazy} from "react";
+import {Routes, Route, Outlet, useNavigate} from "react-router-dom";
 import AppContext from "./context/AppContext";
 import {useCardDataSubscribe} from "./context/useCardData";
 
@@ -7,25 +7,29 @@ import QuoteOfTheDay from "./components/QuoteOfTheDay";
 import Credits from "./components/Credits";
 import {WelcomeLogo} from "./components/WelcomeLogo";
 import {WelcomeButtons} from "./components/WelcomeButtons";
-import {FlightLobby} from "./components/FlightLobby";
 import {FaCamera} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
 import {netSend} from "./context/netSend";
 import LoginButton from "./components/LoginButton";
+import FlightQuickStart from "./components/FlightQuickStart";
+import {QuickStartProvider} from "./components/FlightQuickStart/FlightQuickStartContext";
 
 const DocLayout = lazy(() => import("./docs"));
 const Config = lazy(() => import("./pages/Config"));
 
 const MainPage = () => {
   return (
-    <div className="welcome h-full p-12 grid grid-cols-2 grid-rows-2">
-      <WelcomeLogo />
-      <Credits className="row-start-2 col-start-2" />
+    <>
+      <div className="welcome h-full p-12 grid grid-cols-2 grid-rows-2">
+        <WelcomeLogo />
+        <Credits className="row-start-2 col-start-2" />
 
-      <WelcomeButtons className="col-start-1 row-start-2" />
-      <QuoteOfTheDay />
-      <LoginButton />
-    </div>
+        <WelcomeButtons className="col-start-1 row-start-2" />
+        <QuoteOfTheDay />
+        <LoginButton />
+      </div>
+      <Outlet />
+    </>
   );
 };
 
@@ -38,10 +42,20 @@ function AppRoutes() {
   return (
     <>
       <Routes>
-        <Route
-          path="/"
-          element={window.isHeadless ? <FlightLobby /> : <MainPage />}
-        />
+        <Route path="/" element={<MainPage />}>
+          <Route
+            path="/flight/quick"
+            element={
+              <QuickStartProvider>
+                <FlightQuickStart />
+              </QuickStartProvider>
+            }
+          >
+            <Route path="crew" element={null} />
+            <Route path="ship" element={null} />
+            <Route path="mission" element={null} />
+          </Route>
+        </Route>
         <Route path="/components" element={<ComponentDemo />} />
         <Route path="/releases" element={<Releases />} />
         <Route path="/docs/*" element={<DocLayout />}></Route>

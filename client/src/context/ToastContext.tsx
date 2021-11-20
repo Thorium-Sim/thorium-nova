@@ -2,7 +2,7 @@ import {ReactNode, useEffect, useReducer, useRef, useState} from "react";
 import {FaTimes} from "react-icons/fa";
 import uniqid from "@thorium/uniqid";
 import {Transition} from "@headlessui/react";
-
+import {createPortal} from "react-dom";
 const Toast = ({
   title,
   body = null,
@@ -98,7 +98,6 @@ export let toast = (
 ) => {};
 export default function ToastContainer() {
   const [toasts, dispatch] = useReducer(toastReducer, []);
-
   useEffect(() => {
     let timeouts: Record<string, ReturnType<typeof setTimeout>> = {};
     toast = (
@@ -125,11 +124,25 @@ export default function ToastContainer() {
       }
     };
   }, []);
-  return (
-    <div className="toast-container fixed top-0 right-0">
+
+  let [portalRef, setPortalRef] = useState<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!portalRef) {
+      const div = document.createElement("div");
+      div.className = "toast-container";
+      document.body.appendChild(div);
+      setPortalRef(div);
+    }
+  }, [portalRef]);
+  if (!portalRef) {
+    return null;
+  }
+  return createPortal(
+    <div className="toast-container fixed top-0 right-0 z-20">
       {toasts.map(toast => (
         <Toast key={toast.id} {...toast} dismiss={() => dispatch(toast.id)} />
       ))}
-    </div>
+    </div>,
+    portalRef
   );
 }
