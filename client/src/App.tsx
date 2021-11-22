@@ -16,6 +16,9 @@ import {QuickStartProvider} from "./components/FlightQuickStart/FlightQuickStart
 
 const DocLayout = lazy(() => import("./docs"));
 const Config = lazy(() => import("./pages/Config"));
+const ShipConfig = lazy(
+  () => import("./components/FlightQuickStart/ShipConfig")
+);
 
 const MainPage = () => {
   return (
@@ -52,7 +55,7 @@ function AppRoutes() {
             }
           >
             <Route path="crew" element={null} />
-            <Route path="ship" element={null} />
+            <Route path="ship" element={<ShipConfig />} />
             <Route path="mission" element={null} />
           </Route>
         </Route>
