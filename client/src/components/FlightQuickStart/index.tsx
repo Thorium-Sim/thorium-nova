@@ -26,7 +26,9 @@ export default function FlightQuickStart() {
       setIsOpen={() => navigate("/")}
       title={capitalize(step || "Quick Start")}
     >
-      <Outlet />
+      <div className="pt-4">
+        <Outlet />
+      </div>
       <div className="flex justify-end mt-4 gap-4">
         {step !== "crew" && (
           <Link
@@ -38,7 +40,11 @@ export default function FlightQuickStart() {
         )}
         {step !== "mission" && (
           <Link
-            className="btn btn-primary"
+            className={`btn btn-primary ${
+              step === "ship" && (!state.shipName || !state.shipId)
+                ? "btn-disabled"
+                : ""
+            }`}
             to={step === "crew" ? "ship" : "mission"}
           >
             Next
