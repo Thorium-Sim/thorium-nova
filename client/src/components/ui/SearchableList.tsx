@@ -1,6 +1,7 @@
 import {matchSorter} from "match-sorter";
 import {Fragment} from "react";
 import {useMemo, useState} from "react";
+import deepEqual from "fast-deep-equal";
 
 const capitalCase = (str: string) => {
   return str[0].toUpperCase() + str.slice(1);
@@ -78,7 +79,7 @@ function SearchableList<
                   <li
                     key={c.id}
                     className={`list-group-item ${
-                      c.id === selectedItem ? "selected" : ""
+                      deepEqual(c.id, selectedItem) ? "selected" : ""
                     }`}
                     onClick={() => {
                       setSelectedItem?.(c.id);
