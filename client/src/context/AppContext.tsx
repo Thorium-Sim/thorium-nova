@@ -1,13 +1,13 @@
-import {ReactNode, StrictMode, Suspense, useEffect, useReducer} from "react";
+import {ReactNode, StrictMode, Suspense} from "react";
 import {ThoriumProvider} from "./ThoriumContext";
 import {AlertDialog} from "@thorium/ui/AlertDialog";
 import {BrowserRouter as Router} from "react-router-dom";
 import useEasterEgg from "../hooks/useEasterEgg";
 import {ErrorBoundary, FallbackProps} from "react-error-boundary";
 import bg from "../images/background.jpg";
-import {FaSpinner} from "react-icons/fa";
 import ToastContainer from "./ToastContext";
 import {NetRequestData} from "./useNetRequest";
+import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 
 const Fallback: React.FC<FallbackProps> = ({error}) => {
   return (
@@ -34,19 +34,6 @@ url(${bg})`,
       }}
     >
       {children}
-    </div>
-  );
-};
-const LoadingSpinner = () => {
-  const [show, toggleShow] = useReducer(() => true, false);
-  useEffect(() => {
-    const timeout = setTimeout(toggleShow, 500);
-    return () => clearTimeout(timeout);
-  }, []);
-  if (!show) return null;
-  return (
-    <div className="h-screen w-full flex justify-center items-center">
-      <FaSpinner className="animate-spin-step text-4xl text-white" />
     </div>
   );
 };
