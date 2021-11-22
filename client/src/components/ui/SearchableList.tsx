@@ -10,7 +10,7 @@ type OnlyString<T> = T extends string ? T : never;
 
 interface SearchableListProps<
   ID extends string | number = string,
-  L extends ListItem<ID> = ListItem<ID>
+  L extends ListItem = ListItem
 > {
   items: L[];
   selectedItem?: ID | null;
@@ -18,13 +18,13 @@ interface SearchableListProps<
   renderItem?: (item: L) => JSX.Element;
   searchKeys?: OnlyString<keyof L>[];
 }
-interface ListItem<ID extends string | number = string> {
-  id: ID;
+interface ListItem {
+  id: any;
   [key: string]: any;
 }
 function SearchableList<
-  ID extends string | number,
-  Item extends ListItem<ID> = {id: ID; label: string; category: string}
+  ID extends Item["id"],
+  Item extends ListItem = {id: unknown; label: string; category: string}
 >({
   items,
   selectedItem,
