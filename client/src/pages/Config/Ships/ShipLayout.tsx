@@ -47,7 +47,7 @@ export const ShipLayout = () => {
           >
             Delete Ship
           </Button>
-          <Button
+          {/* <Button
             className="w-full btn-outline btn-alert"
             disabled={true}
             onClick={async () => {
@@ -56,15 +56,20 @@ export const ShipLayout = () => {
                 header: "What is the name of the duplicated plugin?",
               });
               if (!name || typeof name !== "string") return;
-              const {pluginId: duplicateId} = await netSend("pluginDuplicate", {
+              const result = await netSend("pluginShipDuplicate", {
                 pluginId: pluginId,
+                shipId,
                 name,
               });
-              navigate(`/config/${duplicateId}`);
+              if ("error" in result) {
+                toast({title:"Error duplicating plugin", body: result.error, color:"error"});
+                return;
+              }
+              navigate(`/config/${result.shipId}`);
             }}
           >
             Duplicate Ship
-          </Button>
+          </Button> */}
         </div>
         <Outlet />
       </>
