@@ -8,7 +8,7 @@ export const clientInputs = {
       throw new Error("name must be a string.");
     if (!params.name.trim()) throw new Error("name cannot be blank.");
     context.server.clients[context.clientId].name = params.name;
-    pubsub.publish("clientList");
+    pubsub.publish("clients");
     pubsub.publish("client", {clientId: context.clientId});
 
     return {
@@ -57,7 +57,7 @@ export const clientInputs = {
     flightClient.stationId = params.stationId;
     flightClient.shipId = params.shipId;
 
-    pubsub.publish("clientList");
+    pubsub.publish("clients");
     pubsub.publish("client", {clientId: context.clientId});
 
     return flightClient;

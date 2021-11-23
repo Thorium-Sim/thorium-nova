@@ -46,7 +46,7 @@ Changes to any saved flight, including flight creation and deletion.
 
 **Filter Arguments:** None
 
-### `clientList`
+### `clients`
 
 Changes to any connected client, including connecting, name changes, and
 disconnecting.

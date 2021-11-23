@@ -20,9 +20,9 @@ immediately should be selected in the client UI.
 Inputs are defined in the `/server/src/inputs` folder. Files in that folder
 include an export of a single object where each key is the name of the input and
 the value is the function executed when that input is received. The function,
-which can be an `async` function, includes [`DataContext`](/docs/development/datacontext) as
-the first parameter. The second parameter is the `params` which can be sent from
-the client.
+which can be an `async` function, includes
+[`DataContext`](/docs/development/datacontext) as the first parameter. The
+second parameter is the `params` which can be sent from the client.
 
 It is _very important_ that the `params` object be given a TypeScript type
 annotation. That annotation makes it much easier to know how each input is
@@ -55,7 +55,7 @@ export const clientInputs = {
 
     context.server.clients[context.clientId].name = params.name;
 
-    pubsub.publish("clientList");
+    pubsub.publish("clients");
     pubsub.publish("client", {clientId: context.clientId});
 
     return {clientId: context.clientId, name: params.name};

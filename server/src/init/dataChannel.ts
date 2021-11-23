@@ -52,7 +52,7 @@ export async function applyDataChannel(
     }
     client.connected = true;
     await client.initDataChannel(channel, database);
-    pubsub.publish("clientList");
+    pubsub.publish("clients");
   });
 
   // Connect the Geckos WebRTC handlers to the HTTP server.
@@ -73,7 +73,7 @@ export async function applyDataChannel(
         }
         client.connected = true;
         await client.initWebSocket(connection, database);
-        pubsub.publish("clientList");
+        pubsub.publish("clients");
       }
     } catch (err) {
       console.error(err);
