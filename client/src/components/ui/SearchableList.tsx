@@ -18,6 +18,7 @@ interface SearchableListProps<
   setSelectedItem?: (item: ID) => void;
   renderItem?: (item: L) => JSX.Element;
   searchKeys?: OnlyString<keyof L>[];
+  showSearchLabel?: boolean;
 }
 interface ListItem {
   id: any;
@@ -32,6 +33,7 @@ function SearchableList<
   setSelectedItem,
   renderItem,
   searchKeys = ["label", "category"] as OnlyString<keyof Item>[],
+  showSearchLabel = true,
 }: SearchableListProps<ID, Item>) {
   const [search, setSearch] = useState<string>("");
   const filteredObjects = useMemo(
@@ -50,7 +52,7 @@ function SearchableList<
   return (
     <>
       <div className="form-control">
-        <label className="label">Search</label>
+        {showSearchLabel ? <label className="label">Search</label> : null}
         <input
           type="search"
           value={search}
