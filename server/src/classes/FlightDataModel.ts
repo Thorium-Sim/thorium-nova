@@ -13,7 +13,7 @@ export class FlightDataModel extends FSDataStore {
   date!: number;
   paused!: boolean;
   ecs!: ECS;
-  clients: Record<string, FlightClient> = {};
+  clients!: Record<string, FlightClient>;
   pluginIds: string[] = [];
   private entities!: Entity[];
   serverDataModel: ServerDataModel;
@@ -25,18 +25,28 @@ export class FlightDataModel extends FSDataStore {
     },
     storeOptions: FSDataStoreOptions = {}
   ) {
-    super(storeOptions);
-    this.name ??= params.name || randomWords(3).join("-");
+    const flightName = params.name || randomWords(3).join("-");
+
+    super(
+      {
+        name: flightName,
+        paused: false,
+        date: Number(params.date ? new Date(params.date) : new Date()),
+      },
+      storeOptions
+    );
+
+    this.name ??= flightName;
     this.paused ??= params.paused ?? true;
     this.date ??= Number(params.date ? new Date(params.date) : new Date());
     this.pluginIds ??= params.pluginIds || [];
     this.serverDataModel = params.serverDataModel;
     this.entities ??= params.entities || [];
+
     this.clients = Object.fromEntries(
-      Object.entries(params.clients || {}).map(([id, client]) => [
-        id,
-        new FlightClient(client),
-      ])
+      Object.entries(this.clients || params.clients || {}).map(
+        ([id, client]) => [id, new FlightClient(client)]
+      )
     );
   }
   run = () => {

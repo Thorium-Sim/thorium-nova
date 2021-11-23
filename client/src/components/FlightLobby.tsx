@@ -2,50 +2,177 @@ import {useNavigate} from "react-router-dom";
 import {useThorium} from "../context/ThoriumContext";
 import {useClientData} from "../context/useCardData";
 import {usePrompt} from "@thorium/ui/AlertDialog";
-import {FaSpinner} from "react-icons/fa";
+import {FaBan, FaSpinner} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
 import {netSend} from "../context/netSend";
-
+import {useNetRequest} from "../context/useNetRequest";
+import SearchableList from "./ui/SearchableList";
+import {Dispatch, SetStateAction, useState} from "react";
+import {toast} from "../context/ToastContext";
 export function FlightLobby() {
-  const prompt = usePrompt();
-  const navigate = useNavigate();
   const clientData = useClientData();
+
   return (
-    <div className="flex flex-col justify-center items-center h-full  filter drop-shadow-lg space-y-8">
+    <>
+      <div className="flex flex-col justify-center items-center h-full  bg-black/50 backdrop-filter backdrop-blur space-y-8">
+        {clientData.flight ? <ClientAssignment /> : <WaitingForFlight />}
+      </div>
+      <ClientButton />
+    </>
+  );
+}
+
+function ClientAssignment() {
+  const playerShips = useNetRequest("flightPlayerShips");
+  const clients = useNetRequest("clients");
+  const clientData = useClientData();
+  const [selectedClient, setSelectedClient] = useState(clientData.client.id);
+  return (
+    <div className="flex justify-around gap-4 w-full">
+      <div>
+        <h3 className="text-xl font-bold">Unassigned Clients</h3>
+        <SearchableList
+          showSearchLabel={false}
+          selectedItem={selectedClient}
+          setSelectedItem={setSelectedClient}
+          items={clients
+            .filter(c => c.shipId === null || c.shipId === undefined)
+            .map(c => ({
+              id: c.id,
+              label: c.name,
+            }))}
+        />
+      </div>
+      <div className="flex flex-wrap justify-center">
+        {playerShips.map(ship => (
+          <div key={ship.id}>
+            <h3 className="text-xl font-bold">
+              {ship.components.identity?.name}
+            </h3>
+            <ul>
+              {ship.components.stationComplement?.stations.map(station => (
+                <StationItem
+                  shipId={ship.id}
+                  station={station}
+                  key={station.name}
+                  selectedClient={selectedClient}
+                  setSelectedClient={setSelectedClient}
+                />
+              ))}
+              <StationItem
+                shipId={ship.id}
+                station={{name: "Flight Director"}}
+                selectedClient={selectedClient}
+                setSelectedClient={setSelectedClient}
+              />
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StationItem({
+  shipId,
+  station,
+  selectedClient,
+  setSelectedClient,
+}: {
+  shipId: number;
+  station: {name: string};
+  selectedClient: string;
+  setSelectedClient: Dispatch<SetStateAction<string>>;
+}) {
+  const clients = useNetRequest("clients");
+
+  return (
+    <>
+      <li className="list-group-item" key={station.name}>
+        <span className="flex justify-between gap-2">
+          <span>{station.name}</span>{" "}
+          <Button
+            className={`btn-xs btn-success ${
+              !selectedClient ? "btn-disabled" : ""
+            }`}
+            onClick={async () => {
+              const result = await netSend("clientSetStation", {
+                shipId: shipId,
+                stationId: station.name,
+                clientId: selectedClient,
+              });
+              if ("error" in result) {
+                toast({
+                  title: "Error assigning station",
+                  body: result.error,
+                  color: "error",
+                });
+              }
+            }}
+          >
+            Assign
+          </Button>
+        </span>
+      </li>
+      {clients
+        .filter(c => c.shipId === shipId && c.stationId === station.name)
+        .map(client => (
+          <li
+            key={client.id}
+            className={`list-group-item list-group-item-small ${
+              selectedClient === client.id ? "selected" : ""
+            }`}
+            onClick={() => setSelectedClient(client.id)}
+          >
+            <div className="pl-4 flex items-center justify-between">
+              {client.name}{" "}
+              <FaBan
+                className="text-red-600 cursor-pointer"
+                onClick={e => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  netSend("clientSetStation", {
+                    shipId: null,
+                    clientId: client.id,
+                  });
+                }}
+              />
+            </div>
+          </li>
+        ))}
+    </>
+  );
+}
+
+function WaitingForFlight() {
+  return (
+    <>
       <h1 className="text-6xl text-white font-bold">
         Waiting for Flight to Start...
       </h1>
       <FaSpinner className="animate-spin-step text-4xl text-white" />
-      <div className="flex items-center gap-4">
-        <h2 className="text-4xl text-white font-bold">My Client Name:</h2>
-        <button
-          className="btn btn-primary"
-          onClick={async () => {
-            const name = await prompt({
-              header: "What is the new client name?",
-            });
-            if (typeof name === "string") {
-              const result = await netSend("clientSetName", {name});
-            }
-          }}
-        >
-          {clientData?.client.name || ""}
-        </button>
-      </div>
+    </>
+  );
+}
+
+function ClientButton() {
+  const clientData = useClientData();
+  const prompt = usePrompt();
+  return (
+    <div className="flex items-center gap-4 absolute top-2 left-2">
+      <h2 className="text-white font-bold">Client Name:</h2>
       <Button
-        className="btn btn-primary btn-lg"
-        onClick={async e => {
-          const result = await prompt({
-            header: "",
-            body: "What is the password?",
-            inputProps: {type: "password"},
+        className="btn-primary btn-sm"
+        onClick={async () => {
+          const name = await prompt({
+            header: "What is the new client name?",
           });
-          if (result) {
-            navigate("/config");
+          if (typeof name === "string") {
+            const result = await netSend("clientSetName", {name});
           }
         }}
       >
-        Go to Config
+        {clientData?.client.name || ""}
       </Button>
     </div>
   );

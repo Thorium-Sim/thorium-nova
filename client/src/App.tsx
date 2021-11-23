@@ -13,6 +13,7 @@ import {netSend} from "./context/netSend";
 import LoginButton from "./components/LoginButton";
 import FlightQuickStart from "./components/FlightQuickStart";
 import {QuickStartProvider} from "./components/FlightQuickStart/FlightQuickStartContext";
+import {FlightLobby} from "./components/FlightLobby";
 
 const DocLayout = lazy(() => import("./docs"));
 const Config = lazy(() => import("./pages/Config"));
@@ -56,6 +57,7 @@ function AppRoutes() {
             <Route path="mission" element={null} />
           </Route>
         </Route>
+        <Route path="/flight" element={<FlightLobby />} />
         <Route path="/components" element={<ComponentDemo />} />
         <Route path="/releases" element={<Releases />} />
         <Route path="/docs/*" element={<DocLayout />}></Route>

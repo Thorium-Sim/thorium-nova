@@ -19,9 +19,9 @@ export class FlightClient extends BaseClient {
     if (!params.flightId)
       throw new Error("Error creating flight client: FlightID is required");
     this.flightId = params.flightId;
-    this.shipId = params.shipId || null;
-    this.stationId = params.stationId || null;
-    this.loginName = params.loginName || "";
+    this.shipId = params.shipId ?? null;
+    this.stationId = params.stationId ?? null;
+    this.loginName = params.loginName ?? "";
     this.offlineState = params.offlineState || null;
     this.training = params.training || false;
   }
