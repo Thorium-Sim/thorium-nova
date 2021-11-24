@@ -72,7 +72,7 @@ const QuickStartContext = React.createContext<
   [FlightConfigState, React.Dispatch<FlightConfigAction>]
 >(null!);
 
-export const QuickStartProvider = ({children}: {children: React.ReactNode}) => {
+const QuickStartProvider = ({children}: {children: React.ReactNode}) => {
   const value = useLocalStorageReducer<
     typeof quickStartReducer,
     FlightConfigState
@@ -92,5 +92,13 @@ export const QuickStartProvider = ({children}: {children: React.ReactNode}) => {
     </QuickStartContext.Provider>
   );
 };
+export default QuickStartProvider;
 
-export const useFlightQuickStart = () => React.useContext(QuickStartContext);
+export const useFlightQuickStart = () => {
+  const returnVal = React.useContext(QuickStartContext);
+  if (!returnVal)
+    throw new Error(
+      "useFlightQuickStart must be used within a QuickStartProvider"
+    );
+  return returnVal;
+};

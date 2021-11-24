@@ -1,23 +1,69 @@
-import {useNavigate} from "react-router-dom";
-import {useThorium} from "../context/ThoriumContext";
 import {useClientData} from "../context/useCardData";
 import {usePrompt} from "@thorium/ui/AlertDialog";
 import {FaBan, FaSpinner} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
 import {netSend} from "../context/netSend";
 import {useNetRequest} from "../context/useNetRequest";
-import SearchableList from "./ui/SearchableList";
+import SearchableList from "../components/ui/SearchableList";
 import {Dispatch, SetStateAction, useState} from "react";
 import {toast} from "../context/ToastContext";
-export function FlightLobby() {
-  const clientData = useClientData();
+import Menubar from "@thorium/ui/Menubar";
+import {useNavigate} from "react-router-dom";
 
+export default function FlightLobby() {
+  const clientData = useClientData();
+  const navigate = useNavigate();
   return (
     <>
-      <div className="flex flex-col justify-center items-center h-full  bg-black/50 backdrop-filter backdrop-blur space-y-8">
-        {clientData.flight ? <ClientAssignment /> : <WaitingForFlight />}
+      <Menubar>
+        {clientData.flight && (
+          <>
+            <Button
+              className="btn btn-outline btn-xs btn-error"
+              onClick={async () => {
+                await netSend("flightStop");
+                navigate("/");
+              }}
+            >
+              End
+            </Button>
+            {clientData.flight?.paused ? (
+              <Button
+                className="btn btn-outline btn-xs btn-success"
+                onClick={() => {
+                  netSend("flightResume");
+                }}
+              >
+                Resume
+              </Button>
+            ) : (
+              <Button
+                className="btn btn-outline btn-xs btn-warning"
+                onClick={() => {
+                  netSend("flightPause");
+                }}
+              >
+                Pause
+              </Button>
+            )}
+            <Button
+              className="btn btn-outline btn-xs btn-alert"
+              onClick={() => {
+                netSend("flightReset");
+              }}
+            >
+              Reset
+            </Button>
+          </>
+        )}
+      </Menubar>
+      <div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur">
+        <ClientButton />
+
+        <div className="h-full flex flex-col justify-center items-center space-y-8">
+          {clientData.flight ? <ClientAssignment /> : <WaitingForFlight />}
+        </div>
       </div>
-      <ClientButton />
     </>
   );
 }
@@ -159,7 +205,7 @@ function ClientButton() {
   const clientData = useClientData();
   const prompt = usePrompt();
   return (
-    <div className="flex items-center gap-4 absolute top-2 left-2">
+    <div className="flex items-center gap-4">
       <h2 className="text-white font-bold">Client Name:</h2>
       <Button
         className="btn-primary btn-sm"
