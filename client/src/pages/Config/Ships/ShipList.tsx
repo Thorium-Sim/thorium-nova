@@ -6,6 +6,7 @@ import {Outlet, useParams, useNavigate} from "react-router-dom";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {Fragment} from "react";
 import {netSend} from "client/src/context/netSend";
+import {toast} from "client/src/context/ToastContext";
 
 export function ShipList() {
   const {pluginId, shipId} = useParams() as {pluginId: string; shipId?: string};
@@ -26,11 +27,19 @@ export function ShipList() {
                 const name = await prompt({header: "Enter ship name"});
                 if (typeof name !== "string" || name.trim().length === 0)
                   return;
-                const {shipId} = await netSend("pluginShipCreate", {
+                const result = await netSend("pluginShipCreate", {
                   name,
                   pluginId,
                 });
-                navigate(`${shipId}`);
+                if ("error" in result) {
+                  toast({
+                    title: "Error creating ship",
+                    body: result.error,
+                    color: "error",
+                  });
+                  return;
+                }
+                navigate(`${result.shipId}`);
               }}
             >
               New Ship

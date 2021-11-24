@@ -62,7 +62,7 @@ export class ServerClient extends BaseClient {
       for (let subId of this.subscriptionListeners) {
         pubsub.unsubscribe(subId);
       }
-      pubsub.publish("clientList");
+      pubsub.publish("clients");
     });
   }
   public async initWebSocket(

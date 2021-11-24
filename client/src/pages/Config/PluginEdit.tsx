@@ -11,6 +11,7 @@ import {netSend} from "client/src/context/netSend";
 import {useEffect, useState} from "react";
 import {FaEdit} from "react-icons/fa";
 import {Link, NavLink, useNavigate, useParams} from "react-router-dom";
+import {toast} from "client/src/context/ToastContext";
 
 export default function PluginEdit() {
   const [error, setError] = useState(false);
@@ -39,8 +40,16 @@ export default function PluginEdit() {
               onClick={async () => {
                 const name = await prompt({header: "Enter plugin name"});
                 if (typeof name !== "string") return;
-                const {pluginId} = await netSend("pluginCreate", {name});
-                navigate(`/config/${pluginId}`);
+                const result = await netSend("pluginCreate", {name});
+                if ("error" in result) {
+                  toast({
+                    title: "Error creating plugin",
+                    body: result.error,
+                    color: "error",
+                  });
+                  return;
+                }
+                navigate(`/config/${result.pluginId}`);
               }}
             >
               New Plugin
@@ -93,11 +102,19 @@ export default function PluginEdit() {
                 const target = e.target as HTMLInputElement;
                 if (!plugin) return;
                 if (target.value) {
-                  const {pluginId} = await netSend("pluginUpdate", {
+                  const result = await netSend("pluginUpdate", {
                     name: target.value,
                     pluginId: plugin.id,
                   });
-                  navigate(`/config/${pluginId}`);
+                  if ("error" in result) {
+                    toast({
+                      title: "Error renaming plugin",
+                      body: result.error,
+                      color: "error",
+                    });
+                    return;
+                  }
+                  navigate(`/config/${result.pluginId}`);
                 } else {
                   setError(true);
                 }
@@ -188,14 +205,19 @@ export default function PluginEdit() {
                   header: "What is the name of the duplicated plugin?",
                 });
                 if (!name || typeof name !== "string") return;
-                const {pluginId: duplicateId} = await netSend(
-                  "pluginDuplicate",
-                  {
-                    pluginId: pluginId,
-                    name,
-                  }
-                );
-                navigate(`/config/${duplicateId}`);
+                const result = await netSend("pluginDuplicate", {
+                  pluginId: pluginId,
+                  name,
+                });
+                if ("error" in result) {
+                  toast({
+                    title: "Error duplicating plugin",
+                    body: result.error,
+                    color: "error",
+                  });
+                  return;
+                }
+                navigate(`/config/${result.pluginId}`);
               }}
             >
               Duplicate Plugin

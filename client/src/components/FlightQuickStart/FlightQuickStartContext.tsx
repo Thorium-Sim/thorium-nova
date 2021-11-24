@@ -13,8 +13,8 @@ export interface FlightConfigState {
 }
 
 export type FlightConfigAction =
-  | {type: "increaseCrewCount"}
-  | {type: "decreaseCrewCount"}
+  | {type: "increaseCrewCount"; availableCrewSizes: number[]}
+  | {type: "decreaseCrewCount"; availableCrewSizes: number[]}
   | {type: "hasFlightDirector"; flightDirector: boolean}
   | {type: "shipId"; shipId: {pluginId: string; shipId: string} | undefined}
   | {type: "shipName"; name: string}
@@ -32,10 +32,26 @@ function quickStartReducer(
   action: FlightConfigAction
 ): FlightConfigState {
   switch (action.type) {
-    case "increaseCrewCount":
-      return {...state, crewCount: Math.min(12, state.crewCount + 1)};
-    case "decreaseCrewCount":
-      return {...state, crewCount: Math.max(1, state.crewCount - 1)};
+    case "increaseCrewCount": {
+      const currentIndex = action.availableCrewSizes.indexOf(state.crewCount);
+      if (currentIndex < action.availableCrewSizes.length - 1) {
+        return {
+          ...state,
+          crewCount: action.availableCrewSizes[currentIndex + 1],
+        };
+      }
+      return state;
+    }
+    case "decreaseCrewCount": {
+      const currentIndex = action.availableCrewSizes.indexOf(state.crewCount);
+      if (currentIndex > 0) {
+        return {
+          ...state,
+          crewCount: action.availableCrewSizes[currentIndex - 1],
+        };
+      }
+      return state;
+    }
     case "hasFlightDirector":
       return {...state, flightDirector: action.flightDirector};
     case "shipId":

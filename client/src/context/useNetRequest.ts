@@ -49,10 +49,12 @@ function useNetRequestData() {
   }, [socket, handleError]);
 }
 
+type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
+
 export function useNetRequest<
   T extends AllRequestNames,
   R extends AllRequestReturns[T]
->(requestName: T, params?: AllRequestParams[T]): R {
+>(requestName: T, params?: AllRequestParams[T]): UnwrapPromise<R> {
   const requestId = stableValueHash({requestName, params});
   const data = useSnapshot(netRequestProxy);
   const {socket} = useThorium();

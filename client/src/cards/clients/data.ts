@@ -1,7 +1,7 @@
 import {DataContext} from "server/src/utils/DataContext";
 
 export const subscriptions = {
-  clientList: async (context: DataContext) => {
+  clients: async (context: DataContext) => {
     const serverClients = Object.values(context.server.clients);
     const flightClients = context.flight?.clients || {};
     const clients = serverClients.map(client => {

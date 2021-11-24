@@ -321,7 +321,7 @@ body {
   /* disabled */
   &-disabled,
   &[disabled] {
-    @apply bg-neutral border-opacity-0 bg-opacity-20 text-base-content text-opacity-20;
+    @apply bg-neutral border-opacity-0 bg-opacity-20 text-base-300 text-opacity-20 pointer-events-none cursor-not-allowed;
   }
 
   /* loading */

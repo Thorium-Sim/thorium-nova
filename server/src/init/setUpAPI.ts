@@ -172,7 +172,7 @@ export function setUpAPI(
       const cardSubs = cardSubscriptions[req.params.card] as any;
       const subscription = req.params.subscription;
       const clientContext = new DataContext(clientId, database);
-      const data = await cardSubs[subscription].fetch(clientContext);
+      const data = await cardSubs[subscription](clientContext);
       return data;
     } catch (err) {
       if (err instanceof Error) {
