@@ -1,4 +1,4 @@
-import {lazy} from "react";
+import {lazy, Suspense} from "react";
 import {Routes, Route, Outlet, useNavigate} from "react-router-dom";
 import AppContext from "./context/AppContext";
 import {useCardDataSubscribe} from "./context/useCardData";
@@ -13,7 +13,7 @@ import {netSend} from "./context/netSend";
 import LoginButton from "./components/LoginButton";
 import FlightQuickStart from "./components/FlightQuickStart";
 import {QuickStartProvider} from "./components/FlightQuickStart/FlightQuickStartContext";
-import {FlightLobby} from "./components/FlightLobby";
+import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 
 const DocLayout = lazy(() => import("./docs"));
 const Config = lazy(() => import("./pages/Config"));
@@ -37,6 +37,13 @@ const MainPage = () => {
 const ComponentDemo = lazy(() => import("./pages/ComponentDemo"));
 const NoMatch = lazy(() => import("./pages/NotFound"));
 const Releases = lazy(() => import("./pages/Releases"));
+const CrewConfig = lazy(
+  () => import("./components/FlightQuickStart/CrewConfig")
+);
+const ShipConfig = lazy(
+  () => import("./components/FlightQuickStart/ShipConfig")
+);
+const FlightLobby = lazy(() => import("./components/FlightQuickStart/index"));
 
 function AppRoutes() {
   useCardDataSubscribe();
@@ -52,8 +59,23 @@ function AppRoutes() {
               </QuickStartProvider>
             }
           >
-            <Route path="crew" element={null} />
-            <Route path="ship" element={null} />
+            <Route
+              path="crew"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <CrewConfig />
+                </Suspense>
+              }
+            />
+            <Route
+              path="ship"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <ShipConfig />
+                </Suspense>
+              }
+            />
+
             <Route path="mission" element={null} />
           </Route>
         </Route>

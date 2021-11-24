@@ -66,7 +66,6 @@ export default function FlightQuickStart() {
                 startingPointId: startingPoint,
               } = state;
               if (!shipTemplate) {
-                console.log("Toast!");
                 toast({
                   title: "Ship is required",
                   body: "You must select a ship template to start a flight.",

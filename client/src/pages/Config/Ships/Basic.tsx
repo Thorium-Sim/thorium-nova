@@ -4,6 +4,7 @@ import {useState} from "react";
 import Input from "@thorium/ui/Input";
 import TagInput from "@thorium/ui/TagInput";
 import {netSend} from "client/src/context/netSend";
+import {toast} from "client/src/context/ToastContext";
 
 export function Basic() {
   const {pluginId, shipId} = useParams() as {pluginId: string; shipId: string};
@@ -27,12 +28,20 @@ export function Basic() {
               onChange={() => setError(false)}
               onBlur={async (e: any) => {
                 if (!e.target.value) return setError(true);
-                const {shipId: newId} = await netSend("pluginShipUpdate", {
+                const result = await netSend("pluginShipUpdate", {
                   pluginId,
                   shipId,
                   name: e.target.value,
                 });
-                navigate(`/config/${pluginId}/ships/${newId}`);
+                if ("error" in result) {
+                  toast({
+                    title: "Error renaming ship",
+                    body: result.error,
+                    color: "error",
+                  });
+                  return;
+                }
+                navigate(`/config/${pluginId}/ships/${result.shipId}`);
               }}
             />
           </div>
