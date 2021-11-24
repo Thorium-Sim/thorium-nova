@@ -40,6 +40,10 @@ const Releases = lazy(() => import("./pages/Releases"));
 const CrewConfig = lazy(
   () => import("./components/FlightQuickStart/CrewConfig")
 );
+const ShipConfig = lazy(
+  () => import("./components/FlightQuickStart/ShipConfig")
+);
+
 function AppRoutes() {
   useCardDataSubscribe();
   return (
@@ -62,7 +66,13 @@ function AppRoutes() {
                 </Suspense>
               }
             />
-            <Route path="ship" element={null} />
+            <Route path="ship" element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <ShipConfig />
+                </Suspense>
+              }
+            />
+            
             <Route path="mission" element={null} />
           </Route>
         </Route>
