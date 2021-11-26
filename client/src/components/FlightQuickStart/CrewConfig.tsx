@@ -11,7 +11,7 @@ const CrewConfig = () => {
     .map(station => station.stationCount)
     .filter((a, i, arr) => arr.indexOf(a) === i)
     .sort();
-  console.log(availableCrewSizes);
+
   return (
     <>
       <div className="flex justify-between select-none">

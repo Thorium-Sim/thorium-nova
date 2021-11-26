@@ -11,8 +11,6 @@ import {FaCamera} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
 import {netSend} from "./context/netSend";
 import LoginButton from "./components/LoginButton";
-import FlightQuickStart from "./components/FlightQuickStart";
-import {QuickStartProvider} from "./components/FlightQuickStart/FlightQuickStartContext";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 
 const DocLayout = lazy(() => import("./docs"));
@@ -43,6 +41,11 @@ const CrewConfig = lazy(
 const ShipConfig = lazy(
   () => import("./components/FlightQuickStart/ShipConfig")
 );
+const FlightLobby = lazy(() => import("./pages/FlightLobby"));
+const FlightQuickStart = lazy(() => import("./components/FlightQuickStart"));
+const QuickStartProvider = lazy(
+  () => import("./components/FlightQuickStart/FlightQuickStartContext")
+);
 
 function AppRoutes() {
   useCardDataSubscribe();
@@ -53,9 +56,11 @@ function AppRoutes() {
           <Route
             path="/flight/quick"
             element={
-              <QuickStartProvider>
-                <FlightQuickStart />
-              </QuickStartProvider>
+              <Suspense fallback={<LoadingSpinner />}>
+                <QuickStartProvider>
+                  <FlightQuickStart />
+                </QuickStartProvider>
+              </Suspense>
             }
           >
             <Route
@@ -66,16 +71,19 @@ function AppRoutes() {
                 </Suspense>
               }
             />
-            <Route path="ship" element={
+            <Route
+              path="ship"
+              element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <ShipConfig />
                 </Suspense>
               }
             />
-            
+
             <Route path="mission" element={null} />
           </Route>
         </Route>
+        <Route path="/flight" element={<FlightLobby />} />
         <Route path="/components" element={<ComponentDemo />} />
         <Route path="/releases" element={<Releases />} />
         <Route path="/docs/*" element={<DocLayout />}></Route>

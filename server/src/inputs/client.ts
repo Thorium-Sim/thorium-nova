@@ -18,10 +18,12 @@ export const clientInputs = {
   },
   clientSetStation: (
     context: DataContext,
-    params: {shipId: number | null; stationId: string; clientId?: string}
+    params:
+      | {shipId: number; stationId: string; clientId?: string}
+      | {shipId: null; clientId?: string}
   ) => {
     let flightClient = context.flightClient;
-    if (!flightClient) {
+    if (params.clientId) {
       // TODO November 18, 2021 - Check to see if the client is the host of the flight.
       // This will probably involve checking their Thorium account or associating their
       // client ID with the flight somehow.
@@ -32,16 +34,18 @@ export const clientInputs = {
         throw new Error("No flight has been started.");
       }
       flightClient = context.findFlightClient(params.clientId);
-      if (!flightClient) {
-        throw new Error("No flight has been started.");
-      }
+    }
+    if (!flightClient) {
+      throw new Error("No flight has been started.");
     }
 
     // If shipId is null, we're removing ourselves from the flight.
-    if (!params.shipId) {
+    if (params.shipId === null) {
       flightClient.stationId = null;
       flightClient.shipId = null;
 
+      pubsub.publish("clients");
+      pubsub.publish("client", {clientId: context.clientId});
       return flightClient;
     }
     const ship = context.flight?.ships.find(ship => ship.id === params.shipId);

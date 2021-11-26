@@ -2,6 +2,7 @@ import Button from "@thorium/ui/Button";
 import Modal from "@thorium/ui/Modal";
 import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
+import {useClientData} from "client/src/context/useCardData";
 import {useMatch, useNavigate, Navigate, Outlet, Link} from "react-router-dom";
 import {randomNameGenerator} from "server/src/utils/randomNameGenerator";
 import {useFlightQuickStart} from "./FlightQuickStartContext";
@@ -10,6 +11,8 @@ function capitalize(val: string) {
   return val.charAt(0).toUpperCase() + val.slice(1);
 }
 export default function FlightQuickStart() {
+  const clientData = useClientData();
+
   const [state, dispatch] = useFlightQuickStart();
 
   const navigate = useNavigate();
@@ -17,13 +20,16 @@ export default function FlightQuickStart() {
   const match = useMatch("/flight/quick/:step");
 
   if (!match) return <Navigate to="/flight/quick/crew" replace />;
+  if (clientData.flight) return <Navigate to="/flight" replace />;
 
   const {step} = match.params;
 
   return (
     <Modal
       isOpen={true}
-      setIsOpen={() => navigate("/")}
+      setIsOpen={() => {
+        navigate("/");
+      }}
       title={capitalize(step || "Quick Start")}
     >
       <div className="pt-4">

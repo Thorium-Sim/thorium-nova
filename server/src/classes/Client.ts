@@ -177,7 +177,7 @@ export class ServerClient extends BaseClient {
                         },
                       })
                     );
-                    return data;
+                    return data as any;
                   } catch (err) {
                     handleNetRequestError(err);
                   }
@@ -320,7 +320,7 @@ export class ServerClient extends BaseClient {
     );
   }
   public async sendDataStream() {
-    if (!this.clientContext.flight) return;
+    if (!this.clientContext?.flight) return;
     const entities = this.clientContext.flight.ecs.entities
       .filter(entity => {
         for (let card of this.cards) {
