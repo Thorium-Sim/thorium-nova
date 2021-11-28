@@ -21,5 +21,6 @@ module.exports = {
     "no-inner-declarations": 0,
     "no-throw-literal": 0,
     "no-prototype-builtins": 0,
+    "no-restricted-globals": 0,
   },
 };
