@@ -1,5 +1,4 @@
 import {ECS, Entity} from "server/src/utils/ecs";
-import uniqid from "@thorium/uniqid";
 import randomWords from "@thorium/random-words";
 import {ServerDataModel} from "./ServerDataModel";
 import systems from "../systems";

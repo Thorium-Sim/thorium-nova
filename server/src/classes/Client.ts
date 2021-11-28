@@ -165,9 +165,14 @@ export class ServerClient extends BaseClient {
               // Create the subscription
               const subscriptionId = await pubsub.subscribe(
                 requestName,
-                (payload: any, context: DataContext) => {
+                async (payload: any, context: DataContext) => {
                   try {
-                    const data = requestFunction(context, params, payload);
+                    const data = await requestFunction(
+                      context,
+                      params,
+                      payload
+                    );
+
                     socket.socket.send(
                       JSON.stringify({
                         type: "netRequestData",
@@ -193,6 +198,7 @@ export class ServerClient extends BaseClient {
               const response =
                 (await requestFunction(this.clientContext, params, null!)) ||
                 {};
+
               socket.socket.send(
                 JSON.stringify({
                   type: "netRequestData",
