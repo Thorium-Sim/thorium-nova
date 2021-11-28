@@ -43,6 +43,17 @@ export abstract class Aspect extends FSDataStore {
   get pluginName() {
     return this.plugin.name;
   }
+  async duplicate(name: string) {
+    const data = {...this};
+    data.name = generateIncrementedName(
+      name,
+      this.plugin.aspects[this.kind].map(aspect => aspect.name)
+    );
+    // TODO November 26, 2021: Properly duplicate all of the files associated with this aspect
+    // in the file system
+    const duplicateConstructor = this.constructor as any;
+    return new duplicateConstructor(data);
+  }
   /**
    * Used for messages sent to the client. We transform the asset
    * path to make sure it works with the client.
