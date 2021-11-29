@@ -7,6 +7,9 @@ import fs from "fs/promises";
 import {spawnShip} from "../spawners/ship";
 import type ShipPlugin from "../classes/Plugins/Ship";
 import type StationComplementPlugin from "../classes/Plugins/StationComplement";
+import {generateIncrementedName} from "../utils/generateIncrementedName";
+import {parse} from "yaml";
+import {getFlights} from "../utils/getFlights";
 
 interface FlightStartShips {
   shipTemplate: {pluginId: string; shipId: string};
@@ -25,7 +28,7 @@ interface FlightStartShips {
   startingPoint?: {pluginId: string; startingPointId: string};
 }
 export const flightInputs = {
-  flightStart: (
+  flightStart: async (
     context: DataContext,
     {
       flightName,
@@ -36,7 +39,12 @@ export const flightInputs = {
     }
   ) => {
     if (context.flight) return context.flight;
-    flightName = flightName || randomWords(3).join("-");
+    const flightData = await getFlights();
+    flightName = generateIncrementedName(
+      flightName || randomWords(3).join("-"),
+      flightData.map(f => f.name)
+    );
+
     context.flight = new FlightDataModel(
       {
         name: flightName,
@@ -120,7 +128,7 @@ export const flightInputs = {
       }
 
       shipEntity.addComponent("stationComplement", {
-        stations: stationComplement?.stations || [],
+        stations: stationComplement?.toJSON()?.stations || [],
       });
       context.flight.ecs.addEntity(shipEntity);
     }

@@ -16,6 +16,7 @@ export type FlightConfigAction =
   | {type: "increaseCrewCount"; availableCrewSizes: number[]}
   | {type: "decreaseCrewCount"; availableCrewSizes: number[]}
   | {type: "hasFlightDirector"; flightDirector: boolean}
+  | {type: "flightName"; name: string}
   | {type: "shipId"; shipId: {pluginId: string; shipId: string} | undefined}
   | {type: "shipName"; name: string}
   | {
@@ -62,7 +63,8 @@ function quickStartReducer(
       return {...state, missionId: action.missionId};
     case "startingPointId":
       return {...state, startingPointId: action.startingPointId};
-
+    case "flightName":
+      return {...state, flightName: action.name};
     default:
       return state;
   }
@@ -85,6 +87,13 @@ const QuickStartProvider = ({children}: {children: React.ReactNode}) => {
     },
     "flightConfig"
   );
+
+  React.useEffect(() => {
+    value[1]({
+      type: "flightName",
+      name: randomNameGenerator(),
+    });
+  }, [value]);
 
   return (
     <QuickStartContext.Provider value={value}>

@@ -351,6 +351,6 @@ export class ServerClient extends BaseClient {
         };
       });
     const snapshot = this.SI.snapshot.create({entities});
-    channels[this.id].raw.emit(encode(snapshot));
+    channels[this.id]?.raw.emit(encode(snapshot));
   }
 }

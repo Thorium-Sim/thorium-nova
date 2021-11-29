@@ -46,4 +46,9 @@ export class DataContext {
     }
     return this.database.flight.clients[clientId];
   }
+  get ship() {
+    return this.flight?.playerShips.find(
+      s => s.id === this.flightClient?.shipId
+    );
+  }
 }
