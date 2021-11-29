@@ -1,4 +1,10 @@
-import {useCallback, useEffect, useReducer} from "react";
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+} from "react";
 import {
   AllRequestNames,
   AllRequestParams,
@@ -11,6 +17,10 @@ import {useThorium} from "./ThoriumContext";
 import {useErrorHandler} from "react-error-boundary";
 const netRequestProxy = proxy<Partial<{[requestId: string]: any}>>({});
 const netRequestPromises: {[requestId: string]: (value: unknown) => void} = {};
+const netRequestCallbacks: Map<
+  string,
+  MutableRefObject<((result: any) => void) | undefined>
+> = new Map();
 
 export function NetRequestData() {
   useNetRequestData();
@@ -38,6 +48,7 @@ function useNetRequestData() {
         }
         netRequestProxy[data.requestId] = data.response;
         netRequestPromises[data.requestId]?.(null);
+        netRequestCallbacks.get(data.requestId)?.current?.(data.response);
       } catch (err) {
         handleError(err);
       }
@@ -54,7 +65,11 @@ type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 export function useNetRequest<
   T extends AllRequestNames,
   R extends AllRequestReturns[T]
->(requestName: T, params?: AllRequestParams[T]): UnwrapPromise<R> {
+>(
+  requestName: T,
+  params?: AllRequestParams[T],
+  callback?: (result: UnwrapPromise<R>) => void
+): UnwrapPromise<R> {
   const requestId = stableValueHash({requestName, params});
   const data = useSnapshot(netRequestProxy);
   const {socket} = useThorium();
@@ -65,7 +80,8 @@ export function useNetRequest<
     if (!netRequestPromises[requestId]) {
       socket.send("netRequest", {requestName, params, requestId});
     }
-  }, [params, requestId, requestName, socket]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Params are properly tracked via the requestId
+  }, [requestId, requestName, socket]);
 
   const takeDownRequest = useCallback(() => {
     socket.send("netRequestEnd", {requestId});
@@ -87,6 +103,20 @@ export function useNetRequest<
     setUpRequest();
     return () => takeDownRequest();
   }, [setUpRequest, takeDownRequest, ready]);
+
+  const callbackRef = useRef(callback);
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
+
+  useEffect(() => {
+    if (callbackRef.current) {
+      netRequestCallbacks.set(requestId, callbackRef);
+    }
+    return () => {
+      netRequestCallbacks.delete(requestId);
+    };
+  }, [requestId]);
 
   if (!data[requestId] && data[requestId] !== null) {
     setUpRequest();
