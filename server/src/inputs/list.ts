@@ -5,3 +5,4 @@ export {dotsInputs} from "./dots";
 export {effectsInputs} from "./effects";
 export {pluginInputs} from "./plugins";
 export {shipsPluginInputs} from "./plugins/ships";
+export {themesPluginInput} from "./plugins/themes";
