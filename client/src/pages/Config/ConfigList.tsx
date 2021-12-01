@@ -48,7 +48,7 @@ const ConfigList = () => {
             <MdMessage className="text-6xl mb-4" />
             <p className="font-bold text-2xl">Phrases</p>
           </ConfigIcon>
-          <ConfigIcon disabled to={`/config/${pluginId}/themes`}>
+          <ConfigIcon to={`/config/${pluginId}/themes`}>
             <FaPaintBrush className="text-6xl mb-4" />
             <p className="font-bold text-2xl">Themes</p>
           </ConfigIcon>
