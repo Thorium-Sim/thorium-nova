@@ -14,8 +14,10 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/busboy": "^0.3.1",
+    "@types/less": "^3.0.3",
     "@types/luxon": "^2.0.5",
     "@types/node": "^16.10.2",
+    "@types/tailwindcss": "^2.2.4",
     "@types/three": "^0.132.2",
     "@types/ws": "^8.2.0",
     "nodemon": "^2.0.13",
@@ -32,7 +34,11 @@
     "fastify-multipart": "^5.0.2",
     "fastify-static": "^4.2.3",
     "fastify-websocket": "^4.0.0",
+    "less": "^4.1.2",
     "luxon": "^2.0.2",
+    "postcss": "^8.4.4",
+    "postcss-less": "^5.0.0",
+    "tailwindcss": "^2.2.19",
     "three": "^0.133.0",
     "yaml": "^1.10.2"
   }

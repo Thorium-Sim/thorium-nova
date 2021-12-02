@@ -4,6 +4,7 @@ import {Route, Routes} from "react-router-dom";
 const PluginEdit = lazy(() => import("./PluginEdit"));
 const ConfigList = lazy(() => import("./ConfigList"));
 const ShipsConfig = lazy(() => import("./Ships"));
+const ThemesConfig = lazy(() => import("./Themes"));
 
 export default function ConfigRoutes() {
   return (
@@ -12,6 +13,7 @@ export default function ConfigRoutes() {
       <Route path="/:pluginId" element={<PluginEdit />} />
       <Route path="/:pluginId/list" element={<ConfigList />} />
       <Route path="/:pluginId/ships/*" element={<ShipsConfig />} />
+      <Route path="/:pluginId/themes/*" element={<ThemesConfig />} />
     </Routes>
   );
 }

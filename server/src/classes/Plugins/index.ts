@@ -8,6 +8,7 @@ import {FSDataStore} from "@thorium/db-fs";
 import path from "path";
 import StationComplementPlugin from "./StationComplement";
 import {loadFolderYaml} from "server/src/utils/loadFolderYaml";
+import ThemePlugin from "./Theme";
 
 export function pluginPublish(plugin: BasePlugin) {
   pubsub.publish("pluginsList", {
@@ -21,6 +22,7 @@ export function pluginPublish(plugin: BasePlugin) {
 interface Aspects {
   ships: ShipPlugin[];
   stationComplements: StationComplementPlugin[];
+  themes: ThemePlugin[];
 }
 // Storing the server here so it doesn't get
 // serialized with the plugin.
@@ -82,6 +84,7 @@ export default class BasePlugin extends FSDataStore {
       aspects = {
         ships: [],
         stationComplements: [],
+        themes: [],
       };
       pluginAspects.set(this, aspects);
     }
@@ -94,6 +97,12 @@ export default class BasePlugin extends FSDataStore {
       this,
       "stationComplements",
       StationComplementPlugin
+    );
+
+    this.aspects.themes = await BasePlugin.loadAspect(
+      this,
+      "themes",
+      ThemePlugin
     );
   }
   toJSON() {
@@ -135,11 +144,11 @@ export default class BasePlugin extends FSDataStore {
   }
   duplicate(name: string) {
     const data = {...this};
-    data.name = name;
-    data.id = generateIncrementedName(
+    data.name = generateIncrementedName(
       name,
       this.server.plugins.map(p => p.name)
     );
+    data.id = data.name;
     // TODO October 23: Properly duplicate all of the files associated with this plugin
     // in the file system
     return new BasePlugin(data, this.server);
