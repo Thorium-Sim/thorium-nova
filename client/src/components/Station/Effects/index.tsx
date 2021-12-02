@@ -82,15 +82,15 @@ export const Effects = () => {
         } catch {}
         break;
       }
-      case "shutdown":
-      case "restart":
-      case "sleep":
-      case "quit":
-      case "beep":
-        // TODO November 29, 2021: Implement the message transmission
-        // to the Electron instance.
-        // return window.thorium.sendMessage({effect});
-        break;
+      // case "shutdown":
+      // case "restart":
+      // case "sleep":
+      // case "quit":
+      // case "beep":
+      //   // TODO November 29, 2021: Implement the message transmission
+      //   // to the Electron instance.
+      //   // return window.thorium.sendMessage({effect});
+      // break;
       default:
         return;
     }

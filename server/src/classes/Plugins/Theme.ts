@@ -41,7 +41,7 @@ export default class ThemePlugin extends Aspect {
     const config = await import("client/tailwind.config.js");
     const postcssOutput = (
       await postcss([tailwindcss(config.default)]).process(
-        `.card-container {${rawCSS}}`,
+        `#theme-container {${rawCSS}}`,
         {
           syntax: postcssLess,
           from: "tailwind-default",

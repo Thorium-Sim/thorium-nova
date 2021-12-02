@@ -8,13 +8,13 @@ import {spawnShip} from "../spawners/ship";
 import type ShipPlugin from "../classes/Plugins/Ship";
 import type StationComplementPlugin from "../classes/Plugins/StationComplement";
 import {generateIncrementedName} from "../utils/generateIncrementedName";
-import {parse} from "yaml";
 import {getFlights} from "../utils/getFlights";
-
+import type BasePlugin from "../classes/Plugins";
 interface FlightStartShips {
   shipTemplate: {pluginId: string; shipId: string};
   shipName: string;
   crewCount: number;
+  theme?: {pluginId: string; themeId: string};
   stationComplement?: {pluginId: string; stationId: string};
   // TODO November 15, 2021 - Implement the mission once missions
   // are actually a thing
@@ -84,52 +84,41 @@ export const flightInputs = {
         tags: ["player"],
       });
       shipEntity.addComponent("isPlayerShip");
-
-      // First see if there is a station complement
-      // that matches the specific one that was passed in
-      let stationComplement = activePlugins.reduce(
-        (acc: StationComplementPlugin | null, plugin) => {
-          if (acc) return acc;
-          if (
-            ship.stationComplement &&
-            plugin.id !== ship.stationComplement.pluginId
-          )
-            return acc;
-          if (ship.stationComplement) {
-            return (
-              plugin.aspects.stationComplements.find(
-                pluginStationComplement =>
-                  pluginStationComplement.name ===
-                  ship.stationComplement?.stationId
-              ) || null
-            );
-          }
-          return null;
-        },
-        null
-      );
-      // No station complement? Find the one that best fits from the default plugin
-      if (!stationComplement) {
-        stationComplement = activePlugins.reduce(
-          (acc: StationComplementPlugin | null, plugin) => {
+      let theme = ship.theme || null;
+      if (!theme) {
+        theme = activePlugins.reduce(
+          (acc: {pluginId: string; themeId: string} | null, plugin) => {
             if (acc) return acc;
-            if (!plugin.default) return acc;
-            // TODO November 18, 2021 - Check to see if the ship is a big ship or a little ship
-            // and assign the appropriate station complement based on that.
-            return (
-              plugin.aspects.stationComplements.find(
-                pluginStationComplement =>
-                  pluginStationComplement.stationCount === ship.crewCount
-              ) || null
-            );
+            const theme = plugin.aspects.themes[0];
+            if (!theme) return null;
+            return {pluginId: plugin.id, themeId: theme.name};
           },
           null
         );
       }
+      if (theme) {
+        shipEntity.addComponent("theme", theme);
+      }
 
+      // First see if there is a station complement
+      // that matches the specific one that was passed in
+      let stationComplement = getStationComplement(activePlugins, ship);
       shipEntity.addComponent("stationComplement", {
-        stations: stationComplement?.toJSON()?.stations || [],
+        stations:
+          stationComplement?.stations.map(s => ({
+            ...s,
+            logo: stationComplement?.toJSON()?.assets[`${s.name}-logo`] || "",
+            cards: s.cards.map(c => {
+              return {
+                ...c,
+                icon: stationComplement?.toJSON()?.assets[
+                  `${s.name}-${c.name}-icon`
+                ],
+              };
+            }),
+          })) || [],
       });
+
       context.flight.ecs.addEntity(shipEntity);
     }
     context.server.activeFlightName = flightName;
@@ -203,3 +192,47 @@ export const flightInputs = {
     return null;
   },
 };
+function getStationComplement(
+  activePlugins: BasePlugin[],
+  ship: FlightStartShips
+) {
+  let stationComplement = activePlugins.reduce(
+    (acc: StationComplementPlugin | null, plugin) => {
+      if (acc) return acc;
+      if (
+        ship.stationComplement &&
+        plugin.id !== ship.stationComplement.pluginId
+      )
+        return acc;
+      if (ship.stationComplement) {
+        return (
+          plugin.aspects.stationComplements.find(
+            pluginStationComplement =>
+              pluginStationComplement.name === ship.stationComplement?.stationId
+          ) || null
+        );
+      }
+      return null;
+    },
+    null
+  );
+  // No station complement? Find the one that best fits from the default plugin
+  if (!stationComplement) {
+    stationComplement = activePlugins.reduce(
+      (acc: StationComplementPlugin | null, plugin) => {
+        if (acc) return acc;
+        if (!plugin.default) return acc;
+        // TODO November 18, 2021 - Check to see if the ship is a big ship or a little ship
+        // and assign the appropriate station complement based on that.
+        return (
+          plugin.aspects.stationComplements.find(
+            pluginStationComplement =>
+              pluginStationComplement.stationCount === ship.crewCount
+          ) || null
+        );
+      },
+      null
+    );
+  }
+  return stationComplement;
+}

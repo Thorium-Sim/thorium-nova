@@ -124,6 +124,9 @@ class MockDataContext {
   findFlightClient(clientId: string) {
     return this.flight.clients[clientId];
   }
+  get ship() {
+    return this.flight.playerShips[0];
+  }
 }
 describe("Client input", () => {
   it("should assign to a client and station", () => {
