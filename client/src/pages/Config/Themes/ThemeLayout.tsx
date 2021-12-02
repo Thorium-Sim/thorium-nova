@@ -19,9 +19,11 @@ import {FaBan} from "react-icons/fa";
 import {AssetPreview} from "@thorium/ui/AssetPreview";
 import InfoTip from "@thorium/ui/InfoTip";
 import type ThemePlugin from "server/src/classes/Plugins/Theme";
-
+import StationLayout from "client/src/components/Station/StationLayout";
+import {MockClientDataContext} from "client/src/context/useCardData";
+import normalLogo from "../../../images/logo.svg?url";
+import colorLogo from "../../../images/logo-color.svg?url";
 export const ThemeLayout = () => {
-  const {pathname} = useLocation();
   const {themeId, pluginId} = useParams() as {
     themeId: string;
     pluginId: string;
@@ -60,15 +62,52 @@ export const ThemeLayout = () => {
               }}
             >
               <style dangerouslySetInnerHTML={{__html: theme.processedCSS}} />
-              <div className="card-container">
-                <h1 className="theme">Hi there</h1>
-              </div>
-              {/* <SampleClientContextProvider
-                shipName={shipName}
-                stationName={stationName}
+              <MockClientDataContext.Provider
+                value={{
+                  client: {
+                    id: "Test",
+                    name: "Test Client",
+                    connected: true,
+                    loginName: "Test User",
+                  },
+                  flight: null,
+                  flights: [] as any,
+                  ship: {
+                    id: 0,
+                    components: {
+                      isPlayerShip: {value: true},
+                      identity: {name: shipName},
+                      isShip: {
+                        assets: {
+                          logo: normalLogo,
+                        },
+                        category: "Cruiser",
+                        registry: "NCC-2016-A",
+                        shipClass: "Astra Cruiser",
+                      },
+                    },
+                  } as any,
+                  station: {
+                    name: stationName,
+                    logo: "",
+                    cards: [
+                      {
+                        icon: colorLogo,
+                        name: "Test Card",
+                        component: "Login",
+                      },
+                      {
+                        icon: colorLogo,
+                        name: "Pilot Card",
+                        component: "Pilot",
+                      },
+                    ],
+                  } as any,
+                  theme: null,
+                }}
               >
-                <StationViewer alertLevel={alertLevel} />
-              </SampleClientContextProvider> */}
+                <StationLayout />
+              </MockClientDataContext.Provider>
             </div>
           </div>
           <Editor
