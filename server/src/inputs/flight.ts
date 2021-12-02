@@ -89,7 +89,7 @@ export const flightInputs = {
         theme = activePlugins.reduce(
           (acc: {pluginId: string; themeId: string} | null, plugin) => {
             if (acc) return acc;
-            const theme = plugin.aspects.themes[0];
+            const theme = plugin.aspects?.themes?.[0];
             if (!theme) return null;
             return {pluginId: plugin.id, themeId: theme.name};
           },
