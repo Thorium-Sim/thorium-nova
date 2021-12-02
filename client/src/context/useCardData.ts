@@ -75,7 +75,7 @@ export const MockClientDataContext = React.createContext<CardProxy["allData"]>(
 export function useClientData() {
   const data = useSnapshot(cardProxy);
   const mockData = useContext(MockClientDataContext);
-  if (mockData) return mockData;
+  if (mockData) return mockData as unknown as NonNullable<typeof data.allData>;
   const cardData = data.allData!;
   if (!cardData) {
     throw new Promise(res => {
