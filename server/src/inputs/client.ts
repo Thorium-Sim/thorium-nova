@@ -63,7 +63,21 @@ export const clientInputs = {
 
     pubsub.publish("clients");
     pubsub.publish("client", {clientId: context.clientId});
-
+    pubsub.publish("station", {clientId: context.clientId});
+    pubsub.publish("theme", {clientId: context.clientId});
+    pubsub.publish("ship", {shipId: flightClient.shipId});
     return flightClient;
+  },
+  clientLogin: (context: DataContext, params: {loginName: string}) => {
+    if (context.flightClient) {
+      context.flightClient.loginName = params.loginName;
+    }
+    pubsub.publish("client", {clientId: context.clientId});
+  },
+  clientLogout: (context: DataContext) => {
+    if (context.flightClient) {
+      context.flightClient.loginName = "";
+    }
+    pubsub.publish("client", {clientId: context.clientId});
   },
 };
