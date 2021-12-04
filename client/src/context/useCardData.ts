@@ -1,4 +1,4 @@
-import {useEffect} from "react";
+import React, {useContext, useEffect} from "react";
 import {proxy, useSnapshot} from "valtio";
 import {
   GetSubscriptionReturns,
@@ -69,8 +69,13 @@ export default function useCardData<CardName extends DataCardNames>() {
   return cardData as Required<CardProxy[CardName]>;
 }
 
+export const MockClientDataContext = React.createContext<CardProxy["allData"]>(
+  null!
+);
 export function useClientData() {
   const data = useSnapshot(cardProxy);
+  const mockData = useContext(MockClientDataContext);
+  if (mockData) return mockData as unknown as NonNullable<typeof data.allData>;
   const cardData = data.allData!;
   if (!cardData) {
     throw new Promise(res => {

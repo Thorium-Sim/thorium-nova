@@ -4,3 +4,4 @@ export {shipsRequest} from "./ships";
 export {pluginStationsRequest} from "./plugins/stations";
 export {pluginThemesRequest} from "./plugins/themes";
 export {clientsRequest} from "./clients";
+export {effectsRequest} from "./effects";

@@ -12,7 +12,7 @@ export class FlightClient extends BaseClient {
   shipId: number | null;
   stationId: string | null;
   loginName: string;
-  offlineState: OfflineStates | null;
+  offlineState: "blackout" | {title: string; message: string} | null;
   training: boolean;
   constructor(params: {id: string} & Partial<FlightClient>) {
     super(params.id);
