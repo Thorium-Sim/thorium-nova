@@ -1,6 +1,6 @@
 import {Link} from "react-router-dom";
 import Logo from "../images/logo.svg?url";
-import packageJson from "../../package.json";
+import packageJson from "../../../package.json";
 
 export const WelcomeLogo = ({className}: {className?: string}) => {
   return (

@@ -39,6 +39,7 @@
   "files": [
     "src/pages/NotFound/astronaut.json",
     "src/pages/Releases/release-notes.json",
-    "./package.json"
+    "./package.json",
+    "../package.json"
   ]
 }
