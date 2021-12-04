@@ -34,9 +34,9 @@ const Input = (
       </label>
       {React.createElement(as, {
         ...(inputProps as React.InputHTMLAttributes<HTMLInputElement>),
-        className: `w-full input ${inputProps.className} ${
-          isInvalid ? "border-red-500" : ""
-        } `,
+        className: `w-full ${as === "textarea" ? "textarea" : "input"} ${
+          inputProps.className
+        } ${isInvalid ? "border-red-500" : ""} `,
       })}
       {isInvalid && <p className="text-red-500">{invalidMessage}</p>}
     </div>

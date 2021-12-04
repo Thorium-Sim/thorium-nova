@@ -3,7 +3,7 @@ import {Link, useMatch} from "react-router-dom";
 export function SettingsList() {
   const match = useMatch("/config/:pluginId/ships/:shipId/:setting");
   return (
-    <div className="mb-2">
+    <div className="mb-2 w-72">
       <Link
         to="basic"
         className={`list-group-item ${

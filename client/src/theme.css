@@ -500,7 +500,7 @@ body {
 }
 
 .textarea {
-  @apply bg-neutral rounded-btn border border-opacity-0 border-neutral-content;
+  @apply text-base bg-neutral rounded-btn border border-opacity-0 border-neutral-content;
   &-bordered {
     @apply border-opacity-20;
   }
