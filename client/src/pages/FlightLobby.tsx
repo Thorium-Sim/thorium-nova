@@ -9,10 +9,15 @@ import {Dispatch, SetStateAction, useState} from "react";
 import {toast} from "../context/ToastContext";
 import Menubar from "@thorium/ui/Menubar";
 import {useNavigate} from "react-router-dom";
+import StationWrapper from "../components/Station";
 
 export default function FlightLobby() {
   const clientData = useClientData();
   const navigate = useNavigate();
+
+  if (clientData.station) {
+    return <StationWrapper />;
+  }
   return (
     <>
       <Menubar>

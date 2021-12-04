@@ -54,6 +54,10 @@ export default class ShipPlugin extends Aspect {
    * allowed.
    */
   shipSystems: string[];
+  /**
+   * The station theme used for this ship if it is a player ship.
+   */
+  theme?: {pluginId: string; themeId: string};
   constructor(params: Partial<ShipPlugin>, plugin: BasePlugin) {
     const name = generateIncrementedName(
       params.name || "New Ship",
@@ -75,5 +79,6 @@ export default class ShipPlugin extends Aspect {
     this.mass = params.mass || 700_000_000;
     this.length = params.length || 350;
     this.shipSystems = params.shipSystems || [];
+    this.theme = params.theme || undefined;
   }
 }
