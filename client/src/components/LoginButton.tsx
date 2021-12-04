@@ -4,6 +4,7 @@ import {useThoriumAccount} from "../context/ThoriumAccountContext";
 import {Menu, Transition} from "@headlessui/react";
 import {VscIssues} from "react-icons/vsc";
 import {useIssueTracker} from "./IssueTracker";
+import {HiLogout} from "react-icons/hi";
 // https://stackoverflow.com/a/16861050/4697675
 const popupCenter = ({
   url,
@@ -53,7 +54,7 @@ const popupCenter = ({
 };
 
 function AccountMenu() {
-  const {account} = useThoriumAccount();
+  const {account, logout} = useThoriumAccount();
   const {setOpen} = useIssueTracker();
   if (!account) return null;
   return (
@@ -87,6 +88,18 @@ function AccountMenu() {
                   } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
                 >
                   <VscIssues className="mr-2" /> Issue Tracker
+                </button>
+              )}
+            </Menu.Item>
+            <Menu.Item>
+              {({active}) => (
+                <button
+                  onClick={() => logout()}
+                  className={`${
+                    active ? "bg-purple-900 text-white" : "text-white"
+                  } group flex rounded-md items-center w-full px-2 py-2 text-sm`}
+                >
+                  <HiLogout className="mr-2" /> Logout
                 </button>
               )}
             </Menu.Item>
@@ -135,18 +148,16 @@ export default function LoginButton({
       >
         {" "}
       </a>
-      <Button
-        className={`w-max ${buttonClassName} ${verifying ? "loading" : ""}`}
-        onClick={() => {
-          if (account) {
-            logout();
-          } else {
+      {!account || verifying ? (
+        <Button
+          className={`w-max ${buttonClassName} ${verifying ? "loading" : ""}`}
+          onClick={() => {
             login();
-          }
-        }}
-      >
-        {verifying ? "Verifying..." : account ? "Logout" : "Login to Thorium"}
-      </Button>
+          }}
+        >
+          {verifying ? "Verifying..." : "Login to Thorium"}
+        </Button>
+      ) : null}
       {account && <AccountMenu />}
     </div>
   );
