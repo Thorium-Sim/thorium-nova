@@ -1,0 +1,13 @@
+.actionsContainer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 10000000;
+  pointer-events: none;
+}
+.actionsContainer.flash {
+  background-color: yellow;
+  /* mix-blend-mode: overlay; */
+}

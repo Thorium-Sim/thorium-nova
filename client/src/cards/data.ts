@@ -1,10 +1,9 @@
 import {DataContext} from "server/src/utils/DataContext";
-import fs from "fs/promises";
-import {thoriumPath} from "server/src/utils/appPaths";
-import type {FlightDataModel} from "server/src/classes/FlightDataModel";
 import {Entity} from "server/src/utils/ecs";
-import {parse} from "yaml";
 import {getFlights} from "server/src/utils/getFlights";
+import type Station from "server/src/classes/Station";
+import ThemePlugin from "server/src/classes/Plugins/Theme";
+
 // This file is used for any subscriptions which all clients
 // make, regardless of what cards they have.
 export const subscriptions = {
@@ -26,12 +25,32 @@ export const subscriptions = {
   flights: async (context: DataContext) => {
     return getFlights();
   },
-  dots(context: DataContext) {
-    return (
-      context.flight?.ecs.entities
-        .filter(e => e.components.position && e.components.velocity)
-        .map(e => ({id: e.id, color: e.components.color?.color})) || []
-    );
+  ship(context: DataContext, params: {shipId: number}) {
+    if (params && params.shipId !== context.flightClient?.shipId) throw null;
+    return context.ship as Entity;
+  },
+  station(context: DataContext, params: {clientId: string}): Station {
+    if (params && params.clientId !== context.clientId) throw null;
+
+    const station = context.ship?.components.stationComplement?.stations.find(
+      s => s.name === context.flightClient?.stationId
+    ) as unknown as Station;
+    return station;
+  },
+  theme(context: DataContext, params: {clientId: string}) {
+    if (params && params.clientId !== context.clientId) throw null;
+    const themeObj = context.server.plugins
+      .filter(plugin => context.flight?.pluginIds.includes(plugin.id))
+      .reduce((acc: null | ThemePlugin, plugin) => {
+        if (acc) return acc;
+        if (plugin.id !== context.ship?.components.theme?.pluginId) return acc;
+        return (
+          plugin.aspects.themes.find(
+            t => t.name === context.ship?.components.theme?.themeId
+          ) || null
+        );
+      }, null);
+    return themeObj;
   },
 };
 
