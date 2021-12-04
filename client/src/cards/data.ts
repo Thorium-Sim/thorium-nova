@@ -31,7 +31,8 @@ export const subscriptions = {
   },
   station(context: DataContext, params: {clientId: string}): Station {
     if (params && params.clientId !== context.clientId) throw null;
-
+    if (context.flightClient?.stationOverride)
+      return context.flightClient.stationOverride;
     const station = context.ship?.components.stationComplement?.stations.find(
       s => s.name === context.flightClient?.stationId
     ) as unknown as Station;

@@ -8,7 +8,7 @@ import SearchableList from "../components/ui/SearchableList";
 import {Dispatch, SetStateAction, useState} from "react";
 import {toast} from "../context/ToastContext";
 import Menubar from "@thorium/ui/Menubar";
-import {useNavigate} from "react-router-dom";
+import {NavLink, useNavigate} from "react-router-dom";
 import StationWrapper from "../components/Station";
 
 export default function FlightLobby() {
@@ -59,6 +59,11 @@ export default function FlightLobby() {
             >
               Reset
             </Button>
+            {process.env.NODE_ENV !== "production" && (
+              <NavLink className="btn btn-xs btn-info btn-outline" to="/cards">
+                Cards
+              </NavLink>
+            )}
           </>
         )}
       </Menubar>

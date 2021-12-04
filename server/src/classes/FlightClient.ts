@@ -1,5 +1,5 @@
-import {OfflineStates} from "../utils/types";
 import {BaseClient} from "./BaseClient";
+import Station from "./Station";
 
 /**
  * Properties which are associated between a flight and a client.
@@ -14,6 +14,7 @@ export class FlightClient extends BaseClient {
   loginName: string;
   offlineState: "blackout" | {title: string; message: string} | null;
   training: boolean;
+  stationOverride?: Station;
   constructor(params: {id: string} & Partial<FlightClient>) {
     super(params.id);
     if (!params.flightId)

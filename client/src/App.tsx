@@ -46,6 +46,8 @@ const FlightQuickStart = lazy(() => import("./components/FlightQuickStart"));
 const QuickStartProvider = lazy(
   () => import("./components/FlightQuickStart/FlightQuickStartContext")
 );
+const CardsDevelopment = lazy(() => import("./pages/CardsDevelopment"));
+const CardRenderer = lazy(() => import("./pages/CardRenderer"));
 
 function AppRoutes() {
   useCardDataSubscribe();
@@ -84,6 +86,8 @@ function AppRoutes() {
           </Route>
         </Route>
         <Route path="/flight" element={<FlightLobby />} />
+        <Route path="/cards" element={<CardsDevelopment />} />
+        <Route path="/cards/:component" element={<CardRenderer />} />
         <Route path="/components" element={<ComponentDemo />} />
         <Route path="/releases" element={<Releases />} />
         <Route path="/docs/*" element={<DocLayout />}></Route>
