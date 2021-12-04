@@ -220,6 +220,7 @@ export const Editor = React.forwardRef<RefEditorInstance, MonacoEditorProps>(
           }
         );
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
