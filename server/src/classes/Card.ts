@@ -1,4 +1,3 @@
-import uniqid from "@thorium/uniqid";
 type CardConfig = unknown;
 export class Card {
   name: string;

@@ -16,7 +16,6 @@ const StationLayout = () => {
   // TODO November 29, 2021: Get the proper alert level and put it here.
   const alertLevel = 5;
   const {account} = useThoriumAccount();
-  console.log(JSON.stringify(theme, null, 2));
   return (
     <div id="theme-container" className="h-full w-full">
       <div
@@ -64,16 +63,17 @@ const StationLayout = () => {
             <div className="card-frame-login-name select-none">
               {client.loginName}
             </div>
-            {/* TODO: Add this once we get Thoriumsim.com accounts */}
-            <div className="card-frame-login-profile w-24 h-24">
-              <img
-                draggable="false"
-                aria-hidden
-                className="card-frame-login-profile-image"
-                src={account.profilePictureUrl}
-                alt={account.displayName}
-              />
-            </div>
+            {account && (
+              <div className="card-frame-login-profile w-24 h-24">
+                <img
+                  draggable="false"
+                  aria-hidden
+                  className="card-frame-login-profile-image"
+                  src={account.profilePictureUrl}
+                  alt={account.displayName}
+                />
+              </div>
+            )}
             <div className="doodad-1 absolute"></div>
             <div className="doodad-2 absolute"></div>
             <div className="doodad-3 absolute"></div>

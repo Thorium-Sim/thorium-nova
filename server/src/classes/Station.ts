@@ -1,4 +1,3 @@
-import uuid from "@thorium/uniqid";
 import {Card} from "./Card";
 
 export default class Station {

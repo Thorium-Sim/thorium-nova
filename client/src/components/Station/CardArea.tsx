@@ -34,12 +34,10 @@ export const CardArea: React.FC<{
   card: ReturnType<typeof useClientData>["station"]["cards"][0];
 }> = ({card}) => {
   const {client, station} = useClientData();
-  console.log(card, station);
   const CardComponents = station.cards.map(card => ({
     ...card,
     CardComponent: Cards[card.component as keyof typeof Cards],
   }));
-  console.log(Cards, CardComponents);
   return (
     <Fragment>
       <Transition show={!client.loginName} {...transitionProps}>
