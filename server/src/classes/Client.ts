@@ -268,7 +268,6 @@ export class ServerClient extends BaseClient {
       pubsub.unsubscribe(subId);
     }
     this._cards = null;
-    console.log("Reiniting", this.cards);
     // All clients get the 'client' data, so automatically add it to the list
     const subscriptionList: {
       trigger: SubscriptionNames;
