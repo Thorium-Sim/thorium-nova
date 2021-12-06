@@ -298,7 +298,7 @@ export default function DocLayout() {
             ))}
           </ul>
         </aside>
-        <article className="overflow-y-auto flex-1">
+        <article className="overflow-y-auto flex-1" key={location.pathname}>
           <div
             className="prose prose-lg mx-auto max-w-screen-lg my-16 bg-black/80 p-8 rounded-lg backdrop-filter backdrop-blur"
             ref={docRef}
