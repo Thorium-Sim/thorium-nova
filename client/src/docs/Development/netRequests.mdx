@@ -21,9 +21,9 @@ used. Each file exports an object where the keys are net request names and the
 values are functions that return the data.
 
 The function, which can be an `async` function, includes
-[`DataContext`](/docs/development/datacontext) as the first parameter. The second parameter
-is the `params` which can be sent from the client. A third param called
-`publishParams` is the params which are passed by `pubsub.publish`.
+[`DataContext`](/docs/development/datacontext) as the first parameter. The
+second parameter is the `params` which can be sent from the client. A third
+param called `publishParams` is the params which are passed by `pubsub.publish`.
 
 Unlike card loaders, net requests only use one function that both determines
 whether the net request should get the data and what data should be returned.
@@ -69,3 +69,7 @@ whenever data is loading.
 Net requests use a cache to prevent duplicate data or unnecessary requests. The
 cache is keyed by the name of the parameter and the hashed params, so you can
 make the same netRequest multiple times without any additional network overhead.
+
+`useNetRequest` also supports an optional callback parameter which is called
+with the NetRequest data whenever a subscription publish is called. This makes
+it possible to respond imperatively to specific NetRequests as they come in.
