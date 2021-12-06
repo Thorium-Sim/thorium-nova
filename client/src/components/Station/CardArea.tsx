@@ -6,6 +6,8 @@ import {ErrorBoundary} from "react-error-boundary";
 import {Transition} from "@headlessui/react";
 import {CardProps} from "./CardProps";
 import {useClientData} from "client/src/context/useCardData";
+import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
+import CardProvider from "client/src/context/CardContext";
 
 const CardError = () => {
   return (
@@ -72,22 +74,24 @@ const CardRenderer = ({
   const [cardLoaded, setCardLoaded] = useState(false);
   const show = allowCard && currentCardId === id;
   return (
-    <Transition
-      key={id}
-      show={show}
-      {...transitionProps}
-      beforeEnter={() => {
-        setCardLoaded(false);
-      }}
-      afterEnter={() => {
-        setCardLoaded(true);
-      }}
-    >
-      <Suspense fallback={null}>
-        <ErrorBoundary fallback={<CardError />}>
-          <CardComponent cardLoaded={cardLoaded} />
-        </ErrorBoundary>
-      </Suspense>
-    </Transition>
+    <CardProvider cardName={id}>
+      <Transition
+        key={id}
+        show={show}
+        {...transitionProps}
+        beforeEnter={() => {
+          setCardLoaded(false);
+        }}
+        afterEnter={() => {
+          setCardLoaded(true);
+        }}
+      >
+        <Suspense fallback={<LoadingSpinner />}>
+          <ErrorBoundary fallback={<CardError />}>
+            <CardComponent cardLoaded={cardLoaded} />
+          </ErrorBoundary>
+        </Suspense>
+      </Transition>
+    </CardProvider>
   );
 };

@@ -1,8 +1,10 @@
+import {cardSubscriptions} from "client/src/utils/cardData";
+
 type CardConfig = unknown;
 export class Card {
   name: string;
 
-  component: string;
+  component: keyof typeof cardSubscriptions;
 
   config?: CardConfig;
 
