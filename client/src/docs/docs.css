@@ -29,3 +29,15 @@ h6:hover .icon.icon-link {
   background-repeat: no-repeat;
   background-position: center;
 }
+.prose a code {
+  @apply text-purple-300;
+}
+.prose h1 {
+  @apply font-bold;
+}
+.prose {
+  @apply text-xl leading-relaxed;
+}
+.prose pre {
+  @apply text-base;
+}

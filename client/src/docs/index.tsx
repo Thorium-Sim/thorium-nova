@@ -2,9 +2,10 @@ import * as React from "react";
 import {Link, NavLink, Route, Routes, useLocation} from "react-router-dom";
 import "prismjs/themes/prism-tomorrow.css";
 import Menubar from "@thorium/ui/Menubar";
-import {Popover, Transition} from "@headlessui/react";
+import {Disclosure, Popover, Transition} from "@headlessui/react";
 import {Index} from "flexsearch";
 import "./docs.css";
+import {FaChevronUp} from "react-icons/fa";
 
 const docIndex = new Index();
 
@@ -56,7 +57,7 @@ function Search() {
               className="absolute z-10 w-64 px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-3xl"
             >
               <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
-                <div className="relative bg-black/50 p-7">
+                <div className="relative bg-black/70 backdrop-filter backdrop-blur-xl p-4 text-2xl">
                   {results.map(item => (
                     <Link
                       onClick={() => {
@@ -105,6 +106,7 @@ export const routes = Object.keys(ROUTES)
       .replace(/\[(.+)\]/, ":$1");
     if (!ROUTES[route].default) return null;
     const routeParts = path.split("/");
+    if (routeParts.length <= 1) return null;
     return {
       path: path.toLowerCase().replace(/\s/g, "-"),
       component: ROUTES[route].default,
@@ -266,48 +268,66 @@ export default function DocLayout() {
       <Menubar></Menubar>
       <div className="flex justify-around gap-4 h-[calc(100%-2rem)]">
         <aside className="px-4 py-8 text-white w-full max-w-sm bg-black/60 backdrop-filter backdrop-blur">
-          <ul className="ml-2">
-            {orderedRoutes.map(([section, route]) => (
-              <li key={section}>
-                <span className="font-semibold text-2xl">{section}</span>
-                <ul className="ml-4">
-                  {route
-                    .concat()
-                    .sort((a, b) => {
-                      if (a.frontmatter.order < b.frontmatter.order) return -1;
-                      if (a.frontmatter.order > b.frontmatter.order) return 1;
-                      return 0;
-                    })
-                    .map(
-                      route =>
-                        route.frontmatter && (
-                          <li key={route.path}>
-                            <NavLink
-                              to={`/docs/${route.path}`}
-                              className={({isActive}) =>
-                                isActive ? "font-semibold" : ""
-                              }
-                            >
-                              {route.frontmatter.title}
-                            </NavLink>
-                          </li>
-                        )
-                    )}
-                </ul>
-              </li>
-            ))}
-          </ul>
+          {orderedRoutes.map(([section, route]) => (
+            <Disclosure key={section}>
+              {({open}) => (
+                <>
+                  <Disclosure.Button className="flex justify-between w-full px-4 py-2 text-2xl font-medium text-left text-purple-300 hover:text-purple-400 focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75">
+                    <span>{section}</span>
+                    <FaChevronUp
+                      className={`${
+                        open ? "transform rotate-180" : ""
+                      } w-5 h-5 text-purple-300`}
+                    />
+                  </Disclosure.Button>
+                  <Disclosure.Panel className="px-4 text-xl">
+                    <ul className="ml-4">
+                      {route
+                        .concat()
+                        .sort((a, b) => {
+                          if (a.frontmatter.order < b.frontmatter.order)
+                            return -1;
+                          if (a.frontmatter.order > b.frontmatter.order)
+                            return 1;
+                          return 0;
+                        })
+                        .map(
+                          route =>
+                            route.frontmatter && (
+                              <li
+                                key={route.path}
+                                className="hover:text-gray-200 text-gray-400"
+                              >
+                                <NavLink
+                                  to={`/docs/${route.path}`}
+                                  className={({isActive}) =>
+                                    isActive ? "font-semibold text-white" : ""
+                                  }
+                                >
+                                  {route.frontmatter.title}
+                                </NavLink>
+                              </li>
+                            )
+                        )}
+                    </ul>
+                  </Disclosure.Panel>
+                </>
+              )}
+            </Disclosure>
+          ))}
         </aside>
         <article className="overflow-y-auto flex-1" key={location.pathname}>
           <div
-            className="prose prose-lg mx-auto max-w-screen-lg my-16 bg-black/80 p-8 rounded-lg backdrop-filter backdrop-blur"
+            className="mx-auto max-w-screen-lg my-16 bg-black/80 p-8 rounded-lg backdrop-filter backdrop-blur"
             ref={docRef}
           >
-            <Routes>
-              {routes.map(({path, component: Component = React.Fragment}) => (
-                <Route key={path} path={path} element={<Component />} />
-              ))}
-            </Routes>
+            <div className="prose prose-lg mx-auto">
+              <Routes>
+                {routes.map(({path, component: Component = React.Fragment}) => (
+                  <Route key={path} path={path} element={<Component />} />
+                ))}
+              </Routes>
+            </div>
           </div>
         </article>
         <aside className="flex-1 overflow-y-auto px-4 py-8 text-white w-full max-w-sm bg-black/60 backdrop-filter backdrop-blur">
