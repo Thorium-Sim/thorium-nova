@@ -1,5 +1,6 @@
 import {pubsub} from "../utils/pubsub";
 import {DataContext} from "../utils/DataContext";
+import Station from "../classes/Station";
 
 export const clientInputs = {
   clientSetName: (context: DataContext, params: {name: string}) => {
@@ -79,5 +80,25 @@ export const clientInputs = {
       context.flightClient.loginName = "";
     }
     pubsub.publish("client", {clientId: context.clientId});
+  },
+  clientOverrideStation: (
+    context: DataContext,
+    params: {station?: Station}
+  ) => {
+    if (!context.flightClient || !context.flight) {
+      throw new Error("No flight has been started.");
+    }
+    context.flightClient.stationOverride = params.station;
+    if (params.station) {
+      context.flightClient.shipId = context.flight.playerShips[0].id;
+      pubsub.publish("ship", {shipId: context.flightClient.shipId});
+      context.flightClient.loginName = "Test User";
+    } else {
+      context.flightClient.shipId = null;
+      context.flightClient.loginName = "";
+    }
+    pubsub.publish("station", {clientId: context.clientId});
+    pubsub.publish("client", {clientId: context.clientId});
+    pubsub.publish("theme", {clientId: context.clientId});
   },
 };

@@ -2,6 +2,7 @@ import {NavLink} from "react-router-dom";
 import {useClientData} from "../context/useCardData";
 import Button from "@thorium/ui/Button";
 import {Disclosure} from "@headlessui/react";
+import {netSend} from "../context/netSend";
 
 export const WelcomeButtons = ({className}: {className?: string}) => {
   const client = useClientData();
@@ -11,9 +12,22 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
       className={`${className} flex flex-col justify-end self-end space-y-4 max-w-md h-full`}
     >
       {client.flight ? (
-        <NavLink className="btn btn-primary btn-outline" to="/flight">
-          Go To Flight Lobby
-        </NavLink>
+        <>
+          <NavLink className="btn btn-primary btn-outline" to="/flight">
+            Go To Flight Lobby
+          </NavLink>
+          {process.env.NODE_ENV !== "production" && (
+            <NavLink className="btn btn-info btn-outline" to="/cards">
+              Go To Card Development
+            </NavLink>
+          )}
+          <Button
+            className="btn btn-error btn-outline"
+            onClick={() => netSend("flightStop")}
+          >
+            Stop Flight
+          </Button>
+        </>
       ) : (
         <>
           <NavLink className="btn btn-primary btn-outline" to="/flight/quick">
