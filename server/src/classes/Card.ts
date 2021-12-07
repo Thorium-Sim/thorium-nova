@@ -10,7 +10,7 @@ export class Card {
 
   constructor(params: Partial<Card>) {
     this.name = params.name || "Card";
-    this.component = params.component || "Card";
+    this.component = params.component || "Login";
     this.config = params.config;
     this.icon = params.icon || null;
   }

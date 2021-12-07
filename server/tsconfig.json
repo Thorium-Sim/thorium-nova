@@ -31,7 +31,12 @@
       "@thorium/cardSubscriptions": ["./client/src/utils/subscriptions"]
     }
   },
-  "include": ["src/**/*", "../shared", "../client/src/cards/**/data.ts"],
+  "include": [
+    "src/**/*",
+    "../shared",
+    "../client/src/cards/**/data.ts",
+    "../client/src/cards/**/data.tsx"
+  ],
   "files": [
     "../client/src/utils/cardData.ts",
     "../client/src/cards/dataList.ts",

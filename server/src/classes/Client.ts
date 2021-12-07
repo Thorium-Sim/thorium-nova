@@ -17,6 +17,7 @@ import {SocketStream} from "fastify-websocket";
 import requests, {AllRequestNames} from "../netRequests";
 import {BaseClient} from "./BaseClient";
 import {randomNameGenerator} from "../utils/randomNameGenerator";
+import Station from "./Station";
 
 type NetSendData = {inputName: AllInputNames; params: any; requestId: string};
 type NetRequestData = {
@@ -39,7 +40,7 @@ export class ServerClient extends BaseClient {
   clientContext!: DataContext;
   subscriptionListeners: number[] = [];
   SI = new SnapshotInterpolation();
-
+  private _cards: (keyof typeof cardSubscriptions)[] | null = null;
   constructor(params: {id: string} & Partial<ServerClient>) {
     super(params.id);
     this.name = params.name || randomNameGenerator();
@@ -250,22 +251,24 @@ export class ServerClient extends BaseClient {
     );
   }
   get cards() {
-    // TODO Aug 28, 2021 Populate this list with the dynamic list of cards assigned to the client.
-    // Also, there needs to be some way to unsubscribe and re-subscribe whenever the client's
-    // ship, station, or cards change.
-    const cards: (keyof typeof cardSubscriptions)[] = ["Clients", "Flights"];
+    if (!this._cards)
+      this._cards =
+        this.clientContext.ship?.components.stationComplement?.stations
+          .find(s => s.name === this.clientContext.flightClient?.stationId)
+          ?.cards.map(c => c.component) || [];
 
     // This is required for the data that is passed to every connected client;
-    cards.push("allData");
+    this._cards.push("allData");
 
-    return cards;
+    return this._cards;
   }
-  public async initSubscriptions(socket: SocketStream) {
+  public async initSubscriptions(socket: SocketStream = sockets[this.id]) {
+    if (process.env.NODE_ENV === "test") return;
     // Remove all of the existing subscriptions
     for (let subId of this.subscriptionListeners) {
       pubsub.unsubscribe(subId);
     }
-
+    this._cards = null;
     // All clients get the 'client' data, so automatically add it to the list
     const subscriptionList: {
       trigger: SubscriptionNames;
@@ -277,6 +280,8 @@ export class ServerClient extends BaseClient {
       const cardSubs = cardSubscriptions[card] as UnionToIntersection<
         typeof cardSubscriptions[typeof card]
       >;
+      if (!cardSubs) continue;
+
       const keys = Object.keys(cardSubs) as SubscriptionNames[];
       const initialData: Record<string, any> = {};
       for (let sub of keys) {

@@ -16,7 +16,7 @@ export const clientInputs = {
       name: params.name,
     };
   },
-  clientSetStation: (
+  clientSetStation: async (
     context: DataContext,
     params:
       | {shipId: number; stationId: string; clientId?: string}
@@ -60,7 +60,7 @@ export const clientInputs = {
     }
     flightClient.stationId = params.stationId;
     flightClient.shipId = params.shipId;
-
+    await context.client.initSubscriptions();
     pubsub.publish("clients");
     pubsub.publish("client", {clientId: context.clientId});
     pubsub.publish("station", {clientId: context.clientId});

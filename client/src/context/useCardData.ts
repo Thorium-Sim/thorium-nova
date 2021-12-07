@@ -61,6 +61,7 @@ export default function useCardData<CardName extends DataCardNames>() {
   const {cardName} = useCardContext() as {cardName: CardName};
   const data = useSnapshot(cardProxy);
   const cardData = (data[cardName] || {}) as any;
+
   if (!data[cardName])
     throw new Promise(res => {
       loadingPromises[cardName] = res;
