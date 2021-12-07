@@ -1,8 +1,6 @@
 import {
   createContext,
-  Dispatch,
   ReactNode,
-  SetStateAction,
   useContext,
   useEffect,
   useMemo,
@@ -11,12 +9,13 @@ import {
 import {useLocalStorage} from "../hooks/useLocalStorage";
 
 type ThoriumAccountContextProps = {
-  account: ThoriumAccount;
+  account: ThoriumAccount | null;
   login: () => void;
   logout: () => void;
   userCode?: string;
   verificationUrl?: string;
   verifying: boolean;
+  refresh: () => void;
 };
 interface ThoriumAccount {
   id: number;
@@ -24,6 +23,7 @@ interface ThoriumAccount {
   profilePictureUrl: string;
   githubConnection: boolean;
   access_token: string;
+  accounts: string[];
 }
 const ThoriumAccountContext = createContext<ThoriumAccountContextProps>(null!);
 
@@ -49,6 +49,16 @@ export function ThoriumAccountContextProvider({
     function logout() {
       setDeviceCode(null);
       setAccount(null);
+    }
+    async function refresh() {
+      if (!account) return;
+      const user = await fetch(`${process.env.THORIUMSIM_URL}/api/identity`, {
+        headers: {
+          Authorization: `Bearer ${account.access_token}`,
+        },
+        credentials: "omit",
+      }).then(res => res.json());
+      setAccount({...account, ...user});
     }
     async function login() {
       setVerifying(true);
@@ -80,6 +90,7 @@ export function ThoriumAccountContextProvider({
       userCode: deviceCode?.user_code,
       verificationUrl: deviceCode?.verification_uri,
       verifying,
+      refresh,
     };
   }, [account, setAccount, deviceCode, verifying]);
 
@@ -120,16 +131,7 @@ export function ThoriumAccountContextProvider({
         if (data.access_token) {
           setVerifying(false);
           clearInterval(interval);
-          const user = await fetch(
-            `${process.env.THORIUMSIM_URL}/api/identity`,
-            {
-              headers: {
-                Authorization: `Bearer ${data.access_token}`,
-              },
-              credentials: "omit",
-            }
-          ).then(res => res.json());
-          setAccount({...data, ...user});
+          value.refresh();
           setDeviceCode(null);
         }
       }, deviceCode.interval * 1000);

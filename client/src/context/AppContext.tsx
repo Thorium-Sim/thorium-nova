@@ -8,6 +8,7 @@ import bg from "../images/background.jpg";
 import ToastContainer from "./ToastContext";
 import {NetRequestData} from "./useNetRequest";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
+import {IssueTrackerProvider} from "../components/IssueTracker";
 
 const Fallback: React.FC<FallbackProps> = ({error}) => {
   return (
@@ -50,7 +51,9 @@ export default function AppContext({children}: {children: ReactNode}) {
             <AlertDialog>
               <ThoriumProvider>
                 <NetRequestData />
-                <Router>{children}</Router>
+                <IssueTrackerProvider>
+                  <Router>{children}</Router>
+                </IssueTrackerProvider>
               </ThoriumProvider>
               <ToastContainer />
             </AlertDialog>

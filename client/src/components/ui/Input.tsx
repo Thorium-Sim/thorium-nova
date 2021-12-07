@@ -1,15 +1,21 @@
 import React from "react";
 
+interface CommonProps {
+  label: string;
+  labelHidden?: boolean;
+  isInvalid?: boolean;
+  invalidMessage?: string;
+  fixed?: boolean;
+  labelProps?: React.LabelHTMLAttributes<HTMLLabelElement>;
+}
 const Input = (
-  props: React.InputHTMLAttributes<HTMLInputElement> & {
-    label: string;
-    labelHidden?: boolean;
-    isInvalid?: boolean;
-    invalidMessage?: string;
-    fixed?: boolean;
-    labelProps?: React.LabelHTMLAttributes<HTMLLabelElement>;
-    as?: "input" | "textarea";
-  }
+  props:
+    | (React.InputHTMLAttributes<HTMLInputElement> & {
+        as?: "input" | "textarea";
+      } & CommonProps)
+    | (React.SelectHTMLAttributes<HTMLSelectElement> & {
+        as: "select";
+      } & CommonProps)
 ) => {
   let {
     label,

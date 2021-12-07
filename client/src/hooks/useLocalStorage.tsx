@@ -30,7 +30,7 @@ export function useLocalStorageReducer<R extends Reducer<I, any>, I>(
 
 export function useLocalStorage<T>(storageKey: string, defaultValue: T) {
   return useLocalStorageReducer(
-    (state, action) => action,
+    (state: T, action: T) => action,
     defaultValue,
     storageKey
   );
