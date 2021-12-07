@@ -46,6 +46,7 @@ export const shipsPluginInputs = {
       top?: Blob | string;
       side?: Blob | string;
       vanity?: Blob | string;
+      theme?: {themeId: string; pluginId: string};
     }
   ) {
     const plugin = getPlugin(context, params.pluginId);
@@ -80,6 +81,15 @@ export const shipsPluginInputs = {
       await moveFile(params.side, "side.png", "sideView");
     if (typeof params.vanity === "string")
       await moveFile(params.vanity, "vanity.png", "vanity");
+
+    if (params.theme) {
+      const themePlugin = getPlugin(context, params.theme.pluginId);
+      const theme = themePlugin.aspects.themes.find(
+        theme => theme.name === params.theme?.themeId
+      );
+      if (!theme) throw new Error("Theme not found");
+      ship.theme = params.theme;
+    }
 
     if (params.name !== ship.name && params.name) {
       await ship?.rename(params.name);

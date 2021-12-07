@@ -33,4 +33,17 @@ export const pluginThemesRequest = {
 
     return theme;
   },
+  pluginAllThemes(context: DataContext) {
+    return context.server.plugins.reduce(
+      (themes: {themeId: string; pluginId: string}[], plugin) => {
+        return themes.concat(
+          plugin.aspects.themes.map(theme => ({
+            themeId: theme.name,
+            pluginId: plugin.id,
+          }))
+        );
+      },
+      []
+    );
+  },
 };
