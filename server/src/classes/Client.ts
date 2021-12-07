@@ -263,6 +263,7 @@ export class ServerClient extends BaseClient {
     return this._cards;
   }
   public async initSubscriptions(socket: SocketStream = sockets[this.id]) {
+    if (process.env.NODE_ENV === "test") return;
     // Remove all of the existing subscriptions
     for (let subId of this.subscriptionListeners) {
       pubsub.unsubscribe(subId);

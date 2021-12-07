@@ -6,6 +6,7 @@ import {clientInputs} from "../client";
 import systems from "../../systems";
 import type ShipPlugin from "server/src/classes/Plugins/Ship";
 import {FlightDataModel} from "server/src/classes/FlightDataModel";
+import {SocketStream} from "fastify-websocket";
 
 class MockServerDataModel {
   clients!: Record<string, ServerClient>;
@@ -114,6 +115,9 @@ class MockDataContext {
   }) as any as FlightDataModel;
   constructor() {
     this.flight.initEcs(this.server);
+    for (let client in this.server.clients) {
+      this.server.clients[client].clientContext = this;
+    }
   }
   get client() {
     return this.server.clients[this.clientId];
@@ -129,18 +133,19 @@ class MockDataContext {
   }
 }
 describe("Client input", () => {
-  it("should assign to a client and station", () => {
+  it("should assign to a client and station", async () => {
     const mockDataContext = new MockDataContext();
-    expect(() =>
+    expect(
       clientInputs.clientSetStation(mockDataContext, {
         shipId: 1,
         stationId: "Test",
       })
-    ).toThrowError("No ship with that ID exists");
+    ).rejects.toThrowError("No ship with that ID exists");
 
     const ship = mockDataContext.flight.ecs.addEntity(
       new Entity(1, {
         isShip: {shipClass: "Test", category: "Test", registry: "", assets: {}},
+        isPlayerShip: {value: true},
         stationComplement: {
           stations: [
             {
@@ -157,7 +162,7 @@ describe("Client input", () => {
         },
       })
     );
-    clientInputs.clientSetStation(mockDataContext, {
+    await clientInputs.clientSetStation(mockDataContext, {
       shipId: 1,
       stationId: "Test",
     });

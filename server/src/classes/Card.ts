@@ -1,10 +1,8 @@
-import {cardSubscriptions} from "client/src/utils/cardData";
-
 type CardConfig = unknown;
 export class Card {
   name: string;
 
-  component: keyof typeof cardSubscriptions;
+  component: string;
 
   config?: CardConfig;
 
@@ -12,7 +10,7 @@ export class Card {
 
   constructor(params: Partial<Card>) {
     this.name = params.name || "Card";
-    this.component = params.component || "Card";
+    this.component = params.component || "Login";
     this.config = params.config;
     this.icon = params.icon || null;
   }
