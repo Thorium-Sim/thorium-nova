@@ -251,14 +251,19 @@ export class ServerClient extends BaseClient {
     );
   }
   get cards() {
-    if (!this._cards)
+    if (!this._cards) {
       this._cards =
         this.clientContext.ship?.components.stationComplement?.stations
           .find(s => s.name === this.clientContext.flightClient?.stationId)
           ?.cards.map(c => c.component) || [];
-
-    // This is required for the data that is passed to every connected client;
-    this._cards.push("allData");
+      this._cards = this._cards.concat(
+        this.clientContext.flightClient?.stationOverride?.cards.map(
+          c => c.component
+        ) || []
+      );
+      // This is required for the data that is passed to every connected client;
+      this._cards.push("allData");
+    }
 
     return this._cards;
   }
