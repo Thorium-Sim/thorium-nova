@@ -102,7 +102,7 @@ function Snapshot() {
   if (process.env.NODE_ENV === "production") return null;
   return (
     <Button
-      className="btn-circle fixed bottom-2 left-2 btn-ghost"
+      className="btn-circle fixed bottom-2 left-2 btn-ghost z-50"
       onClick={() => {
         netSend("serverSnapshot");
       }}
