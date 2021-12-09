@@ -1,29 +1,70 @@
-import {Popover, Transition} from "@headlessui/react";
-import {ReactNode} from "react";
+import {
+  autoPlacement,
+  useFloating,
+  getScrollParents,
+} from "@floating-ui/react-dom";
+import {ReactNode, useEffect, useLayoutEffect, useState} from "react";
 import {FaInfoCircle} from "react-icons/fa";
+import Button from "@thorium/ui/Button";
 
 const InfoTip = ({children}: {children: ReactNode}) => {
+  const {x, y, reference, floating, strategy, refs, update} = useFloating({
+    placement: "left",
+    middleware: [autoPlacement()],
+  });
+  const [visible, setVisible] = useState(false);
+  // Update on scroll and resize for all relevant nodes
+  useEffect(() => {
+    if (!refs.reference.current || !refs.floating.current) {
+      return;
+    }
+    const parents = [
+      ...getScrollParents(refs.reference.current),
+      ...getScrollParents(refs.floating.current),
+    ];
+    parents.forEach(parent => {
+      parent.addEventListener("scroll", update);
+      parent.addEventListener("resize", update);
+    });
+    return () => {
+      parents.forEach(parent => {
+        parent.removeEventListener("scroll", update);
+        parent.removeEventListener("resize", update);
+      });
+    };
+  }, [refs.reference, refs.floating, update]);
+
+  useLayoutEffect(() => {
+    if (visible) {
+      update();
+    }
+  }, [update, visible]);
+  console.log(x, y);
+
   return (
-    <Popover className="relative">
-      <Popover.Button className="btn btn-ghost btn-xs p-0">
-        <FaInfoCircle className="inline-block text-primary text-base cursor-pointer" />
-      </Popover.Button>
-      <Transition
-        className="origin-center"
-        enter="transition duration-100 ease-out"
-        enterFrom="transform scale-95 opacity-0"
-        enterTo="transform scale-100 opacity-100"
-        leave="transition duration-75 ease-out"
-        leaveFrom="transform scale-100 opacity-100"
-        leaveTo="transform scale-95 opacity-0"
+    <>
+      <Button
+        className="btn btn-ghost btn-xs p-0"
+        ref={reference}
+        onClick={() => setVisible(v => !v)}
       >
-        <Popover.Panel
-          className={`absolute bottom-8 transform -translate-x-1/2 max-w-xs w-max z-10 border-transparent shadow-lg bg-opacity-90 bg-black rounded-lg p-2`}
-        >
-          {children}
-        </Popover.Panel>
-      </Transition>
-    </Popover>
+        <FaInfoCircle className="inline-block text-primary text-base cursor-pointer" />
+      </Button>
+
+      <div
+        ref={floating}
+        style={{
+          position: strategy,
+          top: y ?? "",
+          left: x ?? "",
+        }}
+        className={`max-w-xs w-max z-10 border-transparent shadow-lg bg-opacity-90 bg-black rounded-lg p-2 ${
+          visible ? "block" : "hidden"
+        }`}
+      >
+        {children}
+      </div>
+    </>
   );
 };
 export default InfoTip;

@@ -12,6 +12,7 @@ import Button from "@thorium/ui/Button";
 import {netSend} from "./context/netSend";
 import LoginButton from "./components/LoginButton";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
+import {ComponentDemo} from "./cards";
 
 const DocLayout = lazy(() => import("./docs"));
 const Config = lazy(() => import("./pages/Config"));
@@ -32,7 +33,6 @@ const MainPage = () => {
   );
 };
 
-const ComponentDemo = lazy(() => import("./pages/ComponentDemo"));
 const NoMatch = lazy(() => import("./pages/NotFound"));
 const Releases = lazy(() => import("./pages/Releases"));
 const CrewConfig = lazy(
@@ -88,7 +88,16 @@ function AppRoutes() {
         <Route path="/flight" element={<FlightLobby />} />
         <Route path="/cards" element={<CardsDevelopment />} />
         <Route path="/cards/:component" element={<CardRenderer />} />
-        <Route path="/components" element={<ComponentDemo />} />
+        <Route
+          path="/components"
+          element={
+            <div className="bg-gray-900 h-full overflow-y-auto">
+              <div className="p-8">
+                <ComponentDemo />
+              </div>
+            </div>
+          }
+        />
         <Route path="/releases" element={<Releases />} />
         <Route path="/docs/*" element={<DocLayout />}></Route>
         <Route path="/config/*" element={<Config />}></Route>

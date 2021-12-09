@@ -12,6 +12,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
+    "@floating-ui/react-dom": "^0.3.2",
     "@geckos.io/client": "^2.1.0",
     "@geckos.io/snapshot-interpolation": "^1.0.2",
     "@headlessui/react": "^1.4.1",

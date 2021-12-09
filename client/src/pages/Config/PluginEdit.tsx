@@ -197,7 +197,7 @@ export default function PluginEdit() {
               Delete Plugin
             </Button>
             <Button
-              className="w-full btn-outline btn-alert"
+              className="w-full btn-outline btn-notice"
               disabled={!pluginId}
               onClick={async () => {
                 if (!pluginId) return;
