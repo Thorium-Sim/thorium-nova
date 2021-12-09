@@ -48,7 +48,7 @@ export const ShipLayout = () => {
             Delete Ship
           </Button>
           {/* <Button
-            className="w-full btn-outline btn-alert"
+            className="w-full btn-outline btn-notice"
             disabled={true}
             onClick={async () => {
               if (!pluginId) return;

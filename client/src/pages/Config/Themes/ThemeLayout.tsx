@@ -41,7 +41,10 @@ export const ThemeLayout = () => {
     "theme-station-name",
     "Command"
   );
-  const [alertLevel, setAlertLevel] = useLocalStorage("theme-alert-level", "5");
+  const [alertLevel, setAlertLevel] = useLocalStorage(
+    "theme-notice-level",
+    "5"
+  );
 
   if (!themeId || !theme) return <Navigate to={`/config/${pluginId}/themes`} />;
 
@@ -86,6 +89,7 @@ export const ThemeLayout = () => {
                         shipClass: "Astra Cruiser",
                       },
                     },
+                    alertLevel,
                   } as any,
                   station: {
                     name: stationName,
@@ -93,13 +97,13 @@ export const ThemeLayout = () => {
                     cards: [
                       {
                         icon: colorLogo,
-                        name: "Test Card",
-                        component: "Login",
+                        name: "Component Demo",
+                        component: "ComponentDemo",
                       },
                       {
                         icon: colorLogo,
-                        name: "Pilot Card",
-                        component: "Pilot",
+                        name: "Test Card",
+                        component: "Login",
                       },
                     ],
                   } as any,
@@ -157,7 +161,7 @@ export const ThemeLayout = () => {
               Delete Theme
             </Button>
             <Button
-              className="btn-outline btn-alert"
+              className="btn-outline btn-notice"
               disabled={!themeId}
               onClick={async () => {
                 if (!pluginId) return;

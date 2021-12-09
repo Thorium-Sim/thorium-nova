@@ -31,12 +31,12 @@ export default function Dropdown({
   children,
 }: DropdownProps) {
   return (
-    <Menu as="div" className="relative inline-block text-left">
+    <Menu as="div" className="relative inline-block text-left menu-container">
       <div>
         {triggerEl ? (
           triggerEl
         ) : (
-          <Menu.Button className="origin- inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
+          <Menu.Button className="menu-trigger inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
             {triggerLabel}
             <HiOutlineChevronDown
               className="-mr-1 ml-2 h-5 w-5"
@@ -58,9 +58,9 @@ export default function Dropdown({
         <Menu.Items
           className={`z-20 ${origin} absolute ${
             origin.includes("right") ? "right-0" : "left-0"
-          } mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none max-h-48 overflow-y-auto`}
+          } mt-2 w-56 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none max-h-48 overflow-y-auto`}
         >
-          <div className="py-1">{children}</div>
+          <div className="py-1 menu-dropdown">{children}</div>
         </Menu.Items>
       </Transition>
     </Menu>
@@ -71,6 +71,7 @@ export const DropdownItem = ({
   activeClass = "bg-gray-100 text-gray-900",
   inactiveClass = "text-gray-700",
   className,
+  ref,
   ...props
 }: {activeClass?: string; inactiveClass?: string} & React.DetailedHTMLProps<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -82,7 +83,7 @@ export const DropdownItem = ({
         <Button
           className={classNames(
             active ? activeClass : inactiveClass,
-            "block px-4 py-2 text-sm w-full text-left",
+            "menu-btn block px-4 py-2 text-sm w-full text-left",
             className
           )}
           {...props}

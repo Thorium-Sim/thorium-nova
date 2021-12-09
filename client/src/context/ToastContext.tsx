@@ -37,8 +37,8 @@ const Toast = ({
             ? "alert-error"
             : color === "info"
             ? "alert-info"
-            : color === "alert"
-            ? "alert-alert"
+            : color === "notice"
+            ? "alert-notice"
             : ""
         } !block m-4 min-h-16 w-80 ${
           action ? "cursor-pointer" : "pointer-events-none"
@@ -72,7 +72,7 @@ interface Notification {
   visible: boolean;
   duration?: number;
   action?: () => any;
-  color?: "info" | "success" | "warning" | "error" | "alert";
+  color?: "info" | "success" | "warning" | "error" | "notice";
   pause: () => void;
   resume: () => void;
 }
