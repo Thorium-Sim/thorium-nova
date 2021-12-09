@@ -69,3 +69,7 @@ whenever data is loading.
 Net requests use a cache to prevent duplicate data or unnecessary requests. The
 cache is keyed by the name of the parameter and the hashed params, so you can
 make the same netRequest multiple times without any additional network overhead.
+
+`useNetRequest` also supports an optional callback parameter which is called
+with the NetRequest data whenever a subscription publish is called. This makes
+it possible to respond imperatively to specific NetRequests as they come in.
