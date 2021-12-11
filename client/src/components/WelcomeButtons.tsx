@@ -3,10 +3,11 @@ import {useClientData} from "../context/useCardData";
 import Button from "@thorium/ui/Button";
 import {Disclosure} from "@headlessui/react";
 import {netSend} from "../context/netSend";
+import {useNetRequest} from "../context/useNetRequest";
 
 export const WelcomeButtons = ({className}: {className?: string}) => {
+  const flights = useNetRequest("flights");
   const client = useClientData();
-
   return (
     <div
       className={`${className} flex flex-col justify-end self-end space-y-4 max-w-md h-full`}
@@ -41,8 +42,8 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
               className="text-white list-none max-h-full overflow-y-auto"
               as="ul"
             >
-              {client.flights.length ? (
-                client.flights.map(f => (
+              {flights.length ? (
+                flights.map(f => (
                   <li className="list-group-item" key={f.name}>
                     <strong>{f.name}</strong>
                     <br />

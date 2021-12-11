@@ -10,8 +10,6 @@ export const subscriptions = {
   client: (context: DataContext, params: {clientId: string}) => {
     if (params && params.clientId !== context.clientId) throw null;
 
-    // TODO Aug 31, 2021 - Merge this data with the flight client data
-    // or create a new subscription just for the flight client.
     const {id, name, connected} = context.server.clients[context.clientId];
 
     return {id, name, connected, ...context.flightClient};
@@ -21,9 +19,6 @@ export const subscriptions = {
     if (!flight) return null;
     const {date, name, paused} = flight;
     return {date, name, paused};
-  },
-  flights: async (context: DataContext) => {
-    return getFlights();
   },
   ship(context: DataContext, params: {shipId: number}) {
     if (params && params.shipId !== context.flightClient?.shipId) throw null;
