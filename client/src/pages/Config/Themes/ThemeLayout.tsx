@@ -71,7 +71,6 @@ export const ThemeLayout = () => {
                     loginName: "Test User",
                   },
                   flight: null,
-                  flights: [] as any,
                   ship: {
                     id: 0,
                     components: {
