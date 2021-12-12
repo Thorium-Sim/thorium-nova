@@ -52,7 +52,7 @@ export default function FlightLobby() {
               </Button>
             )}
             <Button
-              className="btn btn-outline btn-xs btn-alert"
+              className="btn btn-outline btn-xs btn-notice"
               onClick={() => {
                 netSend("flightReset");
               }}

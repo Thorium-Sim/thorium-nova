@@ -37,10 +37,10 @@ const Toast = ({
             ? "alert-error"
             : color === "info"
             ? "alert-info"
-            : color === "alert"
-            ? "alert-alert"
+            : color === "notice"
+            ? "alert-notice"
             : ""
-        } !block m-4 min-h-16 w-80 ${
+        } !block m-4 min-h-16 max-w-max ${
           action ? "cursor-pointer" : "pointer-events-none"
         }`}
         onClick={() => {
@@ -51,7 +51,7 @@ const Toast = ({
         onMouseLeave={() => resume()}
       >
         <div className="w-full flex items-center justify-between">
-          <h5 className="font-bold text-xl">{title}</h5>
+          <h5 className="font-bold text-xl whitespace-nowrap">{title}</h5>
           <button
             className="close p-1 rounded-full hover:bg-white/30 transition-colors pointer-events-auto"
             aria-label="close"
@@ -72,7 +72,7 @@ interface Notification {
   visible: boolean;
   duration?: number;
   action?: () => any;
-  color?: "info" | "success" | "warning" | "error" | "alert";
+  color?: "info" | "success" | "warning" | "error" | "notice";
   pause: () => void;
   resume: () => void;
 }

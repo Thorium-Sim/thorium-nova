@@ -59,7 +59,7 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
           </Disclosure>
 
           <Button className="btn btn-warning btn-outline">Join a Server</Button>
-          <NavLink className="btn btn-alert btn-outline" to="/config">
+          <NavLink className="btn btn-notice btn-outline" to="/config">
             Configure Plugins
           </NavLink>
           <NavLink className="btn btn-info btn-outline" to="/docs">
