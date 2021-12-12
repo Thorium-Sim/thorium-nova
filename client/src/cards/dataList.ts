@@ -5,4 +5,4 @@ export * as OfficersLog from "./OfficersLog/data";
 
 // This is a special set of data that is available
 // on all cards.
-export * as allData from "./data";
+export * as allData from "./clientData";
