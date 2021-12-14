@@ -35,7 +35,13 @@
       "@thorium/cardSubscriptions": ["./client/src/utils/subscriptions"]
     }
   },
-  "include": ["src/**/*", "../shared", "../server", "vite-plugins"],
+  "include": [
+    "src/**/*",
+    "../shared",
+    "../server",
+    "test-utils.tsx",
+    "vite-plugins"
+  ],
   "files": [
     "src/pages/NotFound/astronaut.json",
     "src/pages/Releases/release-notes.json",

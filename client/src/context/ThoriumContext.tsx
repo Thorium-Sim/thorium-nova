@@ -1,5 +1,6 @@
 import {ClientChannel} from "@geckos.io/client";
 import {createContext, ReactNode, useContext, useEffect, useMemo} from "react";
+import * as React from "react";
 import {useDataConnection} from "../hooks/useDataConnection";
 import {FaSpinner} from "react-icons/fa";
 import {SnapshotInterpolation, Types} from "@geckos.io/snapshot-interpolation";

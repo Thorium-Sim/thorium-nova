@@ -1,5 +1,7 @@
 const path = require("path");
 
+const esModules = ["@geckos\\.io"];
+
 module.exports = {
   rootDir: path.join(__dirname, ".."),
   moduleDirectories: [
@@ -10,11 +12,24 @@ module.exports = {
   ],
   moduleNameMapper: {
     "\\.module\\.css$": "identity-obj-proxy",
-    "\\.css$": require.resolve("./style-mock.cjs"),
+    "\\.(css|jpg|png)$": require.resolve("./style-mock.cjs"),
+    "@thorium/ui/(.*)": "<rootDir>/client/src/components/ui/$1",
     "@thorium/(.*)": "<rootDir>/shared/$1",
   },
   transform: {
-    "^.+\\.tsx?$": "esbuild-jest",
+    "^.+\\.tsx?$": [
+      "esbuild-jest",
+      {
+        sourcemap: true,
+      },
+    ],
+    [`node_modules/(${esModules.join("|")})/*`]: [
+      "esbuild-jest",
+      {
+        sourcemap: true,
+      },
+    ],
   },
+  transformIgnorePatterns: [`node_modules/(?!(${esModules.join("|")})/)`],
   watchPlugins: ["jest-watch-select-projects"],
 };

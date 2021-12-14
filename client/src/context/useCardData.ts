@@ -10,7 +10,7 @@ import {useCardContext} from "./CardContext";
 import {useThorium} from "./ThoriumContext";
 
 type UnwrapPromise<T> = T extends Promise<infer R> ? UnwrapPromise<R> : T;
-type CardProxy = {
+export type CardProxy = {
   [Card in DataCardNames]: UnwrapPromise<
     GetSubscriptionReturns<CardDataFunctions[Card]["subscriptions"]>
   >;
@@ -57,9 +57,14 @@ export function useCardDataSubscribe() {
     }
   }, [socket]);
 }
+
+export const MockCardDataContext = React.createContext<any>(null!);
 export default function useCardData<CardName extends DataCardNames>() {
   const {cardName} = useCardContext() as {cardName: CardName};
   const data = useSnapshot(cardProxy);
+  const mockData = useContext(MockCardDataContext);
+  if (mockData) return mockData as unknown as Required<CardProxy[CardName]>;
+
   const cardData = (data[cardName] || {}) as any;
 
   if (!data[cardName])
@@ -73,6 +78,7 @@ export default function useCardData<CardName extends DataCardNames>() {
 export const MockClientDataContext = React.createContext<CardProxy["allData"]>(
   null!
 );
+
 export function useClientData() {
   const data = useSnapshot(cardProxy);
   const mockData = useContext(MockClientDataContext);

@@ -1,5 +1,5 @@
 import {lazy, Suspense} from "react";
-import {Routes, Route, Outlet, useNavigate} from "react-router-dom";
+import {Routes, Route, Outlet, BrowserRouter as Router} from "react-router-dom";
 import AppContext from "./context/AppContext";
 import {useCardDataSubscribe} from "./context/useCardData";
 
@@ -123,7 +123,9 @@ function Snapshot() {
 function App() {
   return (
     <AppContext>
-      <AppRoutes />
+      <Router>
+        <AppRoutes />
+      </Router>
     </AppContext>
   );
 }

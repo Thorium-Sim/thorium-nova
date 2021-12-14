@@ -1,7 +1,7 @@
+import * as React from "react";
 import {ReactNode, StrictMode, Suspense} from "react";
 import {ThoriumProvider} from "./ThoriumContext";
 import {AlertDialog} from "@thorium/ui/AlertDialog";
-import {BrowserRouter as Router} from "react-router-dom";
 import useEasterEgg from "../hooks/useEasterEgg";
 import {ErrorBoundary, FallbackProps} from "react-error-boundary";
 import bg from "../images/background.jpg";
@@ -51,9 +51,7 @@ export default function AppContext({children}: {children: ReactNode}) {
             <AlertDialog>
               <ThoriumProvider>
                 <NetRequestData />
-                <IssueTrackerProvider>
-                  <Router>{children}</Router>
-                </IssueTrackerProvider>
+                <IssueTrackerProvider>{children}</IssueTrackerProvider>
               </ThoriumProvider>
               <ToastContainer />
             </AlertDialog>

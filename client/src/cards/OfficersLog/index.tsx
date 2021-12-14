@@ -3,14 +3,15 @@ import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
 import useCardData, {useClientData} from "client/src/context/useCardData";
 import {fromDate} from "dot-beat-time";
-import {useRef, useState} from "react";
+import * as React from "react";
+
 export default function OfficersLog() {
   const {client} = useClientData();
   const {officersLog} = useCardData<"OfficersLog">();
-  const [stardate, setStardate] = useState(new Date());
-  const [logEntry, setLogEntry] = useState<string>("");
-  const [selectedEntry, setSelectedEntry] = useState<number | null>();
-  const textRef = useRef<HTMLTextAreaElement>(null);
+  const [stardate, setStardate] = React.useState(new Date());
+  const [logEntry, setLogEntry] = React.useState<string>("");
+  const [selectedEntry, setSelectedEntry] = React.useState<number | null>();
+  const textRef = React.useRef<HTMLTextAreaElement>(null);
   const entry = officersLog.find(e => e.timestamp === selectedEntry);
   return (
     <div className="mx-auto max-w-5xl flex h-full py-4 gap-8">
