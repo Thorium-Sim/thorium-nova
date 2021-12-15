@@ -7,6 +7,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import * as React from "react";
 import {FaExternalLinkAlt} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
 import LoginButton from "./LoginButton";

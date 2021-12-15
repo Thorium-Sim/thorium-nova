@@ -15,6 +15,10 @@ export class FlightClient extends BaseClient {
   offlineState: "blackout" | {title: string; message: string} | null;
   training: boolean;
   stationOverride?: Station;
+  officersLog: {
+    timestamp: number;
+    message: string;
+  }[];
   constructor(params: {id: string} & Partial<FlightClient>) {
     super(params.id);
     if (!params.flightId)
@@ -25,6 +29,7 @@ export class FlightClient extends BaseClient {
     this.loginName = params.loginName ?? "";
     this.offlineState = params.offlineState || null;
     this.training = params.training || false;
+    this.officersLog = params.officersLog || [];
   }
   toJSON() {
     return {

@@ -39,7 +39,6 @@ const InfoTip = ({children}: {children: ReactNode}) => {
       update();
     }
   }, [update, visible]);
-  console.log(x, y);
 
   return (
     <>

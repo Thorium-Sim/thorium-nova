@@ -3,6 +3,7 @@ import {Entity} from "server/src/utils/ecs";
 import {getFlights} from "server/src/utils/getFlights";
 import type Station from "server/src/classes/Station";
 import ThemePlugin from "server/src/classes/Plugins/Theme";
+import type {FlightClient} from "server/src/classes/FlightClient";
 
 // This file is used for any subscriptions which all clients
 // make, regardless of what cards they have.
@@ -11,8 +12,12 @@ export const subscriptions = {
     if (params && params.clientId !== context.clientId) throw null;
 
     const {id, name, connected} = context.server.clients[context.clientId];
-
-    return {id, name, connected, ...context.flightClient};
+    const {
+      officersLog,
+      id: _id,
+      ...flightClient
+    } = (context.flightClient as FlightClient) || {};
+    return {id, name, connected, ...flightClient};
   },
   flight(context: DataContext) {
     const flight = context.flight;

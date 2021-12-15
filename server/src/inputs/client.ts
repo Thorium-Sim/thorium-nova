@@ -84,7 +84,7 @@ export const clientInputs = {
     }
     pubsub.publish("client", {clientId: context.clientId});
   },
-  clientOverrideStation: (
+  clientOverrideStation: async (
     context: DataContext,
     params: {station?: Station}
   ) => {
@@ -100,6 +100,7 @@ export const clientInputs = {
       context.flightClient.shipId = null;
       context.flightClient.loginName = "";
     }
+    await context.client.initSubscriptions();
     pubsub.publish("station", {clientId: context.clientId});
     pubsub.publish("client", {clientId: context.clientId});
     pubsub.publish("theme", {clientId: context.clientId});

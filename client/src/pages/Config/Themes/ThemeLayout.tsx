@@ -72,7 +72,7 @@ export const ThemeLayout = () => {
                     name: "Test Client",
                     connected: true,
                     loginName: "Test User",
-                  },
+                  } as any,
                   flight: null,
                   ship: {
                     id: 0,

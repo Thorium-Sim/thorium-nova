@@ -1,4 +1,5 @@
 import {ReactNode, useEffect, useReducer, useRef, useState} from "react";
+import * as React from "react";
 import {FaTimes} from "react-icons/fa";
 import uniqid from "@thorium/uniqid";
 import {Transition} from "@headlessui/react";

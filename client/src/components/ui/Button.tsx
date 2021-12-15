@@ -1,4 +1,4 @@
-import {forwardRef} from "react";
+import React, {forwardRef} from "react";
 
 // This component should be used for all buttons to make it easy to add user interface sound effects.
 export default forwardRef<

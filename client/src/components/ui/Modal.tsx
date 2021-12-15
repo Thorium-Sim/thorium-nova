@@ -1,4 +1,5 @@
 import {Fragment, ReactNode} from "react";
+import * as React from "react";
 import {Dialog, Transition} from "@headlessui/react";
 import {HiX} from "react-icons/hi";
 import Button from "./Button";
