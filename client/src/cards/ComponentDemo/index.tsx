@@ -80,7 +80,7 @@ const TagInputDemo = () => {
 };
 export default function ComponentDemo() {
   return (
-    <div className="flex flex-col gap-8 bg-gray-900 p-12 text-white">
+    <div className="flex flex-col gap-8 text-white h-full overflow-y-auto">
       <div className="flex flex-col gap-4">
         <h2 className="text-3xl">Alert</h2>
         <div className="alert">
@@ -108,7 +108,7 @@ export default function ComponentDemo() {
             <label>This is an error alert</label>
           </div>
         </div>
-        <div className="alert alert-alert">
+        <div className="alert alert-notice">
           <div className="flex-1">
             <label>This is an alert alert</label>
           </div>
@@ -132,52 +132,54 @@ export default function ComponentDemo() {
       <div>
         <h2 className="text-3xl">Buttons</h2>
         <div className="flex gap-4 w-full flex-wrap">
-          <Button className="btn">Button</Button>
-          <Button className="btn btn-primary">Primary</Button>
-          <Button className="btn btn-secondary">Secondary</Button>
-          <Button className="btn btn-accent">Accent</Button>
-          <Button className="btn btn-info">Info</Button>
-          <Button className="btn btn-success">Success</Button>
-          <Button className="btn btn-warning">Warning</Button>
-          <Button className="btn btn-error">Error</Button>
-          <Button className="btn btn-alert">Alert</Button>
-          <Button className="btn btn-ghost">Ghost</Button>
-          <Button className="btn btn-link">Link</Button>
-          <Button className="btn glass">Glass</Button>
+          <Button>Button</Button>
+          <Button className="btn-primary">Primary</Button>
+          <Button className="btn-secondary">Secondary</Button>
+          <Button className="btn-accent">Accent</Button>
+          <Button className="btn-info">Info</Button>
+          <Button className="btn-success">Success</Button>
+          <Button className="btn-warning">Warning</Button>
+          <Button className="btn-error">Error</Button>
+          <Button className="btn-notice">Notice</Button>
+          <Button className="btn-alert">Alert</Button>
+          <Button className="btn-ghost">Ghost</Button>
+          <Button className="btn-link">Link</Button>
+          <Button className="glass">Glass</Button>
         </div>
       </div>
       <div>
         <h2 className="text-3xl">Outline Buttons</h2>
         <div className="flex gap-4 w-full flex-wrap">
-          <Button className="btn btn-outline">Button</Button>
-          <Button className="btn btn-outline btn-primary">Primary</Button>
-          <Button className="btn btn-outline btn-secondary">Secondary</Button>
-          <Button className="btn btn-outline btn-accent">Accent</Button>
-          <Button className="btn btn-outline btn-info">Info</Button>
-          <Button className="btn btn-outline btn-success">Success</Button>
-          <Button className="btn btn-outline btn-warning">Warning</Button>
-          <Button className="btn btn-outline btn-error">Error</Button>
-          <Button className="btn btn-outline btn-alert">Alert</Button>
-          <Button className="btn btn-outline btn-ghost">Ghost</Button>
-          <Button className="btn btn-outline btn-link">Link</Button>
-          <Button className="btn btn-outline glass">Glass</Button>
+          <Button className="btn-outline">Button</Button>
+          <Button className="btn-outline btn-primary">Primary</Button>
+          <Button className="btn-outline btn-secondary">Secondary</Button>
+          <Button className="btn-outline btn-accent">Accent</Button>
+          <Button className="btn-outline btn-info">Info</Button>
+          <Button className="btn-outline btn-success">Success</Button>
+          <Button className="btn-outline btn-warning">Warning</Button>
+          <Button className="btn-outline btn-error">Error</Button>
+          <Button className="btn-outline btn-notice">Notice</Button>
+          <Button className="btn-outline btn-alert">Alert</Button>
+          <Button className="btn-outline btn-ghost">Ghost</Button>
+          <Button className="btn-outline btn-link">Link</Button>
+          <Button className="btn-outline glass">Glass</Button>
         </div>
       </div>
       <div>
         <h2 className="text-3xl">Button Sizes</h2>
         <div className="flex gap-4">
-          <Button className="btn btn-lg">Large</Button>
-          <Button className="btn btn-md">Normal</Button>
-          <Button className="btn btn-sm">Small</Button>
-          <Button className="btn btn-xs">Tiny</Button>
+          <Button className="btn-lg">Large</Button>
+          <Button className="btn-md">Normal</Button>
+          <Button className="btn-sm">Small</Button>
+          <Button className="btn-xs">Tiny</Button>
         </div>
       </div>
       <div>
         <h2 className="text-3xl">Button Groups</h2>
         <div className="btn-group">
-          <Button className="btn btn-active">Item 1</Button>
-          <Button className="btn">Item 2</Button>
-          <Button className="btn">Item 3</Button>
+          <Button className="btn-active">Item 1</Button>
+          <Button>Item 2</Button>
+          <Button>Item 3</Button>
         </div>
       </div>
       <div>
@@ -228,8 +230,8 @@ export default function ComponentDemo() {
             <input type="text" className="input input-error"></input>
           </div>
           <div className="form-control">
-            <label className="label">Alert</label>
-            <input type="text" className="input input-alert"></input>
+            <label className="label">Notice</label>
+            <input type="text" className="input input-notice"></input>
           </div>
         </div>
       </div>
@@ -269,8 +271,8 @@ export default function ComponentDemo() {
             <textarea className="textarea textarea-error"></textarea>
           </div>
           <div className="form-control">
-            <label className="label">Alert</label>
-            <textarea className="textarea textarea-alert"></textarea>
+            <label className="label">Notice</label>
+            <textarea className="textarea textarea-notice"></textarea>
           </div>
         </div>
       </div>
@@ -279,6 +281,19 @@ export default function ComponentDemo() {
       </div>
       <div>
         <h2 className="text-3xl">Panel</h2>
+        <div className="flex gap-4">
+          <div className="panel h-32 w-64 p-4">Panel</div>
+          <div className="panel panel-ghost h-32 w-64 p-4">Panel</div>
+          <div className="panel panel-primary h-32 w-64 p-4">Panel</div>
+          <div className="panel panel-secondary h-32 w-64 p-4">Panel</div>
+          <div className="panel panel-accent h-32 w-64 p-4">Panel</div>
+          <div className="panel panel-info h-32 w-64 p-4">Panel</div>
+          <div className="panel panel-success h-32 w-64 p-4">Panel</div>
+          <div className="panel panel-warning h-32 w-64 p-4">Panel</div>
+          <div className="panel panel-error h-32 w-64 p-4">Panel</div>
+          <div className="panel panel-notice h-32 w-64 p-4">Panel</div>
+          <div className="panel panel-alert h-32 w-64 p-4">Panel</div>
+        </div>
       </div>
       <div>
         <h2 className="text-3xl">Keypad</h2>
@@ -286,6 +301,19 @@ export default function ComponentDemo() {
       <div>
         <h2 className="text-3xl">Colored Bar</h2>
         <progress className="progress progress-accent" value={50} max={100} />
+        <progress className="progress progress-primary" value={50} max={100} />
+        <progress
+          className="progress progress-secondary"
+          value={50}
+          max={100}
+        />
+        <progress className="progress progress-accent" value={50} max={100} />
+        <progress className="progress progress-info" value={50} max={100} />
+        <progress className="progress progress-success" value={50} max={100} />
+        <progress className="progress progress-warning" value={50} max={100} />
+        <progress className="progress progress-error" value={50} max={100} />
+        <progress className="progress progress-notice" value={50} max={100} />
+        <progress className="progress progress-alert" value={50} max={100} />
       </div>
       <div>
         <h2 className="text-3xl">Scrollable List</h2>
@@ -326,7 +354,7 @@ export default function ComponentDemo() {
         <input type="range" className="slider slider-success max-w-sm" />
         <input type="range" className="slider slider-warning max-w-sm" />
         <input type="range" className="slider slider-error max-w-sm" />
-        <input type="range" className="slider slider-alert max-w-sm" />
+        <input type="range" className="slider slider-notice max-w-sm" />
       </div>
       <div>
         <h2 className="text-3xl">Modal</h2>

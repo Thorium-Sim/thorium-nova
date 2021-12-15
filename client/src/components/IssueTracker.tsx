@@ -97,7 +97,7 @@ function IssueTracker({
             to a Thorium Nova account.
           </p>
           <div>
-            <LoginButton buttonClassName="btn-alert" />
+            <LoginButton buttonClassName="btn-notice" />
           </div>
         </div>
       ) : !account.accounts?.includes("github") ? (
@@ -111,7 +111,7 @@ function IssueTracker({
             <a
               href="https://thoriumsim.com/profile"
               target="thoriumsim.com"
-              className="btn btn-alert"
+              className="btn btn-notice"
             >
               Connect Account <FaExternalLinkAlt className="ml-4" />
             </a>

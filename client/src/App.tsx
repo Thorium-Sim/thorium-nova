@@ -17,6 +17,7 @@ import FlightQuickStart from "./components/FlightQuickStart";
 import CrewConfig from "./components/FlightQuickStart/CrewConfig";
 import ShipConfig from "./components/FlightQuickStart/ShipConfig";
 import {netRequest, useNetRequest} from "./context/useNetRequest";
+import {ComponentDemo} from "./cards";
 
 const DocLayout = lazy(() => import("./docs"));
 const Config = lazy(() => import("./pages/Config"));
@@ -37,7 +38,6 @@ const MainPage = () => {
   );
 };
 
-const ComponentDemo = lazy(() => import("./pages/ComponentDemo"));
 const NoMatch = lazy(() => import("./pages/NotFound"));
 const Releases = lazy(() => import("./pages/Releases"));
 const FlightLobby = lazy(() => import("./pages/FlightLobby"));
@@ -86,7 +86,16 @@ function AppRoutes() {
         <Route path="/flight" element={<FlightLobby />} />
         <Route path="/cards" element={<CardsDevelopment />} />
         <Route path="/cards/:component" element={<CardRenderer />} />
-        <Route path="/components" element={<ComponentDemo />} />
+        <Route
+          path="/components"
+          element={
+            <div className="bg-gray-900 h-full overflow-y-auto">
+              <div className="p-8">
+                <ComponentDemo />
+              </div>
+            </div>
+          }
+        />
         <Route path="/releases" element={<Releases />} />
         <Route path="/docs/*" element={<DocLayout />}></Route>
         <Route path="/config/*" element={<Config />}></Route>
