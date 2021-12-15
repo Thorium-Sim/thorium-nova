@@ -25,8 +25,13 @@ export const subscriptions = {
     const {date, name, paused} = flight;
     return {date, name, paused};
   },
-  ship(context: DataContext, params: {shipId: number}) {
-    if (params && params.shipId !== context.flightClient?.shipId) throw null;
+  ship(context: DataContext, params: {shipId: number} | {clientId: string}) {
+    if (params) {
+      if ("shipId" in params && params.shipId !== context.flightClient?.shipId)
+        throw null;
+      if ("clientId" in params && params.clientId !== context.clientId)
+        throw null;
+    }
     return context.ship as Entity;
   },
   station(context: DataContext, params: {clientId: string}): Station {
@@ -36,7 +41,7 @@ export const subscriptions = {
     const station = context.ship?.components.stationComplement?.stations.find(
       s => s.name === context.flightClient?.stationId
     ) as unknown as Station;
-    return station;
+    return station || null;
   },
   theme(context: DataContext, params: {clientId: string}) {
     if (params && params.clientId !== context.clientId) throw null;

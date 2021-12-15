@@ -2,9 +2,16 @@ import {useClientData} from "client/src/context/useCardData";
 import {Navigate} from "react-router-dom";
 import {Effects} from "./Effects";
 import StationLayout from "./StationLayout";
+import {useHotkeys} from "react-hotkeys-hook";
+import {netSend} from "client/src/context/netSend";
 
 const StationWrapper = () => {
   const {client, station} = useClientData();
+
+  useHotkeys("esc", () => {
+    netSend("clientSetStation", {shipId: null});
+  });
+
   // TODO November 29, 2021: Include sound player here
   // TODO November 29, 2021: Include some kind of alert toast notification thing here
   // The existing alerts won't be targeted by the theme, so we need to embed it here.

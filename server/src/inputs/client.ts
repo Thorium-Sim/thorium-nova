@@ -47,6 +47,9 @@ export const clientInputs = {
 
       pubsub.publish("clients");
       pubsub.publish("client", {clientId: context.clientId});
+      pubsub.publish("station", {clientId: context.clientId});
+      pubsub.publish("theme", {clientId: context.clientId});
+      pubsub.publish("ship", {clientId: context.clientId});
       return flightClient;
     }
     const ship = context.flight?.ships.find(ship => ship.id === params.shipId);

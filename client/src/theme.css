@@ -25,24 +25,29 @@ body {
     Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
 }
 .alert {
-  @apply flex items-center justify-between p-4 rounded-box bg-neutral text-neutral-content bg-opacity-50;
+  @apply relative flex items-center justify-between p-4 rounded-box bg-neutral text-neutral-content bg-opacity-50;
+  &::after {
+    content: "";
+    z-index: -1;
+    @apply absolute inset-0 bg-black/80 rounded-box;
+  }
   &-sm {
     @apply p-2;
   }
   &-info {
-    @apply bg-opacity-30 bg-info text-info-content;
+    @apply bg-opacity-70 bg-info-focus text-info-content;
   }
   &-success {
-    @apply bg-opacity-30 bg-success text-success-content;
+    @apply bg-opacity-70 bg-success-focus text-success-content;
   }
   &-warning {
-    @apply bg-opacity-30 bg-warning text-warning-content;
+    @apply bg-opacity-70 bg-warning-focus text-warning-content;
   }
   &-error {
-    @apply bg-opacity-30 bg-error text-error-content;
+    @apply bg-opacity-70 bg-error-focus text-error-content;
   }
   &-notice {
-    @apply bg-opacity-30 bg-notice text-error-content;
+    @apply bg-opacity-70 bg-notice-focus text-error-content;
   }
 }
 .badge {

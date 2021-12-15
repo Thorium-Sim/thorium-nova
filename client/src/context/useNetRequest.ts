@@ -4,6 +4,7 @@ import {
   useEffect,
   useReducer,
   useRef,
+  useState,
 } from "react";
 import {
   AllRequestNames,
@@ -15,7 +16,10 @@ import {NetResponseData} from "../hooks/useDataConnection";
 import {stableValueHash} from "../utils/stableValueHash";
 import {useThorium} from "./ThoriumContext";
 import {useErrorHandler} from "react-error-boundary";
+import {getTabId} from "@thorium/tab-id";
+import uniqid from "@thorium/uniqid";
 const netRequestProxy = proxy<Partial<{[requestId: string]: any}>>({});
+const mountedNetRequests: Map<string, Set<string>> = new Map();
 const netRequestPromises: {[requestId: string]: (value: unknown) => void} = {};
 const netRequestCallbacks: Map<
   string,
@@ -62,6 +66,32 @@ function useNetRequestData() {
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 
+export async function netRequest<
+  T extends AllRequestNames,
+  R extends AllRequestReturns[T]
+>(requestName: T, params?: AllRequestParams[T]): Promise<UnwrapPromise<R>> {
+  const requestId = stableValueHash({requestName, params});
+  const clientId = await getTabId();
+  const body = {
+    request: requestName,
+    ...(params as any),
+  };
+  const result = await fetch(`/netRequest`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      authorization: `Bearer ${clientId}`,
+    },
+    body: JSON.stringify(body),
+  }).then(res => res.json());
+  if (result.error) {
+    throw new Error(result.error);
+  }
+  netRequestProxy[requestId] = result;
+
+  return result;
+}
+
 export function useNetRequest<
   T extends AllRequestNames,
   R extends AllRequestReturns[T]
@@ -74,19 +104,37 @@ export function useNetRequest<
   const data = useSnapshot(netRequestProxy);
   const {socket} = useThorium();
   const [ready, resetReady] = useReducer(() => ({}), {});
+  const [hookId] = useState(() => uniqid());
   if (!socket) throw new Promise(() => {});
 
-  const setUpRequest = useCallback(() => {
-    if (!netRequestPromises[requestId]) {
-      socket.send("netRequest", {requestName, params, requestId});
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Params are properly tracked via the requestId
-  }, [requestId, requestName, socket]);
+  const setUpRequest = useCallback(
+    hookId => {
+      let request = mountedNetRequests.get(requestId);
+      if (!request) {
+        request = new Set();
+        mountedNetRequests.set(requestId, request);
+      }
 
-  const takeDownRequest = useCallback(() => {
-    socket.send("netRequestEnd", {requestId});
-    delete netRequestPromises[requestId];
-  }, [requestId, socket]);
+      if (request.size === 0) {
+        socket.send("netRequest", {requestName, params, requestId});
+      }
+      request.add(hookId);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Params are properly tracked via the requestId
+    [requestId, requestName, socket]
+  );
+
+  const takeDownRequest = useCallback(
+    hookId => {
+      let request = mountedNetRequests.get(requestId);
+      request?.delete(hookId);
+      if (!request || request?.size === 0) {
+        socket.send("netRequestEnd", {requestId});
+        delete netRequestPromises[requestId];
+      }
+    },
+    [requestId, socket]
+  );
 
   useEffect(() => {
     const handleReady = () => {
@@ -100,9 +148,11 @@ export function useNetRequest<
   }, [socket, requestId, data]);
 
   useEffect(() => {
-    setUpRequest();
-    return () => takeDownRequest();
-  }, [setUpRequest, takeDownRequest, ready]);
+    setUpRequest(hookId);
+    return () => {
+      takeDownRequest(hookId);
+    };
+  }, [setUpRequest, takeDownRequest, ready, hookId, requestId]);
 
   const callbackRef = useRef(callback);
   useEffect(() => {
@@ -119,7 +169,7 @@ export function useNetRequest<
   }, [requestId]);
 
   if (!data[requestId] && data[requestId] !== null) {
-    setUpRequest();
+    setUpRequest(hookId);
     throw new Promise(res => {
       netRequestPromises[requestId] = res;
     });

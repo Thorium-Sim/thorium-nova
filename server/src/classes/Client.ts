@@ -161,6 +161,10 @@ export class ServerClient extends BaseClient {
               delete netRequestList[requestId];
             }
 
+            // If this client is already subscribed to this request, ignore the request.
+            // It will already get the data it needs from the other request.
+            if (netRequestList[requestId]) return;
+
             try {
               const requestFunction = requests[requestName];
               // Create the subscription
