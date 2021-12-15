@@ -62,11 +62,16 @@ export default function buildHTTPServer({
     prefix: "thorium",
   });
 
-  app.register(staticServe, {root: `${staticRoot}/assets`, prefix: "/assets"});
+  app.register(staticServe, {
+    root: `${staticRoot}/assets`,
+    prefix: "/assets",
+    maxAge: "60s",
+  });
   app.register(staticServe, {
     root: `${thoriumPath}/plugins`,
     prefix: "/plugins",
     decorateReply: false,
+    maxAge: "60s",
   });
 
   app.get("/*", async (_req, reply) => {
