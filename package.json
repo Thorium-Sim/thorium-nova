@@ -13,12 +13,12 @@
   "main": "dist/electron.js",
   "scripts": {
     "dev": "concurrently --kill-others --names \"client,server\" -c \"blue.bold,magenta.bold\" \"npm run dev --workspace=client\" \"npm run dev --workspace=server\"",
-    "build": "concurrently --names \"client,server,electron\" -c \"blue.bold,magenta.bold,green.bold\" \"npm run build --workspace=client\" \"npm run build --workspace=server\" \"npm run build --workspace=electron\"",
+    "build": "concurrently --names \"client,server,desktop\" -c \"blue.bold,magenta.bold,green.bold\" \"npm run build --workspace=client\" \"npm run build --workspace=server\" \"npm run build --workspace=desktop\"",
     "start": "NODE_ENV=production node dist/index.js",
     "test": "is-ci-cli \"test:coverage\" \"test:watch\"",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
-    "typecheck": "concurrently --names \"client,server,shared,electron\" -c \"blue.bold,magenta.bold,yellow.bold,green.bold\" \"npm run typecheck --workspace=client\" \"npm run typecheck --workspace=server\" \"npm run typecheck --workspace=shared\" \"npm run typecheck --workspace=electron\"",
+    "typecheck": "concurrently --names \"client,server,shared,desktop\" -c \"blue.bold,magenta.bold,yellow.bold,green.bold\" \"npm run typecheck --workspace=client\" \"npm run typecheck --workspace=server\" \"npm run typecheck --workspace=shared\" \"npm run typecheck --workspace=desktop\"",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.+(js|jsx|yml|yaml|css|less|scss|ts|tsx|md|mdx|graphql|vue)\"",
     "format:different": "prettier --list-different \"**/*.+(js|jsx|yml|yaml|css|less|scss|ts|tsx|md|mdx|graphql|vue)\"",
@@ -31,7 +31,7 @@
   "build": {
     "appId": "us.fyreworks.thorium-nova",
     "productName": "Thorium Nova",
-    "electronVersion": "13.1.9",
+    "electronVersion": "16.0.4",
     "files": [
       "dist/**/*",
       "resources/**/*",
@@ -47,10 +47,10 @@
       "!**/{appveyor.yml,.travis.yml,circle.yml}",
       "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
     ],
-    "asar": true,
+    "asar": false,
     "directories": {
       "output": "./packages",
-      "buildResources": "./electron/resources"
+      "buildResources": "./desktop/resources"
     },
     "publish": {
       "provider": "github"
@@ -60,7 +60,7 @@
       "category": "public.app-category.entertainment",
       "icon": "./nova.icns",
       "hardenedRuntime": true,
-      "entitlements": "./electron/resources/entitlements.mac.plist",
+      "entitlements": "./desktop/resources/entitlements.mac.plist",
       "gatekeeperAssess": true,
       "fileAssociations": [
         {
@@ -104,7 +104,7 @@
     "shared",
     "client",
     "server",
-    "electron"
+    "desktop"
   ],
   "volta": {
     "node": "16.13.0",
@@ -122,7 +122,7 @@
     "@typescript-eslint/parser": "^5.7.0",
     "alias-hq": "^5.3.0",
     "concurrently": "^6.4.0",
-    "electron": "file:electron",
+    "electron": "^16.0.4",
     "electron-builder": "^22.14.5",
     "electron-builder-notarize": "^1.2.0",
     "esbuild": "^0.14.5",
