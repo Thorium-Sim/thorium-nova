@@ -85,7 +85,7 @@ class Entity {
       // of logic in components initialization ALTHOUGH these kind of
       // initialization should be done in enter() handler
       const componentClass = Object.values(allComponents).find(
-        c => c.id === component
+        c => c && c.id === component
       ) as any;
       const data = components[component as ComponentIDs];
       let componentData =
@@ -171,7 +171,7 @@ class Entity {
     data?: Partial<Data>
   ) {
     const componentClass = Object.values(allComponents).find(
-      c => c.id === name
+      c => c && c.id === name
     ) as any;
     let componentData =
       (data as any) instanceof componentClass

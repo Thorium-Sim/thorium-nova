@@ -1,9 +1,9 @@
 diff --git a/node_modules/vite-plugin-mdx/dist/transform.js b/node_modules/vite-plugin-mdx/dist/transform.js
-index 9ba9617..bae1673 100644
+index 029d80f..fbe8fa3 100644
 --- a/node_modules/vite-plugin-mdx/dist/transform.js
 +++ b/node_modules/vite-plugin-mdx/dist/transform.js
 @@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
- exports.createTransformer = exports.stopService = void 0;
+ exports.createTransformer = void 0;
  const esbuild_1 = require("esbuild");
  const imports_1 = require("./imports");
 +const graymatter = require('gray-matter');
@@ -21,12 +21,4 @@ index 9ba9617..bae1673 100644
 +            return imports.concat('', code_es2019, extraExports).join('\n');
          });
      };
- }
-@@ -48,6 +51,7 @@ function jsxToES2019(code_jsx) {
-         });
-         // TODO stabilize this bugfix
-         code_es2019 = code_es2019.replace('export default function MDXContent', 'export default MDXContent; function MDXContent');
-+        
-         return code_es2019;
-     });
  }

@@ -1,10 +1,14 @@
-import React from "react";
+import React, {ReactNode} from "react";
 import {FaStar, FaTools, FaRocket, FaPaintBrush} from "react-icons/fa";
 import {NavLink, useParams} from "react-router-dom";
 import {MdMessage} from "react-icons/md";
 import Menubar from "@thorium/ui/Menubar";
 
-const ConfigIcon: React.FC<{to: string; disabled?: boolean}> = props => {
+const ConfigIcon: React.FC<{
+  to: string;
+  disabled?: boolean;
+  children: ReactNode;
+}> = props => {
   return (
     <NavLink
       aria-disabled={props.disabled}

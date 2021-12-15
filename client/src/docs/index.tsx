@@ -250,6 +250,7 @@ export default function DocLayout() {
       return acc;
     }, {})
   );
+  console.log(orderedRoutes);
   const docRef = React.useRef<HTMLDivElement>(null);
   const scrollToHeading = React.useCallback(
     (id: string) => {
@@ -285,6 +286,8 @@ export default function DocLayout() {
                       {route
                         .concat()
                         .sort((a, b) => {
+                          if (!a.frontmatter) return -1;
+                          if (!b.frontmatter) return 1;
                           if (a.frontmatter.order < b.frontmatter.order)
                             return -1;
                           if (a.frontmatter.order > b.frontmatter.order)

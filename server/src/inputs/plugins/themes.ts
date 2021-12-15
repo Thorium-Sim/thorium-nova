@@ -2,12 +2,7 @@ import ThemePlugin from "server/src/classes/Plugins/Theme";
 import {DataContext} from "server/src/utils/DataContext";
 import {pubsub} from "server/src/utils/pubsub";
 import {getPlugin} from "./utils";
-import fs from "fs";
-import path from "path";
-const defaultCSS = fs.readFileSync(
-  path.join(__dirname, "./defaultTheme.css"),
-  "utf-8"
-);
+import defaultCSS from "./defaultTheme";
 
 export const themesPluginInput = {
   async pluginThemeCreate(

@@ -4,13 +4,14 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import reactJsx from "vite-react-jsx";
 import releasesPlugin from "./vite-plugins/releases";
 import mdx from "vite-plugin-mdx";
-import remarkFrontmatter from "remark-frontmatter";
 import remarkPrism from "remark-prism";
 import {remarkMdxImages} from "remark-mdx-images";
 import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => {
+  const remarkFrontmatter = await import("remark-frontmatter");
+
   const options = {
     // See https://mdxjs.com/advanced/plugins
     remarkPlugins: [remarkMdxImages, remarkFrontmatter, remarkPrism],

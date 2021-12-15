@@ -7,8 +7,8 @@
   "author": "Alex Anderson",
   "license": "Apache-2.0",
   "dependencies": {
-    "@geckos.io/client": "^2.0.0",
-    "@geckos.io/server": "^2.0.0",
+    "@geckos.io/client": "^2.1.5",
+    "@geckos.io/server": "^2.1.5",
     "fast-json-patch": "^3.1.0",
     "lodash.throttle": "^4.1.1",
     "pure-rand": "^5.0.0",

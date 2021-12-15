@@ -6,7 +6,6 @@ import {clientInputs} from "../client";
 import systems from "../../systems";
 import type ShipPlugin from "server/src/classes/Plugins/Ship";
 import {FlightDataModel} from "server/src/classes/FlightDataModel";
-import {SocketStream} from "fastify-websocket";
 
 class MockServerDataModel {
   clients!: Record<string, ServerClient>;

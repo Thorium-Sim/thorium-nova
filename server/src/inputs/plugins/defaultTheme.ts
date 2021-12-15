@@ -1,4 +1,4 @@
-@alert5: #2ba1cb;
+const defaultTheme = `@alert5: #2ba1cb;
 @alert4: #36c236;
 @alert3: #acac34;
 @alert2: #cc7926;
@@ -344,3 +344,6 @@
     .button-variant(gray);
   }
 }
+`;
+
+export default defaultTheme;

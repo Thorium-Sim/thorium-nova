@@ -1,11 +1,9 @@
 module.exports = {
-  plugins: {
-    "postcss-import": {},
-    tailwindcss: {},
-    "postcss-mixins": {},
-    "postcss-nested": {
-      bubble: ["screen"],
-    },
-    autoprefixer: {},
-  },
+  plugins: [
+    require("postcss-import"),
+    require("tailwindcss/nesting"),
+    require("postcss-mixins"),
+    require("tailwindcss"),
+    require("autoprefixer"),
+  ],
 };
