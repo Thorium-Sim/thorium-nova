@@ -1,4 +1,4 @@
-import {lazy, Suspense} from "react";
+import {lazy, Suspense, useEffect, useState} from "react";
 import {Routes, Route, Outlet, useNavigate} from "react-router-dom";
 import AppContext from "./context/AppContext";
 import {useCardDataSubscribe} from "./context/useCardData";
@@ -12,6 +12,11 @@ import Button from "@thorium/ui/Button";
 import {netSend} from "./context/netSend";
 import LoginButton from "./components/LoginButton";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
+import QuickStartProvider from "./components/FlightQuickStart/FlightQuickStartContext";
+import FlightQuickStart from "./components/FlightQuickStart";
+import CrewConfig from "./components/FlightQuickStart/CrewConfig";
+import ShipConfig from "./components/FlightQuickStart/ShipConfig";
+import {netRequest, useNetRequest} from "./context/useNetRequest";
 import {ComponentDemo} from "./cards";
 
 const DocLayout = lazy(() => import("./docs"));
@@ -35,22 +40,15 @@ const MainPage = () => {
 
 const NoMatch = lazy(() => import("./pages/NotFound"));
 const Releases = lazy(() => import("./pages/Releases"));
-const CrewConfig = lazy(
-  () => import("./components/FlightQuickStart/CrewConfig")
-);
-const ShipConfig = lazy(
-  () => import("./components/FlightQuickStart/ShipConfig")
-);
 const FlightLobby = lazy(() => import("./pages/FlightLobby"));
-const FlightQuickStart = lazy(() => import("./components/FlightQuickStart"));
-const QuickStartProvider = lazy(
-  () => import("./components/FlightQuickStart/FlightQuickStartContext")
-);
 const CardsDevelopment = lazy(() => import("./pages/CardsDevelopment"));
 const CardRenderer = lazy(() => import("./pages/CardRenderer"));
 
 function AppRoutes() {
   useCardDataSubscribe();
+  useEffect(() => {
+    netRequest("availableStationsList");
+  }, []);
   return (
     <>
       <Routes>

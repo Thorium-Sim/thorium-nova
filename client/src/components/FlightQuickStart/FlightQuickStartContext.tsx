@@ -87,13 +87,13 @@ const QuickStartProvider = ({children}: {children: React.ReactNode}) => {
     },
     "flightConfig"
   );
-
+  const set = value[1];
   React.useEffect(() => {
-    value[1]({
+    set({
       type: "flightName",
       name: randomNameGenerator(),
     });
-  }, [value]);
+  }, [set]);
 
   return (
     <QuickStartContext.Provider value={value}>
