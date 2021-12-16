@@ -24,6 +24,9 @@ if (process.env.THORIUM_PATH) {
   }
 }
 
+/* format path to function with windows machines */
+thoriumPath = thoriumPath.replaceAll('\\', '/');
+
 fs.mkdirSync(thoriumPath, {recursive: true});
 
 export const databaseName =
