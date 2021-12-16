@@ -33,7 +33,6 @@ export default defineConfig(async () => {
       emptyOutDir: false,
     },
     define: {
-      "process.env.USER_PATH": `"${path.resolve(process.cwd(), "..")}"`,
       "process.env.THORIUMSIM_URL":
         process.env.NODE_ENV === "production"
           ? `"https://thoriumsim.com"`
