@@ -12,7 +12,6 @@
   "author": "Alex Anderson",
   "devDependencies": {
     "@types/bonjour": "^3.5.9",
-    "electron": "^16.0.4",
     "electron-esbuild": "^3.0.0"
   },
   "dependencies": {
