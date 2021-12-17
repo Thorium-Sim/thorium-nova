@@ -61,7 +61,8 @@
       "icon": "./nova.icns",
       "hardenedRuntime": true,
       "entitlements": "./desktop/resources/entitlements.mac.plist",
-      "gatekeeperAssess": true,
+      "entitlementsInherit": "./desktop/resources/entitlements.mac.plist",
+      "gatekeeperAssess": false,
       "fileAssociations": [
         {
           "ext": "flight",

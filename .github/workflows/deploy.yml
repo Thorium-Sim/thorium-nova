@@ -63,6 +63,8 @@ jobs:
         with:
           name: desktop
           path: desktop
+      - name: Remove old package.json
+        run: rm package.json
       - name: Download package
         uses: actions/download-artifact@v2
         with:
