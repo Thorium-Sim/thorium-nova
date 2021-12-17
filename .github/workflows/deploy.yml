@@ -27,6 +27,16 @@ jobs:
         with:
           name: dist
           path: dist
+      - name: Archive other artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: desktop
+          path: desktop
+      - name: Archive package.json
+        uses: actions/upload-artifact@v2
+        with:
+          name: package
+          path: package.json
   release:
     runs-on: ${{ matrix.os }}
     needs: build
@@ -48,6 +58,16 @@ jobs:
         with:
           name: dist
           path: dist
+      - name: Download other artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: desktop
+          path: desktop
+      - name: Download package
+        uses: actions/download-artifact@v2
+        with:
+          name: package
+          path: package.json
       - name: Install Snapcraft
         uses: samuelmeuli/action-snapcraft@v1
         # Only install Snapcraft on Ubuntu
@@ -68,9 +88,9 @@ jobs:
         with:
           # GitHub token, automatically provided to the action
           # (No need to define this secret in the repo settings)
-          github_token: ${{ secrets.github_token }}
-          mac_certs: ${{ secrets.mac_cert }}
-          mac_certs_password: ${{ secrets.mac_cert_password }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          mac_certs: ${{ secrets.MAC_CERT }}
+          mac_certs_password: ${{ secrets.MAC_CERT_PASSWORD }}
           # Don't worry about running the build, just use electron-builder
           skip_build: true
           # If the commit is tagged with a version (e.g. "1.0.0"),
@@ -78,8 +98,8 @@ jobs:
           release: true
         env:
           # macOS notarization API key
-          API_KEY_ID: ${{ secrets.api_key_id }}
-          API_KEY_ISSUER_ID: ${{ secrets.api_key_issuer_id }}
+          API_KEY_ID: ${{ secrets.API_KEY_ID }}
+          API_KEY_ISSUER_ID: ${{ secrets.API_KEY_ISSUER_ID }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v2
