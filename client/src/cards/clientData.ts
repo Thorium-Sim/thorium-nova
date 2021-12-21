@@ -61,5 +61,5 @@ export const subscriptions = {
 };
 
 export function dataStream(entity: Entity, context: DataContext): boolean {
-  return !!(entity.components.position && entity.components.velocity);
+  return true; //!!(entity.components.position && entity.components.velocity);
 }

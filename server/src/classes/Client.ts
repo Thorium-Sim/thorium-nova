@@ -1,6 +1,4 @@
-import {ServerChannel} from "@geckos.io/server";
 import type {UnionToIntersection} from "../utils/types";
-import randomWords from "@thorium/random-words";
 import {DataContext} from "../utils/DataContext";
 import inputs, {AllInputNames} from "../inputs";
 import {
@@ -17,7 +15,6 @@ import {SocketStream} from "fastify-websocket";
 import requests, {AllRequestNames} from "../netRequests";
 import {BaseClient} from "./BaseClient";
 import {randomNameGenerator} from "../utils/randomNameGenerator";
-import Station from "./Station";
 
 type NetSendData = {inputName: AllInputNames; params: any; requestId: string};
 type NetRequestData = {
@@ -25,7 +22,6 @@ type NetRequestData = {
   params: any;
   requestId: string;
 };
-const channels: Record<string, ServerChannel> = {};
 const sockets: Record<string, SocketStream> = {};
 /**
  * A client is a single computer running a Station. To run Thorium,
@@ -51,20 +47,6 @@ export class ServerClient extends BaseClient {
   public toJSON() {
     const {clientContext, subscriptionListeners, SI, ...data} = this;
     return data;
-  }
-  public async initDataChannel(
-    channel: ServerChannel,
-    database: Pick<DataContext, "server" | "flight">
-  ) {
-    this.clientContext = new DataContext(this.id, database);
-    channels[this.id] = channel;
-    channel.onDisconnect(connectionState => {
-      this.connected = false;
-      for (let subId of this.subscriptionListeners) {
-        pubsub.unsubscribe(subId);
-      }
-      pubsub.publish("clients");
-    });
   }
   public async initWebSocket(
     connection: SocketStream,
@@ -365,6 +347,6 @@ export class ServerClient extends BaseClient {
         };
       });
     const snapshot = this.SI.snapshot.create({entities});
-    channels[this.id]?.raw.emit(encode(snapshot));
+    sockets[this.id].socket.send(encode(snapshot));
   }
 }

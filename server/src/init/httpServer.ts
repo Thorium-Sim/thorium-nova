@@ -3,23 +3,30 @@ import cookies from "fastify-cookie";
 import staticServe from "fastify-static";
 import cors from "fastify-cors";
 import path from "path";
-import {thoriumPath} from "../utils/appPaths";
-import {promises as fs, createWriteStream} from "fs";
+import {thoriumPath, rootPath} from "../utils/appPaths";
+import {promises as fs, createWriteStream, readFileSync} from "fs";
 import {pipeline} from "stream/promises";
 import uniqid from "@thorium/uniqid";
 import os from "os";
 import multipart, {MultipartFile} from "fastify-multipart";
 
+const isHeadless = !process.env.FORK;
 export default function buildHTTPServer({
-  staticRoot = path.join(__dirname, "public"),
-  isHeadless = false,
+  staticRoot = path.join(rootPath, "public"),
 }: {
   staticRoot?: string;
-  isHeadless?: boolean;
   port?: number;
 } = {}) {
-  // TODO: Enable HTTPS
-  const app = fastify({});
+  const certDir = isHeadless ? "./resources" : "../../app";
+  const app = fastify({
+    https:
+      process.env.NODE_ENV === "production"
+        ? {
+            key: readFileSync(path.join(rootPath, certDir, "server.key")),
+            cert: readFileSync(path.join(rootPath, certDir, "server.cert")),
+          }
+        : (undefined as any),
+  });
 
   async function onFile(part: MultipartFile) {
     const tmpdir = os.tmpdir();

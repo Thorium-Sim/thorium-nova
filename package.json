@@ -48,6 +48,15 @@
       "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
     ],
     "asar": true,
+    "extraResources": [
+      {
+        "from": "./desktop/resources",
+        "to": "./app",
+        "filter": [
+          "server.*"
+        ]
+      }
+    ],
     "directories": {
       "output": "./packages",
       "buildResources": "./desktop/resources"

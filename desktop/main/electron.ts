@@ -3,6 +3,10 @@ import {app, BrowserWindow, dialog} from "electron";
 import {is} from "electron-util";
 import fs from "fs";
 import {restoreMenubar} from "./helpers/menu";
+import {
+  startThoriumServer,
+  stopThoriumServer,
+} from "./helpers/startThoriumServer";
 let win: BrowserWindow | null = null;
 app.enableSandbox();
 
@@ -20,7 +24,17 @@ app.on("will-finish-launching", () => {
   });
 });
 
+const cert = fs.readFileSync(
+  path.join(
+    app.getAppPath(),
+    is.development ? `desktop/resources/server.cert` : `../app/server.cert`
+  ),
+  "utf8"
+);
+const port = process.env.PORT || 4444;
+
 async function createWindow() {
+  await startThoriumServer();
   loaded = true;
   if (loadedPath) {
     loadFile(loadedPath);
@@ -29,13 +43,9 @@ async function createWindow() {
   app.on(
     "certificate-error",
     (event, webContents, url, error, certificate, callback) => {
-      // On certificate error we disable default behaviour (stop loading the page)
+      // On certificate error we disable default behavior (stop loading the page)
       // and we then say "it is all fine - true" to the callback
       event.preventDefault();
-      const cert = fs.readFileSync(
-        path.resolve(`../resources/server.cert`),
-        "utf8"
-      );
       callback(certificate.data === cert);
     }
   );
@@ -45,6 +55,7 @@ async function createWindow() {
     height: 600,
     minHeight: 600,
     minWidth: 650,
+    backgroundColor: "#2e2c29",
     webPreferences: {
       nodeIntegration: true,
       devTools: true,
@@ -53,12 +64,7 @@ async function createWindow() {
     show: false,
   });
 
-  const isDev = is.development;
-  if (isDev) {
-    win.loadURL("http://localhost:3000");
-  } else {
-    win.loadURL(`file://${path.join(__dirname, "public/index.html")}`);
-  }
+  win.loadURL(`https://localhost:${port}`);
   win.on("closed", () => {
     win = null;
   });
@@ -75,6 +81,7 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => {
+  stopThoriumServer();
   app.quit();
 });
 

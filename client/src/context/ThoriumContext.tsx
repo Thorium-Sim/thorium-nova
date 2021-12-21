@@ -1,20 +1,17 @@
-import {ClientChannel} from "@geckos.io/client";
-import {createContext, ReactNode, useContext, useEffect, useMemo} from "react";
+import {createContext, ReactNode, useContext, useMemo} from "react";
 import * as React from "react";
 import {useDataConnection} from "../hooks/useDataConnection";
 import {FaSpinner} from "react-icons/fa";
-import {SnapshotInterpolation, Types} from "@geckos.io/snapshot-interpolation";
-import {decode} from "@msgpack/msgpack";
+import {SnapshotInterpolation} from "@geckos.io/snapshot-interpolation";
 import {ClientSocket} from "../utils/clientSocket";
 import Button from "@thorium/ui/Button";
 import {ThoriumAccountContextProvider} from "./ThoriumAccountContext";
-const serverFPS = 3;
+import {SI} from "../utils/clientSocket";
 
 const ThoriumContext = createContext<IThoriumContext | null>(null);
 
 interface IThoriumContext {
   SI: SnapshotInterpolation;
-  channel: ClientChannel;
   socket: ClientSocket;
 }
 
@@ -54,25 +51,14 @@ const Disconnected = () => {
   );
 };
 
-const SI = new SnapshotInterpolation(serverFPS);
 export function ThoriumProvider({children}: {children: ReactNode}) {
-  const {channel, socket, reconnectionState} = useDataConnection();
-
-  useEffect(() => {
-    channel?.onRaw(snapshot => {
-      if (snapshot instanceof ArrayBuffer) {
-        const decoded = decode(snapshot) as Types.Snapshot;
-        SI.snapshot.add(decoded);
-      }
-    });
-  }, [channel]);
+  const {socket, reconnectionState} = useDataConnection();
   const value: IThoriumContext = useMemo(() => {
     return {
-      channel,
       socket,
       SI,
     };
-  }, [channel, socket]);
+  }, [socket]);
 
   return (
     <ThoriumContext.Provider value={value}>

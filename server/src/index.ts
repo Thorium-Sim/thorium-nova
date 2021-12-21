@@ -1,5 +1,5 @@
 import {setBasePath} from "@thorium/db-fs";
-import {databaseName, thoriumPath} from "./utils/appPaths";
+import {databaseName, thoriumPath, rootPath} from "./utils/appPaths";
 import buildHTTPServer from "./init/httpServer";
 import path from "path";
 import {setUpAPI} from "./init/setUpAPI";
@@ -10,7 +10,6 @@ import chalk from "chalk";
 import {FlightDataModel} from "./classes/FlightDataModel";
 
 setBasePath(thoriumPath);
-const isHeadless = !process.env.FORK;
 
 export async function startServer() {
   // Create the primary database
@@ -41,41 +40,25 @@ export async function startServer() {
 
   const database = {server: serverModel, flight};
 
-  if (isHeadless) {
-    // Start the headless HTTP server. Most of the time, Thorium Clients
-    // aren't running HTTP servers unless they are running a flight.
-    // However, headless servers will always eventually run a flight,
-    // so there's no reason not to start the HTTP server right away.
-
-    const app = buildHTTPServer({
-      isHeadless,
-      staticRoot: path.join(process.cwd(), "public/"),
-    });
-    const UDP_START = parseInt(process.env.UDP_START || "50000", 10);
-    const UDP_RANGE = parseInt(process.env.UDP_RANGE || "200", 10);
-    await applyDataChannel(app, database, UDP_START, UDP_START + UDP_RANGE);
-    setUpAPI(app, database);
-    const PORT =
-      process.env.PORT || (process.env.NODE_ENV === "production" ? 4444 : 3001);
-    try {
-      await app.listen(PORT, "0.0.0.0");
-      console.info(chalk.greenBright(`Access app at http://localhost:${PORT}`));
-      console.info(
-        chalk.cyan(`Doing port forwarding? Open these ports in your router:`)
-      );
-      console.info(chalk.cyan(`  - TCP ${PORT} for web app access`));
-      console.info(
-        chalk.cyan(
-          `  - UDP ${UDP_START} - ${Math.min(
-            UDP_START + UDP_RANGE,
-            Math.pow(2, 16) - 1
-          )} for realtime connections`
-        )
-      );
-    } catch (err) {
-      console.error(err);
-      app.log.error(err);
-    }
+  const app = buildHTTPServer({
+    staticRoot: path.join(rootPath, "public/"),
+  });
+  await applyDataChannel(app, database);
+  setUpAPI(app, database);
+  const PORT =
+    process.env.PORT || (process.env.NODE_ENV === "production" ? 4444 : 3001);
+  try {
+    await app.listen(PORT, "0.0.0.0");
+    console.info(chalk.greenBright(`Access app at http://localhost:${PORT}`));
+    console.info(
+      chalk.cyan(`Doing port forwarding? Open this port in your router:`)
+    );
+    console.info(chalk.cyan(`  - TCP ${PORT} for web app access`));
+    process.send?.("ready");
+  } catch (err) {
+    process.send?.("error");
+    console.error(err);
+    app.log.error(err);
   }
 }
 

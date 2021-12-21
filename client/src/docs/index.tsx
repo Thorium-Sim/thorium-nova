@@ -250,7 +250,6 @@ export default function DocLayout() {
       return acc;
     }, {})
   );
-  console.log(orderedRoutes);
   const docRef = React.useRef<HTMLDivElement>(null);
   const scrollToHeading = React.useCallback(
     (id: string) => {

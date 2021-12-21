@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "dev": "",
-    "start": "electron-esbuild dev",
+    "start": "concurrently \"electron-esbuild dev\" \"copy-dir-cli resources ../dist/resources\"",
     "build": "electron-esbuild build",
     "typecheck": "tsc --noEmit"
   },
@@ -12,6 +12,7 @@
   "author": "Alex Anderson",
   "devDependencies": {
     "@types/bonjour": "^3.5.9",
+    "copy-dir-cli": "^0.0.3",
     "electron-esbuild": "^3.0.0"
   },
   "dependencies": {

@@ -4,10 +4,6 @@
 
 - `PORT` - Set the port for the HTTP server. Useful for headless setups.
   Defaults to 4444.
-- `UDP_START` - Sets the lowest port for UDP connections. Defaults to 50000
-- `UDP_RANGE` - Sets the number of ports the app uses after `UDP_START`. This is
-  effectively the max number of connected clients allowed. The max port will be
-  `UDP_START + UDP_RANGE`. Defaults to 200.
 - `COOKIE_SECRET` - A secret key used to encrypt secure cookies. This is
   currently unused.
 - `THORIUM_PATH` - The directory that will contain the data and assets for
