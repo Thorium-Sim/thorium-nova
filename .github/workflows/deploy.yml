@@ -91,8 +91,8 @@ jobs:
           # GitHub token, automatically provided to the action
           # (No need to define this secret in the repo settings)
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          mac_certs: ${{ secrets.MAC_CERT }}
-          mac_certs_password: ${{ secrets.MAC_CERT_PASSWORD }}
+          mac_certs: ${{ secrets.MAC_CERTS }}
+          mac_certs_password: ${{ secrets.MAC_CERTS_PASSWORD }}
           # Don't worry about running the build, just use electron-builder
           skip_build: true
           # If the commit is tagged with a version (e.g. "1.0.0"),
