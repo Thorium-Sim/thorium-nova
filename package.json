@@ -24,9 +24,8 @@
     "format:different": "prettier --list-different \"**/*.+(js|jsx|yml|yaml|css|less|scss|ts|tsx|md|mdx|graphql|vue)\"",
     "semantic-release": "semantic-release",
     "package": "electron-builder --dir",
-    "postinstall": "concurrently \"electron-builder install-app-deps\" \"patch-package\" \"init:plugin\"",
-    "validate": "concurrently --names \"lint,format,typecheck,test\" -c \"yellow.bold,magenta.bold,blue.bold,green.bold\" \"npm run lint\" \"npm run format:different\" \"npm run typecheck\" \"CI=true npm run test\"",
-    "init:plugin": "node shared/pluginInit.js"
+    "postinstall": "concurrently \"electron-builder install-app-deps\" \"patch-package\" \"node shared/pluginInit.js\"",
+    "validate": "concurrently --names \"lint,format,typecheck,test\" -c \"yellow.bold,magenta.bold,blue.bold,green.bold\" \"npm run lint\" \"npm run format:different\" \"npm run typecheck\" \"CI=true npm run test\""
   },
   "build": {
     "appId": "us.fyreworks.thorium-nova",
