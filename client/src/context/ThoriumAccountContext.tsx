@@ -51,11 +51,11 @@ export function ThoriumAccountContextProvider({
       setDeviceCode(null);
       setAccount(null);
     }
-    async function refresh() {
-      if (!account) return;
+    async function refresh(accessToken?: string) {
+      if (!account?.access_token && !accessToken) return;
       const user = await fetch(`${process.env.THORIUMSIM_URL}/api/identity`, {
         headers: {
-          Authorization: `Bearer ${account.access_token}`,
+          Authorization: `Bearer ${accessToken || account?.access_token}`,
         },
         credentials: "omit",
       }).then(res => res.json());
@@ -112,7 +112,7 @@ export function ThoriumAccountContextProvider({
             },
           }
         ).then(res => res.json());
-
+        console.log(data);
         if (data.error) {
           if (data.error === "authorization_pending") return;
           if (data.error === "slow_down") {
@@ -121,18 +121,17 @@ export function ThoriumAccountContextProvider({
           }
           if (data.error === "expired_token") {
             setDeviceCode(null);
-            value.login();
+            setVerifying(false);
             clearInterval(interval);
             return;
           }
           setVerifying(false);
           setDeviceCode(null);
         }
-
         if (data.access_token) {
           setVerifying(false);
           clearInterval(interval);
-          value.refresh();
+          value.refresh(data.access_token);
           setDeviceCode(null);
         }
       }, deviceCode.interval * 1000);

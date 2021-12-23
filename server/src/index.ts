@@ -8,10 +8,24 @@ import randomWords from "@thorium/random-words";
 import {applyDataChannel} from "./init/dataChannel";
 import chalk from "chalk";
 import {FlightDataModel} from "./classes/FlightDataModel";
+import {promises as fs, existsSync} from "fs";
+import {unzip} from "./utils/unzipFolder";
 
 setBasePath(thoriumPath);
+const isHeadless = !process.env.FORK;
 
 export async function startServer() {
+  // Initialize the database if it doesn't exist
+  if (!existsSync(thoriumPath)) {
+    await fs.mkdir(thoriumPath, {recursive: true});
+    await fs.mkdir(path.join(thoriumPath, "plugins"), {recursive: true});
+    // Initialize the default plugin
+    await unzip(
+      path.join(rootPath, isHeadless ? "./" : "../../app", "defaultPlugin.zip"),
+      path.join(thoriumPath, "plugins/")
+    );
+  }
+
   // Create the primary database
   // This is for any user data that is persisted between flights
   // but that isn't part of a plugin. Not much goes in here.

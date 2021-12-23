@@ -30,7 +30,7 @@ export async function startThoriumServer() {
     });
     child.stdout?.on("data", function (data) {
       const message: string = data.toString();
-      console.log(message);
+      console.info(message);
     });
     child.stderr?.on("data", function (data) {
       const error = data.toString();

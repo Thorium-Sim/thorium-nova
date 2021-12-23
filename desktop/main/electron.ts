@@ -1,5 +1,5 @@
 import path from "path";
-import {app, BrowserWindow, dialog} from "electron";
+import {app, BrowserWindow, dialog, shell} from "electron";
 import {is} from "electron-util";
 import fs from "fs";
 import {restoreMenubar} from "./helpers/menu";
@@ -51,17 +51,25 @@ async function createWindow() {
   );
   restoreMenubar(app);
   win = new BrowserWindow({
-    width: 800,
-    height: 600,
-    minHeight: 600,
-    minWidth: 650,
-    backgroundColor: "#2e2c29",
+    width: 1024,
+    height: 768,
+    minHeight: 768,
+    minWidth: 1024,
+    backgroundColor: "#251029",
     webPreferences: {
       nodeIntegration: true,
       devTools: true,
       contextIsolation: false,
     },
     show: false,
+  });
+
+  win.webContents.setWindowOpenHandler(({url}) => {
+    shell.openExternal(url);
+    return {action: "deny"};
+  });
+  win.webContents.on("new-window", function (e, url) {
+    // e.preventDefault();
   });
 
   win.loadURL(`https://localhost:${port}`);

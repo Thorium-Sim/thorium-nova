@@ -2,6 +2,11 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 
+const isHeadless = !process.env.FORK;
+export const rootPath = isHeadless
+  ? process.env.NODE_PATH || __dirname
+  : __dirname;
+
 export let thoriumPath = path.join(process.cwd(), "data");
 /* istanbul ignore next */
 if (process.env.NODE_ENV === "production") {
@@ -26,8 +31,6 @@ if (process.env.THORIUM_PATH) {
 /* format path to function with windows machines */
 thoriumPath = thoriumPath.replaceAll("\\", "/");
 
-fs.mkdirSync(thoriumPath, {recursive: true});
-
 export const databaseName =
   process.env.NODE_ENV === "production"
     ? /* istanbul ignore next */
@@ -36,8 +39,3 @@ export const databaseName =
     ? "db-test.yml"
     : /* istanbul ignore next */
       "db-dev.yml";
-
-const isHeadless = !process.env.FORK;
-export const rootPath = isHeadless
-  ? process.env.NODE_PATH || __dirname
-  : __dirname;

@@ -272,7 +272,7 @@ export default function DocLayout() {
             <Disclosure key={section}>
               {({open}) => (
                 <>
-                  <Disclosure.Button className="flex justify-between w-full px-4 py-2 text-2xl font-medium text-left text-purple-300 hover:text-purple-400 focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75">
+                  <Disclosure.Button className="flex justify-between w-full px-4 py-2 text-xl font-medium text-left text-purple-300 hover:text-purple-400 focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75">
                     <span>{section}</span>
                     <FaChevronUp
                       className={`${
@@ -280,7 +280,7 @@ export default function DocLayout() {
                       } w-5 h-5 text-purple-300`}
                     />
                   </Disclosure.Button>
-                  <Disclosure.Panel className="px-4 text-xl">
+                  <Disclosure.Panel className="px-4 text-lg">
                     <ul className="ml-4">
                       {route
                         .concat()

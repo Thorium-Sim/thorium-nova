@@ -115,8 +115,7 @@ export default function LoginButton({
 }: {
   buttonClassName?: string;
 }) {
-  const {login, logout, account, verificationUrl, verifying} =
-    useThoriumAccount();
+  const {login, account, verificationUrl, verifying} = useThoriumAccount();
   const linkRef = useRef<HTMLAnchorElement>(null);
   const windowRef = useRef<Window | null>(null);
   useEffect(() => {

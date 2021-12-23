@@ -1,5 +1,9 @@
+diff --git a/node_modules/vite-plugin-mdx/.DS_Store b/node_modules/vite-plugin-mdx/.DS_Store
+new file mode 100644
+index 0000000..63a294d
+Binary files /dev/null and b/node_modules/vite-plugin-mdx/.DS_Store differ
 diff --git a/node_modules/vite-plugin-mdx/dist/transform.js b/node_modules/vite-plugin-mdx/dist/transform.js
-index 029d80f..fbe8fa3 100644
+index 029d80f..9692174 100644
 --- a/node_modules/vite-plugin-mdx/dist/transform.js
 +++ b/node_modules/vite-plugin-mdx/dist/transform.js
 @@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
@@ -10,11 +14,13 @@ index 029d80f..fbe8fa3 100644
  function createTransformer(root, namedImports = imports_1.inferNamedImports(root)) {
      const mdx = imports_1.requireMdx(root);
      const imports = Object.entries(namedImports).map(([packageName, imported]) => {
-@@ -23,8 +24,10 @@ function createTransformer(root, namedImports = imports_1.inferNamedImports(root
+@@ -22,9 +23,11 @@ function createTransformer(root, namedImports = imports_1.inferNamedImports(root
+     });
      return function transform(code_mdx, mdxOptions) {
          return __awaiter(this, void 0, void 0, function* () {
-             const code_jsx = yield mdx(code_mdx, mdxOptions);
+-            const code_jsx = yield mdx(code_mdx, mdxOptions);
 +            const {data:frontmatter, content} = graymatter(code_mdx);
++            const code_jsx = yield mdx(content, mdxOptions);
              const code_es2019 = yield jsxToES2019(code_jsx);
 -            return imports.concat('', code_es2019).join('\n');
 +            const extraExports = `export const frontmatter = ${JSON.stringify(frontmatter, null, 2)};\nexport const content = \`${content.replace(/`/g,'\\`')}\``
