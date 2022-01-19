@@ -59,7 +59,11 @@ export function ThoriumAccountContextProvider({
         },
         credentials: "omit",
       }).then(res => res.json());
-      setAccount({...account, ...user});
+      setAccount({
+        ...account,
+        ...user,
+        access_token: accessToken || account?.access_token,
+      });
     }
     async function login() {
       setVerifying(true);
@@ -112,7 +116,7 @@ export function ThoriumAccountContextProvider({
             },
           }
         ).then(res => res.json());
-        console.log(data);
+
         if (data.error) {
           if (data.error === "authorization_pending") return;
           if (data.error === "slow_down") {
