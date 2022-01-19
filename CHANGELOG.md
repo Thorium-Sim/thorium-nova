@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.2](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.1...1.0.0-alpha.2) (2022-01-19)
+
+
+### Bug Fixes
+
+* **Issue Tracker:** Fixes an issue where the issue tracker doesn't submit properly. Closes [#200](https://github.com/Thorium-Sim/thorium-nova/issues/200) ([a77aef5](https://github.com/Thorium-Sim/thorium-nova/commit/a77aef5d7ba5be5529cad628d3a2cffbcf75c335))
+
 # 1.0.0-alpha.1 (2021-12-23)
 
 ### Bug Fixes
