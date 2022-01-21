@@ -1,9 +1,8 @@
 import {DataContext} from "../utils/DataContext";
 import type {EffectConfig, EffectOptions} from "../netRequests/effects";
 import {pubsub} from "../utils/pubsub";
-function randomFromList<T>(list: T[]): T {
-  return list[Math.floor(Math.random() * list.length)];
-}
+import {randomFromList} from "../utils/randomFromList";
+
 type EffectInputParams =
   | {
       effect: EffectOptions;

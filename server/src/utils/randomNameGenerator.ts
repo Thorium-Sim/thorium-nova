@@ -1,6 +1,4 @@
-function randomFromList<T>(list: T[]) {
-  return list[Math.floor(Math.random() * list.length)];
-}
+import {randomFromList} from "./randomFromList";
 
 const adjectives = [
   "Green",
