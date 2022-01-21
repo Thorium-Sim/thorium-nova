@@ -6,3 +6,4 @@ export {pluginInputs} from "./plugins";
 export {shipsPluginInputs} from "./plugins/ships";
 export {themesPluginInput} from "./plugins/themes";
 export {officerLogInputs} from "./officersLog";
+export {solarSystemsPluginInputs} from "./plugins/solarSystems";

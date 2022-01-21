@@ -1,5 +1,6 @@
 import systemNames from "server/src/spawners/systemNames";
 import {UNIVERSE_RADIUS} from "server/src/utils/constants";
+import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
 import {randomFromList} from "server/src/utils/randomFromList";
 import {AstronomicalUnit, LightMinute} from "server/src/utils/unitTypes";
 import BasePlugin from "..";
@@ -37,10 +38,19 @@ export default class SolarSystemPlugin extends Aspect {
   assets = {};
 
   constructor(params: Partial<SolarSystemPlugin>, plugin: BasePlugin) {
-    const starNames = plugin.aspects.solarSystems.map(s => s.name);
-    const availableNames = systemNames.filter(val => !starNames.includes(val));
+    let name = params.name;
+    if (!name) {
+      const starNames = plugin.aspects.solarSystems.map(s => s.name);
+      const availableNames = systemNames.filter(
+        val => !starNames.includes(val)
+      );
 
-    const name = randomFromList(availableNames) || "Bob"; // If this happens, I'll laugh very hard.
+      name = randomFromList(availableNames) || "Bob"; // If this happens, I'll laugh very hard.
+    }
+    name = generateIncrementedName(
+      name || "New Solar System",
+      plugin.aspects.solarSystems.map(solarSystem => solarSystem.name)
+    );
 
     super({name, ...params}, {kind: "solarSystems"}, plugin);
     this.name = name;
