@@ -2,7 +2,7 @@ import SolarSystemPlugin from "server/src/classes/Plugins/Universe/SolarSystem";
 import {DataContext} from "server/src/utils/DataContext";
 import {pubsub} from "server/src/utils/pubsub";
 import {AstronomicalUnit, LightMinute} from "server/src/utils/unitTypes";
-import {getPlugin} from "./utils";
+import {getPlugin} from "../utils";
 
 export const solarSystemsPluginInputs = {
   pluginSolarSystemCreate(
