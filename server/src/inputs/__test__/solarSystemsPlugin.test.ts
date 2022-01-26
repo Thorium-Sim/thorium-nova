@@ -1,4 +1,4 @@
-import {solarSystemsPluginInputs} from "../plugins/solarSystems";
+import {solarSystemsPluginInputs} from "../plugins/universe/solarSystems";
 import {promises as fs} from "fs";
 function createMockDataContext() {
   return {

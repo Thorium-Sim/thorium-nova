@@ -1,29 +1,29 @@
 import {Vector3} from "three";
-export const DEG_TO_RAD = Math.PI / 180;
+import {degToRad} from "./unitTypes";
 
 const axis = new Vector3(0, 0, 1);
 
 export function getOrbitPosition({
-  radius,
+  semiMajorAxis,
   eccentricity,
   orbitalArc,
-  orbitalInclination,
+  inclination,
   origin = new Vector3(),
 }: OrbitPositionProps) {
-  const radiusY = radius - radius * eccentricity;
-  const X = radius * Math.cos(DEG_TO_RAD * orbitalArc);
-  const Z = radiusY * Math.sin(DEG_TO_RAD * orbitalArc);
+  const radiusY = semiMajorAxis - semiMajorAxis * eccentricity;
+  const X = semiMajorAxis * Math.cos(degToRad(orbitalArc));
+  const Z = radiusY * Math.sin(degToRad(orbitalArc));
   const vec = new Vector3(X, 0, Z);
-  const angle = orbitalInclination * DEG_TO_RAD;
+  const angle = degToRad(inclination);
 
   vec.applyAxisAngle(axis, angle).add(origin);
   return vec;
 }
 
 interface OrbitPositionProps {
-  radius: number;
+  semiMajorAxis: number;
   eccentricity: number;
   orbitalArc: number;
-  orbitalInclination: number;
+  inclination: number;
   origin?: Vector3;
 }
