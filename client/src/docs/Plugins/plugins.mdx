@@ -9,14 +9,15 @@ order: 1
 
 Plugins are wrappers around all the things that can be configured in Thorium
 Nova, and all of these things can be edited from within Thorium Nova. These
-include:
+include different "Aspects", which are the parts of Thorium Nova that the plugin
+affects. These include:
 
 - Custom themes for the controls
 - UI sound packs that play when clicking on buttons and using the controls
 - Ships which fly around the 3D Starmap
 - Ship systems, like engines or weapons, which are a part of these ships
 - Inventory on the ship, like probe casings, coolant, and repair supplies
-- Planetary systems, stars, and planets in the Starmap
+- Solar systems, stars, and planets in the Starmap
 - Factions, or organizations which control the planets and solar systems and
   define the behavior of ships.
 - Campaigns, Mission storylines, and timelines, including any visuals and
@@ -24,6 +25,11 @@ include:
 
 This also includes all of the assets and files which are used by these plugins,
 such as images, 3D models, and sounds.
+
+Plugins are intended to be modular, where a Flight Director can choose to add or
+remove plugins _before_ starting a flight to adjust what is possible during the
+flight. Currently, it isn't possible to add or remove plugins after a flight has
+started.
 
 ## Plugin Config
 
