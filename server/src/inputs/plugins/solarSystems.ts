@@ -45,7 +45,7 @@ export const solarSystemsPluginInputs = {
     );
 
     await solarSystem?.removeFile();
-    pubsub.publish("pluginShips", {pluginId: params.pluginId});
+    pubsub.publish("pluginSolarSystems", {pluginId: params.pluginId});
   },
   async pluginSolarSystemUpdate(
     context: DataContext,
