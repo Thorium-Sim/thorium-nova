@@ -80,7 +80,7 @@ const SystemCircle: React.FC<
     canvas.height = size;
     canvas.width = size;
 
-    var ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+    const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
     return ctx;
   }, []);
 

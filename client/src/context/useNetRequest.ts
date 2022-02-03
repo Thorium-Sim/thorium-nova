@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import {
-  AllRequests,
   AllRequestNames,
   AllRequestParams,
   AllRequestReturns,
@@ -153,7 +152,7 @@ export function useNetRequest<
     return () => {
       socket.off("ready", handleReady);
     };
-  }, [socket, requestId, data]);
+  }, [socket, requestId, data, mockData]);
 
   useEffect(() => {
     if (mockData) return;
@@ -161,7 +160,7 @@ export function useNetRequest<
     return () => {
       takeDownRequest(hookId);
     };
-  }, [setUpRequest, takeDownRequest, ready, hookId, requestId]);
+  }, [setUpRequest, takeDownRequest, ready, hookId, requestId, mockData]);
 
   const callbackRef = useRef(callback);
   useEffect(() => {

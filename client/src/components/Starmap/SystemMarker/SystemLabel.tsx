@@ -1,5 +1,4 @@
 import React from "react";
-// @ts-ignore
 import TextTexture from "@seregpie/three.text-texture";
 import {AdditiveBlending, Sprite} from "three";
 import {useFrame} from "@react-three/fiber";

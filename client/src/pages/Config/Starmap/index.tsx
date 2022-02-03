@@ -58,7 +58,7 @@ function useSynchronizeSystemId() {
       navigate(`/config/${pluginId}/starmap`);
       useStarmapStore.setState({systemId: null});
     }
-  }, [storedSystemId]);
+  }, [storedSystemId, navigate, pluginId]);
   useEffect(() => {
     mounted.current = true;
   }, []);
@@ -237,7 +237,7 @@ function SolarSystemMap() {
   );
 }
 
-const StarmapScene = forwardRef((props, ref) => {
+const StarmapScene = forwardRef(function StarmapScene(props, ref) {
   const pluginId = useStarmapStore(s => s.pluginId);
   const systemId = useStarmapStore(s => s.systemId);
 
