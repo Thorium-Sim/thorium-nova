@@ -7,6 +7,8 @@ import {
   MockClientDataContext,
 } from "./src/context/useCardData";
 import {DataCardNames} from "./src/utils/cardData";
+import {MockNetRequestContext} from "./src/context/useNetRequest";
+import {AllRequests} from "server/src/netRequests";
 
 let netSendResponse: {response: any} = {response: ""};
 const netSendSpy = jest.fn((input, params) => netSendResponse);
@@ -31,6 +33,7 @@ global.fetch = jest.fn((path: string, {body}: {body: FormData}) => {
 interface OptionsInterface<CardName extends DataCardNames> {
   initialRoutes?: string[];
   cardData?: Required<CardProxy[CardName]>;
+  netRequestData?: AllRequests;
 }
 
 async function render<CardName extends DataCardNames = "allData">(
@@ -80,9 +83,11 @@ async function render<CardName extends DataCardNames = "allData">(
             theme: null,
           }}
         >
-          <MockCardDataContext.Provider value={options?.cardData}>
-            <Router initialEntries={initialRoutes}>{children}</Router>
-          </MockCardDataContext.Provider>
+          <MockNetRequestContext.Provider value={options?.netRequestData}>
+            <MockCardDataContext.Provider value={options?.cardData}>
+              <Router initialEntries={initialRoutes}>{children}</Router>
+            </MockCardDataContext.Provider>
+          </MockNetRequestContext.Provider>
         </MockClientDataContext.Provider>
       </Suspense>
     );

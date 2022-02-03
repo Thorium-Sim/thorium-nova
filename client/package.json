@@ -57,6 +57,7 @@
     "zustand": "^3.6.9"
   },
   "devDependencies": {
+    "@react-three/test-renderer": "^7.0.25",
     "@types/color": "^3.0.2",
     "@types/flexsearch": "^0.7.2",
     "@types/lodash.debounce": "^4.0.6",
@@ -68,6 +69,7 @@
     "autoprefixer": "^10.4.0",
     "daisyui": "^1.16.5",
     "hast-util-to-estree": "^2.0.2",
+    "jest-canvas-mock": "^2.3.1",
     "markdown-it": "^12.3.0",
     "postcss": "^8.4.5",
     "postcss-cli": "^9.1.0",

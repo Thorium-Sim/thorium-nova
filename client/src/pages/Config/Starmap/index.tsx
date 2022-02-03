@@ -1,3 +1,4 @@
+import * as React from "react";
 import Menubar from "@thorium/ui/Menubar";
 import {useMatch, useNavigate, useParams} from "react-router-dom";
 import {Canvas, useFrame, useThree} from "@react-three/fiber";
@@ -185,7 +186,7 @@ function StatusBar() {
 
 const INTERSTELLAR_MAX_DISTANCE: LightYear = 2000;
 
-function InterstellarMap() {
+export function InterstellarMap() {
   const pluginId = useStarmapStore(s => s.pluginId as string);
 
   const stars = useNetRequest("pluginSolarSystems", {pluginId});
