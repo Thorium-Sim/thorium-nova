@@ -1,4 +1,3 @@
-import * as React from "react";
 import Menubar from "@thorium/ui/Menubar";
 import {useMatch, useNavigate, useParams} from "react-router-dom";
 import {Canvas, useFrame, useThree} from "@react-three/fiber";
@@ -16,6 +15,7 @@ import {useStarmapStore} from "client/src/components/Starmap/starmapStore";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {ThoriumContext} from "client/src/context/ThoriumContext";
 import SystemMarker from "client/src/components/Starmap/SystemMarker";
+import Starfield from "client/src/components/Starmap/Starfield";
 import Button from "@thorium/ui/Button";
 import {
   lightMinuteToLightYear,
@@ -58,7 +58,7 @@ function useSynchronizeSystemId() {
       navigate(`/config/${pluginId}/starmap`);
       useStarmapStore.setState({systemId: null});
     }
-  }, [storedSystemId, navigate, pluginId]);
+  }, [storedSystemId]);
   useEffect(() => {
     mounted.current = true;
   }, []);
@@ -186,7 +186,7 @@ function StatusBar() {
 
 const INTERSTELLAR_MAX_DISTANCE: LightYear = 2000;
 
-export function InterstellarMap() {
+function InterstellarMap() {
   const pluginId = useStarmapStore(s => s.pluginId as string);
 
   const stars = useNetRequest("pluginSolarSystems", {pluginId});
@@ -204,6 +204,7 @@ export function InterstellarMap() {
 
   return (
     <Suspense fallback={null}>
+      <Starfield radius={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)} />
       <OrbitControls
         ref={orbitControls}
         enabled={controlsEnabled}
@@ -237,7 +238,7 @@ function SolarSystemMap() {
   );
 }
 
-const StarmapScene = forwardRef(function StarmapScene(props, ref) {
+const StarmapScene = forwardRef((props, ref) => {
   const pluginId = useStarmapStore(s => s.pluginId);
   const systemId = useStarmapStore(s => s.systemId);
 
