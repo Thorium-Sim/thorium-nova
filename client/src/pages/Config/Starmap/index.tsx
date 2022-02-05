@@ -1,3 +1,4 @@
+import * as React from "react";
 import Menubar from "@thorium/ui/Menubar";
 import {useMatch, useNavigate, useParams} from "react-router-dom";
 import {Canvas, useFrame, useThree} from "@react-three/fiber";
@@ -58,7 +59,7 @@ function useSynchronizeSystemId() {
       navigate(`/config/${pluginId}/starmap`);
       useStarmapStore.setState({systemId: null});
     }
-  }, [storedSystemId]);
+  }, [storedSystemId, navigate, pluginId]);
   useEffect(() => {
     mounted.current = true;
   }, []);
@@ -186,7 +187,7 @@ function StatusBar() {
 
 const INTERSTELLAR_MAX_DISTANCE: LightYear = 2000;
 
-function InterstellarMap() {
+export function InterstellarMap() {
   const pluginId = useStarmapStore(s => s.pluginId as string);
 
   const stars = useNetRequest("pluginSolarSystems", {pluginId});
@@ -238,7 +239,7 @@ function SolarSystemMap() {
   );
 }
 
-const StarmapScene = forwardRef((props, ref) => {
+const StarmapScene = forwardRef(function StarmapScene(props, ref) {
   const pluginId = useStarmapStore(s => s.pluginId);
   const systemId = useStarmapStore(s => s.systemId);
 
