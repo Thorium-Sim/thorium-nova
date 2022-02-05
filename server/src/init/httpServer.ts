@@ -4,7 +4,7 @@ import staticServe from "fastify-static";
 import cors from "fastify-cors";
 import path from "path";
 import {thoriumPath, rootPath} from "../utils/appPaths";
-import {promises as fs, createWriteStream, readFileSync} from "fs";
+import {promises as fs, createWriteStream} from "fs";
 import {pipeline} from "stream/promises";
 import uniqid from "@thorium/uniqid";
 import os from "os";
@@ -17,16 +17,7 @@ export default function buildHTTPServer({
   staticRoot?: string;
   port?: number;
 } = {}) {
-  const certDir = isHeadless ? "./resources" : "../../app";
-  const app = fastify({
-    https:
-      process.env.NODE_ENV === "production"
-        ? {
-            key: readFileSync(path.join(rootPath, certDir, "server.key")),
-            cert: readFileSync(path.join(rootPath, certDir, "server.cert")),
-          }
-        : (undefined as any),
-  });
+  const app = fastify();
 
   async function onFile(part: MultipartFile) {
     const tmpdir = os.tmpdir();
