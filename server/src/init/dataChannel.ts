@@ -3,6 +3,7 @@ import {DataContext} from "../utils/DataContext";
 import buildHTTPServer from "./httpServer";
 import {ServerClient} from "../classes/Client";
 import websocketPlugin from "fastify-websocket";
+import {RawData} from "ws";
 
 export async function applyDataChannel(
   app: ReturnType<typeof buildHTTPServer>,
@@ -12,20 +13,36 @@ export async function applyDataChannel(
   app.register(websocketPlugin);
 
   app.get("/ws", {websocket: true}, async (connection, req) => {
-    const authData = req.cookies["x-websocket-auth"];
     try {
-      if (typeof authData === "string") {
-        const {clientId} = JSON.parse(authData);
-        let client = database.server.clients[clientId];
-        if (!client) {
-          client = new ServerClient({id: clientId});
-          database.server.clients[clientId] = client;
-        }
-        client.connected = true;
-        await client.initWebSocket(connection, database);
-        pubsub.publish("clients");
+      const authData = (await Promise.race([
+        new Promise(res => {
+          const handleConnection = (data: RawData) => {
+            const message = JSON.parse(data.toString()) as {
+              clientId: string;
+              type: string;
+            };
+            if (message.type === "clientConnect") {
+              res(message);
+            }
+          };
+          connection.socket.on("message", handleConnection);
+        }),
+        new Promise((res, rej) =>
+          setTimeout(() => rej(`Client Connect Timeout`), 5000)
+        ),
+      ])) as {clientId: string; type: string};
+
+      const clientId = authData.clientId;
+      let client = database.server.clients[clientId];
+      if (!client) {
+        client = new ServerClient({id: clientId});
+        database.server.clients[clientId] = client;
       }
+      client.connected = true;
+      await client.initWebSocket(connection, database);
+      pubsub.publish("clients");
     } catch (err) {
+      connection.socket.close();
       console.error(err);
     }
   });

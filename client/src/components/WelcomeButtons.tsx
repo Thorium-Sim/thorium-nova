@@ -66,7 +66,7 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
             How-to Guides
           </NavLink>
           {process.env.NODE_ENV === "production" &&
-            location.protocol !== "https" && (
+            location.protocol !== "https:" && (
               <a
                 className="btn btn-error btn-outline"
                 href={`https://${location.hostname}:${

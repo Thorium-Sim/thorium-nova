@@ -23,6 +23,7 @@ export function buildHttpsProxy(port: number) {
   });
   proxy.register(fastifyHttpProxy, {
     upstream: `http://localhost:${port}`,
+    websocket: true,
   });
 
   return proxy;
