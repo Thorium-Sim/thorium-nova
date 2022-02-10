@@ -17,7 +17,9 @@ stations:
 `;
 describe("StationComplementPlugin", () => {
   afterAll(async () => {
-    await fs.rm("./plugins", {recursive: true});
+    try {
+      await fs.rm("plugins", {recursive: true});
+    } catch {}
   });
   it("should instantiate correctly", async () => {
     const plugin = new Plugin({}, {plugins: []} as unknown as ServerDataModel);
