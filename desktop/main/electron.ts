@@ -7,6 +7,7 @@ import {
   startThoriumServer,
   stopThoriumServer,
 } from "./helpers/startThoriumServer";
+import {ipcHandlers} from "./helpers/ipcHandlers";
 let win: BrowserWindow | null = null;
 app.enableSandbox();
 
@@ -35,6 +36,7 @@ const port = process.env.PORT || 4444;
 
 async function createWindow() {
   await startThoriumServer();
+  ipcHandlers();
   loaded = true;
   if (loadedPath) {
     loadFile(loadedPath);
@@ -60,6 +62,7 @@ async function createWindow() {
       nodeIntegration: true,
       devTools: true,
       contextIsolation: false,
+      preload: path.join(__dirname, "preload.js"),
     },
     show: false,
   });
