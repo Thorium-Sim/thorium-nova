@@ -1,6 +1,7 @@
 import {Link} from "react-router-dom";
 import Logo from "../images/logo.svg?url";
 import packageJson from "../../../package.json";
+import {ClientButton} from "./ClientButton";
 
 export const WelcomeLogo = ({className}: {className?: string}) => {
   return (
@@ -19,7 +20,8 @@ export const WelcomeLogo = ({className}: {className?: string}) => {
           Version {packageJson.version}
         </Link>
       </h2>
-      {/* <ClientButton /> */}
+      <div className="mt-6"></div>
+      <ClientButton />
     </div>
   );
 };
