@@ -1,9 +1,9 @@
-import {Centimeter, LightMinute} from "./unitTypes";
+import {Centimeter, LightMinute, lightYearToLightMinute} from "./unitTypes";
 
 /**
- * Measured in light minutes; the radius of the Milky Way
+ * Measured in light minutes; 2000 light years in radius
  */
-export const UNIVERSE_RADIUS: LightMinute = 2.6e10;
+export const UNIVERSE_RADIUS: LightMinute = lightYearToLightMinute(2000);
 
 /**
  * Measured in centimeters

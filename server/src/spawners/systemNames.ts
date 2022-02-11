@@ -1,5 +1,5 @@
 // System names from Endless Sky and Ur Quan Masters
-export default [
+const SystemNames = [
   "Ablodab",
   "Ablub",
   "Acamar",
@@ -859,3 +859,5 @@ export default [
   "Beeblebrox",
   "Mendon",
 ];
+
+export default SystemNames;
