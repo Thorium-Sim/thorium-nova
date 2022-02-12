@@ -1,6 +1,8 @@
 import {
+  createContext,
   MutableRefObject,
   useCallback,
+  useContext,
   useEffect,
   useReducer,
   useRef,
@@ -66,6 +68,8 @@ function useNetRequestData() {
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 
+export const MockNetRequestContext = createContext<any>(null!);
+
 export async function netRequest<
   T extends AllRequestNames,
   R extends AllRequestReturns[T]
@@ -105,7 +109,9 @@ export function useNetRequest<
   const {socket} = useThorium();
   const [ready, resetReady] = useReducer(() => ({}), {});
   const [hookId] = useState(() => uniqid());
-  if (!socket) throw new Promise(() => {});
+  const mockData = useContext(MockNetRequestContext);
+
+  if (!socket && !mockData) throw new Promise(() => {});
 
   const setUpRequest = useCallback(
     hookId => {
@@ -141,18 +147,20 @@ export function useNetRequest<
       resetReady();
       delete data[requestId];
     };
+    if (mockData) return;
     socket.on("ready", handleReady);
     return () => {
       socket.off("ready", handleReady);
     };
-  }, [socket, requestId, data]);
+  }, [socket, requestId, data, mockData]);
 
   useEffect(() => {
+    if (mockData) return;
     setUpRequest(hookId);
     return () => {
       takeDownRequest(hookId);
     };
-  }, [setUpRequest, takeDownRequest, ready, hookId, requestId]);
+  }, [setUpRequest, takeDownRequest, ready, hookId, requestId, mockData]);
 
   const callbackRef = useRef(callback);
   useEffect(() => {
@@ -167,6 +175,8 @@ export function useNetRequest<
       netRequestCallbacks.delete(requestId);
     };
   }, [requestId]);
+
+  if (mockData) return mockData[requestName];
 
   if (!data[requestId] && data[requestId] !== null) {
     setUpRequest(hookId);

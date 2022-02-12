@@ -36,7 +36,7 @@ const ConfigList = () => {
         <h1 className="font-bold text-white text-3xl mb-4">Plugin Aspects</h1>
 
         <div className="flex flex-wrap gap-[10vw] justify-center">
-          <ConfigIcon disabled to={`/config/${pluginId}/starmap`}>
+          <ConfigIcon to={`/config/${pluginId}/starmap`}>
             <FaStar className="text-6xl mb-4" />
             <p className="font-bold text-2xl">Universe</p>
           </ConfigIcon>

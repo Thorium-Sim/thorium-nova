@@ -99,6 +99,8 @@ describe("solar system plugin input", () => {
     );
   });
   afterAll(async () => {
-    await fs.rm("plugins", {recursive: true});
+    try {
+      await fs.rm("plugins", {recursive: true});
+    } catch {}
   });
 });

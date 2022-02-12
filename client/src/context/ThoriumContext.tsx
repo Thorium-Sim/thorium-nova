@@ -1,5 +1,4 @@
 import {createContext, ReactNode, useContext, useMemo} from "react";
-import * as React from "react";
 import {useDataConnection} from "../hooks/useDataConnection";
 import {FaSpinner} from "react-icons/fa";
 import {SnapshotInterpolation} from "@geckos.io/snapshot-interpolation";
@@ -8,7 +7,7 @@ import Button from "@thorium/ui/Button";
 import {ThoriumAccountContextProvider} from "./ThoriumAccountContext";
 import {SI} from "../utils/clientSocket";
 
-const ThoriumContext = createContext<IThoriumContext | null>(null);
+export const ThoriumContext = createContext<IThoriumContext | null>(null);
 
 interface IThoriumContext {
   SI: SnapshotInterpolation;

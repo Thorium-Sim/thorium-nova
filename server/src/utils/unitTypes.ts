@@ -15,6 +15,13 @@ export type AstronomicalUnit = Flavor<number, "astronomicalUnit">;
 export type LightYear = Flavor<number, "lightYear">;
 export type LightMinute = Flavor<number, "lightMinute">;
 
+export function lightMinuteToLightYear(len: LightMinute) {
+  return len / (60 * 24 * 365.25);
+}
+export function lightYearToLightMinute(len: LightYear) {
+  return len * (60 * 24 * 365.25);
+}
+
 export type Kilograms = Flavor<number, "kilograms">;
 /**
  * Mass compared to the sun eg. 1 solar mass = the mass of the sun

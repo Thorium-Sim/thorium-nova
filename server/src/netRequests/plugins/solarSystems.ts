@@ -9,7 +9,11 @@ export const pluginSolarSystemsRequest = {
   ) {
     if (publishParams && params.pluginId !== publishParams.pluginId) throw null;
     const plugin = getPlugin(context, params.pluginId);
-    return plugin.aspects.solarSystems;
+    return plugin.aspects.solarSystems.map(solarSystem => ({
+      name: solarSystem.name,
+      position: solarSystem.position,
+      description: solarSystem.description,
+    }));
   },
   pluginSolarSystem(
     context: DataContext,
