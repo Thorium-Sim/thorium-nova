@@ -1,8 +1,12 @@
 import type {FlightDataModel} from "../classes/FlightDataModel";
-import {promises as fs} from "fs";
+import {promises} from "fs";
 import {thoriumPath} from "./appPaths";
 import {parse} from "yaml";
 
+const fs =
+  process.env.NODE_ENV === "test"
+    ? {readdir: () => [], readFile: () => "", mkdir: () => {}}
+    : promises;
 export async function getFlights() {
   let files: string[];
   try {
