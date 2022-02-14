@@ -5,7 +5,7 @@ import {parse} from "yaml";
 
 const fs =
   process.env.NODE_ENV === "test"
-    ? {readdir: () => [], readFile: () => "", qmkdir: () => {}}
+    ? {readdir: () => [], readFile: () => "", mkdir: () => {}}
     : promises;
 export async function getFlights() {
   let files: string[];
