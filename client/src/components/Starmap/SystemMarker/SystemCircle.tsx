@@ -7,7 +7,7 @@ import {CanvasTexture, Group, Vector3} from "three";
 import {useStarmapStore} from "../starmapStore";
 
 const size = 50;
-const lineWidth = 0.07;
+const lineWidth = 0.1;
 export const DraggableSystemCircle: React.FC<
   {
     hoveringDirection: React.MutableRefObject<number>;
@@ -91,7 +91,7 @@ const SystemCircle: React.FC<
       ctx.clearRect(0, 0, size, size);
 
       ctx.lineWidth = size / (1 / lineWidth);
-      ctx.strokeStyle = isSelected ? "white" : "rgba(0,255,255,0.2)";
+      ctx.strokeStyle = isSelected ? "white" : "rgba(0,255,255,0.5)";
       ctx.beginPath();
       ctx.arc(
         size / 2,
