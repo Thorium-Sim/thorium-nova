@@ -18,8 +18,7 @@ export default class StationComplementPlugin extends Aspect {
       params.name || "New Station Complement",
       plugin.aspects.stationComplements.map(station => station.name)
     );
-    super({name, ...params}, {kind: "stationComplements"}, plugin);
-
+    super({...params, name}, {kind: "stationComplements"}, plugin);
     this.stations = this.stations || params.stations || [];
     this.hasShipMap = this.hasShipMap || params.hasShipMap || false;
     this.assets = this.assets || params.assets || {};
