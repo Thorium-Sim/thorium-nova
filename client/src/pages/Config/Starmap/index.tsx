@@ -16,6 +16,7 @@ import {useStarmapStore} from "client/src/components/Starmap/starmapStore";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {ThoriumContext} from "client/src/context/ThoriumContext";
 import SystemMarker from "client/src/components/Starmap/SystemMarker";
+import Starfield from "client/src/components/Starmap/Starfield";
 import Button from "@thorium/ui/Button";
 import {
   lightMinuteToLightYear,
@@ -204,6 +205,7 @@ export function InterstellarMap() {
 
   return (
     <Suspense fallback={null}>
+      <Starfield radius={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)} />
       <OrbitControls
         ref={orbitControls}
         enabled={controlsEnabled}

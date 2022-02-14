@@ -30,7 +30,7 @@ describe("Starmap Plugin Editor", () => {
     );
 
     // Stars, the solar system, and the camera
-    expect(renderer.scene.allChildren.length).toBe(2);
+    expect(renderer.scene.allChildren.length).toBe(3);
     expect(renderer.scene.findByType("Group").props.position).toEqual([
       10, 20, 30,
     ]);
@@ -67,6 +67,6 @@ describe("Starmap Plugin Editor", () => {
     );
 
     // Stars, the solar system, and the camera
-    expect(renderer.scene.allChildren.length).toBe(4);
+    expect(renderer.scene.allChildren.length).toBe(5);
   });
 });
