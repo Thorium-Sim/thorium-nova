@@ -7,6 +7,7 @@ const fs =
   process.env.NODE_ENV === "test"
     ? {readdir: () => [], readFile: () => "", mkdir: () => {}}
     : promises;
+
 export async function getFlights() {
   let files: string[];
   try {
