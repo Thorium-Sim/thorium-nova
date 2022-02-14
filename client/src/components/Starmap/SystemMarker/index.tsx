@@ -20,7 +20,12 @@ const SystemMarker: React.FC<
     const zoom = group.current?.position
       ? camera.position.distanceTo(group.current?.position)
       : 1;
-    let zoomedScale = (zoom / 2) * 0.015;
+
+    let zoomedScale = Math.max(
+      Math.min(zoom ** (1 / 3) * 5000, zoom / 120),
+      zoom / 250
+    );
+
     group.current?.scale.set(zoomedScale, zoomedScale, zoomedScale);
     group.current?.quaternion.copy(camera.quaternion);
   });

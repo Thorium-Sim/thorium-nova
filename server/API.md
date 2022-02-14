@@ -3,7 +3,7 @@
 ## Environment Variables
 
 - `PORT` - Set the port for the HTTP server. Useful for headless setups.
-  Defaults to 4444.
+  Defaults to 4444. The HTTPS server with use the port + 1, defaulting to 4445.
 - `COOKIE_SECRET` - A secret key used to encrypt secure cookies. This is
   currently unused.
 - `THORIUM_PATH` - The directory that will contain the data and assets for

@@ -9,7 +9,7 @@ const fs =
     ? {mkdir: () => {}, writeFile: () => {}, rename: () => {}, unlink: () => {}}
     : fsCallback.promises;
 const readFileSync =
-  process.env.NODE_ENV === "test" ? () => null : fsCallback.readFileSync;
+  process.env.NODE_ENV === "test" ? () => "" : fsCallback.readFileSync;
 let isProxy = Symbol("isProxy");
 
 let basePath = "./";
