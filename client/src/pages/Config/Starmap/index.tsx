@@ -151,12 +151,12 @@ export default function StarMap() {
           Edit
         </Button>
       </Menubar>
-      <div className="h-[calc(100%-2rem)]  relative">
+      <div className="h-[calc(100%-2rem)]  relative bg-black">
         <Canvas
           onContextMenu={e => {
             e.preventDefault();
           }}
-          gl={{antialias: true, logarithmicDepthBuffer: true, alpha: false}}
+          gl={{antialias: true, logarithmicDepthBuffer: true}}
           camera={{fov: 45, far: FAR}}
           mode="concurrent"
         >
@@ -192,7 +192,7 @@ export function InterstellarMap() {
 
   const stars = useNetRequest("pluginSolarSystems", {pluginId});
   const controlsEnabled = useStarmapStore(s => s.cameraControlsEnabled);
-
+  console.log(JSON.parse(JSON.stringify(stars)));
   const orbitControls = useRef<any>();
   const {camera} = useThree();
   useEffect(() => {

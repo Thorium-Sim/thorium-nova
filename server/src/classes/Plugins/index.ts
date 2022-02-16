@@ -107,6 +107,11 @@ export default class BasePlugin extends FSDataStore {
       "themes",
       ThemePlugin
     );
+    this.aspects.solarSystems = await BasePlugin.loadAspect(
+      this,
+      "solarSystems",
+      SolarSystemPlugin
+    );
   }
   toJSON() {
     const {_coverImage, ...data} = this;
