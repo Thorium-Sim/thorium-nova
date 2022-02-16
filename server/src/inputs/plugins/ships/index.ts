@@ -3,7 +3,7 @@ import ShipPlugin, {ShipCategories} from "server/src/classes/Plugins/Ship";
 import {promises as fs} from "fs";
 import {DataContext} from "server/src/utils/DataContext";
 import {pubsub} from "server/src/utils/pubsub";
-import {getPlugin} from "./utils";
+import {getPlugin} from "../utils";
 import {thoriumPath} from "server/src/utils/appPaths";
 
 export const shipsPluginInputs = {
@@ -104,7 +104,7 @@ export const shipsPluginInputs = {
     async function moveFile(
       file: Blob | File | string,
       filePath: string,
-      propertyName: keyof NonNullable<typeof ship>["assets"]
+      propertyName: "logo" | "model" | "topView" | "sideView" | "vanity"
     ) {
       if (!ship) return;
       if (typeof file === "string") {

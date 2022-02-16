@@ -1,6 +1,7 @@
-import type BasePlugin from "./index";
-import {Aspect} from "./Aspect";
+import type BasePlugin from "../index";
+import {Aspect} from "../Aspect";
 import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
+import DeckPlugin from "./Deck";
 
 export type ShipCategories = "Cruiser" | "Frigate" | "Scout" | "Shuttle";
 
@@ -38,6 +39,10 @@ export default class ShipPlugin extends Aspect {
      * The side view of the ship as a PNG. Usually auto-generated from the model.
      */
     sideView: string;
+    /**
+     * The paths to the ship's deck images, where the index corresponds to the deck order.
+     */
+    decks: string[];
   };
   /**
    * The mass of the ship in kilograms
@@ -58,6 +63,10 @@ export default class ShipPlugin extends Aspect {
    * The station theme used for this ship if it is a player ship.
    */
   theme?: {pluginId: string; themeId: string};
+  /**
+   * The decks assigned to this ship.
+   */
+  decks: DeckPlugin[];
   constructor(params: Partial<ShipPlugin>, plugin: BasePlugin) {
     const name = generateIncrementedName(
       params.name || "New Ship",
@@ -75,10 +84,23 @@ export default class ShipPlugin extends Aspect {
       vanity: "",
       topView: "",
       sideView: "",
+      decks: [],
     };
     this.mass = params.mass || 700_000_000;
     this.length = params.length || 350;
     this.shipSystems = params.shipSystems || [];
     this.theme = params.theme || undefined;
+    this.decks = params.decks?.map(deck => new DeckPlugin(deck)) || [];
+  }
+  addDeck(deck: Partial<DeckPlugin>) {
+    let {name} = deck;
+    const order = this.decks.length;
+    if (!name) name = `Deck ${order + 1}`;
+    const deckNum = this.decks.push({name}) - 1;
+
+    return deckNum;
+  }
+  removeDeck(index: number) {
+    this.decks.splice(index, 1);
   }
 }
