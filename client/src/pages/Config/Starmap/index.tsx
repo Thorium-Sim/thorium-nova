@@ -119,7 +119,6 @@ export default function StarMap() {
             const vec = new Vector3(0, 0, lightYearToLightMinute(-300));
 
             vec.applyQuaternion(camera.quaternion).add(camera.position);
-            console.log(vec);
             const system = await netSend("pluginSolarSystemCreate", {
               pluginId,
               position: vec,
@@ -192,7 +191,6 @@ export function InterstellarMap() {
 
   const stars = useNetRequest("pluginSolarSystems", {pluginId});
   const controlsEnabled = useStarmapStore(s => s.cameraControlsEnabled);
-  console.log(JSON.parse(JSON.stringify(stars)));
   const orbitControls = useRef<any>();
   const {camera} = useThree();
   useEffect(() => {
