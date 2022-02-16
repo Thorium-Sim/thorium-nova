@@ -76,7 +76,7 @@ export const decksPluginInputs = {
         ship.assets.decks =
           ship.assets.decks ||
           Array.from({length: ship.decks.length}).fill(null);
-        ship.assets.decks[params.index] = filePath;
+        ship.assets.decks[params.index] = path.join(ship.assetPath, filePath);
         ship.writeFile(true);
       }
     }

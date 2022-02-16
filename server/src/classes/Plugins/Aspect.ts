@@ -10,12 +10,7 @@ type AspectKinds = keyof BasePlugin["aspects"];
 type AspectAsset = {
   [assetName: string]: string | string[];
 };
-function transformStringAsset(value: string, assetPath: string) {
-  // Allow images from the internet
-  // Allow absolute paths
-  if (!value || value.startsWith("http") || value.startsWith("/")) return value;
-  return path.join(assetPath, value);
-}
+
 export abstract class Aspect extends FSDataStore {
   abstract apiVersion: string;
   abstract kind: AspectKinds;
@@ -53,28 +48,6 @@ export abstract class Aspect extends FSDataStore {
     // in the file system
     const duplicateConstructor = this.constructor as any;
     return new duplicateConstructor(data);
-  }
-  /**
-   * Used for messages sent to the client. We transform the asset
-   * path to make sure it works with the client.
-   */
-  toJSON() {
-    const assets = this.assets || {};
-    const transformedAssets = Object.fromEntries(
-      Object.entries(assets).map(([key, value]) => {
-        if (typeof value === "string") {
-          return [key, transformStringAsset(value, this.assetPath)];
-        } else {
-          return [key, value.map(v => transformStringAsset(v, this.assetPath))];
-        }
-      })
-    );
-    const {plugin, ...data} = this;
-    return {
-      ...data,
-      pluginName: this.pluginName,
-      assets: transformedAssets,
-    };
   }
   /**
    * Used for serializing the data before it is stored in the file system.

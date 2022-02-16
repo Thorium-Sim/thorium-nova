@@ -112,7 +112,7 @@ export const shipsPluginInputs = {
           recursive: true,
         });
         await fs.rename(file, path.join(thoriumPath, ship.assetPath, filePath));
-        ship.assets[propertyName] = filePath;
+        ship.assets[propertyName] = path.join(ship.assetPath, filePath);
       }
     }
   },
