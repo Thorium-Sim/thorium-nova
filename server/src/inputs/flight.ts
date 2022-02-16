@@ -109,13 +109,11 @@ export const flightInputs = {
         stations:
           stationComplement?.stations.map(s => ({
             ...s,
-            logo: stationComplement?.toJSON()?.assets[`${s.name}-logo`] || "",
+            logo: stationComplement?.assets[`${s.name}-logo`] || "",
             cards: s.cards.map(c => {
               return {
                 ...c,
-                icon: stationComplement?.toJSON()?.assets[
-                  `${s.name}-${c.name}-icon`
-                ],
+                icon: stationComplement?.assets[`${s.name}-${c.name}-icon`],
               };
             }),
           })) || [],
