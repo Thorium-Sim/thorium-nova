@@ -152,17 +152,20 @@ function StationItem({
               !selectedClient ? "btn-disabled" : ""
             }`}
             onClick={async () => {
-              const result = await netSend("clientSetStation", {
-                shipId: shipId,
-                stationId: station.name,
-                clientId: selectedClient,
-              });
-              if ("error" in result) {
-                toast({
-                  title: "Error assigning station",
-                  body: result.error,
-                  color: "error",
+              try {
+                const result = await netSend("clientSetStation", {
+                  shipId: shipId,
+                  stationId: station.name,
+                  clientId: selectedClient,
                 });
+              } catch (err) {
+                if (err instanceof Error) {
+                  toast({
+                    title: "Error assigning station",
+                    body: err.message,
+                    color: "error",
+                  });
+                }
               }
             }}
           >

@@ -30,19 +30,22 @@ export function ThemeList() {
                 const name = await prompt({header: "Enter theme name"});
                 if (typeof name !== "string" || name.trim().length === 0)
                   return;
-                const result = await netSend("pluginThemeCreate", {
-                  name,
-                  pluginId,
-                });
-                if ("error" in result) {
-                  toast({
-                    title: "Error creating theme",
-                    body: result.error,
-                    color: "error",
+                try {
+                  const result = await netSend("pluginThemeCreate", {
+                    name,
+                    pluginId,
                   });
-                  return;
+                  navigate(`${result.themeId}`);
+                } catch (err) {
+                  if (err instanceof Error) {
+                    toast({
+                      title: "Error creating theme",
+                      body: err.message,
+                      color: "error",
+                    });
+                    return;
+                  }
                 }
-                navigate(`${result.themeId}`);
               }}
             >
               New theme

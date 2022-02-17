@@ -27,19 +27,22 @@ export function ShipList() {
                 const name = await prompt({header: "Enter ship name"});
                 if (typeof name !== "string" || name.trim().length === 0)
                   return;
-                const result = await netSend("pluginShipCreate", {
-                  name,
-                  pluginId,
-                });
-                if ("error" in result) {
-                  toast({
-                    title: "Error creating ship",
-                    body: result.error,
-                    color: "error",
+                try {
+                  const result = await netSend("pluginShipCreate", {
+                    name,
+                    pluginId,
                   });
-                  return;
+                  navigate(`${result.shipId}`);
+                } catch (err) {
+                  if (err instanceof Error) {
+                    toast({
+                      title: "Error creating ship",
+                      body: err.message,
+                      color: "error",
+                    });
+                    return;
+                  }
                 }
-                navigate(`${result.shipId}`);
               }}
             >
               New Ship

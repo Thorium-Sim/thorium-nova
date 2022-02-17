@@ -119,19 +119,24 @@ export default function StarMap() {
             const vec = new Vector3(0, 0, lightYearToLightMinute(-300));
 
             vec.applyQuaternion(camera.quaternion).add(camera.position);
-            const system = await netSend("pluginSolarSystemCreate", {
-              pluginId,
-              position: vec,
-            });
-            if ("error" in system) {
-              toast({
-                title: "Error creating system",
-                body: system.error,
-                color: "error",
+            try {
+              const system = await netSend("pluginSolarSystemCreate", {
+                pluginId,
+                position: vec,
               });
-              return;
+              useStarmapStore.setState({
+                selectedObjectId: system.solarSystemId,
+              });
+            } catch (err) {
+              if (err instanceof Error) {
+                toast({
+                  title: "Error creating system",
+                  body: err.message,
+                  color: "error",
+                });
+                return;
+              }
             }
-            useStarmapStore.setState({selectedObjectId: system.solarSystemId});
           }}
         >
           Add
