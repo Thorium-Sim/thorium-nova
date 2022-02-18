@@ -168,20 +168,23 @@ export const ThemeLayout = () => {
                   header: "What is the name of the duplicated plugin?",
                 });
                 if (!name || typeof name !== "string") return;
-                const result = await netSend("pluginThemeDuplicate", {
-                  pluginId: pluginId,
-                  themeId,
-                  name,
-                });
-                if ("error" in result) {
-                  toast({
-                    title: "Error duplicating plugin",
-                    body: result.error,
-                    color: "error",
+                try {
+                  const result = await netSend("pluginThemeDuplicate", {
+                    pluginId: pluginId,
+                    themeId,
+                    name,
                   });
-                  return;
+                  navigate(`/config/${pluginId}/themes/${result.themeId}`);
+                } catch (err) {
+                  if (err instanceof Error) {
+                    toast({
+                      title: "Error duplicating plugin",
+                      body: err.message,
+                      color: "error",
+                    });
+                    return;
+                  }
                 }
-                navigate(`/config/${pluginId}/themes/${result.themeId}`);
               }}
             >
               Duplicate Theme

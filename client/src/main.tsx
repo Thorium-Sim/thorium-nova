@@ -10,7 +10,9 @@ initializeTabId();
 declare global {
   interface Window {
     isHeadless: boolean;
-    thorium: {};
+    thorium: {
+      getAddress: () => Promise<string>;
+    };
   }
 }
 

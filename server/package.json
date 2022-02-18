@@ -33,6 +33,7 @@
     "fastify": "^3.25.0",
     "fastify-cookie": "^5.4.0",
     "fastify-cors": "^6.0.2",
+    "fastify-http-proxy": "^6.2.1",
     "fastify-multipart": "^5.2.1",
     "fastify-static": "^4.5.0",
     "fastify-websocket": "^4.0.0",

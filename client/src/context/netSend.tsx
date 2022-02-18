@@ -5,7 +5,7 @@ export async function netSend<
   InputName extends AllInputNames,
   Params extends AllInputParams[InputName],
   Return extends AllInputReturns[InputName]
->(type: InputName, params?: Params): Promise<Return | {error: string}> {
+>(type: InputName, params?: Params): Promise<Return> {
   const clientId = await getTabId();
   const body = new FormData();
   body.append("input", type.toString());
@@ -32,5 +32,8 @@ export async function netSend<
     body,
   });
   const json = await response.json();
+  if (json.error) {
+    throw new Error(json.error);
+  }
   return json;
 }

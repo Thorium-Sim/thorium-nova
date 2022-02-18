@@ -1,8 +1,19 @@
 import {Link} from "react-router-dom";
 import Logo from "../images/logo.svg?url";
 import packageJson from "../../../package.json";
+import {ClientButton} from "./ClientButton";
+import {useEffect, useState} from "react";
 
+function useConnectionAddress() {
+  const [connectionAddress, setConnectionAddress] = useState("");
+
+  useEffect(() => {
+    window?.thorium?.getAddress().then(setConnectionAddress);
+  }, []);
+  return connectionAddress;
+}
 export const WelcomeLogo = ({className}: {className?: string}) => {
+  const connectionAddress = useConnectionAddress();
   return (
     <div className={className}>
       <div className="flex items-end self-start ">
@@ -19,7 +30,13 @@ export const WelcomeLogo = ({className}: {className?: string}) => {
           Version {packageJson.version}
         </Link>
       </h2>
-      {/* <ClientButton /> */}
+      {connectionAddress && (
+        <h3 className="text-xl font-semi-bold mt-2">
+          Connect: {connectionAddress}
+        </h3>
+      )}
+      <div className="mt-6"></div>
+      <ClientButton />
     </div>
   );
 };
