@@ -14,7 +14,7 @@ export const decksPluginInputs = {
   ) {
     const plugin = getPlugin(context, params.pluginId);
     const ship = plugin.aspects.ships.find(ship => ship.name === params.shipId);
-    if (!ship) return;
+    if (!ship) return null;
 
     const deckIndex = ship.addDeck({});
 
@@ -47,7 +47,7 @@ export const decksPluginInputs = {
       index: number;
       name?: string;
       newIndex?: number;
-      backgroundImage?: File | string;
+      backgroundImage?: File | string | null;
     }
   ) {
     const plugin = getPlugin(context, params.pluginId);
@@ -66,7 +66,7 @@ export const decksPluginInputs = {
     if (params.backgroundImage && typeof params.backgroundImage === "string") {
       const ext = path.extname(params.backgroundImage);
       let file = params.backgroundImage;
-      let filePath = `${uniqid(`deck-${params.index}`)}.${ext}`;
+      let filePath = `${uniqid(`deck-${params.index}-`)}${ext}`;
       if (!ship) return;
       if (typeof file === "string") {
         await fs.mkdir(path.join(thoriumPath, ship.assetPath), {
@@ -80,11 +80,21 @@ export const decksPluginInputs = {
         ship.writeFile(true);
       }
     }
+    if (params.backgroundImage === null) {
+      ship.assets.decks =
+        ship.assets.decks || Array.from({length: ship.decks.length}).fill(null);
+      const oldAsset = ship.assets.decks[params.index];
+      if (oldAsset) {
+        await fs.unlink(path.join(thoriumPath, oldAsset));
+      }
+      ship.assets.decks[params.index] = "";
+      ship.writeFile(true);
+    }
     pubsub.publish("pluginShip", {
       pluginId: params.pluginId,
       shipId: ship.name,
     });
 
-    return params.newIndex || params.index;
+    return params.newIndex ?? params.index;
   },
 };
