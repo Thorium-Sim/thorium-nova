@@ -35,13 +35,13 @@ describe("ship decks plugin input", () => {
       shipId: "Test Template",
     });
 
-    expect(shipDeck).toEqual(0);
+    expect(shipDeck).toEqual({backgroundUrl: "", name: "Deck 1"});
     const shipDeck2 = decksPluginInputs.pluginShipDeckCreate(mockDataContext, {
       pluginId: "Test Plugin",
       shipId: "Test Template",
     });
 
-    expect(shipDeck2).toEqual(1);
+    expect(shipDeck2).toEqual({backgroundUrl: "", name: "Deck 2"});
   });
   it("should delete a deck", async () => {
     const mockDataContext = createMockDataContext();
@@ -93,8 +93,8 @@ describe("ship decks plugin input", () => {
     decksPluginInputs.pluginShipDeckUpdate(mockDataContext, {
       pluginId: "Test Plugin",
       shipId: "Test Template",
-      index: 0,
-      name: "A Deck",
+      deckId: "Deck 1",
+      newName: "A Deck",
     });
 
     expect(
@@ -104,7 +104,7 @@ describe("ship decks plugin input", () => {
     decksPluginInputs.pluginShipDeckUpdate(mockDataContext, {
       pluginId: "Test Plugin",
       shipId: "Test Template",
-      index: 1,
+      deckId: "A Deck",
       newIndex: 0,
     });
 

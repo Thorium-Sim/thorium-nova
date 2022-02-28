@@ -44,39 +44,40 @@ export const decksPluginInputs = {
     params: {
       pluginId: string;
       shipId: string;
-      index: number;
-      name?: string;
-      newIndex?: number;
-      backgroundImage?: File | string;
-    }
+      deckId: string;
+    } & (
+      | {newName: string}
+      | {newIndex: number}
+      | {backgroundImage: File | string}
+    )
   ) {
     const plugin = getPlugin(context, params.pluginId);
     const ship = plugin.aspects.ships.find(ship => ship.name === params.shipId);
-    if (!ship) return;
+    if (!ship) throw new Error("Ship not found");
 
-    const deck = ship.decks[params.index];
-
-    if (params.name) {
-      deck.name = params.name;
+    const deck = ship.decks.find(deck => deck.name === params.deckId);
+    if (!deck) throw new Error("Deck not found");
+    if ("newName" in params) {
+      deck.name = params.newName;
     }
-    if (typeof params.newIndex === "number") {
-      moveArrayItem(ship.decks, params.index, params.newIndex);
-      moveArrayItem(ship.assets.decks, params.index, params.newIndex);
+    if ("newIndex" in params && typeof params.newIndex === "number") {
+      const oldIndex = ship.decks.indexOf(deck);
+      moveArrayItem(ship.decks, oldIndex, params.newIndex);
     }
-    if (params.backgroundImage && typeof params.backgroundImage === "string") {
+    if (
+      "backgroundImage" in params &&
+      typeof params.backgroundImage === "string"
+    ) {
       const ext = path.extname(params.backgroundImage);
       let file = params.backgroundImage;
-      let filePath = `${uniqid(`deck-${params.index}`)}.${ext}`;
+      let filePath = `${uniqid(`deck-${deck.name}`)}.${ext}`;
       if (!ship) return;
       if (typeof file === "string") {
         await fs.mkdir(path.join(thoriumPath, ship.assetPath), {
           recursive: true,
         });
         await fs.rename(file, path.join(thoriumPath, ship.assetPath, filePath));
-        ship.assets.decks =
-          ship.assets.decks ||
-          Array.from({length: ship.decks.length}).fill(null);
-        ship.assets.decks[params.index] = path.join(ship.assetPath, filePath);
+        deck.backgroundUrl = path.join(ship.assetPath, filePath);
         ship.writeFile(true);
       }
     }
@@ -85,6 +86,6 @@ export const decksPluginInputs = {
       shipId: ship.name,
     });
 
-    return params.newIndex || params.index;
+    return deck;
   },
 };
