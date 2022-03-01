@@ -11,7 +11,7 @@ export default class PlanetPlugin {
     name: string;
     description: string;
     tags: string[];
-    //what does omit do? should I do it for the other three components?
+    //I still don't quite understand Omit, so I may have done this wrong.
     satellite: Omit<SatelliteComponent, "init">;
     isPlanet: Omit<IsPlanetComponet, "init">;
     population: Omit<PopulationComponent, "init">;

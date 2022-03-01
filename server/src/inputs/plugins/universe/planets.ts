@@ -43,20 +43,19 @@ export const planetPluginInputs = {
             params.pluginId,
             params.starId
         );
-        const childrenPlanets = star.planets;//is that a bad name? They're more like sibling planets
+        const childrenPlanets = star.planets;
 
         const planetType = planetTypes.find(
-            p => p.classification === params.planetType//I need to figure out planetType vs classification
+            p => p.classification === params.planetType,
         );
         if (!planetType) {
             throw new Error(`Invalid planet type: ${params.planetType}`);
         }
         const name = `${star.name} ${childrenPlanets.length}`;
 
-        //I probably don't need this here if the radius is negligible for orbit...right? Is it planetary radius or orbital radius?
+        //I don't think I'm using the radius right. I copied it from the stars, but star orbits are different than planetary orbits
         const radius = randomFromRange(planetType.radiusRange);
 
-        //I need to learn how to calculate these for new planets
         let semiMajorAxis = childrenPlanets.length * PLANET_DISTANCE;
         let orbitalArc = Math.random() * 360;
 
@@ -92,7 +91,7 @@ export const planetPluginInputs = {
         );
         star.planets.push(planet);
         
-        //I need to add this somewhere for it to work...
+        //I haven't yet added this to the pubsub list
         pubsub.publish("pluginStar", {
             pluginId: params.pluginId,
             starId: star.name,
@@ -160,7 +159,7 @@ export const planetPluginInputs = {
         if (params.age) {
             planet.isPlanet.age = params.age;
         }
-        //should all of these be editable? I know planet class influences a lot of attributes.
+        //I wasn't sure if all of these should be editable since the planet's class influences most of these attributes.
         if (params.classification) {
             planet.isPlanet.classification = params.classification;
         }

@@ -45,6 +45,7 @@ export class IsPlanetComponet extends Component {
      */
     hasClouds: number = 0.5;
 
+    //I couldn't quite copy over how the assets worked, I think I'm missing some things...
     /*
     assets: Partial<{
         texture: string;
