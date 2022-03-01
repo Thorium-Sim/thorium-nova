@@ -6,6 +6,7 @@ import path from "path";
 import {promises as fs} from "fs";
 import {thoriumPath} from "server/src/utils/appPaths";
 import uniqid from "@thorium/uniqid";
+import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
 
 export const decksPluginInputs = {
   pluginShipDeckCreate(
@@ -55,14 +56,19 @@ export const decksPluginInputs = {
     const ship = plugin.aspects.ships.find(ship => ship.name === params.shipId);
     if (!ship) throw new Error("Ship not found");
 
-    const deck = ship.decks.find(deck => deck.name === params.deckId);
+    const deckIndex = ship.decks.findIndex(deck => deck.name === params.deckId);
+    const deck = ship.decks[deckIndex];
     if (!deck) throw new Error("Deck not found");
     if ("newName" in params) {
-      deck.name = params.newName;
+      deck.name = generateIncrementedName(
+        params.newName,
+        ship.decks.map(deck => deck.name)
+      );
     }
     if ("newIndex" in params && typeof params.newIndex === "number") {
-      const oldIndex = ship.decks.indexOf(deck);
-      moveArrayItem(ship.decks, oldIndex, params.newIndex);
+      console.log(ship.decks);
+      moveArrayItem(ship.decks, deckIndex, params.newIndex);
+      console.log(ship.decks);
     }
     if (
       "backgroundImage" in params &&
@@ -70,7 +76,7 @@ export const decksPluginInputs = {
     ) {
       const ext = path.extname(params.backgroundImage);
       let file = params.backgroundImage;
-      let filePath = `${uniqid(`deck-${deck.name}-`)}.${ext}`;
+      let filePath = `${uniqid(`deck-${deck.name}-`)}${ext}`;
       if (!ship) return;
       if (typeof file === "string") {
         await fs.mkdir(path.join(thoriumPath, ship.assetPath), {

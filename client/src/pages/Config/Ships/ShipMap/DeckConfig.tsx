@@ -16,15 +16,17 @@ export interface PanStateI {
 }
 
 export function DeckConfig() {
-  const {pluginId, shipId, deckIndex} = useParams() as {
+  const {pluginId, shipId, deckName} = useParams() as {
     pluginId: string;
     shipId: string;
-    deckIndex: string;
+    deckName: string;
   };
   const data = useNetRequest("pluginShip", {pluginId, shipId});
-  const deckNumber = Number(deckIndex);
-  const deck = data.decks[deckNumber];
-  const deckImage = data.assets.decks[deckNumber];
+  const deck = data.decks.find(d => d.name === deckName);
+  if (!deck) {
+    throw new Error("Deck not found");
+  }
+  const deckImage = deck.backgroundUrl;
 
   const [ref, dimensions, , node] = useMeasure<HTMLDivElement>();
   const panState = useRef<PanStateI>({x: 0, y: 0, scale: 1});
@@ -58,7 +60,7 @@ export function DeckConfig() {
             await netSend("pluginShipDeckUpdate", {
               pluginId,
               shipId,
-              index: deckNumber,
+              deckId: deck.name,
               backgroundImage: files[0],
             });
           }}
@@ -71,7 +73,7 @@ export function DeckConfig() {
   return (
     <div className="flex-1 flex flex-col gap-4 h-full " ref={ref}>
       <PanZoom
-        key={`${deck.name}-${deckIndex}-${deckImage}`}
+        key={`${deck.name}-${deckName}-${deckImage}`}
         onMouseDown={() => (panned.current = false)}
         style={{width: "100%", outline: "none", flex: 1}}
         className="text-purple-400 border-2 border-white/10 rounded-lg bg-gray-800 overflow-hidden"
@@ -97,13 +99,13 @@ export function DeckConfig() {
               await netSend("pluginShipDeckUpdate", {
                 pluginId,
                 shipId,
-                index: deckNumber,
+                deckId: deck.name,
                 backgroundImage: null,
               });
             }
           }}
         >
-          Remove Deck
+          Remove Background
         </Button>
         <p ref={elementNameRef} className="h-4">
           &nbsp;

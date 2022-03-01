@@ -26,7 +26,7 @@ export default function ShipsRoute() {
           <Route path="physics" element={<Physics />} />
           <Route path="systems" element={<Systems />} />
           <Route path="shipMap" element={<ShipMap />}>
-            <Route path=":deckIndex" element={<DeckConfig />} />
+            <Route path=":deckName" element={<DeckConfig />} />
           </Route>
         </Route>
       </Route>

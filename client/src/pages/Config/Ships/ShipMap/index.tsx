@@ -23,11 +23,11 @@ import {CSS} from "@dnd-kit/utilities";
 export function SortableItem({
   id,
   name,
-  deckIndex,
+  deckName,
 }: {
   id: string;
   name: string;
-  deckIndex: string;
+  deckName: string;
 }) {
   const {attributes, listeners, setNodeRef, transform, transition, isDragging} =
     useSortable({id: id});
@@ -44,7 +44,7 @@ export function SortableItem({
       {...attributes}
       {...listeners}
       className={`list-group-item !p-0 transition-[border-radius] ${
-        deckIndex === id ? "selected" : ""
+        deckName === id ? "selected" : ""
       } touch-none ${isDragging ? "!border !rounded" : ""}`}
     >
       <Link
@@ -59,10 +59,10 @@ export function SortableItem({
 }
 
 export function ShipMap() {
-  const {pluginId, shipId, deckIndex} = useParams() as {
+  const {pluginId, shipId, deckName} = useParams() as {
     pluginId: string;
     shipId: string;
-    deckIndex: string;
+    deckName: string;
   };
   const navigate = useNavigate();
   const data = useNetRequest("pluginShip", {pluginId, shipId});
@@ -77,16 +77,19 @@ export function ShipMap() {
   );
   async function handleDragEnd(event: DragEndEvent) {
     const {active, over} = event;
-    if (!over?.id) return;
-    if (active.id !== over?.id) {
+    const activeIndex = active.data.current?.sortable.index;
+    const overIndex = over?.data.current?.sortable.index;
+
+    if (typeof overIndex !== "number") return;
+    if (activeIndex !== overIndex) {
       const result = await netSend("pluginShipDeckUpdate", {
         pluginId,
         shipId,
-        index: Number(active.id),
-        newIndex: Number(over.id),
+        deckId: active.id,
+        newIndex: Number(overIndex),
       });
       if (result) {
-        navigate(result);
+        navigate(result.name);
       }
     }
   }
@@ -104,16 +107,17 @@ export function ShipMap() {
             <SortableContext
               items={data.decks.map((deck, index) => ({
                 ...deck,
-                id: index.toString(),
+                id: deck.name,
+                index,
               }))}
               strategy={verticalListSortingStrategy}
             >
-              {data.decks.map((deck, i) => (
+              {data.decks.map(deck => (
                 <SortableItem
-                  key={i}
+                  key={deck.name}
                   name={deck.name}
-                  id={i.toString()}
-                  deckIndex={deckIndex}
+                  id={deck.name}
+                  deckName={deckName}
                 />
               ))}
             </SortableContext>
@@ -122,12 +126,12 @@ export function ShipMap() {
         <Button
           className="btn-success w-full"
           onClick={async () => {
-            const deckIndex = await netSend("pluginShipDeckCreate", {
+            const deck = await netSend("pluginShipDeckCreate", {
               pluginId,
               shipId,
             });
-            if (deckIndex === null) return;
-            navigate(deckIndex.toString());
+            if (deck === null) return;
+            navigate(deck.name.toString());
           }}
         >
           Add Deck
