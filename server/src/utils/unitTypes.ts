@@ -20,7 +20,14 @@ export type Kilograms = Flavor<number, "kilograms">;
  * Mass compared to the sun eg. 1 solar mass = the mass of the sun
  */
 export type SolarMass = Flavor<number, "solarMass">;
-
+/**
+ * Mass compared to the Earth eg. 1 terran mass = the mass of the Earth
+ */
+export type TerranMass = Flavor<number, "terranMass">;
+/**
+ * Force of gravity at the surface compared to Earth's
+ */
+export type GForce = Flavor<number, "gForce">;
 export type Kelvin = Flavor<number, "kelvin">;
 
 export type Year = Flavor<number, "year">;

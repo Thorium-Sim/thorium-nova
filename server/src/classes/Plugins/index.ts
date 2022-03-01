@@ -10,6 +10,7 @@ import StationComplementPlugin from "./StationComplement";
 import {loadFolderYaml} from "server/src/utils/loadFolderYaml";
 import ThemePlugin from "./Theme";
 import SolarSystemPlugin from "./Universe/SolarSystem";
+import StarPlugin from "./Universe/Star"
 
 export function pluginPublish(plugin: BasePlugin) {
   pubsub.publish("pluginsList", {
@@ -25,6 +26,7 @@ interface Aspects {
   stationComplements: StationComplementPlugin[];
   themes: ThemePlugin[];
   solarSystems: SolarSystemPlugin[];
+  stars: StarPlugin[];
 }
 // Storing the server here so it doesn't get
 // serialized with the plugin.
@@ -88,6 +90,7 @@ export default class BasePlugin extends FSDataStore {
         stationComplements: [],
         themes: [],
         solarSystems: [],
+        stars: [],
       };
       pluginAspects.set(this, aspects);
     }
