@@ -40,16 +40,18 @@ export default function PluginEdit() {
               onClick={async () => {
                 const name = await prompt({header: "Enter plugin name"});
                 if (typeof name !== "string") return;
-                const result = await netSend("pluginCreate", {name});
-                if ("error" in result) {
-                  toast({
-                    title: "Error creating plugin",
-                    body: result.error,
-                    color: "error",
-                  });
-                  return;
+                try {
+                  const result = await netSend("pluginCreate", {name});
+                  navigate(`/config/${result.pluginId}`);
+                } catch (err) {
+                  if (err instanceof Error) {
+                    toast({
+                      title: "Error creating plugin",
+                      body: err.message,
+                      color: "error",
+                    });
+                  }
                 }
-                navigate(`/config/${result.pluginId}`);
               }}
             >
               New Plugin
@@ -102,19 +104,21 @@ export default function PluginEdit() {
                 const target = e.target as HTMLInputElement;
                 if (!plugin) return;
                 if (target.value) {
-                  const result = await netSend("pluginUpdate", {
-                    name: target.value,
-                    pluginId: plugin.id,
-                  });
-                  if ("error" in result) {
-                    toast({
-                      title: "Error renaming plugin",
-                      body: result.error,
-                      color: "error",
+                  try {
+                    const result = await netSend("pluginUpdate", {
+                      name: target.value,
+                      pluginId: plugin.id,
                     });
-                    return;
+                    navigate(`/config/${result.pluginId}`);
+                  } catch (err) {
+                    if (err instanceof Error) {
+                      toast({
+                        title: "Error renaming plugin",
+                        body: err.message,
+                        color: "error",
+                      });
+                    }
                   }
-                  navigate(`/config/${result.pluginId}`);
                 } else {
                   setError(true);
                 }
@@ -205,19 +209,22 @@ export default function PluginEdit() {
                   header: "What is the name of the duplicated plugin?",
                 });
                 if (!name || typeof name !== "string") return;
-                const result = await netSend("pluginDuplicate", {
-                  pluginId: pluginId,
-                  name,
-                });
-                if ("error" in result) {
-                  toast({
-                    title: "Error duplicating plugin",
-                    body: result.error,
-                    color: "error",
+                try {
+                  const result = await netSend("pluginDuplicate", {
+                    pluginId: pluginId,
+                    name,
                   });
-                  return;
+                  navigate(`/config/${result.pluginId}`);
+                } catch (err) {
+                  if (err instanceof Error) {
+                    toast({
+                      title: "Error duplicating plugin",
+                      body: err.message,
+                      color: "error",
+                    });
+                    return;
+                  }
                 }
-                navigate(`/config/${result.pluginId}`);
               }}
             >
               Duplicate Plugin

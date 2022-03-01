@@ -50,12 +50,9 @@ export default class ThemePlugin extends Aspect {
     ).css;
     const processedCSS = (await less.render(postcssOutput)).css;
     await fs.mkdir(path.join(thoriumPath, this.assetPath), {recursive: true});
+    await fs.writeFile(path.join(thoriumPath, this.assets.rawCSS), rawCSS);
     await fs.writeFile(
-      path.join(thoriumPath, this.assetPath, "raw.css"),
-      rawCSS
-    );
-    await fs.writeFile(
-      path.join(thoriumPath, this.assetPath, "processed.css"),
+      path.join(thoriumPath, this.assets.processedCSS),
       processedCSS
     );
     return processedCSS;
@@ -69,20 +66,21 @@ export default class ThemePlugin extends Aspect {
       assetPath,
       path.join(thoriumPath, this.assetPath, fileName)
     );
-    this.assets.files.push(fileName);
+    this.assets.files.push(path.join(this.assetPath, fileName));
   }
 
   async removeAsset(assetPath: string) {
     const removePath = path.join(thoriumPath, assetPath);
-    await fs.unlink(removePath);
-    this.assets.files = this.assets.files.filter(
-      file => file !== path.basename(assetPath)
-    );
+    try {
+      await fs.unlink(removePath);
+    } finally {
+      this.assets.files = this.assets.files.filter(file => file !== assetPath);
+    }
   }
 
   get rawCSS() {
     const rawCSS = readFileSync(
-      path.join(thoriumPath, this.assetPath, this.assets.rawCSS),
+      path.join(thoriumPath, this.assets.rawCSS),
       "utf-8"
     );
 
@@ -90,18 +88,10 @@ export default class ThemePlugin extends Aspect {
   }
   get processedCSS() {
     const processedCSS = readFileSync(
-      path.join(thoriumPath, this.assetPath, this.assets.processedCSS),
+      path.join(thoriumPath, this.assets.processedCSS),
       "utf-8"
     );
 
     return processedCSS;
-  }
-
-  toJSON() {
-    return {
-      ...super.toJSON(),
-      rawCSS: this.rawCSS,
-      processedCSS: this.processedCSS,
-    };
   }
 }

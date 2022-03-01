@@ -1,8 +1,5 @@
 import {DataContext} from "server/src/utils/DataContext";
 import {getPlugin} from "./utils";
-import {promises as fs} from "fs";
-import path from "path";
-import {thoriumPath} from "server/src/utils/appPaths";
 
 export const pluginThemesRequest = {
   pluginThemes(
@@ -12,7 +9,11 @@ export const pluginThemesRequest = {
   ) {
     if (publishParams && params.pluginId !== publishParams.pluginId) throw null;
     const plugin = getPlugin(context, params.pluginId);
-    return plugin.aspects.themes;
+    return plugin.aspects.themes.map(theme => ({
+      ...theme,
+      rawCSS: theme.rawCSS,
+      processedCSS: theme.processedCSS,
+    }));
   },
   async pluginTheme(
     context: DataContext,
@@ -31,7 +32,7 @@ export const pluginThemesRequest = {
     );
     if (!theme) throw null;
 
-    return theme;
+    return {...theme, rawCSS: theme.rawCSS, processedCSS: theme.processedCSS};
   },
   pluginAllThemes(context: DataContext) {
     return context.server.plugins.reduce(

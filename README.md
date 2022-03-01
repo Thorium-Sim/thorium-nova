@@ -43,13 +43,16 @@ project.
 
 ```bash
 npm install
-npm run init:plugin
 npm run dev
 ```
 
 This will automatically start the client and development servers and open up the
 UI in your web browser. If it doesn't automatically open, you can open it
 yourself by going to http://localhost:3000.
+
+> Note: Running `npm install` will automatically update the default plugin with
+> the latest assets and configuration. If you want to manually pull the latest
+> default plugin from Github, you can run `npm run init:plugin`.
 
 ## Project Vision
 

@@ -5,6 +5,7 @@ const PluginEdit = lazy(() => import("./PluginEdit"));
 const ConfigList = lazy(() => import("./ConfigList"));
 const ShipsConfig = lazy(() => import("./Ships"));
 const ThemesConfig = lazy(() => import("./Themes"));
+const StarmapConfig = lazy(() => import("./Starmap"));
 
 export default function ConfigRoutes() {
   return (
@@ -14,6 +15,7 @@ export default function ConfigRoutes() {
       <Route path="/:pluginId/list" element={<ConfigList />} />
       <Route path="/:pluginId/ships/*" element={<ShipsConfig />} />
       <Route path="/:pluginId/themes/*" element={<ThemesConfig />} />
+      <Route path="/:pluginId/starmap/*" element={<StarmapConfig />} />
     </Routes>
   );
 }

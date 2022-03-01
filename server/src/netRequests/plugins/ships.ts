@@ -34,7 +34,7 @@ export const pluginShipsRequest = {
       .map(ship => ({
         name: ship.name,
         description: ship.description,
-        vanityUrl: ship.toJSON().assets.vanity,
+        vanityUrl: ship.assets.vanity,
         pluginName: ship.pluginName,
       }));
   },

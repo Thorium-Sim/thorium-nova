@@ -23,6 +23,12 @@ module.exports = {
         sourcemap: true,
       },
     ],
+    "^.+\\.jsx?$": [
+      "esbuild-jest",
+      {
+        sourcemap: true,
+      },
+    ],
     [`node_modules/(${esModules.join("|")})/*`]: [
       "esbuild-jest",
       {
