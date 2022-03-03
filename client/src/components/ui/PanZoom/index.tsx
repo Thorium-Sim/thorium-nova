@@ -57,7 +57,7 @@ type Props = {
   boundaryRatioHorizontal: number;
   enableBoundingBox?: boolean;
   style?: Object;
-  className?:string;
+  className?: string;
   initialX?: number;
   initialY?: number;
 
@@ -971,7 +971,7 @@ class PanZoom extends React.Component<Props, State> {
     if (process.env.NODE_ENV !== "production") {
       function warning(
         invariant: boolean,
-        ...args: Parameters<typeof console.log>
+        ...args: Parameters<typeof console.warn>
       ) {
         if (!invariant) console.warn(...args);
       }

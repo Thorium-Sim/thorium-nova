@@ -105,7 +105,7 @@ describe("ship decks plugin input", () => {
       pluginId: "Test Plugin",
       shipId: "Test Template",
       deckId: "A Deck",
-      newIndex: 0,
+      newIndex: 1,
     });
 
     expect(

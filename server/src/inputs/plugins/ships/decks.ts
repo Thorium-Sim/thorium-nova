@@ -66,9 +66,7 @@ export const decksPluginInputs = {
       );
     }
     if ("newIndex" in params && typeof params.newIndex === "number") {
-      console.log(ship.decks);
       moveArrayItem(ship.decks, deckIndex, params.newIndex);
-      console.log(ship.decks);
     }
     if (
       "backgroundImage" in params &&
