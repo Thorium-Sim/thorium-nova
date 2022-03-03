@@ -6,6 +6,8 @@ import {Assets} from "./Assets";
 import {Basic} from "./Basic";
 import {ShipList} from "./ShipList";
 import {ShipLayout} from "./ShipLayout";
+import {ShipMap} from "./ShipMap";
+import {DeckConfig} from "./ShipMap/DeckConfig";
 
 export default function ShipsRoute() {
   return (
@@ -23,6 +25,9 @@ export default function ShipsRoute() {
           <Route path="assets" element={<Assets />} />
           <Route path="physics" element={<Physics />} />
           <Route path="systems" element={<Systems />} />
+          <Route path="shipMap" element={<ShipMap />}>
+            <Route path=":deckName" element={<DeckConfig />} />
+          </Route>
         </Route>
       </Route>
     </Routes>
