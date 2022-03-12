@@ -355,43 +355,51 @@ function DeckEdge({
   );
 }
 function DeckEdges() {
-  const {pluginId, shipId} = useParams() as {
+  const {pluginId, shipId, deckName} = useParams() as {
     pluginId: string;
     shipId: string;
+    deckName: string;
   };
   const data = useNetRequest("pluginShip", {pluginId, shipId});
   const [selectedEdge, setSelectedEdge] = useState<number | null>(null);
 
-  const allNodes = data.decks.reduce((acc: DeckNode[], deck) => {
+  const deckNodes = data.decks.reduce((acc: DeckNode[], deck) => {
+    if (deckName !== deck.name) return acc;
     return [...acc, ...deck.nodes];
   }, []);
+  const deckNodeIds = deckNodes.map(node => node.id);
 
   return (
     <svg className="pointer-events-none absolute inset-0 w-full h-full">
-      {data.deckEdges.map(edge => (
-        <DeckEdge
-          key={edge.id}
-          {...edge}
-          allNodes={allNodes}
-          selectedEdge={selectedEdge}
-          setSelectedEdge={setSelectedEdge}
-          updateEdge={(input: {weight: number} | {flags: EdgeFlag[]}) => {
-            netSend("pluginShipDeckUpdateEdge", {
-              pluginId,
-              shipId,
-              edgeId: edge.id,
-              ...input,
-            });
-          }}
-          removeEdge={() => {
-            netSend("pluginShipDeckRemoveEdge", {
-              pluginId,
-              shipId,
-              edgeId: edge.id,
-            });
-          }}
-        />
-      ))}
+      {data.deckEdges
+        .filter(
+          edge =>
+            deckNodeIds.includes(edge.from) && deckNodeIds.includes(edge.to)
+        )
+        .map(edge => (
+          <DeckEdge
+            key={edge.id}
+            {...edge}
+            allNodes={deckNodes}
+            selectedEdge={selectedEdge}
+            setSelectedEdge={setSelectedEdge}
+            updateEdge={(input: {weight: number} | {flags: EdgeFlag[]}) => {
+              netSend("pluginShipDeckUpdateEdge", {
+                pluginId,
+                shipId,
+                edgeId: edge.id,
+                ...input,
+              });
+            }}
+            removeEdge={() => {
+              netSend("pluginShipDeckRemoveEdge", {
+                pluginId,
+                shipId,
+                edgeId: edge.id,
+              });
+            }}
+          />
+        ))}
     </svg>
   );
 }
