@@ -13,6 +13,7 @@ import {
   NodeFlag,
 } from "server/src/classes/Plugins/Ship/Deck";
 import type ShipPlugin from "../../../classes/Plugins/Ship";
+import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
 
 function getDeck(
   context: DataContext,
@@ -42,7 +43,7 @@ export const decksPluginInputs = {
   ) {
     const plugin = getPlugin(context, params.pluginId);
     const ship = plugin.aspects.ships.find(ship => ship.name === params.shipId);
-    if (!ship) return;
+    if (!ship) return null;
 
     const deckIndex = ship.addDeck({});
 
@@ -76,17 +77,21 @@ export const decksPluginInputs = {
     } & (
       | {newName: string}
       | {newIndex: number}
-      | {backgroundImage: File | string}
+      | {backgroundImage: File | string | null}
     )
   ) {
     const {ship, deck} = getDeck(context, params);
 
+    const deckIndex = ship.decks.findIndex(deck => deck.name === params.deckId);
+    if (!deck) throw new Error("Deck not found");
     if ("newName" in params) {
-      deck.name = params.newName;
+      deck.name = generateIncrementedName(
+        params.newName,
+        ship.decks.map(deck => deck.name)
+      );
     }
     if ("newIndex" in params && typeof params.newIndex === "number") {
-      const oldIndex = ship.decks.indexOf(deck);
-      moveArrayItem(ship.decks, oldIndex, params.newIndex);
+      moveArrayItem(ship.decks, deckIndex, params.newIndex);
     }
     if (
       "backgroundImage" in params &&
@@ -94,7 +99,7 @@ export const decksPluginInputs = {
     ) {
       const ext = path.extname(params.backgroundImage);
       let file = params.backgroundImage;
-      let filePath = `${uniqid(`deck-${deck.name}`)}.${ext}`;
+      let filePath = `${uniqid(`deck-${deck.name}-`)}${ext}`;
       if (!ship) return;
       if (typeof file === "string") {
         await fs.mkdir(path.join(thoriumPath, ship.assetPath), {
@@ -104,6 +109,14 @@ export const decksPluginInputs = {
         deck.backgroundUrl = path.join(ship.assetPath, filePath);
         ship.writeFile(true);
       }
+    }
+    if ("backgroundImage" in params && params.backgroundImage === null) {
+      const oldAsset = deck.backgroundUrl;
+      if (oldAsset) {
+        await fs.unlink(path.join(thoriumPath, oldAsset));
+      }
+      deck.backgroundUrl = "";
+      ship.writeFile(true);
     }
     pubsub.publish("pluginShip", {
       pluginId: params.pluginId,
