@@ -19,6 +19,7 @@ import UploadWell from "@thorium/ui/UploadWell";
 import {netSend} from "client/src/context/netSend";
 import {useConfirm} from "@thorium/ui/AlertDialog";
 import type {
+  DeckEdge as DeckEdgeT,
   DeckNode,
   EdgeFlag,
   NodeFlag,
@@ -30,6 +31,7 @@ import Checkbox from "@thorium/ui/Checkbox";
 import {Portal} from "@headlessui/react";
 import useOnClickOutside from "client/src/hooks/useClickOutside";
 import {useCallback} from "react";
+import {useDeckNode} from "./DeckNodeContext";
 
 export interface PanStateI {
   x: number;
@@ -59,6 +61,7 @@ function NodeCircle({
   deselectNode,
   removeNode,
   addingEdges,
+  hasCrossDeckConnection,
 }: DeckNode & {
   panState: MutableRefObject<PanStateI>;
   updateNode: (params: updateNodeParams) => void;
@@ -67,6 +70,7 @@ function NodeCircle({
   removeNode: () => void;
   selected: boolean;
   addingEdges: boolean;
+  hasCrossDeckConnection: boolean;
 }) {
   const {
     x: floatingX,
@@ -116,8 +120,10 @@ function NodeCircle({
       <div
         ref={reference}
         className={`rounded-full ${
-          addingEdges && selected ? "bg-purple-400" : "bg-white"
-        } w-2 h-2 absolute -top-1 -left-1 cursor-grab touch-none`}
+          selected ? (addingEdges ? "bg-purple-400" : "bg-primary") : "bg-white"
+        } w-2 h-2 absolute -top-1 -left-1 cursor-grab touch-none ${
+          hasCrossDeckConnection ? "ring-1" : ""
+        } ring-white ring-offset-1 ring-offset-black`}
         onMouseDown={e => e.stopPropagation()}
         {...bind()}
         style={{
@@ -144,6 +150,7 @@ function NodeCircle({
               top: floatingY ?? "",
               left: floatingX ?? "",
             }}
+            onMouseDown={e => e.stopPropagation()}
           >
             <Input
               label="Name"
@@ -254,8 +261,6 @@ function DeckEdge({
   from,
   to,
   allNodes,
-  selectedEdge,
-  setSelectedEdge,
   removeEdge,
   updateEdge,
 }: {
@@ -263,13 +268,15 @@ function DeckEdge({
   from: number;
   to: number;
   allNodes: DeckNode[];
-  selectedEdge: number | null;
-  setSelectedEdge: (edge: number | null) => void;
   removeEdge: () => void;
   updateEdge: (input: {weight: number} | {flags: EdgeFlag[]}) => void;
 }) {
   const fromNode = allNodes.find(node => node.id === from);
   const toNode = allNodes.find(node => node.id === to);
+
+  const {
+    edgeState: [selectedEdge, setSelectedEdge],
+  } = useDeckNode();
 
   const {
     x: floatingX,
@@ -331,6 +338,7 @@ function DeckEdge({
               top: floatingY ?? "",
               left: floatingX ?? "",
             }}
+            onMouseDown={e => e.stopPropagation()}
           >
             <Button
               className="btn-error btn-sm w-full"
@@ -354,20 +362,19 @@ function DeckEdge({
     </>
   );
 }
-function DeckEdges() {
+function DeckEdges({
+  deckNodes,
+  deckNodeIds,
+}: {
+  deckNodes: DeckNode[];
+  deckNodeIds: number[];
+}) {
   const {pluginId, shipId, deckName} = useParams() as {
     pluginId: string;
     shipId: string;
     deckName: string;
   };
   const data = useNetRequest("pluginShip", {pluginId, shipId});
-  const [selectedEdge, setSelectedEdge] = useState<number | null>(null);
-
-  const deckNodes = data.decks.reduce((acc: DeckNode[], deck) => {
-    if (deckName !== deck.name) return acc;
-    return [...acc, ...deck.nodes];
-  }, []);
-  const deckNodeIds = deckNodes.map(node => node.id);
 
   return (
     <svg className="pointer-events-none absolute inset-0 w-full h-full">
@@ -381,8 +388,6 @@ function DeckEdges() {
             key={edge.id}
             {...edge}
             allNodes={deckNodes}
-            selectedEdge={selectedEdge}
-            setSelectedEdge={setSelectedEdge}
             updateEdge={(input: {weight: number} | {flags: EdgeFlag[]}) => {
               netSend("pluginShipDeckUpdateEdge", {
                 pluginId,
@@ -414,11 +419,15 @@ export function DeckConfig() {
   if (!deck) {
     throw new Error("Deck not found");
   }
+  const {
+    nodeState: nodeState,
+    edgeState: [, setSelectedEdgeId],
+  } = useDeckNode();
+  const [selectedNodeId, setSelectedNodeId] = nodeState;
   const nodes = deck.nodes;
-  const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
   const deckImage = deck.backgroundUrl;
 
-  const [ref, dimensions, , node] = useMeasure<HTMLDivElement>();
+  const [ref, , , node] = useMeasure<HTMLDivElement>();
   const panState = useRef<PanStateI>({x: 0, y: 0, scale: 1});
   // Used to determine if a click event is after a pan event
 
@@ -444,6 +453,13 @@ export function DeckConfig() {
 
   const [addingNodes, setAddingNodes] = useState(false);
   const [addingEdges, setAddingEdges] = useState(false);
+
+  const deckNodes = data.decks.reduce((acc: DeckNode[], deck) => {
+    if (deckName !== deck.name) return acc;
+    return [...acc, ...deck.nodes];
+  }, []);
+  const deckNodeIds = deckNodes.map(node => node.id);
+
   if (!deckImage) {
     return (
       <div className="flex flex-col flex-1 justify-center items-center">
@@ -467,16 +483,23 @@ export function DeckConfig() {
       <PanZoom
         // TODO March 3, 2022 - Set the initial pan and zoom state so the item is centered
         key={`${deck.name}-${deckName}-${deckImage}`}
-        onMouseDown={() => (panned.current = false)}
+        onMouseDown={() => {
+          panned.current = false;
+          setSelectedNodeId(null);
+          setSelectedEdgeId(null);
+        }}
         style={{width: "100%", outline: "none", flex: 1}}
         className="text-purple-400 border-2 border-white/10 rounded-lg bg-gray-800 overflow-hidden"
         maxZoom={8}
         minZoom={0.5}
         noStateUpdate={false}
+        onPan={() => {
+          setSelectedNodeId(null);
+          setSelectedEdgeId(null);
+        }}
         onStateChange={(state: PanStateI) => {
           panned.current = true;
           panState.current = state;
-          setSelectedNodeId(null);
         }}
       >
         <SVGImageLoader
@@ -502,51 +525,61 @@ export function DeckConfig() {
           }}
         />
         <EdgeContextProvider>
-          <DeckEdges />
+          <DeckEdges deckNodes={deckNodes} deckNodeIds={deckNodeIds} />
 
-          {nodes.map(node => (
+          {nodes.map(deckNode => (
             <NodeCircle
-              key={node.id}
-              {...node}
+              key={deckNode.id}
+              {...deckNode}
               panState={panState}
               updateNode={async (params: updateNodeParams) => {
                 await netSend("pluginShipDeckUpdateNode", {
                   pluginId,
                   shipId,
                   deckId: deck.name,
-                  nodeId: node.id,
+                  nodeId: deckNode.id,
                   ...params,
                 });
               }}
               selectNode={() => {
                 if (selectedNodeId && addingEdges) {
-                  if (selectedNodeId === node.id) {
+                  if (selectedNodeId === deckNode.id) {
                     setSelectedNodeId(null);
+                    setSelectedEdgeId(null);
                   } else {
                     setSelectedNodeId(null);
                     netSend("pluginShipDeckAddEdge", {
                       pluginId,
                       shipId,
                       from: selectedNodeId,
-                      to: node.id,
+                      to: deckNode.id,
                     });
                   }
                 } else {
-                  setSelectedNodeId(node.id);
+                  setSelectedNodeId(deckNode.id);
+                  setSelectedEdgeId(null);
                 }
               }}
-              deselectNode={() => setSelectedNodeId(null)}
+              deselectNode={() => {
+                setSelectedNodeId(null);
+                setSelectedEdgeId(null);
+              }}
               removeNode={() => {
                 netSend("pluginShipDeckRemoveNode", {
                   pluginId,
                   shipId,
                   deckId: deck.name,
-                  nodeId: node.id,
+                  nodeId: deckNode.id,
                 });
                 setSelectedNodeId(null);
               }}
-              selected={selectedNodeId === node.id}
+              selected={selectedNodeId === deckNode.id}
               addingEdges={addingEdges}
+              hasCrossDeckConnection={getCrossDeckConnection(
+                deckNode.id,
+                data.deckEdges,
+                deckNodeIds
+              )}
             />
           ))}
         </EdgeContextProvider>
@@ -578,6 +611,7 @@ export function DeckConfig() {
               setAddingEdges(false);
               setAddingNodes(!addingNodes);
               setSelectedNodeId(null);
+              setSelectedEdgeId(null);
             }}
           >
             {addingNodes ? "Done Adding Nodes" : "Add Nodes"}
@@ -588,6 +622,7 @@ export function DeckConfig() {
               setAddingNodes(false);
               setAddingEdges(!addingEdges);
               setSelectedNodeId(null);
+              setSelectedEdgeId(null);
             }}
           >
             {addingEdges ? "Done Adding Edges" : "Add Edges"}
@@ -606,4 +641,23 @@ export function DeckConfig() {
       </div>
     </div>
   );
+}
+
+function getCrossDeckConnection(
+  nodeId: number,
+  edges: DeckEdgeT[],
+  deckNodeIds: number[]
+) {
+  const roomEdges = edges.filter(
+    edge => edge.from === nodeId || edge.to === nodeId
+  );
+  if (
+    roomEdges.some(edge => {
+      const otherNode = edge.from === nodeId ? edge.to : edge.from;
+      return !deckNodeIds.includes(otherNode);
+    })
+  ) {
+    return true;
+  }
+  return false;
 }
