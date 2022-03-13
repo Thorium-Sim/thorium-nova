@@ -1,43 +1,27 @@
-import {Link, useMatch} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
+
+const links = {
+  basic: "Basic",
+  physics: "Physics",
+  assets: "Assets",
+  shipMap: "Ship Map",
+  systems: "Systems",
+};
 
 export function SettingsList() {
-  const match = useMatch("/config/:pluginId/ships/:shipId/:setting");
+  const params = useParams();
+  const setting = params["*"]?.split("/")[1];
   return (
     <div className="mb-2 w-72">
-      <Link
-        to="basic"
-        className={`list-group-item ${
-          match?.params.setting === "basic" ? "selected" : ""
-        }`}
-      >
-        Basic
-      </Link>
-
-      <Link
-        to="physics"
-        className={`list-group-item ${
-          match?.params.setting === "physics" ? "selected" : ""
-        }`}
-      >
-        Physics
-      </Link>
-
-      <Link
-        to="assets"
-        className={`list-group-item ${
-          match?.params.setting === "assets" ? "selected" : ""
-        }`}
-      >
-        Assets
-      </Link>
-      <Link
-        to="systems"
-        className={`list-group-item ${
-          match?.params.setting === "systems" ? "selected" : ""
-        }`}
-      >
-        Systems
-      </Link>
+      {Object.entries(links).map(([key, value]) => (
+        <Link
+          key={key}
+          to={key}
+          className={`list-group-item ${setting === key ? "selected" : ""}`}
+        >
+          {value}
+        </Link>
+      ))}
     </div>
   );
 }
