@@ -83,7 +83,6 @@ export const decksPluginInputs = {
     const {ship, deck} = getDeck(context, params);
 
     const deckIndex = ship.decks.findIndex(deck => deck.name === params.deckId);
-
     if ("newName" in params) {
       deck.name = generateIncrementedName(
         params.newName,
