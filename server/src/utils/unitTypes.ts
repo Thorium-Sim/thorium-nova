@@ -6,6 +6,14 @@ export type Flavor<T, FlavorT> = T & Flavoring<FlavorT>;
 export type Kilometer = Flavor<number, "kilometer">;
 export type Meter = Flavor<number, "meter">;
 export type Centimeter = Flavor<number, "centimeter">;
+
+export type KilometerPerSecond = Flavor<number, "kilometerPerSecond">;
+export type KilometerPerSecondSquared = Flavor<
+  number,
+  "kilometerPerSecondSquared"
+>;
+export type KiloNewtons = Flavor<number, "kiloNewtons">;
+
 /**
  * Distance compared to the radius of the sun eg. 1 solar radius = the radius of the sun
  */
