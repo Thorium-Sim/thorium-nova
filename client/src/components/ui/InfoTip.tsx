@@ -1,7 +1,7 @@
 import {
   autoPlacement,
   useFloating,
-  getScrollParents,
+  getOverflowAncestors,
 } from "@floating-ui/react-dom";
 import {ReactNode, useEffect, useLayoutEffect, useState} from "react";
 import {FaInfoCircle} from "react-icons/fa";
@@ -19,8 +19,8 @@ const InfoTip = ({children}: {children: ReactNode}) => {
       return;
     }
     const parents = [
-      ...getScrollParents(refs.reference.current),
-      ...getScrollParents(refs.floating.current),
+      ...getOverflowAncestors(refs.reference.current as any),
+      ...getOverflowAncestors(refs.floating.current),
     ];
     parents.forEach(parent => {
       parent.addEventListener("scroll", update);
