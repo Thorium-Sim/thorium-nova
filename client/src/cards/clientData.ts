@@ -32,7 +32,7 @@ export const subscriptions = {
       if ("clientId" in params && params.clientId !== context.clientId)
         throw null;
     }
-    return context.ship as Entity;
+    return context.ship?.toJSON() as Entity;
   },
   station(context: DataContext, params: {clientId: string}): Station {
     if (params && params.clientId !== context.clientId) throw null;
@@ -44,11 +44,14 @@ export const subscriptions = {
     return station || null;
   },
   theme(context: DataContext, params: {clientId: string}) {
+    console.log(context.ship?.components.theme);
     if (params && params.clientId !== context.clientId) throw null;
+    console.log(context.flight?.pluginIds);
     const themeObj = context.server.plugins
       .filter(plugin => context.flight?.pluginIds.includes(plugin.id))
       .reduce((acc: null | ThemePlugin, plugin) => {
         if (acc) return acc;
+        console.log(plugin.id, context.ship?.components.theme?.pluginId);
         if (plugin.id !== context.ship?.components.theme?.pluginId) return acc;
         return (
           plugin.aspects.themes.find(
@@ -56,6 +59,7 @@ export const subscriptions = {
           ) || null
         );
       }, null);
+    console.log(themeObj);
     return themeObj;
   },
 };

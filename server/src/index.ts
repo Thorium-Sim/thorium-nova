@@ -44,7 +44,7 @@ export async function startServer() {
     flight = new FlightDataModel(
       {
         name: flightName,
-        initialLoad: true,
+        initialLoad: false,
         entities: [],
         serverDataModel: serverModel,
       },
