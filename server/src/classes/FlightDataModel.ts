@@ -13,7 +13,7 @@ export class FlightDataModel extends FSDataStore {
   paused!: boolean;
   ecs!: ECS;
   clients!: Record<string, FlightClient>;
-  pluginIds: string[] = [];
+  pluginIds!: string[];
   private entities!: Entity[];
   serverDataModel: ServerDataModel;
   constructor(
@@ -34,7 +34,6 @@ export class FlightDataModel extends FSDataStore {
       },
       storeOptions
     );
-
     this.name ??= flightName;
     this.paused ??= params.paused ?? true;
     this.date ??= Number(params.date ? new Date(params.date) : new Date());
@@ -116,7 +115,7 @@ export class FlightDataModel extends FSDataStore {
   }
   toJSON() {
     // Get all of the entities in the world and serialize them into objects
-    return {
+    const data = {
       name: this.name,
       paused: this.paused,
       date: this.date,
@@ -126,5 +125,6 @@ export class FlightDataModel extends FSDataStore {
         Object.entries(this.clients).map(([id, client]) => [id, client])
       ),
     };
+    return data;
   }
 }
