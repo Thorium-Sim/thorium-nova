@@ -32,7 +32,7 @@ export const subscriptions = {
       if ("clientId" in params && params.clientId !== context.clientId)
         throw null;
     }
-    return context.ship as Entity;
+    return context.ship?.toJSON() as Entity;
   },
   station(context: DataContext, params: {clientId: string}): Station {
     if (params && params.clientId !== context.clientId) throw null;

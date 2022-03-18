@@ -8,3 +8,5 @@ export {decksPluginInputs} from "./plugins/ships/decks";
 export {themesPluginInput} from "./plugins/themes";
 export {officerLogInputs} from "./officersLog";
 export {solarSystemsPluginInputs} from "./plugins/universe/solarSystems";
+export {shipSystemsPluginInput} from "./plugins/shipSystems";
+export {impulseEnginesPluginInput} from "./plugins/shipSystems/impulseEngines";

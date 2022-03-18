@@ -48,12 +48,12 @@ export const CardArea: React.FC<{
       <Transition show={Boolean(client.offlineState)} {...transitionProps}>
         <Offline />
       </Transition>
-      {CardComponents.map(({CardComponent, name}) => (
+      {CardComponents.map(({CardComponent, component, name}) => (
         <CardRenderer
           key={name}
           CardComponent={CardComponent}
-          id={name}
-          currentCardId={card.name}
+          id={component}
+          currentCardId={card.component}
         />
       ))}
     </Fragment>

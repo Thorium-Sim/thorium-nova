@@ -32,7 +32,12 @@ const sockets: Record<string, SocketStream> = {};
  */
 
 function socketSend(socket: SocketStream, data: any) {
-  socket.socket.send(encode(data));
+  try {
+    socket.socket.send(encode(data));
+  } catch (err) {
+    console.error(err);
+    console.error(data);
+  }
 }
 export class ServerClient extends BaseClient {
   name: string;
