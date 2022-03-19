@@ -1,63 +1,51 @@
-import { SatelliteComponent } from "server/src/components/satellite";
-import {
-    Kilometer,
-  } from "server/src/utils/unitTypes";
-import StarPlugin from "./Star";
-import { IsPlanetComponet } from "server/src/components/isPlanet";
-import { PopulationComponent } from "server/src/components/population";
-import { TemperatureComponent } from "server/src/components/temperature";
+import {SatelliteComponent} from "server/src/components/satellite";
+import {IsPlanetComponent} from "server/src/components/isPlanet";
 
 export default class PlanetPlugin {
-    name: string;
-    description: string;
-    tags: string[];
-    //I still don't quite understand Omit, so I may have done this wrong.
-    satellite: Omit<SatelliteComponent, "init">;
-    isPlanet: Omit<IsPlanetComponet, "init">;
-    population: Omit<PopulationComponent, "init">;
-    temperature: Omit<TemperatureComponent, "init">;
-    constructor(
-      params: Partial<
-        Omit<PlanetPlugin, "satellite"> & {
-          satellite: Partial<Omit<SatelliteComponent, "init">>;
-        }
-      >,
-      star: StarPlugin
-    ) {
-      this.name =
-        params.name ||
-        `${star.name} ${[star.planets.length]}`;
-      this.description = params.description || "";
-      this.tags = params.tags || [];
-      this.isPlanet = {
-        age: params.isPlanet?.age || 0,
-        classification: params.isPlanet?.classification || "M",
-        radius: params.isPlanet?.radius || 3959,
-        terranMass: params.isPlanet?.terranMass || 1,
-        isHabitable: params.isPlanet?.isHabitable || true,
-        lifeforms: params.isPlanet?.lifeforms || ["Unknown"],
-        zone: params.isPlanet?.zone || ["habitable"],
-        atmosphericComposition: params.isPlanet?.atmosphericComposition || [],
-        hasRings: params.isPlanet?.hasRings || 0,
-        hasClouds: params.isPlanet?.hasClouds || 0,
+  name: string;
+  description: string;
+  tags: string[];
+  satellite: Omit<SatelliteComponent, "init">;
+  isPlanet: Omit<IsPlanetComponent, "init">;
+  population: number;
+  temperature: number;
+  constructor(
+    params: {name: string} & Partial<
+      Omit<PlanetPlugin, "satellite"> & {
+        satellite: Partial<Omit<SatelliteComponent, "init">>;
       }
-      
-      this.satellite = {
-        axialTilt: params.satellite?.axialTilt || 0,
-        eccentricity: params.satellite?.eccentricity || 0,
-        inclination: params.satellite?.inclination || 0,
-        semiMajorAxis: params.satellite?.semiMajorAxis || 0,
-        orbitalArc: params.satellite?.orbitalArc || 0,
-        showOrbit: true,
-        parentId: star.name,
-      };
+    >
+  ) {
+    this.name = params.name;
+    this.description = params.description || "";
+    this.tags = params.tags || [];
+    this.isPlanet = {
+      age: params.isPlanet?.age || 0,
+      classification: params.isPlanet?.classification || "M",
+      radius: params.isPlanet?.radius || 3959,
+      terranMass: params.isPlanet?.terranMass || 1,
+      isHabitable: params.isPlanet?.isHabitable || true,
+      lifeforms: params.isPlanet?.lifeforms || ["Unknown"],
+      atmosphericComposition: params.isPlanet?.atmosphericComposition || [],
+      textureMapAsset:
+        params.isPlanet?.textureMapAsset ||
+        "/plugins/Thorium Default/assets/default/planets/planet_textureAuric.jpg",
+      cloudMapAsset: params.isPlanet?.cloudMapAsset || null,
+      ringMapAsset: params.isPlanet?.ringMapAsset || null,
+    };
 
-      this.population = {
-        count: params.population?.count || 0,
-      }
+    this.satellite = {
+      axialTilt: params.satellite?.axialTilt || 0,
+      eccentricity: params.satellite?.eccentricity || 0,
+      inclination: params.satellite?.inclination || 0,
+      semiMajorAxis: params.satellite?.semiMajorAxis || 0,
+      orbitalArc: params.satellite?.orbitalArc || 0,
+      showOrbit: true,
+      parentId: params.satellite?.parentId || null,
+    };
 
-      this.temperature = {
-        temperature: params.temperature?.temperature || 5800,
-      }
-    }
+    this.population = params.population || 0;
+
+    this.temperature = params.temperature || 5800;
   }
+}

@@ -54,7 +54,6 @@ export default class StarPlugin {
   temperature: Kelvin;
 
   satellite: Omit<SatelliteComponent, "init">;
-  planets: PlanetPlugin[] = [];
 
   constructor(
     params: Partial<
@@ -88,6 +87,5 @@ export default class StarPlugin {
       showOrbit: false,
       parentId: solarSystem.name,
     };
-    this.planets = params.planets?.map(planet => new PlanetPlugin(planet, this)) ?? [];
   }
 }

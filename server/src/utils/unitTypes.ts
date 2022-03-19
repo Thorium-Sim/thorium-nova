@@ -19,9 +19,16 @@ export type KiloNewtons = Flavor<number, "kiloNewtons">;
  */
 export type SolarRadius = Flavor<number, "solarRadius">;
 
+export function solarRadiusToKilometers(solarRadius: SolarRadius): Kilometer {
+  return solarRadius * 695_700;
+}
 export type AstronomicalUnit = Flavor<number, "astronomicalUnit">;
 export type LightYear = Flavor<number, "lightYear">;
 export type LightMinute = Flavor<number, "lightMinute">;
+
+export function astronomicalUnitToKilometer(au: AstronomicalUnit): Kilometer {
+  return au * 149_597_870;
+}
 
 export function lightMinuteToLightYear(len: LightMinute) {
   return len / (60 * 24 * 365.25);
