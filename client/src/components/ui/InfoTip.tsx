@@ -19,7 +19,7 @@ const InfoTip = ({children}: {children: ReactNode}) => {
       return;
     }
     const parents = [
-      ...getOverflowAncestors(refs.reference.current as any),
+      ...getOverflowAncestors(refs.reference.current as HTMLElement),
       ...getOverflowAncestors(refs.floating.current),
     ];
     parents.forEach(parent => {
