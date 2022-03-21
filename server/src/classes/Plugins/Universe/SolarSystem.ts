@@ -5,6 +5,7 @@ import {randomFromList} from "server/src/utils/randomFromList";
 import {AstronomicalUnit, LightMinute} from "server/src/utils/unitTypes";
 import BasePlugin from "..";
 import {Aspect} from "../Aspect";
+import PlanetPlugin from "./Planet";
 import StarPlugin from "./Star";
 
 export default class SolarSystemPlugin extends Aspect {
@@ -36,7 +37,8 @@ export default class SolarSystemPlugin extends Aspect {
    * A string key that is used to procedurally generate the nebula skybox background in this system in the viewscreen.
    */
   skyboxKey: string;
-  stars: StarPlugin[] = [];
+  stars!: StarPlugin[];
+  planets!: PlanetPlugin[];
   assets = {};
 
   constructor(params: Partial<SolarSystemPlugin>, plugin: BasePlugin) {
@@ -70,6 +72,8 @@ export default class SolarSystemPlugin extends Aspect {
     this.habitableZoneOuter = params.habitableZoneOuter || 3.0;
     this.skyboxKey = params.skyboxKey || "Random Key";
 
-    this.stars = params.stars?.map(star => new StarPlugin(star, this)) ?? [];
+    this.stars ??= params.stars?.map(star => new StarPlugin(star, this)) ?? [];
+    this.planets ??=
+      params.planets?.map(planet => new PlanetPlugin(planet)) ?? [];
   }
 }

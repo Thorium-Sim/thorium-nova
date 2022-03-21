@@ -19,9 +19,16 @@ export type KiloNewtons = Flavor<number, "kiloNewtons">;
  */
 export type SolarRadius = Flavor<number, "solarRadius">;
 
+export function solarRadiusToKilometers(solarRadius: SolarRadius): Kilometer {
+  return solarRadius * 695_700;
+}
 export type AstronomicalUnit = Flavor<number, "astronomicalUnit">;
 export type LightYear = Flavor<number, "lightYear">;
 export type LightMinute = Flavor<number, "lightMinute">;
+
+export function astronomicalUnitToKilometer(au: AstronomicalUnit): Kilometer {
+  return au * 149_597_870;
+}
 
 export function lightMinuteToLightYear(len: LightMinute) {
   return len / (60 * 24 * 365.25);
@@ -35,7 +42,14 @@ export type Kilograms = Flavor<number, "kilograms">;
  * Mass compared to the sun eg. 1 solar mass = the mass of the sun
  */
 export type SolarMass = Flavor<number, "solarMass">;
-
+/**
+ * Mass compared to the Earth eg. 1 terran mass = the mass of the Earth
+ */
+export type TerranMass = Flavor<number, "terranMass">;
+/**
+ * Force of gravity at the surface compared to Earth's
+ */
+export type GForce = Flavor<number, "gForce">;
 export type Kelvin = Flavor<number, "kelvin">;
 
 export type Year = Flavor<number, "year">;
