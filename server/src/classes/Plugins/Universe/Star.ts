@@ -8,6 +8,7 @@ import {
   Year,
 } from "server/src/utils/unitTypes";
 import type SolarSystemPlugin from "./SolarSystem";
+import PlanetPlugin from "./Planet";
 
 const ALPHABET = "ABC";
 

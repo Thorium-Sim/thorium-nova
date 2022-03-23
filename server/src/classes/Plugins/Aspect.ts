@@ -72,11 +72,12 @@ export abstract class Aspect extends FSDataStore {
     );
     const aspectPath = path.dirname(this.path);
     const newAspectPath = path.join(aspectPath, "..", newName);
-
-    await fs.rename(
-      `${thoriumPath}/${aspectPath}`,
-      `${thoriumPath}/${newAspectPath}`
-    );
+    if (process.env.NODE_ENV !== "test") {
+      await fs.rename(
+        `${thoriumPath}/${aspectPath}`,
+        `${thoriumPath}/${newAspectPath}`
+      );
+    }
     this.path = path.join(newAspectPath, "manifest.yml");
     this.name = newName;
 

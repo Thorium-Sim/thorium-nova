@@ -39,7 +39,7 @@ export const CardSwitcher: React.FC<{
             name={c.name}
             icon={c.icon || null}
             component={c.component}
-            onClick={() => changeCard(c.name)}
+            onClick={() => changeCard(c.component)}
           ></CardButton>
         ))}
       </div>

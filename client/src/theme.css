@@ -423,7 +423,7 @@ body {
 }
 
 .input {
-  @apply h-10 text-neutral-content bg-neutral rounded-btn border border-opacity-0 border-neutral-focus;
+  @apply h-10 px-2 text-neutral-content bg-neutral rounded-btn border border-opacity-0 border-neutral-focus;
   &-md {
     @apply px-4 h-10 text-sm leading-loose;
   }

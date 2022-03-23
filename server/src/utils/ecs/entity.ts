@@ -110,7 +110,7 @@ class Entity {
           return [key, newValue];
         })
       ),
-    };
+    } as Pick<Entity, "id" | "components">;
   }
   /**
    * Set the parent ecs reference.
