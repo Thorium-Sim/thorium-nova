@@ -1,8 +1,9 @@
 import React from "react";
-import {Group} from "three";
+import {Group, Vector3} from "three";
 import SystemLabel from "./SystemLabel";
 import SystemCircle, {DraggableSystemCircle} from "./SystemCircle";
 import {MeshProps, useFrame} from "@react-three/fiber";
+import {useStarmapStore} from "../starmapStore";
 const SystemMarker: React.FC<
   {
     systemId: string;
@@ -15,6 +16,7 @@ const SystemMarker: React.FC<
   const group = React.useRef<Group>(new Group());
 
   const direction = React.useRef(0);
+  const cameraView = useStarmapStore(state => state.cameraView);
 
   useFrame(({camera}) => {
     const zoom = group.current?.position
@@ -29,15 +31,17 @@ const SystemMarker: React.FC<
     group.current?.scale.set(zoomedScale, zoomedScale, zoomedScale);
     group.current?.quaternion.copy(camera.quaternion);
   });
-
+  const positionVector = new Vector3(...position);
+  if (cameraView === "2d") positionVector.setY(0);
   return (
     <>
-      <group position={position} ref={group}>
+      <group position={positionVector} ref={group}>
         {draggable ? (
           <DraggableSystemCircle
             systemId={systemId}
             hoveringDirection={direction}
             parentObject={group}
+            position={position}
             {...props}
             onPointerOver={e => {
               props?.onPointerOver?.(e);
