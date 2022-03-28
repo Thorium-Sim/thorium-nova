@@ -33,6 +33,7 @@ import {IoMdClose} from "react-icons/io";
 import {FaMinus, FaTimes} from "react-icons/fa";
 import Input from "@thorium/ui/Input";
 import {useLocalStorage} from "client/src/hooks/useLocalStorage";
+import debounce from "lodash.debounce";
 const FAR = 1e27;
 
 interface SceneRef {
@@ -73,11 +74,16 @@ function useSynchronizeSystemId() {
   return storedSystemId;
 }
 
-function EditorPalette() {
-  const [[x, y], setXY] = useLocalStorage(
-    "starmapEditorPalettePosition",
-    [0, 0]
-  );
+function EditorPalette({
+  isOpen,
+  onClose,
+  children,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  const [[x, y], setXY] = useLocalStorage("editorPalettePosition", [0, 0]);
 
   const bind = useDrag(
     ({offset: [x, y]}) => {
@@ -89,9 +95,8 @@ function EditorPalette() {
     }
   );
   const [minimized, setMinimized] = useState(false);
-  const selectedItem = useStarmapStore(store => store.selectedObjectId);
 
-  if (!selectedItem) return null;
+  if (!isOpen) return null;
 
   return (
     <Portal>
@@ -110,7 +115,7 @@ function EditorPalette() {
         >
           <button
             className="p-1 ml-1 rounded-full hover:bg-white/10 cursor-pointer"
-            onClick={() => useStarmapStore.setState({selectedObjectId: null})}
+            onClick={onClose}
             aria-label="Close"
           >
             <FaTimes />
@@ -124,15 +129,84 @@ function EditorPalette() {
             <FaMinus />
           </button>
         </div>
-        {minimized ? null : (
-          <div className="w-full h-full overflow-y-auto p-2 text-white">
-            <Input label="Name" />
-          </div>
-        )}
+        {minimized ? null : children}
       </animated.div>
     </Portal>
   );
 }
+
+const InterstellarPalette = () => {
+  const {pluginId} = useParams() as {
+    pluginId: string;
+  };
+  const selectedObjectId = useStarmapStore(store => store.selectedObjectId);
+  const stars = useNetRequest("pluginSolarSystems", {pluginId});
+
+  const selectedStar = stars.find(s => s.name === selectedObjectId);
+
+  useEffect(() => {
+    if (!selectedStar) {
+      useStarmapStore.setState({selectedObjectId: null});
+    }
+  }, []);
+
+  const [name, setName] = useState(selectedStar?.name || "");
+  const [description, setDescription] = useState(
+    selectedStar?.description || ""
+  );
+
+  const update = React.useMemo(
+    () =>
+      debounce(
+        async (params: {name?: string; description?: string}) => {
+          if (!selectedObjectId) return;
+          const result = await netSend("pluginSolarSystemUpdate", {
+            pluginId,
+            solarSystemId: selectedObjectId,
+            ...params,
+          });
+          if (params.name) {
+            useStarmapStore.setState({selectedObjectId: result.solarSystemId});
+          }
+        },
+        500,
+        {maxWait: 2000, trailing: true}
+      ),
+    [pluginId, selectedObjectId]
+  );
+
+  useEffect(() => {
+    if (!selectedStar) return;
+    setName(selectedStar.name);
+    setDescription(selectedStar.description);
+  }, [selectedStar?.name, selectedStar?.description]);
+
+  return (
+    <div className="w-full h-full overflow-y-auto p-2 text-white">
+      <Input
+        label="Name"
+        value={name}
+        onChange={e => {
+          setName(e.target.value);
+          update({name: e.target.value});
+        }}
+        name="name"
+      />
+      <Input
+        label="Description"
+        as="textarea"
+        rows={5}
+        className="resize-none"
+        value={description}
+        onChange={e => {
+          setDescription(e.target.value);
+          update({description: e.target.value});
+        }}
+        name="description"
+      />
+    </div>
+  );
+};
 
 export default function StarMap() {
   const {pluginId} = useParams() as {
@@ -223,7 +297,12 @@ export default function StarMap() {
           Edit
         </Button>
       </Menubar>
-      <EditorPalette />
+      <EditorPalette
+        isOpen={!!selectedObjectId}
+        onClose={() => useStarmapStore.setState({selectedObjectId: null})}
+      >
+        {systemId ? null : <InterstellarPalette />}
+      </EditorPalette>
       <div className="h-[calc(100%-2rem)]  relative bg-black">
         <Canvas
           onContextMenu={e => {
