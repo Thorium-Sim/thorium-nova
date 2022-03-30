@@ -5,8 +5,11 @@ import {InterstellarMap} from ".";
 import {ThoriumContext} from "client/src/context/ThoriumContext";
 import {MockNetRequestContext} from "client/src/context/useNetRequest";
 import {MemoryRouter} from "react-router-dom";
+import {QueryClient, QueryClientProvider} from "react-query";
+
 jest.mock("scheduler", () => require("scheduler/unstable_mock"));
 
+const client = new QueryClient();
 describe("Starmap Plugin Editor", () => {
   it("should render a single solar system properly", async () => {
     const renderer = await ReactThreeTestRenderer.create(
@@ -24,7 +27,9 @@ describe("Starmap Plugin Editor", () => {
                 ],
               }}
             >
-              <InterstellarMap />
+              <QueryClientProvider client={client}>
+                <InterstellarMap />{" "}
+              </QueryClientProvider>
             </MockNetRequestContext.Provider>
           </Suspense>
         </MemoryRouter>
@@ -65,7 +70,9 @@ describe("Starmap Plugin Editor", () => {
                 ],
               }}
             >
-              <InterstellarMap />
+              <QueryClientProvider client={client}>
+                <InterstellarMap />
+              </QueryClientProvider>
             </MockNetRequestContext.Provider>
           </Suspense>
         </MemoryRouter>

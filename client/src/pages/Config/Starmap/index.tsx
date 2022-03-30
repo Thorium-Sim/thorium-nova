@@ -39,6 +39,7 @@ import {FaMinus, FaTimes} from "react-icons/fa";
 import Input from "@thorium/ui/Input";
 import {useLocalStorage} from "client/src/hooks/useLocalStorage";
 import debounce from "lodash.debounce";
+import {useQueryClient, QueryClientProvider} from "react-query";
 const FAR = 1e27;
 
 interface SceneRef {
@@ -216,6 +217,7 @@ function InterstellarMenuButtons({
     });
   }
 
+  const client = useQueryClient();
   return (
     <>
       <Button
@@ -286,6 +288,8 @@ export default function StarMap() {
 
   const systemId = useSystemId();
 
+  const client = useQueryClient();
+
   const ContextBridge = useContextBridge(ThoriumContext);
   const Location = useContextBridge(UNSAFE_LocationContext);
   const Navigation = useContextBridge(UNSAFE_NavigationContext);
@@ -318,7 +322,9 @@ export default function StarMap() {
             <Location>
               <RouteContext>
                 <ContextBridge>
-                  <StarmapScene ref={sceneRef} />
+                  <QueryClientProvider client={client}>
+                    <StarmapScene ref={sceneRef} />
+                  </QueryClientProvider>
                 </ContextBridge>
               </RouteContext>
             </Location>

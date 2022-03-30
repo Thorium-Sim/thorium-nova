@@ -1,7 +1,6 @@
 import {Routes, Route, Outlet, BrowserRouter as Router} from "react-router-dom";
 import {lazy, Suspense, useEffect} from "react";
 import AppContext from "./context/AppContext";
-import {useCardDataSubscribe} from "./context/useCardData";
 
 import QuoteOfTheDay from "./components/QuoteOfTheDay";
 import Credits from "./components/Credits";
@@ -45,7 +44,6 @@ const CardsDevelopment = lazy(() => import("./pages/CardsDevelopment"));
 const CardRenderer = lazy(() => import("./pages/CardRenderer"));
 
 function AppRoutes() {
-  useCardDataSubscribe();
   useEffect(() => {
     netRequest("availableStationsList");
   }, []);
