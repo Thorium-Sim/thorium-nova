@@ -34,6 +34,7 @@ import {FaMinus, FaTimes} from "react-icons/fa";
 import Input from "@thorium/ui/Input";
 import {useLocalStorage} from "client/src/hooks/useLocalStorage";
 import debounce from "lodash.debounce";
+import {useQueryClient, QueryClientProvider} from "react-query";
 const FAR = 1e27;
 
 interface SceneRef {
@@ -246,6 +247,7 @@ export default function StarMap() {
     });
   }
 
+  const client = useQueryClient();
   return (
     <div className="h-full">
       <Menubar
@@ -312,9 +314,11 @@ export default function StarMap() {
           camera={{fov: 45, far: FAR}}
           mode="concurrent"
         >
-          <ContextBridge>
-            <StarmapScene ref={sceneRef} />
-          </ContextBridge>
+          <QueryClientProvider client={client}>
+            <ContextBridge>
+              <StarmapScene ref={sceneRef} />
+            </ContextBridge>
+          </QueryClientProvider>
         </Canvas>
         <StatusBar />
       </div>
