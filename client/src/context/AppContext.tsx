@@ -6,7 +6,6 @@ import useEasterEgg from "../hooks/useEasterEgg";
 import {ErrorBoundary, FallbackProps} from "react-error-boundary";
 import bg from "../images/background.jpg";
 import ToastContainer from "./ToastContext";
-import {NetRequestData} from "./useNetRequest";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 import {IssueTrackerProvider} from "../components/IssueTracker";
 
@@ -48,13 +47,16 @@ export default function AppContext({children}: {children: ReactNode}) {
       <Layout>
         <ErrorBoundary FallbackComponent={Fallback}>
           <Suspense fallback={<LoadingSpinner />}>
-            <AlertDialog>
-              <ThoriumProvider>
-                <NetRequestData />
-                <IssueTrackerProvider>{children}</IssueTrackerProvider>
-              </ThoriumProvider>
-              <ToastContainer />
-            </AlertDialog>
+            <ThoriumProvider>
+              <ErrorBoundary FallbackComponent={Fallback}>
+                <Suspense fallback={<LoadingSpinner />}>
+                  <AlertDialog>
+                    <IssueTrackerProvider>{children}</IssueTrackerProvider>
+                    <ToastContainer />
+                  </AlertDialog>
+                </Suspense>
+              </ErrorBoundary>
+            </ThoriumProvider>
           </Suspense>
         </ErrorBoundary>
       </Layout>
