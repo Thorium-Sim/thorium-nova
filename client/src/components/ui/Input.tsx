@@ -11,7 +11,10 @@ interface CommonProps {
 const Input = (
   props:
     | (React.InputHTMLAttributes<HTMLInputElement> & {
-        as?: "input" | "textarea";
+        as?: "input";
+      } & CommonProps)
+    | (React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
+        as: "textarea";
       } & CommonProps)
     | (React.SelectHTMLAttributes<HTMLSelectElement> & {
         as: "select";
