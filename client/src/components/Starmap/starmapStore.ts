@@ -1,4 +1,3 @@
-import {Vector3} from "three";
 import create from "zustand";
 
 interface StarmapStore {
@@ -7,10 +6,9 @@ interface StarmapStore {
   selectedObjectId: string | null;
   cameraControlsEnabled: boolean;
   setCameraControlsEnabled: (enabled: boolean) => void;
-  pluginId: string | null;
-  systemId: string | null;
-  setSystemId: (systemId: string | null) => void;
   hoveredPosition: [number, number, number] | null;
+  cameraView: "2d" | "3d";
+  setCameraView: (view: "2d" | "3d") => void;
 }
 export const useStarmapStore = create<StarmapStore>(set => ({
   skyboxKey: "blank",
@@ -19,8 +17,7 @@ export const useStarmapStore = create<StarmapStore>(set => ({
   cameraControlsEnabled: true,
   setCameraControlsEnabled: (enabled: boolean) =>
     set({cameraControlsEnabled: enabled}),
-  pluginId: null,
-  systemId: null,
-  setSystemId: (systemId: string | null) => set({systemId: systemId}),
   hoveredPosition: null,
+  cameraView: "3d",
+  setCameraView: (view: "2d" | "3d") => set({cameraView: view}),
 }));
