@@ -23,9 +23,6 @@ export default function useObjectDrag(
 
   const bind = useGesture(
     {
-      onMouseDown: e => {
-        onMouseDown?.(e);
-      },
       onDragStart: e => {
         if (!obj.current) return;
         e.event?.stopPropagation();
@@ -57,6 +54,8 @@ export default function useObjectDrag(
         onMouseUp?.(obj.current.position);
       },
       onDrag: e => {
+        onMouseDown?.(e);
+        if (!e.intentional) return;
         onDrag?.(obj.current?.position);
         raycaster.current.setFromCamera(mouse, camera);
         if (
@@ -76,7 +75,6 @@ export default function useObjectDrag(
     {
       drag: {
         filterTaps: true,
-        delay: true,
       },
     }
   );

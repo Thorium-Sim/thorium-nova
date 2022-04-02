@@ -1,11 +1,11 @@
 import * as React from "react";
 import {Suspense} from "react";
 import ReactThreeTestRenderer from "@react-three/test-renderer";
-import {InterstellarMap} from ".";
 import {ThoriumContext} from "client/src/context/ThoriumContext";
 import {MockNetRequestContext} from "client/src/context/useNetRequest";
 import {MemoryRouter} from "react-router-dom";
 import {QueryClient, QueryClientProvider} from "react-query";
+import {InterstellarMap} from "client/src/components/Starmap/InterstellarMap";
 
 jest.mock("scheduler", () => require("scheduler/unstable_mock"));
 
