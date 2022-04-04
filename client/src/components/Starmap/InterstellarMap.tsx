@@ -2,7 +2,7 @@ import * as React from "react";
 import {useParams} from "react-router-dom";
 import {useThree} from "@react-three/fiber";
 import {useRef, Suspense, useEffect} from "react";
-import {Camera, MOUSE, Plane, Vector2, Vector3} from "three";
+import {Box3, Camera, MOUSE, Plane, Vector2, Vector3} from "three";
 import {OrbitControls} from "@react-three/drei";
 import {useStarmapStore} from "client/src/components/Starmap/starmapStore";
 import {useNetRequest} from "client/src/context/useNetRequest";
@@ -13,6 +13,10 @@ import {toast} from "client/src/context/ToastContext";
 import {netSend} from "client/src/context/netSend";
 import {useConfirm} from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
+import {CameraControls} from "./CameraControls";
+import CameraControlsClass from "camera-controls";
+
+const ACTION = CameraControlsClass.ACTION;
 
 const INTERSTELLAR_MAX_DISTANCE: LightYear = 2000;
 const Y_PLANE = new Plane(new Vector3(0, 1, 0), 0);
@@ -25,29 +29,52 @@ export function InterstellarMap() {
   const stars = useNetRequest("pluginSolarSystems", {pluginId});
   const controlsEnabled = useStarmapStore(s => s.cameraControlsEnabled);
   const cameraView = useStarmapStore(s => s.cameraView);
-  const orbitControls = useRef<any>();
+  const orbitControls = useRef<CameraControlsClass>(null);
   const {camera, raycaster, size} = useThree();
   useEffect(() => {
     // Set the initial camera position
-    camera.position.setY(lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE) / 2);
-    camera.position.setZ(0);
-    camera.position.setX(0);
-    camera.lookAt(0, 0, 0);
+    orbitControls.current?.setPosition(
+      0,
+      lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE) / 2,
+      0
+    );
+    const max = lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE) * 0.75;
+    orbitControls.current?.setBoundary(
+      new Box3(new Vector3(-max, -max, -max), new Vector3(max, max, max))
+    );
   }, [camera]);
 
   useEffect(() => {
     raycaster.setFromCamera(new Vector2(0, 0), camera);
     const intersects = new Vector3();
     raycaster.ray.intersectPlane(Y_PLANE, intersects);
-    camera.position.set(intersects.x, camera.position.y, intersects.z);
-    orbitControls.current.target.set(intersects.x, intersects.y, intersects.z);
+    // camera.position.set(intersects.x, camera.position.y, intersects.z);
+    // orbitControls.current.target.set(intersects.x, intersects.y, intersects.z);
+    if (cameraView === "2d") {
+      orbitControls.current?.rotatePolarTo(0, true);
+      orbitControls.current?.rotateAzimuthTo(0, true);
+    }
   }, [camera, cameraView, size, raycaster]);
 
   return (
     <Suspense fallback={null}>
       <Starfield radius={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)} />
-      <OrbitControls
+      <CameraControls
         ref={orbitControls}
+        enabled={controlsEnabled}
+        maxDistance={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)}
+        minDistance={1}
+        mouseButtons={{
+          left: cameraView === "2d" ? ACTION.TRUCK : ACTION.ROTATE,
+          right: ACTION.TRUCK,
+          middle: ACTION.DOLLY,
+          wheel: ACTION.DOLLY,
+          shiftLeft: ACTION.DOLLY,
+        }}
+        dollyToCursor
+        dollySpeed={0.5}
+      />
+      {/* <OrbitControls
         enabled={controlsEnabled}
         maxDistance={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)}
         minDistance={1}
@@ -56,7 +83,7 @@ export function InterstellarMap() {
           RIGHT: MOUSE.PAN,
           MIDDLE: MOUSE.DOLLY,
         }}
-      />
+      /> */}
       <polarGridHelper
         rotation={[0, (2 * Math.PI) / 12, 0]}
         args={[

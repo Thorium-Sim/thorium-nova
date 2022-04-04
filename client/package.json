@@ -30,6 +30,7 @@
     "@types/roman-numerals": "^0.3.0",
     "@uiw/react-monacoeditor": "^3.4.5",
     "@use-gesture/react": "^10.2.4",
+    "camera-controls": "^1.34.2",
     "color": "^4.1.0",
     "dot-beat-time": "^1.2.1",
     "eventemitter3": "^4.0.7",
