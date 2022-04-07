@@ -6,6 +6,8 @@ import {
   UNSAFE_LocationContext,
   UNSAFE_NavigationContext,
   UNSAFE_RouteContext,
+  Route,
+  Routes,
 } from "react-router-dom";
 import {Canvas, useThree} from "@react-three/fiber";
 import {forwardRef, useImperativeHandle, useRef, useEffect} from "react";
@@ -29,6 +31,10 @@ import {
   InterstellarMenuButtons,
 } from "../../../components/Starmap/InterstellarMap";
 import {Camera} from "three";
+import {
+  SolarSystemMap,
+  SolarSystemMenuButtons,
+} from "../../../components/Starmap/SolarSystemMap";
 
 const FAR = 1e27;
 
@@ -201,6 +207,7 @@ export default function StarMap() {
         }
       >
         {!systemId && <InterstellarMenuButtons sceneRef={sceneRef} />}
+        {systemId && <SolarSystemMenuButtons sceneRef={sceneRef} />}
       </Menubar>
       <EditorPalette
         isOpen={!!selectedObjectId}
@@ -250,27 +257,7 @@ function StatusBar() {
   );
 }
 
-function SolarSystemMap() {
-  const {camera} = useThree();
-
-  useEffect(() => {
-    camera.position.set(0, 0, 5);
-    camera.lookAt(0, 0, 0);
-  }, []);
-  return (
-    <mesh rotation={[Math.PI / 3, Math.PI / 5, 0]}>
-      <meshLambertMaterial attach="material" color="blue" />
-      <boxGeometry attach="geometry" args={[1, 1, 1]} />
-    </mesh>
-  );
-}
-
 const StarmapScene = forwardRef(function StarmapScene(props, ref) {
-  const systemId = useSystemId();
-  const {pluginId} = useParams() as {
-    pluginId: string;
-  };
-
   const {camera} = useThree();
   useImperativeHandle(ref, () => ({
     camera: () => {
@@ -282,8 +269,10 @@ const StarmapScene = forwardRef(function StarmapScene(props, ref) {
     <>
       <ambientLight intensity={0.2} />
       <pointLight position={[10, 10, 10]} />
-      {pluginId && !systemId && <InterstellarMap />}
-      {pluginId && systemId && <SolarSystemMap />}
+      <Routes>
+        <Route path="/:systemId" element={<SolarSystemMap />} />
+        <Route path="*" element={<InterstellarMap />} />
+      </Routes>
     </>
   );
 });

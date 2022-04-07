@@ -2,8 +2,7 @@ import * as React from "react";
 import {useParams} from "react-router-dom";
 import {useThree} from "@react-three/fiber";
 import {useRef, Suspense, useEffect} from "react";
-import {Box3, Camera, MOUSE, Plane, Vector2, Vector3} from "three";
-import {OrbitControls} from "@react-three/drei";
+import {Box3, Camera, Plane, Vector2, Vector3} from "three";
 import {useStarmapStore} from "client/src/components/Starmap/starmapStore";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import SystemMarker from "client/src/components/Starmap/SystemMarker";
@@ -19,7 +18,6 @@ import CameraControlsClass from "camera-controls";
 const ACTION = CameraControlsClass.ACTION;
 
 const INTERSTELLAR_MAX_DISTANCE: LightYear = 2000;
-const Y_PLANE = new Plane(new Vector3(0, 1, 0), 0);
 
 export function InterstellarMap() {
   const {pluginId} = useParams() as {
@@ -30,7 +28,7 @@ export function InterstellarMap() {
   const controlsEnabled = useStarmapStore(s => s.cameraControlsEnabled);
   const cameraView = useStarmapStore(s => s.cameraView);
   const orbitControls = useRef<CameraControlsClass>(null);
-  const {camera, raycaster, size} = useThree();
+  const {camera} = useThree();
   useEffect(() => {
     // Set the initial camera position
     orbitControls.current?.setPosition(
@@ -45,16 +43,11 @@ export function InterstellarMap() {
   }, [camera]);
 
   useEffect(() => {
-    raycaster.setFromCamera(new Vector2(0, 0), camera);
-    const intersects = new Vector3();
-    raycaster.ray.intersectPlane(Y_PLANE, intersects);
-    // camera.position.set(intersects.x, camera.position.y, intersects.z);
-    // orbitControls.current.target.set(intersects.x, intersects.y, intersects.z);
     if (cameraView === "2d") {
       orbitControls.current?.rotatePolarTo(0, true);
       orbitControls.current?.rotateAzimuthTo(0, true);
     }
-  }, [camera, cameraView, size, raycaster]);
+  }, [camera, cameraView]);
 
   return (
     <Suspense fallback={null}>
@@ -74,16 +67,6 @@ export function InterstellarMap() {
         dollyToCursor
         dollySpeed={0.5}
       />
-      {/* <OrbitControls
-        enabled={controlsEnabled}
-        maxDistance={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)}
-        minDistance={1}
-        mouseButtons={{
-          LEFT: cameraView === "2d" ? MOUSE.PAN : MOUSE.ROTATE,
-          RIGHT: MOUSE.PAN,
-          MIDDLE: MOUSE.DOLLY,
-        }}
-      /> */}
       <polarGridHelper
         rotation={[0, (2 * Math.PI) / 12, 0]}
         args={[
