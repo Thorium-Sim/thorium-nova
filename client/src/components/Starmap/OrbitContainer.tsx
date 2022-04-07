@@ -1,7 +1,7 @@
 import React from "react";
 import {BufferGeometry, EllipseCurve, MathUtils} from "three";
 
-const OrbitLine: React.FC<{radiusX: number; radiusY: number}> = ({
+export const OrbitLine: React.FC<{radiusX: number; radiusY: number}> = ({
   radiusX,
   radiusY,
 }) => {

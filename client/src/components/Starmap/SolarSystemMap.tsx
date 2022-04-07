@@ -21,7 +21,8 @@ import {planetTypes} from "server/src/spawners/planetTypes";
 import {useMatch} from "react-router-dom";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import Disc from "./Disc";
-import StarEntity from "./StarEntity";
+import StarEntity from "./Star";
+import {Planet} from "./Planet";
 
 const ACTION = CameraControlsClass.ACTION;
 
@@ -76,7 +77,7 @@ export function SolarSystemMap() {
       orbitControls.current?.rotateAzimuthTo(0, true);
     }
   }, [camera, cameraView]);
-
+  console.log(systemData.planets);
   return (
     <Suspense fallback={null}>
       <CameraControls
@@ -97,6 +98,9 @@ export function SolarSystemMap() {
       <HabitableZone />
       {systemData.stars.map(star => (
         <StarEntity key={star.name} star={star} />
+      ))}
+      {systemData.planets.map(planet => (
+        <Planet key={planet.name} planet={planet} />
       ))}
       <polarGridHelper
         rotation={[0, (2 * Math.PI) / 12, 0]}
