@@ -43,11 +43,11 @@ const UploadWell: React.FC<{
   return (
     <label
       {...props}
-      className={`w-64 h-64 ${
+      className={`max-w-64 w-full aspect-square ${
         disabled ? "" : dragging ? "cursor-[copy]" : "cursor-pointer"
       } shadow-inner rounded-lg ${
         dragging ? "bg-white/50" : "bg-black/50"
-      } my-4 flex items-center justify-center`}
+      } flex items-center justify-center`}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragEnter}
       onDragLeave={handleDragExit}

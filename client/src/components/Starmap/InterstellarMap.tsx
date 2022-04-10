@@ -2,7 +2,7 @@ import * as React from "react";
 import {useParams} from "react-router-dom";
 import {useThree} from "@react-three/fiber";
 import {useRef, Suspense, useEffect} from "react";
-import {Box3, Camera, Plane, Vector2, Vector3} from "three";
+import {Box3, Camera, Vector3} from "three";
 import {useStarmapStore} from "client/src/components/Starmap/starmapStore";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import SystemMarker from "client/src/components/Starmap/SystemMarker";
@@ -14,6 +14,8 @@ import {useConfirm} from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import {CameraControls} from "./CameraControls";
 import CameraControlsClass from "camera-controls";
+import debounce from "lodash.debounce";
+import Input from "@thorium/ui/Input";
 
 const ACTION = CameraControlsClass.ACTION;
 
@@ -185,3 +187,76 @@ export function InterstellarMenuButtons({
     </>
   );
 }
+
+export const InterstellarPalette = () => {
+  const {pluginId} = useParams() as {
+    pluginId: string;
+  };
+  const selectedObjectId = useStarmapStore(store => store.selectedObjectId);
+  const stars = useNetRequest("pluginSolarSystems", {pluginId});
+
+  const selectedStar = stars.find(s => s.name === selectedObjectId);
+
+  useEffect(() => {
+    if (!selectedStar) {
+      useStarmapStore.setState({selectedObjectId: null});
+    }
+  }, []);
+
+  const [name, setName] = React.useState(selectedStar?.name || "");
+  const [description, setDescription] = React.useState(
+    selectedStar?.description || ""
+  );
+
+  const update = React.useMemo(
+    () =>
+      debounce(
+        async (params: {name?: string; description?: string}) => {
+          if (!selectedObjectId) return;
+          const result = await netSend("pluginSolarSystemUpdate", {
+            pluginId,
+            solarSystemId: selectedObjectId,
+            ...params,
+          });
+          if (params.name) {
+            useStarmapStore.setState({selectedObjectId: result.solarSystemId});
+          }
+        },
+        500,
+        {maxWait: 2000, trailing: true}
+      ),
+    [pluginId, selectedObjectId]
+  );
+
+  useEffect(() => {
+    if (!selectedStar) return;
+    setName(selectedStar.name);
+    setDescription(selectedStar.description);
+  }, [selectedStar?.name, selectedStar?.description]);
+
+  return (
+    <div className="w-full h-full overflow-y-auto p-2 text-white">
+      <Input
+        label="Name"
+        value={name}
+        onChange={e => {
+          setName(e.target.value);
+          update({name: e.target.value});
+        }}
+        name="name"
+      />
+      <Input
+        label="Description"
+        as="textarea"
+        rows={5}
+        className="resize-none"
+        value={description}
+        onChange={e => {
+          setDescription(e.target.value);
+          update({description: e.target.value});
+        }}
+        name="description"
+      />
+    </div>
+  );
+};

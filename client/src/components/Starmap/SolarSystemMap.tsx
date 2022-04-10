@@ -12,7 +12,7 @@ import {
 import {Box3, Camera, Vector3} from "three";
 import {useParams} from "react-router";
 import Button from "../ui/Button";
-import {Menu, Transition} from "@headlessui/react";
+import {Menu, Transition, Disclosure} from "@headlessui/react";
 import {HiChevronDown} from "react-icons/hi";
 import {starTypes} from "server/src/spawners/starTypes";
 import {netSend} from "client/src/context/netSend";
@@ -23,7 +23,13 @@ import {useNetRequest} from "client/src/context/useNetRequest";
 import Disc from "./Disc";
 import StarEntity from "./Star";
 import {Planet} from "./Planet";
-
+import {HiChevronUp} from "react-icons/hi";
+import {useLocalStorage} from "client/src/hooks/useLocalStorage";
+import {BasicDisclosure} from "./EditorPalettes/BasicDisclosure";
+import {PlanetDisclosure} from "./EditorPalettes/PlanetDisclosure";
+import {OrbitDisclosure} from "./EditorPalettes/OrbitDisclosure";
+import {PlanetAssetDisclosure} from "././EditorPalettes/PlanetAssetDisclosure";
+import StarPlugin from "server/src/classes/Plugins/Universe/Star";
 const ACTION = CameraControlsClass.ACTION;
 
 // 10% further than Neptune's orbit
@@ -77,7 +83,7 @@ export function SolarSystemMap() {
       orbitControls.current?.rotateAzimuthTo(0, true);
     }
   }, [camera, cameraView]);
-  console.log(systemData.planets);
+
   return (
     <Suspense fallback={null}>
       <CameraControls
@@ -148,8 +154,17 @@ export function SolarSystemMenuButtons({
 
   return (
     <>
+      <Button
+        className="btn-info btn-outline btn-xs"
+        onClick={() =>
+          useStarmapStore.setState({selectedObjectId: solarSystemId})
+        }
+      >
+        Edit System
+      </Button>
       <AddStarMenu />
       <AddPlanetMenu />
+
       <Button
         className="btn-error btn-outline btn-xs"
         disabled={!selectedObjectId}
@@ -171,12 +186,19 @@ export function SolarSystemMenuButtons({
   );
 }
 
-function useSystemIds() {
+export function useSystemIds() {
   const pluginId = useParams().pluginId;
   const match = useMatch("/config/:pluginId/starmap/:systemId");
   const matchSystemId = match?.params.systemId;
   if (!pluginId) throw new Error("Error determining plugin ID");
   if (!matchSystemId) throw new Error("Error determining solar system ID");
+  useEffect(() => {
+    if (!useStarmapStore.getState().selectedObjectId) {
+      useStarmapStore.setState({
+        selectedObjectId: matchSystemId,
+      });
+    }
+  }, [matchSystemId]);
   return [pluginId, matchSystemId] as const;
 }
 
@@ -279,4 +301,130 @@ function AddPlanetMenu() {
       </Transition>
     </Menu>
   );
+}
+
+const HandleIsOpen = ({
+  open,
+  title,
+  scrollRef,
+}: {
+  title: string;
+  open: boolean;
+  scrollRef: React.RefObject<HTMLDivElement>;
+}) => {
+  const hasMounted = React.useRef(false);
+  useEffect(() => {
+    localStorage.setItem(`editor-palette-open-${title}`, JSON.stringify(open));
+  }, [title, open]);
+  React.useLayoutEffect(() => {
+    if (open && hasMounted.current) {
+      setTimeout(() => {
+        scrollRef.current?.scrollIntoView({behavior: "smooth", block: "start"});
+      }, 100);
+    }
+    hasMounted.current = true;
+  }, [open]);
+
+  return null;
+};
+export function PaletteDisclosure({
+  title,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [isDefaultOpen] = useLocalStorage(
+    `editor-palette-open-${title}`,
+    defaultOpen
+  );
+  const disclosureRef = React.useRef<HTMLDivElement>(null);
+  return (
+    <Disclosure defaultOpen={isDefaultOpen}>
+      {({open}) => (
+        <>
+          <HandleIsOpen open={open} title={title} scrollRef={disclosureRef} />
+          <div
+            className="w-full py-1 px-2 bg-gray-900 sticky -top-1"
+            ref={disclosureRef}
+          >
+            <Disclosure.Button className="btn btn-notice btn-sm justify-between btn-block">
+              <span>{title}</span>
+              <HiChevronUp
+                className={` transition-transform${
+                  open ? "transform rotate-180" : ""
+                } w-5 h-5`}
+              />
+            </Disclosure.Button>
+          </div>
+          <Transition
+            enter="transition duration-100 ease-out"
+            enterFrom="transform scale-95 opacity-0"
+            enterTo="transform scale-100 opacity-100"
+            leave="transition duration-75 ease-out"
+            leaveFrom="transform scale-100 opacity-100"
+            leaveTo="transform scale-95 opacity-0"
+          >
+            <Disclosure.Panel className="pt-4 pb-2 px-2 border-b border-b-gray-700">
+              {children}
+            </Disclosure.Panel>
+          </Transition>
+        </>
+      )}
+    </Disclosure>
+  );
+}
+
+function getSelectedObject() {
+  const [pluginId, solarSystemId] = useSystemIds();
+  const selectedObjectId = useStarmapStore(state => state.selectedObjectId);
+  const systemData = useNetRequest("pluginSolarSystem", {
+    pluginId,
+    solarSystemId,
+  });
+
+  // It could be a system, star, or planet
+  if (solarSystemId === selectedObjectId) {
+    return {type: "system" as const, object: systemData};
+  }
+
+  const star = systemData.stars.find(star => star.name === selectedObjectId);
+  if (star) {
+    return {type: "star" as const, object: star};
+  }
+
+  const planet = systemData.planets.find(
+    planet => planet.name === selectedObjectId
+  );
+  if (planet) {
+    return {type: "planet" as const, object: planet};
+  }
+
+  return null;
+}
+export function SolarSystemPalette() {
+  const results = getSelectedObject();
+  if (!results) return null;
+  return (
+    <div
+      className="w-full h-full overflow-y-auto overflow-x-hidden text-white"
+      key={results.object.name}
+    >
+      <BasicDisclosure object={results.object} type={results.type} />
+      {results.type === "planet" && (
+        <>
+          <PlanetDisclosure object={results.object} />
+          <PlanetAssetDisclosure object={results.object} />
+          <OrbitDisclosure object={results.object} />
+        </>
+      )}
+      {results.type === "star" && <StarDisclosure object={results.object} />}
+    </div>
+  );
+}
+
+function StarDisclosure({object}: {object: StarPlugin}) {
+  return <></>;
 }
