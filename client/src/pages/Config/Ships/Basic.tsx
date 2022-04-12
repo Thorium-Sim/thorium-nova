@@ -32,20 +32,22 @@ export function Basic() {
               onChange={() => setError(false)}
               onBlur={async (e: any) => {
                 if (!e.target.value) return setError(true);
-                const result = await netSend("pluginShipUpdate", {
-                  pluginId,
-                  shipId,
-                  name: e.target.value,
-                });
-                if ("error" in result) {
-                  toast({
-                    title: "Error renaming ship",
-                    body: result.error,
-                    color: "error",
+                try {
+                  const result = await netSend("pluginShipUpdate", {
+                    pluginId,
+                    shipId,
+                    name: e.target.value,
                   });
-                  return;
+                  navigate(`/config/${pluginId}/ships/${result.shipId}`);
+                } catch (err) {
+                  if (err instanceof Error) {
+                    toast({
+                      title: "Error renaming ship",
+                      body: err.message,
+                      color: "error",
+                    });
+                  }
                 }
-                navigate(`/config/${pluginId}/ships/${result.shipId}`);
               }}
             />
           </div>

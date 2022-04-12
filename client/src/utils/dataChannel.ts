@@ -16,15 +16,14 @@ export async function loadWebSocket() {
       protocol === "https:" ? "wss" : "ws"
     }://${hostname}:${port}/ws`;
 
-    const authData: AuthData = {clientId: await getTabId()};
-    document.cookie = `x-websocket-auth=${JSON.stringify(authData)}`;
     const socket = new ReconnectingWebSocket(socketUrl, [], {
       minReconnectionDelay: 500,
     });
 
-    return new Promise<ReconnectingWebSocket>((res, rej) => {
+    await new Promise<ReconnectingWebSocket>((res, rej) => {
       socket.onopen = () => res(socket);
     });
+    return socket;
   } catch (err) {
     return Promise.reject(err);
   }

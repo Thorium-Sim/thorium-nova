@@ -13,16 +13,17 @@ export class ClientSocket extends EventEmitter {
         const reader = new FileReader();
         reader.addEventListener("loadend", () => {
           if (reader.result instanceof ArrayBuffer) {
-            const data = decode(reader.result) as Types.Snapshot;
-            SI.snapshot.add(data);
+            const data = decode(reader.result) as
+              | {type: string; data: any}
+              | Types.Snapshot;
+            if ("type" in data) {
+              this.emit(data.type, data.data);
+            } else {
+              SI.snapshot.add(data);
+            }
           }
         });
         reader.readAsArrayBuffer(event.data);
-      }
-
-      if (typeof event.data === "string") {
-        const messageData = JSON.parse(event.data);
-        this.emit(messageData.type, messageData.data);
       }
     });
   }

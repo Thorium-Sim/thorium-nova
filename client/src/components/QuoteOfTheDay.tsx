@@ -191,11 +191,13 @@ const quotes = [
   // Ike
   "Plans are useless, but planning is indispensable.",
   // Alex
-  "I feel like we’re drowning in ambition.",
+  "I feel like we're drowning in ambition.",
   // Gilmore
   "It Takes A Remarkable Person To Inspire All Of This.",
   "That Was A Once In A Lifetime Experience - Only If You Want It To Be.",
   "We're Almost There, But Nowhere Near It. All That Matters Is That We're Going.",
+  // Cereal Box
+  "Feel good about breakfast. Feel good about every day!",
 ];
 
 const QuoteOfTheDay = () => {

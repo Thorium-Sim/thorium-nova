@@ -1,4 +1,4 @@
-import {starPluginInputs} from "../plugins/universe/stars";
+import {starPluginInputs} from "./stars";
 function createMockDataContext() {
   const context = {
     flight: null,

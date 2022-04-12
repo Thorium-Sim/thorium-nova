@@ -12,6 +12,7 @@ import {FlightDataModel} from "../classes/FlightDataModel";
 const NETSEND_PATH = "/netSend";
 const NETREQUEST_PATH = "/netRequest";
 const CARDREQUEST_PATH = "/cardRequest/:card/:subscription";
+const ALLCARD_PATH = "/cardRequest/:card";
 
 function checkBody(body: any, clientId: string) {
   if (typeof body !== "object") throw new Error("Body must be a JSON object");
@@ -58,7 +59,8 @@ function checkBodyNetRequest(
 }
 function checkBodyCardRequest(
   body: any,
-  clientId: string
+  clientId: string,
+  all: boolean
 ): asserts body is {
   card: DataCardNames;
   subscription: SubscriptionNames;
@@ -81,7 +83,7 @@ function checkBodyCardRequest(
         .join(", ")}`
     );
   const cardSubs = cardSubscriptions[bodyObject.card];
-  if (!(bodyObject.subscription in cardSubs))
+  if (!(bodyObject.subscription in cardSubs) && !all)
     throw new Error(
       `Invalid subscription for card '${bodyObject.card}': ${
         bodyObject.subscription
@@ -168,12 +170,41 @@ export function setUpAPI(
       req.headers.authorization?.replace("Bearer ", "").replace("bearer", "") ||
       "";
     try {
-      checkBodyCardRequest(req.params, clientId);
+      checkBodyCardRequest(req.params, clientId, false);
       const cardSubs = cardSubscriptions[req.params.card] as any;
       const subscription = req.params.subscription;
       const clientContext = new DataContext(clientId, database);
       const data = await cardSubs[subscription](clientContext);
       return data;
+    } catch (err) {
+      if (err instanceof Error) {
+        return reply
+          .code(400)
+          .header("content-type", "application/json")
+          .send(JSON.stringify({message: err.message}));
+      }
+    }
+  });
+
+  app.get(ALLCARD_PATH, async (req, reply) => {
+    const clientId =
+      req.headers.authorization?.replace("Bearer ", "").replace("bearer", "") ||
+      "";
+    try {
+      checkBodyCardRequest(req.params, clientId, true);
+      const cardSubs = cardSubscriptions[req.params.card] as any;
+      const clientContext = new DataContext(clientId, database);
+      const dataRequests = Object.fromEntries(
+        await Promise.all(
+          Object.entries(cardSubs).map(
+            async ([subscription, dataRequest]: any) => {
+              const data = await dataRequest(clientContext);
+              return [subscription, data];
+            }
+          )
+        )
+      );
+      return dataRequests;
     } catch (err) {
       if (err instanceof Error) {
         return reply
@@ -200,6 +231,8 @@ export function setUpAPI(
       // Send the result back to the client, regardless of what it is.
       return response;
     } catch (err) {
+      if (err === null) return {};
+
       let message = err;
       if (err instanceof Error) {
         message = err.message;

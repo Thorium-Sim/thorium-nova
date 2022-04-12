@@ -10,6 +10,7 @@ import chalk from "chalk";
 import {FlightDataModel} from "./classes/FlightDataModel";
 import {promises as fs, existsSync} from "fs";
 import {unzip} from "./utils/unzipFolder";
+import {buildHttpsProxy} from "./init/httpsProxy";
 
 setBasePath(thoriumPath);
 const isHeadless = !process.env.FORK;
@@ -43,7 +44,7 @@ export async function startServer() {
     flight = new FlightDataModel(
       {
         name: flightName,
-        initialLoad: true,
+        initialLoad: false,
         entities: [],
         serverDataModel: serverModel,
       },
@@ -60,14 +61,22 @@ export async function startServer() {
   await applyDataChannel(app, database);
   setUpAPI(app, database);
   const PORT =
-    process.env.PORT || (process.env.NODE_ENV === "production" ? 4444 : 3001);
+    Number(process.env.PORT) ||
+    (process.env.NODE_ENV === "production" ? 4444 : 3001);
+  const HTTPSPort = PORT + 1;
+  const proxy = buildHttpsProxy(PORT);
+
   try {
     await app.listen(PORT, "0.0.0.0");
+    if (process.env.NODE_ENV === "production") {
+      await proxy.listen(HTTPSPort, "0.0.0.0");
+    }
     console.info(chalk.greenBright(`Access app at http://localhost:${PORT}`));
     console.info(
       chalk.cyan(`Doing port forwarding? Open this port in your router:`)
     );
     console.info(chalk.cyan(`  - TCP ${PORT} for web app access`));
+    console.info(chalk.cyan(`  - TCP ${HTTPSPort} for HTTPS access`));
     process.send?.("ready");
   } catch (err) {
     process.send?.("error");

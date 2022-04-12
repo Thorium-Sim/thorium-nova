@@ -7,6 +7,7 @@ import {
   startThoriumServer,
   stopThoriumServer,
 } from "./helpers/startThoriumServer";
+import {ipcHandlers} from "./helpers/ipcHandlers";
 let win: BrowserWindow | null = null;
 app.enableSandbox();
 
@@ -31,10 +32,11 @@ const cert = fs.readFileSync(
   ),
   "utf8"
 );
-const port = process.env.PORT || 4444;
+const port = Number(process.env.PORT) || 4444;
 
 async function createWindow() {
   await startThoriumServer();
+  ipcHandlers();
   loaded = true;
   if (loadedPath) {
     loadFile(loadedPath);
@@ -60,6 +62,7 @@ async function createWindow() {
       nodeIntegration: true,
       devTools: true,
       contextIsolation: false,
+      preload: path.join(__dirname, "preload.js"),
     },
     show: false,
   });
@@ -72,7 +75,9 @@ async function createWindow() {
     // e.preventDefault();
   });
 
-  win.loadURL(`https://localhost:${port}`);
+  // We add 1 to the port, since we want to connect to the HTTPS server
+  // which is 1 more than the default port
+  win.loadURL(`https://localhost:${port + 1}`);
   win.on("closed", () => {
     win = null;
   });

@@ -9,7 +9,7 @@ const wait = (time = 1000) => new Promise(resolve => setTimeout(resolve, time));
 afterAll(async () => {
   await rm("./dbTest", {recursive: true, force: true});
 });
-describe("db", () => {
+describe.skip("db", () => {
   it("should work with the class constructor", async () => {
     setBasePath("./dbTest");
     class Data extends FSDataStore {

@@ -1,11 +1,13 @@
 import {AllInputNames, AllInputParams, AllInputReturns} from "@thorium/inputs";
 import {getTabId} from "@thorium/tab-id";
 
+type UnPromise<T> = T extends Promise<infer U> ? UnPromise<U> : T;
+
 export async function netSend<
   InputName extends AllInputNames,
   Params extends AllInputParams[InputName],
   Return extends AllInputReturns[InputName]
->(type: InputName, params?: Params): Promise<Return | {error: string}> {
+>(type: InputName, params?: Params): Promise<UnPromise<Return>> {
   const clientId = await getTabId();
   const body = new FormData();
   body.append("input", type.toString());
@@ -32,5 +34,8 @@ export async function netSend<
     body,
   });
   const json = await response.json();
+  if (json.error) {
+    throw new Error(json.error);
+  }
   return json;
 }

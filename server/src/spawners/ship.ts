@@ -40,7 +40,7 @@ export function spawnShip(
     registry: params.registry || "",
     shipClass: template.name,
     assets: {
-      ...(template.toJSON?.().assets || template.assets),
+      ...template.assets,
       ...params.assets,
     },
   });

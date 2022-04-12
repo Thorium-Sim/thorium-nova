@@ -3,13 +3,15 @@ import {FlightDataModel} from "../classes/FlightDataModel";
 import randomWords from "@thorium/random-words";
 import {pubsub} from "../utils/pubsub";
 import {thoriumPath} from "../utils/appPaths";
-import fs from "fs/promises";
+import {promises} from "fs";
 import {spawnShip} from "../spawners/ship";
 import type ShipPlugin from "../classes/Plugins/Ship";
 import type StationComplementPlugin from "../classes/Plugins/StationComplement";
 import {generateIncrementedName} from "../utils/generateIncrementedName";
 import {getFlights} from "../utils/getFlights";
 import type BasePlugin from "../classes/Plugins";
+
+const fs = process.env.NODE_ENV === "test" ? {unlink: () => {}} : promises;
 interface FlightStartShips {
   shipTemplate: {pluginId: string; shipId: string};
   shipName: string;
@@ -107,13 +109,11 @@ export const flightInputs = {
         stations:
           stationComplement?.stations.map(s => ({
             ...s,
-            logo: stationComplement?.toJSON()?.assets[`${s.name}-logo`] || "",
+            logo: stationComplement?.assets[`${s.name}-logo`] || "",
             cards: s.cards.map(c => {
               return {
                 ...c,
-                icon: stationComplement?.toJSON()?.assets[
-                  `${s.name}-${c.name}-icon`
-                ],
+                icon: stationComplement?.assets[`${s.name}-${c.name}-icon`],
               };
             }),
           })) || [],

@@ -16,15 +16,9 @@ export const ShipLayout = () => {
   const {shipId, pluginId} = useParams() as {shipId: string; pluginId: string};
   const navigate = useNavigate();
   const confirm = useConfirm();
-  const prompt = usePrompt();
   const data = useNetRequest("pluginShip", {pluginId, shipId});
   if (!shipId || !data) return <Navigate to={`/config/${pluginId}/ships`} />;
-  if (
-    pathname.endsWith("/basic") ||
-    pathname.endsWith("/assets") ||
-    pathname.endsWith("/physics") ||
-    pathname.endsWith("/systems")
-  ) {
+  if (!pathname.endsWith(shipId)) {
     return (
       <>
         <div>

@@ -1,5 +1,6 @@
 import SolarSystemPlugin from "server/src/classes/Plugins/Universe/SolarSystem";
 import {DataContext} from "server/src/utils/DataContext";
+import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
 import {pubsub} from "server/src/utils/pubsub";
 import {AstronomicalUnit, LightMinute} from "server/src/utils/unitTypes";
 import {getPlugin} from "../utils";
@@ -45,7 +46,7 @@ export const solarSystemsPluginInputs = {
     );
 
     await solarSystem?.removeFile();
-    pubsub.publish("pluginShips", {pluginId: params.pluginId});
+    pubsub.publish("pluginSolarSystems", {pluginId: params.pluginId});
   },
   async pluginSolarSystemUpdate(
     context: DataContext,
@@ -72,7 +73,13 @@ export const solarSystemsPluginInputs = {
     );
     if (!solarSystem) return {solarSystemId: ""};
     if (params.position) solarSystem.position = params.position;
-    if (params.name) solarSystem.name = params.name;
+    if (params.name) {
+      let name = generateIncrementedName(
+        params.name,
+        plugin.aspects.solarSystems.map(solarSystem => solarSystem.name)
+      );
+      solarSystem.name = name;
+    }
     if (params.description) solarSystem.description = params.description;
     if (params.tags) solarSystem.tags = params.tags;
     if (params.habitableZoneInner)

@@ -10,6 +10,7 @@ import StationComplementPlugin from "./StationComplement";
 import {loadFolderYaml} from "server/src/utils/loadFolderYaml";
 import ThemePlugin from "./Theme";
 import SolarSystemPlugin from "./Universe/SolarSystem";
+import BaseShipSystemPlugin from "./ShipSystems/BaseSystem";
 
 export function pluginPublish(plugin: BasePlugin) {
   pubsub.publish("pluginsList", {
@@ -22,6 +23,7 @@ export function pluginPublish(plugin: BasePlugin) {
 
 interface Aspects {
   ships: ShipPlugin[];
+  shipSystems: BaseShipSystemPlugin[];
   stationComplements: StationComplementPlugin[];
   themes: ThemePlugin[];
   solarSystems: SolarSystemPlugin[];
@@ -85,6 +87,7 @@ export default class BasePlugin extends FSDataStore {
     if (!aspects) {
       aspects = {
         ships: [],
+        shipSystems: [],
         stationComplements: [],
         themes: [],
         solarSystems: [],
@@ -106,6 +109,11 @@ export default class BasePlugin extends FSDataStore {
       this,
       "themes",
       ThemePlugin
+    );
+    this.aspects.solarSystems = await BasePlugin.loadAspect(
+      this,
+      "solarSystems",
+      SolarSystemPlugin
     );
   }
   toJSON() {

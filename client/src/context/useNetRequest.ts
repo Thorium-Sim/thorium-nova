@@ -1,76 +1,22 @@
-import {
-  MutableRefObject,
-  useCallback,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import {createContext, useContext, useEffect, useRef} from "react";
 import {
   AllRequestNames,
   AllRequestParams,
   AllRequestReturns,
 } from "server/src/netRequests";
-import {proxy, useSnapshot} from "valtio";
-import {NetResponseData} from "../hooks/useDataConnection";
-import {stableValueHash} from "../utils/stableValueHash";
+import {getTabId, getTabIdSync} from "@thorium/tab-id";
+import {useQuery} from "react-query";
 import {useThorium} from "./ThoriumContext";
-import {useErrorHandler} from "react-error-boundary";
-import {getTabId} from "@thorium/tab-id";
-import uniqid from "@thorium/uniqid";
-const netRequestProxy = proxy<Partial<{[requestId: string]: any}>>({});
-const mountedNetRequests: Map<string, Set<string>> = new Map();
-const netRequestPromises: {[requestId: string]: (value: unknown) => void} = {};
-const netRequestCallbacks: Map<
-  string,
-  MutableRefObject<((result: any) => void) | undefined>
-> = new Map();
-
-export function NetRequestData() {
-  useNetRequestData();
-  return null;
-}
-function useNetRequestData() {
-  const {socket} = useThorium();
-  const handleError = useErrorHandler();
-
-  if (!socket) throw new Promise(() => {});
-  useEffect(() => {
-    function handleNetRequestData(data: NetResponseData) {
-      try {
-        if (typeof data !== "object") {
-          throw new Error(`netResponse data must be an object. Got "${data}"`);
-        }
-        if ("error" in data) {
-          throw new Error(data.error);
-        }
-        if (!("requestId" in data && "response" in data)) {
-          const dataString = JSON.stringify(data, null, 2);
-          throw new Error(
-            `netResponse data must include a requestId and a response. Got ${dataString}`
-          );
-        }
-        netRequestProxy[data.requestId] = data.response;
-        netRequestPromises[data.requestId]?.(null);
-        netRequestCallbacks.get(data.requestId)?.current?.(data.response);
-      } catch (err) {
-        handleError(err);
-      }
-    }
-    socket.on("netRequestData", handleNetRequestData);
-    return () => {
-      socket.off("netRequestData", handleNetRequestData);
-    };
-  }, [socket, handleError]);
-}
+import {stableValueHash} from "../utils/stableValueHash";
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
+
+export const MockNetRequestContext = createContext<any>(null!);
 
 export async function netRequest<
   T extends AllRequestNames,
   R extends AllRequestReturns[T]
->(requestName: T, params?: AllRequestParams[T]): Promise<UnwrapPromise<R>> {
-  const requestId = stableValueHash({requestName, params});
+>(requestName: T, params?: AllRequestParams[T]): Promise<R> {
   const clientId = await getTabId();
   const body = {
     request: requestName,
@@ -87,9 +33,8 @@ export async function netRequest<
   if (result.error) {
     throw new Error(result.error);
   }
-  netRequestProxy[requestId] = result;
 
-  return result;
+  return result as R;
 }
 
 export function useNetRequest<
@@ -100,59 +45,30 @@ export function useNetRequest<
   params?: AllRequestParams[T],
   callback?: (result: UnwrapPromise<R>) => void
 ): UnwrapPromise<R> {
-  const requestId = stableValueHash({requestName, params});
-  const data = useSnapshot(netRequestProxy);
+  const clientId = getTabIdSync();
   const {socket} = useThorium();
-  const [ready, resetReady] = useReducer(() => ({}), {});
-  const [hookId] = useState(() => uniqid());
-  if (!socket) throw new Promise(() => {});
+  const requestId = stableValueHash({requestName, params});
 
-  const setUpRequest = useCallback(
-    hookId => {
-      let request = mountedNetRequests.get(requestId);
-      if (!request) {
-        request = new Set();
-        mountedNetRequests.set(requestId, request);
-      }
-
-      if (request.size === 0) {
-        socket.send("netRequest", {requestName, params, requestId});
-      }
-      request.add(hookId);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Params are properly tracked via the requestId
-    [requestId, requestName, socket]
-  );
-
-  const takeDownRequest = useCallback(
-    hookId => {
-      let request = mountedNetRequests.get(requestId);
-      request?.delete(hookId);
-      if (!request || request?.size === 0) {
-        socket.send("netRequestEnd", {requestId});
-        delete netRequestPromises[requestId];
-      }
-    },
-    [requestId, socket]
+  const netRequestQuery = useQuery<UnwrapPromise<R>>(
+    [clientId, "netRequest", requestName, params],
+    async () => {
+      const data = await netRequest(requestName, params);
+      return (data as any) || null;
+    }
   );
 
   useEffect(() => {
-    const handleReady = () => {
-      resetReady();
-      delete data[requestId];
-    };
-    socket.on("ready", handleReady);
-    return () => {
-      socket.off("ready", handleReady);
-    };
-  }, [socket, requestId, data]);
+    if (!socket) return;
+    // Subscribe to the effect
+    socket.send("netRequest", {requestName, params, requestId});
 
-  useEffect(() => {
-    setUpRequest(hookId);
     return () => {
-      takeDownRequest(hookId);
+      // Unsubscribe from the effect
+      socket.send("netRequestEnd", {requestId});
     };
-  }, [setUpRequest, takeDownRequest, ready, hookId, requestId]);
+  }, [socket, requestId]);
+
+  const mockData = useContext(MockNetRequestContext);
 
   const callbackRef = useRef(callback);
   useEffect(() => {
@@ -160,20 +76,11 @@ export function useNetRequest<
   }, [callback]);
 
   useEffect(() => {
-    if (callbackRef.current) {
-      netRequestCallbacks.set(requestId, callbackRef);
-    }
-    return () => {
-      netRequestCallbacks.delete(requestId);
-    };
-  }, [requestId]);
+    if (!netRequestQuery.data) return;
+    callbackRef.current?.(netRequestQuery.data);
+  }, [netRequestQuery.data]);
 
-  if (!data[requestId] && data[requestId] !== null) {
-    setUpRequest(hookId);
-    throw new Promise(res => {
-      netRequestPromises[requestId] = res;
-    });
-  }
+  if (mockData) return mockData[requestName];
 
-  return data[requestId];
+  return netRequestQuery.data as any;
 }

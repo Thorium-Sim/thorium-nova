@@ -4,7 +4,12 @@ import path from "path";
 import throttle from "lodash.throttle";
 import {stringify, parse} from "yaml";
 
-const fs = fsCallback.promises;
+const fs =
+  process.env.NODE_ENV === "test"
+    ? {mkdir: () => {}, writeFile: () => {}, rename: () => {}, unlink: () => {}}
+    : fsCallback.promises;
+const readFileSync =
+  process.env.NODE_ENV === "test" ? () => "" : fsCallback.readFileSync;
 let isProxy = Symbol("isProxy");
 
 let basePath = "./";
@@ -68,7 +73,7 @@ export abstract class FSDataStore {
     let data;
     try {
       data = this.filePath
-        ? parse(fsCallback.readFileSync(this.filePath, "utf8"))
+        ? parse(readFileSync(this.filePath, "utf8"))
         : initialData;
     } catch (err: any) {
       if (err.code === "EACCES") {

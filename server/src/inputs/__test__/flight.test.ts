@@ -1,5 +1,4 @@
 import {flightInputs} from "../flight";
-import fs from "fs/promises";
 
 describe("flight input", () => {
   it("should start a flight", async () => {
@@ -22,7 +21,7 @@ describe("flight input", () => {
         ],
       },
     } as any;
-    await fs.mkdir("./data/flights", {recursive: true});
+
     const flight = await flightInputs.flightStart(mockDataContext, {
       flightName: "Test Flight",
       ships: [
@@ -39,7 +38,5 @@ describe("flight input", () => {
     expect(mockDataContext.flight.ships[0].components.identity.name).toEqual(
       "Test Ship"
     );
-    await fs.rm("./flights", {recursive: true});
-    await fs.rm("./data/flights", {recursive: true});
   });
 });

@@ -30,6 +30,15 @@ const sockets: Record<string, SocketStream> = {};
  * same Station on larger bridges. Each crew member (except the Captain)
  * should have at least one client computer.
  */
+
+function socketSend(socket: SocketStream, data: any) {
+  try {
+    socket.socket.send(encode(data));
+  } catch (err) {
+    console.error(err);
+    console.error(data);
+  }
+}
 export class ServerClient extends BaseClient {
   name: string;
   connected: boolean;
@@ -90,15 +99,13 @@ export class ServerClient extends BaseClient {
                 (await inputFunction(this.clientContext, params)) || {};
 
               // Send the result back to the client, regardless of what it is.
-              socket.socket.send(
-                JSON.stringify({
-                  type: "netResponse",
-                  data: {
-                    requestId: requestId,
-                    response,
-                  },
-                })
-              );
+              socketSend(socket, {
+                type: "netResponse",
+                data: {
+                  requestId: requestId,
+                  response,
+                },
+              });
             } catch (err) {
               let message = err;
               if (err instanceof Error) {
@@ -106,15 +113,13 @@ export class ServerClient extends BaseClient {
               }
               console.error(`Error in input ${inputName}: ${message}`);
               if (err instanceof Error) console.error(err.stack);
-              socket.socket.send(
-                JSON.stringify({
-                  type: "netResponse",
-                  data: {
-                    requestId: requestId,
-                    error: message,
-                  },
-                })
-              );
+              socketSend(socket, {
+                type: "netResponse",
+                data: {
+                  requestId: requestId,
+                  error: message,
+                },
+              });
             }
             break;
           }
@@ -130,15 +135,13 @@ export class ServerClient extends BaseClient {
               }
               console.error(`Error in request ${requestName}: ${message}`);
               if (err instanceof Error) console.error(err.stack);
-              socket.socket.send(
-                JSON.stringify({
-                  type: "netRequestData",
-                  data: {
-                    requestId: requestId,
-                    error: message,
-                  },
-                })
-              );
+              socketSend(socket, {
+                type: "netRequestData",
+                data: {
+                  requestId: requestId,
+                  error: message,
+                },
+              });
               pubsub.unsubscribe(netRequestList[requestId]?.subscriptionId);
               delete netRequestList[requestId];
             }
@@ -160,15 +163,13 @@ export class ServerClient extends BaseClient {
                       payload
                     );
 
-                    socket.socket.send(
-                      JSON.stringify({
-                        type: "netRequestData",
-                        data: {
-                          requestId: requestId,
-                          response: data,
-                        },
-                      })
-                    );
+                    socketSend(socket, {
+                      type: "netRequestData",
+                      data: {
+                        requestId: requestId,
+                        response: data,
+                      },
+                    });
                     return data as any;
                   } catch (err) {
                     handleNetRequestError(err);
@@ -186,27 +187,23 @@ export class ServerClient extends BaseClient {
                 (await requestFunction(this.clientContext, params, null!)) ||
                 {};
 
-              socket.socket.send(
-                JSON.stringify({
-                  type: "netRequestData",
-                  data: {
-                    requestId: requestId,
-                    response,
-                  },
-                })
-              );
+              socketSend(socket, {
+                type: "netRequestData",
+                data: {
+                  requestId: requestId,
+                  response,
+                },
+              });
             } catch (err) {
               if (err === null) {
                 // Send null for the first request, to indicate there is no data
-                socket.socket.send(
-                  JSON.stringify({
-                    type: "netRequestData",
-                    data: {
-                      requestId: requestId,
-                      response: null,
-                    },
-                  })
-                );
+                socketSend(socket, {
+                  type: "netRequestData",
+                  data: {
+                    requestId: requestId,
+                    response: null,
+                  },
+                });
               } else {
                 handleNetRequestError(err);
               }
@@ -230,11 +227,9 @@ export class ServerClient extends BaseClient {
     });
 
     // Send a message to the client indicating that the connection is open
-    socket.socket.send(
-      JSON.stringify({
-        type: "ready",
-      })
-    );
+    socketSend(socket, {
+      type: "ready",
+    });
   }
   get cards() {
     if (!this._cards) {
@@ -284,12 +279,10 @@ export class ServerClient extends BaseClient {
             const data = await subFunction(context, payload);
 
             // Send the data to the client, keyed by card
-            socket.socket.send(
-              JSON.stringify({
-                type: "cardData",
-                data: {card, data: {[sub]: data}},
-              })
-            );
+            socketSend(socket, {
+              type: "cardData",
+              data: {card, data: {[sub]: data}},
+            });
           } catch (err) {
             if (err === null) return;
             throw err;
@@ -302,12 +295,10 @@ export class ServerClient extends BaseClient {
       setTimeout(async () => {
         // Send initial data to the client. Need a delay for
         // the client to register.
-        socket.socket.send(
-          JSON.stringify({
-            type: "cardData",
-            data: {card, data: initialData},
-          })
-        );
+        socketSend(socket, {
+          type: "cardData",
+          data: {card, data: initialData},
+        });
       }, 100);
     }
     this.subscriptionListeners = await Promise.all(

@@ -3,6 +3,40 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.4](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.3...1.0.0-alpha.4) (2022-03-23)
+
+
+### Features
+
+* **Ship Map:** Add deck creation and image upload. Closes [#166](https://github.com/Thorium-Sim/thorium-nova/issues/166). Closes [#171](https://github.com/Thorium-Sim/thorium-nova/issues/171). ([55970ab](https://github.com/Thorium-Sim/thorium-nova/commit/55970ab3816c65202e9b5f7fc537614f5b50865d))
+* **Ship Map:** Add the backend for adding and removing nodes and edges from the ship map. ([49fa053](https://github.com/Thorium-Sim/thorium-nova/commit/49fa053665b88fc83c1495122851156437d04ae4))
+* **Ship Map:** Adds the ability to configure the node and edge graph for ship maps. ([5ecb1ac](https://github.com/Thorium-Sim/thorium-nova/commit/5ecb1ac46859c4a4a4b749baca0c3096cf686a09))
+* **Ship Systems:** Add the backend structures for defining ship systems. ([d13c17c](https://github.com/Thorium-Sim/thorium-nova/commit/d13c17c97d71dcaa4ba8062dd68c4dfa95fccfff))
+* **Star Map:** Add the backend structures for stars, planets, and moons. ([8230488](https://github.com/Thorium-Sim/thorium-nova/commit/823048849d91519db5d452a4da3d2e1998404db3))
+
+# [1.0.0-alpha.3](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.2...1.0.0-alpha.3) (2022-02-18)
+
+
+### Bug Fixes
+
+* **HTTPS:** Fixes an issue with connecting using HTTPS. Closes [#206](https://github.com/Thorium-Sim/thorium-nova/issues/206) ([f721b2a](https://github.com/Thorium-Sim/thorium-nova/commit/f721b2a9e007a52e5dd6533ca78b4d276225ccf9))
+
+
+### Features
+
+* **Ship Map:** Add the backend for creating decks on a ship and uploading background images. ([0bfd79d](https://github.com/Thorium-Sim/thorium-nova/commit/0bfd79d74bd66f8f27625fbf5711a636aa6d9664))
+* **Star Map:** Add backend and API for adding, updating, and deleting stars from solar systems. Closes [#174](https://github.com/Thorium-Sim/thorium-nova/issues/174) ([10c71a3](https://github.com/Thorium-Sim/thorium-nova/commit/10c71a3b5aba72c3840d9319dfb7eb97666fdd7d))
+* **Star Map:** Add backend and API for adding, updating, and deleting stars from solar systems. Closes [#174](https://github.com/Thorium-Sim/thorium-nova/issues/174) ([681e97a](https://github.com/Thorium-Sim/thorium-nova/commit/681e97affd58629c20924d4d49c1c80492ea54ad))
+* **Star Map:** Add the APIs for adding, removing, and updating solar system plugins. Refs [#173](https://github.com/Thorium-Sim/thorium-nova/issues/173) ([f469d69](https://github.com/Thorium-Sim/thorium-nova/commit/f469d6920b56dd7eb31af695f206a9c14ca5b975))
+* **Star Map:** Add the backend data structure for storing Solar Systems in plugins. Refs [#173](https://github.com/Thorium-Sim/thorium-nova/issues/173) ([febab2c](https://github.com/Thorium-Sim/thorium-nova/commit/febab2ce4177bc51ef6c2bb52c7e94dc00483cc0))
+
+# [1.0.0-alpha.2](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.1...1.0.0-alpha.2) (2022-01-19)
+
+
+### Bug Fixes
+
+* **Issue Tracker:** Fixes an issue where the issue tracker doesn't submit properly. Closes [#200](https://github.com/Thorium-Sim/thorium-nova/issues/200) ([a77aef5](https://github.com/Thorium-Sim/thorium-nova/commit/a77aef5d7ba5be5529cad628d3a2cffbcf75c335))
+
 # 1.0.0-alpha.1 (2021-12-23)
 
 ### Bug Fixes
