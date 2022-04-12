@@ -29,6 +29,7 @@ import {
   InterstellarMenuButtons,
 } from "../../../components/Starmap/InterstellarMap";
 import {Camera} from "three";
+import Nebula from "client/src/components/Starmap/Nebula";
 
 const FAR = 1e27;
 
@@ -282,6 +283,7 @@ const StarmapScene = forwardRef(function StarmapScene(props, ref) {
     <>
       <ambientLight intensity={0.2} />
       <pointLight position={[10, 10, 10]} />
+      <Nebula />
       {pluginId && !systemId && <InterstellarMap />}
       {pluginId && systemId && <SolarSystemMap />}
     </>
