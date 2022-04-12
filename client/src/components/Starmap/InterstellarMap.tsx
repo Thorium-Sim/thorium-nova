@@ -16,6 +16,7 @@ import {CameraControls} from "./CameraControls";
 import CameraControlsClass from "camera-controls";
 import debounce from "lodash.debounce";
 import Input from "@thorium/ui/Input";
+import {PolarGrid} from "./PolarGrid";
 
 const ACTION = CameraControlsClass.ACTION;
 
@@ -51,6 +52,10 @@ export function InterstellarMap() {
     }
   }, [camera, cameraView]);
 
+  useEffect(() => {
+    useStarmapStore.setState({skyboxKey: "blank"});
+  }, []);
+
   return (
     <Suspense fallback={null}>
       <Starfield radius={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)} />
@@ -69,15 +74,15 @@ export function InterstellarMap() {
         dollyToCursor
         dollySpeed={0.5}
       />
-      <polarGridHelper
+      <PolarGrid
         rotation={[0, (2 * Math.PI) / 12, 0]}
         args={[
           lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE),
           12,
           20,
           64,
-          0x050505,
-          0x050505,
+          0xffffff,
+          0xffffff,
         ]}
       />
       {stars.map(star => (

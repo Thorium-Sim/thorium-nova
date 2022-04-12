@@ -4,7 +4,8 @@ import {netSend} from "client/src/context/netSend";
 import UploadWell from "@thorium/ui/UploadWell";
 import InfoTip from "@thorium/ui/InfoTip";
 import PlanetPlugin from "server/src/classes/Plugins/Universe/Planet";
-import {useSystemIds, PaletteDisclosure} from "../SolarSystemMap";
+import {PaletteDisclosure} from "../SolarSystemMap";
+import {useSystemIds} from "../useSystemIds";
 
 export function PlanetAssetDisclosure({object}: {object: PlanetPlugin}) {
   const [pluginId, solarSystemId] = useSystemIds();

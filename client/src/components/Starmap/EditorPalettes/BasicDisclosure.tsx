@@ -7,7 +7,8 @@ import Input from "@thorium/ui/Input";
 import {MdRepeat} from "react-icons/md";
 import randomWords from "@thorium/random-words";
 import debounce from "lodash.debounce";
-import {useSystemIds, PaletteDisclosure} from "../SolarSystemMap";
+import {PaletteDisclosure} from "../SolarSystemMap";
+import {useSystemIds} from "../useSystemIds";
 
 export function BasicDisclosure({
   object,
@@ -22,7 +23,6 @@ export function BasicDisclosure({
     () =>
       debounce(
         async (event: React.ChangeEvent<HTMLInputElement>) => {
-          console.log("Runnign throttle");
           const name = event.target.value.trim();
           if (!name) return;
           const body = {

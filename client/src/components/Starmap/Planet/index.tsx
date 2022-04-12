@@ -164,7 +164,7 @@ export function Planet({
   }
 
   const radiusY = semiMajorAxis - semiMajorAxis * eccentricity;
-  console.log(size, radius);
+
   return (
     <group>
       {viewingMode !== "viewscreen" && planet.satellite.showOrbit && (

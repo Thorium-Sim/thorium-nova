@@ -80,7 +80,7 @@ export function SocketHandler({
           queryClient.setQueryData(queryKey, data.response);
           queryClient.invalidateQueries(queryKey);
         } catch (err) {
-          console.log(err);
+          console.error(err);
           handleError(err);
         }
       }

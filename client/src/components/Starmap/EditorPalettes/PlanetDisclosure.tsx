@@ -3,7 +3,8 @@ import {netSend} from "client/src/context/netSend";
 import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
 import PlanetPlugin from "server/src/classes/Plugins/Universe/Planet";
-import {useSystemIds, PaletteDisclosure} from "../SolarSystemMap";
+import {PaletteDisclosure} from "../SolarSystemMap";
+import {useSystemIds} from "../useSystemIds";
 
 export function PlanetDisclosure({object}: {object: PlanetPlugin}) {
   const [pluginId, solarSystemId] = useSystemIds();

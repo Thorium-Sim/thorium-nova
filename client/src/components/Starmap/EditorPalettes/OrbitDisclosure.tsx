@@ -4,7 +4,8 @@ import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
 import PlanetPlugin from "server/src/classes/Plugins/Universe/Planet";
 import StarPlugin from "server/src/classes/Plugins/Universe/Star";
-import {useSystemIds, PaletteDisclosure} from "../SolarSystemMap";
+import {PaletteDisclosure} from "../SolarSystemMap";
+import {useSystemIds} from "../useSystemIds";
 
 export function OrbitDisclosure({object}: {object: PlanetPlugin | StarPlugin}) {
   const [pluginId, solarSystemId] = useSystemIds();

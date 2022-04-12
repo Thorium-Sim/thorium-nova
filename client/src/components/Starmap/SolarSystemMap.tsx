@@ -10,7 +10,6 @@ import {
   Kilometer,
 } from "server/src/utils/unitTypes";
 import {Box3, Camera, Vector3} from "three";
-import {useParams} from "react-router";
 import Button from "../ui/Button";
 import {Menu, Transition, Disclosure} from "@headlessui/react";
 import {HiChevronDown} from "react-icons/hi";
@@ -18,7 +17,6 @@ import {starTypes} from "server/src/spawners/starTypes";
 import {netSend} from "client/src/context/netSend";
 import {useConfirm} from "@thorium/ui/AlertDialog";
 import {planetTypes} from "server/src/spawners/planetTypes";
-import {useMatch} from "react-router-dom";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import Disc from "./Disc";
 import StarEntity from "./Star";
@@ -30,10 +28,12 @@ import {PlanetDisclosure} from "./EditorPalettes/PlanetDisclosure";
 import {OrbitDisclosure} from "./EditorPalettes/OrbitDisclosure";
 import {PlanetAssetDisclosure} from "././EditorPalettes/PlanetAssetDisclosure";
 import StarPlugin from "server/src/classes/Plugins/Universe/Star";
+import {PolarGrid} from "./PolarGrid";
+import {useSystemIds} from "./useSystemIds";
 const ACTION = CameraControlsClass.ACTION;
 
 // 10% further than Neptune's orbit
-const SOLAR_SYSTEM_MAX_DISTANCE: Kilometer = 4_000_000_000 * 1.1;
+export const SOLAR_SYSTEM_MAX_DISTANCE: Kilometer = 4_000_000_000 * 1.1;
 
 function HabitableZone() {
   const [pluginId, solarSystemId] = useSystemIds();
@@ -66,6 +66,10 @@ export function SolarSystemMap() {
     pluginId,
     solarSystemId,
   });
+
+  useEffect(() => {
+    useStarmapStore.setState({skyboxKey: systemData.skyboxKey || "blank"});
+  }, [systemData.skyboxKey]);
 
   useEffect(() => {
     // Set the initial camera position
@@ -102,16 +106,16 @@ export function SolarSystemMap() {
         dollySpeed={0.5}
       />
       <HabitableZone />
+      <PolarGrid
+        rotation={[0, (2 * Math.PI) / 12, 0]}
+        args={[SOLAR_SYSTEM_MAX_DISTANCE, 12, 20, 64, 0xffffff, 0xffffff]}
+      />
       {systemData.stars.map(star => (
         <StarEntity key={star.name} star={star} />
       ))}
       {systemData.planets.map(planet => (
         <Planet key={planet.name} planet={planet} />
       ))}
-      <polarGridHelper
-        rotation={[0, (2 * Math.PI) / 12, 0]}
-        args={[SOLAR_SYSTEM_MAX_DISTANCE, 12, 20, 64, 0x050505, 0x050505]}
-      />
     </Suspense>
   );
 }
@@ -184,22 +188,6 @@ export function SolarSystemMenuButtons({
       </Button>
     </>
   );
-}
-
-export function useSystemIds() {
-  const pluginId = useParams().pluginId;
-  const match = useMatch("/config/:pluginId/starmap/:systemId");
-  const matchSystemId = match?.params.systemId;
-  if (!pluginId) throw new Error("Error determining plugin ID");
-  if (!matchSystemId) throw new Error("Error determining solar system ID");
-  useEffect(() => {
-    if (!useStarmapStore.getState().selectedObjectId) {
-      useStarmapStore.setState({
-        selectedObjectId: matchSystemId,
-      });
-    }
-  }, [matchSystemId]);
-  return [pluginId, matchSystemId] as const;
 }
 
 function AddStarMenu() {
