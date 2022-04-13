@@ -1,6 +1,7 @@
 module.exports = {
   extends: ["react-app", "typescript", "typescript/react", "prettier"],
   rules: {
+    "no-var": 0,
     "prefer-const": 0,
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/ban-types": 0,
@@ -8,6 +9,7 @@ module.exports = {
     "@typescript-eslint/explicit-module-boundary-types": 0,
     "@typescript-eslint/no-unused-vars": 0,
     "@typescript-eslint/no-non-null-assertion": 0,
+    "@typescript-eslint/ban-ts-comment": 0,
     "no-empty": 0,
     "no-empty-pattern": 0,
     "@typescript-eslint/no-empty-function": 0,
