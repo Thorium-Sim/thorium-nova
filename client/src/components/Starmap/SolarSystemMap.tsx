@@ -30,6 +30,8 @@ import {PlanetAssetDisclosure} from "././EditorPalettes/PlanetAssetDisclosure";
 import StarPlugin from "server/src/classes/Plugins/Universe/Star";
 import {PolarGrid} from "./PolarGrid";
 import {useSystemIds} from "./useSystemIds";
+import Input from "@thorium/ui/Input";
+import Checkbox from "@thorium/ui/Checkbox";
 const ACTION = CameraControlsClass.ACTION;
 
 // 10% further than Neptune's orbit
@@ -414,5 +416,111 @@ export function SolarSystemPalette() {
 }
 
 function StarDisclosure({object}: {object: StarPlugin}) {
-  return <></>;
+  const [pluginId, solarSystemId] = useSystemIds();
+
+  return (
+    <PaletteDisclosure title="Star">
+      <Input
+        label="Spectral Type"
+        helperText="Cannot be changed"
+        type="text"
+        readOnly
+        defaultValue={object.spectralType}
+      />
+      <Input
+        label="Solar Mass"
+        helperText="The mass of the star compared to the Sun"
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        defaultValue={object.solarMass}
+        onChange={e => {
+          netSend("pluginStarUpdate", {
+            pluginId,
+            solarSystemId,
+            starId: object.name,
+            solarMass: parseFloat(e.target.value),
+          });
+        }}
+      />
+      <Input
+        label="Age"
+        helperText="The age of the star in years"
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        defaultValue={object.age}
+        onChange={e => {
+          netSend("pluginStarUpdate", {
+            pluginId,
+            solarSystemId,
+            starId: object.name,
+            age: parseFloat(e.target.value),
+          });
+        }}
+      />
+      <Input
+        label="Radius"
+        helperText="The radius of the star compared to the radius of the sun."
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        defaultValue={object.radius}
+        onChange={e => {
+          netSend("pluginStarUpdate", {
+            pluginId,
+            solarSystemId,
+            starId: object.name,
+            radius: parseFloat(e.target.value),
+          });
+        }}
+      />
+      <Input
+        label="Temperature"
+        helperText="The temperature of the star in Kelvin."
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        defaultValue={object.temperature}
+        onChange={e => {
+          netSend("pluginStarUpdate", {
+            pluginId,
+            solarSystemId,
+            starId: object.name,
+            temperature: parseFloat(e.target.value),
+          });
+        }}
+      />
+      <Input
+        label="Hue"
+        helperText="The hue of the star"
+        type="range"
+        min={0}
+        max={360}
+        step={1}
+        defaultValue={object.hue}
+        onChange={e => {
+          netSend("pluginStarUpdate", {
+            pluginId,
+            solarSystemId,
+            starId: object.name,
+            hue: parseFloat(e.target.value),
+          });
+        }}
+      />
+      <Checkbox
+        label="White Star"
+        helperText="If checked, the star will be white. Overrides hue."
+        defaultChecked={object.isWhite}
+        onChange={e => {
+          netSend("pluginStarUpdate", {
+            pluginId,
+            solarSystemId,
+            starId: object.name,
+            isWhite: e.target.checked,
+          });
+        }}
+      />
+    </PaletteDisclosure>
+  );
 }
