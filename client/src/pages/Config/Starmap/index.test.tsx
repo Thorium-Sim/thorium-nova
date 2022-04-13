@@ -9,6 +9,10 @@ import {InterstellarMap} from "client/src/components/Starmap/InterstellarMap";
 
 jest.mock("scheduler", () => require("scheduler/unstable_mock"));
 
+//@ts-expect-error Mocking globals
+globalThis.DOMRect = class {
+  fromRect = jest.fn();
+};
 const client = new QueryClient();
 describe("Starmap Plugin Editor", () => {
   it("should render a single solar system properly", async () => {
