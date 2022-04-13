@@ -50,4 +50,6 @@ const Selected: React.FC = React.memo(() => {
   );
 });
 
+Selected.displayName = "Selected";
+
 export default Selected;

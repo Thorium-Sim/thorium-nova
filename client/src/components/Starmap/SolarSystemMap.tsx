@@ -313,7 +313,7 @@ const HandleIsOpen = ({
       }, 100);
     }
     hasMounted.current = true;
-  }, [open]);
+  }, [open, scrollRef]);
 
   return null;
 };
@@ -367,7 +367,7 @@ export function PaletteDisclosure({
   );
 }
 
-function getSelectedObject() {
+function useSelectedObject() {
   const [pluginId, solarSystemId] = useSystemIds();
   const selectedObjectId = useStarmapStore(state => state.selectedObjectId);
   const systemData = useNetRequest("pluginSolarSystem", {
@@ -395,7 +395,7 @@ function getSelectedObject() {
   return null;
 }
 export function SolarSystemPalette() {
-  const results = getSelectedObject();
+  const results = useSelectedObject();
   if (!results) return null;
   return (
     <div

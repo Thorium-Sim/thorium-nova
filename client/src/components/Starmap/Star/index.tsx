@@ -11,6 +11,7 @@ import StarPlugin from "server/src/classes/Plugins/Universe/Star";
 const StarEntity: React.FC<{
   star: StarPlugin;
 }> = ({star}) => {
+  const viewingMode = useStarmapStore(state => state.viewingMode);
   // const selectedId = useConfigStore(store => store.selectedObject?.id);
   const selected = false; //selectedId === entity.id;
   if (!star.satellite) return null;
@@ -23,7 +24,6 @@ const StarEntity: React.FC<{
     `hsl(${star.hue + 20}, 100%, ${star.isWhite ? 100 : 50}%)`
   );
 
-  const viewingMode = useStarmapStore(state => state.viewingMode);
   const size =
     viewingMode === "editor"
       ? 10 + 5 * star.radius

@@ -92,7 +92,7 @@ const Disc: React.FC<{
     const offset2: vec4 = [0.2, 0.75, 0, 1];
     const geometry = makeDiscGeometry(new Color(color), offset1, offset2);
     return geometry;
-  }, [habitableZoneInner, habitableZoneOuter]);
+  }, [habitableZoneInner, habitableZoneOuter, color]);
   return (
     <mesh {...props} rotation={[0, Math.PI / 2, 0]} geometry={geometry}>
       <shaderMaterial

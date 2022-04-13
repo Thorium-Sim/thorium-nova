@@ -51,7 +51,7 @@ export function BasicDisclosure({
         1000,
         {trailing: true, leading: false}
       ),
-    [pluginId, solarSystemId]
+    [pluginId, solarSystemId, navigate, object.name, type]
   );
 
   const skyboxKeyRef = React.useRef<HTMLInputElement>(null);

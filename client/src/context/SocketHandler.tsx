@@ -97,7 +97,7 @@ export function SocketHandler({
         socket.off("ready", handleReady);
       };
     }
-  }, [socket]);
+  }, [socket, handleError, queryClient]);
 
   if (reconnectionState === "reconnecting") {
     return <Reconnecting />;

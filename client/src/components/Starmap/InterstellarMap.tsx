@@ -206,7 +206,7 @@ export const InterstellarPalette = () => {
     if (!selectedStar) {
       useStarmapStore.setState({selectedObjectId: null});
     }
-  }, []);
+  }, [selectedStar]);
 
   const [name, setName] = React.useState(selectedStar?.name || "");
   const [description, setDescription] = React.useState(
@@ -237,7 +237,7 @@ export const InterstellarPalette = () => {
     if (!selectedStar) return;
     setName(selectedStar.name);
     setDescription(selectedStar.description);
-  }, [selectedStar?.name, selectedStar?.description]);
+  }, [selectedStar, selectedStar?.name, selectedStar?.description]);
 
   return (
     <div className="w-full h-full overflow-y-auto p-2 text-white">

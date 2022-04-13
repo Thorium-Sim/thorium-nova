@@ -58,7 +58,7 @@ const Star: React.FC<{
     texture.wrapS = RepeatWrapping;
     texture.wrapT = RepeatWrapping;
     return texture;
-  }, [texturePath]);
+  }, []);
   const uniforms = React.useMemo(
     () => getUniforms({map: texture, color1, color2}),
     [color1, color2, texture]
