@@ -21,8 +21,10 @@ function generateMaterial() {
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = CANVAS_WIDTH;
 
+  // @ts-ignore Built in types don't recognize this property
   const offscreenCanvas = canvas.transferControlToOffscreen();
   offscreenCanvas.width = offscreenCanvas.height = CANVAS_WIDTH;
+
   const canvasTexture = new CanvasTexture(canvas);
   canvasTexture.encoding = sRGBEncoding;
 
