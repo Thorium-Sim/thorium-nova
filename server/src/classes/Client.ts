@@ -153,28 +153,26 @@ export class ServerClient extends BaseClient {
             try {
               const requestFunction = requests[requestName];
               // Create the subscription
+              async function handleRequest(payload: any, context: DataContext) {
+                try {
+                  const data = await requestFunction(context, params, payload);
+
+                  socketSend(socket, {
+                    type: "netRequestData",
+                    data: {
+                      requestId: requestId,
+                      response: data,
+                    },
+                  });
+                  return data as any;
+                } catch (err) {
+                  handleNetRequestError(err);
+                }
+              }
               const subscriptionId = await pubsub.subscribe(
                 requestName,
-                async (payload: any, context: DataContext) => {
-                  try {
-                    const data = await requestFunction(
-                      context,
-                      params,
-                      payload
-                    );
-
-                    socketSend(socket, {
-                      type: "netRequestData",
-                      data: {
-                        requestId: requestId,
-                        response: data,
-                      },
-                    });
-                    return data as any;
-                  } catch (err) {
-                    handleNetRequestError(err);
-                  }
-                },
+                // @ts-expect-error Promises are throwing this off, so we'll just ignore it.
+                handleRequest,
                 this.clientContext
               );
               netRequestList[requestId] = {
