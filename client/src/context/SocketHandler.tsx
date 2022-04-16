@@ -2,7 +2,7 @@ import {getTabIdSync} from "@thorium/tab-id";
 import {useEffect} from "react";
 import {useErrorHandler} from "react-error-boundary";
 import {useQueryClient} from "react-query";
-import {NetResponseData, useDataConnection} from "../hooks/useDataConnection";
+import {NetResponseData} from "../hooks/useDataConnection";
 import {DataCardNames, SubscriptionNames} from "../utils/cardData";
 import {FaSpinner} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
@@ -80,13 +80,13 @@ export function SocketHandler({
           queryClient.setQueryData(queryKey, data.response);
           queryClient.invalidateQueries(queryKey);
         } catch (err) {
-          console.log(err);
+          console.error(err);
           handleError(err);
         }
       }
 
       function handleReady() {
-        queryClient.clear();
+        queryClient.invalidateQueries();
       }
       socket.on("cardData", handleCardData);
       socket.on("netRequestData", handleNetRequestData);

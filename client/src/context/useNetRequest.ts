@@ -8,6 +8,7 @@ import {getTabId, getTabIdSync} from "@thorium/tab-id";
 import {useQuery} from "react-query";
 import {useThorium} from "./ThoriumContext";
 import {stableValueHash} from "../utils/stableValueHash";
+import {useRequestSub} from "./useRequestSub";
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 
@@ -57,16 +58,7 @@ export function useNetRequest<
     }
   );
 
-  useEffect(() => {
-    if (!socket) return;
-    // Subscribe to the effect
-    socket.send("netRequest", {requestName, params, requestId});
-
-    return () => {
-      // Unsubscribe from the effect
-      socket.send("netRequestEnd", {requestId});
-    };
-  }, [socket, requestId]);
+  useRequestSub({requestName, params});
 
   const mockData = useContext(MockNetRequestContext);
 

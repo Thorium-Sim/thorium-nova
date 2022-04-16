@@ -79,6 +79,7 @@ const CardRenderer = ({
         key={id}
         show={show}
         {...transitionProps}
+        unmount={false}
         beforeEnter={() => {
           setCardLoaded(false);
         }}

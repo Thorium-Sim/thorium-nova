@@ -64,7 +64,6 @@ export const clientInputs = {
     }
     flightClient.stationId = params.stationId;
     flightClient.shipId = params.shipId;
-    await context.client.initSubscriptions();
     pubsub.publish("clients");
     pubsub.publish("client", {clientId: context.clientId});
     pubsub.publish("station", {clientId: context.clientId});
@@ -100,7 +99,6 @@ export const clientInputs = {
       context.flightClient.shipId = null;
       context.flightClient.loginName = "";
     }
-    await context.client.initSubscriptions();
     pubsub.publish("station", {clientId: context.clientId});
     pubsub.publish("client", {clientId: context.clientId});
     pubsub.publish("theme", {clientId: context.clientId});

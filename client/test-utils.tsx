@@ -13,6 +13,7 @@ import {
 import {MockNetRequestContext} from "./src/context/useNetRequest";
 import {AllRequests} from "server/src/netRequests";
 import {QueryClient, QueryClientProvider} from "react-query";
+import {ThoriumContext} from "./src/context/ThoriumContext";
 
 let netSendResponse: {response: any} = {response: ""};
 const netSendSpy = jest.fn((input, params) => netSendResponse);
@@ -52,53 +53,55 @@ async function render<CardName extends DataCardNames = "allData">(
   const Wrapper: React.FC = ({children}) => {
     return (
       <Suspense fallback={<p>Suspended in test</p>}>
-        <QueryClientProvider client={queryClient}>
-          <MockClientDataContext.Provider
-            value={{
-              client: {
-                id: "Test",
-                name: "Test Client",
-                connected: true,
-                loginName: "Test User",
-              } as any,
-              flight: null,
-              ship: {
-                id: 0,
-                components: {
-                  isPlayerShip: {value: true},
-                  identity: {name: "Test Ship"},
-                  isShip: {
-                    assets: {
-                      logo: "",
+        <ThoriumContext.Provider value={{} as any}>
+          <QueryClientProvider client={queryClient}>
+            <MockClientDataContext.Provider
+              value={{
+                client: {
+                  id: "Test",
+                  name: "Test Client",
+                  connected: true,
+                  loginName: "Test User",
+                } as any,
+                flight: null,
+                ship: {
+                  id: 0,
+                  components: {
+                    isPlayerShip: {value: true},
+                    identity: {name: "Test Ship"},
+                    isShip: {
+                      assets: {
+                        logo: "",
+                      },
+                      category: "Cruiser",
+                      registry: "NCC-2016-A",
+                      shipClass: "Astra Cruiser",
                     },
-                    category: "Cruiser",
-                    registry: "NCC-2016-A",
-                    shipClass: "Astra Cruiser",
                   },
-                },
-                alertLevel: 5,
-              } as any,
-              station: {
-                name: "Test Station",
-                logo: "",
-                cards: [
-                  {
-                    icon: "",
-                    name: "Test Card",
-                    component: "Login",
-                  },
-                ],
-              } as any,
-              theme: null,
-            }}
-          >
-            <MockNetRequestContext.Provider value={options?.netRequestData}>
-              <MockCardDataContext.Provider value={options?.cardData}>
-                <Router initialEntries={initialRoutes}>{children}</Router>
-              </MockCardDataContext.Provider>
-            </MockNetRequestContext.Provider>
-          </MockClientDataContext.Provider>
-        </QueryClientProvider>
+                  alertLevel: 5,
+                } as any,
+                station: {
+                  name: "Test Station",
+                  logo: "",
+                  cards: [
+                    {
+                      icon: "",
+                      name: "Test Card",
+                      component: "Login",
+                    },
+                  ],
+                } as any,
+                theme: null,
+              }}
+            >
+              <MockNetRequestContext.Provider value={options?.netRequestData}>
+                <MockCardDataContext.Provider value={options?.cardData}>
+                  <Router initialEntries={initialRoutes}>{children}</Router>
+                </MockCardDataContext.Provider>
+              </MockNetRequestContext.Provider>
+            </MockClientDataContext.Provider>
+          </QueryClientProvider>
+        </ThoriumContext.Provider>
       </Suspense>
     );
   };

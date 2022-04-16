@@ -15,7 +15,7 @@ import QuickStartProvider from "./components/FlightQuickStart/FlightQuickStartCo
 import FlightQuickStart from "./components/FlightQuickStart";
 import CrewConfig from "./components/FlightQuickStart/CrewConfig";
 import ShipConfig from "./components/FlightQuickStart/ShipConfig";
-import {netRequest, useNetRequest} from "./context/useNetRequest";
+import {netRequest} from "./context/useNetRequest";
 import {ComponentDemo} from "./cards";
 
 const DocLayout = lazy(() => import("./docs"));
