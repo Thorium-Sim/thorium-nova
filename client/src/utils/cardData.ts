@@ -1,5 +1,8 @@
 import {DataContext, UnionToIntersection} from "server/src/utils/types";
-import * as allData from "../cards/dataList";
+import * as allCards from "../cards/dataList";
+import * as allCores from "../cores/dataList";
+
+const allData = {...allCards, ...allCores};
 
 // @ts-expect-error The default value duplicates everything else. No need to include it.
 const {["default"]: defaultValue, ...cardData} = allData;

@@ -76,6 +76,7 @@ export const clientInputs = {
     if (context.flightClient) {
       context.flightClient.loginName = params.loginName;
     }
+    pubsub.publish("clients");
     pubsub.publish("client", {clientId: context.clientId});
   },
   clientLogout: (context: DataContext) => {
@@ -83,6 +84,7 @@ export const clientInputs = {
       context.flightClient.loginName = "";
     }
     pubsub.publish("client", {clientId: context.clientId});
+    pubsub.publish("clients");
   },
   clientOverrideStation: async (
     context: DataContext,
