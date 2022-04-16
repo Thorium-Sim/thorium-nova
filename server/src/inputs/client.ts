@@ -1,6 +1,6 @@
 import {pubsub} from "../utils/pubsub";
 import {DataContext} from "../utils/DataContext";
-import Station from "../classes/Station";
+import Station, {staticStations} from "../classes/Station";
 
 export const clientInputs = {
   clientSetName: (context: DataContext, params: {name: string}) => {
@@ -56,9 +56,10 @@ export const clientInputs = {
     if (!ship) {
       throw new Error("No ship with that ID exists.");
     }
-    const station = ship.components.stationComplement?.stations.find(
-      station => station.name === params.stationId
-    );
+    const station = staticStations
+      .concat(ship.components.stationComplement?.stations || [])
+      .find(station => station.name === params.stationId);
+
     if (!station) {
       throw new Error("No station with that ID exists.");
     }
