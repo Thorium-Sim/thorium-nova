@@ -8,7 +8,7 @@ const Releases = () => {
       <div className="prose lg:prose-xl max-w-prose mx-auto mt-8 ">
         <Link to="/">Go Back</Link>
         <h1>Release Notes</h1>
-        <div className="p-8 rounded-box md:mt-16 mb-16 backdrop-filter backdrop-blur backdrop-brightness-50 backdrop-contrast-125">
+        <div className="p-8 rounded-box md:mt-16 mb-16 backdrop-filter backdrop-blur backdrop-brightness-50 backdrop-contrast-125 prose-h1:text-xl">
           <div dangerouslySetInnerHTML={{__html: releaseNotes.data}} />
         </div>
       </div>
