@@ -54,8 +54,8 @@ export class ServerClient extends BaseClient {
     this.name = params.name || randomNameGenerator();
     // Host will always default to false, and will be set
     // to true when the host client connects to the server
-
     this.isHost = false;
+
     // The client starts disconnected since that's
     // how it will always be when the server starts up.
     this.connected = false;
