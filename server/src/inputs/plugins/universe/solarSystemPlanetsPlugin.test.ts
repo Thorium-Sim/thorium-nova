@@ -1,41 +1,16 @@
+import {createMockDataContext} from "server/src/utils/createMockDataContext";
 import {planetPluginInputs} from "./planets";
-
-function createMockDataContext() {
-  const context = {
-    flight: null,
-    server: {
-      plugins: [
-        {
-          id: "Test Plugin",
-          name: "Test Plugin",
-          active: true,
-          aspects: {
-            ships: [
-              {
-                name: "Test Template",
-              },
-            ],
-            solarSystems: [
-              {
-                name: "Test System",
-                stars: [{radius: 1, temperature: 5772}],
-                planets: [],
-              },
-            ],
-          },
-        },
-      ],
-    },
-  } as any;
-
-  return context;
-}
 
 describe("solar system planet plugin input", () => {
   it("should create a new planet in a solar system", async () => {
     const oldRandom = Math.random;
     Math.random = () => 0.5;
     const context = createMockDataContext();
+    context.server.plugins[0].aspects.solarSystems.push({
+      name: "Test System",
+      stars: [{radius: 1, temperature: 5772}],
+      planets: [],
+    } as any);
     const planet = planetPluginInputs.pluginPlanetCreate(context, {
       pluginId: "Test Plugin",
       solarSystemId: "Test System",
@@ -118,6 +93,12 @@ describe("solar system planet plugin input", () => {
 
   it("should delete a planet in the solar system", async () => {
     const context = createMockDataContext();
+    context.server.plugins[0].aspects.solarSystems.push({
+      name: "Test System",
+      stars: [{radius: 1, temperature: 5772}],
+      planets: [],
+    } as any);
+
     const planet = planetPluginInputs.pluginPlanetCreate(context, {
       pluginId: "Test Plugin",
       solarSystemId: "Test System",
@@ -156,6 +137,12 @@ describe("solar system planet plugin input", () => {
     const oldRandom = Math.random;
     Math.random = () => 0.5;
     const context = createMockDataContext();
+    context.server.plugins[0].aspects.solarSystems.push({
+      name: "Test System",
+      stars: [{radius: 1, temperature: 5772}],
+      planets: [],
+    } as any);
+
     const planet = planetPluginInputs.pluginPlanetCreate(context, {
       pluginId: "Test Plugin",
       solarSystemId: "Test System",
