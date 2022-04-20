@@ -33,6 +33,8 @@ export const WelcomeLogo = ({className}: {className?: string}) => {
           Version {packageJson.version}
         </Link>
       </h2>
+      <div className="mt-6"></div>
+      <ClientButton />
       {connectionAddress && (
         <h3 className="text-xl font-semi-bold mt-2">
           Connect: {connectionAddress}
@@ -41,8 +43,6 @@ export const WelcomeLogo = ({className}: {className?: string}) => {
       {clientData.client.isHost && (
         <h3 className="text-xl font-semi-bold mt-2">You are the host!</h3>
       )}
-      <div className="mt-6"></div>
-      <ClientButton />
     </div>
   );
 };
