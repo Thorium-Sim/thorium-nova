@@ -39,6 +39,14 @@ export async function applyDataChannel(
         database.server.clients[clientId] = client;
       }
       client.connected = true;
+
+      // Assign the client as host if there isn't already a host
+      if (
+        Object.values(database.server.clients).filter(c => c.isHost).length ===
+        0
+      ) {
+        client.isHost = true;
+      }
       await client.initWebSocket(connection, database);
       pubsub.publish("clients");
     } catch (err) {
