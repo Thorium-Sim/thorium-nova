@@ -40,6 +40,11 @@ export async function applyDataChannel(
         database.server.clients[clientId] = client;
       }
       if (authData.hostSecret === hostSecret) {
+        // Clear out the rest of the hosts - the Electron
+        // app overrides all of them.
+        for (let clientId in database.server.clients) {
+          database.server.clients[clientId].isHost = false;
+        }
         client.isHost = true;
       }
       client.connected = true;
