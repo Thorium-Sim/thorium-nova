@@ -93,6 +93,8 @@ export class ServerClient extends BaseClient {
     } = {};
 
     socket.socket.on("close", () => {
+      this.connected = false;
+      this.isHost = false;
       for (let requestId in netRequestList) {
         pubsub.unsubscribe(netRequestList[requestId]?.subscriptionId);
       }
