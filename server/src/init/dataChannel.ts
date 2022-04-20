@@ -40,15 +40,26 @@ export async function applyDataChannel(
       }
       client.connected = true;
 
-      // Assign the client as host if there isn't already a host
+      // If there is another client that is host, make this one not host
       if (
-        Object.values(database.server.clients).filter(c => c.isHost).length ===
-        0
+        Object.values(database.server.clients).some(
+          c => c.id !== clientId && c.isHost && c.connected
+        )
+      ) {
+        client.isHost = false;
+      }
+      // Assign the client as host if there aren't any other clients connected
+      if (
+        Object.values(database.server.clients).filter(
+          c => c.connected && c.id !== clientId
+        ).length === 0
       ) {
         client.isHost = true;
       }
       await client.initWebSocket(connection, database);
+      pubsub.publish("thorium");
       pubsub.publish("clients");
+      pubsub.publish("client", {clientId: client.id});
     } catch (err) {
       connection.socket.close();
       console.error(err);

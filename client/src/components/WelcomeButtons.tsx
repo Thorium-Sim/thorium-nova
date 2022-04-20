@@ -7,12 +7,12 @@ import {useNetRequest} from "../context/useNetRequest";
 
 export const WelcomeButtons = ({className}: {className?: string}) => {
   const flights = useNetRequest("flights");
-  const client = useClientData();
+  const clientData = useClientData();
   return (
     <div
       className={`${className} flex flex-col justify-end self-end space-y-4 max-w-md h-full`}
     >
-      {client.flight ? (
+      {clientData.flight ? (
         <>
           <NavLink className="btn btn-primary btn-outline" to="/flight">
             Go To Flight Lobby
@@ -31,37 +31,46 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
         </>
       ) : (
         <>
-          <NavLink className="btn btn-primary btn-outline" to="/flight/quick">
-            Start Flight
-          </NavLink>
-          <Disclosure>
-            <Disclosure.Button className="btn btn-info btn-outline">
-              Load a Saved Flight
-            </Disclosure.Button>
-            <Disclosure.Panel
-              className="text-white list-none max-h-full overflow-y-auto"
-              as="ul"
-            >
-              {flights.length ? (
-                flights.map(f => (
-                  <li className="list-group-item" key={f.name}>
-                    <strong>{f.name}</strong>
-                    <br />
-                    <small>{new Date(f.date).toLocaleDateString()}</small>
-                  </li>
-                ))
-              ) : (
-                <>
-                  <li className="list-group-item">No Saved Flights</li>
-                </>
-              )}
-            </Disclosure.Panel>
-          </Disclosure>
+          {clientData.client.isHost && (
+            <>
+              <NavLink
+                className="btn btn-primary btn-outline"
+                to="/flight/quick"
+              >
+                Start Flight
+              </NavLink>
+              <Disclosure>
+                <Disclosure.Button className="btn btn-info btn-outline">
+                  Load a Saved Flight
+                </Disclosure.Button>
+                <Disclosure.Panel
+                  className="text-white list-none max-h-full overflow-y-auto"
+                  as="ul"
+                >
+                  {flights.length ? (
+                    flights.map(f => (
+                      <li className="list-group-item" key={f.name}>
+                        <strong>{f.name}</strong>
+                        <br />
+                        <small>{new Date(f.date).toLocaleDateString()}</small>
+                      </li>
+                    ))
+                  ) : (
+                    <>
+                      <li className="list-group-item">No Saved Flights</li>
+                    </>
+                  )}
+                </Disclosure.Panel>
+              </Disclosure>
+            </>
+          )}
 
           <Button className="btn btn-warning btn-outline">Join a Server</Button>
-          <NavLink className="btn btn-notice btn-outline" to="/config">
-            Configure Plugins
-          </NavLink>
+          {clientData.client.isHost && (
+            <NavLink className="btn btn-notice btn-outline" to="/config">
+              Configure Plugins
+            </NavLink>
+          )}
           <NavLink className="btn btn-info btn-outline" to="/docs">
             How-to Guides
           </NavLink>

@@ -8,6 +8,7 @@ export const clientInputs = {
     if (typeof params.name !== "string")
       throw new Error("name must be a string.");
     if (!params.name.trim()) throw new Error("name cannot be blank.");
+
     context.server.clients[context.clientId].name = params.name;
     pubsub.publish("clients");
     pubsub.publish("client", {clientId: context.clientId});
@@ -102,5 +103,16 @@ export const clientInputs = {
     pubsub.publish("station", {clientId: context.clientId});
     pubsub.publish("client", {clientId: context.clientId});
     pubsub.publish("theme", {clientId: context.clientId});
+  },
+  clientClaimHost: async (context: DataContext) => {
+    const hasExistingHost = Object.values(context.server.clients).some(
+      client => client.isHost && client.connected
+    );
+    if (!hasExistingHost) {
+      context.client.isHost = true;
+    }
+    pubsub.publish("clients");
+    pubsub.publish("client", {clientId: context.clientId});
+    pubsub.publish("thorium");
   },
 };

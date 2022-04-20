@@ -1,6 +1,5 @@
 import {DataContext} from "server/src/utils/DataContext";
 import {Entity} from "server/src/utils/ecs";
-import {getFlights} from "server/src/utils/getFlights";
 import type Station from "server/src/classes/Station";
 import ThemePlugin from "server/src/classes/Plugins/Theme";
 import type {FlightClient} from "server/src/classes/FlightClient";
@@ -8,6 +7,14 @@ import type {FlightClient} from "server/src/classes/FlightClient";
 // This file is used for any subscriptions which all clients
 // make, regardless of what cards they have.
 export const subscriptions = {
+  thorium: (context: DataContext) => {
+    const hasHost = Object.values(context.server.clients).some(
+      client => client.isHost && client.connected
+    );
+    return {
+      hasHost,
+    };
+  },
   client: (context: DataContext, params: {clientId: string}) => {
     if (params && params.clientId !== context.clientId) throw null;
 
