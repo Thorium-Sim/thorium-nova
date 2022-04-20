@@ -130,6 +130,9 @@ class MockDataContext {
   get ship() {
     return this.flight.playerShips[0];
   }
+  get isHost() {
+    return true;
+  }
 }
 describe("Client input", () => {
   it("should assign to a client and station", async () => {
