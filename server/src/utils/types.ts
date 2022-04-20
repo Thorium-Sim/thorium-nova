@@ -1,4 +1,5 @@
 import {Entity} from "server/src/utils/ecs";
+import {TimerComponent} from "../components/timer";
 import type {DataContext} from "./DataContext";
 export {DataContext};
 export type UnionToIntersection<U> = (
@@ -16,6 +17,29 @@ export type OfflineStates =
   | "lockdown"
   | "maintenance"
   | null;
+
+type JSONTypes =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | JSONTypes[]
+  | object;
+
+type ForbiddenJSONTypes = Function | RegExp | symbol;
+type JSONOnlyObject<T> = {
+  readonly [K in keyof T as T[K] extends ForbiddenJSONTypes
+    ? never
+    : T[K] extends JSONTypes
+    ? K
+    : never]: T[K] extends Date ? string : T[K];
+};
+type JSONOnly<T> = T extends any[]
+  ? JSONOnlyObject<T[number]>[]
+  : JSONOnlyObject<T>;
+
+type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 
 type SecondParam<Func extends (...args: any) => any> = Func extends (
   first: any,
@@ -40,7 +64,9 @@ export type RequestPublishParams<Requests extends Record<string, AnyFunc>> = {
   [Property in keyof Requests]: ThirdParam<Requests[Property]>;
 };
 export type InputReturns<Inputs extends Record<string, AnyFunc>> = {
-  [Property in keyof Inputs]: ReturnType<Inputs[Property]>;
+  [Property in keyof Inputs]: JSONOnly<
+    UnwrapPromise<ReturnType<Inputs[Property]>>
+  >;
 };
 
 // TODO: Aug 16 - Build out the notification system

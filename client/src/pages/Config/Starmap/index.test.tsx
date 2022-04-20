@@ -13,6 +13,7 @@ jest.mock("scheduler", () => require("scheduler/unstable_mock"));
 globalThis.DOMRect = class {
   fromRect = jest.fn();
 };
+
 const client = new QueryClient();
 describe("Starmap Plugin Editor", () => {
   it("should render a single solar system properly", async () => {

@@ -29,6 +29,7 @@ import {
 import {EditorPalette} from "client/src/components/ui/EditorPalette";
 import {InterstellarPalette} from "client/src/components/Starmap/InterstellarMap";
 import {SolarSystemPalette} from "client/src/components/Starmap/SolarSystemMap";
+import Nebula from "client/src/components/Starmap/Nebula";
 
 const FAR = 1e27;
 
@@ -133,6 +134,7 @@ const StarmapScene = forwardRef(function StarmapScene(props, ref) {
         <Route path="/:systemId" element={<SolarSystemMap />} />
         <Route path="*" element={<InterstellarMap />} />
       </Routes>
+      <Nebula />
     </>
   );
 });

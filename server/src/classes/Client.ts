@@ -16,11 +16,14 @@ import requests, {AllRequestNames} from "../netRequests";
 import {BaseClient} from "./BaseClient";
 import {randomNameGenerator} from "../utils/randomNameGenerator";
 
-type NetSendData = {inputName: AllInputNames; params: any; requestId: string};
 type NetRequestData = {
   requestName: AllRequestNames;
   params: any;
   requestId: string;
+};
+type CardRequestData = {
+  requestId: string;
+  requestName: ["cardData", string];
 };
 const sockets: Record<string, SocketStream> = {};
 /**
@@ -43,7 +46,6 @@ export class ServerClient extends BaseClient {
   name: string;
   connected: boolean;
   clientContext!: DataContext;
-  subscriptionListeners: number[] = [];
   SI = new SnapshotInterpolation();
   private _cards: (keyof typeof cardSubscriptions)[] | null = null;
   constructor(params: {id: string} & Partial<ServerClient>) {
@@ -54,7 +56,7 @@ export class ServerClient extends BaseClient {
     this.connected = false;
   }
   public toJSON() {
-    const {clientContext, subscriptionListeners, SI, ...data} = this;
+    const {clientContext, SI, ...data} = this;
     return data;
   }
   public async initWebSocket(
@@ -65,7 +67,6 @@ export class ServerClient extends BaseClient {
 
     sockets[this.id] = connection;
     await this.initRequests(connection);
-    await this.initSubscriptions(connection);
   }
   private async initRequests(socket: SocketStream) {
     if (!socket)
@@ -79,9 +80,21 @@ export class ServerClient extends BaseClient {
         subscriptionId: number;
       };
     } = {};
+    const cardRequestList: {
+      [requestId: string]: {
+        requestName: ["cardData", string];
+        subscriptionId: number;
+      }[];
+    } = {};
+
     socket.socket.on("close", () => {
       for (let requestId in netRequestList) {
         pubsub.unsubscribe(netRequestList[requestId]?.subscriptionId);
+      }
+      for (let requestId in cardRequestList) {
+        for (let {subscriptionId} of cardRequestList[requestId]) {
+          pubsub.unsubscribe(subscriptionId);
+        }
       }
     });
 
@@ -90,42 +103,10 @@ export class ServerClient extends BaseClient {
       try {
         const messageData = JSON.parse(data.toString());
         switch (messageData.type) {
-          case "netSend": {
-            const {inputName, params, requestId} =
-              messageData.data as NetSendData;
-            try {
-              const inputFunction = inputs[inputName];
-              const response =
-                (await inputFunction(this.clientContext, params)) || {};
-
-              // Send the result back to the client, regardless of what it is.
-              socketSend(socket, {
-                type: "netResponse",
-                data: {
-                  requestId: requestId,
-                  response,
-                },
-              });
-            } catch (err) {
-              let message = err;
-              if (err instanceof Error) {
-                message = err.message;
-              }
-              console.error(`Error in input ${inputName}: ${message}`);
-              if (err instanceof Error) console.error(err.stack);
-              socketSend(socket, {
-                type: "netResponse",
-                data: {
-                  requestId: requestId,
-                  error: message,
-                },
-              });
-            }
-            break;
-          }
           case "netRequest": {
-            const {requestName, params, requestId} =
-              messageData.data as NetRequestData;
+            const {requestName, requestId} = messageData.data as
+              | NetRequestData
+              | CardRequestData;
 
             function handleNetRequestError(err: unknown) {
               if (err === null) return;
@@ -149,13 +130,73 @@ export class ServerClient extends BaseClient {
             // If this client is already subscribed to this request, ignore the request.
             // It will already get the data it needs from the other request.
             if (netRequestList[requestId]) return;
+            if (cardRequestList[requestId]) return;
 
             try {
-              const requestFunction = requests[requestName];
-              // Create the subscription
-              const subscriptionId = await pubsub.subscribe(
-                requestName,
-                async (payload: any, context: DataContext) => {
+              if (Array.isArray(requestName)) {
+                // This is a card request
+                const [, card] = requestName;
+                const cardSubs = cardSubscriptions[card] as UnionToIntersection<
+                  typeof cardSubscriptions[typeof card]
+                >;
+                if (!cardSubs) return;
+
+                const keys = Object.keys(cardSubs) as SubscriptionNames[];
+                const initialData: Record<string, any> = {};
+                for (let sub of keys) {
+                  // This listener will be called whenever `pubsub.publish(sub, payload)` is called.
+                  const listener = async (
+                    payload: any,
+                    context: DataContext
+                  ) => {
+                    const subFunction = cardSubs[sub] as SubRecord;
+
+                    try {
+                      const data = await subFunction(context, payload);
+
+                      // Send the data to the client, keyed by card
+                      socketSend(socket, {
+                        type: "cardData",
+                        data: {card, data: {[sub]: data}},
+                      });
+                    } catch (err) {
+                      if (err === null) return;
+                      throw err;
+                    }
+                  };
+
+                  initialData[sub] = await cardSubs[sub](this.clientContext);
+                  const subscriptionId = await pubsub.subscribe(
+                    sub,
+                    // @ts-expect-error Promises are throwing this off, so we'll just ignore it.
+                    listener,
+                    this.clientContext
+                  );
+                  if (!cardRequestList[requestId])
+                    cardRequestList[requestId] = [];
+
+                  cardRequestList[requestId].push({
+                    requestName,
+                    subscriptionId,
+                  });
+                }
+                setTimeout(async () => {
+                  // Send initial data to the client. Need a delay for
+                  // the client to register.
+                  socketSend(socket, {
+                    type: "cardData",
+                    data: {card, data: initialData},
+                  });
+                }, 100);
+              } else {
+                const requestFunction = requests[requestName];
+                const params = messageData.data.params;
+
+                // Create the subscription
+                async function handleRequest(
+                  payload: any,
+                  context: DataContext
+                ) {
                   try {
                     const data = await requestFunction(
                       context,
@@ -174,26 +215,31 @@ export class ServerClient extends BaseClient {
                   } catch (err) {
                     handleNetRequestError(err);
                   }
-                },
-                this.clientContext
-              );
-              netRequestList[requestId] = {
-                params,
-                requestName,
-                subscriptionId,
-              };
-              // Collect and send the initial data
-              const response =
-                (await requestFunction(this.clientContext, params, null!)) ||
-                {};
+                }
+                const subscriptionId = await pubsub.subscribe(
+                  requestName,
+                  // @ts-expect-error Promises are throwing this off, so we'll just ignore it.
+                  handleRequest,
+                  this.clientContext
+                );
+                netRequestList[requestId] = {
+                  params,
+                  requestName,
+                  subscriptionId,
+                };
+                // Collect and send the initial data
+                const response =
+                  (await requestFunction(this.clientContext, params, null!)) ||
+                  {};
 
-              socketSend(socket, {
-                type: "netRequestData",
-                data: {
-                  requestId: requestId,
-                  response,
-                },
-              });
+                socketSend(socket, {
+                  type: "netRequestData",
+                  data: {
+                    requestId: requestId,
+                    response,
+                  },
+                });
+              }
             } catch (err) {
               if (err === null) {
                 // Send null for the first request, to indicate there is no data
@@ -212,8 +258,15 @@ export class ServerClient extends BaseClient {
           }
           case "netRequestEnd": {
             const {requestId} = messageData.data as {requestId: string};
-            pubsub.unsubscribe(netRequestList[requestId]?.subscriptionId);
+            if (netRequestList[requestId]) {
+              pubsub.unsubscribe(netRequestList[requestId]?.subscriptionId);
+            } else if (cardRequestList[requestId]) {
+              for (let {subscriptionId} of cardRequestList[requestId]) {
+                pubsub.unsubscribe(subscriptionId);
+              }
+            }
             delete netRequestList[requestId];
+            delete cardRequestList[requestId];
             break;
           }
         }
@@ -248,70 +301,7 @@ export class ServerClient extends BaseClient {
 
     return this._cards;
   }
-  public async initSubscriptions(socket: SocketStream = sockets[this.id]) {
-    if (process.env.NODE_ENV === "test") return;
-    // Remove all of the existing subscriptions
-    for (let subId of this.subscriptionListeners) {
-      pubsub.unsubscribe(subId);
-    }
-    this._cards = null;
-    // All clients get the 'client' data, so automatically add it to the list
-    const subscriptionList: {
-      trigger: SubscriptionNames;
-      listener: (payload: any, context: DataContext) => any;
-    }[] = [];
 
-    // Loop through all of the cards to generate the necessary subscription listeners
-    for (let card of this.cards) {
-      const cardSubs = cardSubscriptions[card] as UnionToIntersection<
-        typeof cardSubscriptions[typeof card]
-      >;
-      if (!cardSubs) continue;
-
-      const keys = Object.keys(cardSubs) as SubscriptionNames[];
-      const initialData: Record<string, any> = {};
-      for (let sub of keys) {
-        // This listener will be called whenever `pubsub.publish(sub, payload)` is called.
-        const listener = async (payload: any, context: DataContext) => {
-          const subFunction = cardSubs[sub] as SubRecord;
-
-          try {
-            const data = await subFunction(context, payload);
-
-            // Send the data to the client, keyed by card
-            socketSend(socket, {
-              type: "cardData",
-              data: {card, data: {[sub]: data}},
-            });
-          } catch (err) {
-            if (err === null) return;
-            throw err;
-          }
-        };
-
-        initialData[sub] = await cardSubs[sub](this.clientContext);
-        subscriptionList.push({trigger: sub, listener});
-      }
-      setTimeout(async () => {
-        // Send initial data to the client. Need a delay for
-        // the client to register.
-        socketSend(socket, {
-          type: "cardData",
-          data: {card, data: initialData},
-        });
-      }, 100);
-    }
-    this.subscriptionListeners = await Promise.all(
-      subscriptionList.map(async sub => {
-        const subId = await pubsub.subscribe(
-          sub.trigger,
-          sub.listener,
-          this.clientContext
-        );
-        return subId;
-      })
-    );
-  }
   public async sendDataStream() {
     if (!this.clientContext?.flight) return;
     const entities = this.clientContext.flight.ecs.entities

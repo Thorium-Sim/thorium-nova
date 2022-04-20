@@ -7,10 +7,14 @@ import {
   CardDataFunctions,
 } from "../utils/cardData";
 import {useCardContext} from "./CardContext";
+import {useRequestSub} from "./useRequestSub";
 
 export const MockCardDataContext = React.createContext<any>(null!);
-export default function useCardData<CardName extends DataCardNames>() {
-  const {cardName} = useCardContext() as {cardName: CardName};
+export default function useCardData<CardName extends DataCardNames>(
+  allData: boolean = false
+) {
+  let {cardName} = useCardContext() as {cardName: CardName};
+  if (allData) cardName = "allData" as CardName;
   const clientId = getTabIdSync();
   const cardQuery = useQuery(
     [clientId, "cardData", cardName],
@@ -26,8 +30,12 @@ export default function useCardData<CardName extends DataCardNames>() {
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
       staleTime: Infinity,
+      cacheTime: Infinity,
     }
   );
+  const requestName = ["cardData", cardName] as const;
+
+  useRequestSub({requestName});
 
   const mockData = useContext(MockCardDataContext);
   if (mockData)
@@ -40,32 +48,15 @@ export default function useCardData<CardName extends DataCardNames>() {
   >;
 }
 
-export const MockClientDataContext = React.createContext<
-  GetSubscriptionReturns<CardDataFunctions["allData"]["subscriptions"]>
->(null!);
+export const MockClientDataContext = React.createContext<any>(null!);
 
 export function useClientData() {
-  const clientId = getTabIdSync();
-  const clientQuery = useQuery(
-    [clientId, "cardData", "allData"],
-    async () => {
-      return fetch("/cardRequest/allData", {
-        headers: {
-          authorization: `Bearer ${clientId}`,
-        },
-      }).then(res => res.json());
-    },
-    {
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
-    }
-  );
+  const clientData = useCardData<"allData">(true);
   const mockData = useContext(MockClientDataContext);
-  if (mockData) return mockData;
+  if (mockData)
+    return mockData as GetSubscriptionReturns<
+      CardDataFunctions["allData"]["subscriptions"]
+    >;
 
-  return clientQuery.data as GetSubscriptionReturns<
-    CardDataFunctions["allData"]["subscriptions"]
-  >;
+  return clientData;
 }
