@@ -3,6 +3,7 @@ import Logo from "../images/logo.svg?url";
 import packageJson from "../../../package.json";
 import {ClientButton} from "./ClientButton";
 import {useEffect, useState} from "react";
+import {CopyToClipboard} from "./ui/CopyToClipboard";
 
 function useConnectionAddress() {
   const [connectionAddress, setConnectionAddress] = useState("");
@@ -32,7 +33,10 @@ export const WelcomeLogo = ({className}: {className?: string}) => {
       </h2>
       {connectionAddress && (
         <h3 className="text-xl font-semi-bold mt-2">
-          Connect: {connectionAddress}
+          Connect:{" "}
+          <CopyToClipboard text={connectionAddress}>
+            {connectionAddress}
+          </CopyToClipboard>
         </h3>
       )}
       <div className="mt-6"></div>

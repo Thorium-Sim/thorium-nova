@@ -1,6 +1,6 @@
 import {createContext, ReactNode, useContext, useMemo} from "react";
 
-const CardContext = createContext({cardName: "default"});
+const CardContext = createContext({cardName: "allData"});
 
 export default function CardProvider({
   children,

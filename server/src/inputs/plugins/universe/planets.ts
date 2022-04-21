@@ -223,7 +223,7 @@ export const planetPluginInputs = {
     if (params.classification) {
       planet.isPlanet.classification = params.classification;
     }
-    if (params.radius) {
+    if (typeof params.radius === "number") {
       planet.isPlanet.radius = params.radius;
     }
     if (typeof params.terranMass === "number") {
@@ -245,7 +245,6 @@ export const planetPluginInputs = {
       planet.isPlanet.atmosphericComposition = params.atmosphericComposition;
     }
 
-    // TODO March 18 2022 - Make these support file uploads.
     if (typeof params.textureMapAsset === "string") {
       const ext = path.extname(params.textureMapAsset);
       await moveFile(

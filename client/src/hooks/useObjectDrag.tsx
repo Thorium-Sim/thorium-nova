@@ -21,55 +21,63 @@ export default function useObjectDrag(
   const offset = React.useRef(new Vector3());
   const inverseMatrix = React.useRef(new Matrix4());
 
-  const bind = useGesture({
-    onMouseDown: e => {
-      onMouseDown?.(e);
-    },
-    onDragStart: e => {
-      if (!obj.current) return;
-      e.event?.stopPropagation();
-      onMouseDown?.(e);
-      distance.current = camera.position.distanceTo(obj.current.position);
-      plane.current.setFromNormalAndCoplanarPoint(
-        camera.getWorldDirection(plane.current.normal),
-        worldPosition.current.setFromMatrixPosition(obj.current.matrixWorld)
-      );
-      if (
-        raycaster.current.ray.intersectPlane(
-          plane.current,
-          intersection.current
-        ) &&
-        obj.current.parent
-      ) {
-        inverseMatrix.current.copy(obj.current.parent.matrixWorld).invert();
-        offset.current
-          .copy(intersection.current)
-          .sub(
-            worldPosition.current.setFromMatrixPosition(obj.current.matrixWorld)
-          );
-      }
-    },
-    onDragEnd: e => {
-      if (!obj.current) return;
-      onMouseUp?.(obj.current.position);
-    },
-    onDrag: e => {
-      onDrag?.(obj.current?.position);
-      raycaster.current.setFromCamera(mouse, camera);
-      if (
-        raycaster.current.ray.intersectPlane(
-          plane.current,
-          intersection.current
-        )
-      ) {
-        obj.current?.position.copy(
-          intersection.current
-            // .sub(offset.current)
-            .applyMatrix4(inverseMatrix.current)
+  const bind = useGesture(
+    {
+      onDragStart: e => {
+        if (!obj.current) return;
+        e.event?.stopPropagation();
+        onMouseDown?.(e);
+        distance.current = camera.position.distanceTo(obj.current.position);
+        plane.current.setFromNormalAndCoplanarPoint(
+          camera.getWorldDirection(plane.current.normal),
+          worldPosition.current.setFromMatrixPosition(obj.current.matrixWorld)
         );
-      }
+        if (
+          raycaster.current.ray.intersectPlane(
+            plane.current,
+            intersection.current
+          ) &&
+          obj.current.parent
+        ) {
+          inverseMatrix.current.copy(obj.current.parent.matrixWorld).invert();
+          offset.current
+            .copy(intersection.current)
+            .sub(
+              worldPosition.current.setFromMatrixPosition(
+                obj.current.matrixWorld
+              )
+            );
+        }
+      },
+      onDragEnd: e => {
+        if (!obj.current) return;
+        onMouseUp?.(obj.current.position);
+      },
+      onDrag: e => {
+        onMouseDown?.(e);
+        if (!e.intentional) return;
+        onDrag?.(obj.current?.position);
+        raycaster.current.setFromCamera(mouse, camera);
+        if (
+          raycaster.current.ray.intersectPlane(
+            plane.current,
+            intersection.current
+          )
+        ) {
+          obj.current?.position.copy(
+            intersection.current
+              // .sub(offset.current)
+              .applyMatrix4(inverseMatrix.current)
+          );
+        }
+      },
     },
-  });
+    {
+      drag: {
+        filterTaps: true,
+      },
+    }
+  );
 
   return bind;
 }

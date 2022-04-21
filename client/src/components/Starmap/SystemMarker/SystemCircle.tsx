@@ -3,6 +3,7 @@ import {netSend} from "client/src/context/netSend";
 import useObjectDrag from "client/src/hooks/useObjectDrag";
 import * as React from "react";
 import {useCallback} from "react";
+import {useNavigate, useParams} from "react-router-dom";
 import {CanvasTexture, Group, Vector3} from "three";
 import {useStarmapStore} from "../starmapStore";
 
@@ -14,16 +15,32 @@ export const DraggableSystemCircle: React.FC<
     systemId: string;
     parentObject: React.MutableRefObject<Group>;
   } & MeshProps
-> = ({parentObject: parent, hoveringDirection, systemId, ...props}) => {
+> = ({
+  parentObject: parent,
+  hoveringDirection,
+  systemId,
+  position,
+  ...props
+}) => {
+  const {pluginId} = useParams() as {
+    pluginId: string;
+  };
   const bind = useObjectDrag(parent, {
-    onMouseUp: (position: Vector3) => {
+    onMouseUp: (newPosition: Vector3) => {
       useStarmapStore.getState().setCameraControlsEnabled(true);
-      const pluginId = useStarmapStore.getState().pluginId;
+      if (useStarmapStore.getState().cameraView === "2d") {
+        if (position instanceof Vector3) {
+          newPosition.setY(position.y);
+        }
+        if (Array.isArray(position)) {
+          newPosition.setY(position[1]);
+        }
+      }
       if (!pluginId) return;
       netSend("pluginSolarSystemUpdate", {
         pluginId,
         solarSystemId: systemId,
-        position,
+        position: newPosition,
       });
     },
     onMouseDown: () => {
@@ -40,7 +57,7 @@ export const DraggableSystemCircle: React.FC<
       });
     },
   });
-  const setSystemId = useStarmapStore(s => s.setSystemId);
+  const navigate = useNavigate();
 
   return (
     <SystemCircle
@@ -62,7 +79,7 @@ export const DraggableSystemCircle: React.FC<
         });
       }}
       onDoubleClick={() => {
-        setSystemId(systemId);
+        navigate(systemId);
       }}
     />
   );

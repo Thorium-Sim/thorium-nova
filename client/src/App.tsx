@@ -1,7 +1,6 @@
 import {Routes, Route, Outlet, BrowserRouter as Router} from "react-router-dom";
 import {lazy, Suspense, useEffect} from "react";
 import AppContext from "./context/AppContext";
-import {useCardDataSubscribe} from "./context/useCardData";
 
 import QuoteOfTheDay from "./components/QuoteOfTheDay";
 import Credits from "./components/Credits";
@@ -16,7 +15,7 @@ import QuickStartProvider from "./components/FlightQuickStart/FlightQuickStartCo
 import FlightQuickStart from "./components/FlightQuickStart";
 import CrewConfig from "./components/FlightQuickStart/CrewConfig";
 import ShipConfig from "./components/FlightQuickStart/ShipConfig";
-import {netRequest, useNetRequest} from "./context/useNetRequest";
+import {netRequest} from "./context/useNetRequest";
 import {ComponentDemo} from "./cards";
 
 const DocLayout = lazy(() => import("./docs"));
@@ -25,14 +24,16 @@ const Config = lazy(() => import("./pages/Config"));
 const MainPage = () => {
   return (
     <>
-      <div className="welcome h-full p-12 grid grid-cols-2 grid-rows-2">
-        <WelcomeLogo />
-        <Credits className="row-start-2 col-start-2" />
+      <Suspense fallback={<LoadingSpinner />}>
+        <div className="welcome h-full p-12 grid grid-cols-2 grid-rows-2">
+          <WelcomeLogo />
+          <Credits className="row-start-2 col-start-2" />
 
-        <WelcomeButtons className="col-start-1 row-start-2" />
-        <QuoteOfTheDay />
-        <LoginButton />
-      </div>
+          <WelcomeButtons className="col-start-1 row-start-2" />
+          <QuoteOfTheDay />
+          <LoginButton />
+        </div>
+      </Suspense>
       <Outlet />
     </>
   );
@@ -45,7 +46,6 @@ const CardsDevelopment = lazy(() => import("./pages/CardsDevelopment"));
 const CardRenderer = lazy(() => import("./pages/CardRenderer"));
 
 function AppRoutes() {
-  useCardDataSubscribe();
   useEffect(() => {
     netRequest("availableStationsList");
   }, []);
