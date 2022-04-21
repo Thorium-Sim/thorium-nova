@@ -300,7 +300,7 @@ const ThemeAssetUpload = ({assets}: {assets: ThemePlugin["assets"]}) => {
         onDrop={handleDrop}
       >
         {dragging && (
-          <div className="absolute h-full w-full bg-blackAlpha-500 flex items-center justify-center pointer-events-none">
+          <div className="absolute h-full w-full bg-black/50 flex items-center justify-center pointer-events-none">
             <span className="font-bold text-4xl">Drag file to upload.</span>
           </div>
         )}
