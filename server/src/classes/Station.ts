@@ -1,5 +1,11 @@
 import {Card} from "./Card";
 
+export const staticStations = [
+  {
+    name: "Flight Director",
+    cards: [{name: "Flight Director", component: "FlightDirector"}],
+  },
+];
 export default class Station {
   apiVersion = "stations/v1" as const;
   kind = "stations" as const;
