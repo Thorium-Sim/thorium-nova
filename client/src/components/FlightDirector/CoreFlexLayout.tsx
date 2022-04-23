@@ -25,6 +25,9 @@ export const CoreFlexLayout = forwardRef<Layout>((_, ref) => {
     />
   );
 });
+
+CoreFlexLayout.displayName = "CoreFlexLayout";
+
 function FlexCore({compName}: {compName: keyof typeof Cores}) {
   const Core = Cores[compName];
   if (Core)

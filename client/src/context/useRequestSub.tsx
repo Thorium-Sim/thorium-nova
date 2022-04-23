@@ -32,5 +32,6 @@ export function useRequestSub(requestParams: {
         socket.send("netRequestEnd", {requestId});
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps - The request ID is a stable way to represent the missing dependencies
   }, [socket, hookId, requestId, isConnected]);
 }
