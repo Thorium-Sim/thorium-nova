@@ -3,9 +3,10 @@ import {
   useFloating,
   getOverflowAncestors,
 } from "@floating-ui/react-dom";
-import {ReactNode, useEffect, useLayoutEffect, useState} from "react";
+import React, {ReactNode, useEffect, useLayoutEffect, useState} from "react";
 import {FaInfoCircle} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
+import useOnClickOutside from "client/src/hooks/useClickOutside";
 
 const InfoTip = ({children}: {children: ReactNode}) => {
   const {x, y, reference, floating, strategy, refs, update} = useFloating({
@@ -40,6 +41,9 @@ const InfoTip = ({children}: {children: ReactNode}) => {
     }
   }, [update, visible]);
 
+  useOnClickOutside(refs.reference as React.MutableRefObject<HTMLElement>, () =>
+    setVisible(false)
+  );
   return (
     <>
       <Button

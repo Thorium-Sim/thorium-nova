@@ -43,7 +43,7 @@ export function DeckConfig() {
     throw new Error("Deck not found");
   }
   const {
-    nodeState: nodeState,
+    nodeState,
     edgeState: [, setSelectedEdgeId],
   } = useDeckNode();
   const [selectedNodeId, setSelectedNodeId] = nodeState;

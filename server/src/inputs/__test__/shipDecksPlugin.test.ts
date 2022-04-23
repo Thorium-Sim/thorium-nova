@@ -1,30 +1,6 @@
-import BasePlugin from "server/src/classes/Plugins";
-import ShipPlugin from "server/src/classes/Plugins/Ship";
 import {decksPluginInputs} from "../plugins/ships/decks";
 import {promises as fs} from "fs";
-
-function createMockDataContext() {
-  return {
-    flight: null,
-    server: {
-      plugins: [
-        {
-          id: "Test Plugin",
-          name: "Test Plugin",
-          active: true,
-          aspects: {
-            ships: [
-              new ShipPlugin({name: "Test Template"}, {
-                name: "Test Plugin",
-                aspects: {ships: []},
-              } as unknown as BasePlugin),
-            ],
-          },
-        },
-      ],
-    },
-  } as any;
-}
+import {createMockDataContext} from "server/src/utils/createMockDataContext";
 
 describe("ship decks plugin input", () => {
   it("should create a new deck", async () => {

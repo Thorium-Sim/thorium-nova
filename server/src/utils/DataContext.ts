@@ -36,6 +36,9 @@ export class DataContext {
   get flightClient() {
     return this.findFlightClient(this.clientId);
   }
+  get isHost() {
+    return this.client.isHost;
+  }
   findFlightClient(clientId: string) {
     if (!this.database.flight) return null;
     if (!this.database.flight.clients[clientId]) {
