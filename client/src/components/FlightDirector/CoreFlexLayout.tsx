@@ -22,8 +22,11 @@ export const CoreFlexLayout = forwardRef<Layout>((_, ref) => {
   );
 });
 
+CoreFlexLayout.displayName = "CoreFlexLayout";
+
 function flexLayoutFactory(node: TabNode) {
   var compName = node.getComponent() as keyof typeof Cores;
+
   const Core = Cores[compName];
   if (Core)
     return (
