@@ -2,8 +2,7 @@ import * as React from "react";
 import {useParams} from "react-router-dom";
 import {useThree} from "@react-three/fiber";
 import {useRef, Suspense, useEffect} from "react";
-import {Box3, Camera, MOUSE, Plane, Vector2, Vector3} from "three";
-import {OrbitControls} from "@react-three/drei";
+import {Box3, Camera, Vector3} from "three";
 import {useStarmapStore} from "client/src/components/Starmap/starmapStore";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import SystemMarker from "client/src/components/Starmap/SystemMarker";
@@ -15,11 +14,13 @@ import {useConfirm} from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import {CameraControls} from "./CameraControls";
 import CameraControlsClass from "camera-controls";
+import debounce from "lodash.debounce";
+import Input from "@thorium/ui/Input";
+import {PolarGrid} from "./PolarGrid";
 
 const ACTION = CameraControlsClass.ACTION;
 
 const INTERSTELLAR_MAX_DISTANCE: LightYear = 2000;
-const Y_PLANE = new Plane(new Vector3(0, 1, 0), 0);
 
 export function InterstellarMap() {
   const {pluginId} = useParams() as {
@@ -30,7 +31,7 @@ export function InterstellarMap() {
   const controlsEnabled = useStarmapStore(s => s.cameraControlsEnabled);
   const cameraView = useStarmapStore(s => s.cameraView);
   const orbitControls = useRef<CameraControlsClass>(null);
-  const {camera, raycaster, size} = useThree();
+  const {camera} = useThree();
   useEffect(() => {
     // Set the initial camera position
     orbitControls.current?.setPosition(
@@ -45,16 +46,15 @@ export function InterstellarMap() {
   }, [camera]);
 
   useEffect(() => {
-    raycaster.setFromCamera(new Vector2(0, 0), camera);
-    const intersects = new Vector3();
-    raycaster.ray.intersectPlane(Y_PLANE, intersects);
-    // camera.position.set(intersects.x, camera.position.y, intersects.z);
-    // orbitControls.current.target.set(intersects.x, intersects.y, intersects.z);
     if (cameraView === "2d") {
       orbitControls.current?.rotatePolarTo(0, true);
       orbitControls.current?.rotateAzimuthTo(0, true);
     }
-  }, [camera, cameraView, size, raycaster]);
+  }, [camera, cameraView]);
+
+  useEffect(() => {
+    useStarmapStore.setState({skyboxKey: "blank"});
+  }, []);
 
   return (
     <Suspense fallback={null}>
@@ -74,25 +74,15 @@ export function InterstellarMap() {
         dollyToCursor
         dollySpeed={0.5}
       />
-      {/* <OrbitControls
-        enabled={controlsEnabled}
-        maxDistance={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)}
-        minDistance={1}
-        mouseButtons={{
-          LEFT: cameraView === "2d" ? MOUSE.PAN : MOUSE.ROTATE,
-          RIGHT: MOUSE.PAN,
-          MIDDLE: MOUSE.DOLLY,
-        }}
-      /> */}
-      <polarGridHelper
+      <PolarGrid
         rotation={[0, (2 * Math.PI) / 12, 0]}
         args={[
           lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE),
           12,
           20,
           64,
-          0x050505,
-          0x050505,
+          0xffffff,
+          0xffffff,
         ]}
       />
       {stars.map(star => (
@@ -202,3 +192,76 @@ export function InterstellarMenuButtons({
     </>
   );
 }
+
+export const InterstellarPalette = () => {
+  const {pluginId} = useParams() as {
+    pluginId: string;
+  };
+  const selectedObjectId = useStarmapStore(store => store.selectedObjectId);
+  const stars = useNetRequest("pluginSolarSystems", {pluginId});
+
+  const selectedStar = stars.find(s => s.name === selectedObjectId);
+
+  useEffect(() => {
+    if (!selectedStar) {
+      useStarmapStore.setState({selectedObjectId: null});
+    }
+  }, [selectedStar]);
+
+  const [name, setName] = React.useState(selectedStar?.name || "");
+  const [description, setDescription] = React.useState(
+    selectedStar?.description || ""
+  );
+
+  const update = React.useMemo(
+    () =>
+      debounce(
+        async (params: {name?: string; description?: string}) => {
+          if (!selectedObjectId) return;
+          const result = await netSend("pluginSolarSystemUpdate", {
+            pluginId,
+            solarSystemId: selectedObjectId,
+            ...params,
+          });
+          if (params.name) {
+            useStarmapStore.setState({selectedObjectId: result.solarSystemId});
+          }
+        },
+        500,
+        {maxWait: 2000, trailing: true}
+      ),
+    [pluginId, selectedObjectId]
+  );
+
+  useEffect(() => {
+    if (!selectedStar) return;
+    setName(selectedStar.name);
+    setDescription(selectedStar.description);
+  }, [selectedStar, selectedStar?.name, selectedStar?.description]);
+
+  return (
+    <div className="w-full h-full overflow-y-auto p-2 text-white">
+      <Input
+        label="Name"
+        value={name}
+        onChange={e => {
+          setName(e.target.value);
+          update({name: e.target.value});
+        }}
+        name="name"
+      />
+      <Input
+        label="Description"
+        as="textarea"
+        rows={5}
+        className="resize-none"
+        value={description}
+        onChange={e => {
+          setDescription(e.target.value);
+          update({description: e.target.value});
+        }}
+        name="description"
+      />
+    </div>
+  );
+};

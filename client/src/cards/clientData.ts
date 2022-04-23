@@ -11,13 +11,14 @@ export const subscriptions = {
   client: (context: DataContext, params: {clientId: string}) => {
     if (params && params.clientId !== context.clientId) throw null;
 
-    const {id, name, connected} = context.server.clients[context.clientId];
+    const {id, name, connected, isHost} =
+      context.server.clients[context.clientId];
     const {
       officersLog,
       id: _id,
       ...flightClient
     } = (context.flightClient as FlightClient) || {};
-    return {id, name, connected, ...flightClient};
+    return {id, name, connected, isHost, ...flightClient};
   },
   flight(context: DataContext) {
     const flight = context.flight;

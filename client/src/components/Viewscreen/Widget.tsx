@@ -34,7 +34,7 @@ export {};
 //         <Viewscreen />
 //       </div>
 //       <FaTimes
-//         className="close-button absolute p-1 text-2xl top-1 right-1 rounded-full bg-whiteAlpha-200 text-white hover:bg-whiteAlpha-300 cursor-pointer transition-opacity opacity-0"
+//         className="close-button absolute p-1 text-2xl top-1 right-1 rounded-full bg-white/20 text-white hover:bg-white/30 cursor-pointer transition-opacity opacity-0"
 //         onClick={close}
 //       ></FaTimes>
 //     </animated.div>

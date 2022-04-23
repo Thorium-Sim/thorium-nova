@@ -1,22 +1,5 @@
+import {createMockDataContext} from "server/src/utils/createMockDataContext";
 import {shipSystemsPluginInput} from ".";
-
-function createMockDataContext() {
-  return {
-    flight: null,
-    server: {
-      plugins: [
-        {
-          id: "Test Plugin",
-          name: "Test Plugin",
-          active: true,
-          aspects: {
-            shipSystems: [],
-          },
-        },
-      ],
-    },
-  } as any;
-}
 
 describe("ship systems plugin input", () => {
   it("should create a new ship system", async () => {

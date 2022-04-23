@@ -11,9 +11,10 @@ export function useRequestSub(requestParams: {
 }) {
   const requestId = stableValueHash(requestParams);
   const [hookId] = useState(uniqid());
-  const {socket} = useThorium();
+  const {socket, reconnectionState} = useThorium();
+  const isConnected = reconnectionState === "connected";
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !isConnected) return;
     if (!requestMap.has(requestId)) {
       requestMap.set(requestId, new Set());
     }
@@ -31,5 +32,5 @@ export function useRequestSub(requestParams: {
         socket.send("netRequestEnd", {requestId});
       }
     };
-  }, [socket, hookId, requestId]);
+  }, [socket, hookId, requestId, isConnected]);
 }

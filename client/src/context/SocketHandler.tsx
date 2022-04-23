@@ -86,7 +86,7 @@ export function SocketHandler({
       }
 
       function handleReady() {
-        queryClient.invalidateQueries();
+        queryClient.refetchQueries();
       }
       socket.on("cardData", handleCardData);
       socket.on("netRequestData", handleNetRequestData);
@@ -97,7 +97,7 @@ export function SocketHandler({
         socket.off("ready", handleReady);
       };
     }
-  }, [socket]);
+  }, [socket, handleError, queryClient]);
 
   if (reconnectionState === "reconnecting") {
     return <Reconnecting />;

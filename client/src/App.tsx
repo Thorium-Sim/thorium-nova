@@ -24,14 +24,16 @@ const Config = lazy(() => import("./pages/Config"));
 const MainPage = () => {
   return (
     <>
-      <div className="welcome h-full p-12 grid grid-cols-2 grid-rows-2">
-        <WelcomeLogo />
-        <Credits className="row-start-2 col-start-2" />
+      <Suspense fallback={<LoadingSpinner />}>
+        <div className="welcome h-full p-12 grid grid-cols-2 grid-rows-2">
+          <WelcomeLogo />
+          <Credits className="row-start-2 col-start-2" />
 
-        <WelcomeButtons className="col-start-1 row-start-2" />
-        <QuoteOfTheDay />
-        <LoginButton />
-      </div>
+          <WelcomeButtons className="col-start-1 row-start-2" />
+          <QuoteOfTheDay />
+          <LoginButton />
+        </div>
+      </Suspense>
       <Outlet />
     </>
   );

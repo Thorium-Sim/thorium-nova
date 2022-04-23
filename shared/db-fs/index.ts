@@ -111,13 +111,13 @@ export abstract class FSDataStore {
     try {
       if (this.safeMode && force === false) return;
       if (
-        (!this.safeMode &&
-          process.env.NODE_ENV !== "production" &&
-          process.env.NODE_ENV !== "test" &&
-          force === false) ||
-        (this.safeMode !== false && process.env.NODE_ENV === "test")
+        !this.safeMode &&
+        process.env.NODE_ENV !== "production" &&
+        process.env.NODE_ENV !== "test" &&
+        force === false
       )
         return;
+      if (process.env.NODE_ENV === "test") return;
       if (!this.filePath) {
         return;
       }
