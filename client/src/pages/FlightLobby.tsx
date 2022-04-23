@@ -10,13 +10,14 @@ import Menubar from "@thorium/ui/Menubar";
 import {NavLink, useNavigate} from "react-router-dom";
 import StationWrapper from "../components/Station";
 import {ClientButton} from "../components/ClientButton";
+import InfoTip from "@thorium/ui/InfoTip";
 
 export default function FlightLobby() {
   const clientData = useClientData();
 
   if (clientData.station) return <StationWrapper />;
 
-  if (clientData.client.isHost) return <HostLobby />;
+  return <HostLobby />;
   return <PlayerLobby />;
 }
 
@@ -41,9 +42,12 @@ function PlayerLobby() {
   );
 }
 
+const flightDirectorStation = {
+  name: "Flight Director",
+  description: "Behind-the-scenes station for controlling the flight.",
+};
 function PlayerStationSelection() {
   const playerShips = useNetRequest("flightPlayerShips");
-  const clientData = useClientData();
 
   return (
     <>
@@ -65,7 +69,7 @@ function PlayerStationSelection() {
               {/* TODO April 23, 2022 - Hide this when the ship is configured to not have a flight director */}
               <PlayerStationItem
                 shipId={ship.id}
-                station={{name: "Flight Director"}}
+                station={flightDirectorStation}
               />
             </ul>
           </div>
@@ -80,7 +84,7 @@ function PlayerStationItem({
   station,
 }: {
   shipId: number;
-  station: {name: string};
+  station: {name: string; description: string};
 }) {
   const clients = useNetRequest("clients");
 
@@ -107,7 +111,10 @@ function PlayerStationItem({
           }
         }}
       >
-        {station.name}
+        <div className="flex justify-between">
+          <span>{station.name}</span>
+          <InfoTip>{station.description}</InfoTip>
+        </div>
       </li>
       {clients
         .filter(c => c.shipId === shipId && c.stationId === station.name)
@@ -227,7 +234,7 @@ function ClientAssignment() {
               {/* TODO April 23, 2022 - Hide this when the ship is configured to not have a flight director */}
               <HostStationItem
                 shipId={ship.id}
-                station={{name: "Flight Director"}}
+                station={flightDirectorStation}
                 selectedClient={selectedClient}
                 setSelectedClient={setSelectedClient}
               />
@@ -246,7 +253,7 @@ function HostStationItem({
   setSelectedClient,
 }: {
   shipId: number;
-  station: {name: string};
+  station: {name: string; description: string};
   selectedClient: string;
   setSelectedClient: Dispatch<SetStateAction<string>>;
 }) {
@@ -256,7 +263,7 @@ function HostStationItem({
     <>
       <li className="list-group-item" key={station.name}>
         <span className="flex justify-between gap-2">
-          <span>{station.name}</span>{" "}
+          <span className="flex-1">{station.name}</span>{" "}
           <Button
             className={`btn-xs btn-success ${
               !selectedClient ? "btn-disabled" : ""
@@ -281,6 +288,7 @@ function HostStationItem({
           >
             Assign
           </Button>
+          <InfoTip>{station.description}</InfoTip>
         </span>
       </li>
       {clients
