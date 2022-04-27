@@ -10,14 +10,131 @@ import Menubar from "@thorium/ui/Menubar";
 import {NavLink, useNavigate} from "react-router-dom";
 import StationWrapper from "../components/Station";
 import {ClientButton} from "../components/ClientButton";
+import InfoTip from "@thorium/ui/InfoTip";
 
 export default function FlightLobby() {
   const clientData = useClientData();
-  const navigate = useNavigate();
 
-  if (clientData.station) {
-    return <StationWrapper />;
-  }
+  if (clientData.station) return <StationWrapper />;
+
+  if (clientData.client.isHost) return <HostLobby />;
+  return <PlayerLobby />;
+}
+
+function PlayerLobby() {
+  const clientData = useClientData();
+
+  return (
+    <>
+      <Menubar />
+      <div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur">
+        <ClientButton />
+
+        <div className="flex-1 flex flex-col pt-16">
+          {clientData.flight ? (
+            <PlayerStationSelection />
+          ) : (
+            <WaitingForFlight />
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+const flightDirectorStation = {
+  name: "Flight Director",
+  description: "Behind-the-scenes station for controlling the flight.",
+};
+function PlayerStationSelection() {
+  const playerShips = useNetRequest("flightPlayerShips");
+
+  return (
+    <>
+      <h1 className="text-center text-4xl font-bold mb-8">Choose a Station</h1>
+      <div className="flex-1 flex justify-center gap-8">
+        {playerShips.map(ship => (
+          <div key={ship.id}>
+            <h3 className="text-xl font-bold">
+              {ship.components.identity?.name}
+            </h3>
+            <ul>
+              {ship.components.stationComplement?.stations.map(station => (
+                <PlayerStationItem
+                  shipId={ship.id}
+                  station={station}
+                  key={station.name}
+                />
+              ))}
+              {/* TODO April 23, 2022 - Hide this when the ship is configured to not have a flight director */}
+              <PlayerStationItem
+                shipId={ship.id}
+                station={flightDirectorStation}
+              />
+            </ul>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+function PlayerStationItem({
+  shipId,
+  station,
+}: {
+  shipId: number;
+  station: {name: string; description: string};
+}) {
+  const clients = useNetRequest("clients");
+
+  return (
+    <>
+      <li
+        className="list-group-item"
+        key={station.name}
+        role="button"
+        onClick={async () => {
+          try {
+            const result = await netSend("clientSetStation", {
+              shipId: shipId,
+              stationId: station.name,
+            });
+          } catch (err) {
+            if (err instanceof Error) {
+              toast({
+                title: "Error assigning station",
+                body: err.message,
+                color: "error",
+              });
+            }
+          }
+        }}
+      >
+        <div className="flex justify-between">
+          <span>{station.name}</span>
+          <InfoTip>{station.description}</InfoTip>
+        </div>
+      </li>
+      {clients
+        .filter(c => c.shipId === shipId && c.stationId === station.name)
+        .map(client => (
+          <li
+            key={client.id}
+            className={`list-group-item list-group-item-small`}
+          >
+            <div className="pl-4 flex items-center justify-between">
+              {client.name}
+            </div>
+          </li>
+        ))}
+    </>
+  );
+}
+function HostLobby() {
+  const navigate = useNavigate();
+  const clientData = useClientData();
+
   return (
     <>
       <Menubar>
@@ -69,10 +186,9 @@ export default function FlightLobby() {
           </>
         )}
       </Menubar>
-      <div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur">
+      <div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur flex flex-col">
         <ClientButton />
-
-        <div className="h-full flex flex-col justify-center items-center space-y-8">
+        <div className="flex-1 flex flex-col pt-16">
           {clientData.flight ? <ClientAssignment /> : <WaitingForFlight />}
         </div>
       </div>
@@ -81,9 +197,9 @@ export default function FlightLobby() {
 }
 
 function ClientAssignment() {
-  const playerShips = useNetRequest("flightPlayerShips");
   const clients = useNetRequest("clients");
   const clientData = useClientData();
+  const playerShips = useNetRequest("flightPlayerShips");
   const [selectedClient, setSelectedClient] = useState(clientData.client.id);
   return (
     <div className="flex justify-around gap-4 w-full">
@@ -109,7 +225,7 @@ function ClientAssignment() {
             </h3>
             <ul>
               {ship.components.stationComplement?.stations.map(station => (
-                <StationItem
+                <HostStationItem
                   shipId={ship.id}
                   station={station}
                   key={station.name}
@@ -117,9 +233,10 @@ function ClientAssignment() {
                   setSelectedClient={setSelectedClient}
                 />
               ))}
-              <StationItem
+              {/* TODO April 23, 2022 - Hide this when the ship is configured to not have a flight director */}
+              <HostStationItem
                 shipId={ship.id}
-                station={{name: "Flight Director"}}
+                station={flightDirectorStation}
                 selectedClient={selectedClient}
                 setSelectedClient={setSelectedClient}
               />
@@ -131,14 +248,14 @@ function ClientAssignment() {
   );
 }
 
-function StationItem({
+function HostStationItem({
   shipId,
   station,
   selectedClient,
   setSelectedClient,
 }: {
   shipId: number;
-  station: {name: string};
+  station: {name: string; description: string};
   selectedClient: string;
   setSelectedClient: Dispatch<SetStateAction<string>>;
 }) {
@@ -148,7 +265,7 @@ function StationItem({
     <>
       <li className="list-group-item" key={station.name}>
         <span className="flex justify-between gap-2">
-          <span>{station.name}</span>{" "}
+          <span className="flex-1">{station.name}</span>{" "}
           <Button
             className={`btn-xs btn-success ${
               !selectedClient ? "btn-disabled" : ""
@@ -173,6 +290,7 @@ function StationItem({
           >
             Assign
           </Button>
+          <InfoTip>{station.description}</InfoTip>
         </span>
       </li>
       {clients
@@ -208,10 +326,10 @@ function StationItem({
 function WaitingForFlight() {
   return (
     <>
-      <h1 className="text-6xl text-white font-bold">
+      <h1 className="text-6xl text-white font-bold text-center">
         Waiting for Flight to Start...
       </h1>
-      <FaSpinner className="animate-spin-step text-4xl text-white" />
+      <FaSpinner className="animate-spin-step text-4xl text-white mx-auto mt-4" />
     </>
   );
 }
