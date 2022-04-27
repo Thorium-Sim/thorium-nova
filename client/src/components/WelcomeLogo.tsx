@@ -4,6 +4,8 @@ import packageJson from "../../../package.json";
 import {ClientButton} from "./ClientButton";
 import {useEffect, useState} from "react";
 import {useClientData} from "../context/useCardData";
+import Button from "@thorium/ui/Button";
+import {netSend} from "../context/netSend";
 import {CopyToClipboard} from "./ui/CopyToClipboard";
 
 function useConnectionAddress() {
@@ -44,8 +46,13 @@ export const WelcomeLogo = ({className}: {className?: string}) => {
           </CopyToClipboard>
         </h3>
       )}
-      {clientData.client.isHost && (
-        <h3 className="text-xl font-semi-bold mt-2">You are the host!</h3>
+      {clientData.thorium.hasHost ? null : (
+        <Button
+          className="btn-warning btn-sm"
+          onClick={() => netSend("clientClaimHost")}
+        >
+          Claim Host
+        </Button>
       )}
     </div>
   );

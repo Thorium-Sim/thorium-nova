@@ -8,6 +8,14 @@ import {staticStations} from "server/src/classes/Station";
 // This file is used for any subscriptions which all clients
 // make, regardless of what cards they have.
 export const subscriptions = {
+  thorium: (context: DataContext) => {
+    const hasHost = Object.values(context.server.clients).some(
+      client => client.isHost && client.connected
+    );
+    return {
+      hasHost,
+    };
+  },
   client: (context: DataContext, params: {clientId: string}) => {
     if (params && params.clientId !== context.clientId) throw null;
 
