@@ -140,15 +140,17 @@ function HostLobby() {
       <Menubar>
         {clientData.flight && (
           <>
-            <Button
-              className="btn btn-outline btn-xs btn-error"
-              onClick={async () => {
-                await netSend("flightStop");
-                navigate("/");
-              }}
-            >
-              End
-            </Button>
+            {clientData.client.isHost && (
+              <Button
+                className="btn btn-outline btn-xs btn-error"
+                onClick={async () => {
+                  await netSend("flightStop");
+                  navigate("/");
+                }}
+              >
+                End
+              </Button>
+            )}
             {clientData.flight?.paused ? (
               <Button
                 className="btn btn-outline btn-xs btn-success"

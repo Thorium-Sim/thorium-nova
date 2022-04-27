@@ -1,16 +1,19 @@
 import {app} from "electron";
 import path from "path";
 import {fork, ChildProcess} from "child_process";
+import {hostSecret} from "../hostSecret";
 
 let child: ChildProcess | null = null;
 export async function startThoriumServer() {
   return new Promise<void>(function startServer(resolve, reject) {
     if (child) return;
+
     child = fork(path.join(app.getAppPath(), "dist/index.js"), [], {
       env: {
         FORK: "1",
         NODE_ENV: "production",
         NODE_PATH: path.join(app.getAppPath(), "dist"),
+        HOST_SECRET: hostSecret,
         ...process.env,
       },
       // execArgv: [
