@@ -12,6 +12,7 @@ export const ThoriumContext = createContext<IThoriumContext | null>(null);
 interface IThoriumContext {
   SI: SnapshotInterpolation;
   socket: ClientSocket;
+  reconnectionState: ReturnType<typeof useDataConnection>["reconnectionState"];
 }
 
 const queryClient = new QueryClient({
@@ -29,8 +30,9 @@ export function ThoriumProvider({children}: {children: ReactNode}) {
     return {
       SI,
       socket,
+      reconnectionState,
     };
-  }, [socket]);
+  }, [socket, reconnectionState]);
 
   return (
     <ThoriumContext.Provider value={value}>

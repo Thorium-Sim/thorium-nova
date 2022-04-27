@@ -1,37 +1,15 @@
+import SolarSystemPlugin from "server/src/classes/Plugins/Universe/SolarSystem";
+import {createMockDataContext} from "server/src/utils/createMockDataContext";
 import {starPluginInputs} from "./stars";
-function createMockDataContext() {
-  const context = {
-    flight: null,
-    server: {
-      plugins: [
-        {
-          id: "Test Plugin",
-          name: "Test Plugin",
-          active: true,
-          aspects: {
-            ships: [
-              {
-                name: "Test Template",
-              },
-            ],
-            solarSystems: [
-              {
-                name: "Test System",
-                stars: [],
-              },
-            ],
-          },
-        },
-      ],
-    },
-  } as any;
-
-  return context;
-}
 
 describe("solar system star plugin input", () => {
   it("should create a new star in the solar system", async () => {
     const mockDataContext = createMockDataContext();
+    mockDataContext.server.plugins[0].aspects.solarSystems.push({
+      name: "Test System",
+      stars: [],
+      planets: [],
+    } as any);
 
     const system = mockDataContext.server.plugins[0].aspects.solarSystems[0];
     const star = starPluginInputs.pluginStarCreate(mockDataContext, {
@@ -48,6 +26,11 @@ describe("solar system star plugin input", () => {
   });
   it("should adjust the orbital positions when there are two stars in the system", async () => {
     const mockDataContext = createMockDataContext();
+    mockDataContext.server.plugins[0].aspects.solarSystems.push({
+      name: "Test System",
+      stars: [],
+      planets: [],
+    } as any);
 
     const system = mockDataContext.server.plugins[0].aspects.solarSystems[0];
     const star = starPluginInputs.pluginStarCreate(mockDataContext, {
@@ -72,6 +55,11 @@ describe("solar system star plugin input", () => {
   });
   it("should delete a system that has been created", () => {
     const mockDataContext = createMockDataContext();
+    mockDataContext.server.plugins[0].aspects.solarSystems.push({
+      name: "Test System",
+      stars: [],
+      planets: [],
+    } as any);
 
     const system = mockDataContext.server.plugins[0].aspects.solarSystems[0];
     const star = starPluginInputs.pluginStarCreate(mockDataContext, {
@@ -92,6 +80,11 @@ describe("solar system star plugin input", () => {
   });
   it("should update properties of a star", () => {
     const mockDataContext = createMockDataContext();
+    mockDataContext.server.plugins[0].aspects.solarSystems.push({
+      name: "Test System",
+      stars: [],
+      planets: [],
+    } as any);
 
     const system = mockDataContext.server.plugins[0].aspects.solarSystems[0];
     const star = starPluginInputs.pluginStarCreate(mockDataContext, {

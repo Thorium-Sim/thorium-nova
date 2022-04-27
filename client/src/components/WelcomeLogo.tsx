@@ -4,6 +4,7 @@ import packageJson from "../../../package.json";
 import {ClientButton} from "./ClientButton";
 import {useEffect, useState} from "react";
 import {useClientData} from "../context/useCardData";
+import {CopyToClipboard} from "./ui/CopyToClipboard";
 
 function useConnectionAddress() {
   const [connectionAddress, setConnectionAddress] = useState("");
@@ -37,7 +38,10 @@ export const WelcomeLogo = ({className}: {className?: string}) => {
       <ClientButton />
       {connectionAddress && (
         <h3 className="text-xl font-semi-bold mt-2">
-          Connect: {connectionAddress}
+          Connect:{" "}
+          <CopyToClipboard text={connectionAddress}>
+            {connectionAddress}
+          </CopyToClipboard>
         </h3>
       )}
       {clientData.client.isHost && (

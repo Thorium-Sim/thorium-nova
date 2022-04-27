@@ -1,6 +1,6 @@
 import {pubsub} from "../utils/pubsub";
 import {DataContext} from "../utils/DataContext";
-import Station from "../classes/Station";
+import Station, {staticStations} from "../classes/Station";
 
 export const clientInputs = {
   clientSetName: (context: DataContext, params: {name: string}) => {
@@ -25,14 +25,11 @@ export const clientInputs = {
   ) => {
     let flightClient = context.flightClient;
     if (params.clientId) {
-      // TODO November 18, 2021 - Check to see if the client is the host of the flight.
-      // This will probably involve checking their Thorium account or associating their
-      // client ID with the flight somehow.
-      // For now, we'll just allow anyone to change anyone else's station.
-      let isHost = true;
-
-      if (!isHost || !params.clientId) {
-        throw new Error("No flight has been started.");
+      // Only hosts can change other client's station assignment
+      if (!context.isHost || !params.clientId) {
+        throw new Error(
+          "You must be host to change other client's assignments."
+        );
       }
       flightClient = context.findFlightClient(params.clientId);
     }
@@ -56,9 +53,10 @@ export const clientInputs = {
     if (!ship) {
       throw new Error("No ship with that ID exists.");
     }
-    const station = ship.components.stationComplement?.stations.find(
-      station => station.name === params.stationId
-    );
+    const station = staticStations
+      .concat(ship.components.stationComplement?.stations || [])
+      .find(station => station.name === params.stationId);
+
     if (!station) {
       throw new Error("No station with that ID exists.");
     }
@@ -75,6 +73,7 @@ export const clientInputs = {
     if (context.flightClient) {
       context.flightClient.loginName = params.loginName;
     }
+    pubsub.publish("clients");
     pubsub.publish("client", {clientId: context.clientId});
   },
   clientLogout: (context: DataContext) => {
@@ -82,6 +81,7 @@ export const clientInputs = {
       context.flightClient.loginName = "";
     }
     pubsub.publish("client", {clientId: context.clientId});
+    pubsub.publish("clients");
   },
   clientOverrideStation: async (
     context: DataContext,

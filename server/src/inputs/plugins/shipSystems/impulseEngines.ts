@@ -1,5 +1,6 @@
 import ImpulseEnginesPlugin from "server/src/classes/Plugins/ShipSystems/ImpulseEngines";
 import {DataContext} from "server/src/utils/DataContext";
+import inputAuth from "server/src/utils/inputAuth";
 import {pubsub} from "server/src/utils/pubsub";
 import {KilometerPerSecond, KiloNewtons} from "server/src/utils/unitTypes";
 import {getPlugin} from "../utils";
@@ -30,6 +31,7 @@ export const impulseEnginesPluginInput = {
       thrust?: KiloNewtons;
     }
   ) {
+    inputAuth(context);
     const shipSystem = getShipSystem(
       context,
       params.pluginId,

@@ -4,6 +4,8 @@ import uuid from "@thorium/uniqid";
 import Spark from "./spark";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import "./effects.css";
+import {useHotkeys} from "react-hotkeys-hook";
+import {netSend} from "client/src/context/netSend";
 
 let synth: SpeechSynthesis | undefined;
 try {
@@ -52,9 +54,13 @@ const useSpark = () => {
   };
 };
 
-export const Effects = () => {
+const Effects = () => {
   const {flash, doFlash} = useFlash();
   const {doSpark, sparks} = useSpark();
+
+  useHotkeys("esc", () => {
+    netSend("clientSetStation", {shipId: null});
+  });
 
   useNetRequest("effects", {}, payload => {
     if (typeof payload === "boolean" || !payload) return;
@@ -103,3 +109,5 @@ export const Effects = () => {
     </div>
   );
 };
+
+export default Effects;
