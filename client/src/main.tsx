@@ -12,6 +12,7 @@ declare global {
     isHeadless: boolean;
     thorium: {
       getAddress: () => Promise<string>;
+      getHostSecret: () => Promise<string>;
     };
   }
 }

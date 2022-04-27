@@ -3,6 +3,7 @@ import Logo from "../images/logo.svg?url";
 import packageJson from "../../../package.json";
 import {ClientButton} from "./ClientButton";
 import {useEffect, useState} from "react";
+import {useClientData} from "../context/useCardData";
 import {CopyToClipboard} from "./ui/CopyToClipboard";
 
 function useConnectionAddress() {
@@ -15,6 +16,8 @@ function useConnectionAddress() {
 }
 export const WelcomeLogo = ({className}: {className?: string}) => {
   const connectionAddress = useConnectionAddress();
+  const clientData = useClientData();
+
   return (
     <div className={className}>
       <div className="flex items-end self-start ">
@@ -31,6 +34,8 @@ export const WelcomeLogo = ({className}: {className?: string}) => {
           Version {packageJson.version}
         </Link>
       </h2>
+      <div className="mt-6"></div>
+      <ClientButton />
       {connectionAddress && (
         <h3 className="text-xl font-semi-bold mt-2">
           Connect:{" "}
@@ -39,8 +44,9 @@ export const WelcomeLogo = ({className}: {className?: string}) => {
           </CopyToClipboard>
         </h3>
       )}
-      <div className="mt-6"></div>
-      <ClientButton />
+      {clientData.client.isHost && (
+        <h3 className="text-xl font-semi-bold mt-2">You are the host!</h3>
+      )}
     </div>
   );
 };

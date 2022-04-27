@@ -6,7 +6,7 @@ export default function releasesPlugin() {
       const path = await import("path");
       const {default: markdown} = await import("markdown-it");
       const releaseNotes = await fs.readFile(
-        path.resolve("../ARCHITECTURE.md"),
+        path.resolve("../CHANGELOG.md"),
         "utf8"
       );
       const html = markdown().render(releaseNotes);
