@@ -52,5 +52,6 @@ export function spawnShip(
   //  based on the the provided length and the dimensions of the 3D model
   entity.addComponent("size");
 
+  // TODO April 27, 2022 - Include ship systems
   return entity;
 }
