@@ -17,7 +17,7 @@ export default function FlightLobby() {
 
   if (clientData.station) return <StationWrapper />;
 
-  return <HostLobby />;
+  if (clientData.client.isHost) return <HostLobby />;
   return <PlayerLobby />;
 }
 
