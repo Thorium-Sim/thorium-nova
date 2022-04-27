@@ -86,7 +86,7 @@ export function SocketHandler({
       }
 
       function handleReady() {
-        queryClient.invalidateQueries();
+        queryClient.refetchQueries();
       }
       socket.on("cardData", handleCardData);
       socket.on("netRequestData", handleNetRequestData);

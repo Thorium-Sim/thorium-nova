@@ -3,12 +3,14 @@ import {DataContext} from "server/src/utils/DataContext";
 import {pubsub} from "server/src/utils/pubsub";
 import {getPlugin} from "./utils";
 import defaultCSS from "./defaultTheme";
+import inputAuth from "server/src/utils/inputAuth";
 
 export const themesPluginInput = {
   async pluginThemeCreate(
     context: DataContext,
     params: {pluginId: string; name: string}
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const theme = new ThemePlugin({name: params.name}, plugin);
     plugin.aspects.themes.push(theme);
@@ -22,6 +24,7 @@ export const themesPluginInput = {
     context: DataContext,
     params: {pluginId: string; themeId: string}
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const theme = plugin.aspects.themes.find(
       theme => theme.name === params.themeId
@@ -36,6 +39,7 @@ export const themesPluginInput = {
     context: DataContext,
     params: {pluginId: string; themeId: string; name?: string; rawCSS?: string}
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const theme = plugin.aspects.themes.find(
       theme => theme.name === params.themeId
@@ -59,6 +63,7 @@ export const themesPluginInput = {
     context: DataContext,
     params: {pluginId: string; themeId: string; name: string}
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const theme = plugin.aspects.themes.find(
       theme => theme.name === params.themeId
@@ -77,6 +82,7 @@ export const themesPluginInput = {
       fileName: string;
     }
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const theme = plugin.aspects.themes.find(
       theme => theme.name === params.themeId
@@ -96,6 +102,7 @@ export const themesPluginInput = {
     context: DataContext,
     params: {pluginId: string; themeId: string; file: string}
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const theme = plugin.aspects.themes.find(
       theme => theme.name === params.themeId

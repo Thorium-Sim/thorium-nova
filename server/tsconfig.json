@@ -36,11 +36,14 @@
     "../shared",
     "../client/src/cards/**/data.ts",
     "../client/src/cards/**/data.tsx",
+    "../client/src/cores/**/data.tsx",
+    "../client/src/cores/**/data.tsx",
     "../client/src/cards/clientData.ts"
   ],
   "files": [
     "../client/src/utils/cardData.ts",
     "../client/src/cards/dataList.ts",
+    "../client/src/cores/dataList.ts",
     "./src/utils/DataContext.ts"
   ]
 }

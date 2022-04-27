@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.5](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.4...1.0.0-alpha.5) (2022-04-21)
+
+
+### Features
+
+* **Star Map:** Add an editor palette for updating properties of solar systems. ([877156c](https://github.com/Thorium-Sim/thorium-nova/commit/877156c72dc62d5ced8c32a6a94361dd9ce84086))
+* **Star Map:** Add auto-generated nebula background to the interstellar and system maps. ([18be783](https://github.com/Thorium-Sim/thorium-nova/commit/18be783324f184c357e2684ae7d75fc1f162068e))
+* **Star Map:** Clean up the 3D view and create a top-down 2D view. Closes [#179](https://github.com/Thorium-Sim/thorium-nova/issues/179). Closes [#178](https://github.com/Thorium-Sim/thorium-nova/issues/178). ([a0675b4](https://github.com/Thorium-Sim/thorium-nova/commit/a0675b4ceefab677dcdb3a5bb3d0d54a7f394c90))
+* **Star Map:** Enables configuring solar systems, including stars and planets. ([96ed284](https://github.com/Thorium-Sim/thorium-nova/commit/96ed28484b8e189a9926e8345b9b46a21b64a7fc))
+* **Star Map:** Major improvements to the camera controls for the interstellar star map. ([0141d6d](https://github.com/Thorium-Sim/thorium-nova/commit/0141d6dfae0da4d1f9d62e0cbcc9b5ceaf40dad5))
+
 # [1.0.0-alpha.4](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.3...1.0.0-alpha.4) (2022-03-23)
 
 

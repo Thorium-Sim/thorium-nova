@@ -1,27 +1,7 @@
 import {solarSystemsPluginInputs} from "./solarSystems";
 import {promises as fs} from "fs";
-function createMockDataContext() {
-  return {
-    flight: null,
-    server: {
-      plugins: [
-        {
-          id: "Test Plugin",
-          name: "Test Plugin",
-          active: true,
-          aspects: {
-            ships: [
-              {
-                name: "Test Template",
-              },
-            ],
-            solarSystems: [],
-          },
-        },
-      ],
-    },
-  } as any;
-}
+import {createMockDataContext} from "server/src/utils/createMockDataContext";
+
 describe("solar system plugin input", () => {
   it("should create a new solar system", async () => {
     const mockDataContext = createMockDataContext();

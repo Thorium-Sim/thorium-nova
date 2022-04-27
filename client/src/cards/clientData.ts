@@ -3,6 +3,7 @@ import {Entity} from "server/src/utils/ecs";
 import type Station from "server/src/classes/Station";
 import ThemePlugin from "server/src/classes/Plugins/Theme";
 import type {FlightClient} from "server/src/classes/FlightClient";
+import {staticStations} from "server/src/classes/Station";
 
 // This file is used for any subscriptions which all clients
 // make, regardless of what cards they have.
@@ -46,9 +47,11 @@ export const subscriptions = {
     if (params && params.clientId !== context.clientId) throw null;
     if (context.flightClient?.stationOverride)
       return context.flightClient.stationOverride;
-    const station = context.ship?.components.stationComplement?.stations.find(
-      s => s.name === context.flightClient?.stationId
-    ) as unknown as Station;
+    const station = staticStations
+      .concat(context.ship?.components.stationComplement?.stations || [])
+      .find(
+        s => s.name === context.flightClient?.stationId
+      ) as unknown as Station;
     return station || null;
   },
   theme(context: DataContext, params: {clientId: string}) {

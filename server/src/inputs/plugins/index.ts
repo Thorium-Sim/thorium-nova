@@ -4,15 +4,18 @@ import fs from "fs/promises";
 import path from "path";
 import {thoriumPath} from "../../utils/appPaths";
 import {getPlugin, publish} from "./utils";
+import inputAuth from "server/src/utils/inputAuth";
 
 export const pluginInputs = {
   pluginCreate(context: DataContext, params: {name: string}) {
+    inputAuth(context);
     const plugin = new BasePlugin(params, context.server);
     context.server.plugins.push(plugin);
     publish(plugin.id);
     return {pluginId: plugin.id};
   },
   async pluginDelete(context: DataContext, params: {pluginId: string}) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     await plugin.removeFile();
     context.server.plugins.splice(context.server.plugins.indexOf(plugin), 1);
@@ -22,6 +25,7 @@ export const pluginInputs = {
     context: DataContext,
     params: {pluginId: string; name: string}
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
 
     const pluginCopy = plugin.duplicate(params.name);
@@ -40,6 +44,7 @@ export const pluginInputs = {
       active?: boolean;
     }
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     if (params.description) {
       plugin.description = params.description;

@@ -1,6 +1,7 @@
 import StarPlugin from "server/src/classes/Plugins/Universe/Star";
 import {SpectralTypes, starTypes} from "server/src/spawners/starTypes";
 import {DataContext} from "server/src/utils/DataContext";
+import inputAuth from "server/src/utils/inputAuth";
 import {pubsub} from "server/src/utils/pubsub";
 import {randomFromRange} from "server/src/utils/randomFromRange";
 import {getPlugin} from "../utils";
@@ -36,6 +37,7 @@ export const starPluginInputs = {
       spectralType: SpectralTypes;
     }
   ) {
+    inputAuth(context);
     const solarSystem = getSolarSystem(
       context,
       params.pluginId,
@@ -119,6 +121,7 @@ export const starPluginInputs = {
       starId: string;
     }
   ) {
+    inputAuth(context);
     const solarSystem = getSolarSystem(
       context,
       params.pluginId,
@@ -151,6 +154,7 @@ export const starPluginInputs = {
       temperature?: number;
     }
   ) {
+    inputAuth(context);
     const solarSystem = getSolarSystem(
       context,
       params.pluginId,

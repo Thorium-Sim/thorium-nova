@@ -14,6 +14,7 @@ import {
 } from "server/src/classes/Plugins/Ship/Deck";
 import type ShipPlugin from "../../../classes/Plugins/Ship";
 import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
+import inputAuth from "server/src/utils/inputAuth";
 
 function getDeck(
   context: DataContext,
@@ -41,6 +42,7 @@ export const decksPluginInputs = {
     context: DataContext,
     params: {pluginId: string; shipId: string}
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const ship = plugin.aspects.ships.find(ship => ship.name === params.shipId);
     if (!ship) return null;
@@ -57,6 +59,7 @@ export const decksPluginInputs = {
     context: DataContext,
     params: {pluginId: string; shipId: string; index: number}
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const ship = plugin.aspects.ships.find(ship => ship.name === params.shipId);
     if (!ship) return;
@@ -80,6 +83,7 @@ export const decksPluginInputs = {
       | {backgroundImage: File | string | null}
     )
   ) {
+    inputAuth(context);
     const {ship, deck} = getDeck(context, params);
 
     const deckIndex = ship.decks.findIndex(deck => deck.name === params.deckId);
@@ -134,6 +138,7 @@ export const decksPluginInputs = {
       y: number;
     }
   ) {
+    inputAuth(context);
     const {ship, deck} = getDeck(context, params);
     const node = new DeckNode({
       x: params.x,
@@ -151,6 +156,7 @@ export const decksPluginInputs = {
     context: DataContext,
     params: {pluginId: string; shipId: string; deckId: string; nodeId: number}
   ) {
+    inputAuth(context);
     const {ship, deck} = getDeck(context, params);
     const node = deck.nodes.find(node => node.id === params.nodeId);
     if (!node) return;
@@ -185,6 +191,7 @@ export const decksPluginInputs = {
       | {flags: NodeFlag[]}
     )
   ) {
+    inputAuth(context);
     const {ship, deck} = getDeck(context, params);
     const node = deck.nodes.find(node => node.id === params.nodeId);
     if (!node) return;
@@ -229,6 +236,7 @@ export const decksPluginInputs = {
     context: DataContext,
     params: {pluginId: string; shipId: string; from: number; to: number}
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const ship = plugin.aspects.ships.find(ship => ship.name === params.shipId);
     if (!ship) throw new Error("Ship not found");
@@ -249,6 +257,7 @@ export const decksPluginInputs = {
     context: DataContext,
     params: {pluginId: string; shipId: string; edgeId: number}
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const ship = plugin.aspects.ships.find(ship => ship.name === params.shipId);
     if (!ship) throw new Error("Ship not found");
@@ -269,6 +278,7 @@ export const decksPluginInputs = {
       | {flags: EdgeFlag[]}
     )
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const ship = plugin.aspects.ships.find(ship => ship.name === params.shipId);
     if (!ship) throw new Error("Ship not found");

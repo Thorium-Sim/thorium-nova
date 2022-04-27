@@ -6,6 +6,7 @@ import {useEffect, useState} from "react";
 import {useClientData} from "../context/useCardData";
 import Button from "@thorium/ui/Button";
 import {netSend} from "../context/netSend";
+import {CopyToClipboard} from "./ui/CopyToClipboard";
 
 function useConnectionAddress() {
   const [connectionAddress, setConnectionAddress] = useState("");
@@ -39,7 +40,10 @@ export const WelcomeLogo = ({className}: {className?: string}) => {
       <ClientButton />
       {connectionAddress && (
         <h3 className="text-xl font-semi-bold mt-2">
-          Connect: {connectionAddress}
+          Connect:{" "}
+          <CopyToClipboard text={connectionAddress}>
+            {connectionAddress}
+          </CopyToClipboard>
         </h3>
       )}
       {clientData.thorium.hasHost ? null : (

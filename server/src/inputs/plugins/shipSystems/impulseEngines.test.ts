@@ -1,23 +1,7 @@
+import ImpulseEnginesPlugin from "server/src/classes/Plugins/ShipSystems/ImpulseEngines";
+import {createMockDataContext} from "server/src/utils/createMockDataContext";
 import {shipSystemsPluginInput} from ".";
 import {impulseEnginesPluginInput} from "./impulseEngines";
-
-function createMockDataContext() {
-  return {
-    flight: null,
-    server: {
-      plugins: [
-        {
-          id: "Test Plugin",
-          name: "Test Plugin",
-          active: true,
-          aspects: {
-            shipSystems: [],
-          },
-        },
-      ],
-    },
-  } as any;
-}
 
 describe("impulse engines plugin input", () => {
   it("should create a new impulse engine system", async () => {
@@ -34,6 +18,8 @@ describe("impulse engines plugin input", () => {
     expect(created).toBeTruthy();
     expect(created.shipSystemId).toEqual("Test Impulse Engine");
     const system = dataContext.server.plugins[0].aspects.shipSystems[0];
+    if (!(system instanceof ImpulseEnginesPlugin))
+      throw new Error("Not impulse engines");
     expect(system.type).toEqual("impulseEngines");
     expect(system.cruisingSpeed).toEqual(1500);
   });
@@ -54,6 +40,8 @@ describe("impulse engines plugin input", () => {
       shipSystemId: "Test Impulse Engine",
       cruisingSpeed: 2000,
     });
+    if (!(system instanceof ImpulseEnginesPlugin))
+      throw new Error("Not impulse engines");
     expect(system.cruisingSpeed).toEqual(2000);
 
     expect(system.emergencySpeed).toEqual(2000);
