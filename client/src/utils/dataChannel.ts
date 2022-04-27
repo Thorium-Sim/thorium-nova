@@ -1,5 +1,3 @@
-import {getTabId} from "@thorium/tab-id";
-import {AuthData} from "@thorium/types";
 import ReconnectingWebSocket from "reconnecting-websocket";
 
 const hostname = window.location.hostname;
