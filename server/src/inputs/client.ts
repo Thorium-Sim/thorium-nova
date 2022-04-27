@@ -25,14 +25,11 @@ export const clientInputs = {
   ) => {
     let flightClient = context.flightClient;
     if (params.clientId) {
-      // TODO November 18, 2021 - Check to see if the client is the host of the flight.
-      // This will probably involve checking their Thorium account or associating their
-      // client ID with the flight somehow.
-      // For now, we'll just allow anyone to change anyone else's station.
-      let isHost = true;
-
-      if (!isHost || !params.clientId) {
-        throw new Error("No flight has been started.");
+      // Only hosts can change other client's station assignment
+      if (!context.isHost || !params.clientId) {
+        throw new Error(
+          "You must be host to change other client's assignments."
+        );
       }
       flightClient = context.findFlightClient(params.clientId);
     }
