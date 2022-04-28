@@ -44,7 +44,7 @@ const ConfigList = () => {
             <FaRocket className="text-6xl mb-4" />
             <p className="font-bold text-2xl">Ships</p>
           </ConfigIcon>
-          <ConfigIcon disabled to={`/config/${pluginId}/systems`}>
+          <ConfigIcon to={`/config/${pluginId}/systems`}>
             <FaTools className="text-6xl mb-4" />
             <p className="font-bold text-2xl">Ship Systems</p>
           </ConfigIcon>

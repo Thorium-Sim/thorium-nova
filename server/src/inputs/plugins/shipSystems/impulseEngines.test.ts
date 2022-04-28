@@ -35,7 +35,7 @@ describe("impulse engines plugin input", () => {
     );
     const system = dataContext.server.plugins[0].aspects.shipSystems[0];
 
-    impulseEnginesPluginInput.impulseEnginesPluginUpdate(dataContext, {
+    impulseEnginesPluginInput.pluginImpulseEnginesUpdate(dataContext, {
       pluginId: "Test Plugin",
       shipSystemId: "Test Impulse Engine",
       cruisingSpeed: 2000,
@@ -45,7 +45,7 @@ describe("impulse engines plugin input", () => {
     expect(system.cruisingSpeed).toEqual(2000);
 
     expect(system.emergencySpeed).toEqual(2000);
-    impulseEnginesPluginInput.impulseEnginesPluginUpdate(dataContext, {
+    impulseEnginesPluginInput.pluginImpulseEnginesUpdate(dataContext, {
       pluginId: "Test Plugin",
       shipSystemId: "Test Impulse Engine",
       emergencySpeed: 1000,
@@ -53,7 +53,7 @@ describe("impulse engines plugin input", () => {
     expect(system.emergencySpeed).toEqual(1000);
 
     expect(system.thrust).toEqual(12500);
-    impulseEnginesPluginInput.impulseEnginesPluginUpdate(dataContext, {
+    impulseEnginesPluginInput.pluginImpulseEnginesUpdate(dataContext, {
       pluginId: "Test Plugin",
       shipSystemId: "Test Impulse Engine",
       thrust: 10000,

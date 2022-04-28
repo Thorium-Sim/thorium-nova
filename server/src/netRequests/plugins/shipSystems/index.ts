@@ -1,4 +1,7 @@
-import {AllShipSystems} from "server/src/classes/Plugins/ShipSystems/shipSystemTypes";
+import {
+  AllShipSystems,
+  ShipSystemTypes,
+} from "server/src/classes/Plugins/ShipSystems/shipSystemTypes";
 import {DataContext} from "server/src/utils/DataContext";
 import {getPlugin} from "../utils";
 
@@ -19,7 +22,7 @@ export const pluginShipSystemsRequests = {
   },
   pluginShipSystem<T extends keyof AllShipSystems>(
     context: DataContext,
-    params: {pluginId: string; type: T; systemId: string},
+    params: {pluginId: string; type?: T; systemId: string},
     publishParams: {pluginId: string; systemId: string} | null
   ) {
     if (publishParams && params.pluginId !== publishParams.pluginId) throw null;
@@ -30,5 +33,12 @@ export const pluginShipSystemsRequests = {
     if (!system) throw null;
 
     return system as AllShipSystems[T];
+  },
+  availableShipSystems() {
+    return Object.keys(ShipSystemTypes).map(key => {
+      const type = key as keyof typeof ShipSystemTypes;
+      const systemConstructor = ShipSystemTypes[type];
+      return {type, flags: systemConstructor.flags};
+    });
   },
 };

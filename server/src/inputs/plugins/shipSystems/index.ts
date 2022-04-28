@@ -67,6 +67,10 @@ export const shipSystemsPluginInput = {
     }
 
     pubsub.publish("pluginShipSystems", {pluginId: params.pluginId});
+    pubsub.publish("pluginShipSystem", {
+      pluginId: params.pluginId,
+      systemId: shipSystem.name,
+    });
     return {shipSystemId: shipSystem.name};
   },
 };
