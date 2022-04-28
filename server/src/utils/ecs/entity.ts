@@ -89,7 +89,7 @@ class Entity {
       ) as any;
       const data = components[component as ComponentIDs];
       let componentData =
-        data instanceof componentClass ? data : new componentClass().init(data);
+        data instanceof componentClass ? data : new componentClass(data);
       this.components[component as ComponentIDs] = componentData;
     }
     /**
@@ -174,9 +174,7 @@ class Entity {
       c => c && c.id === name
     ) as any;
     let componentData =
-      (data as any) instanceof componentClass
-        ? data
-        : new componentClass().init(data);
+      (data as any) instanceof componentClass ? data : new componentClass(data);
 
     this.components[name] = componentData;
     this.setSystemsDirty();
