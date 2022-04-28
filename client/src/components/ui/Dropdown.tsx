@@ -58,7 +58,7 @@ export default function Dropdown({
         <Menu.Items
           className={`z-20 ${origin} absolute ${
             origin.includes("right") ? "right-0" : "left-0"
-          } mt-2 w-56 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none max-h-48 overflow-y-auto`}
+          } mt-2 w-56 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none max-h-48 overflow-y-auto overflow-x-hidden`}
         >
           <div className="py-1 menu-dropdown">{children}</div>
         </Menu.Items>

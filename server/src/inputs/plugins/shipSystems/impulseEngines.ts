@@ -21,7 +21,7 @@ function getShipSystem(
 }
 
 export const impulseEnginesPluginInput = {
-  async impulseEnginesPluginUpdate(
+  async pluginImpulseEnginesUpdate(
     context: DataContext,
     params: {
       pluginId: string;
