@@ -15,7 +15,7 @@ export function Assets() {
   const [, render] = useReducer(() => ({}), {});
   return (
     <div className="grid grid-cols-2 grid-rows-2 gap-4 overflow-y-auto">
-      <div>
+      <div className="max-w-md">
         <h3 className="text-lg font-bold flex items-center">
           Logo{" "}
           <InfoTip>
@@ -43,7 +43,7 @@ export function Assets() {
           )}
         </UploadWell>
       </div>
-      <div>
+      <div className="max-w-md">
         <h3 className="text-lg font-bold flex items-center">
           Model{" "}
           <InfoTip>
@@ -116,7 +116,7 @@ export function Assets() {
           )}
         </UploadWell>
       </div>
-      <div>
+      <div className="max-w-md">
         <h3 className="text-lg font-bold flex items-center">Side View</h3>
         <UploadWell disabled>
           {ship?.assets.sideView && (
@@ -128,7 +128,7 @@ export function Assets() {
           )}
         </UploadWell>
       </div>
-      <div>
+      <div className="max-w-md">
         <h3 className="text-lg font-bold flex items-center">Top View</h3>
         <UploadWell disabled>
           {ship?.assets.topView && (

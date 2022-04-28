@@ -5,10 +5,15 @@ import {getPlugin} from "../utils";
 export const pluginShipSystemsRequests = {
   pluginShipSystems(
     context: DataContext,
-    params: {pluginId: string},
+    params: {pluginId?: string},
     publishParams: {pluginId: string} | null
   ) {
     if (publishParams && params.pluginId !== publishParams.pluginId) throw null;
+    if (!params?.pluginId)
+      return context.server.plugins.reduce(
+        (acc, plugin) => acc.concat(plugin.aspects.shipSystems),
+        [] as typeof plugin.aspects.shipSystems
+      );
     const plugin = getPlugin(context, params.pluginId);
     return plugin.aspects.shipSystems;
   },
