@@ -8,12 +8,25 @@ import {getPlugin} from "../utils";
 export const pluginShipSystemsRequests = {
   pluginShipSystems(
     context: DataContext,
-    params: {pluginId: string},
+    params: {pluginId?: string},
     publishParams: {pluginId: string} | null
   ) {
     if (publishParams && params.pluginId !== publishParams.pluginId) throw null;
+    if (!params?.pluginId)
+      return context.server.plugins
+        .reduce(
+          (acc, plugin) => acc.concat(plugin.aspects.shipSystems),
+          [] as typeof plugin.aspects.shipSystems
+        )
+        .map(({plugin, ...shipSystem}) => ({
+          ...shipSystem,
+          pluginName: plugin.name,
+        }));
     const plugin = getPlugin(context, params.pluginId);
-    return plugin.aspects.shipSystems;
+    return plugin.aspects.shipSystems.map(({plugin, ...shipSystem}) => ({
+      ...shipSystem,
+      pluginName: plugin.name,
+    }));
   },
   pluginShipSystem<T extends keyof AllShipSystems>(
     context: DataContext,
@@ -22,12 +35,12 @@ export const pluginShipSystemsRequests = {
   ) {
     if (publishParams && params.pluginId !== publishParams.pluginId) throw null;
     const plugin = getPlugin(context, params.pluginId);
-    const system = plugin.aspects.shipSystems.find(
+    const {plugin: sysPlugin, ...system} = plugin.aspects.shipSystems.find(
       system => system.name === params.systemId
     ) as AllShipSystems[keyof AllShipSystems];
     if (!system) throw null;
 
-    return system as AllShipSystems[T];
+    return {...system, pluginName: plugin.name} as AllShipSystems[T];
   },
   availableShipSystems() {
     return Object.keys(ShipSystemTypes).map(key => {

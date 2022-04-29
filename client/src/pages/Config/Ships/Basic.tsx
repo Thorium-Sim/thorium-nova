@@ -18,7 +18,7 @@ export function Basic() {
   const navigate = useNavigate();
   if (!ship) return <Navigate to={`/config/${pluginId}/ships`} />;
   return (
-    <fieldset key={shipId} className="flex-1 overflow-y-auto">
+    <fieldset key={shipId} className="flex-1 overflow-y-auto max-w-3xl">
       <div className="flex flex-wrap">
         <div className="flex-1 pr-4">
           <div className="pb-4">
