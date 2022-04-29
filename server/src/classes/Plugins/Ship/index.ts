@@ -54,7 +54,7 @@ export default class ShipPlugin extends Aspect {
    * The list of ship systems assigned to the ship. Duplicate systems are
    * allowed.
    */
-  shipSystems: string[];
+  shipSystems: {systemId: string; pluginId: string}[];
   /**
    * The station theme used for this ship if it is a player ship.
    */
