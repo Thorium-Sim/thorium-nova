@@ -58,9 +58,10 @@ export default function Dropdown({
         <Menu.Items
           className={`z-20 ${origin} absolute ${
             origin.includes("right") ? "right-0" : "left-0"
-          } mt-2 w-56 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none max-h-48 overflow-y-auto overflow-x-hidden`}
+          } mt-2 w-56 text-base bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 ring-1
+          ring-black ring-opacity-5 focus:outline-none sm:text-sm overflow-y-auto overflow-x-hidden`}
         >
-          <div className="py-1 menu-dropdown">{children}</div>
+          <div className="menu-dropdown">{children}</div>
         </Menu.Items>
       </Transition>
     </Menu>
@@ -83,7 +84,7 @@ export const DropdownItem = ({
         <Button
           className={classNames(
             active ? activeClass : inactiveClass,
-            "menu-btn block px-4 py-2 text-sm w-full text-left",
+            "block px-4 py-2 text-sm w-full text-left",
             className
           )}
           {...props}
