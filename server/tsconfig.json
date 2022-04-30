@@ -36,7 +36,7 @@
     "../shared",
     "../client/src/cards/**/data.ts",
     "../client/src/cards/**/data.tsx",
-    "../client/src/cores/**/data.tsx",
+    "../client/src/cores/**/data.ts",
     "../client/src/cores/**/data.tsx",
     "../client/src/cards/clientData.ts"
   ],

@@ -19,7 +19,7 @@ type ThoriumAccountContextProps = {
   refresh: () => void;
 };
 interface ThoriumAccount {
-  id: number;
+  user_id: number;
   displayName: string;
   profilePictureUrl: string;
   githubConnection: boolean;
