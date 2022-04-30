@@ -20,10 +20,10 @@ type EffectInputParams =
     };
 export const effectsInputs = {
   effectTrigger(context: DataContext, params: EffectInputParams) {
-    const randomStation = randomFromList(
+    const stationList =
       context.flight?.ecs.getEntityById(params.shipId ?? -1)?.components
-        .stationComplement?.stations || []
-    )?.name;
+        .stationComplement?.stations || [];
+    const randomStation = randomFromList(stationList)?.name;
     const payload = {
       effect: params.effect,
       config: params.config,

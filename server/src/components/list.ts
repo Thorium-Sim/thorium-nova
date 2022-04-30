@@ -13,3 +13,7 @@ export {RotationVelocityComponent} from "./rotationVelocity";
 export {SizeComponent} from "./size";
 export {TagsComponent} from "./tags";
 export {ThemeComponent} from "./theme";
+export * from "./shipSystems";
+export * from "./heat";
+export * from "./power";
+export * from "./efficiency";

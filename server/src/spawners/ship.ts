@@ -1,5 +1,7 @@
-import {Entity} from "../utils/ecs";
+import {ECS, Entity} from "../utils/ecs";
 import type ShipPlugin from "../classes/Plugins/Ship";
+import {spawnShipSystem} from "./shipSystem";
+import BasePlugin from "../classes/Plugins";
 
 /*
 AlertLevelComponent,
@@ -23,8 +25,9 @@ export function spawnShip(
     position: Coordinates;
     tags?: string[];
     assets?: Partial<InstanceType<typeof ShipPlugin>["assets"]>;
-  }
-): Entity {
+  },
+  plugins: BasePlugin[]
+) {
   const entity = new Entity();
 
   entity.addComponent("identity", {
@@ -52,5 +55,22 @@ export function spawnShip(
   //  based on the the provided length and the dimensions of the 3D model
   entity.addComponent("size");
 
-  return entity;
+  const shipSystems: Entity[] = [];
+  entity.addComponent("shipSystems");
+  template.shipSystems?.forEach(system => {
+    const plugin = plugins.find(plugin => system.pluginId === plugin.id);
+    const systemPlugin = plugin?.aspects.shipSystems.find(
+      sys => sys.name === system.systemId
+    );
+    if (!systemPlugin) return;
+    const systemEntity = spawnShipSystem(systemPlugin);
+    shipSystems.push(systemEntity);
+    entity.updateComponent("shipSystems", {
+      shipSystemIds: [
+        ...(entity.components.shipSystems?.shipSystemIds || []),
+        systemEntity.id,
+      ],
+    });
+  });
+  return {ship: entity, shipSystems};
 }

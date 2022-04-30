@@ -80,13 +80,21 @@ export const flightInputs = {
         null
       );
       if (!shipTemplate) continue;
-      const shipEntity = spawnShip(shipTemplate, {
-        name: ship.shipName,
-        // TODO November 16, 2021 - Implement the position once the
-        // universe is implemented
-        position: {x: 0, y: 0, z: 0},
-        tags: ["player"],
-      });
+      const {ship: shipEntity, shipSystems} = spawnShip(
+        shipTemplate,
+        {
+          name: ship.shipName,
+          // TODO November 16, 2021 - Implement the position once the
+          // universe is implemented
+          position: {x: 0, y: 0, z: 0},
+          tags: ["player"],
+        },
+        context.server.plugins.filter(p =>
+          context.flight?.pluginIds.includes(p.id)
+        )
+      );
+
+      shipSystems.forEach(s => context.flight?.ecs.addEntity(s));
       shipEntity.addComponent("isPlayerShip");
       let theme = ship.theme || null;
       if (!theme) {
