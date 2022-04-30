@@ -79,7 +79,7 @@ function SearchableList<
               {items.map(c => {
                 return (
                   <li
-                    key={c.id}
+                    key={JSON.stringify(c.id)}
                     className={`list-group-item ${
                       deepEqual(c.id, selectedItem) ? "selected" : ""
                     }`}

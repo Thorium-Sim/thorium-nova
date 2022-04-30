@@ -1,6 +1,7 @@
 import SolarSystemPlugin from "server/src/classes/Plugins/Universe/SolarSystem";
 import {DataContext} from "server/src/utils/DataContext";
 import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
+import inputAuth from "server/src/utils/inputAuth";
 import {pubsub} from "server/src/utils/pubsub";
 import {AstronomicalUnit, LightMinute} from "server/src/utils/unitTypes";
 import {getPlugin} from "../utils";
@@ -17,6 +18,7 @@ export const solarSystemsPluginInputs = {
       };
     }
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const solarSystem = new SolarSystemPlugin(
       {position: params.position},
@@ -35,6 +37,7 @@ export const solarSystemsPluginInputs = {
       solarSystemId: string;
     }
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const solarSystem = plugin.aspects.solarSystems.find(
       solarSystem => solarSystem.name === params.solarSystemId
@@ -66,6 +69,7 @@ export const solarSystemsPluginInputs = {
       skyboxKey?: string;
     }
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     if (!params.solarSystemId) throw new Error("Solar System ID is required");
     const solarSystem = plugin.aspects.solarSystems.find(

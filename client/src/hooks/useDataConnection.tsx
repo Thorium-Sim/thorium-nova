@@ -11,9 +11,14 @@ export type NetResponseData =
   | Object
   | {requestId: string; response?: any; error?: string};
 
-const connectClient = (socket: ReconnectingWebSocket, clientId: string) => {
+const connectClient = async (
+  socket: ReconnectingWebSocket,
+  clientId: string
+) => {
+  const hostSecret = await window.thorium?.getHostSecret();
   const authData: AuthData = {
     clientId,
+    hostSecret,
     type: "clientConnect",
   };
   socket.send(JSON.stringify(authData));
@@ -32,7 +37,7 @@ export function useDataConnection() {
 
       const clientId = await getTabId();
       const socket = await loadWebSocket();
-      connectClient(socket, clientId);
+      await connectClient(socket, clientId);
 
       setSocket(new ClientSocket(socket));
       socket.addEventListener("close", () => {

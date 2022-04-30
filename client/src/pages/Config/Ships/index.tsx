@@ -9,6 +9,8 @@ import {ShipLayout} from "./ShipLayout";
 import {ShipMap} from "./ShipMap";
 import {DeckConfig} from "./ShipMap/DeckConfig";
 import {DeckNodeContextProvider} from "./ShipMap/DeckNodeContext";
+import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
+
 export default function ShipsRoute() {
   return (
     <DeckNodeContextProvider>
@@ -17,7 +19,7 @@ export default function ShipsRoute() {
           <Route
             path=":shipId"
             element={
-              <Suspense fallback={<div>Loading...</div>}>
+              <Suspense fallback={<LoadingSpinner />}>
                 <ShipLayout />
               </Suspense>
             }

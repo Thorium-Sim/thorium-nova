@@ -8,6 +8,7 @@ export const clientInputs = {
     if (typeof params.name !== "string")
       throw new Error("name must be a string.");
     if (!params.name.trim()) throw new Error("name cannot be blank.");
+
     context.server.clients[context.clientId].name = params.name;
     pubsub.publish("clients");
     pubsub.publish("client", {clientId: context.clientId});
@@ -25,14 +26,11 @@ export const clientInputs = {
   ) => {
     let flightClient = context.flightClient;
     if (params.clientId) {
-      // TODO November 18, 2021 - Check to see if the client is the host of the flight.
-      // This will probably involve checking their Thorium account or associating their
-      // client ID with the flight somehow.
-      // For now, we'll just allow anyone to change anyone else's station.
-      let isHost = true;
-
-      if (!isHost || !params.clientId) {
-        throw new Error("No flight has been started.");
+      // Only hosts can change other client's station assignment
+      if (!context.isHost || !params.clientId) {
+        throw new Error(
+          "You must be host to change other client's assignments."
+        );
       }
       flightClient = context.findFlightClient(params.clientId);
     }
@@ -105,5 +103,16 @@ export const clientInputs = {
     pubsub.publish("station", {clientId: context.clientId});
     pubsub.publish("client", {clientId: context.clientId});
     pubsub.publish("theme", {clientId: context.clientId});
+  },
+  clientClaimHost: async (context: DataContext) => {
+    const hasExistingHost = Object.values(context.server.clients).some(
+      client => client.isHost && client.connected
+    );
+    if (!hasExistingHost) {
+      context.client.isHost = true;
+    }
+    pubsub.publish("clients");
+    pubsub.publish("client", {clientId: context.clientId});
+    pubsub.publish("thorium");
   },
 };

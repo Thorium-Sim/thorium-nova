@@ -99,6 +99,11 @@ export default class BasePlugin extends FSDataStore {
   async loadAspects() {
     this.aspects.ships = await BasePlugin.loadAspect(this, "ships", ShipPlugin);
 
+    this.aspects.shipSystems = await BasePlugin.loadAspect(
+      this,
+      "shipSystems",
+      BaseShipSystemPlugin
+    );
     this.aspects.stationComplements = await BasePlugin.loadAspect(
       this,
       "stationComplements",
