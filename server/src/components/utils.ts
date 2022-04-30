@@ -1,17 +1,18 @@
-import {nextTick} from "process";
-export abstract class Component {
-  static id: string;
+export class Component {
+  static id: string = "Component";
   static serialize(component: Omit<Component, "init">): any {
     return component;
   }
-  constructor(params: any = {}) {
-    nextTick(() => {
-      // We have to wait to initialize until the next tick,
-      // because otherwise the sub-classed components defaults
-      // will override the data passed in to the constructor.
-      this.init(params);
-    });
+  static create(params: any = {}) {
+    if (this.id === "Component")
+      throw new Error(
+        "Component is an abstract class that you must extend to use."
+      );
+    const comp = new this();
+    comp.init(params);
+    return comp;
   }
+  constructor() {}
   init(params: any = {}) {
     (Object.getOwnPropertyNames(this) as (keyof this)[]).forEach(key => {
       if (key !== "init") {

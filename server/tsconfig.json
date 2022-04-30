@@ -44,6 +44,7 @@
     "../client/src/utils/cardData.ts",
     "../client/src/cards/dataList.ts",
     "../client/src/cores/dataList.ts",
-    "./src/utils/DataContext.ts"
+    "./src/utils/DataContext.ts",
+    "../client/src/utils/getShipSystem.ts"
   ]
 }
