@@ -41,7 +41,10 @@ export function ShipSystemsList() {
                 <DropdownItem
                   key={system.type}
                   onClick={async () => {
-                    const name = await prompt({header: "Enter system name"});
+                    const name = await prompt({
+                      header: "Enter system name",
+                      defaultValue: capitalCase(system.type),
+                    });
                     if (typeof name !== "string") return;
                     try {
                       const result = await netSend("pluginShipSystemCreate", {
