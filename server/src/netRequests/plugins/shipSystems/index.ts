@@ -35,7 +35,6 @@ export const pluginShipSystemsRequests = {
   ) {
     if (publishParams && params.pluginId !== publishParams.pluginId) throw null;
     const plugin = getPlugin(context, params.pluginId);
-    console.log(plugin.aspects.shipSystems);
     const shipSystem = plugin.aspects.shipSystems.find(
       system => system.name === params.systemId
     ) as AllShipSystems[keyof AllShipSystems];
