@@ -17,3 +17,4 @@ export * from "./shipSystems";
 export * from "./heat";
 export * from "./power";
 export * from "./efficiency";
+export * from "./mass";
