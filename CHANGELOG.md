@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.6](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.5...1.0.0-alpha.6) (2022-05-04)
+
+
+### Features
+
+* **Auto-update:** Enables auto-updates for the Thorium Nova app. ([264ac55](https://github.com/Thorium-Sim/thorium-nova/commit/264ac55138ee3efcc499227336837a4d54d81193))
+* **Flight Director:** Add the ability to save flight director flex layouts to ThoriumSim accounts. Closes [#278](https://github.com/Thorium-Sim/thorium-nova/issues/278) ([2cb91ae](https://github.com/Thorium-Sim/thorium-nova/commit/2cb91aecd8e4380a437efe9c2ef5bfbf398592ae))
+* **Flight Director:** Adds a flex layout for arranging cores. ([e66eaa6](https://github.com/Thorium-Sim/thorium-nova/commit/e66eaa6023f4faf1d5dd0787b92f427a10ec9d8c)), closes [#276](https://github.com/Thorium-Sim/thorium-nova/issues/276)
+* **Flight Lobby:** Add a separate lobby for non-host clients to assign themselves to stations. Closes [#104](https://github.com/Thorium-Sim/thorium-nova/issues/104) ([4bc5eb4](https://github.com/Thorium-Sim/thorium-nova/commit/4bc5eb43043bac20ab060832e05bc12be209adf6))
+* **Host:** Add a button and logic for claiming the host position outside of Electron. ([cd55c23](https://github.com/Thorium-Sim/thorium-nova/commit/cd55c2357840455c34be678a746ef1a793460950))
+* **Host:** Lock down any operations that only the host can perform. Closes [#127](https://github.com/Thorium-Sim/thorium-nova/issues/127) ([4b162f5](https://github.com/Thorium-Sim/thorium-nova/commit/4b162f5d8428f98a0c137687ff0f29cfc5846542))
+* **Login:** Add a Flight Director core for seeing which clients are logged in. ([386a95f](https://github.com/Thorium-Sim/thorium-nova/commit/386a95f6e79abc5107f85b54ed1bbe53515d9395)), closes [#274](https://github.com/Thorium-Sim/thorium-nova/issues/274)
+* **Ship Plugin:** Add the ability to assign ship systems to a ship plugin. ([6a4bf1c](https://github.com/Thorium-Sim/thorium-nova/commit/6a4bf1c002d9472c630a7e6c3c947929c1f77d9e))
+* **Ship Systems:** Add the ability to create ship system instances and edit their properties from the plugin config UI. Impulse engines only for now. Closes [#251](https://github.com/Thorium-Sim/thorium-nova/issues/251) ([c33ddf7](https://github.com/Thorium-Sim/thorium-nova/commit/c33ddf7b96eb10de990b61f18d733171cf00d596))
+* **Ship Systems:** Ship Systems assigned to a ship plugin are now spawned and assigned to a ship. ([5669cee](https://github.com/Thorium-Sim/thorium-nova/commit/5669cee3b1983e40ecc171c588acba35c8db9e33))
+
 # [1.0.0-alpha.5](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.4...1.0.0-alpha.5) (2022-04-21)
 
 
