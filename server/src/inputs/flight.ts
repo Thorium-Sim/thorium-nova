@@ -10,6 +10,7 @@ import type StationComplementPlugin from "../classes/Plugins/StationComplement";
 import {generateIncrementedName} from "../utils/generateIncrementedName";
 import {getFlights} from "../utils/getFlights";
 import type BasePlugin from "../classes/Plugins";
+import inputAuth from "../utils/inputAuth";
 
 const fs = process.env.NODE_ENV === "test" ? {unlink: () => {}} : promises;
 interface FlightStartShips {
@@ -40,6 +41,7 @@ export const flightInputs = {
       ships: FlightStartShips[];
     }
   ) => {
+    inputAuth(context);
     if (context.flight) return context.flight;
     const flightData = await getFlights();
     flightName = generateIncrementedName(
@@ -78,13 +80,21 @@ export const flightInputs = {
         null
       );
       if (!shipTemplate) continue;
-      const shipEntity = spawnShip(shipTemplate, {
-        name: ship.shipName,
-        // TODO November 16, 2021 - Implement the position once the
-        // universe is implemented
-        position: {x: 0, y: 0, z: 0},
-        tags: ["player"],
-      });
+      const {ship: shipEntity, shipSystems} = spawnShip(
+        shipTemplate,
+        {
+          name: ship.shipName,
+          // TODO November 16, 2021 - Implement the position once the
+          // universe is implemented
+          position: {x: 0, y: 0, z: 0},
+          tags: ["player"],
+        },
+        context.server.plugins.filter(p =>
+          context.flight?.pluginIds.includes(p.id)
+        )
+      );
+
+      shipSystems.forEach(s => context.flight?.ecs.addEntity(s));
       shipEntity.addComponent("isPlayerShip");
       let theme = ship.theme || null;
       if (!theme) {
@@ -126,6 +136,7 @@ export const flightInputs = {
     return context.flight;
   },
   flightLoad(context: DataContext, params: {flightName: string}) {
+    inputAuth(context);
     if (context.flight) return context.flight;
 
     context.flight = new FlightDataModel(
@@ -162,6 +173,7 @@ export const flightInputs = {
     return context.flight;
   },
   flightStop(context: DataContext): null {
+    inputAuth(context);
     // Save the flight, but don't delete it.
     if (!context.flight) return null;
     context.flight.paused = false;
@@ -178,6 +190,7 @@ export const flightInputs = {
     context: DataContext,
     {flightName}: {flightName: string}
   ): Promise<null> {
+    inputAuth(context);
     if (context.flight?.name === flightName) {
       context.flight = null;
       context.server.activeFlightName = null;

@@ -12,6 +12,8 @@ declare global {
     isHeadless: boolean;
     thorium: {
       getAddress: () => Promise<string>;
+      getHostSecret: () => Promise<string>;
+      registerUpdateHandler: (handler: (update: string) => void) => void;
     };
   }
 }

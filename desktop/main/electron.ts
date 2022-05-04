@@ -8,6 +8,9 @@ import {
   stopThoriumServer,
 } from "./helpers/startThoriumServer";
 import {ipcHandlers} from "./helpers/ipcHandlers";
+import {autoUpdater} from "electron-updater";
+import {initWin} from "./helpers/autoUpdate";
+
 let win: BrowserWindow | null = null;
 app.enableSandbox();
 
@@ -66,7 +69,7 @@ async function createWindow() {
     },
     show: false,
   });
-
+  initWin(win);
   win.webContents.setWindowOpenHandler(({url}) => {
     shell.openExternal(url);
     return {action: "deny"};
@@ -90,6 +93,7 @@ async function createWindow() {
 }
 
 app.whenReady().then(() => {
+  autoUpdater.checkForUpdatesAndNotify();
   createWindow();
 });
 

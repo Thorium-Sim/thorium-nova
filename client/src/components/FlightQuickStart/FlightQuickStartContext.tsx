@@ -82,8 +82,9 @@ const QuickStartProvider = ({children}: {children: React.ReactNode}) => {
     quickStartReducer,
     {
       flightName: randomNameGenerator(),
-      crewCount: 6,
+      crewCount: 1,
       flightDirector: true,
+      shipName: "Voyager",
     },
     "flightConfig"
   );

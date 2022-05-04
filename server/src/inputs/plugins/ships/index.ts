@@ -5,12 +5,14 @@ import {DataContext} from "server/src/utils/DataContext";
 import {pubsub} from "server/src/utils/pubsub";
 import {getPlugin} from "../utils";
 import {thoriumPath} from "server/src/utils/appPaths";
+import inputAuth from "server/src/utils/inputAuth";
 
 export const shipsPluginInputs = {
   pluginShipCreate(
     context: DataContext,
     params: {pluginId: string; name: string}
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const ship = new ShipPlugin({name: params.name}, plugin);
     plugin.aspects.ships.push(ship);
@@ -22,6 +24,7 @@ export const shipsPluginInputs = {
     context: DataContext,
     params: {pluginId: string; shipId: string}
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const ship = plugin.aspects.ships.find(ship => ship.name === params.shipId);
     if (!ship) return;
@@ -49,6 +52,7 @@ export const shipsPluginInputs = {
       theme?: {themeId: string; pluginId: string};
     }
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     if (!params.shipId) throw new Error("Ship ID is required");
     const ship = plugin.aspects.ships.find(ship => ship.name === params.shipId);
@@ -115,5 +119,49 @@ export const shipsPluginInputs = {
         ship.assets[propertyName] = path.join(ship.assetPath, filePath);
       }
     }
+  },
+  pluginShipToggleSystem(
+    context: DataContext,
+    params: {
+      pluginId: string;
+      shipId: string;
+      systemId: string;
+      systemPlugin: string;
+    }
+  ) {
+    inputAuth(context);
+    const plugin = getPlugin(context, params.pluginId);
+    if (!params.shipId) throw new Error("Ship ID is required");
+    const ship = plugin.aspects.ships.find(ship => ship.name === params.shipId);
+    if (!ship) return {shipId: ""};
+
+    const systemPlugin = getPlugin(context, params.systemPlugin);
+    const system = systemPlugin.aspects.shipSystems.find(
+      system => system.name === params.systemId
+    );
+    if (!system) return ship;
+
+    const existingSystem = ship.shipSystems.find(
+      system =>
+        system.systemId === params.systemId &&
+        system.pluginId === params.systemPlugin
+    );
+
+    if (existingSystem) {
+      ship.shipSystems.splice(ship.shipSystems.indexOf(existingSystem), 1);
+    } else {
+      ship.shipSystems.push({
+        systemId: params.systemId,
+        pluginId: params.systemPlugin,
+      });
+    }
+
+    pubsub.publish("pluginShips", {pluginId: params.pluginId});
+    pubsub.publish("pluginShip", {
+      pluginId: params.pluginId,
+      shipId: ship.name,
+    });
+
+    return ship;
   },
 };

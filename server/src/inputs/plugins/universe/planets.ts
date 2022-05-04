@@ -24,6 +24,7 @@ import path from "path";
 import {promises as fs} from "fs";
 import {thoriumPath} from "server/src/utils/appPaths";
 import {SatelliteComponent} from "server/src/components/satellite";
+import inputAuth from "server/src/utils/inputAuth";
 
 function getSystem(context: DataContext, pluginId: string, systemId: string) {
   const plugin = getPlugin(context, pluginId);
@@ -96,6 +97,7 @@ export const planetPluginInputs = {
       planetType: PlanetTypes;
     }
   ) {
+    inputAuth(context);
     const system = getSystem(context, params.pluginId, params.solarSystemId);
     const childrenPlanets = system.planets;
 
@@ -167,6 +169,7 @@ export const planetPluginInputs = {
       planetId: string;
     }
   ) {
+    inputAuth(context);
     const system = getSystem(context, params.pluginId, params.solarSystemId);
     const planet = system.planets.find(s => s.name === params.planetId);
     if (!system) {
@@ -205,6 +208,7 @@ export const planetPluginInputs = {
       satellite?: Partial<SatelliteComponent>;
     }
   ) {
+    inputAuth(context);
     const system = getSystem(context, params.pluginId, params.solarSystemId);
     const planet = system.planets.find(s => s.name === params.planetId);
     if (!planet) {

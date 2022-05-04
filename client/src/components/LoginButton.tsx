@@ -53,7 +53,7 @@ const popupCenter = ({
   return newWindow;
 };
 
-function AccountMenu() {
+function AccountMenu({size = "md"}) {
   const {account, logout} = useThoriumAccount();
   const {setOpen} = useIssueTracker();
   if (!account) return null;
@@ -61,7 +61,10 @@ function AccountMenu() {
     <Menu as="div">
       <Menu.Button className="inline-flex justify-center">
         <img
-          className="avatar w-10 h-10 rounded-full border border-gray-500"
+          draggable={false}
+          className={`avatar ${
+            size === "sm" ? "w-8 h-8" : "w-10 h-10"
+          } rounded-full border border-gray-500`}
           src={account.profilePictureUrl}
           alt={account.displayName}
         />
@@ -75,7 +78,7 @@ function AccountMenu() {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute right-8 w-56 mt-2 origin-top-right bg-gray-900 divide-y divide-gray-700 rounded-md shadow-lg ring-1 ring-gray-300 ring-opacity-5 focus:outline-none text-lg">
+        <Menu.Items className="z-10 absolute right-8 w-56 mt-2 origin-top-right bg-gray-900 divide-y divide-gray-700 rounded-md shadow-lg ring-1 ring-gray-300 ring-opacity-5 focus:outline-none text-lg">
           <div className="px-1 py-1 ">
             <Menu.Item>
               {({active}) => (
@@ -112,8 +115,10 @@ function AccountMenu() {
 
 export default function LoginButton({
   buttonClassName = "btn-ghost btn-sm",
+  size = "md",
 }: {
   buttonClassName?: string;
+  size?: string;
 }) {
   const {login, account, verificationUrl, verifying} = useThoriumAccount();
   const linkRef = useRef<HTMLAnchorElement>(null);
@@ -157,7 +162,7 @@ export default function LoginButton({
           {verifying ? "Verifying..." : "Login to Thorium"}
         </Button>
       ) : null}
-      {account && <AccountMenu />}
+      {account && <AccountMenu size={size} />}
     </div>
   );
 }

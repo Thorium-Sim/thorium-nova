@@ -27,7 +27,7 @@ const ShipConfig = () => {
   return (
     <div>
       <Input
-        placeholder="Voyager"
+        placeholder="Ship Name Here"
         className="mb-4"
         label="Ship Name"
         labelHidden={false}
@@ -50,7 +50,7 @@ const ShipConfig = () => {
               <img
                 src={item.image}
                 alt={item.label}
-                className="float-left h-12 w-12 mr-2 bg-blackAlpha-800 rounded-full"
+                className="float-left h-12 w-12 mr-2 bg-black/80 rounded-full"
               />
               <p className="font-bold">{item.label}</p>
               <p>{item.description}</p>

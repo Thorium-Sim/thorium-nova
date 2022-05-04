@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "dev": "",
-    "start": "concurrently \"electron-esbuild dev\" \"copy-dir-cli resources ../dist/resources\"",
+    "start": "concurrently \"electron-esbuild dev\" \"npx copy-dir-cli resources ../dist/resources\"",
     "build": "electron-esbuild build",
     "typecheck": "tsc --noEmit"
   },
@@ -19,6 +19,7 @@
     "bonjour": "^3.5.0",
     "electron-better-ipc": "^2.0.1",
     "electron-store": "^8.0.1",
+    "electron-updater": "^5.0.1",
     "electron-util": "^0.17.2"
   }
 }

@@ -49,7 +49,11 @@ const InfoTip = ({children}: {children: ReactNode}) => {
       <Button
         className="btn btn-ghost btn-xs p-0"
         ref={reference}
-        onClick={() => setVisible(v => !v)}
+        onClick={e => {
+          e.preventDefault();
+          e.stopPropagation();
+          setVisible(v => !v);
+        }}
       >
         <FaInfoCircle className="inline-block text-primary text-base cursor-pointer" />
       </Button>

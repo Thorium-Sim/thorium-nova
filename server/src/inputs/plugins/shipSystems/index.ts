@@ -1,5 +1,6 @@
 import {ShipSystemTypes} from "server/src/classes/Plugins/ShipSystems/shipSystemTypes";
 import {DataContext} from "server/src/utils/DataContext";
+import inputAuth from "server/src/utils/inputAuth";
 import {pubsub} from "server/src/utils/pubsub";
 import {getPlugin} from "../utils";
 
@@ -8,6 +9,7 @@ export const shipSystemsPluginInput = {
     context: DataContext,
     params: {pluginId: string; name: string; type: keyof typeof ShipSystemTypes}
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const ShipSystemClass = ShipSystemTypes[params.type];
     const shipSystem = new ShipSystemClass({name: params.name}, plugin);
@@ -20,6 +22,7 @@ export const shipSystemsPluginInput = {
     context: DataContext,
     params: {pluginId: string; shipSystemId: string}
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const shipSystem = plugin.aspects.shipSystems.find(
       s => s.name === params.shipSystemId
@@ -45,6 +48,7 @@ export const shipSystemsPluginInput = {
       tags?: string[];
     }
   ) {
+    inputAuth(context);
     const plugin = getPlugin(context, params.pluginId);
     const shipSystem = plugin.aspects.shipSystems.find(
       s => s.name === params.shipSystemId
@@ -63,6 +67,10 @@ export const shipSystemsPluginInput = {
     }
 
     pubsub.publish("pluginShipSystems", {pluginId: params.pluginId});
+    pubsub.publish("pluginShipSystem", {
+      pluginId: params.pluginId,
+      systemId: shipSystem.name,
+    });
     return {shipSystemId: shipSystem.name};
   },
 };
