@@ -1,5 +1,5 @@
 import Button from "@thorium/ui/Button";
-import {Fragment, useEffect, useRef} from "react";
+import {Fragment, useEffect, useRef, useState} from "react";
 import {useThoriumAccount} from "../context/ThoriumAccountContext";
 import {Menu, Transition} from "@headlessui/react";
 import {VscIssues} from "react-icons/vsc";
@@ -56,18 +56,24 @@ const popupCenter = ({
 function AccountMenu({size = "md"}) {
   const {account, logout} = useThoriumAccount();
   const {setOpen} = useIssueTracker();
+  const [noImg, setNoImg] = useState(!account?.profilePictureUrl);
   if (!account) return null;
   return (
     <Menu as="div">
       <Menu.Button className="inline-flex justify-center">
-        <img
-          draggable={false}
-          className={`avatar ${
-            size === "sm" ? "w-8 h-8" : "w-10 h-10"
-          } rounded-full border border-gray-500`}
-          src={account.profilePictureUrl}
-          alt={account.displayName}
-        />
+        {noImg ? (
+          "Thorium Account"
+        ) : (
+          <img
+            draggable={false}
+            className={`avatar ${
+              size === "sm" ? "w-8 h-8" : "w-10 h-10"
+            } rounded-full border border-gray-500`}
+            src={account.profilePictureUrl}
+            alt={account.displayName}
+            onError={() => setNoImg(true)}
+          />
+        )}
       </Menu.Button>
       <Transition
         as={Fragment}
