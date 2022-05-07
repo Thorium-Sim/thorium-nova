@@ -41,7 +41,7 @@ const Toast = ({
             : color === "notice"
             ? "alert-notice"
             : ""
-        } !block m-4 min-h-16 max-w-max ${
+        } !block m-4 min-h-16 max-w-md ${
           action ? "cursor-pointer" : "pointer-events-none"
         }`}
         onClick={() => {
@@ -52,16 +52,16 @@ const Toast = ({
         onMouseLeave={() => resume()}
       >
         <div className="w-full flex items-center justify-between">
-          <h5 className="font-bold text-xl whitespace-nowrap">{title}</h5>
+          <h5 className="font-bold text-xl whitespace-pre-wrap">{title}</h5>
           <button
-            className="close p-1 rounded-full hover:bg-white/30 transition-colors pointer-events-auto"
+            className="close p-1 rounded-full hover:bg-white/30 transition-colors pointer-events-auto ml-2"
             aria-label="close"
             onClick={() => dismiss()}
           >
             <FaTimes />
           </button>
         </div>
-        <p>{body}</p>
+        <p className="whitespace-pre-wrap">{body}</p>
       </div>
     </Transition>
   );
