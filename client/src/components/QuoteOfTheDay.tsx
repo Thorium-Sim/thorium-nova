@@ -202,6 +202,7 @@ const quotes = [
   "Man cannot discover new oceans unless he has the courage to lose sight of the shore.",
   // Teller
   "Sometimes magic is just someone spending more time on something than anyone else might reasonably expect.",
+  "Intelligence and infallibility are mutually exclusive.",
 ];
 
 const QuoteOfTheDay = () => {
