@@ -1,18 +1,24 @@
 import {SatelliteComponent} from "server/src/components/satellite";
-import {IsPlanetComponent} from "server/src/components/isPlanet";
+import {IsPlanetComponent} from "server/src/components/solarSystem/isPlanet";
 
 export default class PlanetPlugin {
   name: string;
   description: string;
   tags: string[];
-  satellite: Omit<SatelliteComponent, "init">;
+  satellite: Omit<SatelliteComponent, "init" | "parentId"> & {
+    parentId: string | null;
+  };
   isPlanet: Omit<IsPlanetComponent, "init">;
   population: number;
   temperature: number;
   constructor(
     params: {name: string} & Partial<
       Omit<PlanetPlugin, "satellite"> & {
-        satellite: Partial<Omit<SatelliteComponent, "init">>;
+        satellite: Partial<
+          Omit<SatelliteComponent, "init" | "parentId"> & {
+            parentId: string | null;
+          }
+        >;
       }
     >
   ) {
