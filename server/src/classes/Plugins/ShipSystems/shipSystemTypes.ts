@@ -1,8 +1,10 @@
 import GenericSystemPlugin from "./Generic";
 import ImpulseEnginesPlugin from "./ImpulseEngines";
+import WarpEnginesPlugin from "./warpEngines";
 import InertialDampenersPlugin from "./InertialDampeners";
 
 export const ShipSystemTypes = {
+  warpEngines: WarpEnginesPlugin,
   impulseEngines: ImpulseEnginesPlugin,
   generic: GenericSystemPlugin,
   inertialDampeners: InertialDampenersPlugin,
