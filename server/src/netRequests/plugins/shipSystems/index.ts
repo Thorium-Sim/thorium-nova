@@ -35,10 +35,11 @@ export const pluginShipSystemsRequests = {
   ) {
     if (publishParams && params.pluginId !== publishParams.pluginId) throw null;
     const plugin = getPlugin(context, params.pluginId);
-    const {plugin: sysPlugin, ...system} = plugin.aspects.shipSystems.find(
+    const shipSystem = plugin.aspects.shipSystems.find(
       system => system.name === params.systemId
     ) as AllShipSystems[keyof AllShipSystems];
-    if (!system) throw null;
+    if (!shipSystem) throw null;
+    const {plugin: sysPlugin, ...system} = shipSystem;
 
     return {...system, pluginName: plugin.name} as AllShipSystems[T];
   },

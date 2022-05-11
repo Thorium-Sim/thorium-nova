@@ -198,6 +198,11 @@ const quotes = [
   "We're Almost There, But Nowhere Near It. All That Matters Is That We're Going.",
   // Cereal Box
   "Feel good about breakfast. Feel good about every day!",
+  // Andre Gide
+  "Man cannot discover new oceans unless he has the courage to lose sight of the shore.",
+  // Teller
+  "Sometimes magic is just someone spending more time on something than anyone else might reasonably expect.",
+  "Intelligence and infallibility are mutually exclusive.",
 ];
 
 const QuoteOfTheDay = () => {
