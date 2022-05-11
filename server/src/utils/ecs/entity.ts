@@ -11,6 +11,10 @@ import {
   ComponentIDs,
   components as allComponents,
 } from "../../components";
+
+type DeepPartial<T> = Partial<{
+  [P in keyof T]: Partial<T[P]>;
+}>;
 /**
  * An entity.
  *
@@ -35,7 +39,7 @@ class Entity {
   components: Partial<Components>;
   constructor(
     idOrUidGenerator?: number | UIDGenerator | null,
-    components: Partial<Components> = {} as Components
+    components: DeepPartial<Components> = {} as Components
   ) {
     /**
      * Unique identifier of the entity.
