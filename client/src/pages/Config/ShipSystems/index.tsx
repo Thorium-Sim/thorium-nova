@@ -10,7 +10,7 @@ import {useParams} from "react-router-dom";
 import {lazy, Suspense} from "react";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 
-const systemConfigs = Object.fromEntries(
+export const systemConfigs = Object.fromEntries(
   Object.entries(import.meta.glob("./SystemConfigs/*.tsx")).map(
     ([path, mod]) => {
       const pathRegx = /\.\/SystemConfigs\/(.*)\.tsx/g;

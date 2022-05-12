@@ -1,10 +1,15 @@
 import SearchableList from "@thorium/ui/SearchableList";
 import {useNetRequest} from "client/src/context/useNetRequest";
-import {useParams} from "react-router-dom";
+import {Routes, Route, useNavigate, useParams} from "react-router-dom";
 import Button from "@thorium/ui/Button";
 import {useState} from "react";
 import {capitalCase} from "change-case";
 import {netSend} from "client/src/context/netSend";
+import {FaBan, FaPencilAlt} from "react-icons/fa";
+import {OverrideEdit} from "./OverrideEdit";
+import {Suspense} from "react";
+import {ShipPluginIdContext} from "./ShipSystemOverrideContext";
+
 export function Systems() {
   const {pluginId, shipId} = useParams() as {pluginId: string; shipId: string};
   const allSystems = useNetRequest("pluginShipSystems");
@@ -18,6 +23,8 @@ export function Systems() {
         ss => ss.systemId === sys.name && ss.pluginId === sys.pluginName
       ) && (allPlugins ? true : sys.pluginName === pluginId)
   );
+
+  const navigate = useNavigate();
   return (
     <>
       <div className="w-72">
@@ -64,14 +71,7 @@ export function Systems() {
         <SearchableList
           showSearchLabel={false}
           selectedItem={null}
-          setSelectedItem={item => {
-            netSend("pluginShipToggleSystem", {
-              shipId,
-              pluginId,
-              systemId: item.systemId,
-              systemPlugin: item.pluginId,
-            });
-          }}
+          setSelectedItem={item => {}}
           items={ship.shipSystems
             .map(c => {
               const system = allSystems.find(
@@ -86,7 +86,46 @@ export function Systems() {
               };
             })
             .filter(notNull)}
+          renderItem={item => (
+            <span className="flex items-center justify-between gap-2">
+              <span>{item.label}</span>
+              <span className="flex-1"></span>
+              <Button
+                className="btn-outline btn-xs btn-primary"
+                aria-label="Edit"
+                onClick={() =>
+                  navigate(`edit/${item.id.pluginId}/${item.id.systemId}`)
+                }
+              >
+                <FaPencilAlt />
+              </Button>
+              <Button
+                className="btn-outline btn-xs btn-error"
+                aria-label="Remove"
+                onClick={() =>
+                  netSend("pluginShipToggleSystem", {
+                    shipId,
+                    pluginId,
+                    systemId: item.id.systemId,
+                    systemPlugin: item.id.pluginId,
+                  })
+                }
+              >
+                <FaBan />
+              </Button>
+            </span>
+          )}
         />
+        <Suspense fallback={null}>
+          <ShipPluginIdContext.Provider value={pluginId}>
+            <Routes>
+              <Route
+                path="edit/:pluginId/:systemId/*"
+                element={<OverrideEdit />}
+              />
+            </Routes>
+          </ShipPluginIdContext.Provider>
+        </Suspense>
       </div>
     </>
   );

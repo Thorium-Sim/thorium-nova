@@ -198,7 +198,7 @@ export class ServerClient extends BaseClient {
                 }, 100);
               } else {
                 const requestFunction = requests[requestName];
-                const params = messageData.data.params;
+                const params = messageData.data.params || {};
 
                 // Create the subscription
                 async function handleRequest(

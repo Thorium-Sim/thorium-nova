@@ -1,23 +1,7 @@
-import InertialDampenersPlugin from "server/src/classes/Plugins/ShipSystems/InertialDampeners";
 import {DataContext} from "server/src/utils/DataContext";
 import inputAuth from "server/src/utils/inputAuth";
 import {pubsub} from "server/src/utils/pubsub";
-import {getPlugin} from "../utils";
-
-function getShipSystem(
-  context: DataContext,
-  pluginId: string,
-  shipSystemId: string
-): InertialDampenersPlugin {
-  const plugin = getPlugin(context, pluginId);
-  const shipSystem = plugin.aspects.shipSystems.find(
-    s => s.name === shipSystemId
-  ) as InertialDampenersPlugin;
-  if (!shipSystem || shipSystem.type !== "inertialDampeners") {
-    throw new Error("Ship system not found");
-  }
-  return shipSystem;
-}
+import {getShipSystem} from "./utils";
 
 export const inertialDampenersPluginInput = {
   async pluginInertialDampenersUpdate(
@@ -25,15 +9,22 @@ export const inertialDampenersPluginInput = {
     params: {
       pluginId: string;
       shipSystemId: string;
+      shipPluginId?: string;
+      shipId?: string;
       dampening: number;
     }
   ) {
     inputAuth(context);
-    const shipSystem = getShipSystem(
+    const [system, override] = getShipSystem(
       context,
       params.pluginId,
-      params.shipSystemId
+      params.shipSystemId,
+      "inertialDampeners",
+      params.shipPluginId,
+      params.shipId
     );
+    const shipSystem = override || system;
+
     if (typeof params.dampening === "number" && params.dampening > 0) {
       shipSystem.dampening = params.dampening;
     }
@@ -42,6 +33,12 @@ export const inertialDampenersPluginInput = {
       systemId: params.shipSystemId,
     });
 
+    if (params.shipPluginId && params.shipId) {
+      pubsub.publish("pluginShip", {
+        pluginId: params.shipPluginId,
+        shipId: params.shipId,
+      });
+    }
     return shipSystem;
   },
 };
