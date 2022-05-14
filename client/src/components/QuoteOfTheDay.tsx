@@ -203,6 +203,10 @@ const quotes = [
   // Teller
   "Sometimes magic is just someone spending more time on something than anyone else might reasonably expect.",
   "Intelligence and infallibility are mutually exclusive.",
+  // Ernst Kirchsteiger
+  "In the simple lives the beautiful.",
+  // Steve Jobs
+  "The most powerful person in the world is the storyteller.",
 ];
 
 const QuoteOfTheDay = () => {
