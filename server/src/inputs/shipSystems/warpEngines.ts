@@ -12,7 +12,7 @@ export const warpEnginesInputs = {
       systemType: "warpEngines",
     });
     if (!system.components.isWarpEngines)
-      throw new Error("System is not a warp engines outfit");
+      throw new Error("System is not a warp engine");
     const {interstellarCruisingSpeed, solarCruisingSpeed} =
       system.components.isWarpEngines;
 
