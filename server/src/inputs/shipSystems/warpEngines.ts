@@ -13,8 +13,6 @@ export const warpEnginesInputs = {
     });
     if (!system.components.isWarpEngines)
       throw new Error("System is not a warp engine");
-    const {interstellarCruisingSpeed, solarCruisingSpeed} =
-      system.components.isWarpEngines;
 
     system.updateComponent("isWarpEngines", {
       currentWarpFactor: params.factor,
