@@ -329,9 +329,10 @@ export class ServerClient extends BaseClient {
         // See https://github.com/geckosio/snapshot-interpolation#world-state
         // We're also removing any components of the entity that don't update
         // frequently to keep packet size down.
+        const {parentId, type, ...position} = e.components.position || {};
         return {
           id: e.id.toString(),
-          ...e.components.position,
+          ...position,
           rotation: e.components.rotation,
         };
       });

@@ -23,7 +23,8 @@ describe("WarpSystem", () => {
     entity.addComponent("isWarpEngines");
     entity.addComponent("isShipSystem");
     const ship = new Entity();
-    ship.addComponent("isShip", {mass: 2000});
+    ship.addComponent("isShip");
+    ship.addComponent("mass", {mass: 2000});
     ship.addComponent("position", {type: "solar"});
     ship.addComponent("velocity");
     ship.addComponent("rotation");
