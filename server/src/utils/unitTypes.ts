@@ -7,6 +7,7 @@ export type Kilometer = Flavor<number, "kilometer">;
 export type Meter = Flavor<number, "meter">;
 export type Centimeter = Flavor<number, "centimeter">;
 
+export type MetersPerSecond = Flavor<number, "metersPerSecond">;
 export type KilometerPerSecond = Flavor<number, "kilometerPerSecond">;
 export type KilometerPerSecondSquared = Flavor<
   number,
@@ -56,6 +57,7 @@ export type Year = Flavor<number, "year">;
 
 export type Degree = Flavor<number, "degree">;
 export type Radian = Flavor<number, "radian">;
+export type RotationsPerMinute = Flavor<number, "rotationsPerMinute">;
 
 export function degToRad(degree: Degree): Radian {
   return (degree * Math.PI) / 180;
