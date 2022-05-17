@@ -62,8 +62,9 @@ export const flightInputs = {
     context.flight.initEcs(context.server);
     const activePlugins = context.server.plugins.filter(p => p.active);
     context.flight.pluginIds = activePlugins.map(p => p.id);
-    // TODO September 1, 2021 - We can uncomment this when the plugin system is done
-    // context.flight.activatePlugins(true)
+
+    // This will spawn all of the systems and planets bundled with the plugins
+    context.flight.activatePlugins(true);
 
     // Spawn the ships that were defined when the flight was started
     for (const ship of ships) {

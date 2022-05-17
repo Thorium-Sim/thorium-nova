@@ -37,7 +37,7 @@ export class SatelliteComponent extends Component {
   showOrbit: boolean = true;
 
   /**
-   * The ID of the parent object
+   * The ID of the parent object.
    */
-  parentId?: string | null = null;
+  parentId?: number | null = null;
 }
