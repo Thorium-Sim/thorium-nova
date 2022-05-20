@@ -54,6 +54,7 @@ export function spawnShip(
   // TODO November 16, 2021 - write a function that calculates the width and height
   //  based on the the provided length and the dimensions of the 3D model
   entity.addComponent("size");
+  entity.addComponent("mass", {mass: template.mass});
 
   const shipSystems: Entity[] = [];
   entity.addComponent("shipSystems");
@@ -63,7 +64,7 @@ export function spawnShip(
       sys => sys.name === system.systemId
     );
     if (!systemPlugin) return;
-    const systemEntity = spawnShipSystem(systemPlugin);
+    const systemEntity = spawnShipSystem(systemPlugin, system.overrides);
     shipSystems.push(systemEntity);
     entity.updateComponent("shipSystems", {
       shipSystemIds: [

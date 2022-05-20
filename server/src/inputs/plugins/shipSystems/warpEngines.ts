@@ -10,6 +10,8 @@ export const warpEnginesPluginInput = {
     params: {
       pluginId: string;
       shipSystemId: string;
+      shipPluginId?: string;
+      shipId?: string;
       interstellarCruisingSpeed?: KilometerPerSecond;
       solarCruisingSpeed?: KilometerPerSecond;
       minSpeedMultiplier?: number;
@@ -17,12 +19,16 @@ export const warpEnginesPluginInput = {
     }
   ) {
     inputAuth(context);
-    const shipSystem = getShipSystem(
+    const [system, override] = getShipSystem(
       context,
       params.pluginId,
       params.shipSystemId,
-      "warpEngines"
+      "warpEngines",
+      params.shipPluginId,
+      params.shipId
     );
+    const shipSystem = override || system;
+
     if (typeof params.minSpeedMultiplier === "number") {
       if (params.minSpeedMultiplier < 0)
         throw new Error("minSpeedMultiplier must be >= 0");
@@ -46,6 +52,12 @@ export const warpEnginesPluginInput = {
       pluginId: params.pluginId,
       systemId: params.shipSystemId,
     });
+    if (params.shipPluginId && params.shipId) {
+      pubsub.publish("pluginShip", {
+        pluginId: params.shipPluginId,
+        shipId: params.shipId,
+      });
+    }
 
     return shipSystem;
   },
