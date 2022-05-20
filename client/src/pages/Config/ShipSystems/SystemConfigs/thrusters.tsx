@@ -7,7 +7,8 @@ import {toast} from "client/src/context/ToastContext";
 import {useContext, useReducer} from "react";
 import {ShipPluginIdContext} from "../../Ships/ShipSystemOverrideContext";
 import {OverrideResetButton} from "../OverrideResetButton";
-export default function WarpEngines() {
+
+export default function ThrustersConfig() {
   const {pluginId, systemId, shipId} = useParams() as {
     pluginId: string;
     systemId: string;
@@ -17,16 +18,16 @@ export default function WarpEngines() {
 
   const system = useNetRequest("pluginShipSystem", {
     pluginId,
-    type: "warpEngines",
+    type: "thrusters",
     systemId,
-  }) as AllShipSystems["warpEngines"];
+    shipId,
+    shipPluginId,
+  }) as AllShipSystems["thrusters"];
   const [rekey, setRekey] = useReducer(() => Math.random(), Math.random());
-
   const key = `${systemId}${rekey}`;
   if (!system) return <Navigate to={`/config/${pluginId}/systems`} />;
 
-  // TODO: May 3, 2022 - Add sound effects configuration here
-  // TODO: May 3, 2022 - Figure out how to model the warp dynamo too
+  // TODO: April 21, 2022 - Add sound effects configuration here
   return (
     <fieldset key={key} className="flex-1 overflow-y-auto">
       <div className="flex flex-wrap">
@@ -36,24 +37,24 @@ export default function WarpEngines() {
               labelHidden={false}
               inputMode="numeric"
               pattern="[0-9]*"
-              label="Interstellar Cruising Speed"
-              placeholder={"599600000000"}
-              helperText={"For traveling through interstellar space. In km/s"}
-              defaultValue={system.interstellarCruisingSpeed}
+              label="Linear Max Speed"
+              placeholder={"1"}
+              helperText={"In m/s"}
+              defaultValue={system.directionMaxSpeed}
               onBlur={async e => {
                 if (!e.target.value || isNaN(Number(e.target.value))) return;
                 try {
-                  await netSend("pluginWarpEnginesUpdate", {
+                  await netSend("pluginThrustersUpdate", {
                     pluginId,
                     shipSystemId: systemId,
                     shipId,
                     shipPluginId,
-                    interstellarCruisingSpeed: Number(e.target.value),
+                    directionMaxSpeed: Number(e.target.value),
                   });
                 } catch (err) {
                   if (err instanceof Error) {
                     toast({
-                      title: "Error changing interstellar cruising speed",
+                      title: "Error changing linear max speed",
                       body: err.message,
                       color: "error",
                     });
@@ -62,7 +63,7 @@ export default function WarpEngines() {
               }}
             />
             <OverrideResetButton
-              property="interstellarCruisingSpeed"
+              property="directionMaxSpeed"
               setRekey={setRekey}
               className="mt-6"
             />
@@ -72,24 +73,24 @@ export default function WarpEngines() {
               labelHidden={false}
               inputMode="numeric"
               pattern="[0-9]*"
-              label="Solar Cruising Speed"
-              placeholder={"29980000"}
-              helperText={"For traveling through solar system space. In km/s"}
-              defaultValue={system.solarCruisingSpeed}
+              label="Linear Thrust"
+              placeholder={"12500"}
+              helperText="In Kilo-newtons. Affected by the mass of the ship the thrusters are attached to."
+              defaultValue={system.directionThrust}
               onBlur={async e => {
                 if (!e.target.value || isNaN(Number(e.target.value))) return;
                 try {
-                  await netSend("pluginWarpEnginesUpdate", {
+                  await netSend("pluginThrustersUpdate", {
                     pluginId,
                     shipSystemId: systemId,
                     shipId,
                     shipPluginId,
-                    solarCruisingSpeed: Number(e.target.value),
+                    directionThrust: Number(e.target.value),
                   });
                 } catch (err) {
                   if (err instanceof Error) {
                     toast({
-                      title: "Error changing solar cruising speed",
+                      title: "Error changing linear thrust",
                       body: err.message,
                       color: "error",
                     });
@@ -98,7 +99,7 @@ export default function WarpEngines() {
               }}
             />
             <OverrideResetButton
-              property="solarCruisingSpeed"
+              property="directionThrust"
               setRekey={setRekey}
               className="mt-6"
             />
@@ -108,64 +109,24 @@ export default function WarpEngines() {
               labelHidden={false}
               inputMode="numeric"
               pattern="[0-9]*"
-              label="Minimum Speed Multiplier"
-              placeholder={"0.01"}
-              helperText={
-                "The min speed (warp 1) compared to the cruising speed. Defaults to 0.01, should be less than 1."
-              }
-              defaultValue={system.minSpeedMultiplier}
-              onBlur={async e => {
-                if (!e.target.value || isNaN(Number(e.target.value))) return;
-                try {
-                  await netSend("pluginWarpEnginesUpdate", {
-                    pluginId,
-                    shipSystemId: systemId,
-                    shipId,
-                    shipPluginId,
-                    minSpeedMultiplier: Number(e.target.value),
-                  });
-                } catch (err) {
-                  if (err instanceof Error) {
-                    toast({
-                      title: "Error changing minimum speed multiplier",
-                      body: err.message,
-                      color: "error",
-                    });
-                  }
-                }
-              }}
-            />
-            <OverrideResetButton
-              property="minSpeedMultiplier"
-              setRekey={setRekey}
-              className="mt-6"
-            />
-          </div>
-          <div className="pb-2 flex">
-            <Input
-              labelHidden={false}
-              inputMode="numeric"
-              pattern="[0-9]*"
-              label="Warp Factor Count"
+              label="Rotation Max Speed"
               placeholder={"5"}
-              helperText={
-                "The number of warp factors available. Does not include emergency or destructive warp. Must be greater than 2"
-              }
-              defaultValue={system.warpFactorCount}
+              helperText={"In revolutions per minute"}
+              defaultValue={system.rotationMaxSpeed}
               onBlur={async e => {
                 if (!e.target.value || isNaN(Number(e.target.value))) return;
                 try {
-                  await netSend("pluginWarpEnginesUpdate", {
+                  await netSend("pluginThrustersUpdate", {
                     pluginId,
                     shipSystemId: systemId,
                     shipId,
                     shipPluginId,
-                    warpFactorCount: Math.round(Number(e.target.value)),
+                    rotationMaxSpeed: Number(e.target.value),
                   });
                 } catch (err) {
                   if (err instanceof Error) {
                     toast({
-                      title: "Error changing warp factor count",
+                      title: "Error changing rotation max speed",
                       body: err.message,
                       color: "error",
                     });
@@ -174,7 +135,43 @@ export default function WarpEngines() {
               }}
             />
             <OverrideResetButton
-              property="warpFactorCount"
+              property="rotationMaxSpeed"
+              setRekey={setRekey}
+              className="mt-6"
+            />
+          </div>
+          <div className="pb-2 flex">
+            <Input
+              labelHidden={false}
+              inputMode="numeric"
+              pattern="[0-9]*"
+              label="Rotation Thrust"
+              placeholder={"12500"}
+              helperText="In Kilo-newtons. Affected by the mass of the ship the thrusters are attached to."
+              defaultValue={system.rotationThrust}
+              onBlur={async e => {
+                if (!e.target.value || isNaN(Number(e.target.value))) return;
+                try {
+                  await netSend("pluginThrustersUpdate", {
+                    pluginId,
+                    shipSystemId: systemId,
+                    shipId,
+                    shipPluginId,
+                    rotationThrust: Number(e.target.value),
+                  });
+                } catch (err) {
+                  if (err instanceof Error) {
+                    toast({
+                      title: "Error changing rotation thrust",
+                      body: err.message,
+                      color: "error",
+                    });
+                  }
+                }
+              }}
+            />
+            <OverrideResetButton
+              property="rotationThrust"
               setRekey={setRekey}
               className="mt-6"
             />

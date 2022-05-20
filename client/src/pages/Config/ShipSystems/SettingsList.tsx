@@ -8,6 +8,7 @@ export function SettingsList() {
   const {pluginId, systemId} = params as {pluginId: string; systemId: string};
   const system = useNetRequest("pluginShipSystem", {pluginId, systemId});
   const availableShipSystems = useNetRequest("availableShipSystems");
+  if (!system?.type) return null;
   const systemType = availableShipSystems.find(s => s.type === system.type);
   return (
     <div className="mb-2 w-72">

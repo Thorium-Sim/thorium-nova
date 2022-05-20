@@ -64,7 +64,7 @@ export function spawnShip(
       sys => sys.name === system.systemId
     );
     if (!systemPlugin) return;
-    const systemEntity = spawnShipSystem(systemPlugin);
+    const systemEntity = spawnShipSystem(systemPlugin, system.overrides);
     shipSystems.push(systemEntity);
     entity.updateComponent("shipSystems", {
       shipSystemIds: [

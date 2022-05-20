@@ -4,25 +4,35 @@ import Input from "@thorium/ui/Input";
 import {AllShipSystems} from "server/src/classes/Plugins/ShipSystems/shipSystemTypes";
 import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
+import {useContext, useReducer} from "react";
+import {ShipPluginIdContext} from "../../Ships/ShipSystemOverrideContext";
+import {OverrideResetButton} from "../OverrideResetButton";
 
 export default function ImpulseEngineConfig() {
-  const {pluginId, systemId} = useParams() as {
+  const {pluginId, systemId, shipId} = useParams() as {
     pluginId: string;
     systemId: string;
+    shipId: string;
   };
+  const shipPluginId = useContext(ShipPluginIdContext);
+
   const system = useNetRequest("pluginShipSystem", {
     pluginId,
     type: "impulseEngines",
     systemId,
+    shipId,
+    shipPluginId,
   }) as AllShipSystems["impulseEngines"];
+  const [rekey, setRekey] = useReducer(() => Math.random(), Math.random());
+  const key = `${systemId}${rekey}`;
   if (!system) return <Navigate to={`/config/${pluginId}/systems`} />;
 
   // TODO: April 21, 2022 - Add sound effects configuration here
   return (
-    <fieldset key={systemId} className="flex-1 overflow-y-auto">
+    <fieldset key={key} className="flex-1 overflow-y-auto">
       <div className="flex flex-wrap">
         <div className="flex-1 pr-4">
-          <div className="pb-2">
+          <div className="pb-2 flex">
             <Input
               labelHidden={false}
               inputMode="numeric"
@@ -37,6 +47,8 @@ export default function ImpulseEngineConfig() {
                   await netSend("pluginImpulseEnginesUpdate", {
                     pluginId,
                     shipSystemId: systemId,
+                    shipId,
+                    shipPluginId,
                     cruisingSpeed: Number(e.target.value),
                   });
                 } catch (err) {
@@ -50,8 +62,13 @@ export default function ImpulseEngineConfig() {
                 }
               }}
             />
+            <OverrideResetButton
+              property="cruisingSpeed"
+              setRekey={setRekey}
+              className="mt-6"
+            />
           </div>
-          <div className="pb-2">
+          <div className="pb-2 flex">
             <Input
               labelHidden={false}
               inputMode="numeric"
@@ -66,6 +83,8 @@ export default function ImpulseEngineConfig() {
                   await netSend("pluginImpulseEnginesUpdate", {
                     pluginId,
                     shipSystemId: systemId,
+                    shipId,
+                    shipPluginId,
                     emergencySpeed: Number(e.target.value),
                   });
                 } catch (err) {
@@ -79,8 +98,13 @@ export default function ImpulseEngineConfig() {
                 }
               }}
             />
+            <OverrideResetButton
+              property="emergencySpeed"
+              setRekey={setRekey}
+              className="mt-6"
+            />
           </div>
-          <div className="pb-2">
+          <div className="pb-2 flex">
             <Input
               labelHidden={false}
               inputMode="numeric"
@@ -97,6 +121,8 @@ export default function ImpulseEngineConfig() {
                   await netSend("pluginImpulseEnginesUpdate", {
                     pluginId,
                     shipSystemId: systemId,
+                    shipId,
+                    shipPluginId,
                     thrust: Number(e.target.value),
                   });
                 } catch (err) {
@@ -109,6 +135,11 @@ export default function ImpulseEngineConfig() {
                   }
                 }
               }}
+            />
+            <OverrideResetButton
+              property="thrust"
+              setRekey={setRekey}
+              className="mt-6"
             />
           </div>
         </div>
