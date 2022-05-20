@@ -95,3 +95,10 @@ export type DataSelection = {
    */
   notifications?: NotificationNames[];
 };
+
+export type FlightStartingPoint = {
+  pluginId: string;
+  solarSystemId: string;
+  objectId: string;
+  type: "planet" | "ship";
+};

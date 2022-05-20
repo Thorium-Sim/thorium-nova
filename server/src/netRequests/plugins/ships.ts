@@ -1,5 +1,6 @@
 import ShipPlugin from "server/src/classes/Plugins/Ship";
 import {DataContext} from "server/src/utils/DataContext";
+import {FlightStartingPoint} from "server/src/utils/types";
 import {getPlugin} from "./utils";
 
 export const pluginShipsRequest = {
@@ -37,5 +38,25 @@ export const pluginShipsRequest = {
         vanityUrl: ship.assets.vanity,
         pluginName: ship.pluginName,
       }));
+  },
+  availableStartingPoints(context: DataContext) {
+    return context.server.plugins.reduce(
+      (points: FlightStartingPoint[], plugin) => {
+        if (!plugin.active) return points;
+        return points.concat(
+          plugin.aspects.solarSystems.flatMap(solarSystem => {
+            const planets = solarSystem.planets.map(planet => ({
+              pluginId: plugin.id,
+              solarSystemId: solarSystem.name,
+              objectId: planet.name,
+              type: "planet" as const,
+            }));
+            // TODO May 17, 2022 - Make permanent ships available as starting points.
+            return planets;
+          })
+        );
+      },
+      []
+    );
   },
 };

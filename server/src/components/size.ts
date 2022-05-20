@@ -1,3 +1,4 @@
+import {Meter} from "../utils/unitTypes";
 import {Component} from "./utils";
 
 /**
@@ -12,13 +13,13 @@ export class SizeComponent extends Component {
   /**
    * Length in meters
    */
-  length: number = 350;
+  length: Meter = 350;
   /**
    * Width in meters
    */
-  width: number = 135;
+  width: Meter = 135;
   /**
    * Height in meters
    */
-  height: number = 67;
+  height: Meter = 67;
 }
