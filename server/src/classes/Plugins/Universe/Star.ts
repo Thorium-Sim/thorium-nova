@@ -53,12 +53,16 @@ export default class StarPlugin {
    */
   temperature: Kelvin;
 
-  satellite: Omit<SatelliteComponent, "init">;
+  satellite: Omit<SatelliteComponent, "init" | "parentId"> & {parentId: string};
 
   constructor(
     params: Partial<
       Omit<StarPlugin, "satellite"> & {
-        satellite: Partial<Omit<SatelliteComponent, "init">>;
+        satellite: Partial<
+          Omit<SatelliteComponent, "init" | "parentId"> & {
+            parentId: string;
+          }
+        >;
       }
     >,
     solarSystem: SolarSystemPlugin

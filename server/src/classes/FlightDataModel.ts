@@ -5,6 +5,7 @@ import systems from "../systems";
 import {FlightClient} from "./FlightClient";
 import {FSDataStore, FSDataStoreOptions} from "@thorium/db-fs";
 import ShipPlugin from "./Plugins/Ship";
+import {spawnSolarSystem} from "../spawners/solarSystem";
 
 export class FlightDataModel extends FSDataStore {
   static INTERVAL = 1000 / 60;
@@ -70,21 +71,23 @@ export class FlightDataModel extends FSDataStore {
     // TODO: Flight Reset Handling
   }
 
-  // TODO September 1, 2021 - We can uncomment this when the plugin system is done
-  // activatePlugins(initialLoad?: boolean): void {
-  //   this.pluginIds.forEach(pluginId => {
-  //     const plugin = getPlugin(pluginId);
-  //     if (initialLoad) {
-  //       // TODO: Combine remix plugins with the base plugins.
-  //       // Create entities for the universe objects
-  //       plugin.universe.forEach(universeItem => {
-  //         this.ecs.addEntity(
-  //           new Entity({...universeItem, pluginId: plugin.id})
-  //         );
-  //       });
-  //     }
-  //   });
-  // }
+  activatePlugins(initialLoad?: boolean): void {
+    this.pluginIds.forEach(pluginId => {
+      const plugin = this.serverDataModel.plugins.find(
+        plugin => plugin.id === pluginId
+      );
+      if (!plugin) return;
+      if (initialLoad) {
+        // Create entities for the universe objects
+        plugin.aspects.solarSystems.forEach(solarSystem => {
+          const entities = spawnSolarSystem(solarSystem);
+          entities.forEach(entity => {
+            this.ecs.addEntity(entity);
+          });
+        });
+      }
+    });
+  }
   // Helper Getters
   /**
    * All player ships in the universe.
