@@ -96,7 +96,9 @@ describe("flight input", () => {
   it("should properly position the player ship in sandbox mode", async () => {
     const mockDataContext = createMockDataContext();
     mockDataContext.database.flight = null;
-
+    // Shim Math.random
+    const oldRandom = Math.random;
+    Math.random = () => 0.5;
     // Create some star map object plugins
     const solarSystem = solarSystemsPluginInputs.pluginSolarSystemCreate(
       mockDataContext,
@@ -116,6 +118,18 @@ describe("flight input", () => {
       planetType: "M",
     });
 
+    expect(planet.satellite).toMatchInlineSnapshot(`
+      Object {
+        "axialTilt": 0,
+        "eccentricity": 0,
+        "inclination": 0,
+        "orbitalArc": 180,
+        "parentId": "Eta Giclas",
+        "semiMajorAxis": 228643390,
+        "showOrbit": true,
+      }
+    `);
+
     const flight = await flightInputs.flightStart(mockDataContext, {
       flightName: "Test Flight",
       ships: [
@@ -132,6 +146,7 @@ describe("flight input", () => {
         },
       ],
     });
+    Math.random = oldRandom;
     expect(mockDataContext.flight).toBeDefined();
     if (!mockDataContext.flight) throw new Error("No flight created");
 
@@ -139,9 +154,9 @@ describe("flight input", () => {
       PositionComponent {
         "parentId": 50000,
         "type": "solar",
-        "x": 405653673.54815173,
+        "x": -228630890,
         "y": 0,
-        "z": -175748537.63086534,
+        "z": 12500.000000027532,
       }
     `);
   });
