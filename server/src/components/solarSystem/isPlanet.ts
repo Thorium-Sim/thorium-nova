@@ -1,6 +1,6 @@
-import {AtmosphericComposition} from "../spawners/planetTypes";
-import {Year, Kilometer, TerranMass} from "../utils/unitTypes";
-import {Component} from "./utils";
+import {AtmosphericComposition} from "../../spawners/planetTypes";
+import {Year, Kilometer, TerranMass} from "../../utils/unitTypes";
+import {Component} from "../utils";
 
 export class IsPlanetComponent extends Component {
   static id = "isPlanet" as const;
