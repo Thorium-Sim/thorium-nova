@@ -12,3 +12,5 @@ export {starPluginInputs} from "./plugins/universe/stars";
 export {planetPluginInputs} from "./plugins/universe/planets";
 export {shipSystemsPluginInput} from "./plugins/shipSystems";
 export {impulseEnginesPluginInput} from "./plugins/shipSystems/impulseEngines";
+export {warpEnginesPluginInput} from "./plugins/shipSystems/warpEngines";
+export {inertialDampenersPluginInput} from "./plugins/shipSystems/inertialDampeners";
