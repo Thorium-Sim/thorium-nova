@@ -15,3 +15,4 @@ export {impulseEnginesPluginInput} from "./plugins/shipSystems/impulseEngines";
 export {warpEnginesPluginInput} from "./plugins/shipSystems/warpEngines";
 export {inertialDampenersPluginInput} from "./plugins/shipSystems/inertialDampeners";
 export {impulseEnginesInputs} from "./shipSystems/impulseEngines";
+export {warpEnginesInputs} from "./shipSystems/warpEngines";

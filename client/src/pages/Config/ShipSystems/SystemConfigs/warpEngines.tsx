@@ -1,29 +1,37 @@
-import {Navigate, useParams, useNavigate} from "react-router-dom";
+import {Navigate, useParams} from "react-router-dom";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import Input from "@thorium/ui/Input";
 import {AllShipSystems} from "server/src/classes/Plugins/ShipSystems/shipSystemTypes";
 import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
-
+import {useContext, useReducer} from "react";
+import {ShipPluginIdContext} from "../../Ships/ShipSystemOverrideContext";
+import {OverrideResetButton} from "../OverrideResetButton";
 export default function WarpEngines() {
-  const {pluginId, systemId} = useParams() as {
+  const {pluginId, systemId, shipId} = useParams() as {
     pluginId: string;
     systemId: string;
+    shipId: string;
   };
+  const shipPluginId = useContext(ShipPluginIdContext);
+
   const system = useNetRequest("pluginShipSystem", {
     pluginId,
     type: "warpEngines",
     systemId,
   }) as AllShipSystems["warpEngines"];
+  const [rekey, setRekey] = useReducer(() => Math.random(), Math.random());
+
+  const key = `${systemId}${rekey}`;
   if (!system) return <Navigate to={`/config/${pluginId}/systems`} />;
 
   // TODO: May 3, 2022 - Add sound effects configuration here
   // TODO: May 3, 2022 - Figure out how to model the warp dynamo too
   return (
-    <fieldset key={systemId} className="flex-1 overflow-y-auto">
+    <fieldset key={key} className="flex-1 overflow-y-auto">
       <div className="flex flex-wrap">
         <div className="flex-1 pr-4">
-          <div className="pb-2">
+          <div className="pb-2 flex">
             <Input
               labelHidden={false}
               inputMode="numeric"
@@ -38,6 +46,8 @@ export default function WarpEngines() {
                   await netSend("pluginWarpEnginesUpdate", {
                     pluginId,
                     shipSystemId: systemId,
+                    shipId,
+                    shipPluginId,
                     interstellarCruisingSpeed: Number(e.target.value),
                   });
                 } catch (err) {
@@ -51,8 +61,13 @@ export default function WarpEngines() {
                 }
               }}
             />
+            <OverrideResetButton
+              property="interstellarCruisingSpeed"
+              setRekey={setRekey}
+              className="mt-6"
+            />
           </div>
-          <div className="pb-2">
+          <div className="pb-2 flex">
             <Input
               labelHidden={false}
               inputMode="numeric"
@@ -67,6 +82,8 @@ export default function WarpEngines() {
                   await netSend("pluginWarpEnginesUpdate", {
                     pluginId,
                     shipSystemId: systemId,
+                    shipId,
+                    shipPluginId,
                     solarCruisingSpeed: Number(e.target.value),
                   });
                 } catch (err) {
@@ -80,8 +97,13 @@ export default function WarpEngines() {
                 }
               }}
             />
+            <OverrideResetButton
+              property="solarCruisingSpeed"
+              setRekey={setRekey}
+              className="mt-6"
+            />
           </div>
-          <div className="pb-2">
+          <div className="pb-2 flex">
             <Input
               labelHidden={false}
               inputMode="numeric"
@@ -98,6 +120,8 @@ export default function WarpEngines() {
                   await netSend("pluginWarpEnginesUpdate", {
                     pluginId,
                     shipSystemId: systemId,
+                    shipId,
+                    shipPluginId,
                     minSpeedMultiplier: Number(e.target.value),
                   });
                 } catch (err) {
@@ -111,8 +135,13 @@ export default function WarpEngines() {
                 }
               }}
             />
+            <OverrideResetButton
+              property="minSpeedMultiplier"
+              setRekey={setRekey}
+              className="mt-6"
+            />
           </div>
-          <div className="pb-2">
+          <div className="pb-2 flex">
             <Input
               labelHidden={false}
               inputMode="numeric"
@@ -129,6 +158,8 @@ export default function WarpEngines() {
                   await netSend("pluginWarpEnginesUpdate", {
                     pluginId,
                     shipSystemId: systemId,
+                    shipId,
+                    shipPluginId,
                     warpFactorCount: Math.round(Number(e.target.value)),
                   });
                 } catch (err) {
@@ -141,6 +172,11 @@ export default function WarpEngines() {
                   }
                 }
               }}
+            />
+            <OverrideResetButton
+              property="warpFactorCount"
+              setRekey={setRekey}
+              className="mt-6"
             />
           </div>
         </div>

@@ -4,7 +4,7 @@ import EventEmitter from "eventemitter3";
 import ReconnectingWebSocket from "reconnecting-websocket";
 
 const serverFPS = 3;
-export const SI = new SnapshotInterpolation(serverFPS);
+export let SI = new SnapshotInterpolation(serverFPS);
 export class ClientSocket extends EventEmitter {
   constructor(private socket: ReconnectingWebSocket) {
     super();

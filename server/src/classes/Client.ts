@@ -198,7 +198,7 @@ export class ServerClient extends BaseClient {
                 }, 100);
               } else {
                 const requestFunction = requests[requestName];
-                const params = messageData.data.params;
+                const params = messageData.data.params || {};
 
                 // Create the subscription
                 async function handleRequest(
@@ -329,9 +329,14 @@ export class ServerClient extends BaseClient {
         // See https://github.com/geckosio/snapshot-interpolation#world-state
         // We're also removing any components of the entity that don't update
         // frequently to keep packet size down.
+
+        // TODO May 9, 2022 - There should be logic here to indicate when
+        // the snapshot should _not_ interpolate, for example when transitioning
+        // from interstellar space to solar system space.
+        const {parentId, type, ...position} = e.components.position || {};
         return {
           id: e.id.toString(),
-          ...e.components.position,
+          ...position,
           rotation: e.components.rotation,
         };
       });
