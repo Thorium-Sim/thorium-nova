@@ -1,27 +1,36 @@
-import {Navigate, useParams, useNavigate} from "react-router-dom";
+import {Navigate, useParams} from "react-router-dom";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import Input from "@thorium/ui/Input";
 import {AllShipSystems} from "server/src/classes/Plugins/ShipSystems/shipSystemTypes";
 import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
-
+import {useContext, useReducer} from "react";
+import {ShipPluginIdContext} from "../../Ships/ShipSystemOverrideContext";
+import {OverrideResetButton} from "../OverrideResetButton";
 export default function InertialDampenersConfig() {
-  const {pluginId, systemId} = useParams() as {
+  const {pluginId, systemId, shipId} = useParams() as {
     pluginId: string;
     systemId: string;
+    shipId: string;
   };
+  const shipPluginId = useContext(ShipPluginIdContext);
+
   const system = useNetRequest("pluginShipSystem", {
     pluginId,
     type: "inertialDampeners",
     systemId,
+    shipId,
+    shipPluginId,
   }) as AllShipSystems["inertialDampeners"];
+  const [rekey, setRekey] = useReducer(() => Math.random(), Math.random());
+  const key = `${systemId}${rekey}`;
   if (!system) return <Navigate to={`/config/${pluginId}/systems`} />;
 
   return (
-    <fieldset key={systemId} className="flex-1 overflow-y-auto">
+    <fieldset key={key} className="flex-1 overflow-y-auto">
       <div className="flex flex-wrap">
         <div className="flex-1 pr-4">
-          <div className="pb-2">
+          <div className="pb-2 flex">
             <Input
               labelHidden={false}
               inputMode="numeric"
@@ -38,6 +47,8 @@ export default function InertialDampenersConfig() {
                   await netSend("pluginInertialDampenersUpdate", {
                     pluginId,
                     shipSystemId: systemId,
+                    shipId,
+                    shipPluginId,
                     dampening: Number(e.target.value),
                   });
                 } catch (err) {
@@ -50,6 +61,11 @@ export default function InertialDampenersConfig() {
                   }
                 }
               }}
+            />
+            <OverrideResetButton
+              property="dampening"
+              setRekey={setRekey}
+              className="mt-6"
             />
           </div>
         </div>

@@ -2,9 +2,14 @@ import BaseShipSystemPlugin from "../classes/Plugins/ShipSystems/BaseSystem";
 import {ShipSystemTypes} from "../classes/Plugins/ShipSystems/shipSystemTypes";
 import {components, ComponentIDs} from "../components";
 import {Entity} from "../utils/ecs";
+import {mergeDeep} from "../utils/mergeDeep";
 
-export function spawnShipSystem(template: Partial<BaseShipSystemPlugin>) {
+export function spawnShipSystem(
+  systemPlugin: Partial<BaseShipSystemPlugin>,
+  overrides: Record<string, any> = {}
+) {
   const entity = new Entity();
+  const template = mergeDeep(systemPlugin, overrides);
 
   entity.addComponent("identity", {
     name: template.name,

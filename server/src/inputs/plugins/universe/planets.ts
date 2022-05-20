@@ -205,7 +205,7 @@ export const planetPluginInputs = {
       ringMapAsset?: File | string | null;
       population?: number;
       temperature?: Kelvin;
-      satellite?: Partial<SatelliteComponent>;
+      satellite?: Partial<Omit<SatelliteComponent, "init" | "parentId">>;
     }
   ) {
     inputAuth(context);
