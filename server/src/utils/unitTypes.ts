@@ -16,6 +16,8 @@ export type KilometerPerSecondSquared = Flavor<
 >;
 export type KiloNewtons = Flavor<number, "kiloNewtons">;
 
+export const KM_TO_LY = 1 / 9460730777119.56;
+export const M_TO_KM = 1 / 1000;
 /**
  * Distance compared to the radius of the sun eg. 1 solar radius = the radius of the sun
  */
