@@ -1,4 +1,5 @@
 import {DataContext} from "server/src/utils/DataContext";
+import {pubsub} from "server/src/utils/pubsub";
 
 export const requests = {
   officersLog(
@@ -10,5 +11,23 @@ export const requests = {
       throw null;
 
     return context.flightClient?.officersLog || [];
+  },
+};
+
+export const inputs = {
+  officersLogAdd(
+    context: DataContext,
+    params: {message: string; timestamp: number}
+  ) {
+    const {message, timestamp = Date.now()} = params;
+
+    context.flightClient?.officersLog.push({
+      message,
+      timestamp,
+    });
+
+    pubsub.publish("officersLog", {
+      clientId: context.clientId,
+    });
   },
 };

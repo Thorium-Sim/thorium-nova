@@ -18,3 +18,7 @@ export function dataStream(
       entity.components.position.parentId === params.systemId
   );
 }
+
+export const inputs = {
+  impulseEnginesSetSpeed() {},
+};
