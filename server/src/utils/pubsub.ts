@@ -1,8 +1,3 @@
-import {
-  SubscriptionNames,
-  SubscriptionParams,
-  SubscriptionReturn,
-} from "client/src/utils/cardData";
 import {EventEmitter} from "events";
 import {
   AllRequestNames,
@@ -24,17 +19,17 @@ class PubSub {
   }
 
   public publish<
-    TriggerName extends SubscriptionNames | AllRequestNames,
-    Payload extends (SubscriptionParams & AllRequestPublishParams)[TriggerName]
+    TriggerName extends AllRequestNames,
+    Payload extends AllRequestPublishParams[TriggerName]
   >(triggerName: TriggerName, payload?: Payload): Promise<void> {
     this.ee.emit(triggerName, payload);
     return Promise.resolve();
   }
 
   public subscribe<
-    TriggerName extends SubscriptionNames | AllRequestNames,
-    Payload extends (SubscriptionParams & AllRequestPublishParams)[TriggerName],
-    Return extends (SubscriptionReturn & AllRequestReturns)[TriggerName]
+    TriggerName extends AllRequestNames,
+    Payload extends AllRequestPublishParams[TriggerName],
+    Return extends AllRequestReturns[TriggerName]
   >(
     triggerName: TriggerName,
     onMessage: (payload: Payload, context: DataContext) => Return,

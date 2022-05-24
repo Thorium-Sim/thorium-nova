@@ -1,7 +1,7 @@
-import useCardData from "client/src/context/useCardData";
+import {useNetRequest} from "client/src/context/useNetRequest";
 
 export function LoginCore() {
-  const data = useCardData<"LoginCore">();
+  const clients = useNetRequest("flightClients");
   return (
     <div className="prose prose-invert w-full mx-auto">
       <table>
@@ -13,7 +13,7 @@ export function LoginCore() {
           </tr>
         </thead>
         <tbody>
-          {data.clients.map(client => (
+          {clients.map(client => (
             <tr key={client.id}>
               <td>{client.name}</td>
               <td>{client.stationId}</td>

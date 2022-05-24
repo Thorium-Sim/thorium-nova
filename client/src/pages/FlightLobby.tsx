@@ -1,4 +1,3 @@
-import {useClientData} from "../context/useCardData";
 import {FaBan, FaSpinner} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
 import {netSend} from "../context/netSend";
@@ -13,16 +12,17 @@ import {ClientButton} from "../components/ClientButton";
 import InfoTip from "@thorium/ui/InfoTip";
 
 export default function FlightLobby() {
-  const clientData = useClientData();
+  const station = useNetRequest("station");
+  const client = useNetRequest("client");
 
-  if (clientData.station) return <StationWrapper />;
+  if (station) return <StationWrapper />;
 
-  if (clientData.client.isHost) return <HostLobby />;
+  if (client.isHost) return <HostLobby />;
   return <PlayerLobby />;
 }
 
 function PlayerLobby() {
-  const clientData = useClientData();
+  const flight = useNetRequest("flight");
 
   return (
     <>
@@ -31,11 +31,7 @@ function PlayerLobby() {
         <ClientButton />
 
         <div className="flex-1 flex flex-col pt-16">
-          {clientData.flight ? (
-            <PlayerStationSelection />
-          ) : (
-            <WaitingForFlight />
-          )}
+          {flight ? <PlayerStationSelection /> : <WaitingForFlight />}
         </div>
       </div>
     </>
@@ -133,14 +129,15 @@ function PlayerStationItem({
 }
 function HostLobby() {
   const navigate = useNavigate();
-  const clientData = useClientData();
+  const flight = useNetRequest("flight");
+  const client = useNetRequest("client");
 
   return (
     <>
       <Menubar>
-        {clientData.flight && (
+        {flight && (
           <>
-            {clientData.client.isHost && (
+            {client.isHost && (
               <Button
                 className="btn btn-outline btn-xs btn-error"
                 onClick={async () => {
@@ -151,7 +148,7 @@ function HostLobby() {
                 End
               </Button>
             )}
-            {clientData.flight?.paused ? (
+            {flight?.paused ? (
               <Button
                 className="btn btn-outline btn-xs btn-success"
                 onClick={() => {
@@ -189,7 +186,7 @@ function HostLobby() {
       <div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur flex flex-col">
         <ClientButton />
         <div className="flex-1 flex flex-col pt-16">
-          {clientData.flight ? <ClientAssignment /> : <WaitingForFlight />}
+          {flight ? <ClientAssignment /> : <WaitingForFlight />}
         </div>
       </div>
     </>
@@ -198,9 +195,9 @@ function HostLobby() {
 
 function ClientAssignment() {
   const clients = useNetRequest("clients");
-  const clientData = useClientData();
+  const client = useNetRequest("client");
   const playerShips = useNetRequest("flightPlayerShips");
-  const [selectedClient, setSelectedClient] = useState(clientData.client.id);
+  const [selectedClient, setSelectedClient] = useState(client.id);
   return (
     <div className="flex justify-around gap-4 w-full">
       <div>

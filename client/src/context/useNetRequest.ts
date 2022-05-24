@@ -6,8 +6,6 @@ import {
 } from "server/src/netRequests";
 import {getTabId, getTabIdSync} from "@thorium/tab-id";
 import {useQuery} from "react-query";
-import {useThorium} from "./ThoriumContext";
-import {stableValueHash} from "../utils/stableValueHash";
 import {useRequestSub} from "./useRequestSub";
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
@@ -31,7 +29,7 @@ export async function netRequest<
     },
     body: JSON.stringify(body),
   }).then(res => res.json());
-  if (result.error) {
+  if (result?.error) {
     throw new Error(result.error);
   }
 
@@ -47,17 +45,18 @@ export function useNetRequest<
   callback?: (result: UnwrapPromise<R>) => void
 ): UnwrapPromise<R> {
   const clientId = getTabIdSync();
-  const {socket} = useThorium();
-  const requestId = stableValueHash({requestName, params});
 
   const netRequestQuery = useQuery<UnwrapPromise<R>>(
     [clientId, "netRequest", requestName, params],
     async () => {
       const data = await netRequest(requestName, params);
       return (data as any) || null;
+    },
+    {
+      cacheTime: Infinity,
+      networkMode: "always",
     }
   );
-
   useRequestSub({requestName, params});
 
   const mockData = useContext(MockNetRequestContext);
@@ -73,6 +72,5 @@ export function useNetRequest<
   }, [netRequestQuery.data]);
 
   if (mockData) return mockData[requestName];
-
   return netRequestQuery.data as any;
 }

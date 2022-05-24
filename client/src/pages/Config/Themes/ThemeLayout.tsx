@@ -1,13 +1,10 @@
 import {useConfirm, usePrompt} from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
+import {Navigate, Outlet, useParams, useNavigate} from "react-router-dom";
 import {
-  Navigate,
-  Outlet,
-  useLocation,
-  useParams,
-  useNavigate,
-} from "react-router-dom";
-import {useNetRequest} from "client/src/context/useNetRequest";
+  MockNetRequestContext,
+  useNetRequest,
+} from "client/src/context/useNetRequest";
 import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
 import {useCallback, useEffect, useRef, useState} from "react";
@@ -20,7 +17,6 @@ import {AssetPreview} from "@thorium/ui/AssetPreview";
 import InfoTip from "@thorium/ui/InfoTip";
 import type ThemePlugin from "server/src/classes/Plugins/Theme";
 import StationLayout from "client/src/components/Station/StationLayout";
-import {MockClientDataContext} from "client/src/context/useCardData";
 import normalLogo from "../../../images/logo.svg?url";
 import colorLogo from "../../../images/logo-color.svg?url";
 export const ThemeLayout = () => {
@@ -65,7 +61,7 @@ export const ThemeLayout = () => {
               }}
             >
               <style dangerouslySetInnerHTML={{__html: theme.processedCSS}} />
-              <MockClientDataContext.Provider
+              <MockNetRequestContext.Provider
                 value={{
                   client: {
                     id: "Test",
@@ -110,7 +106,7 @@ export const ThemeLayout = () => {
                 }}
               >
                 <StationLayout />
-              </MockClientDataContext.Provider>
+              </MockNetRequestContext.Provider>
             </div>
           </div>
           <Editor

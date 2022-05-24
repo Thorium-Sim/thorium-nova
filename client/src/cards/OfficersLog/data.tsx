@@ -1,7 +1,11 @@
 import {DataContext} from "server/src/utils/DataContext";
 
-export const subscriptions = {
-  officersLog(context: DataContext, publishParams: {clientId: string}) {
+export const requests = {
+  officersLog(
+    context: DataContext,
+    params: {},
+    publishParams: {clientId: string}
+  ) {
     if (publishParams && context.clientId !== publishParams.clientId)
       throw null;
 

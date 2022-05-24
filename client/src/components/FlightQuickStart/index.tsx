@@ -2,7 +2,7 @@ import Button from "@thorium/ui/Button";
 import Modal from "@thorium/ui/Modal";
 import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
-import {useClientData} from "client/src/context/useCardData";
+import {useNetRequest} from "client/src/context/useNetRequest";
 import {useMatch, useNavigate, Navigate, Outlet, Link} from "react-router-dom";
 import {randomNameGenerator} from "server/src/utils/randomNameGenerator";
 import {useFlightQuickStart} from "./FlightQuickStartContext";
@@ -11,7 +11,8 @@ function capitalize(val: string) {
   return val.charAt(0).toUpperCase() + val.slice(1);
 }
 export default function FlightQuickStart() {
-  const clientData = useClientData();
+  const flight = useNetRequest("flight");
+  const client = useNetRequest("client");
 
   const [state, dispatch] = useFlightQuickStart();
 
@@ -20,8 +21,8 @@ export default function FlightQuickStart() {
   const match = useMatch("/flight/quick/:step");
 
   if (!match) return <Navigate to="/flight/quick/crew" replace />;
-  if (clientData.flight) return <Navigate to="/flight" replace />;
-  if (!clientData.client.isHost) return <Navigate to="/" replace />;
+  if (flight) return <Navigate to="/flight" replace />;
+  if (!client.isHost) return <Navigate to="/" replace />;
 
   const {step} = match.params;
 
