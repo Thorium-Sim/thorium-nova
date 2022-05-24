@@ -319,6 +319,10 @@ export class ServerClient extends BaseClient {
             entity: Entity,
             context: DataContext
           ) => boolean;
+
+          if (cardStream) {
+            console.log(cardStream?.toString());
+          }
           let includedInCard = cardStream?.(entity, this.clientContext);
           if (includedInCard) return true;
         }

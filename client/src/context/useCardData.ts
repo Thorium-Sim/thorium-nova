@@ -29,12 +29,12 @@ export default function useCardData<CardName extends DataCardNames>(
       refetchOnMount: false,
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,
+      networkMode: "always",
       staleTime: Infinity,
       cacheTime: Infinity,
     }
   );
   const requestName = ["cardData", cardName] as const;
-
   useRequestSub({requestName});
 
   const mockData = useContext(MockCardDataContext);

@@ -70,7 +70,3 @@ export const subscriptions = {
     return themeObj;
   },
 };
-
-export function dataStream(entity: Entity, context: DataContext): boolean {
-  return true; //!!(entity.components.position && entity.components.velocity);
-}
