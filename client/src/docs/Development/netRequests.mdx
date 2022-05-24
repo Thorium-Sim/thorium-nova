@@ -4,29 +4,25 @@ title: Net Requests
 
 # Net Requests
 
-Most data in Thorium Nova should be handled by card loaders. However, there are
-some times when it can be helpful to subscribe to a specific kind of data. This
-is called a "net request". It works like a card loader, but it can be loaded
-anywhere in the app and return any kind of data.
+Net Requests are the primary way of getting data from the server to the client.
+They work like functions which the client can call to automatically handle
+fetching the data and subscribing to any changes.
 
-Also like card loaders, net requests return initial data when they first load
-and send updates whenever `pubsub.publish` is called with the same `topic` as
-the net request's name.
+Net requests return initial data when they first load and send updates whenever
+`pubsub.publish` is called with the same `topic` as the net request's name.
 
 ## Defining Net Requests
 
-Net Requests are defined in the `/server/src/netRequests` directory. Like
-inputs, they should be grouped into files and folders based on how they are
-used. Each file exports an object where the keys are net request names and the
-values are functions that return the data.
+Net Requests are defined in the `/server/src/netRequests` directory. They can
+also be defined in the `data.ts` file for each card or core. Like inputs, they
+should be grouped into files and folders based on how they are used. Each file
+exports an object where the keys are net request names and the values are
+functions that return the data.
 
 The function, which can be an `async` function, includes
 [`DataContext`](/docs/development/datacontext) as the first parameter. The
 second parameter is the `params` which can be sent from the client. A third
 param called `publishParams` is the params which are passed by `pubsub.publish`.
-
-Unlike card loaders, net requests only use one function that both determines
-whether the net request should get the data and what data should be returned.
 
 The net request function should use `params` and `publishParams` to decide
 whether to return data or not. For example, if the user subscribed to updates

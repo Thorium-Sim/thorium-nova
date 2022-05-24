@@ -8,14 +8,17 @@ import DevLink from "../DevLink";
 
 Cards and cores are the foundational UI elements for Thorium Nova. Cards are the
 screens which the crew uses to control their ship, and cores are how the Flight
-Director interacts with the simulation. All cards and cores live inside the
-`/client/src/cards/` folder, with each card having its own PascalCased folder
-named after the card.
+Director interacts with the simulation. All cards live inside the
+`/client/src/cards/` folder, while cores live in `/client/src/cores`, with each
+having its own PascalCased folder named after the card or core.
 
 Card UIs are largely built with React, but any other web technologies, like SVG,
 Canvas, or WebGL, can be used in their creation.
 
 > This document mostly refers to cards, but it applies to both cards and cores.
+
+You likely want to review [`NetRequests`](/docs/development/netRequests) before
+reading this document.
 
 ## Card Data Subscriptions
 
@@ -27,8 +30,8 @@ transferring data from the server to the client.
 Subscriptions based on a "pubsub" system, where the server publishes data using
 `pubsub.publish(channelName, {...filterArgs})` on a channel that the client
 subscribes to. Note that `pubsub.publish` doesn't actually send any data to the
-client. It only signals that data for that channel has changed. The card itself
-chooses which data it will get when a channel has a publish.
+client. It only signals that data for that channel has changed. The client
+itself chooses which data it will get when a channel has a publish.
 
 For more information and a reference about pubsub channels, see the
 [Pubsub channel reference](pubsub-channel-reference) document.
@@ -36,58 +39,55 @@ For more information and a reference about pubsub channels, see the
 > **IMPORTANT:** Make sure you properly export your data functions in your card
 > from the "<DevLink>/client/src/cards/dataList.ts</DevLink>" file.
 
-### Defining Card Subscriptions
+### Defining Card Requests
 
-Cards define their own subscriptions. There is even a TypeScript check in place
-to make sure `pubsub.publish` can't be called on a channel that hasn't been
-defined in a card yet.
+Cards can define the netRequests which will be consumed by the card. There is
+even a TypeScript check in place to make sure `pubsub.publish` can't be called
+on a netRequest that hasn't been defined in a card yet. These netRequests are
+exactly the same as the netRequests defined in the `server/src/netRequests`
+folder - it's just nice to colocate them with the card they'll be used in.
 
-Subscriptions can also be defined for any client using the
-"<DevLink>/client/src/cards/data.ts</DevLink>" file, which works the same as
-card data files, but creates the subscription for every client, regardless of
-what cards are assigned. This file is good for data that is necessary outside of
-an active flight, or that is useful for every client to have, like updates about
-the client's ship alert status.
-
-Cards themselvse define their subscriptions in a file called `data.ts` inside
+Cards themselves define their subscriptions in a file called `data.ts` inside
 the card's folder.
 
-All `data.ts` files **must** export a on object called `subscriptions`. The
-properties of this object represent different subscription channel names. These
-channel names are used by the `pubsub.publish` function to signal that the data
-has changed and trigger a subscription publish. Calling `pubsub.publish` usually
-happens in an input definition, but it could happen in an infrequently triggered
-ECS System.
+To define net requests, the `data.ts` file should export a on object called
+`requests`. The properties of this object represent different netRequest names.
+These netRequest names are used by the `pubsub.publish` function to signal that
+the data has changed and trigger a subscription publish. Calling
+`pubsub.publish` usually happens in an input definition, but it could happen in
+an infrequently triggered ECS System.
 
-Each of the channel name properties on the `subscriptions` exports a single
+Each of the netRequest name properties on the `requests` exports a single
 function which both determines whether a client should receive data and also
-collects and returns the data that should be sent. The function takes two
+collects and returns the data that should be sent. The function takes three
 parameters: `context` which is an instance of [DataContext](datacontext) for
-that particular client, and `params`, being whatever values are passed to
-`pubsub.publish` in addition to the channel name. The second `params` parameter
-should always have a type annotation on it. This is automatically picked up by
-the `pubsub.publish` function.
+that particular client, `params`, which is the parameters passed in from the
+client, and `publishParams`, being whatever values are passed to
+`pubsub.publish` in addition to the channel name. The second and third
+`params/publishParams` parameters should always have a type annotation on it.
+This is automatically picked up by the `useNetRequest` and `pubsub.publish`
+functions.
 
-#### Subscription Filters
+#### Net Request Filters
 
-Subscription filters are optional. The idea is to makes sure that subscriptions
+Net Request filters are optional. The idea is to makes sure that subscriptions
 are only fired for the clients that need them. For example, two clients on two
-different player ships might both be subscribed to the 'phasers' channel, but
-when one of the ships charges their phasers, only the client on that ship should
-get the subscription update.
+different player ships might have both requested the 'phasers' channel, but when
+one of the ships charges their phasers, only the client on that ship should get
+the subscription update.
 
-To determine whether a client should receive data, the subscription function
-should check the `params` parameter against data in the database and about the
-client, like which ship the client is assigned to. If it determines that the
-publish should not go to that client, it should throw `null`. This stops the
-rest of the data handler from running and indicates that the client shouldn't
-receive that update.
+To determine whether a client should receive data, the request function should
+check the `params` parameter against data in the database and about the client,
+like which ship the client is assigned to. If it determines that the publish
+should not go to that client, it should throw `null`. This stops the rest of the
+data handler from running and indicates that the client shouldn't receive that
+update.
 
 Like the example above, it's most commonly used for filtering based on the ship
 the client is assigned to, though it could filter based on any other criteria.
 
 ```ts
-// /client/src/cards/WeaponsControl/subscriptions.ts
+// /client/src/cards/WeaponsControl/data.ts
 export const subscriptions = {
   phasers: (context: DataContext, params: {shipId: string}) => {
     if (context.ship.id !== params.shipId) throw null;
@@ -103,15 +103,16 @@ every publish.
 
 After filtering the subscription, the function collects the data that is needed
 for the card to operate. Since it is called both when the card first loads _and_
-when any subscription publishes happen, it needs to be stateless. That means it
-should not access the argument passed in to `pubsub.publish` to collect data.
+when any subscription publishes happen, this function cannot depend on the
+`publishParams` parameter. Instead, it should only use that for request
+filtering.
 
 Whatever the function returns is sent to the client and made available with the
-[useCardData](#usecarddata) hook. This most likely means finding specific
+[useNetRequest](#useNetRequest) hook. This most likely means finding specific
 entities associated with the ship the client is assigned to.
 
 ```ts
-// /client/src/cards/WeaponsControl/subscriptions.ts
+// /client/src/cards/WeaponsControl/data.ts
 export const subscriptions = {
   phasers: (context: DataContext) => {
     // ...
@@ -131,7 +132,7 @@ export const subscriptions = {
 Subscriptions should be defined as narrowly as possible, and cards should have
 as many subscriptions as are necessary to get all of the data.
 
-Whenever creating a new subscription channel name, it's importnat to make sure
+Whenever creating a new subscription channel name, it's important to make sure
 that `pubsub.publish` is being called any time the relevant data changes on the
 server.
 
@@ -143,8 +144,8 @@ determine if the subscription should go to the client.
 
 Some data changes very rapidly, like the position and rotation of ships and
 moving objects in space, and the position of crew members in space. To keep
-latency as low as possible Thorium Nova is architected to use WebRTC Data
-Channels to transmit high-frequency data.
+latency as low as possible, there's a separate method for sending just this
+data.
 
 Cards can define a filter function which is used to select the entities that
 will be sent via high-frequency data channels. To keep the bandwidth low, only
@@ -166,60 +167,26 @@ encoded in a way that makes it easy to do
 on the client.
 
 To define the entity filter for a card, export a `dataStream` function from the
-`data.ts` file, which is called for every entity. This function recieves an
-`Entity` and `DataContext` as parameters and should return `true` if the entity
-should be sent to the client.
+`data.ts` file, which is called for every entity. This function receives an
+`Entity`, `DataContext`, and optionally `params` as parameters and should return
+`true` if the entity should be sent to the client.
 
 ```ts
-export function dataStream(entity: Entity, context: DataContext): boolean {
-  return !!(entity.components.position && entity.components.velocity);
+export function dataStream(
+  entity: Entity,
+  context: DataContext,
+  params: {systemId: number | null}
+): boolean {
+  return Boolean(
+    entity.components.position?.parentId === systemId &&
+      entity.components.velocity
+  );
 }
 ```
 
----
-
-Both subscription data and data streams are automatically collected and
-processed on the client. The server automatically knows which cards are assigned
-to which clients and will only send the data that those cards need.
-
-## Accessing Data in Cards
-
-There are two hooks for accessing subscription data in cards: `useClientData()`
-and `useCardData()`.
-
-### `useClientData()`
-
-This hook accesses the data defined in
-"<DevLink>/client/src/cards/data.ts</DevLink>" which is made available to every
-client. That means this hook can be used outside of cards, but you can also use
-it in cards if needed.
-
-Loading states are handled by a Suspense implementation that resolves once the
-initial data arrives.
-
-Refer to that file to see what data is being made available.
-
-### `useCardData()`
-
-This hook returns the data defined in the `data.ts` file for the card. It takes
-one generic parameter: a literal string with the name of the card. If you're
-using VS Code, it should autocomplete with all of the available card names.
-
-```ts
-// /client/src/cards/WeaponsControl/index.tsx
-const data = useCardData<"WeaponsControl">();
-```
-
-Once you add that generic parameter, it has TypeScript type inference, so you
-get end-to-end type safety. 🎉
-
-Under the hood, both of these hooks are implemented as
-[Valtio](https://github.com/pmndrs/valtio) stores, which means they'll
-automatically optimize the renders for whatever components they are used in, to
-make sure they only trigger a re-render when the data being used in the
-component changes. Because of that, don't pass the direct output of
-`useCardData` or `useClientData` as props to another component; just use the
-hooks again inside that component or pass specific properties as props.
+Data Streams will only be active when `useDataStream` is called somewhere in the
+card. This hook accepts parameters and returns nothing, so it's best to call it
+at the top of the card component.
 
 ### DataStreams
 
