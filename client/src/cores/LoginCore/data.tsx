@@ -1,7 +1,7 @@
 import {DataContext} from "server/src/utils/DataContext";
 
-export const subscriptions = {
-  clients(context: DataContext) {
+export const requests = {
+  flightClients(context: DataContext) {
     if (!context.flight) return [];
     const serverClients = Object.values(context.server.clients);
     const flightClients = context.flight?.clients || {};

@@ -33,6 +33,7 @@ export function CoreFlexLayoutDropdown() {
     },
     {
       enabled: account?.user_id !== undefined,
+      suspense: false,
     }
   );
 

@@ -1,8 +1,8 @@
-import {useClientData} from "client/src/context/useCardData";
+import {useNetRequest} from "client/src/context/useNetRequest";
 import {useCallback, useRef, useState} from "react";
 
 export function useManageCard() {
-  const {station} = useClientData();
+  const station = useNetRequest("station");
   const [currentCard, setCurrentCard] = useState(
     station.cards[0]?.component || ""
   );

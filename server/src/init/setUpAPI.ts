@@ -3,16 +3,9 @@ import {DataContext} from "../utils/DataContext";
 import type buildHTTPServer from "./httpServer";
 import inputs, {AllInputNames} from "../inputs";
 import requests, {AllRequestNames} from "../netRequests";
-import {
-  cardSubscriptions,
-  DataCardNames,
-  SubscriptionNames,
-} from "client/src/utils/cardData";
 import {FlightDataModel} from "../classes/FlightDataModel";
 const NETSEND_PATH = "/netSend";
 const NETREQUEST_PATH = "/netRequest";
-const CARDREQUEST_PATH = "/cardRequest/:card/:subscription";
-const ALLCARD_PATH = "/cardRequest/:card";
 
 function checkBody(body: any, clientId: string) {
   if (typeof body !== "object") throw new Error("Body must be a JSON object");
@@ -56,41 +49,6 @@ function checkBodyNetRequest(
       )}" is not a valid request name.`
     );
   }
-}
-function checkBodyCardRequest(
-  body: any,
-  clientId: string,
-  all: boolean
-): asserts body is {
-  card: DataCardNames;
-  subscription: SubscriptionNames;
-} {
-  checkBody(body, clientId);
-  const bodyObject = (body || {}) as
-    | object
-    | {card: DataCardNames; subscription: SubscriptionNames};
-
-  if (!("card" in bodyObject))
-    throw new Error(
-      "Invalid event input. It must be a JSON body with a `card` property."
-    );
-  if (!cardSubscriptions[bodyObject.card])
-    throw new Error(
-      `Invalid card name: ${bodyObject.card}. Valid cards are ${Object.keys(
-        cardSubscriptions
-      )
-        .map(c => `'${c}'`)
-        .join(", ")}`
-    );
-  const cardSubs = cardSubscriptions[bodyObject.card];
-  if (!(bodyObject.subscription in cardSubs) && !all)
-    throw new Error(
-      `Invalid subscription for card '${bodyObject.card}': ${
-        bodyObject.subscription
-      }. Valid subscriptions are ${Object.keys(cardSubs)
-        .map(s => `'${s}'`)
-        .join(", ")}`
-    );
 }
 export function setUpAPI(
   app: ReturnType<typeof buildHTTPServer>,
@@ -162,59 +120,6 @@ export function setUpAPI(
     }
   });
 
-  // This maps all card data to a single HTTP endpoint.
-  // In the future, this could be split into separate
-  // HTTP endpoints
-  app.get(CARDREQUEST_PATH, async (req, reply) => {
-    const clientId =
-      req.headers.authorization?.replace("Bearer ", "").replace("bearer", "") ||
-      "";
-    try {
-      checkBodyCardRequest(req.params, clientId, false);
-      const cardSubs = cardSubscriptions[req.params.card] as any;
-      const subscription = req.params.subscription;
-      const clientContext = new DataContext(clientId, database);
-      const data = await cardSubs[subscription](clientContext);
-      return data;
-    } catch (err) {
-      if (err instanceof Error) {
-        return reply
-          .code(400)
-          .header("content-type", "application/json")
-          .send(JSON.stringify({message: err.message}));
-      }
-    }
-  });
-
-  app.get(ALLCARD_PATH, async (req, reply) => {
-    const clientId =
-      req.headers.authorization?.replace("Bearer ", "").replace("bearer", "") ||
-      "";
-    try {
-      checkBodyCardRequest(req.params, clientId, true);
-      const cardSubs = cardSubscriptions[req.params.card] as any;
-      const clientContext = new DataContext(clientId, database);
-      const dataRequests = Object.fromEntries(
-        await Promise.all(
-          Object.entries(cardSubs).map(
-            async ([subscription, dataRequest]: any) => {
-              const data = await dataRequest(clientContext);
-              return [subscription, data];
-            }
-          )
-        )
-      );
-      return dataRequests;
-    } catch (err) {
-      if (err instanceof Error) {
-        return reply
-          .code(400)
-          .header("content-type", "application/json")
-          .send(JSON.stringify({message: err.message}));
-      }
-    }
-  });
-
   app.post(NETREQUEST_PATH, async (req, reply) => {
     let body = req.body as any;
     const clientId =
@@ -225,8 +130,11 @@ export function setUpAPI(
     const {request, ...params} = body;
     try {
       const requestFunction = requests[request];
-      const response =
-        (await requestFunction(clientContext, params as any, null!)) || {};
+      const response = await requestFunction(
+        clientContext,
+        params as any,
+        null!
+      );
 
       // Send the result back to the client, regardless of what it is.
       return response;

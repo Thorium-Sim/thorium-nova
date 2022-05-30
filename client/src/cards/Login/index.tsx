@@ -1,13 +1,13 @@
 import Button from "@thorium/ui/Button";
 import Input from "@thorium/ui/Input";
 import {netSend} from "client/src/context/netSend";
-import {useClientData} from "client/src/context/useCardData";
+import {useNetRequest} from "client/src/context/useNetRequest";
 import {useState} from "react";
 
 const Login = () => {
   const [loginName, setLoginName] = useState("");
   // TODO: Support logging in with a ThoriumSim account
-  const {ship} = useClientData();
+  const ship = useNetRequest("ship");
   const login = () => {
     if (loginName.trim().length > 0) {
       // TODO: Play a sound effect when the user logs in

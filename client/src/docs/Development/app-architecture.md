@@ -6,7 +6,7 @@ title: App Architecture
 
 Thorium Nova is comprised of several parts that work together to create the
 complete package. These three pieces exist as separate workspaces in the
-`server`, `client`, and `electron` folders in the repository.
+`server`, `client`, and `desktop` folders in the repository.
 
 ## Server
 
@@ -19,13 +19,11 @@ It also runs the ECS frameworks that are embedded into each flight, which
 includes creating entities, running systems, and sending network messages to
 connected clients.
 
-Speaking of, the server keeps track of connected clients, both through Websocket
-connections and WebRTC datachannels. It make sure that clients get whatever data
-they need for whatever cards they might be displaying.
-
 It also runs an HTTP server which hosts a few API endpoints which can be used by
 third-party peripheral devices in addition to the static HTML and assets that
-browsers can access to run the game.
+browsers can access to run the game. Clients can also subscribe to specific
+data, and the server keeps track of which data each client has requested updates
+for.
 
 One of the principles Thorium Nova is built on is that most of the game should
 be playable through a modern web browser, like Google Chrome. That's why the
@@ -33,7 +31,7 @@ HTTP server serves the client assets over HTTP. This also makes it almost
 trivial to create a headless version of Thorium Nova that can run for long
 periods of time in the cloud.
 
-## Electron
+## Desktop
 
 [Electron](https://www.electronjs.org/) is a framework for building
 cross-platform JavaScript applications by bundling Node.js and Chrome into a
@@ -65,8 +63,8 @@ the built-in documentation (maybe that you are reading right now on the client!)
 The client is organized into routes with React Router and much of its behavior
 is determined by the server. For example, when a flight has started, the client
 can be assigned to a ship and station. Once assigned, when the client navigates
-to the `/flight` page (or something similar) it should automatically display the
-controls for that station on that ship.
+to the `/flight` page it should automatically display the controls for that
+station on that ship.
 
 The Flight Director has a bit more agency when it comes to what their station
 displays, having the ability to switch between different screens and views

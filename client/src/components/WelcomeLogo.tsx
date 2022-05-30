@@ -3,10 +3,10 @@ import Logo from "../images/logo.svg?url";
 import packageJson from "../../../package.json";
 import {ClientButton} from "./ClientButton";
 import {useEffect, useState} from "react";
-import {useClientData} from "../context/useCardData";
 import Button from "@thorium/ui/Button";
 import {netSend} from "../context/netSend";
 import {CopyToClipboard} from "./ui/CopyToClipboard";
+import {useNetRequest} from "../context/useNetRequest";
 
 function useConnectionAddress() {
   const [connectionAddress, setConnectionAddress] = useState("");
@@ -18,7 +18,7 @@ function useConnectionAddress() {
 }
 export const WelcomeLogo = ({className}: {className?: string}) => {
   const connectionAddress = useConnectionAddress();
-  const clientData = useClientData();
+  const thoriumData = useNetRequest("thorium");
   const [updateText, setUpdateText] = useState("");
   useEffect(() => {
     window.thorium?.registerUpdateHandler(message => {
@@ -61,7 +61,7 @@ export const WelcomeLogo = ({className}: {className?: string}) => {
           </CopyToClipboard>
         </h3>
       )}
-      {clientData.thorium.hasHost ? null : (
+      {thoriumData.hasHost ? null : (
         <Button
           className="btn-warning btn-sm"
           onClick={() => netSend("clientClaimHost")}
