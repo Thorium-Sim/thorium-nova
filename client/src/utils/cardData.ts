@@ -35,7 +35,6 @@ export const cardInputs = Object.fromEntries(
     })
 );
 
-console.log(cardInputs);
 type CardDataFunctions = typeof allData;
 type DataCardNames = keyof CardDataFunctions;
 export type CardRequestFunctions = UnionToIntersection<
