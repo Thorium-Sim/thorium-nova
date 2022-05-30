@@ -11,8 +11,28 @@ import {generateIncrementedName} from "../utils/generateIncrementedName";
 import {getFlights} from "../utils/getFlights";
 import type BasePlugin from "../classes/Plugins";
 import inputAuth from "../utils/inputAuth";
+import {FlightStartingPoint} from "../utils/types";
+import {spawnSolarSystem} from "../spawners/solarSystem";
+import {Entity} from "../utils/ecs";
+import {getOrbitPosition} from "../utils/getOrbitPosition";
+import {Vector3} from "three";
+import {PositionComponent} from "../components/position";
 
 const fs = process.env.NODE_ENV === "test" ? {unlink: () => {}} : promises;
+
+function getPlanetSystem(context: DataContext, planet: Entity): Entity {
+  if (!planet.components?.satellite?.parentId)
+    throw new Error("No satellite parentId");
+  const parentEntity = context.flight?.ecs.getEntityById(
+    planet.components?.satellite?.parentId
+  );
+  if (!parentEntity)
+    throw new Error(
+      `Could not find parent entity for planet: ${JSON.stringify(planet)} `
+    );
+  if (parentEntity.components.isSolarSystem) return parentEntity;
+  return getPlanetSystem(context, parentEntity);
+}
 interface FlightStartShips {
   shipTemplate: {pluginId: string; shipId: string};
   shipName: string;
@@ -28,7 +48,7 @@ interface FlightStartShips {
    * The Name or ID of the starting point of the mission
    * in the universe.
    */
-  startingPoint?: {pluginId: string; startingPointId: string};
+  startingPoint?: FlightStartingPoint;
 }
 export const flightInputs = {
   flightStart: async (
@@ -64,7 +84,29 @@ export const flightInputs = {
     context.flight.pluginIds = activePlugins.map(p => p.id);
 
     // This will spawn all of the systems and planets bundled with the plugins
-    context.flight.activatePlugins(true);
+    const solarSystemMap = context.flight.pluginIds.reduce(
+      (map: Record<string, Entity>, pluginId) => {
+        const plugin = context.server.plugins.find(
+          plugin => plugin.id === pluginId
+        );
+        if (!plugin) return map;
+        // Create entities for the universe objects
+        plugin.aspects.solarSystems.forEach(solarSystem => {
+          const entities = spawnSolarSystem(solarSystem);
+          entities.forEach(object => {
+            const {entity} = object;
+            context.flight?.ecs.addEntity(entity);
+            let key = `${object.pluginId}-${object.pluginSystemId}`;
+            if (object.type === "planet" || object.type === "star") {
+              key += `-${object.objectId}`;
+            }
+            map[key] = entity;
+          });
+        });
+        return map;
+      },
+      {}
+    );
 
     // Spawn the ships that were defined when the flight was started
     for (const ship of ships) {
@@ -81,13 +123,76 @@ export const flightInputs = {
         null
       );
       if (!shipTemplate) continue;
+      let position: Omit<PositionComponent, "init"> = {
+        x: 0,
+        y: 0,
+        z: 0,
+        type: "interstellar",
+        parentId: null,
+      };
+      if (ship.startingPoint) {
+        context.flight.ecs.entities.forEach(e => {
+          try {
+            if (!ship.startingPoint) throw new Error("No starting point");
+            const key = `${ship.startingPoint.pluginId}-${ship.startingPoint.solarSystemId}-${ship.startingPoint.objectId}`;
+            const startingEntity = solarSystemMap[key];
+            if (!startingEntity)
+              throw new Error(`Could not find entity for ${key}`);
+            if (!startingEntity.components.satellite)
+              throw new Error(`${key} is not a satellite`);
+            let origin = new Vector3();
+            if (startingEntity.components.satellite.parentId) {
+              const parent = context.flight?.ecs.getEntityById(
+                startingEntity.components.satellite.parentId
+              );
+              if (parent?.components.satellite)
+                origin = getOrbitPosition(parent.components.satellite);
+            }
+            const objectPosition = startingEntity.components?.position ||
+              (startingEntity.components?.satellite &&
+                getOrbitPosition({
+                  ...startingEntity.components.satellite,
+                  origin,
+                })) || {
+                x: -0.5 * Math.random() * 100000000,
+                y: -0.5 * Math.random() * 10000,
+                z: -0.5 * Math.random() * 100000000,
+              };
+            const startObjectScale =
+              startingEntity.components?.isPlanet?.radius ||
+              (startingEntity.components.size &&
+                Math.max(
+                  startingEntity.components.size.height,
+                  startingEntity.components.size.length,
+                  startingEntity.components.size.width
+                ) / 1000) ||
+              1;
+            const distanceVector = new Vector3(
+              startObjectScale * 2 + (Math.random() - 0.5) * startObjectScale,
+              0,
+              startObjectScale * 2 + (Math.random() - 0.5) * startObjectScale
+            );
+            const parentSystem = getPlanetSystem(context, startingEntity);
+            position = {
+              x: objectPosition.x + distanceVector.x,
+              y: objectPosition.y,
+              z: objectPosition.z + distanceVector.z,
+              type: "solar",
+              parentId: parentSystem.id,
+            };
+            // TODO May 18 2022 Once docking gets sorted out, make it so the ship can start out docked with a starbase.
+          } catch (e) {
+            if (e instanceof Error) {
+              console.error(e);
+            }
+          }
+        });
+      }
       const {ship: shipEntity, shipSystems} = spawnShip(
         shipTemplate,
         {
           name: ship.shipName,
-          // TODO November 16, 2021 - Implement the position once the
-          // universe is implemented
-          position: {x: 0, y: 0, z: 0},
+          position,
           tags: ["player"],
         },
         context.server.plugins.filter(p =>

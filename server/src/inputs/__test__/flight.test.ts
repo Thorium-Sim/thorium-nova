@@ -93,4 +93,71 @@ describe("flight input", () => {
     expect(planetEntity).toBeDefined();
     expect(planetEntity?.components.identity?.name).toEqual(planet.name);
   });
+  it("should properly position the player ship in sandbox mode", async () => {
+    const mockDataContext = createMockDataContext();
+    mockDataContext.database.flight = null;
+    // Shim Math.random
+    const oldRandom = Math.random;
+    Math.random = () => 0.5;
+    // Create some star map object plugins
+    const solarSystem = solarSystemsPluginInputs.pluginSolarSystemCreate(
+      mockDataContext,
+      {
+        pluginId: "Test Plugin",
+        position: {x: 1, y: 2, z: 3},
+      }
+    );
+    const star = starPluginInputs.pluginStarCreate(mockDataContext, {
+      pluginId: "Test Plugin",
+      solarSystemId: solarSystem.solarSystemId,
+      spectralType: "G",
+    });
+    const planet = planetPluginInputs.pluginPlanetCreate(mockDataContext, {
+      pluginId: "Test Plugin",
+      solarSystemId: solarSystem.solarSystemId,
+      planetType: "M",
+    });
+
+    expect(planet.satellite).toMatchInlineSnapshot(`
+      Object {
+        "axialTilt": 0,
+        "eccentricity": 0,
+        "inclination": 0,
+        "orbitalArc": 180,
+        "parentId": "Eta Giclas",
+        "semiMajorAxis": 228643390,
+        "showOrbit": true,
+      }
+    `);
+
+    const flight = await flightInputs.flightStart(mockDataContext, {
+      flightName: "Test Flight",
+      ships: [
+        {
+          shipName: "Test Ship",
+          shipTemplate: {pluginId: "Test Plugin", shipId: "Test Template"},
+          crewCount: 1,
+          startingPoint: {
+            pluginId: "Test Plugin",
+            type: "planet",
+            solarSystemId: solarSystem.solarSystemId,
+            objectId: planet.name,
+          },
+        },
+      ],
+    });
+    Math.random = oldRandom;
+    expect(mockDataContext.flight).toBeDefined();
+    if (!mockDataContext.flight) throw new Error("No flight created");
+
+    expect(flight.playerShips[0].components.position).toMatchInlineSnapshot(`
+      PositionComponent {
+        "parentId": 50000,
+        "type": "solar",
+        "x": -228630890,
+        "y": 0,
+        "z": 12500.000000027532,
+      }
+    `);
+  });
 });

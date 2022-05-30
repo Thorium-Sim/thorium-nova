@@ -15,13 +15,34 @@ export function spawnSolarSystem(systemPlugin: SolarSystemPlugin) {
 
   // Spawn all the stars and planets
   const stars = systemPlugin.stars.map(star => {
-    return spawnStar(star, system.id);
+    return {
+      pluginId: systemPlugin.pluginName,
+      pluginSystemId: systemPlugin.name,
+      objectId: star.name,
+      type: "star" as const,
+      entity: spawnStar(star, system.id),
+    };
   });
   const planets = systemPlugin.planets.map(planet => {
-    return spawnPlanet(planet, system.id);
+    return {
+      pluginId: systemPlugin.pluginName,
+      pluginSystemId: systemPlugin.name,
+      objectId: planet.name,
+      type: "planet" as const,
+      entity: spawnPlanet(planet, system.id),
+    };
   });
 
-  return [system, ...stars, ...planets];
+  return [
+    {
+      pluginSystemId: systemPlugin.name,
+      pluginId: systemPlugin.pluginName,
+      type: "system" as const,
+      entity: system,
+    },
+    ...stars,
+    ...planets,
+  ];
 }
 
 function spawnStar(star: StarPlugin, systemId: number) {
@@ -50,6 +71,7 @@ function spawnPlanet(planet: PlanetPlugin, systemId: number) {
     ...planet.satellite,
     parentId: systemId,
   });
+
   planetEntity.addComponent("temperature", {temperature: planet.temperature});
   planetEntity.addComponent("population", {count: planet.population});
 
