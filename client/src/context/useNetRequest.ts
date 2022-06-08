@@ -29,7 +29,7 @@ export async function netRequest<
     },
     body: JSON.stringify(body),
   }).then(res => res.json());
-  if (result.error) {
+  if (result?.error) {
     throw new Error(result.error);
   }
 
@@ -61,7 +61,6 @@ export function useNetRequest<
       cacheTime: Infinity,
     }
   );
-
   useRequestSub({requestName, params});
 
   const mockData = useContext(MockNetRequestContext);
@@ -77,6 +76,5 @@ export function useNetRequest<
   }, [netRequestQuery.data]);
 
   if (mockData) return mockData[requestName];
-
   return netRequestQuery.data as any;
 }

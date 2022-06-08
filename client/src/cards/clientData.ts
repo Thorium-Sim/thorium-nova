@@ -7,7 +7,7 @@ import {staticStations} from "server/src/classes/Station";
 
 // This file is used for any subscriptions which all clients
 // make, regardless of what cards they have.
-export const subscriptions = {
+export const requests = {
   thorium: (context: DataContext) => {
     const hasHost = Object.values(context.server.clients).some(
       client => client.isHost && client.connected
@@ -16,8 +16,13 @@ export const subscriptions = {
       hasHost,
     };
   },
-  client: (context: DataContext, params: {clientId: string}) => {
-    if (params && params.clientId !== context.clientId) throw null;
+  client: (
+    context: DataContext,
+    params: {},
+    publishParams: {clientId: string}
+  ) => {
+    if (publishParams && publishParams.clientId !== context.clientId)
+      throw null;
 
     const {id, name, connected, isHost} =
       context.server.clients[context.clientId];
@@ -34,17 +39,32 @@ export const subscriptions = {
     const {date, name, paused} = flight;
     return {date, name, paused};
   },
-  ship(context: DataContext, params: {shipId: number} | {clientId: string}) {
-    if (params) {
-      if ("shipId" in params && params.shipId !== context.flightClient?.shipId)
+  ship(
+    context: DataContext,
+    params: {},
+    publishParams: {shipId: number} | {clientId: string}
+  ) {
+    if (publishParams) {
+      if (
+        "shipId" in publishParams &&
+        publishParams.shipId !== context.flightClient?.shipId
+      )
         throw null;
-      if ("clientId" in params && params.clientId !== context.clientId)
+      if (
+        "clientId" in publishParams &&
+        publishParams.clientId !== context.clientId
+      )
         throw null;
     }
     return context.ship?.toJSON() as Entity;
   },
-  station(context: DataContext, params: {clientId: string}): Station {
-    if (params && params.clientId !== context.clientId) throw null;
+  station(
+    context: DataContext,
+    params: {},
+    publishParams: {clientId: string}
+  ): Station {
+    if (publishParams && publishParams.clientId !== context.clientId)
+      throw null;
     if (context.flightClient?.stationOverride)
       return context.flightClient.stationOverride;
     const station = staticStations
@@ -54,8 +74,9 @@ export const subscriptions = {
       ) as unknown as Station;
     return station || null;
   },
-  theme(context: DataContext, params: {clientId: string}) {
-    if (params && params.clientId !== context.clientId) throw null;
+  theme(context: DataContext, params: {}, publishParams: {clientId: string}) {
+    if (publishParams && publishParams.clientId !== context.clientId)
+      throw null;
     const themeObj = context.server.plugins
       .filter(plugin => context.flight?.pluginIds.includes(plugin.id))
       .reduce((acc: null | ThemePlugin, plugin) => {

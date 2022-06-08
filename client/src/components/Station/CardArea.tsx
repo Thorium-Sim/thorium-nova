@@ -5,9 +5,9 @@ import {ComponentType, Fragment, Suspense, useState} from "react";
 import {ErrorBoundary} from "react-error-boundary";
 import {Transition} from "@headlessui/react";
 import {CardProps} from "./CardProps";
-import {useClientData} from "client/src/context/useCardData";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 import CardProvider from "client/src/context/CardContext";
+import {useNetRequest} from "client/src/context/useNetRequest";
 
 const CardError = () => {
   return (
@@ -33,9 +33,10 @@ const transitionProps = {
 };
 
 export const CardArea: React.FC<{
-  card: ReturnType<typeof useClientData>["station"]["cards"][0];
+  card: {component: string};
 }> = ({card}) => {
-  const {client, station} = useClientData();
+  const client = useNetRequest("client");
+  const station = useNetRequest("station");
   const CardComponents = station.cards.map(card => ({
     ...card,
     CardComponent: Cards[card.component as keyof typeof Cards],
@@ -69,7 +70,7 @@ const CardRenderer = ({
   id: string;
   currentCardId: string;
 }) => {
-  const {client} = useClientData();
+  const client = useNetRequest("client");
   const allowCard = Boolean(client.loginName) && !client.offlineState;
   const [cardLoaded, setCardLoaded] = useState(false);
   const show = allowCard && currentCardId === id;

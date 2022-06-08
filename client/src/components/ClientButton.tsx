@@ -1,10 +1,11 @@
-import {useClientData} from "../context/useCardData";
 import {usePrompt} from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import {netSend} from "../context/netSend";
+import {useNetRequest} from "../context/useNetRequest";
 
 export function ClientButton() {
-  const clientData = useClientData();
+  const client = useNetRequest("client");
+
   const prompt = usePrompt();
   return (
     <div className="flex items-center gap-4">
@@ -20,7 +21,7 @@ export function ClientButton() {
           }
         }}
       >
-        {clientData?.client.name || ""}
+        {client.name || ""}
       </Button>
     </div>
   );

@@ -48,7 +48,6 @@ export default defineConfig(async () => {
       proxy: {
         "/netSend": "http://localhost:3001",
         "/netRequest": "http://localhost:3001",
-        "/cardRequest": "http://localhost:3001",
         "/plugins": "http://localhost:3001",
       },
     },

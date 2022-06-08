@@ -1,5 +1,4 @@
 import {NavLink} from "react-router-dom";
-import {useClientData} from "../context/useCardData";
 import Button from "@thorium/ui/Button";
 import {Disclosure} from "@headlessui/react";
 import {netSend} from "../context/netSend";
@@ -7,12 +6,13 @@ import {useNetRequest} from "../context/useNetRequest";
 
 export const WelcomeButtons = ({className}: {className?: string}) => {
   const flights = useNetRequest("flights");
-  const clientData = useClientData();
+  const flight = useNetRequest("flight");
+  const client = useNetRequest("client");
   return (
     <div
       className={`${className} flex flex-col justify-end self-end space-y-4 max-w-md h-full`}
     >
-      {clientData.flight ? (
+      {flight ? (
         <>
           <NavLink className="btn btn-primary btn-outline" to="/flight">
             Go To Flight Lobby
@@ -31,7 +31,7 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
         </>
       ) : (
         <>
-          {clientData.client.isHost && (
+          {client.isHost && (
             <>
               <NavLink
                 className="btn btn-primary btn-outline"
@@ -66,7 +66,7 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
           )}
 
           <Button className="btn btn-warning btn-outline">Join a Server</Button>
-          {clientData.client.isHost && (
+          {client.isHost && (
             <NavLink className="btn btn-notice btn-outline" to="/config">
               Configure Plugins
             </NavLink>

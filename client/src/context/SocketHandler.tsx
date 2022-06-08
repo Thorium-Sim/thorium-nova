@@ -3,16 +3,12 @@ import {useEffect} from "react";
 import {useErrorHandler} from "react-error-boundary";
 import {useQueryClient} from "react-query";
 import {NetResponseData} from "../hooks/useDataConnection";
-import {DataCardNames, SubscriptionNames} from "../utils/cardData";
 import {FaSpinner} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
 import {ClientSocket} from "../utils/clientSocket";
+import {netRequest} from "./useNetRequest";
 
-type CardData =
-  | string
-  | number
-  | Object
-  | {card: DataCardNames; data: Record<SubscriptionNames, any>};
+type CardData = string | number | Object;
 
 export function SocketHandler({
   socket,
@@ -31,23 +27,6 @@ export function SocketHandler({
 
   useEffect(() => {
     if (socket) {
-      const handleCardData = (data: CardData) => {
-        if (typeof data !== "object") {
-          throw new Error(`cardData data must be an object. Got "${data}"`);
-        }
-        if (!("card" in data && "data" in data)) {
-          const dataString = JSON.stringify(data, null, 2);
-          throw new Error(
-            `cardData data must include a card name and a data object. Got ${dataString}`
-          );
-        }
-        const clientId = getTabIdSync();
-        const queryKey = [clientId, "cardData", data.card];
-        queryClient.setQueryData(queryKey, oldData =>
-          typeof oldData === "object" ? {...oldData, ...data.data} : data.data
-        );
-      };
-
       function handleNetRequestData(data: NetResponseData) {
         try {
           if (typeof data !== "object") {
@@ -88,11 +67,9 @@ export function SocketHandler({
       function handleReady() {
         queryClient.refetchQueries();
       }
-      socket.on("cardData", handleCardData);
       socket.on("netRequestData", handleNetRequestData);
       socket.on("ready", handleReady);
       return () => {
-        socket.off("cardData", handleCardData);
         socket.off("netRequestData", handleNetRequestData);
         socket.off("ready", handleReady);
       };

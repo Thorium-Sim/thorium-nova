@@ -15,7 +15,7 @@ export class PositionComponent extends Component {
   static id: "position" = "position";
 
   /** If the type is solar, the ID of the solar system entity; if ship, the ID of the ship entity */
-  parentId: string | null = null;
+  parentId: number | null = null;
   type: "interstellar" | "solar" | "ship" = "interstellar";
 
   x: number = 0;

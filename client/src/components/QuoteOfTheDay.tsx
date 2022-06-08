@@ -207,6 +207,12 @@ const quotes = [
   "In the simple lives the beautiful.",
   // Steve Jobs
   "The most powerful person in the world is the storyteller.",
+  // Hey Now
+  "Imagination calling mirrors for you",
+  // Albert Einstein
+  "The only reason for time is so that everything doesn't happen at once.",
+  "Reality is merely an illusion, albeit a very persistent one.",
+  "The true sign of intelligence is not knowledge but imagination.",
 ];
 
 const QuoteOfTheDay = () => {

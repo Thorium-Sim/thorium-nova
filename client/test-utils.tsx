@@ -1,17 +1,8 @@
 import React, {Suspense} from "react";
 import {render as rtlRender, RenderOptions} from "@testing-library/react";
 import {MemoryRouter as Router} from "react-router-dom";
-import {
-  MockCardDataContext,
-  MockClientDataContext,
-} from "./src/context/useCardData";
-import {
-  CardDataFunctions,
-  DataCardNames,
-  GetSubscriptionReturns,
-} from "./src/utils/cardData";
 import {MockNetRequestContext} from "./src/context/useNetRequest";
-import {AllRequests} from "server/src/netRequests";
+import {AllRequestReturns} from "server/src/netRequests";
 import {QueryClient, QueryClientProvider} from "react-query";
 import {ThoriumContext} from "./src/context/ThoriumContext";
 
@@ -35,19 +26,16 @@ global.fetch = jest.fn((path: string, {body}: {body: FormData}) => {
   });
 }) as any;
 
-interface OptionsInterface<CardName extends DataCardNames> {
+interface OptionsInterface {
   initialRoutes?: string[];
-  cardData?: Required<
-    GetSubscriptionReturns<CardDataFunctions[CardName]["subscriptions"]>
-  >;
-  netRequestData?: AllRequests;
+  netRequestData?: Partial<AllRequestReturns>;
 }
 
 const queryClient = new QueryClient();
 
-async function render<CardName extends DataCardNames = "allData">(
+async function render(
   ui: Parameters<typeof rtlRender>[0],
-  options?: Omit<RenderOptions, "queries"> & OptionsInterface<CardName>
+  options?: Omit<RenderOptions, "queries"> & OptionsInterface
 ) {
   const {initialRoutes = ["/"]} = options || {};
   const Wrapper: React.FC = ({children}) => {
@@ -55,7 +43,7 @@ async function render<CardName extends DataCardNames = "allData">(
       <Suspense fallback={<p>Suspended in test</p>}>
         <ThoriumContext.Provider value={{} as any}>
           <QueryClientProvider client={queryClient}>
-            <MockClientDataContext.Provider
+            <MockNetRequestContext.Provider
               value={{
                 client: {
                   id: "Test",
@@ -92,14 +80,11 @@ async function render<CardName extends DataCardNames = "allData">(
                   ],
                 } as any,
                 theme: null,
+                ...options?.netRequestData,
               }}
             >
-              <MockNetRequestContext.Provider value={options?.netRequestData}>
-                <MockCardDataContext.Provider value={options?.cardData}>
-                  <Router initialEntries={initialRoutes}>{children}</Router>
-                </MockCardDataContext.Provider>
-              </MockNetRequestContext.Provider>
-            </MockClientDataContext.Provider>
+              <Router initialEntries={initialRoutes}>{children}</Router>
+            </MockNetRequestContext.Provider>
           </QueryClientProvider>
         </ThoriumContext.Provider>
       </Suspense>

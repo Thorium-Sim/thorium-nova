@@ -15,6 +15,7 @@ import QuickStartProvider from "./components/FlightQuickStart/FlightQuickStartCo
 import FlightQuickStart from "./components/FlightQuickStart";
 import CrewConfig from "./components/FlightQuickStart/CrewConfig";
 import ShipConfig from "./components/FlightQuickStart/ShipConfig";
+import MissionConfig from "./components/FlightQuickStart/MissionConfig";
 import {netRequest} from "./context/useNetRequest";
 import {ComponentDemo} from "./cards";
 
@@ -80,7 +81,14 @@ function AppRoutes() {
               }
             />
 
-            <Route path="mission" element={null} />
+            <Route
+              path="mission"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <MissionConfig />
+                </Suspense>
+              }
+            />
           </Route>
         </Route>
         <Route path="/flight" element={<FlightLobby />} />

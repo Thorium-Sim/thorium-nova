@@ -8,6 +8,7 @@ import bg from "../images/background.jpg";
 import ToastContainer from "./ToastContext";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 import {IssueTrackerProvider} from "../components/IssueTracker";
+import {useRequestSub} from "./useRequestSub";
 
 const Fallback: React.FC<FallbackProps> = ({error}) => {
   return (
@@ -50,6 +51,7 @@ export default function AppContext({children}: {children: ReactNode}) {
             <ThoriumProvider>
               <ErrorBoundary FallbackComponent={Fallback}>
                 <Suspense fallback={<LoadingSpinner />}>
+                  <Preload />
                   <AlertDialog>
                     <IssueTrackerProvider>{children}</IssueTrackerProvider>
                     <ToastContainer />
@@ -62,4 +64,16 @@ export default function AppContext({children}: {children: ReactNode}) {
       </Layout>
     </StrictMode>
   );
+}
+
+function Preload() {
+  useRequestSub({requestName: "theme"});
+  useRequestSub({requestName: "effects"});
+  useRequestSub({requestName: "ship"});
+  useRequestSub({requestName: "flight"});
+  useRequestSub({requestName: "station"});
+  useRequestSub({requestName: "client"});
+  useRequestSub({requestName: "thorium"});
+
+  return null;
 }

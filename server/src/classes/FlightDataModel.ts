@@ -71,23 +71,6 @@ export class FlightDataModel extends FSDataStore {
     // TODO: Flight Reset Handling
   }
 
-  activatePlugins(initialLoad?: boolean): void {
-    this.pluginIds.forEach(pluginId => {
-      const plugin = this.serverDataModel.plugins.find(
-        plugin => plugin.id === pluginId
-      );
-      if (!plugin) return;
-      if (initialLoad) {
-        // Create entities for the universe objects
-        plugin.aspects.solarSystems.forEach(solarSystem => {
-          const entities = spawnSolarSystem(solarSystem);
-          entities.forEach(entity => {
-            this.ecs.addEntity(entity);
-          });
-        });
-      }
-    });
-  }
   // Helper Getters
   /**
    * All player ships in the universe.
