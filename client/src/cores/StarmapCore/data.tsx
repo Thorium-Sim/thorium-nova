@@ -1,7 +1,7 @@
 import {DataContext} from "server/src/utils/DataContext";
 import {Entity} from "server/src/utils/ecs";
 
-export const subscriptions = {
+export const requests = {
   starmapSystems: (context: DataContext) => {
     if (!context.flight) return [];
     const data = context.flight.ecs.entities.reduce(

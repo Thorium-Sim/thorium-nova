@@ -1,5 +1,4 @@
 import {InterstellarMap} from "client/src/components/Starmap/InterstellarMap";
-import useCardData from "client/src/context/useCardData";
 import SystemMarker from "client/src/components/Starmap/SystemMarker";
 import StarmapCanvas from "client/src/components/Starmap/StarmapCanvas";
 import {useContext, useEffect, useMemo, useRef} from "react";
@@ -9,6 +8,7 @@ import {ErrorBoundary} from "react-error-boundary";
 import type {Entity} from "server/src/utils/ecs";
 import {useGLTF, useTexture} from "@react-three/drei";
 import {
+  CanvasTexture,
   Color,
   FrontSide,
   Group,
@@ -19,14 +19,19 @@ import {
 } from "three";
 import {useFrame} from "@react-three/fiber";
 import {ThoriumContext} from "client/src/context/ThoriumContext";
+import {useNetRequest} from "client/src/context/useNetRequest";
+import {useDataStream} from "client/src/context/useDataStream";
+import {createAsset} from "use-asset";
 
 export function StarmapCore() {
-  const {starmapSystems, starmapShips} = useCardData<"StarmapCore">();
+  const starmapShips = useNetRequest("starmapShips");
+  const starmapSystems = useNetRequest("starmapSystems");
 
+  useDataStream({});
   useEffect(() => {
     useStarmapStore.setState({viewingMode: "core"});
   }, []);
-  console.log(useStarmapStore(state => state.selectedObjectId));
+
   return (
     <StarmapCanvas>
       <ambientLight intensity={0.2} />
@@ -78,7 +83,14 @@ function StarmapShip(props: Pick<Entity, "id" | "components">) {
   // const lineRef = useRef<Line2>(null);
 
   useFrame(() => {
-    console.log(context?.SI.calcInterpolation("x y z"));
+    if (!group.current) return;
+    const state = context?.interpolate(props.id);
+    if (!state) {
+      group.current.visible = false;
+      return;
+    }
+    group.current.visible = true;
+    group.current.position.set(state.x, state.y, state.z);
   });
   return (
     <group>
@@ -97,6 +109,14 @@ function StarmapShip(props: Pick<Entity, "id" | "components">) {
   /> */}
       <group
         ref={group}
+        onPointerOver={() => {
+          // set the cursor to pointer
+          document.body.style.cursor = "pointer";
+        }}
+        onPointerOut={() => {
+          // set the cursor to default
+          document.body.style.cursor = "default";
+        }}
         // TODO May 24, 2022 - This is for making it possible to drag ships around
         // {...functions}
         // onPointerDown={e => {
@@ -123,15 +143,17 @@ function StarmapShip(props: Pick<Entity, "id" | "components">) {
         //   functions.onPointerDown?.(e);
         // }}
       >
-        <group ref={shipSprite}>
-          {props.components.isShip?.assets.logo && (
-            <ShipSprite
-              id={props.id}
-              color={"white"}
-              spriteAsset={props.components.isShip?.assets.logo}
-            />
-          )}
-        </group>
+        <Suspense fallback={null}>
+          <group ref={shipSprite}>
+            {props.components.isShip?.assets.logo && (
+              <ShipSprite
+                id={props.id}
+                color={"red"}
+                spriteAsset={props.components.isShip?.assets.logo}
+              />
+            )}
+          </group>
+        </Suspense>
         <group ref={shipMesh}>
           {/* <axesHelper args={[3]} /> */}
           <primitive object={model} rotation={[Math.PI / 2, Math.PI, 0]} />
@@ -169,9 +191,39 @@ function useShipModel(modelAsset: string | undefined) {
   return scene;
 }
 
+const maskTextureAsset = createAsset(async image => {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  await new Promise<void>((resolve, reject) => {
+    const img = new Image();
+    img.src = image;
+    img.onload = () => {
+      if (!ctx) return reject();
+      const scale = 4;
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(
+        0,
+        0,
+        img.width * scale,
+        img.height * scale
+      );
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        data[i] = data[i + 1] = data[i + 2] = data[i + 3];
+        data[i + 3] = 255;
+      }
+      ctx.putImageData(imageData, 0, 0);
+      resolve();
+    };
+  });
+  return new CanvasTexture(canvas);
+});
+
 const ShipSprite = ({
   id,
-  color = "white",
+  color = "red",
   spriteAsset,
 }: {
   id: string | number;
@@ -179,8 +231,9 @@ const ShipSprite = ({
   spriteAsset: string;
 }) => {
   // TODO: Replace with a ship icon
-  const spriteMap = useTexture(spriteAsset);
-  const scale = 1 / 25;
+  const spriteMap = maskTextureAsset.read(spriteAsset);
+  useTexture;
+  const scale = 1 / 50;
   const ref = useRef<Sprite>();
   useFrame(() => {
     const isSelected = false;
@@ -196,9 +249,10 @@ const ShipSprite = ({
     <sprite ref={ref} scale={[scale, scale, scale]}>
       <spriteMaterial
         attach="material"
-        map={spriteMap}
+        alphaMap={spriteMap}
         color={color}
         sizeAttenuation={false}
+        needsUpdate={true}
       ></spriteMaterial>
     </sprite>
   );

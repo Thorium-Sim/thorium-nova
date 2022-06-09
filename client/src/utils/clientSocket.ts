@@ -1,10 +1,11 @@
 import {SnapshotInterpolation, Types} from "@geckos.io/snapshot-interpolation";
+import {InterpolatedSnapshot} from "@geckos.io/snapshot-interpolation/lib/types";
 import {decode} from "@msgpack/msgpack";
 import EventEmitter from "eventemitter3";
 import ReconnectingWebSocket from "reconnecting-websocket";
+import {SERVER_FPS} from "server/src/utils/constants";
 
-const serverFPS = 3;
-export let SI = new SnapshotInterpolation(serverFPS);
+export let SI = new SnapshotInterpolation(SERVER_FPS);
 
 export class ClientSocket extends EventEmitter {
   constructor(private socket: ReconnectingWebSocket) {
@@ -20,7 +21,6 @@ export class ClientSocket extends EventEmitter {
             if ("type" in data) {
               this.emit(data.type, data.data);
             } else {
-              console.log(data);
               SI.snapshot.add(data);
             }
           }
