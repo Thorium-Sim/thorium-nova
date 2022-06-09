@@ -148,7 +148,8 @@ function StarmapShip(props: Pick<Entity, "id" | "components">) {
             {props.components.isShip?.assets.logo && (
               <ShipSprite
                 id={props.id}
-                color={"red"}
+                // TODO June 9, 2022 - This color should represent the faction, with a toggle to make it show IFF for the current ship
+                color={"rebeccapurple"}
                 spriteAsset={props.components.isShip?.assets.logo}
               />
             )}
@@ -232,7 +233,7 @@ const ShipSprite = ({
 }) => {
   // TODO: Replace with a ship icon
   const spriteMap = maskTextureAsset.read(spriteAsset);
-  useTexture;
+
   const scale = 1 / 50;
   const ref = useRef<Sprite>();
   useFrame(() => {
