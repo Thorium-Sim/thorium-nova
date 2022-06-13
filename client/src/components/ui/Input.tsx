@@ -1,7 +1,7 @@
-import React, {forwardRef} from "react";
+import React, {forwardRef, ReactNode} from "react";
 
 interface CommonProps {
-  label: string;
+  label: ReactNode;
   labelHidden?: boolean;
   isInvalid?: boolean;
   invalidMessage?: string;

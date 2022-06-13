@@ -6,6 +6,7 @@ const links = {
   assets: "Assets",
   shipMap: "Ship Map",
   systems: "Systems",
+  cargo: "Cargo",
 };
 
 export function SettingsList() {

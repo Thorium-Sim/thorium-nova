@@ -6,6 +6,7 @@ import {pubsub} from "server/src/utils/pubsub";
 import {getPlugin} from "../utils";
 import {thoriumPath} from "server/src/utils/appPaths";
 import inputAuth from "server/src/utils/inputAuth";
+import {CubicMeter} from "server/src/utils/unitTypes";
 
 export const shipsPluginInputs = {
   pluginShipCreate(
@@ -50,6 +51,8 @@ export const shipsPluginInputs = {
       side?: Blob | string;
       vanity?: Blob | string;
       theme?: {themeId: string; pluginId: string};
+      cargoContainers?: number;
+      cargoContainerVolume?: CubicMeter;
     }
   ) {
     inputAuth(context);
@@ -93,6 +96,24 @@ export const shipsPluginInputs = {
       );
       if (!theme) throw new Error("Theme not found");
       ship.theme = params.theme;
+    }
+
+    if (typeof params.cargoContainers === "number") {
+      if (isNaN(params.cargoContainers) || params.cargoContainers <= 0) {
+        throw new Error("Cargo Containers must be a number greater than 0");
+      }
+      ship.cargoContainers = params.cargoContainers;
+    }
+    if (typeof params.cargoContainerVolume === "number") {
+      if (
+        isNaN(params.cargoContainerVolume) ||
+        params.cargoContainerVolume <= 0
+      ) {
+        throw new Error(
+          "Cargo Container Volume must be a number greater than 0"
+        );
+      }
+      ship.cargoContainerVolume = params.cargoContainerVolume;
     }
 
     if (params.name !== ship.name && params.name) {
