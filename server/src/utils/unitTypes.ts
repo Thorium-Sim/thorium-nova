@@ -41,6 +41,8 @@ export function lightYearToLightMinute(len: LightYear) {
   return len * (60 * 24 * 365.25);
 }
 
+export type CubicMeter = Flavor<number, "cubicMeter">;
+
 export type Kilograms = Flavor<number, "kilograms">;
 /**
  * Mass compared to the sun eg. 1 solar mass = the mass of the sun
@@ -72,3 +74,6 @@ export class Coordinates<T extends number> {
   y: T = 0 as T;
   z: T = 0 as T;
 }
+
+export type PowerUnit = Flavor<number, "powerUnit">;
+export type PowerUnitPerSecond = Flavor<number, "powerUnitPerSecond">;

@@ -188,6 +188,7 @@ export const decksPluginInputs = {
       | {isRoom: boolean}
       | {icon: File | string}
       | {radius: number}
+      | {volume: number}
       | {flags: NodeFlag[]}
     )
   ) {
@@ -224,6 +225,12 @@ export const decksPluginInputs = {
     }
     if ("flags" in params) {
       node.flags = params.flags;
+    }
+    if ("volume" in params) {
+      if (params.volume < 0) {
+        node.volume = 0;
+      }
+      node.volume = params.volume;
     }
 
     pubsub.publish("pluginShip", {
