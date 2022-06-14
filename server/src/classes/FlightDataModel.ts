@@ -106,7 +106,7 @@ export class FlightDataModel extends FSDataStore {
       paused: this.paused,
       date: this.date,
       pluginIds: this.pluginIds,
-      entities: this.ecs.entities,
+      entities: this.ecs.entities.map(e => e.toJSON()),
       clients: Object.fromEntries(
         Object.entries(this.clients).map(([id, client]) => [id, client])
       ),

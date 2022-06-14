@@ -194,6 +194,7 @@ export const flightInputs = {
           name: ship.shipName,
           position,
           tags: ["player"],
+          playerShip: true,
         },
         context.server.plugins.filter(p =>
           context.flight?.pluginIds.includes(p.id)
@@ -201,7 +202,6 @@ export const flightInputs = {
       );
 
       shipSystems.forEach(s => context.flight?.ecs.addEntity(s));
-      shipEntity.addComponent("isPlayerShip");
       let theme = ship.theme || null;
       if (!theme) {
         theme = activePlugins.reduce(
