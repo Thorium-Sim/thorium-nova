@@ -26,12 +26,10 @@ export function calculateShipMapPath(
   graph: ShipMapGraph,
   start: number,
   goal: number,
-  options = {cost: false, avoid: [], trim: false, reverse: false}
-) {
+  options = {avoid: [], trim: false, reverse: false}
+): number[] | null {
   // Don't run when we don't have nodes set
   if (!graph.size) {
-    if (options.cost) return {path: null, cost: 0};
-
     return null;
   }
 
@@ -106,8 +104,6 @@ export function calculateShipMapPath(
 
   // Return null when no path can be found
   if (!path.length) {
-    if (options.cost) return {path: null, cost: 0};
-
     return null;
   }
 
@@ -126,14 +122,6 @@ export function calculateShipMapPath(
   // from `start` to `goal`
   if (!options.reverse) {
     path = path.reverse();
-  }
-
-  // Return an object if we also want the cost
-  if (options.cost) {
-    return {
-      path,
-      cost: totalCost,
-    };
   }
 
   return path;

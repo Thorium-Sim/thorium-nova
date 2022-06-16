@@ -4,10 +4,14 @@
  */
 import {DataStreamSystem} from "./DataStreamSystem";
 import {ImpulseSystem} from "./ImpulseSystem";
+import {PassengerDestinationSystem} from "./PassengerDestinationSystem";
+import {PassengerMovementSystem} from "./PassengerMovementSystem";
 import {RandomMovementSystem} from "./RandomMovementSystem";
 import {TimerSystem} from "./TimerSystem";
 
 const systems = [
+  PassengerDestinationSystem,
+  PassengerMovementSystem,
   TimerSystem,
   ImpulseSystem,
   RandomMovementSystem,

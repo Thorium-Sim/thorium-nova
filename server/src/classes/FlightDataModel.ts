@@ -5,7 +5,6 @@ import systems from "../systems";
 import {FlightClient} from "./FlightClient";
 import {FSDataStore, FSDataStoreOptions} from "@thorium/db-fs";
 import ShipPlugin from "./Plugins/Ship";
-import {spawnSolarSystem} from "../spawners/solarSystem";
 
 export class FlightDataModel extends FSDataStore {
   static INTERVAL = 1000 / 60;

@@ -19,6 +19,8 @@ type DeckNodeId = Flavor<number, "deckNodeId">;
 export class DeckNode {
   id: DeckNodeId;
   name: string;
+  /** Only used for in-flight use, not in plugin configuration */
+  deckIndex!: number;
   x: number;
   y: number;
   isRoom: boolean;
@@ -28,6 +30,7 @@ export class DeckNode {
   constructor(params: Partial<DeckNode>) {
     this.id = params.id || 0;
     this.name = params.name || "";
+    this.deckIndex = params.deckIndex!;
     this.x = params.x || 0;
     this.y = params.y || 0;
     this.isRoom = params.isRoom || false;
