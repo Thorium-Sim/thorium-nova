@@ -3,6 +3,18 @@ import {CubicMeter, PowerUnit} from "server/src/utils/unitTypes";
 import BasePlugin from "..";
 import {Aspect} from "../Aspect";
 
+export type InventoryFlags = Partial<{
+  fuel: {
+    /** How much power is released from one unit of fuel */
+    fuelDensity: PowerUnit;
+  };
+  coolant: {};
+  torpedoCasing: {};
+  torpedoWarhead: {};
+  probeCasing: {};
+  probeEquipment: {};
+  forCrew: {};
+}>;
 export default class InventoryPlugin extends Aspect {
   apiVersion = "inventory/v1" as const;
   kind = "inventory" as const;
@@ -19,18 +31,7 @@ export default class InventoryPlugin extends Aspect {
   // remaining!: number;
   tags!: string[];
   // TODO June 13, 2022 - We need to figure out some heuristics for automatically generating the inventory list on ships
-  flags!: Partial<{
-    fuel: {
-      /** How much power is released from one unit of fuel */
-      fuelDensity: PowerUnit;
-    };
-    coolant: {};
-    torpedoCasing: {};
-    torpedoWarhead: {};
-    probeCasing: {};
-    probeEquipment: {};
-    forCrew: {};
-  }>;
+  flags!: InventoryFlags;
   constructor(params: Partial<InventoryPlugin>, plugin: BasePlugin) {
     const name = generateIncrementedName(
       params.name || "New Inventory",
