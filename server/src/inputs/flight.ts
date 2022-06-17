@@ -241,6 +241,28 @@ export const flightInputs = {
     pubsub.publish("flight");
     return context.flight;
   },
+  spawnShip(context: DataContext) {
+    const shipTemplate = context.server.plugins[0].aspects.ships[0];
+    const {ship: shipEntity, shipSystems} = spawnShip(
+      shipTemplate,
+      {
+        name: "Test Ship",
+        position: {
+          x: 0,
+          y: 0,
+          z: 0,
+          type: "interstellar",
+          parentId: null,
+        },
+      },
+      context.server.plugins.filter(p =>
+        context.flight?.pluginIds.includes(p.id)
+      )
+    );
+    shipSystems.forEach(s => context.flight?.ecs.addEntity(s));
+    context.flight?.ecs.addEntity(shipEntity);
+    pubsub.publish("starmapShips");
+  },
   flightLoad(context: DataContext, params: {flightName: string}) {
     inputAuth(context);
     if (context.flight) return context.flight;

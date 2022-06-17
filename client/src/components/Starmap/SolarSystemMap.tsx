@@ -147,11 +147,15 @@ export function SolarSystemMenuButtons({
     });
     if (!doRemove) return;
 
-    await netSend("pluginStarDelete", {
-      pluginId,
-      solarSystemId,
-      starId: selectedObjectId,
-    });
+    if (typeof selectedObjectId === "string") {
+      await netSend("pluginStarDelete", {
+        pluginId,
+        solarSystemId,
+        starId: selectedObjectId,
+      });
+    } else {
+      // TODO: Delete objects from the flight director menubar? Maybe not...
+    }
 
     useStarmapStore.setState({
       selectedObjectId: null,

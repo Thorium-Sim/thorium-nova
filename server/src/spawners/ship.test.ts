@@ -30,7 +30,10 @@ describe("Ship Spawner", () => {
     if (!shipPlugin) throw new Error("Ship not found");
     const {ship, shipSystems} = spawnShip(
       shipPlugin,
-      {name: "Spawned Ship", position: {x: 10, y: 20, z: 30}},
+      {
+        name: "Spawned Ship",
+        position: {x: 10, y: 20, z: 30, type: "interstellar", parentId: null},
+      },
       dataContext.server.plugins
     );
     expect(ship.components.identity?.name).toEqual("Spawned Ship");

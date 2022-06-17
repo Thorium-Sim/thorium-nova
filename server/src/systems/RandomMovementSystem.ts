@@ -1,5 +1,6 @@
 import {Entity, System} from "../utils/ecs";
 
+const constant = 5000000;
 export class RandomMovementSystem extends System {
   test(entity: Entity) {
     return !!(entity.components.position && entity.components.velocity);
@@ -11,9 +12,9 @@ export class RandomMovementSystem extends System {
     const xSign = entity.components.position.x > 0 ? -1 : 1;
     const ySign = entity.components.position.y > 0 ? -1 : 1;
     const zSign = entity.components.position.z > 0 ? -1 : 1;
-    const accelerationX = Math.random() * xSign;
-    const accelerationY = Math.random() * ySign;
-    const accelerationZ = Math.random() * zSign;
+    const accelerationX = Math.random() * xSign * constant;
+    const accelerationY = Math.random() * ySign * constant;
+    const accelerationZ = Math.random() * zSign * constant;
     entity.components.velocity.x += accelerationX;
     entity.components.velocity.y += accelerationY;
     entity.components.velocity.z += accelerationZ;

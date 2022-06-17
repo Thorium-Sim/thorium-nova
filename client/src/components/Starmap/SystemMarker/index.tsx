@@ -6,7 +6,7 @@ import {MeshProps, useFrame} from "@react-three/fiber";
 import {useStarmapStore} from "../starmapStore";
 const SystemMarker: React.FC<
   {
-    systemId: string;
+    systemId: string | number;
     name: string;
     position: [number, number, number];
     draggable?: boolean;
