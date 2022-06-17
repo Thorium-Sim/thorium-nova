@@ -183,7 +183,7 @@ describe("PassengerMovementSystem", () => {
     ecs.update(16);
     expect(passenger.components.position).toMatchInlineSnapshot(`
       PositionComponent {
-        "parentId": 20000,
+        "parentId": 2,
         "type": "ship",
         "x": 2,
         "y": 1,
@@ -201,7 +201,7 @@ describe("PassengerMovementSystem", () => {
     update(2);
     expect(passenger.components.position).toMatchInlineSnapshot(`
       PositionComponent {
-        "parentId": 20000,
+        "parentId": 2,
         "type": "ship",
         "x": 2,
         "y": 1,
@@ -212,7 +212,7 @@ describe("PassengerMovementSystem", () => {
     update(22);
     expect(passenger.components.position).toMatchInlineSnapshot(`
       PositionComponent {
-        "parentId": 20000,
+        "parentId": 2,
         "type": "ship",
         "x": 2,
         "y": 1,
@@ -222,7 +222,7 @@ describe("PassengerMovementSystem", () => {
     update(4);
     expect(passenger.components.position).toMatchInlineSnapshot(`
       PositionComponent {
-        "parentId": 20000,
+        "parentId": 2,
         "type": "ship",
         "x": 1.2219398082404278,
         "y": 0.22193980824042775,
@@ -232,7 +232,7 @@ describe("PassengerMovementSystem", () => {
     update(4);
     expect(passenger.components.position).toMatchInlineSnapshot(`
       PositionComponent {
-        "parentId": 20000,
+        "parentId": 2,
         "type": "ship",
         "x": 1,
         "y": 0,
