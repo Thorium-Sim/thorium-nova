@@ -25,3 +25,4 @@ export * from "./satellite";
 export * from "./temperature";
 export * from "./population";
 export * from "./isInventory";
+export * from "./autopilot";

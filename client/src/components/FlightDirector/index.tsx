@@ -34,6 +34,14 @@ export default function FlightDirectorLayout() {
           <ErrorBoundary fallback={<></>}>
             <CoreFlexLayoutDropdown />
           </ErrorBoundary>
+          <Button
+            className="btn-xs btn-info btn-outline"
+            onClick={() => {
+              netSend("spawnShip");
+            }}
+          >
+            Spawn Ship
+          </Button>
           <div className="flex-1"></div>
           <LoginButton size="sm" />
         </Menubar>
