@@ -3,7 +3,7 @@ import create from "zustand";
 interface StarmapStore {
   viewingMode: "editor" | "core" | "station" | "viewscreen";
   skyboxKey: string;
-  selectedObjectId: string | null;
+  selectedObjectId: string | number | null;
   cameraControlsEnabled: boolean;
   setCameraControlsEnabled: (enabled: boolean) => void;
   hoveredPosition: [number, number, number] | null;

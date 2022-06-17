@@ -74,6 +74,15 @@ async function buildServer() {
       process.exit(1);
     });
   await bundleDefaultPlugin();
+  fs.mkdirSync("../dist/resources");
+  fs.copyFileSync(
+    "../desktop/resources/server.cert",
+    "../dist/resources/server.cert"
+  );
+  fs.copyFileSync(
+    "../desktop/resources/server.key",
+    "../dist/resources/server.key"
+  );
 }
 
 buildServer();

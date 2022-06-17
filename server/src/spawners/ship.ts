@@ -2,6 +2,7 @@ import {ECS, Entity} from "../utils/ecs";
 import type ShipPlugin from "../classes/Plugins/Ship";
 import {spawnShipSystem} from "./shipSystem";
 import BasePlugin from "../classes/Plugins";
+import {PositionComponent} from "../components/position";
 
 /*
 AlertLevelComponent,
@@ -22,7 +23,7 @@ export function spawnShip(
     name?: string;
     description?: string;
     registry?: string;
-    position: Coordinates;
+    position: Omit<PositionComponent, "init">;
     tags?: string[];
     assets?: Partial<InstanceType<typeof ShipPlugin>["assets"]>;
   },
