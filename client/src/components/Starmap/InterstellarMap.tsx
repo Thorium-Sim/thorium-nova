@@ -5,9 +5,12 @@ import {useRef, Suspense, useEffect} from "react";
 import {Box3, Camera, Vector3} from "three";
 import {useStarmapStore} from "client/src/components/Starmap/starmapStore";
 import {useNetRequest} from "client/src/context/useNetRequest";
-import SystemMarker from "client/src/components/Starmap/SystemMarker";
 import Starfield from "client/src/components/Starmap/Starfield";
-import {LightYear, lightYearToLightMinute} from "server/src/utils/unitTypes";
+import {
+  LightMinute,
+  LightYear,
+  lightYearToLightMinute,
+} from "server/src/utils/unitTypes";
 import {toast} from "client/src/context/ToastContext";
 import {netSend} from "client/src/context/netSend";
 import {useConfirm} from "@thorium/ui/AlertDialog";
@@ -22,12 +25,7 @@ const ACTION = CameraControlsClass.ACTION;
 
 const INTERSTELLAR_MAX_DISTANCE: LightYear = 2000;
 
-export function InterstellarMap() {
-  const {pluginId} = useParams() as {
-    pluginId: string;
-  };
-
-  const stars = useNetRequest("pluginSolarSystems", {pluginId});
+export function InterstellarMap({children}: {children: React.ReactNode}) {
   const controlsEnabled = useStarmapStore(s => s.cameraControlsEnabled);
   const cameraView = useStarmapStore(s => s.cameraView);
   const orbitControls = useRef<CameraControlsClass>(null);
@@ -85,15 +83,7 @@ export function InterstellarMap() {
           0xffffff,
         ]}
       />
-      {stars.map(star => (
-        <SystemMarker
-          key={star.name}
-          systemId={star.name}
-          position={Object.values(star.position) as [number, number, number]}
-          name={star.name}
-          draggable
-        />
-      ))}
+      {children}
     </Suspense>
   );
 }
@@ -116,7 +106,7 @@ export function InterstellarMenuButtons({
   const confirm = useConfirm();
   async function deleteObject() {
     const selectedObjectId = useStarmapStore.getState().selectedObjectId;
-    if (!selectedObjectId) return;
+    if (!selectedObjectId || typeof selectedObjectId === "number") return;
 
     const doRemove = await confirm({
       header: "Are you sure you want to remove this object?",
@@ -193,15 +183,20 @@ export function InterstellarMenuButtons({
   );
 }
 
-export const InterstellarPalette = () => {
-  const {pluginId} = useParams() as {
-    pluginId: string;
+export const InterstellarPalette = ({
+  selectedStar,
+  update,
+}: {
+  selectedStar: {
+    name: string;
+    position: Record<"x" | "y" | "z", LightMinute>;
+    description: string;
   };
-  const selectedObjectId = useStarmapStore(store => store.selectedObjectId);
-  const stars = useNetRequest("pluginSolarSystems", {pluginId});
-
-  const selectedStar = stars.find(s => s.name === selectedObjectId);
-
+  update: (params: {
+    name?: string | undefined;
+    description?: string | undefined;
+  }) => Promise<void>;
+}) => {
   useEffect(() => {
     if (!selectedStar) {
       useStarmapStore.setState({selectedObjectId: null});
@@ -213,24 +208,9 @@ export const InterstellarPalette = () => {
     selectedStar?.description || ""
   );
 
-  const update = React.useMemo(
-    () =>
-      debounce(
-        async (params: {name?: string; description?: string}) => {
-          if (!selectedObjectId) return;
-          const result = await netSend("pluginSolarSystemUpdate", {
-            pluginId,
-            solarSystemId: selectedObjectId,
-            ...params,
-          });
-          if (params.name) {
-            useStarmapStore.setState({selectedObjectId: result.solarSystemId});
-          }
-        },
-        500,
-        {maxWait: 2000, trailing: true}
-      ),
-    [pluginId, selectedObjectId]
+  const debouncedUpdate = React.useMemo(
+    () => debounce(update, 500, {maxWait: 2000, trailing: true}),
+    [update]
   );
 
   useEffect(() => {
@@ -246,7 +226,7 @@ export const InterstellarPalette = () => {
         value={name}
         onChange={e => {
           setName(e.target.value);
-          update({name: e.target.value});
+          debouncedUpdate({name: e.target.value});
         }}
         name="name"
       />
@@ -258,7 +238,7 @@ export const InterstellarPalette = () => {
         value={description}
         onChange={e => {
           setDescription(e.target.value);
-          update({description: e.target.value});
+          debouncedUpdate({description: e.target.value});
         }}
         name="description"
       />
