@@ -5,7 +5,7 @@ import {useFrame} from "@react-three/fiber";
 import {useStarmapStore} from "../starmapStore";
 
 const SystemLabel: React.FC<{
-  systemId: string;
+  systemId: string | number;
   name: string;
   color?: string;
   scale?: number;

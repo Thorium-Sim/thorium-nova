@@ -53,8 +53,12 @@ export function useNetRequest<
       return (data as any) || null;
     },
     {
-      cacheTime: Infinity,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
       networkMode: "always",
+      staleTime: Infinity,
+      cacheTime: Infinity,
     }
   );
   useRequestSub({requestName, params});

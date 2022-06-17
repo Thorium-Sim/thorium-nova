@@ -1,16 +1,17 @@
 import {createContext, ReactNode, useContext, useMemo} from "react";
 import {useDataConnection} from "../hooks/useDataConnection";
-import {SnapshotInterpolation} from "@geckos.io/snapshot-interpolation";
 import {ClientSocket} from "../utils/clientSocket";
 import {ThoriumAccountContextProvider} from "./ThoriumAccountContext";
 import {SI} from "../utils/clientSocket";
 import {QueryClient, QueryClientProvider} from "react-query";
 import {ReactQueryDevtools} from "react-query/devtools";
 import {SocketHandler} from "./SocketHandler";
+import {InterpolatedSnapshot} from "@geckos.io/snapshot-interpolation/lib/types";
+
 export const ThoriumContext = createContext<IThoriumContext | null>(null);
 
 interface IThoriumContext {
-  SI: SnapshotInterpolation;
+  interpolate: (entityId: number) => null | {x: number; y: number; z: number};
   socket: ClientSocket;
   reconnectionState: ReturnType<typeof useDataConnection>["reconnectionState"];
 }
@@ -23,12 +24,45 @@ const queryClient = new QueryClient({
   },
 });
 
+type EntityValues = {
+  x: number;
+  y: number;
+  z: number;
+};
+
+let interpolationCache: Record<string, EntityValues> = {};
+
+export function processInterpolation(
+  snapshot: InterpolatedSnapshot | undefined
+) {
+  if (!snapshot) return {};
+  return snapshot.state.forEach(entity => {
+    interpolationCache[entity.id] = {
+      x: entity.x,
+      y: entity.y,
+      z: entity.z,
+    } as EntityValues;
+  });
+}
+
+function updateInterpolation() {
+  processInterpolation(SI.calcInterpolation("x y z"));
+  requestAnimationFrame(updateInterpolation);
+}
+
+updateInterpolation();
+
 export function ThoriumProvider({children}: {children: ReactNode}) {
   const {socket, reconnectionState} = useDataConnection();
 
   const value: IThoriumContext = useMemo(() => {
     return {
-      SI,
+      interpolate: (entityId: number) => {
+        let state = interpolationCache?.[entityId.toString()];
+
+        if (!state) return null;
+        return state;
+      },
       socket,
       reconnectionState,
     };
