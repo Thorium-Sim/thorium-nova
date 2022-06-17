@@ -1,22 +1,11 @@
 import * as React from "react";
 import Menubar from "@thorium/ui/Menubar";
-import {
-  useMatch,
-  useParams,
-  UNSAFE_LocationContext,
-  UNSAFE_NavigationContext,
-  UNSAFE_RouteContext,
-  Route,
-  Routes,
-} from "react-router-dom";
-import {Canvas, useThree} from "@react-three/fiber";
+import {useMatch, useParams, Route, Routes} from "react-router-dom";
+import {useThree} from "@react-three/fiber";
 import {forwardRef, useImperativeHandle, useRef} from "react";
-import {useContextBridge} from "@react-three/drei";
 import {useStarmapStore} from "client/src/components/Starmap/starmapStore";
-import {ThoriumContext} from "client/src/context/ThoriumContext";
 import {lightMinuteToLightYear} from "server/src/utils/unitTypes";
 
-import {useQueryClient, QueryClientProvider} from "react-query";
 import {
   InterstellarMap,
   InterstellarMenuButtons,
@@ -30,9 +19,10 @@ import {EditorPalette} from "client/src/components/ui/EditorPalette";
 import {InterstellarPalette} from "client/src/components/Starmap/InterstellarMap";
 import {SolarSystemPalette} from "client/src/components/Starmap/SolarSystemMap";
 import Nebula from "client/src/components/Starmap/Nebula";
-
-const FAR = 1e27;
-
+import SystemMarker from "client/src/components/Starmap/SystemMarker";
+import {useNetRequest} from "client/src/context/useNetRequest";
+import {netSend} from "client/src/context/netSend";
+import StarmapCanvas from "client/src/components/Starmap/StarmapCanvas";
 function useSystemId() {
   const match = useMatch("/config/:pluginId/starmap/:systemId");
   const matchSystemId = match?.params.systemId || null;
@@ -43,6 +33,34 @@ interface SceneRef {
   camera: () => Camera;
 }
 
+function InterstellarPaletteWrapper() {
+  const {pluginId} = useParams() as {
+    pluginId: string;
+  };
+
+  const selectedObjectId = useStarmapStore(s => s.selectedObjectId);
+
+  const stars = useNetRequest("pluginSolarSystems", {pluginId});
+
+  const selectedStar = stars.find(s => s.name === selectedObjectId);
+
+  const update = React.useCallback(
+    async (params: {name?: string; description?: string}) => {
+      if (!selectedObjectId || typeof selectedObjectId === "number") return;
+      const result = await netSend("pluginSolarSystemUpdate", {
+        pluginId,
+        solarSystemId: selectedObjectId,
+        ...params,
+      });
+      if (params.name) {
+        useStarmapStore.setState({selectedObjectId: result.solarSystemId});
+      }
+    },
+    [pluginId, selectedObjectId]
+  );
+  if (!selectedStar) return null;
+  return <InterstellarPalette selectedStar={selectedStar} update={update} />;
+}
 export default function StarMap() {
   const {pluginId} = useParams() as {
     pluginId: string;
@@ -54,12 +72,6 @@ export default function StarMap() {
 
   const systemId = useSystemId();
 
-  const client = useQueryClient();
-
-  const ContextBridge = useContextBridge(ThoriumContext);
-  const Location = useContextBridge(UNSAFE_LocationContext);
-  const Navigation = useContextBridge(UNSAFE_NavigationContext);
-  const RouteContext = useContextBridge(UNSAFE_RouteContext);
   return (
     <div className="h-full">
       <Menubar
@@ -74,29 +86,13 @@ export default function StarMap() {
         isOpen={!!selectedObjectId}
         onClose={() => useStarmapStore.setState({selectedObjectId: null})}
       >
-        {systemId ? <SolarSystemPalette /> : <InterstellarPalette />}
+        {systemId ? <SolarSystemPalette /> : <InterstellarPaletteWrapper />}
       </EditorPalette>
       <div className="h-[calc(100%-2rem)]  relative bg-black">
-        <Canvas
-          onContextMenu={e => {
-            e.preventDefault();
-          }}
-          gl={{antialias: true, logarithmicDepthBuffer: true}}
-          camera={{fov: 45, far: FAR}}
-          mode="concurrent"
-        >
-          <Navigation>
-            <Location>
-              <RouteContext>
-                <ContextBridge>
-                  <QueryClientProvider client={client}>
-                    <StarmapScene ref={sceneRef} />
-                  </QueryClientProvider>
-                </ContextBridge>
-              </RouteContext>
-            </Location>
-          </Navigation>
-        </Canvas>
+        <StarmapCanvas>
+          <StarmapScene ref={sceneRef} />
+        </StarmapCanvas>
+
         <StatusBar />
       </div>
     </div>
@@ -132,9 +128,30 @@ const StarmapScene = forwardRef(function StarmapScene(props, ref) {
       <pointLight position={[10, 10, 10]} />
       <Routes>
         <Route path="/:systemId" element={<SolarSystemMap />} />
-        <Route path="*" element={<InterstellarMap />} />
+        <Route path="*" element={<InterstellarWrapper />} />
       </Routes>
       <Nebula />
     </>
   );
 });
+
+function InterstellarWrapper() {
+  const {pluginId} = useParams() as {
+    pluginId: string;
+  };
+
+  const stars = useNetRequest("pluginSolarSystems", {pluginId});
+  return (
+    <InterstellarMap>
+      {stars.map(star => (
+        <SystemMarker
+          key={star.name}
+          systemId={star.name}
+          position={Object.values(star.position) as [number, number, number]}
+          name={star.name}
+          draggable
+        />
+      ))}
+    </InterstellarMap>
+  );
+}
