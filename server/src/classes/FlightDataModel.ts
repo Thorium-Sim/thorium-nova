@@ -5,6 +5,7 @@ import systems from "../systems";
 import {FlightClient} from "./FlightClient";
 import {FSDataStore, FSDataStoreOptions} from "@thorium/db-fs";
 import ShipPlugin from "./Plugins/Ship";
+import {DefaultUIDGenerator} from "../utils/ecs/uid";
 
 export class FlightDataModel extends FSDataStore {
   static INTERVAL = 1000 / 60;
@@ -63,6 +64,7 @@ export class FlightDataModel extends FSDataStore {
     this.entities.forEach(({id, components}) => {
       const e = new Entity(id, components);
       this.ecs.addEntity(e);
+      DefaultUIDGenerator.uid = Math.max(DefaultUIDGenerator.uid, id);
     });
     this.run();
   }
@@ -106,6 +108,7 @@ export class FlightDataModel extends FSDataStore {
       date: this.date,
       pluginIds: this.pluginIds,
       entities: this.ecs.entities.map(e => e.toJSON()),
+      maxEntityId: this.ecs.maxEntityId,
       clients: Object.fromEntries(
         Object.entries(this.clients).map(([id, client]) => [id, client])
       ),

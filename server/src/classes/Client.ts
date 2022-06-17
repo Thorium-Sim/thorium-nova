@@ -270,10 +270,10 @@ export class ServerClient extends BaseClient {
         return {
           id: e.id.toString(),
           ...position,
-          rotation: e.components.rotation,
+          r: e.components.rotation,
         };
       });
     const snapshot = this.SI.snapshot.create(entities);
-    sockets[this.id].socket.send(encode(snapshot));
+    socketSend(sockets[this.id], snapshot);
   }
 }
