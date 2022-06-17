@@ -27,6 +27,7 @@ class ECS {
   updateCounter = 0;
   lastUpdate = performance.now();
   rng: RNG;
+  maxEntityId: number = 0;
   constructor(
     public server: ServerDataModel,
     seed: string | number = "thorium",
@@ -52,6 +53,7 @@ class ECS {
   addEntity(entity: Entity) {
     this.entities.push(entity);
     entity.addToECS(this);
+    this.maxEntityId = Math.max(this.maxEntityId, entity.id);
   }
   /**
    * Remove an entity from the ecs by reference.

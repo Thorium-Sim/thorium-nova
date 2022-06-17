@@ -12,7 +12,7 @@ const lineWidth = 0.1;
 export const DraggableSystemCircle: React.FC<
   {
     hoveringDirection: React.MutableRefObject<number>;
-    systemId: string;
+    systemId: string | number;
     parentObject: React.MutableRefObject<Group>;
   } & MeshProps
 > = ({
@@ -36,7 +36,7 @@ export const DraggableSystemCircle: React.FC<
           newPosition.setY(position[1]);
         }
       }
-      if (!pluginId) return;
+      if (!pluginId || typeof systemId === "number") return;
       netSend("pluginSolarSystemUpdate", {
         pluginId,
         solarSystemId: systemId,
@@ -64,6 +64,9 @@ export const DraggableSystemCircle: React.FC<
       systemId={systemId}
       hoveringDirection={hoveringDirection}
       {...(bind() as any)}
+      onDoubleClick={() => {
+        navigate(systemId.toString());
+      }}
       {...props}
       onPointerOver={e => {
         props?.onPointerOver?.(e);
@@ -78,16 +81,13 @@ export const DraggableSystemCircle: React.FC<
           hoveredPosition: null,
         });
       }}
-      onDoubleClick={() => {
-        navigate(systemId);
-      }}
     />
   );
 };
 
 const SystemCircle: React.FC<
   {
-    systemId: string;
+    systemId: string | number;
     hoveringDirection: React.MutableRefObject<number>;
   } & MeshProps
 > = ({systemId, hoveringDirection, ...props}) => {
