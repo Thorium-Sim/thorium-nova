@@ -237,6 +237,16 @@ describe("ship decks plugin input", () => {
         radius: 10,
       });
       expect(deck.nodes[0].radius).toEqual(10);
+
+      expect(deck.nodes[0].volume).toEqual(12);
+      decksPluginInputs.pluginShipDeckUpdateNode(mockDataContext, {
+        pluginId: "Test Plugin",
+        shipId: "Test Template",
+        deckId: "Deck 1",
+        nodeId: 1,
+        volume: 20,
+      });
+      expect(deck.nodes[0].volume).toEqual(20);
     });
   });
   describe("Deck Edges", () => {

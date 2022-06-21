@@ -25,6 +25,7 @@ class MockServerDataModel {
           } as unknown as BasePlugin),
         ],
         solarSystems: [],
+        inventory: [],
       },
     },
   ];
