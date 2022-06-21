@@ -1,4 +1,4 @@
-import {Flavor} from "server/src/utils/unitTypes";
+import {CubicMeter, Flavor} from "server/src/utils/unitTypes";
 
 export default class DeckPlugin {
   name: string;
@@ -24,6 +24,7 @@ export class DeckNode {
   isRoom: boolean;
   icon: string;
   radius: number;
+  volume: CubicMeter;
   flags: NodeFlag[];
   constructor(params: Partial<DeckNode>) {
     this.id = params.id || 0;
@@ -33,6 +34,7 @@ export class DeckNode {
     this.isRoom = params.isRoom || false;
     this.icon = params.icon || "";
     this.radius = params.radius || 0;
+    this.volume = params.volume || 12;
     this.flags = params.flags || [];
   }
 }

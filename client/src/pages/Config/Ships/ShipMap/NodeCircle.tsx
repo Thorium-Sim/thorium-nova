@@ -1,7 +1,7 @@
 import {MutableRefObject, useEffect, useState} from "react";
 import Button from "@thorium/ui/Button";
 import {useConfirm} from "@thorium/ui/AlertDialog";
-import {DeckNode} from "server/src/classes/Plugins/Ship/Deck";
+import {DeckNode, nodeFlags} from "server/src/classes/Plugins/Ship/Deck";
 import {useDrag} from "@use-gesture/react";
 import {autoUpdate, offset, shift, useFloating} from "@floating-ui/react-dom";
 import Input from "@thorium/ui/Input";
@@ -10,6 +10,8 @@ import {Portal} from "@headlessui/react";
 import useOnClickOutside from "client/src/hooks/useClickOutside";
 import {PanStateI, updateNodeParams} from "./DeckConfig";
 import {useTriggerEdgeRender} from "./EdgeContextProvider";
+import {capitalCase} from "change-case";
+import InfoTip from "@thorium/ui/InfoTip";
 const pixelRatio = window.devicePixelRatio;
 export function NodeCircle({
   id,
@@ -17,6 +19,8 @@ export function NodeCircle({
   y,
   isRoom,
   radius,
+  volume,
+  flags,
   name,
   icon,
   selected,
@@ -133,6 +137,25 @@ export function NodeCircle({
               defaultChecked={isRoom}
               onChange={e => updateNode({isRoom: e.target.checked})}
             />
+            {nodeFlags.map(flag => (
+              <Checkbox
+                key={flag}
+                label={
+                  <>
+                    {capitalCase(flag)}
+                    <FlagExplainer flag={flag} />
+                  </>
+                }
+                defaultChecked={flags.includes(flag)}
+                onChange={e => {
+                  if (e.target.checked) {
+                    updateNode({flags: [...flags, flag]});
+                  } else {
+                    updateNode({flags: flags.filter(f => f !== flag)});
+                  }
+                }}
+              />
+            ))}
             <Input
               label="Radius"
               type="range"
@@ -149,6 +172,14 @@ export function NodeCircle({
                 })
               }
             />
+            {isRoom && flags.includes("cargo") && (
+              <Input
+                label="Volume for cargo in cubic meters"
+                pattern="[0-9]*"
+                defaultValue={volume}
+                onChange={e => updateNode({volume: Number(e.target.value)})}
+              />
+            )}
             <Button
               className="btn-error btn-sm w-full"
               onClick={async () => {
@@ -169,4 +200,11 @@ export function NodeCircle({
       </Portal>
     </>
   );
+}
+
+function FlagExplainer({flag}: {flag: string}) {
+  if (flag === "cargo") {
+    return <InfoTip>Whether the room accepts cargo.</InfoTip>;
+  }
+  return null;
 }

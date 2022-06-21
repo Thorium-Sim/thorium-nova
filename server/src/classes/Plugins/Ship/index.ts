@@ -2,6 +2,7 @@ import type BasePlugin from "../index";
 import {Aspect} from "../Aspect";
 import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
 import DeckPlugin, {DeckEdge} from "./Deck";
+import {CubicMeter} from "server/src/utils/unitTypes";
 
 export type ShipCategories = "Cruiser" | "Frigate" | "Scout" | "Shuttle";
 
@@ -72,6 +73,11 @@ export default class ShipPlugin extends Aspect {
    * to support cross-deck connections.
    */
   deckEdges: DeckEdge[];
+  /** The number of cargo containers on the ship. */
+  cargoContainers: number;
+  /** The volume of the ship's cargo containers. */
+  cargoContainerVolume: CubicMeter;
+
   constructor(params: Partial<ShipPlugin>, plugin: BasePlugin) {
     const name = generateIncrementedName(
       params.name || "New Ship",
@@ -96,6 +102,8 @@ export default class ShipPlugin extends Aspect {
     this.theme = params.theme || undefined;
     this.decks = params.decks?.map(deck => new DeckPlugin(deck)) || [];
     this.deckEdges = params.deckEdges?.map(edge => new DeckEdge(edge)) || [];
+    this.cargoContainers = params.cargoContainers || 4;
+    this.cargoContainerVolume = params.cargoContainerVolume || 4;
   }
   addDeck(deck: Partial<DeckPlugin>) {
     let {name} = deck;

@@ -8,3 +8,4 @@ export {effectsRequest} from "./effects";
 export {flightsRequests} from "./flights";
 export {pluginSolarSystemsRequest} from "./plugins/solarSystems";
 export {pluginShipSystemsRequests} from "./plugins/shipSystems";
+export {pluginInventoryRequests} from "./plugins/inventory";
