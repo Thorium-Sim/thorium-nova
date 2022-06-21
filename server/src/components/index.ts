@@ -13,3 +13,7 @@ export type ComponentProperties = {
 };
 
 export {allComponents as components};
+
+export function getComponentClassFromId(id: ComponentIDs): any {
+  return Object.values(allComponents).find(comp => comp.id === id);
+}

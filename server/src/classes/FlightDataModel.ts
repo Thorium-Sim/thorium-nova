@@ -5,7 +5,6 @@ import systems from "../systems";
 import {FlightClient} from "./FlightClient";
 import {FSDataStore, FSDataStoreOptions} from "@thorium/db-fs";
 import ShipPlugin from "./Plugins/Ship";
-import {spawnSolarSystem} from "../spawners/solarSystem";
 import {DefaultUIDGenerator} from "../utils/ecs/uid";
 
 export class FlightDataModel extends FSDataStore {
@@ -108,8 +107,8 @@ export class FlightDataModel extends FSDataStore {
       paused: this.paused,
       date: this.date,
       pluginIds: this.pluginIds,
+      entities: this.ecs.entities.map(e => e.toJSON()),
       maxEntityId: this.ecs.maxEntityId,
-      entities: this.ecs.entities,
       clients: Object.fromEntries(
         Object.entries(this.clients).map(([id, client]) => [id, client])
       ),

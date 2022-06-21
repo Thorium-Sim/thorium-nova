@@ -10,6 +10,7 @@ import {
   ComponentProperties as Components,
   ComponentIDs,
   components as allComponents,
+  getComponentClassFromId,
 } from "../../components";
 
 type DeepPartial<T> = Partial<{
@@ -108,7 +109,7 @@ class Entity {
       components: Object.fromEntries(
         Object.entries(this.components).map(([key, comp]) => {
           let newValue =
-            allComponents[key as keyof typeof allComponents]?.serialize(
+            getComponentClassFromId(key as ComponentIDs)?.serialize(
               comp as any
             ) || comp;
           return [key, newValue];

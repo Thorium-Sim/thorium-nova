@@ -24,4 +24,5 @@ export * from "./solarSystem/isPlanet";
 export * from "./satellite";
 export * from "./temperature";
 export * from "./population";
+export * from "./shipMap";
 export * from "./autopilot";
