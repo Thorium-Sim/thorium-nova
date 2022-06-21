@@ -1,10 +1,10 @@
-import React from "react";
+import React, {ReactNode} from "react";
 
 const Checkbox = (
   props: React.DetailedHTMLProps<
     React.InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
-  > & {label: string; helperText?: string}
+  > & {label: ReactNode; helperText?: string}
 ) => {
   const {label, ...otherProps} = props;
   return (
