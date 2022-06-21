@@ -62,7 +62,7 @@ export class DeckEdge {
     this.id = params.id;
     this.to = params.to || 0;
     this.from = params.from || 0;
-    this.weight = params.weight || 0;
+    this.weight = params.weight || 1;
     this.isOpen = params.isOpen || true;
     this.flags = params.flags || [];
   }

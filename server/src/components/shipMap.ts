@@ -1,4 +1,5 @@
 import DeckPlugin, {DeckEdge} from "../classes/Plugins/Ship/Deck";
+import {ShipMapGraph} from "../utils/shipMapPathfinder";
 import {Component} from "./utils";
 
 const roundTo1000 = (num: number) => Math.round(num * 1000) / 1000;
@@ -39,4 +40,5 @@ export class ShipMapComponent extends Component {
   }
   decks: DeckPlugin[] = [];
   deckEdges: DeckEdge[] = [];
+  graph: ShipMapGraph | null = null;
 }
