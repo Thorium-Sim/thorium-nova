@@ -26,6 +26,7 @@ export function spawnShip(
     position: Omit<PositionComponent, "init">;
     tags?: string[];
     assets?: Partial<InstanceType<typeof ShipPlugin>["assets"]>;
+    playerShip?: boolean;
   },
   plugins: BasePlugin[]
 ) {
@@ -74,5 +75,16 @@ export function spawnShip(
       ],
     });
   });
+  if (params.playerShip) {
+    entity.addComponent("isPlayerShip");
+  }
+  // Initialize the ship map. For now, we'll just load the ship map onto a component of the ship.
+  // In the future, rooms themselves might become entities.
+  if (entity.components.isPlayerShip) {
+    entity.addComponent("shipMap", {
+      decks: template.decks || [],
+      deckEdges: template.deckEdges || [],
+    });
+  }
   return {ship: entity, shipSystems};
 }
