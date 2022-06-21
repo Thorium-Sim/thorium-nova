@@ -13,6 +13,12 @@ import {useFrame} from "@react-three/fiber";
 import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
 import {Kilometer} from "server/src/utils/unitTypes";
 import {OrbitLine} from "../OrbitContainer";
+import type {
+  IdentityComponent,
+  IsPlanetComponent,
+  SatelliteComponent,
+} from "server/src/components/list";
+
 const PlanetSprite = ({color = "white"}) => {
   const spriteMap = useTexture(Dot);
 
@@ -61,14 +67,31 @@ export function Planet({
   showSprite,
   showMesh = true,
 }: {
-  planet: PlanetPlugin;
+  planet: {
+    id: string | number;
+    name: string;
+    isPlanet: {
+      radius: number;
+      ringMapAsset: string | null;
+      cloudMapAsset: string | null;
+      textureMapAsset: string;
+    };
+    satellite: {
+      axialTilt: number;
+      semiMajorAxis: number;
+      eccentricity: number;
+      orbitalArc: number;
+      inclination: number;
+      showOrbit: boolean;
+    };
+  };
   isSatellite?: boolean;
   origin?: Vector3;
   showSprite?: boolean;
   showMesh?: boolean;
 }) {
   const selected = useStarmapStore(
-    state => state.selectedObjectId === planet.name
+    state => state.selectedObjectId === planet.id
   );
   const {
     radius,
@@ -159,7 +182,7 @@ export function Planet({
     if (viewingMode === "viewscreen") return;
     if (viewingMode === "core") return;
     useStarmapStore.setState({
-      selectedObjectId: planet.name,
+      selectedObjectId: planet.id,
     });
   }
 
@@ -207,14 +230,15 @@ export function Planet({
             />
           </group>
         )}
-        {satellites?.map((s, i) => (
+        {/* TODO June 20, 2022 - Figure out all of the stuff around moons */}
+        {/* {satellites?.map((s, i) => (
           <Planet
             key={`orbit-${s.name}`}
             isSatellite
             origin={position}
             planet={s}
           />
-        ))}
+        ))} */}
       </group>
     </group>
   );

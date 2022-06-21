@@ -6,10 +6,21 @@ import Star from "./StarMesh";
 import Selected from "../Selected";
 import {useStarmapStore} from "../starmapStore";
 import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
-import StarPlugin from "server/src/classes/Plugins/Universe/Star";
 
 const StarEntity: React.FC<{
-  star: StarPlugin;
+  star: {
+    satellite: {
+      semiMajorAxis: number;
+      eccentricity: number;
+      orbitalArc: number;
+      inclination: number;
+      showOrbit: boolean;
+    };
+    hue: number;
+    isWhite: boolean;
+    radius: number;
+    id: string | number;
+  };
 }> = ({star}) => {
   const viewingMode = useStarmapStore(state => state.viewingMode);
   // const selectedId = useConfigStore(store => store.selectedObject?.id);
@@ -71,7 +82,7 @@ const StarEntity: React.FC<{
             semiMajorAxis: semiMajorAxis,
           });
           useStarmapStore.setState({
-            selectedObjectId: star.name,
+            selectedObjectId: star.id,
             // selectedPosition: position,
             // scaledSelectedPosition: position,
           });

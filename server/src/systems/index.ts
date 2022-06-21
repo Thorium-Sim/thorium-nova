@@ -8,7 +8,6 @@ import {EngineVelocityPosition} from "./EngineVelocityPosition";
 import {EngineVelocitySystem} from "./EngineVelocitySystem";
 import {ImpulseSystem} from "./ImpulseSystem";
 import {PositionVelocitySystem} from "./PositionVelocitySystem";
-import {RandomMovementSystem} from "./RandomMovementSystem";
 import {RotationSystem} from "./RotationSystem";
 import {ThrusterSystem} from "./ThrusterSystem";
 import {TimerSystem} from "./TimerSystem";
@@ -24,7 +23,6 @@ const systems = [
   EngineVelocitySystem,
   EngineVelocityPosition,
   PositionVelocitySystem,
-  RandomMovementSystem,
   DataStreamSystem,
 ];
 export default systems;

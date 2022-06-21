@@ -57,7 +57,15 @@ export class ServerClient extends BaseClient {
     this.connected = false;
   }
   public toJSON() {
-    const {clientContext, SI, ...data} = this;
+    const {
+      clientContext,
+      SI,
+      dataStreamList,
+      _cards,
+      connected,
+      isHost,
+      ...data
+    } = this;
     return data;
   }
   public async initWebSocket(

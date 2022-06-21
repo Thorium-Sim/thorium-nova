@@ -5,7 +5,6 @@ import {useThree} from "@react-three/fiber";
 import {forwardRef, useImperativeHandle, useRef} from "react";
 import {useStarmapStore} from "client/src/components/Starmap/starmapStore";
 import {lightMinuteToLightYear} from "server/src/utils/unitTypes";
-
 import {
   InterstellarMap,
   InterstellarMenuButtons,
@@ -23,6 +22,10 @@ import SystemMarker from "client/src/components/Starmap/SystemMarker";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {netSend} from "client/src/context/netSend";
 import StarmapCanvas from "client/src/components/Starmap/StarmapCanvas";
+import {useSystemIds} from "client/src/components/Starmap/useSystemIds";
+import {Planet} from "client/src/components/Starmap/Planet";
+import StarEntity from "client/src/components/Starmap/Star";
+
 function useSystemId() {
   const match = useMatch("/config/:pluginId/starmap/:systemId");
   const matchSystemId = match?.params.systemId || null;
@@ -127,7 +130,7 @@ const StarmapScene = forwardRef(function StarmapScene(props, ref) {
       <ambientLight intensity={0.2} />
       <pointLight position={[10, 10, 10]} />
       <Routes>
-        <Route path="/:systemId" element={<SolarSystemMap />} />
+        <Route path="/:systemId" element={<SolarSystemWrapper />} />
         <Route path="*" element={<InterstellarWrapper />} />
       </Routes>
       <Nebula />
@@ -153,5 +156,24 @@ function InterstellarWrapper() {
         />
       ))}
     </InterstellarMap>
+  );
+}
+
+function SolarSystemWrapper() {
+  const [pluginId, solarSystemId] = useSystemIds();
+  const systemData = useNetRequest("pluginSolarSystem", {
+    pluginId,
+    solarSystemId,
+  });
+
+  return (
+    <SolarSystemMap skyboxKey={systemData.skyboxKey}>
+      {systemData.stars.map(star => (
+        <StarEntity key={star.name} star={{id: star.name, ...star}} />
+      ))}
+      {systemData.planets.map(planet => (
+        <Planet key={planet.name} planet={planet} />
+      ))}
+    </SolarSystemMap>
   );
 }

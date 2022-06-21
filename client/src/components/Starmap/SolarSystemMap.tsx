@@ -19,8 +19,6 @@ import {useConfirm} from "@thorium/ui/AlertDialog";
 import {planetTypes} from "server/src/spawners/planetTypes";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import Disc from "./Disc";
-import StarEntity from "./Star";
-import {Planet} from "./Planet";
 import {HiChevronUp} from "react-icons/hi";
 import {useLocalStorage} from "client/src/hooks/useLocalStorage";
 import {BasicDisclosure} from "./EditorPalettes/BasicDisclosure";
@@ -32,6 +30,7 @@ import {PolarGrid} from "./PolarGrid";
 import {useSystemIds} from "./useSystemIds";
 import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
+import {useParams} from "react-router-dom";
 const ACTION = CameraControlsClass.ACTION;
 
 // 10% further than Neptune's orbit
@@ -57,21 +56,23 @@ function HabitableZone() {
   ) : null;
 }
 
-export function SolarSystemMap() {
+export function SolarSystemMap({
+  skyboxKey = "Basic",
+  children,
+}: {
+  skyboxKey: string;
+  children?: React.ReactNode;
+}) {
+  const pluginId = useParams().pluginId;
+
   const {camera} = useThree();
   const controlsEnabled = useStarmapStore(s => s.cameraControlsEnabled);
   const cameraView = useStarmapStore(s => s.cameraView);
   const orbitControls = React.useRef<CameraControlsClass>(null);
 
-  const [pluginId, solarSystemId] = useSystemIds();
-  const systemData = useNetRequest("pluginSolarSystem", {
-    pluginId,
-    solarSystemId,
-  });
-
   useEffect(() => {
-    useStarmapStore.setState({skyboxKey: systemData.skyboxKey || "blank"});
-  }, [systemData.skyboxKey]);
+    useStarmapStore.setState({skyboxKey: skyboxKey || "blank"});
+  }, [skyboxKey]);
 
   useEffect(() => {
     // Set the initial camera position
@@ -107,17 +108,12 @@ export function SolarSystemMap() {
         dollyToCursor
         dollySpeed={0.5}
       />
-      <HabitableZone />
+      {!pluginId ? null : <HabitableZone />}
       <PolarGrid
         rotation={[0, (2 * Math.PI) / 12, 0]}
         args={[SOLAR_SYSTEM_MAX_DISTANCE, 12, 20, 64, 0xffffff, 0xffffff]}
       />
-      {systemData.stars.map(star => (
-        <StarEntity key={star.name} star={star} />
-      ))}
-      {systemData.planets.map(planet => (
-        <Planet key={planet.name} planet={planet} />
-      ))}
+      {children}
     </Suspense>
   );
 }

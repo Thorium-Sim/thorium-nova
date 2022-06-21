@@ -92,9 +92,13 @@ class Entity {
         c => c && c.id === component
       ) as any;
       const data = components[component as ComponentIDs];
-      let componentData =
-        data instanceof componentClass ? data : componentClass.create(data);
-      this.components[component as ComponentIDs] = componentData;
+      try {
+        let componentData =
+          data instanceof componentClass ? data : componentClass.create(data);
+        this.components[component as ComponentIDs] = componentData;
+      } catch (err) {
+        console.error("Error initializing component:", component);
+      }
     }
     /**
      * A reference to parent ECS class.
