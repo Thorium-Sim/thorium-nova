@@ -37,7 +37,9 @@ export abstract class FSDataStore {
         Object.getOwnPropertyDescriptor(target, key) &&
         typeof target[key] === "object" &&
         target[key] !== null &&
-        !(target[key] instanceof Date)
+        !(target[key] instanceof Date) &&
+        !(target[key] instanceof Map) &&
+        !(target[key] instanceof Set)
       ) {
         return new Proxy(target[key], this.#handler);
       } else {

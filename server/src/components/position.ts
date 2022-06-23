@@ -20,5 +20,10 @@ export class PositionComponent extends Component {
 
   x: number = 0;
   y: number = 0;
+  /**
+   * For ship maps, the Z coordinate is used to represent which deck the crew member is on.
+   * Z is the index of the deck number. Decimal values are used when traveling between decks.
+   * The deck that the crew member is on is found by rounding the Z coordinate.
+   */
   z: number = 0;
 }
