@@ -29,6 +29,7 @@ describe("Entity", () => {
     });
     expect(entity.components.identity).toEqual({
       name: "Testing!",
+      plural: "",
       description: "This is a test.",
     });
   });
