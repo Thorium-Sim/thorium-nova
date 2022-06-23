@@ -83,6 +83,10 @@ export function spawnShip(
   if (entity.components.isPlayerShip) {
     entity.addComponent("shipMap", {
       decks: template.decks || [],
+      deckNodes:
+        template.decks?.flatMap((deck, i) =>
+          deck.nodes.map(n => ({...n, deckIndex: i}))
+        ) || [],
       deckEdges: template.deckEdges || [],
     });
   }
