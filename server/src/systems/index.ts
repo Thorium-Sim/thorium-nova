@@ -3,6 +3,7 @@
  * of the systems and re-export them in an array
  */
 import {AutoRotateSystem} from "./AutoRotateSystem";
+import {AutoThrustSystem} from "./AutoThrustSystem";
 import {DataStreamSystem} from "./DataStreamSystem";
 import {EngineVelocityPosition} from "./EngineVelocityPosition";
 import {EngineVelocitySystem} from "./EngineVelocitySystem";
@@ -21,6 +22,7 @@ const systems = [
   PassengerMovementSystem,
   TimerSystem,
   AutoRotateSystem,
+  AutoThrustSystem,
   ThrusterSystem,
   ImpulseSystem,
   WarpSystem,
