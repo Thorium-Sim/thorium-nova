@@ -2,7 +2,7 @@ import React from "react";
 import TextTexture from "@seregpie/three.text-texture";
 import {AdditiveBlending, Sprite} from "three";
 import {useFrame} from "@react-three/fiber";
-import {useStarmapStore} from "../starmapStore";
+import {useGetStarmapStore} from "../starmapStore";
 
 const SystemLabel: React.FC<{
   systemId: string | number;
@@ -17,6 +17,8 @@ const SystemLabel: React.FC<{
   name,
   hoveringDirection,
 }) => {
+  const useStarmapStore = useGetStarmapStore();
+
   React.useEffect(() => {
     if (text.current) {
       text.current.material.opacity = 0.5;

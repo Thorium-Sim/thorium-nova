@@ -4,7 +4,7 @@ import {Color} from "three";
 import OrbitContainer from "../OrbitContainer";
 import Star from "./StarMesh";
 import Selected from "../Selected";
-import {useStarmapStore} from "../starmapStore";
+import {useGetStarmapStore} from "../starmapStore";
 import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
 
 const StarEntity: React.FC<{
@@ -22,6 +22,7 @@ const StarEntity: React.FC<{
     id: string | number;
   };
 }> = ({star}) => {
+  const useStarmapStore = useGetStarmapStore();
   const viewingMode = useStarmapStore(state => state.viewingMode);
   // const selectedId = useConfigStore(store => store.selectedObject?.id);
   const selected = false; //selectedId === entity.id;

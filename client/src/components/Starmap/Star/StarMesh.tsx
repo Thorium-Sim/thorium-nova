@@ -16,7 +16,7 @@ import getUniforms from "./uniforms";
 import ColorUtil from "color";
 import {useTexture} from "@react-three/drei";
 import {useFrame} from "@react-three/fiber";
-import {useStarmapStore} from "../starmapStore";
+import {useGetStarmapStore} from "../starmapStore";
 
 import texturePath from "./textures/01_Texture.jpg";
 import spritePath from "./textures/Star.svg";
@@ -52,6 +52,8 @@ const Star: React.FC<{
   showSprite,
   ...props
 }) => {
+  const useStarmapStore = useGetStarmapStore();
+
   const texture = React.useMemo(() => {
     const loader = new TextureLoader();
     const texture = loader.load(texturePath);

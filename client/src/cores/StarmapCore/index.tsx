@@ -2,7 +2,10 @@ import {InterstellarMap} from "client/src/components/Starmap/InterstellarMap";
 import SystemMarker from "client/src/components/Starmap/SystemMarker";
 import StarmapCanvas from "client/src/components/Starmap/StarmapCanvas";
 import {useContext, useEffect, useMemo, useRef} from "react";
-import {useStarmapStore} from "client/src/components/Starmap/starmapStore";
+import {
+  StarmapStoreProvider,
+  useGetStarmapStore,
+} from "client/src/components/Starmap/starmapStore";
 import {Suspense} from "react";
 import {ErrorBoundary} from "react-error-boundary";
 import type {Entity} from "server/src/utils/ecs";
@@ -22,15 +25,23 @@ import {ThoriumContext} from "client/src/context/ThoriumContext";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {useDataStream} from "client/src/context/useDataStream";
 import {createAsset} from "use-asset";
-import {useStarmapCoreStore} from "./useStarmapCoreStore";
 import {SolarSystemMap} from "client/src/components/Starmap/SolarSystemMap";
 import {Planet} from "client/src/components/Starmap/Planet";
 import StarEntity from "client/src/components/Starmap/Star";
 
 export function StarmapCore() {
-  const {currentSystem} = useStarmapCoreStore();
+  return (
+    <StarmapStoreProvider>
+      <CanvasWrapper />
+    </StarmapStoreProvider>
+  );
+}
 
+function CanvasWrapper() {
+  const useStarmapStore = useGetStarmapStore();
+  const {currentSystem} = useStarmapStore();
   useDataStream({systemId: currentSystem});
+
   useEffect(() => {
     useStarmapStore.setState({viewingMode: "core"});
   }, []);
@@ -47,9 +58,9 @@ export function StarmapCore() {
     </StarmapCanvas>
   );
 }
-
 function InterstellarWrapper() {
-  const {currentSystem, setCurrentSystem} = useStarmapCoreStore();
+  const useStarmapStore = useGetStarmapStore();
+  const {currentSystem, setCurrentSystem} = useStarmapStore();
 
   const starmapShips = useNetRequest("starmapShips", {systemId: currentSystem});
   const starmapSystems = useNetRequest("starmapSystems");
@@ -91,7 +102,8 @@ function InterstellarWrapper() {
 }
 
 function SolarSystemWrapper() {
-  const {currentSystem} = useStarmapCoreStore();
+  const useStarmapStore = useGetStarmapStore();
+  const {currentSystem} = useStarmapStore();
   if (!currentSystem) throw new Error("No current system");
   const system = useNetRequest("starmapSystem", {systemId: currentSystem});
   const starmapEntities = useNetRequest("starmapSystemEntities", {
@@ -104,7 +116,6 @@ function SolarSystemWrapper() {
       {starmapEntities.map(entity => {
         if (entity.components.isStar) {
           if (!entity.components.satellite) return null;
-          console.log(entity.components.satellite);
           return (
             <Suspense key={entity.id} fallback={null}>
               <ErrorBoundary

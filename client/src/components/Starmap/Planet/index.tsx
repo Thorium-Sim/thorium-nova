@@ -5,7 +5,7 @@ import {Rings} from "./Rings";
 import {Clouds} from "./Clouds";
 import Selected from "../Selected";
 import Dot from "./Dot.svg";
-import {useStarmapStore} from "../starmapStore";
+import {useGetStarmapStore} from "../starmapStore";
 import SystemLabel from "../SystemMarker/SystemLabel";
 import {DEG2RAD} from "three/src/math/MathUtils";
 import {Group, Vector3} from "three";
@@ -90,6 +90,8 @@ export function Planet({
   showSprite?: boolean;
   showMesh?: boolean;
 }) {
+  const useStarmapStore = useGetStarmapStore();
+
   const selected = useStarmapStore(
     state => state.selectedObjectId === planet.id
   );

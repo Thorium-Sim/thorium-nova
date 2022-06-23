@@ -5,7 +5,7 @@ import * as React from "react";
 import {useCallback} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {CanvasTexture, Group, Vector3} from "three";
-import {useStarmapStore} from "../starmapStore";
+import {useGetStarmapStore} from "../starmapStore";
 
 const size = 50;
 const lineWidth = 0.1;
@@ -22,6 +22,8 @@ export const DraggableSystemCircle: React.FC<
   position,
   ...props
 }) => {
+  const useStarmapStore = useGetStarmapStore();
+
   const {pluginId} = useParams() as {
     pluginId: string;
   };
@@ -91,6 +93,8 @@ const SystemCircle: React.FC<
     hoveringDirection: React.MutableRefObject<number>;
   } & MeshProps
 > = ({systemId, hoveringDirection, ...props}) => {
+  const useStarmapStore = useGetStarmapStore();
+
   const ctx = React.useMemo(() => {
     const canvas = document.createElement("canvas");
 

@@ -3,7 +3,7 @@ import Menubar from "@thorium/ui/Menubar";
 import {useMatch, useParams, Route, Routes} from "react-router-dom";
 import {useThree} from "@react-three/fiber";
 import {forwardRef, useImperativeHandle, useRef} from "react";
-import {useStarmapStore} from "client/src/components/Starmap/starmapStore";
+import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
 import {lightMinuteToLightYear} from "server/src/utils/unitTypes";
 import {
   InterstellarMap,
@@ -37,6 +37,8 @@ interface SceneRef {
 }
 
 function InterstellarPaletteWrapper() {
+  const useStarmapStore = useGetStarmapStore();
+
   const {pluginId} = useParams() as {
     pluginId: string;
   };
@@ -65,6 +67,8 @@ function InterstellarPaletteWrapper() {
   return <InterstellarPalette selectedStar={selectedStar} update={update} />;
 }
 export default function StarMap() {
+  const useStarmapStore = useGetStarmapStore();
+
   const {pluginId} = useParams() as {
     pluginId: string;
   };
@@ -103,6 +107,8 @@ export default function StarMap() {
 }
 
 function StatusBar() {
+  const useStarmapStore = useGetStarmapStore();
+
   const hoveredPosition = useStarmapStore(s => s.hoveredPosition);
   return (
     <div className="absolute bottom-0 w-full text-white z-20 flex justify-end">
@@ -172,7 +178,15 @@ function SolarSystemWrapper() {
         <StarEntity key={star.name} star={{id: star.name, ...star}} />
       ))}
       {systemData.planets.map(planet => (
-        <Planet key={planet.name} planet={planet} />
+        <Planet
+          key={planet.name}
+          planet={{
+            id: planet.name,
+            name: planet.name,
+            isPlanet: planet.isPlanet,
+            satellite: planet.satellite,
+          }}
+        />
       ))}
     </SolarSystemMap>
   );

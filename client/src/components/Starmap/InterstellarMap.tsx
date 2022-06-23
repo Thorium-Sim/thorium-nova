@@ -3,8 +3,8 @@ import {useParams} from "react-router-dom";
 import {useThree} from "@react-three/fiber";
 import {useRef, Suspense, useEffect} from "react";
 import {Box3, Camera, Vector3} from "three";
-import {useStarmapStore} from "client/src/components/Starmap/starmapStore";
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
+
 import Starfield from "client/src/components/Starmap/Starfield";
 import {
   LightMinute,
@@ -26,6 +26,7 @@ const ACTION = CameraControlsClass.ACTION;
 const INTERSTELLAR_MAX_DISTANCE: LightYear = 2000;
 
 export function InterstellarMap({children}: {children: React.ReactNode}) {
+  const useStarmapStore = useGetStarmapStore();
   const controlsEnabled = useStarmapStore(s => s.cameraControlsEnabled);
   const cameraView = useStarmapStore(s => s.cameraView);
   const orbitControls = useRef<CameraControlsClass>(null);
@@ -100,6 +101,7 @@ export function InterstellarMenuButtons({
   const {pluginId} = useParams() as {
     pluginId: string;
   };
+  const useStarmapStore = useGetStarmapStore();
 
   const selectedObjectId = useStarmapStore(s => s.selectedObjectId);
   const cameraView = useStarmapStore(s => s.cameraView);
@@ -197,6 +199,8 @@ export const InterstellarPalette = ({
     description?: string | undefined;
   }) => Promise<void>;
 }) => {
+  const useStarmapStore = useGetStarmapStore();
+
   useEffect(() => {
     if (!selectedStar) {
       useStarmapStore.setState({selectedObjectId: null});

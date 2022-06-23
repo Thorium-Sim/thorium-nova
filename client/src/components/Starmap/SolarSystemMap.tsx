@@ -3,7 +3,7 @@ import {Suspense} from "react";
 import {useThree} from "@react-three/fiber";
 import {useEffect} from "react";
 import {CameraControls} from "./CameraControls";
-import {useStarmapStore} from "./starmapStore";
+import {useGetStarmapStore} from "./starmapStore";
 import CameraControlsClass from "camera-controls";
 import {
   astronomicalUnitToKilometer,
@@ -64,6 +64,7 @@ export function SolarSystemMap({
   children?: React.ReactNode;
 }) {
   const pluginId = useParams().pluginId;
+  const useStarmapStore = useGetStarmapStore();
 
   const {camera} = useThree();
   const controlsEnabled = useStarmapStore(s => s.cameraControlsEnabled);
@@ -128,6 +129,7 @@ export function SolarSystemMenuButtons({
   sceneRef: React.MutableRefObject<SceneRef | undefined>;
 }) {
   const [pluginId, solarSystemId] = useSystemIds();
+  const useStarmapStore = useGetStarmapStore();
 
   const selectedObjectId = useStarmapStore(s => s.selectedObjectId);
   const cameraView = useStarmapStore(s => s.cameraView);
@@ -194,6 +196,8 @@ export function SolarSystemMenuButtons({
 
 function AddStarMenu() {
   const [pluginId, solarSystemId] = useSystemIds();
+  const useStarmapStore = useGetStarmapStore();
+
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
@@ -245,6 +249,8 @@ function AddStarMenu() {
 
 function AddPlanetMenu() {
   const [pluginId, solarSystemId] = useSystemIds();
+  const useStarmapStore = useGetStarmapStore();
+
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
@@ -368,6 +374,8 @@ export function PaletteDisclosure({
 }
 
 function useSelectedObject() {
+  const useStarmapStore = useGetStarmapStore();
+
   const [pluginId, solarSystemId] = useSystemIds();
   const selectedObjectId = useStarmapStore(state => state.selectedObjectId);
   const systemData = useNetRequest("pluginSolarSystem", {
