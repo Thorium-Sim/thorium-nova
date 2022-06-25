@@ -188,7 +188,7 @@ export const flightInputs = {
           }
         });
       }
-      const {ship: shipEntity, shipSystems} = spawnShip(
+      const {ship: shipEntity, extraEntities} = spawnShip(
         shipTemplate,
         {
           name: ship.shipName,
@@ -201,7 +201,7 @@ export const flightInputs = {
         )
       );
 
-      shipSystems.forEach(s => context.flight?.ecs.addEntity(s));
+      extraEntities.forEach(s => context.flight?.ecs.addEntity(s));
       let theme = ship.theme || null;
       if (!theme) {
         theme = activePlugins.reduce(
@@ -243,7 +243,7 @@ export const flightInputs = {
   },
   spawnShip(context: DataContext) {
     const shipTemplate = context.server.plugins[0].aspects.ships[0];
-    const {ship: shipEntity, shipSystems} = spawnShip(
+    const {ship: shipEntity, extraEntities} = spawnShip(
       shipTemplate,
       {
         name: "Test Ship",
@@ -259,7 +259,7 @@ export const flightInputs = {
         context.flight?.pluginIds.includes(p.id)
       )
     );
-    shipSystems.forEach(s => context.flight?.ecs.addEntity(s));
+    extraEntities.forEach(s => context.flight?.ecs.addEntity(s));
     context.flight?.ecs.addEntity(shipEntity);
     pubsub.publish("starmapShips");
   },
