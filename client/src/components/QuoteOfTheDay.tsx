@@ -213,6 +213,10 @@ const quotes = [
   "The only reason for time is so that everything doesn't happen at once.",
   "Reality is merely an illusion, albeit a very persistent one.",
   "The true sign of intelligence is not knowledge but imagination.",
+  // Whimsey
+  "Perfect. That is to say, slightly flawed. The mark of a true gentleman.",
+  // Zodiac
+  "Always under the same sky.",
 ];
 
 const QuoteOfTheDay = () => {
