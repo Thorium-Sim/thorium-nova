@@ -46,8 +46,6 @@
     "src/pages/NotFound/astronaut.json",
     "src/pages/Releases/release-notes.json",
     "./package.json",
-    "../package.json",
-    "./src/pages/Config/Inventory/InventoryList.tsx",
-    "./src/pages/Config/Inventory/InventoryLayout.tsx"
+    "../package.json"
   ]
 }
