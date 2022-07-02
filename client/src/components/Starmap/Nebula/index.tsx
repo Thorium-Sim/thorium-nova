@@ -8,7 +8,7 @@ import {
   BoxBufferGeometry,
   Mesh,
 } from "three";
-import {useStarmapStore} from "../starmapStore";
+import {useGetStarmapStore} from "../starmapStore";
 import NebulaWorker from "./generateNebulaMap?worker";
 
 const radius = 1e20;
@@ -91,6 +91,7 @@ function Nebula() {
       }
     }
   }, []);
+  const useStarmapStore = useGetStarmapStore();
 
   const skyboxKey = useStarmapStore(s => s.skyboxKey);
   useEffect(() => {

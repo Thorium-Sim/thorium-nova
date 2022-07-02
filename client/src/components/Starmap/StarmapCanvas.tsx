@@ -10,16 +10,20 @@ import {useContextBridge} from "@react-three/drei";
 
 import {useQueryClient, QueryClientProvider} from "react-query";
 import {ThoriumContext} from "client/src/context/ThoriumContext";
+import {StarmapStoreContext} from "./starmapStore";
 
 const FAR = 1e27;
 
 export default function StarmapCanvas({children}: {children: ReactNode}) {
   const client = useQueryClient();
 
-  const ContextBridge = useContextBridge(ThoriumContext);
-  const Location = useContextBridge(UNSAFE_LocationContext);
-  const Navigation = useContextBridge(UNSAFE_NavigationContext);
-  const RouteContext = useContextBridge(UNSAFE_RouteContext);
+  const ContextBridge = useContextBridge(
+    ThoriumContext,
+    UNSAFE_LocationContext,
+    UNSAFE_NavigationContext,
+    UNSAFE_RouteContext,
+    StarmapStoreContext
+  );
 
   return (
     <Canvas
@@ -30,17 +34,9 @@ export default function StarmapCanvas({children}: {children: ReactNode}) {
       camera={{fov: 45, far: FAR}}
       mode="concurrent"
     >
-      <Navigation>
-        <Location>
-          <RouteContext>
-            <ContextBridge>
-              <QueryClientProvider client={client}>
-                {children}
-              </QueryClientProvider>
-            </ContextBridge>
-          </RouteContext>
-        </Location>
-      </Navigation>
+      <ContextBridge>
+        <QueryClientProvider client={client}>{children}</QueryClientProvider>
+      </ContextBridge>
     </Canvas>
   );
 }

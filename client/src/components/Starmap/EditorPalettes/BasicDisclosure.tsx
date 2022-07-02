@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useStarmapStore} from "../starmapStore";
+import {useGetStarmapStore} from "../starmapStore";
 import Button from "../../ui/Button";
 import {netSend} from "client/src/context/netSend";
 import {useNavigate} from "react-router-dom";
@@ -17,6 +17,7 @@ export function BasicDisclosure({
   object: {name: string; description: string; skyboxKey?: string};
   type: "system" | "star" | "planet";
 }) {
+  const useStarmapStore = useGetStarmapStore();
   const [pluginId, solarSystemId] = useSystemIds();
   const navigate = useNavigate();
   const updateName = React.useMemo(
