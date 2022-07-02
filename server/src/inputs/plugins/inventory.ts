@@ -31,10 +31,17 @@ export const pluginInventoryInputs = {
       inventory => inventory.name === params.inventoryId
     );
     if (!inventory) return;
-    plugin.aspects.ships.splice(plugin.aspects.inventory.indexOf(inventory), 1);
+    plugin.aspects.inventory.splice(
+      plugin.aspects.inventory.indexOf(inventory),
+      1
+    );
 
     await inventory?.removeFile();
     pubsub.publish("pluginInventory", {pluginId: params.pluginId});
+    pubsub.publish("pluginInventoryItem", {
+      pluginId: params.pluginId,
+      inventoryId: inventory.name,
+    });
   },
   async pluginInventoryUpdate(
     context: DataContext,
@@ -46,6 +53,7 @@ export const pluginInventoryInputs = {
       tags?: string[];
       plural?: string;
       volume?: CubicMeter;
+      durability?: number;
       continuous?: boolean;
       flags?: InstanceType<typeof InventoryPlugin>["flags"];
       image?: File | string;
@@ -66,7 +74,8 @@ export const pluginInventoryInputs = {
       inventory.continuous = params.continuous;
     if (params.flags) inventory.flags = params.flags;
     if (typeof params.plural === "string") inventory.plural = params.plural;
-
+    if (typeof params.durability === "number")
+      inventory.durability = params.durability;
     if (params.name !== inventory.name && params.name) {
       await inventory?.rename(params.name);
     }
@@ -82,6 +91,10 @@ export const pluginInventoryInputs = {
       await inventory?.rename(params.name);
     }
     pubsub.publish("pluginInventory", {pluginId: params.pluginId});
+    pubsub.publish("pluginInventoryItem", {
+      pluginId: params.pluginId,
+      inventoryId: inventory.name,
+    });
     return {inventoryId: inventory.name};
 
     async function moveFile(
