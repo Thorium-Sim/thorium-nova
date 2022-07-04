@@ -1,5 +1,5 @@
 import fastify from "fastify";
-import fastifyHttpProxy from "fastify-http-proxy";
+import fastifyHttpProxy from "@fastify/http-proxy";
 import {readFileSync} from "fs";
 import path from "path";
 import {rootPath} from "../utils/appPaths";

@@ -227,7 +227,7 @@ class Entity {
     if (!component) {
       this.addComponent(name, data);
     } else {
-      Object.assign(this.components[name], data);
+      Object.assign(component, data);
     }
   }
   /**

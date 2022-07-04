@@ -1,5 +1,4 @@
 import {parse} from "yaml";
-import {YAMLSemanticError} from "yaml/util";
 import {promises as fs} from "fs";
 import {thoriumPath} from "./appPaths";
 import FastGlob from "fast-glob";
@@ -11,8 +10,8 @@ export async function loadFolderYaml<T>(objectGlob: string) {
     try {
       const manifest = parse(await fs.readFile(aspectPath, "utf8"));
       files.push(manifest);
-    } catch (err) {
-      if (err instanceof YAMLSemanticError) {
+    } catch (err: any) {
+      if (err) {
         console.error(
           `Error parsing ${aspectPath
             .replace(`${thoriumPath}/plugins/`, "")

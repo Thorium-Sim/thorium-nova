@@ -7,6 +7,5 @@ export class PassengerDestinationSystem extends System {
   frequency = 10;
   update(entity: Entity, elapsed: number) {
     const elapsedRatio = elapsed / 1000;
-    // console.log("Lets go!");
   }
 }

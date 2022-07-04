@@ -67,9 +67,9 @@ export async function startServer() {
   const proxy = buildHttpsProxy(PORT);
 
   try {
-    await app.listen(PORT, "0.0.0.0");
+    await app.listen({host: "0.0.0.0", port: PORT});
     if (process.env.NODE_ENV === "production") {
-      await proxy.listen(HTTPSPort, "0.0.0.0");
+      await proxy.listen({port: HTTPSPort, host: "0.0.0.0"});
     }
     console.info(chalk.greenBright(`Access app at http://localhost:${PORT}`));
     console.info(
