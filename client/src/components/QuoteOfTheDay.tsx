@@ -217,6 +217,9 @@ const quotes = [
   "Perfect. That is to say, slightly flawed. The mark of a true gentleman.",
   // Zodiac
   "Always under the same sky.",
+  // 🤷
+  "I was just dreaming a little for you because all my dreams are gone.",
+  "Danger is very real, but fear is a choice.",
 ];
 
 const QuoteOfTheDay = () => {
