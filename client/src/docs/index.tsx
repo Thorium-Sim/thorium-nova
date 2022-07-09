@@ -80,7 +80,8 @@ function Search() {
   );
 }
 
-const ROUTES = import.meta.globEager("/src/docs/**/*.{tsx,jsx,md,mdx}");
+// const ROUTES = import.meta.globEager("/src/docs/**/*.{tsx,jsx,md,mdx}");
+const ROUTES: {[key: string]: any} = {};
 
 type RouteType = {
   path: string;

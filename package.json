@@ -13,7 +13,7 @@
   "main": "dist/electron.js",
   "scripts": {
     "dev": "concurrently --kill-others --names \"client,server\" -c \"blue.bold,magenta.bold\" \"npm run dev --workspace=client\" \"npm run dev --workspace=server\"",
-    "build": "concurrently --names \"client,server,desktop\" -c \"blue.bold,magenta.bold,green.bold\" \"npm run build --workspace=client\" \"npm run build --workspace=server\" \"npm run build --workspace=desktop\"",
+    "build": "concurrently -n \"client,server,desktop\" -c \"blue.bold,magenta.bold,green.bold\" \"npm run build --workspace=client\" \"npm run build --workspace=server\" \"npm run build --workspace=desktop\"",
     "start": "NODE_ENV=production node dist/index.js",
     "test": "is-ci-cli \"test:coverage\" \"test:watch\"",
     "test:coverage": "jest --coverage",
@@ -138,7 +138,7 @@
     "@typescript-eslint/parser": "^5.30.5",
     "alias-hq": "^5.4.0",
     "concurrently": "^7.2.2",
-    "electron": "^19.0.7",
+    "electron": "^19.0.8",
     "electron-builder": "^23.1.0",
     "electron-builder-notarize": "^1.5.0",
     "esbuild": "^0.14.48",

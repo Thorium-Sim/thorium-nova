@@ -6,7 +6,7 @@ const Checkbox = (
     HTMLInputElement
   > & {label: ReactNode; helperText?: string}
 ) => {
-  const {label, ...otherProps} = props;
+  const {label, helperText, ...otherProps} = props;
   return (
     <>
       <label className="flex items-center select-none">
@@ -17,10 +17,8 @@ const Checkbox = (
         />
         {label}
       </label>
-      {props.helperText && (
-        <p className="text-gray-400 text-sm leading-tight mb-2">
-          {props.helperText}
-        </p>
+      {helperText && (
+        <p className="text-gray-400 text-sm leading-tight mb-2">{helperText}</p>
       )}
     </>
   );

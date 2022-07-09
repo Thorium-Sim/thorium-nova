@@ -74,7 +74,7 @@ async function buildServer() {
       process.exit(1);
     });
   await bundleDefaultPlugin();
-  fs.mkdirSync("../dist/resources");
+  fs.mkdirSync("../dist/resources", {recursive: true});
   fs.copyFileSync(
     "../desktop/resources/server.cert",
     "../dist/resources/server.cert"

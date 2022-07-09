@@ -136,7 +136,7 @@ const Star: React.FC<{
           <meshBasicMaterial attach="material" color={0x000000} />
         </mesh>
       </group>
-      {viewingMode !== "core" && !noLensFlare && <LensFlare />}
+      {/* {viewingMode !== "core" && !noLensFlare && <LensFlare />} */}
     </group>
   );
 };

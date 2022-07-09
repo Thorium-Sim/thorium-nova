@@ -52,7 +52,7 @@ function makeLineGeometry(pointList: Vector3[]) {
   return geometry;
 }
 
-function getModelViewMatrix(mesh: Mesh | undefined, camera: Camera) {
+function getModelViewMatrix(mesh: Mesh | undefined | null, camera: Camera) {
   if (!mesh) return new Matrix4();
   return new Matrix4().multiplyMatrices(
     camera.matrixWorldInverse,
@@ -90,7 +90,6 @@ const Starfield: React.FC<{count?: number; radius?: number}> = ({
     function makeStarfieldMaterial(
       input: {color1?: string; color2?: string} = {}
     ) {
-      if (!mesh.current) return;
       const uniforms = {
         color1: {
           type: "c",
