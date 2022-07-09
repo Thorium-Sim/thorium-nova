@@ -15,7 +15,7 @@ try {
 const useFlash = () => {
   const [flash, setFlash] = useState(false);
   const timeoutRef = useRef<number | undefined>();
-  const doFlash = useCallback((duration, lastTime = Date.now()) => {
+  const doFlash = useCallback((duration: number, lastTime = Date.now()) => {
     clearTimeout(timeoutRef.current);
     duration = duration || duration === 0 ? duration : 1000;
     if (duration <= 0) {
@@ -35,8 +35,7 @@ const useFlash = () => {
 const useSpark = () => {
   const [sparks, setSparks] = useState<string[]>([]);
   const timeoutRef = useRef<number[]>([]);
-  const doSpark = useCallback(duration => {
-    duration = duration || 5000;
+  const doSpark = useCallback((duration: number = 5000) => {
     const id = uuid();
     setSparks(sparks => [...sparks, id]);
     const timeout = setTimeout(() => {

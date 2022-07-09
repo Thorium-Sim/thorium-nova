@@ -3,7 +3,7 @@ import reactRefresh from "@vitejs/plugin-react-refresh";
 import tsconfigPaths from "vite-tsconfig-paths";
 import reactJsx from "vite-react-jsx";
 import releasesPlugin from "./vite-plugins/releases";
-import mdx from "vite-plugin-mdx";
+// import mdx from "vite-plugin-mdx";
 import remarkPrism from "remark-prism";
 import {remarkMdxImages} from "remark-mdx-images";
 import path from "path";
@@ -26,7 +26,7 @@ export default defineConfig(async () => {
       tsconfigPaths(),
       reactJsx(),
       releasesPlugin(),
-      mdx(options),
+      // mdx(options),
     ],
     build: {
       outDir: "../dist/public",

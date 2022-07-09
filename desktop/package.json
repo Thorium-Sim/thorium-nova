@@ -11,15 +11,15 @@
   "keywords": [],
   "author": "Alex Anderson",
   "devDependencies": {
-    "@types/bonjour": "^3.5.9",
+    "@types/bonjour": "^3.5.10",
     "copy-dir-cli": "^0.0.3",
-    "electron-esbuild": "^3.0.0"
+    "electron-esbuild": "^5.0.2"
   },
   "dependencies": {
     "bonjour": "^3.5.0",
     "electron-better-ipc": "^2.0.1",
-    "electron-store": "^8.0.1",
-    "electron-updater": "^5.0.1",
+    "electron-store": "^8.0.2",
+    "electron-updater": "^5.0.5",
     "electron-util": "^0.17.2"
   }
 }

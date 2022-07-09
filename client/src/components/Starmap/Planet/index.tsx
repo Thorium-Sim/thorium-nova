@@ -13,11 +13,6 @@ import {useFrame} from "@react-three/fiber";
 import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
 import {Kilometer} from "server/src/utils/unitTypes";
 import {OrbitLine} from "../OrbitContainer";
-import type {
-  IdentityComponent,
-  IsPlanetComponent,
-  SatelliteComponent,
-} from "server/src/components/list";
 
 const PlanetSprite = ({color = "white"}) => {
   const spriteMap = useTexture(Dot);
@@ -119,8 +114,8 @@ export function Planet({
   const wireframe = false;
 
   const labelRef = useRef<Group>(null);
-  const planetSpriteRef = useRef<Group>();
-  const planetMeshRef = useRef<Group>();
+  const planetSpriteRef = useRef<Group>(null);
+  const planetMeshRef = useRef<Group>(null);
 
   useFrame(({camera}) => {
     if (labelRef.current) {

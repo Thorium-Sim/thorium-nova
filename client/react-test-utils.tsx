@@ -1,10 +1,13 @@
-import React, {Suspense} from "react";
+import React, {ReactNode, Suspense} from "react";
 import {render as rtlRender, RenderOptions} from "@testing-library/react";
 import {MemoryRouter as Router} from "react-router-dom";
 import {MockNetRequestContext} from "./src/context/useNetRequest";
 import {AllRequestReturns} from "server/src/netRequests";
 import {QueryClient, QueryClientProvider} from "react-query";
 import {ThoriumContext} from "./src/context/ThoriumContext";
+
+// @ts-expect-error
+global.IS_REACT_ACT_ENVIRONMENT = true;
 
 let netSendResponse: {response: any} = {response: ""};
 const netSendSpy = jest.fn((input, params) => netSendResponse);
@@ -38,7 +41,7 @@ async function render(
   options?: Omit<RenderOptions, "queries"> & OptionsInterface
 ) {
   const {initialRoutes = ["/"]} = options || {};
-  const Wrapper: React.FC = ({children}) => {
+  const Wrapper = ({children}: {children: ReactNode}) => {
     return (
       <Suspense fallback={<p>Suspended in test</p>}>
         <ThoriumContext.Provider value={{} as any}>
@@ -91,10 +94,11 @@ async function render(
     );
   };
 
+  const renderOutput = rtlRender(ui, {wrapper: Wrapper, ...options});
   return {
     netSendSpy,
     setNetSendResponse,
-    ...rtlRender(ui, {wrapper: Wrapper, ...options}),
+    ...renderOutput,
   };
 }
 

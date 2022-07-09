@@ -65,9 +65,9 @@ const Star: React.FC<{
     () => getUniforms({map: texture, color1, color2}),
     [color1, color2, texture]
   );
-  const shader = React.useRef<Mesh>();
-  const starMesh = React.useRef<Group>();
-  const starSprite = React.useRef<Group>();
+  const shader = React.useRef<Mesh>(null);
+  const starMesh = React.useRef<Group>(null);
+  const starSprite = React.useRef<Group>(null);
 
   const viewingMode = useStarmapStore(state => state.viewingMode);
 
@@ -136,7 +136,7 @@ const Star: React.FC<{
           <meshBasicMaterial attach="material" color={0x000000} />
         </mesh>
       </group>
-      {viewingMode !== "core" && !noLensFlare && <LensFlare />}
+      {/* {viewingMode !== "core" && !noLensFlare && <LensFlare />} */}
     </group>
   );
 };

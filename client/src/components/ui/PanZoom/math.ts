@@ -49,8 +49,8 @@ export const TransformMatrix = (
   transformationParameters: TransformationParameters,
   centerCoordinates: Coordinates
 ): TransformationMatrix => {
-  const { angle, scale, offsetX, offsetY } = transformationParameters;
-  const { x: centerX, y: centerY } = centerCoordinates;
+  const {angle, scale, offsetX, offsetY} = transformationParameters;
+  const {x: centerX, y: centerY} = centerCoordinates;
   const theta = (angle * Math.PI) / 180;
   const a = Math.cos(theta) * scale;
   const b = Math.sin(theta) * scale;
@@ -58,7 +58,7 @@ export const TransformMatrix = (
   const d = a;
   const transformX = -centerX * a + centerY * b + centerX * scale;
   const transformY = centerX * c - centerY * d + centerY * scale;
-  return { a, b, c, d, x: transformX + offsetX, y: transformY + offsetY };
+  return {a, b, c, d, x: transformX + offsetX, y: transformY + offsetY};
 };
 
 const applyTransformMatrix =
@@ -82,7 +82,7 @@ export const getTransformedBoundingBox = (
   transformationParameters: TransformationParameters,
   boundingBox: BoundingBox
 ): BoundingBox => {
-  const { top, left, width, height } = boundingBox;
+  const {top, left, width, height} = boundingBox;
   const center = {
     x: width / 2,
     y: height / 2,
@@ -133,7 +133,7 @@ export const boundCoordinates = (
   offsetX: number = 0,
   offsetY: number = 0
 ): BoundCoordinates => {
-  const { top, left, width, height } = boundingBox;
+  const {top, left, width, height} = boundingBox;
   // check that computed are inside boundaries otherwise set to the bounding box limits
   let boundX = left;
   let boundY = top;

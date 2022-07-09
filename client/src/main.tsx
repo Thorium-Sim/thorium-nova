@@ -1,4 +1,4 @@
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 import "./theme.css";
 import App from "./App";
 import {initializeTabId} from "@thorium/tab-id";
@@ -34,4 +34,6 @@ window.addEventListener(
   false
 );
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+  <App />
+);

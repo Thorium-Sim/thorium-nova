@@ -1,14 +1,14 @@
 import fastify from "fastify";
-import cookies from "fastify-cookie";
-import staticServe from "fastify-static";
-import cors from "fastify-cors";
+import cookies from "@fastify/cookie";
+import staticServe from "@fastify/static";
+import cors from "@fastify/cors";
 import path from "path";
 import {thoriumPath, rootPath} from "../utils/appPaths";
 import {promises as fs, createWriteStream} from "fs";
 import {pipeline} from "stream/promises";
 import uniqid from "@thorium/uniqid";
 import os from "os";
-import multipart, {MultipartFile} from "fastify-multipart";
+import multipart, {MultipartFile} from "@fastify/multipart";
 
 const isHeadless = !process.env.FORK;
 export default function buildHTTPServer({

@@ -177,9 +177,9 @@ function SolarSystemWrapper() {
 function StarmapShip(props: Pick<Entity, "id" | "components">) {
   const model = useShipModel(props.components.isShip?.assets.model);
 
-  const group = useRef<Group>();
-  const shipMesh = useRef<Group>();
-  const shipSprite = useRef<Group>();
+  const group = useRef<Group>(null);
+  const shipMesh = useRef<Group>(null);
+  const shipSprite = useRef<Group>(null);
   const context = useContext(ThoriumContext);
   // const lineRef = useRef<Line2>(null);
 
@@ -336,7 +336,7 @@ const ShipSprite = ({
   const spriteMap = maskTextureAsset.read(spriteAsset);
 
   const scale = 1 / 50;
-  const ref = useRef<Sprite>();
+  const ref = useRef<Sprite>(null);
   useFrame(() => {
     const isSelected = false;
     // TODO May 24 2022 - this is used for showing that a ship is selected.

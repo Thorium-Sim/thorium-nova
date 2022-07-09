@@ -32,7 +32,6 @@ export default function StarmapCanvas({children}: {children: ReactNode}) {
       }}
       gl={{antialias: true, logarithmicDepthBuffer: true}}
       camera={{fov: 45, far: FAR}}
-      mode="concurrent"
     >
       <ContextBridge>
         <QueryClientProvider client={client}>{children}</QueryClientProvider>

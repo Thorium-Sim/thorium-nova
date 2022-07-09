@@ -32,6 +32,7 @@ type OnStateChangeData = {
 };
 
 type Props = {
+  children: React.ReactNode;
   zoomSpeed: number;
   doubleZoomSpeed: number;
   disabled?: boolean;

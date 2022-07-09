@@ -4,7 +4,7 @@ import {pubsub} from "../utils/pubsub";
 import {Entity} from "../utils/ecs";
 import {SnapshotInterpolation} from "@geckos.io/snapshot-interpolation";
 import {encode} from "@msgpack/msgpack";
-import {SocketStream} from "fastify-websocket";
+import {SocketStream} from "@fastify/websocket";
 import requests, {AllRequestNames} from "../netRequests";
 import {BaseClient} from "./BaseClient";
 import {randomNameGenerator} from "../utils/randomNameGenerator";

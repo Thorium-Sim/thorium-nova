@@ -38,6 +38,7 @@ export const OrbitLine: React.FC<{radiusX: number; radiusY: number}> = ({
 };
 
 interface OrbitContainerProps {
+  children: React.ReactNode;
   radius: number;
   eccentricity: number;
   orbitalArc: number;

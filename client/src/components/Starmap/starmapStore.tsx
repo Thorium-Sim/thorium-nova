@@ -38,7 +38,6 @@ export const StarmapStoreProvider = ({children}: {children: ReactNode}) => {
   const [useStarmapStore] = useState<ReturnType<typeof createStarmapStore>>(
     () => createStarmapStore()
   );
-  console.log(useStarmapStore);
   return (
     <StarmapStoreContext.Provider value={useStarmapStore}>
       {children}

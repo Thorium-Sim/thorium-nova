@@ -11,7 +11,7 @@ import {FlightDataModel} from "./classes/FlightDataModel";
 import {promises as fs, existsSync} from "fs";
 import {unzip} from "./utils/unzipFolder";
 import {buildHttpsProxy} from "./init/httpsProxy";
-
+import fastify from "fastify";
 setBasePath(thoriumPath);
 const isHeadless = !process.env.FORK;
 
@@ -67,9 +67,9 @@ export async function startServer() {
   const proxy = buildHttpsProxy(PORT);
 
   try {
-    await app.listen(PORT, "0.0.0.0");
+    await app.listen({port: PORT});
     if (process.env.NODE_ENV === "production") {
-      await proxy.listen(HTTPSPort, "0.0.0.0");
+      await proxy.listen({port: HTTPSPort});
     }
     console.info(chalk.greenBright(`Access app at http://localhost:${PORT}`));
     console.info(

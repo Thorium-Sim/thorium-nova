@@ -1,6 +1,6 @@
 import React from "react";
 import TextTexture from "@seregpie/three.text-texture";
-import {AdditiveBlending, Sprite} from "three";
+import {AdditiveBlending, Mesh, Sprite} from "three";
 import {useFrame} from "@react-three/fiber";
 import {useGetStarmapStore} from "../starmapStore";
 
@@ -21,6 +21,8 @@ const SystemLabel: React.FC<{
 
   React.useEffect(() => {
     if (text.current) {
+      if (Array.isArray(text.current.material)) return;
+
       text.current.material.opacity = 0.5;
     }
   }, []);
@@ -37,12 +39,13 @@ const SystemLabel: React.FC<{
     return texture;
   }, [name, color]);
 
-  const text = React.useRef<Sprite>();
+  const text = React.useRef<Mesh>(null);
   const selected = React.useRef(false);
   useFrame(({camera}) => {
     const selectedObjectId = useStarmapStore.getState().selectedObjectId;
     const isSelected = systemId === selectedObjectId;
     if (text.current) {
+      if (Array.isArray(text.current.material)) return;
       if (isSelected) {
         selected.current = true;
         text.current.material.opacity = 1;
