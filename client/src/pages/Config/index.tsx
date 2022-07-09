@@ -8,6 +8,7 @@ const ShipsConfig = lazy(() => import("./Ships"));
 const ThemesConfig = lazy(() => import("./Themes"));
 const StarmapConfig = lazy(() => import("./Starmap"));
 const ShipSystemConfig = lazy(() => import("./ShipSystems"));
+const InventoryConfig = lazy(() => import("./Inventory"));
 
 export default function ConfigRoutes() {
   const client = useNetRequest("client");
@@ -23,6 +24,7 @@ export default function ConfigRoutes() {
       <Route path="/:pluginId/themes/*" element={<ThemesConfig />} />
       <Route path="/:pluginId/starmap/*" element={<StarmapConfig />} />
       <Route path="/:pluginId/systems/*" element={<ShipSystemConfig />} />
+      <Route path="/:pluginId/inventory/*" element={<InventoryConfig />} />
     </Routes>
   );
 }

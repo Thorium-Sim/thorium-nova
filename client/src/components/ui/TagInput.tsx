@@ -1,4 +1,4 @@
-import React from "react";
+import React, {ReactNode} from "react";
 import {FaTimes} from "react-icons/fa";
 import Button from "./Button";
 
@@ -14,7 +14,7 @@ const Tag: React.FC<{tag: string; onClick: () => void}> = ({tag, onClick}) => {
   );
 };
 const TagInput: React.FC<{
-  label: string;
+  label: ReactNode;
   tags: string[];
   disabled?: boolean;
   onRemove: (t: string) => void;

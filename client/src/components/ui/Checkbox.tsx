@@ -18,7 +18,7 @@ const Checkbox = (
         {label}
       </label>
       {helperText && (
-        <p className="text-gray-400 text-sm leading-tight mb-2">{helperText}</p>
+        <p className="text-white text-sm leading-tight mb-2">{helperText}</p>
       )}
     </>
   );
