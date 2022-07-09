@@ -22,7 +22,7 @@ const DialogContext = React.createContext<
   }: DialogI) => Promise<boolean | string>
 >(async () => false);
 
-export const AlertDialog: React.FC = ({children}) => {
+export const AlertDialog = ({children}: {children: React.ReactNode}) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [header, setHeader] = React.useState("");
   const [body, setBody] = React.useState("");

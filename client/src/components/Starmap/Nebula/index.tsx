@@ -43,8 +43,8 @@ function generateMaterial() {
 
 function Nebula() {
   const activeMesh = React.useRef<"primary" | "secondary">("secondary");
-  const primaryMesh = React.useRef<Mesh>();
-  const secondaryMesh = React.useRef<Mesh>();
+  const primaryMesh = React.useRef<Mesh>(null);
+  const secondaryMesh = React.useRef<Mesh>(null);
 
   const [primaryMaterials, secondaryMaterials] = React.useMemo(
     () => [

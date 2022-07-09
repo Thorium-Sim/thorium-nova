@@ -47,7 +47,7 @@ function useMeasure<Element extends HTMLElement = HTMLElement>(): [
   });
   const [node, setNode] = useState<Element>();
 
-  const ref = useCallback(node => {
+  const ref = useCallback((node: Element) => {
     setNode(node);
   }, []);
 

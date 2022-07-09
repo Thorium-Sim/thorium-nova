@@ -12,8 +12,8 @@ const Selected: React.FC = React.memo(() => {
     return geometry;
   }, []);
 
-  const ref1 = React.useRef<LineLoop>();
-  const ref2 = React.useRef<LineLoop>();
+  const ref1 = React.useRef<LineLoop>(null);
+  const ref2 = React.useRef<LineLoop>(null);
   useFrame(() => {
     if (!ref1.current || !ref2.current) return;
     ref1.current.rotation.x += 0.01;

@@ -1,9 +1,9 @@
+import * as React from "react";
 import Button from "@thorium/ui/Button";
 import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {fromDate} from "dot-beat-time";
-import * as React from "react";
 
 export default function OfficersLog() {
   const client = useNetRequest("client");

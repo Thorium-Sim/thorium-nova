@@ -1,4 +1,3 @@
-import * as React from "react";
 import Button from "../../ui/Button";
 import {netSend} from "client/src/context/netSend";
 import UploadWell from "@thorium/ui/UploadWell";
