@@ -2,8 +2,6 @@
 title: Card & Core Data
 ---
 
-import DevLink from "../DevLink";
-
 # Card & Core Creation
 
 Cards and cores are the foundational UI elements for Thorium Nova. Cards are the
@@ -37,7 +35,7 @@ For more information and a reference about pubsub channels, see the
 [Pubsub channel reference](pubsub-channel-reference) document.
 
 > **IMPORTANT:** Make sure you properly export your data functions in your card
-> from the "<DevLink>/client/src/cards/dataList.ts</DevLink>" file.
+> from the "/client/src/cards/dataList.ts" file.
 
 ### Defining Card Requests
 
@@ -160,9 +158,9 @@ the following data sent:
 That means the rest of the data needs to be collected with a subscription.
 
 The data for each client is sent by the
-"<DevLink>/server/src/systems/DataStreamSystem.ts</DevLink>" ECS system, which
-also defines how often it is sent. On this interval, the data is processed and
-encoded in a way that makes it easy to do
+"/server/src/systems/DataStreamSystem.ts" ECS system, which also defines how
+often it is sent. On this interval, the data is processed and encoded in a way
+that makes it easy to do
 [snapshot interpolation](https://github.com/geckosio/snapshot-interpolation#readme)
 on the client.
 
@@ -223,7 +221,7 @@ Inputs are the way clients can trigger mutations to server data. Inputs are
 messages sent from the client to the server over WebSockets to trigger events.
 Since many cards may use the same input, and to make it easier to keep track of
 all of the `pubsub.publish` calls, inputs are defined separately from cards. The
-list of all inputs is kept in "<DevLink>/server/src/inputs/list.ts</DevLink>".
+list of all inputs is kept in "/server/src/inputs/list.ts".
 
 When a client needs to update server data, it sends a message to the server with
 the name of the input and any appropriate parameters as a JavaScript object.

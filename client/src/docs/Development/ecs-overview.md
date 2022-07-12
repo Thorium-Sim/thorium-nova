@@ -2,8 +2,6 @@
 title: ECS Overview
 ---
 
-import DevLink from "../DevLink";
-
 # ECS Overview
 
 [Entity Component System](https://en.wikipedia.org/wiki/Entity_component_system)
@@ -43,9 +41,8 @@ Since one system might depend on the results of another system's update, the
 order that systems run matters.
 
 Each flight has its own ECS world. When a flight is created, it will pull the
-list of systems from "<DevLink>/server/src/systems/index.ts</DevLink>" and
-instantiate them, and create any initial entities and assign them their
-components.
+list of systems from "/server/src/systems/index.ts" and instantiate them, and
+create any initial entities and assign them their components.
 
 > Note: Thorium Nova's ECS framework is currently only used on the server side,
 > not the client side. This could change in the future, but for now it makes
@@ -61,5 +58,4 @@ Adding new data structures or simulations usually looks like this:
 - Factory functions can be created for common entity types.
 - [Create a new system](ecs-system) or change the test function or update
   function of an existing system.
-- Make sure any new systems are listed in
-  "<DevLink>/server/src/systems/index.ts</DevLink>"
+- Make sure any new systems are listed in "/server/src/systems/index.ts"

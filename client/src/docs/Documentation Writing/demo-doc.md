@@ -3,8 +3,6 @@ title: Demo Doc
 order: 999
 ---
 
-import Button from "../../components/ui/Button";
-
 # Demo Doc
 
 This is a doc to demonstrate different syntax and options available in the
@@ -24,16 +22,6 @@ order: 1
 
 # Demo Doc
 ```
-
-## MDX React Component Import
-
-If your doc uses the `.mdx` extension, you can import React components from
-elsewhere in the app and run it here. For example, here is a Thorium button:
-
-<Button onClick={() => alert("Hi there!")}>Hi there!</Button>
-
-> Note that you can't use fancy `@thorium/ui` paths here, since the MDX import
-> doesn't recognize them. You have to use a full relative path to the component.
 
 ## Images
 

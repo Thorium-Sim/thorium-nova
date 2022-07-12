@@ -1,4 +1,5 @@
 import * as React from "react";
+import {renderToString} from "react-dom/server";
 import {Link, NavLink, Route, Routes, useLocation} from "react-router-dom";
 import "prismjs/themes/prism-tomorrow.css";
 import Menubar from "@thorium/ui/Menubar";
@@ -80,22 +81,21 @@ function Search() {
   );
 }
 
-// const ROUTES = import.meta.globEager("/src/docs/**/*.{tsx,jsx,md,mdx}");
-const ROUTES: {[key: string]: any} = {};
+const ROUTES = import.meta.globEager("/src/docs/**/*.{tsx,jsx,md,mdx}");
 
 type RouteType = {
   path: string;
-  component: React.ComponentType;
   content: string;
   section: string;
   frontmatter: {
     title: string;
     order: number;
   };
+  toc: {level: "1" | "2" | "3" | "4" | "5" | "6"; content: string}[];
 };
 function isRoute(route: any): route is RouteType {
   if (!route) return false;
-  return route.path && route.component;
+  return route.path && route.content;
 }
 
 export const routes = Object.keys(ROUTES)
@@ -105,15 +105,15 @@ export const routes = Object.keys(ROUTES)
       .replace(/^\/(.*)$/g, "$1")
       .replace(/\[\.{3}.+\]/, "*")
       .replace(/\[(.+)\]/, ":$1");
-    if (!ROUTES[route].default) return null;
+    if (!ROUTES[route].html) return null;
     const routeParts = path.split("/");
     if (routeParts.length <= 1) return null;
     return {
       path: path.toLowerCase().replace(/\s/g, "-"),
-      component: ROUTES[route].default,
-      content: ROUTES[route].content,
+      content: ROUTES[route].html,
       section: routeParts[0],
-      frontmatter: ROUTES[route].frontmatter,
+      frontmatter: ROUTES[route].attributes,
+      toc: ROUTES[route].toc,
     };
   })
   .filter(isRoute);
@@ -124,116 +124,61 @@ routes.forEach(route => {
     route.content
   );
 });
+
 type Heading = {
   title: string;
   id: string;
   level: "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-  children: Heading[];
-  parent: Heading;
 };
 const TOCItem = ({
   title,
   id,
   level,
-  children,
   scrollToHeading,
-}: Heading & {scrollToHeading: (id: string) => void}) => (
-  <li>
-    <a
-      href={`#${id}`}
-      className={`mb-2 text-purple-200 hover:text-purple-400 block ${
-        level === "h2"
-          ? "text-2xl"
-          : level === "h3"
-          ? "text-xl"
-          : level === "h4"
-          ? "text-lg"
-          : "text-base"
-      }`}
-      onClick={e => {
-        e.preventDefault();
-        scrollToHeading(id);
-      }}
-    >
-      {title}
-    </a>
-    {children.length > 0 && (
-      <ul className="ml-4">
-        {children.map(child => (
-          <TOCItem
-            key={child.id}
-            {...child}
-            scrollToHeading={scrollToHeading}
-          />
-        ))}
-      </ul>
-    )}
-  </li>
-);
+}: Heading & {scrollToHeading: (id: string) => void}) => {
+  if (level === "h1") return null;
+  return (
+    <li>
+      <a
+        href={`#${id}`}
+        className={`mb-2 text-purple-200 hover:text-purple-400 block ${
+          level === "h2"
+            ? "text-2xl"
+            : level === "h3"
+            ? "text-xl"
+            : level === "h4"
+            ? "text-lg"
+            : "text-base"
+        }`}
+        onClick={e => {
+          e.preventDefault();
+          scrollToHeading(id);
+        }}
+      >
+        {title}
+      </a>
+    </li>
+  );
+};
 const TOC = function TOC({
   pathname,
+  toc,
   scrollToHeading,
-  docRef,
 }: {
   pathname: string;
   scrollToHeading: (id: string) => void;
-  docRef: React.RefObject<HTMLDivElement>;
+  toc: {level: "1" | "2" | "3" | "4" | "5" | "6"; content: string}[];
 }) {
-  const [current, setCurrent] = React.useState<Heading | null>(null);
-  React.useEffect(() => {
-    const parentHeading: Heading = {
-      title: "",
-      id: "",
-      level: "h1",
-      children: [],
-      parent: null!,
-    };
-    parentHeading.parent = parentHeading;
-    let currentHeading: Heading = parentHeading;
-    docRef.current?.querySelectorAll("h2,h3,h4,h5,h6").forEach((h, i) => {
-      if (!(h instanceof HTMLHeadingElement)) return;
-      const heading: Heading = {
-        title: h.innerText,
-        id: h.id,
-        level: h.tagName.toLowerCase() as
-          | "h1"
-          | "h2"
-          | "h3"
-          | "h4"
-          | "h5"
-          | "h6",
-        children: [] as Heading[],
-        parent: null!,
-      };
-      if (currentHeading.level === heading.level) {
-        currentHeading.parent.children.push(heading);
-        heading.parent = currentHeading.parent;
-        currentHeading = heading;
-      } else if (currentHeading.level < heading.level) {
-        heading.parent = currentHeading;
-        currentHeading.children.push(heading);
-        currentHeading = heading;
-      } else {
-        while (currentHeading.level > heading.level) {
-          if (!currentHeading.parent) break;
-          currentHeading = currentHeading.parent;
-        }
-        heading.parent = currentHeading.parent;
-        heading.parent.children.push(heading);
-        currentHeading = heading;
-      }
-    });
-    setCurrent(parentHeading);
-  }, [pathname, docRef]);
-  if (!current) return null;
   return (
     <div className="toc">
       <h2 className="font-bold text-3xl mb-4">Table of Contents</h2>
       <ul className="ml-2">
-        {current.children.map(child => (
+        {toc.map(child => (
           <TOCItem
-            key={child.id}
-            {...child}
+            key={child.content}
+            title={child.content}
+            id={child.content.toLowerCase().replace(/\s/g, "-")}
+            level={`h${child.level}`}
             scrollToHeading={scrollToHeading}
           />
         ))}
@@ -326,8 +271,14 @@ export default function DocLayout() {
           >
             <div className="prose prose-lg mx-auto">
               <Routes>
-                {routes.map(({path, component: Component = React.Fragment}) => (
-                  <Route key={path} path={path} element={<Component />} />
+                {routes.map(({path, content}) => (
+                  <Route
+                    key={path}
+                    path={path}
+                    element={
+                      <div dangerouslySetInnerHTML={{__html: content}} />
+                    }
+                  />
                 ))}
               </Routes>
             </div>
@@ -335,11 +286,21 @@ export default function DocLayout() {
         </article>
         <aside className="flex-1 overflow-y-auto px-4 py-8 text-white w-full max-w-sm bg-black/60 backdrop-filter backdrop-blur">
           <Search />
-          <TOC
-            pathname={location.pathname}
-            docRef={docRef}
-            scrollToHeading={scrollToHeading}
-          />
+          <Routes>
+            {routes.map(({path, toc}) => (
+              <Route
+                key={path}
+                path={path}
+                element={
+                  <TOC
+                    pathname={location.pathname}
+                    toc={toc}
+                    scrollToHeading={scrollToHeading}
+                  />
+                }
+              />
+            ))}
+          </Routes>
         </aside>
       </div>
     </div>

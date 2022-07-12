@@ -2,8 +2,6 @@
 title: ECS Components
 ---
 
-import DevLink from "../DevLink";
-
 # ECS Components
 
 ECS Components are the building blocks of entities. They define the data
@@ -12,7 +10,7 @@ structures can be assigned to entities to make them more than just an ID.
 ## Defining Components
 
 Components should extend from the `Component` class defined in
-"<DevLink>/server/src/components/utils.ts</DevLink>" and be placed inside the
+"/server/src/components/utils.ts" and be placed inside the
 `/server/src/components` folder or a sub-folder. Every component should includ a
 static `id` which is a literal string type. Using `as const` here is helpful.
 

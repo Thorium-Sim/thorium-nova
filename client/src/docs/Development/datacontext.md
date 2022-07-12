@@ -2,8 +2,6 @@
 title: DataContext
 ---
 
-import DevLink from "../DevLink";
-
 # DataContext
 
 To keep implementation details decoupled, the context for every data fetching
@@ -11,7 +9,7 @@ function and every server input is passed in as a parameter called
 `DataContext`. This object represents data and methods associated with a
 specific client that is making the request and should be available any time
 there's data fetching happening. The DataContext is defined in
-"<DevLink>/server/src/utils/DataContext.ts/</DevLink>".
+"/server/src/utils/DataContext.ts/".
 
 ## `clientId`
 

@@ -2,8 +2,6 @@
 title: Inputs
 ---
 
-import DevLink from "../DevLink";
-
 # Inputs
 
 Inputs define the messages that can be sent from any client to the server. The
@@ -64,18 +62,18 @@ export const clientInputs = {
 ```
 
 Once the input is defined, it should be exported from the
-"<DevLink>/server/src/inputs/list.ts</DevLink>" file. Exporting a `const` from
-the input file makes it easier to use the `export {inputName} from 'filepath'`
-syntax which keeps the list file uncluttered.
+"/server/src/inputs/list.ts" file. Exporting a `const` from the input file makes
+it easier to use the `export {inputName} from 'filepath'` syntax which keeps the
+list file uncluttered.
 
 ## Sending Inputs using netSend
 
 Thorium Nova provides the `netSend` function which can be imported from
-"<DevLink>/client/src/context/netSend.tsx</DevLink>". This async function takes
-an input name as the first parameter and the params object as the second
-parameter. Conveniently, it's type checked and uses autocomplete based on the
-input name you pass in. Being an async function, you can `await` the results to
-get what the server sent back.
+"/client/src/context/netSend.tsx". This async function takes an input name as
+the first parameter and the params object as the second parameter. Conveniently,
+it's type checked and uses autocomplete based on the input name you pass in.
+Being an async function, you can `await` the results to get what the server sent
+back.
 
 ```tsx
 const ClientButton = () => {
@@ -102,11 +100,10 @@ const ClientButton = () => {
 
 ## Sending Inputs using HTTP POST
 
-If you look at the source code for
-"<DevLink>/client/src/context/netSend.tsx</DevLink>" you'll find that it's
-mostly just a wrapper around an HTTP call to the `/netSend` endpoint. The
-`netSend` implementation uses a multipart form upload for uploading files, but
-the server also supports a JSON request body.
+If you look at the source code for "/client/src/context/netSend.tsx" you'll find
+that it's mostly just a wrapper around an HTTP call to the `/netSend` endpoint.
+The `netSend` implementation uses a multipart form upload for uploading files,
+but the server also supports a JSON request body.
 
 It requires an `authorization` header which includes the client's name as the
 `Bearer` token, as in `Authorization: Bearer my-client-name`. This is used to

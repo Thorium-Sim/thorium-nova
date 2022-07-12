@@ -2,16 +2,14 @@
 title: ECS Systems
 ---
 
-import DevLink from "../DevLink";
-
 # ECS Systems
 
 ECS Systems are what actually run the simulations and provide the behaviors to
 the entity components. Systems are extended from the base `System` class and
-exported from "<DevLink>/server/src/systems/index.ts</DevLink>" in the specific
-order that they are supposed to run. The base `System` class is designed to keep
-a cache of the entities associated with it so it doesn't have to iterate over
-the entire entity list every time it runs.
+exported from "/server/src/systems/index.ts" in the specific order that they are
+supposed to run. The base `System` class is designed to keep a cache of the
+entities associated with it so it doesn't have to iterate over the entire entity
+list every time it runs.
 
 The intention is to extend any of the several abstract methods provided by the
 `System` class. These include `test`, `preUpdate`, `update`, `postUpdate`,
@@ -50,8 +48,7 @@ Called whenever an entity is removed from the system.
 
 ## Example
 
-This code can be found in
-"<DevLink>/server/src/systems/TimerSystem.ts</DevLink>"
+This code can be found in "/server/src/systems/TimerSystem.ts"
 
 ```ts
 import {Duration} from "luxon";
