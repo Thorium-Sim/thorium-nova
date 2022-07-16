@@ -15,7 +15,7 @@ import {toast} from "client/src/context/ToastContext";
 import {netSend} from "client/src/context/netSend";
 import {useConfirm} from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
-import {CameraControls} from "./CameraControls";
+import {CameraControls, useExternalCameraControl} from "./CameraControls";
 import CameraControlsClass from "camera-controls";
 import debounce from "lodash.debounce";
 import Input from "@thorium/ui/Input";
@@ -54,6 +54,7 @@ export function InterstellarMap({children}: {children: React.ReactNode}) {
   useEffect(() => {
     useStarmapStore.setState({skyboxKey: "blank"});
   }, []);
+  useExternalCameraControl(orbitControls);
 
   return (
     <Suspense fallback={null}>

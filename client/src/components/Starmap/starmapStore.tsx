@@ -1,7 +1,17 @@
-import {createContext, ReactNode, useContext, useState} from "react";
+import {useFrame} from "@react-three/fiber";
+import CameraControls from "camera-controls";
+import {
+  createContext,
+  MutableRefObject,
+  ReactNode,
+  useContext,
+  useState,
+} from "react";
+import {Vector3} from "three";
 import create from "zustand";
 
 interface StarmapStore {
+  storeCount: number;
   viewingMode: "editor" | "core" | "station" | "viewscreen";
   skyboxKey: string;
   selectedObjectId: string | number | null;
@@ -13,9 +23,13 @@ interface StarmapStore {
   /** Used for core */
   currentSystem: number | null;
   setCurrentSystem: (systemId: number | null) => void;
+  cameraVerticalDistance: number;
+  cameraControls?: MutableRefObject<CameraControls | null>;
 }
+let storeCount = 0;
 const createStarmapStore = () =>
   create<StarmapStore>(set => ({
+    storeCount: storeCount++,
     skyboxKey: "blank",
     viewingMode: "editor",
     selectedObjectId: null,
@@ -28,6 +42,7 @@ const createStarmapStore = () =>
     currentSystem: null,
     setCurrentSystem: (systemId: number | null) =>
       set({currentSystem: systemId}),
+    cameraVerticalDistance: 0,
   }));
 
 const useStarmapStore = createStarmapStore();
@@ -48,3 +63,16 @@ export const StarmapStoreProvider = ({children}: {children: ReactNode}) => {
 export const useGetStarmapStore = () => {
   return useContext(StarmapStoreContext);
 };
+
+const distanceVector = new Vector3();
+export function useCalculateVerticalDistance() {
+  const useStarmapStore = useGetStarmapStore();
+  useFrame(({camera}) => {
+    const distance = camera.position.distanceTo(
+      distanceVector.set(camera.position.x, 0, camera.position.z)
+    );
+    useStarmapStore.setState({
+      cameraVerticalDistance: distance,
+    });
+  });
+}
