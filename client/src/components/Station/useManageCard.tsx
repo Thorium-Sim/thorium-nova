@@ -1,11 +1,22 @@
 import {useNetRequest} from "client/src/context/useNetRequest";
-import {useCallback, useRef, useState} from "react";
+import {useSessionStorage} from "client/src/hooks/useSessionStorage";
+import {useCallback, useEffect, useRef, useState} from "react";
 
 export function useManageCard() {
   const station = useNetRequest("station");
-  const [currentCard, setCurrentCard] = useState(
+  const [currentCard, setCurrentCard] = useSessionStorage(
+    `currentCard-${station.name}`,
     station.cards[0]?.component || ""
   );
+
+  useEffect(() => {
+    if (
+      currentCard !== "" &&
+      !station.cards.some(c => c.component === currentCard)
+    ) {
+      setCurrentCard(station.cards[0]?.component || "");
+    }
+  }, [currentCard, station.cards]);
   const cardChanged = useRef(false);
 
   const changeCard = useCallback(

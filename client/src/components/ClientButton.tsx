@@ -11,7 +11,7 @@ export function ClientButton() {
     <div className="flex items-center gap-4">
       <h2 className="text-white font-bold">Client Name:</h2>
       <Button
-        className="btn-primary btn-sm"
+        className="btn-primary btn-sm m-0"
         onClick={async () => {
           const name = await prompt({
             header: "What is the new client name?",
