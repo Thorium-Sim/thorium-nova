@@ -138,6 +138,8 @@ export const StarSprite = forwardRef<
   );
 });
 
+StarSprite.displayName = "StarSprite";
+
 const StarSpriteInner = ({color1}: {color1: Color | number}) => {
   const spriteMap = useTexture(spritePath) as Texture;
 
