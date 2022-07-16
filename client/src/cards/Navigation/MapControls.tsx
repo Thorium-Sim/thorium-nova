@@ -1,6 +1,6 @@
 import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
 import Button from "@thorium/ui/Button";
-
+import {ZoomSlider} from "@thorium/ui/Slider";
 export function MapControls() {
   const useStarmapStore = useGetStarmapStore();
   const systemId = useStarmapStore(state => state.currentSystem);
