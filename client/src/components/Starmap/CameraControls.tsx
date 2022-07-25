@@ -29,6 +29,7 @@ import {
   Overwrite,
 } from "@react-three/fiber";
 import CameraControlsDefault from "camera-controls";
+import {useGetStarmapStore} from "./starmapStore";
 
 declare global {
   namespace JSX {
@@ -61,6 +62,20 @@ const subsetOfTHREE = {
 CameraControlsDefault.install({THREE: subsetOfTHREE});
 extend({CameraControlsDefault});
 
+export function useExternalCameraControl(
+  controls: React.MutableRefObject<CameraControlsDefault | null>
+) {
+  const useStarmapStore = useGetStarmapStore();
+
+  useEffect(() => {
+    if (controls) {
+      useStarmapStore.setState({
+        cameraControls: controls,
+      });
+    }
+  }, [controls]);
+}
+
 export const CameraControls = forwardRef<
   CameraControlsDefault,
   ExtendedColors<
@@ -75,6 +90,7 @@ export const CameraControls = forwardRef<
   const renderer = useThree(state => state.gl);
   useFrame((_, delta) => cameraControls.current?.update(delta));
   useEffect(() => () => cameraControls.current?.dispose(), []);
+
   return (
     <cameraControlsDefault
       ref={mergeRefs<CameraControlsDefault>(cameraControls, ref)}

@@ -14,7 +14,13 @@ import {StarmapStoreContext} from "./starmapStore";
 
 const FAR = 1e27;
 
-export default function StarmapCanvas({children}: {children: ReactNode}) {
+export default function StarmapCanvas({
+  children,
+  shouldRender = true,
+}: {
+  children: ReactNode;
+  shouldRender?: boolean;
+}) {
   const client = useQueryClient();
 
   const ContextBridge = useContextBridge(
@@ -32,6 +38,7 @@ export default function StarmapCanvas({children}: {children: ReactNode}) {
       }}
       gl={{antialias: true, logarithmicDepthBuffer: true}}
       camera={{fov: 45, far: FAR}}
+      frameloop={shouldRender ? "always" : "demand"}
     >
       <ContextBridge>
         <QueryClientProvider client={client}>{children}</QueryClientProvider>

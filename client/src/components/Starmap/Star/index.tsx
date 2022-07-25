@@ -42,10 +42,10 @@ const StarEntity: React.FC<{
       : solarRadiusToKilometers(star.radius);
   return (
     <OrbitContainer
-      radius={semiMajorAxis}
+      semiMajorAxis={semiMajorAxis}
       eccentricity={eccentricity}
       orbitalArc={orbitalArc}
-      orbitalInclination={inclination}
+      inclination={inclination}
       showOrbit={showOrbit}
     >
       <group

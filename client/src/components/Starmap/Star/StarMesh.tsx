@@ -1,4 +1,4 @@
-import React, {Suspense} from "react";
+import React, {forwardRef, Suspense} from "react";
 import {
   TextureLoader,
   RepeatWrapping,
@@ -22,20 +22,6 @@ import texturePath from "./textures/01_Texture.jpg";
 import spritePath from "./textures/Star.svg";
 const distanceVector = new Vector3();
 
-const StarSprite = ({color1}: {color1?: number | Color}) => {
-  const spriteMap = useTexture(spritePath) as Texture;
-
-  return (
-    <sprite>
-      <spriteMaterial
-        attach="material"
-        map={spriteMap}
-        color={color1}
-        sizeAttenuation={false}
-      ></spriteMaterial>
-    </sprite>
-  );
-};
 const SPRITE_SCALE_FACTOR = 50;
 const Star: React.FC<{
   color1?: number | Color;
@@ -68,8 +54,6 @@ const Star: React.FC<{
   const shader = React.useRef<Mesh>(null);
   const starMesh = React.useRef<Group>(null);
   const starSprite = React.useRef<Group>(null);
-
-  const viewingMode = useStarmapStore(state => state.viewingMode);
 
   useFrame(({camera}) => {
     shader.current?.quaternion.copy(camera.quaternion);
@@ -109,15 +93,11 @@ const Star: React.FC<{
     return ColorUtil(colorVal).lighten(90).rgbNumber();
   }, [color1]);
 
-  const spriteScale = 1 / (size || 1) / SPRITE_SCALE_FACTOR;
   return (
     <group {...props}>
       <pointLight intensity={0.8} decay={2} color={color} castShadow />
-      <group ref={starSprite} scale={[spriteScale, spriteScale, spriteScale]}>
-        <Suspense fallback={null}>
-          <StarSprite color1={color1} />
-        </Suspense>
-      </group>
+      <StarSprite size={size} color1={color1} />
+
       <group ref={starMesh}>
         <mesh ref={shader} uuid="My star">
           <circleBufferGeometry attach="geometry" args={[1, 8, 8]} />
@@ -142,3 +122,35 @@ const Star: React.FC<{
 };
 
 export default Star;
+
+export const StarSprite = forwardRef<
+  Group,
+  {size?: number; color1: Color | number}
+>(({size = 1, color1}, starSprite) => {
+  const spriteScale = 1 / size / SPRITE_SCALE_FACTOR;
+
+  return (
+    <group ref={starSprite} scale={[spriteScale, spriteScale, spriteScale]}>
+      <Suspense fallback={null}>
+        <StarSpriteInner color1={color1} />
+      </Suspense>
+    </group>
+  );
+});
+
+StarSprite.displayName = "StarSprite";
+
+const StarSpriteInner = ({color1}: {color1: Color | number}) => {
+  const spriteMap = useTexture(spritePath) as Texture;
+
+  return (
+    <sprite>
+      <spriteMaterial
+        attach="material"
+        map={spriteMap}
+        color={color1}
+        sizeAttenuation={false}
+      ></spriteMaterial>
+    </sprite>
+  );
+};

@@ -14,7 +14,7 @@ import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
 import {Kilometer} from "server/src/utils/unitTypes";
 import {OrbitLine} from "../OrbitContainer";
 
-const PlanetSprite = ({color = "white"}) => {
+export const PlanetSprite = ({color = "white"}) => {
   const spriteMap = useTexture(Dot);
 
   return (
@@ -53,7 +53,7 @@ function PlanetSphere({
 }
 
 const SPRITE_SCALE_FACTOR = 50;
-const spriteScale = 1 / SPRITE_SCALE_FACTOR;
+export const planetSpriteScale = 1 / SPRITE_SCALE_FACTOR;
 const distanceVector = new Vector3();
 
 export function Planet({
@@ -201,7 +201,7 @@ export function Planet({
           <Suspense fallback={null}>
             <group
               ref={planetSpriteRef}
-              scale={[spriteScale, spriteScale, spriteScale]}
+              scale={[planetSpriteScale, planetSpriteScale, planetSpriteScale]}
             >
               <PlanetSprite />
             </group>

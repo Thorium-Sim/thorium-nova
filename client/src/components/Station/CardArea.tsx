@@ -72,8 +72,8 @@ const CardRenderer = ({
 }) => {
   const client = useNetRequest("client");
   const allowCard = Boolean(client.loginName) && !client.offlineState;
-  const [cardLoaded, setCardLoaded] = useState(false);
   const show = allowCard && currentCardId === id;
+  const [cardLoaded, setCardLoaded] = useState(show);
   return (
     <CardProvider cardName={id}>
       <Transition
@@ -81,10 +81,10 @@ const CardRenderer = ({
         show={show}
         {...transitionProps}
         unmount={false}
-        beforeEnter={() => {
+        afterLeave={() => {
           setCardLoaded(false);
         }}
-        afterEnter={() => {
+        beforeEnter={() => {
           setCardLoaded(true);
         }}
       >

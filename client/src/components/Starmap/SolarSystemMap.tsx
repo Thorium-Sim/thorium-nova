@@ -2,7 +2,7 @@ import * as React from "react";
 import {Suspense} from "react";
 import {useThree} from "@react-three/fiber";
 import {useEffect} from "react";
-import {CameraControls} from "./CameraControls";
+import {CameraControls, useExternalCameraControl} from "./CameraControls";
 import {useGetStarmapStore} from "./starmapStore";
 import CameraControlsClass from "camera-controls";
 import {
@@ -91,6 +91,8 @@ export function SolarSystemMap({
       orbitControls.current?.rotateAzimuthTo(0, true);
     }
   }, [camera, cameraView]);
+
+  useExternalCameraControl(orbitControls);
 
   return (
     <Suspense fallback={null}>
