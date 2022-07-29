@@ -14,11 +14,4 @@ export class IsInventoryComponent extends Component {
 
   flags: InventoryFlags = {};
   assets: {image?: string} = {};
-
-  /**
-   * The ID of the entity that contains this inventory.
-   * Could be a room, shipping container, or person.
-   * Entities take on the position of their container.
-   */
-  containerId: number | null = null;
 }

@@ -24,7 +24,7 @@ export async function getFlights() {
         "utf-8"
       );
       const data = parse(raw);
-      return {...data, date: new Date(data.date)} as FlightDataModel;
+      return {...data, date: new Date(data?.date)} as FlightDataModel;
     })
   );
   return flightData;

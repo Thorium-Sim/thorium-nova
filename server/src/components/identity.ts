@@ -9,11 +9,6 @@ export class IdentityComponent extends Component {
   name: string = "Entity";
 
   /**
-   * The plural name of the entity.
-   */
-  plural?: string = "";
-
-  /**
    * Should only be used for information provided by the Flight Director
    */
   description?: string = "";
