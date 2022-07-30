@@ -1,9 +1,20 @@
 import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
 import Button from "@thorium/ui/Button";
 import {ZoomSlider} from "@thorium/ui/Slider";
+import {useNetRequest} from "client/src/context/useNetRequest";
+import {useEffect} from "react";
 export function MapControls() {
   const useStarmapStore = useGetStarmapStore();
   const systemId = useStarmapStore(state => state.currentSystem);
+  const ship = useNetRequest("navigationShip");
+
+  useEffect(() => {
+    if (useStarmapStore.getState().followEntityId === ship.id) {
+      useStarmapStore
+        .getState()
+        .setCurrentSystem(ship.position?.parentId || null);
+    }
+  }, [ship.position?.parentId]);
 
   return (
     <div className="self-end max-w-sm space-y-2">
@@ -21,8 +32,16 @@ export function MapControls() {
           Interstellar View
         </Button>
       )}
-      <Button className="w-full btn-warning pointer-events-auto">
-        Recenter
+      <Button
+        className="w-full btn-warning pointer-events-auto"
+        onClick={() =>
+          useStarmapStore.setState({
+            followEntityId: ship.id,
+            currentSystem: ship.position?.parentId || null,
+          })
+        }
+      >
+        Follow Ship
       </Button>
     </div>
   );
