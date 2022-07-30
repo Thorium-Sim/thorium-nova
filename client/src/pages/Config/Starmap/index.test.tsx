@@ -7,7 +7,7 @@ import {
   useNetRequest,
 } from "client/src/context/useNetRequest";
 import {MemoryRouter, useParams} from "react-router-dom";
-import {QueryClient, QueryClientProvider} from "react-query";
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {InterstellarMap} from "client/src/components/Starmap/InterstellarMap";
 import SystemMarker from "client/src/components/Starmap/SystemMarker";
 jest.mock("scheduler", () => require("scheduler/unstable_mock"));

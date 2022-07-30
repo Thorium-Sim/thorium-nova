@@ -69,7 +69,6 @@ export function InterstellarMap({children}: {children: React.ReactNode}) {
           right: ACTION.TRUCK,
           middle: ACTION.DOLLY,
           wheel: ACTION.DOLLY,
-          shiftLeft: ACTION.DOLLY,
         }}
         dollyToCursor
         dollySpeed={0.5}

@@ -3,7 +3,7 @@ import {render as rtlRender, RenderOptions} from "@testing-library/react";
 import {MemoryRouter as Router} from "react-router-dom";
 import {MockNetRequestContext} from "./src/context/useNetRequest";
 import {AllRequestReturns} from "server/src/netRequests";
-import {QueryClient, QueryClientProvider} from "react-query";
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {ThoriumContext} from "./src/context/ThoriumContext";
 
 // @ts-expect-error

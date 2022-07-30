@@ -1,7 +1,7 @@
 import {Model} from "flexlayout-react";
 import {useContext, useState} from "react";
 import {useThoriumAccount} from "client/src/context/ThoriumAccountContext";
-import {useMutation, useQuery} from "react-query";
+import {useMutation, useQuery} from "@tanstack/react-query";
 import Dropdown, {DropdownItem} from "@thorium/ui/Dropdown";
 import {Menu} from "@headlessui/react";
 import {HiOutlineChevronDown, HiCheck} from "react-icons/hi";

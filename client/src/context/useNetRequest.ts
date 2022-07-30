@@ -5,7 +5,7 @@ import {
   AllRequestReturns,
 } from "server/src/netRequests";
 import {getTabId, getTabIdSync} from "@thorium/tab-id";
-import {useQuery} from "react-query";
+import {useQuery} from "@tanstack/react-query";
 import {useRequestSub} from "./useRequestSub";
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;

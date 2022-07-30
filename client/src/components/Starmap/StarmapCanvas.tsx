@@ -8,7 +8,7 @@ import {Canvas} from "@react-three/fiber";
 
 import {useContextBridge} from "@react-three/drei";
 
-import {useQueryClient, QueryClientProvider} from "react-query";
+import {useQueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {ThoriumContext} from "client/src/context/ThoriumContext";
 import {StarmapStoreContext} from "./starmapStore";
 

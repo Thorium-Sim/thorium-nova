@@ -18,7 +18,7 @@
   "dependencies": {
     "bonjour": "^3.5.0",
     "electron-better-ipc": "^2.0.1",
-    "electron-store": "^8.0.2",
+    "electron-store": "^8.1.0",
     "electron-updater": "^5.0.5",
     "electron-util": "^0.17.2"
   }
