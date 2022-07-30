@@ -102,6 +102,7 @@ export function spawnShip(
       if (!node.isRoom) return;
       const room = new Entity();
       room.addComponent("isRoom", {flags: node.flags});
+      room.addComponent("identity", {name: node.name});
       if (node.flags.includes("cargo")) {
         room.addComponent("cargoContainer", {volume: node.volume});
       }

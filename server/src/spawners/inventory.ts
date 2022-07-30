@@ -292,26 +292,29 @@ export function generateShipInventory(
 
   // How much water is there? Basically fill up the water tanks.
 
-  let i = 0;
   // Now go through the rest of the inventory and fill up the rest of the rooms
+  // We'll optimize for keeping the same inventory in the same room, not spreading it out
+  // TODO July 30, 2022: Rooms that are associated with ship systems should not have general
+  // cargo inside them.
+  const cargoRooms: Map<
+    number,
+    ReturnType<typeof getRandomInventoryRoom>
+  > = new Map();
   while (cargoAbundance.length > 0) {
-    if (i === 0) {
-    }
     const index = randomFromList(cargoAbundance);
-    if (i === 0) {
+    let room = cargoRooms.get(index);
+    if (!room || room.availableVolume <= inventoryList[index].volume) {
+      room = getRandomInventoryRoom("cargo", inventoryList[index].volume);
+      cargoRooms.set(index, room);
     }
-
-    const room = getRandomInventoryRoom("cargo", inventoryList[index].volume);
-    if (i === 0) {
+    if (!room) {
+      cargoRooms.delete(index);
+      break;
     }
-    if (!room) break;
     try {
       addInventory(inventoryList[index], room);
-      if (i === 0) {
-      }
     } catch {
       break;
     }
-    if (i === 0) i++;
   }
 }
