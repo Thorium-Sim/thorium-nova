@@ -39,6 +39,7 @@ describe("Ship Spawner", () => {
       pluginId: "Test Plugin",
       nodeId: id,
       isRoom: true,
+      flags: ["cargo"],
     });
 
     shipsPluginInputs.pluginShipToggleSystem(dataContext, {
