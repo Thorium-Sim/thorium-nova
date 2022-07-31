@@ -91,7 +91,6 @@ export function StarmapShip({
   );
 }
 function useShipModel(modelAsset: string | undefined) {
-  if (!modelAsset) return null;
   const model = useGLTF(modelAsset || "", false);
 
   const scene = useMemo(() => {
@@ -115,6 +114,7 @@ function useShipModel(modelAsset: string | undefined) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelAsset]);
 
+  if (!modelAsset) return null;
   return scene;
 }
 const maskTextureAsset = createAsset(async image => {
