@@ -3,10 +3,9 @@ import {useEffect} from "react";
 
 export function useCancelFollow() {
   const useStarmapStore = useGetStarmapStore();
-  const {cameraControls} = useStarmapStore();
+  const cameraControls = useStarmapStore(store => store.cameraControls);
   useEffect(() => {
     const cancel = () => {
-      console.log("Cancel");
       useStarmapStore.setState({followEntityId: null});
     };
     cameraControls?.current?.addEventListener("controlstart", cancel);

@@ -5,9 +5,10 @@ import {useGetStarmapStore} from "./starmapStore";
 export function useFollowEntity(topDown = true) {
   const useStarmapStore = useGetStarmapStore();
 
-  const {followEntityId, cameraControls} = useStarmapStore();
+  const cameraControls = useStarmapStore(store => store.cameraControls);
+  const followEntityId = useStarmapStore(store => store.followEntityId);
+
   const {interpolate} = useThorium();
-  const {camera} = useThree();
   useFrame(() => {
     if (!followEntityId) return;
     const position = interpolate(followEntityId);
