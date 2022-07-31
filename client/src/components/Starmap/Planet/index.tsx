@@ -28,7 +28,7 @@ export const PlanetSprite = ({color = "white"}) => {
     </sprite>
   );
 };
-function PlanetSphere({
+export function PlanetSphere({
   texture,
   wireframe,
 }: {
