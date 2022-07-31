@@ -1,6 +1,5 @@
 import {PositionComponent} from "server/src/components/position";
 import {DataContext} from "server/src/utils/DataContext";
-
 import {Entity} from "server/src/utils/ecs";
 import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
 import {pubsub} from "server/src/utils/pubsub";

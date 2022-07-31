@@ -14,8 +14,10 @@ import {ObjectDetails} from "./ObjectDetails";
 import Button from "@thorium/ui/Button";
 import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
+import {useDataStream} from "client/src/context/useDataStream";
 
 export function Navigation(props: CardProps) {
+  useDataStream();
   return (
     <StarmapStoreProvider>
       <div className="mx-auto h-full bg-black/70 border border-white/50 relative">

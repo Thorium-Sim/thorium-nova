@@ -11,8 +11,8 @@ export function InterstellarWrapper() {
   const useStarmapStore = useGetStarmapStore();
   // This netRequest comes from the starmap core.
   const starmapSystems = useNetRequest("starmapSystems");
-
   const ship = useNetRequest("navigationShip");
+
   const waypoints = useNetRequest("waypoints", {systemId: null});
   return (
     <InterstellarMap>
