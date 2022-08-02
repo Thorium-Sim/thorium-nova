@@ -154,7 +154,6 @@ export default function ComponentDemo() {
           selected={selected}
           setSelected={val => {
             setSelected(val);
-            console.log(val);
           }}
           getOptions={searchableInputQuery}
           displayValue={result => result?.name}
