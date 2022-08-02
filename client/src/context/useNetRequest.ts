@@ -15,7 +15,11 @@ export const MockNetRequestContext = createContext<any>(null!);
 export async function netRequest<
   T extends AllRequestNames,
   R extends AllRequestReturns[T]
->(requestName: T, params?: AllRequestParams[T]): Promise<R> {
+>(
+  requestName: T,
+  params?: AllRequestParams[T],
+  options: {signal?: AbortSignal} = {}
+): Promise<R> {
   const clientId = await getTabId();
   const body = {
     request: requestName,
@@ -28,6 +32,7 @@ export async function netRequest<
       authorization: `Bearer ${clientId}`,
     },
     body: JSON.stringify(body),
+    signal: options.signal,
   }).then(res => res.json());
   if (result?.error) {
     throw new Error(result.error);
@@ -46,21 +51,19 @@ export function useNetRequest<
 ): UnwrapPromise<R> {
   const clientId = getTabIdSync();
 
-  const netRequestQuery = useQuery<UnwrapPromise<R>>(
-    [clientId, "netRequest", requestName, params],
-    async () => {
-      const data = await netRequest(requestName, params);
+  const netRequestQuery = useQuery<UnwrapPromise<R>>({
+    queryKey: [clientId, "netRequest", requestName, params],
+    queryFn: async ({signal}) => {
+      const data = await netRequest(requestName, params, {signal});
       return (data as any) || null;
     },
-    {
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
-      networkMode: "always",
-      staleTime: Infinity,
-      cacheTime: Infinity,
-    }
-  );
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+    networkMode: "always",
+    staleTime: Infinity,
+    cacheTime: Infinity,
+  });
   useRequestSub({requestName, params});
 
   const mockData = useContext(MockNetRequestContext);

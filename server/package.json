@@ -38,6 +38,7 @@
     "fastify": "^4.3.0",
     "less": "^4.1.3",
     "luxon": "^2.4.0",
+    "match-sorter": "^6.3.1",
     "node-pid-controller": "^1.0.1",
     "postcss": "^8.4.14",
     "postcss-less": "^6.0.0",
