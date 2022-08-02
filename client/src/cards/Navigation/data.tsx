@@ -110,7 +110,7 @@ export const requests = {
   },
   waypoints: (
     context: DataContext,
-    params: {shipId?: number; systemId: number | null},
+    params: {shipId?: number; systemId: "all" | number | null},
     publishParams: {shipId: number}
   ) => {
     const shipId = params.shipId ?? context.ship?.id;
@@ -119,14 +119,16 @@ export const requests = {
       (prev: Waypoint[], next) => {
         if (
           next.components.isWaypoint?.assignedShipId === shipId &&
-          next.components.position?.parentId === params.systemId
+          (params.systemId === "all" ||
+            next.components.position?.parentId === params.systemId)
         ) {
-          prev.push({
-            id: next.id,
-            name: next.components.identity?.name || "",
-            objectId: next.components.isWaypoint?.attachedObjectId,
-            position: next.components.position,
-          });
+          if (next.components.position)
+            prev.push({
+              id: next.id,
+              name: next.components.identity?.name || "",
+              objectId: next.components.isWaypoint?.attachedObjectId,
+              position: next.components.position,
+            });
         }
         return prev;
       },
@@ -300,6 +302,22 @@ export const inputs = {
     });
 
     return newWaypoint;
+  },
+  waypointDelete(context: DataContext, params: {waypointId: number}) {
+    if (!context.flight) throw new Error("No flight in progress");
+    const ship = context.ship;
+    if (!ship) throw new Error("No ship selected.");
+    const shipId = ship.id;
+    const waypoint = context.flight.ecs.entities.find(
+      e => e.id === params.waypointId
+    );
+    if (!waypoint) throw new Error("No waypoint found.");
+    if (waypoint.components.isWaypoint?.assignedShipId !== shipId)
+      throw new Error("Waypoint is not assigned to this ship.");
+    context.flight.ecs.removeEntity(waypoint);
+    pubsub.publish("waypoints", {
+      shipId,
+    });
   },
 };
 
