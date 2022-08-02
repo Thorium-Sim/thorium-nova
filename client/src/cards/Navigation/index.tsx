@@ -87,6 +87,7 @@ function Waypoints() {
             renderItem={({id, label}) => (
               <span className="flex">
                 <span className="flex-1">{label}</span>
+                {/* TODO Aug 1 2022 - Add some method for marking waypoints as non-deletable for mission purposes. */}
                 {id > -1 && (
                   <button
                     className="appearance-none"
