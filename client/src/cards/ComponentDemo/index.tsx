@@ -158,11 +158,9 @@ export default function ComponentDemo() {
           getOptions={searchableInputQuery}
           displayValue={result => result?.name}
           ResultLabel={({result, active, selected}) => (
-            <DefaultResultLabel
-              name={result.name}
-              active={active}
-              selected={selected}
-            />
+            <DefaultResultLabel active={active} selected={selected}>
+              {result.name}
+            </DefaultResultLabel>
           )}
         />
       </div>
