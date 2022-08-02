@@ -139,7 +139,7 @@ export const requests = {
   navigationSearch: async (
     context: DataContext,
     params: {query: string},
-    publishParams: null
+    publishParams: {}
   ) => {
     if (publishParams !== null) throw null;
     const {query} = params;
