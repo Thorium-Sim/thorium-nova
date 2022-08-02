@@ -11,6 +11,8 @@ import SearchableList from "@thorium/ui/SearchableList";
 import InfoTip from "@thorium/ui/InfoTip";
 import TagInput from "@thorium/ui/TagInput";
 import Button from "@thorium/ui/Button";
+import SearchableInput, {DefaultResultLabel} from "@thorium/ui/SearchableInput";
+import {QueryFunctionContext} from "@tanstack/react-query";
 
 const ModalDemo = ({title, children}: {title: string; children: ReactNode}) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -78,7 +80,38 @@ const TagInputDemo = () => {
     />
   );
 };
+
+async function searchableInputQuery({
+  queryKey,
+}: QueryFunctionContext<[string, string]>) {
+  await new Promise(res => setTimeout(res, 1000 + Math.random() * 500));
+  const [key, query] = queryKey;
+  const people = [
+    {id: 1, name: "Wade Cooper"},
+    {id: 2, name: "Arlene Mccoy"},
+    {id: 3, name: "Devon Webb"},
+    {id: 4, name: "Tom Cook"},
+    {id: 5, name: "Tanya Fox"},
+    {id: 6, name: "Hellen Schmidt"},
+  ];
+
+  const filteredPeople =
+    query === ""
+      ? people
+      : people.filter(person =>
+          person.name
+            .toLowerCase()
+            .replace(/\s+/g, "")
+            .includes(query.toLowerCase().replace(/\s+/g, ""))
+        );
+
+  return filteredPeople;
+}
+
 export default function ComponentDemo() {
+  const [selected, setSelected] = useState<null | {id: number; name: string}>(
+    null
+  );
   return (
     <div className="flex flex-col gap-8 text-white h-full overflow-y-auto">
       <div className="flex flex-col gap-4">
@@ -114,7 +147,26 @@ export default function ComponentDemo() {
           </div>
         </div>
       </div>
-
+      <div>
+        <h2 className="text-3xl">Searchable Input</h2>
+        <SearchableInput
+          key="demo"
+          selected={selected}
+          setSelected={val => {
+            setSelected(val);
+            console.log(val);
+          }}
+          getOptions={searchableInputQuery}
+          displayValue={result => result?.name}
+          ResultLabel={({result, active, selected}) => (
+            <DefaultResultLabel
+              name={result.name}
+              active={active}
+              selected={selected}
+            />
+          )}
+        />
+      </div>
       <div>
         <h2 className="text-3xl">Badges</h2>
         <div className="flex gap-4">
