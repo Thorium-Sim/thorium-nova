@@ -1,6 +1,6 @@
 import Button from "@thorium/ui/Button";
 import Modal from "@thorium/ui/Modal";
-import {netSend} from "client/src/context/netSend";
+import {useNetSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {useMatch, useNavigate, Navigate, Outlet, Link} from "react-router-dom";
@@ -14,7 +14,9 @@ export default function FlightQuickStart() {
   const flight = useNetRequest("flight");
   const client = useNetRequest("client");
 
-  const [state, dispatch] = useFlightQuickStart();
+  const {mutate: netSend, isLoading} = useNetSend();
+
+  const [state] = useFlightQuickStart();
 
   const navigate = useNavigate();
 
@@ -61,6 +63,7 @@ export default function FlightQuickStart() {
         {step === "mission" && (
           <Button
             className="btn-success"
+            disabled={isLoading}
             onClick={async () => {
               // TODO November 20, 2021 - Do something with the "Flight Director" parameter
               // once we get Flight Director controls implemented.
@@ -85,21 +88,24 @@ export default function FlightQuickStart() {
               if (!shipName) {
                 shipName = randomNameGenerator();
               }
-              await netSend("flightStart", {
-                flightName,
-                ships: [
-                  {
-                    crewCount,
-                    shipName,
-                    shipTemplate,
-                    missionName,
-                    startingPoint,
-                  },
-                ],
+              netSend({
+                type: "flightStart",
+                params: {
+                  flightName,
+                  ships: [
+                    {
+                      crewCount,
+                      shipName,
+                      shipTemplate,
+                      missionName,
+                      startingPoint,
+                    },
+                  ],
+                },
               });
             }}
           >
-            Start
+            {isLoading ? "Starting Flight..." : "Start"}
           </Button>
         )}
       </div>

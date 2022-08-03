@@ -56,7 +56,7 @@ export const requests = {
       )
         throw null;
     }
-    return context.ship?.toJSON() as Entity;
+    return (context.ship?.toJSON() as Entity) || null;
   },
   station(
     context: DataContext,

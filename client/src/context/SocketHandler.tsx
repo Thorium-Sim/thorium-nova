@@ -65,7 +65,7 @@ export function SocketHandler({
       }
 
       function handleReady() {
-        queryClient.refetchQueries();
+        queryClient.refetchQueries(undefined, {cancelRefetch: false});
       }
       socket.on("netRequestData", handleNetRequestData);
       socket.on("ready", handleReady);
