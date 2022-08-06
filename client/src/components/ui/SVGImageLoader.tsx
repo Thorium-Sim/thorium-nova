@@ -1,8 +1,15 @@
-import {useState, useEffect, memo, ComponentPropsWithoutRef} from "react";
+import {
+  useState,
+  useEffect,
+  memo,
+  ComponentPropsWithoutRef,
+  forwardRef,
+} from "react";
 
-export const SVGImageLoader: React.FC<
+export const SVGImageLoader = forwardRef<
+  HTMLImageElement,
   {url: string} & ComponentPropsWithoutRef<"img">
-> = memo(function SVGImageLoader({url, alt, ...props}) {
+>(function SVGImageLoader({url, alt, ...props}, ref) {
   const [data, setData] = useState<string | null>(null);
   useEffect(() => {
     async function loadSvg() {
@@ -19,8 +26,22 @@ export const SVGImageLoader: React.FC<
   }, [url]);
   if (data) {
     return (
-      <div role="img" {...props} dangerouslySetInnerHTML={{__html: data}} />
+      <div
+        role="img"
+        {...props}
+        dangerouslySetInnerHTML={{__html: data}}
+        ref={ref}
+      />
     );
   }
-  return <img draggable="false" alt={alt} aria-hidden {...props} src={url} />;
+  return (
+    <img
+      draggable="false"
+      alt={alt}
+      aria-hidden
+      {...props}
+      src={url}
+      ref={ref}
+    />
+  );
 });

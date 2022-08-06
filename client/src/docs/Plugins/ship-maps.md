@@ -54,10 +54,14 @@ example), can scale infinitely, and have a small file size. Creating SVGs is
 possible with tools like Adobe Illustrator, Infinity Designer, Inkscape, and
 many online tools.
 
-Whether using SVGs or other images, Thorium Nova treats 10 pixels/points as 1
-meter, and expects the deck images to be looking down from the top with the ship
-in a horizontal orientation. That means if your ship is 200 meters long and 100
-meters wide, the background image should be 2000x1000 pixels.
+Thorium Nova will automatically scale your background image so its width matches
+the configured length of the ship, meaning the ship map is always displayed with
+the ship pointed horizontal. For non-SVG background images, that means you
+should make your deck image width a multiple of the ship's length.
+
+It's also best to make all of the background images for each deck the same size,
+even if each deck is bigger or smaller. That helps to line up the decks on the
+screen as the crew flips through them.
 
 While the actual construction of the SVG is irrelevant, it might be helpful to
 create separate paths for each room to better organize them. Don't forget to
