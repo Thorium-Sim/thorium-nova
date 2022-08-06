@@ -10,8 +10,12 @@ import {CardProps} from "client/src/components/Station/CardProps";
 import {MapControls} from "./MapControls";
 import {InterstellarWrapper} from "./InterstellarWrapper";
 import {SolarSystemWrapper} from "./SolarSystemWrapper";
+import {useDataStream} from "client/src/context/useDataStream";
+import {useFollowEntity} from "client/src/components/Starmap/useFollowEntity";
+import {useCancelFollow} from "../../components/Starmap/useCancelFollow";
 
 export function Navigation(props: CardProps) {
+  useDataStream();
   return (
     <StarmapStoreProvider>
       <div className="mx-auto h-full bg-black/70 border border-white/50 relative">
@@ -56,6 +60,8 @@ function CanvasWrapper({shouldRender}: {shouldRender: boolean}) {
 }
 
 function StarmapHooks() {
+  useCancelFollow();
+  useFollowEntity();
   useCalculateVerticalDistance();
   return null;
 }

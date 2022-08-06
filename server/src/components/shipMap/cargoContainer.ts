@@ -6,4 +6,7 @@ export class CargoContainer extends Component {
 
   /** How much cargo this entity can hold */
   volume: CubicMeter = 1;
+
+  /** The contents of this cargo container. The key is the name/ID of inventory template object stored on the flight. */
+  contents: {[inventoryTemplateName: string]: number} = {};
 }

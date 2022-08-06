@@ -25,6 +25,7 @@ interface StarmapStore {
   setCurrentSystem: (systemId: number | null) => void;
   cameraVerticalDistance: number;
   cameraControls?: MutableRefObject<CameraControls | null>;
+  followEntityId?: number | null;
 }
 let storeCount = 0;
 const createStarmapStore = () =>
