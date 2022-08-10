@@ -1,6 +1,6 @@
 import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
 import {useNetRequest} from "client/src/context/useNetRequest";
-import {useRef} from "react";
+import {useEffect, useRef} from "react";
 import {SolarSystemMap} from "client/src/components/Starmap/SolarSystemMap";
 import {Suspense} from "react";
 import {Color, Group, Vector3} from "three";
@@ -25,6 +25,11 @@ export function SolarSystemWrapper() {
   const currentSystem = useStarmapStore(store => store.currentSystem);
 
   if (currentSystem === null) throw new Error("No current system");
+
+  useEffect(() => {
+    useStarmapStore.getState().currentSystemSet?.(currentSystem);
+  }, []);
+
   const system = useNetRequest("starmapSystem", {systemId: currentSystem});
   const starmapEntities = useNetRequest("starmapSystemEntities", {
     systemId: currentSystem,

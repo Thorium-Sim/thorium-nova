@@ -15,7 +15,11 @@ export const MockNetRequestContext = createContext<any>(null!);
 export async function netRequest<
   T extends AllRequestNames,
   R extends AllRequestReturns[T]
->(requestName: T, params?: AllRequestParams[T]): Promise<R> {
+>(
+  requestName: T,
+  params?: AllRequestParams[T],
+  options: {signal?: AbortSignal} = {}
+): Promise<R> {
   const clientId = await getTabId();
   const body = {
     request: requestName,
@@ -28,11 +32,9 @@ export async function netRequest<
       authorization: `Bearer ${clientId}`,
     },
     body: JSON.stringify(body),
-  }).then(res =>
-    res.json().catch(err => {
-      console.error(requestName, err);
-    })
-  );
+    signal: options.signal,
+  }).then(res => res.json());
+
   if (result?.error) {
     throw new Error(result.error);
   }

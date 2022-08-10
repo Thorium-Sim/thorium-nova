@@ -1018,6 +1018,9 @@ input[type="range"].slider {
   &-notice {
     @apply border-notice;
   }
+  &-opaque {
+    @apply bg-opacity-100;
+  }
 }
 .menu-dropdown .btn {
   line-height: 1;

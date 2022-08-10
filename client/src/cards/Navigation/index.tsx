@@ -5,11 +5,13 @@ import {
 } from "client/src/components/Starmap/starmapStore";
 import {useEffect, useState} from "react";
 import StarmapCanvas from "client/src/components/Starmap/StarmapCanvas";
-import Input from "@thorium/ui/Input";
 import {CardProps} from "client/src/components/Station/CardProps";
 import {MapControls} from "./MapControls";
 import {InterstellarWrapper} from "./InterstellarWrapper";
 import {SolarSystemWrapper} from "./SolarSystemWrapper";
+import SearchableInput, {DefaultResultLabel} from "@thorium/ui/SearchableInput";
+import {netRequest} from "client/src/context/useNetRequest";
+import {capitalCase} from "change-case";
 import {ObjectDetails} from "./ObjectDetails";
 import Button from "@thorium/ui/Button";
 import {netSend} from "client/src/context/netSend";
@@ -25,12 +27,9 @@ export function Navigation(props: CardProps) {
       <div className="mx-auto h-full bg-black/70 border border-white/50 relative">
         <CanvasWrapper shouldRender={props.cardLoaded} />
         <div className="grid grid-cols-2 grid-rows-2 absolute inset-0 pointer-events-none p-4">
-          <Input
-            label="Search"
-            labelHidden
-            placeholder="Search..."
-            className="pointer-events-auto max-w-sm"
-          />
+          <div className="pointer-events-auto max-w-sm">
+            <StarmapSearch />
+          </div>
           <div className="w-96 self-start justify-self-end max-h-min">
             <ObjectDetails />
             <AddWaypoint />{" "}
@@ -42,6 +41,53 @@ export function Navigation(props: CardProps) {
   );
 }
 
+function StarmapSearch() {
+  const useStarmapStore = useGetStarmapStore();
+  return (
+    <SearchableInput<{id: number; name: string; type: string; position: any}>
+      queryKey="nav"
+      getOptions={async ({queryKey, signal}) => {
+        const result = await netRequest(
+          "navigationSearch",
+          {query: queryKey[1]},
+          {signal}
+        );
+        return result;
+      }}
+      ResultLabel={({active, result, selected}) => (
+        <DefaultResultLabel active={active} selected={selected}>
+          <p>{result.name}</p>
+          <p>
+            <small>
+              {result.type === "solar"
+                ? "Solar System"
+                : capitalCase(result.type)}
+            </small>
+          </p>
+        </DefaultResultLabel>
+      )}
+      setSelected={async item => {
+        if (!item) return;
+        if (
+          useStarmapStore.getState().currentSystem !== item?.position.parentId
+        ) {
+          await useStarmapStore
+            .getState()
+            .setCurrentSystem(item?.position.parentId);
+        }
+        useStarmapStore.setState({selectedObjectId: item.id});
+        const controls = useStarmapStore.getState().cameraControls;
+        controls?.current?.moveTo(
+          item.position.x,
+          item.position.y,
+          item.position.z,
+          true
+        );
+      }}
+      placeholder="Search..."
+    />
+  );
+}
 function AddWaypoint() {
   const useStarmapStore = useGetStarmapStore();
   const selectedObjectId = useStarmapStore(store => store.selectedObjectId);
