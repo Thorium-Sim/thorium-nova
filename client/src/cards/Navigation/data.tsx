@@ -1,9 +1,10 @@
-import {matchSorter} from "match-sorter";
+
+import {PositionComponent} from "server/src/components/position";
 import {DataContext} from "server/src/utils/DataContext";
 import {Entity} from "server/src/utils/ecs";
 import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
+import {matchSorter} from "match-sorter";
 import {Vector3} from "three";
-import {PositionComponent} from "server/src/components/position";
 import {pubsub} from "server/src/utils/pubsub";
 import {
   Coordinates,
@@ -108,6 +109,34 @@ export const requests = {
       return "";
     }
   },
+  waypoints: (
+    context: DataContext,
+    params: {shipId?: number; systemId: "all" | number | null},
+    publishParams: {shipId: number}
+  ) => {
+    const shipId = params.shipId ?? context.ship?.id;
+    if (publishParams !== null && shipId !== publishParams.shipId) throw null;
+    const waypoints = context.flight?.ecs.entities.reduce(
+      (prev: Waypoint[], next) => {
+        if (
+          next.components.isWaypoint?.assignedShipId === shipId &&
+          (params.systemId === "all" ||
+            next.components.position?.parentId === params.systemId)
+        ) {
+          if (next.components.position)
+            prev.push({
+              id: next.id,
+              name: next.components.identity?.name || "",
+              objectId: next.components.isWaypoint?.attachedObjectId,
+              position: next.components.position,
+            });
+        }
+        return prev;
+      },
+      []
+    );
+    return waypoints || [];
+  },
   navigationSearch: async (
     context: DataContext,
     params: {query: string},
@@ -180,32 +209,6 @@ export const requests = {
     }));
 
     return matchItems;
-  },
-  waypoints: (
-    context: DataContext,
-    params: {shipId?: number; systemId: number | null},
-    publishParams: {shipId: number}
-  ) => {
-    const shipId = params.shipId ?? context.ship?.id;
-    if (publishParams !== null && shipId !== publishParams.shipId) throw null;
-    const waypoints = context.flight?.ecs.entities.reduce(
-      (prev: Waypoint[], next) => {
-        if (
-          next.components.isWaypoint?.assignedShipId === shipId &&
-          next.components.position?.parentId === params.systemId
-        ) {
-          prev.push({
-            id: next.id,
-            name: next.components.identity?.name || "",
-            objectId: next.components.isWaypoint?.attachedObjectId,
-            position: next.components.position,
-          });
-        }
-        return prev;
-      },
-      []
-    );
-    return waypoints || [];
   },
 };
 
@@ -300,6 +303,22 @@ export const inputs = {
     });
 
     return newWaypoint;
+  },
+  waypointDelete(context: DataContext, params: {waypointId: number}) {
+    if (!context.flight) throw new Error("No flight in progress");
+    const ship = context.ship;
+    if (!ship) throw new Error("No ship selected.");
+    const shipId = ship.id;
+    const waypoint = context.flight.ecs.entities.find(
+      e => e.id === params.waypointId
+    );
+    if (!waypoint) throw new Error("No waypoint found.");
+    if (waypoint.components.isWaypoint?.assignedShipId !== shipId)
+      throw new Error("Waypoint is not assigned to this ship.");
+    context.flight.ecs.removeEntity(waypoint);
+    pubsub.publish("waypoints", {
+      shipId,
+    });
   },
 };
 
