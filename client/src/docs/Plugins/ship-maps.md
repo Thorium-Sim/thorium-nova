@@ -51,7 +51,7 @@ The background image for each deck should be an SVG, although any image format
 is compatible. SVGs provide the most flexibility, since they can be dynamically
 altered by the controls (to change colors for the current alert condition, for
 example), can scale infinitely, and have a small file size. Creating SVGs is
-possible with tools like Adobe Illustrator, Infinity Designer, Inkscape, and
+possible with tools like Adobe Illustrator, Affinity Designer, Inkscape, and
 many online tools.
 
 Whether using SVGs or other images, Thorium Nova treats 10 pixels/points as 1

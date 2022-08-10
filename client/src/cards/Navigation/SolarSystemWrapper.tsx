@@ -16,7 +16,8 @@ import {planetSpriteScale} from "client/src/components/Starmap/Planet";
 import {PlanetSprite} from "client/src/components/Starmap/Planet";
 import SystemLabel from "client/src/components/Starmap/SystemMarker/SystemLabel";
 import {useFrame} from "@react-three/fiber";
-import type {Entity} from "server/src/utils/ecs";
+import {ErrorBoundary} from "react-error-boundary";
+import {StarmapShip} from "client/src/components/Starmap/StarmapShip";
 
 export function SolarSystemWrapper() {
   const useStarmapStore = useGetStarmapStore();
@@ -32,6 +33,8 @@ export function SolarSystemWrapper() {
   const starmapEntities = useNetRequest("starmapSystemEntities", {
     systemId: currentSystem,
   });
+  const ship = useNetRequest("navigationShip");
+
   return (
     <SolarSystemMap
       skyboxKey={system?.components.isSolarSystem?.skyboxKey || "Blank"}
@@ -78,6 +81,16 @@ export function SolarSystemWrapper() {
         }
         return null;
       })}
+      {ship.position?.parentId === currentSystem && (
+        <Suspense key={ship.id} fallback={null}>
+          <ErrorBoundary
+            FallbackComponent={() => <></>}
+            onError={err => console.error(err)}
+          >
+            <StarmapShip id={ship.id} logoUrl={ship.icon} />
+          </ErrorBoundary>
+        </Suspense>
+      )}
     </SolarSystemMap>
   );
 }

@@ -1,5 +1,6 @@
 import {AllInputNames, AllInputParams, AllInputReturns} from "@thorium/inputs";
 import {getTabId} from "@thorium/tab-id";
+import {useMutation, UseMutationOptions} from "@tanstack/react-query";
 
 type UnPromise<T> = T extends Promise<infer U> ? UnPromise<U> : T;
 
@@ -38,4 +39,21 @@ export async function netSend<
     throw new Error(json.error);
   }
   return json;
+}
+
+export function useNetSend<
+  InputName extends AllInputNames,
+  Params extends AllInputParams[InputName],
+  Return extends AllInputReturns[InputName]
+>(
+  options?: Omit<
+    UseMutationOptions<
+      UnPromise<Return>,
+      Error,
+      {type: InputName; params?: Params}
+    >,
+    "mutationFn"
+  >
+) {
+  return useMutation(({type, params}) => netSend(type, params), options);
 }

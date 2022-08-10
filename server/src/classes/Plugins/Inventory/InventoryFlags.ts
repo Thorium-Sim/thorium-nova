@@ -46,6 +46,7 @@ export type InventoryFlags = Partial<{
     /** Tags to indicate the systems the spare part is used to repair. If left blank it can be used with all systems */
     systemTags: string[];
   };
+  water: {};
 }>;
 
 export const InventoryFlagValues: {

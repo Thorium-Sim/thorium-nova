@@ -5,6 +5,19 @@ import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
 import {Vector3} from "three";
 
 export const requests = {
+  navigationShip: (
+    context: DataContext,
+    params: {},
+    publishParams: {shipId: number} | {clientId: string}
+  ) => {
+    if (!context.ship) throw null;
+    return {
+      id: context.ship.id,
+      name: context.ship.components.identity?.name,
+      position: context.ship.components.position,
+      icon: context.ship.components.isShip?.assets.logo,
+    };
+  },
   navigationSearch: async (
     context: DataContext,
     params: {query: string},
@@ -113,4 +126,8 @@ function getObjectSystem(obj: Entity): Entity | null {
   const parent = obj.ecs?.entities.find(e => e.id === parentObjId);
   if (!parent) return null;
   return getObjectSystem(parent);
+}
+
+export function dataStream(entity: Entity, context: DataContext): boolean {
+  return Boolean(entity.components.position && entity.id === context.ship?.id);
 }

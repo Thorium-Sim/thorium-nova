@@ -39,6 +39,7 @@ describe("Ship Spawner", () => {
       pluginId: "Test Plugin",
       nodeId: id,
       isRoom: true,
+      flags: ["cargo"],
     });
 
     shipsPluginInputs.pluginShipToggleSystem(dataContext, {
@@ -53,15 +54,11 @@ describe("Ship Spawner", () => {
       ?.aspects.ships.find(s => s.name === "Test Ship");
     expect(shipPlugin).toBeDefined();
     if (!shipPlugin) throw new Error("Ship not found");
-    const {ship, extraEntities} = spawnShip(
-      shipPlugin,
-      {
-        name: "Spawned Ship",
-        position: {x: 10, y: 20, z: 30, type: "interstellar", parentId: null},
-        playerShip: true,
-      },
-      dataContext.server.plugins
-    );
+    const {ship, extraEntities} = spawnShip(dataContext, shipPlugin, {
+      name: "Spawned Ship",
+      position: {x: 10, y: 20, z: 30, type: "interstellar", parentId: null},
+      playerShip: true,
+    });
     expect(ship.components.identity?.name).toEqual("Spawned Ship");
     expect(ship.components.position?.x).toEqual(10);
     expect(ship.components.position?.y).toEqual(20);

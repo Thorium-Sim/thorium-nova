@@ -113,7 +113,7 @@ export function NodeCircle({
         {selected && !addingEdges && (
           <div
             ref={floating}
-            className="rounded min-w-max w-44 p-2 bg-black/60 backdrop-blur shadow-lg z-10 text-white space-y-4"
+            className="rounded min-w-max w-52 max-h-96 overflow-y-auto p-2 bg-black/60 backdrop-blur shadow-lg z-10 text-white space-y-4"
             style={{
               position: strategy,
               top: floatingY ?? "",
@@ -122,6 +122,7 @@ export function NodeCircle({
             onMouseDown={e => e.stopPropagation()}
           >
             <Input
+              className="sticky top-0"
               label="Name"
               labelHidden
               autoFocus

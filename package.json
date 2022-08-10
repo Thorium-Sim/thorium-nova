@@ -12,8 +12,8 @@
   },
   "main": "dist/electron.js",
   "scripts": {
-    "dev": "concurrently --kill-others --names \"client,server\" -c \"blue.bold,magenta.bold\" \"npm run dev --workspace=client\" \"npm run dev --workspace=server\"",
-    "build": "concurrently -n \"client,server,desktop\" -c \"blue.bold,magenta.bold,green.bold\" \"npm run build --workspace=client\" \"npm run build --workspace=server\" \"npm run build --workspace=desktop\"",
+    "dev": "node -r ts-eager/register scripts/dev.ts",
+    "build": "node -r ts-eager/register scripts/build.ts",
     "start": "NODE_ENV=production node dist/index.js",
     "test": "is-ci-cli \"test:coverage\" \"test:watch\"",
     "test:coverage": "jest --coverage",
