@@ -113,8 +113,8 @@ function useShipModel(modelAsset: string | undefined) {
     return scene;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelAsset]);
-
   if (!modelAsset) return null;
+
   return scene;
 }
 const maskTextureAsset = createAsset(async image => {

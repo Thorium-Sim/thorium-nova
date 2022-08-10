@@ -15,6 +15,8 @@ import Button from "@thorium/ui/Button";
 import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
 import {useDataStream} from "client/src/context/useDataStream";
+import {useFollowEntity} from "client/src/components/Starmap/useFollowEntity";
+import {useCancelFollow} from "../../components/Starmap/useCancelFollow";
 
 export function Navigation(props: CardProps) {
   useDataStream();
@@ -90,6 +92,8 @@ function CanvasWrapper({shouldRender}: {shouldRender: boolean}) {
 }
 
 function StarmapHooks() {
+  useCancelFollow();
+  useFollowEntity();
   useCalculateVerticalDistance();
   return null;
 }

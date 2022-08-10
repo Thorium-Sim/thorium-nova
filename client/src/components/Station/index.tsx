@@ -18,10 +18,14 @@ const StationWrapper = () => {
   return (
     <div className="bg-black absolute z-1 h-full w-full top-0 bottom-">
       {client.offlineState !== "blackout" && (
-        <Suspense fallback={<LoadingSpinner />}>
-          <Effects />
-          <StationLayout />
-        </Suspense>
+        <>
+          <Suspense fallback={null}>
+            <Effects />
+          </Suspense>
+          <Suspense fallback={<LoadingSpinner />}>
+            <StationLayout />
+          </Suspense>
+        </>
       )}
     </div>
   );

@@ -5,7 +5,7 @@ import {
   AllRequestReturns,
 } from "server/src/netRequests";
 import {getTabId, getTabIdSync} from "@thorium/tab-id";
-import {useQuery} from "@tanstack/react-query";
+import {useQuery, QueryFunctionContext} from "@tanstack/react-query";
 import {useRequestSub} from "./useRequestSub";
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
@@ -28,12 +28,29 @@ export async function netRequest<
       authorization: `Bearer ${clientId}`,
     },
     body: JSON.stringify(body),
-  }).then(res => res.json());
+  }).then(res =>
+    res.json().catch(err => {
+      console.error(requestName, err);
+    })
+  );
   if (result?.error) {
     throw new Error(result.error);
   }
 
   return result as R;
+}
+
+async function queryFn<T extends AllRequestNames>({
+  queryKey,
+}: QueryFunctionContext) {
+  const [_, __, requestName, params] = queryKey as [
+    string,
+    "netRequest",
+    T,
+    AllRequestParams[T]
+  ];
+  const data = await netRequest(requestName, params);
+  return (data as any) || null;
 }
 
 export function useNetRequest<
@@ -48,10 +65,7 @@ export function useNetRequest<
 
   const netRequestQuery = useQuery<UnwrapPromise<R>>(
     [clientId, "netRequest", requestName, params],
-    async () => {
-      const data = await netRequest(requestName, params);
-      return (data as any) || null;
-    },
+    queryFn,
     {
       refetchOnMount: false,
       refetchOnReconnect: false,
