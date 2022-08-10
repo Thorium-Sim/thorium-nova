@@ -1,6 +1,6 @@
 import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
 import {useNetRequest} from "client/src/context/useNetRequest";
-import {useRef} from "react";
+import {useEffect, useRef} from "react";
 import {SolarSystemMap} from "client/src/components/Starmap/SolarSystemMap";
 import {Suspense} from "react";
 import {Color, Group, Vector3} from "three";
@@ -18,17 +18,24 @@ import SystemLabel from "client/src/components/Starmap/SystemMarker/SystemLabel"
 import {useFrame} from "@react-three/fiber";
 import {ErrorBoundary} from "react-error-boundary";
 import {StarmapShip} from "client/src/components/Starmap/StarmapShip";
+import {WaypointEntity} from "client/src/components/Starmap/WaypointEntity";
 
 export function SolarSystemWrapper() {
   const useStarmapStore = useGetStarmapStore();
   const currentSystem = useStarmapStore(store => store.currentSystem);
 
   if (currentSystem === null) throw new Error("No current system");
+
+  useEffect(() => {
+    useStarmapStore.getState().currentSystemSet?.(currentSystem);
+  }, []);
+
   const system = useNetRequest("starmapSystem", {systemId: currentSystem});
   const starmapEntities = useNetRequest("starmapSystemEntities", {
     systemId: currentSystem,
   });
   const ship = useNetRequest("navigationShip");
+  const waypoints = useNetRequest("waypoints", {systemId: currentSystem});
 
   return (
     <SolarSystemMap
@@ -46,7 +53,18 @@ export function SolarSystemWrapper() {
           );
           return (
             <OrbitContainer key={entity.id} {...entity.components.satellite}>
-              <group scale={[size, size, size]}>
+              <group
+                scale={[size, size, size]}
+                onPointerOver={e => {
+                  document.body.style.cursor = "pointer";
+                }}
+                onPointerOut={e => {
+                  document.body.style.cursor = "auto";
+                }}
+                onClick={() =>
+                  useStarmapStore.setState({selectedObjectId: entity.id})
+                }
+              >
                 <StarSprite size={size} color1={color} />
               </group>
             </OrbitContainer>
@@ -71,6 +89,9 @@ export function SolarSystemWrapper() {
               satellites={satellites}
               inclination={inclination}
               radiusY={radiusY}
+              onClick={() =>
+                useStarmapStore.setState({selectedObjectId: entity.id})
+              }
             />
           );
         }
@@ -86,6 +107,16 @@ export function SolarSystemWrapper() {
           </ErrorBoundary>
         </Suspense>
       )}
+      {waypoints.map(waypoint => (
+        <Suspense key={waypoint.id}>
+          <ErrorBoundary
+            FallbackComponent={() => <></>}
+            onError={err => console.error(err)}
+          >
+            <WaypointEntity position={waypoint.position} />
+          </ErrorBoundary>
+        </Suspense>
+      ))}
     </SolarSystemMap>
   );
 }
@@ -98,6 +129,7 @@ function PlanetRenderer({
   satellites,
   inclination,
   radiusY,
+  onClick,
 }: {
   name?: string;
   position: Vector3;
@@ -106,6 +138,7 @@ function PlanetRenderer({
   satellites: PlanetPlugin[];
   inclination: number;
   radiusY: number;
+  onClick: () => void;
 }) {
   const labelRef = useRef<Group>(null);
 
@@ -127,6 +160,13 @@ function PlanetRenderer({
         <Suspense fallback={null}>
           <group
             scale={[planetSpriteScale, planetSpriteScale, planetSpriteScale]}
+            onPointerOver={e => {
+              document.body.style.cursor = "pointer";
+            }}
+            onPointerOut={e => {
+              document.body.style.cursor = "auto";
+            }}
+            onClick={onClick}
           >
             <PlanetSprite />
           </group>

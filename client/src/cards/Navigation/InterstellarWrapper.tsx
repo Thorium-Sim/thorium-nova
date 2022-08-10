@@ -2,14 +2,21 @@ import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {InterstellarMap} from "client/src/components/Starmap/InterstellarMap";
 import SystemMarker from "client/src/components/Starmap/SystemMarker";
-import {Suspense} from "react";
+import {Suspense, useEffect} from "react";
 import {ErrorBoundary} from "react-error-boundary";
 import {StarmapShip} from "client/src/components/Starmap/StarmapShip";
+import {WaypointEntity} from "client/src/components/Starmap/WaypointEntity";
+
 export function InterstellarWrapper() {
   const useStarmapStore = useGetStarmapStore();
   // This netRequest comes from the starmap core.
   const starmapSystems = useNetRequest("starmapSystems");
   const ship = useNetRequest("navigationShip");
+
+  const waypoints = useNetRequest("waypoints", {systemId: null});
+  useEffect(() => {
+    useStarmapStore.getState().currentSystemSet?.(null);
+  }, []);
 
   return (
     <InterstellarMap>
@@ -43,6 +50,16 @@ export function InterstellarWrapper() {
           </ErrorBoundary>
         </Suspense>
       )}
+      {waypoints.map(waypoint => (
+        <Suspense key={waypoint.id}>
+          <ErrorBoundary
+            FallbackComponent={() => <></>}
+            onError={err => console.error(err)}
+          >
+            <WaypointEntity position={waypoint.position} />
+          </ErrorBoundary>
+        </Suspense>
+      ))}
     </InterstellarMap>
   );
 }

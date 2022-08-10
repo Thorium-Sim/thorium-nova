@@ -220,6 +220,10 @@ const quotes = [
   // 🤷
   "I was just dreaming a little for you because all my dreams are gone.",
   "Danger is very real, but fear is a choice.",
+  // Larry Elison
+  "Choose your competitors carefully, because you’ll become a lot like them.",
+  // William Martin
+  "Make the ordinary come alive. The extraordinary will take care of itself.",
 ];
 
 const QuoteOfTheDay = () => {
