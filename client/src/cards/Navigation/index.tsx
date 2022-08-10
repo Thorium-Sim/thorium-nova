@@ -40,7 +40,7 @@ export function Navigation(props: CardProps) {
           <div className="w-96 self-start justify-self-end max-h-min">
             <Suspense fallback={null}>
               <ObjectDetails />
-              <AddWaypoint />{" "}
+              <AddWaypoint />
             </Suspense>
           </div>
           <MapControls />
@@ -159,6 +159,7 @@ function AddWaypoint() {
     </Button>
   );
 }
+
 function StarmapSearch() {
   const useStarmapStore = useGetStarmapStore();
   return (

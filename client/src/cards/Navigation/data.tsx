@@ -1,7 +1,10 @@
+
 import {PositionComponent} from "server/src/components/position";
 import {DataContext} from "server/src/utils/DataContext";
 import {Entity} from "server/src/utils/ecs";
 import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
+import {matchSorter} from "match-sorter";
+import {Vector3} from "three";
 import {pubsub} from "server/src/utils/pubsub";
 import {
   Coordinates,
@@ -9,8 +12,6 @@ import {
   LightMinute,
   solarRadiusToKilometers,
 } from "server/src/utils/unitTypes";
-import {Vector3} from "three";
-import {matchSorter} from "match-sorter";
 
 type Waypoint = {
   id: number;

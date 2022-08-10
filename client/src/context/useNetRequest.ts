@@ -34,6 +34,7 @@ export async function netRequest<
     body: JSON.stringify(body),
     signal: options.signal,
   }).then(res => res.json());
+
   if (result?.error) {
     throw new Error(result.error);
   }
