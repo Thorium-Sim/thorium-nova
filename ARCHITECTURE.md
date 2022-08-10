@@ -87,13 +87,7 @@ operate on the list of relevant entities once ever game frame.
 
 An Client is an individual game window that is connected to the server. Each tab
 or window of a browser is its own client. Clients are connected to the server
-using WebRTC for high-frequency messages, and WebSockets are used for
-low-frequency messages.
-
-Data about the currently running flight and the state of the client itself
-automatically sent to the client and available to React components using the
-`useClientData` hook, which uses a [Valtio](https://github.com/pmndrs/valtio)
-store to facilitate updating and subscribing in React components.
+using HTTP and WebSockets.
 
 ### Flights
 
@@ -143,9 +137,8 @@ client based on the data needs of the cards that client is displaying.
 
 Each card or core is a React component. It also defines the server data which
 that component uses. The component is responsible for rendering whatever it
-needs, using the `useCardData` hook to access its data, and `useInput` hook to
-fire off inputs. Card data is stored in a separate
-[Valtio](https://github.com/pmndrs/valtio) proxy store.
+needs, using the `useNetRequest` hook to request data and `netSend` to fire off
+inputs to mutate server data.
 
 #### Inputs
 

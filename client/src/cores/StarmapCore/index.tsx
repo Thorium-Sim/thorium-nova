@@ -25,7 +25,7 @@ export function StarmapCore() {
 
 function CanvasWrapper() {
   const useStarmapStore = useGetStarmapStore();
-  const {currentSystem} = useStarmapStore();
+  const currentSystem = useStarmapStore(store => store.currentSystem);
   useDataStream({systemId: currentSystem});
 
   useEffect(() => {
@@ -46,7 +46,7 @@ function CanvasWrapper() {
 }
 function InterstellarWrapper() {
   const useStarmapStore = useGetStarmapStore();
-  const {currentSystem, setCurrentSystem} = useStarmapStore();
+  const currentSystem = useStarmapStore(store => store.currentSystem);
 
   const starmapShips = useNetRequest("starmapShips", {systemId: currentSystem});
   const starmapSystems = useNetRequest("starmapSystems");
@@ -67,7 +67,9 @@ function InterstellarWrapper() {
             }
             name={sys.components.identity.name}
             onClick={() => useStarmapStore.setState({selectedObjectId: sys.id})}
-            onDoubleClick={() => setCurrentSystem(sys.id)}
+            onDoubleClick={() =>
+              useStarmapStore.getState().setCurrentSystem(sys.id)
+            }
           />
         ) : null
       )}
@@ -89,7 +91,7 @@ function InterstellarWrapper() {
 
 function SolarSystemWrapper() {
   const useStarmapStore = useGetStarmapStore();
-  const {currentSystem} = useStarmapStore();
+  const currentSystem = useStarmapStore(store => store.currentSystem);
   if (!currentSystem) throw new Error("No current system");
   const system = useNetRequest("starmapSystem", {systemId: currentSystem});
   const starmapEntities = useNetRequest("starmapSystemEntities", {
