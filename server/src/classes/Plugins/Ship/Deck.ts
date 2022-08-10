@@ -12,7 +12,22 @@ export default class DeckPlugin {
 }
 
 // More flags can be added in the future.
-export const nodeFlags = ["cargo"] as const;
+export const nodeFlags = [
+  "cargo",
+  "security",
+  "maintenance",
+  "medical",
+  "torpedoStorage",
+  "probeStorage",
+  "fuelStorage",
+  "coolantStorage",
+  "waterStorage",
+  "lifeSupport",
+  "crewQuarters",
+  "cafeteria",
+  "recreation",
+  "science",
+] as const;
 export type NodeFlag = typeof nodeFlags[number];
 
 type DeckNodeId = Flavor<number, "deckNodeId">;

@@ -115,6 +115,7 @@ function useShipModel(modelAsset: string | undefined) {
   }, [modelAsset]);
 
   if (!modelAsset) return null;
+
   return scene;
 }
 const maskTextureAsset = createAsset(async image => {

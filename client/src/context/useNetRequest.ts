@@ -5,7 +5,7 @@ import {
   AllRequestReturns,
 } from "server/src/netRequests";
 import {getTabId, getTabIdSync} from "@thorium/tab-id";
-import {useQuery} from "@tanstack/react-query";
+import {useQuery, QueryFunctionContext} from "@tanstack/react-query";
 import {useRequestSub} from "./useRequestSub";
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
@@ -41,6 +41,19 @@ export async function netRequest<
   return result as R;
 }
 
+async function queryFn<T extends AllRequestNames>({
+  queryKey,
+}: QueryFunctionContext) {
+  const [_, __, requestName, params] = queryKey as [
+    string,
+    "netRequest",
+    T,
+    AllRequestParams[T]
+  ];
+  const data = await netRequest(requestName, params);
+  return (data as any) || null;
+}
+
 export function useNetRequest<
   T extends AllRequestNames,
   R extends AllRequestReturns[T]
@@ -51,19 +64,18 @@ export function useNetRequest<
 ): UnwrapPromise<R> {
   const clientId = getTabIdSync();
 
-  const netRequestQuery = useQuery<UnwrapPromise<R>>({
-    queryKey: [clientId, "netRequest", requestName, params],
-    queryFn: async ({signal}) => {
-      const data = await netRequest(requestName, params, {signal});
-      return (data as any) || null;
-    },
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-    networkMode: "always",
-    staleTime: Infinity,
-    cacheTime: Infinity,
-  });
+  const netRequestQuery = useQuery<UnwrapPromise<R>>(
+    [clientId, "netRequest", requestName, params],
+    queryFn,
+    {
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      networkMode: "always",
+      staleTime: Infinity,
+      cacheTime: Infinity,
+    }
+  );
   useRequestSub({requestName, params});
 
   const mockData = useContext(MockNetRequestContext);

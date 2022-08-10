@@ -1,9 +1,11 @@
 import {ECS, Entity} from "../utils/ecs";
 import type ShipPlugin from "../classes/Plugins/Ship";
 import {spawnShipSystem} from "./shipSystem";
-import BasePlugin from "../classes/Plugins";
 import {PositionComponent} from "../components/position";
 import {randomFromList} from "../utils/randomFromList";
+import {generateShipInventory} from "./inventory";
+import {FlightDataModel} from "../classes/FlightDataModel";
+import {ServerDataModel} from "../classes/ServerDataModel";
 
 /*
 AlertLevelComponent,
@@ -19,6 +21,7 @@ interface Coordinates {
   z: number;
 }
 export function spawnShip(
+  dataContext: {flight: FlightDataModel | null; server: ServerDataModel},
   template: Partial<ShipPlugin>,
   params: {
     name?: string;
@@ -28,9 +31,9 @@ export function spawnShip(
     tags?: string[];
     assets?: Partial<InstanceType<typeof ShipPlugin>["assets"]>;
     playerShip?: boolean;
-  },
-  plugins: BasePlugin[]
+  }
 ) {
+  if (!dataContext.flight) throw new Error("No flight has been started.");
   const entity = new Entity();
 
   entity.addComponent("identity", {
@@ -62,7 +65,9 @@ export function spawnShip(
   const shipSystems: Entity[] = [];
   entity.addComponent("shipSystems");
   template.shipSystems?.forEach(system => {
-    const plugin = plugins.find(plugin => system.pluginId === plugin.id);
+    const plugin = dataContext.server.plugins.find(
+      plugin => system.pluginId === plugin.id
+    );
     const systemPlugin = plugin?.aspects.shipSystems.find(
       sys => sys.name === system.systemId
     );
@@ -96,10 +101,15 @@ export function spawnShip(
     deckNodes.forEach(node => {
       if (!node.isRoom) return;
       const room = new Entity();
-      room.addComponent("isRoom", {});
-      room.addComponent("cargoContainer", {volume: node.volume});
+      room.addComponent("isRoom", {flags: node.flags});
+      room.addComponent("identity", {name: node.name});
+      if (node.flags.includes("cargo")) {
+        room.addComponent("cargoContainer", {volume: node.volume});
+      }
       extraEntities.push(room);
     });
+    generateShipInventory(extraEntities, dataContext.flight.inventoryTemplates);
+
     // Place cargo containers
     Array.from({length: template.cargoContainers || 0}).forEach(() => {
       // TODO June 24, 2022: Maybe make this use the ECS PRNG
@@ -125,6 +135,8 @@ export function spawnShip(
       // TODO June 24, 2022: Make this a configurable value
       volume: 500,
     });
+    generateShipInventory([entity], dataContext.flight.inventoryTemplates);
   }
+
   return {ship: entity, extraEntities: shipSystems.concat(extraEntities)};
 }

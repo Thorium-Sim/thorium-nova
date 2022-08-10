@@ -8,6 +8,8 @@ const fs =
     ? {readdir: () => [], readFile: () => "", mkdir: () => {}}
     : promises;
 
+const flightMap = new Map<string, FlightDataModel>();
+
 export async function getFlights() {
   let files: string[];
   try {
@@ -19,13 +21,18 @@ export async function getFlights() {
   const flightFiles = files.filter(f => f.includes(".flight"));
   const flightData = await Promise.all(
     flightFiles.map(async flightName => {
+      if (flightMap.has(flightName)) return flightMap.get(flightName);
       const raw = await fs.readFile(
         `${thoriumPath}/flights/${flightName}`,
         "utf-8"
       );
       const data = parse(raw);
-      return {...data, date: new Date(data.date)} as FlightDataModel;
+      flightMap.set(flightName, {
+        ...data,
+        date: new Date(data?.date),
+      } as FlightDataModel);
+      return flightMap.get(flightName);
     })
   );
-  return flightData;
+  return flightData as FlightDataModel[];
 }

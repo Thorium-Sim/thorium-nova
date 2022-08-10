@@ -17,6 +17,8 @@ import {Entity} from "../utils/ecs";
 import {getOrbitPosition} from "../utils/getOrbitPosition";
 import {Vector3} from "three";
 import {PositionComponent} from "../components/position";
+import {InventoryTemplate} from "../classes/Plugins/Inventory";
+import {generateShipInventory} from "../spawners/inventory";
 
 const fs = process.env.NODE_ENV === "test" ? {unlink: () => {}} : promises;
 
@@ -108,6 +110,15 @@ export const flightInputs = {
       {}
     );
 
+    // Duplicate the inventory templates in the active plugins
+    activePlugins.forEach(plugin => {
+      plugin.aspects.inventory.forEach(template => {
+        if (!context.flight) return;
+        context.flight.inventoryTemplates[template.name] =
+          new InventoryTemplate(template);
+      });
+    });
+
     // Spawn the ships that were defined when the flight was started
     for (const ship of ships) {
       const shipTemplate = activePlugins.reduce(
@@ -189,16 +200,14 @@ export const flightInputs = {
         });
       }
       const {ship: shipEntity, extraEntities} = spawnShip(
+        context,
         shipTemplate,
         {
           name: ship.shipName,
           position,
           tags: ["player"],
           playerShip: true,
-        },
-        context.server.plugins.filter(p =>
-          context.flight?.pluginIds.includes(p.id)
-        )
+        }
       );
 
       extraEntities.forEach(s => context.flight?.ecs.addEntity(s));
@@ -243,22 +252,16 @@ export const flightInputs = {
   },
   spawnShip(context: DataContext) {
     const shipTemplate = context.server.plugins[0].aspects.ships[0];
-    const {ship: shipEntity, extraEntities} = spawnShip(
-      shipTemplate,
-      {
-        name: "Test Ship",
-        position: {
-          x: 0,
-          y: 0,
-          z: 0,
-          type: "interstellar",
-          parentId: null,
-        },
+    const {ship: shipEntity, extraEntities} = spawnShip(context, shipTemplate, {
+      name: "Test Ship",
+      position: {
+        x: 0,
+        y: 0,
+        z: 0,
+        type: "interstellar",
+        parentId: null,
       },
-      context.server.plugins.filter(p =>
-        context.flight?.pluginIds.includes(p.id)
-      )
-    );
+    });
     extraEntities.forEach(s => context.flight?.ecs.addEntity(s));
     context.flight?.ecs.addEntity(shipEntity);
     pubsub.publish("starmapShips");

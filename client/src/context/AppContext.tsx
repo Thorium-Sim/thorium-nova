@@ -67,11 +67,7 @@ export default function AppContext({children}: {children: ReactNode}) {
 }
 
 function Preload() {
-  useRequestSub({requestName: "theme"});
-  useRequestSub({requestName: "effects"});
-  useRequestSub({requestName: "ship"});
   useRequestSub({requestName: "flight"});
-  useRequestSub({requestName: "station"});
   useRequestSub({requestName: "client"});
   useRequestSub({requestName: "thorium"});
 

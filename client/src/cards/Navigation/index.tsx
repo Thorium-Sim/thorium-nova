@@ -5,7 +5,6 @@ import {
 } from "client/src/components/Starmap/starmapStore";
 import {useEffect, useRef, useState, Suspense} from "react";
 import StarmapCanvas from "client/src/components/Starmap/StarmapCanvas";
-import Input from "@thorium/ui/Input";
 import {CardProps} from "client/src/components/Station/CardProps";
 import {MapControls} from "./MapControls";
 import {InterstellarWrapper} from "./InterstellarWrapper";
@@ -23,6 +22,9 @@ import SearchableList from "@thorium/ui/SearchableList";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 import {FaBan} from "react-icons/fa";
+import {useFollowEntity} from "client/src/components/Starmap/useFollowEntity";
+import {useCancelFollow} from "../../components/Starmap/useCancelFollow";
+
 export function Navigation(props: CardProps) {
   useDataStream();
   return (
@@ -230,6 +232,8 @@ function CanvasWrapper({shouldRender}: {shouldRender: boolean}) {
 }
 
 function StarmapHooks() {
+  useCancelFollow();
+  useFollowEntity();
   useCalculateVerticalDistance();
   return null;
 }
