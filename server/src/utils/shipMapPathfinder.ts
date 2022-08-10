@@ -1,4 +1,3 @@
-import type {DeckEdge} from "../classes/Plugins/Ship/Deck";
 import {PriorityQueue} from "./priorityQueue";
 
 export type ShipMapGraph = Map<number, Map<number, 1>>;

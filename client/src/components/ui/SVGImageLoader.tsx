@@ -1,29 +1,20 @@
-import {
-  useState,
-  useEffect,
-  memo,
-  ComponentPropsWithoutRef,
-  forwardRef,
-} from "react";
+import {ComponentPropsWithoutRef, forwardRef} from "react";
+import {suspend} from "suspend-react";
 
 export const SVGImageLoader = forwardRef<
   HTMLImageElement,
-  {url: string} & ComponentPropsWithoutRef<"img">
+  {url: string; onLoad?: () => void} & ComponentPropsWithoutRef<"img">
 >(function SVGImageLoader({url, alt, ...props}, ref) {
-  const [data, setData] = useState<string | null>(null);
-  useEffect(() => {
-    async function loadSvg() {
-      const res = await fetch(url);
-      if (!res.ok) return;
-      const data = await res.text();
-      if (data.includes("<svg")) {
-        setData(data);
-      }
+  const data = suspend(async () => {
+    const res = await fetch(url);
+    if (!res.ok) return;
+    const data = await res.text();
+    if (data.includes("<svg")) {
+      return data;
     }
-    if (url?.endsWith(".svg")) {
-      loadSvg();
-    }
+    return null;
   }, [url]);
+
   if (data) {
     return (
       <div

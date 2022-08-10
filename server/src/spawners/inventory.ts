@@ -1,10 +1,17 @@
-import {Entity} from "../utils/ecs";
 import {NodeFlag} from "../classes/Plugins/Ship/Deck";
 import {InventoryTemplate} from "../classes/Plugins/Inventory";
 import {randomFromList} from "../utils/randomFromList";
 
+type RoomI = {
+  id: number;
+  volume: number;
+  flags: NodeFlag[];
+  contents: {
+    [inventoryTemplateName: string]: number;
+  };
+};
 export function generateShipInventory(
-  inputRooms: Entity[],
+  inputRooms: RoomI[],
   flightInventory: {[inventoryTemplateName: string]: InventoryTemplate}
 ) {
   // First, lets figure out how much space we even have
@@ -13,12 +20,12 @@ export function generateShipInventory(
       acc: [number, {availableVolume: number; id: number; flags: NodeFlag[]}[]],
       room
     ) => {
-      if (!room.components.cargoContainer?.volume) return acc;
-      const volume = acc[0] + (room.components.cargoContainer?.volume ?? 0);
+      if (!room.volume) return acc;
+      const volume = acc[0] + (room.volume ?? 0);
       const roomData = {
-        availableVolume: room.components.cargoContainer?.volume ?? 0,
+        availableVolume: room.volume ?? 0,
         id: room.id,
-        flags: room.components.isRoom?.flags ?? ["cargo"],
+        flags: room.flags ?? ["cargo"],
       };
       return [volume, acc[1].concat(roomData)];
     },
@@ -45,7 +52,7 @@ export function generateShipInventory(
   });
 
   /** Adds an inventory item to a room */
-  const roomsMap = new Map<number, Entity>();
+  const roomsMap = new Map<number, RoomI>();
   inputRooms.forEach(room => roomsMap.set(room.id, room));
 
   function addInventory(
@@ -53,11 +60,10 @@ export function generateShipInventory(
     room: {availableVolume: number; id: number; flags: NodeFlag[]}
   ) {
     const roomEntity = roomsMap.get(room.id);
-    if (!roomEntity?.components.cargoContainer) return;
-    roomEntity.components.cargoContainer.contents[inventoryTemplate.name] =
-      roomEntity.components.cargoContainer.contents[inventoryTemplate.name] ??
-      0;
-    roomEntity.components.cargoContainer.contents[inventoryTemplate.name] += 1;
+    if (!roomEntity) return;
+    roomEntity.contents[inventoryTemplate.name] =
+      roomEntity.contents[inventoryTemplate.name] ?? 0;
+    roomEntity.contents[inventoryTemplate.name] += 1;
     totalVolume -= inventoryTemplate.volume;
     const inventoryIndex = inventoryList.indexOf(inventoryTemplate);
     if (inventoryIndex === -1) return;
