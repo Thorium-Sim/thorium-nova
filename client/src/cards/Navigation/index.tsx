@@ -12,6 +12,10 @@ import {SolarSystemWrapper} from "./SolarSystemWrapper";
 import SearchableInput, {DefaultResultLabel} from "@thorium/ui/SearchableInput";
 import {netRequest} from "client/src/context/useNetRequest";
 import {capitalCase} from "change-case";
+import {ObjectDetails} from "./ObjectDetails";
+import Button from "@thorium/ui/Button";
+import {netSend} from "client/src/context/netSend";
+import {toast} from "client/src/context/ToastContext";
 import {useDataStream} from "client/src/context/useDataStream";
 import {useFollowEntity} from "client/src/components/Starmap/useFollowEntity";
 import {useCancelFollow} from "../../components/Starmap/useCancelFollow";
@@ -26,7 +30,10 @@ export function Navigation(props: CardProps) {
           <div className="pointer-events-auto max-w-sm">
             <StarmapSearch />
           </div>
-          <div></div>
+          <div className="w-96 self-start justify-self-end max-h-min">
+            <ObjectDetails />
+            <AddWaypoint />{" "}
+          </div>
           <MapControls />
         </div>
       </div>
@@ -79,6 +86,30 @@ function StarmapSearch() {
       }}
       placeholder="Search..."
     />
+  );
+}
+function AddWaypoint() {
+  const useStarmapStore = useGetStarmapStore();
+  const selectedObjectId = useStarmapStore(store => store.selectedObjectId);
+  return (
+    <Button
+      className={`pointer-events-auto w-full mt-2 btn-primary ${
+        !selectedObjectId ? "btn-disabled" : ""
+      }`}
+      disabled={!selectedObjectId}
+      onClick={async () => {
+        try {
+          typeof selectedObjectId === "number" &&
+            (await netSend("waypointSpawn", {entityId: selectedObjectId}));
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            toast({title: error.message, color: "error"});
+          }
+        }
+      }}
+    >
+      Add Waypoint
+    </Button>
   );
 }
 
