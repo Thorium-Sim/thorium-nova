@@ -50,8 +50,10 @@ function checkBodyNetRequest(
     );
   }
 }
+type Awaited<T> = T extends Promise<infer U> ? U : T;
+
 export function setUpAPI(
-  app: ReturnType<typeof buildHTTPServer>,
+  app: Awaited<ReturnType<typeof buildHTTPServer>>,
   database: {
     server: ServerDataModel;
     flight: FlightDataModel | null;

@@ -8,8 +8,10 @@ import {AuthData} from "@thorium/types";
 
 const hostSecret = process.env.HOST_SECRET || "";
 
+type Awaited<T> = T extends Promise<infer U> ? U : T;
+
 export async function applyDataChannel(
-  app: ReturnType<typeof buildHTTPServer>,
+  app: Awaited<ReturnType<typeof buildHTTPServer>>,
   database: Pick<DataContext, "server" | "flight">
 ) {
   // Set up WebSockets too, but only for NetSend, NetRequest

@@ -21,7 +21,7 @@
     "@mdx-js/react": "^2.1.2",
     "@msgpack/msgpack": "^2.7.2",
     "@react-spring/web": "^9.5.2",
-    "@react-three/drei": "^9.20.0",
+    "@react-three/drei": "^9.21.0",
     "@react-three/fiber": "^8.3.1",
     "@seregpie/three.text-texture": "^3.2.1",
     "@tailwindcss/typography": "^0.5.4",
