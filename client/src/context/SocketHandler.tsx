@@ -1,5 +1,5 @@
 import {getTabIdSync} from "@thorium/tab-id";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {useErrorHandler} from "react-error-boundary";
 import {useQueryClient} from "@tanstack/react-query";
 import {NetResponseData} from "../hooks/useDataConnection";
@@ -86,6 +86,19 @@ export function SocketHandler({
 }
 
 const Reconnecting = () => {
+  const [timeoutPassed, setTimeoutPassed] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setTimeoutPassed(true);
+    }, 500);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  if (!timeoutPassed) return null;
+
   return (
     <div className="fixed inset-0 z-30 bg-black bg-opacity-70 flex flex-col items-center justify-center space-y-8">
       <h2 className="text-6xl font-bold text-error">

@@ -18,13 +18,16 @@ export default defineConfig(async () => {
     build: {
       outDir: "../dist/public",
       emptyOutDir: false,
+      commonjsOptions: {include: []},
     },
+    optimizeDeps: {disabled: false},
     define: {
       "process.env.THORIUMSIM_CLIENT_ID": `"01FM3JNPNP3GFAXYR22Y7F9XAJ"`,
       "process.env.THORIUMSIM_URL": `"https://thoriumsim.com"`,
     },
     base: "/",
     server: {
+      port: 3000,
       open: true,
       fs: {
         strict: false,

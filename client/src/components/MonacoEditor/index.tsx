@@ -9,7 +9,7 @@ import {editor, languages} from "monaco-editor";
 import prettier from "prettier";
 import pluginLess from "prettier/parser-postcss";
 function noop() {}
-// @ts-expect-error The Environment doesn't have the right types.
+
 self.MonacoEnvironment = {
   getWorker(_: any, label: string) {
     if (label === "json") {

@@ -81,7 +81,9 @@ function Search() {
   );
 }
 
-const ROUTES = import.meta.globEager("/src/docs/**/*.{tsx,jsx,md,mdx}");
+const ROUTES = import.meta.glob("/src/docs/**/*.{tsx,jsx,md,mdx}", {
+  eager: true,
+});
 
 type RouteType = {
   path: string;
@@ -98,22 +100,32 @@ function isRoute(route: any): route is RouteType {
   return route.path && route.content;
 }
 
+function isRouteModule(
+  route: unknown
+): route is {html: string; attributes: any; toc: any} {
+  if (typeof route !== "object") return false;
+  if (!route) return false;
+  if (!("html" in route)) return false;
+  return true;
+}
 export const routes = Object.keys(ROUTES)
   .map(route => {
+    const routeObj = ROUTES[route];
+    if (!isRouteModule(routeObj)) return null;
     const path = route
       .replace(/\/src\/docs|index|\.(tsx|jsx|md|mdx)$/g, "")
       .replace(/^\/(.*)$/g, "$1")
       .replace(/\[\.{3}.+\]/, "*")
       .replace(/\[(.+)\]/, ":$1");
-    if (!ROUTES[route].html) return null;
+    if (!routeObj.html) return null;
     const routeParts = path.split("/");
     if (routeParts.length <= 1) return null;
     return {
       path: path.toLowerCase().replace(/\s/g, "-"),
-      content: ROUTES[route].html,
+      content: routeObj.html,
       section: routeParts[0],
-      frontmatter: ROUTES[route].attributes,
-      toc: ROUTES[route].toc,
+      frontmatter: routeObj.attributes,
+      toc: routeObj.toc,
     };
   })
   .filter(isRoute);
