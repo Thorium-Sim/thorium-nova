@@ -11,7 +11,7 @@ import os from "os";
 import multipart, {MultipartFile} from "@fastify/multipart";
 
 const isHeadless = !process.env.FORK;
-export default function buildHTTPServer({
+export default async function buildHTTPServer({
   staticRoot = path.join(rootPath, "public"),
 }: {
   staticRoot?: string;
@@ -45,27 +45,27 @@ export default function buildHTTPServer({
     await pipeline(part.file, createWriteStream(filepath));
   }
 
-  app.register(multipart, {attachFieldsToBody: true, onFile});
+  await app.register(multipart, {attachFieldsToBody: true, onFile});
 
   let cookieSecret = process.env.COOKIE_SECRET || "";
   try {
     cookieSecret = JSON.parse(process.env.COOKIE_SECRET || "");
   } catch {}
-  app.register(cors, {
+  await app.register(cors, {
     origin: "*",
     methods: ["GET", "PUT", "POST", "DELETE"],
   });
-  app.register(cookies, {
+  await app.register(cookies, {
     secret: cookieSecret,
     prefix: "thorium",
   });
 
-  app.register(staticServe, {
+  await app.register(staticServe, {
     root: `${staticRoot}/assets`,
     prefix: "/assets",
     maxAge: "60s",
   });
-  app.register(staticServe, {
+  await app.register(staticServe, {
     root: `${thoriumPath}/plugins`,
     prefix: "/plugins",
     decorateReply: false,

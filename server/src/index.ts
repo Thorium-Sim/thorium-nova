@@ -55,7 +55,7 @@ export async function startServer() {
 
   const database = {server: serverModel, flight};
 
-  const app = buildHTTPServer({
+  const app = await buildHTTPServer({
     staticRoot: path.join(rootPath, "public/"),
   });
   await applyDataChannel(app, database);
@@ -85,4 +85,4 @@ export async function startServer() {
   }
 }
 
-startServer();
+export const viteNodeApp = startServer();
