@@ -59,20 +59,20 @@ async function bundleDefaultPlugin() {
   zip.outputStream.pipe(fs.createWriteStream("../dist/defaultPlugin.zip"));
 }
 async function buildServer() {
-  // await require("esbuild")
-  //   .build({
-  //     define: {"process.env.NODE_ENV": '"production"'},
-  //     entryPoints: ["src/index.ts"],
-  //     bundle: true,
-  //     platform: "node",
-  //     target: "node16",
-  //     outdir: "../dist",
-  //     plugins: [nativeNodeModulesPlugin],
-  //   })
-  //   .catch(err => {
-  //     console.error(err);
-  //     process.exit(1);
-  //   });
+  await require("esbuild")
+    .build({
+      define: {"process.env.NODE_ENV": '"production"'},
+      entryPoints: ["src/index.ts"],
+      bundle: true,
+      platform: "node",
+      target: "node16",
+      outdir: "../dist",
+      plugins: [nativeNodeModulesPlugin],
+    })
+    .catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
   await bundleDefaultPlugin();
   fs.mkdirSync("../dist/resources", {recursive: true});
   fs.copyFileSync(

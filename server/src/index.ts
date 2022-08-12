@@ -85,4 +85,4 @@ export async function startServer() {
   }
 }
 
-export const viteNodeApp = startServer();
+startServer();

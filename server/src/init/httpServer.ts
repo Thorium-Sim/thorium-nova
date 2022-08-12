@@ -72,6 +72,10 @@ export default async function buildHTTPServer({
     maxAge: "60s",
   });
 
+  app.get("/healthcheck", async (req, reply) => {
+    reply.code(200).send("OK");
+  });
+
   app.get("/*", async (_req, reply) => {
     // Return a slightly different index.html for headless servers.
     // SPAs in normal mode should render the client assignment screen.
