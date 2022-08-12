@@ -12,9 +12,9 @@
   },
   "main": "dist/electron.js",
   "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "typecheck": "turbo run typecheck",
+    "dev": "node -r ts-eager/register scripts/dev.ts",
+    "build": "node -r ts-eager/register scripts/build.ts",
+    "typecheck": "concurrently --names \"client,server,shared,desktop\" -c \"blue.bold,magenta.bold,yellow.bold,green.bold\" \"npm run typecheck --workspace=client\" \"npm run typecheck --workspace=server\" \"npm run typecheck --workspace=shared\" \"npm run typecheck --workspace=desktop\"",
     "start": "NODE_ENV=production node dist/index.js",
     "test": "is-ci-cli \"test:coverage\" \"test:watch\"",
     "test:coverage": "jest --coverage",
@@ -155,8 +155,7 @@
     "jest-watch-typeahead": "^2.0.0",
     "patch-package": "^6.4.7",
     "prettier": "^2.7.1",
-    "semantic-release": "^19.0.3",
-    "turbo": "^1.4.3"
+    "semantic-release": "^19.0.3"
   },
   "publishConfig": {
     "access": "restricted"
