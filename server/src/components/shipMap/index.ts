@@ -23,6 +23,7 @@ export class ShipMapComponent extends Component {
           x,
           y,
           contents,
+          volume,
         }) => {
           const output: Partial<typeof data["deckNodes"][0]> = {
             id,
@@ -36,6 +37,7 @@ export class ShipMapComponent extends Component {
           if (radius) output.radius = radius;
           if (contents) output.contents = contents;
           if (flags?.length > 0) output.flags = flags;
+          if (typeof volume === "number") output.volume = volume;
           return output;
         }
       ),

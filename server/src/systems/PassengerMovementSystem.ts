@@ -1,5 +1,6 @@
 import DeckPlugin, {DeckNode} from "../classes/Plugins/Ship/Deck";
 import {Entity, System} from "../utils/ecs";
+import {pubsub} from "../utils/pubsub";
 export class PassengerMovementSystem extends System {
   test(entity: Entity) {
     return !!(
@@ -38,28 +39,37 @@ export class PassengerMovementSystem extends System {
           y: nextNode.y,
           z: nextNode.deckIndex,
         });
-      }
-    } else {
-      // Move towards the next node
-      const direction = Math.atan2(nextNode?.y - y, nextNode?.x - x);
-      const velocity = Math.min(
-        passengerMovement.movementMaxVelocity.x,
-        distanceToNext
-      );
-      const zVelocity = Math.min(
-        passengerMovement.movementMaxVelocity.z,
-        nextNode.deckIndex - z
-      );
-      const newX = x + velocity * Math.cos(direction) * elapsedRatio;
-      const newY = y + velocity * Math.sin(direction) * elapsedRatio;
-      let newZ = z + zVelocity * elapsedRatio;
-      if (Math.abs(newZ - nextNode.deckIndex) < 0.1) {
-        // We've reached the next deck
-        newZ = nextNode.deckIndex;
-      }
 
-      entity.updateComponent("position", {x: newX, y: newY, z: newZ});
+        if (
+          entity.components.cargoContainer &&
+          entity.components.position?.parentId
+        ) {
+          pubsub.publish("cargoContainers", {
+            shipId: entity.components.position.parentId,
+          });
+        }
+        return;
+      }
     }
+    // Move towards the next node
+    const direction = Math.atan2(nextNode?.y - y, nextNode?.x - x);
+    const velocity = Math.min(
+      passengerMovement.movementMaxVelocity.x,
+      distanceToNext
+    );
+    const zVelocity = Math.min(
+      passengerMovement.movementMaxVelocity.z,
+      nextNode.deckIndex - z
+    );
+    const newX = x + velocity * Math.cos(direction) * elapsedRatio;
+    const newY = y + velocity * Math.sin(direction) * elapsedRatio;
+    let newZ = z + zVelocity * elapsedRatio;
+    if (Math.abs(newZ - nextNode.deckIndex) < 0.1) {
+      // We've reached the next deck
+      newZ = nextNode.deckIndex;
+    }
+
+    entity.updateComponent("position", {x: newX, y: newY, z: newZ});
   }
 }
 

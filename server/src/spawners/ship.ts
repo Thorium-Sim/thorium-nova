@@ -6,6 +6,7 @@ import {randomFromList} from "../utils/randomFromList";
 import {generateShipInventory} from "./inventory";
 import {FlightDataModel} from "../classes/FlightDataModel";
 import {ServerDataModel} from "../classes/ServerDataModel";
+import {greekLetters} from "../utils/constantStrings";
 
 /*
 AlertLevelComponent,
@@ -110,11 +111,14 @@ export function spawnShip(
     });
 
     // Place cargo containers
-    Array.from({length: template.cargoContainers || 0}).forEach(() => {
+    Array.from({length: template.cargoContainers || 0}).forEach((_, i) => {
       // TODO June 24, 2022: Maybe make this use the ECS PRNG
       const randomRoom = randomFromList(deckNodes.filter(n => n.isRoom));
       if (!randomRoom) return;
       const cargoContainer = new Entity();
+      cargoContainer.addComponent("identity", {
+        name: `Container ${greekLetters[i]}${i > 25 ? i : ""}`,
+      });
       cargoContainer.addComponent("cargoContainer", {
         volume: template.cargoContainerVolume || 1,
       });
@@ -125,7 +129,9 @@ export function spawnShip(
         type: "ship",
         parentId: entity.id,
       });
-      cargoContainer.addComponent("passengerMovement", {});
+      cargoContainer.addComponent("passengerMovement", {
+        destinationNode: randomRoom.id,
+      });
       extraEntities.push(cargoContainer);
     });
   } else {
