@@ -2,17 +2,22 @@ import {useDataStream} from "client/src/context/useDataStream";
 import {useNetRequest} from "client/src/context/useNetRequest";
 
 export function Pilot() {
-  const ship = useNetRequest("ship");
-  const impulseEngines = useNetRequest("impulseEngines");
   useDataStream({systemId: null});
 
   return (
-    <div className="flex flex-col justify-center items-center h-full">
-      <h1 className="text-6xl font-bold">Pilot</h1>
-      <pre className="flex-1 overflow-y-auto">
-        {JSON.stringify(ship, null, 2)}
-        {JSON.stringify(impulseEngines, null, 2)}
-      </pre>
+    <div className="grid grid-cols-4 h-full place-content-center gap-4">
+      <div className="bg-purple-500 h-full">
+        <div>Impulse controls here</div>
+        <div>Thruster direction here here</div>
+      </div>
+      <div className="col-span-2 h-full">
+        <div className="aspect-square w-full max-h-full bg-orange-400"></div>
+      </div>
+      <div className="bg-purple-500 h-full">
+        <div>Course controls here</div>
+        <div>Camera controls here</div>
+        <div>Thruster rotation here</div>
+      </div>
     </div>
   );
 }

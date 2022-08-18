@@ -51,10 +51,10 @@ export const CardArea: React.FC<{
       </Transition>
       {CardComponents.map(({CardComponent, component, name}) => (
         <CardRenderer
-          key={name}
           CardComponent={CardComponent}
           id={component}
           currentCardId={card.component}
+          key={name}
         />
       ))}
     </Fragment>
@@ -90,10 +90,23 @@ const CardRenderer = ({
       >
         <Suspense fallback={<LoadingSpinner />}>
           <ErrorBoundary fallback={<CardError />}>
-            <CardComponent cardLoaded={cardLoaded} />
+            <RenderComponent
+              cardLoaded={cardLoaded}
+              CardComponent={CardComponent}
+            />
           </ErrorBoundary>
         </Suspense>
       </Transition>
     </CardProvider>
   );
 };
+
+function RenderComponent({
+  cardLoaded,
+  CardComponent,
+}: {
+  cardLoaded: boolean;
+  CardComponent: ComponentType<{cardLoaded: boolean}>;
+}) {
+  return <CardComponent cardLoaded={cardLoaded} />;
+}
