@@ -8,7 +8,7 @@ import {
   useHover,
 } from "@floating-ui/react-dom-interactions";
 import {useState} from "react";
-import {useShipMapStore} from "./index";
+import {useShipMapStore} from "./useShipMapStore";
 
 export function RoomDot({
   id,

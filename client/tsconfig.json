@@ -46,6 +46,8 @@
     "src/pages/NotFound/astronaut.json",
     "src/pages/Releases/release-notes.json",
     "./package.json",
-    "../package.json"
+    "../package.json",
+    "./src/cards/CargoControl/useShipMapStore.tsx",
+    "./src/cards/CargoControl/cargoSort.tsx"
   ]
 }

@@ -63,14 +63,12 @@ describe("Ship Spawner", () => {
     expect(ship.components.position?.x).toEqual(10);
     expect(ship.components.position?.y).toEqual(20);
     expect(ship.components.position?.z).toEqual(30);
-    expect(extraEntities.length).toEqual(6);
+    expect(extraEntities.length).toEqual(5);
     expect(extraEntities[0].components.identity?.name).toEqual(
       "Generic System"
     );
     expect(extraEntities[0].components.isShipSystem?.type).toEqual("generic");
-    expect(extraEntities[1].components.cargoContainer?.volume).toEqual(12);
-    expect(extraEntities[1].components.isRoom).toBeTruthy();
-    expect(extraEntities[2].components.isRoom).toBeFalsy();
+    expect(extraEntities[1].components.cargoContainer?.volume).toEqual(4);
     expect(extraEntities[2].components.cargoContainer?.volume).toEqual(4);
   });
 });

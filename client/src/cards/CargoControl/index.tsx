@@ -3,7 +3,6 @@ import {CardProps} from "client/src/components/Station/CardProps";
 import {netSend} from "client/src/context/netSend";
 import {useDataStream} from "client/src/context/useDataStream";
 import {useNetRequest} from "client/src/context/useNetRequest";
-import create from "zustand";
 import "./style.css";
 import {toast} from "client/src/context/ToastContext";
 import {ContainerLabel} from "./ContainerLabel";
@@ -13,21 +12,7 @@ import {CargoContainerList} from "./CargoContainerList";
 import {CargoList} from "./CargoList";
 import {GoToRoomButton} from "./GoToRoomButton";
 import {ShipView} from "./ShipView";
-export const pixelRatio = window.devicePixelRatio;
-
-export const useShipMapStore = create<{
-  selectedRoomId: number | null;
-  selectedContainerId: number | null;
-  deckIndex: number;
-}>(set => ({
-  selectedRoomId: null,
-  selectedContainerId: null,
-  deckIndex: 0,
-}));
-
-export function cargoSort([keyA]: [string, number], [keyB]: [string, number]) {
-  return keyA.localeCompare(keyB);
-}
+import {useShipMapStore} from "./useShipMapStore";
 
 export function CargoControl(props: CardProps) {
   const selectedRoomId = useShipMapStore(state => state.selectedRoomId);
@@ -94,11 +79,13 @@ export function CargoControl(props: CardProps) {
                   transfers: [{item: key, count: transferAmount}],
                 });
               } catch (err) {
-                toast({
-                  title: "Error transferring cargo",
-                  body: err.message,
-                  color: "error",
-                });
+                if (err instanceof Error) {
+                  toast({
+                    title: "Error transferring cargo",
+                    body: err.message,
+                    color: "error",
+                  });
+                }
               }
             }
           }}
@@ -124,11 +111,13 @@ export function CargoControl(props: CardProps) {
                       roomId: selectedRoomId,
                     });
                   } catch (err) {
-                    toast({
-                      title: "Error sending container",
-                      body: err.message,
-                      color: "error",
-                    });
+                    if (err instanceof Error) {
+                      toast({
+                        title: "Error sending container",
+                        body: err.message,
+                        color: "error",
+                      });
+                    }
                   }
                 }
               }}
@@ -156,11 +145,13 @@ export function CargoControl(props: CardProps) {
                   transfers: [{item: key, count: transferAmount}],
                 });
               } catch (err) {
-                toast({
-                  title: "Error transferring cargo",
-                  body: err.message,
-                  color: "error",
-                });
+                if (err instanceof Error) {
+                  toast({
+                    title: "Error transferring cargo",
+                    body: err.message,
+                    color: "error",
+                  });
+                }
               }
             }
           }}
@@ -190,11 +181,13 @@ export function CargoControl(props: CardProps) {
                   containerId: selectedContainerId,
                 });
               } catch (err) {
-                toast({
-                  title: "Error sending container",
-                  body: err.message,
-                  color: "error",
-                });
+                if (err instanceof Error) {
+                  toast({
+                    title: "Error sending container",
+                    body: err.message,
+                    color: "error",
+                  });
+                }
               }
             }
           }}

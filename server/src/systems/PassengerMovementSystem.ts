@@ -7,9 +7,9 @@ export class PassengerMovementSystem extends System {
       entity.components.passengerMovement && entity.components.position
     );
   }
-  frequency = 1;
+  frequency = 20;
   update(entity: Entity, elapsed: number) {
-    const elapsedRatio = 1;
+    const elapsedRatio = elapsed / (1000 / this.frequency);
     const {position, passengerMovement} = entity.components;
     if (!position || !passengerMovement) return;
     const {x, y, z, parentId} = position;

@@ -1,5 +1,5 @@
 import {useNetRequest} from "client/src/context/useNetRequest";
-import {cargoSort} from "./index";
+import {cargoSort} from "./cargoSort";
 
 export function CargoList({
   selectedRoom,

@@ -1,5 +1,5 @@
 import {useNetRequest} from "client/src/context/useNetRequest";
-import {useShipMapStore} from "./index";
+import {useShipMapStore} from "./useShipMapStore";
 
 export function ContainerLabel() {
   const selectedContainerId = useShipMapStore(

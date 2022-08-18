@@ -1,7 +1,9 @@
 import {useThorium} from "client/src/context/ThoriumContext";
 import useAnimationFrame from "client/src/hooks/useAnimationFrame";
 import {useRef} from "react";
-import {useShipMapStore, pixelRatio} from "./index";
+import {useShipMapStore} from "./useShipMapStore";
+
+const pixelRatio = window.devicePixelRatio;
 
 export function CargoContainerDot(props: {
   id: number;

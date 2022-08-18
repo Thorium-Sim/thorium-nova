@@ -1,6 +1,6 @@
 import {Tooltip} from "@thorium/ui/Tooltip";
 import {MdLogout} from "react-icons/md";
-import {useShipMapStore} from "./index";
+import {useShipMapStore} from "./useShipMapStore";
 
 export function GoToRoomButton({
   decks,

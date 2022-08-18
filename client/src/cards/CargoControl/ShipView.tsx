@@ -4,9 +4,11 @@ import {useNetRequest} from "client/src/context/useNetRequest";
 import {useEffect, useState} from "react";
 import {Suspense} from "react";
 import {useResizeObserver} from "client/src/hooks/useResizeObserver";
-import {pixelRatio, useShipMapStore} from "./index";
+import {useShipMapStore} from "./useShipMapStore";
 import {CargoContainerDot} from "./CargoContainerDot";
 import {RoomDot} from "./RoomDot";
+
+const pixelRatio = window.devicePixelRatio;
 
 export function ShipView({
   deckIndex,

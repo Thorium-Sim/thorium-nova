@@ -204,8 +204,7 @@ export const inputs = {
           if (!acc) return entity;
 
           // If the entity is busy, skip it
-          if (Boolean(entity.components.passengerMovement?.nodePath.length))
-            return acc;
+          if (entity.components.passengerMovement?.nodePath.length) return acc;
 
           // Prioritize entities that are close to the target deck, but not busy.
           if (

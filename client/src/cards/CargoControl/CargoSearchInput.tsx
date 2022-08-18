@@ -1,6 +1,6 @@
 import SearchableInput, {DefaultResultLabel} from "@thorium/ui/SearchableInput";
 import {netRequest} from "client/src/context/useNetRequest";
-import {useShipMapStore} from "./index";
+import {useShipMapStore} from "./useShipMapStore";
 
 export function CargoSearchInput() {
   return (
