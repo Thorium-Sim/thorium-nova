@@ -1,13 +1,26 @@
+import {DeckNode} from "../classes/Plugins/Ship/Deck";
 import {PriorityQueue} from "./priorityQueue";
 
-export type ShipMapGraph = Map<number, Map<number, 1>>;
-export function createShipMapGraph(edges: {from: number; to: number}[]) {
+export type ShipMapGraph = Map<number, Map<number, number>>;
+export function createShipMapGraph(
+  edges: {from: number; to: number}[],
+  inputNodes: DeckNode[] = []
+) {
   const nodes: ShipMapGraph = new Map();
+  const nodeMap = new Map(inputNodes.map(({id, x, y}) => [id, {x, y}]));
   edges.forEach(edge => {
     if (!nodes.has(edge.from)) nodes.set(edge.from, new Map());
     if (!nodes.has(edge.to)) nodes.set(edge.to, new Map());
-    nodes.get(edge.from)?.set(edge.to, 1);
-    nodes.get(edge.to)?.set(edge.from, 1);
+    const fromNode = nodeMap.get(edge.from);
+    const toNode = nodeMap.get(edge.to);
+    let distance = 1;
+    if (fromNode && toNode) {
+      distance = Math.sqrt(
+        Math.pow(fromNode.x - toNode.x, 2) + Math.pow(fromNode.y - toNode.y, 2)
+      );
+    }
+    nodes.get(edge.from)?.set(edge.to, distance);
+    nodes.get(edge.to)?.set(edge.from, distance);
   });
   // Verify that every node has at least one input and one output.
   for (let node of nodes.keys()) {
@@ -25,7 +38,15 @@ export function calculateShipMapPath(
   graph: ShipMapGraph,
   start: number,
   goal: number,
-  options = {avoid: [], trim: false, reverse: false}
+  options: {
+    avoid?: [];
+    trim?: boolean;
+    reverse?: boolean;
+  } = {
+    avoid: [],
+    trim: false,
+    reverse: false,
+  }
 ): number[] | null {
   // Don't run when we don't have nodes set
   if (!graph.size) {
@@ -37,7 +58,6 @@ export function calculateShipMapPath(
   const previous = new Map();
 
   let path = [];
-  let totalCost = 0;
 
   let avoid: number[] = [];
   if (options.avoid) avoid = [].concat(options.avoid);
@@ -59,9 +79,6 @@ export function calculateShipMapPath(
     // When the node with the lowest cost in the frontier in our goal node,
     // we can compute the path and exit the loop
     if (node.key === goal) {
-      // Set the total cost to the current value
-      totalCost = node.priority;
-
       let nodeKey = node.key;
       while (previous.has(nodeKey)) {
         path.push(nodeKey);

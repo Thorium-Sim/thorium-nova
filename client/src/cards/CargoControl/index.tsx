@@ -130,10 +130,21 @@ export function CargoControl(props: CardProps) {
                 !selectedRoomId ? "btn-disabled" : "btn-primary"
               }`}
               disabled={!selectedRoomId}
-              onClick={() =>
-                typeof selectedRoomId === "number" &&
-                netSend("cargoContainerSummon", {roomId: selectedRoomId})
-              }
+              onClick={async () => {
+                if (typeof selectedRoomId === "number") {
+                  try {
+                    await netSend("cargoContainerSummon", {
+                      roomId: selectedRoomId,
+                    });
+                  } catch (err) {
+                    toast({
+                      title: "Error sending container",
+                      body: err.message,
+                      color: "error",
+                    });
+                  }
+                }
+              }}
             >
               Summon Closest Container
               {selectedRoom?.name ? ` to ${selectedRoom?.name}` : ""}
@@ -181,14 +192,25 @@ export function CargoControl(props: CardProps) {
             !selectedRoom ||
             !selectedContainer
           }
-          onClick={() =>
-            typeof selectedRoomId === "number" &&
-            typeof selectedContainerId === "number" &&
-            netSend("cargoContainerSummon", {
-              roomId: selectedRoomId,
-              containerId: selectedContainerId,
-            })
-          }
+          onClick={async () => {
+            if (
+              typeof selectedRoomId === "number" &&
+              typeof selectedContainerId === "number"
+            ) {
+              try {
+                await netSend("cargoContainerSummon", {
+                  roomId: selectedRoomId,
+                  containerId: selectedContainerId,
+                });
+              } catch (err) {
+                toast({
+                  title: "Error sending container",
+                  body: err.message,
+                  color: "error",
+                });
+              }
+            }
+          }}
         >
           Send Container{selectedRoom?.name ? ` to ${selectedRoom?.name}` : ""}
         </Button>
@@ -326,6 +348,7 @@ function CargoContainerList() {
         );
         return (
           <button
+            key={container.id}
             className={`relative flex justify-center items-center text-3xl  transition-colors aspect-square w-full rounded-full border border-white ${
               isSelected
                 ? "bg-primary-focus/75 hover:bg-primary-focus"
@@ -631,7 +654,7 @@ function RoomDot({
             top: y ?? 0,
             left: x ?? 0,
           }}
-          className="text-white text-2xl drop-shadow-xl bg-black/90 border-white/50 border-2 rounded px-2 py-1"
+          className="z-50 text-white text-2xl drop-shadow-xl bg-black/90 border-white/50 border-2 rounded px-2 py-1"
           {...getFloatingProps()}
         >
           {name}

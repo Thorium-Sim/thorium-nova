@@ -178,7 +178,8 @@ export const inputs = {
     if (!context.ship.components.shipMap?.graph) {
       context.ship.updateComponent("shipMap", {
         graph: createShipMapGraph(
-          context.ship.components.shipMap?.deckEdges || []
+          context.ship.components.shipMap?.deckEdges || [],
+          context.ship.components.shipMap.deckNodes
         ),
       });
     }
@@ -245,7 +246,8 @@ export const inputs = {
 
     if (!context.ship.components.shipMap.graph)
       throw new Error("Invalid ship map.");
-    const nodePath = calculateShipMapPath(
+
+    let nodePath = calculateShipMapPath(
       context.ship.components.shipMap.graph,
       closestNode.id,
       params.roomId
@@ -257,6 +259,8 @@ export const inputs = {
         nextNodeIndex: 0,
         destinationNode: params.roomId,
       });
+    } else {
+      throw new Error("No path to room.");
     }
 
     if (container.components.position.parentId) {
