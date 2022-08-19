@@ -7,6 +7,8 @@ export const warpEnginesInputs = {
     context: DataContext,
     params: {systemId?: number; factor: number}
   ) => {
+    if (!context.ship) throw new Error("No ship found.");
+
     const system = getShipSystem(context, {
       systemId: params.systemId,
       systemType: "warpEngines",
@@ -17,8 +19,8 @@ export const warpEnginesInputs = {
     system.updateComponent("isWarpEngines", {
       currentWarpFactor: params.factor,
     });
-    // @ts-expect-error We can remove this once the warp engines card data is defined.
-    pubsub.publish("warpEngines", {
+
+    pubsub.publish("pilotWarpEngines", {
       shipId: context.ship?.id,
       systemId: system.id,
     });
