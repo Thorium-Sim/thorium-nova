@@ -90,7 +90,8 @@ export const ImpulseControls = ({cardLoaded = true}) => {
   const {targetSpeed, cruisingSpeed, emergencySpeed} = useNetRequest(
     "pilotImpulseEngines"
   );
-  const {warpFactorCount, maxVelocity} = useNetRequest("pilotWarpEngines");
+  const {warpFactorCount, currentWarpFactor} =
+    useNetRequest("pilotWarpEngines");
   const downRef = useRef(false);
   const [ref, measurement, getMeasurements] = useMeasure<HTMLDivElement>();
   const [{y}, set] = useSpring(() => ({
@@ -228,7 +229,9 @@ export const ImpulseControls = ({cardLoaded = true}) => {
             <p className="text-xl">Warp Speed:</p>
             <div className="flex flex-col justify-around h-full">
               <Button
-                className="btn-error"
+                className={`btn-error ${
+                  currentWarpFactor === warpFactorCount + 1 ? "btn-active" : ""
+                }`}
                 onClick={() =>
                   netSend("warpEnginesSetWarpFactor", {
                     factor: warpFactorCount + 1,
@@ -244,13 +247,9 @@ export const ImpulseControls = ({cardLoaded = true}) => {
                 return (
                   <Button
                     key={`warp-${warpFactor}`}
-                    // active={
-                    //   warpFactor ===
-                    //   warpData?.warpEnginesOutfit?.warpEngines.currentWarpFactor
-                    //     ? true
-                    //     : undefined
-                    // }
-                    className={`btn-primary ${i === 0 ? "warning" : ""}`}
+                    className={`btn-primary ${i === 0 ? "warning" : ""} ${
+                      warpFactor === currentWarpFactor ? "btn-active" : ""
+                    }`}
                     onClick={() =>
                       netSend("warpEnginesSetWarpFactor", {factor: warpFactor})
                     }

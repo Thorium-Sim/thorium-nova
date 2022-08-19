@@ -37,6 +37,8 @@ export const requests = {
       warpFactorCount:
         warpEngines.components.isWarpEngines?.warpFactorCount || 5,
       maxVelocity: warpEngines.components.isWarpEngines?.maxVelocity || 0,
+      currentWarpFactor:
+        warpEngines.components.isWarpEngines?.currentWarpFactor || 0,
     };
   },
 };
