@@ -17,7 +17,7 @@ export function getShipSystem(
 
         if (
           entity?.components &&
-          `is${pascalCase(param.systemType)}` in entity?.components
+          `is${pascalCase(param.systemType)}` in entity.components
         ) {
           return entity;
         }
