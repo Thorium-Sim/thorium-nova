@@ -29,7 +29,6 @@ function formatSpeed(speed: KilometerPerSecond) {
       maximumFractionDigits: 1,
     })} km/s`;
   }
-  7;
 
   return `${(speed * 1000).toLocaleString(undefined, {
     minimumFractionDigits: 1,
