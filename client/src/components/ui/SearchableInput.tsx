@@ -91,7 +91,7 @@ export default function SearchableInput<T extends {id: any}>({
             setQuery("");
           }}
         >
-          <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto panel !bg-black/90">
+          <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto panel !bg-black/90 z-40">
             {searchQuery.isLoading && searchQuery.isFetching && (
               <div className="relative cursor-default select-none py-2 px-4">
                 <LoadingSpinner compact />

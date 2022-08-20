@@ -12,19 +12,32 @@ export class ShipMapComponent extends Component {
         name,
       })),
       deckNodes: data.deckNodes.map(
-        ({flags, deckIndex, icon, id, isRoom, name, radius, x, y}) => {
-          const output: Partial<DeckPlugin["nodes"][0]> & {deckIndex: number} =
-            {
-              id,
-              deckIndex,
-              x: roundTo1000(x),
-              y: roundTo1000(y),
-            };
+        ({
+          flags,
+          deckIndex,
+          icon,
+          id,
+          isRoom,
+          name,
+          radius,
+          x,
+          y,
+          contents,
+          volume,
+        }) => {
+          const output: Partial<typeof data["deckNodes"][0]> = {
+            id,
+            deckIndex,
+            x: roundTo1000(x),
+            y: roundTo1000(y),
+          };
           if (name) output.name = name;
           if (icon) output.icon = icon;
           if (isRoom) output.isRoom = isRoom;
           if (radius) output.radius = radius;
+          if (contents) output.contents = contents;
           if (flags?.length > 0) output.flags = flags;
+          if (typeof volume === "number") output.volume = volume;
           return output;
         }
       ),
@@ -42,7 +55,12 @@ export class ShipMapComponent extends Component {
     };
   }
   decks: Omit<DeckPlugin, "nodes">[] = [];
-  deckNodes: (DeckPlugin["nodes"][0] & {deckIndex: number})[] = [];
+  deckNodes: (DeckPlugin["nodes"][0] & {
+    deckIndex: number;
+    contents: {
+      [inventoryTemplateName: string]: number;
+    };
+  })[] = [];
   deckEdges: DeckEdge[] = [];
   graph: ShipMapGraph | null = null;
 }

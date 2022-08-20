@@ -6,6 +6,7 @@ import {randomFromList} from "../utils/randomFromList";
 import {generateShipInventory} from "./inventory";
 import {FlightDataModel} from "../classes/FlightDataModel";
 import {ServerDataModel} from "../classes/ServerDataModel";
+import {greekLetters} from "../utils/constantStrings";
 
 /*
 AlertLevelComponent,
@@ -90,32 +91,34 @@ export function spawnShip(
   if (entity.components.isPlayerShip) {
     const deckNodes =
       template.decks?.flatMap((deck, i) =>
-        deck.nodes.map(n => ({...n, deckIndex: i}))
+        deck.nodes.map(n => ({...n, deckIndex: i, contents: {}}))
       ) || [];
+
+    generateShipInventory(
+      deckNodes.map(node => ({
+        id: node.id,
+        contents: node.contents,
+        flags: node.flags,
+        volume: node.volume,
+      })),
+      dataContext.flight.inventoryTemplates
+    );
 
     entity.addComponent("shipMap", {
       decks: template.decks || [],
       deckNodes,
       deckEdges: template.deckEdges || [],
     });
-    deckNodes.forEach(node => {
-      if (!node.isRoom) return;
-      const room = new Entity();
-      room.addComponent("isRoom", {flags: node.flags});
-      room.addComponent("identity", {name: node.name});
-      if (node.flags.includes("cargo")) {
-        room.addComponent("cargoContainer", {volume: node.volume});
-      }
-      extraEntities.push(room);
-    });
-    generateShipInventory(extraEntities, dataContext.flight.inventoryTemplates);
 
     // Place cargo containers
-    Array.from({length: template.cargoContainers || 0}).forEach(() => {
+    Array.from({length: template.cargoContainers || 0}).forEach((_, i) => {
       // TODO June 24, 2022: Maybe make this use the ECS PRNG
       const randomRoom = randomFromList(deckNodes.filter(n => n.isRoom));
       if (!randomRoom) return;
       const cargoContainer = new Entity();
+      cargoContainer.addComponent("identity", {
+        name: `Container ${greekLetters[i]}${i > 25 ? i : ""}`,
+      });
       cargoContainer.addComponent("cargoContainer", {
         volume: template.cargoContainerVolume || 1,
       });
@@ -126,7 +129,9 @@ export function spawnShip(
         type: "ship",
         parentId: entity.id,
       });
-      cargoContainer.addComponent("passengerMovement", {});
+      cargoContainer.addComponent("passengerMovement", {
+        destinationNode: randomRoom.id,
+      });
       extraEntities.push(cargoContainer);
     });
   } else {
@@ -135,7 +140,17 @@ export function spawnShip(
       // TODO June 24, 2022: Make this a configurable value
       volume: 500,
     });
-    generateShipInventory([entity], dataContext.flight.inventoryTemplates);
+    generateShipInventory(
+      [
+        {
+          id: entity.id,
+          contents: entity.components.cargoContainer?.contents || {},
+          flags: ["cargo"],
+          volume: entity.components.cargoContainer?.volume || 500,
+        },
+      ],
+      dataContext.flight.inventoryTemplates
+    );
   }
 
   return {ship: entity, extraEntities: shipSystems.concat(extraEntities)};

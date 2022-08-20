@@ -87,7 +87,17 @@ describe("Inventory Generator", () => {
       volume: 1,
       abundance: 1,
     });
-    generateShipInventory(inputRooms, flightInventory);
+    generateShipInventory(
+      inputRooms.map(room => {
+        return {
+          id: room.id,
+          contents: room.components.cargoContainer?.contents || {},
+          flags: room.components.isRoom?.flags || [],
+          volume: room.components.cargoContainer?.volume || 1,
+        };
+      }),
+      flightInventory
+    );
     expect(inputRooms).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -240,7 +250,17 @@ describe("Inventory Generator", () => {
       volume: 1,
       abundance: 1,
     });
-    generateShipInventory(inputRooms, flightInventory);
+    generateShipInventory(
+      inputRooms.map(room => {
+        return {
+          id: room.id,
+          contents: room.components.cargoContainer?.contents || {},
+          flags: ["cargo"],
+          volume: room.components.cargoContainer?.volume || 1,
+        };
+      }),
+      flightInventory
+    );
     expect(inputRooms).toMatchInlineSnapshot(`
       Array [
         Object {

@@ -46,9 +46,6 @@
     "src/pages/NotFound/astronaut.json",
     "src/pages/Releases/release-notes.json",
     "./package.json",
-    "../package.json",
-    "./src/cards/Pilot/usePilotStore.tsx",
-    "./src/cards/Pilot/PilotZoomSlider.tsx",
-    "./src/cards/Pilot/CircleGrid.tsx"
+    "../package.json"
   ]
 }
