@@ -115,7 +115,6 @@ function Waypoints() {
                     .getState()
                     .setCurrentSystem(waypoint?.position.parentId);
                 }
-                console.log(waypoint);
                 useStarmapStore.setState({
                   selectedObjectId: waypoint.objectId || null,
                 });

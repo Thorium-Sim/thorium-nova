@@ -667,7 +667,6 @@ class PanZoom extends React.Component<Props, State> {
 
     const x = (containerRect.width - clientWidth * scale) / 2;
     const y = (containerRect.height - clientHeight * scale) / 2;
-
     let afterStateUpdate = undefined;
     if (!animate) {
       const transition = dragContainer.style.transition;

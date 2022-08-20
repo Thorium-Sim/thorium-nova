@@ -17,7 +17,7 @@ export class FlightDataModel extends FSDataStore {
   clients!: Record<string, FlightClient>;
   pluginIds!: string[];
   private entities!: Entity[];
-  inventoryTemplates: {[inventoryTemplateName: string]: InventoryTemplate};
+  inventoryTemplates!: {[inventoryTemplateName: string]: InventoryTemplate};
   serverDataModel: ServerDataModel;
   constructor(
     params: Partial<FlightDataModel> & {
@@ -51,10 +51,9 @@ export class FlightDataModel extends FSDataStore {
     );
 
     this.inventoryTemplates = Object.fromEntries(
-      Object.entries(params.inventoryTemplates || {}).map(([key, val]) => [
-        key,
-        new InventoryTemplate(val),
-      ])
+      Object.entries(
+        this.inventoryTemplates || params.inventoryTemplates || {}
+      ).map(([key, val]) => [key, new InventoryTemplate(val)])
     );
   }
   run = () => {
@@ -121,6 +120,7 @@ export class FlightDataModel extends FSDataStore {
       clients: Object.fromEntries(
         Object.entries(this.clients).map(([id, client]) => [id, client])
       ),
+      inventoryTemplates: this.inventoryTemplates,
     };
     return data;
   }

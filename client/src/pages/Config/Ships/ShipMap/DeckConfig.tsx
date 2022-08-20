@@ -125,6 +125,7 @@ export function DeckConfig() {
           panned.current = true;
           panState.current = state;
         }}
+        disableDoubleClickZoom
       >
         <SVGImageLoader
           style={{

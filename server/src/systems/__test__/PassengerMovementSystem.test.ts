@@ -136,14 +136,14 @@ describe("PassengerMovementSystem", () => {
     expect(passenger.components.passengerMovement?.nextNodeIndex).toBe(1);
     update(7);
     expect(passenger.components.position).toMatchInlineSnapshot(`
-          PositionComponent {
-            "parentId": 0,
-            "type": "ship",
-            "x": 0.9302150222153458,
-            "y": 0.9302150222153458,
-            "z": 0,
-          }
-        `);
+      PositionComponent {
+        "parentId": 0,
+        "type": "ship",
+        "x": 0.9525462151064351,
+        "y": 0.9525462151064351,
+        "z": 0,
+      }
+    `);
     expect(passenger.components.passengerMovement?.nextNodeIndex).toBe(2);
     update(8);
     const oldX = passenger.components.position?.x;

@@ -1,4 +1,4 @@
-import {useState, useCallback, useLayoutEffect} from "react";
+import {useState, useCallback, useLayoutEffect, startTransition} from "react";
 
 export interface Dimensions {
   width: number;
@@ -53,9 +53,11 @@ function useMeasure<Element extends HTMLElement = HTMLElement>(): [
 
   const measure = useCallback(() => {
     if (node) {
-      window.requestAnimationFrame(() =>
-        setDimensions(getDimensionObject<Element>(node))
-      );
+      window.requestAnimationFrame(() => {
+        startTransition(() => {
+          setDimensions(getDimensionObject<Element>(node));
+        });
+      });
     }
   }, [node]);
 

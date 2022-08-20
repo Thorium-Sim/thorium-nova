@@ -1105,3 +1105,80 @@ input[type="range"].slider.zoom::-webkit-slider-runnable-track {
 input[type="range"].slider.zoom:focus::-webkit-slider-runnable-track {
   background: rgba(255, 255, 255, 0.05);
 }
+
+.slider {
+  display: flex;
+}
+
+.slider.horizontal {
+  flex-direction: column;
+  width: 300px;
+}
+
+.slider.vertical {
+  height: 150px;
+}
+
+.label-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.slider.horizontal .track {
+  height: 30px;
+  width: 100%;
+}
+
+/* track line */
+.track:before {
+  content: attr(x);
+  display: block;
+  position: absolute;
+  background: gray;
+}
+
+.slider.horizontal .track:before {
+  height: 3px;
+  width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.slider.vertical .track {
+  width: 30px;
+  height: 100%;
+}
+
+.slider.vertical .track:before {
+  width: 3px;
+  height: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: gray;
+}
+
+.thumb.dragging {
+  background: dimgray;
+}
+
+.thumb.focus {
+  background: orange;
+}
+
+.slider.horizontal .thumb {
+  top: 50%;
+}
+
+.slider.vertical .thumb {
+  left: 50%;
+}
+
+.track.disabled {
+  opacity: 0.4;
+}
