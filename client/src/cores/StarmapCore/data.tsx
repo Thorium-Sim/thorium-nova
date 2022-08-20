@@ -1,3 +1,5 @@
+import {matchSorter} from "match-sorter";
+import ShipPlugin from "server/src/classes/Plugins/Ship";
 import {DataContext} from "server/src/utils/DataContext";
 import {Entity} from "server/src/utils/ecs";
 
@@ -23,6 +25,7 @@ export const requests = {
     if (!context.flight) return [];
     const data = context.flight.ecs.entities.reduce(
       (prev: Pick<Entity, "components" | "id">[], {components, id}) => {
+        if (components.isShip) return prev;
         if (
           components.position?.parentId === params.systemId ||
           components.satellite?.parentId === params.systemId
@@ -34,19 +37,62 @@ export const requests = {
     );
     return data;
   },
-  starmapShips: (context: DataContext, params: {systemId?: number | null}) => {
-    // TODO: May 24 2022 - This really should be a netrequest so it can be
-    // filtered based on what system the flight director is currently looking at.
+  starmapShips: (
+    context: DataContext,
+    params: {systemId?: number | null},
+    publishParams: {systemId: number | null}
+  ) => {
+    if (
+      publishParams &&
+      publishParams.systemId !== params.systemId &&
+      params.systemId !== undefined
+    )
+      throw null;
     if (!context.flight) return [];
     const data = context.flight.ecs.entities.reduce(
-      (prev: Pick<Entity, "components" | "id">[], {components, id}) => {
-        if (components.isShip && components.position?.type === "interstellar")
-          prev.push({components, id});
+      (
+        prev: {id: number; modelUrl?: string; logoUrl?: string}[],
+        {components, id}
+      ) => {
+        if (components.isShip) {
+          if (
+            (params.systemId &&
+              components.position?.parentId === params.systemId) ||
+            (!params.systemId && components.position?.type === "interstellar")
+          ) {
+            prev.push({
+              id,
+              modelUrl: components.isShip.assets.model,
+              logoUrl: components.isShip.assets.logo,
+            });
+          }
+        }
         return prev;
       },
       []
     );
     return data;
+  },
+  shipSpawnSearch: (context: DataContext, params: {query: string}) => {
+    if (!context.flight) return [];
+    const shipTemplates = context.server.plugins
+      .filter(p => context.flight?.pluginIds.includes(p.id))
+      .reduce((acc: ShipPlugin[], plugin) => {
+        return acc.concat(plugin.aspects.ships);
+      }, []);
+
+    // TODO August 20, 2022: Add faction here too
+    return matchSorter(shipTemplates, params.query, {
+      keys: ["name", "description", "category", "tags"],
+    })
+      .slice(0, 10)
+      .map(({pluginName, name, category, assets: {vanity}}) => ({
+        id: name,
+        pluginName,
+        name,
+        category,
+        vanity,
+      }));
   },
 };
 
