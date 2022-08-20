@@ -18,6 +18,7 @@ html,
 body {
   overflow: hidden;
   @apply bg-gray-900;
+  overscroll-behavior-x: none;
 }
 
 body {

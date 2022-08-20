@@ -6,12 +6,12 @@ import {SI} from "../utils/clientSocket";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
 import {SocketHandler} from "./SocketHandler";
-import {InterpolatedSnapshot} from "@geckos.io/snapshot-interpolation/lib/types";
+import {InterpolatedSnapshot} from "@thorium/snapshot-interpolation/src/types";
 
 export const ThoriumContext = createContext<IThoriumContext | null>(null);
 
 interface IThoriumContext {
-  interpolate: (entityId: number) => null | {x: number; y: number; z: number};
+  interpolate: (entityId: number) => null | EntityValues;
   socket: ClientSocket;
   reconnectionState: ReturnType<typeof useDataConnection>["reconnectionState"];
 }
@@ -28,6 +28,7 @@ type EntityValues = {
   x: number;
   y: number;
   z: number;
+  r: {x: number; y: number; z: number; w: number};
 };
 
 let interpolationCache: Record<string, EntityValues> = {};
@@ -41,12 +42,13 @@ export function processInterpolation(
       x: entity.x,
       y: entity.y,
       z: entity.z,
+      r: entity.r,
     } as EntityValues;
   });
 }
 
 function updateInterpolation() {
-  processInterpolation(SI.calcInterpolation("x y z"));
+  processInterpolation(SI.calcInterpolation("x y z r(quat)"));
   requestAnimationFrame(updateInterpolation);
 }
 

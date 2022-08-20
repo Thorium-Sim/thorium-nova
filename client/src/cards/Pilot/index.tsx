@@ -1,7 +1,12 @@
+import Button from "@thorium/ui/Button";
+import {CardProps} from "client/src/components/Station/CardProps";
 import {useDataStream} from "client/src/context/useDataStream";
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {Suspense} from "react";
+import {GridCanvas, CircleGrid} from "./CircleGrid";
+import {PilotZoomSlider} from "./PilotZoomSlider";
+import {usePilotStore} from "./usePilotStore";
 
-export function Pilot() {
+export function Pilot({cardLoaded}: CardProps) {
   useDataStream({systemId: null});
 
   return (
@@ -11,11 +16,27 @@ export function Pilot() {
         <div>Thruster direction here here</div>
       </div>
       <div className="col-span-2 h-full">
-        <div className="aspect-square w-full max-h-full bg-orange-400"></div>
+        <Suspense fallback={null}>
+          <GridCanvas shouldRender={cardLoaded}>
+            <CircleGrid />
+          </GridCanvas>
+        </Suspense>
       </div>
-      <div className="bg-purple-500 h-full">
+      <div className="h-full">
         <div>Course controls here</div>
-        <div>Camera controls here</div>
+        <div>
+          <PilotZoomSlider />
+          <Button
+            className="w-full btn-primary"
+            onClick={() =>
+              usePilotStore.setState(({tilt: t}) => ({
+                tilt: t == 0 ? 0.5 : t === 0.5 ? 1 : 0,
+              }))
+            }
+          >
+            Tilt Sensor View
+          </Button>
+        </div>
         <div>Thruster rotation here</div>
       </div>
     </div>

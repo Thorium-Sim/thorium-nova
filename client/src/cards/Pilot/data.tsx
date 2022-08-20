@@ -3,6 +3,10 @@ import {DataContext} from "server/src/utils/DataContext";
 import {Entity} from "server/src/utils/ecs";
 
 export const requests = {
+  playerShipId(context: DataContext) {
+    if (!context.ship) throw new Error("Cannot find ship");
+    return context.ship.id;
+  },
   impulseEngines(context: DataContext) {
     return getShipSystem(context, "impulseEngines");
   },

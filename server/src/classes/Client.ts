@@ -2,12 +2,12 @@ import {DataContext} from "../utils/DataContext";
 import {cardSubscriptions, cardDataStreams} from "client/src/utils/cardData";
 import {pubsub} from "../utils/pubsub";
 import {Entity} from "../utils/ecs";
-import {SnapshotInterpolation} from "@geckos.io/snapshot-interpolation";
 import {encode} from "@msgpack/msgpack";
 import {SocketStream} from "@fastify/websocket";
 import requests, {AllRequestNames} from "../netRequests";
 import {BaseClient} from "./BaseClient";
 import {randomNameGenerator} from "../utils/randomNameGenerator";
+import {SnapshotInterpolation} from "@thorium/snapshot-interpolation/src";
 
 type NetRequestData = {
   requestName: AllRequestNames;
