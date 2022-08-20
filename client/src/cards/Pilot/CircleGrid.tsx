@@ -73,7 +73,6 @@ export function CircleGrid() {
           untiltedQuaternion.slerp(tiltedQuaternion, tiltRef.current)
         );
 
-      console.log(tiltRef.current);
       camera.quaternion.set(r.x, r.y, r.z, r.w);
       camera.rotateX(-Math.PI / 2 - (Math.PI / 2) * tiltRef.current);
       camera.rotateZ(Math.PI);
