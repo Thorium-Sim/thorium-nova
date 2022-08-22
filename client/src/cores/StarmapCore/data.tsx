@@ -19,8 +19,12 @@ export const requests = {
     if (!data?.components.isSolarSystem) throw new Error("Not a solar system");
     return {id: data.id, components: data.components};
   },
-  starmapSystemEntities: (context: DataContext, params: {systemId: number}) => {
+  starmapSystemEntities: (
+    context: DataContext,
+    params: {systemId?: number}
+  ) => {
     if (!context.flight) return [];
+    if (!params.systemId) return [];
     const data = context.flight.ecs.entities.reduce(
       (prev: Pick<Entity, "components" | "id">[], {components, id}) => {
         if (
@@ -34,14 +38,37 @@ export const requests = {
     );
     return data;
   },
-  starmapShips: (context: DataContext, params: {systemId?: number | null}) => {
-    // TODO: May 24 2022 - This really should be a netrequest so it can be
-    // filtered based on what system the flight director is currently looking at.
+  starmapShips: (
+    context: DataContext,
+    params: {systemId?: number | null},
+    publishParams: {systemId: number | null}
+  ) => {
+    if (
+      publishParams &&
+      publishParams.systemId !== params.systemId &&
+      params.systemId !== undefined
+    )
+      throw null;
     if (!context.flight) return [];
     const data = context.flight.ecs.entities.reduce(
-      (prev: Pick<Entity, "components" | "id">[], {components, id}) => {
-        if (components.isShip && components.position?.type === "interstellar")
-          prev.push({components, id});
+      (
+        prev: {id: number; modelUrl?: string; logoUrl?: string; size: number}[],
+        {components, id}
+      ) => {
+        if (components.isShip) {
+          if (
+            (params.systemId &&
+              components.position?.parentId === params.systemId) ||
+            (!params.systemId && components.position?.type === "interstellar")
+          ) {
+            prev.push({
+              id,
+              modelUrl: components.isShip.assets.model,
+              logoUrl: components.isShip.assets.logo,
+              size: components.size?.length || 50,
+            });
+          }
+        }
         return prev;
       },
       []

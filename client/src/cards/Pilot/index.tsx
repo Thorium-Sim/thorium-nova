@@ -2,12 +2,14 @@ import Button from "@thorium/ui/Button";
 import {CardProps} from "client/src/components/Station/CardProps";
 import {useDataStream} from "client/src/context/useDataStream";
 import {Suspense} from "react";
+import {Object3D, Quaternion} from "three";
 import {GridCanvas, CircleGrid} from "./CircleGrid";
 import {PilotZoomSlider} from "./PilotZoomSlider";
 import {usePilotStore} from "./usePilotStore";
 
+window.Object3D = Object3D;
 export function Pilot({cardLoaded}: CardProps) {
-  useDataStream({systemId: null});
+  useDataStream();
 
   return (
     <div className="grid grid-cols-4 h-full place-content-center gap-4">
