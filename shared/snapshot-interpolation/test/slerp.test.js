@@ -1,4 +1,4 @@
-const {quatSlerp} = require("../lib/slerp");
+import {quatSlerp} from "../src/slerp";
 
 const quatIsEqual = (q1, q2) => {
   expect(q1.x).toBeCloseTo(q2.x, 3);
