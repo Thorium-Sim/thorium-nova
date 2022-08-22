@@ -73,18 +73,16 @@ function InterstellarWrapper() {
           />
         ) : null
       )}
-      {starmapShips.map(ship =>
-        ship.components.position && ship.components.isShip ? (
-          <Suspense key={ship.id} fallback={null}>
-            <ErrorBoundary
-              FallbackComponent={() => <></>}
-              onError={err => console.error(err)}
-            >
-              <StarmapShip {...ship} />
-            </ErrorBoundary>
-          </Suspense>
-        ) : null
-      )}
+      {starmapShips.map(ship => (
+        <Suspense key={ship.id} fallback={null}>
+          <ErrorBoundary
+            FallbackComponent={() => <></>}
+            onError={err => console.error(err)}
+          >
+            <StarmapShip {...ship} />
+          </ErrorBoundary>
+        </Suspense>
+      ))}
     </InterstellarMap>
   );
 }
