@@ -28,7 +28,7 @@ export class IsThrustersComponent extends Component {
   /** The current rotation velocity in radians per second. */
   rotationVelocity: Coordinates<RadiansPerSecond> = new Coordinates();
   /** The max rotation speed in rotations per minute. */
-  rotationMaxSpeed: RotationsPerMinute = 5;
+  rotationMaxSpeed: RotationsPerMinute = 50;
   /** The thrust applied by rotation thrusters in kilo-newtons, which affects how fast the rotation accelerates based on the mass of the ship. */
   rotationThrust: KiloNewtons = 12500;
 }

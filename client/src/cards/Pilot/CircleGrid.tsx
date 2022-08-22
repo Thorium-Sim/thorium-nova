@@ -148,10 +148,10 @@ export function CircleGrid() {
         <DistanceCircle radius={0.01} />
 
         <PlayerArrow />
-        <Suspense fallback={null}>
-          <PilotContacts />
-        </Suspense>
       </group>
+      <Suspense fallback={null}>
+        <PilotContacts />
+      </Suspense>
     </group>
   );
 }
