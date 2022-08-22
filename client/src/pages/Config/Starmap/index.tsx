@@ -61,7 +61,7 @@ function InterstellarPaletteWrapper() {
         useStarmapStore.setState({selectedObjectId: result.solarSystemId});
       }
     },
-    [pluginId, selectedObjectId]
+    [pluginId, selectedObjectId, useStarmapStore]
   );
   if (!selectedStar) return null;
   return <InterstellarPalette selectedStar={selectedStar} update={update} />;

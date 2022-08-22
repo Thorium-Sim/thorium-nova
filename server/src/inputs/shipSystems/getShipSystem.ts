@@ -21,6 +21,7 @@ export function getShipSystem(
         ) {
           return entity;
         }
+        return sys;
       },
       undefined
     );

@@ -472,6 +472,8 @@ export const PlanetaryEntity = memo(
   }
 );
 
+PlanetaryEntity.displayName = "PlanetaryEntity";
+
 function BasicRings() {
   const geo = useMemo(() => {
     const geometry = new RingBufferGeometry(1.5, 3, 64);

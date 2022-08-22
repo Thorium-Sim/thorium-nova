@@ -30,7 +30,7 @@ export function Pilot({cardLoaded}: CardProps) {
             className="w-full btn-primary"
             onClick={() =>
               usePilotStore.setState(({tilt: t}) => ({
-                tilt: t == 0 ? 0.5 : t === 0.5 ? 1 : 0,
+                tilt: t === 0 ? 0.5 : t === 0.5 ? 1 : 0,
               }))
             }
           >
