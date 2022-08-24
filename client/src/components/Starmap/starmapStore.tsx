@@ -27,6 +27,15 @@ interface StarmapStore {
   cameraVerticalDistance: number;
   cameraControls?: MutableRefObject<CameraControls | null>;
   followEntityId?: number | null;
+  yDimensionIndex: number;
+  spawnShipTemplate: null | {
+    id: string;
+    pluginName: string;
+    name: string;
+    category: string;
+    vanity: string;
+  };
+  translate2DTo3D?: (x: number, y: number) => Vector3;
 }
 let storeCount = 0;
 const createStarmapStore = () =>
@@ -54,6 +63,8 @@ const createStarmapStore = () =>
       await promise;
     },
     cameraVerticalDistance: 0,
+    yDimensionIndex: 0,
+    spawnShipTemplate: null,
   }));
 
 const useStarmapStore = createStarmapStore();

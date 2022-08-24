@@ -1,4 +1,4 @@
-import {ReactNode} from "react";
+import {ReactNode, useEffect} from "react";
 import {
   UNSAFE_LocationContext,
   UNSAFE_NavigationContext,
@@ -10,9 +10,19 @@ import {useContextBridge} from "@react-three/drei";
 
 import {useQueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {ThoriumContext} from "client/src/context/ThoriumContext";
-import {StarmapStoreContext} from "./starmapStore";
+import {StarmapStoreContext, useGetStarmapStore} from "./starmapStore";
+import {useTranslate2DTo3D} from "client/src/hooks/useTranslate2DTo3D";
 
 const FAR = 1e27;
+
+function StarmapEffects() {
+  const to3D = useTranslate2DTo3D();
+  const useStarmapStore = useGetStarmapStore();
+  useEffect(() => {
+    useStarmapStore.setState({translate2DTo3D: to3D});
+  }, [to3D]);
+  return null;
+}
 
 export default function StarmapCanvas({
   children,
@@ -41,7 +51,10 @@ export default function StarmapCanvas({
       frameloop={shouldRender ? "always" : "demand"}
     >
       <ContextBridge>
-        <QueryClientProvider client={client}>{children}</QueryClientProvider>
+        <QueryClientProvider client={client}>
+          <StarmapEffects />
+          {children}
+        </QueryClientProvider>
       </ContextBridge>
     </Canvas>
   );

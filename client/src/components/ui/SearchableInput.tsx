@@ -41,6 +41,7 @@ export default function SearchableInput<T extends {id: any}>({
   selected,
   setSelected,
   placeholder,
+  inputClassName,
 }: {
   queryKey?: string;
   displayValue?: (item: T) => string;
@@ -56,6 +57,7 @@ export default function SearchableInput<T extends {id: any}>({
   selected?: T | null;
   setSelected?: (item: T | null) => void;
   placeholder?: string;
+  inputClassName?: string;
 }) {
   const [query, setQuery] = useState("");
 
@@ -72,7 +74,7 @@ export default function SearchableInput<T extends {id: any}>({
       <div className="relative mt-1">
         <div className="relative w-full cursor-default overflow-hidden rounded-lg text-left focus:outline-none sm:text-sm">
           <Combobox.Input
-            className="input w-full"
+            className={`input w-full ${inputClassName || ""}`}
             displayValue={displayValue}
             defaultValue={query}
             onChange={event => setQuery(event.target.value)}
