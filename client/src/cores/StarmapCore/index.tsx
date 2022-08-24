@@ -1,25 +1,99 @@
 import {InterstellarMap} from "client/src/components/Starmap/InterstellarMap";
 import SystemMarker from "client/src/components/Starmap/SystemMarker";
 import StarmapCanvas from "client/src/components/Starmap/StarmapCanvas";
-import {useEffect} from "react";
+import {useEffect, useRef} from "react";
 import {
   StarmapStoreProvider,
   useGetStarmapStore,
 } from "client/src/components/Starmap/starmapStore";
 import {Suspense} from "react";
 import {ErrorBoundary} from "react-error-boundary";
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {netRequest, useNetRequest} from "client/src/context/useNetRequest";
 import {useDataStream} from "client/src/context/useDataStream";
 import {SolarSystemMap} from "client/src/components/Starmap/SolarSystemMap";
 import {Planet} from "client/src/components/Starmap/Planet";
 import StarEntity from "client/src/components/Starmap/Star";
 import {StarmapShip} from "../../components/Starmap/StarmapShip";
+import SearchableInput, {DefaultResultLabel} from "@thorium/ui/SearchableInput";
+import Input from "@thorium/ui/Input";
+import {StarmapCoreContextMenu} from "./StarmapCoreContextMenu";
 
 export function StarmapCore() {
+  const ref = useRef<HTMLDivElement>(null);
   return (
-    <StarmapStoreProvider>
-      <CanvasWrapper />
-    </StarmapStoreProvider>
+    <div className="h-[calc(100%-2rem)]" ref={ref}>
+      <StarmapStoreProvider>
+        <StarmapCoreContextMenu parentRef={ref} />
+        <div className="border-b border-b-white/20 pb-0.5 px-2 flex gap-2 items-baseline">
+          <SpawnSearch />
+          <YDimension />
+        </div>
+        <CanvasWrapper />
+      </StarmapStoreProvider>
+    </div>
+  );
+}
+
+function YDimension() {
+  const useStarmapStore = useGetStarmapStore();
+  const yDimension = useStarmapStore(store => store.yDimensionIndex);
+  return (
+    <Input
+      className="input-sm"
+      label="Y Dimension"
+      title="Y Dimension"
+      labelHidden
+      placeholder="Y Dimension"
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      value={yDimension}
+      onChange={e =>
+        useStarmapStore.setState({yDimensionIndex: Number(e.target.value)})
+      }
+    />
+  );
+}
+
+function SpawnSearch() {
+  const useStarmapStore = useGetStarmapStore();
+  const selectedSpawn = useStarmapStore(store => store.spawnShipTemplate);
+
+  return (
+    <SearchableInput<{
+      id: string;
+      pluginName: string;
+      name: string;
+      category: string;
+      vanity: string;
+    }>
+      inputClassName="input-sm"
+      queryKey="spawn"
+      getOptions={async ({queryKey, signal}) => {
+        const result = await netRequest(
+          "shipSpawnSearch",
+          {query: queryKey[1]},
+          {signal}
+        );
+        return result;
+      }}
+      ResultLabel={({active, result, selected}) => (
+        <DefaultResultLabel active={active} selected={selected}>
+          <div className="flex gap-4">
+            <img src={result.vanity} className="w-8 h-8" />
+            <div>
+              <p className="m-0 leading-none">{result.name}</p>
+              <p className="m-0 leading-none">
+                <small>{result.category}</small>
+              </p>
+            </div>
+          </div>
+        </DefaultResultLabel>
+      )}
+      setSelected={item => useStarmapStore.setState({spawnShipTemplate: item})}
+      selected={selectedSpawn}
+      placeholder="Ship Spawn Search..."
+    />
   );
 }
 
@@ -31,7 +105,6 @@ function CanvasWrapper() {
   useEffect(() => {
     useStarmapStore.setState({viewingMode: "core"});
   }, []);
-
   return (
     <StarmapCanvas>
       <ambientLight intensity={0.2} />
@@ -95,6 +168,10 @@ function SolarSystemWrapper() {
   const starmapEntities = useNetRequest("starmapSystemEntities", {
     systemId: currentSystem,
   });
+  const starmapShips = useNetRequest("starmapShips", {
+    systemId: currentSystem,
+  });
+
   return (
     <SolarSystemMap
       skyboxKey={system?.components.isSolarSystem?.skyboxKey || "Blank"}
@@ -142,20 +219,19 @@ function SolarSystemWrapper() {
             </Suspense>
           );
         }
-        if (entity.components.isShip) {
-          return (
-            <Suspense key={entity.id} fallback={null}>
-              <ErrorBoundary
-                FallbackComponent={() => <></>}
-                onError={err => console.error(err)}
-              >
-                <StarmapShip {...entity} />
-              </ErrorBoundary>
-            </Suspense>
-          );
-        }
+
         return null;
       })}
+      {starmapShips.map(ship => (
+        <Suspense key={ship.id} fallback={null}>
+          <ErrorBoundary
+            FallbackComponent={() => <></>}
+            onError={err => console.error(err)}
+          >
+            <StarmapShip {...ship} />
+          </ErrorBoundary>
+        </Suspense>
+      ))}
     </SolarSystemMap>
   );
 }

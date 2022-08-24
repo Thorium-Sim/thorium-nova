@@ -271,6 +271,21 @@ export class ServerClient extends BaseClient {
         // We're also removing any components of the entity that don't update
         // frequently to keep packet size down.
 
+        if (e.components.isWarpEngines) {
+          return {
+            id: e.id.toString(),
+            x: e.components.isWarpEngines.forwardVelocity,
+            y: e.components.isWarpEngines.maxVelocity,
+          };
+        }
+
+        if (e.components.isImpulseEngines) {
+          return {
+            id: e.id.toString(),
+            x: e.components.isImpulseEngines.forwardVelocity,
+          };
+        }
+
         // TODO May 9, 2022 - There should be logic here to indicate when
         // the snapshot should _not_ interpolate, for example when transitioning
         // from interstellar space to solar system space.

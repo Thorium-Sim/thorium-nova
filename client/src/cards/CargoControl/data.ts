@@ -17,6 +17,7 @@ function calculateCargoUsed(
     [inventoryTemplateName: string]: InventoryTemplate;
   }
 ) {
+  if (!contents) return 0;
   const value = Object.keys(contents).reduce((acc, key) => {
     const template = inventory[key];
     if (!template) {
