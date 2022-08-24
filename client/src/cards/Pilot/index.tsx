@@ -1,13 +1,15 @@
+import {CardProps} from "client/src/components/Station/CardProps";
 import {useDataStream} from "client/src/context/useDataStream";
-import {useNetRequest} from "client/src/context/useNetRequest";
 
-export function Pilot() {
+import {ImpulseControls} from "./ImpulseControls";
+
+export function Pilot({cardLoaded}: CardProps) {
   useDataStream({systemId: null});
 
   return (
     <div className="grid grid-cols-4 h-full place-content-center gap-4">
-      <div className="bg-purple-500 h-full">
-        <div>Impulse controls here</div>
+      <div className="h-full">
+        <ImpulseControls cardLoaded={cardLoaded} />
         <div>Thruster direction here here</div>
       </div>
       <div className="col-span-2 h-full">
