@@ -1,4 +1,5 @@
 import {DataContext} from "server/src/utils/DataContext";
+import {pubsub} from "server/src/utils/pubsub";
 import {
   Coordinates,
   MetersPerSecond,

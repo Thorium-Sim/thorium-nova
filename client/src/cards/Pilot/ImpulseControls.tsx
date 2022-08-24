@@ -164,42 +164,42 @@ export const ImpulseControls = ({cardLoaded = true}) => {
   return (
     <div className="select-none flex-1">
       <div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1">
           <ForwardVelocity />
         </div>
         {/* TODO: Include heat indicator here eventually. */}
 
-        <div className="flex  mt-4">
+        <div className="flex mt-2">
           <div className="flex-1">
             <p className="text-xl">Impulse Speed:</p>
             <div className="flex">
               <div className="flex flex-1 flex-col justify-around text-right mr-4">
                 <Button
                   onClick={() => callback.current(emergencySpeed)}
-                  className="btn-error"
+                  className="btn-error btn-sm"
                 >
                   Emergency
                 </Button>
                 <Button
                   onClick={() => callback.current(cruisingSpeed)}
-                  className="btn-warning"
+                  className="btn-warning btn-sm"
                 >
                   Full
                 </Button>
                 <Button
-                  className="btn-primary"
+                  className="btn-primary btn-sm"
                   onClick={() => callback.current((cruisingSpeed * 3) / 4)}
                 >
                   3/4
                 </Button>
                 <Button
-                  className="btn-primary"
+                  className="btn-primary btn-sm"
                   onClick={() => callback.current((cruisingSpeed * 1) / 2)}
                 >
                   1/2
                 </Button>
                 <Button
-                  className="btn-primary"
+                  className="btn-primary btn-sm"
                   onClick={() => callback.current((cruisingSpeed * 1) / 4)}
                 >
                   1/4
@@ -213,7 +213,7 @@ export const ImpulseControls = ({cardLoaded = true}) => {
               </div>
               <div
                 ref={ref}
-                className="h-0 min-h-[20rem] relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end"
+                className="h-0 min-h-[18rem] relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end"
               >
                 <a.div
                   {...bind()}
@@ -228,7 +228,7 @@ export const ImpulseControls = ({cardLoaded = true}) => {
             <p className="text-xl">Warp Speed:</p>
             <div className="flex flex-col justify-around h-full">
               <Button
-                className={`btn-error ${
+                className={`btn-sm btn-error ${
                   currentWarpFactor === warpFactorCount + 1 ? "btn-active" : ""
                 }`}
                 onClick={() =>
@@ -246,9 +246,9 @@ export const ImpulseControls = ({cardLoaded = true}) => {
                 return (
                   <Button
                     key={`warp-${warpFactor}`}
-                    className={`btn-primary ${i === 0 ? "warning" : ""} ${
-                      warpFactor === currentWarpFactor ? "btn-active" : ""
-                    }`}
+                    className={`btn-sm btn-primary ${
+                      i === 0 ? "warning" : ""
+                    } ${warpFactor === currentWarpFactor ? "btn-active" : ""}`}
                     onClick={() =>
                       netSend("warpEnginesSetWarpFactor", {factor: warpFactor})
                     }
