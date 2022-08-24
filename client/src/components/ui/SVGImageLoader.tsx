@@ -1,26 +1,38 @@
-import {useState, useEffect, memo, ComponentPropsWithoutRef} from "react";
+import {ComponentPropsWithoutRef, forwardRef} from "react";
+import {suspend} from "suspend-react";
 
-export const SVGImageLoader: React.FC<
-  {url: string} & ComponentPropsWithoutRef<"img">
-> = memo(function SVGImageLoader({url, alt, ...props}) {
-  const [data, setData] = useState<string | null>(null);
-  useEffect(() => {
-    async function loadSvg() {
-      const res = await fetch(url);
-      if (!res.ok) return;
-      const data = await res.text();
-      if (data.includes("<svg")) {
-        setData(data);
-      }
+export const SVGImageLoader = forwardRef<
+  HTMLImageElement,
+  {url: string; onLoad?: () => void} & ComponentPropsWithoutRef<"img">
+>(function SVGImageLoader({url, alt, ...props}, ref) {
+  const data = suspend(async () => {
+    const res = await fetch(url);
+    if (!res.ok) return;
+    const data = await res.text();
+    if (data.includes("<svg")) {
+      return data;
     }
-    if (url?.endsWith(".svg")) {
-      loadSvg();
-    }
+    return null;
   }, [url]);
+
   if (data) {
     return (
-      <div role="img" {...props} dangerouslySetInnerHTML={{__html: data}} />
+      <div
+        role="img"
+        {...props}
+        dangerouslySetInnerHTML={{__html: data}}
+        ref={ref}
+      />
     );
   }
-  return <img draggable="false" alt={alt} aria-hidden {...props} src={url} />;
+  return (
+    <img
+      draggable="false"
+      alt={alt}
+      aria-hidden
+      {...props}
+      src={url}
+      ref={ref}
+    />
+  );
 });

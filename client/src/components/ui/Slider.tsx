@@ -1,13 +1,87 @@
 import React, {ChangeEvent} from "react";
 
-const Slider = (
-  props: React.DetailedHTMLProps<
-    React.InputHTMLAttributes<HTMLInputElement>,
-    HTMLInputElement
-  >
-) => {
-  return <input className="slider" {...props} type="range" />;
-};
+import {SliderState, useSliderState} from "react-stately";
+
+import {
+  mergeProps,
+  useFocusRing,
+  useNumberFormatter,
+  useSlider,
+  useSliderThumb,
+  VisuallyHidden,
+  AriaSliderProps,
+  AriaSliderThumbOptions,
+} from "react-aria";
+
+import {NumberFormatOptions} from "@internationalized/number";
+
+function Slider(
+  props: AriaSliderProps & {
+    formatOptions?: NumberFormatOptions;
+    className?: string;
+  }
+) {
+  let trackRef = React.useRef(null);
+  let numberFormatter = useNumberFormatter(props.formatOptions);
+  let state = useSliderState({...props, numberFormatter});
+  let {groupProps, trackProps, labelProps, outputProps} = useSlider(
+    props,
+    state,
+    trackRef
+  );
+
+  return (
+    <div
+      {...groupProps}
+      className={`slider ${state.orientation} ${props.className}`}
+    >
+      {/* Create a container for the label and output element. */}
+      {props.label && (
+        <div className="label-container">
+          <label {...labelProps}>{props.label}</label>
+          <output {...outputProps}>{state.getThumbValueLabel(0)}</output>
+        </div>
+      )}
+      {/* The track element holds the visible track line and the thumb. */}
+      <div
+        {...trackProps}
+        ref={trackRef}
+        className={`track ${state.isDisabled ? "disabled" : ""}`}
+      >
+        <Thumb index={0} state={state} trackRef={trackRef} />
+      </div>
+    </div>
+  );
+}
+
+function Thumb(
+  props: {state: SliderState} & Omit<AriaSliderThumbOptions, "inputRef">
+) {
+  let {state, trackRef, index} = props;
+  let inputRef = React.useRef(null);
+  let {thumbProps, inputProps, isDragging} = useSliderThumb(
+    {
+      index,
+      trackRef,
+      inputRef,
+    },
+    state
+  );
+
+  let {focusProps, isFocusVisible} = useFocusRing();
+  return (
+    <div
+      {...thumbProps}
+      className={`thumb ${isFocusVisible ? "focus" : ""} ${
+        isDragging ? "dragging" : ""
+      }`}
+    >
+      <VisuallyHidden>
+        <input ref={inputRef} {...mergeProps(inputProps, focusProps)} />
+      </VisuallyHidden>
+    </div>
+  );
+}
 
 export default Slider;
 
@@ -41,14 +115,13 @@ export const ZoomSlider = ({
 
   return (
     <Slider
-      min={0}
-      max={100}
+      aria-label="Zoom"
+      minValue={0}
+      maxValue={100}
       step={step}
       value={logslider(value, true) || 0}
       className="slider zoom"
-      onChange={(e: ChangeEvent<HTMLInputElement>) =>
-        setValue(logslider(parseFloat(e.target.value)))
-      }
+      onChange={(val: number | number[]) => setValue(logslider(val as number))}
     />
   );
 };

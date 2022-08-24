@@ -1,0 +1,20 @@
+.deck-before {
+  transform: perspective(2000px) rotateX(-90deg) scale(var(--deck-scale, 1));
+  transform-origin: center bottom;
+  transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+.deck-after {
+  transform: perspective(2000px) rotateX(90deg) scale(var(--deck-scale, 1));
+  transform-origin: center top;
+  transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+}
+.deck-on {
+  transform: perspective(2000px) rotateX(0deg) scale(var(--deck-scale, 1));
+  transform-origin: center center;
+}
+.deck-on .deck-image > svg,
+.deck-after .deck-image > svg,
+.deck-before .deck-image > svg {
+  height: 100%;
+  width: 100%;
+}

@@ -43,6 +43,7 @@ export class DeckNode {
   radius: number;
   volume: CubicMeter;
   flags: NodeFlag[];
+  contents: {} = {};
   constructor(params: Partial<DeckNode>) {
     this.id = params.id || 0;
     this.name = params.name || "";

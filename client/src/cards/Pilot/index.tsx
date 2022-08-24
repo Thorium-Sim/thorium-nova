@@ -1,4 +1,6 @@
+import {CardProps} from "client/src/components/Station/CardProps";
 import {useDataStream} from "client/src/context/useDataStream";
+import {ImpulseControls} from "./ImpulseControls";
 import {Joystick, LinearJoystick} from "@thorium/ui/Joystick";
 import {ReactNode} from "react";
 import type {Coordinates} from "server/src/utils/unitTypes";
@@ -24,14 +26,15 @@ function UntouchableLabel({
     </p>
   );
 }
-export function Pilot() {
+
+export function Pilot({cardLoaded}: CardProps) {
   useDataStream({systemId: null});
 
   return (
     <div className="grid grid-cols-4 h-full place-content-center gap-4">
       <div className="flex flex-col justify-between">
-        <div>Impulse controls here</div>
-        <div className="flex gap-4 w-full">
+        <ImpulseControls cardLoaded={cardLoaded} />
+        <div className="flex gap-4 w-full flex-1">
           <LinearJoystick onDrag={({y}) => direction({z: -y})} vertical>
             <UntouchableLabel className="top-1">Fore</UntouchableLabel>
             <UntouchableLabel className="bottom-1">Aft</UntouchableLabel>
