@@ -1,5 +1,10 @@
+import Button from "@thorium/ui/Button";
 import {CardProps} from "client/src/components/Station/CardProps";
 import {useDataStream} from "client/src/context/useDataStream";
+import {Suspense} from "react";
+import {GridCanvas, CircleGrid} from "./CircleGrid";
+import {PilotZoomSlider} from "./PilotZoomSlider";
+import {usePilotStore} from "./usePilotStore";
 import {ImpulseControls} from "./ImpulseControls";
 import {Joystick, LinearJoystick} from "@thorium/ui/Joystick";
 import {ReactNode} from "react";
@@ -51,11 +56,28 @@ export function Pilot({cardLoaded}: CardProps) {
         </div>
       </div>
       <div className="col-span-2 h-full">
-        <div className="aspect-square w-full max-h-full bg-orange-400"></div>
+        <Suspense fallback={null}>
+          <GridCanvas shouldRender={cardLoaded}>
+            <CircleGrid />
+          </GridCanvas>
+        </Suspense>
       </div>
+
       <div className="h-full flex flex-col justify-between gap-4">
         <div>Course controls here</div>
-        <div>Camera controls here</div>
+        <div>
+          <PilotZoomSlider />
+          <Button
+            className="w-full btn-primary"
+            onClick={() =>
+              usePilotStore.setState(({tilt: t}) => ({
+                tilt: t === 0 ? 0.5 : t === 0.5 ? 1 : 0,
+              }))
+            }
+          >
+            Tilt Sensor View
+          </Button>
+        </div>
         <div className="flex-1"></div>
         <Joystick onDrag={({x, y}) => rotation({z: x, x: y})}>
           <UntouchableLabel className="bottom-1">Pitch Down</UntouchableLabel>

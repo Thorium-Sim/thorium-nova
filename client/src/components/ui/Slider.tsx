@@ -1,4 +1,5 @@
-import React, {ChangeEvent} from "react";
+import {logslider} from "client/src/utils/logSlider";
+import React from "react";
 
 import {SliderState, useSliderState} from "react-stately";
 
@@ -98,30 +99,17 @@ export const ZoomSlider = ({
   zoomMax?: number;
   step?: number;
 }) => {
-  function logslider(position: number, reverse?: boolean) {
-    // position will be between 0 and 100
-    var minP = 0;
-    var maxP = 100;
-
-    // The result should be between 100 an 10000000
-    var minV = Math.log(zoomMin);
-    var maxV = Math.log(zoomMax);
-
-    // calculate adjustment factor
-    var scale = (maxV - minV) / (maxP - minP);
-    if (reverse) return (Math.log(position) - minV) / scale + minP;
-    return Math.exp(minV + scale * (position - minP));
-  }
-
   return (
     <Slider
       aria-label="Zoom"
       minValue={0}
       maxValue={100}
       step={step}
-      value={logslider(value, true) || 0}
+      value={logslider(zoomMin, zoomMax, value, true) || 0}
       className="slider zoom"
-      onChange={(val: number | number[]) => setValue(logslider(val as number))}
+      onChange={(val: number | number[]) =>
+        setValue(logslider(zoomMin, zoomMax, val as number))
+      }
     />
   );
 };

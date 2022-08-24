@@ -21,8 +21,12 @@ export const requests = {
     if (!data?.components.isSolarSystem) throw new Error("Not a solar system");
     return {id: data.id, components: data.components};
   },
-  starmapSystemEntities: (context: DataContext, params: {systemId: number}) => {
+  starmapSystemEntities: (
+    context: DataContext,
+    params: {systemId?: number}
+  ) => {
     if (!context.flight) return [];
+    if (!params.systemId) return [];
     const data = context.flight.ecs.entities.reduce(
       (prev: Pick<Entity, "components" | "id">[], {components, id}) => {
         if (components.isShip) return prev;
@@ -51,7 +55,7 @@ export const requests = {
     if (!context.flight) return [];
     const data = context.flight.ecs.entities.reduce(
       (
-        prev: {id: number; modelUrl?: string; logoUrl?: string}[],
+        prev: {id: number; modelUrl?: string; logoUrl?: string; size: number}[],
         {components, id}
       ) => {
         if (components.isShip) {
@@ -64,6 +68,7 @@ export const requests = {
               id,
               modelUrl: components.isShip.assets.model,
               logoUrl: components.isShip.assets.logo,
+              size: components.size?.length || 50,
             });
           }
         }
