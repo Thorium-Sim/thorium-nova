@@ -42,10 +42,16 @@ function PlayerLobby() {
   );
 }
 
-const flightDirectorStation = {
-  name: "Flight Director",
-  description: "Behind-the-scenes station for controlling the flight.",
-};
+const staticStations = [
+  {
+    name: "Viewscreen",
+    description: "Outside view of the space around the ship.",
+  },
+  {
+    name: "Flight Director",
+    description: "Behind-the-scenes station for controlling the flight.",
+  },
+];
 function PlayerStationSelection() {
   const playerShips = useNetRequest("flightPlayerShips");
 
@@ -67,10 +73,9 @@ function PlayerStationSelection() {
                 />
               ))}
               {/* TODO April 23, 2022 - Hide this when the ship is configured to not have a flight director */}
-              <PlayerStationItem
-                shipId={ship.id}
-                station={flightDirectorStation}
-              />
+              {staticStations.map(station => (
+                <PlayerStationItem shipId={ship.id} station={station} />
+              ))}
             </ul>
           </div>
         ))}
@@ -239,12 +244,14 @@ function ClientAssignment() {
                 />
               ))}
               {/* TODO April 23, 2022 - Hide this when the ship is configured to not have a flight director */}
-              <HostStationItem
-                shipId={ship.id}
-                station={flightDirectorStation}
-                selectedClient={selectedClient}
-                setSelectedClient={setSelectedClient}
-              />
+              {staticStations.map(station => (
+                <HostStationItem
+                  shipId={ship.id}
+                  station={station}
+                  selectedClient={selectedClient}
+                  setSelectedClient={setSelectedClient}
+                />
+              ))}
             </ul>
           </div>
         ))}

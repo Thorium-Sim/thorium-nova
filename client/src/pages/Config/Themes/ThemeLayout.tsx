@@ -42,6 +42,8 @@ export const ThemeLayout = () => {
     "5"
   );
 
+  const [previewViewscreen, setPreviewViewscreen] = useState(false);
+
   if (!themeId || !theme) return <Navigate to={`/config/${pluginId}/themes`} />;
 
   return (
@@ -87,20 +89,28 @@ export const ThemeLayout = () => {
                     alertLevel,
                   } as any,
                   station: {
-                    name: stationName,
+                    name: previewViewscreen ? "Viewscreen" : stationName,
                     logo: "",
-                    cards: [
-                      {
-                        icon: colorLogo,
-                        name: "Component Demo",
-                        component: "ComponentDemo",
-                      },
-                      {
-                        icon: colorLogo,
-                        name: "Test Card",
-                        component: "Login",
-                      },
-                    ],
+                    cards: previewViewscreen
+                      ? [
+                          {
+                            icon: colorLogo,
+                            name: "Viewscreen",
+                            component: "ViewscreenDemo",
+                          },
+                        ]
+                      : [
+                          {
+                            icon: colorLogo,
+                            name: "Component Demo",
+                            component: "ComponentDemo",
+                          },
+                          {
+                            icon: colorLogo,
+                            name: "Test Card",
+                            component: "Login",
+                          },
+                        ],
                   } as any,
                   theme: null,
                 }}
@@ -136,7 +146,7 @@ export const ThemeLayout = () => {
             }}
           />
 
-          <div className="flex">
+          <div className="flex gap-4">
             <Button
               className="btn-outline btn-error"
               disabled={!themeId}
@@ -184,6 +194,13 @@ export const ThemeLayout = () => {
               }}
             >
               Duplicate Theme
+            </Button>
+            <Button
+              className="btn-outline btn-info"
+              disabled={!themeId}
+              onClick={() => setPreviewViewscreen(v => !v)}
+            >
+              Preview {previewViewscreen ? "Station" : "Viewscreen"}
             </Button>
           </div>
         </div>

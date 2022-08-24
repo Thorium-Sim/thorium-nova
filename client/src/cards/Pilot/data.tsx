@@ -4,6 +4,13 @@ import {Entity} from "server/src/utils/ecs";
 import {pubsub} from "server/src/utils/pubsub";
 
 export const requests = {
+  pilotPlayerShip(context: DataContext) {
+    if (!context.ship) throw new Error("Cannot find ship");
+    return {
+      id: context.ship.id,
+      currentSystem: context.ship.components.position?.parentId || null,
+    };
+  },
   pilotImpulseEngines(
     context: DataContext,
     params: {},
@@ -39,6 +46,11 @@ export const requests = {
       maxVelocity: warpEngines.components.isWarpEngines?.maxVelocity || 0,
       currentWarpFactor:
         warpEngines.components.isWarpEngines?.currentWarpFactor || 0,
+      interstellarCruisingSpeed:
+        warpEngines.components.isWarpEngines?.interstellarCruisingSpeed ||
+        599600000000,
+      solarCruisingSpeed:
+        warpEngines.components.isWarpEngines?.solarCruisingSpeed || 29980000,
     };
   },
 };

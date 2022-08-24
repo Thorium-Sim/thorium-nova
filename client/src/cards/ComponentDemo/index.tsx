@@ -108,7 +108,7 @@ async function searchableInputQuery({
   return filteredPeople;
 }
 
-export default function ComponentDemo() {
+export function ComponentDemo() {
   const [selected, setSelected] = useState<null | {id: number; name: string}>(
     null
   );
@@ -511,6 +511,15 @@ export default function ComponentDemo() {
           <LinearDotIndicator color="red" level={0.25} dotCount={30} />
         </div>
       </div>
+    </div>
+  );
+}
+
+export function ViewscreenDemo() {
+  // TODO August 23, 2022 - This is a good place to add viewscreen overlays and HUD when those end up getting developed
+  return (
+    <div className="w-full h-full flex items-center justify-center text-white bg-purple-500/20 text-6xl">
+      Viewscreen
     </div>
   );
 }

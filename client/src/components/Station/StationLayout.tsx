@@ -20,8 +20,14 @@ const StationLayout = () => {
   // TODO November 29, 2021: Get the proper alert level and put it here.
   // @ts-expect-error See above
   const alertLevel = ship.alertLevel || "5";
+
   return (
-    <div id="theme-container" className="h-full w-full">
+    <div
+      id="theme-container"
+      className={`h-full w-full ${
+        station.name === "Viewscreen" ? "viewscreen" : ""
+      }`}
+    >
       <div
         className={`alertLevel-${alertLevel} h-full`}
         style={

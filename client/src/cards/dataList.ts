@@ -4,6 +4,7 @@ export * as Pilot from "./Pilot/data";
 export * as OfficersLog from "./OfficersLog/data";
 export * as Navigation from "./Navigation/data";
 export * as CargoControl from "./CargoControl/data";
+export * as Viewscreen from "./Viewscreen/data";
 
 // This is a special set of data that is available
 // on all cards.
