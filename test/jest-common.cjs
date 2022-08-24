@@ -1,6 +1,6 @@
 const path = require("path");
 
-const esModules = ["@geckos\\.io"];
+const esModules = [];
 
 module.exports = {
   rootDir: path.join(__dirname, ".."),

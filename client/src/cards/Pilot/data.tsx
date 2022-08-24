@@ -58,11 +58,16 @@ export const requests = {
 export function dataStream(
   entity: Entity,
   context: DataContext,
-  params: {systemId: number | null}
+  params?: {systemId: number | null}
 ): boolean {
+  const systemId =
+    params?.systemId || context.ship?.components.position?.parentId;
+  if (typeof systemId === "undefined") {
+    return false;
+  }
   return Boolean(
     (entity.components.position &&
-      entity.components.position.parentId === params.systemId) ||
+      entity.components.position.parentId === systemId) ||
       ((entity.components.isWarpEngines ||
         entity.components.isImpulseEngines) &&
         context.ship?.components.shipSystems?.shipSystemIds.includes(entity.id))

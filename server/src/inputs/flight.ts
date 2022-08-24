@@ -19,6 +19,7 @@ import {Vector3} from "three";
 import {PositionComponent} from "../components/position";
 import {InventoryTemplate} from "../classes/Plugins/Inventory";
 import {generateShipInventory} from "../spawners/inventory";
+import {Coordinates} from "../utils/unitTypes";
 
 const fs = process.env.NODE_ENV === "test" ? {unlink: () => {}} : promises;
 
@@ -250,21 +251,33 @@ export const flightInputs = {
     pubsub.publish("flight");
     return context.flight;
   },
-  spawnShip(context: DataContext) {
-    const shipTemplate = context.server.plugins[0].aspects.ships[0];
+  shipSpawn(
+    context: DataContext,
+    params: {
+      template: {id: string; pluginName: string};
+      systemId: number | null;
+      position: Coordinates<number>;
+    }
+  ) {
+    const shipTemplate = context.server.plugins
+      .find(plugin => (plugin.name = params.template.pluginName))
+      ?.aspects.ships.find(ship => ship.name === params.template.id);
+    if (!shipTemplate) throw new Error("Ship template not found.");
+
     const {ship: shipEntity, extraEntities} = spawnShip(context, shipTemplate, {
+      // TODO: August 20, 2022 - Generate a name for this ship somehow
       name: "Test Ship",
       position: {
-        x: 0,
-        y: 0,
-        z: 0,
-        type: "interstellar",
-        parentId: null,
+        x: params.position.x,
+        y: params.position.y,
+        z: params.position.z,
+        type: params.systemId ? "solar" : "interstellar",
+        parentId: params.systemId,
       },
     });
     extraEntities.forEach(s => context.flight?.ecs.addEntity(s));
     context.flight?.ecs.addEntity(shipEntity);
-    pubsub.publish("starmapShips");
+    pubsub.publish("starmapShips", {systemId: params.systemId || null});
   },
   flightLoad(context: DataContext, params: {flightName: string}) {
     inputAuth(context);
