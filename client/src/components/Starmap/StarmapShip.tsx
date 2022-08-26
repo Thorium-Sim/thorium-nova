@@ -15,6 +15,8 @@ import {
 import {useFrame} from "@react-three/fiber";
 import {ThoriumContext} from "client/src/context/ThoriumContext";
 import {createAsset} from "use-asset";
+import {useGetStarmapStore} from "./starmapStore";
+import {useNetRequest} from "client/src/context/useNetRequest";
 
 export function StarmapShip({
   id,
@@ -26,6 +28,16 @@ export function StarmapShip({
   logoUrl?: string;
 }) {
   const model = useShipModel(modelUrl);
+
+  const useStarmapStore = useGetStarmapStore();
+  let playerId: number | undefined;
+  try {
+    const player = useNetRequest("pilotPlayerShip");
+    playerId = player?.id;
+  } catch {}
+  const isNotViewscreen = useStarmapStore(
+    store => store.viewingMode !== "viewscreen"
+  );
 
   const group = useRef<Group>(null);
   const shipMesh = useRef<Group>(null);
@@ -41,6 +53,19 @@ export function StarmapShip({
     }
     group.current.visible = true;
     group.current.position.set(state.x, state.y, state.z);
+    shipMesh.current?.quaternion.set(
+      state.r.x,
+      state.r.y,
+      state.r.z,
+      state.r.w
+    );
+    if (shipMesh.current) {
+      if (!isNotViewscreen && playerId === id) {
+        shipMesh.current.visible = false;
+      } else {
+        shipMesh.current.visible = true;
+      }
+    }
   });
   return (
     <group>
@@ -68,18 +93,20 @@ export function StarmapShip({
           document.body.style.cursor = "default";
         }}
       >
-        <Suspense fallback={null}>
-          <group ref={shipSprite}>
-            {logoUrl && (
-              <ShipSprite
-                id={id}
-                // TODO June 9, 2022 - This color should represent the faction, with a toggle to make it show IFF for the current ship
-                color={"white"}
-                spriteAsset={logoUrl}
-              />
-            )}
-          </group>
-        </Suspense>
+        {isNotViewscreen && (
+          <Suspense fallback={null}>
+            <group ref={shipSprite}>
+              {logoUrl && (
+                <ShipSprite
+                  id={id}
+                  // TODO June 9, 2022 - This color should represent the faction, with a toggle to make it show IFF for the current ship
+                  color={"white"}
+                  spriteAsset={logoUrl}
+                />
+              )}
+            </group>
+          </Suspense>
+        )}
         {model && (
           <group ref={shipMesh}>
             {/* <axesHelper args={[3]} /> */}

@@ -246,6 +246,7 @@ function ClientAssignment() {
               {/* TODO April 23, 2022 - Hide this when the ship is configured to not have a flight director */}
               {staticStations.map(station => (
                 <HostStationItem
+                  key={station.name}
                   shipId={ship.id}
                   station={station}
                   selectedClient={selectedClient}

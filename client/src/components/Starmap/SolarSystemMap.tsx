@@ -93,28 +93,35 @@ export function SolarSystemMap({
   }, [camera, cameraView]);
 
   useExternalCameraControl(orbitControls);
+  const isViewscreen = useStarmapStore(
+    store => store.viewingMode === "viewscreen"
+  );
 
   return (
     <Suspense fallback={null}>
-      <CameraControls
-        ref={orbitControls}
-        enabled={controlsEnabled}
-        maxDistance={SOLAR_SYSTEM_MAX_DISTANCE}
-        minDistance={1}
-        mouseButtons={{
-          left: cameraView === "2d" ? ACTION.TRUCK : ACTION.ROTATE,
-          right: ACTION.TRUCK,
-          middle: ACTION.DOLLY,
-          wheel: ACTION.DOLLY,
-        }}
-        dollyToCursor
-        dollySpeed={0.5}
-      />
       {!pluginId ? null : <HabitableZone />}
-      <PolarGrid
-        rotation={[0, (2 * Math.PI) / 12, 0]}
-        args={[SOLAR_SYSTEM_MAX_DISTANCE, 12, 20, 64, 0xffffff, 0xffffff]}
-      />
+      {!isViewscreen && (
+        <>
+          <CameraControls
+            ref={orbitControls}
+            enabled={controlsEnabled}
+            maxDistance={SOLAR_SYSTEM_MAX_DISTANCE}
+            minDistance={1}
+            mouseButtons={{
+              left: cameraView === "2d" ? ACTION.TRUCK : ACTION.ROTATE,
+              right: ACTION.TRUCK,
+              middle: ACTION.DOLLY,
+              wheel: ACTION.DOLLY,
+            }}
+            dollyToCursor
+            dollySpeed={0.5}
+          />
+          <PolarGrid
+            rotation={[0, (2 * Math.PI) / 12, 0]}
+            args={[SOLAR_SYSTEM_MAX_DISTANCE, 12, 20, 64, 0xffffff, 0xffffff]}
+          />
+        </>
+      )}
       {children}
     </Suspense>
   );

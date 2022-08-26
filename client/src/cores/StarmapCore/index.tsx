@@ -117,7 +117,7 @@ function CanvasWrapper() {
     </StarmapCanvas>
   );
 }
-function InterstellarWrapper() {
+export function InterstellarWrapper() {
   const useStarmapStore = useGetStarmapStore();
   const currentSystem = useStarmapStore(store => store.currentSystem);
 
@@ -160,10 +160,11 @@ function InterstellarWrapper() {
   );
 }
 
-function SolarSystemWrapper() {
+export function SolarSystemWrapper() {
   const useStarmapStore = useGetStarmapStore();
   const currentSystem = useStarmapStore(store => store.currentSystem);
-  if (!currentSystem) throw new Error("No current system");
+
+  if (currentSystem === null) throw new Error("No current system");
   const system = useNetRequest("starmapSystem", {systemId: currentSystem});
   const starmapEntities = useNetRequest("starmapSystemEntities", {
     systemId: currentSystem,

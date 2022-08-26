@@ -13,7 +13,8 @@ export const Fuzz = () => {
   useFrame(({camera}) => {
     const children = (spriteRef.current?.children as Sprite[]) || [];
     const [forwardVelocity] = getForwardVelocity();
-    const cameraOpacity = Math.max(0, Math.min(1, forwardVelocity));
+    let cameraOpacity = Math.max(0, Math.min(1, forwardVelocity));
+    if (forwardVelocity > 200000) cameraOpacity = 0;
     for (let i = 0; i < children.length; i++) {
       const c = children[i];
 

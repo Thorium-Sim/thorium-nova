@@ -1,4 +1,5 @@
 import {useFrame} from "@react-three/fiber";
+import Star from "client/src/components/Starmap/Star/StarMesh";
 import {useThorium} from "client/src/context/ThoriumContext";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import {getSphericalPositionWithBias} from "client/src/utils/getSphericalPositionWithBias";
@@ -7,17 +8,19 @@ import {memo, useMemo} from "react";
 import {
   Color,
   CylinderBufferGeometry,
+  DoubleSide,
   Euler,
   InstancedMesh,
   Matrix4,
   MeshBasicMaterial,
   Quaternion,
+  Side,
   Vector3,
 } from "three";
 import {useForwardVelocity} from "../Pilot/ImpulseControls";
 
-const STAR_COUNT = 10000;
-const FORWARD_DISTANCE = 5000;
+const STAR_COUNT = 5000;
+const FORWARD_DISTANCE = 10000;
 const LY_IN_KM = 9460730472580.8;
 
 const StarPosition = new Vector3();
@@ -42,10 +45,11 @@ export const WarpStars = () => {
   const mesh = useMemo(() => {
     const geometry = new CylinderBufferGeometry(1, 0, 100, 16, 16);
     const material = new MeshBasicMaterial({
-      color: new Color(`hsl(0,0%,30%)`),
+      color: new Color(`hsl(0,0%,100%)`),
       // emissive: new Color(`hsl(230, 100%, 70%)`),
       transparent: true,
       opacity: 0.9,
+      side: DoubleSide,
     });
     const mesh = new InstancedMesh(geometry, material, STAR_COUNT);
     for (let i = 0; i < STAR_COUNT; i++) {
@@ -63,16 +67,18 @@ export const WarpStars = () => {
   useFrame(() => {
     const entity = interpolate(shipId);
     if (!entity) return;
-    // @ts-expect-error
+
     const rotation = entity.r || {x: 0, y: 0, z: 0, w: 1};
-    const [forwardVelocity] = getForwardVelocity();
+    let [forwardVelocity] = getForwardVelocity();
 
     const going = forwardVelocity > 20000;
-    const maxPossibleVelocity = isInSystem
+    let maxPossibleVelocity = isInSystem
       ? solarCruisingSpeed
       : interstellarCruisingSpeed;
-    const velocity =
+
+    let velocity =
       (forwardVelocity / maxPossibleVelocity) * 50 + (going ? 4 : 0);
+
     if (rotation) {
       RotateQuaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
     }
@@ -83,7 +89,7 @@ export const WarpStars = () => {
         .negate()
 
         .divideScalar(
-          maxPossibleVelocity / (isInSystem ? 5000 : LY_IN_KM * 5000)
+          maxPossibleVelocity / (isInSystem ? 500000 : LY_IN_KM * 5000)
         );
       mesh.position.copy(shipPosition);
     }
@@ -97,7 +103,7 @@ export const WarpStars = () => {
       const distance = StarPosition.distanceTo(ZeroVector);
       StarScale.setX(Math.min(2, Math.max(0, distance / 100)));
       StarScale.setZ(Math.min(2, Math.max(0, distance / 100)));
-      StarScale.setY((velocity + 0.01) / 50);
+      StarScale.setY((velocity + 0.01) / 10);
       StarQuaternion.copy(RotateQuaternion).multiply(starRotationQuaternion);
       matrix.compose(StarPosition, StarQuaternion, StarScale);
       mesh.setMatrixAt(i, matrix);
@@ -108,6 +114,7 @@ export const WarpStars = () => {
       StarColor.setHSL(hue / 360, 1, 0.9);
       mesh.setColorAt(i, StarColor);
     }
+
     if (!Array.isArray(mesh.material)) {
       mesh.material.opacity = Math.min(
         0.9,
