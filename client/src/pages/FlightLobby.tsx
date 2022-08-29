@@ -74,7 +74,11 @@ function PlayerStationSelection() {
               ))}
               {/* TODO April 23, 2022 - Hide this when the ship is configured to not have a flight director */}
               {staticStations.map(station => (
-                <PlayerStationItem shipId={ship.id} station={station} />
+                <PlayerStationItem
+                  key={station.name}
+                  shipId={ship.id}
+                  station={station}
+                />
               ))}
             </ul>
           </div>
