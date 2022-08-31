@@ -39,6 +39,9 @@ const Star: React.FC<{
   ...props
 }) => {
   const useStarmapStore = useGetStarmapStore();
+  const isViewscreen = useStarmapStore(
+    store => store.viewingMode === "viewscreen"
+  );
 
   const texture = React.useMemo(() => {
     const loader = new TextureLoader();
@@ -96,7 +99,7 @@ const Star: React.FC<{
   return (
     <group {...props}>
       <pointLight intensity={0.8} decay={2} color={color} castShadow />
-      <StarSprite size={size} color1={color1} />
+      {!isViewscreen && <StarSprite size={size} color1={color1} />}
 
       <group ref={starMesh}>
         <mesh ref={shader} uuid="My star">

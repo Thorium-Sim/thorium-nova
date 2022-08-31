@@ -61,6 +61,14 @@ export class ShipMapComponent extends Component {
       [inventoryTemplateName: string]: number;
     };
   })[] = [];
+  deckNodeMap: {
+    [key: number]: DeckPlugin["nodes"][0] & {
+      deckIndex: number;
+      contents: {
+        [inventoryTemplateName: string]: number;
+      };
+    };
+  } | null = null;
   deckEdges: DeckEdge[] = [];
   graph: ShipMapGraph | null = null;
 }

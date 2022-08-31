@@ -15,11 +15,19 @@ export class PassengerMovementSystem extends System {
     const {x, y, z, parentId} = position;
     if (parentId === null) return;
     const ship = this.ecs.getEntityById(parentId);
-    if (!ship) return;
-    const nextNode = ship.components.shipMap?.deckNodes.find(
-      node =>
-        node.id === passengerMovement.nodePath[passengerMovement.nextNodeIndex]
-    );
+    if (!ship?.components.shipMap) return;
+
+    if (!ship.components.shipMap.deckNodeMap) {
+      ship.components.shipMap.deckNodeMap =
+        ship.components.shipMap.deckNodes.reduce((acc: any, node) => {
+          acc[node.id] = node;
+          return acc;
+        }, {});
+    }
+    const nextNode =
+      ship.components.shipMap.deckNodeMap?.[
+        passengerMovement.nodePath[passengerMovement.nextNodeIndex]
+      ];
     if (!nextNode) return;
     const distanceToNext = Math.hypot(x - nextNode?.x, y - nextNode?.y); // Increment to the next node
     if (distanceToNext <= 0.1 && z === nextNode.deckIndex) {

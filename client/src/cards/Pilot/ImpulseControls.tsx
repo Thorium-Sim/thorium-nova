@@ -36,17 +36,15 @@ function formatSpeed(speed: KilometerPerSecond) {
   })} m/s`;
 }
 
-const ForwardVelocity = () => {
-  const forwardRef = useRef<HTMLDivElement>(null);
-  const targetRef = useRef<HTMLDivElement>(null);
-
+export function useForwardVelocity() {
   const {id: impulseId, targetSpeed} = useNetRequest("pilotImpulseEngines");
-  const {id: warpId, maxVelocity} = useNetRequest("pilotWarpEngines");
+  const {id: warpId} = useNetRequest("pilotWarpEngines");
   const {interpolate} = useThorium();
 
-  const targetVelocity = targetSpeed || maxVelocity;
-
-  useAnimationFrame(() => {
+  return function getForwardVelocity(): [
+    KilometerPerSecond,
+    KilometerPerSecond
+  ] {
     const warpInterpolation = interpolate(warpId);
     const {x: warpForward, y: warpMax} = warpInterpolation || {x: 0, y: 0};
 
@@ -54,13 +52,25 @@ const ForwardVelocity = () => {
     const {x: impulseForward} = impulseInterpolation || {x: 0};
 
     const targetVelocity = Math.max(targetSpeed, warpMax);
+    const forwardVelocity = Math.max(warpForward, impulseForward);
+    return [forwardVelocity, targetVelocity] as [
+      KilometerPerSecond,
+      KilometerPerSecond
+    ];
+  };
+}
+const ForwardVelocity = () => {
+  const forwardRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef<HTMLDivElement>(null);
+  const getForwardVelocity = useForwardVelocity();
+
+  useAnimationFrame(() => {
+    const [forwardVelocity, targetVelocity] = getForwardVelocity();
     if (targetRef.current) {
       targetRef.current.textContent = formatSpeed(targetVelocity);
     }
     if (forwardRef.current) {
-      forwardRef.current.textContent = formatSpeed(
-        Math.max(warpForward, impulseForward)
-      );
+      forwardRef.current.textContent = formatSpeed(forwardVelocity);
     }
   });
 
@@ -76,7 +86,7 @@ const ForwardVelocity = () => {
         <div>Target Velocity:</div>
 
         <p className="font-bold text-3xl my-2 tabular-nums" ref={targetRef}>
-          {formatSpeed(targetVelocity)}
+          {formatSpeed(0)}
         </p>
       </div>
     </>

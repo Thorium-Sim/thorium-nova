@@ -46,6 +46,11 @@ export const requests = {
       maxVelocity: warpEngines.components.isWarpEngines?.maxVelocity || 0,
       currentWarpFactor:
         warpEngines.components.isWarpEngines?.currentWarpFactor || 0,
+      interstellarCruisingSpeed:
+        warpEngines.components.isWarpEngines?.interstellarCruisingSpeed ||
+        599600000000,
+      solarCruisingSpeed:
+        warpEngines.components.isWarpEngines?.solarCruisingSpeed || 29980000,
     };
   },
 };

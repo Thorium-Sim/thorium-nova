@@ -274,7 +274,6 @@ export const ShipEntity = ({
   size: number;
   tilted?: boolean;
 }) => {
-  console.log(size);
   const {id: playerId} = useNetRequest("pilotPlayerShip");
   // TODO: Use useGLTF.preload outside of this to preload the asset
   const model = useGLTF(modelUrl || "", false);

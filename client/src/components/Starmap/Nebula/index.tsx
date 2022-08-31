@@ -30,8 +30,8 @@ function generateMaterial() {
 
   const material = new MeshBasicMaterial({
     side: BackSide,
-    transparent: true,
-    depthWrite: false,
+    // transparent: true,
+    // depthWrite: false,
     depthTest: false,
     map: canvasTexture,
     userData: {

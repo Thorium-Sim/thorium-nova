@@ -26,7 +26,7 @@ export const requests = {
     params: {systemId?: number}
   ) => {
     if (!context.flight) return [];
-    if (!params.systemId) return [];
+    if (params.systemId === null || params.systemId === undefined) return [];
     const data = context.flight.ecs.entities.reduce(
       (prev: Pick<Entity, "components" | "id">[], {components, id}) => {
         if (components.isShip) return prev;
@@ -52,6 +52,7 @@ export const requests = {
       params.systemId !== undefined
     )
       throw null;
+
     if (!context.flight) return [];
     const data = context.flight.ecs.entities.reduce(
       (
@@ -60,9 +61,10 @@ export const requests = {
       ) => {
         if (components.isShip) {
           if (
-            (params.systemId &&
+            (typeof params.systemId === "number" &&
               components.position?.parentId === params.systemId) ||
-            (!params.systemId && components.position?.type === "interstellar")
+            ((params.systemId === null || params.systemId === undefined) &&
+              components.position?.type === "interstellar")
           ) {
             prev.push({
               id,
@@ -76,6 +78,7 @@ export const requests = {
       },
       []
     );
+
     return data;
   },
   shipSpawnSearch: (context: DataContext, params: {query: string}) => {
@@ -107,9 +110,14 @@ export const dataStream = (
   params: {systemId?: number | null}
 ) => {
   if (entity.components.isShip && entity.components.position) {
-    if (entity.components.position.type === "interstellar" && !params.systemId)
+    if (
+      entity.components.position.type === "interstellar" &&
+      (params.systemId === null || params.systemId === undefined)
+    )
       return true;
-    if (entity.components.position.parentId === params.systemId) return true;
+    if (entity.components.position.parentId === params.systemId) {
+      return true;
+    }
   }
   return false;
 };
