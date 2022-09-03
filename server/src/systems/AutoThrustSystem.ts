@@ -16,7 +16,7 @@ const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
 
 const IMPULSE_PROPORTION = 10;
 const IMPULSE_INTEGRAL = 0.1;
-const IMPULSE_DERIVATIVE = 50;
+const IMPULSE_DERIVATIVE = 25;
 const WARP_PROPORTION = 10;
 const WARP_INTEGRAL = 5;
 const WARP_DERIVATIVE = 8;

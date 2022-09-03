@@ -64,16 +64,26 @@ export const requests = {
 
     const waypointId = context.ship.components.autopilot?.destinationWaypointId;
     let destinationName = "";
+    let waypoint;
     if (typeof waypointId === "number") {
-      const waypoint = context.flight?.ecs.getEntityById(waypointId);
+      waypoint = context.flight?.ecs.getEntityById(waypointId);
       destinationName =
         waypoint?.components.identity?.name.replace(" Waypoint", "").trim() ||
         "";
     }
+    const waypointParentId = waypoint?.components.position?.parentId;
+
+    const waypointSystemPosition =
+      typeof waypointParentId === "number"
+        ? context.flight?.ecs.getEntityById(waypointParentId)?.components
+            .position || null
+        : null;
 
     return {
       forwardAutopilot: context.ship.components.autopilot?.forwardAutopilot,
       destinationName,
+      destinationPosition: waypoint?.components.position || null,
+      destinationSystemPosition: waypointSystemPosition,
       locked: !!context.ship.components.autopilot?.desiredCoordinates,
     };
   },
