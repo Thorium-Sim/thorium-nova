@@ -1,8 +1,8 @@
 import {Entity, System} from "../utils/ecs";
 
-const PEDAL_TO_THE_METAL_CONST = 10;
-const HARD_BRAKE_CONST = 5;
-const SOFT_BRAKE_CONST = 5;
+const PEDAL_TO_THE_METAL_CONST = 1;
+const HARD_BRAKE_CONST = 50;
+const SOFT_BRAKE_CONST = 50;
 
 export class WarpSystem extends System {
   test(entity: Entity) {

@@ -3,6 +3,8 @@ import Controller from "node-pid-controller";
 import {Entity, System} from "../utils/ecs";
 import {autopilotGetCoordinates} from "../utils/autopilotGetCoordinates";
 import {KM_TO_LY} from "../utils/unitTypes";
+import {pubsub} from "../utils/pubsub";
+import {isWarpEnginesComponent} from "../components/shipSystems";
 
 let positionVec = new Vector3();
 let rotationQuat = new Quaternion();
@@ -14,18 +16,22 @@ const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
 
 const IMPULSE_PROPORTION = 10;
 const IMPULSE_INTEGRAL = 0.1;
-const IMPULSE_DERIVATIVE = 25;
+const IMPULSE_DERIVATIVE = 50;
 const WARP_PROPORTION = 10;
 const WARP_INTEGRAL = 5;
 const WARP_DERIVATIVE = 8;
 
 export class AutoThrustSystem extends System {
+  updateCount = 0;
   test(entity: Entity) {
     return !!(
       entity.components.isShip &&
       entity.components.rotation &&
       entity.components.autopilot
     );
+  }
+  preUpdate() {
+    this.updateCount = (this.updateCount + 1) % 3;
   }
   update(entity: Entity, elapsed: number) {
     const {position, rotation, autopilot} = entity.components;
@@ -55,9 +61,18 @@ export class AutoThrustSystem extends System {
       },
       [null, null]
     );
+    // Get the current system the ship is in and the autopilot desired system
+    const entitySystem = entity.components.position?.parentId
+      ? this.ecs.getEntityById(entity.components.position.parentId)
+      : null;
+    const destinationSystem = entity.components.autopilot?.desiredSolarSystemId
+      ? this.ecs.getEntityById(entity.components.autopilot.desiredSolarSystemId)
+      : null;
+
     const isInInterstellar = autopilotGetCoordinates(
-      this.ecs.entities,
       entity,
+      entitySystem,
+      destinationSystem,
       desiredDestination,
       positionVec
     );
@@ -102,6 +117,9 @@ export class AutoThrustSystem extends System {
     // Basically, if it would take 15 seconds or less to reach the destination at cruising
     // impulse speed, we should use that. Otherwise, we should use warp.
     const TRAVEL_TIME_THRESHOLD_SECONDS = 15;
+
+    // If we are less than 0.5 degrees off course, activate engines.
+    const inCorrectDirection = rotationDifference <= 10 * (Math.PI / 180);
     if (
       warpEngines?.components.isWarpEngines &&
       distanceInKM / impulseEngineSpeed > TRAVEL_TIME_THRESHOLD_SECONDS
@@ -112,7 +130,7 @@ export class AutoThrustSystem extends System {
       const warpCruisingSpeed = isInInterstellar
         ? warpEngines.components.isWarpEngines.interstellarCruisingSpeed
         : warpEngines.components.isWarpEngines.solarCruisingSpeed;
-      if (rotationDifference <= 10 * (Math.PI / 180)) {
+      if (inCorrectDirection) {
         const controllerOutput = autopilot.warpController?.update(
           -1 * Math.min(warpCruisingSpeed, distanceInKM)
         );
@@ -121,8 +139,13 @@ export class AutoThrustSystem extends System {
           Math.max(0, controllerOutput)
         );
         // Figure out an appropriate warp factor to get us to that speed.
+        const currentWarpFactor = getWarpFactorFromDesiredSpeed(
+          desiredSpeed,
+          warpEngines.components.isWarpEngines,
+          isInInterstellar
+        );
         warpEngines.updateComponent("isWarpEngines", {
-          maxVelocity: desiredSpeed,
+          currentWarpFactor,
         });
       } else {
         autopilot.warpController?.reset();
@@ -133,8 +156,7 @@ export class AutoThrustSystem extends System {
         currentWarpFactor: 0,
         maxVelocity: 0,
       });
-      // If we are less than 0.5 degrees off course, activate engines.
-      if (rotationDifference <= 10 * (Math.PI / 180)) {
+      if (inCorrectDirection) {
         const controllerOutput = autopilot.impulseController.update(
           -1 *
             Math.min(
@@ -146,6 +168,8 @@ export class AutoThrustSystem extends System {
           impulseEngines.components.isImpulseEngines.cruisingSpeed,
           Math.max(0, controllerOutput)
         );
+
+        // Arbitrary number that gets roughly close to 5 KM away
         if (distanceInKM < 5) {
           desiredSpeed = 0;
         }
@@ -157,5 +181,47 @@ export class AutoThrustSystem extends System {
         impulseEngines.updateComponent("isImpulseEngines", {targetSpeed: 0});
       }
     }
+    if (this.updateCount === 0) {
+      if (warpEngines) {
+        pubsub.publish("pilotWarpEngines", {
+          shipId: entity.id,
+          systemId: warpEngines?.id,
+        });
+      }
+      if (impulseEngines) {
+        pubsub.publish("pilotImpulseEngines", {
+          shipId: entity.id,
+          systemId: impulseEngines.id,
+        });
+      }
+    }
   }
+}
+
+function getWarpFactorFromDesiredSpeed(
+  desiredSpeed: number,
+  warp: Omit<isWarpEnginesComponent, "init">,
+  isInterstellar: boolean = false
+) {
+  const {
+    interstellarCruisingSpeed,
+    solarCruisingSpeed,
+    minSpeedMultiplier,
+    warpFactorCount,
+  } = warp;
+  const cruisingSpeed = isInterstellar
+    ? interstellarCruisingSpeed
+    : solarCruisingSpeed;
+
+  const minWarp = cruisingSpeed * minSpeedMultiplier;
+
+  // Calculate max warp speed based on the factor and the number of warp factors
+  if (desiredSpeed < 1000) return 0;
+  if (desiredSpeed > 1000 && desiredSpeed < minWarp) return 1;
+  if (desiredSpeed > cruisingSpeed) return warpFactorCount + 1;
+
+  const speedOutput =
+    (desiredSpeed * (warpFactorCount - 1)) / (cruisingSpeed - minWarp) + 1;
+
+  return speedOutput;
 }

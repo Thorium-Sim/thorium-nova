@@ -60,13 +60,20 @@ export class AutoRotateSystem extends System {
     }
 
     // Get the current system the ship is in and the autopilot desired system
+    const entitySystem = entity.components.position?.parentId
+      ? this.ecs.getEntityById(entity.components.position.parentId)
+      : null;
+    const destinationSystem = entity.components.autopilot?.desiredSolarSystemId
+      ? this.ecs.getEntityById(entity.components.autopilot.desiredSolarSystemId)
+      : null;
+
     autopilotGetCoordinates(
-      this.ecs.entities,
       entity,
+      entitySystem,
+      destinationSystem,
       desiredDestination,
       positionVec
     );
-
     const distance = positionVec.distanceTo(desiredDestination);
     rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
     up.set(0, 1, 0).applyQuaternion(rotationQuat);

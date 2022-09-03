@@ -1,7 +1,7 @@
 import Button from "@thorium/ui/Button";
 import {CardProps} from "client/src/components/Station/CardProps";
 import {useDataStream} from "client/src/context/useDataStream";
-import {Suspense} from "react";
+import {Fragment, Suspense} from "react";
 import {GridCanvas, CircleGrid} from "./CircleGrid";
 import {PilotZoomSlider} from "./PilotZoomSlider";
 import {usePilotStore} from "./usePilotStore";
@@ -10,6 +10,7 @@ import {Joystick, LinearJoystick} from "@thorium/ui/Joystick";
 import {ReactNode} from "react";
 import type {Coordinates} from "server/src/utils/unitTypes";
 import {netSend} from "client/src/context/netSend";
+import {useNetRequest} from "client/src/context/useNetRequest";
 
 async function rotation({x = 0, y = 0, z = 0}: Partial<Coordinates<number>>) {
   await netSend("thrustersSetRotationDelta", {rotation: {x, y, z}});
@@ -64,7 +65,7 @@ export function Pilot({cardLoaded}: CardProps) {
       </div>
 
       <div className="h-full flex flex-col justify-between gap-4">
-        <div>Course controls here</div>
+        <LockOnButton />
         <div>
           <PilotZoomSlider />
           <Button
@@ -95,3 +96,51 @@ export function Pilot({cardLoaded}: CardProps) {
     </div>
   );
 }
+
+const LockOnButton = () => {
+  const waypoint = usePilotStore(store => store.facingWaypoints?.[0]);
+  const autopilot = useNetRequest("autopilot");
+  return (
+    <Fragment>
+      <div className="text-center panel panel-primary">
+        <div>Current Course:</div>
+        <div className="font-bold text-3xl my-2">
+          {autopilot.destinationName || "No Course Set"}
+        </div>
+      </div>
+      {autopilot.locked ? (
+        <Button
+          className="w-full mt-2 btn-error btn-lg"
+          onClick={() => netSend("autopilotUnlockCourse")}
+        >
+          Unlock Course
+        </Button>
+      ) : (
+        <Button
+          className="w-full mt-2 btn-warning btn-lg"
+          disabled={typeof waypoint !== "number"}
+          onClick={() => netSend("autopilotLockCourse", {waypointId: waypoint})}
+        >
+          Lock On Course
+        </Button>
+      )}
+      {!autopilot.forwardAutopilot ? (
+        <Button
+          className="w-full mt-2 btn-error btn-lg"
+          disabled={!autopilot.locked}
+          onClick={() => netSend("autopilotActivate")}
+        >
+          Activate Autopilot
+        </Button>
+      ) : (
+        <Button
+          className="w-full mt-2 btn-error btn-lg"
+          disabled={!autopilot.locked}
+          onClick={() => netSend("autopilotDeactivate")}
+        >
+          Deactivate Autopilot
+        </Button>
+      )}
+    </Fragment>
+  );
+};

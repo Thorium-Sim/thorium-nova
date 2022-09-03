@@ -214,11 +214,12 @@ export class ServerClient extends BaseClient {
           }
         }
       } catch (err) {
-        throw new Error(
+        console.error(
           `Client ${this.id} sent invalid request data:${
             typeof data === "object" ? JSON.stringify(data) : data
           }`
         );
+        console.error(err);
       }
     });
 

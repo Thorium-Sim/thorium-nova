@@ -6,9 +6,14 @@ import {pubsub} from "server/src/utils/pubsub";
 export const requests = {
   pilotPlayerShip(context: DataContext) {
     if (!context.ship) throw new Error("Cannot find ship");
+    const systemId = context.ship.components.position?.parentId;
+    const systemPosition = systemId
+      ? context.flight?.ecs.getEntityById(systemId)?.components.position || null
+      : null;
     return {
       id: context.ship.id,
-      currentSystem: context.ship.components.position?.parentId || null,
+      currentSystem: systemId || null,
+      systemPosition,
     };
   },
   pilotImpulseEngines(
@@ -46,6 +51,25 @@ export const requests = {
       maxVelocity: warpEngines.components.isWarpEngines?.maxVelocity || 0,
       currentWarpFactor:
         warpEngines.components.isWarpEngines?.currentWarpFactor || 0,
+    };
+  },
+  autopilot(context: DataContext, params: {}, publishParams: {shipId: number}) {
+    if (publishParams && publishParams.shipId !== context.ship?.id) throw null;
+    if (!context.ship) throw new Error("Ship not found");
+
+    const waypointId = context.ship.components.autopilot?.destinationWaypointId;
+    let destinationName = "";
+    if (typeof waypointId === "number") {
+      const waypoint = context.flight?.ecs.getEntityById(waypointId);
+      destinationName =
+        waypoint?.components.identity?.name.replace(" Waypoint", "").trim() ||
+        "";
+    }
+
+    return {
+      forwardAutopilot: context.ship.components.autopilot?.forwardAutopilot,
+      destinationName,
+      locked: !!context.ship.components.autopilot?.desiredCoordinates,
     };
   },
 };
@@ -93,5 +117,63 @@ export const inputs = {
       systemId: system.id,
     });
     return system;
+  },
+  autopilotLockCourse(context: DataContext, params: {waypointId: number}) {
+    if (!context.ship) throw new Error("Ship not found.");
+    const waypoint = context.flight?.ecs.getEntityById(params.waypointId);
+    const position = waypoint?.components.position;
+    if (!waypoint || !position) throw new Error("Waypoint not found.");
+
+    context.ship.updateComponent("autopilot", {
+      destinationWaypointId: params.waypointId,
+      desiredCoordinates: {x: position.x, y: position.y, z: position.z},
+      desiredSolarSystemId: position.parentId,
+      rotationAutopilot: true,
+      forwardAutopilot: false,
+    });
+
+    pubsub.publish("autopilot", {shipId: context.ship.id});
+  },
+  autopilotUnlockCourse(context: DataContext) {
+    if (!context.ship) throw new Error("Ship not found.");
+
+    context.ship.updateComponent("autopilot", {
+      destinationWaypointId: null,
+      desiredCoordinates: undefined,
+      desiredSolarSystemId: undefined,
+      rotationAutopilot: false,
+      forwardAutopilot: false,
+    });
+
+    // Clear out the current thruster adjustments
+    const thrusters = context.flight?.ecs.entities.find(
+      e =>
+        e.components.isThrusters &&
+        context.ship?.components.shipSystems?.shipSystemIds.includes(e.id)
+    );
+    thrusters?.updateComponent("isThrusters", {
+      rotationDelta: {x: 0, y: 0, z: 0},
+    });
+
+    pubsub.publish("autopilot", {shipId: context.ship.id});
+  },
+  autopilotActivate(context: DataContext) {
+    if (!context.ship) throw new Error("Ship not found.");
+
+    context.ship.updateComponent("autopilot", {
+      forwardAutopilot: true,
+    });
+
+    pubsub.publish("autopilot", {shipId: context.ship.id});
+  },
+  autopilotDeactivate(context: DataContext) {
+    if (!context.ship) throw new Error("Ship not found.");
+    context.ship.updateComponent("autopilot", {
+      forwardAutopilot: false,
+    });
+    // We specifically won't clear out the impulse and warp because
+    // we want the ship to maintain its current speed.
+
+    pubsub.publish("autopilot", {shipId: context.ship.id});
   },
 };
