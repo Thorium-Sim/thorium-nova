@@ -18,17 +18,15 @@ import {getOrbitPosition} from "../utils/getOrbitPosition";
 import {Vector3} from "three";
 import {PositionComponent} from "../components/position";
 import {InventoryTemplate} from "../classes/Plugins/Inventory";
-import {generateShipInventory} from "../spawners/inventory";
 import {Coordinates} from "../utils/unitTypes";
 
 const fs = process.env.NODE_ENV === "test" ? {unlink: () => {}} : promises;
 
 function getPlanetSystem(context: DataContext, planet: Entity): Entity {
-  if (!planet.components?.satellite?.parentId)
+  const parentId = planet.components?.satellite?.parentId;
+  if (parentId === undefined || parentId === null)
     throw new Error("No satellite parentId");
-  const parentEntity = context.flight?.ecs.getEntityById(
-    planet.components?.satellite?.parentId
-  );
+  const parentEntity = context.flight?.ecs.getEntityById(parentId);
   if (!parentEntity)
     throw new Error(
       `Could not find parent entity for planet: ${JSON.stringify(planet)} `

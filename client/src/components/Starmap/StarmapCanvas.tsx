@@ -1,4 +1,4 @@
-import {ReactNode, useEffect} from "react";
+import {ReactNode, Suspense, useEffect} from "react";
 import {
   UNSAFE_LocationContext,
   UNSAFE_NavigationContext,
@@ -27,9 +27,13 @@ function StarmapEffects() {
 export default function StarmapCanvas({
   children,
   shouldRender = true,
+  alpha = true,
+  className = "",
 }: {
   children: ReactNode;
   shouldRender?: boolean;
+  alpha?: boolean;
+  className?: string;
 }) {
   const client = useQueryClient();
 
@@ -43,17 +47,20 @@ export default function StarmapCanvas({
 
   return (
     <Canvas
+      className={className}
       onContextMenu={e => {
         e.preventDefault();
       }}
-      gl={{antialias: true, logarithmicDepthBuffer: true}}
-      camera={{fov: 45, far: FAR}}
+      gl={{antialias: true, logarithmicDepthBuffer: true, alpha}}
+      camera={{fov: 45, near: 0.01, far: FAR}}
       frameloop={shouldRender ? "always" : "demand"}
     >
       <ContextBridge>
         <QueryClientProvider client={client}>
-          <StarmapEffects />
-          {children}
+          <Suspense fallback={null}>
+            <StarmapEffects />
+            {children}
+          </Suspense>
         </QueryClientProvider>
       </ContextBridge>
     </Canvas>

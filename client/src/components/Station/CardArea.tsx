@@ -43,7 +43,10 @@ export const CardArea: React.FC<{
   }));
   return (
     <Fragment>
-      <Transition show={!client.loginName} {...transitionProps}>
+      <Transition
+        show={!client.loginName && station.name !== "Viewscreen"}
+        {...transitionProps}
+      >
         <Login />
       </Transition>
       <Transition show={Boolean(client.offlineState)} {...transitionProps}>
@@ -71,7 +74,10 @@ const CardRenderer = ({
   currentCardId: string;
 }) => {
   const client = useNetRequest("client");
-  const allowCard = Boolean(client.loginName) && !client.offlineState;
+  const station = useNetRequest("station");
+  const allowCard =
+    (station.name === "Viewscreen" || Boolean(client.loginName)) &&
+    !client.offlineState;
   const show = allowCard && currentCardId === id;
   const [cardLoaded, setCardLoaded] = useState(show);
   return (
