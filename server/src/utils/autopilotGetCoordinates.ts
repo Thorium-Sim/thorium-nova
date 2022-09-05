@@ -2,27 +2,14 @@ import {Vector3} from "three";
 import type {Entity} from "./ecs";
 
 export function autopilotGetCoordinates(
-  entities: Entity[],
   entity: Entity,
+  shipSystem: Entity | null,
+  autopilotDesiredSystem: Entity | null,
   desiredDestination: Vector3,
   positionVec: Vector3
 ): boolean {
   const {position, rotation, autopilot} = entity.components;
-  if (
-    !position ||
-    !rotation ||
-    !autopilot?.forwardAutopilot ||
-    !autopilot?.desiredCoordinates
-  )
-    return false;
-  const shipSystem = entities.find(
-    e =>
-      entity.components.position?.type === "solar" &&
-      e.id === entity.components.position?.parentId
-  );
-  const autopilotDesiredSystem = entities.find(
-    e => e.id === autopilot.desiredSolarSystemId
-  );
+  if (!position || !rotation || !autopilot?.desiredCoordinates) return false;
   if (
     autopilotDesiredSystem?.id === entity.components.position?.parentId ||
     (!autopilotDesiredSystem && !entity.components.position?.parentId)

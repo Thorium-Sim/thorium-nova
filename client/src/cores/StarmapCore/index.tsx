@@ -17,6 +17,7 @@ import {StarmapShip} from "../../components/Starmap/StarmapShip";
 import SearchableInput, {DefaultResultLabel} from "@thorium/ui/SearchableInput";
 import Input from "@thorium/ui/Input";
 import {StarmapCoreContextMenu} from "./StarmapCoreContextMenu";
+import {WaypointEntity} from "client/src/cards/Pilot/Waypoint";
 
 export function StarmapCore() {
   const ref = useRef<HTMLDivElement>(null);
@@ -172,6 +173,9 @@ export function SolarSystemWrapper() {
   const starmapShips = useNetRequest("starmapShips", {
     systemId: currentSystem,
   });
+  const waypoints = useNetRequest("waypoints", {
+    systemId: "all",
+  });
 
   return (
     <SolarSystemMap
@@ -223,6 +227,9 @@ export function SolarSystemWrapper() {
 
         return null;
       })}
+      {waypoints.map(waypoint => (
+        <WaypointEntity key={waypoint.id} waypoint={waypoint} viewscreen />
+      ))}
       {starmapShips.map(ship => (
         <Suspense key={ship.id} fallback={null}>
           <ErrorBoundary

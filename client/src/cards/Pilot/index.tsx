@@ -1,7 +1,7 @@
 import Button from "@thorium/ui/Button";
 import {CardProps} from "client/src/components/Station/CardProps";
 import {useDataStream} from "client/src/context/useDataStream";
-import {Suspense} from "react";
+import {Fragment, Suspense, useRef} from "react";
 import {GridCanvas, CircleGrid} from "./CircleGrid";
 import {PilotZoomSlider} from "./PilotZoomSlider";
 import {usePilotStore} from "./usePilotStore";
@@ -10,6 +10,9 @@ import {Joystick, LinearJoystick} from "@thorium/ui/Joystick";
 import {ReactNode} from "react";
 import type {Coordinates} from "server/src/utils/unitTypes";
 import {netSend} from "client/src/context/netSend";
+import {useNetRequest} from "client/src/context/useNetRequest";
+import useAnimationFrame from "client/src/hooks/useAnimationFrame";
+import {useThorium} from "client/src/context/ThoriumContext";
 
 async function rotation({x = 0, y = 0, z = 0}: Partial<Coordinates<number>>) {
   await netSend("thrustersSetRotationDelta", {rotation: {x, y, z}});
@@ -64,7 +67,7 @@ export function Pilot({cardLoaded}: CardProps) {
       </div>
 
       <div className="h-full flex flex-col justify-between gap-4">
-        <div>Course controls here</div>
+        <LockOnButton />
         <div>
           <PilotZoomSlider />
           <Button
@@ -95,3 +98,114 @@ export function Pilot({cardLoaded}: CardProps) {
     </div>
   );
 }
+
+function getInterstellarDistance(
+  position1: {x: number; y: number; z: number; parentId: number | null},
+  system1: {x: number; y: number; z: number} | null,
+  position2: {x: number; y: number; z: number; parentId: number | null},
+  system2: {x: number; y: number; z: number} | null
+) {
+  let value = 0;
+  let unit = "ly";
+  if (position1.parentId === position2.parentId) {
+    value = Math.hypot(
+      position2.x - position1.x,
+      position2.y - position1.y,
+      position2.z - position1.z
+    );
+    if (typeof position1.parentId === "number") unit = "km";
+  } else if (system1 && system2) {
+    value = Math.hypot(
+      system2.x - system1.x,
+      system2.y - system1.y,
+      system2.z - system1.z
+    );
+  } else if (!system1 && system2) {
+    value = Math.hypot(
+      system2.x - position1.x,
+      system2.y - position1.y,
+      system2.z - position1.z
+    );
+  } else if (!system2 && system1) {
+    value = Math.hypot(
+      system1.x - position2.x,
+      system1.y - position2.y,
+      system1.z - position2.z
+    );
+  }
+  return `${value.toLocaleString()} ${unit}`;
+}
+
+const LockOnButton = () => {
+  const waypoint = usePilotStore(store => store.facingWaypoints?.[0]);
+  const autopilot = useNetRequest("autopilot");
+  const distanceRef = useRef<HTMLSpanElement>(null);
+  const {id, currentSystem, systemPosition} = useNetRequest("pilotPlayerShip");
+  const {interpolate} = useThorium();
+
+  useAnimationFrame(() => {
+    const shipPosition = interpolate(id);
+    if (!shipPosition || !autopilot.destinationPosition) return;
+    const distance = getInterstellarDistance(
+      {...shipPosition, parentId: currentSystem},
+      systemPosition,
+      autopilot.destinationPosition,
+      autopilot.destinationSystemPosition
+    );
+    if (distanceRef.current) {
+      distanceRef.current.textContent = distance;
+    }
+  });
+  return (
+    <Fragment>
+      <div className="text-center panel panel-primary">
+        <div>Current Course:</div>
+        <div className="font-bold text-3xl my-2">
+          {autopilot.destinationName || "No Course Set"}
+        </div>
+        <div className="h-8">
+          {autopilot.destinationName ? (
+            <span>
+              Distance: <span ref={distanceRef}></span>
+            </span>
+          ) : (
+            ""
+          )}
+        </div>
+      </div>
+      {autopilot.locked ? (
+        <Button
+          className="w-full btn-error"
+          onClick={() => netSend("autopilotUnlockCourse")}
+        >
+          Unlock Course
+        </Button>
+      ) : (
+        <Button
+          className="w-full btn-warning"
+          disabled={typeof waypoint !== "number"}
+          onClick={() => netSend("autopilotLockCourse", {waypointId: waypoint})}
+        >
+          Lock On Course
+        </Button>
+      )}
+      {!autopilot.forwardAutopilot ? (
+        <Button
+          className="w-full btn-error"
+          disabled={!autopilot.locked}
+          onClick={() => netSend("autopilotActivate")}
+        >
+          Activate Autopilot
+        </Button>
+      ) : (
+        <Button
+          className="w-full btn-error"
+          disabled={!autopilot.locked}
+          onClick={() => netSend("autopilotDeactivate")}
+        >
+          Deactivate Autopilot
+        </Button>
+      )}
+    </Fragment>
+  );
+};

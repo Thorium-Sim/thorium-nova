@@ -7,6 +7,15 @@ const SOFT_BRAKE_CONST = 5;
  * based on the mass of the ship they are attached to
  */
 export class ImpulseSystem extends System {
+  WarpSystem?: System;
+  constructor() {
+    super();
+    setTimeout(() => {
+      this.WarpSystem = this.ecs?.systems.find(
+        s => s.constructor.name === "WarpSystem"
+      );
+    }, 0);
+  }
   test(entity: Entity) {
     return !!(
       entity.components.isImpulseEngines && entity.components.isShipSystem
@@ -20,6 +29,10 @@ export class ImpulseSystem extends System {
     );
     if (!ship || !ship.components.isShip || !entity.components.isImpulseEngines)
       return;
+
+    const warp = this.WarpSystem?.entities.find(e =>
+      ship.components.shipSystems?.shipSystemIds.includes(e.id)
+    );
     const mass = ship.components.mass?.mass || 1;
 
     const {thrust, targetSpeed, cruisingSpeed} =
@@ -30,6 +43,20 @@ export class ImpulseSystem extends System {
     if (!entity.components.isImpulseEngines.targetSpeed) {
       acceleration = 0;
     }
+    const warpForwardVelocity = warp?.components.isWarpEngines?.forwardVelocity;
+    if (
+      warpForwardVelocity &&
+      warpForwardVelocity > entity.components.isImpulseEngines.emergencySpeed
+    ) {
+      // Set the impulse forward velocity to the warp forward velocity so we don't have to accelerate from nothing
+      entity.updateComponent("isImpulseEngines", {
+        forwardVelocity: Math.max(
+          warpForwardVelocity,
+          entity.components.isImpulseEngines.emergencySpeed
+        ),
+      });
+    }
+
     if (
       entity.components.isImpulseEngines.forwardVelocity >
       entity.components.isImpulseEngines.targetSpeed

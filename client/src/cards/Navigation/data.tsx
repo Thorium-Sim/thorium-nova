@@ -1,4 +1,3 @@
-
 import {PositionComponent} from "server/src/components/position";
 import {DataContext} from "server/src/utils/DataContext";
 import {Entity} from "server/src/utils/ecs";
@@ -18,6 +17,7 @@ type Waypoint = {
   name: string;
   objectId?: number;
   position: Omit<PositionComponent, "init">;
+  systemPosition: Omit<PositionComponent, "init"> | null;
 };
 
 export const requests = {
@@ -123,18 +123,25 @@ export const requests = {
           (params.systemId === "all" ||
             next.components.position?.parentId === params.systemId)
         ) {
-          if (next.components.position)
+          if (next.components.position) {
+            const systemPosition =
+              context.flight?.ecs.getEntityById(
+                next.components.position.parentId || -1
+              )?.components.position || null;
             prev.push({
               id: next.id,
               name: next.components.identity?.name || "",
               objectId: next.components.isWaypoint?.attachedObjectId,
               position: next.components.position,
+              systemPosition,
             });
+          }
         }
         return prev;
       },
       []
     );
+
     return waypoints || [];
   },
   navigationSearch: async (

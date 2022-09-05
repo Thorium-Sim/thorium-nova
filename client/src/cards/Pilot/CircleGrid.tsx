@@ -49,7 +49,8 @@ import {
 } from "./constants";
 import {DistanceCircle} from "./DistanceCircle";
 import {PlayerArrow} from "./PlayerArrow";
-import {usePilotStore} from "./usePilotStore";
+import {useGetFacingWaypoint, usePilotStore} from "./usePilotStore";
+import {WaypointEntity} from "./Waypoint";
 
 const CameraEffects = () => {
   const {camera, size} = useThree();
@@ -219,9 +220,13 @@ function PilotContacts() {
     systemId: systemId || undefined,
   });
   const ships = useNetRequest("starmapShips", {systemId});
-
+  const waypoints = useNetRequest("waypoints", {systemId: "all"});
+  useGetFacingWaypoint();
   return (
     <group>
+      {waypoints.map(waypoint => (
+        <WaypointEntity key={waypoint.id} waypoint={waypoint} />
+      ))}
       {orbs.map(entity => {
         const {satellite, isPlanet, isStar} = entity.components;
         if (!satellite) return null;
