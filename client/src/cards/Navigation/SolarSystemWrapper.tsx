@@ -39,6 +39,7 @@ export function SolarSystemWrapper() {
 
   return (
     <SolarSystemMap
+      minDistance={10000}
       skyboxKey={system?.components.isSolarSystem?.skyboxKey || "Blank"}
     >
       {starmapEntities.map(entity => {
@@ -103,7 +104,11 @@ export function SolarSystemWrapper() {
             FallbackComponent={() => <></>}
             onError={err => console.error(err)}
           >
-            <StarmapShip id={ship.id} logoUrl={ship.icon} />
+            <StarmapShip
+              id={ship.id}
+              logoUrl={ship.icon}
+              spriteColor={0x0088ff}
+            />
           </ErrorBoundary>
         </Suspense>
       )}

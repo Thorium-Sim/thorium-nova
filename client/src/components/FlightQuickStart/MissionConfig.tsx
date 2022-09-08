@@ -28,7 +28,7 @@ const ShipConfig = () => {
     return <div>No starting points are present in the active plugins.</div>;
 
   return (
-    <div className="h-64">
+    <div className="h-64 flex flex-col w-64">
       <SearchableList
         selectedItem={state.startingPointId}
         setSelectedItem={item =>

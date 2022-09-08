@@ -64,9 +64,14 @@ export const requests = {
           : null,
       };
     const objectSystem = getObjectSystem(object);
+    const position =
+      object.components.position ||
+      (object.components.satellite
+        ? getOrbitPosition(object.components.satellite)
+        : undefined);
     return {
       object: {
-        position: object.components.position,
+        position,
         name: object.components.identity?.name,
         classification: getClassification(),
         type: object.components.isShip
