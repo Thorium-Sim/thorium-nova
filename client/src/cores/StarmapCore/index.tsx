@@ -18,6 +18,9 @@ import SearchableInput, {DefaultResultLabel} from "@thorium/ui/SearchableInput";
 import Input from "@thorium/ui/Input";
 import {StarmapCoreContextMenu} from "./StarmapCoreContextMenu";
 import {WaypointEntity} from "client/src/cards/Pilot/Waypoint";
+import {useThree} from "@react-three/fiber";
+import {FaArrowLeft} from "react-icons/fa";
+import Button from "@thorium/ui/Button";
 
 export function StarmapCore() {
   const ref = useRef<HTMLDivElement>(null);
@@ -26,12 +29,30 @@ export function StarmapCore() {
       <StarmapStoreProvider>
         <StarmapCoreContextMenu parentRef={ref} />
         <div className="border-b border-b-white/20 pb-0.5 px-2 flex gap-2 items-baseline">
+          <ReturnToInterstellar />
           <SpawnSearch />
           <YDimension />
         </div>
         <CanvasWrapper />
       </StarmapStoreProvider>
     </div>
+  );
+}
+
+function ReturnToInterstellar() {
+  const useStarmapStore = useGetStarmapStore();
+
+  const inSystem = useStarmapStore(store => !!store.currentSystem);
+
+  if (!inSystem) return null;
+
+  return (
+    <Button
+      className="btn-xs"
+      onClick={() => useStarmapStore.getState().setCurrentSystem(null)}
+    >
+      <FaArrowLeft />
+    </Button>
   );
 }
 
@@ -125,6 +146,7 @@ export function InterstellarWrapper() {
   const starmapShips = useNetRequest("starmapShips", {systemId: currentSystem});
   const starmapSystems = useNetRequest("starmapSystems");
 
+  const {camera} = useThree();
   return (
     <InterstellarMap>
       {starmapSystems.map(sys =>
@@ -140,7 +162,22 @@ export function InterstellarWrapper() {
               ] as [number, number, number]
             }
             name={sys.components.identity.name}
-            onClick={() => useStarmapStore.setState({selectedObjectId: sys.id})}
+            onClick={() => {
+              useStarmapStore.setState({selectedObjectId: sys.id});
+              const cameraControls =
+                useStarmapStore.getState().cameraControls?.current;
+              if (sys.components.position && cameraControls) {
+                cameraControls.setLookAt(
+                  camera.position.x,
+                  camera.position.y,
+                  camera.position.z,
+                  sys.components.position.x,
+                  sys.components.position.y,
+                  sys.components.position.z,
+                  true
+                );
+              }
+            }}
             onDoubleClick={() =>
               useStarmapStore.getState().setCurrentSystem(sys.id)
             }

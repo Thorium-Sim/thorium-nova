@@ -6,6 +6,7 @@ import Star from "./StarMesh";
 import Selected from "../Selected";
 import {useGetStarmapStore} from "../starmapStore";
 import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
+import {useThree} from "@react-three/fiber";
 
 const StarEntity: React.FC<{
   star: {
@@ -36,6 +37,8 @@ const StarEntity: React.FC<{
     `hsl(${star.hue + 20}, 100%, ${star.isWhite ? 100 : 50}%)`
   );
 
+  const {camera} = useThree();
+
   const size =
     viewingMode === "editor"
       ? 10 + 5 * star.radius
@@ -51,7 +54,6 @@ const StarEntity: React.FC<{
       <group
         onPointerOver={() => {
           if (viewingMode === "viewscreen") return;
-          if (viewingMode === "core") return;
           document.body.style.cursor = "pointer";
           const position = getOrbitPosition({
             eccentricity,
@@ -66,7 +68,6 @@ const StarEntity: React.FC<{
         }}
         onPointerOut={() => {
           if (viewingMode === "viewscreen") return;
-          if (viewingMode === "core") return;
           document.body.style.cursor = "auto";
           // useConfigStore.setState({
           //   hoveredPosition: null,
@@ -75,13 +76,30 @@ const StarEntity: React.FC<{
         }}
         onClick={() => {
           if (viewingMode === "viewscreen") return;
-          if (viewingMode === "core") return;
+
           const position = getOrbitPosition({
             eccentricity,
             orbitalArc,
             inclination: inclination,
             semiMajorAxis: semiMajorAxis,
           });
+
+          if (viewingMode === "core") {
+            const cameraControls =
+              useStarmapStore.getState().cameraControls?.current;
+            if (position && cameraControls) {
+              cameraControls.setLookAt(
+                camera.position.x,
+                camera.position.y,
+                camera.position.z,
+                position.x,
+                position.y,
+                position.z,
+                true
+              );
+            }
+          }
+
           useStarmapStore.setState({
             selectedObjectId: star.id,
             // selectedPosition: position,
