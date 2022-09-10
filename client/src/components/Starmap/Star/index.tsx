@@ -6,7 +6,6 @@ import Star from "./StarMesh";
 import Selected from "../Selected";
 import {useGetStarmapStore} from "../starmapStore";
 import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
-import {useThree} from "@react-three/fiber";
 
 const StarEntity: React.FC<{
   star: {
