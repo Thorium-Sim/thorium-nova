@@ -114,8 +114,8 @@ export function SolarSystemMap({
             maxDistance={maxDistance}
             minDistance={minDistance}
             mouseButtons={{
-              left: cameraView === "2d" ? ACTION.TRUCK : ACTION.ROTATE,
-              right: ACTION.TRUCK,
+              left: ACTION.TRUCK,
+              right: ACTION.ROTATE,
               middle: ACTION.DOLLY,
               wheel: ACTION.DOLLY,
             }}

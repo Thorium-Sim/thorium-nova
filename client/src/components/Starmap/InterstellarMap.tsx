@@ -58,7 +58,6 @@ export function InterstellarMap({children}: {children: React.ReactNode}) {
 
   const viewingMode = useStarmapStore(store => store.viewingMode);
 
-  const isViewscreen = viewingMode === "viewscreen";
   const isStation = viewingMode === "station";
 
   return (
@@ -71,8 +70,8 @@ export function InterstellarMap({children}: {children: React.ReactNode}) {
         maxDistance={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)}
         minDistance={1}
         mouseButtons={{
-          left: cameraView === "2d" ? ACTION.TRUCK : ACTION.ROTATE,
-          right: ACTION.TRUCK,
+          left: ACTION.TRUCK,
+          right: ACTION.ROTATE,
           middle: ACTION.DOLLY,
           wheel: ACTION.DOLLY,
         }}

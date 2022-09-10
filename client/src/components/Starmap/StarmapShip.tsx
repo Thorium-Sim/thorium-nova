@@ -17,27 +17,27 @@ import {ThoriumContext} from "client/src/context/ThoriumContext";
 import {createAsset} from "use-asset";
 import {useGetStarmapStore} from "./starmapStore";
 import {useNetRequest} from "client/src/context/useNetRequest";
-import {GLTF} from "three-stdlib";
 
 export function StarmapShip({
   id,
   modelUrl,
   logoUrl,
   spriteColor = "white",
+  onClick,
 }: {
   id: number;
   modelUrl?: string;
   logoUrl?: string;
   spriteColor?: number | string;
+  onClick?: () => void;
 }) {
   const model = useShipModel(modelUrl);
 
   const useStarmapStore = useGetStarmapStore();
-  let playerId: number | undefined;
-  try {
-    const player = useNetRequest("pilotPlayerShip");
-    playerId = player?.id;
-  } catch {}
+
+  const player = useNetRequest("pilotPlayerShip");
+  const playerId = player?.id;
+
   const isNotViewscreen = useStarmapStore(
     store => store.viewingMode !== "viewscreen"
   );
@@ -95,6 +95,7 @@ export function StarmapShip({
           // set the cursor to default
           document.body.style.cursor = "default";
         }}
+        onClick={onClick}
       >
         {isNotViewscreen && (
           <Suspense fallback={null}>
@@ -119,8 +120,9 @@ export function StarmapShip({
     </group>
   );
 }
+
 function useShipModel(modelAsset: string | undefined) {
-  let model = useGLTF(modelAsset || "", false);
+  let model = useGLTF(modelAsset || "/assets/Empty.glb", false);
   const scene = useMemo(() => {
     if (!model) return new Object3D();
 

@@ -178,20 +178,7 @@ export function Planet({
 
   function onClick() {
     if (viewingMode === "viewscreen") return;
-    if (viewingMode === "core") {
-      const cameraControls = useStarmapStore.getState().cameraControls?.current;
-      if (position && cameraControls) {
-        cameraControls.setLookAt(
-          camera.position.x,
-          camera.position.y,
-          camera.position.z,
-          position.x,
-          position.y,
-          position.z,
-          true
-        );
-      }
-    }
+    useStarmapStore.getState().setCameraFocus(position);
     useStarmapStore.setState({
       selectedObjectId: planet.id,
     });

@@ -7,6 +7,7 @@ import {
   useContext,
   useState,
 } from "react";
+import {Coordinates} from "server/src/utils/unitTypes";
 import {Vector3} from "three";
 import create from "zustand";
 
@@ -36,6 +37,8 @@ interface StarmapStore {
     vanity: string;
   };
   translate2DTo3D?: (x: number, y: number) => Vector3;
+  setCameraFocus: (position: Coordinates<number>) => void;
+  planetsHidden: boolean;
 }
 let storeCount = 0;
 const createStarmapStore = () =>
@@ -65,6 +68,28 @@ const createStarmapStore = () =>
     cameraVerticalDistance: 0,
     yDimensionIndex: 0,
     spawnShipTemplate: null,
+    setCameraFocus: async position => {
+      const viewingMode = get().viewingMode;
+      const cameraControls = get().cameraControls?.current;
+      if (viewingMode === "core") {
+        if (position && cameraControls) {
+          const camera = cameraControls.camera;
+          const up = camera.up.clone();
+          camera.up.set(0, 0, -1);
+          await cameraControls.setLookAt(
+            camera.position.x,
+            camera.position.y,
+            camera.position.z,
+            position.x,
+            position.y,
+            position.z,
+            true
+          );
+          camera.up.copy(up);
+        }
+      }
+    },
+    planetsHidden: false,
   }));
 
 const useStarmapStore = createStarmapStore();
