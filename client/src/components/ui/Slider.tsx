@@ -34,7 +34,7 @@ function Slider(
   return (
     <div
       {...groupProps}
-      className={`slider ${state.orientation} ${props.className}`}
+      className={`slider ${state.orientation} ${props.className} pointer-events-auto`}
     >
       {/* Create a container for the label and output element. */}
       {props.label && (

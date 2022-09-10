@@ -2,11 +2,18 @@ import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
 import Button from "@thorium/ui/Button";
 import {ZoomSlider} from "@thorium/ui/Slider";
 import {useNetRequest} from "client/src/context/useNetRequest";
-import {useEffect} from "react";
+import {useEffect, useRef} from "react";
 export function MapControls() {
   const useStarmapStore = useGetStarmapStore();
   const systemId = useStarmapStore(state => state.currentSystem);
-  const ship = useNetRequest("navigationShip");
+  const rendered = useRef(false);
+  const ship = useNetRequest("navigationShip", {}, ship => {
+    // Follow the player ship on first render
+    if (!rendered.current) {
+      rendered.current = true;
+      useStarmapStore.setState({followEntityId: ship.id});
+    }
+  });
 
   useEffect(() => {
     if (useStarmapStore.getState().followEntityId === ship.id) {
