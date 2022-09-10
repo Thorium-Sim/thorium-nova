@@ -1113,7 +1113,6 @@ input[type="range"].slider.zoom:focus::-webkit-slider-runnable-track {
 
 .slider.horizontal {
   flex-direction: column;
-  width: 300px;
 }
 
 .slider.vertical {
@@ -1139,10 +1138,15 @@ input[type="range"].slider.zoom:focus::-webkit-slider-runnable-track {
 }
 
 .slider.horizontal .track:before {
-  height: 3px;
   width: 100%;
   top: 50%;
   transform: translateY(-50%);
+  height: calc(1.5rem + 4px);
+  cursor: pointer;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  background: rgba(0, 0, 0, 0.36);
+  border-radius: 9999px;
+  border: 2px rgba(255, 255, 255, 0.36) solid;
 }
 
 .slider.vertical .track {

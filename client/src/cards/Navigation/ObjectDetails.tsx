@@ -28,7 +28,10 @@ function getDistance(
     );
     if (objectSystem?.id) {
       // Inside a solar system
-      return `${distance.toFixed(2)} KM`;
+      return `${distance.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })} KM`;
     }
   }
   // The ship is in interstellar space, calculate the distance from the ship to the object's system.
@@ -47,7 +50,10 @@ function getDistance(
       object.z - shipSystem.z
     );
   }
-  return `${lightMinuteToLightYear(distance).toFixed(2)} LY`;
+  return `${lightMinuteToLightYear(distance).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })} LY`;
 }
 
 export const ObjectDetails = () => {

@@ -59,9 +59,13 @@ function HabitableZone() {
 export function SolarSystemMap({
   skyboxKey = "Basic",
   children,
+  minDistance = 1,
+  maxDistance = SOLAR_SYSTEM_MAX_DISTANCE,
 }: {
   skyboxKey: string;
   children?: React.ReactNode;
+  minDistance?: number;
+  maxDistance?: number;
 }) {
   const pluginId = useParams().pluginId;
   const useStarmapStore = useGetStarmapStore();
@@ -105,8 +109,8 @@ export function SolarSystemMap({
           <CameraControls
             ref={orbitControls}
             enabled={controlsEnabled}
-            maxDistance={SOLAR_SYSTEM_MAX_DISTANCE}
-            minDistance={1}
+            maxDistance={maxDistance}
+            minDistance={minDistance}
             mouseButtons={{
               left: cameraView === "2d" ? ACTION.TRUCK : ACTION.ROTATE,
               right: ACTION.TRUCK,
@@ -118,7 +122,7 @@ export function SolarSystemMap({
           />
           <PolarGrid
             rotation={[0, (2 * Math.PI) / 12, 0]}
-            args={[SOLAR_SYSTEM_MAX_DISTANCE, 12, 20, 64, 0xffffff, 0xffffff]}
+            args={[maxDistance, 12, 20, 64, 0xffffff, 0xffffff]}
           />
         </>
       )}

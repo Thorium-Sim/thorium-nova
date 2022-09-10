@@ -17,15 +17,18 @@ import {ThoriumContext} from "client/src/context/ThoriumContext";
 import {createAsset} from "use-asset";
 import {useGetStarmapStore} from "./starmapStore";
 import {useNetRequest} from "client/src/context/useNetRequest";
+import {GLTF} from "three-stdlib";
 
 export function StarmapShip({
   id,
   modelUrl,
   logoUrl,
+  spriteColor = "white",
 }: {
   id: number;
   modelUrl?: string;
   logoUrl?: string;
+  spriteColor?: number | string;
 }) {
   const model = useShipModel(modelUrl);
 
@@ -100,7 +103,7 @@ export function StarmapShip({
                 <ShipSprite
                   id={id}
                   // TODO June 9, 2022 - This color should represent the faction, with a toggle to make it show IFF for the current ship
-                  color={"white"}
+                  color={spriteColor}
                   spriteAsset={logoUrl}
                 />
               )}
@@ -109,7 +112,6 @@ export function StarmapShip({
         )}
         {model && (
           <group ref={shipMesh}>
-            {/* <axesHelper args={[3]} /> */}
             <primitive object={model} rotation={[Math.PI / 2, Math.PI, 0]} />
           </group>
         )}
@@ -118,9 +120,10 @@ export function StarmapShip({
   );
 }
 function useShipModel(modelAsset: string | undefined) {
-  const model = useGLTF(modelAsset || "", false);
-
+  let model = useGLTF(modelAsset || "", false);
   const scene = useMemo(() => {
+    if (!model) return new Object3D();
+
     const scene: Object3D = model.scene.clone(true);
     if (scene.traverse) {
       scene.traverse(function (object: Object3D | Mesh) {
@@ -180,7 +183,7 @@ const ShipSprite = ({
   spriteAsset,
 }: {
   id: string | number;
-  color?: string;
+  color?: string | number;
   spriteAsset: string;
 }) => {
   // TODO: Replace with a ship icon

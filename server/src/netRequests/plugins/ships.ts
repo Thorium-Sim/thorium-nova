@@ -43,6 +43,7 @@ export const pluginShipsRequest = {
     return context.server.plugins.reduce(
       (points: FlightStartingPoint[], plugin) => {
         if (!plugin.active) return points;
+
         return points.concat(
           plugin.aspects.solarSystems.flatMap(solarSystem => {
             const planets = solarSystem.planets.map(planet => ({
