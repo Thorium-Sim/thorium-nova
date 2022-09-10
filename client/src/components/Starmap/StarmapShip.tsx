@@ -120,10 +120,7 @@ export function StarmapShip({
   );
 }
 function useShipModel(modelAsset: string | undefined) {
-  let model: GLTF;
-  try {
-    model = useGLTF(modelAsset || "", false);
-  } catch (err) {}
+  let model = useGLTF(modelAsset || "", false);
   const scene = useMemo(() => {
     if (!model) return new Object3D();
 
