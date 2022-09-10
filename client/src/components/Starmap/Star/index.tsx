@@ -37,8 +37,6 @@ const StarEntity: React.FC<{
     `hsl(${star.hue + 20}, 100%, ${star.isWhite ? 100 : 50}%)`
   );
 
-  const {camera} = useThree();
-
   const size =
     viewingMode === "editor"
       ? 10 + 5 * star.radius
