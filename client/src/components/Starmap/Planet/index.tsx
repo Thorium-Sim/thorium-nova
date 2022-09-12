@@ -9,7 +9,7 @@ import {useGetStarmapStore} from "../starmapStore";
 import SystemLabel from "../SystemMarker/SystemLabel";
 import {DEG2RAD} from "three/src/math/MathUtils";
 import {Group, Vector3} from "three";
-import {useFrame} from "@react-three/fiber";
+import {useFrame, useThree} from "@react-three/fiber";
 import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
 import {Kilometer} from "server/src/utils/unitTypes";
 import {OrbitLine} from "../OrbitContainer";
@@ -146,7 +146,6 @@ export function Planet({
 
   function onPointerOver() {
     if (viewingMode === "viewscreen") return;
-    if (viewingMode === "core") return;
     // const hoveredPosition = getOrbitPosition({
     //   eccentricity,
     //   orbitalArc,
@@ -175,9 +174,11 @@ export function Planet({
     // });
     document.body.style.cursor = "auto";
   }
+  const {camera} = useThree();
+
   function onClick() {
     if (viewingMode === "viewscreen") return;
-    if (viewingMode === "core") return;
+    useStarmapStore.getState().setCameraFocus(position);
     useStarmapStore.setState({
       selectedObjectId: planet.id,
     });
@@ -203,7 +204,7 @@ export function Planet({
               ref={planetSpriteRef}
               scale={[planetSpriteScale, planetSpriteScale, planetSpriteScale]}
             >
-              <PlanetSprite />
+              <PlanetSprite color={selected ? "#0088ff" : "white"} />
             </group>
             <group
               ref={planetMeshRef}

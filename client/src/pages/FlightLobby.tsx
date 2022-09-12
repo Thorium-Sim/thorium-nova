@@ -61,11 +61,9 @@ function PlayerStationSelection() {
       <div className="flex-1 flex justify-center gap-8">
         {playerShips.map(ship => (
           <div key={ship.id}>
-            <h3 className="text-xl font-bold">
-              {ship.components.identity?.name}
-            </h3>
+            <h3 className="text-xl font-bold">{ship.name}</h3>
             <ul>
-              {ship.components.stationComplement?.stations.map(station => (
+              {ship.stations.map(station => (
                 <PlayerStationItem
                   shipId={ship.id}
                   station={station}
@@ -234,11 +232,9 @@ function ClientAssignment() {
       <div className="flex flex-wrap justify-center">
         {playerShips.map(ship => (
           <div key={ship.id}>
-            <h3 className="text-xl font-bold">
-              {ship.components.identity?.name}
-            </h3>
+            <h3 className="text-xl font-bold">{ship.name}</h3>
             <ul>
-              {ship.components.stationComplement?.stations.map(station => (
+              {ship.stations.map(station => (
                 <HostStationItem
                   shipId={ship.id}
                   station={station}

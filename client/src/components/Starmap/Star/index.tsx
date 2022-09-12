@@ -51,7 +51,6 @@ const StarEntity: React.FC<{
       <group
         onPointerOver={() => {
           if (viewingMode === "viewscreen") return;
-          if (viewingMode === "core") return;
           document.body.style.cursor = "pointer";
           const position = getOrbitPosition({
             eccentricity,
@@ -66,7 +65,6 @@ const StarEntity: React.FC<{
         }}
         onPointerOut={() => {
           if (viewingMode === "viewscreen") return;
-          if (viewingMode === "core") return;
           document.body.style.cursor = "auto";
           // useConfigStore.setState({
           //   hoveredPosition: null,
@@ -75,13 +73,16 @@ const StarEntity: React.FC<{
         }}
         onClick={() => {
           if (viewingMode === "viewscreen") return;
-          if (viewingMode === "core") return;
+
           const position = getOrbitPosition({
             eccentricity,
             orbitalArc,
             inclination: inclination,
             semiMajorAxis: semiMajorAxis,
           });
+
+          useStarmapStore.getState().setCameraFocus(position);
+
           useStarmapStore.setState({
             selectedObjectId: star.id,
             // selectedPosition: position,

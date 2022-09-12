@@ -56,21 +56,26 @@ export function InterstellarMap({children}: {children: React.ReactNode}) {
   }, []);
   useExternalCameraControl(orbitControls);
 
+  const viewingMode = useStarmapStore(store => store.viewingMode);
+
+  const isStation = viewingMode === "station";
+
   return (
     <Suspense fallback={null}>
       <Starfield radius={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)} />
       <CameraControls
+        dampingFactor={0.15}
         ref={orbitControls}
         enabled={controlsEnabled}
         maxDistance={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)}
         minDistance={1}
         mouseButtons={{
-          left: cameraView === "2d" ? ACTION.TRUCK : ACTION.ROTATE,
-          right: ACTION.TRUCK,
+          left: ACTION.TRUCK,
+          right: ACTION.ROTATE,
           middle: ACTION.DOLLY,
           wheel: ACTION.DOLLY,
         }}
-        dollyToCursor
+        dollyToCursor={isStation}
         dollySpeed={0.5}
       />
       <PolarGrid
