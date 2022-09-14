@@ -19,6 +19,11 @@ import SearchableInput, {DefaultResultLabel} from "@thorium/ui/SearchableInput";
 import Input from "@thorium/ui/Input";
 import {StarmapCoreContextMenu} from "./StarmapCoreContextMenu";
 import {WaypointEntity} from "client/src/cards/Pilot/Waypoint";
+import useDragSelect, {
+  DragSelection,
+  get3dSelectedObjects,
+} from "client/src/hooks/useDragSelect";
+import {PerspectiveCamera, Vector3} from "three";
 import {FaArrowLeft} from "react-icons/fa";
 import {GiTargeted} from "react-icons/gi";
 import Button from "@thorium/ui/Button";
@@ -27,9 +32,11 @@ import {useCancelFollow} from "client/src/components/Starmap/useCancelFollow";
 import {useFollowEntity} from "client/src/components/Starmap/useFollowEntity";
 import {ZoomSliderComp} from "client/src/cards/Navigation/MapControls";
 import {TbPlanet, TbPlanetOff} from "react-icons/tb";
+import {Coordinates} from "server/src/utils/unitTypes";
 
 export function StarmapCore() {
   const ref = useRef<HTMLDivElement>(null);
+
   return (
     <div className="h-[calc(100%-2rem)] relative" ref={ref}>
       <StarmapStoreProvider>
@@ -54,14 +61,14 @@ function StarmapCoreMenubar() {
   useEffect(() => {
     useStarmapStore.setState({
       followEntityId: playerShip.id,
-      selectedObjectId: playerShip.id,
+      selectedObjectIds: [playerShip.id],
       currentSystem: playerShip.currentSystem,
     });
   }, [playerShip.id, playerShip.currentSystem]);
   const inSystem = useStarmapStore(store => !!store.currentSystem);
   const yDimension = useStarmapStore(store => store.yDimensionIndex);
   const selectedSpawn = useStarmapStore(store => store.spawnShipTemplate);
-  const selectedObjectId = useStarmapStore(store => store.selectedObjectId);
+  const selectedObjectIds = useStarmapStore(store => store.selectedObjectIds);
   const followEntityId = useStarmapStore(store => store.followEntityId);
   const planetsHidden = useStarmapStore(store => store.planetsHidden);
   return (
@@ -113,14 +120,15 @@ function StarmapCoreMenubar() {
       />
       <Button
         title="Follow selected entity"
-        disabled={selectedObjectId === null}
-        className={`btn-xs ${selectedObjectId === null ? "btn-disabled" : ""} ${
-          followEntityId ? "btn-primary" : "btn-outline"
-        }`}
+        disabled={selectedObjectIds.length === 0}
+        className={`btn-xs ${
+          selectedObjectIds.length === 0 ? "btn-disabled" : ""
+        } ${followEntityId ? "btn-primary" : "btn-outline"}`}
         onClick={() => {
-          if (typeof selectedObjectId === "number") {
+          const firstSelected = selectedObjectIds[0];
+          if (typeof firstSelected === "number") {
             useStarmapStore.setState(state => ({
-              followEntityId: state.followEntityId ? null : selectedObjectId,
+              followEntityId: state.followEntityId ? null : firstSelected,
             }));
           }
         }}
@@ -164,25 +172,66 @@ function StarmapCoreCanvasHooks() {
   return null;
 }
 
+const startPoint = new Vector3();
+const endPoint = new Vector3();
+
 function CanvasWrapper() {
   const useStarmapStore = useGetStarmapStore();
   const currentSystem = useStarmapStore(store => store.currentSystem);
   useDataStream({systemId: currentSystem});
+  const starmapShips = useNetRequest("starmapShips", {systemId: currentSystem});
+  const {interpolate} = useThorium();
+
+  const cameraRef = useRef<PerspectiveCamera>();
+
+  const [dragRef, dragPosition, node] = useDragSelect<HTMLCanvasElement>({
+    setSelectionBounds: ({x1, x2, y1, y2}) => {
+      if (cameraRef.current) {
+        const selectedObjectIds = get3dSelectedObjects(
+          starmapShips.reduce(
+            (acc: {id: number; position: Coordinates<number>}[], ship) => {
+              const position = interpolate(ship.id);
+              if (position) {
+                return acc.concat({id: ship.id, position});
+              }
+              return acc;
+            },
+            []
+          ),
+          cameraRef.current,
+          startPoint.set(x1 * 2 - 1, -(y1 * 2 - 1), 0.5),
+          endPoint.set(x2 * 2 - 1, -(y2 * 2 - 1), 0.5)
+        );
+        useStarmapStore.setState({selectedObjectIds});
+      }
+    },
+    onDragStart: () =>
+      useStarmapStore.getState().setCameraControlsEnabled(false),
+    onDragEnd: () => useStarmapStore.getState().setCameraControlsEnabled(true),
+  });
 
   useEffect(() => {
     useStarmapStore.setState({viewingMode: "core"});
   }, []);
   return (
-    <StarmapCanvas>
-      <StarmapCoreCanvasHooks />
-      <ambientLight intensity={0.2} />
-      <pointLight position={[10, 10, 10]} />
-      {currentSystem === null ? (
-        <InterstellarWrapper />
-      ) : (
-        <SolarSystemWrapper />
-      )}
-    </StarmapCanvas>
+    <>
+      <StarmapCanvas
+        onCreated={({gl, camera}) => {
+          dragRef(gl.domElement);
+          cameraRef.current = camera as PerspectiveCamera;
+        }}
+      >
+        <StarmapCoreCanvasHooks />
+        <ambientLight intensity={0.2} />
+        <pointLight position={[10, 10, 10]} />
+        {currentSystem === null ? (
+          <InterstellarWrapper />
+        ) : (
+          <SolarSystemWrapper />
+        )}
+      </StarmapCanvas>
+      {dragPosition && <DragSelection {...dragPosition} className="top-8" />}
+    </>
   );
 }
 export function InterstellarWrapper() {
@@ -208,7 +257,7 @@ export function InterstellarWrapper() {
             }
             name={sys.components.identity.name}
             onClick={() => {
-              useStarmapStore.setState({selectedObjectId: sys.id});
+              useStarmapStore.setState({selectedObjectIds: [sys.id]});
 
               if (sys.components.position) {
                 useStarmapStore
@@ -252,7 +301,7 @@ export function SolarSystemWrapper() {
     systemId: "all",
   });
 
-  const selectedObjectId = useStarmapStore(store => store.selectedObjectId);
+  const selectedObjectIds = useStarmapStore(store => store.selectedObjectIds);
   const planetsHidden = useStarmapStore(store => store.planetsHidden);
 
   const {interpolate} = useThorium();
@@ -319,14 +368,17 @@ export function SolarSystemWrapper() {
             <StarmapShip
               {...ship}
               // TODO September 10, 2022 - This should use the faction color, or display the color scheme the flight director chooses
-              spriteColor={selectedObjectId === ship.id ? "#0088ff" : "white"}
+              spriteColor={
+                selectedObjectIds.includes(ship.id) ? "#0088ff" : "white"
+              }
               onClick={() => {
                 const position = interpolate(ship.id);
                 if (position) {
                   useStarmapStore.getState().setCameraFocus(position);
                 }
+                // TODO September 13, 2022 - Support shift/meta clicking to add or remove the ship from the selected objects list.
                 useStarmapStore.setState({
-                  selectedObjectId: ship.id,
+                  selectedObjectIds: [ship.id],
                   followEntityId: ship.id,
                 });
               }}

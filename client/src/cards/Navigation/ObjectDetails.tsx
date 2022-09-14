@@ -58,11 +58,11 @@ function getDistance(
 
 export const ObjectDetails = () => {
   const useStarmapStore = useGetStarmapStore();
-  const selectedObjectId = useStarmapStore(store => store.selectedObjectId);
+  const selectedObjectIds = useStarmapStore(store => store.selectedObjectIds);
 
   return (
     <div className="p-2 border-2 border-white/50 bg-black/50 rounded">
-      {selectedObjectId ? (
+      {selectedObjectIds[0] ? (
         <Suspense fallback={<h3 className="text-2xl">Accessing...</h3>}>
           <ObjectData />
         </Suspense>
@@ -75,13 +75,13 @@ export const ObjectDetails = () => {
 
 const ObjectData = () => {
   const useStarmapStore = useGetStarmapStore();
-  const selectedObjectId = useStarmapStore(store => store.selectedObjectId);
+  const selectedObjectIds = useStarmapStore(store => store.selectedObjectIds);
 
   const ship = useNetRequest("navigationShip");
   const {interpolate} = useThorium();
   const distanceRef = useRef<HTMLSpanElement>(null);
   const requestData = useNetRequest("navigationGetObject", {
-    objectId: Number(selectedObjectId) || undefined,
+    objectId: Number(selectedObjectIds[0]) || undefined,
   });
   const object = requestData.object;
   const objectSystem = requestData.objectSystem;

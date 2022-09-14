@@ -34,19 +34,21 @@ export function BasicDisclosure({
           if (type === "system") {
             const result = await netSend("pluginSolarSystemUpdate", body);
             navigate(result.solarSystemId);
-            useStarmapStore.setState({selectedObjectId: result.solarSystemId});
+            useStarmapStore.setState({
+              selectedObjectIds: [result.solarSystemId],
+            });
           } else if (type === "planet") {
             const result = await netSend("pluginPlanetUpdate", {
               ...body,
               planetId: object.name,
             });
-            useStarmapStore.setState({selectedObjectId: result.name});
+            useStarmapStore.setState({selectedObjectIds: [result.name]});
           } else if (type === "star") {
             const result = await netSend("pluginStarUpdate", {
               ...body,
               starId: object.name,
             });
-            useStarmapStore.setState({selectedObjectId: result.name});
+            useStarmapStore.setState({selectedObjectIds: [result.name]});
           }
         },
         1000,

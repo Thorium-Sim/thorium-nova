@@ -108,12 +108,16 @@ export function InterstellarMenuButtons({
   };
   const useStarmapStore = useGetStarmapStore();
 
-  const selectedObjectId = useStarmapStore(s => s.selectedObjectId);
+  const selectedObjectIds = useStarmapStore(s => s.selectedObjectIds);
   const cameraView = useStarmapStore(s => s.cameraView);
   const confirm = useConfirm();
   async function deleteObject() {
-    const selectedObjectId = useStarmapStore.getState().selectedObjectId;
-    if (!selectedObjectId || typeof selectedObjectId === "number") return;
+    const selectedObjectIds = useStarmapStore.getState().selectedObjectIds;
+    if (
+      selectedObjectIds.length === 0 ||
+      typeof selectedObjectIds[0] === "number"
+    )
+      return;
 
     const doRemove = await confirm({
       header: "Are you sure you want to remove this object?",
@@ -123,11 +127,11 @@ export function InterstellarMenuButtons({
 
     await netSend("pluginSolarSystemDelete", {
       pluginId,
-      solarSystemId: selectedObjectId,
+      solarSystemId: selectedObjectIds[0],
     });
 
     useStarmapStore.setState({
-      selectedObjectId: null,
+      selectedObjectIds: [],
     });
   }
 
@@ -147,7 +151,7 @@ export function InterstellarMenuButtons({
               position: vec,
             });
             useStarmapStore.setState({
-              selectedObjectId: system.solarSystemId,
+              selectedObjectIds: [system.solarSystemId],
             });
           } catch (err) {
             if (err instanceof Error) {
@@ -165,14 +169,14 @@ export function InterstellarMenuButtons({
       </Button>
       <Button
         className="btn-error btn-outline btn-xs"
-        disabled={!selectedObjectId}
+        disabled={!selectedObjectIds}
         onClick={deleteObject}
       >
         Delete
       </Button>
       <Button
         className="btn-primary btn-outline btn-xs"
-        disabled={!selectedObjectId}
+        disabled={!selectedObjectIds}
       >
         Edit
       </Button>
@@ -208,7 +212,7 @@ export const InterstellarPalette = ({
 
   useEffect(() => {
     if (!selectedStar) {
-      useStarmapStore.setState({selectedObjectId: null});
+      useStarmapStore.setState({selectedObjectIds: []});
     }
   }, [selectedStar]);
 

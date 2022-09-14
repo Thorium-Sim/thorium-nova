@@ -15,7 +15,7 @@ interface StarmapStore {
   storeCount: number;
   viewingMode: "editor" | "core" | "station" | "viewscreen";
   skyboxKey: string;
-  selectedObjectId: string | number | null;
+  selectedObjectIds: (string | number)[];
   cameraControlsEnabled: boolean;
   setCameraControlsEnabled: (enabled: boolean) => void;
   hoveredPosition: [number, number, number] | null;
@@ -46,7 +46,7 @@ const createStarmapStore = () =>
     storeCount: storeCount++,
     skyboxKey: "blank",
     viewingMode: "editor",
-    selectedObjectId: null,
+    selectedObjectIds: [],
     cameraControlsEnabled: true,
     setCameraControlsEnabled: (enabled: boolean) =>
       set({cameraControlsEnabled: enabled}),

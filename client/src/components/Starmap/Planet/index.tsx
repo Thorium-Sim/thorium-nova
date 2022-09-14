@@ -87,8 +87,8 @@ export function Planet({
 }) {
   const useStarmapStore = useGetStarmapStore();
 
-  const selected = useStarmapStore(
-    state => state.selectedObjectId === planet.id
+  const selected = useStarmapStore(state =>
+    state.selectedObjectIds.includes(planet.id)
   );
   const {
     radius,
@@ -180,7 +180,7 @@ export function Planet({
     if (viewingMode === "viewscreen") return;
     useStarmapStore.getState().setCameraFocus(position);
     useStarmapStore.setState({
-      selectedObjectId: planet.id,
+      selectedObjectIds: [planet.id],
     });
   }
 

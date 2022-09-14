@@ -84,7 +84,7 @@ const StarEntity: React.FC<{
           useStarmapStore.getState().setCameraFocus(position);
 
           useStarmapStore.setState({
-            selectedObjectId: star.id,
+            selectedObjectIds: [star.id],
             // selectedPosition: position,
             // scaledSelectedPosition: position,
           });

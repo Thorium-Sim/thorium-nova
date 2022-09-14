@@ -63,7 +63,7 @@ export function SolarSystemWrapper() {
                   document.body.style.cursor = "auto";
                 }}
                 onClick={() =>
-                  useStarmapStore.setState({selectedObjectId: entity.id})
+                  useStarmapStore.setState({selectedObjectIds: [entity.id]})
                 }
               >
                 <StarSprite size={size} color1={color} />
@@ -91,7 +91,7 @@ export function SolarSystemWrapper() {
               inclination={inclination}
               radiusY={radiusY}
               onClick={() =>
-                useStarmapStore.setState({selectedObjectId: entity.id})
+                useStarmapStore.setState({selectedObjectIds: [entity.id]})
               }
             />
           );

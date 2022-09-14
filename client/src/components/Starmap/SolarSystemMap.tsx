@@ -145,13 +145,13 @@ export function SolarSystemMenuButtons({
   const [pluginId, solarSystemId] = useSystemIds();
   const useStarmapStore = useGetStarmapStore();
 
-  const selectedObjectId = useStarmapStore(s => s.selectedObjectId);
+  const selectedObjectIds = useStarmapStore(s => s.selectedObjectIds);
   const cameraView = useStarmapStore(s => s.cameraView);
   const confirm = useConfirm();
 
   async function deleteObject() {
-    const selectedObjectId = useStarmapStore.getState().selectedObjectId;
-    if (!selectedObjectId) return;
+    const selectedObjectIds = useStarmapStore.getState().selectedObjectIds;
+    if (selectedObjectIds.length === 0) return;
 
     const doRemove = await confirm({
       header: "Are you sure you want to remove this object?",
@@ -159,18 +159,18 @@ export function SolarSystemMenuButtons({
     });
     if (!doRemove) return;
 
-    if (typeof selectedObjectId === "string") {
+    if (typeof selectedObjectIds === "string") {
       await netSend("pluginStarDelete", {
         pluginId,
         solarSystemId,
-        starId: selectedObjectId,
+        starId: selectedObjectIds,
       });
     } else {
       // TODO: Delete objects from the flight director menubar? Maybe not...
     }
 
     useStarmapStore.setState({
-      selectedObjectId: null,
+      selectedObjectIds: [],
     });
   }
 
@@ -179,7 +179,7 @@ export function SolarSystemMenuButtons({
       <Button
         className="btn-info btn-outline btn-xs"
         onClick={() =>
-          useStarmapStore.setState({selectedObjectId: solarSystemId})
+          useStarmapStore.setState({selectedObjectIds: [solarSystemId]})
         }
       >
         Edit System
@@ -189,7 +189,7 @@ export function SolarSystemMenuButtons({
 
       <Button
         className="btn-error btn-outline btn-xs"
-        disabled={!selectedObjectId}
+        disabled={!selectedObjectIds}
         onClick={deleteObject}
       >
         Delete
@@ -246,7 +246,9 @@ function AddStarMenu() {
                       solarSystemId,
                       spectralType: starType.spectralType,
                     });
-                    useStarmapStore.setState({selectedObjectId: result.name});
+                    useStarmapStore.setState({
+                      selectedObjectIds: [result.name],
+                    });
                   }}
                 >
                   {starType.spectralType} - {starType.name} (
@@ -299,7 +301,9 @@ function AddPlanetMenu() {
                       solarSystemId,
                       planetType: planetType.classification,
                     });
-                    useStarmapStore.setState({selectedObjectId: result.name});
+                    useStarmapStore.setState({
+                      selectedObjectIds: [result.name],
+                    });
                   }}
                 >
                   {planetType.classification} - {planetType.name}
@@ -391,24 +395,26 @@ function useSelectedObject() {
   const useStarmapStore = useGetStarmapStore();
 
   const [pluginId, solarSystemId] = useSystemIds();
-  const selectedObjectId = useStarmapStore(state => state.selectedObjectId);
+  const selectedObjectIds = useStarmapStore(state => state.selectedObjectIds);
   const systemData = useNetRequest("pluginSolarSystem", {
     pluginId,
     solarSystemId,
   });
 
   // It could be a system, star, or planet
-  if (solarSystemId === selectedObjectId) {
+  if (selectedObjectIds.includes(solarSystemId)) {
     return {type: "system" as const, object: systemData};
   }
 
-  const star = systemData.stars.find(star => star.name === selectedObjectId);
+  const star = systemData.stars.find(star =>
+    selectedObjectIds.includes(star.name)
+  );
   if (star) {
     return {type: "star" as const, object: star};
   }
 
-  const planet = systemData.planets.find(
-    planet => planet.name === selectedObjectId
+  const planet = systemData.planets.find(planet =>
+    selectedObjectIds.includes(planet.name)
   );
   if (planet) {
     return {type: "planet" as const, object: planet};

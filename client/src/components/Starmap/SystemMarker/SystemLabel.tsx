@@ -42,8 +42,8 @@ const SystemLabel: React.FC<{
   const text = React.useRef<Mesh>(null);
   const selected = React.useRef(false);
   useFrame(({camera}) => {
-    const selectedObjectId = useStarmapStore.getState().selectedObjectId;
-    const isSelected = systemId === selectedObjectId;
+    const selectedObjectIds = useStarmapStore.getState().selectedObjectIds;
+    const isSelected = selectedObjectIds.includes(systemId);
     if (text.current) {
       if (Array.isArray(text.current.material)) return;
       if (isSelected) {
