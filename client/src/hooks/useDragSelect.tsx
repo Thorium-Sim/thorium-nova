@@ -4,14 +4,20 @@ import useEventListener from "./useEventListener";
 import {Frustum, PerspectiveCamera, Vector3} from "three";
 
 type Box = {x: number; y: number; width: number; height: number};
-export default function useDragSelect<DOMElement extends HTMLElement>(
+export default function useDragSelect<DOMElement extends HTMLElement>({
+  setSelectionBounds,
+  onDragEnd,
+  onDragStart,
+}: {
   setSelectionBounds?: (param: {
     x1: number;
     x2: number;
     y1: number;
     y2: number;
-  }) => void
-) {
+  }) => void;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
+}) {
   const [dragPosition, setDragPosition] = React.useState<Box | null>(null);
   const [initialPosition, setInitialPosition] = React.useState<{
     x: number;
@@ -44,8 +50,9 @@ export default function useDragSelect<DOMElement extends HTMLElement>(
     e.stopPropagation();
   });
   useEventListener("pointerdown", (e: MouseEvent) => {
-    if (e.button !== 2) return;
+    if (!e.shiftKey) return;
     e.preventDefault();
+    onDragStart?.();
 
     if (e.target === node) {
       setInitialPosition({
@@ -61,6 +68,9 @@ export default function useDragSelect<DOMElement extends HTMLElement>(
     }
   });
   useEventListener("pointerup", () => {
+    if (dragPosition) {
+      onDragEnd?.();
+    }
     setDragPosition(null);
     setInitialPosition(null);
   });
@@ -90,19 +100,21 @@ export const DragSelection = ({
   height,
   x,
   y,
+  className,
 }: {
   width: number;
   height: number;
   x: number;
   y: number;
+  className?: string;
 }) => {
   return (
     <div
-      className="absolute bg-blue-500/10 border-solid border-blue-500 w-8 h-8 left-0 top-0"
+      className={`absolute bg-blue-500/10 border border-blue-500 w-8 h-8 left-0 top-0 ${className}`}
       style={{
         width,
         height,
-        translate: `translate(${x}px, ${y}px)`,
+        transform: `translate(${x}px, ${y}px)`,
       }}
     ></div>
   );
@@ -125,7 +137,7 @@ var vectemp3 = new Vector3();
 const tempVec = new Vector3();
 export function get3dSelectedObjects(
   objects: {
-    id: string;
+    id: number;
     position: {
       x: number;
       y: number;
@@ -191,7 +203,7 @@ export function get3dSelectedObjects(
   planes[5].setFromCoplanarPoints(vectemp3, vectemp2, vectemp1);
   planes[5].normal.multiplyScalar(-1);
 
-  const collection: string[] = [];
+  const collection: number[] = [];
 
   // TODO: Once we get a 'Flatten Y diimension" button in place, update this.
   objects.forEach(object => {

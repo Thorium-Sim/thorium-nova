@@ -32,6 +32,7 @@ import {useCancelFollow} from "client/src/components/Starmap/useCancelFollow";
 import {useFollowEntity} from "client/src/components/Starmap/useFollowEntity";
 import {ZoomSliderComp} from "client/src/cards/Navigation/MapControls";
 import {TbPlanet, TbPlanetOff} from "react-icons/tb";
+import {Coordinates} from "server/src/utils/unitTypes";
 
 export function StarmapCore() {
   const ref = useRef<HTMLDivElement>(null);
@@ -178,30 +179,36 @@ function CanvasWrapper() {
   const useStarmapStore = useGetStarmapStore();
   const currentSystem = useStarmapStore(store => store.currentSystem);
   useDataStream({systemId: currentSystem});
+  const starmapShips = useNetRequest("starmapShips", {systemId: currentSystem});
+  const {interpolate} = useThorium();
 
   const cameraRef = useRef<PerspectiveCamera>();
 
-  const [dragRef, dragPosition, node] = useDragSelect<HTMLCanvasElement>(
-    ({x1, x2, y1, y2}) => {
-      // const ships = Object.values(useSystemShipsStore.getState());
-      // if (cameraRef.current) {
-      //   const selectedObjectIds = get3dSelectedObjects(
-      //     ships.filter(s => s.position) as {
-      //       id: string;
-      //       position: {
-      //         x: number;
-      //         y: number;
-      //         z: number;
-      //       };
-      //     }[],
-      //     cameraRef.current,
-      //     startPoint.set(x1 * 2 - 1, -(y1 * 2 - 1), 0.5),
-      //     endPoint.set(x2 * 2 - 1, -(y2 * 2 - 1), 0.5)
-      //   );
-      //   useStarmapStore.setState({selectedObjectIds});
-      // }
-    }
-  );
+  const [dragRef, dragPosition, node] = useDragSelect<HTMLCanvasElement>({
+    setSelectionBounds: ({x1, x2, y1, y2}) => {
+      if (cameraRef.current) {
+        const selectedObjectIds = get3dSelectedObjects(
+          starmapShips.reduce(
+            (acc: {id: number; position: Coordinates<number>}[], ship) => {
+              const position = interpolate(ship.id);
+              if (position) {
+                return acc.concat({id: ship.id, position});
+              }
+              return acc;
+            },
+            []
+          ),
+          cameraRef.current,
+          startPoint.set(x1 * 2 - 1, -(y1 * 2 - 1), 0.5),
+          endPoint.set(x2 * 2 - 1, -(y2 * 2 - 1), 0.5)
+        );
+        useStarmapStore.setState({selectedObjectIds});
+      }
+    },
+    onDragStart: () =>
+      useStarmapStore.getState().setCameraControlsEnabled(false),
+    onDragEnd: () => useStarmapStore.getState().setCameraControlsEnabled(true),
+  });
 
   useEffect(() => {
     useStarmapStore.setState({viewingMode: "core"});
@@ -223,7 +230,7 @@ function CanvasWrapper() {
           <SolarSystemWrapper />
         )}
       </StarmapCanvas>
-      {dragPosition && <DragSelection {...dragPosition} />}
+      {dragPosition && <DragSelection {...dragPosition} className="top-8" />}
     </>
   );
 }
