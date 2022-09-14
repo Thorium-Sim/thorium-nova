@@ -97,9 +97,10 @@ export function SolarSystemMap({
   }, [camera, cameraView]);
 
   useExternalCameraControl(orbitControls);
-  const isViewscreen = useStarmapStore(
-    store => store.viewingMode === "viewscreen"
-  );
+  const viewingMode = useStarmapStore(store => store.viewingMode);
+
+  const isViewscreen = viewingMode === "viewscreen";
+  const isStation = viewingMode === "station";
 
   return (
     <Suspense fallback={null}>
@@ -108,16 +109,17 @@ export function SolarSystemMap({
         <>
           <CameraControls
             ref={orbitControls}
+            dampingFactor={0.15}
             enabled={controlsEnabled}
             maxDistance={maxDistance}
             minDistance={minDistance}
             mouseButtons={{
-              left: cameraView === "2d" ? ACTION.TRUCK : ACTION.ROTATE,
-              right: ACTION.TRUCK,
+              left: ACTION.TRUCK,
+              right: ACTION.ROTATE,
               middle: ACTION.DOLLY,
               wheel: ACTION.DOLLY,
             }}
-            dollyToCursor
+            dollyToCursor={isStation}
             dollySpeed={0.5}
           />
           <PolarGrid
