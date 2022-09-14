@@ -18,9 +18,15 @@ import SearchableInput, {DefaultResultLabel} from "@thorium/ui/SearchableInput";
 import Input from "@thorium/ui/Input";
 import {StarmapCoreContextMenu} from "./StarmapCoreContextMenu";
 import {WaypointEntity} from "client/src/cards/Pilot/Waypoint";
+import useDragSelect, {
+  DragSelection,
+  get3dSelectedObjects,
+} from "client/src/hooks/useDragSelect";
+import {PerspectiveCamera, Vector3} from "three";
 
 export function StarmapCore() {
   const ref = useRef<HTMLDivElement>(null);
+
   return (
     <div className="h-[calc(100%-2rem)]" ref={ref}>
       <StarmapStoreProvider>
@@ -98,24 +104,59 @@ function SpawnSearch() {
   );
 }
 
+const startPoint = new Vector3();
+const endPoint = new Vector3();
+
 function CanvasWrapper() {
   const useStarmapStore = useGetStarmapStore();
   const currentSystem = useStarmapStore(store => store.currentSystem);
   useDataStream({systemId: currentSystem});
 
+  const cameraRef = useRef<PerspectiveCamera>();
+
+  const [dragRef, dragPosition, node] = useDragSelect<HTMLCanvasElement>(
+    ({x1, x2, y1, y2}) => {
+      // const ships = Object.values(useSystemShipsStore.getState());
+      // if (cameraRef.current) {
+      //   const selectedObjectIds = get3dSelectedObjects(
+      //     ships.filter(s => s.position) as {
+      //       id: string;
+      //       position: {
+      //         x: number;
+      //         y: number;
+      //         z: number;
+      //       };
+      //     }[],
+      //     cameraRef.current,
+      //     startPoint.set(x1 * 2 - 1, -(y1 * 2 - 1), 0.5),
+      //     endPoint.set(x2 * 2 - 1, -(y2 * 2 - 1), 0.5)
+      //   );
+      //   useStarmapStore.setState({selectedObjectIds});
+      // }
+    }
+  );
+
   useEffect(() => {
     useStarmapStore.setState({viewingMode: "core"});
   }, []);
   return (
-    <StarmapCanvas>
-      <ambientLight intensity={0.2} />
-      <pointLight position={[10, 10, 10]} />
-      {currentSystem === null ? (
-        <InterstellarWrapper />
-      ) : (
-        <SolarSystemWrapper />
-      )}
-    </StarmapCanvas>
+    <>
+      <StarmapCanvas
+        onCreated={({gl, camera}) => {
+          dragRef(gl.domElement);
+          cameraRef.current = camera as PerspectiveCamera;
+        }}
+      >
+        <ambientLight intensity={0.2} />
+        <pointLight position={[10, 10, 10]} />
+        {currentSystem === null ? (
+          <InterstellarWrapper />
+        ) : (
+          <SolarSystemWrapper />
+        )}
+      </StarmapCanvas>
+      {dragPosition && <DragSelection {...dragPosition} />}
+    </>
   );
 }
 export function InterstellarWrapper() {
@@ -140,7 +181,9 @@ export function InterstellarWrapper() {
               ] as [number, number, number]
             }
             name={sys.components.identity.name}
-            onClick={() => useStarmapStore.setState({selectedObjectId: sys.id})}
+            onClick={() =>
+              useStarmapStore.setState({selectedObjectIds: [sys.id]})
+            }
             onDoubleClick={() =>
               useStarmapStore.getState().setCurrentSystem(sys.id)
             }

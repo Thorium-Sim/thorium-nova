@@ -116,7 +116,9 @@ function Waypoints() {
                     .setCurrentSystem(waypoint?.position.parentId);
                 }
                 useStarmapStore.setState({
-                  selectedObjectId: waypoint.objectId || null,
+                  selectedObjectIds: waypoint.objectId
+                    ? [waypoint.objectId]
+                    : [],
                 });
                 const controls = useStarmapStore.getState().cameraControls;
                 controls?.current?.moveTo(
@@ -136,17 +138,17 @@ function Waypoints() {
 
 function AddWaypoint() {
   const useStarmapStore = useGetStarmapStore();
-  const selectedObjectId = useStarmapStore(store => store.selectedObjectId);
+  const selectedObjectIds = useStarmapStore(store => store.selectedObjectIds);
   return (
     <Button
       className={`pointer-events-auto w-full mt-2 btn-primary ${
-        !selectedObjectId ? "btn-disabled" : ""
+        !selectedObjectIds ? "btn-disabled" : ""
       }`}
-      disabled={!selectedObjectId}
+      disabled={selectedObjectIds.length === 0}
       onClick={async () => {
         try {
-          typeof selectedObjectId === "number" &&
-            (await netSend("waypointSpawn", {entityId: selectedObjectId}));
+          typeof selectedObjectIds[0] === "number" &&
+            (await netSend("waypointSpawn", {entityId: selectedObjectIds[0]}));
         } catch (error: unknown) {
           if (error instanceof Error) {
             toast({title: error.message, color: "error"});
@@ -193,7 +195,7 @@ function StarmapSearch() {
             .getState()
             .setCurrentSystem(item?.position.parentId);
         }
-        useStarmapStore.setState({selectedObjectId: item.id});
+        useStarmapStore.setState({selectedObjectIds: [item.id]});
         const controls = useStarmapStore.getState().cameraControls;
         controls?.current?.moveTo(
           item.position.x,

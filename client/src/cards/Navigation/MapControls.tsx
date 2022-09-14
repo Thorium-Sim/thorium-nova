@@ -32,7 +32,7 @@ export function MapControls() {
           onClick={() => {
             useStarmapStore.setState({
               currentSystem: null,
-              selectedObjectId: null,
+              selectedObjectIds: [],
             });
           }}
         >

@@ -47,7 +47,7 @@ export const DraggableSystemCircle: React.FC<
     },
     onMouseDown: () => {
       useStarmapStore.setState({
-        selectedObjectId: systemId,
+        selectedObjectIds: [systemId],
         // selectedPosition: parent.current.position,
         // scaledSelectedPosition: parent.current.position,
       });
@@ -107,8 +107,8 @@ const SystemCircle: React.FC<
 
   const drawRadius = useCallback(
     function drawRadius(endArc = 360) {
-      const selectedObjectId = useStarmapStore.getState().selectedObjectId;
-      const isSelected = systemId === selectedObjectId;
+      const selectedObjectIds = useStarmapStore.getState().selectedObjectIds;
+      const isSelected = selectedObjectIds.includes(systemId);
       ctx.clearRect(0, 0, size, size);
 
       ctx.lineWidth = size / (1 / lineWidth);
@@ -145,8 +145,8 @@ const SystemCircle: React.FC<
   }, [ctx]);
 
   useFrame(() => {
-    const selectedObjectId = useStarmapStore.getState().selectedObjectId;
-    const isSelected = systemId === selectedObjectId;
+    const selectedObjectIds = useStarmapStore.getState().selectedObjectIds;
+    const isSelected = selectedObjectIds.includes(systemId);
     if (isSelected) {
       selected.current = true;
     }

@@ -4,7 +4,7 @@ import {
   UNSAFE_NavigationContext,
   UNSAFE_RouteContext,
 } from "react-router-dom";
-import {Canvas} from "@react-three/fiber";
+import {Canvas, Props} from "@react-three/fiber";
 
 import {useContextBridge} from "@react-three/drei";
 
@@ -29,12 +29,13 @@ export default function StarmapCanvas({
   shouldRender = true,
   alpha = true,
   className = "",
+  ...props
 }: {
   children: ReactNode;
   shouldRender?: boolean;
   alpha?: boolean;
   className?: string;
-}) {
+} & Props) {
   const client = useQueryClient();
 
   const ContextBridge = useContextBridge(
@@ -54,6 +55,7 @@ export default function StarmapCanvas({
       gl={{antialias: true, logarithmicDepthBuffer: true, alpha}}
       camera={{fov: 45, near: 0.01, far: FAR}}
       frameloop={shouldRender ? "always" : "demand"}
+      {...props}
     >
       <ContextBridge>
         <QueryClientProvider client={client}>

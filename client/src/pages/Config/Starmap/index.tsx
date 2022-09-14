@@ -43,25 +43,30 @@ function InterstellarPaletteWrapper() {
     pluginId: string;
   };
 
-  const selectedObjectId = useStarmapStore(s => s.selectedObjectId);
+  const selectedObjectIds = useStarmapStore(s => s.selectedObjectIds);
 
   const stars = useNetRequest("pluginSolarSystems", {pluginId});
 
-  const selectedStar = stars.find(s => s.name === selectedObjectId);
+  const selectedStar = stars.find(s => selectedObjectIds?.includes(s.name));
 
   const update = React.useCallback(
     async (params: {name?: string; description?: string}) => {
-      if (!selectedObjectId || typeof selectedObjectId === "number") return;
+      if (
+        !selectedObjectIds?.length ||
+        selectedObjectIds.length > 1 ||
+        typeof selectedObjectIds[0] === "number"
+      )
+        return;
       const result = await netSend("pluginSolarSystemUpdate", {
         pluginId,
-        solarSystemId: selectedObjectId,
+        solarSystemId: selectedObjectIds[0],
         ...params,
       });
       if (params.name) {
-        useStarmapStore.setState({selectedObjectId: result.solarSystemId});
+        useStarmapStore.setState({selectedObjectIds: [result.solarSystemId]});
       }
     },
-    [pluginId, selectedObjectId, useStarmapStore]
+    [pluginId, selectedObjectIds, useStarmapStore]
   );
   if (!selectedStar) return null;
   return <InterstellarPalette selectedStar={selectedStar} update={update} />;
@@ -73,7 +78,7 @@ export default function StarMap() {
     pluginId: string;
   };
 
-  const selectedObjectId = useStarmapStore(s => s.selectedObjectId);
+  const selectedObjectIds = useStarmapStore(s => s.selectedObjectIds);
 
   const sceneRef = useRef<SceneRef>();
 
@@ -90,8 +95,8 @@ export default function StarMap() {
         {systemId && <SolarSystemMenuButtons sceneRef={sceneRef} />}
       </Menubar>
       <EditorPalette
-        isOpen={!!selectedObjectId}
-        onClose={() => useStarmapStore.setState({selectedObjectId: null})}
+        isOpen={selectedObjectIds.length > 0}
+        onClose={() => useStarmapStore.setState({selectedObjectIds: []})}
       >
         {systemId ? <SolarSystemPalette /> : <InterstellarPaletteWrapper />}
       </EditorPalette>

@@ -33,7 +33,9 @@ export function InterstellarWrapper() {
               ] as [number, number, number]
             }
             name={sys.components.identity.name}
-            onClick={() => useStarmapStore.setState({selectedObjectId: sys.id})}
+            onClick={() =>
+              useStarmapStore.setState({selectedObjectIds: [sys.id]})
+            }
             onDoubleClick={() =>
               useStarmapStore.getState().setCurrentSystem(sys.id)
             }

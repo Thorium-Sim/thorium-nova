@@ -83,7 +83,7 @@ const StarEntity: React.FC<{
             semiMajorAxis: semiMajorAxis,
           });
           useStarmapStore.setState({
-            selectedObjectId: star.id,
+            selectedObjectIds: [star.id],
             // selectedPosition: position,
             // scaledSelectedPosition: position,
           });

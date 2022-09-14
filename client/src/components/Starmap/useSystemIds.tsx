@@ -12,9 +12,9 @@ export function useSystemIds() {
   if (!pluginId) throw new Error("Error determining plugin ID");
   if (!matchSystemId) throw new Error("Error determining solar system ID");
   useEffect(() => {
-    if (!useStarmapStore.getState().selectedObjectId) {
+    if (useStarmapStore.getState().selectedObjectIds.length === 0) {
       useStarmapStore.setState({
-        selectedObjectId: matchSystemId,
+        selectedObjectIds: [matchSystemId],
       });
     }
   }, [matchSystemId]);
