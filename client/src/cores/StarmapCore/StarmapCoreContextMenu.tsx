@@ -48,27 +48,25 @@ export const StarmapCoreContextMenu = ({
 
   useRightClick(e => {
     e.preventDefault();
-    // TODO: August 20, 2022 - Use this for directing ships from the flight director screen
-    // const selectedShips = useSelectedShips.getState().selectedIds;
-    // if (selectedShips.length > 0) {
-    //   const position = useStarmapStore
-    //     .getState()
-    //     .translate2DTo3D?.(e.clientX, e.clientY);
-    //   if (!position) return;
-    //   setDestination({
-    //     variables: {
-    //       shipPositions: selectedShips.map(id => ({
-    //         id,
-    //         position: {
-    //           x: position.x,
-    //           y: useStarmapStore.getState().yDimensionIndex,
-    //           z: position.z,
-    //         },
-    //       })),
-    //     },
-    //   });
-    //   return;
-    // }
+    const selectedShips = useStarmapStore.getState().selectedObjectIds;
+    if (selectedShips.length > 0) {
+      const position = useStarmapStore
+        .getState()
+        .translate2DTo3D?.(e.clientX, e.clientY);
+      if (!position) return;
+      netSend("shipsSetDestinations", {
+        ships: selectedShips.map((id: any) => ({
+          id,
+          position: {
+            x: position.x,
+            y: useStarmapStore.getState().yDimensionIndex,
+            z: position.z,
+          },
+          systemId: useStarmapStore.getState().currentSystem,
+        })),
+      });
+      return;
+    }
 
     setOpen(true);
     const virtualEl = makeVirtualEl({x: e.clientX, y: e.clientY});

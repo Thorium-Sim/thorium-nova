@@ -41,6 +41,8 @@ export const thrustersInputs = {
 
     system.updateComponent("isThrusters", {rotationDelta: params.rotation});
 
+    // TODO: September 21 2022 - Deactivate the ships autopilot when the thruster rotation change
+
     // @ts-expect-error We can remove this once the thrusters card data is defined.
     pubsub.publish("thrusters", {
       shipId: context.ship?.id,

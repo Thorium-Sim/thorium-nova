@@ -27,7 +27,7 @@ class ECS {
   updateCounter = 0;
   lastUpdate = performance.now();
   rng: RNG;
-  maxEntityId: number = 0;
+  maxEntityId: number = 1;
   constructor(
     public server: ServerDataModel,
     seed: string | number = "thorium",

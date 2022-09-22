@@ -1,7 +1,10 @@
 import {matchSorter} from "match-sorter";
 import ShipPlugin from "server/src/classes/Plugins/Ship";
+import {PositionComponent} from "server/src/components/position";
 import {DataContext} from "server/src/utils/DataContext";
 import {Entity} from "server/src/utils/ecs";
+import {pubsub} from "server/src/utils/pubsub";
+import {Coordinates} from "server/src/utils/unitTypes";
 
 export const requests = {
   starmapSystems: (context: DataContext) => {
@@ -21,6 +24,7 @@ export const requests = {
     if (!data?.components.isSolarSystem) throw new Error("Not a solar system");
     return {id: data.id, components: data.components};
   },
+  /** Includes all the things in a system that isn't a ship */
   starmapSystemEntities: (
     context: DataContext,
     params: {systemId?: number}
@@ -41,6 +45,7 @@ export const requests = {
     );
     return data;
   },
+  /** Includes all the ship in a system or interstellar space */
   starmapShips: (
     context: DataContext,
     params: {systemId?: number | null},
@@ -101,6 +106,90 @@ export const requests = {
         category,
         vanity,
       }));
+  },
+  systemAutopilot(
+    context: DataContext,
+    params: {systemId: null | number},
+    publishParams: {systemId: number | null}
+  ) {
+    if (publishParams && publishParams.systemId !== params.systemId) throw null;
+    const autopilotSystem = context.flight?.ecs.systems.find(
+      system => system.constructor.name === "AutoThrustSystem"
+    );
+    const ships = autopilotSystem?.entities.filter(
+      entity => entity.components.position?.parentId === params.systemId
+    );
+
+    type AutopilotInfo = {
+      forwardAutopilot: boolean;
+      destinationName: string;
+      destinationPosition: Coordinates<number> | null;
+      destinationSystemPosition: Coordinates<number> | null;
+      locked: boolean;
+    };
+
+    return (
+      ships?.reduce((acc: {[id: number]: AutopilotInfo}, ship) => {
+        const waypointId = ship.components.autopilot?.destinationWaypointId;
+        let destinationName = "";
+        let waypoint;
+        if (typeof waypointId === "number") {
+          waypoint = context.flight?.ecs.getEntityById(waypointId);
+          destinationName =
+            waypoint?.components.identity?.name
+              .replace(" Waypoint", "")
+              .trim() || "";
+        }
+        const waypointParentId = waypoint?.components.position?.parentId;
+
+        const waypointSystemPosition =
+          typeof waypointParentId === "number"
+            ? context.flight?.ecs.getEntityById(waypointParentId)?.components
+                .position || null
+            : null;
+
+        acc[ship.id] = {
+          forwardAutopilot: !!ship.components.autopilot?.forwardAutopilot,
+          destinationName,
+          destinationPosition:
+            ship.components.autopilot?.desiredCoordinates || null,
+          destinationSystemPosition: waypointSystemPosition,
+          locked: !!ship.components.autopilot?.desiredCoordinates,
+        };
+        return acc;
+      }, {}) || {}
+    );
+  },
+};
+
+export const inputs = {
+  shipsSetDestinations(
+    context: DataContext,
+    params: {
+      ships: {
+        id: number;
+        position: Coordinates<number>;
+        systemId: number | null;
+      }[];
+    }
+  ) {
+    const systemIds = new Set<number | null>();
+
+    params.ships.forEach(ship => {
+      const entity = context.flight?.ecs.getEntityById(ship.id);
+      entity?.updateComponent("autopilot", {
+        desiredCoordinates: ship.position,
+        desiredSolarSystemId: ship.systemId,
+      });
+      if (typeof entity?.components.position?.parentId !== "undefined") {
+        systemIds.add(entity.components.position.parentId);
+      }
+      pubsub.publish("autopilot", {shipId: ship.id});
+    });
+
+    systemIds.forEach(id => {
+      pubsub.publish("systemAutopilot", {systemId: id});
+    });
   },
 };
 

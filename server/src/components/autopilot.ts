@@ -17,9 +17,9 @@ export class AutopilotComponent extends Component {
   }
   destinationWaypointId?: number | null = null;
   /** The desired coordinates of the ship in the current stage. If desiredSolarSystemId is null, then it's interstellar coordinates */
-  desiredCoordinates?: Coordinates<number>;
+  desiredCoordinates?: Coordinates<number> = undefined;
   /** Desired interstellar system. For when we are traveling from one system to another. */
-  desiredSolarSystemId?: number | null;
+  desiredSolarSystemId?: number | null = null;
   /** Whether the rotation autopilot is on. */
   rotationAutopilot: boolean = true;
   /** Whether the forward movement autopilot is on. */

@@ -1,7 +1,7 @@
 import {useContext, useMemo, useRef} from "react";
 import {Suspense} from "react";
 import {Entity} from "server/src/utils/ecs";
-import {useGLTF} from "@react-three/drei";
+import {Line, useGLTF} from "@react-three/drei";
 import {
   CanvasTexture,
   Color,
@@ -17,6 +17,7 @@ import {ThoriumContext} from "client/src/context/ThoriumContext";
 import {createAsset} from "use-asset";
 import {useGetStarmapStore} from "./starmapStore";
 import {useNetRequest} from "client/src/context/useNetRequest";
+import {Line2} from "three-stdlib";
 
 export function StarmapShip({
   id,
@@ -35,6 +36,12 @@ export function StarmapShip({
 
   const useStarmapStore = useGetStarmapStore();
 
+  const systemId = useStarmapStore(store => store.currentSystem);
+
+  const autopilotData = useNetRequest("systemAutopilot", {systemId});
+
+  const shipAutopilot = autopilotData[id];
+
   const player = useNetRequest("pilotPlayerShip");
   const playerId = player?.id;
 
@@ -46,7 +53,7 @@ export function StarmapShip({
   const shipMesh = useRef<Group>(null);
   const shipSprite = useRef<Group>(null);
   const context = useContext(ThoriumContext);
-  // const lineRef = useRef<Line2>(null);
+  const lineRef = useRef<Line2>(null);
   useFrame(() => {
     if (!group.current) return;
     const state = context?.interpolate(id);
@@ -69,22 +76,42 @@ export function StarmapShip({
         shipMesh.current.visible = true;
       }
     }
+
+    // Autopilot Destination
+    if (lineRef.current && group.current) {
+      if (
+        // TODO September 14, 2022 - Make it so you can toggle autopilot lines on and off
+        // useConfigStore.getState().includeAutopilotData &&
+        shipAutopilot?.destinationPosition
+      ) {
+        lineRef.current.geometry.setPositions([
+          group.current.position.x,
+          group.current.position.y,
+          group.current.position.z,
+          shipAutopilot.destinationPosition.x,
+          shipAutopilot.destinationPosition.y,
+          shipAutopilot.destinationPosition.z,
+        ]);
+        lineRef.current.geometry.attributes.position.needsUpdate = true;
+        lineRef.current.visible = true;
+      } else {
+        // lineRef.current.visible = false;
+      }
+    }
   });
   return (
     <group>
-      {/*
-        TODO May 24, 2022 - This is for autopilot destination lines
-        <Line
-          ref={lineRef}
-          points={[
-            [1, 1, 1],
-            [2, 2, 2],
-          ]} // Array of points
-          color="white"
-          opacity={0.2}
-          transparent
-          lineWidth={0.25} // In pixels (default)
-        /> */}
+      <Line
+        ref={lineRef}
+        points={[
+          [1, 1, 1],
+          [2, 2, 2],
+        ]} // Array of points
+        color="white"
+        opacity={0.25}
+        transparent
+        lineWidth={0.25} // In pixels (default)
+      />
       <group
         ref={group}
         onPointerOver={() => {

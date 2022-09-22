@@ -2,24 +2,24 @@ import {Quaternion, Vector3, Matrix4} from "three";
 import Controller from "node-pid-controller";
 import {Entity, System} from "../utils/ecs";
 import {autopilotGetCoordinates} from "../utils/autopilotGetCoordinates";
-import {KM_TO_LY} from "../utils/unitTypes";
+import {KM_TO_LY, Radian} from "../utils/unitTypes";
 import {pubsub} from "../utils/pubsub";
 import {isWarpEnginesComponent} from "../components/shipSystems";
 
 let positionVec = new Vector3();
 let rotationQuat = new Quaternion();
 let desiredDestination = new Vector3();
-let desiredRotationQuat = new Quaternion();
-let up = new Vector3(0, 1, 0);
-let matrix = new Matrix4();
-const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
+const emptyVector = new Vector3(0, 0, 0);
+const scaleVector = new Vector3(1, 1, 1);
+const shipMatrix = new Matrix4();
+const lookVector = new Vector3(0, 0, 1);
 
 const IMPULSE_PROPORTION = 10;
 const IMPULSE_INTEGRAL = 0.1;
 const IMPULSE_DERIVATIVE = 25;
 const WARP_PROPORTION = 10;
 const WARP_INTEGRAL = 5;
-const WARP_DERIVATIVE = 8;
+const WARP_DERIVATIVE = 25;
 
 export class AutoThrustSystem extends System {
   updateCount = 0;
@@ -78,15 +78,19 @@ export class AutoThrustSystem extends System {
     );
     positionVec.set(position.x, position.y, position.z);
     rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
-    up.set(0, 1, 0).applyQuaternion(rotationQuat);
-    matrix.lookAt(positionVec, desiredDestination, up).multiply(rotationMatrix);
-    desiredRotationQuat.setFromRotationMatrix(matrix);
 
     const distanceInKM =
       positionVec.distanceTo(desiredDestination) *
       (isInInterstellar ? 1 / KM_TO_LY : 1);
-    const rotationDifference = Math.abs(
-      rotationQuat.angleTo(desiredRotationQuat)
+
+    shipMatrix.compose(emptyVector, rotationQuat, scaleVector);
+    const rotatedLookVector = lookVector
+      .clone()
+      .applyMatrix4(shipMatrix)
+      .normalize();
+
+    const dotProd = rotatedLookVector.dot(
+      desiredDestination.clone().normalize()
     );
 
     if (!(autopilot.impulseController instanceof Controller)) {
@@ -110,16 +114,16 @@ export class AutoThrustSystem extends System {
     const impulseEngineSpeed =
       impulseEngines?.components.isImpulseEngines?.cruisingSpeed || 1;
 
-    // We want Warp to get us within 15 seconds at impulse of our destination
-    autopilot.warpController.target = impulseEngineSpeed * 15;
-
     // There's a heuristic here for which engine to choose to reach a given destination.
     // Basically, if it would take 15 seconds or less to reach the destination at cruising
     // impulse speed, we should use that. Otherwise, we should use warp.
     const TRAVEL_TIME_THRESHOLD_SECONDS = 15;
 
-    // If we are less than 0.5 degrees off course, activate engines.
-    const inCorrectDirection = rotationDifference <= 10 * (Math.PI / 180);
+    // We want Warp to get us within 15 seconds at impulse of our destination
+    autopilot.warpController.target =
+      impulseEngineSpeed * TRAVEL_TIME_THRESHOLD_SECONDS;
+    // If the dot product to the destination is very close to 1.
+    const inCorrectDirection = dotProd > 0.999; //rotationDifference <= 0.5 * (Math.PI / 180);
     if (
       warpEngines?.components.isWarpEngines &&
       distanceInKM / impulseEngineSpeed > TRAVEL_TIME_THRESHOLD_SECONDS
@@ -149,6 +153,7 @@ export class AutoThrustSystem extends System {
         });
       } else {
         autopilot.warpController?.reset();
+        warpEngines.updateComponent("isWarpEngines", {currentWarpFactor: 0});
       }
     } else if (impulseEngines?.components.isImpulseEngines) {
       autopilot.warpController.reset();

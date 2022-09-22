@@ -57,7 +57,7 @@ export function SocketHandler({
           ];
 
           queryClient.setQueryData(queryKey, data.response);
-          queryClient.invalidateQueries(queryKey);
+          // queryClient.invalidateQueries(queryKey);
         } catch (err) {
           console.error(err);
           handleError(err);

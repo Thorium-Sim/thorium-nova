@@ -15,8 +15,10 @@ import {RotationSystem} from "./RotationSystem";
 import {ThrusterSystem} from "./ThrusterSystem";
 import {TimerSystem} from "./TimerSystem";
 import {WarpSystem} from "./WarpSystem";
+import {InterstellarTransitionSystem} from "./InterstellarTransitionSystem";
 
 const systems = [
+  InterstellarTransitionSystem,
   PassengerDestinationSystem,
   PassengerMovementSystem,
   TimerSystem,
