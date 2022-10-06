@@ -84,13 +84,18 @@ export function StarmapShip({
         // useConfigStore.getState().includeAutopilotData &&
         shipAutopilot?.destinationPosition
       ) {
+        const destinationPosition = player.currentSystem
+          ? shipAutopilot.destinationPosition
+          : shipAutopilot.destinationSystemPosition ||
+            shipAutopilot.destinationPosition;
+
         lineRef.current.geometry.setPositions([
           group.current.position.x,
           group.current.position.y,
           group.current.position.z,
-          shipAutopilot.destinationPosition.x,
-          shipAutopilot.destinationPosition.y,
-          shipAutopilot.destinationPosition.z,
+          destinationPosition.x,
+          destinationPosition.y,
+          destinationPosition.z,
         ]);
         lineRef.current.geometry.attributes.position.needsUpdate = true;
         lineRef.current.visible = true;

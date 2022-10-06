@@ -1,6 +1,6 @@
 import {Object3D, Quaternion} from "three";
 import {Entity, System} from "../utils/ecs";
-import {KM_TO_LY} from "../utils/unitTypes";
+import {KM_TO_LM, KM_TO_LY} from "../utils/unitTypes";
 
 const velocityObject = new Object3D();
 export class EngineVelocityPosition extends System {
@@ -14,8 +14,8 @@ export class EngineVelocityPosition extends System {
   }
   update(entity: Entity, elapsed: number) {
     const elapsedRatio = elapsed / 1000;
-    const interstellarMultiplier =
-      entity.components.position?.type === "solar" ? 1 : KM_TO_LY;
+    const interstellarMultiplier = 
+     entity.components.position?.type === "solar" ? 1 : KM_TO_LM;
     const [impulseEngines, warpEngines] = this.ecs.entities.reduce(
       (acc: [Entity | null, Entity | null], sysEntity) => {
         if (

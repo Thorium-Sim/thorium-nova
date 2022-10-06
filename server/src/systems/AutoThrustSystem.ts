@@ -2,7 +2,7 @@ import {Quaternion, Vector3, Matrix4} from "three";
 import Controller from "node-pid-controller";
 import {Entity, System} from "../utils/ecs";
 import {autopilotGetCoordinates} from "../utils/autopilotGetCoordinates";
-import {KM_TO_LY, Radian} from "../utils/unitTypes";
+import {kilometerToLightMinute, KM_TO_LY, lightMinuteToLightYear, lightYearToLightMinute, Radian} from "../utils/unitTypes";
 import {pubsub} from "../utils/pubsub";
 import {isWarpEnginesComponent} from "../components/shipSystems";
 
@@ -17,9 +17,9 @@ const lookVector = new Vector3(0, 0, 1);
 const IMPULSE_PROPORTION = 10;
 const IMPULSE_INTEGRAL = 0.1;
 const IMPULSE_DERIVATIVE = 25;
-const WARP_PROPORTION = 10;
-const WARP_INTEGRAL = 5;
-const WARP_DERIVATIVE = 25;
+const WARP_PROPORTION = 1;
+const WARP_INTEGRAL = 0;
+const WARP_DERIVATIVE = 0.5;
 
 export class AutoThrustSystem extends System {
   updateCount = 0;
@@ -81,7 +81,7 @@ export class AutoThrustSystem extends System {
 
     const distanceInKM =
       positionVec.distanceTo(desiredDestination) *
-      (isInInterstellar ? 1 / KM_TO_LY : 1);
+      (isInInterstellar ? 1 / lightYearToLightMinute(KM_TO_LY) : 1);
 
     shipMatrix.compose(emptyVector, rotationQuat, scaleVector);
     const rotatedLookVector = lookVector
@@ -123,7 +123,7 @@ export class AutoThrustSystem extends System {
     autopilot.warpController.target =
       impulseEngineSpeed * TRAVEL_TIME_THRESHOLD_SECONDS;
     // If the dot product to the destination is very close to 1.
-    const inCorrectDirection = dotProd > 0.999; //rotationDifference <= 0.5 * (Math.PI / 180);
+    const inCorrectDirection = dotProd > 0.995; //rotationDifference <= 0.5 * (Math.PI / 180);
     if (
       warpEngines?.components.isWarpEngines &&
       distanceInKM / impulseEngineSpeed > TRAVEL_TIME_THRESHOLD_SECONDS

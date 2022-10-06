@@ -112,7 +112,7 @@ describe("Inventory Generator", () => {
               ],
             },
           },
-          "id": 0,
+          "id": 1,
         },
         Object {
           "components": Object {
@@ -129,7 +129,7 @@ describe("Inventory Generator", () => {
               ],
             },
           },
-          "id": 1,
+          "id": 2,
         },
         Object {
           "components": Object {
@@ -146,7 +146,7 @@ describe("Inventory Generator", () => {
               ],
             },
           },
-          "id": 2,
+          "id": 3,
         },
         Object {
           "components": Object {
@@ -162,7 +162,7 @@ describe("Inventory Generator", () => {
               ],
             },
           },
-          "id": 3,
+          "id": 4,
         },
         Object {
           "components": Object {
@@ -178,7 +178,7 @@ describe("Inventory Generator", () => {
               ],
             },
           },
-          "id": 4,
+          "id": 5,
         },
         Object {
           "components": Object {
@@ -194,7 +194,7 @@ describe("Inventory Generator", () => {
               ],
             },
           },
-          "id": 5,
+          "id": 6,
         },
         Object {
           "components": Object {
@@ -221,7 +221,7 @@ describe("Inventory Generator", () => {
               ],
             },
           },
-          "id": 6,
+          "id": 7,
         },
       ]
     `);
@@ -284,7 +284,7 @@ describe("Inventory Generator", () => {
               "volume": 1000,
             },
           },
-          "id": 7,
+          "id": 8,
         },
       ]
     `);

@@ -217,7 +217,7 @@ function CanvasWrapper({shouldRender}: {shouldRender: boolean}) {
   useEffect(() => {
     useStarmapStore.setState({viewingMode: "station", cameraView: "2d"});
     setFirstRender(false);
-  }, []);
+  }, [useStarmapStore]);
 
   return (
     <StarmapCanvas shouldRender={firstRender || shouldRender}>

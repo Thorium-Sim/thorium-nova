@@ -2,6 +2,7 @@ import {Matrix4, Quaternion, Vector3} from "three";
 import {Entity, System} from "../utils/ecs";
 import {getOrbitPosition} from "../utils/getOrbitPosition";
 import {pubsub} from "../utils/pubsub";
+import { lightMinuteToLightYear } from "../utils/unitTypes";
 
 const MIN_SYSTEM_SIZE = 10_000;
 const SYSTEM_PADDING = 1.05;
@@ -116,6 +117,7 @@ export class InterstellarTransitionSystem extends System {
         // }
         pubsub.publish("starmapShips", {systemId: system.id});
         pubsub.publish("starmapShips", {systemId: null});
+        pubsub.publish("starmapShip", {shipId:entity.id})
 
         if (entity.components.isPlayerShip) {
           pubsub.publish("pilotPlayerShip", {shipId: entity.id});
@@ -141,11 +143,7 @@ export class InterstellarTransitionSystem extends System {
         entity.components.position.z - destinationSystem.components.position.z
       );
       // 1/100th of a lightyear
-      if (distance < 0.01) {
-        entity.updateComponent("position", {
-          parentId: destinationSystem.id,
-          type: "solar",
-        });
+      if (lightMinuteToLightYear(distance) < 0.01) {
 
         // create a vector of the ship from the center of the system, and position it outside the heliopause
         const maxDistance = getMaxDistance(
@@ -171,6 +169,8 @@ export class InterstellarTransitionSystem extends System {
           x: direction.x,
           y: direction.y,
           z: direction.z,
+          parentId: destinationSystem.id,
+          type: "solar",
         });
         // Also set the rotation to the destination to be spot-on to the destination
         if (
@@ -198,6 +198,7 @@ export class InterstellarTransitionSystem extends System {
         }
         pubsub.publish("starmapShips", {systemId: destinationSystem.id});
         pubsub.publish("starmapShips", {systemId: null});
+        pubsub.publish("starmapShip", {shipId:entity.id})
 
         if (entity.components.isPlayerShip) {
           pubsub.publish("pilotPlayerShip", {shipId: entity.id});

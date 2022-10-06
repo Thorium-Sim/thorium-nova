@@ -86,6 +86,21 @@ export const requests = {
 
     return data;
   },
+  /** Useful for fetching a single ship when following that ship */
+  starmapShip: (
+    context: DataContext,
+    params: {shipId?: number | null},
+    publishParams: {shipId: number}
+  ) => {
+    if (!params.shipId) return null;
+    if (publishParams && publishParams.shipId !== params.shipId) throw null;
+
+    if (!context.flight) return null;
+
+    const entity = context.flight.ecs.getEntityById(params.shipId);
+    if (!entity) return null;
+    return {id: entity.id, systemId: entity.components.position?.parentId};
+  },
   shipSpawnSearch: (context: DataContext, params: {query: string}) => {
     if (!context.flight) return [];
     const shipTemplates = context.server.plugins
