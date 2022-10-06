@@ -4,7 +4,12 @@ import {Entity} from "server/src/utils/ecs";
 import {pubsub} from "server/src/utils/pubsub";
 
 export const requests = {
-  pilotPlayerShip(context: DataContext) {
+  pilotPlayerShip(
+    context: DataContext,
+    params: {},
+    publishParams: {shipId: number}
+  ) {
+    if (publishParams && publishParams.shipId !== context.ship?.id) throw null;
     if (!context.ship) throw new Error("Cannot find ship");
     const systemId = context.ship.components.position?.parentId;
     const systemPosition = systemId
@@ -148,6 +153,9 @@ export const inputs = {
     });
 
     pubsub.publish("autopilot", {shipId: context.ship.id});
+    pubsub.publish("systemAutopilot", {
+      systemId: context.ship.components.position?.parentId || null,
+    });
   },
   autopilotUnlockCourse(context: DataContext) {
     if (!context.ship) throw new Error("Ship not found.");
@@ -171,6 +179,9 @@ export const inputs = {
     });
 
     pubsub.publish("autopilot", {shipId: context.ship.id});
+    pubsub.publish("systemAutopilot", {
+      systemId: context.ship.components.position?.parentId || null,
+    });
   },
   autopilotActivate(context: DataContext) {
     if (!context.ship) throw new Error("Ship not found.");
@@ -180,6 +191,9 @@ export const inputs = {
     });
 
     pubsub.publish("autopilot", {shipId: context.ship.id});
+    pubsub.publish("systemAutopilot", {
+      systemId: context.ship.components.position?.parentId || null,
+    });
   },
   autopilotDeactivate(context: DataContext) {
     if (!context.ship) throw new Error("Ship not found.");
@@ -190,5 +204,8 @@ export const inputs = {
     // we want the ship to maintain its current speed.
 
     pubsub.publish("autopilot", {shipId: context.ship.id});
+    pubsub.publish("systemAutopilot", {
+      systemId: context.ship.components.position?.parentId || null,
+    });
   },
 };

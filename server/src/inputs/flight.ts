@@ -322,6 +322,11 @@ export const flightInputs = {
 
     context.flight.writeFile();
 
+    try {
+      context.flight.destroy();
+    } catch (err) {
+      console.error(err);
+    }
     context.flight = null;
     context.server.activeFlightName = null;
     // TODO September 1, 2021 - Stop broadcasting this flight with Bonjour.

@@ -250,8 +250,9 @@ class Entity {
    * @private
    */
   dispose() {
-    for (let i = 0, system; (system = this.systems[0]); i += 1) {
-      system.removeEntity(this);
+    while (this.systems.length > 0) {
+      this.systems[0].removeEntity(this);
+      fastSplice(this.systems, 0, 1);
     }
   }
 }

@@ -30,7 +30,7 @@ const getYawPitchRoll = (quat: Quaternion) => {
     Math.PI * 4;
   const roll =
     Math.asin(2 * quat.x * quat.y + 2 * quat.z * quat.w) + Math.PI * 4;
-  return [yaw, pitch, roll];
+  return [yaw, pitch, roll] as const;
 };
 
 function getClosestAngle(current: number, target: number) {
@@ -146,6 +146,20 @@ export class AutoRotateSystem extends System {
           y: Math.min(Math.max(yawCorrection, -1), 1),
           z: Math.min(Math.max(rollCorrection, -1), 1),
         },
+      });
+    }
+
+    const rotationDifference = Math.abs(
+      rotationQuat.angleTo(desiredRotationQuat)
+    );
+
+    if (rotationDifference <= 0.5 * (Math.PI / 180)) {
+      // If we're close enough, make it exact. That way the ship won't overshoot the destination so easily.
+      entity.updateComponent("rotation", {
+        x: desiredRotationQuat.x,
+        y: desiredRotationQuat.y,
+        z: desiredRotationQuat.z,
+        w: desiredRotationQuat.w,
       });
     }
   }

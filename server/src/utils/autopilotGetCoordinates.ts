@@ -23,7 +23,7 @@ export function autopilotGetCoordinates(
       );
     }
     positionVec.set(position.x, position.y, position.z);
-    return !entity.components.position?.parentId;
+    return entity.components.position?.parentId === null;
   } else if (!autopilotDesiredSystem) {
     // From within a system to some random point in interstellar space
     if (autopilot.desiredCoordinates) {

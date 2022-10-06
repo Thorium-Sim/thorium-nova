@@ -23,7 +23,7 @@ import useDragSelect, {
   DragSelection,
   get3dSelectedObjects,
 } from "client/src/hooks/useDragSelect";
-import {PerspectiveCamera, Vector3} from "three";
+import {Mesh, Object3D, PerspectiveCamera, Vector3} from "three";
 import {FaArrowLeft} from "react-icons/fa";
 import {GiTargeted} from "react-icons/gi";
 import Button from "@thorium/ui/Button";
@@ -33,6 +33,9 @@ import {useFollowEntity} from "client/src/components/Starmap/useFollowEntity";
 import {ZoomSliderComp} from "client/src/cards/Navigation/MapControls";
 import {TbPlanet, TbPlanetOff} from "react-icons/tb";
 import {Coordinates} from "server/src/utils/unitTypes";
+import {useFrame} from "@react-three/fiber";
+import {useTranslate2DTo3D} from "client/src/hooks/useTranslate2DTo3D";
+import useEventListener from "client/src/hooks/useEventListener";
 
 export function StarmapCore() {
   const ref = useRef<HTMLDivElement>(null);
@@ -155,9 +158,18 @@ function StarmapCoreMenubar() {
         type="text"
         inputMode="numeric"
         pattern="[0-9]*"
-        value={yDimension}
+        defaultValue={yDimension}
+        onBlur={e =>
+          (e.target.value = (
+            isNaN(Number(e.target.value)) ? 0 : Number(e.target.value)
+          ).toString())
+        }
         onChange={e =>
-          useStarmapStore.setState({yDimensionIndex: Number(e.target.value)})
+          useStarmapStore.setState({
+            yDimensionIndex: isNaN(Number(e.target.value))
+              ? 0
+              : Number(e.target.value),
+          })
         }
       />
     </>

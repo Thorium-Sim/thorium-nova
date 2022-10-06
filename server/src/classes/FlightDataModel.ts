@@ -19,6 +19,7 @@ export class FlightDataModel extends FSDataStore {
   private entities!: Entity[];
   inventoryTemplates!: {[inventoryTemplateName: string]: InventoryTemplate};
   serverDataModel: ServerDataModel;
+  interval!: ReturnType<typeof setInterval>;
   constructor(
     params: Partial<FlightDataModel> & {
       serverDataModel: ServerDataModel;
@@ -62,8 +63,15 @@ export class FlightDataModel extends FSDataStore {
       this.ecs.update();
     }
     if (process.env.NODE_ENV === "test") return;
-    setTimeout(this.run, FlightDataModel.INTERVAL);
+    this.interval = setTimeout(this.run, FlightDataModel.INTERVAL);
   };
+  destroy() {
+    clearInterval(this.interval);
+
+    this.ecs.entities.forEach(entity => {
+      entity.dispose();
+    });
+  }
   initEcs(server: ServerDataModel) {
     this.ecs = new ECS(server);
     systems.forEach(Sys => {
