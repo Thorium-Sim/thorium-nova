@@ -13,6 +13,10 @@ const emptyVector = new Vector3(0, 0, 0);
 const scaleVector = new Vector3(1, 1, 1);
 const shipMatrix = new Matrix4();
 const lookVector = new Vector3(0, 0, 1);
+let up = new Vector3(0, 1, 0);
+let matrix = new Matrix4();
+const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
+let desiredRotationQuat = new Quaternion();
 
 const IMPULSE_PROPORTION = 10;
 const IMPULSE_INTEGRAL = 0.1;
@@ -79,6 +83,11 @@ export class AutoThrustSystem extends System {
     positionVec.set(position.x, position.y, position.z);
     rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
 
+    up.set(0, 1, 0).applyQuaternion(rotationQuat);
+
+    matrix.lookAt(positionVec, desiredDestination, up).multiply(rotationMatrix);
+    desiredRotationQuat.setFromRotationMatrix(matrix);
+
     const distanceInKM =
       positionVec.distanceTo(desiredDestination) *
       (isInInterstellar ? 1 / lightYearToLightMinute(KM_TO_LY) : 1);
@@ -88,6 +97,9 @@ export class AutoThrustSystem extends System {
       .clone()
       .applyMatrix4(shipMatrix)
       .normalize();
+
+    const rotationDifference =
+      (Math.abs(rotationQuat.angleTo(desiredRotationQuat)) / Math.PI) * 180;
 
     const dotProd = rotatedLookVector.dot(
       desiredDestination.clone().normalize()
@@ -122,8 +134,9 @@ export class AutoThrustSystem extends System {
     // We want Warp to get us within 15 seconds at impulse of our destination
     autopilot.warpController.target =
       impulseEngineSpeed * TRAVEL_TIME_THRESHOLD_SECONDS;
-    // If the dot product to the destination is very close to 1.
-    const inCorrectDirection = dotProd > 0.995; //rotationDifference <= 0.5 * (Math.PI / 180);
+
+    // If the rotation is < 0.5˚ off
+    const inCorrectDirection = rotationDifference <= 0.5;
     if (
       warpEngines?.components.isWarpEngines &&
       distanceInKM / impulseEngineSpeed > TRAVEL_TIME_THRESHOLD_SECONDS

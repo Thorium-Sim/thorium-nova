@@ -115,7 +115,7 @@ export function StarmapShip({
         color="white"
         opacity={0.25}
         transparent
-        lineWidth={0.25} // In pixels (default)
+        lineWidth={0.5} // In pixels (default)
       />
       <group
         ref={group}

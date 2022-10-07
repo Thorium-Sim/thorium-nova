@@ -80,8 +80,9 @@ export class FlightDataModel extends FSDataStore {
     this.entities.forEach(({id, components}) => {
       const e = new Entity(id, components);
       this.ecs.addEntity(e);
-      DefaultUIDGenerator.uid = Math.max(DefaultUIDGenerator.uid, id);
     });
+    const maxId = this.entities.reduce((acc, {id}) => Math.max(acc, id), 0);
+    DefaultUIDGenerator.uid = Math.max(DefaultUIDGenerator.uid, maxId);
     this.run();
   }
   reset() {

@@ -11,9 +11,9 @@ let up = new Vector3(0, 1, 0);
 let matrix = new Matrix4();
 const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
 
-const C_PROPORTION = 1;
+const C_PROPORTION = 5;
 const C_INTEGRAL = 0;
-const C_DERIVATIVE = 0.8;
+const C_DERIVATIVE = 1;
 
 const getYawPitchRoll = (quat: Quaternion) => {
   const yaw =
@@ -124,6 +124,7 @@ export class AutoRotateSystem extends System {
     let pitchCorrection = autopilot.pitchController.update(
       getClosestAngle(currentAngles[1], desiredAngles[1])
     );
+    // Minimize the effect of roll
     let rollCorrection = autopilot.rollController.update(
       getClosestAngle(currentAngles[2], desiredAngles[2])
     );

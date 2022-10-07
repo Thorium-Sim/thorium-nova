@@ -54,13 +54,13 @@ export function BasicDisclosure({
         1000,
         {trailing: true, leading: false}
       ),
-    [pluginId, solarSystemId, navigate, object.name, type]
+    [pluginId, solarSystemId, navigate, object.name, type, useStarmapStore]
   );
 
   const skyboxKeyRef = React.useRef<HTMLInputElement>(null);
   return (
     <PaletteDisclosure title="Basic">
-      <Input label="Name" defaultValue={object.name} onChange={updateName} />
+      <Input label="Name" defaultValue={object.name} onBlur={updateName} />
       <Input
         label="Description"
         as="textarea"

@@ -77,7 +77,7 @@ export function SolarSystemMap({
 
   useEffect(() => {
     useStarmapStore.setState({skyboxKey: skyboxKey || "blank"});
-  }, [skyboxKey]);
+  }, [skyboxKey, useStarmapStore]);
 
   useEffect(() => {
     // Set the initial camera position
@@ -87,7 +87,7 @@ export function SolarSystemMap({
       new Box3(new Vector3(-max, -max, -max), new Vector3(max, max, max))
     );
     useStarmapStore.getState().setCameraControlsEnabled(true);
-  }, [camera]);
+  }, [camera, useStarmapStore]);
 
   useEffect(() => {
     if (cameraView === "2d") {

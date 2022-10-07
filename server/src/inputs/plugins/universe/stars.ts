@@ -1,6 +1,7 @@
 import StarPlugin from "server/src/classes/Plugins/Universe/Star";
 import {SpectralTypes, starTypes} from "server/src/spawners/starTypes";
 import {DataContext} from "server/src/utils/DataContext";
+import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
 import inputAuth from "server/src/utils/inputAuth";
 import {pubsub} from "server/src/utils/pubsub";
 import {randomFromRange} from "server/src/utils/randomFromRange";
@@ -89,7 +90,13 @@ export const starPluginInputs = {
 
     const star = new StarPlugin(
       {
-        name,
+        name: generateIncrementedName(
+          name,
+          solarSystem.planets
+            .map(p => p.name)
+            .concat(solarSystem.stars.map(star => star.name))
+            .concat(solarSystem.name)
+        ),
         spectralType: params.spectralType,
         radius,
         age: randomFromRange(starType.ageRange),
@@ -165,7 +172,13 @@ export const starPluginInputs = {
       throw new Error(`No star found with id ${params.starId}`);
     }
     if (params.name) {
-      star.name = params.name;
+      star.name = generateIncrementedName(
+        params.name,
+        solarSystem.planets
+          .map(p => p.name)
+          .concat(solarSystem.stars.map(star => star.name))
+          .concat(solarSystem.name)
+      );
     }
     if (params.radius) {
       star.radius = params.radius;

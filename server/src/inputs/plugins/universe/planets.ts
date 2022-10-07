@@ -109,7 +109,10 @@ export const planetPluginInputs = {
     }
     const name = generateIncrementedName(
       `${system.name} ${toRoman(childrenPlanets.length + 1)}`,
-      childrenPlanets.map(p => p.name)
+      system.planets
+        .map(p => p.name)
+        .concat(system.stars.map(star => star.name))
+        .concat(system.name)
     );
 
     const radius = randomFromRange(planetType.radiusRange);
@@ -216,8 +219,11 @@ export const planetPluginInputs = {
     }
     if (params.name) {
       planet.name = generateIncrementedName(
-        `${params.name} ${toRoman(system.planets.length + 1)}`,
-        system.planets.map(p => p.name)
+        params.name,
+        system.planets
+          .map(p => p.name)
+          .concat(system.stars.map(star => star.name))
+          .concat(system.name)
       );
     }
     if (typeof params.age === "number") {
