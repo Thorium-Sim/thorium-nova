@@ -222,6 +222,10 @@ const quotes = [
   "Danger is very real, but fear is a choice.",
   "Individual moments of brilliance in concert",
   "Nobody gets to go back, only forward",
+  "When I leave, you will finally understand why storms are named after people.",
+  "We are autumn children, burdened with memories of sun.",
+  "Impudent of you to assume I will meet a mortal end.",
+  "Heaven, are you watching?",
   // Larry Elison
   "Choose your competitors carefully, because you'll become a lot like them.",
   // William Martin
