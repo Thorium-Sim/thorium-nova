@@ -8,5 +8,5 @@ export default {
     path.resolve("main/preload.ts"),
   ],
   bundle: true,
-  target: "node14.16.0", // electron version target
+  target: "node16.15.0", // electron version target
 } as BuildOptions;

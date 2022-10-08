@@ -1,4 +1,4 @@
-import {useClientData} from "client/src/context/useCardData";
+import {useNetRequest} from "client/src/context/useNetRequest";
 import {Fragment} from "react";
 
 // Messages go here
@@ -26,7 +26,7 @@ const messages: Record<string, {title: string; message: string}> = {
 };
 
 const Offline: React.FC = () => {
-  const {client} = useClientData();
+  const client = useNetRequest("client");
 
   if (!client.offlineState) return null;
   return (

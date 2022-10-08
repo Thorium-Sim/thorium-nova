@@ -1,13 +1,13 @@
+import * as React from "react";
 import Button from "@thorium/ui/Button";
 import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
-import useCardData, {useClientData} from "client/src/context/useCardData";
+import {useNetRequest} from "client/src/context/useNetRequest";
 import {fromDate} from "dot-beat-time";
-import * as React from "react";
 
 export default function OfficersLog() {
-  const {client} = useClientData();
-  const {officersLog} = useCardData<"OfficersLog">();
+  const client = useNetRequest("client");
+  const officersLog = useNetRequest("officersLog");
   const [stardate, setStardate] = React.useState(new Date());
   const [logEntry, setLogEntry] = React.useState<string>("");
   const [selectedEntry, setSelectedEntry] = React.useState<number | null>();

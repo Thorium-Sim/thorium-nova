@@ -5,9 +5,7 @@ import {
   AllRequestReturns,
 } from "server/src/netRequests";
 import {getTabId, getTabIdSync} from "@thorium/tab-id";
-import {useQuery} from "react-query";
-import {useThorium} from "./ThoriumContext";
-import {stableValueHash} from "../utils/stableValueHash";
+import {useQuery, QueryFunctionContext} from "@tanstack/react-query";
 import {useRequestSub} from "./useRequestSub";
 
 type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
@@ -17,7 +15,11 @@ export const MockNetRequestContext = createContext<any>(null!);
 export async function netRequest<
   T extends AllRequestNames,
   R extends AllRequestReturns[T]
->(requestName: T, params?: AllRequestParams[T]): Promise<R> {
+>(
+  requestName: T,
+  params?: AllRequestParams[T],
+  options: {signal?: AbortSignal} = {}
+): Promise<R> {
   const clientId = await getTabId();
   const body = {
     request: requestName,
@@ -30,12 +32,27 @@ export async function netRequest<
       authorization: `Bearer ${clientId}`,
     },
     body: JSON.stringify(body),
+    signal: options.signal,
   }).then(res => res.json());
-  if (result.error) {
+
+  if (result?.error) {
     throw new Error(result.error);
   }
 
   return result as R;
+}
+
+async function queryFn<T extends AllRequestNames>({
+  queryKey,
+}: QueryFunctionContext) {
+  const [_, __, requestName, params] = queryKey as [
+    string,
+    "netRequest",
+    T,
+    AllRequestParams[T]
+  ];
+  const data = await netRequest(requestName, params);
+  return (data as any) || null;
 }
 
 export function useNetRequest<
@@ -47,17 +64,19 @@ export function useNetRequest<
   callback?: (result: UnwrapPromise<R>) => void
 ): UnwrapPromise<R> {
   const clientId = getTabIdSync();
-  const {socket} = useThorium();
-  const requestId = stableValueHash({requestName, params});
 
   const netRequestQuery = useQuery<UnwrapPromise<R>>(
     [clientId, "netRequest", requestName, params],
-    async () => {
-      const data = await netRequest(requestName, params);
-      return (data as any) || null;
+    queryFn,
+    {
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+      networkMode: "always",
+      staleTime: Infinity,
+      cacheTime: Infinity,
     }
   );
-
   useRequestSub({requestName, params});
 
   const mockData = useContext(MockNetRequestContext);
@@ -73,6 +92,5 @@ export function useNetRequest<
   }, [netRequestQuery.data]);
 
   if (mockData) return mockData[requestName];
-
   return netRequestQuery.data as any;
 }

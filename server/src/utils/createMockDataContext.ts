@@ -2,6 +2,7 @@ import {ServerClient} from "../classes/Client";
 import {FlightClient} from "../classes/FlightClient";
 import {FlightDataModel} from "../classes/FlightDataModel";
 import BasePlugin from "../classes/Plugins";
+import {InventoryTemplate} from "../classes/Plugins/Inventory";
 import ShipPlugin from "../classes/Plugins/Ship";
 import {ServerDataModel} from "../classes/ServerDataModel";
 import systems from "../systems";
@@ -25,6 +26,7 @@ class MockServerDataModel {
           } as unknown as BasePlugin),
         ],
         solarSystems: [],
+        inventory: [],
       },
     },
   ];
@@ -51,6 +53,7 @@ class MockFlightDataModel {
   pluginIds: string[] = [];
   private initEntities: Entity[] = [];
   serverDataModel: ServerDataModel;
+  inventoryTemplates: {[key: string]: InventoryTemplate} = {};
   constructor(
     params: Partial<MockFlightDataModel> & {
       serverDataModel: ServerDataModel;

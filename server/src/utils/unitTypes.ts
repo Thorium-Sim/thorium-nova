@@ -7,12 +7,18 @@ export type Kilometer = Flavor<number, "kilometer">;
 export type Meter = Flavor<number, "meter">;
 export type Centimeter = Flavor<number, "centimeter">;
 
+export type MetersPerSecond = Flavor<number, "metersPerSecond">;
 export type KilometerPerSecond = Flavor<number, "kilometerPerSecond">;
+export type MetersPerSecondSquared = Flavor<number, "metersPerSecondSquared">;
 export type KilometerPerSecondSquared = Flavor<
   number,
   "kilometerPerSecondSquared"
 >;
 export type KiloNewtons = Flavor<number, "kiloNewtons">;
+
+export const KM_TO_LY = 1 / 9460730777119.56;
+export const KM_TO_LM = lightYearToLightMinute(KM_TO_LY) 
+export const M_TO_KM = 1 / 1000;
 
 /**
  * Distance compared to the radius of the sun eg. 1 solar radius = the radius of the sun
@@ -36,6 +42,11 @@ export function lightMinuteToLightYear(len: LightMinute) {
 export function lightYearToLightMinute(len: LightYear) {
   return len * (60 * 24 * 365.25);
 }
+export function kilometerToLightMinute(len:Kilometer) {
+  return len * 5.559e-8
+}
+
+export type CubicMeter = Flavor<number, "cubicMeter">;
 
 export type Kilograms = Flavor<number, "kilograms">;
 /**
@@ -56,7 +67,18 @@ export type Year = Flavor<number, "year">;
 
 export type Degree = Flavor<number, "degree">;
 export type Radian = Flavor<number, "radian">;
+export type RotationsPerMinute = Flavor<number, "rotationsPerMinute">;
+export type RadiansPerSecond = Flavor<number, "radiansPerSecond">;
 
 export function degToRad(degree: Degree): Radian {
   return (degree * Math.PI) / 180;
 }
+
+export class Coordinates<T extends number> {
+  x: T = 0 as T;
+  y: T = 0 as T;
+  z: T = 0 as T;
+}
+
+export type PowerUnit = Flavor<number, "powerUnit">;
+export type PowerUnitPerSecond = Flavor<number, "powerUnitPerSecond">;

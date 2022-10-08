@@ -6,7 +6,7 @@ import {useThorium} from "./ThoriumContext";
 const requestMap = new Map<string, Set<string>>();
 
 export function useRequestSub(requestParams: {
-  requestName: string | readonly ["cardData", string];
+  requestName: string;
   params?: any;
 }) {
   const requestId = stableValueHash(requestParams);

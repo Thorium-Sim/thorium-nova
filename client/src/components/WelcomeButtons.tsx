@@ -1,18 +1,18 @@
 import {NavLink} from "react-router-dom";
-import {useClientData} from "../context/useCardData";
 import Button from "@thorium/ui/Button";
 import {Disclosure} from "@headlessui/react";
 import {netSend} from "../context/netSend";
 import {useNetRequest} from "../context/useNetRequest";
+import {Suspense} from "react";
 
 export const WelcomeButtons = ({className}: {className?: string}) => {
-  const flights = useNetRequest("flights");
-  const clientData = useClientData();
+  const flight = useNetRequest("flight");
+  const client = useNetRequest("client");
   return (
     <div
       className={`${className} flex flex-col justify-end self-end space-y-4 max-w-md h-full`}
     >
-      {clientData.flight ? (
+      {flight ? (
         <>
           <NavLink className="btn btn-primary btn-outline" to="/flight">
             Go To Flight Lobby
@@ -31,7 +31,7 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
         </>
       ) : (
         <>
-          {clientData.client.isHost && (
+          {client.isHost && (
             <>
               <NavLink
                 className="btn btn-primary btn-outline"
@@ -43,30 +43,25 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
                 <Disclosure.Button className="btn btn-info btn-outline">
                   Load a Saved Flight
                 </Disclosure.Button>
-                <Disclosure.Panel
-                  className="text-white list-none max-h-full overflow-y-auto"
-                  as="ul"
+
+                <Suspense
+                  fallback={
+                    <Disclosure.Panel
+                      className="text-white list-none max-h-full overflow-y-auto"
+                      as="ul"
+                    >
+                      <li className="list-group-item">Loading...</li>
+                    </Disclosure.Panel>
+                  }
                 >
-                  {flights.length ? (
-                    flights.map(f => (
-                      <li className="list-group-item" key={f.name}>
-                        <strong>{f.name}</strong>
-                        <br />
-                        <small>{new Date(f.date).toLocaleDateString()}</small>
-                      </li>
-                    ))
-                  ) : (
-                    <>
-                      <li className="list-group-item">No Saved Flights</li>
-                    </>
-                  )}
-                </Disclosure.Panel>
+                  <Flights />
+                </Suspense>
               </Disclosure>
             </>
           )}
 
           <Button className="btn btn-warning btn-outline">Join a Server</Button>
-          {clientData.client.isHost && (
+          {client.isHost && (
             <NavLink className="btn btn-notice btn-outline" to="/config">
               Configure Plugins
             </NavLink>
@@ -90,3 +85,28 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
     </div>
   );
 };
+
+function Flights() {
+  const flights = useNetRequest("flights");
+
+  return (
+    <Disclosure.Panel
+      className="text-white list-none max-h-full overflow-y-auto"
+      as="ul"
+    >
+      {flights.length ? (
+        flights.map(f => (
+          <li className="list-group-item" key={f.name}>
+            <strong>{f.name}</strong>
+            <br />
+            <small>{new Date(f.date).toLocaleDateString()}</small>
+          </li>
+        ))
+      ) : (
+        <>
+          <li className="list-group-item">No Saved Flights</li>
+        </>
+      )}
+    </Disclosure.Panel>
+  );
+}

@@ -17,7 +17,9 @@ export const OrbitLine: React.FC<{radiusX: number; radiusY: number}> = ({
       0
     );
 
-    const points = curve.getPoints(Math.round(Math.max(200, radiusX / 400000)));
+    const points = curve.getPoints(
+      Math.round(Math.max(1000, radiusX / 400000))
+    );
 
     const geometry = new BufferGeometry().setFromPoints(points);
     return geometry;
@@ -38,23 +40,24 @@ export const OrbitLine: React.FC<{radiusX: number; radiusY: number}> = ({
 };
 
 interface OrbitContainerProps {
-  radius: number;
+  children: React.ReactNode;
+  semiMajorAxis: number;
   eccentricity: number;
   orbitalArc: number;
-  orbitalInclination: number;
+  inclination: number;
   showOrbit: boolean;
 }
 
 const OrbitContainer: React.FC<OrbitContainerProps> = ({
-  radius,
+  semiMajorAxis,
   eccentricity,
   orbitalArc,
-  orbitalInclination,
+  inclination,
   showOrbit,
   children,
 }) => {
-  const radiusY = radius - radius * eccentricity;
-  const X = radius * Math.cos(MathUtils.DEG2RAD * orbitalArc);
+  const radiusY = semiMajorAxis - semiMajorAxis * eccentricity;
+  const X = semiMajorAxis * Math.cos(MathUtils.DEG2RAD * orbitalArc);
   const Z = radiusY * Math.sin(MathUtils.DEG2RAD * orbitalArc);
   const position = [X, 0, Z];
   const childrenWithProps = React.Children.map(children, child => {
@@ -66,8 +69,8 @@ const OrbitContainer: React.FC<OrbitContainerProps> = ({
     return child;
   });
   return (
-    <group rotation={[0, 0, orbitalInclination * MathUtils.DEG2RAD]}>
-      {showOrbit && <OrbitLine radiusX={radius} radiusY={radiusY} />}
+    <group rotation={[0, 0, inclination * MathUtils.DEG2RAD]}>
+      {showOrbit && <OrbitLine radiusX={semiMajorAxis} radiusY={radiusY} />}
       {childrenWithProps}
     </group>
   );

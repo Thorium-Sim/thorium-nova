@@ -4,13 +4,25 @@ import {Color} from "three";
 import OrbitContainer from "../OrbitContainer";
 import Star from "./StarMesh";
 import Selected from "../Selected";
-import {useStarmapStore} from "../starmapStore";
+import {useGetStarmapStore} from "../starmapStore";
 import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
-import StarPlugin from "server/src/classes/Plugins/Universe/Star";
 
 const StarEntity: React.FC<{
-  star: StarPlugin;
+  star: {
+    satellite: {
+      semiMajorAxis: number;
+      eccentricity: number;
+      orbitalArc: number;
+      inclination: number;
+      showOrbit: boolean;
+    };
+    hue: number;
+    isWhite: boolean;
+    radius: number;
+    id: string | number;
+  };
 }> = ({star}) => {
+  const useStarmapStore = useGetStarmapStore();
   const viewingMode = useStarmapStore(state => state.viewingMode);
   // const selectedId = useConfigStore(store => store.selectedObject?.id);
   const selected = false; //selectedId === entity.id;
@@ -30,16 +42,15 @@ const StarEntity: React.FC<{
       : solarRadiusToKilometers(star.radius);
   return (
     <OrbitContainer
-      radius={semiMajorAxis}
+      semiMajorAxis={semiMajorAxis}
       eccentricity={eccentricity}
       orbitalArc={orbitalArc}
-      orbitalInclination={inclination}
+      inclination={inclination}
       showOrbit={showOrbit}
     >
       <group
         onPointerOver={() => {
           if (viewingMode === "viewscreen") return;
-          if (viewingMode === "core") return;
           document.body.style.cursor = "pointer";
           const position = getOrbitPosition({
             eccentricity,
@@ -54,7 +65,6 @@ const StarEntity: React.FC<{
         }}
         onPointerOut={() => {
           if (viewingMode === "viewscreen") return;
-          if (viewingMode === "core") return;
           document.body.style.cursor = "auto";
           // useConfigStore.setState({
           //   hoveredPosition: null,
@@ -63,15 +73,18 @@ const StarEntity: React.FC<{
         }}
         onClick={() => {
           if (viewingMode === "viewscreen") return;
-          if (viewingMode === "core") return;
+
           const position = getOrbitPosition({
             eccentricity,
             orbitalArc,
             inclination: inclination,
             semiMajorAxis: semiMajorAxis,
           });
+
+          useStarmapStore.getState().setCameraFocus(position);
+
           useStarmapStore.setState({
-            selectedObjectId: star.name,
+            selectedObjectIds: [star.id],
             // selectedPosition: position,
             // scaledSelectedPosition: position,
           });

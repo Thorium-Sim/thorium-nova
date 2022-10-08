@@ -1,4 +1,3 @@
-import {useClientData} from "../context/useCardData";
 import {FaBan, FaSpinner} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
 import {netSend} from "../context/netSend";
@@ -13,39 +12,46 @@ import {ClientButton} from "../components/ClientButton";
 import InfoTip from "@thorium/ui/InfoTip";
 
 export default function FlightLobby() {
-  const clientData = useClientData();
+  const station = useNetRequest("station");
+  const client = useNetRequest("client");
 
-  if (clientData.station) return <StationWrapper />;
+  if (station) return <StationWrapper />;
 
-  if (clientData.client.isHost) return <HostLobby />;
+  if (client.isHost) return <HostLobby />;
   return <PlayerLobby />;
 }
 
 function PlayerLobby() {
-  const clientData = useClientData();
+  const flight = useNetRequest("flight");
 
   return (
     <>
       <Menubar />
       <div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur">
+        <h2 className="text-white font-bold text-xl mb-2">
+          Flight Name: <em>{flight?.name}</em>
+        </h2>
+
         <ClientButton />
 
         <div className="flex-1 flex flex-col pt-16">
-          {clientData.flight ? (
-            <PlayerStationSelection />
-          ) : (
-            <WaitingForFlight />
-          )}
+          {flight ? <PlayerStationSelection /> : <WaitingForFlight />}
         </div>
       </div>
     </>
   );
 }
 
-const flightDirectorStation = {
-  name: "Flight Director",
-  description: "Behind-the-scenes station for controlling the flight.",
-};
+const staticStations = [
+  {
+    name: "Viewscreen",
+    description: "Outside view of the space around the ship.",
+  },
+  {
+    name: "Flight Director",
+    description: "Behind-the-scenes station for controlling the flight.",
+  },
+];
 function PlayerStationSelection() {
   const playerShips = useNetRequest("flightPlayerShips");
 
@@ -55,11 +61,9 @@ function PlayerStationSelection() {
       <div className="flex-1 flex justify-center gap-8">
         {playerShips.map(ship => (
           <div key={ship.id}>
-            <h3 className="text-xl font-bold">
-              {ship.components.identity?.name}
-            </h3>
+            <h3 className="text-xl font-bold">{ship.name}</h3>
             <ul>
-              {ship.components.stationComplement?.stations.map(station => (
+              {ship.stations.map(station => (
                 <PlayerStationItem
                   shipId={ship.id}
                   station={station}
@@ -67,10 +71,13 @@ function PlayerStationSelection() {
                 />
               ))}
               {/* TODO April 23, 2022 - Hide this when the ship is configured to not have a flight director */}
-              <PlayerStationItem
-                shipId={ship.id}
-                station={flightDirectorStation}
-              />
+              {staticStations.map(station => (
+                <PlayerStationItem
+                  key={station.name}
+                  shipId={ship.id}
+                  station={station}
+                />
+              ))}
             </ul>
           </div>
         ))}
@@ -133,14 +140,15 @@ function PlayerStationItem({
 }
 function HostLobby() {
   const navigate = useNavigate();
-  const clientData = useClientData();
+  const flight = useNetRequest("flight");
+  const client = useNetRequest("client");
 
   return (
     <>
       <Menubar>
-        {clientData.flight && (
+        {flight && (
           <>
-            {clientData.client.isHost && (
+            {client.isHost && (
               <Button
                 className="btn btn-outline btn-xs btn-error"
                 onClick={async () => {
@@ -151,7 +159,7 @@ function HostLobby() {
                 End
               </Button>
             )}
-            {clientData.flight?.paused ? (
+            {flight?.paused ? (
               <Button
                 className="btn btn-outline btn-xs btn-success"
                 onClick={() => {
@@ -187,9 +195,13 @@ function HostLobby() {
         )}
       </Menubar>
       <div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur flex flex-col">
+        <h2 className="text-white font-bold text-xl mb-2">
+          Flight Name: <em>{flight?.name}</em>
+        </h2>
+
         <ClientButton />
         <div className="flex-1 flex flex-col pt-16">
-          {clientData.flight ? <ClientAssignment /> : <WaitingForFlight />}
+          {flight ? <ClientAssignment /> : <WaitingForFlight />}
         </div>
       </div>
     </>
@@ -198,9 +210,9 @@ function HostLobby() {
 
 function ClientAssignment() {
   const clients = useNetRequest("clients");
-  const clientData = useClientData();
+  const client = useNetRequest("client");
   const playerShips = useNetRequest("flightPlayerShips");
-  const [selectedClient, setSelectedClient] = useState(clientData.client.id);
+  const [selectedClient, setSelectedClient] = useState(client.id);
   return (
     <div className="flex justify-around gap-4 w-full">
       <div>
@@ -220,11 +232,9 @@ function ClientAssignment() {
       <div className="flex flex-wrap justify-center">
         {playerShips.map(ship => (
           <div key={ship.id}>
-            <h3 className="text-xl font-bold">
-              {ship.components.identity?.name}
-            </h3>
+            <h3 className="text-xl font-bold">{ship.name}</h3>
             <ul>
-              {ship.components.stationComplement?.stations.map(station => (
+              {ship.stations.map(station => (
                 <HostStationItem
                   shipId={ship.id}
                   station={station}
@@ -234,12 +244,15 @@ function ClientAssignment() {
                 />
               ))}
               {/* TODO April 23, 2022 - Hide this when the ship is configured to not have a flight director */}
-              <HostStationItem
-                shipId={ship.id}
-                station={flightDirectorStation}
-                selectedClient={selectedClient}
-                setSelectedClient={setSelectedClient}
-              />
+              {staticStations.map(station => (
+                <HostStationItem
+                  key={station.name}
+                  shipId={ship.id}
+                  station={station}
+                  selectedClient={selectedClient}
+                  setSelectedClient={setSelectedClient}
+                />
+              ))}
             </ul>
           </div>
         ))}

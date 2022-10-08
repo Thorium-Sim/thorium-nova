@@ -12,13 +12,13 @@
   },
   "main": "dist/electron.js",
   "scripts": {
-    "dev": "concurrently --kill-others --names \"client,server\" -c \"blue.bold,magenta.bold\" \"npm run dev --workspace=client\" \"npm run dev --workspace=server\"",
-    "build": "concurrently --names \"client,server,desktop\" -c \"blue.bold,magenta.bold,green.bold\" \"npm run build --workspace=client\" \"npm run build --workspace=server\" \"npm run build --workspace=desktop\"",
+    "dev": "node -r ts-eager/register scripts/dev.ts",
+    "build": "node -r ts-eager/register scripts/build.ts",
+    "typecheck": "concurrently --names \"client,server,shared,desktop\" -c \"blue.bold,magenta.bold,yellow.bold,green.bold\" \"npm run typecheck --workspace=client\" \"npm run typecheck --workspace=server\" \"npm run typecheck --workspace=shared\" \"npm run typecheck --workspace=desktop\"",
     "start": "NODE_ENV=production node dist/index.js",
     "test": "is-ci-cli \"test:coverage\" \"test:watch\"",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
-    "typecheck": "concurrently --names \"client,server,shared,desktop\" -c \"blue.bold,magenta.bold,yellow.bold,green.bold\" \"npm run typecheck --workspace=client\" \"npm run typecheck --workspace=server\" \"npm run typecheck --workspace=shared\" \"npm run typecheck --workspace=desktop\"",
     "lint": "eslint .",
     "format": "prettier --write \"**/*.+(js|jsx|yml|yaml|css|less|scss|ts|tsx|md|mdx|graphql|vue)\"",
     "format:different": "prettier --list-different \"**/*.+(js|jsx|yml|yaml|css|less|scss|ts|tsx|md|mdx|graphql|vue)\"",
@@ -124,40 +124,43 @@
     "desktop"
   ],
   "volta": {
-    "node": "16.13.0",
-    "npm": "8.1.3"
+    "node": "18.4.0"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.1",
-    "@semantic-release/exec": "^6.0.2",
+    "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
-    "@testing-library/jest-dom": "^5.16.1",
-    "@testing-library/react": "^12.1.2",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.0.3",
-    "@typescript-eslint/eslint-plugin": "^5.7.0",
-    "@typescript-eslint/parser": "^5.7.0",
-    "alias-hq": "^5.3.0",
-    "concurrently": "^6.4.0",
-    "electron": "^16.0.4",
-    "electron-builder": "^22.14.5",
-    "electron-builder-notarize": "^1.2.0",
-    "esbuild": "^0.14.5",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.3.0",
+    "@testing-library/user-event": "^14.4.3",
+    "@types/jest": "^28.1.6",
+    "@typescript-eslint/eslint-plugin": "^5.33.0",
+    "@typescript-eslint/parser": "^5.33.0",
+    "alias-hq": "^5.4.0",
+    "concurrently": "^7.3.0",
+    "electron": "^20.0.2",
+    "electron-builder": "^23.3.3",
+    "electron-builder-notarize": "^1.5.0",
+    "esbuild": "^0.15.1",
     "esbuild-jest": "^0.5.0",
-    "eslint": "^8.4.1",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-config-react-app": "^7.0.0",
+    "eslint": "^8.21.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-react-app": "^7.0.1",
     "eslint-config-typescript": "^3.0.0",
-    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "is-ci-cli": "^2.2.0",
-    "jest": "^27.4.5",
+    "jest": "^28.1.3",
+    "jest-environment-jsdom": "^28.1.3",
     "jest-watch-select-projects": "^2.0.0",
-    "jest-watch-typeahead": "^1.0.0",
+    "jest-watch-typeahead": "^2.0.0",
     "patch-package": "^6.4.7",
-    "prettier": "^2.5.1",
-    "semantic-release": "^18.0.1"
+    "prettier": "^2.7.1",
+    "semantic-release": "^19.0.3"
   },
   "publishConfig": {
     "access": "restricted"
+  },
+  "dependencies": {
+    "react": "^18.2.0"
   }
 }

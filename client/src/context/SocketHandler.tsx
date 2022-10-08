@@ -1,18 +1,14 @@
 import {getTabIdSync} from "@thorium/tab-id";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {useErrorHandler} from "react-error-boundary";
-import {useQueryClient} from "react-query";
+import {useQueryClient} from "@tanstack/react-query";
 import {NetResponseData} from "../hooks/useDataConnection";
-import {DataCardNames, SubscriptionNames} from "../utils/cardData";
 import {FaSpinner} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
 import {ClientSocket} from "../utils/clientSocket";
+import {netRequest} from "./useNetRequest";
 
-type CardData =
-  | string
-  | number
-  | Object
-  | {card: DataCardNames; data: Record<SubscriptionNames, any>};
+type CardData = string | number | Object;
 
 export function SocketHandler({
   socket,
@@ -31,23 +27,6 @@ export function SocketHandler({
 
   useEffect(() => {
     if (socket) {
-      const handleCardData = (data: CardData) => {
-        if (typeof data !== "object") {
-          throw new Error(`cardData data must be an object. Got "${data}"`);
-        }
-        if (!("card" in data && "data" in data)) {
-          const dataString = JSON.stringify(data, null, 2);
-          throw new Error(
-            `cardData data must include a card name and a data object. Got ${dataString}`
-          );
-        }
-        const clientId = getTabIdSync();
-        const queryKey = [clientId, "cardData", data.card];
-        queryClient.setQueryData(queryKey, oldData =>
-          typeof oldData === "object" ? {...oldData, ...data.data} : data.data
-        );
-      };
-
       function handleNetRequestData(data: NetResponseData) {
         try {
           if (typeof data !== "object") {
@@ -78,7 +57,7 @@ export function SocketHandler({
           ];
 
           queryClient.setQueryData(queryKey, data.response);
-          queryClient.invalidateQueries(queryKey);
+          // queryClient.invalidateQueries(queryKey);
         } catch (err) {
           console.error(err);
           handleError(err);
@@ -86,13 +65,11 @@ export function SocketHandler({
       }
 
       function handleReady() {
-        queryClient.refetchQueries();
+        queryClient.refetchQueries(undefined, {cancelRefetch: false});
       }
-      socket.on("cardData", handleCardData);
       socket.on("netRequestData", handleNetRequestData);
       socket.on("ready", handleReady);
       return () => {
-        socket.off("cardData", handleCardData);
         socket.off("netRequestData", handleNetRequestData);
         socket.off("ready", handleReady);
       };
@@ -109,6 +86,19 @@ export function SocketHandler({
 }
 
 const Reconnecting = () => {
+  const [timeoutPassed, setTimeoutPassed] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setTimeoutPassed(true);
+    }, 500);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  if (!timeoutPassed) return null;
+
   return (
     <div className="fixed inset-0 z-30 bg-black bg-opacity-70 flex flex-col items-center justify-center space-y-8">
       <h2 className="text-6xl font-bold text-error">

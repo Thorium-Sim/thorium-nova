@@ -19,6 +19,7 @@ interface SearchableListProps<
   renderItem?: (item: L) => JSX.Element;
   searchKeys?: OnlyString<keyof L>[];
   showSearchLabel?: boolean;
+  categorySort?: (a: [string, L[]], b: [string, L[]]) => number;
 }
 interface ListItem {
   id: any;
@@ -34,6 +35,11 @@ function SearchableList<
   renderItem,
   searchKeys = ["label", "category"] as OnlyString<keyof Item>[],
   showSearchLabel = true,
+  categorySort = ([a], [b]) => {
+    if (a > b) return 1;
+    if (b > a) return -1;
+    return 0;
+  },
 }: SearchableListProps<ID, Item>) {
   const [search, setSearch] = useState<string>("");
   const filteredObjects = useMemo(
@@ -64,11 +70,7 @@ function SearchableList<
       <ul className="flex-1 overflow-y-auto select-none">
         {Object.entries(sortedIntoCategories)
           .concat()
-          .sort(([a], [b]) => {
-            if (a > b) return 1;
-            if (b > a) return -1;
-            return 0;
-          })
+          .sort(categorySort)
           .map(([key, items]) => (
             <Fragment key={key}>
               {key && (

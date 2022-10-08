@@ -4,10 +4,12 @@ import {useParams, Navigate} from "react-router-dom";
 import Station from "server/src/classes/Station";
 import StationWrapper from "../components/Station";
 import {netSend} from "../context/netSend";
-import {useClientData} from "../context/useCardData";
+import {useNetRequest} from "../context/useNetRequest";
+
 export default function CardRenderer() {
   const {component} = useParams() as {component: string};
-  const {station, flight} = useClientData();
+  const station = useNetRequest("station");
+  const flight = useNetRequest("flight");
   useEffect(() => {
     netSend("clientOverrideStation", {
       station: new Station({

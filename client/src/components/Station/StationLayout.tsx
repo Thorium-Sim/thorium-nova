@@ -1,7 +1,7 @@
 import {SVGImageLoader} from "@thorium/ui/SVGImageLoader";
 import {netSend} from "client/src/context/netSend";
 import {useThoriumAccount} from "client/src/context/ThoriumAccountContext";
-import {useClientData} from "client/src/context/useCardData";
+import {useNetRequest} from "client/src/context/useNetRequest";
 import {RiLogoutCircleRLine} from "react-icons/ri";
 import {CardArea} from "./CardArea";
 import {CardSwitcher} from "./CardSwitcher";
@@ -9,16 +9,25 @@ import {useManageCard} from "./useManageCard";
 import {ClickWidget} from "./widgets";
 
 const StationLayout = () => {
-  const {ship, client, station, theme} = useClientData();
+  const ship = useNetRequest("ship");
+  const client = useNetRequest("client");
+  const station = useNetRequest("station");
+  const theme = useNetRequest("theme");
   const [card, changeCard] = useManageCard();
 
-  if (!ship) throw new Promise(() => {});
+  const {account} = useThoriumAccount();
+  if (!ship) return null;
   // TODO November 29, 2021: Get the proper alert level and put it here.
   // @ts-expect-error See above
   const alertLevel = ship.alertLevel || "5";
-  const {account} = useThoriumAccount();
+
   return (
-    <div id="theme-container" className="h-full w-full">
+    <div
+      id="theme-container"
+      className={`h-full w-full ${
+        station.name === "Viewscreen" ? "viewscreen" : ""
+      }`}
+    >
       <div
         className={`alertLevel-${alertLevel} h-full`}
         style={

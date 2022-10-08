@@ -65,7 +65,7 @@ async function buildServer() {
       entryPoints: ["src/index.ts"],
       bundle: true,
       platform: "node",
-      target: "node14",
+      target: "node16",
       outdir: "../dist",
       plugins: [nativeNodeModulesPlugin],
     })
@@ -74,6 +74,15 @@ async function buildServer() {
       process.exit(1);
     });
   await bundleDefaultPlugin();
+  fs.mkdirSync("../dist/resources", {recursive: true});
+  fs.copyFileSync(
+    "../desktop/resources/server.cert",
+    "../dist/resources/server.cert"
+  );
+  fs.copyFileSync(
+    "../desktop/resources/server.key",
+    "../dist/resources/server.key"
+  );
 }
 
 buildServer();

@@ -5,6 +5,10 @@ export const staticStations = [
     name: "Flight Director",
     cards: [{name: "Flight Director", component: "FlightDirector"}],
   },
+  {
+    name: "Viewscreen",
+    cards: [{name: "Viewscreen", component: "Viewscreen"}],
+  },
 ];
 export default class Station {
   apiVersion = "stations/v1" as const;

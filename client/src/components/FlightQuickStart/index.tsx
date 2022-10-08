@@ -1,8 +1,8 @@
 import Button from "@thorium/ui/Button";
 import Modal from "@thorium/ui/Modal";
-import {netSend} from "client/src/context/netSend";
+import {useNetSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
-import {useClientData} from "client/src/context/useCardData";
+import {useNetRequest} from "client/src/context/useNetRequest";
 import {useMatch, useNavigate, Navigate, Outlet, Link} from "react-router-dom";
 import {randomNameGenerator} from "server/src/utils/randomNameGenerator";
 import {useFlightQuickStart} from "./FlightQuickStartContext";
@@ -11,17 +11,20 @@ function capitalize(val: string) {
   return val.charAt(0).toUpperCase() + val.slice(1);
 }
 export default function FlightQuickStart() {
-  const clientData = useClientData();
+  const flight = useNetRequest("flight");
+  const client = useNetRequest("client");
 
-  const [state, dispatch] = useFlightQuickStart();
+  const {mutate: netSend, isLoading} = useNetSend();
+
+  const [state] = useFlightQuickStart();
 
   const navigate = useNavigate();
 
   const match = useMatch("/flight/quick/:step");
 
   if (!match) return <Navigate to="/flight/quick/crew" replace />;
-  if (clientData.flight) return <Navigate to="/flight" replace />;
-  if (!clientData.client.isHost) return <Navigate to="/" replace />;
+  if (flight) return <Navigate to="/flight" replace />;
+  if (!client.isHost) return <Navigate to="/" replace />;
 
   const {step} = match.params;
 
@@ -60,6 +63,7 @@ export default function FlightQuickStart() {
         {step === "mission" && (
           <Button
             className="btn-success"
+            disabled={isLoading}
             onClick={async () => {
               // TODO November 20, 2021 - Do something with the "Flight Director" parameter
               // once we get Flight Director controls implemented.
@@ -84,21 +88,24 @@ export default function FlightQuickStart() {
               if (!shipName) {
                 shipName = randomNameGenerator();
               }
-              await netSend("flightStart", {
-                flightName,
-                ships: [
-                  {
-                    crewCount,
-                    shipName,
-                    shipTemplate,
-                    missionName,
-                    startingPoint,
-                  },
-                ],
+              netSend({
+                type: "flightStart",
+                params: {
+                  flightName,
+                  ships: [
+                    {
+                      crewCount,
+                      shipName,
+                      shipTemplate,
+                      missionName,
+                      startingPoint,
+                    },
+                  ],
+                },
               });
             }}
           >
-            Start
+            {isLoading ? "Starting Flight..." : "Start"}
           </Button>
         )}
       </div>

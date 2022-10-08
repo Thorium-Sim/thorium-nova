@@ -28,6 +28,7 @@ export type updateNodeParams =
   | {isRoom: boolean}
   | {name: string}
   | {radius: number}
+  | {volume: number}
   | {flags: NodeFlag[]};
 const pixelRatio = window.devicePixelRatio;
 
@@ -124,6 +125,7 @@ export function DeckConfig() {
           panned.current = true;
           panState.current = state;
         }}
+        disableDoubleClickZoom
       >
         <SVGImageLoader
           style={{

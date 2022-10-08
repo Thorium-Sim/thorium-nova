@@ -30,17 +30,45 @@ export const pluginShipSystemsRequests = {
   },
   pluginShipSystem<T extends keyof AllShipSystems>(
     context: DataContext,
-    params: {pluginId: string; type?: T; systemId: string},
+    params: {
+      pluginId: string;
+      type?: T;
+      systemId: string;
+      shipId?: string;
+      shipPluginId?: string;
+    },
     publishParams: {pluginId: string; systemId: string} | null
   ) {
     if (publishParams && params.pluginId !== publishParams.pluginId) throw null;
+    let override = {};
+    if (params.shipPluginId) {
+      const plugin = getPlugin(context, params.shipPluginId);
+      const ship = plugin.aspects.ships.find(s => s.name === params.shipId);
+      if (ship) {
+        const system = ship.shipSystems.find(
+          s =>
+            s.systemId === params.systemId && s.pluginId === params.shipPluginId
+        );
+        if (system) {
+          if (!system.overrides) {
+            system.overrides = {};
+          }
+          override = system.overrides;
+        }
+      }
+    }
     const plugin = getPlugin(context, params.pluginId);
-    const {plugin: sysPlugin, ...system} = plugin.aspects.shipSystems.find(
+    const shipSystem = plugin.aspects.shipSystems.find(
       system => system.name === params.systemId
     ) as AllShipSystems[keyof AllShipSystems];
-    if (!system) throw null;
+    if (!shipSystem) throw null;
+    const {plugin: sysPlugin, ...system} = shipSystem;
 
-    return {...system, pluginName: plugin.name} as AllShipSystems[T];
+    return {
+      ...system,
+      ...override,
+      pluginName: plugin.name,
+    } as AllShipSystems[T];
   },
   availableShipSystems() {
     return Object.keys(ShipSystemTypes).map(key => {

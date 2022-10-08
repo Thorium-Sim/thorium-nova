@@ -10,7 +10,12 @@ import {
   ComponentProperties as Components,
   ComponentIDs,
   components as allComponents,
+  getComponentClassFromId,
 } from "../../components";
+
+type DeepPartial<T> = Partial<{
+  [P in keyof T]: Partial<T[P]>;
+}>;
 /**
  * An entity.
  *
@@ -35,7 +40,7 @@ class Entity {
   components: Partial<Components>;
   constructor(
     idOrUidGenerator?: number | UIDGenerator | null,
-    components: Partial<Components> = {} as Components
+    components: DeepPartial<Components> = {} as Components
   ) {
     /**
      * Unique identifier of the entity.
@@ -88,9 +93,13 @@ class Entity {
         c => c && c.id === component
       ) as any;
       const data = components[component as ComponentIDs];
-      let componentData =
-        data instanceof componentClass ? data : componentClass.create(data);
-      this.components[component as ComponentIDs] = componentData;
+      try {
+        let componentData =
+          data instanceof componentClass ? data : componentClass.create(data);
+        this.components[component as ComponentIDs] = componentData;
+      } catch (err) {
+        console.error("Error initializing component:", component);
+      }
     }
     /**
      * A reference to parent ECS class.
@@ -104,7 +113,7 @@ class Entity {
       components: Object.fromEntries(
         Object.entries(this.components).map(([key, comp]) => {
           let newValue =
-            allComponents[key as keyof typeof allComponents]?.serialize(
+            getComponentClassFromId(key as ComponentIDs)?.serialize(
               comp as any
             ) || comp;
           return [key, newValue];
@@ -218,7 +227,7 @@ class Entity {
     if (!component) {
       this.addComponent(name, data);
     } else {
-      Object.assign(this.components[name], data);
+      Object.assign(component, data);
     }
   }
   /**
@@ -241,8 +250,9 @@ class Entity {
    * @private
    */
   dispose() {
-    for (let i = 0, system; (system = this.systems[0]); i += 1) {
-      system.removeEntity(this);
+    while (this.systems.length > 0) {
+      this.systems[0].removeEntity(this);
+      fastSplice(this.systems, 0, 1);
     }
   }
 }

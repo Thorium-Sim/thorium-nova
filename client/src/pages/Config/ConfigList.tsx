@@ -1,5 +1,11 @@
 import React, {ReactNode} from "react";
-import {FaStar, FaTools, FaRocket, FaPaintBrush} from "react-icons/fa";
+import {
+  FaStar,
+  FaTools,
+  FaRocket,
+  FaPaintBrush,
+  FaBoxOpen,
+} from "react-icons/fa";
 import {NavLink, useParams} from "react-router-dom";
 import {MdMessage} from "react-icons/md";
 import Menubar from "@thorium/ui/Menubar";
@@ -55,6 +61,10 @@ const ConfigList = () => {
           <ConfigIcon to={`/config/${pluginId}/themes`}>
             <FaPaintBrush className="text-6xl mb-4" />
             <p className="font-bold text-2xl">Themes</p>
+          </ConfigIcon>
+          <ConfigIcon to={`/config/${pluginId}/inventory`}>
+            <FaBoxOpen className="text-6xl mb-4" />
+            <p className="font-bold text-2xl">Inventory</p>
           </ConfigIcon>
         </div>
       </div>

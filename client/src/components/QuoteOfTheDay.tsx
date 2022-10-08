@@ -198,6 +198,43 @@ const quotes = [
   "We're Almost There, But Nowhere Near It. All That Matters Is That We're Going.",
   // Cereal Box
   "Feel good about breakfast. Feel good about every day!",
+  // Andre Gide
+  "Man cannot discover new oceans unless he has the courage to lose sight of the shore.",
+  // Teller
+  "Sometimes magic is just someone spending more time on something than anyone else might reasonably expect.",
+  "Intelligence and infallibility are mutually exclusive.",
+  // Ernst Kirchsteiger
+  "In the simple lives the beautiful.",
+  // Steve Jobs
+  "The most powerful person in the world is the storyteller.",
+  // Hey Now
+  "Imagination calling mirrors for you",
+  // Albert Einstein
+  "The only reason for time is so that everything doesn't happen at once.",
+  "Reality is merely an illusion, albeit a very persistent one.",
+  "The true sign of intelligence is not knowledge but imagination.",
+  // Whimsey
+  "Perfect. That is to say, slightly flawed. The mark of a true gentleman.",
+  // Zodiac
+  "Always under the same sky.",
+  // 🤷
+  "I was just dreaming a little for you because all my dreams are gone.",
+  "Danger is very real, but fear is a choice.",
+  "Individual moments of brilliance in concert",
+  "Nobody gets to go back, only forward",
+  "When I leave, you will finally understand why storms are named after people.",
+  "We are autumn children, burdened with memories of sun.",
+  "Impudent of you to assume I will meet a mortal end.",
+  "Heaven, are you watching?",
+  // Larry Elison
+  "Choose your competitors carefully, because you'll become a lot like them.",
+  // William Martin
+  "Make the ordinary come alive. The extraordinary will take care of itself.",
+  // Trashy Quotes
+  "Of all the senses, sight must be the most delightful.",
+  // Brene Brown
+  "No one belongs here more than you.",
+  "When we own the story, we can write a brave new ending.",
 ];
 
 const QuoteOfTheDay = () => {

@@ -85,7 +85,7 @@ export function ShipMap() {
       const result = await netSend("pluginShipDeckUpdate", {
         pluginId,
         shipId,
-        deckId: active.id,
+        deckId: active.id as string,
         newIndex: Number(overIndex),
       });
       if (result) {

@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "dev": "",
     "start": "concurrently \"electron-esbuild dev\" \"npx copy-dir-cli resources ../dist/resources\"",
     "build": "electron-esbuild build",
     "typecheck": "tsc --noEmit"
@@ -11,15 +10,15 @@
   "keywords": [],
   "author": "Alex Anderson",
   "devDependencies": {
-    "@types/bonjour": "^3.5.9",
+    "@types/bonjour": "^3.5.10",
     "copy-dir-cli": "^0.0.3",
-    "electron-esbuild": "^3.0.0"
+    "electron-esbuild": "^6.0.0"
   },
   "dependencies": {
     "bonjour": "^3.5.0",
     "electron-better-ipc": "^2.0.1",
-    "electron-store": "^8.0.1",
-    "electron-updater": "^5.0.1",
+    "electron-store": "^8.1.0",
+    "electron-updater": "^5.2.1",
     "electron-util": "^0.17.2"
   }
 }

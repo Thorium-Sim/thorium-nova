@@ -1,4 +1,4 @@
-import React, {Suspense} from "react";
+import React, {forwardRef, Suspense} from "react";
 import {
   TextureLoader,
   RepeatWrapping,
@@ -16,26 +16,12 @@ import getUniforms from "./uniforms";
 import ColorUtil from "color";
 import {useTexture} from "@react-three/drei";
 import {useFrame} from "@react-three/fiber";
-import {useStarmapStore} from "../starmapStore";
+import {useGetStarmapStore} from "../starmapStore";
 
 import texturePath from "./textures/01_Texture.jpg";
 import spritePath from "./textures/Star.svg";
 const distanceVector = new Vector3();
 
-const StarSprite = ({color1}: {color1?: number | Color}) => {
-  const spriteMap = useTexture(spritePath) as Texture;
-
-  return (
-    <sprite>
-      <spriteMaterial
-        attach="material"
-        map={spriteMap}
-        color={color1}
-        sizeAttenuation={false}
-      ></spriteMaterial>
-    </sprite>
-  );
-};
 const SPRITE_SCALE_FACTOR = 50;
 const Star: React.FC<{
   color1?: number | Color;
@@ -52,6 +38,11 @@ const Star: React.FC<{
   showSprite,
   ...props
 }) => {
+  const useStarmapStore = useGetStarmapStore();
+  const isViewscreen = useStarmapStore(
+    store => store.viewingMode === "viewscreen"
+  );
+
   const texture = React.useMemo(() => {
     const loader = new TextureLoader();
     const texture = loader.load(texturePath);
@@ -63,11 +54,9 @@ const Star: React.FC<{
     () => getUniforms({map: texture, color1, color2}),
     [color1, color2, texture]
   );
-  const shader = React.useRef<Mesh>();
-  const starMesh = React.useRef<Group>();
-  const starSprite = React.useRef<Group>();
-
-  const viewingMode = useStarmapStore(state => state.viewingMode);
+  const shader = React.useRef<Mesh>(null);
+  const starMesh = React.useRef<Group>(null);
+  const starSprite = React.useRef<Group>(null);
 
   useFrame(({camera}) => {
     shader.current?.quaternion.copy(camera.quaternion);
@@ -107,15 +96,11 @@ const Star: React.FC<{
     return ColorUtil(colorVal).lighten(90).rgbNumber();
   }, [color1]);
 
-  const spriteScale = 1 / (size || 1) / SPRITE_SCALE_FACTOR;
   return (
     <group {...props}>
       <pointLight intensity={0.8} decay={2} color={color} castShadow />
-      <group ref={starSprite} scale={[spriteScale, spriteScale, spriteScale]}>
-        <Suspense fallback={null}>
-          <StarSprite color1={color1} />
-        </Suspense>
-      </group>
+      {!isViewscreen && <StarSprite size={size} color1={color1} />}
+
       <group ref={starMesh}>
         <mesh ref={shader} uuid="My star">
           <circleBufferGeometry attach="geometry" args={[1, 8, 8]} />
@@ -134,9 +119,41 @@ const Star: React.FC<{
           <meshBasicMaterial attach="material" color={0x000000} />
         </mesh>
       </group>
-      {viewingMode !== "core" && !noLensFlare && <LensFlare />}
+      {/* {viewingMode !== "core" && !noLensFlare && <LensFlare />} */}
     </group>
   );
 };
 
 export default Star;
+
+export const StarSprite = forwardRef<
+  Group,
+  {size?: number; color1: Color | number}
+>(({size = 1, color1}, starSprite) => {
+  const spriteScale = 1 / size / SPRITE_SCALE_FACTOR;
+
+  return (
+    <group ref={starSprite} scale={[spriteScale, spriteScale, spriteScale]}>
+      <Suspense fallback={null}>
+        <StarSpriteInner color1={color1} />
+      </Suspense>
+    </group>
+  );
+});
+
+StarSprite.displayName = "StarSprite";
+
+const StarSpriteInner = ({color1}: {color1: Color | number}) => {
+  const spriteMap = useTexture(spritePath) as Texture;
+
+  return (
+    <sprite>
+      <spriteMaterial
+        attach="material"
+        map={spriteMap}
+        color={color1}
+        sizeAttenuation={false}
+      ></spriteMaterial>
+    </sprite>
+  );
+};

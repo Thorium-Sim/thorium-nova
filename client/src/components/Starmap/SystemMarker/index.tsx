@@ -3,10 +3,10 @@ import {Group, Vector3} from "three";
 import SystemLabel from "./SystemLabel";
 import SystemCircle, {DraggableSystemCircle} from "./SystemCircle";
 import {MeshProps, useFrame} from "@react-three/fiber";
-import {useStarmapStore} from "../starmapStore";
+import {useGetStarmapStore} from "../starmapStore";
 const SystemMarker: React.FC<
   {
-    systemId: string;
+    systemId: string | number;
     name: string;
     position: [number, number, number];
     draggable?: boolean;
@@ -14,6 +14,7 @@ const SystemMarker: React.FC<
   } & MeshProps
 > = ({systemId, name, position, draggable, ...props}) => {
   const group = React.useRef<Group>(new Group());
+  const useStarmapStore = useGetStarmapStore();
 
   const direction = React.useRef(0);
   const cameraView = useStarmapStore(state => state.cameraView);

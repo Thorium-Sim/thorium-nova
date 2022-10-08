@@ -5,6 +5,8 @@ import systems from "../systems";
 import {FlightClient} from "./FlightClient";
 import {FSDataStore, FSDataStoreOptions} from "@thorium/db-fs";
 import ShipPlugin from "./Plugins/Ship";
+import {DefaultUIDGenerator} from "../utils/ecs/uid";
+import {InventoryTemplate} from "./Plugins/Inventory";
 
 export class FlightDataModel extends FSDataStore {
   static INTERVAL = 1000 / 60;
@@ -15,7 +17,9 @@ export class FlightDataModel extends FSDataStore {
   clients!: Record<string, FlightClient>;
   pluginIds!: string[];
   private entities!: Entity[];
+  inventoryTemplates!: {[inventoryTemplateName: string]: InventoryTemplate};
   serverDataModel: ServerDataModel;
+  interval!: ReturnType<typeof setInterval>;
   constructor(
     params: Partial<FlightDataModel> & {
       serverDataModel: ServerDataModel;
@@ -46,6 +50,12 @@ export class FlightDataModel extends FSDataStore {
         ([id, client]) => [id, new FlightClient(client)]
       )
     );
+
+    this.inventoryTemplates = Object.fromEntries(
+      Object.entries(
+        this.inventoryTemplates || params.inventoryTemplates || {}
+      ).map(([key, val]) => [key, new InventoryTemplate(val)])
+    );
   }
   run = () => {
     // Run all the systems
@@ -53,8 +63,15 @@ export class FlightDataModel extends FSDataStore {
       this.ecs.update();
     }
     if (process.env.NODE_ENV === "test") return;
-    setTimeout(this.run, FlightDataModel.INTERVAL);
+    this.interval = setTimeout(this.run, FlightDataModel.INTERVAL);
   };
+  destroy() {
+    clearInterval(this.interval);
+
+    this.ecs.entities.forEach(entity => {
+      entity.dispose();
+    });
+  }
   initEcs(server: ServerDataModel) {
     this.ecs = new ECS(server);
     systems.forEach(Sys => {
@@ -64,27 +81,14 @@ export class FlightDataModel extends FSDataStore {
       const e = new Entity(id, components);
       this.ecs.addEntity(e);
     });
+    const maxId = this.entities.reduce((acc, {id}) => Math.max(acc, id), 0);
+    DefaultUIDGenerator.uid = Math.max(DefaultUIDGenerator.uid, maxId);
     this.run();
   }
   reset() {
     // TODO: Flight Reset Handling
   }
 
-  // TODO September 1, 2021 - We can uncomment this when the plugin system is done
-  // activatePlugins(initialLoad?: boolean): void {
-  //   this.pluginIds.forEach(pluginId => {
-  //     const plugin = getPlugin(pluginId);
-  //     if (initialLoad) {
-  //       // TODO: Combine remix plugins with the base plugins.
-  //       // Create entities for the universe objects
-  //       plugin.universe.forEach(universeItem => {
-  //         this.ecs.addEntity(
-  //           new Entity({...universeItem, pluginId: plugin.id})
-  //         );
-  //       });
-  //     }
-  //   });
-  // }
   // Helper Getters
   /**
    * All player ships in the universe.
@@ -120,10 +124,12 @@ export class FlightDataModel extends FSDataStore {
       paused: this.paused,
       date: this.date,
       pluginIds: this.pluginIds,
-      entities: this.ecs.entities,
+      entities: this.ecs.entities.map(e => e.toJSON()),
+      maxEntityId: this.ecs.maxEntityId,
       clients: Object.fromEntries(
         Object.entries(this.clients).map(([id, client]) => [id, client])
       ),
+      inventoryTemplates: this.inventoryTemplates,
     };
     return data;
   }

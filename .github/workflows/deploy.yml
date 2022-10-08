@@ -15,7 +15,7 @@ jobs:
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v1
         with:
-          node-version: 16
+          node-version: 18
       - name: Install Dependencies
         run: npm install
       - name: Release
@@ -42,7 +42,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        os: [macos-10.15, ubuntu-20.04, windows-2019]
+        os: [macos-latest, ubuntu-20.04, windows-2019]
 
     steps:
       - name: Check out Git repository
@@ -52,7 +52,7 @@ jobs:
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v1
         with:
-          node-version: 16
+          node-version: 18
       - name: Download production artifacts
         uses: actions/download-artifact@v2
         with:

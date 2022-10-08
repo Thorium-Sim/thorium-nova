@@ -12,11 +12,10 @@ export class Component {
     comp.init(params);
     return comp;
   }
-  constructor() {}
   init(params: any = {}) {
     (Object.getOwnPropertyNames(this) as (keyof this)[]).forEach(key => {
       if (key !== "init") {
-        this[key] = params[key] || this[key];
+        this[key] = params[key] ?? this[key];
       }
     });
   }

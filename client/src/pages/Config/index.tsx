@@ -1,4 +1,4 @@
-import {useClientData} from "client/src/context/useCardData";
+import {useNetRequest} from "client/src/context/useNetRequest";
 import {lazy} from "react";
 import {Navigate, Route, Routes} from "react-router-dom";
 
@@ -8,11 +8,12 @@ const ShipsConfig = lazy(() => import("./Ships"));
 const ThemesConfig = lazy(() => import("./Themes"));
 const StarmapConfig = lazy(() => import("./Starmap"));
 const ShipSystemConfig = lazy(() => import("./ShipSystems"));
+const InventoryConfig = lazy(() => import("./Inventory"));
 
 export default function ConfigRoutes() {
-  const clientData = useClientData();
+  const client = useNetRequest("client");
 
-  if (!clientData.client.isHost) return <Navigate to="/" replace />;
+  if (!client.isHost) return <Navigate to="/" replace />;
 
   return (
     <Routes>
@@ -23,6 +24,7 @@ export default function ConfigRoutes() {
       <Route path="/:pluginId/themes/*" element={<ThemesConfig />} />
       <Route path="/:pluginId/starmap/*" element={<StarmapConfig />} />
       <Route path="/:pluginId/systems/*" element={<ShipSystemConfig />} />
+      <Route path="/:pluginId/inventory/*" element={<InventoryConfig />} />
     </Routes>
   );
 }

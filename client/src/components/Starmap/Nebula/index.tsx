@@ -8,7 +8,7 @@ import {
   BoxBufferGeometry,
   Mesh,
 } from "three";
-import {useStarmapStore} from "../starmapStore";
+import {useGetStarmapStore} from "../starmapStore";
 import NebulaWorker from "./generateNebulaMap?worker";
 
 const radius = 1e20;
@@ -30,8 +30,8 @@ function generateMaterial() {
 
   const material = new MeshBasicMaterial({
     side: BackSide,
-    transparent: true,
-    depthWrite: false,
+    // transparent: true,
+    // depthWrite: false,
     depthTest: false,
     map: canvasTexture,
     userData: {
@@ -43,8 +43,8 @@ function generateMaterial() {
 
 function Nebula() {
   const activeMesh = React.useRef<"primary" | "secondary">("secondary");
-  const primaryMesh = React.useRef<Mesh>();
-  const secondaryMesh = React.useRef<Mesh>();
+  const primaryMesh = React.useRef<Mesh>(null);
+  const secondaryMesh = React.useRef<Mesh>(null);
 
   const [primaryMaterials, secondaryMaterials] = React.useMemo(
     () => [
@@ -91,6 +91,7 @@ function Nebula() {
       }
     }
   }, []);
+  const useStarmapStore = useGetStarmapStore();
 
   const skyboxKey = useStarmapStore(s => s.skyboxKey);
   useEffect(() => {

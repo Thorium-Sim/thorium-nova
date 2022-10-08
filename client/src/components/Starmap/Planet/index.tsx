@@ -5,15 +5,16 @@ import {Rings} from "./Rings";
 import {Clouds} from "./Clouds";
 import Selected from "../Selected";
 import Dot from "./Dot.svg";
-import {useStarmapStore} from "../starmapStore";
+import {useGetStarmapStore} from "../starmapStore";
 import SystemLabel from "../SystemMarker/SystemLabel";
 import {DEG2RAD} from "three/src/math/MathUtils";
 import {Group, Vector3} from "three";
-import {useFrame} from "@react-three/fiber";
+import {useFrame, useThree} from "@react-three/fiber";
 import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
 import {Kilometer} from "server/src/utils/unitTypes";
 import {OrbitLine} from "../OrbitContainer";
-const PlanetSprite = ({color = "white"}) => {
+
+export const PlanetSprite = ({color = "white"}) => {
   const spriteMap = useTexture(Dot);
 
   return (
@@ -27,7 +28,7 @@ const PlanetSprite = ({color = "white"}) => {
     </sprite>
   );
 };
-function PlanetSphere({
+export function PlanetSphere({
   texture,
   wireframe,
 }: {
@@ -52,7 +53,7 @@ function PlanetSphere({
 }
 
 const SPRITE_SCALE_FACTOR = 50;
-const spriteScale = 1 / SPRITE_SCALE_FACTOR;
+export const planetSpriteScale = 1 / SPRITE_SCALE_FACTOR;
 const distanceVector = new Vector3();
 
 export function Planet({
@@ -61,14 +62,33 @@ export function Planet({
   showSprite,
   showMesh = true,
 }: {
-  planet: PlanetPlugin;
+  planet: {
+    id: string | number;
+    name: string;
+    isPlanet: {
+      radius: number;
+      ringMapAsset: string | null;
+      cloudMapAsset: string | null;
+      textureMapAsset: string;
+    };
+    satellite: {
+      axialTilt: number;
+      semiMajorAxis: number;
+      eccentricity: number;
+      orbitalArc: number;
+      inclination: number;
+      showOrbit: boolean;
+    };
+  };
   isSatellite?: boolean;
   origin?: Vector3;
   showSprite?: boolean;
   showMesh?: boolean;
 }) {
-  const selected = useStarmapStore(
-    state => state.selectedObjectId === planet.name
+  const useStarmapStore = useGetStarmapStore();
+
+  const selected = useStarmapStore(state =>
+    state.selectedObjectIds.includes(planet.id)
   );
   const {
     radius,
@@ -94,8 +114,8 @@ export function Planet({
   const wireframe = false;
 
   const labelRef = useRef<Group>(null);
-  const planetSpriteRef = useRef<Group>();
-  const planetMeshRef = useRef<Group>();
+  const planetSpriteRef = useRef<Group>(null);
+  const planetMeshRef = useRef<Group>(null);
 
   useFrame(({camera}) => {
     if (labelRef.current) {
@@ -126,7 +146,6 @@ export function Planet({
 
   function onPointerOver() {
     if (viewingMode === "viewscreen") return;
-    if (viewingMode === "core") return;
     // const hoveredPosition = getOrbitPosition({
     //   eccentricity,
     //   orbitalArc,
@@ -155,11 +174,13 @@ export function Planet({
     // });
     document.body.style.cursor = "auto";
   }
+  const {camera} = useThree();
+
   function onClick() {
     if (viewingMode === "viewscreen") return;
-    if (viewingMode === "core") return;
+    useStarmapStore.getState().setCameraFocus(position);
     useStarmapStore.setState({
-      selectedObjectId: planet.name,
+      selectedObjectIds: [planet.id],
     });
   }
 
@@ -181,9 +202,9 @@ export function Planet({
           <Suspense fallback={null}>
             <group
               ref={planetSpriteRef}
-              scale={[spriteScale, spriteScale, spriteScale]}
+              scale={[planetSpriteScale, planetSpriteScale, planetSpriteScale]}
             >
-              <PlanetSprite />
+              <PlanetSprite color={selected ? "#0088ff" : "white"} />
             </group>
             <group
               ref={planetMeshRef}
@@ -207,14 +228,15 @@ export function Planet({
             />
           </group>
         )}
-        {satellites?.map((s, i) => (
+        {/* TODO June 20, 2022 - Figure out all of the stuff around moons */}
+        {/* {satellites?.map((s, i) => (
           <Planet
             key={`orbit-${s.name}`}
             isSatellite
             origin={position}
             planet={s}
           />
-        ))}
+        ))} */}
       </group>
     </group>
   );

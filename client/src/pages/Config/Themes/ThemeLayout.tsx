@@ -1,13 +1,10 @@
 import {useConfirm, usePrompt} from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
+import {Navigate, Outlet, useParams, useNavigate} from "react-router-dom";
 import {
-  Navigate,
-  Outlet,
-  useLocation,
-  useParams,
-  useNavigate,
-} from "react-router-dom";
-import {useNetRequest} from "client/src/context/useNetRequest";
+  MockNetRequestContext,
+  useNetRequest,
+} from "client/src/context/useNetRequest";
 import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
 import {useCallback, useEffect, useRef, useState} from "react";
@@ -20,7 +17,6 @@ import {AssetPreview} from "@thorium/ui/AssetPreview";
 import InfoTip from "@thorium/ui/InfoTip";
 import type ThemePlugin from "server/src/classes/Plugins/Theme";
 import StationLayout from "client/src/components/Station/StationLayout";
-import {MockClientDataContext} from "client/src/context/useCardData";
 import normalLogo from "../../../images/logo.svg?url";
 import colorLogo from "../../../images/logo-color.svg?url";
 export const ThemeLayout = () => {
@@ -46,6 +42,8 @@ export const ThemeLayout = () => {
     "5"
   );
 
+  const [previewViewscreen, setPreviewViewscreen] = useState(false);
+
   if (!themeId || !theme) return <Navigate to={`/config/${pluginId}/themes`} />;
 
   return (
@@ -65,7 +63,7 @@ export const ThemeLayout = () => {
               }}
             >
               <style dangerouslySetInnerHTML={{__html: theme.processedCSS}} />
-              <MockClientDataContext.Provider
+              <MockNetRequestContext.Provider
                 value={{
                   client: {
                     id: "Test",
@@ -91,26 +89,34 @@ export const ThemeLayout = () => {
                     alertLevel,
                   } as any,
                   station: {
-                    name: stationName,
+                    name: previewViewscreen ? "Viewscreen" : stationName,
                     logo: "",
-                    cards: [
-                      {
-                        icon: colorLogo,
-                        name: "Component Demo",
-                        component: "ComponentDemo",
-                      },
-                      {
-                        icon: colorLogo,
-                        name: "Test Card",
-                        component: "Login",
-                      },
-                    ],
+                    cards: previewViewscreen
+                      ? [
+                          {
+                            icon: colorLogo,
+                            name: "Viewscreen",
+                            component: "ViewscreenDemo",
+                          },
+                        ]
+                      : [
+                          {
+                            icon: colorLogo,
+                            name: "Component Demo",
+                            component: "ComponentDemo",
+                          },
+                          {
+                            icon: colorLogo,
+                            name: "Test Card",
+                            component: "Login",
+                          },
+                        ],
                   } as any,
                   theme: null,
                 }}
               >
                 <StationLayout />
-              </MockClientDataContext.Provider>
+              </MockNetRequestContext.Provider>
             </div>
           </div>
           <Editor
@@ -140,7 +146,7 @@ export const ThemeLayout = () => {
             }}
           />
 
-          <div className="flex">
+          <div className="flex gap-4">
             <Button
               className="btn-outline btn-error"
               disabled={!themeId}
@@ -188,6 +194,13 @@ export const ThemeLayout = () => {
               }}
             >
               Duplicate Theme
+            </Button>
+            <Button
+              className="btn-outline btn-info"
+              disabled={!themeId}
+              onClick={() => setPreviewViewscreen(v => !v)}
+            >
+              Preview {previewViewscreen ? "Station" : "Viewscreen"}
             </Button>
           </div>
         </div>

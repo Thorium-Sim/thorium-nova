@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useStarmapStore} from "../starmapStore";
+import {useGetStarmapStore} from "../starmapStore";
 import Button from "../../ui/Button";
 import {netSend} from "client/src/context/netSend";
 import {useNavigate} from "react-router-dom";
@@ -17,6 +17,7 @@ export function BasicDisclosure({
   object: {name: string; description: string; skyboxKey?: string};
   type: "system" | "star" | "planet";
 }) {
+  const useStarmapStore = useGetStarmapStore();
   const [pluginId, solarSystemId] = useSystemIds();
   const navigate = useNavigate();
   const updateName = React.useMemo(
@@ -33,31 +34,33 @@ export function BasicDisclosure({
           if (type === "system") {
             const result = await netSend("pluginSolarSystemUpdate", body);
             navigate(result.solarSystemId);
-            useStarmapStore.setState({selectedObjectId: result.solarSystemId});
+            useStarmapStore.setState({
+              selectedObjectIds: [result.solarSystemId],
+            });
           } else if (type === "planet") {
             const result = await netSend("pluginPlanetUpdate", {
               ...body,
               planetId: object.name,
             });
-            useStarmapStore.setState({selectedObjectId: result.name});
+            useStarmapStore.setState({selectedObjectIds: [result.name]});
           } else if (type === "star") {
             const result = await netSend("pluginStarUpdate", {
               ...body,
               starId: object.name,
             });
-            useStarmapStore.setState({selectedObjectId: result.name});
+            useStarmapStore.setState({selectedObjectIds: [result.name]});
           }
         },
         1000,
         {trailing: true, leading: false}
       ),
-    [pluginId, solarSystemId, navigate, object.name, type]
+    [pluginId, solarSystemId, navigate, object.name, type, useStarmapStore]
   );
 
   const skyboxKeyRef = React.useRef<HTMLInputElement>(null);
   return (
     <PaletteDisclosure title="Basic">
-      <Input label="Name" defaultValue={object.name} onChange={updateName} />
+      <Input label="Name" defaultValue={object.name} onBlur={updateName} />
       <Input
         label="Description"
         as="textarea"

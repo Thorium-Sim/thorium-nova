@@ -5,14 +5,14 @@ import * as React from "react";
 import {useCallback} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {CanvasTexture, Group, Vector3} from "three";
-import {useStarmapStore} from "../starmapStore";
+import {useGetStarmapStore} from "../starmapStore";
 
 const size = 50;
 const lineWidth = 0.1;
 export const DraggableSystemCircle: React.FC<
   {
     hoveringDirection: React.MutableRefObject<number>;
-    systemId: string;
+    systemId: string | number;
     parentObject: React.MutableRefObject<Group>;
   } & MeshProps
 > = ({
@@ -22,6 +22,8 @@ export const DraggableSystemCircle: React.FC<
   position,
   ...props
 }) => {
+  const useStarmapStore = useGetStarmapStore();
+
   const {pluginId} = useParams() as {
     pluginId: string;
   };
@@ -36,7 +38,7 @@ export const DraggableSystemCircle: React.FC<
           newPosition.setY(position[1]);
         }
       }
-      if (!pluginId) return;
+      if (!pluginId || typeof systemId === "number") return;
       netSend("pluginSolarSystemUpdate", {
         pluginId,
         solarSystemId: systemId,
@@ -45,7 +47,7 @@ export const DraggableSystemCircle: React.FC<
     },
     onMouseDown: () => {
       useStarmapStore.setState({
-        selectedObjectId: systemId,
+        selectedObjectIds: [systemId],
         // selectedPosition: parent.current.position,
         // scaledSelectedPosition: parent.current.position,
       });
@@ -64,6 +66,9 @@ export const DraggableSystemCircle: React.FC<
       systemId={systemId}
       hoveringDirection={hoveringDirection}
       {...(bind() as any)}
+      onDoubleClick={() => {
+        navigate(systemId.toString());
+      }}
       {...props}
       onPointerOver={e => {
         props?.onPointerOver?.(e);
@@ -78,19 +83,18 @@ export const DraggableSystemCircle: React.FC<
           hoveredPosition: null,
         });
       }}
-      onDoubleClick={() => {
-        navigate(systemId);
-      }}
     />
   );
 };
 
 const SystemCircle: React.FC<
   {
-    systemId: string;
+    systemId: string | number;
     hoveringDirection: React.MutableRefObject<number>;
   } & MeshProps
 > = ({systemId, hoveringDirection, ...props}) => {
+  const useStarmapStore = useGetStarmapStore();
+
   const ctx = React.useMemo(() => {
     const canvas = document.createElement("canvas");
 
@@ -103,8 +107,8 @@ const SystemCircle: React.FC<
 
   const drawRadius = useCallback(
     function drawRadius(endArc = 360) {
-      const selectedObjectId = useStarmapStore.getState().selectedObjectId;
-      const isSelected = systemId === selectedObjectId;
+      const selectedObjectIds = useStarmapStore.getState().selectedObjectIds;
+      const isSelected = selectedObjectIds.includes(systemId);
       ctx.clearRect(0, 0, size, size);
 
       ctx.lineWidth = size / (1 / lineWidth);
@@ -141,8 +145,8 @@ const SystemCircle: React.FC<
   }, [ctx]);
 
   useFrame(() => {
-    const selectedObjectId = useStarmapStore.getState().selectedObjectId;
-    const isSelected = systemId === selectedObjectId;
+    const selectedObjectIds = useStarmapStore.getState().selectedObjectIds;
+    const isSelected = selectedObjectIds.includes(systemId);
     if (isSelected) {
       selected.current = true;
     }

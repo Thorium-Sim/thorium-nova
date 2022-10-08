@@ -1,6 +1,7 @@
 import {useLocalStorageReducer} from "client/src/hooks/useLocalStorage";
 import * as React from "react";
 import {randomNameGenerator} from "server/src/utils/randomNameGenerator";
+import type {FlightStartingPoint} from "server/src/utils/types";
 
 export interface FlightConfigState {
   crewCount: number;
@@ -9,7 +10,7 @@ export interface FlightConfigState {
   shipId?: {pluginId: string; shipId: string};
   shipName?: string;
   missionId?: {pluginId: string; missionId: string};
-  startingPointId?: {pluginId: string; startingPointId: string};
+  startingPointId?: FlightStartingPoint;
 }
 
 export type FlightConfigAction =
@@ -25,7 +26,7 @@ export type FlightConfigAction =
     }
   | {
       type: "startingPointId";
-      startingPointId: {pluginId: string; startingPointId: string} | undefined;
+      startingPointId: FlightStartingPoint | undefined;
     };
 
 function quickStartReducer(

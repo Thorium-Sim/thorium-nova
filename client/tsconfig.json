@@ -39,7 +39,7 @@
     "src/**/*",
     "../shared",
     "../server",
-    "test-utils.tsx",
+    "react-test-utils.tsx",
     "vite-plugins"
   ],
   "files": [

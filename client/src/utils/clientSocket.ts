@@ -1,10 +1,13 @@
-import {SnapshotInterpolation, Types} from "@geckos.io/snapshot-interpolation";
 import {decode} from "@msgpack/msgpack";
+import {
+  SnapshotInterpolation,
+  Types,
+} from "@thorium/snapshot-interpolation/src";
 import EventEmitter from "eventemitter3";
 import ReconnectingWebSocket from "reconnecting-websocket";
+import {SERVER_FPS} from "server/src/utils/constants";
 
-const serverFPS = 3;
-export const SI = new SnapshotInterpolation(serverFPS);
+export let SI = new SnapshotInterpolation(SERVER_FPS);
 export class ClientSocket extends EventEmitter {
   constructor(private socket: ReconnectingWebSocket) {
     super();

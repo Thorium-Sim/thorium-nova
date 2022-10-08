@@ -5,9 +5,9 @@ import {ComponentType, Fragment, Suspense, useState} from "react";
 import {ErrorBoundary} from "react-error-boundary";
 import {Transition} from "@headlessui/react";
 import {CardProps} from "./CardProps";
-import {useClientData} from "client/src/context/useCardData";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 import CardProvider from "client/src/context/CardContext";
+import {useNetRequest} from "client/src/context/useNetRequest";
 
 const CardError = () => {
   return (
@@ -33,16 +33,20 @@ const transitionProps = {
 };
 
 export const CardArea: React.FC<{
-  card: ReturnType<typeof useClientData>["station"]["cards"][0];
+  card: {component: string};
 }> = ({card}) => {
-  const {client, station} = useClientData();
+  const client = useNetRequest("client");
+  const station = useNetRequest("station");
   const CardComponents = station.cards.map(card => ({
     ...card,
     CardComponent: Cards[card.component as keyof typeof Cards],
   }));
   return (
     <Fragment>
-      <Transition show={!client.loginName} {...transitionProps}>
+      <Transition
+        show={!client.loginName && station.name !== "Viewscreen"}
+        {...transitionProps}
+      >
         <Login />
       </Transition>
       <Transition show={Boolean(client.offlineState)} {...transitionProps}>
@@ -50,10 +54,10 @@ export const CardArea: React.FC<{
       </Transition>
       {CardComponents.map(({CardComponent, component, name}) => (
         <CardRenderer
-          key={name}
           CardComponent={CardComponent}
           id={component}
           currentCardId={card.component}
+          key={name}
         />
       ))}
     </Fragment>
@@ -69,10 +73,13 @@ const CardRenderer = ({
   id: string;
   currentCardId: string;
 }) => {
-  const {client} = useClientData();
-  const allowCard = Boolean(client.loginName) && !client.offlineState;
-  const [cardLoaded, setCardLoaded] = useState(false);
+  const client = useNetRequest("client");
+  const station = useNetRequest("station");
+  const allowCard =
+    (station.name === "Viewscreen" || Boolean(client.loginName)) &&
+    !client.offlineState;
   const show = allowCard && currentCardId === id;
+  const [cardLoaded, setCardLoaded] = useState(show);
   return (
     <CardProvider cardName={id}>
       <Transition
@@ -80,19 +87,32 @@ const CardRenderer = ({
         show={show}
         {...transitionProps}
         unmount={false}
-        beforeEnter={() => {
+        afterLeave={() => {
           setCardLoaded(false);
         }}
-        afterEnter={() => {
+        beforeEnter={() => {
           setCardLoaded(true);
         }}
       >
         <Suspense fallback={<LoadingSpinner />}>
           <ErrorBoundary fallback={<CardError />}>
-            <CardComponent cardLoaded={cardLoaded} />
+            <RenderComponent
+              cardLoaded={cardLoaded}
+              CardComponent={CardComponent}
+            />
           </ErrorBoundary>
         </Suspense>
       </Transition>
     </CardProvider>
   );
 };
+
+function RenderComponent({
+  cardLoaded,
+  CardComponent,
+}: {
+  cardLoaded: boolean;
+  CardComponent: ComponentType<{cardLoaded: boolean}>;
+}) {
+  return <CardComponent cardLoaded={cardLoaded} />;
+}

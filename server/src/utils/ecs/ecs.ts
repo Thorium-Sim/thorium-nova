@@ -27,6 +27,7 @@ class ECS {
   updateCounter = 0;
   lastUpdate = performance.now();
   rng: RNG;
+  maxEntityId: number = 1;
   constructor(
     public server: ServerDataModel,
     seed: string | number = "thorium",
@@ -52,6 +53,7 @@ class ECS {
   addEntity(entity: Entity) {
     this.entities.push(entity);
     entity.addToECS(this);
+    this.maxEntityId = Math.max(this.maxEntityId, entity.id);
   }
   /**
    * Remove an entity from the ecs by reference.
@@ -156,20 +158,17 @@ class ECS {
   update(testElapsed?: number) {
     let now = performance.now();
     let elapsed = testElapsed ?? now - this.lastUpdate;
-
     for (let i = 0, system; (system = this.systems[i]); i += 1) {
       if (this.updateCounter % system.frequency > 0) {
-        break;
+        continue;
       }
 
       if (this.entitiesSystemsDirty.length) {
         // if the last system flagged some entities as dirty check that case
         this.cleanDirtyEntities();
       }
-
       system.updateAll(elapsed);
     }
-
     this.updateCounter += 1;
     this.lastUpdate = now;
   }

@@ -52,7 +52,7 @@ function makeLineGeometry(pointList: Vector3[]) {
   return geometry;
 }
 
-function getModelViewMatrix(mesh: Mesh | undefined, camera: Camera) {
+function getModelViewMatrix(mesh: Mesh | undefined | null, camera: Camera) {
   if (!mesh) return new Matrix4();
   return new Matrix4().multiplyMatrices(
     camera.matrixWorldInverse,
@@ -67,7 +67,7 @@ const Starfield: React.FC<{count?: number; radius?: number}> = ({
   const presenceRatio = React.useRef(1);
   const skip = React.useRef(0);
 
-  const mesh = React.useRef<Mesh>();
+  const mesh = React.useRef<Mesh>(null);
   const geometry = React.useMemo(() => {
     let pointList: Vector3[] = [];
     for (let f = 0; count > f; f++) {
@@ -225,6 +225,7 @@ const Starfield: React.FC<{count?: number; radius?: number}> = ({
   const previousModelViewMatrix = React.useRef(new Matrix4());
   useFrame((state, delta) => {
     const mat = mesh.current?.material as ShaderMaterial;
+    if (!mesh.current) return;
     if (mat) {
       mat.uniforms.previousModelViewMatrix.value.copy(
         previousModelViewMatrix.current

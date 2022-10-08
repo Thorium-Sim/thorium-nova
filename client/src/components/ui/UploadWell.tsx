@@ -1,10 +1,11 @@
-import React from "react";
+import React, {ReactNode} from "react";
 import {FaFileUpload} from "react-icons/fa";
 
 const UploadWell: React.FC<{
   disabled?: boolean;
   accept?: string;
   onChange?: (files: FileList) => void;
+  children?: ReactNode;
 }> = ({children, disabled, accept, onChange = files => {}, ...props}) => {
   const [dragging, setDragging] = React.useState(false);
 

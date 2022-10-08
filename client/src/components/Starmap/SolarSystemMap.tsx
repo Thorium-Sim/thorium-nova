@@ -2,8 +2,8 @@ import * as React from "react";
 import {Suspense} from "react";
 import {useThree} from "@react-three/fiber";
 import {useEffect} from "react";
-import {CameraControls} from "./CameraControls";
-import {useStarmapStore} from "./starmapStore";
+import {CameraControls, useExternalCameraControl} from "./CameraControls";
+import {useGetStarmapStore} from "./starmapStore";
 import CameraControlsClass from "camera-controls";
 import {
   astronomicalUnitToKilometer,
@@ -19,8 +19,6 @@ import {useConfirm} from "@thorium/ui/AlertDialog";
 import {planetTypes} from "server/src/spawners/planetTypes";
 import {useNetRequest} from "client/src/context/useNetRequest";
 import Disc from "./Disc";
-import StarEntity from "./Star";
-import {Planet} from "./Planet";
 import {HiChevronUp} from "react-icons/hi";
 import {useLocalStorage} from "client/src/hooks/useLocalStorage";
 import {BasicDisclosure} from "./EditorPalettes/BasicDisclosure";
@@ -32,6 +30,7 @@ import {PolarGrid} from "./PolarGrid";
 import {useSystemIds} from "./useSystemIds";
 import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
+import {useParams} from "react-router-dom";
 const ACTION = CameraControlsClass.ACTION;
 
 // 10% further than Neptune's orbit
@@ -57,21 +56,28 @@ function HabitableZone() {
   ) : null;
 }
 
-export function SolarSystemMap() {
+export function SolarSystemMap({
+  skyboxKey = "Basic",
+  children,
+  minDistance = 1,
+  maxDistance = SOLAR_SYSTEM_MAX_DISTANCE,
+}: {
+  skyboxKey: string;
+  children?: React.ReactNode;
+  minDistance?: number;
+  maxDistance?: number;
+}) {
+  const pluginId = useParams().pluginId;
+  const useStarmapStore = useGetStarmapStore();
+
   const {camera} = useThree();
   const controlsEnabled = useStarmapStore(s => s.cameraControlsEnabled);
   const cameraView = useStarmapStore(s => s.cameraView);
   const orbitControls = React.useRef<CameraControlsClass>(null);
 
-  const [pluginId, solarSystemId] = useSystemIds();
-  const systemData = useNetRequest("pluginSolarSystem", {
-    pluginId,
-    solarSystemId,
-  });
-
   useEffect(() => {
-    useStarmapStore.setState({skyboxKey: systemData.skyboxKey || "blank"});
-  }, [systemData.skyboxKey]);
+    useStarmapStore.setState({skyboxKey: skyboxKey || "blank"});
+  }, [skyboxKey, useStarmapStore]);
 
   useEffect(() => {
     // Set the initial camera position
@@ -81,7 +87,7 @@ export function SolarSystemMap() {
       new Box3(new Vector3(-max, -max, -max), new Vector3(max, max, max))
     );
     useStarmapStore.getState().setCameraControlsEnabled(true);
-  }, [camera]);
+  }, [camera, useStarmapStore]);
 
   useEffect(() => {
     if (cameraView === "2d") {
@@ -90,34 +96,39 @@ export function SolarSystemMap() {
     }
   }, [camera, cameraView]);
 
+  useExternalCameraControl(orbitControls);
+  const viewingMode = useStarmapStore(store => store.viewingMode);
+
+  const isViewscreen = viewingMode === "viewscreen";
+  const isStation = viewingMode === "station";
+
   return (
     <Suspense fallback={null}>
-      <CameraControls
-        ref={orbitControls}
-        enabled={controlsEnabled}
-        maxDistance={SOLAR_SYSTEM_MAX_DISTANCE}
-        minDistance={1}
-        mouseButtons={{
-          left: cameraView === "2d" ? ACTION.TRUCK : ACTION.ROTATE,
-          right: ACTION.TRUCK,
-          middle: ACTION.DOLLY,
-          wheel: ACTION.DOLLY,
-          shiftLeft: ACTION.DOLLY,
-        }}
-        dollyToCursor
-        dollySpeed={0.5}
-      />
-      <HabitableZone />
-      <PolarGrid
-        rotation={[0, (2 * Math.PI) / 12, 0]}
-        args={[SOLAR_SYSTEM_MAX_DISTANCE, 12, 20, 64, 0xffffff, 0xffffff]}
-      />
-      {systemData.stars.map(star => (
-        <StarEntity key={star.name} star={star} />
-      ))}
-      {systemData.planets.map(planet => (
-        <Planet key={planet.name} planet={planet} />
-      ))}
+      {!pluginId ? null : <HabitableZone />}
+      {!isViewscreen && (
+        <>
+          <CameraControls
+            ref={orbitControls}
+            dampingFactor={0.15}
+            enabled={controlsEnabled}
+            maxDistance={maxDistance}
+            minDistance={minDistance}
+            mouseButtons={{
+              left: ACTION.TRUCK,
+              right: ACTION.ROTATE,
+              middle: ACTION.DOLLY,
+              wheel: ACTION.DOLLY,
+            }}
+            dollyToCursor={isStation}
+            dollySpeed={0.5}
+          />
+          <PolarGrid
+            rotation={[0, (2 * Math.PI) / 12, 0]}
+            args={[maxDistance, 12, 20, 64, 0xffffff, 0xffffff]}
+          />
+        </>
+      )}
+      {children}
     </Suspense>
   );
 }
@@ -132,14 +143,15 @@ export function SolarSystemMenuButtons({
   sceneRef: React.MutableRefObject<SceneRef | undefined>;
 }) {
   const [pluginId, solarSystemId] = useSystemIds();
+  const useStarmapStore = useGetStarmapStore();
 
-  const selectedObjectId = useStarmapStore(s => s.selectedObjectId);
+  const selectedObjectIds = useStarmapStore(s => s.selectedObjectIds);
   const cameraView = useStarmapStore(s => s.cameraView);
   const confirm = useConfirm();
 
   async function deleteObject() {
-    const selectedObjectId = useStarmapStore.getState().selectedObjectId;
-    if (!selectedObjectId) return;
+    const selectedObjectIds = useStarmapStore.getState().selectedObjectIds;
+    if (selectedObjectIds.length === 0) return;
 
     const doRemove = await confirm({
       header: "Are you sure you want to remove this object?",
@@ -147,14 +159,18 @@ export function SolarSystemMenuButtons({
     });
     if (!doRemove) return;
 
-    await netSend("pluginStarDelete", {
-      pluginId,
-      solarSystemId,
-      starId: selectedObjectId,
-    });
+    if (typeof selectedObjectIds === "string") {
+      await netSend("pluginStarDelete", {
+        pluginId,
+        solarSystemId,
+        starId: selectedObjectIds,
+      });
+    } else {
+      // TODO: Delete objects from the flight director menubar? Maybe not...
+    }
 
     useStarmapStore.setState({
-      selectedObjectId: null,
+      selectedObjectIds: [],
     });
   }
 
@@ -163,7 +179,7 @@ export function SolarSystemMenuButtons({
       <Button
         className="btn-info btn-outline btn-xs"
         onClick={() =>
-          useStarmapStore.setState({selectedObjectId: solarSystemId})
+          useStarmapStore.setState({selectedObjectIds: [solarSystemId]})
         }
       >
         Edit System
@@ -173,7 +189,7 @@ export function SolarSystemMenuButtons({
 
       <Button
         className="btn-error btn-outline btn-xs"
-        disabled={!selectedObjectId}
+        disabled={!selectedObjectIds}
         onClick={deleteObject}
       >
         Delete
@@ -194,6 +210,8 @@ export function SolarSystemMenuButtons({
 
 function AddStarMenu() {
   const [pluginId, solarSystemId] = useSystemIds();
+  const useStarmapStore = useGetStarmapStore();
+
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
@@ -228,7 +246,9 @@ function AddStarMenu() {
                       solarSystemId,
                       spectralType: starType.spectralType,
                     });
-                    useStarmapStore.setState({selectedObjectId: result.name});
+                    useStarmapStore.setState({
+                      selectedObjectIds: [result.name],
+                    });
                   }}
                 >
                   {starType.spectralType} - {starType.name} (
@@ -245,6 +265,8 @@ function AddStarMenu() {
 
 function AddPlanetMenu() {
   const [pluginId, solarSystemId] = useSystemIds();
+  const useStarmapStore = useGetStarmapStore();
+
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
@@ -279,7 +301,9 @@ function AddPlanetMenu() {
                       solarSystemId,
                       planetType: planetType.classification,
                     });
-                    useStarmapStore.setState({selectedObjectId: result.name});
+                    useStarmapStore.setState({
+                      selectedObjectIds: [result.name],
+                    });
                   }}
                 >
                   {planetType.classification} - {planetType.name}
@@ -368,25 +392,29 @@ export function PaletteDisclosure({
 }
 
 function useSelectedObject() {
+  const useStarmapStore = useGetStarmapStore();
+
   const [pluginId, solarSystemId] = useSystemIds();
-  const selectedObjectId = useStarmapStore(state => state.selectedObjectId);
+  const selectedObjectIds = useStarmapStore(state => state.selectedObjectIds);
   const systemData = useNetRequest("pluginSolarSystem", {
     pluginId,
     solarSystemId,
   });
 
   // It could be a system, star, or planet
-  if (solarSystemId === selectedObjectId) {
+  if (selectedObjectIds.includes(solarSystemId)) {
     return {type: "system" as const, object: systemData};
   }
 
-  const star = systemData.stars.find(star => star.name === selectedObjectId);
+  const star = systemData.stars.find(star =>
+    selectedObjectIds.includes(star.name)
+  );
   if (star) {
     return {type: "star" as const, object: star};
   }
 
-  const planet = systemData.planets.find(
-    planet => planet.name === selectedObjectId
+  const planet = systemData.planets.find(planet =>
+    selectedObjectIds.includes(planet.name)
   );
   if (planet) {
     return {type: "planet" as const, object: planet};
