@@ -3,6 +3,46 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.7](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.6...1.0.0-alpha.7) (2022-10-08)
+
+
+### Bug Fixes
+
+* **Docs:** Fixes the docs so the properly render after the dependency update. ([296db90](https://github.com/Thorium-Sim/thorium-nova/commit/296db90b3eb3db8c2c19af7ba8be989a56c4732c))
+* **Networking:** Overhaul the networking layer to be more flexible for card and core development. ([339ce9c](https://github.com/Thorium-Sim/thorium-nova/commit/339ce9c3690d6f4f88a2862c03a3ea3d111de656))
+* **Notifications:** Fix a visual error with notifications on Firefox. Closes [#202](https://github.com/Thorium-Sim/thorium-nova/issues/202) ([836d3f7](https://github.com/Thorium-Sim/thorium-nova/commit/836d3f7745adc421e1a1d0248439022b5c0b3d36))
+* **Thorium Account:** Don't show the thorium account profile image if there isn't one. Closes [#236](https://github.com/Thorium-Sim/thorium-nova/issues/236) ([882980a](https://github.com/Thorium-Sim/thorium-nova/commit/882980abbca41a92ac7d1dafaa60dd23822e1c5f))
+
+
+### Features
+
+* **Autopilot:** Add autopilot for controlling engines. Closes [#346](https://github.com/Thorium-Sim/thorium-nova/issues/346) ([95c7465](https://github.com/Thorium-Sim/thorium-nova/commit/95c74651b8653533001aeec3edf83ebac36ec0ce))
+* **Autopilot:** Add rotation autopilot to rotate a ship towards a destination. ([508f3ae](https://github.com/Thorium-Sim/thorium-nova/commit/508f3ae8962d20beeec884dcd50cf070f90de4fd))
+* **Flight Director:** Add controls for viewing and spawning ships on the starmap. ([b5d6870](https://github.com/Thorium-Sim/thorium-nova/commit/b5d68705157dbc4e27323064a3d7fc9c6e8e46e9))
+* **Flight:** Makes it possible to choose a starting point for a sandbox flight. Closes [#325](https://github.com/Thorium-Sim/thorium-nova/issues/325) ([4d7e0c9](https://github.com/Thorium-Sim/thorium-nova/commit/4d7e0c93e39c211f318167014a1a614c0efa00a9))
+* **Impulse Engines:** Add an ECS system to simulate the acceleration and velocity of the impulse engines. ([9b9cdae](https://github.com/Thorium-Sim/thorium-nova/commit/9b9cdaec3d1d0a0fc50e481d601623ceb9745807))
+* Include a button on the Navigation screen to make the view follow the ship's position. Closes [#386](https://github.com/Thorium-Sim/thorium-nova/issues/386) ([b3b21f9](https://github.com/Thorium-Sim/thorium-nova/commit/b3b21f95ba501b54741791321267d3fdf7e7b88b))
+* **Inertial Dampeners:** Add the plugin definition and config UI for inertial dampeners. ([c5890ca](https://github.com/Thorium-Sim/thorium-nova/commit/c5890cab49e1d1ed086682f9e6d47aeff0a82c89))
+* **Inventory:** Add configuration backend and UI for setting the number of cargo containers a ship has. Closes [#262](https://github.com/Thorium-Sim/thorium-nova/issues/262). Closes [#351](https://github.com/Thorium-Sim/thorium-nova/issues/351). ([e23dc65](https://github.com/Thorium-Sim/thorium-nova/commit/e23dc659b26c2bc795205fecda7ebaaf77225bff))
+* **Inventory:** Add the backend class, inputs, and request for inventory plugins. Closes [#261](https://github.com/Thorium-Sim/thorium-nova/issues/261) ([ab46cbe](https://github.com/Thorium-Sim/thorium-nova/commit/ab46cbe677aa4923c33a477ed69e253d5028cd35))
+* **Inventory:** Add the ECS components for inventory. Closes [#354](https://github.com/Thorium-Sim/thorium-nova/issues/354) ([8ca7059](https://github.com/Thorium-Sim/thorium-nova/commit/8ca705926f1445193d671a2f3eaa63f628ece284))
+* **Inventory:** Adds the ability to define inventory in plugins. ([d20e83e](https://github.com/Thorium-Sim/thorium-nova/commit/d20e83e8b33e5f18d0b6f2e95e9243e51fadf6d5)), closes [#363](https://github.com/Thorium-Sim/thorium-nova/issues/363)
+* **Inventory:** Cargo containers spawn with player ships. Closes [#355](https://github.com/Thorium-Sim/thorium-nova/issues/355). Closes [#365](https://github.com/Thorium-Sim/thorium-nova/issues/365) ([950fe46](https://github.com/Thorium-Sim/thorium-nova/commit/950fe46d6300e88f690af7a3901610cd6ed0bc98))
+* **Navigation:** Add a list for managing waypoints, including deleting waypoints. Closes [#389](https://github.com/Thorium-Sim/thorium-nova/issues/389) ([1228d67](https://github.com/Thorium-Sim/thorium-nova/commit/1228d675beee673fd2c570767560a0dbd3199fdc))
+* **Navigation:** Add search field for finding solar systems and planets. Closes [#388](https://github.com/Thorium-Sim/thorium-nova/issues/388) ([75e6143](https://github.com/Thorium-Sim/thorium-nova/commit/75e614344043cd8fe2204c9236c4af0998bbc596))
+* **Navigation:** Adds the navigation card ([272626a](https://github.com/Thorium-Sim/thorium-nova/commit/272626a75af96ac4b1c135cf3aa47ea4f38f5269))
+* **Pilot:** Add controls for impulse and warp engines. ([219c8f9](https://github.com/Thorium-Sim/thorium-nova/commit/219c8f9a22bdf0859064e43c335a66a9accdf4ab))
+* **Pilot:** Add direction and rotation thruster joysticks. ([f9eaf0f](https://github.com/Thorium-Sim/thorium-nova/commit/f9eaf0f86159391a3c06c8160a793a12edd5b454))
+* **Pilot:** Add the framework for the pilot sensor grid. ([4648265](https://github.com/Thorium-Sim/thorium-nova/commit/46482651b7e929917699d0251b65af29d9832621))
+* **Ship Map:** Add a pathfinding algorithm which takes a ship map and returns the rooms to travel to in order to reach a destination. Closes [#264](https://github.com/Thorium-Sim/thorium-nova/issues/264) ([7fbe026](https://github.com/Thorium-Sim/thorium-nova/commit/7fbe0264b45c5163c87343126a32b749497b6a80))
+* **Ship Map:** Adds volume as a property of rooms and adds a flag for rooms to accept cargo. Closes [#263](https://github.com/Thorium-Sim/thorium-nova/issues/263) ([f8647f1](https://github.com/Thorium-Sim/thorium-nova/commit/f8647f1cc5f4a4a3a14f6a2a18103976ff9898ee))
+* **Ship Map:** Creates the ECS components and systems for entities to traverse a ship map. Closes [#265](https://github.com/Thorium-Sim/thorium-nova/issues/265) ([43d0264](https://github.com/Thorium-Sim/thorium-nova/commit/43d0264bbb2f302842d62aca7fff3a207da2768d))
+* **Ship Map:** Initializes the ship map on the player ship when the flight starts. Closes [#246](https://github.com/Thorium-Sim/thorium-nova/issues/246) ([cc83b62](https://github.com/Thorium-Sim/thorium-nova/commit/cc83b62e00e7561edbf83cb5564bdb1563a3f6f6))
+* **Ship Systems:** Makes it possible to override individual properties of a ship system on a per-ship basis. Closes [#328](https://github.com/Thorium-Sim/thorium-nova/issues/328) ([463ee8d](https://github.com/Thorium-Sim/thorium-nova/commit/463ee8ddce5ceb21434543e949a0900ca481ad4f))
+* **Star Map:** Initialize the star map when a flight is started. ([4057661](https://github.com/Thorium-Sim/thorium-nova/commit/40576618780551c7942b7603be0673b5d0d342bc))
+* **Thrusters:** Add the config UI for thruster systems. Closes [#330](https://github.com/Thorium-Sim/thorium-nova/issues/330) ([3dbe62d](https://github.com/Thorium-Sim/thorium-nova/commit/3dbe62d20e9777ec458a1c39c0b0a932ae7856c5))
+* **Warp Engines:** Add the plugin definition and config UI for warp engines. ([97a8658](https://github.com/Thorium-Sim/thorium-nova/commit/97a8658863f21444cf37faddbd20782300e7840b))
+
 # [1.0.0-alpha.6](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.5...1.0.0-alpha.6) (2022-05-04)
 
 
