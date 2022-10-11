@@ -6,7 +6,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import * as React from "react";
 import {useLocalStorage} from "../hooks/useLocalStorage";
 
 type ThoriumAccountContextProps = {

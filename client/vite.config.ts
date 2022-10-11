@@ -1,7 +1,6 @@
 import {defineConfig} from "vite";
-import reactRefresh from "@vitejs/plugin-react-refresh";
 import tsconfigPaths from "vite-tsconfig-paths";
-import reactJsx from "vite-react-jsx";
+import react from "@vitejs/plugin-react";
 import releasesPlugin from "./vite-plugins/releases";
 import mdPlugin, {Mode} from "vite-plugin-markdown";
 
@@ -9,9 +8,8 @@ import mdPlugin, {Mode} from "vite-plugin-markdown";
 export default defineConfig(async () => {
   return {
     plugins: [
-      reactRefresh(),
       tsconfigPaths(),
-      reactJsx(),
+      react(),
       releasesPlugin(),
       mdPlugin({mode: [Mode.HTML, Mode.TOC]}),
     ],
@@ -20,7 +18,9 @@ export default defineConfig(async () => {
       emptyOutDir: false,
       commonjsOptions: {include: []},
     },
-    optimizeDeps: {disabled: false},
+    optimizeDeps: {
+      disabled: false,
+    },
     define: {
       "process.env.THORIUMSIM_CLIENT_ID": `"01FM3JNPNP3GFAXYR22Y7F9XAJ"`,
       "process.env.THORIUMSIM_URL": `"https://thoriumsim.com"`,
