@@ -39,7 +39,7 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
               >
                 Start Flight
               </NavLink>
-              <Disclosure>
+              {/* <Disclosure>
                 <Disclosure.Button className="btn btn-info btn-outline">
                   Load a Saved Flight
                 </Disclosure.Button>
@@ -56,11 +56,11 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
                 >
                   <Flights />
                 </Suspense>
-              </Disclosure>
+              </Disclosure> */}
             </>
           )}
 
-          <Button className="btn btn-warning btn-outline">Join a Server</Button>
+          {/* <Button className="btn btn-warning btn-outline">Join a Server</Button> */}
           {client.isHost && (
             <NavLink className="btn btn-notice btn-outline" to="/config">
               Configure Plugins

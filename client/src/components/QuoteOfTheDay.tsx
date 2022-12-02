@@ -208,7 +208,7 @@ const quotes = [
   // Steve Jobs
   "The most powerful person in the world is the storyteller.",
   // Hey Now
-  "Imagination calling mirrors for you",
+  "Imagination calling mirrors for you.",
   // Albert Einstein
   "The only reason for time is so that everything doesn't happen at once.",
   "Reality is merely an illusion, albeit a very persistent one.",
@@ -226,6 +226,7 @@ const quotes = [
   "We are autumn children, burdened with memories of sun.",
   "Impudent of you to assume I will meet a mortal end.",
   "Heaven, are you watching?",
+  "You're the wind. You're the stars. You are all endless things.",
   // Larry Elison
   "Choose your competitors carefully, because you'll become a lot like them.",
   // William Martin
@@ -235,6 +236,12 @@ const quotes = [
   // Brene Brown
   "No one belongs here more than you.",
   "When we own the story, we can write a brave new ending.",
+  // Timothy Dexter
+  "I am the first in the east. I am the first in the west. I am the first of all things.",
+  // Václav Havel
+  "Hope is not the conviction that something will turn out well, but the certainty that something is worth doing no matter how it turns out.",
+  // Pierre Coubertin
+  "The important thing in life is not the triumph, but the struggle.",
 ];
 
 const QuoteOfTheDay = () => {
