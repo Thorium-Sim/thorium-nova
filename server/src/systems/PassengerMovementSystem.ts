@@ -7,7 +7,7 @@ export class PassengerMovementSystem extends System {
       entity.components.passengerMovement && entity.components.position
     );
   }
-  frequency = 20;
+  frequency = 5;
   update(entity: Entity, elapsed: number) {
     const elapsedRatio = elapsed / (1000 / this.frequency);
     const {position, passengerMovement} = entity.components;
@@ -28,7 +28,9 @@ export class PassengerMovementSystem extends System {
       ship.components.shipMap.deckNodeMap?.[
         passengerMovement.nodePath[passengerMovement.nextNodeIndex]
       ];
-    if (!nextNode) return;
+    if (!nextNode) {
+      return;
+    }
     const distanceToNext = Math.hypot(x - nextNode?.x, y - nextNode?.y); // Increment to the next node
     if (distanceToNext <= 0.1 && z === nextNode.deckIndex) {
       passengerMovement.nextNodeIndex++;

@@ -58,7 +58,7 @@ export function Pilot({cardLoaded}: CardProps) {
           </Joystick>
         </div>
       </div>
-      <div className="col-span-2 h-full">
+      <div className="col-span-2 w-full aspect-square self-center">
         <Suspense fallback={null}>
           <GridCanvas shouldRender={cardLoaded}>
             <CircleGrid />

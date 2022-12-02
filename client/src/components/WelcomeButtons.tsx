@@ -39,7 +39,7 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
               >
                 Start Flight
               </NavLink>
-              <Disclosure>
+              {/* <Disclosure>
                 <Disclosure.Button className="btn btn-info btn-outline">
                   Load a Saved Flight
                 </Disclosure.Button>
@@ -56,11 +56,11 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
                 >
                   <Flights />
                 </Suspense>
-              </Disclosure>
+              </Disclosure> */}
             </>
           )}
 
-          <Button className="btn btn-warning btn-outline">Join a Server</Button>
+          {/* <Button className="btn btn-warning btn-outline">Join a Server</Button> */}
           {client.isHost && (
             <NavLink className="btn btn-notice btn-outline" to="/config">
               Configure Plugins
@@ -69,7 +69,7 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
           <NavLink className="btn btn-info btn-outline" to="/docs">
             How-to Guides
           </NavLink>
-          {process.env.NODE_ENV === "production" &&
+          {/* {process.env.NODE_ENV === "production" &&
             location.protocol !== "https:" && (
               <a
                 className="btn btn-error btn-outline"
@@ -79,7 +79,7 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
               >
                 Use HTTPS
               </a>
-            )}
+            )} */}
         </>
       )}
     </div>

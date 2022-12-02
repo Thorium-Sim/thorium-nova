@@ -11,7 +11,10 @@ import {FlightDataModel} from "./classes/FlightDataModel";
 import {promises as fs, existsSync} from "fs";
 import {unzip} from "./utils/unzipFolder";
 import {buildHttpsProxy} from "./init/httpsProxy";
-import fastify from "fastify";
+import fastify, {RawServerBase} from "fastify";
+// @ts-expect-error Importing from untyped file
+import symbols from "fastify/lib/symbols.js";
+
 setBasePath(thoriumPath);
 const isHeadless = !process.env.FORK;
 
@@ -64,11 +67,17 @@ export async function startServer() {
     Number(process.env.PORT) ||
     (process.env.NODE_ENV === "production" ? 4444 : 3001);
   const HTTPSPort = PORT + 1;
-  const proxy = buildHttpsProxy(PORT);
 
   try {
     await app.listen({port: PORT});
+    // @ts-expect-error can't index with any
+    app[symbols.kServerBindings].forEach((server: RawServerBase) => {
+      server.on("upgrade", (...args: any[]) => {
+        app.server.emit("upgrade", ...args);
+      });
+    });
     if (process.env.NODE_ENV === "production") {
+      const proxy = buildHttpsProxy(PORT);
       await proxy.listen({port: HTTPSPort});
     }
     console.info(chalk.greenBright(`Access app at http://localhost:${PORT}`));

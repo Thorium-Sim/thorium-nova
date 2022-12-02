@@ -13,6 +13,7 @@ import {initWin} from "./helpers/autoUpdate";
 
 let win: BrowserWindow | null = null;
 app.enableSandbox();
+app.commandLine.appendSwitch("ignore-certificate-errors");
 
 function loadFile(url: string) {
   dialog.showMessageBox({message: url});
@@ -80,7 +81,7 @@ async function createWindow() {
 
   // We add 1 to the port, since we want to connect to the HTTPS server
   // which is 1 more than the default port
-  win.loadURL(`https://localhost:${port + 1}`);
+  win.loadURL(`http://localhost:${port}`);
   win.on("closed", () => {
     win = null;
   });
