@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v2
@@ -42,7 +42,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-20.04, windows-2019]
+        os: [macos-latest, windows-latest]
 
     steps:
       - name: Check out Git repository
@@ -70,13 +70,6 @@ jobs:
         with:
           name: package
           path: "."
-      - name: Install Snapcraft
-        uses: samuelmeuli/action-snapcraft@v1
-        # Only install Snapcraft on Ubuntu
-        if: startsWith(matrix.os, 'ubuntu')
-        with:
-          # Log in to Snap Store
-          snapcraft_token: ${{ secrets.snapcraft_token }}
       - name: Prepare for app notarization
         if: startsWith(matrix.os, 'macos')
         # Import Apple API key for app notarization on macOS
@@ -100,8 +93,9 @@ jobs:
           release: true
         env:
           # macOS notarization API key
-          API_KEY_ID: ${{ secrets.API_KEY_ID }}
-          API_KEY_ISSUER_ID: ${{ secrets.API_KEY_ISSUER_ID }}
+          APPLE_API_KEY: ${{ secrets.API_KEY }}
+          APPLE_API_KEY_ID: ${{ secrets.API_KEY_ID }}
+          APPLE_API_KEY_ISSUER_ID: ${{ secrets.API_KEY_ISSUER_ID }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v2
