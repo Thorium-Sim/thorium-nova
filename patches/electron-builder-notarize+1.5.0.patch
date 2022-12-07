@@ -1,0 +1,14 @@
+diff --git a/node_modules/electron-builder-notarize/index.js b/node_modules/electron-builder-notarize/index.js
+index fd7bb4a..772865d 100644
+--- a/node_modules/electron-builder-notarize/index.js
++++ b/node_modules/electron-builder-notarize/index.js
+@@ -78,7 +78,8 @@ module.exports = async params => {
+ 	const notarizeOptions = {
+ 		...authInfo,
+ 		appPath,
+-		appBundleId: appId
++		appBundleId: appId,
++		tool: 'notarytool'
+ 	};
+ 
+ 	console.log(`📦 Start notarizing ${appId} found at ${appPath}`);
