@@ -1,11 +1,11 @@
+import {q} from "@client/context/AppContext";
+import {useLiveQuery} from "@thorium/live-query/client";
 import {Tooltip} from "@thorium/ui/Tooltip";
-import {useThorium} from "client/src/context/ThoriumContext";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {FaBoxOpen, FaChevronRight} from "react-icons/fa";
 import {useShipMapStore} from "./useShipMapStore";
 
 export function CargoContainerList() {
-  const cargoContainers = useNetRequest("cargoContainers");
+  const [cargoContainers] = q.cargoControl.containers.useNetRequest();
 
   return (
     <div className="flex flex-col h-full gap-4 justify-center row-span-2 cursor-pointer">
@@ -25,11 +25,11 @@ function CargoContainer({
     entityState: "idle" | "enRoute";
   };
 }) {
-  const cargoRooms = useNetRequest("cargoRooms");
+  const [cargoRooms] = q.cargoControl.rooms.useNetRequest();
   const {rooms} = cargoRooms;
 
   const selectedRoomId = useShipMapStore(state => state.selectedRoomId);
-  const {interpolate} = useThorium();
+  const {interpolate} = useLiveQuery();
 
   const selectedContainerId = useShipMapStore(
     state => state.selectedContainerId

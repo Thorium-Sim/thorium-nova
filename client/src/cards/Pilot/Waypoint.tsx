@@ -1,9 +1,10 @@
+import {q} from "@client/context/AppContext";
 import {useTexture} from "@react-three/drei";
 import {useFrame} from "@react-three/fiber";
-import {useThorium} from "client/src/context/ThoriumContext";
-import {useNetRequest} from "client/src/context/useNetRequest";
+import type {AppRouter} from "@server/init/router";
+import {useLiveQuery} from "@thorium/live-query/client";
+import type {inferTransformedProcedureOutput} from "@thorium/live-query/server/types";
 import {useRef} from "react";
-import type {AllRequestReturns} from "server/src/netRequests";
 import {
   Camera,
   Frustum,
@@ -20,6 +21,10 @@ import StrokeTexture from "../../components/Starmap/WaypointStroke.svg";
 import {getWaypointRelativePosition} from "./getWaypointRelativePosition";
 import {usePilotStore} from "./usePilotStore";
 
+type WaypointItem = inferTransformedProcedureOutput<
+  AppRouter["waypoints"]["all"]
+>[0];
+
 const playerVector = new Vector3();
 const waypointVector = new Vector3();
 const frustum = new Frustum();
@@ -34,7 +39,7 @@ export const WaypointEntity = ({
   waypoint,
   viewscreen,
 }: {
-  waypoint: AllRequestReturns["waypoints"][0];
+  waypoint: WaypointItem;
   viewscreen?: boolean;
 }) => {
   const spriteMap = useTexture(WaypointTexture);
@@ -45,13 +50,10 @@ export const WaypointEntity = ({
   const stroke = useRef<Sprite>(null);
   const scale = 1 / 40;
 
-  const {
-    id,
-    currentSystem: playerSystem,
-    systemPosition,
-  } = useNetRequest("pilotPlayerShip");
+  const [{id, currentSystem: playerSystem, systemPosition}] =
+    q.ship.player.useNetRequest();
 
-  const {interpolate} = useThorium();
+  const {interpolate} = useLiveQuery();
   useFrame(props => {
     const {size} = props;
     const camera = props.camera as OrthographicCamera;

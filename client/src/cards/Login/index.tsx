@@ -1,17 +1,16 @@
+import {q} from "@client/context/AppContext";
 import Button from "@thorium/ui/Button";
 import Input from "@thorium/ui/Input";
-import {netSend} from "client/src/context/netSend";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useState} from "react";
 
 const Login = () => {
   const [loginName, setLoginName] = useState("");
   // TODO: Support logging in with a ThoriumSim account
-  const ship = useNetRequest("ship");
+  const [ship] = q.ship.get.useNetRequest();
   const login = () => {
     if (loginName.trim().length > 0) {
       // TODO: Play a sound effect when the user logs in
-      netSend("clientLogin", {loginName});
+      q.client.login.netSend({name: loginName});
     }
   };
   return (

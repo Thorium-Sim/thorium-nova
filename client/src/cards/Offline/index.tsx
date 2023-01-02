@@ -1,4 +1,4 @@
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {q} from "@client/context/AppContext";
 import {Fragment} from "react";
 
 // Messages go here
@@ -26,7 +26,7 @@ const messages: Record<string, {title: string; message: string}> = {
 };
 
 const Offline: React.FC = () => {
-  const client = useNetRequest("client");
+  const [client] = q.client.get.useNetRequest();
 
   if (!client.offlineState) return null;
   return (

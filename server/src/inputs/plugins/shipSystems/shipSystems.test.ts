@@ -1,17 +1,17 @@
-import {createMockDataContext} from "server/src/utils/createMockDataContext";
-import {shipSystemsPluginInput} from ".";
+import {
+  createMockDataContext,
+  createMockRouter,
+} from "@server/utils/createMockDataContext";
 
 describe("ship systems plugin input", () => {
   it("should create a new ship system", async () => {
     const dataContext = createMockDataContext();
-    const shipSystem = await shipSystemsPluginInput.pluginShipSystemCreate(
-      dataContext,
-      {
-        pluginId: "Test Plugin",
-        name: "Generic System",
-        type: "generic",
-      }
-    );
+    const router = createMockRouter(dataContext);
+    const shipSystem = await router.plugin.systems.create({
+      pluginId: "Test Plugin",
+      name: "Generic System",
+      type: "generic",
+    });
 
     expect(shipSystem).toBeDefined();
     expect(shipSystem.shipSystemId).toEqual("Generic System");
@@ -21,27 +21,22 @@ describe("ship systems plugin input", () => {
   });
   it("should delete a ship system", async () => {
     const dataContext = createMockDataContext();
-    const shipSystem = await shipSystemsPluginInput.pluginShipSystemCreate(
-      dataContext,
-      {
-        pluginId: "Test Plugin",
-        name: "Generic System",
-        type: "generic",
-      }
-    );
-    const shipSystem2 = await shipSystemsPluginInput.pluginShipSystemCreate(
-      dataContext,
-      {
-        pluginId: "Test Plugin",
-        name: "Generic System",
-        type: "generic",
-      }
-    );
+    const router = createMockRouter(dataContext);
+    const shipSystem = await router.plugin.systems.create({
+      pluginId: "Test Plugin",
+      name: "Generic System",
+      type: "generic",
+    });
+    const shipSystem2 = await router.plugin.systems.create({
+      pluginId: "Test Plugin",
+      name: "Generic System",
+      type: "generic",
+    });
 
     expect(dataContext.server.plugins[0].aspects.shipSystems.length).toEqual(2);
     expect(shipSystem2.shipSystemId).toEqual("Generic System (1)");
 
-    await shipSystemsPluginInput.pluginShipSystemDelete(dataContext, {
+    await router.plugin.systems.delete({
       pluginId: "Test Plugin",
       shipSystemId: shipSystem.shipSystemId,
     });
@@ -53,28 +48,23 @@ describe("ship systems plugin input", () => {
   });
   it("should update a ship system", async () => {
     const dataContext = createMockDataContext();
-    const shipSystem = await shipSystemsPluginInput.pluginShipSystemCreate(
-      dataContext,
-      {
-        pluginId: "Test Plugin",
-        name: "Generic System",
-        type: "generic",
-      }
-    );
+    const router = createMockRouter(dataContext);
+    const shipSystem = await router.plugin.systems.create({
+      pluginId: "Test Plugin",
+      name: "Generic System",
+      type: "generic",
+    });
 
     expect(shipSystem.shipSystemId).toEqual("Generic System");
     expect(dataContext.server.plugins[0].aspects.shipSystems[0].type).toEqual(
       "generic"
     );
 
-    const updated = await shipSystemsPluginInput.pluginShipSystemUpdate(
-      dataContext,
-      {
-        pluginId: "Test Plugin",
-        shipSystemId: shipSystem.shipSystemId,
-        name: "New Name",
-      }
-    );
+    const updated = await router.plugin.systems.update({
+      pluginId: "Test Plugin",
+      shipSystemId: shipSystem.shipSystemId,
+      name: "New Name",
+    });
 
     expect(dataContext.server.plugins[0].aspects.shipSystems[0].name).toEqual(
       "New Name"
@@ -83,7 +73,7 @@ describe("ship systems plugin input", () => {
     expect(
       dataContext.server.plugins[0].aspects.shipSystems[0].description
     ).toEqual("");
-    await shipSystemsPluginInput.pluginShipSystemUpdate(dataContext, {
+    await router.plugin.systems.update({
       pluginId: "Test Plugin",
       shipSystemId: updated.shipSystemId,
       description: "New Description",

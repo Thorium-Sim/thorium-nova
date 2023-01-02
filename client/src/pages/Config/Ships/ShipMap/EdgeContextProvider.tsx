@@ -46,7 +46,7 @@ export function useEdgeRerender(
       edgeRenderFunctions.current[from].delete(rerender);
       edgeRenderFunctions.current[to].delete(rerender);
     };
-  }, [from, to]);
+  }, [from, to, edgeRenderFunctions]);
 }
 export function useTriggerEdgeRender(nodeId: number) {
   const edgeRenderFunctions = useContext(EdgeContext);

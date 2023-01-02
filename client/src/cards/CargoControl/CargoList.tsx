@@ -1,4 +1,4 @@
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {q} from "@client/context/AppContext";
 import {cargoSort} from "./cargoSort";
 
 export function CargoList({
@@ -14,7 +14,7 @@ export function CargoList({
   selectedContainerId: number | null;
   onClick: (key: string) => Promise<void>;
 }) {
-  const inventoryTypes = useNetRequest("inventoryTypes");
+  const [inventoryTypes] = q.cargoControl.inventoryTypes.useNetRequest();
 
   return (
     <ul className="panel panel-primary flex-1 overflow-y-auto">

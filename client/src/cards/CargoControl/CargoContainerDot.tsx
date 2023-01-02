@@ -1,4 +1,4 @@
-import {useThorium} from "client/src/context/ThoriumContext";
+import {useLiveQuery} from "@thorium/live-query/client";
 import useAnimationFrame from "client/src/hooks/useAnimationFrame";
 import {useRef} from "react";
 import {useShipMapStore} from "./useShipMapStore";
@@ -11,7 +11,7 @@ export function CargoContainerDot(props: {
   deckIndex: number;
   widthScale: number;
 }) {
-  const {interpolate} = useThorium();
+  const {interpolate} = useLiveQuery();
   const dotRef = useRef<HTMLDivElement>(null);
   const selectedContainerId = useShipMapStore(
     state => state.selectedContainerId

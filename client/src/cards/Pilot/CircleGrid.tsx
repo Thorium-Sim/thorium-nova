@@ -3,10 +3,8 @@ import {Line, useContextBridge, useGLTF, useTexture} from "@react-three/drei";
 import {Canvas, useFrame, useThree} from "@react-three/fiber";
 import {useQueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {useWheel} from "@use-gesture/react";
-import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
-import {ThoriumContext, useThorium} from "client/src/context/ThoriumContext";
-import {useNetRequest} from "client/src/context/useNetRequest";
-import {logslider} from "client/src/utils/logSlider";
+import {useGetStarmapStore} from "@client/components/Starmap/starmapStore";
+import {logslider} from "@client/utils/logSlider";
 import {
   ReactNode,
   useEffect,
@@ -22,10 +20,10 @@ import {
   UNSAFE_NavigationContext,
   UNSAFE_RouteContext,
 } from "react-router-dom";
-import {IsPlanetComponent, IsStarComponent} from "server/src/components/list";
-import type {SatelliteComponent} from "server/src/components/satellite";
-import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
-import {degToRad, solarRadiusToKilometers} from "server/src/utils/unitTypes";
+import {IsPlanetComponent, IsStarComponent} from "@server/components/list";
+import type {SatelliteComponent} from "@server/components/satellite";
+import {getOrbitPosition} from "@server/utils/getOrbitPosition";
+import {degToRad, solarRadiusToKilometers} from "@server/utils/unitTypes";
 import {
   BufferAttribute,
   DoubleSide,
@@ -51,6 +49,11 @@ import {DistanceCircle} from "./DistanceCircle";
 import {PlayerArrow} from "./PlayerArrow";
 import {useGetFacingWaypoint, usePilotStore} from "./usePilotStore";
 import {WaypointEntity} from "./Waypoint";
+import {
+  LiveQueryContext,
+  useLiveQuery,
+} from "@thorium/live-query/client/liveQueryContext";
+import {q} from "@client/context/AppContext";
 
 const CameraEffects = () => {
   const {camera, size} = useThree();
@@ -80,12 +83,12 @@ export function CircleGrid() {
     onChange: ({value}) => (tiltRef.current = value.tilt),
   });
 
-  const {id, currentSystem} = useNetRequest("pilotPlayerShip");
+  const [{id, currentSystem}] = q.ship.player.useNetRequest();
 
   useEffect(() => {
     useStarmapStore.getState().setCurrentSystem(currentSystem);
   }, [currentSystem, useStarmapStore]);
-  const {interpolate} = useThorium();
+  const {interpolate} = useLiveQuery();
   useFrame(props => {
     const playerShip = interpolate(id);
 
@@ -166,7 +169,7 @@ export function GridCanvas({
   const client = useQueryClient();
 
   const ContextBridge = useContextBridge(
-    ThoriumContext,
+    LiveQueryContext,
     UNSAFE_LocationContext,
     UNSAFE_NavigationContext,
     UNSAFE_RouteContext
@@ -216,11 +219,11 @@ function PilotContacts() {
   const tilted = usePilotStore(store => store.tilt > 0);
   const useStarmapStore = useGetStarmapStore();
   const systemId = useStarmapStore(store => store.currentSystem);
-  const orbs = useNetRequest("starmapSystemEntities", {
-    systemId: systemId || undefined,
+  const [orbs] = q.starmapCore.entities.useNetRequest({
+    systemId,
   });
-  const ships = useNetRequest("starmapShips", {systemId});
-  const waypoints = useNetRequest("waypoints", {systemId: "all"});
+  const [ships] = q.starmapCore.ships.useNetRequest({systemId});
+  const [waypoints] = q.waypoints.all.useNetRequest({systemId: "all"});
   useGetFacingWaypoint();
   return (
     <group>
@@ -279,7 +282,7 @@ export const ShipEntity = ({
   size: number;
   tilted?: boolean;
 }) => {
-  const {id: playerId} = useNetRequest("pilotPlayerShip");
+  const [{id: playerId}] = q.ship.player.useNetRequest();
   // TODO: Use useGLTF.preload outside of this to preload the asset
   const model = useGLTF(modelUrl || "", false);
 
@@ -300,7 +303,7 @@ export const ShipEntity = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelUrl]);
 
-  const {interpolate} = useThorium();
+  const {interpolate} = useLiveQuery();
 
   const spriteMap = useTexture(logoUrl);
   const scale = 1 / 50;
@@ -433,8 +436,8 @@ interface PlanetaryEntityProps {
 
 export const PlanetaryEntity = memo(
   ({satellite, isPlanet, isStar}: PlanetaryEntityProps) => {
-    const {id: playerId} = useNetRequest("pilotPlayerShip");
-    const {interpolate} = useThorium();
+    const [{id: playerId}] = q.ship.player.useNetRequest();
+    const {interpolate} = useLiveQuery();
 
     const ref = useRef<Group>(null);
     useFrame(() => {

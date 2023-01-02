@@ -3,10 +3,9 @@ import Menubar from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
 import Button from "@thorium/ui/Button";
 import {Outlet, useParams, useNavigate} from "react-router-dom";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {Fragment} from "react";
-import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
+import {q} from "@client/context/AppContext";
 
 export function ThemeList() {
   const {pluginId, themeId} = useParams() as {
@@ -15,7 +14,7 @@ export function ThemeList() {
   };
   const navigate = useNavigate();
   const prompt = usePrompt();
-  const data = useNetRequest("pluginThemes", {pluginId});
+  const [data] = q.plugin.theme.all.useNetRequest({pluginId});
   const theme = data.find(d => d.name === themeId);
   return (
     <div className="h-full">
@@ -31,7 +30,7 @@ export function ThemeList() {
                 if (typeof name !== "string" || name.trim().length === 0)
                   return;
                 try {
-                  const result = await netSend("pluginThemeCreate", {
+                  const result = await q.plugin.theme.create.netSend({
                     name,
                     pluginId,
                   });

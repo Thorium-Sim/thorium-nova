@@ -1,14 +1,12 @@
-import Input from "@thorium/ui/Input";
+import {q} from "@client/context/AppContext";
 import SearchableList from "@thorium/ui/SearchableList";
-import {capitalCase} from "change-case";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import * as React from "react";
 import {useFlightQuickStart} from "./FlightQuickStartContext";
 
 const ShipConfig = () => {
   const [state, dispatch] = useFlightQuickStart();
 
-  const startingPoints = useNetRequest("availableStartingPoints");
+  const [startingPoints] = q.plugin.mission.startingPoints.useNetRequest();
 
   const startingPoint = startingPoints.find(
     point =>

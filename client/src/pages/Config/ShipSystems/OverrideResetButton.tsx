@@ -1,9 +1,9 @@
 import {useParams} from "react-router-dom";
 import {useContext} from "react";
-import {netSend} from "client/src/context/netSend";
 import {ShipPluginIdContext} from "../Ships/ShipSystemOverrideContext";
 import {MdLoop} from "react-icons/md";
 import Button from "@thorium/ui/Button";
+import {q} from "@client/context/AppContext";
 
 export function OverrideResetButton({
   property,
@@ -26,7 +26,7 @@ export function OverrideResetButton({
     <Button
       title="Reset override"
       onClick={async () => {
-        await netSend("pluginShipSystemRestoreOverride", {
+        await q.plugin.systems.restoreOverride.netSend({
           pluginId,
           shipSystemId: systemId,
           shipId,

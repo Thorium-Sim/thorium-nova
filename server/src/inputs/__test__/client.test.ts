@@ -1,12 +1,15 @@
-import {createMockDataContext} from "server/src/utils/createMockDataContext";
-import {Entity} from "server/src/utils/ecs";
-import {clientInputs} from "../client";
+import {
+  createMockDataContext,
+  createMockRouter,
+} from "@server/utils/createMockDataContext";
+import {Entity} from "@server/utils/ecs";
 
 describe("Client input", () => {
   it("should assign to a client and station", async () => {
     const mockDataContext = createMockDataContext();
-    expect(
-      clientInputs.clientSetStation(mockDataContext, {
+    const router = createMockRouter(mockDataContext);
+    await expect(
+      router.client.setStation({
         shipId: 1,
         stationId: "Test",
       })
@@ -34,7 +37,7 @@ describe("Client input", () => {
         },
       })
     );
-    await clientInputs.clientSetStation(mockDataContext, {
+    await router.client.setStation({
       shipId: 1,
       stationId: "Test",
     });

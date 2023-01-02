@@ -1,4 +1,4 @@
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {q} from "@client/context/AppContext";
 import {lazy} from "react";
 import {Navigate, Route, Routes} from "react-router-dom";
 
@@ -11,7 +11,7 @@ const ShipSystemConfig = lazy(() => import("./ShipSystems"));
 const InventoryConfig = lazy(() => import("./Inventory"));
 
 export default function ConfigRoutes() {
-  const client = useNetRequest("client");
+  const [client] = q.client.get.useNetRequest();
 
   if (!client.isHost) return <Navigate to="/" replace />;
 

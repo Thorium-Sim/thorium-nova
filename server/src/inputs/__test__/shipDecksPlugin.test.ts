@@ -1,18 +1,20 @@
-import {decksPluginInputs} from "../plugins/ships/decks";
 import {promises as fs} from "fs";
-import {createMockDataContext} from "server/src/utils/createMockDataContext";
+import {
+  createMockDataContext,
+  createMockRouter,
+} from "@server/utils/createMockDataContext";
 
 describe("ship decks plugin input", () => {
   it("should create a new deck", async () => {
     const mockDataContext = createMockDataContext();
-
-    const shipDeck = decksPluginInputs.pluginShipDeckCreate(mockDataContext, {
+    const router = createMockRouter(mockDataContext);
+    const shipDeck = await router.plugin.ship.deck.create({
       pluginId: "Test Plugin",
       shipId: "Test Template",
     });
 
     expect(shipDeck).toEqual({backgroundUrl: "", name: "Deck 1", nodes: []});
-    const shipDeck2 = decksPluginInputs.pluginShipDeckCreate(mockDataContext, {
+    const shipDeck2 = await router.plugin.ship.deck.create({
       pluginId: "Test Plugin",
       shipId: "Test Template",
     });
@@ -21,13 +23,14 @@ describe("ship decks plugin input", () => {
   });
   it("should delete a deck", async () => {
     const mockDataContext = createMockDataContext();
+    const router = createMockRouter(mockDataContext);
 
-    const shipDeck = decksPluginInputs.pluginShipDeckCreate(mockDataContext, {
+    const shipDeck = await router.plugin.ship.deck.create({
       pluginId: "Test Plugin",
       shipId: "Test Template",
     });
 
-    const shipDeck2 = decksPluginInputs.pluginShipDeckCreate(mockDataContext, {
+    const shipDeck2 = await router.plugin.ship.deck.create({
       pluginId: "Test Plugin",
       shipId: "Test Template",
     });
@@ -36,7 +39,7 @@ describe("ship decks plugin input", () => {
       mockDataContext.server.plugins[0].aspects.ships[0].decks.length
     ).toEqual(2);
 
-    decksPluginInputs.pluginShipDeckDelete(mockDataContext, {
+    await router.plugin.ship.deck.delete({
       pluginId: "Test Plugin",
       shipId: "Test Template",
       index: 0,
@@ -51,13 +54,13 @@ describe("ship decks plugin input", () => {
   });
   it("should update a deck", async () => {
     const mockDataContext = createMockDataContext();
-
-    const shipDeck = decksPluginInputs.pluginShipDeckCreate(mockDataContext, {
+    const router = createMockRouter(mockDataContext);
+    const shipDeck = await router.plugin.ship.deck.create({
       pluginId: "Test Plugin",
       shipId: "Test Template",
     });
 
-    const shipDeck2 = decksPluginInputs.pluginShipDeckCreate(mockDataContext, {
+    const shipDeck2 = await router.plugin.ship.deck.create({
       pluginId: "Test Plugin",
       shipId: "Test Template",
     });
@@ -66,7 +69,7 @@ describe("ship decks plugin input", () => {
       mockDataContext.server.plugins[0].aspects.ships[0].decks[0].name
     ).toEqual("Deck 1");
 
-    decksPluginInputs.pluginShipDeckUpdate(mockDataContext, {
+    await router.plugin.ship.deck.update({
       pluginId: "Test Plugin",
       shipId: "Test Template",
       deckId: "Deck 1",
@@ -77,7 +80,7 @@ describe("ship decks plugin input", () => {
       mockDataContext.server.plugins[0].aspects.ships[0].decks[0].name
     ).toEqual("A Deck");
 
-    decksPluginInputs.pluginShipDeckUpdate(mockDataContext, {
+    await router.plugin.ship.deck.update({
       pluginId: "Test Plugin",
       shipId: "Test Template",
       deckId: "A Deck",
@@ -93,17 +96,17 @@ describe("ship decks plugin input", () => {
   });
 
   describe("Deck Nodes", () => {
-    it("should create a few new deck nodes", () => {
+    it("should create a few new deck nodes", async () => {
       const mockDataContext = createMockDataContext();
+      const router = createMockRouter(mockDataContext);
 
-      const shipDeck = decksPluginInputs.pluginShipDeckCreate(mockDataContext, {
+      const shipDeck = await router.plugin.ship.deck.create({
         pluginId: "Test Plugin",
         shipId: "Test Template",
       });
       const deck = mockDataContext.server.plugins[0].aspects.ships[0].decks[0];
       expect(deck.nodes.length).toEqual(0);
-
-      decksPluginInputs.pluginShipDeckAddNode(mockDataContext, {
+      await router.plugin.ship.deck.addNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
@@ -116,7 +119,7 @@ describe("ship decks plugin input", () => {
       expect(deck.nodes[0].y).toEqual(50);
       expect(deck.nodes[0].id).toEqual(1);
 
-      decksPluginInputs.pluginShipDeckAddNode(mockDataContext, {
+      await router.plugin.ship.deck.addNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
@@ -129,17 +132,18 @@ describe("ship decks plugin input", () => {
       expect(deck.nodes[1].y).toEqual(100);
       expect(deck.nodes[1].id).toEqual(2);
     });
-    it("should delete a deck node", () => {
+    it("should delete a deck node", async () => {
       const mockDataContext = createMockDataContext();
+      const router = createMockRouter(mockDataContext);
 
-      const shipDeck = decksPluginInputs.pluginShipDeckCreate(mockDataContext, {
+      const shipDeck = await router.plugin.ship.deck.create({
         pluginId: "Test Plugin",
         shipId: "Test Template",
       });
       const deck = mockDataContext.server.plugins[0].aspects.ships[0].decks[0];
       expect(deck.nodes.length).toEqual(0);
 
-      decksPluginInputs.pluginShipDeckAddNode(mockDataContext, {
+      await router.plugin.ship.deck.addNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
@@ -151,8 +155,7 @@ describe("ship decks plugin input", () => {
       expect(deck.nodes[0].x).toEqual(50);
       expect(deck.nodes[0].y).toEqual(50);
       expect(deck.nodes[0].id).toEqual(1);
-
-      decksPluginInputs.pluginShipDeckRemoveNode(mockDataContext, {
+      await router.plugin.ship.deck.removeNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
@@ -161,17 +164,18 @@ describe("ship decks plugin input", () => {
 
       expect(deck.nodes.length).toEqual(0);
     });
-    it("should update a deck node", () => {
+    it("should update a deck node", async () => {
       const mockDataContext = createMockDataContext();
+      const router = createMockRouter(mockDataContext);
 
-      const shipDeck = decksPluginInputs.pluginShipDeckCreate(mockDataContext, {
+      const shipDeck = await router.plugin.ship.deck.create({
         pluginId: "Test Plugin",
         shipId: "Test Template",
       });
       const deck = mockDataContext.server.plugins[0].aspects.ships[0].decks[0];
       expect(deck.nodes.length).toEqual(0);
 
-      decksPluginInputs.pluginShipDeckAddNode(mockDataContext, {
+      await router.plugin.ship.deck.addNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
@@ -184,7 +188,7 @@ describe("ship decks plugin input", () => {
       expect(deck.nodes[0].y).toEqual(50);
       expect(deck.nodes[0].id).toEqual(1);
 
-      decksPluginInputs.pluginShipDeckUpdateNode(mockDataContext, {
+      await router.plugin.ship.deck.updateNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
@@ -199,7 +203,7 @@ describe("ship decks plugin input", () => {
       expect(deck.nodes[0].id).toEqual(1);
 
       expect(deck.nodes[0].isRoom).toEqual(false);
-      decksPluginInputs.pluginShipDeckUpdateNode(mockDataContext, {
+      await router.plugin.ship.deck.updateNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
@@ -209,7 +213,7 @@ describe("ship decks plugin input", () => {
       expect(deck.nodes[0].isRoom).toEqual(true);
 
       expect(deck.nodes[0].flags).toEqual([]);
-      decksPluginInputs.pluginShipDeckUpdateNode(mockDataContext, {
+      await router.plugin.ship.deck.updateNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
@@ -219,7 +223,7 @@ describe("ship decks plugin input", () => {
       expect(deck.nodes[0].flags).toEqual(["cargo"]);
 
       expect(deck.nodes[0].name).toEqual("");
-      decksPluginInputs.pluginShipDeckUpdateNode(mockDataContext, {
+      await router.plugin.ship.deck.updateNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
@@ -229,7 +233,7 @@ describe("ship decks plugin input", () => {
       expect(deck.nodes[0].name).toEqual("Test Node");
 
       expect(deck.nodes[0].radius).toEqual(0);
-      decksPluginInputs.pluginShipDeckUpdateNode(mockDataContext, {
+      await router.plugin.ship.deck.updateNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
@@ -239,7 +243,7 @@ describe("ship decks plugin input", () => {
       expect(deck.nodes[0].radius).toEqual(10);
 
       expect(deck.nodes[0].volume).toEqual(12);
-      decksPluginInputs.pluginShipDeckUpdateNode(mockDataContext, {
+      await router.plugin.ship.deck.updateNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
@@ -250,22 +254,23 @@ describe("ship decks plugin input", () => {
     });
   });
   describe("Deck Edges", () => {
-    it("should create a deck edge", () => {
+    it("should create a deck edge", async () => {
       const mockDataContext = createMockDataContext();
+      const router = createMockRouter(mockDataContext);
 
-      decksPluginInputs.pluginShipDeckCreate(mockDataContext, {
+      await router.plugin.ship.deck.create({
         pluginId: "Test Plugin",
         shipId: "Test Template",
       });
       const ship = mockDataContext.server.plugins[0].aspects.ships[0];
-      decksPluginInputs.pluginShipDeckAddNode(mockDataContext, {
+      await router.plugin.ship.deck.addNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
         x: 50,
         y: 50,
       });
-      decksPluginInputs.pluginShipDeckAddNode(mockDataContext, {
+      await router.plugin.ship.deck.addNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
@@ -274,7 +279,7 @@ describe("ship decks plugin input", () => {
       });
       expect(ship.deckEdges.length).toEqual(0);
 
-      decksPluginInputs.pluginShipDeckAddEdge(mockDataContext, {
+      await router.plugin.ship.deck.addEdge({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         from: 2,
@@ -286,24 +291,25 @@ describe("ship decks plugin input", () => {
       expect(ship.deckEdges[0].from).toEqual(2);
       expect(ship.deckEdges[0].id).toEqual(1);
     });
-    it("should delete a deck edge", () => {
+    it("should delete a deck edge", async () => {
       const mockDataContext = createMockDataContext();
+      const router = createMockRouter(mockDataContext);
 
-      decksPluginInputs.pluginShipDeckCreate(mockDataContext, {
+      await router.plugin.ship.deck.create({
         pluginId: "Test Plugin",
         shipId: "Test Template",
       });
       const ship = mockDataContext.server.plugins[0].aspects.ships[0];
       expect(ship.deckEdges.length).toEqual(0);
 
-      decksPluginInputs.pluginShipDeckAddNode(mockDataContext, {
+      await router.plugin.ship.deck.addNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
         x: 50,
         y: 50,
       });
-      decksPluginInputs.pluginShipDeckAddNode(mockDataContext, {
+      await router.plugin.ship.deck.addNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         deckId: "Deck 1",
@@ -312,7 +318,7 @@ describe("ship decks plugin input", () => {
       });
       expect(ship.deckEdges.length).toEqual(0);
 
-      decksPluginInputs.pluginShipDeckAddEdge(mockDataContext, {
+      await router.plugin.ship.deck.addEdge({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         from: 2,
@@ -320,7 +326,7 @@ describe("ship decks plugin input", () => {
       });
 
       expect(ship.deckEdges.length).toEqual(1);
-      decksPluginInputs.pluginShipDeckRemoveEdge(mockDataContext, {
+      await router.plugin.ship.deck.removeEdge({
         pluginId: "Test Plugin",
         shipId: "Test Template",
         edgeId: 1,

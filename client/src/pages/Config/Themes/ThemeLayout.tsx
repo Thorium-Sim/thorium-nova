@@ -1,11 +1,6 @@
 import {useConfirm, usePrompt} from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import {Navigate, Outlet, useParams, useNavigate} from "react-router-dom";
-import {
-  MockNetRequestContext,
-  useNetRequest,
-} from "client/src/context/useNetRequest";
-import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {Editor} from "client/src/components/MonacoEditor";
@@ -19,6 +14,8 @@ import type ThemePlugin from "server/src/classes/Plugins/Theme";
 import StationLayout from "client/src/components/Station/StationLayout";
 import normalLogo from "../../../images/logo.svg?url";
 import colorLogo from "../../../images/logo-color.svg?url";
+import {q} from "@client/context/AppContext";
+import {MockNetRequestContext} from "@thorium/live-query/client/mockContext";
 export const ThemeLayout = () => {
   const {themeId, pluginId} = useParams() as {
     themeId: string;
@@ -27,7 +24,7 @@ export const ThemeLayout = () => {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const prompt = usePrompt();
-  const theme = useNetRequest("pluginTheme", {pluginId, themeId});
+  const [theme] = q.plugin.theme.get.useNetRequest({pluginId, themeId});
 
   const [shipName, setShipName] = useLocalStorage(
     "theme-ship-name",
@@ -66,51 +63,57 @@ export const ThemeLayout = () => {
               <MockNetRequestContext.Provider
                 value={{
                   client: {
-                    id: "Test",
-                    name: "Test Client",
-                    connected: true,
-                    loginName: "Test User",
+                    get: {
+                      id: "Test",
+                      name: "Test Client",
+                      connected: true,
+                      loginName: "Test User",
+                    },
                   } as any,
                   flight: null,
                   ship: {
-                    id: 0,
-                    components: {
-                      isPlayerShip: {value: true},
-                      identity: {name: shipName},
-                      isShip: {
-                        assets: {
-                          logo: normalLogo,
+                    get: {
+                      id: 0,
+                      components: {
+                        isPlayerShip: {value: true},
+                        identity: {name: shipName},
+                        isShip: {
+                          assets: {
+                            logo: normalLogo,
+                          },
+                          category: "Cruiser",
+                          registry: "NCC-2016-A",
+                          shipClass: "Astra Cruiser",
                         },
-                        category: "Cruiser",
-                        registry: "NCC-2016-A",
-                        shipClass: "Astra Cruiser",
                       },
+                      alertLevel,
                     },
-                    alertLevel,
                   } as any,
                   station: {
-                    name: previewViewscreen ? "Viewscreen" : stationName,
-                    logo: "",
-                    cards: previewViewscreen
-                      ? [
-                          {
-                            icon: colorLogo,
-                            name: "Viewscreen",
-                            component: "ViewscreenDemo",
-                          },
-                        ]
-                      : [
-                          {
-                            icon: colorLogo,
-                            name: "Component Demo",
-                            component: "ComponentDemo",
-                          },
-                          {
-                            icon: colorLogo,
-                            name: "Test Card",
-                            component: "Login",
-                          },
-                        ],
+                    get: {
+                      name: previewViewscreen ? "Viewscreen" : stationName,
+                      logo: "",
+                      cards: previewViewscreen
+                        ? [
+                            {
+                              icon: colorLogo,
+                              name: "Viewscreen",
+                              component: "ViewscreenDemo",
+                            },
+                          ]
+                        : [
+                            {
+                              icon: colorLogo,
+                              name: "Component Demo",
+                              component: "ComponentDemo",
+                            },
+                            {
+                              icon: colorLogo,
+                              name: "Test Card",
+                              component: "Login",
+                            },
+                          ],
+                    },
                   } as any,
                   theme: null,
                 }}
@@ -128,7 +131,7 @@ export const ThemeLayout = () => {
             defaultValue={theme.rawCSS}
             onChange={debounce(
               async e => {
-                await netSend("pluginThemeUpdate", {
+                await q.plugin.theme.update.netSend({
                   pluginId: pluginId,
                   themeId: themeId,
                   rawCSS: e,
@@ -159,7 +162,7 @@ export const ThemeLayout = () => {
                   }))
                 )
                   return;
-                netSend("pluginThemeDelete", {pluginId, themeId});
+                q.plugin.theme.delete.netSend({pluginId, themeId});
                 navigate(`/config/${pluginId}/themes`);
               }}
             >
@@ -175,7 +178,7 @@ export const ThemeLayout = () => {
                 });
                 if (!name || typeof name !== "string") return;
                 try {
-                  const result = await netSend("pluginThemeDuplicate", {
+                  const result = await q.plugin.theme.duplicate.netSend({
                     pluginId: pluginId,
                     themeId,
                     name,
@@ -251,7 +254,7 @@ const ThemeAssetUpload = ({assets}: {assets: ThemePlugin["assets"]}) => {
   async function onChange(files: FileList) {
     if (!files.length) return;
     const file = files[0];
-    netSend("pluginThemeUploadFile", {
+    q.plugin.theme.uploadFile.netSend({
       pluginId,
       themeId,
       file,
@@ -393,7 +396,7 @@ const UploadedFile: React.FC<{file: string}> = ({file}) => {
                 body: "The file will be deleted permanently.",
               })
             ) {
-              netSend("pluginThemeRemoveFile", {
+              q.plugin.theme.removeFile.netSend({
                 pluginId,
                 themeId,
                 file,

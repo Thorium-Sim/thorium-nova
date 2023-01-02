@@ -1,4 +1,4 @@
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {q} from "@client/context/AppContext";
 import {useParams} from "react-router-dom";
 import {Link} from "react-router-dom";
 
@@ -6,8 +6,8 @@ export function SettingsList() {
   const params = useParams();
   const setting = params["*"]?.split("/")[1];
   const {pluginId, systemId} = params as {pluginId: string; systemId: string};
-  const system = useNetRequest("pluginShipSystem", {pluginId, systemId});
-  const availableShipSystems = useNetRequest("availableShipSystems");
+  const [system] = q.plugin.systems.get.useNetRequest({pluginId, systemId});
+  const [availableShipSystems] = q.plugin.systems.available.useNetRequest();
   if (!system?.type) return null;
   const systemType = availableShipSystems.find(s => s.type === system.type);
   return (

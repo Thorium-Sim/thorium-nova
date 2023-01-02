@@ -14,7 +14,7 @@ export class FlightClient extends BaseClient {
   loginName: string;
   offlineState: "blackout" | {title: string; message: string} | null;
   training: boolean;
-  stationOverride?: Station;
+  stationOverride?: Station | null;
   officersLog: {
     timestamp: number;
     message: string;

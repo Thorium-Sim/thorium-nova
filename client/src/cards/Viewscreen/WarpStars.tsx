@@ -1,9 +1,9 @@
+import {q} from "@client/context/AppContext";
 import {useFrame} from "@react-three/fiber";
-import Star from "client/src/components/Starmap/Star/StarMesh";
-import {useThorium} from "client/src/context/ThoriumContext";
-import {useNetRequest} from "client/src/context/useNetRequest";
-import {getSphericalPositionWithBias} from "client/src/utils/getSphericalPositionWithBias";
-import {randomPointInSphere} from "client/src/utils/randomPointInSphere";
+import {useLiveQuery} from "@thorium/live-query/client";
+import Star from "@client/components/Starmap/Star/StarMesh";
+import {getSphericalPositionWithBias} from "@client/utils/getSphericalPositionWithBias";
+import {randomPointInSphere} from "@client/utils/randomPointInSphere";
 import {memo, useMemo} from "react";
 import {
   Color,
@@ -40,7 +40,7 @@ const shipPosition = new Vector3();
 const movement = new Vector3();
 
 export const WarpStars = () => {
-  const {id: shipId, currentSystem} = useNetRequest("pilotPlayerShip");
+  const [{id: shipId, currentSystem}] = q.ship.player.useNetRequest();
   const isInSystem = typeof currentSystem === "number";
   const mesh = useMemo(() => {
     const geometry = new CylinderBufferGeometry(1, 0, 100, 16, 16);
@@ -59,11 +59,11 @@ export const WarpStars = () => {
     }
     return mesh;
   }, []);
-  const {interstellarCruisingSpeed, solarCruisingSpeed} =
-    useNetRequest("pilotWarpEngines");
+  const [{interstellarCruisingSpeed, solarCruisingSpeed}] =
+    q.pilot.warpEngines.get.useNetRequest();
 
   const getForwardVelocity = useForwardVelocity();
-  const {interpolate} = useThorium();
+  const {interpolate} = useLiveQuery();
   useFrame(() => {
     const entity = interpolate(shipId);
     if (!entity) return;

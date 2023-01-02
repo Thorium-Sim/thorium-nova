@@ -1,6 +1,6 @@
 import Button from "@thorium/ui/Button";
 import {useConfirm} from "@thorium/ui/AlertDialog";
-import {DeckNode, EdgeFlag} from "server/src/classes/Plugins/Ship/Deck";
+import {DeckNode, EdgeFlag} from "@server/classes/Plugins/Ship/Deck";
 import {offset, shift, useFloating} from "@floating-ui/react-dom";
 import {Portal} from "@headlessui/react";
 import {useDeckNode} from "./DeckNodeContext";

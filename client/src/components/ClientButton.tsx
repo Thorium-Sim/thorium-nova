@@ -1,10 +1,9 @@
+import {q} from "@client/context/AppContext";
 import {usePrompt} from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
-import {netSend} from "../context/netSend";
-import {useNetRequest} from "../context/useNetRequest";
 
 export function ClientButton() {
-  const client = useNetRequest("client");
+  const [client] = q.client.get.useNetRequest();
 
   const prompt = usePrompt();
   return (
@@ -17,7 +16,7 @@ export function ClientButton() {
             header: "What is the new client name?",
           });
           if (typeof name === "string") {
-            const result = await netSend("clientSetName", {name});
+            const result = await q.client.setName.netSend({name});
           }
         }}
       >

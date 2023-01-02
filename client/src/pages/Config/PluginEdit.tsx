@@ -6,21 +6,20 @@ import Menubar from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
 import TagInput from "@thorium/ui/TagInput";
 import UploadWell from "@thorium/ui/UploadWell";
-import {useNetRequest} from "client/src/context/useNetRequest";
-import {netSend} from "client/src/context/netSend";
 import {useEffect, useState} from "react";
 import {FaEdit} from "react-icons/fa";
 import {Link, NavLink, useNavigate, useParams} from "react-router-dom";
-import {toast} from "client/src/context/ToastContext";
+import {toast} from "@client/context/ToastContext";
+import {q} from "@client/context/AppContext";
 
 export default function PluginEdit() {
   const [error, setError] = useState(false);
-  const data = useNetRequest("pluginsList");
+  const {pluginId} = useParams() as {pluginId: string};
+  const [plugins] = q.plugin.all.useNetRequest();
+  const [plugin] = q.plugin.get.useNetRequest({pluginId});
   const navigate = useNavigate();
-  const {pluginId} = useParams();
   const prompt = usePrompt();
   const confirm = useConfirm();
-  const plugin = data.find(d => d.id === pluginId);
 
   useEffect(() => {
     if (!plugin) {
@@ -41,7 +40,7 @@ export default function PluginEdit() {
                 const name = await prompt({header: "Enter plugin name"});
                 if (typeof name !== "string") return;
                 try {
-                  const result = await netSend("pluginCreate", {name});
+                  const result = await q.plugin.create.netSend({name});
                   navigate(`/config/${result.pluginId}`);
                 } catch (err) {
                   if (err instanceof Error) {
@@ -58,7 +57,7 @@ export default function PluginEdit() {
             </Button>
 
             <SearchableList
-              items={data.map(d => ({
+              items={plugins.map(d => ({
                 id: d.id,
                 name: d.name,
                 description: d.description,
@@ -105,7 +104,7 @@ export default function PluginEdit() {
                 if (!plugin) return;
                 if (target.value) {
                   try {
-                    const result = await netSend("pluginUpdate", {
+                    const result = await q.plugin.update.netSend({
                       name: target.value,
                       pluginId: plugin.id,
                     });
@@ -134,7 +133,7 @@ export default function PluginEdit() {
               onBlur={(e: React.FocusEvent<Element>) => {
                 const target = e.target as HTMLInputElement;
                 plugin &&
-                  netSend("pluginUpdate", {
+                  q.plugin.update.netSend({
                     description: target.value,
                     pluginId: plugin.id,
                   });
@@ -146,14 +145,14 @@ export default function PluginEdit() {
               disabled={!plugin}
               onAdd={tag => {
                 if (plugin?.tags.includes(tag) || !plugin) return;
-                netSend("pluginUpdate", {
+                q.plugin.update.netSend({
                   tags: [...plugin.tags, tag],
                   pluginId: plugin.id,
                 });
               }}
               onRemove={tag => {
                 if (!plugin) return;
-                netSend("pluginUpdate", {
+                q.plugin.update.netSend({
                   tags: plugin.tags.filter(t => t !== tag),
                   pluginId: plugin.id,
                 });
@@ -165,7 +164,7 @@ export default function PluginEdit() {
                 disabled={!pluginId}
                 onClick={async () => {
                   if (!pluginId) return;
-                  netSend("pluginUpdate", {pluginId, active: false});
+                  q.plugin.update.netSend({pluginId, active: false});
                 }}
               >
                 Deactivate Plugin
@@ -176,7 +175,7 @@ export default function PluginEdit() {
                 disabled={!pluginId}
                 onClick={async () => {
                   if (!pluginId) return;
-                  netSend("pluginUpdate", {pluginId, active: true});
+                  q.plugin.update.netSend({pluginId, active: true});
                 }}
               >
                 Activate Plugin
@@ -194,7 +193,7 @@ export default function PluginEdit() {
                   }))
                 )
                   return;
-                netSend("pluginDelete", {pluginId});
+                q.plugin.update.netSend({pluginId});
                 navigate("/config");
               }}
             >
@@ -210,7 +209,7 @@ export default function PluginEdit() {
                 });
                 if (!name || typeof name !== "string") return;
                 try {
-                  const result = await netSend("pluginDuplicate", {
+                  const result = await q.plugin.update.netSend({
                     pluginId: pluginId,
                     name,
                   });
@@ -251,7 +250,7 @@ export default function PluginEdit() {
                 accept="image/*"
                 onChange={(files: FileList) => {
                   if (!plugin) return;
-                  netSend("pluginUpdate", {
+                  q.plugin.update.netSend({
                     pluginId: plugin.id,
                     coverImage: files[0],
                   });
