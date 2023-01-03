@@ -115,7 +115,7 @@ export const ThemeLayout = () => {
                           ],
                     },
                   } as any,
-                  theme: null,
+                  theme: {get: null},
                 }}
               >
                 <StationLayout />

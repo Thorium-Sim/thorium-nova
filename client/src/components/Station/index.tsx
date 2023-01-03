@@ -2,6 +2,7 @@ import {Navigate} from "react-router-dom";
 import {lazy, Suspense} from "react";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 import {q} from "@client/context/AppContext";
+import {ErrorBoundary} from "react-error-boundary";
 
 const FlightDirectorLayout = lazy(() => import("../FlightDirector"));
 const StationLayout = lazy(() => import("./StationLayout"));
@@ -19,12 +20,14 @@ const StationWrapper = () => {
     <div className="bg-black absolute z-1 h-full w-full top-0 bottom-">
       {client.offlineState !== "blackout" && (
         <>
-          <Suspense fallback={null}>
-            <Effects />
-          </Suspense>
-          <Suspense fallback={<LoadingSpinner />}>
-            <StationLayout />
-          </Suspense>
+          <ErrorBoundary fallback={<p>Error</p>}>
+            <Suspense fallback={null}>
+              <Effects />
+            </Suspense>
+            <Suspense fallback={<LoadingSpinner />}>
+              <StationLayout />
+            </Suspense>
+          </ErrorBoundary>
         </>
       )}
     </div>

@@ -77,7 +77,11 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
             return false;
           const cardStream =
             this.router._def.procedures[streamData.path]?._def.resolver;
-          let includeEntity = cardStream?.(entity, context, streamData.params);
+          let includeEntity = cardStream?.({
+            entity,
+            ctx: context,
+            input: streamData.params,
+          });
           if (includeEntity) return true;
         }
         return false;
@@ -114,7 +118,6 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
         };
       });
     const snapshot = this.SI.snapshot.create(entities);
-    // console.log(snapshot);
     this.send(snapshot);
   }
   toJSON() {

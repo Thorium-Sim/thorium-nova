@@ -8,15 +8,13 @@ export function MapControls() {
   const useStarmapStore = useGetStarmapStore();
   const systemId = useStarmapStore(state => state.currentSystem);
   const rendered = useRef(false);
-  const [ship] = q.navigation.ship.useNetRequest(undefined, {
-    callback: ship => {
-      // Follow the player ship on first render
-      if (!rendered.current) {
-        rendered.current = true;
-        useStarmapStore.setState({followEntityId: ship.id});
-      }
-    },
-  });
+  const [ship] = q.navigation.ship.useNetRequest();
+
+  useEffect(() => {
+    q.navigation.ship.netRequest().then(res => {
+      useStarmapStore.setState({followEntityId: res.id});
+    });
+  }, [useStarmapStore]);
 
   useEffect(() => {
     if (useStarmapStore.getState().followEntityId === ship.id) {

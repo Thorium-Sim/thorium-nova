@@ -6,26 +6,18 @@ import Menubar from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
 import TagInput from "@thorium/ui/TagInput";
 import UploadWell from "@thorium/ui/UploadWell";
-import {useEffect, useState} from "react";
+import {Suspense, useEffect, useState} from "react";
 import {FaEdit} from "react-icons/fa";
 import {Link, NavLink, useNavigate, useParams} from "react-router-dom";
 import {toast} from "@client/context/ToastContext";
 import {q} from "@client/context/AppContext";
 
 export default function PluginEdit() {
-  const [error, setError] = useState(false);
   const {pluginId} = useParams() as {pluginId: string};
   const [plugins] = q.plugin.all.useNetRequest();
-  const [plugin] = q.plugin.get.useNetRequest({pluginId});
   const navigate = useNavigate();
   const prompt = usePrompt();
-  const confirm = useConfirm();
 
-  useEffect(() => {
-    if (!plugin) {
-      navigate("/config");
-    }
-  }, [plugin, navigate]);
   return (
     <div className="h-full">
       <Menubar></Menubar>
@@ -91,183 +83,210 @@ export default function PluginEdit() {
               )}
             />
           </div>
-          <div className="w-96 space-y-4" key={plugin?.id}>
-            <Input
-              label="Plugin Name"
-              defaultValue={plugin?.name}
-              isInvalid={error}
-              invalidMessage="Name is required"
-              disabled={!plugin}
-              onChange={() => setError(false)}
-              onBlur={async (e: React.FocusEvent<Element>) => {
-                const target = e.target as HTMLInputElement;
-                if (!plugin) return;
-                if (target.value) {
-                  try {
-                    const result = await q.plugin.update.netSend({
-                      name: target.value,
-                      pluginId: plugin.id,
-                    });
-                    navigate(`/config/${result.pluginId}`);
-                  } catch (err) {
-                    if (err instanceof Error) {
-                      toast({
-                        title: "Error renaming plugin",
-                        body: err.message,
-                        color: "error",
-                      });
-                    }
-                  }
-                } else {
-                  setError(true);
-                }
-              }}
-            />
-            <Input
-              label="Description"
-              as="textarea"
-              className="h-64"
-              defaultValue={plugin?.description}
-              onChange={() => setError(false)}
-              disabled={!plugin}
-              onBlur={(e: React.FocusEvent<Element>) => {
-                const target = e.target as HTMLInputElement;
-                plugin &&
-                  q.plugin.update.netSend({
-                    description: target.value,
-                    pluginId: plugin.id,
-                  });
-              }}
-            />
-            <TagInput
-              label="Tags"
-              tags={plugin?.tags || []}
-              disabled={!plugin}
-              onAdd={tag => {
-                if (plugin?.tags.includes(tag) || !plugin) return;
-                q.plugin.update.netSend({
-                  tags: [...plugin.tags, tag],
-                  pluginId: plugin.id,
-                });
-              }}
-              onRemove={tag => {
-                if (!plugin) return;
-                q.plugin.update.netSend({
-                  tags: plugin.tags.filter(t => t !== tag),
-                  pluginId: plugin.id,
-                });
-              }}
-            />
-            {plugin?.active ? (
-              <Button
-                className="w-full btn-outline btn-warning"
-                disabled={!pluginId}
-                onClick={async () => {
-                  if (!pluginId) return;
-                  q.plugin.update.netSend({pluginId, active: false});
-                }}
-              >
-                Deactivate Plugin
-              </Button>
-            ) : (
-              <Button
-                className="w-full btn-outline btn-success"
-                disabled={!pluginId}
-                onClick={async () => {
-                  if (!pluginId) return;
-                  q.plugin.update.netSend({pluginId, active: true});
-                }}
-              >
-                Activate Plugin
-              </Button>
-            )}
-            <Button
-              className="w-full btn-outline btn-error"
-              disabled={!pluginId}
-              onClick={async () => {
-                if (
-                  !pluginId ||
-                  !(await confirm({
-                    header: "Are you sure you want to delete this plugin?",
-                    body: "All content in this plugin, including images and other assets, will be gone forever.",
-                  }))
-                )
-                  return;
-                q.plugin.update.netSend({pluginId});
-                navigate("/config");
-              }}
-            >
-              Delete Plugin
-            </Button>
-            <Button
-              className="w-full btn-outline btn-notice"
-              disabled={!pluginId}
-              onClick={async () => {
-                if (!pluginId) return;
-                const name = await prompt({
-                  header: "What is the name of the duplicated plugin?",
-                });
-                if (!name || typeof name !== "string") return;
-                try {
-                  const result = await q.plugin.update.netSend({
-                    pluginId: pluginId,
-                    name,
-                  });
-                  navigate(`/config/${result.pluginId}`);
-                } catch (err) {
-                  if (err instanceof Error) {
-                    toast({
-                      title: "Error duplicating plugin",
-                      body: err.message,
-                      color: "error",
-                    });
-                    return;
-                  }
-                }
-              }}
-            >
-              Duplicate Plugin
-            </Button>
-            <Link
-              className={`btn w-full btn-outline btn-warning ${
-                !pluginId ? "btn-disabled" : ""
-              }`}
-              to={`/config/${pluginId}/list`}
-            >
-              Edit Plugin
-            </Link>
-          </div>
-          <div>
-            <label>
-              <span className="flex">
-                Cover Image{" "}
-                <InfoTip>
-                  Used on the Thorium Plugin Registry. Images should be square
-                  and at least 1024x1024 in size.
-                </InfoTip>
-              </span>
-              <UploadWell
-                accept="image/*"
-                onChange={(files: FileList) => {
-                  if (!plugin) return;
-                  q.plugin.update.netSend({
-                    pluginId: plugin.id,
-                    coverImage: files[0],
-                  });
-                }}
-              >
-                {plugin?.coverImage && (
-                  <img
-                    src={`${plugin.coverImage}?${new Date().getTime()}`}
-                    className="w-[90%] h-[90%] object-cover"
-                    alt="Cover"
-                  />
-                )}
-              </UploadWell>
-            </label>
-          </div>
+          <Suspense fallback={<PluginDetails />}>
+            <PluginDetails />
+          </Suspense>
         </div>
       </div>
     </div>
+  );
+}
+
+function PluginDetails() {
+  const [error, setError] = useState(false);
+  const confirm = useConfirm();
+  const prompt = usePrompt();
+  const navigate = useNavigate();
+  const {pluginId} = useParams() as {pluginId: string};
+
+  const [plugin] = q.plugin.get.useNetRequest(
+    {pluginId},
+    {enabled: !!pluginId}
+  );
+
+  useEffect(() => {
+    if (!plugin) {
+      navigate("/config");
+    }
+  }, [plugin, navigate]);
+
+  return (
+    <>
+      <div className="w-96 space-y-4" key={plugin?.id}>
+        <Input
+          label="Plugin Name"
+          defaultValue={plugin?.name}
+          isInvalid={error}
+          invalidMessage="Name is required"
+          disabled={!plugin}
+          onChange={() => setError(false)}
+          onBlur={async (e: React.FocusEvent<Element>) => {
+            const target = e.target as HTMLInputElement;
+            if (!plugin) return;
+            if (target.value) {
+              try {
+                const result = await q.plugin.update.netSend({
+                  name: target.value,
+                  pluginId: plugin.id,
+                });
+                navigate(`/config/${result.pluginId}`);
+              } catch (err) {
+                if (err instanceof Error) {
+                  toast({
+                    title: "Error renaming plugin",
+                    body: err.message,
+                    color: "error",
+                  });
+                }
+              }
+            } else {
+              setError(true);
+            }
+          }}
+        />
+        <Input
+          label="Description"
+          as="textarea"
+          className="h-64"
+          defaultValue={plugin?.description}
+          onChange={() => setError(false)}
+          disabled={!plugin}
+          onBlur={(e: React.FocusEvent<Element>) => {
+            const target = e.target as HTMLInputElement;
+            plugin &&
+              q.plugin.update.netSend({
+                description: target.value,
+                pluginId: plugin.id,
+              });
+          }}
+        />
+        <TagInput
+          label="Tags"
+          tags={plugin?.tags || []}
+          disabled={!plugin}
+          onAdd={tag => {
+            if (plugin?.tags.includes(tag) || !plugin) return;
+            q.plugin.update.netSend({
+              tags: [...plugin.tags, tag],
+              pluginId: plugin.id,
+            });
+          }}
+          onRemove={tag => {
+            if (!plugin) return;
+            q.plugin.update.netSend({
+              tags: plugin.tags.filter(t => t !== tag),
+              pluginId: plugin.id,
+            });
+          }}
+        />
+        {plugin?.active ? (
+          <Button
+            className="w-full btn-outline btn-warning"
+            disabled={!pluginId}
+            onClick={async () => {
+              if (!pluginId) return;
+              q.plugin.update.netSend({pluginId, active: false});
+            }}
+          >
+            Deactivate Plugin
+          </Button>
+        ) : (
+          <Button
+            className="w-full btn-outline btn-success"
+            disabled={!pluginId}
+            onClick={async () => {
+              if (!pluginId) return;
+              q.plugin.update.netSend({pluginId, active: true});
+            }}
+          >
+            Activate Plugin
+          </Button>
+        )}
+        <Button
+          className="w-full btn-outline btn-error"
+          disabled={!pluginId}
+          onClick={async () => {
+            if (
+              !pluginId ||
+              !(await confirm({
+                header: "Are you sure you want to delete this plugin?",
+                body: "All content in this plugin, including images and other assets, will be gone forever.",
+              }))
+            )
+              return;
+            q.plugin.update.netSend({pluginId});
+            navigate("/config");
+          }}
+        >
+          Delete Plugin
+        </Button>
+        <Button
+          className="w-full btn-outline btn-notice"
+          disabled={!pluginId}
+          onClick={async () => {
+            if (!pluginId) return;
+            const name = await prompt({
+              header: "What is the name of the duplicated plugin?",
+            });
+            if (!name || typeof name !== "string") return;
+            try {
+              const result = await q.plugin.update.netSend({
+                pluginId: pluginId,
+                name,
+              });
+              navigate(`/config/${result.pluginId}`);
+            } catch (err) {
+              if (err instanceof Error) {
+                toast({
+                  title: "Error duplicating plugin",
+                  body: err.message,
+                  color: "error",
+                });
+                return;
+              }
+            }
+          }}
+        >
+          Duplicate Plugin
+        </Button>
+        <Link
+          className={`btn w-full btn-outline btn-warning ${
+            !pluginId ? "btn-disabled" : ""
+          }`}
+          to={`/config/${pluginId}/list`}
+        >
+          Edit Plugin
+        </Link>
+      </div>
+      <div>
+        <label>
+          <span className="flex">
+            Cover Image{" "}
+            <InfoTip>
+              Used on the Thorium Plugin Registry. Images should be square and
+              at least 1024x1024 in size.
+            </InfoTip>
+          </span>
+          <UploadWell
+            accept="image/*"
+            onChange={(files: FileList) => {
+              if (!plugin) return;
+              q.plugin.update.netSend({
+                pluginId: plugin.id,
+                coverImage: files[0],
+              });
+            }}
+          >
+            {plugin?.coverImage && (
+              <img
+                src={`${plugin.coverImage}?${new Date().getTime()}`}
+                className="w-[90%] h-[90%] object-cover"
+                alt="Cover"
+              />
+            )}
+          </UploadWell>
+        </label>
+      </div>
+    </>
   );
 }

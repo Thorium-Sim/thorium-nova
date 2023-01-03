@@ -48,9 +48,9 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
     netRequest: (
       path: string,
       input: any,
-      {headers, signal}: {headers?: HeadersResolver; signal?: AbortSignal}
+      {headers, signal}: {headers?: HeadersResolver; signal?: AbortSignal} = {}
     ) => {
-      client.netRequest({path, input, headers, signal});
+      return client.netRequest({path, input, headers, signal});
     },
     useNetRequest: (path: string, input: any, ...args: unknown[]) => {
       useRequestSub({path, params: input});

@@ -1,6 +1,5 @@
 import {getDataContext} from "@server/init/liveQuery";
-import {DataContext} from "@server/utils/DataContext";
-import {SERVER_FPS} from "../utils/constants";
+import {SERVER_FPS} from "@thorium/live-query/constants";
 import {System} from "../utils/ecs";
 
 export class DataStreamSystem extends System {

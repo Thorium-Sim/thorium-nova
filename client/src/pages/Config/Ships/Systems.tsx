@@ -11,11 +11,12 @@ import {q} from "@client/context/AppContext";
 
 export function Systems() {
   const {pluginId, shipId} = useParams() as {pluginId: string; shipId: string};
-  const [allSystems] = q.plugin.systems.all.useNetRequest();
+  const [allSystems] = q.plugin.systems.all.useNetRequest({pluginId});
   const [ship] = q.plugin.ship.get.useNetRequest({pluginId, shipId});
 
   const [allPlugins, setAllPlugins] = useState(false);
 
+  console.log(allSystems);
   const systems = allSystems.filter(
     sys =>
       !ship.shipSystems.some(

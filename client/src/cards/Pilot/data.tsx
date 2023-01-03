@@ -253,7 +253,6 @@ export const pilot = t.router({
         system.updateComponent("isThrusters", {rotationDelta: input.rotation});
 
         // TODO: September 21 2022 - Deactivate the ships autopilot when the thruster rotation change
-
         return system;
       }),
   }),

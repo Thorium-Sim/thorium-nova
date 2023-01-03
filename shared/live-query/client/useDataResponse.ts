@@ -40,7 +40,8 @@ export function useDataResponse() {
             );
           }
           if ("error" in data) {
-            throw new Error(data.error);
+            // TODO: Ignore any errors. We'll have to figure out how to address this later.
+            return;
           }
           if (!("id" in data && "data" in data)) {
             const dataString = JSON.stringify(data, null, 2);

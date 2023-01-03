@@ -30,14 +30,12 @@ export interface FastifyHandlerOptions<
     res: TResponse;
     context: TContext;
   }) => MaybePromise<inferRouterContext<TRouter>>;
-  pubsub: PubSub<TRouter>;
   createWSContext?: (opts: {
     connection: SocketStream;
     req: TRequest;
     context: TContext;
   }) => MaybePromise<inferRouterContext<TRouter>> & {id: string | number};
   extraContext: TContext;
-  Client: typeof ServerClient;
 }
 
 function processBody(req: FastifyRequest) {
@@ -84,9 +82,7 @@ export async function liveQueryPlugin<TRouter extends AnyRouter, TContext>(
     netSendPath = NETSEND_PATH,
     netRequestPath = NETREQUEST_PATH,
     router,
-    pubsub,
     extraContext,
-    Client = ServerClient,
   }: FastifyHandlerOptions<TRouter, FastifyRequest, FastifyReply, TContext>,
   done: (err?: Error) => void
 ) {
@@ -224,6 +220,9 @@ type IncomingMessage =
 
 export class ServerClient<TRouter extends AnyRouter> {
   SI = new SnapshotInterpolation();
+  // This is necessary because of "Illegal Invocation" errors around the connection.socket
+  // object. No idea how to solve it, so I just don't assign it to the class and use the
+  // ee to pass messages to it.
   private ee = new EventEmitter();
   public connected = false;
   private subscriptions: Map<string, () => void> = new Map();
@@ -394,7 +393,6 @@ export class ServerClient<TRouter extends AnyRouter> {
     });
   }
   send(data: SocketMessages) {
-    console.log("Emitting", data);
     this.ee.emit("send", data);
   }
   public async sendDataStream(context: inferRouterContext<TRouter>) {

@@ -35,9 +35,7 @@ export async function init() {
     createContext: createContext as any,
     createWSContext: createWSContext as any,
     router,
-    pubsub,
     extraContext: database,
-    Client,
   });
 
   await startServer(app);

@@ -22,7 +22,6 @@ export class ClientSocket extends EventEmitter {
             if ("type" in data) {
               this.emit(data.type, data.data);
             } else {
-              console.log("adding snapshot data");
               this.SI.snapshot.add(data);
             }
           }
