@@ -1,5 +1,5 @@
 import {CubicMeter, Flavor} from "server/src/utils/unitTypes";
-
+import {z} from "zod";
 export default class DeckPlugin {
   name: string;
   backgroundUrl: string;
@@ -12,23 +12,27 @@ export default class DeckPlugin {
 }
 
 // More flags can be added in the future.
-export const nodeFlags = [
-  "cargo",
-  "security",
-  "maintenance",
-  "medical",
-  "torpedoStorage",
-  "probeStorage",
-  "fuelStorage",
-  "coolantStorage",
-  "waterStorage",
-  "lifeSupport",
-  "crewQuarters",
-  "cafeteria",
-  "recreation",
-  "science",
-] as const;
-export type NodeFlag = typeof nodeFlags[number];
+export const nodeFlagsSchema = z.union([
+  z.literal("cargo"),
+  z.literal("security"),
+  z.literal("maintenance"),
+  z.literal("medical"),
+  z.literal("torpedoStorage"),
+  z.literal("probeStorage"),
+  z.literal("fuelStorage"),
+  z.literal("coolantStorage"),
+  z.literal("waterStorage"),
+  z.literal("lifeSupport"),
+  z.literal("crewQuarters"),
+  z.literal("cafeteria"),
+  z.literal("recreation"),
+  z.literal("science"),
+]);
+
+export const nodeFlags = nodeFlagsSchema._def.options.map(
+  flag => flag._def.value
+);
+export type NodeFlag = Zod.infer<typeof nodeFlagsSchema>;
 
 type DeckNodeId = Flavor<number, "deckNodeId">;
 export class DeckNode {
@@ -58,8 +62,16 @@ export class DeckNode {
   }
 }
 
-export const edgeFlags = ["cargoOnly", "crewOnly", "botsOnly"] as const;
-export type EdgeFlag = typeof edgeFlags[number];
+export const edgeFlagsSchema = z.union([
+  z.literal("cargoOnly"),
+  z.literal("crewOnly"),
+  z.literal("botsOnly"),
+]);
+export const edgeFlags = edgeFlagsSchema._def.options.map(
+  flag => flag._def.value
+);
+export type EdgeFlag = Zod.infer<typeof edgeFlagsSchema>;
+
 export class DeckEdge {
   id: number;
   to: DeckNodeId;

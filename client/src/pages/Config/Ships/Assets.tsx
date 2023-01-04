@@ -1,17 +1,16 @@
 import {useParams, Link} from "react-router-dom";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useReducer} from "react";
 import InfoTip from "@thorium/ui/InfoTip";
 import UploadWell from "@thorium/ui/UploadWell";
 import {readFile} from "client/src/utils/readFile";
 import {renderGLTFPreview} from "client/src/utils/generateGltfImage";
 import {toast} from "client/src/context/ToastContext";
-import {netSend} from "client/src/context/netSend";
+import {q} from "@client/context/AppContext";
 
 export function Assets() {
   const {pluginId, shipId} = useParams() as {pluginId: string; shipId: string};
-  const data = useNetRequest("pluginShips", {pluginId});
-  const ship = data.find(d => d.name === shipId);
+  const [ships] = q.plugin.ship.all.useNetRequest({pluginId});
+  const ship = ships.find(d => d.name === shipId);
   const [, render] = useReducer(() => ({}), {});
   return (
     <div className="grid grid-cols-2 grid-rows-2 gap-4 overflow-y-auto">
@@ -26,7 +25,7 @@ export function Assets() {
         <UploadWell
           accept="image/*"
           onChange={async files => {
-            await netSend("pluginShipUpdate", {
+            await q.plugin.ship.update.netSend({
               pluginId,
               shipId,
               logo: files[0],
@@ -85,7 +84,7 @@ export function Assets() {
                   },
                 }),
               ]);
-              await netSend("pluginShipUpdate", {
+              await q.plugin.ship.update.netSend({
                 pluginId,
                 shipId,
                 model: file,

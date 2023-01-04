@@ -1,13 +1,13 @@
 import * as React from "react";
 import Button from "@thorium/ui/Button";
-import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {fromDate} from "dot-beat-time";
+import {q} from "@client/context/AppContext";
 
 export default function OfficersLog() {
-  const client = useNetRequest("client");
-  const officersLog = useNetRequest("officersLog");
+  const [client] = q.client.get.useNetRequest();
+  const [officersLog] = q.officersLog.get.useNetRequest();
+
   const [stardate, setStardate] = React.useState(new Date());
   const [logEntry, setLogEntry] = React.useState<string>("");
   const [selectedEntry, setSelectedEntry] = React.useState<number | null>();
@@ -85,7 +85,7 @@ export default function OfficersLog() {
                 });
                 return;
               }
-              await netSend("officersLogAdd", {
+              await q.officersLog.add.netSend({
                 message: logEntry,
                 timestamp: stardate.getTime(),
               });

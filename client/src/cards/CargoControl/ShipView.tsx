@@ -1,12 +1,12 @@
 import Slider from "@thorium/ui/Slider";
 import {SVGImageLoader} from "@thorium/ui/SVGImageLoader";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useEffect, useState} from "react";
 import {Suspense} from "react";
 import {useResizeObserver} from "client/src/hooks/useResizeObserver";
 import {useShipMapStore} from "./useShipMapStore";
 import {CargoContainerDot} from "./CargoContainerDot";
 import {RoomDot} from "./RoomDot";
+import {q} from "@client/context/AppContext";
 
 const pixelRatio = window.devicePixelRatio;
 
@@ -17,10 +17,10 @@ export function ShipView({
   deckIndex: number;
   cardLoaded: boolean;
 }) {
-  const cargoRooms = useNetRequest("cargoRooms");
+  const [cargoRooms] = q.cargoControl.rooms.useNetRequest();
 
   const {decks, rooms, shipLength} = cargoRooms;
-  const cargoContainers = useNetRequest("cargoContainers");
+  const [cargoContainers] = q.cargoControl.containers.useNetRequest();
 
   const [ref, dims, measure] = useResizeObserver();
   const [imgRef, imgDims, imgMeasure] = useResizeObserver();
@@ -42,7 +42,7 @@ export function ShipView({
         setTransformationLoaded(true);
       }, 200);
     }
-  }, [cardLoaded]);
+  }, [cardLoaded, imgMeasure, measure]);
 
   return (
     <div

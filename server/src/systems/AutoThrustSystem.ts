@@ -2,9 +2,15 @@ import {Quaternion, Vector3, Matrix4} from "three";
 import Controller from "node-pid-controller";
 import {Entity, System} from "../utils/ecs";
 import {autopilotGetCoordinates} from "../utils/autopilotGetCoordinates";
-import {kilometerToLightMinute, KM_TO_LY, lightMinuteToLightYear, lightYearToLightMinute, Radian} from "../utils/unitTypes";
-import {pubsub} from "../utils/pubsub";
+import {
+  kilometerToLightMinute,
+  KM_TO_LY,
+  lightMinuteToLightYear,
+  lightYearToLightMinute,
+  Radian,
+} from "../utils/unitTypes";
 import {isWarpEnginesComponent} from "../components/shipSystems";
+import {pubsub} from "@server/init/pubsub";
 
 let positionVec = new Vector3();
 let rotationQuat = new Quaternion();
@@ -201,13 +207,13 @@ export class AutoThrustSystem extends System {
     }
     if (this.updateCount === 0) {
       if (warpEngines) {
-        pubsub.publish("pilotWarpEngines", {
+        pubsub.publish.pilot.warpEngines.get({
           shipId: entity.id,
           systemId: warpEngines?.id,
         });
       }
       if (impulseEngines) {
-        pubsub.publish("pilotImpulseEngines", {
+        pubsub.publish.pilot.impulseEngines.get({
           shipId: entity.id,
           systemId: impulseEngines.id,
         });

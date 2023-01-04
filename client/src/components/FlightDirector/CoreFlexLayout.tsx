@@ -1,7 +1,7 @@
 import {Layout, TabNode} from "flexlayout-react";
 import {forwardRef, Suspense, useContext} from "react";
 import * as Cores from "../../cores";
-import CardProvider from "client/src/context/CardContext";
+import CardProvider from "@client/context/CardContext";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 import {CoreFlexLayoutContext} from "./CoreFlexLayoutContext";
 

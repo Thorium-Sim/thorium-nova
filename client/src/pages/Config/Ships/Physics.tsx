@@ -1,8 +1,7 @@
 import {Navigate, useParams} from "react-router-dom";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useState} from "react";
 import Input from "@thorium/ui/Input";
-import {netSend} from "client/src/context/netSend";
+import {q} from "@client/context/AppContext";
 
 export function Physics() {
   const [massError, setMassError] = useState(false);
@@ -12,8 +11,8 @@ export function Physics() {
     pluginId: string;
     shipId: string;
   };
-  const data = useNetRequest("pluginShips", {pluginId});
-  const ship = data.find(d => d.name === shipId);
+  const [ships] = q.plugin.ship.all.useNetRequest({pluginId});
+  const ship = ships.find(d => d.name === shipId);
   if (!ship) return <Navigate to={`/config/${pluginId}/ships`} />;
   return (
     <fieldset key={shipId} className="flex-1 overflow-y-auto  max-w-3xl">
@@ -34,7 +33,7 @@ export function Physics() {
                   parseFloat(e.target.value) <= 0
                 )
                   return setMassError(true);
-                await netSend("pluginShipUpdate", {
+                await q.plugin.ship.update.netSend({
                   pluginId,
                   shipId,
                   mass: parseFloat(e.target.value),
@@ -60,7 +59,7 @@ export function Physics() {
                   parseFloat(e.target.value) <= 0
                 )
                   return setLengthError(true);
-                await netSend("pluginShipUpdate", {
+                await q.plugin.ship.update.netSend({
                   pluginId,
                   shipId,
                   length: e.target.value,

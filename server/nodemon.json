@@ -1,12 +1,11 @@
 {
   "watch": [
     "src",
-    "../client/src/cards/**/data.ts",
-    "../client/src/cards/**/data.tsx",
-    "../client/src/cores/**/data.tsx",
-    "../client/src/cores/**/data.tsx",
-    "../client/src/cards/clientData.ts",
-    "../client/src/utils/cardData.ts"
+    "../shared/**",
+    "../client/src/**/data.ts",
+    "../client/src/**/data.tsx",
+    "../client/src/**/data/**/*.ts",
+    "../client/src/**/data/**/*.tsx"
   ],
   "ignore": ["src/**/*.test.ts"],
   "ext": "ts,tsx,mjs,js,json",

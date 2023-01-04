@@ -3,8 +3,14 @@ import {Aspect} from "../Aspect";
 import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
 import DeckPlugin, {DeckEdge} from "./Deck";
 import {CubicMeter} from "server/src/utils/unitTypes";
-
-export type ShipCategories = "Cruiser" | "Frigate" | "Scout" | "Shuttle";
+import {z} from "zod";
+export const shipCategories = z.union([
+  z.literal("Cruiser"),
+  z.literal("Frigate"),
+  z.literal("Scout"),
+  z.literal("Shuttle"),
+]);
+export type ShipCategories = Zod.infer<typeof shipCategories>;
 
 export default class ShipPlugin extends Aspect {
   apiVersion = "ships/v1" as const;

@@ -1,19 +1,20 @@
-import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
+import {useGetStarmapStore} from "@client/components/Starmap/starmapStore";
+import {q} from "@client/context/AppContext";
 import Button from "@thorium/ui/Button";
 import {ZoomSlider} from "@thorium/ui/Slider";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useEffect, useRef} from "react";
+
 export function MapControls() {
   const useStarmapStore = useGetStarmapStore();
   const systemId = useStarmapStore(state => state.currentSystem);
   const rendered = useRef(false);
-  const ship = useNetRequest("navigationShip", {}, ship => {
-    // Follow the player ship on first render
-    if (!rendered.current) {
-      rendered.current = true;
-      useStarmapStore.setState({followEntityId: ship.id});
-    }
-  });
+  const [ship] = q.navigation.ship.useNetRequest();
+
+  useEffect(() => {
+    q.navigation.ship.netRequest().then(res => {
+      useStarmapStore.setState({followEntityId: res.id});
+    });
+  }, [useStarmapStore]);
 
   useEffect(() => {
     if (useStarmapStore.getState().followEntityId === ship.id) {
@@ -21,7 +22,7 @@ export function MapControls() {
         .getState()
         .setCurrentSystem(ship.position?.parentId || null);
     }
-  }, [ship.position?.parentId]);
+  }, [ship.position?.parentId, useStarmapStore, ship.id]);
 
   return (
     <div className="self-end max-w-sm space-y-2">

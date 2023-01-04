@@ -8,12 +8,14 @@ test("it should render without error", async () => {
     <OfficersLog />,
     {
       netRequestData: {
-        officersLog: [
-          {
-            message: "This is a test log entry",
-            timestamp: 1639484836855,
-          },
-        ],
+        officersLog: {
+          get: [
+            {
+              message: "This is a test log entry",
+              timestamp: 1639484836855,
+            },
+          ],
+        },
       },
     }
   );

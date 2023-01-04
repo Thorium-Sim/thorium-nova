@@ -1,12 +1,11 @@
 import {Navigate, useParams} from "react-router-dom";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import Input from "@thorium/ui/Input";
 import {AllShipSystems} from "server/src/classes/Plugins/ShipSystems/shipSystemTypes";
-import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
 import {useContext, useReducer} from "react";
 import {ShipPluginIdContext} from "../../Ships/ShipSystemOverrideContext";
 import {OverrideResetButton} from "../OverrideResetButton";
+import {q} from "@client/context/AppContext";
 export default function InertialDampenersConfig() {
   const {pluginId, systemId, shipId} = useParams() as {
     pluginId: string;
@@ -15,13 +14,12 @@ export default function InertialDampenersConfig() {
   };
   const shipPluginId = useContext(ShipPluginIdContext);
 
-  const system = useNetRequest("pluginShipSystem", {
+  const [system] = q.plugin.systems.inertialDampeners.get.useNetRequest({
     pluginId,
-    type: "inertialDampeners",
     systemId,
     shipId,
     shipPluginId,
-  }) as AllShipSystems["inertialDampeners"];
+  });
   const [rekey, setRekey] = useReducer(() => Math.random(), Math.random());
   const key = `${systemId}${rekey}`;
   if (!system) return <Navigate to={`/config/${pluginId}/systems`} />;
@@ -44,7 +42,7 @@ export default function InertialDampenersConfig() {
               onBlur={async e => {
                 if (!e.target.value || isNaN(Number(e.target.value))) return;
                 try {
-                  await netSend("pluginInertialDampenersUpdate", {
+                  await q.plugin.systems.inertialDampeners.update.netSend({
                     pluginId,
                     shipSystemId: systemId,
                     shipId,

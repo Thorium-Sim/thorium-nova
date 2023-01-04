@@ -1,8 +1,7 @@
+import {q} from "@client/context/AppContext";
 import Button from "@thorium/ui/Button";
 import Modal from "@thorium/ui/Modal";
-import {useNetSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useMatch, useNavigate, Navigate, Outlet, Link} from "react-router-dom";
 import {randomNameGenerator} from "server/src/utils/randomNameGenerator";
 import {useFlightQuickStart} from "./FlightQuickStartContext";
@@ -11,10 +10,10 @@ function capitalize(val: string) {
   return val.charAt(0).toUpperCase() + val.slice(1);
 }
 export default function FlightQuickStart() {
-  const flight = useNetRequest("flight");
-  const client = useNetRequest("client");
+  const [flight] = q.flight.active.useNetRequest();
+  const [client] = q.client.get.useNetRequest();
 
-  const {mutate: netSend, isLoading} = useNetSend();
+  const {mutate: netSend, isLoading} = q.flight.start.useNetSend();
 
   const [state] = useFlightQuickStart();
 
@@ -89,19 +88,16 @@ export default function FlightQuickStart() {
                 shipName = randomNameGenerator();
               }
               netSend({
-                type: "flightStart",
-                params: {
-                  flightName,
-                  ships: [
-                    {
-                      crewCount,
-                      shipName,
-                      shipTemplate,
-                      missionName,
-                      startingPoint,
-                    },
-                  ],
-                },
+                flightName,
+                ships: [
+                  {
+                    crewCount,
+                    shipName,
+                    shipTemplate,
+                    missionName,
+                    startingPoint,
+                  },
+                ],
               });
             }}
           >

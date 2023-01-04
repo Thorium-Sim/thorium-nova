@@ -3,17 +3,12 @@ import {useEffect, useRef} from "react";
 import {useSpring, animated as a} from "@react-spring/web";
 import {useDrag} from "@use-gesture/react";
 import throttle from "lodash.throttle";
-// import {
-//   useForwardVelocityStore,
-//   usePlayerForwardVelocity,
-// } from "client/components/viewscreen/usePlayerForwardVelocity";
-import {KilometerPerSecond} from "server/src/utils/unitTypes";
-import useMeasure from "client/src/hooks/useMeasure";
+import {KilometerPerSecond} from "@server/utils/unitTypes";
+import useMeasure from "@client/hooks/useMeasure";
 import Button from "@thorium/ui/Button";
-import {useNetRequest} from "client/src/context/useNetRequest";
-import {netSend} from "client/src/context/netSend";
-import {useThorium} from "client/src/context/ThoriumContext";
-import useAnimationFrame from "client/src/hooks/useAnimationFrame";
+import useAnimationFrame from "@client/hooks/useAnimationFrame";
+import {useLiveQuery} from "@thorium/live-query/client";
+import {q} from "@client/context/AppContext";
 
 const C_IN_METERS = 299792458;
 function formatSpeed(speed: KilometerPerSecond) {
@@ -37,9 +32,10 @@ function formatSpeed(speed: KilometerPerSecond) {
 }
 
 export function useForwardVelocity() {
-  const {id: impulseId, targetSpeed} = useNetRequest("pilotImpulseEngines");
-  const {id: warpId} = useNetRequest("pilotWarpEngines");
-  const {interpolate} = useThorium();
+  const [{id: impulseId, targetSpeed}] =
+    q.pilot.impulseEngines.get.useNetRequest();
+  const [{id: warpId}] = q.pilot.warpEngines.get.useNetRequest();
+  const {interpolate} = useLiveQuery();
 
   return function getForwardVelocity(): [
     KilometerPerSecond,
@@ -96,11 +92,10 @@ const ForwardVelocity = () => {
 const KNOB_HEIGHT = 44;
 const BUTTON_OFFSET = 0.8;
 export const ImpulseControls = ({cardLoaded = true}) => {
-  const {targetSpeed, cruisingSpeed, emergencySpeed} = useNetRequest(
-    "pilotImpulseEngines"
-  );
-  const {warpFactorCount, currentWarpFactor} =
-    useNetRequest("pilotWarpEngines");
+  const [{targetSpeed, cruisingSpeed, emergencySpeed}] =
+    q.pilot.impulseEngines.get.useNetRequest();
+  const [{warpFactorCount, currentWarpFactor}] =
+    q.pilot.warpEngines.get.useNetRequest();
   const downRef = useRef(false);
   const [ref, measurement, getMeasurements] = useMeasure<HTMLDivElement>();
   const [{y}, set] = useSpring(() => ({
@@ -110,9 +105,9 @@ export const ImpulseControls = ({cardLoaded = true}) => {
 
   const callback = useRef(
     throttle((speed: number) => {
-      netSend("impulseEnginesSetSpeed", {speed});
+      q.pilot.impulseEngines.setSpeed.netSend({speed});
       if (speed === 0) {
-        netSend("warpEnginesSetWarpFactor", {factor: 0});
+        q.pilot.warpEngines.setWarpFactor.netSend({factor: 0});
       }
     }, 100)
   );
@@ -242,7 +237,7 @@ export const ImpulseControls = ({cardLoaded = true}) => {
                   currentWarpFactor === warpFactorCount + 1 ? "btn-active" : ""
                 }`}
                 onClick={() =>
-                  netSend("warpEnginesSetWarpFactor", {
+                  q.pilot.warpEngines.setWarpFactor.netSend({
                     factor: warpFactorCount + 1,
                   })
                 }
@@ -260,7 +255,9 @@ export const ImpulseControls = ({cardLoaded = true}) => {
                       i === 0 ? "warning" : ""
                     } ${warpFactor === currentWarpFactor ? "btn-active" : ""}`}
                     onClick={() =>
-                      netSend("warpEnginesSetWarpFactor", {factor: warpFactor})
+                      q.pilot.warpEngines.setWarpFactor.netSend({
+                        factor: warpFactor,
+                      })
                     }
                   >
                     Warp {warpFactor}

@@ -1,33 +1,26 @@
-import {DataContext} from "server/src/utils/DataContext";
-import {pubsub} from "server/src/utils/pubsub";
+import {t} from "@server/init/t";
+import {pubsub} from "@server/init/pubsub";
+import {z} from "zod";
 
-export const requests = {
-  officersLog(
-    context: DataContext,
-    params: {},
-    publishParams: {clientId: string}
-  ) {
-    if (publishParams && context.clientId !== publishParams.clientId)
-      throw null;
+export const officersLog = t.router({
+  get: t.procedure
+    .filter((publish: {clientId: string}, {ctx}) => {
+      if (publish && ctx.id !== publish.clientId) return false;
+      return true;
+    })
+    .request(({ctx}) => {
+      return ctx.flightClient?.officersLog || [];
+    }),
+  add: t.procedure
+    .input(z.object({message: z.string(), timestamp: z.number()}))
+    .send(({ctx, input}) => {
+      const {message, timestamp = Date.now()} = input;
 
-    return context.flightClient?.officersLog || [];
-  },
-};
+      ctx.flightClient?.officersLog.push({
+        message,
+        timestamp,
+      });
 
-export const inputs = {
-  officersLogAdd(
-    context: DataContext,
-    params: {message: string; timestamp: number}
-  ) {
-    const {message, timestamp = Date.now()} = params;
-
-    context.flightClient?.officersLog.push({
-      message,
-      timestamp,
-    });
-
-    pubsub.publish("officersLog", {
-      clientId: context.clientId,
-    });
-  },
-};
+      pubsub.publish.officersLog.get({clientId: ctx.id});
+    }),
+});

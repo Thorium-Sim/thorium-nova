@@ -1,6 +1,4 @@
 import Button from "@thorium/ui/Button";
-import {netSend} from "client/src/context/netSend";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useNavigate, useParams, Outlet, Link} from "react-router-dom";
 import {
   DndContext,
@@ -19,6 +17,7 @@ import {
 import {restrictToVerticalAxis} from "@dnd-kit/modifiers";
 import {useSortable} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
+import {q} from "@client/context/AppContext";
 
 export function SortableItem({
   id,
@@ -65,7 +64,7 @@ export function ShipMap() {
     deckName: string;
   };
   const navigate = useNavigate();
-  const data = useNetRequest("pluginShip", {pluginId, shipId});
+  const [data] = q.plugin.ship.get.useNetRequest({pluginId, shipId});
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -82,7 +81,7 @@ export function ShipMap() {
 
     if (typeof overIndex !== "number") return;
     if (activeIndex !== overIndex) {
-      const result = await netSend("pluginShipDeckUpdate", {
+      const result = await q.plugin.ship.deck.update.netSend({
         pluginId,
         shipId,
         deckId: active.id as string,
@@ -126,7 +125,7 @@ export function ShipMap() {
         <Button
           className="btn-success w-full"
           onClick={async () => {
-            const deck = await netSend("pluginShipDeckCreate", {
+            const deck = await q.plugin.ship.deck.create.netSend({
               pluginId,
               shipId,
             });

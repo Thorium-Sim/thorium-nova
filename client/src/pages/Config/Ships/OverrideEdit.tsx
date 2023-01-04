@@ -12,21 +12,21 @@ import {Basic} from "../ShipSystems/Basic";
 import {Power} from "../ShipSystems/Power";
 import {Efficiency} from "../ShipSystems/Efficiency";
 import {Heat} from "../ShipSystems/Heat";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {systemConfigs} from "../ShipSystems";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
-import {createContext, Suspense, useContext} from "react";
+import {Suspense, useContext} from "react";
 import {
   ShipSystemOverrideContext,
   ShipPluginIdContext,
 } from "./ShipSystemOverrideContext";
+import {q} from "@client/context/AppContext";
 
 const SystemConfig = () => {
   const {pluginId, systemId} = useParams() as {
     pluginId: string;
     systemId: string;
   };
-  const system = useNetRequest("pluginShipSystem", {pluginId, systemId});
+  const [system] = q.plugin.systems.get.useNetRequest({pluginId, systemId});
   if (!system?.type) return null;
   const Comp = systemConfigs[system.type];
   if (!Comp) return null;
@@ -47,7 +47,7 @@ export function OverrideEdit() {
   const {pathname} = useLocation();
 
   const pluginId = useContext(ShipPluginIdContext);
-  const ship = useNetRequest("pluginShip", {pluginId, shipId});
+  const [ship] = q.plugin.ship.get.useNetRequest({pluginId, shipId});
   const overrides =
     ship.shipSystems.find(
       s => s.systemId === systemId && s.pluginId === systemPluginId

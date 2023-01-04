@@ -1,4 +1,6 @@
-import {ServerClient} from "../classes/Client";
+import {Client} from "@server/init/liveQuery";
+import {pubsub} from "@server/init/pubsub";
+import {router} from "@server/init/router";
 import {FlightClient} from "../classes/FlightClient";
 import {FlightDataModel} from "../classes/FlightDataModel";
 import BasePlugin from "../classes/Plugins";
@@ -6,10 +8,11 @@ import {InventoryTemplate} from "../classes/Plugins/Inventory";
 import ShipPlugin from "../classes/Plugins/Ship";
 import {ServerDataModel} from "../classes/ServerDataModel";
 import systems from "../systems";
+import {DataContext} from "./DataContext";
 import {ECS, Entity} from "./ecs";
 
 class MockServerDataModel {
-  clients!: Record<string, ServerClient>;
+  clients!: Record<string, Client<any>>;
   thoriumId!: string;
   activeFlightName!: string | null;
   plugins = [
@@ -32,9 +35,7 @@ class MockServerDataModel {
   ];
   constructor() {
     this.clients = {
-      test: new ServerClient({
-        id: "test",
-      }),
+      test: new Client("test", router, pubsub),
     };
   }
   toJSON() {
@@ -123,7 +124,7 @@ class MockFlightDataModel {
   }
 }
 class MockDataContext {
-  clientId: "test" = "test";
+  id: "test" = "test";
   database: {server: ServerDataModel; flight: FlightDataModel | null} = {
     server: new MockServerDataModel() as any as ServerDataModel,
     flight: null,
@@ -135,9 +136,6 @@ class MockDataContext {
       entities: [],
     }) as any as FlightDataModel;
     this.flight?.initEcs(this.server);
-    for (let client in this.server.clients) {
-      this.server.clients[client].clientContext = this as any;
-    }
   }
   get flight() {
     return this.database.flight;
@@ -149,10 +147,10 @@ class MockDataContext {
     return this.database.server;
   }
   get client() {
-    return this.server.clients[this.clientId];
+    return this.server.clients[this.id];
   }
   get flightClient() {
-    return this.findFlightClient(this.clientId);
+    return this.findFlightClient(this.id);
   }
   findFlightClient(clientId: string) {
     return this.flight?.clients[clientId] || null;
@@ -167,4 +165,8 @@ class MockDataContext {
 
 export function createMockDataContext() {
   return new MockDataContext();
+}
+
+export function createMockRouter(context: DataContext) {
+  return router.createCaller(context);
 }

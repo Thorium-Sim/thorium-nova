@@ -1,14 +1,13 @@
 import {Navigate, useParams} from "react-router-dom";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useState} from "react";
 import Input from "@thorium/ui/Input";
-import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
 import InfoTip from "@thorium/ui/InfoTip";
+import {q} from "@client/context/AppContext";
 
 export function Cargo() {
   const {pluginId, shipId} = useParams() as {pluginId: string; shipId: string};
-  const data = useNetRequest("pluginShips", {pluginId});
+  const [data] = q.plugin.ship.all.useNetRequest({pluginId});
   const ship = data.find(d => d.name === shipId);
   const [error, setError] = useState(false);
   if (!ship) return <Navigate to={`/config/${pluginId}/ships`} />;
@@ -37,7 +36,7 @@ export function Cargo() {
               onBlur={async (e: any) => {
                 if (!e.target.value) return setError(true);
                 try {
-                  const result = await netSend("pluginShipUpdate", {
+                  const result = await q.plugin.ship.update.netSend({
                     pluginId,
                     shipId,
                     cargoContainers: Number(e.target.value),
@@ -66,7 +65,7 @@ export function Cargo() {
               onBlur={async (e: any) => {
                 if (!e.target.value) return setError(true);
                 try {
-                  const result = await netSend("pluginShipUpdate", {
+                  const result = await q.plugin.ship.update.netSend({
                     pluginId,
                     shipId,
                     cargoContainerVolume: Number(e.target.value),

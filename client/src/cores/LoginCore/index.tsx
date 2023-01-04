@@ -1,7 +1,7 @@
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {q} from "@client/context/AppContext";
 
 export function LoginCore() {
-  const clients = useNetRequest("flightClients");
+  const [clients] = q.loginCore.clients.useNetRequest();
   return (
     <div className="prose prose-invert w-full mx-auto">
       <table>

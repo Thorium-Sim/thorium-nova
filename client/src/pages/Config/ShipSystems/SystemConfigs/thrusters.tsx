@@ -1,12 +1,11 @@
 import {Navigate, useParams} from "react-router-dom";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import Input from "@thorium/ui/Input";
 import {AllShipSystems} from "server/src/classes/Plugins/ShipSystems/shipSystemTypes";
-import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
 import {useContext, useReducer} from "react";
 import {ShipPluginIdContext} from "../../Ships/ShipSystemOverrideContext";
 import {OverrideResetButton} from "../OverrideResetButton";
+import {q} from "@client/context/AppContext";
 
 export default function ThrustersConfig() {
   const {pluginId, systemId, shipId} = useParams() as {
@@ -16,13 +15,12 @@ export default function ThrustersConfig() {
   };
   const shipPluginId = useContext(ShipPluginIdContext);
 
-  const system = useNetRequest("pluginShipSystem", {
+  const [system] = q.plugin.systems.thrusters.get.useNetRequest({
     pluginId,
-    type: "thrusters",
     systemId,
     shipId,
     shipPluginId,
-  }) as AllShipSystems["thrusters"];
+  });
   const [rekey, setRekey] = useReducer(() => Math.random(), Math.random());
   const key = `${systemId}${rekey}`;
   if (!system) return <Navigate to={`/config/${pluginId}/systems`} />;
@@ -44,7 +42,7 @@ export default function ThrustersConfig() {
               onBlur={async e => {
                 if (!e.target.value || isNaN(Number(e.target.value))) return;
                 try {
-                  await netSend("pluginThrustersUpdate", {
+                  await q.plugin.systems.thrusters.update.netSend({
                     pluginId,
                     shipSystemId: systemId,
                     shipId,
@@ -80,7 +78,7 @@ export default function ThrustersConfig() {
               onBlur={async e => {
                 if (!e.target.value || isNaN(Number(e.target.value))) return;
                 try {
-                  await netSend("pluginThrustersUpdate", {
+                  await q.plugin.systems.thrusters.update.netSend({
                     pluginId,
                     shipSystemId: systemId,
                     shipId,
@@ -116,7 +114,7 @@ export default function ThrustersConfig() {
               onBlur={async e => {
                 if (!e.target.value || isNaN(Number(e.target.value))) return;
                 try {
-                  await netSend("pluginThrustersUpdate", {
+                  await q.plugin.systems.thrusters.update.netSend({
                     pluginId,
                     shipSystemId: systemId,
                     shipId,
@@ -152,7 +150,7 @@ export default function ThrustersConfig() {
               onBlur={async e => {
                 if (!e.target.value || isNaN(Number(e.target.value))) return;
                 try {
-                  await netSend("pluginThrustersUpdate", {
+                  await q.plugin.systems.thrusters.update.netSend({
                     pluginId,
                     shipSystemId: systemId,
                     shipId,

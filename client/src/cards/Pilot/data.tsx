@@ -1,211 +1,275 @@
-import {getShipSystem} from "server/src/inputs/shipSystems/getShipSystem";
-import {DataContext} from "server/src/utils/DataContext";
-import {Entity} from "server/src/utils/ecs";
-import {pubsub} from "server/src/utils/pubsub";
+import {t} from "@server/init/t";
+import {pubsub} from "@server/init/pubsub";
+import {getShipSystem} from "@server/utils/getShipSystem";
+import {z} from "zod";
 
-export const requests = {
-  pilotPlayerShip(
-    context: DataContext,
-    params: {},
-    publishParams: {shipId: number}
-  ) {
-    if (publishParams && publishParams.shipId !== context.ship?.id) throw null;
-    if (!context.ship) throw new Error("Cannot find ship");
-    const systemId = context.ship.components.position?.parentId;
-    const systemPosition = systemId
-      ? context.flight?.ecs.getEntityById(systemId)?.components.position || null
-      : null;
-    return {
-      id: context.ship.id,
-      currentSystem: systemId || null,
-      systemPosition,
-    };
-  },
-  pilotImpulseEngines(
-    context: DataContext,
-    params: {},
-    publishParams: {shipId: number; systemId: number}
-  ) {
-    if (publishParams && publishParams.shipId !== context.ship?.id) throw null;
+export const pilot = t.router({
+  impulseEngines: t.router({
+    get: t.procedure
+      .filter((publish: {shipId: number; systemId: number}, {ctx}) => {
+        if (publish && publish.shipId !== ctx.ship?.id) return false;
+        return true;
+      })
+      .request(({ctx}) => {
+        // Currently only support one impulse engines
+        const impulseEngines = getShipSystem(ctx, {
+          systemType: "impulseEngines",
+        });
+        return {
+          id: impulseEngines.id,
+          targetSpeed:
+            impulseEngines.components.isImpulseEngines?.targetSpeed || 0,
+          cruisingSpeed:
+            impulseEngines.components.isImpulseEngines?.cruisingSpeed || 1,
+          emergencySpeed:
+            impulseEngines.components.isImpulseEngines?.emergencySpeed || 1,
+        };
+      }),
+    setSpeed: t.procedure
+      .input(z.object({systemId: z.number().optional(), speed: z.number()}))
+      .send(({ctx, input}) => {
+        if (!ctx.ship) throw new Error("No ship found.");
 
-    // Currently only support one impulse engines
-    const impulseEngines = getShipSystem(context, {
-      systemType: "impulseEngines",
-    });
-    return {
-      id: impulseEngines.id,
-      targetSpeed: impulseEngines.components.isImpulseEngines?.targetSpeed || 0,
-      cruisingSpeed:
-        impulseEngines.components.isImpulseEngines?.cruisingSpeed || 1,
-      emergencySpeed:
-        impulseEngines.components.isImpulseEngines?.emergencySpeed || 1,
-    };
-  },
-  pilotWarpEngines(
-    context: DataContext,
-    params: {},
-    publishParams: {shipId: number; systemId: number}
-  ) {
-    if (publishParams && publishParams.shipId !== context.ship?.id) throw null;
-    // Currently only support one warp engines
-    const warpEngines = getShipSystem(context, {systemType: "warpEngines"});
-    return {
-      id: warpEngines.id,
-      warpFactorCount:
-        warpEngines.components.isWarpEngines?.warpFactorCount || 5,
-      maxVelocity: warpEngines.components.isWarpEngines?.maxVelocity || 0,
-      currentWarpFactor:
-        warpEngines.components.isWarpEngines?.currentWarpFactor || 0,
-      interstellarCruisingSpeed:
-        warpEngines.components.isWarpEngines?.interstellarCruisingSpeed ||
-        599600000000,
-      solarCruisingSpeed:
-        warpEngines.components.isWarpEngines?.solarCruisingSpeed || 29980000,
-    };
-  },
-  autopilot(context: DataContext, params: {}, publishParams: {shipId: number}) {
-    if (publishParams && publishParams.shipId !== context.ship?.id) throw null;
-    if (!context.ship) throw new Error("Ship not found");
+        const system = getShipSystem(ctx, {
+          systemId: input.systemId,
+          systemType: "impulseEngines",
+        });
 
-    const waypointId = context.ship.components.autopilot?.destinationWaypointId;
-    let destinationName = "";
-    let waypoint;
-    if (typeof waypointId === "number") {
-      waypoint = context.flight?.ecs.getEntityById(waypointId);
-      destinationName =
-        waypoint?.components.identity?.name.replace(" Waypoint", "").trim() ||
-        "";
-    }
-    const waypointParentId = waypoint?.components.position?.parentId;
+        if (!system.components.isImpulseEngines)
+          throw new Error("System is not a impulse engine");
 
-    const waypointSystemPosition =
-      typeof waypointParentId === "number"
-        ? context.flight?.ecs.getEntityById(waypointParentId)?.components
-            .position || null
-        : null;
+        system.updateComponent("isImpulseEngines", {
+          targetSpeed: input.speed,
+        });
 
-    return {
-      forwardAutopilot: context.ship.components.autopilot?.forwardAutopilot,
-      destinationName,
-      destinationPosition: waypoint?.components.position || null,
-      destinationSystemPosition: waypointSystemPosition,
-      locked: !!context.ship.components.autopilot?.desiredCoordinates,
-    };
-  },
-};
+        pubsub.publish.pilot.impulseEngines.get({
+          shipId: ctx.ship?.id,
+          systemId: system.id,
+        });
+        return system;
+      }),
+  }),
+  warpEngines: t.router({
+    get: t.procedure
+      .filter((publish: {shipId: number; systemId: number}, {ctx}) => {
+        if (publish && publish.shipId !== ctx.ship?.id) return false;
+        return true;
+      })
+      .request(({ctx}) => {
+        // Currently only support one impulse engines
+        const impulseEngines = getShipSystem(ctx, {
+          systemType: "impulseEngines",
+        });
+        // Currently only support one warp engines
+        const warpEngines = getShipSystem(ctx, {systemType: "warpEngines"});
+        return {
+          id: warpEngines.id,
+          warpFactorCount:
+            warpEngines.components.isWarpEngines?.warpFactorCount || 5,
+          maxVelocity: warpEngines.components.isWarpEngines?.maxVelocity || 0,
+          currentWarpFactor:
+            warpEngines.components.isWarpEngines?.currentWarpFactor || 0,
+          interstellarCruisingSpeed:
+            warpEngines.components.isWarpEngines?.interstellarCruisingSpeed ||
+            599600000000,
+          solarCruisingSpeed:
+            warpEngines.components.isWarpEngines?.solarCruisingSpeed ||
+            29980000,
+        };
+      }),
+    setWarpFactor: t.procedure
+      .input(z.object({systemId: z.number().optional(), factor: z.number()}))
+      .send(({ctx, input}) => {
+        if (!ctx.ship) throw new Error("No ship found.");
 
-export function dataStream(
-  entity: Entity,
-  context: DataContext,
-  params?: {systemId: number | null}
-): boolean {
-  const systemId =
-    params?.systemId || context.ship?.components.position?.parentId;
-  if (typeof systemId === "undefined") {
-    return false;
-  }
-  return Boolean(
-    (entity.components.position &&
-      entity.components.position.parentId === systemId) ||
-      ((entity.components.isWarpEngines ||
-        entity.components.isImpulseEngines) &&
-        context.ship?.components.shipSystems?.shipSystemIds.includes(entity.id))
-  );
-}
+        const system = getShipSystem(ctx, {
+          systemId: input.systemId,
+          systemType: "warpEngines",
+        });
+        if (!system.components.isWarpEngines)
+          throw new Error("System is not a warp engine");
 
-export const inputs = {
-  impulseEnginesSetSpeed(
-    context: DataContext,
-    params: {systemId?: number; speed: number}
-  ) {
-    if (!context.ship) throw new Error("No ship found.");
+        system.updateComponent("isWarpEngines", {
+          currentWarpFactor: input.factor,
+        });
 
-    const system = getShipSystem(context, {
-      systemId: params.systemId,
-      systemType: "impulseEngines",
-    });
+        pubsub.publish.pilot.warpEngines.get({
+          shipId: ctx.ship?.id,
+          systemId: system.id,
+        });
+        return system;
+      }),
+  }),
+  autopilot: t.router({
+    get: t.procedure
+      .filter((publish: {shipId: number}, {ctx}) => {
+        if (publish && publish.shipId !== ctx.ship?.id) return false;
+        return true;
+      })
+      .request(({ctx}) => {
+        if (!ctx.ship) throw new Error("Ship not found");
 
-    if (!system.components.isImpulseEngines)
-      throw new Error("System is not a impulse engine");
+        const waypointId = ctx.ship.components.autopilot?.destinationWaypointId;
+        let destinationName = "";
+        let waypoint;
+        if (typeof waypointId === "number") {
+          waypoint = ctx.flight?.ecs.getEntityById(waypointId);
+          destinationName =
+            waypoint?.components.identity?.name
+              .replace(" Waypoint", "")
+              .trim() || "";
+        }
+        const waypointParentId = waypoint?.components.position?.parentId;
 
-    system.updateComponent("isImpulseEngines", {
-      targetSpeed: params.speed,
-    });
+        const waypointSystemPosition =
+          typeof waypointParentId === "number"
+            ? ctx.flight?.ecs.getEntityById(waypointParentId)?.components
+                .position || null
+            : null;
 
-    pubsub.publish("pilotImpulseEngines", {
-      shipId: context.ship?.id,
-      systemId: system.id,
-    });
-    return system;
-  },
-  autopilotLockCourse(context: DataContext, params: {waypointId: number}) {
-    if (!context.ship) throw new Error("Ship not found.");
-    const waypoint = context.flight?.ecs.getEntityById(params.waypointId);
-    const position = waypoint?.components.position;
-    if (!waypoint || !position) throw new Error("Waypoint not found.");
+        return {
+          forwardAutopilot: ctx.ship.components.autopilot?.forwardAutopilot,
+          destinationName,
+          destinationPosition: waypoint?.components.position || null,
+          destinationSystemPosition: waypointSystemPosition,
+          locked: !!ctx.ship.components.autopilot?.desiredCoordinates,
+        };
+      }),
+    lockCourse: t.procedure
+      .input(z.object({waypointId: z.number()}))
+      .send(({ctx, input}) => {
+        if (!ctx.ship) throw new Error("Ship not found.");
+        const waypoint = ctx.flight?.ecs.getEntityById(input.waypointId);
+        const position = waypoint?.components.position;
+        if (!waypoint || !position) throw new Error("Waypoint not found.");
 
-    context.ship.updateComponent("autopilot", {
-      destinationWaypointId: params.waypointId,
-      desiredCoordinates: {x: position.x, y: position.y, z: position.z},
-      desiredSolarSystemId: position.parentId,
-      rotationAutopilot: true,
-      forwardAutopilot: false,
-    });
+        ctx.ship.updateComponent("autopilot", {
+          destinationWaypointId: input.waypointId,
+          desiredCoordinates: {x: position.x, y: position.y, z: position.z},
+          desiredSolarSystemId: position.parentId,
+          rotationAutopilot: true,
+          forwardAutopilot: false,
+        });
 
-    pubsub.publish("autopilot", {shipId: context.ship.id});
-    pubsub.publish("systemAutopilot", {
-      systemId: context.ship.components.position?.parentId || null,
-    });
-  },
-  autopilotUnlockCourse(context: DataContext) {
-    if (!context.ship) throw new Error("Ship not found.");
+        pubsub.publish.pilot.autopilot.get({shipId: ctx.ship.id});
+        pubsub.publish.starmapCore.autopilot({
+          systemId: ctx.ship.components.position?.parentId || null,
+        });
+      }),
+    unlockCourse: t.procedure.send(({ctx}) => {
+      if (!ctx.ship) throw new Error("Ship not found.");
 
-    context.ship.updateComponent("autopilot", {
-      destinationWaypointId: null,
-      desiredCoordinates: undefined,
-      desiredSolarSystemId: undefined,
-      rotationAutopilot: false,
-      forwardAutopilot: false,
-    });
+      ctx.ship.updateComponent("autopilot", {
+        destinationWaypointId: null,
+        desiredCoordinates: undefined,
+        desiredSolarSystemId: undefined,
+        rotationAutopilot: false,
+        forwardAutopilot: false,
+      });
 
-    // Clear out the current thruster adjustments
-    const thrusters = context.flight?.ecs.entities.find(
-      e =>
-        e.components.isThrusters &&
-        context.ship?.components.shipSystems?.shipSystemIds.includes(e.id)
-    );
-    thrusters?.updateComponent("isThrusters", {
-      rotationDelta: {x: 0, y: 0, z: 0},
-    });
+      // Clear out the current thruster adjustments
+      const thrusters = ctx.flight?.ecs.entities.find(
+        e =>
+          e.components.isThrusters &&
+          ctx.ship?.components.shipSystems?.shipSystemIds.includes(e.id)
+      );
+      thrusters?.updateComponent("isThrusters", {
+        rotationDelta: {x: 0, y: 0, z: 0},
+      });
 
-    pubsub.publish("autopilot", {shipId: context.ship.id});
-    pubsub.publish("systemAutopilot", {
-      systemId: context.ship.components.position?.parentId || null,
-    });
-  },
-  autopilotActivate(context: DataContext) {
-    if (!context.ship) throw new Error("Ship not found.");
+      pubsub.publish.pilot.autopilot.get({shipId: ctx.ship.id});
+      pubsub.publish.starmapCore.autopilot({
+        systemId: ctx.ship.components.position?.parentId || null,
+      });
+    }),
+    activate: t.procedure.send(({ctx}) => {
+      if (!ctx.ship) throw new Error("Ship not found.");
 
-    context.ship.updateComponent("autopilot", {
-      forwardAutopilot: true,
-    });
+      ctx.ship.updateComponent("autopilot", {
+        forwardAutopilot: true,
+      });
+      pubsub.publish.pilot.autopilot.get({shipId: ctx.ship.id});
+      pubsub.publish.starmapCore.autopilot({
+        systemId: ctx.ship.components.position?.parentId || null,
+      });
+    }),
+    deactivate: t.procedure.send(({ctx}) => {
+      if (!ctx.ship) throw new Error("Ship not found.");
+      ctx.ship.updateComponent("autopilot", {
+        forwardAutopilot: false,
+      });
+      // We specifically won't clear out the impulse and warp because
+      // we want the ship to maintain its current speed.
+      pubsub.publish.pilot.autopilot.get({shipId: ctx.ship.id});
+      pubsub.publish.starmapCore.autopilot({
+        systemId: ctx.ship.components.position?.parentId || null,
+      });
+    }),
+  }),
+  thrusters: t.router({
+    setDirection: t.procedure
+      .input(
+        z.object({
+          systemId: z.number().optional(),
+          direction: z.object({
+            x: z.number(),
+            y: z.number(),
+            z: z.number(),
+          }),
+        })
+      )
+      .send(({ctx, input}) => {
+        const system = getShipSystem(ctx, {
+          systemId: input.systemId,
+          systemType: "thrusters",
+        });
+        if (!system.components.isThrusters)
+          throw new Error("System is not thrusters");
 
-    pubsub.publish("autopilot", {shipId: context.ship.id});
-    pubsub.publish("systemAutopilot", {
-      systemId: context.ship.components.position?.parentId || null,
-    });
-  },
-  autopilotDeactivate(context: DataContext) {
-    if (!context.ship) throw new Error("Ship not found.");
-    context.ship.updateComponent("autopilot", {
-      forwardAutopilot: false,
-    });
-    // We specifically won't clear out the impulse and warp because
-    // we want the ship to maintain its current speed.
+        system.updateComponent("isThrusters", {direction: input.direction});
 
-    pubsub.publish("autopilot", {shipId: context.ship.id});
-    pubsub.publish("systemAutopilot", {
-      systemId: context.ship.components.position?.parentId || null,
-    });
-  },
-};
+        return system;
+      }),
+    setRotationDelta: t.procedure
+      .input(
+        z.object({
+          systemId: z.number().optional(),
+          rotation: z.object({
+            x: z.number(),
+            y: z.number(),
+            z: z.number(),
+          }),
+        })
+      )
+      .send(({ctx, input}) => {
+        const system = getShipSystem(ctx, {
+          systemId: input.systemId,
+          systemType: "thrusters",
+        });
+        if (!system.components.isThrusters)
+          throw new Error("System is not thrusters");
+
+        system.updateComponent("isThrusters", {rotationDelta: input.rotation});
+
+        // TODO: September 21 2022 - Deactivate the ships autopilot when the thruster rotation change
+        return system;
+      }),
+  }),
+  stream: t.procedure
+    .input(z.object({systemId: z.number().nullable()}))
+    .dataStream(({ctx, input, entity}) => {
+      if (!entity) return false;
+      const systemId =
+        input?.systemId || ctx.ship?.components.position?.parentId;
+      if (typeof systemId === "undefined") {
+        return false;
+      }
+      return Boolean(
+        (entity.components.position &&
+          entity.components.position.parentId === systemId) ||
+          ((entity.components.isWarpEngines ||
+            entity.components.isImpulseEngines) &&
+            ctx.ship?.components.shipSystems?.shipSystemIds.includes(entity.id))
+      );
+    }),
+});
