@@ -1,22 +1,22 @@
-import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
-import {useNetRequest} from "client/src/context/useNetRequest";
-import {InterstellarMap} from "client/src/components/Starmap/InterstellarMap";
-import SystemMarker from "client/src/components/Starmap/SystemMarker";
+import {useGetStarmapStore} from "@client/components/Starmap/starmapStore";
+import {InterstellarMap} from "@client/components/Starmap/InterstellarMap";
+import SystemMarker from "@client/components/Starmap/SystemMarker";
 import {Suspense, useEffect} from "react";
 import {ErrorBoundary} from "react-error-boundary";
-import {StarmapShip} from "client/src/components/Starmap/StarmapShip";
-import {WaypointEntity} from "client/src/components/Starmap/WaypointEntity";
+import {StarmapShip} from "@client/components/Starmap/StarmapShip";
+import {WaypointEntity} from "@client/components/Starmap/WaypointEntity";
+import {q} from "@client/context/AppContext";
 
 export function InterstellarWrapper() {
   const useStarmapStore = useGetStarmapStore();
   // This netRequest comes from the starmap core.
-  const starmapSystems = useNetRequest("starmapSystems");
-  const ship = useNetRequest("navigationShip");
+  const [starmapSystems] = q.starmapCore.systems.useNetRequest();
+  const [ship] = q.navigation.ship.useNetRequest();
 
-  const waypoints = useNetRequest("waypoints", {systemId: null});
+  const [waypoints] = q.waypoints.all.useNetRequest({systemId: null});
   useEffect(() => {
     useStarmapStore.getState().currentSystemSet?.(null);
-  }, []);
+  }, [useStarmapStore]);
 
   return (
     <InterstellarMap>

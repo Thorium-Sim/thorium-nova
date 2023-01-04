@@ -1,6 +1,5 @@
-import {useContext, useMemo, useRef} from "react";
+import {useMemo, useRef} from "react";
 import {Suspense} from "react";
-import {Entity} from "server/src/utils/ecs";
 import {Line, useGLTF} from "@react-three/drei";
 import {
   CanvasTexture,
@@ -13,11 +12,11 @@ import {
   Sprite,
 } from "three";
 import {useFrame} from "@react-three/fiber";
-import {ThoriumContext} from "client/src/context/ThoriumContext";
 import {createAsset} from "use-asset";
 import {useGetStarmapStore} from "./starmapStore";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {Line2} from "three-stdlib";
+import {q} from "@client/context/AppContext";
+import {useLiveQuery} from "@thorium/live-query/client";
 
 export function StarmapShip({
   id,
@@ -38,11 +37,11 @@ export function StarmapShip({
 
   const systemId = useStarmapStore(store => store.currentSystem);
 
-  const autopilotData = useNetRequest("systemAutopilot", {systemId});
+  const [autopilotData] = q.starmapCore.autopilot.useNetRequest({systemId});
 
   const shipAutopilot = autopilotData[id];
 
-  const player = useNetRequest("pilotPlayerShip");
+  const [player] = q.ship.player.useNetRequest();
   const playerId = player?.id;
 
   const isNotViewscreen = useStarmapStore(
@@ -52,11 +51,11 @@ export function StarmapShip({
   const group = useRef<Group>(null);
   const shipMesh = useRef<Group>(null);
   const shipSprite = useRef<Group>(null);
-  const context = useContext(ThoriumContext);
+  const {interpolate} = useLiveQuery();
   const lineRef = useRef<Line2>(null);
   useFrame(() => {
     if (!group.current) return;
-    const state = context?.interpolate(id);
+    const state = interpolate(id);
     if (!state) {
       group.current.visible = false;
       return;

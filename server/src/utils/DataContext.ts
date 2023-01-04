@@ -1,7 +1,9 @@
-import {ServerClient} from "../classes/Client";
+import {Client} from "../init/liveQuery";
 import {FlightClient} from "../classes/FlightClient";
 import type {ServerDataModel} from "../classes/ServerDataModel";
 import type {FlightDataModel} from "../classes/FlightDataModel";
+import {router} from "@server/init/router";
+import {pubsub} from "@server/init/pubsub";
 
 /**
  * An instance of this class is available in every input and subscription handler
@@ -12,13 +14,13 @@ import type {FlightDataModel} from "../classes/FlightDataModel";
 
 export class DataContext {
   constructor(
-    public clientId: string,
+    public id: string,
     public database: {server: ServerDataModel; flight: FlightDataModel | null}
   ) {
     // Let's generate a client if it doesn't already exist in the database
-    const client = database.server.clients[clientId];
+    const client = database.server.clients[id];
     if (!client) {
-      database.server.clients[clientId] = new ServerClient({id: clientId});
+      database.server.clients[id] = new Client(id, router, pubsub);
     }
   }
   get server() {
@@ -31,10 +33,10 @@ export class DataContext {
     this.database.flight = flight;
   }
   get client() {
-    return this.database.server.clients[this.clientId];
+    return this.database.server.clients[this.id];
   }
   get flightClient() {
-    return this.findFlightClient(this.clientId);
+    return this.findFlightClient(this.id);
   }
   get isHost() {
     return this.client.isHost;

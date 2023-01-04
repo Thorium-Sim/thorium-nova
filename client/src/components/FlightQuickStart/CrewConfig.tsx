@@ -1,11 +1,11 @@
+import {q} from "@client/context/AppContext";
 import Checkbox from "@thorium/ui/Checkbox";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {FaArrowDown, FaArrowUp} from "react-icons/fa";
 import {useFlightQuickStart} from "./FlightQuickStartContext";
 
 const CrewConfig = () => {
   const [state, dispatch] = useFlightQuickStart();
-  const availableStations = useNetRequest("availableStationsList");
+  const [availableStations] = q.station.available.useNetRequest();
 
   const availableCrewSizes = availableStations
     .map(station => station.stationCount)

@@ -1,7 +1,6 @@
+import {q} from "@client/context/AppContext";
 import {SVGImageLoader} from "@thorium/ui/SVGImageLoader";
-import {netSend} from "client/src/context/netSend";
-import {useThoriumAccount} from "client/src/context/ThoriumAccountContext";
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {useThoriumAccount} from "@client/context/ThoriumAccountContext";
 import {RiLogoutCircleRLine} from "react-icons/ri";
 import {CardArea} from "./CardArea";
 import {CardSwitcher} from "./CardSwitcher";
@@ -9,10 +8,10 @@ import {useManageCard} from "./useManageCard";
 import {ClickWidget} from "./widgets";
 
 const StationLayout = () => {
-  const ship = useNetRequest("ship");
-  const client = useNetRequest("client");
-  const station = useNetRequest("station");
-  const theme = useNetRequest("theme");
+  const [ship] = q.ship.get.useNetRequest();
+  const [client] = q.client.get.useNetRequest();
+  const [station] = q.station.get.useNetRequest();
+  const [theme] = q.theme.get.useNetRequest();
   const [card, changeCard] = useManageCard();
 
   const {account} = useThoriumAccount();
@@ -103,7 +102,7 @@ const StationLayout = () => {
           {/* <Widget icon={RiPictureInPictureLine} component={ViewscreenWidget} /> */}
           <ClickWidget
             icon={RiLogoutCircleRLine}
-            onClick={() => netSend("clientLogout")}
+            onClick={() => q.client.logout.netSend()}
           />
         </div>
       </div>

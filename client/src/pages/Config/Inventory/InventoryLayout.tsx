@@ -1,8 +1,6 @@
 import {useConfirm} from "@thorium/ui/AlertDialog";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useParams, useNavigate, Navigate} from "react-router-dom";
 import Button from "@thorium/ui/Button";
-import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
 import {useState} from "react";
 import Input from "@thorium/ui/Input";
@@ -12,6 +10,7 @@ import UploadWell from "@thorium/ui/UploadWell";
 import {InventoryFlagValues} from "server/src/classes/Plugins/Inventory/InventoryFlags";
 import {capitalCase} from "capital-case";
 import InfoTip from "@thorium/ui/InfoTip";
+import {q} from "@client/context/AppContext";
 
 export const InventoryLayout = () => {
   const {inventoryId, pluginId} = useParams() as {
@@ -22,7 +21,7 @@ export const InventoryLayout = () => {
   const confirm = useConfirm();
   const [volumeError, setVolumeError] = useState(false);
   const [durabilityError, setDurabilityError] = useState(false);
-  const item = useNetRequest("pluginInventoryItem", {pluginId, inventoryId});
+  const [item] = q.plugin.inventory.get.useNetRequest({pluginId, inventoryId});
   const [error, setError] = useState(false);
 
   if (!inventoryId || !item)
@@ -47,7 +46,7 @@ export const InventoryLayout = () => {
               onBlur={async (e: any) => {
                 if (!e.target.value) return setError(true);
                 try {
-                  const result = await netSend("pluginInventoryUpdate", {
+                  const result = await q.plugin.inventory.update.netSend({
                     pluginId,
                     inventoryId,
                     name: e.target.value,
@@ -73,7 +72,7 @@ export const InventoryLayout = () => {
               label="Plural"
               defaultValue={item.plural}
               onBlur={(e: any) =>
-                netSend("pluginInventoryUpdate", {
+                q.plugin.inventory.update.netSend({
                   pluginId,
                   inventoryId,
                   plural: e.target.value,
@@ -89,7 +88,7 @@ export const InventoryLayout = () => {
               label="Description"
               defaultValue={item.description}
               onBlur={(e: any) =>
-                netSend("pluginInventoryUpdate", {
+                q.plugin.inventory.update.netSend({
                   pluginId,
                   inventoryId,
                   description: e.target.value,
@@ -104,7 +103,7 @@ export const InventoryLayout = () => {
                 tags={item.tags}
                 onAdd={tag => {
                   if (item.tags.includes(tag)) return;
-                  netSend("pluginInventoryUpdate", {
+                  q.plugin.inventory.update.netSend({
                     pluginId,
                     inventoryId,
                     tags: [...item.tags, tag],
@@ -112,7 +111,7 @@ export const InventoryLayout = () => {
                 }}
                 onRemove={tag => {
                   if (!item.tags.includes(tag)) return;
-                  netSend("pluginInventoryUpdate", {
+                  q.plugin.inventory.update.netSend({
                     pluginId,
                     inventoryId,
                     tags: item.tags.filter(t => t !== tag),
@@ -140,7 +139,7 @@ export const InventoryLayout = () => {
                   parseFloat(e.target.value) <= 0
                 )
                   return setVolumeError(true);
-                netSend("pluginInventoryUpdate", {
+                q.plugin.inventory.update.netSend({
                   pluginId,
                   inventoryId,
                   volume: Number(e.target.value),
@@ -157,7 +156,7 @@ export const InventoryLayout = () => {
               label="Continuous"
               helperText="If unchecked, this is a discrete item, like a probe casing. When checked, this item can be continuously consumed, like fuel."
               onChange={e => {
-                netSend("pluginInventoryUpdate", {
+                q.plugin.inventory.update.netSend({
                   pluginId,
                   inventoryId,
                   continuous: e.target.checked,
@@ -182,7 +181,7 @@ export const InventoryLayout = () => {
                   parseFloat(e.target.value) > 1
                 )
                   return setDurabilityError(true);
-                netSend("pluginInventoryUpdate", {
+                q.plugin.inventory.update.netSend({
                   pluginId,
                   inventoryId,
                   durability: Number(e.target.value),
@@ -202,7 +201,7 @@ export const InventoryLayout = () => {
           <UploadWell
             accept="image/*"
             onChange={async files => {
-              await netSend("pluginInventoryUpdate", {
+              await q.plugin.inventory.update.netSend({
                 pluginId,
                 inventoryId,
                 image: files[0],
@@ -233,7 +232,7 @@ export const InventoryLayout = () => {
                 name="flags"
                 defaultChecked={defaultValue}
                 onChange={e => {
-                  netSend("pluginInventoryUpdate", {
+                  q.plugin.inventory.update.netSend({
                     pluginId,
                     inventoryId,
                     flags: {
@@ -266,7 +265,7 @@ export const InventoryLayout = () => {
               }))
             )
               return;
-            netSend("pluginInventoryDelete", {
+            q.plugin.inventory.update.netSend({
               pluginId,
               inventoryId,
             });

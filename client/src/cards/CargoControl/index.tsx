@@ -1,8 +1,5 @@
 import Button from "@thorium/ui/Button";
 import {CardProps} from "client/src/components/Station/CardProps";
-import {netSend} from "client/src/context/netSend";
-import {useDataStream} from "client/src/context/useDataStream";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import "./style.css";
 import {toast} from "client/src/context/ToastContext";
 import {ContainerLabel} from "./ContainerLabel";
@@ -13,6 +10,7 @@ import {CargoList} from "./CargoList";
 import {GoToRoomButton} from "./GoToRoomButton";
 import {ShipView} from "./ShipView";
 import {useShipMapStore} from "./useShipMapStore";
+import {q} from "@client/context/AppContext";
 
 export function CargoControl(props: CardProps) {
   const selectedRoomId = useShipMapStore(state => state.selectedRoomId);
@@ -21,9 +19,9 @@ export function CargoControl(props: CardProps) {
   );
   const deckIndex = useShipMapStore(state => state.deckIndex);
 
-  const cargoRooms = useNetRequest("cargoRooms");
-  const cargoContainers = useNetRequest("cargoContainers");
-  useDataStream();
+  const [cargoRooms] = q.cargoControl.rooms.useNetRequest();
+  const [cargoContainers] = q.cargoControl.containers.useNetRequest();
+  q.cargoControl.stream.useDataStream();
   const {rooms, decks} = cargoRooms;
 
   const selectedRoom = rooms.find(r => r.id === selectedRoomId);
@@ -73,7 +71,7 @@ export function CargoControl(props: CardProps) {
               enRouteContainer?.id === selectedContainerId
             ) {
               try {
-                await netSend("cargoTransfer", {
+                await q.cargoControl.transfer.netSend({
                   fromId: {type: "room", id: selectedRoom?.id},
                   toId: {type: "entity", id: selectedContainerId},
                   transfers: [{item: key, count: transferAmount}],
@@ -107,7 +105,7 @@ export function CargoControl(props: CardProps) {
               onClick={async () => {
                 if (typeof selectedRoomId === "number") {
                   try {
-                    await netSend("cargoContainerSummon", {
+                    await q.cargoControl.containerSummon.netSend({
                       roomId: selectedRoomId,
                     });
                   } catch (err) {
@@ -139,7 +137,7 @@ export function CargoControl(props: CardProps) {
           onClick={async key => {
             if (enRouteContainer?.id === selectedContainerId && selectedRoom) {
               try {
-                await netSend("cargoTransfer", {
+                await q.cargoControl.transfer.netSend({
                   toId: {type: "room", id: selectedRoom.id},
                   fromId: {type: "entity", id: selectedContainerId},
                   transfers: [{item: key, count: transferAmount}],
@@ -176,7 +174,7 @@ export function CargoControl(props: CardProps) {
               typeof selectedContainerId === "number"
             ) {
               try {
-                await netSend("cargoContainerSummon", {
+                await q.cargoControl.containerSummon.netSend({
                   roomId: selectedRoomId,
                   containerId: selectedContainerId,
                 });

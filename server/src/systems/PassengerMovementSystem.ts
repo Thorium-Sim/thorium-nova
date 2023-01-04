@@ -1,6 +1,7 @@
+import {pubsub} from "@server/init/pubsub";
 import DeckPlugin, {DeckNode} from "../classes/Plugins/Ship/Deck";
 import {Entity, System} from "../utils/ecs";
-import {pubsub} from "../utils/pubsub";
+
 export class PassengerMovementSystem extends System {
   test(entity: Entity) {
     return !!(
@@ -54,7 +55,7 @@ export class PassengerMovementSystem extends System {
           entity.components.cargoContainer &&
           entity.components.position?.parentId
         ) {
-          pubsub.publish("cargoContainers", {
+          pubsub.publish.cargoControl.containers({
             shipId: entity.components.position.parentId,
           });
         }

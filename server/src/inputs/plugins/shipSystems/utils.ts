@@ -1,6 +1,6 @@
-import {AllShipSystems} from "server/src/classes/Plugins/ShipSystems/shipSystemTypes";
-import {DataContext} from "server/src/utils/DataContext";
-import {getPlugin} from "../utils";
+import {getPlugin} from "@client/pages/Config/data/utils";
+import {AllShipSystems} from "@server/classes/Plugins/ShipSystems/shipSystemTypes";
+import {DataContext} from "@server/utils/DataContext";
 
 /**
  * Gets a ship system plugin. You need to pass in the plugin type to get proper type inference.

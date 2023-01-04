@@ -1,9 +1,9 @@
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {q} from "@client/context/AppContext";
 import {useSessionStorage} from "client/src/hooks/useSessionStorage";
 import {useCallback, useEffect, useRef, useState} from "react";
 
 export function useManageCard() {
-  const station = useNetRequest("station");
+  const [station] = q.station.get.useNetRequest();
   const [currentCard, setCurrentCard] = useSessionStorage(
     `currentCard-${station?.name || ""}`,
     station?.cards[0]?.component || ""
@@ -16,7 +16,7 @@ export function useManageCard() {
     ) {
       setCurrentCard(station?.cards[0]?.component || "");
     }
-  }, [currentCard, station?.cards]);
+  }, [currentCard, station?.cards, setCurrentCard]);
   const cardChanged = useRef(false);
 
   const changeCard = useCallback(
@@ -28,7 +28,7 @@ export function useManageCard() {
       // TODO: Add handler for card change sound effect
       setCurrentCard(component);
     },
-    [currentCard, station?.cards]
+    [currentCard, station?.cards, setCurrentCard]
   );
   const card =
     station?.cards.find(c => c.component === currentCard) || station?.cards[0];

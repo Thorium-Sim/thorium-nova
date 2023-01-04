@@ -1,13 +1,11 @@
 import {NavLink} from "react-router-dom";
 import Button from "@thorium/ui/Button";
 import {Disclosure} from "@headlessui/react";
-import {netSend} from "../context/netSend";
-import {useNetRequest} from "../context/useNetRequest";
-import {Suspense} from "react";
+import {q} from "@client/context/AppContext";
 
 export const WelcomeButtons = ({className}: {className?: string}) => {
-  const flight = useNetRequest("flight");
-  const client = useNetRequest("client");
+  const [flight] = q.flight.active.useNetRequest();
+  const [client] = q.client.get.useNetRequest();
   return (
     <div
       className={`${className} flex flex-col justify-end self-end space-y-4 max-w-md h-full`}
@@ -24,7 +22,7 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
           )}
           <Button
             className="btn btn-error btn-outline"
-            onClick={() => netSend("flightStop")}
+            onClick={() => q.flight.stop.netSend()}
           >
             Stop Flight
           </Button>
@@ -87,7 +85,7 @@ export const WelcomeButtons = ({className}: {className?: string}) => {
 };
 
 function Flights() {
-  const flights = useNetRequest("flights");
+  const [flights] = q.flight.all.useNetRequest();
 
   return (
     <Disclosure.Panel

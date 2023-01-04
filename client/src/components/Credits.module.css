@@ -11,9 +11,6 @@
 .all-credits {
   animation: scroll-up var(--credits-duration, 3s) linear infinite;
 }
-/*.all-credits:hover {
-  animation-play-state: paused;
-}*/
 
 @keyframes scroll-up {
   to {

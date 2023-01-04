@@ -1,6 +1,15 @@
 import {Degree, Kilometer} from "../utils/unitTypes";
 import {Component} from "./utils";
+import {z} from "zod";
 
+export const satelliteComponent = z.object({
+  axialTilt: z.number(),
+  semiMajorAxis: z.number(),
+  eccentricity: z.number(),
+  inclination: z.number(),
+  orbitalArc: z.number(),
+  showOrbit: z.boolean(),
+});
 export class SatelliteComponent extends Component {
   static id = "satellite" as const;
   /**

@@ -1,12 +1,11 @@
 import {usePrompt} from "@thorium/ui/AlertDialog";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useParams, useNavigate, Outlet} from "react-router-dom";
 import Menubar from "@thorium/ui/Menubar";
 import Button from "@thorium/ui/Button";
-import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
 import SearchableList from "@thorium/ui/SearchableList";
 import {Fragment} from "react";
+import {q} from "@client/context/AppContext";
 
 export function InventoryList() {
   const {pluginId, inventoryId} = useParams() as {
@@ -15,7 +14,7 @@ export function InventoryList() {
   };
   const navigate = useNavigate();
   const prompt = usePrompt();
-  const data = useNetRequest("pluginInventory", {pluginId});
+  const [data] = q.plugin.inventory.all.useNetRequest({pluginId});
   const inventory = data.find(d => d.name === inventoryId);
   return (
     <div className="h-full">
@@ -32,7 +31,7 @@ export function InventoryList() {
                 });
                 if (typeof name !== "string") return;
                 try {
-                  const result = await netSend("pluginInventoryCreate", {
+                  const result = await q.plugin.inventory.create.netSend({
                     name,
                     pluginId,
                   });

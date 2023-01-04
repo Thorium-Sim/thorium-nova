@@ -1,7 +1,17 @@
 import {Range} from "../utils/randomFromRange";
 import {Degree, Kelvin, SolarMass, SolarRadius, Year} from "../utils/unitTypes";
-
-export type SpectralTypes = "O" | "B" | "G" | "K" | "A" | "MG" | "M" | "D";
+import {z} from "zod";
+export const spectralTypes = z.union([
+  z.literal("O"),
+  z.literal("B"),
+  z.literal("G"),
+  z.literal("K"),
+  z.literal("A"),
+  z.literal("MG"),
+  z.literal("M"),
+  z.literal("D"),
+]);
+export type SpectralTypes = Zod.infer<typeof spectralTypes>;
 
 interface StarType {
   name: string;

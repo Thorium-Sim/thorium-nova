@@ -1,5 +1,5 @@
+import {q} from "@client/context/AppContext";
 import {MeshProps, useFrame} from "@react-three/fiber";
-import {netSend} from "client/src/context/netSend";
 import useObjectDrag from "client/src/hooks/useObjectDrag";
 import * as React from "react";
 import {useCallback} from "react";
@@ -39,7 +39,7 @@ export const DraggableSystemCircle: React.FC<
         }
       }
       if (!pluginId || typeof systemId === "number") return;
-      netSend("pluginSolarSystemUpdate", {
+      q.plugin.starmap.solarSystem.update.netSend({
         pluginId,
         solarSystemId: systemId,
         position: newPosition,
@@ -133,7 +133,7 @@ const SystemCircle: React.FC<
       );
       ctx.stroke();
     },
-    [ctx, systemId]
+    [ctx, systemId, useStarmapStore]
   );
   const radius = React.useRef(0);
   const selected = React.useRef(false);

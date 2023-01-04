@@ -1,17 +1,20 @@
-import {createMockDataContext} from "server/src/utils/createMockDataContext";
-import {planetPluginInputs} from "./planets";
+import {
+  createMockDataContext,
+  createMockRouter,
+} from "server/src/utils/createMockDataContext";
 
 describe("solar system planet plugin input", () => {
   it("should create a new planet in a solar system", async () => {
     const oldRandom = Math.random;
     Math.random = () => 0.5;
     const context = createMockDataContext();
+    const router = createMockRouter(context);
     context.server.plugins[0].aspects.solarSystems.push({
       name: "Test System",
       stars: [{radius: 1, temperature: 5772}],
       planets: [],
     } as any);
-    const planet = planetPluginInputs.pluginPlanetCreate(context, {
+    const planet = await router.plugin.starmap.planet.create({
       pluginId: "Test Plugin",
       solarSystemId: "Test System",
       planetType: "A",
@@ -51,7 +54,7 @@ describe("solar system planet plugin input", () => {
       }
     `);
 
-    const planet2 = planetPluginInputs.pluginPlanetCreate(context, {
+    const planet2 = await router.plugin.starmap.planet.create({
       pluginId: "Test Plugin",
       solarSystemId: "Test System",
       planetType: "M",
@@ -93,18 +96,19 @@ describe("solar system planet plugin input", () => {
 
   it("should delete a planet in the solar system", async () => {
     const context = createMockDataContext();
+    const router = createMockRouter(context);
     context.server.plugins[0].aspects.solarSystems.push({
       name: "Test System",
       stars: [{radius: 1, temperature: 5772}],
       planets: [],
     } as any);
 
-    const planet = planetPluginInputs.pluginPlanetCreate(context, {
+    const planet = await router.plugin.starmap.planet.create({
       pluginId: "Test Plugin",
       solarSystemId: "Test System",
       planetType: "C",
     });
-    const planet2 = planetPluginInputs.pluginPlanetCreate(context, {
+    const planet2 = await router.plugin.starmap.planet.create({
       pluginId: "Test Plugin",
       solarSystemId: "Test System",
       planetType: "O",
@@ -119,8 +123,7 @@ describe("solar system planet plugin input", () => {
     expect(
       context.server.plugins[0].aspects.solarSystems[0].planets[1].name
     ).toBe("Test System II");
-
-    planetPluginInputs.pluginPlanetDelete(context, {
+    await router.plugin.starmap.planet.delete({
       pluginId: "Test Plugin",
       solarSystemId: "Test System",
       planetId: planet.name,
@@ -137,13 +140,14 @@ describe("solar system planet plugin input", () => {
     const oldRandom = Math.random;
     Math.random = () => 0.5;
     const context = createMockDataContext();
+    const router = createMockRouter(context);
     context.server.plugins[0].aspects.solarSystems.push({
       name: "Test System",
       stars: [{radius: 1, temperature: 5772}],
       planets: [],
     } as any);
 
-    const planet = planetPluginInputs.pluginPlanetCreate(context, {
+    const planet = await router.plugin.starmap.planet.create({
       pluginId: "Test Plugin",
       solarSystemId: "Test System",
       planetType: "C",
@@ -181,7 +185,7 @@ describe("solar system planet plugin input", () => {
       }
     `);
 
-    planetPluginInputs.pluginPlanetUpdate(context, {
+    await router.plugin.starmap.planet.update({
       pluginId: "Test Plugin",
       solarSystemId: "Test System",
       planetId: planet.name,

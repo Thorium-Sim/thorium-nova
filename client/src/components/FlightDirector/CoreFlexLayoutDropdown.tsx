@@ -1,12 +1,12 @@
 import {Model} from "flexlayout-react";
 import {useContext, useState} from "react";
-import {useThoriumAccount} from "client/src/context/ThoriumAccountContext";
+import {useThoriumAccount} from "@client/context/ThoriumAccountContext";
 import {useMutation, useQuery} from "@tanstack/react-query";
 import Dropdown, {DropdownItem} from "@thorium/ui/Dropdown";
 import {Menu} from "@headlessui/react";
 import {HiOutlineChevronDown, HiCheck} from "react-icons/hi";
 import {useConfirm, usePrompt} from "@thorium/ui/AlertDialog";
-import {toast} from "client/src/context/ToastContext";
+import {toast} from "@client/context/ToastContext";
 import {CoreFlexLayoutContext, defaultJson} from "./CoreFlexLayoutContext";
 
 export function CoreFlexLayoutDropdown() {

@@ -2,10 +2,10 @@ import {Fragment, useCallback, useEffect, useRef, useState} from "react";
 import uuid from "@thorium/uniqid";
 // @ts-expect-error Importing from a JS module.
 import Spark from "./spark";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import "./effects.css";
 import {useHotkeys} from "react-hotkeys-hook";
-import {netSend} from "client/src/context/netSend";
+import {q} from "@client/context/AppContext";
+import {EffectPayload} from "@client/data";
 
 let synth: SpeechSynthesis | undefined;
 try {
@@ -58,48 +58,54 @@ const Effects = () => {
   const {doSpark, sparks} = useSpark();
 
   useHotkeys("esc", () => {
-    netSend("clientSetStation", {shipId: null});
+    q.client.setStation.netSend({shipId: null});
   });
 
-  useNetRequest("effects", {}, payload => {
-    if (typeof payload === "boolean" || !payload) return;
-    const {effect, config} = payload;
-    switch (effect) {
-      case "flash":
-        return doFlash(config?.duration || 1000);
-      case "spark":
-        return doSpark(config?.duration || 5000);
-      case "reload":
-        return window.location.reload();
-      case "speak": {
-        try {
-          const voices = synth?.getVoices() || [];
-          if (!config?.message) return;
-          const words = new SpeechSynthesisUtterance(config.message);
-          if (words) {
-            const voice =
-              voices.find(v => v.name === config.voice) || voices[0];
-            if (voice) {
-              words.voice = voice;
+  const doEffect = useCallback(
+    (payload: EffectPayload) => {
+      if (typeof payload === "boolean" || !payload) return;
+      const {effect, config} = payload;
+      switch (effect) {
+        case "flash":
+          return doFlash(config?.duration || 1000);
+        case "spark":
+          return doSpark(config?.duration || 5000);
+        case "reload":
+          return window.location.reload();
+        case "speak": {
+          try {
+            const voices = synth?.getVoices() || [];
+            if (!config?.message) return;
+            const words = new SpeechSynthesisUtterance(config.message);
+            if (words) {
+              const voice =
+                voices.find(v => v.name === config.voice) || voices[0];
+              if (voice) {
+                words.voice = voice;
+              }
             }
-          }
-          return synth?.speak(words);
-        } catch {}
-        break;
+            return synth?.speak(words);
+          } catch {}
+          break;
+        }
+        // case "shutdown":
+        // case "restart":
+        // case "sleep":
+        // case "quit":
+        // case "beep":
+        //   // TODO November 29, 2021: Implement the message transmission
+        //   // to the Electron instance.
+        //   // return window.thorium.sendMessage({effect});
+        // break;
+        default:
+          return;
       }
-      // case "shutdown":
-      // case "restart":
-      // case "sleep":
-      // case "quit":
-      // case "beep":
-      //   // TODO November 29, 2021: Implement the message transmission
-      //   // to the Electron instance.
-      //   // return window.thorium.sendMessage({effect});
-      // break;
-      default:
-        return;
-    }
-  });
+    },
+    [doFlash, doSpark]
+  );
+
+  q.effects.sub.useNetRequest(undefined, {callback: doEffect});
+
   return (
     <div className={`actionsContainer ${flash ? "flash" : ""}`}>
       {sparks.map(s => (

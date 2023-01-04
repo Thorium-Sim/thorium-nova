@@ -1,6 +1,6 @@
+import {q} from "@client/context/AppContext";
 import {useFrame} from "@react-three/fiber";
-import {useThorium} from "client/src/context/ThoriumContext";
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {useLiveQuery} from "@thorium/live-query/client";
 import {Matrix4, Quaternion, Vector3} from "three";
 import create from "zustand";
 import {getWaypointRelativePosition} from "./getWaypointRelativePosition";
@@ -28,9 +28,9 @@ let rotationQuat = new Quaternion();
 let desiredRotationQuat = new Quaternion();
 
 export function useGetFacingWaypoint() {
-  const {interpolate} = useThorium();
-  const {id, currentSystem, systemPosition} = useNetRequest("pilotPlayerShip");
-  const waypoints = useNetRequest("waypoints", {systemId: "all"});
+  const {interpolate} = useLiveQuery();
+  const [{id, currentSystem, systemPosition}] = q.ship.player.useNetRequest();
+  const [waypoints] = q.waypoints.all.useNetRequest({systemId: "all"});
   // This needs some work
   useFrame(() => {
     const playerShip = interpolate(id);

@@ -1,10 +1,11 @@
 import React, {ReactNode, Suspense} from "react";
 import {render as rtlRender, RenderOptions} from "@testing-library/react";
 import {MemoryRouter as Router} from "react-router-dom";
-import {MockNetRequestContext} from "./src/context/useNetRequest";
-import {AllRequestReturns} from "server/src/netRequests";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
-import {ThoriumContext} from "./src/context/ThoriumContext";
+import {LiveQueryContext} from "@thorium/live-query/client/liveQueryContext";
+import {MockNetRequestContext} from "@thorium/live-query/client/mockContext";
+import {AppRouter} from "@server/init/router";
+import {inferRouterOutputs} from "@thorium/live-query/server/types";
 
 // @ts-expect-error
 global.IS_REACT_ACT_ENVIRONMENT = true;
@@ -14,24 +15,33 @@ const netSendSpy = jest.fn((input, params) => netSendResponse);
 function setNetSendResponse(response: any) {
   netSendResponse = {response};
 }
-global.fetch = jest.fn((path: string, {body}: {body: FormData}) => {
-  if (path.toLowerCase() === "/netsend") {
+global.fetch = jest.fn((url: URL, {body}: {body: FormData}) => {
+  if (url.pathname.toLowerCase() === "/netsend") {
     let bodyObj: any = {};
+
     body.forEach((value, key) => (bodyObj[key] = value));
     const params = JSON.parse(bodyObj.params);
     netSendSpy(bodyObj.input, {...params});
     return Promise.resolve({
       json: () => Promise.resolve(netSendResponse.response),
+      text: () => Promise.resolve(netSendResponse.response),
     });
   }
   return Promise.resolve({
     json: () => Promise.resolve({}),
+    text: () => Promise.resolve({}),
   });
 }) as any;
 
+type DeepPartial<T> = T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
+  : T;
+
 interface OptionsInterface {
   initialRoutes?: string[];
-  netRequestData?: Partial<AllRequestReturns>;
+  netRequestData?: DeepPartial<inferRouterOutputs<AppRouter>>;
 }
 
 const queryClient = new QueryClient();
@@ -44,43 +54,49 @@ async function render(
   const Wrapper = ({children}: {children: ReactNode}) => {
     return (
       <Suspense fallback={<p>Suspended in test</p>}>
-        <ThoriumContext.Provider value={{} as any}>
+        <LiveQueryContext.Provider value={{} as any}>
           <QueryClientProvider client={queryClient}>
             <MockNetRequestContext.Provider
               value={{
                 client: {
-                  id: "Test",
-                  name: "Test Client",
-                  connected: true,
-                  loginName: "Test User",
+                  get: {
+                    id: "Test",
+                    name: "Test Client",
+                    connected: true,
+                    loginName: "Test User",
+                  },
                 } as any,
                 flight: null,
                 ship: {
-                  id: 0,
-                  components: {
-                    isPlayerShip: {value: true},
-                    identity: {name: "Test Ship"},
-                    isShip: {
-                      assets: {
-                        logo: "",
+                  get: {
+                    id: 0,
+                    components: {
+                      isPlayerShip: {value: true},
+                      identity: {name: "Test Ship"},
+                      isShip: {
+                        assets: {
+                          logo: "",
+                        },
+                        category: "Cruiser",
+                        registry: "NCC-2016-A",
+                        shipClass: "Astra Cruiser",
                       },
-                      category: "Cruiser",
-                      registry: "NCC-2016-A",
-                      shipClass: "Astra Cruiser",
                     },
+                    alertLevel: 5,
                   },
-                  alertLevel: 5,
                 } as any,
                 station: {
-                  name: "Test Station",
-                  logo: "",
-                  cards: [
-                    {
-                      icon: "",
-                      name: "Test Card",
-                      component: "Login",
-                    },
-                  ],
+                  get: {
+                    name: "Test Station",
+                    logo: "",
+                    cards: [
+                      {
+                        icon: "",
+                        name: "Test Card",
+                        component: "Login",
+                      },
+                    ],
+                  },
                 } as any,
                 theme: null,
                 ...options?.netRequestData,
@@ -89,7 +105,7 @@ async function render(
               <Router initialEntries={initialRoutes}>{children}</Router>
             </MockNetRequestContext.Provider>
           </QueryClientProvider>
-        </ThoriumContext.Provider>
+        </LiveQueryContext.Provider>
       </Suspense>
     );
   };
