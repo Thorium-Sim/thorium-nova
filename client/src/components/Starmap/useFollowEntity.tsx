@@ -1,16 +1,18 @@
+import {q} from "@client/context/AppContext";
 import {useFrame, useThree} from "@react-three/fiber";
-import {useThorium} from "client/src/context/ThoriumContext";
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {useLiveQuery} from "@thorium/live-query/client";
 import {useEffect} from "react";
 import {useGetStarmapStore} from "./starmapStore";
 
 export function useFollowEntity(topDown = true) {
   const useStarmapStore = useGetStarmapStore();
-  
+
   const cameraControls = useStarmapStore(store => store.cameraControls);
   const followEntityId = useStarmapStore(store => store.followEntityId);
 
-  const starmapShip = useNetRequest("starmapShip", {shipId: followEntityId});
+  const [starmapShip] = q.starmapCore.ship.useNetRequest({
+    shipId: followEntityId,
+  });
 
   const systemId = starmapShip?.systemId;
   useEffect(() => {
@@ -19,7 +21,7 @@ export function useFollowEntity(topDown = true) {
     }
   }, [starmapShip?.id, systemId, useStarmapStore]);
 
-  const {interpolate} = useThorium();
+  const {interpolate} = useLiveQuery();
   useFrame(() => {
     if (!followEntityId) return;
     const position = interpolate(followEntityId);

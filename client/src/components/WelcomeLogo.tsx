@@ -4,9 +4,8 @@ import packageJson from "../../../package.json";
 import {ClientButton} from "./ClientButton";
 import {useEffect, useState} from "react";
 import Button from "@thorium/ui/Button";
-import {netSend} from "../context/netSend";
 import {CopyToClipboard} from "./ui/CopyToClipboard";
-import {useNetRequest} from "../context/useNetRequest";
+import {q} from "@client/context/AppContext";
 
 function useConnectionAddress() {
   const [connectionAddress, setConnectionAddress] = useState("");
@@ -18,7 +17,7 @@ function useConnectionAddress() {
 }
 export const WelcomeLogo = ({className}: {className?: string}) => {
   const connectionAddress = useConnectionAddress();
-  const thoriumData = useNetRequest("thorium");
+  const [hasHost] = q.thorium.hasHost.useNetRequest();
   const [updateText, setUpdateText] = useState("");
   useEffect(() => {
     window.thorium?.registerUpdateHandler(message => {
@@ -61,10 +60,10 @@ export const WelcomeLogo = ({className}: {className?: string}) => {
           </CopyToClipboard>
         </h3>
       )}
-      {thoriumData.hasHost ? null : (
+      {hasHost ? null : (
         <Button
           className="btn-warning btn-sm"
-          onClick={() => netSend("clientClaimHost")}
+          onClick={() => q.thorium.claimHost.netSend()}
         >
           Claim Host
         </Button>

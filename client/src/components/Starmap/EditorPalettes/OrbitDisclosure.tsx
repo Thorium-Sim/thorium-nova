@@ -1,11 +1,11 @@
 import * as React from "react";
-import {netSend} from "client/src/context/netSend";
 import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
 import PlanetPlugin from "server/src/classes/Plugins/Universe/Planet";
 import StarPlugin from "server/src/classes/Plugins/Universe/Star";
 import {PaletteDisclosure} from "../SolarSystemMap";
 import {useSystemIds} from "../useSystemIds";
+import {q} from "@client/context/AppContext";
 
 export function OrbitDisclosure({object}: {object: PlanetPlugin | StarPlugin}) {
   const [pluginId, solarSystemId] = useSystemIds();
@@ -28,9 +28,15 @@ export function OrbitDisclosure({object}: {object: PlanetPlugin | StarPlugin}) {
             },
           };
           if ("isPlanet" in object) {
-            netSend("pluginPlanetUpdate", {...body, planetId: object.name});
+            q.plugin.starmap.planet.update.netSend({
+              ...body,
+              planetId: object.name,
+            });
           } else {
-            netSend("pluginStarUpdate", {...body, starId: object.name});
+            q.plugin.starmap.star.update.netSend({
+              ...body,
+              starId: object.name,
+            });
           }
         }}
       />
@@ -50,9 +56,15 @@ export function OrbitDisclosure({object}: {object: PlanetPlugin | StarPlugin}) {
             },
           };
           if ("isPlanet" in object) {
-            netSend("pluginPlanetUpdate", {...body, planetId: object.name});
+            q.plugin.starmap.planet.update.netSend({
+              ...body,
+              planetId: object.name,
+            });
           } else {
-            netSend("pluginStarUpdate", {...body, starId: object.name});
+            q.plugin.starmap.star.update.netSend({
+              ...body,
+              starId: object.name,
+            });
           }
         }}
       />
@@ -72,9 +84,15 @@ export function OrbitDisclosure({object}: {object: PlanetPlugin | StarPlugin}) {
             },
           };
           if ("isPlanet" in object) {
-            netSend("pluginPlanetUpdate", {...body, planetId: object.name});
+            q.plugin.starmap.planet.update.netSend({
+              ...body,
+              planetId: object.name,
+            });
           } else {
-            netSend("pluginStarUpdate", {...body, starId: object.name});
+            q.plugin.starmap.star.update.netSend({
+              ...body,
+              starId: object.name,
+            });
           }
         }}
       />
@@ -94,9 +112,15 @@ export function OrbitDisclosure({object}: {object: PlanetPlugin | StarPlugin}) {
             },
           };
           if ("isPlanet" in object) {
-            netSend("pluginPlanetUpdate", {...body, planetId: object.name});
+            q.plugin.starmap.planet.update.netSend({
+              ...body,
+              planetId: object.name,
+            });
           } else {
-            netSend("pluginStarUpdate", {...body, starId: object.name});
+            q.plugin.starmap.star.update.netSend({
+              ...body,
+              starId: object.name,
+            });
           }
         }}
       />
@@ -116,9 +140,15 @@ export function OrbitDisclosure({object}: {object: PlanetPlugin | StarPlugin}) {
             },
           };
           if ("isPlanet" in object) {
-            netSend("pluginPlanetUpdate", {...body, planetId: object.name});
+            q.plugin.starmap.planet.update.netSend({
+              ...body,
+              planetId: object.name,
+            });
           } else {
-            netSend("pluginStarUpdate", {...body, starId: object.name});
+            q.plugin.starmap.star.update.netSend({
+              ...body,
+              starId: object.name,
+            });
           }
         }}
       />
@@ -127,7 +157,7 @@ export function OrbitDisclosure({object}: {object: PlanetPlugin | StarPlugin}) {
           label="Show Orbit Path"
           defaultChecked={object.satellite.showOrbit}
           onChange={e => {
-            netSend("pluginPlanetUpdate", {
+            q.plugin.starmap.planet.update.netSend({
               pluginId,
               solarSystemId,
               satellite: {

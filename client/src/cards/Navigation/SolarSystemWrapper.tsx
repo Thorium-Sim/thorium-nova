@@ -1,24 +1,24 @@
-import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {useGetStarmapStore} from "@client/components/Starmap/starmapStore";
 import {useEffect, useRef} from "react";
-import {SolarSystemMap} from "client/src/components/Starmap/SolarSystemMap";
+import {SolarSystemMap} from "@client/components/Starmap/SolarSystemMap";
 import {Suspense} from "react";
 import {Color, Group, Vector3} from "three";
-import {solarRadiusToKilometers} from "server/src/utils/unitTypes";
-import {StarSprite} from "client/src/components/Starmap/Star/StarMesh";
+import {solarRadiusToKilometers} from "@server/utils/unitTypes";
+import {StarSprite} from "@client/components/Starmap/Star/StarMesh";
 import OrbitContainer, {
   OrbitLine,
-} from "client/src/components/Starmap/OrbitContainer";
-import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
-import PlanetPlugin from "server/src/classes/Plugins/Universe/Planet";
+} from "@client/components/Starmap/OrbitContainer";
+import {getOrbitPosition} from "@server/utils/getOrbitPosition";
+import PlanetPlugin from "@server/classes/Plugins/Universe/Planet";
 import {DEG2RAD} from "three/src/math/MathUtils";
-import {planetSpriteScale} from "client/src/components/Starmap/Planet";
-import {PlanetSprite} from "client/src/components/Starmap/Planet";
-import SystemLabel from "client/src/components/Starmap/SystemMarker/SystemLabel";
+import {planetSpriteScale} from "@client/components/Starmap/Planet";
+import {PlanetSprite} from "@client/components/Starmap/Planet";
+import SystemLabel from "@client/components/Starmap/SystemMarker/SystemLabel";
 import {useFrame} from "@react-three/fiber";
 import {ErrorBoundary} from "react-error-boundary";
-import {StarmapShip} from "client/src/components/Starmap/StarmapShip";
-import {WaypointEntity} from "client/src/components/Starmap/WaypointEntity";
+import {StarmapShip} from "@client/components/Starmap/StarmapShip";
+import {WaypointEntity} from "@client/components/Starmap/WaypointEntity";
+import {q} from "@client/context/AppContext";
 
 export function SolarSystemWrapper() {
   const useStarmapStore = useGetStarmapStore();
@@ -28,14 +28,17 @@ export function SolarSystemWrapper() {
 
   useEffect(() => {
     useStarmapStore.getState().currentSystemSet?.(currentSystem);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useStarmapStore]);
 
-  const system = useNetRequest("starmapSystem", {systemId: currentSystem});
-  const starmapEntities = useNetRequest("starmapSystemEntities", {
+  const [system] = q.starmapCore.system.useNetRequest({
     systemId: currentSystem,
   });
-  const ship = useNetRequest("navigationShip");
-  const waypoints = useNetRequest("waypoints", {systemId: currentSystem});
+  const [starmapEntities] = q.starmapCore.entities.useNetRequest({
+    systemId: currentSystem,
+  });
+  const [ship] = q.navigation.ship.useNetRequest();
+  const [waypoints] = q.waypoints.all.useNetRequest({systemId: currentSystem});
 
   return (
     <SolarSystemMap

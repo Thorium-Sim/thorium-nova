@@ -1,4 +1,3 @@
-import {pubsub} from "server/src/utils/pubsub";
 import type {ServerDataModel} from "../ServerDataModel";
 import {generateIncrementedName} from "../../utils/generateIncrementedName";
 import ShipPlugin from "./Ship";
@@ -12,12 +11,11 @@ import ThemePlugin from "./Theme";
 import SolarSystemPlugin from "./Universe/SolarSystem";
 import BaseShipSystemPlugin from "./ShipSystems/BaseSystem";
 import InventoryPlugin from "./Inventory";
+import {pubsub} from "@server/init/pubsub";
 
 export function pluginPublish(plugin: BasePlugin) {
-  pubsub.publish("pluginsList", {
-    id: plugin.id,
-  });
-  pubsub.publish("plugin", {
+  pubsub.publish.plugin.all();
+  pubsub.publish.plugin.get({
     pluginId: plugin.id,
   });
 }

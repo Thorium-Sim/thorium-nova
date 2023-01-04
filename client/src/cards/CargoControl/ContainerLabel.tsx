@@ -1,12 +1,12 @@
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {q} from "@client/context/AppContext";
 import {useShipMapStore} from "./useShipMapStore";
 
 export function ContainerLabel() {
   const selectedContainerId = useShipMapStore(
     state => state.selectedContainerId
   );
-  const cargoRooms = useNetRequest("cargoRooms");
-  const cargoContainers = useNetRequest("cargoContainers");
+  const [cargoRooms] = q.cargoControl.rooms.useNetRequest();
+  const [cargoContainers] = q.cargoControl.containers.useNetRequest();
 
   const selectedContainer = cargoContainers.find(
     c => c.id === selectedContainerId

@@ -1,19 +1,18 @@
 import ThrustersPlugin from "server/src/classes/Plugins/ShipSystems/Thrusters";
-import {createMockDataContext} from "server/src/utils/createMockDataContext";
-import {shipSystemsPluginInput} from ".";
-import {thrustersPluginInput} from "./thrusters";
+import {
+  createMockDataContext,
+  createMockRouter,
+} from "server/src/utils/createMockDataContext";
 
 describe("thrusters plugin input", () => {
   it("should create a new thrusters system", async () => {
     const dataContext = createMockDataContext();
-    const created = await shipSystemsPluginInput.pluginShipSystemCreate(
-      dataContext,
-      {
-        pluginId: "Test Plugin",
-        type: "thrusters",
-        name: "Test Thrusters",
-      }
-    );
+    const router = createMockRouter(dataContext);
+    const created = await router.plugin.systems.create({
+      pluginId: "Test Plugin",
+      type: "thrusters",
+      name: "Test Thrusters",
+    });
 
     expect(created).toBeTruthy();
     expect(created.shipSystemId).toEqual("Test Thrusters");
@@ -24,17 +23,14 @@ describe("thrusters plugin input", () => {
   });
   it("should update a thrusters system", async () => {
     const dataContext = createMockDataContext();
-    const created = await shipSystemsPluginInput.pluginShipSystemCreate(
-      dataContext,
-      {
-        pluginId: "Test Plugin",
-        type: "thrusters",
-        name: "Test Thrusters",
-      }
-    );
+    const router = createMockRouter(dataContext);
+    const created = await router.plugin.systems.create({
+      pluginId: "Test Plugin",
+      type: "thrusters",
+      name: "Test Thrusters",
+    });
     const system = dataContext.server.plugins[0].aspects.shipSystems[0];
-
-    thrustersPluginInput.pluginThrustersUpdate(dataContext, {
+    await router.plugin.systems.thrusters.update({
       pluginId: "Test Plugin",
       shipSystemId: "Test Thrusters",
       directionMaxSpeed: 5,
@@ -43,7 +39,7 @@ describe("thrusters plugin input", () => {
     expect(system.directionMaxSpeed).toEqual(5);
 
     expect(system.rotationMaxSpeed).toEqual(5);
-    thrustersPluginInput.pluginThrustersUpdate(dataContext, {
+    await router.plugin.systems.thrusters.update({
       pluginId: "Test Plugin",
       shipSystemId: "Test Thrusters",
       rotationMaxSpeed: 2,

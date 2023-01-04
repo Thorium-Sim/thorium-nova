@@ -1,7 +1,6 @@
 import * as React from "react";
 import {useGetStarmapStore} from "../starmapStore";
 import Button from "../../ui/Button";
-import {netSend} from "client/src/context/netSend";
 import {useNavigate} from "react-router-dom";
 import Input from "@thorium/ui/Input";
 import {MdRepeat} from "react-icons/md";
@@ -9,6 +8,7 @@ import randomWords from "@thorium/random-words";
 import debounce from "lodash.debounce";
 import {PaletteDisclosure} from "../SolarSystemMap";
 import {useSystemIds} from "../useSystemIds";
+import {q} from "@client/context/AppContext";
 
 export function BasicDisclosure({
   object,
@@ -32,19 +32,21 @@ export function BasicDisclosure({
             name,
           };
           if (type === "system") {
-            const result = await netSend("pluginSolarSystemUpdate", body);
+            const result = await q.plugin.starmap.solarSystem.update.netSend(
+              body
+            );
             navigate(result.solarSystemId);
             useStarmapStore.setState({
               selectedObjectIds: [result.solarSystemId],
             });
           } else if (type === "planet") {
-            const result = await netSend("pluginPlanetUpdate", {
+            const result = await q.plugin.starmap.planet.update.netSend({
               ...body,
               planetId: object.name,
             });
             useStarmapStore.setState({selectedObjectIds: [result.name]});
           } else if (type === "star") {
-            const result = await netSend("pluginStarUpdate", {
+            const result = await q.plugin.starmap.star.update.netSend({
               ...body,
               starId: object.name,
             });
@@ -72,11 +74,17 @@ export function BasicDisclosure({
             description: event.target.value,
           };
           if (type === "system") {
-            netSend("pluginSolarSystemUpdate", body);
+            q.plugin.starmap.solarSystem.update.netSend(body);
           } else if (type === "planet") {
-            netSend("pluginPlanetUpdate", {...body, planetId: object.name});
+            q.plugin.starmap.planet.update.netSend({
+              ...body,
+              planetId: object.name,
+            });
           } else if (type === "star") {
-            netSend("pluginStarUpdate", {...body, starId: object.name});
+            q.plugin.starmap.star.update.netSend({
+              ...body,
+              starId: object.name,
+            });
           }
         }}
       />
@@ -95,7 +103,7 @@ export function BasicDisclosure({
                   if (skyboxKeyRef.current) {
                     skyboxKeyRef.current.value = string;
                   }
-                  netSend("pluginSolarSystemUpdate", {
+                  q.plugin.starmap.solarSystem.update.netSend({
                     pluginId,
                     solarSystemId,
                     skyboxKey: string,
@@ -107,7 +115,7 @@ export function BasicDisclosure({
             }
             defaultValue={object.skyboxKey}
             onBlur={event => {
-              netSend("pluginSolarSystemUpdate", {
+              q.plugin.starmap.solarSystem.update.netSend({
                 pluginId,
                 solarSystemId,
                 skyboxKey: event.target.value,

@@ -1,12 +1,11 @@
 import {Navigate, useParams, useNavigate} from "react-router-dom";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useContext, useReducer, useState} from "react";
 import Input from "@thorium/ui/Input";
 import TagInput from "@thorium/ui/TagInput";
-import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
 import {ShipPluginIdContext} from "../Ships/ShipSystemOverrideContext";
 import {OverrideResetButton} from "./OverrideResetButton";
+import {q} from "@client/context/AppContext";
 
 export function Basic() {
   const [rekey, setRekey] = useReducer(() => Math.random(), Math.random());
@@ -17,7 +16,7 @@ export function Basic() {
   };
   const shipPluginId = useContext(ShipPluginIdContext);
 
-  const system = useNetRequest("pluginShipSystem", {
+  const [system] = q.plugin.systems.get.useNetRequest({
     pluginId,
     systemId,
     shipId,
@@ -43,7 +42,7 @@ export function Basic() {
               onBlur={async (e: any) => {
                 if (!e.target.value) return setError(true);
                 try {
-                  const result = await netSend("pluginShipSystemUpdate", {
+                  const result = await q.plugin.systems.update.netSend({
                     pluginId,
                     shipSystemId: systemId,
                     shipId,
@@ -76,7 +75,7 @@ export function Basic() {
               label="Description"
               defaultValue={system.description}
               onBlur={(e: any) =>
-                netSend("pluginShipSystemUpdate", {
+                q.plugin.systems.update.netSend({
                   pluginId,
                   shipSystemId: systemId,
                   shipId,
@@ -98,7 +97,7 @@ export function Basic() {
                 tags={system.tags}
                 onAdd={tag => {
                   if (system.tags.includes(tag)) return;
-                  netSend("pluginShipSystemUpdate", {
+                  q.plugin.systems.update.netSend({
                     pluginId,
                     shipSystemId: systemId,
                     tags: [...system.tags, tag],
@@ -106,7 +105,7 @@ export function Basic() {
                 }}
                 onRemove={tag => {
                   if (!system.tags.includes(tag)) return;
-                  netSend("pluginShipSystemUpdate", {
+                  q.plugin.systems.update.netSend({
                     pluginId,
                     shipSystemId: systemId,
                     shipId,

@@ -1,6 +1,5 @@
 import {Duration} from "luxon";
 import {Entity, System} from "../utils/ecs";
-import {pubsub} from "../utils/pubsub";
 
 function subtractTimer(timer: string) {
   const [hours = "0", minutes = "0", seconds = "0"] = timer.split(":");
@@ -53,7 +52,7 @@ export class TimerSystem extends System {
   postUpdate() {
     if (this.timeCount >= 1000) {
       this.timeCount = 0;
-      pubsub.publish("timer");
+      // pubsub.publish("timer");
     }
   }
 }

@@ -1,29 +1,32 @@
 import {Kelvin, Kilometer, TerranMass, Year} from "../utils/unitTypes";
 import {Range} from "../utils/randomFromRange";
+import {z} from "zod";
 
-export type PlanetTypes =
-  | "A"
-  | "B"
-  | "C"
-  | "D"
-  | "E"
-  | "F"
-  | "G"
-  | "H"
-  | "I"
-  | "J"
-  | "K"
-  | "L"
-  | "M"
-  | "N"
-  | "O"
-  | "P"
-  | "S";
+export const planetClasses = z.union([
+  z.literal("A"),
+  z.literal("B"),
+  z.literal("C"),
+  z.literal("D"),
+  z.literal("E"),
+  z.literal("F"),
+  z.literal("G"),
+  z.literal("H"),
+  z.literal("I"),
+  z.literal("J"),
+  z.literal("K"),
+  z.literal("L"),
+  z.literal("M"),
+  z.literal("N"),
+  z.literal("O"),
+  z.literal("P"),
+  z.literal("S"),
+]);
+export type PlanetClasses = Zod.infer<typeof planetClasses>;
 export type Zone = ("hot" | "cold" | "habitable")[];
-export type AtmosphericComposition = {
-  component: string;
-  concentration: number;
-}[];
+export const atmosphericComposition = z
+  .object({component: z.string(), concentration: z.number()})
+  .array();
+export type AtmosphericComposition = Zod.infer<typeof atmosphericComposition>;
 
 const possibleRingMaps = [
   "/plugins/Thorium Default/assets/default/rings/rings1.png",
@@ -39,7 +42,7 @@ const possibleRingMaps = [
 
 interface PlanetType {
   name: string;
-  classification: PlanetTypes;
+  classification: PlanetClasses;
   temperatureRange: Range<Kelvin>;
   zone: Zone;
   radiusRange: Range<Kilometer>;

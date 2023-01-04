@@ -1,7 +1,5 @@
 import {FaBan, FaSpinner} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
-import {netSend} from "../context/netSend";
-import {useNetRequest} from "../context/useNetRequest";
 import SearchableList from "../components/ui/SearchableList";
 import {Dispatch, SetStateAction, useState} from "react";
 import {toast} from "../context/ToastContext";
@@ -10,10 +8,11 @@ import {NavLink, useNavigate} from "react-router-dom";
 import StationWrapper from "../components/Station";
 import {ClientButton} from "../components/ClientButton";
 import InfoTip from "@thorium/ui/InfoTip";
+import {q} from "@client/context/AppContext";
 
 export default function FlightLobby() {
-  const station = useNetRequest("station");
-  const client = useNetRequest("client");
+  const [station] = q.station.get.useNetRequest();
+  const [client] = q.client.get.useNetRequest();
 
   if (station) return <StationWrapper />;
 
@@ -22,7 +21,7 @@ export default function FlightLobby() {
 }
 
 function PlayerLobby() {
-  const flight = useNetRequest("flight");
+  const [flight] = q.flight.active.useNetRequest();
 
   return (
     <>
@@ -53,7 +52,7 @@ const staticStations = [
   },
 ];
 function PlayerStationSelection() {
-  const playerShips = useNetRequest("flightPlayerShips");
+  const [playerShips] = q.ship.players.useNetRequest();
 
   return (
     <>
@@ -93,7 +92,7 @@ function PlayerStationItem({
   shipId: number;
   station: {name: string; description: string};
 }) {
-  const clients = useNetRequest("clients");
+  const [clients] = q.client.all.useNetRequest();
 
   return (
     <>
@@ -103,7 +102,7 @@ function PlayerStationItem({
         role="button"
         onClick={async () => {
           try {
-            const result = await netSend("clientSetStation", {
+            await q.client.setStation.netSend({
               shipId: shipId,
               stationId: station.name,
             });
@@ -140,8 +139,8 @@ function PlayerStationItem({
 }
 function HostLobby() {
   const navigate = useNavigate();
-  const flight = useNetRequest("flight");
-  const client = useNetRequest("client");
+  const [flight] = q.flight.active.useNetRequest();
+  const [client] = q.client.get.useNetRequest();
 
   return (
     <>
@@ -152,7 +151,7 @@ function HostLobby() {
               <Button
                 className="btn btn-outline btn-xs btn-error"
                 onClick={async () => {
-                  await netSend("flightStop");
+                  await q.flight.stop.netSend();
                   navigate("/");
                 }}
               >
@@ -163,7 +162,7 @@ function HostLobby() {
               <Button
                 className="btn btn-outline btn-xs btn-success"
                 onClick={() => {
-                  netSend("flightResume");
+                  q.flight.resume.netSend();
                 }}
               >
                 Resume
@@ -172,7 +171,7 @@ function HostLobby() {
               <Button
                 className="btn btn-outline btn-xs btn-warning"
                 onClick={() => {
-                  netSend("flightPause");
+                  q.flight.pause.netSend();
                 }}
               >
                 Pause
@@ -181,7 +180,7 @@ function HostLobby() {
             <Button
               className="btn btn-outline btn-xs btn-notice"
               onClick={() => {
-                netSend("flightReset");
+                q.flight.reset.netSend();
               }}
             >
               Reset
@@ -209,9 +208,9 @@ function HostLobby() {
 }
 
 function ClientAssignment() {
-  const clients = useNetRequest("clients");
-  const client = useNetRequest("client");
-  const playerShips = useNetRequest("flightPlayerShips");
+  const [clients] = q.client.all.useNetRequest();
+  const [client] = q.client.get.useNetRequest();
+  const [playerShips] = q.ship.players.useNetRequest();
   const [selectedClient, setSelectedClient] = useState(client.id);
   return (
     <div className="flex justify-around gap-4 w-full">
@@ -272,7 +271,7 @@ function HostStationItem({
   selectedClient: string;
   setSelectedClient: Dispatch<SetStateAction<string>>;
 }) {
-  const clients = useNetRequest("clients");
+  const [clients] = q.client.all.useNetRequest();
 
   return (
     <>
@@ -285,7 +284,7 @@ function HostStationItem({
             }`}
             onClick={async () => {
               try {
-                const result = await netSend("clientSetStation", {
+                const result = await q.client.setStation.netSend({
                   shipId: shipId,
                   stationId: station.name,
                   clientId: selectedClient,
@@ -323,7 +322,7 @@ function HostStationItem({
                 onClick={e => {
                   e.stopPropagation();
                   e.preventDefault();
-                  netSend("clientSetStation", {
+                  q.client.setStation.netSend({
                     shipId: null,
                     clientId: client.id,
                   });

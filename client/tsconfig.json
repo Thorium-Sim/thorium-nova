@@ -30,9 +30,8 @@
     "paths": {
       "@thorium/ui/*": ["./client/src/components/ui/*"],
       "@thorium/*": ["./shared/*"],
-
-      "@thorium/inputs": ["./server/src/inputs"],
-      "@thorium/cardSubscriptions": ["./client/src/utils/subscriptions"]
+      "@server/*": ["./server/src/*"],
+      "@client/*": ["./client/src/*"]
     }
   },
   "include": [
@@ -46,6 +45,12 @@
     "src/pages/NotFound/astronaut.json",
     "src/pages/Releases/release-notes.json",
     "./package.json",
-    "../package.json"
+    "../package.json",
+    "./src/data/server.ts",
+    "./src/data/thorium.ts",
+    "./src/data/flight.ts",
+    "./src/data/client.ts",
+    "./src/data/ship.ts",
+    "./src/data/effects.ts"
   ]
 }

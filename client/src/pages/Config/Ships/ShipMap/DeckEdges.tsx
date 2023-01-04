@@ -1,6 +1,5 @@
-import {useNetRequest} from "client/src/context/useNetRequest";
+import {q} from "@client/context/AppContext";
 import {useParams} from "react-router-dom";
-import {netSend} from "client/src/context/netSend";
 import {DeckNode, EdgeFlag} from "server/src/classes/Plugins/Ship/Deck";
 import {DeckEdge} from "./DeckEdge";
 
@@ -16,7 +15,7 @@ export function DeckEdges({
     shipId: string;
     deckName: string;
   };
-  const data = useNetRequest("pluginShip", {pluginId, shipId});
+  const [data] = q.plugin.ship.get.useNetRequest({pluginId, shipId});
 
   return (
     <svg className="pointer-events-none absolute inset-0 w-full h-full">
@@ -31,7 +30,7 @@ export function DeckEdges({
             {...edge}
             allNodes={deckNodes}
             updateEdge={(input: {weight: number} | {flags: EdgeFlag[]}) => {
-              netSend("pluginShipDeckUpdateEdge", {
+              q.plugin.ship.deck.updateEdge.netSend({
                 pluginId,
                 shipId,
                 edgeId: edge.id,
@@ -39,7 +38,7 @@ export function DeckEdges({
               });
             }}
             removeEdge={() => {
-              netSend("pluginShipDeckRemoveEdge", {
+              q.plugin.ship.deck.removeEdge.netSend({
                 pluginId,
                 shipId,
                 edgeId: edge.id,

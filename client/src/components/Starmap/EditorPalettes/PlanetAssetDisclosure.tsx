@@ -1,10 +1,10 @@
 import Button from "../../ui/Button";
-import {netSend} from "client/src/context/netSend";
 import UploadWell from "@thorium/ui/UploadWell";
 import InfoTip from "@thorium/ui/InfoTip";
 import PlanetPlugin from "server/src/classes/Plugins/Universe/Planet";
 import {PaletteDisclosure} from "../SolarSystemMap";
 import {useSystemIds} from "../useSystemIds";
+import {q} from "@client/context/AppContext";
 
 export function PlanetAssetDisclosure({object}: {object: PlanetPlugin}) {
   const [pluginId, solarSystemId] = useSystemIds();
@@ -22,7 +22,7 @@ export function PlanetAssetDisclosure({object}: {object: PlanetPlugin}) {
         <UploadWell
           accept="image/*"
           onChange={(files: FileList) => {
-            netSend("pluginPlanetUpdate", {
+            q.plugin.starmap.planet.update.netSend({
               pluginId,
               solarSystemId,
               planetId: object.name,
@@ -48,7 +48,7 @@ export function PlanetAssetDisclosure({object}: {object: PlanetPlugin}) {
         <UploadWell
           accept="image/*"
           onChange={(files: FileList) => {
-            netSend("pluginPlanetUpdate", {
+            q.plugin.starmap.planet.update.netSend({
               pluginId,
               solarSystemId,
               planetId: object.name,
@@ -67,7 +67,7 @@ export function PlanetAssetDisclosure({object}: {object: PlanetPlugin}) {
         <Button
           className="btn-block btn-xs my-2"
           onClick={() =>
-            netSend("pluginPlanetUpdate", {
+            q.plugin.starmap.planet.update.netSend({
               pluginId,
               solarSystemId,
               planetId: object.name,
@@ -89,7 +89,7 @@ export function PlanetAssetDisclosure({object}: {object: PlanetPlugin}) {
         <UploadWell
           accept="image/*"
           onChange={(files: FileList) => {
-            netSend("pluginPlanetUpdate", {
+            q.plugin.starmap.planet.update.netSend({
               pluginId,
               solarSystemId,
               planetId: object.name,
@@ -108,7 +108,7 @@ export function PlanetAssetDisclosure({object}: {object: PlanetPlugin}) {
         <Button
           className="btn-block btn-xs my-2"
           onClick={() =>
-            netSend("pluginPlanetUpdate", {
+            q.plugin.starmap.planet.update.netSend({
               pluginId,
               solarSystemId,
               planetId: object.name,

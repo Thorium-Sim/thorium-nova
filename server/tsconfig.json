@@ -28,23 +28,16 @@
     "baseUrl": "..",
     "paths": {
       "@thorium/*": ["./shared/*"],
-      "@thorium/cardSubscriptions": ["./client/src/utils/subscriptions"]
+      "@server/*": ["./server/src/*"],
+      "@client/*": ["./client/src/*"]
     }
   },
   "include": [
     "src/**/*",
     "../shared",
-    "../client/src/cards/**/data.ts",
-    "../client/src/cards/**/data.tsx",
-    "../client/src/cores/**/data.ts",
-    "../client/src/cores/**/data.tsx",
-    "../client/src/cards/clientData.ts"
-  ],
-  "files": [
-    "../client/src/utils/cardData.ts",
-    "../client/src/cards/dataList.ts",
-    "../client/src/cores/dataList.ts",
-    "./src/utils/DataContext.ts",
-    "../client/src/utils/getShipSystem.ts"
+    "../client/src/**/data.ts",
+    "../client/src/**/data.tsx",
+    "../client/src/**/data/**/*.ts",
+    "../client/src/**/data/**/*.tsx"
   ]
 }

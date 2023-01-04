@@ -1,10 +1,9 @@
+import {q} from "@client/context/AppContext";
 import {useFrame} from "@react-three/fiber";
+import {useLiveQuery} from "@thorium/live-query/client";
 import Nebula from "client/src/components/Starmap/Nebula";
 import StarmapCanvas from "client/src/components/Starmap/StarmapCanvas";
 import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
-import {useThorium} from "client/src/context/ThoriumContext";
-import {useDataStream} from "client/src/context/useDataStream";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {
   InterstellarWrapper,
   SolarSystemWrapper,
@@ -17,9 +16,9 @@ import {WarpStars} from "./WarpStars";
 const forwardQuaternion = new Quaternion(0, 1, 0, 0);
 
 function ViewscreenEffects() {
-  const viewscreenSystem = useNetRequest("viewscreenSystem");
-  const player = useNetRequest("pilotPlayerShip");
-  const {interpolate} = useThorium();
+  const [viewscreenSystem] = q.viewscreen.system.useNetRequest();
+  const [player] = q.ship.player.useNetRequest();
+  const {interpolate} = useLiveQuery();
 
   const useStarmapStore = useGetStarmapStore();
   useEffect(() => {
@@ -52,7 +51,7 @@ export function Viewscreen() {
   const useStarmapStore = useGetStarmapStore();
   const currentSystem = useStarmapStore(store => store.currentSystem);
 
-  useDataStream();
+  q.viewscreen.stream.useDataStream();
 
   return (
     <div className="w-full h-full flex items-center justify-center text-white text-6xl">

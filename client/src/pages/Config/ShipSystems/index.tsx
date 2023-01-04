@@ -5,10 +5,10 @@ import {Basic} from "./Basic";
 import {Power} from "./Power";
 import {Efficiency} from "./Efficiency";
 import {Heat} from "./Heat";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useParams} from "react-router-dom";
 import {lazy, Suspense} from "react";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
+import {q} from "@client/context/AppContext";
 
 export const systemConfigs = Object.fromEntries(
   Object.entries(import.meta.glob("./SystemConfigs/*.tsx")).map(
@@ -26,7 +26,7 @@ const SystemConfig = () => {
     pluginId: string;
     systemId: string;
   };
-  const system = useNetRequest("pluginShipSystem", {pluginId, systemId});
+  const [system] = q.plugin.systems.get.useNetRequest({pluginId, systemId});
   const Comp = systemConfigs[system.type];
   if (!Comp) return null;
   return <Comp />;

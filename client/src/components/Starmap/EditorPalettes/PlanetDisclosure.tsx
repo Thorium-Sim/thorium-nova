@@ -1,10 +1,10 @@
 import * as React from "react";
-import {netSend} from "client/src/context/netSend";
 import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
 import PlanetPlugin from "server/src/classes/Plugins/Universe/Planet";
 import {PaletteDisclosure} from "../SolarSystemMap";
 import {useSystemIds} from "../useSystemIds";
+import {q} from "@client/context/AppContext";
 
 export function PlanetDisclosure({object}: {object: PlanetPlugin}) {
   const [pluginId, solarSystemId] = useSystemIds();
@@ -19,7 +19,7 @@ export function PlanetDisclosure({object}: {object: PlanetPlugin}) {
         pattern="[0-9]*"
         defaultValue={object.isPlanet.age}
         onChange={e => {
-          netSend("pluginPlanetUpdate", {
+          q.plugin.starmap.planet.update.netSend({
             pluginId,
             solarSystemId,
             planetId: object.name,
@@ -42,7 +42,7 @@ export function PlanetDisclosure({object}: {object: PlanetPlugin}) {
         pattern="[0-9]*"
         defaultValue={object.isPlanet.radius}
         onChange={e => {
-          netSend("pluginPlanetUpdate", {
+          q.plugin.starmap.planet.update.netSend({
             pluginId,
             solarSystemId,
             planetId: object.name,
@@ -58,11 +58,11 @@ export function PlanetDisclosure({object}: {object: PlanetPlugin}) {
         pattern="[0-9]*"
         defaultValue={object.isPlanet.terranMass}
         onChange={e => {
-          netSend("pluginPlanetUpdate", {
+          q.plugin.starmap.planet.update.netSend({
             pluginId,
             solarSystemId,
             planetId: object.name,
-            mass: parseFloat(e.target.value),
+            terranMass: parseFloat(e.target.value),
           });
         }}
       />
@@ -71,7 +71,7 @@ export function PlanetDisclosure({object}: {object: PlanetPlugin}) {
         helperText="Whether the planet is habitable by humans."
         defaultChecked={object.isPlanet.isHabitable}
         onChange={e => {
-          netSend("pluginPlanetUpdate", {
+          q.plugin.starmap.planet.update.netSend({
             pluginId,
             solarSystemId,
             planetId: object.name,
@@ -87,7 +87,7 @@ export function PlanetDisclosure({object}: {object: PlanetPlugin}) {
         pattern="[0-9]*"
         defaultValue={object.temperature}
         onChange={e => {
-          netSend("pluginPlanetUpdate", {
+          q.plugin.starmap.planet.update.netSend({
             pluginId,
             solarSystemId,
             planetId: object.name,
@@ -101,7 +101,7 @@ export function PlanetDisclosure({object}: {object: PlanetPlugin}) {
         helperText="A text description of the types of lifeforms that inhabit this planet."
         defaultValue={object.isPlanet.lifeforms.join(" ")}
         onChange={e => {
-          netSend("pluginPlanetUpdate", {
+          q.plugin.starmap.planet.update.netSend({
             pluginId,
             solarSystemId,
             planetId: object.name,

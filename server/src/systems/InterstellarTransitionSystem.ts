@@ -1,8 +1,8 @@
+import {pubsub} from "@server/init/pubsub";
 import {Matrix4, Quaternion, Vector3} from "three";
 import {Entity, System} from "../utils/ecs";
 import {getOrbitPosition} from "../utils/getOrbitPosition";
-import {pubsub} from "../utils/pubsub";
-import { lightMinuteToLightYear } from "../utils/unitTypes";
+import {lightMinuteToLightYear} from "../utils/unitTypes";
 
 const MIN_SYSTEM_SIZE = 10_000;
 const SYSTEM_PADDING = 1.05;
@@ -115,12 +115,12 @@ export class InterstellarTransitionSystem extends System {
         //   });
         //   outfitPublish({plugin: undefined, ship: entity, outfit: warpEngines});
         // }
-        pubsub.publish("starmapShips", {systemId: system.id});
-        pubsub.publish("starmapShips", {systemId: null});
-        pubsub.publish("starmapShip", {shipId:entity.id})
+        pubsub.publish.starmapCore.ships({systemId: system.id});
+        pubsub.publish.starmapCore.ships({systemId: null});
+        pubsub.publish.starmapCore.ship({shipId: entity.id});
 
         if (entity.components.isPlayerShip) {
-          pubsub.publish("pilotPlayerShip", {shipId: entity.id});
+          pubsub.publish.ship.player({shipId: entity.id});
         }
       }
     } else {
@@ -144,7 +144,6 @@ export class InterstellarTransitionSystem extends System {
       );
       // 1/100th of a lightyear
       if (lightMinuteToLightYear(distance) < 0.01) {
-
         // create a vector of the ship from the center of the system, and position it outside the heliopause
         const maxDistance = getMaxDistance(
           this.ecs.entities,
@@ -196,14 +195,13 @@ export class InterstellarTransitionSystem extends System {
             w: desiredRotationQuat.w,
           });
         }
-        pubsub.publish("starmapShips", {systemId: destinationSystem.id});
-        pubsub.publish("starmapShips", {systemId: null});
-        pubsub.publish("starmapShip", {shipId:entity.id})
+        pubsub.publish.starmapCore.ships({systemId: destinationSystem.id});
+        pubsub.publish.starmapCore.ships({systemId: null});
+        pubsub.publish.starmapCore.ship({shipId: entity.id});
 
         if (entity.components.isPlayerShip) {
-          pubsub.publish("pilotPlayerShip", {shipId: entity.id});
+          pubsub.publish.ship.player({shipId: entity.id});
         }
-
         // // Update the warp engines
         // const warpEngines = this.ecs.entities.find(
         //   e =>

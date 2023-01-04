@@ -1,16 +1,17 @@
-import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
-import {useThorium} from "client/src/context/ThoriumContext";
-import {useNetRequest} from "client/src/context/useNetRequest";
-import useAnimationFrame from "client/src/hooks/useAnimationFrame";
+import {useGetStarmapStore} from "@client/components/Starmap/starmapStore";
+import useAnimationFrame from "@client/hooks/useAnimationFrame";
 import {Fragment, Suspense, useRef} from "react";
-import {lightMinuteToLightYear} from "server/src/utils/unitTypes";
+import {lightMinuteToLightYear} from "@server/utils/unitTypes";
 import {Canvas, useFrame} from "@react-three/fiber";
 import {Color, Group} from "three";
-import {Planet, PlanetSphere} from "client/src/components/Starmap/Planet";
-import Star from "client/src/components/Starmap/Star/StarMesh";
-import {Rings} from "client/src/components/Starmap/Planet/Rings";
-import {Clouds} from "client/src/components/Starmap/Planet/Clouds";
+import {Planet, PlanetSphere} from "@client/components/Starmap/Planet";
+import Star from "@client/components/Starmap/Star/StarMesh";
+import {Rings} from "@client/components/Starmap/Planet/Rings";
+import {Clouds} from "@client/components/Starmap/Planet/Clouds";
 import {degToRad} from "three/src/math/MathUtils";
+import {useLiveQuery} from "@thorium/live-query/client";
+import {q} from "@client/context/AppContext";
+
 function getDistance(
   object: {x: number; y: number; z: number},
   shipPosition: {x: number; y: number; z: number} | null,
@@ -77,10 +78,10 @@ const ObjectData = () => {
   const useStarmapStore = useGetStarmapStore();
   const selectedObjectIds = useStarmapStore(store => store.selectedObjectIds);
 
-  const ship = useNetRequest("navigationShip");
-  const {interpolate} = useThorium();
+  const [ship] = q.navigation.ship.useNetRequest();
+  const {interpolate} = useLiveQuery();
   const distanceRef = useRef<HTMLSpanElement>(null);
-  const requestData = useNetRequest("navigationGetObject", {
+  const [requestData] = q.navigation.object.useNetRequest({
     objectId: Number(selectedObjectIds[0]) || undefined,
   });
   const object = requestData.object;

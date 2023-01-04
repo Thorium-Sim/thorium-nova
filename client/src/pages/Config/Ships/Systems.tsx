@@ -1,22 +1,22 @@
 import SearchableList from "@thorium/ui/SearchableList";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {Routes, Route, useNavigate, useParams} from "react-router-dom";
 import Button from "@thorium/ui/Button";
 import {useState} from "react";
 import {capitalCase} from "change-case";
-import {netSend} from "client/src/context/netSend";
 import {FaBan, FaPencilAlt} from "react-icons/fa";
 import {OverrideEdit} from "./OverrideEdit";
 import {Suspense} from "react";
 import {ShipPluginIdContext} from "./ShipSystemOverrideContext";
+import {q} from "@client/context/AppContext";
 
 export function Systems() {
   const {pluginId, shipId} = useParams() as {pluginId: string; shipId: string};
-  const allSystems = useNetRequest("pluginShipSystems");
-  const ship = useNetRequest("pluginShip", {pluginId, shipId});
+  const [allSystems] = q.plugin.systems.all.useNetRequest({pluginId});
+  const [ship] = q.plugin.ship.get.useNetRequest({pluginId, shipId});
 
   const [allPlugins, setAllPlugins] = useState(false);
 
+  console.log(allSystems);
   const systems = allSystems.filter(
     sys =>
       !ship.shipSystems.some(
@@ -35,7 +35,7 @@ export function Systems() {
           showSearchLabel={false}
           selectedItem={null}
           setSelectedItem={item => {
-            netSend("pluginShipToggleSystem", {
+            q.plugin.ship.toggleSystem.netSend({
               shipId,
               pluginId,
               systemId: item.systemId,
@@ -103,7 +103,7 @@ export function Systems() {
                 className="btn-outline btn-xs btn-error"
                 aria-label="Remove"
                 onClick={() =>
-                  netSend("pluginShipToggleSystem", {
+                  q.plugin.ship.toggleSystem.netSend({
                     shipId,
                     pluginId,
                     systemId: item.id.systemId,

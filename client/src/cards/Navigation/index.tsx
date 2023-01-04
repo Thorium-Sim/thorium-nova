@@ -2,31 +2,28 @@ import {
   StarmapStoreProvider,
   useCalculateVerticalDistance,
   useGetStarmapStore,
-} from "client/src/components/Starmap/starmapStore";
+} from "@client/components/Starmap/starmapStore";
 import {useEffect, useRef, useState, Suspense} from "react";
-import StarmapCanvas from "client/src/components/Starmap/StarmapCanvas";
-import {CardProps} from "client/src/components/Station/CardProps";
+import StarmapCanvas from "@client/components/Starmap/StarmapCanvas";
+import {CardProps} from "@client/components/Station/CardProps";
 import {MapControls} from "./MapControls";
 import {InterstellarWrapper} from "./InterstellarWrapper";
 import {SolarSystemWrapper} from "./SolarSystemWrapper";
 import {ObjectDetails} from "./ObjectDetails";
 import Button from "@thorium/ui/Button";
-import {netSend} from "client/src/context/netSend";
-import {toast} from "client/src/context/ToastContext";
-import {useDataStream} from "client/src/context/useDataStream";
+import {toast} from "@client/context/ToastContext";
 import SearchableInput, {DefaultResultLabel} from "@thorium/ui/SearchableInput";
-import {netRequest} from "client/src/context/useNetRequest";
 import {capitalCase} from "change-case";
 import {useSpring, a} from "@react-spring/web";
 import SearchableList from "@thorium/ui/SearchableList";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 import {FaBan} from "react-icons/fa";
-import {useFollowEntity} from "client/src/components/Starmap/useFollowEntity";
+import {useFollowEntity} from "@client/components/Starmap/useFollowEntity";
 import {useCancelFollow} from "../../components/Starmap/useCancelFollow";
+import {q} from "@client/context/AppContext";
 
 export function Navigation(props: CardProps) {
-  useDataStream();
+  q.navigation.stream.useDataStream();
   return (
     <StarmapStoreProvider>
       <div className="mx-auto h-full bg-black/70 border border-white/50 relative">
@@ -64,7 +61,7 @@ function Waypoints() {
       height: (toggle ? 250 : 0) + "px",
     });
   }, [animate, ref, toggle]);
-  const waypoints = useNetRequest("waypoints", {systemId: "all"});
+  const [waypoints] = q.waypoints.all.useNetRequest({systemId: "all"});
   return (
     <div className="self-end justify-self-end w-96 pointer-events-auto">
       <Button className="btn-primary w-full" onClick={() => setToggle(t => !t)}>
@@ -96,7 +93,7 @@ function Waypoints() {
                     onClick={e => {
                       e.preventDefault();
                       e.stopPropagation();
-                      netSend("waypointDelete", {waypointId: id});
+                      q.waypoints.delete.netSend({waypointId: id});
                     }}
                   >
                     <FaBan className="text-red-500" />
@@ -148,7 +145,7 @@ function AddWaypoint() {
       onClick={async () => {
         try {
           typeof selectedObjectIds[0] === "number" &&
-            (await netSend("waypointSpawn", {entityId: selectedObjectIds[0]}));
+            (await q.waypoints.spawn.netSend({entityId: selectedObjectIds[0]}));
         } catch (error: unknown) {
           if (error instanceof Error) {
             toast({title: error.message, color: "error"});
@@ -167,8 +164,7 @@ function StarmapSearch() {
     <SearchableInput<{id: number; name: string; type: string; position: any}>
       queryKey="nav"
       getOptions={async ({queryKey, signal}) => {
-        const result = await netRequest(
-          "navigationSearch",
+        const result = await q.navigation.search.netRequest(
           {query: queryKey[1]},
           {signal}
         );

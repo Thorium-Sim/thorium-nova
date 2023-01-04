@@ -1,10 +1,9 @@
 import Button from "@thorium/ui/Button";
 import {Outlet, useParams, useNavigate} from "react-router-dom";
-import {useNetRequest} from "client/src/context/useNetRequest";
-import {netSend} from "client/src/context/netSend";
 import {useConfirm} from "@thorium/ui/AlertDialog";
 import {Navigate, useLocation} from "react-router-dom";
 import {SettingsList} from "./SettingsList";
+import {q} from "@client/context/AppContext";
 
 export const SystemLayout = () => {
   const {pathname} = useLocation();
@@ -14,7 +13,7 @@ export const SystemLayout = () => {
   };
   const navigate = useNavigate();
   const confirm = useConfirm();
-  const data = useNetRequest("pluginShipSystem", {pluginId, systemId});
+  const data = q.plugin.systems.get.useNetRequest({pluginId, systemId});
   if (!systemId || !data)
     return <Navigate to={`/config/${pluginId}/systems`} />;
 
@@ -36,7 +35,7 @@ export const SystemLayout = () => {
               }))
             )
               return;
-            netSend("pluginShipSystemDelete", {
+            q.plugin.systems.delete.netSend({
               pluginId,
               shipSystemId: systemId,
             });

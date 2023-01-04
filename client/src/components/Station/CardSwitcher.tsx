@@ -1,5 +1,5 @@
+import {q} from "@client/context/AppContext";
 import {SVGImageLoader} from "@thorium/ui/SVGImageLoader";
-import {useNetRequest} from "client/src/context/useNetRequest";
 
 const CardButton: React.FC<{
   active: boolean;
@@ -28,7 +28,7 @@ export const CardSwitcher: React.FC<{
   card: string;
   changeCard: (id: string) => void;
 }> = ({card, changeCard}) => {
-  const station = useNetRequest("station");
+  const [station] = q.station.get.useNetRequest();
   return (
     <div className="card-switcher-holder absolute right-0">
       <div className="card-switcher">
