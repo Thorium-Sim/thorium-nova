@@ -1,7 +1,6 @@
 import {t} from "@server/init/t";
 import {pubsub} from "@server/init/pubsub";
 import {getShipSystem} from "@server/utils/getShipSystem";
-import {DataContext} from "@server/utils/DataContext";
 import {z} from "zod";
 
 export const pilot = t.router({

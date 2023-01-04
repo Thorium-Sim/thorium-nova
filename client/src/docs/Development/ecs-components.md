@@ -11,8 +11,8 @@ structures can be assigned to entities to make them more than just an ID.
 
 Components should extend from the `Component` class defined in
 "/server/src/components/utils.ts" and be placed inside the
-`/server/src/components` folder or a sub-folder. Every component should includ a
-static `id` which is a literal string type. Using `as const` here is helpful.
+`/server/src/components` folder or a sub-folder. Every component should include
+a static `id` which is a literal string type. Using `as const` here is helpful.
 
 Components should contain as many properties for that component that are
 exclusive to that component. Properties should be defined with a type and either

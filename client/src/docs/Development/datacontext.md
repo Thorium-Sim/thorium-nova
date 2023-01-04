@@ -9,13 +9,13 @@ function and every server input is passed in as a parameter called
 `DataContext`. This object represents data and methods associated with a
 specific client that is making the request and should be available any time
 there's data fetching happening. The DataContext is defined in
-"/server/src/utils/DataContext.ts/".
+"/server/src/utils/DataContext.ts".
 
 ## `clientId`
 
 **Type**: `string`
 
-The ID of the client making the request or recieving the subscription response.
+The ID of the client making the request or receiving the subscription response.
 
 ## `database`
 
@@ -41,7 +41,7 @@ any.
 
 **Type**: `ServerClient`
 
-A convenience property for accessing the permenant client object in the server
+A convenience property for accessing the permanent client object in the server
 database.
 
 ## `flightClient`
