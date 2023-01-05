@@ -7,38 +7,60 @@ import {
   sRGBEncoding,
   BoxBufferGeometry,
   Mesh,
+  TextureLoader,
 } from "three";
 import {useGetStarmapStore} from "../starmapStore";
 import NebulaWorker from "./generateNebulaMap?worker";
 
 const radius = 1e20;
 const CANVAS_WIDTH = 2048;
-const nebulaWorker = new NebulaWorker();
+let nebulaWorker: Worker | null = null;
+
+const canvas = document.createElement("canvas");
+if ("transferControlToOffscreen" in canvas) {
+  nebulaWorker = new NebulaWorker();
+}
 
 const nebulaGeometry = new BoxBufferGeometry(1, 1, 1);
 
-function generateMaterial() {
+const sides = ["back", "bottom", "front", "left", "right", "top"];
+function generateMaterial(primary: boolean, index: number) {
   const canvas = document.createElement("canvas");
+  document.body.appendChild(canvas);
   canvas.width = canvas.height = CANVAS_WIDTH;
 
-  // @ts-ignore Built in types don't recognize this property
-  const offscreenCanvas = canvas.transferControlToOffscreen();
-  offscreenCanvas.width = offscreenCanvas.height = CANVAS_WIDTH;
+  if ("transferControlToOffscreen" in canvas) {
+    // @ts-ignore Built in types don't recognize this property
+    const offscreenCanvas = canvas.transferControlToOffscreen();
+    offscreenCanvas.width = offscreenCanvas.height = CANVAS_WIDTH;
 
-  const canvasTexture = new CanvasTexture(canvas);
-  canvasTexture.encoding = sRGBEncoding;
+    const canvasTexture = new CanvasTexture(canvas);
+    canvasTexture.encoding = sRGBEncoding;
 
-  const material = new MeshBasicMaterial({
-    side: BackSide,
-    // transparent: true,
-    // depthWrite: false,
-    depthTest: false,
-    map: canvasTexture,
-    userData: {
-      offscreenCanvas,
-    },
-  });
-  return material;
+    const material = new MeshBasicMaterial({
+      side: BackSide,
+      transparent: primary,
+      depthWrite: !primary,
+      depthTest: false,
+      map: canvasTexture,
+      userData: {
+        offscreenCanvas,
+      },
+    });
+    return material;
+  } else {
+    const texture = new TextureLoader().load(
+      `/assets/skybox/${sides[index]}.png`
+    );
+    const material = new MeshBasicMaterial({
+      side: BackSide,
+      transparent: primary,
+      depthWrite: !primary,
+      depthTest: false,
+      map: texture,
+    });
+    return material;
+  }
 }
 
 function Nebula() {
@@ -48,12 +70,14 @@ function Nebula() {
 
   const [primaryMaterials, secondaryMaterials] = React.useMemo(
     () => [
-      Array.from({length: 6}).map(generateMaterial),
-      Array.from({length: 6}).map(generateMaterial),
+      Array.from({length: 6}).map((_, index) => generateMaterial(true, index)),
+      Array.from({length: 6}).map((_, index) => generateMaterial(false, index)),
     ],
     []
   );
+
   useEffect(() => {
+    if (!nebulaWorker) return;
     if (primaryMesh.current && secondaryMesh.current) {
       if (
         Array.isArray(primaryMesh.current.material) &&
@@ -87,7 +111,7 @@ function Nebula() {
           }, 500);
         }
         nebulaWorker.addEventListener("message", onMessage);
-        return () => nebulaWorker.removeEventListener("message", onMessage);
+        return () => nebulaWorker?.removeEventListener("message", onMessage);
       }
     }
   }, []);
@@ -95,7 +119,7 @@ function Nebula() {
 
   const skyboxKey = useStarmapStore(s => s.skyboxKey);
   useEffect(() => {
-    nebulaWorker.postMessage({
+    nebulaWorker?.postMessage({
       type: "render",
       seed: skyboxKey,
       which: activeMesh.current === "primary" ? "secondary" : "primary",

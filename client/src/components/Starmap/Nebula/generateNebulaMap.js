@@ -131,8 +131,8 @@ function generateTexture(seed, canvases) {
       nebulaParams.push({
         scale: rand.random() * 0.5 + 0.25,
         color: [rand.random(), rand.random(), rand.random()],
-        intensity: rand.random() * 0.2 + 0.5,
-        falloff: rand.random() * 3.0 + 2.0,
+        intensity: rand.random() * 0.2 + 0.9,
+        falloff: rand.random() * 3.0 + 3.0,
         offset: [
           rand.random() * 2000 - 1000,
           rand.random() * 2000 - 1000,
