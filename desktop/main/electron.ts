@@ -62,6 +62,7 @@ async function createWindow() {
     minHeight: 768,
     minWidth: 1024,
     backgroundColor: "#251029",
+    autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: true,
       devTools: true,
