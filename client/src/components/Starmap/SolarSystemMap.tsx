@@ -8,6 +8,7 @@ import CameraControlsClass from "camera-controls";
 import {
   astronomicalUnitToKilometer,
   Kilometer,
+  solarRadiusToKilometers,
 } from "server/src/utils/unitTypes";
 import {Box3, Camera, Vector3} from "three";
 import Button from "../ui/Button";
@@ -30,6 +31,9 @@ import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
 import {useParams} from "react-router-dom";
 import {q} from "@client/context/AppContext";
+import PlanetPlugin from "@server/classes/Plugins/Universe/Planet";
+import SolarSystemPlugin from "@server/classes/Plugins/Universe/SolarSystem";
+import {getOrbitPosition} from "@server/utils/getOrbitPosition";
 const ACTION = CameraControlsClass.ACTION;
 
 // 10% further than Neptune's orbit
@@ -428,6 +432,7 @@ export function SolarSystemPalette() {
       className="w-full h-full overflow-y-auto overflow-x-hidden text-white"
       key={results.object.name}
     >
+      <ZoomToObject object={results.object} />
       <BasicDisclosure object={results.object} type={results.type} />
       {results.type === "planet" && (
         <>
@@ -438,6 +443,49 @@ export function SolarSystemPalette() {
       )}
       {results.type === "star" && <StarDisclosure object={results.object} />}
     </div>
+  );
+}
+
+function ZoomToObject({
+  object,
+}: {
+  object: StarPlugin | PlanetPlugin | SolarSystemPlugin;
+}) {
+  const useStarmapStore = useGetStarmapStore();
+
+  if (!("satellite" in object)) {
+    return null;
+  }
+
+  return (
+    <Button
+      className="btn-block btn-xs"
+      onClick={() => {
+        const position = getOrbitPosition(object.satellite);
+        let radius = 0;
+        if ("isPlanet" in object) {
+          radius = object.isPlanet.radius;
+        } else {
+          radius = solarRadiusToKilometers(object.radius);
+        }
+
+        const box = new Box3(
+          new Vector3(
+            position.x - radius,
+            position.y - radius,
+            position.z - radius
+          ),
+          new Vector3(
+            position.x + radius,
+            position.y + radius,
+            position.z + radius
+          )
+        );
+        useStarmapStore.getState().cameraControls?.current?.fitToBox(box, true);
+      }}
+    >
+      Zoom to Object
+    </Button>
   );
 }
 
