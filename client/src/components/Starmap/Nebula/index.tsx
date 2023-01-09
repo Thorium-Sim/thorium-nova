@@ -5,7 +5,7 @@ import {
   CanvasTexture,
   BackSide,
   sRGBEncoding,
-  BoxBufferGeometry,
+  BoxGeometry,
   Mesh,
   TextureLoader,
 } from "three";
@@ -21,7 +21,7 @@ if ("transferControlToOffscreen" in canvas) {
   nebulaWorker = new NebulaWorker();
 }
 
-const nebulaGeometry = new BoxBufferGeometry(1, 1, 1);
+const nebulaGeometry = new BoxGeometry(1, 1, 1);
 
 const sides = ["back", "bottom", "front", "left", "right", "top"];
 function generateMaterial(primary: boolean, index: number) {

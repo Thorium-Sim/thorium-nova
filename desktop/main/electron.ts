@@ -76,9 +76,6 @@ async function createWindow() {
     shell.openExternal(url);
     return {action: "deny"};
   });
-  win.webContents.on("new-window", function (e, url) {
-    // e.preventDefault();
-  });
 
   // We add 1 to the port, since we want to connect to the HTTPS server
   // which is 1 more than the default port

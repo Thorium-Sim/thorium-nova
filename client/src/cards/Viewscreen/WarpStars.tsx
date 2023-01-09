@@ -7,7 +7,7 @@ import {randomPointInSphere} from "@client/utils/randomPointInSphere";
 import {memo, useMemo} from "react";
 import {
   Color,
-  CylinderBufferGeometry,
+  CylinderGeometry,
   DoubleSide,
   Euler,
   InstancedMesh,
@@ -43,7 +43,7 @@ export const WarpStars = () => {
   const [{id: shipId, currentSystem}] = q.ship.player.useNetRequest();
   const isInSystem = typeof currentSystem === "number";
   const mesh = useMemo(() => {
-    const geometry = new CylinderBufferGeometry(1, 0, 100, 16, 16);
+    const geometry = new CylinderGeometry(1, 0, 100, 16, 16);
     const material = new MeshBasicMaterial({
       color: new Color(`hsl(0,0%,100%)`),
       // emissive: new Color(`hsl(230, 100%, 70%)`),

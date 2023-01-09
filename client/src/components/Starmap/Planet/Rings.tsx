@@ -1,7 +1,7 @@
 import {useTexture} from "@react-three/drei";
 import React from "react";
 
-import {BufferAttribute, DoubleSide, RingBufferGeometry, Vector3} from "three";
+import {BufferAttribute, DoubleSide, RingGeometry, Vector3} from "three";
 import {whiteImage} from "../whiteImage";
 
 interface RingsProps {
@@ -15,7 +15,7 @@ export const Rings: React.FC<RingsProps> = ({
 }) => {
   const rings = useTexture(texture);
   const geo = React.useMemo(() => {
-    const geometry = new RingBufferGeometry(1.5, 3, 64);
+    const geometry = new RingGeometry(1.5, 3, 64);
     const pos = geometry.attributes.position as BufferAttribute;
     const v3 = new Vector3();
     for (let i = 0; i < pos.count; i++) {
