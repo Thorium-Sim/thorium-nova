@@ -139,7 +139,7 @@ export default function ToastContainer() {
     return null;
   }
   return createPortal(
-    <div className="toast-container fixed top-0 right-0 z-20">
+    <div className="fixed top-0 right-0 z-20">
       {toasts.map(toast => (
         <Toast key={toast.id} {...toast} dismiss={() => dispatch(toast.id)} />
       ))}
