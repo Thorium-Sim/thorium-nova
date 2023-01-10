@@ -16,7 +16,6 @@ export function Systems() {
 
   const [allPlugins, setAllPlugins] = useState(false);
 
-  console.log(allSystems);
   const systems = allSystems.filter(
     sys =>
       !ship.shipSystems.some(
