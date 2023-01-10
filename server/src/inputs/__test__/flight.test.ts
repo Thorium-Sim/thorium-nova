@@ -150,7 +150,7 @@ describe("flight input", () => {
 
     expect(flight.playerShips[0].components.position).toMatchInlineSnapshot(`
       PositionComponent {
-        "parentId": 6,
+        "parentId": 9,
         "type": "solar",
         "x": -228630890,
         "y": 0,
