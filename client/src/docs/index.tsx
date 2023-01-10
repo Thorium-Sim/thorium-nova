@@ -7,6 +7,7 @@ import {Disclosure, Popover, Transition} from "@headlessui/react";
 import {Index} from "flexsearch";
 import "./docs.css";
 import {FaChevronUp} from "react-icons/fa";
+import {parseDocument, DomUtils} from "htmlparser2";
 
 const docIndex = new Index();
 
@@ -120,12 +121,33 @@ export const routes = Object.keys(ROUTES)
     if (!routeObj.html) return null;
     const routeParts = path.split("/");
     if (routeParts.length <= 1) return null;
+
+    // Figure out the TOC
+    const root: any = parseDocument(routeObj.html);
+    function searchChildren(node: any): any[] {
+      let output: Element[] = [];
+      if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(node.name)) {
+        output.push(node);
+      }
+      node.children?.forEach((node: any) => {
+        output = output.concat(searchChildren(node as any));
+      });
+      return output;
+    }
+
+    const toc: {level: string; content: string}[] = searchChildren(root).map(
+      index => ({
+        level: index.tagName.replace("h", ""),
+        content: DomUtils.getInnerHTML(index),
+      })
+    );
+
     return {
       path: path.toLowerCase().replace(/\s/g, "-"),
       content: routeObj.html,
       section: routeParts[0],
       frontmatter: routeObj.attributes,
-      toc: routeObj.toc,
+      toc,
     };
   })
   .filter(isRoute);

@@ -1,3 +1,18 @@
+.header-permalink {
+  position: relative;
+  padding-left: 2rem;
+  margin-left: -2rem;
+}
+.header-anchor {
+  position: absolute;
+  left: 0.5rem;
+  top: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+}
+.header-permalink:hover .header-anchor {
+  opacity: 1;
+}
 h1,
 h2,
 h3,
