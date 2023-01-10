@@ -39,10 +39,6 @@ export function useDataResponse() {
               `netResponse data must be an object. Got "${data}"`
             );
           }
-          if ("error" in data) {
-            // TODO: Ignore any errors. We'll have to figure out how to address this later.
-            return;
-          }
           if (!("id" in data && "data" in data)) {
             const dataString = JSON.stringify(data, null, 2);
             throw new Error(
@@ -52,6 +48,23 @@ export function useDataResponse() {
 
           const [path, params] = JSON.parse(data.id);
           const queryKey = getArrayQueryKey(getQueryKey(path, params));
+
+          if ("error" in data) {
+            const query = queryClient
+              .getQueryCache()
+              .build(queryClient, {queryKey});
+            const state = queryClient.getQueryState(queryKey);
+            if (state) {
+              query.setState({
+                ...state,
+                error: new Error((data as any).error),
+                errorUpdateCount: state.errorUpdateCount + 1,
+                errorUpdatedAt: Date.now(),
+              });
+            }
+            return;
+          }
+
           queryClient.setQueryData(queryKey, data.data);
 
           dataCallbacks.get(JSON.stringify(queryKey))?.forEach(callback => {
