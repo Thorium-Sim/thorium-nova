@@ -9,7 +9,7 @@ import {
 } from "react";
 import {Coordinates} from "server/src/utils/unitTypes";
 import {Vector3} from "three";
-import create from "zustand";
+import {create} from "zustand";
 
 interface StarmapStore {
   storeCount: number;

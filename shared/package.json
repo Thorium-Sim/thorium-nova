@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@tanstack/react-query-devtools": "^4.22.0",
     "@types/lodash.throttle": "^4.1.7"
   }
 }

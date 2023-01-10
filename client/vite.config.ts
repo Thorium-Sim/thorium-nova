@@ -3,6 +3,8 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import react from "@vitejs/plugin-react";
 import releasesPlugin from "./vite-plugins/releases";
 import mdPlugin, {Mode} from "vite-plugin-markdown";
+import {setDefaultResultOrder} from "dns";
+setDefaultResultOrder("ipv4first");
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => {
@@ -28,6 +30,7 @@ export default defineConfig(async () => {
     base: "/",
     server: {
       port: 3000,
+      host: "0.0.0.0",
       open: true,
       fs: {
         strict: false,
@@ -39,6 +42,10 @@ export default defineConfig(async () => {
         "/netSend": "http://localhost:3001",
         "/netRequest": "http://localhost:3001",
         "/plugins": "http://localhost:3001",
+        "/ws": {
+          target: "ws://localhost:3001/ws",
+          ws: true,
+        },
       },
     },
   };

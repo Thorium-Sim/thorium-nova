@@ -15,7 +15,6 @@ export default function Modal({
   setIsOpen: (open: boolean) => void;
   children: ReactNode;
 }) {
-  console.log(isOpen);
   return (
     // Use the `Transition` component at the root level
     <Transition show={isOpen} as={Fragment}>
