@@ -22,7 +22,7 @@ export function AddCoreCombobox({
           <Combobox.Input
             placeholder="Add Core"
             className="w-full bg-transparent placeholder:text-success placeholder:font-semibold text-success border-none outline-none focus:ring-0 pl-3 pr-10 text-xs leading-5"
-            displayValue={coreName => coreName as string}
+            // displayValue={coreName => coreName}
             onChange={event => setQuery(event.target.value)}
           />
           <Combobox.Button className="absolute w-10 bg-success/20 hover:bg-success/50 cursor-pointer rounded inset-y-0 right-0 flex items-center justify-center">
