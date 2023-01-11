@@ -415,7 +415,7 @@ export const ShipEntity = ({
             lineWidth={1}
           ></Line>
           <mesh ref={mesh}>
-            <planeBufferGeometry args={[0.01, 0.01]} attach="geometry" />
+            <planeGeometry args={[0.01, 0.01]} attach="geometry" />
             <meshBasicMaterial
               attach="material"
               color="white"
@@ -470,7 +470,7 @@ export const PlanetaryEntity = memo(
         rotation={[0, 0, degToRad(satellite.axialTilt)]}
       >
         <mesh>
-          <icosahedronBufferGeometry args={[1, 3]} attach="geometry" />
+          <icosahedronGeometry args={[1, 3]} attach="geometry" />
           <meshBasicMaterial wireframe color="white" attach="material" />
         </mesh>
         {isPlanet?.ringMapAsset && <BasicRings />}

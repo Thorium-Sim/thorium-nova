@@ -177,7 +177,7 @@ const SystemCircle: React.FC<
 
   return (
     <mesh {...props}>
-      <planeBufferGeometry args={[4, 4, 4]} attach="geometry" />
+      <planeGeometry args={[4, 4, 4]} attach="geometry" />
       <meshBasicMaterial attach="material" map={texture} transparent />
     </mesh>
   );

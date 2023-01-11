@@ -39,7 +39,7 @@ export function useDataResponse() {
               `netResponse data must be an object. Got "${data}"`
             );
           }
-          if (!("id" in data && "data" in data)) {
+          if (!("id" in data && ("data" in data || "error" in data))) {
             const dataString = JSON.stringify(data, null, 2);
             throw new Error(
               `netResponse data must include an id and a response. Got ${dataString}`
