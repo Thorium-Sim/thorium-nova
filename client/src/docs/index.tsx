@@ -1,6 +1,13 @@
 import * as React from "react";
 import {renderToString} from "react-dom/server";
-import {Link, NavLink, Route, Routes, useLocation} from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  NavLink,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import "prismjs/themes/prism-tomorrow.css";
 import Menubar from "@thorium/ui/Menubar";
 import {Disclosure, Popover, Transition} from "@headlessui/react";
@@ -223,6 +230,9 @@ export default function DocLayout() {
 
   return (
     <div className="docs h-full">
+      {location.pathname === "/docs" ? (
+        <Navigate to={"/docs/quick-start/getting-started"} />
+      ) : null}
       <Menubar></Menubar>
       <div className="flex justify-around gap-4 h-[calc(100%-2rem)]">
         <aside className="px-4 py-8 text-white w-full max-w-sm bg-black/60 backdrop-filter backdrop-blur">
