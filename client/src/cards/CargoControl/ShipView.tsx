@@ -46,7 +46,7 @@ export function ShipView({
 
   return (
     <div
-      className="h-full w-full justify-self-center overflow-hidden relative select-none mx-16"
+      className="h-full w-full justify-self-center overflow-hidden relative select-none"
       ref={ref}
     >
       <Suspense fallback={null}>
@@ -105,20 +105,6 @@ export function ShipView({
           </div>
         ))}
       </Suspense>
-      <div className="absolute bottom-0 top-0 left-0 flex items-center justify-center">
-        <Slider
-          aria-label="Deck Selector"
-          value={decks.length - deckIndex}
-          onChange={val =>
-            useShipMapStore.setState({
-              deckIndex: decks.length - (val as number) - 1,
-            })
-          }
-          minValue={0}
-          maxValue={decks.length - 1}
-          orientation="vertical"
-        />
-      </div>
     </div>
   );
 }
