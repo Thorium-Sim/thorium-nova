@@ -31,13 +31,16 @@ export function Navigation(props: CardProps) {
           <CanvasWrapper shouldRender={props.cardLoaded} />
         </Suspense>
         <div className="grid grid-cols-2 grid-rows-2 absolute inset-0 pointer-events-none p-4">
-          <div className="pointer-events-auto max-w-sm">
+          <div className="max-w-sm">
             <StarmapSearch />
           </div>
           <div className="w-96 self-start justify-self-end max-h-min">
             <Suspense fallback={null}>
               <ObjectDetails />
-              <AddWaypoint />
+              <div className="flex gap-4 w-full mt-2">
+                <AddWaypoint />
+                <EnterSystem />
+              </div>
             </Suspense>
           </div>
           <MapControls />
@@ -90,10 +93,17 @@ function Waypoints() {
                 {id > -1 && (
                   <button
                     className="appearance-none"
-                    onClick={e => {
+                    onClick={async e => {
                       e.preventDefault();
                       e.stopPropagation();
-                      q.waypoints.delete.netSend({waypointId: id});
+                      try {
+                        await q.waypoints.delete.netSend({waypointId: id});
+                      } catch (err) {
+                        if (err instanceof Error) {
+                          console.log(err);
+                          toast({color: "error", title: err.message});
+                        }
+                      }
                     }}
                   >
                     <FaBan className="text-red-500" />
@@ -138,7 +148,7 @@ function AddWaypoint() {
   const selectedObjectIds = useStarmapStore(store => store.selectedObjectIds);
   return (
     <Button
-      className={`pointer-events-auto w-full mt-2 btn-primary ${
+      className={`pointer-events-auto flex-1 btn-primary ${
         !selectedObjectIds ? "btn-disabled" : ""
       }`}
       disabled={selectedObjectIds.length === 0}
@@ -154,6 +164,33 @@ function AddWaypoint() {
       }}
     >
       Add Waypoint
+    </Button>
+  );
+}
+
+function EnterSystem() {
+  const useStarmapStore = useGetStarmapStore();
+  const [id] = useStarmapStore(store => store.selectedObjectIds);
+  const [requestData] = q.navigation.object.useNetRequest({
+    objectId: Number(id) || undefined,
+  });
+  const object = requestData.object;
+  if (!object) return null;
+  if (object.type !== "solarSystem") return null;
+
+  return (
+    <Button
+      className={`pointer-events-auto flex-1 btn-warning ${
+        !id ? "btn-disabled" : ""
+      }`}
+      disabled={!id}
+      onClick={async () => {
+        typeof id === "number" &&
+          useStarmapStore.getState().setCurrentSystem(id);
+        useStarmapStore.setState({selectedObjectIds: []});
+      }}
+    >
+      Enter System
     </Button>
   );
 }

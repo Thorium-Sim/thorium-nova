@@ -23,7 +23,7 @@ import {q} from "@client/context/AppContext";
 
 const ACTION = CameraControlsClass.ACTION;
 
-const INTERSTELLAR_MAX_DISTANCE: LightYear = 2000;
+export const INTERSTELLAR_MAX_DISTANCE: LightYear = 2000;
 
 export function InterstellarMap({children}: {children: React.ReactNode}) {
   const useStarmapStore = useGetStarmapStore();
