@@ -31,7 +31,7 @@ export function Navigation(props: CardProps) {
           <CanvasWrapper shouldRender={props.cardLoaded} />
         </Suspense>
         <div className="grid grid-cols-2 grid-rows-2 absolute inset-0 pointer-events-none p-4">
-          <div className="pointer-events-auto max-w-sm">
+          <div className="max-w-sm">
             <StarmapSearch />
           </div>
           <div className="w-96 self-start justify-self-end max-h-min">
