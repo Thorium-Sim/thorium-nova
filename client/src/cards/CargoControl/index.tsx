@@ -11,6 +11,7 @@ import {GoToRoomButton} from "./GoToRoomButton";
 import {ShipView} from "./ShipView";
 import {useShipMapStore} from "./useShipMapStore";
 import {q} from "@client/context/AppContext";
+import {DeckPicker} from "./DeckPicker";
 
 export function CargoControl(props: CardProps) {
   const selectedRoomId = useShipMapStore(state => state.selectedRoomId);
@@ -34,9 +35,15 @@ export function CargoControl(props: CardProps) {
   );
 
   const transferAmount = useTransferAmount();
-
+  const maxDeckName = Math.max(...decks.map(d => d.name.length));
   return (
-    <div className="mx-auto h-full relative grid grid-cols-[1fr_30%_50px] grid-rows-2 gap-8">
+    <div
+      className="mx-auto h-full relative grid grid-rows-2 gap-8"
+      style={{
+        gridTemplateColumns: `calc(${maxDeckName}ch + 1.25rem) 1fr 30% 50px`,
+      }}
+    >
+      <DeckPicker decks={decks} />
       <div className="row-span-2">
         <div className="w-1/3 mx-auto z-10">
           <CargoSearchInput />
