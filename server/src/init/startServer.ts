@@ -1,6 +1,7 @@
 import type buildHTTPServer from "./httpServer";
 import {buildHttpsProxy} from "./httpsProxy";
 import chalk from "chalk";
+import {ipAddress} from "@thorium/ipAddress";
 
 export async function startServer(
   app: Awaited<ReturnType<typeof buildHTTPServer>>
@@ -16,7 +17,9 @@ export async function startServer(
       const proxy = buildHttpsProxy(PORT);
       await proxy.listen({port: HTTPSPort, host: "0.0.0.0"});
     }
-    console.info(chalk.greenBright(`Access app at http://localhost:${PORT}`));
+    console.info(
+      chalk.greenBright(`Access app at http://${ipAddress}:${PORT}`)
+    );
     console.info(
       chalk.cyan(`Doing port forwarding? Open this port in your router:`)
     );

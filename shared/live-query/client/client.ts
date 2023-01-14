@@ -64,11 +64,11 @@ export class LiveQueryClient {
 
     try {
       result = JSON.parse(result);
-      if (result?.error) {
-        throw new Error(result.error);
-      }
     } catch {
-      // Who knows what happened?
+      // Not JSON, apparently
+    }
+    if (result?.error) {
+      throw new Error(result.error);
     }
 
     return result;

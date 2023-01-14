@@ -2,7 +2,7 @@ import {q} from "@client/context/AppContext";
 import {useFrame} from "@react-three/fiber";
 import {useLiveQuery} from "@thorium/live-query/client";
 import {Matrix4, Quaternion, Vector3} from "three";
-import create from "zustand";
+import {create} from "zustand";
 import {getWaypointRelativePosition} from "./getWaypointRelativePosition";
 
 export const usePilotStore = create<{

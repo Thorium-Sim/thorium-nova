@@ -74,13 +74,15 @@ export default function SearchableInput<T extends {id: any}>({
       <div className="relative mt-1">
         <div className="relative w-full cursor-default overflow-hidden rounded-lg text-left focus:outline-none sm:text-sm">
           <Combobox.Input
-            className={`input w-full ${inputClassName || ""}`}
+            className={`input w-full pointer-events-auto ${
+              inputClassName || ""
+            }`}
             displayValue={displayValue}
             defaultValue={query}
             onChange={event => setQuery(event.target.value)}
             placeholder={placeholder}
           />
-          <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+          <Combobox.Button className="absolute pointer-events-auto inset-y-0 right-0 flex items-center pr-2">
             <HiSelector className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </Combobox.Button>
         </div>
@@ -93,7 +95,7 @@ export default function SearchableInput<T extends {id: any}>({
             setQuery("");
           }}
         >
-          <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto panel !bg-black/90 z-40">
+          <Combobox.Options className="absolute pointer-events-auto mt-1 max-h-60 w-full overflow-auto panel !bg-black/90 z-40">
             {searchQuery.isLoading && searchQuery.isFetching && (
               <div className="relative cursor-default select-none py-2 px-4">
                 <LoadingSpinner compact />

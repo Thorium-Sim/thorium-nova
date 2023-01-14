@@ -251,6 +251,7 @@ export class ServerClient<TRouter extends AnyRouter> {
       }
     };
 
+    this.ee.removeAllListeners();
     this.ee.on("send", data => send(data));
     this.connected = true;
     if (!connection) {

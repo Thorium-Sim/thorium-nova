@@ -97,12 +97,16 @@ export default function StarMap() {
         isOpen={selectedObjectIds.length > 0}
         onClose={() => useStarmapStore.setState({selectedObjectIds: []})}
       >
-        {systemId ? <SolarSystemPalette /> : <InterstellarPaletteWrapper />}
+        <React.Suspense fallback={null}>
+          {systemId ? <SolarSystemPalette /> : <InterstellarPaletteWrapper />}
+        </React.Suspense>
       </EditorPalette>
       <div className="h-[calc(100%-2rem)]  relative bg-black">
-        <StarmapCanvas>
-          <StarmapScene ref={sceneRef} />
-        </StarmapCanvas>
+        <React.Suspense fallback={null}>
+          <StarmapCanvas>
+            <StarmapScene ref={sceneRef} />
+          </StarmapCanvas>
+        </React.Suspense>
 
         <StatusBar />
       </div>
