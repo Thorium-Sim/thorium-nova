@@ -103,7 +103,7 @@ const Star: React.FC<{
 
       <group ref={starMesh}>
         <mesh ref={shader} uuid="My star">
-          <circleBufferGeometry attach="geometry" args={[1, 8, 8]} />
+          <circleGeometry attach="geometry" args={[1, 8, 8]} />
           <shaderMaterial
             attach="material"
             fragmentShader={fragment}
@@ -115,7 +115,7 @@ const Star: React.FC<{
           />
         </mesh>
         <mesh uuid="My star background">
-          <sphereBufferGeometry attach="geometry" args={[0.5, 32, 32]} />
+          <sphereGeometry attach="geometry" args={[0.5, 32, 32]} />
           <meshBasicMaterial attach="material" color={0x000000} />
         </mesh>
       </group>

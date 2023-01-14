@@ -16,7 +16,7 @@ export const Clouds: React.FC<CloudsProps> = ({texture = whiteImage}) => {
   });
   return (
     <mesh ref={ref} scale={[1.02, 1.02, 1.02]}>
-      <sphereBufferGeometry args={[1, 32, 32]} attach="geometry" />
+      <sphereGeometry args={[1, 32, 32]} attach="geometry" />
       <meshLambertMaterial
         map={clouds}
         side={FrontSide}

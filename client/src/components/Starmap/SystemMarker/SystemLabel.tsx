@@ -74,7 +74,7 @@ const SystemLabel: React.FC<{
       ref={text}
       renderOrder={1000}
     >
-      <planeBufferGeometry
+      <planeGeometry
         args={[textTexture.width, textTexture.height, 1]}
         attach="geometry"
       />

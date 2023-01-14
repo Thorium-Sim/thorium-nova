@@ -40,7 +40,7 @@ export function PlanetSphere({
   return (
     <group>
       <mesh castShadow>
-        <sphereBufferGeometry args={[1, 32, 32]} attach="geometry" />
+        <sphereGeometry args={[1, 32, 32]} attach="geometry" />
         <meshPhysicalMaterial
           map={wireframe ? undefined : mapTexture}
           wireframe={wireframe}
