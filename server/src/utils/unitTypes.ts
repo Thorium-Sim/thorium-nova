@@ -17,7 +17,7 @@ export type KilometerPerSecondSquared = Flavor<
 export type KiloNewtons = Flavor<number, "kiloNewtons">;
 
 export const KM_TO_LY = 1 / 9460730777119.56;
-export const KM_TO_LM = lightYearToLightMinute(KM_TO_LY) 
+export const KM_TO_LM = lightYearToLightMinute(KM_TO_LY);
 export const M_TO_KM = 1 / 1000;
 
 /**
@@ -42,8 +42,8 @@ export function lightMinuteToLightYear(len: LightMinute) {
 export function lightYearToLightMinute(len: LightYear) {
   return len * (60 * 24 * 365.25);
 }
-export function kilometerToLightMinute(len:Kilometer) {
-  return len * 5.559e-8
+export function kilometerToLightMinute(len: Kilometer) {
+  return len * 5.559e-8;
 }
 
 export type CubicMeter = Flavor<number, "cubicMeter">;
@@ -80,5 +80,5 @@ export class Coordinates<T extends number> {
   z: T = 0 as T;
 }
 
-export type PowerUnit = Flavor<number, "powerUnit">;
-export type PowerUnitPerSecond = Flavor<number, "powerUnitPerSecond">;
+export type KiloWattHour = Flavor<number, "kilowatthour">;
+export type KiloWatt = Flavor<number, "kilowatt">;

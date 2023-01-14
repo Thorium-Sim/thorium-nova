@@ -1,6 +1,5 @@
 import {ECS, Entity} from "../utils/ecs";
 import type ShipPlugin from "../classes/Plugins/Ship";
-import {spawnShipSystem} from "./shipSystem";
 import {PositionComponent} from "../components/position";
 import {randomFromList} from "../utils/randomFromList";
 import {generateShipInventory} from "./inventory";
@@ -73,12 +72,14 @@ export function spawnShip(
       sys => sys.name === system.systemId
     );
     if (!systemPlugin) return;
-    const systemEntity = spawnShipSystem(systemPlugin, system.overrides);
-    shipSystems.push(systemEntity);
+    const entities = systemPlugin.makeEntities(system.overrides);
+    entities.forEach(entity => {
+      shipSystems.push(entity);
+    });
     entity.updateComponent("shipSystems", {
       shipSystemIds: [
         ...(entity.components.shipSystems?.shipSystemIds || []),
-        systemEntity.id,
+        ...entities.map(({id}) => id),
       ],
     });
   });
