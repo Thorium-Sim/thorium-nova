@@ -15,8 +15,10 @@ import {Disclosure, Popover, Transition} from "@headlessui/react";
 import {Index} from "flexsearch";
 import "./docs.css";
 import {FaChevronUp} from "react-icons/fa";
+import {parseDocument} from "htmlparser2";
 import SearchableInput, {DefaultResultLabel} from "@thorium/ui/SearchableInput";
 import {QueryFunctionContext} from "@tanstack/react-query";
+import render from "dom-serializer";
 
 const docIndex = new Index();
 
@@ -88,6 +90,13 @@ function isRouteModule(
   if (!("html" in route)) return false;
   return true;
 }
+
+function stripHtml(html: string) {
+  let tmp = document.createElement("DIV");
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || "";
+}
+
 export const routes = Object.keys(ROUTES)
   .map(route => {
     const routeObj = ROUTES[route];
@@ -100,12 +109,33 @@ export const routes = Object.keys(ROUTES)
     if (!routeObj.html) return null;
     const routeParts = path.split("/");
     if (routeParts.length <= 1) return null;
+
+    // Figure out the TOC
+    const root: any = parseDocument(routeObj.html);
+    function searchChildren(node: any): any[] {
+      let output: Element[] = [];
+      if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(node.name)) {
+        output.push(node);
+      }
+      node.children?.forEach((node: any) => {
+        output = output.concat(searchChildren(node as any));
+      });
+      return output;
+    }
+
+    const toc: {level: string; content: string}[] = searchChildren(root).map(
+      index => ({
+        level: index.tagName.replace("h", ""),
+        content: stripHtml(render(index)),
+      })
+    );
+
     return {
       path: path.toLowerCase().replace(/\s/g, "-"),
       content: routeObj.html,
       section: routeParts[0],
       frontmatter: routeObj.attributes,
-      toc: routeObj.toc,
+      toc,
     };
   })
   .filter(isRoute);
