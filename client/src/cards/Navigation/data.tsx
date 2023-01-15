@@ -269,6 +269,7 @@ export const waypoints = t.router({
       let systemId: number | null = null;
       let object: Entity | undefined = undefined;
       if ("entityId" in input) {
+        // This waypoint is being attached to a specific object in space.
         object = ctx.flight?.ecs.entities.find(e => e.id === input.entityId);
         if (!object) throw new Error("No object found.");
         position = getObjectOffsetPosition(object, ship);
@@ -293,6 +294,7 @@ export const waypoints = t.router({
           return maybeWaypoint;
         }
       } else if ("position" in input) {
+        // This waypoint is just being plopped at some random point in space.
         position = input.position;
         systemId = input.systemId;
       } else {
@@ -437,14 +439,14 @@ function getObjectOffsetPosition(object: Entity, ship: Entity) {
   } else {
     // Take the vector that we've calculated and set the waypoint position along that line
     // with a bit of distance. The distance is proportional to the radius of the object itself
-    // and the size of the ship: distanceFromCenter = crewShipSize * 2 + objectSize * 0.5
+    // and the size of the ship: distanceFromCenter = crewShipSize * 2 + objectSize * 2
     const objectSize =
       object.components.size?.length ||
       object.components.isPlanet?.radius ||
       solarRadiusToKilometers(object.components.isStar?.radius || 1) ||
       1;
     const distanceFromCenter =
-      ((ship.components.size?.length || 1) / 1000) * 2 + objectSize * 1.25;
+      ((ship.components.size?.length || 1) / 1000) * 2 + objectSize * 3;
 
     return objectAngle.multiplyScalar(distanceFromCenter).add(objectCenter);
   }
