@@ -15,9 +15,10 @@ import {Disclosure, Popover, Transition} from "@headlessui/react";
 import {Index} from "flexsearch";
 import "./docs.css";
 import {FaChevronUp} from "react-icons/fa";
-import {parseDocument, DomUtils} from "htmlparser2";
+import {parseDocument} from "htmlparser2";
 import SearchableInput, {DefaultResultLabel} from "@thorium/ui/SearchableInput";
 import {QueryFunctionContext} from "@tanstack/react-query";
+import render from "dom-serializer";
 
 const docIndex = new Index();
 
@@ -89,6 +90,13 @@ function isRouteModule(
   if (!("html" in route)) return false;
   return true;
 }
+
+function stripHtml(html: string) {
+  let tmp = document.createElement("DIV");
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || "";
+}
+
 export const routes = Object.keys(ROUTES)
   .map(route => {
     const routeObj = ROUTES[route];
@@ -118,7 +126,7 @@ export const routes = Object.keys(ROUTES)
     const toc: {level: string; content: string}[] = searchChildren(root).map(
       index => ({
         level: index.tagName.replace("h", ""),
-        content: DomUtils.getInnerHTML(index),
+        content: stripHtml(render(index)),
       })
     );
 
