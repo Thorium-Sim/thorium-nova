@@ -65,6 +65,7 @@ export function generateShipInventory(
       roomEntity.contents[inventoryTemplate.name] ?? 0;
     roomEntity.contents[inventoryTemplate.name] += 1;
     totalVolume -= inventoryTemplate.volume;
+    room.availableVolume -= inventoryTemplate.volume;
     const inventoryIndex = inventoryList.indexOf(inventoryTemplate);
     if (inventoryIndex === -1) return;
     const removeIndex = cargoAbundance.indexOf(inventoryIndex);
@@ -83,7 +84,7 @@ export function generateShipInventory(
    * to the cargo hold
    */
   const roomMap = rooms.reduce(
-    (acc: {[key: string]: typeof rooms[0][]}, room) => {
+    (acc: {[key: string]: (typeof rooms)[0][]}, room) => {
       room.flags.forEach(flag => {
         if (!acc[flag]) acc[flag] = [];
         if (flag !== "cargo") {
