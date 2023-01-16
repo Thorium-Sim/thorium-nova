@@ -100,7 +100,6 @@ export function SolarSystemMap({
   const viewingMode = useStarmapStore(store => store.viewingMode);
 
   const isViewscreen = viewingMode === "viewscreen";
-  const isStation = viewingMode === "station";
 
   return (
     <Suspense fallback={null}>
@@ -119,7 +118,7 @@ export function SolarSystemMap({
               middle: ACTION.DOLLY,
               wheel: ACTION.DOLLY,
             }}
-            dollyToCursor={isStation}
+            dollyToCursor={false}
             dollySpeed={0.5}
           />
           <PolarGrid

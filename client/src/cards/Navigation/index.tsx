@@ -100,7 +100,6 @@ function Waypoints() {
                         await q.waypoints.delete.netSend({waypointId: id});
                       } catch (err) {
                         if (err instanceof Error) {
-                          console.log(err);
                           toast({color: "error", title: err.message});
                         }
                       }
