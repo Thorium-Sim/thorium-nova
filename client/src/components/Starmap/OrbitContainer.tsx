@@ -18,7 +18,7 @@ export const OrbitLine: React.FC<{radiusX: number; radiusY: number}> = ({
     );
 
     const points = curve.getPoints(
-      Math.round(Math.max(1000, radiusX / 400000))
+      Math.round(Math.max(10000, radiusX / 400000))
     );
 
     const geometry = new BufferGeometry().setFromPoints(points);

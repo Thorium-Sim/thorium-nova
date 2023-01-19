@@ -15,8 +15,8 @@ export class PassengerMovementComponent extends Component {
     y: MetersPerSecond;
     z: MetersPerSecond;
   } = {
-    x: 1.3,
-    y: 1.3,
-    z: 1.3 / 10, // The Z default is because decks are 10 meters high, so it should take 10x as long to move between decks.
+    x: 3,
+    y: 3,
+    z: 3 / 10, // The Z default is because decks are 10 meters high, so it should take 10x as long to move between decks.
   };
 }
