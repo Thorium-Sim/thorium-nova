@@ -3,6 +3,41 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.8](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.7...1.0.0-alpha.8) (2023-01-19)
+
+
+### Bug Fixes
+
+* Adjust waypoint distance to not be so close to planets. ([983a411](https://github.com/Thorium-Sim/thorium-nova/commit/983a411466298979ccb1773f98b517d3f20f317b))
+* Don't let external links open in the kiosk window. Closes [#445](https://github.com/Thorium-Sim/thorium-nova/issues/445) ([950ce39](https://github.com/Thorium-Sim/thorium-nova/commit/950ce39c9589c820c3297c7d5b95743c3fbf1321))
+* Don't overfill any rooms with cargo. ([d1062c7](https://github.com/Thorium-Sim/thorium-nova/commit/d1062c7865b36ce1c6f7cf64d3de49a990b67cc8))
+* Editor palette no longer hides itself. ([326bd93](https://github.com/Thorium-Sim/thorium-nova/commit/326bd933b801f3152269208b33dfab74d0162a47))
+* Fix modal backdrop not disappearing. Closes [#454](https://github.com/Thorium-Sim/thorium-nova/issues/454) ([a78509b](https://github.com/Thorium-Sim/thorium-nova/commit/a78509b9fae2c328e51eb6348d03a358e00b82c0))
+* Fix the How-to Guide Search. Closes [#462](https://github.com/Thorium-Sim/thorium-nova/issues/462) ([32cb85c](https://github.com/Thorium-Sim/thorium-nova/commit/32cb85cb44dc1ec3e488e0b530a28eac94c2e364))
+* Hide autopilot lines on viewscreen ([05c1485](https://github.com/Thorium-Sim/thorium-nova/commit/05c1485eadfab9571d2179eb4c63376063f39784))
+* Hide the menubar when kiosked on Windows. Closes [#441](https://github.com/Thorium-Sim/thorium-nova/issues/441) ([af99882](https://github.com/Thorium-Sim/thorium-nova/commit/af998827fead607418e40641777152b7340bdb29))
+* How To Guide TOC now scroll to headings properly. Closes [#456](https://github.com/Thorium-Sim/thorium-nova/issues/456) ([f6817e4](https://github.com/Thorium-Sim/thorium-nova/commit/f6817e4a9df8ac696178e679c68219c94b218903))
+* **How-to Guides:** Image support. ([18627eb](https://github.com/Thorium-Sim/thorium-nova/commit/18627eb4e004bd9f368cb9c7e971c86122136042))
+* Improve how client connections are handled. ([36931cb](https://github.com/Thorium-Sim/thorium-nova/commit/36931cbb2bfffdfbcb2fdf6d100585022686747e))
+* Improve the deck navigation. ([ac743f8](https://github.com/Thorium-Sim/thorium-nova/commit/ac743f88a83076e9da7f8a3766b5e8f3ed55fd36))
+* Improvements to the nebula renderer. Closes [#447](https://github.com/Thorium-Sim/thorium-nova/issues/447) ([2c2ee59](https://github.com/Thorium-Sim/thorium-nova/commit/2c2ee594927a6bcc15449d83ba7974d254336a1e))
+* Improvements to the release notes formatting and navigation. Closes [#443](https://github.com/Thorium-Sim/thorium-nova/issues/443) ([7c7b059](https://github.com/Thorium-Sim/thorium-nova/commit/7c7b059d01b809d6f1579840df7c2b853bd4990f))
+* Improves thrust autopilot behavior ([a0e6128](https://github.com/Thorium-Sim/thorium-nova/commit/a0e612866235d455a6511d103ec842f9d8b4a21a))
+* Improves thruster Autopilot ([1977b69](https://github.com/Thorium-Sim/thorium-nova/commit/1977b6992909b7fd5378be1fe4a39b3af56be88e))
+* **Navigation:** Move camera directly above when following ship ([8fcf72d](https://github.com/Thorium-Sim/thorium-nova/commit/8fcf72d01d8ef0eaa2cafca72e7e899769abee9a))
+* Remove the hidden event blocker on the Navigation screen. Closes [#458](https://github.com/Thorium-Sim/thorium-nova/issues/458) ([9d986e8](https://github.com/Thorium-Sim/thorium-nova/commit/9d986e8b911e89c9ce4d6fea3bd0b41866b5c97b))
+* Remove waypoints from the core starmap. ([70f7b82](https://github.com/Thorium-Sim/thorium-nova/commit/70f7b8216d2f5883d1bde61aac0943708b7dae70))
+* User experience improvements to starmaps ([0be5528](https://github.com/Thorium-Sim/thorium-nova/commit/0be5528c896793aa494b3d39a492903ca6ece709))
+
+
+### Features
+
+* Add a "Zoom to Object" button on the starmap editor. ([5940621](https://github.com/Thorium-Sim/thorium-nova/commit/59406210ed11943ade10dfb502b8d3dfac45fd14))
+* Add a brief getting started guide. ([7c1a800](https://github.com/Thorium-Sim/thorium-nova/commit/7c1a800a583cc7fe02f4db5808ae59b872b06a77))
+* **How-to Guide:** Add images to Getting Started ([bb1a9da](https://github.com/Thorium-Sim/thorium-nova/commit/bb1a9dab9f03bd882d47dd105ac11bfaf8075cfe))
+* Make the flight name configurable. Closes [#451](https://github.com/Thorium-Sim/thorium-nova/issues/451) ([3c09a7c](https://github.com/Thorium-Sim/thorium-nova/commit/3c09a7c6c2d110a78f2ad90ad688b241a6c16fe7))
+* **Navigation:** Adds a button for easily entering systems ([d8436c2](https://github.com/Thorium-Sim/thorium-nova/commit/d8436c250bd8e64942d173af5c59b2144947c74f))
+
 # [1.0.0-alpha.7](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.6...1.0.0-alpha.7) (2022-12-07)
 
 
