@@ -9,6 +9,7 @@ import Button from "@thorium/ui/Button";
 import useAnimationFrame from "@client/hooks/useAnimationFrame";
 import {useLiveQuery} from "@thorium/live-query/client";
 import {q} from "@client/context/AppContext";
+import {useGamepadValue} from "@client/hooks/useGamepadStore";
 
 const C_IN_METERS = 299792458;
 function formatSpeed(speed: KilometerPerSecond) {
@@ -94,6 +95,7 @@ const BUTTON_OFFSET = 0.8;
 export const ImpulseControls = ({cardLoaded = true}) => {
   const [{targetSpeed, cruisingSpeed, emergencySpeed}] =
     q.pilot.impulseEngines.get.useNetRequest();
+
   const [{warpFactorCount, currentWarpFactor}] =
     q.pilot.warpEngines.get.useNetRequest();
   const downRef = useRef(false);
@@ -166,6 +168,9 @@ export const ImpulseControls = ({cardLoaded = true}) => {
     cardLoaded,
   ]);
 
+  useGamepadValue("impulse-speed", value => {
+    const throttleValue = (value + 1) / 2;
+  });
   return (
     <div className="select-none flex-1">
       <div>

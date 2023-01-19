@@ -212,9 +212,9 @@ export const pilot = t.router({
         z.object({
           systemId: z.number().optional(),
           direction: z.object({
-            x: z.number(),
-            y: z.number(),
-            z: z.number(),
+            x: z.number().optional(),
+            y: z.number().optional(),
+            z: z.number().optional(),
           }),
         })
       )
@@ -226,7 +226,23 @@ export const pilot = t.router({
         if (!system.components.isThrusters)
           throw new Error("System is not thrusters");
 
-        system.updateComponent("isThrusters", {direction: input.direction});
+        const current = system.components.isThrusters.direction;
+        system.updateComponent("isThrusters", {
+          direction: {
+            x:
+              typeof input.direction.x === "number"
+                ? input.direction.x
+                : current.x,
+            y:
+              typeof input.direction.y === "number"
+                ? input.direction.y
+                : current.y,
+            z:
+              typeof input.direction.z === "number"
+                ? input.direction.z
+                : current.z,
+          },
+        });
 
         return system;
       }),
@@ -235,9 +251,9 @@ export const pilot = t.router({
         z.object({
           systemId: z.number().optional(),
           rotation: z.object({
-            x: z.number(),
-            y: z.number(),
-            z: z.number(),
+            x: z.number().optional(),
+            y: z.number().optional(),
+            z: z.number().optional(),
           }),
         })
       )
@@ -249,7 +265,23 @@ export const pilot = t.router({
         if (!system.components.isThrusters)
           throw new Error("System is not thrusters");
 
-        system.updateComponent("isThrusters", {rotationDelta: input.rotation});
+        const current = system.components.isThrusters.rotationDelta;
+        system.updateComponent("isThrusters", {
+          rotationDelta: {
+            x:
+              typeof input.rotation.x === "number"
+                ? input.rotation.x
+                : current.x,
+            y:
+              typeof input.rotation.y === "number"
+                ? input.rotation.y
+                : current.y,
+            z:
+              typeof input.rotation.z === "number"
+                ? input.rotation.z
+                : current.z,
+          },
+        });
 
         // TODO: September 21 2022 - Deactivate the ships autopilot when the thruster rotation change
         return system;
