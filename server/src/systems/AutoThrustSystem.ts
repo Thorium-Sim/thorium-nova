@@ -24,11 +24,11 @@ let matrix = new Matrix4();
 const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
 let desiredRotationQuat = new Quaternion();
 
-const IMPULSE_PROPORTION = 10;
-const IMPULSE_INTEGRAL = 0.1;
-const IMPULSE_DERIVATIVE = 25;
+const IMPULSE_PROPORTION = 1;
+const IMPULSE_DERIVATIVE = 0.5;
+const IMPULSE_INTEGRAL = 0.5;
 const WARP_PROPORTION = 1;
-const WARP_INTEGRAL = 0;
+const WARP_INTEGRAL = 0.5;
 const WARP_DERIVATIVE = 0.5;
 
 export class AutoThrustSystem extends System {
@@ -247,5 +247,5 @@ function getWarpFactorFromDesiredSpeed(
   const speedOutput =
     (desiredSpeed * (warpFactorCount - 1)) / (cruisingSpeed - minWarp) + 1;
 
-  return speedOutput;
+  return Math.max(1, speedOutput);
 }
