@@ -73,13 +73,13 @@ export const StarmapCoreContextMenu = ({
     reference(virtualEl);
   }, parentRef);
 
-  const cameraVerticalDistance = useStarmapStore(
-    store => store.cameraVerticalDistance
+  const cameraObjectDistance = useStarmapStore(
+    store => store.cameraObjectDistance
   );
   useEffect(() => {
     // If the camera zooms in or out, hide the context menu.
     setOpen(false);
-  }, [cameraVerticalDistance]);
+  }, [cameraObjectDistance]);
 
   if (!open) return null;
 

@@ -6,10 +6,10 @@ import {useEffect, useRef} from "react";
 import {SOLAR_SYSTEM_MAX_DISTANCE} from "@client/components/Starmap/SolarSystemMap";
 import {INTERSTELLAR_MAX_DISTANCE} from "@client/components/Starmap/InterstellarMap";
 import {lightYearToLightMinute} from "@server/utils/unitTypes";
+
 export function MapControls() {
   const useStarmapStore = useGetStarmapStore();
   const systemId = useStarmapStore(state => state.currentSystem);
-  const rendered = useRef(false);
   const [ship] = q.navigation.ship.useNetRequest();
 
   useEffect(() => {
@@ -55,13 +55,7 @@ export function MapControls() {
               ? lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)
               : SOLAR_SYSTEM_MAX_DISTANCE;
           if (ship.position) {
-            useStarmapStore
-              .getState()
-              .cameraControls?.current?.setPosition(
-                ship.position?.x,
-                y / 2,
-                ship.position?.z
-              );
+            useStarmapStore.getState().setCameraFocus(ship.position);
           }
         }}
       >
@@ -73,7 +67,7 @@ export function MapControls() {
 
 export const ZoomSliderComp = () => {
   const useStarmapStore = useGetStarmapStore();
-  const cameraZoom = useStarmapStore(store => store.cameraVerticalDistance);
+  const cameraZoom = useStarmapStore(store => store.cameraObjectDistance);
   const cameraControls = useStarmapStore(store => store.cameraControls);
   const maxDistance = cameraControls?.current?.maxDistance || 30000000000;
   const minDistance = cameraControls?.current?.minDistance || 10000;

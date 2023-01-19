@@ -122,9 +122,7 @@ export function Planet({
       labelRef.current.quaternion.copy(camera.quaternion);
     }
 
-    const distance = camera.position.distanceTo(
-      distanceVector.set(camera.position.x, 0, camera.position.z)
-    );
+    const distance = camera.position.distanceTo(position);
 
     if (planetSpriteRef.current && planetMeshRef.current) {
       if (

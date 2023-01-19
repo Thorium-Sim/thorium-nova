@@ -65,9 +65,16 @@ export function SolarSystemWrapper() {
                 onPointerOut={e => {
                   document.body.style.cursor = "auto";
                 }}
-                onClick={() =>
-                  useStarmapStore.setState({selectedObjectIds: [entity.id]})
-                }
+                onClick={() => {
+                  if (entity.components.satellite) {
+                    const position = getOrbitPosition(
+                      entity.components.satellite
+                    );
+                    useStarmapStore.getState().setCameraFocus(position);
+                  }
+
+                  useStarmapStore.setState({selectedObjectIds: [entity.id]});
+                }}
               >
                 <StarSprite size={size} color1={color} />
               </group>
@@ -93,9 +100,10 @@ export function SolarSystemWrapper() {
               satellites={satellites}
               inclination={inclination}
               radiusY={radiusY}
-              onClick={() =>
-                useStarmapStore.setState({selectedObjectIds: [entity.id]})
-              }
+              onClick={() => {
+                useStarmapStore.setState({selectedObjectIds: [entity.id]});
+                useStarmapStore.getState().setCameraFocus(position);
+              }}
             />
           );
         }
