@@ -12,25 +12,23 @@ export const client = t.router({
       return false;
     })
     .request(({ctx}) => {
-      const {
-        id,
-        name,
-        connected: connected,
-        isHost,
-      } = ctx.server.clients[ctx.id];
+      const {id, name, connected, isHost} = ctx.server.clients[ctx.id];
       const {officersLog, id: _id, ...flightClient} = ctx.flightClient || {};
       return {id, name, connected, isHost, ...flightClient};
     }),
   all: t.procedure.request(({ctx}) => {
     const serverClients = Object.values(ctx.server.clients);
     const flightClients = ctx.flight?.clients || {};
-    const clients = serverClients.map(client => {
-      const flightClient = flightClients[client.id];
-      return {
-        name: client.name,
-        ...flightClient?.toJSON(),
-      };
-    });
+    const clients = serverClients
+      .map(client => {
+        const flightClient = flightClients[client.id];
+        return {
+          name: client.name,
+          connected: client.connected,
+          ...flightClient?.toJSON(),
+        };
+      })
+      .filter(client => client.connected);
     return clients;
   }),
   setName: t.procedure

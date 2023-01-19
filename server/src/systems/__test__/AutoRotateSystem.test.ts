@@ -64,10 +64,10 @@ describe("AutoRotateSystem", () => {
 
     expect(ship.components.rotation).toMatchInlineSnapshot(`
       RotationComponent {
-        "w": 0.9238795325112867,
-        "x": -0.38268343236508984,
-        "y": 5.658202458516908e-17,
-        "z": -2.3406724141989947e-17,
+        "w": 0.9229762896655683,
+        "x": -0.384856815861667,
+        "y": 4.208942449290669e-16,
+        "z": 8.61779774125045e-16,
       }
     `);
   });

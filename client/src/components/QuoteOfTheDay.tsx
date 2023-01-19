@@ -242,6 +242,8 @@ const quotes = [
   "Hope is not the conviction that something will turn out well, but the certainty that something is worth doing no matter how it turns out.",
   // Pierre Coubertin
   "The important thing in life is not the triumph, but the struggle.",
+  // Sarah Williams
+  "Though my soul may set in darkness, it will rise in perfect light; I have loved the stars too fondly to be fearful of the night.",
 ];
 
 const QuoteOfTheDay = () => {

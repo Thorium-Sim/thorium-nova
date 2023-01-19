@@ -11,9 +11,9 @@ let up = new Vector3(0, 1, 0);
 let matrix = new Matrix4();
 const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
 
-const C_PROPORTION = 5;
-const C_INTEGRAL = 0;
-const C_DERIVATIVE = 1;
+const C_PROPORTION = 1;
+const C_INTEGRAL = 0.5;
+const C_DERIVATIVE = 0.5;
 
 const getYawPitchRoll = (quat: Quaternion) => {
   const yaw =

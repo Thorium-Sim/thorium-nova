@@ -10,10 +10,14 @@ lets get started.
 
 ## Starting A Flight
 
+![Getting Started](intro.jpeg)
+
 On the main page, click "Start Flight" to start a flight. There are three things
 you need to configure for starting a flight.
 
 ### Crew Selection
+
+![Crew Selection](crew.jpeg)
 
 First, choose the number of players who will be playing on the bridge.
 
@@ -29,17 +33,23 @@ unchecked.
 
 ### Ship Selection
 
+![Ship Selection](ship.jpeg)
+
 Next, choose the ship you want to fly with. The ship you choose will affect
 which missions will be available to you, based on the capabilities of the ship.
 This is also where you'll name your ship.
 
 ### Mission Selection
 
+![Mission Selection](mission.jpeg)
+
 Finally, choose the mission that you'll play. Each mission has different
 storylines and characters. If you want to free-play, you can choose a starting
 location for your ship instead.
 
 ## Station Assignment
+
+![Station Selection](station.jpeg)
 
 Once the flight has started, you'll be taken to the flight lobby. In the
 top-left you'll be able to end, reset, and pause/resume the flight. You'll want
@@ -48,6 +58,8 @@ to make sure you resume the flight before the flight actually begins.
 The game host can assign any client to any station, while each client can only
 choose the station for themselves. Once a client is assigned to a station
 (including the host), they'll immediately be taken to the station view.
+
+![Pilot](pilot.jpeg)
 
 ### Leaving Station Views
 

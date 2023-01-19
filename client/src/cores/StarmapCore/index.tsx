@@ -316,6 +316,7 @@ export function SolarSystemWrapper() {
 
   const selectedObjectIds = useStarmapStore(store => store.selectedObjectIds);
   const planetsHidden = useStarmapStore(store => store.planetsHidden);
+  const isCore = useStarmapStore(store => store.viewingMode === "core");
 
   const {interpolate} = useLiveQuery();
   return (
@@ -369,9 +370,11 @@ export function SolarSystemWrapper() {
 
         return null;
       })}
-      {waypoints.map(waypoint => (
-        <WaypointEntity key={waypoint.id} waypoint={waypoint} viewscreen />
-      ))}
+      {isCore
+        ? null
+        : waypoints.map(waypoint => (
+            <WaypointEntity key={waypoint.id} waypoint={waypoint} viewscreen />
+          ))}
       {starmapShips.map(ship => (
         <Suspense key={ship.id} fallback={null}>
           <ErrorBoundary
