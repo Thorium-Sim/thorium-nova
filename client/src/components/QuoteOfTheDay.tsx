@@ -249,7 +249,7 @@ const quotes = [
 const QuoteOfTheDay = () => {
   const quote = useRef(quotes[Math.floor(Math.random() * quotes.length)]);
   return (
-    <h5 className="text-lg px-2 fixed bottom-0 right-0 text-white text-opacity-60">
+    <h5 className="text-lg px-2 fixed bottom-0 right-0 text-white text-opacity-60 max-w-prose">
       {quote.current}
     </h5>
   );

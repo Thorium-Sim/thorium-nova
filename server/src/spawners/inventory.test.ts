@@ -103,7 +103,10 @@ describe("Inventory Generator", () => {
         Object {
           "components": Object {
             "cargoContainer": CargoContainer {
-              "contents": Object {},
+              "contents": Object {
+                "Test torpedoCasing Cargo": 7,
+                "Test torpedoWarhead Cargo": 1,
+              },
               "volume": 100,
             },
             "isRoom": IsRoomComponent {
@@ -118,8 +121,7 @@ describe("Inventory Generator", () => {
           "components": Object {
             "cargoContainer": CargoContainer {
               "contents": Object {
-                "Test torpedoCasing Cargo": 15,
-                "Test torpedoWarhead Cargo": 16,
+                "Test torpedoCasing Cargo": 8,
               },
               "volume": 100,
             },
@@ -200,18 +202,15 @@ describe("Inventory Generator", () => {
           "components": Object {
             "cargoContainer": CargoContainer {
               "contents": Object {
-                "Test Random Cargo": 2,
-                "Test coolant Cargo": 4,
-                "Test forCrew Cargo": 5,
-                "Test fuel Cargo": 2,
+                "Test forCrew Cargo": 1,
                 "Test medical Cargo": 4,
                 "Test probeCasing Cargo": 17,
-                "Test probeEquipment Cargo": 18,
+                "Test probeEquipment Cargo": 11,
                 "Test repair Cargo": 7,
                 "Test science Cargo": 7,
                 "Test security Cargo": 5,
                 "Test sparePart Cargo": 13,
-                "Test torpedoWarhead Cargo": 1,
+                "Test torpedoWarhead Cargo": 16,
               },
               "volume": 1000,
             },
@@ -267,13 +266,10 @@ describe("Inventory Generator", () => {
           "components": Object {
             "cargoContainer": CargoContainer {
               "contents": Object {
-                "Test Random Cargo": 2,
-                "Test coolant Cargo": 3,
-                "Test forCrew Cargo": 4,
-                "Test fuel Cargo": 2,
+                "Test forCrew Cargo": 2,
                 "Test medical Cargo": 6,
                 "Test probeCasing Cargo": 12,
-                "Test probeEquipment Cargo": 13,
+                "Test probeEquipment Cargo": 9,
                 "Test repair Cargo": 8,
                 "Test science Cargo": 5,
                 "Test security Cargo": 7,
