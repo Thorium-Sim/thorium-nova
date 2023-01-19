@@ -2,7 +2,7 @@ import {defineConfig} from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import react from "@vitejs/plugin-react";
 import releasesPlugin from "./vite-plugins/releases";
-import mdPlugin, {Mode} from "vite-plugin-markdown";
+import mdPlugin from "./vite-plugins/markdown";
 import {setDefaultResultOrder} from "dns";
 setDefaultResultOrder("ipv4first");
 
@@ -20,15 +20,7 @@ export default defineConfig(async () => {
     }),
   });
   return {
-    plugins: [
-      tsconfigPaths(),
-      react(),
-      releasesPlugin(),
-      mdPlugin({
-        mode: [Mode.HTML, Mode.TOC],
-        markdownIt: md,
-      }),
-    ],
+    plugins: [tsconfigPaths(), react(), releasesPlugin(), mdPlugin()],
     build: {
       outDir: "../dist/public",
       emptyOutDir: false,
