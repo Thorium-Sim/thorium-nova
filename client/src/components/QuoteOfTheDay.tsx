@@ -244,6 +244,8 @@ const quotes = [
   "The important thing in life is not the triumph, but the struggle.",
   // Sarah Williams
   "Though my soul may set in darkness, it will rise in perfect light; I have loved the stars too fondly to be fearful of the night.",
+  // Ozymandias
+  "Look on my works, ye Mighty, and despair!"
 ];
 
 const QuoteOfTheDay = () => {
