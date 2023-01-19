@@ -1,10 +1,12 @@
-import SolarSystemPlugin from "server/src/classes/Plugins/Universe/SolarSystem";
-import {createMockDataContext} from "server/src/utils/createMockDataContext";
-import {starPluginInputs} from "./stars";
+import {
+  createMockDataContext,
+  createMockRouter,
+} from "@server/utils/createMockDataContext";
 
 describe("solar system star plugin input", () => {
   it("should create a new star in the solar system", async () => {
     const mockDataContext = createMockDataContext();
+    const router = createMockRouter(mockDataContext);
     mockDataContext.server.plugins[0].aspects.solarSystems.push({
       name: "Test System",
       stars: [],
@@ -12,7 +14,7 @@ describe("solar system star plugin input", () => {
     } as any);
 
     const system = mockDataContext.server.plugins[0].aspects.solarSystems[0];
-    const star = starPluginInputs.pluginStarCreate(mockDataContext, {
+    const star = await router.plugin.starmap.star.create({
       pluginId: "Test Plugin",
       solarSystemId: system.name,
       spectralType: "G",
@@ -26,6 +28,7 @@ describe("solar system star plugin input", () => {
   });
   it("should adjust the orbital positions when there are two stars in the system", async () => {
     const mockDataContext = createMockDataContext();
+    const router = createMockRouter(mockDataContext);
     mockDataContext.server.plugins[0].aspects.solarSystems.push({
       name: "Test System",
       stars: [],
@@ -33,14 +36,14 @@ describe("solar system star plugin input", () => {
     } as any);
 
     const system = mockDataContext.server.plugins[0].aspects.solarSystems[0];
-    const star = starPluginInputs.pluginStarCreate(mockDataContext, {
+    const star = await router.plugin.starmap.star.create({
       pluginId: "Test Plugin",
       solarSystemId: system.name,
       spectralType: "G",
     });
 
     const {orbitalArc, semiMajorAxis} = star.satellite;
-    const star2 = starPluginInputs.pluginStarCreate(mockDataContext, {
+    const star2 = await router.plugin.starmap.star.create({
       pluginId: "Test Plugin",
       solarSystemId: system.name,
       spectralType: "O",
@@ -53,8 +56,9 @@ describe("solar system star plugin input", () => {
     expect(star.satellite.semiMajorAxis).toEqual(star2.satellite.semiMajorAxis);
     expect(star.satellite.semiMajorAxis).toBeGreaterThan(0);
   });
-  it("should delete a system that has been created", () => {
+  it("should delete a system that has been created", async () => {
     const mockDataContext = createMockDataContext();
+    const router = createMockRouter(mockDataContext);
     mockDataContext.server.plugins[0].aspects.solarSystems.push({
       name: "Test System",
       stars: [],
@@ -62,7 +66,7 @@ describe("solar system star plugin input", () => {
     } as any);
 
     const system = mockDataContext.server.plugins[0].aspects.solarSystems[0];
-    const star = starPluginInputs.pluginStarCreate(mockDataContext, {
+    const star = await router.plugin.starmap.star.create({
       pluginId: "Test Plugin",
       solarSystemId: system.name,
       spectralType: "G",
@@ -70,7 +74,7 @@ describe("solar system star plugin input", () => {
 
     expect(system.stars.length).toBe(1);
 
-    starPluginInputs.pluginStarDelete(mockDataContext, {
+    await router.plugin.starmap.star.delete({
       pluginId: "Test Plugin",
       solarSystemId: system.name,
       starId: star.name,
@@ -78,8 +82,9 @@ describe("solar system star plugin input", () => {
 
     expect(system.stars.length).toBe(0);
   });
-  it("should update properties of a star", () => {
+  it("should update properties of a star", async () => {
     const mockDataContext = createMockDataContext();
+    const router = createMockRouter(mockDataContext);
     mockDataContext.server.plugins[0].aspects.solarSystems.push({
       name: "Test System",
       stars: [],
@@ -87,7 +92,7 @@ describe("solar system star plugin input", () => {
     } as any);
 
     const system = mockDataContext.server.plugins[0].aspects.solarSystems[0];
-    const star = starPluginInputs.pluginStarCreate(mockDataContext, {
+    const star = await router.plugin.starmap.star.create({
       pluginId: "Test Plugin",
       solarSystemId: system.name,
       spectralType: "G",
@@ -96,7 +101,7 @@ describe("solar system star plugin input", () => {
     expect(system.stars.length).toBe(1);
     expect(star.spectralType).toBe("G");
 
-    starPluginInputs.pluginStarUpdate(mockDataContext, {
+    await router.plugin.starmap.star.update({
       pluginId: "Test Plugin",
       solarSystemId: system.name,
       starId: star.name,

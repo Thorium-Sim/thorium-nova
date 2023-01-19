@@ -1,4 +1,5 @@
-import {useConfirm, usePrompt} from "@thorium/ui/AlertDialog";
+import {q} from "@client/context/AppContext";
+import {useConfirm} from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import {
   Navigate,
@@ -7,17 +8,15 @@ import {
   useParams,
   useNavigate,
 } from "react-router-dom";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {SettingsList} from "./SettingsList";
-import {netSend} from "client/src/context/netSend";
 
 export const ShipLayout = () => {
   const {pathname} = useLocation();
   const {shipId, pluginId} = useParams() as {shipId: string; pluginId: string};
   const navigate = useNavigate();
   const confirm = useConfirm();
-  const data = useNetRequest("pluginShip", {pluginId, shipId});
-  if (!shipId || !data) return <Navigate to={`/config/${pluginId}/ships`} />;
+  const [ship] = q.plugin.ship.get.useNetRequest({pluginId, shipId});
+  if (!shipId || !ship) return <Navigate to={`/config/${pluginId}/ships`} />;
   if (!pathname.endsWith(shipId)) {
     return (
       <>
@@ -35,7 +34,7 @@ export const ShipLayout = () => {
                 }))
               )
                 return;
-              netSend("pluginShipDelete", {pluginId, shipId});
+              q.plugin.ship.delete.netSend({pluginId, shipId});
               navigate(`/config/${pluginId}/ships`);
             }}
           >

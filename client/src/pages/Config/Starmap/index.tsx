@@ -19,12 +19,11 @@ import {InterstellarPalette} from "client/src/components/Starmap/InterstellarMap
 import {SolarSystemPalette} from "client/src/components/Starmap/SolarSystemMap";
 import Nebula from "client/src/components/Starmap/Nebula";
 import SystemMarker from "client/src/components/Starmap/SystemMarker";
-import {useNetRequest} from "client/src/context/useNetRequest";
-import {netSend} from "client/src/context/netSend";
 import StarmapCanvas from "client/src/components/Starmap/StarmapCanvas";
 import {useSystemIds} from "client/src/components/Starmap/useSystemIds";
 import {Planet} from "client/src/components/Starmap/Planet";
 import StarEntity from "client/src/components/Starmap/Star";
+import {q} from "@client/context/AppContext";
 
 function useSystemId() {
   const match = useMatch("/config/:pluginId/starmap/:systemId");
@@ -45,7 +44,7 @@ function InterstellarPaletteWrapper() {
 
   const selectedObjectIds = useStarmapStore(s => s.selectedObjectIds);
 
-  const stars = useNetRequest("pluginSolarSystems", {pluginId});
+  const [stars] = q.plugin.starmap.all.useNetRequest({pluginId});
 
   const selectedStar = stars.find(s => selectedObjectIds?.includes(s.name));
 
@@ -57,7 +56,7 @@ function InterstellarPaletteWrapper() {
         typeof selectedObjectIds[0] === "number"
       )
         return;
-      const result = await netSend("pluginSolarSystemUpdate", {
+      const result = await q.plugin.starmap.solarSystem.update.netSend({
         pluginId,
         solarSystemId: selectedObjectIds[0],
         ...params,
@@ -98,12 +97,16 @@ export default function StarMap() {
         isOpen={selectedObjectIds.length > 0}
         onClose={() => useStarmapStore.setState({selectedObjectIds: []})}
       >
-        {systemId ? <SolarSystemPalette /> : <InterstellarPaletteWrapper />}
+        <React.Suspense fallback={null}>
+          {systemId ? <SolarSystemPalette /> : <InterstellarPaletteWrapper />}
+        </React.Suspense>
       </EditorPalette>
       <div className="h-[calc(100%-2rem)]  relative bg-black">
-        <StarmapCanvas>
-          <StarmapScene ref={sceneRef} />
-        </StarmapCanvas>
+        <React.Suspense fallback={null}>
+          <StarmapCanvas>
+            <StarmapScene ref={sceneRef} />
+          </StarmapCanvas>
+        </React.Suspense>
 
         <StatusBar />
       </div>
@@ -154,7 +157,7 @@ function InterstellarWrapper() {
     pluginId: string;
   };
 
-  const stars = useNetRequest("pluginSolarSystems", {pluginId});
+  const [stars] = q.plugin.starmap.all.useNetRequest({pluginId});
   return (
     <InterstellarMap>
       {stars.map(star => (
@@ -172,7 +175,7 @@ function InterstellarWrapper() {
 
 function SolarSystemWrapper() {
   const [pluginId, solarSystemId] = useSystemIds();
-  const systemData = useNetRequest("pluginSolarSystem", {
+  const [systemData] = q.plugin.starmap.get.useNetRequest({
     pluginId,
     solarSystemId,
   });

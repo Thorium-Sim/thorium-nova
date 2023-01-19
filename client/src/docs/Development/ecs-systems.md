@@ -15,34 +15,58 @@ The intention is to extend any of the several abstract methods provided by the
 `System` class. These include `test`, `preUpdate`, `update`, `postUpdate`,
 `enter`, and `exit`.
 
-## `test(entity:Entity):boolean`
+---
+
+```
+test(entity:Entity):boolean
+```
 
 This is called whenever a system is added to the ECS world, whenever an entity
 is added, or whenever a component is added or removed from an entity. It should
 return `true` if the system should operate on the entity and `false` if it
 should not.
 
-## `preUpdate(elapsed:number)`
+---
+
+```
+preUpdate(elapsed:number)
+```
 
 Called once every update before any entities are updated. It is passed the
 amount of time that elapsed since the last update.
 
-## `update(entity:Entity, elapsed:number)`
+---
+
+```
+update(entity:Entity, elapsed:number)
+```
 
 Called for every entity associated with this system. This is where the bulk of
 the logic should be. Any mutations to entities should happen here.
 
-## `postUpdate(elapsed:number)`
+---
+
+```
+postUpdate(elapsed:number)
+```
 
 Called once every update after all of the entities have been updated. It is
 passed the amount of time that elapsed since the last update. This is where any
 `pubsub.publish` calls should be placed.
 
-## `enter(entity:Entity)`
+---
+
+```
+enter(entity:Entity)
+```
 
 Called whenever an entity is added to the system.
 
-## `exit(entity:Entity)`
+---
+
+```
+exit(entity:Entity)
+```
 
 Called whenever an entity is removed from the system.
 

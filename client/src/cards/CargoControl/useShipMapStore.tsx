@@ -1,4 +1,4 @@
-import create from "zustand";
+import {create} from "zustand";
 
 export const useShipMapStore = create<{
   selectedRoomId: number | null;

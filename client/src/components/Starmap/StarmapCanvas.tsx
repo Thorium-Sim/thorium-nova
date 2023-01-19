@@ -9,9 +9,9 @@ import {Canvas, Props} from "@react-three/fiber";
 import {useContextBridge} from "@react-three/drei";
 
 import {useQueryClient, QueryClientProvider} from "@tanstack/react-query";
-import {ThoriumContext} from "client/src/context/ThoriumContext";
 import {StarmapStoreContext, useGetStarmapStore} from "./starmapStore";
 import {useTranslate2DTo3D} from "client/src/hooks/useTranslate2DTo3D";
+import {LiveQueryContext} from "@thorium/live-query/client/liveQueryContext";
 
 const FAR = 1e27;
 
@@ -20,7 +20,7 @@ function StarmapEffects() {
   const useStarmapStore = useGetStarmapStore();
   useEffect(() => {
     useStarmapStore.setState({translate2DTo3D: to3D});
-  }, [to3D]);
+  }, [to3D, useStarmapStore]);
   return null;
 }
 
@@ -39,7 +39,7 @@ export default function StarmapCanvas({
   const client = useQueryClient();
 
   const ContextBridge = useContextBridge(
-    ThoriumContext,
+    LiveQueryContext,
     UNSAFE_LocationContext,
     UNSAFE_NavigationContext,
     UNSAFE_RouteContext,

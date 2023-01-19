@@ -1,6 +1,5 @@
-import {useContext, useMemo, useRef} from "react";
+import {useMemo, useRef} from "react";
 import {Suspense} from "react";
-import {Entity} from "server/src/utils/ecs";
 import {Line, useGLTF} from "@react-three/drei";
 import {
   CanvasTexture,
@@ -13,11 +12,11 @@ import {
   Sprite,
 } from "three";
 import {useFrame} from "@react-three/fiber";
-import {ThoriumContext} from "client/src/context/ThoriumContext";
 import {createAsset} from "use-asset";
 import {useGetStarmapStore} from "./starmapStore";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {Line2} from "three-stdlib";
+import {q} from "@client/context/AppContext";
+import {useLiveQuery} from "@thorium/live-query/client";
 
 export function StarmapShip({
   id,
@@ -38,25 +37,26 @@ export function StarmapShip({
 
   const systemId = useStarmapStore(store => store.currentSystem);
 
-  const autopilotData = useNetRequest("systemAutopilot", {systemId});
+  const [autopilotData] = q.starmapCore.autopilot.useNetRequest({systemId});
 
   const shipAutopilot = autopilotData[id];
 
-  const player = useNetRequest("pilotPlayerShip");
+  const [player] = q.ship.player.useNetRequest();
   const playerId = player?.id;
 
   const isNotViewscreen = useStarmapStore(
     store => store.viewingMode !== "viewscreen"
   );
+  const isCore = useStarmapStore(store => store.viewingMode === "core");
 
   const group = useRef<Group>(null);
   const shipMesh = useRef<Group>(null);
   const shipSprite = useRef<Group>(null);
-  const context = useContext(ThoriumContext);
+  const {interpolate} = useLiveQuery();
   const lineRef = useRef<Line2>(null);
   useFrame(() => {
     if (!group.current) return;
-    const state = context?.interpolate(id);
+    const state = interpolate(id);
     if (!state) {
       group.current.visible = false;
       return;
@@ -80,6 +80,7 @@ export function StarmapShip({
     // Autopilot Destination
     if (lineRef.current && group.current) {
       if (
+        isCore &&
         // TODO September 14, 2022 - Make it so you can toggle autopilot lines on and off
         // useConfigStore.getState().includeAutopilotData &&
         shipAutopilot?.destinationPosition
@@ -100,7 +101,7 @@ export function StarmapShip({
         lineRef.current.geometry.attributes.position.needsUpdate = true;
         lineRef.current.visible = true;
       } else {
-        // lineRef.current.visible = false;
+        lineRef.current.visible = false;
       }
     }
   });

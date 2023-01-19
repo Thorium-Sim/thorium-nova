@@ -1,39 +1,36 @@
 import {
-  decksPluginInputs,
-  shipsPluginInputs,
-  shipSystemsPluginInput,
-} from "../inputs/list";
-import {createMockDataContext} from "../utils/createMockDataContext";
+  createMockDataContext,
+  createMockRouter,
+} from "../utils/createMockDataContext";
 import {spawnShip} from "./ship";
 describe("Ship Spawner", () => {
   it("should spawn a ship from a template", async () => {
     const dataContext = createMockDataContext();
-    const shipSystem = await shipSystemsPluginInput.pluginShipSystemCreate(
-      dataContext,
-      {
-        pluginId: "Test Plugin",
-        name: "Generic System",
-        type: "generic",
-      }
-    );
-    const createdShip = shipsPluginInputs.pluginShipCreate(dataContext, {
+    const router = createMockRouter(dataContext);
+
+    const shipSystem = await router.plugin.systems.create({
+      pluginId: "Test Plugin",
+      name: "Generic System",
+      type: "generic",
+    });
+    const createdShip = await router.plugin.ship.create({
       pluginId: "Test Plugin",
       name: "Test Ship",
     });
 
-    const shipDeck = decksPluginInputs.pluginShipDeckCreate(dataContext, {
+    const shipDeck = await router.plugin.ship.deck.create({
       pluginId: "Test Plugin",
       shipId: "Test Ship",
     });
 
-    const {id} = decksPluginInputs.pluginShipDeckAddNode(dataContext, {
+    const {id} = await router.plugin.ship.deck.addNode({
       pluginId: "Test Plugin",
       shipId: "Test Ship",
       deckId: "Deck 1",
       x: 50,
       y: 50,
     });
-    decksPluginInputs.pluginShipDeckUpdateNode(dataContext, {
+    await router.plugin.ship.deck.updateNode({
       deckId: "Deck 1",
       shipId: "Test Ship",
       pluginId: "Test Plugin",
@@ -42,7 +39,7 @@ describe("Ship Spawner", () => {
       flags: ["cargo"],
     });
 
-    shipsPluginInputs.pluginShipToggleSystem(dataContext, {
+    await router.plugin.ship.toggleSystem({
       pluginId: "Test Plugin",
       shipId: createdShip.shipId,
       systemPlugin: "Test Plugin",

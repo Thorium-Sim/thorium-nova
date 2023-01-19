@@ -1,6 +1,5 @@
 import * as React from "react";
 import {ReactNode, StrictMode, Suspense} from "react";
-import {ThoriumProvider} from "./ThoriumContext";
 import {AlertDialog} from "@thorium/ui/AlertDialog";
 import useEasterEgg from "../hooks/useEasterEgg";
 import {ErrorBoundary, FallbackProps} from "react-error-boundary";
@@ -8,7 +7,13 @@ import bg from "../images/background.jpg";
 import ToastContainer from "./ToastContext";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 import {IssueTrackerProvider} from "../components/IssueTracker";
-import {useRequestSub} from "./useRequestSub";
+import {getTabId} from "@thorium/tab-id";
+import {
+  createLiveQueryReact,
+  LiveQueryProvider,
+} from "@thorium/live-query/client";
+import {AppRouter} from "@server/init/router";
+import {ThoriumAccountContextProvider} from "./ThoriumAccountContext";
 
 const Fallback: React.FC<FallbackProps> = ({error}) => {
   return (
@@ -38,6 +43,11 @@ url(${bg})`,
     </div>
   );
 };
+
+async function getRequestContext() {
+  return {id: await getTabId()};
+}
+
 /**
  * A component to contain all of the context and wrapper components for the app.
  */
@@ -48,17 +58,18 @@ export default function AppContext({children}: {children: ReactNode}) {
       <Layout>
         <ErrorBoundary FallbackComponent={Fallback}>
           <Suspense fallback={<LoadingSpinner />}>
-            <ThoriumProvider>
+            <LiveQueryProvider getRequestContext={getRequestContext}>
               <ErrorBoundary FallbackComponent={Fallback}>
                 <Suspense fallback={<LoadingSpinner />}>
-                  <Preload />
-                  <AlertDialog>
-                    <IssueTrackerProvider>{children}</IssueTrackerProvider>
-                    <ToastContainer />
-                  </AlertDialog>
+                  <ThoriumAccountContextProvider>
+                    <AlertDialog>
+                      <IssueTrackerProvider>{children}</IssueTrackerProvider>
+                      <ToastContainer />
+                    </AlertDialog>
+                  </ThoriumAccountContextProvider>
                 </Suspense>
               </ErrorBoundary>
-            </ThoriumProvider>
+            </LiveQueryProvider>
           </Suspense>
         </ErrorBoundary>
       </Layout>
@@ -66,10 +77,8 @@ export default function AppContext({children}: {children: ReactNode}) {
   );
 }
 
-function Preload() {
-  useRequestSub({requestName: "flight"});
-  useRequestSub({requestName: "client"});
-  useRequestSub({requestName: "thorium"});
-
-  return null;
-}
+export const q = createLiveQueryReact<AppRouter>({
+  headers: async () => ({
+    "client-id": await getTabId(),
+  }),
+});

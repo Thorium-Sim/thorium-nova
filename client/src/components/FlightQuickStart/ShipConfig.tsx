@@ -1,12 +1,12 @@
+import {q} from "@client/context/AppContext";
 import Input from "@thorium/ui/Input";
 import SearchableList from "@thorium/ui/SearchableList";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import * as React from "react";
 import {useFlightQuickStart} from "./FlightQuickStartContext";
 const ShipConfig = () => {
   const [state, dispatch] = useFlightQuickStart();
 
-  const pluginShips = useNetRequest("availableShips");
+  const [pluginShips] = q.plugin.ship.available.useNetRequest();
   // Clear the shipId if the ship isn't present in the selected plugins.
   React.useEffect(() => {
     if (!pluginShips) return;

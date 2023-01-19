@@ -1,11 +1,11 @@
 import {autoPlacement, useFloating} from "@floating-ui/react-dom-interactions";
 import {Portal} from "@headlessui/react";
-import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
-import {netSend} from "client/src/context/netSend";
-import {toast} from "client/src/context/ToastContext";
-import useEventListener from "client/src/hooks/useEventListener";
-import {useRightClick} from "client/src/hooks/useRightClick";
+import {useGetStarmapStore} from "@client/components/Starmap/starmapStore";
+import {toast} from "@client/context/ToastContext";
+import useEventListener from "@client/hooks/useEventListener";
+import {useRightClick} from "@client/hooks/useRightClick";
 import {useEffect, RefObject, useState} from "react";
+import {q} from "@client/context/AppContext";
 
 function makeVirtualEl({x: X, y: Y}: {x: number; y: number}) {
   const virtualEl = {
@@ -54,7 +54,7 @@ export const StarmapCoreContextMenu = ({
         .getState()
         .translate2DTo3D?.(e.clientX, e.clientY);
       if (!position) return;
-      netSend("shipsSetDestinations", {
+      q.starmapCore.setDestinations.netSend({
         ships: selectedShips.map((id: any) => ({
           id,
           position: {
@@ -73,13 +73,13 @@ export const StarmapCoreContextMenu = ({
     reference(virtualEl);
   }, parentRef);
 
-  const cameraVerticalDistance = useStarmapStore(
-    store => store.cameraVerticalDistance
+  const cameraObjectDistance = useStarmapStore(
+    store => store.cameraObjectDistance
   );
   useEffect(() => {
     // If the camera zooms in or out, hide the context menu.
     setOpen(false);
-  }, [cameraVerticalDistance]);
+  }, [cameraObjectDistance]);
 
   if (!open) return null;
 
@@ -113,7 +113,7 @@ export const StarmapCoreContextMenu = ({
             const position = useStarmapStore.getState().translate2DTo3D?.(x, y);
             if (!position) return;
 
-            await netSend("shipSpawn", {
+            await q.ship.spawn.netSend({
               systemId: useStarmapStore.getState().currentSystem,
               template: {id: template.id, pluginName: template.pluginName},
               position: {

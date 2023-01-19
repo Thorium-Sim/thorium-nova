@@ -1,22 +1,22 @@
-import {solarSystemsPluginInputs} from "./solarSystems";
 import {promises as fs} from "fs";
-import {createMockDataContext} from "server/src/utils/createMockDataContext";
+import {
+  createMockDataContext,
+  createMockRouter,
+} from "@server/utils/createMockDataContext";
 
 describe("solar system plugin input", () => {
   it("should create a new solar system", async () => {
     const mockDataContext = createMockDataContext();
+    const router = createMockRouter(mockDataContext);
 
-    const solarSystem = solarSystemsPluginInputs.pluginSolarSystemCreate(
-      mockDataContext,
-      {
-        pluginId: "Test Plugin",
-        position: {
-          x: 100,
-          y: 200,
-          z: 300,
-        },
-      }
-    );
+    const solarSystem = await router.plugin.starmap.solarSystem.create({
+      pluginId: "Test Plugin",
+      position: {
+        x: 100,
+        y: 200,
+        z: 300,
+      },
+    });
     expect(solarSystem.solarSystemId).toBeDefined();
     expect(mockDataContext.server.plugins[0].aspects.solarSystems.length).toBe(
       1
@@ -28,22 +28,21 @@ describe("solar system plugin input", () => {
   });
   it("should edit a solar system", async () => {
     const mockDataContext = createMockDataContext();
-    const solarSystem = solarSystemsPluginInputs.pluginSolarSystemCreate(
-      mockDataContext,
-      {
-        pluginId: "Test Plugin",
-        position: {
-          x: 100,
-          y: 200,
-          z: 300,
-        },
-      }
-    );
+    const router = createMockRouter(mockDataContext);
+
+    const solarSystem = await router.plugin.starmap.solarSystem.create({
+      pluginId: "Test Plugin",
+      position: {
+        x: 100,
+        y: 200,
+        z: 300,
+      },
+    });
     const solarSystem2 =
       mockDataContext.server.plugins[0].aspects.solarSystems[0];
     expect(solarSystem2.position).toEqual({x: 100, y: 200, z: 300});
 
-    solarSystemsPluginInputs.pluginSolarSystemUpdate(mockDataContext, {
+    await router.plugin.starmap.solarSystem.update({
       pluginId: "Test Plugin",
       solarSystemId: solarSystem.solarSystemId,
       position: {
@@ -56,21 +55,20 @@ describe("solar system plugin input", () => {
   });
   it("should delete a solar system", async () => {
     const mockDataContext = createMockDataContext();
-    const solarSystem = solarSystemsPluginInputs.pluginSolarSystemCreate(
-      mockDataContext,
-      {
-        pluginId: "Test Plugin",
-        position: {
-          x: 100,
-          y: 200,
-          z: 300,
-        },
-      }
-    );
+    const router = createMockRouter(mockDataContext);
+
+    const solarSystem = await router.plugin.starmap.solarSystem.create({
+      pluginId: "Test Plugin",
+      position: {
+        x: 100,
+        y: 200,
+        z: 300,
+      },
+    });
     expect(mockDataContext.server.plugins[0].aspects.solarSystems.length).toBe(
       1
     );
-    await solarSystemsPluginInputs.pluginSolarSystemDelete(mockDataContext, {
+    await router.plugin.starmap.solarSystem.delete({
       pluginId: "Test Plugin",
       solarSystemId: solarSystem.solarSystemId,
     });

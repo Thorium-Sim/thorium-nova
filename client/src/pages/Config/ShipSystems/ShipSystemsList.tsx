@@ -2,14 +2,13 @@ import {usePrompt} from "@thorium/ui/AlertDialog";
 import Menubar from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
 import {Outlet, useParams, useNavigate} from "react-router-dom";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {Fragment} from "react";
-import {netSend} from "client/src/context/netSend";
 import {toast} from "client/src/context/ToastContext";
 import Dropdown, {DropdownItem} from "@thorium/ui/Dropdown";
 import {HiChevronDown} from "react-icons/hi";
 import {Menu} from "@headlessui/react";
 import {capitalCase} from "change-case";
+import {q} from "@client/context/AppContext";
 
 export function ShipSystemsList() {
   const {pluginId, systemId} = useParams() as {
@@ -18,8 +17,8 @@ export function ShipSystemsList() {
   };
   const navigate = useNavigate();
   const prompt = usePrompt();
-  const data = useNetRequest("pluginShipSystems", {pluginId});
-  const availableShipSystems = useNetRequest("availableShipSystems");
+  const [data] = q.plugin.systems.all.useNetRequest({pluginId});
+  const [availableShipSystems] = q.plugin.systems.available.useNetRequest();
   const system = data.find(d => d.name === systemId);
   return (
     <div className="h-full">
@@ -47,7 +46,7 @@ export function ShipSystemsList() {
                     });
                     if (typeof name !== "string") return;
                     try {
-                      const result = await netSend("pluginShipSystemCreate", {
+                      const result = await q.plugin.systems.create.netSend({
                         name,
                         type: system.type,
                         pluginId,

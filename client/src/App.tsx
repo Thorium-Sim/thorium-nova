@@ -1,6 +1,6 @@
 import {Routes, Route, Outlet, BrowserRouter as Router} from "react-router-dom";
-import {lazy, Suspense, useEffect} from "react";
-import AppContext from "./context/AppContext";
+import {lazy, Suspense} from "react";
+import AppContext, {q} from "./context/AppContext";
 
 import QuoteOfTheDay from "./components/QuoteOfTheDay";
 import Credits from "./components/Credits";
@@ -8,7 +8,6 @@ import {WelcomeLogo} from "./components/WelcomeLogo";
 import {WelcomeButtons} from "./components/WelcomeButtons";
 import {FaCamera} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
-import {netSend} from "./context/netSend";
 import LoginButton from "./components/LoginButton";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 import QuickStartProvider from "./components/FlightQuickStart/FlightQuickStartContext";
@@ -16,7 +15,6 @@ import FlightQuickStart from "./components/FlightQuickStart";
 import CrewConfig from "./components/FlightQuickStart/CrewConfig";
 import ShipConfig from "./components/FlightQuickStart/ShipConfig";
 import MissionConfig from "./components/FlightQuickStart/MissionConfig";
-import {netRequest} from "./context/useNetRequest";
 import {ComponentDemo} from "./cards";
 
 const DocLayout = lazy(() => import("./docs"));
@@ -47,9 +45,6 @@ const CardsDevelopment = lazy(() => import("./pages/CardsDevelopment"));
 const CardRenderer = lazy(() => import("./pages/CardRenderer"));
 
 function AppRoutes() {
-  useEffect(() => {
-    netRequest("availableStationsList");
-  }, []);
   return (
     <>
       <Routes>
@@ -119,7 +114,7 @@ function Snapshot() {
     <Button
       className="btn-circle fixed bottom-2 left-2 btn-ghost z-50"
       onClick={() => {
-        netSend("serverSnapshot");
+        q.server.snapshot.netSend();
       }}
     >
       <FaCamera />

@@ -26,45 +26,29 @@ that might have larger data payloads. This is the most commonly used method for
 transferring data from the server to the client.
 
 Subscriptions based on a "pubsub" system, where the server publishes data using
-`pubsub.publish(channelName, {...filterArgs})` on a channel that the client
+`pubsub.publish.path.to.request({...filterArgs})` on a channel that the client
 subscribes to. Note that `pubsub.publish` doesn't actually send any data to the
 client. It only signals that data for that channel has changed. The client
 itself chooses which data it will get when a channel has a publish.
 
-For more information and a reference about pubsub channels, see the
-[Pubsub channel reference](pubsub-channel-reference) document.
-
-> **IMPORTANT:** Make sure you properly export your data functions in your card
-> from the "/client/src/cards/dataList.ts" file.
+> **IMPORTANT:** Make sure you properly export your router in your card from the
+> "/client/src/cards/data.ts" file.
 
 ### Defining Card Requests
 
 Cards can define the netRequests which will be consumed by the card. There is
 even a TypeScript check in place to make sure `pubsub.publish` can't be called
-on a netRequest that hasn't been defined in a card yet. These netRequests are
-exactly the same as the netRequests defined in the `server/src/netRequests`
-folder - it's just nice to colocate them with the card they'll be used in.
+on a netRequest that hasn't been defined in a card yet.
 
-Cards themselves define their subscriptions in a file called `data.ts` inside
-the card's folder.
+Cards themselves should define their subscriptions in a file called `data.ts`
+inside the card's folder.
 
-To define net requests, the `data.ts` file should export a on object called
-`requests`. The properties of this object represent different netRequest names.
-These netRequest names are used by the `pubsub.publish` function to signal that
-the data has changed and trigger a subscription publish. Calling
-`pubsub.publish` usually happens in an input definition, but it could happen in
-an infrequently triggered ECS System.
-
-Each of the netRequest name properties on the `requests` exports a single
-function which both determines whether a client should receive data and also
-collects and returns the data that should be sent. The function takes three
-parameters: `context` which is an instance of [DataContext](datacontext) for
-that particular client, `params`, which is the parameters passed in from the
-client, and `publishParams`, being whatever values are passed to
-`pubsub.publish` in addition to the channel name. The second and third
-`params/publishParams` parameters should always have a type annotation on it.
-This is automatically picked up by the `useNetRequest` and `pubsub.publish`
-functions.
+To define net requests and net sends, the `data.ts` file should export either a
+router or a procedure. The properties of this object represent different
+netRequest and netSend names. These netRequest names are used by the
+`pubsub.publish` function to signal that the data has changed and trigger a
+subscription publish. Calling `pubsub.publish` usually happens in a netSend
+definition, but it could happen in an infrequently triggered ECS System.
 
 #### Net Request Filters
 
@@ -74,69 +58,90 @@ different player ships might have both requested the 'phasers' channel, but when
 one of the ships charges their phasers, only the client on that ship should get
 the subscription update.
 
-To determine whether a client should receive data, the request function should
-check the `params` parameter against data in the database and about the client,
-like which ship the client is assigned to. If it determines that the publish
-should not go to that client, it should throw `null`. This stops the rest of the
-data handler from running and indicates that the client shouldn't receive that
-update.
+To determine whether a client should receive data, the request's filter function
+should check the `input` parameter against data in the database and about the
+client, like which ship the client is assigned to. If it determines that the
+publish should not go to that client, it should return `false`. This stops the
+rest of the data handler from running and indicates that the client shouldn't
+receive that update.
 
 Like the example above, it's most commonly used for filtering based on the ship
 the client is assigned to, though it could filter based on any other criteria.
 
 ```ts
-// /client/src/cards/WeaponsControl/data.ts
-export const subscriptions = {
-  phasers: (context: DataContext, params: {shipId: string}) => {
-    if (context.ship.id !== params.shipId) throw null;
-    // ...
-  },
-};
+// /client/src/cards/Pilot/data.ts
+export const pilot = t.router({
+  impulseEngines: t.router({
+    get: t.procedure
+      .filter((publish: {shipId: number; systemId: number} | null, {ctx}) => {
+        if (publish && publish.shipId !== ctx.ship?.id) return false;
+        return true;
+      })
+      .request(({ctx}) => {
+        // ...
+      }),
+  }),
+});
 ```
 
-If it never throws `null`, every client subscribed to that channel will receive
-every publish.
+If the filter function returns `true`, the respective client subscribed to that
+channel will receive the publish.
 
 #### Fetching Data
 
-After filtering the subscription, the function collects the data that is needed
-for the card to operate. Since it is called both when the card first loads _and_
-when any subscription publishes happen, this function cannot depend on the
-`publishParams` parameter. Instead, it should only use that for request
-filtering.
+After filtering the subscription, the resolve function collects the data that is
+needed for the card to operate. Since it is called both when the card first
+loads _and_ when any subscription publishes happen, this function should not
+depend on the `publishParams` parameter, though it is made available for special
+circumstances.
 
 Whatever the function returns is sent to the client and made available with the
 [useNetRequest](#useNetRequest) hook. This most likely means finding specific
 entities associated with the ship the client is assigned to.
 
 ```ts
-// /client/src/cards/WeaponsControl/data.ts
-export const subscriptions = {
-  phasers: (context: DataContext) => {
-    // ...
-    const phaserSystems = context.flight.ecs.entities.filter(
-      entity =>
-        !!entity.components.phasers &&
-        entity.components.shipAssignment.shipId === context.ship.id
-    );
-
-    return phaserSystems;
-  },
-};
+// /client/src/cards/Pilot/data.ts
+export const pilot = t.router({
+  impulseEngines: t.router({
+    get: t.procedure
+      .filter((publish: {shipId: number; systemId: number} | null, {ctx}) => {
+        // ...
+      })
+      .request(({ctx}) => {
+        const {
+          impulseEngines: {
+            id,
+            components: {isImpulseEngines},
+          },
+        } = getShipSystem(ctx, {
+          systemType: "impulseEngines",
+        });
+        return {
+          id: impulseEngines.id,
+          targetSpeed: isImpulseEngines?.targetSpeed || 0,
+          cruisingSpeed: isImpulseEngines?.cruisingSpeed || 1,
+          emergencySpeed: isImpulseEngines?.emergencySpeed || 1,
+        };
+      }),
+  }),
+});
 ```
 
 ### Suggestions for Writing Subscriptions
 
-Subscriptions should be defined as narrowly as possible, and cards should have
-as many subscriptions as are necessary to get all of the data.
+Requests and Sends should be defined as narrowly as possible, and cards should
+have as many subscriptions as are necessary to get all of the data. Since we can
+nest routers as much as we want, there's little concern about overlapping.
 
-Whenever creating a new subscription channel name, it's important to make sure
-that `pubsub.publish` is being called any time the relevant data changes on the
-server.
+Whenever creating a new request, it's important to make sure that
+`pubsub.publish` is being called any time the relevant data changes on the
+server. These `pubsub.publish` calls might be happening in sends or systems
+elsewhere in the codebase, so keep this in mind and make sure they're always
+being called correctly.
 
-The `params` object passed to `pubsub.publish` should include as many values as
-possible to give the subscription function as much information as is needed to
-determine if the subscription should go to the client.
+The `publish` object passed to `pubsub.publish` should include as many values as
+possible to give the filter function as much information as is needed to
+determine if the request should go to the client.
 
 ## Data Streams
 
@@ -155,7 +160,12 @@ the following data sent:
 - `z` - The z position of the entity
 - `rotation` - The rotation quaternion of the entity
 
-That means the rest of the data needs to be collected with a subscription.
+That means the rest of the data needs to be collected with a NetRequest.
+
+Note that not every entity has an x,y,z and rotation property. We can use this
+to our advantage, such as sending a stream of impulse and warp speeds to the
+client by passing the numbers on the x, y, and z properties as though they were
+positions.
 
 The data for each client is sent by the
 "/server/src/systems/DataStreamSystem.ts" ECS system, which also defines how
@@ -164,10 +174,10 @@ that makes it easy to do
 [snapshot interpolation](https://github.com/geckosio/snapshot-interpolation#readme)
 on the client.
 
-To define the entity filter for a card, export a `dataStream` function from the
-`data.ts` file, which is called for every entity. This function receives an
-`Entity`, `DataContext`, and optionally `params` as parameters and should return
-`true` if the entity should be sent to the client.
+To define the entity filter for a card, include a `dataStream` function on the
+router in the `data.ts` file, which is called for every entity. This function
+receives an object with the `entity`, `ctx`, and optionally `input` as
+parameters and should return `true` if the entity should be sent to the client.
 
 ```ts
 export function dataStream(
@@ -186,7 +196,25 @@ Data Streams will only be active when `useDataStream` is called somewhere in the
 card. This hook accepts parameters and returns nothing, so it's best to call it
 at the top of the card component.
 
-### DataStreams
+```ts
+export const cargoControl = t.router({
+  stream: t.procedure.dataStream(({entity, ctx}) => {
+    if (!entity) return false;
+    return Boolean(
+      entity.components.cargoContainer &&
+        entity.components.position?.parentId === ctx.ship?.id &&
+        entity.components.passengerMovement
+    );
+  }),
+});
+```
+
+You still need to request the data stream once per card using the `q` utility.
+This is where you would pass params, if they were needed.
+
+```ts
+q.cargoControl.stream.useDataStream();
+```
 
 The challenge with DataStreams is making sure the UI remains responsive while
 updating at 60fps. React renders, while really convenient and fast enough for
@@ -200,8 +228,8 @@ about transient updates on the
 
 Because of this, accessing the data from DataStreams is a two-part process:
 
-1. Make sure the subscriptions for your card include the entities that you
-   include in your DataStream definition.
+1. Make sure the requests for your card include the entities that you include in
+   your DataStream definition.
 2. Render the entities that you want to animate as DOM elements or Three.js
    Object3Ds.
 3. In an animation loop, either with `useAnimationFrame` or the `useFrame` hook
@@ -213,80 +241,20 @@ Even though DataStream frames are only sent from the server on an interval, we
 can still render them at 60fps because of
 [snapshot interpolation](https://github.com/geckosio/snapshot-interpolation#readme).
 
-// TODO October 14, 2021 - include a code example for DataStreams
+## NetSends
 
-## Inputs
-
-Inputs are the way clients can trigger mutations to server data. Inputs are
-messages sent from the client to the server over WebSockets to trigger events.
-Since many cards may use the same input, and to make it easier to keep track of
-all of the `pubsub.publish` calls, inputs are defined separately from cards. The
-list of all inputs is kept in "/server/src/inputs/list.ts".
+NetSends or Sends are the way clients can trigger mutations to server data.
+NetSends are messages sent from the client to the server over WebSockets to
+trigger events.
 
 When a client needs to update server data, it sends a message to the server with
 the name of the input and any appropriate parameters as a JavaScript object.
 
-Inputs are defined in individual files as a map of functions, with the key being
-the name of the input. An instance of [DataContext](datacontext) is the first
-parameter, and the `params` passed from the client are the second.
+Inputs are defined the same way as requests, but don't need a `filter` function
+and don't need to return anything, though they can. For more information, review
+the [`NetRequests`](/docs/development/netRequests) docs.
 
 When the client sends the message, the server will call the function for that
 input, which is able to perform whatever mutations it needs on the databases in
 `DataContext`. It should call `pubsub.publish` for any channels it might have
 modified.
-
-Optionally, the input can return data back to the client. This return data could
-be useful for automatically selecting an item in a list after it has been
-created.
-
-Inputs have error handling capabilities. They should be written such that if
-invalid parameters are sent, they throw an error with an appropriate error
-message. The error is returned to the client as `{error:string}`.
-
-```ts
-// /server/src/inputs/client.ts
-import {pubsub} from "../utils/pubsub";
-import {DataContext} from "../utils/DataContext";
-
-export const clientInputs = {
-  clientSetName: (context: DataContext, params: {name: string}) => {
-    if (!params.name) throw new Error("name is a required parameter.");
-    if (typeof params.name !== "string")
-      throw new Error("name must be a string.");
-    if (!params.name.trim()) throw new Error("name cannot be blank.");
-    context.server.clients[context.clientId].name = params.name;
-    pubsub.publish("clients");
-    pubsub.publish("client", {clientId: context.clientId});
-  },
-  // ...
-};
-```
-
-The `params` parameter should have a TypeScript annotation, which is used on the
-client for type checking and auto-complete.
-
-### `netSend`
-
-The `netSend` function is available on the Thorium context object provided by
-`useThorium()`. It is used on the client to send inputs to the server.
-
-The first parameter is the name of the input, and the second is the `params`
-object.
-
-```ts
-import {useThorium} from "../context/ThoriumContext";
-
-function EditClientName() {
-  const {netSend} = useThorium();
-  const [newName, setNewName] = useState("");
-
-  function handleEditName() {
-    const result = await netSend("clientSetName", {name: newName});
-    if (result.error) {
-      alert("Error: " + result.error);
-    }
-  }
-
-  // ...
-}
-```

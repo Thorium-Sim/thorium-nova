@@ -12,7 +12,6 @@ import {
   lightYearToLightMinute,
 } from "server/src/utils/unitTypes";
 import {toast} from "client/src/context/ToastContext";
-import {netSend} from "client/src/context/netSend";
 import {useConfirm} from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import {CameraControls, useExternalCameraControl} from "./CameraControls";
@@ -20,10 +19,11 @@ import CameraControlsClass from "camera-controls";
 import debounce from "lodash.debounce";
 import Input from "@thorium/ui/Input";
 import {PolarGrid} from "./PolarGrid";
+import {q} from "@client/context/AppContext";
 
 const ACTION = CameraControlsClass.ACTION;
 
-const INTERSTELLAR_MAX_DISTANCE: LightYear = 2000;
+export const INTERSTELLAR_MAX_DISTANCE: LightYear = 2000;
 
 export function InterstellarMap({children}: {children: React.ReactNode}) {
   const useStarmapStore = useGetStarmapStore();
@@ -53,7 +53,7 @@ export function InterstellarMap({children}: {children: React.ReactNode}) {
 
   useEffect(() => {
     useStarmapStore.setState({skyboxKey: "blank"});
-  }, []);
+  }, [useStarmapStore]);
   useExternalCameraControl(orbitControls);
 
   const viewingMode = useStarmapStore(store => store.viewingMode);
@@ -125,7 +125,7 @@ export function InterstellarMenuButtons({
     });
     if (!doRemove) return;
 
-    await netSend("pluginSolarSystemDelete", {
+    await q.plugin.starmap.solarSystem.delete.netSend({
       pluginId,
       solarSystemId: selectedObjectIds[0],
     });
@@ -146,7 +146,7 @@ export function InterstellarMenuButtons({
 
           vec.applyQuaternion(camera.quaternion).add(camera.position);
           try {
-            const system = await netSend("pluginSolarSystemCreate", {
+            const system = await q.plugin.starmap.solarSystem.create.netSend({
               pluginId,
               position: vec,
             });
@@ -214,7 +214,7 @@ export const InterstellarPalette = ({
     if (!selectedStar) {
       useStarmapStore.setState({selectedObjectIds: []});
     }
-  }, [selectedStar]);
+  }, [selectedStar, useStarmapStore]);
 
   const [name, setName] = React.useState(selectedStar?.name || "");
   const [description, setDescription] = React.useState(

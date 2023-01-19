@@ -1,7 +1,6 @@
 import Menubar from "@thorium/ui/Menubar";
 import {FaArrowLeft} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
-import {netSend} from "client/src/context/netSend";
 import type {Layout} from "flexlayout-react";
 import {useRef} from "react";
 import "flexlayout-react/style/dark.css";
@@ -11,6 +10,7 @@ import LoginButton from "../LoginButton";
 import {ErrorBoundary} from "react-error-boundary";
 import {CoreFlexLayoutProvider} from "./CoreFlexLayoutContext";
 import {CoreFlexLayoutDropdown} from "./CoreFlexLayoutDropdown";
+import {q} from "@client/context/AppContext";
 export default function FlightDirectorLayout() {
   const layoutRef = useRef<Layout>(null);
   return (
@@ -19,7 +19,7 @@ export default function FlightDirectorLayout() {
         <Menubar>
           <Button
             className="btn-primary btn-xs btn-outline"
-            onClick={() => netSend("clientSetStation", {shipId: null})}
+            onClick={() => q.client.setStation.netSend({shipId: null})}
           >
             <FaArrowLeft />
           </Button>

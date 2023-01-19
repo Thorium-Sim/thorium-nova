@@ -62,6 +62,7 @@ async function createWindow() {
     minHeight: 768,
     minWidth: 1024,
     backgroundColor: "#251029",
+    autoHideMenuBar: true,
     webPreferences: {
       nodeIntegration: true,
       devTools: true,
@@ -74,9 +75,6 @@ async function createWindow() {
   win.webContents.setWindowOpenHandler(({url}) => {
     shell.openExternal(url);
     return {action: "deny"};
-  });
-  win.webContents.on("new-window", function (e, url) {
-    // e.preventDefault();
   });
 
   // We add 1 to the port, since we want to connect to the HTTPS server

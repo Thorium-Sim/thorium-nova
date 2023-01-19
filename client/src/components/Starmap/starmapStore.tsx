@@ -9,7 +9,7 @@ import {
 } from "react";
 import {Coordinates} from "server/src/utils/unitTypes";
 import {Vector3} from "three";
-import create from "zustand";
+import {create} from "zustand";
 
 interface StarmapStore {
   storeCount: number;
@@ -25,7 +25,7 @@ interface StarmapStore {
   currentSystem: number | null;
   setCurrentSystem: (systemId: number | null) => Promise<void>;
   currentSystemSet?: (value: any) => void;
-  cameraVerticalDistance: number;
+  cameraObjectDistance: number;
   cameraControls?: MutableRefObject<CameraControls | null>;
   followEntityId?: number | null;
   yDimensionIndex: number;
@@ -65,28 +65,28 @@ const createStarmapStore = () =>
       set({currentSystemSet, currentSystem: systemId});
       await promise;
     },
-    cameraVerticalDistance: 0,
+    cameraObjectDistance: 0,
     yDimensionIndex: 0,
     spawnShipTemplate: null,
+    cameraFocusPoint: new Vector3(),
     setCameraFocus: async position => {
-      const viewingMode = get().viewingMode;
       const cameraControls = get().cameraControls?.current;
-      if (viewingMode === "core") {
-        if (position && cameraControls) {
-          const camera = cameraControls.camera;
-          const up = camera.up.clone();
-          camera.up.set(0, 0, -1);
-          await cameraControls.setLookAt(
-            camera.position.x,
-            camera.position.y,
-            camera.position.z,
-            position.x,
-            position.y,
-            position.z,
-            true
-          );
-          camera.up.copy(up);
-        }
+      if (position && cameraControls) {
+        const camera = cameraControls.camera;
+        const up = camera.up.clone();
+        camera.up.set(0, 0, -1);
+        const distance = camera.position.distanceTo(position as Vector3);
+
+        await cameraControls.setLookAt(
+          position.x,
+          distance,
+          position.z,
+          position.x,
+          position.y,
+          position.z,
+          true
+        );
+        camera.up.copy(up);
       }
     },
     planetsHidden: false,
@@ -115,11 +115,12 @@ const distanceVector = new Vector3();
 export function useCalculateVerticalDistance() {
   const useStarmapStore = useGetStarmapStore();
   useFrame(({camera}) => {
-    const distance = camera.position.distanceTo(
-      distanceVector.set(camera.position.x, 0, camera.position.z)
-    );
+    useStarmapStore
+      .getState()
+      .cameraControls?.current?.getTarget(distanceVector);
+    const distance = camera.position.distanceTo(distanceVector);
     useStarmapStore.setState({
-      cameraVerticalDistance: distance,
+      cameraObjectDistance: distance,
     });
   });
 }

@@ -84,8 +84,9 @@ const QuickStartProvider = ({children}: {children: React.ReactNode}) => {
     {
       flightName: randomNameGenerator(),
       crewCount: 1,
-      flightDirector: true,
+      flightDirector: false,
       shipName: "Voyager",
+      shipId: {pluginId: "Thorium Default", shipId: "Astra Frigate"},
     },
     "flightConfig"
   );

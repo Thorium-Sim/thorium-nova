@@ -9,8 +9,6 @@ import {
 } from "client/src/components/Starmap/starmapStore";
 import {Suspense} from "react";
 import {ErrorBoundary} from "react-error-boundary";
-import {netRequest, useNetRequest} from "client/src/context/useNetRequest";
-import {useDataStream} from "client/src/context/useDataStream";
 import {SolarSystemMap} from "client/src/components/Starmap/SolarSystemMap";
 import {Planet} from "client/src/components/Starmap/Planet";
 import StarEntity from "client/src/components/Starmap/Star";
@@ -23,19 +21,17 @@ import useDragSelect, {
   DragSelection,
   get3dSelectedObjects,
 } from "client/src/hooks/useDragSelect";
-import {Mesh, Object3D, PerspectiveCamera, Vector3} from "three";
+import {PerspectiveCamera, Vector3} from "three";
 import {FaArrowLeft} from "react-icons/fa";
 import {GiTargeted} from "react-icons/gi";
 import Button from "@thorium/ui/Button";
-import {useThorium} from "client/src/context/ThoriumContext";
 import {useCancelFollow} from "client/src/components/Starmap/useCancelFollow";
 import {useFollowEntity} from "client/src/components/Starmap/useFollowEntity";
 import {ZoomSliderComp} from "client/src/cards/Navigation/MapControls";
 import {TbPlanet, TbPlanetOff} from "react-icons/tb";
 import {Coordinates} from "server/src/utils/unitTypes";
-import {useFrame} from "@react-three/fiber";
-import {useTranslate2DTo3D} from "client/src/hooks/useTranslate2DTo3D";
-import useEventListener from "client/src/hooks/useEventListener";
+import {q} from "@client/context/AppContext";
+import {useLiveQuery} from "@thorium/live-query/client";
 
 export function StarmapCore() {
   const ref = useRef<HTMLDivElement>(null);
@@ -58,7 +54,7 @@ export function StarmapCore() {
 
 function StarmapCoreMenubar() {
   const useStarmapStore = useGetStarmapStore();
-  const playerShips = useNetRequest("flightPlayerShips");
+  const [playerShips] = q.ship.players.useNetRequest();
 
   const playerShip = playerShips[0];
   useEffect(() => {
@@ -67,7 +63,7 @@ function StarmapCoreMenubar() {
       selectedObjectIds: [playerShip.id],
       currentSystem: playerShip.currentSystem,
     });
-  }, [playerShip.id, playerShip.currentSystem]);
+  }, [playerShip.id, playerShip.currentSystem, useStarmapStore]);
   const inSystem = useStarmapStore(store => !!store.currentSystem);
   const yDimension = useStarmapStore(store => store.yDimensionIndex);
   const selectedSpawn = useStarmapStore(store => store.spawnShipTemplate);
@@ -95,8 +91,7 @@ function StarmapCoreMenubar() {
         inputClassName="input-sm"
         queryKey="spawn"
         getOptions={async ({queryKey, signal}) => {
-          const result = await netRequest(
-            "shipSpawnSearch",
+          const result = await q.starmapCore.spawnSearch.netRequest(
             {query: queryKey[1]},
             {signal}
           );
@@ -105,7 +100,7 @@ function StarmapCoreMenubar() {
         ResultLabel={({active, result, selected}) => (
           <DefaultResultLabel active={active} selected={selected}>
             <div className="flex gap-4">
-              <img src={result.vanity} className="w-8 h-8" />
+              <img src={result.vanity} alt="" className="w-8 h-8" />
               <div>
                 <p className="m-0 leading-none">{result.name}</p>
                 <p className="m-0 leading-none">
@@ -190,9 +185,11 @@ const endPoint = new Vector3();
 function CanvasWrapper() {
   const useStarmapStore = useGetStarmapStore();
   const currentSystem = useStarmapStore(store => store.currentSystem);
-  useDataStream({systemId: currentSystem});
-  const starmapShips = useNetRequest("starmapShips", {systemId: currentSystem});
-  const {interpolate} = useThorium();
+  q.starmapCore.stream.useDataStream({systemId: currentSystem});
+  const [starmapShips] = q.starmapCore.ships.useNetRequest({
+    systemId: currentSystem,
+  });
+  const {interpolate} = useLiveQuery();
 
   const cameraRef = useRef<PerspectiveCamera>();
 
@@ -224,7 +221,7 @@ function CanvasWrapper() {
 
   useEffect(() => {
     useStarmapStore.setState({viewingMode: "core"});
-  }, []);
+  }, [useStarmapStore]);
   return (
     <>
       <StarmapCanvas
@@ -250,8 +247,10 @@ export function InterstellarWrapper() {
   const useStarmapStore = useGetStarmapStore();
   const currentSystem = useStarmapStore(store => store.currentSystem);
 
-  const starmapShips = useNetRequest("starmapShips", {systemId: currentSystem});
-  const starmapSystems = useNetRequest("starmapSystems");
+  const [starmapShips] = q.starmapCore.ships.useNetRequest({
+    systemId: currentSystem,
+  });
+  const [starmapSystems] = q.starmapCore.systems.useNetRequest();
 
   return (
     <InterstellarMap>
@@ -302,21 +301,24 @@ export function SolarSystemWrapper() {
   const currentSystem = useStarmapStore(store => store.currentSystem);
 
   if (currentSystem === null) throw new Error("No current system");
-  const system = useNetRequest("starmapSystem", {systemId: currentSystem});
-  const starmapEntities = useNetRequest("starmapSystemEntities", {
+  const [system] = q.starmapCore.system.useNetRequest({
     systemId: currentSystem,
   });
-  const starmapShips = useNetRequest("starmapShips", {
+  const [starmapEntities] = q.starmapCore.entities.useNetRequest({
     systemId: currentSystem,
   });
-  const waypoints = useNetRequest("waypoints", {
+  const [starmapShips] = q.starmapCore.ships.useNetRequest({
+    systemId: currentSystem,
+  });
+  const [waypoints] = q.waypoints.all.useNetRequest({
     systemId: "all",
   });
 
   const selectedObjectIds = useStarmapStore(store => store.selectedObjectIds);
   const planetsHidden = useStarmapStore(store => store.planetsHidden);
+  const isCore = useStarmapStore(store => store.viewingMode === "core");
 
-  const {interpolate} = useThorium();
+  const {interpolate} = useLiveQuery();
   return (
     <SolarSystemMap
       skyboxKey={system?.components.isSolarSystem?.skyboxKey || "Blank"}
@@ -368,9 +370,11 @@ export function SolarSystemWrapper() {
 
         return null;
       })}
-      {waypoints.map(waypoint => (
-        <WaypointEntity key={waypoint.id} waypoint={waypoint} viewscreen />
-      ))}
+      {isCore
+        ? null
+        : waypoints.map(waypoint => (
+            <WaypointEntity key={waypoint.id} waypoint={waypoint} viewscreen />
+          ))}
       {starmapShips.map(ship => (
         <Suspense key={ship.id} fallback={null}>
           <ErrorBoundary

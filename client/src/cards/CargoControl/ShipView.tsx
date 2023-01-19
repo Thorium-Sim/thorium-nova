@@ -1,12 +1,12 @@
 import Slider from "@thorium/ui/Slider";
 import {SVGImageLoader} from "@thorium/ui/SVGImageLoader";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useEffect, useState} from "react";
 import {Suspense} from "react";
 import {useResizeObserver} from "client/src/hooks/useResizeObserver";
 import {useShipMapStore} from "./useShipMapStore";
 import {CargoContainerDot} from "./CargoContainerDot";
 import {RoomDot} from "./RoomDot";
+import {q} from "@client/context/AppContext";
 
 const pixelRatio = window.devicePixelRatio;
 
@@ -17,10 +17,10 @@ export function ShipView({
   deckIndex: number;
   cardLoaded: boolean;
 }) {
-  const cargoRooms = useNetRequest("cargoRooms");
+  const [cargoRooms] = q.cargoControl.rooms.useNetRequest();
 
   const {decks, rooms, shipLength} = cargoRooms;
-  const cargoContainers = useNetRequest("cargoContainers");
+  const [cargoContainers] = q.cargoControl.containers.useNetRequest();
 
   const [ref, dims, measure] = useResizeObserver();
   const [imgRef, imgDims, imgMeasure] = useResizeObserver();
@@ -42,11 +42,11 @@ export function ShipView({
         setTransformationLoaded(true);
       }, 200);
     }
-  }, [cardLoaded]);
+  }, [cardLoaded, imgMeasure, measure]);
 
   return (
     <div
-      className="h-full w-full justify-self-center overflow-hidden relative select-none mx-16"
+      className="h-full w-full justify-self-center overflow-hidden relative select-none"
       ref={ref}
     >
       <Suspense fallback={null}>
@@ -105,20 +105,6 @@ export function ShipView({
           </div>
         ))}
       </Suspense>
-      <div className="absolute bottom-0 top-0 left-0 flex items-center justify-center">
-        <Slider
-          aria-label="Deck Selector"
-          value={decks.length - deckIndex}
-          onChange={val =>
-            useShipMapStore.setState({
-              deckIndex: decks.length - (val as number) - 1,
-            })
-          }
-          minValue={0}
-          maxValue={decks.length - 1}
-          orientation="vertical"
-        />
-      </div>
     </div>
   );
 }

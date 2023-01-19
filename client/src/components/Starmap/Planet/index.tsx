@@ -40,7 +40,7 @@ export function PlanetSphere({
   return (
     <group>
       <mesh castShadow>
-        <sphereBufferGeometry args={[1, 32, 32]} attach="geometry" />
+        <sphereGeometry args={[1, 32, 32]} attach="geometry" />
         <meshPhysicalMaterial
           map={wireframe ? undefined : mapTexture}
           wireframe={wireframe}
@@ -103,10 +103,7 @@ export function Planet({
   const position = getOrbitPosition(planet.satellite);
 
   // TODO - April 7, 2022 - Figure out how to make the scales nice for solar system editing
-  const size =
-    viewingMode !== "editor"
-      ? radius
-      : (((isSatellite ? 1 : 5) + 100 * radius * 10) as Kilometer);
+  const size = radius;
 
   // TODO - April 7, 2022 - Add moons
   const satellites: PlanetPlugin[] = [];
@@ -125,15 +122,13 @@ export function Planet({
       labelRef.current.quaternion.copy(camera.quaternion);
     }
 
-    const distance = camera.position.distanceTo(
-      distanceVector.set(camera.position.x, 0, camera.position.z)
-    );
+    const distance = camera.position.distanceTo(position);
 
     if (planetSpriteRef.current && planetMeshRef.current) {
       if (
         size &&
         distance / size > 100 &&
-        (viewingMode === "core" || showSprite)
+        (viewingMode === "core" || viewingMode === "editor" || showSprite)
       ) {
         planetSpriteRef.current.visible = true;
         planetMeshRef.current.visible = false;

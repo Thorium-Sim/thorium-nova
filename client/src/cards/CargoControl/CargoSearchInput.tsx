@@ -1,5 +1,5 @@
+import {q} from "@client/context/AppContext";
 import SearchableInput, {DefaultResultLabel} from "@thorium/ui/SearchableInput";
-import {netRequest} from "client/src/context/useNetRequest";
 import {useShipMapStore} from "./useShipMapStore";
 
 export function CargoSearchInput() {
@@ -17,8 +17,7 @@ export function CargoSearchInput() {
       queryKey="cargo"
       placeholder="Search for rooms, cargo, and containers"
       getOptions={async ({queryKey, signal}) => {
-        const result = await netRequest(
-          "cargoSearch",
+        const result = await q.cargoControl.search.netRequest(
           {query: queryKey[1]},
           {signal}
         );

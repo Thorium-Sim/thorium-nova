@@ -128,8 +128,8 @@ describe("PassengerMovementSystem", () => {
       PositionComponent {
         "parentId": 1,
         "type": "ship",
-        "x": 0.4378550077971717,
-        "y": 0.4378550077971716,
+        "x": 0.44215339876352006,
+        "y": 0.44215339876352006,
         "z": 0,
       }
     `);
@@ -139,8 +139,8 @@ describe("PassengerMovementSystem", () => {
       PositionComponent {
         "parentId": 1,
         "type": "ship",
-        "x": 1.0991613293113442,
-        "y": 0.9455613293113442,
+        "x": 1.0995775896953266,
+        "y": 0.9459775896953266,
         "z": 0,
       }
     `);
@@ -205,7 +205,7 @@ describe("PassengerMovementSystem", () => {
         "type": "ship",
         "x": 2,
         "y": 1,
-        "z": 0.0728,
+        "z": 0.16799999999999998,
       }
     `);
     expect(passenger.components.passengerMovement?.nextNodeIndex).toBe(1);
@@ -214,8 +214,8 @@ describe("PassengerMovementSystem", () => {
       PositionComponent {
         "parentId": 3,
         "type": "ship",
-        "x": 1.5621449922028285,
-        "y": 0.5621449922028283,
+        "x": 1,
+        "y": 0,
         "z": 1,
       }
     `);
@@ -224,8 +224,8 @@ describe("PassengerMovementSystem", () => {
       PositionComponent {
         "parentId": 3,
         "type": "ship",
-        "x": 1.1480653998204364,
-        "y": 0.14806539982043648,
+        "x": 1,
+        "y": 0,
         "z": 1,
       }
     `);

@@ -3,17 +3,16 @@ import Menubar from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
 import Button from "@thorium/ui/Button";
 import {Outlet, useParams, useNavigate} from "react-router-dom";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {Fragment} from "react";
-import {netSend} from "client/src/context/netSend";
-import {toast} from "client/src/context/ToastContext";
+import {toast} from "@client/context/ToastContext";
+import {q} from "@client/context/AppContext";
 
 export function ShipList() {
   const {pluginId, shipId} = useParams() as {pluginId: string; shipId?: string};
   const navigate = useNavigate();
   const prompt = usePrompt();
-  const data = useNetRequest("pluginShips", {pluginId});
-  const ship = data.find(d => d.name === shipId);
+  const [ships] = q.plugin.ship.all.useNetRequest({pluginId});
+  const ship = ships.find(d => d.name === shipId);
   return (
     <div className="h-full">
       <Menubar backTo={`/config/${pluginId}/list`}></Menubar>
@@ -28,7 +27,7 @@ export function ShipList() {
                 if (typeof name !== "string" || name.trim().length === 0)
                   return;
                 try {
-                  const result = await netSend("pluginShipCreate", {
+                  const result = await q.plugin.ship.create.netSend({
                     name,
                     pluginId,
                   });
@@ -49,7 +48,7 @@ export function ShipList() {
             </Button>
 
             <SearchableList
-              items={data.map(d => ({
+              items={ships.map(d => ({
                 id: d.name,
                 name: d.name,
                 description: d.description,

@@ -1,6 +1,5 @@
 import Button from "@thorium/ui/Button";
 import {CardProps} from "client/src/components/Station/CardProps";
-import {useDataStream} from "client/src/context/useDataStream";
 import {Fragment, Suspense, useRef} from "react";
 import {GridCanvas, CircleGrid} from "./CircleGrid";
 import {PilotZoomSlider} from "./PilotZoomSlider";
@@ -9,16 +8,15 @@ import {ImpulseControls} from "./ImpulseControls";
 import {Joystick, LinearJoystick} from "@thorium/ui/Joystick";
 import {ReactNode} from "react";
 import type {Coordinates} from "server/src/utils/unitTypes";
-import {netSend} from "client/src/context/netSend";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import useAnimationFrame from "client/src/hooks/useAnimationFrame";
-import {useThorium} from "client/src/context/ThoriumContext";
+import {q} from "@client/context/AppContext";
+import {useLiveQuery} from "@thorium/live-query/client";
 
 async function rotation({x = 0, y = 0, z = 0}: Partial<Coordinates<number>>) {
-  await netSend("thrustersSetRotationDelta", {rotation: {x, y, z}});
+  await q.pilot.thrusters.setRotationDelta.netSend({rotation: {x, y, z}});
 }
 async function direction({x = 0, y = 0, z = 0}: Partial<Coordinates<number>>) {
-  await netSend("thrustersSetDirection", {direction: {x, y, z}});
+  await q.pilot.thrusters.setDirection.netSend({direction: {x, y, z}});
 }
 
 function UntouchableLabel({
@@ -36,7 +34,7 @@ function UntouchableLabel({
 }
 
 export function Pilot({cardLoaded}: CardProps) {
-  useDataStream({systemId: null});
+  q.pilot.stream.useDataStream({systemId: null});
 
   return (
     <div className="grid grid-cols-4 h-full place-content-center gap-4">
@@ -138,10 +136,10 @@ function getInterstellarDistance(
 
 const LockOnButton = () => {
   const waypoint = usePilotStore(store => store.facingWaypoints?.[0]);
-  const autopilot = useNetRequest("autopilot");
+  const [autopilot] = q.pilot.autopilot.get.useNetRequest();
   const distanceRef = useRef<HTMLSpanElement>(null);
-  const {id, currentSystem, systemPosition} = useNetRequest("pilotPlayerShip");
-  const {interpolate} = useThorium();
+  const [{id, currentSystem, systemPosition}] = q.ship.player.useNetRequest();
+  const {interpolate} = useLiveQuery();
 
   useAnimationFrame(() => {
     const shipPosition = interpolate(id);
@@ -176,7 +174,7 @@ const LockOnButton = () => {
       {autopilot.locked ? (
         <Button
           className="w-full btn-error"
-          onClick={() => netSend("autopilotUnlockCourse")}
+          onClick={() => q.pilot.autopilot.unlockCourse.netSend()}
         >
           Unlock Course
         </Button>
@@ -184,7 +182,9 @@ const LockOnButton = () => {
         <Button
           className="w-full btn-warning"
           disabled={typeof waypoint !== "number"}
-          onClick={() => netSend("autopilotLockCourse", {waypointId: waypoint})}
+          onClick={() =>
+            q.pilot.autopilot.lockCourse.netSend({waypointId: waypoint})
+          }
         >
           Lock On Course
         </Button>
@@ -193,7 +193,7 @@ const LockOnButton = () => {
         <Button
           className="w-full btn-error"
           disabled={!autopilot.locked}
-          onClick={() => netSend("autopilotActivate")}
+          onClick={() => q.pilot.autopilot.activate.netSend()}
         >
           Activate Autopilot
         </Button>
@@ -201,7 +201,7 @@ const LockOnButton = () => {
         <Button
           className="w-full btn-error"
           disabled={!autopilot.locked}
-          onClick={() => netSend("autopilotDeactivate")}
+          onClick={() => q.pilot.autopilot.deactivate.netSend()}
         >
           Deactivate Autopilot
         </Button>

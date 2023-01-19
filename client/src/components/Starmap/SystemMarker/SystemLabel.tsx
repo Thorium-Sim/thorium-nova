@@ -30,7 +30,7 @@ const SystemLabel: React.FC<{
   const textTexture = React.useMemo(() => {
     let texture = new TextTexture({
       color,
-      fontFamily: 'Electrolize, "Gill Sans", sans-serif',
+      fontFamily: 'Electrolize, "Outfit", sans-serif',
       fontSize: 128,
       alignment: "right",
       text: name,
@@ -74,7 +74,7 @@ const SystemLabel: React.FC<{
       ref={text}
       renderOrder={1000}
     >
-      <planeBufferGeometry
+      <planeGeometry
         args={[textTexture.width, textTexture.height, 1]}
         attach="geometry"
       />

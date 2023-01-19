@@ -8,16 +8,15 @@ import CameraControlsClass from "camera-controls";
 import {
   astronomicalUnitToKilometer,
   Kilometer,
+  solarRadiusToKilometers,
 } from "server/src/utils/unitTypes";
 import {Box3, Camera, Vector3} from "three";
 import Button from "../ui/Button";
 import {Menu, Transition, Disclosure} from "@headlessui/react";
 import {HiChevronDown} from "react-icons/hi";
 import {starTypes} from "server/src/spawners/starTypes";
-import {netSend} from "client/src/context/netSend";
 import {useConfirm} from "@thorium/ui/AlertDialog";
 import {planetTypes} from "server/src/spawners/planetTypes";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import Disc from "./Disc";
 import {HiChevronUp} from "react-icons/hi";
 import {useLocalStorage} from "client/src/hooks/useLocalStorage";
@@ -31,6 +30,10 @@ import {useSystemIds} from "./useSystemIds";
 import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
 import {useParams} from "react-router-dom";
+import {q} from "@client/context/AppContext";
+import PlanetPlugin from "@server/classes/Plugins/Universe/Planet";
+import SolarSystemPlugin from "@server/classes/Plugins/Universe/SolarSystem";
+import {getOrbitPosition} from "@server/utils/getOrbitPosition";
 const ACTION = CameraControlsClass.ACTION;
 
 // 10% further than Neptune's orbit
@@ -38,14 +41,11 @@ export const SOLAR_SYSTEM_MAX_DISTANCE: Kilometer = 4_000_000_000 * 1.1;
 
 function HabitableZone() {
   const [pluginId, solarSystemId] = useSystemIds();
-  const {
-    habitableZoneInner = 0,
-    habitableZoneOuter = 3,
-    stars,
-  } = useNetRequest("pluginSolarSystem", {
-    pluginId,
-    solarSystemId,
-  });
+  const [{habitableZoneInner = 0, habitableZoneOuter = 3, stars}] =
+    q.plugin.starmap.get.useNetRequest({
+      pluginId,
+      solarSystemId,
+    });
   const scaleUnit = astronomicalUnitToKilometer(1);
   return stars.length > 0 ? (
     <Disc
@@ -100,7 +100,6 @@ export function SolarSystemMap({
   const viewingMode = useStarmapStore(store => store.viewingMode);
 
   const isViewscreen = viewingMode === "viewscreen";
-  const isStation = viewingMode === "station";
 
   return (
     <Suspense fallback={null}>
@@ -119,7 +118,7 @@ export function SolarSystemMap({
               middle: ACTION.DOLLY,
               wheel: ACTION.DOLLY,
             }}
-            dollyToCursor={isStation}
+            dollyToCursor={false}
             dollySpeed={0.5}
           />
           <PolarGrid
@@ -160,7 +159,7 @@ export function SolarSystemMenuButtons({
     if (!doRemove) return;
 
     if (typeof selectedObjectIds === "string") {
-      await netSend("pluginStarDelete", {
+      await q.plugin.starmap.star.delete.netSend({
         pluginId,
         solarSystemId,
         starId: selectedObjectIds,
@@ -241,7 +240,7 @@ function AddStarMenu() {
                     active ? "bg-violet-900 text-white" : "text-gray-200"
                   } group flex items-center w-full px-2 py-2 text-sm`}
                   onClick={async () => {
-                    const result = await netSend("pluginStarCreate", {
+                    const result = await q.plugin.starmap.star.create.netSend({
                       pluginId,
                       solarSystemId,
                       spectralType: starType.spectralType,
@@ -296,11 +295,13 @@ function AddPlanetMenu() {
                     active ? "bg-violet-900 text-white" : "text-gray-200"
                   } group flex items-center w-full px-2 py-2 text-sm`}
                   onClick={async () => {
-                    const result = await netSend("pluginPlanetCreate", {
-                      pluginId,
-                      solarSystemId,
-                      planetType: planetType.classification,
-                    });
+                    const result = await q.plugin.starmap.planet.create.netSend(
+                      {
+                        pluginId,
+                        solarSystemId,
+                        planetType: planetType.classification,
+                      }
+                    );
                     useStarmapStore.setState({
                       selectedObjectIds: [result.name],
                     });
@@ -396,7 +397,7 @@ function useSelectedObject() {
 
   const [pluginId, solarSystemId] = useSystemIds();
   const selectedObjectIds = useStarmapStore(state => state.selectedObjectIds);
-  const systemData = useNetRequest("pluginSolarSystem", {
+  const [systemData] = q.plugin.starmap.get.useNetRequest({
     pluginId,
     solarSystemId,
   });
@@ -430,6 +431,7 @@ export function SolarSystemPalette() {
       className="w-full h-full overflow-y-auto overflow-x-hidden text-white"
       key={results.object.name}
     >
+      <ZoomToObject object={results.object} />
       <BasicDisclosure object={results.object} type={results.type} />
       {results.type === "planet" && (
         <>
@@ -440,6 +442,49 @@ export function SolarSystemPalette() {
       )}
       {results.type === "star" && <StarDisclosure object={results.object} />}
     </div>
+  );
+}
+
+function ZoomToObject({
+  object,
+}: {
+  object: StarPlugin | PlanetPlugin | SolarSystemPlugin;
+}) {
+  const useStarmapStore = useGetStarmapStore();
+
+  if (!("satellite" in object)) {
+    return null;
+  }
+
+  return (
+    <Button
+      className="btn-block btn-xs"
+      onClick={() => {
+        const position = getOrbitPosition(object.satellite);
+        let radius = 0;
+        if ("isPlanet" in object) {
+          radius = object.isPlanet.radius;
+        } else {
+          radius = solarRadiusToKilometers(object.radius);
+        }
+
+        const box = new Box3(
+          new Vector3(
+            position.x - radius,
+            position.y - radius,
+            position.z - radius
+          ),
+          new Vector3(
+            position.x + radius,
+            position.y + radius,
+            position.z + radius
+          )
+        );
+        useStarmapStore.getState().cameraControls?.current?.fitToBox(box, true);
+      }}
+    >
+      Zoom to Object
+    </Button>
   );
 }
 
@@ -463,7 +508,7 @@ function StarDisclosure({object}: {object: StarPlugin}) {
         pattern="[0-9]*"
         defaultValue={object.solarMass}
         onChange={e => {
-          netSend("pluginStarUpdate", {
+          q.plugin.starmap.star.update.netSend({
             pluginId,
             solarSystemId,
             starId: object.name,
@@ -479,7 +524,7 @@ function StarDisclosure({object}: {object: StarPlugin}) {
         pattern="[0-9]*"
         defaultValue={object.age}
         onChange={e => {
-          netSend("pluginStarUpdate", {
+          q.plugin.starmap.star.update.netSend({
             pluginId,
             solarSystemId,
             starId: object.name,
@@ -495,7 +540,7 @@ function StarDisclosure({object}: {object: StarPlugin}) {
         pattern="[0-9]*"
         defaultValue={object.radius}
         onChange={e => {
-          netSend("pluginStarUpdate", {
+          q.plugin.starmap.star.update.netSend({
             pluginId,
             solarSystemId,
             starId: object.name,
@@ -511,7 +556,7 @@ function StarDisclosure({object}: {object: StarPlugin}) {
         pattern="[0-9]*"
         defaultValue={object.temperature}
         onChange={e => {
-          netSend("pluginStarUpdate", {
+          q.plugin.starmap.star.update.netSend({
             pluginId,
             solarSystemId,
             starId: object.name,
@@ -528,7 +573,7 @@ function StarDisclosure({object}: {object: StarPlugin}) {
         step={1}
         defaultValue={object.hue}
         onChange={e => {
-          netSend("pluginStarUpdate", {
+          q.plugin.starmap.star.update.netSend({
             pluginId,
             solarSystemId,
             starId: object.name,
@@ -541,7 +586,7 @@ function StarDisclosure({object}: {object: StarPlugin}) {
         helperText="If checked, the star will be white. Overrides hue."
         defaultChecked={object.isWhite}
         onChange={e => {
-          netSend("pluginStarUpdate", {
+          q.plugin.starmap.star.update.netSend({
             pluginId,
             solarSystemId,
             starId: object.name,

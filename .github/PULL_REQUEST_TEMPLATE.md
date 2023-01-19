@@ -2,12 +2,6 @@
 
 ## Description of Changes
 
-**API:**
-
--
-
-**UI:**
-
 -
 
 ## Related Issue

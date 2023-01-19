@@ -1,17 +1,17 @@
-import {createMockDataContext} from "server/src/utils/createMockDataContext";
-import {flightInputs} from "../flight";
-import {solarSystemsPluginInputs} from "../plugins/universe/solarSystems";
-import {starPluginInputs} from "../plugins/universe/stars";
-import {planetPluginInputs} from "../plugins/universe/planets";
+import {
+  createMockDataContext,
+  createMockRouter,
+} from "@server/utils/createMockDataContext";
 
 describe("flight input", () => {
   it("should start a flight", async () => {
     const mockDataContext = createMockDataContext();
     mockDataContext.database.flight = null;
+    const router = createMockRouter(mockDataContext);
 
     expect(mockDataContext.flight).toBeNull();
 
-    const flight = await flightInputs.flightStart(mockDataContext, {
+    const flight = await router.flight.start({
       flightName: "Test Flight",
       ships: [
         {
@@ -31,29 +31,28 @@ describe("flight input", () => {
   });
   it("should correctly spawn star map objects", async () => {
     const mockDataContext = createMockDataContext();
+    const router = createMockRouter(mockDataContext);
     mockDataContext.database.flight = null;
 
     // Create some star map object plugins
-    const solarSystem = solarSystemsPluginInputs.pluginSolarSystemCreate(
-      mockDataContext,
-      {
-        pluginId: "Test Plugin",
-        position: {x: 1, y: 2, z: 3},
-      }
-    );
-    const star = starPluginInputs.pluginStarCreate(mockDataContext, {
+    const solarSystem = await router.plugin.starmap.solarSystem.create({
+      pluginId: "Test Plugin",
+      position: {x: 1, y: 2, z: 3},
+    });
+
+    const star = await router.plugin.starmap.star.create({
       pluginId: "Test Plugin",
       solarSystemId: solarSystem.solarSystemId,
       spectralType: "G",
     });
-    const planet = planetPluginInputs.pluginPlanetCreate(mockDataContext, {
+    const planet = await router.plugin.starmap.planet.create({
       pluginId: "Test Plugin",
       solarSystemId: solarSystem.solarSystemId,
       planetType: "M",
     });
 
     // Start a flight
-    const flight = await flightInputs.flightStart(mockDataContext, {
+    const flight = await router.flight.start({
       flightName: "Test Flight",
       ships: [
         {
@@ -95,24 +94,23 @@ describe("flight input", () => {
   });
   it("should properly position the player ship in sandbox mode", async () => {
     const mockDataContext = createMockDataContext();
+    const router = createMockRouter(mockDataContext);
+
     mockDataContext.database.flight = null;
     // Shim Math.random
     const oldRandom = Math.random;
     Math.random = () => 0.5;
     // Create some star map object plugins
-    const solarSystem = solarSystemsPluginInputs.pluginSolarSystemCreate(
-      mockDataContext,
-      {
-        pluginId: "Test Plugin",
-        position: {x: 1, y: 2, z: 3},
-      }
-    );
-    const star = starPluginInputs.pluginStarCreate(mockDataContext, {
+    const solarSystem = await router.plugin.starmap.solarSystem.create({
+      pluginId: "Test Plugin",
+      position: {x: 1, y: 2, z: 3},
+    });
+    const star = await router.plugin.starmap.star.create({
       pluginId: "Test Plugin",
       solarSystemId: solarSystem.solarSystemId,
       spectralType: "G",
     });
-    const planet = planetPluginInputs.pluginPlanetCreate(mockDataContext, {
+    const planet = await router.plugin.starmap.planet.create({
       pluginId: "Test Plugin",
       solarSystemId: solarSystem.solarSystemId,
       planetType: "M",
@@ -130,7 +128,7 @@ describe("flight input", () => {
       }
     `);
 
-    const flight = await flightInputs.flightStart(mockDataContext, {
+    const flight = await router.flight.start({
       flightName: "Test Flight",
       ships: [
         {
@@ -152,7 +150,7 @@ describe("flight input", () => {
 
     expect(flight.playerShips[0].components.position).toMatchInlineSnapshot(`
       PositionComponent {
-        "parentId": 6,
+        "parentId": 9,
         "type": "solar",
         "x": -228630890,
         "y": 0,

@@ -1,11 +1,15 @@
+import {q} from "@client/context/AppContext";
+import {randomNameGenerator} from "@server/utils/randomNameGenerator";
+import Button from "@thorium/ui/Button";
 import Checkbox from "@thorium/ui/Checkbox";
-import {useNetRequest} from "client/src/context/useNetRequest";
+import Input from "@thorium/ui/Input";
 import {FaArrowDown, FaArrowUp} from "react-icons/fa";
+import {MdRepeat} from "react-icons/md";
 import {useFlightQuickStart} from "./FlightQuickStartContext";
 
 const CrewConfig = () => {
   const [state, dispatch] = useFlightQuickStart();
-  const availableStations = useNetRequest("availableStationsList");
+  const [availableStations] = q.station.available.useNetRequest();
 
   const availableCrewSizes = availableStations
     .map(station => station.stationCount)
@@ -14,6 +18,21 @@ const CrewConfig = () => {
 
   return (
     <>
+      <Input
+        label="Flight Name"
+        value={state.flightName}
+        onChange={e => dispatch({type: "flightName", name: e.target.value})}
+        inputButton={
+          <Button
+            className="btn-sm btn-outline btn-notice"
+            onClick={() =>
+              dispatch({type: "flightName", name: randomNameGenerator()})
+            }
+          >
+            <MdRepeat width="2rem" />
+          </Button>
+        }
+      />
       <div className="flex justify-between select-none">
         <div className="flex justify-center items-center border-2 border-white/60 rounded-lg w-64 h-64 my-4 text-[10rem]">
           {state.crewCount}

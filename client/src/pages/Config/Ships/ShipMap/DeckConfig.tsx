@@ -1,22 +1,21 @@
 import {SVGImageLoader} from "@thorium/ui/SVGImageLoader";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useParams} from "react-router-dom";
-import PanZoom from "client/src/components/ui/PanZoom";
-import useMeasure from "client/src/hooks/useMeasure";
+import PanZoom from "@client/components/ui/PanZoom";
+import useMeasure from "@client/hooks/useMeasure";
 import {useEffect, useRef, useState} from "react";
 import Button from "@thorium/ui/Button";
 import UploadWell from "@thorium/ui/UploadWell";
-import {netSend} from "client/src/context/netSend";
 import {useConfirm} from "@thorium/ui/AlertDialog";
 import type {
   DeckEdge as DeckEdgeT,
   DeckNode,
   NodeFlag,
-} from "server/src/classes/Plugins/Ship/Deck";
+} from "@server/classes/Plugins/Ship/Deck";
 import {useDeckNode} from "./DeckNodeContext";
 import {NodeCircle} from "./NodeCircle";
 import {EdgeContextProvider} from "./EdgeContextProvider";
 import {DeckEdges} from "./DeckEdges";
+import {q} from "@client/context/AppContext";
 
 export interface PanStateI {
   x: number;
@@ -38,7 +37,7 @@ export function DeckConfig() {
     shipId: string;
     deckName: string;
   };
-  const data = useNetRequest("pluginShip", {pluginId, shipId});
+  const [data] = q.plugin.ship.get.useNetRequest({pluginId, shipId});
   const deck = data.decks.find(d => d.name === deckName);
   if (!deck) {
     throw new Error("Deck not found");
@@ -90,7 +89,7 @@ export function DeckConfig() {
         <UploadWell
           accept="image/*"
           onChange={async files => {
-            await netSend("pluginShipDeckUpdate", {
+            await q.plugin.ship.deck.update.netSend({
               pluginId,
               shipId,
               deckId: deck.name,
@@ -139,7 +138,7 @@ export function DeckConfig() {
 
             const x = (e.clientX - left) / panState.current.scale / pixelRatio;
             const y = (e.clientY - top) / panState.current.scale / pixelRatio;
-            const node = await netSend("pluginShipDeckAddNode", {
+            const node = await q.plugin.ship.deck.addNode.netSend({
               pluginId,
               shipId,
               deckId: deck.name,
@@ -158,7 +157,7 @@ export function DeckConfig() {
               {...deckNode}
               panState={panState}
               updateNode={async (params: updateNodeParams) => {
-                await netSend("pluginShipDeckUpdateNode", {
+                await q.plugin.ship.deck.updateNode.netSend({
                   pluginId,
                   shipId,
                   deckId: deck.name,
@@ -173,7 +172,7 @@ export function DeckConfig() {
                     setSelectedEdgeId(null);
                   } else {
                     setSelectedNodeId(null);
-                    netSend("pluginShipDeckAddEdge", {
+                    q.plugin.ship.deck.addEdge.netSend({
                       pluginId,
                       shipId,
                       from: selectedNodeId,
@@ -190,7 +189,7 @@ export function DeckConfig() {
                 setSelectedEdgeId(null);
               }}
               removeNode={() => {
-                netSend("pluginShipDeckRemoveNode", {
+                q.plugin.ship.deck.removeNode.netSend({
                   pluginId,
                   shipId,
                   deckId: deck.name,
@@ -219,7 +218,7 @@ export function DeckConfig() {
                   header: "Are you sure you want to remove this deck image?",
                 })
               ) {
-                await netSend("pluginShipDeckUpdate", {
+                await q.plugin.ship.deck.update.netSend({
                   pluginId,
                   shipId,
                   deckId: deck.name,

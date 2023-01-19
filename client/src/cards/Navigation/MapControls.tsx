@@ -1,19 +1,22 @@
-import {useGetStarmapStore} from "client/src/components/Starmap/starmapStore";
+import {useGetStarmapStore} from "@client/components/Starmap/starmapStore";
+import {q} from "@client/context/AppContext";
 import Button from "@thorium/ui/Button";
 import {ZoomSlider} from "@thorium/ui/Slider";
-import {useNetRequest} from "client/src/context/useNetRequest";
 import {useEffect, useRef} from "react";
+import {SOLAR_SYSTEM_MAX_DISTANCE} from "@client/components/Starmap/SolarSystemMap";
+import {INTERSTELLAR_MAX_DISTANCE} from "@client/components/Starmap/InterstellarMap";
+import {lightYearToLightMinute} from "@server/utils/unitTypes";
+
 export function MapControls() {
   const useStarmapStore = useGetStarmapStore();
   const systemId = useStarmapStore(state => state.currentSystem);
-  const rendered = useRef(false);
-  const ship = useNetRequest("navigationShip", {}, ship => {
-    // Follow the player ship on first render
-    if (!rendered.current) {
-      rendered.current = true;
-      useStarmapStore.setState({followEntityId: ship.id});
-    }
-  });
+  const [ship] = q.navigation.ship.useNetRequest();
+
+  useEffect(() => {
+    q.navigation.ship.netRequest().then(res => {
+      useStarmapStore.setState({followEntityId: res.id});
+    });
+  }, [useStarmapStore]);
 
   useEffect(() => {
     if (useStarmapStore.getState().followEntityId === ship.id) {
@@ -21,7 +24,7 @@ export function MapControls() {
         .getState()
         .setCurrentSystem(ship.position?.parentId || null);
     }
-  }, [ship.position?.parentId]);
+  }, [ship.position?.parentId, useStarmapStore, ship.id]);
 
   return (
     <div className="self-end max-w-sm space-y-2">
@@ -41,12 +44,20 @@ export function MapControls() {
       )}
       <Button
         className="w-full btn-warning pointer-events-auto"
-        onClick={() =>
+        onClick={() => {
           useStarmapStore.setState({
             followEntityId: ship.id,
             currentSystem: ship.position?.parentId || null,
-          })
-        }
+          });
+          const currentSystem = useStarmapStore.getState().currentSystem;
+          const y =
+            currentSystem === null
+              ? lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)
+              : SOLAR_SYSTEM_MAX_DISTANCE;
+          if (ship.position) {
+            useStarmapStore.getState().setCameraFocus(ship.position);
+          }
+        }}
       >
         Follow Ship
       </Button>
@@ -56,7 +67,7 @@ export function MapControls() {
 
 export const ZoomSliderComp = () => {
   const useStarmapStore = useGetStarmapStore();
-  const cameraZoom = useStarmapStore(store => store.cameraVerticalDistance);
+  const cameraZoom = useStarmapStore(store => store.cameraObjectDistance);
   const cameraControls = useStarmapStore(store => store.cameraControls);
   const maxDistance = cameraControls?.current?.maxDistance || 30000000000;
   const minDistance = cameraControls?.current?.minDistance || 10000;
