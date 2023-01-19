@@ -113,7 +113,7 @@ export function ComponentDemo() {
     null
   );
   return (
-    <div className="flex flex-col gap-8 text-white h-full overflow-y-auto">
+    <div className="flex flex-col gap-8 text-white h-full overflow-y-auto p-4">
       <div className="flex flex-col gap-4">
         <h2 className="text-3xl">Alert</h2>
         <div className="alert">
@@ -230,6 +230,10 @@ export function ComponentDemo() {
           <Button>Item 2</Button>
           <Button>Item 3</Button>
         </div>
+      </div>
+      <div>
+        <h2 className="text-3xl">Gamepad Focus Border</h2>
+        <Button className="btn-active gamepad-focus">I am focused</Button>
       </div>
       <div>
         <h2 className="text-3xl">Divider</h2>

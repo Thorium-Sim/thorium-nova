@@ -13,6 +13,7 @@ const Login = () => {
       q.client.login.netSend({name: loginName});
     }
   };
+  if (!ship) throw new Error("Station is not assigned to a ship.");
   return (
     <div className="card-login flex flex-col items-center justify-center h-full">
       <img
