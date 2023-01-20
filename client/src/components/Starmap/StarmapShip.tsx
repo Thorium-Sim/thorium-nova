@@ -47,6 +47,7 @@ export function StarmapShip({
   const isNotViewscreen = useStarmapStore(
     store => store.viewingMode !== "viewscreen"
   );
+  const isCore = useStarmapStore(store => store.viewingMode === "core");
 
   const group = useRef<Group>(null);
   const shipMesh = useRef<Group>(null);
@@ -79,6 +80,7 @@ export function StarmapShip({
     // Autopilot Destination
     if (lineRef.current && group.current) {
       if (
+        isCore &&
         // TODO September 14, 2022 - Make it so you can toggle autopilot lines on and off
         // useConfigStore.getState().includeAutopilotData &&
         shipAutopilot?.destinationPosition
@@ -99,7 +101,7 @@ export function StarmapShip({
         lineRef.current.geometry.attributes.position.needsUpdate = true;
         lineRef.current.visible = true;
       } else {
-        // lineRef.current.visible = false;
+        lineRef.current.visible = false;
       }
     }
   });

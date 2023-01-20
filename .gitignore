@@ -7,3 +7,6 @@ tsconfig.tsbuildinfo
 coverage
 .env
 .turbo
+
+# Copied docs images
+client/public/docs

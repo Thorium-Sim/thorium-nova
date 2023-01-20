@@ -3,11 +3,13 @@ import {q} from "@client/context/AppContext";
 import Button from "@thorium/ui/Button";
 import {ZoomSlider} from "@thorium/ui/Slider";
 import {useEffect, useRef} from "react";
+import {SOLAR_SYSTEM_MAX_DISTANCE} from "@client/components/Starmap/SolarSystemMap";
+import {INTERSTELLAR_MAX_DISTANCE} from "@client/components/Starmap/InterstellarMap";
+import {lightYearToLightMinute} from "@server/utils/unitTypes";
 
 export function MapControls() {
   const useStarmapStore = useGetStarmapStore();
   const systemId = useStarmapStore(state => state.currentSystem);
-  const rendered = useRef(false);
   const [ship] = q.navigation.ship.useNetRequest();
 
   useEffect(() => {
@@ -42,12 +44,20 @@ export function MapControls() {
       )}
       <Button
         className="w-full btn-warning pointer-events-auto"
-        onClick={() =>
+        onClick={() => {
           useStarmapStore.setState({
             followEntityId: ship.id,
             currentSystem: ship.position?.parentId || null,
-          })
-        }
+          });
+          const currentSystem = useStarmapStore.getState().currentSystem;
+          const y =
+            currentSystem === null
+              ? lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)
+              : SOLAR_SYSTEM_MAX_DISTANCE;
+          if (ship.position) {
+            useStarmapStore.getState().setCameraFocus(ship.position);
+          }
+        }}
       >
         Follow Ship
       </Button>
@@ -57,7 +67,7 @@ export function MapControls() {
 
 export const ZoomSliderComp = () => {
   const useStarmapStore = useGetStarmapStore();
-  const cameraZoom = useStarmapStore(store => store.cameraVerticalDistance);
+  const cameraZoom = useStarmapStore(store => store.cameraObjectDistance);
   const cameraControls = useStarmapStore(store => store.cameraControls);
   const maxDistance = cameraControls?.current?.maxDistance || 30000000000;
   const minDistance = cameraControls?.current?.minDistance || 10000;

@@ -7,6 +7,7 @@ import {AnyRouter} from "@thorium/live-query/server/router";
 import {FastifyRequest, FastifyReply} from "fastify";
 import {DataContext} from "../utils/DataContext";
 import {buildDatabase} from "./buildDatabase";
+import {pubsub} from "./pubsub";
 
 const dataContextCache = new Map<string, DataContext>();
 
@@ -123,5 +124,13 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
   toJSON() {
     const {id, name, isHost} = this;
     return {id, name, isHost};
+  }
+  connectionOpened(): void {
+    pubsub.publish.client.get({clientId: this.id});
+    pubsub.publish.client.all();
+  }
+  connectionClosed(): void {
+    pubsub.publish.client.get({clientId: this.id});
+    pubsub.publish.client.all();
   }
 }

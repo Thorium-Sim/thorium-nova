@@ -13,7 +13,8 @@ concurrently(
       prefixColor: "green.bold",
     },
     {
-      command: "npm run build --workspace client",
+      command:
+        "NODE_OPTIONS=--max-old-space-size=32768 npm run build --workspace client",
       name: "client",
       prefixColor: "magenta.bold",
     },

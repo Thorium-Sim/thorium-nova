@@ -267,6 +267,7 @@ export class ServerClient<TRouter extends AnyRouter> {
       });
 
       this.subscriptions.clear();
+      this.connectionClosed();
     });
 
     // Set up the whole netSend process for calling input functions
@@ -392,6 +393,8 @@ export class ServerClient<TRouter extends AnyRouter> {
     send({
       type: "connected",
     });
+
+    this.connectionOpened();
   }
   send(data: SocketMessages) {
     this.ee.emit("send", data);
@@ -399,4 +402,6 @@ export class ServerClient<TRouter extends AnyRouter> {
   public async sendDataStream(context: inferRouterContext<TRouter>) {
     // Filter the list of entities provided
   }
+  connectionOpened() {}
+  connectionClosed() {}
 }
