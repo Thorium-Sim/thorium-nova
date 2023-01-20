@@ -39,7 +39,20 @@ const gamepadKeys = [
   "warp-focus-adjust",
   "warp-engage",
 ] as const;
+
 export type GamepadKey = (typeof gamepadKeys)[number];
+const keyLabels: Partial<Record<GamepadKey, string>> = {
+  "zoom-adjust": "Hold down a button to adjust zoom. Use with two buttons.",
+  "zoom-set": "Set the current zoom to the value of an axis.",
+  "pilot-sensor-tilt": "Press a button to toggle the sensor tilt.",
+  "impulse-speed": "Set the current speed to the value of an axis.",
+  "impulse-adjust": "Hold down a button to adjust speed. Use with two buttons.",
+  "warp-focus-set":
+    "Use an axis to shift focus between the warp speed buttons.",
+  "warp-focus-adjust":
+    "Use two buttons to shift focus between the warp speed buttons.",
+  "warp-engage": "Activate the currently focused warp speed.",
+};
 
 type GamepadActionConfig = (
   | {
@@ -464,7 +477,10 @@ function GamepadAction({
 
   return (
     <div className="flex gap-2 items-center justify-between py-4">
-      <div style={{width: `${width}ch`}}>{capitalCase(key)}</div>
+      <div style={{width: `${width}ch`}}>
+        {capitalCase(key)}
+        <small className="block text-gray-400">{keyLabels[key]}</small>
+      </div>
 
       <ul className="flex-1">
         {keyConfigs.map(keyConfig => (
