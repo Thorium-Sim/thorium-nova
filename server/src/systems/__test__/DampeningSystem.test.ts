@@ -48,7 +48,11 @@ describe("DampeningSystem", () => {
     ship.addComponent("rotation");
 
     ship.updateComponent("shipSystems", {
-      shipSystemIds: [impulse.id, thrusters.id, dampening.id],
+      shipSystems: new Map([
+        [impulse.id, {}],
+        [thrusters.id, {}],
+        [dampening.id, {}],
+      ]),
     });
 
     ecs.addSystem(impulseSystem);

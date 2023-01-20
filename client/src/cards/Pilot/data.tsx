@@ -171,7 +171,7 @@ export const pilot = t.router({
       const thrusters = ctx.flight?.ecs.entities.find(
         e =>
           e.components.isThrusters &&
-          ctx.ship?.components.shipSystems?.shipSystemIds.includes(e.id)
+          ctx.ship?.components.shipSystems?.shipSystems.has(e.id)
       );
       thrusters?.updateComponent("isThrusters", {
         rotationDelta: {x: 0, y: 0, z: 0},
@@ -269,7 +269,7 @@ export const pilot = t.router({
           entity.components.position.parentId === systemId) ||
           ((entity.components.isWarpEngines ||
             entity.components.isImpulseEngines) &&
-            ctx.ship?.components.shipSystems?.shipSystemIds.includes(entity.id))
+            ctx.ship?.components.shipSystems?.shipSystems.has(entity.id))
       );
     }),
 });

@@ -75,12 +75,7 @@ export function spawnShip(
     if (!systemPlugin) return;
     const systemEntity = spawnShipSystem(systemPlugin, system.overrides);
     shipSystems.push(systemEntity);
-    entity.updateComponent("shipSystems", {
-      shipSystemIds: [
-        ...(entity.components.shipSystems?.shipSystemIds || []),
-        systemEntity.id,
-      ],
-    });
+    entity.components.shipSystems?.shipSystems.set(systemEntity.id, {});
   });
   if (params.playerShip) {
     entity.addComponent("isPlayerShip");
@@ -151,6 +146,31 @@ export function spawnShip(
       ],
       dataContext.flight.inventoryTemplates
     );
+  }
+
+  // With the deck map initialized, we can now assign rooms to systems
+  let occupiedRooms: number[] = [];
+  for (let [id, info] of entity.components.shipSystems?.shipSystems || []) {
+    const system = shipSystems.find(sys => sys.id === id);
+    const systemType = system?.components.isShipSystem?.type;
+    if (!systemType) continue;
+    const availableRooms =
+      entity.components.shipMap?.deckNodes.filter(node =>
+        node.systems.includes(systemType)
+      ) || [];
+
+    if (occupiedRooms.length === availableRooms.length) {
+      occupiedRooms = [];
+    }
+    availableRooms.filter(a => !occupiedRooms.includes(a.id));
+
+    const roomAssignment = randomFromList(availableRooms);
+    if (!roomAssignment) continue;
+    occupiedRooms.push(roomAssignment.id);
+    entity.components.shipSystems?.shipSystems.set(id, {
+      ...info,
+      roomId: roomAssignment.id,
+    });
   }
 
   return {ship: entity, extraEntities: shipSystems.concat(extraEntities)};

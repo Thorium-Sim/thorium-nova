@@ -14,20 +14,20 @@ export class EngineVelocityPosition extends System {
   }
   update(entity: Entity, elapsed: number) {
     const elapsedRatio = elapsed / 1000;
-    const interstellarMultiplier = 
-     entity.components.position?.type === "solar" ? 1 : KM_TO_LM;
+    const interstellarMultiplier =
+      entity.components.position?.type === "solar" ? 1 : KM_TO_LM;
     const [impulseEngines, warpEngines] = this.ecs.entities.reduce(
       (acc: [Entity | null, Entity | null], sysEntity) => {
         if (
           !acc[0] &&
           sysEntity.components.isImpulseEngines &&
-          entity.components.shipSystems?.shipSystemIds.includes(sysEntity.id)
+          entity.components.shipSystems?.shipSystems.has(sysEntity.id)
         )
           return [sysEntity, acc[1]];
         if (
           !acc[1] &&
           sysEntity.components.isWarpEngines &&
-          entity.components.shipSystems?.shipSystemIds.includes(sysEntity.id)
+          entity.components.shipSystems?.shipSystems.has(sysEntity.id)
         )
           return [acc[0], sysEntity];
         return acc;
