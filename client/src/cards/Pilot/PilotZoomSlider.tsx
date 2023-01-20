@@ -15,6 +15,17 @@ export function PilotZoomSlider() {
   useGamepadValue("zoom-adjust", value => {
     setZoomAdjust(value);
   });
+  useGamepadValue("zoom-set", value => {
+    const max = width / (zoomMax * 2);
+    const min = width / (zoomMin * 2);
+    usePilotStore.setState({
+      zoom: logslider(
+        max,
+        min,
+        Math.min(100, Math.max(0, ((value + 1) / 2) * 100))
+      ),
+    });
+  });
   useAnimationFrame(() => {
     const max = width / (zoomMax * 2);
     const min = width / (zoomMin * 2);

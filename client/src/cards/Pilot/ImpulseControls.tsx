@@ -1,4 +1,4 @@
-import {useEffect, useRef} from "react";
+import {useEffect, useRef, useState} from "react";
 
 import {useSpring, animated as a} from "@react-spring/web";
 import {useDrag} from "@use-gesture/react";
@@ -9,7 +9,7 @@ import Button from "@thorium/ui/Button";
 import useAnimationFrame from "@client/hooks/useAnimationFrame";
 import {useLiveQuery} from "@thorium/live-query/client";
 import {q} from "@client/context/AppContext";
-import {useGamepadValue} from "@client/hooks/useGamepadStore";
+import {useGamepadPress, useGamepadValue} from "@client/hooks/useGamepadStore";
 
 const C_IN_METERS = 299792458;
 function formatSpeed(speed: KilometerPerSecond) {
@@ -107,7 +107,9 @@ export const ImpulseControls = ({cardLoaded = true}) => {
 
   const callback = useRef(
     throttle((speed: number) => {
-      q.pilot.impulseEngines.setSpeed.netSend({speed});
+      q.pilot.impulseEngines.setSpeed.netSend({
+        speed: Math.min(emergencySpeed, Math.max(0, speed)),
+      });
       if (speed === 0) {
         q.pilot.warpEngines.setWarpFactor.netSend({factor: 0});
       }
@@ -170,6 +172,61 @@ export const ImpulseControls = ({cardLoaded = true}) => {
 
   useGamepadValue("impulse-speed", value => {
     const throttleValue = (value + 1) / 2;
+    console.log(value);
+    callback.current(throttleValue * cruisingSpeed);
+  });
+
+  const [impulseAdjust, setImpulseAdjust] = useState(0);
+  const impulseAdjustVelocity = useRef(0);
+  useGamepadValue("impulse-adjust", value => {
+    setImpulseAdjust(value);
+    impulseAdjustVelocity.current = 0;
+  });
+
+  useAnimationFrame(() => {
+    const adjust =
+      Math.min(
+        Math.abs(impulseAdjustVelocity.current),
+        Math.abs(impulseAdjust)
+      ) * Math.sign(impulseAdjust);
+    callback.current(targetSpeed + adjust);
+    impulseAdjustVelocity.current += impulseAdjust / 500;
+  }, impulseAdjust !== 0);
+
+  // Warp Gamepad Control
+  const [warpFocus, setWarpFocus] = useState(0);
+
+  useGamepadValue("warp-focus-set", value => {
+    setWarpFocus(
+      Math.max(
+        0,
+        Math.min(
+          warpFactorCount + 1,
+          Math.round(((value + 1) / 2) * (warpFactorCount + 1))
+        )
+      )
+    );
+  });
+  useGamepadPress("warp-focus-adjust", {
+    onDown: val => {
+      setWarpFocus(focus =>
+        Math.max(0, Math.min(warpFactorCount + 1, Math.round(val + focus)))
+      );
+    },
+  });
+  useGamepadPress("warp-engage", {
+    onDown: () => {
+      q.pilot.warpEngines.setWarpFactor.netSend({
+        factor: warpFocus,
+      });
+      setWarpFocus(0);
+    },
+  });
+  useGamepadPress("full-stop", {
+    onDown: () => {
+      callback.current(0);
+      setWarpFocus(0);
+    },
   });
   return (
     <div className="select-none flex-1">
@@ -239,6 +296,8 @@ export const ImpulseControls = ({cardLoaded = true}) => {
             <div className="flex flex-col justify-around h-full">
               <Button
                 className={`btn-sm btn-error ${
+                  warpFocus === warpFactorCount + 1 ? "gamepad-focus" : ""
+                }${
                   currentWarpFactor === warpFactorCount + 1 ? "btn-active" : ""
                 }`}
                 onClick={() =>
@@ -257,7 +316,7 @@ export const ImpulseControls = ({cardLoaded = true}) => {
                   <Button
                     key={`warp-${warpFactor}`}
                     className={`btn-sm btn-primary ${
-                      i === 0 ? "warning" : ""
+                      warpFocus === warpFactor ? "gamepad-focus" : ""
                     } ${warpFactor === currentWarpFactor ? "btn-active" : ""}`}
                     onClick={() =>
                       q.pilot.warpEngines.setWarpFactor.netSend({

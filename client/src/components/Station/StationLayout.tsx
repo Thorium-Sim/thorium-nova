@@ -8,11 +8,7 @@ import {CardSwitcher} from "./CardSwitcher";
 import {useManageCard} from "./useManageCard";
 import {ClickWidget} from "./widgets";
 import {useState} from "react";
-import {
-  GamepadConfig,
-  useGamepadConfigStore,
-  useGamepadStore,
-} from "@client/hooks/useGamepadStore";
+import {GamepadConfig, useGamepadStore} from "@client/hooks/useGamepadStore";
 
 const StationLayout = () => {
   const [ship] = q.ship.get.useNetRequest();

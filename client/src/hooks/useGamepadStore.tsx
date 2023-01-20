@@ -28,11 +28,16 @@ const gamepadKeys = [
   "y-thrusters",
   "z-thrusters",
   "zoom-adjust",
+  "zoom-set",
   "pilot-sensor-tilt",
   "autopilot-lock-on",
   "autopilot-activate",
   "full-stop",
   "impulse-speed",
+  "impulse-adjust",
+  "warp-focus-set",
+  "warp-focus-adjust",
+  "warp-engage",
 ] as const;
 export type GamepadKey = (typeof gamepadKeys)[number];
 
@@ -282,6 +287,7 @@ export function useGamepadValue(
     callbackRef.current = callback;
   }, [callback]);
 
+  const oldValue = useRef(0);
   const actions = config?.actions[key || ("" as GamepadKey)];
   useEffect(() => {
     if (!actions) return;
@@ -327,7 +333,11 @@ export function useGamepadValue(
         }
         value += actionValue;
       }
-      callbackRef.current(value);
+
+      if (value !== oldValue.current) {
+        oldValue.current = value;
+        callbackRef.current(value);
+      }
     });
 
     return () => unsubscribe();
@@ -336,14 +346,14 @@ export function useGamepadValue(
 
 export function useGamepadPress(
   key: GamepadKey | undefined,
-  callbacks: {onDown?: () => void; onUp?: () => void}
+  callbacks: {onDown?: (val: number) => void; onUp?: (val: number) => void}
 ) {
   const lastVal = useRef(0);
   useGamepadValue(key, value => {
-    if (value === 1) {
-      callbacks.onDown?.();
-    } else if (lastVal.current === 1) {
-      callbacks.onUp?.();
+    if (Math.abs(value) > 0.5) {
+      callbacks.onDown?.(value);
+    } else if (Math.abs(lastVal.current) > 0.5) {
+      callbacks.onUp?.(lastVal.current);
     }
     lastVal.current = value;
   });
