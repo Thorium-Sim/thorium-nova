@@ -34,8 +34,6 @@ export default function FlightDirectorLayout() {
           <ErrorBoundary fallback={<></>}>
             <CoreFlexLayoutDropdown />
           </ErrorBoundary>
-          <div className="flex-1"></div>
-          <LoginButton size="sm" />
         </Menubar>
         <div className="relative flex-1">
           <CoreFlexLayout ref={layoutRef} />
