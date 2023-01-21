@@ -129,7 +129,7 @@ export const AlertDialog = ({children}: {children: React.ReactNode}) => {
                 {type === "prompt" ? (
                   <div>
                     <label>
-                      {body || "Response"}
+                      {body || ""}
                       <input
                         {...inputProps}
                         ref={inputEl}
