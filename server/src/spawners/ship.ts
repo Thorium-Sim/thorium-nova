@@ -88,7 +88,11 @@ export function spawnShip(
   let extraEntities: Entity[] = [];
   // Initialize the ship map. For now, we'll just load the ship map onto a component of the ship.
   // In the future, rooms themselves might become entities.
-  if (entity.components.isPlayerShip) {
+  if (
+    entity.components.isPlayerShip &&
+    template.decks &&
+    template.decks?.length > 0
+  ) {
     const deckNodes =
       template.decks?.flatMap((deck, i) =>
         deck.nodes.map(n => ({...n, deckIndex: i, contents: {}}))

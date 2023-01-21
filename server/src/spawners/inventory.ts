@@ -32,9 +32,38 @@ export function generateShipInventory(
     [0, []]
   );
 
+  // We only want to add the kinds of cargo that are absolutely necessary, especially at first.
+  const neededInventory: string[] = [];
+  // TODO Jan 21, 2023 - these should be conditional based on reactors and systems that need heat.
+  neededInventory.push("fuel");
+  neededInventory.push("coolant");
+  // TODO Jan 21, 2023 - these should be conditional based on whether there are torpedos or not
+  neededInventory.push("torpedoCasing");
+  neededInventory.push("torpedoWarhead");
+  // TODO Jan 21, 2023 - these should be conditional based on whether there are probes or not
+  neededInventory.push("probeCasing");
+  neededInventory.push("probeEquipment");
+  // TODO Jan 21, 2023 - these should be conditional based on whether there are crew on the ship
+  // For now, if there are more than 1 rooms on the ship, they have crew
+  if (inputRooms.length > 1) {
+    neededInventory.push("forCrew");
+    neededInventory.push("science");
+    neededInventory.push("medical");
+    neededInventory.push("security");
+    neededInventory.push("repair");
+    neededInventory.push("sparePart");
+  }
+
+  neededInventory.push("water");
+
   // And we need to figure out our abundance level of each piece of cargo
   // for doing weighted random selection.
-  const inventoryList = Object.values(flightInventory);
+  const inventoryList = Object.values(flightInventory).filter(i => {
+    for (let key in i.flags) {
+      if (neededInventory.includes(key)) return true;
+    }
+    return false;
+  });
   const cargoAbundance: number[] = [];
   const totalInventoryVolume = inventoryList.reduce(
     (acc, inventoryTemplate) => {
@@ -42,9 +71,12 @@ export function generateShipInventory(
     },
     0
   );
-  const shipAbundanceRatio = totalVolume / totalInventoryVolume;
+  // Limit the amount of cargo so we don't fill up every nook and cranny
+  const volumeMultiplier = 0.75;
+  const shipAbundanceRatio =
+    (totalVolume * volumeMultiplier) / totalInventoryVolume;
 
-  Object.values(flightInventory).forEach((inventoryTemplate, index) => {
+  inventoryList.forEach((inventoryTemplate, index) => {
     const abundance = inventoryTemplate.abundance * shipAbundanceRatio;
     for (let i = 0; i < abundance; i++) {
       cargoAbundance.push(index);
@@ -121,9 +153,10 @@ export function generateShipInventory(
   // TODO July 22 2022 - replace these numbers with actual numbers from the ship config
   const torpedoLauncherCount = 2;
   const probeLauncherCount = 1;
-  const securityCrew = 5;
-  const repairCrew = 5;
-  const medicalCrew = 5;
+  // If there is only one room, we can safely assume there are no crew members
+  const securityCrew = inputRooms.length > 1 ? 5 : 0;
+  const repairCrew = inputRooms.length > 1 ? 5 : 0;
+  const medicalCrew = inputRooms.length > 1 ? 5 : 0;
 
   // Next lets determine the important things
   // How much fuel does the ship need?
