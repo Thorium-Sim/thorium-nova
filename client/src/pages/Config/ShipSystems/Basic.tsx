@@ -44,7 +44,7 @@ export function Basic() {
                 try {
                   const result = await q.plugin.systems.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     shipId,
                     shipPluginId,
                     name: e.target.value,
@@ -77,7 +77,7 @@ export function Basic() {
               onBlur={(e: any) =>
                 q.plugin.systems.update.netSend({
                   pluginId,
-                  shipSystemId: systemId,
+                  systemId: systemId,
                   shipId,
                   shipPluginId,
                   description: e.target.value,
@@ -99,7 +99,7 @@ export function Basic() {
                   if (system.tags.includes(tag)) return;
                   q.plugin.systems.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     tags: [...system.tags, tag],
                   });
                 }}
@@ -107,7 +107,7 @@ export function Basic() {
                   if (!system.tags.includes(tag)) return;
                   q.plugin.systems.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     shipId,
                     shipPluginId,
                     tags: system.tags.filter(t => t !== tag),

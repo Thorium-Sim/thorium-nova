@@ -26,7 +26,7 @@ export const inertialDampeners = t.router({
     .input(
       z.object({
         pluginId: z.string(),
-        shipSystemId: z.string(),
+        systemId: z.string(),
         shipPluginId: z.string().optional(),
         shipId: z.string().optional(),
         dampening: z.number().optional(),

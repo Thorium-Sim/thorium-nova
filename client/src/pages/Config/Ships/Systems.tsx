@@ -3,7 +3,7 @@ import {Routes, Route, useNavigate, useParams} from "react-router-dom";
 import Button from "@thorium/ui/Button";
 import {useState} from "react";
 import {capitalCase} from "change-case";
-import {FaBan, FaPencilAlt} from "react-icons/fa";
+import {FaBan, FaPencilAlt, FaPlus} from "react-icons/fa";
 import {OverrideEdit} from "./OverrideEdit";
 import {Suspense} from "react";
 import {ShipPluginIdContext} from "./ShipSystemOverrideContext";
@@ -18,9 +18,11 @@ export function Systems() {
 
   const systems = allSystems.filter(
     sys =>
-      !ship.shipSystems.some(
-        ss => ss.systemId === sys.name && ss.pluginId === sys.pluginName
-      ) && (allPlugins ? true : sys.pluginName === pluginId)
+      (sys.allowMultiple
+        ? true
+        : !ship.shipSystems.some(
+            ss => ss.systemId === sys.name && ss.pluginId === sys.pluginName
+          )) && (allPlugins ? true : sys.pluginName === pluginId)
   );
 
   const navigate = useNavigate();
@@ -34,19 +36,42 @@ export function Systems() {
           showSearchLabel={false}
           selectedItem={null}
           setSelectedItem={item => {
+            if (item.allowMultiple) return null;
             q.plugin.ship.toggleSystem.netSend({
               shipId,
               pluginId,
-              systemId: item.systemId,
-              systemPlugin: item.pluginId,
+              systemId: item.id.systemId,
+              systemPlugin: item.id.pluginId,
             });
           }}
           items={systems.map(c => ({
             id: {systemId: c.name, pluginId: c.pluginName},
             category: capitalCase(c.type),
+            allowMultiple: c.allowMultiple,
             label: c.name,
             pluginName: c.pluginName,
           }))}
+          renderItem={item => (
+            <div className="flex">
+              {item.label}
+              <div className="flex-1"></div>
+              {item.allowMultiple ? (
+                <Button
+                  className="btn-xs"
+                  onClick={() => {
+                    q.plugin.ship.addSystem.netSend({
+                      shipId,
+                      pluginId,
+                      systemId: item.id.systemId,
+                      systemPlugin: item.id.pluginId,
+                    });
+                  }}
+                >
+                  <FaPlus />
+                </Button>
+              ) : null}
+            </div>
+          )}
         />
         {!allPlugins && (
           <Button
@@ -78,9 +103,9 @@ export function Systems() {
               );
               if (!system) return null;
               return {
-                id: {systemId: c.systemId, pluginId: system.pluginName},
+                id: c.id,
                 category: capitalCase(system.type),
-                label: system.name,
+                label: c.overrides?.name || system.name,
                 pluginName: system.pluginName,
               };
             })
@@ -92,9 +117,7 @@ export function Systems() {
               <Button
                 className="btn-outline btn-xs btn-primary"
                 aria-label="Edit"
-                onClick={() =>
-                  navigate(`edit/${item.id.pluginId}/${item.id.systemId}`)
-                }
+                onClick={() => navigate(`edit/${item.pluginName}/${item.id}`)}
               >
                 <FaPencilAlt />
               </Button>
@@ -105,8 +128,8 @@ export function Systems() {
                   q.plugin.ship.toggleSystem.netSend({
                     shipId,
                     pluginId,
-                    systemId: item.id.systemId,
-                    systemPlugin: item.id.pluginId,
+                    systemId: item.id,
+                    systemPlugin: item.pluginName,
                   })
                 }
               >

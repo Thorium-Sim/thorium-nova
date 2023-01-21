@@ -44,7 +44,7 @@ export default function ImpulseEngineConfig() {
                 try {
                   await q.plugin.systems.impulse.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     shipId,
                     shipPluginId,
                     cruisingSpeed: Number(e.target.value),
@@ -80,7 +80,7 @@ export default function ImpulseEngineConfig() {
                 try {
                   await q.plugin.systems.impulse.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     shipId,
                     shipPluginId,
                     emergencySpeed: Number(e.target.value),
@@ -118,7 +118,7 @@ export default function ImpulseEngineConfig() {
                 try {
                   await q.plugin.systems.impulse.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     shipId,
                     shipPluginId,
                     thrust: Number(e.target.value),

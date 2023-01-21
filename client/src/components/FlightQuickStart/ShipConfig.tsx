@@ -37,7 +37,7 @@ const ShipConfig = () => {
       <div className="h-64">
         <SearchableList
           selectedItem={state.shipId}
-          setSelectedItem={item => dispatch({type: "shipId", shipId: item})}
+          setSelectedItem={({id}) => dispatch({type: "shipId", shipId: id})}
           items={pluginShips.map(item => ({
             id: {shipId: item.name, pluginId: item.pluginName},
             label: item.name,

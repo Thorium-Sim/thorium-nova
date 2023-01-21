@@ -45,7 +45,7 @@ describe(`${testConfig.systemName} plugin input`, () => {
     // Test updating the system
     await router.plugin.systems.warp.update({
       pluginId: "Test Plugin",
-      shipSystemId: `Test ${testConfig.systemName}`,
+      systemId: `Test ${testConfig.systemName}`,
       interstellarCruisingSpeed: 1_000_000_000,
     });
     expect(system.interstellarCruisingSpeed).toEqual(1_000_000_000);
@@ -53,7 +53,7 @@ describe(`${testConfig.systemName} plugin input`, () => {
     expect(system.solarCruisingSpeed).toEqual(29_980_000);
     await router.plugin.systems.warp.update({
       pluginId: "Test Plugin",
-      shipSystemId: `Test ${testConfig.systemName}`,
+      systemId: `Test ${testConfig.systemName}`,
       solarCruisingSpeed: 1_000_000_000,
     });
     expect(system.solarCruisingSpeed).toEqual(1_000_000_000);
@@ -62,20 +62,20 @@ describe(`${testConfig.systemName} plugin input`, () => {
     await expect(
       router.plugin.systems.warp.update({
         pluginId: "Test Plugin",
-        shipSystemId: `Test ${testConfig.systemName}`,
+        systemId: `Test ${testConfig.systemName}`,
         warpFactorCount: 0.5,
       })
     ).rejects.toThrow();
     await expect(
       router.plugin.systems.warp.update({
         pluginId: "Test Plugin",
-        shipSystemId: `Test ${testConfig.systemName}`,
+        systemId: `Test ${testConfig.systemName}`,
         warpFactorCount: 3.5,
       })
     ).rejects.toThrow();
     await router.plugin.systems.warp.update({
       pluginId: "Test Plugin",
-      shipSystemId: `Test ${testConfig.systemName}`,
+      systemId: `Test ${testConfig.systemName}`,
       warpFactorCount: 3,
     });
     expect(system.warpFactorCount).toEqual(3);

@@ -110,7 +110,7 @@ function Waypoints() {
                 )}
               </span>
             )}
-            setSelectedItem={async id => {
+            setSelectedItem={async ({id}) => {
               const waypoint = waypoints.find(w => w.id === id);
               if (waypoint) {
                 if (

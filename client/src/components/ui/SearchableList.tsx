@@ -15,7 +15,7 @@ interface SearchableListProps<
 > {
   items: L[];
   selectedItem?: ID | null;
-  setSelectedItem?: (item: ID) => void;
+  setSelectedItem?: (item: L) => void;
   renderItem?: (item: L) => JSX.Element;
   searchKeys?: OnlyString<keyof L>[];
   showSearchLabel?: boolean;
@@ -86,7 +86,7 @@ function SearchableList<
                       deepEqual(c.id, selectedItem) ? "selected" : ""
                     }`}
                     onClick={() => {
-                      setSelectedItem?.(c.id);
+                      setSelectedItem?.(c);
                     }}
                   >
                     {renderItem ? renderItem(c) : c.label}

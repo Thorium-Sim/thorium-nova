@@ -147,11 +147,11 @@ export function Basic() {
                             })) || []
                           }
                           selectedItem={ship.theme}
-                          setSelectedItem={item => {
+                          setSelectedItem={({id}) => {
                             q.plugin.ship.update.netSend({
                               pluginId,
                               shipId,
-                              theme: item,
+                              theme: id,
                             });
                             close();
                           }}

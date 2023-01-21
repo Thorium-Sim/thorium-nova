@@ -21,6 +21,7 @@ export default class BaseShipSystemPlugin extends Aspect {
    * for this system
    */
   assets: {};
+  allowMultiple: boolean = false;
   constructor(params: Partial<BaseShipSystemPlugin>, plugin: BasePlugin) {
     const name = generateIncrementedName(
       params.name || `New ${params.type}`,
