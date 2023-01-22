@@ -16,6 +16,12 @@ export class IsShipComponent extends Component {
    */
   category: string = "Cruiser";
 
+  /**
+   * The current alert level of the ship. On a scale from 5 being "all clear" and 1 being "red alert".
+   * p represents a cloaked status.
+   */
+  alertLevel: string = "5";
+
   assets: Partial<{
     /**
      * The path to the logo image. Best if it's a square image. SVGs are preferred.
