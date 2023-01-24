@@ -14,6 +14,12 @@ export default class ReactorPlugin extends BaseShipSystemPlugin {
    * any lower increases overall efficiency, making fuel last longer.
    */
   optimalOutputPercent: number;
+  /**
+   * The max power output of each reactor is determined by the power
+   * required by all of the systems on the ship divided by the
+   * number of reactors. Maybe with a bit of margin for error, just
+   * in case.
+   */
   reactorCount: number;
   constructor(params: Partial<ReactorPlugin>, plugin: BasePlugin) {
     super(params, plugin);

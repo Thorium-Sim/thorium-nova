@@ -82,3 +82,7 @@ export class Coordinates<T extends number> {
 
 export type KiloWattHour = Flavor<number, "kilowatthour">;
 export type KiloWatt = Flavor<number, "kilowatt">;
+export type MegaWattHour = Flavor<number, "megawatthour">;
+export type MegaWatt = Flavor<number, "megawatt">;
+export type GigaWattHour = Flavor<number, "gigawatthour">;
+export type GigaWatt = Flavor<number, "gigawatt">;
