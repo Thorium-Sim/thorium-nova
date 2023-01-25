@@ -46,18 +46,14 @@ const AlertLevel = () => {
       });
     }
     const clearDesc = () => {
-      alertLevelText.forEach((e) => {
-        if (e.number.toString() === ship.components.isShip?.alertLevel) {
-          setDescription("");
-        }
-      });
+      setDescription("");
     }
     return (
         <div className="flex flex-row h-full gap-4">
           <div className="flex-1">
-            <div className="flex flex-col justify-between h-full">
+            <div className="flex flex-col justify-between h-full gap-4">
               <Button 
-                className="btn-primary btn-lg"
+                className="btn-primary flex-1"
                 type="button"
                 onClick={() => updateLevel("5")}
                 onMouseEnter={() => displayDesc(5)}
@@ -66,7 +62,7 @@ const AlertLevel = () => {
                 Alert Condition 5
               </Button>
               <Button
-                className="btn-success btn-lg"
+                className="btn-success flex-1"
                 type="button"
                 onClick={() => updateLevel("4")}
                 onMouseEnter={() => displayDesc(4)}
@@ -75,7 +71,7 @@ const AlertLevel = () => {
                 Alert Condition 4
               </Button>
               <Button
-                className="btn-warning btn-lg"
+                className="btn-warning flex-1"
                 type="button"
                 onClick={() => updateLevel("3")}
                 onMouseEnter={() => displayDesc(3)}
@@ -84,7 +80,7 @@ const AlertLevel = () => {
                 Alert Condition 3
               </Button>
               <Button
-                className="btn-secondary btn-lg"
+                className="btn-secondary flex-1"
                 type="button"
                 onClick={() => updateLevel("2")}
                 onMouseEnter={() => displayDesc(2)}
@@ -93,7 +89,7 @@ const AlertLevel = () => {
                 Alert Condition 2
               </Button>
               <Button
-                className="btn-error btn-lg"
+                className="btn-error flex-1"
                 type="button"
                 onClick={() => updateLevel("1")}
                 onMouseEnter={() => displayDesc(1)}
