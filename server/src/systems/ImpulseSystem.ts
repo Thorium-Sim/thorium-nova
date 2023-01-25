@@ -25,13 +25,13 @@ export class ImpulseSystem extends System {
     const elapsedRatio = elapsed / 1000;
 
     const ship = this.ecs.entities.find(e =>
-      e.components.shipSystems?.shipSystemIds.includes(entity.id)
+      e.components.shipSystems?.shipSystems.has(entity.id)
     );
     if (!ship || !ship.components.isShip || !entity.components.isImpulseEngines)
       return;
 
     const warp = this.WarpSystem?.entities.find(e =>
-      ship.components.shipSystems?.shipSystemIds.includes(e.id)
+      ship.components.shipSystems?.shipSystems.has(e.id)
     );
     const mass = ship.components.mass?.mass || 1;
 

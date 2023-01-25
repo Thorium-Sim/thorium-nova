@@ -31,7 +31,7 @@ describe("ThrusterSystem", () => {
     ship.addComponent("position");
     ship.addComponent("velocity");
     ship.addComponent("rotation");
-    ship.addComponent("shipSystems", {shipSystemIds: [entity.id]});
+    ship.addComponent("shipSystems", {shipSystems: new Map([[entity.id, {}]])});
     ecs.addSystem(thrusterSystem);
     ecs.addSystem(rotationSystem);
     ecs.addSystem(engineVelocitySystem);

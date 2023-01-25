@@ -1,4 +1,10 @@
-import {MutableRefObject, useEffect, useState} from "react";
+import {
+  MutableRefObject,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import Button from "@thorium/ui/Button";
 import {useConfirm} from "@thorium/ui/AlertDialog";
 import {DeckNode, nodeFlags} from "server/src/classes/Plugins/Ship/Deck";
@@ -6,13 +12,89 @@ import {useDrag} from "@use-gesture/react";
 import {autoUpdate, offset, shift, useFloating} from "@floating-ui/react-dom";
 import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
-import {Portal} from "@headlessui/react";
+import {Disclosure, Portal, Transition} from "@headlessui/react";
 import useOnClickOutside from "client/src/hooks/useClickOutside";
 import {PanStateI, updateNodeParams} from "./DeckConfig";
 import {useTriggerEdgeRender} from "./EdgeContextProvider";
 import {capitalCase} from "change-case";
 import InfoTip from "@thorium/ui/InfoTip";
+import {q} from "@client/context/AppContext";
+import {useLocalStorage} from "@client/hooks/useLocalStorage";
+import {HiChevronUp} from "react-icons/hi";
 const pixelRatio = window.devicePixelRatio;
+
+const HandleIsOpen = ({
+  open,
+  title,
+  scrollRef,
+}: {
+  title: string;
+  open: boolean;
+  scrollRef: React.RefObject<HTMLDivElement>;
+}) => {
+  const hasMounted = useRef(false);
+  useEffect(() => {
+    localStorage.setItem(`editor-palette-open-${title}`, JSON.stringify(open));
+  }, [title, open]);
+  useLayoutEffect(() => {
+    if (open && hasMounted.current) {
+      setTimeout(() => {
+        scrollRef.current?.scrollIntoView({behavior: "smooth", block: "start"});
+      }, 100);
+    }
+    hasMounted.current = true;
+  }, [open, scrollRef]);
+
+  return null;
+};
+
+function NodeDisclosure({
+  title,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [isDefaultOpen] = useLocalStorage(`node-palette-${title}`, defaultOpen);
+  const disclosureRef = useRef<HTMLDivElement>(null);
+  return (
+    <Disclosure defaultOpen={isDefaultOpen}>
+      {({open}) => (
+        <>
+          <HandleIsOpen open={open} title={title} scrollRef={disclosureRef} />
+          <div
+            className="w-full py-1 px-2 bg-gray-900 sticky z-10 -top-1"
+            ref={disclosureRef}
+          >
+            <Disclosure.Button className="btn btn-notice btn-sm justify-between btn-block">
+              <span>{title}</span>
+              <HiChevronUp
+                className={` transition-transform${
+                  open ? "transform rotate-180" : ""
+                } w-5 h-5`}
+              />
+            </Disclosure.Button>
+          </div>
+          <Transition
+            enter="transition duration-100 ease-out"
+            enterFrom="transform scale-95 opacity-0"
+            enterTo="transform scale-100 opacity-100"
+            leave="transition duration-75 ease-out"
+            leaveFrom="transform scale-100 opacity-100"
+            leaveTo="transform scale-95 opacity-0"
+          >
+            <Disclosure.Panel className="pt-4 pb-2 px-2 border-b border-b-gray-700">
+              {children}
+            </Disclosure.Panel>
+          </Transition>
+        </>
+      )}
+    </Disclosure>
+  );
+}
+
 export function NodeCircle({
   id,
   x,
@@ -21,6 +103,7 @@ export function NodeCircle({
   radius,
   volume,
   flags,
+  systems,
   name,
   icon,
   selected,
@@ -84,6 +167,7 @@ export function NodeCircle({
     }
   });
   const confirm = useConfirm();
+  const [availableSystems] = q.plugin.systems.available.useNetRequest();
   return (
     <>
       <div
@@ -138,25 +222,43 @@ export function NodeCircle({
               defaultChecked={isRoom}
               onChange={e => updateNode({isRoom: e.target.checked})}
             />
-            {nodeFlags.map(flag => (
-              <Checkbox
-                key={flag}
-                label={
-                  <>
-                    {capitalCase(flag)}
-                    <FlagExplainer flag={flag} />
-                  </>
-                }
-                defaultChecked={flags.includes(flag)}
-                onChange={e => {
-                  if (e.target.checked) {
-                    updateNode({flags: [...flags, flag]});
-                  } else {
-                    updateNode({flags: flags.filter(f => f !== flag)});
+            <NodeDisclosure title="Flags">
+              {nodeFlags.map(flag => (
+                <Checkbox
+                  key={flag}
+                  label={
+                    <>
+                      {capitalCase(flag)}
+                      <FlagExplainer flag={flag} />
+                    </>
                   }
-                }}
-              />
-            ))}
+                  defaultChecked={flags.includes(flag)}
+                  onChange={e => {
+                    if (e.target.checked) {
+                      updateNode({flags: [...flags, flag]});
+                    } else {
+                      updateNode({flags: flags.filter(f => f !== flag)});
+                    }
+                  }}
+                />
+              ))}
+            </NodeDisclosure>
+            <NodeDisclosure title="Systems">
+              {availableSystems.map(({type}) => (
+                <Checkbox
+                  key={type}
+                  label={<>{capitalCase(type)}</>}
+                  defaultChecked={systems.includes(type)}
+                  onChange={e => {
+                    if (e.target.checked) {
+                      updateNode({systems: [...systems, type]});
+                    } else {
+                      updateNode({systems: systems.filter(t => t !== type)});
+                    }
+                  }}
+                />
+              ))}
+            </NodeDisclosure>
             <Input
               label="Radius"
               type="range"

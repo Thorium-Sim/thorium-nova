@@ -138,7 +138,7 @@ export class AutoRotateSystem extends System {
     const thrusters = this.ecs.entities.find(
       sysEntity =>
         sysEntity.components.isThrusters &&
-        entity.components.shipSystems?.shipSystemIds.includes(sysEntity.id)
+        entity.components.shipSystems?.shipSystems.has(sysEntity.id)
     );
     if (thrusters?.components?.isThrusters) {
       thrusters.updateComponent("isThrusters", {
