@@ -44,7 +44,7 @@ export default function InertialDampenersConfig() {
                 try {
                   await q.plugin.systems.inertialDampeners.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     shipId,
                     shipPluginId,
                     dampening: Number(e.target.value),

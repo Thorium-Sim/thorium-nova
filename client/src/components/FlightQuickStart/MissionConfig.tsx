@@ -29,8 +29,8 @@ const ShipConfig = () => {
     <div className="h-64 flex flex-col w-64">
       <SearchableList
         selectedItem={state.startingPointId}
-        setSelectedItem={item =>
-          dispatch({type: "startingPointId", startingPointId: item})
+        setSelectedItem={({id}) =>
+          dispatch({type: "startingPointId", startingPointId: id})
         }
         items={startingPoints.map(item => ({
           id: item,

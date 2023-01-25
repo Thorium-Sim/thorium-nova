@@ -35,14 +35,18 @@ export function getShipSystem({
   };
 }) {
   let override = {};
+  let systemId = input.systemId;
   if (input.shipPluginId) {
     const plugin = getPlugin(ctx, input.shipPluginId);
     const ship = plugin.aspects.ships.find(s => s.name === input.shipId);
     if (ship) {
       const system = ship.shipSystems.find(
-        s => s.systemId === input.systemId && s.pluginId === input.shipPluginId
+        s =>
+          s.id === input.systemId ||
+          (s.systemId === input.systemId && s.pluginId === input.shipPluginId)
       );
       if (system) {
+        systemId = system.systemId;
         if (!system.overrides) {
           system.overrides = {};
         }
@@ -52,9 +56,9 @@ export function getShipSystem({
   }
   const plugin = getPlugin(ctx, input.pluginId);
   const shipSystem = plugin.aspects.shipSystems.find(
-    system => system.name === input.systemId
+    system => system.name === systemId
   );
-  if (!shipSystem) throw new Error(`System not found: ${input.systemId}`);
+  if (!shipSystem) throw new Error(`System not found: ${systemId}`);
   const {plugin: sysPlugin, ...system} = shipSystem;
 
   return {
@@ -74,12 +78,12 @@ export function getShipSystemForInput<
   context: DataContext,
   {
     pluginId,
-    shipSystemId,
+    systemId,
     shipPluginId,
     shipId,
   }: {
     pluginId: string;
-    shipSystemId: string;
+    systemId: string;
     shipPluginId?: string;
     shipId?: string;
   }
@@ -93,18 +97,21 @@ export function getShipSystemForInput<
       throw new Error("Ship not found");
     }
     const system = ship.shipSystems.find(
-      s => s.systemId === shipSystemId && s.pluginId === shipPluginId
+      s =>
+        s.id === systemId ||
+        (s.systemId === systemId && s.pluginId === shipPluginId)
     );
     if (!system) {
       throw new Error("Ship system is not assigned to ship");
     }
+    systemId = system.systemId;
     if (!system.overrides) {
       system.overrides = {};
     }
     override = system.overrides;
   }
   const shipSystem = plugin.aspects.shipSystems.find(
-    s => s.name === shipSystemId
+    s => s.name === systemId
   ) as Sys;
   if (!shipSystem) {
     throw new Error("Ship system not found");

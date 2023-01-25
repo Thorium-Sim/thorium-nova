@@ -42,7 +42,7 @@ export default function WarpEngines() {
                 try {
                   await q.plugin.systems.warp.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     shipId,
                     shipPluginId,
                     interstellarCruisingSpeed: Number(e.target.value),
@@ -78,7 +78,7 @@ export default function WarpEngines() {
                 try {
                   await q.plugin.systems.warp.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     shipId,
                     shipPluginId,
                     solarCruisingSpeed: Number(e.target.value),
@@ -116,7 +116,7 @@ export default function WarpEngines() {
                 try {
                   await q.plugin.systems.warp.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     shipId,
                     shipPluginId,
                     minSpeedMultiplier: Number(e.target.value),
@@ -154,7 +154,7 @@ export default function WarpEngines() {
                 try {
                   await q.plugin.systems.warp.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     shipId,
                     shipPluginId,
                     warpFactorCount: Math.round(Number(e.target.value)),

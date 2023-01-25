@@ -57,7 +57,7 @@ export function ShipList() {
               }))}
               searchKeys={["name", "category", "tags"]}
               selectedItem={shipId || null}
-              setSelectedItem={id => navigate(`${id}`)}
+              setSelectedItem={({id}) => navigate(`${id}`)}
               renderItem={c => (
                 <div className="flex justify-between items-center" key={c.id}>
                   <div>

@@ -32,7 +32,7 @@ describe("thrusters plugin input", () => {
     const system = dataContext.server.plugins[0].aspects.shipSystems[0];
     await router.plugin.systems.thrusters.update({
       pluginId: "Test Plugin",
-      shipSystemId: "Test Thrusters",
+      systemId: "Test Thrusters",
       directionMaxSpeed: 5,
     });
     if (!(system instanceof ThrustersPlugin)) throw new Error("Not thrusters");
@@ -41,7 +41,7 @@ describe("thrusters plugin input", () => {
     expect(system.rotationMaxSpeed).toEqual(5);
     await router.plugin.systems.thrusters.update({
       pluginId: "Test Plugin",
-      shipSystemId: "Test Thrusters",
+      systemId: "Test Thrusters",
       rotationMaxSpeed: 2,
     });
     expect(system.rotationMaxSpeed).toEqual(2);

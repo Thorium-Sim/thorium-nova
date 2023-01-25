@@ -59,7 +59,7 @@ export default function PluginEdit() {
               }))}
               searchKeys={["name", "author", "tags"]}
               selectedItem={pluginId || null}
-              setSelectedItem={id => navigate(`/config/${id}`)}
+              setSelectedItem={({id}) => navigate(`/config/${id}`)}
               renderItem={c => (
                 <div className="flex justify-between items-center" key={c.id}>
                   <div>

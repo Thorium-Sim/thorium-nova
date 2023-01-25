@@ -99,7 +99,7 @@ export const systems = t.router({
     .input(
       z.object({
         pluginId: z.string(),
-        shipSystemId: z.string(),
+        systemId: z.string(),
         shipId: z.string().optional(),
         shipPluginId: z.string().optional(),
         name: z.string().optional(),
@@ -145,7 +145,7 @@ export const systems = t.router({
     .input(
       z.object({
         pluginId: z.string(),
-        shipSystemId: z.string(),
+        systemId: z.string(),
         shipId: z.string(),
         shipPluginId: z.string(),
         property: z.string(),

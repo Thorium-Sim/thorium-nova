@@ -33,7 +33,12 @@ describe("AutoRotateSystem", () => {
       rotation: {},
       rotationVelocity: {},
       autopilot: {},
-      shipSystems: {shipSystemIds: [thrusters.id, dampening.id]},
+      shipSystems: {
+        shipSystems: new Map([
+          [thrusters.id, {}],
+          [dampening.id, {}],
+        ]),
+      },
     });
 
     ecs.addSystem(autoRotateSystem);

@@ -104,8 +104,8 @@ describe("Inventory Generator", () => {
           "components": Object {
             "cargoContainer": CargoContainer {
               "contents": Object {
-                "Test torpedoCasing Cargo": 7,
-                "Test torpedoWarhead Cargo": 1,
+                "Test torpedoCasing Cargo": 3,
+                "Test torpedoWarhead Cargo": 5,
               },
               "volume": 100,
             },
@@ -202,15 +202,17 @@ describe("Inventory Generator", () => {
           "components": Object {
             "cargoContainer": CargoContainer {
               "contents": Object {
-                "Test forCrew Cargo": 1,
-                "Test medical Cargo": 4,
-                "Test probeCasing Cargo": 17,
-                "Test probeEquipment Cargo": 11,
-                "Test repair Cargo": 7,
-                "Test science Cargo": 7,
-                "Test security Cargo": 5,
-                "Test sparePart Cargo": 13,
-                "Test torpedoWarhead Cargo": 16,
+                "Test coolant Cargo": 3,
+                "Test forCrew Cargo": 4,
+                "Test fuel Cargo": 2,
+                "Test medical Cargo": 2,
+                "Test probeCasing Cargo": 13,
+                "Test probeEquipment Cargo": 13,
+                "Test repair Cargo": 4,
+                "Test science Cargo": 5,
+                "Test security Cargo": 3,
+                "Test sparePart Cargo": 10,
+                "Test torpedoWarhead Cargo": 8,
               },
               "volume": 1000,
             },
@@ -266,16 +268,12 @@ describe("Inventory Generator", () => {
           "components": Object {
             "cargoContainer": CargoContainer {
               "contents": Object {
-                "Test forCrew Cargo": 2,
-                "Test medical Cargo": 6,
-                "Test probeCasing Cargo": 12,
-                "Test probeEquipment Cargo": 9,
-                "Test repair Cargo": 8,
-                "Test science Cargo": 5,
-                "Test security Cargo": 7,
-                "Test sparePart Cargo": 9,
-                "Test torpedoCasing Cargo": 10,
-                "Test torpedoWarhead Cargo": 11,
+                "Test coolant Cargo": 4,
+                "Test fuel Cargo": 2,
+                "Test probeCasing Cargo": 17,
+                "Test probeEquipment Cargo": 19,
+                "Test torpedoCasing Cargo": 14,
+                "Test torpedoWarhead Cargo": 16,
               },
               "volume": 1000,
             },

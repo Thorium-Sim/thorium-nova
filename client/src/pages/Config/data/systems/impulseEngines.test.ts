@@ -34,7 +34,7 @@ describe("impulse engines plugin input", () => {
 
     await router.plugin.systems.impulse.update({
       pluginId: "Test Plugin",
-      shipSystemId: "Test Impulse Engine",
+      systemId: "Test Impulse Engine",
       cruisingSpeed: 2000,
     });
     if (!(system instanceof ImpulseEnginesPlugin))
@@ -44,7 +44,7 @@ describe("impulse engines plugin input", () => {
     expect(system.emergencySpeed).toEqual(2000);
     await router.plugin.systems.impulse.update({
       pluginId: "Test Plugin",
-      shipSystemId: "Test Impulse Engine",
+      systemId: "Test Impulse Engine",
       emergencySpeed: 1000,
     });
     expect(system.emergencySpeed).toEqual(1000);
@@ -52,7 +52,7 @@ describe("impulse engines plugin input", () => {
     expect(system.thrust).toEqual(12500);
     await router.plugin.systems.impulse.update({
       pluginId: "Test Plugin",
-      shipSystemId: "Test Impulse Engine",
+      systemId: "Test Impulse Engine",
       thrust: 10000,
     });
     expect(system.thrust).toEqual(10000);

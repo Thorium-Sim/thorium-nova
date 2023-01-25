@@ -6,7 +6,7 @@ export class ThrusterSystem extends System {
   }
   update(entity: Entity, elapsed: number) {
     const ship = this.ecs.entities.find(e =>
-      e.components.shipSystems?.shipSystemIds.includes(entity.id)
+      e.components.shipSystems?.shipSystems.has(entity.id)
     );
     if (!ship || !ship.components.isShip || !entity.components.isThrusters)
       return;

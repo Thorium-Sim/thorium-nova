@@ -62,6 +62,7 @@ export default class ShipPlugin extends Aspect {
    * allowed.
    */
   shipSystems: {
+    id: string;
     systemId: string;
     pluginId: string;
     overrides?: Record<string, any>;
