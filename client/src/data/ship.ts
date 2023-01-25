@@ -14,7 +14,6 @@ export const ship = t.router({
     })
     .request(({ctx}) => {
       const ship = ctx.ship?.toJSON() || null;
-      if (!ship) throw new Error("No ship assigned");
       return ship;
     }),
   players: t.procedure.request(({ctx}) => {
