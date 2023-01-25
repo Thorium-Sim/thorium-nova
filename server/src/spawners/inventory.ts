@@ -7,7 +7,7 @@ type RoomI = {
   volume: number;
   flags: NodeFlag[];
   contents: {
-    [inventoryTemplateName: string]: number;
+    [inventoryTemplateName: string]: {count: number};
   };
 };
 export function generateShipInventory(
@@ -93,9 +93,10 @@ export function generateShipInventory(
   ) {
     const roomEntity = roomsMap.get(room.id);
     if (!roomEntity) return;
-    roomEntity.contents[inventoryTemplate.name] =
-      roomEntity.contents[inventoryTemplate.name] ?? 0;
-    roomEntity.contents[inventoryTemplate.name] += 1;
+    roomEntity.contents[inventoryTemplate.name] = roomEntity.contents[
+      inventoryTemplate.name
+    ] ?? {count: 0, temperature: 295.37};
+    roomEntity.contents[inventoryTemplate.name].count += 1;
     totalVolume -= inventoryTemplate.volume;
     room.availableVolume -= inventoryTemplate.volume;
     const inventoryIndex = inventoryList.indexOf(inventoryTemplate);

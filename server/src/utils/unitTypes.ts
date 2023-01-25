@@ -62,6 +62,7 @@ export type TerranMass = Flavor<number, "terranMass">;
  */
 export type GForce = Flavor<number, "gForce">;
 export type Kelvin = Flavor<number, "kelvin">;
+export type KelvinPerSecond = Flavor<number, "kelvinPerSecond">;
 
 export type Year = Flavor<number, "year">;
 
