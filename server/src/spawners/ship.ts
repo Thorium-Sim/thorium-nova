@@ -6,6 +6,7 @@ import {generateShipInventory} from "./inventory";
 import {FlightDataModel} from "../classes/FlightDataModel";
 import {ServerDataModel} from "../classes/ServerDataModel";
 import {greekLetters} from "../utils/constantStrings";
+import {makeSystemEntities} from "@server/classes/Plugins/ShipSystems/makeSystemEntities";
 
 /*
 AlertLevelComponent,
@@ -72,7 +73,7 @@ export function spawnShip(
       sys => sys.name === system.systemId
     );
     if (!systemPlugin) return;
-    const entities = systemPlugin.makeEntities(system.overrides);
+    const entities = makeSystemEntities(systemPlugin, system.overrides);
     entities.forEach(entity => {
       shipSystems.push(entity);
     });

@@ -1,4 +1,3 @@
-import BasePlugin from "..";
 import BaseShipSystemPlugin from "./BaseSystem";
 import {ShipSystemFlags} from "./shipSystemTypes";
 

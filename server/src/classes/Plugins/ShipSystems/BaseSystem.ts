@@ -2,8 +2,6 @@ import {generateIncrementedName} from "server/src/utils/generateIncrementedName"
 import {Aspect} from "../Aspect";
 import BasePlugin from "..";
 import {ShipSystemTypes, ShipSystemFlags} from "./shipSystemTypes";
-import {Entity} from "@server/utils/ecs";
-import {spawnShipSystem} from "@server/spawners/shipSystem";
 
 /**
  * The base class to use when creating system plugins
@@ -36,8 +34,5 @@ export default class BaseShipSystemPlugin extends Aspect {
     this.assets = params.assets || {
       soundEffects: [],
     };
-  }
-  makeEntities(overrides?: Record<string, any>): Entity[] {
-    return [spawnShipSystem(this, overrides)];
   }
 }
