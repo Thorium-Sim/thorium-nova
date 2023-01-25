@@ -1,4 +1,4 @@
-import BaseShipSystemPlugin from "../classes/Plugins/ShipSystems/BaseSystem";
+import type BaseShipSystemPlugin from "../classes/Plugins/ShipSystems/BaseSystem";
 import {ShipSystemTypes} from "../classes/Plugins/ShipSystems/shipSystemTypes";
 import {components, ComponentIDs} from "../components";
 import {Entity} from "../utils/ecs";

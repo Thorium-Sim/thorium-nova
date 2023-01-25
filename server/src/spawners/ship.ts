@@ -1,12 +1,12 @@
 import {ECS, Entity} from "../utils/ecs";
 import type ShipPlugin from "../classes/Plugins/Ship";
-import {spawnShipSystem} from "./shipSystem";
 import {PositionComponent} from "../components/position";
 import {randomFromList} from "../utils/randomFromList";
 import {generateShipInventory} from "./inventory";
 import {FlightDataModel} from "../classes/FlightDataModel";
 import {ServerDataModel} from "../classes/ServerDataModel";
 import {greekLetters} from "../utils/constantStrings";
+import {makeSystemEntities} from "@server/classes/Plugins/ShipSystems/makeSystemEntities";
 
 /*
 AlertLevelComponent,
@@ -73,9 +73,12 @@ export function spawnShip(
       sys => sys.name === system.systemId
     );
     if (!systemPlugin) return;
-    const systemEntity = spawnShipSystem(systemPlugin, system.overrides);
-    shipSystems.push(systemEntity);
-    entity.components.shipSystems?.shipSystems.set(systemEntity.id, {});
+
+    const entities = makeSystemEntities(systemPlugin, system.overrides);
+    entities.forEach(entity => {
+      shipSystems.push(entity);
+      entity.components.shipSystems?.shipSystems.set(entity.id, {});
+    });
   });
   if (params.playerShip) {
     entity.addComponent("isPlayerShip");
