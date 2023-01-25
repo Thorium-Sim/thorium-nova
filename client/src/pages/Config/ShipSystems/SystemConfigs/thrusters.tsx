@@ -44,7 +44,7 @@ export default function ThrustersConfig() {
                 try {
                   await q.plugin.systems.thrusters.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     shipId,
                     shipPluginId,
                     directionMaxSpeed: Number(e.target.value),
@@ -80,7 +80,7 @@ export default function ThrustersConfig() {
                 try {
                   await q.plugin.systems.thrusters.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     shipId,
                     shipPluginId,
                     directionThrust: Number(e.target.value),
@@ -116,7 +116,7 @@ export default function ThrustersConfig() {
                 try {
                   await q.plugin.systems.thrusters.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     shipId,
                     shipPluginId,
                     rotationMaxSpeed: Number(e.target.value),
@@ -152,7 +152,7 @@ export default function ThrustersConfig() {
                 try {
                   await q.plugin.systems.thrusters.update.netSend({
                     pluginId,
-                    shipSystemId: systemId,
+                    systemId: systemId,
                     shipId,
                     shipPluginId,
                     rotationThrust: Number(e.target.value),

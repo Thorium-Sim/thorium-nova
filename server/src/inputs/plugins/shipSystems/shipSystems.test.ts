@@ -62,7 +62,7 @@ describe("ship systems plugin input", () => {
 
     const updated = await router.plugin.systems.update({
       pluginId: "Test Plugin",
-      shipSystemId: shipSystem.shipSystemId,
+      systemId: shipSystem.shipSystemId,
       name: "New Name",
     });
 
@@ -75,7 +75,7 @@ describe("ship systems plugin input", () => {
     ).toEqual("");
     await router.plugin.systems.update({
       pluginId: "Test Plugin",
-      shipSystemId: updated.shipSystemId,
+      systemId: updated.shipSystemId,
       description: "New Description",
     });
   });

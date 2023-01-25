@@ -61,7 +61,7 @@ const SearchableListDemo = () => {
           },
         ]}
         selectedItem={selected}
-        setSelectedItem={id => {
+        setSelectedItem={({id}) => {
           setSelected(id);
         }}
       />

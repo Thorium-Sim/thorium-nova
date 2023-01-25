@@ -28,7 +28,7 @@ export function OverrideResetButton({
       onClick={async () => {
         await q.plugin.systems.restoreOverride.netSend({
           pluginId,
-          shipSystemId: systemId,
+          systemId: systemId,
           shipId,
           shipPluginId,
           property,

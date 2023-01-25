@@ -37,7 +37,7 @@ describe("inertial dampeners plugin input", () => {
     expect(system.dampening).toEqual(1);
     await router.plugin.systems.inertialDampeners.update({
       pluginId: "Test Plugin",
-      shipSystemId: "Test Inertial Dampeners",
+      systemId: "Test Inertial Dampeners",
       dampening: 2000,
     });
 

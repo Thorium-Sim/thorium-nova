@@ -8,6 +8,7 @@ import fs from "fs/promises";
 import path from "path";
 import {thoriumPath} from "@server/utils/appPaths";
 import {deck} from "./deck";
+import uniqid from "@thorium/uniqid";
 
 export const ship = t.router({
   deck,
@@ -192,6 +193,43 @@ export const ship = t.router({
         }
       }
     }),
+  addSystem: t.procedure
+    .input(
+      z.object({
+        pluginId: z.string(),
+        shipId: z.string(),
+        systemId: z.string(),
+        systemPlugin: z.string(),
+      })
+    )
+    .send(({ctx, input}) => {
+      const plugin = getPlugin(ctx, input.pluginId);
+      if (!input.shipId) throw new Error("Ship ID is required");
+      const ship = plugin.aspects.ships.find(
+        ship => ship.name === input.shipId
+      );
+      if (!ship) return {shipId: ""};
+
+      const systemPlugin = getPlugin(ctx, input.systemPlugin);
+      const system = systemPlugin.aspects.shipSystems.find(
+        system => system.name === input.systemId
+      );
+      if (!system) return ship;
+      const id = uniqid("ssys-");
+      ship.shipSystems.push({
+        id,
+        systemId: input.systemId,
+        pluginId: input.systemPlugin,
+      });
+
+      pubsub.publish.plugin.ship.all({pluginId: input.pluginId});
+      pubsub.publish.plugin.ship.get({
+        pluginId: input.pluginId,
+        shipId: ship.name,
+      });
+
+      return ship;
+    }),
   toggleSystem: t.procedure
     .input(
       z.object({
@@ -210,22 +248,24 @@ export const ship = t.router({
       );
       if (!ship) return {shipId: ""};
 
-      const systemPlugin = getPlugin(ctx, input.systemPlugin);
-      const system = systemPlugin.aspects.shipSystems.find(
-        system => system.name === input.systemId
-      );
-      if (!system) return ship;
-
-      const existingSystem = ship.shipSystems.find(
+      const existingSystem = ship.shipSystems.findIndex(
         system =>
-          system.systemId === input.systemId &&
-          system.pluginId === input.systemPlugin
+          system.id === input.systemId ||
+          (system.systemId === input.systemId &&
+            system.pluginId === input.systemPlugin)
       );
 
-      if (existingSystem) {
-        ship.shipSystems.splice(ship.shipSystems.indexOf(existingSystem), 1);
+      if (existingSystem > -1) {
+        ship.shipSystems.splice(existingSystem, 1);
       } else {
+        const systemPlugin = getPlugin(ctx, input.systemPlugin);
+        const system = systemPlugin.aspects.shipSystems.find(
+          system => system.name === input.systemId
+        );
+        if (!system) return ship;
+        const id = uniqid("ssys-");
         ship.shipSystems.push({
+          id,
           systemId: input.systemId,
           pluginId: input.systemPlugin,
         });
