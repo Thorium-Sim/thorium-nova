@@ -35,7 +35,24 @@ export function spawnShipSystem(
     )
       entity.addComponent(componentName as ComponentIDs, template);
 
-    if (flags.includes("heat")) entity.addComponent("heat");
+    const {
+      coolantHeatTransferRate,
+      heatDissipationRate,
+      maxHeat,
+      maxSafeHeat,
+      nominalHeat,
+    } = systemPlugin;
+    if (flags.includes("heat"))
+      entity.addComponent("heat", {
+        coolantHeatTransferRate:
+          overrides.coolantHeatTransferRate || coolantHeatTransferRate,
+        heatDissipationRate:
+          overrides.heatDissipationRate || heatDissipationRate,
+        maxHeat: overrides.maxHeat || maxHeat,
+        maxSafeHeat: overrides.maxSafeHeat || maxSafeHeat,
+        nominalHeat: overrides.nominalHeat || nominalHeat,
+        heat: overrides.nominalHeat || nominalHeat,
+      });
     if (flags.includes("power")) entity.addComponent("power");
     if (flags.includes("efficiency")) entity.addComponent("efficiency");
   }
