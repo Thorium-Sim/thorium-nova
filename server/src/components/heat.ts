@@ -1,40 +1,6 @@
 import {Kelvin, KelvinPerSecond} from "../utils/unitTypes";
 import {Component} from "./utils";
 
-/**
- * http://www.projectrho.com/public_html/rocket/heatrad.php#dullred
- * Heat is radiated out based on this equation:
- * P = A * σ * T4
- * Where P is watts, A is the area of the radiator, σ is the constant below
- * and T4 is the temperature of the radiator raised to the fourth power
- *
- * This is untenable for the power we're dealing with, and very boring in a
- * sci-fi setting. Therefore, I'm adjusting the formula just a little bit.
- *
- * P = A * a * T5
- *
- * We can hand-wave the explanation as using some kind of warp field to
- * change the speed of light value used in the Stefan-Boltzmann constant
- *
- * We'll assume each heat radiator is 1 meter square
- *
- * We can also use this formula for converting heat into watts and vice versa
- *
- * (J / specific heat capacity) / mass (of the heated object)
- *
- * A few possible mediums for transferring heat, in J/gK:
- * - Ammonia Gas: 2.061
- * - Ammonia Liquid: 4.7
- * - Water Vapor: 1.865
- * - Water Liquid: 4.18
- * - Steel: .475
- * - Titanium: .52
- * - Aluminum: .904
- */
-
-// https://en.wikipedia.org/wiki/Stefan–Boltzmann_constant
-const StephanBoltzmannConstant = 5.670373 * 1e-8;
-
 export class HeatComponent extends Component {
   static id = "heat" as const;
 
