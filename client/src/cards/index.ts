@@ -5,4 +5,4 @@ export * from "./ComponentDemo";
 export * from "./Navigation";
 export * from "./CargoControl";
 export * from "./Viewscreen";
-export {default as AlertLevel} from "./AlertLevel";
+export * from "./AlertLevel";
