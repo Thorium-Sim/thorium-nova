@@ -19,9 +19,7 @@ const StationLayout = () => {
 
   const {account} = useThoriumAccount();
   if (!ship) return null;
-  // TODO November 29, 2021: Get the proper alert level and put it here.
-  // @ts-expect-error See above
-  const alertLevel = ship.alertLevel || "5";
+  const alertLevel = ship.components.isShip?.alertLevel || "5";
 
   return (
     <div
