@@ -62,6 +62,7 @@ export type TerranMass = Flavor<number, "terranMass">;
  */
 export type GForce = Flavor<number, "gForce">;
 export type Kelvin = Flavor<number, "kelvin">;
+export type KelvinPerSecond = Flavor<number, "kelvinPerSecond">;
 
 export type Year = Flavor<number, "year">;
 
@@ -86,3 +87,6 @@ export type MegaWattHour = Flavor<number, "megawatthour">;
 export type MegaWatt = Flavor<number, "megawatt">;
 export type GigaWattHour = Flavor<number, "gigawatthour">;
 export type GigaWatt = Flavor<number, "gigawatt">;
+
+// https://en.wikipedia.org/wiki/Stefan–Boltzmann_constant
+const StephanBoltzmannConstant = 5.670373 * 1e-8;

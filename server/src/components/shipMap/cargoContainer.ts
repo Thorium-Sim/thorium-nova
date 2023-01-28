@@ -1,4 +1,4 @@
-import {CubicMeter} from "server/src/utils/unitTypes";
+import {CubicMeter, Kelvin} from "server/src/utils/unitTypes";
 import {Component} from "../utils";
 
 export class CargoContainer extends Component {
@@ -8,5 +8,7 @@ export class CargoContainer extends Component {
   volume: CubicMeter = 1;
 
   /** The contents of this cargo container. The key is the name/ID of inventory template object stored on the flight. */
-  contents: {[inventoryTemplateName: string]: number} = {};
+  contents: {
+    [inventoryTemplateName: string]: {count: number; temperature: Kelvin};
+  } = {};
 }
