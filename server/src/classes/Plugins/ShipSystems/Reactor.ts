@@ -15,6 +15,11 @@ export default class ReactorPlugin extends BaseShipSystemPlugin {
    */
   optimalOutputPercent: number;
   /**
+   * Determines the total output of all reactors by multiplying this by all
+   * ship system's default power.
+   */
+  powerMultiplier: number;
+  /**
    * The max power output of each reactor is determined by the power
    * required by all of the systems on the ship divided by the
    * number of reactors. Maybe with a bit of margin for error, just
@@ -26,6 +31,7 @@ export default class ReactorPlugin extends BaseShipSystemPlugin {
 
     this.optimalOutputPercent = params.optimalOutputPercent || 0.5;
     this.reactorCount = params.reactorCount || 4;
+    this.powerMultiplier = params.powerMultiplier || 1;
   }
   makeEntities(overrides?: Record<string, any>): Entity[] {
     return Array.from({length: this.reactorCount}).map(() =>
