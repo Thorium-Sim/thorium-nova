@@ -105,6 +105,9 @@ export const systems = t.router({
         name: z.string().optional(),
         description: z.string().optional(),
         tags: z.string().array().optional(),
+        requiredPower: z.number().optional(),
+        defaultPower: z.number().optional(),
+        maxSafePower: z.number().optional(),
       })
     )
     .send(async ({ctx, input}) => {
@@ -134,6 +137,16 @@ export const systems = t.router({
           pluginId: input.shipPluginId,
           shipId: input.shipId,
         });
+      }
+
+      if (typeof input.requiredPower === "number") {
+        shipSystem.requiredPower = input.requiredPower;
+      }
+      if (typeof input.defaultPower === "number") {
+        shipSystem.defaultPower = input.defaultPower;
+      }
+      if (typeof input.maxSafePower === "number") {
+        shipSystem.maxSafePower = input.maxSafePower;
       }
       pubsub.publish.plugin.systems.all({pluginId: input.pluginId});
       pubsub.publish.plugin.systems.get({

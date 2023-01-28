@@ -2,6 +2,7 @@ import {generateIncrementedName} from "server/src/utils/generateIncrementedName"
 import {Aspect} from "../Aspect";
 import BasePlugin from "..";
 import {ShipSystemTypes, ShipSystemFlags} from "./shipSystemTypes";
+import {MegaWatt} from "@server/utils/unitTypes";
 
 /**
  * The base class to use when creating system plugins
@@ -21,7 +22,18 @@ export default class BaseShipSystemPlugin extends Aspect {
    * for this system
    */
   assets: {};
-  allowMultiple: boolean = false;
+  allowMultiple: boolean;
+
+  ///////////
+  // Power //
+  ///////////
+  /** The minimum amount of power required to make this system operate */
+  requiredPower: MegaWatt;
+  /** The normal amount of power this system will request  */
+  defaultPower: MegaWatt;
+  /** The threshold of power usage for safely using this system */
+  maxSafePower: MegaWatt;
+
   constructor(params: Partial<BaseShipSystemPlugin>, plugin: BasePlugin) {
     const name = generateIncrementedName(
       params.name || `New ${params.type}`,
@@ -35,5 +47,9 @@ export default class BaseShipSystemPlugin extends Aspect {
     this.assets = params.assets || {
       soundEffects: [],
     };
+    this.allowMultiple = params.allowMultiple ?? false;
+    this.requiredPower = params.requiredPower || 5;
+    this.defaultPower = params.defaultPower || 10;
+    this.maxSafePower = params.maxSafePower || 20;
   }
 }

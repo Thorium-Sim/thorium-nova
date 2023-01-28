@@ -49,6 +49,5 @@ const links = {
   basic: "Basic",
   system: "System",
   power: "Power",
-  efficiency: "Efficiency",
   heat: "Heat",
 };
