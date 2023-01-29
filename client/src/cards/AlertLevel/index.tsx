@@ -1,6 +1,7 @@
 import * as React from "react";
 import {q} from "@client/context/AppContext";
 import Button from "@thorium/ui/Button";
+import { AlertLevel } from "@server/components/isShip";
 
 const alertLevelText = [
   {
@@ -30,11 +31,11 @@ const alertLevelText = [
   },
 ];
 
-export function AlertLevel() {
+export function AlertLevelCard() {
     const [ship] = q.ship.get.useNetRequest();
     let [description, setDescription] = React.useState("");
 
-    const updateLevel = (newLevel: string) => {
+    const updateLevel = (newLevel: AlertLevel) => {
       q.alertLevel.update.netSend({
         level: newLevel
       });
