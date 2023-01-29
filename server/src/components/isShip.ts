@@ -1,5 +1,7 @@
 import {Component} from "./utils";
 
+export type AlertLevel = "5" | "4" | "3" | "2" | "1" | "p";
+
 export class IsShipComponent extends Component {
   static id: "isShip" = "isShip";
   /**
@@ -20,9 +22,8 @@ export class IsShipComponent extends Component {
    * The current alert level of the ship. On a scale from 5 being "all clear" and 1 being "red alert".
    * p represents a cloaked status.
    */
-  //It might be useful to create an AlertLevel type that has all of the possible alert levels
-  //type AlertLevel = "5" | "4" | "3" | "2" | "1" | "p";
-  alertLevel: string = "5";
+  
+  alertLevel: AlertLevel = "5";
 
   assets: Partial<{
     /**
