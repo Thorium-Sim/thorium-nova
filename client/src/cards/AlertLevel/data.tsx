@@ -4,7 +4,14 @@ import {z} from "zod";
 
 export const alertLevel = t.router({
     update: t.procedure
-      .input(z.object({level: z.string()}))
+      .input(z.object({level: z.union([
+        z.literal("5"), 
+        z.literal("4"), 
+        z.literal("3"), 
+        z.literal("2"), 
+        z.literal("1"), 
+        z.literal("p")
+      ])}))
       .send(({ctx, input}) => {
         if (!ctx.ship) throw new Error("Ship not found");
 
