@@ -1,7 +1,5 @@
-import {spawnShipSystem} from "@server/spawners/shipSystem";
-import {Entity} from "@server/utils/ecs";
 import BasePlugin from "..";
-import BaseShipSystemPlugin from "./BaseSystem";
+import BaseShipSystemPlugin, {registerSystem} from "./BaseSystem";
 import {ShipSystemFlags} from "./shipSystemTypes";
 
 export default class ReactorPlugin extends BaseShipSystemPlugin {
@@ -29,13 +27,9 @@ export default class ReactorPlugin extends BaseShipSystemPlugin {
   constructor(params: Partial<ReactorPlugin>, plugin: BasePlugin) {
     super(params, plugin);
 
-    this.optimalOutputPercent = params.optimalOutputPercent || 0.5;
+    this.optimalOutputPercent = params.optimalOutputPercent || 0.7;
     this.reactorCount = params.reactorCount || 4;
     this.powerMultiplier = params.powerMultiplier || 1;
   }
-  makeEntities(overrides?: Record<string, any>): Entity[] {
-    return Array.from({length: this.reactorCount}).map(() =>
-      spawnShipSystem(this, overrides)
-    );
-  }
 }
+registerSystem("reactor", ReactorPlugin);
