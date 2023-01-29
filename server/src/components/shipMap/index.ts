@@ -1,6 +1,7 @@
 import DeckPlugin, {DeckEdge} from "../../classes/Plugins/Ship/Deck";
 import {ShipMapGraph} from "../../utils/shipMapPathfinder";
 import {Component} from "server/src/components/utils";
+import {Kelvin} from "@server/utils/unitTypes";
 
 const roundTo1000 = (num: number) => Math.round(num * 1000) / 1000;
 export class ShipMapComponent extends Component {
@@ -25,7 +26,7 @@ export class ShipMapComponent extends Component {
           contents,
           volume,
         }) => {
-          const output: Partial<typeof data["deckNodes"][0]> = {
+          const output: Partial<(typeof data)["deckNodes"][0]> = {
             id,
             deckIndex,
             x: roundTo1000(x),
@@ -58,14 +59,14 @@ export class ShipMapComponent extends Component {
   deckNodes: (DeckPlugin["nodes"][0] & {
     deckIndex: number;
     contents: {
-      [inventoryTemplateName: string]: number;
+      [inventoryTemplateName: string]: {count: number; temperature: Kelvin};
     };
   })[] = [];
   deckNodeMap: {
     [key: number]: DeckPlugin["nodes"][0] & {
       deckIndex: number;
       contents: {
-        [inventoryTemplateName: string]: number;
+        [inventoryTemplateName: string]: {count: number; temperature: Kelvin};
       };
     };
   } | null = null;

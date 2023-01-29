@@ -108,6 +108,11 @@ export const systems = t.router({
         requiredPower: z.number().optional(),
         defaultPower: z.number().optional(),
         maxSafePower: z.number().optional(),
+        coolantHeatTransferRate: z.number().optional(),
+        heatDissipationRate: z.number().optional(),
+        nominalHeat: z.number().optional(),
+        maxSafeHeat: z.number().optional(),
+        maxHeat: z.number().optional(),
       })
     )
     .send(async ({ctx, input}) => {
@@ -147,6 +152,21 @@ export const systems = t.router({
       }
       if (typeof input.maxSafePower === "number") {
         shipSystem.maxSafePower = input.maxSafePower;
+      }
+      if (typeof input.coolantHeatTransferRate === "number") {
+        shipSystem.coolantHeatTransferRate = input.coolantHeatTransferRate;
+      }
+      if (typeof input.heatDissipationRate === "number") {
+        shipSystem.heatDissipationRate = input.heatDissipationRate;
+      }
+      if (typeof input.nominalHeat === "number") {
+        shipSystem.nominalHeat = input.nominalHeat;
+      }
+      if (typeof input.maxSafeHeat === "number") {
+        shipSystem.maxSafeHeat = input.maxSafeHeat;
+      }
+      if (typeof input.maxHeat === "number") {
+        shipSystem.maxHeat = input.maxHeat;
       }
       pubsub.publish.plugin.systems.all({pluginId: input.pluginId});
       pubsub.publish.plugin.systems.get({

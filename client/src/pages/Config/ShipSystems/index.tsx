@@ -27,7 +27,12 @@ const SystemConfig = () => {
   };
   const [system] = q.plugin.systems.get.useNetRequest({pluginId, systemId});
   const Comp = systemConfigs[system.type];
-  if (!Comp) return null;
+  if (!Comp)
+    return (
+      <h3 className="text-center text-xl">
+        No configuration for this system type.
+      </h3>
+    );
   return <Comp />;
 };
 
