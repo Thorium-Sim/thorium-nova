@@ -10,7 +10,6 @@ import Modal from "@thorium/ui/Modal";
 import {SettingsList} from "../ShipSystems/SettingsList";
 import {Basic} from "../ShipSystems/Basic";
 import {Power} from "../ShipSystems/Power";
-import {Efficiency} from "../ShipSystems/Efficiency";
 import {Heat} from "../ShipSystems/Heat";
 import {systemConfigs} from "../ShipSystems";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
@@ -77,7 +76,6 @@ export function OverrideEdit() {
               />
 
               <Route path="power" element={<Power />} />
-              <Route path="efficiency" element={<Efficiency />} />
               <Route path="heat" element={<Heat />} />
             </Routes>
           </div>

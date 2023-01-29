@@ -107,6 +107,9 @@ export const systems = t.router({
         name: z.string().optional(),
         description: z.string().optional(),
         tags: z.string().array().optional(),
+        requiredPower: z.number().optional(),
+        defaultPower: z.number().optional(),
+        maxSafePower: z.number().optional(),
         coolantHeatTransferRate: z.number().optional(),
         heatDissipationRate: z.number().optional(),
         nominalHeat: z.number().optional(),
@@ -143,6 +146,15 @@ export const systems = t.router({
         });
       }
 
+      if (typeof input.requiredPower === "number") {
+        shipSystem.requiredPower = input.requiredPower;
+      }
+      if (typeof input.defaultPower === "number") {
+        shipSystem.defaultPower = input.defaultPower;
+      }
+      if (typeof input.maxSafePower === "number") {
+        shipSystem.maxSafePower = input.maxSafePower;
+      }
       if (typeof input.coolantHeatTransferRate === "number") {
         shipSystem.coolantHeatTransferRate = input.coolantHeatTransferRate;
       }
