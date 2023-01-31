@@ -4,6 +4,7 @@ import WarpEnginesPlugin from "./warpEngines";
 import InertialDampenersPlugin from "./InertialDampeners";
 import ThrustersPlugin from "./Thrusters";
 import ReactorPlugin from "./Reactor";
+import BatteryPlugin from "./Battery";
 
 export const ShipSystemTypes = {
   warpEngines: WarpEnginesPlugin,
@@ -12,6 +13,7 @@ export const ShipSystemTypes = {
   inertialDampeners: InertialDampenersPlugin,
   thrusters: ThrustersPlugin,
   reactor: ReactorPlugin,
+  battery: BatteryPlugin,
 };
 
 export type ShipSystemFlags = "power" | "heat" | "efficiency";
