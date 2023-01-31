@@ -1,5 +1,5 @@
 import BasePlugin from "..";
-import BaseShipSystemPlugin from "./BaseSystem";
+import BaseShipSystemPlugin, {registerSystem} from "./BaseSystem";
 import {ShipSystemFlags} from "./shipSystemTypes";
 
 export default class InertialDampenersPlugin extends BaseShipSystemPlugin {
@@ -15,6 +15,7 @@ export default class InertialDampenersPlugin extends BaseShipSystemPlugin {
     this.dampening = params.dampening || 1;
   }
 }
+registerSystem("inertialDampeners", InertialDampenersPlugin);
 
 /**
  * Dampening works like such.

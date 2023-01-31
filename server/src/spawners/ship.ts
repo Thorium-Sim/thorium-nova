@@ -6,20 +6,27 @@ import {generateShipInventory} from "./inventory";
 import {FlightDataModel} from "../classes/FlightDataModel";
 import {ServerDataModel} from "../classes/ServerDataModel";
 import {greekLetters} from "../utils/constantStrings";
-import {makeSystemEntities} from "@server/classes/Plugins/ShipSystems/makeSystemEntities";
+import {spawnShipSystem} from "./shipSystem";
+import ReactorPlugin from "@server/classes/Plugins/ShipSystems/Reactor";
+import BaseShipSystemPlugin from "@server/classes/Plugins/ShipSystems/BaseSystem";
 
-/*
-AlertLevelComponent,
-ThemeComponent,
-InterstellarPositionComponent,
-AutopilotComponent,
-ShipOutfitsComponent,
-*/
-
-interface Coordinates {
-  x: number;
-  y: number;
-  z: number;
+const systemCache: Record<string, BaseShipSystemPlugin> = {};
+function getSystem(
+  dataContext: {flight: FlightDataModel | null; server: ServerDataModel},
+  systemId: string,
+  pluginId: string
+) {
+  if (!systemCache[`${systemId}-${pluginId}`]) {
+    const plugin = dataContext.server.plugins.find(
+      plugin => pluginId === plugin.id
+    );
+    const systemPlugin = plugin?.aspects.shipSystems.find(
+      sys => sys.name === systemId
+    );
+    if (!systemPlugin) return undefined;
+    systemCache[`${systemId}-${pluginId}`] = systemPlugin;
+  }
+  return systemCache[`${systemId}-${pluginId}`];
 }
 export function spawnShip(
   dataContext: {flight: FlightDataModel | null; server: ServerDataModel},
@@ -63,22 +70,103 @@ export function spawnShip(
   entity.addComponent("size");
   entity.addComponent("mass", {mass: template.mass});
 
-  const shipSystems: Entity[] = [];
   entity.addComponent("shipSystems");
+
+  let systemEntities: Entity[] = [];
+  // First we'll create some power nodes
+  const powerNodes: Record<string, {entity: Entity; count: number}> = {};
+  template.powerNodes?.forEach(name => {
+    const node = new Entity();
+    node.addComponent("identity", {name});
+    node.addComponent("isPowerNode", {
+      maxConnections: 3,
+      connectedSystems: [],
+      distributionMode: "leastFirst",
+    });
+    powerNodes[name] = {entity: node, count: 0};
+    systemEntities.push(node);
+  });
+
   template.shipSystems?.forEach(system => {
-    const plugin = dataContext.server.plugins.find(
-      plugin => system.pluginId === plugin.id
-    );
-    const systemPlugin = plugin?.aspects.shipSystems.find(
-      sys => sys.name === system.systemId
+    const systemPlugin = getSystem(
+      dataContext,
+      system.systemId,
+      system.pluginId
     );
     if (!systemPlugin) return;
+    switch (systemPlugin.type) {
+      case "reactor":
+        // Reactors are special, so take care of them later.
 
-    const entities = makeSystemEntities(systemPlugin, system.overrides);
-    entities.forEach(entity => {
-      shipSystems.push(entity);
-      entity.components.shipSystems?.shipSystems.set(entity.id, {});
-    });
+        break;
+      default: {
+        const entity = spawnShipSystem(systemPlugin, system.overrides);
+        systemEntities.push(entity);
+        if (entity.components.power) {
+          // Hook up the power node
+          const leastPowerNode = Object.entries(powerNodes).reduce(
+            (prev, next) => {
+              if (next[1].count < prev.count) return next[1];
+              return prev;
+            },
+            powerNodes[Object.keys(powerNodes)[0]]
+          );
+          const powerNode =
+            powerNodes[systemPlugin.powerNode || ""] || leastPowerNode;
+          powerNode.count += 1;
+          powerNode.entity.components.isPowerNode?.connectedSystems.push(
+            entity.id
+          );
+        }
+        break;
+      }
+    }
+  });
+
+  // Now let's power up the reactors
+  const totalPower = systemEntities.reduce((prev, next) => {
+    return prev + (next.components.power?.defaultPower || 0);
+  }, 0);
+  const reactorCount =
+    template.shipSystems?.reduce((prev, system) => {
+      const systemPlugin = getSystem(
+        dataContext,
+        system.systemId,
+        system.pluginId
+      );
+      if (systemPlugin instanceof ReactorPlugin) {
+        return (
+          prev + (system.overrides?.reactorCount || systemPlugin.reactorCount)
+        );
+      }
+      return prev;
+    }, 0) || 1;
+
+  // Split amongst the reactors and generously make it a nice round number
+  const reactorPower = Math.ceil(totalPower / reactorCount / 5) * 5;
+
+  template.shipSystems?.forEach(system => {
+    const systemPlugin = getSystem(
+      dataContext,
+      system.systemId,
+      system.pluginId
+    );
+    if (systemPlugin instanceof ReactorPlugin) {
+      Array.from({length: systemPlugin.reactorCount}).forEach(() => {
+        const sys = spawnShipSystem(systemPlugin, system.overrides);
+        const maxOutput = reactorPower * systemPlugin.powerMultiplier;
+        sys.updateComponent("isReactor", {
+          maxOutput,
+          currentOutput: maxOutput * systemPlugin.optimalOutputPercent,
+          desiredOutput: maxOutput * systemPlugin.optimalOutputPercent,
+          optimalOutputPercent: systemPlugin.optimalOutputPercent,
+        });
+        systemEntities.push(sys);
+      });
+    }
+  });
+  systemEntities.forEach(e => {
+    entity.components.shipSystems?.shipSystems.set(e.id, {});
   });
   if (params.playerShip) {
     entity.addComponent("isPlayerShip");
@@ -158,7 +246,7 @@ export function spawnShip(
   // With the deck map initialized, we can now assign rooms to systems
   let occupiedRooms: number[] = [];
   for (let [id, info] of entity.components.shipSystems?.shipSystems || []) {
-    const system = shipSystems.find(sys => sys.id === id);
+    const system = systemEntities.find(sys => sys.id === id);
     const systemType = system?.components.isShipSystem?.type;
     if (!systemType) continue;
     const availableRooms =
@@ -180,5 +268,5 @@ export function spawnShip(
     });
   }
 
-  return {ship: entity, extraEntities: shipSystems.concat(extraEntities)};
+  return {ship: entity, extraEntities: systemEntities.concat(extraEntities)};
 }

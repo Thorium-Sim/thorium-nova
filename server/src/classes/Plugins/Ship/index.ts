@@ -84,6 +84,8 @@ export default class ShipPlugin extends Aspect {
   cargoContainers: number;
   /** The volume of the ship's cargo containers. */
   cargoContainerVolume: CubicMeter;
+  /** The names of the power nodes that will be spawned when the ship spawns. */
+  powerNodes: string[];
 
   constructor(params: Partial<ShipPlugin>, plugin: BasePlugin) {
     const name = generateIncrementedName(
@@ -111,6 +113,7 @@ export default class ShipPlugin extends Aspect {
     this.deckEdges = params.deckEdges?.map(edge => new DeckEdge(edge)) || [];
     this.cargoContainers = params.cargoContainers || 4;
     this.cargoContainerVolume = params.cargoContainerVolume || 4;
+    this.powerNodes = ["offense", "defense", "navigation", "intel", "internal"];
   }
   addDeck(deck: Partial<DeckPlugin>) {
     let {name} = deck;

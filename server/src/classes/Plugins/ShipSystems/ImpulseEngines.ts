@@ -1,7 +1,7 @@
 import {KilometerPerSecond, KiloNewtons} from "server/src/utils/unitTypes";
 import BasePlugin from "..";
-import BaseShipSystemPlugin from "./BaseSystem";
-import {ShipSystemFlags} from "./shipSystemTypes";
+import BaseShipSystemPlugin, {registerSystem} from "./BaseSystem";
+import {PowerNodes, ShipSystemFlags} from "./shipSystemTypes";
 
 // TODO March 16, 2022: Add the necessary sound effects
 export default class ImpulseEnginesPlugin extends BaseShipSystemPlugin {
@@ -10,6 +10,7 @@ export default class ImpulseEnginesPlugin extends BaseShipSystemPlugin {
   cruisingSpeed: KilometerPerSecond;
   emergencySpeed: KilometerPerSecond;
   thrust: KiloNewtons;
+  powerNode?: PowerNodes = "navigation";
   constructor(params: Partial<ImpulseEnginesPlugin>, plugin: BasePlugin) {
     super(params, plugin);
     this.cruisingSpeed = params.cruisingSpeed || 1500;
@@ -17,3 +18,4 @@ export default class ImpulseEnginesPlugin extends BaseShipSystemPlugin {
     this.thrust = params.thrust || 12500;
   }
 }
+registerSystem("impulseEngines", ImpulseEnginesPlugin);

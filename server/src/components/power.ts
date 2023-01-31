@@ -1,4 +1,4 @@
-import {KiloWatt, MegaWatt} from "@server/utils/unitTypes";
+import {MegaWatt} from "@server/utils/unitTypes";
 import {Component} from "./utils";
 
 export class PowerComponent extends Component {

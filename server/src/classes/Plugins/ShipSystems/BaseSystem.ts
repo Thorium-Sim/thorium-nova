@@ -1,8 +1,13 @@
 import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
 import {Aspect} from "../Aspect";
 import BasePlugin from "..";
-import {ShipSystemTypes, ShipSystemFlags} from "./shipSystemTypes";
+import {ShipSystemTypes, ShipSystemFlags, PowerNodes} from "./shipSystemTypes";
 import {Kelvin, KelvinPerSecond, MegaWatt} from "@server/utils/unitTypes";
+
+const systemPlugins: Record<string, typeof BaseShipSystemPlugin> = {};
+export function registerSystem(name: string, sys: typeof BaseShipSystemPlugin) {
+  systemPlugins[name] = sys;
+}
 
 /**
  * The base class to use when creating system plugins
@@ -33,6 +38,8 @@ export default class BaseShipSystemPlugin extends Aspect {
   defaultPower: MegaWatt;
   /** The threshold of power usage for safely using this system */
   maxSafePower: MegaWatt;
+  /** The type of power node this system is assigned to */
+  powerNode?: PowerNodes;
 
   //////////
   // Heat //
@@ -89,5 +96,11 @@ export default class BaseShipSystemPlugin extends Aspect {
     this.nominalHeat = params.nominalHeat || 295.37;
     this.maxSafeHeat = params.maxSafeHeat || 1000;
     this.maxHeat = params.maxHeat || 2500;
+
+    if (this.constructor.name === "BaseShipSystemPlugin") {
+      if (systemPlugins[this.type]) {
+        return new systemPlugins[this.type](params, plugin);
+      }
+    }
   }
 }

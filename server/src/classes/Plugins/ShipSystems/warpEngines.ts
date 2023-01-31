@@ -1,7 +1,7 @@
 import {KilometerPerSecond, KiloNewtons} from "server/src/utils/unitTypes";
 import BasePlugin from "..";
-import BaseShipSystemPlugin from "./BaseSystem";
-import {ShipSystemFlags} from "./shipSystemTypes";
+import BaseShipSystemPlugin, {registerSystem} from "./BaseSystem";
+import {PowerNodes, ShipSystemFlags} from "./shipSystemTypes";
 
 // TODO May 3, 2022: Add the necessary sound effects
 export default class WarpEnginesPlugin extends BaseShipSystemPlugin {
@@ -15,6 +15,7 @@ export default class WarpEnginesPlugin extends BaseShipSystemPlugin {
   minSpeedMultiplier: number;
   /** How many warp factors there are between min and max inclusive. This does not include emergency or destructive warp which are automatically extrapolated. */
   warpFactorCount: number;
+  powerNode?: PowerNodes = "navigation";
   constructor(params: Partial<WarpEnginesPlugin>, plugin: BasePlugin) {
     super(params, plugin);
     this.interstellarCruisingSpeed =
@@ -24,3 +25,4 @@ export default class WarpEnginesPlugin extends BaseShipSystemPlugin {
     this.warpFactorCount = params.warpFactorCount || 5;
   }
 }
+registerSystem("warpEngines", WarpEnginesPlugin);

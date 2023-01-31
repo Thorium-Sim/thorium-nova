@@ -1,4 +1,4 @@
-import BaseShipSystemPlugin from "./BaseSystem";
+import BaseShipSystemPlugin, {registerSystem} from "./BaseSystem";
 import {ShipSystemFlags} from "./shipSystemTypes";
 
 export default class GenericSystemPlugin extends BaseShipSystemPlugin {
@@ -9,3 +9,4 @@ export default class GenericSystemPlugin extends BaseShipSystemPlugin {
   //   super(params, plugin);
   // }
 }
+registerSystem("generic", GenericSystemPlugin);

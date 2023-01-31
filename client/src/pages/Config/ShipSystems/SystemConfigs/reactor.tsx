@@ -35,7 +35,7 @@ export default function ReactorsConfig() {
               inputMode="numeric"
               pattern="[0-9]*"
               label="Optimal Output Percent"
-              placeholder={"0.5"}
+              placeholder={"0.7"}
               helperText={
                 "The percent of the possible reactor output that provides the highest fuel-to-energy conversion."
               }
