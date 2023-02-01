@@ -1,4 +1,4 @@
-import {MegaWatt} from "@server/utils/unitTypes";
+import {MegaWatt, MegaWattHour} from "@server/utils/unitTypes";
 import {Component} from "../../utils";
 
 export class IsReactorComponent extends Component {
@@ -26,4 +26,10 @@ export class IsReactorComponent extends Component {
    * It will always be less than or equal to the desired output, never more.
    */
   currentOutput: MegaWatt = 84;
+  /**
+   * How much fuel is left to burn after the previous tick. Fuel is only removed
+   * from inventory in whole units. Any fuel not turned into power remains in the
+   * reactor.
+   */
+  unusedFuel: {amount: number; density: MegaWattHour} = {amount: 0, density: 1};
 }

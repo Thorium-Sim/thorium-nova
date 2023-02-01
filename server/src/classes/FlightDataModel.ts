@@ -6,7 +6,6 @@ import {FlightClient} from "./FlightClient";
 import {FSDataStore, FSDataStoreOptions} from "@thorium/db-fs";
 import ShipPlugin from "./Plugins/Ship";
 import {DefaultUIDGenerator} from "../utils/ecs/uid";
-import {InventoryTemplate} from "./Plugins/Inventory";
 
 export class FlightDataModel extends FSDataStore {
   static INTERVAL = 1000 / 60;
@@ -17,7 +16,6 @@ export class FlightDataModel extends FSDataStore {
   clients!: Record<string, FlightClient>;
   pluginIds!: string[];
   private entities!: Entity[];
-  inventoryTemplates!: {[inventoryTemplateName: string]: InventoryTemplate};
   serverDataModel: ServerDataModel;
   interval!: ReturnType<typeof setInterval>;
   constructor(
@@ -49,12 +47,6 @@ export class FlightDataModel extends FSDataStore {
       Object.entries(this.clients || params.clients || {}).map(
         ([id, client]) => [id, new FlightClient(client)]
       )
-    );
-
-    this.inventoryTemplates = Object.fromEntries(
-      Object.entries(
-        this.inventoryTemplates || params.inventoryTemplates || {}
-      ).map(([key, val]) => [key, new InventoryTemplate(val)])
     );
   }
   run = () => {
@@ -132,7 +124,6 @@ export class FlightDataModel extends FSDataStore {
       clients: Object.fromEntries(
         Object.entries(this.clients).map(([id, client]) => [id, client])
       ),
-      inventoryTemplates: this.inventoryTemplates,
     };
     return data;
   }

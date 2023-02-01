@@ -16,12 +16,18 @@ import {ThrusterSystem} from "./ThrusterSystem";
 import {TimerSystem} from "./TimerSystem";
 import {WarpSystem} from "./WarpSystem";
 import {InterstellarTransitionSystem} from "./InterstellarTransitionSystem";
+import {ReactorFuelSystem} from "./ReactorFuelSystem";
+import {FilterShipsWithReactors} from "./FilterShipsWithReactors";
+import {FilterInventorySystem} from "./FilterInventorySystem";
 
 const systems = [
+  FilterInventorySystem,
+  FilterShipsWithReactors,
   InterstellarTransitionSystem,
   PassengerDestinationSystem,
   PassengerMovementSystem,
   TimerSystem,
+  ReactorFuelSystem,
   AutoRotateSystem,
   AutoThrustSystem,
   ThrusterSystem,

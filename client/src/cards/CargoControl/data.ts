@@ -1,7 +1,6 @@
 import {t} from "@server/init/t";
 import {pubsub} from "@server/init/pubsub";
 import {matchSorter} from "match-sorter";
-import {InventoryTemplate} from "server/src/classes/Plugins/Inventory";
 import {findClosestNode} from "server/src/systems/PassengerMovementSystem";
 import {DataContext} from "server/src/utils/DataContext";
 import {Entity} from "server/src/utils/ecs";
@@ -11,6 +10,7 @@ import {
 } from "server/src/utils/shipMapPathfinder";
 import {z} from "zod";
 import {Kelvin} from "@server/utils/unitTypes";
+import {getInventoryTemplates} from "@server/utils/getInventoryTemplates";
 
 const transferId = z.object({
   type: z.union([z.literal("room"), z.literal("entity")]),
@@ -19,7 +19,15 @@ const transferId = z.object({
 
 export const cargoControl = t.router({
   inventoryTypes: t.procedure.request(({ctx}) => {
-    return ctx.flight?.inventoryTemplates || {};
+    const inventorySystem = ctx.flight?.ecs.systems.find(
+      sys => sys.constructor.name === "InventoryTemplateSystem"
+    );
+    return Object.fromEntries(
+      inventorySystem?.entities.map(entity => [
+        entity.components.identity?.name,
+        {...entity.components.identity, ...entity.components.isInventory},
+      ]) || []
+    );
   }),
   rooms: t.procedure
     .filter((publish: {shipId: number} | null, {ctx}) => {
@@ -28,6 +36,7 @@ export const cargoControl = t.router({
     })
     .request(({ctx}) => {
       if (!ctx.ship) throw new Error("No ship selected");
+      const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
       const rooms =
         ctx.ship?.components.shipMap?.deckNodes
           .filter(node => node.isRoom && node.flags?.includes("cargo"))
@@ -39,10 +48,7 @@ export const cargoControl = t.router({
               position: {x: node.x, y: node.y},
               volume: node.volume,
               contents: node.contents,
-              used: calculateCargoUsed(
-                node.contents,
-                ctx.flight?.inventoryTemplates || {}
-              ),
+              used: calculateCargoUsed(node.contents, inventoryTemplates),
             };
           }) || [];
       const decks = ctx.ship.components.shipMap?.decks || [];
@@ -59,6 +65,8 @@ export const cargoControl = t.router({
     })
     .request(({ctx}) => {
       if (!ctx.ship) throw new Error("No ship selected");
+      const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
+
       return (
         ctx.flight?.ecs.entities
           .filter(
@@ -80,7 +88,7 @@ export const cargoControl = t.router({
               contents: entity.components.cargoContainer?.contents || {},
               used: calculateCargoUsed(
                 entity.components.cargoContainer?.contents || {},
-                ctx.flight?.inventoryTemplates || {}
+                inventoryTemplates
               ),
               volume: entity.components.cargoContainer?.volume || 0,
               destinationNode:
@@ -271,6 +279,8 @@ export const cargoControl = t.router({
       const toContainer = getCargoContents(ctx, input.toId);
       if (!toContainer) throw new Error("No destination container found.");
 
+      const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
+
       let itemCounts: {[key: string]: number} = {};
       let destinationVolume = toContainer.volume;
       // First loop to see if there are any errors
@@ -283,18 +293,18 @@ export const cargoControl = t.router({
         }
         const destinationUsedSpace = calculateCargoUsed(
           toContainer.contents || {},
-          ctx.flight?.inventoryTemplates || {}
+          inventoryTemplates
         );
         const movedVolume = calculateCargoUsed(
           {[item]: {count: itemCounts[item] || count}},
-          ctx.flight?.inventoryTemplates || {}
+          inventoryTemplates
         );
 
         if (destinationUsedSpace + movedVolume > destinationVolume) {
           const volumeLeft = destinationVolume - destinationUsedSpace;
           const singleVolume = calculateCargoUsed(
             {[item]: {count: 1}},
-            ctx.flight?.inventoryTemplates || {}
+            inventoryTemplates
           );
           const cargoItemsThatFitInVolumeLeft = Math.floor(
             volumeLeft / singleVolume
@@ -309,7 +319,7 @@ export const cargoControl = t.router({
         }
         const actualMovedVolume = calculateCargoUsed(
           {[item]: {count: itemCounts[item] || count}},
-          ctx.flight?.inventoryTemplates || {}
+          inventoryTemplates
         );
         destinationVolume -= actualMovedVolume;
       });
@@ -349,7 +359,7 @@ function calculateCargoUsed(
     [inventoryTemplateName: string]: {count: number};
   },
   inventory: {
-    [inventoryTemplateName: string]: InventoryTemplate;
+    [inventoryTemplateName: string]: {volume: number};
   }
 ) {
   if (!contents) return 0;

@@ -9,6 +9,7 @@ import {greekLetters} from "../utils/constantStrings";
 import {spawnShipSystem} from "./shipSystem";
 import ReactorPlugin from "@server/classes/Plugins/ShipSystems/Reactor";
 import BaseShipSystemPlugin from "@server/classes/Plugins/ShipSystems/BaseSystem";
+import {getInventoryTemplates} from "@server/utils/getInventoryTemplates";
 
 const systemCache: Record<string, BaseShipSystemPlugin> = {};
 function getSystem(
@@ -42,6 +43,8 @@ export function spawnShip(
   }
 ) {
   if (!dataContext.flight) throw new Error("No flight has been started.");
+  const inventoryTemplates = getInventoryTemplates(dataContext.flight?.ecs);
+
   const entity = new Entity();
 
   entity.addComponent("identity", {
@@ -191,7 +194,7 @@ export function spawnShip(
         flags: node.flags,
         volume: node.volume,
       })),
-      dataContext.flight.inventoryTemplates
+      inventoryTemplates
     );
 
     entity.addComponent("shipMap", {
@@ -239,7 +242,7 @@ export function spawnShip(
           volume: entity.components.cargoContainer?.volume || 500,
         },
       ],
-      dataContext.flight.inventoryTemplates
+      inventoryTemplates
     );
   }
 
