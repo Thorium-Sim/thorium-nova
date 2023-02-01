@@ -11,7 +11,6 @@ import {FlightDataModel} from "@server/classes/FlightDataModel";
 import {Entity} from "@server/utils/ecs";
 import {DataContext} from "@server/utils/DataContext";
 import {spawnSolarSystem} from "@server/spawners/solarSystem";
-import {InventoryTemplate} from "@server/classes/Plugins/Inventory";
 import ShipPlugin from "@server/classes/Plugins/Ship";
 import {PositionComponent} from "@server/components/position";
 import {Vector3} from "three";
@@ -175,9 +174,21 @@ export const flight = t.router({
       activePlugins.forEach(plugin => {
         plugin.aspects.inventory.forEach(template => {
           if (!ctx.flight) return;
-          ctx.flight.inventoryTemplates[template.name] = new InventoryTemplate(
-            template
-          );
+          const inventory = new Entity();
+          inventory.addComponent("isInventory", {
+            plural: template.plural,
+            volume: template.volume,
+            continuous: template.continuous,
+            durability: template.durability,
+            abundance: template.abundance,
+            flags: template.flags,
+            assets: template.assets,
+          });
+          inventory.addComponent("identity", {
+            name: template.name,
+            description: template.description,
+          });
+          ctx.flight.ecs.addEntity(inventory);
         });
       });
 

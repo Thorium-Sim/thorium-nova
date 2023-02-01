@@ -84,9 +84,15 @@ export class Coordinates<T extends number> {
 export type KiloWattHour = Flavor<number, "kilowatthour">;
 export type KiloWatt = Flavor<number, "kilowatt">;
 export type MegaWattHour = Flavor<number, "megawatthour">;
+export type MegaWattSecond = Flavor<number, "megawattsecond">;
 export type MegaWatt = Flavor<number, "megawatt">;
 export type GigaWattHour = Flavor<number, "gigawatthour">;
 export type GigaWatt = Flavor<number, "gigawatt">;
 
+export function megaWattHourToMegaWattSecond(
+  input: MegaWattHour
+): MegaWattSecond {
+  return input * 60 * 60;
+}
 // https://en.wikipedia.org/wiki/Stefan–Boltzmann_constant
 const StephanBoltzmannConstant = 5.670373 * 1e-8;

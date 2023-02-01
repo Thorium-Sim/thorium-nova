@@ -1,5 +1,5 @@
+import {InventoryFlags} from "@server/classes/Plugins/Inventory/InventoryFlags";
 import {NodeFlag} from "../classes/Plugins/Ship/Deck";
-import {InventoryTemplate} from "../classes/Plugins/Inventory";
 import {randomFromList} from "../utils/randomFromList";
 
 type RoomI = {
@@ -12,7 +12,14 @@ type RoomI = {
 };
 export function generateShipInventory(
   inputRooms: RoomI[],
-  flightInventory: {[inventoryTemplateName: string]: InventoryTemplate}
+  flightInventory: {
+    [inventoryTemplateName: string]: {
+      name: string;
+      volume: number;
+      abundance: number;
+      flags: InventoryFlags;
+    };
+  }
 ) {
   // First, lets figure out how much space we even have
   let [totalVolume, rooms] = inputRooms.reduce(
@@ -88,9 +95,15 @@ export function generateShipInventory(
   inputRooms.forEach(room => roomsMap.set(room.id, room));
 
   function addInventory(
-    inventoryTemplate: InventoryTemplate,
+    inventoryTemplate: {
+      name: string;
+      volume: number;
+      abundance: number;
+      flags: InventoryFlags;
+    } | null,
     room: {availableVolume: number; id: number; flags: NodeFlag[]}
   ) {
+    if (!inventoryTemplate) return;
     const roomEntity = roomsMap.get(room.id);
     if (!roomEntity) return;
     roomEntity.contents[inventoryTemplate.name] = roomEntity.contents[

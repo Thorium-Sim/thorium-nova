@@ -1,5 +1,7 @@
-import {InventoryTemplate} from "../classes/Plugins/Inventory";
-import {InventoryFlagValues} from "../classes/Plugins/Inventory/InventoryFlags";
+import {
+  InventoryFlags,
+  InventoryFlagValues,
+} from "../classes/Plugins/Inventory/InventoryFlags";
 import {Entity} from "../utils/ecs";
 import {generateShipInventory} from "./inventory";
 let oldRandom: any;
@@ -71,22 +73,28 @@ describe("Inventory Generator", () => {
     inputRooms.push(cargoRoom);
 
     const flightInventory: {
-      [inventoryTemplateName: string]: InventoryTemplate;
+      [inventoryTemplateName: string]: {
+        name: string;
+        volume: number;
+        abundance: number;
+        flags: InventoryFlags;
+      };
     } = {};
     Object.keys(InventoryFlagValues).forEach((key, i) => {
-      flightInventory[key] = new InventoryTemplate({
+      flightInventory[key] = {
         name: `Test ${key} Cargo`,
         volume: 20 - i,
         abundance: i + 1,
         flags: {[key]: {}},
-      });
+      };
     });
 
-    flightInventory["random"] = new InventoryTemplate({
+    flightInventory["random"] = {
       name: `Test Random Cargo`,
       volume: 1,
       abundance: 1,
-    });
+      flags: {},
+    };
     generateShipInventory(
       inputRooms.map(room => {
         return {
@@ -292,22 +300,28 @@ describe("Inventory Generator", () => {
     });
     inputRooms.push(cargoRoom);
     const flightInventory: {
-      [inventoryTemplateName: string]: InventoryTemplate;
+      [inventoryTemplateName: string]: {
+        name: string;
+        volume: number;
+        abundance: number;
+        flags: InventoryFlags;
+      };
     } = {};
     Object.keys(InventoryFlagValues).forEach((key, i) => {
-      flightInventory[key] = new InventoryTemplate({
+      flightInventory[key] = {
         name: `Test ${key} Cargo`,
         volume: 20 - i,
         abundance: i + 1,
         flags: {[key]: {}},
-      });
+      };
     });
 
-    flightInventory["random"] = new InventoryTemplate({
+    flightInventory["random"] = {
       name: `Test Random Cargo`,
       volume: 1,
       abundance: 1,
-    });
+      flags: {},
+    };
     generateShipInventory(
       inputRooms.map(room => {
         return {

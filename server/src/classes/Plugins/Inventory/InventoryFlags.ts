@@ -1,4 +1,4 @@
-import {KiloWattHour} from "server/src/utils/unitTypes";
+import {KiloWattHour, MegaWattHour} from "server/src/utils/unitTypes";
 
 /**
  * Jumping the gun a bit of this, but I figure it's helpful to have context
@@ -23,7 +23,7 @@ export type RepairTypes =
 export type InventoryFlags = Partial<{
   fuel: {
     /** How much power is released from one unit of fuel */
-    fuelDensity: KiloWattHour;
+    fuelDensity: MegaWattHour;
   };
   coolant: {};
   // TODO July 1, 2022 - Could be interesting to put torpedo movement properties on the torpedo casing. Max speed, acceleration, turn speed, etc.

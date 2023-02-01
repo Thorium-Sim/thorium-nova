@@ -1,10 +1,10 @@
+import {InventoryFlags} from "@server/classes/Plugins/Inventory/InventoryFlags";
 import {Client} from "@server/init/liveQuery";
 import {pubsub} from "@server/init/pubsub";
 import {router} from "@server/init/router";
 import {FlightClient} from "../classes/FlightClient";
 import {FlightDataModel} from "../classes/FlightDataModel";
 import BasePlugin from "../classes/Plugins";
-import {InventoryTemplate} from "../classes/Plugins/Inventory";
 import ShipPlugin from "../classes/Plugins/Ship";
 import {ServerDataModel} from "../classes/ServerDataModel";
 import systems from "../systems";
@@ -54,7 +54,14 @@ class MockFlightDataModel {
   pluginIds: string[] = [];
   private initEntities: Entity[] = [];
   serverDataModel: ServerDataModel;
-  inventoryTemplates: {[key: string]: InventoryTemplate} = {};
+  inventoryTemplates: {
+    [key: string]: {
+      name: string;
+      volume: number;
+      abundance: number;
+      flags: InventoryFlags;
+    };
+  } = {};
   constructor(
     params: Partial<MockFlightDataModel> & {
       serverDataModel: ServerDataModel;
