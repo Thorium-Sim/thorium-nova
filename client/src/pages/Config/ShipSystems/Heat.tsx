@@ -32,12 +32,12 @@ export function Heat() {
           <div className="pb-4 flex">
             <Input
               labelHidden={false}
-              label="Coolant Heat Transfer Rate"
-              helperText="The rate at which heat can transfer from the system to coolant stored the room, in Kelvin / second."
+              label="Power to Heat Ratio"
+              helperText="The percentage of power which passes through the system which is turned into heat."
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              defaultValue={system.coolantHeatTransferRate}
+              defaultValue={system.powerToHeat}
               onBlur={(e: any) => {
                 if (isNaN(Number(e.target.value))) return;
                 q.plugin.systems.update.netSend({
@@ -45,12 +45,12 @@ export function Heat() {
                   systemId: systemId,
                   shipId,
                   shipPluginId,
-                  coolantHeatTransferRate: Number(e.target.value),
+                  powerToHeat: Number(e.target.value),
                 });
               }}
             />
             <OverrideResetButton
-              property="coolantHeatTransferRate"
+              property="powerToHeat"
               setRekey={setRekey}
               className="mt-6"
             />

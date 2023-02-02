@@ -12,6 +12,13 @@ export class ReactorFuelSystem extends System {
   }
   update(entity: Entity, elapsed: number) {
     if (!entity.components.isReactor) return;
+    const efficiency = entity.components.efficiency?.efficiency ?? 1;
+    if (efficiency === 0) {
+      entity.updateComponent("isReactor", {
+        currentOutput: 0,
+      });
+      return;
+    }
 
     const {
       desiredOutput: powerNeeded,
@@ -24,7 +31,7 @@ export class ReactorFuelSystem extends System {
     // E(mWh) = P(mW) * T(h)
     const elapsedTimeHours = elapsed / 1000 / 60 / 60;
     const energyNeeded: MegaWattHour =
-      powerNeeded * elapsedTimeHours * outputBonus;
+      powerNeeded * elapsedTimeHours * outputBonus * (1 / efficiency);
 
     // Reduce energyNeeded by the unused fuel
     const unusedFuelEnergy: MegaWattHour =

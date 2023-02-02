@@ -30,6 +30,7 @@ export function getSystemInventory(system: Entity) {
         room: entityRoom,
         ...inventoryItem,
         count,
+        temperature,
         name: key,
       };
     }

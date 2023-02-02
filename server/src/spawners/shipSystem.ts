@@ -36,7 +36,7 @@ export function spawnShipSystem(
       entity.addComponent(componentName as ComponentIDs, template);
 
     const {
-      coolantHeatTransferRate,
+      powerToHeat,
       heatDissipationRate,
       maxHeat,
       maxSafeHeat,
@@ -47,8 +47,7 @@ export function spawnShipSystem(
     } = systemPlugin;
     if (flags.includes("heat"))
       entity.addComponent("heat", {
-        coolantHeatTransferRate:
-          overrides.coolantHeatTransferRate || coolantHeatTransferRate,
+        powerToHeat: overrides.powerToHeat || powerToHeat,
         heatDissipationRate:
           overrides.heatDissipationRate || heatDissipationRate,
         maxHeat: overrides.maxHeat || maxHeat,

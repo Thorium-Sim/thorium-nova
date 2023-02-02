@@ -7,6 +7,8 @@ export type Kilometer = Flavor<number, "kilometer">;
 export type Meter = Flavor<number, "meter">;
 export type Centimeter = Flavor<number, "centimeter">;
 
+export type MeterSquared = Flavor<number, "metersquared">;
+
 export type MetersPerSecond = Flavor<number, "metersPerSecond">;
 export type KilometerPerSecond = Flavor<number, "kilometerPerSecond">;
 export type MetersPerSecondSquared = Flavor<number, "metersPerSecondSquared">;
@@ -94,5 +96,8 @@ export function megaWattHourToMegaWattSecond(
 ): MegaWattSecond {
   return input * 60 * 60;
 }
+
+export type HeatCapacity = Flavor<number, "heatcapacity">;
+
 // https://en.wikipedia.org/wiki/Stefan–Boltzmann_constant
-const StephanBoltzmannConstant = 5.670373 * 1e-8;
+export const StephanBoltzmannConstant = 5.670373 * 1e-8;

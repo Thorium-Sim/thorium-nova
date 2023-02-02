@@ -112,7 +112,7 @@ export const systems = t.router({
         requiredPower: z.number().optional(),
         defaultPower: z.number().optional(),
         maxSafePower: z.number().optional(),
-        coolantHeatTransferRate: z.number().optional(),
+        powerToHeat: z.number().optional(),
         heatDissipationRate: z.number().optional(),
         nominalHeat: z.number().optional(),
         maxSafeHeat: z.number().optional(),
@@ -157,8 +157,8 @@ export const systems = t.router({
       if (typeof input.maxSafePower === "number") {
         shipSystem.maxSafePower = input.maxSafePower;
       }
-      if (typeof input.coolantHeatTransferRate === "number") {
-        shipSystem.coolantHeatTransferRate = input.coolantHeatTransferRate;
+      if (typeof input.powerToHeat === "number") {
+        shipSystem.powerToHeat = input.powerToHeat;
       }
       if (typeof input.heatDissipationRate === "number") {
         shipSystem.heatDissipationRate = input.heatDissipationRate;

@@ -24,10 +24,10 @@ describe("ReactorFuelSystem", () => {
     // Set up the initial state for each of the tests
     fuel = new Entity();
     fuel.addComponent("isInventory", {
-      volume: 1,
+      volume: 1e-6,
       abundance: 1,
       continuous: true,
-      flags: {fuel: {fuelDensity: 20340}},
+      flags: {fuel: {fuelDensity: 14.3}},
     });
     fuel.addComponent("identity", {
       name: `Deuterium`,
@@ -179,7 +179,7 @@ describe("ReactorFuelSystem", () => {
     }
     expect(reactorComponent.currentOutput).toMatchInlineSnapshot(`120`);
     expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot(
-      `0.9999989761358504`
+      `0.9985436785436778`
     );
     expect(
       ship.components.shipMap?.deckNodes[0].contents.Deuterium.count
