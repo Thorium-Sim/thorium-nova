@@ -19,6 +19,9 @@ import {InterstellarTransitionSystem} from "./InterstellarTransitionSystem";
 import {ReactorFuelSystem} from "./ReactorFuelSystem";
 import {FilterShipsWithReactors} from "./FilterShipsWithReactors";
 import {FilterInventorySystem} from "./FilterInventorySystem";
+import {ReactorHeatSystem} from "./ReactorHeatSystem";
+import {HeatToCoolantSystem} from "./HeatToCoolantSystem";
+import {HeatDispersionSystem} from "./HeatDispersionSystem";
 
 const systems = [
   FilterInventorySystem,
@@ -28,6 +31,7 @@ const systems = [
   PassengerMovementSystem,
   TimerSystem,
   ReactorFuelSystem,
+  ReactorHeatSystem,
   AutoRotateSystem,
   AutoThrustSystem,
   ThrusterSystem,
@@ -37,6 +41,8 @@ const systems = [
   EngineVelocitySystem,
   EngineVelocityPosition,
   PositionVelocitySystem,
+  HeatToCoolantSystem,
+  HeatDispersionSystem,
   DataStreamSystem,
 ];
 export default systems;

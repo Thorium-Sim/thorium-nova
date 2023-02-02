@@ -172,7 +172,6 @@ export const ImpulseControls = ({cardLoaded = true}) => {
 
   useGamepadValue("impulse-speed", value => {
     const throttleValue = (value + 1) / 2;
-    console.log(value);
     callback.current(throttleValue * cruisingSpeed);
   });
 
