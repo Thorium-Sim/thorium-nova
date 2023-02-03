@@ -245,7 +245,11 @@ const quotes = [
   // Sarah Williams
   "Though my soul may set in darkness, it will rise in perfect light; I have loved the stars too fondly to be fearful of the night.",
   // Ozymandias
-  "Look on my works, ye Mighty, and despair!"
+  "Look on my works, ye Mighty, and despair!",
+  // Muppets
+  "Life's like a movie, write your own ending, keep believing, keep pretending.",
+  "There's not a word yet for old friends who've just met.",
+  "Life is made up of meetings and partings and that is the way of it.",
 ];
 
 const QuoteOfTheDay = () => {
