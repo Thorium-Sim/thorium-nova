@@ -16,6 +16,7 @@ import CrewConfig from "./components/FlightQuickStart/CrewConfig";
 import ShipConfig from "./components/FlightQuickStart/ShipConfig";
 import MissionConfig from "./components/FlightQuickStart/MissionConfig";
 import {ComponentDemo} from "./cards";
+import {GamepadConfig} from "./hooks/useGamepadStore";
 
 const DocLayout = lazy(() => import("./docs"));
 const Config = lazy(() => import("./pages/Config"));

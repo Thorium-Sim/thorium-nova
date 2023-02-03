@@ -1,12 +1,25 @@
 import {q} from "@client/context/AppContext";
+import {useContext} from "react";
 import {useParams} from "react-router-dom";
 import {Link} from "react-router-dom";
+import {ShipPluginIdContext} from "../Ships/ShipSystemOverrideContext";
 
 export function SettingsList() {
   const params = useParams();
   const setting = params["*"]?.split("/")[1];
-  const {pluginId, systemId} = params as {pluginId: string; systemId: string};
-  const [system] = q.plugin.systems.get.useNetRequest({pluginId, systemId});
+  const {pluginId, systemId, shipId} = params as {
+    pluginId: string;
+    systemId: string;
+    shipId: string;
+  };
+  const shipPluginId = useContext(ShipPluginIdContext);
+
+  const [system] = q.plugin.systems.get.useNetRequest({
+    pluginId,
+    systemId,
+    shipId,
+    shipPluginId,
+  });
   const [availableShipSystems] = q.plugin.systems.available.useNetRequest();
   if (!system?.type) return null;
   const systemType = availableShipSystems.find(s => s.type === system.type);
@@ -36,6 +49,5 @@ const links = {
   basic: "Basic",
   system: "System",
   power: "Power",
-  efficiency: "Efficiency",
   heat: "Heat",
 };

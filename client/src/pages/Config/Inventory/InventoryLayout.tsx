@@ -11,6 +11,8 @@ import {InventoryFlagValues} from "server/src/classes/Plugins/Inventory/Inventor
 import {capitalCase} from "capital-case";
 import InfoTip from "@thorium/ui/InfoTip";
 import {q} from "@client/context/AppContext";
+import {FaPencilAlt} from "react-icons/fa";
+import {Popover, Transition} from "@headlessui/react";
 
 export const InventoryLayout = () => {
   const {inventoryId, pluginId} = useParams() as {
@@ -223,31 +225,86 @@ export const InventoryLayout = () => {
         <label>Inventory Type</label>
         {Object.entries(InventoryFlagValues).map(([key, value]) => {
           let defaultValue = key in item.flags;
-          let keyVal = key as keyof typeof InventoryFlagValues;
+          const flagKey = key as keyof typeof InventoryFlagValues;
           return (
             <>
-              <Checkbox
-                key={key}
-                type="radio"
-                name="flags"
-                defaultChecked={defaultValue}
-                onChange={e => {
-                  q.plugin.inventory.update.netSend({
-                    pluginId,
-                    inventoryId,
-                    flags: {
-                      ...{[key]: e.target.checked ? {} : undefined},
-                    },
-                  });
-                }}
-                label={
-                  <span className="flex items-center cursor-pointer">
-                    {capitalCase(key)}
-                    <InfoTip>{value.info}</InfoTip>
-                  </span>
-                }
-              />
-              {/* TODO July 1 2022 - Figure out some way to configure the properties of inventory flags without it being totally nonsensical*/}
+              <div className="flex items-center gap-1">
+                <Checkbox
+                  key={key}
+                  name="flags"
+                  defaultChecked={defaultValue}
+                  onChange={e => {
+                    q.plugin.inventory.update.netSend({
+                      pluginId,
+                      inventoryId,
+                      flags: {
+                        ...{
+                          ...item.flags,
+                          [key]: e.target.checked ? {} : undefined,
+                        },
+                      },
+                    });
+                  }}
+                  label={capitalCase(key)}
+                />
+                {defaultValue &&
+                Object.keys(value).filter(t => t !== "info").length > 0 ? (
+                  <Popover className="relative">
+                    <Popover.Button
+                      as={Button}
+                      className="btn-xs btn-warning btn-outline"
+                    >
+                      <FaPencilAlt />
+                    </Popover.Button>
+                    <Transition
+                      enter="transition duration-100 ease-out"
+                      enterFrom="transform scale-95 opacity-0"
+                      enterTo="transform scale-100 opacity-100"
+                      leave="transition duration-75 ease-out"
+                      leaveFrom="transform scale-100 opacity-100"
+                      leaveTo="transform scale-95 opacity-0"
+                    >
+                      <Popover.Panel className="absolute right-0 z-10 bg-black/90 border border-white/50 rounded p-2 w-max max-w-lg">
+                        {Object.entries(value).map(([config, value]) => {
+                          if (config === "info") return null;
+                          return (
+                            <Input
+                              key={config}
+                              label={capitalCase(config)}
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              defaultValue={
+                                // @ts-expect-error Pain to type these literal keys
+                                item.flags[flagKey]?.[config] ??
+                                value.defaultValue
+                              }
+                              helperText={value.info}
+                              onChange={e => {
+                                if (isNaN(Number(e.target.value))) return;
+                                q.plugin.inventory.update.netSend({
+                                  pluginId,
+                                  inventoryId,
+                                  flags: {
+                                    ...{
+                                      ...item.flags,
+                                      [key]: {
+                                        ...item.flags[flagKey],
+                                        [config]: Number(e.target.value),
+                                      },
+                                    },
+                                  },
+                                });
+                              }}
+                            />
+                          );
+                        })}
+                      </Popover.Panel>
+                    </Transition>
+                  </Popover>
+                ) : null}
+                <InfoTip>{value.info}</InfoTip>
+              </div>
             </>
           );
         })}

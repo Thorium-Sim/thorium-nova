@@ -30,7 +30,7 @@ export const viewscreen = t.router({
           entity.components.position.parentId === systemId) ||
           ((entity.components.isWarpEngines ||
             entity.components.isImpulseEngines) &&
-            ship?.components.shipSystems?.shipSystemIds.includes(entity.id))
+            ship?.components.shipSystems?.shipSystems.has(entity.id))
       );
     }),
 });

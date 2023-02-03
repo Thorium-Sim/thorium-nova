@@ -1,4 +1,4 @@
-import BaseShipSystemPlugin from "../classes/Plugins/ShipSystems/BaseSystem";
+import type BaseShipSystemPlugin from "../classes/Plugins/ShipSystems/BaseSystem";
 import {ShipSystemTypes} from "../classes/Plugins/ShipSystems/shipSystemTypes";
 import {components, ComponentIDs} from "../components";
 import {Entity} from "../utils/ecs";
@@ -35,8 +35,32 @@ export function spawnShipSystem(
     )
       entity.addComponent(componentName as ComponentIDs, template);
 
-    if (flags.includes("heat")) entity.addComponent("heat");
-    if (flags.includes("power")) entity.addComponent("power");
+    const {
+      powerToHeat,
+      heatDissipationRate,
+      maxHeat,
+      maxSafeHeat,
+      nominalHeat,
+      requiredPower,
+      defaultPower,
+      maxSafePower,
+    } = systemPlugin;
+    if (flags.includes("heat"))
+      entity.addComponent("heat", {
+        powerToHeat: overrides.powerToHeat || powerToHeat,
+        heatDissipationRate:
+          overrides.heatDissipationRate || heatDissipationRate,
+        maxHeat: overrides.maxHeat || maxHeat,
+        maxSafeHeat: overrides.maxSafeHeat || maxSafeHeat,
+        nominalHeat: overrides.nominalHeat || nominalHeat,
+        heat: overrides.nominalHeat || nominalHeat,
+      });
+    if (flags.includes("power"))
+      entity.addComponent("power", {
+        requiredPower: overrides.requiredPower || requiredPower,
+        defaultPower: overrides.defaultPower || defaultPower,
+        maxSafePower: overrides.maxSafePower || maxSafePower,
+      });
     if (flags.includes("efficiency")) entity.addComponent("efficiency");
   }
 

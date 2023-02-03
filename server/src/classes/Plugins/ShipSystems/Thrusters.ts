@@ -4,8 +4,8 @@ import {
   RotationsPerMinute,
 } from "server/src/utils/unitTypes";
 import BasePlugin from "..";
-import BaseShipSystemPlugin from "./BaseSystem";
-import {ShipSystemFlags} from "./shipSystemTypes";
+import BaseShipSystemPlugin, {registerSystem} from "./BaseSystem";
+import {PowerNodes, ShipSystemFlags} from "./shipSystemTypes";
 
 // TODO March 16, 2022: Add the necessary sound effects
 export default class ThrustersPlugin extends BaseShipSystemPlugin {
@@ -15,6 +15,7 @@ export default class ThrustersPlugin extends BaseShipSystemPlugin {
   directionThrust: KiloNewtons;
   rotationMaxSpeed: RotationsPerMinute;
   rotationThrust: KiloNewtons;
+  powerNode?: PowerNodes = "navigation";
   constructor(params: Partial<ThrustersPlugin>, plugin: BasePlugin) {
     super(params, plugin);
     this.directionMaxSpeed = params.directionMaxSpeed || 1;
@@ -23,3 +24,4 @@ export default class ThrustersPlugin extends BaseShipSystemPlugin {
     this.rotationThrust = params.rotationThrust || 12500;
   }
 }
+registerSystem("thrusters", ThrustersPlugin);

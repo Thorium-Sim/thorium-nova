@@ -67,7 +67,13 @@ describe.skip("AutoThrustSystem", () => {
       rotation: {},
       rotationVelocity: {},
       autopilot: {},
-      shipSystems: {shipSystemIds: [dampening.id, warp.id, impulse.id]},
+      shipSystems: {
+        shipSystems: new Map([
+          [dampening.id, {}],
+          [warp.id, {}],
+          [impulse.id, {}],
+        ]),
+      },
     });
     ecs.addEntity(ship);
   });

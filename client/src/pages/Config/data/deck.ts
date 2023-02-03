@@ -219,6 +219,7 @@ export const deck = t.router({
           z.object({radius: z.number()}),
           z.object({volume: z.number()}),
           z.object({flags: nodeFlagsSchema.array()}),
+          z.object({systems: z.string().array()}),
         ])
       )
     )
@@ -259,6 +260,9 @@ export const deck = t.router({
       }
       if ("flags" in input) {
         node.flags = input.flags;
+      }
+      if ("systems" in input) {
+        node.systems = input.systems;
       }
       if ("volume" in input) {
         if (input.volume < 0) {

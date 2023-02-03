@@ -219,7 +219,7 @@ function ClientAssignment() {
         <SearchableList
           showSearchLabel={false}
           selectedItem={selectedClient}
-          setSelectedItem={setSelectedClient}
+          setSelectedItem={({id}) => setSelectedClient(id)}
           items={clients
             .filter(c => c.shipId === null || c.shipId === undefined)
             .map(c => ({

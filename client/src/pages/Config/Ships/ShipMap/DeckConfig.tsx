@@ -28,7 +28,8 @@ export type updateNodeParams =
   | {name: string}
   | {radius: number}
   | {volume: number}
-  | {flags: NodeFlag[]};
+  | {flags: NodeFlag[]}
+  | {systems: string[]};
 const pixelRatio = window.devicePixelRatio;
 
 export function DeckConfig() {

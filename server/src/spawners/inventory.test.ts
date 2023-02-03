@@ -1,5 +1,7 @@
-import {InventoryTemplate} from "../classes/Plugins/Inventory";
-import {InventoryFlagValues} from "../classes/Plugins/Inventory/InventoryFlags";
+import {
+  InventoryFlags,
+  InventoryFlagValues,
+} from "../classes/Plugins/Inventory/InventoryFlags";
 import {Entity} from "../utils/ecs";
 import {generateShipInventory} from "./inventory";
 let oldRandom: any;
@@ -71,22 +73,28 @@ describe("Inventory Generator", () => {
     inputRooms.push(cargoRoom);
 
     const flightInventory: {
-      [inventoryTemplateName: string]: InventoryTemplate;
+      [inventoryTemplateName: string]: {
+        name: string;
+        volume: number;
+        abundance: number;
+        flags: InventoryFlags;
+      };
     } = {};
     Object.keys(InventoryFlagValues).forEach((key, i) => {
-      flightInventory[key] = new InventoryTemplate({
+      flightInventory[key] = {
         name: `Test ${key} Cargo`,
         volume: 20 - i,
         abundance: i + 1,
         flags: {[key]: {}},
-      });
+      };
     });
 
-    flightInventory["random"] = new InventoryTemplate({
+    flightInventory["random"] = {
       name: `Test Random Cargo`,
       volume: 1,
       abundance: 1,
-    });
+      flags: {},
+    };
     generateShipInventory(
       inputRooms.map(room => {
         return {
@@ -104,8 +112,14 @@ describe("Inventory Generator", () => {
           "components": Object {
             "cargoContainer": CargoContainer {
               "contents": Object {
-                "Test torpedoCasing Cargo": 7,
-                "Test torpedoWarhead Cargo": 1,
+                "Test torpedoCasing Cargo": Object {
+                  "count": 3,
+                  "temperature": 295.37,
+                },
+                "Test torpedoWarhead Cargo": Object {
+                  "count": 5,
+                  "temperature": 295.37,
+                },
               },
               "volume": 100,
             },
@@ -121,7 +135,10 @@ describe("Inventory Generator", () => {
           "components": Object {
             "cargoContainer": CargoContainer {
               "contents": Object {
-                "Test torpedoCasing Cargo": 8,
+                "Test torpedoCasing Cargo": Object {
+                  "count": 8,
+                  "temperature": 295.37,
+                },
               },
               "volume": 100,
             },
@@ -137,8 +154,14 @@ describe("Inventory Generator", () => {
           "components": Object {
             "cargoContainer": CargoContainer {
               "contents": Object {
-                "Test probeCasing Cargo": 1,
-                "Test probeEquipment Cargo": 2,
+                "Test probeCasing Cargo": Object {
+                  "count": 1,
+                  "temperature": 295.37,
+                },
+                "Test probeEquipment Cargo": Object {
+                  "count": 2,
+                  "temperature": 295.37,
+                },
               },
               "volume": 100,
             },
@@ -154,7 +177,10 @@ describe("Inventory Generator", () => {
           "components": Object {
             "cargoContainer": CargoContainer {
               "contents": Object {
-                "Test security Cargo": 5,
+                "Test security Cargo": Object {
+                  "count": 5,
+                  "temperature": 295.37,
+                },
               },
               "volume": 100,
             },
@@ -170,7 +196,10 @@ describe("Inventory Generator", () => {
           "components": Object {
             "cargoContainer": CargoContainer {
               "contents": Object {
-                "Test repair Cargo": 5,
+                "Test repair Cargo": Object {
+                  "count": 5,
+                  "temperature": 295.37,
+                },
               },
               "volume": 100,
             },
@@ -186,7 +215,10 @@ describe("Inventory Generator", () => {
           "components": Object {
             "cargoContainer": CargoContainer {
               "contents": Object {
-                "Test medical Cargo": 5,
+                "Test medical Cargo": Object {
+                  "count": 5,
+                  "temperature": 295.37,
+                },
               },
               "volume": 100,
             },
@@ -202,15 +234,50 @@ describe("Inventory Generator", () => {
           "components": Object {
             "cargoContainer": CargoContainer {
               "contents": Object {
-                "Test forCrew Cargo": 1,
-                "Test medical Cargo": 4,
-                "Test probeCasing Cargo": 17,
-                "Test probeEquipment Cargo": 11,
-                "Test repair Cargo": 7,
-                "Test science Cargo": 7,
-                "Test security Cargo": 5,
-                "Test sparePart Cargo": 13,
-                "Test torpedoWarhead Cargo": 16,
+                "Test coolant Cargo": Object {
+                  "count": 3,
+                  "temperature": 295.37,
+                },
+                "Test forCrew Cargo": Object {
+                  "count": 4,
+                  "temperature": 295.37,
+                },
+                "Test fuel Cargo": Object {
+                  "count": 2,
+                  "temperature": 295.37,
+                },
+                "Test medical Cargo": Object {
+                  "count": 2,
+                  "temperature": 295.37,
+                },
+                "Test probeCasing Cargo": Object {
+                  "count": 13,
+                  "temperature": 295.37,
+                },
+                "Test probeEquipment Cargo": Object {
+                  "count": 13,
+                  "temperature": 295.37,
+                },
+                "Test repair Cargo": Object {
+                  "count": 4,
+                  "temperature": 295.37,
+                },
+                "Test science Cargo": Object {
+                  "count": 5,
+                  "temperature": 295.37,
+                },
+                "Test security Cargo": Object {
+                  "count": 3,
+                  "temperature": 295.37,
+                },
+                "Test sparePart Cargo": Object {
+                  "count": 10,
+                  "temperature": 295.37,
+                },
+                "Test torpedoWarhead Cargo": Object {
+                  "count": 8,
+                  "temperature": 295.37,
+                },
               },
               "volume": 1000,
             },
@@ -233,22 +300,28 @@ describe("Inventory Generator", () => {
     });
     inputRooms.push(cargoRoom);
     const flightInventory: {
-      [inventoryTemplateName: string]: InventoryTemplate;
+      [inventoryTemplateName: string]: {
+        name: string;
+        volume: number;
+        abundance: number;
+        flags: InventoryFlags;
+      };
     } = {};
     Object.keys(InventoryFlagValues).forEach((key, i) => {
-      flightInventory[key] = new InventoryTemplate({
+      flightInventory[key] = {
         name: `Test ${key} Cargo`,
         volume: 20 - i,
         abundance: i + 1,
         flags: {[key]: {}},
-      });
+      };
     });
 
-    flightInventory["random"] = new InventoryTemplate({
+    flightInventory["random"] = {
       name: `Test Random Cargo`,
       volume: 1,
       abundance: 1,
-    });
+      flags: {},
+    };
     generateShipInventory(
       inputRooms.map(room => {
         return {
@@ -266,16 +339,30 @@ describe("Inventory Generator", () => {
           "components": Object {
             "cargoContainer": CargoContainer {
               "contents": Object {
-                "Test forCrew Cargo": 2,
-                "Test medical Cargo": 6,
-                "Test probeCasing Cargo": 12,
-                "Test probeEquipment Cargo": 9,
-                "Test repair Cargo": 8,
-                "Test science Cargo": 5,
-                "Test security Cargo": 7,
-                "Test sparePart Cargo": 9,
-                "Test torpedoCasing Cargo": 10,
-                "Test torpedoWarhead Cargo": 11,
+                "Test coolant Cargo": Object {
+                  "count": 4,
+                  "temperature": 295.37,
+                },
+                "Test fuel Cargo": Object {
+                  "count": 2,
+                  "temperature": 295.37,
+                },
+                "Test probeCasing Cargo": Object {
+                  "count": 17,
+                  "temperature": 295.37,
+                },
+                "Test probeEquipment Cargo": Object {
+                  "count": 19,
+                  "temperature": 295.37,
+                },
+                "Test torpedoCasing Cargo": Object {
+                  "count": 14,
+                  "temperature": 295.37,
+                },
+                "Test torpedoWarhead Cargo": Object {
+                  "count": 16,
+                  "temperature": 295.37,
+                },
               },
               "volume": 1000,
             },

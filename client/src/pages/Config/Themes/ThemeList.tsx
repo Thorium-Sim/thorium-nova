@@ -57,7 +57,7 @@ export function ThemeList() {
               }))}
               searchKeys={["name"]}
               selectedItem={themeId || null}
-              setSelectedItem={id => navigate(`${id}`)}
+              setSelectedItem={({id}) => navigate(`${id}`)}
               renderItem={c => (
                 <div className="flex justify-between items-center" key={c.id}>
                   <div>{c.name}</div>

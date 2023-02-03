@@ -1,7 +1,6 @@
 import {t} from "@server/init/t";
 import {pubsub} from "@server/init/pubsub";
 import {matchSorter} from "match-sorter";
-import {InventoryTemplate} from "server/src/classes/Plugins/Inventory";
 import {findClosestNode} from "server/src/systems/PassengerMovementSystem";
 import {DataContext} from "server/src/utils/DataContext";
 import {Entity} from "server/src/utils/ecs";
@@ -10,6 +9,8 @@ import {
   createShipMapGraph,
 } from "server/src/utils/shipMapPathfinder";
 import {z} from "zod";
+import {Kelvin} from "@server/utils/unitTypes";
+import {getInventoryTemplates} from "@server/utils/getInventoryTemplates";
 
 const transferId = z.object({
   type: z.union([z.literal("room"), z.literal("entity")]),
@@ -18,7 +19,15 @@ const transferId = z.object({
 
 export const cargoControl = t.router({
   inventoryTypes: t.procedure.request(({ctx}) => {
-    return ctx.flight?.inventoryTemplates || {};
+    const inventorySystem = ctx.flight?.ecs.systems.find(
+      sys => sys.constructor.name === "InventoryTemplateSystem"
+    );
+    return Object.fromEntries(
+      inventorySystem?.entities.map(entity => [
+        entity.components.identity?.name,
+        {...entity.components.identity, ...entity.components.isInventory},
+      ]) || []
+    );
   }),
   rooms: t.procedure
     .filter((publish: {shipId: number} | null, {ctx}) => {
@@ -27,6 +36,7 @@ export const cargoControl = t.router({
     })
     .request(({ctx}) => {
       if (!ctx.ship) throw new Error("No ship selected");
+      const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
       const rooms =
         ctx.ship?.components.shipMap?.deckNodes
           .filter(node => node.isRoom && node.flags?.includes("cargo"))
@@ -38,10 +48,7 @@ export const cargoControl = t.router({
               position: {x: node.x, y: node.y},
               volume: node.volume,
               contents: node.contents,
-              used: calculateCargoUsed(
-                node.contents,
-                ctx.flight?.inventoryTemplates || {}
-              ),
+              used: calculateCargoUsed(node.contents, inventoryTemplates),
             };
           }) || [];
       const decks = ctx.ship.components.shipMap?.decks || [];
@@ -58,6 +65,8 @@ export const cargoControl = t.router({
     })
     .request(({ctx}) => {
       if (!ctx.ship) throw new Error("No ship selected");
+      const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
+
       return (
         ctx.flight?.ecs.entities
           .filter(
@@ -79,7 +88,7 @@ export const cargoControl = t.router({
               contents: entity.components.cargoContainer?.contents || {},
               used: calculateCargoUsed(
                 entity.components.cargoContainer?.contents || {},
-                ctx.flight?.inventoryTemplates || {}
+                inventoryTemplates
               ),
               volume: entity.components.cargoContainer?.volume || 0,
               destinationNode:
@@ -130,7 +139,7 @@ export const cargoControl = t.router({
           });
 
           // And the cargo items in the room.
-          Object.entries(node.contents).forEach(([name, count], i) => {
+          Object.entries(node.contents).forEach(([name, {count}], i) => {
             if (count === 0) return;
             output.push({
               id: Number(`${node.id}${i}${count}`),
@@ -270,30 +279,32 @@ export const cargoControl = t.router({
       const toContainer = getCargoContents(ctx, input.toId);
       if (!toContainer) throw new Error("No destination container found.");
 
+      const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
+
       let itemCounts: {[key: string]: number} = {};
       let destinationVolume = toContainer.volume;
       // First loop to see if there are any errors
       input.transfers.forEach(({item, count}) => {
         if (
           !fromContainer.contents[item] ||
-          fromContainer.contents[item] < count
+          fromContainer.contents[item].count < count
         ) {
-          itemCounts[item] = fromContainer.contents[item];
+          itemCounts[item] = fromContainer.contents[item].count;
         }
         const destinationUsedSpace = calculateCargoUsed(
           toContainer.contents || {},
-          ctx.flight?.inventoryTemplates || {}
+          inventoryTemplates
         );
         const movedVolume = calculateCargoUsed(
-          {[item]: itemCounts[item] || count},
-          ctx.flight?.inventoryTemplates || {}
+          {[item]: {count: itemCounts[item] || count}},
+          inventoryTemplates
         );
 
         if (destinationUsedSpace + movedVolume > destinationVolume) {
           const volumeLeft = destinationVolume - destinationUsedSpace;
           const singleVolume = calculateCargoUsed(
-            {[item]: 1},
-            ctx.flight?.inventoryTemplates || {}
+            {[item]: {count: 1}},
+            inventoryTemplates
           );
           const cargoItemsThatFitInVolumeLeft = Math.floor(
             volumeLeft / singleVolume
@@ -307,17 +318,29 @@ export const cargoControl = t.router({
             throw new Error("Not enough space in destination.");
         }
         const actualMovedVolume = calculateCargoUsed(
-          {[item]: itemCounts[item] || count},
-          ctx.flight?.inventoryTemplates || {}
+          {[item]: {count: itemCounts[item] || count}},
+          inventoryTemplates
         );
         destinationVolume -= actualMovedVolume;
       });
 
       // Then loop to do the actual transfer
       input.transfers.forEach(({item, count}) => {
-        fromContainer.contents[item] -= itemCounts[item] || count;
-        if (!toContainer.contents[item]) toContainer.contents[item] = 0;
-        toContainer.contents[item] += itemCounts[item] || count;
+        fromContainer.contents[item].count -= itemCounts[item] || count;
+        if (!toContainer.contents[item])
+          toContainer.contents[item] = {count: 0, temperature: 295.37};
+
+        // Average the temperatures of the items being transferred.
+        // The formula we'll use for combining heat is
+        // (T1 * C1 + T2 * C2) / (C1 + C2)
+        const T1 = fromContainer.contents[item].temperature;
+        const T2 = toContainer.contents[item].temperature;
+        const C1 = toContainer.contents[item].count;
+        const C2 = itemCounts[item] || count;
+
+        toContainer.contents[item].count += C2;
+        toContainer.contents[item].temperature =
+          (T1 * C1 + T2 * C2) / (C1 + C2);
       });
 
       if (ctx.ship) {
@@ -333,10 +356,10 @@ export const cargoControl = t.router({
 
 function calculateCargoUsed(
   contents: {
-    [inventoryTemplateName: string]: number;
+    [inventoryTemplateName: string]: {count: number};
   },
   inventory: {
-    [inventoryTemplateName: string]: InventoryTemplate;
+    [inventoryTemplateName: string]: {volume: number};
   }
 ) {
   if (!contents) return 0;
@@ -345,7 +368,7 @@ function calculateCargoUsed(
     if (!template) {
       return acc;
     }
-    return acc + contents[key] * template.volume;
+    return acc + contents[key].count * template.volume;
   }, 0);
 
   return Math.round(value * 1000) / 1000;

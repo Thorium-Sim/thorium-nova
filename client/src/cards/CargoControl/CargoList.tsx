@@ -1,4 +1,5 @@
 import {q} from "@client/context/AppContext";
+import {Kelvin} from "@server/utils/unitTypes";
 import {cargoSort} from "./cargoSort";
 
 export function CargoList({
@@ -8,7 +9,12 @@ export function CargoList({
   onClick,
 }: {
   selectedRoom:
-    | {id: number; contents: {[inventoryTemplateName: string]: number}}
+    | {
+        id: number;
+        contents: {
+          [inventoryTemplateName: string]: {temperature: Kelvin; count: number};
+        };
+      }
     | undefined;
   enRouteContainerId: number | undefined;
   selectedContainerId: number | null;
@@ -22,7 +28,7 @@ export function CargoList({
         Object.entries(selectedRoom.contents)
           .sort(cargoSort)
           .map(([key, value]) => {
-            if (value === 0) return null;
+            if (value.count === 0) return null;
             const inventoryType = inventoryTypes[key];
             let itemVolume = Math.max(
               Math.round(inventoryType.volume * 1000) / 1000,
@@ -43,7 +49,7 @@ export function CargoList({
                   <span className="font-bold">
                     {key} {inventoryType ? `(${itemVolume} / unit)` : ""}
                   </span>
-                  <span className="tabular-nums">{value}</span>
+                  <span className="tabular-nums">{value.count}</span>
                 </div>
               </li>
             );

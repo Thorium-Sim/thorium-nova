@@ -1,4 +1,9 @@
-import {PowerUnit} from "server/src/utils/unitTypes";
+import {
+  HeatCapacity,
+  Kilograms,
+  KiloWattHour,
+  MegaWattHour,
+} from "server/src/utils/unitTypes";
 
 /**
  * Jumping the gun a bit of this, but I figure it's helpful to have context
@@ -23,9 +28,12 @@ export type RepairTypes =
 export type InventoryFlags = Partial<{
   fuel: {
     /** How much power is released from one unit of fuel */
-    fuelDensity: PowerUnit;
+    fuelDensity: MegaWattHour;
   };
-  coolant: {};
+  coolant: {
+    heatCapacity: HeatCapacity;
+    massPerUnit: Kilograms;
+  };
   // TODO July 1, 2022 - Could be interesting to put torpedo movement properties on the torpedo casing. Max speed, acceleration, turn speed, etc.
   torpedoCasing: {};
   // TODO July 1, 2022 - Put the damage yield, and perhaps the damage type, here.
@@ -66,6 +74,15 @@ export const InventoryFlagValues: {
   },
   coolant: {
     info: "Cools down things that get hot, like the reactor, engines, and weapons.",
+    heatCapacity: {
+      defaultValue: 4.18,
+      info: "How quickly this coolant heats or cools.",
+    },
+    massPerUnit: {
+      // The mass of 1 m^3 of water.
+      defaultValue: 1000,
+      info: "The mass of one unit (1 m^3) of the coolant. Used with the heat capacity to determine the heat rate.",
+    },
   },
   forCrew: {info: "Indicates that this item can be equipped by a crew member."},
   science: {

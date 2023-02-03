@@ -3,7 +3,6 @@ import {SystemLayout} from "./SystemLayout";
 import {ShipSystemsList} from "./ShipSystemsList";
 import {Basic} from "./Basic";
 import {Power} from "./Power";
-import {Efficiency} from "./Efficiency";
 import {Heat} from "./Heat";
 import {useParams} from "react-router-dom";
 import {lazy, Suspense} from "react";
@@ -28,7 +27,12 @@ const SystemConfig = () => {
   };
   const [system] = q.plugin.systems.get.useNetRequest({pluginId, systemId});
   const Comp = systemConfigs[system.type];
-  if (!Comp) return null;
+  if (!Comp)
+    return (
+      <h3 className="text-center text-xl">
+        No configuration for this system type.
+      </h3>
+    );
   return <Comp />;
 };
 
@@ -48,7 +52,6 @@ export default function ShipSystemsConfig() {
           />
 
           <Route path="power" element={<Power />} />
-          <Route path="efficiency" element={<Efficiency />} />
           <Route path="heat" element={<Heat />} />
         </Route>
       </Route>

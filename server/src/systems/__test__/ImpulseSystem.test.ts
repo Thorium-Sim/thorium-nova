@@ -23,7 +23,7 @@ describe("ImpulseSystem", () => {
       isShip: {},
       mass: {mass: 2000},
       shipSystems: {
-        shipSystemIds: [entity.id],
+        shipSystems: new Map([[entity.id, {}]]),
       },
     });
     ecs.addEntity(entity);

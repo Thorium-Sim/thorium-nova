@@ -1,3 +1,4 @@
+import {GamepadKey} from "@client/hooks/useGamepadStore";
 import {animated as a} from "@react-spring/web";
 import {useJoystick} from "client/src/hooks/useJoystick";
 import {ReactNode} from "react";
@@ -6,12 +7,18 @@ export const Joystick = ({
   children,
   className,
   onDrag,
+  gamepadKeys,
 }: {
   onDrag: (dir: {x: number; y: number}) => void;
   className?: string;
   children?: ReactNode;
+  gamepadKeys?: {x: GamepadKey; y: GamepadKey};
 }) => {
-  const [xy, bind, containerRef] = useJoystick({axisSnap: true, onDrag});
+  const [xy, bind, containerRef] = useJoystick({
+    axisSnap: true,
+    onDrag,
+    gamepadKeys,
+  });
 
   return (
     <div className={`relative aspect-square ${className}`}>
@@ -35,15 +42,22 @@ export const LinearJoystick = ({
   onDrag,
   children,
   vertical,
+  gamepadKey,
 }: {
   className?: string;
   onDrag: (dirs: {x: number; y: number}) => void;
   children: ReactNode;
   vertical?: boolean;
+  gamepadKey?: GamepadKey;
 }) => {
   const [xy, bind, containerRef] = useJoystick({
     axis: vertical ? "y" : "x",
     onDrag,
+    gamepadKeys: gamepadKey
+      ? vertical
+        ? {x: "" as GamepadKey, y: gamepadKey}
+        : {x: gamepadKey, y: "" as GamepadKey}
+      : undefined,
   });
   return (
     <div

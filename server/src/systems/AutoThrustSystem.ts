@@ -58,13 +58,13 @@ export class AutoThrustSystem extends System {
         if (
           !acc[0] &&
           sysEntity.components.isImpulseEngines &&
-          entity.components.shipSystems?.shipSystemIds.includes(sysEntity.id)
+          entity.components.shipSystems?.shipSystems.has(sysEntity.id)
         )
           return [sysEntity, acc[1]];
         if (
           !acc[1] &&
           sysEntity.components.isWarpEngines &&
-          entity.components.shipSystems?.shipSystemIds.includes(sysEntity.id)
+          entity.components.shipSystems?.shipSystems.has(sysEntity.id)
         )
           return [acc[0], sysEntity];
         return acc;

@@ -14,6 +14,8 @@ import {impulse} from "./impulse";
 import {warp} from "./warp";
 import {inertialDampeners} from "./inertialDampeners";
 import {thrusters} from "./thrusters";
+import {reactor} from "./reactor";
+import {battery} from "./battery";
 
 const systemTypes = createUnionSchema(
   Object.keys(ShipSystemTypes) as (keyof typeof ShipSystemTypes)[]
@@ -24,6 +26,8 @@ export const systems = t.router({
   warp,
   inertialDampeners,
   thrusters,
+  reactor,
+  battery,
   all: t.procedure
     .input(z.object({pluginId: z.string()}).optional())
     .filter((publish: {pluginId: string} | null, {input}) => {
@@ -99,12 +103,20 @@ export const systems = t.router({
     .input(
       z.object({
         pluginId: z.string(),
-        shipSystemId: z.string(),
+        systemId: z.string(),
         shipId: z.string().optional(),
         shipPluginId: z.string().optional(),
         name: z.string().optional(),
         description: z.string().optional(),
         tags: z.string().array().optional(),
+        requiredPower: z.number().optional(),
+        defaultPower: z.number().optional(),
+        maxSafePower: z.number().optional(),
+        powerToHeat: z.number().optional(),
+        heatDissipationRate: z.number().optional(),
+        nominalHeat: z.number().optional(),
+        maxSafeHeat: z.number().optional(),
+        maxHeat: z.number().optional(),
       })
     )
     .send(async ({ctx, input}) => {
@@ -135,6 +147,31 @@ export const systems = t.router({
           shipId: input.shipId,
         });
       }
+
+      if (typeof input.requiredPower === "number") {
+        shipSystem.requiredPower = input.requiredPower;
+      }
+      if (typeof input.defaultPower === "number") {
+        shipSystem.defaultPower = input.defaultPower;
+      }
+      if (typeof input.maxSafePower === "number") {
+        shipSystem.maxSafePower = input.maxSafePower;
+      }
+      if (typeof input.powerToHeat === "number") {
+        shipSystem.powerToHeat = input.powerToHeat;
+      }
+      if (typeof input.heatDissipationRate === "number") {
+        shipSystem.heatDissipationRate = input.heatDissipationRate;
+      }
+      if (typeof input.nominalHeat === "number") {
+        shipSystem.nominalHeat = input.nominalHeat;
+      }
+      if (typeof input.maxSafeHeat === "number") {
+        shipSystem.maxSafeHeat = input.maxSafeHeat;
+      }
+      if (typeof input.maxHeat === "number") {
+        shipSystem.maxHeat = input.maxHeat;
+      }
       pubsub.publish.plugin.systems.all({pluginId: input.pluginId});
       pubsub.publish.plugin.systems.get({
         pluginId: input.pluginId,
@@ -145,7 +182,7 @@ export const systems = t.router({
     .input(
       z.object({
         pluginId: z.string(),
-        shipSystemId: z.string(),
+        systemId: z.string(),
         shipId: z.string(),
         shipPluginId: z.string(),
         property: z.string(),

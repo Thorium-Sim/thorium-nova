@@ -71,6 +71,7 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
         networkMode: "always",
         staleTime: Infinity,
         cacheTime: Infinity,
+        enabled: !!data || opts.enabled,
       });
       const key = JSON.stringify(queryKey);
 

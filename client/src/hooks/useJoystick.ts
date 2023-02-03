@@ -2,6 +2,7 @@ import throttle from "lodash.throttle";
 import {useSpring} from "@react-spring/web";
 import {useDrag} from "@use-gesture/react";
 import {useRef} from "react";
+import {GamepadKey, useGamepadValue} from "./useGamepadStore";
 
 function distance(x1: number, y1: number, x2 = 0, y2 = 0) {
   const a = x1 - x2;
@@ -15,14 +16,17 @@ export function useJoystick({
   axis,
   onDrag = () => {},
   throttleMs = 100,
+  gamepadKeys,
 }: {
   axisSnap?: boolean;
   axis?: "x" | "y" | undefined;
   onDrag?: (values: {x: number; y: number}) => void;
   throttleMs?: number;
+  gamepadKeys?: {x: GamepadKey; y: GamepadKey};
 } = {}) {
   const callback = useRef(throttle(onDrag, throttleMs));
   const containerRef = useRef<HTMLDivElement>(null);
+  const dragDown = useRef(false);
   const maxDistance = useRef(0);
   const [{xy}, set] = useSpring(() => ({
     xy: [0, 0],
@@ -36,6 +40,7 @@ export function useJoystick({
             axis === "y" ? "height" : "width"
           ] || 0) / 2;
       }
+      dragDown.current = down;
       const dist = distance(x, y);
       if (dist > maxDistance.current) {
         const theta = Math.abs(Math.atan(y / x));
@@ -61,5 +66,42 @@ export function useJoystick({
     },
     {axis}
   );
+
+  const gamepadValues = useRef([0, 0]);
+
+  function setGamepadValue() {
+    if (dragDown.current) return;
+    if (!maxDistance.current) {
+      maxDistance.current =
+        (containerRef.current?.getBoundingClientRect()[
+          axis === "y" ? "height" : "width"
+        ] || 0) / 2;
+    }
+    let [x, y] = gamepadValues.current;
+    x *= maxDistance.current;
+    y *= maxDistance.current;
+    const dist = distance(x, y);
+    if (dist > maxDistance.current) {
+      const theta = Math.abs(Math.atan(y / x));
+      x = maxDistance.current * Math.cos(theta) * (x > 0 ? 1 : -1);
+      y = maxDistance.current * Math.sin(theta) * (y > 0 ? 1 : -1);
+    }
+    set({
+      xy: [x, y],
+      immediate: true,
+    });
+    callback.current?.({
+      x: x / maxDistance.current,
+      y: y / maxDistance.current,
+    });
+  }
+  useGamepadValue(gamepadKeys?.x, value => {
+    gamepadValues.current[0] = value;
+    setGamepadValue();
+  });
+  useGamepadValue(gamepadKeys?.y, value => {
+    gamepadValues.current[1] = value;
+    setGamepadValue();
+  });
   return [xy, bind, containerRef] as const;
 }

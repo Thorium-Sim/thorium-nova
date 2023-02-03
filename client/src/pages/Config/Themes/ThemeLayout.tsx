@@ -2,7 +2,7 @@ import {useConfirm, usePrompt} from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import {Navigate, Outlet, useParams, useNavigate} from "react-router-dom";
 import {toast} from "client/src/context/ToastContext";
-import {useCallback, useEffect, useRef, useState} from "react";
+import {Suspense, useCallback, useEffect, useRef, useState} from "react";
 import {Editor} from "client/src/components/MonacoEditor";
 import debounce from "lodash.debounce";
 import {useLocalStorage} from "client/src/hooks/useLocalStorage";
@@ -118,7 +118,9 @@ export const ThemeLayout = () => {
                   theme: {get: null},
                 }}
               >
-                <StationLayout />
+                <Suspense fallback={null}>
+                  <StationLayout />
+                </Suspense>
               </MockNetRequestContext.Provider>
             </div>
           </div>

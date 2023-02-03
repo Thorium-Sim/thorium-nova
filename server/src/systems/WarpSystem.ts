@@ -13,7 +13,7 @@ export class WarpSystem extends System {
   update(entity: Entity, elapsed: number) {
     const elapsedRatio = elapsed / 1000;
     const ship = this.ecs.entities.find(e =>
-      e.components.shipSystems?.shipSystemIds.includes(entity.id)
+      e.components.shipSystems?.shipSystems.has(entity.id)
     );
     if (!ship || !ship.components.isShip || !entity.components.isWarpEngines)
       return;
