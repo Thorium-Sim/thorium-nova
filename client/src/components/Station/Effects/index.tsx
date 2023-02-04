@@ -3,7 +3,6 @@ import uuid from "@thorium/uniqid";
 // @ts-expect-error Importing from a JS module.
 import Spark from "./spark";
 import "./effects.css";
-import {useHotkeys} from "react-hotkeys-hook";
 import {q} from "@client/context/AppContext";
 import {EffectPayload} from "@client/data";
 
@@ -53,13 +52,24 @@ const useSpark = () => {
   };
 };
 
+function useEscapeHotkey() {
+  useEffect(() => {
+    function handleKeydown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        q.client.setStation.netSend({shipId: null});
+      }
+    }
+    document.addEventListener("keydown", handleKeydown);
+
+    return () => document.removeEventListener("keydown", handleKeydown);
+  }, []);
+}
+
 const Effects = () => {
   const {flash, doFlash} = useFlash();
   const {doSpark, sparks} = useSpark();
 
-  useHotkeys("esc", () => {
-    q.client.setStation.netSend({shipId: null});
-  });
+  useEscapeHotkey();
 
   const doEffect = useCallback(
     (payload: EffectPayload) => {

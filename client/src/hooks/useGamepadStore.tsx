@@ -201,12 +201,12 @@ export const useGamepadConfigStore = create(
     }
   )
 );
-let gamepadTimestamps: number[] = [];
+let gamepadTimestamps: Record<string, number> = {};
 
 function updateGamepadStore() {
   const gamepads = navigator.getGamepads();
   let shouldUpdate = false;
-  for (let [index, gamepad] of gamepads.entries()) {
+  for (let [index, gamepad] of Object.entries(gamepads)) {
     if (!gamepad) continue;
     if (gamepad.timestamp !== gamepadTimestamps[index]) {
       gamepadTimestamps[index] = gamepad.timestamp;

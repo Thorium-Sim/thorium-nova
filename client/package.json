@@ -50,7 +50,6 @@
     "react-aria": "^3.22.0",
     "react-dom": "^18.2.0",
     "react-error-boundary": "^3.1.4",
-    "react-hotkeys-hook": "^4.3.4",
     "react-icons": "^4.7.1",
     "react-router-dom": "^6.8.0",
     "react-stately": "^3.20.0",
