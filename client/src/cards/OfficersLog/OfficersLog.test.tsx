@@ -2,10 +2,14 @@ import * as React from "react";
 import OfficersLog from ".";
 import {render} from "client/react-test-utils";
 import userEvent from "@testing-library/user-event";
-
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 test("it should render without error", async () => {
+  const queryClient = new QueryClient();
+
   const {findByText, queryByText, findByRole, netSendSpy} = await render(
-    <OfficersLog />,
+    <QueryClientProvider client={queryClient}>
+      <OfficersLog />
+    </QueryClientProvider>,
     {
       netRequestData: {
         officersLog: {

@@ -13,6 +13,14 @@ const creditList = [
     content: "Tanner Chamberlain",
   },
   {
+    header: "Documentation",
+    content: (
+      <>
+        Deven <em>"AdminAnonymous"</em> North
+      </>
+    ),
+  },
+  {
     header: "Inspiration",
     content: "Victor Williamson",
   },

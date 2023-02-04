@@ -20,7 +20,9 @@ export const Rings: React.FC<RingsProps> = ({
     const v3 = new Vector3();
     for (let i = 0; i < pos.count; i++) {
       v3.fromBufferAttribute(pos, i);
-      geometry.attributes.uv.setXY(i, v3.length() < 2 ? 0 : 1, 1);
+      if ("setXY" in geometry.attributes.uv) {
+        geometry.attributes.uv.setXY(i, v3.length() < 2 ? 0 : 1, 1);
+      }
     }
     return geometry;
   }, []);

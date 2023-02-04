@@ -10,8 +10,8 @@ export class ShipSystemsComponent extends Component {
   }
   init(params: any = {}) {
     (Object.getOwnPropertyNames(this) as (keyof this)[]).forEach(key => {
-      if (key === "shipSystemsIds") {
-        this.shipSystems = new Map(params["shipSystemsIds"]);
+      if (key === "shipSystems") {
+        this.shipSystems = new Map(params["shipSystemIds"]);
       }
       if (key !== "init") {
         this[key] = params[key] ?? this[key];

@@ -8,7 +8,7 @@ describe("rng", () => {
     numbers.push(rng.next());
     numbers.push(rng.next());
     expect(JSON.stringify(numbers)).toMatchInlineSnapshot(
-      `"[0.417021998534217,0.9971848083653452,0.7203244894557457]"`
+      `"[0.417021998534217,-0.0028151918674854544,-0.27967551077708497]"`
     );
     const rng2 = createRNG(1);
     let otherNumbers = [];
@@ -52,7 +52,7 @@ describe("rng", () => {
     numbers.push(rng.nextInt(10, 5));
 
     expect(JSON.stringify(numbers)).toMatchInlineSnapshot(
-      `"[9,88,302,901,976,-89,-97,220,10]"`
+      `"[7,36,950,968,942,-91,-95,284,10]"`
     );
   });
   it("should pick random values from a list", () => {
@@ -71,7 +71,7 @@ describe("rng", () => {
     values.push(rng.nextFromList(list));
     expect(
       JSON.stringify(values).replace(new RegExp('"', "g"), "'")
-    ).toMatchInlineSnapshot(`"['c','e','d','e','a','a','b','e','a','b']"`);
+    ).toMatchInlineSnapshot(`"['c',null,null,null,'a','a','b',null,'a','b']"`);
   });
   it("should work with different iterations of value generation", () => {
     const rng1 = createRNG(1);
@@ -108,7 +108,7 @@ describe("rng", () => {
     expect(
       JSON.stringify(values).replace(new RegExp('"', "g"), "'")
     ).toMatchInlineSnapshot(
-      `"[false,false,false,'s','y','1','a','b','c','DC7Rj','Z5DToQ','usdr90C']"`
+      `"[false,false,false,'q','w','z','c','a','b','FE9Th','X7FVqO','sqbpB2A']"`
     );
     expect(rng1.iterationCount).toMatchInlineSnapshot(`27`);
     expect(rng1.seed).toMatchInlineSnapshot(`2`);

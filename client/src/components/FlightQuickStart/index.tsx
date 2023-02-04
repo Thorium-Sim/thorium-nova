@@ -5,7 +5,8 @@ import {toast} from "client/src/context/ToastContext";
 import {useMatch, useNavigate, Navigate, Outlet, Link} from "react-router-dom";
 import {randomNameGenerator} from "server/src/utils/randomNameGenerator";
 import {useFlightQuickStart} from "./FlightQuickStartContext";
-
+import {useMutation} from "@tanstack/react-query";
+import {useState} from "react";
 function capitalize(val: string) {
   return val.charAt(0).toUpperCase() + val.slice(1);
 }
@@ -13,7 +14,7 @@ export default function FlightQuickStart() {
   const [flight] = q.flight.active.useNetRequest();
   const [client] = q.client.get.useNetRequest();
 
-  const {mutate: netSend, isLoading} = q.flight.start.useNetSend();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [state] = useFlightQuickStart();
 
@@ -87,7 +88,8 @@ export default function FlightQuickStart() {
               if (!shipName) {
                 shipName = randomNameGenerator();
               }
-              netSend({
+              setIsLoading(true);
+              await q.flight.start.netSend({
                 flightName,
                 ships: [
                   {
@@ -99,6 +101,7 @@ export default function FlightQuickStart() {
                   },
                 ],
               });
+              setIsLoading(false);
             }}
           >
             {isLoading ? "Starting Flight..." : "Start"}

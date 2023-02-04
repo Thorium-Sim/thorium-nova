@@ -108,7 +108,6 @@ export function SolarSystemMap({
         <>
           <CameraControls
             ref={orbitControls}
-            dampingFactor={0.15}
             enabled={controlsEnabled}
             maxDistance={maxDistance}
             minDistance={minDistance}

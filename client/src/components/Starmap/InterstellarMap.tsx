@@ -64,7 +64,6 @@ export function InterstellarMap({children}: {children: React.ReactNode}) {
     <Suspense fallback={null}>
       <Starfield radius={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)} />
       <CameraControls
-        dampingFactor={0.15}
         ref={orbitControls}
         enabled={controlsEnabled}
         maxDistance={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)}
