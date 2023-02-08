@@ -120,7 +120,7 @@ function IssueTracker({
         </div>
       ) : (
         <form
-          className="flex flex-col gap-4 my-4"
+          className="flex flex-col gap-4 my-4 w-96"
           onSubmit={async event => {
             event.preventDefault();
             const title = event.currentTarget.issueTitle.value;

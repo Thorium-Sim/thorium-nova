@@ -92,7 +92,11 @@ async function createWindow() {
 }
 
 app.whenReady().then(() => {
-  autoUpdater.checkForUpdatesAndNotify();
+  try {
+    autoUpdater.checkForUpdatesAndNotify();
+  } catch {
+    // Ignore it
+  }
   createWindow();
 });
 

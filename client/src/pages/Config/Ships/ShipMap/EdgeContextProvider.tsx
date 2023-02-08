@@ -34,17 +34,18 @@ export function useEdgeRerender(
   const edgeRenderFunctions = useContext(EdgeContext);
   useEffect(() => {
     const rerender = callback.current;
-    if (!edgeRenderFunctions.current[from]) {
-      edgeRenderFunctions.current[from] = new Set();
+    const functions = edgeRenderFunctions.current;
+    if (!functions[from]) {
+      functions[from] = new Set();
     }
-    if (!edgeRenderFunctions.current[to]) {
-      edgeRenderFunctions.current[to] = new Set();
+    if (!functions[to]) {
+      functions[to] = new Set();
     }
-    edgeRenderFunctions.current[from].add(rerender);
-    edgeRenderFunctions.current[to].add(rerender);
+    functions[from].add(rerender);
+    functions[to].add(rerender);
     return () => {
-      edgeRenderFunctions.current[from].delete(rerender);
-      edgeRenderFunctions.current[to].delete(rerender);
+      functions[from].delete(rerender);
+      functions[to].delete(rerender);
     };
   }, [from, to, edgeRenderFunctions]);
 }

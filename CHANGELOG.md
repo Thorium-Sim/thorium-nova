@@ -3,31 +3,6 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [1.0.0-alpha.9](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.8...1.0.0-alpha.9) (2023-02-05)
-
-
-### Bug Fixes
-
-* Fixes the theme editor. ([36ae7a1](https://github.com/Thorium-Sim/thorium-nova/commit/36ae7a1ae7996b1854428bd4093cf6ce2ab98272))
-
-
-### Features
-
-* Add configuration options for Reactor systems. ([694bdcf](https://github.com/Thorium-Sim/thorium-nova/commit/694bdcfb980200cf708a3e3634e26c7e8053e9ff))
-* Add Reactor fuel system. ([9e1898a](https://github.com/Thorium-Sim/thorium-nova/commit/9e1898a946d6e0dafcb451dee33a5c86ded3c171))
-* Add support for gamepads and joysticks to the Pilot card ([2d945e2](https://github.com/Thorium-Sim/thorium-nova/commit/2d945e2007c9de64c3d17a2a41abf75e32fdf8a8))
-* Alert Condition Card. Thanks Tanner ([f59f2ab](https://github.com/Thorium-Sim/thorium-nova/commit/f59f2ab98e8fdc53f6106050180183b140c7a3af))
-* Always show the Thorium account option in the menubar when the user is logged in. ([75ec53a](https://github.com/Thorium-Sim/thorium-nova/commit/75ec53a5e4981baf69d40526509ae564ecd9cbf7))
-* Configuration for battery ship systems. ([23b9776](https://github.com/Thorium-Sim/thorium-nova/commit/23b97767f00b73bd984c597c36dc01be0b7f353f))
-* Configure power settings on ship systems. ([186ca25](https://github.com/Thorium-Sim/thorium-nova/commit/186ca2542651c75eb876076c6a0e4aa94bf6ec12))
-* ECS Components fro representing reactors, batteries, power nodes, and power connections. ([0c8c847](https://github.com/Thorium-Sim/thorium-nova/commit/0c8c847c71593f1901f619e6c2aaf01bc9060cc6))
-* Generate inventory for ships that don't have a deck map. ([1d0acd5](https://github.com/Thorium-Sim/thorium-nova/commit/1d0acd5f6c0081b651a33a88f51409c5379ebffa))
-* Make it possible to assign multiples of the same type of ship system to a ship. ([8250417](https://github.com/Thorium-Sim/thorium-nova/commit/8250417edad651f9f457b9d589d05c3bc462bdbb))
-* Make it possible to assign system types to rooms. ([1bd0a39](https://github.com/Thorium-Sim/thorium-nova/commit/1bd0a39867d945326cfef8f263b85af88c8c5a6c))
-* Model and simulate the transfer of heat. ([04462f4](https://github.com/Thorium-Sim/thorium-nova/commit/04462f463cf308f3693e9e8fbee9f46286cc6a7a))
-* Ships spawn with reactors and power nodes. ([9bd1e58](https://github.com/Thorium-Sim/thorium-nova/commit/9bd1e58dbbe13d632349f5e53b0e12c50108adbd))
-* System heat configuration ([c6d75a3](https://github.com/Thorium-Sim/thorium-nova/commit/c6d75a3d719fd6f543d1e2becbe37cb561d29a2d))
-
 # [1.0.0-alpha.8](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.7...1.0.0-alpha.8) (2023-01-19)
 
 ### Bug Fixes

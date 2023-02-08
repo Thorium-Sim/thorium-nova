@@ -17,6 +17,6 @@ export function useSystemIds() {
         selectedObjectIds: [matchSystemId],
       });
     }
-  }, [matchSystemId]);
+  }, [matchSystemId, useStarmapStore]);
   return [pluginId, matchSystemId] as const;
 }

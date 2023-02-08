@@ -8,9 +8,10 @@ export function useCancelFollow() {
     const cancel = () => {
       useStarmapStore.setState({followEntityId: null});
     };
-    cameraControls?.current?.addEventListener("controlstart", cancel);
+    const controls = cameraControls?.current;
+    controls?.addEventListener("controlstart", cancel);
     return () => {
-      cameraControls?.current?.removeEventListener("controlstart", cancel);
+      controls?.removeEventListener("controlstart", cancel);
     };
   });
 }

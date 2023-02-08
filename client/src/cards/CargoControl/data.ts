@@ -9,7 +9,6 @@ import {
   createShipMapGraph,
 } from "server/src/utils/shipMapPathfinder";
 import {z} from "zod";
-import {Kelvin} from "@server/utils/unitTypes";
 import {getInventoryTemplates} from "@server/utils/getInventoryTemplates";
 
 const transferId = z.object({
@@ -20,7 +19,7 @@ const transferId = z.object({
 export const cargoControl = t.router({
   inventoryTypes: t.procedure.request(({ctx}) => {
     const inventorySystem = ctx.flight?.ecs.systems.find(
-      sys => sys.constructor.name === "InventoryTemplateSystem"
+      sys => sys.constructor.name === "FilterInventorySystem"
     );
     return Object.fromEntries(
       inventorySystem?.entities.map(entity => [

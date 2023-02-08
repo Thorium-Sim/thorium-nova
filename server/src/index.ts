@@ -7,9 +7,8 @@ import {unzip} from "./utils/unzipFolder";
 import {liveQueryPlugin} from "@thorium/live-query/adapters/fastify-adapter";
 import {rootPath, thoriumPath} from "./utils/appPaths";
 import {buildDatabase} from "./init/buildDatabase";
-import {createContext, createWSContext, Client} from "./init/liveQuery";
+import {createContext, createWSContext} from "./init/liveQuery";
 import {router} from "./init/router";
-import {pubsub} from "./init/pubsub";
 import {startServer} from "./init/startServer";
 
 setBasePath(thoriumPath);

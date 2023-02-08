@@ -191,6 +191,8 @@ export const flight = t.router({
           ctx.flight.ecs.addEntity(inventory);
         });
       });
+      // Add inventory entities to their appropriate system
+      ctx.flight.ecs.cleanDirtyEntities();
 
       // Spawn the ships that were defined when the flight was started
       for (const ship of ships) {

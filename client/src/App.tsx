@@ -16,11 +16,28 @@ import CrewConfig from "./components/FlightQuickStart/CrewConfig";
 import ShipConfig from "./components/FlightQuickStart/ShipConfig";
 import MissionConfig from "./components/FlightQuickStart/MissionConfig";
 import {ComponentDemo} from "./cards";
-import {GamepadConfig} from "./hooks/useGamepadStore";
+import {ZoomSlider} from "@thorium/ui/Slider";
+import {RoomDot} from "./cards/CargoControl/RoomDot";
+import {useSpring, animated as a} from "@react-spring/web";
 
 const DocLayout = lazy(() => import("./docs"));
 const Config = lazy(() => import("./pages/Config"));
 
+function HackyFix() {
+  const [{y}] = useSpring(() => ({
+    y: 0,
+    config: {mass: 1, tension: 280, friction: 30},
+  }));
+  return (
+    <a.div
+      className="absolute -left-[9999px] opacity-0"
+      style={{transform: y?.to(y => `translate3d(0px,${y}px,0)`)}}
+    >
+      <ZoomSlider value={0} setValue={() => {}} />
+      <RoomDot id={1} name="Hack" position={{x: 0, y: 0}} />
+    </a.div>
+  );
+}
 const MainPage = () => {
   return (
     <>
@@ -32,6 +49,7 @@ const MainPage = () => {
           <WelcomeButtons className="col-start-1 row-start-2" />
           <QuoteOfTheDay />
           <LoginButton />
+          <HackyFix />
         </div>
       </Suspense>
       <Outlet />

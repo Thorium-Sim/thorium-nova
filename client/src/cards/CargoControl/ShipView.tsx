@@ -1,8 +1,7 @@
-import Slider from "@thorium/ui/Slider";
 import {SVGImageLoader} from "@thorium/ui/SVGImageLoader";
 import {useEffect, useState} from "react";
 import {Suspense} from "react";
-import {useResizeObserver} from "client/src/hooks/useResizeObserver";
+import {useResizeObserver} from "@client/hooks/useResizeObserver";
 import {useShipMapStore} from "./useShipMapStore";
 import {CargoContainerDot} from "./CargoContainerDot";
 import {RoomDot} from "./RoomDot";
