@@ -13,80 +13,87 @@ import {toast} from "@client/context/ToastContext";
 import {q} from "@client/context/AppContext";
 
 export default function PluginEdit() {
+  return (
+    <div className="h-full">
+      <Menubar></Menubar>
+      <Suspense>
+        <PluginEditInner />
+      </Suspense>
+    </div>
+  );
+}
+
+function PluginEditInner() {
   const {pluginId} = useParams() as {pluginId: string};
   const [plugins] = q.plugin.all.useNetRequest();
   const navigate = useNavigate();
   const prompt = usePrompt();
-
   return (
-    <div className="h-full">
-      <Menubar></Menubar>
-      <div className="p-8 h-[calc(100%-2rem)]">
-        <h1 className="font-bold text-white text-3xl mb-4">Plugin Config</h1>
+    <div className="p-8 h-[calc(100%-2rem)]">
+      <h1 className="font-bold text-white text-3xl mb-4">Plugin Config</h1>
 
-        <div className="flex gap-8 h-[calc(100%-3rem)]">
-          <div className="flex flex-col w-80 h-full">
-            <Button
-              className="w-full btn-sm btn-success"
-              onClick={async () => {
-                const name = await prompt({header: "Enter plugin name"});
-                if (typeof name !== "string") return;
-                try {
-                  const result = await q.plugin.create.netSend({name});
-                  navigate(`/config/${result.pluginId}`);
-                } catch (err) {
-                  if (err instanceof Error) {
-                    toast({
-                      title: "Error creating plugin",
-                      body: err.message,
-                      color: "error",
-                    });
-                  }
+      <div className="flex gap-8 h-[calc(100%-3rem)]">
+        <div className="flex flex-col w-80 h-full">
+          <Button
+            className="w-full btn-sm btn-success"
+            onClick={async () => {
+              const name = await prompt({header: "Enter plugin name"});
+              if (typeof name !== "string") return;
+              try {
+                const result = await q.plugin.create.netSend({name});
+                navigate(`/config/${result.pluginId}`);
+              } catch (err) {
+                if (err instanceof Error) {
+                  toast({
+                    title: "Error creating plugin",
+                    body: err.message,
+                    color: "error",
+                  });
                 }
-              }}
-            >
-              New Plugin
-            </Button>
+              }
+            }}
+          >
+            New Plugin
+          </Button>
 
-            <SearchableList
-              items={plugins.map(d => ({
-                id: d.id,
-                name: d.name,
-                description: d.description,
-                tags: d.tags,
-                author: d.author,
-                active: d.active,
-              }))}
-              searchKeys={["name", "author", "tags"]}
-              selectedItem={pluginId || null}
-              setSelectedItem={({id}) => navigate(`/config/${id}`)}
-              renderItem={c => (
-                <div className="flex justify-between items-center" key={c.id}>
+          <SearchableList
+            items={plugins.map(d => ({
+              id: d.id,
+              name: d.name,
+              description: d.description,
+              tags: d.tags,
+              author: d.author,
+              active: d.active,
+            }))}
+            searchKeys={["name", "author", "tags"]}
+            selectedItem={pluginId || null}
+            setSelectedItem={({id}) => navigate(`/config/${id}`)}
+            renderItem={c => (
+              <div className="flex justify-between items-center" key={c.id}>
+                <div>
+                  {c.name}
+                  {c.active ? (
+                    ""
+                  ) : (
+                    <span className="text-red-600"> (inactive)</span>
+                  )}
                   <div>
-                    {c.name}
-                    {c.active ? (
-                      ""
-                    ) : (
-                      <span className="text-red-600"> (inactive)</span>
-                    )}
-                    <div>
-                      <small>{c.author}</small>
-                    </div>
+                    <small>{c.author}</small>
                   </div>
-                  <NavLink
-                    {...{to: `/config/${c.id}/list`}}
-                    onClick={e => e.stopPropagation()}
-                  >
-                    <FaEdit />
-                  </NavLink>
                 </div>
-              )}
-            />
-          </div>
-          <Suspense fallback={<PluginDetails />}>
-            <PluginDetails />
-          </Suspense>
+                <NavLink
+                  {...{to: `/config/${c.id}/list`}}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <FaEdit />
+                </NavLink>
+              </div>
+            )}
+          />
         </div>
+        <Suspense fallback={<PluginDetails />}>
+          <PluginDetails />
+        </Suspense>
       </div>
     </div>
   );
