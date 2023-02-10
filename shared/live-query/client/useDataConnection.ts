@@ -14,6 +14,9 @@ const connectClient = async <TContext extends RequestContext>(
 ) => {
   socket.send(JSON.stringify({type: "clientConnect", ...context}));
 };
+
+const isTestEnv = process.env.NODE_ENV === "test";
+
 export function useDataConnection<TContext extends RequestContext>(
   getRequestContext: () => TContext | Promise<TContext>
 ) {
@@ -54,6 +57,7 @@ export function useDataConnection<TContext extends RequestContext>(
   );
 
   useEffect(() => {
+    if (isTestEnv) return;
     startDataConnection();
     return () => {
       socket?.close();
