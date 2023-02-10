@@ -69,7 +69,9 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
   isHost: boolean = false;
   name: string = randomNameGenerator();
 
-  public async sendDataStream(context: DataContext) {
+  public async sendDataStream() {
+    const context = getDataContext(this.id);
+
     if (!context?.flight || !this.connected) return;
     const entities = context.flight.ecs.entities
       .filter((entity: Entity) => {
