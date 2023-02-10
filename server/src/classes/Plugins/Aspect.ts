@@ -31,6 +31,8 @@ export abstract class Aspect extends FSDataStore {
       path: `/plugins/${plugin.id}/${kind}${subPath}${name}/manifest.yml`,
     });
     this.plugin = plugin;
+    const data = this.getData();
+    Object.assign(this, data);
   }
   get assetPath() {
     return path.join(path.dirname(this.path), "assets");

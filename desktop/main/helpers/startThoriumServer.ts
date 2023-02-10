@@ -24,10 +24,10 @@ export async function startThoriumServer() {
       // ],
       silent: true,
     });
-    child.on("message", function (msg) {
+    child.once("message", function (msg) {
       if (msg === "ready") {
         resolve();
-      } else {
+      } else if (msg === "error") {
         reject();
       }
     });
@@ -43,13 +43,31 @@ export async function startThoriumServer() {
     child.on("error", function (err) {
       console.error(err);
     });
-
-    app.on("before-quit", () => {
-      if (child) child.kill();
-    });
   });
 }
-export function stopThoriumServer() {
-  if (child) child.kill();
-  child = null;
+
+app.on("before-quit", async event => {
+  if (child) {
+    event.preventDefault();
+    await stopThoriumServer();
+  }
+  app.exit();
+});
+
+export async function stopThoriumServer() {
+  if (child) {
+    await Promise.race([
+      new Promise<void>(res => {
+        child?.once("message", message => {
+          if (message === "saved") {
+            res();
+          }
+        });
+        child?.send("save");
+      }),
+      new Promise(res => setTimeout(res, 5000)),
+    ]);
+    child.kill();
+    child = null;
+  }
 }

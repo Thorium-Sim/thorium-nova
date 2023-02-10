@@ -27,7 +27,7 @@ export abstract class FSDataStore {
   #throttle: number;
   #safeMode: boolean;
   #writeThrottle: () => void;
-
+  initialData: unknown;
   #handler: ProxyHandler<any> = {
     get: (target, key) => {
       if (key === isProxy) return true;
@@ -62,6 +62,7 @@ export abstract class FSDataStore {
     },
   };
   constructor(initialData: unknown, options: FSDataStoreOptions = {}) {
+    this.initialData = initialData;
     this.#path = options.path || "db.json";
     this.#throttle = options.throttle || 1000 * 30;
     this.#safeMode = options.safeMode || false;
@@ -72,11 +73,15 @@ export abstract class FSDataStore {
             trailing: true,
           });
 
+    const proxy = new Proxy(this, this.#handler);
+    return proxy;
+  }
+  getData() {
     let data;
     try {
       data = this.filePath
         ? parse(readFileSync(this.filePath, "utf8"))
-        : initialData;
+        : this.initialData;
     } catch (err: any) {
       if (err.code === "EACCES") {
         err.message +=
@@ -85,14 +90,9 @@ export abstract class FSDataStore {
       }
     }
     if (!data) {
-      data = initialData;
+      data = Object.fromEntries(Object.entries(this.initialData as any));
     }
-    for (const key in data) {
-      (initialData as any)[key] = data[key];
-    }
-    Object.assign(this, data);
-    const proxy = new Proxy(this, this.#handler);
-    return proxy;
+    return data;
   }
   get filePath() {
     return path.join(basePath, this.#path);

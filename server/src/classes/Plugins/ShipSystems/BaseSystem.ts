@@ -91,6 +91,7 @@ export default class BaseShipSystemPlugin extends Aspect {
     this.requiredPower = params.requiredPower || 5;
     this.defaultPower = params.defaultPower || 10;
     this.maxSafePower = params.maxSafePower || 20;
+    this.powerNode = params.powerNode;
     this.powerToHeat = params.powerToHeat || 10;
     this.heatDissipationRate = params.heatDissipationRate || 1;
     this.nominalHeat = params.nominalHeat || 295.37;

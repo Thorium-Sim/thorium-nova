@@ -100,8 +100,8 @@ app.whenReady().then(() => {
   createWindow();
 });
 
-app.on("window-all-closed", () => {
-  stopThoriumServer();
+app.on("window-all-closed", async () => {
+  await stopThoriumServer();
   app.quit();
 });
 
