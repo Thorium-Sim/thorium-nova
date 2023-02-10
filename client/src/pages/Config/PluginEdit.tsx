@@ -106,16 +106,16 @@ function PluginDetails() {
   const navigate = useNavigate();
   const {pluginId} = useParams() as {pluginId: string};
 
-  const [plugin] = q.plugin.get.useNetRequest(
+  const [plugin, {isPreviousData}] = q.plugin.get.useNetRequest(
     {pluginId},
-    {enabled: !!pluginId}
+    {enabled: !!pluginId, keepPreviousData: true}
   );
 
   useEffect(() => {
-    if (!plugin) {
+    if (!plugin && !isPreviousData) {
       navigate("/config");
     }
-  }, [plugin, navigate]);
+  }, [plugin, navigate, isPreviousData]);
 
   return (
     <>
