@@ -234,7 +234,6 @@ export class ServerClient<TRouter extends AnyRouter> {
   ) {}
   encode(data: any) {
     return encode(data);
-    // return JSON.stringify(data);
   }
   public async initWebSocket(
     connection: SocketStream,
