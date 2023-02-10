@@ -1,4 +1,10 @@
-import {createContext, ReactNode, Suspense, useContext, useMemo} from "react";
+import React, {
+  createContext,
+  ReactNode,
+  Suspense,
+  useContext,
+  useMemo,
+} from "react";
 import {useDataConnection} from "./useDataConnection";
 import {ClientSocket} from "./clientSocket";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
@@ -47,6 +53,8 @@ export function processInterpolation(
   });
 }
 
+const isTestEnv = process.env.NODE_ENV === "test";
+
 function DataResponse() {
   useDataResponse();
   return null;
@@ -60,8 +68,9 @@ export function LiveQueryProvider({
 }) {
   const {socket, reconnectionState} = useDataConnection(getRequestContext);
 
-  useAnimationFrame(() =>
-    processInterpolation(socket?.SI.calcInterpolation("x y z r(quat)"))
+  useAnimationFrame(
+    () => processInterpolation(socket?.SI.calcInterpolation("x y z r(quat)")),
+    isTestEnv ? false : true
   );
   const value: ILiveQueryContext = useMemo(() => {
     return {
@@ -82,7 +91,7 @@ export function LiveQueryProvider({
         <ErrorBoundary fallback={<>Error Loading</>}>
           <Suspense>{children}</Suspense>
         </ErrorBoundary>
-        <DataResponse />
+        {!isTestEnv ? <DataResponse /> : null}
         <ReactQueryDevtools position="bottom-right" />
       </QueryClientProvider>
     </LiveQueryContext.Provider>
