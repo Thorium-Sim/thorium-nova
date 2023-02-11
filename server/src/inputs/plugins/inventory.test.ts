@@ -48,7 +48,7 @@ describe("inventory plugin input", () => {
     });
     expect(inventory.continuous).toEqual(false);
 
-    expect(inventory.volume).toEqual(1);
+    expect(inventory.volume).toEqual(1000);
     await router.plugin.inventory.update({
       pluginId: "Test Plugin",
       inventoryId: "Test Inventory",

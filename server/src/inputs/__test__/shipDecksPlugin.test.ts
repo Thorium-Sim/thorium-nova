@@ -242,7 +242,7 @@ describe("ship decks plugin input", () => {
       });
       expect(deck.nodes[0].radius).toEqual(10);
 
-      expect(deck.nodes[0].volume).toEqual(12);
+      expect(deck.nodes[0].volume).toEqual(12000);
       await router.plugin.ship.deck.updateNode({
         pluginId: "Test Plugin",
         shipId: "Test Template",
