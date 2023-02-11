@@ -1,5 +1,5 @@
 import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
-import {CubicMeter} from "server/src/utils/unitTypes";
+import {Liter} from "server/src/utils/unitTypes";
 import BasePlugin from "..";
 import {Aspect} from "../Aspect";
 import {InventoryFlags} from "./InventoryFlags";
@@ -11,7 +11,7 @@ export default class InventoryPlugin extends Aspect {
   plural!: string;
   description!: string;
   /** How much space is required to store 1 unit of this inventory */
-  volume!: CubicMeter;
+  volume!: Liter;
   assets!: {image?: string};
   /** Whether the inventory is a discrete item, like a probe casing, vs being represented with a decimal, like fuel */
   continuous!: boolean;
@@ -31,7 +31,7 @@ export default class InventoryPlugin extends Aspect {
     this.name = this.name || name;
     this.plural = this.plural || params.plural || name;
     this.description = this.description || params.description || "";
-    this.volume = this.volume ?? params.volume ?? 1;
+    this.volume = this.volume ?? params.volume ?? 1000;
     this.assets = this.assets || params.assets || {};
     this.continuous = this.continuous ?? params.continuous ?? false;
     this.durability = this.durability ?? params.durability ?? 1;
