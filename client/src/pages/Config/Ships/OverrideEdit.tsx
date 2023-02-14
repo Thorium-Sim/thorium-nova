@@ -21,11 +21,18 @@ import {
 import {q} from "@client/context/AppContext";
 
 const SystemConfig = () => {
-  const {pluginId, systemId} = useParams() as {
-    pluginId: string;
+  const {systemId, shipId, pluginId} = useParams() as {
     systemId: string;
+    shipId: string;
+    pluginId: string;
   };
-  const [system] = q.plugin.systems.get.useNetRequest({pluginId, systemId});
+  const shipPluginId = useContext(ShipPluginIdContext);
+  const [system] = q.plugin.systems.get.useNetRequest({
+    pluginId,
+    systemId,
+    shipId,
+    shipPluginId,
+  });
   if (!system?.type) return null;
   const Comp = systemConfigs[system.type];
   if (!Comp) return null;
