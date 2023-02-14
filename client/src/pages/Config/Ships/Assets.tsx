@@ -37,7 +37,7 @@ export function Assets() {
             <img
               src={`${ship.assets.logo}?${new Date().getTime()}`}
               alt="Ship Logo"
-              className="w-5/6 h-5/6 object-contain"
+              className="w-5/6 h-5/6 object-contain aspect-square"
             />
           )}
         </UploadWell>
@@ -112,7 +112,7 @@ export function Assets() {
             <img
               src={`${ship.assets.vanity}?${new Date().getTime()}`}
               alt="Ship Vanity View"
-              className="w-5/6 h-5/6 object-contain"
+              className="w-5/6 h-5/6 object-contain aspect-square"
             />
           )}
         </UploadWell>
@@ -124,7 +124,7 @@ export function Assets() {
             <img
               src={`${ship.assets.sideView}?${new Date().getTime()}`}
               alt="Ship Side View"
-              className="w-5/6 h-5/6 object-contain"
+              className="w-5/6 h-5/6 object-contain aspect-square"
             />
           )}
         </UploadWell>
@@ -136,7 +136,7 @@ export function Assets() {
             <img
               src={`${ship.assets.topView}?${new Date().getTime()}`}
               alt="Ship Top View"
-              className="w-5/6 h-5/6 object-contain"
+              className="w-5/6 h-5/6 object-contain aspect-square"
             />
           )}
         </UploadWell>
