@@ -32,3 +32,4 @@ export * from "./shipMap/cargoContainer";
 export * from "./shipMap/isRoom";
 export * from "./isWaypoint";
 export * from "./isStatic";
+export * from "./snapInterpolation";
