@@ -2,16 +2,18 @@ import {
   autoPlacement,
   useFloating,
   getOverflowAncestors,
+  shift,
 } from "@floating-ui/react-dom";
 import React, {ReactNode, useEffect, useLayoutEffect, useState} from "react";
 import {FaInfoCircle} from "react-icons/fa";
 import Button from "@thorium/ui/Button";
 import useOnClickOutside from "client/src/hooks/useClickOutside";
+import {Portal} from "@headlessui/react";
 
 const InfoTip = ({children}: {children: ReactNode}) => {
   const {x, y, reference, floating, strategy, refs, update} = useFloating({
     placement: "left",
-    middleware: [autoPlacement()],
+    middleware: [autoPlacement(), shift()],
   });
   const [visible, setVisible] = useState(false);
   // Update on scroll and resize for all relevant nodes
@@ -57,20 +59,21 @@ const InfoTip = ({children}: {children: ReactNode}) => {
       >
         <FaInfoCircle className="inline-block text-primary text-base cursor-pointer" />
       </Button>
-
-      <div
-        ref={floating}
-        style={{
-          position: strategy,
-          top: y ?? "",
-          left: x ?? "",
-        }}
-        className={`max-w-xs w-max z-10 border-transparent shadow-lg bg-opacity-90 bg-black rounded-lg p-2 ${
-          visible ? "block" : "hidden"
-        }`}
-      >
-        {children}
-      </div>
+      <Portal>
+        <div
+          ref={floating}
+          style={{
+            position: strategy,
+            top: y ?? "",
+            left: x ?? "",
+          }}
+          className={`max-w-xs w-max z-10 border-transparent shadow-lg bg-opacity-90 bg-black text-white rounded-lg p-2 ${
+            visible ? "block" : "hidden"
+          }`}
+        >
+          {children}
+        </div>
+      </Portal>
     </>
   );
 };

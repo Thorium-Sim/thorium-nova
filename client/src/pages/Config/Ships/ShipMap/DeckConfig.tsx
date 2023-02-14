@@ -112,7 +112,7 @@ export function DeckConfig() {
           setSelectedNodeId(null);
           setSelectedEdgeId(null);
         }}
-        style={{width: "100%", outline: "none", flex: 1}}
+        style={{outline: "none", flex: 1}}
         className="text-purple-400 border-2 border-white/10 rounded-lg bg-gray-800 overflow-hidden"
         maxZoom={8}
         minZoom={0.5}

@@ -1,4 +1,4 @@
-import {Link, useParams} from "react-router-dom";
+import {Link, useParams, useHref, use, useMatch} from "react-router-dom";
 
 const links = {
   basic: "Basic",
@@ -10,10 +10,10 @@ const links = {
 };
 
 export function SettingsList() {
-  const params = useParams();
-  const setting = params["*"]?.split("/")[1];
+  const setting = useMatch("config/:pluginId/ships/:shipId/:setting")?.params
+    .setting;
   return (
-    <div className="mb-2 w-72">
+    <div className="mb-2 w-72 overflow-y-auto">
       {Object.entries(links).map(([key, value]) => (
         <Link
           key={key}

@@ -28,7 +28,7 @@ export function Systems() {
   const navigate = useNavigate();
   return (
     <>
-      <div className="w-72">
+      <div className="w-72 flex flex-col">
         {/* TODO April 27 2022 - Figure out some way to define and determine the maximum number of
         one type of system that can be assigned to a ship. Ex. only one impulse engine should be assignable. */}
         <h3 className="text-2xl font-bold">Available Systems</h3>
@@ -90,7 +90,7 @@ export function Systems() {
           </Button>
         )}
       </div>
-      <div className="w-72">
+      <div className="w-72 flex flex-col">
         <h3 className="text-2xl font-bold">Assigned Systems</h3>
         <SearchableList
           showSearchLabel={false}
