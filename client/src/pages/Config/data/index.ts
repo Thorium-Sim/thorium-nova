@@ -30,7 +30,7 @@ export const plugin = t.router({
     return ctx.server.plugins;
   }),
   get: t.procedure
-    .input(z.object({pluginId: z.string()}))
+    .input(z.object({pluginId: z.string().catch("")}))
     .filter((publish: {pluginId: string} | null, {input}) => {
       if (publish && input.pluginId !== publish.pluginId) return false;
       return true;
