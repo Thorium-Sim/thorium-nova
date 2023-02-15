@@ -110,7 +110,7 @@ export default function SearchableInput<T extends {id: any}>({
                 <Combobox.Option
                   key={result.id}
                   className={({active}) =>
-                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                    `relative cursor-default select-none py-2 pl-2 pr-4 ${
                       active ? "bg-primary text-white" : "text-gray-200"
                     }`
                   }

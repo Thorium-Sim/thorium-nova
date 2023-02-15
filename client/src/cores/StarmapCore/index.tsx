@@ -229,6 +229,12 @@ function CanvasWrapper() {
           dragRef(gl.domElement);
           cameraRef.current = camera as PerspectiveCamera;
         }}
+        onPointerMissed={event => {
+          if (event.button !== 2) {
+            // Ignore Right click
+            useStarmapStore.setState({selectedObjectIds: []});
+          }
+        }}
       >
         <StarmapCoreCanvasHooks />
         <ambientLight intensity={0.2} />
