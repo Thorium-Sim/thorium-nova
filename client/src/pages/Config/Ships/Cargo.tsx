@@ -86,7 +86,7 @@ export function Cargo() {
             <p>
               Total cargo movement capacity:{" "}
               <strong>
-                {ship.cargoContainers * ship.cargoContainerVolume} m<sup>3</sup>
+                {ship.cargoContainers * ship.cargoContainerVolume} L
               </strong>
             </p>
           </div>

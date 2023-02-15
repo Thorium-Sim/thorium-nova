@@ -277,7 +277,7 @@ export function NodeCircle({
             />
             {isRoom && flags.includes("cargo") && (
               <Input
-                label="Volume for cargo in cubic meters"
+                label="Volume for cargo in liters"
                 pattern="[0-9]*"
                 defaultValue={volume}
                 onChange={e => updateNode({volume: Number(e.target.value)})}

@@ -65,7 +65,7 @@ describe("Ship Spawner", () => {
       "Generic System"
     );
     expect(extraEntities[5].components.isShipSystem?.type).toEqual("generic");
-    expect(extraEntities[6].components.cargoContainer?.volume).toEqual(4);
-    expect(extraEntities[7].components.cargoContainer?.volume).toEqual(4);
+    expect(extraEntities[6].components.cargoContainer?.volume).toEqual(4000);
+    expect(extraEntities[7].components.cargoContainer?.volume).toEqual(4000);
   });
 });

@@ -2,8 +2,8 @@ import type BasePlugin from "../index";
 import {Aspect} from "../Aspect";
 import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
 import DeckPlugin, {DeckEdge} from "./Deck";
-import {CubicMeter} from "server/src/utils/unitTypes";
 import {z} from "zod";
+import {Liter} from "@server/utils/unitTypes";
 export const shipCategories = z.union([
   z.literal("Cruiser"),
   z.literal("Frigate"),
@@ -83,7 +83,7 @@ export default class ShipPlugin extends Aspect {
   /** The number of cargo containers on the ship. */
   cargoContainers: number;
   /** The volume of the ship's cargo containers. */
-  cargoContainerVolume: CubicMeter;
+  cargoContainerVolume: Liter;
   /** The names of the power nodes that will be spawned when the ship spawns. */
   powerNodes: string[];
 
@@ -112,7 +112,7 @@ export default class ShipPlugin extends Aspect {
     this.decks = params.decks?.map(deck => new DeckPlugin(deck)) || [];
     this.deckEdges = params.deckEdges?.map(edge => new DeckEdge(edge)) || [];
     this.cargoContainers = params.cargoContainers || 4;
-    this.cargoContainerVolume = params.cargoContainerVolume || 4;
+    this.cargoContainerVolume = params.cargoContainerVolume || 4000;
     this.powerNodes = ["offense", "defense", "navigation", "intel", "internal"];
   }
   addDeck(deck: Partial<DeckPlugin>) {

@@ -127,11 +127,7 @@ export const InventoryLayout = () => {
               labelHidden={false}
               isInvalid={volumeError}
               invalidMessage="Volume must be a number greater than 0"
-              label={
-                <span>
-                  Volume in m<sup>3</sup>
-                </span>
-              }
+              label={<span>Volume in liters</span>}
               defaultValue={item.volume}
               onFocus={() => setVolumeError(false)}
               onChange={() => setVolumeError(false)}

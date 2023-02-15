@@ -48,7 +48,7 @@ export function kilometerToLightMinute(len: Kilometer) {
   return len * 5.559e-8;
 }
 
-export type CubicMeter = Flavor<number, "cubicMeter">;
+export type Liter = Flavor<number, "liter">;
 
 export type Kilograms = Flavor<number, "kilograms">;
 /**
