@@ -370,6 +370,7 @@ export class ServerClient<TRouter extends AnyRouter> {
             const {id, path, params} = messageData;
             if (this.dataStreams.get(id)) return;
             this.dataStreams.set(id, {path, params});
+            this.sendDataStream();
             break;
           }
           case "dataStreamEnd": {
@@ -398,7 +399,7 @@ export class ServerClient<TRouter extends AnyRouter> {
   send(data: SocketMessages) {
     this.ee.emit("send", data);
   }
-  public async sendDataStream(context: inferRouterContext<TRouter>) {
+  public async sendDataStream() {
     // Filter the list of entities provided
   }
   connectionOpened() {}
