@@ -126,11 +126,25 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
     return {id, name, isHost};
   }
   connectionOpened(): void {
+    // Claim host if there isn't one already claimed
+    const ctx = getDataContext(this.id);
+    if (ctx) {
+      const hasHost = Object.values(ctx.server.clients).some(
+        client => client.isHost && client.connected
+      );
+      if (!hasHost) {
+        this.isHost = true;
+      }
+    }
     pubsub.publish.client.get({clientId: this.id});
     pubsub.publish.client.all();
+    pubsub.publish.thorium.hasHost();
   }
   connectionClosed(): void {
     pubsub.publish.client.get({clientId: this.id});
     pubsub.publish.client.all();
+    if (this.isHost) {
+      pubsub.publish.thorium.hasHost();
+    }
   }
 }

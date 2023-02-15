@@ -250,6 +250,8 @@ const quotes = [
   "Life's like a movie, write your own ending, keep believing, keep pretending.",
   "There's not a word yet for old friends who've just met.",
   "Life is made up of meetings and partings and that is the way of it.",
+  // Chantastic
+  "It's only dark until your eyes adjust.",
 ];
 
 const QuoteOfTheDay = () => {
