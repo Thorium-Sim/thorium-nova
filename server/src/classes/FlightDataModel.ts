@@ -36,17 +36,19 @@ export class FlightDataModel extends FSDataStore {
       },
       storeOptions
     );
+    const data = this.getData();
     this.name ??= flightName;
-    this.paused ??= params.paused ?? true;
-    this.date ??= Number(params.date ? new Date(params.date) : new Date());
-    this.pluginIds ??= params.pluginIds || [];
+    this.paused ??= data.paused ?? true;
+    this.date ??= Number(data.date ? new Date(data.date) : new Date());
+    this.pluginIds ??= data.pluginIds || [];
     this.serverDataModel = params.serverDataModel;
-    this.entities ??= params.entities || [];
+    this.entities ??= data.entities || [];
 
     this.clients = Object.fromEntries(
-      Object.entries(this.clients || params.clients || {}).map(
-        ([id, client]) => [id, new FlightClient(client)]
-      )
+      Object.entries(this.clients || data.clients || {}).map(([id, client]) => [
+        id,
+        new FlightClient(client),
+      ])
     );
   }
   run = () => {
