@@ -10,6 +10,7 @@ import {buildDatabase} from "./init/buildDatabase";
 import {createContext, createWSContext} from "./init/liveQuery";
 import {router} from "./init/router";
 import {startServer} from "./init/startServer";
+import {exitHandler} from "./init/exitHandler";
 
 setBasePath(thoriumPath);
 const isHeadless = !process.env.FORK;
@@ -26,7 +27,7 @@ export async function init() {
     );
   }
 
-  const database = buildDatabase();
+  const database = await buildDatabase();
   const app = await buildHTTPServer({
     staticRoot: path.join(rootPath, "public/"),
   });
@@ -38,6 +39,8 @@ export async function init() {
   });
 
   await startServer(app);
+
+  exitHandler(database);
 }
 
 init();

@@ -15,9 +15,7 @@ export async function loadFolderYaml<T>(objectGlob: string) {
         console.error(
           `Error parsing ${aspectPath
             .replace(`${thoriumPath}/plugins/`, "")
-            .replace("/manifast.yml", "")} on line ${
-            err.source?.rangeAsLinePos?.start.line
-          }: ${err.message}`
+            .replace("/manifest.yml", "")}: ${err.message}`
         );
       }
     }

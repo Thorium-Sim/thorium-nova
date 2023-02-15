@@ -3,7 +3,7 @@ import {databaseName} from "../utils/appPaths";
 import randomWords from "@thorium/random-words";
 import {FlightDataModel} from "../classes/FlightDataModel";
 
-export function buildDatabase() {
+export async function buildDatabase() {
   // Create the primary database
   // This is for any user data that is persisted between flights
   // but that isn't part of a plugin. Not much goes in here.
@@ -11,6 +11,12 @@ export function buildDatabase() {
     {thoriumId: randomWords(3).join("-"), activeFlightName: null},
     {path: databaseName}
   );
+
+  await new Promise<void>(res => {
+    setInterval(() => {
+      if (serverModel.plugins.length > 0) res();
+    }, 100);
+  });
 
   // If a flight is in progress, load it.
   // This helps in situations where the server is shut

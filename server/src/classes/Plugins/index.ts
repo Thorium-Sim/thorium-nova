@@ -67,14 +67,15 @@ export default class BasePlugin extends FSDataStore {
     super(params, {
       path: `/plugins/${name}/manifest.yml`,
     });
-    this.id = params.id || name;
+    const data = this.getData();
+    this.id = data.id || params.id || name;
     this.name = name;
-    this.author = params.author || "";
-    this.description = params.description || "A great plugin";
-    this._coverImage = params.coverImage || "";
-    this.tags = params.tags || [];
-    this.active = params.active ?? true;
-    this.default = params.default ?? false;
+    this.author = data.author || "";
+    this.description = data.description || "A great plugin";
+    this._coverImage = data.coverImage || "";
+    this.tags = data.tags || [];
+    this.active = data.active ?? true;
+    this.default = data.default ?? false;
     storedServer = server;
 
     this.loadAspects();

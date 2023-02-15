@@ -5,6 +5,7 @@ import BasePlugin from "./Plugins";
 import fg from "fast-glob";
 import {router} from "@server/init/router";
 import {pubsub} from "@server/init/pubsub";
+import randomWords from "@thorium/random-words";
 
 export class ServerDataModel extends FSDataStore {
   clients!: Record<string, Client<any>>;
@@ -13,6 +14,10 @@ export class ServerDataModel extends FSDataStore {
   plugins: BasePlugin[] = [];
   constructor(params: Partial<ServerDataModel>, options: FSDataStoreOptions) {
     super(params, options);
+    const data = this.getData();
+    this.activeFlightName = data.activeFlightName || null;
+    this.thoriumId = data.thoriumId || randomWords(3).join("-");
+
     if (this.clients) {
       this.clients = Object.fromEntries(
         Object.entries(this.clients).map(([id, client]) => {
@@ -23,7 +28,7 @@ export class ServerDataModel extends FSDataStore {
       );
     } else {
       this.clients = Object.fromEntries(
-        Object.entries(params.clients || {}).map(([id, client]) => {
+        Object.entries(data.clients || {}).map(([id, client]: any) => {
           const c = new Client(client.id, router, pubsub);
           c.name = client.name;
           return [id, c];
@@ -35,6 +40,8 @@ export class ServerDataModel extends FSDataStore {
   #loadPlugins = async () => {
     const plugins = await fg(`${thoriumPath}/plugins/*/manifest.yml`);
     const pluginRegex = new RegExp(`${thoriumPath}/plugins/(.*)/manifest.yml`);
+    if (plugins.length === 0)
+      throw new Error("Thorium Nova requires at least one plugin to run.");
     plugins.forEach(plugin => {
       const name = pluginRegex.exec(plugin)![1];
       this.plugins.push(new BasePlugin({name}, this));
