@@ -186,84 +186,106 @@ function PluginDetails() {
             });
           }}
         />
-        {plugin?.active ? (
+        <div className="grid grid-cols-2 w-full gap-2">
+          {plugin?.active ? (
+            <Button
+              className="w-full btn-outline btn-warning"
+              disabled={!pluginId}
+              onClick={async () => {
+                if (!pluginId) return;
+                q.plugin.update.netSend({pluginId, active: false});
+              }}
+            >
+              Deactivate Plugin
+            </Button>
+          ) : (
+            <Button
+              className="w-full btn-outline btn-success"
+              disabled={!pluginId}
+              onClick={async () => {
+                if (!pluginId) return;
+                q.plugin.update.netSend({pluginId, active: true});
+              }}
+            >
+              Activate Plugin
+            </Button>
+          )}
           <Button
-            className="w-full btn-outline btn-warning"
+            className="w-full btn-outline btn-error"
             disabled={!pluginId}
             onClick={async () => {
-              if (!pluginId) return;
-              q.plugin.update.netSend({pluginId, active: false});
-            }}
-          >
-            Deactivate Plugin
-          </Button>
-        ) : (
-          <Button
-            className="w-full btn-outline btn-success"
-            disabled={!pluginId}
-            onClick={async () => {
-              if (!pluginId) return;
-              q.plugin.update.netSend({pluginId, active: true});
-            }}
-          >
-            Activate Plugin
-          </Button>
-        )}
-        <Button
-          className="w-full btn-outline btn-error"
-          disabled={!pluginId}
-          onClick={async () => {
-            if (
-              !pluginId ||
-              !(await confirm({
-                header: "Are you sure you want to delete this plugin?",
-                body: "All content in this plugin, including images and other assets, will be gone forever.",
-              }))
-            )
-              return;
-            q.plugin.update.netSend({pluginId});
-            navigate("/config");
-          }}
-        >
-          Delete Plugin
-        </Button>
-        <Button
-          className="w-full btn-outline btn-notice"
-          disabled={!pluginId}
-          onClick={async () => {
-            if (!pluginId) return;
-            const name = await prompt({
-              header: "What is the name of the duplicated plugin?",
-            });
-            if (!name || typeof name !== "string") return;
-            try {
-              const result = await q.plugin.update.netSend({
-                pluginId: pluginId,
-                name,
-              });
-              navigate(`/config/${result.pluginId}`);
-            } catch (err) {
-              if (err instanceof Error) {
-                toast({
-                  title: "Error duplicating plugin",
-                  body: err.message,
-                  color: "error",
-                });
+              if (
+                !pluginId ||
+                !(await confirm({
+                  header: "Are you sure you want to delete this plugin?",
+                  body: "All content in this plugin, including images and other assets, will be gone forever.",
+                }))
+              )
                 return;
+              q.plugin.update.netSend({pluginId});
+              navigate("/config");
+            }}
+          >
+            Delete Plugin
+          </Button>
+          <Button
+            className="w-full btn-outline btn-notice"
+            disabled={!pluginId}
+            onClick={async () => {
+              if (!pluginId) return;
+              const name = await prompt({
+                header: "What is the name of the duplicated plugin?",
+              });
+              if (!name || typeof name !== "string") return;
+              try {
+                const result = await q.plugin.update.netSend({
+                  pluginId: pluginId,
+                  name,
+                });
+                navigate(`/config/${result.pluginId}`);
+              } catch (err) {
+                if (err instanceof Error) {
+                  toast({
+                    title: "Error duplicating plugin",
+                    body: err.message,
+                    color: "error",
+                  });
+                  return;
+                }
               }
-            }
-          }}
-        >
-          Duplicate Plugin
-        </Button>
-        <Link
-          className={`btn w-full btn-outline btn-warning ${
-            !pluginId ? "btn-disabled" : ""
-          }`}
-          to={`/config/${pluginId}/list`}
-        >
-          Edit Plugin
-        </Link>
+            }}
+          >
+            Duplicate Plugin
+          </Button>
+          <Link
+            className={`btn w-full btn-outline btn-warning ${
+              !pluginId ? "btn-disabled" : ""
+            }`}
+            to={`/config/${pluginId}/list`}
+          >
+            Edit Plugin
+          </Link>
+          {plugin?.default ? (
+            <Button
+              className="w-full btn-outline btn-info"
+              disabled={!pluginId}
+              onClick={async () => {
+                if (!pluginId) return;
+                if (
+                  await confirm({
+                    header:
+                      "Are you sure you want to restore the default plugin?",
+                    body: "Any changes that you've made to the default plugin will be overwritten.",
+                  })
+                ) {
+                  await q.server.restoreDefaultPlugin.netSend();
+                }
+              }}
+            >
+              Restore Plugin
+            </Button>
+          ) : null}
+        </div>
       </div>
       <div>
         <label>
