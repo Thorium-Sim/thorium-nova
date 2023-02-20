@@ -95,8 +95,8 @@ export function ShipMap() {
 
   return (
     <>
-      <div className="w-72">
-        <ul className="mb-2 relative">
+      <div className="w-72 flex flex-col">
+        <ul className="mb-2 relative overflow-y-auto">
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}

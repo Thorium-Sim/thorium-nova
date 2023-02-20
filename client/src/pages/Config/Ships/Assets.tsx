@@ -13,7 +13,7 @@ export function Assets() {
   const ship = ships.find(d => d.name === shipId);
   const [, render] = useReducer(() => ({}), {});
   return (
-    <div className="grid grid-cols-2 grid-rows-2 gap-4 overflow-y-auto">
+    <div className="h-full grid grid-cols-2 grid-rows-2 gap-4 ">
       <div className="max-w-md">
         <h3 className="text-lg font-bold flex items-center">
           Logo{" "}
@@ -37,7 +37,7 @@ export function Assets() {
             <img
               src={`${ship.assets.logo}?${new Date().getTime()}`}
               alt="Ship Logo"
-              className="w-10/12 h-10/12 object-cover"
+              className="w-5/6 h-5/6 object-contain aspect-square"
             />
           )}
         </UploadWell>
@@ -49,7 +49,9 @@ export function Assets() {
             Models should be in .glb format. Top and side views are
             automatically generated from the model.
             {/* TODO November 1 2021 - Write a page about how to create 3D models */}
-            <Link to="/docs">Read about how to create compatible models.</Link>
+            <Link to="/docs" className="text-purple-300">
+              Read about how to create compatible models.
+            </Link>
           </InfoTip>
         </h3>
         <UploadWell
@@ -110,7 +112,7 @@ export function Assets() {
             <img
               src={`${ship.assets.vanity}?${new Date().getTime()}`}
               alt="Ship Vanity View"
-              className="w-10/12 h-10/12 object-cover"
+              className="w-5/6 h-5/6 object-contain aspect-square"
             />
           )}
         </UploadWell>
@@ -122,7 +124,7 @@ export function Assets() {
             <img
               src={`${ship.assets.sideView}?${new Date().getTime()}`}
               alt="Ship Side View"
-              className="w-10/12 h-10/12 object-cover"
+              className="w-5/6 h-5/6 object-contain aspect-square"
             />
           )}
         </UploadWell>
@@ -134,7 +136,7 @@ export function Assets() {
             <img
               src={`${ship.assets.topView}?${new Date().getTime()}`}
               alt="Ship Top View"
-              className="w-10/12 h-10/12 object-cover"
+              className="w-5/6 h-5/6 object-contain aspect-square"
             />
           )}
         </UploadWell>

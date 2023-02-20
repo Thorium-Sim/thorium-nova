@@ -20,7 +20,7 @@ export const ShipLayout = () => {
   if (!pathname.endsWith(shipId)) {
     return (
       <>
-        <div>
+        <div className="h-full flex flex-col">
           <SettingsList />
           <Button
             className="w-full btn-outline btn-error"

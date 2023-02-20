@@ -44,7 +44,7 @@ const UploadWell: React.FC<{
   return (
     <label
       {...props}
-      className={`max-w-64 w-full aspect-square ${
+      className={`max-w-64 h-full w-full aspect-square ${
         disabled ? "" : dragging ? "cursor-[copy]" : "cursor-pointer"
       } shadow-inner rounded-lg ${
         dragging ? "bg-white/50" : "bg-black/50"
