@@ -120,6 +120,7 @@ export class InterstellarTransitionSystem extends System {
         pubsub.publish.starmapCore.ship({shipId: entity.id});
 
         if (entity.components.isPlayerShip) {
+          pubsub.publish.navigation.ship({shipId: entity.id});
           pubsub.publish.ship.player({shipId: entity.id});
         }
       }
@@ -200,6 +201,7 @@ export class InterstellarTransitionSystem extends System {
         pubsub.publish.starmapCore.ship({shipId: entity.id});
 
         if (entity.components.isPlayerShip) {
+          pubsub.publish.navigation.ship({shipId: entity.id});
           pubsub.publish.ship.player({shipId: entity.id});
         }
         // // Update the warp engines

@@ -23,22 +23,24 @@ import {q} from "@client/context/AppContext";
 export function SolarSystemWrapper() {
   const useStarmapStore = useGetStarmapStore();
   const currentSystem = useStarmapStore(store => store.currentSystem);
-
-  if (currentSystem === null) throw new Error("No current system");
-
   useEffect(() => {
     useStarmapStore.getState().currentSystemSet?.(currentSystem);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useStarmapStore]);
 
-  const [system] = q.starmapCore.system.useNetRequest({
-    systemId: currentSystem,
-  });
+  const [system] = q.starmapCore.system.useNetRequest(
+    {
+      systemId: currentSystem!,
+    },
+    {keepPreviousData: true, enabled: currentSystem !== null}
+  );
   const [starmapEntities] = q.starmapCore.entities.useNetRequest({
     systemId: currentSystem,
   });
   const [ship] = q.navigation.ship.useNetRequest();
   const [waypoints] = q.waypoints.all.useNetRequest({systemId: currentSystem});
+
+  if (currentSystem === null) return null;
 
   return (
     <SolarSystemMap
