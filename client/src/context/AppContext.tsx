@@ -10,11 +10,13 @@ import {getTabId} from "@thorium/tab-id";
 import {
   createLiveQueryReact,
   LiveQueryProvider,
+  useLiveQuery,
 } from "@thorium/live-query/client";
 import {AppRouter} from "@server/init/router";
 import {ThoriumAccountContextProvider} from "./ThoriumAccountContext";
 import {useSessionStorage} from "@client/hooks/useSessionStorage";
 import {randomFromList} from "@server/utils/randomFromList";
+import {Disconnected, Reconnecting} from "./ConnectionStatus";
 
 const Fallback: React.FC<FallbackProps> = ({error}) => {
   return (
@@ -57,6 +59,14 @@ async function getRequestContext() {
   return {id: await getTabId()};
 }
 
+function ConnectionStatus() {
+  const {reconnectionState} = useLiveQuery();
+
+  if (reconnectionState === "reconnecting") return <Reconnecting />;
+  if (reconnectionState === "disconnected") return <Disconnected />;
+  return null;
+}
+
 /**
  * A component to contain all of the context and wrapper components for the app.
  */
@@ -68,6 +78,7 @@ export default function AppContext({children}: {children: ReactNode}) {
         <ErrorBoundary FallbackComponent={Fallback}>
           <Suspense fallback={<LoadingSpinner />}>
             <LiveQueryProvider getRequestContext={getRequestContext}>
+              <ConnectionStatus />
               <ErrorBoundary FallbackComponent={Fallback}>
                 <Suspense fallback={<LoadingSpinner />}>
                   <ThoriumAccountContextProvider>
