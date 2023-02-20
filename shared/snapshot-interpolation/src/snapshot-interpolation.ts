@@ -218,6 +218,12 @@ export class SnapshotInterpolation {
       );
       if (!other) return;
 
+      // A special property which indicates the interpolation
+      // should snap
+      const shouldSnap = e.s === 1;
+      let entityPercent = pPercent;
+      if (shouldSnap) entityPercent = 1;
+
       params.forEach(p => {
         // TODO yandeu: improve this code
         const match = p.match(/\w\(([\w]+)\)/);
@@ -226,8 +232,7 @@ export class SnapshotInterpolation {
 
         const p0 = e?.[p];
         const p1 = other?.[p];
-
-        const pn = lerpFnc(lerpMethod, p1, p0, pPercent);
+        const pn = lerpFnc(lerpMethod, p1, p0, entityPercent);
         if (Array.isArray(tmpSnapshot.state)) tmpSnapshot.state[i][p] = pn;
       });
     });

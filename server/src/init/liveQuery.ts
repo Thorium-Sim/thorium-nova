@@ -110,13 +110,14 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
           };
         }
 
-        // TODO May 9, 2022 - There should be logic here to indicate when
-        // the snapshot should _not_ interpolate, for example when transitioning
-        // from interstellar space to solar system space.
         const {parentId, type, ...position} = e.components.position || {};
+        const shouldSnap = e.components.snapInterpolation ? 1 : 0;
+        e.removeComponent("snapInterpolation");
+
         return {
           id: e.id.toString(),
           ...position,
+          s: shouldSnap,
           r: e.components.rotation,
         };
       });

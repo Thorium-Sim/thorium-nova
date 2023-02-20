@@ -85,6 +85,7 @@ export class InterstellarTransitionSystem extends System {
           type: "interstellar",
           parentId: null,
         });
+        entity.addComponent("snapInterpolation");
         // We also need to update the warp engines so they go faster.
 
         // const warpEngines = warpSystem?.entities.find(e => entity.components.shipSystems?.shipSystemIds.includes(e.id) && e.components.isWarpEngines)
@@ -172,6 +173,8 @@ export class InterstellarTransitionSystem extends System {
           parentId: destinationSystem.id,
           type: "solar",
         });
+        entity.addComponent("snapInterpolation");
+
         // Also set the rotation to the destination to be spot-on to the destination
         if (
           destinationWaypoint?.components.isWaypoint?.attachedObjectId !==
