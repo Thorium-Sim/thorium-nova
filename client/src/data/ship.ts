@@ -2,6 +2,7 @@ import {t} from "@server/init/t";
 import {pubsub} from "@server/init/pubsub";
 import {spawnShip} from "@server/spawners/ship";
 import {z} from "zod";
+import {randomNameGenerator} from "@server/utils/randomNameGenerator";
 
 export const ship = t.router({
   get: t.procedure
@@ -71,12 +72,12 @@ export const ship = t.router({
 
       const {ship: shipEntity, extraEntities} = spawnShip(ctx, shipTemplate, {
         // TODO: August 20, 2022 - Generate a name for this ship somehow
-        name: "Test Ship",
+        name: randomNameGenerator(),
         position: {
           x: input.position.x,
           y: input.position.y,
           z: input.position.z,
-          type: input.systemId ? "solar" : "interstellar",
+          type: typeof input.systemId === "number" ? "solar" : "interstellar",
           parentId: input.systemId,
         },
       });

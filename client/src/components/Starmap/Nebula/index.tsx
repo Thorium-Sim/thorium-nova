@@ -40,7 +40,7 @@ function generateMaterial(primary: boolean, index: number) {
       side: BackSide,
       transparent: primary,
       depthWrite: !primary,
-      depthTest: false,
+      depthTest: true,
       map: canvasTexture,
       userData: {
         offscreenCanvas,
