@@ -1,4 +1,4 @@
-import {CubicMeter, Flavor, Kelvin} from "server/src/utils/unitTypes";
+import {Flavor, Kelvin, Liter} from "server/src/utils/unitTypes";
 import {z} from "zod";
 export default class DeckPlugin {
   name: string;
@@ -45,7 +45,7 @@ export class DeckNode {
   isRoom: boolean;
   icon: string;
   radius: number;
-  volume: CubicMeter;
+  volume: Liter;
   flags: NodeFlag[];
   systems: string[];
   contents: {
@@ -60,7 +60,7 @@ export class DeckNode {
     this.isRoom = params.isRoom || false;
     this.icon = params.icon || "";
     this.radius = params.radius || 0;
-    this.volume = params.volume || 12;
+    this.volume = params.volume || 12000;
     this.flags = params.flags || [];
     this.systems = params.systems || [];
     this.contents = params.contents || {};

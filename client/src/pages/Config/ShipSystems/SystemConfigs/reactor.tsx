@@ -29,7 +29,7 @@ export default function ReactorsConfig() {
     <fieldset key={key} className="flex-1 overflow-y-auto">
       <div className="flex flex-wrap">
         <div className="flex-1 pr-4">
-          <div className="pb-2 flex items-center">
+          <div className="pb-2 flex items-start">
             <Input
               labelHidden={false}
               inputMode="numeric"
@@ -83,7 +83,7 @@ export default function ReactorsConfig() {
               </p>
             </InfoTip>
           </div>
-          <div className="pb-2 flex items-center">
+          <div className="pb-2 flex items-start">
             <Input
               labelHidden={false}
               inputMode="numeric"
@@ -130,7 +130,7 @@ export default function ReactorsConfig() {
               </p>
             </InfoTip>
           </div>
-          <div className="pb-2 flex items-center">
+          <div className="pb-2 flex items-start">
             <Input
               labelHidden={false}
               inputMode="numeric"

@@ -14,7 +14,7 @@ export default class ThemePlugin extends Aspect {
   apiVersion = "theme/v1" as const;
   kind = "themes" as const;
   name: string;
-
+  default?: boolean;
   assets: {
     rawCSS: string;
     processedCSS: string;
@@ -34,6 +34,7 @@ export default class ThemePlugin extends Aspect {
       processedCSS: "processed.css",
       files: [],
     };
+    this.default = params.default || false;
   }
 
   async setCSS(rawCSS: string) {

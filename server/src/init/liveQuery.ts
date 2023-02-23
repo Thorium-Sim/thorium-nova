@@ -69,7 +69,9 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
   isHost: boolean = false;
   name: string = randomNameGenerator();
 
-  public async sendDataStream(context: DataContext) {
+  public async sendDataStream() {
+    const context = getDataContext(this.id);
+
     if (!context?.flight || !this.connected) return;
     const entities = context.flight.ecs.entities
       .filter((entity: Entity) => {
@@ -108,13 +110,14 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
           };
         }
 
-        // TODO May 9, 2022 - There should be logic here to indicate when
-        // the snapshot should _not_ interpolate, for example when transitioning
-        // from interstellar space to solar system space.
         const {parentId, type, ...position} = e.components.position || {};
+        const shouldSnap = e.components.snapInterpolation ? 1 : 0;
+        e.removeComponent("snapInterpolation");
+
         return {
           id: e.id.toString(),
           ...position,
+          s: shouldSnap,
           r: e.components.rotation,
         };
       });
@@ -126,11 +129,25 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
     return {id, name, isHost};
   }
   connectionOpened(): void {
+    // Claim host if there isn't one already claimed
+    const ctx = getDataContext(this.id);
+    if (ctx) {
+      const hasHost = Object.values(ctx.server.clients).some(
+        client => client.isHost && client.connected
+      );
+      if (!hasHost) {
+        this.isHost = true;
+      }
+    }
     pubsub.publish.client.get({clientId: this.id});
     pubsub.publish.client.all();
+    pubsub.publish.thorium.hasHost();
   }
   connectionClosed(): void {
     pubsub.publish.client.get({clientId: this.id});
     pubsub.publish.client.all();
+    if (this.isHost) {
+      pubsub.publish.thorium.hasHost();
+    }
   }
 }

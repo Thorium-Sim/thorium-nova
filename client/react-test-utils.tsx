@@ -1,8 +1,10 @@
 import React, {ReactNode, Suspense} from "react";
 import {render as rtlRender, RenderOptions} from "@testing-library/react";
 import {MemoryRouter as Router} from "react-router-dom";
-import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
-import {LiveQueryContext} from "@thorium/live-query/client/liveQueryContext";
+import {
+  LiveQueryContext,
+  LiveQueryProvider,
+} from "@thorium/live-query/client/liveQueryContext";
 import {MockNetRequestContext} from "@thorium/live-query/client/mockContext";
 import {AppRouter} from "@server/init/router";
 import {inferRouterOutputs} from "@thorium/live-query/server/types";
@@ -44,8 +46,6 @@ interface OptionsInterface {
   netRequestData?: DeepPartial<inferRouterOutputs<AppRouter>>;
 }
 
-const queryClient = new QueryClient();
-
 async function render(
   ui: Parameters<typeof rtlRender>[0],
   options?: Omit<RenderOptions, "queries"> & OptionsInterface
@@ -54,58 +54,56 @@ async function render(
   const Wrapper = ({children}: {children: ReactNode}) => {
     return (
       <Suspense fallback={<p>Suspended in test</p>}>
-        <LiveQueryContext.Provider value={{} as any}>
-          <QueryClientProvider client={queryClient}>
-            <MockNetRequestContext.Provider
-              value={{
-                client: {
-                  get: {
-                    id: "Test",
-                    name: "Test Client",
-                    connected: true,
-                    loginName: "Test User",
-                  },
-                } as any,
-                flight: null,
-                ship: {
-                  get: {
-                    id: 0,
-                    components: {
-                      isPlayerShip: {value: true},
-                      identity: {name: "Test Ship"},
-                      isShip: {
-                        assets: {
-                          logo: "",
-                        },
-                        category: "Cruiser",
-                        registry: "NCC-2016-A",
-                        shipClass: "Astra Cruiser",
+        <LiveQueryProvider getRequestContext={() => ({id: "test"})}>
+          <MockNetRequestContext.Provider
+            value={{
+              client: {
+                get: {
+                  id: "Test",
+                  name: "Test Client",
+                  connected: true,
+                  loginName: "Test User",
+                },
+              } as any,
+              flight: null,
+              ship: {
+                get: {
+                  id: 0,
+                  components: {
+                    isPlayerShip: {value: true},
+                    identity: {name: "Test Ship"},
+                    isShip: {
+                      assets: {
+                        logo: "",
                       },
+                      category: "Cruiser",
+                      registry: "NCC-2016-A",
+                      shipClass: "Astra Cruiser",
                     },
-                    alertLevel: 5,
                   },
-                } as any,
-                station: {
-                  get: {
-                    name: "Test Station",
-                    logo: "",
-                    cards: [
-                      {
-                        icon: "",
-                        name: "Test Card",
-                        component: "Login",
-                      },
-                    ],
-                  },
-                } as any,
-                theme: null,
-                ...options?.netRequestData,
-              }}
-            >
-              <Router initialEntries={initialRoutes}>{children}</Router>
-            </MockNetRequestContext.Provider>
-          </QueryClientProvider>
-        </LiveQueryContext.Provider>
+                  alertLevel: 5,
+                },
+              } as any,
+              station: {
+                get: {
+                  name: "Test Station",
+                  logo: "",
+                  cards: [
+                    {
+                      icon: "",
+                      name: "Test Card",
+                      component: "Login",
+                    },
+                  ],
+                },
+              } as any,
+              theme: null,
+              ...options?.netRequestData,
+            }}
+          >
+            <Router initialEntries={initialRoutes}>{children}</Router>
+          </MockNetRequestContext.Provider>
+        </LiveQueryProvider>
       </Suspense>
     );
   };

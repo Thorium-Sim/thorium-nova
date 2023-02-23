@@ -59,35 +59,40 @@ export function InterstellarMap({children}: {children: React.ReactNode}) {
   const viewingMode = useStarmapStore(store => store.viewingMode);
 
   const isStation = viewingMode === "station";
+  const isViewscreen = viewingMode === "viewscreen";
 
   return (
     <Suspense fallback={null}>
       <Starfield radius={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)} />
-      <CameraControls
-        ref={orbitControls}
-        enabled={controlsEnabled}
-        maxDistance={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)}
-        minDistance={1}
-        mouseButtons={{
-          left: ACTION.TRUCK,
-          right: ACTION.ROTATE,
-          middle: ACTION.DOLLY,
-          wheel: ACTION.DOLLY,
-        }}
-        dollyToCursor={isStation}
-        dollySpeed={0.5}
-      />
-      <PolarGrid
-        rotation={[0, (2 * Math.PI) / 12, 0]}
-        args={[
-          lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE),
-          12,
-          20,
-          64,
-          0xffffff,
-          0xffffff,
-        ]}
-      />
+      {!isViewscreen && (
+        <>
+          <CameraControls
+            ref={orbitControls}
+            enabled={controlsEnabled}
+            maxDistance={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)}
+            minDistance={1}
+            mouseButtons={{
+              left: ACTION.TRUCK,
+              right: ACTION.ROTATE,
+              middle: ACTION.DOLLY,
+              wheel: ACTION.DOLLY,
+            }}
+            dollyToCursor={isStation}
+            dollySpeed={0.5}
+          />
+          <PolarGrid
+            rotation={[0, (2 * Math.PI) / 12, 0]}
+            args={[
+              lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE),
+              12,
+              20,
+              64,
+              0xffffff,
+              0xffffff,
+            ]}
+          />
+        </>
+      )}
       {children}
     </Suspense>
   );

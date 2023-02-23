@@ -1,5 +1,5 @@
 import {q} from "@client/context/AppContext";
-import {lazy} from "react";
+import {lazy, Suspense} from "react";
 import {Navigate, Route, Routes} from "react-router-dom";
 
 const PluginEdit = lazy(() => import("./PluginEdit"));
@@ -16,15 +16,25 @@ export default function ConfigRoutes() {
   if (!client.isHost) return <Navigate to="/" replace />;
 
   return (
-    <Routes>
-      <Route path="/" element={<PluginEdit />} />
-      <Route path="/:pluginId" element={<PluginEdit />} />
-      <Route path="/:pluginId/list" element={<ConfigList />} />
-      <Route path="/:pluginId/ships/*" element={<ShipsConfig />} />
-      <Route path="/:pluginId/themes/*" element={<ThemesConfig />} />
-      <Route path="/:pluginId/starmap/*" element={<StarmapConfig />} />
-      <Route path="/:pluginId/systems/*" element={<ShipSystemConfig />} />
-      <Route path="/:pluginId/inventory/*" element={<InventoryConfig />} />
-    </Routes>
+    <>
+      <div className="z-10 relative h-full">
+        <Suspense>
+          <Routes>
+            <Route path="/" element={<PluginEdit />} />
+            <Route path="/:pluginId" element={<PluginEdit />} />
+            <Route path="/:pluginId/list" element={<ConfigList />} />
+            <Route path="/:pluginId/ships/*" element={<ShipsConfig />} />
+            <Route path="/:pluginId/themes/*" element={<ThemesConfig />} />
+            <Route path="/:pluginId/starmap/*" element={<StarmapConfig />} />
+            <Route path="/:pluginId/systems/*" element={<ShipSystemConfig />} />
+            <Route
+              path="/:pluginId/inventory/*"
+              element={<InventoryConfig />}
+            />
+          </Routes>
+        </Suspense>
+      </div>
+      <div className="w-full h-full bg-black/60 fixed backdrop-filter backdrop-blur top-0 z-0"></div>
+    </>
   );
 }
