@@ -5,14 +5,8 @@ import {Component} from "./utils";
 export class AutopilotComponent extends Component {
   static id: "autopilot" = "autopilot";
   static serialize(component: Omit<AutopilotComponent, "init">) {
-    const {
-      yawController,
-      pitchController,
-      rollController,
-      impulseController,
-      warpController,
-      ...data
-    } = component;
+    const {rotationController, impulseController, warpController, ...data} =
+      component;
     return data;
   }
   destinationWaypointId?: number | null = null;
@@ -25,9 +19,7 @@ export class AutopilotComponent extends Component {
   /** Whether the forward movement autopilot is on. */
   forwardAutopilot: boolean = true;
 
-  yawController?: Controller;
-  pitchController?: Controller;
-  rollController?: Controller;
+  rotationController?: Controller;
   impulseController?: Controller;
   warpController?: Controller;
 }

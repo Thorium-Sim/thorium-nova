@@ -31,4 +31,6 @@ export class IsThrustersComponent extends Component {
   rotationMaxSpeed: RotationsPerMinute = 5;
   /** The thrust applied by rotation thrusters in kilo-newtons, which affects how fast the rotation accelerates based on the mass of the ship. */
   rotationThrust: KiloNewtons = 12500;
+  /** Rotation velocity scalar used by the autopilot */
+  autoRotationVelocity: number = 0;
 }

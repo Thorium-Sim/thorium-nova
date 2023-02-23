@@ -54,49 +54,56 @@ describe("ThrusterSystem", () => {
 
     entity.updateComponent("isThrusters", {direction: {x: 1, y: 0, z: 0}});
 
-    ecs.update(1000);
+    for (let i = 0; i < 60; i++) {
+      ecs.update(16);
+    }
     expect(ship.components.velocity).toMatchInlineSnapshot(`
       VelocityComponent {
-        "x": 0.00625,
+        "x": 0.006,
         "y": 0,
         "z": 0,
       }
     `);
-    ecs.update(2000);
+    for (let i = 0; i < 60 * 2; i++) {
+      ecs.update(16);
+    }
     expect(ship.components.velocity).toMatchInlineSnapshot(`
-        VelocityComponent {
-          "x": 0.01875,
-          "y": 0,
-          "z": 0,
-        }
-      `);
+      VelocityComponent {
+        "x": 0.018,
+        "y": 0,
+        "z": 0,
+      }
+    `);
 
     entity.updateComponent("isThrusters", {
       direction: {x: 0, y: 1, z: 0},
       rotationDelta: {x: 1, y: 0, z: 0},
     });
-    ecs.update(1000);
-    ecs.update(1000);
+    for (let i = 0; i < 60 * 2; i++) {
+      ecs.update(16);
+    }
     expect(ship.components.velocity).toMatchInlineSnapshot(`
       VelocityComponent {
-        "x": 0.01875,
-        "y": 0.0101371,
-        "z": 0.0065592,
+        "x": 0.018,
+        "y": 0.0115944,
+        "z": 0.0022997,
       }
     `);
     expect(ship.components.rotation).toMatchInlineSnapshot(`
       RotationComponent {
-        "w": 0.9138825852226744,
-        "x": 0.40597859602043207,
+        "w": 0.9595433007677061,
+        "x": 0.28156110163126624,
         "y": 0,
         "z": 0,
       }
     `);
-    ecs.update(10 * 1000);
+    for (let i = 0; i < 60 * 10; i++) {
+      ecs.update(16);
+    }
     expect(ship.components.rotation).toMatchInlineSnapshot(`
       RotationComponent {
-        "w": -0.9944348328892493,
-        "x": 0.10535351506490337,
+        "w": -0.9417843003177649,
+        "x": 0.3362176849526648,
         "y": 0,
         "z": 0,
       }
