@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.10](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.9...1.0.0-alpha.10) (2023-02-23)
+
+
+### Bug Fixes
+
+* Add back in the "Reconnect to Server" dialogs ([7f34e1c](https://github.com/Thorium-Sim/thorium-nova/commit/7f34e1cfce0619209b3496c29cdba2b59f6f7915))
+* Auto-claim host when first connecting. ([52b4d75](https://github.com/Thorium-Sim/thorium-nova/commit/52b4d757daac0ebd940df30d30e6c1635a019828))
+* Config UX improvements. ([e5bd455](https://github.com/Thorium-Sim/thorium-nova/commit/e5bd4554fe8134dcd2a49ee30aa32860c28ea870))
+* Darken the background when configuring plugins. ([d20f426](https://github.com/Thorium-Sim/thorium-nova/commit/d20f426cfb9085ac6fef40d08dbab90dc189d6b7))
+* Flight Director right-click to spawn and order ships. ([4cbcb0e](https://github.com/Thorium-Sim/thorium-nova/commit/4cbcb0e33d98ea8095a687e0f580d0125257da84))
+* If a ship doesn't have a theme assigned to it, only automatically assign themes marked as default. ([004c954](https://github.com/Thorium-Sim/thorium-nova/commit/004c954cd17724f212bdbf0b15f632ea713b04c6))
+* Interstellar viewscreen no longer shows the Flight Director view. ([e8c9840](https://github.com/Thorium-Sim/thorium-nova/commit/e8c98403190a7674b2d5e52767226af370353bb1))
+* Navigation no longer crashes when transitioning to interstellar space. ([acab5f5](https://github.com/Thorium-Sim/thorium-nova/commit/acab5f5dcf66e142037ab9afdb08c01ef4f7e248))
+* Properly save flights periodically while the app is open and when it closes. ([55ca019](https://github.com/Thorium-Sim/thorium-nova/commit/55ca0199ef2c666c6f5b687f0eb5c3036373f942))
+* Refactor inventory to use liters instead of cubic meters. ([6d0e95f](https://github.com/Thorium-Sim/thorium-nova/commit/6d0e95f31f14c37b0313ea674018d45a90107849))
+* Resolves backend errors when visiting plugin config page. ([be8fb36](https://github.com/Thorium-Sim/thorium-nova/commit/be8fb3696e50c58ff38c1f63b477b123c75ef3ef))
+* Send initial data stream when a client first requests it. ([9a94fc2](https://github.com/Thorium-Sim/thorium-nova/commit/9a94fc2c6aff13cabe34fd7e09ce92e1a208377d))
+* System specific config overrides ([1bb73da](https://github.com/Thorium-Sim/thorium-nova/commit/1bb73da04059652465d859d1f5a872bf86a0622b))
+
+
+### Features
+
+* Add a button to restore the default plugin, which will also update the default plugin contents with new Thorium Nova versions. ([82388a8](https://github.com/Thorium-Sim/thorium-nova/commit/82388a8e6ca5cd4d298d0a4e200748e1b9aa1c03))
+* Enable snapping network data instead of smoothly interpolating. ([2ab84d8](https://github.com/Thorium-Sim/thorium-nova/commit/2ab84d89a6c9ac6363743d9e11ec16b005e0dd55))
+* Improve the behavior of autopilot rotation. ([0ca5723](https://github.com/Thorium-Sim/thorium-nova/commit/0ca57238f4a3e61d824dec5d03a355e29d2520a1))
+* Randomly cycle through backgrounds. ([945dd22](https://github.com/Thorium-Sim/thorium-nova/commit/945dd2240ecefb69eed894ff95c4d13d2d615a7e))
+
 # [1.0.0-alpha.9](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.8...1.0.0-alpha.9) (2023-02-08)
 
 
