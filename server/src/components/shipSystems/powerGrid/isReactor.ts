@@ -5,6 +5,11 @@ export class IsReactorComponent extends Component {
   static id = "isReactor" as const;
 
   /**
+   * The power nodes and batteries that are associated with this reactor
+   */
+  connectedEntities: number[] = [];
+
+  /**
    * This will be set when the ship is spawned
    * based on the total power required
    * to run all systems divided by the number of

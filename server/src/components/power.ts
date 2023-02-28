@@ -16,9 +16,6 @@ export class PowerComponent extends Component {
   /** The current power provided to this system, calculated every frame */
   currentPower: MegaWatt = 10;
 
-  /** How much power the system is currently drawing, calculated every frame */
-  powerDraw: MegaWatt = 0;
-
   /** How much power is currently being requested. Could be more than the maxSafePower */
   requestedPower: MegaWatt = 10;
 }
