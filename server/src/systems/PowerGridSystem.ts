@@ -45,7 +45,7 @@ export class PowerGridSystem extends System {
       for (let systemId of node.components.isPowerNode?.connectedSystems ||
         []) {
         const system = poweredSystems.find(s => s.id === systemId);
-        nodePower += system?.components.power?.requestedPower || 0;
+        nodePower += system?.components.power?.powerDraw || 0;
       }
       nodeRequestedPower.set(node.id, nodePower);
     }
@@ -238,13 +238,13 @@ export class PowerGridSystem extends System {
       connectedSystems.sort((a, b) => {
         if (distributionMode === "mostFirst") {
           return (
-            (b.components.power?.requestedPower || 0) -
-            (a.components.power?.requestedPower || 0)
+            (b.components.power?.powerDraw || 0) -
+            (a.components.power?.powerDraw || 0)
           );
         } else {
           return (
-            (a.components.power?.requestedPower || 0) -
-            (b.components.power?.requestedPower || 0)
+            (a.components.power?.powerDraw || 0) -
+            (b.components.power?.powerDraw || 0)
           );
         }
       });
@@ -259,16 +259,15 @@ export class PowerGridSystem extends System {
           if (!leastPowerRequired) break;
 
           // The system with the least power need doesn't need it's allotment of power, so let's
-          // give it all that it's asking for and split the rest among the other systems
+          // give it all that it's trying to pull and split the rest among the other systems
           const requestedPower =
-            leastPowerRequired.components.power?.requestedPower || 0;
+            leastPowerRequired.components.power?.powerDraw || 0;
 
           if (requestedPower < powerSplit) {
             connectedSystems.forEach(entity => {
               value -= requestedPower;
               const currentPower = entity.components.power?.currentPower || 0;
-              const sysRequestedPower =
-                entity.components.power?.requestedPower || 0;
+              const sysRequestedPower = entity.components.power?.powerDraw || 0;
               entity.updateComponent("power", {
                 currentPower: Math.min(
                   sysRequestedPower,
@@ -284,7 +283,7 @@ export class PowerGridSystem extends System {
           // so we'll give them all it can give.
           connectedSystems.forEach(system => {
             const currentPower = system.components.power?.currentPower || 0;
-            const requestedPower = system.components.power?.requestedPower || 0;
+            const requestedPower = system.components.power?.powerDraw || 0;
             system.updateComponent("power", {
               currentPower: Math.min(requestedPower, powerSplit + currentPower),
             });
@@ -294,7 +293,7 @@ export class PowerGridSystem extends System {
       } else {
         connectedSystems.forEach(system => {
           let powerDraw = Math.min(
-            system.components.power?.requestedPower || 0,
+            system.components.power?.powerDraw || 0,
             value
           );
           if (powerDraw < 0) powerDraw = 0;

@@ -19,7 +19,7 @@ describe("PowerGridSystem", () => {
   it("should work with a simple setup", () => {
     const system = new Entity();
     system.addComponent("isShipSystem", {type: "generic"});
-    system.addComponent("power", {requestedPower: 50, currentPower: 0});
+    system.addComponent("power", {powerDraw: 50, currentPower: 0});
     ship.components.shipSystems?.shipSystems.set(system.id, {});
     ecs.addEntity(system);
 
@@ -49,7 +49,7 @@ describe("PowerGridSystem", () => {
     ecs.update(16);
     expect(system.components.power?.currentPower).toEqual(10);
 
-    system.updateComponent("power", {requestedPower: 5});
+    system.updateComponent("power", {powerDraw: 5});
     ecs.update(16);
     expect(system.components.power?.currentPower).toEqual(5);
   });
@@ -57,12 +57,12 @@ describe("PowerGridSystem", () => {
   it("should properly distribute power from a single reactor to multiple systems", () => {
     const system1 = new Entity();
     system1.addComponent("isShipSystem", {type: "generic"});
-    system1.addComponent("power", {requestedPower: 50, currentPower: 0});
+    system1.addComponent("power", {powerDraw: 50, currentPower: 0});
     ship.components.shipSystems?.shipSystems.set(system1.id, {});
     ecs.addEntity(system1);
     const system2 = new Entity();
     system2.addComponent("isShipSystem", {type: "generic"});
-    system2.addComponent("power", {requestedPower: 50, currentPower: 0});
+    system2.addComponent("power", {powerDraw: 50, currentPower: 0});
     ship.components.shipSystems?.shipSystems.set(system2.id, {});
     ecs.addEntity(system2);
 
@@ -87,7 +87,7 @@ describe("PowerGridSystem", () => {
     expect(system1.components.power?.currentPower).toEqual(30);
     expect(system2.components.power?.currentPower).toEqual(30);
 
-    system1.updateComponent("power", {requestedPower: 10});
+    system1.updateComponent("power", {powerDraw: 10});
     ecs.update(16);
     expect(system1.components.power?.currentPower).toEqual(10);
     expect(system2.components.power?.currentPower).toEqual(50);
@@ -106,22 +106,22 @@ describe("PowerGridSystem", () => {
   it("should work with multiple reactors connected to multiple power nodes", () => {
     const system1 = new Entity();
     system1.addComponent("isShipSystem", {type: "generic"});
-    system1.addComponent("power", {requestedPower: 50, currentPower: 0});
+    system1.addComponent("power", {powerDraw: 50, currentPower: 0});
     ship.components.shipSystems?.shipSystems.set(system1.id, {});
     ecs.addEntity(system1);
     const system2 = new Entity();
     system2.addComponent("isShipSystem", {type: "generic"});
-    system2.addComponent("power", {requestedPower: 50, currentPower: 0});
+    system2.addComponent("power", {powerDraw: 50, currentPower: 0});
     ship.components.shipSystems?.shipSystems.set(system2.id, {});
     ecs.addEntity(system2);
     const system3 = new Entity();
     system3.addComponent("isShipSystem", {type: "generic"});
-    system3.addComponent("power", {requestedPower: 50, currentPower: 0});
+    system3.addComponent("power", {powerDraw: 50, currentPower: 0});
     ship.components.shipSystems?.shipSystems.set(system3.id, {});
     ecs.addEntity(system3);
     const system4 = new Entity();
     system4.addComponent("isShipSystem", {type: "generic"});
-    system4.addComponent("power", {requestedPower: 50, currentPower: 0});
+    system4.addComponent("power", {powerDraw: 50, currentPower: 0});
     ship.components.shipSystems?.shipSystems.set(system4.id, {});
     ecs.addEntity(system4);
 
@@ -170,8 +170,8 @@ describe("PowerGridSystem", () => {
     expect(system3.components.power?.currentPower).toEqual(45);
     expect(system4.components.power?.currentPower).toEqual(45);
 
-    system1.updateComponent("power", {requestedPower: 10});
-    system2.updateComponent("power", {requestedPower: 10});
+    system1.updateComponent("power", {powerDraw: 10});
+    system2.updateComponent("power", {powerDraw: 10});
 
     ecs.update(16);
     expect(system1.components.power?.currentPower).toEqual(10);
@@ -179,10 +179,10 @@ describe("PowerGridSystem", () => {
     expect(system3.components.power?.currentPower).toEqual(50);
     expect(system4.components.power?.currentPower).toEqual(50);
 
-    system1.updateComponent("power", {requestedPower: 50});
-    system2.updateComponent("power", {requestedPower: 50});
-    system3.updateComponent("power", {requestedPower: 10});
-    system4.updateComponent("power", {requestedPower: 10});
+    system1.updateComponent("power", {powerDraw: 50});
+    system2.updateComponent("power", {powerDraw: 50});
+    system3.updateComponent("power", {powerDraw: 10});
+    system4.updateComponent("power", {powerDraw: 10});
 
     ecs.update(16);
     expect(system1.components.power?.currentPower).toEqual(30);
@@ -193,7 +193,7 @@ describe("PowerGridSystem", () => {
   it("should properly charge and discharge batteries", () => {
     const system = new Entity();
     system.addComponent("isShipSystem", {type: "generic"});
-    system.addComponent("power", {requestedPower: 50, currentPower: 0});
+    system.addComponent("power", {powerDraw: 50, currentPower: 0});
     ship.components.shipSystems?.shipSystems.set(system.id, {});
     ecs.addEntity(system);
 
@@ -334,7 +334,7 @@ describe("PowerGridSystem", () => {
       const system = new Entity();
       system.addComponent("isShipSystem", {type: "generic"});
       system.addComponent("power", {
-        requestedPower: Math.random() * 100,
+        powerDraw: Math.random() * 100,
         currentPower: 0,
       });
       ship.components.shipSystems?.shipSystems.set(system.id, {});
