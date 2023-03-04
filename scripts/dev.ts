@@ -9,7 +9,7 @@ concurrently(
     },
     {
       command:
-        "npx wait-on http://localhost:3001/healthcheck && npm run dev --workspace client",
+        "npx wait-on http://127.0.0.1:3001/healthcheck && npm run dev --workspace client",
       name: "client",
       prefixColor: "magenta.bold",
     },
