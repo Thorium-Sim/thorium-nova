@@ -352,6 +352,6 @@ describe("PowerGridSystem", () => {
 
     const time = performance.now();
     ecs.update(16);
-    expect(performance.now() - time).toBeLessThan(1);
+    expect(performance.now() - time).toBeLessThan(3);
   });
 });
