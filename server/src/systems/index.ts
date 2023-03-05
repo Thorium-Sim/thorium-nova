@@ -22,6 +22,7 @@ import {FilterInventorySystem} from "./FilterInventorySystem";
 import {ReactorHeatSystem} from "./ReactorHeatSystem";
 import {HeatToCoolantSystem} from "./HeatToCoolantSystem";
 import {HeatDispersionSystem} from "./HeatDispersionSystem";
+import {PowerDrawSystem} from "./PowerDrawSystem";
 import {PowerGridSystem} from "./PowerGridSystem";
 
 const systems = [
@@ -33,6 +34,7 @@ const systems = [
   TimerSystem,
   ReactorFuelSystem,
   ReactorHeatSystem,
+  PowerDrawSystem,
   PowerGridSystem,
   AutoRotateSystem,
   AutoThrustSystem,
