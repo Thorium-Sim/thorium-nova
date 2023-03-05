@@ -10,6 +10,7 @@ import {spawnShipSystem} from "./shipSystem";
 import ReactorPlugin from "@server/classes/Plugins/ShipSystems/Reactor";
 import BaseShipSystemPlugin from "@server/classes/Plugins/ShipSystems/BaseSystem";
 import {getInventoryTemplates} from "@server/utils/getInventoryTemplates";
+import {battery} from "@client/pages/Config/data/systems/battery";
 
 const systemCache: Record<string, BaseShipSystemPlugin> = {};
 function getSystem(
@@ -84,7 +85,7 @@ export function spawnShip(
     node.addComponent("isPowerNode", {
       maxConnections: 3,
       connectedSystems: [],
-      distributionMode: "leastFirst",
+      distributionMode: "evenly",
     });
     powerNodes[name] = {entity: node, count: 0};
     systemEntities.push(node);
@@ -102,6 +103,16 @@ export function spawnShip(
         // Reactors are special, so take care of them later.
 
         break;
+      case "battery": {
+        const entity = spawnShipSystem(systemPlugin, system.overrides);
+        if (entity.components.isBattery) {
+          entity.components.isBattery.storage =
+            entity.components.isBattery.capacity;
+        }
+        systemEntities.push(entity);
+
+        break;
+      }
       default: {
         const entity = spawnShipSystem(systemPlugin, system.overrides);
         systemEntities.push(entity);

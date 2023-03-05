@@ -19,5 +19,5 @@ export class IsPowerNodeComponent extends Component {
    * - Least Need First (first fill up the systems with the smallest power requirement)
    * - Most Need First (first fill up the systems with the largest power requirement)
    */
-  distributionMode: "evenly" | "leastFirst" | "mostFirst" = "leastFirst";
+  distributionMode: "evenly" | "leastFirst" | "mostFirst" = "evenly";
 }
