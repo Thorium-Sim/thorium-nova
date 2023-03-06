@@ -4,7 +4,16 @@ const SOFT_BRAKE_CONST = 5;
 
 /**
  * Determines the forward velocity applied by the impulse engines
- * based on the mass of the ship they are attached to
+ * based on the mass of the ship they are attached to.
+ *
+ * This works based on the power provided to the system.
+ * The powerDraw and currentPower have already been calculated
+ * by other systems. This system takes the currentPower value and
+ * reverses the operation to determine what the actual target speed
+ * is based on the power provided.
+ *
+ * It might be necessary to adjust the applied thrust as well, but
+ * it also might not be necessary.
  */
 export class ImpulseSystem extends System {
   WarpSystem?: System;
@@ -35,8 +44,17 @@ export class ImpulseSystem extends System {
     );
     const mass = ship.components.mass?.mass || 1;
 
-    const {thrust, targetSpeed, cruisingSpeed} =
+    let {thrust, targetSpeed, cruisingSpeed} =
       entity.components.isImpulseEngines;
+
+    if (entity.components.power) {
+      const {currentPower, maxSafePower, requiredPower} =
+        entity.components.power || {};
+      targetSpeed =
+        cruisingSpeed *
+        ((currentPower - requiredPower) / (maxSafePower - requiredPower));
+    }
+
     const appliedThrust = (targetSpeed / cruisingSpeed) * thrust;
 
     let acceleration = appliedThrust / mass;
