@@ -5,7 +5,7 @@ export function getInventoryTemplates(ecs?: ECS | null) {
   const inventorySystem = ecs?.systems.find(
     sys => sys.constructor.name === "FilterInventorySystem"
   );
-  return (Object.fromEntries(
+  const data = (Object.fromEntries(
     inventorySystem?.entities.map(entity => [
       entity.components.identity?.name,
       {...entity.components.identity, ...entity.components.isInventory},
@@ -24,4 +24,5 @@ export function getInventoryTemplates(ecs?: ECS | null) {
       assets: {image?: string};
     }
   >;
+  return data;
 }

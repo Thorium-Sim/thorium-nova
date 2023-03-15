@@ -996,7 +996,7 @@ input[type="range"].slider {
     @apply cursor-not-allowed bg-base-200 border-base-200 text-opacity-20 placeholder-base-content placeholder-opacity-20;
   }
 }
-.panel {
+:where(.panel) {
   @apply text-base bg-neutral rounded-btn border border-opacity-0 border-neutral-content;
   &-ghost {
     @apply bg-opacity-5;
@@ -1132,7 +1132,9 @@ input[type="range"].slider.zoom:focus::-webkit-slider-runnable-track {
 
 .slider.horizontal .track {
   height: 30px;
-  width: 100%;
+  width: calc(100% - 2rem);
+  padding-left: 1rem;
+  margin-left: 1rem;
 }
 
 /* track line */
@@ -1144,7 +1146,8 @@ input[type="range"].slider.zoom:focus::-webkit-slider-runnable-track {
 }
 
 .slider.horizontal .track:before {
-  width: 100%;
+  width: calc(100% + 2rem);
+  margin-left: -2rem;
   top: 50%;
   transform: translateY(-50%);
   height: calc(1.5rem + 4px);
@@ -1192,4 +1195,9 @@ input[type="range"].slider.zoom:focus::-webkit-slider-runnable-track {
 
 .track.disabled {
   opacity: 0.4;
+}
+
+body.drag-active * {
+  user-select: none;
+  cursor: grabbing;
 }

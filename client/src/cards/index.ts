@@ -6,3 +6,4 @@ export * from "./Navigation";
 export * from "./CargoControl";
 export * from "./Viewscreen";
 export * from "./AlertLevel";
+export * from "./PowerGrid";

@@ -197,15 +197,18 @@ export function spawnShip(
       template.decks?.flatMap((deck, i) =>
         deck.nodes.map(n => ({...n, deckIndex: i, contents: {}}))
       ) || [];
-
     generateShipInventory(
       deckNodes.map(node => ({
         id: node.id,
         contents: node.contents,
         flags: node.flags,
         volume: node.volume,
+        systems: node.systems,
       })),
-      inventoryTemplates
+      inventoryTemplates,
+      {
+        powerNeed: totalPower * 2.5, // Convert megawatts into 2.5 MegaWatt hours
+      }
     );
 
     entity.addComponent("shipMap", {
@@ -251,9 +254,13 @@ export function spawnShip(
           contents: entity.components.cargoContainer?.contents || {},
           flags: ["cargo"],
           volume: entity.components.cargoContainer?.volume || 500,
+          systems: [],
         },
       ],
-      inventoryTemplates
+      inventoryTemplates,
+      {
+        powerNeed: totalPower * 2.5, // Convert megawatts into 2.5 MegaWatt hours
+      }
     );
   }
 

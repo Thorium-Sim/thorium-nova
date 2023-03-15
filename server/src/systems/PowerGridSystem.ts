@@ -193,11 +193,10 @@ export class PowerGridSystem extends System {
       const capacity = battery?.components.isBattery?.capacity || 0;
       const storage = battery?.components.isBattery?.storage || 0;
       const limit = battery?.components.isBattery?.chargeRate || Infinity;
+      const chargeAmount = storage === capacity ? 0 : Math.min(value, limit);
       battery?.updateComponent("isBattery", {
-        storage: Math.min(
-          capacity,
-          storage + Math.min(value, limit) * elapsedTimeHours
-        ),
+        storage: Math.min(capacity, storage + chargeAmount * elapsedTimeHours),
+        chargeAmount,
       });
     });
 
@@ -214,17 +213,21 @@ export class PowerGridSystem extends System {
         connectedBatteries.forEach(battery => {
           const limit = battery.components.isBattery?.dischargeRate || Infinity;
           const storage = battery.components.isBattery?.storage || 0;
-          const powerDraw = Math.min(limit, excessDemand) * elapsedTimeHours;
-          if (storage > powerDraw) {
+          const dischargeRate = Math.min(limit, excessDemand);
+          if (storage > dischargeRate * elapsedTimeHours) {
             battery.updateComponent("isBattery", {
-              storage: Math.max(0, storage - powerDraw),
+              storage: Math.max(0, storage - dischargeRate * elapsedTimeHours),
+              dischargeRate,
             });
             excessDemand = 0;
             value = nodeRequestedPower.get(key) || 0;
           } else {
             excessDemand -= storage / elapsedTimeHours;
             value += storage / elapsedTimeHours;
-            battery.updateComponent("isBattery", {storage: 0});
+            battery.updateComponent("isBattery", {
+              storage: 0,
+              dischargeRate: 0,
+            });
           }
         });
       }

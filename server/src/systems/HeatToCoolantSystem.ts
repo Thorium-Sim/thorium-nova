@@ -1,4 +1,4 @@
-import {getSystemInventory} from "@server/utils/getSystemInventory";
+import {getReactorInventory} from "@server/utils/getSystemInventory";
 import {
   HeatCapacity,
   Kelvin,
@@ -34,7 +34,7 @@ export class HeatToCoolantSystem extends System {
   update(entity: Entity, elapsed: number) {
     const elapsedInSeconds = elapsed / 1000;
     if (!entity.components.heat) return;
-    const inventory = getSystemInventory(entity) || [];
+    const inventory = getReactorInventory(entity) || [];
 
     // Transfer heat between the system and the coolant
     // We do this by converting the heat of each thing

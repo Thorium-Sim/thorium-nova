@@ -2,11 +2,11 @@ import {Entity} from "./ecs";
 import {getInventoryTemplates} from "./getInventoryTemplates";
 
 /**
- * Get the inventory currently located in the room associated with this system
- * @param system - An ECS system
+ * Get the inventory currently located in the room associated with this reactor
+ * @param system - An ECS entity
  * @returns
  */
-export function getSystemInventory(system: Entity) {
+export function getReactorInventory(system: Entity) {
   const shipFilterSystem = system.ecs?.systems.find(
     system => system.constructor.name === "FilterShipsWithReactors"
   );

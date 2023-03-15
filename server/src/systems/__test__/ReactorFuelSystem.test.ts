@@ -1,7 +1,7 @@
 import {DeckNode} from "@server/classes/Plugins/Ship/Deck";
 import {createMockDataContext} from "@server/utils/createMockDataContext";
 import {ECS, Entity} from "@server/utils/ecs";
-import {getSystemInventory} from "@server/utils/getSystemInventory";
+import {getReactorInventory} from "@server/utils/getSystemInventory";
 import {FilterInventorySystem} from "../FilterInventorySystem";
 import {FilterShipsWithReactors} from "../FilterShipsWithReactors";
 import {ReactorFuelSystem} from "../ReactorFuelSystem";
@@ -91,7 +91,7 @@ describe("ReactorFuelSystem", () => {
     expect(filterShipsWithReactorSystem.entities[0]).toEqual(ship);
   });
   it("should detect the correct amount of items related to a system", () => {
-    const fuelList = getSystemInventory(reactor);
+    const fuelList = getReactorInventory(reactor);
     expect(fuelList).toHaveLength(1);
     expect(fuelList?.[0].name).toEqual("Deuterium");
   });

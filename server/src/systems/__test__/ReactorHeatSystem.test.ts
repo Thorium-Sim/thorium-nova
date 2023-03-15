@@ -1,7 +1,7 @@
 import {DeckNode} from "@server/classes/Plugins/Ship/Deck";
 import {createMockDataContext} from "@server/utils/createMockDataContext";
 import {ECS, Entity} from "@server/utils/ecs";
-import {getSystemInventory} from "@server/utils/getSystemInventory";
+import {getReactorInventory} from "@server/utils/getSystemInventory";
 import {FilterInventorySystem} from "../FilterInventorySystem";
 import {FilterShipsWithReactors} from "../FilterShipsWithReactors";
 import {HeatDispersionSystem} from "../HeatDispersionSystem";

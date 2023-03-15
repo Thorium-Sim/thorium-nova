@@ -58,7 +58,8 @@ export abstract class FSDataStore {
         this.#writeThrottle();
         return true;
       }
-      return false;
+      // Ignore it
+      return true;
     },
   };
   constructor(initialData: unknown, options: FSDataStoreOptions = {}) {

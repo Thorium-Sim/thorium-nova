@@ -1,4 +1,4 @@
-import {getSystemInventory} from "@server/utils/getSystemInventory";
+import {getReactorInventory} from "@server/utils/getSystemInventory";
 import {MeterSquared, StephanBoltzmannConstant} from "@server/utils/unitTypes";
 import {Entity, System} from "../utils/ecs";
 
@@ -29,7 +29,7 @@ export class HeatDispersionSystem extends System {
   update(entity: Entity, elapsed: number) {
     const elapsedInSeconds = elapsed / 1000;
     if (!entity.components.heat) return;
-    const inventory = getSystemInventory(entity) || [];
+    const inventory = getReactorInventory(entity) || [];
     // Radiate the heat of the coolant into space
     for (let item of inventory) {
       if (!item.flags?.coolant) continue;
