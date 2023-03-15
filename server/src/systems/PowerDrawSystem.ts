@@ -34,6 +34,11 @@ export class PowerDrawSystem extends System {
       case "impulseEngines": {
         if (!entity.components.isImpulseEngines) return;
         const {cruisingSpeed, targetSpeed} = entity.components.isImpulseEngines;
+        // If we're going faster than the cruising speed,
+        // draw as much power as possible
+        if (targetSpeed > cruisingSpeed) {
+          powerDraw = power.requestedPower;
+        }
         if (targetSpeed === 0) break;
         const impulseEngineUse = targetSpeed / cruisingSpeed;
         powerDraw =

@@ -15,12 +15,21 @@ export const pilot = t.router({
         const impulseEngines = getShipSystem(ctx, {
           systemType: "impulseEngines",
         });
+        let targetSpeed =
+          impulseEngines.components.isImpulseEngines?.targetSpeed || 0;
+        let cruisingSpeed =
+          impulseEngines.components.isImpulseEngines?.cruisingSpeed || 1;
+        if (impulseEngines.components.power) {
+          const {currentPower, maxSafePower, requiredPower} =
+            impulseEngines.components.power || {};
+          targetSpeed =
+            cruisingSpeed *
+            ((currentPower - requiredPower) / (maxSafePower - requiredPower));
+        }
         return {
           id: impulseEngines.id,
-          targetSpeed:
-            impulseEngines.components.isImpulseEngines?.targetSpeed || 0,
-          cruisingSpeed:
-            impulseEngines.components.isImpulseEngines?.cruisingSpeed || 1,
+          targetSpeed,
+          cruisingSpeed,
           emergencySpeed:
             impulseEngines.components.isImpulseEngines?.emergencySpeed || 1,
         };
