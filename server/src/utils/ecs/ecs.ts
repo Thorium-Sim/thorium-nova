@@ -28,6 +28,7 @@ class ECS {
   lastUpdate = performance.now();
   rng: RNG;
   maxEntityId: number = 1;
+  entityIndex: Map<number, Entity> = new Map();
   constructor(
     public server: ServerDataModel,
     seed: string | number = "thorium",
@@ -39,13 +40,14 @@ class ECS {
    * Retrieve an entity by id
    */
   getEntityById(id: number) {
-    for (let i = 0, entity; (entity = this.entities[i]); i += 1) {
-      if (entity.id === id) {
-        return entity;
+    if (!this.entityIndex.get(id)) {
+      for (let i = 0, entity; (entity = this.entities[i]); i += 1) {
+        if (entity.id === id) {
+          this.entityIndex.set(id, entity);
+        }
       }
     }
-
-    return null;
+    return this.entityIndex.get(id) || null;
   }
   /**
    * Add an entity to the ecs.
