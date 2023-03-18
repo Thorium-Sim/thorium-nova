@@ -226,6 +226,7 @@ const quotes = [
   "We are autumn children, burdened with memories of sun.",
   "Impudent of you to assume I will meet a mortal end.",
   "Heaven, are you watching?",
+  // The lost metal
   "You're the wind. You're the stars. You are all endless things.",
   // Larry Elison
   "Choose your competitors carefully, because you'll become a lot like them.",
@@ -252,6 +253,10 @@ const quotes = [
   "Life is made up of meetings and partings and that is the way of it.",
   // Chantastic
   "It's only dark until your eyes adjust.",
+  // Arthur C Clarke
+  "The only way of discovering the limits of the possible is to venture a little way past them into the impossible.",
+  "Leading others to a promised land that you yourself will never set foot in.",
+  "Your heart knows the direction. Run!",
 ];
 
 const QuoteOfTheDay = () => {

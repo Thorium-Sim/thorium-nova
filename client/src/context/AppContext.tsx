@@ -32,6 +32,11 @@ const backgrounds = [
   "/assets/backgrounds/background2.jpg",
   "/assets/backgrounds/background3.jpg",
   "/assets/backgrounds/background4.jpg",
+  "/assets/backgrounds/background5.jpg",
+  "/assets/backgrounds/background6.jpg",
+  "/assets/backgrounds/background7.jpg",
+  "/assets/backgrounds/background8.jpg",
+  "/assets/backgrounds/background9.jpg",
 ];
 
 const Layout = ({children}: {children: ReactNode}) => {
