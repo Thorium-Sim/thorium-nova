@@ -55,13 +55,20 @@ export class RotationSystem extends System {
         rotationVelocity,
       } = thrusters.components.isThrusters;
 
+      const currentPower = entity.components.power?.currentPower || 1;
+      const maxSafePower = entity.components.power?.maxSafePower || 1;
+      const requiredPower = entity.components.power?.requiredPower || 1;
+      const powerRatio = currentPower / maxSafePower;
+      let thrust =
+        currentPower > requiredPower ? rotationThrust * powerRatio : 0;
+
       rotationAcceleration.set(
-        ((rotationDelta.x * rotationThrust) / (mass * 20)) * elapsedRatio,
-        ((rotationDelta.y * rotationThrust) / (mass * 20)) * elapsedRatio,
-        ((rotationDelta.z * rotationThrust) / (mass * 20)) * elapsedRatio
+        ((rotationDelta.x * thrust) / (mass * 20)) * elapsedRatio,
+        ((rotationDelta.y * thrust) / (mass * 20)) * elapsedRatio,
+        ((rotationDelta.z * thrust) / (mass * 20)) * elapsedRatio
       );
 
-      const revolutionsPerSecond = rotationMaxSpeed / 60;
+      const revolutionsPerSecond = (rotationMaxSpeed * powerRatio) / 60;
       const maxRadiansPerSecond = revolutionsPerSecond * (Math.PI * 2);
 
       rotationVelocity.x = Math.min(

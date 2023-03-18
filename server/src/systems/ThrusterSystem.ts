@@ -14,12 +14,17 @@ export class ThrusterSystem extends System {
     const mass = ship.components.mass?.mass || 1;
 
     const {direction, directionThrust} = entity.components.isThrusters;
-
+    const currentPower = entity.components.power?.currentPower || 1;
+    const maxSafePower = entity.components.power?.maxSafePower || 1;
+    const requiredPower = entity.components.power?.requiredPower || 1;
+    const powerRatio = currentPower / maxSafePower;
+    let thrust =
+      currentPower > requiredPower ? directionThrust * powerRatio : 0;
     entity.updateComponent("isThrusters", {
       directionAcceleration: {
-        x: (direction.x * directionThrust) / mass,
-        y: (direction.y * directionThrust) / mass,
-        z: (direction.z * directionThrust) / mass,
+        x: (direction.x * thrust) / mass,
+        y: (direction.y * thrust) / mass,
+        z: (direction.z * thrust) / mass,
       },
     });
 
