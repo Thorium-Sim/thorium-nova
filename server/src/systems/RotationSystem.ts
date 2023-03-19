@@ -60,7 +60,7 @@ export class RotationSystem extends System {
       const requiredPower = entity.components.power?.requiredPower || 1;
       const powerRatio = currentPower / maxSafePower;
       let thrust =
-        currentPower > requiredPower ? rotationThrust * powerRatio : 0;
+        currentPower >= requiredPower ? rotationThrust * powerRatio : 0;
 
       rotationAcceleration.set(
         ((rotationDelta.x * thrust) / (mass * 20)) * elapsedRatio,

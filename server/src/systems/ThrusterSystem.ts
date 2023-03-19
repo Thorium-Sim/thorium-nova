@@ -19,7 +19,7 @@ export class ThrusterSystem extends System {
     const requiredPower = entity.components.power?.requiredPower || 1;
     const powerRatio = currentPower / maxSafePower;
     let thrust =
-      currentPower > requiredPower ? directionThrust * powerRatio : 0;
+      currentPower >= requiredPower ? directionThrust * powerRatio : 0;
     entity.updateComponent("isThrusters", {
       directionAcceleration: {
         x: (direction.x * thrust) / mass,
