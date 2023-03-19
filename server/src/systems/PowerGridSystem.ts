@@ -87,7 +87,9 @@ export class PowerGridSystem extends System {
     const nodeSuppliedPower = new Map<number, number>(
       powerNodes.map(e => [e.id, 0])
     );
-    const batterySuppliedPower = new Map<number, number>();
+    const batterySuppliedPower = new Map<number, number>(
+      batteries.map(e => [e.id, 0])
+    );
     for (let reactor of reactors) {
       if (!reactor.components.isReactor) continue;
       if (reactor.components.isReactor.connectedEntities.length === 0) continue;
@@ -214,7 +216,6 @@ export class PowerGridSystem extends System {
         chargeAmount,
       });
     });
-
     // Distribute the power node power to all of the connected systems
     nodeSuppliedPower.forEach((value, key) => {
       const node = powerNodes.find(node => node.id === key);
