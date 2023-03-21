@@ -42,4 +42,3 @@ export class WaypointRemoveSystem extends System {
     }
   }
 }
-``;
