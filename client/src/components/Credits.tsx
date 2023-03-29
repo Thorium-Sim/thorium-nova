@@ -25,6 +25,14 @@ const creditList = [
     content: "Victor Williamson",
   },
   {
+    header: "Conceptual Development",
+    content: "Matt Ricks",
+  },
+  {
+    header: "Conceptual Development",
+    content: "Natalie Brianne",
+  },
+  {
     header: (
       <a
         href="https://github.com/Thorium-Sim/thorium-nova/blob/develop/CONTRIBUTING.md"

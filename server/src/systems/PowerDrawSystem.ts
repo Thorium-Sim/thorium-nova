@@ -51,7 +51,6 @@ export class PowerDrawSystem extends System {
         if (!entity.components.isThrusters) return;
         const {direction, rotationDelta, thrusting} =
           entity.components.isThrusters;
-        if (!thrusting) break;
         const directionOutput = Math.hypot(
           direction.x,
           direction.y,
@@ -62,7 +61,12 @@ export class PowerDrawSystem extends System {
           rotationDelta.y,
           rotationDelta.z
         );
-        const totalOutput = directionOutput + rotationOutput;
+        const overloadPercent = Math.min(
+          1,
+          power.requestedPower / maxSafePower
+        );
+        const totalOutput =
+          (directionOutput + rotationOutput) * overloadPercent;
         powerDraw =
           (maxSafePower - requiredPower) * totalOutput + requiredPower;
         break;
