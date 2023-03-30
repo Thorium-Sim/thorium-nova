@@ -1,4 +1,4 @@
-import {getSystemInventory} from "@server/utils/getSystemInventory";
+import {getReactorInventory} from "@server/utils/getSystemInventory";
 import {
   MegaWatt,
   MegaWattHour,
@@ -37,7 +37,6 @@ export class ReactorFuelSystem extends System {
     const unusedFuelEnergy: MegaWattHour =
       entity.components.isReactor.unusedFuel.amount *
       entity.components.isReactor.unusedFuel.density;
-
     let energyProvided = unusedFuelEnergy;
     if (energyNeeded - energyProvided < 0) {
       entity.components.isReactor.unusedFuel.amount =
@@ -50,7 +49,7 @@ export class ReactorFuelSystem extends System {
     entity.components.isReactor.unusedFuel.amount = 0;
 
     const fuel =
-      getSystemInventory(entity)?.filter(item => item.flags.fuel) || [];
+      getReactorInventory(entity)?.filter(item => item.flags.fuel) || [];
 
     // // Pick the fuel item with the highest energy density
     const toBurn = fuel.reduce((prev: null | (typeof fuel)[0], next) => {

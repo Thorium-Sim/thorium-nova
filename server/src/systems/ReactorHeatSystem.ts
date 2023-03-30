@@ -1,4 +1,4 @@
-import {getSystemInventory} from "@server/utils/getSystemInventory";
+import {getReactorInventory} from "@server/utils/getSystemInventory";
 import {
   HeatCapacity,
   Kelvin,

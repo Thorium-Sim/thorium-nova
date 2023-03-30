@@ -1,3 +1,4 @@
+import {MegaWatt} from "@server/utils/unitTypes";
 import {Component} from "../../utils";
 
 export class IsPowerNodeComponent extends Component {
@@ -20,4 +21,14 @@ export class IsPowerNodeComponent extends Component {
    * - Most Need First (first fill up the systems with the largest power requirement)
    */
   distributionMode: "evenly" | "leastFirst" | "mostFirst" = "evenly";
+
+  /**
+   * How much power is being put into the power node, updated every frame
+   */
+  powerInput: MegaWatt = 0;
+
+  /**
+   * How much power the power node needs, updated every frame
+   */
+  powerRequirement: MegaWatt = 0;
 }

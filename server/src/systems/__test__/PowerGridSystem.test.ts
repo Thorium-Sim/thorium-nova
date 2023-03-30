@@ -208,7 +208,7 @@ describe("PowerGridSystem", () => {
     const battery = new Entity();
     battery.addComponent("isShipSystem", {type: "battery"});
     battery.addComponent("isBattery", {
-      connectedNodes: [powerNode.id],
+      connectedNodes: [],
       storage: 0,
     });
     ship.components.shipSystems?.shipSystems.set(battery.id, {});
@@ -222,12 +222,17 @@ describe("PowerGridSystem", () => {
     });
     ship.components.shipSystems?.shipSystems.set(reactor.id, {});
     ecs.addEntity(reactor);
-
     expect(battery.components.isBattery?.storage).toEqual(0);
     ecs.update(16);
     expect(battery.components.isBattery?.storage).toMatchInlineSnapshot(
       `0.00013333333333333334`
     );
+    battery.updateComponent("isBattery", {connectedNodes: [powerNode.id]});
+    ecs.update(16);
+    expect(battery.components.isBattery?.storage).toMatchInlineSnapshot(
+      `0.00004444444444444442`
+    );
+
     reactor.updateComponent("isReactor", {currentOutput: 180});
     battery.updateComponent("isBattery", {storage: 0});
     ecs.update(16);
@@ -235,14 +240,16 @@ describe("PowerGridSystem", () => {
     reactor.updateComponent("isReactor", {currentOutput: 500});
     battery.updateComponent("isBattery", {storage: 0});
     ecs.update(16);
-    expect(storage).toMatchInlineSnapshot(`0.0008000000000000001`);
+    expect(storage).toMatchInlineSnapshot(`0.0005777777777777779`);
     expect(storage).toEqual(battery.components.isBattery?.storage);
 
-    // It should take 16 minutes to fully charge a battery at this rate.
-    for (let i = 0; i < 60 * 60 * 16; i++) {
+    // It should take about 23 minutes to fully charge a battery at this rate.
+    for (let i = 0; i < 60 * 60 * 23; i++) {
       ecs.update(16);
     }
-    expect(battery.components.isBattery?.storage).toMatchInlineSnapshot(`46`);
+    expect(battery.components.isBattery?.storage).toMatchInlineSnapshot(
+      `45.99977777777778`
+    );
 
     reactor.updateComponent("isReactor", {
       currentOutput: 50,

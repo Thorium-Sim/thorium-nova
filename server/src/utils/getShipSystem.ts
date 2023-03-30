@@ -24,3 +24,21 @@ export function getShipSystem(
   if (!system) throw new Error(`System ${JSON.stringify(param)} not found.`);
   return system;
 }
+
+export function getShipSystems(
+  context: DataContext,
+  param: {systemType: string}
+) {
+  let systems: Entity[] = [];
+  const ship = context.ship;
+  for (let [id] of ship?.components.shipSystems?.shipSystems || []) {
+    const entity = context.flight?.ecs.getEntityById(id);
+    if (
+      entity?.components &&
+      `is${pascalCase(param.systemType)}` in entity.components
+    ) {
+      systems.push(entity);
+    }
+  }
+  return systems;
+}

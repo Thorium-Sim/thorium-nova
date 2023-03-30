@@ -23,8 +23,7 @@ const StationLayout = () => {
 
   return (
     <div
-      id="theme-container"
-      className={`h-full w-full ${
+      className={`theme-container h-full w-full ${
         station.name === "Viewscreen" ? "viewscreen" : ""
       }`}
     >

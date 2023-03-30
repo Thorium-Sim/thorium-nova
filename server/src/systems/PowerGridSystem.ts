@@ -38,8 +38,21 @@ export class PowerGridSystem extends System {
         poweredSystems.push(sys);
     }
 
+    // Reset all of the battery and power node metrics
+    batteries.forEach(battery => {
+      battery.updateComponent("isBattery", {
+        chargeAmount: 0,
+        dischargeAmount: 0,
+      });
+    });
+    powerNodes.forEach(node => {
+      node.updateComponent("isPowerNode", {
+        powerRequirement: 0,
+        powerInput: 0,
+      });
+    });
+
     // First, figure out how much power each power node is requesting
-    const nodeRequestedPower = new Map<number, number>();
     for (let node of powerNodes) {
       let nodePower = 0;
       for (let systemId of node.components.isPowerNode?.connectedSystems ||
@@ -47,7 +60,7 @@ export class PowerGridSystem extends System {
         const system = poweredSystems.find(s => s.id === systemId);
         nodePower += system?.components.power?.powerDraw || 0;
       }
-      nodeRequestedPower.set(node.id, nodePower);
+      node.updateComponent("isPowerNode", {powerRequirement: nodePower});
     }
 
     // Sort reactors based on whether they are connected to batteries,
@@ -71,8 +84,12 @@ export class PowerGridSystem extends System {
     });
     // Supply reactor power to the power nodes,
     // but only up to their requested power level
-    const nodeSuppliedPower = new Map<number, number>();
-    const batterySuppliedPower = new Map<number, number>();
+    const nodeSuppliedPower = new Map<number, number>(
+      powerNodes.map(e => [e.id, 0])
+    );
+    const batterySuppliedPower = new Map<number, number>(
+      batteries.map(e => [e.id, 0])
+    );
     for (let reactor of reactors) {
       if (!reactor.components.isReactor) continue;
       if (reactor.components.isReactor.connectedEntities.length === 0) continue;
@@ -89,7 +106,7 @@ export class PowerGridSystem extends System {
             id: powerNode.id,
             requestedPower: Math.max(
               0,
-              (nodeRequestedPower.get(id) || 0) -
+              (powerNode.components.isPowerNode?.powerRequirement || 0) -
                 (nodeSuppliedPower.get(id) || 0)
             ),
           };
@@ -193,38 +210,45 @@ export class PowerGridSystem extends System {
       const capacity = battery?.components.isBattery?.capacity || 0;
       const storage = battery?.components.isBattery?.storage || 0;
       const limit = battery?.components.isBattery?.chargeRate || Infinity;
+      const chargeAmount = storage === capacity ? 0 : Math.min(value, limit);
       battery?.updateComponent("isBattery", {
-        storage: Math.min(
-          capacity,
-          storage + Math.min(value, limit) * elapsedTimeHours
-        ),
+        storage: Math.min(capacity, storage + chargeAmount * elapsedTimeHours),
+        chargeAmount,
       });
     });
-
     // Distribute the power node power to all of the connected systems
     nodeSuppliedPower.forEach((value, key) => {
       const node = powerNodes.find(node => node.id === key);
-      if (value < (nodeRequestedPower.get(key) || 0)) {
+      if (value < (node?.components.isPowerNode?.powerRequirement || 0)) {
         // If a power node doesn't have sufficient power,
         // draw that power from batteries
         const connectedBatteries = batteries.filter(b =>
           b.components.isBattery?.connectedNodes.includes(key)
         );
-        let excessDemand = (nodeRequestedPower.get(key) || 0) - value;
+        let excessDemand =
+          (node?.components.isPowerNode?.powerRequirement || 0) - value;
+
         connectedBatteries.forEach(battery => {
           const limit = battery.components.isBattery?.dischargeRate || Infinity;
           const storage = battery.components.isBattery?.storage || 0;
-          const powerDraw = Math.min(limit, excessDemand) * elapsedTimeHours;
-          if (storage > powerDraw) {
+          const dischargeAmount = Math.min(limit, excessDemand);
+          if (storage > dischargeAmount * elapsedTimeHours) {
             battery.updateComponent("isBattery", {
-              storage: Math.max(0, storage - powerDraw),
+              storage: Math.max(
+                0,
+                storage - dischargeAmount * elapsedTimeHours
+              ),
+              dischargeAmount,
             });
             excessDemand = 0;
-            value = nodeRequestedPower.get(key) || 0;
+            value = node?.components.isPowerNode?.powerRequirement || 0;
           } else {
             excessDemand -= storage / elapsedTimeHours;
             value += storage / elapsedTimeHours;
-            battery.updateComponent("isBattery", {storage: 0});
+            battery.updateComponent("isBattery", {
+              storage: 0,
+              dischargeAmount: 0,
+            });
           }
         });
       }
@@ -248,6 +272,8 @@ export class PowerGridSystem extends System {
           );
         }
       });
+
+      node?.updateComponent("isPowerNode", {powerInput: value});
       if (distributionMode === "evenly") {
         connectedSystems.forEach(entity => {
           entity.updateComponent("power", {currentPower: 0});

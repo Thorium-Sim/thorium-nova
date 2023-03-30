@@ -102,7 +102,7 @@ export const AlertDialog = ({children}: {children: React.ReactNode}) => {
           initialFocus={type === "prompt" ? inputEl : okayButton}
           open={isOpen}
           onClose={() => close()}
-          className="fixed z-10 inset-0 overflow-y-auto"
+          className="theme-container fixed z-10 inset-0 overflow-y-auto"
         >
           <div className="flex items-center justify-center min-h-screen">
             <Transition.Child
@@ -133,7 +133,7 @@ export const AlertDialog = ({children}: {children: React.ReactNode}) => {
                       <input
                         {...inputProps}
                         ref={inputEl}
-                        className="input block w-full"
+                        className="input block w-full mt-4"
                         value={input}
                         onChange={e => setInput(e.currentTarget.value)}
                       />

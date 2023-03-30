@@ -1,4 +1,5 @@
 import {InventoryFlags} from "@server/classes/Plugins/Inventory/InventoryFlags";
+import {MegaWattHour} from "@server/utils/unitTypes";
 import {NodeFlag} from "../classes/Plugins/Ship/Deck";
 import {randomFromList} from "../utils/randomFromList";
 
@@ -9,7 +10,14 @@ type RoomI = {
   contents: {
     [inventoryTemplateName: string]: {count: number};
   };
+  systems: string[];
 };
+
+/** Generate inventory based on the needs of the ship */
+type ShipConfig = {
+  powerNeed: MegaWattHour;
+};
+
 export function generateShipInventory(
   inputRooms: RoomI[],
   flightInventory: {
@@ -19,12 +27,21 @@ export function generateShipInventory(
       abundance: number;
       flags: InventoryFlags;
     };
-  }
+  },
+  shipConfig: ShipConfig
 ) {
   // First, lets figure out how much space we even have
   let [totalVolume, rooms] = inputRooms.reduce(
     (
-      acc: [number, {availableVolume: number; id: number; flags: NodeFlag[]}[]],
+      acc: [
+        number,
+        {
+          availableVolume: number;
+          id: number;
+          flags: NodeFlag[];
+          systems: string[];
+        }[]
+      ],
       room
     ) => {
       if (!room.volume) return acc;
@@ -33,6 +50,7 @@ export function generateShipInventory(
         availableVolume: room.volume ?? 0,
         id: room.id,
         flags: room.flags ?? ["cargo"],
+        systems: room.systems,
       };
       return [volume, acc[1].concat(roomData)];
     },
@@ -41,8 +59,10 @@ export function generateShipInventory(
 
   // We only want to add the kinds of cargo that are absolutely necessary, especially at first.
   const neededInventory: string[] = [];
+  if (shipConfig.powerNeed > 0) {
+    neededInventory.push("fuel");
+  }
   // TODO Jan 21, 2023 - these should be conditional based on reactors and systems that need heat.
-  neededInventory.push("fuel");
   neededInventory.push("coolant");
   // TODO Jan 21, 2023 - these should be conditional based on whether there are torpedos or not
   neededInventory.push("torpedoCasing");
@@ -144,11 +164,15 @@ export function generateShipInventory(
           }
         }
       });
+      room.systems.forEach(sys => {
+        if (!acc[sys]) acc[sys] = [];
+        acc[sys].push(room);
+      });
       return acc;
     },
     {}
   );
-  function getRandomInventoryRoom(type: NodeFlag, inventoryVolume: number) {
+  function getRandomInventoryRoom(type: string, inventoryVolume: number) {
     const room = randomFromList(
       (roomMap[type] ?? []).filter(r => r.availableVolume >= inventoryVolume)
     );
@@ -157,7 +181,6 @@ export function generateShipInventory(
         (roomMap.cargo ?? []).filter(r => r.availableVolume >= inventoryVolume)
       );
       if (!cargoRoom) {
-        console.error(`Ran out of room for inventory of type ${type}!`);
         return null;
       }
       return cargoRoom;
@@ -178,7 +201,21 @@ export function generateShipInventory(
   // and an assumed mission duration of 2.5 hours.
   // A mission timeline could add more fuel, or the crew can
   // pick up fuel from a starbase if needed.
+  const fuelItems = inventoryList.filter(i => i.flags.fuel);
+  if (fuelItems.length > 0 && neededInventory.includes("fuel")) {
+    let powerNeeded = shipConfig.powerNeed;
+    while (powerNeeded > 0) {
+      const inventoryTemplate = randomFromList(fuelItems);
+      if (!inventoryTemplate.flags.fuel) continue;
+      powerNeeded -= inventoryTemplate.flags.fuel?.fuelDensity || 1;
 
+      let room = getRandomInventoryRoom("reactor", inventoryTemplate.volume);
+      if (!room)
+        room = getRandomInventoryRoom("fuelStorage", inventoryTemplate.volume);
+      if (!room) continue;
+      addInventory(inventoryTemplate, room);
+    }
+  }
   // How much coolant does the ship need?
   // This is based on how many systems the ship needs
   // to keep cool. Perhaps 2 * the amount of coolant needed

@@ -69,7 +69,7 @@ export const InventoryFlagValues: {
     info: "Used by the reactor to generate power.",
     fuelDensity: {
       defaultValue: 1,
-      info: "How much power is released from one unit of fuel.",
+      info: "How much power is released from one unit of fuel in MegaWatt Hours.",
     },
   },
   coolant: {

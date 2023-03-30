@@ -1,12 +1,9 @@
 import {DeckNode} from "@server/classes/Plugins/Ship/Deck";
 import {createMockDataContext} from "@server/utils/createMockDataContext";
 import {ECS, Entity} from "@server/utils/ecs";
-import {getSystemInventory} from "@server/utils/getSystemInventory";
 import {FilterInventorySystem} from "../FilterInventorySystem";
 import {FilterShipsWithReactors} from "../FilterShipsWithReactors";
-import {HeatDispersionSystem} from "../HeatDispersionSystem";
 import {HeatToCoolantSystem} from "../HeatToCoolantSystem";
-import {ReactorHeatSystem} from "../ReactorHeatSystem";
 
 describe("HeatToCoolantSystem", () => {
   let ecs: ECS;
@@ -135,5 +132,37 @@ describe("HeatToCoolantSystem", () => {
       `372.5756048299453`
     );
     expect(water?.temperature).toMatchInlineSnapshot(`373.2994653663502`);
+  });
+  it("more water should lower the reactor's heat faster", () => {
+    if (!reactor.components.isReactor) throw new Error("Not reactor");
+    const water = ship.components.shipMap?.deckNodes[0].contents.Water;
+    if (water) {
+      water.count = 1;
+      water.temperature = 100;
+    }
+    if (reactor.components.heat) {
+      reactor.components.heat.heat = 1200;
+    }
+    for (let i = 0; i < 60; i++) {
+      ecs.update(16);
+    }
+    expect(reactor.components.heat?.heat).toMatchInlineSnapshot(
+      `1199.0351698356333`
+    );
+    expect(water?.temperature).toMatchInlineSnapshot(`1199.0271656452544`);
+    if (water) {
+      water.count = 1000;
+      water.temperature = 100;
+    }
+    if (reactor.components.heat) {
+      reactor.components.heat.heat = 1200;
+    }
+    for (let i = 0; i < 60; i++) {
+      ecs.update(16);
+    }
+    expect(reactor.components.heat?.heat).toMatchInlineSnapshot(
+      `1189.7420382472358`
+    );
+    expect(water?.temperature).toMatchInlineSnapshot(`111.68472861525993`);
   });
 });

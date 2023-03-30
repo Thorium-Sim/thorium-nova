@@ -38,11 +38,13 @@ export class PowerDrawSystem extends System {
         // draw as much power as possible
         if (targetSpeed > cruisingSpeed) {
           powerDraw = power.requestedPower;
+          break;
         }
         if (targetSpeed === 0) break;
         const impulseEngineUse = targetSpeed / cruisingSpeed;
         powerDraw =
           (maxSafePower - requiredPower) * impulseEngineUse + requiredPower;
+
         break;
       }
       case "thrusters": {
