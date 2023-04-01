@@ -1,4 +1,5 @@
 import {Entity} from "./ecs";
+import {getDeckNode} from "./getDeckNode";
 import {getInventoryTemplates} from "./getInventoryTemplates";
 
 /**
@@ -18,9 +19,7 @@ export function getReactorInventory(system: Entity) {
   const entityRoomId = systemShip.components.shipSystems?.shipSystems.get(
     system.id
   )?.roomId;
-  const entityRoom = systemShip.components.shipMap?.deckNodes.find(
-    node => node.id === entityRoomId
-  );
+  const entityRoom = getDeckNode(entityRoomId, systemShip);
 
   const inventoryTemplates = getInventoryTemplates(system.ecs);
   const roomInventory = Object.entries(entityRoom?.contents || {}).map(

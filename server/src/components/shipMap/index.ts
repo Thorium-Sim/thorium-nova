@@ -4,6 +4,13 @@ import {Component} from "server/src/components/utils";
 import {Kelvin} from "@server/utils/unitTypes";
 
 const roundTo1000 = (num: number) => Math.round(num * 1000) / 1000;
+
+export type ShipMapDeckNode = DeckPlugin["nodes"][0] & {
+  deckIndex: number;
+  contents: {
+    [inventoryTemplateName: string]: {count: number; temperature: Kelvin};
+  };
+};
 export class ShipMapComponent extends Component {
   static id = "shipMap" as const;
   static serialize(data: ShipMapComponent) {
@@ -55,13 +62,9 @@ export class ShipMapComponent extends Component {
       }),
     };
   }
+  deckNodeCache: Map<number, ShipMapDeckNode> = new Map();
   decks: Omit<DeckPlugin, "nodes">[] = [];
-  deckNodes: (DeckPlugin["nodes"][0] & {
-    deckIndex: number;
-    contents: {
-      [inventoryTemplateName: string]: {count: number; temperature: Kelvin};
-    };
-  })[] = [];
+  deckNodes: ShipMapDeckNode[] = [];
   deckNodeMap: {
     [key: number]: DeckPlugin["nodes"][0] & {
       deckIndex: number;
