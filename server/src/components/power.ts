@@ -13,10 +13,14 @@ export class PowerComponent extends Component {
   /** The threshold of power usage for safely using this system */
   maxSafePower: MegaWatt = 20;
 
-  /** The current power provided to this system, calculated every frame */
+  /** The current power provided to this system, calculated every frame. */
   currentPower: MegaWatt = 10;
 
-  /** How much power the system is currently drawing, calculated every frame */
+  /**
+   * How much power the system is attempting to draw, calculated every frame.
+   * This will always be less than or equal to requested power. If the system
+   * isn't doing as much work, it won't draw as much power.
+   */
   powerDraw: MegaWatt = 0;
 
   /** How much power is currently being requested. Could be more than the maxSafePower */
