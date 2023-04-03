@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.11](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.10...1.0.0-alpha.11) (2023-04-03)
+
+
+### Bug Fixes
+
+* Both development servers now start in parallel. ([54f649a](https://github.com/Thorium-Sim/thorium-nova/commit/54f649a4bb070b71f07def4c355c0d81a566a7c6))
+* Improves inventory template lookup performance. ([1584170](https://github.com/Thorium-Sim/thorium-nova/commit/15841709ff814ff7f6605bf2f5b07e20c3e4446a))
+* Optimize and speed up fetching deck nodes. ([2fa1694](https://github.com/Thorium-Sim/thorium-nova/commit/2fa1694614b22faeb2defc346ff0572c4311eb03))
+
+
+### Features
+
+* Add a card for managing the power grid. ([b58a208](https://github.com/Thorium-Sim/thorium-nova/commit/b58a208f713b559070745a924372162f1f58073f))
+* Add a simulation for automatically decreasing efficiency when a system is overloaded. ([0ef62cd](https://github.com/Thorium-Sim/thorium-nova/commit/0ef62cd1aa523b84f49784be041a5aef8ced1bb5))
+* Add a simulation for calculating the power used by a ship system. ([8630ae6](https://github.com/Thorium-Sim/thorium-nova/commit/8630ae659caeefda3c8516d39043da9b11bef519))
+* Add a simulation for distributing power through the power grid. ([51001bf](https://github.com/Thorium-Sim/thorium-nova/commit/51001bfb85bd1eacbc2882e5329bd331de1b2968))
+* Automatically remove waypoints after reaching the destination. ([958a621](https://github.com/Thorium-Sim/thorium-nova/commit/958a62199633ecd762445504e64f57187a4b8e83))
+* Have thrusters respond to the power supplied to them. ([37e6b67](https://github.com/Thorium-Sim/thorium-nova/commit/37e6b6771fed427e6371fb90df8a5248044ea70f))
+* Simulate impulse engine power consumption. ([31e7f4d](https://github.com/Thorium-Sim/thorium-nova/commit/31e7f4d5cee27d385b39141de5e454d3f9834e49))
+
 # [1.0.0-alpha.10](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.9...1.0.0-alpha.10) (2023-02-23)
 
 
