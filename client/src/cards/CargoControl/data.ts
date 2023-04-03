@@ -10,11 +10,14 @@ import {
 } from "server/src/utils/shipMapPathfinder";
 import {z} from "zod";
 import {getInventoryTemplates} from "@server/utils/getInventoryTemplates";
+import {ShipMapDeckNode} from "@server/components/shipMap";
 
 const transferId = z.object({
   type: z.union([z.literal("room"), z.literal("entity")]),
   id: z.number(),
 });
+
+const cargoRoomsCache = new Map<Entity, ShipMapDeckNode[]>();
 
 export const cargoControl = t.router({
   inventoryTypes: t.procedure.request(({ctx}) => {
@@ -36,20 +39,26 @@ export const cargoControl = t.router({
     .request(({ctx}) => {
       if (!ctx.ship) throw new Error("No ship selected");
       const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
+      if (!cargoRoomsCache.get(ctx.ship)) {
+        cargoRoomsCache.set(
+          ctx.ship,
+          ctx.ship.components.shipMap?.deckNodes.filter(
+            node => node.isRoom && node.flags?.includes("cargo")
+          ) || []
+        );
+      }
       const rooms =
-        ctx.ship?.components.shipMap?.deckNodes
-          .filter(node => node.isRoom && node.flags?.includes("cargo"))
-          .map(node => {
-            return {
-              id: node.id,
-              name: node.name,
-              deck: ctx.ship?.components.shipMap?.decks[node.deckIndex].name,
-              position: {x: node.x, y: node.y},
-              volume: node.volume,
-              contents: node.contents,
-              used: calculateCargoUsed(node.contents, inventoryTemplates),
-            };
-          }) || [];
+        cargoRoomsCache.get(ctx.ship)!.map(node => {
+          return {
+            id: node.id,
+            name: node.name,
+            deck: ctx.ship?.components.shipMap?.decks[node.deckIndex].name,
+            position: {x: node.x, y: node.y},
+            volume: node.volume,
+            contents: node.contents,
+            used: calculateCargoUsed(node.contents, inventoryTemplates),
+          };
+        }) || [];
       const decks = ctx.ship.components.shipMap?.decks || [];
       return {
         rooms,
