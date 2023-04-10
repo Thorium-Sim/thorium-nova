@@ -4,9 +4,9 @@ import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 import {q} from "@client/context/AppContext";
 import {ErrorBoundary} from "react-error-boundary";
 
-const FlightDirectorLayout = lazy(() => import("../FlightDirector"));
-const StationLayout = lazy(() => import("./StationLayout"));
-const Effects = lazy(() => import("./Effects"));
+import FlightDirectorLayout from "../FlightDirector";
+import StationLayout from "./StationLayout";
+import Effects from "./Effects";
 
 const StationWrapper = () => {
   const [client] = q.client.get.useNetRequest();
