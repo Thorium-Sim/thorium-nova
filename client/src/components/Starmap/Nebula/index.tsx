@@ -1,14 +1,6 @@
 import {useFrame} from "@react-three/fiber";
-import React, {useEffect} from "react";
-import {
-  MeshBasicMaterial,
-  CanvasTexture,
-  BackSide,
-  sRGBEncoding,
-  BoxGeometry,
-  Mesh,
-  TextureLoader,
-} from "three";
+import React, {forwardRef, memo, useEffect, useRef, useState} from "react";
+import {BackSide, BoxGeometry, Mesh, ShaderMaterial, CubeTexture} from "three";
 import {useGetStarmapStore} from "../starmapStore";
 import NebulaWorker from "./generateNebulaMap?worker";
 
@@ -24,148 +16,191 @@ if ("transferControlToOffscreen" in canvas) {
 const nebulaGeometry = new BoxGeometry(1, 1, 1);
 
 const sides = ["back", "bottom", "front", "left", "right", "top"];
-function generateMaterial(primary: boolean, index: number) {
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = CANVAS_WIDTH;
-
-  if ("transferControlToOffscreen" in canvas) {
-    // @ts-ignore Built in types don't recognize this property
-    const offscreenCanvas = canvas.transferControlToOffscreen();
-    offscreenCanvas.width = offscreenCanvas.height = CANVAS_WIDTH;
-
-    const canvasTexture = new CanvasTexture(canvas);
-    canvasTexture.encoding = sRGBEncoding;
-
-    const material = new MeshBasicMaterial({
-      side: BackSide,
-      transparent: primary,
-      depthWrite: !primary,
-      depthTest: true,
-      map: canvasTexture,
-      userData: {
-        offscreenCanvas,
-      },
-    });
-    return material;
-  } else {
-    const texture = new TextureLoader().load(
-      `/assets/skybox/${sides[index]}.png`
-    );
-    const material = new MeshBasicMaterial({
-      side: BackSide,
-      transparent: primary,
-      depthWrite: !primary,
-      depthTest: false,
-      map: texture,
-    });
-    return material;
-  }
-}
 
 function Nebula() {
-  const activeMesh = React.useRef<"primary" | "secondary">("secondary");
-  const primaryMesh = React.useRef<Mesh>(null);
-  const secondaryMesh = React.useRef<Mesh>(null);
+  const mesh = React.useRef<Mesh>(null);
 
-  const [primaryMaterials, secondaryMaterials] = React.useMemo(
-    () => [
-      Array.from({length: 6}).map((_, index) => generateMaterial(true, index)),
-      Array.from({length: 6}).map((_, index) => generateMaterial(false, index)),
-    ],
-    []
-  );
-
-  useEffect(() => {
-    if (!nebulaWorker) return;
-    if (primaryMesh.current && secondaryMesh.current) {
-      if (
-        Array.isArray(primaryMesh.current.material) &&
-        Array.isArray(secondaryMesh.current.material)
-      ) {
-        const primaryCanvases = primaryMesh.current.material.map(
-          m => m.userData.offscreenCanvas
-        );
-        const secondaryCanvases = secondaryMesh.current.material.map(
-          m => m.userData.offscreenCanvas
-        );
-        nebulaWorker.postMessage(
-          {type: "init", primaryCanvases, secondaryCanvases},
-          primaryCanvases.concat(secondaryCanvases)
-        );
-
-        function onMessage(e: MessageEvent) {
-          let materials: MeshBasicMaterial[] = [];
-          if (e.data.which === "primary") {
-            materials = primaryMesh.current!.material as MeshBasicMaterial[];
-          } else {
-            materials = secondaryMesh.current!.material as MeshBasicMaterial[];
-          }
-          setTimeout(() => {
-            materials.forEach(m => {
-              if (m.map) {
-                m.map.needsUpdate = true;
-              }
-            });
-            activeMesh.current = e.data.which;
-          }, 500);
-        }
-        nebulaWorker.addEventListener("message", onMessage);
-        return () => nebulaWorker?.removeEventListener("message", onMessage);
-      }
-    }
-  }, []);
   const useStarmapStore = useGetStarmapStore();
 
   const skyboxKey = useStarmapStore(s => s.skyboxKey);
-  useEffect(() => {
-    nebulaWorker?.postMessage({
-      type: "render",
-      seed: skyboxKey,
-      which: activeMesh.current === "primary" ? "secondary" : "primary",
-    });
-  }, [skyboxKey]);
-
-  useFrame((state, delta) => {
-    if (Array.isArray(primaryMesh.current?.material)) {
-      const primaryMat = primaryMesh.current
-        ?.material?.[0] as MeshBasicMaterial;
-      if (activeMesh.current === "primary" && primaryMat.opacity < 1) {
-        primaryMesh.current?.material.forEach(mat => {
-          mat.opacity = Math.min(1, mat.opacity + delta / 3);
-        });
-      } else if (activeMesh.current === "secondary" && primaryMat.opacity > 0) {
-        primaryMesh.current?.material.forEach(mat => {
-          mat.opacity = Math.max(0, mat.opacity - delta / 3);
-        });
-      }
-    }
-  });
 
   // Always center the nebula on the camera
   useFrame(({camera}) => {
-    primaryMesh.current?.position.copy(camera.position);
-    secondaryMesh.current?.position.copy(camera.position);
+    mesh.current?.position.copy(camera.position);
   });
   return (
     <>
       <mesh
-        ref={primaryMesh}
+        ref={mesh}
         geometry={nebulaGeometry}
         scale={radius}
         renderOrder={-100}
         dispose={null}
-        material={primaryMaterials}
-      ></mesh>
-      <mesh
-        ref={secondaryMesh}
-        geometry={nebulaGeometry}
-        scale={radius + 10}
-        renderOrder={-101}
-        dispose={null}
-        material={secondaryMaterials}
-      ></mesh>
+      >
+        {/* TODO: Throw a nice default skybox in here for browsers that don't support the worker. */}
+        {"transferControlToOffscreen" in canvas ? (
+          <NebulaShader skyboxKey={skyboxKey} />
+        ) : null}
+      </mesh>
     </>
   );
 }
 
 export default Nebula;
+
+function NebulaShader({skyboxKey}: {skyboxKey: string}) {
+  const [canvases] = useState(() => {
+    let primary = [];
+    let offscreenPrimary = [];
+    let secondary = [];
+    let offscreenSecondary = [];
+
+    for (let side of sides) {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = CANVAS_WIDTH;
+      const offscreenCanvas = canvas.transferControlToOffscreen();
+      offscreenCanvas.width = offscreenCanvas.height = CANVAS_WIDTH;
+
+      primary.push(canvas);
+      offscreenPrimary.push(offscreenCanvas);
+    }
+    for (let side of sides) {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = CANVAS_WIDTH;
+
+      const offscreenCanvas = canvas.transferControlToOffscreen();
+      offscreenCanvas.width = offscreenCanvas.height = CANVAS_WIDTH;
+
+      secondary.push(canvas);
+      offscreenSecondary.push(offscreenCanvas);
+    }
+    const primaryCube = new CubeTexture(primary);
+    const secondaryCube = new CubeTexture(secondary);
+    primaryCube.needsUpdate = true;
+    secondaryCube.needsUpdate = true;
+    return [
+      primaryCube,
+      secondaryCube,
+      offscreenPrimary,
+      offscreenSecondary,
+    ] as const;
+  });
+  const activeCanvas = useRef<0 | 1>(0);
+  const shaderMaterial = useRef<ShaderMaterial>(null);
+  const t = useRef(0);
+
+  useEffect(() => {
+    if (!nebulaWorker) return;
+    nebulaWorker.postMessage(
+      {
+        type: "init",
+        primaryCanvases: canvases[2],
+        secondaryCanvases: canvases[3],
+      },
+      canvases[2].concat(canvases[3])
+    );
+
+    function onMessage(e: MessageEvent) {
+      // Set the appropriate shader uniform needsUpdate
+      const activeCanvasVal = e.data.which === "secondary" ? 1 : 0;
+      activeCanvas.current = activeCanvasVal;
+      if (shaderMaterial.current) {
+        canvases[0].needsUpdate = true;
+        canvases[1].needsUpdate = true;
+      }
+    }
+    nebulaWorker.addEventListener("message", onMessage);
+    return () => nebulaWorker?.removeEventListener("message", onMessage);
+  }, [canvases]);
+
+  useEffect(() => {
+    nebulaWorker?.postMessage({
+      type: "render",
+      seed: skyboxKey,
+      which: activeCanvas.current === 0 ? "secondary" : "primary",
+    });
+  }, [skyboxKey]);
+
+  const isMounted = useRef(false);
+  useEffect(() => {
+    setTimeout(() => {
+      isMounted.current = true;
+    }, 1000);
+  }, []);
+
+  useFrame((state, delta) => {
+    if (activeCanvas.current === 0) {
+      t.current = Math.min(1, t.current + delta / 3);
+    } else {
+      t.current = Math.max(0, t.current - delta / 3);
+    }
+
+    // Spam updating these when first mounting to get
+    // the background visible as quickly as possible
+    if (!isMounted.current) {
+      canvases[0].needsUpdate = true;
+      canvases[1].needsUpdate = true;
+    }
+
+    if (shaderMaterial.current) {
+      shaderMaterial.current.uniforms.t.value = t.current;
+    }
+  });
+
+  return <InnerShaderMat ref={shaderMaterial} canvases={canvases} />;
+}
+
+const InnerShaderMat = memo(
+  forwardRef<
+    ShaderMaterial,
+    {
+      canvases: readonly [
+        CubeTexture,
+        CubeTexture,
+        OffscreenCanvas[],
+        OffscreenCanvas[]
+      ];
+    }
+  >(({canvases}, ref) => {
+    return (
+      <shaderMaterial
+        side={BackSide}
+        depthTest
+        ref={ref}
+        uniforms={{
+          t: {value: 1},
+          primaryTexture: {value: canvases[0]},
+          secondaryTexture: {value: canvases[1]},
+        }}
+        vertexShader={`
+    varying vec4 coords;
+
+    void main()	{
+
+      vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+      coords = modelMatrix * vec4( position, 1.0 );
+
+      gl_Position = projectionMatrix * mvPosition;
+
+    }`}
+        fragmentShader={`
+    uniform samplerCube primaryTexture;
+    uniform samplerCube secondaryTexture;
+    uniform float t;
+
+    varying vec4 coords;
+
+    void main() {
+
+      vec4 primaryTex = textureCube(primaryTexture, coords.xyz);
+      vec4 secondaryTex = textureCube(secondaryTexture, coords.xyz);
+
+      gl_FragColor = vec4(primaryTex.rgb * t + secondaryTex.rgb * (1.0-t), 1.0);
+    }`}
+      />
+    );
+  })
+);
+
+InnerShaderMat.displayName = "InnerShaderMat";
