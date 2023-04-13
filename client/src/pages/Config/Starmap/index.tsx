@@ -143,11 +143,13 @@ const StarmapScene = forwardRef(function StarmapScene(props, ref) {
     <>
       <ambientLight intensity={0.2} />
       <pointLight position={[10, 10, 10]} />
-      <Routes>
-        <Route path="/:systemId" element={<SolarSystemWrapper />} />
-        <Route path="*" element={<InterstellarWrapper />} />
-      </Routes>
-      <Nebula />
+      <React.Suspense fallback={null}>
+        <Routes>
+          <Route path="/:systemId" element={<SolarSystemWrapper />} />
+          <Route path="*" element={<InterstellarWrapper />} />
+        </Routes>
+        <Nebula />
+      </React.Suspense>
     </>
   );
 });
