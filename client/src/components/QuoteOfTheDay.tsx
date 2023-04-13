@@ -257,6 +257,8 @@ const quotes = [
   "The only way of discovering the limits of the possible is to venture a little way past them into the impossible.",
   "Leading others to a promised land that you yourself will never set foot in.",
   "Your heart knows the direction. Run!",
+  // Natalie's Bishop's Wife. Also maybe Draconius
+  "I'm tired of being a wanderer. I'm tired of an existence where one is neither hot nor cold, hungry nor full."
 ];
 
 const QuoteOfTheDay = () => {
