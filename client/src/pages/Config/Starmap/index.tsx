@@ -77,6 +77,13 @@ export default function StarMap() {
     pluginId: string;
   };
 
+  React.useEffect(() => {
+    useStarmapStore.getState().setCameraControlsEnabled(true);
+    useStarmapStore.setState({
+      viewingMode: "editor",
+    });
+  }, [useStarmapStore]);
+
   const selectedObjectIds = useStarmapStore(s => s.selectedObjectIds);
 
   const sceneRef = useRef<SceneRef>();
