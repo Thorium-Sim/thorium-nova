@@ -184,6 +184,12 @@ export function spawnShip(
   });
   if (params.playerShip) {
     entity.addComponent("isPlayerShip");
+  } else {
+    entity.addComponent("shipBehavior", {
+      objective: "hold",
+      target: entity.components.position,
+      destination: entity.components.position,
+    });
   }
   let extraEntities: Entity[] = [];
   // Initialize the ship map. For now, we'll just load the ship map onto a component of the ship.
