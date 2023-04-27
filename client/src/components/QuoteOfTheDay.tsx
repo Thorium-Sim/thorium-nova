@@ -263,7 +263,9 @@ const quotes = [
   "I'm tired of being a wanderer. I'm tired of an existence where one is neither hot nor cold, hungry nor full.",
   // The Little Prince
   "If you want to build a ship, don't drum up the people to gather wood, divide the work, and give orders. Instead, teach them to yearn for the vast and endless sea.",
-  "Dream big, and you may never wake up.
+  "Dream big, and you may never wake up.",
+  // Drake. From https://collabfund.com/blog/thoughts/
+  "People like you more when you are working towards something, not when you have it."
 ];
 
 const QuoteOfTheDay = () => {
