@@ -265,7 +265,9 @@ const quotes = [
   "If you want to build a ship, don't drum up the people to gather wood, divide the work, and give orders. Instead, teach them to yearn for the vast and endless sea.",
   "Dream big, and you may never wake up.",
   // Drake. From https://collabfund.com/blog/thoughts/
-  "People like you more when you are working towards something, not when you have it."
+  "People like you more when you are working towards something, not when you have it.",
+  // https://twitter.com/shminsington/status/1670799279974232064
+  "As you howl your melancholy question into the abyss, tell me - which do you dread more? the echo, or the answer?
 ];
 
 const QuoteOfTheDay = () => {
