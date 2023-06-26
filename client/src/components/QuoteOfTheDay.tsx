@@ -268,6 +268,8 @@ const quotes = [
   "People like you more when you are working towards something, not when you have it.",
   // https://twitter.com/shminsington/status/1670799279974232064
   "As you howl your melancholy question into the abyss, tell me - which do you dread more? the echo, or the answer?
+  // Kilton
+  "Look and learn! Then you won’t hate! Understand what you fear and you’ll feel great! For those with an open mind, wonders always await!",
 ];
 
 const QuoteOfTheDay = () => {
