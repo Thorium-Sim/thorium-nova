@@ -272,6 +272,8 @@ const quotes = [
   "Look and learn! Then you won’t hate! Understand what you fear and you’ll feel great! For those with an open mind, wonders always await!",
   // Paul Samuelson
   "Well when events change, I change my mind. What do you do?",
+  // https://twitter.com/visakanv/status/1443196536800772115
+  "So we beat on, boats against the current, saying ayy lmao.",
 ];
 
 const QuoteOfTheDay = () => {
