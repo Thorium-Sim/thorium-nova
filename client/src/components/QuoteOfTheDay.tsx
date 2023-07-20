@@ -276,6 +276,7 @@ const quotes = [
   "So we beat on, boats against the current, saying ayy lmao.",
   // Walt Whitman. Also, Ted Lasso
   "Be curious, not judgemental.",
+  "You alone are not enough, but you can still do great things.",
 ];
 
 const QuoteOfTheDay = () => {
