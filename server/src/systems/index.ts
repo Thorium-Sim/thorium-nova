@@ -25,6 +25,7 @@ import {HeatDispersionSystem} from "./HeatDispersionSystem";
 import {PowerDrawSystem} from "./PowerDrawSystem";
 import {PowerGridSystem} from "./PowerGridSystem";
 import {WaypointRemoveSystem} from "./WaypointRemoveSystem";
+import {DebugSphereSystem} from "./DebugSphereSystem";
 
 const systems = [
   FilterInventorySystem,
@@ -49,6 +50,7 @@ const systems = [
   WaypointRemoveSystem,
   HeatToCoolantSystem,
   HeatDispersionSystem,
+  DebugSphereSystem,
   DataStreamSystem,
 ];
 export default systems;

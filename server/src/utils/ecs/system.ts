@@ -72,6 +72,10 @@ class System {
   }
   // methods to be extended by subclasses
   /**
+   * Called when the system is attached to an ECS instance
+   */
+  attach() {}
+  /**
    * Abstract method to subclass. Called once per update, before entities
    * iteration.
    */

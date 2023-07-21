@@ -21,7 +21,7 @@ import useDragSelect, {
   DragSelection,
   get3dSelectedObjects,
 } from "client/src/hooks/useDragSelect";
-import {PerspectiveCamera, Vector3} from "three";
+import {Mesh, PerspectiveCamera, Vector3} from "three";
 import {FaArrowLeft} from "react-icons/fa";
 import {GiTargeted} from "react-icons/gi";
 import Button from "@thorium/ui/Button";
@@ -32,6 +32,7 @@ import {TbPlanet, TbPlanetOff} from "react-icons/tb";
 import {Coordinates} from "server/src/utils/unitTypes";
 import {q} from "@client/context/AppContext";
 import {useLiveQuery} from "@thorium/live-query/client";
+import {useFrame} from "@react-three/fiber";
 
 export function StarmapCore() {
   const ref = useRef<HTMLDivElement>(null);
@@ -319,6 +320,9 @@ export function SolarSystemWrapper() {
   const [waypoints] = q.waypoints.all.useNetRequest({
     systemId: "all",
   });
+  const [debugSpheres] = q.starmapCore.debugSpheres.useNetRequest({
+    systemId: currentSystem,
+  });
 
   const selectedObjectIds = useStarmapStore(store => store.selectedObjectIds);
   const planetsHidden = useStarmapStore(store => store.planetsHidden);
@@ -408,6 +412,29 @@ export function SolarSystemWrapper() {
           </ErrorBoundary>
         </Suspense>
       ))}
+      {debugSpheres.map(sphere => (
+        <DebugSphere key={sphere.id} id={sphere.id} />
+      ))}
     </SolarSystemMap>
+  );
+}
+
+function DebugSphere({id}: {id: number}) {
+  const {interpolate} = useLiveQuery();
+  const sphere = useRef<Mesh>(null);
+  useFrame(({camera}) => {
+    const position = interpolate(id);
+    if (position && sphere.current) {
+      sphere.current?.position.set(position.x, position.y, position.z);
+      const zoom = camera.position.distanceTo(sphere.current.position) + 500;
+      let zoomedScale = (zoom / 2) * 0.01;
+      sphere.current.scale.set(zoomedScale, zoomedScale, zoomedScale);
+    }
+  });
+  return (
+    <mesh ref={sphere} scale={[1000, 1000, 1000]}>
+      <sphereGeometry args={[1, 32, 32]} />
+      <meshBasicMaterial color="red" />
+    </mesh>
   );
 }
