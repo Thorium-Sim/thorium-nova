@@ -55,10 +55,16 @@ export type Kilograms = Flavor<number, "kilograms">;
  * Mass compared to the sun eg. 1 solar mass = the mass of the sun
  */
 export type SolarMass = Flavor<number, "solarMass">;
+export function solarMassToKilograms(solarMass: SolarMass): Kilograms {
+  return solarMass * 1.989e30;
+}
 /**
  * Mass compared to the Earth eg. 1 terran mass = the mass of the Earth
  */
 export type TerranMass = Flavor<number, "terranMass">;
+export function terranMassToKilograms(solarMass: TerranMass): Kilograms {
+  return solarMass * 5.972e24;
+}
 /**
  * Force of gravity at the surface compared to Earth's
  */

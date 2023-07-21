@@ -107,6 +107,7 @@ class ECS {
   addSystem(system: System) {
     system.ecs = this;
     this.systems.push(system);
+    system.attach();
 
     // iterate over all entities to eventually add system
     for (let i = 0, entity; (entity = this.entities[i]); i += 1) {

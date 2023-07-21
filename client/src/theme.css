@@ -213,7 +213,7 @@ kbd {
     @apply bg-warning border-warning text-warning-content;
     &:hover,
     &.btn-active {
-      @apply bg-warning border-warning;
+      @apply bg-warning border-warning text-warning-content;
     }
     &:focus-visible {
       @apply ring-2 ring-warning;
@@ -282,49 +282,57 @@ kbd {
     }
     &.btn-primary {
       @apply text-primary;
-      &:hover {
+      &:hover,
+      &.btn-active {
         @apply bg-primary-focus text-primary-content border-primary-focus;
       }
     }
     &.btn-secondary {
       @apply text-secondary;
-      &:hover {
+      &:hover,
+      &.btn-active {
         @apply bg-secondary-focus text-secondary-content border-secondary-focus;
       }
     }
     &.btn-accent {
       @apply text-accent;
-      &:hover {
+      &:hover,
+      &.btn-active {
         @apply bg-accent-focus text-accent-content border-accent-focus;
       }
     }
     &.btn-info {
       @apply text-info;
-      &:hover {
+      &:hover,
+      &.btn-active {
         @apply bg-info-focus text-info-content border-info-focus;
       }
     }
     &.btn-success {
       @apply text-success;
-      &:hover {
+      &:hover,
+      &.btn-active {
         @apply bg-success-focus text-success-content border-success-focus;
       }
     }
     &.btn-warning {
       @apply text-warning;
-      &:hover {
+      &:hover,
+      &.btn-active {
         @apply bg-warning-focus text-warning-content border-warning-focus;
       }
     }
     &.btn-error {
       @apply text-error;
-      &:hover {
+      &:hover,
+      &.btn-active {
         @apply bg-error-focus text-error-content border-error-focus;
       }
     }
     &.btn-notice {
       @apply text-notice;
-      &:hover {
+      &:hover,
+      &.btn-active {
         @apply bg-notice-focus text-notice-content border-notice-focus;
       }
     }

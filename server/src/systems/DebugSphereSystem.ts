@@ -29,7 +29,6 @@ export class DebugSphereSystem extends System {
     );
     this.ecs.addEntity(debugSphere);
     this.debugSphereMap.set(entity, debugSphere);
-    console.log("Added debug sphere", debugSphere.id, entity.id);
     pubsub.publish.starmapCore.debugSpheres({
       systemId: debugSphere.components.position?.parentId || null,
     });
