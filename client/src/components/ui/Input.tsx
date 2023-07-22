@@ -47,6 +47,7 @@ const Input = forwardRef<
       </label>
       <div className="flex justify-between w-full gap-2">
         {React.createElement(as, {
+          autoComplete: "off",
           ...(inputProps as React.InputHTMLAttributes<HTMLInputElement>),
           ref,
           className: `flex-1 ${as === "textarea" ? "textarea" : "input"} ${

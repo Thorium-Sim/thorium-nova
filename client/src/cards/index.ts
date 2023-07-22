@@ -7,3 +7,4 @@ export * from "./CargoControl";
 export * from "./Viewscreen";
 export * from "./AlertLevel";
 export * from "./PowerGrid";
+export * from "./RemoteAccess";

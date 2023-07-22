@@ -9,11 +9,15 @@ export default function Modal({
   isOpen,
   setIsOpen,
   children,
+  className = "",
+  panelClassName = "",
 }: {
   title: string;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   children: ReactNode;
+  className?: string;
+  panelClassName?: string;
 }) {
   return (
     // Use the `Transition` component at the root level
@@ -24,7 +28,9 @@ export default function Modal({
         onClose={() => setIsOpen(false)}
       >
         <Dialog.Overlay className="fixed inset-0 bg-black opacity-50" />
-        <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div
+          className={`flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0 ${className}`}
+        >
           {/* This element is to trick the browser into centering the modal contents. */}
           <span
             className="hidden sm:inline-block sm:align-middle sm:h-screen"
@@ -42,7 +48,9 @@ export default function Modal({
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <div className="inline-block align-bottom bg-gray-900/50 backdrop-filter backdrop-blur text-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 mx-8 md:max-w-max">
+            <div
+              className={`inline-block align-bottom bg-gray-900/50 backdrop-filter backdrop-blur text-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 mx-8 md:max-w-max ${panelClassName}`}
+            >
               <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
                 <Button
                   type="button"

@@ -6,11 +6,12 @@ import {useRef} from "react";
 import "flexlayout-react/style/dark.css";
 import {AddCoreCombobox} from "./AddCoreCombobox";
 import {CoreFlexLayout} from "./CoreFlexLayout";
-import LoginButton from "../LoginButton";
 import {ErrorBoundary} from "react-error-boundary";
 import {CoreFlexLayoutProvider} from "./CoreFlexLayoutContext";
 import {CoreFlexLayoutDropdown} from "./CoreFlexLayoutDropdown";
 import {q} from "@client/context/AppContext";
+import {capitalCase} from "change-case";
+
 export default function FlightDirectorLayout() {
   const layoutRef = useRef<Layout>(null);
   return (
@@ -27,7 +28,7 @@ export default function FlightDirectorLayout() {
             onChange={coreName => {
               layoutRef.current?.addTabToActiveTabSet?.({
                 component: coreName,
-                name: coreName.replace("Core", ""),
+                name: capitalCase(coreName.replace("Core", "")),
               });
             }}
           />
