@@ -277,6 +277,8 @@ const quotes = [
   // Walt Whitman. Also, Ted Lasso
   "Be curious, not judgemental.",
   "You alone are not enough, but you can still do great things.",
+  // Jeremy Goldberg
+  "Courage is knowing it might hurt, and doing it anyway. Stupidity is the same. And that's why life is hard.",
 ];
 
 const QuoteOfTheDay = () => {

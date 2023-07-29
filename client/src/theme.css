@@ -17,7 +17,7 @@
 html,
 body {
   overflow: hidden;
-  @apply bg-gray-900;
+  @apply bg-gray-900 cursor-default;
   overscroll-behavior-x: none;
 }
 
@@ -122,7 +122,7 @@ kbd {
 .btn {
   &,
   &-md {
-    @apply px-4 leading-loose h-10 text-base min-h-[2.5rem];
+    @apply px-4 leading-loose h-10 text-base min-h-[2.5rem] cursor-pointer;
   }
   &-xs {
     @apply px-2 text-xs leading-relaxed h-6 min-h-6;
@@ -438,7 +438,7 @@ kbd {
 }
 
 .input {
-  @apply h-8 px-2 text-neutral-content bg-neutral rounded-btn border border-opacity-0 border-neutral-focus;
+  @apply h-8 px-2 text-neutral-content bg-neutral rounded-btn border border-opacity-0 border-neutral-focus cursor-text;
   &-md {
     @apply px-2 h-8 text-sm leading-loose;
   }
@@ -726,6 +726,13 @@ kbd {
   border-radius: 10px;
   background-color: rgba(255, 255, 255, 0.5);
   box-shadow: inset 0 0 9px rgba(0, 0, 0, 0.4);
+}
+
+input[type="checkbox"],
+label,
+a,
+button {
+  @apply cursor-pointer;
 }
 
 input[type="range"].slider {
@@ -1208,4 +1215,243 @@ input[type="range"].slider.zoom:focus::-webkit-slider-runnable-track {
 body.drag-active * {
   user-select: none;
   cursor: grabbing;
+}
+
+.cursor-wait {
+  cursor: url(/assets/cursors/wait/01.png), wait;
+  animation: wait-cursor 1.5s steps(77) infinite;
+}
+
+@keyframes wait-cursor {
+  0% {
+    cursor: url(/assets/cursors/wait/01.png), wait;
+  }
+  1.298% {
+    cursor: url(/assets/cursors/wait/02.png), wait;
+  }
+  2.597% {
+    cursor: url(/assets/cursors/wait/03.png), wait;
+  }
+  3.896% {
+    cursor: url(/assets/cursors/wait/04.png), wait;
+  }
+  5.194% {
+    cursor: url(/assets/cursors/wait/05.png), wait;
+  }
+  6.493% {
+    cursor: url(/assets/cursors/wait/06.png), wait;
+  }
+  7.792% {
+    cursor: url(/assets/cursors/wait/07.png), wait;
+  }
+  9.090% {
+    cursor: url(/assets/cursors/wait/08.png), wait;
+  }
+  10.389% {
+    cursor: url(/assets/cursors/wait/09.png), wait;
+  }
+  11.688% {
+    cursor: url(/assets/cursors/wait/10.png), wait;
+  }
+  12.987% {
+    cursor: url(/assets/cursors/wait/11.png), wait;
+  }
+  14.285% {
+    cursor: url(/assets/cursors/wait/12.png), wait;
+  }
+  15.584% {
+    cursor: url(/assets/cursors/wait/13.png), wait;
+  }
+  16.883% {
+    cursor: url(/assets/cursors/wait/14.png), wait;
+  }
+  18.181% {
+    cursor: url(/assets/cursors/wait/15.png), wait;
+  }
+  19.480% {
+    cursor: url(/assets/cursors/wait/16.png), wait;
+  }
+  20.779% {
+    cursor: url(/assets/cursors/wait/17.png), wait;
+  }
+  22.077% {
+    cursor: url(/assets/cursors/wait/18.png), wait;
+  }
+  23.376% {
+    cursor: url(/assets/cursors/wait/19.png), wait;
+  }
+  24.675% {
+    cursor: url(/assets/cursors/wait/20.png), wait;
+  }
+  25.974% {
+    cursor: url(/assets/cursors/wait/21.png), wait;
+  }
+  27.272% {
+    cursor: url(/assets/cursors/wait/22.png), wait;
+  }
+  28.571% {
+    cursor: url(/assets/cursors/wait/23.png), wait;
+  }
+  29.870% {
+    cursor: url(/assets/cursors/wait/24.png), wait;
+  }
+  31.168% {
+    cursor: url(/assets/cursors/wait/25.png), wait;
+  }
+  32.467% {
+    cursor: url(/assets/cursors/wait/26.png), wait;
+  }
+  33.766% {
+    cursor: url(/assets/cursors/wait/27.png), wait;
+  }
+  35.064% {
+    cursor: url(/assets/cursors/wait/28.png), wait;
+  }
+  36.363% {
+    cursor: url(/assets/cursors/wait/29.png), wait;
+  }
+  37.662% {
+    cursor: url(/assets/cursors/wait/30.png), wait;
+  }
+  38.961% {
+    cursor: url(/assets/cursors/wait/31.png), wait;
+  }
+  40.259% {
+    cursor: url(/assets/cursors/wait/32.png), wait;
+  }
+  41.558% {
+    cursor: url(/assets/cursors/wait/33.png), wait;
+  }
+  42.857% {
+    cursor: url(/assets/cursors/wait/34.png), wait;
+  }
+  44.155% {
+    cursor: url(/assets/cursors/wait/35.png), wait;
+  }
+  45.454% {
+    cursor: url(/assets/cursors/wait/36.png), wait;
+  }
+  46.753% {
+    cursor: url(/assets/cursors/wait/37.png), wait;
+  }
+  48.051% {
+    cursor: url(/assets/cursors/wait/38.png), wait;
+  }
+  49.350% {
+    cursor: url(/assets/cursors/wait/39.png), wait;
+  }
+  50.649% {
+    cursor: url(/assets/cursors/wait/40.png), wait;
+  }
+  51.948% {
+    cursor: url(/assets/cursors/wait/41.png), wait;
+  }
+  53.246% {
+    cursor: url(/assets/cursors/wait/42.png), wait;
+  }
+  54.545% {
+    cursor: url(/assets/cursors/wait/43.png), wait;
+  }
+  55.844% {
+    cursor: url(/assets/cursors/wait/44.png), wait;
+  }
+  57.142% {
+    cursor: url(/assets/cursors/wait/45.png), wait;
+  }
+  58.441% {
+    cursor: url(/assets/cursors/wait/46.png), wait;
+  }
+  59.740% {
+    cursor: url(/assets/cursors/wait/47.png), wait;
+  }
+  61.038% {
+    cursor: url(/assets/cursors/wait/48.png), wait;
+  }
+  62.337% {
+    cursor: url(/assets/cursors/wait/49.png), wait;
+  }
+  63.636% {
+    cursor: url(/assets/cursors/wait/50.png), wait;
+  }
+  64.935% {
+    cursor: url(/assets/cursors/wait/51.png), wait;
+  }
+  66.233% {
+    cursor: url(/assets/cursors/wait/52.png), wait;
+  }
+  67.532% {
+    cursor: url(/assets/cursors/wait/53.png), wait;
+  }
+  68.831% {
+    cursor: url(/assets/cursors/wait/54.png), wait;
+  }
+  70.129% {
+    cursor: url(/assets/cursors/wait/55.png), wait;
+  }
+  71.428% {
+    cursor: url(/assets/cursors/wait/56.png), wait;
+  }
+  72.727% {
+    cursor: url(/assets/cursors/wait/57.png), wait;
+  }
+  74.025% {
+    cursor: url(/assets/cursors/wait/58.png), wait;
+  }
+  75.324% {
+    cursor: url(/assets/cursors/wait/59.png), wait;
+  }
+  76.623% {
+    cursor: url(/assets/cursors/wait/60.png), wait;
+  }
+  77.922% {
+    cursor: url(/assets/cursors/wait/61.png), wait;
+  }
+  79.220% {
+    cursor: url(/assets/cursors/wait/62.png), wait;
+  }
+  80.519% {
+    cursor: url(/assets/cursors/wait/63.png), wait;
+  }
+  81.818% {
+    cursor: url(/assets/cursors/wait/64.png), wait;
+  }
+  83.116% {
+    cursor: url(/assets/cursors/wait/65.png), wait;
+  }
+  84.415% {
+    cursor: url(/assets/cursors/wait/66.png), wait;
+  }
+  85.714% {
+    cursor: url(/assets/cursors/wait/67.png), wait;
+  }
+  87.012% {
+    cursor: url(/assets/cursors/wait/68.png), wait;
+  }
+  88.311% {
+    cursor: url(/assets/cursors/wait/69.png), wait;
+  }
+  89.610% {
+    cursor: url(/assets/cursors/wait/70.png), wait;
+  }
+  90.909% {
+    cursor: url(/assets/cursors/wait/71.png), wait;
+  }
+  92.207% {
+    cursor: url(/assets/cursors/wait/72.png), wait;
+  }
+  93.506% {
+    cursor: url(/assets/cursors/wait/73.png), wait;
+  }
+  94.805% {
+    cursor: url(/assets/cursors/wait/74.png), wait;
+  }
+  96.103% {
+    cursor: url(/assets/cursors/wait/75.png), wait;
+  }
+  97.402% {
+    cursor: url(/assets/cursors/wait/76.png), wait;
+  }
+  98.701% {
+    cursor: url(/assets/cursors/wait/77.png), wait;
+  }
 }
