@@ -291,8 +291,8 @@ describe("PowerGridSystem", () => {
         connectedSystems: [],
         distributionMode: randomFromList([
           "evenly",
-          "leastNeed",
-          "mostNeed",
+          "leastFirst",
+          "mostFirst",
         ]) as any,
       });
       ship.components.shipSystems?.shipSystems.set(powerNode.id, {});

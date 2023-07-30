@@ -12,7 +12,7 @@ import {Entity} from "@server/utils/ecs";
 import {DataContext} from "@server/utils/DataContext";
 import {spawnSolarSystem} from "@server/spawners/solarSystem";
 import ShipPlugin from "@server/classes/Plugins/Ship";
-import {PositionComponent} from "@server/components/position";
+import {position as positionComponent} from "@server/components/position";
 import {Vector3} from "three";
 import {getOrbitPosition} from "@server/utils/getOrbitPosition";
 import {spawnShip} from "@server/spawners/ship";
@@ -209,7 +209,7 @@ export const flight = t.router({
           null
         );
         if (!shipTemplate) continue;
-        let position: Omit<PositionComponent, "init"> = {
+        let position: Zod.infer<typeof positionComponent> = {
           x: 0,
           y: 0,
           z: 0,
@@ -312,6 +312,12 @@ export const flight = t.router({
                 return {
                   ...c,
                   icon: stationComplement?.assets[`${s.name}-${c.name}-icon`],
+                };
+              }),
+              widgets: s.widgets.map(w => {
+                return {
+                  ...w,
+                  icon: stationComplement?.assets[`${s.name}-${w.name}-icon`],
                 };
               }),
             })) || [],

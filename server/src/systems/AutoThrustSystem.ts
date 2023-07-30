@@ -9,7 +9,7 @@ import {
   lightYearToLightMinute,
   Radian,
 } from "../utils/unitTypes";
-import {isWarpEnginesComponent} from "../components/shipSystems";
+import {isWarpEngines} from "../components/shipSystems";
 import {pubsub} from "@server/init/pubsub";
 
 let positionVec = new Vector3();
@@ -30,6 +30,40 @@ const IMPULSE_INTEGRAL = 0.5;
 const WARP_PROPORTION = 1;
 const WARP_INTEGRAL = 0.5;
 const WARP_DERIVATIVE = 0.5;
+
+const controllerCache = new Map<number, Controller>();
+
+function getWarpController(id?: number) {
+  if (!id) return null;
+  if (!controllerCache.has(id)) {
+    controllerCache.set(
+      id,
+      new Controller({
+        k_d: WARP_DERIVATIVE,
+        k_i: WARP_INTEGRAL,
+        k_p: WARP_PROPORTION,
+        i_max: 1,
+      })
+    );
+  }
+  return controllerCache.get(id);
+}
+
+function getImpulseController(id?: number) {
+  if (!id) return null;
+  if (!controllerCache.has(id)) {
+    controllerCache.set(
+      id,
+      new Controller({
+        k_p: IMPULSE_PROPORTION,
+        k_d: IMPULSE_DERIVATIVE,
+        k_i: IMPULSE_INTEGRAL,
+        i_max: 1,
+      })
+    );
+  }
+  return controllerCache.get(id);
+}
 
 export class AutoThrustSystem extends System {
   updateCount = 0;
@@ -110,25 +144,13 @@ export class AutoThrustSystem extends System {
     const dotProd = rotatedLookVector.dot(
       desiredDestination.clone().normalize()
     );
+    const impulseController = getImpulseController(impulseEngines?.id);
+    const warpController = getWarpController(warpEngines?.id);
 
-    if (!(autopilot.impulseController instanceof Controller)) {
-      autopilot.impulseController = new Controller({
-        k_p: IMPULSE_PROPORTION,
-        k_d: IMPULSE_DERIVATIVE,
-        k_i: IMPULSE_INTEGRAL,
-        i_max: 1,
-      });
+    if (impulseController) {
+      impulseController.target = 1;
     }
-    autopilot.impulseController.target = 1;
 
-    if (!(autopilot.warpController instanceof Controller)) {
-      autopilot.warpController = new Controller({
-        k_d: WARP_DERIVATIVE,
-        k_i: WARP_INTEGRAL,
-        k_p: WARP_PROPORTION,
-        i_max: 1,
-      });
-    }
     const impulseEngineSpeed =
       impulseEngines?.components.isImpulseEngines?.cruisingSpeed || 1;
 
@@ -137,9 +159,11 @@ export class AutoThrustSystem extends System {
     // impulse speed, we should use that. Otherwise, we should use warp.
     const TRAVEL_TIME_THRESHOLD_SECONDS = 15;
 
-    // We want Warp to get us within 15 seconds at impulse of our destination
-    autopilot.warpController.target =
-      impulseEngineSpeed * TRAVEL_TIME_THRESHOLD_SECONDS;
+    if (warpController) {
+      // We want Warp to get us within 15 seconds at impulse of our destination
+      warpController.target =
+        impulseEngineSpeed * TRAVEL_TIME_THRESHOLD_SECONDS;
+    }
 
     // If the rotation is < 0.5˚ off
     const inCorrectDirection = rotationDifference <= 0.5;
@@ -147,19 +171,19 @@ export class AutoThrustSystem extends System {
       warpEngines?.components.isWarpEngines &&
       distanceInKM / impulseEngineSpeed > TRAVEL_TIME_THRESHOLD_SECONDS
     ) {
-      autopilot.impulseController.reset();
+      impulseController?.reset();
       impulseEngines?.updateComponent("isImpulseEngines", {targetSpeed: 0});
       // Use warp engines
       const warpCruisingSpeed = isInInterstellar
         ? warpEngines.components.isWarpEngines.interstellarCruisingSpeed
         : warpEngines.components.isWarpEngines.solarCruisingSpeed;
       if (inCorrectDirection) {
-        const controllerOutput = autopilot.warpController?.update(
+        const controllerOutput = warpController?.update(
           -1 * Math.min(warpCruisingSpeed, distanceInKM)
         );
         let desiredSpeed = Math.min(
           warpCruisingSpeed,
-          Math.max(0, controllerOutput)
+          Math.max(0, controllerOutput || 0)
         );
         // Figure out an appropriate warp factor to get us to that speed.
         const currentWarpFactor = getWarpFactorFromDesiredSpeed(
@@ -171,17 +195,17 @@ export class AutoThrustSystem extends System {
           currentWarpFactor,
         });
       } else {
-        autopilot.warpController?.reset();
+        warpController?.reset();
         warpEngines.updateComponent("isWarpEngines", {currentWarpFactor: 0});
       }
     } else if (impulseEngines?.components.isImpulseEngines) {
-      autopilot.warpController.reset();
+      warpController?.reset();
       warpEngines?.updateComponent("isWarpEngines", {
         currentWarpFactor: 0,
         maxVelocity: 0,
       });
       if (inCorrectDirection) {
-        const controllerOutput = autopilot.impulseController.update(
+        const controllerOutput = impulseController?.update(
           -1 *
             Math.min(
               impulseEngines.components.isImpulseEngines.cruisingSpeed,
@@ -190,7 +214,7 @@ export class AutoThrustSystem extends System {
         );
         let desiredSpeed = Math.min(
           impulseEngines.components.isImpulseEngines.cruisingSpeed,
-          Math.max(0, controllerOutput)
+          Math.max(0, controllerOutput || 0)
         );
 
         // Arbitrary number that gets roughly close to 5 KM away
@@ -201,7 +225,7 @@ export class AutoThrustSystem extends System {
           targetSpeed: desiredSpeed,
         });
       } else {
-        autopilot.impulseController.reset();
+        impulseController?.reset();
         impulseEngines.updateComponent("isImpulseEngines", {targetSpeed: 0});
       }
     }
@@ -224,7 +248,7 @@ export class AutoThrustSystem extends System {
 
 function getWarpFactorFromDesiredSpeed(
   desiredSpeed: number,
-  warp: Omit<isWarpEnginesComponent, "init">,
+  warp: Zod.infer<typeof isWarpEngines>,
   isInterstellar: boolean = false
 ) {
   const {

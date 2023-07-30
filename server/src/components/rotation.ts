@@ -1,9 +1,10 @@
-import {Component} from "./utils";
+import z from "zod";
 
-export class RotationComponent extends Component {
-  static id: "rotation" = "rotation";
-  x: number = 0;
-  y: number = 0;
-  z: number = 0;
-  w: number = 1;
-}
+export const rotation = z
+  .object({
+    x: z.number().default(0),
+    y: z.number().default(0),
+    z: z.number().default(0),
+    w: z.number().default(1),
+  })
+  .default({});

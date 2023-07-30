@@ -8,9 +8,9 @@ import {UIDGenerator, DefaultUIDGenerator} from "./uid";
 import {fastSplice} from "./utils";
 import {
   ComponentProperties as Components,
-  ComponentIDs,
+  ComponentIds,
   components as allComponents,
-  getComponentClassFromId,
+  ComponentInputs,
 } from "../../components";
 
 type DeepPartial<T> = Partial<{
@@ -83,22 +83,20 @@ class Entity {
      */
     this.components = {} as Components;
     // components initialization
-    for (let component in components) {
+    for (let componentId in components) {
       // Initialize with a function. First because it lets the
       // runtime allocate the component is way more faster than using a copy
       // function. Secondly because the user may want to provide some kind
       // of logic in components initialization ALTHOUGH these kind of
       // initialization should be done in enter() handler
-      const componentClass = Object.values(allComponents).find(
-        c => c && c.id === component
-      ) as any;
-      const data = components[component as ComponentIDs];
+      const component = allComponents[componentId as ComponentIds];
+      const data = components[componentId as ComponentIds];
       try {
-        let componentData =
-          data instanceof componentClass ? data : componentClass.create(data);
-        this.components[component as ComponentIDs] = componentData;
+        this.components[componentId as ComponentIds] = component.parse(
+          data
+        ) as any;
       } catch (err) {
-        console.error("Error initializing component:", component);
+        console.error("Error initializing component:", componentId);
       }
     }
     /**
@@ -112,11 +110,13 @@ class Entity {
       id: this.id,
       components: Object.fromEntries(
         Object.entries(this.components).map(([key, comp]) => {
-          let newValue =
-            getComponentClassFromId(key as ComponentIDs)?.serialize(
-              comp as any
-            ) || comp;
-          return [key, newValue];
+          if ("shipSystems" in comp && key === "shipSystems") {
+            return [
+              key,
+              {...comp, shipSystems: Array.from(comp.shipSystems.entries())},
+            ];
+          }
+          return [key, comp];
         })
       ),
     } as Pick<Entity, "id" | "components">;
@@ -179,13 +179,8 @@ class Entity {
     Name extends keyof Components,
     Data extends Components[Name]
   >(name: Name, data?: Partial<Data>) {
-    const componentClass = Object.values(allComponents).find(
-      c => c && c.id === name
-    ) as any;
-    let componentData =
-      (data as any) instanceof componentClass
-        ? data
-        : componentClass.create(data);
+    const component = allComponents[name as ComponentIds];
+    let componentData = component.parse(data) as Data;
 
     this.components[name] = componentData;
     this.setSystemsDirty();
@@ -235,8 +230,8 @@ class Entity {
    *
    * @param  {Object} componentsData Dict of components to update.
    */
-  updateComponents<K extends keyof Components>(
-    componentsData: Partial<Components>
+  updateComponents<K extends keyof ComponentInputs>(
+    componentsData: Partial<ComponentInputs>
   ) {
     let components = Object.keys(componentsData) as K[];
 

@@ -1,10 +1,8 @@
-import {Component} from "./utils";
+import z from "zod";
 
-export class IsWaypointComponent extends Component {
-  static id: "isWaypoint" = "isWaypoint";
-
-  /** The ship that has the assigned waypoint */
-  assignedShipId: number = -1;
-  /** The object which the waypoint is associated with. */
-  attachedObjectId?: number;
-}
+export const isWaypoint = z
+  .object({
+    assignedShipId: z.number().default(-1),
+    attachedObjectId: z.number().optional(),
+  })
+  .default({});

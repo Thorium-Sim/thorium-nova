@@ -1,3 +1,5 @@
+import z from "zod";
+
 import {
   HeatCapacity,
   Kilograms,
@@ -10,52 +12,71 @@ import {
  * for how inventory flags work. These repair types came from Thorium Classic.
  **/
 
-export type RepairTypes =
-  | "Computer Specialist"
-  | "Custodian"
-  | "Quality Assurance"
-  | "Electrician"
-  | "Explosive Expert"
-  | "Fire Control"
-  | "General Engineer"
-  | "Hazardous Waste"
-  | "Mechanic"
-  | "Plumber"
-  | "Structural Engineer"
-  | "Welder"
-  | null;
+export type RepairTypes = z.infer<typeof repairTypes>;
 
-export type InventoryFlags = Partial<{
-  fuel: {
-    /** How much power is released from one unit of fuel */
-    fuelDensity: MegaWattHour;
-  };
-  coolant: {
-    heatCapacity: HeatCapacity;
-    massPerUnit: Kilograms;
-  };
-  // TODO July 1, 2022 - Could be interesting to put torpedo movement properties on the torpedo casing. Max speed, acceleration, turn speed, etc.
-  torpedoCasing: {};
-  // TODO July 1, 2022 - Put the damage yield, and perhaps the damage type, here.
-  torpedoWarhead: {};
-  probeCasing: {};
-  probeEquipment: {};
-  forCrew: {};
-  science: {};
-  // TODO July 1, 2022 - Individual inventory items could be used to heal different kinds of ailments,
-  // like poison, radiation, etc. and those can be noted here.
-  medical: {};
-  security: {};
-  repair: {
-    /** The type of repair team that this item is used by. */
-    type: RepairTypes;
-  };
-  sparePart: {
-    /** Tags to indicate the systems the spare part is used to repair. If left blank it can be used with all systems */
-    systemTags: string[];
-  };
-  water: {};
-}>;
+const repairTypes = z.union([
+  z.literal("Computer Specialist"),
+  z.literal("Custodian"),
+  z.literal("Quality Assurance"),
+  z.literal("Electrician"),
+  z.literal("Explosive Expert"),
+  z.literal("Fire Control"),
+  z.literal("General Engineer"),
+  z.literal("Hazardous Waste"),
+  z.literal("Mechanic"),
+  z.literal("Plumber"),
+  z.literal("Structural Engineer"),
+  z.literal("Welder"),
+  z.null(),
+]);
+
+// Turn the type above into a zod schema.
+export const inventoryFlags = z
+  .object({
+    fuel: z
+      .object({
+        /** How much power is released from one unit of fuel in Megawatt Hours */
+        fuelDensity: z.number().default(1),
+      })
+      .optional(),
+    coolant: z
+      .object({
+        // HeatCapacity
+        heatCapacity: z.number().default(4.18),
+        // Kilograms
+        massPerUnit: z.number().default(1000),
+      })
+      .optional(),
+    // TODO July 1, 2022 - Could be interesting to put torpedo movement properties on the torpedo casing. Max speed, acceleration, turn speed, etc.
+    torpedoCasing: z.object({}).optional(),
+    // TODO July 1, 2022 - Put the damage yield, and perhaps the damage type, here.
+    torpedoWarhead: z.object({}).optional(),
+    probeCasing: z.object({}).optional(),
+    probeEquipment: z.object({}).optional(),
+    forCrew: z.object({}).optional(),
+    science: z.object({}).optional(),
+    // TODO July 1, 2022 - Individual inventory items could be used to heal different kinds of ailments,
+    // like poison, radiation, etc. and those can be noted here.
+    medical: z.object({}).optional(),
+    security: z.object({}).optional(),
+    repair: z
+      .object({
+        /** The type of repair team that this item is used by. */
+
+        type: repairTypes,
+      })
+      .optional(),
+    sparePart: z
+      .object({
+        /** Tags to indicate the systems the spare part is used to repair. If left blank it can be used with all systems */
+        systemTags: z.array(z.string()).default([]),
+      })
+      .optional(),
+    water: z.object({}).optional(),
+  })
+  .default({});
+
+export type InventoryFlags = z.infer<typeof inventoryFlags>;
 
 export const InventoryFlagValues: {
   [P in keyof InventoryFlags]: {

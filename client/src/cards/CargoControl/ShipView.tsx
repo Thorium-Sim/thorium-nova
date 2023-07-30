@@ -74,7 +74,7 @@ export function ShipView({
                   <RoomDot
                     key={room.id}
                     id={room.id}
-                    name={room.name}
+                    name={room.name || ""}
                     position={{
                       x: room.position.x * pixelRatio * transform.widthScale,
                       y: room.position.y * pixelRatio * transform.widthScale,
@@ -96,7 +96,7 @@ export function ShipView({
               )}
 
               <SVGImageLoader
-                url={d.backgroundUrl}
+                url={d.backgroundUrl || ""}
                 onClick={() => useShipMapStore.setState({selectedRoomId: null})}
                 className="pointer-events-auto"
               />

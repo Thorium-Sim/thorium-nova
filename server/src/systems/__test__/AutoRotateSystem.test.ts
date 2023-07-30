@@ -58,7 +58,7 @@ describe.skip("AutoRotateSystem", () => {
     });
     ecs.update(16);
     expect(ship.components.rotation).toMatchInlineSnapshot(`
-      RotationComponent {
+      Object {
         "w": 0.9999912270311376,
         "x": -0.004188777955403881,
         "y": 6.192184396419897e-19,
@@ -70,7 +70,7 @@ describe.skip("AutoRotateSystem", () => {
     }
 
     expect(ship.components.rotation).toMatchInlineSnapshot(`
-      RotationComponent {
+      Object {
         "w": 0.9238795325112867,
         "x": -0.38268343236508984,
         "y": 5.4048322458121166e-17,
@@ -87,7 +87,7 @@ describe.skip("AutoRotateSystem", () => {
     });
     ecs.update(16);
     expect(ship.components.rotation).toMatchInlineSnapshot(`
-      RotationComponent {
+      Object {
         "w": 0.9252641056657583,
         "x": -0.37931785220505165,
         "y": 0.0011478880311793197,
@@ -98,7 +98,7 @@ describe.skip("AutoRotateSystem", () => {
       ecs.update(16);
     }
     expect(ship.components.rotation).toMatchInlineSnapshot(`
-      RotationComponent {
+      Object {
         "w": 0.9563685301630789,
         "x": 0.20566153737682227,
         "y": 0.14583398634000644,
@@ -112,7 +112,7 @@ describe.skip("AutoRotateSystem", () => {
       ecs.update(16);
     }
     expect(ship.components.rotation).toMatchInlineSnapshot(`
-      RotationComponent {
+      Object {
         "w": 0.9563685301630789,
         "x": 0.20566153737682227,
         "y": 0.14583398634000644,

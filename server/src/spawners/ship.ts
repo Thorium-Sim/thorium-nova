@@ -1,6 +1,6 @@
-import {ECS, Entity} from "../utils/ecs";
+import {Entity} from "../utils/ecs";
 import type ShipPlugin from "../classes/Plugins/Ship";
-import {PositionComponent} from "../components/position";
+import {position} from "../components/position";
 import {randomFromList} from "../utils/randomFromList";
 import {generateShipInventory} from "./inventory";
 import {FlightDataModel} from "../classes/FlightDataModel";
@@ -10,7 +10,6 @@ import {spawnShipSystem} from "./shipSystem";
 import ReactorPlugin from "@server/classes/Plugins/ShipSystems/Reactor";
 import BaseShipSystemPlugin from "@server/classes/Plugins/ShipSystems/BaseSystem";
 import {getInventoryTemplates} from "@server/utils/getInventoryTemplates";
-import {battery} from "@client/pages/Config/data/systems/battery";
 
 const systemCache: Record<string, BaseShipSystemPlugin> = {};
 function getSystem(
@@ -37,7 +36,7 @@ export function spawnShip(
     name?: string;
     description?: string;
     registry?: string;
-    position: Omit<PositionComponent, "init">;
+    position: Zod.infer<typeof position>;
     tags?: string[];
     assets?: Partial<InstanceType<typeof ShipPlugin>["assets"]>;
     playerShip?: boolean;
@@ -278,7 +277,7 @@ export function spawnShip(
     if (!systemType) continue;
     const availableRooms =
       entity.components.shipMap?.deckNodes.filter(node =>
-        node.systems.includes(systemType)
+        node.systems?.includes(systemType)
       ) || [];
 
     if (occupiedRooms.length === availableRooms.length) {

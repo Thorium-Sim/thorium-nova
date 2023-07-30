@@ -1,6 +1,6 @@
 import type BaseShipSystemPlugin from "../classes/Plugins/ShipSystems/BaseSystem";
 import {ShipSystemTypes} from "../classes/Plugins/ShipSystems/shipSystemTypes";
-import {components, ComponentIDs} from "../components";
+import {components, ComponentIds} from "../components";
 import {Entity} from "../utils/ecs";
 import {mergeDeep} from "../utils/mergeDeep";
 
@@ -27,13 +27,8 @@ export function spawnShipSystem(
 
     const flags = ShipSystemTypes[template.type].flags;
 
-    if (
-      template.type !== "generic" &&
-      Object.values(components).some(
-        c => template.type && c.id === componentName
-      )
-    )
-      entity.addComponent(componentName as ComponentIDs, template);
+    if (template.type !== "generic" && componentName in components)
+      entity.addComponent(componentName as ComponentIds, template);
 
     const {
       powerToHeat,

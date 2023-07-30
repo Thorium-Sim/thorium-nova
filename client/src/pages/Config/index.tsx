@@ -9,6 +9,7 @@ const ThemesConfig = lazy(() => import("./Themes"));
 const StarmapConfig = lazy(() => import("./Starmap"));
 const ShipSystemConfig = lazy(() => import("./ShipSystems"));
 const InventoryConfig = lazy(() => import("./Inventory"));
+const TriggersConfig = lazy(() => import("./Triggers"));
 
 export default function ConfigRoutes() {
   const [client] = q.client.get.useNetRequest();
@@ -31,6 +32,7 @@ export default function ConfigRoutes() {
               path="/:pluginId/inventory/*"
               element={<InventoryConfig />}
             />
+            <Route path="/:pluginId/triggers/*" element={<TriggersConfig />} />
           </Routes>
         </Suspense>
       </div>

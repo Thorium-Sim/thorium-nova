@@ -1,21 +1,22 @@
-import {SatelliteComponent} from "server/src/components/satellite";
-import {IsPlanetComponent} from "server/src/components/solarSystem/isPlanet";
+import {isPlanet} from "@server/components/list";
+import {satellite} from "@server/components/satellite";
+import z from "zod";
 
 export default class PlanetPlugin {
   name: string;
   description: string;
   tags: string[];
-  satellite: Omit<SatelliteComponent, "init" | "parentId"> & {
+  satellite: Omit<Zod.infer<typeof satellite>, "parentId"> & {
     parentId: string | null;
   };
-  isPlanet: Omit<IsPlanetComponent, "init">;
+  isPlanet: Zod.infer<typeof isPlanet>;
   population: number;
   temperature: number;
   constructor(
     params: {name: string} & Partial<
       Omit<PlanetPlugin, "satellite"> & {
         satellite: Partial<
-          Omit<SatelliteComponent, "init" | "parentId"> & {
+          Omit<Zod.infer<typeof satellite>, "parentId"> & {
             parentId: string | null;
           }
         >;

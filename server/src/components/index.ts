@@ -1,19 +1,13 @@
 import * as allComponents from "./list";
 
 type AllComponents = typeof allComponents;
-type ComponentKeys = keyof AllComponents;
-
-export type ComponentIDs = AllComponents[ComponentKeys]["id"];
+export type ComponentIds = keyof AllComponents;
 
 export type ComponentProperties = {
-  [P in ComponentKeys as AllComponents[P]["id"]]: Omit<
-    InstanceType<AllComponents[P]>,
-    "init"
-  >;
+  [P in ComponentIds]: Zod.infer<AllComponents[P]>;
+};
+export type ComponentInputs = {
+  [P in ComponentIds]: Zod.input<AllComponents[P]>;
 };
 
 export {allComponents as components};
-
-export function getComponentClassFromId(id: ComponentIDs): any {
-  return Object.values(allComponents).find(comp => comp.id === id);
-}

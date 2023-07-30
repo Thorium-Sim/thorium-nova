@@ -1,12 +1,9 @@
-import {Kilometer, Meter} from "../utils/unitTypes";
-import {Component} from "./utils";
+import z from "zod";
 
 /**
  * Determines what a ship is trying to do on the star map
  */
-export class ShipBehaviorComponent extends Component {
-  static id: "shipBehavior" = "shipBehavior";
-
+export const shipBehavior = z.object({
   /**
    * The main thing the ship is trying to accomplish
    * - hold: stay in place
@@ -16,26 +13,25 @@ export class ShipBehaviorComponent extends Component {
    * - defend: move towards a target and defend it
    * - avoid: move away from a target
    */
-  objective: "hold" | "seek" | "patrol" | "attack" | "defend" | "avoid" =
-    "hold";
-
+  objective: z.enum(["hold", "seek", "patrol", "attack", "defend", "avoid"]),
   /**
    * The target of the ship's objective
    * If it's a number, it's an entity of some kind.
    * If it's an object, it's a point in space.
    * If it's null, there is no target.
    */
-  target:
-    | null
-    | number
-    | {
-        parentId: number | null;
-
-        x: number;
-        y: number;
-        z: number;
-      } = null;
-
+  target: z
+    .union([
+      z.null(),
+      z.number(),
+      z.object({
+        parentId: z.number().nullable(),
+        x: z.number(),
+        y: z.number(),
+        z: z.number(),
+      }),
+    ])
+    .default(null),
   /**
    * The point the ship is currently trying to get to.
    * This is different from the target, since the target
@@ -43,18 +39,21 @@ export class ShipBehaviorComponent extends Component {
    * to that ship. Or the destination could be another
    * point in space within a sphere centered around the target.
    */
-  destination: null | {
-    parentId: number | null;
-
-    x: number;
-    y: number;
-    z: number;
-  } = null;
-
+  destination: z
+    .union([
+      z.null(),
+      z.object({
+        parentId: z.number().nullable(),
+        x: z.number(),
+        y: z.number(),
+        z: z.number(),
+      }),
+    ])
+    .default(null),
   /**
    * The radius of the sphere where the ship will attempt to patrol,
    * basically mid-orbit. When patrolling around a planet, set this
    * to 5 times the planet's radius.
    */
-  patrolRadius: Kilometer = 25_000;
-}
+  patrolRadius: z.number().default(25_000),
+});

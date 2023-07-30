@@ -103,3 +103,10 @@ export class DeckEdge {
     this.flags = params.flags || [];
   }
 }
+
+export type ShipMapDeckNode = DeckPlugin["nodes"][0] & {
+  deckIndex: number;
+  contents: {
+    [inventoryTemplateName: string]: {count: number; temperature: Kelvin};
+  };
+};

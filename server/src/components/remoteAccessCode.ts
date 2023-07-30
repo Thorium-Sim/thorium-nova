@@ -1,12 +1,12 @@
-import {Component} from "./utils";
+import z from "zod";
 
-export class RemoteAccessCodeComponent extends Component {
-  static id = "remoteAccessCode" as const;
-
-  shipId: number = -1;
-  clientId: string = "";
-  station: string | null | undefined = "";
-  code: string = "";
-  state: "waiting" | "accepted" | "denied" = "waiting";
-  timestamp: number = Date.now();
-}
+export const remoteAccessCode = z
+  .object({
+    shipId: z.number().default(-1),
+    clientId: z.string().default(""),
+    station: z.string().nullish(),
+    code: z.string().default(""),
+    state: z.enum(["waiting", "accepted", "denied"]).default("waiting"),
+    timestamp: z.number().default(Date.now()),
+  })
+  .default({});

@@ -1,5 +1,5 @@
 import {useRef} from "react";
-import {Texture, Group} from "three";
+import {Group} from "three";
 import {useTexture} from "@react-three/drei";
 
 import WaypointSvg from "./Waypoint.svg";

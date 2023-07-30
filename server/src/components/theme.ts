@@ -1,8 +1,8 @@
-import {Component} from "./utils";
+import z from "zod";
 
-export class ThemeComponent extends Component {
-  static id = "theme" as const;
-
-  pluginId: string = "Thorium Default";
-  themeId: string = "Default Theme";
-}
+export const theme = z
+  .object({
+    pluginId: z.string().default("Thorium Default"),
+    themeId: z.string().default("Default Theme"),
+  })
+  .default({});

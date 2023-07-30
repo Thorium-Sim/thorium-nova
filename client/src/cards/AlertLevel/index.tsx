@@ -1,8 +1,9 @@
 import * as React from "react";
 import {q} from "@client/context/AppContext";
 import Button from "@thorium/ui/Button";
-import {AlertLevel as AlertLevelT} from "@server/components/isShip";
+import {isShip} from "@server/components/isShip";
 
+type AlertLevelT = Zod.infer<typeof isShip>["alertLevel"];
 const alertLevelText = [
   {
     number: 5,

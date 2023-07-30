@@ -1,6 +1,7 @@
-import {Component} from "./utils";
+import z from "zod";
 
-export class TagsComponent extends Component {
-  static id: "tags" = "tags";
-  tags: string[] = [];
-}
+export const tags = z
+  .object({
+    tags: z.array(z.string()).default([]),
+  })
+  .default({});

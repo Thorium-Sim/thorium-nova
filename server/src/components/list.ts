@@ -21,7 +21,7 @@ export * from "./mass";
 export * from "./solarSystem/isSolarSystem";
 export * from "./solarSystem/isStar";
 export * from "./solarSystem/isPlanet";
-export {SatelliteComponent} from "./satellite";
+export * from "./satellite";
 export * from "./temperature";
 export * from "./population";
 export * from "./isInventory";

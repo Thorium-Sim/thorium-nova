@@ -1,15 +1,9 @@
-import {PositionComponent} from "server/src/components/position";
-import {DataContext} from "server/src/utils/DataContext";
+import {position} from "server/src/components/position";
 import {Entity} from "server/src/utils/ecs";
 import {getOrbitPosition} from "server/src/utils/getOrbitPosition";
 import {matchSorter} from "match-sorter";
 import {Vector3} from "three";
-import {
-  Coordinates,
-  Kilometer,
-  LightMinute,
-  solarRadiusToKilometers,
-} from "server/src/utils/unitTypes";
+import {Coordinates, solarRadiusToKilometers} from "server/src/utils/unitTypes";
 import {t} from "@server/init/t";
 import {z} from "zod";
 import {pubsub} from "@server/init/pubsub";
@@ -18,8 +12,8 @@ type Waypoint = {
   id: number;
   name: string;
   objectId?: number;
-  position: Omit<PositionComponent, "init">;
-  systemPosition: Omit<PositionComponent, "init"> | null;
+  position: Zod.infer<typeof position>;
+  systemPosition: Zod.infer<typeof position> | null;
 };
 
 export const navigation = t.router({

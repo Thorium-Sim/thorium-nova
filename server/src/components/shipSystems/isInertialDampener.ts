@@ -1,8 +1,8 @@
-import {Component} from "../utils";
+import z from "zod";
 
-export class IsInertialDampenersComponent extends Component {
-  static id = "isInertialDampeners" as const;
-
-  /** The dampening factor, which affects the speed of the ship based on its current velocity */
-  dampening: number = 1;
-}
+export const isInertialDampeners = z
+  .object({
+    /** The dampening factor, which affects the speed of the ship based on its current velocity */
+    dampening: z.number().default(1),
+  })
+  .default({});

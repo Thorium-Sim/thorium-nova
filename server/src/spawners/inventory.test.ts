@@ -125,7 +125,7 @@ describe("Inventory Generator", () => {
       Array [
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test torpedoCasing Cargo": Object {
                   "count": 4,
@@ -138,7 +138,7 @@ describe("Inventory Generator", () => {
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "torpedoStorage",
               ],
@@ -148,7 +148,7 @@ describe("Inventory Generator", () => {
         },
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test torpedoCasing Cargo": Object {
                   "count": 8,
@@ -157,7 +157,7 @@ describe("Inventory Generator", () => {
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "torpedoStorage",
               ],
@@ -167,7 +167,7 @@ describe("Inventory Generator", () => {
         },
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test probeCasing Cargo": Object {
                   "count": 1,
@@ -180,7 +180,7 @@ describe("Inventory Generator", () => {
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "probeStorage",
               ],
@@ -190,7 +190,7 @@ describe("Inventory Generator", () => {
         },
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test security Cargo": Object {
                   "count": 5,
@@ -199,7 +199,7 @@ describe("Inventory Generator", () => {
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "security",
               ],
@@ -209,7 +209,7 @@ describe("Inventory Generator", () => {
         },
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test repair Cargo": Object {
                   "count": 5,
@@ -218,7 +218,7 @@ describe("Inventory Generator", () => {
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "maintenance",
               ],
@@ -228,7 +228,7 @@ describe("Inventory Generator", () => {
         },
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test medical Cargo": Object {
                   "count": 5,
@@ -237,7 +237,7 @@ describe("Inventory Generator", () => {
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "medical",
               ],
@@ -247,7 +247,7 @@ describe("Inventory Generator", () => {
         },
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test coolant Cargo": Object {
                   "count": 3,
@@ -292,7 +292,7 @@ describe("Inventory Generator", () => {
               },
               "volume": 1000,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "cargo",
               ],
@@ -365,7 +365,7 @@ describe("Inventory Generator", () => {
       Array [
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test coolant Cargo": Object {
                   "count": 4,
@@ -526,7 +526,7 @@ describe("Inventory Generator", () => {
       Array [
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test torpedoCasing Cargo": Object {
                   "count": 5,
@@ -539,7 +539,7 @@ describe("Inventory Generator", () => {
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "torpedoStorage",
               ],
@@ -549,7 +549,7 @@ describe("Inventory Generator", () => {
         },
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test torpedoCasing Cargo": Object {
                   "count": 8,
@@ -558,7 +558,7 @@ describe("Inventory Generator", () => {
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "torpedoStorage",
               ],
@@ -568,7 +568,7 @@ describe("Inventory Generator", () => {
         },
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test probeCasing Cargo": Object {
                   "count": 1,
@@ -581,7 +581,7 @@ describe("Inventory Generator", () => {
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "probeStorage",
               ],
@@ -591,7 +591,7 @@ describe("Inventory Generator", () => {
         },
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test security Cargo": Object {
                   "count": 5,
@@ -600,7 +600,7 @@ describe("Inventory Generator", () => {
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "security",
               ],
@@ -610,7 +610,7 @@ describe("Inventory Generator", () => {
         },
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test repair Cargo": Object {
                   "count": 5,
@@ -619,7 +619,7 @@ describe("Inventory Generator", () => {
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "maintenance",
               ],
@@ -629,7 +629,7 @@ describe("Inventory Generator", () => {
         },
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test fuel Cargo": Object {
                   "count": 5,
@@ -638,11 +638,10 @@ describe("Inventory Generator", () => {
               },
               "volume": 100,
             },
-            "identity": IdentityComponent {
-              "description": "",
+            "identity": Object {
               "name": "Reactor Room",
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [],
             },
           },
@@ -650,11 +649,11 @@ describe("Inventory Generator", () => {
         },
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {},
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "fuelStorage",
               ],
@@ -664,7 +663,7 @@ describe("Inventory Generator", () => {
         },
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test medical Cargo": Object {
                   "count": 5,
@@ -673,7 +672,7 @@ describe("Inventory Generator", () => {
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "medical",
               ],
@@ -683,7 +682,7 @@ describe("Inventory Generator", () => {
         },
         Object {
           "components": Object {
-            "cargoContainer": CargoContainer {
+            "cargoContainer": Object {
               "contents": Object {
                 "Test fuel Cargo": Object {
                   "count": 20,
@@ -720,7 +719,7 @@ describe("Inventory Generator", () => {
               },
               "volume": 1000,
             },
-            "isRoom": IsRoomComponent {
+            "isRoom": Object {
               "flags": Array [
                 "cargo",
               ],

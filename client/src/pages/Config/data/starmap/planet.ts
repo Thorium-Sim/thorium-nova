@@ -1,5 +1,4 @@
 import PlanetPlugin from "@server/classes/Plugins/Universe/Planet";
-import {satelliteComponent} from "@server/components/satellite";
 import {t} from "@server/init/t";
 import {pubsub} from "@server/init/pubsub";
 import {
@@ -20,6 +19,7 @@ import {getSolarSystem} from "../utils";
 import path from "path";
 import fs from "fs/promises";
 import {thoriumPath} from "@server/utils/appPaths";
+import {satellite} from "@server/components/satellite";
 
 // Just less than the orbit of Neptune 🥶
 const MAX_PLANET_DISTANCE: Kilometer = 4_000_000_000;
@@ -202,7 +202,7 @@ export const planet = t.router({
         temperature: z.number().optional(),
         satellite: z
           .intersection(
-            satelliteComponent.deepPartial(),
+            satellite.removeDefault().deepPartial(),
             z.object({parentId: z.string().optional()})
           )
           .optional(),

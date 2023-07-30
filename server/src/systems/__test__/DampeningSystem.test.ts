@@ -136,7 +136,7 @@ describe("DampeningSystem", () => {
       rotationDelta: {x: 1, y: 0, z: 0},
     });
     expect(ship.components.rotation).toMatchInlineSnapshot(`
-      RotationComponent {
+      Object {
         "w": 1,
         "x": 0,
         "y": 0,
@@ -147,7 +147,7 @@ describe("DampeningSystem", () => {
       ecs.update(16);
     }
     expect(ship.components.rotation).toMatchInlineSnapshot(`
-      RotationComponent {
+      Object {
         "w": 0.5067351256482651,
         "x": 0.8621017993451933,
         "y": 0,
@@ -156,7 +156,7 @@ describe("DampeningSystem", () => {
     `);
     expect(thrusters.components.isThrusters?.rotationVelocity)
       .toMatchInlineSnapshot(`
-      Coordinates {
+      Object {
         "x": 0.5235987755982988,
         "y": 0,
         "z": 0,
@@ -169,7 +169,7 @@ describe("DampeningSystem", () => {
       ecs.update(16);
     }
     expect(ship.components.rotation).toMatchInlineSnapshot(`
-      RotationComponent {
+      Object {
         "w": 0.5067351256482651,
         "x": 0.8621017993451933,
         "y": 0,
@@ -178,7 +178,7 @@ describe("DampeningSystem", () => {
     `);
     expect(thrusters.components.isThrusters?.rotationVelocity)
       .toMatchInlineSnapshot(`
-      Coordinates {
+      Object {
         "x": 0,
         "y": 0,
         "z": 0,

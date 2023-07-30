@@ -1,11 +1,13 @@
+import z from "zod";
 import {ShipSystemTypes} from "server/src/classes/Plugins/ShipSystems/shipSystemTypes";
-import {Component} from "../utils";
+import {LiteralTuple, TuplifyUnion} from "@server/utils/types";
 
-export class IsShipSystem extends Component {
-  static id: "isShipSystem" = "isShipSystem";
+const shipSystemTypes = Object.keys(ShipSystemTypes).map(key =>
+  z.literal(key as any)
+) as LiteralTuple<TuplifyUnion<keyof typeof ShipSystemTypes>>;
 
-  /** The type of ship system, eg impulseEngines, shields, etc. */
-  type: keyof typeof ShipSystemTypes = "generic";
-
-  // Assets should be included in the individual ship systems components
-}
+export const isShipSystem = z
+  .object({
+    type: z.union(shipSystemTypes).default("generic"),
+  })
+  .default({});

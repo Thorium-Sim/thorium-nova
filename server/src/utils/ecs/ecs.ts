@@ -128,7 +128,7 @@ class ECS {
     }
   }
   /**
-   * "Clean" entities flagged as dirty by removing unecessary systems and
+   * "Clean" entities flagged as dirty by removing unnecessary systems and
    * adding missing systems.
    */
   cleanDirtyEntities() {

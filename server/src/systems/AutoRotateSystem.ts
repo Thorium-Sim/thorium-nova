@@ -10,6 +10,21 @@ let desiredRotationQuat = new Quaternion();
 let up = new Vector3(0, 1, 0);
 let matrix = new Matrix4();
 const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
+
+const rotationControllerCache = new Map<number, Controller>();
+function getRotationController(id: number) {
+  if (!rotationControllerCache.has(id)) {
+    const rotationController = new Controller({
+      k_p: 0.1,
+      k_i: 0,
+      k_d: 0.05,
+      i_max: 1,
+    });
+    rotationController.setTarget(1);
+    rotationControllerCache.set(id, rotationController);
+  }
+  return rotationControllerCache.get(id)!;
+}
 /*
  * How auto-rotation works:
  * - Bail if there is no destination, if the autopilot is turned off
@@ -51,15 +66,6 @@ export class AutoRotateSystem extends System {
       thrusters.components.isThrusters.autoRotationVelocity = 0;
       return;
     }
-    if (!autopilot.rotationController) {
-      autopilot.rotationController = new Controller({
-        k_p: 0.1,
-        k_i: 0,
-        k_d: 0.05,
-        i_max: 1,
-      });
-      autopilot.rotationController.setTarget(1);
-    }
 
     // Get the current system the ship is in and the autopilot desired system
     const entitySystem = entity.components.position?.parentId
@@ -98,7 +104,8 @@ export class AutoRotateSystem extends System {
       thrusters.components.isThrusters.rotationThrust /
       (entity.components?.mass?.mass || 70000);
     const angleTo = rotationQuat.angleTo(desiredRotationQuat);
-    const output = autopilot.rotationController.update(1 - angleTo);
+    const rotationController = getRotationController(entity.id);
+    const output = rotationController.update(1 - angleTo);
     const acc = Math.min(Math.max(output, accelMax * -1), accelMax);
     thrusters.components.isThrusters.autoRotationVelocity = Math.min(
       rpf,

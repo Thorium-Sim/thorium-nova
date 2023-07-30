@@ -1,15 +1,18 @@
-import {Component} from "./utils";
+import z from "zod";
 
-export class IdentityComponent extends Component {
-  static id = "identity" as const;
-
-  /**
-   * The name of the entity.
-   */
-  name: string = "Entity";
-
-  /**
-   * Should only be used for information provided by the Flight Director
-   */
-  description?: string = "";
-}
+// Zod schema that matches IdentityComponent
+export const identity = z
+  .object({
+    /**
+     * The name of the entity.
+     */
+    name: z.string().default("Entity"),
+    description: z
+      .string()
+      .default("")
+      .describe(
+        "Should only be used for information provided by the Flight Director."
+      )
+      .optional(),
+  })
+  .default({});

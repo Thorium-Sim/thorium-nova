@@ -1,6 +1,8 @@
-import {Component} from "./utils";
+import z from "zod";
 
-/** Whether the object is unmoving */
-export class IsStaticComponent extends Component {
-  static id: "isStatic" = "isStatic";
-}
+export const isStatic = z
+  .object({
+    /** Whether the object is unmoving */
+    isStatic: z.literal(true).default(true),
+  })
+  .default({});

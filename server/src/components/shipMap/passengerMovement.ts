@@ -1,22 +1,18 @@
-import {MetersPerSecond} from "server/src/utils/unitTypes";
-import {Component} from "../utils";
+import z from "zod";
 
-/** This class represents entities that can move around a ship */
-export class PassengerMovementComponent extends Component {
-  static id = "passengerMovement" as const;
+export const passengerMovement = z
+  .object({
+    /** TODO June 16, 2022 - Some day it should be possible to connect from one ship to another and have entities move between them. */
+    destinationNode: z.number().nullable().default(null),
+    nodePath: z.array(z.number()).default([]),
+    nextNodeIndex: z.number().default(0),
 
-  /** TODO June 16, 2022 - Some day it should be possible to connect from one ship to another and have entities move between them. */
-  destinationNode: number | null = null;
-  nodePath: number[] = [];
-  nextNodeIndex: number = 0;
-
-  movementMaxVelocity: {
-    x: MetersPerSecond;
-    y: MetersPerSecond;
-    z: MetersPerSecond;
-  } = {
-    x: 3,
-    y: 3,
-    z: 3 / 10, // The Z default is because decks are 10 meters high, so it should take 10x as long to move between decks.
-  };
-}
+    movementMaxVelocity: z
+      .object({
+        x: z.number().default(3),
+        y: z.number().default(3),
+        z: z.number().default(3 / 10), // The Z default is because decks are 10 meters high, so it should take 10x as long to move between decks.
+      })
+      .default({}),
+  })
+  .default({});

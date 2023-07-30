@@ -149,7 +149,7 @@ describe("flight input", () => {
     if (!mockDataContext.flight) throw new Error("No flight created");
 
     expect(flight.playerShips[0].components.position).toMatchInlineSnapshot(`
-      PositionComponent {
+      Object {
         "parentId": 19,
         "type": "solar",
         "x": -228630890,

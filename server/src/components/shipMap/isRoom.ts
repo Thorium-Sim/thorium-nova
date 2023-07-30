@@ -1,8 +1,8 @@
-import {NodeFlag} from "server/src/classes/Plugins/Ship/Deck";
-import {Component} from "../utils";
+import z from "zod";
+import {nodeFlagsSchema} from "server/src/classes/Plugins/Ship/Deck";
 
-export class IsRoomComponent extends Component {
-  static id = "isRoom" as const;
-
-  flags: NodeFlag[] = [];
-}
+export const isRoom = z
+  .object({
+    flags: nodeFlagsSchema.array().default([]),
+  })
+  .default({});

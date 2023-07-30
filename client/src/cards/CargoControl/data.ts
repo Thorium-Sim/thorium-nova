@@ -10,7 +10,8 @@ import {
 } from "server/src/utils/shipMapPathfinder";
 import {z} from "zod";
 import {getInventoryTemplates} from "@server/utils/getInventoryTemplates";
-import {ShipMapDeckNode} from "@server/components/shipMap";
+import {shipMap} from "@server/components/shipMap";
+type ShipMapDeckNode = Zod.infer<typeof shipMap>["deckNodes"][number];
 
 const transferId = z.object({
   type: z.union([z.literal("room"), z.literal("entity")]),
@@ -18,6 +19,25 @@ const transferId = z.object({
 });
 
 const cargoRoomsCache = new Map<Entity, ShipMapDeckNode[]>();
+
+const shipMapGraphCache = new Map<
+  number,
+  ReturnType<typeof createShipMapGraph>
+>();
+
+function getGraph(entity: Entity) {
+  if (!shipMapGraphCache.has(entity.id)) {
+    if (!entity.components.shipMap) throw new Error("Invalid ship map.");
+    shipMapGraphCache.set(
+      entity.id,
+      createShipMapGraph(
+        entity.components.shipMap?.deckEdges || [],
+        entity.components.shipMap.deckNodes
+      )
+    );
+  }
+  return shipMapGraphCache.get(entity.id)!;
+}
 
 export const cargoControl = t.router({
   inventoryTypes: t.procedure.request(({ctx}) => {
@@ -139,7 +159,7 @@ export const cargoControl = t.router({
           output.push({
             id: node.id,
             type: "room",
-            name: node.name,
+            name: node.name || "",
             roomId: node.id,
             deck:
               ctx.ship?.components.shipMap?.decks[node.deckIndex].name || "",
@@ -179,14 +199,7 @@ export const cargoControl = t.router({
     .send(({ctx, input}) => {
       if (!ctx.ship) throw new Error("You are not assigned to a ship.");
       if (!ctx.ship.components.shipMap) throw new Error("Invalid ship map.");
-      if (!ctx.ship.components.shipMap?.graph) {
-        ctx.ship.updateComponent("shipMap", {
-          graph: createShipMapGraph(
-            ctx.ship.components.shipMap?.deckEdges || [],
-            ctx.ship.components.shipMap.deckNodes
-          ),
-        });
-      }
+      const graph = getGraph(ctx.ship);
       const room = ctx.ship?.components.shipMap?.deckNodes.find(
         d => d.id === input.roomId
       );
@@ -248,14 +261,7 @@ export const cargoControl = t.router({
       );
       if (!closestNode) throw new Error("No container available.");
 
-      if (!ctx.ship.components.shipMap.graph)
-        throw new Error("Invalid ship map.");
-
-      let nodePath = calculateShipMapPath(
-        ctx.ship.components.shipMap.graph,
-        closestNode.id,
-        input.roomId
-      );
+      let nodePath = calculateShipMapPath(graph, closestNode.id, input.roomId);
 
       if (nodePath) {
         container.updateComponent("passengerMovement", {
@@ -290,7 +296,7 @@ export const cargoControl = t.router({
       const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
 
       let itemCounts: {[key: string]: number} = {};
-      let destinationVolume = toContainer.volume;
+      let destinationVolume = toContainer.volume || 0;
       // First loop to see if there are any errors
       input.transfers.forEach(({item, count}) => {
         if (
