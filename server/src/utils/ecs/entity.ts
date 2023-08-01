@@ -178,11 +178,15 @@ class Entity {
   async addComponent<
     Name extends keyof Components,
     Data extends Components[Name]
-  >(name: Name, data?: Partial<Data>) {
+  >(name: Name, data: Partial<Data> = {}) {
     const component = allComponents[name as ComponentIds];
-    let componentData = component.parse(data) as Data;
+    try {
+      let componentData = component.parse(data) as Data;
+      this.components[name] = componentData;
+    } catch (err) {
+      console.error("Error initializing component:", name, data, err);
+    }
 
-    this.components[name] = componentData;
     this.setSystemsDirty();
   }
   /**

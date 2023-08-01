@@ -16,7 +16,7 @@ export const isInventory = z
     flags: inventoryFlags,
     assets: z
       .object({
-        image: z.string().optional(),
+        image: z.string().nullish(),
       })
       .default({}),
   })

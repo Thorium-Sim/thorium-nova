@@ -264,7 +264,7 @@ export function spawnShip(
       ],
       inventoryTemplates,
       {
-        powerNeed: totalPower * 2.5, // Convert megawatts into 2.5 MegaWatt hours
+        powerNeed: totalPower * 2.5, // Convert megawatts into 2.5 MegaWatt hours, so we have enough for a 2.5 hour trip
       }
     );
   }

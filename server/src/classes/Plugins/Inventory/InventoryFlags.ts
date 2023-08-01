@@ -63,8 +63,9 @@ export const inventoryFlags = z
       .object({
         /** The type of repair team that this item is used by. */
 
-        type: repairTypes,
+        type: repairTypes.optional(),
       })
+      .default({})
       .optional(),
     sparePart: z
       .object({
