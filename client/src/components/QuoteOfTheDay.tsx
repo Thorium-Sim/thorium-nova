@@ -279,6 +279,8 @@ const quotes = [
   "You alone are not enough, but you can still do great things.",
   // Jeremy Goldberg
   "Courage is knowing it might hurt, and doing it anyway. Stupidity is the same. And that's why life is hard.",
+  // Marvin Minsky
+  "If you understand something in only one way, then you don't really understand it at all.",
 ];
 
 const QuoteOfTheDay = () => {
