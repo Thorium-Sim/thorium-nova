@@ -51,6 +51,13 @@
     "./src/data/flight.ts",
     "./src/data/client.ts",
     "./src/data/ship.ts",
-    "./src/data/effects.ts"
+    "./src/data/effects.ts",
+    "src/components/ui/SortableItem.tsx",
+    "./src/pages/Config/Timelines/actionReducer.tsx",
+    "./src/pages/Config/Timelines/TimelineAction.tsx",
+    "./src/pages/Config/Timelines/TimelineStep.tsx",
+    "./src/pages/Config/Timelines/TimelineDetails.tsx",
+    "./src/pages/Config/Timelines/TimelineLayout.tsx",
+    "./src/pages/Config/Timelines/TimelineList.tsx"
   ]
 }

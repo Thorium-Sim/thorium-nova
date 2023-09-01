@@ -38,6 +38,7 @@
     "../client/src/**/data.ts",
     "../client/src/**/data.tsx",
     "../client/src/**/data/**/*.ts",
-    "../client/src/**/data/**/*.tsx"
+    "../client/src/**/data/**/*.tsx",
+    "../client/src/utils/effects.tsx"
   ]
 }

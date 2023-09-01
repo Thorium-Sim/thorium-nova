@@ -33,7 +33,7 @@ export function AlertLevel() {
 
   const updateLevel = (newLevel: AlertLevelT) => {
     q.alertLevel.update.netSend({
-      level: newLevel,
+      alertLevel: newLevel,
     });
   };
   const displayDesc = (level: number) => {

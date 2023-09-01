@@ -2,7 +2,7 @@ import "./init/polyfill";
 import {setBasePath} from "@thorium/db-fs";
 import buildHTTPServer from "./init/httpServer";
 import path from "path";
-import {promises as fs, existsSync} from "fs";
+import {existsSync} from "fs";
 import {liveQueryPlugin} from "@thorium/live-query/adapters/fastify-adapter";
 import {rootPath, thoriumPath} from "./utils/appPaths";
 import {buildDatabase} from "./init/buildDatabase";

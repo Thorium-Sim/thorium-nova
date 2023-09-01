@@ -4,7 +4,7 @@ import uuid from "@thorium/uniqid";
 import Spark from "./spark";
 import "./effects.css";
 import {q} from "@client/context/AppContext";
-import {EffectPayload} from "@client/data";
+import {type EffectPayload} from "@client/utils/effects";
 
 let synth: SpeechSynthesis | undefined;
 try {

@@ -1,13 +1,18 @@
 import z from "zod";
-import {ShipSystemTypes} from "server/src/classes/Plugins/ShipSystems/shipSystemTypes";
-import {LiteralTuple, TuplifyUnion} from "@server/utils/types";
 
-const shipSystemTypes = Object.keys(ShipSystemTypes).map(key =>
-  z.literal(key as any)
-) as LiteralTuple<TuplifyUnion<keyof typeof ShipSystemTypes>>;
+const shipSystemTypes = z.enum([
+  "warpEngines",
+  "impulseEngines",
+  "generic",
+  "inertialDampeners",
+  "thrusters",
+  "reactor",
+  "battery",
+]);
 
 export const isShipSystem = z
   .object({
-    type: z.union(shipSystemTypes).default("generic"),
+    type: shipSystemTypes.default("generic"),
+    shipId: z.number().int().positive().default(-1),
   })
   .default({});

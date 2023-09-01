@@ -3,6 +3,7 @@ import * as React from "react";
 import {Dialog, Transition} from "@headlessui/react";
 import {HiX} from "react-icons/hi";
 import Button from "./Button";
+import {cn} from "@client/utils/cn";
 
 export default function Modal({
   title,
@@ -49,7 +50,10 @@ export default function Modal({
             leaveTo="opacity-0 scale-95"
           >
             <div
-              className={`inline-block align-bottom bg-gray-900/50 backdrop-filter backdrop-blur text-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6 mx-8 md:max-w-max ${panelClassName}`}
+              className={cn(
+                `inline-block align-bottom bg-gray-900/50 backdrop-filter backdrop-blur text-white rounded-lg px-4 pt-5 pb-4 text-left shadow-xl transform transition-all sm:my-8 sm:align-middle m:w-full sm:p-6 mx-8 `,
+                panelClassName
+              )}
             >
               <div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
                 <Button

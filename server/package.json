@@ -36,6 +36,7 @@
     "esbuild": "^0.17.5",
     "fast-glob": "^3.2.12",
     "fastify": "^4.12.0",
+    "json-schema-to-zod": "^1.1.1",
     "less": "^4.1.3",
     "luxon": "^3.2.1",
     "match-sorter": "^6.3.1",
@@ -47,6 +48,7 @@
     "web-file-polyfill": "^1.0.4",
     "yaml": "^2.2.1",
     "yauzl": "^2.10.0",
-    "yazl": "^2.5.1"
+    "yazl": "^2.5.1",
+    "zod-to-json-schema": "^3.21.4"
   }
 }

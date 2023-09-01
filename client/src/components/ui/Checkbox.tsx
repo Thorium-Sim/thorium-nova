@@ -4,9 +4,9 @@ const Checkbox = (
   props: React.DetailedHTMLProps<
     React.InputHTMLAttributes<HTMLInputElement>,
     HTMLInputElement
-  > & {label: ReactNode; helperText?: string}
+  > & {label: ReactNode; labelHidden?: boolean; helperText?: string}
 ) => {
-  const {label, helperText, ...otherProps} = props;
+  const {label, labelHidden, helperText, ...otherProps} = props;
   return (
     <>
       <label className="flex items-center select-none">
@@ -15,7 +15,7 @@ const Checkbox = (
           {...otherProps}
           className={`${props.className} form-checkbox mr-2 text-blue-600`}
         />
-        {label}
+        <span className={labelHidden ? "sr-only" : ""}>{label}</span>
       </label>
       {helperText && (
         <p className="text-white text-sm leading-tight mb-2">{helperText}</p>

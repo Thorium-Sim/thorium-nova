@@ -46,6 +46,7 @@ export function spawnShip(
   const inventoryTemplates = getInventoryTemplates(dataContext.flight?.ecs);
 
   const entity = new Entity();
+  const shipId = entity.id;
 
   entity.addComponent("identity", {
     name: params.name || template.name,
@@ -103,7 +104,7 @@ export function spawnShip(
 
         break;
       case "battery": {
-        const entity = spawnShipSystem(systemPlugin, system.overrides);
+        const entity = spawnShipSystem(shipId, systemPlugin, system.overrides);
         if (entity.components.isBattery) {
           entity.components.isBattery.storage =
             entity.components.isBattery.capacity;
@@ -113,7 +114,7 @@ export function spawnShip(
         break;
       }
       default: {
-        const entity = spawnShipSystem(systemPlugin, system.overrides);
+        const entity = spawnShipSystem(shipId, systemPlugin, system.overrides);
         systemEntities.push(entity);
         if (entity.components.power) {
           // Hook up the power node
@@ -166,7 +167,7 @@ export function spawnShip(
     );
     if (systemPlugin instanceof ReactorPlugin) {
       Array.from({length: systemPlugin.reactorCount}).forEach(() => {
-        const sys = spawnShipSystem(systemPlugin, system.overrides);
+        const sys = spawnShipSystem(shipId, systemPlugin, system.overrides);
         const maxOutput = reactorPower * systemPlugin.powerMultiplier;
         sys.updateComponent("isReactor", {
           maxOutput,

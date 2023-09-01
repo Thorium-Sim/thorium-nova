@@ -161,6 +161,8 @@
     "access": "restricted"
   },
   "dependencies": {
-    "immer": "^9.0.18"
+    "clsx": "^2.0.0",
+    "immer": "^9.0.18",
+    "tailwind-merge": "^1.14.0"
   }
 }

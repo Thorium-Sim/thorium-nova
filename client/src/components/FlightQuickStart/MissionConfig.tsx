@@ -6,7 +6,7 @@ import {useFlightQuickStart} from "./FlightQuickStartContext";
 const ShipConfig = () => {
   const [state, dispatch] = useFlightQuickStart();
 
-  const [startingPoints] = q.plugin.mission.startingPoints.useNetRequest();
+  const [startingPoints] = q.plugin.timeline.startingPoints.useNetRequest();
 
   const startingPoint = startingPoints.find(
     point =>

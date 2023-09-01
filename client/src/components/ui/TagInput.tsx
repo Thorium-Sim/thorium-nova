@@ -1,6 +1,7 @@
 import React, {ReactNode} from "react";
 import {FaTimes} from "react-icons/fa";
 import Button from "./Button";
+import {cn} from "@client/utils/cn";
 
 const Tag: React.FC<{tag: string; onClick: () => void}> = ({tag, onClick}) => {
   return (
@@ -15,16 +16,26 @@ const Tag: React.FC<{tag: string; onClick: () => void}> = ({tag, onClick}) => {
 };
 const TagInput: React.FC<{
   label: ReactNode;
+  labelHidden?: boolean;
   tags: string[];
   disabled?: boolean;
   onRemove: (t: string) => void;
   onAdd: (t: string) => void;
-}> = ({tags = [], onRemove, onAdd, label, disabled}) => {
+  className?: string;
+}> = ({
+  tags = [],
+  onRemove,
+  onAdd,
+  label,
+  labelHidden,
+  disabled,
+  className,
+}) => {
   const [tagInput, setTagInput] = React.useState("");
   return (
     <>
-      <div className="form-control">
-        <label className="label">{label}</label>
+      <div className={cn("form-control", className)}>
+        <label className={cn("label", {"sr-only": labelHidden})}>{label}</label>
         <input
           disabled={disabled}
           className="input"

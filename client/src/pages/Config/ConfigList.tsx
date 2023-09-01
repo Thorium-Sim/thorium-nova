@@ -5,10 +5,11 @@ import {
   FaRocket,
   FaPaintBrush,
   FaBoxOpen,
+  FaCodeBranch,
 } from "react-icons/fa";
 import {NavLink, useParams} from "react-router-dom";
 import {MdMessage} from "react-icons/md";
-import Menubar from "@thorium/ui/Menubar";
+import Menubar, {useMenubar} from "@thorium/ui/Menubar";
 
 const ConfigIcon: React.FC<{
   to: string;
@@ -35,38 +36,40 @@ const ConfigIcon: React.FC<{
 
 const ConfigList = () => {
   const {pluginId} = useParams();
+  useMenubar({backTo: `/config/${pluginId}`});
   return (
-    <div className="h-full">
-      <Menubar backTo={`/config/${pluginId}`}></Menubar>
-      <div className="p-8 h-[calc(100%-2rem)]">
-        <h1 className="font-bold text-white text-3xl mb-4">Plugin Aspects</h1>
+    <div className="p-8 h-[calc(100%-2rem)] overflow-y-auto">
+      <h1 className="font-bold text-white text-3xl mb-4">Plugin Aspects</h1>
 
-        <div className="flex flex-wrap gap-[10vw] justify-center">
-          <ConfigIcon to={`/config/${pluginId}/starmap`}>
-            <FaStar className="text-6xl mb-4" />
-            <p className="font-bold text-2xl">Universe</p>
-          </ConfigIcon>
-          <ConfigIcon to={`/config/${pluginId}/ships`}>
-            <FaRocket className="text-6xl mb-4" />
-            <p className="font-bold text-2xl">Ships</p>
-          </ConfigIcon>
-          <ConfigIcon to={`/config/${pluginId}/systems`}>
-            <FaTools className="text-6xl mb-4" />
-            <p className="font-bold text-2xl">Ship Systems</p>
-          </ConfigIcon>
-          <ConfigIcon disabled to={`/config/${pluginId}/phrases`}>
-            <MdMessage className="text-6xl mb-4" />
-            <p className="font-bold text-2xl">Phrases</p>
-          </ConfigIcon>
-          <ConfigIcon to={`/config/${pluginId}/themes`}>
-            <FaPaintBrush className="text-6xl mb-4" />
-            <p className="font-bold text-2xl">Themes</p>
-          </ConfigIcon>
-          <ConfigIcon to={`/config/${pluginId}/inventory`}>
-            <FaBoxOpen className="text-6xl mb-4" />
-            <p className="font-bold text-2xl">Inventory</p>
-          </ConfigIcon>
-        </div>
+      <div className="h-full flex flex-wrap gap-16 justify-center">
+        <ConfigIcon to={`/config/${pluginId}/starmap`}>
+          <FaStar className="text-6xl mb-4" />
+          <p className="font-bold text-2xl">Universe</p>
+        </ConfigIcon>
+        <ConfigIcon to={`/config/${pluginId}/ships`}>
+          <FaRocket className="text-6xl mb-4" />
+          <p className="font-bold text-2xl">Ships</p>
+        </ConfigIcon>
+        <ConfigIcon to={`/config/${pluginId}/systems`}>
+          <FaTools className="text-6xl mb-4" />
+          <p className="font-bold text-2xl">Ship Systems</p>
+        </ConfigIcon>
+        <ConfigIcon to={`/config/${pluginId}/timelines`}>
+          <FaCodeBranch className="text-6xl mb-4" />
+          <p className="font-bold text-2xl">Timelines</p>
+        </ConfigIcon>
+        <ConfigIcon disabled to={`/config/${pluginId}/phrases`}>
+          <MdMessage className="text-6xl mb-4" />
+          <p className="font-bold text-2xl">Phrases</p>
+        </ConfigIcon>
+        <ConfigIcon to={`/config/${pluginId}/themes`}>
+          <FaPaintBrush className="text-6xl mb-4" />
+          <p className="font-bold text-2xl">Themes</p>
+        </ConfigIcon>
+        <ConfigIcon to={`/config/${pluginId}/inventory`}>
+          <FaBoxOpen className="text-6xl mb-4" />
+          <p className="font-bold text-2xl">Inventory</p>
+        </ConfigIcon>
       </div>
     </div>
   );

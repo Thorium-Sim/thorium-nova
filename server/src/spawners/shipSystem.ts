@@ -5,6 +5,7 @@ import {Entity} from "../utils/ecs";
 import {mergeDeep} from "../utils/mergeDeep";
 
 export function spawnShipSystem(
+  shipId: number,
   systemPlugin: Partial<BaseShipSystemPlugin>,
   overrides: Record<string, any> = {}
 ) {
@@ -18,7 +19,7 @@ export function spawnShipSystem(
   entity.addComponent("tags", {tags: template.tags});
 
   if (template.type) {
-    entity.addComponent("isShipSystem", {type: template.type});
+    entity.addComponent("isShipSystem", {type: template.type, shipId});
 
     const componentName =
       `is${template.type[0].toUpperCase()}${template.type.slice(

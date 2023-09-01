@@ -1216,7 +1216,13 @@ body.drag-active * {
   user-select: none;
   cursor: grabbing;
 }
-
+input,
+textarea {
+  @apply cursor-text;
+}
+:disabled {
+  @apply cursor-not-allowed;
+}
 .cursor-wait {
   cursor: url(/assets/cursors/wait/01.png), wait;
   animation: wait-cursor 1.5s steps(77) infinite;

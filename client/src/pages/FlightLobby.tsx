@@ -3,7 +3,7 @@ import Button from "@thorium/ui/Button";
 import SearchableList from "../components/ui/SearchableList";
 import {Dispatch, SetStateAction, useState} from "react";
 import {toast} from "../context/ToastContext";
-import Menubar from "@thorium/ui/Menubar";
+import Menubar, {useMenubar} from "@thorium/ui/Menubar";
 import {NavLink, useNavigate} from "react-router-dom";
 import StationWrapper from "../components/Station";
 import {ClientButton} from "../components/ClientButton";
@@ -25,18 +25,19 @@ function PlayerLobby() {
 
   return (
     <>
-      <Menubar />
-      <div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur">
-        <h2 className="text-white font-bold text-xl mb-2">
-          Flight Name: <em>{flight?.name}</em>
-        </h2>
+      <Menubar>
+        <div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur">
+          <h2 className="text-white font-bold text-xl mb-2">
+            Flight Name: <em>{flight?.name}</em>
+          </h2>
 
-        <ClientButton />
+          <ClientButton />
 
-        <div className="flex-1 flex flex-col pt-16">
-          {flight ? <PlayerStationSelection /> : <WaitingForFlight />}
+          <div className="flex-1 flex flex-col pt-16">
+            {flight ? <PlayerStationSelection /> : <WaitingForFlight />}
+          </div>
         </div>
-      </div>
+      </Menubar>
     </>
   );
 }
@@ -138,73 +139,82 @@ function PlayerStationItem({
   );
 }
 function HostLobby() {
-  const navigate = useNavigate();
   const [flight] = q.flight.active.useNetRequest();
-  const [client] = q.client.get.useNetRequest();
 
   return (
     <>
       <Menubar>
-        {flight && (
-          <>
-            {client.isHost && (
-              <Button
-                className="btn btn-outline btn-xs btn-error"
-                onClick={async () => {
-                  await q.flight.stop.netSend();
-                  navigate("/");
-                }}
-              >
-                End
-              </Button>
-            )}
-            {flight?.paused ? (
-              <Button
-                className="btn btn-outline btn-xs btn-success"
-                onClick={() => {
-                  q.flight.resume.netSend();
-                }}
-              >
-                Resume
-              </Button>
-            ) : (
-              <Button
-                className="btn btn-outline btn-xs btn-warning"
-                onClick={() => {
-                  q.flight.pause.netSend();
-                }}
-              >
-                Pause
-              </Button>
-            )}
-            <Button
-              className="btn btn-outline btn-xs btn-notice"
-              onClick={() => {
-                q.flight.reset.netSend();
-              }}
-            >
-              Reset
-            </Button>
-            {process.env.NODE_ENV !== "production" && (
-              <NavLink className="btn btn-xs btn-info btn-outline" to="/cards">
-                Cards
-              </NavLink>
-            )}
-          </>
-        )}
-      </Menubar>
-      <div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur flex flex-col">
-        <h2 className="text-white font-bold text-xl mb-2">
-          Flight Name: <em>{flight?.name}</em>
-        </h2>
+        <div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur flex flex-col">
+          <h2 className="text-white font-bold text-xl mb-2">
+            Flight Name: <em>{flight?.name}</em>
+          </h2>
 
-        <ClientButton />
-        <div className="flex-1 flex flex-col pt-16">
-          {flight ? <ClientAssignment /> : <WaitingForFlight />}
+          <ClientButton />
+          <div className="flex-1 flex flex-col pt-16">
+            {flight ? <ClientAssignment /> : <WaitingForFlight />}
+          </div>
         </div>
-      </div>
+        <FlightButtons />
+      </Menubar>
     </>
   );
+}
+
+function FlightButtons() {
+  const navigate = useNavigate();
+  const [flight] = q.flight.active.useNetRequest();
+  const [client] = q.client.get.useNetRequest();
+  useMenubar({
+    children: flight ? (
+      <>
+        {client.isHost && (
+          <Button
+            className="btn btn-outline btn-xs btn-error"
+            onClick={async () => {
+              await q.flight.stop.netSend();
+              navigate("/");
+            }}
+          >
+            End
+          </Button>
+        )}
+        {flight?.paused ? (
+          <Button
+            className="btn btn-outline btn-xs btn-success"
+            onClick={() => {
+              q.flight.resume.netSend();
+            }}
+          >
+            Resume
+          </Button>
+        ) : (
+          <Button
+            className="btn btn-outline btn-xs btn-warning"
+            onClick={() => {
+              q.flight.pause.netSend();
+            }}
+          >
+            Pause
+          </Button>
+        )}
+        <Button
+          className="btn btn-outline btn-xs btn-notice"
+          onClick={() => {
+            q.flight.reset.netSend();
+          }}
+        >
+          Reset
+        </Button>
+        {process.env.NODE_ENV !== "production" && (
+          <NavLink className="btn btn-xs btn-info btn-outline" to="/cards">
+            Cards
+          </NavLink>
+        )}
+      </>
+    ) : null,
+  });
+
+  return null;
 }
 
 function ClientAssignment() {

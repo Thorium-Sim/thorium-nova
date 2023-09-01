@@ -36,3 +36,5 @@ export * from "./snapInterpolation";
 export * from "./debugSphere";
 export * from "./shipBehavior";
 export * from "./remoteAccessCode";
+export * from "./isTrigger";
+export * from "./isTimeline";

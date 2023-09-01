@@ -281,6 +281,12 @@ const quotes = [
   "Courage is knowing it might hurt, and doing it anyway. Stupidity is the same. And that's why life is hard.",
   // Marvin Minsky
   "If you understand something in only one way, then you don't really understand it at all.",
+  // I can eat a glass; it doesn't hurt me.
+  "Vitrum edere possum; mihi non nocet.",
+  // https://twitter.com/cassidoo/status/1696672212491608144
+  "Is the juice worth the squeeze?",
+  // PartyKit
+  "Everything is better with friends.",
 ];
 
 const QuoteOfTheDay = () => {

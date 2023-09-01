@@ -11,6 +11,7 @@ import ThemePlugin from "./Theme";
 import SolarSystemPlugin from "./Universe/SolarSystem";
 import BaseShipSystemPlugin from "./ShipSystems/BaseSystem";
 import InventoryPlugin from "./Inventory";
+import TimelinePlugin from "./Timeline";
 import {pubsub} from "@server/init/pubsub";
 
 export function pluginPublish(plugin: BasePlugin) {
@@ -27,6 +28,7 @@ interface Aspects {
   themes: ThemePlugin[];
   solarSystems: SolarSystemPlugin[];
   inventory: InventoryPlugin[];
+  timelines: TimelinePlugin[];
 }
 // Storing the server here so it doesn't get
 // serialized with the plugin.
@@ -93,6 +95,7 @@ export default class BasePlugin extends FSDataStore {
         themes: [],
         solarSystems: [],
         inventory: [],
+        timelines: [],
       };
       pluginAspects.set(this, aspects);
     }
@@ -126,6 +129,11 @@ export default class BasePlugin extends FSDataStore {
       this,
       "inventory",
       InventoryPlugin
+    );
+    this.aspects.timelines = await BasePlugin.loadAspect(
+      this,
+      "timelines",
+      TimelinePlugin
     );
   }
   toJSON() {

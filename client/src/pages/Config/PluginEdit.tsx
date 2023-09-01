@@ -15,7 +15,6 @@ import {q} from "@client/context/AppContext";
 export default function PluginEdit() {
   return (
     <div className="h-full">
-      <Menubar></Menubar>
       <Suspense>
         <PluginEditInner />
       </Suspense>

@@ -10,6 +10,7 @@ module.exports = {
         pointer: "url(/assets/cursors/black-hand.png) 7 2, pointer",
         text: "url(/assets/cursors/beam.png) 4 10, text",
         progress: "url(/assets/cursors/black-background.png), progress",
+        "not-allowed": "url(/assets/cursors/forbidden.png), not-allowed",
         wait: "url(/assets/cursors/wait.gif), wait",
       },
       typography: theme => ({
