@@ -23,6 +23,8 @@ export const valueQuery = z.object({
 export const actionSchema = z
   .array(
     z.object({
+      id: z.string(),
+      name: z.string(),
       action: z.string(),
       values: z.record(z.union([z.string(), valueQuery])),
     })

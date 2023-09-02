@@ -128,6 +128,8 @@ export default class TimelinePlugin extends Aspect {
         conditions: [],
         actions: [
           {
+            id: uniqid("act-"),
+            name: "Timeline: Advance",
             action: "timeline.advance",
             values: {},
           },

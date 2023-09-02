@@ -22,7 +22,7 @@ const NoMatch = () => {
     loadAnimation();
   }, []);
   return (
-    <div className="fixed top-0 left-0 right-0 bottom-0">
+    <div className="fixed top-0 left-0 right-0 bottom-0 pointer-events-none">
       <div className="mx-auto max-w-5xl">
         <div
           ref={container}
@@ -34,7 +34,7 @@ const NoMatch = () => {
         <h2 className="text-2xl font-bold text-center">
           <NavLink
             to="/"
-            className="text-blue-300 hover:text-blue-500 transition-colors duration-300 drop-shadow-lg filter"
+            className="text-blue-300 hover:text-blue-500 transition-colors duration-300 drop-shadow-lg filter pointer-events-auto"
           >
             Better head back home.
           </NavLink>

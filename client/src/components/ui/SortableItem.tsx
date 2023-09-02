@@ -23,10 +23,12 @@ export function SortableItem({
   id,
   children,
   className,
+  onClick,
 }: {
   id: string;
   children: ReactNode;
   className?: string;
+  onClick?: () => void;
 }) {
   const {attributes, listeners, setNodeRef, transform, transition, isDragging} =
     useSortable({id: id});
@@ -48,14 +50,27 @@ export function SortableItem({
         }`,
         className
       )}
+      onClick={onClick}
     >
-      <Link
-        to={id}
-        // Pointer-events-none is necessary to avoid navigating when the sorting is done
-        className={`block px-4 py-2 ${isDragging ? "pointer-events-none" : ""}`}
-      >
-        {children}
-      </Link>
+      {onClick ? (
+        <span
+          className={`block px-4 py-2 ${
+            isDragging ? "pointer-events-none" : ""
+          }`}
+        >
+          {children}
+        </span>
+      ) : (
+        <Link
+          to={id || "#"}
+          // Pointer-events-none is necessary to avoid navigating when the sorting is done
+          className={`block px-4 py-2 ${
+            isDragging ? "pointer-events-none" : ""
+          }`}
+        >
+          {children}
+        </Link>
+      )}
     </li>
   );
 }
@@ -63,8 +78,10 @@ export function SortableItem({
 export function SortableList({
   onDragEnd,
   className,
+  outerClassName,
   items,
   selectedItem,
+  onClick,
 }: {
   items: {id: string; children: ReactNode}[];
   selectedItem?: string;
@@ -75,6 +92,8 @@ export function SortableList({
     overIndex: number;
   }) => void;
   className?: string;
+  outerClassName?: string;
+  onClick?: (id: string, index: number) => void;
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -97,7 +116,12 @@ export function SortableList({
   }
 
   return (
-    <div className="relative overflow-y-auto overflow-x-hidden">
+    <div
+      className={cn(
+        "relative overflow-y-auto overflow-x-hidden",
+        outerClassName
+      )}
+    >
       <ul className={cn("relative", className)}>
         <DndContext
           sensors={sensors}
@@ -112,11 +136,12 @@ export function SortableList({
             }))}
             strategy={verticalListSortingStrategy}
           >
-            {items.map(item => (
+            {items.map((item, index) => (
               <SortableItem
                 key={item.id}
                 id={item.id}
                 className={selectedItem === item.id ? "selected" : ""}
+                onClick={onClick ? () => onClick?.(item.id, index) : undefined}
               >
                 {item.children}
               </SortableItem>

@@ -13,6 +13,7 @@ import produce from "immer";
 import type {components} from "@server/components";
 import type {ValueQuery} from "@server/classes/Plugins/Timeline";
 import {matchSorter} from "match-sorter";
+import {cn} from "@client/utils/cn";
 
 declare global {
   interface Window {
@@ -143,6 +144,7 @@ export function ActionCombobox({
   value,
   onChange,
   placeholder = "Actions",
+  className,
 }: {
   value: {
     name: string;
@@ -151,6 +153,7 @@ export function ActionCombobox({
   } | null;
   onChange: (value: {name: string; action: string; input?: any}) => void;
   placeholder?: string;
+  className?: string;
 }) {
   const [availableActions] = q.thorium.actions.useNetRequest();
 
@@ -162,7 +165,7 @@ export function ActionCombobox({
 
   return (
     <Combobox value={value} onChange={onChange}>
-      <div className="relative flex-1">
+      <div className={cn("relative flex-1", className)}>
         <div className="cursor-pointer min-h-6 h-6 leading-5 relative border-success border rounded-lg">
           <Combobox.Input
             placeholder={placeholder}
@@ -192,7 +195,7 @@ export function ActionCombobox({
               filteredActions.map(action => (
                 <Combobox.Option
                   key={action.name}
-                  className={({active}) =>
+                  className={({active}: {active: boolean}) =>
                     `cursor-default select-none relative py-1 px-2 ${
                       active ? "text-white bg-success" : ""
                     }`

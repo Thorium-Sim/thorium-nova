@@ -1,5 +1,6 @@
 import {
   ActionAction,
+  ActionCombobox,
   ActionInput,
   ActionState,
 } from "@client/components/Config/ActionBuilder";
@@ -13,7 +14,7 @@ import Select from "@thorium/ui/Select";
 import {capitalCase} from "change-case";
 import {Tooltip} from "@thorium/ui/Tooltip";
 import {FaBan} from "react-icons/fa";
-import {useState} from "react";
+import {Suspense, useState} from "react";
 import {cn} from "@client/utils/cn";
 import {ComponentQuery} from "@server/classes/Plugins/Timeline";
 import {
@@ -21,10 +22,14 @@ import {
   queryReducer,
 } from "@client/components/Config/EntityQueryBuilder";
 import InfoTip from "@thorium/ui/InfoTip";
+import {SortableList} from "@thorium/ui/SortableItem";
+import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
+import {DragEndEvent} from "@dnd-kit/core";
+import uniqid from "@thorium/uniqid";
+import {moveArrayItem} from "@server/utils/moveArrayItem";
 
 export function TimelineAction() {
   const navigate = useNavigate();
-  const [availableActions] = q.thorium.actions.useNetRequest();
 
   const {pluginId, timelineId, stepId, actionId} = useParams() as {
     pluginId: string;
@@ -65,7 +70,25 @@ export function TimelineAction() {
       <Navigate to={`/config/${pluginId}/timelines/${timelineId}/${stepId}`} />
     );
 
-  const input = availableActions.find(a => a.action === action.action)?.input;
+  async function rename(name: string) {
+    try {
+      await q.plugin.timeline.step.action.update.netSend({
+        pluginId,
+        timelineId,
+        stepId,
+        actionId,
+        name,
+      });
+    } catch (err) {
+      if (err instanceof Error) {
+        toast({
+          title: "Error renaming action",
+          body: err.message,
+          color: "error",
+        });
+      }
+    }
+  }
 
   return (
     <Modal
@@ -74,43 +97,12 @@ export function TimelineAction() {
       title="Action Details"
       panelClassName="min-w-[20rem]"
     >
-      <div className="mt-4">
-        <Input
-          labelHidden={false}
-          label="Action Name"
-          placeholder="Advance Timeline"
-          defaultValue={action.name}
-          onBlur={async (e: any) => {
-            try {
-              await q.plugin.timeline.step.action.update.netSend({
-                pluginId,
-                timelineId,
-                stepId,
-                actionId,
-                name: e.target.value,
-              });
-            } catch (err) {
-              if (err instanceof Error) {
-                toast({
-                  title: "Error renaming action",
-                  body: err.message,
-                  color: "error",
-                });
-              }
-            }
-          }}
-        />
-      </div>
-      <div className="mt-4">
-        <h3 className="text-xl font-semibold">Action Inputs</h3>
-        <ActionInput
-          action={action}
-          dispatch={dispatch}
-          input={input}
-          path=""
-        />
-        <CustomInputs action={action} dispatch={dispatch} path="" />
-      </div>
+      <TriggerAction
+        action={action}
+        dispatch={dispatch}
+        rename={rename}
+        path=""
+      />
     </Modal>
   );
 }
@@ -141,12 +133,74 @@ function TriggerInput({
   dispatch: (input: ActionAction) => void;
   path: string;
 }) {
-  const [selectedCondition, setSelectedCondition] = useState<null | number>(0);
+  const [selectedCondition, setSelectedCondition] = useState<null | number>(
+    null
+  );
+  const [selectedAction, setSelectedAction] = useState<null | number>(null);
   // @ts-expect-error Things get messy here
   const condition = action.values?.conditions?.[selectedCondition ?? -1];
+  // @ts-expect-error Things get messy here
+  const actionItem = action.values?.actions?.[selectedAction ?? -1];
+
+  // @ts-expect-error Things get messy here
+  const actions = action.values?.actions?.map(
+    (action: ActionState & {id: string}, index: number) => ({
+      id: action.id,
+      children: (
+        <span className="flex">
+          <span className="flex-1 whitespace-nowrap">
+            {action.name}{" "}
+            <span className="text-gray-400"> - {action.action}</span>
+          </span>
+          <Tooltip content="Delete Action" className="w-min mr-4">
+            <button
+              className=""
+              aria-label="Delete action"
+              onClick={async e => {
+                e.stopPropagation();
+                e.preventDefault();
+
+                dispatch({
+                  type: "value",
+                  path: `${path}.values.actions`,
+                  // @ts-expect-error Things get messy here
+                  value: (action.values.actions || []).filter(
+                    // @ts-expect-error Things get messy here
+                    (_, i) => i !== index
+                  ),
+                });
+              }}
+            >
+              <FaBan className="text-red-500" />
+            </button>
+          </Tooltip>
+        </span>
+      ),
+    })
+  );
+
+  function handleDragEnd({
+    active,
+    overIndex,
+    activeIndex,
+  }: {
+    active: DragEndEvent["active"];
+    overIndex: number;
+    activeIndex: number;
+  }) {
+    // @ts-expect-error Things get messy here
+    const actions = [...(action.values?.actions || [])];
+    moveArrayItem(actions, activeIndex, overIndex);
+    dispatch({
+      type: "value",
+      path: `${path}.values.actions`,
+      // @ts-expect-error
+      value: actions,
+    });
+  }
   return (
     <>
-      <div className="w-[80vw] min-h-[30vh] max-h-[40vh] flex gap-4 mt-4 divide-x">
+      <div className="w-[80vw] min-h-[30vh] max-h-[40vh] flex gap-4 mt-4 items-stretch">
         <div className="flex-1 flex flex-col">
           <p className="font-bold text-center">Conditions</p>
           <div className="relative overflow-y-auto overflow-x-hidden flex-1">
@@ -165,10 +219,10 @@ function TriggerInput({
                     <span className="flex-1">
                       {capitalCase(condition.type)}
                     </span>
-                    <Tooltip content="Delete Action" className="w-min mr-4">
+                    <Tooltip content="Delete Condition" className="w-min mr-4">
                       <button
                         className=""
-                        aria-label="Delete action"
+                        aria-label="Delete condition"
                         onClick={async e => {
                           e.stopPropagation();
                           e.preventDefault();
@@ -213,10 +267,38 @@ function TriggerInput({
             placeholder="Add Condition"
           ></Select>
         </div>
-        <div className="flex-1">
+        <div className="border-r border-gray-400 h-[30vh]" />
+        <div className="flex-1 flex flex-col">
           <p className="font-bold text-center">Actions</p>
+          <SortableList
+            items={actions}
+            onDragEnd={handleDragEnd}
+            selectedItem={actionItem?.id}
+            className="mb-2"
+            outerClassName="flex-1"
+            onClick={(_, index) => setSelectedAction(index)}
+          />
+          <Suspense fallback={<LoadingSpinner />}>
+            <ActionCombobox
+              value={null}
+              onChange={async ({action: newAction, name}) => {
+                dispatch({
+                  type: "value",
+                  path: `${path}.values.actions`,
+                  // @ts-expect-error Things get messy here
+                  value: [
+                    ...action.values.actions,
+                    {action: newAction, name, values: {}, id: uniqid("act-")},
+                  ],
+                });
+              }}
+              placeholder="Add Action"
+              className="flex-grow-0"
+            />
+          </Suspense>
         </div>
       </div>
+      {/* TODO September 1, 2023 - It might be nice to make it so individual conditions can be labeled so it's easier to know what it does at a glance */}
       <Modal
         isOpen={selectedCondition !== null}
         setIsOpen={() => setSelectedCondition(null)}
@@ -228,6 +310,27 @@ function TriggerInput({
             condition={condition}
             dispatch={dispatch}
             index={selectedCondition}
+          />
+        </div>
+      </Modal>
+      <Modal
+        isOpen={selectedAction !== null}
+        setIsOpen={() => setSelectedAction(null)}
+        title="Action"
+        panelClassName="min-w-[30rem]"
+      >
+        <div className="mt-4">
+          <TriggerAction
+            action={actionItem}
+            dispatch={dispatch}
+            rename={name => {
+              dispatch({
+                type: "value",
+                path: `${path}.values.actions.${selectedAction}.name`,
+                value: name,
+              });
+            }}
+            path={`values.actions.${selectedAction}`}
           />
         </div>
       </Modal>
@@ -484,4 +587,46 @@ function TriggerCondition({
     default:
       return null;
   }
+}
+
+function TriggerAction({
+  action,
+  dispatch,
+  rename,
+  path = "",
+}: {
+  action?: ActionState;
+  dispatch: (input: ActionAction) => void;
+  rename: (name: string) => void;
+  path?: string;
+}) {
+  const [availableActions] = q.thorium.actions.useNetRequest();
+  if (!action) return null;
+  const input = availableActions.find(a => a.action === action.action)?.input;
+
+  return (
+    <>
+      <div className="mt-4">
+        <Input
+          labelHidden={false}
+          label="Action Name"
+          placeholder="Advance Timeline"
+          defaultValue={action.name}
+          onBlur={(e: any) => {
+            rename(e.target.value);
+          }}
+        />
+      </div>
+      <div className="mt-4">
+        <h3 className="text-xl font-semibold">Action Inputs</h3>
+        <ActionInput
+          action={action}
+          dispatch={dispatch}
+          input={input}
+          path={path}
+        />
+        <CustomInputs action={action} dispatch={dispatch} path={path} />
+      </div>
+    </>
+  );
 }

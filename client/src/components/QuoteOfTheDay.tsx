@@ -287,6 +287,10 @@ const quotes = [
   "Is the juice worth the squeeze?",
   // PartyKit
   "Everything is better with friends.",
+  // https://twitter.com/bookpoets/status/1697615168711381090
+  "I'll never know, and neither will you of the life you don't choose.",
+  // Hiromu Arakawa
+  "It's a cruel and random world, but the chaos is all so beautiful.",
 ];
 
 const QuoteOfTheDay = () => {
