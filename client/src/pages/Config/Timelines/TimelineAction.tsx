@@ -180,11 +180,9 @@ function TriggerInput({
   );
 
   function handleDragEnd({
-    active,
     overIndex,
     activeIndex,
   }: {
-    active: DragEndEvent["active"];
     overIndex: number;
     activeIndex: number;
   }) {
@@ -197,6 +195,18 @@ function TriggerInput({
       // @ts-expect-error
       value: actions,
     });
+  }
+
+  const conditionOptions = [
+    {id: "entityMatch", label: "Entity Match"},
+    {id: "distance", label: "Distance"},
+  ];
+
+  // Don't allow more than one event listener, since it's impossible
+  // to evaluate two event listeners at the same time.
+  // @ts-expect-error
+  if (action.values?.conditions?.some(c => c.type === "eventListener")) {
+    conditionOptions.push({id: "eventListener", label: "Event Listener"});
   }
   return (
     <>
@@ -250,11 +260,7 @@ function TriggerInput({
             size="xs"
             label="Add Condition"
             labelHidden
-            items={[
-              {id: "entityMatch", label: "Entity Match"},
-              {id: "distance", label: "Distance"},
-              {id: "eventListener", label: "Event Listener"},
-            ]}
+            items={conditionOptions}
             selected={null}
             setSelected={value =>
               dispatch({
@@ -344,7 +350,7 @@ function TriggerCondition({
   index,
 }: {
   condition:
-    | {type: "entityMatch"; query: ComponentQuery[]; matchCount: ">1" | string}
+    | {type: "entityMatch"; query: ComponentQuery[]; matchCount: ">=1" | string}
     | {
         type: "distance";
         entityA: ComponentQuery[];
@@ -392,11 +398,11 @@ function TriggerCondition({
                     label: "0 Entities",
                   },
                   {id: "1", label: "1 Entities"},
-                  {id: ">1", label: "> 1 Entities"},
+                  {id: ">=1", label: ">= 1 Entities"},
                   {id: "custom", label: "Custom"},
                 ]}
                 selected={
-                  ![null, "0", "1", ">1"].includes(condition.matchCount)
+                  ![null, "0", "1", ">=1"].includes(condition.matchCount)
                     ? {id: "custom", label: "Custom"}
                     : condition.matchCount
                     ? {
@@ -413,14 +419,14 @@ function TriggerCondition({
                       ? null!
                       : value.id === "custom"
                       ? "2"
-                      : value.id === ">1"
-                      ? ">1"
+                      : value.id === ">=1"
+                      ? ">=1"
                       : value.id,
                   });
                 }}
               />
             </div>
-            {![null, "0", "1", ">1"].includes(condition.matchCount) ? (
+            {![null, "0", "1", ">=1"].includes(condition.matchCount) ? (
               <div className="flex-1">
                 <Input
                   className="input-sm"
@@ -532,6 +538,7 @@ function TriggerCondition({
                     value: event.target.value ?? "2",
                   })
                 }
+                helperText="For space entities, distance is in kilometers. For entities in ships, distance is in meters."
               />
             </div>
           </div>

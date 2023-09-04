@@ -13,6 +13,6 @@ const shipSystemTypes = z.enum([
 export const isShipSystem = z
   .object({
     type: shipSystemTypes.default("generic"),
-    shipId: z.number().int().positive().default(-1),
+    shipId: z.number().int().default(-1),
   })
   .default({});

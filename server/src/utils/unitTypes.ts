@@ -47,6 +47,9 @@ export function lightYearToLightMinute(len: LightYear) {
 export function kilometerToLightMinute(len: Kilometer) {
   return len * 5.559e-8;
 }
+export function lightMinuteToKilometer(len: LightMinute) {
+  return len / 5.559e-8;
+}
 
 export type Liter = Flavor<number, "liter">;
 

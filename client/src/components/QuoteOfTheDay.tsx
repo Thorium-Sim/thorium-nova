@@ -291,6 +291,7 @@ const quotes = [
   "I'll never know, and neither will you of the life you don't choose.",
   // Hiromu Arakawa
   "It's a cruel and random world, but the chaos is all so beautiful.",
+  "Basking in reflected glory.",
 ];
 
 const QuoteOfTheDay = () => {

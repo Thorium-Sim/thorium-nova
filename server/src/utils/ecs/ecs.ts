@@ -29,6 +29,7 @@ class ECS {
   rng: RNG;
   maxEntityId: number = 1;
   entityIndex: Map<number, Entity> = new Map();
+  componentCache: Map<string, Set<Entity>> = new Map();
   constructor(
     public server: ServerDataModel,
     seed: string | number = "thorium",
@@ -73,6 +74,11 @@ class ECS {
       fastSplice(this.entities, index, 1);
     }
 
+    Object.keys(entity.components).forEach(componentName => {
+      const componentCache = this.componentCache.get(componentName);
+      if (!componentCache) return;
+      componentCache.delete(entity);
+    });
     return entityRemoved;
   }
   /**

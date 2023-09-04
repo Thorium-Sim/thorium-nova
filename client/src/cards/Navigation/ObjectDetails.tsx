@@ -1,7 +1,6 @@
 import {useGetStarmapStore} from "@client/components/Starmap/starmapStore";
 import useAnimationFrame from "@client/hooks/useAnimationFrame";
 import {Fragment, Suspense, useRef} from "react";
-import {lightMinuteToLightYear} from "@server/utils/unitTypes";
 import {Canvas, useFrame} from "@react-three/fiber";
 import {Color, Group} from "three";
 import {Planet, PlanetSphere} from "@client/components/Starmap/Planet";
@@ -11,50 +10,14 @@ import {Clouds} from "@client/components/Starmap/Planet/Clouds";
 import {degToRad} from "three/src/math/MathUtils";
 import {useLiveQuery} from "@thorium/live-query/client";
 import {q} from "@client/context/AppContext";
+import {getNavigationDistance} from "../../../../server/src/utils/getNavigationDistance";
 
-function getDistance(
-  object: {x: number; y: number; z: number},
-  shipPosition: {x: number; y: number; z: number} | null,
-  objectSystem: {x: number; y: number; z: number; id: number} | null,
-  shipSystem: {x: number; y: number; z: number; id: number} | null
-) {
-  if (!shipPosition) return "Unknown";
-  let distance = 0;
-  // Interstellar distances OR they are in the same system
-  if (objectSystem?.id === shipSystem?.id) {
-    let distance = Math.hypot(
-      object.x - shipPosition.x,
-      object.y - shipPosition.y,
-      object.z - shipPosition.z
-    );
-    if (objectSystem?.id) {
-      // Inside a solar system
-      return `${distance.toLocaleString("en-US", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })} KM`;
-    }
-  }
-  // The ship is in interstellar space, calculate the distance from the ship to the object's system.
-  if (!shipSystem && objectSystem) {
-    distance = Math.hypot(
-      shipPosition.x - objectSystem.x,
-      shipPosition.y - objectSystem.y,
-      shipPosition.z - objectSystem.z
-    );
-  }
-  // The ship is in a system and the object is in interstellar space.
-  if (shipSystem && !objectSystem) {
-    distance = Math.hypot(
-      object.x - shipSystem.x,
-      object.y - shipSystem.y,
-      object.z - shipSystem.z
-    );
-  }
-  return `${lightMinuteToLightYear(distance).toLocaleString("en-US", {
+function getDistanceLabel(input: {distance: number; unit: string} | null) {
+  if (!input) return "Unknown";
+  return `${input.distance.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })} LY`;
+  })} ${input.unit}`;
 }
 
 export const ObjectDetails = () => {
@@ -92,13 +55,13 @@ const ObjectData = () => {
     const objectPosition = object?.position;
     if (distanceRef.current && objectPosition) {
       const shipPosition = interpolate(ship.id);
-      const distance = getDistance(
+      const distance = getNavigationDistance(
         objectPosition,
         shipPosition,
         objectSystem,
         shipSystem
       );
-      distanceRef.current.innerText = distance;
+      distanceRef.current.innerText = getDistanceLabel(distance);
     }
   });
 

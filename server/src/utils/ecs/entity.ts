@@ -130,6 +130,25 @@ class Entity {
   addToECS(ecs: ECS) {
     this.ecs = ecs;
     this.setSystemsDirty();
+    this.setComponentCache();
+  }
+  setComponentCache() {
+    Object.keys(this.components).forEach(componentName => {
+      this.addComponentCache(componentName as keyof Components);
+    });
+  }
+  addComponentCache(componentName: keyof Components) {
+    let componentCache = this.ecs?.componentCache.get(componentName);
+    if (!componentCache) {
+      componentCache = new Set();
+      this.ecs?.componentCache.set(componentName, componentCache);
+    }
+    componentCache.add(this);
+  }
+  removeComponentCache(componentName: keyof Components) {
+    const componentCache = this.ecs?.componentCache.get(componentName);
+    if (!componentCache) return;
+    componentCache.delete(this);
   }
   /**
    * Set the systems dirty flag so the ECS knows this entity
@@ -186,7 +205,7 @@ class Entity {
     } catch (err) {
       console.error("Error initializing component:", name, data, err);
     }
-
+    this.addComponentCache(name);
     this.setSystemsDirty();
   }
   /**
@@ -203,6 +222,7 @@ class Entity {
 
     delete this.components[name];
     this.setSystemsDirty();
+    this.removeComponentCache(name);
   }
   /**
    * Update a component field by field, NOT recursively. If the component

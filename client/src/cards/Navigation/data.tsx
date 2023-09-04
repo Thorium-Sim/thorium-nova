@@ -446,7 +446,7 @@ function getObjectOffsetPosition(object: Entity, ship: Entity) {
   }
 }
 
-function getCompletePositionFromOrbit(object: Entity) {
+export function getCompletePositionFromOrbit(object: Entity) {
   const origin = new Vector3(0, 0, 0);
   if (object.components.satellite) {
     if (object.components.satellite.parentId) {
@@ -467,7 +467,7 @@ function getCompletePositionFromOrbit(object: Entity) {
   return new Vector3();
 }
 
-function getObjectSystem(obj: Entity): Entity | null {
+export function getObjectSystem(obj: Entity): Entity | null {
   const objSystemId = obj.components.position?.parentId;
   if (objSystemId) {
     const parentObject = obj.ecs?.entities.find(e => e.id === objSystemId);
