@@ -11,6 +11,7 @@ import {router} from "./init/router";
 import {startServer} from "./init/startServer";
 import {exitHandler} from "./init/exitHandler";
 import {initDefaultPlugin} from "./init/initDefaultPlugin";
+import {processTriggers} from "./utils/evaluateEntityQuery";
 
 setBasePath(thoriumPath);
 
@@ -29,6 +30,18 @@ export async function init() {
     createWSContext: createWSContext as any,
     router,
     extraContext: database,
+    onCall: (opts: any) => {
+      const ecs = database?.flight?.ecs;
+      if (!ecs || opts.type !== "send") return;
+      processTriggers(ecs, {
+        event: opts.path,
+        values: {
+          shipId: opts.ctx.ship?.id,
+          clientId: opts.ctx.client.id,
+          ...opts.rawInput,
+        },
+      });
+    },
   });
 
   await startServer(app);

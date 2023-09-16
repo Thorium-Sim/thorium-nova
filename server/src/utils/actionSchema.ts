@@ -20,16 +20,13 @@ export const valueQuery = z.object({
     .optional(),
 });
 
-export const actionSchema = z
-  .array(
-    z.object({
-      id: z.string(),
-      name: z.string(),
-      action: z.string(),
-      values: z.record(z.union([z.string(), valueQuery])),
-    })
-  )
-  .default([]);
+export const actionItem = z.object({
+  id: z.string(),
+  name: z.string(),
+  action: z.string(),
+  values: z.record(z.any()),
+});
+export const actionSchema = z.array(actionItem).default([]);
 
 const eventListener = z.object({
   type: z.literal("eventListener"),
@@ -41,7 +38,7 @@ const distance = z.object({
   type: z.literal("distance"),
   entityA: z.array(componentQuery),
   entityB: z.array(componentQuery),
-  distance: z.number(),
+  distance: z.coerce.number(),
   condition: z.union([z.literal("lessThan"), z.literal("greaterThan")]),
 });
 

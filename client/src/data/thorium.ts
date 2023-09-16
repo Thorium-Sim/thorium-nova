@@ -87,10 +87,16 @@ export const thorium = t.router({
     .meta({action: true})
     .input(
       z.object({
-        milliseconds: z.number(),
+        milliseconds: z.coerce.number(),
       })
     )
     .send(async ({input}) => {
       await new Promise(resolve => setTimeout(resolve, input.milliseconds));
+    }),
+  debug: t.procedure
+    .meta({action: true})
+    .input(z.object({message: z.string()}))
+    .send(({input}) => {
+      console.debug(input.message);
     }),
 });

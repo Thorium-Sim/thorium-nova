@@ -7,5 +7,6 @@ export const isTrigger = z
     triggeredAt: z.date().nullable().default(null),
     conditions: z.array(conditionSchema).default([]),
     actions: actionSchema,
+    stepId: z.number().optional(),
   })
   .default({});

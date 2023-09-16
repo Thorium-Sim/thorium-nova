@@ -77,45 +77,47 @@ export function TimelineDetails() {
           </div>
 
           <div className="pb-4 flex gap-2">
-            <Input
-              className="flex-1"
-              labelHidden={false}
-              label="Category"
-              type="textarea"
-              defaultValue={timeline.category}
-              onBlur={(e: any) =>
-                q.plugin.timeline.update.netSend({
-                  pluginId,
-                  timelineId,
-                  category: e.target.value,
-                })
-              }
-            />
-            <TagInput
-              className="flex-1"
-              label="Tags"
-              tags={timeline.tags}
-              onAdd={tag => {
-                if (timeline.tags.includes(tag)) return;
-                q.plugin.timeline.update.netSend({
-                  pluginId,
-                  timelineId,
-                  tags: [...timeline.tags, tag],
-                });
-              }}
-              onRemove={tag => {
-                if (!timeline.tags.includes(tag)) return;
-                q.plugin.timeline.update.netSend({
-                  pluginId,
-                  timelineId,
-                  tags: timeline.tags.filter(t => t !== tag),
-                });
-              }}
-            />
+            <div className="flex-1">
+              <Input
+                labelHidden={false}
+                label="Category"
+                type="textarea"
+                defaultValue={timeline.category}
+                onBlur={(e: any) =>
+                  q.plugin.timeline.update.netSend({
+                    pluginId,
+                    timelineId,
+                    category: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div className="flex-1">
+              <TagInput
+                label="Tags"
+                tags={timeline.tags}
+                onAdd={tag => {
+                  if (timeline.tags.includes(tag)) return;
+                  q.plugin.timeline.update.netSend({
+                    pluginId,
+                    timelineId,
+                    tags: [...timeline.tags, tag],
+                  });
+                }}
+                onRemove={tag => {
+                  if (!timeline.tags.includes(tag)) return;
+                  q.plugin.timeline.update.netSend({
+                    pluginId,
+                    timelineId,
+                    tags: timeline.tags.filter(t => t !== tag),
+                  });
+                }}
+              />
+            </div>
           </div>
           <Checkbox
             label="Mission"
-            helperText="Check this box include this mission option when starting a flight."
+            helperText="Check this box to include this mission option when starting a flight."
             checked={timeline.isMission}
             onChange={event =>
               q.plugin.timeline.update.netSend({

@@ -1,6 +1,8 @@
 import {t} from "@server/init/t";
+import {spawnTimeline} from "@server/spawners/timeline";
 import {Entity} from "@server/utils/ecs";
 import {z} from "zod";
+import {triggerStep} from "@server/utils/evaluateEntityQuery";
 
 export const timeline = t.router({
   activate: t.procedure
@@ -14,75 +16,83 @@ export const timeline = t.router({
           timeline => timeline.name === input.timelineId
         );
       if (!timeline) return;
-      // Create the timeline entity
-      const timelineEntity = new Entity();
-      const stepIds: number[] = [];
-      for (let stepItem of timeline.steps) {
-        const step = new Entity();
-        step.addComponent("identity", {
-          name: stepItem.name,
-          description: stepItem.description,
-        });
-        step.addComponent("tags", {tags: stepItem.tags});
-        step.addComponent("isTimelineStep", {
-          actions: stepItem.actions,
-          active: false,
-          timelineId: timelineEntity.id,
-        });
-        ctx.flight.ecs.addEntity(step);
-        stepIds.push(step.id);
-      }
-
-      timelineEntity.addComponent("identity", {
-        name: timeline.name,
-        description: timeline.description,
+      const stepIds = spawnTimeline(timeline, (entity: Entity) => {
+        ctx.flight?.ecs.addEntity(entity);
       });
-      timelineEntity.addComponent("tags", {tags: timeline.tags});
-      timelineEntity.addComponent("isTimeline", {
-        steps: stepIds,
-        isMission: timeline.isMission,
-      });
-      ctx.flight.ecs.addEntity(timelineEntity);
 
-      // August 25, 2023 - Send the necessary pubsub updates
-      // Also trigger the first step
+      // Trigger the first step
+      triggerStep(ctx.flight.ecs.getEntityById(stepIds[0])!);
     }),
   advance: t.procedure
+    .meta({action: true, inputs: ["timelineId"]})
+    .input(
+      z.object({
+        timelineId: z
+          .number()
+          .optional()
+          .describe(
+            "If using in a timeline action trigger, leave blank to advance the current timeline."
+          ),
+        stepId: z.number().optional(),
+      })
+    )
+    .send(({ctx, input}) => {
+      let timeline: Entity | undefined | null;
+      if (input.timelineId !== undefined) {
+        timeline = ctx.flight?.ecs.getEntityById(input.timelineId);
+      } else if (typeof input.stepId === "number") {
+        const timelines = Array.from(
+          ctx.flight?.ecs.componentCache.get("isTimeline") || []
+        );
+        timeline = timelines?.find(timeline =>
+          timeline.components.isTimeline?.steps.includes(input.stepId!)
+        );
+      }
+      if (!timeline) return;
+      const stepIndex = timeline?.components.isTimeline?.currentStep;
+      if (stepIndex === undefined) return;
+      const steps = timeline.components.isTimeline?.steps;
+      if (!steps) return;
+      const nextStep = steps[stepIndex + 1];
+      if (nextStep === undefined) return;
+      timeline.updateComponent("isTimeline", {currentStep: stepIndex + 1});
+
+      triggerStep(ctx.flight!.ecs.getEntityById(steps[stepIndex + 1])!);
+      // TODO: August 25, 2023 Send the necessary pubsub updates
+    }),
+  goToStep: t.procedure
     .meta({action: true})
     .input(
       z.object({
         timelineId: z
           .number()
+          .optional()
           .describe(
-            "If using in a timeline action trigger, leave blank to advance the current timeline."
+            "Leave blank to use the timeline associated with the step."
           ),
+        stepId: z.number(),
       })
     )
     .send(({ctx, input}) => {
-      const timeline = ctx.flight?.ecs.getEntityById(input.timelineId);
-      if (!timeline) return;
-      const currentStep = timeline.components.isTimeline?.currentStep;
-      if (currentStep === undefined) return;
-      const steps = timeline.components.isTimeline?.steps;
-      if (!steps) return;
-      const nextStep = steps[currentStep + 1];
-      if (nextStep === undefined) return;
-      timeline.updateComponent("isTimeline", {currentStep: currentStep + 1});
-
-      // TODO: August 25, 2023 Send the necessary pubsub updates
-    }),
-  goToStep: t.procedure
-    .meta({action: true})
-    .input(z.object({timelineId: z.number(), stepId: z.number()}))
-    .send(({ctx, input}) => {
-      const timeline = ctx.flight?.ecs.getEntityById(input.timelineId);
+      let timeline: Entity | undefined | null;
+      if (input.timelineId !== undefined) {
+        timeline = ctx.flight?.ecs.getEntityById(input.timelineId);
+      } else if (typeof input.stepId === "number") {
+        const timelines = Array.from(
+          ctx.flight?.ecs.componentCache.get("isTimeline") || []
+        );
+        timeline = timelines?.find(timeline =>
+          timeline.components.isTimeline?.steps.includes(input.stepId!)
+        );
+      }
       if (!timeline) return;
       const steps = timeline.components.isTimeline?.steps;
       if (!steps) return;
-      const step = steps[input.stepId];
-      if (!step) return;
-      timeline.updateComponent("isTimeline", {currentStep: input.stepId});
+      const stepIndex = steps.indexOf(input.stepId);
+      if (typeof stepIndex !== "number" || stepIndex === -1) return;
+      timeline.updateComponent("isTimeline", {currentStep: stepIndex});
 
+      triggerStep(ctx.flight!.ecs.getEntityById(steps[stepIndex])!);
       // TODO: August 25, 2023 Send the necessary pubsub updates
     }),
   deactivate: t.procedure

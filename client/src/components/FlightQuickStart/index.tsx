@@ -67,12 +67,13 @@ export default function FlightQuickStart() {
             onClick={async () => {
               // TODO November 20, 2021 - Do something with the "Flight Director" parameter
               // once we get Flight Director controls implemented.
+              // TODO September 6, 2023 - Add support for multiple player ships
               let {
                 crewCount,
                 shipName,
                 shipId: shipTemplate,
                 flightName,
-                missionId: missionName,
+                missionId,
                 flightDirector,
                 startingPointId: startingPoint,
               } = state;
@@ -96,10 +97,10 @@ export default function FlightQuickStart() {
                     crewCount,
                     shipName,
                     shipTemplate,
-                    missionName,
-                    startingPoint,
                   },
                 ],
+                missionId,
+                startingPoint,
               });
               setIsLoading(false);
             }}

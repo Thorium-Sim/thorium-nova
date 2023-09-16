@@ -3,6 +3,10 @@ import {databaseName} from "../utils/appPaths";
 import randomWords from "@thorium/random-words";
 import {FlightDataModel} from "../classes/FlightDataModel";
 
+export let database: {
+  server: ServerDataModel;
+  flight: FlightDataModel | null;
+};
 export async function buildDatabase() {
   // Create the primary database
   // This is for any user data that is persisted between flights
@@ -36,7 +40,7 @@ export async function buildDatabase() {
     flight.initEcs(serverModel);
   }
 
-  const database = {server: serverModel, flight};
+  database = {server: serverModel, flight};
 
   return database;
 }

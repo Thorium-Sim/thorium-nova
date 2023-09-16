@@ -1,5 +1,6 @@
 import {ECS, Entity} from "./ecs";
 import {
+  evaluateAction,
   evaluateEntityQuery,
   evaluateTriggerCondition,
   selectValueQuery,
@@ -455,5 +456,132 @@ describe("evaluate trigger condition", () => {
         }
       )
     ).toBe(true);
+  });
+});
+describe("evaluate action", () => {
+  it("should evaluate an action with literal values", () => {
+    const ecs = new ECS(server);
+
+    expect(
+      evaluateAction(ecs, {
+        action: "test",
+        values: {value1: "A", value2: "2"},
+        name: "test",
+        id: "test",
+      })
+    ).toEqual([{value1: "A", value2: "2"}]);
+  });
+  it("should evaluate an action with a single value query", () => {
+    const ecs = new ECS(server);
+
+    const entity = new Entity();
+    entity.addComponent("identity", {
+      name: "Identity",
+    });
+    entity.addComponent("tags", {
+      tags: ["test"],
+    });
+    ecs.addEntity(entity);
+
+    expect(
+      evaluateAction(ecs, {
+        action: "test",
+        values: {
+          value1: {
+            query: [
+              {
+                component: "tags",
+                property: "tags",
+                comparison: "contains",
+                value: "test",
+              },
+            ],
+            select: {
+              component: "identity",
+              property: "name",
+              matchType: "first",
+            },
+          },
+          value2: "2",
+        },
+        name: "test",
+        id: "test",
+      })
+    ).toEqual([{value1: "Identity", value2: "2"}]);
+  });
+  it("should evaluate an action with a multiple value query", () => {
+    const ecs = new ECS(server);
+
+    const entity = new Entity();
+    entity.addComponent("identity", {
+      name: "Identity 1",
+    });
+    entity.addComponent("tags", {
+      tags: ["test"],
+    });
+    ecs.addEntity(entity);
+    const entity2 = new Entity();
+    entity2.addComponent("identity", {
+      name: "Identity 2",
+    });
+    entity2.addComponent("tags", {
+      tags: ["test"],
+    });
+    ecs.addEntity(entity2);
+
+    expect(
+      evaluateAction(ecs, {
+        action: "test",
+        values: {
+          value1: {
+            query: [
+              {
+                component: "tags",
+                property: "tags",
+                comparison: "contains",
+                value: "test",
+              },
+            ],
+            select: {
+              component: "identity",
+              property: "name",
+              matchType: "first",
+            },
+          },
+          value2: "2",
+        },
+        name: "test",
+        id: "test",
+      })
+    ).toEqual([{value1: "Identity 1", value2: "2"}]);
+
+    expect(
+      evaluateAction(ecs, {
+        action: "test",
+        values: {
+          value1: {
+            query: [
+              {
+                component: "tags",
+                property: "tags",
+                comparison: "contains",
+                value: "test",
+              },
+            ],
+            select: {
+              component: "identity",
+              property: "name",
+              matchType: "all",
+            },
+          },
+          value2: "2",
+        },
+        name: "test",
+        id: "test",
+      })
+    ).toEqual([
+      {value1: "Identity 1", value2: "2"},
+      {value1: "Identity 2", value2: "2"},
+    ]);
   });
 });

@@ -2,7 +2,6 @@ import {t} from "@server/init/t";
 import {pubsub} from "@server/init/pubsub";
 import {matchSorter} from "match-sorter";
 import ShipPlugin from "server/src/classes/Plugins/Ship";
-import {DataContext} from "server/src/utils/DataContext";
 import {Entity} from "server/src/utils/ecs";
 import {Coordinates} from "server/src/utils/unitTypes";
 import {z} from "zod";
@@ -20,9 +19,11 @@ export const starmapCore = t.router({
     return data;
   }),
   system: t.procedure
-    .input(z.object({systemId: z.number()}))
+    .input(z.object({systemId: z.number().nullish()}))
     .request(({ctx, input}) => {
       if (!ctx.flight) throw new Error("No flight in progress");
+      if (input?.systemId === null || input?.systemId === undefined)
+        throw new Error("No system id provided");
       const data = ctx.flight.ecs.getEntityById(input.systemId);
       if (!data?.components.isSolarSystem)
         throw new Error("Not a solar system");

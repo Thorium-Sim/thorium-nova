@@ -423,6 +423,33 @@ export const timeline = t.router({
       }
     }),
   step,
+  missions: t.procedure.request(({ctx}) => {
+    return ctx.server.plugins.reduce(
+      (
+        acc: {
+          name: string;
+          description: string;
+          category: string;
+          cover: string;
+          pluginId: string;
+        }[],
+        plugin
+      ) => {
+        if (!plugin.active) return acc;
+        const missions = plugin.aspects.timelines
+          .filter(timeline => timeline.isMission)
+          .map(({name, description, category, assets}) => ({
+            name,
+            description,
+            category,
+            cover: assets.cover,
+            pluginId: plugin.id,
+          }));
+        return [...acc, ...missions];
+      },
+      []
+    );
+  }),
   startingPoints: t.procedure.request(({ctx}) => {
     return ctx.server.plugins.reduce(
       (points: FlightStartingPoint[], plugin) => {

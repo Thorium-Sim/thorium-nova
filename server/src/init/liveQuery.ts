@@ -4,7 +4,7 @@ import {randomNameGenerator} from "@server/utils/randomNameGenerator";
 import {ServerClient} from "@thorium/live-query/adapters/fastify-adapter";
 import {inferAsyncReturnType} from "@thorium/live-query/server";
 import {AnyRouter} from "@thorium/live-query/server/router";
-import {FastifyRequest, FastifyReply} from "fastify";
+import {FastifyRequest} from "fastify";
 import {DataContext} from "../utils/DataContext";
 import {buildDatabase} from "./buildDatabase";
 import {pubsub} from "./pubsub";
@@ -18,11 +18,9 @@ export function getDataContext(id: string) {
 type ExtraContext = Awaited<ReturnType<typeof buildDatabase>>;
 export function createContext({
   req,
-  res,
   context,
 }: {
   req: FastifyRequest;
-  res: FastifyReply;
   context: ExtraContext;
 }) {
   const id = req.headers["client-id"] as string;

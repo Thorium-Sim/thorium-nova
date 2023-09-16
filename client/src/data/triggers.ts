@@ -16,12 +16,11 @@ export const triggers = t.router({
       })
     )
     .send(async ({ctx, input}) => {
-      const {name, ...trigger} = input;
+      const {name, tags, ...trigger} = input;
       const entity = new Entity();
       entity.addComponent("identity", {name});
       entity.addComponent("isTrigger", trigger);
-      entity.addComponent("tags", {tags: input.tags});
-
+      entity.addComponent("tags", {tags});
       ctx.flight?.ecs.addEntity(entity);
 
       return {triggerId: entity.id};

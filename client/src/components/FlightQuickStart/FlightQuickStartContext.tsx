@@ -87,6 +87,7 @@ const QuickStartProvider = ({children}: {children: React.ReactNode}) => {
       flightDirector: false,
       shipName: "Voyager",
       shipId: {pluginId: "Thorium Default", shipId: "Astra Frigate"},
+      missionId: {pluginId: "Thorium Default", missionId: "Sandbox"},
     },
     "flightConfig"
   );

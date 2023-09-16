@@ -36,5 +36,13 @@ export function getNavigationDistance(
       object.z - shipSystem.z
     );
   }
+  // The ship and object are in different systems.
+  if (objectSystem && shipSystem && objectSystem.id !== shipSystem.id) {
+    distance = Math.hypot(
+      objectSystem.x - shipSystem.x,
+      objectSystem.y - shipSystem.y,
+      objectSystem.z - shipSystem.z
+    );
+  }
   return {distance: lightMinuteToLightYear(distance), unit: "LY"};
 }

@@ -292,6 +292,11 @@ const quotes = [
   // Hiromu Arakawa
   "It's a cruel and random world, but the chaos is all so beautiful.",
   "Basking in reflected glory.",
+  "This crazy mad world keeps turning around! You're right-side up then you're upside down!",
+  "You ever have a dream that never came true?",
+  "Colorless green ideas sleep furiously",
+  "Hued ideas mock the brain, notions of color not yet color, of pure, touchless, branching pallor of invading, essential Green",
+  "If you see the same tree twice in the forest, you’re lost.",
 ];
 
 const QuoteOfTheDay = () => {

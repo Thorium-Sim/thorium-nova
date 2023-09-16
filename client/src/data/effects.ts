@@ -39,24 +39,21 @@ export const effects = t.router({
       return {effect: publish.effect, config: publish.config};
     }),
   trigger: t.procedure
+    .meta({action: true, event: true})
     .input(
-      z.union([
-        z.object({
-          effect: effectOptions,
-          config: effectConfig,
-          shipId: z.number(),
-          station: z.union([z.literal("all"), z.literal("bridge"), z.string()]),
-        }),
-        z.object({
-          effect: effectOptions,
-          config: effectConfig,
-          clientId: z.string(),
-        }),
-      ])
+      z.object({
+        effect: effectOptions,
+        config: effectConfig,
+        shipId: z.number().optional(),
+        station: z
+          .union([z.literal("all"), z.literal("bridge"), z.string()])
+          .optional(),
+        clientId: z.string().optional(),
+      })
     )
     .send(({ctx, input}) => {
-      const clientId = "clientId" in input ? input.clientId : null;
-      const shipId = "shipId" in input ? input.shipId : null;
+      const clientId = "clientId" in input ? input.clientId || null : null;
+      const shipId = "shipId" in input ? input.shipId || null : null;
       let station: string | null = null;
       if ("shipId" in input) {
         const stationList =
@@ -64,7 +61,9 @@ export const effects = t.router({
             .stationComplement?.stations || [];
 
         station =
-          "shipId" in input ? input.station : randomFromList(stationList)?.name;
+          ("shipId" in input
+            ? input.station
+            : randomFromList(stationList)?.name) || null;
       }
       const payload = {
         effect: input.effect,
