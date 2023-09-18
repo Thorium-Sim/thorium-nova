@@ -297,6 +297,9 @@ const quotes = [
   "Colorless green ideas sleep furiously",
   "Hued ideas mock the brain, notions of color not yet color, of pure, touchless, branching pallor of invading, essential Green",
   "If you see the same tree twice in the forest, you’re lost.",
+  "We do this, not becasue it is easy, but because we thought it would be easy.",
+  // Jack London
+  "I’d rather be ashes than dust.",
 ];
 
 const QuoteOfTheDay = () => {
