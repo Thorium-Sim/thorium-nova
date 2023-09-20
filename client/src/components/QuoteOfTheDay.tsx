@@ -300,6 +300,7 @@ const quotes = [
   "We do this, not becasue it is easy, but because we thought it would be easy.",
   // Jack London
   "I’d rather be ashes than dust.",
+  "It's better to be approximately right than exactly wrong.",
 ];
 
 const QuoteOfTheDay = () => {
