@@ -296,6 +296,7 @@ function PluginDetails() {
             </InfoTip>
           </span>
           <UploadWell
+            className="max-w-sm aspect-square h-auto"
             accept="image/*"
             onChange={(files: FileList) => {
               if (!plugin) return;

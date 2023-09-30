@@ -36,7 +36,10 @@ export const plugin = t.router({
       return true;
     })
     .request(({ctx, input}) => {
-      return ctx.server.plugins.find(plugin => plugin.id === input.pluginId);
+      const plugin = ctx.server.plugins.find(
+        plugin => plugin.id === input.pluginId
+      );
+      return plugin ? {...plugin, coverImage: plugin.coverImage} : null;
     }),
   create: t.procedure
     .input(z.object({name: z.string()}))
