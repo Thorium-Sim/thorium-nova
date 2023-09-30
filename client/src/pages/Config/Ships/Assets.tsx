@@ -47,9 +47,11 @@ export function Assets() {
           Model{" "}
           <InfoTip>
             Models should be in .glb format. Top and side views are
-            automatically generated from the model.
-            {/* TODO November 1 2021 - Write a page about how to create 3D models */}
-            <Link to="/docs" className="text-purple-300">
+            automatically generated from the model.{" "}
+            <Link
+              to="/docs/plugins/ships#formatting-ship-models"
+              className="text-purple-300"
+            >
               Read about how to create compatible models.
             </Link>
           </InfoTip>

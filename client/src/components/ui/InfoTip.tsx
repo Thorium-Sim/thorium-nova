@@ -43,8 +43,12 @@ const InfoTip = ({children}: {children: ReactNode}) => {
     }
   }, [update, visible]);
 
-  useOnClickOutside(refs.reference as React.MutableRefObject<HTMLElement>, () =>
-    setVisible(false)
+  useOnClickOutside(
+    refs.reference as React.MutableRefObject<HTMLElement>,
+    event => {
+      if (refs.floating.current?.contains(event.target as Node)) return;
+      setVisible(false);
+    }
   );
   return (
     <>

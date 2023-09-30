@@ -234,7 +234,7 @@ export default function DocLayout() {
   return (
     <div className="docs h-full">
       {location.pathname === "/docs" ? (
-        <Navigate to={"/docs/quick-start/getting-started"} />
+        <Navigate to={"/docs/quick-start/getting-started"} replace />
       ) : null}
       <Menubar>
         <div className="flex justify-around gap-4 h-[calc(100%-2rem)]">
