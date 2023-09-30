@@ -299,8 +299,10 @@ const quotes = [
   "If you see the same tree twice in the forest, you’re lost.",
   "We do this, not becasue it is easy, but because we thought it would be easy.",
   // Jack London
-  "I’d rather be ashes than dust.",
+  "I'd rather be ashes than dust.",
   "It's better to be approximately right than exactly wrong.",
+  // Thomas Merton
+  "What choice remains? Well, to be ordinary is not a choice: It is the usual freedom of men and women without their visions.",
 ];
 
 const QuoteOfTheDay = () => {
