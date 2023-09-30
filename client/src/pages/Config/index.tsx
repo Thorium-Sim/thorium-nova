@@ -1,8 +1,9 @@
-import {q} from "@client/context/AppContext";
+import {Fallback, q} from "@client/context/AppContext";
 import Menubar from "@thorium/ui/Menubar";
 import {lazy, Suspense} from "react";
 import {Navigate, Route, Routes} from "react-router-dom";
 import NoMatch from "../NotFound";
+import {ErrorBoundary} from "react-error-boundary";
 
 const PluginEdit = lazy(() => import("./PluginEdit"));
 const ConfigList = lazy(() => import("./ConfigList"));
@@ -23,27 +24,32 @@ export default function ConfigRoutes() {
       <div className="z-10 relative h-full">
         <Menubar>
           <Suspense>
-            <Routes>
-              <Route path="/" element={<PluginEdit />} />
-              <Route path="/:pluginId" element={<PluginEdit />} />
-              <Route path="/:pluginId/list" element={<ConfigList />} />
-              <Route path="/:pluginId/ships/*" element={<ShipsConfig />} />
-              <Route path="/:pluginId/themes/*" element={<ThemesConfig />} />
-              <Route path="/:pluginId/starmap/*" element={<StarmapConfig />} />
-              <Route
-                path="/:pluginId/systems/*"
-                element={<ShipSystemConfig />}
-              />
-              <Route
-                path="/:pluginId/inventory/*"
-                element={<InventoryConfig />}
-              />
-              <Route
-                path="/:pluginId/timelines/*"
-                element={<TimelinesConfig />}
-              />
-              <Route path="*" element={<NoMatch />} />
-            </Routes>
+            <ErrorBoundary FallbackComponent={Fallback}>
+              <Routes>
+                <Route path="/" element={<PluginEdit />} />
+                <Route path="/:pluginId" element={<PluginEdit />} />
+                <Route path="/:pluginId/list" element={<ConfigList />} />
+                <Route path="/:pluginId/ships/*" element={<ShipsConfig />} />
+                <Route path="/:pluginId/themes/*" element={<ThemesConfig />} />
+                <Route
+                  path="/:pluginId/starmap/*"
+                  element={<StarmapConfig />}
+                />
+                <Route
+                  path="/:pluginId/systems/*"
+                  element={<ShipSystemConfig />}
+                />
+                <Route
+                  path="/:pluginId/inventory/*"
+                  element={<InventoryConfig />}
+                />
+                <Route
+                  path="/:pluginId/timelines/*"
+                  element={<TimelinesConfig />}
+                />
+                <Route path="*" element={<NoMatch />} />
+              </Routes>
+            </ErrorBoundary>
           </Suspense>
         </Menubar>
       </div>

@@ -18,7 +18,7 @@ import {useSessionStorage} from "@client/hooks/useSessionStorage";
 import {randomFromList} from "@server/utils/randomFromList";
 import {Disconnected, Reconnecting} from "./ConnectionStatus";
 
-const Fallback: React.FC<FallbackProps> = ({error}) => {
+export const Fallback: React.FC<FallbackProps> = ({error}) => {
   return (
     <div className="p-4 text-white">
       <h1 className="text-5xl">Error</h1>

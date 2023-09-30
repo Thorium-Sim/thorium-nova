@@ -99,6 +99,7 @@ const QuickStartProvider = ({children}: {children: React.ReactNode}) => {
     });
   }, [set]);
 
+  console.log(value[0]);
   return (
     <QuickStartContext.Provider value={value}>
       {children}
