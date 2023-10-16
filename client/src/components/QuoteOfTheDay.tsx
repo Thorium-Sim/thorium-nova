@@ -207,6 +207,8 @@ const quotes = [
   "In the simple lives the beautiful.",
   // Steve Jobs
   "The most powerful person in the world is the storyteller.",
+  "I love and admire my species, living and dead, and am totally dependent on them for my life and well being.",
+  "You can't connect the dots looking forward; you can only connect them looking backwards. So you have to trust that the dots will somehow connect in your future.",
   // Hey Now
   "Imagination calling mirrors for you.",
   // Albert Einstein
