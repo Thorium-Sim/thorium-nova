@@ -66,12 +66,20 @@ export class FlightDataModel extends FSDataStore {
       entity.dispose();
     });
   }
-  initEcs(server: ServerDataModel) {
+  async initEcs(server: ServerDataModel) {
     this.ecs = new ECS(server);
     systems.forEach(Sys => {
       this.ecs.addSystem(new Sys());
     });
+    // We need to selectively add certain entities first
     this.entities.forEach(({id, components}) => {
+      if (components.isSolarSystem) {
+        const e = new Entity(id, components);
+        this.ecs.addEntity(e);
+      }
+    });
+    this.entities.forEach(({id, components}) => {
+      if (components.isSolarSystem) return;
       const e = new Entity(id, components);
       this.ecs.addEntity(e);
     });

@@ -22,8 +22,9 @@ import useDragSelect, {
   get3dSelectedObjects,
 } from "client/src/hooks/useDragSelect";
 import {Mesh, PerspectiveCamera, Vector3} from "three";
-import {FaArrowLeft} from "react-icons/fa";
-import {GiTargeted} from "react-icons/gi";
+import {FaArrowLeft, FaHandPaper, FaShieldAlt} from "react-icons/fa";
+import {GiBroadsword, GiTargeted} from "react-icons/gi";
+import {AiFillAlert} from "react-icons/ai";
 import Button from "@thorium/ui/Button";
 import {useCancelFollow} from "client/src/components/Starmap/useCancelFollow";
 import {useFollowEntity} from "client/src/components/Starmap/useFollowEntity";
@@ -33,6 +34,8 @@ import {Coordinates} from "server/src/utils/unitTypes";
 import {q} from "@client/context/AppContext";
 import {useLiveQuery} from "@thorium/live-query/client";
 import {useFrame} from "@react-three/fiber";
+import clsx from "clsx";
+import {Tooltip} from "@thorium/ui/Tooltip";
 
 export function StarmapCore() {
   const ref = useRef<HTMLDivElement>(null);
@@ -45,11 +48,105 @@ export function StarmapCore() {
           <StarmapCoreMenubar />
         </div>
         <CanvasWrapper />
-        <div className="absolute left-4 bottom-4 w-96">
-          <ZoomSliderComp />
+        <div className="absolute left-4 bottom-0 flex gap-2 items-end">
+          <div className="w-96">
+            <ZoomSliderComp />
+          </div>
+          <ShipControls />
         </div>
       </StarmapStoreProvider>
     </div>
+  );
+}
+
+function ShipControls() {
+  const useStarmapStore = useGetStarmapStore();
+  const followEntityId = useStarmapStore(store => store.followEntityId);
+
+  const [starmapShip] = q.starmapCore.ship.useNetRequest({
+    shipId: followEntityId,
+  });
+
+  return (
+    <>
+      {followEntityId && starmapShip?.behavior ? (
+        <>
+          <Tooltip content="Patrol">
+            <Button
+              onClick={() =>
+                q.starmapCore.setBehavior.netSend({
+                  ships: [followEntityId],
+                  behavior: "patrol",
+                })
+              }
+              className={clsx("btn-sm btn-info btn-outline", {
+                "btn-active": starmapShip.behavior.objective === "patrol",
+              })}
+            >
+              <AiFillAlert />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Hold Position">
+            <Button
+              onClick={() =>
+                q.starmapCore.setBehavior.netSend({
+                  ships: [followEntityId],
+                  behavior: "hold",
+                })
+              }
+              className={clsx("btn-sm btn-warning btn-outline", {
+                "btn-active": starmapShip.behavior.objective === "hold",
+              })}
+            >
+              <FaHandPaper />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Attack">
+            <Button
+              onClick={() =>
+                q.starmapCore.setBehavior.netSend({
+                  ships: [followEntityId],
+                  behavior: "attack",
+                })
+              }
+              className={clsx("btn-sm btn-error btn-outline", {
+                "btn-active": starmapShip.behavior.objective === "attack",
+              })}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fillRule="evenodd"
+                strokeLinejoin="round"
+                strokeMiterlimit="2"
+                clipRule="evenodd"
+                viewBox="0 0 700 700"
+                className="w-4 h-4"
+              >
+                <path
+                  fill="currentColor"
+                  d="M212 533L88 639l-25 48-56-9-7-55 49-24 112-119-74-78 26-27 101 74 30 31 70 105-28 26-74-78zM700 13l-70 155-368 320-11-15-30-32-13-10L540 77l160-64z"
+                ></path>
+              </svg>
+            </Button>
+          </Tooltip>
+          <Tooltip content="Follow & Defend">
+            <Button
+              onClick={() =>
+                q.starmapCore.setBehavior.netSend({
+                  ships: [followEntityId],
+                  behavior: "defend",
+                })
+              }
+              className={clsx("btn-sm btn-primary btn-outline", {
+                "btn-active": starmapShip.behavior.objective === "defend",
+              })}
+            >
+              <FaShieldAlt />
+            </Button>
+          </Tooltip>
+        </>
+      ) : null}
+    </>
   );
 }
 
@@ -335,27 +432,27 @@ export function SolarSystemWrapper() {
     >
       {starmapEntities.map(entity => {
         if (planetsHidden) return null;
-        if (entity.components.isStar) {
-          if (!entity.components.satellite) return null;
-          return (
-            <Suspense key={entity.id} fallback={null}>
-              <ErrorBoundary
-                FallbackComponent={() => <></>}
-                onError={err => console.error(err)}
-              >
-                <StarEntity
-                  star={{
-                    id: entity.id,
-                    hue: entity.components.isStar.hue,
-                    isWhite: entity.components.isStar.isWhite,
-                    radius: entity.components.isStar.radius,
-                    satellite: entity.components.satellite,
-                  }}
-                />
-              </ErrorBoundary>
-            </Suspense>
-          );
-        }
+        // if (entity.components.isStar) {
+        //   if (!entity.components.satellite) return null;
+        //   return (
+        //     <Suspense key={entity.id} fallback={null}>
+        //       <ErrorBoundary
+        //         FallbackComponent={() => <></>}
+        //         onError={err => console.error(err)}
+        //       >
+        //         <StarEntity
+        //           star={{
+        //             id: entity.id,
+        //             hue: entity.components.isStar.hue,
+        //             isWhite: entity.components.isStar.isWhite,
+        //             radius: entity.components.isStar.radius,
+        //             satellite: entity.components.satellite,
+        //           }}
+        //         />
+        //       </ErrorBoundary>
+        //     </Suspense>
+        //   );
+        // }
         if (entity.components.isPlanet) {
           if (!entity.components.satellite) return null;
 

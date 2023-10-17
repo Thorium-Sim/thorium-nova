@@ -16,9 +16,13 @@ export async function buildDatabase() {
     {path: databaseName}
   );
 
+  // Wait for the plugins to load. Shouldn't take long.
   await new Promise<void>(res => {
-    setInterval(() => {
-      if (serverModel.plugins.length > 0) res();
+    const interval = setInterval(() => {
+      if (serverModel.plugins.length > 0) {
+        clearInterval(interval);
+        res();
+      }
     }, 100);
   });
 
@@ -37,7 +41,7 @@ export async function buildDatabase() {
       },
       {path: `/flights/${flightName}.flight`}
     );
-    flight.initEcs(serverModel);
+    await flight.initEcs(serverModel);
   }
 
   database = {server: serverModel, flight};
