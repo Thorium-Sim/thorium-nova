@@ -25,7 +25,7 @@ import {PlanetDisclosure} from "./EditorPalettes/PlanetDisclosure";
 import {OrbitDisclosure} from "./EditorPalettes/OrbitDisclosure";
 import {PlanetAssetDisclosure} from "././EditorPalettes/PlanetAssetDisclosure";
 import StarPlugin from "server/src/classes/Plugins/Universe/Star";
-import {PolarGrid} from "./PolarGrid";
+import {Grid, PolarGrid} from "./PolarGrid";
 import {useSystemIds} from "./useSystemIds";
 import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
@@ -38,7 +38,8 @@ const ACTION = CameraControlsClass.ACTION;
 
 // 10% further than Neptune's orbit
 export const SOLAR_SYSTEM_MAX_DISTANCE: Kilometer = 4_000_000_000 * 1.1;
-
+const GRID_SIZE: Kilometer = 2_000_000;
+const CELLS = Math.ceil(SOLAR_SYSTEM_MAX_DISTANCE / GRID_SIZE);
 function HabitableZone() {
   const [pluginId, solarSystemId] = useSystemIds();
   const [{habitableZoneInner = 0, habitableZoneOuter = 3, stars}] =
@@ -100,7 +101,6 @@ export function SolarSystemMap({
   const viewingMode = useStarmapStore(store => store.viewingMode);
 
   const isViewscreen = viewingMode === "viewscreen";
-
   return (
     <Suspense fallback={null}>
       {!pluginId ? null : <HabitableZone />}
@@ -124,6 +124,8 @@ export function SolarSystemMap({
             rotation={[0, (2 * Math.PI) / 12, 0]}
             args={[maxDistance, 12, 20, 64, 0xffffff, 0xffffff]}
           />
+          {/* Adjust opacity as the camera zooms in. */}
+          <Grid args={[CELLS * GRID_SIZE * 2, CELLS, 0xffffff, 0xffffff]} />
         </>
       )}
       {children}
