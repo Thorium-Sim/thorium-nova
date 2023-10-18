@@ -1,7 +1,6 @@
 import {
   PolarGridHelperProps,
   GridHelperProps,
-  useThree,
   useFrame,
 } from "@react-three/fiber";
 import * as React from "react";

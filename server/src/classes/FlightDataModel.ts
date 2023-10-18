@@ -6,6 +6,9 @@ import {FlightClient} from "./FlightClient";
 import {FSDataStore, FSDataStoreOptions} from "@thorium/db-fs";
 import ShipPlugin from "./Plugins/Ship";
 import {DefaultUIDGenerator} from "../utils/ecs/uid";
+import RAPIER, {World} from "@dimforge/rapier3d-compat";
+import path from "path";
+import {thoriumPath} from "@server/utils/appPaths";
 
 export class FlightDataModel extends FSDataStore {
   static INTERVAL = 1000 / 60;
@@ -90,6 +93,28 @@ export class FlightDataModel extends FSDataStore {
     DefaultUIDGenerator.uid = maxId + 1;
     this.run();
   }
+  async initPhysics() {
+    // Fetch and calculate all of the colliders for the ships in the plugins
+    // Loop over every ship in every loaded plugin
+    let ships: ShipPlugin[] = [];
+    for (let plugin of this.serverDataModel.plugins) {
+      if (!this.pluginIds.includes(plugin.id)) continue;
+      for (let ship of plugin.aspects.ships) {
+        ships.push(ship);
+      }
+    }
+    await Promise.all(
+      ships.map(async ship => {
+        const colliderDesc = await generateColliderDesc(
+          path.join(thoriumPath, ship.assets.model),
+          ship.mass
+        );
+        if (!colliderDesc) return;
+        this.ecs.colliderCache.set(ship.assets.model, colliderDesc);
+      })
+    );
+  }
+
   reset() {
     // TODO: Flight Reset Handling
   }
@@ -137,4 +162,22 @@ export class FlightDataModel extends FSDataStore {
     };
     return data;
   }
+}
+
+async function generateColliderDesc(filePath: string, mass: number) {
+  const ConvexHull = await import("three-stdlib").then(res => res.ConvexHull);
+  const loadGltf = await import("node-three-gltf").then(res => res.loadGltf);
+
+  const gltf = await loadGltf(filePath);
+  const hull = new ConvexHull();
+  hull.setFromObject(gltf.scene.children[0]);
+
+  const vertices = [];
+  for (let vertex of hull.vertices) {
+    vertices.push(vertex.point.x, vertex.point.y, vertex.point.z);
+  }
+  const verticesFloat32 = new Float32Array(vertices);
+  const colliderDesc =
+    RAPIER.ColliderDesc.convexHull(verticesFloat32)?.setMass(mass);
+  return colliderDesc;
 }

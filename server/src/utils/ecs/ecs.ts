@@ -8,6 +8,8 @@ import performance from "./performance";
 import {fastSplice} from "./utils";
 import {RNG, createRNG} from "@thorium/rng";
 import {ServerDataModel} from "server/src/classes/ServerDataModel";
+import type {ColliderDesc, World} from "@dimforge/rapier3d-compat";
+
 class ECS {
   /**
    * Store all entities of the ECS.
@@ -30,6 +32,7 @@ class ECS {
   maxEntityId: number = 1;
   entityIndex: Map<number, Entity> = new Map();
   componentCache: Map<string, Set<Entity>> = new Map();
+  colliderCache: Map<string, ColliderDesc> = new Map();
   constructor(
     public server: ServerDataModel,
     seed: string | number = "thorium",

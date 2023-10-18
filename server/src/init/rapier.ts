@@ -1,0 +1,218 @@
+import RAPIER from "@dimforge/rapier3d-compat";
+import {getOrbitPosition} from "@server/utils/getOrbitPosition";
+import {ECS, Entity} from "../utils/ecs";
+import {Euler, Quaternion, Vector, Vector3} from "three";
+
+import {
+  Kilometer,
+  degToRad,
+  solarMassToKilograms,
+  terranMassToKilograms,
+} from "@server/utils/unitTypes";
+import type {World} from "@dimforge/rapier3d-compat";
+
+/**
+ * This distance is just about where RapierJS goes from
+ * 0.001 precision to 0.01 precision.
+ */
+export const COLLISION_PHYSICS_LIMIT: Kilometer = 2_000_000;
+export const SECTOR_GRID_SIZE: Kilometer = COLLISION_PHYSICS_LIMIT * 2;
+
+export async function initRapier() {
+  await RAPIER.init();
+}
+export {RAPIER};
+
+const tempVector = new Vector3();
+
+/**
+ * Given a position vector, return the origin point of the world that contains that point.
+ */
+function getWorldPosition(entityPosition: {x: number; y: number; z: number}) {
+  // World positions snap to the center of grid segments.
+  const x =
+    Math.floor(entityPosition.x / SECTOR_GRID_SIZE) * SECTOR_GRID_SIZE +
+    SECTOR_GRID_SIZE / 2;
+  const y =
+    Math.floor(entityPosition.y / SECTOR_GRID_SIZE) * SECTOR_GRID_SIZE +
+    SECTOR_GRID_SIZE / 2;
+  const z =
+    Math.floor(entityPosition.z / SECTOR_GRID_SIZE) * SECTOR_GRID_SIZE +
+    SECTOR_GRID_SIZE / 2;
+  return {x, y, z};
+}
+/**
+ * Given a position vector, return sector number that contains that point.
+ */
+export function getSectorNumber(entityPosition: {
+  x: number;
+  y: number;
+  z: number;
+}) {
+  // World positions snap to the center of grid segments.
+  const x = Math.floor(entityPosition.x / SECTOR_GRID_SIZE);
+  const y = Math.floor(entityPosition.y / SECTOR_GRID_SIZE);
+  const z = Math.floor(entityPosition.z / SECTOR_GRID_SIZE);
+  return {x, y, z};
+}
+
+const worldVector = new Vector3();
+export function universeToWorld(objectVector: Vector3) {
+  const vec = getWorldPosition(objectVector);
+  worldVector.set(vec.x, vec.y, vec.z);
+  return objectVector.sub(worldVector);
+}
+
+export function worldToUniverse(objectVector: Vector3) {
+  const vec = getWorldPosition(objectVector);
+  worldVector.set(vec.x, vec.y, vec.z);
+  return objectVector.add(worldVector);
+}
+
+const euler = new Euler();
+const rotation = new Quaternion();
+
+export function generateRigidBody(
+  world: World,
+  entity: Entity,
+  colliderCache: Map<string, RAPIER.ColliderDesc>
+) {
+  const type = entity.components.isPlanet
+    ? "planet"
+    : entity.components.isStar
+    ? "star"
+    : entity.components.isShip
+    ? "ship"
+    : entity.components.debugSphere
+    ? "debugSphere"
+    : "unknown";
+
+  switch (type) {
+    case "planet": {
+      if (!entity.components.satellite || !entity.components.isPlanet) break;
+      const position = getOrbitPosition(entity.components.satellite!);
+      euler.set(0, 0, degToRad(entity.components.satellite.axialTilt));
+      rotation.setFromEuler(euler);
+      universeToWorld(position);
+      const bodyDesc = new RAPIER.RigidBodyDesc(RAPIER.RigidBodyType.Fixed)
+        .setTranslation(position.x, position.y, position.z)
+        .setRotation({
+          x: rotation.x,
+          y: rotation.y,
+          z: rotation.z,
+          w: rotation.w,
+        });
+      const body = world.createRigidBody(bodyDesc);
+      body.userData = {entityId: entity.id};
+      const colliderDesc = new RAPIER.ColliderDesc(
+        new RAPIER.Ball(entity.components.isPlanet.radius)
+      ).setMass(terranMassToKilograms(entity.components.isPlanet.terranMass));
+      world.createCollider(colliderDesc, body);
+      // TODO: Add rings
+      return body;
+    }
+    case "star": {
+      if (!entity.components.isStar) break;
+      const position = getOrbitPosition(entity.components.satellite!);
+      universeToWorld(position);
+      const bodyDesc = new RAPIER.RigidBodyDesc(
+        RAPIER.RigidBodyType.Fixed
+      ).setTranslation(position.x, position.y, position.z);
+
+      const body = world.createRigidBody(bodyDesc);
+      body.userData = {entityId: entity.id};
+      const colliderDesc = new RAPIER.ColliderDesc(
+        new RAPIER.Ball(entity.components.isStar.radius)
+      ).setMass(solarMassToKilograms(entity.components.isStar.solarMass));
+      world.createCollider(colliderDesc, body);
+
+      return body;
+    }
+    case "ship": {
+      if (!entity.components.isShip) break;
+      const model = entity.components.isShip.assets.model;
+      if (!model) break;
+      const colliderDesc = colliderCache.get(model);
+
+      if (!colliderDesc) break;
+      tempVector.set(
+        entity.components.position?.x || 0,
+        entity.components.position?.y || 0,
+        entity.components.position?.z || 0
+      );
+      universeToWorld(tempVector);
+
+      const res = generateShipRigidBody(
+        colliderDesc,
+        world,
+        tempVector,
+        entity.components.rotation || {x: 0, y: 0, z: 0, w: 0}
+      );
+      res.body.userData = {entityId: entity.id};
+      if (entity.components.mass?.mass) {
+        res.collider.setMass(entity.components.mass.mass * 10);
+      }
+
+      return res.body;
+    }
+    case "debugSphere":
+      break;
+    default:
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("Unknown solar system physics entity", entity.components);
+      }
+  }
+}
+
+function generateShipRigidBody(
+  colliderDesc: RAPIER.ColliderDesc,
+  world: World,
+  position: {x: number; y: number; z: number},
+  rotation: {x: number; y: number; z: number; w: number}
+) {
+  const rigidBodyDesc = new RAPIER.RigidBodyDesc(RAPIER.RigidBodyType.Dynamic)
+    .setTranslation(position.x, position.y, position.z)
+    .setRotation({w: rotation.w, x: rotation.x, y: rotation.y, z: rotation.z});
+  let rigidBody = world.createRigidBody(rigidBodyDesc);
+  let collider = world.createCollider(colliderDesc, rigidBody);
+
+  return {collider, body: rigidBody, world};
+}
+
+export function getEntitiesInWorld(ecs: ECS, position: Vector3) {
+  const worldPosition = getWorldPosition(position);
+  // Get all entities within the cube defined by the world position +/- the collision limit.
+  let entities: Entity[] = [];
+  ecs.componentCache.get("position")?.forEach(entity => {
+    const position = entity.components.position;
+    if (!position) return;
+    if (positionCheck(position, worldPosition)) {
+      entities.push(entity);
+    }
+  });
+  ecs.componentCache.get("satellite")?.forEach(entity => {
+    const position = getOrbitPosition(entity.components.satellite!);
+    universeToWorld(position);
+    if (positionCheck(position, worldPosition)) {
+      entities.push(entity);
+    }
+  });
+  entities = entities.filter(
+    (a, i, arr) => arr.findIndex(b => b.id === a.id) === i
+  );
+  return entities;
+}
+
+function positionCheck(
+  position: {x: number; y: number; z: number},
+  worldPosition: {x: number; y: number; z: number}
+) {
+  return (
+    position.x > worldPosition.x - COLLISION_PHYSICS_LIMIT &&
+    position.x < worldPosition.x + COLLISION_PHYSICS_LIMIT &&
+    position.y > worldPosition.y - COLLISION_PHYSICS_LIMIT &&
+    position.y < worldPosition.y + COLLISION_PHYSICS_LIMIT &&
+    position.z > worldPosition.z - COLLISION_PHYSICS_LIMIT &&
+    position.z < worldPosition.z + COLLISION_PHYSICS_LIMIT
+  );
+}

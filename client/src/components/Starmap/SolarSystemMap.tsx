@@ -34,12 +34,12 @@ import {q} from "@client/context/AppContext";
 import PlanetPlugin from "@server/classes/Plugins/Universe/Planet";
 import SolarSystemPlugin from "@server/classes/Plugins/Universe/SolarSystem";
 import {getOrbitPosition} from "@server/utils/getOrbitPosition";
+import {SECTOR_GRID_SIZE} from "@server/init/rapier";
 const ACTION = CameraControlsClass.ACTION;
 
 // 10% further than Neptune's orbit
 export const SOLAR_SYSTEM_MAX_DISTANCE: Kilometer = 4_000_000_000 * 1.1;
-const GRID_SIZE: Kilometer = 2_000_000;
-const CELLS = Math.ceil(SOLAR_SYSTEM_MAX_DISTANCE / GRID_SIZE);
+const CELLS = Math.ceil(SOLAR_SYSTEM_MAX_DISTANCE / SECTOR_GRID_SIZE);
 function HabitableZone() {
   const [pluginId, solarSystemId] = useSystemIds();
   const [{habitableZoneInner = 0, habitableZoneOuter = 3, stars}] =
@@ -125,7 +125,7 @@ export function SolarSystemMap({
             args={[maxDistance, 12, 20, 64, 0xffffff, 0xffffff]}
           />
           {/* Adjust opacity as the camera zooms in. */}
-          <Grid args={[CELLS * GRID_SIZE * 2, CELLS, 0xffffff, 0xffffff]} />
+          <Grid args={[CELLS * SECTOR_GRID_SIZE, CELLS, 0xffffff, 0xffffff]} />
         </>
       )}
       {children}

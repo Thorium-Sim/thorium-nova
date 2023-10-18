@@ -143,10 +143,10 @@ export const flight = t.router({
           {path: `/flights/${flightName}.flight`}
         );
 
-        ctx.flight.initEcs(ctx.server);
         const activePlugins = ctx.server.plugins.filter(p => p.active);
         ctx.flight.pluginIds = activePlugins.map(p => p.id);
 
+        await ctx.flight.initEcs(ctx.server);
         // This will spawn all of the systems and planets bundled with the plugins
         const solarSystemMap = ctx.flight.pluginIds.reduce(
           (map: Record<string, Entity>, pluginId) => {
