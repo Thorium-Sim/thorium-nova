@@ -179,21 +179,21 @@ function generateShipRigidBody(
   return {collider, body: rigidBody, world};
 }
 
-export function getEntitiesInWorld(ecs: ECS, position: Vector3) {
-  const worldPosition = getWorldPosition(position);
+export function getEntitiesInWorld(
+  ecs: ECS,
+  position: Vector3,
+  parentId: number | null
+) {
+  const worldPosition = {...getWorldPosition(position), parentId};
   // Get all entities within the cube defined by the world position +/- the collision limit.
   let entities: Entity[] = [];
   ecs.componentCache.get("position")?.forEach(entity => {
-    const position = entity.components.position;
-    if (!position) return;
-    if (positionCheck(position, worldPosition)) {
+    if (entityInWorld(entity, worldPosition)) {
       entities.push(entity);
     }
   });
   ecs.componentCache.get("satellite")?.forEach(entity => {
-    const position = getOrbitPosition(entity.components.satellite!);
-    universeToWorld(position);
-    if (positionCheck(position, worldPosition)) {
+    if (entityInWorld(entity, worldPosition)) {
       entities.push(entity);
     }
   });
@@ -203,10 +203,29 @@ export function getEntitiesInWorld(ecs: ECS, position: Vector3) {
   return entities;
 }
 
-function positionCheck(
-  position: {x: number; y: number; z: number},
-  worldPosition: {x: number; y: number; z: number}
+export function entityInWorld(
+  entity: Entity,
+  worldPosition: {x: number; y: number; z: number; parentId: number | null}
 ) {
+  let position: {
+    x: number;
+    y: number;
+    z: number;
+    parentId: number | null;
+  } | null = null;
+  if (
+    entity.components.position &&
+    entity.components.position.type !== "ship"
+  ) {
+    position = entity.components.position;
+  } else if (entity.components.satellite) {
+    const orbitPosition = getOrbitPosition(entity.components.satellite);
+    position = {
+      ...orbitPosition,
+      parentId: entity.components.satellite.parentId,
+    };
+  }
+  if (!position) return false;
   return (
     position.x > worldPosition.x - COLLISION_PHYSICS_LIMIT &&
     position.x < worldPosition.x + COLLISION_PHYSICS_LIMIT &&
