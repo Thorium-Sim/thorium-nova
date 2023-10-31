@@ -305,6 +305,9 @@ const quotes = [
   "It's better to be approximately right than exactly wrong.",
   // Thomas Merton
   "What choice remains? Well, to be ordinary is not a choice: It is the usual freedom of men and women without their visions.",
+  // C.S. Lewis
+  "If I find in myself a desire which no experience in this world can satisfy, the most probable explanation is that I was made for another world.",
+  "A children's story that can only be enjoyed by children is not a good children's story in the slightest.",
 ];
 
 const QuoteOfTheDay = () => {
