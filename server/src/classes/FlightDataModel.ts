@@ -6,7 +6,7 @@ import {FlightClient} from "./FlightClient";
 import {FSDataStore, FSDataStoreOptions} from "@thorium/db-fs";
 import ShipPlugin from "./Plugins/Ship";
 import {DefaultUIDGenerator} from "../utils/ecs/uid";
-import RAPIER, {World} from "@dimforge/rapier3d-compat";
+import {RAPIER} from "../init/rapier";
 import path from "path";
 import {thoriumPath} from "@server/utils/appPaths";
 

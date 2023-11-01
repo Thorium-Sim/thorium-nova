@@ -1,6 +1,6 @@
 import {Euler, Object3D, Quaternion, Vector3} from "three";
 import {Entity, System} from "../utils/ecs";
-import RAPIER from "@dimforge/rapier3d-compat";
+import {RAPIER} from "../init/rapier";
 import {M_TO_KM} from "@server/utils/unitTypes";
 import {
   generateRigidBody,

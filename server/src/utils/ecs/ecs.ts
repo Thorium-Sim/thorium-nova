@@ -8,7 +8,7 @@ import performance from "./performance";
 import {fastSplice} from "./utils";
 import {RNG, createRNG} from "@thorium/rng";
 import {ServerDataModel} from "server/src/classes/ServerDataModel";
-import type {ColliderDesc, World} from "@dimforge/rapier3d-compat";
+import type {ColliderDesc} from "@dimforge/rapier3d-compat";
 import type {ComponentIds} from "@server/components";
 
 class ECS {

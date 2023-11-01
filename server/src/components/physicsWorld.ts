@@ -1,6 +1,8 @@
 import z from "zod";
 
-import {World} from "@dimforge/rapier3d-compat";
+import {RAPIER} from "../init/rapier";
+
+const World = RAPIER.World;
 
 export const physicsWorld = z
   .object({
