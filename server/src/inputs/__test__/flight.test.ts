@@ -135,14 +135,14 @@ describe("flight input", () => {
           shipName: "Test Ship",
           shipTemplate: {pluginId: "Test Plugin", shipId: "Test Template"},
           crewCount: 1,
-          startingPoint: {
-            pluginId: "Test Plugin",
-            type: "planet",
-            solarSystemId: solarSystem.solarSystemId,
-            objectId: planet.name,
-          },
         },
       ],
+      startingPoint: {
+        pluginId: "Test Plugin",
+        type: "planet",
+        solarSystemId: solarSystem.solarSystemId,
+        objectId: planet.name,
+      },
     });
     Math.random = oldRandom;
     expect(mockDataContext.flight).toBeDefined();

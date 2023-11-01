@@ -28,7 +28,11 @@ const tempVector = new Vector3();
 /**
  * Given a position vector, return the origin point of the world that contains that point.
  */
-function getWorldPosition(entityPosition: {x: number; y: number; z: number}) {
+export function getWorldPosition(entityPosition: {
+  x: number;
+  y: number;
+  z: number;
+}) {
   // World positions snap to the center of grid segments.
   const x =
     Math.floor(entityPosition.x / SECTOR_GRID_SIZE) * SECTOR_GRID_SIZE +
@@ -53,7 +57,7 @@ export function getSectorNumber(entityPosition: {
   const x = Math.floor(entityPosition.x / SECTOR_GRID_SIZE);
   const y = Math.floor(entityPosition.y / SECTOR_GRID_SIZE);
   const z = Math.floor(entityPosition.z / SECTOR_GRID_SIZE);
-  return {x, y, z};
+  return [x, y, z].join(":");
 }
 
 const worldVector = new Vector3();
@@ -153,6 +157,8 @@ export function generateRigidBody(
         res.collider.setMass(entity.components.mass.mass * 10);
       }
 
+      res.body.enableCcd(true);
+
       return res.body;
     }
     case "debugSphere":
@@ -234,4 +240,30 @@ export function entityInWorld(
     position.z > worldPosition.z - COLLISION_PHYSICS_LIMIT &&
     position.z < worldPosition.z + COLLISION_PHYSICS_LIMIT
   );
+}
+
+/** Returns the world that contains this entity */
+export function getEntityWorld(ecs: ECS, entity: Entity) {
+  const position =
+    entity.components.position ||
+    (entity.components.satellite && {
+      ...getOrbitPosition(entity.components.satellite),
+      parentId: entity.components.satellite.parentId,
+    });
+  if (!position?.parentId) return null;
+  const entitySector = getSectorNumber(position);
+
+  let world: Entity | null = null;
+  ecs.componentCache.get("physicsWorld")?.forEach(entity => {
+    if (world) return;
+    const {
+      location,
+      world: physicsWorld,
+      enabled,
+    } = entity.components.physicsWorld || {};
+    if (!location || !physicsWorld || !enabled) return;
+    const key = getSectorNumber(location);
+    if (key === entitySector) world = entity;
+  });
+  return world as Entity | null;
 }

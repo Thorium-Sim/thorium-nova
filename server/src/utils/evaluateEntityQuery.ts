@@ -21,7 +21,7 @@ export function evaluateEntityQuery(ecs: ECS, query: EntityQuery): Entity[] {
   const output: Entity[] = [];
   const entitySet = new Set<Entity>();
   for (let componentQuery of query) {
-    const entities = ecs.componentCache.get(componentQuery.component);
+    const entities = ecs.componentCache.get(componentQuery.component as any);
     if (!entities) continue;
     for (let entity of entities) {
       entitySet.add(entity);

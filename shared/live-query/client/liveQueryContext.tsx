@@ -34,6 +34,8 @@ type EntityValues = {
   x: number;
   y: number;
   z: number;
+  s: 1 | 0;
+  f: number;
   r: {x: number; y: number; z: number; w: number};
 };
 

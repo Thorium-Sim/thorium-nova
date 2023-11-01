@@ -306,11 +306,8 @@ export const pilot = t.router({
         return false;
       }
       return Boolean(
-        (entity.components.position &&
-          entity.components.position.parentId === systemId) ||
-          ((entity.components.isWarpEngines ||
-            entity.components.isImpulseEngines) &&
-            ctx.ship?.components.shipSystems?.shipSystems.has(entity.id))
+        entity.components.position &&
+          entity.components.position.parentId === systemId
       );
     }),
 });
