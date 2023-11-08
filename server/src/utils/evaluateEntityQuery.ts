@@ -222,7 +222,6 @@ export function evaluateTriggerCondition(
         break;
       }
       const distance = getEntityDistance(entityA, entityB, condition.condition);
-      console.log(distance, condition.distance);
       if (condition.condition === "lessThan") {
         if (distance > condition.distance) {
           match = false;

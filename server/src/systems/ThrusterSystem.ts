@@ -20,7 +20,6 @@ export class ThrusterSystem extends System {
       currentPower >= requiredPower ? directionThrust * powerRatio : 0;
     let rotationImpulse =
       currentPower >= requiredPower ? rotationThrust * powerRatio : 0;
-
     entity.updateComponent("isThrusters", {
       directionImpulse: {
         x: direction.x * directionImpulse,

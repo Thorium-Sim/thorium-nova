@@ -54,7 +54,6 @@ const staticStations = [
 ];
 function PlayerStationSelection() {
   const [playerShips] = q.ship.players.useNetRequest();
-
   return (
     <>
       <h1 className="text-center text-4xl font-bold mb-8">Choose a Station</h1>
@@ -222,6 +221,7 @@ function ClientAssignment() {
   const [client] = q.client.get.useNetRequest();
   const [playerShips] = q.ship.players.useNetRequest();
   const [selectedClient, setSelectedClient] = useState(client.id);
+
   return (
     <div className="flex justify-around gap-4 w-full">
       <div>

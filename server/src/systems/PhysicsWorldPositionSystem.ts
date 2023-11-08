@@ -29,18 +29,25 @@ export class PhysicsWorldPositionSystem extends System {
     // After all of the world positions have been updated,
     // we can determine which ones should be enabled and
     // which should be disabled.
-    const entities = new Map<string, Entity[]>();
+    const entities = new Map<string, Set<number>>();
     this.entities.forEach(entity => {
       const {location} = entity.components.physicsWorld || {};
       if (!location) return;
       const key = getSectorNumber(location);
-      if (!entities.has(key)) entities.set(key, []);
-      entities.get(key)?.push(entity);
+      if (!entities.has(key)) entities.set(key, new Set());
+      entities.get(key)?.add(entity.id);
     });
     entities.forEach(entities => {
-      entities.forEach((entity, index) => {
-        entity.updateComponent("physicsWorld", {enabled: index === 0});
+      const iterator = entities.values();
+      const id = iterator.next().value;
+      this.ecs.getEntityById(id)?.updateComponent("physicsWorld", {
+        enabled: true,
       });
+      for (const entity of iterator) {
+        this.ecs
+          .getEntityById(entity)
+          ?.updateComponent("physicsWorld", {enabled: false});
+      }
     });
   }
 }

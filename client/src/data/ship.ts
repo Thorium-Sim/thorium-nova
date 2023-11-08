@@ -24,7 +24,6 @@ export const ship = t.router({
         const systemPosition = systemId
           ? ctx.flight?.ecs.getEntityById(systemId)?.components.position || null
           : null;
-
         return {
           id: ship.id,
           name: ship.components.identity?.name,

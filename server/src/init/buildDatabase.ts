@@ -42,6 +42,7 @@ export async function buildDatabase() {
       {path: `/flights/${flightName}.flight`}
     );
     await flight.initEcs(serverModel);
+    await flight.initPhysics();
   }
 
   database = {server: serverModel, flight};

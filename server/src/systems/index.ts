@@ -23,6 +23,8 @@ import {ProcessTriggersSystem} from "./ProcessTriggersSystem";
 import {WarpSystem} from "./WarpSystem";
 import {ImpulseSystem} from "./ImpulseSystem";
 import {ThrusterSystem} from "./ThrusterSystem";
+import {PhysicsMovementSystem} from "./PhysicsMovementSystem";
+import {PhysicsWorldPositionSystem} from "./PhysicsWorldPositionSystem";
 
 const systems = [
   FilterInventorySystem,
@@ -40,6 +42,8 @@ const systems = [
   ThrusterSystem,
   ImpulseSystem,
   WarpSystem,
+  PhysicsWorldPositionSystem,
+  PhysicsMovementSystem,
   WaypointRemoveSystem,
   HeatToCoolantSystem,
   HeatDispersionSystem,

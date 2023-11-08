@@ -15,6 +15,6 @@ export const physicsWorld = z
         parentId: z.number().optional(),
       })
       .default({}),
-    world: z.instanceof(World).default(new World({x: 0, y: 0, z: 0})),
+    world: z.instanceof(World).nullable().default(null),
   })
   .default({});

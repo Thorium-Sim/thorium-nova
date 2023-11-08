@@ -1,6 +1,6 @@
 import {Euler, Object3D, Quaternion, Vector3} from "three";
 import {Entity, System} from "../utils/ecs";
-import {RAPIER} from "../init/rapier";
+import {RAPIER, getWorldPosition} from "../init/rapier";
 import {M_TO_KM} from "@server/utils/unitTypes";
 import {
   generateRigidBody,
@@ -10,6 +10,7 @@ import {
 } from "@server/init/rapier";
 const tempObj = new Object3D();
 const tempVector = new Vector3();
+const worldVector = new Vector3();
 const velocityVector = new Vector3();
 const rotationVelocityVector = new Vector3();
 const velocityEuler = new Euler();
@@ -28,7 +29,7 @@ const BRAKE_CONSTANT = 0.99;
  *  physics world as the player.
  */
 export class PhysicsMovementSystem extends System {
-  collisionStepEntities = new Set<Entity>();
+  collisionStepEntities = new Set<number>();
   test(entity: Entity) {
     return Boolean(
       (entity.components.position && entity.components.velocity) ||
@@ -61,7 +62,6 @@ export class PhysicsMovementSystem extends System {
     const forwardImpulse =
       impulseEngines?.components.isImpulseEngines?.forwardImpulse || 0;
     const thrusters = systems.find(sys => sys.components.isThrusters);
-
     // We don't do collision when traveling at high warp speed
     // Let's say half of solar cruising speed
     const warpEngines = systems.find(sys => sys.components.isWarpEngines);
@@ -81,18 +81,17 @@ export class PhysicsMovementSystem extends System {
       if (!body) {
         // Generate a body for the component and store the handle on the entity
         body = generateRigidBody(world, entity, this.ecs.colliderCache) || null;
-        if (body?.handle) {
+        if (typeof body?.handle === "number") {
           handles.set(worldEntity.id, body.handle);
           entity.updateComponent("physicsHandles", {handles});
         }
       }
-
       // eslint-disable-next-line no-labels
       if (body && !isHighSpeed) {
         /**
          * Collision Physics
          */
-        this.collisionStepEntities.add(entity);
+        this.collisionStepEntities.add(entity.id);
 
         // Transform the position of the body based on the position of the entity relative
         // to the position of the physics world entity.
@@ -108,12 +107,12 @@ export class PhysicsMovementSystem extends System {
             entity.components.position.z
           );
 
-          positionVector = universeToWorld(positionVector);
+          const worldPosition = getWorldPosition(positionVector);
+          positionVector = universeToWorld(positionVector, worldPosition);
           body.setTranslation(positionVector, true);
           body.setRotation(entity.components.rotation, true);
           body.setLinvel(entity.components.velocity, true);
           body.setAngvel(entity.components.rotationVelocity, true);
-
           /**
            * Inertial Dampeners
            */
@@ -186,140 +185,142 @@ export class PhysicsMovementSystem extends System {
       }
       // Fall back on simple physics if we can't get a physics body for the entity.
     }
-
-    /**
-     * Simple Physics
-     */
-    const elapsedRatio = elapsed / 1000;
-    const mass = entity.components.mass?.mass || 1;
     {
-      const {x, y, z} = entity.components.velocity || {x: 0, y: 0, z: 0};
-      velocityVector.set(x, y, z);
-    }
-    {
-      const {x, y, z} = entity.components.rotationVelocity || {
-        x: 0,
-        y: 0,
-        z: 0,
-      };
-      rotationVelocityVector.set(x, y, z);
-    }
-    /**
-     * Inertial Dampeners
-     */
-    velocityVector.multiplyScalar(1 / (1 + elapsedRatio * dampening));
-    rotationVelocityVector.multiplyScalar(1 / (1 + elapsedRatio * dampening));
-
-    /**
-     * Warp Engines
-     */
-    if (warpEngines?.components.isWarpEngines?.forwardVelocity) {
-      velocityVector.add(
-        tempObj.localToWorld(
-          tempVector.set(
-            0,
-            0,
-            warpEngines.components.isWarpEngines.forwardVelocity
-          )
-        )
-      );
-    }
-    /**
-     * Impulse Engines
-     */
-    velocityVector.add(
-      tempObj.localToWorld(
-        tempVector
-          .set(0, 0, forwardImpulse)
-          .divideScalar(mass)
-          .multiplyScalar(elapsedRatio)
-      )
-    );
-    /**
-     * Thrusters
-     */
-    if (thrusters?.components.isThrusters) {
+      /**
+       * Simple Physics
+       */
+      const elapsedRatio = elapsed / 1000;
+      const mass = entity.components.mass?.mass || 1;
       {
-        const {x, y, z} = thrusters.components.isThrusters.directionImpulse;
-        tempVector.set(x, y, z).multiplyScalar(elapsedRatio * M_TO_KM);
-        velocityVector.add(tempObj.localToWorld(tempVector));
+        const {x, y, z} = entity.components.velocity || {x: 0, y: 0, z: 0};
+        velocityVector.set(x, y, z);
       }
+      {
+        const {x, y, z} = entity.components.rotationVelocity || {
+          x: 0,
+          y: 0,
+          z: 0,
+        };
+        rotationVelocityVector.set(x, y, z);
+      }
+      /**
+       * Inertial Dampeners
+       */
+      velocityVector.multiplyScalar(1 / (1 + elapsedRatio * dampening));
+      rotationVelocityVector.multiplyScalar(1 / (1 + elapsedRatio * dampening));
 
-      // Set the max rotation velocity
-      if (
-        rotationVelocityVector.lengthSq() >
-        thrusters.components.isThrusters.rotationMaxSpeed
-      ) {
-        rotationVelocityVector.multiplyScalar(BRAKE_CONSTANT);
-      } else {
-        let {x, y, z} = thrusters.components.isThrusters.rotationImpulse;
-
-        tempVector.set(x, y, z);
-
-        rotationVelocityVector.add(
-          tempVector.divideScalar(mass).multiplyScalar(elapsedRatio)
+      /**
+       * Warp Engines
+       */
+      if (warpEngines?.components.isWarpEngines?.forwardVelocity) {
+        velocityVector.add(
+          tempObj.localToWorld(
+            tempVector.set(
+              0,
+              0,
+              warpEngines.components.isWarpEngines.forwardVelocity
+            )
+          )
         );
       }
-    }
+      /**
+       * Impulse Engines
+       */
+      velocityVector.add(
+        tempObj.localToWorld(
+          tempVector
+            .set(0, 0, forwardImpulse)
+            .divideScalar(mass)
+            .multiplyScalar(elapsedRatio)
+        )
+      );
+      /**
+       * Thrusters
+       */
+      if (thrusters?.components.isThrusters) {
+        {
+          const {x, y, z} = thrusters.components.isThrusters.directionImpulse;
+          tempVector.set(x, y, z).multiplyScalar(elapsedRatio * M_TO_KM);
+          velocityVector.add(tempObj.localToWorld(tempVector));
+        }
 
-    /**
-     * Apply the velocity to the position
-     */
-    {
-      entity.updateComponent("velocity", {
-        x: velocityVector.x,
-        y: velocityVector.y,
-        z: velocityVector.z,
+        // Set the max rotation velocity
+        if (
+          rotationVelocityVector.lengthSq() >
+          thrusters.components.isThrusters.rotationMaxSpeed
+        ) {
+          rotationVelocityVector.multiplyScalar(BRAKE_CONSTANT);
+        } else {
+          let {x, y, z} = thrusters.components.isThrusters.rotationImpulse;
+
+          tempVector.set(x, y, z);
+
+          rotationVelocityVector.add(
+            tempVector.divideScalar(mass).multiplyScalar(elapsedRatio)
+          );
+        }
+      }
+
+      /**
+       * Apply the velocity to the position
+       */
+      {
+        entity.updateComponent("velocity", {
+          x: velocityVector.x,
+          y: velocityVector.y,
+          z: velocityVector.z,
+        });
+        const {x, y, z} = entity.components.position || {x: 0, y: 0, z: 0};
+        tempVector.set(x, y, z);
+        tempVector.add(velocityVector.multiplyScalar(elapsedRatio));
+        entity.updateComponent("position", {
+          x: tempVector.x,
+          y: tempVector.y,
+          z: tempVector.z,
+        });
+      }
+      /**
+       * Apply the rotation velocity to the rotation
+       */
+      entity.updateComponent("rotationVelocity", {
+        x: rotationVelocityVector.x,
+        y: rotationVelocityVector.y,
+        z: rotationVelocityVector.z,
       });
-      const {x, y, z} = entity.components.position || {x: 0, y: 0, z: 0};
-      tempVector.set(x, y, z);
-      tempVector.add(velocityVector.multiplyScalar(elapsedRatio));
-      entity.updateComponent("position", {
-        x: tempVector.x,
-        y: tempVector.y,
-        z: tempVector.z,
+      velocityEuler.setFromVector3(rotationVelocityVector);
+      velocityQuaternion.setFromEuler(velocityEuler);
+      tempObj.quaternion.multiply(velocityQuaternion);
+      entity.updateComponent("rotation", {
+        x: tempObj.quaternion.x,
+        y: tempObj.quaternion.y,
+        z: tempObj.quaternion.z,
+        w: tempObj.quaternion.w,
       });
     }
-    /**
-     * Apply the rotation velocity to the rotation
-     */
-    entity.updateComponent("rotationVelocity", {
-      x: rotationVelocityVector.x,
-      y: rotationVelocityVector.y,
-      z: rotationVelocityVector.z,
-    });
-    velocityEuler.setFromVector3(rotationVelocityVector);
-    velocityQuaternion.setFromEuler(velocityEuler);
-    tempObj.quaternion.multiply(velocityQuaternion);
-    entity.updateComponent("rotation", {
-      x: tempObj.quaternion.x,
-      y: tempObj.quaternion.y,
-      z: tempObj.quaternion.z,
-      w: tempObj.quaternion.w,
-    });
   }
   postUpdate(_elapsed: number): void {
     // Run the physics simulation for all of the relevant worlds.
     this.ecs.componentCache.get("physicsWorld")?.forEach(entity => {
       const world = entity.components.physicsWorld?.world;
       if (!world) return;
-
+      worldVector.set(
+        entity.components.physicsWorld?.location.x || 0,
+        entity.components.physicsWorld?.location.y || 0,
+        entity.components.physicsWorld?.location.z || 0
+      );
       world.step();
       // Copy over the properties of each of the bodies to the entities
-
       world.bodies.forEach(body => {
         // @ts-expect-error Unknown
         const entity = this.ecs.getEntityById(body.userData?.entityId);
-
-        if (!entity || !this.collisionStepEntities.has(entity)) return;
-
+        if (!entity || !this.collisionStepEntities.has(entity.id)) return;
         // No need to update fixed bodies.
         if (body.bodyType() === RAPIER.RigidBodyType.Fixed) return;
-
         {
           const translation = body.translation();
           const {x, y, z} = worldToUniverse(
-            tempVector.set(translation.x, translation.y, translation.z)
+            tempVector.set(translation.x, translation.y, translation.z),
+            worldVector
           );
           entity.updateComponent("position", {x, y, z});
         }

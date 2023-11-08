@@ -184,6 +184,7 @@ export function spawnShip(
   });
   if (params.playerShip) {
     entity.addComponent("isPlayerShip");
+    entity.addComponent("physicsWorld");
   } else {
     entity.addComponent("shipBehavior", {
       objective: "hold",

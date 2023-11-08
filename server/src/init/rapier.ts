@@ -24,7 +24,7 @@ export async function initRapier() {
 export {RAPIER};
 
 const tempVector = new Vector3();
-
+const worldVector = new Vector3();
 /**
  * Given a position vector, return the origin point of the world that contains that point.
  */
@@ -43,7 +43,7 @@ export function getWorldPosition(entityPosition: {
   const z =
     Math.floor(entityPosition.z / SECTOR_GRID_SIZE) * SECTOR_GRID_SIZE +
     SECTOR_GRID_SIZE / 2;
-  return {x, y, z};
+  return worldVector.set(x, y, z);
 }
 /**
  * Given a position vector, return sector number that contains that point.
@@ -60,16 +60,11 @@ export function getSectorNumber(entityPosition: {
   return [x, y, z].join(":");
 }
 
-const worldVector = new Vector3();
-export function universeToWorld(objectVector: Vector3) {
-  const vec = getWorldPosition(objectVector);
-  worldVector.set(vec.x, vec.y, vec.z);
+export function universeToWorld(objectVector: Vector3, worldVector: Vector3) {
   return objectVector.sub(worldVector);
 }
 
-export function worldToUniverse(objectVector: Vector3) {
-  const vec = getWorldPosition(objectVector);
-  worldVector.set(vec.x, vec.y, vec.z);
+export function worldToUniverse(objectVector: Vector3, worldVector: Vector3) {
   return objectVector.add(worldVector);
 }
 
@@ -97,7 +92,9 @@ export function generateRigidBody(
       const position = getOrbitPosition(entity.components.satellite!);
       euler.set(0, 0, degToRad(entity.components.satellite.axialTilt));
       rotation.setFromEuler(euler);
-      universeToWorld(position);
+      const worldPosition = getWorldPosition(position);
+      universeToWorld(position, worldPosition);
+
       const bodyDesc = new RAPIER.RigidBodyDesc(RAPIER.RigidBodyType.Fixed)
         .setTranslation(position.x, position.y, position.z)
         .setRotation({
@@ -118,7 +115,9 @@ export function generateRigidBody(
     case "star": {
       if (!entity.components.isStar) break;
       const position = getOrbitPosition(entity.components.satellite!);
-      universeToWorld(position);
+      const worldPosition = getWorldPosition(position);
+      universeToWorld(position, worldPosition);
+
       const bodyDesc = new RAPIER.RigidBodyDesc(
         RAPIER.RigidBodyType.Fixed
       ).setTranslation(position.x, position.y, position.z);
@@ -144,7 +143,8 @@ export function generateRigidBody(
         entity.components.position?.y || 0,
         entity.components.position?.z || 0
       );
-      universeToWorld(tempVector);
+      const worldPosition = getWorldPosition(tempVector);
+      universeToWorld(tempVector, worldPosition);
 
       const res = generateShipRigidBody(
         colliderDesc,
@@ -250,18 +250,24 @@ export function getEntityWorld(ecs: ECS, entity: Entity) {
       ...getOrbitPosition(entity.components.satellite),
       parentId: entity.components.satellite.parentId,
     });
-  if (!position?.parentId) return null;
+  if (typeof position?.parentId !== "number") return null;
   const entitySector = getSectorNumber(position);
 
   let world: Entity | null = null;
   ecs.componentCache.get("physicsWorld")?.forEach(entity => {
     if (world) return;
-    const {
+    let {
       location,
       world: physicsWorld,
       enabled,
     } = entity.components.physicsWorld || {};
-    if (!location || !physicsWorld || !enabled) return;
+    if (!physicsWorld) {
+      entity.updateComponent("physicsWorld", {
+        world: new RAPIER.World({x: 0, y: 0, z: 0}),
+      });
+      physicsWorld = entity.components.physicsWorld?.world;
+    }
+    if (!location || !enabled) return;
     const key = getSectorNumber(location);
     if (key === entitySector) world = entity;
   });

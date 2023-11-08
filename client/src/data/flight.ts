@@ -147,6 +147,7 @@ export const flight = t.router({
         ctx.flight.pluginIds = activePlugins.map(p => p.id);
 
         await ctx.flight.initEcs(ctx.server);
+        await ctx.flight.initPhysics();
         // This will spawn all of the systems and planets bundled with the plugins
         const solarSystemMap = ctx.flight.pluginIds.reduce(
           (map: Record<string, Entity>, pluginId) => {
@@ -195,7 +196,6 @@ export const flight = t.router({
         });
         // Add inventory entities to their appropriate system
         ctx.flight.ecs.cleanDirtyEntities();
-
         // Spawn the ships that were defined when the flight was started
         for (const ship of ships) {
           const shipTemplate = activePlugins.reduce(
@@ -317,7 +317,7 @@ export const flight = t.router({
   }),
   load: t.procedure
     .input(z.object({flightName: z.string()}))
-    .send(({ctx, input}) => {
+    .send(async ({ctx, input}) => {
       inputAuth(ctx);
       if (ctx.flight) return ctx.flight;
 
@@ -329,7 +329,8 @@ export const flight = t.router({
         },
         {path: `/flights/${input.flightName}.flight`}
       );
-      ctx.flight.initEcs(ctx.server);
+      await ctx.flight.initEcs(ctx.server);
+      await ctx.flight.initPhysics();
 
       ctx.server.activeFlightName = input.flightName;
       pubsub.publish.flight.active();
