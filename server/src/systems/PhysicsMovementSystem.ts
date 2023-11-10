@@ -180,7 +180,6 @@ export class PhysicsMovementSystem extends System {
             }
           }
         }
-
         return;
       }
       // Fall back on simple physics if we can't get a physics body for the entity.
@@ -260,7 +259,6 @@ export class PhysicsMovementSystem extends System {
           );
         }
       }
-
       /**
        * Apply the velocity to the position
        */

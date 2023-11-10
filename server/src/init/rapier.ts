@@ -15,7 +15,7 @@ import type {World} from "@dimforge/rapier3d-compat";
  * This distance is just about where RapierJS goes from
  * 0.001 precision to 0.01 precision.
  */
-export const COLLISION_PHYSICS_LIMIT: Kilometer = 2_000_000;
+export const COLLISION_PHYSICS_LIMIT: Kilometer = Math.floor(2 ** 24 / 1000);
 export const SECTOR_GRID_SIZE: Kilometer = COLLISION_PHYSICS_LIMIT * 2;
 
 export async function initRapier() {

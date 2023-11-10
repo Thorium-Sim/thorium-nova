@@ -67,6 +67,11 @@ export const ship = t.router({
       const shipTemplate = ctx.server.plugins
         .find(plugin => (plugin.name = input.template.pluginName))
         ?.aspects.ships.find(ship => ship.name === input.template.id);
+      console.log(
+        ctx.server.plugins.find(
+          plugin => (plugin.name = input.template.pluginName)
+        )
+      );
       if (!shipTemplate) throw new Error("Ship template not found.");
 
       const {ship: shipEntity, extraEntities} = spawnShip(ctx, shipTemplate, {
