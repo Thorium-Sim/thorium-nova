@@ -432,27 +432,27 @@ export function SolarSystemWrapper() {
     >
       {starmapEntities.map(entity => {
         if (planetsHidden) return null;
-        // if (entity.components.isStar) {
-        //   if (!entity.components.satellite) return null;
-        //   return (
-        //     <Suspense key={entity.id} fallback={null}>
-        //       <ErrorBoundary
-        //         FallbackComponent={() => <></>}
-        //         onError={err => console.error(err)}
-        //       >
-        //         <StarEntity
-        //           star={{
-        //             id: entity.id,
-        //             hue: entity.components.isStar.hue,
-        //             isWhite: entity.components.isStar.isWhite,
-        //             radius: entity.components.isStar.radius,
-        //             satellite: entity.components.satellite,
-        //           }}
-        //         />
-        //       </ErrorBoundary>
-        //     </Suspense>
-        //   );
-        // }
+        if (entity.components.isStar) {
+          if (!entity.components.satellite) return null;
+          return (
+            <Suspense key={entity.id} fallback={null}>
+              <ErrorBoundary
+                FallbackComponent={() => <></>}
+                onError={err => console.error(err)}
+              >
+                <StarEntity
+                  star={{
+                    id: entity.id,
+                    hue: entity.components.isStar.hue,
+                    isWhite: entity.components.isStar.isWhite,
+                    radius: entity.components.isStar.radius,
+                    satellite: entity.components.satellite,
+                  }}
+                />
+              </ErrorBoundary>
+            </Suspense>
+          );
+        }
         if (entity.components.isPlanet) {
           if (!entity.components.satellite) return null;
 
