@@ -75,7 +75,7 @@ describe("flight input", () => {
     );
     const {x, y, z} = systemEntity?.components.position || {};
     expect({x, y, z}).toMatchInlineSnapshot(`
-      Object {
+      {
         "x": 1,
         "y": 2,
         "z": 3,
@@ -117,7 +117,7 @@ describe("flight input", () => {
     });
 
     expect(planet.satellite).toMatchInlineSnapshot(`
-      Object {
+      {
         "axialTilt": 0,
         "eccentricity": 0,
         "inclination": 0,
@@ -149,7 +149,7 @@ describe("flight input", () => {
     if (!mockDataContext.flight) throw new Error("No flight created");
 
     expect(flight.playerShips[0].components.position).toMatchInlineSnapshot(`
-      Object {
+      {
         "parentId": 19,
         "type": "solar",
         "x": -228630890,

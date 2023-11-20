@@ -8,16 +8,16 @@ import {
 import {MockNetRequestContext} from "@thorium/live-query/client/mockContext";
 import {AppRouter} from "@server/init/router";
 import {inferRouterOutputs} from "@thorium/live-query/server/types";
-
+import {vi} from "vitest";
 // @ts-expect-error
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
 let netSendResponse: {response: any} = {response: ""};
-const netSendSpy = jest.fn((input, params) => netSendResponse);
+const netSendSpy = vi.fn((input, params) => netSendResponse);
 function setNetSendResponse(response: any) {
   netSendResponse = {response};
 }
-global.fetch = jest.fn((url: URL, {body}: {body: FormData}) => {
+global.fetch = vi.fn((url: URL, {body}: {body: FormData}) => {
   if (url.pathname.toLowerCase() === "/netsend") {
     let bodyObj: any = {};
 

@@ -2,7 +2,7 @@
 import fsCallback from "fs";
 import path from "path";
 import throttle from "lodash.throttle";
-import {stringify, parse} from "yaml";
+import {load, dump} from "js-yaml";
 
 const fs =
   process.env.NODE_ENV === "test"
@@ -81,7 +81,7 @@ export abstract class FSDataStore {
     let data;
     try {
       data = this.filePath
-        ? parse(readFileSync(this.filePath, "utf8"))
+        ? load(readFileSync(this.filePath, "utf8"))
         : this.initialData;
     } catch (err: any) {
       if (err.code === "EACCES") {
@@ -93,7 +93,7 @@ export abstract class FSDataStore {
     if (!data) {
       data = Object.fromEntries(Object.entries(this.initialData as any));
     }
-    return data;
+    return data as any;
   }
   get filePath() {
     return path.join(basePath, this.#path);
@@ -127,7 +127,7 @@ export abstract class FSDataStore {
       await fs.mkdir(path.dirname(this.filePath), {recursive: true});
       const serialized = this.serialize();
       delete serialized.initialData;
-      let data = stringify(serialized);
+      let data = dump(serialized);
 
       await fs.writeFile(this.filePath, data, {mode: 0o0600});
     } catch (e: any) {

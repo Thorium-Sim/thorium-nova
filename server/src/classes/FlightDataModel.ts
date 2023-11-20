@@ -105,6 +105,7 @@ export class FlightDataModel extends FSDataStore {
     }
     await Promise.all(
       ships.map(async ship => {
+        if (!ship.assets.model) return;
         const colliderDesc = await generateColliderDesc(
           path.join(thoriumPath, ship.assets.model),
           ship.mass
