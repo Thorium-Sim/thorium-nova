@@ -156,7 +156,10 @@ export async function liveQueryPlugin<TRouter extends AnyRouter, TContext>(
           message = err.message;
         }
         console.error(`Error in ${type} ${String(path)}: ${message}`);
-        if (err instanceof Error && process.env.NODE_ENV !== "production")
+        if (
+          err instanceof Error
+          //  && process.env.NODE_ENV !== "production"
+        )
           console.error(err.stack);
         return res
           .code(400)

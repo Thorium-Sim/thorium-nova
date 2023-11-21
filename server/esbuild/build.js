@@ -55,6 +55,7 @@ async function buildServer() {
         target: "node16",
         outdir: "../dist",
         plugins: [nativeNodeModulesPlugin],
+        external: ["jsdom"],
       })
       .catch(err => {
         console.error(err);

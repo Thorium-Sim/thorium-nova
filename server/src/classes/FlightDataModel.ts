@@ -9,6 +9,7 @@ import {DefaultUIDGenerator} from "../utils/ecs/uid";
 import {RAPIER} from "../init/rapier";
 import path from "path";
 import {thoriumPath} from "@server/utils/appPaths";
+import {loadGltf} from "@server/utils/loadGltf";
 
 export class FlightDataModel extends FSDataStore {
   static INTERVAL = 1000 / 60;
@@ -166,19 +167,23 @@ export class FlightDataModel extends FSDataStore {
 }
 
 async function generateColliderDesc(filePath: string, mass: number) {
-  const ConvexHull = await import("three-stdlib").then(res => res.ConvexHull);
-  const loadGltf = await import("node-three-gltf").then(res => res.loadGltf);
+  try {
+    const ConvexHull = await import("three-stdlib").then(res => res.ConvexHull);
+    const gltf: any = await loadGltf(filePath);
+    const hull = new ConvexHull();
+    hull.setFromObject(gltf.scene.children[0]);
+    const vertices = [];
+    for (let vertex of hull.vertices) {
+      vertices.push(vertex.point.x, vertex.point.y, vertex.point.z);
+    }
+    const verticesFloat32 = new Float32Array(vertices);
+    const colliderDesc =
+      RAPIER.ColliderDesc.convexHull(verticesFloat32)?.setMass(mass);
 
-  const gltf = await loadGltf(filePath);
-  const hull = new ConvexHull();
-  hull.setFromObject(gltf.scene.children[0]);
-
-  const vertices = [];
-  for (let vertex of hull.vertices) {
-    vertices.push(vertex.point.x, vertex.point.y, vertex.point.z);
+    return colliderDesc;
+  } catch (err) {
+    console.error("Failed to generate convex hulls for", filePath);
+    console.error(err);
+    return null;
   }
-  const verticesFloat32 = new Float32Array(vertices);
-  const colliderDesc =
-    RAPIER.ColliderDesc.convexHull(verticesFloat32)?.setMass(mass);
-  return colliderDesc;
 }

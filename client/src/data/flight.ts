@@ -132,7 +132,6 @@ export const flight = t.router({
           flightName || randomWords(3).join("-"),
           flightData.map(f => f.name)
         );
-
         ctx.flight = new FlightDataModel(
           {
             name: flightName,
@@ -145,7 +144,6 @@ export const flight = t.router({
 
         const activePlugins = ctx.server.plugins.filter(p => p.active);
         ctx.flight.pluginIds = activePlugins.map(p => p.id);
-
         await ctx.flight.initEcs(ctx.server);
         await ctx.flight.initPhysics();
         // This will spawn all of the systems and planets bundled with the plugins
@@ -270,7 +268,7 @@ export const flight = t.router({
                     icon: stationComplement?.assets[`${s.name}-${c.name}-icon`],
                   };
                 }),
-                widgets: s.widgets.map(w => {
+                widgets: s.widgets?.map(w => {
                   return {
                     ...w,
                     icon: stationComplement?.assets[`${s.name}-${w.name}-icon`],
@@ -281,7 +279,6 @@ export const flight = t.router({
 
           ctx.flight.ecs.addEntity(shipEntity);
         }
-
         // Add the mission if it exists
         if (missionId) {
           triggerSend("timeline.activate", {

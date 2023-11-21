@@ -127,7 +127,7 @@ export abstract class FSDataStore {
       await fs.mkdir(path.dirname(this.filePath), {recursive: true});
       const serialized = this.serialize();
       delete serialized.initialData;
-      let data = dump(serialized);
+      let data = dump(serialized, {skipInvalid: true});
 
       await fs.writeFile(this.filePath, data, {mode: 0o0600});
     } catch (e: any) {
