@@ -8,6 +8,9 @@ import performance from "./performance";
 import {fastSplice} from "./utils";
 import {RNG, createRNG} from "@thorium/rng";
 import {ServerDataModel} from "server/src/classes/ServerDataModel";
+import type {ColliderDesc} from "@dimforge/rapier3d-compat";
+import type {ComponentIds} from "@server/components";
+
 class ECS {
   /**
    * Store all entities of the ECS.
@@ -29,7 +32,8 @@ class ECS {
   rng: RNG;
   maxEntityId: number = 1;
   entityIndex: Map<number, Entity> = new Map();
-  componentCache: Map<string, Set<Entity>> = new Map();
+  componentCache: Map<ComponentIds, Set<Entity>> = new Map();
+  colliderCache: Map<string, ColliderDesc> = new Map();
   constructor(
     public server: ServerDataModel,
     seed: string | number = "thorium",
@@ -75,7 +79,9 @@ class ECS {
     }
 
     Object.keys(entity.components).forEach(componentName => {
-      const componentCache = this.componentCache.get(componentName);
+      const componentCache = this.componentCache.get(
+        componentName as ComponentIds
+      );
       if (!componentCache) return;
       componentCache.delete(entity);
     });

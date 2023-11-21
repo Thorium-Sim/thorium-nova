@@ -12,6 +12,7 @@ import {startServer} from "./init/startServer";
 import {exitHandler} from "./init/exitHandler";
 import {initDefaultPlugin} from "./init/initDefaultPlugin";
 import {processTriggers} from "./utils/evaluateEntityQuery";
+import {initRapier} from "./init/rapier";
 
 setBasePath(thoriumPath);
 
@@ -20,6 +21,7 @@ export async function init() {
   if (!existsSync(thoriumPath)) {
     await initDefaultPlugin();
   }
+  await initRapier();
 
   const database = await buildDatabase();
   const app = await buildHTTPServer({

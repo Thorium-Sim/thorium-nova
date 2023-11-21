@@ -5,16 +5,9 @@
 import {AutoRotateSystem} from "./AutoRotateSystem";
 import {AutoThrustSystem} from "./AutoThrustSystem";
 import {DataStreamSystem} from "./DataStreamSystem";
-import {EngineVelocityPosition} from "./EngineVelocityPosition";
-import {EngineVelocitySystem} from "./EngineVelocitySystem";
-import {ImpulseSystem} from "./ImpulseSystem";
 import {PassengerDestinationSystem} from "./PassengerDestinationSystem";
 import {PassengerMovementSystem} from "./PassengerMovementSystem";
-import {PositionVelocitySystem} from "./PositionVelocitySystem";
-import {RotationSystem} from "./RotationSystem";
-import {ThrusterSystem} from "./ThrusterSystem";
 import {TimerSystem} from "./TimerSystem";
-import {WarpSystem} from "./WarpSystem";
 import {InterstellarTransitionSystem} from "./InterstellarTransitionSystem";
 import {ReactorFuelSystem} from "./ReactorFuelSystem";
 import {FilterShipsWithReactors} from "./FilterShipsWithReactors";
@@ -27,6 +20,11 @@ import {PowerGridSystem} from "./PowerGridSystem";
 import {WaypointRemoveSystem} from "./WaypointRemoveSystem";
 import {DebugSphereSystem} from "./DebugSphereSystem";
 import {ProcessTriggersSystem} from "./ProcessTriggersSystem";
+import {WarpSystem} from "./WarpSystem";
+import {ImpulseSystem} from "./ImpulseSystem";
+import {ThrusterSystem} from "./ThrusterSystem";
+import {PhysicsMovementSystem} from "./PhysicsMovementSystem";
+import {PhysicsWorldPositionSystem} from "./PhysicsWorldPositionSystem";
 
 const systems = [
   FilterInventorySystem,
@@ -44,10 +42,8 @@ const systems = [
   ThrusterSystem,
   ImpulseSystem,
   WarpSystem,
-  RotationSystem,
-  EngineVelocitySystem,
-  EngineVelocityPosition,
-  PositionVelocitySystem,
+  PhysicsWorldPositionSystem,
+  PhysicsMovementSystem,
   WaypointRemoveSystem,
   HeatToCoolantSystem,
   HeatDispersionSystem,

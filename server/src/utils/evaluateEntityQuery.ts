@@ -21,7 +21,7 @@ export function evaluateEntityQuery(ecs: ECS, query: EntityQuery): Entity[] {
   const output: Entity[] = [];
   const entitySet = new Set<Entity>();
   for (let componentQuery of query) {
-    const entities = ecs.componentCache.get(componentQuery.component);
+    const entities = ecs.componentCache.get(componentQuery.component as any);
     if (!entities) continue;
     for (let entity of entities) {
       entitySet.add(entity);
@@ -222,7 +222,6 @@ export function evaluateTriggerCondition(
         break;
       }
       const distance = getEntityDistance(entityA, entityB, condition.condition);
-      console.log(distance, condition.distance);
       if (condition.condition === "lessThan") {
         if (distance > condition.distance) {
           match = false;

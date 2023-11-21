@@ -96,7 +96,7 @@ class Entity {
           data
         ) as any;
       } catch (err) {
-        console.error("Error initializing component:", componentId);
+        console.error("Error initializing component:", componentId, err);
       }
     }
     /**
@@ -115,6 +115,12 @@ class Entity {
               key,
               {...comp, shipSystems: Array.from(comp.shipSystems.entries())},
             ];
+          }
+          if ("world" in comp && key === "physicsWorld") {
+            return [key, {...comp, world: null}];
+          }
+          if (key === "physicsHandles") {
+            return [key, {handles: new Map()}];
           }
           return [key, comp];
         })

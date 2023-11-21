@@ -33,23 +33,18 @@ function formatSpeed(speed: KilometerPerSecond) {
 }
 
 export function useForwardVelocity() {
-  const [{id: impulseId, targetSpeed}] =
-    q.pilot.impulseEngines.get.useNetRequest();
-  const [{id: warpId}] = q.pilot.warpEngines.get.useNetRequest();
+  const [{targetSpeed}] = q.pilot.impulseEngines.get.useNetRequest();
+  const [{maxVelocity: warpMax}] = q.pilot.warpEngines.get.useNetRequest();
+  const [ship] = q.navigation.ship.useNetRequest();
   const {interpolate} = useLiveQuery();
 
   return function getForwardVelocity(): [
     KilometerPerSecond,
     KilometerPerSecond
   ] {
-    const warpInterpolation = interpolate(warpId);
-    const {x: warpForward, y: warpMax} = warpInterpolation || {x: 0, y: 0};
-
-    const impulseInterpolation = interpolate(impulseId);
-    const {x: impulseForward} = impulseInterpolation || {x: 0};
+    const {f: forwardVelocity} = interpolate(ship.id) || {f: 0};
 
     const targetVelocity = Math.max(targetSpeed, warpMax);
-    const forwardVelocity = Math.max(warpForward, impulseForward);
     return [forwardVelocity, targetVelocity] as [
       KilometerPerSecond,
       KilometerPerSecond

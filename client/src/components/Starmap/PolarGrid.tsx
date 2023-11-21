@@ -1,6 +1,11 @@
-import {PolarGridHelperProps} from "@react-three/fiber";
+import {
+  PolarGridHelperProps,
+  GridHelperProps,
+  useFrame,
+} from "@react-three/fiber";
 import * as React from "react";
-import {AdditiveBlending, PolarGridHelper} from "three";
+import {AdditiveBlending, PolarGridHelper, GridHelper} from "three";
+import {useGetStarmapStore} from "./starmapStore";
 
 export function PolarGrid(props: PolarGridHelperProps) {
   const polarRef = React.useRef<PolarGridHelper>(null);
@@ -14,4 +19,28 @@ export function PolarGrid(props: PolarGridHelperProps) {
     }
   });
   return <polarGridHelper ref={polarRef} {...props} />;
+}
+export function Grid(props: GridHelperProps) {
+  const gridRef = React.useRef<GridHelper>(null);
+  const useStarmapStore = useGetStarmapStore();
+  const cameraControls = useStarmapStore(s => s.cameraControls);
+  React.useLayoutEffect(() => {
+    if (gridRef.current && !Array.isArray(gridRef.current?.material)) {
+      gridRef.current.material.depthWrite = false;
+      gridRef.current.material.transparent = true;
+      gridRef.current.renderOrder = -1;
+      gridRef.current.material.blending = AdditiveBlending;
+      gridRef.current.material.opacity = 0.15;
+    }
+  });
+  useFrame(() => {
+    if (gridRef.current && !Array.isArray(gridRef.current?.material)) {
+      const y = cameraControls?.current?.camera.position.y || Infinity;
+      gridRef.current.material.opacity = Math.min(
+        300000000 * (1 / y) * 0.15,
+        0.3
+      );
+    }
+  });
+  return <gridHelper ref={gridRef} {...props} />;
 }

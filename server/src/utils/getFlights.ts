@@ -1,7 +1,7 @@
 import type {FlightDataModel} from "../classes/FlightDataModel";
 import {promises} from "fs";
 import {thoriumPath} from "./appPaths";
-import {parse} from "yaml";
+import {load} from "js-yaml";
 
 const fs =
   process.env.NODE_ENV === "test"
@@ -26,7 +26,7 @@ export async function getFlights() {
         `${thoriumPath}/flights/${flightName}`,
         "utf-8"
       );
-      const data = parse(raw);
+      const data = load(raw) as any;
       flightMap.set(flightName, {
         ...data,
         date: new Date(data?.date),

@@ -24,13 +24,13 @@ describe("solar system planet plugin input", () => {
     expect(planet).toMatchInlineSnapshot(`
       PlanetPlugin {
         "description": "",
-        "isPlanet": Object {
+        "isPlanet": {
           "age": 1000500000,
-          "atmosphericComposition": Array [],
+          "atmosphericComposition": [],
           "classification": "A",
           "cloudMapAsset": null,
           "isHabitable": true,
-          "lifeforms": Array [
+          "lifeforms": [
             "None",
           ],
           "radius": 2750,
@@ -40,7 +40,7 @@ describe("solar system planet plugin input", () => {
         },
         "name": "Test System I",
         "population": 0,
-        "satellite": Object {
+        "satellite": {
           "axialTilt": 0,
           "eccentricity": 0,
           "inclination": 0,
@@ -49,7 +49,7 @@ describe("solar system planet plugin input", () => {
           "semiMajorAxis": 2112004271,
           "showOrbit": true,
         },
-        "tags": Array [],
+        "tags": [],
         "temperature": 1583,
       }
     `);
@@ -62,13 +62,13 @@ describe("solar system planet plugin input", () => {
     expect(planet2).toMatchInlineSnapshot(`
       PlanetPlugin {
         "description": "",
-        "isPlanet": Object {
+        "isPlanet": {
           "age": 6500000000,
-          "atmosphericComposition": Array [],
+          "atmosphericComposition": [],
           "classification": "M",
           "cloudMapAsset": null,
           "isHabitable": true,
-          "lifeforms": Array [
+          "lifeforms": [
             "Varied and extensive vegetation and animal life, humanoids",
           ],
           "radius": 6250,
@@ -78,7 +78,7 @@ describe("solar system planet plugin input", () => {
         },
         "name": "Test System II",
         "population": 5005000000,
-        "satellite": Object {
+        "satellite": {
           "axialTilt": 0,
           "eccentricity": 0,
           "inclination": 0,
@@ -87,7 +87,7 @@ describe("solar system planet plugin input", () => {
           "semiMajorAxis": 164272931,
           "showOrbit": true,
         },
-        "tags": Array [],
+        "tags": [],
         "temperature": 295.5,
       }
     `);
@@ -155,13 +155,13 @@ describe("solar system planet plugin input", () => {
     expect(planet).toMatchInlineSnapshot(`
       PlanetPlugin {
         "description": "",
-        "isPlanet": Object {
+        "isPlanet": {
           "age": 510000000,
-          "atmosphericComposition": Array [],
+          "atmosphericComposition": [],
           "classification": "C",
           "cloudMapAsset": null,
           "isHabitable": true,
-          "lifeforms": Array [
+          "lifeforms": [
             "None",
           ],
           "radius": 2750,
@@ -171,7 +171,7 @@ describe("solar system planet plugin input", () => {
         },
         "name": "Test System I",
         "population": 0,
-        "satellite": Object {
+        "satellite": {
           "axialTilt": 0,
           "eccentricity": 0,
           "inclination": 0,
@@ -180,7 +180,7 @@ describe("solar system planet plugin input", () => {
           "semiMajorAxis": 2112004271,
           "showOrbit": true,
         },
-        "tags": Array [],
+        "tags": [],
         "temperature": 44,
       }
     `);
@@ -205,13 +205,13 @@ describe("solar system planet plugin input", () => {
     expect(planet).toMatchInlineSnapshot(`
       PlanetPlugin {
         "description": "",
-        "isPlanet": Object {
+        "isPlanet": {
           "age": 50,
-          "atmosphericComposition": Array [],
+          "atmosphericComposition": [],
           "classification": "C",
           "cloudMapAsset": null,
           "isHabitable": false,
-          "lifeforms": Array [
+          "lifeforms": [
             "None",
           ],
           "radius": 1000,
@@ -221,7 +221,7 @@ describe("solar system planet plugin input", () => {
         },
         "name": "Test System I",
         "population": 5000,
-        "satellite": Object {
+        "satellite": {
           "axialTilt": 0,
           "eccentricity": 0,
           "inclination": 0,
@@ -230,7 +230,7 @@ describe("solar system planet plugin input", () => {
           "semiMajorAxis": 500000,
           "showOrbit": true,
         },
-        "tags": Array [],
+        "tags": [],
         "temperature": 100,
       }
     `);

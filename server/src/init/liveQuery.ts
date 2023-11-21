@@ -3,10 +3,10 @@ import {Entity} from "@server/utils/ecs";
 import {randomNameGenerator} from "@server/utils/randomNameGenerator";
 import {ServerClient} from "@thorium/live-query/adapters/fastify-adapter";
 import {inferAsyncReturnType} from "@thorium/live-query/server";
-import {AnyRouter} from "@thorium/live-query/server/router";
-import {FastifyRequest} from "fastify";
+import type {AnyRouter} from "@thorium/live-query/server/router";
+import type {FastifyRequest} from "fastify";
 import {DataContext} from "../utils/DataContext";
-import {buildDatabase} from "./buildDatabase";
+import type {buildDatabase} from "./buildDatabase";
 import {pubsub} from "./pubsub";
 import {dataStreamEntity} from "./dataStreamEntity";
 

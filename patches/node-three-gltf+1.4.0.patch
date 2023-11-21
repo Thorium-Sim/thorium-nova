@@ -1,0 +1,120 @@
+diff --git a/node_modules/node-three-gltf/build/index.cjs b/node_modules/node-three-gltf/build/index.cjs
+index 4bf0138..e3ce2de 100644
+--- a/node_modules/node-three-gltf/build/index.cjs
++++ b/node_modules/node-three-gltf/build/index.cjs
+@@ -1780,54 +1780,7 @@ class GLTFParser {
+         return this.loadTextureImage(textureIndex, source, loader);
+     }
+     loadTextureImage(textureIndex, source, loader) {
+-        const parser = this;
+-        const json = this.json;
+-        const options = this.options;
+-        const textureDef = json.textures[textureIndex];
+-        const cacheKey = (source.uri || source.bufferView) + ':' + textureDef.sampler;
+-        if (this.textureCache[cacheKey]) {
+-            return this.textureCache[cacheKey];
+-        }
+-        const URL = global.URL;
+-        let sourceURI = source.uri || '';
+-        let isObjectURL = false;
+-        if (source.bufferView !== undefined) {
+-            sourceURI = parser.getDependency('bufferView', source.bufferView).then(function (bufferView) {
+-                isObjectURL = true;
+-                const blob = new Blob([bufferView], { type: source.mimeType });
+-                sourceURI = URL.createObjectURL(blob);
+-                return sourceURI;
+-            });
+-        }
+-        else if (source.uri === undefined) {
+-            throw new Error('THREE.GLTFLoader: Image ' + textureIndex + ' is missing URI and bufferView');
+-        }
+-        const promise = Promise.resolve(sourceURI).then(function (sourceURI) {
+-            three.LoaderUtils.resolveURL(sourceURI, options.path);
+-            return new Promise(function (resolve, reject) {
+-                loader.load(three.LoaderUtils.resolveURL(sourceURI, options.path), resolve, undefined, reject);
+-            });
+-        }).then(function (texture) {
+-            if (isObjectURL === true) {
+-                URL.revokeObjectURL(sourceURI);
+-            }
+-            texture.flipY = false;
+-            if (textureDef.name)
+-                texture.name = textureDef.name;
+-            const samplers = json.samplers || {};
+-            const sampler = samplers[textureDef.sampler] || {};
+-            texture.magFilter = WEBGL_FILTERS[sampler.magFilter] || three.LinearFilter;
+-            texture.minFilter = WEBGL_FILTERS[sampler.minFilter] || three.LinearMipmapLinearFilter;
+-            texture.wrapS = WEBGL_WRAPPINGS[sampler.wrapS] || three.RepeatWrapping;
+-            texture.wrapT = WEBGL_WRAPPINGS[sampler.wrapT] || three.RepeatWrapping;
+-            parser.associations.set(texture, { textures: textureIndex });
+-            return texture;
+-        }).catch(() => {
+-            console.error('THREE.GLTFLoader: Couldn\'t load texture', sourceURI);
+-            return null;
+-        });
+-        this.textureCache[cacheKey] = promise;
+-        return promise;
++        return Promise.resolve(null);
+     }
+     assignTexture(materialParams, mapName, mapDef) {
+         const parser = this;
+diff --git a/node_modules/node-three-gltf/build/index.js b/node_modules/node-three-gltf/build/index.js
+index a8e145c..b0e86a6 100644
+--- a/node_modules/node-three-gltf/build/index.js
++++ b/node_modules/node-three-gltf/build/index.js
+@@ -1771,54 +1771,7 @@ class GLTFParser {
+         return this.loadTextureImage(textureIndex, source, loader);
+     }
+     loadTextureImage(textureIndex, source, loader) {
+-        const parser = this;
+-        const json = this.json;
+-        const options = this.options;
+-        const textureDef = json.textures[textureIndex];
+-        const cacheKey = (source.uri || source.bufferView) + ':' + textureDef.sampler;
+-        if (this.textureCache[cacheKey]) {
+-            return this.textureCache[cacheKey];
+-        }
+-        const URL = global.URL;
+-        let sourceURI = source.uri || '';
+-        let isObjectURL = false;
+-        if (source.bufferView !== undefined) {
+-            sourceURI = parser.getDependency('bufferView', source.bufferView).then(function (bufferView) {
+-                isObjectURL = true;
+-                const blob = new Blob([bufferView], { type: source.mimeType });
+-                sourceURI = URL.createObjectURL(blob);
+-                return sourceURI;
+-            });
+-        }
+-        else if (source.uri === undefined) {
+-            throw new Error('THREE.GLTFLoader: Image ' + textureIndex + ' is missing URI and bufferView');
+-        }
+-        const promise = Promise.resolve(sourceURI).then(function (sourceURI) {
+-            LoaderUtils.resolveURL(sourceURI, options.path);
+-            return new Promise(function (resolve, reject) {
+-                loader.load(LoaderUtils.resolveURL(sourceURI, options.path), resolve, undefined, reject);
+-            });
+-        }).then(function (texture) {
+-            if (isObjectURL === true) {
+-                URL.revokeObjectURL(sourceURI);
+-            }
+-            texture.flipY = false;
+-            if (textureDef.name)
+-                texture.name = textureDef.name;
+-            const samplers = json.samplers || {};
+-            const sampler = samplers[textureDef.sampler] || {};
+-            texture.magFilter = WEBGL_FILTERS[sampler.magFilter] || LinearFilter;
+-            texture.minFilter = WEBGL_FILTERS[sampler.minFilter] || LinearMipmapLinearFilter;
+-            texture.wrapS = WEBGL_WRAPPINGS[sampler.wrapS] || RepeatWrapping;
+-            texture.wrapT = WEBGL_WRAPPINGS[sampler.wrapT] || RepeatWrapping;
+-            parser.associations.set(texture, { textures: textureIndex });
+-            return texture;
+-        }).catch(() => {
+-            console.error('THREE.GLTFLoader: Couldn\'t load texture', sourceURI);
+-            return null;
+-        });
+-        this.textureCache[cacheKey] = promise;
+-        return promise;
++       return Promise.resolve(null);
+     }
+     assignTexture(materialParams, mapName, mapDef) {
+         const parser = this;

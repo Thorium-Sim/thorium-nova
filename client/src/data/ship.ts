@@ -24,7 +24,6 @@ export const ship = t.router({
         const systemPosition = systemId
           ? ctx.flight?.ecs.getEntityById(systemId)?.components.position || null
           : null;
-
         return {
           id: ship.id,
           name: ship.components.identity?.name,
@@ -68,6 +67,7 @@ export const ship = t.router({
       const shipTemplate = ctx.server.plugins
         .find(plugin => (plugin.name = input.template.pluginName))
         ?.aspects.ships.find(ship => ship.name === input.template.id);
+
       if (!shipTemplate) throw new Error("Ship template not found.");
 
       const {ship: shipEntity, extraEntities} = spawnShip(ctx, shipTemplate, {
