@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.12](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.11...1.0.0-alpha.12) (2023-11-21)
+
+
+### Bug Fixes
+
+* Fixes an issue where the client would error out when opening the Flight Director screen. ([8fb683d](https://github.com/Thorium-Sim/thorium-nova/commit/8fb683dbebd25ca01ff57ddd7cb7cb6024fcf8a1))
+* Improve rendering and transitioning the nebula background. ([7d5cb7b](https://github.com/Thorium-Sim/thorium-nova/commit/7d5cb7bc0abbefa279fdf144331ea697a9cc83ba))
+* Restore the editor viewing mode when using the starmap editor. ([f210f1e](https://github.com/Thorium-Sim/thorium-nova/commit/f210f1e5abd11eba29814066b486d82e0b25f37a))
+
 # [1.0.0-alpha.11](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.10...1.0.0-alpha.11) (2023-04-03)
 
 
