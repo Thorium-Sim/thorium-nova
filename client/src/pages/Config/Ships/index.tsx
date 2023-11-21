@@ -11,6 +11,7 @@ import {Cargo} from "./Cargo";
 import {DeckConfig} from "./ShipMap/DeckConfig";
 import {DeckNodeContextProvider} from "./ShipMap/DeckNodeContext";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
+import NoMatch from "@client/pages/NotFound";
 
 export default function ShipsRoute() {
   return (
@@ -35,6 +36,7 @@ export default function ShipsRoute() {
             </Route>
           </Route>
         </Route>
+        <Route path="*" element={<NoMatch />} />
       </Routes>
     </DeckNodeContextProvider>
   );

@@ -1,11 +1,18 @@
-import {ShipSystemTypes} from "server/src/classes/Plugins/ShipSystems/shipSystemTypes";
-import {Component} from "../utils";
+import z from "zod";
 
-export class IsShipSystem extends Component {
-  static id: "isShipSystem" = "isShipSystem";
+const shipSystemTypes = z.enum([
+  "warpEngines",
+  "impulseEngines",
+  "generic",
+  "inertialDampeners",
+  "thrusters",
+  "reactor",
+  "battery",
+]);
 
-  /** The type of ship system, eg impulseEngines, shields, etc. */
-  type: keyof typeof ShipSystemTypes = "generic";
-
-  // Assets should be included in the individual ship systems components
-}
+export const isShipSystem = z
+  .object({
+    type: shipSystemTypes.default("generic"),
+    shipId: z.number().int().default(-1),
+  })
+  .default({});

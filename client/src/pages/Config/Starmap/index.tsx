@@ -1,5 +1,5 @@
 import * as React from "react";
-import Menubar from "@thorium/ui/Menubar";
+import Menubar, {useMenubar} from "@thorium/ui/Menubar";
 import {useMatch, useParams, Route, Routes} from "react-router-dom";
 import {useThree} from "@react-three/fiber";
 import {forwardRef, useImperativeHandle, useRef} from "react";
@@ -90,16 +90,19 @@ export default function StarMap() {
 
   const systemId = useSystemId();
 
-  return (
-    <div className="h-full">
-      <Menubar
-        backTo={
-          systemId ? `/config/${pluginId}/starmap` : `/config/${pluginId}/list`
-        }
-      >
+  useMenubar({
+    backTo: systemId
+      ? `/config/${pluginId}/starmap`
+      : `/config/${pluginId}/list`,
+    children: (
+      <>
         {!systemId && <InterstellarMenuButtons sceneRef={sceneRef} />}
         {systemId && <SolarSystemMenuButtons sceneRef={sceneRef} />}
-      </Menubar>
+      </>
+    ),
+  });
+  return (
+    <div className="h-full">
       <EditorPalette
         isOpen={selectedObjectIds.length > 0}
         onClose={() => useStarmapStore.setState({selectedObjectIds: []})}

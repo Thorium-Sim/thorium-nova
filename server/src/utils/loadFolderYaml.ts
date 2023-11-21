@@ -1,4 +1,4 @@
-import {parse} from "yaml";
+import {load} from "js-yaml";
 import {promises as fs} from "fs";
 import {thoriumPath} from "./appPaths";
 import FastGlob from "fast-glob";
@@ -8,7 +8,7 @@ export async function loadFolderYaml<T>(objectGlob: string) {
   let files: T[] = [];
   for (const aspectPath of aspectPaths) {
     try {
-      const manifest = parse(await fs.readFile(aspectPath, "utf8"));
+      const manifest = load(await fs.readFile(aspectPath, "utf8")) as T;
       files.push(manifest);
     } catch (err: any) {
       if (err) {

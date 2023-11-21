@@ -23,7 +23,6 @@ export class WarpSystem extends System {
       interstellarCruisingSpeed,
       solarCruisingSpeed,
       minSpeedMultiplier,
-      maxVelocity,
       currentWarpFactor,
       warpFactorCount,
     } = entity.components.isWarpEngines;
@@ -46,41 +45,48 @@ export class WarpSystem extends System {
     }
 
     // Calculate max warp speed based on the factor and the number of warp factors
-    warp.forwardVelocity = warp.forwardVelocity ?? 0;
+    let forwardVelocity = warp.forwardVelocity ?? 0;
+    let forwardAcceleration = warp.forwardAcceleration ?? 0;
+    let maxVelocity = warp.maxVelocity ?? 0;
 
-    if (warp.forwardVelocity > warpSpeed) {
+    if (forwardVelocity > warpSpeed) {
       // Slow the ship down
       // Rapidly slow the ship down so we don't cross too much space as we decelerate.
-      if (warpSpeed === 0 && warp.forwardVelocity > minWarp) {
-        warp.forwardVelocity = minWarp / HARD_BRAKE_CONST;
+      if (warpSpeed === 0 && forwardVelocity > minWarp) {
+        forwardVelocity = minWarp / HARD_BRAKE_CONST;
       }
-      warp.forwardAcceleration = warp.forwardVelocity * SOFT_BRAKE_CONST * -1;
+      forwardAcceleration = forwardVelocity * SOFT_BRAKE_CONST * -1;
     } else {
       // Calculate acceleration based on warp speed
-      warp.forwardAcceleration = warpSpeed / PEDAL_TO_THE_METAL_CONST;
+      forwardAcceleration = warpSpeed / PEDAL_TO_THE_METAL_CONST;
     }
-    warp.maxVelocity = warpSpeed;
+    maxVelocity = warpSpeed;
 
     // Accelerate until we hit the max velocity
     if (
-      warp.forwardVelocity + warp.forwardAcceleration * elapsedRatio <
-        warp.maxVelocity ||
-      warp.forwardAcceleration < 0
+      forwardVelocity + forwardAcceleration * elapsedRatio < maxVelocity ||
+      forwardAcceleration < 0
     ) {
-      warp.forwardVelocity += warp.forwardAcceleration * elapsedRatio;
+      forwardVelocity += forwardAcceleration * elapsedRatio;
     } else if (
-      warp.forwardVelocity + warp.forwardAcceleration * elapsedRatio >
-      warp.maxVelocity
+      forwardVelocity + forwardAcceleration * elapsedRatio >
+      maxVelocity
     ) {
-      warp.forwardVelocity = warp.maxVelocity;
+      forwardVelocity = maxVelocity;
     }
 
     // Or stop the ship entirely once we slow to a certain point
-    if (warp.forwardVelocity < 0.0000001) {
-      warp.forwardVelocity = 0;
+    if (forwardVelocity < 0.0000001) {
+      forwardVelocity = 0;
       if (warpSpeed === 0) {
-        warp.forwardAcceleration = 0;
+        forwardAcceleration = 0;
       }
     }
+
+    entity.updateComponent("isWarpEngines", {
+      forwardVelocity,
+      maxVelocity,
+      forwardAcceleration,
+    });
   }
 }

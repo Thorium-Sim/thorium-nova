@@ -1,6 +1,7 @@
 import ECS from "../ecs";
 import Entity from "../entity";
 import System from "../system";
+import {vi} from "vitest";
 
 const server: any = {};
 describe("ECS", () => {
@@ -31,17 +32,21 @@ describe("ECS", () => {
       system = new System();
     });
 
-    it("should give the elapsed time to update methods", done => {
+    it("should give the elapsed time to update methods", async () => {
       system.test = () => true;
-      system.update = (_entity, elapsed) => {
-        expect(typeof elapsed).toBe("number");
-        done();
-      };
+      const done = new Promise<void>(res => {
+        system.update = (_entity, elapsed) => {
+          expect(typeof elapsed).toBe("number");
+          res();
+        };
+      });
 
       ecs.addSystem(system);
       ecs.addEntity(entity);
 
       ecs.update();
+
+      await done;
     });
   });
 
@@ -56,7 +61,7 @@ describe("ECS", () => {
 
     it("should call enter() when update", () => {
       system.test = () => true;
-      system.enter = jest.fn();
+      system.enter = vi.fn();
       ecs.addSystem(system);
       ecs.addEntity(entity);
 
@@ -67,7 +72,7 @@ describe("ECS", () => {
 
     it("should call enter() when removing and re-adding a system", () => {
       system.test = () => true;
-      system.enter = jest.fn();
+      system.enter = vi.fn();
       ecs.addSystem(system);
       ecs.addEntity(entity);
       ecs.update();
@@ -93,7 +98,7 @@ describe("ECS", () => {
 
     it("should call exit(entity) when removed", () => {
       system.test = () => true;
-      system.exit = jest.fn();
+      system.exit = vi.fn();
 
       ecs.addSystem(system);
       ecs.addEntity(entity);
@@ -107,7 +112,7 @@ describe("ECS", () => {
 
     it("should call exit(entity) of all systems when removed", () => {
       system.test = () => true;
-      system.exit = jest.fn();
+      system.exit = vi.fn();
 
       ecs.addSystem(system);
       ecs.addEntity(entity);
@@ -132,7 +137,7 @@ describe("ECS", () => {
 
     it("should call exit(entity) when removed", () => {
       system1.test = () => true;
-      system1.exit = jest.fn();
+      system1.exit = vi.fn();
 
       ecs.addSystem(system1);
       ecs.addEntity(entity);
@@ -146,9 +151,9 @@ describe("ECS", () => {
 
     it("should call exit(entity) of all systems when removed", async () => {
       system2.test = () => true;
-      system2.exit = jest.fn();
+      system2.exit = vi.fn();
       system1.test = () => true;
-      system1.exit = jest.fn();
+      system1.exit = vi.fn();
 
       ecs.addSystem(system1);
       ecs.addSystem(system2);

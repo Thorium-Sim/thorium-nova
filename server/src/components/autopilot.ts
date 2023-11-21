@@ -1,28 +1,26 @@
-import Controller from "node-pid-controller";
-import {Coordinates} from "../utils/unitTypes";
-import {Component} from "./utils";
+import z from "zod";
 
-export class AutopilotComponent extends Component {
-  static id: "autopilot" = "autopilot";
-  static serialize(component: Omit<AutopilotComponent, "init">) {
-    const {rotationController, impulseController, warpController, ...data} =
-      component;
-    return data;
-  }
-  destinationWaypointId?: number | null = null;
-  /** The desired coordinates of the ship in the current stage. If desiredSolarSystemId is null, then it's interstellar coordinates */
-  desiredCoordinates?: Coordinates<number> = undefined;
-  /** Desired interstellar system. For when we are traveling from one system to another. */
-  desiredSolarSystemId?: number | null = null;
-  /** Whether the rotation autopilot is on. */
-  rotationAutopilot: boolean = true;
-  /** Whether the forward movement autopilot is on. */
-  forwardAutopilot: boolean = true;
+export const autopilot = z
+  .object({
+    destinationWaypointId: z.number().nullable().default(null),
+    /** The desired coordinates of the ship in the current stage. If desiredSolarSystemId is null, then it's interstellar coordinates */
+    desiredCoordinates: z
+      .object({
+        x: z.number(),
+        y: z.number(),
+        z: z.number(),
+      })
+      .nullable()
+      .default(null),
+    /** Desired interstellar system. For when we are traveling from one system to another. */
+    desiredSolarSystemId: z.number().nullable().default(null),
+    /** Whether the rotation autopilot is on. */
+    rotationAutopilot: z.boolean().default(true),
+    /** Whether the forward movement autopilot is on. */
+    forwardAutopilot: z.boolean().default(true),
+  })
+  .default({});
 
-  rotationController?: Controller;
-  impulseController?: Controller;
-  warpController?: Controller;
-}
 /**
  * Setting course has the following steps:
  * 1. Open up the starmap and find the destination you want to go to

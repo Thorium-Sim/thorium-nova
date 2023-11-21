@@ -1,6 +1,6 @@
-import {ECS, Entity} from "../utils/ecs";
+import {Entity} from "../utils/ecs";
 import type ShipPlugin from "../classes/Plugins/Ship";
-import {PositionComponent} from "../components/position";
+import {position} from "../components/position";
 import {randomFromList} from "../utils/randomFromList";
 import {generateShipInventory} from "./inventory";
 import {FlightDataModel} from "../classes/FlightDataModel";
@@ -10,7 +10,6 @@ import {spawnShipSystem} from "./shipSystem";
 import ReactorPlugin from "@server/classes/Plugins/ShipSystems/Reactor";
 import BaseShipSystemPlugin from "@server/classes/Plugins/ShipSystems/BaseSystem";
 import {getInventoryTemplates} from "@server/utils/getInventoryTemplates";
-import {battery} from "@client/pages/Config/data/systems/battery";
 
 const systemCache: Record<string, BaseShipSystemPlugin> = {};
 function getSystem(
@@ -37,7 +36,7 @@ export function spawnShip(
     name?: string;
     description?: string;
     registry?: string;
-    position: Omit<PositionComponent, "init">;
+    position: Zod.infer<typeof position>;
     tags?: string[];
     assets?: Partial<InstanceType<typeof ShipPlugin>["assets"]>;
     playerShip?: boolean;
@@ -47,6 +46,7 @@ export function spawnShip(
   const inventoryTemplates = getInventoryTemplates(dataContext.flight?.ecs);
 
   const entity = new Entity();
+  const shipId = entity.id;
 
   entity.addComponent("identity", {
     name: params.name || template.name,
@@ -104,7 +104,7 @@ export function spawnShip(
 
         break;
       case "battery": {
-        const entity = spawnShipSystem(systemPlugin, system.overrides);
+        const entity = spawnShipSystem(shipId, systemPlugin, system.overrides);
         if (entity.components.isBattery) {
           entity.components.isBattery.storage =
             entity.components.isBattery.capacity;
@@ -114,7 +114,7 @@ export function spawnShip(
         break;
       }
       default: {
-        const entity = spawnShipSystem(systemPlugin, system.overrides);
+        const entity = spawnShipSystem(shipId, systemPlugin, system.overrides);
         systemEntities.push(entity);
         if (entity.components.power) {
           // Hook up the power node
@@ -167,7 +167,7 @@ export function spawnShip(
     );
     if (systemPlugin instanceof ReactorPlugin) {
       Array.from({length: systemPlugin.reactorCount}).forEach(() => {
-        const sys = spawnShipSystem(systemPlugin, system.overrides);
+        const sys = spawnShipSystem(shipId, systemPlugin, system.overrides);
         const maxOutput = reactorPower * systemPlugin.powerMultiplier;
         sys.updateComponent("isReactor", {
           maxOutput,
@@ -184,6 +184,7 @@ export function spawnShip(
   });
   if (params.playerShip) {
     entity.addComponent("isPlayerShip");
+    entity.addComponent("physicsWorld");
   } else {
     entity.addComponent("shipBehavior", {
       objective: "hold",
@@ -265,7 +266,7 @@ export function spawnShip(
       ],
       inventoryTemplates,
       {
-        powerNeed: totalPower * 2.5, // Convert megawatts into 2.5 MegaWatt hours
+        powerNeed: totalPower * 2.5, // Convert megawatts into 2.5 MegaWatt hours, so we have enough for a 2.5 hour trip
       }
     );
   }
@@ -278,7 +279,7 @@ export function spawnShip(
     if (!systemType) continue;
     const availableRooms =
       entity.components.shipMap?.deckNodes.filter(node =>
-        node.systems.includes(systemType)
+        node.systems?.includes(systemType)
       ) || [];
 
     if (occupiedRooms.length === availableRooms.length) {

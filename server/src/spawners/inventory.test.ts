@@ -122,178 +122,178 @@ describe("Inventory Generator", () => {
       {powerNeed: 0}
     );
     expect(inputRooms).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test torpedoCasing Cargo": Object {
+      [
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test torpedoCasing Cargo": {
                   "count": 4,
                   "temperature": 295.37,
                 },
-                "Test torpedoWarhead Cargo": Object {
+                "Test torpedoWarhead Cargo": {
                   "count": 4,
                   "temperature": 295.37,
                 },
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "torpedoStorage",
               ],
             },
           },
           "id": 1,
         },
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test torpedoCasing Cargo": Object {
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test torpedoCasing Cargo": {
                   "count": 8,
                   "temperature": 295.37,
                 },
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "torpedoStorage",
               ],
             },
           },
           "id": 2,
         },
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test probeCasing Cargo": Object {
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test probeCasing Cargo": {
                   "count": 1,
                   "temperature": 295.37,
                 },
-                "Test probeEquipment Cargo": Object {
+                "Test probeEquipment Cargo": {
                   "count": 2,
                   "temperature": 295.37,
                 },
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "probeStorage",
               ],
             },
           },
           "id": 3,
         },
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test security Cargo": Object {
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test security Cargo": {
                   "count": 5,
                   "temperature": 295.37,
                 },
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "security",
               ],
             },
           },
           "id": 4,
         },
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test repair Cargo": Object {
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test repair Cargo": {
                   "count": 5,
                   "temperature": 295.37,
                 },
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "maintenance",
               ],
             },
           },
           "id": 5,
         },
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test medical Cargo": Object {
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test medical Cargo": {
                   "count": 5,
                   "temperature": 295.37,
                 },
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "medical",
               ],
             },
           },
           "id": 6,
         },
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test coolant Cargo": Object {
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test coolant Cargo": {
                   "count": 3,
                   "temperature": 295.37,
                 },
-                "Test forCrew Cargo": Object {
+                "Test forCrew Cargo": {
                   "count": 4,
                   "temperature": 295.37,
                 },
-                "Test medical Cargo": Object {
+                "Test medical Cargo": {
                   "count": 2,
                   "temperature": 295.37,
                 },
-                "Test probeCasing Cargo": Object {
+                "Test probeCasing Cargo": {
                   "count": 13,
                   "temperature": 295.37,
                 },
-                "Test probeEquipment Cargo": Object {
+                "Test probeEquipment Cargo": {
                   "count": 13,
                   "temperature": 295.37,
                 },
-                "Test repair Cargo": Object {
+                "Test repair Cargo": {
                   "count": 4,
                   "temperature": 295.37,
                 },
-                "Test science Cargo": Object {
+                "Test science Cargo": {
                   "count": 5,
                   "temperature": 295.37,
                 },
-                "Test security Cargo": Object {
+                "Test security Cargo": {
                   "count": 3,
                   "temperature": 295.37,
                 },
-                "Test sparePart Cargo": Object {
+                "Test sparePart Cargo": {
                   "count": 10,
                   "temperature": 295.37,
                 },
-                "Test torpedoWarhead Cargo": Object {
+                "Test torpedoWarhead Cargo": {
                   "count": 9,
                   "temperature": 295.37,
                 },
               },
               "volume": 1000,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "cargo",
               ],
             },
@@ -362,28 +362,28 @@ describe("Inventory Generator", () => {
       }
     );
     expect(inputRooms).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test coolant Cargo": Object {
+      [
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test coolant Cargo": {
                   "count": 4,
                   "temperature": 295.37,
                 },
-                "Test probeCasing Cargo": Object {
+                "Test probeCasing Cargo": {
                   "count": 18,
                   "temperature": 295.37,
                 },
-                "Test probeEquipment Cargo": Object {
+                "Test probeEquipment Cargo": {
                   "count": 19,
                   "temperature": 295.37,
                 },
-                "Test torpedoCasing Cargo": Object {
+                "Test torpedoCasing Cargo": {
                   "count": 15,
                   "temperature": 295.37,
                 },
-                "Test torpedoWarhead Cargo": Object {
+                "Test torpedoWarhead Cargo": {
                   "count": 16,
                   "temperature": 295.37,
                 },
@@ -523,205 +523,204 @@ describe("Inventory Generator", () => {
       {powerNeed: 1000}
     );
     expect(inputRooms).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test torpedoCasing Cargo": Object {
+      [
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test torpedoCasing Cargo": {
                   "count": 5,
                   "temperature": 295.37,
                 },
-                "Test torpedoWarhead Cargo": Object {
+                "Test torpedoWarhead Cargo": {
                   "count": 3,
                   "temperature": 295.37,
                 },
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "torpedoStorage",
               ],
             },
           },
           "id": 9,
         },
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test torpedoCasing Cargo": Object {
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test torpedoCasing Cargo": {
                   "count": 8,
                   "temperature": 295.37,
                 },
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "torpedoStorage",
               ],
             },
           },
           "id": 10,
         },
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test probeCasing Cargo": Object {
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test probeCasing Cargo": {
                   "count": 1,
                   "temperature": 295.37,
                 },
-                "Test probeEquipment Cargo": Object {
+                "Test probeEquipment Cargo": {
                   "count": 2,
                   "temperature": 295.37,
                 },
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "probeStorage",
               ],
             },
           },
           "id": 11,
         },
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test security Cargo": Object {
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test security Cargo": {
                   "count": 5,
                   "temperature": 295.37,
                 },
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "security",
               ],
             },
           },
           "id": 12,
         },
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test repair Cargo": Object {
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test repair Cargo": {
                   "count": 5,
                   "temperature": 295.37,
                 },
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "maintenance",
               ],
             },
           },
           "id": 13,
         },
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test fuel Cargo": Object {
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test fuel Cargo": {
                   "count": 5,
                   "temperature": 295.37,
                 },
               },
               "volume": 100,
             },
-            "identity": IdentityComponent {
-              "description": "",
+            "identity": {
               "name": "Reactor Room",
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [],
+            "isRoom": {
+              "flags": [],
             },
           },
           "id": 444,
         },
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {},
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {},
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "fuelStorage",
               ],
             },
           },
           "id": 15,
         },
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test medical Cargo": Object {
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test medical Cargo": {
                   "count": 5,
                   "temperature": 295.37,
                 },
               },
               "volume": 100,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "medical",
               ],
             },
           },
           "id": 16,
         },
-        Object {
-          "components": Object {
-            "cargoContainer": CargoContainer {
-              "contents": Object {
-                "Test fuel Cargo": Object {
+        {
+          "components": {
+            "cargoContainer": {
+              "contents": {
+                "Test fuel Cargo": {
                   "count": 20,
                   "temperature": 295.37,
                 },
-                "Test medical Cargo": Object {
+                "Test medical Cargo": {
                   "count": 2,
                   "temperature": 295.37,
                 },
-                "Test probeCasing Cargo": Object {
+                "Test probeCasing Cargo": {
                   "count": 15,
                   "temperature": 295.37,
                 },
-                "Test probeEquipment Cargo": Object {
+                "Test probeEquipment Cargo": {
                   "count": 2,
                   "temperature": 295.37,
                 },
-                "Test repair Cargo": Object {
+                "Test repair Cargo": {
                   "count": 5,
                   "temperature": 295.37,
                 },
-                "Test security Cargo": Object {
+                "Test security Cargo": {
                   "count": 4,
                   "temperature": 295.37,
                 },
-                "Test sparePart Cargo": Object {
+                "Test sparePart Cargo": {
                   "count": 11,
                   "temperature": 295.37,
                 },
-                "Test torpedoWarhead Cargo": Object {
+                "Test torpedoWarhead Cargo": {
                   "count": 11,
                   "temperature": 295.37,
                 },
               },
               "volume": 1000,
             },
-            "isRoom": IsRoomComponent {
-              "flags": Array [
+            "isRoom": {
+              "flags": [
                 "cargo",
               ],
             },

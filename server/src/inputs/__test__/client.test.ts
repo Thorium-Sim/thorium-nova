@@ -25,13 +25,12 @@ describe("Client input", () => {
           stations: [
             {
               name: "Test",
-              apiVersion: "stations/v1",
-              kind: "stations",
               description: "",
               logo: "",
               theme: "",
               tags: [],
               cards: [],
+              widgets: [],
             },
           ],
         },

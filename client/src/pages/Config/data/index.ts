@@ -1,6 +1,6 @@
 import {t} from "@server/init/t";
 import {ship} from "./ship";
-import {mission} from "./mission";
+import {timeline} from "./timeline";
 import {theme} from "./themes";
 import {systems} from "./systems";
 import {starmap} from "./starmap";
@@ -21,7 +21,7 @@ export function publish(pluginId: string) {
 
 export const plugin = t.router({
   ship,
-  mission,
+  timeline,
   theme,
   systems,
   starmap,
@@ -36,7 +36,10 @@ export const plugin = t.router({
       return true;
     })
     .request(({ctx, input}) => {
-      return ctx.server.plugins.find(plugin => plugin.id === input.pluginId);
+      const plugin = ctx.server.plugins.find(
+        plugin => plugin.id === input.pluginId
+      );
+      return plugin ? {...plugin, coverImage: plugin.coverImage} : null;
     }),
   create: t.procedure
     .input(z.object({name: z.string()}))

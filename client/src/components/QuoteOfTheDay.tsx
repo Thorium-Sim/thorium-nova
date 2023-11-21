@@ -207,6 +207,8 @@ const quotes = [
   "In the simple lives the beautiful.",
   // Steve Jobs
   "The most powerful person in the world is the storyteller.",
+  "I love and admire my species, living and dead, and am totally dependent on them for my life and well being.",
+  "You can't connect the dots looking forward; you can only connect them looking backwards. So you have to trust that the dots will somehow connect in your future.",
   // Hey Now
   "Imagination calling mirrors for you.",
   // Albert Einstein
@@ -277,6 +279,35 @@ const quotes = [
   // Walt Whitman. Also, Ted Lasso
   "Be curious, not judgemental.",
   "You alone are not enough, but you can still do great things.",
+  // Jeremy Goldberg
+  "Courage is knowing it might hurt, and doing it anyway. Stupidity is the same. And that's why life is hard.",
+  // Marvin Minsky
+  "If you understand something in only one way, then you don't really understand it at all.",
+  // I can eat a glass; it doesn't hurt me.
+  "Vitrum edere possum; mihi non nocet.",
+  // https://twitter.com/cassidoo/status/1696672212491608144
+  "Is the juice worth the squeeze?",
+  // PartyKit
+  "Everything is better with friends.",
+  // https://twitter.com/bookpoets/status/1697615168711381090
+  "I'll never know, and neither will you of the life you don't choose.",
+  // Hiromu Arakawa
+  "It's a cruel and random world, but the chaos is all so beautiful.",
+  "Basking in reflected glory.",
+  "This crazy mad world keeps turning around! You're right-side up then you're upside down!",
+  "You ever have a dream that never came true?",
+  "Colorless green ideas sleep furiously",
+  "Hued ideas mock the brain, notions of color not yet color, of pure, touchless, branching pallor of invading, essential Green",
+  "If you see the same tree twice in the forest, you’re lost.",
+  "We do this, not becasue it is easy, but because we thought it would be easy.",
+  // Jack London
+  "I'd rather be ashes than dust.",
+  "It's better to be approximately right than exactly wrong.",
+  // Thomas Merton
+  "What choice remains? Well, to be ordinary is not a choice: It is the usual freedom of men and women without their visions.",
+  // C.S. Lewis
+  "If I find in myself a desire which no experience in this world can satisfy, the most probable explanation is that I was made for another world.",
+  "A children's story that can only be enjoyed by children is not a good children's story in the slightest.",
 ];
 
 const QuoteOfTheDay = () => {

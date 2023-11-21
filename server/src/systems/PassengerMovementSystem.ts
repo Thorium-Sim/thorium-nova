@@ -1,6 +1,20 @@
 import {pubsub} from "@server/init/pubsub";
-import DeckPlugin, {DeckNode} from "../classes/Plugins/Ship/Deck";
+import {DeckNode} from "../classes/Plugins/Ship/Deck";
 import {Entity, System} from "../utils/ecs";
+import {Kelvin} from "@server/utils/unitTypes";
+
+type DeckNodeMap = {
+  [key: number]: NonNullable<
+    Entity["components"]["shipMap"]
+  >["deckNodes"][number] & {
+    deckIndex: number;
+    contents: {
+      [inventoryTemplateName: string]: {count: number; temperature: Kelvin};
+    };
+  };
+};
+
+const deckNodeCache = new Map<number, DeckNodeMap>();
 
 export class PassengerMovementSystem extends System {
   test(entity: Entity) {
@@ -18,17 +32,18 @@ export class PassengerMovementSystem extends System {
     const ship = this.ecs.getEntityById(parentId);
     if (!ship?.components.shipMap) return;
 
-    if (!ship.components.shipMap.deckNodeMap) {
-      ship.components.shipMap.deckNodeMap =
-        ship.components.shipMap.deckNodes.reduce((acc: any, node) => {
+    if (!deckNodeCache.has(ship.id)) {
+      deckNodeCache.set(
+        ship.id,
+        ship.components.shipMap.deckNodes.reduce((acc: DeckNodeMap, node) => {
           acc[node.id] = node;
           return acc;
-        }, {});
+        }, {})
+      );
     }
-    const nextNode =
-      ship.components.shipMap.deckNodeMap?.[
-        passengerMovement.nodePath[passengerMovement.nextNodeIndex]
-      ];
+    const nextNode = deckNodeCache.get(ship.id)?.[
+      passengerMovement.nodePath[passengerMovement.nextNodeIndex]
+    ];
     if (!nextNode) {
       return;
     }
@@ -85,11 +100,17 @@ export class PassengerMovementSystem extends System {
 }
 
 export function findClosestNode(
-  nodes: DeckNode[],
+  nodes: {id: number; x: number; y: number; deckIndex: number}[],
   {x, y, z}: {x: number; y: number; z: number}
 ) {
   const node = nodes.reduce(
-    (acc: {distance3d: number; node: null | DeckNode}, node) => {
+    (
+      acc: {
+        distance3d: number;
+        node: null | {id: number; x: number; y: number; deckIndex: number};
+      },
+      node
+    ) => {
       const distance3d = Math.hypot(node.x - x, node.y - y, node.deckIndex - z);
       if (distance3d < acc.distance3d) return {distance3d, node};
       return acc;

@@ -1,14 +1,18 @@
-import {Liter, Kelvin} from "server/src/utils/unitTypes";
-import {Component} from "../utils";
+import z from "zod";
 
-export class CargoContainer extends Component {
-  static id = "cargoContainer" as const;
-
-  /** How much cargo this entity can hold */
-  volume: Liter = 1000;
-
-  /** The contents of this cargo container. The key is the name/ID of inventory template object stored on the flight. */
-  contents: {
-    [inventoryTemplateName: string]: {count: number; temperature: Kelvin};
-  } = {};
-}
+export const cargoContainer = z
+  .object({
+    /** How much cargo this entity can hold. Measured in liters. */
+    volume: z.number().default(1000),
+    /** The contents of this cargo container. The key is the name/ID of inventory template object stored on the flight. */
+    contents: z
+      .record(
+        z.object({
+          count: z.number(),
+          // Measured in Kelvin
+          temperature: z.number(),
+        })
+      )
+      .default({}),
+  })
+  .default({});

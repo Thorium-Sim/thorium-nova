@@ -1,10 +1,10 @@
-import {Component} from "./utils";
+import z from "zod";
 
-export class MassComponent extends Component {
-  static id: "mass" = "mass";
-
-  /**
-   * The mass of the object in kilograms
-   */
-  mass: number = 700_000_000;
-}
+export const mass = z
+  .object({
+    /**
+     * The mass of the object in kilograms
+     */
+    mass: z.number().default(700_000_000),
+  })
+  .default({});

@@ -15,7 +15,6 @@ import {q} from "@client/context/AppContext";
 export default function PluginEdit() {
   return (
     <div className="h-full">
-      <Menubar></Menubar>
       <Suspense>
         <PluginEditInner />
       </Suspense>
@@ -297,6 +296,7 @@ function PluginDetails() {
             </InfoTip>
           </span>
           <UploadWell
+            className="max-w-sm aspect-square h-auto"
             accept="image/*"
             onChange={(files: FileList) => {
               if (!plugin) return;

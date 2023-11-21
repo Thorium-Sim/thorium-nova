@@ -1,7 +1,7 @@
-import {Component} from "./utils";
+import z from "zod";
 
-export class ColorComponent extends Component {
-  static id: "color" = "color";
-
-  color: string = "hsl(0,100%,50%)";
-}
+export const color = z
+  .object({
+    color: z.string().default("hsl(0,100%,50%)"),
+  })
+  .default({});

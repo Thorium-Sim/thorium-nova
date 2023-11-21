@@ -1,6 +1,7 @@
-import {Component} from "./utils";
+import z from "zod";
 
-export class PopulationComponent extends Component {
-  static id = "population" as const;
-  count: number = 0;
-}
+export const population = z
+  .object({
+    count: z.number().default(0),
+  })
+  .default({});

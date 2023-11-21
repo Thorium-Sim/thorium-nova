@@ -234,100 +234,101 @@ export default function DocLayout() {
   return (
     <div className="docs h-full">
       {location.pathname === "/docs" ? (
-        <Navigate to={"/docs/quick-start/getting-started"} />
+        <Navigate to={"/docs/quick-start/getting-started"} replace />
       ) : null}
-      <Menubar></Menubar>
-      <div className="flex justify-around gap-4 h-[calc(100%-2rem)]">
-        <aside className="px-4 py-8 text-white w-full max-w-sm bg-black/60 backdrop-filter backdrop-blur">
-          {orderedRoutes.map(([section, route]) => (
-            <Disclosure key={section}>
-              {({open}) => (
-                <>
-                  <Disclosure.Button className="flex justify-between w-full px-4 py-2 text-xl font-medium text-left text-purple-300 hover:text-purple-400 focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75">
-                    <span>{section}</span>
-                    <FaChevronUp
-                      className={`${
-                        open ? "transform rotate-180" : ""
-                      } w-5 h-5 text-purple-300`}
-                    />
-                  </Disclosure.Button>
-                  <Disclosure.Panel className="px-4 text-lg">
-                    <ul className="ml-4">
-                      {route
-                        .concat()
-                        .sort((a, b) => {
-                          if (!a.frontmatter) return -1;
-                          if (!b.frontmatter) return 1;
-                          if (a.frontmatter.order < b.frontmatter.order)
-                            return -1;
-                          if (a.frontmatter.order > b.frontmatter.order)
-                            return 1;
-                          return 0;
-                        })
-                        .map(
-                          route =>
-                            route.frontmatter && (
-                              <li
-                                key={route.path}
-                                className="hover:text-gray-200 text-gray-400"
-                              >
-                                <NavLink
-                                  to={`/docs/${route.path}`}
-                                  className={({isActive}) =>
-                                    isActive ? "font-semibold text-white" : ""
-                                  }
+      <Menubar>
+        <div className="flex justify-around gap-4 h-[calc(100%-2rem)]">
+          <aside className="px-4 py-8 text-white w-full max-w-sm bg-black/60 backdrop-filter backdrop-blur">
+            {orderedRoutes.map(([section, route]) => (
+              <Disclosure key={section}>
+                {({open}) => (
+                  <>
+                    <Disclosure.Button className="flex justify-between w-full px-4 py-2 text-xl font-medium text-left text-purple-300 hover:text-purple-400 focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75">
+                      <span>{section}</span>
+                      <FaChevronUp
+                        className={`${
+                          open ? "transform rotate-180" : ""
+                        } w-5 h-5 text-purple-300`}
+                      />
+                    </Disclosure.Button>
+                    <Disclosure.Panel className="px-4 text-lg">
+                      <ul className="ml-4">
+                        {route
+                          .concat()
+                          .sort((a, b) => {
+                            if (!a.frontmatter) return -1;
+                            if (!b.frontmatter) return 1;
+                            if (a.frontmatter.order < b.frontmatter.order)
+                              return -1;
+                            if (a.frontmatter.order > b.frontmatter.order)
+                              return 1;
+                            return 0;
+                          })
+                          .map(
+                            route =>
+                              route.frontmatter && (
+                                <li
+                                  key={route.path}
+                                  className="hover:text-gray-200 text-gray-400"
                                 >
-                                  {route.frontmatter.title}
-                                </NavLink>
-                              </li>
-                            )
-                        )}
-                    </ul>
-                  </Disclosure.Panel>
-                </>
-              )}
-            </Disclosure>
-          ))}
-        </aside>
-        <article className="overflow-y-auto flex-1" key={location.pathname}>
-          <div
-            className="mx-auto max-w-screen-lg my-16 bg-black/80 p-8 rounded-lg backdrop-filter backdrop-blur"
-            ref={docRef}
-          >
-            <div className="prose prose-lg mx-auto">
-              <Routes>
-                {routes.map(({path, content}) => (
-                  <Route
-                    key={path}
-                    path={path}
-                    element={
-                      <div dangerouslySetInnerHTML={{__html: content}} />
-                    }
-                  />
-                ))}
-              </Routes>
-            </div>
-          </div>
-        </article>
-        <aside className="flex-1 overflow-y-auto px-4 py-8 text-white w-full max-w-sm bg-black/60 backdrop-filter backdrop-blur">
-          <Search />
-          <Routes>
-            {routes.map(({path, toc}) => (
-              <Route
-                key={path}
-                path={path}
-                element={
-                  <TOC
-                    pathname={location.pathname}
-                    toc={toc}
-                    scrollToHeading={scrollToHeading}
-                  />
-                }
-              />
+                                  <NavLink
+                                    to={`/docs/${route.path}`}
+                                    className={({isActive}) =>
+                                      isActive ? "font-semibold text-white" : ""
+                                    }
+                                  >
+                                    {route.frontmatter.title}
+                                  </NavLink>
+                                </li>
+                              )
+                          )}
+                      </ul>
+                    </Disclosure.Panel>
+                  </>
+                )}
+              </Disclosure>
             ))}
-          </Routes>
-        </aside>
-      </div>
+          </aside>
+          <article className="overflow-y-auto flex-1" key={location.pathname}>
+            <div
+              className="mx-auto max-w-screen-lg my-16 bg-black/80 p-8 rounded-lg backdrop-filter backdrop-blur"
+              ref={docRef}
+            >
+              <div className="prose prose-lg mx-auto">
+                <Routes>
+                  {routes.map(({path, content}) => (
+                    <Route
+                      key={path}
+                      path={path}
+                      element={
+                        <div dangerouslySetInnerHTML={{__html: content}} />
+                      }
+                    />
+                  ))}
+                </Routes>
+              </div>
+            </div>
+          </article>
+          <aside className="flex-1 overflow-y-auto px-4 py-8 text-white w-full max-w-sm bg-black/60 backdrop-filter backdrop-blur">
+            <Search />
+            <Routes>
+              {routes.map(({path, toc}) => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={
+                    <TOC
+                      pathname={location.pathname}
+                      toc={toc}
+                      scrollToHeading={scrollToHeading}
+                    />
+                  }
+                />
+              ))}
+            </Routes>
+          </aside>
+        </div>
+      </Menubar>
     </div>
   );
 }

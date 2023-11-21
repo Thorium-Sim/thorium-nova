@@ -1,7 +1,7 @@
-import {Component} from "./utils";
+import z from "zod";
 
-export class IsPlayerShipComponent extends Component {
-  static id: "isPlayerShip" = "isPlayerShip";
-
-  value: true = true;
-}
+export const isPlayerShip = z
+  .object({
+    value: z.literal(true).default(true),
+  })
+  .default({});

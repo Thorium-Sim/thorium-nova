@@ -2,7 +2,7 @@ import "./init/polyfill";
 import {setBasePath} from "@thorium/db-fs";
 import buildHTTPServer from "./init/httpServer";
 import path from "path";
-import {promises as fs, existsSync} from "fs";
+import {existsSync} from "fs";
 import {liveQueryPlugin} from "@thorium/live-query/adapters/fastify-adapter";
 import {rootPath, thoriumPath} from "./utils/appPaths";
 import {buildDatabase} from "./init/buildDatabase";
@@ -11,6 +11,8 @@ import {router} from "./init/router";
 import {startServer} from "./init/startServer";
 import {exitHandler} from "./init/exitHandler";
 import {initDefaultPlugin} from "./init/initDefaultPlugin";
+import {processTriggers} from "./utils/evaluateEntityQuery";
+import {initRapier} from "./init/rapier";
 
 setBasePath(thoriumPath);
 
@@ -19,6 +21,7 @@ export async function init() {
   if (!existsSync(thoriumPath)) {
     await initDefaultPlugin();
   }
+  await initRapier();
 
   const database = await buildDatabase();
   const app = await buildHTTPServer({
@@ -29,6 +32,18 @@ export async function init() {
     createWSContext: createWSContext as any,
     router,
     extraContext: database,
+    onCall: (opts: any) => {
+      const ecs = database?.flight?.ecs;
+      if (!ecs || opts.type !== "send") return;
+      processTriggers(ecs, {
+        event: opts.path,
+        values: {
+          shipId: opts.ctx.ship?.id,
+          clientId: opts.ctx.client.id,
+          ...opts.rawInput,
+        },
+      });
+    },
   });
 
   await startServer(app);

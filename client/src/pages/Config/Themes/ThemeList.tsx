@@ -1,5 +1,5 @@
 import {usePrompt} from "@thorium/ui/AlertDialog";
-import Menubar from "@thorium/ui/Menubar";
+import Menubar, {useMenubar} from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
 import Button from "@thorium/ui/Button";
 import {Outlet, useParams, useNavigate} from "react-router-dom";
@@ -11,9 +11,9 @@ export function ThemeList() {
   const {pluginId} = useParams() as {
     pluginId: string;
   };
+  useMenubar({backTo: `/config/${pluginId}/list`});
   return (
     <div className="h-full">
-      <Menubar backTo={`/config/${pluginId}/list`}></Menubar>
       <Suspense>
         <ThemeListInner />
       </Suspense>

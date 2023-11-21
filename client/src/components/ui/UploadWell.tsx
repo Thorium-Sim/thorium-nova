@@ -1,3 +1,4 @@
+import {cn} from "@client/utils/cn";
 import React, {ReactNode} from "react";
 import {FaFileUpload} from "react-icons/fa";
 
@@ -6,7 +7,15 @@ const UploadWell: React.FC<{
   accept?: string;
   onChange?: (files: FileList) => void;
   children?: ReactNode;
-}> = ({children, disabled, accept, onChange = files => {}, ...props}) => {
+  className?: string;
+}> = ({
+  children,
+  disabled,
+  accept,
+  className,
+  onChange = files => {},
+  ...props
+}) => {
   const [dragging, setDragging] = React.useState(false);
 
   // Drag and drop is hard to test
@@ -44,11 +53,17 @@ const UploadWell: React.FC<{
   return (
     <label
       {...props}
-      className={`max-w-64 h-full w-full aspect-square ${
-        disabled ? "" : dragging ? "cursor-[copy]" : "cursor-pointer"
-      } shadow-inner rounded-lg ${
-        dragging ? "bg-white/50" : "bg-black/50"
-      } flex items-center justify-center`}
+      className={cn(
+        "max-w-64 h-full w-full aspect-square",
+        "flex items-center justify-center",
+        {
+          "cursor-[copy]": !disabled && dragging,
+          "cursor-pointer": !disabled && !dragging,
+        },
+        "shadow-inner rounded-lg",
+        dragging ? "bg-white/50" : "bg-black/50",
+        className
+      )}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragEnter}
       onDragLeave={handleDragExit}

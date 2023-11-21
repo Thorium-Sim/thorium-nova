@@ -1,8 +1,9 @@
-import {Component} from "./utils";
+import z from "zod";
 
-export class RotationVelocityComponent extends Component {
-  static id: "rotationVelocity" = "rotationVelocity";
-  x: number = 0;
-  y: number = 0;
-  z: number = 0;
-}
+export const rotationVelocity = z
+  .object({
+    x: z.number().default(0),
+    y: z.number().default(0),
+    z: z.number().default(0),
+  })
+  .default({});

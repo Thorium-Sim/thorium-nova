@@ -1,6 +1,6 @@
 import {usePrompt} from "@thorium/ui/AlertDialog";
 import {useParams, useNavigate, Outlet} from "react-router-dom";
-import Menubar from "@thorium/ui/Menubar";
+import {useMenubar} from "@thorium/ui/Menubar";
 import Button from "@thorium/ui/Button";
 import {toast} from "client/src/context/ToastContext";
 import SearchableList from "@thorium/ui/SearchableList";
@@ -11,13 +11,11 @@ export function InventoryList() {
   const {pluginId} = useParams() as {
     pluginId: string;
   };
+  useMenubar({backTo: `/config/${pluginId}/list`});
   return (
-    <div className="h-full">
-      <Menubar backTo={`/config/${pluginId}/list`}></Menubar>
-      <Suspense>
-        <InventoryListInner />
-      </Suspense>
-    </div>
+    <Suspense>
+      <InventoryListInner />
+    </Suspense>
   );
 }
 

@@ -3,6 +3,10 @@ import {databaseName} from "../utils/appPaths";
 import randomWords from "@thorium/random-words";
 import {FlightDataModel} from "../classes/FlightDataModel";
 
+export let database: {
+  server: ServerDataModel;
+  flight: FlightDataModel | null;
+};
 export async function buildDatabase() {
   // Create the primary database
   // This is for any user data that is persisted between flights
@@ -12,9 +16,13 @@ export async function buildDatabase() {
     {path: databaseName}
   );
 
+  // Wait for the plugins to load. Shouldn't take long.
   await new Promise<void>(res => {
-    setInterval(() => {
-      if (serverModel.plugins.length > 0) res();
+    const interval = setInterval(() => {
+      if (serverModel.plugins.length > 0) {
+        clearInterval(interval);
+        res();
+      }
     }, 100);
   });
 
@@ -33,10 +41,11 @@ export async function buildDatabase() {
       },
       {path: `/flights/${flightName}.flight`}
     );
-    flight.initEcs(serverModel);
+    await flight.initEcs(serverModel);
+    await flight.initPhysics();
   }
 
-  const database = {server: serverModel, flight};
+  database = {server: serverModel, flight};
 
   return database;
 }

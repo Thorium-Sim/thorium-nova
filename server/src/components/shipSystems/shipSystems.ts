@@ -1,26 +1,19 @@
-import {Component} from "../utils";
+import z from "zod";
 
-export class ShipSystemsComponent extends Component {
-  static id: "shipSystems" = "shipSystems";
-  static serialize({
-    shipSystems: shipSystemIds,
-    ...data
-  }: Omit<ShipSystemsComponent, "init">) {
-    return {...data, shipSystemIds: Array.from(shipSystemIds.entries())};
-  }
-  init(params: any = {}) {
-    (Object.getOwnPropertyNames(this) as (keyof this)[]).forEach(key => {
-      if (key === "shipSystems") {
-        this.shipSystems = new Map(params["shipSystemIds"]);
-      }
-      if (key !== "init") {
-        this[key] = params[key] ?? this[key];
-      }
-    });
-  }
-  /**
-   * The IDs of the ship system entities assigned to this ship
-   * and the rooms they are assigned to
-   */
-  shipSystems: Map<number, {roomId?: number}> = new Map();
-}
+const systemRooms = z.object({roomId: z.number().optional()}).default({});
+
+export const shipSystems = z
+  .object({
+    /**
+     * The IDs of the ship system entities assigned to this ship
+     * and the rooms they are assigned to
+     */
+    shipSystems: z
+      .union([
+        z.array(z.tuple([z.number(), systemRooms])),
+        z.map(z.number(), systemRooms),
+      ])
+      .default([])
+      .transform(val => (val instanceof Map ? val : new Map(val))),
+  })
+  .default({});

@@ -1,11 +1,10 @@
-import {Component} from "./utils";
+import z from "zod";
 
-export class TimerComponent extends Component {
-  static id: "timer" = "timer";
-
-  label: string = "Generic";
-
-  time: string = "00:05:00";
-
-  paused: boolean = false;
-}
+// Zod schema that matches the Timer component
+export const timer = z
+  .object({
+    label: z.string().default("Generic"),
+    time: z.string().default("00:05:00"),
+    paused: z.boolean().default(false),
+  })
+  .default({});

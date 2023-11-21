@@ -1,9 +1,11 @@
-import {Component} from "./utils";
+import z from "zod";
 
 /**
  * Add this component to indicate an entity's animation should snap instead of interpolate
  * such as when a ship transitions from solar to interstellar space.
  */
-export class SnapInterpolationComponent extends Component {
-  static id: "snapInterpolation" = "snapInterpolation";
-}
+export const snapInterpolation = z
+  .object({
+    snapInterpolation: z.literal(true).default(true),
+  })
+  .default({});

@@ -2,7 +2,6 @@ import {t} from "@server/init/t";
 import {pubsub} from "@server/init/pubsub";
 import {matchSorter} from "match-sorter";
 import ShipPlugin from "server/src/classes/Plugins/Ship";
-import {DataContext} from "server/src/utils/DataContext";
 import {Entity} from "server/src/utils/ecs";
 import {Coordinates} from "server/src/utils/unitTypes";
 import {z} from "zod";
@@ -20,9 +19,11 @@ export const starmapCore = t.router({
     return data;
   }),
   system: t.procedure
-    .input(z.object({systemId: z.number()}))
+    .input(z.object({systemId: z.number().nullish()}))
     .request(({ctx, input}) => {
       if (!ctx.flight) throw new Error("No flight in progress");
+      if (input?.systemId === null || input?.systemId === undefined)
+        throw new Error("No system id provided");
       const data = ctx.flight.ecs.getEntityById(input.systemId);
       if (!data?.components.isSolarSystem)
         throw new Error("Not a solar system");
@@ -106,7 +107,11 @@ export const starmapCore = t.router({
 
       const entity = ctx.flight.ecs.getEntityById(input.shipId);
       if (!entity) return null;
-      return {id: entity.id, systemId: entity.components.position?.parentId};
+      return {
+        id: entity.id,
+        systemId: entity.components.position?.parentId,
+        behavior: entity.components.shipBehavior,
+      };
     }),
   debugSpheres: t.procedure
     .input(z.object({systemId: z.number().nullable()}))
@@ -247,6 +252,32 @@ export const starmapCore = t.router({
 
       systemIds.forEach(id => {
         pubsub.publish.starmapCore.autopilot({systemId: id});
+      });
+    }),
+  setBehavior: t.procedure
+    .input(
+      z.object({
+        ships: z.number().array(),
+        behavior: z.union([
+          z.literal("hold"),
+          z.literal("seek"),
+          z.literal("patrol"),
+          z.literal("attack"),
+          z.literal("defend"),
+          z.literal("avoid"),
+        ]),
+      })
+    )
+    .send(({ctx, input}) => {
+      input.ships.forEach(shipId => {
+        const entity = ctx.flight?.ecs.getEntityById(shipId);
+        entity?.updateComponent("shipBehavior", {
+          objective: input.behavior,
+        });
+
+        pubsub.publish.pilot.autopilot.get({shipId});
+        pubsub.publish.ship.get({shipId});
+        pubsub.publish.starmapCore.ship({shipId});
       });
     }),
   stream: t.procedure

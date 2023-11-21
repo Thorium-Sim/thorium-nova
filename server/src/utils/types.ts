@@ -1,5 +1,4 @@
 import {Entity} from "server/src/utils/ecs";
-import {TimerComponent} from "../components/timer";
 import type {DataContext} from "./DataContext";
 export {DataContext};
 export type UnionToIntersection<U> = (
@@ -7,6 +6,21 @@ export type UnionToIntersection<U> = (
 ) extends (x: infer I) => 0
   ? Extract<I, U>
   : never;
+
+export type TuplifyUnion<
+  T,
+  L = LastOf<T>,
+  N = [T] extends [never] ? true : false
+> = true extends N ? [] : Push<TuplifyUnion<Exclude<T, L>>, L>;
+type Push<T extends any[], V> = [...T, V];
+
+type LastOf<T> = UnionToIntersection<
+  T extends any ? () => T : never
+> extends () => infer R
+  ? R
+  : never;
+export type LiteralTuple<T> = {[K in keyof T]: Zod.ZodLiteral<T[K]>};
+
 /**
  * All of the different ways a client can be considered offline.
  */

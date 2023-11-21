@@ -2,6 +2,7 @@ import {Suspense} from "react";
 import {Route, Routes} from "react-router-dom";
 import {ThemeLayout} from "./ThemeLayout";
 import {ThemeList} from "./ThemeList";
+import NoMatch from "@client/pages/NotFound";
 
 export default function Themes() {
   return (
@@ -16,6 +17,7 @@ export default function Themes() {
           }
         ></Route>
       </Route>
+      <Route path="*" element={<NoMatch />} />
     </Routes>
   );
 }

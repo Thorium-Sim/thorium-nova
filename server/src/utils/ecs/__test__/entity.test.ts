@@ -39,7 +39,7 @@ describe("Entity", () => {
       expect(entity.components.identity).toEqual(undefined);
       entity.addComponent("identity");
       expect(entity.components.identity?.name).toEqual("Entity");
-      expect(entity.components.identity?.description).toEqual("");
+      expect(entity.components.identity?.description).toBeUndefined();
     });
   });
 

@@ -1,5 +1,5 @@
 import {usePrompt} from "@thorium/ui/AlertDialog";
-import Menubar from "@thorium/ui/Menubar";
+import Menubar, {useMenubar} from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
 import {Outlet, useParams, useNavigate} from "react-router-dom";
 import {Fragment, Suspense} from "react";
@@ -14,9 +14,9 @@ export function ShipSystemsList() {
   const {pluginId} = useParams() as {
     pluginId: string;
   };
+  useMenubar({backTo: `/config/${pluginId}/list`});
   return (
     <div className="h-full">
-      <Menubar backTo={`/config/${pluginId}/list`}></Menubar>
       <Suspense>
         <ShipSystemsInner />
       </Suspense>

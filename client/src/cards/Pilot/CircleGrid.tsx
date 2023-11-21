@@ -20,8 +20,8 @@ import {
   UNSAFE_NavigationContext,
   UNSAFE_RouteContext,
 } from "react-router-dom";
-import {IsPlanetComponent, IsStarComponent} from "@server/components/list";
-import type {SatelliteComponent} from "@server/components/satellite";
+import {isPlanet, isStar} from "@server/components/list";
+import type {satellite} from "@server/components/satellite";
 import {getOrbitPosition} from "@server/utils/getOrbitPosition";
 import {degToRad, solarRadiusToKilometers} from "@server/utils/unitTypes";
 import {
@@ -429,9 +429,9 @@ export const ShipEntity = ({
 };
 
 interface PlanetaryEntityProps {
-  satellite: Omit<SatelliteComponent, "init">;
-  isPlanet?: Omit<IsPlanetComponent, "init">;
-  isStar?: Omit<IsStarComponent, "init">;
+  satellite: Zod.infer<typeof satellite>;
+  isPlanet?: Zod.infer<typeof isPlanet>;
+  isStar?: Zod.infer<typeof isStar>;
 }
 
 export const PlanetaryEntity = memo(

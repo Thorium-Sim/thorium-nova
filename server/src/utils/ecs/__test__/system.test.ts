@@ -1,10 +1,11 @@
 import Entity from "../entity";
 import System from "../system";
+import {vi} from "vitest";
 
 function getFakeEntity() {
   return {
-    addSystem: jest.fn(),
-    removeSystem: jest.fn(),
+    addSystem: vi.fn(),
+    removeSystem: vi.fn(),
   } as unknown as Entity;
 }
 
@@ -35,7 +36,7 @@ describe("System", () => {
     });
 
     it("should call enter() on added entity", () => {
-      system.enter = jest.fn();
+      system.enter = vi.fn();
 
       system.addEntity(entity);
 
@@ -65,7 +66,7 @@ describe("System", () => {
     });
 
     it("should call exit() on removed entity", () => {
-      system.exit = jest.fn();
+      system.exit = vi.fn();
 
       system.removeEntity(entity);
 
@@ -78,7 +79,7 @@ describe("System", () => {
       let entity1 = getFakeEntity();
       let entity2 = getFakeEntity();
       let system = new System();
-      system.update = jest.fn();
+      system.update = vi.fn();
 
       system.addEntity(entity1);
       system.addEntity(entity2);
@@ -89,7 +90,7 @@ describe("System", () => {
 
     it("should call preUpdate()", () => {
       let system = new System();
-      system.preUpdate = jest.fn();
+      system.preUpdate = vi.fn();
 
       system.updateAll();
 
@@ -98,7 +99,7 @@ describe("System", () => {
 
     it("should call postUpdate()", () => {
       let system = new System();
-      system.postUpdate = jest.fn();
+      system.postUpdate = vi.fn();
 
       system.updateAll();
 

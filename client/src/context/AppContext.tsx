@@ -18,7 +18,7 @@ import {useSessionStorage} from "@client/hooks/useSessionStorage";
 import {randomFromList} from "@server/utils/randomFromList";
 import {Disconnected, Reconnecting} from "./ConnectionStatus";
 
-const Fallback: React.FC<FallbackProps> = ({error}) => {
+export const Fallback: React.FC<FallbackProps> = ({error}) => {
   return (
     <div className="p-4 text-white">
       <h1 className="text-5xl">Error</h1>
@@ -40,6 +40,7 @@ const backgrounds = [
   "/assets/backgrounds/background10.jpg",
   "/assets/backgrounds/background11.jpg",
   "/assets/backgrounds/background12.jpg",
+  "/assets/backgrounds/background13.jpg",
 ];
 
 const Layout = ({children}: {children: ReactNode}) => {

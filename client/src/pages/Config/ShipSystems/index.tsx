@@ -8,6 +8,7 @@ import {useParams} from "react-router-dom";
 import {lazy, Suspense} from "react";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 import {q} from "@client/context/AppContext";
+import NoMatch from "@client/pages/NotFound";
 
 export const systemConfigs = Object.fromEntries(
   Object.entries(import.meta.glob("./SystemConfigs/*.tsx")).map(
@@ -55,6 +56,7 @@ export default function ShipSystemsConfig() {
           <Route path="heat" element={<Heat />} />
         </Route>
       </Route>
+      <Route path="*" element={<NoMatch />} />
     </Routes>
   );
 }

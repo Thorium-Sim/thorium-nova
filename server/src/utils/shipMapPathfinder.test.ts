@@ -16,21 +16,21 @@ describe("ship map pathfinder", () => {
     expect(graph.get(1)?.size).toBe(2);
 
     expect(calculateShipMapPath(graph, 1, 5)).toMatchInlineSnapshot(`
-      Array [
+      [
         1,
         3,
         5,
       ]
     `);
     expect(calculateShipMapPath(graph, 5, 1)).toMatchInlineSnapshot(`
-      Array [
+      [
         5,
         3,
         1,
       ]
     `);
     expect(calculateShipMapPath(graph, 3, 2)).toMatchInlineSnapshot(`
-      Array [
+      [
         3,
         2,
       ]

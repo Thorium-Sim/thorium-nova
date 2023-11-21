@@ -188,15 +188,18 @@ export function createRouterFactory<TConfig extends AnyRootConfig>(
 /**
  * @internal
  */
-export function callProcedure(
+export async function callProcedure(
   opts: ProcedureCallOptions & {procedures: ProcedureRouterRecord}
 ) {
-  const {type, path} = opts;
+  const {type, path, onCall} = opts;
 
   if (!(path in opts.procedures) || !opts.procedures[path]?._def[type]) {
     throw new Error(`No "${type}"-procedure on path "${path}"`);
   }
 
-  const procedure = opts.procedures[path] as AnyProcedure;
-  return procedure(opts);
+  const {procedures, ...procedureOpts} = opts;
+  const procedure = procedures[path] as AnyProcedure;
+  const result = await procedure(opts);
+  onCall?.(procedureOpts);
+  return result;
 }

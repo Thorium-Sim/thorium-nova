@@ -38,6 +38,7 @@ function HackyFix() {
     </a.div>
   );
 }
+
 const MainPage = () => {
   return (
     <>

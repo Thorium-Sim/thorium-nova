@@ -1,14 +1,10 @@
 import {q} from "@client/context/AppContext";
 import {SVGImageLoader} from "@thorium/ui/SVGImageLoader";
 import {useThoriumAccount} from "@client/context/ThoriumAccountContext";
-import {RiLogoutCircleRLine} from "react-icons/ri";
-import {BsJoystick} from "react-icons/bs";
 import {CardArea} from "./CardArea";
 import {CardSwitcher} from "./CardSwitcher";
 import {useManageCard} from "./useManageCard";
-import {ClickWidget} from "./widgets";
-import {useState} from "react";
-import {GamepadConfig, useGamepadStore} from "@client/hooks/useGamepadStore";
+import {Widgets} from "./widgets";
 
 const StationLayout = () => {
   const [ship] = q.ship.get.useNetRequest();
@@ -99,33 +95,11 @@ const StationLayout = () => {
           </div>
         </div>
         <div className="widgets flex space-x-2 absolute bottom-8 right-[calc(2rem+50px)]">
-          {/* <Widget icon={RiPictureInPictureLine} component={ViewscreenWidget} /> */}
-          <GamepadWidget />
-          <ClickWidget
-            icon={RiLogoutCircleRLine}
-            onClick={() => q.client.logout.netSend()}
-          />
+          <Widgets />
         </div>
       </div>
     </div>
   );
 };
-
-function GamepadWidget() {
-  const [configOpen, setConfigOpen] = useState(false);
-  const hasGamepad = useGamepadStore(
-    store => store.gamepads.filter(Boolean).length > 0
-  );
-  if (!hasGamepad) return null;
-  return (
-    <>
-      <ClickWidget icon={BsJoystick} onClick={() => setConfigOpen(true)} />
-      <GamepadConfig
-        isOpen={configOpen}
-        setIsOpen={() => setConfigOpen(false)}
-      />
-    </>
-  );
-}
 
 export default StationLayout;

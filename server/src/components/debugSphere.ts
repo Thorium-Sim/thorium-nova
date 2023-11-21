@@ -1,11 +1,11 @@
-import {Component} from "./utils";
+import z from "zod";
 
 /**
  * A component that is used to debug the behavior system
  * by showing where the ship is trying to go.
  */
-export class DebugSphereComponent extends Component {
-  static id = "debugSphere" as const;
-
-  entityId: number = -1;
-}
+export const debugSphere = z
+  .object({
+    entityId: z.number().default(-1),
+  })
+  .default({});

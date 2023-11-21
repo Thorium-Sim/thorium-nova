@@ -1,4 +1,4 @@
-import {SatelliteComponent} from "server/src/components/satellite";
+import {satellite} from "server/src/components/satellite";
 import {SpectralTypes, starTypes} from "server/src/spawners/starTypes";
 import {
   Degree,
@@ -53,13 +53,13 @@ export default class StarPlugin {
    */
   temperature: Kelvin;
 
-  satellite: Omit<SatelliteComponent, "init" | "parentId"> & {parentId: string};
+  satellite: Omit<Zod.infer<typeof satellite>, "parentId"> & {parentId: string};
 
   constructor(
     params: Partial<
       Omit<StarPlugin, "satellite"> & {
         satellite: Partial<
-          Omit<SatelliteComponent, "init" | "parentId"> & {
+          Omit<Zod.infer<typeof satellite>, "parentId"> & {
             parentId: string;
           }
         >;

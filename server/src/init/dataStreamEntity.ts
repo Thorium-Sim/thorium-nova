@@ -5,20 +5,6 @@ export function dataStreamEntity(e: Entity) {
   // See https://github.com/geckosio/snapshot-interpolation#world-state
   // We're also removing any components of the entity that don't update
   // frequently to keep packet size down.
-  if (e.components.isWarpEngines) {
-    return {
-      id: e.id.toString(),
-      x: e.components.isWarpEngines.forwardVelocity,
-      y: e.components.isWarpEngines.maxVelocity,
-    };
-  }
-
-  if (e.components.isImpulseEngines) {
-    return {
-      id: e.id.toString(),
-      x: e.components.isImpulseEngines.measuredVelocity,
-    };
-  }
 
   if (e.components.isReactor) {
     return {
@@ -50,6 +36,7 @@ export function dataStreamEntity(e: Entity) {
   return {
     id: e.id.toString(),
     ...position,
+    f: e.components.velocity?.forwardVelocity || 0,
     s: shouldSnap,
     r: e.components.rotation,
   };

@@ -3,6 +3,7 @@ import OfficersLog from ".";
 import {render} from "client/react-test-utils";
 import userEvent from "@testing-library/user-event";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
+
 test("it should render without error", async () => {
   const queryClient = new QueryClient();
 
@@ -23,12 +24,12 @@ test("it should render without error", async () => {
       },
     }
   );
-  const logEl = await findByText("@560.60");
-  expect(logEl).toBeInTheDocument();
+  const logEl = await findByText("@560.60", {}, {timeout: 5000});
+  expect(logEl).toBeDefined();
   userEvent.click(logEl);
-  expect(await findByText("This is a test log entry")).toBeInTheDocument();
+  expect(await findByText("This is a test log entry")).toBeDefined();
   await userEvent.click(await findByText("Clear"));
-  expect(queryByText("This is a test log entry")).not.toBeInTheDocument();
+  expect(queryByText("This is a test log entry")).toBeNull();
   await userEvent.click(await findByText("New Log Entry"));
   const entryText = "This is a new log entry.";
   await userEvent.type(await findByRole("textbox"), entryText);

@@ -82,9 +82,6 @@ describe("PassengerMovementSystem", () => {
         }),
       ],
     });
-    ship?.updateComponent("shipMap", {
-      graph: createShipMapGraph(ship.components.shipMap?.deckEdges || []),
-    });
     ecs.addEntity(ship);
   });
   it("should move a passenger within the same deck", () => {
@@ -107,7 +104,7 @@ describe("PassengerMovementSystem", () => {
     ecs.addEntity(passenger);
     ecs.update(16);
     expect(passenger.components.position).toMatchInlineSnapshot(`
-      PositionComponent {
+      {
         "parentId": 1,
         "type": "ship",
         "x": 0,
@@ -115,9 +112,8 @@ describe("PassengerMovementSystem", () => {
         "z": 0,
       }
     `);
-    if (!ship.components.shipMap?.graph)
-      throw new Error("shipMap.graph is undefined");
-    const nodePath = calculateShipMapPath(ship.components.shipMap?.graph, 1, 3);
+    const graph = createShipMapGraph(ship.components.shipMap?.deckEdges || []);
+    const nodePath = calculateShipMapPath(graph, 1, 3);
     if (!nodePath) throw new Error("unable to calculate node path");
     passenger.updateComponent("passengerMovement", {
       nodePath,
@@ -125,7 +121,7 @@ describe("PassengerMovementSystem", () => {
     });
     update(2);
     expect(passenger.components.position).toMatchInlineSnapshot(`
-      PositionComponent {
+      {
         "parentId": 1,
         "type": "ship",
         "x": 0.44215339876352006,
@@ -136,7 +132,7 @@ describe("PassengerMovementSystem", () => {
     expect(passenger.components.passengerMovement?.nextNodeIndex).toBe(1);
     update(7);
     expect(passenger.components.position).toMatchInlineSnapshot(`
-      PositionComponent {
+      {
         "parentId": 1,
         "type": "ship",
         "x": 1.0995775896953266,
@@ -148,7 +144,7 @@ describe("PassengerMovementSystem", () => {
     update(8);
     const oldX = passenger.components.position?.x;
     expect(passenger.components.position).toMatchInlineSnapshot(`
-      PositionComponent {
+      {
         "parentId": 1,
         "type": "ship",
         "x": 2,
@@ -182,7 +178,7 @@ describe("PassengerMovementSystem", () => {
     ecs.addEntity(passenger);
     ecs.update(16);
     expect(passenger.components.position).toMatchInlineSnapshot(`
-      PositionComponent {
+      {
         "parentId": 3,
         "type": "ship",
         "x": 2,
@@ -190,9 +186,8 @@ describe("PassengerMovementSystem", () => {
         "z": 0,
       }
     `);
-    if (!ship.components.shipMap?.graph)
-      throw new Error("shipMap.graph is undefined");
-    const nodePath = calculateShipMapPath(ship.components.shipMap?.graph, 3, 5);
+    const graph = createShipMapGraph(ship.components.shipMap?.deckEdges || []);
+    const nodePath = calculateShipMapPath(graph, 3, 5);
     if (!nodePath) throw new Error("unable to calculate node path");
     passenger.updateComponent("passengerMovement", {
       nodePath,
@@ -200,7 +195,7 @@ describe("PassengerMovementSystem", () => {
     });
     update(2);
     expect(passenger.components.position).toMatchInlineSnapshot(`
-      PositionComponent {
+      {
         "parentId": 3,
         "type": "ship",
         "x": 2,
@@ -211,7 +206,7 @@ describe("PassengerMovementSystem", () => {
     expect(passenger.components.passengerMovement?.nextNodeIndex).toBe(1);
     update(22);
     expect(passenger.components.position).toMatchInlineSnapshot(`
-      PositionComponent {
+      {
         "parentId": 3,
         "type": "ship",
         "x": 1,
@@ -221,7 +216,7 @@ describe("PassengerMovementSystem", () => {
     `);
     update(4);
     expect(passenger.components.position).toMatchInlineSnapshot(`
-      PositionComponent {
+      {
         "parentId": 3,
         "type": "ship",
         "x": 1,
@@ -231,7 +226,7 @@ describe("PassengerMovementSystem", () => {
     `);
     update(4);
     expect(passenger.components.position).toMatchInlineSnapshot(`
-      PositionComponent {
+      {
         "parentId": 3,
         "type": "ship",
         "x": 1,

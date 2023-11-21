@@ -177,7 +177,11 @@ export function useConfirm() {
   const dialog = React.useContext(DialogContext);
 
   return React.useCallback(
-    ({header, body}: {header: string; body?: string}) => {
+    (input: string | {header: string; body?: string}, bodyInput?: string) => {
+      if (typeof input === "string") {
+        return dialog({header: input, body: bodyInput, type: "confirm"});
+      }
+      const {header, body} = input;
       return dialog({header, body, type: "confirm"});
     },
     [dialog]
@@ -186,20 +190,31 @@ export function useConfirm() {
 export function usePrompt() {
   const dialog = React.useContext(DialogContext);
 
-  return ({
-    header,
-    body,
-    defaultValue,
-    inputProps,
-  }: {
-    header: string;
-    body?: string;
-    defaultValue?: string;
-    inputProps?: React.DetailedHTMLProps<
-      React.InputHTMLAttributes<HTMLInputElement>,
-      HTMLInputElement
-    >;
-  }) => dialog({header, body, defaultValue, type: "prompt", inputProps});
+  return (
+    input:
+      | string
+      | {
+          header: string;
+          body?: string;
+          defaultValue?: string;
+          inputProps?: React.DetailedHTMLProps<
+            React.InputHTMLAttributes<HTMLInputElement>,
+            HTMLInputElement
+          >;
+        }
+  ) => {
+    if (typeof input === "string") {
+      return dialog({header: input, type: "prompt"}) as Promise<string>;
+    }
+    const {header, body, defaultValue, inputProps} = input;
+    return dialog({
+      header,
+      body,
+      defaultValue,
+      type: "prompt",
+      inputProps,
+    }) as Promise<string>;
+  };
 }
 export function useAlert() {
   const dialog = React.useContext(DialogContext);

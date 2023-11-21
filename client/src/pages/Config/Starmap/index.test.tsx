@@ -8,11 +8,13 @@ import SystemMarker from "@client/components/Starmap/SystemMarker";
 import {q} from "@client/context/AppContext";
 import {LiveQueryContext} from "@thorium/live-query/client/liveQueryContext";
 import {MockNetRequestContext} from "@thorium/live-query/client/mockContext";
-jest.mock("scheduler", () => require("scheduler/unstable_mock"));
+import {vi} from "vitest";
+
+vi.mock("scheduler", () => require("scheduler/unstable_mock"));
 
 //@ts-expect-error Mocking globals
 globalThis.DOMRect = class {
-  fromRect = jest.fn();
+  fromRect = vi.fn();
 };
 //@ts-expect-error Act environment
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;

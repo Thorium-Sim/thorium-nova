@@ -4,7 +4,7 @@ import {PriorityQueue} from "./priorityQueue";
 export type ShipMapGraph = Map<number, Map<number, number>>;
 export function createShipMapGraph(
   edges: {from: number; to: number}[],
-  inputNodes: DeckNode[] = []
+  inputNodes: {x: number; y: number; id: number}[] = []
 ) {
   const nodes: ShipMapGraph = new Map();
   const nodeMap = new Map(inputNodes.map(({id, x, y}) => [id, {x, y}]));

@@ -15,6 +15,7 @@ import {SnapshotInterpolation} from "@thorium/snapshot-interpolation/src";
 import {Snapshot} from "@thorium/snapshot-interpolation/src/types";
 import {encode} from "@msgpack/msgpack";
 import {EventEmitter} from "events";
+import {ProcedureCallOptions} from "@thorium/live-query/server/procedure";
 
 export interface FastifyHandlerOptions<
   TRouter extends AnyRouter,
@@ -36,6 +37,7 @@ export interface FastifyHandlerOptions<
     context: TContext;
   }) => MaybePromise<inferRouterContext<TRouter>> & {id: string | number};
   extraContext: TContext;
+  onCall?: (opts: ProcedureCallOptions) => void | Promise<void>;
 }
 
 function processBody(req: FastifyRequest) {
@@ -83,6 +85,7 @@ export async function liveQueryPlugin<TRouter extends AnyRouter, TContext>(
     netRequestPath = NETREQUEST_PATH,
     router,
     extraContext,
+    onCall,
   }: FastifyHandlerOptions<TRouter, FastifyRequest, FastifyReply, TContext>,
   done: (err?: Error) => void
 ) {
@@ -131,6 +134,7 @@ export async function liveQueryPlugin<TRouter extends AnyRouter, TContext>(
           ctx,
           rawInput: params,
           type,
+          onCall,
         });
 
         // Send the result back to the client, regardless of what it is.

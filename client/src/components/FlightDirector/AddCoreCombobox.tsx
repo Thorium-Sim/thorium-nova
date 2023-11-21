@@ -2,6 +2,7 @@ import {Fragment, useState} from "react";
 import {Combobox, Transition} from "@headlessui/react";
 import {HiSelector} from "react-icons/hi";
 import * as Cores from "../../cores";
+import {capitalCase} from "change-case";
 
 export const coreNames = Object.keys(Cores);
 
@@ -53,7 +54,7 @@ export function AddCoreCombobox({
                   value={coreName}
                 >
                   <span className={`block truncate font-normal`}>
-                    {coreName.replace("Core", "")}
+                    {capitalCase(coreName.replace("Core", ""))}
                   </span>
                 </Combobox.Option>
               ))

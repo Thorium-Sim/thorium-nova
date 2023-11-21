@@ -1,10 +1,10 @@
-import {AstronomicalUnit} from "server/src/utils/unitTypes";
-import {Component} from "../utils";
+import z from "zod";
 
-export class IsSolarSystemComponent extends Component {
-  static id: "isSolarSystem" = "isSolarSystem";
-
-  habitableZoneInner: AstronomicalUnit = 0.9;
-  habitableZoneOuter: AstronomicalUnit = 3.0;
-  skyboxKey: string = "Random Key";
-}
+export const isSolarSystem = z
+  .object({
+    // Measured in AU
+    habitableZoneInner: z.number().default(0.9),
+    habitableZoneOuter: z.number().default(3.0),
+    skyboxKey: z.string().default("Random Key"),
+  })
+  .default({});
