@@ -1,10 +1,7 @@
 import ReactDOM from "react-dom/client";
 import "./theme.css";
 import App from "./App";
-import {initializeTabId} from "@thorium/tab-id";
 import "@fontsource/outfit";
-
-initializeTabId();
 
 // TODO Aug 23 2021 - Configure this with the methods that come
 // from the Electron preload script.

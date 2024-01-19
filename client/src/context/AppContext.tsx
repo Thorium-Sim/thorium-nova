@@ -6,7 +6,6 @@ import {ErrorBoundary, FallbackProps} from "react-error-boundary";
 import ToastContainer from "./ToastContext";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 import {IssueTrackerProvider} from "../components/IssueTracker";
-import {getTabId} from "@thorium/tab-id";
 import {
   createLiveQueryReact,
   LiveQueryProvider,
@@ -17,6 +16,12 @@ import {ThoriumAccountContextProvider} from "./ThoriumAccountContext";
 import {useSessionStorage} from "@client/hooks/useSessionStorage";
 import {randomFromList} from "@server/utils/randomFromList";
 import {Disconnected, Reconnecting} from "./ConnectionStatus";
+import {TabIdCoordinator} from "browser-tab-id";
+import {createRNG} from "@thorium/rng";
+
+const tabCoordinator = new TabIdCoordinator();
+const rng = createRNG(tabCoordinator.tabId);
+const tabId = rng.nextString();
 
 export const Fallback: React.FC<FallbackProps> = ({error}) => {
   return (
@@ -64,8 +69,8 @@ url(${bg})`,
   );
 };
 
-async function getRequestContext() {
-  return {id: await getTabId()};
+function getRequestContext() {
+  return {id: tabId};
 }
 
 function ConnectionStatus() {
@@ -108,6 +113,6 @@ export default function AppContext({children}: {children: ReactNode}) {
 
 export const q = createLiveQueryReact<AppRouter>({
   headers: async () => ({
-    "client-id": await getTabId(),
+    "client-id": tabId,
   }),
 });

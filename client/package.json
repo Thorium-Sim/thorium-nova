@@ -30,6 +30,7 @@
     "@types/roman-numerals": "^0.3.2",
     "@uiw/react-monacoeditor": "^3.6.0",
     "@use-gesture/react": "^10.3.0",
+    "browser-tab-id": "^0.0.4",
     "camera-controls": "^2.7.3",
     "change-case": "^4.1.2",
     "clsx": "^2.1.0",
