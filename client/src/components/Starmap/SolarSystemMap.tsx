@@ -125,7 +125,7 @@ export function SolarSystemMap({
             args={[maxDistance, 12, 20, 64, 0xffffff, 0xffffff]}
           />
           {/* Adjust opacity as the camera zooms in. */}
-          <Grid args={[CELLS * SECTOR_GRID_SIZE, CELLS, 0xffffff, 0xffffff]} />
+          {/* <Grid args={[CELLS * SECTOR_GRID_SIZE, CELLS, 0xffffff, 0xffffff]} /> */}
         </>
       )}
       {children}

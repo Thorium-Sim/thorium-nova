@@ -101,7 +101,7 @@ export abstract class FSDataStore {
   get safeMode() {
     return this.#safeMode;
   }
-  serialize(): any {
+  toJSON(): any {
     return this;
   }
   get path() {
@@ -125,10 +125,9 @@ export abstract class FSDataStore {
         return;
       }
       await fs.mkdir(path.dirname(this.filePath), {recursive: true});
-      const serialized = this.serialize();
+      const serialized = this.toJSON();
       delete serialized.initialData;
       let data = dump(serialized, {skipInvalid: true});
-
       await fs.writeFile(this.filePath, data, {mode: 0o0600});
     } catch (e: any) {
       e.message = "db-fs: Error writing file:\n" + e.message;
