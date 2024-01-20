@@ -34,7 +34,10 @@ export const inertialDampeners = t.router({
     )
     .send(({ctx, input}) => {
       inputAuth(ctx);
-      const [system, override] = getShipSystemForInput(ctx, input);
+      const [system, override] = getShipSystemForInput<"inertialDampeners">(
+        ctx,
+        input
+      );
       const shipSystem = override || system;
 
       if (typeof input.dampening === "number" && input.dampening > 0) {

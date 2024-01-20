@@ -37,7 +37,10 @@ export const warp = t.router({
     )
     .send(({ctx, input}) => {
       inputAuth(ctx);
-      const [system, override] = getShipSystemForInput(ctx, input);
+      const [system, override] = getShipSystemForInput<"warpEngines">(
+        ctx,
+        input
+      );
 
       const shipSystem = override || system;
 

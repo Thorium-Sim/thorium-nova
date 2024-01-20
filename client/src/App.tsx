@@ -20,9 +20,6 @@ import {ZoomSlider} from "@thorium/ui/Slider";
 import {RoomDot} from "./cards/CargoControl/RoomDot";
 import {useSpring, animated as a} from "@react-spring/web";
 
-const DocLayout = lazy(() => import("./docs"));
-const Config = lazy(() => import("./pages/Config"));
-
 function HackyFix() {
   const [{y}] = useSpring(() => ({
     y: 0,
@@ -58,6 +55,8 @@ const MainPage = () => {
   );
 };
 
+const DocLayout = lazy(() => import("./docs"));
+const Config = lazy(() => import("./pages/Config"));
 const NoMatch = lazy(() => import("./pages/NotFound"));
 const Releases = lazy(() => import("./pages/Releases"));
 const FlightLobby = lazy(() => import("./pages/FlightLobby"));
@@ -106,7 +105,9 @@ function AppRoutes() {
             />
           </Route>
         </Route>
+
         <Route path="/flight" element={<FlightLobby />} />
+
         <Route path="/cards" element={<CardsDevelopment />} />
         <Route path="/cards/:component" element={<CardRenderer />} />
         <Route

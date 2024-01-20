@@ -35,7 +35,7 @@ export const reactor = t.router({
     )
     .send(({ctx, input}) => {
       inputAuth(ctx);
-      const [system, override] = getShipSystemForInput(ctx, input);
+      const [system, override] = getShipSystemForInput<"reactor">(ctx, input);
       const shipSystem = override || system;
 
       if (typeof input.optimalOutputPercent === "number") {

@@ -37,7 +37,7 @@ export const thrusters = t.router({
     )
     .send(({ctx, input}) => {
       inputAuth(ctx);
-      const [system, override] = getShipSystemForInput(ctx, input);
+      const [system, override] = getShipSystemForInput<"thrusters">(ctx, input);
       const shipSystem = override || system;
 
       if (typeof input.directionMaxSpeed === "number") {

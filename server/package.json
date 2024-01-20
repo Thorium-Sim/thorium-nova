@@ -19,13 +19,13 @@
     "@types/luxon": "^3.2.0",
     "@types/node": "^18.11.18",
     "@types/node-fetch": "^2.6.9",
-    "@types/three": "^0.149.0",
+    "@types/three": "^0.160.0",
     "@types/ws": "^8.5.4",
     "@types/yauzl": "^2.10.0",
     "@types/yazl": "^2.4.2",
     "nodemon": "^2.0.20",
     "ts-eager": "^2.0.2",
-    "typescript": "^4.9.5"
+    "typescript": "^5.3.3"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "^0.11.2",
@@ -48,7 +48,7 @@
     "postcss": "^8.4.21",
     "postcss-less": "^6.0.0",
     "tailwindcss": "^3.2.4",
-    "three": "^0.149.0",
+    "three": "^0.160.0",
     "web-file-polyfill": "^1.0.4",
     "yauzl": "^2.10.0",
     "yazl": "^2.5.1",

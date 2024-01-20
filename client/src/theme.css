@@ -1011,7 +1011,7 @@ input[type="range"].slider {
     @apply cursor-not-allowed bg-base-200 border-base-200 text-opacity-20 placeholder-base-content placeholder-opacity-20;
   }
 }
-:where(.panel) {
+.panel {
   @apply text-base bg-neutral rounded-btn border border-opacity-0 border-neutral-content;
   &-ghost {
     @apply bg-opacity-5;

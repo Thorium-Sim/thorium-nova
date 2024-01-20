@@ -71,10 +71,7 @@ export function getShipSystem({
 /**
  * Gets a ship system plugin to use in an input
  */
-export function getShipSystemForInput<
-  T extends keyof AllShipSystems,
-  Sys extends AllShipSystems[T]
->(
+export function getShipSystemForInput<T extends keyof AllShipSystems>(
   context: DataContext,
   {
     pluginId,
@@ -112,7 +109,7 @@ export function getShipSystemForInput<
   }
   const shipSystem = plugin.aspects.shipSystems.find(
     s => s.name === systemId
-  ) as Sys;
+  ) as AllShipSystems[T];
   if (!shipSystem) {
     throw new Error("Ship system not found");
   }

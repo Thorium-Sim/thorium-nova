@@ -12,56 +12,12 @@ import {
 import "prismjs/themes/prism-tomorrow.css";
 import Menubar from "@thorium/ui/Menubar";
 import {Disclosure, Popover, Transition} from "@headlessui/react";
-import {Index} from "flexsearch";
 import "./docs.css";
 import {FaChevronUp} from "react-icons/fa";
 import {parseDocument} from "htmlparser2";
 import SearchableInput, {DefaultResultLabel} from "@thorium/ui/SearchableInput";
 import {QueryFunctionContext} from "@tanstack/react-query";
 import render from "dom-serializer";
-
-const docIndex = new Index();
-
-async function searchQuery({
-  queryKey,
-}: QueryFunctionContext<[string, string]>): Promise<
-  {id: string; title: string; path: string}[]
-> {
-  const [key, value] = queryKey;
-  if (value.length > 2) {
-    const results = docIndex
-      .search(value)
-      .map(id => (typeof id === "string" ? JSON.parse(id) : id))
-      .map(item => ({...item, id: item.path}));
-
-    return results;
-  } else {
-    return [];
-  }
-}
-function Search() {
-  const navigate = useNavigate();
-  return (
-    <div className="search mb-4">
-      <SearchableInput
-        key="how-to-search"
-        placeholder="Search..."
-        setSelected={item => {
-          if (item) {
-            navigate(`/docs/${item.path}`);
-          }
-        }}
-        getOptions={searchQuery}
-        displayValue={item => item?.title}
-        ResultLabel={({result, active, selected}) => (
-          <DefaultResultLabel active={active} selected={selected}>
-            {result.title}
-          </DefaultResultLabel>
-        )}
-      />
-    </div>
-  );
-}
 
 const ROUTES = import.meta.glob("/src/docs/**/*.{tsx,jsx,md,mdx}", {
   eager: true,
@@ -139,13 +95,6 @@ export const routes = Object.keys(ROUTES)
     };
   })
   .filter(isRoute);
-
-routes.forEach(route => {
-  docIndex.add(
-    JSON.stringify({...route.frontmatter, path: route.path}),
-    route.content
-  );
-});
 
 type Heading = {
   title: string;
@@ -310,7 +259,6 @@ export default function DocLayout() {
             </div>
           </article>
           <aside className="flex-1 overflow-y-auto px-4 py-8 text-white w-full max-w-sm bg-black/60 backdrop-filter backdrop-blur">
-            <Search />
             <Routes>
               {routes.map(({path, toc}) => (
                 <Route

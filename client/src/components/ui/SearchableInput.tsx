@@ -78,7 +78,7 @@ export default function SearchableInput<T extends {id: any}>({
               inputClassName || ""
             }`}
             displayValue={displayValue}
-            defaultValue={query}
+            defaultValue={query as unknown as T}
             onChange={event => setQuery(event.target.value)}
             placeholder={placeholder}
           />

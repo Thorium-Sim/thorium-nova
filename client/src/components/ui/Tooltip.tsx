@@ -20,7 +20,8 @@ export function Tooltip({
   content: ReactNode;
   children: ReactNode;
   placement?: Placement;
-} & React.HTMLAttributes<HTMLDivElement>) {
+  className?: string;
+}) {
   const [open, setOpen] = useState(false);
 
   const {x, y, reference, floating, strategy, context} = useFloating({
