@@ -2,6 +2,13 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 
+export let __dirname =
+  process.env.NODE_ENV === "production"
+    ? path.join(path.dirname(new URL(import.meta.url).pathname), "..")
+    : path.join(new URL(import.meta.url).pathname, "../../../..");
+
+__dirname = __dirname.replaceAll("%20", " ");
+
 const isHeadless = !process.env.FORK;
 export const rootPath = isHeadless
   ? process.env.NODE_PATH || __dirname

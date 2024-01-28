@@ -1,4 +1,4 @@
-import {getPlugin} from "@client/pages/Config/data/utils";
+import {getPlugin} from "@client/data/plugins/utils";
 import {AllShipSystems} from "@server/classes/Plugins/ShipSystems/shipSystemTypes";
 import {DataContext} from "@server/utils/DataContext";
 

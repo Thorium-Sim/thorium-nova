@@ -5,7 +5,7 @@ import {
   LiveQueryClientOptions,
 } from "./client";
 import {createFlatProxy, createRecursiveProxy} from "../proxy";
-import {useMutation, useQuery} from "@tanstack/react-query";
+import {useMutation, useSuspenseQuery} from "@tanstack/react-query";
 import {useRequestSub} from "./useRequestSub";
 import {getArrayQueryKey} from "./getArrayQueryKey";
 import {CreateLiveQueryReact} from "./types";
@@ -59,7 +59,7 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
       const data = useContext(MockNetRequestContext);
 
       const queryKey = getArrayQueryKey(getQueryKey(path, input));
-      const result = useQuery({
+      const result = useSuspenseQuery({
         ...opts,
         queryFn: ({signal}: {signal: any}) => {
           return client.netRequest({path, input, signal});

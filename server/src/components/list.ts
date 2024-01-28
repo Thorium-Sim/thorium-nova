@@ -1,4 +1,4 @@
-// Be sure to update the /client/src/docs/Development/ecs-components.mdx
+// Be sure to update the /@client/docs/Development/ecs-components.mdx
 // file whenever you update this list
 export * from "./timer";
 export * from "./identity";

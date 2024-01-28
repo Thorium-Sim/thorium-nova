@@ -1,4 +1,4 @@
-import {useRef, useLayoutEffect} from "react";
+import {useRef, useEffect} from "react";
 
 const useAnimationFrame = (
   callback: (delta: number) => void,
@@ -7,13 +7,13 @@ const useAnimationFrame = (
   const callbackRef = useRef(callback);
   const time = useRef(performance.now());
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     callbackRef.current = callback;
   }, [callback]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const frameRef = useRef<number>(0);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const loop = (now: number) => {
       const diff = now - (time.current || now - 16);
       time.current = now;

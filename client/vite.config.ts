@@ -1,58 +1,71 @@
+import {unstable_vitePlugin as remix} from "@remix-run/dev";
 import {defineConfig} from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
-import react from "@vitejs/plugin-react";
-import releasesPlugin from "./vite-plugins/releases";
-import mdPlugin from "./vite-plugins/markdown";
+import {flatRoutes} from "remix-flat-routes";
 import {setDefaultResultOrder} from "dns";
+import mdx from "@mdx-js/rollup";
+import remarkFrontmatter from "remark-frontmatter";
+import remarkMdxFrontmatter from "remark-mdx-frontmatter";
+import remarkMdxImages from "remark-mdx-images";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import rehypeSlug from "rehype-slug";
+import rehypeShiki from "@shikijs/rehype";
 setDefaultResultOrder("ipv4first");
 
-// https://vitejs.dev/config/
-export default defineConfig(async () => {
-  const markdownIt = await import("markdown-it");
-  const anchor = await import("markdown-it-anchor");
-  const md = markdownIt.default();
-  md.use(anchor.default, {
-    permalink: anchor.default.permalink.linkAfterHeader({
-      style: "visually-hidden",
-      assistiveText: title => `Permalink to “${title}”`,
-      visuallyHiddenClass: "sr-only",
-      wrapper: ['<div class="header-permalink">', "</div>"],
+export default defineConfig({
+  plugins: [
+    remix({
+      unstable_ssr: false,
+      assetsBuildDirectory: "../dist/public",
+      serverBuildDirectory: "../dist/server",
+      ignoredRouteFiles: ["**/*"],
+      routes: async defineRoutes => {
+        return flatRoutes("routes", defineRoutes);
+      },
     }),
-  });
-  return {
-    plugins: [tsconfigPaths(), react(), releasesPlugin(), mdPlugin()],
-    build: {
-      outDir: "../dist/public",
-      emptyOutDir: false,
-      commonjsOptions: {include: []},
+    // @ts-expect-error
+    mdx({
+      remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkMdxImages],
+      rehypePlugins: [
+        rehypeSlug,
+        rehypeAutolinkHeadings,
+        [rehypeShiki, {theme: "one-dark-pro"}],
+      ],
+    }),
+    // @ts-expect-error
+    tsconfigPaths(),
+  ],
+  build: {
+    outDir: "../dist/public",
+    emptyOutDir: false,
+    rollupOptions: {
+      onwarn: (warning, warn) => {},
     },
-    optimizeDeps: {
-      disabled: false,
-    },
-    define: {
-      "process.env.THORIUMSIM_CLIENT_ID": `"01FM3JNPNP3GFAXYR22Y7F9XAJ"`,
-      "process.env.THORIUMSIM_URL": `"https://thoriumsim.com"`,
-    },
-    base: "/",
-    server: {
-      port: 3000,
-      host: "0.0.0.0",
-      open: true,
-      fs: {
-        strict: false,
+  },
 
-        // Allow serving files from one level up to the project root
-        allow: [".."],
-      },
-      proxy: {
-        "/netSend": "http://localhost:3001",
-        "/netRequest": "http://localhost:3001",
-        "/plugins": "http://localhost:3001",
-        "/ws": {
-          target: "ws://localhost:3001/ws",
-          ws: true,
-        },
+  define: {
+    "process.env.THORIUMSIM_CLIENT_ID": `"01FM3JNPNP3GFAXYR22Y7F9XAJ"`,
+    "process.env.THORIUMSIM_URL": `"https://thoriumsim.com"`,
+  },
+  base: "/",
+  server: {
+    port: 3000,
+    host: "0.0.0.0",
+    open: true,
+    fs: {
+      strict: false,
+
+      // Allow serving files from one level up to the project root
+      allow: [".."],
+    },
+    proxy: {
+      "/netSend": "http://localhost:3001",
+      "/netRequest": "http://localhost:3001",
+      "/plugins": "http://localhost:3001",
+      "/ws": {
+        target: "ws://localhost:3001/ws",
+        ws: true,
       },
     },
-  };
+  },
 });

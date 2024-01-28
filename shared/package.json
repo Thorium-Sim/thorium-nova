@@ -6,6 +6,7 @@
   "keywords": [],
   "author": "Alex Anderson",
   "license": "Apache-2.0",
+  "type": "module",
   "dependencies": {
     "@msgpack/msgpack": "^2.8.0",
     "lodash.throttle": "^4.1.1",
@@ -17,7 +18,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@tanstack/react-query-devtools": "^4.24.4",
+    "@tanstack/react-query-devtools": "^5.17.21",
     "@types/lodash.throttle": "^4.1.7"
   }
 }

@@ -2,12 +2,12 @@
   "watch": [
     "src",
     "../shared/**",
-    "../client/src/**/data.ts",
-    "../client/src/**/data.tsx",
-    "../client/src/**/data/**/*.ts",
-    "../client/src/**/data/**/*.tsx"
+    "../client/app/**/data.ts",
+    "../client/app/**/data.tsx",
+    "../client/app/**/data/**/*.ts",
+    "../client/app/**/data/**/*.tsx"
   ],
   "ignore": ["src/**/*.test.ts"],
   "ext": "ts,tsx,mjs,js,json",
-  "exec": "node -r ts-eager/register --trace-warnings src/index.ts"
+  "exec": "tsx --trace-warnings src/index.ts"
 }

@@ -29,16 +29,18 @@
     "paths": {
       "@thorium/*": ["./shared/*"],
       "@server/*": ["./server/src/*"],
-      "@client/*": ["./client/src/*"]
+      "@client/*": ["./client/app/*"]
     }
   },
   "include": [
     "src/**/*",
     "../shared",
-    "../client/src/**/data.ts",
-    "../client/src/**/data.tsx",
-    "../client/src/**/data/**/*.ts",
-    "../client/src/**/data/**/*.tsx",
-    "../client/src/utils/effects.tsx"
+    "../client/app/**/data.ts",
+    "../client/app/**/data.tsx",
+    "../client/app/**/data/**/*.ts",
+    "../client/app/**/data/**/*.tsx",
+    "../client/app/utils/effects.tsx",
+    "../client/tailwind.config.ts",
+    "../client/tailwindComponents.ts"
   ]
 }

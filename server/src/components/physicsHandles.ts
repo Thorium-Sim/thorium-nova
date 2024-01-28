@@ -7,4 +7,5 @@ export const physicsHandles = z
      */
     handles: z.any().default(new Map()),
   })
-  .default({});
+  .default({})
+  .nullable();

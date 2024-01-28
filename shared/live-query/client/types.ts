@@ -33,11 +33,14 @@ type DecorateProcedure<
         TData = inferTransformedProcedureOutput<TProcedure>
       >(
         input: inferProcedureInput<TProcedure>,
-        opts?: UseQueryOptions<
-          TQueryFnData,
-          TData,
-          Error,
-          [TPath, inferProcedureInput<TProcedure>]
+        opts?: Omit<
+          UseQueryOptions<
+            TQueryFnData,
+            TData,
+            Error,
+            [TPath, inferProcedureInput<TProcedure>]
+          >,
+          "queryKey"
         > & {callback?: (data: any) => void}
       ) => [TData, UseQueryResult<TData, Error>];
     }

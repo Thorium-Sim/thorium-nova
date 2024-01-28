@@ -1,63 +1,32 @@
 {
+  "include": ["env.d.ts", ".", "../shared"],
   "compilerOptions": {
-    /* Visit https://aka.ms/tsconfig.json to read more about this file */
-
-    /* Basic Options */
-    // "incremental": true,                         /* Enable incremental compilation */
-    "target": "ESNEXT",
-    "module": "ES2020",
-    "lib": ["es2021", "DOM"],
-    "jsx": "react-jsx" /* Specify JSX code generation: 'preserve', 'react-native', 'react', 'react-jsx' or 'react-jsxdev'. */,
-    "declaration": true /* Generates corresponding '.d.ts' file. */,
-    "declarationMap": true /* Generates a sourcemap for each corresponding '.d.ts' file. */,
-    "sourceMap": true /* Generates corresponding '.map' file. */,
-    "noEmit": true /* Do not emit outputs. */,
-    "isolatedModules": true /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */,
-
-    /* Strict Type-Checking Options */
-    "strict": true /* Enable all strict type-checking options. */,
-    "alwaysStrict": true /* Parse in strict mode and emit "use strict" for each source file. */,
-
-    /* Module Resolution Options */
-    "moduleResolution": "node" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "resolveJsonModule": true,
-    "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
-    "skipLibCheck": true /* Skip type checking of declaration files. */,
-    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
-    "composite": true,
+    "target": "ES2022",
+    "strict": true,
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
     "rootDir": "..",
     "baseUrl": "..",
+    "skipLibCheck": true,
     "paths": {
-      "@thorium/ui/*": ["./client/src/components/ui/*"],
+      "@thorium/ui/*": ["./client/app/components/ui/*"],
       "@thorium/*": ["./shared/*"],
       "@server/*": ["./server/src/*"],
-      "@client/*": ["./client/src/*"]
-    }
-  },
-  "include": [
-    "src/**/*",
-    "../shared",
-    "../server",
-    "react-test-utils.tsx",
-    "vite-plugins"
-  ],
-  "files": [
-    "src/pages/NotFound/astronaut.json",
-    "src/pages/Releases/release-notes.json",
-    "./package.json",
-    "../package.json",
-    "./src/data/server.ts",
-    "./src/data/thorium.ts",
-    "./src/data/flight.ts",
-    "./src/data/client.ts",
-    "./src/data/ship.ts",
-    "./src/data/effects.ts",
-    "src/components/ui/SortableItem.tsx",
-    "./src/pages/Config/Timelines/actionReducer.tsx",
-    "./src/pages/Config/Timelines/TimelineAction.tsx",
-    "./src/pages/Config/Timelines/TimelineStep.tsx",
-    "./src/pages/Config/Timelines/TimelineDetails.tsx",
-    "./src/pages/Config/Timelines/TimelineLayout.tsx",
-    "./src/pages/Config/Timelines/TimelineList.tsx"
-  ]
+      "@client/*": ["./client/app/*"],
+      "@/icon-name": [
+        "./client/app/components/ui/icons/name.d.ts",
+        "./client/types/icon-name.d.ts"
+      ]
+    },
+
+    // Remix takes care of building everything in `remix build`.
+    "noEmit": true
+  }
 }

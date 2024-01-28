@@ -1,6 +1,5 @@
 import {t} from "./t";
 import * as client from "@client/data";
-import {plugin} from "@client/pages/Config/data";
 import * as cards from "@client/cards/data";
 import * as cores from "@client/cores/data";
 
@@ -9,7 +8,7 @@ const {default: _, ...allCards} = cards;
 // @ts-expect-error TypeScript's being too helpful
 const {default: __, ...allCores} = cores;
 // @ts-expect-error TypeScript's being too helpful
-const {default: ___, ...allClient} = client;
+const {default: ___, plugin, publish, ...allClient} = client;
 
 export const router = t.router({
   plugin,

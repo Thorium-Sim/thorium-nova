@@ -6,14 +6,15 @@
   "author": "Alex Anderson",
   "license": "Apache 2.0",
   "private": true,
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/Thorium-Sim/thorium-nova.git"
   },
   "main": "dist/electron.js",
   "scripts": {
-    "dev": "node -r ts-eager/register scripts/dev.ts",
-    "build": "node -r ts-eager/register scripts/build.ts",
+    "dev": "tsx scripts/dev.ts",
+    "build": "tsx scripts/build.ts",
     "typecheck": "concurrently --names \"client,server,shared,desktop\" -c \"blue.bold,magenta.bold,yellow.bold,green.bold\" \"npm run typecheck --workspace=client\" \"npm run typecheck --workspace=server\" \"npm run typecheck --workspace=shared\" \"npm run typecheck --workspace=desktop\"",
     "start": "NODE_ENV=production node dist/index.js",
     "test": "is-ci-cli \"test:coverage\" \"test:watch\"",
@@ -26,7 +27,7 @@
     "package": "electron-builder --dir",
     "postinstall": "concurrently \"electron-builder install-app-deps\" \"patch-package\" \"npm run init:plugin\"",
     "validate": "concurrently --names \"lint,format,typecheck,test\" -c \"yellow.bold,magenta.bold,blue.bold,green.bold\" \"npm run lint\" \"npm run format:different\" \"npm run typecheck\" \"CI=true npm run test\"",
-    "init:plugin": "node shared/pluginInit.js"
+    "init:plugin": "tsx scripts/pluginInit.ts"
   },
   "build": {
     "appId": "us.fyreworks.thorium-nova",
@@ -47,7 +48,7 @@
       "!**/{appveyor.yml,.travis.yml,circle.yml}",
       "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
     ],
-    "asar": true,
+    "asar": false,
     "extraResources": [
       {
         "from": "./desktop/resources",
@@ -60,7 +61,7 @@
         "from": "./dist",
         "to": "./app",
         "filter": [
-          "defaultPlugin.zip"
+          "defaultPlugin.plug"
         ]
       }
     ],
@@ -155,12 +156,14 @@
     "patch-package": "^6.5.1",
     "prettier": "^2.8.2",
     "semantic-release": "^20.0.1",
+    "tsx": "^4.7.0",
     "vitest": "^0.34.6"
   },
   "publishConfig": {
     "access": "restricted"
   },
   "dependencies": {
+    "@remix-run/react": "^2.5.1",
     "immer": "^9.0.18"
   }
 }

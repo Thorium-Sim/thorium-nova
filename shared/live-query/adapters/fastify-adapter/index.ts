@@ -266,6 +266,7 @@ export class ServerClient<TRouter extends AnyRouter> {
       );
     }
 
+    // @ts-ignore
     connection.socket.on("close", () => {
       this.connected = false;
       this.subscriptions.forEach(unsub => {
@@ -277,6 +278,7 @@ export class ServerClient<TRouter extends AnyRouter> {
     });
 
     // Set up the whole netSend process for calling input functions
+    // @ts-ignore
     connection.socket.on("message", async data => {
       try {
         const messageData = JSON.parse(data.toString()) as IncomingMessage;

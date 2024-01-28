@@ -1,9 +1,8 @@
 import ReconnectingWebSocket from "reconnecting-websocket";
 
-const hostname = window.location.hostname;
-const protocol = window.location.protocol;
-
 export async function loadWebSocket() {
+  const hostname = window.location.hostname;
+  const protocol = window.location.protocol;
   try {
     const port =
       process.env.NODE_ENV === "production"

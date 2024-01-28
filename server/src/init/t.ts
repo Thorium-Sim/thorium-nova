@@ -1,6 +1,6 @@
 import type {Entity} from "@server/utils/ecs";
-import {initLiveQuery} from "@thorium/live-query/server";
 import type {Context} from "./liveQuery";
+import {initLiveQuery} from "@thorium/live-query/server";
 
 export const t = initLiveQuery
   .dataStreamEntity<Entity>()

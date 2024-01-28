@@ -209,7 +209,7 @@ export function getInputType<T extends keyof typeof ZOD_COMPARISONS>(
 }
 
 const fieldConfig = {} as any;
-export function parseSchema(schema: z.ZodObject<any, any>) {
+export function parseSchema(schema: any) {
   if (!schema) return [];
   const {shape} = schema;
   if (!shape) return [];

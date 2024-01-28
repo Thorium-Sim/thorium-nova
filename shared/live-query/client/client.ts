@@ -23,7 +23,9 @@ export class LiveQueryClient {
   sendUrl: URL;
   headers: HTTPHeaders | (() => HTTPHeaders | Promise<HTTPHeaders>);
   constructor({
-    baseUrl = window.location.origin,
+    baseUrl = typeof window === "undefined"
+      ? "http://localhost:4444"
+      : window.location.origin,
     netRequestPath = NETREQUEST_PATH,
     netSendPath = NETSEND_PATH,
     headers = {},

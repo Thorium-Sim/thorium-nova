@@ -110,13 +110,13 @@ class Entity {
       id: this.id,
       components: Object.fromEntries(
         Object.entries(this.components).map(([key, comp]) => {
-          if ("shipSystems" in comp && key === "shipSystems") {
+          if (comp && "shipSystems" in comp && key === "shipSystems") {
             return [
               key,
               {...comp, shipSystems: Array.from(comp.shipSystems.entries())},
             ];
           }
-          if ("world" in comp && key === "physicsWorld") {
+          if (comp && "world" in comp && key === "physicsWorld") {
             return [key, {...comp, world: null}];
           }
           if (key === "physicsHandles") {

@@ -12,7 +12,6 @@ import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
 import {InterpolatedSnapshot} from "@thorium/snapshot-interpolation/src/types";
 import useAnimationFrame from "./useAnimationFrame";
 import {useDataResponse} from "./useDataResponse";
-import {ErrorBoundary} from "react-error-boundary";
 
 export const LiveQueryContext = createContext<ILiveQueryContext | null>(null);
 export type RequestContext = Record<any, any> & {id: string};
@@ -22,13 +21,7 @@ interface ILiveQueryContext {
   reconnectionState: ReturnType<typeof useDataConnection>["reconnectionState"];
 }
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      suspense: true,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 type EntityValues = {
   x: number;
@@ -90,11 +83,9 @@ export function LiveQueryProvider({
   return (
     <LiveQueryContext.Provider value={value}>
       <QueryClientProvider client={queryClient}>
-        <ErrorBoundary fallback={<>Error Loading</>}>
-          <Suspense>{children}</Suspense>
-        </ErrorBoundary>
+        <Suspense>{children}</Suspense>
         {!isTestEnv ? <DataResponse /> : null}
-        <ReactQueryDevtools position="bottom-right" />
+        <ReactQueryDevtools buttonPosition="bottom-right" position="bottom" />
       </QueryClientProvider>
     </LiveQueryContext.Provider>
   );

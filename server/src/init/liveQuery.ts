@@ -48,6 +48,7 @@ export async function createWSContext({
           res(id);
         }
       };
+      // @ts-ignore
       connection.socket.on("message", handleConnection);
     }),
     new Promise((res, rej) =>

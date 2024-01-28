@@ -38,8 +38,7 @@ export default class ThemePlugin extends Aspect {
   }
 
   async setCSS(rawCSS: string) {
-    // @ts-expect-error - No support for importing JS files.
-    const config = await import("client/tailwind.config.js");
+    const config = (await import("client/tailwind.config")) as any;
     const postcssOutput = (
       await postcss([tailwindcss(config.default)]).process(
         `.theme-container {${rawCSS}}`,

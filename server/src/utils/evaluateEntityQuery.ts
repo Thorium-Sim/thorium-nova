@@ -8,14 +8,11 @@ import {ECS, Entity} from "./ecs";
 import {actionItem, actionSchema, conditionSchema} from "./actionSchema";
 import {getNavigationDistance} from "./getNavigationDistance";
 import {lightMinuteToKilometer, lightYearToLightMinute} from "./unitTypes";
-import {
-  getCompletePositionFromOrbit,
-  getObjectSystem,
-} from "@client/cards/Navigation/data";
 import {callProcedure} from "@thorium/live-query/server/router";
 import {router} from "@server/init/router";
 import {DataContext} from "./DataContext";
 import {database} from "@server/init/buildDatabase";
+import {getCompletePositionFromOrbit, getObjectSystem} from "./position";
 
 export function evaluateEntityQuery(ecs: ECS, query: EntityQuery): Entity[] {
   const output: Entity[] = [];

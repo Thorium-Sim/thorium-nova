@@ -1,0 +1,17 @@
+{
+  "$schema": "https://sly-cli.fly.dev/registry/config.json",
+  "libraries": [
+    {
+      "name": "tailwindlabs/heroicons",
+      "directory": "app/icons",
+      "postinstall": [],
+      "transformers": []
+    },
+    {
+      "name": "lucide-icons",
+      "directory": "app/icons",
+      "postinstall": ["npm", "run", "build:icons"],
+      "transformers": []
+    }
+  ]
+}
