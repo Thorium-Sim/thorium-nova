@@ -1,29 +1,19 @@
-import {ipcRenderer} from "electron";
+const {ipcRenderer} = require("electron");
 
-let updateHandler = (message: string) => {};
+let updateHandler = (message: string) => {
+  console.info(message);
+};
 ipcRenderer.on("update-message", (event, message) => {
   updateHandler(message);
 });
 
 const thorium = {
-  getAddress: function () {
-    return ipcRenderer.invoke("get-address");
-  },
-  getHostSecret: function () {
-    return ipcRenderer.invoke("get-secret");
-  },
-  registerUpdateHandler: function (handler: typeof updateHandler) {
+  getAddress: () => ipcRenderer.invoke("get-address"),
+  getHostSecret: () => ipcRenderer.invoke("get-secret"),
+  registerUpdateHandler: (handler: typeof updateHandler) => {
     updateHandler = handler;
   },
 };
-window.thorium = thorium;
 
-declare global {
-  interface Window {
-    isHeadless: boolean;
-    thorium: {
-      getAddress: () => Promise<string>;
-      getHostSecret: () => Promise<string>;
-    };
-  }
-}
+// @ts-expect-error
+window.thorium = thorium;

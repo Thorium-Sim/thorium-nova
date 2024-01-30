@@ -84,7 +84,6 @@ const links = {
 function SettingsList() {
   const setting = useMatch("config/:pluginId/ships/:shipId/:setting")?.params
     .setting;
-  console.log(useParams());
   return (
     <div className="mb-2 w-72 overflow-y-auto">
       {Object.entries(links).map(([key, value]) => (

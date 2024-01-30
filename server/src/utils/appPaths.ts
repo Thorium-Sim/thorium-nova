@@ -11,10 +11,10 @@ __dirname = __dirname.replaceAll("%20", " ");
 
 const isHeadless = !process.env.FORK;
 export const rootPath = isHeadless
-  ? process.env.NODE_PATH || __dirname
-  : __dirname;
+  ? process.env.NODE_PATH || path.join(__dirname, "./dist")
+  : path.join(__dirname, "./dist");
 
-export let thoriumPath = path.join(process.cwd(), "data");
+export let thoriumPath = path.join(__dirname, "data");
 /* istanbul ignore next */
 if (process.env.NODE_ENV === "production") {
   /* istanbul ignore next */

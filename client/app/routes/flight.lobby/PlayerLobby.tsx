@@ -1,10 +1,10 @@
-import {ClientButton} from "@client/components/ClientButton";
 import {q} from "@client/context/AppContext";
 import Menubar from "@thorium/ui/Menubar";
 import {WaitingForFlight} from "./WaitingForFlight";
 import {staticStations} from "./staticStations";
 import {toast} from "@client/context/ToastContext";
 import InfoTip from "@thorium/ui/InfoTip";
+import {LobbyHeader} from "./LobbyHeader";
 
 export function PlayerLobby() {
   const [flight] = q.flight.active.useNetRequest();
@@ -13,12 +13,7 @@ export function PlayerLobby() {
     <>
       <Menubar>
         <div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur">
-          <h2 className="text-white font-bold text-xl mb-2">
-            Flight Name: <em>{flight?.name}</em>
-          </h2>
-
-          <ClientButton />
-
+          <LobbyHeader />
           <div className="flex-1 flex flex-col pt-16">
             {flight ? <PlayerStationSelection /> : <WaitingForFlight />}
           </div>

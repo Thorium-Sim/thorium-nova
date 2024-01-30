@@ -254,9 +254,9 @@ export interface ILayoutCallbacks {
 // not work on any version if IE or the original Edge browser
 // Assume any recent desktop browser not IE or original Edge will work
 /** @internal */
-// @ts-ignore
 const isIEorEdge =
   typeof window !== "undefined" &&
+  // @ts-ignore
   (window.document.documentMode || /Edge\//.test(window.navigator.userAgent));
 /** @internal */
 const isDesktop =
@@ -432,7 +432,6 @@ export class Layout extends React.Component<ILayoutProps, ILayoutState> {
       this.props.model._setChangeListener(this.onModelChange);
       this.previousModel = this.props.model;
     }
-    // console.log("Layout time: " + this.layoutTime + "ms Render time: " + (Date.now() - this.start) + "ms");
   }
 
   /** @internal */

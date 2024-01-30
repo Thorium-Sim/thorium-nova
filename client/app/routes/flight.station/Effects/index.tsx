@@ -4,6 +4,7 @@ import Spark from "./spark";
 import "./effects.css";
 import {q} from "@client/context/AppContext";
 import {type EffectPayload} from "@client/utils/effects";
+import {useNavigate} from "@remix-run/react";
 
 let synth: SpeechSynthesis | undefined;
 try {
@@ -52,10 +53,11 @@ const useSpark = () => {
 };
 
 function useEscapeHotkey() {
+  const navigate = useNavigate();
   useEffect(() => {
     function handleKeydown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        q.client.setStation.netSend({shipId: null});
+        navigate("/flight/lobby");
       }
     }
     document.addEventListener("keydown", handleKeydown);

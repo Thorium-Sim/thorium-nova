@@ -21,7 +21,7 @@ export default function FlightQuickStart() {
   const match = useMatch("/flight/quick/:step");
 
   if (!match) return <Navigate to="/flight/quick/crew" replace />;
-  if (flight) return <Navigate to="/flight" replace />;
+  if (flight) return <Navigate to="/flight/lobby" replace />;
   if (!client.isHost) return <Navigate to="/" replace />;
 
   const {step} = match.params;

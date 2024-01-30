@@ -12,6 +12,6 @@ export async function initDefaultPlugin() {
   // Initialize the default plugin
   await unzip(
     path.join(rootPath, isHeadless ? "./" : "../../app", "defaultPlugin.plug"),
-    path.join(thoriumPath, "plugins/")
+    path.join(thoriumPath, "plugins/Thorium Default")
   );
 }

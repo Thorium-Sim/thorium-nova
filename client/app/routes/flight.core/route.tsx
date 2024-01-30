@@ -11,6 +11,7 @@ import {CoreFlexLayoutDropdown} from "./CoreFlexLayoutDropdown";
 import {q} from "@client/context/AppContext";
 import {capitalCase} from "change-case";
 import {Icon} from "@thorium/ui/Icon";
+import {Link} from "@remix-run/react";
 
 export default function FlightDirectorLayout() {
   const layoutRef = useRef<Layout>(null);
@@ -32,12 +33,9 @@ function CoreMenubar({layoutRef}: {layoutRef: React.RefObject<Layout>}) {
   useMenubar({
     children: (
       <>
-        <Button
-          className="btn-primary btn-xs btn-outline"
-          onClick={() => q.client.setStation.netSend({shipId: null})}
-        >
+        <Link to="/flight/lobby" className="btn btn-primary btn-xs btn-outline">
           <Icon name="arrow-left" />
-        </Button>
+        </Link>
         <AddCoreCombobox
           onChange={coreName => {
             layoutRef.current?.addTabToActiveTabSet?.({

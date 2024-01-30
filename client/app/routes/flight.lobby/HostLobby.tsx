@@ -10,6 +10,7 @@ import InfoTip from "@thorium/ui/InfoTip";
 import {toast} from "@client/context/ToastContext";
 import {Icon} from "@thorium/ui/Icon";
 import {staticStations} from "./staticStations";
+import {LobbyHeader} from "./LobbyHeader";
 
 export function HostLobby() {
   const [flight] = q.flight.active.useNetRequest();
@@ -18,11 +19,7 @@ export function HostLobby() {
     <>
       <Menubar>
         <div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur flex flex-col">
-          <h2 className="text-white font-bold text-xl mb-2">
-            Flight Name: <em>{flight?.name}</em>
-          </h2>
-
-          <ClientButton />
+          <LobbyHeader />
           <div className="flex-1 flex flex-col pt-16">
             {flight ? <ClientAssignment /> : <WaitingForFlight />}
           </div>
