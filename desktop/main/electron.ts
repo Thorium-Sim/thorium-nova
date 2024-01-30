@@ -91,13 +91,13 @@ async function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   try {
-    autoUpdater.checkForUpdatesAndNotify();
+    await autoUpdater.checkForUpdatesAndNotify();
   } catch {
     // Ignore it
   }
-  createWindow();
+  await createWindow();
 });
 
 app.on("window-all-closed", async () => {
