@@ -92,14 +92,11 @@ async function createWindow() {
 }
 
 app.whenReady().then(async () => {
-  console.info("CHECKING FOR UPDATES");
   try {
     await autoUpdater.checkForUpdatesAndNotify();
   } catch (error) {
-    console.error("GOT ERROR", error);
     // Ignore it
   }
-  console.info("CREATING WINDOW");
   await createWindow();
 });
 

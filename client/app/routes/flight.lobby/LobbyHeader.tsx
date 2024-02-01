@@ -6,7 +6,6 @@ import {Link} from "@remix-run/react";
 export function LobbyHeader() {
   const [flight] = q.flight.active.useNetRequest();
   const [client] = q.client.get.useNetRequest();
-  console.log(client);
   return (
     <div className="flex justify-between">
       <div>

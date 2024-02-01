@@ -48,7 +48,7 @@
       "!**/{appveyor.yml,.travis.yml,circle.yml}",
       "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
     ],
-    "asar": false,
+    "asar": true,
     "extraResources": [
       {
         "from": "./desktop/resources",

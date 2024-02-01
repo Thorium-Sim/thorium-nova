@@ -31,6 +31,7 @@ export async function startServer(
     if (hasHttps) {
       console.info(chalk.cyan(`  - TCP ${HTTPSPort} for HTTPS access`));
     }
+    // Alert the Electron process that the server is ready
     process.send?.("ready");
   } catch (err) {
     process.send?.("error");
