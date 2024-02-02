@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html>
+  <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+      <title>Thorium Nova</title>
+      <style>
+        *,
+        ::before,
+        ::after {
+          box-sizing: border-box;
+          border-width: 0;
+          border-style: solid;
+          border-color: #e5e7eb;
+        }
+        ::before,
+        ::after {
+          --tw-content: "";
+        }
+        html,
+        :host {
+          line-height: 1.5;
+          -webkit-text-size-adjust: 100%;
+          -moz-tab-size: 4;
+          tab-size: 4;
+          font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+            "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+          font-feature-settings: normal;
+          font-variation-settings: normal;
+          -webkit-tap-highlight-color: transparent;
+        }
+        body {
+          margin: 0;
+          line-height: inherit;
+        }
+        hr {
+          height: 0;
+          color: inherit;
+          border-top-width: 1px;
+        }
+        abbr:where([title]) {
+          text-decoration: underline dotted;
+        }
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+          font-size: inherit;
+          font-weight: inherit;
+        }
+        a {
+          color: inherit;
+          text-decoration: inherit;
+        }
+        b,
+        strong {
+          font-weight: bolder;
+        }
+        code,
+        kbd,
+        samp,
+        pre {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+            "Liberation Mono", "Courier New", monospace;
+          font-feature-settings: normal;
+          font-variation-settings: normal;
+          font-size: 1em;
+        }
+        small {
+          font-size: 80%;
+        }
+        sub,
+        sup {
+          font-size: 75%;
+          line-height: 0;
+          position: relative;
+          vertical-align: baseline;
+        }
+        sub {
+          bottom: -0.25em;
+        }
+        sup {
+          top: -0.5em;
+        }
+        table {
+          text-indent: 0;
+          border-color: inherit;
+          border-collapse: collapse;
+        }
+        button,
+        input,
+        optgroup,
+        select,
+        textarea {
+          font-family: inherit;
+          font-feature-settings: inherit;
+          font-variation-settings: inherit;
+          font-size: 100%;
+          font-weight: inherit;
+          line-height: inherit;
+          color: inherit;
+          margin: 0;
+          padding: 0;
+        }
+        button,
+        select {
+          text-transform: none;
+        }
+        button,
+        [type="button"],
+        [type="reset"],
+        [type="submit"] {
+          -webkit-appearance: button;
+          background-color: transparent;
+          background-image: none;
+        }
+        :-moz-focusring {
+          outline: auto;
+        }
+        :-moz-ui-invalid {
+          box-shadow: none;
+        }
+        progress {
+          vertical-align: baseline;
+        }
+        ::-webkit-inner-spin-button,
+        ::-webkit-outer-spin-button {
+          height: auto;
+        }
+        [type="search"] {
+          -webkit-appearance: textfield;
+          outline-offset: -2px;
+        }
+        ::-webkit-search-decoration {
+          -webkit-appearance: none;
+        }
+        ::-webkit-file-upload-button {
+          -webkit-appearance: button;
+          font: inherit;
+        }
+        summary {
+          display: list-item;
+        }
+        blockquote,
+        dl,
+        dd,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        hr,
+        figure,
+        p,
+        pre {
+          margin: 0;
+        }
+        fieldset {
+          margin: 0;
+          padding: 0;
+        }
+        legend {
+          padding: 0;
+        }
+        ol,
+        ul,
+        menu {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+        }
+        dialog {
+          padding: 0;
+        }
+        textarea {
+          resize: vertical;
+        }
+        input::placeholder,
+        textarea::placeholder {
+          opacity: 1;
+          color: #9ca3af;
+        }
+        button,
+        [role="button"] {
+          cursor: pointer;
+        }
+        :disabled {
+          cursor: default;
+        }
+        img,
+        svg,
+        video,
+        canvas,
+        audio,
+        iframe,
+        embed,
+        object {
+          display: block;
+          vertical-align: middle;
+        }
+        img,
+        video {
+          max-width: 100%;
+          height: auto;
+        }
+        [hidden] {
+          display: none;
+        }
+        *,
+        ::before,
+        ::after {
+          --tw-border-spacing-x: 0;
+          --tw-border-spacing-y: 0;
+          --tw-translate-x: 0;
+          --tw-translate-y: 0;
+          --tw-rotate: 0;
+          --tw-skew-x: 0;
+          --tw-skew-y: 0;
+          --tw-scale-x: 1;
+          --tw-scale-y: 1;
+          --tw-pan-x: ;
+          --tw-pan-y: ;
+          --tw-pinch-zoom: ;
+          --tw-scroll-snap-strictness: proximity;
+          --tw-gradient-from-position: ;
+          --tw-gradient-via-position: ;
+          --tw-gradient-to-position: ;
+          --tw-ordinal: ;
+          --tw-slashed-zero: ;
+          --tw-numeric-figure: ;
+          --tw-numeric-spacing: ;
+          --tw-numeric-fraction: ;
+          --tw-ring-inset: ;
+          --tw-ring-offset-width: 0px;
+          --tw-ring-offset-color: #fff;
+          --tw-ring-color: rgb(59 130 246 / 0.5);
+          --tw-ring-offset-shadow: 0 0 #0000;
+          --tw-ring-shadow: 0 0 #0000;
+          --tw-shadow: 0 0 #0000;
+          --tw-shadow-colored: 0 0 #0000;
+          --tw-blur: ;
+          --tw-brightness: ;
+          --tw-contrast: ;
+          --tw-grayscale: ;
+          --tw-hue-rotate: ;
+          --tw-invert: ;
+          --tw-saturate: ;
+          --tw-sepia: ;
+          --tw-drop-shadow: ;
+          --tw-backdrop-blur: ;
+          --tw-backdrop-brightness: ;
+          --tw-backdrop-contrast: ;
+          --tw-backdrop-grayscale: ;
+          --tw-backdrop-hue-rotate: ;
+          --tw-backdrop-invert: ;
+          --tw-backdrop-opacity: ;
+          --tw-backdrop-saturate: ;
+          --tw-backdrop-sepia: ;
+        }
+        ::backdrop {
+          --tw-border-spacing-x: 0;
+          --tw-border-spacing-y: 0;
+          --tw-translate-x: 0;
+          --tw-translate-y: 0;
+          --tw-rotate: 0;
+          --tw-skew-x: 0;
+          --tw-skew-y: 0;
+          --tw-scale-x: 1;
+          --tw-scale-y: 1;
+          --tw-pan-x: ;
+          --tw-pan-y: ;
+          --tw-pinch-zoom: ;
+          --tw-scroll-snap-strictness: proximity;
+          --tw-gradient-from-position: ;
+          --tw-gradient-via-position: ;
+          --tw-gradient-to-position: ;
+          --tw-ordinal: ;
+          --tw-slashed-zero: ;
+          --tw-numeric-figure: ;
+          --tw-numeric-spacing: ;
+          --tw-numeric-fraction: ;
+          --tw-ring-inset: ;
+          --tw-ring-offset-width: 0px;
+          --tw-ring-offset-color: #fff;
+          --tw-ring-color: rgb(59 130 246 / 0.5);
+          --tw-ring-offset-shadow: 0 0 #0000;
+          --tw-ring-shadow: 0 0 #0000;
+          --tw-shadow: 0 0 #0000;
+          --tw-shadow-colored: 0 0 #0000;
+          --tw-blur: ;
+          --tw-brightness: ;
+          --tw-contrast: ;
+          --tw-grayscale: ;
+          --tw-hue-rotate: ;
+          --tw-invert: ;
+          --tw-saturate: ;
+          --tw-sepia: ;
+          --tw-drop-shadow: ;
+          --tw-backdrop-blur: ;
+          --tw-backdrop-brightness: ;
+          --tw-backdrop-contrast: ;
+          --tw-backdrop-grayscale: ;
+          --tw-backdrop-hue-rotate: ;
+          --tw-backdrop-invert: ;
+          --tw-backdrop-opacity: ;
+          --tw-backdrop-saturate: ;
+          --tw-backdrop-sepia: ;
+        }
+        .absolute {
+          position: absolute;
+        }
+        .relative {
+          position: relative;
+        }
+        .inset-0 {
+          inset: 0px;
+        }
+        .mx-auto {
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .flex {
+          display: flex;
+        }
+        .min-h-screen {
+          min-height: 100vh;
+        }
+        .w-32 {
+          width: 8rem;
+        }
+        .max-w-md {
+          max-width: 28rem;
+        }
+        .transform {
+          transform: translate(var(--tw-translate-x), var(--tw-translate-y))
+            rotate(var(--tw-rotate)) skewX(var(--tw-skew-x))
+            skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x))
+            scaleY(var(--tw-scale-y));
+        }
+        .flex-col {
+          flex-direction: column;
+        }
+        .items-center {
+          align-items: center;
+        }
+        .justify-center {
+          justify-content: center;
+        }
+        .gap-4 {
+          gap: 1rem;
+        }
+        .overflow-hidden {
+          overflow: hidden;
+        }
+        .bg-gray-900 {
+          --tw-bg-opacity: 1;
+          background-color: rgb(17 24 39 / var(--tw-bg-opacity));
+        }
+        .bg-gradient-to-bl {
+          background-image: linear-gradient(
+            to bottom left,
+            var(--tw-gradient-stops)
+          );
+        }
+        .from-violet-950 {
+          --tw-gradient-from: #2e1065 var(--tw-gradient-from-position);
+          --tw-gradient-to: rgb(46 16 101 / 0) var(--tw-gradient-to-position);
+          --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+        }
+        .to-fuchsia-950 {
+          --tw-gradient-to: #4a044e var(--tw-gradient-to-position);
+        }
+        .px-6 {
+          padding-left: 1.5rem;
+          padding-right: 1.5rem;
+        }
+        .py-6 {
+          padding-top: 1.5rem;
+          padding-bottom: 1.5rem;
+        }
+        .pb-8 {
+          padding-bottom: 2rem;
+        }
+        .pt-10 {
+          padding-top: 2.5rem;
+        }
+        .text-2xl {
+          font-size: 1.5rem;
+          line-height: 2rem;
+        }
+        .font-bold {
+          font-weight: 700;
+        }
+        .text-gray-50 {
+          --tw-text-opacity: 1;
+          color: rgb(249 250 251 / var(--tw-text-opacity));
+        }
+        .shadow-xl {
+          --tw-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1),
+            0 8px 10px -6px rgb(0 0 0 / 0.1);
+          --tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color),
+            0 8px 10px -6px var(--tw-shadow-color);
+          box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+            var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+        }
+        .ring-1 {
+          --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
+            var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+          --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
+            calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+          box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+            var(--tw-shadow, 0 0 #0000);
+        }
+        .ring-gray-900\/5 {
+          --tw-ring-color: rgb(17 24 39 / 0.05);
+        }
+        @media (min-width: 640px) {
+          .sm\:mx-auto {
+            margin-left: auto;
+            margin-right: auto;
+          }
+          .sm\:max-w-lg {
+            max-width: 32rem;
+          }
+          .sm\:rounded-lg {
+            border-radius: 0.5rem;
+          }
+          .sm\:px-10 {
+            padding-left: 2.5rem;
+            padding-right: 2.5rem;
+          }
+          .sm\:py-12 {
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div
+        class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-gray-900 py-6 sm:py-12"
+      >
+        <div
+          class="absolute inset-0 bg-gradient-to-bl to-fuchsia-950 from-violet-950"
+        ></div>
+        <div
+          class="relative bg-gray-900 text-gray-50 px-6 pt-10 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:max-w-lg sm:rounded-lg sm:px-10"
+        >
+          <div class="mx-auto max-w-md flex flex-col gap-4 items-center">
+            <svg
+              class="w-32"
+              xmlns="http://www.w3.org/2000/svg"
+              xml:space="preserve"
+              style="
+                fill-rule: evenodd;
+                clip-rule: evenodd;
+                stroke-linejoin: round;
+                stroke-miterlimit: 2;
+              "
+              viewBox="0 0 512 512"
+            >
+              <path
+                d="M191.995 296.773a249.132 249.132 0 0 0 9.186 50.471c-39.931 29.977-67.544 75.481-73.875 127.551-1.565 12.876-13.289 22.058-26.164 20.492-12.876-1.565-22.058-13.289-20.492-26.164 8.884-73.07 51.281-135.809 111.345-172.35Zm76.541-29.71a236.112 236.112 0 0 1 45.451-4.392c120.129 0 219.219 90.128 233.363 206.44 1.566 12.875-7.616 24.599-20.491 26.165-12.875 1.565-24.599-7.616-26.165-20.491-11.315-93.045-90.609-165.114-186.707-165.114a188.655 188.655 0 0 0-41.757 4.652 173.73 173.73 0 0 1-3.99-37.118c0-3.398.1-6.781.296-10.142Z"
+                style="fill: url(#a)"
+                transform="matrix(1.09624 0 0 1.09624 -88.22 -71.228)"
+              />
+              <path
+                d="M366.397 332.746a172.37 172.37 0 0 1 42.79 20.426c-31.595 92.558-119.29 159.11-222.53 159.11a235.088 235.088 0 0 1-91.862-18.691c-11.939-5.069-17.517-18.876-12.449-30.815 5.069-11.939 18.876-17.517 30.815-12.448a188.077 188.077 0 0 0 73.496 14.954c66.335 0 124.648-34.342 158.132-86.216a187.154 187.154 0 0 0 21.608-46.32Zm6.998-77.974c-6.112-50.997-32.857-97.125-73.555-127.784-10.359-7.804-12.434-22.55-4.63-32.909 7.804-10.36 22.55-12.435 32.91-4.631 56.876 42.845 91.952 109.861 93.556 182.539a248.226 248.226 0 0 0-48.281-17.215Z"
+                style="fill: url(#b)"
+                transform="matrix(1.09624 0 0 1.09624 -88.22 -71.228)"
+              />
+              <path
+                d="M367.283 450.15c22.719 9.739 47.747 15.132 74.034 15.132 46.321 0 71.53-14.12 73.519-14.965 11.938-5.069 25.747.507 30.816 12.445 5.07 11.938-.506 25.746-12.444 30.816-2.486 1.056-33.995 18.704-91.891 18.704-40.984 0-79.519-10.488-113.063-28.926a251.41 251.41 0 0 0 39.029-33.206Zm-102.959-18.232c-36.168-41.343-58.084-95.468-58.084-154.713 0-74.684 35.368-143.889 93.6-187.757 10.36-7.804 25.106-5.729 32.91 4.63 7.804 10.36 5.729 25.106-4.63 32.91-46.588 35.096-74.88 90.466-74.88 150.217 0 49.355 19.011 94.27 50.11 127.822a173.448 173.448 0 0 1-39.026 26.891Z"
+                style="fill: url(#c)"
+                transform="matrix(1.09624 0 0 1.09624 -88.22 -71.228)"
+              />
+              <defs>
+                <linearGradient
+                  id="a"
+                  x1="0"
+                  x2="1"
+                  y1="0"
+                  y2="0"
+                  gradientTransform="matrix(467.048 363 -363 467.048 80.476 123)"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop
+                    offset="0"
+                    style="stop-color: #f94cc3; stop-opacity: 1"
+                  />
+                  <stop
+                    offset="1"
+                    style="stop-color: #4800af; stop-opacity: 1"
+                  />
+                </linearGradient>
+                <linearGradient
+                  id="b"
+                  x1="0"
+                  x2="1"
+                  y1="0"
+                  y2="0"
+                  gradientTransform="matrix(467.048 363 -363 467.048 80.476 123)"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop
+                    offset="0"
+                    style="stop-color: #f94cc3; stop-opacity: 1"
+                  />
+                  <stop
+                    offset="1"
+                    style="stop-color: #4800af; stop-opacity: 1"
+                  />
+                </linearGradient>
+                <linearGradient
+                  id="c"
+                  x1="0"
+                  x2="1"
+                  y1="0"
+                  y2="0"
+                  gradientTransform="matrix(467.048 363 -363 467.048 80.476 123)"
+                  gradientUnits="userSpaceOnUse"
+                >
+                  <stop
+                    offset="0"
+                    style="stop-color: #f94cc3; stop-opacity: 1"
+                  />
+                  <stop
+                    offset="1"
+                    style="stop-color: #4800af; stop-opacity: 1"
+                  />
+                </linearGradient>
+              </defs>
+            </svg>
+            <h1 class="font-bold text-2xl">Thorium Nova is Loading...</h1>
+          </div>
+        </div>
+      </div>
+    </body>
+  </html>
+</html>

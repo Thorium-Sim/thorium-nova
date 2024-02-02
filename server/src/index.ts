@@ -48,7 +48,7 @@ export async function init() {
 
   await startServer(app);
 
-  exitHandler(database);
+  exitHandler();
 }
 
 init();

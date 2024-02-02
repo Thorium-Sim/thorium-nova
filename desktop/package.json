@@ -11,6 +11,7 @@
   "author": "Alex Anderson",
   "devDependencies": {
     "@types/bonjour": "^3.5.13",
+    "@types/wait-on": "^5.3.4",
     "copy-dir-cli": "^0.0.3",
     "electron-esbuild": "^8.0.0"
   },
@@ -19,6 +20,7 @@
     "electron-better-ipc": "^2.0.1",
     "electron-store": "^8.1.0",
     "electron-updater": "^6.1.7",
-    "electron-util": "^0.17.2"
+    "electron-util": "^0.17.2",
+    "wait-on": "^7.2.0"
   }
 }

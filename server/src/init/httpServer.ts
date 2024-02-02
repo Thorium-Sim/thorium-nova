@@ -5,6 +5,7 @@ import cors from "@fastify/cors";
 import path from "path";
 import {thoriumPath, rootPath} from "../utils/appPaths";
 import {promises as fs} from "fs";
+import {snapshot} from "./exitHandler";
 
 const isHeadless = !process.env.FORK;
 export default async function buildHTTPServer({
@@ -41,6 +42,10 @@ export default async function buildHTTPServer({
   });
 
   app.get("/healthcheck", async (req, reply) => {
+    reply.code(200).send("OK");
+  });
+  app.post("/snapshot", async (req, reply) => {
+    await snapshot();
     reply.code(200).send("OK");
   });
 

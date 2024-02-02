@@ -1,9 +1,22 @@
 import {autoUpdater} from "electron-updater";
-import {BrowserWindow} from "electron";
+import {BrowserWindow, shell} from "electron";
 
 let win: BrowserWindow | null = null;
 export function initWin(newWin: BrowserWindow) {
   win = newWin;
+  win.webContents.setWindowOpenHandler(({url}) => {
+    shell.openExternal(url);
+    return {action: "deny"};
+  });
+  win.on("closed", () => {
+    win = null;
+  });
+  win.on("ready-to-show", () => {
+    if (win) {
+      win.show();
+      win.focus();
+    }
+  });
 }
 function sendStatusToWindow(text: string) {
   win?.webContents.send("update-message", text);

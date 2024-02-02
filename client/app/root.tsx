@@ -19,7 +19,7 @@ import {Icon, href as iconsHref} from "@thorium/ui/Icon";
 import {ReactNode} from "react";
 import {getBackground} from "./utils/getBackground";
 import {ClientOnly} from "remix-utils/client-only";
-import NoMatch from "./components/NotFound";
+import NoMatch from "./components/NotFound/index.client";
 import Button from "@thorium/ui/Button";
 
 export const meta: MetaFunction = () => {

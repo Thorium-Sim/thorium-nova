@@ -2,6 +2,8 @@ import {app} from "electron";
 import path from "path";
 import {fork, ChildProcess} from "child_process";
 import {hostSecret} from "../hostSecret";
+import waitOn from "wait-on";
+import {port} from "./settings";
 
 let child: ChildProcess | null = null;
 export async function startThoriumServer() {
@@ -23,11 +25,6 @@ export async function startThoriumServer() {
     // ],
     silent: true,
   });
-  child.once("message", function (msg) {
-    if (msg === "ready") {
-    } else if (msg === "error") {
-    }
-  });
   child.stdout?.on("data", function (data) {
     const message: string = data.toString();
     console.info(message);
@@ -41,7 +38,9 @@ export async function startThoriumServer() {
     console.error(err);
   });
 
-  await new Promise(res => setTimeout(res, 1000));
+  await waitOn({
+    resources: [`http://0.0.0.0:${port}/healthcheck`],
+  });
 }
 
 app.on("before-quit", async event => {
@@ -55,14 +54,7 @@ app.on("before-quit", async event => {
 export async function stopThoriumServer() {
   if (child) {
     await Promise.race([
-      new Promise<void>(res => {
-        child?.once("message", message => {
-          if (message === "saved") {
-            res();
-          }
-        });
-        child?.send("save");
-      }),
+      fetch(`http://0.0.0.0:${port}/snapshot`, {method: "POST"}),
       new Promise(res => setTimeout(res, 5000)),
     ]);
     child.kill();

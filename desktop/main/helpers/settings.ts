@@ -5,3 +5,5 @@ export const settings = new Store<{recentDocs: string[]}>({
     recentDocs: [],
   },
 });
+
+export const port = Number(process.env.PORT) || 4444;

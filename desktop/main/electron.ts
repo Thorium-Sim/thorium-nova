@@ -10,6 +10,7 @@ import {
 import {ipcHandlers} from "./helpers/ipcHandlers";
 import {autoUpdater} from "electron-updater";
 import {initWin} from "./helpers/autoUpdate";
+import {port} from "./helpers/settings";
 
 let win: BrowserWindow | null = null;
 app.enableSandbox();
@@ -29,22 +30,14 @@ app.on("will-finish-launching", () => {
   });
 });
 
-const cert = fs.readFileSync(
-  path.join(
-    app.getAppPath(),
-    is.development ? `desktop/resources/server.cert` : `../app/server.cert`
-  ),
-  "utf8"
-);
-const port = Number(process.env.PORT) || 4444;
-
 async function createWindow() {
-  await startThoriumServer();
-  ipcHandlers();
-  loaded = true;
-  if (loadedPath) {
-    loadFile(loadedPath);
-  }
+  const cert = fs.readFileSync(
+    path.join(
+      app.getAppPath(),
+      is.development ? `desktop/resources/server.cert` : `../app/server.cert`
+    ),
+    "utf8"
+  );
   // TODO: Manage this with the multi-window manager some day
   app.on(
     "certificate-error",
@@ -55,7 +48,7 @@ async function createWindow() {
       callback(certificate.data === cert);
     }
   );
-  restoreMenubar(app);
+
   win = new BrowserWindow({
     width: 1024,
     height: 768,
@@ -71,33 +64,29 @@ async function createWindow() {
     },
     show: false,
   });
+
   initWin(win);
-  win.webContents.setWindowOpenHandler(({url}) => {
-    shell.openExternal(url);
-    return {action: "deny"};
-  });
+  await win.loadFile("index.html");
+  await startThoriumServer();
+  ipcHandlers();
+  loaded = true;
+  if (loadedPath) {
+    loadFile(loadedPath);
+  }
+  restoreMenubar(app);
 
   // We add 1 to the port, since we want to connect to the HTTPS server
   // which is 1 more than the default port
-  win.loadURL(`http://localhost:${port}`);
-  win.on("closed", () => {
-    win = null;
-  });
-  win.on("ready-to-show", () => {
-    if (win) {
-      win.show();
-      win.focus();
-    }
-  });
+  await win.loadURL(`http://0.0.0.0:${port}`);
 }
 
 app.whenReady().then(async () => {
+  await createWindow();
   try {
     await autoUpdater.checkForUpdatesAndNotify();
   } catch (error) {
     // Ignore it
   }
-  await createWindow();
 });
 
 app.on("window-all-closed", async () => {

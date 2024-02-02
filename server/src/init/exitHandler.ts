@@ -1,22 +1,6 @@
-import type {buildDatabase} from "./buildDatabase";
+import {database} from "./buildDatabase";
 
-export function exitHandler(
-  database: Awaited<ReturnType<typeof buildDatabase>>
-) {
-  process.on("message", async message => {
-    if (message === "save") {
-      await database.server.writeFile(true);
-      await Promise.all(
-        database.server.plugins.map(async plugin => {
-          await plugin.writeFile(true);
-        })
-      );
-      await database.flight?.writeFile(true);
-
-      process.send?.("saved");
-    }
-  });
-
+export function exitHandler() {
   if (process.env.NODE_ENV === "production") {
     process.stdin.resume(); //so the program will not close instantly
 
@@ -25,13 +9,7 @@ export function exitHandler(
       exitCode: number
     ) {
       if (options.cleanup) {
-        await database.server.writeFile(true);
-        await Promise.all(
-          database.server.plugins.map(async plugin => {
-            await plugin.writeFile(true);
-          })
-        );
-        await database.flight?.writeFile(true);
+        await snapshot();
       }
       if (options.exit) process.exit();
     }
@@ -49,4 +27,14 @@ export function exitHandler(
     //catches uncaught exceptions
     process.on("uncaughtException", exitHandler.bind(null, {exit: true}));
   }
+}
+
+export async function snapshot() {
+  await database.server.writeFile(true);
+  await Promise.all(
+    database.server.plugins.map(async plugin => {
+      await plugin.writeFile(true);
+    })
+  );
+  await database.flight?.writeFile(true);
 }

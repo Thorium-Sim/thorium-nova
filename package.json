@@ -48,13 +48,14 @@
       "!**/{appveyor.yml,.travis.yml,circle.yml}",
       "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
     ],
-    "asar": true,
+    "asar": false,
     "extraResources": [
       {
         "from": "./desktop/resources",
         "to": "./app",
         "filter": [
-          "server.*"
+          "server.*",
+          "index.html"
         ]
       },
       {
