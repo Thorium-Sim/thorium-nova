@@ -30,6 +30,7 @@ export abstract class FSDataStore {
   initialData: unknown;
   #handler: ProxyHandler<any> = {
     get: (target, key) => {
+      if (key === "getData") return target[key];
       if (key === isProxy) return true;
       if (key === "mapKey") return target[key];
       if (
@@ -65,7 +66,8 @@ export abstract class FSDataStore {
   constructor(initialData: unknown, options: FSDataStoreOptions = {}) {
     this.initialData = initialData;
     this.#path = options.path || "db.json";
-    this.#throttle = options.throttle || 1000 * 30;
+    this.#throttle =
+      options.throttle || process.env.NODE_ENV === "production" ? 1000 * 30 : 0;
     this.#safeMode = options.safeMode || false;
     this.#writeThrottle =
       process.env.NODE_ENV === "test"

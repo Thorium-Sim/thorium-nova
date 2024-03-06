@@ -8,7 +8,7 @@ import {
   Camera,
   SRGBColorSpace,
 } from "three";
-import * as STDLIB from "three-stdlib";
+import {GLTFLoader} from "three-stdlib";
 
 let renderer: WebGLRenderer;
 
@@ -67,7 +67,7 @@ export async function generateScene(
     const objectGroup = new Group();
 
     scene.add(objectGroup);
-    const loader = new STDLIB.GLTFLoader();
+    const loader = new GLTFLoader();
     loader.load(assetPath, (gltf: any) => {
       const obj = gltf.scene;
       scene.add(obj);

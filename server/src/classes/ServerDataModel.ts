@@ -17,7 +17,6 @@ export class ServerDataModel extends FSDataStore {
     const data = this.getData();
     this.activeFlightName = data.activeFlightName || null;
     this.thoriumId = data.thoriumId || randomWords(3).join("-");
-
     if (this.clients) {
       this.clients = Object.fromEntries(
         Object.entries(this.clients).map(([id, client]) => {
@@ -48,7 +47,12 @@ export class ServerDataModel extends FSDataStore {
     });
   };
   toJSON() {
-    const {plugins, ...data} = this;
-    return data;
+    const {plugins, clients, ...data} = this;
+    return {
+      ...data,
+      clients: Object.fromEntries(
+        Object.entries(clients).map(([id, client]) => [id, client.toJSON()])
+      ),
+    };
   }
 }

@@ -308,6 +308,8 @@ const quotes = [
   // C.S. Lewis
   "If I find in myself a desire which no experience in this world can satisfy, the most probable explanation is that I was made for another world.",
   "A children's story that can only be enjoyed by children is not a good children's story in the slightest.",
+  // E.B. White
+  "I arise in the morning torn between a desire to improve the world and a desire to enjoy the world. This makes it hard to plan the day.",
 ];
 
 const QuoteOfTheDay = () => {
