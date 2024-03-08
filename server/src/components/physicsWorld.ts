@@ -1,9 +1,5 @@
 import z from "zod";
 
-import {RAPIER} from "../init/rapier";
-
-const World = RAPIER.World;
-
 export const physicsWorld = z
   .object({
     enabled: z.boolean().default(true),
@@ -15,6 +11,6 @@ export const physicsWorld = z
         parentId: z.number().optional(),
       })
       .default({}),
-    world: z.instanceof(World).nullable().default(null),
+    world: z.any().nullable().default(null),
   })
   .default({});

@@ -2,6 +2,7 @@ import {GamepadKey} from "@client/hooks/useGamepadStore";
 import {animated as a} from "@react-spring/web";
 import {useJoystick} from "@client/hooks/useJoystick";
 import {ReactNode} from "react";
+import {cn} from "@client/utils/cn";
 
 export const Joystick = ({
   children,
@@ -21,7 +22,7 @@ export const Joystick = ({
   });
 
   return (
-    <div className={`relative aspect-square ${className}`}>
+    <div className={cn(`relative aspect-square`, className)}>
       <div
         ref={containerRef}
         className="top-0 absolute bg-black/50 border-2 border-white/50 rounded-full w-full h-full flex justify-center items-center"

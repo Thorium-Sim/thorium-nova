@@ -50,8 +50,9 @@ export function Pilot({cardLoaded}: CardProps) {
     <div className="grid grid-cols-4 h-full place-content-center gap-4">
       <div className="flex flex-col justify-between">
         <ImpulseControls cardLoaded={cardLoaded} />
-        <div className="flex gap-4 w-full flex-1 mt-2">
+        <div className="flex gap-4 flex-1 mt-2">
           <LinearJoystick
+            className="h-[calc(100%-2.5rem)]"
             onDrag={({y}) => direction({z: -y})}
             vertical
             gamepadKey="z-thrusters"
@@ -60,7 +61,7 @@ export function Pilot({cardLoaded}: CardProps) {
             <UntouchableLabel className="bottom-1">Aft</UntouchableLabel>
           </LinearJoystick>
           <Joystick
-            className="flex-1"
+            className="w-[calc(100%-2.5rem)] h-[calc(100%-2.5rem)]"
             onDrag={({x, y}) => direction({y: -y, x: -x})}
             gamepadKeys={{x: "x-thrusters", y: "y-thrusters"}}
           >
