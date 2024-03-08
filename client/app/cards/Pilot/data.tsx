@@ -19,13 +19,7 @@ export const pilot = t.router({
           impulseEngines.components.isImpulseEngines?.targetSpeed || 0;
         let cruisingSpeed =
           impulseEngines.components.isImpulseEngines?.cruisingSpeed || 1;
-        if (impulseEngines.components.power) {
-          const {currentPower, maxSafePower, requiredPower} =
-            impulseEngines.components.power || {};
-          targetSpeed =
-            cruisingSpeed *
-            ((currentPower - requiredPower) / (maxSafePower - requiredPower));
-        }
+
         return {
           id: impulseEngines.id,
           targetSpeed,
@@ -65,10 +59,6 @@ export const pilot = t.router({
         return true;
       })
       .request(({ctx}) => {
-        // Currently only support one impulse engines
-        const impulseEngines = getShipSystem(ctx, {
-          systemType: "impulseEngines",
-        });
         // Currently only support one warp engines
         const warpEngines = getShipSystem(ctx, {systemType: "warpEngines"});
         return {
@@ -304,6 +294,13 @@ export const pilot = t.router({
         input?.systemId || ctx.ship?.components.position?.parentId;
       if (typeof systemId === "undefined") {
         return false;
+      }
+      if (
+        (entity.components.isImpulseEngines ||
+          entity.components.isWarpEngines) &&
+        ctx.ship?.components.shipSystems?.shipSystems.has(entity.id)
+      ) {
+        return true;
       }
       return Boolean(
         entity.components.position &&

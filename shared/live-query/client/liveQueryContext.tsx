@@ -43,6 +43,8 @@ export function processInterpolation(
       x: entity.x,
       y: entity.y,
       z: entity.z,
+      f: entity.f,
+      s: entity.s,
       r: entity.r,
     } as EntityValues;
   });
@@ -64,7 +66,7 @@ export function LiveQueryProvider({
   const {socket, reconnectionState} = useDataConnection(getRequestContext);
 
   useAnimationFrame(
-    () => processInterpolation(socket?.SI.calcInterpolation("x y z r(quat)")),
+    () => processInterpolation(socket?.SI.calcInterpolation("x y z f r(quat)")),
     isTestEnv ? false : true
   );
   const value: ILiveQueryContext = useMemo(() => {

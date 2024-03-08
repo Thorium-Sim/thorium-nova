@@ -194,9 +194,9 @@ const LockOnButton = () => {
 
   return (
     <Fragment>
-      <div className="text-center panel panel-primary">
+      <div className="text-center panel panel-primary h-24">
         <div>Current Course:</div>
-        <div className="font-bold text-3xl my-1">
+        <div className="font-bold text-3xl my-1 ">
           {autopilot.destinationName || "No Course Set"}
         </div>
         <div>

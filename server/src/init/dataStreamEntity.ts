@@ -28,11 +28,34 @@ export function dataStreamEntity(e: Entity) {
       y: e.components.isPowerNode.powerRequirement,
     };
   }
+  if (e.components.isImpulseEngines) {
+    let {targetSpeed, cruisingSpeed} = e.components.isImpulseEngines;
+    if (e.components.power) {
+      const {currentPower, maxSafePower, requiredPower} =
+        e.components.power || {};
+
+      targetSpeed = Math.max(
+        0,
+        cruisingSpeed *
+          ((currentPower - requiredPower) / (maxSafePower - requiredPower))
+      );
+    }
+    return {
+      id: e.id.toString(),
+      x: targetSpeed,
+    };
+  }
+  if (e.components.isWarpEngines) {
+    let {maxVelocity} = e.components.isWarpEngines;
+    return {
+      id: e.id.toString(),
+      x: maxVelocity,
+    };
+  }
 
   const {parentId, type, ...position} = e.components.position || {};
   const shouldSnap = e.components.snapInterpolation ? 1 : 0;
   e.removeComponent("snapInterpolation");
-
   return {
     id: e.id.toString(),
     ...position,

@@ -33,8 +33,9 @@ function formatSpeed(speed: KilometerPerSecond) {
 }
 
 export function useForwardVelocity() {
-  const [{targetSpeed}] = q.pilot.impulseEngines.get.useNetRequest();
-  const [{maxVelocity: warpMax}] = q.pilot.warpEngines.get.useNetRequest();
+  const [{id: impulseId}] = q.pilot.impulseEngines.get.useNetRequest();
+  const [{id: warpId, currentWarpFactor}] =
+    q.pilot.warpEngines.get.useNetRequest();
   const [ship] = q.navigation.ship.useNetRequest();
   const {interpolate} = useLiveQuery();
 
@@ -42,10 +43,10 @@ export function useForwardVelocity() {
     KilometerPerSecond,
     KilometerPerSecond
   ] {
+    const id = currentWarpFactor ? warpId : impulseId;
     const {f: forwardVelocity} = interpolate(ship.id) || {f: 0};
-
-    const targetVelocity = Math.max(targetSpeed, warpMax);
-    return [forwardVelocity, targetVelocity] as [
+    const {x: targetSpeed} = interpolate(id) || {x: 0};
+    return [forwardVelocity, targetSpeed] as [
       KilometerPerSecond,
       KilometerPerSecond
     ];
@@ -122,7 +123,7 @@ export const ImpulseControls = ({cardLoaded = true}) => {
   );
 
   const bind = useDrag(
-    ({down, first, movement: [_, yVal]}) => {
+    ({down, first, offset: [_, yVal]}) => {
       downRef.current = down;
       set({
         y: yVal,
@@ -275,19 +276,26 @@ export const ImpulseControls = ({cardLoaded = true}) => {
                 >
                   1/4
                 </Button>
+                <Button
+                  className="btn-notice w-full"
+                  onClick={() => callback.current(0)}
+                >
+                  Full Stop
+                </Button>
+              </div>
+              <div
+                ref={ref}
+                className="relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end"
+              >
+                <a.div
+                  {...bind()}
+                  style={{transform: y?.to(y => `translate3d(0px,${y}px,0)`)}}
+                  className="z-10 w-10 h-10 rounded-full border-blackAlpha-500 border-2 bg-gray-500 shadow-md cursor-pointer"
+                ></a.div>
               </div>
             </div>
           </div>
-          <div
-            ref={ref}
-            className="relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end"
-          >
-            <a.div
-              {...bind()}
-              style={{transform: y?.to(y => `translate3d(0px,${y}px,0)`)}}
-              className="z-10 w-10 h-10 rounded-full border-blackAlpha-500 border-2 bg-gray-500 shadow-md cursor-pointer"
-            ></a.div>
-          </div>
+          <div className="w-2"></div>
           <div className="flex flex-1 flex-col justify-around">
             <p className="text-xl">Warp Speed:</p>
             <div className="flex flex-col justify-around h-full gap-1">
@@ -328,12 +336,6 @@ export const ImpulseControls = ({cardLoaded = true}) => {
             </div>
           </div>
         </div>
-        <Button
-          className="btn-notice w-full"
-          onClick={() => callback.current(0)}
-        >
-          Full Stop
-        </Button>
       </div>
     </div>
   );
