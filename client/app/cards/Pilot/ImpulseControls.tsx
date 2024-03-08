@@ -68,16 +68,26 @@ const ForwardVelocity = () => {
 
   return (
     <>
-      <div className="panel text-center">
-        <div>Forward Velocity:</div>
-        <div className="font-bold text-3xl my-2 tabular-nums" ref={forwardRef}>
+      <div className="panel flex items-center px-4">
+        <div className="max-w-min text-right leading-tight">
+          Forward Velocity
+        </div>
+        <div
+          className="w-full text-right font-bold text-2xl my-2 tabular-nums"
+          ref={forwardRef}
+        >
           {formatSpeed(0)}
         </div>
       </div>
-      <div className="panel text-center">
-        <div>Target Velocity:</div>
+      <div className="panel flex items-center px-4">
+        <div className="max-w-min text-right leading-tight">
+          Target Velocity
+        </div>
 
-        <p className="font-bold text-3xl my-2 tabular-nums" ref={targetRef}>
+        <p
+          className="w-full text-right font-bold text-2xl my-2 tabular-nums"
+          ref={targetRef}
+        >
           {formatSpeed(0)}
         </p>
       </div>
@@ -230,11 +240,11 @@ export const ImpulseControls = ({cardLoaded = true}) => {
         </div>
         {/* TODO: Include heat indicator here eventually. */}
 
-        <div className="flex mt-2">
+        <div className="flex mt-2 gap-1">
           <div className="flex-1">
             <p className="text-xl">Impulse Speed:</p>
             <div className="flex">
-              <div className="flex flex-1 flex-col justify-around text-right mr-4">
+              <div className="flex flex-1 flex-col justify-around text-right gap-1">
                 <Button
                   onClick={() => callback.current(emergencySpeed)}
                   className="btn-error btn-sm"
@@ -265,29 +275,22 @@ export const ImpulseControls = ({cardLoaded = true}) => {
                 >
                   1/4
                 </Button>
-                <Button
-                  onClick={() => callback.current(0)}
-                  className="btn-notice"
-                >
-                  Full Stop
-                </Button>
-              </div>
-              <div
-                ref={ref}
-                className="h-0 min-h-[18rem] relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end"
-              >
-                <a.div
-                  {...bind()}
-                  style={{transform: y?.to(y => `translate3d(0px,${y}px,0)`)}}
-                  className="z-10 w-10 h-10 rounded-full border-blackAlpha-500 border-2 bg-gray-500 shadow-md cursor-pointer"
-                ></a.div>
               </div>
             </div>
           </div>
-
-          <div className="flex flex-1 flex-col justify-around ml-6">
+          <div
+            ref={ref}
+            className="relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end"
+          >
+            <a.div
+              {...bind()}
+              style={{transform: y?.to(y => `translate3d(0px,${y}px,0)`)}}
+              className="z-10 w-10 h-10 rounded-full border-blackAlpha-500 border-2 bg-gray-500 shadow-md cursor-pointer"
+            ></a.div>
+          </div>
+          <div className="flex flex-1 flex-col justify-around">
             <p className="text-xl">Warp Speed:</p>
-            <div className="flex flex-col justify-around h-full">
+            <div className="flex flex-col justify-around h-full gap-1">
               <Button
                 className={`btn-sm btn-error ${
                   warpFocus === warpFactorCount + 1 ? "gamepad-focus" : ""
@@ -322,15 +325,15 @@ export const ImpulseControls = ({cardLoaded = true}) => {
                   </Button>
                 );
               })}
-              <Button
-                className="btn-notice"
-                onClick={() => callback.current(0)}
-              >
-                Full Stop
-              </Button>
             </div>
           </div>
         </div>
+        <Button
+          className="btn-notice w-full"
+          onClick={() => callback.current(0)}
+        >
+          Full Stop
+        </Button>
       </div>
     </div>
   );

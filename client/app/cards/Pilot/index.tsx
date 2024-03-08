@@ -50,7 +50,7 @@ export function Pilot({cardLoaded}: CardProps) {
     <div className="grid grid-cols-4 h-full place-content-center gap-4">
       <div className="flex flex-col justify-between">
         <ImpulseControls cardLoaded={cardLoaded} />
-        <div className="flex gap-4 w-full flex-1">
+        <div className="flex gap-4 w-full flex-1 mt-2">
           <LinearJoystick
             onDrag={({y}) => direction({z: -y})}
             vertical
@@ -79,7 +79,7 @@ export function Pilot({cardLoaded}: CardProps) {
         </Suspense>
       </div>
 
-      <div className="h-full flex flex-col justify-between gap-4">
+      <div className="h-full flex flex-col justify-between gap-2">
         <LockOnButton />
         <div>
           <PilotZoomSlider />
@@ -196,10 +196,10 @@ const LockOnButton = () => {
     <Fragment>
       <div className="text-center panel panel-primary">
         <div>Current Course:</div>
-        <div className="font-bold text-3xl my-2">
+        <div className="font-bold text-3xl my-1">
           {autopilot.destinationName || "No Course Set"}
         </div>
-        <div className="h-8">
+        <div>
           {autopilot.destinationName ? (
             <span>
               Distance: <span ref={distanceRef}></span>

@@ -96,7 +96,7 @@ const CardRenderer = ({
       >
         <Suspense fallback={<LoadingSpinner />}>
           <ErrorBoundary fallback={<CardError />}>
-            <CardComponent cardLoaded={cardLoaded} />;
+            <CardComponent cardLoaded={cardLoaded} />
           </ErrorBoundary>
         </Suspense>
       </Transition>

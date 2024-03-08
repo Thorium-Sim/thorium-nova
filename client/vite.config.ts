@@ -1,4 +1,4 @@
-import {unstable_vitePlugin as remix} from "@remix-run/dev";
+import {vitePlugin as remix} from "@remix-run/dev";
 import {defineConfig} from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import {flatRoutes} from "remix-flat-routes";
@@ -14,16 +14,6 @@ setDefaultResultOrder("ipv4first");
 
 export default defineConfig({
   plugins: [
-    remix({
-      unstable_ssr: false,
-      assetsBuildDirectory: "../dist/public",
-      serverBuildDirectory: "../dist/server",
-      ignoredRouteFiles: ["**/*"],
-      routes: async defineRoutes => {
-        return flatRoutes("routes", defineRoutes);
-      },
-    }),
-    // @ts-expect-error
     mdx({
       remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkMdxImages],
       rehypePlugins: [
@@ -32,7 +22,15 @@ export default defineConfig({
         [rehypeShiki, {theme: "one-dark-pro"}],
       ],
     }),
-    // @ts-expect-error
+    remix({
+      ssr: false,
+      buildDirectory: "../dist/public",
+
+      ignoredRouteFiles: ["**/*"],
+      routes: async defineRoutes => {
+        return flatRoutes("routes", defineRoutes);
+      },
+    }),
     tsconfigPaths(),
   ],
   build: {
