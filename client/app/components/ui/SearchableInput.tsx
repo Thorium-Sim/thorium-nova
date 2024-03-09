@@ -22,7 +22,7 @@ export function DefaultResultLabel({
       </span>
       {selected ? (
         <span
-          className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+          className={`absolute inset-y-0 right-0 flex items-center pl-3 ${
             active ? "text-white" : "text-teal-600"
           }`}
         >
@@ -68,6 +68,7 @@ export default function SearchableInput<T extends {id: any}>({
     enabled: query.length > 0,
   });
 
+  console.log({selected, query, displayValue});
   return (
     <Combobox value={selected} onChange={setSelected || (() => {})}>
       <div className="relative mt-1">

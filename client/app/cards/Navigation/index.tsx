@@ -237,6 +237,7 @@ function StarmapSearch() {
         );
       }}
       placeholder="Search..."
+      displayValue={item => item.name}
     />
   );
 }

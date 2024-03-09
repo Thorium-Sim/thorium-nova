@@ -44,6 +44,7 @@ export function CargoSearchInput() {
         useShipMapStore.setState({deckIndex});
         useShipMapStore.setState({selectedRoomId: roomId || null});
       }}
+      displayValue={item => item.name}
     />
   );
 }
