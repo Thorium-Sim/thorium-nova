@@ -1,13 +1,11 @@
 import {
   Links,
-  LiveReload,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
   useRouteError,
   isRouteErrorResponse,
-  useLoaderData,
 } from "@remix-run/react";
 import "@fontsource/outfit";
 import "./styles/tailwind.css";
@@ -81,7 +79,6 @@ function Document({children}: {children: ReactNode}) {
 
         <ScrollRestoration />
         <Scripts />
-        <LiveReload />
       </body>
     </html>
   );

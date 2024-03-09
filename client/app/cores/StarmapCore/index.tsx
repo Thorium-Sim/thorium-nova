@@ -1,7 +1,7 @@
 import {InterstellarMap} from "@client/components/Starmap/InterstellarMap";
 import SystemMarker from "@client/components/Starmap/SystemMarker";
 import StarmapCanvas from "@client/components/Starmap/StarmapCanvas";
-import {useEffect, useRef} from "react";
+import {useEffect, useRef, useState} from "react";
 import {
   StarmapStoreProvider,
   useCalculateVerticalDistance,
@@ -33,6 +33,7 @@ import {useFrame} from "@react-three/fiber";
 import clsx from "clsx";
 import {Tooltip} from "@thorium/ui/Tooltip";
 import {Icon} from "@thorium/ui/Icon";
+import useInterval from "@client/hooks/useInterval";
 
 export function StarmapCore() {
   const ref = useRef<HTMLDivElement>(null);
@@ -160,11 +161,12 @@ function StarmapCoreMenubar() {
     });
   }, [playerShip.id, playerShip.currentSystem, useStarmapStore]);
   const inSystem = useStarmapStore(store => !!store.currentSystem);
-  const yDimension = useStarmapStore(store => store.yDimensionIndex);
   const selectedSpawn = useStarmapStore(store => store.spawnShipTemplate);
   const selectedObjectIds = useStarmapStore(store => store.selectedObjectIds);
   const followEntityId = useStarmapStore(store => store.followEntityId);
   const planetsHidden = useStarmapStore(store => store.planetsHidden);
+  const sensorsHidden = useStarmapStore(store => store.sensorsHidden);
+
   return (
     <>
       {inSystem && (
@@ -239,30 +241,58 @@ function StarmapCoreMenubar() {
       >
         {planetsHidden ? <Icon name="orbit" /> : <Icon name="circle-off" />}
       </Button>
-      <Input
-        className="input-sm"
-        label="Y Dimension"
-        title="Y Dimension"
-        labelHidden
-        placeholder="Y Dimension"
-        type="text"
-        inputMode="numeric"
-        pattern="[0-9]*"
-        defaultValue={yDimension}
-        onBlur={e =>
-          (e.target.value = (
-            isNaN(Number(e.target.value)) ? 0 : Number(e.target.value)
-          ).toString())
+      <Button
+        title="Hide/Show Sensor Range"
+        className={`btn-xs btn-info ${sensorsHidden ? "" : "btn-outline"}`}
+        onClick={() =>
+          useStarmapStore.setState(state => ({
+            sensorsHidden: !state.sensorsHidden,
+          }))
         }
-        onChange={e =>
-          useStarmapStore.setState({
-            yDimensionIndex: isNaN(Number(e.target.value))
-              ? 0
-              : Number(e.target.value),
-          })
-        }
-      />
+      >
+        {sensorsHidden ? (
+          <Icon name="circle-dot" />
+        ) : (
+          <Icon name="circle-off" />
+        )}
+      </Button>
+      <YDimensionInput />
     </>
+  );
+}
+
+function YDimensionInput() {
+  const useStarmapStore = useGetStarmapStore();
+
+  const yDimension = useStarmapStore(store => store.yDimensionIndex);
+  const [yDimensionState, setYDimensionState] = useState(yDimension.toString());
+
+  useEffect(() => {
+    setYDimensionState(yDimension.toString());
+  }, [yDimension]);
+  return (
+    <Input
+      className="input-sm"
+      label="Y Dimension"
+      title="Y Dimension"
+      labelHidden
+      placeholder="Y Dimension"
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      value={yDimensionState}
+      onBlur={e => {
+        setYDimensionState(yDimension.toString());
+      }}
+      onChange={e => {
+        setYDimensionState(e.target.value);
+        if (!isNaN(Number(e.target.value))) {
+        }
+        useStarmapStore.setState({
+          yDimensionIndex: Number(e.target.value),
+        });
+      }}
+    />
   );
 }
 
@@ -427,6 +457,7 @@ export function SolarSystemWrapper() {
     <SolarSystemMap
       skyboxKey={system?.components.isSolarSystem?.skyboxKey || "Blank"}
     >
+      <ambientLight intensity={0.5} />
       {starmapEntities.map(entity => {
         if (planetsHidden) return null;
         if (entity.components.isStar) {
@@ -506,9 +537,9 @@ export function SolarSystemWrapper() {
           </ErrorBoundary>
         </Suspense>
       ))}
-      {debugSpheres.map(sphere => (
+      {/* {debugSpheres.map(sphere => (
         <DebugSphere key={sphere.id} id={sphere.id} />
-      ))}
+      ))} */}
     </SolarSystemMap>
   );
 }

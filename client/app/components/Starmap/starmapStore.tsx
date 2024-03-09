@@ -39,7 +39,9 @@ interface StarmapStore {
   translate2DTo3D?: (x: number, y: number) => Vector3;
   setCameraFocus: (position: Coordinates<number>) => void;
   planetsHidden: boolean;
+  sensorsHidden: boolean;
 }
+
 let storeCount = 0;
 const createStarmapStore = () =>
   create<StarmapStore>((set, get) => ({
@@ -76,6 +78,8 @@ const createStarmapStore = () =>
         const up = camera.up.clone();
         camera.up.set(0, 0, -1);
         const distance = camera.position.distanceTo(position as Vector3);
+        set({yDimensionIndex: position.y});
+        camera.up.copy(up);
 
         await cameraControls.setLookAt(
           position.x,
@@ -86,10 +90,10 @@ const createStarmapStore = () =>
           position.z,
           true
         );
-        camera.up.copy(up);
       }
     },
     planetsHidden: false,
+    sensorsHidden: true,
   }));
 
 const useStarmapStore = createStarmapStore();

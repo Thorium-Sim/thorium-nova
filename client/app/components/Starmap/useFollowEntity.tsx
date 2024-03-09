@@ -4,7 +4,7 @@ import {useLiveQuery} from "@thorium/live-query/client";
 import {useEffect} from "react";
 import {useGetStarmapStore} from "./starmapStore";
 
-export function useFollowEntity(topDown = true) {
+export function useFollowEntity() {
   const useStarmapStore = useGetStarmapStore();
 
   const cameraControls = useStarmapStore(store => store.cameraControls);
@@ -26,12 +26,7 @@ export function useFollowEntity(topDown = true) {
     if (!followEntityId) return;
     const position = interpolate(followEntityId);
     if (!position) return;
-    cameraControls?.current?.moveTo(
-      position.x,
-      topDown ? 0 : position.y,
-      position.z,
-      false
-    );
+    cameraControls?.current?.moveTo(position.x, position.y, position.z, false);
     // TODO July 30, 2022: Also make the camera point in the direction of the entity. Useful for the viewscreen
   });
 }

@@ -66,7 +66,6 @@ export function useExternalCameraControl(
   controls: React.MutableRefObject<CameraControlsDefault | null>
 ) {
   const useStarmapStore = useGetStarmapStore();
-
   useEffect(() => {
     if (controls) {
       useStarmapStore.setState({

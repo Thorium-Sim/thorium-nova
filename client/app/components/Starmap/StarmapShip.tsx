@@ -48,6 +48,7 @@ export function StarmapShip({
     store => store.viewingMode !== "viewscreen"
   );
   const isCore = useStarmapStore(store => store.viewingMode === "core");
+  const sensorsHidden = useStarmapStore(store => store.sensorsHidden);
 
   const group = useRef<Group>(null);
   const shipMesh = useRef<Group>(null);
@@ -118,37 +119,49 @@ export function StarmapShip({
         transparent
         lineWidth={0.5} // In pixels (default)
       />
-      <group
-        ref={group}
-        onPointerOver={() => {
-          // set the cursor to pointer
-          document.body.style.cursor = "pointer";
-        }}
-        onPointerOut={() => {
-          // set the cursor to default
-          document.body.style.cursor = "default";
-        }}
-        onClick={onClick}
-      >
-        {isNotViewscreen && (
-          <Suspense fallback={null}>
-            <group ref={shipSprite}>
-              {logoUrl && (
-                <ShipSprite
-                  id={id}
-                  // TODO June 9, 2022 - This color should represent the faction, with a toggle to make it show IFF for the current ship
-                  color={spriteColor}
-                  spriteAsset={logoUrl}
-                />
-              )}
+      <group ref={group}>
+        {!isCore || sensorsHidden ? null : (
+          <mesh>
+            <icosahedronGeometry args={[10_000, 1]} />
+            <meshBasicMaterial
+              color="#0088ff"
+              transparent
+              opacity={0.2}
+              wireframe
+            />
+          </mesh>
+        )}
+        <group
+          onPointerOver={() => {
+            // set the cursor to pointer
+            document.body.style.cursor = "pointer";
+          }}
+          onPointerOut={() => {
+            // set the cursor to default
+            document.body.style.cursor = "default";
+          }}
+          onClick={onClick}
+        >
+          {isNotViewscreen && (
+            <Suspense fallback={null}>
+              <group ref={shipSprite}>
+                {logoUrl && (
+                  <ShipSprite
+                    id={id}
+                    // TODO June 9, 2022 - This color should represent the faction, with a toggle to make it show IFF for the current ship
+                    color={spriteColor}
+                    spriteAsset={logoUrl}
+                  />
+                )}
+              </group>
+            </Suspense>
+          )}
+          {model && (
+            <group ref={shipMesh}>
+              <primitive object={model} rotation={[Math.PI / 2, Math.PI, 0]} />
             </group>
-          </Suspense>
-        )}
-        {model && (
-          <group ref={shipMesh}>
-            <primitive object={model} rotation={[Math.PI / 2, Math.PI, 0]} />
-          </group>
-        )}
+          )}
+        </group>
       </group>
     </group>
   );
