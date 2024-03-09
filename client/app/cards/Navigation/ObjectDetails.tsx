@@ -1,16 +1,14 @@
 import {useGetStarmapStore} from "@client/components/Starmap/starmapStore";
 import useAnimationFrame from "@client/hooks/useAnimationFrame";
-import {Fragment, Suspense, useRef} from "react";
+import {Suspense, useRef} from "react";
 import {Canvas, useFrame} from "@react-three/fiber";
 import {Color, Group} from "three";
-import {Planet, PlanetSphere} from "@client/components/Starmap/Planet";
+import {PlanetSphere} from "@client/components/Starmap/Planet";
 import Star from "@client/components/Starmap/Star/StarMesh";
-import {Rings} from "@client/components/Starmap/Planet/Rings";
 import {Clouds} from "@client/components/Starmap/Planet/Clouds";
 import {useLiveQuery} from "@thorium/live-query/client";
 import {q} from "@client/context/AppContext";
 import {getNavigationDistance} from "@server/utils/getNavigationDistance";
-import {degToRad} from "@server/utils/unitTypes";
 
 function getDistanceLabel(input: {distance: number; unit: string} | null) {
   if (!input) return "Unknown";
@@ -25,7 +23,7 @@ export const ObjectDetails = () => {
   const selectedObjectIds = useStarmapStore(store => store.selectedObjectIds);
 
   return (
-    <div className="p-2 border-2 border-white/50 bg-black/50 rounded">
+    <div className="p-2 border border-white/50 bg-black/50 rounded">
       {selectedObjectIds[0] ? (
         <Suspense fallback={<h3 className="text-2xl">Accessing...</h3>}>
           <ObjectData />
@@ -67,9 +65,9 @@ const ObjectData = () => {
 
   if (!object) return null;
   return (
-    <Fragment>
+    <div className="flex items-center">
       {object.type === "solarSystem" ? null : (
-        <div className="float-left w-24 h-24 mr-2 border border-whiteAlpha-500 rounded">
+        <div className="w-24 h-24 mr-2 border border-white/50 rounded">
           {object.type === "planet" ? (
             <PlanetCanvas
               cloudMapAsset={object.cloudMapAsset}
@@ -86,12 +84,14 @@ const ObjectData = () => {
           ) : null}
         </div>
       )}
-      <h3 className="text-2xl">{object.name}</h3>
-      <h4 className="text-xl">{object.classification}</h4>
-      <h4 className="text-xl">
-        <strong>Distance:</strong> <span ref={distanceRef}></span>
-      </h4>
-    </Fragment>
+      <div>
+        <h3 className="text-2xl">{object.name}</h3>
+        <h4 className="text-xl">{object.classification}</h4>
+        <h4 className="text-xl">
+          <strong>Distance:</strong> <span ref={distanceRef}></span>
+        </h4>
+      </div>
+    </div>
   );
 };
 
@@ -112,12 +112,10 @@ const PlanetGroup = ({
   });
   return (
     <group ref={planetRef}>
-      <group rotation={[0, 0, degToRad(12)]}>
-        <PlanetSphere texture={textureMapAsset} />
-        {/* The ring really does not look goood. */}
-        {/* {ringMapAsset && <Rings texture={ringMapAsset} />} */}
-        {cloudMapAsset && <Clouds texture={cloudMapAsset} />}
-      </group>
+      <PlanetSphere texture={textureMapAsset} />
+      {/* The ring really does not look goood. */}
+      {/* {ringMapAsset && <Rings texture={ringMapAsset} />} */}
+      {cloudMapAsset && <Clouds texture={cloudMapAsset} />}
     </group>
   );
 };
@@ -132,8 +130,8 @@ const PlanetCanvas = ({
   if (!textureMapAsset) return null;
   return (
     <Canvas camera={{position: [0, 0, 1.8]}}>
-      <ambientLight intensity={0.1} />
-      <pointLight position={[10, 10, 10]} />
+      <ambientLight intensity={0.2} />
+      <pointLight position={[0, 0.5, 1.5]} intensity={1} />
       <PlanetGroup textureMapAsset={textureMapAsset} {...props} />
     </Canvas>
   );

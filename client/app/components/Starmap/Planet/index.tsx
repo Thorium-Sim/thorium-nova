@@ -37,17 +37,15 @@ export function PlanetSphere({
   const mapTexture = useTexture(texture);
 
   return (
-    <group>
-      <mesh castShadow>
-        <sphereGeometry args={[1, 32, 32]} attach="geometry" />
-        <meshPhysicalMaterial
-          map={wireframe ? undefined : mapTexture}
-          wireframe={wireframe}
-          transparent
-          attach="material"
-        />
-      </mesh>
-    </group>
+    <mesh castShadow>
+      <sphereGeometry args={[1, 32, 32]} attach="geometry" />
+      <meshPhysicalMaterial
+        map={wireframe ? undefined : mapTexture}
+        wireframe={wireframe}
+        transparent
+        attach="material"
+      />
+    </mesh>
   );
 }
 
