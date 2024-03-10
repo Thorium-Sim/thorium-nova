@@ -5,7 +5,7 @@ export class DataStreamSystem extends System {
   lastUpdate = Date.now();
   postUpdate() {
     if (Date.now() - this.lastUpdate > 1000 / SERVER_FPS) {
-      for (let clientId in this.ecs.server.clients) {
+      for (const clientId in this.ecs.server.clients) {
         const client = this.ecs.server.clients[clientId];
         if (!client) continue;
         client.sendDataStream();

@@ -1,9 +1,9 @@
 import {pubsub} from "@server/init/pubsub";
 import {t} from "@server/init/t";
-import {Entity} from "@server/utils/ecs";
+import type {Entity} from "@server/utils/ecs";
 import {getShipSystems} from "@server/utils/getShipSystem";
 import {getReactorInventory} from "@server/utils/getSystemInventory";
-import {MegaWattHour} from "@server/utils/unitTypes";
+import type {MegaWattHour} from "@server/utils/unitTypes";
 import {z} from "zod";
 
 export const powerGrid = t.router({

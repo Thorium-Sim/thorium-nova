@@ -1,5 +1,5 @@
 import {q} from "@client/context/AppContext";
-import {DragEndEvent} from "@dnd-kit/core";
+import type {DragEndEvent} from "@dnd-kit/core";
 import {useConfirm, usePrompt} from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import {SortableList} from "@thorium/ui/SortableItem";

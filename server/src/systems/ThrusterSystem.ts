@@ -1,4 +1,4 @@
-import {Entity, System} from "../utils/ecs";
+import {type Entity, System} from "../utils/ecs";
 
 export class ThrusterSystem extends System {
   test(entity: Entity) {
@@ -16,9 +16,9 @@ export class ThrusterSystem extends System {
 
     const powerRatio = currentPower / maxSafePower;
 
-    let directionImpulse =
+    const directionImpulse =
       currentPower >= requiredPower ? directionThrust * powerRatio : 0;
-    let rotationImpulse =
+    const rotationImpulse =
       currentPower >= requiredPower ? rotationThrust * powerRatio : 0;
     entity.updateComponent("isThrusters", {
       directionImpulse: {

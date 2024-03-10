@@ -6,7 +6,7 @@
 // temperature is in kelvin
 // 5777 is the temperature of Sol
 
-import {astronomicalUnitToKilometer, Kelvin, SolarRadius} from "./unitTypes";
+import {astronomicalUnitToKilometer, type Kelvin, type SolarRadius} from "./unitTypes";
 
 export default function getHabitableZone(
   radius: SolarRadius,

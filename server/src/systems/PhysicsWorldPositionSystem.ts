@@ -1,5 +1,5 @@
 import {getSectorNumber, getWorldPosition} from "@server/init/rapier";
-import {Entity, System} from "@server/utils/ecs";
+import {type Entity, System} from "@server/utils/ecs";
 import {getOrbitPosition} from "@server/utils/getOrbitPosition";
 
 export class PhysicsWorldPositionSystem extends System {

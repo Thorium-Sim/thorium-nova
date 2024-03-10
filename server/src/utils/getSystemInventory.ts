@@ -1,4 +1,4 @@
-import {Entity} from "./ecs";
+import type {Entity} from "./ecs";
 import {getDeckNode} from "./getDeckNode";
 import {getInventoryTemplates} from "./getInventoryTemplates";
 

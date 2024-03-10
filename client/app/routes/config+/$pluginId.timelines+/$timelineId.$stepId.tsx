@@ -1,7 +1,7 @@
 import {ActionCombobox} from "@client/components/Config/ActionBuilder";
 import {q} from "@client/context/AppContext";
 import {toast} from "@client/context/ToastContext";
-import {DragEndEvent} from "@dnd-kit/core";
+import type {DragEndEvent} from "@dnd-kit/core";
 import {useConfirm} from "@thorium/ui/AlertDialog";
 import Input from "@thorium/ui/Input";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";

@@ -1,6 +1,6 @@
-import {Object3DNode, useFrame} from "@react-three/fiber";
-import {FC, useMemo, useRef} from "react";
-import {BufferGeometry, Mesh, OrthographicCamera, Vector3} from "three";
+import {type Object3DNode, useFrame} from "@react-three/fiber";
+import {type FC, useMemo, useRef} from "react";
+import {BufferGeometry, type Mesh, type OrthographicCamera, Vector3} from "three";
 
 const arrowVertices = [
   new Vector3(0, 0, -0.75),

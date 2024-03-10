@@ -1,6 +1,6 @@
 import Button from "@thorium/ui/Button";
 import {useNavigate, useParams, Outlet} from "@remix-run/react";
-import {DragEndEvent} from "@dnd-kit/core";
+import type {DragEndEvent} from "@dnd-kit/core";
 import {q} from "@client/context/AppContext";
 import {SortableList} from "@client/components/ui/SortableItem";
 

@@ -1,15 +1,16 @@
 import React, {
   createContext,
+  type 
   ReactNode,
   Suspense,
   useContext,
   useMemo,
 } from "react";
 import {useDataConnection} from "./useDataConnection";
-import {ClientSocket} from "./clientSocket";
+import type {ClientSocket} from "./clientSocket";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
-import {InterpolatedSnapshot} from "@thorium/snapshot-interpolation/src/types";
+import type {InterpolatedSnapshot} from "@thorium/snapshot-interpolation/src/types";
 import useAnimationFrame from "./useAnimationFrame";
 import {useDataResponse} from "./useDataResponse";
 
@@ -32,7 +33,7 @@ type EntityValues = {
   r: {x: number; y: number; z: number; w: number};
 };
 
-let interpolationCache: Record<string, EntityValues> = {};
+const interpolationCache: Record<string, EntityValues> = {};
 
 export function processInterpolation(
   snapshot: InterpolatedSnapshot | undefined
@@ -72,7 +73,7 @@ export function LiveQueryProvider({
   const value: ILiveQueryContext = useMemo(() => {
     return {
       interpolate: (entityId: number) => {
-        let state = interpolationCache?.[entityId.toString()];
+        const state = interpolationCache?.[entityId.toString()];
 
         if (!state) return null;
         return state;

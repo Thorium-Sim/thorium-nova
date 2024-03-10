@@ -1,14 +1,14 @@
 import {Entity} from "../utils/ecs";
 import type ShipPlugin from "../classes/Plugins/Ship";
-import {position} from "../components/position";
+import type {position} from "../components/position";
 import {randomFromList} from "../utils/randomFromList";
 import {generateShipInventory} from "./inventory";
-import {FlightDataModel} from "../classes/FlightDataModel";
-import {ServerDataModel} from "../classes/ServerDataModel";
+import type {FlightDataModel} from "../classes/FlightDataModel";
+import type {ServerDataModel} from "../classes/ServerDataModel";
 import {greekLetters} from "../utils/constantStrings";
 import {spawnShipSystem} from "./shipSystem";
 import ReactorPlugin from "@server/classes/Plugins/ShipSystems/Reactor";
-import BaseShipSystemPlugin from "@server/classes/Plugins/ShipSystems/BaseSystem";
+import type BaseShipSystemPlugin from "@server/classes/Plugins/ShipSystems/BaseSystem";
 import {getInventoryTemplates} from "@server/utils/getInventoryTemplates";
 
 const systemCache: Record<string, BaseShipSystemPlugin> = {};
@@ -76,7 +76,7 @@ export function spawnShip(
 
   entity.addComponent("shipSystems");
 
-  let systemEntities: Entity[] = [];
+  const systemEntities: Entity[] = [];
   // First we'll create some power nodes
   const powerNodes: Record<string, {entity: Entity; count: number}> = {};
   template.powerNodes?.forEach(name => {
@@ -192,7 +192,7 @@ export function spawnShip(
       destination: entity.components.position,
     });
   }
-  let extraEntities: Entity[] = [];
+  const extraEntities: Entity[] = [];
   // Initialize the ship map. For now, we'll just load the ship map onto a component of the ship.
   // In the future, rooms themselves might become entities.
   if (
@@ -273,7 +273,7 @@ export function spawnShip(
 
   // With the deck map initialized, we can now assign rooms to systems
   let occupiedRooms: number[] = [];
-  for (let [id, info] of entity.components.shipSystems?.shipSystems || []) {
+  for (const [id, info] of entity.components.shipSystems?.shipSystems || []) {
     const system = systemEntities.find(sys => sys.id === id);
     const systemType = system?.components.isShipSystem?.type;
     if (!systemType) continue;

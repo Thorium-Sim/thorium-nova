@@ -1,14 +1,17 @@
 import {getReactorInventory} from "@server/utils/getSystemInventory";
 import {
+  type 
   HeatCapacity,
   Kelvin,
+  type 
   Kilograms,
   MegaWatt,
   MegaWattHour,
+  type 
   MeterSquared,
   StephanBoltzmannConstant,
 } from "@server/utils/unitTypes";
-import {Entity, System} from "../utils/ecs";
+import {type Entity, System} from "../utils/ecs";
 
 // For transferring the heat of the coolant
 // into watts
@@ -45,7 +48,7 @@ export class HeatToCoolantSystem extends System {
       (HEAT_CAPACITY * MASS * 1000 * entity.components.heat.heat) /
       elapsedInSeconds;
 
-    for (let item of inventory) {
+    for (const item of inventory) {
       if (!item.flags?.coolant) continue;
       let itemWatts =
         (item.flags.coolant.heatCapacity *
@@ -63,7 +66,7 @@ export class HeatToCoolantSystem extends System {
       systemWatts += heatTransferRate;
       itemWatts -= heatTransferRate;
 
-      let itemTemp =
+      const itemTemp =
         (itemWatts * elapsedInSeconds) /
         (item.flags.coolant.heatCapacity *
           item.flags.coolant.massPerUnit *
@@ -74,7 +77,7 @@ export class HeatToCoolantSystem extends System {
       }
     }
 
-    let systemTemp =
+    const systemTemp =
       (systemWatts * elapsedInSeconds) / (HEAT_CAPACITY * MASS * 1000);
     entity.components.heat.heat = systemTemp;
   }

@@ -1,8 +1,8 @@
-import {ReactNode, useRef} from "react";
+import {type ReactNode, useRef} from "react";
 import useAnimationFrame from "@client/hooks/useAnimationFrame";
 import {useLiveQuery} from "@thorium/live-query/client";
 import type {AppRouter} from "@server/init/router";
-import {inferTransformedProcedureOutput} from "@thorium/live-query/server/types";
+import type {inferTransformedProcedureOutput} from "@thorium/live-query/server/types";
 import {Icon} from "@thorium/ui/Icon";
 
 type BatteryItem = inferTransformedProcedureOutput<

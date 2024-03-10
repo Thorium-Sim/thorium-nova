@@ -14,7 +14,7 @@ import {
   useImperativeHandle,
   useRef,
 } from "react";
-import {Camera} from "three";
+import type {Camera} from "three";
 import {lightMinuteToLightYear} from "@server/utils/unitTypes";
 import Nebula from "@client/components/Starmap/Nebula";
 import {useThree} from "@react-three/fiber";

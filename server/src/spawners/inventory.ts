@@ -1,6 +1,6 @@
-import {InventoryFlags} from "@server/classes/Plugins/Inventory/InventoryFlags";
-import {MegaWattHour} from "@server/utils/unitTypes";
-import {NodeFlag} from "../classes/Plugins/Ship/Deck";
+import type {InventoryFlags} from "@server/classes/Plugins/Inventory/InventoryFlags";
+import type {MegaWattHour} from "@server/utils/unitTypes";
+import type {NodeFlag} from "../classes/Plugins/Ship/Deck";
 import {randomFromList} from "../utils/randomFromList";
 
 type RoomI = {
@@ -86,7 +86,7 @@ export function generateShipInventory(
   // And we need to figure out our abundance level of each piece of cargo
   // for doing weighted random selection.
   const inventoryList = Object.values(flightInventory).filter(i => {
-    for (let key in i.flags) {
+    for (const key in i.flags) {
       if (neededInventory.includes(key)) return true;
     }
     return false;

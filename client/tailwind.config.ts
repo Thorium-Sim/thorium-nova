@@ -1,4 +1,4 @@
-import plugin, {Config} from "tailwindcss";
+import plugin, {type Config} from "tailwindcss";
 import {tailwindComponents} from "./tailwindComponents";
 import daisyUi from "daisyui";
 import typography from "@tailwindcss/typography";
@@ -105,7 +105,7 @@ export default {
     typography,
 
     // @ts-expect-error
-    plugin(function ({addComponents}) {
+    plugin(({addComponents}) => {
       addComponents(tailwindComponents);
     }),
   ],

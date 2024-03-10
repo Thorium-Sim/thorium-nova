@@ -1,6 +1,6 @@
 import {getReactorInventory} from "@server/utils/getSystemInventory";
-import {MeterSquared, StephanBoltzmannConstant} from "@server/utils/unitTypes";
-import {Entity, System} from "../utils/ecs";
+import {type MeterSquared, StephanBoltzmannConstant} from "@server/utils/unitTypes";
+import {type Entity, System} from "../utils/ecs";
 
 // W = A * a * T^5
 // W = Watts
@@ -31,7 +31,7 @@ export class HeatDispersionSystem extends System {
     if (!entity.components.heat) return;
     const inventory = getReactorInventory(entity) || [];
     // Radiate the heat of the coolant into space
-    for (let item of inventory) {
+    for (const item of inventory) {
       if (!item.flags?.coolant) continue;
       const temp = item.temperature;
       const wattsDispersed =

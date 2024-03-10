@@ -6,7 +6,7 @@ export async function loadWebSocket() {
   try {
     const port =
       process.env.NODE_ENV === "production"
-        ? parseInt(window.location.port) || 4444
+        ? Number.parseInt(window.location.port) || 4444
         : 3001;
 
     const socketUrl = `${

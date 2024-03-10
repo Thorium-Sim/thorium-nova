@@ -1,6 +1,6 @@
 import {Quaternion, Vector3, Matrix4} from "three";
 import Controller from "node-pid-controller";
-import {Entity, System} from "../utils/ecs";
+import {type Entity, System} from "../utils/ecs";
 import {autopilotGetCoordinates} from "../utils/autopilotGetCoordinates";
 import {
   kilometerToLightMinute,
@@ -9,20 +9,20 @@ import {
   lightYearToLightMinute,
   Radian,
 } from "../utils/unitTypes";
-import {isWarpEngines} from "../components/shipSystems";
+import type {isWarpEngines} from "../components/shipSystems";
 import {pubsub} from "@server/init/pubsub";
 
-let positionVec = new Vector3();
-let rotationQuat = new Quaternion();
-let desiredDestination = new Vector3();
+const positionVec = new Vector3();
+const rotationQuat = new Quaternion();
+const desiredDestination = new Vector3();
 const emptyVector = new Vector3(0, 0, 0);
 const scaleVector = new Vector3(1, 1, 1);
 const shipMatrix = new Matrix4();
 const lookVector = new Vector3(0, 0, 1);
-let up = new Vector3(0, 1, 0);
-let matrix = new Matrix4();
+const up = new Vector3(0, 1, 0);
+const matrix = new Matrix4();
 const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
-let desiredRotationQuat = new Quaternion();
+const desiredRotationQuat = new Quaternion();
 
 const IMPULSE_PROPORTION = 1;
 const IMPULSE_DERIVATIVE = 0.5;
@@ -181,7 +181,7 @@ export class AutoThrustSystem extends System {
         const controllerOutput = warpController?.update(
           -1 * Math.min(warpCruisingSpeed, distanceInKM)
         );
-        let desiredSpeed = Math.min(
+        const desiredSpeed = Math.min(
           warpCruisingSpeed,
           Math.max(0, controllerOutput || 0)
         );
@@ -249,7 +249,7 @@ export class AutoThrustSystem extends System {
 function getWarpFactorFromDesiredSpeed(
   desiredSpeed: number,
   warp: Zod.infer<typeof isWarpEngines>,
-  isInterstellar: boolean = false
+  isInterstellar = false
 ) {
   const {
     interstellarCruisingSpeed,

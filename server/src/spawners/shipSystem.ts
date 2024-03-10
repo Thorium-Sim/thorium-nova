@@ -1,6 +1,6 @@
 import type BaseShipSystemPlugin from "../classes/Plugins/ShipSystems/BaseSystem";
 import {ShipSystemTypes} from "../classes/Plugins/ShipSystems/shipSystemTypes";
-import {components, ComponentIds} from "../components";
+import {components, type ComponentIds} from "../components";
 import {Entity} from "../utils/ecs";
 import {mergeDeep} from "../utils/mergeDeep";
 

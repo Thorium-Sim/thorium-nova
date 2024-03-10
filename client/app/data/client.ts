@@ -1,4 +1,4 @@
-import {FlightClient} from "@server/classes/FlightClient";
+import type {FlightClient} from "@server/classes/FlightClient";
 import Station, {staticStations} from "@server/classes/Station";
 import {pubsub} from "@server/init/pubsub";
 import {t} from "@server/init/t";

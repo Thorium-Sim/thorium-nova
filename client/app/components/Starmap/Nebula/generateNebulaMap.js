@@ -22,10 +22,10 @@ self.onmessage = e => {
     return postMessage({which: e.data.which});
   }
 };
-let renderingContext = new OffscreenCanvas(256, 256);
+const renderingContext = new OffscreenCanvas(256, 256);
 
 const storage = {};
-storage.initialize = function () {
+storage.initialize = () => {
   if (storage.canvas) return;
   // Initialize the offscreen rendering canvas.
   storage.canvas = renderingContext;

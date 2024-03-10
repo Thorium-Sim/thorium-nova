@@ -1,4 +1,4 @@
-let wordList = [
+const wordList = [
   // Borrowed from xkcd password generator which borrowed it from wherever
   "ability",
   "able",
@@ -1985,7 +1985,7 @@ function words(options?: number | WordsOptions) {
 
   function generateWordWithMaxLength() {
     let rightSize = false;
-    let wordUsed: string = "";
+    let wordUsed = "";
     while (!rightSize) {
       wordUsed = generateRandomWord();
       if (wordUsed.length <= maxLength) {
@@ -2029,8 +2029,8 @@ function words(options?: number | WordsOptions) {
     separator = " ";
   }
 
-  let total = min + Math.floor(randomFloat() * (max + 1 - min));
-  let results: string[] = [];
+  const total = min + Math.floor(randomFloat() * (max + 1 - min));
+  const results: string[] = [];
   let token = "";
   let relativeIndex = 0;
 

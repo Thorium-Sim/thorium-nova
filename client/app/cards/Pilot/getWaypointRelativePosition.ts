@@ -1,4 +1,4 @@
-import {Coordinates, Kilometer} from "@server/utils/unitTypes";
+import type {Coordinates, Kilometer} from "@server/utils/unitTypes";
 import {Vector3} from "three";
 
 const dirVector1 = new Vector3();

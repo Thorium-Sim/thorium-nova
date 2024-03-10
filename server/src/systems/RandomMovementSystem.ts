@@ -1,4 +1,4 @@
-import {Entity, System} from "../utils/ecs";
+import {type Entity, System} from "../utils/ecs";
 
 const constant = 5000000;
 export class RandomMovementSystem extends System {

@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useRef} from "react";
-import {Connector, ConnectorHandle} from "./Connector";
+import {Connector, type ConnectorHandle} from "./Connector";
 
 export function SketchyConnector({
   out,

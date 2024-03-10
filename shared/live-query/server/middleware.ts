@@ -1,7 +1,7 @@
 import {ZodError} from "zod";
-import {ParseFn} from "./getParseFn";
-import {ProcedureBuilderMiddleware, ProcedureParams} from "./procedure";
-import {AnyRootConfig, ProcedureType} from "./types";
+import type {ParseFn} from "./getParseFn";
+import type {ProcedureBuilderMiddleware, ProcedureParams} from "./procedure";
+import type {AnyRootConfig, ProcedureType} from "./types";
 
 /**
  * @internal

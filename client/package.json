@@ -6,7 +6,6 @@
     "build:icons": "icons build -i app/icons -o app/components/ui/icons --optimize",
     "build:remix": "remix vite:build",
     "dev": "remix vite:dev",
-    "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "http-server build/client/",
     "typecheck": "tsc",
     "sly": "npx @sly-cli/sly"

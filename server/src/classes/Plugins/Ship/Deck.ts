@@ -1,4 +1,4 @@
-import {Flavor, Kelvin, Liter} from "server/src/utils/unitTypes";
+import type {Flavor, Kelvin, Liter} from "server/src/utils/unitTypes";
 import {z} from "zod";
 export default class DeckPlugin {
   name: string;

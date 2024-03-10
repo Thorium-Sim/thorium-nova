@@ -1,7 +1,7 @@
 import {useTexture} from "@react-three/drei";
 import React from "react";
 
-import {BufferAttribute, DoubleSide, RingGeometry, Vector3} from "three";
+import {type BufferAttribute, DoubleSide, RingGeometry, Vector3} from "three";
 import {whiteImage} from "../whiteImage";
 
 interface RingsProps {

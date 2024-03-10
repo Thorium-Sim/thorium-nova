@@ -3,9 +3,13 @@ import {q} from "@client/context/AppContext";
 import {SVGImageLoader} from "@thorium/ui/SVGImageLoader";
 import {
   ComponentPropsWithoutRef,
+  type 
   ComponentType,
+  type 
   FC,
+  type 
   ReactElement,
+  type 
   ReactNode,
   useState,
 } from "react";
@@ -17,7 +21,7 @@ import {
   useFloating,
   useInteractions,
 } from "@floating-ui/react";
-import {Icon, IconName} from "@thorium/ui/Icon";
+import {Icon, type IconName} from "@thorium/ui/Icon";
 
 type IconType = IconName | ReactElement;
 

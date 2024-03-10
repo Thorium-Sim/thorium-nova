@@ -1,5 +1,5 @@
 {
-  "include": ["env.d.ts", ".", "../shared"],
+  "include": ["env.d.ts", "./**/*", "../shared"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "isolatedModules": true,

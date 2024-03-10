@@ -1,12 +1,12 @@
-import {KilometerPerSecond, KiloNewtons} from "server/src/utils/unitTypes";
-import BasePlugin from "..";
+import type {KilometerPerSecond, KiloNewtons} from "server/src/utils/unitTypes";
+import type BasePlugin from "..";
 import BaseShipSystemPlugin, {registerSystem} from "./BaseSystem";
-import {PowerNodes, ShipSystemFlags} from "./shipSystemTypes";
+import type {PowerNodes, ShipSystemFlags} from "./shipSystemTypes";
 
 // TODO March 16, 2022: Add the necessary sound effects
 export default class ImpulseEnginesPlugin extends BaseShipSystemPlugin {
   static flags: ShipSystemFlags[] = ["efficiency", "heat", "power"];
-  type: "impulseEngines" = "impulseEngines";
+  type = "impulseEngines" as const;
   cruisingSpeed: KilometerPerSecond;
   emergencySpeed: KilometerPerSecond;
   thrust: KiloNewtons;

@@ -1,7 +1,7 @@
 import * as React from "react";
 import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
-import PlanetPlugin from "@server/classes/Plugins/Universe/Planet";
+import type PlanetPlugin from "@server/classes/Plugins/Universe/Planet";
 import {PaletteDisclosure} from "../SolarSystemMap";
 import {useSystemIds} from "../useSystemIds";
 import {q} from "@client/context/AppContext";
@@ -23,7 +23,7 @@ export function PlanetDisclosure({object}: {object: PlanetPlugin}) {
             pluginId,
             solarSystemId,
             planetId: object.name,
-            age: parseFloat(e.target.value),
+            age: Number.parseFloat(e.target.value),
           });
         }}
       />
@@ -46,7 +46,7 @@ export function PlanetDisclosure({object}: {object: PlanetPlugin}) {
             pluginId,
             solarSystemId,
             planetId: object.name,
-            radius: parseFloat(e.target.value),
+            radius: Number.parseFloat(e.target.value),
           });
         }}
       />
@@ -62,7 +62,7 @@ export function PlanetDisclosure({object}: {object: PlanetPlugin}) {
             pluginId,
             solarSystemId,
             planetId: object.name,
-            terranMass: parseFloat(e.target.value),
+            terranMass: Number.parseFloat(e.target.value),
           });
         }}
       />
@@ -91,7 +91,7 @@ export function PlanetDisclosure({object}: {object: PlanetPlugin}) {
             pluginId,
             solarSystemId,
             planetId: object.name,
-            temperature: parseFloat(e.target.value),
+            temperature: Number.parseFloat(e.target.value),
           });
         }}
       />

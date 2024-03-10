@@ -1,5 +1,5 @@
 import {cn} from "@client/utils/cn";
-import React, {ReactNode} from "react";
+import React, {type ReactNode} from "react";
 import {Icon} from "./Icon";
 
 const UploadWell: React.FC<{

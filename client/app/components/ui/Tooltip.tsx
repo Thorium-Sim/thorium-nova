@@ -6,10 +6,11 @@ import {
   useInteractions,
   useHover,
   useRole,
+  type 
   Placement,
 } from "@floating-ui/react";
 import {Portal} from "@headlessui/react";
-import {ReactNode, useState} from "react";
+import {type ReactNode, useState} from "react";
 
 export function Tooltip({
   content,

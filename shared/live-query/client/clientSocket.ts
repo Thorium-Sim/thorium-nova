@@ -1,10 +1,11 @@
 import {decode} from "@msgpack/msgpack";
 import {
   SnapshotInterpolation,
+  type 
   Types,
 } from "@thorium/snapshot-interpolation/src";
 import EventEmitter from "eventemitter3";
-import ReconnectingWebSocket from "reconnecting-websocket";
+import type ReconnectingWebSocket from "reconnecting-websocket";
 
 export class ClientSocket extends EventEmitter {
   SI: SnapshotInterpolation;

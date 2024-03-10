@@ -85,7 +85,7 @@ export const solarSystem = t.router({
       if (!solarSystem) return {solarSystemId: ""};
       if (input.position) solarSystem.position = input.position;
       if (input.name) {
-        let name = generateIncrementedName(
+        const name = generateIncrementedName(
           input.name,
           plugin.aspects.solarSystems.map(solarSystem => solarSystem.name)
         );

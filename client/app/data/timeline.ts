@@ -1,6 +1,6 @@
 import {t} from "@server/init/t";
 import {spawnTimeline} from "@server/spawners/timeline";
-import {Entity} from "@server/utils/ecs";
+import type {Entity} from "@server/utils/ecs";
 import {z} from "zod";
 import {triggerStep} from "@server/utils/evaluateEntityQuery";
 
@@ -103,7 +103,7 @@ export const timeline = t.router({
       if (!timeline) return;
       const steps = timeline.components.isTimeline?.steps;
       if (!steps) return;
-      for (let stepId of steps) {
+      for (const stepId of steps) {
         const step = ctx.flight?.ecs.getEntityById(stepId);
         if (!step) continue;
         step.updateComponent("isTimelineStep", {active: false});

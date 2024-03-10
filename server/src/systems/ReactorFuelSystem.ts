@@ -1,10 +1,12 @@
 import {getReactorInventory} from "@server/utils/getSystemInventory";
 import {
+  type 
   MegaWatt,
+  type 
   MegaWattHour,
   megaWattHourToMegaWattSecond,
 } from "@server/utils/unitTypes";
-import {Entity, System} from "../utils/ecs";
+import {type Entity, System} from "../utils/ecs";
 
 export class ReactorFuelSystem extends System {
   test(entity: Entity) {

@@ -1,4 +1,4 @@
-import {Color, Texture} from "three";
+import {Color, type Texture} from "three";
 
 export default function getUniforms({
   map,

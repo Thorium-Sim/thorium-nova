@@ -1,17 +1,17 @@
-import {
+import type {
   AnyDataStreamProcedure,
   AnyProcedure,
   AnyRequestProcedure,
   AnySendProcedure,
   ProcedureArgs,
 } from "../server/procedure";
-import {AnyRouter, ProcedureRouterRecord} from "../server/router";
-import {
+import type {AnyRouter, ProcedureRouterRecord} from "../server/router";
+import type {
   inferProcedureInput,
   inferTransformedProcedureOutput,
   MaybePromise,
 } from "../server/types";
-import {
+import type {
   UseQueryOptions,
   UseQueryResult,
   UseMutationOptions,

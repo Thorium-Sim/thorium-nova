@@ -1,4 +1,4 @@
-import {Entity, System} from "../utils/ecs";
+import {type Entity, System} from "../utils/ecs";
 
 /**
  * Determines the forward velocity applied by the impulse engines

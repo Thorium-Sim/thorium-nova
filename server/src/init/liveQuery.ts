@@ -1,8 +1,8 @@
-import {SocketStream} from "@fastify/websocket";
-import {Entity} from "@server/utils/ecs";
+import type {SocketStream} from "@fastify/websocket";
+import type {Entity} from "@server/utils/ecs";
 import {randomNameGenerator} from "@server/utils/randomNameGenerator";
 import {ServerClient} from "@thorium/live-query/adapters/fastify-adapter";
-import {inferAsyncReturnType} from "@thorium/live-query/server";
+import type {inferAsyncReturnType} from "@thorium/live-query/server";
 import type {AnyRouter} from "@thorium/live-query/server/router";
 import type {FastifyRequest} from "fastify";
 import {DataContext} from "../utils/DataContext";
@@ -66,7 +66,7 @@ export async function createWSContext({
 }
 export type Context = inferAsyncReturnType<typeof createContext>;
 export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
-  isHost: boolean = false;
+  isHost = false;
   name: string = randomNameGenerator();
 
   public async sendDataStream() {
@@ -80,7 +80,7 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
             return false;
           const cardStream =
             this.router._def.procedures[streamData.path]?._def.resolver;
-          let includeEntity = cardStream?.({
+          const includeEntity = cardStream?.({
             entity,
             ctx: context,
             input: streamData.params,

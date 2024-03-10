@@ -40,7 +40,7 @@ describe("PowerEfficiencyOverloadSystem", () => {
     expect(system.components.power?.maxSafePower).toEqual(20);
     expect(system.components.efficiency?.efficiency).toEqual(1);
 
-    let system2 = new Entity();
+    const system2 = new Entity();
     system2.addComponent("power");
     system2.addComponent("efficiency");
     ecs.addEntity(system2);

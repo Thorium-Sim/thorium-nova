@@ -2,7 +2,7 @@ import {ShipSystemTypes} from "@server/classes/Plugins/ShipSystems/shipSystemTyp
 import {t} from "@server/init/t";
 import {pubsub} from "@server/init/pubsub";
 import inputAuth from "@server/utils/inputAuth";
-import {Primitive, z, ZodLiteral} from "zod";
+import {type Primitive, z, type ZodLiteral} from "zod";
 import {
   getPlugin,
   getShipSystem,
@@ -122,7 +122,7 @@ export const systems = t.router({
     .send(async ({ctx, input}) => {
       inputAuth(ctx);
       const [system, override] = getShipSystemForInput(ctx, input);
-      let shipSystem = override || system;
+      const shipSystem = override || system;
 
       if (!system || !shipSystem) {
         throw new Error("Ship system not found");

@@ -1,6 +1,6 @@
 import StationComplementPlugin from "./StationComplement";
 import Plugin from "./index";
-import {ServerDataModel} from "../ServerDataModel";
+import type {ServerDataModel} from "../ServerDataModel";
 
 describe("StationComplementPlugin", () => {
   it("should instantiate correctly", async () => {

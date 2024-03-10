@@ -3,7 +3,7 @@ export async function readFile(file: File) {
   const result: string = await new Promise(res => {
     reader.addEventListener(
       "load",
-      function () {
+      () => {
         // convert image file to base64 string
         res(reader.result as string);
       },

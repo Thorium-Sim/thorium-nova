@@ -1,6 +1,6 @@
 import React from "react";
 import TextTexture from "@seregpie/three.text-texture";
-import {AdditiveBlending, Mesh, Sprite} from "three";
+import {AdditiveBlending, type Mesh, Sprite} from "three";
 import {useFrame} from "@react-three/fiber";
 import {useGetStarmapStore} from "../starmapStore";
 
@@ -28,7 +28,7 @@ const SystemLabel: React.FC<{
   }, []);
 
   const textTexture = React.useMemo(() => {
-    let texture = new TextTexture({
+    const texture = new TextTexture({
       color,
       fontFamily: 'Electrolize, "Outfit", sans-serif',
       fontSize: 128,

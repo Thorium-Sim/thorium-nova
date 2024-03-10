@@ -1,16 +1,16 @@
-import {
+import type {
   KiloNewtons,
   MetersPerSecond,
   RotationsPerMinute,
 } from "server/src/utils/unitTypes";
-import BasePlugin from "..";
+import type BasePlugin from "..";
 import BaseShipSystemPlugin, {registerSystem} from "./BaseSystem";
-import {PowerNodes, ShipSystemFlags} from "./shipSystemTypes";
+import type {PowerNodes, ShipSystemFlags} from "./shipSystemTypes";
 
 // TODO March 16, 2022: Add the necessary sound effects
 export default class ThrustersPlugin extends BaseShipSystemPlugin {
   static flags: ShipSystemFlags[] = ["efficiency", "heat", "power"];
-  type: "thrusters" = "thrusters";
+  type = "thrusters" as const;
   directionMaxSpeed: MetersPerSecond;
   directionThrust: KiloNewtons;
   rotationMaxSpeed: RotationsPerMinute;

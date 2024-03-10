@@ -21,11 +21,11 @@ export const usePilotStore = create<{
 
 const waypointPosition = new Vector3();
 const shipPosition = new Vector3();
-let up = new Vector3(0, 1, 0);
-let matrix = new Matrix4();
+const up = new Vector3(0, 1, 0);
+const matrix = new Matrix4();
 const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
-let rotationQuat = new Quaternion();
-let desiredRotationQuat = new Quaternion();
+const rotationQuat = new Quaternion();
+const desiredRotationQuat = new Quaternion();
 
 export function useGetFacingWaypoint() {
   const {interpolate} = useLiveQuery();
@@ -38,8 +38,8 @@ export function useGetFacingWaypoint() {
     const rotation = playerShip.r;
     if (!rotation) return;
     shipPosition.set(playerShip.x, playerShip.y, playerShip.z);
-    let facingWaypoints = [];
-    for (let waypoint of waypoints) {
+    const facingWaypoints = [];
+    for (const waypoint of waypoints) {
       rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
       getWaypointRelativePosition(
         waypoint.position,

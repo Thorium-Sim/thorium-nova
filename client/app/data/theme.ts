@@ -1,4 +1,4 @@
-import ThemePlugin from "@server/classes/Plugins/Theme";
+import type ThemePlugin from "@server/classes/Plugins/Theme";
 import {t} from "@server/init/t";
 
 export const theme = t.router({

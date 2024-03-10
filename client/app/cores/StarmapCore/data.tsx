@@ -1,9 +1,9 @@
 import {t} from "@server/init/t";
 import {pubsub} from "@server/init/pubsub";
 import {matchSorter} from "match-sorter";
-import ShipPlugin from "@server/classes/Plugins/Ship";
-import {Entity} from "@server/utils/ecs";
-import {Coordinates} from "@server/utils/unitTypes";
+import type ShipPlugin from "@server/classes/Plugins/Ship";
+import type {Entity} from "@server/utils/ecs";
+import type {Coordinates} from "@server/utils/unitTypes";
 import {z} from "zod";
 
 export const starmapCore = t.router({
@@ -195,7 +195,7 @@ export const starmapCore = t.router({
         ships?.reduce((acc: {[id: number]: AutopilotInfo}, ship) => {
           const waypointId = ship.components.autopilot?.destinationWaypointId;
           let destinationName = "";
-          let waypoint;
+          let waypoint:Entity|null|undefined;
           if (typeof waypointId === "number") {
             waypoint = ctx.flight?.ecs.getEntityById(waypointId);
             destinationName =

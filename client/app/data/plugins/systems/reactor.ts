@@ -1,4 +1,4 @@
-import ReactorPlugin from "@server/classes/Plugins/ShipSystems/Reactor";
+import type ReactorPlugin from "@server/classes/Plugins/ShipSystems/Reactor";
 import {pubsub} from "@server/init/pubsub";
 import {t} from "@server/init/t";
 import inputAuth from "@server/utils/inputAuth";

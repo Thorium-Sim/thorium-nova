@@ -1,4 +1,4 @@
-import TimelinePlugin from "@server/classes/Plugins/Timeline";
+import type TimelinePlugin from "@server/classes/Plugins/Timeline";
 import {Entity} from "@server/utils/ecs";
 
 export function spawnTimeline(
@@ -8,7 +8,7 @@ export function spawnTimeline(
   // Create the timeline entity
   const timelineEntity = new Entity();
   const stepIds: number[] = [];
-  for (let stepItem of timeline.steps) {
+  for (const stepItem of timeline.steps) {
     const step = new Entity();
     step.addComponent("identity", {
       name: stepItem.name,

@@ -1,4 +1,4 @@
-import {DataContext} from "./DataContext";
+import type {DataContext} from "./DataContext";
 
 export default function inputAuth(context: DataContext) {
   if (!context.isHost)

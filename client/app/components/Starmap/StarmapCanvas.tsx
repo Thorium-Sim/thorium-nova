@@ -1,6 +1,6 @@
-import {ReactNode, Suspense, useEffect} from "react";
+import {type ReactNode, Suspense, useEffect} from "react";
 import {UNSAFE_RemixContext} from "@remix-run/react";
-import {Canvas, Props} from "@react-three/fiber";
+import {Canvas, type Props} from "@react-three/fiber";
 
 import {useContextBridge} from "@react-three/drei";
 

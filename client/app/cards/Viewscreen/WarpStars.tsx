@@ -69,14 +69,14 @@ export const WarpStars = () => {
     if (!entity) return;
 
     const rotation = entity.r || {x: 0, y: 0, z: 0, w: 1};
-    let [forwardVelocity] = getForwardVelocity();
+    const [forwardVelocity] = getForwardVelocity();
 
     const going = forwardVelocity > 20000;
-    let maxPossibleVelocity = isInSystem
+    const maxPossibleVelocity = isInSystem
       ? solarCruisingSpeed
       : interstellarCruisingSpeed;
 
-    let velocity =
+    const velocity =
       (forwardVelocity / maxPossibleVelocity) * 50 + (going ? 4 : 0);
 
     if (rotation) {

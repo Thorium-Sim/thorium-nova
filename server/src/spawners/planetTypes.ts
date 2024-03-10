@@ -1,5 +1,5 @@
-import {Kelvin, Kilometer, TerranMass, Year} from "../utils/unitTypes";
-import {Range} from "../utils/randomFromRange";
+import type {Kelvin, Kilometer, TerranMass, Year} from "../utils/unitTypes";
+import type {Range} from "../utils/randomFromRange";
 import {z} from "zod";
 
 export const planetClasses = z.union([

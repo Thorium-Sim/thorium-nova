@@ -2,26 +2,26 @@ import Entity from "../entity";
 
 describe("Entity", () => {
   it("should initialize", () => {
-    let entity = new Entity();
+    const entity = new Entity();
 
     expect(typeof entity.id).toBe("number");
   });
 
   it("should have an unique id", () => {
-    let entity1 = new Entity();
-    let entity2 = new Entity();
+    const entity1 = new Entity();
+    const entity2 = new Entity();
 
     expect(entity1.id !== entity2.id).toBeTruthy();
   });
 
   it("should support getDefault components", () => {
-    let entity = new Entity(0, {identity: {name: "bar"}});
+    const entity = new Entity(0, {identity: {name: "bar"}});
 
     expect(entity.components.identity?.name).toEqual("bar");
   });
 
   it("should support default data", () => {
-    let entity = new Entity(null, {
+    const entity = new Entity(null, {
       identity: {
         name: "Testing!",
         description: "This is a test.",
@@ -35,7 +35,7 @@ describe("Entity", () => {
 
   describe("addComponent()", () => {
     it("should add a default object when a component name is passed", () => {
-      let entity = new Entity();
+      const entity = new Entity();
       expect(entity.components.identity).toEqual(undefined);
       entity.addComponent("identity");
       expect(entity.components.identity?.name).toEqual("Entity");
@@ -45,7 +45,7 @@ describe("Entity", () => {
 
   describe("updateComponent()", () => {
     it("should update an existing component", () => {
-      let entity = new Entity();
+      const entity = new Entity();
       entity.addComponent("identity", {name: "bar"});
 
       expect(entity.components.identity?.name).toEqual("bar");
@@ -58,7 +58,7 @@ describe("Entity", () => {
 
   describe("updateComponents()", () => {
     it("should update a list of existing component", () => {
-      let entity = new Entity();
+      const entity = new Entity();
       entity.addComponent("identity", {name: "bar"});
 
       expect(entity.components.identity?.name).toEqual("bar");

@@ -1,6 +1,6 @@
-import PlanetPlugin from "../classes/Plugins/Universe/Planet";
-import SolarSystemPlugin from "../classes/Plugins/Universe/SolarSystem";
-import StarPlugin from "../classes/Plugins/Universe/Star";
+import type PlanetPlugin from "../classes/Plugins/Universe/Planet";
+import type SolarSystemPlugin from "../classes/Plugins/Universe/SolarSystem";
+import type StarPlugin from "../classes/Plugins/Universe/Star";
 import {Entity} from "../utils/ecs";
 
 export function spawnSolarSystem(systemPlugin: SolarSystemPlugin) {

@@ -1,0 +1,40 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.6.0/schema.json",
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"ignore": [
+			"**/simplexNoise.js",
+			"**/lensFlareImpl.js",
+			"**/Starmap/Disc.tsx",
+			"**/Nebula/*.js",
+			"**/utils/FlexLayout/**/*",
+			"**/loadGltf/GLTFLoader.ts"
+		],
+		"rules": {
+			"recommended": true,
+			"style": {
+				"noNonNullAssertion": "off",
+				"noUnusedTemplateLiteral": "off",
+				"noParameterAssign": "off"
+			},
+			"suspicious": {
+				"noExplicitAny": "off",
+				"noArrayIndexKey": "off"
+			},
+			"a11y": {
+				"useButtonType": "off"
+			},
+			"complexity": {
+				"noForEach": "off"
+			}
+		}
+	},
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	}
+}

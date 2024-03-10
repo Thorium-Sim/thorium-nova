@@ -92,7 +92,7 @@ describe("PassengerMovementSystem", () => {
         updateTime += 16;
       }
     }
-    let passenger = new Entity();
+    const passenger = new Entity();
     passenger.addComponent("position", {
       x: 0,
       y: 0,
@@ -166,7 +166,7 @@ describe("PassengerMovementSystem", () => {
       }
     }
 
-    let passenger = new Entity();
+    const passenger = new Entity();
     passenger.addComponent("position", {
       x: 2,
       y: 1,

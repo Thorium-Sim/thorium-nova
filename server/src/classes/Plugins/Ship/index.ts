@@ -3,7 +3,7 @@ import {Aspect} from "../Aspect";
 import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
 import DeckPlugin, {DeckEdge} from "./Deck";
 import {z} from "zod";
-import {Liter} from "@server/utils/unitTypes";
+import type {Liter} from "@server/utils/unitTypes";
 export const shipCategories = z.union([
   z.literal("Cruiser"),
   z.literal("Frigate"),

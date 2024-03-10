@@ -1,12 +1,12 @@
-import {KilometerPerSecond, KiloNewtons} from "server/src/utils/unitTypes";
-import BasePlugin from "..";
+import {type KilometerPerSecond, KiloNewtons} from "server/src/utils/unitTypes";
+import type BasePlugin from "..";
 import BaseShipSystemPlugin, {registerSystem} from "./BaseSystem";
-import {PowerNodes, ShipSystemFlags} from "./shipSystemTypes";
+import type {PowerNodes, ShipSystemFlags} from "./shipSystemTypes";
 
 // TODO May 3, 2022: Add the necessary sound effects
 export default class WarpEnginesPlugin extends BaseShipSystemPlugin {
   static flags: ShipSystemFlags[] = ["efficiency", "heat", "power"];
-  type: "warpEngines" = "warpEngines";
+  type = "warpEngines" as const;
   /** The cruising speed in interstellar space in km/s */
   interstellarCruisingSpeed: KilometerPerSecond;
   /** The cruising speed in solar system space in km/s */

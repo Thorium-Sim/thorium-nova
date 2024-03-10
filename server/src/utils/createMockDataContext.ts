@@ -1,14 +1,14 @@
-import {InventoryFlags} from "@server/classes/Plugins/Inventory/InventoryFlags";
+import type {InventoryFlags} from "@server/classes/Plugins/Inventory/InventoryFlags";
 import {Client} from "@server/init/liveQuery";
 import {pubsub} from "@server/init/pubsub";
 import {router} from "@server/init/router";
 import {FlightClient} from "../classes/FlightClient";
-import {FlightDataModel} from "../classes/FlightDataModel";
-import BasePlugin from "../classes/Plugins";
+import type {FlightDataModel} from "../classes/FlightDataModel";
+import type BasePlugin from "../classes/Plugins";
 import ShipPlugin from "../classes/Plugins/Ship";
-import {ServerDataModel} from "../classes/ServerDataModel";
+import type {ServerDataModel} from "../classes/ServerDataModel";
 import systems from "../systems";
-import {DataContext} from "./DataContext";
+import type {DataContext} from "./DataContext";
 import {ECS, Entity} from "./ecs";
 
 class MockServerDataModel {
@@ -45,10 +45,10 @@ class MockServerDataModel {
 }
 class MockFlightDataModel {
   static INTERVAL = 1000 / 60;
-  id: string = "Test Flight";
-  name: string = "Test Flight";
+  id = "Test Flight";
+  name = "Test Flight";
   date: number = Date.now();
-  paused: boolean = false;
+  paused = false;
   ecs!: ECS;
   clients: Record<string, FlightClient> = {};
   pluginIds: string[] = [];
@@ -131,7 +131,7 @@ class MockFlightDataModel {
   }
 }
 class MockDataContext {
-  id: "test" = "test";
+  id = "test" as const;
   database: {server: ServerDataModel; flight: FlightDataModel | null} = {
     server: new MockServerDataModel() as any as ServerDataModel,
     flight: null,

@@ -1,4 +1,4 @@
-import React, {forwardRef, ReactNode} from "react";
+import React, {forwardRef, type ReactNode} from "react";
 
 interface CommonProps {
   label: ReactNode;
@@ -22,7 +22,7 @@ const Input = forwardRef<
       as: "select";
     } & CommonProps)
 >((props, ref) => {
-  let {
+  const {
     label,
     labelHidden = false,
     isInvalid,

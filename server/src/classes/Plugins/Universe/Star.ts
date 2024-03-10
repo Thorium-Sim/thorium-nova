@@ -1,6 +1,6 @@
-import {satellite} from "server/src/components/satellite";
-import {SpectralTypes, starTypes} from "server/src/spawners/starTypes";
-import {
+import type {satellite} from "server/src/components/satellite";
+import {type SpectralTypes, starTypes} from "server/src/spawners/starTypes";
+import type {
   Degree,
   Kelvin,
   SolarMass,

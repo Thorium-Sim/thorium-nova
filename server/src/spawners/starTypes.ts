@@ -1,5 +1,5 @@
-import {Range} from "../utils/randomFromRange";
-import {Degree, Kelvin, SolarMass, SolarRadius, Year} from "../utils/unitTypes";
+import type {Range} from "../utils/randomFromRange";
+import type {Degree, Kelvin, SolarMass, SolarRadius, Year} from "../utils/unitTypes";
 import {z} from "zod";
 export const spectralTypes = z.union([
   z.literal("O"),

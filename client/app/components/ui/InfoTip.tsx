@@ -4,7 +4,8 @@ import {
   getOverflowAncestors,
   shift,
 } from "@floating-ui/react-dom";
-import React, {ReactNode, useEffect, useLayoutEffect, useState} from "react";
+import type React from "react";
+import {type ReactNode, useEffect, useLayoutEffect, useState} from "react"
 import Button from "@thorium/ui/Button";
 import useOnClickOutside from "@client/hooks/useClickOutside";
 import {Portal} from "@headlessui/react";

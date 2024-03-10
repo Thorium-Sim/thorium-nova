@@ -1,10 +1,10 @@
-import BasePlugin from "..";
+import type BasePlugin from "..";
 import BaseShipSystemPlugin, {registerSystem} from "./BaseSystem";
-import {ShipSystemFlags} from "./shipSystemTypes";
+import type {ShipSystemFlags} from "./shipSystemTypes";
 
 export default class InertialDampenersPlugin extends BaseShipSystemPlugin {
   static flags: ShipSystemFlags[] = [];
-  type: "inertialDampeners" = "inertialDampeners";
+  type = "inertialDampeners" as const;
   /**
    * A number > 0. Pulls the ship's velocity to make it match the current heading
    *  and affects how fast the ship slows down when engines are turned off.

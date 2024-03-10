@@ -1,4 +1,4 @@
-import z from "zod";
+import type z from "zod";
 type ZodObjectOrWrapped =
   | z.ZodObject<any, any>
   | z.ZodEffects<z.ZodObject<any, any>>;

@@ -2,7 +2,7 @@ import React from "react";
 import {Group, Vector3} from "three";
 import SystemLabel from "./SystemLabel";
 import SystemCircle, {DraggableSystemCircle} from "./SystemCircle";
-import {MeshProps, useFrame} from "@react-three/fiber";
+import {type MeshProps, useFrame} from "@react-three/fiber";
 import {useGetStarmapStore} from "../starmapStore";
 const SystemMarker: React.FC<
   {
@@ -24,7 +24,7 @@ const SystemMarker: React.FC<
       ? camera.position.distanceTo(group.current?.position)
       : 1;
 
-    let zoomedScale = Math.max(
+    const zoomedScale = Math.max(
       Math.min(zoom ** (1 / 3) * 5000, zoom / 120),
       zoom / 250
     );

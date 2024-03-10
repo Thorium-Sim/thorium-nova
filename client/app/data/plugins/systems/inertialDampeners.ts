@@ -1,4 +1,4 @@
-import InertialDampenersPlugin from "@server/classes/Plugins/ShipSystems/InertialDampeners";
+import type InertialDampenersPlugin from "@server/classes/Plugins/ShipSystems/InertialDampeners";
 import {t} from "@server/init/t";
 import {pubsub} from "@server/init/pubsub";
 import inputAuth from "@server/utils/inputAuth";

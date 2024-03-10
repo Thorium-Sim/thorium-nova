@@ -1,5 +1,5 @@
 import {Euler, Object3D, Quaternion, Vector3} from "three";
-import {Entity, System} from "../utils/ecs";
+import {type Entity, System} from "../utils/ecs";
 import {RAPIER, getWorldPosition} from "../init/rapier";
 import {M_TO_KM} from "@server/utils/unitTypes";
 import {
@@ -250,7 +250,7 @@ export class PhysicsMovementSystem extends System {
         ) {
           rotationVelocityVector.multiplyScalar(BRAKE_CONSTANT);
         } else {
-          let {x, y, z} = thrusters.components.isThrusters.rotationImpulse;
+          const {x, y, z} = thrusters.components.isThrusters.rotationImpulse;
 
           tempVector.set(x, y, z);
 

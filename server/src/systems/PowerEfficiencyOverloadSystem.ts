@@ -1,5 +1,5 @@
 import {pubsub} from "@server/init/pubsub";
-import {Entity, System} from "@server/utils/ecs";
+import {type Entity, System} from "@server/utils/ecs";
 
 export class PowerEfficiencyOverloadSystem extends System {
   test(entity: Entity) {
@@ -13,7 +13,7 @@ export class PowerEfficiencyOverloadSystem extends System {
     if (!power || !efficiency) return;
 
     // A very small random efficiency drop every frame
-    let entropy = Math.abs(this.ecs.rng.next()) * efficiency.entropyMultiplier;
+    const entropy = Math.abs(this.ecs.rng.next()) * efficiency.entropyMultiplier;
     const overloadPercent = Math.max(
       0,
       (power.currentPower - power.maxSafePower) / power.maxSafePower

@@ -1,6 +1,6 @@
-import {Fragment, ReactElement, ReactNode, useState} from "react";
+import {Fragment, type ReactElement, type ReactNode, useState} from "react";
 import {Combobox, Transition} from "@headlessui/react";
-import {QueryFunctionContext, useQuery} from "@tanstack/react-query";
+import {type QueryFunctionContext, useQuery} from "@tanstack/react-query";
 import {LoadingSpinner} from "./LoadingSpinner";
 import {Icon} from "./Icon";
 

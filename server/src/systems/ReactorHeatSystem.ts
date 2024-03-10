@@ -1,12 +1,16 @@
 import {getReactorInventory} from "@server/utils/getSystemInventory";
 import {
+  type 
   HeatCapacity,
+  type 
   Kelvin,
+  type 
   Kilograms,
+  type 
   MegaWatt,
   MegaWattHour,
 } from "@server/utils/unitTypes";
-import {Entity, System} from "../utils/ecs";
+import {type Entity, System} from "../utils/ecs";
 
 // W = Q / 𝚫t = (c * m * 𝚫T)/𝚫t
 // W = watts

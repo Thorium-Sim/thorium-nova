@@ -1,4 +1,4 @@
-import ImpulseEnginesPlugin from "@server/classes/Plugins/ShipSystems/ImpulseEngines";
+import type ImpulseEnginesPlugin from "@server/classes/Plugins/ShipSystems/ImpulseEngines";
 import {t} from "@server/init/t";
 import {pubsub} from "@server/init/pubsub";
 import inputAuth from "@server/utils/inputAuth";

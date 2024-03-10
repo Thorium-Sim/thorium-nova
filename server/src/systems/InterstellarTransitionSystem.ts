@@ -1,6 +1,6 @@
 import {pubsub} from "@server/init/pubsub";
 import {Matrix4, Quaternion, Vector3} from "three";
-import {Entity, System} from "../utils/ecs";
+import {type Entity, System} from "../utils/ecs";
 import {getOrbitPosition} from "../utils/getOrbitPosition";
 import {lightMinuteToLightYear} from "../utils/unitTypes";
 
@@ -40,11 +40,11 @@ const direction = new Vector3();
 const systemPosition = new Vector3();
 const shipPosition = new Vector3();
 const desiredDestination = new Vector3();
-let desiredRotationQuat = new Quaternion();
-let up = new Vector3(0, 1, 0);
-let matrix = new Matrix4();
+const desiredRotationQuat = new Quaternion();
+const up = new Vector3(0, 1, 0);
+const matrix = new Matrix4();
 const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
-let rotationQuat = new Quaternion();
+const rotationQuat = new Quaternion();
 
 export class InterstellarTransitionSystem extends System {
   test(entity: Entity) {

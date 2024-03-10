@@ -1,4 +1,4 @@
-import {Centimeter, LightMinute, lightYearToLightMinute} from "./unitTypes";
+import {type Centimeter, type LightMinute, lightYearToLightMinute} from "./unitTypes";
 
 /**
  * Measured in light minutes; 2000 light years in radius

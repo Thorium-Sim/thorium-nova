@@ -1,4 +1,4 @@
-import ThrustersPlugin from "@server/classes/Plugins/ShipSystems/Thrusters";
+import type ThrustersPlugin from "@server/classes/Plugins/ShipSystems/Thrusters";
 import {t} from "@server/init/t";
 import {pubsub} from "@server/init/pubsub";
 import inputAuth from "@server/utils/inputAuth";

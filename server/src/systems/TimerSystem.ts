@@ -1,18 +1,18 @@
 import {Duration} from "luxon";
-import {Entity, System} from "../utils/ecs";
+import {type Entity, System} from "../utils/ecs";
 
 function subtractTimer(timer: string) {
   const [hours = "0", minutes = "0", seconds = "0"] = timer.split(":");
   const dur = Duration.fromObject({
-    hours: parseInt(hours, 10),
-    minutes: parseInt(minutes, 10),
-    seconds: parseInt(seconds, 10),
+    hours: Number.parseInt(hours, 10),
+    minutes: Number.parseInt(minutes, 10),
+    seconds: Number.parseInt(seconds, 10),
   })
     .minus(1000)
     .normalize()
     .toFormat("hh:mm:ss");
 
-  if (parseInt(seconds, 10) < 0) {
+  if (Number.parseInt(seconds, 10) < 0) {
     throw new Error("Seconds has gone negative");
   }
   return dur;

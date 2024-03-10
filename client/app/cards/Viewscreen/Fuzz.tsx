@@ -2,7 +2,7 @@ import {useTexture} from "@react-three/drei";
 import {useFrame} from "@react-three/fiber";
 import {getSphericalPositionWithBias} from "@client/utils/getSphericalPositionWithBias";
 import {useRef} from "react";
-import {Group, Sprite} from "three";
+import type {Group, Sprite} from "three";
 import {useForwardVelocity} from "../Pilot/ImpulseControls";
 import FuzzTexture from "./fuzz.png";
 

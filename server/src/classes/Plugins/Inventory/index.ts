@@ -1,8 +1,8 @@
 import {generateIncrementedName} from "server/src/utils/generateIncrementedName";
-import {Liter} from "server/src/utils/unitTypes";
-import BasePlugin from "..";
+import type {Liter} from "server/src/utils/unitTypes";
+import type BasePlugin from "..";
 import {Aspect} from "../Aspect";
-import {InventoryFlags} from "./InventoryFlags";
+import type {InventoryFlags} from "./InventoryFlags";
 
 export default class InventoryPlugin extends Aspect {
   apiVersion = "inventory/v1" as const;
@@ -18,7 +18,7 @@ export default class InventoryPlugin extends Aspect {
   /** Probability the item will not be consumed when used. 1 means it lasts forever; 0 means it will always be consumed when used. */
   durability!: number;
   /** The number of this item that a mid-sized ship (think an Intrepid-class from Star Trek - 15 decks, 500 m^3 of total cargo space) would carry. Use 0 if you don't want this inventory automatically being added to new ships. */
-  abundance: number = 1;
+  abundance = 1;
   tags!: string[];
   // TODO June 13, 2022 - We need to figure out some heuristics for automatically generating the inventory list on ships
   flags!: InventoryFlags;

@@ -18,14 +18,14 @@ declare global {
 window.isHeadless = false;
 window.addEventListener(
   "dragover",
-  function (e) {
+  (e) => {
     e.preventDefault();
   },
   false
 );
 window.addEventListener(
   "drop",
-  function (e) {
+  (e) => {
     e.preventDefault();
   },
   false

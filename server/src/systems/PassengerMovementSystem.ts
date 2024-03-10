@@ -1,7 +1,7 @@
 import {pubsub} from "@server/init/pubsub";
 import {DeckNode} from "../classes/Plugins/Ship/Deck";
-import {Entity, System} from "../utils/ecs";
-import {Kelvin} from "@server/utils/unitTypes";
+import {type Entity, System} from "../utils/ecs";
+import type {Kelvin} from "@server/utils/unitTypes";
 
 type DeckNodeMap = {
   [key: number]: NonNullable<
@@ -115,7 +115,7 @@ export function findClosestNode(
       if (distance3d < acc.distance3d) return {distance3d, node};
       return acc;
     },
-    {distance3d: Infinity, node: null}
+    {distance3d: Number.POSITIVE_INFINITY, node: null}
   );
   return node.node;
 }

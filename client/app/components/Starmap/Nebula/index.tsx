@@ -1,6 +1,6 @@
 import {useFrame} from "@react-three/fiber";
 import React, {forwardRef, memo, useEffect, useRef, useState} from "react";
-import {BackSide, BoxGeometry, Mesh, ShaderMaterial, CubeTexture} from "three";
+import {BackSide, BoxGeometry, type Mesh, type ShaderMaterial, CubeTexture} from "three";
 import {useGetStarmapStore} from "../starmapStore";
 import NebulaWorker from "./generateNebulaMap?worker";
 
@@ -51,12 +51,12 @@ export default Nebula;
 
 function NebulaShader({skyboxKey}: {skyboxKey: string}) {
   const [canvases] = useState(() => {
-    let primary = [];
-    let offscreenPrimary = [];
-    let secondary = [];
-    let offscreenSecondary = [];
+    const primary = [];
+    const offscreenPrimary = [];
+    const secondary = [];
+    const offscreenSecondary = [];
 
-    for (let side of sides) {
+    for (const side of sides) {
       const canvas = document.createElement("canvas");
       canvas.width = canvas.height = CANVAS_WIDTH;
       const offscreenCanvas = canvas.transferControlToOffscreen();
@@ -65,7 +65,7 @@ function NebulaShader({skyboxKey}: {skyboxKey: string}) {
       primary.push(canvas);
       offscreenPrimary.push(offscreenCanvas);
     }
-    for (let side of sides) {
+    for (const side of sides) {
       const canvas = document.createElement("canvas");
       canvas.width = canvas.height = CANVAS_WIDTH;
 

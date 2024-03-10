@@ -1,7 +1,7 @@
 import Button from "../../ui/Button";
 import UploadWell from "@thorium/ui/UploadWell";
 import InfoTip from "@thorium/ui/InfoTip";
-import PlanetPlugin from "@server/classes/Plugins/Universe/Planet";
+import type PlanetPlugin from "@server/classes/Plugins/Universe/Planet";
 import {PaletteDisclosure} from "../SolarSystemMap";
 import {useSystemIds} from "../useSystemIds";
 import {q} from "@client/context/AppContext";

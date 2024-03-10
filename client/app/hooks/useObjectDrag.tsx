@@ -1,6 +1,6 @@
 import {useThree} from "@react-three/fiber";
 import React from "react";
-import {Matrix4, Object3D, Plane, Raycaster, Vector3} from "three";
+import {Matrix4, type Object3D, Plane, Raycaster, Vector3} from "three";
 import {useGesture} from "@use-gesture/react";
 
 export default function useObjectDrag(

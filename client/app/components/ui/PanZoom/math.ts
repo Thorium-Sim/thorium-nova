@@ -108,9 +108,9 @@ export const getTransformedBoundingBox = (
 
 export const getScaleMultiplier = (
   delta: number,
-  zoomSpeed: number = 1
+  zoomSpeed = 1
 ): number => {
-  let speed = ZOOM_SPEED_MULTIPLIER * zoomSpeed;
+  const speed = ZOOM_SPEED_MULTIPLIER * zoomSpeed;
   let scaleMultiplier = 1;
   if (delta > 0) {
     // zoom out
@@ -130,8 +130,8 @@ export const boundCoordinates = (
   boundingBox: BoundingBox,
   containerHeight: number,
   containerWidth: number,
-  offsetX: number = 0,
-  offsetY: number = 0
+  offsetX = 0,
+  offsetY = 0
 ): BoundCoordinates => {
   const {top, left, width, height} = boundingBox;
   // check that computed are inside boundaries otherwise set to the bounding box limits

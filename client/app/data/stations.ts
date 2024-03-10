@@ -1,5 +1,6 @@
-import StationComplementPlugin from "@server/classes/Plugins/StationComplement";
-import Station, {staticStations} from "@server/classes/Station";
+import type StationComplementPlugin from "@server/classes/Plugins/StationComplement";
+import type Station from "@server/classes/Station";
+import {staticStations} from "@server/classes/Station";
 import {t} from "@server/init/t";
 
 export const station = t.router({

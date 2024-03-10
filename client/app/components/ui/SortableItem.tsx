@@ -2,7 +2,7 @@ import {Link} from "react-router-dom";
 import {useSortable} from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
 import {cn} from "@client/utils/cn";
-import {ReactNode, useEffect, useState} from "react";
+import {type ReactNode, useEffect, useState} from "react";
 import {
   DndContext,
   closestCenter,
@@ -10,6 +10,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  type 
   DragEndEvent,
 } from "@dnd-kit/core";
 import {

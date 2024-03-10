@@ -1,6 +1,6 @@
 import {useFrame} from "@react-three/fiber";
 import React from "react";
-import {CircleGeometry, LineLoop} from "three";
+import {CircleGeometry, type LineLoop} from "three";
 
 const Selected: React.FC = React.memo(() => {
   const geometry = React.useMemo(() => {

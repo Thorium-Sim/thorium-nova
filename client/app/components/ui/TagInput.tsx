@@ -1,4 +1,4 @@
-import React, {ReactNode} from "react";
+import React, {type ReactNode} from "react";
 import Button from "./Button";
 import {cn} from "@client/utils/cn";
 import {Icon} from "./Icon";

@@ -26,7 +26,7 @@ var Lensflare = function () {
 
   this.type = "Lensflare";
   this.frustumCulled = false;
-  this.renderOrder = Infinity;
+  this.renderOrder = Number.POSITIVE_INFINITY;
 
   //
 
@@ -159,7 +159,7 @@ var Lensflare = function () {
 
   var mesh2 = new Mesh(geometry, material2);
 
-  this.addElement = function (element) {
+  this.addElement = (element) => {
     elements.push(element);
   };
 
@@ -254,7 +254,7 @@ var Lensflare = function () {
       for (var i = 0, l = elements.length; i < l; i++) {
         var element = elements[i];
 
-        let uniforms = material2.uniforms;
+        const uniforms = material2.uniforms;
 
         uniforms["color"].value.copy(element.color);
         uniforms["map"].value = element.texture;
@@ -263,8 +263,8 @@ var Lensflare = function () {
         uniforms["screenPosition"].value.y =
           positionScreen.y + vecY * element.distance;
 
-        let size = element.size / viewport.w;
-        let invAspect = viewport.w / viewport.z;
+        const size = element.size / viewport.w;
+        const invAspect = viewport.w / viewport.z;
 
         uniforms["scale"].value.set(size * invAspect, size);
 
@@ -282,7 +282,7 @@ var Lensflare = function () {
     }
   };
 
-  this.dispose = function () {
+  this.dispose = () => {
     material1a.dispose();
     material1b.dispose();
     material2.dispose();
@@ -377,7 +377,7 @@ LensflareElement.Shader = {
   ].join("\n"),
 };
 
-Lensflare.Geometry = (function () {
+Lensflare.Geometry = (() => {
   var geometry = new BufferGeometry();
 
   var float32Array = new Float32Array([

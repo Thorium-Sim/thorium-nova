@@ -1,4 +1,4 @@
-import {Entity, System} from "../utils/ecs";
+import {type Entity, System} from "../utils/ecs";
 
 /**
  * There's a subtle distinction between powerDraw and requestedPower

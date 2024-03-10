@@ -1,4 +1,4 @@
-import {Entity} from "./ecs";
+import type {Entity} from "./ecs";
 
 type DeckNode = NonNullable<
   Entity["components"]["shipMap"]

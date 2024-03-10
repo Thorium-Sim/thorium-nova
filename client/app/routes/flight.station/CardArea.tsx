@@ -1,10 +1,10 @@
 import Login from "@client/cards/Login";
 import Offline from "@client/cards/Offline";
 import * as Cards from "@client/cards";
-import {ComponentType, Fragment, Suspense, useState} from "react";
+import {type ComponentType, Fragment, Suspense, useState} from "react";
 import {ErrorBoundary} from "react-error-boundary";
 import {Transition} from "@headlessui/react";
-import {CardProps} from "./CardProps";
+import type {CardProps} from "./CardProps";
 import {LoadingSpinner} from "@thorium/ui/LoadingSpinner";
 import CardProvider from "@client/context/CardContext";
 import {q} from "@client/context/AppContext";

@@ -1,5 +1,5 @@
 import Button from "@thorium/ui/Button";
-import {CardProps} from "@client/routes/flight.station/CardProps";
+import type {CardProps} from "@client/routes/flight.station/CardProps";
 import "./style.css";
 import {toast} from "@client/context/ToastContext";
 import {ContainerLabel} from "./ContainerLabel";

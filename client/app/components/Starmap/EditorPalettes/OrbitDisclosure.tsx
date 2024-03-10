@@ -1,7 +1,7 @@
 import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
-import PlanetPlugin from "@server/classes/Plugins/Universe/Planet";
-import StarPlugin from "@server/classes/Plugins/Universe/Star";
+import type PlanetPlugin from "@server/classes/Plugins/Universe/Planet";
+import type StarPlugin from "@server/classes/Plugins/Universe/Star";
 import {PaletteDisclosure} from "../SolarSystemMap";
 import {useSystemIds} from "../useSystemIds";
 import {q} from "@client/context/AppContext";
@@ -23,7 +23,7 @@ export function OrbitDisclosure({object}: {object: PlanetPlugin | StarPlugin}) {
             pluginId,
             solarSystemId,
             satellite: {
-              semiMajorAxis: parseFloat(e.target.value),
+              semiMajorAxis: Number.parseFloat(e.target.value),
             },
           };
           if ("isPlanet" in object) {
@@ -51,7 +51,7 @@ export function OrbitDisclosure({object}: {object: PlanetPlugin | StarPlugin}) {
             pluginId,
             solarSystemId,
             satellite: {
-              orbitalArc: parseFloat(e.target.value),
+              orbitalArc: Number.parseFloat(e.target.value),
             },
           };
           if ("isPlanet" in object) {
@@ -79,7 +79,7 @@ export function OrbitDisclosure({object}: {object: PlanetPlugin | StarPlugin}) {
             pluginId,
             solarSystemId,
             satellite: {
-              inclination: parseFloat(e.target.value),
+              inclination: Number.parseFloat(e.target.value),
             },
           };
           if ("isPlanet" in object) {
@@ -107,7 +107,7 @@ export function OrbitDisclosure({object}: {object: PlanetPlugin | StarPlugin}) {
             pluginId,
             solarSystemId,
             satellite: {
-              eccentricity: parseFloat(e.target.value),
+              eccentricity: Number.parseFloat(e.target.value),
             },
           };
           if ("isPlanet" in object) {
@@ -135,7 +135,7 @@ export function OrbitDisclosure({object}: {object: PlanetPlugin | StarPlugin}) {
             pluginId,
             solarSystemId,
             satellite: {
-              axialTilt: parseFloat(e.target.value),
+              axialTilt: Number.parseFloat(e.target.value),
             },
           };
           if ("isPlanet" in object) {

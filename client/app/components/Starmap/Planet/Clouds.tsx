@@ -1,7 +1,7 @@
 import {useTexture} from "@react-three/drei";
 import {useFrame} from "@react-three/fiber";
 import React from "react";
-import {FrontSide, Mesh} from "three";
+import {FrontSide, type Mesh} from "three";
 import {whiteImage} from "../whiteImage";
 
 interface CloudsProps {

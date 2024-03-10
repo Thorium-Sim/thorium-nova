@@ -2,7 +2,7 @@ import throttle from "lodash.throttle";
 import {useSpring} from "@react-spring/web";
 import {useDrag} from "@use-gesture/react";
 import {useRef} from "react";
-import {GamepadKey, useGamepadValue} from "./useGamepadStore";
+import {type GamepadKey, useGamepadValue} from "./useGamepadStore";
 
 function distance(x1: number, y1: number, x2 = 0, y2 = 0) {
   const a = x1 - x2;

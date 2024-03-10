@@ -1,5 +1,5 @@
-import {AllShipSystems} from "@server/classes/Plugins/ShipSystems/shipSystemTypes";
-import {DataContext} from "@server/utils/types";
+import type {AllShipSystems} from "@server/classes/Plugins/ShipSystems/shipSystemTypes";
+import type {DataContext} from "@server/utils/types";
 import {z} from "zod";
 
 export function getPlugin(context: DataContext, pluginId: string) {

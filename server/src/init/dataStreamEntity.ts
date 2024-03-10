@@ -1,4 +1,4 @@
-import {Entity} from "@server/utils/ecs";
+import type {Entity} from "@server/utils/ecs";
 
 export function dataStreamEntity(e: Entity) {
   // For snapshot interpolation, entities have to be flat, other than quaternions.
@@ -46,7 +46,7 @@ export function dataStreamEntity(e: Entity) {
     };
   }
   if (e.components.isWarpEngines) {
-    let {maxVelocity} = e.components.isWarpEngines;
+    const {maxVelocity} = e.components.isWarpEngines;
     return {
       id: e.id.toString(),
       x: maxVelocity,

@@ -5,6 +5,7 @@ import {
   HemisphereLight,
   Vector3,
   Group,
+  type 
   Camera,
   SRGBColorSpace,
 } from "three";

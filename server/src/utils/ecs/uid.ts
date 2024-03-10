@@ -1,5 +1,5 @@
 export class UIDGenerator {
-  uid: number = 1;
+  uid = 1;
   constructor(firstUID = 1) {
     this.uid = firstUID;
   }

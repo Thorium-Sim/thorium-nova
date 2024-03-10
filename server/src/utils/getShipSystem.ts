@@ -1,5 +1,5 @@
-import {DataContext} from "server/src/utils/DataContext";
-import {Entity} from "server/src/utils/ecs";
+import type {DataContext} from "server/src/utils/DataContext";
+import type {Entity} from "server/src/utils/ecs";
 import {pascalCase} from "change-case";
 export function getShipSystem(
   context: DataContext,
@@ -10,7 +10,7 @@ export function getShipSystem(
     system = context.flight?.ecs.getEntityById(param.systemId);
   } else if ("systemType" in param) {
     const ship = context.ship;
-    for (let [id] of ship?.components.shipSystems?.shipSystems || []) {
+    for (const [id] of ship?.components.shipSystems?.shipSystems || []) {
       const entity = context.flight?.ecs.getEntityById(id);
       if (
         entity?.components &&
@@ -29,9 +29,9 @@ export function getShipSystems(
   context: DataContext,
   param: {systemType: string}
 ) {
-  let systems: Entity[] = [];
+  const systems: Entity[] = [];
   const ship = context.ship;
-  for (let [id] of ship?.components.shipSystems?.shipSystems || []) {
+  for (const [id] of ship?.components.shipSystems?.shipSystems || []) {
     const entity = context.flight?.ecs.getEntityById(id);
     if (
       entity?.components &&

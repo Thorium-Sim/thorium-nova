@@ -12,7 +12,7 @@ export default function handleRequest(
     <RemixServer context={remixContext} url={request.url} />
   );
   if (html.startsWith("<html")) {
-    html = "<!DOCTYPE html>\n" + html;
+    html = `<!DOCTYPE html>\n${html}`;
   }
   return new Response(html, {
     headers: { "Content-Type": "text/html" },

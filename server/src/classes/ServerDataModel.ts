@@ -1,4 +1,4 @@
-import {FSDataStore, FSDataStoreOptions} from "@thorium/db-fs";
+import {FSDataStore, type FSDataStoreOptions} from "@thorium/db-fs";
 import {thoriumPath} from "../utils/appPaths";
 import {Client} from "../init/liveQuery";
 import BasePlugin from "./Plugins";

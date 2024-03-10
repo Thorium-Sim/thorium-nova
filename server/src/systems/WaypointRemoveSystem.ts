@@ -1,5 +1,5 @@
 import {pubsub} from "@server/init/pubsub";
-import {Entity, System} from "@server/utils/ecs";
+import {type Entity, System} from "@server/utils/ecs";
 
 export class WaypointRemoveSystem extends System {
   test(entity: Entity) {

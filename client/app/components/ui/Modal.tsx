@@ -1,4 +1,4 @@
-import {Fragment, ReactNode} from "react";
+import {Fragment, type ReactNode} from "react";
 import * as React from "react";
 import {Dialog, Transition} from "@headlessui/react";
 import Button from "./Button";

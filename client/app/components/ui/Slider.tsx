@@ -1,7 +1,7 @@
 import {logslider} from "@client/utils/logSlider";
 import React from "react";
 
-import {SliderState, useSliderState} from "react-stately";
+import {type SliderState, useSliderState} from "react-stately";
 
 import {
   mergeProps,
@@ -10,11 +10,13 @@ import {
   useSlider,
   useSliderThumb,
   VisuallyHidden,
+  type 
   AriaSliderProps,
+  type 
   AriaSliderThumbOptions,
 } from "react-aria";
 
-import {NumberFormatOptions} from "@internationalized/number";
+import type {NumberFormatOptions} from "@internationalized/number";
 
 function Slider(
   props: AriaSliderProps & {
@@ -22,10 +24,10 @@ function Slider(
     className?: string;
   }
 ) {
-  let trackRef = React.useRef(null);
-  let numberFormatter = useNumberFormatter(props.formatOptions);
-  let state = useSliderState({...props, numberFormatter});
-  let {groupProps, trackProps, labelProps, outputProps} = useSlider(
+  const trackRef = React.useRef(null);
+  const numberFormatter = useNumberFormatter(props.formatOptions);
+  const state = useSliderState({...props, numberFormatter});
+  const {groupProps, trackProps, labelProps, outputProps} = useSlider(
     props,
     state,
     trackRef
@@ -58,9 +60,9 @@ function Slider(
 function Thumb(
   props: {state: SliderState} & Omit<AriaSliderThumbOptions, "inputRef">
 ) {
-  let {state, trackRef, index} = props;
-  let inputRef = React.useRef(null);
-  let {thumbProps, inputProps, isDragging} = useSliderThumb(
+  const {state, trackRef, index} = props;
+  const inputRef = React.useRef(null);
+  const {thumbProps, inputProps, isDragging} = useSliderThumb(
     {
       index,
       trackRef,
@@ -69,7 +71,7 @@ function Thumb(
     state
   );
 
-  let {focusProps, isFocusVisible} = useFocusRing();
+  const {focusProps, isFocusVisible} = useFocusRing();
   return (
     <div
       {...thumbProps}

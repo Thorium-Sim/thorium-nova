@@ -1,5 +1,5 @@
-import {InventoryFlags} from "@server/classes/Plugins/Inventory/InventoryFlags";
-import {Entity, System} from "../utils/ecs";
+import type {InventoryFlags} from "@server/classes/Plugins/Inventory/InventoryFlags";
+import {type Entity, System} from "../utils/ecs";
 
 export class FilterInventorySystem extends System {
   inventoryTemplates!: Record<

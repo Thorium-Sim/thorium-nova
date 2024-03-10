@@ -1,10 +1,12 @@
 import {
+  type 
   PolarGridHelperProps,
+  type 
   GridHelperProps,
   useFrame,
 } from "@react-three/fiber";
 import * as React from "react";
-import {AdditiveBlending, PolarGridHelper, GridHelper} from "three";
+import {AdditiveBlending, type PolarGridHelper, type GridHelper} from "three";
 import {useGetStarmapStore} from "./starmapStore";
 
 export function PolarGrid(props: PolarGridHelperProps) {
@@ -35,7 +37,7 @@ export function Grid(props: GridHelperProps) {
   });
   useFrame(() => {
     if (gridRef.current && !Array.isArray(gridRef.current?.material)) {
-      const y = cameraControls?.current?.camera.position.y || Infinity;
+      const y = cameraControls?.current?.camera.position.y || Number.POSITIVE_INFINITY;
       gridRef.current.material.opacity = Math.min(
         300000000 * (1 / y) * 0.15,
         0.3

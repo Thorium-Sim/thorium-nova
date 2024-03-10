@@ -1,9 +1,10 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import {getOrbitPosition} from "@server/utils/getOrbitPosition";
-import {ECS, Entity} from "../utils/ecs";
+import type {ECS, Entity} from "../utils/ecs";
 import {Euler, Quaternion, Vector, Vector3} from "three";
 
 import {
+  type 
   Kilometer,
   degToRad,
   solarMassToKilograms,
@@ -179,8 +180,8 @@ function generateShipRigidBody(
   const rigidBodyDesc = new RAPIER.RigidBodyDesc(RAPIER.RigidBodyType.Dynamic)
     .setTranslation(position.x, position.y, position.z)
     .setRotation({w: rotation.w, x: rotation.x, y: rotation.y, z: rotation.z});
-  let rigidBody = world.createRigidBody(rigidBodyDesc);
-  let collider = world.createCollider(colliderDesc, rigidBody);
+  const rigidBody = world.createRigidBody(rigidBodyDesc);
+  const collider = world.createCollider(colliderDesc, rigidBody);
 
   return {collider, body: rigidBody, world};
 }

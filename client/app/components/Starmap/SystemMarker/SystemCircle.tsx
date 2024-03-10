@@ -1,10 +1,10 @@
 import {q} from "@client/context/AppContext";
-import {MeshProps, useFrame} from "@react-three/fiber";
+import {type MeshProps, useFrame} from "@react-three/fiber";
 import useObjectDrag from "@client/hooks/useObjectDrag";
 import * as React from "react";
 import {useCallback} from "react";
 import {useNavigate, useParams} from "react-router-dom";
-import {CanvasTexture, Group, Vector3} from "three";
+import {CanvasTexture, type Group, Vector3} from "three";
 import {useGetStarmapStore} from "../starmapStore";
 
 const size = 50;

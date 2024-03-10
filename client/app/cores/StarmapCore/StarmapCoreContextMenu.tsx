@@ -4,7 +4,7 @@ import {useGetStarmapStore} from "@client/components/Starmap/starmapStore";
 import {toast} from "@client/context/ToastContext";
 import useEventListener from "@client/hooks/useEventListener";
 import {useRightClick} from "@client/hooks/useRightClick";
-import {useEffect, RefObject, useState} from "react";
+import {useEffect, type RefObject, useState} from "react";
 import {q} from "@client/context/AppContext";
 
 function makeVirtualEl({x: X, y: Y}: {x: number; y: number}) {
@@ -76,6 +76,7 @@ export const StarmapCoreContextMenu = ({
   const cameraObjectDistance = useStarmapStore(
     store => store.cameraObjectDistance
   );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     // If the camera zooms in or out, hide the context menu.
     setOpen(false);

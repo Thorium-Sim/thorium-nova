@@ -1,14 +1,14 @@
 import {Quaternion, Vector3, Matrix4} from "three";
-import {Entity, System} from "../utils/ecs";
+import {type Entity, System} from "../utils/ecs";
 import {autopilotGetCoordinates} from "../utils/autopilotGetCoordinates";
 import Controller from "node-pid-controller";
 
-let positionVec = new Vector3();
-let rotationQuat = new Quaternion();
-let desiredDestination = new Vector3();
-let desiredRotationQuat = new Quaternion();
-let up = new Vector3(0, 1, 0);
-let matrix = new Matrix4();
+const positionVec = new Vector3();
+const rotationQuat = new Quaternion();
+const desiredDestination = new Vector3();
+const desiredRotationQuat = new Quaternion();
+const up = new Vector3(0, 1, 0);
+const matrix = new Matrix4();
 const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
 
 const rotationControllerCache = new Map<number, Controller>();
@@ -100,7 +100,7 @@ export class AutoRotateSystem extends System {
     const rpm = thrusters.components.isThrusters.rotationMaxSpeed * Math.PI * 2;
     const rpf = rpm / 60 / fps;
 
-    let accelMax =
+    const accelMax =
       thrusters.components.isThrusters.rotationThrust /
       (entity.components?.mass?.mass || 70000);
     const angleTo = rotationQuat.angleTo(desiredRotationQuat);

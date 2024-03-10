@@ -10,7 +10,7 @@ const CardButton: React.FC<{
 }> = ({active, name, component, icon, onClick}) => {
   const iconUrl = icon || `/assets/cardIcons/${component}.svg`;
   return (
-    <div
+    <button
       className={`card-switcher-button ${active ? "active" : ""}`}
       onClick={onClick}
     >
@@ -20,7 +20,7 @@ const CardButton: React.FC<{
       />
       <span className="card-switcher-button-name">{name}</span>
       {/* TODO: Figure out some way to switch between static text and a tooltip */}
-    </div>
+    </button>
   );
 };
 
@@ -40,7 +40,7 @@ export const CardSwitcher: React.FC<{
             icon={c.icon || null}
             component={c.component}
             onClick={() => changeCard(c.component)}
-          ></CardButton>
+          />
         ))}
       </div>
     </div>

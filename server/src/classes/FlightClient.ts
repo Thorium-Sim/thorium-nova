@@ -1,5 +1,5 @@
 import {BaseClient} from "./BaseClient";
-import Station from "./Station";
+import type Station from "./Station";
 
 /**
  * Properties which are associated between a flight and a client.

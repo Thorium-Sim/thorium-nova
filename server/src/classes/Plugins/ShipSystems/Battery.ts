@@ -1,11 +1,11 @@
-import {MegaWatt, MegaWattHour} from "@server/utils/unitTypes";
-import BasePlugin from "..";
+import type {MegaWatt, MegaWattHour} from "@server/utils/unitTypes";
+import type BasePlugin from "..";
 import BaseShipSystemPlugin, {registerSystem} from "./BaseSystem";
-import {ShipSystemFlags} from "./shipSystemTypes";
+import type {ShipSystemFlags} from "./shipSystemTypes";
 
 export default class BatteryPlugin extends BaseShipSystemPlugin {
   static flags: ShipSystemFlags[] = ["efficiency"];
-  type: "battery" = "battery";
+  type = "battery" as const;
   allowMultiple = true;
 
   /**

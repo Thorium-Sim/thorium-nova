@@ -1,10 +1,10 @@
-import BasePlugin from "..";
+import type BasePlugin from "..";
 import BaseShipSystemPlugin, {registerSystem} from "./BaseSystem";
-import {ShipSystemFlags} from "./shipSystemTypes";
+import type {ShipSystemFlags} from "./shipSystemTypes";
 
 export default class ReactorPlugin extends BaseShipSystemPlugin {
   static flags: ShipSystemFlags[] = ["efficiency", "heat"];
-  type: "reactor" = "reactor";
+  type = "reactor" as const;
 
   /**
    * What percent of the max output provides a 100% fuel-to-energy conversion.

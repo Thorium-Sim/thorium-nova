@@ -1,7 +1,7 @@
 import {q} from "@client/context/AppContext";
 import type {AppRouter} from "@server/init/router";
-import {inferTransformedProcedureOutput} from "@thorium/live-query/server/types";
-import {ReactNode} from "react";
+import type {inferTransformedProcedureOutput} from "@thorium/live-query/server/types";
+import type {ReactNode} from "react";
 import {ReactorSlider} from "./ReactorSlider";
 import {Icon} from "@thorium/ui/Icon";
 

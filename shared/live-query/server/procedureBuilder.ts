@@ -2,12 +2,14 @@ import {getParseFn} from "./getParseFn";
 import {
   createInputMiddleware,
   createOutputMiddleware,
+  type 
   MiddlewareFunction,
   middlewareMarker,
+  type 
   MiddlewareResult,
 } from "./middleware";
-import {inferParser, Parser} from "./parser";
-import {
+import type {inferParser, Parser} from "./parser";
+import type {
   AnyDataStreamProcedure,
   AnyProcedure,
   AnyRequestProcedure,
@@ -19,7 +21,7 @@ import {
   ResolveOptions,
   UnsetMarker,
 } from "./procedure";
-import {
+import type {
   AnyRootConfig,
   InferOptional,
   MaybePromise,

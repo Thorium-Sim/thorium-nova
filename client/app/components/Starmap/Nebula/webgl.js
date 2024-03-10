@@ -25,11 +25,10 @@ export function getExtensions(gl, extArray) {
 
 /*...........................................................................*/
 export function Framebuffer(gl, color, depth, ext) {
-  var self = this;
 
-  self.initialize = function () {
-    self.fb = gl.createFramebuffer();
-    self.bind();
+  this.initialize = () => {
+    this.fb = gl.createFramebuffer();
+    this.bind();
     if (color.length > 1) {
       var drawBuffers = [];
       for (let i = 0; i < color.length; i++) {
@@ -65,11 +64,11 @@ export function Framebuffer(gl, color, depth, ext) {
     }
   };
 
-  self.bind = function () {
-    gl.bindFramebuffer(gl.FRAMEBUFFER, self.fb);
+  this.bind = () => {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fb);
   };
 
-  self.initialize();
+  this.initialize();
 }
 
 /*...........................................................................*/
@@ -84,13 +83,11 @@ export function Texture(gl, index, data, width, height, options) {
   options.format = options.format || gl.RGBA;
   options.type = options.type || gl.UNSIGNED_BYTE;
 
-  var self = this;
-
-  self.initialize = function () {
-    self.index = index;
-    self.activate();
-    self.texture = gl.createTexture();
-    self.bind();
+  this.initialize = () => {
+    this.index = index;
+    this.activate();
+    this.texture = gl.createTexture();
+    this.bind();
     gl.texImage2D(
       options.target,
       0,
@@ -108,17 +105,17 @@ export function Texture(gl, index, data, width, height, options) {
     }
   };
 
-  self.bind = function () {
-    gl.bindTexture(options.target, self.texture);
+  this.bind = () => {
+    gl.bindTexture(options.target, this.texture);
   };
 
-  self.activate = function () {
-    gl.activeTexture(gl.TEXTURE0 + self.index);
+  this.activate = () => {
+    gl.activeTexture(gl.TEXTURE0 + this.index);
   };
 
-  self.reset = function () {
-    self.activate();
-    self.bind();
+  this.reset = () => {
+    this.activate();
+    this.bind();
     gl.texImage2D(
       options.target,
       0,
@@ -132,40 +129,38 @@ export function Texture(gl, index, data, width, height, options) {
     );
   };
 
-  self.initialize();
+  this.initialize();
 }
 
 /*...........................................................................*/
 export function GLBuffer(gl) {
-  var self = this;
 
-  self.initialize = function () {
-    self.buffer = gl.createBuffer();
+  this.initialize = () => {
+    this.buffer = gl.createBuffer();
   };
 
-  self.bind = function () {
-    gl.bindBuffer(gl.ARRAY_BUFFER, self.buffer);
+  this.bind = () => {
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
   };
 
-  self.set = function (data) {
-    self.bind();
+  this.set = (data) => {
+    this.bind();
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
   };
 
-  self.initialize();
+  this.initialize();
 }
 
 /*...........................................................................*/
 export function Renderable(gl, program, buffers, primitiveCount) {
-  var self = this;
 
-  self.primitiveCount = primitiveCount;
+  this.primitiveCount = primitiveCount;
 
-  self.initialize = function () {};
+  this.initialize = () => {};
 
-  self.render = function () {
+  this.render = () => {
     program.use();
-    for (let name in buffers) {
+    for (const name in buffers) {
       var buffer = buffers[name].buffer;
       var size = buffers[name].size;
       var location = program.attribs[name].location;
@@ -174,12 +169,12 @@ export function Renderable(gl, program, buffers, primitiveCount) {
       gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
     }
     gl.drawArrays(gl.TRIANGLES, 0, 3 * primitiveCount);
-    for (let name in self.buffers) {
+    for (const name in this.buffers) {
       gl.disableVertexAttribArray(program.attributes[name].location);
     }
   };
 
-  self.initialize();
+  this.initialize();
 }
 
 /*...........................................................................*/
@@ -190,13 +185,12 @@ export function InstancedRenderable(
   primitiveCount,
   instancedExt
 ) {
-  var self = this;
 
-  self.initialize = function () {};
+  this.initialize = () => {};
 
-  self.render = function () {
+  this.render = () => {
     program.use();
-    for (let name in buffers) {
+    for (const name in buffers) {
       var buffer = buffers[name].buffer;
       var size = buffers[name].size;
       var location = program.attribs[name].location;
@@ -211,12 +205,12 @@ export function InstancedRenderable(
       6 * 2 * 3,
       primitiveCount
     );
-    for (let name in self.buffers) {
+    for (const name in this.buffers) {
       gl.disableVertexAttribArray(program.attributes[name].location);
     }
   };
 
-  self.initialize();
+  this.initialize();
 }
 
 export class Program {
@@ -252,16 +246,16 @@ export class Program {
     this.gl.compileShader(shader);
     if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
       var err = this.gl.getShaderInfoLog(shader);
-      var lineno = parseInt(err.split(":")[2]);
+      var lineno = Number.parseInt(err.split(":")[2]);
       var split = source.split("\n");
       for (var i in split) {
         // eslint-disable-next-line
-        var q = parseInt(i);
+        var q = Number.parseInt(i);
         if (i === lineno - 1) {
           console.warn(err);
         }
       }
-      let typeString = type === this.gl.VERTEX_SHADER ? "vertex" : "fragment";
+      const typeString = type === this.gl.VERTEX_SHADER ? "vertex" : "fragment";
       throw "Failed to compile " + typeString + " shader.";
     }
     return shader;

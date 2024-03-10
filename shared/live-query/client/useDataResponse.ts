@@ -3,7 +3,7 @@ import {useQueryClient} from "@tanstack/react-query";
 import {useLiveQuery} from "./liveQueryContext";
 import {getQueryKey} from "./getQueryKey";
 import {getArrayQueryKey} from "./getArrayQueryKey";
-import {NetResponseData} from "./useDataConnection";
+import type {NetResponseData} from "./useDataConnection";
 
 const dataCallbacks: Map<string, Set<(data: any) => void>> = new Map();
 

@@ -1,5 +1,5 @@
 import {FilterInventorySystem} from "@server/systems/FilterInventorySystem";
-import {ECS} from "./ecs";
+import type {ECS} from "./ecs";
 
 export function getInventoryTemplates(ecs?: ECS | null) {
   const inventorySystem = ecs?.systems.find(

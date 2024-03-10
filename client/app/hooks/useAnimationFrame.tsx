@@ -2,7 +2,7 @@ import {useRef, useLayoutEffect} from "react";
 
 const callbacks = new Set<React.MutableRefObject<FrameRequestCallback>>();
 
-let time = performance.now();
+const time = performance.now();
 function loop(now: DOMHighResTimeStamp) {
   const diff = now - (time || now - 16);
 

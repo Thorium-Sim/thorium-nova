@@ -1,4 +1,5 @@
 import {
+  type 
   App,
   BrowserWindow,
   dialog,
@@ -6,7 +7,7 @@ import {
   Menu,
   MenuItem,
 } from "electron";
-import {MenuItemConstructorOptions} from "electron/main";
+import type {MenuItemConstructorOptions} from "electron/main";
 import {settings} from "./settings";
 import {getLoadedUrl} from "./loadedUrl";
 // TODO: Implement loading a flight document
@@ -22,7 +23,7 @@ export function restoreMenubar(app: App) {
       submenu: [
         {
           label: "Open...",
-          click: async function (menuItem, browserWindow) {
+          click: async (menuItem, browserWindow) => {
             if (!browserWindow) return;
             const {canceled, filePaths} = await dialog.showOpenDialog(
               browserWindow,
@@ -43,10 +44,10 @@ export function restoreMenubar(app: App) {
               .filter(r => typeof r === "string")
               .map(r => ({
                 label: r,
-                click: function (
+                click: (
                   _menuItem: any,
                   browserWindow: BrowserWindow | undefined
-                ) {
+                ) => {
                   if (!browserWindow) return;
                   loadFlight(r);
                 },
@@ -54,7 +55,7 @@ export function restoreMenubar(app: App) {
             {type: "separator"},
             {
               label: "Clear",
-              click: function () {
+              click: () => {
                 app.clearRecentDocuments();
                 settings.set("recentDocs", []);
               },
@@ -64,7 +65,7 @@ export function restoreMenubar(app: App) {
         {
           label: "Reload",
           accelerator: "CmdOrCtrl+Alt+R",
-          click: function (menuItem, browserWindow) {
+          click: (menuItem, browserWindow) => {
             if (!browserWindow) return;
 
             browserWindow.reload();
@@ -74,7 +75,7 @@ export function restoreMenubar(app: App) {
         {
           label: "Kiosk",
           accelerator: "CmdOrCtrl+Alt+K",
-          click: function (menuItem, browserWindow) {
+          click: (menuItem, browserWindow) => {
             if (!browserWindow) return;
 
             if (browserWindow.isKiosk()) {
@@ -87,7 +88,7 @@ export function restoreMenubar(app: App) {
         {
           label: "Dev Tools",
           accelerator: "CmdOrCtrl+Alt+I",
-          click: function (menuItem, browserWindow) {
+          click: (menuItem, browserWindow) => {
             if (!browserWindow) return;
 
             browserWindow.webContents.openDevTools();

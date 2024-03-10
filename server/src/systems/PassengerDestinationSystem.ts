@@ -1,4 +1,4 @@
-import {Entity, System} from "../utils/ecs";
+import {type Entity, System} from "../utils/ecs";
 
 export class PassengerDestinationSystem extends System {
   test(entity: Entity) {

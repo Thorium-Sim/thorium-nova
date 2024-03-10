@@ -1,4 +1,4 @@
-import {Entity, System} from "../utils/ecs";
+import {type Entity, System} from "../utils/ecs";
 
 const PEDAL_TO_THE_METAL_CONST = 10;
 const HARD_BRAKE_CONST = 5;

@@ -1,4 +1,4 @@
-import WarpEnginesPlugin from "@server/classes/Plugins/ShipSystems/warpEngines";
+import type WarpEnginesPlugin from "@server/classes/Plugins/ShipSystems/warpEngines";
 import {t} from "@server/init/t";
 import {pubsub} from "@server/init/pubsub";
 import inputAuth from "@server/utils/inputAuth";

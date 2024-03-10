@@ -1,4 +1,4 @@
-import {ReactNode, StrictMode} from "react";
+import {type ReactNode, StrictMode} from "react";
 import {AlertDialog} from "@thorium/ui/AlertDialog";
 import useEasterEgg from "../hooks/useEasterEgg";
 import ToastContainer from "./ToastContext";
@@ -8,7 +8,7 @@ import {
   LiveQueryProvider,
   useLiveQuery,
 } from "@thorium/live-query/client";
-import {AppRouter} from "@server/init/router";
+import type {AppRouter} from "@server/init/router";
 import {ThoriumAccountContextProvider} from "./ThoriumAccountContext";
 import {Disconnected, Reconnecting} from "./ConnectionStatus";
 import {TabIdCoordinator} from "browser-tab-id";

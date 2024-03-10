@@ -74,7 +74,7 @@ test("worldState should be an array", () => {
       y: 10,
       d: 90,
       r: Math.PI / 4,
-      q: {x: 0, y: 0.707, z: 0, w: 0.707},
+      q: {x: 0, y: Math.SQRT1_2, z: 0, w: Math.SQRT1_2},
     });
   }).toThrow();
 });
@@ -88,7 +88,7 @@ test("should create and add another snapshot", async () => {
       y: 10,
       d: 90,
       r: Math.PI / 4,
-      q: {x: 0, y: 0.707, z: 0, w: 0.707},
+      q: {x: 0, y: Math.SQRT1_2, z: 0, w: Math.SQRT1_2},
     },
     {id: "enemyOne"},
   ]);
@@ -131,8 +131,8 @@ test("values should be interpolated", () => {
   expect(entity.x > 0 && entity.x < 10).toBeTruthy();
   expect(entity.r > 0 && entity.r < Math.PI / 4).toBeTruthy();
   expect(entity.d > 0 && entity.d < 90).toBeTruthy();
-  expect(entity.q.w < 1 && entity.q.w > 0.707).toBeTruthy();
-  expect(entity.q.y > 0 && entity.q.y < 0.707).toBeTruthy();
+  expect(entity.q.w < 1 && entity.q.w > Math.SQRT1_2).toBeTruthy();
+  expect(entity.q.y > 0 && entity.q.y < Math.SQRT1_2).toBeTruthy();
 });
 
 test("timeOffset should >= 0", () => {

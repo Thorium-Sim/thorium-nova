@@ -1,7 +1,7 @@
 import {useLocalStorageReducer} from "@client/hooks/useLocalStorage";
 import {Outlet} from "@remix-run/react";
 import {randomNameGenerator} from "@server/utils/randomNameGenerator";
-import {FlightStartingPoint} from "@server/utils/types";
+import type {FlightStartingPoint} from "@server/utils/types";
 import {createContext, useContext, useEffect} from "react";
 
 export interface FlightConfigState {

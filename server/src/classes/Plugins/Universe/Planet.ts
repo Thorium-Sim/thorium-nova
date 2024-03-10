@@ -1,5 +1,5 @@
-import {isPlanet} from "@server/components/list";
-import {satellite} from "@server/components/satellite";
+import type {isPlanet} from "@server/components/list";
+import type {satellite} from "@server/components/satellite";
 import z from "zod";
 
 export default class PlanetPlugin {
