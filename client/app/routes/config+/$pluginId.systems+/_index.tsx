@@ -1,3 +1,3 @@
 export default function SystemsIndex() {
-  return null;
+	return null;
 }

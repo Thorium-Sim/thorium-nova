@@ -3,9 +3,9 @@
 let loadedUrl: string | null = null;
 
 export function setLoadedUrl(url: string) {
-  loadedUrl = url;
+	loadedUrl = url;
 }
 
 export function getLoadedUrl() {
-  return loadedUrl;
+	return loadedUrl;
 }

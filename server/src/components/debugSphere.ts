@@ -5,7 +5,7 @@ import z from "zod";
  * by showing where the ship is trying to go.
  */
 export const debugSphere = z
-  .object({
-    entityId: z.number().default(-1),
-  })
-  .default({});
+	.object({
+		entityId: z.number().default(-1),
+	})
+	.default({});

@@ -1,4 +1,4 @@
-import {type Entity, System} from "../utils/ecs";
+import { type Entity, System } from "../utils/ecs";
 
 /**
  * Determines the forward velocity applied by the impulse engines
@@ -13,31 +13,31 @@ import {type Entity, System} from "../utils/ecs";
  * it also might not be necessary.
  */
 export class ImpulseSystem extends System {
-  test(entity: Entity) {
-    return !!(
-      entity.components.isImpulseEngines && entity.components.isShipSystem
-    );
-  }
-  update(entity: Entity) {
-    const ship = this.ecs.entities.find(e =>
-      e.components.shipSystems?.shipSystems.has(entity.id)
-    );
-    if (!ship || !ship.components.isShip || !entity.components.isImpulseEngines)
-      return;
+	test(entity: Entity) {
+		return !!(
+			entity.components.isImpulseEngines && entity.components.isShipSystem
+		);
+	}
+	update(entity: Entity) {
+		const ship = this.ecs.entities.find((e) =>
+			e.components.shipSystems?.shipSystems.has(entity.id),
+		);
+		if (!ship || !ship.components.isShip || !entity.components.isImpulseEngines)
+			return;
 
-    let {thrust, targetSpeed, cruisingSpeed} =
-      entity.components.isImpulseEngines;
+		let { thrust, targetSpeed, cruisingSpeed } =
+			entity.components.isImpulseEngines;
 
-    if (entity.components.power) {
-      const {currentPower, maxSafePower, requiredPower} =
-        entity.components.power || {};
-      targetSpeed =
-        cruisingSpeed *
-        (Math.max(0, currentPower - requiredPower) /
-          (maxSafePower - requiredPower));
-    }
+		if (entity.components.power) {
+			const { currentPower, maxSafePower, requiredPower } =
+				entity.components.power || {};
+			targetSpeed =
+				cruisingSpeed *
+				(Math.max(0, currentPower - requiredPower) /
+					(maxSafePower - requiredPower));
+		}
 
-    const forwardImpulse = (targetSpeed / cruisingSpeed) * thrust;
-    entity.updateComponent("isImpulseEngines", {forwardImpulse});
-  }
+		const forwardImpulse = (targetSpeed / cruisingSpeed) * thrust;
+		entity.updateComponent("isImpulseEngines", { forwardImpulse });
+	}
 }

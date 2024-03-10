@@ -1,6 +1,6 @@
 export interface CardProps {
-  cardLoaded: boolean;
-  // Widget Props
-  isOpen?: boolean;
-  onClose?: () => void;
+	cardLoaded: boolean;
+	// Widget Props
+	isOpen?: boolean;
+	onClose?: () => void;
 }

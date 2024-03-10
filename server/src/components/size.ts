@@ -8,9 +8,9 @@ import z from "zod";
  * of the object and the dimensions of the 3D models that represents the object
  */
 export const size = z
-  .object({
-    length: z.number().default(350),
-    width: z.number().default(135),
-    height: z.number().default(67),
-  })
-  .default({});
+	.object({
+		length: z.number().default(350),
+		width: z.number().default(135),
+		height: z.number().default(67),
+	})
+	.default({});

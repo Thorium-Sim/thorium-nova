@@ -1,27 +1,27 @@
 import {
-  createMockDataContext,
-  createMockRouter,
+	createMockDataContext,
+	createMockRouter,
 } from "server/src/utils/createMockDataContext";
 
 describe("solar system planet plugin input", () => {
-  it("should create a new planet in a solar system", async () => {
-    const oldRandom = Math.random;
-    Math.random = () => 0.5;
-    const context = createMockDataContext();
-    const router = createMockRouter(context);
-    context.server.plugins[0].aspects.solarSystems.push({
-      name: "Test System",
-      stars: [{radius: 1, temperature: 5772}],
-      planets: [],
-    } as any);
-    const planet = await router.plugin.starmap.planet.create({
-      pluginId: "Test Plugin",
-      solarSystemId: "Test System",
-      planetType: "A",
-    });
+	it("should create a new planet in a solar system", async () => {
+		const oldRandom = Math.random;
+		Math.random = () => 0.5;
+		const context = createMockDataContext();
+		const router = createMockRouter(context);
+		context.server.plugins[0].aspects.solarSystems.push({
+			name: "Test System",
+			stars: [{ radius: 1, temperature: 5772 }],
+			planets: [],
+		} as any);
+		const planet = await router.plugin.starmap.planet.create({
+			pluginId: "Test Plugin",
+			solarSystemId: "Test System",
+			planetType: "A",
+		});
 
-    // All of these should just work based on the random number being overridden
-    expect(planet).toMatchInlineSnapshot(`
+		// All of these should just work based on the random number being overridden
+		expect(planet).toMatchInlineSnapshot(`
       PlanetPlugin {
         "description": "",
         "isPlanet": {
@@ -54,12 +54,12 @@ describe("solar system planet plugin input", () => {
       }
     `);
 
-    const planet2 = await router.plugin.starmap.planet.create({
-      pluginId: "Test Plugin",
-      solarSystemId: "Test System",
-      planetType: "M",
-    });
-    expect(planet2).toMatchInlineSnapshot(`
+		const planet2 = await router.plugin.starmap.planet.create({
+			pluginId: "Test Plugin",
+			solarSystemId: "Test System",
+			planetType: "M",
+		});
+		expect(planet2).toMatchInlineSnapshot(`
       PlanetPlugin {
         "description": "",
         "isPlanet": {
@@ -91,68 +91,68 @@ describe("solar system planet plugin input", () => {
         "temperature": 295.5,
       }
     `);
-    Math.random = oldRandom;
-  });
+		Math.random = oldRandom;
+	});
 
-  it("should delete a planet in the solar system", async () => {
-    const context = createMockDataContext();
-    const router = createMockRouter(context);
-    context.server.plugins[0].aspects.solarSystems.push({
-      name: "Test System",
-      stars: [{radius: 1, temperature: 5772}],
-      planets: [],
-    } as any);
+	it("should delete a planet in the solar system", async () => {
+		const context = createMockDataContext();
+		const router = createMockRouter(context);
+		context.server.plugins[0].aspects.solarSystems.push({
+			name: "Test System",
+			stars: [{ radius: 1, temperature: 5772 }],
+			planets: [],
+		} as any);
 
-    const planet = await router.plugin.starmap.planet.create({
-      pluginId: "Test Plugin",
-      solarSystemId: "Test System",
-      planetType: "C",
-    });
-    const planet2 = await router.plugin.starmap.planet.create({
-      pluginId: "Test Plugin",
-      solarSystemId: "Test System",
-      planetType: "O",
-    });
+		const planet = await router.plugin.starmap.planet.create({
+			pluginId: "Test Plugin",
+			solarSystemId: "Test System",
+			planetType: "C",
+		});
+		const planet2 = await router.plugin.starmap.planet.create({
+			pluginId: "Test Plugin",
+			solarSystemId: "Test System",
+			planetType: "O",
+		});
 
-    expect(
-      context.server.plugins[0].aspects.solarSystems[0].planets.length
-    ).toBe(2);
-    expect(
-      context.server.plugins[0].aspects.solarSystems[0].planets[0].name
-    ).toBe("Test System I");
-    expect(
-      context.server.plugins[0].aspects.solarSystems[0].planets[1].name
-    ).toBe("Test System II");
-    await router.plugin.starmap.planet.delete({
-      pluginId: "Test Plugin",
-      solarSystemId: "Test System",
-      planetId: planet.name,
-    });
+		expect(
+			context.server.plugins[0].aspects.solarSystems[0].planets.length,
+		).toBe(2);
+		expect(
+			context.server.plugins[0].aspects.solarSystems[0].planets[0].name,
+		).toBe("Test System I");
+		expect(
+			context.server.plugins[0].aspects.solarSystems[0].planets[1].name,
+		).toBe("Test System II");
+		await router.plugin.starmap.planet.delete({
+			pluginId: "Test Plugin",
+			solarSystemId: "Test System",
+			planetId: planet.name,
+		});
 
-    expect(
-      context.server.plugins[0].aspects.solarSystems[0].planets.length
-    ).toBe(1);
-    expect(
-      context.server.plugins[0].aspects.solarSystems[0].planets[0].name
-    ).toBe("Test System II");
-  });
-  it("should update properties of a planet", async () => {
-    const oldRandom = Math.random;
-    Math.random = () => 0.5;
-    const context = createMockDataContext();
-    const router = createMockRouter(context);
-    context.server.plugins[0].aspects.solarSystems.push({
-      name: "Test System",
-      stars: [{radius: 1, temperature: 5772}],
-      planets: [],
-    } as any);
+		expect(
+			context.server.plugins[0].aspects.solarSystems[0].planets.length,
+		).toBe(1);
+		expect(
+			context.server.plugins[0].aspects.solarSystems[0].planets[0].name,
+		).toBe("Test System II");
+	});
+	it("should update properties of a planet", async () => {
+		const oldRandom = Math.random;
+		Math.random = () => 0.5;
+		const context = createMockDataContext();
+		const router = createMockRouter(context);
+		context.server.plugins[0].aspects.solarSystems.push({
+			name: "Test System",
+			stars: [{ radius: 1, temperature: 5772 }],
+			planets: [],
+		} as any);
 
-    const planet = await router.plugin.starmap.planet.create({
-      pluginId: "Test Plugin",
-      solarSystemId: "Test System",
-      planetType: "C",
-    });
-    expect(planet).toMatchInlineSnapshot(`
+		const planet = await router.plugin.starmap.planet.create({
+			pluginId: "Test Plugin",
+			solarSystemId: "Test System",
+			planetType: "C",
+		});
+		expect(planet).toMatchInlineSnapshot(`
       PlanetPlugin {
         "description": "",
         "isPlanet": {
@@ -185,24 +185,24 @@ describe("solar system planet plugin input", () => {
       }
     `);
 
-    await router.plugin.starmap.planet.update({
-      pluginId: "Test Plugin",
-      solarSystemId: "Test System",
-      planetId: planet.name,
-      age: 50,
-      population: 5000,
-      radius: 1000,
-      temperature: 100,
-      isHabitable: false,
-      lifeforms: ["Test Lifeforms"],
-      terranMass: 0.5,
-      satellite: {
-        semiMajorAxis: 500000,
-        orbitalArc: 201,
-      },
-    });
+		await router.plugin.starmap.planet.update({
+			pluginId: "Test Plugin",
+			solarSystemId: "Test System",
+			planetId: planet.name,
+			age: 50,
+			population: 5000,
+			radius: 1000,
+			temperature: 100,
+			isHabitable: false,
+			lifeforms: ["Test Lifeforms"],
+			terranMass: 0.5,
+			satellite: {
+				semiMajorAxis: 500000,
+				orbitalArc: 201,
+			},
+		});
 
-    expect(planet).toMatchInlineSnapshot(`
+		expect(planet).toMatchInlineSnapshot(`
       PlanetPlugin {
         "description": "",
         "isPlanet": {
@@ -235,6 +235,6 @@ describe("solar system planet plugin input", () => {
       }
     `);
 
-    Math.random = oldRandom;
-  });
+		Math.random = oldRandom;
+	});
 });

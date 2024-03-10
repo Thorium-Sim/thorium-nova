@@ -1,46 +1,46 @@
 {
-  "compilerOptions": {
-    /* Visit https://aka.ms/tsconfig.json to read more about this file */
+	"compilerOptions": {
+		/* Visit https://aka.ms/tsconfig.json to read more about this file */
 
-    /* Basic Options */
-    // "incremental": true,                         /* Enable incremental compilation */
-    "target": "ESNEXT",
-    "module": "ES2020",
-    "lib": ["es2021", "DOM"],
-    "jsx": "react-jsx" /* Specify JSX code generation: 'preserve', 'react-native', 'react', 'react-jsx' or 'react-jsxdev'. */,
-    "declaration": true /* Generates corresponding '.d.ts' file. */,
-    "declarationMap": true /* Generates a sourcemap for each corresponding '.d.ts' file. */,
-    "sourceMap": true /* Generates corresponding '.map' file. */,
-    "noEmit": true /* Do not emit outputs. */,
-    "isolatedModules": true /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */,
+		/* Basic Options */
+		// "incremental": true,                         /* Enable incremental compilation */
+		"target": "ESNEXT",
+		"module": "ES2020",
+		"lib": ["es2021", "DOM"],
+		"jsx": "react-jsx" /* Specify JSX code generation: 'preserve', 'react-native', 'react', 'react-jsx' or 'react-jsxdev'. */,
+		"declaration": true /* Generates corresponding '.d.ts' file. */,
+		"declarationMap": true /* Generates a sourcemap for each corresponding '.d.ts' file. */,
+		"sourceMap": true /* Generates corresponding '.map' file. */,
+		"noEmit": true /* Do not emit outputs. */,
+		"isolatedModules": true /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */,
 
-    /* Strict Type-Checking Options */
-    "strict": true /* Enable all strict type-checking options. */,
-    "alwaysStrict": true /* Parse in strict mode and emit "use strict" for each source file. */,
+		/* Strict Type-Checking Options */
+		"strict": true /* Enable all strict type-checking options. */,
+		"alwaysStrict": true /* Parse in strict mode and emit "use strict" for each source file. */,
 
-    /* Module Resolution Options */
-    "moduleResolution": "node" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
-    "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
-    "skipLibCheck": true /* Skip type checking of declaration files. */,
-    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
-    "composite": true,
-    "rootDir": "..",
-    "baseUrl": "..",
-    "paths": {
-      "@thorium/*": ["./shared/*"],
-      "@server/*": ["./server/src/*"],
-      "@client/*": ["./client/app/*"]
-    }
-  },
-  "include": [
-    "src/**/*",
-    "../shared",
-    "../client/app/**/data.ts",
-    "../client/app/**/data.tsx",
-    "../client/app/**/data/**/*.ts",
-    "../client/app/**/data/**/*.tsx",
-    "../client/app/utils/effects.tsx",
-    "../client/tailwind.config.ts",
-    "../client/tailwindComponents.ts"
-  ]
+		/* Module Resolution Options */
+		"moduleResolution": "node" /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */,
+		"esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
+		"skipLibCheck": true /* Skip type checking of declaration files. */,
+		"forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
+		"composite": true,
+		"rootDir": "..",
+		"baseUrl": "..",
+		"paths": {
+			"@thorium/*": ["./shared/*"],
+			"@server/*": ["./server/src/*"],
+			"@client/*": ["./client/app/*"]
+		}
+	},
+	"include": [
+		"src/**/*",
+		"../shared",
+		"../client/app/**/data.ts",
+		"../client/app/**/data.tsx",
+		"../client/app/**/data/**/*.ts",
+		"../client/app/**/data/**/*.tsx",
+		"../client/app/utils/effects.tsx",
+		"../client/tailwind.config.ts",
+		"../client/tailwindComponents.ts"
+	]
 }

@@ -1,4 +1,4 @@
-import {BaseClient} from "./BaseClient";
+import { BaseClient } from "./BaseClient";
 import type Station from "./Station";
 
 /**
@@ -8,38 +8,38 @@ import type Station from "./Station";
  */
 
 export class FlightClient extends BaseClient {
-  flightId: string;
-  shipId: number | null;
-  stationId: string | null;
-  loginName: string;
-  offlineState: "blackout" | {title: string; message: string} | null;
-  training: boolean;
-  stationOverride?: Station | null;
-  officersLog: {
-    timestamp: number;
-    message: string;
-  }[];
-  constructor(params: {id: string} & Partial<FlightClient>) {
-    super(params.id);
-    if (!params.flightId)
-      throw new Error("Error creating flight client: FlightID is required");
-    this.flightId = params.flightId;
-    this.shipId = params.shipId ?? null;
-    this.stationId = params.stationId ?? null;
-    this.loginName = params.loginName ?? "";
-    this.offlineState = params.offlineState || null;
-    this.training = params.training || false;
-    this.officersLog = params.officersLog || [];
-  }
-  toJSON() {
-    return {
-      id: this.id,
-      flightId: this.flightId,
-      shipId: this.shipId,
-      stationId: this.stationId,
-      loginName: this.loginName,
-      offlineState: this.offlineState,
-      training: this.training,
-    };
-  }
+	flightId: string;
+	shipId: number | null;
+	stationId: string | null;
+	loginName: string;
+	offlineState: "blackout" | { title: string; message: string } | null;
+	training: boolean;
+	stationOverride?: Station | null;
+	officersLog: {
+		timestamp: number;
+		message: string;
+	}[];
+	constructor(params: { id: string } & Partial<FlightClient>) {
+		super(params.id);
+		if (!params.flightId)
+			throw new Error("Error creating flight client: FlightID is required");
+		this.flightId = params.flightId;
+		this.shipId = params.shipId ?? null;
+		this.stationId = params.stationId ?? null;
+		this.loginName = params.loginName ?? "";
+		this.offlineState = params.offlineState || null;
+		this.training = params.training || false;
+		this.officersLog = params.officersLog || [];
+	}
+	toJSON() {
+		return {
+			id: this.id,
+			flightId: this.flightId,
+			shipId: this.shipId,
+			stationId: this.stationId,
+			loginName: this.loginName,
+			offlineState: this.offlineState,
+			training: this.training,
+		};
+	}
 }

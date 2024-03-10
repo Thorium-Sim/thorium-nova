@@ -1,27 +1,27 @@
 import ReconnectingWebSocket from "reconnecting-websocket";
 
 export async function loadWebSocket() {
-  const hostname = window.location.hostname;
-  const protocol = window.location.protocol;
-  try {
-    const port =
-      process.env.NODE_ENV === "production"
-        ? Number.parseInt(window.location.port) || 4444
-        : 3001;
+	const hostname = window.location.hostname;
+	const protocol = window.location.protocol;
+	try {
+		const port =
+			process.env.NODE_ENV === "production"
+				? Number.parseInt(window.location.port) || 4444
+				: 3001;
 
-    const socketUrl = `${
-      protocol === "https:" ? "wss" : "ws"
-    }://${hostname}:${port}/ws`;
+		const socketUrl = `${
+			protocol === "https:" ? "wss" : "ws"
+		}://${hostname}:${port}/ws`;
 
-    const socket = new ReconnectingWebSocket(socketUrl, [], {
-      minReconnectionDelay: 500,
-    });
+		const socket = new ReconnectingWebSocket(socketUrl, [], {
+			minReconnectionDelay: 500,
+		});
 
-    await new Promise<ReconnectingWebSocket>((res, rej) => {
-      socket.onopen = () => res(socket);
-    });
-    return socket;
-  } catch (err) {
-    return Promise.reject(err);
-  }
+		await new Promise<ReconnectingWebSocket>((res, rej) => {
+			socket.onopen = () => res(socket);
+		});
+		return socket;
+	} catch (err) {
+		return Promise.reject(err);
+	}
 }

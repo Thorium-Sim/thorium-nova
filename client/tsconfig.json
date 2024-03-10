@@ -1,32 +1,32 @@
 {
-  "include": ["env.d.ts", "./**/*", "../shared"],
-  "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "jsx": "react-jsx",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "resolveJsonModule": true,
-    "target": "ES2022",
-    "strict": true,
-    "allowJs": true,
-    "forceConsistentCasingInFileNames": true,
-    "rootDir": "..",
-    "baseUrl": "..",
-    "skipLibCheck": true,
-    "paths": {
-      "@thorium/ui/*": ["./client/app/components/ui/*"],
-      "@thorium/*": ["./shared/*"],
-      "@server/*": ["./server/src/*"],
-      "@client/*": ["./client/app/*"],
-      "@/icon-name": [
-        "./client/app/components/ui/icons/name.d.ts",
-        "./client/types/icon-name.d.ts"
-      ]
-    },
+	"include": ["env.d.ts", "./**/*", "../shared"],
+	"compilerOptions": {
+		"lib": ["DOM", "DOM.Iterable", "ES2022"],
+		"isolatedModules": true,
+		"esModuleInterop": true,
+		"jsx": "react-jsx",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"resolveJsonModule": true,
+		"target": "ES2022",
+		"strict": true,
+		"allowJs": true,
+		"forceConsistentCasingInFileNames": true,
+		"rootDir": "..",
+		"baseUrl": "..",
+		"skipLibCheck": true,
+		"paths": {
+			"@thorium/ui/*": ["./client/app/components/ui/*"],
+			"@thorium/*": ["./shared/*"],
+			"@server/*": ["./server/src/*"],
+			"@client/*": ["./client/app/*"],
+			"@/icon-name": [
+				"./client/app/components/ui/icons/name.d.ts",
+				"./client/types/icon-name.d.ts"
+			]
+		},
 
-    // Remix takes care of building everything in `remix build`.
-    "noEmit": true
-  }
+		// Remix takes care of building everything in `remix build`.
+		"noEmit": true
+	}
 }

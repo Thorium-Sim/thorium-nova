@@ -3,23 +3,23 @@
 import "./MarkdownInput.css";
 
 export default function MarkdownInput({
-  value,
-  setValue,
-  ...props
+	value,
+	setValue,
+	...props
 }: {
-  setValue: React.Dispatch<React.SetStateAction<string>>;
-  saveImage: (data: ArrayBuffer) => AsyncGenerator<string, boolean, unknown>;
-  value: string;
-  name: string;
+	setValue: React.Dispatch<React.SetStateAction<string>>;
+	saveImage: (data: ArrayBuffer) => AsyncGenerator<string, boolean, unknown>;
+	value: string;
+	name: string;
 }) {
-  return (
-    <textarea
-      className="textarea px-2"
-      {...props}
-      value={value}
-      onChange={evt => setValue(evt.target.value)}
-    />
-  );
+	return (
+		<textarea
+			className="textarea px-2"
+			{...props}
+			value={value}
+			onChange={(evt) => setValue(evt.target.value)}
+		/>
+	);
 }
 // export default function MarkdownInput({
 //   saveImage,

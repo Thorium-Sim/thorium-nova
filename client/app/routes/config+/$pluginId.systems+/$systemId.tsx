@@ -1,50 +1,50 @@
 import Button from "@thorium/ui/Button";
-import {Outlet, useParams, useNavigate, useLocation} from "@remix-run/react";
-import {useConfirm} from "@thorium/ui/AlertDialog";
-import {SettingsList} from "./SettingsList";
-import {q} from "@client/context/AppContext";
-import {Navigate} from "@client/components/Navigate";
+import { Outlet, useParams, useNavigate, useLocation } from "@remix-run/react";
+import { useConfirm } from "@thorium/ui/AlertDialog";
+import { SettingsList } from "./SettingsList";
+import { q } from "@client/context/AppContext";
+import { Navigate } from "@client/components/Navigate";
 
 export default function SystemLayout() {
-  const {pathname} = useLocation();
-  const {systemId, pluginId} = useParams() as {
-    systemId: string;
-    pluginId: string;
-  };
-  const navigate = useNavigate();
-  const confirm = useConfirm();
-  const data = q.plugin.systems.get.useNetRequest({pluginId, systemId});
-  if (!systemId || !data)
-    return <Navigate to={`/config/${pluginId}/systems`} />;
+	const { pathname } = useLocation();
+	const { systemId, pluginId } = useParams() as {
+		systemId: string;
+		pluginId: string;
+	};
+	const navigate = useNavigate();
+	const confirm = useConfirm();
+	const data = q.plugin.systems.get.useNetRequest({ pluginId, systemId });
+	if (!systemId || !data)
+		return <Navigate to={`/config/${pluginId}/systems`} />;
 
-  if (decodeURI(pathname).endsWith(systemId)) return <Navigate to={`basic`} />;
+	if (decodeURI(pathname).endsWith(systemId)) return <Navigate to={`basic`} />;
 
-  return (
-    <>
-      <div>
-        <SettingsList />
-        <Button
-          className="w-full btn-outline btn-error btn-sm"
-          disabled={!systemId}
-          onClick={async () => {
-            if (
-              !systemId ||
-              !(await confirm({
-                header: "Are you sure you want to delete this system?",
-                body: "All content for this system, including images and other assets, will be gone forever.",
-              }))
-            )
-              return;
-            q.plugin.systems.delete.netSend({
-              pluginId,
-              shipSystemId: systemId,
-            });
-            navigate(`/config/${pluginId}/systems`);
-          }}
-        >
-          Delete System
-        </Button>
-        {/* <Button
+	return (
+		<>
+			<div>
+				<SettingsList />
+				<Button
+					className="w-full btn-outline btn-error btn-sm"
+					disabled={!systemId}
+					onClick={async () => {
+						if (
+							!systemId ||
+							!(await confirm({
+								header: "Are you sure you want to delete this system?",
+								body: "All content for this system, including images and other assets, will be gone forever.",
+							}))
+						)
+							return;
+						q.plugin.systems.delete.netSend({
+							pluginId,
+							shipSystemId: systemId,
+						});
+						navigate(`/config/${pluginId}/systems`);
+					}}
+				>
+					Delete System
+				</Button>
+				{/* <Button
                   className="w-full btn-outline btn-notice"
                   disabled={true}
                   onClick={async () => {
@@ -67,8 +67,8 @@ export default function SystemLayout() {
                 >
                   Duplicate Ship
                 </Button> */}
-      </div>
-      <Outlet />
-    </>
-  );
+			</div>
+			<Outlet />
+		</>
+	);
 }
