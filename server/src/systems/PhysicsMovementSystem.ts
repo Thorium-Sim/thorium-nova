@@ -310,8 +310,7 @@ export class PhysicsMovementSystem extends System {
 			);
 			world.step();
 			// Copy over the properties of each of the bodies to the entities
-			world.bodies.forEach((body) => {
-				// @ts-expect-error Unknown
+			world.bodies.forEach((body: any) => {
 				const entity = this.ecs.getEntityById(body.userData?.entityId);
 				if (!entity || !this.collisionStepEntities.has(entity.id)) return;
 				// No need to update fixed bodies.

@@ -6,7 +6,7 @@ import { setDefaultResultOrder } from "node:dns";
 import mdx from "@mdx-js/rollup";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkMdxFrontmatter from "remark-mdx-frontmatter";
-import remarkMdxImages from "remark-mdx-images";
+import remarkMdxImages from "./remark-mdx-images";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import rehypeShiki from "@shikijs/rehype";
@@ -15,7 +15,12 @@ setDefaultResultOrder("ipv4first");
 export default defineConfig({
 	plugins: [
 		mdx({
-			remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkMdxImages],
+			remarkPlugins: [
+				remarkFrontmatter,
+				remarkMdxFrontmatter,
+				// @ts-ignore
+				remarkMdxImages,
+			],
 			rehypePlugins: [
 				rehypeSlug,
 				rehypeAutolinkHeadings,
