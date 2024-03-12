@@ -65,9 +65,11 @@ export const LinearJoystick = ({
 	return (
 		<div
 			ref={containerRef}
-			className={`${
-				vertical ? "h-full" : "w-full"
-			} relative bg-black/50 border-2 border-white/50 rounded-full flex justify-center items-center ${className}`}
+			className={cn(
+				vertical ? "h-full" : "w-full",
+				"relative bg-black/50 border-2 border-white/50 rounded-full flex justify-center items-center",
+				className,
+			)}
 		>
 			<a.div
 				{...bind()}
