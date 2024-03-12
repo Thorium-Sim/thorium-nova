@@ -27,7 +27,7 @@ export function Reactor({
 	return (
 		<div className="relative w-full py-2 px-4 panel panel-primary flex items-center gap-2">
 			{children}
-			<Icon name="atom" className="text-5xl" />
+			<Icon name="reactor" className="text-5xl" />
 			<div className="flex-1">
 				<div className="flex items-center gap-2" title="Power Output">
 					<Icon name="zap" className="text-3xl" />

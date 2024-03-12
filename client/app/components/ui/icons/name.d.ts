@@ -47,6 +47,8 @@
 	| "pencil"
 	| "picture-in-picture"
 	| "plus"
+	| "power-node"
+	| "reactor"
 	| "repeat-2"
 	| "rocket"
 	| "shield-half"

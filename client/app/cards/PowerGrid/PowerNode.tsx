@@ -99,7 +99,7 @@ export function PowerNode({
 						/>
 					</div>
 				</div>
-				<Icon name="git-pull-request-create" />
+				<Icon name="power-node" className="text-4xl" />
 				<div className="flex flex-col select-none">
 					<strong className="text-base font-bold">{capitalCase(name)}</strong>
 					<span className="text-sm">{systemCount} Systems</span>

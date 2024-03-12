@@ -95,7 +95,7 @@ export function Battery({
 					0,
 				)}%`}
 			>
-				<div className="min-h-full aspect-square -rotate-90 -ml-4 -mr-2">
+				<div className="min-h-full aspect-square -rotate-90 -ml-4 -mr-12">
 					<meter
 						ref={chargeMeter}
 						className="w-full h-4"
@@ -105,7 +105,7 @@ export function Battery({
 					/>
 				</div>
 			</div>
-			<div className="flex flex-col items-center">
+			<div className="flex flex-col w-16 items-center text-4xl">
 				<div ref={batteryRef100}>
 					<Icon name="battery-100" />
 				</div>
@@ -133,7 +133,7 @@ export function Battery({
 					100
 				).toFixed(0)}%`}
 			>
-				<div className="min-h-full aspect-square -rotate-90 -ml-2 -mr-4">
+				<div className="min-h-full aspect-square -rotate-90 -ml-2 -mr-16">
 					<meter
 						ref={dischargeMeter}
 						className="w-full h-4"
