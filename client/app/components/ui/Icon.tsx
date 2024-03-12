@@ -57,11 +57,11 @@ export function Icon({
 		);
 	}
 	return (
+		// biome-ignore lint/a11y/noSvgWithoutTitle: The parent element should provide a title
 		<svg
 			{...props}
 			className={cn(sizeClassName[size], "inline self-center", className)}
 		>
-			<title>{name}</title>
 			<use href={`${href}#${name}`} />
 		</svg>
 	);

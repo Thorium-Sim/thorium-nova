@@ -61,21 +61,24 @@ export function StarmapCore() {
 
 function ShipControls() {
 	const useStarmapStore = useGetStarmapStore();
-	const followEntityId = useStarmapStore((store) => store.followEntityId);
+	const selectedObjectIds = useStarmapStore(
+		(store) => store.selectedObjectIds,
+	) as number[];
 
+	const firstObject = selectedObjectIds[0];
 	const [starmapShip] = q.starmapCore.ship.useNetRequest({
-		shipId: followEntityId,
+		shipId: firstObject,
 	});
 
 	return (
 		<>
-			{followEntityId && starmapShip?.behavior ? (
+			{selectedObjectIds.length > 0 && starmapShip?.behavior ? (
 				<>
 					<Tooltip content="Patrol">
 						<Button
 							onClick={() =>
 								q.starmapCore.setBehavior.netSend({
-									ships: [followEntityId],
+									ships: selectedObjectIds,
 									behavior: "patrol",
 								})
 							}
@@ -90,7 +93,7 @@ function ShipControls() {
 						<Button
 							onClick={() =>
 								q.starmapCore.setBehavior.netSend({
-									ships: [followEntityId],
+									ships: selectedObjectIds,
 									behavior: "hold",
 								})
 							}
@@ -105,7 +108,7 @@ function ShipControls() {
 						<Button
 							onClick={() =>
 								q.starmapCore.setBehavior.netSend({
-									ships: [followEntityId],
+									ships: selectedObjectIds,
 									behavior: "attack",
 								})
 							}
@@ -134,7 +137,7 @@ function ShipControls() {
 						<Button
 							onClick={() =>
 								q.starmapCore.setBehavior.netSend({
-									ships: [followEntityId],
+									ships: selectedObjectIds,
 									behavior: "defend",
 								})
 							}
@@ -219,9 +222,9 @@ function StarmapCoreMenubar() {
 			<Button
 				title="Follow selected entity"
 				disabled={selectedObjectIds.length === 0}
-				className={`btn-xs ${
+				className={`btn-xs btn-primary ${
 					selectedObjectIds.length === 0 ? "btn-disabled" : ""
-				} ${followEntityId ? "btn-primary" : "btn-outline"}`}
+				} ${followEntityId ? "" : "btn-outline"}`}
 				onClick={() => {
 					const firstSelected = selectedObjectIds[0];
 					if (typeof firstSelected === "number") {

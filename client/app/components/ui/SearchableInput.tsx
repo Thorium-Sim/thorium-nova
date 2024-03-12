@@ -68,7 +68,6 @@ export default function SearchableInput<T extends { id: any }>({
 		enabled: query.length > 0,
 	});
 
-	console.log({ selected, query, displayValue });
 	return (
 		<Combobox value={selected} onChange={setSelected || (() => {})}>
 			<div className="relative mt-1">

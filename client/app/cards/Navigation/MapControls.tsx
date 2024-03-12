@@ -78,6 +78,7 @@ export const ZoomSliderComp = () => {
 				value={cameraZoom}
 				setValue={(val) => {
 					useStarmapStore.getState().cameraControls?.current?.dollyTo(val);
+					window.dispatchEvent(new Event("starmap-zoom"));
 				}}
 				zoomMin={minDistance}
 				zoomMax={maxDistance}
