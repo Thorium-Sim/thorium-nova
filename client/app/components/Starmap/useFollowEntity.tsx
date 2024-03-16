@@ -3,6 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useLiveQuery } from "@thorium/live-query/client";
 import { useEffect } from "react";
 import { useGetStarmapStore } from "./starmapStore";
+import { keepPreviousData } from "@tanstack/react-query";
 
 export function useFollowEntity() {
 	const useStarmapStore = useGetStarmapStore();
@@ -10,9 +11,14 @@ export function useFollowEntity() {
 	const cameraControls = useStarmapStore((store) => store.cameraControls);
 	const followEntityId = useStarmapStore((store) => store.followEntityId);
 
-	const [starmapShip] = q.starmapCore.ship.useNetRequest({
-		shipId: followEntityId,
-	});
+	const [starmapShip] = q.starmapCore.ship.useNetRequest(
+		{
+			shipId: followEntityId,
+		},
+		{
+			placeholderData: keepPreviousData,
+		},
+	);
 
 	const systemId = starmapShip?.systemId;
 	useEffect(() => {

@@ -6,17 +6,22 @@ import { useContextBridge } from "@react-three/drei";
 
 import { useQueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StarmapStoreContext, useGetStarmapStore } from "./starmapStore";
-import { useTranslate2DTo3D } from "@client/hooks/useTranslate2DTo3D";
+import {
+	useGetObjectsAtScreenPoint as useGetObjectsUnderCursor,
+	useTranslate2DTo3D,
+} from "@client/hooks/useTranslate2DTo3D";
 import { LiveQueryContext } from "@thorium/live-query/client/liveQueryContext";
 
 const FAR = 1e27;
 
 function StarmapEffects() {
 	const to3D = useTranslate2DTo3D();
+	const getObjectsUnderCursor = useGetObjectsUnderCursor();
 	const useStarmapStore = useGetStarmapStore();
 	useEffect(() => {
 		useStarmapStore.setState({ translate2DTo3D: to3D });
-	}, [to3D, useStarmapStore]);
+		useStarmapStore.setState({ getObjectsUnderCursor });
+	}, [to3D, useStarmapStore, getObjectsUnderCursor]);
 	return null;
 }
 

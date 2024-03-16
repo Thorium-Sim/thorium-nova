@@ -5,6 +5,12 @@ import type ShipPlugin from "@server/classes/Plugins/Ship";
 import type { Entity } from "@server/utils/ecs";
 import type { Coordinates } from "@server/utils/unitTypes";
 import { z } from "zod";
+import {
+	getObjectOffsetPosition,
+	getObjectSystem,
+} from "@server/utils/position";
+
+const behavior = z.enum(["hold", "patrol", "attack", "defend", "avoid"]);
 
 export const starmapCore = t.router({
 	systems: t.procedure.request(({ ctx }) => {
@@ -254,18 +260,78 @@ export const starmapCore = t.router({
 				pubsub.publish.starmapCore.autopilot({ systemId: id });
 			});
 		}),
+	setOrbit: t.procedure
+		.input(
+			z.object({
+				ships: z.number().array(),
+				objectId: z.number(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const systemIds = new Set<number | null>();
+
+			const orbitedObject = ctx.flight?.ecs.getEntityById(input.objectId);
+			if (!orbitedObject) return;
+			const objectSystem = getObjectSystem(orbitedObject);
+			if (!objectSystem) return;
+
+			for (const shipId of input.ships) {
+				const entity = ctx.flight?.ecs.getEntityById(shipId);
+				if (!entity) continue;
+				const position = getObjectOffsetPosition(orbitedObject, entity);
+				entity.updateComponent("autopilot", {
+					desiredCoordinates: position,
+					desiredSolarSystemId: objectSystem.id,
+				});
+
+				if (typeof entity?.components.position?.parentId !== "undefined") {
+					systemIds.add(entity.components.position.parentId);
+				}
+				pubsub.publish.pilot.autopilot.get({ shipId: entity.id });
+			}
+			systemIds.forEach((id) => {
+				pubsub.publish.starmapCore.autopilot({ systemId: id });
+			});
+		}),
+	setFollowShip: t.procedure
+		.input(
+			z.object({
+				objective: behavior,
+				ships: z.number().array(),
+				objectId: z.number(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const systemIds = new Set<number | null>();
+
+			const followedObject = ctx.flight?.ecs.getEntityById(input.objectId);
+			if (!followedObject) return;
+
+			for (const shipId of input.ships) {
+				const entity = ctx.flight?.ecs.getEntityById(shipId);
+				if (!entity) continue;
+
+				entity.updateComponent("shipBehavior", {
+					objective: input.objective,
+					target: followedObject.id,
+				});
+
+				if (typeof entity?.components.position?.parentId !== "undefined") {
+					systemIds.add(entity.components.position.parentId);
+				}
+				pubsub.publish.pilot.autopilot.get({ shipId: entity.id });
+				pubsub.publish.ship.get({ shipId: entity.id });
+				pubsub.publish.starmapCore.ship({ shipId: entity.id });
+			}
+			systemIds.forEach((id) => {
+				pubsub.publish.starmapCore.autopilot({ systemId: id });
+			});
+		}),
 	setBehavior: t.procedure
 		.input(
 			z.object({
 				ships: z.number().array(),
-				behavior: z.union([
-					z.literal("hold"),
-					z.literal("seek"),
-					z.literal("patrol"),
-					z.literal("attack"),
-					z.literal("defend"),
-					z.literal("avoid"),
-				]),
+				behavior,
 			}),
 		)
 		.send(({ ctx, input }) => {

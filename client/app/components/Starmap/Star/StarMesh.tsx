@@ -30,12 +30,14 @@ const Star: React.FC<{
 	position?: Vector3 | [number, number, number];
 	noLensFlare?: boolean;
 	showSprite?: boolean;
+	userData?: any;
 }> = ({
 	color1 = 0x224488,
 	color2 = 0xf6fcff,
 	size,
 	noLensFlare,
 	showSprite,
+	userData,
 	...props
 }) => {
 	const useStarmapStore = useGetStarmapStore();
@@ -99,10 +101,12 @@ const Star: React.FC<{
 	return (
 		<group {...props}>
 			<pointLight intensity={0.8} decay={2} color={color} castShadow />
-			{!isViewscreen && <StarSprite size={size} color1={color1} />}
+			{!isViewscreen && (
+				<StarSprite size={size} color1={color1} userData={userData} />
+			)}
 
 			<group ref={starMesh}>
-				<mesh ref={shader} uuid="My star">
+				<mesh ref={shader} userData={userData}>
 					<circleGeometry attach="geometry" args={[1, 8, 8]} />
 					<shaderMaterial
 						attach="material"
@@ -114,7 +118,7 @@ const Star: React.FC<{
 						depthTest={false}
 					/>
 				</mesh>
-				<mesh uuid="My star background">
+				<mesh>
 					<sphereGeometry attach="geometry" args={[0.5, 32, 32]} />
 					<meshBasicMaterial attach="material" color={0x000000} />
 				</mesh>
@@ -128,14 +132,14 @@ export default Star;
 
 export const StarSprite = forwardRef<
 	Group,
-	{ size?: number; color1: Color | number }
->(({ size = 1, color1 }, starSprite) => {
+	{ size?: number; color1: Color | number; userData: any }
+>(({ size = 1, color1, userData }, starSprite) => {
 	const spriteScale = 1 / size / SPRITE_SCALE_FACTOR;
 
 	return (
 		<group ref={starSprite} scale={[spriteScale, spriteScale, spriteScale]}>
 			<Suspense fallback={null}>
-				<StarSpriteInner color1={color1} />
+				<StarSpriteInner color1={color1} userData={userData} />
 			</Suspense>
 		</group>
 	);
@@ -143,11 +147,13 @@ export const StarSprite = forwardRef<
 
 StarSprite.displayName = "StarSprite";
 
-const StarSpriteInner = ({ color1 }: { color1: Color | number }) => {
+const StarSpriteInner = ({
+	color1,
+	userData,
+}: { color1: Color | number; userData: any }) => {
 	const spriteMap = useTexture(spritePath) as Texture;
-
 	return (
-		<sprite>
+		<sprite userData={userData}>
 			<spriteMaterial
 				attach="material"
 				map={spriteMap}

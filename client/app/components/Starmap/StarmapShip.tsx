@@ -108,6 +108,7 @@ export function StarmapShip({
 	});
 	return (
 		<group>
+			{/* Points towards the current destination */}
 			<Line
 				ref={lineRef}
 				points={[
@@ -120,6 +121,7 @@ export function StarmapShip({
 				lineWidth={0.5} // In pixels (default)
 			/>
 			<group ref={group}>
+				{/* Ship sensor range */}
 				{!isCore || sensorsHidden ? null : (
 					<mesh>
 						<icosahedronGeometry args={[10_000, 1]} />
@@ -148,10 +150,10 @@ export function StarmapShip({
 							<group ref={shipSprite}>
 								{logoUrl && (
 									<ShipSprite
-										id={id}
 										// TODO June 9, 2022 - This color should represent the faction, with a toggle to make it show IFF for the current ship
 										color={spriteColor}
 										spriteAsset={logoUrl}
+										userData={{ type: "ship", id }}
 									/>
 								)}
 							</group>
@@ -159,7 +161,11 @@ export function StarmapShip({
 					)}
 					{model && (
 						<group ref={shipMesh}>
-							<primitive object={model} rotation={[Math.PI / 2, Math.PI, 0]} />
+							<primitive
+								userData={{ type: "ship", id }}
+								object={model}
+								rotation={[Math.PI / 2, Math.PI, 0]}
+							/>
 						</group>
 					)}
 				</group>
@@ -227,13 +233,13 @@ const maskTextureAsset = createAsset(async (image) => {
 	return new CanvasTexture(canvas);
 });
 const ShipSprite = ({
-	id,
 	color = "red",
 	spriteAsset,
+	userData,
 }: {
-	id: string | number;
 	color?: string | number;
 	spriteAsset: string;
+	userData?: any;
 }) => {
 	// TODO: Replace with a ship icon
 	const spriteMap = maskTextureAsset.read(spriteAsset);
@@ -251,7 +257,7 @@ const ShipSprite = ({
 		}
 	});
 	return (
-		<sprite ref={ref} scale={[scale, scale, scale]}>
+		<sprite ref={ref} scale={[scale, scale, scale]} userData={userData}>
 			<spriteMaterial
 				attach="material"
 				alphaMap={spriteMap}

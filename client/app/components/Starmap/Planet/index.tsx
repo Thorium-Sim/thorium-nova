@@ -7,17 +7,17 @@ import Selected from "../Selected";
 import Dot from "./Dot.svg";
 import { useGetStarmapStore } from "../starmapStore";
 import SystemLabel from "../SystemMarker/SystemLabel";
-import { type Group, Vector3 } from "three";
+import type { Group, Vector3 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { getOrbitPosition } from "@server/utils/getOrbitPosition";
-import { Kilometer, degToRad } from "@server/utils/unitTypes";
+import { degToRad } from "@server/utils/unitTypes";
 import { OrbitLine } from "../OrbitContainer";
 
-export const PlanetSprite = ({ color = "white" }) => {
+export const PlanetSprite = ({ color = "white", userData = {} }) => {
 	const spriteMap = useTexture(Dot);
 
 	return (
-		<sprite>
+		<sprite userData={userData}>
 			<spriteMaterial
 				attach="material"
 				map={spriteMap}
@@ -30,14 +30,16 @@ export const PlanetSprite = ({ color = "white" }) => {
 export function PlanetSphere({
 	texture,
 	wireframe,
+	userData,
 }: {
 	texture: string;
 	wireframe?: boolean;
+	userData?: any;
 }) {
 	const mapTexture = useTexture(texture);
 
 	return (
-		<mesh castShadow>
+		<mesh castShadow userData={userData}>
 			<sphereGeometry args={[1, 32, 32]} attach="geometry" />
 			<meshPhysicalMaterial
 				map={wireframe ? undefined : mapTexture}
@@ -51,7 +53,6 @@ export function PlanetSphere({
 
 const SPRITE_SCALE_FACTOR = 50;
 export const planetSpriteScale = 1 / SPRITE_SCALE_FACTOR;
-const distanceVector = new Vector3();
 
 export function Planet({
 	planet,
@@ -197,14 +198,21 @@ export function Planet({
 							ref={planetSpriteRef}
 							scale={[planetSpriteScale, planetSpriteScale, planetSpriteScale]}
 						>
-							<PlanetSprite color={selected ? "#0088ff" : "white"} />
+							<PlanetSprite
+								color={selected ? "#0088ff" : "white"}
+								userData={{ type: "planet", id: planet.id }}
+							/>
 						</group>
 						<group
 							ref={planetMeshRef}
 							scale={[size, size, size]}
 							rotation={[0, 0, degToRad(axialTilt)]}
 						>
-							<PlanetSphere texture={texture} wireframe={wireframe} />
+							<PlanetSphere
+								texture={texture}
+								wireframe={wireframe}
+								userData={{ type: "planet", id: planet.id }}
+							/>
 							{rings && <Rings texture={rings} wireframe={wireframe} />}
 							{clouds && !wireframe && <Clouds texture={clouds} />}
 							{selected && <Selected />}

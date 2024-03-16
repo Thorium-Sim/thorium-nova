@@ -310,6 +310,17 @@ const quotes = [
 	"A children's story that can only be enjoyed by children is not a good children's story in the slightest.",
 	// E.B. White
 	"I arise in the morning torn between a desire to improve the world and a desire to enjoy the world. This makes it hard to plan the day.",
+	// Kurt Vonnegut
+	"We're here on Earth to fart around.",
+	"We're dancing animals. We love to move around.",
+	"We are what we pretend to be, so we must be careful about what we pretend to be.",
+	"I want to stand as close to the edge as I can without going over. Out on the edge you see all kinds of things you can't see from the center.",
+	"A purpose of human life, no matter who is controlling it, is to love whoever is around to be loved.",
+	"And I urge you to please notice when you are happy, and exclaim or murmur or think at some point, 'If this isn't nice, I don't know what is.'",
+	"The universe is a big place, perhaps the biggest.",
+	"The practice of art isn't to make a living. It's to make your soul grow.",
+	"Everything is nothing, with a twist.",
+	"I can have oodles of charm when I want to.",
 ];
 
 const QuoteOfTheDay = () => {

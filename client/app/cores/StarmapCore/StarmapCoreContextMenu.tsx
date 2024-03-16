@@ -33,7 +33,14 @@ export const StarmapCoreContextMenu = ({
 }: {
 	parentRef: RefObject<HTMLDivElement>;
 }) => {
-	const [open, setOpen] = useState<{ x: number; y: number } | false>(false);
+	const [open, setOpen] = useState<
+		| {
+				x: number;
+				y: number;
+				object?: { type: "star" | "ship" | "planet"; id: number };
+		  }
+		| false
+	>(false);
 	const useStarmapStore = useGetStarmapStore();
 
 	const { strategy, refs } = useFloating({
@@ -51,7 +58,15 @@ export const StarmapCoreContextMenu = ({
 
 	useRightClick((e) => {
 		e.preventDefault();
-		setOpen({ x: e.clientX, y: e.clientY });
+
+		const object = useStarmapStore
+			.getState()
+			.getObjectsUnderCursor?.()
+			.filter(
+				(o) => o.userData.type && o.userData.id !== undefined,
+			)[0]?.userData;
+
+		setOpen({ x: e.clientX, y: e.clientY, object });
 		const virtualEl = makeVirtualEl({ x: e.clientX, y: e.clientY });
 		refs.setReference(virtualEl);
 	}, parentRef);
@@ -68,7 +83,7 @@ export const StarmapCoreContextMenu = ({
 
 	if (!open) return null;
 
-	const { x, y } = open;
+	const { x, y, object } = open;
 
 	return (
 		<Portal>
@@ -83,31 +98,83 @@ export const StarmapCoreContextMenu = ({
 			>
 				{/* TODO March 11, 2024: Add commands for when right clicking on another object, such as following or attacking the target */}
 				{selectedShips.length > 0 ? (
-					<button
-						className={menuItemClass}
-						onClick={() => {
-							if (selectedShips.length > 0) {
-								const position = useStarmapStore
-									.getState()
-									.translate2DTo3D?.(x, y);
-								if (!position) return;
-								q.starmapCore.setDestinations.netSend({
-									ships: selectedShips.map((id: any) => ({
-										id,
-										position: {
-											x: position.x,
-											y: useStarmapStore.getState().yDimensionIndex,
-											z: position.z,
-										},
-										systemId: useStarmapStore.getState().currentSystem,
-									})),
-								});
-								setOpen(false);
-							}
-						}}
-					>
-						Travel To Here
-					</button>
+					!object ? (
+						<button
+							className={menuItemClass}
+							onClick={() => {
+								if (selectedShips.length > 0) {
+									const position = useStarmapStore
+										.getState()
+										.translate2DTo3D?.(x, y);
+									if (!position) return;
+									q.starmapCore.setDestinations.netSend({
+										ships: selectedShips.map((id: any) => ({
+											id,
+											position: {
+												x: position.x,
+												y: useStarmapStore.getState().yDimensionIndex,
+												z: position.z,
+											},
+											systemId: useStarmapStore.getState().currentSystem,
+										})),
+									});
+									setOpen(false);
+								}
+							}}
+						>
+							Travel To Here
+						</button>
+					) : object.type === "planet" ? (
+						<button
+							className={menuItemClass}
+							onClick={() => {
+								if (selectedShips.length > 0) {
+									q.starmapCore.setOrbit.netSend({
+										ships: useStarmapStore.getState()
+											.selectedObjectIds as number[],
+										objectId: object.id,
+									});
+									setOpen(false);
+								}
+							}}
+						>
+							Orbit Planet
+						</button>
+					) : object.type === "star" ? (
+						<button
+							className={menuItemClass}
+							onClick={() => {
+								if (selectedShips.length > 0) {
+									q.starmapCore.setOrbit.netSend({
+										ships: useStarmapStore.getState()
+											.selectedObjectIds as number[],
+										objectId: object.id,
+									});
+									setOpen(false);
+								}
+							}}
+						>
+							Orbit Star
+						</button>
+					) : object.type === "ship" ? (
+						<button
+							className={menuItemClass}
+							onClick={() => {
+								if (selectedShips.length > 0) {
+									q.starmapCore.setFollowShip.netSend({
+										ships: useStarmapStore.getState()
+											.selectedObjectIds as number[],
+										objectId: object.id,
+										// TODO: March 15, 2024 - This should change based on the current objective of the ship
+										objective: "defend",
+									});
+									setOpen(false);
+								}
+							}}
+						>
+							Follow Ship
+						</button>
+					) : null
 				) : null}
 				<button
 					className={menuItemClass}

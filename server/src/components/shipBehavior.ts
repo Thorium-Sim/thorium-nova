@@ -8,14 +8,13 @@ export const shipBehavior = z
 		/**
 		 * The main thing the ship is trying to accomplish
 		 * - hold: stay in place
-		 * - seek: move towards a target
 		 * - patrol: move within a radius of a point
 		 * - attack: move towards a target and attack it
 		 * - defend: move towards a target and defend it
 		 * - avoid: move away from a target
 		 */
 		objective: z
-			.enum(["hold", "seek", "patrol", "attack", "defend", "avoid"])
+			.enum(["hold", "patrol", "attack", "defend", "avoid"])
 			.default("hold"),
 		/**
 		 * The target of the ship's objective

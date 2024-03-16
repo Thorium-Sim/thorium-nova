@@ -37,6 +37,7 @@ interface StarmapStore {
 		vanity: string;
 	};
 	translate2DTo3D?: (x: number, y: number) => Vector3;
+	getObjectsUnderCursor?: () => any[];
 	setCameraFocus: (position: Coordinates<number>) => void;
 	planetsHidden: boolean;
 	sensorsHidden: boolean;

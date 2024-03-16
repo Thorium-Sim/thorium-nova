@@ -1,9 +1,10 @@
-import { useThree } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useEffect } from "react";
 import { Plane, Raycaster, Vector2, Vector3 } from "three";
 
+const raycaster = new Raycaster();
 export function useTranslate2DTo3D() {
 	const { camera, size } = useThree();
-	const raycaster = new Raycaster();
 	const planeY = new Plane(new Vector3(0, 1, 0), 0);
 	return (x: number, y: number) => {
 		const mv = new Vector2(
@@ -14,5 +15,13 @@ export function useTranslate2DTo3D() {
 		const pos = new Vector3();
 		raycaster.ray.intersectPlane(planeY, pos);
 		return pos;
+	};
+}
+
+export function useGetObjectsAtScreenPoint() {
+	const { scene, raycaster } = useThree();
+
+	return () => {
+		return raycaster.intersectObjects(scene.children).map((o) => o.object);
 	};
 }

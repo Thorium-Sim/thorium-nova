@@ -36,6 +36,7 @@ import clsx from "clsx";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { Icon } from "@thorium/ui/Icon";
 import useInterval from "@client/hooks/useInterval";
+import { keepPreviousData } from "@tanstack/react-query";
 
 export function StarmapCore() {
 	const ref = useRef<HTMLDivElement>(null);
@@ -52,7 +53,9 @@ export function StarmapCore() {
 					<div className="w-96">
 						<ZoomSliderComp />
 					</div>
-					<ShipControls />
+					<Suspense fallback={null}>
+						<ShipControls />
+					</Suspense>
 				</div>
 			</StarmapStoreProvider>
 		</div>
@@ -66,9 +69,12 @@ function ShipControls() {
 	) as number[];
 
 	const firstObject = selectedObjectIds[0];
-	const [starmapShip] = q.starmapCore.ship.useNetRequest({
-		shipId: firstObject,
-	});
+	const [starmapShip] = q.starmapCore.ship.useNetRequest(
+		{
+			shipId: firstObject,
+		},
+		{ placeholderData: keepPreviousData },
+	);
 
 	return (
 		<>
@@ -367,7 +373,9 @@ function CanvasWrapper() {
 					}
 				}}
 			>
-				<StarmapCoreCanvasHooks />
+				<Suspense>
+					<StarmapCoreCanvasHooks />
+				</Suspense>
 				<ambientLight intensity={0.2} />
 				<pointLight position={[10, 10, 10]} />
 				{currentSystem === null ? (

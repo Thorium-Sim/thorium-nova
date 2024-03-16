@@ -93,7 +93,12 @@ const StarEntity: React.FC<{
 				scale={[size, size, size]}
 			>
 				{selected && viewingMode !== "viewscreen" && <Selected />}
-				<Star color1={color1} color2={color2} size={size} />
+				<Star
+					color1={color1}
+					color2={color2}
+					size={size}
+					userData={{ type: "star", id: star.id }}
+				/>
 			</group>
 		</OrbitContainer>
 	);

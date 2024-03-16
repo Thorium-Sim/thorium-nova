@@ -264,7 +264,9 @@ function CanvasWrapper({ shouldRender }: { shouldRender: boolean }) {
 		<StarmapCanvas shouldRender={firstRender || shouldRender}>
 			<ambientLight intensity={0.2} />
 			<pointLight position={[10, 10, 10]} />
-			<StarmapHooks />
+			<Suspense>
+				<StarmapHooks />
+			</Suspense>
 			{currentSystem === null ? (
 				<InterstellarWrapper />
 			) : (
