@@ -8,6 +8,8 @@ import {
 	universeToWorld,
 	worldToUniverse,
 } from "@server/init/rapier";
+import type { RigidBody, World } from "@dimforge/rapier3d-compat";
+
 const tempObj = new Object3D();
 const tempVector = new Vector3();
 const worldVector = new Vector3();
@@ -78,16 +80,18 @@ export class PhysicsMovementSystem extends System {
 
 		if (world) {
 			// Make sure the entity in question has a corresponding body in the physics world.
-			const handle = handles.get(worldEntity.id);
-			let body = typeof handle === "number" && world.bodies.get(handle);
+			const handle = handles.get(entity.id);
+			let body: RigidBody | null =
+				typeof handle === "number" && world.bodies.get(handle);
 			if (!body) {
 				// Generate a body for the component and store the handle on the entity
 				body = generateRigidBody(world, entity, this.ecs.colliderCache) || null;
 				if (typeof body?.handle === "number") {
-					handles.set(worldEntity.id, body.handle);
+					handles.set(entity.id, body.handle);
 					entity.updateComponent("physicsHandles", { handles });
 				}
 			}
+
 			// eslint-disable-next-line no-labels
 			if (body && !isHighSpeed) {
 				/**
@@ -301,7 +305,7 @@ export class PhysicsMovementSystem extends System {
 	postUpdate(_elapsed: number): void {
 		// Run the physics simulation for all of the relevant worlds.
 		this.ecs.componentCache.get("physicsWorld")?.forEach((entity) => {
-			const world = entity.components.physicsWorld?.world;
+			const world = entity.components.physicsWorld?.world as World;
 			if (!world) return;
 			worldVector.set(
 				entity.components.physicsWorld?.location.x || 0,

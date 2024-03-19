@@ -17,7 +17,7 @@ import type { World } from "@dimforge/rapier3d-compat";
  */
 export const COLLISION_PHYSICS_LIMIT: Kilometer = Math.floor(2 ** 24 / 1000);
 export const SECTOR_GRID_SIZE: Kilometer = COLLISION_PHYSICS_LIMIT * 2;
-
+export const SECTOR_GRID_OFFSET: Kilometer = SECTOR_GRID_SIZE / 2;
 export async function initRapier() {
 	await RAPIER.init();
 }
@@ -34,15 +34,9 @@ export function getWorldPosition(entityPosition: {
 	z: number;
 }) {
 	// World positions snap to the center of grid segments.
-	const x =
-		Math.floor(entityPosition.x / SECTOR_GRID_SIZE) * SECTOR_GRID_SIZE +
-		SECTOR_GRID_SIZE / 2;
-	const y =
-		Math.floor(entityPosition.y / SECTOR_GRID_SIZE) * SECTOR_GRID_SIZE +
-		SECTOR_GRID_SIZE / 2;
-	const z =
-		Math.floor(entityPosition.z / SECTOR_GRID_SIZE) * SECTOR_GRID_SIZE +
-		SECTOR_GRID_SIZE / 2;
+	const x = Math.floor(entityPosition.x / SECTOR_GRID_SIZE) * SECTOR_GRID_SIZE;
+	const y = Math.floor(entityPosition.y / SECTOR_GRID_SIZE) * SECTOR_GRID_SIZE;
+	const z = Math.floor(entityPosition.z / SECTOR_GRID_SIZE) * SECTOR_GRID_SIZE;
 	return worldVector.set(x, y, z);
 }
 /**
@@ -257,24 +251,24 @@ export function getEntityWorld(ecs: ECS, entity: Entity) {
 		});
 	if (typeof position?.parentId !== "number") return null;
 	const entitySector = getSectorNumber(position);
-
 	let world: Entity | null = null;
-	ecs.componentCache.get("physicsWorld")?.forEach((entity) => {
+
+	ecs.componentCache.get("physicsWorld")?.forEach((worldEntity) => {
 		if (world) return;
 		let {
 			location,
 			world: physicsWorld,
 			enabled,
-		} = entity.components.physicsWorld || {};
+		} = worldEntity.components.physicsWorld || {};
 		if (!physicsWorld) {
-			entity.updateComponent("physicsWorld", {
+			worldEntity.updateComponent("physicsWorld", {
 				world: new RAPIER.World({ x: 0, y: 0, z: 0 }),
 			});
 			physicsWorld = entity.components.physicsWorld?.world;
 		}
 		if (!location || !enabled) return;
 		const key = getSectorNumber(location);
-		if (key === entitySector) world = entity;
+		if (key === entitySector) world = worldEntity;
 	});
 	return world as Entity | null;
 }

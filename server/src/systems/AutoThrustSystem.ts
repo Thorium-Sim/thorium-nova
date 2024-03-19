@@ -165,7 +165,8 @@ export class AutoThrustSystem extends System {
 				impulseEngineSpeed * TRAVEL_TIME_THRESHOLD_SECONDS;
 		}
 
-		// If the rotation is < 0.5˚ off
+		// This will be 1 if the ship is pointing directly at the destination, and 0 if it's pointing directly away
+		const correctDirectionCoefficient = (180 - rotationDifference) / 180;
 		const inCorrectDirection = rotationDifference <= 0.5;
 		if (
 			warpEngines?.components.isWarpEngines &&
@@ -177,6 +178,7 @@ export class AutoThrustSystem extends System {
 			const warpCruisingSpeed = isInInterstellar
 				? warpEngines.components.isWarpEngines.interstellarCruisingSpeed
 				: warpEngines.components.isWarpEngines.solarCruisingSpeed;
+			// Warp is so fast, we'll still require a full rotation before activating.
 			if (inCorrectDirection) {
 				const controllerOutput = warpController?.update(
 					-1 * Math.min(warpCruisingSpeed, distanceInKM),
@@ -204,30 +206,25 @@ export class AutoThrustSystem extends System {
 				currentWarpFactor: 0,
 				maxVelocity: 0,
 			});
-			if (inCorrectDirection) {
-				const controllerOutput = impulseController?.update(
-					-1 *
-						Math.min(
-							impulseEngines.components.isImpulseEngines.cruisingSpeed,
-							distanceInKM,
-						),
-				);
-				let desiredSpeed = Math.min(
-					impulseEngines.components.isImpulseEngines.cruisingSpeed,
-					Math.max(0, controllerOutput || 0),
-				);
+			const controllerOutput = impulseController?.update(
+				-1 *
+					Math.min(
+						impulseEngines.components.isImpulseEngines.cruisingSpeed,
+						distanceInKM,
+					),
+			);
+			let desiredSpeed = Math.min(
+				impulseEngines.components.isImpulseEngines.cruisingSpeed,
+				Math.max(0, controllerOutput || 0) * correctDirectionCoefficient,
+			);
 
-				// Arbitrary number that gets roughly close to 5 KM away
-				if (distanceInKM < 5) {
-					desiredSpeed = 0;
-				}
-				impulseEngines.updateComponent("isImpulseEngines", {
-					targetSpeed: desiredSpeed,
-				});
-			} else {
-				impulseController?.reset();
-				impulseEngines.updateComponent("isImpulseEngines", { targetSpeed: 0 });
+			// Arbitrary number that gets roughly close to 5 KM away
+			if (distanceInKM < 1) {
+				desiredSpeed = 0;
 			}
+			impulseEngines.updateComponent("isImpulseEngines", {
+				targetSpeed: desiredSpeed,
+			});
 		}
 		if (this.updateCount === 0) {
 			if (warpEngines) {
