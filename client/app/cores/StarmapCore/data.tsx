@@ -10,7 +10,14 @@ import {
 	getObjectSystem,
 } from "@server/utils/position";
 
-const behavior = z.enum(["hold", "patrol", "attack", "defend", "avoid"]);
+const behavior = z.enum([
+	"hold",
+	"patrol",
+	"wander",
+	"attack",
+	"defend",
+	"avoid",
+]);
 
 export const starmapCore = t.router({
 	systems: t.procedure.request(({ ctx }) => {
@@ -250,6 +257,20 @@ export const starmapCore = t.router({
 					desiredCoordinates: ship.position,
 					desiredSolarSystemId: ship.systemId,
 				});
+				entity?.updateComponent("shipBehavior", {
+					destination: {
+						parentId: ship.systemId,
+						x: ship.position.x,
+						y: ship.position.y,
+						z: ship.position.z,
+					},
+					target: {
+						parentId: ship.systemId,
+						x: ship.position.x,
+						y: ship.position.y,
+						z: ship.position.z,
+					},
+				});
 				if (typeof entity?.components.position?.parentId !== "undefined") {
 					systemIds.add(entity.components.position.parentId);
 				}
@@ -282,6 +303,20 @@ export const starmapCore = t.router({
 				entity.updateComponent("autopilot", {
 					desiredCoordinates: position,
 					desiredSolarSystemId: objectSystem.id,
+				});
+				entity?.updateComponent("shipBehavior", {
+					destination: {
+						parentId: objectSystem.id,
+						x: position.x,
+						y: position.y,
+						z: position.z,
+					},
+					target: {
+						parentId: objectSystem.id,
+						x: position.x,
+						y: position.y,
+						z: position.z,
+					},
 				});
 
 				if (typeof entity?.components.position?.parentId !== "undefined") {
@@ -341,6 +376,29 @@ export const starmapCore = t.router({
 					objective: input.behavior,
 				});
 
+				if (input.behavior === "hold") {
+					const position = entity?.components.position;
+					if (position) {
+						entity.updateComponent("shipBehavior", {
+							destination: {
+								parentId: position.parentId || null,
+								x: position.x,
+								y: position.y,
+								z: position.z,
+							},
+						});
+						entity.updateComponent("autopilot", {
+							rotationAutopilot: true,
+							forwardAutopilot: true,
+							desiredCoordinates: {
+								x: position.x,
+								y: position.y,
+								z: position.z,
+							},
+							desiredSolarSystemId: position.parentId || null,
+						});
+					}
+				}
 				pubsub.publish.pilot.autopilot.get({ shipId });
 				pubsub.publish.ship.get({ shipId });
 				pubsub.publish.starmapCore.ship({ shipId });

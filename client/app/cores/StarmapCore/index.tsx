@@ -95,6 +95,21 @@ function ShipControls() {
 							<Icon name="siren" />
 						</Button>
 					</Tooltip>
+					<Tooltip content="Wander">
+						<Button
+							onClick={() =>
+								q.starmapCore.setBehavior.netSend({
+									ships: selectedObjectIds,
+									behavior: "wander",
+								})
+							}
+							className={clsx("btn-sm btn-notice btn-outline", {
+								"btn-active": starmapShip.behavior.objective === "wander",
+							})}
+						>
+							<Icon name="route" />
+						</Button>
+					</Tooltip>
 					<Tooltip content="Hold Position">
 						<Button
 							onClick={() =>
@@ -122,21 +137,7 @@ function ShipControls() {
 								"btn-active": starmapShip.behavior.objective === "attack",
 							})}
 						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fillRule="evenodd"
-								strokeLinejoin="round"
-								strokeMiterlimit="2"
-								clipRule="evenodd"
-								viewBox="0 0 700 700"
-								className="w-4 h-4"
-							>
-								<title>attack</title>
-								<path
-									fill="currentColor"
-									d="M212 533L88 639l-25 48-56-9-7-55 49-24 112-119-74-78 26-27 101 74 30 31 70 105-28 26-74-78zM700 13l-70 155-368 320-11-15-30-32-13-10L540 77l160-64z"
-								/>
-							</svg>
+						<Icon name="sword" />
 						</Button>
 					</Tooltip>
 					<Tooltip content="Follow & Defend">

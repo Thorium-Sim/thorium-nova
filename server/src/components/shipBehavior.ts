@@ -14,7 +14,7 @@ export const shipBehavior = z
 		 * - avoid: move away from a target
 		 */
 		objective: z
-			.enum(["hold", "patrol", "attack", "defend", "avoid"])
+			.enum(["hold", "patrol", "wander", "attack", "defend", "avoid"])
 			.default("hold"),
 		/**
 		 * The target of the ship's objective
@@ -57,6 +57,6 @@ export const shipBehavior = z
 		 * basically mid-orbit. When patrolling around a planet, set this
 		 * to 5 times the planet's radius.
 		 */
-		patrolRadius: z.number().default(25_000),
+		patrolRadius: z.number().default(2_500),
 	})
 	.default({});

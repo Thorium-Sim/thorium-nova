@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { useLiveQuery } from "@thorium/live-query/client";
 import Star from "@client/components/Starmap/Star/StarMesh";
 import { getSphericalPositionWithBias } from "@client/utils/getSphericalPositionWithBias";
-import { randomPointInSphere } from "@client/utils/randomPointInSphere";
+import { randomPointInSphere } from "@thorium/randomPoint/randomPointInSphere";
 import { memo, useMemo } from "react";
 import {
 	Color,

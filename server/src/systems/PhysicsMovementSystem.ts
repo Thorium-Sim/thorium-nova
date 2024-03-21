@@ -316,6 +316,7 @@ export class PhysicsMovementSystem extends System {
 			// Copy over the properties of each of the bodies to the entities
 			world.bodies.forEach((body: any) => {
 				const entity = this.ecs.getEntityById(body.userData?.entityId);
+				// No need to update entities that aren't in the collision step.
 				if (!entity || !this.collisionStepEntities.has(entity.id)) return;
 				// No need to update fixed bodies.
 				if (body.bodyType() === RAPIER.RigidBodyType.Fixed) return;

@@ -107,10 +107,12 @@ export class AutoRotateSystem extends System {
 		const rotationController = getRotationController(entity.id);
 		const output = rotationController.update(1 - angleTo);
 		const acc = Math.min(Math.max(output, accelMax * -1), accelMax);
-		thrusters.components.isThrusters.autoRotationVelocity = Math.min(
-			rpf,
-			thrusters.components.isThrusters.autoRotationVelocity + acc,
-		);
+		thrusters.updateComponent("isThrusters", {
+			autoRotationVelocity: Math.min(
+				rpf,
+				thrusters.components.isThrusters.autoRotationVelocity + acc,
+			),
+		});
 
 		// Apply the rotation
 		rotationQuat.rotateTowards(

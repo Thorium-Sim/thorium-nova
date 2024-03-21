@@ -51,10 +51,12 @@
 	| "reactor"
 	| "repeat-2"
 	| "rocket"
+	| "route"
 	| "shield-half"
 	| "siren"
 	| "sparkles"
 	| "star"
+	| "sword"
 	| "text-cursor-input"
 	| "x"
 	| "zap";
