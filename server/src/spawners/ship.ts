@@ -75,6 +75,7 @@ export function spawnShip(
 	entity.addComponent("mass", { mass: template.mass });
 
 	entity.addComponent("shipSystems");
+	entity.addComponent("nearbyObjects", { objects: new Map() });
 
 	const systemEntities: Entity[] = [];
 
@@ -192,7 +193,6 @@ export function spawnShip(
 			}
 		});
 
-		
 		// And connect up the power nodes for good measure
 		// Every battery gets one Reactor
 		const batteries = systemEntities.filter((e) => e.components.isBattery);

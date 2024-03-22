@@ -26,6 +26,7 @@ import { ThrusterSystem } from "./ThrusterSystem";
 import { PhysicsMovementSystem } from "./PhysicsMovementSystem";
 import { PhysicsWorldPositionSystem } from "./PhysicsWorldPositionSystem";
 import { ShipBehaviorSystem } from "./ShipBehaviorSystem";
+import { NearbyObjectsSystem } from "./NearbyObjectsSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -38,6 +39,7 @@ const systems = [
 	ReactorHeatSystem,
 	PowerDrawSystem,
 	PowerGridSystem,
+	NearbyObjectsSystem,
 	ShipBehaviorSystem,
 	AutoRotateSystem,
 	AutoThrustSystem,

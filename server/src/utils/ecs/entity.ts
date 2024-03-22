@@ -122,6 +122,9 @@ class Entity {
 					if (key === "physicsHandles") {
 						return [key, { handles: new Map() }];
 					}
+					if (key === "nearbyObjects") {
+						return [key, { objects: new Map() }];
+					}
 					return [key, comp];
 				}),
 			),
