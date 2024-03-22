@@ -226,7 +226,7 @@ export function spawnShip(
 		// Make sure every power node is connected to at least one reactor
 		Object.values(powerNodes).forEach((node, i) => {
 			const reactor = reactors[(reactorIndex + i) % reactors.length];
-			reactor.updateComponent("isReactor", {
+			reactor?.updateComponent("isReactor", {
 				connectedEntities: [
 					...(reactor.components.isReactor?.connectedEntities || []),
 					node.entity.id,

@@ -81,7 +81,11 @@ export function SolarSystemWrapper() {
 									useStarmapStore.setState({ selectedObjectIds: [entity.id] });
 								}}
 							>
-								<StarSprite size={size} color1={color} />
+								<StarSprite
+									size={size}
+									color1={color}
+									userData={{ type: "star", id: entity.id }}
+								/>
 							</group>
 						</OrbitContainer>
 					);
