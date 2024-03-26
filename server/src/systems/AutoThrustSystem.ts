@@ -23,6 +23,7 @@ const up = new Vector3(0, 1, 0);
 const matrix = new Matrix4();
 const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
 const desiredRotationQuat = new Quaternion();
+const steeringForce = new Vector3();
 
 const IMPULSE_PROPORTION = 1;
 const IMPULSE_DERIVATIVE = 0.5;
@@ -79,31 +80,31 @@ export class AutoThrustSystem extends System {
 	}
 	update(entity: Entity, elapsed: number) {
 		const { position, rotation, autopilot } = entity.components;
-		if (
-			!position ||
-			!rotation ||
-			!autopilot?.forwardAutopilot ||
-			!autopilot?.desiredCoordinates
-		)
-			return;
+		if (!position || !rotation || !autopilot?.forwardAutopilot) return;
 
-		const [impulseEngines, warpEngines] = this.ecs.entities.reduce(
-			(acc: [Entity | null, Entity | null], sysEntity) => {
+		const [impulseEngines, warpEngines, thrusters] = this.ecs.entities.reduce(
+			(acc: [Entity | null, Entity | null, Entity | null], sysEntity) => {
 				if (
 					!acc[0] &&
 					sysEntity.components.isImpulseEngines &&
 					entity.components.shipSystems?.shipSystems.has(sysEntity.id)
 				)
-					return [sysEntity, acc[1]];
+					return [sysEntity, acc[1], acc[2]];
 				if (
 					!acc[1] &&
 					sysEntity.components.isWarpEngines &&
 					entity.components.shipSystems?.shipSystems.has(sysEntity.id)
 				)
-					return [acc[0], sysEntity];
+					return [acc[0], sysEntity, acc[2]];
+				if (
+					!acc[2] &&
+					sysEntity.components.isThrusters &&
+					entity.components.shipSystems?.shipSystems.has(sysEntity.id)
+				)
+					return [acc[0], acc[1], sysEntity];
 				return acc;
 			},
-			[null, null],
+			[null, null, null],
 		);
 		// Get the current system the ship is in and the autopilot desired system
 		const entitySystem = entity.components.position?.parentId
@@ -226,6 +227,25 @@ export class AutoThrustSystem extends System {
 				targetSpeed: desiredSpeed,
 			});
 		}
+
+		if (thrusters?.components.isThrusters) {
+			// Use thrusters to apply the minute steering force
+			steeringForce
+				.set(0, 0, 0)
+				.add(separation(entity))
+				.add(leaderFollowing(entity))
+				.normalize();
+
+			// Apply the steering force to the thrusters
+			thrusters.updateComponent("isThrusters", {
+				thrusting: steeringForce.lengthSq() > 0,
+				direction: {
+					x: steeringForce.x,
+					y: steeringForce.y,
+					z: steeringForce.z,
+				},
+			});
+		}
 		if (this.updateCount === 0) {
 			if (warpEngines) {
 				pubsub.publish.pilot.warpEngines.get({
@@ -241,6 +261,46 @@ export class AutoThrustSystem extends System {
 			}
 		}
 	}
+}
+
+const separationVector = new Vector3();
+const otherEntityPosition = new Vector3();
+function separation(entity: Entity) {
+	separationVector.set(0, 0, 0);
+	const position = entity.components.position;
+	if (!position) return separationVector;
+	positionVec.set(position.x, position.y, position.z);
+	const length = entity.components.size?.length;
+	if (!length) return separationVector;
+
+	// Convert length to kilometers
+	const minSafeDistance = (length * 15) / 1000;
+
+	// Get all of the nearby entities
+	entity.components.nearbyObjects?.objects.forEach(
+		(distance: number, id: number) => {
+			if (distance > minSafeDistance) return;
+			const nearbyEntity = entity.ecs?.getEntityById(id);
+			if (!nearbyEntity) return;
+			const nearbyPosition = nearbyEntity.components.position;
+			if (!nearbyPosition) return;
+			otherEntityPosition.set(
+				nearbyPosition.x,
+				nearbyPosition.y,
+				nearbyPosition.z,
+			);
+
+			positionVec.sub(otherEntityPosition).normalize().divideScalar(distance);
+			separationVector.add(otherEntityPosition);
+		},
+	);
+
+	return separationVector;
+}
+
+const leaderFollowingVector = new Vector3();
+function leaderFollowing(entity: Entity) {
+	return leaderFollowingVector;
 }
 
 function getWarpFactorFromDesiredSpeed(

@@ -9,24 +9,23 @@ export class NearbyObjectsSystem extends System {
 	test(entity: Entity) {
 		return !!(entity.components.nearbyObjects && entity.components.position);
 	}
+	preUpdate(_elapsed: number): void {
+		this.entities.forEach((entity) => {
+			if (!entity.components.nearbyObjects?.objects) {
+				entity.updateComponent("nearbyObjects", { objects: new Map() });
+			} else {
+				entity.components.nearbyObjects?.objects.clear();
+			}
+		});
+	}
 	update(entity: Entity) {
 		const position =
 			entity.components.position || getCompletePositionFromOrbit(entity);
 		const systemId = getObjectSystem(entity)?.id || null;
 
-		if (!entity.components.nearbyObjects?.objects) {
-			entity.updateComponent("nearbyObjects", { objects: new Map() });
-		} else {
-			entity.components.nearbyObjects?.objects.clear();
-		}
-
-		// We'll clear our work every update, but we'll try to reuse as much work from
-		// previous iterations as we can.
+		// We'll clear our work every update.
 		for (const object of this.entities) {
 			if (object.id === entity.id) continue;
-			if (entity.components.nearbyObjects?.objects.has(object.id)) continue;
-			if (object.components.nearbyObjects?.objects.has(entity.id)) continue;
-
 			const objectSystemId = getObjectSystem(object)?.id || null;
 			if (objectSystemId !== systemId) continue;
 
@@ -40,7 +39,6 @@ export class NearbyObjectsSystem extends System {
 			);
 
 			entity.components.nearbyObjects?.objects.set(object.id, distance);
-			object.components.nearbyObjects?.objects.set(entity.id, distance);
 		}
 	}
 }

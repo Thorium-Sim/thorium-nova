@@ -249,6 +249,7 @@ export function spawnShip(
 			target: entity.components.position,
 			destination: entity.components.position,
 		});
+		entity.addComponent("autopilot");
 	}
 	const extraEntities: Entity[] = [];
 	// Initialize the ship map. For now, we'll just load the ship map onto a component of the ship.

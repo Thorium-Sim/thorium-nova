@@ -5,7 +5,7 @@ export const nearbyObjects = z
 		/**
 		 * The key is the entity id, the value is the distance in kilometers.
 		 */
-		objects: z.any().default(new Map()),
+		objects: z.any(),
 	})
 	.default({})
 	.nullable();
