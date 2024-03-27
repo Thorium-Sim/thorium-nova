@@ -206,7 +206,7 @@ export const starmapCore = t.router({
 
 			return (
 				ships?.reduce((acc: { [id: number]: AutopilotInfo }, ship) => {
-					const waypointId = ship.components.autopilot?.destinationWaypointId;
+					const waypointId = ship.components.shipBehavior?.target;
 					let destinationName = "";
 					let waypoint: Entity | null | undefined;
 					if (typeof waypointId === "number") {
@@ -225,12 +225,12 @@ export const starmapCore = t.router({
 							: null;
 
 					acc[ship.id] = {
-						forwardAutopilot: !!ship.components.autopilot?.forwardAutopilot,
+						forwardAutopilot: !!ship.components.shipBehavior?.forwardAutopilot,
 						destinationName,
 						destinationPosition:
-							ship.components.autopilot?.desiredCoordinates || null,
+							ship.components.shipBehavior?.destination || null,
 						destinationSystemPosition: waypointSystemPosition,
-						locked: !!ship.components.autopilot?.desiredCoordinates,
+						locked: !!ship.components.shipBehavior?.destination,
 					};
 					return acc;
 				}, {}) || {}
@@ -253,10 +253,6 @@ export const starmapCore = t.router({
 
 			input.ships.forEach((ship) => {
 				const entity = ctx.flight?.ecs.getEntityById(ship.id);
-				entity?.updateComponent("autopilot", {
-					desiredCoordinates: ship.position,
-					desiredSolarSystemId: ship.systemId,
-				});
 				entity?.updateComponent("shipBehavior", {
 					destination: {
 						parentId: ship.systemId,
@@ -300,10 +296,6 @@ export const starmapCore = t.router({
 				const entity = ctx.flight?.ecs.getEntityById(shipId);
 				if (!entity) continue;
 				const position = getObjectOffsetPosition(orbitedObject, entity);
-				entity.updateComponent("autopilot", {
-					desiredCoordinates: position,
-					desiredSolarSystemId: objectSystem.id,
-				});
 				entity?.updateComponent("shipBehavior", {
 					destination: {
 						parentId: objectSystem.id,
@@ -386,16 +378,8 @@ export const starmapCore = t.router({
 								y: position.y,
 								z: position.z,
 							},
-						});
-						entity.updateComponent("autopilot", {
 							rotationAutopilot: true,
 							forwardAutopilot: true,
-							desiredCoordinates: {
-								x: position.x,
-								y: position.y,
-								z: position.z,
-							},
-							desiredSolarSystemId: position.parentId || null,
 						});
 					}
 				}

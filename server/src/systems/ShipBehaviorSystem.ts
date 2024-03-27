@@ -39,23 +39,14 @@ export class ShipBehaviorSystem extends System {
 
 					// Set the new destination
 					entity.updateComponent("shipBehavior", {
+						rotationAutopilot: true,
+						forwardAutopilot: true,
 						destination: {
 							parentId: destination?.parentId || null,
 							x: wanderVector.x,
 							y: wanderVector.y,
 							z: wanderVector.z,
 						},
-					});
-
-					entity.updateComponent("autopilot", {
-						rotationAutopilot: true,
-						forwardAutopilot: true,
-						desiredCoordinates: {
-							x: wanderVector.x,
-							y: wanderVector.y,
-							z: wanderVector.z,
-						},
-						desiredSolarSystemId: destination?.parentId || null,
 					});
 				}
 

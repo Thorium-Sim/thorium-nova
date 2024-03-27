@@ -2,8 +2,8 @@
  * Since the order of system execution matters, we need to import all
  * of the systems and re-export them in an array
  */
-import { AutoRotateSystem } from "./AutoRotateSystem";
-import { AutoThrustSystem } from "./AutoThrustSystem";
+// import { AutoRotateSystem } from "./AutoRotateSystem";
+// import { AutoThrustSystem } from "./AutoThrustSystem";
 import { DataStreamSystem } from "./DataStreamSystem";
 import { PassengerDestinationSystem } from "./PassengerDestinationSystem";
 import { PassengerMovementSystem } from "./PassengerMovementSystem";
@@ -41,8 +41,8 @@ const systems = [
 	PowerGridSystem,
 	NearbyObjectsSystem,
 	ShipBehaviorSystem,
-	AutoRotateSystem,
-	AutoThrustSystem,
+	// AutoRotateSystem,
+	// AutoThrustSystem,
 	ThrusterSystem,
 	ImpulseSystem,
 	WarpSystem,

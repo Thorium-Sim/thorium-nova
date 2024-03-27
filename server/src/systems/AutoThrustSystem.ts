@@ -72,15 +72,15 @@ export class AutoThrustSystem extends System {
 		return !!(
 			entity.components.isShip &&
 			entity.components.rotation &&
-			entity.components.autopilot
+			entity.components.shipBehavior
 		);
 	}
 	preUpdate() {
 		this.updateCount = (this.updateCount + 1) % 3;
 	}
 	update(entity: Entity, elapsed: number) {
-		const { position, rotation, autopilot } = entity.components;
-		if (!position || !rotation || !autopilot?.forwardAutopilot) return;
+		const { position, rotation, shipBehavior } = entity.components;
+		if (!position || !rotation || !shipBehavior?.forwardAutopilot) return;
 
 		const [impulseEngines, warpEngines, thrusters] = this.ecs.entities.reduce(
 			(acc: [Entity | null, Entity | null, Entity | null], sysEntity) => {
@@ -110,8 +110,10 @@ export class AutoThrustSystem extends System {
 		const entitySystem = entity.components.position?.parentId
 			? this.ecs.getEntityById(entity.components.position.parentId)
 			: null;
-		const destinationSystem = entity.components.autopilot?.desiredSolarSystemId
-			? this.ecs.getEntityById(entity.components.autopilot.desiredSolarSystemId)
+		const destinationSystemId =
+			entity.components.shipBehavior?.destination?.parentId;
+		const destinationSystem = destinationSystemId
+			? this.ecs.getEntityById(destinationSystemId)
 			: null;
 
 		const isInInterstellar = autopilotGetCoordinates(

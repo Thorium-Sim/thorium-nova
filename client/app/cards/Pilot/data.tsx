@@ -109,7 +109,7 @@ export const pilot = t.router({
 			.request(({ ctx }) => {
 				if (!ctx.ship) throw new Error("Ship not found");
 
-				const waypointId = ctx.ship.components.autopilot?.destinationWaypointId;
+				const waypointId = ctx.ship.components.shipBehavior?.target;
 				let destinationName = "";
 				let waypoint: Entity | null | undefined;
 				if (typeof waypointId === "number") {
@@ -128,11 +128,11 @@ export const pilot = t.router({
 						: null;
 
 				return {
-					forwardAutopilot: ctx.ship.components.autopilot?.forwardAutopilot,
+					forwardAutopilot: ctx.ship.components.shipBehavior?.forwardAutopilot,
 					destinationName,
 					destinationPosition: waypoint?.components.position || null,
 					destinationSystemPosition: waypointSystemPosition,
-					locked: !!ctx.ship.components.autopilot?.desiredCoordinates,
+					locked: !!ctx.ship.components.shipBehavior?.destination,
 				};
 			}),
 		lockCourse: t.procedure
@@ -143,10 +143,9 @@ export const pilot = t.router({
 				const position = waypoint?.components.position;
 				if (!waypoint || !position) throw new Error("Waypoint not found.");
 
-				ctx.ship.updateComponent("autopilot", {
-					destinationWaypointId: input.waypointId,
-					desiredCoordinates: { x: position.x, y: position.y, z: position.z },
-					desiredSolarSystemId: position.parentId,
+				ctx.ship.updateComponent("shipBehavior", {
+					target: input.waypointId,
+					destination: position,
 					rotationAutopilot: true,
 					forwardAutopilot: false,
 				});
@@ -159,10 +158,9 @@ export const pilot = t.router({
 		unlockCourse: t.procedure.send(({ ctx }) => {
 			if (!ctx.ship) throw new Error("Ship not found.");
 
-			ctx.ship.updateComponent("autopilot", {
-				destinationWaypointId: null,
-				desiredCoordinates: undefined,
-				desiredSolarSystemId: undefined,
+			ctx.ship.updateComponent("shipBehavior", {
+				target: null,
+				destination: null,
 				rotationAutopilot: false,
 				forwardAutopilot: false,
 			});
@@ -185,7 +183,7 @@ export const pilot = t.router({
 		activate: t.procedure.send(({ ctx }) => {
 			if (!ctx.ship) throw new Error("Ship not found.");
 
-			ctx.ship.updateComponent("autopilot", {
+			ctx.ship.updateComponent("shipBehavior", {
 				forwardAutopilot: true,
 			});
 			pubsub.publish.pilot.autopilot.get({ shipId: ctx.ship.id });
@@ -195,7 +193,7 @@ export const pilot = t.router({
 		}),
 		deactivate: t.procedure.send(({ ctx }) => {
 			if (!ctx.ship) throw new Error("Ship not found.");
-			ctx.ship.updateComponent("autopilot", {
+			ctx.ship.updateComponent("shipBehavior", {
 				forwardAutopilot: false,
 			});
 			// We specifically won't clear out the impulse and warp because

@@ -43,13 +43,13 @@ export class AutoRotateSystem extends System {
 		return !!(
 			entity.components.isShip &&
 			entity.components.rotation &&
-			entity.components.autopilot
+			entity.components.shipBehavior
 		);
 	}
 
 	update(entity: Entity, elapsed: number) {
 		const fps = 1000 / elapsed;
-		const { position, rotation, autopilot } = entity.components;
+		const { position, rotation, shipBehavior } = entity.components;
 		const thrusters = this.ecs.entities.find(
 			(sysEntity) =>
 				sysEntity.components.isThrusters &&
@@ -60,8 +60,8 @@ export class AutoRotateSystem extends System {
 		if (
 			!position ||
 			!rotation ||
-			!autopilot?.rotationAutopilot ||
-			!autopilot?.desiredCoordinates
+			!shipBehavior?.rotationAutopilot ||
+			!shipBehavior?.destination
 		) {
 			thrusters.components.isThrusters.autoRotationVelocity = 0;
 			return;
@@ -71,8 +71,10 @@ export class AutoRotateSystem extends System {
 		const entitySystem = entity.components.position?.parentId
 			? this.ecs.getEntityById(entity.components.position.parentId)
 			: null;
-		const destinationSystem = entity.components.autopilot?.desiredSolarSystemId
-			? this.ecs.getEntityById(entity.components.autopilot.desiredSolarSystemId)
+		const destinationSystemId =
+			entity.components.shipBehavior?.destination?.parentId;
+		const destinationSystem = destinationSystemId
+			? this.ecs.getEntityById(destinationSystemId)
 			: null;
 
 		autopilotGetCoordinates(

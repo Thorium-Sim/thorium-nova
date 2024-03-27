@@ -60,12 +60,12 @@ export class InterstellarTransitionSystem extends System {
 		const system = this.ecs.entities.find(
 			(s) => s.id === entity.components.position?.parentId,
 		);
-		const autopilot = entity.components.autopilot;
+		const shipBehavior = entity.components.shipBehavior;
 
 		if (system) {
 			// Transition from inside a solar system to interstellar space.
 			// If the entity's destination is inside the current solar system, don't leave it
-			if (system.id === autopilot?.desiredSolarSystemId) return;
+			if (system.id === shipBehavior?.destination?.parentId) return;
 			// Check if the ship is on the outskirts of the solar system
 			const maxDistance =
 				getMaxDistance(this.ecs.entities, system.id) * SYSTEM_PADDING;
@@ -129,10 +129,10 @@ export class InterstellarTransitionSystem extends System {
 			// Transition from interstellar space to within a solar system
 			// Check if the ship has locked course on to a solar system, and is within range
 			const destinationWaypoint = this.ecs.entities.find(
-				(e) => e.id === autopilot?.destinationWaypointId,
+				(e) => e.id === shipBehavior?.target,
 			);
 			const destinationSystem = this.ecs.entities.find(
-				(e) => e.id === autopilot?.desiredSolarSystemId,
+				(e) => e.id === shipBehavior?.destination?.parentId,
 			);
 			if (
 				!destinationSystem?.components.position ||

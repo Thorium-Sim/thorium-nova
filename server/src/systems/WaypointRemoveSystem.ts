@@ -25,10 +25,10 @@ export class WaypointRemoveSystem extends System {
 
 			if (distance < 5) {
 				// Update the ship autopilot
-				ship.updateComponent("autopilot", {
-					destinationWaypointId: null,
-					desiredCoordinates: undefined,
-					desiredSolarSystemId: undefined,
+				ship.updateComponent("shipBehavior", {
+					destination: null,
+					target: null,
+					objective: "hold",
 					rotationAutopilot: false,
 					forwardAutopilot: false,
 				});

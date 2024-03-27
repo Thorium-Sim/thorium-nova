@@ -239,17 +239,20 @@ export function spawnShip(
 		entity.components.shipSystems?.shipSystems.set(e.id, {});
 	});
 
+	entity.addComponent("shipBehavior", {
+		objective: "hold",
+		target: entity.components.position,
+		destination: entity.components.position,
+	});
+
 	// Now we can add the ship to the ECS
 	if (params.playerShip) {
 		entity.addComponent("isPlayerShip");
 		entity.addComponent("physicsWorld");
-	} else {
-		entity.addComponent("shipBehavior", {
-			objective: "hold",
-			target: entity.components.position,
-			destination: entity.components.position,
+		entity.updateComponent("shipBehavior", {
+			forwardAutopilot: false,
+			rotationAutopilot: false,
 		});
-		entity.addComponent("autopilot");
 	}
 	const extraEntities: Entity[] = [];
 	// Initialize the ship map. For now, we'll just load the ship map onto a component of the ship.
