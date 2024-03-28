@@ -11,6 +11,7 @@ import {
 } from "../utils/unitTypes";
 import type { isWarpEngines } from "../components/shipSystems";
 import { pubsub } from "@server/init/pubsub";
+import { getLocomotionShipSystems } from "./SteeringBehaviorSystem";
 
 const positionVec = new Vector3();
 const rotationQuat = new Quaternion();
@@ -82,30 +83,9 @@ export class AutoThrustSystem extends System {
 		const { position, rotation, shipBehavior } = entity.components;
 		if (!position || !rotation || !shipBehavior?.forwardAutopilot) return;
 
-		const [impulseEngines, warpEngines, thrusters] = this.ecs.entities.reduce(
-			(acc: [Entity | null, Entity | null, Entity | null], sysEntity) => {
-				if (
-					!acc[0] &&
-					sysEntity.components.isImpulseEngines &&
-					entity.components.shipSystems?.shipSystems.has(sysEntity.id)
-				)
-					return [sysEntity, acc[1], acc[2]];
-				if (
-					!acc[1] &&
-					sysEntity.components.isWarpEngines &&
-					entity.components.shipSystems?.shipSystems.has(sysEntity.id)
-				)
-					return [acc[0], sysEntity, acc[2]];
-				if (
-					!acc[2] &&
-					sysEntity.components.isThrusters &&
-					entity.components.shipSystems?.shipSystems.has(sysEntity.id)
-				)
-					return [acc[0], acc[1], sysEntity];
-				return acc;
-			},
-			[null, null, null],
-		);
+		const { impulseEngines, warpEngines, thrusters } =
+			getLocomotionShipSystems(entity);
+
 		// Get the current system the ship is in and the autopilot desired system
 		const entitySystem = entity.components.position?.parentId
 			? this.ecs.getEntityById(entity.components.position.parentId)

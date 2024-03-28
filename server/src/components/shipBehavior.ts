@@ -11,11 +11,11 @@ export const shipBehavior = z
 		 * - patrol: move within a radius of a point
 		 * - attack: move towards a target and attack it
 		 * - defend: move towards a target and defend it
-		 * - avoid: move away from a target
 		 */
 		objective: z
-			.enum(["hold", "patrol", "wander", "attack", "defend", "avoid"])
+			.enum(["hold", "patrol", "wander", "attack", "defend"])
 			.default("hold"),
+
 		/**
 		 * The target of the ship's objective
 		 * If it's a number, it's an entity of some kind.

@@ -1,4 +1,5 @@
 import { type Entity, System } from "../utils/ecs";
+import { getSystemMaxSpeed } from "./SteeringBehaviorSystem";
 
 /**
  * Determines the forward velocity applied by the impulse engines
@@ -25,19 +26,15 @@ export class ImpulseSystem extends System {
 		if (!ship || !ship.components.isShip || !entity.components.isImpulseEngines)
 			return;
 
-		let { thrust, targetSpeed, cruisingSpeed } =
+		const { thrust, targetSpeed, cruisingSpeed } =
 			entity.components.isImpulseEngines;
 
-		if (entity.components.power) {
-			const { currentPower, maxSafePower, requiredPower } =
-				entity.components.power || {};
-			targetSpeed =
-				cruisingSpeed *
-				(Math.max(0, currentPower - requiredPower) /
-					(maxSafePower - requiredPower));
-		}
+		const maxSpeed = Math.min(
+			targetSpeed,
+			getSystemMaxSpeed(entity, cruisingSpeed),
+		);
 
-		const forwardImpulse = (targetSpeed / cruisingSpeed) * thrust;
+		const forwardImpulse = (maxSpeed / cruisingSpeed) * thrust;
 		entity.updateComponent("isImpulseEngines", { forwardImpulse });
 	}
 }
