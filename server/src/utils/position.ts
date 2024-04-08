@@ -3,19 +3,31 @@ import type { Entity } from "./ecs";
 import { solarRadiusToKilometers } from "./unitTypes";
 import { getOrbitPosition } from "./getOrbitPosition";
 
-export function getObjectOffsetPosition(object: Entity, ship: Entity) {
-	const objectCenter = new Vector3();
+export function getObjectPosition(object: Entity) {
+	const system = getObjectSystem(object)?.id || null;
 	if (object.components.satellite) {
-		objectCenter.copy(getCompletePositionFromOrbit(object));
-	} else if (object.components.position) {
-		objectCenter.set(
-			object.components.position.x,
-			object.components.position.y,
-			object.components.position.z,
-		);
-	} else {
-		throw new Error("Unable to determine object's position.");
+		const position = getCompletePositionFromOrbit(object);
+		return { parentId: system, x: position.x, y: position.y, z: position.z };
 	}
+	if (object.components.position) {
+		return {
+			parentId: system,
+			x: object.components.position.x,
+			y: object.components.position.y,
+			z: object.components.position.z,
+		};
+	}
+	throw new Error("Unable to determine object's position.");
+}
+
+export function getObjectOffsetPosition(object: Entity, ship: Entity) {
+	const objectPosition = getObjectPosition(object);
+	const objectCenter = new Vector3(
+		objectPosition.x,
+		objectPosition.y,
+		objectPosition.z,
+	);
+
 	const objectAngle = new Vector3(0, 0, 1);
 	const shipPosition = new Vector3(
 		ship.components.position?.x,

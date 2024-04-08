@@ -42,6 +42,7 @@ export class PhysicsMovementSystem extends System {
 		this.collisionStepEntities.clear();
 	}
 	update(entity: Entity, elapsed: number) {
+		const elapsedSeconds = elapsed / 1000;
 		// Determine whether the entity is using collision or simple physics
 		// and update the position accordingly.
 		const worldEntity = getEntityWorld(this.ecs, entity);
@@ -65,6 +66,9 @@ export class PhysicsMovementSystem extends System {
 		);
 		const forwardImpulse =
 			impulseEngines?.components.isImpulseEngines?.forwardImpulse || 0;
+		const forwardForce =
+			impulseEngines?.components.isImpulseEngines?.forwardForce || 0;
+
 		const thrusters = systems.find((sys) => sys.components.isThrusters);
 		// We don't do collision when traveling at high warp speed
 		// Let's say half of solar cruising speed
@@ -156,6 +160,14 @@ export class PhysicsMovementSystem extends System {
 						tempObj.localToWorld(tempVector.set(0, 0, forwardImpulse)),
 						true,
 					);
+					// This comes from the Steering Behavior system
+					// Multiply by the elapsed seconds to convert force into impulse
+					body.applyImpulse(
+						tempObj.localToWorld(
+							tempVector.set(0, 0, forwardForce * elapsedSeconds),
+						),
+						true,
+					);
 
 					/**
 					 * Thrusters
@@ -172,7 +184,7 @@ export class PhysicsMovementSystem extends System {
 						const { x, y, z } = body.angvel();
 						if (
 							tempVector.set(x, y, z).lengthSq() >
-							thrusters.components.isThrusters.rotationMaxSpeed
+							thrusters.components.isThrusters.rotationMaxSpeed ** 2
 						) {
 							tempVector.multiplyScalar(BRAKE_CONSTANT);
 							const { x, y, z } = tempVector;
@@ -180,7 +192,6 @@ export class PhysicsMovementSystem extends System {
 						} else {
 							const { x, y, z } =
 								thrusters.components.isThrusters.rotationImpulse;
-
 							tempVector.set(x, y, z);
 							body.applyTorqueImpulse(tempObj.localToWorld(tempVector), true);
 						}
@@ -194,7 +205,7 @@ export class PhysicsMovementSystem extends System {
 			/**
 			 * Simple Physics
 			 */
-			const elapsedRatio = elapsed / 1000;
+
 			const mass = entity.components.mass?.mass || 1;
 			{
 				const { x, y, z } = entity.components.velocity || { x: 0, y: 0, z: 0 };
@@ -211,8 +222,10 @@ export class PhysicsMovementSystem extends System {
 			/**
 			 * Inertial Dampeners
 			 */
-			velocityVector.multiplyScalar(1 / (1 + elapsedRatio * dampening));
-			rotationVelocityVector.multiplyScalar(1 / (1 + elapsedRatio * dampening));
+			velocityVector.multiplyScalar(1 / (1 + elapsedSeconds * dampening));
+			rotationVelocityVector.multiplyScalar(
+				1 / (1 + elapsedSeconds * dampening),
+			);
 
 			/**
 			 * Warp Engines
@@ -236,7 +249,7 @@ export class PhysicsMovementSystem extends System {
 					tempVector
 						.set(0, 0, forwardImpulse)
 						.divideScalar(mass)
-						.multiplyScalar(elapsedRatio),
+						.multiplyScalar(elapsedSeconds),
 				),
 			);
 			/**
@@ -245,14 +258,14 @@ export class PhysicsMovementSystem extends System {
 			if (thrusters?.components.isThrusters) {
 				{
 					const { x, y, z } = thrusters.components.isThrusters.directionImpulse;
-					tempVector.set(x, y, z).multiplyScalar(elapsedRatio * M_TO_KM);
+					tempVector.set(x, y, z).multiplyScalar(elapsedSeconds * M_TO_KM);
 					velocityVector.add(tempObj.localToWorld(tempVector));
 				}
 
 				// Set the max rotation velocity
 				if (
 					rotationVelocityVector.lengthSq() >
-					thrusters.components.isThrusters.rotationMaxSpeed
+					thrusters.components.isThrusters.rotationMaxSpeed ** 2
 				) {
 					rotationVelocityVector.multiplyScalar(BRAKE_CONSTANT);
 				} else {
@@ -261,7 +274,7 @@ export class PhysicsMovementSystem extends System {
 					tempVector.set(x, y, z);
 
 					rotationVelocityVector.add(
-						tempVector.divideScalar(mass).multiplyScalar(elapsedRatio),
+						tempVector.divideScalar(mass).multiplyScalar(elapsedSeconds),
 					);
 				}
 			}
@@ -276,7 +289,7 @@ export class PhysicsMovementSystem extends System {
 				});
 				const { x, y, z } = entity.components.position || { x: 0, y: 0, z: 0 };
 				tempVector.set(x, y, z);
-				tempVector.add(velocityVector.multiplyScalar(elapsedRatio));
+				tempVector.add(velocityVector.multiplyScalar(elapsedSeconds));
 				entity.updateComponent("position", {
 					x: tempVector.x,
 					y: tempVector.y,
@@ -347,6 +360,10 @@ export class PhysicsMovementSystem extends System {
 					entity.updateComponent("velocity", {
 						forwardVelocity: tempVector.set(x, y, z).length(),
 					});
+				}
+
+				if (!entity.components.isPlayerShip) {
+					console.log(body.linvel(), body.angvel());
 				}
 			});
 		});

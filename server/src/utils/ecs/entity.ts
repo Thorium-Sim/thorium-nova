@@ -92,6 +92,7 @@ class Entity {
 			const component = allComponents[componentId as ComponentIds];
 			const data = components[componentId as ComponentIds];
 			try {
+				if (!component) continue;
 				this.components[componentId as ComponentIds] = component.parse(
 					data,
 				) as any;

@@ -11,8 +11,8 @@ export const isImpulseEngines = z
 		thrust: z.number().default(12500),
 		/** The desired speed of the ship in km/s. */
 		targetSpeed: z.number().default(0),
-		/** The forward acceleration of the ship in km/s^2. */
-		forwardAcceleration: z.number().default(0),
+		/** The forward acceleration of the ship in kilo-newtons. */
+		forwardForce: z.number().default(0),
 		/** The measured forward thrust of the ship. */
 		forwardImpulse: z.number().default(0),
 	})
