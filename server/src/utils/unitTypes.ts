@@ -1,5 +1,5 @@
 export interface Flavoring<FlavorT> {
-  _type?: FlavorT;
+	_type?: FlavorT;
 }
 export type Flavor<T, FlavorT> = T & Flavoring<FlavorT>;
 
@@ -13,8 +13,8 @@ export type MetersPerSecond = Flavor<number, "metersPerSecond">;
 export type KilometerPerSecond = Flavor<number, "kilometerPerSecond">;
 export type MetersPerSecondSquared = Flavor<number, "metersPerSecondSquared">;
 export type KilometerPerSecondSquared = Flavor<
-  number,
-  "kilometerPerSecondSquared"
+	number,
+	"kilometerPerSecondSquared"
 >;
 export type KiloNewtons = Flavor<number, "kiloNewtons">;
 
@@ -28,27 +28,27 @@ export const M_TO_KM = 1 / 1000;
 export type SolarRadius = Flavor<number, "solarRadius">;
 
 export function solarRadiusToKilometers(solarRadius: SolarRadius): Kilometer {
-  return solarRadius * 695_700;
+	return solarRadius * 695_700;
 }
 export type AstronomicalUnit = Flavor<number, "astronomicalUnit">;
 export type LightYear = Flavor<number, "lightYear">;
 export type LightMinute = Flavor<number, "lightMinute">;
 
 export function astronomicalUnitToKilometer(au: AstronomicalUnit): Kilometer {
-  return au * 149_597_870;
+	return au * 149_597_870;
 }
 
 export function lightMinuteToLightYear(len: LightMinute) {
-  return len / (60 * 24 * 365.25);
+	return len / (60 * 24 * 365.25);
 }
 export function lightYearToLightMinute(len: LightYear) {
-  return len * (60 * 24 * 365.25);
+	return len * (60 * 24 * 365.25);
 }
 export function kilometerToLightMinute(len: Kilometer) {
-  return len * 5.559e-8;
+	return len * 5.559e-8;
 }
 export function lightMinuteToKilometer(len: LightMinute) {
-  return len / 5.559e-8;
+	return len / 5.559e-8;
 }
 
 export type Liter = Flavor<number, "liter">;
@@ -59,14 +59,14 @@ export type Kilograms = Flavor<number, "kilograms">;
  */
 export type SolarMass = Flavor<number, "solarMass">;
 export function solarMassToKilograms(solarMass: SolarMass): Kilograms {
-  return solarMass * 1.989e30;
+	return solarMass * 1.989e30;
 }
 /**
  * Mass compared to the Earth eg. 1 terran mass = the mass of the Earth
  */
 export type TerranMass = Flavor<number, "terranMass">;
 export function terranMassToKilograms(solarMass: TerranMass): Kilograms {
-  return solarMass * 5.972e24;
+	return solarMass * 5.972e24;
 }
 /**
  * Force of gravity at the surface compared to Earth's
@@ -83,13 +83,13 @@ export type RotationsPerMinute = Flavor<number, "rotationsPerMinute">;
 export type RadiansPerSecond = Flavor<number, "radiansPerSecond">;
 
 export function degToRad(degree: Degree): Radian {
-  return (degree * Math.PI) / 180;
+	return (degree * Math.PI) / 180;
 }
 
 export class Coordinates<T extends number> {
-  x: T = 0 as T;
-  y: T = 0 as T;
-  z: T = 0 as T;
+	x: T = 0 as T;
+	y: T = 0 as T;
+	z: T = 0 as T;
 }
 
 export type KiloWattHour = Flavor<number, "kilowatthour">;
@@ -101,9 +101,9 @@ export type GigaWattHour = Flavor<number, "gigawatthour">;
 export type GigaWatt = Flavor<number, "gigawatt">;
 
 export function megaWattHourToMegaWattSecond(
-  input: MegaWattHour
+	input: MegaWattHour,
 ): MegaWattSecond {
-  return input * 60 * 60;
+	return input * 60 * 60;
 }
 
 export type HeatCapacity = Flavor<number, "heatcapacity">;

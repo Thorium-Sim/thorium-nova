@@ -1,3 +1,3 @@
 export class BaseClient {
-  constructor(public id: string) {}
+	constructor(public id: string) {}
 }

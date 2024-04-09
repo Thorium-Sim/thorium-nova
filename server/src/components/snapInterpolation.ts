@@ -5,7 +5,7 @@ import z from "zod";
  * such as when a ship transitions from solar to interstellar space.
  */
 export const snapInterpolation = z
-  .object({
-    snapInterpolation: z.literal(true).default(true),
-  })
-  .default({});
+	.object({
+		snapInterpolation: z.literal(true).default(true),
+	})
+	.default({});

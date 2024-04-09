@@ -1,6 +1,6 @@
 export function cargoSort(
-  [keyA]: [string, {count: number}],
-  [keyB]: [string, {count: number}]
+	[keyA]: [string, { count: number }],
+	[keyB]: [string, { count: number }],
 ) {
-  return keyA.localeCompare(keyB);
+	return keyA.localeCompare(keyB);
 }

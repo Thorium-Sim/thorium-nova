@@ -1,2 +1,2 @@
-export {loginCore} from "./LoginCore/data";
-export {starmapCore} from "./StarmapCore/data";
+export { loginCore } from "./LoginCore/data";
+export { starmapCore } from "./StarmapCore/data";

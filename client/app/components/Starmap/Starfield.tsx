@@ -1,152 +1,152 @@
-import {useFrame, useThree} from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import React from "react";
 import {
-  Matrix4,
-  Mesh,
-  Vector3,
-  Color,
-  ShaderMaterial,
-  Vector2,
-  DoubleSide,
-  AdditiveBlending,
-  BufferGeometry,
-  BufferAttribute,
-  Camera,
+	Matrix4,
+	type Mesh,
+	Vector3,
+	Color,
+	ShaderMaterial,
+	Vector2,
+	DoubleSide,
+	AdditiveBlending,
+	BufferGeometry,
+	BufferAttribute,
+	type Camera,
 } from "three";
 
 function makeLineGeometry(pointList: Vector3[]) {
-  let a = pointList.length / 2;
-  let s = new Float32Array(18 * a);
-  let l = new Float32Array(18 * a);
-  let c = new Float32Array(12 * a);
-  for (let u = 0; a > u; u++) {
-    let h = 2 * u;
-    let d = 18 * u;
-    let f = 12 * u;
-    let p = pointList[h];
-    let m = pointList[h + 1];
-    let v = new Vector3().subVectors(m, p).normalize();
+	const a = pointList.length / 2;
+	const s = new Float32Array(18 * a);
+	const l = new Float32Array(18 * a);
+	const c = new Float32Array(12 * a);
+	for (let u = 0; a > u; u++) {
+		const h = 2 * u;
+		const d = 18 * u;
+		const f = 12 * u;
+		const p = pointList[h];
+		const m = pointList[h + 1];
+		const v = new Vector3().subVectors(m, p).normalize();
 
-    c[f + 0] = c[f + 2] = c[f + 10] = 0;
-    c[f + 6] = c[f + 8] = c[f + 4] = 1;
-    c[f + 1] = c[f + 5] = c[f + 9] = 0;
+		c[f + 0] = c[f + 2] = c[f + 10] = 0;
+		c[f + 6] = c[f + 8] = c[f + 4] = 1;
+		c[f + 1] = c[f + 5] = c[f + 9] = 0;
 
-    c[f + 3] = c[f + 7] = c[f + 11] = 1;
-    s[d + 0] = s[d + 3] = s[d + 15] = p.x;
-    s[d + 1] = s[d + 4] = s[d + 16] = p.y;
-    s[d + 2] = s[d + 5] = s[d + 17] = p.z;
-    s[d + 6] = s[d + 9] = s[d + 12] = m.x;
-    s[d + 7] = s[d + 10] = s[d + 13] = m.y;
-    s[d + 8] = s[d + 11] = s[d + 14] = m.z;
-    l[d + 0] = l[d + 3] = l[d + 6] = l[d + 9] = l[d + 12] = l[d + 15] = v.x;
-    l[d + 1] = l[d + 4] = l[d + 7] = l[d + 10] = l[d + 13] = l[d + 16] = v.y;
-    l[d + 2] = l[d + 5] = l[d + 8] = l[d + 11] = l[d + 14] = l[d + 17] = v.z;
-  }
-  const geometry = new BufferGeometry();
-  geometry.setAttribute("position", new BufferAttribute(s, 3));
-  geometry.setAttribute("normal", new BufferAttribute(l, 3));
-  geometry.setAttribute("uv", new BufferAttribute(c, 2));
+		c[f + 3] = c[f + 7] = c[f + 11] = 1;
+		s[d + 0] = s[d + 3] = s[d + 15] = p.x;
+		s[d + 1] = s[d + 4] = s[d + 16] = p.y;
+		s[d + 2] = s[d + 5] = s[d + 17] = p.z;
+		s[d + 6] = s[d + 9] = s[d + 12] = m.x;
+		s[d + 7] = s[d + 10] = s[d + 13] = m.y;
+		s[d + 8] = s[d + 11] = s[d + 14] = m.z;
+		l[d + 0] = l[d + 3] = l[d + 6] = l[d + 9] = l[d + 12] = l[d + 15] = v.x;
+		l[d + 1] = l[d + 4] = l[d + 7] = l[d + 10] = l[d + 13] = l[d + 16] = v.y;
+		l[d + 2] = l[d + 5] = l[d + 8] = l[d + 11] = l[d + 14] = l[d + 17] = v.z;
+	}
+	const geometry = new BufferGeometry();
+	geometry.setAttribute("position", new BufferAttribute(s, 3));
+	geometry.setAttribute("normal", new BufferAttribute(l, 3));
+	geometry.setAttribute("uv", new BufferAttribute(c, 2));
 
-  geometry.computeBoundingSphere();
-  geometry.computeBoundingBox();
-  return geometry;
+	geometry.computeBoundingSphere();
+	geometry.computeBoundingBox();
+	return geometry;
 }
 
 function getModelViewMatrix(mesh: Mesh | undefined | null, camera: Camera) {
-  if (!mesh) return new Matrix4();
-  return new Matrix4().multiplyMatrices(
-    camera.matrixWorldInverse,
-    mesh.matrixWorld
-  );
+	if (!mesh) return new Matrix4();
+	return new Matrix4().multiplyMatrices(
+		camera.matrixWorldInverse,
+		mesh.matrixWorld,
+	);
 }
 
-const Starfield: React.FC<{count?: number; radius?: number}> = ({
-  count = 1500,
-  radius = 1500,
+const Starfield: React.FC<{ count?: number; radius?: number }> = ({
+	count = 1500,
+	radius = 1500,
 }) => {
-  const presenceRatio = React.useRef(1);
-  const skip = React.useRef(0);
+	const presenceRatio = React.useRef(1);
+	const skip = React.useRef(0);
 
-  const mesh = React.useRef<Mesh>(null);
-  const geometry = React.useMemo(() => {
-    let pointList: Vector3[] = [];
-    for (let f = 0; count > f; f++) {
-      const point = new Vector3(
-        Math.random() - 0.5,
-        Math.random() - 0.5,
-        Math.random() - 0.5
-      );
-      point.normalize();
-      const m = Math.random();
-      point.multiplyScalar(radius * (1 - m * m * m));
-      pointList.push(point.clone());
-      pointList.push(point.clone());
-    }
-    return makeLineGeometry(pointList);
-  }, [count, radius]);
+	const mesh = React.useRef<Mesh>(null);
+	const geometry = React.useMemo(() => {
+		const pointList: Vector3[] = [];
+		for (let f = 0; count > f; f++) {
+			const point = new Vector3(
+				Math.random() - 0.5,
+				Math.random() - 0.5,
+				Math.random() - 0.5,
+			);
+			point.normalize();
+			const m = Math.random();
+			point.multiplyScalar(radius * (1 - m * m * m));
+			pointList.push(point.clone());
+			pointList.push(point.clone());
+		}
+		return makeLineGeometry(pointList);
+	}, [count, radius]);
 
-  const {camera} = useThree();
-  const material = React.useMemo(() => {
-    function makeStarfieldMaterial(
-      input: {color1?: string; color2?: string} = {}
-    ) {
-      const uniforms = {
-        color1: {
-          type: "c",
-          value: input.color1 ? new Color(input.color1) : new Color(1, 1, 1),
-        },
-        color2: {
-          type: "c",
-          value: input.color2 ? new Color(input.color2) : new Color(1, 1, 1),
-        },
-        sizeMin: {
-          type: "f",
-          value: 1,
-        },
-        sizeMax: {
-          type: "f",
-          value: 2,
-        },
-        intensity: {
-          type: "f",
-          value: 1,
-        },
-        time: {
-          type: "f",
-          value: 0,
-        },
-        deltaTime: {
-          type: "f",
-          value: 0.01,
-        },
-        resolution: {
-          type: "v2",
-          value: new Vector2(window.innerWidth, window.innerHeight),
-        },
-        fadeBack: {
-          type: "f",
-          value: 0,
-        },
-        radiusAndInvRadius: {
-          type: "v2",
-          value: new Vector2(4, 0.25),
-        },
-        fade: {
-          type: "v2",
-          value: new Vector2(1, 1),
-        },
-        depth: {
-          type: "v2",
-          value: new Vector2(0, 1),
-        },
-        previousModelViewMatrix: {
-          type: "m4",
-          value: getModelViewMatrix(mesh.current, camera),
-        },
-      };
-      const material = new ShaderMaterial({
-        uniforms: uniforms,
-        vertexShader: `uniform vec2 resolution;
+	const { camera } = useThree();
+	const material = React.useMemo(() => {
+		function makeStarfieldMaterial(
+			input: { color1?: string; color2?: string } = {},
+		) {
+			const uniforms = {
+				color1: {
+					type: "c",
+					value: input.color1 ? new Color(input.color1) : new Color(1, 1, 1),
+				},
+				color2: {
+					type: "c",
+					value: input.color2 ? new Color(input.color2) : new Color(1, 1, 1),
+				},
+				sizeMin: {
+					type: "f",
+					value: 1,
+				},
+				sizeMax: {
+					type: "f",
+					value: 2,
+				},
+				intensity: {
+					type: "f",
+					value: 1,
+				},
+				time: {
+					type: "f",
+					value: 0,
+				},
+				deltaTime: {
+					type: "f",
+					value: 0.01,
+				},
+				resolution: {
+					type: "v2",
+					value: new Vector2(window.innerWidth, window.innerHeight),
+				},
+				fadeBack: {
+					type: "f",
+					value: 0,
+				},
+				radiusAndInvRadius: {
+					type: "v2",
+					value: new Vector2(4, 0.25),
+				},
+				fade: {
+					type: "v2",
+					value: new Vector2(1, 1),
+				},
+				depth: {
+					type: "v2",
+					value: new Vector2(0, 1),
+				},
+				previousModelViewMatrix: {
+					type: "m4",
+					value: getModelViewMatrix(mesh.current, camera),
+				},
+			};
+			const material = new ShaderMaterial({
+				uniforms: uniforms,
+				vertexShader: `uniform vec2 resolution;
           uniform vec3 color1;
           uniform vec3 color2;
           uniform float sizeMin;
@@ -192,7 +192,7 @@ const Starfield: React.FC<{count?: number; radius?: number}> = ({
               vcolor = vec4(color,intensity);
           
           }`,
-        fragmentShader: `//varying vec2 texcoord;
+				fragmentShader: `//varying vec2 texcoord;
           varying vec4 vcolor;
           varying vec3 texcoord;
           uniform vec2 fade;
@@ -208,48 +208,43 @@ const Starfield: React.FC<{count?: number; radius?: number}> = ({
               float d = 1.0-length(vec2(UVx,UVy));
               gl_FragColor = vec4(vcolor.rgb, d * vcolor.a);
           }`,
-      });
-      material.transparent = !0;
-      material.side = DoubleSide;
-      material.blending = AdditiveBlending;
-      material.depthTest = !1;
-      return material;
-    }
-    return makeStarfieldMaterial({
-      color1: "#877f76",
-      color2: "#96b4cf",
-    });
-  }, [camera]);
+			});
+			material.transparent = !0;
+			material.side = DoubleSide;
+			material.blending = AdditiveBlending;
+			material.depthTest = !1;
+			return material;
+		}
+		return makeStarfieldMaterial({
+			color1: "#877f76",
+			color2: "#96b4cf",
+		});
+	}, [camera]);
 
-  const time = React.useRef(0);
-  const previousModelViewMatrix = React.useRef(new Matrix4());
-  useFrame((state, delta) => {
-    const mat = mesh.current?.material as ShaderMaterial;
-    if (!mesh.current) return;
-    if (mat) {
-      mat.uniforms.previousModelViewMatrix.value.copy(
-        previousModelViewMatrix.current
-      );
-      mat.uniforms.time.value = time.current;
-      time.current += delta;
-      mat.uniforms.deltaTime.value = delta;
-      mat.uniforms.intensity.value = presenceRatio.current;
-      previousModelViewMatrix.current = getModelViewMatrix(
-        mesh.current,
-        state.camera
-      );
-    }
-    skip.current--;
-    if (mesh.current) mesh.current.visible = true;
-  });
-  return (
-    <mesh
-      ref={mesh}
-      geometry={geometry}
-      material={material}
-      visible={false}
-    ></mesh>
-  );
+	const time = React.useRef(0);
+	const previousModelViewMatrix = React.useRef(new Matrix4());
+	useFrame((state, delta) => {
+		const mat = mesh.current?.material as ShaderMaterial;
+		if (!mesh.current) return;
+		if (mat) {
+			mat.uniforms.previousModelViewMatrix.value.copy(
+				previousModelViewMatrix.current,
+			);
+			mat.uniforms.time.value = time.current;
+			time.current += delta;
+			mat.uniforms.deltaTime.value = delta;
+			mat.uniforms.intensity.value = presenceRatio.current;
+			previousModelViewMatrix.current = getModelViewMatrix(
+				mesh.current,
+				state.camera,
+			);
+		}
+		skip.current--;
+		if (mesh.current) mesh.current.visible = true;
+	});
+	return (
+		<mesh ref={mesh} geometry={geometry} material={material} visible={false} />
+	);
 };
 
 export default Starfield;

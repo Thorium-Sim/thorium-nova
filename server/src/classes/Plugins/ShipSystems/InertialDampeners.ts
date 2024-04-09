@@ -1,19 +1,19 @@
-import BasePlugin from "..";
-import BaseShipSystemPlugin, {registerSystem} from "./BaseSystem";
-import {ShipSystemFlags} from "./shipSystemTypes";
+import type BasePlugin from "..";
+import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
+import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class InertialDampenersPlugin extends BaseShipSystemPlugin {
-  static flags: ShipSystemFlags[] = [];
-  type: "inertialDampeners" = "inertialDampeners";
-  /**
-   * A number > 0. Pulls the ship's velocity to make it match the current heading
-   *  and affects how fast the ship slows down when engines are turned off.
-   * Lower number means slow the ship down faster */
-  dampening: number;
-  constructor(params: Partial<InertialDampenersPlugin>, plugin: BasePlugin) {
-    super(params, plugin);
-    this.dampening = params.dampening || 1;
-  }
+	static flags: ShipSystemFlags[] = [];
+	type = "inertialDampeners" as const;
+	/**
+	 * A number > 0. Pulls the ship's velocity to make it match the current heading
+	 *  and affects how fast the ship slows down when engines are turned off.
+	 * Lower number means slow the ship down faster */
+	dampening: number;
+	constructor(params: Partial<InertialDampenersPlugin>, plugin: BasePlugin) {
+		super(params, plugin);
+		this.dampening = params.dampening || 1;
+	}
 }
 registerSystem("inertialDampeners", InertialDampenersPlugin);
 

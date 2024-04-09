@@ -1,25 +1,25 @@
 import z from "zod";
 
 export const autopilot = z
-  .object({
-    destinationWaypointId: z.number().nullable().default(null),
-    /** The desired coordinates of the ship in the current stage. If desiredSolarSystemId is null, then it's interstellar coordinates */
-    desiredCoordinates: z
-      .object({
-        x: z.number(),
-        y: z.number(),
-        z: z.number(),
-      })
-      .nullable()
-      .default(null),
-    /** Desired interstellar system. For when we are traveling from one system to another. */
-    desiredSolarSystemId: z.number().nullable().default(null),
-    /** Whether the rotation autopilot is on. */
-    rotationAutopilot: z.boolean().default(true),
-    /** Whether the forward movement autopilot is on. */
-    forwardAutopilot: z.boolean().default(true),
-  })
-  .default({});
+	.object({
+		destinationWaypointId: z.number().nullable().default(null),
+		/** The desired coordinates of the ship in the current stage. If desiredSolarSystemId is null, then it's interstellar coordinates */
+		desiredCoordinates: z
+			.object({
+				x: z.number(),
+				y: z.number(),
+				z: z.number(),
+			})
+			.nullable()
+			.default(null),
+		/** Desired interstellar system. For when we are traveling from one system to another. */
+		desiredSolarSystemId: z.number().nullable().default(null),
+		/** Whether the rotation autopilot is on. */
+		rotationAutopilot: z.boolean().default(true),
+		/** Whether the forward movement autopilot is on. */
+		forwardAutopilot: z.boolean().default(true),
+	})
+	.default({});
 
 /**
  * Setting course has the following steps:

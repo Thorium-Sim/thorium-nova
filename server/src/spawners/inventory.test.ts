@@ -1,127 +1,127 @@
 import {
-  InventoryFlags,
-  InventoryFlagValues,
+	type InventoryFlags,
+	InventoryFlagValues,
 } from "../classes/Plugins/Inventory/InventoryFlags";
-import {Entity} from "../utils/ecs";
-import {generateShipInventory} from "./inventory";
+import { Entity } from "../utils/ecs";
+import { generateShipInventory } from "./inventory";
 let oldRandom: any;
 describe("Inventory Generator", () => {
-  beforeEach(() => {
-    oldRandom = Math.random;
-    Math.random = () => 0.5;
-  });
-  afterEach(() => {
-    Math.random = oldRandom;
-  });
-  it("Should spawn inventory given a set of templates and a set of rooms", async () => {
-    const inputRooms: Entity[] = [];
-    const torpedoRoom = new Entity();
-    torpedoRoom.addComponent("isRoom", {
-      flags: ["torpedoStorage"],
-    });
-    torpedoRoom.addComponent("cargoContainer", {
-      volume: 100,
-    });
-    inputRooms.push(torpedoRoom);
-    const torpedoRoom2 = new Entity();
-    torpedoRoom2.addComponent("isRoom", {
-      flags: ["torpedoStorage"],
-    });
-    torpedoRoom2.addComponent("cargoContainer", {
-      volume: 100,
-    });
-    inputRooms.push(torpedoRoom2);
-    const probesRoom = new Entity();
-    probesRoom.addComponent("isRoom", {
-      flags: ["probeStorage"],
-    });
-    probesRoom.addComponent("cargoContainer", {
-      volume: 100,
-    });
-    inputRooms.push(probesRoom);
-    const securityRoom = new Entity();
-    securityRoom.addComponent("isRoom", {
-      flags: ["security"],
-    });
-    securityRoom.addComponent("cargoContainer", {
-      volume: 100,
-    });
-    inputRooms.push(securityRoom);
-    const maintenanceRoom = new Entity();
-    maintenanceRoom.addComponent("isRoom", {
-      flags: ["maintenance"],
-    });
-    maintenanceRoom.addComponent("cargoContainer", {
-      volume: 100,
-    });
-    inputRooms.push(maintenanceRoom);
-    const medicalRoom = new Entity();
-    medicalRoom.addComponent("isRoom", {
-      flags: ["medical"],
-    });
-    medicalRoom.addComponent("cargoContainer", {
-      volume: 100,
-    });
-    inputRooms.push(medicalRoom);
-    const cargoRoom = new Entity();
-    cargoRoom.addComponent("isRoom", {
-      flags: ["cargo"],
-    });
-    cargoRoom.addComponent("cargoContainer", {
-      volume: 1000,
-    });
-    inputRooms.push(cargoRoom);
+	beforeEach(() => {
+		oldRandom = Math.random;
+		Math.random = () => 0.5;
+	});
+	afterEach(() => {
+		Math.random = oldRandom;
+	});
+	it("Should spawn inventory given a set of templates and a set of rooms", async () => {
+		const inputRooms: Entity[] = [];
+		const torpedoRoom = new Entity();
+		torpedoRoom.addComponent("isRoom", {
+			flags: ["torpedoStorage"],
+		});
+		torpedoRoom.addComponent("cargoContainer", {
+			volume: 100,
+		});
+		inputRooms.push(torpedoRoom);
+		const torpedoRoom2 = new Entity();
+		torpedoRoom2.addComponent("isRoom", {
+			flags: ["torpedoStorage"],
+		});
+		torpedoRoom2.addComponent("cargoContainer", {
+			volume: 100,
+		});
+		inputRooms.push(torpedoRoom2);
+		const probesRoom = new Entity();
+		probesRoom.addComponent("isRoom", {
+			flags: ["probeStorage"],
+		});
+		probesRoom.addComponent("cargoContainer", {
+			volume: 100,
+		});
+		inputRooms.push(probesRoom);
+		const securityRoom = new Entity();
+		securityRoom.addComponent("isRoom", {
+			flags: ["security"],
+		});
+		securityRoom.addComponent("cargoContainer", {
+			volume: 100,
+		});
+		inputRooms.push(securityRoom);
+		const maintenanceRoom = new Entity();
+		maintenanceRoom.addComponent("isRoom", {
+			flags: ["maintenance"],
+		});
+		maintenanceRoom.addComponent("cargoContainer", {
+			volume: 100,
+		});
+		inputRooms.push(maintenanceRoom);
+		const medicalRoom = new Entity();
+		medicalRoom.addComponent("isRoom", {
+			flags: ["medical"],
+		});
+		medicalRoom.addComponent("cargoContainer", {
+			volume: 100,
+		});
+		inputRooms.push(medicalRoom);
+		const cargoRoom = new Entity();
+		cargoRoom.addComponent("isRoom", {
+			flags: ["cargo"],
+		});
+		cargoRoom.addComponent("cargoContainer", {
+			volume: 1000,
+		});
+		inputRooms.push(cargoRoom);
 
-    const flightInventory: {
-      [inventoryTemplateName: string]: {
-        name: string;
-        volume: number;
-        abundance: number;
-        flags: InventoryFlags;
-      };
-    } = {};
-    Object.keys(InventoryFlagValues).forEach((key, i) => {
-      if (key === "fuel") {
-        flightInventory[key] = {
-          name: `Test ${key} Cargo`,
-          volume: 20 - i,
-          abundance: i + 1,
-          flags: {
-            fuel: {fuelDensity: 41},
-          },
-        };
-        return;
-      }
-      flightInventory[key] = {
-        name: `Test ${key} Cargo`,
-        volume: 20 - i,
-        abundance: i + 1,
-        flags: {
-          [key]: {},
-        },
-      };
-    });
+		const flightInventory: {
+			[inventoryTemplateName: string]: {
+				name: string;
+				volume: number;
+				abundance: number;
+				flags: InventoryFlags;
+			};
+		} = {};
+		Object.keys(InventoryFlagValues).forEach((key, i) => {
+			if (key === "fuel") {
+				flightInventory[key] = {
+					name: `Test ${key} Cargo`,
+					volume: 20 - i,
+					abundance: i + 1,
+					flags: {
+						fuel: { fuelDensity: 41 },
+					},
+				};
+				return;
+			}
+			flightInventory[key] = {
+				name: `Test ${key} Cargo`,
+				volume: 20 - i,
+				abundance: i + 1,
+				flags: {
+					[key]: {},
+				},
+			};
+		});
 
-    flightInventory["random"] = {
-      name: `Test Random Cargo`,
-      volume: 1,
-      abundance: 1,
-      flags: {},
-    };
-    generateShipInventory(
-      inputRooms.map(room => {
-        return {
-          id: room.id,
-          contents: room.components.cargoContainer?.contents || {},
-          flags: room.components.isRoom?.flags || [],
-          volume: room.components.cargoContainer?.volume || 1,
-          systems: [],
-        };
-      }),
-      flightInventory,
-      {powerNeed: 0}
-    );
-    expect(inputRooms).toMatchInlineSnapshot(`
+		flightInventory.random = {
+			name: `Test Random Cargo`,
+			volume: 1,
+			abundance: 1,
+			flags: {},
+		};
+		generateShipInventory(
+			inputRooms.map((room) => {
+				return {
+					id: room.id,
+					contents: room.components.cargoContainer?.contents || {},
+					flags: room.components.isRoom?.flags || [],
+					volume: room.components.cargoContainer?.volume || 1,
+					systems: [],
+				};
+			}),
+			flightInventory,
+			{ powerNeed: 0 },
+		);
+		expect(inputRooms).toMatchInlineSnapshot(`
       [
         {
           "components": {
@@ -302,66 +302,66 @@ describe("Inventory Generator", () => {
         },
       ]
     `);
-  });
-  it("should spawn inventory given a ship with a single room for cargo", () => {
-    const inputRooms: Entity[] = [];
-    const cargoRoom = new Entity();
-    cargoRoom.addComponent("cargoContainer", {
-      volume: 1000,
-    });
-    inputRooms.push(cargoRoom);
-    const flightInventory: {
-      [inventoryTemplateName: string]: {
-        name: string;
-        volume: number;
-        abundance: number;
-        flags: InventoryFlags;
-      };
-    } = {};
-    Object.keys(InventoryFlagValues).forEach((key, i) => {
-      if (key === "fuel") {
-        flightInventory[key] = {
-          name: `Test ${key} Cargo`,
-          volume: 20 - i,
-          abundance: i + 1,
-          flags: {
-            fuel: {fuelDensity: 41},
-          },
-        };
-        return;
-      }
-      flightInventory[key] = {
-        name: `Test ${key} Cargo`,
-        volume: 20 - i,
-        abundance: i + 1,
-        flags: {
-          [key]: {},
-        },
-      };
-    });
+	});
+	it("should spawn inventory given a ship with a single room for cargo", () => {
+		const inputRooms: Entity[] = [];
+		const cargoRoom = new Entity();
+		cargoRoom.addComponent("cargoContainer", {
+			volume: 1000,
+		});
+		inputRooms.push(cargoRoom);
+		const flightInventory: {
+			[inventoryTemplateName: string]: {
+				name: string;
+				volume: number;
+				abundance: number;
+				flags: InventoryFlags;
+			};
+		} = {};
+		Object.keys(InventoryFlagValues).forEach((key, i) => {
+			if (key === "fuel") {
+				flightInventory[key] = {
+					name: `Test ${key} Cargo`,
+					volume: 20 - i,
+					abundance: i + 1,
+					flags: {
+						fuel: { fuelDensity: 41 },
+					},
+				};
+				return;
+			}
+			flightInventory[key] = {
+				name: `Test ${key} Cargo`,
+				volume: 20 - i,
+				abundance: i + 1,
+				flags: {
+					[key]: {},
+				},
+			};
+		});
 
-    flightInventory["random"] = {
-      name: `Test Random Cargo`,
-      volume: 1,
-      abundance: 1,
-      flags: {},
-    };
-    generateShipInventory(
-      inputRooms.map(room => {
-        return {
-          id: room.id,
-          contents: room.components.cargoContainer?.contents || {},
-          flags: ["cargo"],
-          volume: room.components.cargoContainer?.volume || 1,
-          systems: [],
-        };
-      }),
-      flightInventory,
-      {
-        powerNeed: 0,
-      }
-    );
-    expect(inputRooms).toMatchInlineSnapshot(`
+		flightInventory.random = {
+			name: `Test Random Cargo`,
+			volume: 1,
+			abundance: 1,
+			flags: {},
+		};
+		generateShipInventory(
+			inputRooms.map((room) => {
+				return {
+					id: room.id,
+					contents: room.components.cargoContainer?.contents || {},
+					flags: ["cargo"],
+					volume: room.components.cargoContainer?.volume || 1,
+					systems: [],
+				};
+			}),
+			flightInventory,
+			{
+				powerNeed: 0,
+			},
+		);
+		expect(inputRooms).toMatchInlineSnapshot(`
       [
         {
           "components": {
@@ -395,134 +395,134 @@ describe("Inventory Generator", () => {
         },
       ]
     `);
-  });
-  it("Should spawn inventory when the ship has power needs", async () => {
-    const inputRooms: Entity[] = [];
-    const torpedoRoom = new Entity();
-    torpedoRoom.addComponent("isRoom", {
-      flags: ["torpedoStorage"],
-    });
-    torpedoRoom.addComponent("cargoContainer", {
-      volume: 100,
-    });
-    inputRooms.push(torpedoRoom);
-    const torpedoRoom2 = new Entity();
-    torpedoRoom2.addComponent("isRoom", {
-      flags: ["torpedoStorage"],
-    });
-    torpedoRoom2.addComponent("cargoContainer", {
-      volume: 100,
-    });
-    inputRooms.push(torpedoRoom2);
-    const probesRoom = new Entity();
-    probesRoom.addComponent("isRoom", {
-      flags: ["probeStorage"],
-    });
-    probesRoom.addComponent("cargoContainer", {
-      volume: 100,
-    });
-    inputRooms.push(probesRoom);
-    const securityRoom = new Entity();
-    securityRoom.addComponent("isRoom", {
-      flags: ["security"],
-    });
-    securityRoom.addComponent("cargoContainer", {
-      volume: 100,
-    });
-    inputRooms.push(securityRoom);
-    const maintenanceRoom = new Entity();
-    maintenanceRoom.addComponent("isRoom", {
-      flags: ["maintenance"],
-    });
-    maintenanceRoom.addComponent("cargoContainer", {
-      volume: 100,
-    });
-    inputRooms.push(maintenanceRoom);
-    const reactorRoom = new Entity();
-    reactorRoom.id = 444;
-    reactorRoom.addComponent("isRoom", {
-      flags: [],
-    });
-    reactorRoom.addComponent("cargoContainer", {
-      volume: 100,
-    });
-    reactorRoom.addComponent("identity", {name: "Reactor Room"});
-    inputRooms.push(reactorRoom);
-    const fuelRoom = new Entity();
-    fuelRoom.addComponent("isRoom", {
-      flags: ["fuelStorage"],
-    });
-    fuelRoom.addComponent("cargoContainer", {
-      volume: 100,
-    });
-    inputRooms.push(fuelRoom);
-    const medicalRoom = new Entity();
-    medicalRoom.addComponent("isRoom", {
-      flags: ["medical"],
-    });
-    medicalRoom.addComponent("cargoContainer", {
-      volume: 100,
-    });
-    inputRooms.push(medicalRoom);
-    const cargoRoom = new Entity();
-    cargoRoom.addComponent("isRoom", {
-      flags: ["cargo"],
-    });
-    cargoRoom.addComponent("cargoContainer", {
-      volume: 1000,
-    });
-    inputRooms.push(cargoRoom);
+	});
+	it("Should spawn inventory when the ship has power needs", async () => {
+		const inputRooms: Entity[] = [];
+		const torpedoRoom = new Entity();
+		torpedoRoom.addComponent("isRoom", {
+			flags: ["torpedoStorage"],
+		});
+		torpedoRoom.addComponent("cargoContainer", {
+			volume: 100,
+		});
+		inputRooms.push(torpedoRoom);
+		const torpedoRoom2 = new Entity();
+		torpedoRoom2.addComponent("isRoom", {
+			flags: ["torpedoStorage"],
+		});
+		torpedoRoom2.addComponent("cargoContainer", {
+			volume: 100,
+		});
+		inputRooms.push(torpedoRoom2);
+		const probesRoom = new Entity();
+		probesRoom.addComponent("isRoom", {
+			flags: ["probeStorage"],
+		});
+		probesRoom.addComponent("cargoContainer", {
+			volume: 100,
+		});
+		inputRooms.push(probesRoom);
+		const securityRoom = new Entity();
+		securityRoom.addComponent("isRoom", {
+			flags: ["security"],
+		});
+		securityRoom.addComponent("cargoContainer", {
+			volume: 100,
+		});
+		inputRooms.push(securityRoom);
+		const maintenanceRoom = new Entity();
+		maintenanceRoom.addComponent("isRoom", {
+			flags: ["maintenance"],
+		});
+		maintenanceRoom.addComponent("cargoContainer", {
+			volume: 100,
+		});
+		inputRooms.push(maintenanceRoom);
+		const reactorRoom = new Entity();
+		reactorRoom.id = 444;
+		reactorRoom.addComponent("isRoom", {
+			flags: [],
+		});
+		reactorRoom.addComponent("cargoContainer", {
+			volume: 100,
+		});
+		reactorRoom.addComponent("identity", { name: "Reactor Room" });
+		inputRooms.push(reactorRoom);
+		const fuelRoom = new Entity();
+		fuelRoom.addComponent("isRoom", {
+			flags: ["fuelStorage"],
+		});
+		fuelRoom.addComponent("cargoContainer", {
+			volume: 100,
+		});
+		inputRooms.push(fuelRoom);
+		const medicalRoom = new Entity();
+		medicalRoom.addComponent("isRoom", {
+			flags: ["medical"],
+		});
+		medicalRoom.addComponent("cargoContainer", {
+			volume: 100,
+		});
+		inputRooms.push(medicalRoom);
+		const cargoRoom = new Entity();
+		cargoRoom.addComponent("isRoom", {
+			flags: ["cargo"],
+		});
+		cargoRoom.addComponent("cargoContainer", {
+			volume: 1000,
+		});
+		inputRooms.push(cargoRoom);
 
-    const flightInventory: {
-      [inventoryTemplateName: string]: {
-        name: string;
-        volume: number;
-        abundance: number;
-        flags: InventoryFlags;
-      };
-    } = {};
-    Object.keys(InventoryFlagValues).forEach((key, i) => {
-      if (key === "fuel") {
-        flightInventory[key] = {
-          name: `Test ${key} Cargo`,
-          volume: 20 - i,
-          abundance: i + 1,
-          flags: {
-            fuel: {fuelDensity: 41},
-          },
-        };
-        return;
-      }
-      flightInventory[key] = {
-        name: `Test ${key} Cargo`,
-        volume: 20 - i,
-        abundance: i + 1,
-        flags: {
-          [key]: {},
-        },
-      };
-    });
+		const flightInventory: {
+			[inventoryTemplateName: string]: {
+				name: string;
+				volume: number;
+				abundance: number;
+				flags: InventoryFlags;
+			};
+		} = {};
+		Object.keys(InventoryFlagValues).forEach((key, i) => {
+			if (key === "fuel") {
+				flightInventory[key] = {
+					name: `Test ${key} Cargo`,
+					volume: 20 - i,
+					abundance: i + 1,
+					flags: {
+						fuel: { fuelDensity: 41 },
+					},
+				};
+				return;
+			}
+			flightInventory[key] = {
+				name: `Test ${key} Cargo`,
+				volume: 20 - i,
+				abundance: i + 1,
+				flags: {
+					[key]: {},
+				},
+			};
+		});
 
-    flightInventory["random"] = {
-      name: `Test Random Cargo`,
-      volume: 1,
-      abundance: 1,
-      flags: {},
-    };
-    generateShipInventory(
-      inputRooms.map(room => {
-        return {
-          id: room.id,
-          contents: room.components.cargoContainer?.contents || {},
-          flags: room.components.isRoom?.flags || [],
-          volume: room.components.cargoContainer?.volume || 1,
-          systems: room.id === 444 ? ["reactor"] : [],
-        };
-      }),
-      flightInventory,
-      {powerNeed: 1000}
-    );
-    expect(inputRooms).toMatchInlineSnapshot(`
+		flightInventory.random = {
+			name: `Test Random Cargo`,
+			volume: 1,
+			abundance: 1,
+			flags: {},
+		};
+		generateShipInventory(
+			inputRooms.map((room) => {
+				return {
+					id: room.id,
+					contents: room.components.cargoContainer?.contents || {},
+					flags: room.components.isRoom?.flags || [],
+					volume: room.components.cargoContainer?.volume || 1,
+					systems: room.id === 444 ? ["reactor"] : [],
+				};
+			}),
+			flightInventory,
+			{ powerNeed: 1000 },
+		);
+		expect(inputRooms).toMatchInlineSnapshot(`
       [
         {
           "components": {
@@ -729,5 +729,5 @@ describe("Inventory Generator", () => {
         },
       ]
     `);
-  });
+	});
 });

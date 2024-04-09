@@ -1,12 +1,12 @@
-import {getReactorInventory} from "@server/utils/getSystemInventory";
+import { getReactorInventory } from "@server/utils/getSystemInventory";
 import {
-  HeatCapacity,
-  Kelvin,
-  Kilograms,
-  MegaWatt,
-  MegaWattHour,
+	type HeatCapacity,
+	type Kelvin,
+	type Kilograms,
+	type MegaWatt,
+	MegaWattHour,
 } from "@server/utils/unitTypes";
-import {Entity, System} from "../utils/ecs";
+import { type Entity, System } from "../utils/ecs";
 
 // W = Q / 𝚫t = (c * m * 𝚫T)/𝚫t
 // W = watts
@@ -26,22 +26,22 @@ const HEAT_CAPACITY: HeatCapacity = 0.475;
 const MASS: Kilograms = 10000;
 
 export class ReactorHeatSystem extends System {
-  test(entity: Entity) {
-    return !!entity.components.isReactor && !!entity.components.heat;
-  }
-  update(entity: Entity, elapsed: number) {
-    const elapsedInSeconds = elapsed / 1000;
-    if (!entity.components.isReactor || !entity.components.heat) return;
-    const {currentOutput} = entity.components.isReactor;
-    const {powerToHeat} = entity.components.heat;
+	test(entity: Entity) {
+		return !!entity.components.isReactor && !!entity.components.heat;
+	}
+	update(entity: Entity, elapsed: number) {
+		const elapsedInSeconds = elapsed / 1000;
+		if (!entity.components.isReactor || !entity.components.heat) return;
+		const { currentOutput } = entity.components.isReactor;
+		const { powerToHeat } = entity.components.heat;
 
-    const heatGenerated: MegaWatt = currentOutput * powerToHeat;
+		const heatGenerated: MegaWatt = currentOutput * powerToHeat;
 
-    const heatInWatts = heatGenerated * 1e6;
+		const heatInWatts = heatGenerated * 1e6;
 
-    const changeInHeat: Kelvin =
-      (heatInWatts * elapsedInSeconds) / (HEAT_CAPACITY * MASS * 1000);
+		const changeInHeat: Kelvin =
+			(heatInWatts * elapsedInSeconds) / (HEAT_CAPACITY * MASS * 1000);
 
-    entity.components.heat.heat += changeInHeat;
-  }
+		entity.components.heat.heat += changeInHeat;
+	}
 }

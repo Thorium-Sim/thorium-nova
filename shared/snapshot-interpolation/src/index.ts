@@ -4,6 +4,6 @@
  * @license      {@link https://github.com/geckosio/snapshot-interpolation/blob/master/LICENSE|GNU GPLv3}
  */
 
-export { SnapshotInterpolation } from './snapshot-interpolation'
-export { Vault } from './vault'
-export * as Types from './types'
+export { SnapshotInterpolation } from "./snapshot-interpolation";
+export { Vault } from "./vault";
+export * as Types from "./types";

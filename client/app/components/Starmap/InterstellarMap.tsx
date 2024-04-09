@@ -1,264 +1,266 @@
 import * as React from "react";
-import {useParams} from "react-router-dom";
-import {useThree} from "@react-three/fiber";
-import {useRef, Suspense, useEffect} from "react";
-import {Box3, Camera, Vector3} from "three";
-import {useGetStarmapStore} from "@client/components/Starmap/starmapStore";
+import { useParams } from "react-router-dom";
+import { useThree } from "@react-three/fiber";
+import { useRef, Suspense, useEffect } from "react";
+import { Box3, type Camera, Vector3 } from "three";
+import { useGetStarmapStore } from "@client/components/Starmap/starmapStore";
 
 import Starfield from "@client/components/Starmap/Starfield";
 import {
-  LightMinute,
-  LightYear,
-  lightYearToLightMinute,
+	type LightMinute,
+	type LightYear,
+	lightYearToLightMinute,
 } from "@server/utils/unitTypes";
-import {toast} from "@client/context/ToastContext";
-import {useConfirm} from "@thorium/ui/AlertDialog";
+import { toast } from "@client/context/ToastContext";
+import { useConfirm } from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
-import {CameraControls, useExternalCameraControl} from "./CameraControls";
+import { CameraControls, useExternalCameraControl } from "./CameraControls";
 import CameraControlsClass from "camera-controls";
 import debounce from "lodash.debounce";
 import Input from "@thorium/ui/Input";
-import {PolarGrid} from "./PolarGrid";
-import {q} from "@client/context/AppContext";
+import { PolarGrid } from "./PolarGrid";
+import { q } from "@client/context/AppContext";
 
 const ACTION = CameraControlsClass.ACTION;
 
 export const INTERSTELLAR_MAX_DISTANCE: LightYear = 2000;
 
-export function InterstellarMap({children}: {children: React.ReactNode}) {
-  const useStarmapStore = useGetStarmapStore();
-  const controlsEnabled = useStarmapStore(s => s.cameraControlsEnabled);
-  const cameraView = useStarmapStore(s => s.cameraView);
-  const orbitControls = useRef<CameraControlsClass>(null);
-  const {camera} = useThree();
-  useEffect(() => {
-    // Set the initial camera position
-    orbitControls.current?.setPosition(
-      0,
-      lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE) / 2,
-      0
-    );
-    const max = lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE) * 0.75;
-    orbitControls.current?.setBoundary(
-      new Box3(new Vector3(-max, -max, -max), new Vector3(max, max, max))
-    );
-  }, [camera]);
+export function InterstellarMap({ children }: { children: React.ReactNode }) {
+	const useStarmapStore = useGetStarmapStore();
+	const controlsEnabled = useStarmapStore((s) => s.cameraControlsEnabled);
+	const cameraView = useStarmapStore((s) => s.cameraView);
+	const orbitControls = useRef<CameraControlsClass>(null);
+	const { camera } = useThree();
+	// biome-ignore lint/correctness/useExhaustiveDependencies:
+	useEffect(() => {
+		// Set the initial camera position
+		orbitControls.current?.setPosition(
+			0,
+			lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE) / 2,
+			0,
+		);
+		const max = lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE) * 0.75;
+		orbitControls.current?.setBoundary(
+			new Box3(new Vector3(-max, -max, -max), new Vector3(max, max, max)),
+		);
+	}, [camera]);
 
-  useEffect(() => {
-    if (cameraView === "2d") {
-      orbitControls.current?.rotatePolarTo(0, true);
-      orbitControls.current?.rotateAzimuthTo(0, true);
-    }
-  }, [camera, cameraView]);
+	// biome-ignore lint/correctness/useExhaustiveDependencies:
+	useEffect(() => {
+		if (cameraView === "2d") {
+			orbitControls.current?.rotatePolarTo(0, true);
+			orbitControls.current?.rotateAzimuthTo(0, true);
+		}
+	}, [camera, cameraView]);
 
-  useEffect(() => {
-    useStarmapStore.setState({skyboxKey: "blank"});
-  }, [useStarmapStore]);
-  useExternalCameraControl(orbitControls);
+	useEffect(() => {
+		useStarmapStore.setState({ skyboxKey: "blank" });
+	}, [useStarmapStore]);
+	useExternalCameraControl(orbitControls);
 
-  const viewingMode = useStarmapStore(store => store.viewingMode);
+	const viewingMode = useStarmapStore((store) => store.viewingMode);
 
-  const isStation = viewingMode === "station";
-  const isViewscreen = viewingMode === "viewscreen";
+	const isStation = viewingMode === "station";
+	const isViewscreen = viewingMode === "viewscreen";
 
-  return (
-    <Suspense fallback={null}>
-      <Starfield radius={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)} />
-      {!isViewscreen && (
-        <>
-          <CameraControls
-            ref={orbitControls}
-            enabled={controlsEnabled}
-            maxDistance={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)}
-            minDistance={1}
-            mouseButtons={{
-              left: ACTION.TRUCK,
-              right: ACTION.ROTATE,
-              middle: ACTION.DOLLY,
-              wheel: ACTION.DOLLY,
-            }}
-            dollyToCursor={isStation}
-            dollySpeed={0.5}
-          />
-          <PolarGrid
-            rotation={[0, (2 * Math.PI) / 12, 0]}
-            args={[
-              lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE),
-              12,
-              20,
-              64,
-              0xffffff,
-              0xffffff,
-            ]}
-          />
-        </>
-      )}
-      {children}
-    </Suspense>
-  );
+	return (
+		<Suspense fallback={null}>
+			<Starfield radius={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)} />
+			{!isViewscreen && (
+				<>
+					<CameraControls
+						ref={orbitControls}
+						enabled={controlsEnabled}
+						maxDistance={lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)}
+						minDistance={1}
+						mouseButtons={{
+							left: ACTION.TRUCK,
+							right: ACTION.ROTATE,
+							middle: ACTION.DOLLY,
+							wheel: ACTION.DOLLY,
+						}}
+						dollyToCursor={isStation}
+						dollySpeed={0.5}
+					/>
+					<PolarGrid
+						rotation={[0, (2 * Math.PI) / 12, 0]}
+						args={[
+							lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE),
+							12,
+							20,
+							64,
+							0xffffff,
+							0xffffff,
+						]}
+					/>
+				</>
+			)}
+			{children}
+		</Suspense>
+	);
 }
 
 interface SceneRef {
-  camera: () => Camera;
+	camera: () => Camera;
 }
 
 export function InterstellarMenuButtons({
-  sceneRef,
+	sceneRef,
 }: {
-  sceneRef: React.MutableRefObject<SceneRef | undefined>;
+	sceneRef: React.MutableRefObject<SceneRef | undefined>;
 }) {
-  const {pluginId} = useParams() as {
-    pluginId: string;
-  };
-  const useStarmapStore = useGetStarmapStore();
+	const { pluginId } = useParams() as {
+		pluginId: string;
+	};
+	const useStarmapStore = useGetStarmapStore();
 
-  const selectedObjectIds = useStarmapStore(s => s.selectedObjectIds);
-  const cameraView = useStarmapStore(s => s.cameraView);
-  const confirm = useConfirm();
-  async function deleteObject() {
-    const selectedObjectIds = useStarmapStore.getState().selectedObjectIds;
-    if (
-      selectedObjectIds.length === 0 ||
-      typeof selectedObjectIds[0] === "number"
-    )
-      return;
+	const selectedObjectIds = useStarmapStore((s) => s.selectedObjectIds);
+	const cameraView = useStarmapStore((s) => s.cameraView);
+	const confirm = useConfirm();
+	async function deleteObject() {
+		const selectedObjectIds = useStarmapStore.getState().selectedObjectIds;
+		if (
+			selectedObjectIds.length === 0 ||
+			typeof selectedObjectIds[0] === "number"
+		)
+			return;
 
-    const doRemove = await confirm({
-      header: "Are you sure you want to remove this object?",
-      body: "It will remove all of the objects inside of it.",
-    });
-    if (!doRemove) return;
+		const doRemove = await confirm({
+			header: "Are you sure you want to remove this object?",
+			body: "It will remove all of the objects inside of it.",
+		});
+		if (!doRemove) return;
 
-    await q.plugin.starmap.solarSystem.delete.netSend({
-      pluginId,
-      solarSystemId: selectedObjectIds[0],
-    });
+		await q.plugin.starmap.solarSystem.delete.netSend({
+			pluginId,
+			solarSystemId: selectedObjectIds[0],
+		});
 
-    useStarmapStore.setState({
-      selectedObjectIds: [],
-    });
-  }
+		useStarmapStore.setState({
+			selectedObjectIds: [],
+		});
+	}
 
-  return (
-    <>
-      <Button
-        className="btn-success btn-outline btn-xs"
-        onClick={async () => {
-          const camera = sceneRef.current?.camera();
-          if (!camera) return;
-          const vec = new Vector3(0, 0, lightYearToLightMinute(-300));
+	return (
+		<>
+			<Button
+				className="btn-success btn-outline btn-xs"
+				onClick={async () => {
+					const camera = sceneRef.current?.camera();
+					if (!camera) return;
+					const vec = new Vector3(0, 0, lightYearToLightMinute(-300));
 
-          vec.applyQuaternion(camera.quaternion).add(camera.position);
-          try {
-            const system = await q.plugin.starmap.solarSystem.create.netSend({
-              pluginId,
-              position: vec,
-            });
-            useStarmapStore.setState({
-              selectedObjectIds: [system.solarSystemId],
-            });
-          } catch (err) {
-            if (err instanceof Error) {
-              toast({
-                title: "Error creating system",
-                body: err.message,
-                color: "error",
-              });
-              return;
-            }
-          }
-        }}
-      >
-        Add
-      </Button>
-      <Button
-        className="btn-error btn-outline btn-xs"
-        disabled={!selectedObjectIds}
-        onClick={deleteObject}
-      >
-        Delete
-      </Button>
-      <Button
-        className="btn-primary btn-outline btn-xs"
-        disabled={!selectedObjectIds}
-      >
-        Edit
-      </Button>
-      <Button
-        className="btn-notice btn-outline btn-xs"
-        onClick={() =>
-          useStarmapStore
-            .getState()
-            .setCameraView(cameraView === "2d" ? "3d" : "2d")
-        }
-      >
-        Go to {cameraView === "2d" ? "3D" : "2D"}
-      </Button>
-    </>
-  );
+					vec.applyQuaternion(camera.quaternion).add(camera.position);
+					try {
+						const system = await q.plugin.starmap.solarSystem.create.netSend({
+							pluginId,
+							position: vec,
+						});
+						useStarmapStore.setState({
+							selectedObjectIds: [system.solarSystemId],
+						});
+					} catch (err) {
+						if (err instanceof Error) {
+							toast({
+								title: "Error creating system",
+								body: err.message,
+								color: "error",
+							});
+							return;
+						}
+					}
+				}}
+			>
+				Add
+			</Button>
+			<Button
+				className="btn-error btn-outline btn-xs"
+				disabled={!selectedObjectIds}
+				onClick={deleteObject}
+			>
+				Delete
+			</Button>
+			<Button
+				className="btn-primary btn-outline btn-xs"
+				disabled={!selectedObjectIds}
+			>
+				Edit
+			</Button>
+			<Button
+				className="btn-notice btn-outline btn-xs"
+				onClick={() =>
+					useStarmapStore
+						.getState()
+						.setCameraView(cameraView === "2d" ? "3d" : "2d")
+				}
+			>
+				Go to {cameraView === "2d" ? "3D" : "2D"}
+			</Button>
+		</>
+	);
 }
 
 export const InterstellarPalette = ({
-  selectedStar,
-  update,
+	selectedStar,
+	update,
 }: {
-  selectedStar: {
-    name: string;
-    position: Record<"x" | "y" | "z", LightMinute>;
-    description: string;
-  };
-  update: (params: {
-    name?: string | undefined;
-    description?: string | undefined;
-  }) => Promise<void>;
+	selectedStar: {
+		name: string;
+		position: Record<"x" | "y" | "z", LightMinute>;
+		description: string;
+	};
+	update: (params: {
+		name?: string | undefined;
+		description?: string | undefined;
+	}) => Promise<void>;
 }) => {
-  const useStarmapStore = useGetStarmapStore();
+	const useStarmapStore = useGetStarmapStore();
 
-  useEffect(() => {
-    if (!selectedStar) {
-      useStarmapStore.setState({selectedObjectIds: []});
-    }
-  }, [selectedStar, useStarmapStore]);
+	useEffect(() => {
+		if (!selectedStar) {
+			useStarmapStore.setState({ selectedObjectIds: [] });
+		}
+	}, [selectedStar, useStarmapStore]);
 
-  const [name, setName] = React.useState(selectedStar?.name || "");
-  const [description, setDescription] = React.useState(
-    selectedStar?.description || ""
-  );
+	const [name, setName] = React.useState(selectedStar?.name || "");
+	const [description, setDescription] = React.useState(
+		selectedStar?.description || "",
+	);
 
-  const debouncedUpdate = React.useMemo(
-    () => debounce(update, 500, {maxWait: 2000, trailing: true}),
-    [update]
-  );
+	const debouncedUpdate = React.useMemo(
+		() => debounce(update, 500, { maxWait: 2000, trailing: true }),
+		[update],
+	);
 
-  useEffect(() => {
-    if (!selectedStar) return;
-    setName(selectedStar.name);
-    setDescription(selectedStar.description);
-  }, [selectedStar, selectedStar?.name, selectedStar?.description]);
+	useEffect(() => {
+		if (!selectedStar) return;
+		setName(selectedStar.name);
+		setDescription(selectedStar.description);
+	}, [selectedStar, selectedStar?.name, selectedStar?.description]);
 
-  return (
-    <div className="w-full h-full overflow-y-auto p-2 text-white">
-      <Input
-        label="Name"
-        value={name}
-        onChange={e => {
-          setName(e.target.value);
-          debouncedUpdate({name: e.target.value});
-        }}
-        name="name"
-      />
-      <Input
-        label="Description"
-        as="textarea"
-        rows={5}
-        className="resize-none"
-        value={description}
-        onChange={e => {
-          setDescription(e.target.value);
-          debouncedUpdate({description: e.target.value});
-        }}
-        name="description"
-      />
-    </div>
-  );
+	return (
+		<div className="w-full h-full overflow-y-auto p-2 text-white">
+			<Input
+				label="Name"
+				value={name}
+				onChange={(e) => {
+					setName(e.target.value);
+					debouncedUpdate({ name: e.target.value });
+				}}
+				name="name"
+			/>
+			<Input
+				label="Description"
+				as="textarea"
+				rows={5}
+				className="resize-none"
+				value={description}
+				onChange={(e) => {
+					setDescription(e.target.value);
+					debouncedUpdate({ description: e.target.value });
+				}}
+				name="description"
+			/>
+		</div>
+	);
 };

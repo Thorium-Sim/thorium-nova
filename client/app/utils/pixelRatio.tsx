@@ -1,2 +1,2 @@
 export const pixelRatio =
-  typeof window === "undefined" ? 1 : window.devicePixelRatio;
+	typeof window === "undefined" ? 1 : window.devicePixelRatio;

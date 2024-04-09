@@ -1,5 +1,5 @@
-import {Navigate} from "@client/components/Navigate";
+import { Navigate } from "@client/components/Navigate";
 
 export default function Flight() {
-  return <Navigate to="/flight/lobby" />;
+	return <Navigate to="/flight/lobby" />;
 }

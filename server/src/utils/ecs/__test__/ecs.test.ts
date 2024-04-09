@@ -1,169 +1,178 @@
 import ECS from "../ecs";
 import Entity from "../entity";
 import System from "../system";
-import {vi} from "vitest";
+import { vi } from "vitest";
 
 const server: any = {};
 describe("ECS", () => {
-  it("should initialize", () => {
-    let ecs = new ECS(server);
+	it("should initialize", () => {
+		const ecs = new ECS(server);
 
-    expect(Array.isArray(ecs.entities)).toBeTruthy();
-    expect(Array.isArray(ecs.systems)).toBeTruthy();
-  });
+		expect(Array.isArray(ecs.entities)).toBeTruthy();
+		expect(Array.isArray(ecs.systems)).toBeTruthy();
+	});
 
-  describe("getEntityById()", () => {
-    it("should retrieve an entity by id", () => {
-      let ecs = new ECS(server);
-      let entity = new Entity(123, {});
+	describe("getEntityById()", () => {
+		it("should retrieve an entity by id", () => {
+			const ecs = new ECS(server);
+			const entity = new Entity(123, {});
 
-      ecs.addEntity(entity);
+			ecs.addEntity(entity);
 
-      expect(ecs.getEntityById(123)).toEqual(entity);
-    });
-  });
+			expect(ecs.getEntityById(123)).toEqual(entity);
+		});
+	});
 
-  describe("update()", () => {
-    let ecs: ECS, entity: Entity, system: System;
+	describe("update()", () => {
+		let ecs: ECS;
+		let entity: Entity;
+		let system: System;
 
-    beforeEach(() => {
-      ecs = new ECS(server);
-      entity = new Entity();
-      system = new System();
-    });
+		beforeEach(() => {
+			ecs = new ECS(server);
+			entity = new Entity();
+			system = new System();
+		});
 
-    it("should give the elapsed time to update methods", async () => {
-      system.test = () => true;
-      const done = new Promise<void>(res => {
-        system.update = (_entity, elapsed) => {
-          expect(typeof elapsed).toBe("number");
-          res();
-        };
-      });
+		it("should give the elapsed time to update methods", async () => {
+			system.test = () => true;
+			const done = new Promise<void>((res) => {
+				system.update = (_entity, elapsed) => {
+					expect(typeof elapsed).toBe("number");
+					res();
+				};
+			});
 
-      ecs.addSystem(system);
-      ecs.addEntity(entity);
+			ecs.addSystem(system);
+			ecs.addEntity(entity);
 
-      ecs.update();
+			ecs.update();
 
-      await done;
-    });
-  });
+			await done;
+		});
+	});
 
-  describe("addSystem()", () => {
-    let ecs: ECS, entity: Entity, system: System;
+	describe("addSystem()", () => {
+		let ecs: ECS;
+		let entity: Entity;
+		let system: System;
 
-    beforeEach(() => {
-      ecs = new ECS(server);
-      entity = new Entity();
-      system = new System();
-    });
+		beforeEach(() => {
+			ecs = new ECS(server);
+			entity = new Entity();
+			system = new System();
+		});
 
-    it("should call enter() when update", () => {
-      system.test = () => true;
-      system.enter = vi.fn();
-      ecs.addSystem(system);
-      ecs.addEntity(entity);
+		it("should call enter() when update", () => {
+			system.test = () => true;
+			system.enter = vi.fn();
+			ecs.addSystem(system);
+			ecs.addEntity(entity);
 
-      ecs.update();
+			ecs.update();
 
-      expect(system.enter).toBeCalledWith(entity);
-    });
+			expect(system.enter).toBeCalledWith(entity);
+		});
 
-    it("should call enter() when removing and re-adding a system", () => {
-      system.test = () => true;
-      system.enter = vi.fn();
-      ecs.addSystem(system);
-      ecs.addEntity(entity);
-      ecs.update();
+		it("should call enter() when removing and re-adding a system", () => {
+			system.test = () => true;
+			system.enter = vi.fn();
+			ecs.addSystem(system);
+			ecs.addEntity(entity);
+			ecs.update();
 
-      ecs.removeSystem(system);
-      ecs.update();
+			ecs.removeSystem(system);
+			ecs.update();
 
-      ecs.addSystem(system);
-      ecs.update();
+			ecs.addSystem(system);
+			ecs.update();
 
-      expect(system.enter).toHaveBeenCalledTimes(2);
-    });
-  });
+			expect(system.enter).toHaveBeenCalledTimes(2);
+		});
+	});
 
-  describe("removeSystem()", () => {
-    let ecs: ECS, entity: Entity, system: System;
+	describe("removeSystem()", () => {
+		let ecs: ECS;
+		let entity: Entity;
+		let system: System;
 
-    beforeEach(() => {
-      ecs = new ECS(server);
-      entity = new Entity();
-      system = new System();
-    });
+		beforeEach(() => {
+			ecs = new ECS(server);
+			entity = new Entity();
+			system = new System();
+		});
 
-    it("should call exit(entity) when removed", () => {
-      system.test = () => true;
-      system.exit = vi.fn();
+		it("should call exit(entity) when removed", () => {
+			system.test = () => true;
+			system.exit = vi.fn();
 
-      ecs.addSystem(system);
-      ecs.addEntity(entity);
+			ecs.addSystem(system);
+			ecs.addEntity(entity);
 
-      ecs.update();
+			ecs.update();
 
-      ecs.removeSystem(system);
+			ecs.removeSystem(system);
 
-      expect(system.exit).toBeCalledWith(entity);
-    });
+			expect(system.exit).toBeCalledWith(entity);
+		});
 
-    it("should call exit(entity) of all systems when removed", () => {
-      system.test = () => true;
-      system.exit = vi.fn();
+		it("should call exit(entity) of all systems when removed", () => {
+			system.test = () => true;
+			system.exit = vi.fn();
 
-      ecs.addSystem(system);
-      ecs.addEntity(entity);
+			ecs.addSystem(system);
+			ecs.addEntity(entity);
 
-      ecs.update();
+			ecs.update();
 
-      ecs.removeSystem(system);
+			ecs.removeSystem(system);
 
-      expect(system.exit).toBeCalledWith(entity);
-    });
-  });
+			expect(system.exit).toBeCalledWith(entity);
+		});
+	});
 
-  describe("removeEntity()", () => {
-    let ecs: ECS, entity: Entity, system1: System, system2: System;
+	describe("removeEntity()", () => {
+		let ecs: ECS;
+		let entity: Entity;
+		let system1: System;
+		let system2: System;
 
-    beforeEach(() => {
-      ecs = new ECS(server);
-      entity = new Entity();
-      system1 = new System();
-      system2 = new System();
-    });
+		beforeEach(() => {
+			ecs = new ECS(server);
+			entity = new Entity();
+			system1 = new System();
+			system2 = new System();
+		});
 
-    it("should call exit(entity) when removed", () => {
-      system1.test = () => true;
-      system1.exit = vi.fn();
+		it("should call exit(entity) when removed", () => {
+			system1.test = () => true;
+			system1.exit = vi.fn();
 
-      ecs.addSystem(system1);
-      ecs.addEntity(entity);
+			ecs.addSystem(system1);
+			ecs.addEntity(entity);
 
-      ecs.update();
+			ecs.update();
 
-      ecs.removeEntity(entity);
+			ecs.removeEntity(entity);
 
-      expect(system1.exit).toBeCalledWith(entity);
-    });
+			expect(system1.exit).toBeCalledWith(entity);
+		});
 
-    it("should call exit(entity) of all systems when removed", async () => {
-      system2.test = () => true;
-      system2.exit = vi.fn();
-      system1.test = () => true;
-      system1.exit = vi.fn();
+		it("should call exit(entity) of all systems when removed", async () => {
+			system2.test = () => true;
+			system2.exit = vi.fn();
+			system1.test = () => true;
+			system1.exit = vi.fn();
 
-      ecs.addSystem(system1);
-      ecs.addSystem(system2);
-      ecs.addEntity(entity);
+			ecs.addSystem(system1);
+			ecs.addSystem(system2);
+			ecs.addEntity(entity);
 
-      ecs.update();
+			ecs.update();
 
-      ecs.removeEntity(entity);
+			ecs.removeEntity(entity);
 
-      expect(system1.exit).toBeCalledWith(entity);
-    });
-  });
+			expect(system1.exit).toBeCalledWith(entity);
+		});
+	});
 });

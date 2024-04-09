@@ -1,13 +1,13 @@
 {
-  "watch": [
-    "src",
-    "../shared/**",
-    "../client/app/**/data.ts",
-    "../client/app/**/data.tsx",
-    "../client/app/**/data/**/*.ts",
-    "../client/app/**/data/**/*.tsx"
-  ],
-  "ignore": ["src/**/*.test.ts"],
-  "ext": "ts,tsx,mjs,js,json",
-  "exec": "tsx --trace-warnings src/index.ts"
+	"watch": [
+		"src",
+		"../shared/**",
+		"../client/app/**/data.ts",
+		"../client/app/**/data.tsx",
+		"../client/app/**/data/**/*.ts",
+		"../client/app/**/data/**/*.tsx"
+	],
+	"ignore": ["src/**/*.test.ts"],
+	"ext": "ts,tsx,mjs,js,json",
+	"exec": "tsx --trace-warnings src/index.ts"
 }

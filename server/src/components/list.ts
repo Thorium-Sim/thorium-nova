@@ -40,3 +40,4 @@ export * from "./isTrigger";
 export * from "./isTimeline";
 export * from "./physicsHandles";
 export * from "./physicsWorld";
+export * from "./nearbyObjects";

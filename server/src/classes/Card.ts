@@ -1,41 +1,41 @@
 type CardConfig = unknown;
 
 export class Card {
-  name: string;
+	name: string;
 
-  component: string;
+	component: string;
 
-  config?: CardConfig;
+	config?: CardConfig;
 
-  icon?: string | null;
+	icon?: string | null;
 
-  constructor(params: Partial<Card>) {
-    this.name = params.name || "Card";
-    this.component = params.component || "Login";
-    this.config = params.config;
-    this.icon = params.icon || null;
-  }
+	constructor(params: Partial<Card>) {
+		this.name = params.name || "Card";
+		this.component = params.component || "Login";
+		this.config = params.config;
+		this.icon = params.icon || null;
+	}
 }
 
 export class Widget {
-  name: string;
+	name: string;
 
-  component: string;
+	component: string;
 
-  config?: CardConfig;
+	config?: CardConfig;
 
-  icon?: string | null;
+	icon?: string | null;
 
-  size?: "sm" | "md" | "lg" | "xl";
+	size?: "sm" | "md" | "lg" | "xl";
 
-  resize?: boolean;
+	resize?: boolean;
 
-  constructor(params: Partial<Widget>) {
-    this.name = params.name || "Remote Access";
-    this.component = params.component || "RemoteAccess";
-    this.config = params.config;
-    this.icon = params.icon || null;
-    this.size = params.size || "md";
-    this.resize = params.resize || false;
-  }
+	constructor(params: Partial<Widget>) {
+		this.name = params.name || "Remote Access";
+		this.component = params.component || "RemoteAccess";
+		this.config = params.config;
+		this.icon = params.icon || null;
+		this.size = params.size || "md";
+		this.resize = params.resize || false;
+	}
 }

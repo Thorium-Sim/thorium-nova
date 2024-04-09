@@ -9,41 +9,41 @@ let img;
 let primaryCanvases = [];
 let secondaryCanvases = [];
 
-self.onmessage = e => {
-  if (e.data.type === "init") {
-    primaryCanvases = e.data.primaryCanvases;
-    secondaryCanvases = e.data.secondaryCanvases;
-    return;
-  }
-  if (e.data.type === "render") {
-    const canvases =
-      e.data.which === "primary" ? primaryCanvases : secondaryCanvases;
-    generateTexture(e.data.seed, canvases, e.data.which);
-    return postMessage({which: e.data.which});
-  }
+self.onmessage = (e) => {
+	if (e.data.type === "init") {
+		primaryCanvases = e.data.primaryCanvases;
+		secondaryCanvases = e.data.secondaryCanvases;
+		return;
+	}
+	if (e.data.type === "render") {
+		const canvases =
+			e.data.which === "primary" ? primaryCanvases : secondaryCanvases;
+		generateTexture(e.data.seed, canvases, e.data.which);
+		return postMessage({ which: e.data.which });
+	}
 };
-let renderingContext = new OffscreenCanvas(256, 256);
+const renderingContext = new OffscreenCanvas(256, 256);
 
 const storage = {};
-storage.initialize = function () {
-  if (storage.canvas) return;
-  // Initialize the offscreen rendering canvas.
-  storage.canvas = renderingContext;
+storage.initialize = () => {
+	if (storage.canvas) return;
+	// Initialize the offscreen rendering canvas.
+	storage.canvas = renderingContext;
 
-  // Initialize the gl context.
-  storage.gl = storage.canvas.getContext("webgl");
-  storage.gl.enable(storage.gl.BLEND);
-  storage.gl.blendFuncSeparate(
-    storage.gl.SRC_ALPHA,
-    storage.gl.ONE_MINUS_SRC_ALPHA,
-    storage.gl.ZERO,
-    storage.gl.ONE
-  );
+	// Initialize the gl context.
+	storage.gl = storage.canvas.getContext("webgl");
+	storage.gl.enable(storage.gl.BLEND);
+	storage.gl.blendFuncSeparate(
+		storage.gl.SRC_ALPHA,
+		storage.gl.ONE_MINUS_SRC_ALPHA,
+		storage.gl.ZERO,
+		storage.gl.ONE,
+	);
 
-  // Load the programs.
-  storage.pNebula = loadProgram(
-    storage.gl,
-    `#version 100
+	// Load the programs.
+	storage.pNebula = loadProgram(
+		storage.gl,
+		`#version 100
       precision highp float;
       
       uniform mat4 uModel;
@@ -101,157 +101,157 @@ storage.initialize = function () {
           gl_FragColor = vec4(uColor, c);
       
       }
-      `
-  );
+      `,
+	);
 
-  // Create the nebula renderables.
-  storage.rNebula = buildBox(storage.gl, storage.pNebula);
+	// Create the nebula renderables.
+	storage.rNebula = buildBox(storage.gl, storage.pNebula);
 };
 
 function generateTexture(seed, canvases) {
-  async function render(params) {
-    if (!img) {
-      await fetch(imageUrl)
-        .then(r => r.blob())
-        .then(imgblob => {
-          return createImageBitmap(imgblob);
-        })
-        .then(res => {
-          img = res;
-        });
-    }
-    // Handle changes to resolution.
-    storage.canvas.width = storage.canvas.height = params.resolution;
-    storage.gl.viewport(0, 0, params.resolution, params.resolution);
+	async function render(params) {
+		if (!img) {
+			await fetch(imageUrl)
+				.then((r) => r.blob())
+				.then((imgblob) => {
+					return createImageBitmap(imgblob);
+				})
+				.then((res) => {
+					img = res;
+				});
+		}
+		// Handle changes to resolution.
+		storage.canvas.width = storage.canvas.height = params.resolution;
+		storage.gl.viewport(0, 0, params.resolution, params.resolution);
 
-    // Initialize the nebula parameters.
-    var rand = new rng.MT(hashcode(params.seed) + 2000);
-    var nebulaParams = [];
-    while (params.nebulae) {
-      nebulaParams.push({
-        scale: rand.random() * 0.5 + 0.25,
-        color: [rand.random(), rand.random(), rand.random()],
-        intensity: rand.random() * 0.2 + 0.9,
-        falloff: rand.random() * 3.0 + 3.0,
-        offset: [
-          rand.random() * 2000 - 1000,
-          rand.random() * 2000 - 1000,
-          rand.random() * 2000 - 1000,
-        ],
-      });
-      if (rand.random() < 0.5) {
-        break;
-      }
-    }
-    // Create a list of directions we'll be iterating over.
-    var dirs = [
-      {
-        target: [0, 0, -1],
-        up: [-1, 0, 0],
-      },
-      {
-        target: [0, 0, 1],
-        up: [-1, 0, 0],
-      },
-      {
-        target: [-1, 0, 0],
-        up: [0, 1, 0],
-      },
-      {
-        target: [1, 0, 0],
-        up: [0, -1, 0],
-      },
-      {
-        target: [0, -1, 0],
-        up: [-1, 0, 0],
-      },
-      {
-        target: [0, 1, 0],
-        up: [-1, 0, 0],
-      },
-    ];
-    // Define and initialize the model, view, and projection matrices.
-    var model = glm.mat4.create();
-    var view = glm.mat4.create();
-    var projection = glm.mat4.create();
-    glm.mat4.perspective(projection, Math.PI / 2, 1.0, 0.1, 256);
+		// Initialize the nebula parameters.
+		var rand = new rng.MT(hashcode(params.seed) + 2000);
+		var nebulaParams = [];
+		while (params.nebulae) {
+			nebulaParams.push({
+				scale: rand.random() * 0.5 + 0.25,
+				color: [rand.random(), rand.random(), rand.random()],
+				intensity: rand.random() * 0.2 + 0.9,
+				falloff: rand.random() * 3.0 + 3.0,
+				offset: [
+					rand.random() * 2000 - 1000,
+					rand.random() * 2000 - 1000,
+					rand.random() * 2000 - 1000,
+				],
+			});
+			if (rand.random() < 0.5) {
+				break;
+			}
+		}
+		// Create a list of directions we'll be iterating over.
+		var dirs = [
+			{
+				target: [0, 0, -1],
+				up: [-1, 0, 0],
+			},
+			{
+				target: [0, 0, 1],
+				up: [-1, 0, 0],
+			},
+			{
+				target: [-1, 0, 0],
+				up: [0, 1, 0],
+			},
+			{
+				target: [1, 0, 0],
+				up: [0, -1, 0],
+			},
+			{
+				target: [0, -1, 0],
+				up: [-1, 0, 0],
+			},
+			{
+				target: [0, 1, 0],
+				up: [-1, 0, 0],
+			},
+		];
+		// Define and initialize the model, view, and projection matrices.
+		var model = glm.mat4.create();
+		var view = glm.mat4.create();
+		var projection = glm.mat4.create();
+		glm.mat4.perspective(projection, Math.PI / 2, 1.0, 0.1, 256);
 
-    // Iterate over the directions to render and create the textures.
-    for (var i = 0; i < dirs.length; i++) {
-      // Clear the context.
-      storage.gl.clearColor(0, 0, 0, 1);
-      storage.gl.clear(storage.gl.COLOR_BUFFER_BIT);
+		// Iterate over the directions to render and create the textures.
+		for (var i = 0; i < dirs.length; i++) {
+			// Clear the context.
+			storage.gl.clearColor(0, 0, 0, 1);
+			storage.gl.clear(storage.gl.COLOR_BUFFER_BIT);
 
-      // Look in the direction for this texture.
-      var dir = dirs[i];
-      glm.mat4.lookAt(view, [0, 0, 0], dir.target, dir.up);
+			// Look in the direction for this texture.
+			var dir = dirs[i];
+			glm.mat4.lookAt(view, [0, 0, 0], dir.target, dir.up);
 
-      // Render the nebulae.
-      storage.pNebula.use();
-      model = glm.mat4.create();
-      for (let j = 0; j < nebulaParams.length; j++) {
-        var p = nebulaParams[j];
-        storage.pNebula.setUniform("uModel", "Matrix4fv", false, model);
-        storage.pNebula.setUniform("uView", "Matrix4fv", false, view);
-        storage.pNebula.setUniform(
-          "uProjection",
-          "Matrix4fv",
-          false,
-          projection
-        );
-        storage.pNebula.setUniform("uScale", "1f", p.scale);
-        storage.pNebula.setUniform("uColor", "3fv", p.color);
-        storage.pNebula.setUniform("uIntensity", "1f", p.intensity);
-        storage.pNebula.setUniform("uFalloff", "1f", p.falloff);
-        storage.pNebula.setUniform("uOffset", "3fv", p.offset);
-        storage.rNebula.render();
-      }
-      // Create the texture.
-      var c = canvases[i];
-      var ctx = c.getContext("2d");
-      const scale = c.width;
-      ctx.save();
-      ctx.globalCompositeOperation = "source-over";
-      ctx.drawImage(storage.canvas, 0, 0, scale, scale);
-      ctx.globalCompositeOperation = "lighten";
-      ctx.globalAlpha = 0.5;
-      ctx.drawImage(img, 0, 0, scale, scale);
+			// Render the nebulae.
+			storage.pNebula.use();
+			model = glm.mat4.create();
+			for (let j = 0; j < nebulaParams.length; j++) {
+				var p = nebulaParams[j];
+				storage.pNebula.setUniform("uModel", "Matrix4fv", false, model);
+				storage.pNebula.setUniform("uView", "Matrix4fv", false, view);
+				storage.pNebula.setUniform(
+					"uProjection",
+					"Matrix4fv",
+					false,
+					projection,
+				);
+				storage.pNebula.setUniform("uScale", "1f", p.scale);
+				storage.pNebula.setUniform("uColor", "3fv", p.color);
+				storage.pNebula.setUniform("uIntensity", "1f", p.intensity);
+				storage.pNebula.setUniform("uFalloff", "1f", p.falloff);
+				storage.pNebula.setUniform("uOffset", "3fv", p.offset);
+				storage.rNebula.render();
+			}
+			// Create the texture.
+			var c = canvases[i];
+			var ctx = c.getContext("2d");
+			const scale = c.width;
+			ctx.save();
+			ctx.globalCompositeOperation = "source-over";
+			ctx.drawImage(storage.canvas, 0, 0, scale, scale);
+			ctx.globalCompositeOperation = "lighten";
+			ctx.globalAlpha = 0.5;
+			ctx.drawImage(img, 0, 0, scale, scale);
 
-      ctx.restore();
-    }
-  }
-  storage.initialize();
-  return render({seed, resolution: 1024, nebulae: true});
+			ctx.restore();
+		}
+	}
+	storage.initialize();
+	return render({ seed, resolution: 1024, nebulae: true });
 }
 
 function buildBox(gl, program) {
-  var position = [
-    -1, -1, -1, 1, -1, -1, 1, 1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1,
+	var position = [
+		-1, -1, -1, 1, -1, -1, 1, 1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1,
 
-    1, -1, 1, -1, -1, 1, -1, 1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 1,
+		1, -1, 1, -1, -1, 1, -1, 1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 1,
 
-    1, -1, -1, 1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1, 1, -1,
+		1, -1, -1, 1, -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1, 1, -1,
 
-    -1, -1, 1, -1, -1, -1, -1, 1, -1, -1, -1, 1, -1, 1, -1, -1, 1, 1,
+		-1, -1, 1, -1, -1, -1, -1, 1, -1, -1, -1, 1, -1, 1, -1, -1, 1, 1,
 
-    -1, 1, -1, 1, 1, -1, 1, 1, 1, -1, 1, -1, 1, 1, 1, -1, 1, 1,
+		-1, 1, -1, 1, 1, -1, 1, 1, 1, -1, 1, -1, 1, 1, 1, -1, 1, 1,
 
-    -1, -1, 1, 1, -1, 1, 1, -1, -1, -1, -1, 1, 1, -1, -1, -1, -1, -1,
-  ];
-  var attribs = webgl.buildAttribs(gl, {aPosition: 3});
-  attribs.aPosition.buffer.set(new Float32Array(position));
-  var count = position.length / 9;
-  var renderable = new webgl.Renderable(gl, program, attribs, count);
-  return renderable;
+		-1, -1, 1, 1, -1, 1, 1, -1, -1, -1, -1, 1, 1, -1, -1, -1, -1, -1,
+	];
+	var attribs = webgl.buildAttribs(gl, { aPosition: 3 });
+	attribs.aPosition.buffer.set(new Float32Array(position));
+	var count = position.length / 9;
+	var renderable = new webgl.Renderable(gl, program, attribs, count);
+	return renderable;
 }
 
 function hashcode(str) {
-  var hash = 0;
-  for (var i = 0; i < str.length; i++) {
-    var char = str.charCodeAt(i);
-    hash += (i + 1) * char;
-  }
-  return hash;
+	var hash = 0;
+	for (var i = 0; i < str.length; i++) {
+		var char = str.charCodeAt(i);
+		hash += (i + 1) * char;
+	}
+	return hash;
 }
 
 const noise4d = `//
@@ -559,8 +559,8 @@ float pnoise(vec4 P, vec4 rep)
 `;
 
 function loadProgram(gl, source) {
-  source = source.replace("__noise4d__", noise4d);
-  source = source.split("__split__");
-  var program = new webgl.Program(gl, source[0], source[1]);
-  return program;
+	source = source.replace("__noise4d__", noise4d);
+	source = source.split("__split__");
+	var program = new webgl.Program(gl, source[0], source[1]);
+	return program;
 }
