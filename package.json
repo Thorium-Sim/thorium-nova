@@ -1,6 +1,6 @@
 {
 	"name": "thorium-nova",
-	"version": "1.0.0-alpha.12",
+	"version": "1.0.0-alpha.13",
 	"description": "Spaceship Simulator Controls Platform",
 	"keywords": [],
 	"author": "Alex Anderson",
@@ -53,12 +53,17 @@
 			{
 				"from": "./desktop/resources",
 				"to": "./app",
-				"filter": ["server.*", "index.html"]
+				"filter": [
+					"server.*",
+					"index.html"
+				]
 			},
 			{
 				"from": "./dist",
 				"to": "./app",
-				"filter": ["defaultPlugin.plug"]
+				"filter": [
+					"defaultPlugin.plug"
+				]
 			}
 		],
 		"directories": {
@@ -89,7 +94,11 @@
 			"perMachine": true
 		},
 		"win": {
-			"target": ["zip", "portable", "nsis"],
+			"target": [
+				"zip",
+				"portable",
+				"nsis"
+			],
 			"icon": "./nova.ico",
 			"fileAssociations": [
 				{
@@ -101,14 +110,21 @@
 			],
 			"protocols": {
 				"name": "Thorium Flight URL",
-				"schemes": ["flight"]
+				"schemes": [
+					"flight"
+				]
 			}
 		},
 		"linux": {
 			"category": "Utility"
 		}
 	},
-	"workspaces": ["shared", "client", "server", "desktop"],
+	"workspaces": [
+		"shared",
+		"client",
+		"server",
+		"desktop"
+	],
 	"volta": {
 		"node": "18.18.2"
 	},

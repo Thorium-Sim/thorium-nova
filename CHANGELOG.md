@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.13](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.12...1.0.0-alpha.13) (2024-04-16)
+
+
+### Bug Fixes
+
+* Add new icons and update power grid components ([51bace4](https://github.com/Thorium-Sim/thorium-nova/commit/51bace44bdf793422459d6a065622ffecb9b9b57)), closes [#610](https://github.com/Thorium-Sim/thorium-nova/issues/610)
+* Add some default power connections to the power grid. ([8640193](https://github.com/Thorium-Sim/thorium-nova/commit/86401934cc180237d15a8005659ec6e5e43b3725)), closes [#613](https://github.com/Thorium-Sim/thorium-nova/issues/613)
+* Fixes to the Pilot card UI ([0668941](https://github.com/Thorium-Sim/thorium-nova/commit/0668941e4233dace228d143a9f5e1546bfbf1495))
+* Improve how the ship physics system works. ([86d4f9f](https://github.com/Thorium-Sim/thorium-nova/commit/86d4f9f1f5095cd21b6731beba4572677f20f9a4))
+* Improvements to giving orders on the Flight Director screen ([abe697b](https://github.com/Thorium-Sim/thorium-nova/commit/abe697bf39df22a3808222d452cb0b43e8005a1d))
+* Navigation and Cargo searchable inputs no longer fill in with ID when selected ([3720913](https://github.com/Thorium-Sim/thorium-nova/commit/372091327e057f050ddbb867cd0ccbf8b161ce80)), closes [#607](https://github.com/Thorium-Sim/thorium-nova/issues/607)
+* Planet graphics appear correctly on the Navigation card ([558dd64](https://github.com/Thorium-Sim/thorium-nova/commit/558dd64cd4acc274c9cb64ac25467fa5b43b6265)), closes [#608](https://github.com/Thorium-Sim/thorium-nova/issues/608)
+* Starmap Core Travel to Here points at the correct place on the canvas. ([e4e91c3](https://github.com/Thorium-Sim/thorium-nova/commit/e4e91c3b4b6ce86b4c23c4db359ba0d908306ee3)), closes [#612](https://github.com/Thorium-Sim/thorium-nova/issues/612)
+
+
+### Features
+
+* Add a NearbyObjects system, to keep track of objects close to ships. Useful for avoiding collisions. ([3efece9](https://github.com/Thorium-Sim/thorium-nova/commit/3efece9a73eb4745d5bf36135d8ca85ad5ae53b4))
+* Add the wander ship behavior. ([25fc634](https://github.com/Thorium-Sim/thorium-nova/commit/25fc6345d704a68080deaf5dc0891c3e5067fc0d))
+
 # [1.0.0-alpha.12](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.11...1.0.0-alpha.12) (2024-03-06)
 
 
