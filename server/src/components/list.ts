@@ -41,3 +41,4 @@ export * from "./isTimeline";
 export * from "./physicsHandles";
 export * from "./physicsWorld";
 export * from "./nearbyObjects";
+export * from "./isTorpedo";

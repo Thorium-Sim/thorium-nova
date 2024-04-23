@@ -27,6 +27,7 @@ import { PhysicsMovementSystem } from "./PhysicsMovementSystem";
 import { PhysicsWorldPositionSystem } from "./PhysicsWorldPositionSystem";
 import { ShipBehaviorSystem } from "./ShipBehaviorSystem";
 import { NearbyObjectsSystem } from "./NearbyObjectsSystem";
+import { TorpedoLoadingSystem } from "./TorpedoLoadingSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -39,6 +40,7 @@ const systems = [
 	ReactorHeatSystem,
 	PowerDrawSystem,
 	PowerGridSystem,
+	TorpedoLoadingSystem,
 	NearbyObjectsSystem,
 	ShipBehaviorSystem,
 	AutoRotateSystem,

@@ -6,6 +6,7 @@ import ThrustersPlugin from "./Thrusters";
 import ReactorPlugin from "./Reactor";
 import BatteryPlugin from "./Battery";
 import { LiteralTuple, TuplifyUnion } from "@server/utils/types";
+import TorpedoLauncherPlugin from "./TorpedoLauncher";
 
 // Make sure you update teh isShipSystem component when adding a new ship system type
 // We can't derive the isShipSystem list from this list because ECS components
@@ -18,6 +19,7 @@ export const ShipSystemTypes = {
 	thrusters: ThrustersPlugin,
 	reactor: ReactorPlugin,
 	battery: BatteryPlugin,
+	torpedoLauncher: TorpedoLauncherPlugin,
 };
 
 export type ShipSystemFlags = "power" | "heat" | "efficiency";
