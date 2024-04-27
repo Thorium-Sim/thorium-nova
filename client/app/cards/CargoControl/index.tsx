@@ -8,6 +8,7 @@ import { useTransferAmount } from "./useTransferAmount";
 import { CargoContainerList } from "./CargoContainerList";
 import { CargoList } from "./CargoList";
 import { GoToRoomButton } from "./GoToRoomButton";
+import { EditDecknameButton } from "./EditDecknameButton";
 import { ShipView } from "./ShipView";
 import { useShipMapStore } from "./useShipMapStore";
 import { q } from "@client/context/AppContext";
@@ -44,7 +45,10 @@ export function CargoControl(props: CardProps) {
 				gridTemplateColumns: `calc(${maxDeckName}ch + 1.25rem) 1fr 30% 50px`,
 			}}
 		>
-			<DeckPicker decks={decks} />
+			<div className="row-span-2">
+				<DeckPicker decks={decks} />
+				<EditDecknameButton decks={decks} currentDeckIndex={deckIndex} />
+			</div>
 			<div className="row-span-2">
 				<div className="w-1/3 mx-auto z-10">
 					<CargoSearchInput />
