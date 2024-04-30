@@ -11,6 +11,8 @@ import {
 import { z } from "zod";
 import { getInventoryTemplates } from "@server/utils/getInventoryTemplates";
 import type { shipMap } from "@server/components/shipMap";
+import type { NodeFlag } from "@server/classes/Plugins/Ship/Deck";
+
 type ShipMapDeckNode = Zod.infer<typeof shipMap>["deckNodes"][number];
 
 const transferId = z.object({
@@ -58,27 +60,7 @@ export const cargoControl = t.router({
 		})
 		.request(({ ctx }) => {
 			if (!ctx.ship) throw new Error("No ship selected");
-			const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
-			if (!cargoRoomsCache.get(ctx.ship)) {
-				cargoRoomsCache.set(
-					ctx.ship,
-					ctx.ship.components.shipMap?.deckNodes.filter(
-						(node) => node.isRoom && node.flags?.includes("cargo"),
-					) || [],
-				);
-			}
-			const rooms =
-				cargoRoomsCache.get(ctx.ship)!.map((node) => {
-					return {
-						id: node.id,
-						name: node.name,
-						deck: ctx.ship?.components.shipMap?.decks[node.deckIndex].name,
-						position: { x: node.x, y: node.y },
-						volume: node.volume,
-						contents: node.contents,
-						used: calculateCargoUsed(node.contents, inventoryTemplates),
-					};
-				}) || [];
+			const rooms = getCargoRooms(ctx.ship);
 			const decks = ctx.ship.components.shipMap?.decks || [];
 			return {
 				rooms,
@@ -393,7 +375,7 @@ function calculateCargoUsed(
 	return Math.round(value * 1000) / 1000;
 }
 
-function getCargoContents(
+export function getCargoContents(
 	context: DataContext,
 	{ type, id }: { type: "room" | "entity"; id: number },
 ) {
@@ -411,4 +393,38 @@ function getCargoContents(
 		return { volume: room.volume, contents: room.contents };
 	}
 	return null;
+}
+
+function getCargoRooms(ship: Entity) {
+	const inventoryTemplates = getInventoryTemplates(ship.ecs);
+
+	if (!cargoRoomsCache.get(ship)) {
+		cargoRoomsCache.set(
+			ship,
+			ship.components.shipMap?.deckNodes.filter(
+				(node) => node.isRoom && node.flags?.includes("cargo"),
+			) || [],
+		);
+	}
+	const rooms =
+		cargoRoomsCache.get(ship)!.map((node) => {
+			return {
+				id: node.id,
+				name: node.name,
+				deck: ship?.components.shipMap?.decks[node.deckIndex].name,
+				position: { x: node.x, y: node.y },
+				volume: node.volume,
+				contents: node.contents,
+				used: calculateCargoUsed(node.contents, inventoryTemplates),
+				flags: node.flags,
+			};
+		}) || [];
+
+	return rooms;
+}
+
+export function getRoomByFlag(ship: Entity, flag: NodeFlag) {
+	const rooms = getCargoRooms(ship);
+
+	return rooms.filter((room) => room.flags?.includes(flag));
 }

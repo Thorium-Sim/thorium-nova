@@ -26,6 +26,7 @@ const repairTypes = z.union([
 export const torpedoDamageType = z
 	.enum(["explosive", "radiation", "electrical"])
 	.default("explosive");
+export type TorpedoDamageType = z.infer<typeof torpedoDamageType>;
 const torpedoDamageTypeValues = torpedoDamageType._def.innerType._def.values;
 export const torpedoGuidanceMode = z
 	.enum([
@@ -39,6 +40,8 @@ export const torpedoGuidanceMode = z
 		"gravitational",
 	])
 	.default("visual");
+
+export type TorpedoGuidanceMode = z.infer<typeof torpedoGuidanceMode>;
 const torpedoGuidanceModeValues =
 	torpedoGuidanceMode._def.innerType._def.values;
 
