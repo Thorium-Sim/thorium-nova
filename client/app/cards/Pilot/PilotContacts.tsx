@@ -27,6 +27,7 @@ import { WaypointEntity } from "./Waypoint";
 import { useLiveQuery } from "@thorium/live-query/client/liveQueryContext";
 import { q } from "@client/context/AppContext";
 import { setCursor } from "@client/utils/setCursor";
+import ReticleTexture from "@client/cards/Pilot/reticle.svg";
 
 export function CircleGridContacts({
 	onContactClick,
@@ -39,7 +40,7 @@ export function CircleGridContacts({
 		systemId,
 	});
 	const [ships] = q.starmapCore.ships.useNetRequest({ systemId });
-
+	const [targetedContact] = q.targeting.targetedContact.useNetRequest();
 	return (
 		<group>
 			{orbs.map((entity) => {
@@ -66,6 +67,7 @@ export function CircleGridContacts({
 								size={size}
 								tilted={tilted}
 								onClick={onContactClick}
+								targeted={targetedContact === id}
 							/>
 						</ErrorBoundary>
 					</Suspense>
@@ -99,6 +101,7 @@ export const ShipEntity = ({
 	size,
 	tilted,
 	onClick,
+	targeted,
 }: {
 	id: number;
 	modelUrl: string;
@@ -106,6 +109,7 @@ export const ShipEntity = ({
 	size: number;
 	tilted?: boolean;
 	onClick?: (id: number) => void;
+	targeted?: boolean;
 }) => {
 	const [{ id: playerId }] = q.ship.player.useNetRequest();
 	// TODO: Use useGLTF.preload outside of this to preload the asset
@@ -132,10 +136,13 @@ export const ShipEntity = ({
 	const { interpolate } = useLiveQuery();
 
 	const spriteMap = useTexture(logoUrl);
+	const reticleMap = useTexture(ReticleTexture);
+
 	const scale = 1 / 50;
 	const mesh = useRef<Mesh>(null);
 	const line = useRef<Line2>(null);
 	const sprite = useRef<Sprite>(null);
+	const reticle = useRef<Sprite>(null);
 	const shipRef = useRef<Group>(null);
 	useFrame((props) => {
 		const camera = props.camera as OrthographicCamera;
@@ -167,6 +174,11 @@ export const ShipEntity = ({
 				ship.y - playerPosition.y,
 				ship.z - playerPosition.z,
 			);
+			reticle.current?.position.set(
+				ship.x - playerPosition.x,
+				ship.y - playerPosition.y,
+				ship.z - playerPosition.z,
+			);
 			if (sprite.current?.position) {
 				shipRef.current?.position.copy(sprite.current?.position);
 			}
@@ -174,6 +186,8 @@ export const ShipEntity = ({
 			if (ship.r) {
 				shipRef.current?.quaternion.set(ship.r.x, ship.r.y, ship.r.z, ship.r.w);
 			}
+
+			// Draw the vertical line from the sensor plane to the ship
 			if (playerShip.r && sprite.current?.position && mesh.current?.position) {
 				const planeVector = upVector
 					.clone()
@@ -203,6 +217,7 @@ export const ShipEntity = ({
 			}
 		}
 		sprite.current?.scale.setScalar(dx * 3 * scale);
+		reticle.current?.scale.setScalar(dx * 4 * scale);
 
 		mesh.current?.scale.setScalar(dx * 3);
 		if (playerShip.r) {
@@ -239,6 +254,15 @@ export const ShipEntity = ({
 							attach="material"
 							map={spriteMap}
 							color={"white"}
+							sizeAttenuation={true}
+						/>
+					</sprite>
+					<sprite ref={reticle}>
+						<spriteMaterial
+							depthTest={false}
+							attach="material"
+							map={reticleMap}
+							color={"red"}
 							sizeAttenuation={true}
 						/>
 					</sprite>

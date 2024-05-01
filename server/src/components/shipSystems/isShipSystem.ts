@@ -8,6 +8,8 @@ const shipSystemTypes = z.enum([
 	"thrusters",
 	"reactor",
 	"battery",
+	"torpedoLauncher",
+	"targeting",
 ]);
 
 export const isShipSystem = z

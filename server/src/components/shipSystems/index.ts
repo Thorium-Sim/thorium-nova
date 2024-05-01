@@ -6,3 +6,4 @@ export * from "./isThrusters";
 export * from "./isWarpEngines";
 export * from "./powerGrid";
 export * from "./isTorpedoLauncher";
+export * from "./isTargeting";

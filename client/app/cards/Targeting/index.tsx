@@ -9,8 +9,10 @@ import type { CardProps } from "@client/routes/flight.station/CardProps";
 import { CircleGridStoreProvider } from "../Pilot/useCircleGridStore";
 import { PilotZoomSlider } from "../Pilot/PilotZoomSlider";
 import { CircleGridContacts } from "../Pilot/PilotContacts";
+import { q } from "@client/context/AppContext";
 
 export function Targeting({ cardLoaded }: CardProps) {
+	const setTarget = q.targeting.setTarget.useNetSend();
 	return (
 		<CircleGridStoreProvider zoomMax={25000}>
 			<div className="grid grid-cols-4 h-full place-content-center gap-4">
@@ -20,7 +22,9 @@ export function Targeting({ cardLoaded }: CardProps) {
 						<GridCanvas shouldRender={cardLoaded}>
 							<CircleGrid>
 								<CircleGridContacts
-									onContactClick={(contact) => console.log(contact)}
+									onContactClick={(contact) =>
+										setTarget.mutate({ target: contact })
+									}
 								/>
 							</CircleGrid>
 						</GridCanvas>
