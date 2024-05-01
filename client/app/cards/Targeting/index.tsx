@@ -19,7 +19,9 @@ export function Targeting({ cardLoaded }: CardProps) {
 					<React.Suspense fallback={null}>
 						<GridCanvas shouldRender={cardLoaded}>
 							<CircleGrid>
-								<CircleGridContacts />
+								<CircleGridContacts
+									onContactClick={(contact) => console.log(contact)}
+								/>
 							</CircleGrid>
 						</GridCanvas>
 					</React.Suspense>

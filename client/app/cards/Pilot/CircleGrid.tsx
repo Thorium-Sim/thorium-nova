@@ -176,7 +176,6 @@ export function GridCanvas({
 
 export function CircleGridTiltButton() {
 	const circleGridStore = useCircleGridStore();
-	console.log(circleGridStore.getState());
 	useGamepadPress("pilot-sensor-tilt", {
 		onDown: () => {
 			circleGridStore.setState(({ tilt: t }) => ({

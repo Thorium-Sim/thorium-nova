@@ -26,8 +26,11 @@ import { useGetFacingWaypoint, useCircleGridStore } from "./useCircleGridStore";
 import { WaypointEntity } from "./Waypoint";
 import { useLiveQuery } from "@thorium/live-query/client/liveQueryContext";
 import { q } from "@client/context/AppContext";
+import { setCursor } from "@client/utils/setCursor";
 
-export function CircleGridContacts() {
+export function CircleGridContacts({
+	onContactClick,
+}: { onContactClick: (id: number) => void }) {
 	const store = useCircleGridStore();
 	const tilted = store((store) => store.tilt > 0);
 	const useStarmapStore = useGetStarmapStore();
@@ -62,6 +65,7 @@ export function CircleGridContacts() {
 								logoUrl={logoUrl}
 								size={size}
 								tilted={tilted}
+								onClick={onContactClick}
 							/>
 						</ErrorBoundary>
 					</Suspense>
@@ -94,12 +98,14 @@ export const ShipEntity = ({
 	logoUrl,
 	size,
 	tilted,
+	onClick,
 }: {
 	id: number;
 	modelUrl: string;
 	logoUrl: string;
 	size: number;
 	tilted?: boolean;
+	onClick?: (id: number) => void;
 }) => {
 	const [{ id: playerId }] = q.ship.player.useNetRequest();
 	// TODO: Use useGLTF.preload outside of this to preload the asset
@@ -217,7 +223,18 @@ export const ShipEntity = ({
 			</group>
 			{id !== playerId && (
 				<Fragment>
-					<sprite ref={sprite}>
+					<sprite
+						ref={sprite}
+						onPointerDown={() => onClick?.(id)}
+						onPointerOver={(e) => {
+							if (onClick) {
+								setCursor("pointer");
+							}
+						}}
+						onPointerOut={(e) => {
+							setCursor("auto");
+						}}
+					>
 						<spriteMaterial
 							attach="material"
 							map={spriteMap}
