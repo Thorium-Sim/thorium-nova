@@ -13,7 +13,16 @@ export const targeting = t.router({
 			const system = getShipSystem(ctx, {
 				systemType: "targeting",
 			});
-			return system.components.isTargeting?.target || null;
+			const target = system.components.isTargeting?.target;
+			if (typeof target !== "number") return null;
+			const targetEntity = ctx.flight?.ecs.getEntityById(target);
+			return targetEntity
+				? {
+						id: target,
+						name: targetEntity.components.identity?.name,
+						description: targetEntity.components.identity?.description,
+				  }
+				: null;
 		}),
 	setTarget: t.procedure
 		.input(z.object({ target: z.union([z.number(), z.null()]) }))
@@ -23,7 +32,7 @@ export const targeting = t.router({
 				systemType: "targeting",
 			});
 			if (!targeting.components.isTargeting)
-				throw new Error("System is not a impulse engine");
+				throw new Error("System is not targeting");
 
 			targeting.updateComponent("isTargeting", { target: input.target });
 			pubsub.publish.targeting.targetedContact({

@@ -29,7 +29,7 @@ import Button from "@thorium/ui/Button";
 
 const CameraEffects = () => {
 	const store = useCircleGridStore();
-	const { camera, size } = useThree();
+	const { camera, size, internal } = useThree();
 	useEffect(() => {
 		store.setState({
 			width: size.width,
@@ -116,9 +116,11 @@ export function CircleGrid({
 export function GridCanvas({
 	shouldRender,
 	children,
+	onBackgroundClick,
 }: {
 	shouldRender: boolean;
 	children: ReactNode;
+	onBackgroundClick?: () => void;
 }) {
 	const client = useQueryClient();
 	const circleGridStore = useCircleGridStore();
@@ -164,6 +166,7 @@ export function GridCanvas({
 				onContextMenu={(e) => {
 					e.preventDefault();
 				}}
+				onPointerDown={onBackgroundClick}
 			>
 				<CameraEffects />
 				<ContextBridge>

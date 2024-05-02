@@ -31,7 +31,7 @@ import ReticleTexture from "@client/cards/Pilot/reticle.svg";
 
 export function CircleGridContacts({
 	onContactClick,
-}: { onContactClick: (id: number) => void }) {
+}: { onContactClick?: (id: number) => void }) {
 	const store = useCircleGridStore();
 	const tilted = store((store) => store.tilt > 0);
 	const useStarmapStore = useGetStarmapStore();
@@ -67,7 +67,7 @@ export function CircleGridContacts({
 								size={size}
 								tilted={tilted}
 								onClick={onContactClick}
-								targeted={targetedContact === id}
+								targeted={targetedContact?.id === id}
 							/>
 						</ErrorBoundary>
 					</Suspense>
@@ -257,7 +257,7 @@ export const ShipEntity = ({
 							sizeAttenuation={true}
 						/>
 					</sprite>
-					<sprite ref={reticle}>
+					<sprite ref={reticle} visible={targeted}>
 						<spriteMaterial
 							depthTest={false}
 							attach="material"
