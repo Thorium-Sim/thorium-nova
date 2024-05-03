@@ -1,5 +1,5 @@
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
-import { useParams } from "@remix-run/react";
+import { useParams, useNavigate } from "@remix-run/react";
 import PanZoom from "@client/components/ui/PanZoom";
 import useMeasure from "@client/hooks/useMeasure";
 import { useEffect, useRef, useState } from "react";
@@ -16,6 +16,7 @@ import { NodeCircle } from "./NodeCircle";
 import { EdgeContextProvider } from "./EdgeContextProvider";
 import { DeckEdges } from "./DeckEdges";
 import { q } from "@client/context/AppContext";
+import { usePrompt } from "@thorium/ui/AlertDialog";
 
 export interface PanStateI {
 	x: number;
@@ -58,6 +59,7 @@ export default function DeckConfig() {
 	const panned = useRef(false);
 
 	const confirm = useConfirm();
+	const navigate = useNavigate();
 
 	const elementNameRef = useRef<HTMLParagraphElement>(null);
 	useEffect(() => {
@@ -103,6 +105,9 @@ export default function DeckConfig() {
 			</div>
 		);
 	}
+
+	const prompt = usePrompt();
+
 	return (
 		<div className="flex-1 flex flex-col gap-4 h-full " ref={ref}>
 			<PanZoom
@@ -253,6 +258,34 @@ export default function DeckConfig() {
 					>
 						{addingEdges ? "Done Adding Edges" : "Add Edges"}
 					</Button>
+					<Button
+						onClick={async (event) => {
+							event.preventDefault();
+							event.stopPropagation();
+							const deckname = await prompt({
+								header: "Change the current deck's name",
+								body: "Give this deck a distinct name",
+								defaultValue: deck.name,
+								inputProps: { className: "input-error" },
+							});
+							if (typeof deckname === "string") {
+								const result = await q.plugin.ship.deck.update.netSend({
+									pluginId,
+									shipId,
+									deckId: deck.name,
+									newName: deckname,
+								});
+								if (result) {
+									deck.name = deckname;
+									navigate(`../${result.name}`);
+								}
+							}
+						}}
+					>
+						Rename Deck
+					</Button>
+				</div>
+				<div>
 					{addingNodes && <p>Click on map to add node</p>}
 					{addingEdges &&
 						(selectedNodeId ? (

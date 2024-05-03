@@ -91,6 +91,7 @@ export const deck = t.router({
 					deckId: z.string(),
 				}),
 				z.union([
+					z.object({ generateName: z.string() }),
 					z.object({ newName: z.string() }),
 					z.object({ newIndex: z.number() }),
 					z.object({
@@ -110,11 +111,14 @@ export const deck = t.router({
 			const deckIndex = ship.decks.findIndex(
 				(deck) => deck.name === input.deckId,
 			);
-			if ("newName" in input) {
+			if ("generateName" in input) {
 				deck.name = generateIncrementedName(
-					input.newName,
+					input.generateName,
 					ship.decks.map((deck) => deck.name),
 				);
+			}
+			if ("newName" in input) {
+				deck.name = input.newName;
 			}
 			if ("newIndex" in input && typeof input.newIndex === "number") {
 				moveArrayItem(ship.decks, deckIndex, input.newIndex);
