@@ -10,13 +10,17 @@ import { PilotZoomSlider } from "../Pilot/PilotZoomSlider";
 import { CircleGridContacts } from "../Pilot/PilotContacts";
 import { q } from "@client/context/AppContext";
 import { ObjectImage, useObjectData } from "../Navigation/ObjectDetails";
+import { cn } from "@client/utils/cn";
 
 /**
  * TODO:
-- Create the target details box
-- Make it possible to deselect a target
-- Build the torpedo list UI
-- Build the torpedo loading UI
+ * Build the torpedo list UI
+ * Build the torpedo loading UI
+ * Spawn torpedos when they are fired
+ * Add torpedo movement
+ * Add torpedo collision
+ * Add damage calculations
+ * Display torpedo on viewscreen
  */
 export function Targeting({ cardLoaded }: CardProps) {
 	const setTarget = q.targeting.setTarget.useNetSend();
@@ -53,7 +57,13 @@ export function Targeting({ cardLoaded }: CardProps) {
 					</React.Suspense>
 				</div>
 				<div className="h-full flex flex-col justify-between gap-2">
-					<div className="panel panel-primary">
+					<div className="flex-1"></div>
+					<div
+						className={cn(
+							"panel",
+							targetedContact ? "panel-error" : "panel-primary",
+						)}
+					>
 						{targetedContact?.id ? (
 							<React.Suspense
 								fallback={<h3 className="text-2xl">Accessing...</h3>}
