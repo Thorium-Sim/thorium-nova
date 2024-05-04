@@ -65,7 +65,11 @@ export const deck = t.router({
 		}),
 	delete: t.procedure
 		.input(
-			z.object({ pluginId: z.string(), shipId: z.string(), index: z.number() }),
+			z.object({
+				pluginId: z.string(),
+				shipId: z.string(),
+				deckId: z.string(),
+			}),
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
@@ -75,7 +79,10 @@ export const deck = t.router({
 			);
 			if (!ship) return;
 
-			ship.removeDeck(input.index);
+			const deckIndex = ship.decks.findIndex(
+				(deck) => deck.name === input.deckId,
+			);
+			ship.removeDeck(deckIndex);
 
 			pubsub.publish.plugin.ship.get({
 				pluginId: input.pluginId,
