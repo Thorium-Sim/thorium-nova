@@ -56,9 +56,9 @@ export default function ShipMap() {
 				>
 					Add Deck
 				</Button>
-				<div className="flex">
+				<div className="grid gap-2 grid-cols-2 mt-2">
 					<Button
-						className="w-35 mt-2"
+						className=""
 						disabled={deckName && deckName.length > 0 ? false : true}
 						title={
 							deckName && deckName.length > 0
@@ -88,9 +88,9 @@ export default function ShipMap() {
 						}}
 					>
 						Rename Deck
-					</Button>{" "}
+					</Button>
 					<Button
-						className="mt-2 ml-2 w-36 btn-error"
+						className="btn-error"
 						disabled={deckName ? false : true}
 						onClick={async (event) => {
 							event.preventDefault();
