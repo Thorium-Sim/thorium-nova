@@ -126,7 +126,6 @@ export const deck = t.router({
 			}
 			if ("newName" in input) {
 				deck.name = input.newName;
-				ship.writeFile(true);
 			}
 			if ("newIndex" in input && typeof input.newIndex === "number") {
 				moveArrayItem(ship.decks, deckIndex, input.newIndex);
