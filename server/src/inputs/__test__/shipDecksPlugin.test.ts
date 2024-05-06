@@ -39,10 +39,12 @@ describe("ship decks plugin input", () => {
 			mockDataContext.server.plugins[0].aspects.ships[0].decks.length,
 		).toEqual(2);
 
+		const deckIndexToDelete =
+			mockDataContext.server.plugins[0].aspects.ships[0].decks[0].name;
 		await router.plugin.ship.deck.delete({
 			pluginId: "Test Plugin",
 			shipId: "Test Template",
-			index: 0,
+			deckId: deckIndexToDelete,
 		});
 
 		expect(
