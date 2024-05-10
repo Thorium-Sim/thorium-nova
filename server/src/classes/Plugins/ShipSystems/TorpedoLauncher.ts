@@ -10,6 +10,8 @@ import type { PowerNodes, ShipSystemFlags } from "./shipSystemTypes";
 export default class TorpedoLauncherPlugin extends BaseShipSystemPlugin {
 	static flags: ShipSystemFlags[] = ["efficiency", "heat", "power"];
 	type = "torpedoLauncher" as const;
+	allowMultiple = true;
+
 	loadTime: number;
 	fireTime: number;
 	headingDegree: number;

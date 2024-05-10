@@ -1,3 +1,4 @@
+import { pubsub } from "@server/init/pubsub";
 import { type Entity, System } from "../utils/ecs";
 
 /**
@@ -29,6 +30,7 @@ export class TorpedoLoadingSystem extends System {
 		if (status === "loading" || status === "unloading" || status === "firing") {
 			progress -= adjustedTime;
 			if (progress <= 0) {
+				progress = 0;
 				if (status === "loading") {
 					status = "loaded";
 				} else if (status === "unloading") {
@@ -36,9 +38,17 @@ export class TorpedoLoadingSystem extends System {
 				} else if (status === "firing") {
 					status = "ready";
 				}
+				entity.updateComponent("isTorpedoLauncher", {
+					status,
+					progress,
+					...(status === "ready" ? { torpedoEntity: null } : {}),
+				});
+				pubsub.publish.targeting.torpedoLaunchers({
+					shipId: entity.components.isShipSystem?.shipId || 0,
+				});
+			} else {
+				entity.updateComponent("isTorpedoLauncher", { status, progress });
 			}
-
-			entity.updateComponent("isTorpedoLauncher", { status, progress });
 		}
 	}
 }

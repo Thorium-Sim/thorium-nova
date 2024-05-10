@@ -14,6 +14,7 @@ export class FilterInventorySystem extends System {
 			abundance: number;
 			flags: InventoryFlags;
 			assets: { image?: string };
+			entityId: number;
 		}
 	>;
 	invalidated = false;
@@ -25,7 +26,11 @@ export class FilterInventorySystem extends System {
 			Object.fromEntries(
 				this.entities.map((entity) => [
 					entity.components.identity?.name,
-					{ ...entity.components.identity, ...entity.components.isInventory },
+					{
+						...entity.components.identity,
+						...entity.components.isInventory,
+						entityId: entity.id,
+					},
 				]) || [],
 			) || {};
 		this.invalidated = false;

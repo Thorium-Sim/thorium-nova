@@ -10,7 +10,9 @@ export const isTorpedo = z
 		targetId: z.number().nullable().default(null),
 		/** The energy released measured in Kilowatt Hours */
 		yield: z.number().default(1000),
-		damageType: torpedoDamageType,
+		damageType: torpedoDamageType.nullable().default(null),
+
+		color: z.string().default("white"),
 
 		guidanceMode: torpedoGuidanceMode,
 

@@ -40,6 +40,8 @@ export function CircleGridContacts({
 		systemId,
 	});
 	const [ships] = q.starmapCore.ships.useNetRequest({ systemId });
+	const [torpedos] = q.starmapCore.torpedos.useNetRequest({ systemId });
+
 	const [targetedContact] = q.targeting.targetedContact.useNetRequest();
 	return (
 		<group>
@@ -70,6 +72,13 @@ export function CircleGridContacts({
 								targeted={targetedContact?.id === id}
 							/>
 						</ErrorBoundary>
+					</Suspense>
+				);
+			})}
+			{torpedos.map(({ id, color }) => {
+				return (
+					<Suspense key={id} fallback={null}>
+						<TorpedoEntity id={id} color={color} />
 					</Suspense>
 				);
 			})}
@@ -368,5 +377,93 @@ function BasicRings() {
 				attach="material"
 			/>
 		</mesh>
+	);
+}
+
+export function TorpedoEntity({
+	id,
+	tilted,
+	color,
+}: { id: number; tilted?: boolean; color: string }) {
+	const { interpolate } = useLiveQuery();
+	const ref = useRef<Mesh>(null);
+	const mesh = useRef<Mesh>(null);
+	const line = useRef<Line2>(null);
+	const [{ id: playerId }] = q.ship.player.useNetRequest();
+
+	useFrame((props) => {
+		const camera = props.camera as OrthographicCamera;
+		const dx = (camera.right - camera.left) / (2 * camera.zoom);
+		ref.current?.scale.setScalar(dx * 0.1);
+
+		const torpedo = interpolate(id);
+		const playerShip = interpolate(playerId);
+
+		const playerPosition = playerShip || zeroVector;
+		if (!torpedo || !playerPosition || !playerShip) return;
+
+		if (torpedo) {
+			// Since the sensor grid needs to be oriented at 0,0,0
+			// to properly tilt, we reposition the contacts relative
+			// to the player ship's position.
+			ref.current?.position.set(
+				torpedo.x - playerPosition.x,
+				torpedo.y - playerPosition.y,
+				torpedo.z - playerPosition.z,
+			);
+			if (ref.current) {
+				ref.current.visible = true;
+			}
+			// Draw the vertical line from the sensor plane to the ship
+			if (playerShip.r && ref.current?.position && mesh.current?.position) {
+				const planeVector = upVector
+					.clone()
+					.applyQuaternion(
+						playerQuaternion.set(
+							playerShip.r.x,
+							playerShip.r.y,
+							playerShip.r.z,
+							playerShip.r.w,
+						),
+					);
+				plane.set(planeVector, 0);
+				plane.projectPoint(ref.current.position, mesh.current.position);
+				const positions = [
+					...ref.current.position.toArray(),
+					...mesh.current.position.toArray(),
+				];
+				line.current?.geometry.setPositions(positions);
+				if (mesh.current && line.current)
+					if (tilted) {
+						mesh.current.visible = true;
+						line.current.visible = true;
+					} else {
+						mesh.current.visible = false;
+						line.current.visible = false;
+					}
+			}
+		}
+	});
+
+	return (
+		<>
+			<mesh ref={ref} visible={false}>
+				<icosahedronGeometry args={[0.2, 2]} attach="geometry" />
+				<meshBasicMaterial wireframe color={color} attach="material" />
+			</mesh>
+			<Line
+				ref={line}
+				points={[
+					[0, 0, 0],
+					[0, 0, 0],
+				]}
+				color={"white"}
+				lineWidth={1}
+			/>
+			<mesh ref={mesh}>
+				<planeGeometry args={[0.01, 0.01]} attach="geometry" />
+				<meshBasicMaterial attach="material" color="white" side={DoubleSide} />
+			</mesh>
+		</>
 	);
 }

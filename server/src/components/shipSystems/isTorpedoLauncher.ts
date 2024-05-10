@@ -17,10 +17,8 @@ export const isTorpedoLauncher = z
 		/** The time in ms to fire */
 		fireTime: z.number().default(1000),
 
-		/** The warhead, casing, and guidance entities currently being loaded into the torpedo tube */
-		warheadEntity: z.number().nullable().default(null),
-		casingEntity: z.number().nullable().default(null),
-		guidanceEntity: z.number().nullable().default(null),
+		/** The entity currently being loaded into the torpedo tube */
+		torpedoEntity: z.number().nullable().default(null),
 
 		/** Which direction the torpedo launcher launches from, relative to the front of the ship/
 		 * 0 is straight ahead, 90 is to the right, 180 is behind, 270 is to the left

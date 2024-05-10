@@ -355,7 +355,7 @@ export const cargoControl = t.router({
 		}),
 });
 
-function calculateCargoUsed(
+export function calculateCargoUsed(
 	contents: {
 		[inventoryTemplateName: string]: { count: number };
 	},
@@ -417,6 +417,7 @@ function getCargoRooms(ship: Entity) {
 				contents: node.contents,
 				used: calculateCargoUsed(node.contents, inventoryTemplates),
 				flags: node.flags,
+				systems: node.systems,
 			};
 		}) || [];
 
@@ -427,4 +428,10 @@ export function getRoomByFlag(ship: Entity, flag: NodeFlag) {
 	const rooms = getCargoRooms(ship);
 
 	return rooms.filter((room) => room.flags?.includes(flag));
+}
+
+export function getRoomBySystem(ship: Entity, system: string) {
+	const rooms = getCargoRooms(ship);
+
+	return rooms.filter((room) => room.systems?.includes(system));
 }

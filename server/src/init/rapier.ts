@@ -76,9 +76,11 @@ export function generateRigidBody(
 		  ? "star"
 		  : entity.components.isShip
 			  ? "ship"
-			  : entity.components.debugSphere
-				  ? "debugSphere"
-				  : "unknown";
+			  : entity.components.isTorpedo
+				  ? "torpedo"
+				  : entity.components.debugSphere
+					  ? "debugSphere"
+					  : "unknown";
 
 	switch (type) {
 		case "planet": {
@@ -154,6 +156,34 @@ export function generateRigidBody(
 			res.body.enableCcd(true);
 
 			return res.body;
+		}
+		case "torpedo": {
+			if (!entity.components.isShip) break;
+
+			tempVector.set(
+				entity.components.position?.x || 0,
+				entity.components.position?.y || 0,
+				entity.components.position?.z || 0,
+			);
+			const worldPosition = getWorldPosition(tempVector);
+			universeToWorld(tempVector, worldPosition);
+
+			const torpedoRadius = 0.002;
+			const torpedoMass = 1500;
+
+			const bodyDesc = new RAPIER.RigidBodyDesc(
+				RAPIER.RigidBodyType.Dynamic,
+			).setTranslation(tempVector.x, tempVector.y, tempVector.z);
+			const body = world.createRigidBody(bodyDesc);
+			body.userData = { entityId: entity.id };
+			body.enableCcd(true);
+
+			const colliderDesc = new RAPIER.ColliderDesc(
+				new RAPIER.Ball(torpedoRadius),
+			).setMass(terranMassToKilograms(torpedoMass));
+			world.createCollider(colliderDesc, body);
+
+			return body;
 		}
 		case "debugSphere":
 			break;
