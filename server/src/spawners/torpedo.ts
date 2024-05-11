@@ -73,8 +73,10 @@ export function spawnTorpedo(launcher: Entity) {
 		damageType: flags?.torpedoWarhead?.damageType || null,
 		color: flags?.torpedoWarhead?.color || "white",
 		guidanceMode: flags?.torpedoGuidance?.guidanceMode || "visual",
+		guidanceRange: flags?.torpedoGuidance?.range || 5000,
 		speed,
 		maxForce: flags?.torpedoCasing?.maxForce || 0,
+		maxRange: flags?.torpedoCasing?.maxRange || 25000,
 	});
 	torpedoEntity.addComponent("mass", { mass: 1500 });
 

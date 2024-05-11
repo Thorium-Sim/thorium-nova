@@ -1,3 +1,4 @@
+import { pubsub } from "@server/init/pubsub";
 import { type Entity, System } from "@server/utils/ecs";
 import { pursue } from "@server/utils/steering";
 import { Vector3 } from "three";
@@ -67,5 +68,14 @@ export class TorpedoMovementSystem extends System {
 				(component.distanceTraveled || 0) +
 				velocityVector.length() * deltaInSeconds,
 		});
+		if (component.distanceTraveled > component.maxRange) {
+			// TODO May 11, 2024: Make a small explosion on the viewscreen
+			const systemId = entity.components.position?.parentId || null;
+			this.ecs.removeEntity(entity);
+
+			pubsub.publish.starmapCore.torpedos({
+				systemId,
+			});
+		}
 	}
 }
