@@ -158,7 +158,7 @@ export function generateRigidBody(
 			return res.body;
 		}
 		case "torpedo": {
-			if (!entity.components.isShip) break;
+			if (!entity.components.isTorpedo) break;
 
 			tempVector.set(
 				entity.components.position?.x || 0,
@@ -169,7 +169,7 @@ export function generateRigidBody(
 			universeToWorld(tempVector, worldPosition);
 
 			const torpedoRadius = 0.002;
-			const torpedoMass = 1500;
+			const torpedoMass = entity.components.mass?.mass || 1500;
 
 			const bodyDesc = new RAPIER.RigidBodyDesc(
 				RAPIER.RigidBodyType.Dynamic,

@@ -17,15 +17,12 @@ import Button from "@thorium/ui/Button";
 
 /**
  * TODO:
- * Spawn torpedos when they are fired
- * Make torpedos spawn in the right direction
- * Make torpedos move in the right direction
- * Make torpedos not look dumb.
- * Make torpedos rotate towards their velocity.
- * Add torpedo movement
  * Add torpedo collision
  * Add damage calculations
  * Display torpedo on viewscreen
+ * Make torpedos not look dumb.
+ * Make torpedos rotate towards their velocity.
+ * Add overlays to the targeting grid showing where the torpedo will fire from
  */
 export function Targeting({ cardLoaded }: CardProps) {
 	const setTarget = q.targeting.setTarget.useNetSend();

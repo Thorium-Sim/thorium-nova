@@ -17,8 +17,9 @@ export const isTorpedo = z
 		guidanceMode: torpedoGuidanceMode,
 
 		/** The maximum speed which can move in km/s */
-		speed: z.number().default(500),
-		/** The max rotation speed in rotations per minute. */
-		rotationSpeed: z.number().default(10),
+		speed: z.number().default(50),
+		/** The max force the torpedo uses to steer in meganewtons */
+		maxForce: z.number().default(10),
+		distanceTraveled: z.number().default(0),
 	})
 	.default({});

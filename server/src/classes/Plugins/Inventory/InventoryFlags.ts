@@ -65,8 +65,9 @@ export const inventoryFlags = z
 		torpedoCasing: z
 			.object({
 				color: z.string().optional().default("red"),
-				speed: z.number().default(500),
-				rotationSpeed: z.number().default(10),
+				speed: z.number().default(50),
+				maxForce: z.number().default(1000),
+				maxRange: z.number().default(25000),
 			})
 			.optional(),
 		torpedoWarhead: z
@@ -80,6 +81,7 @@ export const inventoryFlags = z
 			.object({
 				color: z.string().optional().default("red"),
 				guidanceMode: torpedoGuidanceMode,
+				range: z.number().optional().default(5000),
 			})
 			.optional(),
 		probeCasing: z.object({}).optional(),
@@ -165,12 +167,16 @@ export const InventoryFlagValues: {
 	torpedoCasing: {
 		info: "Necessary to launch torpedos. Warheads are loaded into the casing before firing.",
 		speed: {
-			info: "The speed of the torpedo in km/s.",
-			defaultValue: 500,
+			info: "The max speed of the torpedo in km/s.",
+			defaultValue: 50,
 		},
-		rotationSpeed: {
-			info: "The max rotation speed in rotations per minute.",
+		maxForce: {
+			info: "The max force of the torpedo in meganewtons.",
 			defaultValue: 10,
+		},
+		maxRange: {
+			info: "The max distance the torpedo can travel in kilometers.",
+			defaultValue: 25000,
 		},
 		color: {
 			info: "The color of the torpedo casing. Supports CSS compatible colors.",
@@ -199,6 +205,10 @@ export const InventoryFlagValues: {
 			info: "The guidance mode of the torpedo.",
 			defaultValue: "visual",
 			options: torpedoGuidanceModeValues,
+		},
+		range: {
+			info: "The range the guidance module uses to track the target in kilometers.",
+			defaultValue: 5000,
 		},
 		color: {
 			info: "The color of the torpedo guidance module. Supports CSS compatible colors.",

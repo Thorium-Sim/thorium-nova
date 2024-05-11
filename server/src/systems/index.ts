@@ -28,6 +28,7 @@ import { PhysicsWorldPositionSystem } from "./PhysicsWorldPositionSystem";
 import { ShipBehaviorSystem } from "./ShipBehaviorSystem";
 import { NearbyObjectsSystem } from "./NearbyObjectsSystem";
 import { TorpedoLoadingSystem } from "./TorpedoLoadingSystem";
+import { TorpedoMovementSystem } from "./TorpedoMovementSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -48,6 +49,7 @@ const systems = [
 	ThrusterSystem,
 	ImpulseSystem,
 	WarpSystem,
+	TorpedoMovementSystem,
 	PhysicsWorldPositionSystem,
 	PhysicsMovementSystem,
 	WaypointRemoveSystem,

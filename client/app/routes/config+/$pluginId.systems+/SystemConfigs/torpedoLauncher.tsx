@@ -151,7 +151,7 @@ export default function TorpedoLauncherConfig() {
 							labelHidden={false}
 							inputMode="numeric"
 							pattern="[0-9]*"
-							label="Fire Time"
+							label="Pitch"
 							placeholder={"0"}
 							helperText={
 								"Which direction the torpedo is fired in on the ZY plane. Angle in degrees from the front of the ship between -90 and 90."

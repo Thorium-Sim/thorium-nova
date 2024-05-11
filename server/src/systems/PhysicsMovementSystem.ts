@@ -91,7 +91,6 @@ export class PhysicsMovementSystem extends System {
 					entity.updateComponent("physicsHandles", { handles });
 				}
 			}
-
 			// eslint-disable-next-line no-labels
 			if (body && !isHighSpeed) {
 				/**
@@ -101,91 +100,93 @@ export class PhysicsMovementSystem extends System {
 
 				// Transform the position of the body based on the position of the entity relative
 				// to the position of the physics world entity.
-				if (
-					entity.components.position &&
-					entity.components.rotation &&
-					entity.components.velocity &&
-					entity.components.rotationVelocity
-				) {
+				if (entity.components.position) {
 					let positionVector = tempVector.set(
 						entity.components.position.x,
 						entity.components.position.y,
 						entity.components.position.z,
 					);
-
 					const worldPosition = getWorldPosition(positionVector);
 					positionVector = universeToWorld(positionVector, worldPosition);
 					body.setTranslation(positionVector, true);
+				}
+				if (entity.components.rotation) {
 					body.setRotation(entity.components.rotation, true);
+				}
+				if (entity.components.velocity) {
 					body.setLinvel(entity.components.velocity, true);
+				}
+				if (entity.components.rotationVelocity) {
 					body.setAngvel(entity.components.rotationVelocity, true);
-					/**
-					 * Inertial Dampeners
-					 */
-					body.setAngularDamping(dampening);
-					body.setLinearDamping(dampening);
+				}
 
-					/**
-					 * Warp Engines
-					 * They're weird, because they ignore mass. So we really
-					 * should just set the velocity directly.
-					 */
-					if (warpEngines?.components.isWarpEngines) {
-						const warpVelocity = tempObj.localToWorld(
-							tempVector.set(
-								0,
-								0,
-								warpEngines.components.isWarpEngines.forwardVelocity,
-							),
-						);
-						const linvel = body.linvel();
-						body.setLinvel(
-							{
-								x: warpVelocity.x + linvel.x,
-								y: warpVelocity.y + linvel.y,
-								z: warpVelocity.z + linvel.z,
-							},
-							true,
-						);
-					}
+				/**
+				 * Inertial Dampeners
+				 */
+				body.setAngularDamping(dampening);
+				body.setLinearDamping(dampening);
 
-					/**
-					 * Impulse Engines
-					 */
-					body.applyImpulse(
-						tempObj.localToWorld(tempVector.set(0, 0, forwardImpulse)),
+				/**
+				 * Warp Engines
+				 * They're weird, because they ignore mass. So we really
+				 * should just set the velocity directly.
+				 */
+				if (warpEngines?.components.isWarpEngines) {
+					const warpVelocity = tempObj.localToWorld(
+						tempVector.set(
+							0,
+							0,
+							warpEngines.components.isWarpEngines.forwardVelocity,
+						),
+					);
+					const linvel = body.linvel();
+					body.setLinvel(
+						{
+							x: warpVelocity.x + linvel.x,
+							y: warpVelocity.y + linvel.y,
+							z: warpVelocity.z + linvel.z,
+						},
 						true,
 					);
+				}
 
-					/**
-					 * Thrusters
-					 */
-					if (thrusters?.components.isThrusters) {
-						{
-							const { x, y, z } =
-								thrusters.components.isThrusters.directionImpulse;
-							tempVector.set(x, y, z);
-							body.applyImpulse(tempObj.localToWorld(tempVector), true);
-						}
+				/**
+				 * Impulse Engines
+				 */
+				body.applyImpulse(
+					tempObj.localToWorld(tempVector.set(0, 0, forwardImpulse)),
+					true,
+				);
 
-						// Set the max rotation velocity
-						const { x, y, z } = body.angvel();
-						if (
-							tempVector.set(x, y, z).lengthSq() >
-							thrusters.components.isThrusters.rotationMaxSpeed
-						) {
-							tempVector.multiplyScalar(BRAKE_CONSTANT);
-							const { x, y, z } = tempVector;
-							body.setAngvel({ x, y, z }, true);
-						} else {
-							const { x, y, z } =
-								thrusters.components.isThrusters.rotationImpulse;
+				/**
+				 * Thrusters
+				 */
+				if (thrusters?.components.isThrusters) {
+					{
+						const { x, y, z } =
+							thrusters.components.isThrusters.directionImpulse;
+						tempVector.set(x, y, z);
+						body.applyImpulse(tempObj.localToWorld(tempVector), true);
+					}
 
-							tempVector.set(x, y, z);
-							body.applyTorqueImpulse(tempObj.localToWorld(tempVector), true);
-						}
+					// Set the max rotation velocity
+					const { x, y, z } = body.angvel();
+					if (
+						tempVector.set(x, y, z).lengthSq() >
+						thrusters.components.isThrusters.rotationMaxSpeed
+					) {
+						tempVector.multiplyScalar(BRAKE_CONSTANT);
+						const { x, y, z } = tempVector;
+						body.setAngvel({ x, y, z }, true);
+					} else {
+						const { x, y, z } =
+							thrusters.components.isThrusters.rotationImpulse;
+
+						tempVector.set(x, y, z);
+						body.applyTorqueImpulse(tempObj.localToWorld(tempVector), true);
 					}
 				}
+
 				return;
 			}
 			// Fall back on simple physics if we can't get a physics body for the entity.

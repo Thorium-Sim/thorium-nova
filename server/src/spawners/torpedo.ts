@@ -25,7 +25,6 @@ export function spawnTorpedo(launcher: Entity) {
 		height: 0,
 	};
 	const distance = (Math.max(width, length, height) / 2 / 1000) * 1.05;
-
 	if (!shipPosition || !rotation)
 		throw new Error("Invalid ship. Missing position or rotation.");
 
@@ -44,13 +43,6 @@ export function spawnTorpedo(launcher: Entity) {
 	rotationQuat
 		.set(rotation.x, rotation.y, rotation.z, rotation.w)
 		.multiply(launcherQuat);
-	console.log(
-		launcher.components.identity,
-		launcher.components.isTorpedoLauncher,
-		rotationEuler,
-		launcherQuat,
-		rotationQuat,
-	);
 	directionVector
 		.set(0, 0, 1)
 		.applyQuaternion(rotationQuat)
@@ -82,7 +74,7 @@ export function spawnTorpedo(launcher: Entity) {
 		color: flags?.torpedoWarhead?.color || "white",
 		guidanceMode: flags?.torpedoGuidance?.guidanceMode || "visual",
 		speed,
-		rotationSpeed: flags?.torpedoCasing?.rotationSpeed || 0,
+		maxForce: flags?.torpedoCasing?.maxForce || 0,
 	});
 	torpedoEntity.addComponent("mass", { mass: 1500 });
 
