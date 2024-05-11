@@ -8,7 +8,7 @@ import {
 	universeToWorld,
 	worldToUniverse,
 } from "@server/init/rapier";
-import type { RigidBody, World } from "@dimforge/rapier3d-compat";
+import type { RigidBody, World } from "@thorium-sim/rapier3d-node";
 
 const tempObj = new Object3D();
 const tempVector = new Vector3();
@@ -18,6 +18,7 @@ const rotationVelocityVector = new Vector3();
 const velocityEuler = new Euler();
 const velocityQuaternion = new Quaternion();
 const BRAKE_CONSTANT = 0.99;
+const eventQueue = new RAPIER.EventQueue(true);
 
 /**
  * This system applies the physics of anything flying through space
@@ -313,7 +314,11 @@ export class PhysicsMovementSystem extends System {
 				entity.components.physicsWorld?.location.y || 0,
 				entity.components.physicsWorld?.location.z || 0,
 			);
-			world.step();
+			world.step(eventQueue);
+
+			eventQueue.drainContactForceEvents((event) => {
+				console.log(event.raw);
+			});
 			// Copy over the properties of each of the bodies to the entities
 			world.bodies.forEach((body: any) => {
 				const entity = this.ecs.getEntityById(body.userData?.entityId);

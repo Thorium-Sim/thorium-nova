@@ -1,4 +1,4 @@
-import RAPIER from "@dimforge/rapier3d-compat";
+import RAPIER, { type World } from "@thorium-sim/rapier3d-node";
 import { getOrbitPosition } from "@server/utils/getOrbitPosition";
 import type { ECS, Entity } from "../utils/ecs";
 import { Euler, Quaternion, Vector, Vector3 } from "three";
@@ -9,18 +9,8 @@ import {
 	solarMassToKilograms,
 	terranMassToKilograms,
 } from "@server/utils/unitTypes";
-import type { World } from "@dimforge/rapier3d-compat";
+import { COLLISION_PHYSICS_LIMIT, SECTOR_GRID_SIZE } from "./rapierConsts";
 
-/**
- * In 32-bit floating point, precision is lost after 2^24,
- * so we limit the physics world to +/- 2^24 meters.
- */
-export const COLLISION_PHYSICS_LIMIT: Kilometer = Math.floor(2 ** 24 / 1000);
-export const SECTOR_GRID_SIZE: Kilometer = COLLISION_PHYSICS_LIMIT * 2;
-export const SECTOR_GRID_OFFSET: Kilometer = SECTOR_GRID_SIZE / 2;
-export async function initRapier() {
-	await RAPIER.init();
-}
 export { RAPIER };
 
 const tempVector = new Vector3();
@@ -90,7 +80,6 @@ export function generateRigidBody(
 			rotation.setFromEuler(euler);
 			const worldPosition = getWorldPosition(position);
 			universeToWorld(position, worldPosition);
-
 			const bodyDesc = new RAPIER.RigidBodyDesc(RAPIER.RigidBodyType.Fixed)
 				.setTranslation(position.x, position.y, position.z)
 				.setRotation({
@@ -180,7 +169,9 @@ export function generateRigidBody(
 
 			const colliderDesc = new RAPIER.ColliderDesc(
 				new RAPIER.Ball(torpedoRadius),
-			).setMass(terranMassToKilograms(torpedoMass));
+			)
+				.setMass(terranMassToKilograms(torpedoMass))
+				.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
 			world.createCollider(colliderDesc, body);
 
 			return body;
@@ -209,6 +200,7 @@ function generateShipRigidBody(
 			z: rotation.z,
 		});
 	const rigidBody = world.createRigidBody(rigidBodyDesc);
+	colliderDesc.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
 	const collider = world.createCollider(colliderDesc, rigidBody);
 
 	return { collider, body: rigidBody, world };

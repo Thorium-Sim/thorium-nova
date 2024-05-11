@@ -28,7 +28,6 @@
 		"typescript": "^5.3.3"
 	},
 	"dependencies": {
-		"@dimforge/rapier3d-compat": "^0.11.2",
 		"@fastify/cookie": "^8.3.0",
 		"@fastify/cors": "^8.2.0",
 		"@fastify/http-proxy": "^8.4.0",
@@ -36,6 +35,7 @@
 		"@fastify/static": "^6.8.0",
 		"@fastify/websocket": "^7.1.2",
 		"@msgpack/msgpack": "^2.8.0",
+		"@thorium-sim/rapier3d-node": "^0.13.1",
 		"esbuild": "^0.17.5",
 		"fast-glob": "^3.2.12",
 		"fastify": "^4.12.0",
