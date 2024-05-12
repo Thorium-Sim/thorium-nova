@@ -9,6 +9,10 @@ import {
 	worldToUniverse,
 } from "@server/init/rapier";
 import type { RigidBody, World } from "@thorium-sim/rapier3d-node";
+import {
+	handleCollisionDamage,
+	handleTorpedoDamage,
+} from "@server/utils/collisionDamage";
 
 const tempObj = new Object3D();
 const tempVector = new Vector3();
@@ -88,7 +92,7 @@ export class PhysicsMovementSystem extends System {
 				// Generate a body for the component and store the handle on the entity
 				body = generateRigidBody(world, entity, this.ecs.colliderCache) || null;
 				if (typeof body?.handle === "number") {
-					handles.set(entity.id, body.handle);
+					handles.set(worldEntity.id, body.handle);
 					entity.updateComponent("physicsHandles", { handles });
 				}
 			}
@@ -304,7 +308,8 @@ export class PhysicsMovementSystem extends System {
 			});
 		}
 	}
-	postUpdate(_elapsed: number): void {
+	postUpdate(elapsed: number): void {
+		const elapsedSeconds = elapsed / 1000;
 		// Run the physics simulation for all of the relevant worlds.
 		this.ecs.componentCache.get("physicsWorld")?.forEach((entity) => {
 			const world = entity.components.physicsWorld?.world as World;
@@ -317,7 +322,33 @@ export class PhysicsMovementSystem extends System {
 			world.step(eventQueue);
 
 			eventQueue.drainContactForceEvents((event) => {
-				console.log(event.raw);
+				const body1 = world.getCollider(event.collider1()).parent();
+				const body2 = world.getCollider(event.collider2()).parent();
+				const entityId1 = (body1?.userData as any)?.entityId;
+				const entityId2 = (body2?.userData as any)?.entityId;
+				const entity1 = this.ecs.getEntityById(entityId1);
+				const entity2 = this.ecs.getEntityById(entityId2);
+				handleCollisionDamage(
+					entity1,
+					event.totalForceMagnitude(),
+					elapsedSeconds,
+				);
+				handleCollisionDamage(
+					entity2,
+					event.totalForceMagnitude(),
+					elapsedSeconds,
+				);
+
+				if (entity1?.components.isTorpedo || entity2?.components.isTorpedo) {
+					const torpedoEntity = entity1?.components.isTorpedo
+						? entity1
+						: entity2;
+					const otherEntity = entity1?.components.isTorpedo ? entity2 : entity1;
+					if (torpedoEntity && otherEntity) {
+						handleTorpedoDamage(torpedoEntity, otherEntity);
+					}
+				}
+				event.free();
 			});
 			// Copy over the properties of each of the bodies to the entities
 			world.bodies.forEach((body: any) => {

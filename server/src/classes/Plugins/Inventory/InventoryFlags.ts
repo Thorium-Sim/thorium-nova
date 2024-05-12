@@ -73,7 +73,7 @@ export const inventoryFlags = z
 		torpedoWarhead: z
 			.object({
 				color: z.string().optional().default("red"),
-				yield: z.number().default(1000),
+				yield: z.number().default(3.6),
 				damageType: torpedoDamageType,
 			})
 			.optional(),

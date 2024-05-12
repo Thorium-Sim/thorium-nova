@@ -17,8 +17,6 @@ import Button from "@thorium/ui/Button";
 
 /**
  * TODO:
- * Add torpedo collision
- * Add damage calculations
  * Display torpedo on viewscreen
  * Make torpedos not look dumb.
  * Make torpedos rotate towards their velocity.
@@ -111,8 +109,7 @@ function Torpedoes() {
 								<div className="flex-1 flex flex-col">
 									<span>{id}</span>
 									<span className="text-sm text-gray-400">
-										Yield: {kilowattHourToGigajoules(torpedoYield)} GJ · Speed:{" "}
-										{speed} km/s
+										Yield: {torpedoYield} GJ · Speed: {speed} km/s
 									</span>
 								</div>
 								<div>{count}</div>

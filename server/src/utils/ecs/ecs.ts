@@ -45,6 +45,7 @@ class ECS {
 	 * Retrieve an entity by id
 	 */
 	getEntityById(id: number) {
+		if (typeof id !== "number") return null;
 		if (!this.entityIndex.get(id)) {
 			// biome-ignore lint/suspicious/noAssignInExpressions:
 			for (let i = 0, entity: Entity; (entity = this.entities[i]); i += 1) {

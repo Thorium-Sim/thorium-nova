@@ -170,7 +170,7 @@ export function generateRigidBody(
 			const colliderDesc = new RAPIER.ColliderDesc(
 				new RAPIER.Ball(torpedoRadius),
 			)
-				.setMass(terranMassToKilograms(torpedoMass))
+				.setMass(torpedoMass)
 				.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
 			world.createCollider(colliderDesc, body);
 
