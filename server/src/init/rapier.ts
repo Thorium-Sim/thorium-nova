@@ -71,7 +71,6 @@ export function generateRigidBody(
 				  : entity.components.debugSphere
 					  ? "debugSphere"
 					  : "unknown";
-
 	switch (type) {
 		case "planet": {
 			if (!entity.components.satellite || !entity.components.isPlanet) break;
@@ -273,10 +272,7 @@ export function getEntityWorld(ecs: ECS, entity: Entity) {
 		});
 	if (typeof position?.parentId !== "number") return null;
 	const entitySector = getSectorNumber(position);
-	let world: Entity | null = null;
-
-	ecs.componentCache.get("physicsWorld")?.forEach((worldEntity) => {
-		if (world) return;
+	for (const worldEntity of ecs.componentCache.get("physicsWorld") || []) {
 		let {
 			location,
 			world: physicsWorld,
@@ -288,9 +284,9 @@ export function getEntityWorld(ecs: ECS, entity: Entity) {
 			});
 			physicsWorld = entity.components.physicsWorld?.world;
 		}
-		if (!location || !enabled) return;
+		if (!location || !enabled) continue;
 		const key = getSectorNumber(location);
-		if (key === entitySector) world = worldEntity;
-	});
-	return world as Entity | null;
+		if (key === entitySector) return worldEntity;
+	}
+	return null;
 }

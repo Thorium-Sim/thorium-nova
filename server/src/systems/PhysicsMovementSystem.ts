@@ -47,12 +47,13 @@ export class PhysicsMovementSystem extends System {
 		this.collisionStepEntities.clear();
 	}
 	update(entity: Entity, elapsed: number) {
+		if (this.ecs.colliderCache.size === 0) return;
 		// Determine whether the entity is using collision or simple physics
 		// and update the position accordingly.
 		const worldEntity = getEntityWorld(this.ecs, entity);
 		const world = worldEntity?.components.physicsWorld?.world as World;
 		const handles = entity.components.physicsHandles?.handles || new Map();
-
+		handles.set("blah", entity.id);
 		// Nab some systems to use elsewhere.
 		const systems: Entity[] = [];
 		entity.components.shipSystems?.shipSystems.forEach((shipSystem, id) => {
@@ -82,19 +83,16 @@ export class PhysicsMovementSystem extends System {
 			const { x, y, z, w } = entity.components.rotation;
 			tempObj.quaternion.set(x, y, z, w);
 		}
-
 		if (world) {
 			// Make sure the entity in question has a corresponding body in the physics world.
 			const handle = handles?.get(worldEntity?.id);
-			let body =
-				(typeof handle === "number" && world.getRigidBody(handle)) || null;
-			if (!body) {
-				// Generate a body for the component and store the handle on the entity
-				body = generateRigidBody(world, entity, this.ecs.colliderCache) || null;
-				if (typeof body?.handle === "number") {
-					handles?.set(worldEntity?.id, body.handle);
-					entity.updateComponent("physicsHandles", { handles });
-				}
+			const body =
+				typeof handle === "number"
+					? world.getRigidBody(handle)
+					: generateRigidBody(world, entity, this.ecs.colliderCache) || null;
+			if (typeof body?.handle === "number") {
+				handles?.set(worldEntity?.id, body.handle);
+				entity.updateComponent("physicsHandles", { handles });
 			}
 
 			if (body && !isHighSpeed) {
@@ -350,6 +348,7 @@ export class PhysicsMovementSystem extends System {
 				}
 				event.free();
 			});
+
 			// Copy over the properties of each of the bodies to the entities
 			world.bodies.forEach((body: any) => {
 				const entity = this.ecs.getEntityById(body.userData?.entityId);
