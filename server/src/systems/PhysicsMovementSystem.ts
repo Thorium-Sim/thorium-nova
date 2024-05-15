@@ -50,7 +50,7 @@ export class PhysicsMovementSystem extends System {
 		// Determine whether the entity is using collision or simple physics
 		// and update the position accordingly.
 		const worldEntity = getEntityWorld(this.ecs, entity);
-		const world = worldEntity?.components.physicsWorld?.world;
+		const world = worldEntity?.components.physicsWorld?.world as World;
 		const handles = entity.components.physicsHandles?.handles || new Map();
 
 		// Nab some systems to use elsewhere.
@@ -85,18 +85,18 @@ export class PhysicsMovementSystem extends System {
 
 		if (world) {
 			// Make sure the entity in question has a corresponding body in the physics world.
-			const handle = handles.get(entity.id);
-			let body: RigidBody | null =
-				typeof handle === "number" && world.bodies.get(handle);
+			const handle = handles?.get(worldEntity?.id);
+			let body =
+				(typeof handle === "number" && world.getRigidBody(handle)) || null;
 			if (!body) {
 				// Generate a body for the component and store the handle on the entity
 				body = generateRigidBody(world, entity, this.ecs.colliderCache) || null;
 				if (typeof body?.handle === "number") {
-					handles.set(worldEntity.id, body.handle);
+					handles?.set(worldEntity?.id, body.handle);
 					entity.updateComponent("physicsHandles", { handles });
 				}
 			}
-			// eslint-disable-next-line no-labels
+
 			if (body && !isHighSpeed) {
 				/**
 				 * Collision Physics
