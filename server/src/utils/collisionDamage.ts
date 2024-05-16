@@ -1,3 +1,4 @@
+import { pubsub } from "@server/init/pubsub";
 import type { Entity } from "./ecs";
 
 export function handleCollisionDamage(
@@ -38,6 +39,10 @@ export function handleTorpedoDamage(torpedo: Entity, other: Entity) {
 	torpedo.addComponent("isDestroyed", {
 		timeToDestroy: explosion !== "none" ? 5000 : 0,
 		explosion,
+	});
+
+	pubsub.publish.starmapCore.torpedos({
+		systemId: torpedo.components.position?.parentId || null,
 	});
 }
 

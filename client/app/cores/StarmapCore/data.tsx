@@ -114,6 +114,11 @@ export const starmapCore = t.router({
 			const data: {
 				id: number;
 				color: string;
+				isDestroyed?: {
+					timer: number;
+					timeToDestroy: number;
+					explosion: "small" | "none" | "medium" | "large";
+				};
 			}[] = [];
 			for (const { components, id } of torpedoEntities) {
 				if (
@@ -126,6 +131,7 @@ export const starmapCore = t.router({
 					data.push({
 						id,
 						color: components.isTorpedo.color,
+						isDestroyed: components.isDestroyed,
 					});
 				}
 			}

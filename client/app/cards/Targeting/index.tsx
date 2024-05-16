@@ -17,10 +17,8 @@ import Button from "@thorium/ui/Button";
 
 /**
  * TODO:
- * Display torpedo on viewscreen
- * Make torpedos not look dumb.
- * Make torpedos rotate towards their velocity.
  * Add overlays to the targeting grid showing where the torpedo will fire from
+ * Add explosions to the Viewscreen, and maybe even the targeting grid.
  */
 export function Targeting({ cardLoaded }: CardProps) {
 	const setTarget = q.targeting.setTarget.useNetSend();
@@ -83,7 +81,6 @@ export function Targeting({ cardLoaded }: CardProps) {
 	);
 }
 
-const kilowattHourToGigajoules = (kwh: number) => kwh * 0.0036;
 function Torpedoes() {
 	const [torpedoLaunchers] = q.targeting.torpedoLaunchers.useNetRequest();
 	const [torpedoList] = q.targeting.torpedoList.useNetRequest();

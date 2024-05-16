@@ -1,4 +1,4 @@
-import { Line, useGLTF, useTexture } from "@react-three/drei";
+import { Edges, Line, Outlines, useGLTF, useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useGetStarmapStore } from "@client/components/Starmap/starmapStore";
 import { useRef, Suspense, memo, useMemo, Fragment } from "react";
@@ -75,10 +75,15 @@ export function CircleGridContacts({
 					</Suspense>
 				);
 			})}
-			{torpedos.map(({ id, color }) => {
+			{torpedos.map(({ id, color, isDestroyed }) => {
 				return (
 					<Suspense key={id} fallback={null}>
-						<TorpedoEntity id={id} color={color} />
+						<TorpedoEntity
+							id={id}
+							color={color}
+							tilted={tilted}
+							isDestroyed={isDestroyed}
+						/>
 					</Suspense>
 				);
 			})}
@@ -384,7 +389,15 @@ export function TorpedoEntity({
 	id,
 	tilted,
 	color,
-}: { id: number; tilted?: boolean; color: string }) {
+	isDestroyed,
+}: {
+	id: number;
+	tilted?: boolean;
+	color: string;
+	isDestroyed?: {
+		explosion: string;
+	};
+}) {
 	const { interpolate } = useLiveQuery();
 	const ref = useRef<Mesh>(null);
 	const mesh = useRef<Mesh>(null);
@@ -394,7 +407,7 @@ export function TorpedoEntity({
 	useFrame((props) => {
 		const camera = props.camera as OrthographicCamera;
 		const dx = (camera.right - camera.left) / (2 * camera.zoom);
-		ref.current?.scale.setScalar(dx * 0.1);
+		ref.current?.scale.set(0.5, 0.2, 1).multiplyScalar(dx * 0.02);
 
 		const torpedo = interpolate(id);
 		const playerShip = interpolate(playerId);
@@ -411,6 +424,14 @@ export function TorpedoEntity({
 				torpedo.y - playerPosition.y,
 				torpedo.z - playerPosition.z,
 			);
+			if (torpedo.r) {
+				ref.current?.quaternion.set(
+					torpedo.r.x,
+					torpedo.r.y,
+					torpedo.r.z,
+					torpedo.r.w,
+				);
+			}
 			if (ref.current) {
 				ref.current.visible = true;
 			}
@@ -444,12 +465,15 @@ export function TorpedoEntity({
 			}
 		}
 	});
-
+	// TODO: Add a proper explosion
+	if (isDestroyed) return null;
 	return (
 		<>
-			<mesh ref={ref} visible={false}>
-				<icosahedronGeometry args={[0.2, 2]} attach="geometry" />
-				<meshBasicMaterial wireframe color={color} attach="material" />
+			<mesh ref={ref} visible={false} scale={[0.5, 0.2, 1]}>
+				<icosahedronGeometry args={[1, 1]} />
+				<meshBasicMaterial color="black" />
+				<Outlines thickness={0.2} color={color} />
+				<Edges color={color} threshold={15} />
 			</mesh>
 			<Line
 				ref={line}
