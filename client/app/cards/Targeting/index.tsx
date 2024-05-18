@@ -27,7 +27,7 @@ export function Targeting({ cardLoaded }: CardProps) {
 	return (
 		<CircleGridStoreProvider zoomMax={25000}>
 			<div className="grid grid-cols-4 h-full place-content-center gap-4">
-				<div className="flex flex-col justify-between">Hi</div>
+				<div className="flex flex-col justify-between" />
 				<div className="col-span-2 w-full aspect-square self-center">
 					<React.Suspense fallback={null}>
 						<GridCanvas
