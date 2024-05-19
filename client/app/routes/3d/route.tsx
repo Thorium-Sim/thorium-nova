@@ -5,8 +5,19 @@ import {
 	Outlines,
 	Stars,
 } from "@react-three/drei";
-import { Canvas, GroupProps, useFrame, useLoader } from "@react-three/fiber";
-import { ReactNode, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import {
+	Canvas,
+	type GroupProps,
+	useFrame,
+	useLoader,
+} from "@react-three/fiber";
+import {
+	type ReactNode,
+	useEffect,
+	useLayoutEffect,
+	useMemo,
+	useRef,
+} from "react";
 import {
 	type InstancedMesh,
 	TextureLoader,
@@ -27,7 +38,14 @@ export default function ThreeD() {
 				<ambientLight intensity={0.1} />
 				<directionalLight color="white" position={[2, 3, 5]} />
 				<Emitter rotation={[0, Math.PI / 2, 0]}>
-					<Cell lifeInSeconds={1} lifeVariance={0.5}>
+					<Cell
+						initialCount={1}
+						lifeInSeconds={1}
+						lifeVariance={0.5}
+						birthRatePerSecond={2}
+						birthRateVariance={1}
+						speedVariance={0.9}
+					>
 						<boxGeometry attach="geometry" args={[0.5, 0.5, 0.5]} />
 						<meshStandardMaterial attach="material" color="yellow" />
 					</Cell>
@@ -67,6 +85,14 @@ const quaternion = new Quaternion();
 const scale = new Vector3();
 const color = new Color();
 const forward = new Vector3(0, 0, 1);
+interface InstanceProps {
+	/** How long the particle has been alive */
+	lifetime: number;
+	/** How long the particle is supposed to live for */
+	lifespan: number;
+	/** How fast the particle goes */
+	speed: number;
+}
 function Cell({
 	children,
 	birthRatePerSecond = 1,
@@ -84,6 +110,7 @@ function Cell({
 	lifeInSeconds?: number;
 	lifeVariance?: number;
 	speed?: number;
+	speedVariance?: number;
 }) {
 	const ref = useRef<InstancedMesh>(null);
 
@@ -109,40 +136,81 @@ function Cell({
 		if (!ref.current) return;
 		const { current: mesh } = ref;
 		if (!mesh.userData.instanceProps) {
-			mesh.userData.instanceProps = [];
+			mesh.userData.instanceProps = new Map();
+			mesh.userData.activeParticles = [];
+			mesh.userData.inactiveParticles = [];
+			mesh.userData.timeToNextParticle =
+				birthRatePerSecond + (Math.random() - 0.5) * 2 * birthRateVariance;
+			let i = 0;
+			for (i = 0; i < initialCount; i++) {
+				mesh.userData.activeParticles.push(i);
+			}
+			for (; i < maxParticles; i++) {
+				mesh.userData.inactiveParticles.push(i);
+			}
 		}
 
+		mesh.userData.timeToNextParticle -= delta;
+		while (mesh.userData.timeToNextParticle <= 0) {
+			const difference = Math.abs(mesh.userData.timeToNextParticle);
+			if (mesh.userData.inactiveParticles.length > 0) {
+				const particleIndex = mesh.userData.inactiveParticles.pop();
+				mesh.userData.activeParticles.push(particleIndex);
+			}
+			const rate =
+				birthRatePerSecond + (Math.random() - 0.5) * 2 * birthRateVariance;
+			mesh.userData.timeToNextParticle = 1 / rate;
+			// We might need to emit two or more particles in a single frame. This makes sure that happens.
+			mesh.userData.timeToNextParticle -= difference;
+		}
 		for (let i = 0; i < maxParticles; i++) {
 			mesh.getMatrixAt(i, instanceMatrix);
 			instanceMatrix.decompose(position, quaternion, scale);
-			if (!mesh.userData.instanceProps[i]) {
-				mesh.userData.instanceProps[i] = {};
+			// If the particle is dead, skip it
+			if (!mesh.userData.activeParticles.includes(i)) {
+				scale.setScalar(0);
+				instanceMatrix.compose(position, quaternion, scale);
+				mesh.setMatrixAt(i, instanceMatrix);
+				continue;
 			}
-			const instanceProps = mesh.userData.instanceProps[i];
+
+			let instanceProps: InstanceProps = mesh.userData.instanceProps.get(i);
 			count++;
 			if (count > 30) {
 				count = 0;
 			}
 
-			// (Re)Initialize the particle
-			if (
-				!instanceProps.lifetime ||
-				instanceProps.lifetime > instanceProps.lifespan
-			) {
+			// Initialize the particle
+			if (!instanceProps) {
 				position.set(0, 0, 0);
 				quaternion.set(0, 0, 0, 1);
 				scale.set(1, 1, 1);
 				color.set(1, 1, 1);
-				instanceProps.lifetime = 0;
-				instanceProps.lifespan =
-					lifeInSeconds + (Math.random() - 0.5) * 2 * lifeVariance;
+
+				instanceProps = {
+					lifetime: 0,
+					lifespan: lifeInSeconds + (Math.random() - 0.5) * 2 * lifeVariance,
+					speed: speed + (Math.random() - 0.5) * 2 * speedVariance,
+				};
+				mesh.userData.instanceProps.set(i, instanceProps);
 			}
 			instanceProps.lifetime = instanceProps.lifetime + delta;
 
-			position.addScaledVector(forward.set(0, 0, 1), speed * delta);
+			position.addScaledVector(
+				forward.set(0, 0, 1),
+				instanceProps.speed * delta,
+			);
 
 			instanceMatrix.compose(position, quaternion, scale);
 			mesh.setMatrixAt(i, instanceMatrix);
+
+			// Deactivate the particle if it's time
+			if (instanceProps.lifetime > instanceProps.lifespan) {
+				const activeParticleIndex = mesh.userData.activeParticles.indexOf(i);
+				mesh.userData.activeParticles.splice(activeParticleIndex, 1);
+				mesh.userData.inactiveParticles.push(i);
+				mesh.userData.instanceProps.delete(i);
+			}
 		}
 
 		mesh.instanceMatrix.needsUpdate = true;
@@ -161,8 +229,8 @@ function calculateMaxParticles(
 	lifeInSeconds: number,
 	lifeVariance: number,
 ) {
-	return (
+	return Math.ceil(
 		(birthRatePerSecond + birthRateVariance) * (lifeInSeconds + lifeVariance) +
-		initialCount
+			initialCount,
 	);
 }
