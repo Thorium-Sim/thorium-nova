@@ -27,6 +27,7 @@ import {
 	Quaternion,
 	Color,
 	AdditiveBlending,
+	Blending,
 } from "three";
 import blobImage from "./blob.png";
 import { randomPointOnSphere } from "@thorium/randomPoint/randomPointInSphere";
@@ -111,6 +112,20 @@ function Cell({
 	lifeVariance?: number;
 	speed?: number;
 	speedVariance?: number;
+
+	// TODO
+	angle?: unknown;
+	angleVariance?: unknown;
+	spin?: unknown;
+	spinVariance?: unknown;
+	alignAngleWithVelocity?: boolean;
+	colorOverLife?: LinearSpline<Color>;
+	opacityOverLife?: LinearSpline<number>;
+	scale?: number;
+	scaleVariance?: number;
+	scaleOverLife?: LinearSpline<number>;
+	attachToEmitter?: boolean;
+	randomSeed?: number;
 }) {
 	const ref = useRef<InstancedMesh>(null);
 
@@ -233,4 +248,41 @@ function calculateMaxParticles(
 		(birthRatePerSecond + birthRateVariance) * (lifeInSeconds + lifeVariance) +
 			initialCount,
 	);
+}
+// https://github.com/simondevyoutube/ThreeJS_Tutorial_ParticleSystems/blob/master/main.js
+// MIT Copyright (c) 2020 simondevyoutube
+class LinearSpline<T> {
+	private points: [number, T][];
+	private lerp: (t: number, a: T, b: T) => T;
+	constructor(lerp: (t: number, a: T, b: T) => T) {
+		this.points = [];
+		this.lerp = lerp;
+	}
+
+	AddPoint(t: number, d: T) {
+		this.points.push([t, d]);
+	}
+
+	Get(t: number) {
+		let p1 = 0;
+
+		for (let i = 0; i < this.points.length; i++) {
+			if (this.points[i][0] >= t) {
+				break;
+			}
+			p1 = i;
+		}
+
+		const p2 = Math.min(this.points.length - 1, p1 + 1);
+
+		if (p1 === p2) {
+			return this.points[p1][1];
+		}
+
+		return this.lerp(
+			(t - this.points[p1][0]) / (this.points[p2][0] - this.points[p1][0]),
+			this.points[p1][1],
+			this.points[p2][1],
+		);
+	}
 }
