@@ -10,10 +10,10 @@ import {
 	DoubleSide,
 } from "three";
 import blob from "./blob.png?url";
-import { LinearSpline } from "./LinearSpline";
-import { Emitter } from "./Emitter";
-import { SpriteCell } from "./SpriteCell";
-import { MeshCell } from "./MeshCell";
+import { LinearSpline } from "@client/components/particles/LinearSpline";
+import { Emitter } from "@client/components/particles/Emitter";
+import { SpriteCell } from "@client/components/particles/SpriteCell";
+import { MeshCell } from "@client/components/particles/MeshCell";
 
 export const instanceMatrix = new Matrix4();
 

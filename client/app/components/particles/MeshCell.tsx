@@ -2,7 +2,7 @@ import { useFrame } from "@react-three/fiber";
 import { type ReactNode, useRef } from "react";
 import { type InstancedMesh, Color, Object3D } from "three";
 import { useParticles } from "./useParticles";
-import { instanceMatrix } from "./route";
+import { instanceMatrix } from "../../routes/3d/route";
 import type { CellProps } from "./types";
 
 const transform = new Object3D();
