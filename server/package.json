@@ -35,7 +35,7 @@
 		"@fastify/static": "^6.8.0",
 		"@fastify/websocket": "^7.1.2",
 		"@msgpack/msgpack": "^2.8.0",
-		"@thorium-sim/rapier3d-node": "^0.13.1",
+		"@thorium-sim/rapier3d-node": "^0.13.2",
 		"esbuild": "^0.17.5",
 		"fast-glob": "^3.2.12",
 		"fastify": "^4.12.0",
