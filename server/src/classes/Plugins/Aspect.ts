@@ -54,7 +54,7 @@ export abstract class Aspect extends FSDataStore {
 	/**
 	 * Used for serializing the data before it is stored in the file system.
 	 */
-	serialize() {
+	toJSON() {
 		const { plugin, ...data } = this;
 
 		return data;

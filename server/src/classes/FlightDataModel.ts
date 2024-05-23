@@ -6,10 +6,10 @@ import { FlightClient } from "./FlightClient";
 import { FSDataStore, type FSDataStoreOptions } from "@thorium/db-fs";
 import type ShipPlugin from "./Plugins/Ship";
 import { DefaultUIDGenerator } from "../utils/ecs/uid";
-import { RAPIER } from "../init/rapier";
 import path from "node:path";
 import { thoriumPath } from "@server/utils/appPaths";
 import { loadGltf } from "@server/utils/loadGltf";
+import RAPIER from "@thorium-sim/rapier3d-node";
 
 export class FlightDataModel extends FSDataStore {
 	static INTERVAL = 1000 / 60;

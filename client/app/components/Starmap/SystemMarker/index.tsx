@@ -4,6 +4,7 @@ import SystemLabel from "./SystemLabel";
 import SystemCircle, { DraggableSystemCircle } from "./SystemCircle";
 import { type MeshProps, useFrame } from "@react-three/fiber";
 import { useGetStarmapStore } from "../starmapStore";
+import { setCursor } from "@client/utils/setCursor";
 const SystemMarker: React.FC<
 	{
 		systemId: string | number;
@@ -47,12 +48,12 @@ const SystemMarker: React.FC<
 						onPointerOver={(e) => {
 							props?.onPointerOver?.(e);
 							direction.current = 1;
-							document.body.style.cursor = "pointer";
+							setCursor("pointer");
 						}}
 						onPointerOut={(e) => {
 							props?.onPointerOut?.(e);
 							direction.current = -1;
-							document.body.style.cursor = "auto";
+							setCursor("auto");
 						}}
 					/>
 				) : (
@@ -63,12 +64,12 @@ const SystemMarker: React.FC<
 						onPointerOver={(e) => {
 							props?.onPointerOver?.(e);
 							direction.current = 1;
-							document.body.style.cursor = "pointer";
+							setCursor("pointer");
 						}}
 						onPointerOut={(e) => {
 							props?.onPointerOut?.(e);
 							direction.current = -1;
-							document.body.style.cursor = "auto";
+							setCursor("auto");
 						}}
 					/>
 				)}

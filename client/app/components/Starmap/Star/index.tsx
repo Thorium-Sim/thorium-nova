@@ -6,6 +6,7 @@ import Star from "./StarMesh";
 import Selected from "../Selected";
 import { useGetStarmapStore } from "../starmapStore";
 import { getOrbitPosition } from "@server/utils/getOrbitPosition";
+import { setCursor } from "@client/utils/setCursor";
 
 const StarEntity: React.FC<{
 	star: {
@@ -52,7 +53,7 @@ const StarEntity: React.FC<{
 			<group
 				onPointerOver={() => {
 					if (viewingMode === "viewscreen") return;
-					document.body.style.cursor = "pointer";
+					setCursor("pointer");
 					const position = getOrbitPosition({
 						eccentricity,
 						orbitalArc,
@@ -66,7 +67,7 @@ const StarEntity: React.FC<{
 				}}
 				onPointerOut={() => {
 					if (viewingMode === "viewscreen") return;
-					document.body.style.cursor = "auto";
+					setCursor("auto");
 					// useConfigStore.setState({
 					//   hoveredPosition: null,
 					//   scaledHoveredPosition: null,

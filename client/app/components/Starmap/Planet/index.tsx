@@ -12,6 +12,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { getOrbitPosition } from "@server/utils/getOrbitPosition";
 import { degToRad } from "@server/utils/unitTypes";
 import { OrbitLine } from "../OrbitContainer";
+import { setCursor } from "@client/utils/setCursor";
 
 export const PlanetSprite = ({ color = "white", userData = {} }) => {
 	const spriteMap = useTexture(Dot);
@@ -156,7 +157,7 @@ export function Planet({
 		//     origin: scaledOrigin,
 		//   }),
 		// });
-		document.body.style.cursor = "pointer";
+		setCursor("pointer");
 	}
 	function onPointerOut() {
 		// if (viewingMode === "viewscreen") return;
@@ -165,7 +166,7 @@ export function Planet({
 		//   hoveredPosition: null,
 		//   scaledHoveredPosition: null,
 		// });
-		document.body.style.cursor = "auto";
+		setCursor("auto");
 	}
 	const { camera } = useThree();
 

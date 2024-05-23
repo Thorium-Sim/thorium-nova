@@ -82,17 +82,19 @@ export function InterstellarMap({ children }: { children: React.ReactNode }) {
 						dollyToCursor={isStation}
 						dollySpeed={0.5}
 					/>
-					<PolarGrid
-						rotation={[0, (2 * Math.PI) / 12, 0]}
-						args={[
-							lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE),
-							12,
-							20,
-							64,
-							0xffffff,
-							0xffffff,
-						]}
-					/>
+					{isViewscreen ? null : (
+						<PolarGrid
+							rotation={[0, (2 * Math.PI) / 12, 0]}
+							args={[
+								lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE),
+								12,
+								20,
+								64,
+								0xffffff,
+								0xffffff,
+							]}
+						/>
+					)}
 				</>
 			)}
 			{children}

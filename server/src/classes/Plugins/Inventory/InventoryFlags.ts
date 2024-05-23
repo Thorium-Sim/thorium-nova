@@ -1,12 +1,5 @@
 import z from "zod";
 
-import {
-	HeatCapacity,
-	Kilograms,
-	KiloWattHour,
-	MegaWattHour,
-} from "server/src/utils/unitTypes";
-
 /**
  * Jumping the gun a bit of this, but I figure it's helpful to have context
  * for how inventory flags work. These repair types came from Thorium Classic.
@@ -30,6 +23,28 @@ const repairTypes = z.union([
 	z.null(),
 ]);
 
+export const torpedoDamageType = z
+	.enum(["explosive", "radiation", "electrical"])
+	.default("explosive");
+export type TorpedoDamageType = z.infer<typeof torpedoDamageType>;
+const torpedoDamageTypeValues = torpedoDamageType._def.innerType._def.values;
+export const torpedoGuidanceMode = z
+	.enum([
+		/** Heat signatures. Works on cloaked ships. */
+		"infrared",
+		/** Electromagnetic. Most common. */
+		"visual",
+		/** Works on most metal ships. Weak. */
+		"magnetic",
+		/** Works on any ship, but very weak. */
+		"gravitational",
+	])
+	.default("visual");
+
+export type TorpedoGuidanceMode = z.infer<typeof torpedoGuidanceMode>;
+const torpedoGuidanceModeValues =
+	torpedoGuidanceMode._def.innerType._def.values;
+
 // Turn the type above into a zod schema.
 export const inventoryFlags = z
 	.object({
@@ -47,10 +62,28 @@ export const inventoryFlags = z
 				massPerUnit: z.number().default(1000),
 			})
 			.optional(),
-		// TODO July 1, 2022 - Could be interesting to put torpedo movement properties on the torpedo casing. Max speed, acceleration, turn speed, etc.
-		torpedoCasing: z.object({}).optional(),
-		// TODO July 1, 2022 - Put the damage yield, and perhaps the damage type, here.
-		torpedoWarhead: z.object({}).optional(),
+		torpedoCasing: z
+			.object({
+				color: z.string().optional().default("red"),
+				speed: z.number().default(50),
+				maxForce: z.number().default(1000),
+				maxRange: z.number().default(25000),
+			})
+			.optional(),
+		torpedoWarhead: z
+			.object({
+				color: z.string().optional().default("red"),
+				yield: z.number().default(3.6),
+				damageType: torpedoDamageType,
+			})
+			.optional(),
+		torpedoGuidance: z
+			.object({
+				color: z.string().optional().default("red"),
+				guidanceMode: torpedoGuidanceMode,
+				range: z.number().optional().default(5000),
+			})
+			.optional(),
 		probeCasing: z.object({}).optional(),
 		probeEquipment: z.object({}).optional(),
 		forCrew: z.object({}).optional(),
@@ -84,6 +117,7 @@ export const InventoryFlagValues: {
 		[O in keyof NonNullable<InventoryFlags[P]>]: {
 			defaultValue: NonNullable<InventoryFlags[P]>[O];
 			info: string;
+			options?: string[];
 		};
 	} & { info: string };
 } = {
@@ -132,9 +166,54 @@ export const InventoryFlagValues: {
 	},
 	torpedoCasing: {
 		info: "Necessary to launch torpedos. Warheads are loaded into the casing before firing.",
+		speed: {
+			info: "The max speed of the torpedo in km/s.",
+			defaultValue: 50,
+		},
+		maxForce: {
+			info: "The max force of the torpedo in meganewtons.",
+			defaultValue: 10,
+		},
+		maxRange: {
+			info: "The max distance the torpedo can travel in kilometers.",
+			defaultValue: 25000,
+		},
+		color: {
+			info: "The color of the torpedo casing. Supports CSS compatible colors.",
+			defaultValue: "red",
+		},
 	},
 	torpedoWarhead: {
 		info: "What inflicts the damage. Warheads are loaded into the casing before firing.",
+		yield: {
+			info: "The energy released measured in Kilowatt Hours.",
+			defaultValue: 1000,
+		},
+		damageType: {
+			info: "The type of damage the warhead inflicts.",
+			defaultValue: "explosive",
+			options: torpedoDamageTypeValues,
+		},
+		color: {
+			info: "The color of the torpedo warhead. Supports CSS compatible colors.",
+			defaultValue: "red",
+		},
+	},
+	torpedoGuidance: {
+		info: "What guides the torpedo to its target. Guidance modules are optionally loaded into the casing before firing.",
+		guidanceMode: {
+			info: "The guidance mode of the torpedo.",
+			defaultValue: "visual",
+			options: torpedoGuidanceModeValues,
+		},
+		range: {
+			info: "The range the guidance module uses to track the target in kilometers.",
+			defaultValue: 5000,
+		},
+		color: {
+			info: "The color of the torpedo guidance module. Supports CSS compatible colors.",
+			defaultValue: "red",
+		},
 	},
 	probeCasing: { info: "Necessary to launch probes." },
 	probeEquipment: { info: "Used by the probe to carry equipment." },

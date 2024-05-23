@@ -17,6 +17,5 @@ export default function CardRenderer() {
 	}, [component]);
 	if (!flight) return <Navigate to="/" />;
 	if (!station) return <LoadingSpinner />;
-
 	return <StationWrapper />;
 }

@@ -32,7 +32,7 @@ import { q } from "@client/context/AppContext";
 import type PlanetPlugin from "@server/classes/Plugins/Universe/Planet";
 import type SolarSystemPlugin from "@server/classes/Plugins/Universe/SolarSystem";
 import { getOrbitPosition } from "@server/utils/getOrbitPosition";
-import { SECTOR_GRID_SIZE } from "@server/init/rapier";
+import { SECTOR_GRID_SIZE } from "@server/init/rapierConsts";
 import { Icon } from "@thorium/ui/Icon";
 const ACTION = CameraControlsClass.ACTION;
 

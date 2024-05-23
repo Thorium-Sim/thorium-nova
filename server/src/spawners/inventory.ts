@@ -67,6 +67,7 @@ export function generateShipInventory(
 	// TODO Jan 21, 2023 - these should be conditional based on whether there are torpedos or not
 	neededInventory.push("torpedoCasing");
 	neededInventory.push("torpedoWarhead");
+	neededInventory.push("torpedoGuidance");
 	// TODO Jan 21, 2023 - these should be conditional based on whether there are probes or not
 	neededInventory.push("probeCasing");
 	neededInventory.push("probeEquipment");
@@ -228,15 +229,20 @@ export function generateShipInventory(
 	// is determined by the number of torpedo launchers on the ship.
 	const torpedoCasingCount = torpedoLauncherCount * 8;
 	const warheadCount = torpedoLauncherCount * 8;
+	const guidanceCount = torpedoLauncherCount * 8;
 
 	const casingsList: number[] = [];
 	const warheadsList: number[] = [];
+	const guidanceList: number[] = [];
 	cargoAbundance.forEach((index) => {
 		if (inventoryList[index].flags.torpedoCasing) {
 			casingsList.push(index);
 		}
 		if (inventoryList[index].flags.torpedoWarhead) {
 			warheadsList.push(index);
+		}
+		if (inventoryList[index].flags.torpedoGuidance) {
+			guidanceList.push(index);
 		}
 	});
 
@@ -269,6 +275,21 @@ export function generateShipInventory(
 		const removeIndex = warheadsList.indexOf(inventoryIndex);
 		if (removeIndex === -1) return;
 		warheadsList.splice(removeIndex, 1);
+	}
+	for (let i = 0; i < guidanceCount; i++) {
+		const inventoryTemplate = getWeightedRandomInventory(guidanceList);
+		if (!inventoryTemplate) continue;
+		const room = getRandomInventoryRoom(
+			"torpedoStorage",
+			inventoryTemplate.volume,
+		);
+		if (!room) continue;
+		addInventory(inventoryTemplate, room);
+		const inventoryIndex = inventoryList.indexOf(inventoryTemplate);
+		if (inventoryIndex === -1) return;
+		const removeIndex = guidanceList.indexOf(inventoryIndex);
+		if (removeIndex === -1) return;
+		guidanceList.splice(removeIndex, 1);
 	}
 
 	// How many probes does the ship need?

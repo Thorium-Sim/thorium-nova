@@ -17,6 +17,7 @@ import { useGetStarmapStore } from "./starmapStore";
 import type { Line2 } from "three-stdlib";
 import { q } from "@client/context/AppContext";
 import { useLiveQuery } from "@thorium/live-query/client";
+import { setCursor } from "@client/utils/setCursor";
 
 export function StarmapShip({
 	id,
@@ -137,11 +138,11 @@ export function StarmapShip({
 				<group
 					onPointerOver={() => {
 						// set the cursor to pointer
-						document.body.style.cursor = "pointer";
+						setCursor("pointer");
 					}}
 					onPointerOut={() => {
 						// set the cursor to default
-						document.body.style.cursor = "default";
+						setCursor("auto");
 					}}
 					onClick={onClick}
 				>
