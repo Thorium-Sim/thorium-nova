@@ -319,36 +319,6 @@ export class PhysicsMovementSystem extends System {
 			);
 			world.step(eventQueue);
 
-			eventQueue.drainContactForceEvents((event) => {
-				const body1 = world.getCollider(event.collider1()).parent();
-				const body2 = world.getCollider(event.collider2()).parent();
-				const entityId1 = (body1?.userData as any)?.entityId;
-				const entityId2 = (body2?.userData as any)?.entityId;
-				const entity1 = this.ecs.getEntityById(entityId1);
-				const entity2 = this.ecs.getEntityById(entityId2);
-				handleCollisionDamage(
-					entity1,
-					event.totalForceMagnitude(),
-					elapsedSeconds,
-				);
-				handleCollisionDamage(
-					entity2,
-					event.totalForceMagnitude(),
-					elapsedSeconds,
-				);
-
-				if (entity1?.components.isTorpedo || entity2?.components.isTorpedo) {
-					const torpedoEntity = entity1?.components.isTorpedo
-						? entity1
-						: entity2;
-					const otherEntity = entity1?.components.isTorpedo ? entity2 : entity1;
-					if (torpedoEntity && otherEntity) {
-						handleTorpedoDamage(torpedoEntity, otherEntity);
-					}
-				}
-				event.free();
-			});
-
 			// Copy over the properties of each of the bodies to the entities
 			world.bodies.forEach((body: any) => {
 				const entity = this.ecs.getEntityById(body.userData?.entityId);
@@ -384,6 +354,41 @@ export class PhysicsMovementSystem extends System {
 						forwardVelocity: tempVector.set(x, y, z).length(),
 					});
 				}
+			});
+
+			eventQueue.drainContactForceEvents((event) => {
+				const body1 = world.getCollider(event.collider1()).parent();
+				const body2 = world.getCollider(event.collider2()).parent();
+				const entityId1 = (body1?.userData as any)?.entityId;
+				const entityId2 = (body2?.userData as any)?.entityId;
+				const entity1 = this.ecs.getEntityById(entityId1);
+				const entity2 = this.ecs.getEntityById(entityId2);
+
+				handleCollisionDamage(
+					entity1,
+					event.totalForceMagnitude(),
+					elapsedSeconds,
+				);
+				handleCollisionDamage(
+					entity2,
+					event.totalForceMagnitude(),
+					elapsedSeconds,
+				);
+
+				if (entity1?.components.isTorpedo || entity2?.components.isTorpedo) {
+					const torpedoEntity = entity1?.components.isTorpedo
+						? entity1
+						: entity2;
+					const otherEntity = entity1?.components.isTorpedo ? entity2 : entity1;
+					if (
+						torpedoEntity &&
+						otherEntity &&
+						!torpedoEntity.components.isDestroyed
+					) {
+						handleTorpedoDamage(torpedoEntity, otherEntity);
+					}
+				}
+				event.free();
 			});
 		});
 	}

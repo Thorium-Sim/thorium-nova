@@ -9,6 +9,8 @@ import {
 	getObjectOffsetPosition,
 	getObjectSystem,
 } from "@server/utils/position";
+import type { isDestroyed } from "@server/components/isDestroyed";
+type IsDestroyed = Zod.infer<typeof isDestroyed>;
 
 const behavior = z.enum([
 	"hold",
@@ -79,6 +81,7 @@ export const starmapCore = t.router({
 				modelUrl?: string;
 				logoUrl?: string;
 				size: number;
+				isDestroyed?: IsDestroyed;
 			}[] = [];
 			for (const { components, id } of shipEntities) {
 				if (
@@ -93,6 +96,7 @@ export const starmapCore = t.router({
 						modelUrl: components.isShip.assets.model,
 						logoUrl: components.isShip.assets.logo,
 						size: components.size?.length || 50,
+						isDestroyed: components.isDestroyed,
 					});
 				}
 			}
@@ -114,11 +118,7 @@ export const starmapCore = t.router({
 			const data: {
 				id: number;
 				color: string;
-				isDestroyed?: {
-					timer: number;
-					timeToDestroy: number;
-					explosion: "small" | "none" | "medium" | "large";
-				};
+				isDestroyed?: IsDestroyed;
 			}[] = [];
 			for (const { components, id } of torpedoEntities) {
 				if (

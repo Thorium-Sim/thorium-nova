@@ -21,6 +21,7 @@ export class IsDestroyedSystem extends System {
 					const world = worldEntity.components.physicsWorld?.world as World;
 					if (!world) continue;
 					const body = world.getRigidBody(handle);
+					if (!body) continue;
 					world.removeRigidBody(body);
 				}
 

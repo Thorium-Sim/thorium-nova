@@ -13,8 +13,19 @@ import {
 	Vector3,
 	type Object3DEventMap,
 } from "three";
+import Explosion from "./Effects/Explosion";
 
-export function Torpedo({ color, id }: { id: number; color: string }) {
+export function Torpedo({
+	color,
+	id,
+	isDestroyed,
+}: {
+	id: number;
+	color: string;
+	isDestroyed?: {
+		explosion: string;
+	};
+}) {
 	const { interpolate } = useLiveQuery();
 	const [target, setTarget] = useState<Group<Object3DEventMap> | null>(null);
 
@@ -26,7 +37,8 @@ export function Torpedo({ color, id }: { id: number; color: string }) {
 	});
 	return (
 		<group ref={(node) => setTarget(node)}>
-			<Nucleus color={color} />
+			{isDestroyed ? <Explosion /> : <Nucleus color={color} />}
+
 			{/* TODO May 14, 2024 - Add some kind of cool trail. But it has to be with instanced meshes,
       since we're way past 32 bit numbers */}
 		</group>

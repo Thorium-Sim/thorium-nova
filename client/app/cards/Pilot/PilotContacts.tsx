@@ -28,6 +28,7 @@ import { useLiveQuery } from "@thorium/live-query/client/liveQueryContext";
 import { q } from "@client/context/AppContext";
 import { setCursor } from "@client/utils/setCursor";
 import ReticleTexture from "@client/cards/Pilot/reticle.svg";
+import Explosion from "@client/components/Starmap/Effects/Explosion";
 
 export function CircleGridContacts({
 	onContactClick,
@@ -41,7 +42,6 @@ export function CircleGridContacts({
 	});
 	const [ships] = q.starmapCore.ships.useNetRequest({ systemId });
 	const [torpedos] = q.starmapCore.torpedos.useNetRequest({ systemId });
-
 	const [targetedContact] = q.targeting.targetedContact.useNetRequest();
 	return (
 		<group>
@@ -400,6 +400,7 @@ export function TorpedoEntity({
 }) {
 	const { interpolate } = useLiveQuery();
 	const ref = useRef<Mesh>(null);
+	const explosionRef = useRef<Group>(null);
 	const mesh = useRef<Mesh>(null);
 	const line = useRef<Line2>(null);
 	const [{ id: playerId }] = q.ship.player.useNetRequest();
@@ -432,8 +433,23 @@ export function TorpedoEntity({
 					torpedo.r.w,
 				);
 			}
+			if (
+				explosionRef.current &&
+				isDestroyed &&
+				explosionRef.current.position.lengthSq() === 0
+			) {
+				explosionRef.current.position.set(
+					torpedo.x - playerPosition.x,
+					torpedo.y - playerPosition.y,
+					torpedo.z - playerPosition.z,
+				);
+			}
 			if (ref.current) {
-				ref.current.visible = true;
+				if (isDestroyed) {
+					ref.current.visible = false;
+				} else {
+					ref.current.visible = true;
+				}
 			}
 			// Draw the vertical line from the sensor plane to the ship
 			if (playerShip.r && ref.current?.position && mesh.current?.position) {
@@ -465,8 +481,6 @@ export function TorpedoEntity({
 			}
 		}
 	});
-	// TODO: Add a proper explosion
-	if (isDestroyed) return null;
 	return (
 		<>
 			<mesh ref={ref} visible={false} scale={[0.5, 0.2, 1]}>
@@ -475,6 +489,11 @@ export function TorpedoEntity({
 				<Outlines thickness={0.2} color={color} />
 				<Edges color={color} threshold={15} />
 			</mesh>
+			{isDestroyed ? (
+				<group ref={explosionRef}>
+					<Explosion />
+				</group>
+			) : null}
 			<Line
 				ref={line}
 				points={[

@@ -158,7 +158,7 @@ export const targeting = t.router({
 
 			launcher.updateComponent("isTorpedoLauncher", {
 				status: torpedoEntity ? "loading" : "unloading",
-				progress: 10 || launcher.components.isTorpedoLauncher.loadTime,
+				progress: launcher.components.isTorpedoLauncher.loadTime,
 				...(torpedoEntity ? { torpedoEntity } : {}),
 			});
 			pubsub.publish.targeting.torpedoLaunchers({

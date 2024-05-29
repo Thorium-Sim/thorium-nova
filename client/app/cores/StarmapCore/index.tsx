@@ -558,9 +558,9 @@ export function SolarSystemWrapper() {
 					</ErrorBoundary>
 				</Suspense>
 			))}
-			{torpedos.map(({ id, color }) => (
+			{torpedos.map(({ id, color, isDestroyed }) => (
 				<Suspense key={id} fallback={null}>
-					<Torpedo id={id} color={color} />
+					<Torpedo id={id} color={color} isDestroyed={isDestroyed} />
 				</Suspense>
 			))}
 			{/* {debugSpheres.map(sphere => (

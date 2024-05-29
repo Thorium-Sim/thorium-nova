@@ -53,7 +53,7 @@ export function Targeting({ cardLoaded }: CardProps) {
 						</GridCanvas>
 					</React.Suspense>
 				</div>
-				<div className="h-full flex flex-col justify-between gap-2">
+				<div className="h-full flex flex-col gap-2 overflow-y-hidden">
 					<Torpedoes />
 					<div
 						className={cn(
@@ -89,8 +89,8 @@ function Torpedoes() {
 	);
 
 	return (
-		<div className="flex-1 flex flex-col gap-4">
-			<ul className="relative panel panel-alert min-h-16">
+		<>
+			<ul className="relative panel panel-alert min-h-16 overflow-y-auto">
 				{Object.entries(torpedoList ?? {}).map(
 					([id, { count, yield: torpedoYield, speed }]) => (
 						// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
@@ -115,15 +115,17 @@ function Torpedoes() {
 					),
 				)}
 			</ul>
-			{torpedoLaunchers?.map((launcher) => (
-				<Launcher
-					launcherId={launcher.id}
-					key={launcher.id}
-					selectedTorpedo={selectedTorpedo}
-					{...launcher}
-				/>
-			))}
-		</div>
+			<div className="overflow-y-auto flex flex-col flex-1 gap-4">
+				{torpedoLaunchers?.map((launcher) => (
+					<Launcher
+						launcherId={launcher.id}
+						key={launcher.id}
+						selectedTorpedo={selectedTorpedo}
+						{...launcher}
+					/>
+				))}
+			</div>
+		</>
 	);
 }
 
@@ -171,7 +173,7 @@ function Launcher({
 	const animationTime =
 		state === "loading" || state === "unloading" ? loadTime : 100;
 	return (
-		<div className="select-none relative">
+		<div className="select-none">
 			<p className="text-right">{name}</p>
 			<div className="relative">
 				<img draggable={false} src={LauncherImage} alt="Torpedo Launcher" />

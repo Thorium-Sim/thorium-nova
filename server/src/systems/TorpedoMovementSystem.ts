@@ -27,7 +27,6 @@ export class TorpedoMovementSystem extends System {
 			const { x, y, z } = entity.components.velocity || { x: 0, y: 0, z: 0 };
 			velocityVector.set(x, y, z);
 		}
-
 		const target = component.targetId
 			? this.ecs.getEntityById(component.targetId)
 			: null;

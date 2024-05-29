@@ -55,7 +55,8 @@ export function useParticles({
 		timeToNextParticle: number;
 		instanceProps: Map<number, InstanceProps>;
 	} | null>(null);
-	const { emissionAngleRange, getEmitterPosition } = useEmitter();
+	const { emissionAngleRange, getEmitterPosition, onParticlesExpired } =
+		useEmitter();
 
 	const maxParticles = useMemo(
 		() =>
@@ -240,6 +241,9 @@ export function useParticles({
 			userData.activeParticles.splice(activeParticleIndex, 1);
 			userData.inactiveParticles.push(index);
 			userData.instanceProps.delete(index);
+			if (userData.activeParticles.length === 0) {
+				onParticlesExpired?.();
+			}
 		}
 		return transform;
 	}

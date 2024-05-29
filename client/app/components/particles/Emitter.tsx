@@ -12,6 +12,7 @@ import type { Angle } from "./types";
 const EmitterContext = createContext<{
 	emissionAngleRange: Angle;
 	getEmitterPosition: () => Vector3;
+	onParticlesExpired?: () => void;
 }>({
 	emissionAngleRange: { longitude: 0, latitude: 0 },
 	getEmitterPosition: () => new Vector3(0, 0, 0),
@@ -35,6 +36,7 @@ export const Emitter = forwardRef<
 	{
 		children: ReactNode;
 		emissionAngleRange?: Angle;
+		onParticlesExpired?: () => void;
 	} & GroupProps
 >(
 	(
@@ -49,6 +51,7 @@ export const Emitter = forwardRef<
 					value={{
 						emissionAngleRange,
 						getEmitterPosition: () => innerRef.current?.position!,
+						onParticlesExpired: props.onParticlesExpired,
 					}}
 				>
 					{children}

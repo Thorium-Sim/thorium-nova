@@ -1,5 +1,6 @@
 import { pubsub } from "@server/init/pubsub";
 import type { Entity } from "./ecs";
+import { Vector3 } from "three";
 
 export function handleCollisionDamage(
 	entity: Entity | null,
@@ -25,9 +26,29 @@ export function handleTorpedoDamage(torpedo: Entity, other: Entity) {
 	// TODO May 11, 2024: Apply other damage based on the damage type of the torpedo
 	applyDamage(other, damage);
 
+	const vector3 = new Vector3();
+	const otherVector = new Vector3();
+	vector3.set(
+		torpedo.components.position?.x || 0,
+		torpedo.components.position?.y || 0,
+		torpedo.components.position?.z || 0,
+	);
+	otherVector.set(
+		other.components.position?.x || 0,
+		other.components.position?.y || 0,
+		other.components.position?.z || 0,
+	);
 	// Stop the torpedo from moving any further
 	torpedo.updateComponent("isTorpedo", { targetId: null });
 	torpedo.updateComponent("velocity", { x: 0, y: 0, z: 0 });
+	if (other.components.position) {
+		torpedo.updateComponent("position", {
+			x: other.components.position.x,
+			y: other.components.position.y,
+			z: other.components.position.z,
+		});
+		torpedo.addComponent("snapInterpolation", {});
+	}
 	const explosion =
 		torpedoYield > 6
 			? "large"
