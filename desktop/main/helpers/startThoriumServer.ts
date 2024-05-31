@@ -35,7 +35,7 @@ export async function startThoriumServer() {
 		console.error(error);
 	});
 	child.on("error", (err) => {
-		console.error(err);
+		throw err;
 	});
 
 	await waitOn({

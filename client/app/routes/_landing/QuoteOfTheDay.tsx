@@ -321,6 +321,8 @@ const quotes = [
 	"The practice of art isn't to make a living. It's to make your soul grow.",
 	"Everything is nothing, with a twist.",
 	"I can have oodles of charm when I want to.",
+	// Cully
+	"I’m building on the shoulders of giants and those giants are my own previous ideas.",
 ];
 
 const QuoteOfTheDay = () => {
