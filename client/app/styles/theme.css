@@ -1208,6 +1208,16 @@ input[type="range"].slider.zoom:focus::-webkit-slider-runnable-track {
   opacity: 0.4;
 }
 
+.value-input-is-nested {
+  padding-left: 0.5rem;
+  border-left: solid 1px #aaa;
+}
+/* Target the first element that has this class */
+.value-input-is-nested:has(+ :not(.value-input-is-nested)) {
+  border-radius: 0 0 0 0.375rem;
+  margin-bottom: 0.5rem;
+}
+
 body.drag-active * {
   user-select: none;
   cursor: grabbing;

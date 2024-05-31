@@ -2,7 +2,8 @@ import { q } from "@client/context/AppContext";
 import { Combobox, Transition } from "@headlessui/react";
 import { Fragment, useReducer, useState } from "react";
 import { parseSchema as parseJsonSchema } from "json-schema-to-zod";
-import type z from "zod";
+// biome-ignore lint/style/useImportType: <explanation>
+import z from "zod";
 import { parseSchema } from "@server/utils/zodAutoForm";
 import {
 	ValueInput,
@@ -22,6 +23,9 @@ declare global {
 	}
 	// biome-ignore lint/suspicious/noRedeclare:
 	var z: ZodType;
+}
+if (typeof window !== "undefined") {
+	window.z = z;
 }
 
 export type ActionState = {
@@ -243,22 +247,32 @@ export function ActionInput({
 	const actionSchema = action
 		? // biome-ignore lint/security/noGlobalEval:
 		  parseSchema(eval(parseJsonSchema(input)))
-		: null;
+		: [];
 
-	return (
-		<>
-			{actionSchema?.map((item) => {
-				const value = action.values[item.key];
-				return (
-					<ValueInput
-						key={item.key}
-						value={value}
-						item={item}
-						dispatch={dispatch}
-						path={path}
-					/>
-				);
-			})}
-		</>
-	);
+	const inputs = [];
+	const queryInputs: string[] = [];
+	for (const item of actionSchema) {
+		const value = item.key
+			.split(".")
+			.reduce((acc: any, key) => acc[key], action.values);
+
+		if (value && typeof value === "object" && "query" in value) {
+			queryInputs.push(item.key);
+		}
+		const hasQueryInputParent = queryInputs.some((queryInput) =>
+			item.key.includes(`${queryInput}.`),
+		);
+		if (hasQueryInputParent) continue;
+		inputs.push(
+			<ValueInput
+				key={item.key}
+				value={value}
+				item={item}
+				dispatch={dispatch}
+				path={path}
+			/>,
+		);
+	}
+
+	return inputs;
 }

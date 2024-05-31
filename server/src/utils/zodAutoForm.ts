@@ -175,6 +175,7 @@ export const ZOD_COMPARISONS = {
 };
 
 export type InputTypes =
+	| "object"
 	| "text"
 	| "number"
 	| "select"
@@ -200,6 +201,9 @@ export function getInputType<T extends keyof typeof ZOD_COMPARISONS>(
 	if (item.zodBaseType === "ZodEnum") {
 		return "select";
 	}
+	if (item.zodBaseType === "ZodObject") {
+		return "object";
+	}
 	if (item.zodBaseType in DEFAULT_ZOD_HANDLERS) {
 		return DEFAULT_ZOD_HANDLERS[
 			item.zodBaseType as keyof typeof DEFAULT_ZOD_HANDLERS
@@ -208,16 +212,34 @@ export function getInputType<T extends keyof typeof ZOD_COMPARISONS>(
 	return "text";
 }
 
+type ParsedSchema = {
+	zodBaseType: string;
+	itemName: string;
+	key: string;
+	isRequired: boolean;
+	zodInputProps: React.InputHTMLAttributes<HTMLInputElement>;
+	baseValues: any;
+	isNested: boolean;
+	path: string;
+}[];
 const fieldConfig = {} as any;
-export function parseSchema(schema: any) {
+export function parseSchema(schema: any, nestedName?: string): ParsedSchema {
 	if (!schema) return [];
 	const { shape } = schema;
 	if (!shape) return [];
-	return Object.keys(shape).map((name) => {
+	return Object.keys(shape).flatMap((name) => {
+		let output: ParsedSchema = [];
 		const item = shape[name] as z.ZodAny;
 		const zodBaseType = getBaseType(item);
+		if (zodBaseType === "ZodObject") {
+			const objectSchema = getObjectFormSchema(
+				item as unknown as ZodObjectOrWrapped,
+			);
+			output = output.concat(parseSchema(objectSchema, name));
+		}
 		const itemName = item._def.description ?? beautifyObjectName(name);
-		const key = name;
+
+		const key = `${nestedName ? `${nestedName}.` : ""}${name}`;
 
 		const baseValues = (getBaseSchema(item) as unknown as z.ZodEnum<any>)._def
 			.values;
@@ -227,13 +249,16 @@ export function parseSchema(schema: any) {
 		const isRequired =
 			zodInputProps.required ?? fieldConfigItem.inputProps?.required ?? false;
 
-		return {
+		output.unshift({
 			zodBaseType,
 			itemName,
 			key,
 			isRequired,
 			zodInputProps,
 			baseValues,
-		};
+			isNested: !!nestedName,
+			path: nestedName || "",
+		});
+		return output;
 	});
 }

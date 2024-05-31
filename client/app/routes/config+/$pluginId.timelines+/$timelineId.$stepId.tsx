@@ -95,6 +95,7 @@ export default function TimelineStep() {
 						labelHidden={false}
 						label="Step Name"
 						placeholder="Retrieve Information"
+						key={step.id}
 						defaultValue={step.name}
 						onBlur={async (e: any) => {
 							try {
@@ -145,6 +146,7 @@ export default function TimelineStep() {
 						className="!h-24"
 						labelHidden={false}
 						label="Description"
+						key={step.id}
 						defaultValue={step.description}
 						onBlur={(e: any) =>
 							q.plugin.timeline.step.update.netSend({

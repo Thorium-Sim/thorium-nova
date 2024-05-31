@@ -20,6 +20,7 @@ import type {
 } from "@server/classes/Plugins/Timeline";
 import TagInput from "@thorium/ui/TagInput";
 import { Icon } from "@thorium/ui/Icon";
+import { cn } from "@client/utils/cn";
 
 type QueryReducerAction =
 	| { type: "add"; path?: string }
@@ -215,6 +216,14 @@ export function QueryComponent({
 	);
 }
 
+const voices =
+	typeof window === "undefined"
+		? []
+		: window.speechSynthesis
+				.getVoices()
+				.filter((s) => s.lang === navigator.language)
+				.map((s) => s.name);
+
 export function ValueInput({
 	value,
 	item,
@@ -223,18 +232,53 @@ export function ValueInput({
 	queryInput,
 }: {
 	value: string | ValueQuery | undefined;
-	item: { key: string; itemName: string; zodBaseType: any; baseValues: any };
+	item: {
+		key: string;
+		itemName: string;
+		zodBaseType: any;
+		baseValues: any;
+		zodInputProps: React.InputHTMLAttributes<HTMLInputElement>;
+		isNested: boolean;
+	};
 	dispatch: React.Dispatch<QueryReducerAction>;
 
 	path: string;
 	queryInput?: boolean;
 }) {
+	// Special override for the voice input
+	if (item.key.endsWith("voice")) {
+		return (
+			<div className={item.isNested ? "value-input-is-nested" : ""}>
+				<label>{item.itemName}</label>
+				<PropertyInput
+					inputType="select"
+					inputValues={voices}
+					value={value}
+					setValue={(value) =>
+						dispatch({
+							type: "value",
+							path: queryInput ? path : `${path}.values.${item.key}`,
+							value,
+						})
+					}
+					label={item.itemName}
+					labelHidden
+				/>
+			</div>
+		);
+	}
+
 	return !(
 		typeof value === "object" &&
 		"query" in value &&
 		"select" in value
 	) ? (
-		<div className="flex items-end">
+		<div
+			className={cn(
+				"flex items-end",
+				item.isNested ? "value-input-is-nested" : "",
+			)}
+		>
 			<div className="flex-1">
 				{queryInput ? null : <label>{item.itemName}</label>}
 				<PropertyInput
@@ -250,6 +294,7 @@ export function ValueInput({
 						})
 					}
 					value={value}
+					{...item.zodInputProps}
 				/>
 			</div>
 			<Tooltip content="Use entity query value">
@@ -282,7 +327,7 @@ export function ValueInput({
 			</Tooltip>
 		</div>
 	) : typeof value === "object" ? (
-		<Fragment>
+		<div className={item.isNested ? "value-input-is-nested" : ""}>
 			<div className="flex gap-2">
 				<label>{item.itemName}</label>
 
@@ -301,7 +346,7 @@ export function ValueInput({
 					</button>
 				</Tooltip>
 			</div>
-			<div className="w-full ml-8">
+			<div className="w-full">
 				<div className="rounded p-2 border border-gray-50/20 w-fit">
 					<p>Entity Query</p>
 					{value.query.map((q, i) => (
@@ -362,7 +407,7 @@ export function ValueInput({
 					/>
 				</div>
 			</div>
-		</Fragment>
+		</div>
 	) : null;
 }
 
@@ -552,7 +597,7 @@ function PropertyCombobox({
 
 function schemaWithoutDefault(component: keyof typeof components) {
 	const schema = components[component];
-	if ("removeDefault" in schema) return schema.removeDefault();
+	if (schema && "removeDefault" in schema) return schema.removeDefault();
 	return schema;
 }
 
@@ -632,6 +677,8 @@ export function PropertyInput({
 					onRemove={(t) => setValue(value?.filter((v: any) => v !== t) || [])}
 				/>
 			);
+		case "object":
+			return <></>;
 		default:
 			return (
 				<Input
