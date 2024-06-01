@@ -12,6 +12,7 @@ import { z } from "zod";
 import { getInventoryTemplates } from "@server/utils/getInventoryTemplates";
 import type { shipMap } from "@server/components/shipMap";
 import type { NodeFlag } from "@server/classes/Plugins/Ship/Deck";
+import { randomFromList } from "@server/utils/randomFromList";
 
 type ShipMapDeckNode = Zod.infer<typeof shipMap>["deckNodes"][number];
 
@@ -353,7 +354,7 @@ export const cargoControl = t.router({
 				});
 			}
 		}),
-	addToRoom: t.procedure
+	setItemCountInRoom: t.procedure
 		.meta({
 			action: (ctx: DataContext) => {
 				const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
@@ -376,7 +377,152 @@ export const cargoControl = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
-			// TODO: IMPLEMENT ME
+			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
+			if (!ship) throw new Error("Ship not found.");
+
+			const room =
+				typeof input.roomId === "number"
+					? ship.components.shipMap?.deckNodes.find(
+							(node) => node.id === input.roomId,
+					  )
+					: randomFromList(getRoomByFlag(ship, "cargo"));
+
+			if (!room) throw new Error("Room not found.");
+
+			const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
+			const inventoryItem =
+				input.item || randomFromList(Object.keys(inventoryTemplates));
+
+			if (!inventoryTemplates[inventoryItem])
+				throw new Error("Inventory item not found.");
+
+			if (!room.contents[inventoryItem])
+				room.contents[inventoryItem] = { count: 0, temperature: 295.37 };
+
+			room.contents[inventoryItem].count = input.count;
+
+			pubsub.publish.cargoControl.rooms({
+				shipId: ship.id,
+			});
+		}),
+
+	addItemToRoom: t.procedure
+		.meta({
+			action: (ctx: DataContext) => {
+				const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
+				const items = Object.keys(inventoryTemplates);
+				return {
+					item: {
+						name: "Inventory Items",
+						type: "select",
+						values: items,
+					},
+				};
+			},
+		})
+		.input(
+			z.object({
+				shipId: z.number(),
+				roomId: z.number().optional(),
+				item: z.string().optional(),
+				count: z.number(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
+			if (!ship) throw new Error("Ship not found.");
+
+			const room =
+				typeof input.roomId === "number"
+					? ship.components.shipMap?.deckNodes.find(
+							(node) => node.id === input.roomId,
+					  )
+					: randomFromList(getRoomByFlag(ship, "cargo"));
+
+			if (!room) throw new Error("Room not found.");
+
+			const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
+			const inventoryItem =
+				input.item || randomFromList(Object.keys(inventoryTemplates));
+
+			if (!inventoryTemplates[inventoryItem])
+				throw new Error("Inventory item not found.");
+
+			if (!room.contents[inventoryItem])
+				room.contents[inventoryItem] = { count: 0, temperature: 295.37 };
+
+			room.contents[inventoryItem].count += input.count;
+
+			pubsub.publish.cargoControl.rooms({
+				shipId: ship.id,
+			});
+		}),
+	removeItemFromRoom: t.procedure
+		.meta({
+			action: (ctx: DataContext) => {
+				const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
+				const items = Object.keys(inventoryTemplates);
+				return {
+					item: {
+						name: "Inventory Items",
+						type: "select",
+						values: items,
+					},
+				};
+			},
+		})
+		.input(
+			z.object({
+				shipId: z.number(),
+				roomId: z.number(),
+				item: z.string(),
+				count: z.number(),
+			}),
+		)
+
+		.send(({ ctx, input }) => {
+			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
+			if (!ship) throw new Error("Ship not found.");
+
+			const room = ship.components.shipMap?.deckNodes.find(
+				(node) => node.id === input.roomId,
+			);
+			if (!room) throw new Error("Room not found.");
+
+			if (!room.contents[input.item])
+				throw new Error("Item not found in room.");
+
+			room.contents[input.item].count -= input.count;
+			if (room.contents[input.item].count <= 0) {
+				delete room.contents[input.item];
+			}
+
+			pubsub.publish.cargoControl.rooms({
+				shipId: ship.id,
+			});
+		}),
+	emptyRoomInventory: t.procedure
+		.meta({ action: true })
+		.input(
+			z.object({
+				shipId: z.number(),
+				roomId: z.number(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
+			if (!ship) throw new Error("Ship not found.");
+
+			const room = ship.components.shipMap?.deckNodes.find(
+				(node) => node.id === input.roomId,
+			);
+			if (!room) throw new Error("Room not found.");
+
+			room.contents = {};
+
+			pubsub.publish.cargoControl.rooms({
+				shipId: ship.id,
+			});
 		}),
 });
 
