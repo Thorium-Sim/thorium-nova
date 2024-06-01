@@ -353,6 +353,31 @@ export const cargoControl = t.router({
 				});
 			}
 		}),
+	addToRoom: t.procedure
+		.meta({
+			action: (ctx: DataContext) => {
+				const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
+				const items = Object.keys(inventoryTemplates);
+				return {
+					item: {
+						name: "Inventory Items",
+						type: "select",
+						values: items,
+					},
+				};
+			},
+		})
+		.input(
+			z.object({
+				shipId: z.number(),
+				roomId: z.number().optional(),
+				item: z.string().optional(),
+				count: z.number(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			// TODO: IMPLEMENT ME
+		}),
 });
 
 export function calculateCargoUsed(

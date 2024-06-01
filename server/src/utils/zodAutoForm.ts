@@ -186,39 +186,37 @@ export type InputTypes =
 export function getInputType<T extends keyof typeof ZOD_COMPARISONS>(
 	item: {
 		key: string;
-		itemName: string;
-		zodBaseType: any;
-		baseValues: any;
+		name: string;
+		type: any;
+		values: any;
 	},
 	comparison: (typeof ZOD_COMPARISONS)[T][number] | null,
 ): InputTypes {
 	if (item.key === "tags") return "tags";
-	if (!item.zodBaseType) return "text";
-	if (item.zodBaseType === "ZodArray") {
+	if (!item.type) return "text";
+	if (item.type === "ZodArray") {
 		if (comparison === "contains") return "text";
 		return "number";
 	}
-	if (item.zodBaseType === "ZodEnum") {
+	if (item.type === "ZodEnum" || item.type === "select") {
 		return "select";
 	}
-	if (item.zodBaseType === "ZodObject") {
+	if (item.type === "ZodObject") {
 		return "object";
 	}
-	if (item.zodBaseType in DEFAULT_ZOD_HANDLERS) {
-		return DEFAULT_ZOD_HANDLERS[
-			item.zodBaseType as keyof typeof DEFAULT_ZOD_HANDLERS
-		];
+	if (item.type in DEFAULT_ZOD_HANDLERS) {
+		return DEFAULT_ZOD_HANDLERS[item.type as keyof typeof DEFAULT_ZOD_HANDLERS];
 	}
 	return "text";
 }
 
 type ParsedSchema = {
-	zodBaseType: string;
-	itemName: string;
+	type: string;
+	name: string;
 	key: string;
 	isRequired: boolean;
-	zodInputProps: React.InputHTMLAttributes<HTMLInputElement>;
-	baseValues: any;
+	inputProps: React.InputHTMLAttributes<HTMLInputElement>;
+	values: any;
 	isNested: boolean;
 	path: string;
 }[];
@@ -230,8 +228,8 @@ export function parseSchema(schema: any, nestedName?: string): ParsedSchema {
 	return Object.keys(shape).flatMap((name) => {
 		let output: ParsedSchema = [];
 		const item = shape[name] as z.ZodAny;
-		const zodBaseType = getBaseType(item);
-		if (zodBaseType === "ZodObject") {
+		const type = getBaseType(item);
+		if (type === "ZodObject") {
 			const objectSchema = getObjectFormSchema(
 				item as unknown as ZodObjectOrWrapped,
 			);
@@ -241,21 +239,21 @@ export function parseSchema(schema: any, nestedName?: string): ParsedSchema {
 
 		const key = `${nestedName ? `${nestedName}.` : ""}${name}`;
 
-		const baseValues = (getBaseSchema(item) as unknown as z.ZodEnum<any>)._def
+		const values = (getBaseSchema(item) as unknown as z.ZodEnum<any>)._def
 			.values;
 
 		const fieldConfigItem = fieldConfig?.[name] ?? {};
-		const zodInputProps = zodToHtmlInputProps(item);
+		const inputProps = zodToHtmlInputProps(item);
 		const isRequired =
-			zodInputProps.required ?? fieldConfigItem.inputProps?.required ?? false;
+			inputProps.required ?? fieldConfigItem.inputProps?.required ?? false;
 
 		output.unshift({
-			zodBaseType,
-			itemName,
+			type: type,
+			name: itemName,
 			key,
 			isRequired,
-			zodInputProps,
-			baseValues,
+			inputProps,
+			values,
 			isNested: !!nestedName,
 			path: nestedName || "",
 		});

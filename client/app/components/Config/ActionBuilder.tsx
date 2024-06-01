@@ -137,9 +137,6 @@ export function ActionBuilder() {
 				<ActionInput
 					key={i}
 					action={action}
-					input={
-						availableActions.find((a) => a.action === action.action)?.input
-					}
 					dispatch={dispatch}
 					path={`${i}`}
 				/>
@@ -235,15 +232,20 @@ export function ActionCombobox({
 
 export function ActionInput({
 	action,
-	input,
 	dispatch,
 	path,
+	input,
 }: {
 	action: ActionState;
-	input: any;
 	dispatch: React.Dispatch<ActionAction>;
 	path: string;
+	input?: any;
 }) {
+	const [availableActions] = q.thorium.actions.useNetRequest();
+	const actionDef = availableActions.find((a) => a.action === action.action);
+	input = input || actionDef?.input;
+	const overrides = actionDef?.actionOverrides || {};
+
 	const actionSchema = action
 		? // biome-ignore lint/security/noGlobalEval:
 		  parseSchema(eval(parseJsonSchema(input)))
@@ -263,11 +265,12 @@ export function ActionInput({
 			item.key.includes(`${queryInput}.`),
 		);
 		if (hasQueryInputParent) continue;
+
 		inputs.push(
 			<ValueInput
 				key={item.key}
 				value={value}
-				item={item}
+				item={{ ...item, ...overrides[item.key] }}
 				dispatch={dispatch}
 				path={path}
 			/>,

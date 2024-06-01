@@ -172,9 +172,8 @@ export function QueryComponent({
 						  )
 						: null;
 					const comparison =
-						ZOD_COMPARISONS[
-							item?.zodBaseType as keyof typeof ZOD_COMPARISONS
-						]?.[0] || null;
+						ZOD_COMPARISONS[item?.type as keyof typeof ZOD_COMPARISONS]?.[0] ||
+						null;
 
 					dispatch({ type: "property", path, value, comparison });
 				}}
@@ -184,7 +183,7 @@ export function QueryComponent({
 			property &&
 			!["isPresent", "isNotPresent"].includes(property) ? (
 				<ComparisonSelect
-					baseType={item?.zodBaseType as keyof typeof ZOD_COMPARISONS}
+					baseType={item?.type as keyof typeof ZOD_COMPARISONS}
 					comparison={comparison}
 					setComparison={(value: string | null) => {
 						dispatch({ type: "comparison", path, value });
@@ -194,7 +193,7 @@ export function QueryComponent({
 			{!isSelect &&
 			property &&
 			comparison &&
-			item?.zodBaseType !== "ZodBoolean" &&
+			item?.type !== "ZodBoolean" &&
 			item ? (
 				<>
 					<ValueInput
@@ -234,10 +233,10 @@ export function ValueInput({
 	value: string | ValueQuery | undefined;
 	item: {
 		key: string;
-		itemName: string;
-		zodBaseType: any;
-		baseValues: any;
-		zodInputProps: React.InputHTMLAttributes<HTMLInputElement>;
+		name: string;
+		type: any;
+		values: any;
+		inputProps: React.InputHTMLAttributes<HTMLInputElement>;
 		isNested: boolean;
 	};
 	dispatch: React.Dispatch<QueryReducerAction>;
@@ -249,7 +248,7 @@ export function ValueInput({
 	if (item.key.endsWith("voice")) {
 		return (
 			<div className={item.isNested ? "value-input-is-nested" : ""}>
-				<label>{item.itemName}</label>
+				<label>{item.name}</label>
 				<PropertyInput
 					inputType="select"
 					inputValues={voices}
@@ -261,7 +260,7 @@ export function ValueInput({
 							value,
 						})
 					}
-					label={item.itemName}
+					label={item.name}
 					labelHidden
 				/>
 			</div>
@@ -280,12 +279,12 @@ export function ValueInput({
 			)}
 		>
 			<div className="flex-1">
-				{queryInput ? null : <label>{item.itemName}</label>}
+				{queryInput ? null : <label>{item.name}</label>}
 				<PropertyInput
 					inputType={getInputType(item, "=")}
-					label={item.itemName}
+					label={item.name}
 					labelHidden
-					inputValues={item.baseValues}
+					inputValues={item.values}
 					setValue={(value) =>
 						dispatch({
 							type: "value",
@@ -294,7 +293,7 @@ export function ValueInput({
 						})
 					}
 					value={value}
-					{...item.zodInputProps}
+					{...item.inputProps}
 				/>
 			</div>
 			<Tooltip content="Use entity query value">
@@ -329,7 +328,7 @@ export function ValueInput({
 	) : typeof value === "object" ? (
 		<div className={item.isNested ? "value-input-is-nested" : ""}>
 			<div className="flex gap-2">
-				<label>{item.itemName}</label>
+				<label>{item.name}</label>
 
 				<Tooltip content="Use text value">
 					<button
@@ -535,7 +534,7 @@ function PropertyCombobox({
 				"isPresent",
 				"isNotPresent",
 				...parseSchema(schemaWithoutDefault(component)).map((item) =>
-					ZOD_COMPARISONS[item.zodBaseType as keyof typeof ZOD_COMPARISONS]
+					ZOD_COMPARISONS[item.type as keyof typeof ZOD_COMPARISONS]
 						? item.key
 						: "",
 				),
