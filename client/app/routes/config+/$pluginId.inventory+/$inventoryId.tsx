@@ -321,6 +321,7 @@ export default function InventoryLayout() {
 																	) || null
 																}
 																setSelected={(value) => {
+																	if (Array.isArray(value)) return;
 																	updateValue(value.id);
 																}}
 															/>

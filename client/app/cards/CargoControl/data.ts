@@ -9,10 +9,18 @@ import {
 	createShipMapGraph,
 } from "@server/utils/shipMapPathfinder";
 import { z } from "zod";
-import { getInventoryTemplates } from "@server/utils/getInventoryTemplates";
+import {
+	getInventoryTemplates,
+	getPluginInventoryTemplates,
+} from "@server/utils/getInventoryTemplates";
 import type { shipMap } from "@server/components/shipMap";
-import type { NodeFlag } from "@server/classes/Plugins/Ship/Deck";
+import {
+	nodeFlags,
+	nodeFlagsSchema,
+	type NodeFlag,
+} from "@server/classes/Plugins/Ship/Deck";
 import { randomFromList } from "@server/utils/randomFromList";
+import { ShipSystemTypes } from "@server/classes/Plugins/ShipSystems/shipSystemTypes";
 
 type ShipMapDeckNode = Zod.infer<typeof shipMap>["deckNodes"][number];
 
@@ -365,13 +373,26 @@ export const cargoControl = t.router({
 						type: "select",
 						values: items,
 					},
+					flags: {
+						name: "Filter Room By Flags",
+						type: "select",
+						inputProps: { multiple: true },
+						values: nodeFlags,
+					},
+					systems: {
+						name: "Filter Room By Systems",
+						type: "select",
+						inputProps: { multiple: true },
+						values: Object.keys(ShipSystemTypes),
+					},
 				};
 			},
 		})
 		.input(
 			z.object({
 				shipId: z.number(),
-				roomId: z.number().optional(),
+				flags: nodeFlagsSchema.array().optional(),
+				systems: z.array(z.string()).optional(),
 				item: z.string().optional(),
 				count: z.number(),
 			}),
@@ -380,14 +401,7 @@ export const cargoControl = t.router({
 			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
 			if (!ship) throw new Error("Ship not found.");
 
-			const room =
-				typeof input.roomId === "number"
-					? ship.components.shipMap?.deckNodes.find(
-							(node) => node.id === input.roomId,
-					  )
-					: randomFromList(getRoomByFlag(ship, "cargo"));
-
-			if (!room) throw new Error("Room not found.");
+			const room = getRoomFromFlagsAndSystems(ship, input.flags, input.systems);
 
 			const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
 			const inventoryItem =
@@ -413,9 +427,21 @@ export const cargoControl = t.router({
 				const items = Object.keys(inventoryTemplates);
 				return {
 					item: {
-						name: "Inventory Items",
+						name: "Inventory Item",
 						type: "select",
 						values: items,
+					},
+					flags: {
+						name: "Filter Room By Flags",
+						type: "select",
+						inputProps: { multiple: true },
+						values: nodeFlags,
+					},
+					systems: {
+						name: "Filter Room By Systems",
+						type: "select",
+						inputProps: { multiple: true },
+						values: Object.keys(ShipSystemTypes),
 					},
 				};
 			},
@@ -423,7 +449,8 @@ export const cargoControl = t.router({
 		.input(
 			z.object({
 				shipId: z.number(),
-				roomId: z.number().optional(),
+				flags: nodeFlagsSchema.array().optional(),
+				systems: z.array(z.string()).optional(),
 				item: z.string().optional(),
 				count: z.number(),
 			}),
@@ -432,14 +459,7 @@ export const cargoControl = t.router({
 			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
 			if (!ship) throw new Error("Ship not found.");
 
-			const room =
-				typeof input.roomId === "number"
-					? ship.components.shipMap?.deckNodes.find(
-							(node) => node.id === input.roomId,
-					  )
-					: randomFromList(getRoomByFlag(ship, "cargo"));
-
-			if (!room) throw new Error("Room not found.");
+			const room = getRoomFromFlagsAndSystems(ship, input.flags, input.systems);
 
 			const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
 			const inventoryItem =
@@ -460,13 +480,24 @@ export const cargoControl = t.router({
 	removeItemFromRoom: t.procedure
 		.meta({
 			action: (ctx: DataContext) => {
-				const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
-				const items = Object.keys(inventoryTemplates);
+				const inventoryTemplates = getPluginInventoryTemplates(ctx);
 				return {
 					item: {
 						name: "Inventory Items",
 						type: "select",
-						values: items,
+						values: inventoryTemplates,
+					},
+					flags: {
+						name: "Filter Room By Flags",
+						type: "select",
+						inputProps: { multiple: true },
+						values: nodeFlags,
+					},
+					systems: {
+						name: "Filter Room By Systems",
+						type: "select",
+						inputProps: { multiple: true },
+						values: Object.keys(ShipSystemTypes),
 					},
 				};
 			},
@@ -474,7 +505,8 @@ export const cargoControl = t.router({
 		.input(
 			z.object({
 				shipId: z.number(),
-				roomId: z.number(),
+				flags: nodeFlagsSchema.array().optional(),
+				systems: z.array(z.string()).optional(),
 				item: z.string(),
 				count: z.number(),
 			}),
@@ -484,10 +516,7 @@ export const cargoControl = t.router({
 			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
 			if (!ship) throw new Error("Ship not found.");
 
-			const room = ship.components.shipMap?.deckNodes.find(
-				(node) => node.id === input.roomId,
-			);
-			if (!room) throw new Error("Room not found.");
+			const room = getRoomFromFlagsAndSystems(ship, input.flags, input.systems);
 
 			if (!room.contents[input.item])
 				throw new Error("Item not found in room.");
@@ -502,21 +531,34 @@ export const cargoControl = t.router({
 			});
 		}),
 	emptyRoomInventory: t.procedure
-		.meta({ action: true })
+		.meta({
+			action: () => ({
+				flags: {
+					name: "Filter Room By Flags",
+					type: "select",
+					inputProps: { multiple: true },
+					values: nodeFlags,
+				},
+				systems: {
+					name: "Filter Room By Systems",
+					type: "select",
+					inputProps: { multiple: true },
+					values: Object.keys(ShipSystemTypes),
+				},
+			}),
+		})
 		.input(
 			z.object({
 				shipId: z.number(),
-				roomId: z.number(),
+				flags: nodeFlagsSchema.array().optional(),
+				systems: z.array(z.string()).optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
 			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
 			if (!ship) throw new Error("Ship not found.");
 
-			const room = ship.components.shipMap?.deckNodes.find(
-				(node) => node.id === input.roomId,
-			);
-			if (!room) throw new Error("Room not found.");
+			const room = getRoomFromFlagsAndSystems(ship, input.flags, input.systems);
 
 			room.contents = {};
 
@@ -605,4 +647,29 @@ export function getRoomBySystem(ship: Entity, system: string) {
 	const rooms = getCargoRooms(ship);
 
 	return rooms.filter((room) => room.systems?.includes(system));
+}
+
+function getRoomFromFlagsAndSystems(
+	ship: Entity,
+	flags?: NodeFlag[],
+	systems?: string[],
+) {
+	const rooms = getCargoRooms(ship).filter((room) => {
+		if (flags) {
+			for (const flag of flags) {
+				if (!room.flags?.includes(flag)) return false;
+			}
+		}
+		if (systems) {
+			for (const system of systems) {
+				if (!room.systems?.includes(system)) return false;
+			}
+		}
+		return true;
+	});
+	const room = randomFromList(rooms);
+
+	if (!room) throw new Error("Room not found.");
+
+	return room;
 }

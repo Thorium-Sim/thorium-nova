@@ -439,6 +439,7 @@ export function GamepadConfig({
 					items={gamepads.map((g) => ({ id: g, label: g }))}
 					selected={gamepad}
 					setSelected={(val) => {
+						if (Array.isArray(val)) return;
 						setGamepad(val);
 						setAssigningKey(null);
 					}}

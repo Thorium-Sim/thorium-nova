@@ -1,4 +1,4 @@
-import { Dispatch, Fragment, SetStateAction, useState } from "react";
+import { Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { Icon } from "./Icon";
 
@@ -8,7 +8,7 @@ function classNames(...classes: string[]) {
 
 export default function Select<
 	I extends string | number,
-	T extends { id: I; label: string },
+	Multiple extends boolean = false,
 >({
 	label,
 	labelHidden,
@@ -19,19 +19,29 @@ export default function Select<
 	size = "md",
 	className,
 	placeholder,
+	multiple,
 }: {
 	label: string;
 	labelHidden?: boolean;
 	disabled?: boolean;
-	items: T[];
-	selected: T | null;
-	setSelected: (value: T) => void;
+	items: { id: I; label: string }[];
+	selected: I | I[] | null;
+	setSelected: (value: I | I[]) => void;
 	size?: "xs" | "sm" | "md";
 	className?: string;
 	placeholder?: string;
+	multiple?: boolean;
 }) {
+	const selectedItem = items.filter((item) =>
+		Array.isArray(selected) ? selected.includes(item.id) : item.id === selected,
+	);
 	return (
-		<Listbox value={selected} onChange={setSelected} disabled={disabled}>
+		<Listbox
+			value={selected}
+			onChange={setSelected}
+			disabled={disabled}
+			multiple={multiple}
+		>
 			{({ open }) => (
 				<>
 					<Listbox.Label
@@ -55,7 +65,15 @@ export default function Select<
 							)}
 						>
 							<span className="block truncate">
-								{selected ? selected.label : placeholder || "Choose One"}
+								{selectedItem.length >= 3
+									? `${selectedItem.length} Selected`
+									: selectedItem.length > 0
+									  ? selectedItem.map((i) => i.label).join(" | ")
+									  : placeholder
+										  ? placeholder
+										  : multiple
+											  ? "Choose One or More"
+											  : "Choose One"}
 							</span>
 							<span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
 								<Icon
@@ -83,7 +101,7 @@ export default function Select<
 												"cursor-default select-none relative py-2 pl-3 pr-9 min-w-fit",
 											)
 										}
-										value={item}
+										value={item.id}
 										title={item.label}
 									>
 										{({ selected, active }) => (

@@ -262,6 +262,7 @@ export function ValueInput({
 					}
 					label={item.name}
 					labelHidden
+					{...item.inputProps}
 				/>
 			</div>
 		);
@@ -390,17 +391,15 @@ export function ValueInput({
 						size="xs"
 						label="Which entities to select?"
 						items={matchItems}
-						selected={
-							matchItems.find((m) => m.id === value.select.matchType) || null
-						}
+						selected={value.select.matchType || null}
 						setSelected={(val) => {
-							if (!val) return;
+							if (!val || Array.isArray(val)) return;
 							dispatch({
 								type: "matchType",
 								path: queryInput
 									? `${path}.value.select`
 									: `${path}.values.${item.key}.select`,
-								value: val.id as any,
+								value: val as any,
 							});
 						}}
 					/>
@@ -438,9 +437,11 @@ function ComparisonSelect({
 			label="Comparison"
 			labelHidden
 			items={items}
-			selected={items.find((i) => i.id === comparison) || null}
+			selected={comparison}
 			setSelected={(value) => {
-				setComparison(value ? value.id : null);
+				if (Array.isArray(value)) return;
+
+				setComparison(value ? value : null);
 			}}
 		/>
 	);
@@ -607,6 +608,7 @@ export function PropertyInput({
 	setValue,
 	label,
 	labelHidden = true,
+	multiple,
 }: {
 	inputType: InputTypes;
 	inputValues?: string[];
@@ -614,6 +616,7 @@ export function PropertyInput({
 	setValue: (value: any) => void;
 	label: string;
 	labelHidden?: boolean;
+	multiple?: boolean;
 }) {
 	switch (inputType) {
 		case "number":
@@ -644,10 +647,11 @@ export function PropertyInput({
 					label={label}
 					labelHidden={labelHidden}
 					items={inputValues?.map((i) => ({ id: i, label: i })) || []}
-					selected={{ id: value, label: value } || null}
+					selected={value}
 					setSelected={(newValue) => {
-						setValue(newValue ? newValue.id : null);
+						setValue(newValue);
 					}}
+					multiple={multiple}
 				/>
 			);
 		case "date":

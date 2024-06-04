@@ -245,7 +245,6 @@ export function ActionInput({
 	const actionDef = availableActions.find((a) => a.action === action.action);
 	input = input || actionDef?.input;
 	const overrides = actionDef?.actionOverrides || {};
-
 	const actionSchema = action
 		? // biome-ignore lint/security/noGlobalEval:
 		  parseSchema(eval(parseJsonSchema(input)))
@@ -256,7 +255,7 @@ export function ActionInput({
 	for (const item of actionSchema) {
 		const value = item.key
 			.split(".")
-			.reduce((acc: any, key) => acc[key], action.values);
+			.reduce((acc: any, key) => acc?.[key], action.values);
 
 		if (value && typeof value === "object" && "query" in value) {
 			queryInputs.push(item.key);
@@ -265,7 +264,6 @@ export function ActionInput({
 			item.key.includes(`${queryInput}.`),
 		);
 		if (hasQueryInputParent) continue;
-
 		inputs.push(
 			<ValueInput
 				key={item.key}

@@ -181,7 +181,8 @@ export type InputTypes =
 	| "select"
 	| "checkbox"
 	| "date"
-	| "tags";
+	| "tags"
+	| "room";
 
 export function getInputType<T extends keyof typeof ZOD_COMPARISONS>(
 	item: {
@@ -201,9 +202,10 @@ export function getInputType<T extends keyof typeof ZOD_COMPARISONS>(
 	if (item.type === "ZodEnum" || item.type === "select") {
 		return "select";
 	}
-	if (item.type === "ZodObject") {
+	if (item.type === "ZodObject" || item.type === "object") {
 		return "object";
 	}
+	if (item.type === "room") return "room";
 	if (item.type in DEFAULT_ZOD_HANDLERS) {
 		return DEFAULT_ZOD_HANDLERS[item.type as keyof typeof DEFAULT_ZOD_HANDLERS];
 	}

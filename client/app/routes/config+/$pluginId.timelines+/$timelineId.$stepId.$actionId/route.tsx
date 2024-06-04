@@ -417,6 +417,7 @@ function TriggerCondition({
 										  : null
 								}
 								setSelected={(value) => {
+									if (Array.isArray(value)) return;
 									dispatch({
 										type: "value",
 										path: `values.conditions.${index}.matchCount`,
@@ -522,6 +523,7 @@ function TriggerCondition({
 										  : null
 								}
 								setSelected={(value) => {
+									if (Array.isArray(value)) return;
 									dispatch({
 										type: "value",
 										path: `values.conditions.${index}.condition`,
@@ -565,6 +567,7 @@ function TriggerCondition({
 						items={mappedEvents}
 						selected={selectedEvent || null}
 						setSelected={(value) => {
+							if (Array.isArray(value)) return;
 							dispatch({
 								type: "value",
 								path: `values.conditions.${index}.event`,
