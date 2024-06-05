@@ -83,8 +83,8 @@ function ShipControls() {
 					<Tooltip content="Patrol">
 						<Button
 							onClick={() =>
-								q.starmapCore.setBehavior.netSend({
-									ships: selectedObjectIds,
+								q.starmapCore.setShipsBehavior.netSend({
+									shipIds: selectedObjectIds,
 									behavior: "patrol",
 								})
 							}
@@ -98,8 +98,8 @@ function ShipControls() {
 					<Tooltip content="Wander">
 						<Button
 							onClick={() =>
-								q.starmapCore.setBehavior.netSend({
-									ships: selectedObjectIds,
+								q.starmapCore.setShipsBehavior.netSend({
+									shipIds: selectedObjectIds,
 									behavior: "wander",
 								})
 							}
@@ -113,8 +113,8 @@ function ShipControls() {
 					<Tooltip content="Hold Position">
 						<Button
 							onClick={() =>
-								q.starmapCore.setBehavior.netSend({
-									ships: selectedObjectIds,
+								q.starmapCore.setShipsBehavior.netSend({
+									shipIds: selectedObjectIds,
 									behavior: "hold",
 								})
 							}
@@ -128,8 +128,8 @@ function ShipControls() {
 					<Tooltip content="Attack">
 						<Button
 							onClick={() =>
-								q.starmapCore.setBehavior.netSend({
-									ships: selectedObjectIds,
+								q.starmapCore.setShipsBehavior.netSend({
+									shipIds: selectedObjectIds,
 									behavior: "attack",
 								})
 							}
@@ -143,8 +143,8 @@ function ShipControls() {
 					<Tooltip content="Follow & Defend">
 						<Button
 							onClick={() =>
-								q.starmapCore.setBehavior.netSend({
-									ships: selectedObjectIds,
+								q.starmapCore.setShipsBehavior.netSend({
+									shipIds: selectedObjectIds,
 									behavior: "defend",
 								})
 							}

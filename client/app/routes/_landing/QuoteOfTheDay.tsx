@@ -308,6 +308,7 @@ const quotes = [
 	// C.S. Lewis
 	"If I find in myself a desire which no experience in this world can satisfy, the most probable explanation is that I was made for another world.",
 	"A children's story that can only be enjoyed by children is not a good children's story in the slightest.",
+	"The longest way round is the shortest way home.",
 	// E.B. White
 	"I arise in the morning torn between a desire to improve the world and a desire to enjoy the world. This makes it hard to plan the day.",
 	// Kurt Vonnegut
@@ -323,6 +324,12 @@ const quotes = [
 	"I can have oodles of charm when I want to.",
 	// Cully
 	"I’m building on the shoulders of giants and those giants are my own previous ideas.",
+	// Random Tumblr
+	"Don't chase your dreams! Humans are persistence hunters. Follow your dreams at a sustainable pace until they get tired and lie down.",
+	// Joseph Campbell
+	"If you can see your path, laid out in front of you step by step, you know it's not your path. Your own path you make with every step you take. That's why it's your path.",
+	// Antonio Machado
+	"Traveler, there is no path. Paths are made by walking.",
 ];
 
 const QuoteOfTheDay = () => {

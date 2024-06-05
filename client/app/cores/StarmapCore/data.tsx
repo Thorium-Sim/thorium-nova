@@ -394,15 +394,19 @@ export const starmapCore = t.router({
 				pubsub.publish.starmapCore.autopilot({ systemId: id });
 			});
 		}),
-	setBehavior: t.procedure
+	setShipsBehavior: t.procedure
+		.meta({ action: true })
 		.input(
 			z.object({
-				ships: z.number().array(),
+				shipIds: z.union([z.number().array(), z.number()]),
 				behavior,
 			}),
 		)
 		.send(({ ctx, input }) => {
-			input.ships.forEach((shipId) => {
+			const ids = Array.isArray(input.shipIds)
+				? input.shipIds
+				: [input.shipIds];
+			ids.forEach((shipId) => {
 				const entity = ctx.flight?.ecs.getEntityById(shipId);
 				entity?.updateComponent("shipBehavior", {
 					objective: input.behavior,
