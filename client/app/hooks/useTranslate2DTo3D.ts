@@ -1,12 +1,14 @@
-import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect } from "react";
+import { useThree } from "@react-three/fiber";
 import { Plane, Raycaster, Vector2, Vector3 } from "three";
 
 const raycaster = new Raycaster();
 export function useTranslate2DTo3D() {
 	const { camera, size } = useThree();
-	const planeY = new Plane(new Vector3(0, 1, 0), 0);
-	return (x: number, y: number) => {
+	return (
+		x: number,
+		y: number,
+		planeY = new Plane(new Vector3(0, 1, 0), 0),
+	) => {
 		const mv = new Vector2(
 			((x - size.left) / size.width) * 2 - 1,
 			-((y - size.top) / size.height) * 2 + 1,

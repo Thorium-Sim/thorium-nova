@@ -39,12 +39,12 @@ const ACTION = CameraControlsClass.ACTION;
 // 10% further than Neptune's orbit
 export const SOLAR_SYSTEM_MAX_DISTANCE: Kilometer = 4_000_000_000 * 1.1;
 const CELLS = Math.ceil(SOLAR_SYSTEM_MAX_DISTANCE / SECTOR_GRID_SIZE);
-function HabitableZone() {
+function HabitableZone({ systemId }: { systemId: string }) {
 	const [pluginId, solarSystemId] = useSystemIds();
 	const [{ habitableZoneInner = 0, habitableZoneOuter = 3, stars }] =
 		q.plugin.starmap.get.useNetRequest({
 			pluginId,
-			solarSystemId,
+			solarSystemId: solarSystemId || systemId,
 		});
 	const scaleUnit = astronomicalUnitToKilometer(1);
 	return stars.length > 0 ? (
@@ -57,11 +57,13 @@ function HabitableZone() {
 }
 
 export function SolarSystemMap({
+	systemId,
 	skyboxKey = "Basic",
 	children,
 	minDistance = 1,
 	maxDistance = SOLAR_SYSTEM_MAX_DISTANCE,
 }: {
+	systemId: string;
 	skyboxKey: string;
 	children?: React.ReactNode;
 	minDistance?: number;
@@ -104,7 +106,7 @@ export function SolarSystemMap({
 	const isViewscreen = viewingMode === "viewscreen";
 	return (
 		<Suspense fallback={null}>
-			{!pluginId ? null : <HabitableZone />}
+			{!pluginId ? null : <HabitableZone systemId={systemId} />}
 			{!isViewscreen && (
 				<>
 					<CameraControls

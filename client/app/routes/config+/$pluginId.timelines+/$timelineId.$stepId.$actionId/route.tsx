@@ -345,6 +345,15 @@ function TriggerInput({
 	);
 }
 
+const itemsOptions = [
+	{
+		id: "0",
+		label: "0 Entities",
+	},
+	{ id: "1", label: "1 Entities" },
+	{ id: ">=1", label: ">= 1 Entities" },
+	{ id: "custom", label: "Custom" },
+];
 function TriggerCondition({
 	condition,
 	dispatch,
@@ -397,23 +406,12 @@ function TriggerCondition({
 							<Select
 								size="xs"
 								label="Trigger When Query Matches:"
-								items={[
-									{
-										id: "0",
-										label: "0 Entities",
-									},
-									{ id: "1", label: "1 Entities" },
-									{ id: ">=1", label: ">= 1 Entities" },
-									{ id: "custom", label: "Custom" },
-								]}
+								items={itemsOptions}
 								selected={
 									![null, "0", "1", ">=1"].includes(condition.matchCount)
-										? { id: "custom", label: "Custom" }
+										? "custom"
 										: condition.matchCount
-										  ? {
-													id: condition.matchCount?.toString(),
-													label: `${condition.matchCount?.toString()} Entities`,
-											  }
+										  ? condition.matchCount?.toString()
 										  : null
 								}
 								setSelected={(value) => {
@@ -423,11 +421,11 @@ function TriggerCondition({
 										path: `values.conditions.${index}.matchCount`,
 										value: !value
 											? null!
-											: value.id === "custom"
+											: value === "custom"
 											  ? "2"
-											  : value.id === ">=1"
+											  : value === ">=1"
 												  ? ">=1"
-												  : value.id,
+												  : value,
 									});
 								}}
 							/>
@@ -517,9 +515,9 @@ function TriggerCondition({
 								]}
 								selected={
 									condition.condition === "lessThan"
-										? { id: "lessThan", label: "Less Than" }
+										? "lessThan"
 										: condition.condition === "greaterThan"
-										  ? { id: "greaterThan", label: "Greater Than" }
+										  ? "greaterThan"
 										  : null
 								}
 								setSelected={(value) => {
@@ -527,7 +525,7 @@ function TriggerCondition({
 									dispatch({
 										type: "value",
 										path: `values.conditions.${index}.condition`,
-										value: value.id,
+										value,
 									});
 								}}
 							/>
@@ -565,13 +563,13 @@ function TriggerCondition({
 						size="xs"
 						label="Event"
 						items={mappedEvents}
-						selected={selectedEvent || null}
+						selected={selectedEvent?.id || null}
 						setSelected={(value) => {
 							if (Array.isArray(value)) return;
 							dispatch({
 								type: "value",
 								path: `values.conditions.${index}.event`,
-								value: value.id,
+								value,
 							});
 						}}
 					/>

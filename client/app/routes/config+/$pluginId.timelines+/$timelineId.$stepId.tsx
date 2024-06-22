@@ -48,10 +48,11 @@ export default function TimelineStep() {
 							e.stopPropagation();
 							e.preventDefault();
 							if (
-								await confirm(
+								e.shiftKey ||
+								(await confirm(
 									"Are you sure you want to delete this action?",
 									"This action will be gone forever.",
-								)
+								))
 							) {
 								const result =
 									await q.plugin.timeline.step.action.delete.netSend({

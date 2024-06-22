@@ -31,6 +31,7 @@ export function InterstellarMap({ children }: { children: React.ReactNode }) {
 	const cameraView = useStarmapStore((s) => s.cameraView);
 	const orbitControls = useRef<CameraControlsClass>(null);
 	const { camera } = useThree();
+	camera.userData.id = "interstellar-camera";
 	// biome-ignore lint/correctness/useExhaustiveDependencies:
 	useEffect(() => {
 		// Set the initial camera position
@@ -82,19 +83,17 @@ export function InterstellarMap({ children }: { children: React.ReactNode }) {
 						dollyToCursor={isStation}
 						dollySpeed={0.5}
 					/>
-					{isViewscreen ? null : (
-						<PolarGrid
-							rotation={[0, (2 * Math.PI) / 12, 0]}
-							args={[
-								lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE),
-								12,
-								20,
-								64,
-								0xffffff,
-								0xffffff,
-							]}
-						/>
-					)}
+					<PolarGrid
+						rotation={[0, (2 * Math.PI) / 12, 0]}
+						args={[
+							lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE),
+							12,
+							20,
+							64,
+							0xffffff,
+							0xffffff,
+						]}
+					/>
 				</>
 			)}
 			{children}

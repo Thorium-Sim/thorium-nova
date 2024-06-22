@@ -9,6 +9,7 @@ export type ActionOverrides = {
 	name?: string;
 	type?: string;
 	values?: string[];
+	helper?: string;
 };
 
 export const thorium = t.router({

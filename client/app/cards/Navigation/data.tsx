@@ -10,6 +10,8 @@ import {
 	getObjectOffsetPosition,
 	getObjectSystem,
 } from "@server/utils/position";
+import type { DataContext } from "@server/utils/types";
+import { defaultDropAnimationSideEffects } from "@dnd-kit/core";
 
 type Waypoint = {
 	id: number;
@@ -234,30 +236,49 @@ export const waypoints = t.router({
 			return waypoints || [];
 		}),
 	spawn: t.procedure
+		.meta({
+			action: (ctx: DataContext) => {
+				return {
+					position: {
+						name: "Position",
+						type: "starmapCoordinates",
+						helper:
+							"A specific point in space to place the waypoint. Use as an alternative to Waypoint Entity.",
+					},
+					entityId: {
+						name: "Waypoint Entity",
+						helper:
+							"The entity to attach the waypoint to. This option is preferred.",
+					},
+				};
+			},
+		})
 		.input(
-			z.union([
-				z.object({
-					systemId: z.number(),
-					position: z.object({
+			z.object({
+				shipId: z.number().optional(),
+
+				entityId: z.number().optional(),
+				position: z
+					.object({
+						parentId: z
+							.union([
+								z.number(),
+								z.object({ name: z.string(), pluginId: z.string() }),
+							])
+							.nullable(),
 						x: z.number(),
 						y: z.number(),
 						z: z.number(),
-					}),
-				}),
-				z.object({
-					systemId: z.null(),
-					position: z.object({
-						x: z.number(),
-						y: z.number(),
-						z: z.number(),
-					}),
-				}),
-				z.object({ entityId: z.number() }),
-			]),
+					})
+					.optional(),
+				tags: z.array(z.string()).optional(),
+			}),
 		)
 		.send(({ ctx, input }) => {
 			if (!ctx.flight) throw new Error("No flight in progress");
-			const ship = ctx.ship;
+			const ship = input.shipId
+				? ctx.flight.ecs.getEntityById(input.shipId)
+				: ctx.ship;
 			if (!ship) throw new Error("No ship selected.");
 			const shipId = ship.id;
 			let position = { x: 0, y: 0, z: 0 };
@@ -282,18 +303,40 @@ export const waypoints = t.router({
 						type: systemId ? "solar" : "interstellar",
 						parentId: systemId,
 					});
+					if (input.tags && input.tags.length > 0) {
+						maybeWaypoint.updateComponent("tags", {
+							tags: [
+								...(maybeWaypoint.components.tags?.tags || []),
+								...input.tags,
+							],
+						});
+					}
 					pubsub.publish.waypoints.all({
 						shipId,
 					});
 					// TODO July 30, 2022: It might be necessary to publish to make this appear on the Pilot or Viewscreen.
 					return maybeWaypoint;
 				}
-			} else if ("position" in input) {
+			} else if ("position" in input && input.position) {
 				// This waypoint is just being plopped at some random point in space.
 				position = input.position;
-				systemId = input.systemId;
+				const parentId = input.position.parentId;
+				if (parentId && typeof parentId === "object") {
+					// This waypoint is probably defined in a timeline action, so we need
+					// to find which system matches the name.
+					const solarSystems =
+						ctx.flight.ecs.componentCache.get("isSolarSystem") || [];
+					for (const entity of solarSystems) {
+						if (entity.components.identity?.name === parentId.name) {
+							systemId = entity.id;
+							break;
+						}
+					}
+				} else {
+					systemId = parentId;
+				}
 			} else {
-				throw new Error("Either position or objectId are required");
+				throw new Error("Either position or entityId are required");
 			}
 
 			const newWaypoint = new Entity();
@@ -330,6 +373,12 @@ export const waypoints = t.router({
 				type: systemId ? "solar" : "interstellar",
 			});
 
+			if (input.tags && input.tags.length > 0) {
+				newWaypoint.addComponent("tags", {
+					tags: input.tags,
+				});
+			}
+
 			ctx.flight.ecs.addEntity(newWaypoint);
 
 			pubsub.publish.waypoints.all({
@@ -339,6 +388,7 @@ export const waypoints = t.router({
 			return newWaypoint;
 		}),
 	delete: t.procedure
+		.meta({ action: true, event: true })
 		.input(z.object({ waypointId: z.number() }))
 		.send(({ ctx, input }) => {
 			if (!ctx.flight) throw new Error("No flight in progress");

@@ -4,8 +4,14 @@ import StarEntity from "@client/components/Starmap/Star";
 import { useSystemIds } from "@client/components/Starmap/useSystemIds";
 import { q } from "@client/context/AppContext";
 
-export default function SolarSystemWrapper() {
-	const [pluginId, solarSystemId] = useSystemIds() as [string, string];
+export default function SolarSystemWrapper({
+	systemId,
+	children,
+}: { systemId?: string; children?: React.ReactNode }) {
+	let [pluginId, solarSystemId] = useSystemIds() as [string, string];
+	if (systemId) {
+		solarSystemId = systemId;
+	}
 	const [systemData] = q.plugin.starmap.get.useNetRequest(
 		{
 			pluginId,
@@ -15,7 +21,7 @@ export default function SolarSystemWrapper() {
 	);
 
 	return (
-		<SolarSystemMap skyboxKey={systemData.skyboxKey}>
+		<SolarSystemMap skyboxKey={systemData.skyboxKey} systemId={solarSystemId}>
 			{systemData.stars.map((star) => (
 				<StarEntity key={star.name} star={{ id: star.name, ...star }} />
 			))}
@@ -30,6 +36,7 @@ export default function SolarSystemWrapper() {
 					}}
 				/>
 			))}
+			{children}
 		</SolarSystemMap>
 	);
 }

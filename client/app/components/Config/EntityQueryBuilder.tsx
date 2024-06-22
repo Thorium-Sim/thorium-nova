@@ -21,6 +21,9 @@ import type {
 import TagInput from "@thorium/ui/TagInput";
 import { Icon } from "@thorium/ui/Icon";
 import { cn } from "@client/utils/cn";
+import { useHover, useRole } from "@floating-ui/react";
+import { ZoomSliderComp } from "@client/cards/Navigation/MapControls";
+import { StarmapCoordinates } from "./StarmapCoordinates";
 
 type QueryReducerAction =
 	| { type: "add"; path?: string }
@@ -203,6 +206,9 @@ export function QueryComponent({
 						dispatch={dispatch}
 						queryInput
 					/>
+					{item.helper && (
+						<p className="text-xs text-gray-400">{item.helper}</p>
+					)}
 					{showDelete ? (
 						<RemoveButton onClick={() => dispatch({ type: "remove", path })} />
 					) : null}
@@ -236,6 +242,7 @@ export function ValueInput({
 		name: string;
 		type: any;
 		values: any;
+		helper?: string;
 		inputProps: React.InputHTMLAttributes<HTMLInputElement>;
 		isNested: boolean;
 	};
@@ -333,7 +340,7 @@ export function ValueInput({
 
 				<Tooltip content="Use text value">
 					<button
-						className="btn btn-xs btn-primary btn-outline"
+						className="btn btn-xs btn-warning btn-outline"
 						onClick={() => {
 							dispatch({
 								type: "value",
@@ -682,7 +689,12 @@ export function PropertyInput({
 			);
 		case "object":
 			return <></>;
+		case "starmapCoordinates":
+			return <StarmapCoordinates value={value} setValue={setValue} />;
 		default:
+			if (inputType !== "text") {
+				console.warn("Unknown input type", inputType);
+			}
 			return (
 				<Input
 					className="input-sm"

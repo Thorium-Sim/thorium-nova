@@ -361,10 +361,11 @@ export const starmapCore = t.router({
 			});
 		}),
 	setFollowShip: t.procedure
+		.meta({ action: true })
 		.input(
 			z.object({
 				objective: behavior,
-				ships: z.number().array(),
+				ships: z.union([z.number().array(), z.number()]),
 				objectId: z.number(),
 			}),
 		)
@@ -374,7 +375,9 @@ export const starmapCore = t.router({
 			const followedObject = ctx.flight?.ecs.getEntityById(input.objectId);
 			if (!followedObject) return;
 
-			for (const shipId of input.ships) {
+			for (const shipId of Array.isArray(input.ships)
+				? input.ships
+				: [input.ships]) {
 				const entity = ctx.flight?.ecs.getEntityById(shipId);
 				if (!entity) continue;
 
