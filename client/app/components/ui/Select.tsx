@@ -6,10 +6,7 @@ function classNames(...classes: string[]) {
 	return classes.filter(Boolean).join(" ");
 }
 
-export default function Select<
-	I extends string | number,
-	Multiple extends boolean = false,
->({
+export default function Select<I extends string | number>({
 	label,
 	labelHidden,
 	disabled,

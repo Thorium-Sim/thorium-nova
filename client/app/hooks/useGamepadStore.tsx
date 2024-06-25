@@ -388,10 +388,7 @@ export function GamepadConfig({
 	const gamepads = useGamepadStore((store) =>
 		store.gamepads.map((gamepad) => gamepad?.id).filter(filterNull),
 	);
-	const [gamepad, setGamepad] = useState<{
-		id: string | number;
-		label: string;
-	} | null>({ id: gamepads[0], label: gamepads[0] });
+	const [gamepad, setGamepad] = useState<string | null>(gamepads[0]);
 	const [assigningKey, setAssigningKey] = useState<GamepadKey | null>(null);
 
 	useEffect(() => {
@@ -414,7 +411,7 @@ export function GamepadConfig({
 					useGamepadStore.getState().gamepads[Number(diffGamepad)];
 				if (!gamepadObj) continue;
 				if (!assigningKey) continue;
-				if (gamepad?.id !== gamepadObj.id) continue;
+				if (gamepad !== gamepadObj.id) continue;
 				// Make sure the axis is actually being adjusted
 				if (Math.abs(newVal) > 0.5) {
 					const config: GamepadActionConfig = {
@@ -451,7 +448,7 @@ export function GamepadConfig({
 							key={key}
 							width={Math.max(...gamepadKeys.map((key) => key.length))}
 							keyData={key}
-							gamepad={gamepad?.id as string}
+							gamepad={gamepad}
 							assigningKey={assigningKey}
 							setAssigningKey={setAssigningKey}
 						/>
@@ -470,7 +467,7 @@ function GamepadAction({
 	width,
 }: {
 	keyData: GamepadKey;
-	gamepad: string | undefined;
+	gamepad: string | null;
 	assigningKey: GamepadKey | null;
 	setAssigningKey: Dispatch<SetStateAction<GamepadKey | null>>;
 	width: number;

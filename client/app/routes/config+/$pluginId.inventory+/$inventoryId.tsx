@@ -314,11 +314,8 @@ export default function InventoryLayout() {
 																label={capitalCase(config)}
 																items={items}
 																selected={
-																	items.find(
-																		(o) =>
-																			// @ts-expect-error Pain to type these literal keys
-																			o.id === item.flags[flagKey]?.[config],
-																	) || null
+																	// @ts-expect-error Pain to type these literal keys
+																	item.flags[flagKey]?.[config] || null
 																}
 																setSelected={(value) => {
 																	if (Array.isArray(value)) return;

@@ -481,7 +481,7 @@ export function ComponentDemo() {
 						{ id: 8, label: "Another Test" },
 						{ id: 9, label: "A third test" },
 					]}
-					selected={{ id: 1, label: "Test" }}
+					selected={null}
 					setSelected={() => {}}
 				/>
 			</div>
