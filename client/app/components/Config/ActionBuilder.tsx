@@ -265,16 +265,10 @@ export function ActionInput({
 		);
 		if (hasQueryInputParent) continue;
 		inputs.push(
-			<>
-				<ValueInput
-					key={item.key}
-					value={value}
-					item={item}
-					dispatch={dispatch}
-					path={path}
-				/>
+			<Fragment key={item.key}>
+				<ValueInput value={value} item={item} dispatch={dispatch} path={path} />
 				{item.helper && <p className="text-xs text-gray-400">{item.helper}</p>}
-			</>,
+			</Fragment>,
 		);
 	}
 

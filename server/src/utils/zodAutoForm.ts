@@ -184,7 +184,8 @@ export type InputTypes =
 	| "date"
 	| "tags"
 	| "room"
-	| "starmapCoordinates";
+	| "starmapCoordinates"
+	| "shipTemplate";
 
 export function getInputType<T extends keyof typeof ZOD_COMPARISONS>(
 	item: {
@@ -207,12 +208,11 @@ export function getInputType<T extends keyof typeof ZOD_COMPARISONS>(
 	if (item.type === "ZodObject" || item.type === "object") {
 		return "object";
 	}
-	if (item.type === "room") return "room";
 	if (item.type in DEFAULT_ZOD_HANDLERS) {
 		return DEFAULT_ZOD_HANDLERS[item.type as keyof typeof DEFAULT_ZOD_HANDLERS];
 	}
-	if (item.type === "starmapCoordinates") return "starmapCoordinates";
-	return "text";
+
+	return item.type as any;
 }
 
 function getItemFromShape(shape: any, name: string) {

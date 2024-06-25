@@ -9,6 +9,7 @@ export const starmap = t.router({
 	solarSystem,
 	star,
 	planet,
+	/** Returns all solar systems in a plugin */
 	all: t.procedure
 		.input(z.object({ pluginId: z.string() }))
 		.filter(pluginFilter)
@@ -21,7 +22,9 @@ export const starmap = t.router({
 			}));
 		}),
 	get: t.procedure
-		.input(z.object({ pluginId: z.string(), solarSystemId: z.string() }))
+		.input(
+			z.object({ pluginId: z.string(), solarSystemId: z.string().nullable() }),
+		)
 		.filter(
 			(
 				publish: { pluginId: string; solarSystemId: string } | null,
@@ -39,7 +42,6 @@ export const starmap = t.router({
 			const solarSystem = plugin.aspects.solarSystems.find(
 				(solarSystem) => solarSystem.name === input.solarSystemId,
 			);
-			if (!solarSystem) throw null;
 			return solarSystem;
 		}),
 });

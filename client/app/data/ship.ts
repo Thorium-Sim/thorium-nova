@@ -3,6 +3,13 @@ import { pubsub } from "@server/init/pubsub";
 import { spawnShip } from "@server/spawners/ship";
 import { z } from "zod";
 import { randomNameGenerator } from "@server/utils/randomNameGenerator";
+import type { Entity } from "@server/utils/ecs";
+import {
+	getCompletePositionFromOrbit,
+	getObjectSystem,
+} from "@server/utils/position";
+import type { DataContext } from "@server/utils/types";
+import { Vector3 } from "three";
 
 export const ship = t.router({
 	get: t.procedure
@@ -52,18 +59,51 @@ export const ship = t.router({
 			};
 		}),
 	spawn: t.procedure
+		.meta({
+			action: (ctx: DataContext) => {
+				return {
+					template: {
+						name: "Ship Template",
+						type: "shipTemplate",
+						helper: "Which type of ship will be spawned.",
+					},
+					position: {
+						name: "Position",
+						type: "starmapCoordinates",
+						helper:
+							"A specific point in space to place the ship. Use as an alternative to Nearby Entity.",
+					},
+					entityId: {
+						name: "Nearby Entity",
+						helper:
+							"Place the ship nearby this entity. This option is preferred.",
+					},
+				};
+			},
+		})
 		.input(
 			z.object({
 				template: z.object({ id: z.string(), pluginName: z.string() }),
-				systemId: z.number().nullable(),
-				position: z.object({
-					x: z.number(),
-					y: z.number(),
-					z: z.number(),
-				}),
+				entityId: z.number().optional(),
+				position: z
+					.object({
+						parentId: z
+							.union([
+								z.number(),
+								z.object({ name: z.string(), pluginId: z.string() }),
+							])
+							.nullable(),
+						x: z.number(),
+						y: z.number(),
+						z: z.number(),
+					})
+					.optional(),
+				tags: z.array(z.string()).optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
+			if (!ctx.flight) throw new Error("Flight not found.");
+
 			const shipTemplate = ctx.server.plugins
 				.find((plugin) => plugin.name === input.template.pluginName)
 				?.aspects.ships.find((ship) => ship.name === input.template.id);
@@ -73,16 +113,86 @@ export const ship = t.router({
 			const { ship: shipEntity, extraEntities } = spawnShip(ctx, shipTemplate, {
 				// TODO: August 20, 2022 - Generate a name for this ship somehow
 				name: randomNameGenerator(),
-				position: {
-					x: input.position.x,
-					y: input.position.y,
-					z: input.position.z,
-					type: typeof input.systemId === "number" ? "solar" : "interstellar",
-					parentId: input.systemId,
-				},
+				tags: input.tags,
 			});
 			extraEntities.forEach((s) => ctx.flight?.ecs.addEntity(s));
 			ctx.flight?.ecs.addEntity(shipEntity);
-			pubsub.publish.starmapCore.ships({ systemId: input.systemId || null });
+
+			// Set the position of the ship
+			let position = { x: 0, y: 0, z: 0 };
+			let systemId: number | null = null;
+			let object: Entity | undefined = undefined;
+			if ("entityId" in input) {
+				// This ship is being attached to a specific object in space.
+				object = ctx.flight?.ecs.entities.find((e) => e.id === input.entityId);
+				if (!object) throw new Error("No object found.");
+				position = getNearbyEntityPoint(object);
+				const sys = getObjectSystem(object);
+				systemId = sys?.id ?? null;
+				if (sys?.id === object.id) systemId = null;
+			} else if ("position" in input && input.position) {
+				// This ship is just being plopped at some random point in space.
+				position = input.position;
+				const parentId = input.position.parentId;
+				if (parentId && typeof parentId === "object") {
+					// This ship is probably defined in a timeline action, so we need
+					// to find which system matches the name.
+					const solarSystems =
+						ctx.flight.ecs.componentCache.get("isSolarSystem") || [];
+					for (const entity of solarSystems) {
+						if (entity.components.identity?.name === parentId.name) {
+							systemId = entity.id;
+							break;
+						}
+					}
+				} else {
+					systemId = parentId;
+				}
+			} else {
+				throw new Error("Either position or entityId are required");
+			}
+			shipEntity.updateComponent("position", {
+				...position,
+				parentId: systemId,
+				type: systemId ? "solar" : "interstellar",
+			});
+
+			pubsub.publish.starmapCore.ships({
+				systemId: shipEntity.components.position?.parentId || null,
+			});
 		}),
 });
+
+const objectPosition = new Vector3();
+function getNearbyEntityPoint(objectEntity: Entity) {
+	if (objectEntity.components.position) {
+		objectPosition.set(
+			objectEntity.components.position.x,
+			objectEntity.components.position.y,
+			objectEntity.components.position.z,
+		);
+	} else {
+		objectPosition.copy(getCompletePositionFromOrbit(objectEntity));
+	}
+
+	const objectScale =
+		objectEntity.components?.isPlanet?.radius ||
+		(objectEntity.components.size &&
+			Math.max(
+				objectEntity.components.size.height,
+				objectEntity.components.size.length,
+				objectEntity.components.size.width,
+			) / 1000) ||
+		1;
+
+	const distanceVector = {
+		x: objectScale * 2 + (Math.random() - 0.5) * objectScale,
+		y: 0,
+		z: objectScale * 2 + (Math.random() - 0.5) * objectScale,
+	};
+	return {
+		x: objectPosition.x + distanceVector.x,
+		y: objectPosition.y,
+		z: objectPosition.z + distanceVector.z,
+	};
+}

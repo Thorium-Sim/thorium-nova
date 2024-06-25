@@ -3,6 +3,7 @@ import type { Entity } from "./ecs";
 import { solarRadiusToKilometers } from "./unitTypes";
 import { getOrbitPosition } from "./getOrbitPosition";
 
+/** Gets a point that is some distance from object, in the direction of ship. Used for setting waypoints. */
 export function getObjectOffsetPosition(object: Entity, ship: Entity) {
 	const objectCenter = new Vector3();
 	if (object.components.satellite) {
@@ -91,6 +92,7 @@ export function getObjectOffsetPosition(object: Entity, ship: Entity) {
 	return objectAngle.multiplyScalar(distanceFromCenter).add(objectCenter);
 }
 
+/** Gets an objects position based on its satellite component, including if it is orbiting another satellite */
 export function getCompletePositionFromOrbit(object: Entity) {
 	const origin = new Vector3(0, 0, 0);
 	if (object.components.satellite) {
@@ -112,6 +114,7 @@ export function getCompletePositionFromOrbit(object: Entity) {
 	return new Vector3();
 }
 
+/** Gets the system entity which an object resides in, including if it is a satellite */
 export function getObjectSystem(obj: Entity): Entity | null {
 	const objSystemId = obj.components.position?.parentId;
 	if (objSystemId) {

@@ -1,5 +1,5 @@
 import Input from "@thorium/ui/Input";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Icon } from "@thorium/ui/Icon";
 import Button from "@thorium/ui/Button";
 import {
@@ -24,18 +24,20 @@ import SolarSystemWrapper from "@client/routes/config+/$pluginId.starmap.$system
 import { useTexture } from "@react-three/drei";
 import FuzzTexture from "../../cards/Viewscreen/fuzz.png";
 import { Plane, Vector3 } from "three";
+import { q } from "@client/context/AppContext";
+import { getOrbitPosition } from "@server/utils/getOrbitPosition";
 
 export function StarmapCoordinates({
 	value,
 	setValue,
 }: {
-	value: {
+	value?: {
 		x: number;
 		y: number;
 		z: number;
 		parentId: { name: string; pluginId: string } | null;
 	};
-	setValue: (value: { x: number; y: number; z: number }) => void;
+	setValue: (value: { x?: number; y?: number; z?: number }) => void;
 }) {
 	return (
 		<div>
@@ -69,7 +71,7 @@ export function StarmapCoordinates({
 					}
 				/>
 			</div>
-			{value.x !== 0 && value.y !== 0 && value.z !== 0 ? (
+			{value && value.x !== 0 && value.y !== 0 && value.z !== 0 ? (
 				<div>
 					System: {value.parentId ? value.parentId.name : "Interstellar"}
 				</div>
@@ -81,7 +83,7 @@ function StarmapPicker({
 	value,
 	setValue,
 }: {
-	value: {
+	value?: {
 		x: number;
 		y: number;
 		z: number;
@@ -122,20 +124,22 @@ function StarmapPicker({
 					className="z-50 drop-shadow-xl bg-black/90 border-white/50 border-2 rounded w-full aspect-square"
 					{...getFloatingProps()}
 				>
-					<StarmapStoreProvider>
-						<div className="border-b border-b-white/20 pb-0.5 px-2 flex gap-2 items-baseline">
-							{/* <StarmapCoreMenubar /> */}
-						</div>
-						<StarmapCoordinatePicker
-							setValue={setValue}
-							system={value.parentId?.name || null}
-						>
-							{value.x !== 0 && value.y !== 0 && value.z !== 0 ? (
-								<PositionPoint position={value} />
-							) : null}
-						</StarmapCoordinatePicker>
-					</StarmapStoreProvider>
-					{value.parentId ? (
+					<Suspense fallback={null}>
+						<StarmapStoreProvider>
+							<div className="border-b border-b-white/20 pb-0.5 px-2 flex gap-2 items-baseline">
+								{/* <StarmapCoreMenubar /> */}
+							</div>
+							<StarmapCoordinatePicker
+								setValue={setValue}
+								system={value?.parentId?.name || null}
+							>
+								{value && value.x !== 0 && value.y !== 0 && value.z !== 0 ? (
+									<PositionPoint position={value} />
+								) : null}
+							</StarmapCoordinatePicker>
+						</StarmapStoreProvider>
+					</Suspense>
+					{value?.parentId ? (
 						<Button
 							className="absolute bottom-0 left-0 btn-xs btn-primary btn-outline"
 							onClick={() =>
@@ -173,6 +177,14 @@ function StarmapCoordinatePicker({
 		pluginId: string;
 	};
 
+	const [systemData] = q.plugin.starmap.get.useNetRequest(
+		{
+			pluginId,
+			solarSystemId: system!,
+		},
+		{ enabled: !!system, placeholderData: { stars: [], planets: [] } },
+	);
+
 	useEffect(() => {
 		useStarmapStore.getState().setCameraControlsEnabled(true);
 		useStarmapStore.setState({
@@ -184,6 +196,18 @@ function StarmapCoordinatePicker({
 		<>
 			<StarmapCanvas
 				onPointerMissed={(event) => {
+					const selected = useStarmapStore.getState().selectedObjectIds[0];
+					if (selected) {
+						const object =
+							systemData?.planets.find((p) => p.name === selected) ||
+							systemData?.stars.find((s) => s.name === selected);
+						if (object) {
+							const position = getOrbitPosition(object.satellite);
+							center.copy(position);
+						}
+					} else {
+						center.set(0, 0, 0);
+					}
 					// Ignore right and middle clicks
 					if (event.button !== 0) return;
 					// Construct a plane perpendicular to the camera that goes through

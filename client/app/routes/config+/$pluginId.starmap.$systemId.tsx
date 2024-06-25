@@ -20,6 +20,7 @@ export default function SolarSystemWrapper({
 		{ enabled: !!solarSystemId, placeholderData: { stars: [], planets: [] } },
 	);
 
+	if (!systemData) return null;
 	return (
 		<SolarSystemMap skyboxKey={systemData.skyboxKey} systemId={solarSystemId}>
 			{systemData.stars.map((star) => (
