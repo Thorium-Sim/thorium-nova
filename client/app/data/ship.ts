@@ -83,7 +83,7 @@ export const ship = t.router({
 		})
 		.input(
 			z.object({
-				template: z.object({ id: z.string(), pluginName: z.string() }),
+				template: z.object({ name: z.string(), pluginId: z.string() }),
 				entityId: z.number().optional(),
 				position: z
 					.object({
@@ -105,8 +105,8 @@ export const ship = t.router({
 			if (!ctx.flight) throw new Error("Flight not found.");
 
 			const shipTemplate = ctx.server.plugins
-				.find((plugin) => plugin.name === input.template.pluginName)
-				?.aspects.ships.find((ship) => ship.name === input.template.id);
+				.find((plugin) => plugin.name === input.template.pluginId)
+				?.aspects.ships.find((ship) => ship.name === input.template.name);
 
 			if (!shipTemplate) throw new Error("Ship template not found.");
 

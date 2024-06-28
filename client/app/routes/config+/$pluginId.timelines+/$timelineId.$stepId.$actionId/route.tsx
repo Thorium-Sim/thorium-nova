@@ -602,16 +602,18 @@ function TriggerCondition({
 	}
 }
 
-function TriggerAction({
+export function TriggerAction({
 	action,
 	dispatch,
 	rename,
 	path = "",
+	minimal,
 }: {
 	action?: ActionState;
 	dispatch: (input: ActionAction) => void;
-	rename: (name: string) => void;
+	rename?: (name: string) => void;
 	path?: string;
+	minimal?: boolean;
 }) {
 	const [availableActions] = q.thorium.actions.useNetRequest();
 	if (!action) return null;
@@ -619,19 +621,23 @@ function TriggerAction({
 
 	return (
 		<>
-			<div className="mt-4">
-				<Input
-					labelHidden={false}
-					label="Action Name"
-					placeholder="Advance Timeline"
-					defaultValue={action.name}
-					onBlur={(e: any) => {
-						rename(e.target.value);
-					}}
-				/>
-			</div>
-			<div className="mt-4">
-				<h3 className="text-xl font-semibold">Action Inputs</h3>
+			{rename ? (
+				<div className={minimal ? "" : "mt-4"}>
+					<Input
+						labelHidden={false}
+						label="Action Name"
+						placeholder="Advance Timeline"
+						defaultValue={action.name}
+						onBlur={(e: any) => {
+							rename(e.target.value);
+						}}
+					/>
+				</div>
+			) : null}
+			<div className={minimal ? "" : "mt-4"}>
+				{minimal ? null : (
+					<h3 className="text-xl font-semibold">Action Inputs</h3>
+				)}
 				<ActionInput
 					action={action}
 					dispatch={dispatch}

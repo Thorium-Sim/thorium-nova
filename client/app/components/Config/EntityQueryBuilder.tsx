@@ -325,7 +325,7 @@ export function ValueInput({
 									},
 								],
 								select: {
-									component: "",
+									component: "id" as any,
 									property: "",
 									matchType: "first",
 								},
@@ -386,7 +386,7 @@ export function ValueInput({
 					>
 						Add Filter
 					</button>
-					<p className="mt-2">Entity Select</p>
+					<p className="mt-2">ID/Component Select</p>
 					<QueryComponent
 						{...value.select}
 						path={

@@ -897,15 +897,29 @@ input[type="range"].slider {
 
 .list-group-item {
   @apply select-none block w-full border border-solid bg-black border-white border-opacity-50 pointer-events-auto cursor-pointer;
-  @apply px-4 py-2;
+  & > div, & > a, &:not(&:has(> div), &:has(> a)) {
+    @apply px-4 py-2;
+  }
   &.list-group-item-small {
-    @apply px-2 py-1 text-sm;
+    @apply text-sm;
+    & > div, & > a, &:not(&:has(> div), &:has(> a)) {
+      @apply px-2 py-1;
+    }
+  }
+  &.list-group-item-xs {
+    @apply text-sm;
+    & > div, & > a, &:not(&:has(> div), &:has(> a)) {
+      @apply px-1 py-0.5;
+    }
   }
   &:hover {
     @apply bg-opacity-50;
   }
   &.selected {
     @apply bg-opacity-40 bg-white;
+    &.subtle {
+      @apply bg-transparent shadow-inner shadow-blue-500 border-blue-500
+    }
   }
   &:disabled,
   &.disabled {

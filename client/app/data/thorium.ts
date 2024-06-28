@@ -1,6 +1,8 @@
 import { pubsub } from "@server/init/pubsub";
 import { router } from "@server/init/router";
 import { t } from "@server/init/t";
+import { actionItem } from "@server/utils/actionSchema";
+import { executeActions } from "@server/utils/evaluateEntityQuery";
 import { capitalCase } from "change-case";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
@@ -74,6 +76,11 @@ export const thorium = t.router({
 			actionOverrides?: Record<string, ActionOverrides>;
 		}[];
 	}),
+	executeActions: t.procedure
+		.input(z.object({ actions: actionItem.array() }))
+		.send(async ({ input, ctx }) => {
+			await executeActions(ctx, input.actions);
+		}),
 	events: t.procedure.request(function getEvents() {
 		const events = Object.entries(router._def.procedures)
 			// @ts-expect-error This does have the meta type

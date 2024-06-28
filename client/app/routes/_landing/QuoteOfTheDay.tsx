@@ -330,6 +330,8 @@ const quotes = [
 	"If you can see your path, laid out in front of you step by step, you know it's not your path. Your own path you make with every step you take. That's why it's your path.",
 	// Antonio Machado
 	"Traveler, there is no path. Paths are made by walking.",
+	// Sarah Bessey
+	"And as I looked up at the sky, I thought 'I can't believe we always sleep through this.",
 ];
 
 const QuoteOfTheDay = () => {
