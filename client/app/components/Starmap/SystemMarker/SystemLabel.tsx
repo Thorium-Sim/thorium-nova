@@ -17,6 +17,7 @@ const SystemLabel: React.FC<{
 	name,
 	hoveringDirection,
 }) => {
+	console.log({ systemId, name });
 	const useStarmapStore = useGetStarmapStore();
 
 	React.useEffect(() => {

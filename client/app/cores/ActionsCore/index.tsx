@@ -9,12 +9,12 @@ import { SortableList } from "@thorium/ui/SortableItem";
 import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { Icon } from "@thorium/ui/Icon";
-import { useConfirm } from "@thorium/ui/AlertDialog";
 import type { DragEndEvent } from "@dnd-kit/core";
 import { TriggerAction } from "@client/routes/config+/$pluginId.timelines+/$timelineId.$stepId.$actionId/route";
 import { actionReducer } from "@client/routes/config+/$pluginId.timelines+/$timelineId.$stepId.$actionId/actionReducer";
 import Button from "@thorium/ui/Button";
 import { q } from "@client/context/AppContext";
+import { ErrorBoundary } from "react-error-boundary";
 
 type ActionsState = (ActionState & { id: string })[];
 function actionsReducer(
@@ -66,8 +66,6 @@ export function ActionsCore() {
 
 	const [selectedAction, setSelectedAction] = useState<string | undefined>();
 
-	const confirm = useConfirm();
-
 	const actions = actionsList.map((a) => ({
 		id: a.id,
 		className: "list-group-item-xs subtle",
@@ -89,13 +87,15 @@ export function ActionsCore() {
 						</button>
 					</Tooltip>
 				</span>
-				{selectedAction === a.id ? (
-					<TriggerAction
-						action={a}
-						dispatch={(action) => dispatch({ actionId: a.id, ...action })}
-						minimal
-					/>
-				) : null}
+				<ErrorBoundary fallback={<>Error in action editor</>}>
+					{selectedAction === a.id ? (
+						<TriggerAction
+							action={a}
+							dispatch={(action) => dispatch({ actionId: a.id, ...action })}
+							minimal
+						/>
+					) : null}
+				</ErrorBoundary>
 			</div>
 		),
 	}));

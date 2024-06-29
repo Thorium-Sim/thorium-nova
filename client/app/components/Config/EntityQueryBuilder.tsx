@@ -10,7 +10,7 @@ import Checkbox from "@thorium/ui/Checkbox";
 import Input from "@thorium/ui/Input";
 import Select from "@thorium/ui/Select";
 import { capitalCase } from "change-case";
-import { type Dispatch, Fragment, useReducer, useState } from "react";
+import { type Dispatch, Fragment, useState } from "react";
 import { produce } from "immer";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import type {
@@ -21,16 +21,11 @@ import type {
 import TagInput from "@thorium/ui/TagInput";
 import { Icon } from "@thorium/ui/Icon";
 import { cn } from "@client/utils/cn";
-import { useHover, useRole } from "@floating-ui/react";
-import { ZoomSliderComp } from "@client/cards/Navigation/MapControls";
 import { StarmapCoordinates } from "./StarmapCoordinates";
-import SearchableInput, {
-	DefaultResultLabel,
-} from "@thorium/ui/SearchableInput";
-import { q } from "@client/context/AppContext";
+import { ShipTemplate } from "./ShipTemplate";
 
 type QueryReducerAction =
-	| { type: "add"; path?: string }
+	| { type: "add"; component?: keyof typeof components | ""; path?: string }
 	| { type: "remove"; path: string }
 	| { type: "component"; path: string; value: keyof typeof components | "" }
 	| {
@@ -51,7 +46,7 @@ export function queryReducer(
 		case "add":
 			return produce(state, (draft) => {
 				getObject(draft, action.path || "").push({
-					component: "",
+					component: action.component || "",
 					property: "",
 					comparison: null,
 					value: "",
@@ -184,6 +179,7 @@ export function QueryComponent({
 
 					dispatch({ type: "property", path, value, comparison });
 				}}
+				onlyShowProperties={isSelect}
 			/>
 			{!isSelect &&
 			typeof comparison === "string" &&
@@ -255,6 +251,7 @@ export function ValueInput({
 	path: string;
 	queryInput?: boolean;
 }) {
+	const noEntityQuery = item.type === "components";
 	// Special override for the voice input
 	if (item.key.endsWith("voice")) {
 		return (
@@ -308,34 +305,36 @@ export function ValueInput({
 					{...item.inputProps}
 				/>
 			</div>
-			<Tooltip content="Use entity query value">
-				<button
-					className="btn btn-xs btn-primary btn-outline"
-					onClick={() => {
-						dispatch({
-							type: "value",
-							path: queryInput ? path : `${path}.values.${item.key}`,
-							value: {
-								query: [
-									{
-										component: "",
+			{noEntityQuery ? null : (
+				<Tooltip content="Use entity query value">
+					<button
+						className="btn btn-xs btn-primary btn-outline"
+						onClick={() => {
+							dispatch({
+								type: "value",
+								path: queryInput ? path : `${path}.values.${item.key}`,
+								value: {
+									query: [
+										{
+											component: "",
+											property: "",
+											comparison: null,
+											value: "",
+										},
+									],
+									select: {
+										component: "id" as any,
 										property: "",
-										comparison: null,
-										value: "",
+										matchType: "first",
 									},
-								],
-								select: {
-									component: "id" as any,
-									property: "",
-									matchType: "first",
 								},
-							},
-						});
-					}}
-				>
-					<Icon name="sparkles" />
-				</button>
-			</Tooltip>
+							});
+						}}
+					>
+						<Icon name="sparkles" />
+					</button>
+				</Tooltip>
+			)}
 		</div>
 	) : typeof value === "object" ? (
 		<div className={item.isNested ? "value-input-is-nested" : ""}>
@@ -533,18 +532,19 @@ function PropertyCombobox({
 	component,
 	property,
 	onChange,
+	onlyShowProperties,
 }: {
 	component: keyof typeof components | "id" | "";
 	property: string;
 	onChange: (value: string) => void;
+	onlyShowProperties?: boolean;
 }) {
 	const [query, setQuery] = useState("");
 	if (component === "id") return null;
 	const filteredProperties = !component
 		? []
 		: [
-				"isPresent",
-				"isNotPresent",
+				...(onlyShowProperties ? [] : ["isPresent", "isNotPresent"]),
 				...parseSchema(schemaWithoutDefault(component)).map((item) =>
 					ZOD_COMPARISONS[item.type as keyof typeof ZOD_COMPARISONS]
 						? item.key
@@ -697,6 +697,8 @@ export function PropertyInput({
 			return <StarmapCoordinates value={value} setValue={setValue} />;
 		case "shipTemplate":
 			return <ShipTemplate value={value} setValue={setValue} />;
+		case "components":
+			return <ComponentsEditor components={value} setValue={setValue} />;
 		default:
 			if (inputType !== "text") {
 				console.warn("Unknown input type", inputType);
@@ -714,57 +716,82 @@ export function PropertyInput({
 	}
 }
 
-function ShipTemplate({
-	value,
+function ComponentsEditor({
+	components,
 	setValue,
 }: {
-	value: { pluginId: string; name: string } | undefined;
-	setValue: (value: { pluginId: string; name: string } | null) => void;
+	components: EntityQuery;
+	setValue: (value: EntityQuery) => void;
 }) {
-	const selectedSpawn = value
-		? {
-				id: value.name,
-				pluginName: value.pluginId,
-				name: value.name,
-				category: "",
-				vanity: "",
-		  }
-		: null;
 	return (
-		<SearchableInput<{
-			id: string;
-			pluginName: string;
-			name: string;
-			category: string;
-			vanity: string;
-		}>
-			inputClassName="input-sm"
-			queryKey="spawn"
-			getOptions={async ({ queryKey, signal }) => {
-				const result = await q.starmapCore.spawnSearch.netRequest(
-					{ query: queryKey[1], allPlugins: true },
-					{ signal },
-				);
-				return result;
-			}}
-			ResultLabel={({ active, result, selected }) => (
-				<DefaultResultLabel active={active} selected={selected}>
-					<div className="flex gap-4">
-						<img src={result.vanity} alt="" className="w-8 h-8" />
-						<div>
-							<p className="m-0 leading-none">{result.name}</p>
-							<p className="m-0 leading-none">
-								<small>{result.category}</small>
-							</p>
+		<div>
+			{!components || components.length === 0 ? (
+				<ComponentCombobox
+					component=""
+					onChange={(component) =>
+						setValue(queryReducer(components || [], { type: "add", component }))
+					}
+				/>
+			) : (
+				components?.map(({ component, property, value }, i) => {
+					const item = component
+						? parseSchema(schemaWithoutDefault(component)).find(
+								(p) => p.key === property,
+						  )
+						: null;
+					console.log(component, property, value, item);
+					return (
+						<div key={`${i}-${component}`} className="flex w-full">
+							<ComponentCombobox
+								component={component}
+								onChange={(component) =>
+									setValue(
+										queryReducer(components, {
+											type: "component",
+											path: i.toString(),
+											value: component,
+										}),
+									)
+								}
+							/>
+							<PropertyCombobox
+								onlyShowProperties
+								component={component}
+								property={property}
+								onChange={(property) =>
+									setValue(
+										queryReducer(components, {
+											type: "property",
+											path: i.toString(),
+											comparison: "",
+											value: property,
+										}),
+									)
+								}
+							/>
+							{item ? (
+								<>
+									<ValueInput
+										item={item}
+										path={i.toString()}
+										value={value}
+										dispatch={(action) =>
+											setValue(queryReducer(components, action))
+										}
+										queryInput
+									/>
+									{item.helper && (
+										<p className="text-xs text-gray-400">{item.helper}</p>
+									)}
+									{/* {showDelete ? (
+						<RemoveButton onClick={() => dispatch({ type: "remove", path })} />
+					) : null} */}
+								</>
+							) : null}
 						</div>
-					</div>
-				</DefaultResultLabel>
+					);
+				})
 			)}
-			setSelected={(item) =>
-				setValue(item ? { pluginId: item?.pluginName, name: item?.name } : null)
-			}
-			selected={selectedSpawn}
-			placeholder="Ship Spawn Search..."
-		/>
+		</div>
 	);
 }
