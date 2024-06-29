@@ -145,7 +145,6 @@ export const thorium = t.router({
 			}),
 		)
 		.send(({ input, ctx }) => {
-			console.log(input);
 			const entity = ctx.flight?.ecs.getEntityById(input.entityId);
 			if (!entity) return;
 
