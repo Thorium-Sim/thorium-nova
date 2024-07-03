@@ -66,6 +66,7 @@ export function dataStreamEntity(e: Entity) {
 		return {
 			id: e.id.toString(),
 			...position,
+			f: e.components.isDestroyed ? 1 : 0,
 			s: shouldSnap,
 			r: { x: quaternion.x, y: quaternion.y, z: quaternion.z, w: quaternion.w },
 		};

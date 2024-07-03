@@ -412,7 +412,7 @@ export function TorpedoEntity({
 
 		const torpedo = interpolate(id);
 		const playerShip = interpolate(playerId);
-
+		const isDestroyed = torpedo?.f === 1;
 		const playerPosition = playerShip || zeroVector;
 		if (!torpedo || !playerPosition || !playerShip) return;
 
