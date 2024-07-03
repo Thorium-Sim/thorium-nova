@@ -12,6 +12,7 @@ import {
 	Quaternion,
 	Vector3,
 	type Object3DEventMap,
+	AdditiveBlending,
 } from "three";
 import Explosion from "./Effects/Explosion";
 
@@ -58,6 +59,8 @@ function Nucleus({ color }: { color: string }) {
 		const geometry = new PlaneGeometry(size, size);
 		const material = new MeshBasicMaterial({
 			color,
+			blending: AdditiveBlending,
+			transparent: true,
 			side: DoubleSide,
 		});
 		const mesh = new InstancedMesh(geometry, material, PLANE_COUNT);

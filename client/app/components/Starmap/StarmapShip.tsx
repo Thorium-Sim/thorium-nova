@@ -25,11 +25,13 @@ export function StarmapShip({
 	logoUrl,
 	spriteColor = "white",
 	onClick,
+	size,
 }: {
 	id: number;
 	modelUrl?: string;
 	logoUrl?: string;
 	spriteColor?: number | string;
+	size: number;
 	onClick?: () => void;
 }) {
 	const model = useShipModel(modelUrl);
@@ -163,6 +165,8 @@ export function StarmapShip({
 					{model && (
 						<group ref={shipMesh}>
 							<primitive
+								// Convert meters to kilometers
+								scale={size / 1000}
 								userData={{ type: "ship", id }}
 								object={model}
 								rotation={[Math.PI / 2, Math.PI, 0]}

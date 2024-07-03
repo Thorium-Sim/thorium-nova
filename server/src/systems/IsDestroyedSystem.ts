@@ -1,3 +1,4 @@
+import { pubsub } from "@server/init/pubsub";
 import { type Entity, System } from "@server/utils/ecs";
 import type { World } from "@thorium-sim/rapier3d-node";
 
@@ -24,8 +25,19 @@ export class IsDestroyedSystem extends System {
 					if (!body) continue;
 					world.removeRigidBody(body);
 				}
-
+				const systemId = entity.components.position?.parentId || null;
 				this.ecs.removeEntity(entity);
+
+				if (entity.components.isTorpedo) {
+					pubsub.publish.starmapCore.torpedos({
+						systemId,
+					});
+				}
+				if (entity.components.isShip) {
+					pubsub.publish.starmapCore.ships({
+						systemId,
+					});
+				}
 			}
 		}
 	}

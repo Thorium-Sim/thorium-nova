@@ -739,7 +739,6 @@ function ComponentsEditor({
 								(p) => p.key === property,
 						  )
 						: null;
-					console.log(component, property, value, item);
 					return (
 						<div key={`${i}-${component}`} className="flex w-full">
 							<ComponentCombobox

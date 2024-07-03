@@ -78,7 +78,11 @@ function Thumb(
 			}`}
 		>
 			<VisuallyHidden>
-				<input ref={inputRef} {...mergeProps(inputProps, focusProps)} />
+				<input
+					ref={inputRef}
+					{...mergeProps(inputProps, focusProps)}
+					value={Number.isNaN(inputProps.value) ? 0 : inputProps.value}
+				/>
 			</VisuallyHidden>
 		</div>
 	);

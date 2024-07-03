@@ -130,6 +130,11 @@ export const starmapCore = t.router({
 						(input?.systemId === undefined &&
 							components.position?.type === "interstellar"))
 				) {
+					if (
+						components.isDestroyed &&
+						components.isDestroyed.timer > components.isDestroyed.timeToDestroy
+					)
+						continue;
 					data.push({
 						id,
 						color: components.isTorpedo.color,

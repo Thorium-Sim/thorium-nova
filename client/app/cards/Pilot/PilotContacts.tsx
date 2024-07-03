@@ -436,13 +436,10 @@ export function TorpedoEntity({
 			if (
 				explosionRef.current &&
 				isDestroyed &&
-				explosionRef.current.position.lengthSq() === 0
+				explosionRef.current.position.lengthSq() === 0 &&
+				ref.current?.position
 			) {
-				explosionRef.current.position.set(
-					torpedo.x - playerPosition.x,
-					torpedo.y - playerPosition.y,
-					torpedo.z - playerPosition.z,
-				);
+				explosionRef.current.position.copy(ref.current.position);
 			}
 			if (ref.current) {
 				if (isDestroyed) {
