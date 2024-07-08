@@ -19,7 +19,7 @@ export type ComponentQuery = {
 	value: string | ValueQuery;
 };
 
-interface TimelineAction {
+export interface TimelineAction {
 	id: string;
 	name: string;
 	action: string;

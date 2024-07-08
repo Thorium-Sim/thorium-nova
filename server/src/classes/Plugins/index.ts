@@ -13,6 +13,7 @@ import BaseShipSystemPlugin from "./ShipSystems/BaseSystem";
 import InventoryPlugin from "./Inventory";
 import TimelinePlugin from "./Timeline";
 import { pubsub } from "@server/init/pubsub";
+import { MacroPlugin } from "./Macro";
 
 export function pluginPublish(plugin: BasePlugin) {
 	pubsub.publish.plugin.all();
@@ -29,6 +30,7 @@ interface Aspects {
 	solarSystems: SolarSystemPlugin[];
 	inventory: InventoryPlugin[];
 	timelines: TimelinePlugin[];
+	macros: MacroPlugin[];
 }
 // Storing the server here so it doesn't get
 // serialized with the plugin.
@@ -96,6 +98,7 @@ export default class BasePlugin extends FSDataStore {
 				solarSystems: [],
 				inventory: [],
 				timelines: [],
+				macros: [],
 			};
 			pluginAspects.set(this, aspects);
 		}
@@ -134,6 +137,11 @@ export default class BasePlugin extends FSDataStore {
 			this,
 			"timelines",
 			TimelinePlugin,
+		);
+		this.aspects.macros = await BasePlugin.loadAspect(
+			this,
+			"macros",
+			MacroPlugin,
 		);
 	}
 	toJSON() {
