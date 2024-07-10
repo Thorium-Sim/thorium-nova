@@ -14,9 +14,9 @@ export default function OfficersLog() {
 	const textRef = React.useRef<HTMLTextAreaElement>(null);
 	const entry = officersLog.find((e) => e.timestamp === selectedEntry);
 	return (
-		<div className="mx-auto max-w-5xl w-full flex h-full min-h-96 py-4 gap-8">
-			<div className="flex flex-col h-full gap-4">
-				<h2 className="text-4xl font-bold h-10">Officers Log</h2>
+		<div className="mx-auto max-w-5xl w-full grid grid-cols-3 h-full min-h-96 @2xl:py-4 @2xl:gap-8 gap-4">
+			<div className="flex flex-col h-full @2xl:gap-4 gap-2">
+				<h2 className="@2xl:text-4xl text-2xl font-bold h-10">Officers Log</h2>
 				<ul className="panel panel-alert flex-1">
 					{officersLog
 						.concat()
@@ -35,7 +35,7 @@ export default function OfficersLog() {
 						))}
 				</ul>
 				<Button
-					className="btn-info"
+					className="btn-info @2xl:btn-md btn-sm"
 					onClick={() => {
 						setSelectedEntry(null);
 						setStardate(new Date());
@@ -45,8 +45,8 @@ export default function OfficersLog() {
 					New Log Entry
 				</Button>
 			</div>
-			<div className="flex-1 flex flex-col h-full gap-4">
-				<h3 className="text-2xl font-bold h-10 flex justify-between items-end">
+			<div className="flex-1 flex flex-col h-full @2xl:gap-4 gap-2 col-span-2">
+				<h3 className="@2xl:text-2xl text-lg font-bold h-10 flex justify-between items-end">
 					<span>Log of Officer: {client.loginName}</span>
 					<span>
 						Stardate:{" "}
@@ -63,9 +63,9 @@ export default function OfficersLog() {
 					readOnly={!!entry}
 					value={entry?.message || logEntry}
 				/>
-				<div className="flex gap-8">
+				<div className="flex @2xl:gap-8 gap-4">
 					<Button
-						className="btn-error flex-1"
+						className="btn-error flex-1 @2xl:btn-md btn-sm"
 						onClick={() => {
 							setSelectedEntry(null);
 							setLogEntry("");
@@ -75,7 +75,7 @@ export default function OfficersLog() {
 						Clear
 					</Button>
 					<Button
-						className="btn-success flex-1"
+						className="btn-success flex-1 @2xl:btn-md btn-sm"
 						disabled={!!entry}
 						onClick={async () => {
 							if (logEntry.trim().length === 0) {

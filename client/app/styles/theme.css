@@ -369,6 +369,11 @@ kbd {
     }
   }
 }
+@container (min-width: 42rem) {
+  .\@2xl\:btn-md {
+    @apply px-4 leading-loose h-10 text-base min-h-[2.5rem];
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .btn.loading:before {
     animation: spin 10s linear infinite;

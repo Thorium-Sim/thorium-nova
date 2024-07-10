@@ -42,7 +42,7 @@ export const Widgets = () => {
 							/>
 						}
 						component={WidgetComp}
-						size="sm"
+						size={widget.size}
 					/>
 				);
 			})}
@@ -76,7 +76,7 @@ export const Widget: FC<{
 		isOpen: boolean;
 		onClose: () => void;
 	}>;
-	size?: "sm" | "md" | "lg";
+	size?: "sm" | "md" | "lg" | "xl";
 }> = ({ name, icon, component: Component, size = "sm" }) => {
 	const [isOpen, setIsOpen] = useState(false);
 
@@ -119,11 +119,12 @@ export const Widget: FC<{
 			>
 				<Popover.Panel
 					className={cn(
-						"absolute isolate right-0 z-50 bg-black/90 border border-white/50 rounded p-2 w-screen @container",
+						"max-w-md absolute isolate right-0 z-50 !bg-black/90 panel backdrop-blur border border-white/50 rounded p-2 w-screen @container",
 						{
-							"max-w-lg": size === "sm",
-							"max-w-3xl": size === "md",
-							"max-w-6xl": size === "lg",
+							"max-w-sm": size === "sm",
+							"max-w-lg": size === "md",
+							"max-w-xl": size === "lg",
+							"max-w-2xl": size === "xl",
 						},
 					)}
 					ref={refs.setFloating}
