@@ -119,7 +119,7 @@ export const Widget: FC<{
 			>
 				<Popover.Panel
 					className={cn(
-						"max-w-md absolute isolate right-0 z-50 !bg-black/90 panel backdrop-blur border border-white/50 rounded p-2 w-screen @container",
+						"max-w-md absolute isolate right-0 max-h-96 z-50 !bg-black/90 panel backdrop-blur border border-white/50 rounded p-2 w-screen @container overflow-hidden",
 						{
 							"max-w-sm": size === "sm",
 							"max-w-lg": size === "md",
