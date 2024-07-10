@@ -62,7 +62,7 @@ export default function Cargo() {
 							labelHidden={false}
 							isInvalid={error}
 							invalidMessage="Cargo container volume must be greater than 1"
-							label="Cargo Container Volume in Cubic Meters"
+							label="Cargo Container Volume (L)"
 							placeholder="4"
 							defaultValue={ship.cargoContainerVolume}
 							onChange={() => setError(false)}
