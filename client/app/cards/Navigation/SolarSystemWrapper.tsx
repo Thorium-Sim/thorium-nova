@@ -128,6 +128,7 @@ export function SolarSystemWrapper() {
 						<StarmapShip
 							id={ship.id}
 							logoUrl={ship.icon}
+							size={ship.size}
 							spriteColor={0x0088ff}
 						/>
 					</ErrorBoundary>

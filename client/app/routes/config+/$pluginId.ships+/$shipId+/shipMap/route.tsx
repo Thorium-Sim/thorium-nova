@@ -4,6 +4,7 @@ import type { DragEndEvent } from "@dnd-kit/core";
 import { q } from "@client/context/AppContext";
 import { SortableList } from "@client/components/ui/SortableItem";
 import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ShipMap() {
 	const { pluginId, shipId, deckName } = useParams() as {
@@ -15,6 +16,7 @@ export default function ShipMap() {
 	const confirm = useConfirm();
 	const prompt = usePrompt();
 	const [data] = q.plugin.ship.get.useNetRequest({ pluginId, shipId });
+	const queryClient = useQueryClient();
 
 	async function handleDragEnd({
 		active,
@@ -44,7 +46,7 @@ export default function ShipMap() {
 					className="mb-2"
 				/>
 				<Button
-					className="btn-success w-full"
+					className="btn-success w-full btn-sm"
 					onClick={async () => {
 						const deck = await q.plugin.ship.deck.create.netSend({
 							pluginId,
@@ -58,7 +60,7 @@ export default function ShipMap() {
 				</Button>
 				<div className="grid gap-2 grid-cols-2 mt-2">
 					<Button
-						className=""
+						className="btn-sm"
 						disabled={deckName && deckName.length > 0 ? false : true}
 						title={
 							deckName && deckName.length > 0
@@ -82,15 +84,21 @@ export default function ShipMap() {
 									newName: deckname,
 								});
 								if (result) {
+									await queryClient.resetQueries({
+										queryKey: q.plugin.ship.get.getQueryKey({
+											pluginId,
+											shipId,
+										}),
+									});
 									navigate(`${result.name}`);
 								}
 							}
 						}}
 					>
-						Rename Deck
+						Rename
 					</Button>
 					<Button
-						className="btn-error"
+						className="btn-error btn-sm"
 						disabled={deckName ? false : true}
 						onClick={async (event) => {
 							event.preventDefault();
@@ -109,7 +117,7 @@ export default function ShipMap() {
 							}
 						}}
 					>
-						Delete Deck
+						Delete
 					</Button>
 				</div>
 			</div>

@@ -40,6 +40,7 @@ export const navigation = t.router({
 				name: ctx.ship.components.identity?.name,
 				position: ctx.ship.components.position,
 				icon: ctx.ship.components.isShip?.assets.logo,
+				size: ctx.ship.components.size?.length || 350,
 			};
 		}),
 	object: t.procedure

@@ -27,6 +27,7 @@ type DecorateProcedure<
 	TPath extends string,
 > = TProcedure extends AnyRequestProcedure
 	? {
+			getQueryKey: (input: inferProcedureInput<TProcedure>) => string[];
 			netRequest: Resolver<TProcedure>;
 			useNetRequest: <
 				TQueryFnData = inferTransformedProcedureOutput<TProcedure>,

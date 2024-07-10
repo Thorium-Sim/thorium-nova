@@ -18,6 +18,7 @@ import type { Line2 } from "three-stdlib";
 import { q } from "@client/context/AppContext";
 import { useLiveQuery } from "@thorium/live-query/client";
 import { setCursor } from "@client/utils/setCursor";
+import type { Meter } from "@server/utils/unitTypes";
 
 export function StarmapShip({
 	id,
@@ -31,7 +32,7 @@ export function StarmapShip({
 	modelUrl?: string;
 	logoUrl?: string;
 	spriteColor?: number | string;
-	size: number;
+	size: Meter;
 	onClick?: () => void;
 }) {
 	const model = useShipModel(modelUrl);

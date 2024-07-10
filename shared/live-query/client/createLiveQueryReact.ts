@@ -55,6 +55,9 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
 		) => {
 			return client.netRequest({ path, input, headers, signal });
 		},
+		getQueryKey: (path: string, input: any) => {
+			return getArrayQueryKey(getQueryKey(path, input));
+		},
 		useNetRequest: (path: string, input: any, ...args: unknown[]) => {
 			useRequestSub({ path, params: input });
 			const firstArg = args[0] || {};
