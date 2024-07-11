@@ -2,7 +2,6 @@ import * as Cards from "@client/cards";
 import { q } from "@client/context/AppContext";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import {
-	ComponentPropsWithoutRef,
 	type ComponentType,
 	type FC,
 	type ReactElement,
@@ -12,6 +11,7 @@ import {
 import { GamepadConfig, useGamepadStore } from "@client/hooks/useGamepadStore";
 import { Popover, Transition } from "@headlessui/react";
 import {
+	autoUpdate,
 	useClick,
 	useDismiss,
 	useFloating,
@@ -80,10 +80,11 @@ export const Widget: FC<{
 }> = ({ name, icon, component: Component, size = "sm" }) => {
 	const [isOpen, setIsOpen] = useState(false);
 
-	const { x, y, strategy, refs, context } = useFloating({
+	const { x, y, strategy, refs, context, update } = useFloating({
 		open: isOpen,
 		onOpenChange: setIsOpen,
 		placement: "top-end",
+		whileElementsMounted: autoUpdate,
 	});
 
 	const dismiss = useDismiss(context);
