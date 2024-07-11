@@ -34,6 +34,7 @@ export default function Basic() {
 							defaultValue={ship.name}
 							onChange={() => setError(false)}
 							onBlur={async (e: any) => {
+								if (e.target.value === ship.name) return;
 								if (!e.target.value) return setError(true);
 								try {
 									const result = await q.plugin.ship.update.netSend({
@@ -41,7 +42,7 @@ export default function Basic() {
 										shipId,
 										name: e.target.value,
 									});
-									navigate(`/config/${pluginId}/ships/${result.shipId}`);
+									navigate(`/config/${pluginId}/ships/${result.shipId}/basic`);
 								} catch (err) {
 									if (err instanceof Error) {
 										toast({
