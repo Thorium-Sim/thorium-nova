@@ -12,6 +12,7 @@ import { Suspense, useEffect, useState } from "react";
 import { Quaternion } from "three";
 import { Fuzz } from "./Fuzz";
 import { WarpStars } from "./WarpStars";
+import { CircleGridStoreProvider } from "@client/cards/Pilot/useCircleGridStore";
 
 const forwardQuaternion = new Quaternion(0, 1, 0, 0);
 
@@ -58,38 +59,40 @@ export function Viewscreen() {
 
 	return (
 		<div className="w-full h-full flex items-center justify-center text-white text-6xl">
-			<StarmapCanvas>
-				<ViewscreenEffects onDone={() => setInitialized(true)} />
-				{initialized ? (
-					<>
-						<pointLight
-							intensity={0.2}
-							decay={2}
-							position={[10000000, 10000000, 1000000]}
-						/>
-						<pointLight
-							intensity={0.1}
-							decay={2}
-							position={[-10000000, -10000000, -1000000]}
-						/>
-						<ambientLight intensity={0.5} />
-						<Suspense fallback={null}>
-							<Fuzz />
-						</Suspense>
-						<Suspense fallback={null}>
-							<WarpStars />
-						</Suspense>
-						<Suspense fallback={null}>
-							<Nebula />
-						</Suspense>
-						{currentSystem === null ? (
-							<InterstellarWrapper />
-						) : (
-							<SolarSystemWrapper />
-						)}
-					</>
-				) : null}
-			</StarmapCanvas>
+			<CircleGridStoreProvider>
+				<StarmapCanvas>
+					<ViewscreenEffects onDone={() => setInitialized(true)} />
+					{initialized ? (
+						<>
+							<pointLight
+								intensity={0.2}
+								decay={2}
+								position={[10000000, 10000000, 1000000]}
+							/>
+							<pointLight
+								intensity={0.1}
+								decay={2}
+								position={[-10000000, -10000000, -1000000]}
+							/>
+							<ambientLight intensity={0.5} />
+							<Suspense fallback={null}>
+								<Fuzz />
+							</Suspense>
+							<Suspense fallback={null}>
+								<WarpStars />
+							</Suspense>
+							<Suspense fallback={null}>
+								<Nebula />
+							</Suspense>
+							{currentSystem === null ? (
+								<InterstellarWrapper />
+							) : (
+								<SolarSystemWrapper />
+							)}
+						</>
+					) : null}
+				</StarmapCanvas>
+			</CircleGridStoreProvider>
 		</div>
 	);
 }
