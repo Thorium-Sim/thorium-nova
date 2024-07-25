@@ -8,14 +8,15 @@ import {
 	InterstellarWrapper,
 	SolarSystemWrapper,
 } from "@client/cores/StarmapCore";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Quaternion } from "three";
 import { Fuzz } from "./Fuzz";
 import { WarpStars } from "./WarpStars";
+import { CircleGridStoreProvider } from "@client/cards/Pilot/useCircleGridStore";
 
 const forwardQuaternion = new Quaternion(0, 1, 0, 0);
 
-function ViewscreenEffects() {
+function ViewscreenEffects({ onDone }: { onDone: () => void }) {
 	const [viewscreenSystem] = q.viewscreen.system.useNetRequest();
 	const [player] = q.ship.player.useNetRequest();
 	const { interpolate } = useLiveQuery();
@@ -34,6 +35,9 @@ function ViewscreenEffects() {
 		});
 	}, [viewscreenSystem?.skyboxKey, useStarmapStore]);
 
+	useEffect(() => {
+		onDone();
+	});
 	useFrame(({ camera }) => {
 		const position = interpolate(player.id);
 		if (!position) return;
@@ -50,39 +54,45 @@ function ViewscreenEffects() {
 export function Viewscreen() {
 	const useStarmapStore = useGetStarmapStore();
 	const currentSystem = useStarmapStore((store) => store.currentSystem);
-
+	const [initialized, setInitialized] = useState(false);
 	q.viewscreen.stream.useDataStream();
 
 	return (
 		<div className="w-full h-full flex items-center justify-center text-white text-6xl">
-			<StarmapCanvas>
-				<ViewscreenEffects />
-				<pointLight
-					intensity={0.2}
-					decay={2}
-					position={[10000000, 10000000, 1000000]}
-				/>
-				<pointLight
-					intensity={0.1}
-					decay={2}
-					position={[-10000000, -10000000, -1000000]}
-				/>
-				<ambientLight intensity={0.5} />
-				<Suspense fallback={null}>
-					<Fuzz />
-				</Suspense>
-				<Suspense fallback={null}>
-					<WarpStars />
-				</Suspense>
-				<Suspense fallback={null}>
-					<Nebula />
-				</Suspense>
-				{currentSystem === null ? (
-					<InterstellarWrapper />
-				) : (
-					<SolarSystemWrapper />
-				)}
-			</StarmapCanvas>
+			<CircleGridStoreProvider>
+				<StarmapCanvas>
+					<ViewscreenEffects onDone={() => setInitialized(true)} />
+					{initialized ? (
+						<>
+							<pointLight
+								intensity={0.2}
+								decay={2}
+								position={[10000000, 10000000, 1000000]}
+							/>
+							<pointLight
+								intensity={0.1}
+								decay={2}
+								position={[-10000000, -10000000, -1000000]}
+							/>
+							<ambientLight intensity={0.5} />
+							<Suspense fallback={null}>
+								<Fuzz />
+							</Suspense>
+							<Suspense fallback={null}>
+								<WarpStars />
+							</Suspense>
+							<Suspense fallback={null}>
+								<Nebula />
+							</Suspense>
+							{currentSystem === null ? (
+								<InterstellarWrapper />
+							) : (
+								<SolarSystemWrapper />
+							)}
+						</>
+					) : null}
+				</StarmapCanvas>
+			</CircleGridStoreProvider>
 		</div>
 	);
 }

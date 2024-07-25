@@ -2,13 +2,10 @@ import { q } from "@client/context/AppContext";
 import { Combobox, Transition } from "@headlessui/react";
 import { Fragment, useReducer, useState } from "react";
 import { parseSchema as parseJsonSchema } from "json-schema-to-zod";
-import type z from "zod";
+// biome-ignore lint/style/useImportType: <explanation>
+import z from "zod";
 import { parseSchema } from "@server/utils/zodAutoForm";
-import {
-	ValueInput,
-	getObject,
-} from "@client/components/Config/EntityQueryBuilder";
-import produce from "immer";
+import { ValueInput } from "@client/components/Config/EntityQueryBuilder";
 import type { components } from "@server/components";
 import type { ValueQuery } from "@server/classes/Plugins/Timeline";
 import { matchSorter } from "match-sorter";
@@ -23,6 +20,9 @@ declare global {
 	// biome-ignore lint/suspicious/noRedeclare:
 	var z: ZodType;
 }
+if (typeof window !== "undefined") {
+	window.z = z;
+}
 
 export type ActionState = {
 	action: string;
@@ -30,15 +30,6 @@ export type ActionState = {
 	values: Record<string, string | ValueQuery>;
 };
 export type ActionAction =
-	| { type: "addAction" }
-	| {
-			type: "setAction";
-			path?: string;
-			name: string;
-			action: string;
-			input: any;
-	  }
-	| { type: "removeAction"; path: string }
 	| { type: "add"; path?: string }
 	| { type: "remove"; path: string }
 	| { type: "component"; path: string; value: keyof typeof components | "" }
@@ -51,104 +42,6 @@ export type ActionAction =
 	| { type: "comparison"; path: string; value: string | null }
 	| { type: "value"; path: string; value: string | ValueQuery }
 	| { type: "matchType"; path: string; value: "all" | "first" | "random" };
-
-function actionReducer(
-	state: ActionState[],
-	action: ActionAction,
-): ActionState[] {
-	switch (action.type) {
-		case "addAction":
-			return [...state, { action: "", name: "", values: {} }];
-		case "setAction":
-			return produce(state, (draft) => {
-				getObject(draft, action.path || "").name = action.name;
-				getObject(draft, action.path || "").name = action.action;
-				getObject(draft, action.path || "").input = action.input;
-			});
-
-		case "removeAction":
-			return produce(state, (draft) => {
-				draft.splice(Number(action.path), 1);
-			});
-
-		case "add":
-			return produce(state, (draft) => {
-				getObject(draft, action.path || "").push({
-					component: "",
-					property: "",
-					comparison: null,
-					value: "",
-				});
-			});
-		case "remove":
-			return produce(state, (draft) => {
-				const path = action.path.split(".").slice(0, -1).join(".");
-				let index: number | string | undefined = action.path.split(".").pop();
-				index = Number.isNaN(Number(index)) ? index : Number(index);
-				getObject(draft, path).splice(index, 1);
-			});
-		case "component":
-			return produce(state, (draft) => {
-				getObject(draft, action.path).component = action.value;
-				getObject(draft, action.path).property = "isPresent";
-				getObject(draft, action.path).comparison = null;
-			});
-
-		case "property":
-			return produce(state, (draft) => {
-				getObject(draft, action.path).property = action.value;
-				getObject(draft, action.path).comparison = action.comparison;
-			});
-		case "comparison":
-			return produce(state, (draft) => {
-				getObject(draft, action.path).comparison = action.value;
-			});
-		case "value":
-			return produce(state, (draft) => {
-				const path = action.path.split(".").slice(0, -1).join(".");
-				const property = action.path.split(".").pop()!;
-				getObject(draft, path)[property] = action.value;
-			});
-		case "matchType":
-			return produce(state, (draft) => {
-				getObject(draft, action.path).matchType = action.value;
-			});
-		default:
-			return state;
-	}
-}
-
-export function ActionBuilder() {
-	const [availableActions] = q.thorium.actions.useNetRequest();
-	const [actions, dispatch] = useReducer(actionReducer, [
-		{
-			...availableActions[0],
-			values: {},
-		},
-	]);
-
-	return (
-		<div className="flex flex-col gap-2">
-			{actions.map((action, i) => (
-				<ActionInput
-					key={i}
-					action={action}
-					input={
-						availableActions.find((a) => a.action === action.action)?.input
-					}
-					dispatch={dispatch}
-					path={`${i}`}
-				/>
-			))}
-			<button
-				className="btn btn-primary btn-xs max-w-fit"
-				onClick={() => dispatch({ type: "addAction" })}
-			>
-				Add Action
-			</button>
-		</div>
-	);
-}
 
 export function ActionCombobox({
 	value,
@@ -231,34 +124,45 @@ export function ActionCombobox({
 
 export function ActionInput({
 	action,
-	input,
 	dispatch,
 	path,
+	input,
 }: {
 	action: ActionState;
-	input: any;
 	dispatch: React.Dispatch<ActionAction>;
 	path: string;
+	input?: any;
 }) {
+	const [availableActions] = q.thorium.actions.useNetRequest();
+	const actionDef = availableActions.find((a) => a.action === action.action);
+	input = input || actionDef?.input;
+	const overrides = actionDef?.actionOverrides || {};
 	const actionSchema = action
 		? // biome-ignore lint/security/noGlobalEval:
-		  parseSchema(eval(parseJsonSchema(input)))
-		: null;
+		  parseSchema(eval(parseJsonSchema(input)), overrides)
+		: [];
 
-	return (
-		<>
-			{actionSchema?.map((item) => {
-				const value = action.values[item.key];
-				return (
-					<ValueInput
-						key={item.key}
-						value={value}
-						item={item}
-						dispatch={dispatch}
-						path={path}
-					/>
-				);
-			})}
-		</>
-	);
+	const inputs = [];
+	const queryInputs: string[] = [];
+	for (const item of actionSchema) {
+		const value = item.key
+			.split(".")
+			.reduce((acc: any, key) => acc?.[key], action.values);
+
+		if (value && typeof value === "object" && "query" in value) {
+			queryInputs.push(item.key);
+		}
+		const hasQueryInputParent = queryInputs.some((queryInput) =>
+			item.key.includes(`${queryInput}.`),
+		);
+		if (hasQueryInputParent) continue;
+		inputs.push(
+			<Fragment key={item.key}>
+				<ValueInput value={value} item={item} dispatch={dispatch} path={path} />
+				{item.helper && <p className="text-xs text-gray-400">{item.helper}</p>}
+			</Fragment>,
+		);
+	}
+
+	return inputs;
 }

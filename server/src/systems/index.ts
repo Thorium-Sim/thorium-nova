@@ -27,6 +27,9 @@ import { PhysicsMovementSystem } from "./PhysicsMovementSystem";
 import { PhysicsWorldPositionSystem } from "./PhysicsWorldPositionSystem";
 import { ShipBehaviorSystem } from "./ShipBehaviorSystem";
 import { NearbyObjectsSystem } from "./NearbyObjectsSystem";
+import { TorpedoLoadingSystem } from "./TorpedoLoadingSystem";
+import { TorpedoMovementSystem } from "./TorpedoMovementSystem";
+import { IsDestroyedSystem } from "./IsDestroyedSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -39,6 +42,7 @@ const systems = [
 	ReactorHeatSystem,
 	PowerDrawSystem,
 	PowerGridSystem,
+	TorpedoLoadingSystem,
 	NearbyObjectsSystem,
 	ShipBehaviorSystem,
 	AutoRotateSystem,
@@ -46,12 +50,14 @@ const systems = [
 	ThrusterSystem,
 	ImpulseSystem,
 	WarpSystem,
+	TorpedoMovementSystem,
 	PhysicsWorldPositionSystem,
 	PhysicsMovementSystem,
 	WaypointRemoveSystem,
 	HeatToCoolantSystem,
 	HeatDispersionSystem,
 	DebugSphereSystem,
+	IsDestroyedSystem,
 	DataStreamSystem,
 	ProcessTriggersSystem,
 ];

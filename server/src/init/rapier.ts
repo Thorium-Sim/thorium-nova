@@ -1,4 +1,4 @@
-import RAPIER from "@dimforge/rapier3d-compat";
+import RAPIER, { type World } from "@thorium-sim/rapier3d-node";
 import { getOrbitPosition } from "@server/utils/getOrbitPosition";
 import type { ECS, Entity } from "../utils/ecs";
 import { Euler, Quaternion, Vector, Vector3 } from "three";
@@ -9,18 +9,8 @@ import {
 	solarMassToKilograms,
 	terranMassToKilograms,
 } from "@server/utils/unitTypes";
-import type { World } from "@dimforge/rapier3d-compat";
+import { COLLISION_PHYSICS_LIMIT, SECTOR_GRID_SIZE } from "./rapierConsts";
 
-/**
- * In 32-bit floating point, precision is lost after 2^24,
- * so we limit the physics world to +/- 2^24 meters.
- */
-export const COLLISION_PHYSICS_LIMIT: Kilometer = Math.floor(2 ** 24 / 1000);
-export const SECTOR_GRID_SIZE: Kilometer = COLLISION_PHYSICS_LIMIT * 2;
-export const SECTOR_GRID_OFFSET: Kilometer = SECTOR_GRID_SIZE / 2;
-export async function initRapier() {
-	await RAPIER.init();
-}
 export { RAPIER };
 
 const tempVector = new Vector3();
@@ -76,10 +66,11 @@ export function generateRigidBody(
 		  ? "star"
 		  : entity.components.isShip
 			  ? "ship"
-			  : entity.components.debugSphere
-				  ? "debugSphere"
-				  : "unknown";
-
+			  : entity.components.isTorpedo
+				  ? "torpedo"
+				  : entity.components.debugSphere
+					  ? "debugSphere"
+					  : "unknown";
 	switch (type) {
 		case "planet": {
 			if (!entity.components.satellite || !entity.components.isPlanet) break;
@@ -88,7 +79,6 @@ export function generateRigidBody(
 			rotation.setFromEuler(euler);
 			const worldPosition = getWorldPosition(position);
 			universeToWorld(position, worldPosition);
-
 			const bodyDesc = new RAPIER.RigidBodyDesc(RAPIER.RigidBodyType.Fixed)
 				.setTranslation(position.x, position.y, position.z)
 				.setRotation({
@@ -155,6 +145,36 @@ export function generateRigidBody(
 
 			return res.body;
 		}
+		case "torpedo": {
+			if (!entity.components.isTorpedo) break;
+
+			tempVector.set(
+				entity.components.position?.x || 0,
+				entity.components.position?.y || 0,
+				entity.components.position?.z || 0,
+			);
+			const worldPosition = getWorldPosition(tempVector);
+			universeToWorld(tempVector, worldPosition);
+
+			const torpedoRadius = 0.002;
+			const torpedoMass = entity.components.mass?.mass || 1500;
+
+			const bodyDesc = new RAPIER.RigidBodyDesc(
+				RAPIER.RigidBodyType.Dynamic,
+			).setTranslation(tempVector.x, tempVector.y, tempVector.z);
+			const body = world.createRigidBody(bodyDesc);
+			body.userData = { entityId: entity.id };
+			body.enableCcd(true);
+
+			const colliderDesc = new RAPIER.ColliderDesc(
+				new RAPIER.Ball(torpedoRadius),
+			)
+				.setMass(torpedoMass)
+				.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
+			world.createCollider(colliderDesc, body);
+
+			return body;
+		}
 		case "debugSphere":
 			break;
 		default:
@@ -179,6 +199,7 @@ function generateShipRigidBody(
 			z: rotation.z,
 		});
 	const rigidBody = world.createRigidBody(rigidBodyDesc);
+	colliderDesc.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
 	const collider = world.createCollider(colliderDesc, rigidBody);
 
 	return { collider, body: rigidBody, world };
@@ -251,10 +272,7 @@ export function getEntityWorld(ecs: ECS, entity: Entity) {
 		});
 	if (typeof position?.parentId !== "number") return null;
 	const entitySector = getSectorNumber(position);
-	let world: Entity | null = null;
-
-	ecs.componentCache.get("physicsWorld")?.forEach((worldEntity) => {
-		if (world) return;
+	for (const worldEntity of ecs.componentCache.get("physicsWorld") || []) {
 		let {
 			location,
 			world: physicsWorld,
@@ -266,9 +284,9 @@ export function getEntityWorld(ecs: ECS, entity: Entity) {
 			});
 			physicsWorld = entity.components.physicsWorld?.world;
 		}
-		if (!location || !enabled) return;
+		if (!location || !enabled) continue;
 		const key = getSectorNumber(location);
-		if (key === entitySector) world = worldEntity;
-	});
-	return world as Entity | null;
+		if (key === entitySector) return worldEntity;
+	}
+	return null;
 }

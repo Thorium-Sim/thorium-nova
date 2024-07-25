@@ -34,6 +34,7 @@ export const remoteAccess = t.router({
 			return codes;
 		}),
 	send: t.procedure
+		.meta({ event: true })
 		.input(z.object({ code: z.string().min(1) }))
 		.send(({ ctx, input }) => {
 			const { code } = input;
@@ -57,10 +58,12 @@ export const remoteAccess = t.router({
 		}),
 
 	accept: t.procedure
-		.input(z.object({ id: z.number() }))
+		.meta({ action: true, event: true })
+		.input(z.object({ remoteAccessCodeId: z.number() }))
 		.send(({ ctx, input }) => {
-			const { id } = input;
-			const remoteAccessCode = ctx.flight?.ecs.getEntityById(id);
+			const { remoteAccessCodeId } = input;
+			const remoteAccessCode =
+				ctx.flight?.ecs.getEntityById(remoteAccessCodeId);
 			if (!remoteAccessCode) return;
 
 			remoteAccessCode.updateComponent("remoteAccessCode", {
@@ -74,10 +77,12 @@ export const remoteAccess = t.router({
 			// TODO: Add notification to the client
 		}),
 	deny: t.procedure
-		.input(z.object({ id: z.number() }))
+		.meta({ action: true, event: true })
+		.input(z.object({ remoteAccessCodeId: z.number() }))
 		.send(({ ctx, input }) => {
-			const { id } = input;
-			const remoteAccessCode = ctx.flight?.ecs.getEntityById(id);
+			const { remoteAccessCodeId } = input;
+			const remoteAccessCode =
+				ctx.flight?.ecs.getEntityById(remoteAccessCodeId);
 			if (!remoteAccessCode) return;
 
 			remoteAccessCode.updateComponent("remoteAccessCode", {

@@ -18,7 +18,7 @@ import {
 import WaypointTexture from "@client/components/Starmap/Waypoint.svg";
 import StrokeTexture from "@client/components/Starmap/WaypointStroke.svg";
 import { getWaypointRelativePosition } from "./getWaypointRelativePosition";
-import { usePilotStore } from "./usePilotStore";
+import { useCircleGridStore } from "./useCircleGridStore";
 import { degToRad } from "@server/utils/unitTypes";
 
 type WaypointItem = inferTransformedProcedureOutput<
@@ -44,7 +44,7 @@ export const WaypointEntity = ({
 }) => {
 	const spriteMap = useTexture(WaypointTexture);
 	const strokeMap = useTexture(StrokeTexture);
-
+	const store = useCircleGridStore();
 	const group = useRef<Group>(null);
 	const sprite = useRef<Sprite>(null);
 	const stroke = useRef<Sprite>(null);
@@ -141,9 +141,7 @@ export const WaypointEntity = ({
 						if (sprite.current && stroke.current) {
 							sprite.current.material.rotation = angle + Math.PI / 2;
 							stroke.current.material.rotation = angle + Math.PI / 2;
-							if (
-								usePilotStore.getState().facingWaypoints.includes(waypoint.id)
-							) {
+							if (store.getState().facingWaypoints.includes(waypoint.id)) {
 								sprite.current.material.color.setRGB(0, 0.5, 1);
 							} else {
 								sprite.current.material.color.setRGB(0.9, 0.6, 0);

@@ -14,13 +14,17 @@ export function RemoteAccessCore() {
 					/>
 					<button
 						className="btn btn-xs btn-error"
-						onClick={() => q.remoteAccess.deny.netSend({ id: code.id })}
+						onClick={() =>
+							q.remoteAccess.deny.netSend({ remoteAccessCodeId: code.id })
+						}
 					>
 						Deny
 					</button>
 					<button
 						className="btn btn-xs btn-success"
-						onClick={() => q.remoteAccess.accept.netSend({ id: code.id })}
+						onClick={() =>
+							q.remoteAccess.accept.netSend({ remoteAccessCodeId: code.id })
+						}
 					>
 						Accept
 					</button>

@@ -26,6 +26,7 @@ import { Icon } from "@thorium/ui/Icon";
 
 export function Navigation(props: CardProps) {
 	q.navigation.stream.useDataStream();
+
 	return (
 		<StarmapStoreProvider>
 			<div className="mx-auto h-full bg-black/70 border border-white/50 relative">

@@ -31,6 +31,7 @@ export function InterstellarMap({ children }: { children: React.ReactNode }) {
 	const cameraView = useStarmapStore((s) => s.cameraView);
 	const orbitControls = useRef<CameraControlsClass>(null);
 	const { camera } = useThree();
+	camera.userData.id = "interstellar-camera";
 	// biome-ignore lint/correctness/useExhaustiveDependencies:
 	useEffect(() => {
 		// Set the initial camera position

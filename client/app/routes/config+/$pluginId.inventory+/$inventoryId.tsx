@@ -13,6 +13,7 @@ import InfoTip from "@thorium/ui/InfoTip";
 import { q } from "@client/context/AppContext";
 import { Popover, Transition } from "@headlessui/react";
 import { Icon } from "@thorium/ui/Icon";
+import Select from "@thorium/ui/Select";
 
 export default function InventoryLayout() {
 	const { inventoryId, pluginId } = useParams() as {
@@ -266,38 +267,81 @@ export default function InventoryLayout() {
 											<Popover.Panel className="absolute right-0 z-10 bg-black/90 border border-white/50 rounded p-2 w-max max-w-lg">
 												{Object.entries(value).map(([config, value]) => {
 													if (config === "info") return null;
-													return (
-														<Input
-															key={config}
-															label={capitalCase(config)}
-															type="text"
-															inputMode="numeric"
-															pattern="[0-9]*"
-															defaultValue={
-																// @ts-expect-error Pain to type these literal keys
-																item.flags[flagKey]?.[config] ??
-																value.defaultValue
-															}
-															helperText={value.info}
-															onChange={(e) => {
-																if (Number.isNaN(Number(e.target.value)))
-																	return;
-																q.plugin.inventory.update.netSend({
-																	pluginId,
-																	inventoryId,
-																	flags: {
-																		...{
-																			...item.flags,
-																			[key]: {
-																				...item.flags[flagKey],
-																				[config]: Number(e.target.value),
-																			},
-																		},
+													function updateValue(value: any) {
+														q.plugin.inventory.update.netSend({
+															pluginId,
+															inventoryId,
+															flags: {
+																...{
+																	...item?.flags,
+																	[key]: {
+																		...item?.flags[flagKey],
+																		[config]: value,
 																	},
-																});
-															}}
-														/>
-													);
+																},
+															},
+														});
+													}
+													if (typeof value.defaultValue === "number")
+														return (
+															<Input
+																key={config}
+																label={capitalCase(config)}
+																type="text"
+																inputMode="numeric"
+																pattern="[0-9]*"
+																defaultValue={
+																	// @ts-expect-error Pain to type these literal keys
+																	item.flags[flagKey]?.[config] ??
+																	value.defaultValue
+																}
+																helperText={value.info}
+																onChange={(e) => {
+																	if (Number.isNaN(Number(e.target.value)))
+																		return;
+																	updateValue(Number(e.target.value));
+																}}
+															/>
+														);
+													if (Array.isArray(value.options)) {
+														const items: { id: string; label: string }[] =
+															value.options.map((o: string) => ({
+																id: o,
+																label: capitalCase(o),
+															}));
+														return (
+															<Select
+																label={capitalCase(config)}
+																items={items}
+																selected={
+																	// @ts-expect-error Pain to type these literal keys
+																	item.flags[flagKey]?.[config] || null
+																}
+																setSelected={(value) => {
+																	if (Array.isArray(value)) return;
+																	updateValue(value.id);
+																}}
+															/>
+														);
+													}
+													if (typeof value.defaultValue === "string")
+														return (
+															<Input
+																key={config}
+																label={capitalCase(config)}
+																type="text"
+																defaultValue={
+																	// @ts-expect-error Pain to type these literal keys
+																	item.flags[flagKey]?.[config] ??
+																	value.defaultValue
+																}
+																helperText={value.info}
+																onChange={(e) => {
+																	updateValue(e.target.value);
+																}}
+															/>
+														);
+													return null;
 												})}
 											</Popover.Panel>
 										</Transition>

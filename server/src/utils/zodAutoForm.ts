@@ -1,3 +1,4 @@
+import type { ActionOverrides } from "@client/data";
 import type z from "zod";
 type ZodObjectOrWrapped =
 	| z.ZodObject<any, any>
@@ -175,65 +176,113 @@ export const ZOD_COMPARISONS = {
 };
 
 export type InputTypes =
+	| "object"
 	| "text"
 	| "number"
 	| "select"
 	| "checkbox"
 	| "date"
-	| "tags";
+	| "tags"
+	| "room"
+	| "starmapCoordinates"
+	| "shipTemplate"
+	| "components";
 
 export function getInputType<T extends keyof typeof ZOD_COMPARISONS>(
 	item: {
 		key: string;
-		itemName: string;
-		zodBaseType: any;
-		baseValues: any;
+		name: string;
+		type: any;
+		values: any;
 	},
 	comparison: (typeof ZOD_COMPARISONS)[T][number] | null,
 ): InputTypes {
 	if (item.key === "tags") return "tags";
-	if (!item.zodBaseType) return "text";
-	if (item.zodBaseType === "ZodArray") {
+	if (!item.type) return "text";
+	if (item.type === "ZodArray") {
 		if (comparison === "contains") return "text";
 		return "number";
 	}
-	if (item.zodBaseType === "ZodEnum") {
+	if (item.type === "ZodEnum" || item.type === "select") {
 		return "select";
 	}
-	if (item.zodBaseType in DEFAULT_ZOD_HANDLERS) {
-		return DEFAULT_ZOD_HANDLERS[
-			item.zodBaseType as keyof typeof DEFAULT_ZOD_HANDLERS
-		];
+	if (item.type === "ZodObject" || item.type === "object") {
+		return "object";
 	}
-	return "text";
+	if (item.type in DEFAULT_ZOD_HANDLERS) {
+		return DEFAULT_ZOD_HANDLERS[item.type as keyof typeof DEFAULT_ZOD_HANDLERS];
+	}
+
+	return item.type as any;
 }
 
+function getItemFromShape(shape: any, name: string) {
+	const item = shape[name] as z.ZodAny;
+
+	if ("unwrap" in item && item.unwrap && typeof item.unwrap === "function") {
+		return item.unwrap();
+	}
+
+	return item;
+}
+
+type ParsedSchema = {
+	type: string;
+	name: string;
+	key: string;
+	isRequired: boolean;
+	inputProps: React.InputHTMLAttributes<HTMLInputElement>;
+	values: any;
+	helper?: string;
+	isNested: boolean;
+	path: string;
+}[];
 const fieldConfig = {} as any;
-export function parseSchema(schema: any) {
+export function parseSchema(
+	schema: any,
+	overrides: Record<string, ActionOverrides> = {},
+	nestedName?: string,
+): ParsedSchema {
 	if (!schema) return [];
 	const { shape } = schema;
 	if (!shape) return [];
-	return Object.keys(shape).map((name) => {
-		const item = shape[name] as z.ZodAny;
-		const zodBaseType = getBaseType(item);
-		const itemName = item._def.description ?? beautifyObjectName(name);
-		const key = name;
+	return Object.keys(shape).flatMap((name) => {
+		let output: ParsedSchema = [];
+		const item = getItemFromShape(shape, name);
+		const type = overrides[name]?.type || getBaseType(item);
+		if (type === "ZodObject") {
+			const objectSchema = getObjectFormSchema(
+				item as unknown as ZodObjectOrWrapped,
+			);
+			output = output.concat(parseSchema(objectSchema, overrides, name));
+		}
+		const itemName =
+			overrides[name]?.name ??
+			item._def.description ??
+			beautifyObjectName(name);
 
-		const baseValues = (getBaseSchema(item) as unknown as z.ZodEnum<any>)._def
-			.values;
+		const key = `${nestedName ? `${nestedName}.` : ""}${name}`;
+
+		const values =
+			overrides[name]?.values ||
+			(getBaseSchema(item) as unknown as z.ZodEnum<any>)._def.values;
 
 		const fieldConfigItem = fieldConfig?.[name] ?? {};
-		const zodInputProps = zodToHtmlInputProps(item);
+		const inputProps = zodToHtmlInputProps(item);
 		const isRequired =
-			zodInputProps.required ?? fieldConfigItem.inputProps?.required ?? false;
+			inputProps.required ?? fieldConfigItem.inputProps?.required ?? false;
 
-		return {
-			zodBaseType,
-			itemName,
+		output.unshift({
+			type: type,
+			name: itemName,
 			key,
 			isRequired,
-			zodInputProps,
-			baseValues,
-		};
+			inputProps,
+			values,
+			helper: overrides[name]?.helper,
+			isNested: !!nestedName,
+			path: nestedName || "",
+		});
+		return output;
 	});
 }

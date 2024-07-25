@@ -88,7 +88,10 @@ export abstract class FSDataStore {
 		let data: any;
 		try {
 			data = this.filePath
-				? load(readFileSync(this.filePath, "utf8"))
+				? load(readFileSync(this.filePath, "utf8"), {
+						json: true,
+						onWarning: (e) => console.warn("YAML load warning:", e),
+				  })
 				: this.initialData;
 		} catch (err: any) {
 			if (err.code === "EACCES") {

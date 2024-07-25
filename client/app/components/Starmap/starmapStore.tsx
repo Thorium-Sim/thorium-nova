@@ -8,7 +8,7 @@ import {
 	useState,
 } from "react";
 import type { Coordinates } from "@server/utils/unitTypes";
-import { Vector3 } from "three";
+import { type Plane, Vector3 } from "three";
 import create from "zustand";
 
 interface StarmapStore {
@@ -36,7 +36,7 @@ interface StarmapStore {
 		category: string;
 		vanity: string;
 	};
-	translate2DTo3D?: (x: number, y: number) => Vector3;
+	translate2DTo3D?: (x: number, y: number, plane?: Plane) => Vector3;
 	getObjectsUnderCursor?: () => any[];
 	setCameraFocus: (position: Coordinates<number>) => void;
 	planetsHidden: boolean;

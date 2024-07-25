@@ -19,6 +19,7 @@ import { StarmapShip } from "@client/components/Starmap/StarmapShip";
 import { WaypointEntity } from "@client/components/Starmap/WaypointEntity";
 import { q } from "@client/context/AppContext";
 import { keepPreviousData } from "@tanstack/react-query";
+import { setCursor } from "@client/utils/setCursor";
 
 export function SolarSystemWrapper() {
 	const useStarmapStore = useGetStarmapStore();
@@ -65,10 +66,10 @@ export function SolarSystemWrapper() {
 							<group
 								scale={[size, size, size]}
 								onPointerOver={(e) => {
-									document.body.style.cursor = "pointer";
+									setCursor("pointer");
 								}}
 								onPointerOut={(e) => {
-									document.body.style.cursor = "auto";
+									setCursor("auto");
 								}}
 								onClick={() => {
 									if (entity.components.satellite) {
@@ -127,6 +128,7 @@ export function SolarSystemWrapper() {
 						<StarmapShip
 							id={ship.id}
 							logoUrl={ship.icon}
+							size={ship.size}
 							spriteColor={0x0088ff}
 						/>
 					</ErrorBoundary>
@@ -187,10 +189,10 @@ function PlanetRenderer({
 					<group
 						scale={[planetSpriteScale, planetSpriteScale, planetSpriteScale]}
 						onPointerOver={(e) => {
-							document.body.style.cursor = "pointer";
+							setCursor("pointer");
 						}}
 						onPointerOut={(e) => {
-							document.body.style.cursor = "auto";
+							setCursor("auto");
 						}}
 						onClick={onClick}
 					>

@@ -55,16 +55,21 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
 		) => {
 			return client.netRequest({ path, input, headers, signal });
 		},
+		getQueryKey: (path: string, input: any) => {
+			return getArrayQueryKey(getQueryKey(path, input));
+		},
 		useNetRequest: (path: string, input: any, ...args: unknown[]) => {
 			useRequestSub({ path, params: input });
 			const firstArg = args[0] || {};
 			const { callback, ...opts } = firstArg as any;
 			const data = useContext(MockNetRequestContext);
-
 			const queryKey = getArrayQueryKey(getQueryKey(path, input));
 			const result = useSuspenseQuery({
 				...opts,
 				queryFn: ({ signal }: { signal: any }) => {
+					if (data) {
+						return path.split(".").reduce((prev, next) => prev[next], data);
+					}
 					return client.netRequest({ path, input, signal });
 				},
 				queryKey,
@@ -74,7 +79,7 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
 				networkMode: "always",
 				staleTime: Number.POSITIVE_INFINITY,
 				cacheTime: Number.POSITIVE_INFINITY,
-				enabled: !!data || opts.enabled,
+				enabled: opts.enabled,
 			});
 			const key = JSON.stringify(queryKey);
 
@@ -89,10 +94,6 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
 					return () => unsub();
 				}
 			}, [key]);
-
-			if (data) {
-				return [path.split(".").reduce((prev, next) => prev[next], data), {}];
-			}
 
 			return [result.data, result];
 		},

@@ -35,12 +35,16 @@ await Promise.all([
 		path.join("../dist/defaultPlugin.plug"),
 		{ ignoreFiles },
 	),
-	fs.copyFile(
+	await fs.copyFile(
 		"../desktop/resources/server.cert",
 		"../dist/resources/server.cert",
 	),
-	fs.copyFile(
+	await fs.copyFile(
 		"../desktop/resources/server.key",
 		"../dist/resources/server.key",
+	),
+	await fs.copyFile(
+		"../node_modules/@thorium-sim/rapier3d-node/dist/rapier_wasm3d_bg.wasm",
+		"../dist/rapier_wasm3d_bg.wasm",
 	),
 ]);

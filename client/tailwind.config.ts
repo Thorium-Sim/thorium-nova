@@ -2,7 +2,7 @@ import plugin, { type Config } from "tailwindcss";
 import { tailwindComponents } from "./tailwindComponents";
 import daisyUi from "daisyui";
 import typography from "@tailwindcss/typography";
-
+import containerQueries from "@tailwindcss/container-queries";
 export default {
 	content: ["./app/**/*.{js,ts,jsx,tsx}"],
 	theme: {
@@ -103,7 +103,7 @@ export default {
 	plugins: [
 		daisyUi,
 		typography,
-
+		containerQueries,
 		// @ts-expect-error
 		plugin(({ addComponents }) => {
 			addComponents(tailwindComponents);

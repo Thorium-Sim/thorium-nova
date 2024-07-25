@@ -48,7 +48,7 @@ export function InterstellarWrapper() {
 						FallbackComponent={() => <></>}
 						onError={(err) => console.error(err)}
 					>
-						<StarmapShip id={ship.id} logoUrl={ship.icon} />
+						<StarmapShip id={ship.id} size={ship.size} logoUrl={ship.icon} />
 					</ErrorBoundary>
 				</Suspense>
 			)}

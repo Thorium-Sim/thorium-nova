@@ -3,6 +3,8 @@ import { useNavigate, useParams, Outlet } from "@remix-run/react";
 import type { DragEndEvent } from "@dnd-kit/core";
 import { q } from "@client/context/AppContext";
 import { SortableList } from "@client/components/ui/SortableItem";
+import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ShipMap() {
 	const { pluginId, shipId, deckName } = useParams() as {
@@ -11,7 +13,10 @@ export default function ShipMap() {
 		deckName: string;
 	};
 	const navigate = useNavigate();
+	const confirm = useConfirm();
+	const prompt = usePrompt();
 	const [data] = q.plugin.ship.get.useNetRequest({ pluginId, shipId });
+	const queryClient = useQueryClient();
 
 	async function handleDragEnd({
 		active,
@@ -41,7 +46,7 @@ export default function ShipMap() {
 					className="mb-2"
 				/>
 				<Button
-					className="btn-success w-full"
+					className="btn-success w-full btn-sm"
 					onClick={async () => {
 						const deck = await q.plugin.ship.deck.create.netSend({
 							pluginId,
@@ -53,6 +58,68 @@ export default function ShipMap() {
 				>
 					Add Deck
 				</Button>
+				<div className="grid gap-2 grid-cols-2 mt-2">
+					<Button
+						className="btn-sm"
+						disabled={deckName && deckName.length > 0 ? false : true}
+						title={
+							deckName && deckName.length > 0
+								? ""
+								: "Select a deck to be able to rename it"
+						}
+						onClick={async (event) => {
+							event.preventDefault();
+							event.stopPropagation();
+							const deckname = await prompt({
+								header: "Change the current deck's name",
+								body: "Give this deck a distinct name",
+								defaultValue: deckName,
+								inputProps: { className: "input-error" },
+							});
+							if (typeof deckname === "string") {
+								const result = await q.plugin.ship.deck.update.netSend({
+									pluginId,
+									shipId,
+									deckId: deckName,
+									newName: deckname,
+								});
+								if (result) {
+									await queryClient.resetQueries({
+										queryKey: q.plugin.ship.get.getQueryKey({
+											pluginId,
+											shipId,
+										}),
+									});
+									navigate(`${result.name}`);
+								}
+							}
+						}}
+					>
+						Rename
+					</Button>
+					<Button
+						className="btn-error btn-sm"
+						disabled={deckName ? false : true}
+						onClick={async (event) => {
+							event.preventDefault();
+							event.stopPropagation();
+							if (
+								await confirm({
+									header: `Are you sure you want to delete deck '${deckName}'?`,
+								})
+							) {
+								await q.plugin.ship.deck.delete.netSend({
+									pluginId,
+									shipId,
+									deckId: deckName,
+								});
+								navigate(`.`);
+							}
+						}}
+					>
+						Delete
+					</Button>
+				</div>
 			</div>
 			<Outlet />
 		</>

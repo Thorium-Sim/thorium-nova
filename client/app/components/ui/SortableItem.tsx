@@ -51,7 +51,7 @@ export function SortableItem({
 			{...attributes}
 			{...listeners}
 			className={cn(
-				`list-group-item !p-0 transition-[border-radius] touch-none ${
+				`list-group-item transition-[border-radius] touch-none ${
 					isDragging ? "!border !rounded isolate" : ""
 				}`,
 				className,
@@ -59,20 +59,14 @@ export function SortableItem({
 			onClick={onClick}
 		>
 			{onClick ? (
-				<span
-					className={`block px-4 py-2 ${
-						isDragging ? "pointer-events-none" : ""
-					}`}
-				>
+				<span className={`block ${isDragging ? "pointer-events-none" : ""}`}>
 					{children}
 				</span>
 			) : (
 				<Link
 					to={id || "#"}
 					// Pointer-events-none is necessary to avoid navigating when the sorting is done
-					className={`block px-4 py-2 ${
-						isDragging ? "pointer-events-none" : ""
-					}`}
+					className={`block ${isDragging ? "pointer-events-none" : ""}`}
 				>
 					{children}
 				</Link>
@@ -89,7 +83,7 @@ export function SortableList({
 	selectedItem,
 	onClick,
 }: {
-	items: { id: string; children: ReactNode }[];
+	items: { id: string; children: ReactNode; className?: string }[];
 	selectedItem?: string;
 	onDragEnd: (params: {
 		active: DragEndEvent["active"];
@@ -146,7 +140,10 @@ export function SortableList({
 							<SortableItem
 								key={item.id}
 								id={item.id}
-								className={selectedItem === item.id ? "selected" : ""}
+								className={cn(
+									item.className,
+									selectedItem === item.id ? "selected" : "",
+								)}
 								onClick={onClick ? () => onClick?.(item.id, index) : undefined}
 							>
 								{item.children}

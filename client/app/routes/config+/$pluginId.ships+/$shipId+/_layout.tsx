@@ -10,6 +10,7 @@ import {
 	Link,
 } from "@remix-run/react";
 import { Navigate } from "@client/components/Navigate";
+import { Suspense } from "react";
 
 export default function ShipLayout() {
 	const { pathname } = useLocation();

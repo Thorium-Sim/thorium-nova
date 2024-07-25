@@ -2,7 +2,6 @@ import * as Cards from "@client/cards";
 import { q } from "@client/context/AppContext";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import {
-	ComponentPropsWithoutRef,
 	type ComponentType,
 	type FC,
 	type ReactElement,
@@ -12,12 +11,14 @@ import {
 import { GamepadConfig, useGamepadStore } from "@client/hooks/useGamepadStore";
 import { Popover, Transition } from "@headlessui/react";
 import {
+	autoUpdate,
 	useClick,
 	useDismiss,
 	useFloating,
 	useInteractions,
 } from "@floating-ui/react";
 import { Icon, type IconName } from "@thorium/ui/Icon";
+import { cn } from "@client/utils/cn";
 
 type IconType = IconName | ReactElement;
 
@@ -41,6 +42,7 @@ export const Widgets = () => {
 							/>
 						}
 						component={WidgetComp}
+						size={widget.size}
 					/>
 				);
 			})}
@@ -74,13 +76,15 @@ export const Widget: FC<{
 		isOpen: boolean;
 		onClose: () => void;
 	}>;
-}> = ({ name, icon, component: Component }) => {
+	size?: "sm" | "md" | "lg" | "xl";
+}> = ({ name, icon, component: Component, size = "sm" }) => {
 	const [isOpen, setIsOpen] = useState(false);
 
-	const { x, y, strategy, refs, context } = useFloating({
+	const { x, y, strategy, refs, context, update } = useFloating({
 		open: isOpen,
 		onOpenChange: setIsOpen,
 		placement: "top-end",
+		whileElementsMounted: autoUpdate,
 	});
 
 	const dismiss = useDismiss(context);
@@ -115,7 +119,15 @@ export const Widget: FC<{
 				leaveTo="transform scale-95 opacity-0"
 			>
 				<Popover.Panel
-					className="absolute isolate right-0 z-50 bg-black/90 border border-white/50 rounded p-2 w-max max-w-lg"
+					className={cn(
+						"max-w-md absolute isolate right-0 max-h-96 z-50 !bg-black/90 panel backdrop-blur border border-white/50 rounded p-2 w-screen @container overflow-hidden",
+						{
+							"max-w-sm": size === "sm",
+							"max-w-lg": size === "md",
+							"max-w-xl": size === "lg",
+							"max-w-2xl": size === "xl",
+						},
+					)}
 					ref={refs.setFloating}
 					style={{
 						position: strategy,

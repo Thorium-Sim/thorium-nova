@@ -23,7 +23,7 @@ const CardError = () => {
 };
 
 const transitionProps = {
-	className: "w-full h-full absolute",
+	className: "w-full h-full absolute @container",
 	enter: "card-transition-enter",
 	enterFrom: "card-transition-enter-from",
 	enterTo: "card-transition-enter-to",

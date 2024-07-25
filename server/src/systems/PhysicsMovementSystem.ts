@@ -8,7 +8,11 @@ import {
 	universeToWorld,
 	worldToUniverse,
 } from "@server/init/rapier";
-import type { RigidBody, World } from "@dimforge/rapier3d-compat";
+import type { RigidBody, World } from "@thorium-sim/rapier3d-node";
+import {
+	handleCollisionDamage,
+	handleTorpedoDamage,
+} from "@server/utils/collisionDamage";
 
 const tempObj = new Object3D();
 const tempVector = new Vector3();
@@ -18,6 +22,7 @@ const rotationVelocityVector = new Vector3();
 const velocityEuler = new Euler();
 const velocityQuaternion = new Quaternion();
 const BRAKE_CONSTANT = 0.99;
+const eventQueue = new RAPIER.EventQueue(true);
 
 /**
  * This system applies the physics of anything flying through space
@@ -42,12 +47,13 @@ export class PhysicsMovementSystem extends System {
 		this.collisionStepEntities.clear();
 	}
 	update(entity: Entity, elapsed: number) {
+		if (this.ecs.colliderCache.size === 0) return;
 		// Determine whether the entity is using collision or simple physics
 		// and update the position accordingly.
 		const worldEntity = getEntityWorld(this.ecs, entity);
-		const world = worldEntity?.components.physicsWorld?.world;
+		const world = worldEntity?.components.physicsWorld?.world as World;
 		const handles = entity.components.physicsHandles?.handles || new Map();
-
+		handles.set("blah", entity.id);
 		// Nab some systems to use elsewhere.
 		const systems: Entity[] = [];
 		entity.components.shipSystems?.shipSystems.forEach((shipSystem, id) => {
@@ -77,22 +83,18 @@ export class PhysicsMovementSystem extends System {
 			const { x, y, z, w } = entity.components.rotation;
 			tempObj.quaternion.set(x, y, z, w);
 		}
-
 		if (world) {
 			// Make sure the entity in question has a corresponding body in the physics world.
-			const handle = handles.get(entity.id);
-			let body: RigidBody | null =
-				typeof handle === "number" && world.bodies.get(handle);
-			if (!body) {
-				// Generate a body for the component and store the handle on the entity
-				body = generateRigidBody(world, entity, this.ecs.colliderCache) || null;
-				if (typeof body?.handle === "number") {
-					handles.set(entity.id, body.handle);
-					entity.updateComponent("physicsHandles", { handles });
-				}
+			const handle = handles?.get(worldEntity?.id);
+			const body =
+				typeof handle === "number"
+					? world.getRigidBody(handle)
+					: generateRigidBody(world, entity, this.ecs.colliderCache) || null;
+			if (typeof body?.handle === "number") {
+				handles?.set(worldEntity?.id, body.handle);
+				entity.updateComponent("physicsHandles", { handles });
 			}
 
-			// eslint-disable-next-line no-labels
 			if (body && !isHighSpeed) {
 				/**
 				 * Collision Physics
@@ -101,91 +103,93 @@ export class PhysicsMovementSystem extends System {
 
 				// Transform the position of the body based on the position of the entity relative
 				// to the position of the physics world entity.
-				if (
-					entity.components.position &&
-					entity.components.rotation &&
-					entity.components.velocity &&
-					entity.components.rotationVelocity
-				) {
+				if (entity.components.position) {
 					let positionVector = tempVector.set(
 						entity.components.position.x,
 						entity.components.position.y,
 						entity.components.position.z,
 					);
-
 					const worldPosition = getWorldPosition(positionVector);
 					positionVector = universeToWorld(positionVector, worldPosition);
 					body.setTranslation(positionVector, true);
+				}
+				if (entity.components.rotation) {
 					body.setRotation(entity.components.rotation, true);
+				}
+				if (entity.components.velocity) {
 					body.setLinvel(entity.components.velocity, true);
+				}
+				if (entity.components.rotationVelocity) {
 					body.setAngvel(entity.components.rotationVelocity, true);
-					/**
-					 * Inertial Dampeners
-					 */
-					body.setAngularDamping(dampening);
-					body.setLinearDamping(dampening);
+				}
 
-					/**
-					 * Warp Engines
-					 * They're weird, because they ignore mass. So we really
-					 * should just set the velocity directly.
-					 */
-					if (warpEngines?.components.isWarpEngines) {
-						const warpVelocity = tempObj.localToWorld(
-							tempVector.set(
-								0,
-								0,
-								warpEngines.components.isWarpEngines.forwardVelocity,
-							),
-						);
-						const linvel = body.linvel();
-						body.setLinvel(
-							{
-								x: warpVelocity.x + linvel.x,
-								y: warpVelocity.y + linvel.y,
-								z: warpVelocity.z + linvel.z,
-							},
-							true,
-						);
-					}
+				/**
+				 * Inertial Dampeners
+				 */
+				body.setAngularDamping(dampening);
+				body.setLinearDamping(dampening);
 
-					/**
-					 * Impulse Engines
-					 */
-					body.applyImpulse(
-						tempObj.localToWorld(tempVector.set(0, 0, forwardImpulse)),
+				/**
+				 * Warp Engines
+				 * They're weird, because they ignore mass. So we really
+				 * should just set the velocity directly.
+				 */
+				if (warpEngines?.components.isWarpEngines) {
+					const warpVelocity = tempObj.localToWorld(
+						tempVector.set(
+							0,
+							0,
+							warpEngines.components.isWarpEngines.forwardVelocity,
+						),
+					);
+					const linvel = body.linvel();
+					body.setLinvel(
+						{
+							x: warpVelocity.x + linvel.x,
+							y: warpVelocity.y + linvel.y,
+							z: warpVelocity.z + linvel.z,
+						},
 						true,
 					);
+				}
 
-					/**
-					 * Thrusters
-					 */
-					if (thrusters?.components.isThrusters) {
-						{
-							const { x, y, z } =
-								thrusters.components.isThrusters.directionImpulse;
-							tempVector.set(x, y, z);
-							body.applyImpulse(tempObj.localToWorld(tempVector), true);
-						}
+				/**
+				 * Impulse Engines
+				 */
+				body.applyImpulse(
+					tempObj.localToWorld(tempVector.set(0, 0, forwardImpulse)),
+					true,
+				);
 
-						// Set the max rotation velocity
-						const { x, y, z } = body.angvel();
-						if (
-							tempVector.set(x, y, z).lengthSq() >
-							thrusters.components.isThrusters.rotationMaxSpeed
-						) {
-							tempVector.multiplyScalar(BRAKE_CONSTANT);
-							const { x, y, z } = tempVector;
-							body.setAngvel({ x, y, z }, true);
-						} else {
-							const { x, y, z } =
-								thrusters.components.isThrusters.rotationImpulse;
+				/**
+				 * Thrusters
+				 */
+				if (thrusters?.components.isThrusters) {
+					{
+						const { x, y, z } =
+							thrusters.components.isThrusters.directionImpulse;
+						tempVector.set(x, y, z);
+						body.applyImpulse(tempObj.localToWorld(tempVector), true);
+					}
 
-							tempVector.set(x, y, z);
-							body.applyTorqueImpulse(tempObj.localToWorld(tempVector), true);
-						}
+					// Set the max rotation velocity
+					const { x, y, z } = body.angvel();
+					if (
+						tempVector.set(x, y, z).lengthSq() >
+						thrusters.components.isThrusters.rotationMaxSpeed
+					) {
+						tempVector.multiplyScalar(BRAKE_CONSTANT);
+						const { x, y, z } = tempVector;
+						body.setAngvel({ x, y, z }, true);
+					} else {
+						const { x, y, z } =
+							thrusters.components.isThrusters.rotationImpulse;
+
+						tempVector.set(x, y, z);
+						body.applyTorqueImpulse(tempObj.localToWorld(tempVector), true);
 					}
 				}
+
 				return;
 			}
 			// Fall back on simple physics if we can't get a physics body for the entity.
@@ -302,7 +306,8 @@ export class PhysicsMovementSystem extends System {
 			});
 		}
 	}
-	postUpdate(_elapsed: number): void {
+	postUpdate(elapsed: number): void {
+		const elapsedSeconds = elapsed / 1000;
 		// Run the physics simulation for all of the relevant worlds.
 		this.ecs.componentCache.get("physicsWorld")?.forEach((entity) => {
 			const world = entity.components.physicsWorld?.world as World;
@@ -312,7 +317,8 @@ export class PhysicsMovementSystem extends System {
 				entity.components.physicsWorld?.location.y || 0,
 				entity.components.physicsWorld?.location.z || 0,
 			);
-			world.step();
+			world.step(eventQueue);
+
 			// Copy over the properties of each of the bodies to the entities
 			world.bodies.forEach((body: any) => {
 				const entity = this.ecs.getEntityById(body.userData?.entityId);
@@ -348,6 +354,41 @@ export class PhysicsMovementSystem extends System {
 						forwardVelocity: tempVector.set(x, y, z).length(),
 					});
 				}
+			});
+
+			eventQueue.drainContactForceEvents((event) => {
+				const body1 = world.getCollider(event.collider1()).parent();
+				const body2 = world.getCollider(event.collider2()).parent();
+				const entityId1 = (body1?.userData as any)?.entityId;
+				const entityId2 = (body2?.userData as any)?.entityId;
+				const entity1 = this.ecs.getEntityById(entityId1);
+				const entity2 = this.ecs.getEntityById(entityId2);
+
+				handleCollisionDamage(
+					entity1,
+					event.totalForceMagnitude(),
+					elapsedSeconds,
+				);
+				handleCollisionDamage(
+					entity2,
+					event.totalForceMagnitude(),
+					elapsedSeconds,
+				);
+
+				if (entity1?.components.isTorpedo || entity2?.components.isTorpedo) {
+					const torpedoEntity = entity1?.components.isTorpedo
+						? entity1
+						: entity2;
+					const otherEntity = entity1?.components.isTorpedo ? entity2 : entity1;
+					if (
+						torpedoEntity &&
+						otherEntity &&
+						!torpedoEntity.components.isDestroyed
+					) {
+						handleTorpedoDamage(torpedoEntity, otherEntity);
+					}
+				}
+				event.free();
 			});
 		});
 	}

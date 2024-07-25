@@ -32,21 +32,22 @@ import { q } from "@client/context/AppContext";
 import type PlanetPlugin from "@server/classes/Plugins/Universe/Planet";
 import type SolarSystemPlugin from "@server/classes/Plugins/Universe/SolarSystem";
 import { getOrbitPosition } from "@server/utils/getOrbitPosition";
-import { SECTOR_GRID_SIZE } from "@server/init/rapier";
+import { SECTOR_GRID_SIZE } from "@server/init/rapierConsts";
 import { Icon } from "@thorium/ui/Icon";
 const ACTION = CameraControlsClass.ACTION;
 
 // 10% further than Neptune's orbit
 export const SOLAR_SYSTEM_MAX_DISTANCE: Kilometer = 4_000_000_000 * 1.1;
-const CELLS = Math.ceil(SOLAR_SYSTEM_MAX_DISTANCE / SECTOR_GRID_SIZE);
-function HabitableZone() {
+
+function HabitableZone({ systemId }: { systemId: string }) {
 	const [pluginId, solarSystemId] = useSystemIds();
-	const [{ habitableZoneInner = 0, habitableZoneOuter = 3, stars }] =
-		q.plugin.starmap.get.useNetRequest({
-			pluginId,
-			solarSystemId,
-		});
+	const [system] = q.plugin.starmap.get.useNetRequest({
+		pluginId,
+		solarSystemId: solarSystemId || systemId,
+	});
 	const scaleUnit = astronomicalUnitToKilometer(1);
+	if (!system) return null;
+	const { habitableZoneInner = 0, habitableZoneOuter = 3, stars } = system;
 	return stars.length > 0 ? (
 		<Disc
 			habitableZoneInner={habitableZoneInner}
@@ -57,11 +58,13 @@ function HabitableZone() {
 }
 
 export function SolarSystemMap({
+	systemId,
 	skyboxKey = "Basic",
 	children,
 	minDistance = 1,
 	maxDistance = SOLAR_SYSTEM_MAX_DISTANCE,
 }: {
+	systemId?: string;
 	skyboxKey: string;
 	children?: React.ReactNode;
 	minDistance?: number;
@@ -104,7 +107,7 @@ export function SolarSystemMap({
 	const isViewscreen = viewingMode === "viewscreen";
 	return (
 		<Suspense fallback={null}>
-			{!pluginId ? null : <HabitableZone />}
+			{!pluginId || !systemId ? null : <HabitableZone systemId={systemId} />}
 			{!isViewscreen && (
 				<>
 					<CameraControls
@@ -421,14 +424,14 @@ function useSelectedObject() {
 		return { type: "system" as const, object: systemData };
 	}
 
-	const star = systemData.stars.find((star) =>
+	const star = systemData?.stars.find((star) =>
 		selectedObjectIds.includes(star.name),
 	);
 	if (star) {
 		return { type: "star" as const, object: star };
 	}
 
-	const planet = systemData.planets.find((planet) =>
+	const planet = systemData?.planets.find((planet) =>
 		selectedObjectIds.includes(planet.name),
 	);
 	if (planet) {
@@ -439,7 +442,7 @@ function useSelectedObject() {
 }
 export function SolarSystemPalette() {
 	const results = useSelectedObject();
-	if (!results) return null;
+	if (!results || !results.object) return null;
 	return (
 		<div
 			className="w-full h-full overflow-y-auto overflow-x-hidden text-white"

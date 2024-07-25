@@ -274,7 +274,9 @@ export const flight = t.router({
 								widgets: s.widgets?.map((w) => {
 									return {
 										...w,
-										icon: stationComplement?.assets[`${s.name}-${w.name}-icon`],
+										icon:
+											w.icon ||
+											stationComplement?.assets[`${s.name}-${w.name}-icon`],
 									};
 								}),
 							})) || [],

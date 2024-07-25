@@ -9,6 +9,7 @@ import { Clouds } from "@client/components/Starmap/Planet/Clouds";
 import { useLiveQuery } from "@thorium/live-query/client";
 import { q } from "@client/context/AppContext";
 import { getNavigationDistance } from "@server/utils/getNavigationDistance";
+import { cn } from "@client/utils/cn";
 
 function getDistanceLabel(input: { distance: number; unit: string } | null) {
 	if (!input) return "Unknown";
@@ -23,10 +24,10 @@ export const ObjectDetails = () => {
 	const selectedObjectIds = useStarmapStore((store) => store.selectedObjectIds);
 
 	return (
-		<div className="p-2 border border-white/50 bg-black/50 rounded">
+		<div className="p-2 panel panel-primary">
 			{selectedObjectIds[0] ? (
 				<Suspense fallback={<h3 className="text-2xl">Accessing...</h3>}>
-					<ObjectData />
+					<ObjectData objectId={selectedObjectIds[0]} />
 				</Suspense>
 			) : (
 				<h3 className="text-2xl">No Object Selected</h3>
@@ -35,22 +36,37 @@ export const ObjectDetails = () => {
 	);
 };
 
-const ObjectData = () => {
-	const useStarmapStore = useGetStarmapStore();
-	const selectedObjectIds = useStarmapStore((store) => store.selectedObjectIds);
+export const ObjectData = ({ objectId }: { objectId: number | string }) => {
+	const [object, distanceRef] = useObjectData(objectId);
 
+	if (!object) return null;
+	return (
+		<div className="flex items-center gap-2">
+			<ObjectImage object={object} />
+			<div>
+				<h3 className="text-lg">{object.name}</h3>
+				<h4>{object.classification}</h4>
+				<h4 className="tabular-nums">
+					<strong>Distance:</strong> <span ref={distanceRef} />
+				</h4>
+			</div>
+		</div>
+	);
+};
+
+export function useObjectData(objectId: number | string) {
 	const [ship] = q.navigation.ship.useNetRequest();
 	const { interpolate } = useLiveQuery();
 	const distanceRef = useRef<HTMLSpanElement>(null);
 	const [requestData] = q.navigation.object.useNetRequest({
-		objectId: Number(selectedObjectIds[0]) || undefined,
+		objectId: Number(objectId) || undefined,
 	});
 	const object = requestData.object;
 	const objectSystem = requestData.objectSystem;
 	const shipSystem = requestData.shipSystem;
 
 	useAnimationFrame(() => {
-		const objectPosition = object?.position;
+		const objectPosition = interpolate(Number(objectId)) || object?.position;
 		if (distanceRef.current && objectPosition) {
 			const shipPosition = interpolate(ship.id);
 			const distance = getNavigationDistance(
@@ -62,38 +78,36 @@ const ObjectData = () => {
 			distanceRef.current.innerText = getDistanceLabel(distance);
 		}
 	});
+	return [object, distanceRef] as const;
+}
 
-	if (!object) return null;
-	return (
-		<div className="flex items-center">
-			{object.type === "solarSystem" ? null : (
-				<div className="w-24 h-24 mr-2 border border-white/50 rounded">
-					{object.type === "planet" ? (
-						<PlanetCanvas
-							cloudMapAsset={object.cloudMapAsset}
-							textureMapAsset={object.textureMapAsset}
-							ringMapAsset={object.ringMapAsset}
-						/>
-					) : object.type === "star" ? (
-						<StarCanvas
-							hue={object.hue || 30}
-							isWhite={object.isWhite || false}
-						/>
-					) : object.type === "ship" ? (
-						<img draggable="false" alt={object.name} src={object?.vanity} />
-					) : null}
-				</div>
-			)}
-			<div>
-				<h3 className="text-2xl">{object.name}</h3>
-				<h4 className="text-xl">{object.classification}</h4>
-				<h4 className="text-xl">
-					<strong>Distance:</strong> <span ref={distanceRef} />
-				</h4>
-			</div>
+export function ObjectImage({
+	object,
+	className,
+}: {
+	object: NonNullable<
+		Awaited<ReturnType<typeof q.navigation.object.netRequest>>["object"]
+	>;
+	className?: string;
+}) {
+	return object.type === "solarSystem" ? null : (
+		<div
+			className={cn("w-24 h-24 border border-white/30 rounded-xl", className)}
+		>
+			{object.type === "planet" ? (
+				<PlanetCanvas
+					cloudMapAsset={object.cloudMapAsset}
+					textureMapAsset={object.textureMapAsset}
+					ringMapAsset={object.ringMapAsset}
+				/>
+			) : object.type === "star" ? (
+				<StarCanvas hue={object.hue || 30} isWhite={object.isWhite || false} />
+			) : object.type === "ship" ? (
+				<img draggable="false" alt={object.name} src={object?.vanity} />
+			) : null}
 		</div>
 	);
-};
+}
 
 const PlanetGroup = ({
 	cloudMapAsset,

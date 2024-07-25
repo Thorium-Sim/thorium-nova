@@ -35,8 +35,8 @@ import { useFrame } from "@react-three/fiber";
 import clsx from "clsx";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { Icon } from "@thorium/ui/Icon";
-import useInterval from "@client/hooks/useInterval";
 import { keepPreviousData } from "@tanstack/react-query";
+import { Torpedo } from "@client/components/Starmap/Torpedo";
 
 export function StarmapCore() {
 	const ref = useRef<HTMLDivElement>(null);
@@ -83,8 +83,8 @@ function ShipControls() {
 					<Tooltip content="Patrol">
 						<Button
 							onClick={() =>
-								q.starmapCore.setBehavior.netSend({
-									ships: selectedObjectIds,
+								q.starmapCore.setShipsBehavior.netSend({
+									shipIds: selectedObjectIds,
 									behavior: "patrol",
 								})
 							}
@@ -98,8 +98,8 @@ function ShipControls() {
 					<Tooltip content="Wander">
 						<Button
 							onClick={() =>
-								q.starmapCore.setBehavior.netSend({
-									ships: selectedObjectIds,
+								q.starmapCore.setShipsBehavior.netSend({
+									shipIds: selectedObjectIds,
 									behavior: "wander",
 								})
 							}
@@ -113,8 +113,8 @@ function ShipControls() {
 					<Tooltip content="Hold Position">
 						<Button
 							onClick={() =>
-								q.starmapCore.setBehavior.netSend({
-									ships: selectedObjectIds,
+								q.starmapCore.setShipsBehavior.netSend({
+									shipIds: selectedObjectIds,
 									behavior: "hold",
 								})
 							}
@@ -128,8 +128,8 @@ function ShipControls() {
 					<Tooltip content="Attack">
 						<Button
 							onClick={() =>
-								q.starmapCore.setBehavior.netSend({
-									ships: selectedObjectIds,
+								q.starmapCore.setShipsBehavior.netSend({
+									shipIds: selectedObjectIds,
 									behavior: "attack",
 								})
 							}
@@ -137,14 +137,14 @@ function ShipControls() {
 								"btn-active": starmapShip.behavior.objective === "attack",
 							})}
 						>
-						<Icon name="sword" />
+							<Icon name="sword" />
 						</Button>
 					</Tooltip>
 					<Tooltip content="Follow & Defend">
 						<Button
 							onClick={() =>
-								q.starmapCore.setBehavior.netSend({
-									ships: selectedObjectIds,
+								q.starmapCore.setShipsBehavior.netSend({
+									shipIds: selectedObjectIds,
 									behavior: "defend",
 								})
 							}
@@ -392,6 +392,7 @@ function CanvasWrapper() {
 export function InterstellarWrapper() {
 	const useStarmapStore = useGetStarmapStore();
 	const currentSystem = useStarmapStore((store) => store.currentSystem);
+	const isViewscreen = useStarmapStore((store) => store.viewingMode);
 
 	const [starmapShips] = q.starmapCore.ships.useNetRequest({
 		systemId: currentSystem,
@@ -400,34 +401,36 @@ export function InterstellarWrapper() {
 
 	return (
 		<InterstellarMap>
-			{starmapSystems.map((sys) =>
-				sys.components.position && sys.components.identity ? (
-					<SystemMarker
-						key={sys.id}
-						systemId={sys.id}
-						position={
-							[
-								sys.components.position.x,
-								sys.components.position.y,
-								sys.components.position.z,
-							] as [number, number, number]
-						}
-						name={sys.components.identity.name}
-						onClick={() => {
-							useStarmapStore.setState({ selectedObjectIds: [sys.id] });
+			{isViewscreen
+				? null
+				: starmapSystems.map((sys) =>
+						sys.components.position && sys.components.identity ? (
+							<SystemMarker
+								key={sys.id}
+								systemId={sys.id}
+								position={
+									[
+										sys.components.position.x,
+										sys.components.position.y,
+										sys.components.position.z,
+									] as [number, number, number]
+								}
+								name={sys.components.identity.name}
+								onClick={() => {
+									useStarmapStore.setState({ selectedObjectIds: [sys.id] });
 
-							if (sys.components.position) {
-								useStarmapStore
-									.getState()
-									.setCameraFocus(sys.components.position);
-							}
-						}}
-						onDoubleClick={() =>
-							useStarmapStore.getState().setCurrentSystem(sys.id)
-						}
-					/>
-				) : null,
-			)}
+									if (sys.components.position) {
+										useStarmapStore
+											.getState()
+											.setCameraFocus(sys.components.position);
+									}
+								}}
+								onDoubleClick={() =>
+									useStarmapStore.getState().setCurrentSystem(sys.id)
+								}
+							/>
+						) : null,
+				  )}
 			{starmapShips.map((ship) => (
 				<Suspense key={ship.id} fallback={null}>
 					<ErrorBoundary
@@ -454,6 +457,9 @@ export function SolarSystemWrapper() {
 		systemId: currentSystem,
 	});
 	const [starmapShips] = q.starmapCore.ships.useNetRequest({
+		systemId: currentSystem,
+	});
+	const [torpedos] = q.starmapCore.torpedos.useNetRequest({
 		systemId: currentSystem,
 	});
 	const [waypoints] = q.waypoints.all.useNetRequest({
@@ -550,6 +556,11 @@ export function SolarSystemWrapper() {
 							}}
 						/>
 					</ErrorBoundary>
+				</Suspense>
+			))}
+			{torpedos.map(({ id, color, isDestroyed }) => (
+				<Suspense key={id} fallback={null}>
+					<Torpedo id={id} color={color} isDestroyed={isDestroyed} />
 				</Suspense>
 			))}
 			{/* {debugSpheres.map(sphere => (

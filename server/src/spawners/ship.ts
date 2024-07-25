@@ -36,7 +36,7 @@ export function spawnShip(
 		name?: string;
 		description?: string;
 		registry?: string;
-		position: Zod.infer<typeof position>;
+		position?: Zod.infer<typeof position>;
 		tags?: string[];
 		assets?: Partial<InstanceType<typeof ShipPlugin>["assets"]>;
 		playerShip?: boolean;
@@ -65,7 +65,9 @@ export function spawnShip(
 			...params.assets,
 		},
 	});
-	entity.addComponent("position", params.position);
+	if (params.position) {
+		entity.addComponent("position", params.position);
+	}
 	entity.addComponent("rotation");
 	entity.addComponent("velocity");
 	entity.addComponent("rotationVelocity");

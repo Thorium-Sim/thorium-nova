@@ -17,6 +17,8 @@ import { useGetStarmapStore } from "./starmapStore";
 import type { Line2 } from "three-stdlib";
 import { q } from "@client/context/AppContext";
 import { useLiveQuery } from "@thorium/live-query/client";
+import { setCursor } from "@client/utils/setCursor";
+import type { Meter } from "@server/utils/unitTypes";
 
 export function StarmapShip({
 	id,
@@ -24,11 +26,13 @@ export function StarmapShip({
 	logoUrl,
 	spriteColor = "white",
 	onClick,
+	size,
 }: {
 	id: number;
 	modelUrl?: string;
 	logoUrl?: string;
 	spriteColor?: number | string;
+	size: Meter;
 	onClick?: () => void;
 }) {
 	const model = useShipModel(modelUrl);
@@ -137,11 +141,11 @@ export function StarmapShip({
 				<group
 					onPointerOver={() => {
 						// set the cursor to pointer
-						document.body.style.cursor = "pointer";
+						setCursor("pointer");
 					}}
 					onPointerOut={() => {
 						// set the cursor to default
-						document.body.style.cursor = "default";
+						setCursor("auto");
 					}}
 					onClick={onClick}
 				>
@@ -162,6 +166,8 @@ export function StarmapShip({
 					{model && (
 						<group ref={shipMesh}>
 							<primitive
+								// Convert meters to kilometers
+								scale={size / 1000}
 								userData={{ type: "ship", id }}
 								object={model}
 								rotation={[Math.PI / 2, Math.PI, 0]}

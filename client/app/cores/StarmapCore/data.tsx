@@ -9,6 +9,10 @@ import {
 	getObjectOffsetPosition,
 	getObjectSystem,
 } from "@server/utils/position";
+import type { isDestroyed } from "@server/components/isDestroyed";
+import type { DataContext } from "@server/utils/types";
+
+type IsDestroyed = Zod.infer<typeof isDestroyed>;
 
 const behavior = z.enum([
 	"hold",
@@ -50,7 +54,7 @@ export const starmapCore = t.router({
 			if (input?.systemId === null || input?.systemId === undefined) return [];
 			const data = ctx.flight.ecs.entities.reduce(
 				(prev: Pick<Entity, "components" | "id">[], { components, id }) => {
-					if (components.isShip) return prev;
+					if (components.isShip || components.isTorpedo) return prev;
 					if (
 						components.position?.parentId === input.systemId ||
 						components.satellite?.parentId === input.systemId
@@ -73,36 +77,71 @@ export const starmapCore = t.router({
 		})
 		.request(({ ctx, input }) => {
 			if (!ctx.flight) return [];
-			const data = ctx.flight.ecs.entities.reduce(
-				(
-					prev: {
-						id: number;
-						modelUrl?: string;
-						logoUrl?: string;
-						size: number;
-					}[],
-					{ components, id },
-				) => {
-					if (components.isShip) {
-						if (
-							(typeof input?.systemId === "number" &&
-								components.position?.parentId === input.systemId) ||
-							(input?.systemId === undefined &&
-								components.position?.type === "interstellar")
-						) {
-							prev.push({
-								id,
-								modelUrl: components.isShip.assets.model,
-								logoUrl: components.isShip.assets.logo,
-								size: components.size?.length || 50,
-							});
-						}
-					}
-					return prev;
-				},
-				[],
-			);
+			const shipEntities = ctx.flight.ecs.componentCache.get("isShip") || [];
+			const data: {
+				id: number;
+				modelUrl?: string;
+				logoUrl?: string;
+				size: number;
+				isDestroyed?: IsDestroyed;
+			}[] = [];
+			for (const { components, id } of shipEntities) {
+				if (
+					components.isShip &&
+					((typeof input?.systemId === "number" &&
+						components.position?.parentId === input.systemId) ||
+						(input?.systemId === undefined &&
+							components.position?.type === "interstellar"))
+				) {
+					data.push({
+						id,
+						modelUrl: components.isShip.assets.model,
+						logoUrl: components.isShip.assets.logo,
+						size: components.size?.length || 50,
+						isDestroyed: components.isDestroyed,
+					});
+				}
+			}
 
+			return data;
+		}),
+	torpedos: t.procedure
+		.input(z.object({ systemId: z.number().nullable() }))
+		.filter((publish: { systemId: number | null }, { input }) => {
+			if (!publish) return true;
+			if (!publish.systemId && !input.systemId) return true;
+			if (publish.systemId === input.systemId) return true;
+			return false;
+		})
+		.request(({ ctx, input }) => {
+			if (!ctx.flight) return [];
+			const torpedoEntities =
+				ctx.flight.ecs.componentCache.get("isTorpedo") || [];
+			const data: {
+				id: number;
+				color: string;
+				isDestroyed?: IsDestroyed;
+			}[] = [];
+			for (const { components, id } of torpedoEntities) {
+				if (
+					components.isTorpedo &&
+					((typeof input?.systemId === "number" &&
+						components.position?.parentId === input.systemId) ||
+						(input?.systemId === undefined &&
+							components.position?.type === "interstellar"))
+				) {
+					if (
+						components.isDestroyed &&
+						components.isDestroyed.timer > components.isDestroyed.timeToDestroy
+					)
+						continue;
+					data.push({
+						id,
+						color: components.isTorpedo.color,
+						isDestroyed: components.isDestroyed,
+					});
+				}
+			}
 			return data;
 		}),
 	/** Useful for fetching a single ship when following that ship */
@@ -160,11 +199,13 @@ export const starmapCore = t.router({
 			return data;
 		}),
 	spawnSearch: t.procedure
-		.input(z.object({ query: z.string() }))
+		.input(z.object({ query: z.string(), allPlugins: z.boolean().optional() }))
 		.request(({ ctx, input }) => {
-			if (!ctx.flight) return [];
+			if (!input.allPlugins && !ctx.flight) return [];
 			const shipTemplates = ctx.server.plugins
-				.filter((p) => ctx.flight?.pluginIds.includes(p.id))
+				.filter((p) =>
+					input.allPlugins ? true : ctx.flight?.pluginIds.includes(p.id),
+				)
 				.reduce((acc: ShipPlugin[], plugin) => {
 					return acc.concat(plugin.aspects.ships);
 				}, []);
@@ -281,6 +322,103 @@ export const starmapCore = t.router({
 				pubsub.publish.starmapCore.autopilot({ systemId: id });
 			});
 		}),
+	// This one is just used for timeline actions
+	setShipDestination: t.procedure
+		.meta({
+			action: (ctx: DataContext) => {
+				return {
+					position: {
+						name: "Position",
+						type: "starmapCoordinates",
+						helper:
+							"A specific point in space to send the ship. Use as an alternative to Nearby Entity.",
+					},
+					entityId: {
+						name: "Nearby Entity",
+						helper:
+							"Send the ship somewhere near this entity. This option is preferred.",
+					},
+				};
+			},
+		})
+		.input(
+			z.object({
+				shipId: z.number(),
+				entityId: z.number().optional(),
+				position: z
+					.object({
+						parentId: z
+							.union([
+								z.number(),
+								z.object({ name: z.string(), pluginId: z.string() }),
+							])
+							.nullable(),
+						x: z.number(),
+						y: z.number(),
+						z: z.number(),
+					})
+					.optional(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
+			if (!ship) throw new Error("No ship found.");
+
+			let position = { x: 0, y: 0, z: 0 };
+			let systemId: number | null = null;
+			let object: Entity | undefined = undefined;
+			if ("entityId" in input) {
+				// This ship is being sent close to an object
+				object = ctx.flight?.ecs.entities.find((e) => e.id === input.entityId);
+				if (!object) throw new Error("No object found.");
+				position = getObjectOffsetPosition(object, ship);
+				const sys = getObjectSystem(object);
+				systemId = sys?.id ?? null;
+				if (sys?.id === object.id) systemId = null;
+			} else if ("position" in input && input.position) {
+				// This waypoint is just being plopped at some random point in space.
+				position = input.position;
+				const parentId = input.position.parentId;
+				if (parentId && typeof parentId === "object") {
+					// This waypoint is probably defined in a timeline action, so we need
+					// to find which system matches the name.
+					const solarSystems =
+						ctx.flight?.ecs.componentCache.get("isSolarSystem") || [];
+					for (const entity of solarSystems) {
+						if (entity.components.identity?.name === parentId.name) {
+							systemId = entity.id;
+							break;
+						}
+					}
+				} else {
+					systemId = parentId;
+				}
+			} else {
+				throw new Error("Either position or entityId are required");
+			}
+
+			ship?.updateComponent("autopilot", {
+				desiredCoordinates: position,
+				desiredSolarSystemId: systemId,
+			});
+			ship?.updateComponent("shipBehavior", {
+				destination: {
+					parentId: systemId,
+					x: position.x,
+					y: position.y,
+					z: position.z,
+				},
+				target: {
+					parentId: systemId,
+					x: position.x,
+					y: position.y,
+					z: position.z,
+				},
+			});
+			pubsub.publish.pilot.autopilot.get({ shipId: ship.id });
+			pubsub.publish.starmapCore.autopilot({ systemId });
+		}),
+
 	setOrbit: t.procedure
 		.input(
 			z.object({
@@ -329,10 +467,11 @@ export const starmapCore = t.router({
 			});
 		}),
 	setFollowShip: t.procedure
+		.meta({ action: true })
 		.input(
 			z.object({
 				objective: behavior,
-				ships: z.number().array(),
+				ships: z.union([z.number().array(), z.number()]),
 				objectId: z.number(),
 			}),
 		)
@@ -342,7 +481,9 @@ export const starmapCore = t.router({
 			const followedObject = ctx.flight?.ecs.getEntityById(input.objectId);
 			if (!followedObject) return;
 
-			for (const shipId of input.ships) {
+			for (const shipId of Array.isArray(input.ships)
+				? input.ships
+				: [input.ships]) {
 				const entity = ctx.flight?.ecs.getEntityById(shipId);
 				if (!entity) continue;
 
@@ -362,15 +503,19 @@ export const starmapCore = t.router({
 				pubsub.publish.starmapCore.autopilot({ systemId: id });
 			});
 		}),
-	setBehavior: t.procedure
+	setShipsBehavior: t.procedure
+		.meta({ action: true })
 		.input(
 			z.object({
-				ships: z.number().array(),
+				shipIds: z.union([z.number().array(), z.number()]),
 				behavior,
 			}),
 		)
 		.send(({ ctx, input }) => {
-			input.ships.forEach((shipId) => {
+			const ids = Array.isArray(input.shipIds)
+				? input.shipIds
+				: [input.shipIds];
+			ids.forEach((shipId) => {
 				const entity = ctx.flight?.ecs.getEntityById(shipId);
 				entity?.updateComponent("shipBehavior", {
 					objective: input.behavior,
@@ -409,7 +554,9 @@ export const starmapCore = t.router({
 		.dataStream(({ entity, input }) => {
 			if (!entity) return false;
 			if (
-				(entity.components.isShip || entity.components.debugSphere) &&
+				(entity.components.isShip ||
+					entity.components.isTorpedo ||
+					entity.components.debugSphere) &&
 				entity.components.position
 			) {
 				if (

@@ -30,7 +30,7 @@ export default async function buildHTTPServer({
 	});
 
 	await app.register(staticServe, {
-		root: `${staticRoot}/assets`,
+		root: `${staticRoot}/client/assets`,
 		prefix: "/assets",
 		maxAge: "60s",
 	});
@@ -56,7 +56,7 @@ export default async function buildHTTPServer({
 		// SPA uses that to know to render a screen to start a new flight or
 		// load an existing flight.
 		let indexFile = await fs.readFile(
-			path.join(staticRoot, "index.html"),
+			path.join(staticRoot, "client/index.html"),
 			"utf-8",
 		);
 		indexFile = indexFile.replace(

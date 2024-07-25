@@ -58,6 +58,7 @@
 		"@remix-run/dev": "^2.8.1",
 		"@shikijs/rehype": "^1.1.7",
 		"@sly-cli/sly": "^1.10.0",
+		"@tailwindcss/container-queries": "^0.1.1",
 		"@tailwindcss/typography": "^0.5.10",
 		"@types/color": "^3.0.6",
 		"@types/lodash.debounce": "^4.0.9",

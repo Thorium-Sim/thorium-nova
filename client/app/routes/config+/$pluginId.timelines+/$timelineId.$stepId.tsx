@@ -48,10 +48,11 @@ export default function TimelineStep() {
 							e.stopPropagation();
 							e.preventDefault();
 							if (
-								await confirm(
+								e.shiftKey ||
+								(await confirm(
 									"Are you sure you want to delete this action?",
 									"This action will be gone forever.",
-								)
+								))
 							) {
 								const result =
 									await q.plugin.timeline.step.action.delete.netSend({
@@ -95,6 +96,7 @@ export default function TimelineStep() {
 						labelHidden={false}
 						label="Step Name"
 						placeholder="Retrieve Information"
+						key={step.id}
 						defaultValue={step.name}
 						onBlur={async (e: any) => {
 							try {
@@ -145,6 +147,7 @@ export default function TimelineStep() {
 						className="!h-24"
 						labelHidden={false}
 						label="Description"
+						key={step.id}
 						defaultValue={step.description}
 						onBlur={(e: any) =>
 							q.plugin.timeline.step.update.netSend({

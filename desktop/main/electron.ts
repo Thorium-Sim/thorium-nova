@@ -67,16 +67,17 @@ async function createWindow() {
 
 	initWin(win);
 	await win.loadFile("index.html");
+
 	await startThoriumServer();
+
 	ipcHandlers();
+
 	loaded = true;
 	if (loadedPath) {
 		loadFile(loadedPath);
 	}
 	restoreMenubar(app);
 
-	// We add 1 to the port, since we want to connect to the HTTPS server
-	// which is 1 more than the default port
 	await win.loadURL(`http://0.0.0.0:${port}`);
 }
 

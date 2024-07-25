@@ -1,4 +1,9 @@
 import type { Entity } from "@server/utils/ecs";
+import { Quaternion, Vector3 } from "three";
+
+const vector = new Vector3();
+const quaternion = new Quaternion();
+const zAxis = new Vector3(0, 0, 1);
 
 export function dataStreamEntity(e: Entity) {
 	// For snapshot interpolation, entities have to be flat, other than quaternions.
@@ -50,6 +55,20 @@ export function dataStreamEntity(e: Entity) {
 		return {
 			id: e.id.toString(),
 			x: maxVelocity,
+		};
+	}
+	if (e.components.isTorpedo) {
+		const { parentId, type, ...position } = e.components.position || {};
+		const { x, y, z } = e.components.velocity || { x: 0, y: 0, z: 0 };
+		const shouldSnap = e.components.snapInterpolation ? 1 : 0;
+		e.removeComponent("snapInterpolation");
+		quaternion.setFromUnitVectors(zAxis, vector.set(x, y, z).normalize());
+		return {
+			id: e.id.toString(),
+			...position,
+			f: e.components.isDestroyed ? 1 : 0,
+			s: shouldSnap,
+			r: { x: quaternion.x, y: quaternion.y, z: quaternion.z, w: quaternion.w },
 		};
 	}
 

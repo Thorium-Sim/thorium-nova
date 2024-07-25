@@ -8,7 +8,7 @@ import performance from "./performance";
 import { fastSplice } from "./utils";
 import { type RNG, createRNG } from "@thorium/rng";
 import type { ServerDataModel } from "server/src/classes/ServerDataModel";
-import type { ColliderDesc } from "@dimforge/rapier3d-compat";
+import type { ColliderDesc } from "@thorium-sim/rapier3d-node";
 import type { ComponentIds } from "@server/components";
 
 class ECS {
@@ -45,6 +45,7 @@ class ECS {
 	 * Retrieve an entity by id
 	 */
 	getEntityById(id: number) {
+		if (typeof id !== "number") return null;
 		if (!this.entityIndex.get(id)) {
 			// biome-ignore lint/suspicious/noAssignInExpressions:
 			for (let i = 0, entity: Entity; (entity = this.entities[i]); i += 1) {

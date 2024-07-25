@@ -5,7 +5,7 @@ export const physicsHandles = z
 		/**
 		 * The key is the world's entity id, the value is the handle.
 		 */
-		handles: z.any().default(new Map()),
+		handles: z.any(),
 	})
 	.default({})
 	.nullable();

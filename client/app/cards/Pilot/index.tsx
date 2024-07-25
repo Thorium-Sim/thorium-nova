@@ -1,9 +1,12 @@
 import Button from "@thorium/ui/Button";
 import type { CardProps } from "@client/routes/flight.station/CardProps";
 import { Fragment, Suspense, useRef } from "react";
-import { GridCanvas, CircleGrid } from "./CircleGrid";
+import { GridCanvas, CircleGrid, CircleGridTiltButton } from "./CircleGrid";
 import { PilotZoomSlider } from "./PilotZoomSlider";
-import { usePilotStore } from "./usePilotStore";
+import {
+	CircleGridStoreProvider,
+	useCircleGridStore,
+} from "./useCircleGridStore";
 import { ImpulseControls } from "./ImpulseControls";
 import { Joystick, LinearJoystick } from "@thorium/ui/Joystick";
 import type { ReactNode } from "react";
@@ -12,6 +15,7 @@ import useAnimationFrame from "@client/hooks/useAnimationFrame";
 import { q } from "@client/context/AppContext";
 import { useLiveQuery } from "@thorium/live-query/client";
 import { useGamepadPress } from "@client/hooks/useGamepadStore";
+import { CircleGridContacts, CircleGridWaypoints } from "./PilotContacts";
 
 async function rotation({ x, y, z }: Partial<Coordinates<number>>) {
 	await q.pilot.thrusters.setRotationDelta.netSend({ rotation: { x, y, z } });
@@ -37,87 +41,78 @@ function UntouchableLabel({
 export function Pilot({ cardLoaded }: CardProps) {
 	q.pilot.stream.useDataStream({ systemId: null });
 
-	useGamepadPress("pilot-sensor-tilt", {
-		onDown: () => {
-			usePilotStore.setState(({ tilt: t }) => ({
-				tilt: t === 0 ? 0.5 : t === 0.5 ? 1 : 0,
-			}));
-		},
-		// TODO: Make it so the button on the webpage responds to the joystick being pressed
-		onUp: () => {},
-	});
 	return (
-		<div className="grid grid-cols-4 h-full place-content-center gap-4">
-			<div className="flex flex-col justify-between">
-				<ImpulseControls cardLoaded={cardLoaded} />
-				<div className="flex-1 mt-2">
-					<div className="flex items-stretch gap-4 ">
-						<LinearJoystick
-							className="h-auto"
-							onDrag={({ y }) => direction({ z: -y })}
-							vertical
-							gamepadKey="z-thrusters"
-						>
-							<UntouchableLabel className="top-1">Fore</UntouchableLabel>
-							<UntouchableLabel className="bottom-1">Aft</UntouchableLabel>
-						</LinearJoystick>
-						<Joystick
-							className="w-[calc(100%-2.5rem)] h-[calc(100%-2.5rem)]"
-							onDrag={({ x, y }) => direction({ y: -y, x: -x })}
-							gamepadKeys={{ x: "x-thrusters", y: "y-thrusters" }}
-						>
-							<UntouchableLabel className="bottom-1">Down</UntouchableLabel>
-							<UntouchableLabel className="top-1">Up</UntouchableLabel>
-							<UntouchableLabel className="right-1">Starboard</UntouchableLabel>
-							<UntouchableLabel className="left-1">Port</UntouchableLabel>
-						</Joystick>
+		<CircleGridStoreProvider>
+			<div className="grid grid-cols-4 h-full place-content-center gap-4">
+				<div className="flex flex-col justify-between">
+					<ImpulseControls cardLoaded={cardLoaded} />
+					<div className="flex-1 mt-2">
+						<div className="flex items-stretch gap-4 ">
+							<LinearJoystick
+								className="h-auto"
+								onDrag={({ y }) => direction({ z: -y })}
+								vertical
+								gamepadKey="z-thrusters"
+							>
+								<UntouchableLabel className="top-1">Fore</UntouchableLabel>
+								<UntouchableLabel className="bottom-1">Aft</UntouchableLabel>
+							</LinearJoystick>
+							<Joystick
+								className="w-[calc(100%-2.5rem)] h-[calc(100%-2.5rem)]"
+								onDrag={({ x, y }) => direction({ y: -y, x: -x })}
+								gamepadKeys={{ x: "x-thrusters", y: "y-thrusters" }}
+							>
+								<UntouchableLabel className="bottom-1">Down</UntouchableLabel>
+								<UntouchableLabel className="top-1">Up</UntouchableLabel>
+								<UntouchableLabel className="right-1">
+									Starboard
+								</UntouchableLabel>
+								<UntouchableLabel className="left-1">Port</UntouchableLabel>
+							</Joystick>
+						</div>
 					</div>
 				</div>
-			</div>
-			<div className="col-span-2 w-full aspect-square self-center">
-				<Suspense fallback={null}>
-					<GridCanvas shouldRender={cardLoaded}>
-						<CircleGrid />
-					</GridCanvas>
-				</Suspense>
-			</div>
-
-			<div className="h-full flex flex-col justify-between gap-2">
-				<LockOnButton />
-				<div>
-					<PilotZoomSlider />
-					<Button
-						className="w-full btn-primary"
-						onClick={() =>
-							usePilotStore.setState(({ tilt: t }) => ({
-								tilt: t === 0 ? 0.5 : t === 0.5 ? 1 : 0,
-							}))
-						}
-					>
-						Tilt Sensor View
-					</Button>
+				<div className="col-span-2 w-full aspect-square self-center">
+					<Suspense fallback={null}>
+						<GridCanvas shouldRender={cardLoaded}>
+							<CircleGrid>
+								<CircleGridContacts />
+								<CircleGridWaypoints />
+							</CircleGrid>
+						</GridCanvas>
+					</Suspense>
 				</div>
-				<div className="flex-1" />
-				<Joystick
-					onDrag={({ x, y }) => rotation({ z: x, x: y })}
-					gamepadKeys={{ x: "roll", y: "pitch" }}
-				>
-					<UntouchableLabel className="bottom-1">Pitch Down</UntouchableLabel>
-					<UntouchableLabel className="top-1">Pitch Up</UntouchableLabel>
-					<UntouchableLabel className="right-1">
-						Starboard Roll
-					</UntouchableLabel>
-					<UntouchableLabel className="left-1">Port Roll</UntouchableLabel>
-				</Joystick>
-				<LinearJoystick
-					onDrag={({ x }) => rotation({ y: -x })}
-					gamepadKey="yaw"
-				>
-					<UntouchableLabel className="left-1">Port Yaw</UntouchableLabel>
-					<UntouchableLabel className="right-1">Starboard Yaw</UntouchableLabel>
-				</LinearJoystick>
+
+				<div className="h-full flex flex-col justify-between gap-2">
+					<LockOnButton />
+					<div>
+						<PilotZoomSlider />
+						<CircleGridTiltButton />
+					</div>
+					<div className="flex-1" />
+					<Joystick
+						onDrag={({ x, y }) => rotation({ z: x, x: y })}
+						gamepadKeys={{ x: "roll", y: "pitch" }}
+					>
+						<UntouchableLabel className="bottom-1">Pitch Down</UntouchableLabel>
+						<UntouchableLabel className="top-1">Pitch Up</UntouchableLabel>
+						<UntouchableLabel className="right-1">
+							Starboard Roll
+						</UntouchableLabel>
+						<UntouchableLabel className="left-1">Port Roll</UntouchableLabel>
+					</Joystick>
+					<LinearJoystick
+						onDrag={({ x }) => rotation({ y: -x })}
+						gamepadKey="yaw"
+					>
+						<UntouchableLabel className="left-1">Port Yaw</UntouchableLabel>
+						<UntouchableLabel className="right-1">
+							Starboard Yaw
+						</UntouchableLabel>
+					</LinearJoystick>
+				</div>
 			</div>
-		</div>
+		</CircleGridStoreProvider>
 	);
 }
 
@@ -159,7 +154,8 @@ function getInterstellarDistance(
 }
 
 const LockOnButton = () => {
-	const waypoint = usePilotStore((store) => store.facingWaypoints?.[0]);
+	const store = useCircleGridStore();
+	const waypoint = store((store) => store.facingWaypoints?.[0]);
 	const [autopilot] = q.pilot.autopilot.get.useNetRequest();
 	const distanceRef = useRef<HTMLSpanElement>(null);
 	const [{ id, currentSystem, systemPosition }] = q.ship.player.useNetRequest();

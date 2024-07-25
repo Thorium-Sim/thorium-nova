@@ -62,7 +62,18 @@ export class LiveQueryClient {
 			headers,
 			body,
 			signal,
-		}).then((res) => res.text());
+		}).then(async (res) => {
+			const response = await res.text();
+
+			if (!res.ok) {
+				throw new Error(
+					`${res.status} Error in request: ${
+						res.statusText
+					}, Url: ${url}, Body: ${JSON.stringify(body)}, Response: ${response}`,
+				);
+			}
+			return response;
+		});
 
 		try {
 			result = JSON.parse(result);
