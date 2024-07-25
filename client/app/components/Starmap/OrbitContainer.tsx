@@ -31,7 +31,7 @@ export const OrbitLine: React.FC<{ radiusX: number; radiusY: number }> = ({
 			<lineBasicMaterial
 				attach="material"
 				color={0x0088ff}
-				linewidth={10}
+				linewidth={1}
 				linecap={"round"}
 				linejoin={"round"}
 			/>
