@@ -5,13 +5,8 @@ import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 test("it should render without error", async () => {
-	const queryClient = new QueryClient();
-
-	const { findByText, queryByText, findByRole, netSendSpy } = await render(
-		<QueryClientProvider client={queryClient}>
-			<OfficersLog />
-		</QueryClientProvider>,
-		{
+	const { findByText, queryByText, findByRole, netSendSpy, debug } =
+		await render(<OfficersLog />, {
 			netRequestData: {
 				officersLog: {
 					get: [
@@ -22,8 +17,7 @@ test("it should render without error", async () => {
 					],
 				},
 			},
-		},
-	);
+		});
 	const logEl = await findByText("@560.60", {}, { timeout: 5000 });
 	expect(logEl).toBeDefined();
 	userEvent.click(logEl);

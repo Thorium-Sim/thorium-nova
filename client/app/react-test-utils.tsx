@@ -33,6 +33,7 @@ global.fetch = vi.fn((url: URL, { body }: { body: FormData }) => {
 		return Promise.resolve({
 			json: () => Promise.resolve(netSendResponse.response),
 			text: () => Promise.resolve(netSendResponse.response),
+			ok: true,
 		});
 	}
 	return Promise.resolve({
