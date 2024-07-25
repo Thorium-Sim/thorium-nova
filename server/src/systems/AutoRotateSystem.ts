@@ -115,10 +115,7 @@ export class AutoRotateSystem extends System {
 		});
 
 		// Apply the rotation
-		rotationQuat.rotateTowards(
-			desiredRotationQuat,
-			thrusters.components.isThrusters.autoRotationVelocity,
-		);
+		rotationQuat.slerp(desiredRotationQuat, 0.01);
 		entity.updateComponent("rotation", {
 			x: rotationQuat.x,
 			y: rotationQuat.y,
