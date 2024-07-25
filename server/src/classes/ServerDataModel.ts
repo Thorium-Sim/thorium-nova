@@ -43,7 +43,11 @@ export class ServerDataModel extends FSDataStore {
 			throw new Error("Thorium Nova requires at least one plugin to run.");
 		plugins.forEach((plugin) => {
 			const name = pluginRegex.exec(plugin)![1];
-			this.plugins.push(new BasePlugin({ name }, this));
+			try {
+				this.plugins.push(new BasePlugin({ name }, this));
+			} catch (err) {
+				console.error(`Error loading plugin ${name}:`, err);
+			}
 		});
 	};
 	toJSON() {
