@@ -16,8 +16,13 @@ import { createRNG } from "@thorium/rng";
 
 let tabId = "";
 if (typeof window !== "undefined") {
+	let browserId = localStorage.getItem("browserId");
 	const tabCoordinator = new TabIdCoordinator();
-	const rng = createRNG(tabCoordinator.tabId);
+	if (!browserId) {
+		browserId = tabCoordinator.generateUUID();
+		localStorage.setItem("browserId", browserId);
+	}
+	const rng = createRNG(`${browserId}${tabCoordinator.tabId}`);
 	tabId = rng.nextString();
 }
 
