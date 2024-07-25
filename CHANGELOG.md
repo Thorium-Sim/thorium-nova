@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.14](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.13...1.0.0-alpha.14) (2024-07-25)
+
+
+### Bug Fixes
+
+* Address an issue which causes the viewscreen to not load ([c34f3ef](https://github.com/Thorium-Sim/thorium-nova/commit/c34f3ef4e5f0e6dcfbda3d3027db7389dff968ca))
+* Disable scaling the browser viewport on mobile devices. ([d728b94](https://github.com/Thorium-Sim/thorium-nova/commit/d728b94ded31e1c6d1c91234fc7082c5dbd1d4b4))
+* Dynamically reposition widget popovers when content changes size ([9e68ba9](https://github.com/Thorium-Sim/thorium-nova/commit/9e68ba9724d7c5b12e75c343f9b46469038542e6)), closes [#617](https://github.com/Thorium-Sim/thorium-nova/issues/617)
+* Fix an issue where two devices accessing the same Thorium server have the same client ID. ([2d4040b](https://github.com/Thorium-Sim/thorium-nova/commit/2d4040b71e8cb3216eda8c644941f7970bb7ad2e))
+* Fix issues with autopilot rotation. ([e94fd0d](https://github.com/Thorium-Sim/thorium-nova/commit/e94fd0d45f5477a931bce453b32c14da911b7421))
+* Fix the appearance of orbit lines on some graphics cards ([3a4b2e4](https://github.com/Thorium-Sim/thorium-nova/commit/3a4b2e4ce22e72aa0461b5455e5ecc36fe166541))
+* Improvements to the officers log widget. ([9c82aeb](https://github.com/Thorium-Sim/thorium-nova/commit/9c82aeb14dc33ef7a7b7e109dba5fc673d2800c3))
+* Label of Cargo Container Volume input field should be Litres ([e7ec8f2](https://github.com/Thorium-Sim/thorium-nova/commit/e7ec8f2f2d49645655f9bf2629b468439997b2b3)), closes [#623](https://github.com/Thorium-Sim/thorium-nova/issues/623)
+* Malformatted plugins no longer crash the entire server on load. ([ce5cebd](https://github.com/Thorium-Sim/thorium-nova/commit/ce5cebd3e734a71fa7b9c1ed5bffe18028f2fab4))
+* Navigation to Deck URL no longer fails. ([32d7338](https://github.com/Thorium-Sim/thorium-nova/commit/32d7338227404fc9d2e0bdc2a7e2100abd977745)), closes [#622](https://github.com/Thorium-Sim/thorium-nova/issues/622)
+* Switching away from the ship class input field no longer navigates away from the basic form ([c10ba26](https://github.com/Thorium-Sim/thorium-nova/commit/c10ba26ab61f79f99acfd198ddaad444f39587a6)), closes [#616](https://github.com/Thorium-Sim/thorium-nova/issues/616)
+
+
+### Features
+
+* Delete decks from the ship map configuration ([de6f502](https://github.com/Thorium-Sim/thorium-nova/commit/de6f502e7fd8c8d4463a914e1ddfafd7d493c4a9))
+
 # [1.0.0-alpha.13](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.12...1.0.0-alpha.13) (2024-04-16)
 
 
