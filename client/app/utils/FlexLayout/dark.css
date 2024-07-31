@@ -1,11 +1,11 @@
 .flexlayout__layout {
   --color-text: #eeeeee;
-  --color-background: black;
+  --color-background: rgba(0,0,0,0.8);
   --color-base: black;
-  --color-1: #121212;
-  --color-2: #1a1a1a;
+  --color-1: #12121288;
+  --color-2: #1a1a1a88;
   --color-3: #262626;
-  --color-4: #333333;
+  --color-4: #333333cc;
   --color-5: #404040;
   --color-6: #4d4d4d;
   --color-drag1: rgb(207, 232, 255);

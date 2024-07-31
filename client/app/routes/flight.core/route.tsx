@@ -17,7 +17,7 @@ export default function FlightDirectorLayout() {
 	const layoutRef = useRef<Layout>(null);
 	return (
 		<CoreFlexLayoutProvider>
-			<div className="h-full flex flex-col bg-black/70">
+			<div className="h-full flex flex-col backdrop-blur">
 				<Menubar>
 					<div className="relative flex-1">
 						<CoreMenubar layoutRef={layoutRef} />
