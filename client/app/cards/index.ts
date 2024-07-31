@@ -9,3 +9,4 @@ export * from "./AlertLevel";
 export * from "./PowerGrid";
 export * from "./RemoteAccess";
 export * from "./Targeting";
+export * from "./Objectives";

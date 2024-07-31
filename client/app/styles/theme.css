@@ -1059,6 +1059,11 @@ input[type="range"].slider {
     @apply bg-opacity-100;
   }
 }
+@container (min-width: 42rem) {
+  .\@2xl\:panel {
+    @apply text-base bg-neutral rounded-btn border border-opacity-0 border-neutral-content;
+  }
+}
 .menu-dropdown .btn {
   line-height: 1;
 }
