@@ -112,13 +112,18 @@ export function ActionsCore() {
 
 	return (
 		<>
-			<SortableList
+			{/* For some reason, rendering the actions in a sortable list messed up 
+		using space bar in input fields, probably because of the a11y of sorting using keyboard shortcuts */}
+			{/* <SortableList
 				items={actions}
 				onDragEnd={handleDragEnd}
 				selectedItem={selectedAction}
 				className="mb-1"
 				onClick={(item) => setSelectedAction(item)}
-			/>
+			/> */}
+			{actions.map((a) => (
+				<div key={a.id} {...a} />
+			))}
 			<Suspense fallback={<LoadingSpinner />}>
 				<ActionCombobox
 					value={null}
