@@ -1258,6 +1258,14 @@ textarea {
   animation: wait-cursor 1.5s steps(77) infinite;
 }
 
+
+[anchor] {
+  bottom: anchor(bottom);
+  position: absolute;
+  left: anchor(left);
+  position-try-options: flip-block, flip-inline, flip-block flip-inline;;
+}
+
 @keyframes wait-cursor {
   0% {
     cursor: url(/assets/cursors/wait/01.png), wait;
