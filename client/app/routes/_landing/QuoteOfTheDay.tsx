@@ -332,6 +332,8 @@ const quotes = [
 	"Traveler, there is no path. Paths are made by walking.",
 	// Sarah Bessey
 	"And as I looked up at the sky, I thought 'I can't believe we always sleep through this.",
+	// Swedish Proverb
+	"Shared joy is double joy; Shared sorrow is half a sorrow.",
 ];
 
 const QuoteOfTheDay = () => {
