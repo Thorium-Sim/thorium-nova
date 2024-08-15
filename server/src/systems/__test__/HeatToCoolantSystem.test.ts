@@ -39,9 +39,9 @@ describe("HeatToCoolantSystem", () => {
 			type: "reactor",
 		});
 		reactor.addComponent("isReactor", {
-			currentOutput: 120,
-			desiredOutput: 120,
-			maxOutput: 180,
+			currentOutput: 6,
+			outputAssignment: [1, 1, 1, 1, 1, 1],
+			maxOutput: 8,
 			optimalOutputPercent: 0.7,
 		});
 		reactor.addComponent("heat", {

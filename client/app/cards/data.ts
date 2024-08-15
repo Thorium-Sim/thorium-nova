@@ -4,7 +4,7 @@ export { navigation, waypoints } from "./Navigation/data";
 export { cargoControl } from "./CargoControl/data";
 export { viewscreen } from "./Viewscreen/data";
 export { alertLevel } from "./AlertLevel/data";
-export { powerGrid } from "./PowerGrid/data";
 export { remoteAccess } from "./RemoteAccess/data";
 export { targeting } from "./Targeting/data";
 export { objectives } from "./Objectives/data";
+export { systemsMonitor } from "./SystemsMonitor/data";

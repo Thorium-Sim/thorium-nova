@@ -149,13 +149,13 @@ describe("flight input", () => {
 		if (!mockDataContext.flight) throw new Error("No flight created");
 
 		expect(flight.playerShips[0].components.position).toMatchInlineSnapshot(`
-      {
-        "parentId": 19,
-        "type": "solar",
-        "x": -228630890,
-        "y": 0,
-        "z": 12500.000000028002,
-      }
-    `);
+			{
+			  "parentId": 9,
+			  "type": "solar",
+			  "x": -228630890,
+			  "y": 0,
+			  "z": 12500.000000028002,
+			}
+		`);
 	});
 });

@@ -16,7 +16,7 @@ import { ReactorHeatSystem } from "./ReactorHeatSystem";
 import { HeatToCoolantSystem } from "./HeatToCoolantSystem";
 import { HeatDispersionSystem } from "./HeatDispersionSystem";
 import { PowerDrawSystem } from "./PowerDrawSystem";
-import { PowerGridSystem } from "./PowerGridSystem";
+// import { PowerGridSystem } from "./PowerGridSystem";
 import { WaypointRemoveSystem } from "./WaypointRemoveSystem";
 import { DebugSphereSystem } from "./DebugSphereSystem";
 import { ProcessTriggersSystem } from "./ProcessTriggersSystem";
@@ -41,7 +41,6 @@ const systems = [
 	ReactorFuelSystem,
 	ReactorHeatSystem,
 	PowerDrawSystem,
-	PowerGridSystem,
 	TorpedoLoadingSystem,
 	NearbyObjectsSystem,
 	ShipBehaviorSystem,

@@ -657,31 +657,33 @@ kbd {
 }
 .radial-dial {
   @apply flex flex-col items-center;
+  --radial-radius: 25px;
+  --radial-border-width: 4px;
+  --radial-background: transparent;
 }
 .radial-indicator {
   position: relative;
   background: conic-gradient(
     var(--radial-color, #fff000) 0%,
     var(--radial-color, #fff000) var(--end-angle, 0%),
-    transparent var(--end-angle, 0%),
-    transparent 100%
+    var(--radial-background) var(--end-angle, 0%),
+    var(--radial-background) 100%
   );
-  width: 50px;
-  height: 50px;
+  width: var(--radial-radius);
+  height: var(--radial-radius);
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.radial-indicator:before {
-  content: attr(data-value) " ";
+.radial-indicator .radial-inner {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 30px;
-  height: 30px;
-  left: 20%;
-  top: 20%;
+  width: calc(var(--radial-radius) - var(--radial-border-width));
+  height: calc(var(--radial-radius) - var(--radial-border-width));
+  left: calc(var(--radial-border-width) / 2);
+  top: calc(var(--radial-border-width) / 2);
   position: absolute;
   background-color: #333;
   border-radius: 50%;

@@ -46,6 +46,8 @@
 	| "package-open"
 	| "pencil"
 	| "picture-in-picture"
+	| "plug-zap"
+	| "plug"
 	| "plus"
 	| "power-node"
 	| "reactor"

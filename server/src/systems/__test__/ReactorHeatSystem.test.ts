@@ -42,9 +42,9 @@ describe("ReactorHeatSystem", () => {
 			type: "reactor",
 		});
 		reactor.addComponent("isReactor", {
-			currentOutput: 120,
-			desiredOutput: 120,
-			maxOutput: 180,
+			currentOutput: 6,
+			outputAssignment: [1, 1, 1, 1, 1, 1],
+			maxOutput: 8,
 			optimalOutputPercent: 0.7,
 		});
 		reactor.addComponent("heat", {
@@ -98,13 +98,13 @@ describe("ReactorHeatSystem", () => {
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
-		expect(heatComponent?.heat).toMatchInlineSnapshot(`300.2425263157909`);
+		expect(heatComponent?.heat).toMatchInlineSnapshot('300.0121263157894');
 
 		// One minute
 		for (let i = 0; i < 60 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(heatComponent?.heat).toMatchInlineSnapshot(`314.79410526324386`);
+		expect(heatComponent?.heat).toMatchInlineSnapshot('300.7397052631518');
 	});
 	it("should transfer some of the heat into the coolant", () => {
 		const heatToCoolantSystem = new HeatToCoolantSystem();
@@ -125,15 +125,15 @@ describe("ReactorHeatSystem", () => {
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
-		expect(water?.temperature).toMatchInlineSnapshot(`300.0013139087228`);
-		expect(heatComponent?.heat).toMatchInlineSnapshot(`300.24137284223843`);
+		expect(water?.temperature).toMatchInlineSnapshot('300.00006569543626');
+		expect(heatComponent?.heat).toMatchInlineSnapshot('300.0120686421116');
 
 		// One minute
 		for (let i = 0; i < 60 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(water?.temperature).toMatchInlineSnapshot(`303.3444012519671`);
-		expect(heatComponent?.heat).toMatchInlineSnapshot(`311.858073006254`);
+		expect(water?.temperature).toMatchInlineSnapshot('300.16722006259494');
+		expect(heatComponent?.heat).toMatchInlineSnapshot('300.5929036503006');
 	});
 	it("should disperse some of the coolant's heat into space", () => {
 		const heatToCoolantSystem = new HeatToCoolantSystem();
@@ -158,15 +158,15 @@ describe("ReactorHeatSystem", () => {
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
-		expect(water?.temperature).toMatchInlineSnapshot(`299.96976663913847`);
-		expect(heatComponent?.heat).toMatchInlineSnapshot(`300.2412269271415`);
+		expect(water?.temperature).toMatchInlineSnapshot('299.96851865283526');
+		expect(heatComponent?.heat).toMatchInlineSnapshot('300.0119227275404');
 
 		// One minute
 		for (let i = 0; i < 60 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(water?.temperature).toMatchInlineSnapshot(`301.8342184058807`);
-		expect(heatComponent?.heat).toMatchInlineSnapshot(`311.4734007014108`);
+		expect(water?.temperature).toMatchInlineSnapshot('298.689037122951');
+		expect(heatComponent?.heat).toMatchInlineSnapshot('300.21266879320314');
 		// Test turning off the reactor
 		if (reactor.components.isReactor) {
 			reactor.components.isReactor.currentOutput = 0;
@@ -174,7 +174,7 @@ describe("ReactorHeatSystem", () => {
 		for (let i = 0; i < 60 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(water?.temperature).toMatchInlineSnapshot(`303.8757180028086`);
-		expect(heatComponent?.heat).toMatchInlineSnapshot(`307.92052500643865`);
+		expect(water?.temperature).toMatchInlineSnapshot('297.823551606293');
+		expect(heatComponent?.heat).toMatchInlineSnapshot('299.34962722360433');
 	});
 });

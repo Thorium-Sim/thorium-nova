@@ -15,7 +15,7 @@ export function dataStreamEntity(e: Entity) {
 		return {
 			id: e.id.toString(),
 			x: e.components.isReactor.currentOutput,
-			y: e.components.heat?.heat || 0,
+			z: e.components.heat?.heat || 0,
 		};
 	}
 	if (e.components.isBattery) {
@@ -23,14 +23,7 @@ export function dataStreamEntity(e: Entity) {
 			id: e.id.toString(),
 			x: e.components.isBattery.storage,
 			y: e.components.isBattery.chargeAmount,
-			z: e.components.isBattery.dischargeAmount,
-		};
-	}
-	if (e.components.isPowerNode) {
-		return {
-			id: e.id.toString(),
-			x: e.components.isPowerNode.powerInput,
-			y: e.components.isPowerNode.powerRequirement,
+			z: e.components.isBattery.outputAmount,
 		};
 	}
 	if (e.components.isImpulseEngines) {
@@ -48,6 +41,8 @@ export function dataStreamEntity(e: Entity) {
 		return {
 			id: e.id.toString(),
 			x: targetSpeed,
+			y: e.components.power?.currentPower,
+			z: e.components.heat?.heat || 0,
 		};
 	}
 	if (e.components.isWarpEngines) {
@@ -55,6 +50,15 @@ export function dataStreamEntity(e: Entity) {
 		return {
 			id: e.id.toString(),
 			x: maxVelocity,
+			y: e.components.power?.currentPower,
+			z: e.components.heat?.heat || 0,
+		};
+	}
+	if (e.components.power) {
+		return {
+			id: e.id.toString(),
+			y: e.components.power.currentPower,
+			z: e.components.heat?.heat || 0,
 		};
 	}
 	if (e.components.isTorpedo) {

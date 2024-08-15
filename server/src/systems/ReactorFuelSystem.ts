@@ -20,11 +20,10 @@ export class ReactorFuelSystem extends System {
 			return;
 		}
 
-		const {
-			desiredOutput: powerNeeded,
-			optimalOutputPercent,
-			maxOutput,
-		} = entity.components.isReactor;
+		const { outputAssignment, optimalOutputPercent, maxOutput } =
+			entity.components.isReactor;
+
+		const powerNeeded = outputAssignment.length;
 
 		const optimalOutput = maxOutput * optimalOutputPercent;
 		const outputBonus = powerNeeded / optimalOutput;
@@ -43,7 +42,7 @@ export class ReactorFuelSystem extends System {
 				Math.abs(energyNeeded - energyProvided) /
 				entity.components.isReactor.unusedFuel.density;
 			entity.components.isReactor.currentOutput =
-				entity.components.isReactor.desiredOutput;
+				entity.components.isReactor.outputAssignment.length;
 			return;
 		}
 		entity.components.isReactor.unusedFuel.amount = 0;
@@ -86,13 +85,14 @@ export class ReactorFuelSystem extends System {
 					Math.abs(energyNeeded - energyProvided) /
 					entity.components.isReactor.unusedFuel.density;
 				entity.components.isReactor.currentOutput =
-					entity.components.isReactor.desiredOutput;
+					entity.components.isReactor.outputAssignment.length;
 				return;
 			}
 		}
 		// Figure out the current power output based on how much power has been provided
 		const powerProvided: MegaWatt =
 			energyProvided / elapsedTimeHours / outputBonus;
+
 		entity.components.isReactor.currentOutput = powerProvided;
 	}
 }

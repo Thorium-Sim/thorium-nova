@@ -40,9 +40,9 @@ describe("ReactorFuelSystem", () => {
 			type: "reactor",
 		});
 		reactor.addComponent("isReactor", {
-			currentOutput: 120,
-			desiredOutput: 120,
-			maxOutput: 180,
+			currentOutput: 6,
+			outputAssignment: [1, 1, 1, 1, 1, 1],
+			maxOutput: 8,
 			optimalOutputPercent: 0.7,
 		});
 		ship = new Entity();
@@ -102,26 +102,26 @@ describe("ReactorFuelSystem", () => {
 			ship.components.shipMap.deckNodes[0].contents.Deuterium.count = 0;
 		}
 		const reactorComponent = reactor.components.isReactor;
-		expect(reactorComponent.currentOutput).toMatchInlineSnapshot(`120`);
+		expect(reactorComponent.currentOutput).toMatchInlineSnapshot('6');
 		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot(`0.33`);
 
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
-		expect(reactorComponent.currentOutput).toMatchInlineSnapshot(`120`);
+		expect(reactorComponent.currentOutput).toMatchInlineSnapshot('6');
 		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot(
-			`0.29952380952380925`,
+			'0.328285714285714',
 		);
 		for (let i = 0; i < 60 * 9 + 50; i++) {
 			ecs.update(16);
 		}
 		expect(reactorComponent.currentOutput).toMatchInlineSnapshot(
-			`82.4999999994225`,
+			'6',
 		);
-		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot(`0`);
+		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot('0.31142857142856833');
 		ecs.update(16);
-		expect(reactorComponent.currentOutput).toMatchInlineSnapshot(`0`);
-		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot(`0`);
+		expect(reactorComponent.currentOutput).toMatchInlineSnapshot('6');
+		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot('0.3113999999999969');
 	});
 	it("should consume extra fuel when the desired power is above the optimal level", () => {
 		if (!reactor.components.isReactor) throw new Error("not reactor");
@@ -131,8 +131,11 @@ describe("ReactorFuelSystem", () => {
 			density: 1,
 		};
 		const reactorComponent = reactor.components.isReactor;
-		reactorComponent.desiredOutput =
-			reactorComponent.maxOutput * reactorComponent.optimalOutputPercent;
+		reactorComponent.outputAssignment = Array.from({
+			length: Math.ceil(
+				reactorComponent.maxOutput * reactorComponent.optimalOutputPercent,
+			),
+		}).map(() => 1);
 
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
@@ -140,7 +143,9 @@ describe("ReactorFuelSystem", () => {
 		const fuel1 = reactorComponent.unusedFuel.amount;
 		const fuelDiff1 = startingFuel - fuel1;
 
-		reactorComponent.desiredOutput = reactorComponent.maxOutput;
+		reactorComponent.outputAssignment = Array.from({
+			length: Math.ceil(reactorComponent.maxOutput),
+		});
 
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
@@ -150,8 +155,13 @@ describe("ReactorFuelSystem", () => {
 
 		expect(fuelDiff1).toBeLessThan(fuelDiff2);
 
-		reactorComponent.desiredOutput =
-			reactorComponent.maxOutput * reactorComponent.optimalOutputPercent * 0.5;
+		reactorComponent.outputAssignment = Array.from({
+			length: Math.ceil(
+				reactorComponent.maxOutput *
+					reactorComponent.optimalOutputPercent *
+					0.5,
+			),
+		});
 
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
@@ -168,7 +178,7 @@ describe("ReactorFuelSystem", () => {
 		};
 		const reactorComponent = reactor.components.isReactor;
 
-		expect(reactorComponent.currentOutput).toMatchInlineSnapshot(`120`);
+		expect(reactorComponent.currentOutput).toMatchInlineSnapshot('6');
 		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot(`0.01`);
 		expect(
 			ship.components.shipMap?.deckNodes[0].contents.Deuterium.count,
@@ -177,12 +187,12 @@ describe("ReactorFuelSystem", () => {
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
-		expect(reactorComponent.currentOutput).toMatchInlineSnapshot(`120`);
+		expect(reactorComponent.currentOutput).toMatchInlineSnapshot('6');
 		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot(
-			`0.9985436785436778`,
+			'0.008285714285714311',
 		);
 		expect(
 			ship.components.shipMap?.deckNodes[0].contents.Deuterium.count,
-		).toMatchInlineSnapshot(`99`);
+		).toMatchInlineSnapshot('100');
 	});
 });

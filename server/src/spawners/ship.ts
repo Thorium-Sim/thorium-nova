@@ -81,22 +81,6 @@ export function spawnShip(
 
 	const systemEntities: Entity[] = [];
 
-	// First we'll create some power nodes
-	const powerNodes: Record<string, { entity: Entity; count: number }> = {};
-	if (params.playerShip) {
-		template.powerNodes?.forEach((name) => {
-			const node = new Entity();
-			node.addComponent("identity", { name });
-			node.addComponent("isPowerNode", {
-				maxConnections: 3,
-				connectedSystems: [],
-				distributionMode: "evenly",
-			});
-			powerNodes[name] = { entity: node, count: 0 };
-			systemEntities.push(node);
-		});
-	}
-
 	template.shipSystems?.forEach((system) => {
 		const systemPlugin = getSystem(
 			dataContext,
@@ -126,26 +110,9 @@ export function spawnShip(
 				break;
 			}
 			default: {
+				// TODO: Set up power from reactors and batteries
 				const entity = spawnShipSystem(shipId, systemPlugin, system.overrides);
 				systemEntities.push(entity);
-				if (params.playerShip && entity.components.power) {
-					// Hook up the power node
-					const leastPowerNode = Object.entries(powerNodes).reduce(
-						(prev, next) => {
-							if (next[1].count < prev.count) return next[1];
-							return prev;
-						},
-						powerNodes[Object.keys(powerNodes)[0]],
-					);
-					const powerNode =
-						powerNodes[systemPlugin.powerNode || ""] || leastPowerNode;
-					powerNode.count += 1;
-					powerNode.entity.components.isPowerNode?.connectedSystems.push(
-						entity.id,
-					);
-				} else {
-					entity.removeComponent("power");
-				}
 				break;
 			}
 		}
@@ -187,53 +154,11 @@ export function spawnShip(
 					sys.updateComponent("isReactor", {
 						maxOutput,
 						currentOutput: maxOutput * systemPlugin.optimalOutputPercent,
-						desiredOutput: maxOutput * systemPlugin.optimalOutputPercent,
 						optimalOutputPercent: systemPlugin.optimalOutputPercent,
 					});
 					systemEntities.push(sys);
 				});
 			}
-		});
-
-		// And connect up the power nodes for good measure
-		// Every battery gets one Reactor
-		const batteries = systemEntities.filter((e) => e.components.isBattery);
-		const reactors = systemEntities.filter((e) => e.components.isReactor);
-		let reactorIndex = 0;
-		// Connect batteries to power nodes in this order
-		const powerNodeOrder = [
-			"internal",
-			"intel",
-			"defense",
-			"navigation",
-			"offense",
-		];
-		batteries.forEach((battery, i) => {
-			reactorIndex = i % reactors.length;
-			const reactor = reactors[reactorIndex];
-			reactor.updateComponent("isReactor", {
-				connectedEntities: [
-					...(reactor.components.isReactor?.connectedEntities || []),
-					battery.id,
-				],
-			});
-			const powerNode = powerNodes[powerNodeOrder[i % powerNodeOrder.length]];
-			battery.updateComponent("isBattery", {
-				connectedNodes: [
-					...(battery.components.isBattery?.connectedNodes || []),
-					powerNode.entity.id,
-				],
-			});
-		});
-		// Make sure every power node is connected to at least one reactor
-		Object.values(powerNodes).forEach((node, i) => {
-			const reactor = reactors[(reactorIndex + i) % reactors.length];
-			reactor?.updateComponent("isReactor", {
-				connectedEntities: [
-					...(reactor.components.isReactor?.connectedEntities || []),
-					node.entity.id,
-				],
-			});
 		});
 	}
 
