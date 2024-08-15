@@ -39,9 +39,8 @@ export const isBattery = z
 		 */
 		discharging: z.boolean().default(true),
 		/**
-		 * Which system the units of power are allocated.
-		 * Each item represents 1 MW of power.
+		 * Which reactor each unit of power is coming from. One unit = 1MW
 		 */
-		outputAssignment: z.array(z.number()).default([]),
+		powerSources: z.number().array().default([]),
 	})
 	.default({});

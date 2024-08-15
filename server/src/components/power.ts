@@ -18,5 +18,9 @@ export const power = z
 		powerDraw: z.number().default(0),
 		/** How much power is currently being requested. Could be more than the maxSafePower */
 		requestedPower: z.number().default(10),
+		/**
+		 * Which reactor or battery each unit of power is coming from. One unit = 1MW
+		 */
+		powerSources: z.number().array().default([]),
 	})
 	.default({});

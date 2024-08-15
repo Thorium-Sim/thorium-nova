@@ -40,7 +40,6 @@ describe("HeatToCoolantSystem", () => {
 		});
 		reactor.addComponent("isReactor", {
 			currentOutput: 6,
-			outputAssignment: [1, 1, 1, 1, 1, 1],
 			maxOutput: 8,
 			optimalOutputPercent: 0.7,
 		});

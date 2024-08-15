@@ -21,11 +21,6 @@ export const isReactor = z
 		 */
 		currentOutput: z.number().default(8),
 		/**
-		 * Which system the units of power are allocated.
-		 * Each item represents 1 MW of power. The length of this is the desired output.
-		 */
-		outputAssignment: z.array(z.number()).default([]),
-		/**
 		 * How much fuel is left to burn after the previous tick. Fuel is only removed
 		 * from inventory in whole units. Any fuel not turned into power remains in the
 		 * reactor.

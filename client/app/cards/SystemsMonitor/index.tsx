@@ -16,7 +16,6 @@ import {
 	useState,
 } from "react";
 import { Fragment } from "react/jsx-runtime";
-import { createRNG } from "@thorium/rng";
 
 /**
  * TODO:
@@ -34,7 +33,6 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 	const [selectedPowerSupplier, setSelectedPowerSupplier] = useState<
 		number | null
 	>(null);
-	const [selectedSystem, setSelectedSystem] = useState<number | null>(null);
 	return (
 		<div className="relative grid grid-cols-5 gap-8 h-full">
 			<div className="flex flex-col justify-around gap-4">
@@ -72,8 +70,7 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 						key={system.id}
 						{...system}
 						cardLoaded={cardLoaded}
-						selectedSystem={selectedSystem}
-						setSelectedSystem={setSelectedSystem}
+						selectedPowerSupplier={selectedPowerSupplier}
 					/>
 				))}
 			</div>
@@ -206,7 +203,7 @@ function Reactor({
 			<div className="flex flex-col col-span-2 mt-2">
 				<div className="flex-1 flex flex-wrap gap-y-1">
 					{Array.from({
-						length: desiredOutput,
+						length: maxOutput,
 					}).map((_, i) => (
 						<Fragment key={i}>
 							<div
@@ -243,6 +240,7 @@ function Battery({
 	chargeRate,
 	outputRate,
 	capacity,
+	powerSources,
 	cardLoaded,
 }: {
 	id: number;
@@ -253,6 +251,7 @@ function Battery({
 	chargeRate: number;
 	outputRate: number;
 	capacity: number;
+	powerSources: number[];
 	cardLoaded: boolean;
 }) {
 	const chargeElementRefs = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -273,12 +272,22 @@ function Battery({
 		const chargeAmount = system.y;
 		const dischargeAmount = system.z;
 		for (const [i, el] of chargeElementRefs.current) {
+			let activeClass = ["bg-yellow-400", "border-yellow-400"];
+			if (powerSources[i] === selectedPowerSupplier) {
+				activeClass = ["bg-green-400", "border-green-400"];
+			}
+			el.classList.remove(
+				"border-gray-500",
+				"bg-gray-500",
+				"bg-green-400",
+				"border-green-400",
+				"bg-yellow-400",
+				"border-yellow-400",
+			);
 			if (i + 1 <= Math.ceil(chargeAmount)) {
-				el.classList.add("bg-yellow-400", "border-yellow-400");
-				el.classList.remove("border-gray-500", "bg-gray-500");
+				el.classList.add(...activeClass);
 			} else {
 				el.classList.add("border-gray-500", "bg-gray-500");
-				el.classList.remove("bg-yellow-400", "border-yellow-400");
 			}
 		}
 		if (storageRef.current) {
@@ -390,28 +399,28 @@ function Battery({
 function System({
 	id,
 	name,
-	requestedPower,
-	maxSafePower,
-	requiredPower,
+	power,
 	efficiency,
 	heat,
-	maxSafeHeat,
-	maxHeat,
-	nominalHeat,
+	selectedPowerSupplier,
 	cardLoaded,
 }: {
 	id: number;
 	name: string;
-	requestedPower: number;
-	maxSafePower: number;
-	requiredPower: number;
+	power?: {
+		requestedPower: number;
+		maxSafePower: number;
+		requiredPower: number;
+		powerSources: number[];
+	};
 	efficiency?: number;
-	heat?: number;
-	maxSafeHeat?: number;
-	maxHeat?: number;
-	nominalHeat?: number;
-	selectedSystem: number | null;
-	setSelectedSystem: Dispatch<SetStateAction<number | null>>;
+	heat?: {
+		heat: number;
+		maxSafeHeat: number;
+		maxHeat: number;
+		nominalHeat: number;
+	};
+	selectedPowerSupplier: number | null;
 	cardLoaded: boolean;
 }) {
 	const elementRefs = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -423,26 +432,36 @@ function System({
 		const system = interpolate(id);
 		if (!system) return;
 		const currentPower = system.y;
-		const heat = system.z;
+		const heatValue = system.z;
 		for (const [i, el] of elementRefs.current) {
+			el.classList.remove(
+				"border-gray-500",
+				"bg-gray-500",
+				"bg-yellow-400",
+				"border-yellow-400",
+				"bg-green-400",
+				"border-green-400",
+			);
 			if (i + 1 <= Math.ceil(currentPower)) {
 				el.classList.add("bg-yellow-400", "border-yellow-400");
-				el.classList.remove("border-gray-500", "bg-gray-500");
 			} else {
 				el.classList.add("border-gray-500", "bg-gray-500");
-				el.classList.remove("bg-yellow-400", "border-yellow-400");
+			}
+			if (power?.powerSources[i] === selectedPowerSupplier) {
+				el.classList.add("border-green-400");
 			}
 		}
 		if (heatRef.current) {
-			heatRef.current.innerText = `Heat: ${Math.round(heat)}K`;
+			heatRef.current.innerText = `Heat: ${Math.round(heatValue)}K`;
 		}
-		if (heatProgressRef.current && nominalHeat && maxHeat) {
+		if (heatProgressRef.current && heat) {
 			heatProgressRef.current.setValue(
-				(heat - nominalHeat) / (maxHeat - nominalHeat),
+				(heatValue - heat.nominalHeat) / (heat.maxHeat - heat.nominalHeat),
 			);
 		}
 	}, cardLoaded);
 
+	if (!power && !efficiency && !heat) return null;
 	return (
 		<div
 			key={id}
@@ -451,19 +470,16 @@ function System({
 			<div className="font-medium w-full gap-1 self-start flex items-center">
 				<span className="truncate">{name}</span>
 				<div className="flex-1" />
-				{typeof heat === "number" &&
-				typeof nominalHeat === "number" &&
-				maxHeat ? (
+				{heat ? (
 					<Tooltip ref={heatRef} content={`Heat: K`}>
 						<RadialDial
 							ref={heatProgressRef}
 							marker={
-								maxSafeHeat
-									? (maxSafeHeat - nominalHeat) / (maxHeat - nominalHeat)
-									: undefined
+								(heat.maxSafeHeat - heat.nominalHeat) /
+								(heat.maxHeat - heat.nominalHeat)
 							}
 							label=""
-							count={(0 - nominalHeat) / (maxHeat - nominalHeat)}
+							count={(0 - heat.nominalHeat) / (heat.maxHeat - heat.nominalHeat)}
 							max={1}
 							color="rgb(293,68,68)"
 							backgroundColor="#888"
@@ -487,46 +503,50 @@ function System({
 				) : null}
 			</div>
 
-			<div className="flex flex-col mt-2">
-				<div className="flex gap-1 items-center">
-					<Tooltip content="Remove Power">
-						<Button className="btn-xs btn-primary">
-							<Icon name="minus" />
-						</Button>
-					</Tooltip>
-					<div className="flex-1 flex flex-wrap gap-y-1">
-						{Array.from({
-							length: Math.max(requestedPower, requiredPower),
-						}).map((_, i) => (
-							<Fragment key={i}>
-								{/* Display a warning indicator if we're past the max safe power */}
-								{i + 1 === maxSafePower + 1 && (
-									<Tooltip content="Max Safe Power">
-										<div className="w-0.5 ml-px mr-px h-3 last-of-type:mr-0 bg-red-500 rounded" />
-									</Tooltip>
-								)}
-								<div
-									ref={(el) => el && elementRefs.current.set(i, el)}
-									className={cn("w-3 h-3 mr-1 last-of-type:mr-0 border-2", {
-										"mr-0": i + 1 === requiredPower || i + 1 === maxSafePower,
-									})}
-								/>
+			{power ? (
+				<div className="flex flex-col mt-2">
+					<div className="flex gap-1 items-center">
+						<Tooltip content="Remove Power">
+							<Button className="btn-xs btn-primary">
+								<Icon name="minus" />
+							</Button>
+						</Tooltip>
+						<div className="flex-1 flex flex-wrap gap-y-1">
+							{Array.from({
+								length: Math.max(power.requestedPower, power.requiredPower),
+							}).map((_, i) => (
+								<Fragment key={i}>
+									{/* Display a warning indicator if we're past the max safe power */}
+									{i + 1 === power.maxSafePower + 1 && (
+										<Tooltip content="Max Safe Power">
+											<div className="w-0.5 ml-px mr-px h-3 last-of-type:mr-0 bg-red-500 rounded" />
+										</Tooltip>
+									)}
+									<div
+										ref={(el) => el && elementRefs.current.set(i, el)}
+										className={cn("w-3 h-3 mr-1 last-of-type:mr-0 border-2", {
+											"mr-0":
+												i + 1 === power.requiredPower ||
+												i + 1 === power.maxSafePower,
+										})}
+									/>
 
-								{i + 1 === requiredPower && (
-									<Tooltip content="Required Power">
-										<div className="w-0.5 ml-px mr-px h-3 last-of-type:mr-0 bg-yellow-500 rounded" />
-									</Tooltip>
-								)}
-							</Fragment>
-						))}
+									{i + 1 === power.requiredPower && (
+										<Tooltip content="Required Power">
+											<div className="w-0.5 ml-px mr-px h-3 last-of-type:mr-0 bg-yellow-500 rounded" />
+										</Tooltip>
+									)}
+								</Fragment>
+							))}
+						</div>
+						<Tooltip content="Allocate Power">
+							<Button className="btn-xs btn-primary">
+								<Icon name="plus" />
+							</Button>
+						</Tooltip>
 					</div>
-					<Tooltip content="Allocate Power">
-						<Button className="btn-xs btn-primary">
-							<Icon name="plus" />
-						</Button>
-					</Tooltip>
 				</div>
-			</div>
+			) : null}
 		</div>
 	);
 }

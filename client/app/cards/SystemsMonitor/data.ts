@@ -1,5 +1,6 @@
 import { pubsub } from "@server/init/pubsub";
 import { t } from "@server/init/t";
+import { getPowerSupplierPowerNeeded } from "@server/systems/ReactorFuelSystem";
 import type { Entity } from "@server/utils/ecs";
 import { getShipSystems } from "@server/utils/getShipSystem";
 import { getReactorInventory } from "@server/utils/getSystemInventory";
@@ -32,7 +33,7 @@ export const systemsMonitor = t.router({
 					return {
 						id: r.id,
 						name: r.components.identity!.name,
-						desiredOutput: r.components.isReactor!.outputAssignment.length,
+						desiredOutput: getPowerSupplierPowerNeeded(r),
 						maxOutput: r.components.isReactor!.maxOutput,
 						optimalOutputPercent: r.components.isReactor!.optimalOutputPercent,
 						nominalHeat: r.components.heat!.nominalHeat,
@@ -61,6 +62,7 @@ export const systemsMonitor = t.router({
 					chargeRate: b.components.isBattery!.chargeRate,
 					outputAmount: b.components.isBattery!.outputAmount,
 					outputRate: b.components.isBattery!.outputRate,
+					powerSources: b.components.isBattery!.powerSources,
 				}));
 			}),
 	}),
@@ -76,18 +78,31 @@ export const systemsMonitor = t.router({
 				for (const systemId of ctx.ship?.components.shipSystems?.shipSystems.keys() ||
 					[]) {
 					const system = ctx.flight?.ecs.getEntityById(systemId);
-					if (!system) continue;
+					if (!system?.components.isShipSystem) continue;
+					// Filter out reactors and batteries
+					if (system.components.isReactor || system.components.isBattery)
+						continue;
 					systems.push({
 						id: systemId,
 						name: system.components.identity!.name,
-						requestedPower: system.components.power?.requestedPower || 0,
-						maxSafePower: system.components.power?.maxSafePower || 0,
-						requiredPower: system.components.power?.requiredPower || 0,
-						efficiency: system.components.efficiency!.efficiency || 1,
-						heat: system.components.heat?.heat || 0,
-						maxHeat: system.components.heat?.maxHeat || 0,
-						maxSafeHeat: system.components.heat?.maxSafeHeat || 0,
-						nominalHeat: system.components.heat?.nominalHeat || 0,
+						power: system.components.power
+							? {
+									requestedPower: system.components.power.requestedPower,
+									maxSafePower: system.components.power.maxSafePower,
+									requiredPower: system.components.power.requiredPower,
+									powerSources: system.components.power.powerSources,
+							  }
+							: undefined,
+
+						efficiency: system.components.efficiency?.efficiency,
+						heat: system.components.heat
+							? {
+									heat: system.components.heat.heat,
+									maxHeat: system.components.heat.maxHeat,
+									maxSafeHeat: system.components.heat.maxSafeHeat,
+									nominalHeat: system.components.heat.nominalHeat,
+							  }
+							: undefined,
 					});
 				}
 
@@ -97,7 +112,10 @@ export const systemsMonitor = t.router({
 	stream: t.procedure.dataStream(({ ctx, entity }) => {
 		if (!entity) return false;
 		return Boolean(
-			ctx.ship?.components.shipSystems?.shipSystems.has(entity.id),
+			ctx.ship?.components.shipSystems?.shipSystems.has(entity.id) &&
+				(entity.components.power ||
+					entity.components.isBattery ||
+					entity.components.isReactor),
 		);
 	}),
 });

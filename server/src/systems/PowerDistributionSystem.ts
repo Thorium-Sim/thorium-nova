@@ -8,18 +8,18 @@ export class PowerDistributionSystem extends System {
 	update(entity: Entity, elapsed: number) {
 		const elapsedTimeHours = elapsed / 1000 / 60 / 60;
 
-		const poweredSystems: Entity[] = [];
-		const reactors: Entity[] = [];
-		const batteries: Entity[] = [];
+		const poweredSystems = new Map<number, Entity>();
+		const reactors = new Map<number, Entity>();
+		const batteries = new Map<number, Entity>();
 
 		const systemIds = entity.components.shipSystems?.shipSystems.keys() || [];
 
 		for (const sysId of systemIds) {
 			const sys = this.ecs.getEntityById(sysId);
-			if (sys?.components.isReactor) reactors.push(sys);
-			else if (sys?.components.isBattery) batteries.push(sys);
+			if (sys?.components.isReactor) reactors.set(sys.id, sys);
+			else if (sys?.components.isBattery) batteries.set(sys.id, sys);
 			else if (sys?.components.isShipSystem && sys.components.power)
-				poweredSystems.push(sys);
+				poweredSystems.set(sys.id, sys);
 		}
 
 		// Reset all of the battery metrics
@@ -30,116 +30,60 @@ export class PowerDistributionSystem extends System {
 			});
 		});
 
-		// Key is systemId, value is array of reactor/battery IDs
-		const reactorPowerAssignment = new Map<number, number[]>();
-		const batteryPowerAssignment = new Map<number, number[]>();
+		// Key is reactor/battery id, value is power supplied
+		const powerSuppliedSources = new Map<number, number>();
 
-		// Pass power from reactors to batteries and systems
-		for (const reactor of reactors) {
-			// Each assignment is one unit of power applied to that system or battery
-			for (const systemId of reactor.components.isReactor?.outputAssignment ||
-				[]) {
-				reactorPowerAssignment.set(systemId, [
-					...(reactorPowerAssignment.get(systemId) || []),
-					reactor.id,
-				]);
-			}
-		}
-
-		// Key is reactor/battery ID, value is power supplied
-		const reactorPowerSupplied = new Map<number, number>();
-		const batteryPowerSupplied = new Map<number, number>();
-
-		// Apply power from reactors, then do the same thing with batteries
-		for (const battery of batteries) {
-			// Charge the battery from the Reactors
-			const storage = battery.components.isBattery?.storage || 0;
-			const capacity = battery.components.isBattery?.capacity || 0;
-			const chargeRate =
-				battery.components.isBattery?.chargeRate || Number.POSITIVE_INFINITY;
-			const batteryPowerSupply = reactorPowerAssignment.get(battery.id) || [];
-
-			let suppliedPower = 0;
-			for (let i = 0; i < chargeRate; i++) {
-				if (batteryPowerSupply.length === 0) break;
-				const reactorId = batteryPowerSupply.pop();
-				if (!reactorId) break;
-				reactorPowerSupplied.set(
-					reactorId,
-					(reactorPowerSupplied.get(reactorId) || 0) + 1,
-				);
-				suppliedPower += 1;
-			}
-
-			const chargeAmount = storage === capacity ? 0 : suppliedPower;
-			battery.updateComponent("isBattery", {
-				chargeAmount,
-				storage: Math.min(storage + chargeAmount * elapsedTimeHours, capacity),
-			});
-
-			// Output battery power to systems
-			if (battery.components.isBattery?.discharging) {
-				// How many points of power
-				let maxOutput = battery.components.isBattery.storage / elapsedTimeHours;
-				// Each assignment is one unit of power applied to that system or battery
-				for (const systemId of battery.components.isBattery?.outputAssignment ||
-					[]) {
-					if (maxOutput <= 0) {
-						break;
-					}
-					batteryPowerAssignment.set(systemId, [
-						...(batteryPowerAssignment.get(systemId) || []),
-						battery.id,
-					]);
-					maxOutput -= 1;
-				}
-			}
-		}
-
-		// Apply power to systems, first from reactors, then from batteries
-		for (const system of poweredSystems) {
-			const powerDraw = system.components.power?.powerDraw || 0;
+		// Apply power to the systems from batteries and reactors
+		for (const [id, system] of poweredSystems) {
+			const power = system.components.power;
+			if (!power) continue;
+			const { powerDraw, powerSources } = power;
 			let suppliedPower = 0;
 			for (let i = 0; i < powerDraw; i++) {
-				const reactorId = reactorPowerAssignment.get(system.id)?.pop();
-				if (reactorId) {
-					reactorPowerSupplied.set(
-						reactorId,
-						(reactorPowerSupplied.get(reactorId) || 0) + 1,
+				const source = powerSources[i];
+				if (typeof source === "number") {
+					const sourceEntity = this.ecs.getEntityById(source);
+					if (sourceEntity?.components.isBattery?.storage === 0) continue;
+					suppliedPower++;
+					powerSuppliedSources.set(
+						source,
+						(powerSuppliedSources.get(source) || 0) + 1,
 					);
-					suppliedPower += 1;
-					continue;
 				}
-				const batteryId = batteryPowerAssignment.get(system.id)?.pop();
-				if (batteryId) {
-					const battery = this.ecs.getEntityById(batteryId);
-					batteryPowerSupplied.set(
-						batteryId,
-						(batteryPowerSupplied.get(batteryId) || 0) + 1,
-					);
-					suppliedPower += 1;
-					continue;
-				}
-				break;
 			}
 			system.updateComponent("power", { currentPower: suppliedPower });
 		}
-
-		// Update the reactor and battery components with the power supplied
-		for (const reactor of reactors) {
-			reactor.updateComponent("isReactor", {
-				currentOutput: reactorPowerSupplied.get(reactor.id) || 0,
+		// Apply power to batteries from reactors
+		for (const [id, battery] of batteries) {
+			const isBattery = battery.components.isBattery;
+			if (!isBattery) continue;
+			let suppliedPower = 0;
+			for (const source of isBattery.powerSources) {
+				suppliedPower++;
+				powerSuppliedSources.set(
+					source,
+					(powerSuppliedSources.get(source) || 0) + 1,
+				);
+			}
+			const outputAmount = powerSuppliedSources.get(battery.id) || 0;
+			const storage = isBattery.storage;
+			const storageAdjustment = suppliedPower - outputAmount;
+			const newStorage = Math.min(
+				Math.max(storage + storageAdjustment * elapsedTimeHours, 0),
+				isBattery.capacity,
+			);
+			battery.updateComponent("isBattery", {
+				chargeAmount: suppliedPower,
+				outputAmount,
+				storage: newStorage,
 			});
 		}
-		for (const battery of batteries) {
-			const storage = battery.components.isBattery?.storage || 0;
-			battery.updateComponent("isBattery", {
-				outputAmount: batteryPowerSupplied.get(battery.id) || 0,
-				storage: Math.max(
-					0,
-					storage -
-						(batteryPowerSupplied.get(battery.id) || 0) * elapsedTimeHours,
-				),
+
+		// Update the reactor metrics
+		for (const [id, reactor] of reactors) {
+			const powerSupplied = powerSuppliedSources.get(reactor.id) || 0;
+			reactor.updateComponent("isReactor", {
+				currentOutput: powerSupplied,
 			});
 		}
 	}

@@ -10,6 +10,7 @@ import { spawnShipSystem } from "./shipSystem";
 import ReactorPlugin from "@server/classes/Plugins/ShipSystems/Reactor";
 import type BaseShipSystemPlugin from "@server/classes/Plugins/ShipSystems/BaseSystem";
 import { getInventoryTemplates } from "@server/utils/getInventoryTemplates";
+import { getPowerSupplierPowerNeeded } from "@server/systems/ReactorFuelSystem";
 
 const systemCache: Record<string, BaseShipSystemPlugin> = {};
 function getSystem(
@@ -139,7 +140,7 @@ export function spawnShip(
 			}, 0) || 1;
 
 		// Split amongst the reactors and generously make it a nice round number
-		const reactorPower = Math.ceil(totalPower / reactorCount / 5) * 5;
+		const reactorPower = Math.ceil(totalPower / reactorCount / 10) * 10;
 
 		template.shipSystems?.forEach((system) => {
 			const systemPlugin = getSystem(
@@ -158,6 +159,39 @@ export function spawnShip(
 					});
 					systemEntities.push(sys);
 				});
+			}
+		});
+
+		// Make sure each system and battery has a reactor to charge it
+		systemEntities.forEach((entity) => {
+			if (entity.components.isBattery) {
+				const reactors = systemEntities.filter(
+					(e) =>
+						e.components.isReactor &&
+						getPowerSupplierPowerNeeded(e) < e.components.isReactor.maxOutput,
+				);
+				const reactor = randomFromList(reactors);
+				if (!reactor) return;
+				entity.updateComponent("isBattery", {
+					powerSources: [
+						...entity.components.isBattery.powerSources,
+						reactor.id,
+					],
+				});
+			}
+			if (entity.components.power) {
+				for (let i = 0; i < entity.components.power.defaultPower; i++) {
+					const reactors = systemEntities.filter(
+						(e) =>
+							e.components.isReactor &&
+							getPowerSupplierPowerNeeded(e) < e.components.isReactor.maxOutput,
+					);
+					const reactor = randomFromList(reactors);
+					if (!reactor) return;
+					entity.updateComponent("power", {
+						powerSources: [...entity.components.power.powerSources, reactor.id],
+					});
+				}
 			}
 		});
 	}
