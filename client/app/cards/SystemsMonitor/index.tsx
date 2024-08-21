@@ -1,8 +1,10 @@
 import { q } from "@client/context/AppContext";
+import { toast } from "@client/context/ToastContext";
 import useAnimationFrame from "@client/hooks/useAnimationFrame";
 import type { CardProps } from "@client/routes/flight.station/CardProps";
 import { cn } from "@client/utils/cn";
 import { useLiveQuery } from "@thorium/live-query/client";
+import { LiveQueryError } from "@thorium/live-query/client/client";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
 import RadialDial from "@thorium/ui/RadialDial";
@@ -34,7 +36,13 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 		number | null
 	>(null);
 	return (
-		<div className="relative grid grid-cols-5 gap-8 h-full">
+		// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
+		<div
+			className="relative grid grid-cols-5 gap-8 h-full"
+			onClick={() => {
+				setSelectedPowerSupplier(null);
+			}}
+		>
 			<div className="flex flex-col justify-around gap-4">
 				{reactors.map((reactor, i) => (
 					<Reactor
@@ -56,6 +64,7 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 						selectedPowerSupplier={selectedPowerSupplier}
 						setSelectedPowerSupplier={setSelectedPowerSupplier}
 						cardLoaded={cardLoaded}
+						reactorIds={reactors.map((r) => r.id)}
 					/>
 				))}
 			</div>
@@ -92,6 +101,7 @@ function Reactor({
 	desiredOutput,
 	maxOutput,
 	optimalOutputPercent,
+	efficiency,
 	cardLoaded,
 }: {
 	name: string;
@@ -107,6 +117,7 @@ function Reactor({
 	desiredOutput: number;
 	maxOutput: number;
 	optimalOutputPercent: number;
+	efficiency?: number;
 	cardLoaded: boolean;
 }) {
 	const heatRef = useRef<HTMLDivElement>(null);
@@ -122,11 +133,44 @@ function Reactor({
 
 		for (const [i, el] of elementRefs.current) {
 			if (i + 1 <= Math.ceil(currentOutput)) {
-				el.classList.add("border-yellow-400");
-				el.classList.remove("border-gray-400");
+				if (id === selectedPowerSupplier) {
+					el.classList.add("bg-green-400");
+					el.classList.remove("bg-gray-600", "bg-orange-700", "bg-yellow-400");
+				} else {
+					el.classList.add("bg-yellow-400");
+					el.classList.remove(
+						"bg-gray-600",
+						"bg-orange-700",
+						"bg-green-400",
+						"bg-green-600",
+					);
+				}
+			} else if (i + 1 <= Math.ceil(desiredOutput)) {
+				if (id === selectedPowerSupplier) {
+					el.classList.add("bg-green-600");
+					el.classList.remove(
+						"bg-gray-600",
+						"bg-orange-700",
+						"bg-yellow-400",
+						"bg-green-400",
+					);
+				} else {
+					el.classList.add("bg-orange-700");
+					el.classList.remove(
+						"bg-gray-600",
+						"bg-yellow-400",
+						"bg-green-400",
+						"bg-green-600",
+					);
+				}
 			} else {
-				el.classList.add("border-gray-400");
-				el.classList.remove("border-yellow-400");
+				el.classList.add("bg-gray-600");
+				el.classList.remove(
+					"bg-yellow-400",
+					"bg-orange-700",
+					"bg-green-400",
+					"bg-green-600",
+				);
 			}
 		}
 
@@ -143,14 +187,16 @@ function Reactor({
 	return (
 		<div
 			aria-label={name}
-			onClick={() => setSelectedPowerSupplier(id)}
+			onClick={(e) => {
+				e.stopPropagation();
+				setSelectedPowerSupplier(id);
+			}}
 			onKeyDown={(e) => {
 				if (e.key === "Enter") {
 					setSelectedPowerSupplier(id);
 				}
 			}}
 			key={id}
-			aria-expanded={selectedPowerSupplier === id}
 			className={cn(
 				"cursor-pointer text-left relative w-full grid grid-cols-[auto_1fr] items-center gap-x-2 p-2 panel panel-primary overflow-hidden group",
 				{
@@ -176,12 +222,25 @@ function Reactor({
 						<Icon name="flame" />
 					</RadialDial>
 				</Tooltip>
+				{typeof efficiency === "number" ? (
+					<Tooltip content={`Efficiency: ${Math.round(efficiency * 100)}%`}>
+						<RadialDial
+							label=""
+							count={efficiency}
+							max={1}
+							color="rgb(221 107 32)"
+							backgroundColor="#888"
+						>
+							<Icon name="power-node" />
+						</RadialDial>
+					</Tooltip>
+				) : null}
 				<Tooltip content={`Active Fuel: ${(fuel * 100).toFixed(0)}%`}>
 					<RadialDial
 						label=""
 						count={fuel}
 						max={1}
-						color="rgb(221 107 32)"
+						color="rgb(180 251 32)"
 						backgroundColor="#888"
 					>
 						<Icon name="atomic-slashes" />
@@ -208,19 +267,16 @@ function Reactor({
 						<Fragment key={i}>
 							<div
 								ref={(el) => el && elementRefs.current.set(i, el)}
-								className={cn(
-									"w-3 h-3 mr-1 last-of-type:mr-0 border-2 bg-gray-500",
-									{
-										"mr-0": i + 1 === maxOutput * optimalOutputPercent,
-									},
-								)}
+								className={cn("w-3 h-3 mr-1 last-of-type:mr-0 bg-gray-500", {
+									"mr-0": i + 1 === maxOutput * optimalOutputPercent,
+								})}
 							/>
 							{i + 1 === maxOutput * optimalOutputPercent && (
 								<Tooltip
 									content="Optimal Output"
 									tooltipClassName="-translate-y-1"
 								>
-									<div className="w-0.5 ml-px mr-px h-3 last-of-type:mr-0 bg-yellow-600 rounded" />
+									<div className="w-0.5 ml-px !mr-px h-3 last-of-type:mr-0 bg-yellow-600 rounded" />
 								</Tooltip>
 							)}
 						</Fragment>
@@ -239,9 +295,11 @@ function Battery({
 	selectedPowerSupplier,
 	chargeRate,
 	outputRate,
+	desiredOutput,
 	capacity,
 	powerSources,
 	cardLoaded,
+	reactorIds,
 }: {
 	id: number;
 	setSelectedPowerSupplier: Dispatch<SetStateAction<number | null>>;
@@ -250,11 +308,14 @@ function Battery({
 	index: number;
 	chargeRate: number;
 	outputRate: number;
+	desiredOutput: number;
 	capacity: number;
 	powerSources: number[];
 	cardLoaded: boolean;
+	reactorIds: number[];
 }) {
 	const chargeElementRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+	const outputElementRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 	const storageRef = useRef<HTMLDivElement>(null);
 	const storageProgressRef = useRef<{ setValue: (value: number) => void }>(
 		null,
@@ -272,22 +333,62 @@ function Battery({
 		const chargeAmount = system.y;
 		const dischargeAmount = system.z;
 		for (const [i, el] of chargeElementRefs.current) {
-			let activeClass = ["bg-yellow-400", "border-yellow-400"];
-			if (powerSources[i] === selectedPowerSupplier) {
-				activeClass = ["bg-green-400", "border-green-400"];
-			}
-			el.classList.remove(
-				"border-gray-500",
-				"bg-gray-500",
-				"bg-green-400",
-				"border-green-400",
-				"bg-yellow-400",
-				"border-yellow-400",
-			);
 			if (i + 1 <= Math.ceil(chargeAmount)) {
-				el.classList.add(...activeClass);
+				if (powerSources[i] === selectedPowerSupplier) {
+					el.classList.add("bg-green-400");
+					el.classList.remove("bg-yellow-400", "bg-green-600", "bg-gray-600");
+				} else {
+					el.classList.add("bg-yellow-400");
+					el.classList.remove("bg-green-400", "bg-green-600", "bg-gray-600");
+				}
+			} else if (powerSources[i] === selectedPowerSupplier) {
+				el.classList.remove("bg-green-400", "bg-yellow-400", "bg-gray-600");
+				el.classList.add("bg-green-600");
 			} else {
-				el.classList.add("border-gray-500", "bg-gray-500");
+				el.classList.remove("bg-green-400", "bg-green-600", "bg-yellow-400");
+				el.classList.add("bg-gray-600");
+			}
+		}
+		for (const [i, el] of outputElementRefs.current) {
+			if (i + 1 <= Math.ceil(dischargeAmount)) {
+				if (id === selectedPowerSupplier) {
+					el.classList.add("bg-green-400");
+					el.classList.remove("bg-gray-600", "bg-orange-700", "bg-yellow-400");
+				} else {
+					el.classList.add("bg-yellow-400");
+					el.classList.remove(
+						"bg-gray-600",
+						"bg-orange-700",
+						"bg-green-400",
+						"bg-green-600",
+					);
+				}
+			} else if (i + 1 <= Math.ceil(desiredOutput)) {
+				if (id === selectedPowerSupplier) {
+					el.classList.add("bg-green-600");
+					el.classList.remove(
+						"bg-gray-600",
+						"bg-orange-700",
+						"bg-yellow-400",
+						"bg-green-400",
+					);
+				} else {
+					el.classList.add("bg-orange-700");
+					el.classList.remove(
+						"bg-gray-600",
+						"bg-yellow-400",
+						"bg-green-400",
+						"bg-green-600",
+					);
+				}
+			} else {
+				el.classList.add("bg-gray-600");
+				el.classList.remove(
+					"bg-yellow-400",
+					"bg-orange-700",
+					"bg-green-400",
+					"bg-green-600",
+				);
 			}
 		}
 		if (storageRef.current) {
@@ -312,7 +413,10 @@ function Battery({
 
 	return (
 		<div
-			onClick={() => setSelectedPowerSupplier(id)}
+			onClick={(e) => {
+				e.stopPropagation();
+				setSelectedPowerSupplier(id);
+			}}
 			onKeyDown={(e) => {
 				if (e.key === "Enter") {
 					setSelectedPowerSupplier(id);
@@ -357,39 +461,76 @@ function Battery({
 				</Tooltip>
 			</div>
 			<div className="flex w-full flex-col mt-2">
-				<p>Power Input</p>
 				<div className="flex gap-1 items-center">
-					<Tooltip content="Remove Power">
-						<Button
-							className="btn-xs btn-primary"
-							onClick={(e) => {
-								e.stopPropagation();
-							}}
+					<div className="flex-1 flex items-center flex-wrap gap-y-1">
+						<Tooltip
+							content="Power Input"
+							className="h-4 w-4 flex items-center -ml-2.5 mr-1.5"
 						>
-							<Icon name="minus" />
-						</Button>
-					</Tooltip>
-					<div className="flex-1 flex flex-wrap gap-y-1">
+							<Icon name="battery-input" />
+						</Tooltip>
 						{Array.from({
 							length: Math.floor(chargeRate),
 						}).map((_, i) => (
+							// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 							<div
+								onClick={(e) => {
+									e.stopPropagation();
+									q.systemsMonitor.systems.removePowerSource.netSend({
+										systemId: id,
+										powerSourceIndex: i,
+									});
+								}}
 								key={i}
 								ref={(el) => el && chargeElementRefs.current.set(i, el)}
-								className="w-3 h-3 mr-1 last-of-type:mr-0 border-2"
+								className="w-3 h-3 mr-1 last-of-type:mr-0"
 							/>
 						))}
 					</div>
 					<Tooltip content="Allocate Power">
 						<Button
-							className="btn-xs btn-primary"
+							className={cn("btn-xs", {
+								"btn-disabled": !reactorIds.includes(selectedPowerSupplier!),
+								"btn-primary": reactorIds.includes(selectedPowerSupplier!),
+							})}
 							onClick={(e) => {
 								e.stopPropagation();
+								if (selectedPowerSupplier !== null) {
+									q.systemsMonitor.systems.addPowerSource
+										.netSend({
+											systemId: id,
+											powerSourceId: selectedPowerSupplier,
+										})
+										.catch((error) => {
+											if (error instanceof LiveQueryError) {
+												toast({ title: error.error, color: "error" });
+											}
+										});
+								}
 							}}
 						>
 							<Icon name="plus" />
 						</Button>
 					</Tooltip>
+				</div>
+				<div className="flex gap-1 items-center">
+					<div className="flex-1 flex items-center flex-wrap gap-y-1">
+						<Tooltip
+							content="Power Output"
+							className="h-4 w-4 flex items-center -ml-[5px] mr-px"
+						>
+							<Icon name="battery-output" />
+						</Tooltip>
+						{Array.from({
+							length: Math.floor(outputRate),
+						}).map((_, i) => (
+							<div
+								key={i}
+								ref={(el) => el && outputElementRefs.current.set(i, el)}
+								className="w-3 h-3 mr-1 last-of-type:mr-0 bg-gray-600"
+							/>
+						))}
+					</div>
 				</div>
 			</div>
 		</div>
@@ -434,21 +575,48 @@ function System({
 		const currentPower = system.y;
 		const heatValue = system.z;
 		for (const [i, el] of elementRefs.current) {
-			el.classList.remove(
-				"border-gray-500",
-				"bg-gray-500",
-				"bg-yellow-400",
-				"border-yellow-400",
-				"bg-green-400",
-				"border-green-400",
-			);
 			if (i + 1 <= Math.ceil(currentPower)) {
-				el.classList.add("bg-yellow-400", "border-yellow-400");
+				if (power?.powerSources[i] === selectedPowerSupplier) {
+					el.classList.remove(
+						"bg-gray-600",
+						"bg-yellow-400",
+						"bg-green-600",
+						"bg-orange-600",
+					);
+					el.classList.add("bg-green-400");
+				} else {
+					el.classList.remove(
+						"bg-gray-600",
+						"bg-green-400",
+						"bg-green-600",
+						"bg-orange-600",
+					);
+					el.classList.add("bg-yellow-400");
+				}
+			} else if (power?.powerSources[i] === selectedPowerSupplier) {
+				el.classList.remove(
+					"bg-gray-600",
+					"bg-yellow-400",
+					"bg-green-400",
+					"bg-orange-600",
+				);
+				el.classList.add("bg-green-600");
+			} else if (typeof power?.powerSources[i] === "number") {
+				el.classList.remove(
+					"bg-yellow-400",
+					"bg-green-400",
+					"bg-green-600",
+					"bg-gray-600",
+				);
+				el.classList.add("bg-orange-600");
 			} else {
-				el.classList.add("border-gray-500", "bg-gray-500");
-			}
-			if (power?.powerSources[i] === selectedPowerSupplier) {
-				el.classList.add("border-green-400");
+				el.classList.remove(
+					"bg-yellow-400",
+					"bg-green-400",
+					"bg-green-600",
+					"bg-orange-600",
+				);
+				el.classList.add("bg-gray-600");
 			}
 		}
 		if (heatRef.current) {
@@ -465,7 +633,7 @@ function System({
 	return (
 		<div
 			key={id}
-			className="relative group transition-all cursor-pointer aria-expanded:cursor-default w-full h-fit p-2 panel panel-success flex flex-col justify-between"
+			className="relative group transition-all aria-expanded:cursor-default w-full h-fit p-2 panel panel-success flex flex-col justify-between"
 		>
 			<div className="font-medium w-full gap-1 self-start flex items-center">
 				<span className="truncate">{name}</span>
@@ -506,41 +674,73 @@ function System({
 			{power ? (
 				<div className="flex flex-col mt-2">
 					<div className="flex gap-1 items-center">
-						<Tooltip content="Remove Power">
-							<Button className="btn-xs btn-primary">
-								<Icon name="minus" />
-							</Button>
-						</Tooltip>
 						<div className="flex-1 flex flex-wrap gap-y-1">
 							{Array.from({
-								length: Math.max(power.requestedPower, power.requiredPower),
+								length: Math.max(
+									power.requestedPower,
+									power.requiredPower,
+									power.powerSources.length,
+								),
 							}).map((_, i) => (
 								<Fragment key={i}>
 									{/* Display a warning indicator if we're past the max safe power */}
 									{i + 1 === power.maxSafePower + 1 && (
 										<Tooltip content="Max Safe Power">
-											<div className="w-0.5 ml-px mr-px h-3 last-of-type:mr-0 bg-red-500 rounded" />
+											<div className="w-0.5 ml-px !mr-px h-3 last-of-type:mr-0 bg-red-500 rounded" />
 										</Tooltip>
 									)}
+
+									{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 									<div
 										ref={(el) => el && elementRefs.current.set(i, el)}
-										className={cn("w-3 h-3 mr-1 last-of-type:mr-0 border-2", {
-											"mr-0":
-												i + 1 === power.requiredPower ||
-												i + 1 === power.maxSafePower,
-										})}
+										onClick={(e) => {
+											e.stopPropagation();
+											q.systemsMonitor.systems.removePowerSource.netSend({
+												systemId: id,
+												powerSourceIndex: i,
+											});
+										}}
+										className={cn(
+											"w-3 h-3 mr-1 last-of-type:mr-0 cursor-pointer text-[9px] flex items-center justify-center",
+											{
+												"mr-0":
+													i + 1 === power.requiredPower ||
+													i + 1 === power.maxSafePower,
+											},
+										)}
 									/>
 
 									{i + 1 === power.requiredPower && (
 										<Tooltip content="Required Power">
-											<div className="w-0.5 ml-px mr-px h-3 last-of-type:mr-0 bg-yellow-500 rounded" />
+											<div className="w-0.5 ml-px !mr-px h-3 last-of-type:mr-0 bg-yellow-500 rounded" />
 										</Tooltip>
 									)}
 								</Fragment>
 							))}
 						</div>
 						<Tooltip content="Allocate Power">
-							<Button className="btn-xs btn-primary">
+							<Button
+								className={cn("btn-xs", {
+									"btn-disabled": selectedPowerSupplier === null,
+									"btn-primary": selectedPowerSupplier !== null,
+								})}
+								disabled={selectedPowerSupplier === null}
+								onClick={(e) => {
+									e.stopPropagation();
+									if (selectedPowerSupplier !== null) {
+										q.systemsMonitor.systems.addPowerSource
+											.netSend({
+												systemId: id,
+												powerSourceId: selectedPowerSupplier,
+											})
+											.catch((error) => {
+												if (error instanceof LiveQueryError) {
+													toast({ title: error.error, color: "error" });
+												}
+											});
+									}
+								}}
+							>
 								<Icon name="plus" />
 							</Button>
 						</Tooltip>

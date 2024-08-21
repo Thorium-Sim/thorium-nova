@@ -11,11 +11,20 @@ export function getPowerSupplierPowerNeeded(entity: Entity) {
 			systems.push(system);
 		}
 	}
+	for (const system of entity.ecs?.componentCache.get("isBattery") || []) {
+		if (system.components.isShipSystem?.shipId === shipId) {
+			systems.push(system);
+		}
+	}
 
 	return systems.reduce((prev, next) => {
 		return (
 			prev +
 			(next.components.power?.powerSources.reduce(
+				(prev, next) => prev + (next === entity.id ? 1 : 0),
+				0,
+			) || 0) +
+			(next.components.isBattery?.powerSources.reduce(
 				(prev, next) => prev + (next === entity.id ? 1 : 0),
 				0,
 			) || 0)

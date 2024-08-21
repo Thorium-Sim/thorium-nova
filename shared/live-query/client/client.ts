@@ -18,6 +18,13 @@ type RequestOptions = {
 	input: any;
 };
 
+export class LiveQueryError extends Error {
+	error: string;
+	constructor(message: string, remoteError: string) {
+		super(message);
+		this.error = remoteError;
+	}
+}
 export class LiveQueryClient {
 	requestUrl: URL;
 	sendUrl: URL;
@@ -66,11 +73,21 @@ export class LiveQueryClient {
 			const response = await res.text();
 
 			if (!res.ok) {
-				throw new Error(
-					`${res.status} Error in request: ${
-						res.statusText
-					}, Url: ${url}, Body: ${JSON.stringify(body)}, Response: ${response}`,
-				);
+				try {
+					throw new LiveQueryError(
+						"Error in request",
+						JSON.parse(response).error,
+					);
+				} catch (error) {
+					if (error instanceof LiveQueryError) throw error;
+					throw new Error(
+						`${res.status} Error in request: ${
+							res.statusText
+						}, Url: ${url}, Body: ${JSON.stringify(
+							body,
+						)}, Response: ${response}`,
+					);
+				}
 			}
 			return response;
 		});

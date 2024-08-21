@@ -10,7 +10,7 @@ import { z } from "zod";
 export const systemsMonitor = t.router({
 	reactors: t.router({
 		get: t.procedure
-			.filter((publish: { shipId: number; systemId: number }, { ctx }) => {
+			.filter((publish: { shipId: number }, { ctx }) => {
 				if (publish && publish.shipId !== ctx.ship?.id) return false;
 				return true;
 			})
@@ -41,13 +41,14 @@ export const systemsMonitor = t.router({
 						maxHeat: r.components.heat!.maxHeat,
 						reserve,
 						fuel: r.components.isReactor!.unusedFuel.amount || 0,
+						efficiency: r.components.efficiency?.efficiency,
 					};
 				});
 			}),
 	}),
 	batteries: t.router({
 		get: t.procedure
-			.filter((publish: { shipId: number; systemId: number }, { ctx }) => {
+			.filter((publish: { shipId: number }, { ctx }) => {
 				if (publish && publish.shipId !== ctx.ship?.id) return false;
 				return true;
 			})
@@ -56,6 +57,7 @@ export const systemsMonitor = t.router({
 				return batteries.map((b) => ({
 					id: b.id,
 					name: b.components.identity!.name,
+					desiredOutput: getPowerSupplierPowerNeeded(b),
 					capacity: b.components.isBattery!.capacity,
 					storage: b.components.isBattery!.storage,
 					chargeAmount: b.components.isBattery!.chargeAmount,
@@ -107,6 +109,98 @@ export const systemsMonitor = t.router({
 				}
 
 				return systems;
+			}),
+		removePowerSource: t.procedure
+			.input(
+				z.object({
+					systemId: z.number(),
+					powerSourceIndex: z.number(),
+				}),
+			)
+			.send(({ input, ctx }) => {
+				const system = ctx.flight?.ecs.getEntityById(input.systemId);
+
+				const shipId = system?.components.isShipSystem?.shipId;
+				if (!shipId) return;
+
+				if (system.components.power) {
+					const newPowerSources = [
+						...(system?.components.power.powerSources || []),
+					];
+					newPowerSources.splice(input.powerSourceIndex, 1);
+					system.updateComponent("power", {
+						powerSources: newPowerSources,
+					});
+				}
+				if (system.components.isBattery) {
+					const newPowerSources = [
+						...(system?.components.isBattery.powerSources || []),
+					];
+					newPowerSources.splice(input.powerSourceIndex, 1);
+					system.updateComponent("isBattery", {
+						powerSources: newPowerSources,
+					});
+				}
+
+				pubsub.publish.systemsMonitor.systems.get({ shipId });
+				pubsub.publish.systemsMonitor.reactors.get({ shipId });
+				pubsub.publish.systemsMonitor.batteries.get({ shipId });
+			}),
+		addPowerSource: t.procedure
+			.input(
+				z.object({
+					systemId: z.number(),
+					powerSourceId: z.number(),
+				}),
+			)
+			.send(({ input, ctx }) => {
+				const system = ctx.flight?.ecs.getEntityById(input.systemId);
+
+				const shipId = system?.components.isShipSystem?.shipId;
+				if (!shipId) return;
+
+				const powerSource = ctx.flight?.ecs.getEntityById(input.powerSourceId);
+				if (!powerSource)
+					throw new Error(
+						"Invalid power source. Power source must be a reactor or battery.",
+					);
+				const powerSupplied = getPowerSupplierPowerNeeded(powerSource);
+
+				if (
+					powerSource.components.isReactor &&
+					powerSource.components.isReactor?.maxOutput < powerSupplied + 1
+				) {
+					throw new Error("Reactor is at maximum output.");
+				}
+				if (
+					powerSource.components.isBattery &&
+					powerSource.components.isBattery.outputRate < powerSupplied + 1
+				) {
+					throw new Error("Battery is at maximum output.");
+				}
+
+				if (system.components.power) {
+					const newPowerSources = [
+						...(system?.components.power?.powerSources || []),
+						input.powerSourceId,
+					];
+
+					system.updateComponent("power", {
+						powerSources: newPowerSources,
+					});
+				} else if (system.components.isBattery) {
+					const newPowerSources = [
+						...(system?.components.isBattery?.powerSources || []),
+						input.powerSourceId,
+					].slice(0, system.components.isBattery.chargeRate);
+					system.updateComponent("isBattery", {
+						powerSources: newPowerSources,
+					});
+				}
+
+				pubsub.publish.systemsMonitor.systems.get({ shipId });
+				pubsub.publish.systemsMonitor.reactors.get({ shipId });
+				pubsub.publish.systemsMonitor.batteries.get({ shipId });
 			}),
 	}),
 	stream: t.procedure.dataStream(({ ctx, entity }) => {
