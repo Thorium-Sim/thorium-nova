@@ -1,11 +1,7 @@
 import { generateIncrementedName } from "server/src/utils/generateIncrementedName";
 import { Aspect } from "../Aspect";
 import type BasePlugin from "..";
-import type {
-	ShipSystemTypes,
-	ShipSystemFlags,
-	PowerNodes,
-} from "./shipSystemTypes";
+import type { ShipSystemTypes, ShipSystemFlags } from "./shipSystemTypes";
 import type {
 	Kelvin,
 	KelvinPerSecond,
@@ -46,8 +42,6 @@ export default class BaseShipSystemPlugin extends Aspect {
 	defaultPower: MegaWatt;
 	/** The threshold of power usage for safely using this system */
 	maxSafePower: MegaWatt;
-	/** The type of power node this system is assigned to */
-	powerNode?: PowerNodes;
 
 	//////////
 	// Heat //
@@ -99,7 +93,6 @@ export default class BaseShipSystemPlugin extends Aspect {
 		this.requiredPower = params.requiredPower || 5;
 		this.defaultPower = params.defaultPower || 10;
 		this.maxSafePower = params.maxSafePower || 20;
-		this.powerNode = params.powerNode;
 		this.powerToHeat = params.powerToHeat || 10;
 		this.heatDissipationRate = params.heatDissipationRate || 1;
 		this.nominalHeat = params.nominalHeat || 295.37;

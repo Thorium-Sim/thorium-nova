@@ -30,10 +30,3 @@ export type AllShipSystems = {
 		(typeof ShipSystemTypes)[k]
 	>;
 };
-
-export type PowerNodes =
-	| "offense"
-	| "defense"
-	| "navigation"
-	| "intel"
-	| "internal";
