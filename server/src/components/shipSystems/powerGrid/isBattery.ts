@@ -3,7 +3,7 @@ import z from "zod";
 export const isBattery = z
 	.object({
 		/**
-		 * The amount of power this battery can hold in megawatthours. Based
+		 * The amount of power this battery can hold in MegaWatt Hours. Based
 		 * on the other defaults, this value provides
 		 * 23 minutes of sustained power.
 		 */

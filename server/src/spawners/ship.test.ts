@@ -51,7 +51,7 @@ describe("Ship Spawner", () => {
 			?.aspects.ships.find((s) => s.name === "Test Ship");
 		expect(shipPlugin).toBeDefined();
 		if (!shipPlugin) throw new Error("Ship not found");
-		const { ship, extraEntities } = spawnShip(dataContext, shipPlugin, {
+		const { ship, extraEntities } = await spawnShip(dataContext, shipPlugin, {
 			name: "Spawned Ship",
 			position: { x: 10, y: 20, z: 30, type: "interstellar", parentId: null },
 			playerShip: true,

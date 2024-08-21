@@ -1,6 +1,7 @@
 import { pubsub } from "@server/init/pubsub";
 import type { Entity } from "./ecs";
 import { Vector3 } from "three";
+import { megaWattHourToGigaJoule } from "@server/utils/unitTypes";
 
 export function handleCollisionDamage(
 	entity: Entity | null,
@@ -20,8 +21,8 @@ export function handleCollisionDamage(
 
 export function handleTorpedoDamage(torpedo: Entity, other: Entity) {
 	const torpedoYield = torpedo.components.isTorpedo?.yield || 0;
-	// Yield is already in gigajoules
-	const damage = torpedoYield;
+	// Yield is in megawatt hours, convert to gigajoules
+	const damage = megaWattHourToGigaJoule(torpedoYield);
 
 	// TODO May 11, 2024: Apply other damage based on the damage type of the torpedo
 	applyDamage(other, damage);

@@ -8,7 +8,7 @@ import {
 	universeToWorld,
 	worldToUniverse,
 } from "@server/init/rapier";
-import type { RigidBody, World } from "@thorium-sim/rapier3d-node";
+import type { World } from "@thorium-sim/rapier3d-node";
 import {
 	handleCollisionDamage,
 	handleTorpedoDamage,

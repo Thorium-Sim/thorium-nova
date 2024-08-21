@@ -14,6 +14,7 @@ import { cn } from "@client/utils/cn";
 import LauncherImage from "./assets/launcher.svg";
 import href from "./assets/torpedoSprite.svg?url";
 import Button from "@thorium/ui/Button";
+import { megaWattHourToGigaJoule } from "@server/utils/unitTypes";
 
 /**
  * TODO:
@@ -106,7 +107,8 @@ function Torpedoes() {
 								<div className="flex-1 flex flex-col">
 									<span>{id}</span>
 									<span className="text-sm text-gray-400">
-										Yield: {torpedoYield} GJ · Speed: {speed} km/s
+										Yield: {megaWattHourToGigaJoule(torpedoYield)} GJ · Speed:{" "}
+										{speed} km/s
 									</span>
 								</div>
 								<div>{count}</div>

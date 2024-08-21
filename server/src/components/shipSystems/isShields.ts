@@ -4,9 +4,9 @@ export const isShields = z
 	.object({
 		/** The frequency of the shields in megahertz */
 		frequency: z.number().default(398.4),
-		/** The current blocking energy of the shields in GigaJoules */
+		/** The current blocking energy of the shields in MegaWatt Hours */
 		strength: z.number().default(0),
-		/** The maximum blocking energy of the shields in GigaJoules */
+		/** The maximum blocking energy of the shields in MegaWatt Hours */
 		maxStrength: z.number().default(5),
 		/**
 		 * Efficiency drop for every hit is calculated based on the max strength, current strength.

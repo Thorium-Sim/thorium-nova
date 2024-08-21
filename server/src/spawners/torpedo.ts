@@ -69,7 +69,7 @@ export function spawnTorpedo(launcher: Entity) {
 	torpedoEntity.addComponent("isTorpedo", {
 		launcherId: launcher.id,
 		targetId: targeting?.components.isTargeting?.target || null,
-		yield: flags?.torpedoWarhead?.yield || 0,
+		yield: flags?.torpedoWarhead?.yield || 1,
 		damageType: flags?.torpedoWarhead?.damageType || null,
 		color: flags?.torpedoWarhead?.color || "white",
 		guidanceMode: flags?.torpedoGuidance?.guidanceMode || "visual",

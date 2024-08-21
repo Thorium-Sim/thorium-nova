@@ -11,6 +11,10 @@ import ReactorPlugin from "@server/classes/Plugins/ShipSystems/Reactor";
 import type BaseShipSystemPlugin from "@server/classes/Plugins/ShipSystems/BaseSystem";
 import { getInventoryTemplates } from "@server/utils/getInventoryTemplates";
 import { getPowerSupplierPowerNeeded } from "@server/systems/ReactorFuelSystem";
+import { Box3, Vector3 } from "three";
+import { loadGltf } from "@server/utils/loadGltf";
+import { thoriumPath } from "@server/utils/appPaths";
+import path from "node:path";
 
 const systemCache: Record<string, BaseShipSystemPlugin> = {};
 function getSystem(
@@ -30,7 +34,7 @@ function getSystem(
 	}
 	return systemCache[`${systemId}-${pluginId}`];
 }
-export function spawnShip(
+export async function spawnShip(
 	dataContext: { flight: FlightDataModel | null; server: ServerDataModel },
 	template: Partial<ShipPlugin>,
 	params: {
@@ -72,9 +76,17 @@ export function spawnShip(
 	entity.addComponent("rotation");
 	entity.addComponent("velocity");
 	entity.addComponent("rotationVelocity");
-	// TODO November 16, 2021 - write a function that calculates the width and height
-	//  based on the the provided length and the dimensions of the 3D model
-	entity.addComponent("size");
+
+	const size = await getMeshSize(
+		path.join(thoriumPath, template.assets!.model),
+	);
+	size.multiplyScalar(template.length || 1);
+	entity.addComponent("size", {
+		length: size.z,
+		width: size.x,
+		height: size.y,
+	});
+
 	entity.addComponent("mass", { mass: template.mass });
 
 	entity.addComponent("shipSystems");
@@ -317,4 +329,12 @@ export function spawnShip(
 	}
 
 	return { ship: entity, extraEntities: systemEntities.concat(extraEntities) };
+}
+
+async function getMeshSize(url: string): Promise<Vector3> {
+	const gltf = await loadGltf(url);
+	if (!gltf) return new Vector3();
+	const box = new Box3().setFromObject(gltf.scene.children[0]);
+
+	return box.getSize(new Vector3());
 }

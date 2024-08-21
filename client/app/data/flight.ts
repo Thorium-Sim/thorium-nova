@@ -227,7 +227,7 @@ export const flight = t.router({
 						);
 						if (startingPointPosition) position = startingPointPosition;
 					}
-					const { ship: shipEntity, extraEntities } = spawnShip(
+					const { ship: shipEntity, extraEntities } = await spawnShip(
 						ctx,
 						shipTemplate,
 						{

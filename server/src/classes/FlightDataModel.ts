@@ -171,8 +171,11 @@ async function generateColliderDesc(filePath: string, mass: number) {
 		const ConvexHull = await import("three-stdlib").then(
 			(res) => res.ConvexHull,
 		);
-		const gltf: any = await loadGltf(filePath);
 		const hull = new ConvexHull();
+		const gltf = await loadGltf(filePath);
+		if (!gltf) {
+			throw new Error("Failed to load gltf");
+		}
 		hull.setFromObject(gltf.scene.children[0]);
 		const vertices = [];
 		for (const vertex of hull.vertices) {
