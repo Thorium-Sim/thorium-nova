@@ -7,3 +7,4 @@ export * from "./isWarpEngines";
 export * from "./powerGrid";
 export * from "./isTorpedoLauncher";
 export * from "./isTargeting";
+export * from "./isShields";

@@ -15,6 +15,9 @@ export const isShields = z
 		 * If shields are fully raised, efficiency drop is 0
 		 **/
 		deflectionEfficiencyMultiplier: z.number().default(0.5),
+		direction: z
+			.enum(["fore", "aft", "starboard", "port", "dorsal", "ventral"])
+			.default("fore"),
 	})
 	.default({});
 

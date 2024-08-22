@@ -111,6 +111,10 @@ export function megaWattHourToGigaJoule(input: MegaWattHour): GigaJoule {
 	return input * 3.6;
 }
 
+export function gigaJouleToMegaWattHour(input: GigaJoule): MegaWattHour {
+	return input / 3.6;
+}
+
 export type HeatCapacity = Flavor<number, "heatcapacity">;
 
 // https://en.wikipedia.org/wiki/Stefan–Boltzmann_constant

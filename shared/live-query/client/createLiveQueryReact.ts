@@ -59,10 +59,10 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
 			return getArrayQueryKey(getQueryKey(path, input));
 		},
 		useNetRequest: (path: string, input: any, ...args: unknown[]) => {
-			useRequestSub({ path, params: input });
+			const data = useContext(MockNetRequestContext);
+			useRequestSub({ path, params: input }, data);
 			const firstArg = args[0] || {};
 			const { callback, ...opts } = firstArg as any;
-			const data = useContext(MockNetRequestContext);
 			const queryKey = getArrayQueryKey(getQueryKey(path, input));
 			const result = useSuspenseQuery({
 				...opts,
