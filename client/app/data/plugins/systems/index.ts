@@ -17,6 +17,7 @@ import { thrusters } from "./thrusters";
 import { reactor } from "./reactor";
 import { battery } from "./battery";
 import { torpedoLauncher } from "./torpedoLauncher";
+import { shields } from "./shields";
 
 const systemTypes = createUnionSchema(
 	Object.keys(ShipSystemTypes) as (keyof typeof ShipSystemTypes)[],
@@ -30,6 +31,7 @@ export const systems = t.router({
 	reactor,
 	battery,
 	torpedoLauncher,
+	shields,
 	all: t.procedure
 		.input(z.object({ pluginId: z.string() }).optional())
 		.filter((publish: { pluginId: string } | null, { input }) => {

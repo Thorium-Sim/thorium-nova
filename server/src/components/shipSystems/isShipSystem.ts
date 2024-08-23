@@ -10,6 +10,7 @@ const shipSystemTypes = z.enum([
 	"battery",
 	"torpedoLauncher",
 	"targeting",
+	"shields",
 ]);
 
 export const isShipSystem = z

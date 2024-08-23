@@ -16,11 +16,13 @@ export default class ShieldsPlugin extends BaseShipSystemPlugin {
 	type = "shields" as const;
 
 	maxStrength: number;
+	shieldCount: 1 | 4 | 6;
 
 	constructor(params: Partial<ShieldsPlugin>, plugin: BasePlugin) {
 		super(params, plugin);
 
 		this.maxStrength = params.maxStrength || 5;
+		this.shieldCount = params.shieldCount || 1;
 	}
 }
 registerSystem("shields", ShieldsPlugin);

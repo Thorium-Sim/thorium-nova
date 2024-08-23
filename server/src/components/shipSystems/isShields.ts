@@ -4,6 +4,8 @@ export const isShields = z
 	.object({
 		/** The frequency of the shields in megahertz */
 		frequency: z.number().default(398.4),
+		/** The current state of the shields */
+		state: z.enum(["up", "down"]).default("down"),
 		/** The current blocking energy of the shields in MegaWatt Hours */
 		strength: z.number().default(0),
 		/** The maximum blocking energy of the shields in MegaWatt Hours */
@@ -15,6 +17,7 @@ export const isShields = z
 		 * If shields are fully raised, efficiency drop is 0
 		 **/
 		deflectionEfficiencyMultiplier: z.number().default(0.5),
+		/** The direction of the shield. Defaults to fore for ships with only one shield system */
 		direction: z
 			.enum(["fore", "aft", "starboard", "port", "dorsal", "ventral"])
 			.default("fore"),

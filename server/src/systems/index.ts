@@ -30,6 +30,7 @@ import { TorpedoLoadingSystem } from "./TorpedoLoadingSystem";
 import { TorpedoMovementSystem } from "./TorpedoMovementSystem";
 import { IsDestroyedSystem } from "./IsDestroyedSystem";
 import { PowerDistributionSystem } from "@server/systems/PowerDistributionSystem";
+import { ShieldsSystem } from "@server/systems/ShieldsSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -47,6 +48,7 @@ const systems = [
 	ShipBehaviorSystem,
 	AutoRotateSystem,
 	AutoThrustSystem,
+	ShieldsSystem,
 	ThrusterSystem,
 	ImpulseSystem,
 	WarpSystem,

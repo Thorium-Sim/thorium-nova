@@ -122,6 +122,29 @@ export async function spawnShip(
 
 				break;
 			}
+			case "shields": {
+				// Create enough shield systems for each shield
+				const shieldDirections = [
+					"fore",
+					"aft",
+					"port",
+					"starboard",
+					"dorsal",
+					"ventral",
+				];
+				const shieldCount =
+					system.overrides?.shieldCount ||
+					("shieldCount" in systemPlugin && systemPlugin.shieldCount) ||
+					1;
+				for (let i = 0; i < shieldCount; i++) {
+					const entity = spawnShipSystem(shipId, systemPlugin, {
+						...system.overrides,
+						direction: shieldDirections[i],
+					});
+					systemEntities.push(entity);
+				}
+				break;
+			}
 			default: {
 				// TODO: Set up power from reactors and batteries
 				const entity = spawnShipSystem(shipId, systemPlugin, system.overrides);

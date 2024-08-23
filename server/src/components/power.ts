@@ -8,7 +8,7 @@ export const power = z
 		defaultPower: z.number().default(10),
 		/** The threshold of power usage for safely using this system */
 		maxSafePower: z.number().default(20),
-		/** The current power provided to this system, calculated every frame. */
+		/** The current power in megawatts provided to this system, calculated every frame. */
 		currentPower: z.number().default(10),
 		/**
 		 * How much power the system is attempting to draw, calculated every frame.
@@ -16,8 +16,6 @@ export const power = z
 		 * isn't doing as much work, it won't draw as much power.
 		 */
 		powerDraw: z.number().default(0),
-		/** How much power is currently being requested. Could be more than the maxSafePower */
-		requestedPower: z.number().default(10),
 		/**
 		 * Which reactor or battery each unit of power is coming from. One unit = 1MW
 		 */

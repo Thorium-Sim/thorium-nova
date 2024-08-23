@@ -89,7 +89,6 @@ export const systemsMonitor = t.router({
 						name: system.components.identity!.name,
 						power: system.components.power
 							? {
-									requestedPower: system.components.power.requestedPower,
 									maxSafePower: system.components.power.maxSafePower,
 									requiredPower: system.components.power.requiredPower,
 									powerSources: system.components.power.powerSources,

@@ -549,7 +549,6 @@ function System({
 	id: number;
 	name: string;
 	power?: {
-		requestedPower: number;
 		maxSafePower: number;
 		requiredPower: number;
 		powerSources: number[];
@@ -677,7 +676,6 @@ function System({
 						<div className="flex-1 flex flex-wrap gap-y-1">
 							{Array.from({
 								length: Math.max(
-									power.requestedPower,
 									power.requiredPower,
 									power.powerSources.length,
 								),
