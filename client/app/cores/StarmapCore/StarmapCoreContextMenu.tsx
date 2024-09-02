@@ -99,31 +99,56 @@ export const StarmapCoreContextMenu = ({
 				{/* TODO March 11, 2024: Add commands for when right clicking on another object, such as following or attacking the target */}
 				{selectedShips.length > 0 ? (
 					!object ? (
-						<button
-							className={menuItemClass}
-							onClick={() => {
-								if (selectedShips.length > 0) {
-									const position = useStarmapStore
-										.getState()
-										.translate2DTo3D?.(x, y);
-									if (!position) return;
-									q.starmapCore.setDestinations.netSend({
-										ships: selectedShips.map((id: any) => ({
-											id,
+						<>
+							<button
+								className={menuItemClass}
+								onClick={() => {
+									if (selectedShips.length > 0) {
+										const position = useStarmapStore
+											.getState()
+											.translate2DTo3D?.(x, y);
+										if (!position) return;
+										q.starmapCore.setDestinations.netSend({
+											ships: selectedShips.map((id: any) => ({
+												id,
+												position: {
+													x: position.x,
+													y: useStarmapStore.getState().yDimensionIndex,
+													z: position.z,
+												},
+												systemId: useStarmapStore.getState().currentSystem,
+											})),
+										});
+										setOpen(false);
+									}
+								}}
+							>
+								Travel To Here
+							</button>
+							<button
+								className={menuItemClass}
+								onClick={() => {
+									if (selectedShips.length > 0) {
+										const position = useStarmapStore
+											.getState()
+											.translate2DTo3D?.(x, y);
+										if (!position) return;
+										q.starmapCore.fireTorpedo.netSend({
+											objectId: selectedShips[0] as number,
 											position: {
 												x: position.x,
 												y: useStarmapStore.getState().yDimensionIndex,
 												z: position.z,
+												parentId: useStarmapStore.getState().currentSystem!,
 											},
-											systemId: useStarmapStore.getState().currentSystem,
-										})),
-									});
-									setOpen(false);
-								}
-							}}
-						>
-							Travel To Here
-						</button>
+										});
+										setOpen(false);
+									}
+								}}
+							>
+								Spawn Torpedo (Debug)
+							</button>
+						</>
 					) : object.type === "planet" ? (
 						<button
 							className={menuItemClass}
@@ -157,23 +182,25 @@ export const StarmapCoreContextMenu = ({
 							Orbit Star
 						</button>
 					) : object.type === "ship" ? (
-						<button
-							className={menuItemClass}
-							onClick={() => {
-								if (selectedShips.length > 0) {
-									q.starmapCore.setFollowShip.netSend({
-										ships: useStarmapStore.getState()
-											.selectedObjectIds as number[],
-										objectId: object.id,
-										// TODO: March 15, 2024 - This should change based on the current objective of the ship
-										objective: "defend",
-									});
-									setOpen(false);
-								}
-							}}
-						>
-							Follow Ship
-						</button>
+						<>
+							<button
+								className={menuItemClass}
+								onClick={() => {
+									if (selectedShips.length > 0) {
+										q.starmapCore.setFollowShip.netSend({
+											ships: useStarmapStore.getState()
+												.selectedObjectIds as number[],
+											objectId: object.id,
+											// TODO: March 15, 2024 - This should change based on the current objective of the ship
+											objective: "defend",
+										});
+										setOpen(false);
+									}
+								}}
+							>
+								Follow Ship
+							</button>
+						</>
 					) : null
 				) : null}
 				<button

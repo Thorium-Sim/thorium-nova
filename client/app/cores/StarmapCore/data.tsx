@@ -2,7 +2,7 @@ import { t } from "@server/init/t";
 import { pubsub } from "@server/init/pubsub";
 import { matchSorter } from "match-sorter";
 import type ShipPlugin from "@server/classes/Plugins/Ship";
-import type { Entity } from "@server/utils/ecs";
+import { Entity } from "@server/utils/ecs";
 import type { Coordinates } from "@server/utils/unitTypes";
 import { z } from "zod";
 import {
@@ -11,6 +11,7 @@ import {
 } from "@server/utils/position";
 import type { isDestroyed } from "@server/components/isDestroyed";
 import type { DataContext } from "@server/utils/types";
+import { Vector3 } from "three";
 
 type IsDestroyed = Zod.infer<typeof isDestroyed>;
 
@@ -501,6 +502,57 @@ export const starmapCore = t.router({
 			}
 			systemIds.forEach((id) => {
 				pubsub.publish.starmapCore.autopilot({ systemId: id });
+			});
+		}),
+	fireTorpedo: t.procedure
+		.input(
+			z.object({
+				objectId: z.number(),
+				position: z.object({
+					x: z.number(),
+					y: z.number(),
+					z: z.number(),
+					parentId: z.number(),
+				}),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const torpedoEntity = new Entity();
+
+			torpedoEntity.addComponent("position", {
+				x: input.position.x,
+				y: input.position.y,
+				z: input.position.z,
+				parentId: input.position.parentId,
+				type: "solar",
+			});
+			const directionVector = new Vector3(0, 0, 1)
+				.normalize()
+				.multiplyScalar(50);
+
+			torpedoEntity.addComponent("velocity", {
+				x: directionVector.x,
+				y: directionVector.y,
+				z: directionVector.z,
+			});
+			torpedoEntity.addComponent("isTorpedo", {
+				launcherId: -1,
+				targetId: input.objectId,
+				yield: 1,
+				damageType: null,
+				color: "white",
+				guidanceMode: "visual",
+				guidanceRange: 5000,
+				speed: 50,
+				maxForce: 10,
+				maxRange: 25000,
+			});
+			torpedoEntity.addComponent("mass", { mass: 1500 });
+
+			ctx.flight?.ecs.addEntity(torpedoEntity);
+
+			pubsub.publish.starmapCore.torpedos({
+				systemId: torpedoEntity.components.position?.parentId || null,
 			});
 		}),
 	setShipsBehavior: t.procedure

@@ -71,6 +71,7 @@ export async function spawnShip(
 			...params.assets,
 		},
 	});
+	entity.addComponent("hull", { hull: 1 });
 	if (params.position) {
 		entity.addComponent("position", params.position);
 	}

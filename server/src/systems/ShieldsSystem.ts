@@ -11,7 +11,7 @@ export class ShieldsSystem extends System {
 		if (entity.components.power && entity.components.isShields) {
 			const { currentPower } = entity.components.power;
 			const { state, maxStrength, strength } = entity.components.isShields;
-			let strengthToRecharge = currentPower * elapsedTimeHours * 100;
+			let strengthToRecharge = currentPower * elapsedTimeHours * 10;
 			if (state === "down") {
 				// Quickly drain shields when they are down
 				strengthToRecharge = (-maxStrength / SHIELD_DISCHARGE_TIME) * elapsed;
