@@ -54,6 +54,14 @@ export function dataStreamEntity(e: Entity) {
 			z: e.components.heat?.heat || 0,
 		};
 	}
+	if (e.components.isShields) {
+		return {
+			id: e.id.toString(),
+			x: e.components.isShields.strength,
+			y: e.components.power?.currentPower,
+			z: e.components.heat?.heat || 0,
+		};
+	}
 	if (e.components.power) {
 		return {
 			id: e.id.toString(),

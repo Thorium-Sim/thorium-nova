@@ -52,10 +52,12 @@ export const ship = t.router({
 			const systemPosition = systemId
 				? ctx.flight?.ecs.getEntityById(systemId)?.components.position || null
 				: null;
+			const assets = ctx.ship.components.isShip!.assets;
 			return {
 				id: ctx.ship.id,
 				currentSystem: systemId || null,
 				systemPosition,
+				assets,
 			};
 		}),
 	spawn: t.procedure

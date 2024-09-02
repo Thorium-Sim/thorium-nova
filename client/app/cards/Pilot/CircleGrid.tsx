@@ -11,7 +11,7 @@ import {
 	UNSAFE_NavigationContext,
 	UNSAFE_RouteContext,
 } from "react-router-dom";
-import { CircleGeometry, type Group, type OrthographicCamera } from "three";
+import type { Group, OrthographicCamera } from "three";
 import { cameraQuaternionMultiplier, forwardQuaternion } from "./constants";
 import { DistanceCircle } from "./DistanceCircle";
 import { PlayerArrow } from "./PlayerArrow";

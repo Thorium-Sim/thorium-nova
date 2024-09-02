@@ -13,7 +13,7 @@ import {
 import LensFlare from "./lensFlare";
 import { fragment, vertex } from "./shaders";
 import getUniforms from "./uniforms";
-import ColorUtil from "color";
+import ColorUtil from "chroma-js";
 import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useGetStarmapStore } from "../starmapStore";
@@ -95,7 +95,7 @@ const Star: React.FC<{
 		const colorVal = `rgb(${Math.round(color[0] * 255)},${Math.round(
 			color[1] * 255,
 		)},${Math.round(color[2] * 255)})`;
-		return ColorUtil(colorVal).lighten(90).rgbNumber();
+		return ColorUtil(colorVal).brighten(90).rgb().toString();
 	}, [color1]);
 
 	return (

@@ -200,6 +200,71 @@ export const targeting = t.router({
 				systemId: torpedo.components.position?.parentId || null,
 			});
 		}),
+
+	shields: t.router({
+		get: t.procedure
+			.filter((publish: { shipId: number }, { ctx }) => {
+				if (publish && publish.shipId !== ctx.ship?.id) return false;
+				return true;
+			})
+			.request(({ ctx }) => {
+				const systems = getShipSystems(ctx, {
+					systemType: "Shields",
+				}).filter(
+					(system) => system.components.isShipSystem?.shipId === ctx.ship?.id,
+				);
+
+				return systems.flatMap((system) => {
+					if (!system.components.isShields) return [];
+					return {
+						id: system.id,
+						state: system.components.isShields.state,
+						strength: system.components.isShields.strength,
+						maxStrength: system.components.isShields.maxStrength,
+						direction: system.components.isShields.direction,
+						frequency: system.components.isShields.frequency,
+					};
+				});
+			}),
+		setState: t.procedure
+			.input(
+				z.object({
+					shieldId: z.number().optional(),
+					state: z.union([z.literal("up"), z.literal("down")]),
+				}),
+			)
+			.send(({ input, ctx }) => {
+				const shieldId = input.shieldId;
+				if (shieldId) {
+					const shield = getShipSystem(ctx, {
+						systemId: shieldId,
+					});
+					if (!shield.components.isShields)
+						throw new Error("System is not a shield generator");
+					shield.updateComponent("isShields", {
+						state: input.state,
+					});
+				} else {
+					const shields = getShipSystems(ctx, {
+						systemType: "Shields",
+					}).filter(
+						(system) => system.components.isShipSystem?.shipId === ctx.ship?.id,
+					);
+					for (const shield of shields) {
+						shield.updateComponent("isShields", {
+							state: input.state,
+						});
+					}
+				}
+				pubsub.publish.targeting.shields.get({
+					shipId: ctx.ship!.id,
+				});
+			}),
+	}),
+	stream: t.procedure.dataStream(({ entity, ctx }) => {
+		if (!entity) return false;
+		return Boolean(entity.components.isShields);
+	}),
 });
 
 function adjustTorpedoInventory(

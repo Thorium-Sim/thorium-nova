@@ -14,6 +14,7 @@ import { getPowerSupplierPowerNeeded } from "@server/systems/ReactorFuelSystem";
 import { Box3, Vector3 } from "three";
 import { loadGltf } from "@server/utils/loadGltf";
 import { thoriumPath } from "@server/utils/appPaths";
+import { capitalCase } from "change-case";
 import path from "node:path";
 
 const systemCache: Record<string, BaseShipSystemPlugin> = {};
@@ -141,6 +142,13 @@ export async function spawnShip(
 						...system.overrides,
 						direction: shieldDirections[i],
 					});
+					if (shieldCount > 1) {
+						entity.updateComponent("identity", {
+							name: `${capitalCase(shieldDirections[i])} ${
+								entity.components.identity?.name || "Shields"
+							}`,
+						});
+					}
 					systemEntities.push(entity);
 				}
 				break;
