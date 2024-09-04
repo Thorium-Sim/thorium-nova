@@ -201,6 +201,14 @@ export const targeting = t.router({
 			});
 		}),
 
+	hull: t.procedure
+		.filter((publish: { shipId: number }, { ctx }) => {
+			if (publish && publish.shipId !== ctx.ship?.id) return false;
+			return true;
+		})
+		.request(({ ctx }) => {
+			return ctx.ship?.components.hull?.hull || 0;
+		}),
 	shields: t.router({
 		get: t.procedure
 			.filter((publish: { shipId: number }, { ctx }) => {

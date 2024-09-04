@@ -87,8 +87,43 @@ export function applyDamage(
 	// The vector from the ship to the impact point.
 	direction: Vector3,
 ) {
-	// TODO May 11, 2024: Apply damage to the shields first
-	const size = entity.components.size || { length: 1, width: 1, height: 1 };
+	const remainingDamage = applyShieldDamage(
+		entity,
+		damageInGigajoules,
+		direction,
+	);
+
+	// Apply damage to the hull
+	if (remainingDamage > 0 && entity.components.hull) {
+		entity.updateComponent("hull", {
+			hull: entity.components.hull.hull - remainingDamage,
+		});
+		pubsub.publish.targeting.hull({ shipId: entity.id });
+
+		if (entity.components.hull.hull <= 0) {
+			const mass = entity.components.mass?.mass || 1;
+			const explosion =
+				mass > 1_000_000_000
+					? "large"
+					: mass > 100_000_000
+					  ? "medium"
+					  : "small";
+
+			entity.addComponent("isDestroyed", {
+				timeToDestroy: 5000,
+				explosion,
+			});
+		}
+	}
+}
+
+function applyShieldDamage(
+	entity: Entity,
+	damageInGigajoules: number,
+	// The vector from the ship to the impact point.
+	direction: Vector3,
+) {
+	const size = /*entity.components.size ||*/ { length: 1, width: 1, height: 1 };
 	const shieldDirection = getWhichShield(direction, {
 		x: size.width,
 		y: size.height,
@@ -130,25 +165,6 @@ export function applyDamage(
 	} else {
 		remainingDamage = damageInGigajoules;
 	}
-	// Apply damage to the hull
-	if (remainingDamage > 0 && entity.components.hull) {
-		entity.updateComponent("hull", {
-			hull: entity.components.hull.hull - remainingDamage,
-		});
 
-		if (entity.components.hull.hull <= 0) {
-			const mass = entity.components.mass?.mass || 1;
-			const explosion =
-				mass > 1_000_000_000
-					? "large"
-					: mass > 100_000_000
-					  ? "medium"
-					  : "small";
-
-			entity.addComponent("isDestroyed", {
-				timeToDestroy: 5000,
-				explosion,
-			});
-		}
-	}
+	return remainingDamage;
 }

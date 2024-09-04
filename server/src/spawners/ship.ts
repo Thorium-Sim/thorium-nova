@@ -71,7 +71,8 @@ export async function spawnShip(
 			...params.assets,
 		},
 	});
-	entity.addComponent("hull", { hull: 1 });
+	// TODO September 3, 2024 - Make this configurable on the ship template
+	entity.addComponent("hull", { hull: 10 });
 	if (params.position) {
 		entity.addComponent("position", params.position);
 	}

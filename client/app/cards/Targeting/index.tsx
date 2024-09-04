@@ -30,12 +30,13 @@ export function Targeting({ cardLoaded }: CardProps) {
 	const [targetedContact] = q.targeting.targetedContact.useNetRequest();
 	const clickRef = React.useRef(false);
 	q.targeting.stream.useDataStream();
-
+	const [hull] = q.targeting.hull.useNetRequest();
 	return (
 		<CircleGridStoreProvider zoomMax={25000}>
 			<div className="grid grid-cols-4 h-full place-content-center gap-4">
 				<div className="flex flex-col justify-between">
 					<Shields cardLoaded={cardLoaded} />
+					<div>Hull: {hull}</div>
 				</div>
 				<div className="col-span-2 w-full aspect-square self-center">
 					<React.Suspense fallback={null}>
@@ -115,32 +116,37 @@ const shieldStyle = (
 	shields.forEach((s) => {
 		const integrity = s.strength / s.maxStrength;
 		const color = shieldColor(integrity);
-		if (s.direction === "starboard") {
+		if (
+			(s.direction === "starboard" && !extra) ||
+			(s.direction === "fore" && extra)
+		) {
 			output.push(`20px 0px 20px -15px ${color}`);
 			output.push(`inset -20px 0px 20px -15px ${color}`);
 		}
-		if (s.direction === "port") {
+		if (
+			(s.direction === "port" && !extra) ||
+			(s.direction === "aft" && extra)
+		) {
 			output.push(`-20px 0px 20px -15px ${color}`);
 			output.push(`inset 20px 0px 20px -15px ${color}`);
 		}
-		if (s.direction === "aft" && !extra) {
+		if (s.direction === "fore" && !extra) {
 			output.push(`0px -20px 20px -15px ${color}`);
 			output.push(`inset 0px 20px 20px -15px ${color}`);
 		}
-		if (s.direction === "fore" && !extra) {
-			output.push(`0px 20px 20px -15px ${color}`);
-			output.push(`inset 0px -20px 20px -15px ${color}`);
-		}
-		if (s.direction === "dorsal" && extra) {
+		if (s.direction === "aft" && !extra) {
 			output.push(`0px 20px 20px -15px ${color}`);
 			output.push(`inset 0px -20px 20px -15px ${color}`);
 		}
 		if (s.direction === "ventral" && extra) {
+			output.push(`0px 20px 20px -15px ${color}`);
+			output.push(`inset 0px -20px 20px -15px ${color}`);
+		}
+		if (s.direction === "dorsal" && extra) {
 			output.push(`0px -20px 20px -15px ${color}`);
 			output.push(`inset 0px 20px 20px -15px ${color}`);
 		}
 	});
-	console.log(output);
 	return output.join(",");
 };
 
@@ -153,7 +159,11 @@ function Shields({ cardLoaded }: { cardLoaded: boolean }) {
 
 	const { interpolate } = useLiveQuery();
 	useAnimationFrame(() => {
-		const shieldItems = [];
+		const shieldItems: {
+			strength: number;
+			maxStrength: number;
+			direction: "fore" | "aft" | "starboard" | "port" | "dorsal" | "ventral";
+		}[] = [];
 		for (const shield of shields) {
 			const strength = interpolate(shield.id)?.x || 0;
 			shieldItems.push({ ...shield, strength });

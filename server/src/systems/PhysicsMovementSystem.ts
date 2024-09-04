@@ -365,12 +365,19 @@ export class PhysicsMovementSystem extends System {
 				const entity2 = this.ecs.getEntityById(entityId2);
 
 				// This is the vector from entity1 to entity2,
-				const maxDirection = event.maxForceDirection();
 				const direction = new Vector3(
-					maxDirection.x,
-					maxDirection.y,
-					maxDirection.z,
-				);
+					body1?.translation().x,
+					body1?.translation().y,
+					body1?.translation().z,
+				)
+					.sub(
+						new Vector3(
+							body2?.translation().x,
+							body2?.translation().y,
+							body2?.translation().z,
+						),
+					)
+					.normalize();
 
 				handleCollisionDamage(
 					entity1,
@@ -395,7 +402,6 @@ export class PhysicsMovementSystem extends System {
 						otherEntity &&
 						!torpedoEntity.components.isDestroyed
 					) {
-						console.log("handling torpedo damage");
 						handleTorpedoDamage(torpedoEntity, otherEntity, direction);
 					}
 				}

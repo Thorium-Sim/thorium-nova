@@ -32,16 +32,17 @@ export function getWhichShield(
 	size: { x: number; y: number; z: number },
 ): ShieldDirections {
 	// Scale direction based on the size of the ship
-	const x = Math.abs(direction.x / size.x);
-	const y = Math.abs(direction.y / size.y);
-	const z = Math.abs(direction.z / size.z);
-	const max = Math.max(x, y, z);
-	if (max === x && max > 0) return "starboard";
-	if (max === x && max < 0) return "port";
-	if (max === z && max > 0) return "fore";
-	if (max === z && max < 0) return "aft";
-	if (max === y && max > 0) return "ventral";
-	if (max === y && max < 0) return "dorsal";
+	const x = direction.x / size.x;
+	const y = direction.y / size.y;
+	const z = direction.z / size.z;
+	const max = Math.max(Math.abs(x), Math.abs(y), Math.abs(z));
+	if (max === Math.abs(x) && x > 0) return "port";
+	if (max === Math.abs(x) && x < 0) return "starboard";
+	if (max === Math.abs(z) && z > 0) return "fore";
+	if (max === Math.abs(z) && z < 0) return "aft";
+	if (max === Math.abs(y) && y > 0) return "ventral";
+	if (max === Math.abs(y) && y < 0) return "dorsal";
+	console.log("No shield direction found");
 	// Default to fore in the very unlikely event that the direction is 0,0,0
 	return "fore";
 }

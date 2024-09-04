@@ -519,6 +519,16 @@ export const starmapCore = t.router({
 		.send(({ ctx, input }) => {
 			const torpedoEntity = new Entity();
 
+			const target = ctx.flight?.ecs.getEntityById(input.objectId);
+			if (!target) return;
+			const targetPosition = target.components.position
+				? new Vector3(
+						target.components.position.x,
+						target.components.position.y,
+						target.components.position.z,
+				  )
+				: new Vector3();
+
 			torpedoEntity.addComponent("position", {
 				x: input.position.x,
 				y: input.position.y,
@@ -526,7 +536,10 @@ export const starmapCore = t.router({
 				parentId: input.position.parentId,
 				type: "solar",
 			});
-			const directionVector = new Vector3(0, 0, 1)
+			// Point the torpedo at the target
+			const directionVector = targetPosition
+				.clone()
+				.sub(new Vector3(input.position.x, input.position.y, input.position.z))
 				.normalize()
 				.multiplyScalar(50);
 
