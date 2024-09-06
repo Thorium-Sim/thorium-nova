@@ -16,7 +16,6 @@ import { ReactorHeatSystem } from "./ReactorHeatSystem";
 import { HeatToCoolantSystem } from "./HeatToCoolantSystem";
 import { HeatDispersionSystem } from "./HeatDispersionSystem";
 import { PowerDrawSystem } from "./PowerDrawSystem";
-import { PowerGridSystem } from "./PowerGridSystem";
 import { WaypointRemoveSystem } from "./WaypointRemoveSystem";
 import { DebugSphereSystem } from "./DebugSphereSystem";
 import { ProcessTriggersSystem } from "./ProcessTriggersSystem";
@@ -30,6 +29,8 @@ import { NearbyObjectsSystem } from "./NearbyObjectsSystem";
 import { TorpedoLoadingSystem } from "./TorpedoLoadingSystem";
 import { TorpedoMovementSystem } from "./TorpedoMovementSystem";
 import { IsDestroyedSystem } from "./IsDestroyedSystem";
+import { PowerDistributionSystem } from "@server/systems/PowerDistributionSystem";
+import { ShieldsSystem } from "@server/systems/ShieldsSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -41,12 +42,13 @@ const systems = [
 	ReactorFuelSystem,
 	ReactorHeatSystem,
 	PowerDrawSystem,
-	PowerGridSystem,
+	PowerDistributionSystem,
 	TorpedoLoadingSystem,
 	NearbyObjectsSystem,
 	ShipBehaviorSystem,
 	AutoRotateSystem,
 	AutoThrustSystem,
+	ShieldsSystem,
 	ThrusterSystem,
 	ImpulseSystem,
 	WarpSystem,

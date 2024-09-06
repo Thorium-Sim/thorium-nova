@@ -180,7 +180,7 @@ export function StarmapShip({
 	);
 }
 
-function useShipModel(modelAsset: string | undefined) {
+export function useShipModel(modelAsset: string | undefined) {
 	const model = useGLTF(modelAsset || "/assets/Empty.glb", false);
 	// biome-ignore lint/correctness/useExhaustiveDependencies:
 	const scene = useMemo(() => {

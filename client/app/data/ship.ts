@@ -52,10 +52,12 @@ export const ship = t.router({
 			const systemPosition = systemId
 				? ctx.flight?.ecs.getEntityById(systemId)?.components.position || null
 				: null;
+			const assets = ctx.ship.components.isShip!.assets;
 			return {
 				id: ctx.ship.id,
 				currentSystem: systemId || null,
 				systemPosition,
+				assets,
 			};
 		}),
 	spawn: t.procedure
@@ -101,7 +103,7 @@ export const ship = t.router({
 				tags: z.array(z.string()).optional(),
 			}),
 		)
-		.send(({ ctx, input }) => {
+		.send(async ({ ctx, input }) => {
 			if (!ctx.flight) throw new Error("Flight not found.");
 
 			const shipTemplate = ctx.server.plugins
@@ -110,11 +112,15 @@ export const ship = t.router({
 
 			if (!shipTemplate) throw new Error("Ship template not found.");
 
-			const { ship: shipEntity, extraEntities } = spawnShip(ctx, shipTemplate, {
-				// TODO: August 20, 2022 - Generate a name for this ship somehow
-				name: randomNameGenerator(),
-				tags: input.tags,
-			});
+			const { ship: shipEntity, extraEntities } = await spawnShip(
+				ctx,
+				shipTemplate,
+				{
+					// TODO: August 20, 2022 - Generate a name for this ship somehow
+					name: randomNameGenerator(),
+					tags: input.tags,
+				},
+			);
 			extraEntities.forEach((s) => ctx.flight?.ecs.addEntity(s));
 			ctx.flight?.ecs.addEntity(shipEntity);
 

@@ -44,3 +44,4 @@ export * from "./nearbyObjects";
 export * from "./isTorpedo";
 export * from "./hull";
 export * from "./isDestroyed";
+export * from "./isObjective";

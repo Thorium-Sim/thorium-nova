@@ -5,14 +5,17 @@ import { useLiveQuery } from "./liveQueryContext";
 
 const requestMap = new Map<string, Set<string>>();
 
-export function useRequestSub(requestParams: { path: string; params?: any }) {
+export function useRequestSub(
+	requestParams: { path: string; params?: any },
+	mockData?: any,
+) {
 	const id = stableValueHash([requestParams.path, requestParams.params]);
 	const [hookId] = useState(uniqid());
 	const { socket, reconnectionState } = useLiveQuery();
 	const isConnected = reconnectionState === "connected";
 	// biome-ignore lint/correctness/useExhaustiveDependencies:
 	useEffect(() => {
-		if (!socket || !isConnected) return;
+		if (!socket || !isConnected || mockData) return;
 		if (!requestMap.has(id)) {
 			requestMap.set(id, new Set());
 		}

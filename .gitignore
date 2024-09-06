@@ -10,3 +10,5 @@ coverage
 
 # Copied docs images
 client/public/docs
+icons/name.d.ts
+icons/sprite.svg

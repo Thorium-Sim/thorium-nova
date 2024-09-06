@@ -1,4 +1,4 @@
-import col from "color";
+import col from "chroma-js";
 export default function LinearDotIndicator({
 	level = 1,
 	color = "rainbow",
@@ -16,7 +16,7 @@ export default function LinearDotIndicator({
 	function calcColor(i: number) {
 		let outputColor: any;
 		if (color === "rainbow") {
-			outputColor = col().hsl(reverse ? i * 5 : Math.abs(i * 5 - 90), 100, 50);
+			outputColor = col(reverse ? i * 5 : Math.abs(i * 5 - 90), 100, 50, "hsl");
 		} else {
 			outputColor = col(color);
 		}
@@ -34,15 +34,13 @@ export default function LinearDotIndicator({
 							key={`dot-${i}`}
 							className={`w-2 h-2 rounded-full`}
 							style={{
-								["--dot-color" as any]: calcColor(i).rgb().toString(),
-								["--dot-highlight" as any]: calcColor(i)
-									.lighten(0.1)
-									.rgb()
-									.toString(),
-								["--dot-border" as any]: calcColor(i)
+								["--dot-color" as any]: `rgba(${calcColor(i).rgba()})`,
+								["--dot-highlight" as any]: `rgba(${calcColor(i)
+									.brighten(0.1)
+									.rgba()})`,
+								["--dot-border" as any]: `rgba(${calcColor(i)
 									.alpha(0.25)
-									.rgb()
-									.toString(),
+									.rgba()})`,
 								background: `radial-gradient(ellipse at center, var(--dot-color) 0%,var(--dot-border) 90%)`,
 								// boxShadow: `0px 0px 5px var(--dot-highlight)`,
 							}}

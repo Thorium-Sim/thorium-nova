@@ -7,6 +7,7 @@ import ReactorPlugin from "./Reactor";
 import BatteryPlugin from "./Battery";
 import TorpedoLauncherPlugin from "./TorpedoLauncher";
 import TargetingSystemPlugin from "./Targeting";
+import ShieldsPlugin from "@server/classes/Plugins/ShipSystems/Shields";
 
 // Make sure you update the isShipSystem component when adding a new ship system type
 // We can't derive the isShipSystem list from this list because ECS components
@@ -21,6 +22,7 @@ export const ShipSystemTypes = {
 	battery: BatteryPlugin,
 	torpedoLauncher: TorpedoLauncherPlugin,
 	targeting: TargetingSystemPlugin,
+	shields: ShieldsPlugin,
 };
 
 export type ShipSystemFlags = "power" | "heat" | "efficiency";
@@ -30,10 +32,3 @@ export type AllShipSystems = {
 		(typeof ShipSystemTypes)[k]
 	>;
 };
-
-export type PowerNodes =
-	| "offense"
-	| "defense"
-	| "navigation"
-	| "intel"
-	| "internal";

@@ -11,6 +11,7 @@ import { ipcHandlers } from "./helpers/ipcHandlers";
 import { autoUpdater } from "electron-updater";
 import { initWin } from "./helpers/autoUpdate";
 import { port } from "./helpers/settings";
+import { ipAddress } from "@thorium/ipAddress";
 
 let win: BrowserWindow | null = null;
 app.enableSandbox();
@@ -78,7 +79,7 @@ async function createWindow() {
 	}
 	restoreMenubar(app);
 
-	await win.loadURL(`http://0.0.0.0:${port}`);
+	await win.loadURL(`http://${ipAddress}:${port}`);
 }
 
 app.whenReady().then(async () => {

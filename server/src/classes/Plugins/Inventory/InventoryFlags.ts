@@ -73,7 +73,7 @@ export const inventoryFlags = z
 		torpedoWarhead: z
 			.object({
 				color: z.string().optional().default("red"),
-				yield: z.number().default(3.6),
+				yield: z.number().default(1),
 				damageType: torpedoDamageType,
 			})
 			.optional(),
@@ -186,8 +186,8 @@ export const InventoryFlagValues: {
 	torpedoWarhead: {
 		info: "What inflicts the damage. Warheads are loaded into the casing before firing.",
 		yield: {
-			info: "The energy released measured in Kilowatt Hours.",
-			defaultValue: 1000,
+			info: "The energy released measured in MegaWatt Hours.",
+			defaultValue: 1,
 		},
 		damageType: {
 			info: "The type of damage the warhead inflicts.",

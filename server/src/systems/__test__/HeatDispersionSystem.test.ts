@@ -39,8 +39,7 @@ describe("HeatDispersionSystem", () => {
 			type: "reactor",
 		});
 		reactor.addComponent("isReactor", {
-			currentOutput: 120,
-			desiredOutput: 120,
+			currentOutput: 6,
 			maxOutput: 180,
 			optimalOutputPercent: 0.7,
 		});

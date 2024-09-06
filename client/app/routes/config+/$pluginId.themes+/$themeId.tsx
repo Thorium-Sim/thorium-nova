@@ -17,18 +17,12 @@ import Input from "@thorium/ui/Input";
 import { AssetPreview } from "@thorium/ui/AssetPreview";
 import InfoTip from "@thorium/ui/InfoTip";
 import type ThemePlugin from "server/src/classes/Plugins/Theme";
-// import StationLayout from "@client/components/Station/StationLayout";
 import normalLogo from "@client/images/logo.svg?url";
 import colorLogo from "@client/images/logo-color.svg?url";
 import { q } from "@client/context/AppContext";
 import { MockNetRequestContext } from "@thorium/live-query/client/mockContext";
 import { Icon } from "@thorium/ui/Icon";
-
-const StationLayout = () => (
-	<>
-		<div className="w-[960px] h-20 bg-blue-500" />
-	</>
-);
+import StationLayout from "@client/routes/flight.station/StationLayout";
 
 export default function ThemeLayout() {
 	const { themeId, pluginId } = useParams() as {
@@ -215,9 +209,7 @@ export default function ThemeLayout() {
 									theme: { get: null },
 								}}
 							>
-								<Suspense fallback={null}>
-									<StationLayout />
-								</Suspense>
+								<StationLayout />
 							</MockNetRequestContext.Provider>
 						</div>
 					</div>

@@ -8,8 +8,8 @@ export const isTorpedo = z
 	.object({
 		launcherId: z.number().nullable().default(null),
 		targetId: z.number().nullable().default(null),
-		/** The energy released measured in GigaJoules */
-		yield: z.number().default(3.6),
+		/** The energy released measured in MegaWatt Hours */
+		yield: z.number().default(1),
 		damageType: torpedoDamageType.nullable().default(null),
 
 		color: z.string().default("white"),

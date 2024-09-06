@@ -1,10 +1,9 @@
 import RAPIER, { type World } from "@thorium-sim/rapier3d-node";
 import { getOrbitPosition } from "@server/utils/getOrbitPosition";
 import type { ECS, Entity } from "../utils/ecs";
-import { Euler, Quaternion, Vector, Vector3 } from "three";
+import { Euler, Quaternion, Vector3 } from "three";
 
 import {
-	type Kilometer,
 	degToRad,
 	solarMassToKilograms,
 	terranMassToKilograms,

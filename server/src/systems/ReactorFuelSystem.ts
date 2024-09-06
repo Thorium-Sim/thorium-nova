@@ -1,11 +1,36 @@
 import { getReactorInventory } from "@server/utils/getSystemInventory";
-import {
-	type MegaWatt,
-	type MegaWattHour,
-	megaWattHourToMegaWattSecond,
-} from "@server/utils/unitTypes";
+import type { MegaWatt, MegaWattHour } from "@server/utils/unitTypes";
 import { type Entity, System } from "../utils/ecs";
 
+export function getPowerSupplierPowerNeeded(entity: Entity) {
+	if (!entity.components.isReactor && !entity.components.isBattery) return 0;
+	const shipId = entity.components.isShipSystem?.shipId;
+	const systems = [];
+	for (const system of entity.ecs?.componentCache.get("power") || []) {
+		if (system.components.isShipSystem?.shipId === shipId) {
+			systems.push(system);
+		}
+	}
+	for (const system of entity.ecs?.componentCache.get("isBattery") || []) {
+		if (system.components.isShipSystem?.shipId === shipId) {
+			systems.push(system);
+		}
+	}
+
+	return systems.reduce((prev, next) => {
+		return (
+			prev +
+			(next.components.power?.powerSources.reduce(
+				(prev, next) => prev + (next === entity.id ? 1 : 0),
+				0,
+			) || 0) +
+			(next.components.isBattery?.powerSources.reduce(
+				(prev, next) => prev + (next === entity.id ? 1 : 0),
+				0,
+			) || 0)
+		);
+	}, 0);
+}
 export class ReactorFuelSystem extends System {
 	test(entity: Entity) {
 		return !!entity.components.isReactor;
@@ -20,14 +45,13 @@ export class ReactorFuelSystem extends System {
 			return;
 		}
 
-		const {
-			desiredOutput: powerNeeded,
-			optimalOutputPercent,
-			maxOutput,
-		} = entity.components.isReactor;
+		const { optimalOutputPercent, maxOutput } = entity.components.isReactor;
+
+		const powerNeeded = getPowerSupplierPowerNeeded(entity);
 
 		const optimalOutput = maxOutput * optimalOutputPercent;
-		const outputBonus = powerNeeded / optimalOutput;
+		const outputBonus = Math.max(powerNeeded / optimalOutput, 0.5);
+
 		// E(mWh) = P(mW) * T(h)
 		const elapsedTimeHours = elapsed / 1000 / 60 / 60;
 		const energyNeeded: MegaWattHour =
@@ -42,8 +66,7 @@ export class ReactorFuelSystem extends System {
 			entity.components.isReactor.unusedFuel.amount =
 				Math.abs(energyNeeded - energyProvided) /
 				entity.components.isReactor.unusedFuel.density;
-			entity.components.isReactor.currentOutput =
-				entity.components.isReactor.desiredOutput;
+			entity.components.isReactor.currentOutput = powerNeeded;
 			return;
 		}
 		entity.components.isReactor.unusedFuel.amount = 0;
@@ -85,14 +108,14 @@ export class ReactorFuelSystem extends System {
 				entity.components.isReactor.unusedFuel.amount =
 					Math.abs(energyNeeded - energyProvided) /
 					entity.components.isReactor.unusedFuel.density;
-				entity.components.isReactor.currentOutput =
-					entity.components.isReactor.desiredOutput;
+				entity.components.isReactor.currentOutput = powerNeeded;
 				return;
 			}
 		}
 		// Figure out the current power output based on how much power has been provided
 		const powerProvided: MegaWatt =
 			energyProvided / elapsedTimeHours / outputBonus;
+
 		entity.components.isReactor.currentOutput = powerProvided;
 	}
 }

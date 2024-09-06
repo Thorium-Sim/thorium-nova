@@ -1,7 +1,7 @@
 import { type Entity, System } from "../utils/ecs";
 
 /**
- * There's a subtle distinction between powerDraw and requestedPower
+ * There's a subtle distinction between powerDraw and requestedPower (powerSources.length)
  * - powerDraw is how much power the system is currently pulling based
  *   on it's current workload.
  * - requestedPower is an artificial limit placed by the crew that keeps
@@ -18,7 +18,8 @@ export class PowerDrawSystem extends System {
 		const efficiency = entity.components.efficiency?.efficiency || 1;
 		const efficiencyMultiple = 1 / efficiency;
 		if (!systemType?.type || !power) return;
-		const { maxSafePower, requiredPower } = power;
+		const { maxSafePower, requiredPower, powerSources } = power;
+		const requestedPower = powerSources.length;
 		let powerDraw = 0;
 		switch (systemType.type) {
 			case "warpEngines": {
@@ -38,7 +39,7 @@ export class PowerDrawSystem extends System {
 				// If we're going faster than the cruising speed,
 				// draw as much power as possible
 				if (targetSpeed > cruisingSpeed) {
-					powerDraw = power.requestedPower;
+					powerDraw = requestedPower;
 					break;
 				}
 				if (targetSpeed === 0) break;
@@ -62,18 +63,27 @@ export class PowerDrawSystem extends System {
 					rotationDelta.y,
 					rotationDelta.z,
 				);
-				const overloadPercent = Math.min(
-					1,
-					power.requestedPower / maxSafePower,
-				);
+				const overloadPercent = Math.min(1, requestedPower / maxSafePower);
 				const totalOutput =
 					(directionOutput + rotationOutput) * overloadPercent;
 				powerDraw =
 					(maxSafePower - requiredPower) * totalOutput + requiredPower;
 				break;
 			}
+			case "shields": {
+				if (!entity.components.isShields) return;
+				const { strength, maxStrength, state } = entity.components.isShields;
+				if (state === "down") {
+					powerDraw = 0;
+				} else if (strength === maxStrength) {
+					powerDraw = power.requiredPower;
+				} else {
+					powerDraw = requestedPower;
+				}
+				break;
+			}
 			case "generic":
-				powerDraw = power.requestedPower;
+				powerDraw = requestedPower;
 				break;
 			default:
 				return;
@@ -81,7 +91,7 @@ export class PowerDrawSystem extends System {
 
 		// Limit the power draw to the requested power, so we never go over it.
 		entity.updateComponent("power", {
-			powerDraw: Math.min(power.requestedPower, powerDraw * efficiencyMultiple),
+			powerDraw: Math.min(requestedPower, powerDraw * efficiencyMultiple),
 		});
 	}
 }

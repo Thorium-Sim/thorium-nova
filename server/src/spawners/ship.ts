@@ -10,6 +10,12 @@ import { spawnShipSystem } from "./shipSystem";
 import ReactorPlugin from "@server/classes/Plugins/ShipSystems/Reactor";
 import type BaseShipSystemPlugin from "@server/classes/Plugins/ShipSystems/BaseSystem";
 import { getInventoryTemplates } from "@server/utils/getInventoryTemplates";
+import { getPowerSupplierPowerNeeded } from "@server/systems/ReactorFuelSystem";
+import { Box3, Vector3 } from "three";
+import { loadGltf } from "@server/utils/loadGltf";
+import { thoriumPath } from "@server/utils/appPaths";
+import { capitalCase } from "change-case";
+import path from "node:path";
 
 const systemCache: Record<string, BaseShipSystemPlugin> = {};
 function getSystem(
@@ -29,7 +35,7 @@ function getSystem(
 	}
 	return systemCache[`${systemId}-${pluginId}`];
 }
-export function spawnShip(
+export async function spawnShip(
 	dataContext: { flight: FlightDataModel | null; server: ServerDataModel },
 	template: Partial<ShipPlugin>,
 	params: {
@@ -65,37 +71,33 @@ export function spawnShip(
 			...params.assets,
 		},
 	});
+	// TODO September 3, 2024 - Make this configurable on the ship template
+	entity.addComponent("hull", { hull: 10 });
 	if (params.position) {
 		entity.addComponent("position", params.position);
 	}
 	entity.addComponent("rotation");
 	entity.addComponent("velocity");
 	entity.addComponent("rotationVelocity");
-	// TODO November 16, 2021 - write a function that calculates the width and height
-	//  based on the the provided length and the dimensions of the 3D model
-	entity.addComponent("size");
+
+	const size = await getMeshSize(
+		template.assets?.model
+			? path.join(".", thoriumPath, template.assets!.model)
+			: null,
+	);
+	size.multiplyScalar(template.length || 1);
+	entity.addComponent("size", {
+		length: size.z,
+		width: size.x,
+		height: size.y,
+	});
+
 	entity.addComponent("mass", { mass: template.mass });
 
 	entity.addComponent("shipSystems");
 	entity.addComponent("nearbyObjects", { objects: new Map() });
 
 	const systemEntities: Entity[] = [];
-
-	// First we'll create some power nodes
-	const powerNodes: Record<string, { entity: Entity; count: number }> = {};
-	if (params.playerShip) {
-		template.powerNodes?.forEach((name) => {
-			const node = new Entity();
-			node.addComponent("identity", { name });
-			node.addComponent("isPowerNode", {
-				maxConnections: 3,
-				connectedSystems: [],
-				distributionMode: "evenly",
-			});
-			powerNodes[name] = { entity: node, count: 0 };
-			systemEntities.push(node);
-		});
-	}
 
 	template.shipSystems?.forEach((system) => {
 		const systemPlugin = getSystem(
@@ -125,27 +127,40 @@ export function spawnShip(
 
 				break;
 			}
+			case "shields": {
+				// Create enough shield systems for each shield
+				const shieldDirections = [
+					"fore",
+					"aft",
+					"port",
+					"starboard",
+					"dorsal",
+					"ventral",
+				];
+				const shieldCount =
+					system.overrides?.shieldCount ||
+					("shieldCount" in systemPlugin && systemPlugin.shieldCount) ||
+					1;
+				for (let i = 0; i < shieldCount; i++) {
+					const entity = spawnShipSystem(shipId, systemPlugin, {
+						...system.overrides,
+						direction: shieldDirections[i],
+					});
+					if (shieldCount > 1) {
+						entity.updateComponent("identity", {
+							name: `${capitalCase(shieldDirections[i])} ${
+								entity.components.identity?.name || "Shields"
+							}`,
+						});
+					}
+					systemEntities.push(entity);
+				}
+				break;
+			}
 			default: {
+				// TODO: Set up power from reactors and batteries
 				const entity = spawnShipSystem(shipId, systemPlugin, system.overrides);
 				systemEntities.push(entity);
-				if (params.playerShip && entity.components.power) {
-					// Hook up the power node
-					const leastPowerNode = Object.entries(powerNodes).reduce(
-						(prev, next) => {
-							if (next[1].count < prev.count) return next[1];
-							return prev;
-						},
-						powerNodes[Object.keys(powerNodes)[0]],
-					);
-					const powerNode =
-						powerNodes[systemPlugin.powerNode || ""] || leastPowerNode;
-					powerNode.count += 1;
-					powerNode.entity.components.isPowerNode?.connectedSystems.push(
-						entity.id,
-					);
-				} else {
-					entity.removeComponent("power");
-				}
 				break;
 			}
 		}
@@ -172,7 +187,7 @@ export function spawnShip(
 			}, 0) || 1;
 
 		// Split amongst the reactors and generously make it a nice round number
-		const reactorPower = Math.ceil(totalPower / reactorCount / 5) * 5;
+		const reactorPower = Math.ceil(totalPower / reactorCount / 10) * 10;
 
 		template.shipSystems?.forEach((system) => {
 			const systemPlugin = getSystem(
@@ -187,7 +202,6 @@ export function spawnShip(
 					sys.updateComponent("isReactor", {
 						maxOutput,
 						currentOutput: maxOutput * systemPlugin.optimalOutputPercent,
-						desiredOutput: maxOutput * systemPlugin.optimalOutputPercent,
 						optimalOutputPercent: systemPlugin.optimalOutputPercent,
 					});
 					systemEntities.push(sys);
@@ -195,45 +209,37 @@ export function spawnShip(
 			}
 		});
 
-		// And connect up the power nodes for good measure
-		// Every battery gets one Reactor
-		const batteries = systemEntities.filter((e) => e.components.isBattery);
-		const reactors = systemEntities.filter((e) => e.components.isReactor);
-		let reactorIndex = 0;
-		// Connect batteries to power nodes in this order
-		const powerNodeOrder = [
-			"internal",
-			"intel",
-			"defense",
-			"navigation",
-			"offense",
-		];
-		batteries.forEach((battery, i) => {
-			reactorIndex = i % reactors.length;
-			const reactor = reactors[reactorIndex];
-			reactor.updateComponent("isReactor", {
-				connectedEntities: [
-					...(reactor.components.isReactor?.connectedEntities || []),
-					battery.id,
-				],
-			});
-			const powerNode = powerNodes[powerNodeOrder[i % powerNodeOrder.length]];
-			battery.updateComponent("isBattery", {
-				connectedNodes: [
-					...(battery.components.isBattery?.connectedNodes || []),
-					powerNode.entity.id,
-				],
-			});
-		});
-		// Make sure every power node is connected to at least one reactor
-		Object.values(powerNodes).forEach((node, i) => {
-			const reactor = reactors[(reactorIndex + i) % reactors.length];
-			reactor?.updateComponent("isReactor", {
-				connectedEntities: [
-					...(reactor.components.isReactor?.connectedEntities || []),
-					node.entity.id,
-				],
-			});
+		// Make sure each system and battery has a reactor to charge it
+		systemEntities.forEach((entity) => {
+			if (entity.components.isBattery) {
+				const reactors = systemEntities.filter(
+					(e) =>
+						e.components.isReactor &&
+						getPowerSupplierPowerNeeded(e) < e.components.isReactor.maxOutput,
+				);
+				const reactor = randomFromList(reactors);
+				if (!reactor) return;
+				entity.updateComponent("isBattery", {
+					powerSources: [
+						...entity.components.isBattery.powerSources,
+						reactor.id,
+					],
+				});
+			}
+			if (entity.components.power) {
+				for (let i = 0; i < entity.components.power.defaultPower; i++) {
+					const reactors = systemEntities.filter(
+						(e) =>
+							e.components.isReactor &&
+							getPowerSupplierPowerNeeded(e) < e.components.isReactor.maxOutput,
+					);
+					const reactor = randomFromList(reactors);
+					if (!reactor) return;
+					entity.updateComponent("power", {
+						powerSources: [...entity.components.power.powerSources, reactor.id],
+					});
+				}
+			}
 		});
 	}
 
@@ -358,4 +364,13 @@ export function spawnShip(
 	}
 
 	return { ship: entity, extraEntities: systemEntities.concat(extraEntities) };
+}
+
+async function getMeshSize(url: string | null): Promise<Vector3> {
+	if (!url) return new Vector3(1, 1, 1);
+	const gltf = await loadGltf(url);
+	if (!gltf) return new Vector3();
+	const box = new Box3().setFromObject(gltf.scene.children[0]);
+
+	return box.getSize(new Vector3());
 }

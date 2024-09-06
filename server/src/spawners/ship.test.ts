@@ -51,7 +51,7 @@ describe("Ship Spawner", () => {
 			?.aspects.ships.find((s) => s.name === "Test Ship");
 		expect(shipPlugin).toBeDefined();
 		if (!shipPlugin) throw new Error("Ship not found");
-		const { ship, extraEntities } = spawnShip(dataContext, shipPlugin, {
+		const { ship, extraEntities } = await spawnShip(dataContext, shipPlugin, {
 			name: "Spawned Ship",
 			position: { x: 10, y: 20, z: 30, type: "interstellar", parentId: null },
 			playerShip: true,
@@ -60,12 +60,12 @@ describe("Ship Spawner", () => {
 		expect(ship.components.position?.x).toEqual(10);
 		expect(ship.components.position?.y).toEqual(20);
 		expect(ship.components.position?.z).toEqual(30);
-		expect(extraEntities.length).toEqual(10);
-		expect(extraEntities[5].components.identity?.name).toEqual(
+		expect(extraEntities.length).toEqual(5);
+		expect(extraEntities[0].components.identity?.name).toEqual(
 			"Generic System",
 		);
-		expect(extraEntities[5].components.isShipSystem?.type).toEqual("generic");
-		expect(extraEntities[6].components.cargoContainer?.volume).toEqual(4000);
-		expect(extraEntities[7].components.cargoContainer?.volume).toEqual(4000);
+		expect(extraEntities[0].components.isShipSystem?.type).toEqual("generic");
+		expect(extraEntities[1].components.cargoContainer?.volume).toEqual(4000);
+		expect(extraEntities[2].components.cargoContainer?.volume).toEqual(4000);
 	});
 });

@@ -10,6 +10,8 @@ import remarkMdxImages from "./remark-mdx-images";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import rehypeShiki from "@shikijs/rehype";
+import { iconsSpritesheet } from "vite-plugin-icons-spritesheet";
+
 setDefaultResultOrder("ipv4first");
 
 export default defineConfig({
@@ -26,6 +28,21 @@ export default defineConfig({
 				rehypeAutolinkHeadings,
 				[rehypeShiki, { theme: "one-dark-pro" }],
 			],
+		}),
+		iconsSpritesheet({
+			// Defaults to false, should it generate TS types for you
+			withTypes: true,
+			// The path to the icon directory
+			inputDir: "app/icons",
+			// Output path for the generated spritesheet and types
+			outputDir: "app/components/ui/icons",
+			// Output path for the generated type file, defaults to types.ts in outputDir
+			typesOutputFile: "app/components/ui/icons/name.d.ts",
+			// What formatter to use to format the generated files, prettier or biome, defaults to no formatter
+			formatter: "biome",
+			// The path to the formatter config file, defaults to no path
+			pathToFormatterConfig: "../biome.json",
+			iconNameTransformer: (name) => name,
 		}),
 		remix({
 			ssr: false,

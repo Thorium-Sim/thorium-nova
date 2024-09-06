@@ -1,10 +1,20 @@
 import { pubsub } from "@server/init/pubsub";
 import type { Entity } from "./ecs";
 import { Vector3 } from "three";
+import {
+	gigaJouleToMegaWattHour,
+	megaWattHourToGigaJoule,
+} from "@server/utils/unitTypes";
+import {
+	getWhichShield,
+	ShieldDirections,
+} from "@server/classes/Plugins/ShipSystems/Shields";
+import { getShipSystems } from "@server/utils/getShipSystem";
 
 export function handleCollisionDamage(
 	entity: Entity | null,
 	force: number,
+	direction: Vector3,
 	elapsed: number,
 ) {
 	if (!entity) return;
@@ -15,16 +25,20 @@ export function handleCollisionDamage(
 	// But I've condensed it a bit.
 	const kineticEnergyInJoules = (elapsed ** 2 * force ** 2) / (2 * m);
 	// Convert the kinetic energy to gigajoules
-	applyDamage(entity, kineticEnergyInJoules / 1e9);
+	applyDamage(entity, kineticEnergyInJoules / 1e9, direction);
 }
 
-export function handleTorpedoDamage(torpedo: Entity, other: Entity) {
+export function handleTorpedoDamage(
+	torpedo: Entity,
+	other: Entity,
+	direction: Vector3,
+) {
 	const torpedoYield = torpedo.components.isTorpedo?.yield || 0;
-	// Yield is already in gigajoules
-	const damage = torpedoYield;
+	// Yield is in megawatt hours, convert to gigajoules
+	const damage = megaWattHourToGigaJoule(torpedoYield);
 
 	// TODO May 11, 2024: Apply other damage based on the damage type of the torpedo
-	applyDamage(other, damage);
+	applyDamage(other, damage, direction);
 
 	const vector3 = new Vector3();
 	const otherVector = new Vector3();
@@ -67,14 +81,24 @@ export function handleTorpedoDamage(torpedo: Entity, other: Entity) {
 	});
 }
 
-export function applyDamage(entity: Entity, damageInGigajoules: number) {
-	// TODO May 11, 2024: Apply damage to the shields first
+export function applyDamage(
+	entity: Entity,
+	damageInGigajoules: number,
+	// The vector from the ship to the impact point.
+	direction: Vector3,
+) {
+	const remainingDamage = applyShieldDamage(
+		entity,
+		damageInGigajoules,
+		direction,
+	);
 
 	// Apply damage to the hull
-	if (entity.components.hull) {
+	if (remainingDamage > 0 && entity.components.hull) {
 		entity.updateComponent("hull", {
-			hull: entity.components.hull.hull - damageInGigajoules,
+			hull: entity.components.hull.hull - remainingDamage,
 		});
+		pubsub.publish.targeting.hull({ shipId: entity.id });
 
 		if (entity.components.hull.hull <= 0) {
 			const mass = entity.components.mass?.mass || 1;
@@ -91,4 +115,56 @@ export function applyDamage(entity: Entity, damageInGigajoules: number) {
 			});
 		}
 	}
+}
+
+function applyShieldDamage(
+	entity: Entity,
+	damageInGigajoules: number,
+	// The vector from the ship to the impact point.
+	direction: Vector3,
+) {
+	const size = /*entity.components.size ||*/ { length: 1, width: 1, height: 1 };
+	const shieldDirection = getWhichShield(direction, {
+		x: size.width,
+		y: size.height,
+		z: size.length,
+	});
+	let shieldSystem: Entity | null = null;
+	for (const systemId of entity.components.shipSystems?.shipSystems.keys() ||
+		[]) {
+		const system = entity.ecs?.getEntityById(systemId);
+		if (system?.components.isShields?.direction === shieldDirection) {
+			shieldSystem = system;
+			break;
+		}
+	}
+	let remainingDamage = 0;
+	if (shieldSystem?.components.isShields) {
+		// TODO August 22, 2024: Have the shield frequency affect the damage
+		const { strength, maxStrength, deflectionEfficiencyMultiplier } =
+			shieldSystem.components.isShields;
+		let shieldStrength = strength - gigaJouleToMegaWattHour(damageInGigajoules);
+		if (shieldStrength < 0) {
+			remainingDamage = -megaWattHourToGigaJoule(shieldStrength);
+			shieldStrength = 0;
+		}
+		shieldSystem.updateComponent("isShields", {
+			strength: shieldStrength,
+		});
+
+		const efficiencyHit =
+			(1 - shieldStrength / maxStrength) * deflectionEfficiencyMultiplier;
+		if (shieldSystem.components.efficiency) {
+			shieldSystem.updateComponent("efficiency", {
+				efficiency: Math.max(
+					0,
+					shieldSystem.components.efficiency.efficiency - efficiencyHit,
+				),
+			});
+		}
+	} else {
+		remainingDamage = damageInGigajoules;
+	}
+
+	return remainingDamage;
 }

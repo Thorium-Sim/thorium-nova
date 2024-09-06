@@ -1,11 +1,12 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 export let __dirname =
 	process.env.NODE_ENV === "production"
-		? path.join(path.dirname(new URL(import.meta.url).pathname), "..")
-		: path.join(new URL(import.meta.url).pathname, "../../../..");
+		? path.join(fileURLToPath(new URL(".", import.meta.url)), "..")
+		: path.join(fileURLToPath(new URL(".", import.meta.url)), "../../..");
 
 __dirname = __dirname.replaceAll("%20", " ");
 

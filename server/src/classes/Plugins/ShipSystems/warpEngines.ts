@@ -4,7 +4,7 @@ import {
 } from "server/src/utils/unitTypes";
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
-import type { PowerNodes, ShipSystemFlags } from "./shipSystemTypes";
+import type { ShipSystemFlags } from "./shipSystemTypes";
 
 // TODO May 3, 2022: Add the necessary sound effects
 export default class WarpEnginesPlugin extends BaseShipSystemPlugin {
@@ -18,7 +18,6 @@ export default class WarpEnginesPlugin extends BaseShipSystemPlugin {
 	minSpeedMultiplier: number;
 	/** How many warp factors there are between min and max inclusive. This does not include emergency or destructive warp which are automatically extrapolated. */
 	warpFactorCount: number;
-	powerNode?: PowerNodes = "navigation";
 	constructor(params: Partial<WarpEnginesPlugin>, plugin: BasePlugin) {
 		super(params, plugin);
 		this.interstellarCruisingSpeed =

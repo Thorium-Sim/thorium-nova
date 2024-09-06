@@ -95,6 +95,7 @@ export class Coordinates<T extends number> {
 export type KiloWattHour = Flavor<number, "kilowatthour">;
 export type KiloWatt = Flavor<number, "kilowatt">;
 export type MegaWattHour = Flavor<number, "megawatthour">;
+export type GigaJoule = Flavor<number, "gigajoule">;
 export type MegaWattSecond = Flavor<number, "megawattsecond">;
 export type MegaWatt = Flavor<number, "megawatt">;
 export type GigaWattHour = Flavor<number, "gigawatthour">;
@@ -104,6 +105,14 @@ export function megaWattHourToMegaWattSecond(
 	input: MegaWattHour,
 ): MegaWattSecond {
 	return input * 60 * 60;
+}
+
+export function megaWattHourToGigaJoule(input: MegaWattHour): GigaJoule {
+	return input * 3.6;
+}
+
+export function gigaJouleToMegaWattHour(input: GigaJoule): MegaWattHour {
+	return input / 3.6;
 }
 
 export type HeatCapacity = Flavor<number, "heatcapacity">;

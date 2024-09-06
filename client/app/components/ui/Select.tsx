@@ -1,5 +1,5 @@
-import { Fragment } from "react";
-import { Listbox, Transition } from "@headlessui/react";
+import { Fragment, useId, useRef } from "react";
+import { Listbox, Portal, Transition } from "@headlessui/react";
 import { Icon } from "./Icon";
 
 function classNames(...classes: string[]) {
@@ -32,6 +32,7 @@ export default function Select<I extends string | number>({
 	const selectedItem = items.filter((item) =>
 		Array.isArray(selected) ? selected.includes(item.id) : item.id === selected,
 	);
+	const id = useId();
 	return (
 		<Listbox
 			value={selected}
@@ -49,7 +50,10 @@ export default function Select<I extends string | number>({
 					>
 						{label}
 					</Listbox.Label>
-					<div className={classNames(labelHidden ? "" : "mt-1", "relative")}>
+					<div
+						className={classNames(labelHidden ? "" : "mt-1", "relative")}
+						id={`${id}-toggle`}
+					>
 						<Listbox.Button
 							className={classNames(
 								size === "xs"
@@ -80,58 +84,62 @@ export default function Select<I extends string | number>({
 								/>
 							</span>
 						</Listbox.Button>
+						<Portal>
+							{/* @ts-expect-error */}
+							<div anchor={`${id}-toggle`}>
+								<Transition
+									show={open}
+									as={Fragment}
+									leave="transition ease-in duration-100"
+									leaveFrom="opacity-100"
+									leaveTo="opacity-0"
+								>
+									<Listbox.Options className="select-options isolate min-w-fit absolute z-10 mt-1 w-full bg-gray-900 shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-gray-400 ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+										{items.map((item) => (
+											<Listbox.Option
+												key={item.id}
+												className={({ active }) =>
+													classNames(
+														active ? "text-white bg-blue-600" : "text-gray-100",
+														"cursor-default select-none relative py-2 pl-3 pr-9 min-w-fit",
+													)
+												}
+												value={item.id}
+												title={item.label}
+											>
+												{({ selected, active }) => (
+													<>
+														<span
+															className={classNames(
+																selected ? "font-semibold" : "font-normal",
+																"block truncate",
+															)}
+														>
+															{item.label}
+														</span>
 
-						<Transition
-							show={open}
-							as={Fragment}
-							leave="transition ease-in duration-100"
-							leaveFrom="opacity-100"
-							leaveTo="opacity-0"
-						>
-							<Listbox.Options className="select-options isolate min-w-fit absolute z-10 mt-1 w-full bg-gray-900 shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-gray-400 ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-								{items.map((item) => (
-									<Listbox.Option
-										key={item.id}
-										className={({ active }) =>
-											classNames(
-												active ? "text-white bg-blue-600" : "text-gray-100",
-												"cursor-default select-none relative py-2 pl-3 pr-9 min-w-fit",
-											)
-										}
-										value={item.id}
-										title={item.label}
-									>
-										{({ selected, active }) => (
-											<>
-												<span
-													className={classNames(
-														selected ? "font-semibold" : "font-normal",
-														"block truncate",
-													)}
-												>
-													{item.label}
-												</span>
-
-												{selected ? (
-													<span
-														className={classNames(
-															active ? "text-white" : "text-blue-600",
-															"absolute inset-y-0 right-0 flex items-center pr-4",
-														)}
-													>
-														<Icon
-															name="check"
-															className="h-5 w-5"
-															aria-hidden="true"
-														/>
-													</span>
-												) : null}
-											</>
-										)}
-									</Listbox.Option>
-								))}
-							</Listbox.Options>
-						</Transition>
+														{selected ? (
+															<span
+																className={classNames(
+																	active ? "text-white" : "text-blue-600",
+																	"absolute inset-y-0 right-0 flex items-center pr-4",
+																)}
+															>
+																<Icon
+																	name="check"
+																	className="h-5 w-5"
+																	aria-hidden="true"
+																/>
+															</span>
+														) : null}
+													</>
+												)}
+											</Listbox.Option>
+										))}
+									</Listbox.Options>
+								</Transition>
+							</div>
+						</Portal>
 					</div>
 				</>
 			)}
