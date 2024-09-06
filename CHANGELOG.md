@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.15](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.14...1.0.0-alpha.15) (2024-09-06)
+
+
+### Bug Fixes
+
+* Address issues with loading the server on Windows ([8964ba7](https://github.com/Thorium-Sim/thorium-nova/commit/8964ba700a9b59a38ec6fcf7e17c0bd373a692b9))
+* Adjust the background of the Flight Director screen to show the blurred picture of the day image. ([a7a281d](https://github.com/Thorium-Sim/thorium-nova/commit/a7a281d4405bb89f3144f775f60d5651c42bc176))
+* Improve the styling and behavior of select dropdown components ([bcde46e](https://github.com/Thorium-Sim/thorium-nova/commit/bcde46ef7d2f9e89c7a568bb345b01558def75d7))
+* It is not possible to use the space bar in text fields in the Actions Core. ([8f28a34](https://github.com/Thorium-Sim/thorium-nova/commit/8f28a3442bf8001fc0c1b179482b335f0383d40f))
+
+
+### Features
+
+* Add shields system. ([32ad64d](https://github.com/Thorium-Sim/thorium-nova/commit/32ad64d536133b8647e18edfd7364d0424c02f60))
+* Mission Objectives card and core ([c42af97](https://github.com/Thorium-Sim/thorium-nova/commit/c42af9730c6f884f3ae5dc7efec79a029ea72602))
+* Replace the Power Grid card with simpler Systems Monitor card ([f8e6623](https://github.com/Thorium-Sim/thorium-nova/commit/f8e6623b86aabcf22f71eee92bf9317891075d65))
+
 # [1.0.0-alpha.14](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.13...1.0.0-alpha.14) (2024-07-25)
 
 
