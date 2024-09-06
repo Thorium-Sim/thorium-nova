@@ -120,7 +120,7 @@ export const inventory = t.router({
 			if (input.name !== inventory.name && input.name) {
 				await inventory?.rename(input.name);
 			}
-			await fs.mkdir(path.join(thoriumPath, inventory.assetPath), {
+			await fs.mkdir(path.join(".", thoriumPath, inventory.assetPath), {
 				recursive: true,
 			});
 			if (typeof input.image === "string") {

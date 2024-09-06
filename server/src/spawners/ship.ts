@@ -81,7 +81,9 @@ export async function spawnShip(
 	entity.addComponent("rotationVelocity");
 
 	const size = await getMeshSize(
-		path.join(thoriumPath, template.assets!.model),
+		template.assets?.model
+			? path.join(".", thoriumPath, template.assets!.model)
+			: null,
 	);
 	size.multiplyScalar(template.length || 1);
 	entity.addComponent("size", {
@@ -364,7 +366,8 @@ export async function spawnShip(
 	return { ship: entity, extraEntities: systemEntities.concat(extraEntities) };
 }
 
-async function getMeshSize(url: string): Promise<Vector3> {
+async function getMeshSize(url: string | null): Promise<Vector3> {
+	if (!url) return new Vector3(1, 1, 1);
 	const gltf = await loadGltf(url);
 	if (!gltf) return new Vector3();
 	const box = new Box3().setFromObject(gltf.scene.children[0]);
