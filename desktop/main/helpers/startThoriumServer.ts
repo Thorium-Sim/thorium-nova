@@ -4,6 +4,7 @@ import { fork, type ChildProcess } from "node:child_process";
 import { hostSecret } from "../hostSecret";
 import waitOn from "wait-on";
 import { port } from "./settings";
+import { ipAddress } from "@thorium/ipAddress";
 
 let child: ChildProcess | null = null;
 export async function startThoriumServer() {
@@ -39,7 +40,7 @@ export async function startThoriumServer() {
 	});
 
 	await waitOn({
-		resources: [`http://0.0.0.0:${port}/healthcheck`],
+		resources: [`http://${ipAddress}:${port}/healthcheck`],
 	});
 }
 
@@ -54,7 +55,7 @@ app.on("before-quit", async (event) => {
 export async function stopThoriumServer() {
 	if (child) {
 		await Promise.race([
-			fetch(`http://0.0.0.0:${port}/snapshot`, { method: "POST" }),
+			fetch(`http://${ipAddress}:${port}/snapshot`, { method: "POST" }),
 			new Promise((res) => setTimeout(res, 5000)),
 		]);
 		child.kill();

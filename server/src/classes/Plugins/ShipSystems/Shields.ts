@@ -42,7 +42,6 @@ export function getWhichShield(
 	if (max === Math.abs(z) && z < 0) return "aft";
 	if (max === Math.abs(y) && y > 0) return "ventral";
 	if (max === Math.abs(y) && y < 0) return "dorsal";
-	console.log("No shield direction found");
 	// Default to fore in the very unlikely event that the direction is 0,0,0
 	return "fore";
 }
