@@ -163,7 +163,7 @@ describe("PowerDistributionSystem", () => {
 		expect(system3.components.power?.currentPower).toEqual(3);
 		expect(system4.components.power?.currentPower).toEqual(3);
 	});
-	it.only("should properly charge and discharge batteries", () => {
+	it("should properly charge and discharge batteries", () => {
 		const reactor = new Entity();
 		reactor.addComponent("isShipSystem", { type: "reactor" });
 		reactor.addComponent("isReactor", {
