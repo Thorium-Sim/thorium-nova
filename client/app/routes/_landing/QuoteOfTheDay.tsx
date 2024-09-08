@@ -334,6 +334,9 @@ const quotes = [
 	"And as I looked up at the sky, I thought 'I can't believe we always sleep through this.",
 	// Swedish Proverb
 	"Shared joy is double joy; Shared sorrow is half a sorrow.",
+ // Walt Whitman
+ "I am large. I contain multitudes",
+ "The past and present wilt—I have fill'd them, emptied them. And proceed to fill my next fold of the future.",
 ];
 
 const QuoteOfTheDay = () => {
