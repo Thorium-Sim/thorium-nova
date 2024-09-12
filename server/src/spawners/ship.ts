@@ -16,6 +16,9 @@ import { loadGltf } from "@server/utils/loadGltf";
 import { thoriumPath } from "@server/utils/appPaths";
 import { capitalCase } from "change-case";
 import path from "node:path";
+import { mergeDeep } from "@server/utils/mergeDeep";
+import type PhasersPlugin from "@server/classes/Plugins/ShipSystems/Phasers";
+import { phasers } from "@client/data/plugins/systems/phasers";
 
 const systemCache: Record<string, BaseShipSystemPlugin> = {};
 function getSystem(
@@ -82,7 +85,11 @@ export async function spawnShip(
 
 	const size = await getMeshSize(
 		template.assets?.model
-			? path.join(".", thoriumPath, template.assets!.model)
+			? path.join(
+					thoriumPath.startsWith("/") ? "" : ".",
+					thoriumPath,
+					template.assets!.model,
+			  )
 			: null,
 	);
 	size.multiplyScalar(template.length || 1);
@@ -98,7 +105,7 @@ export async function spawnShip(
 	entity.addComponent("nearbyObjects", { objects: new Map() });
 
 	const systemEntities: Entity[] = [];
-
+	let phaseCapacitorCount = 0;
 	template.shipSystems?.forEach((system) => {
 		const systemPlugin = getSystem(
 			dataContext,
@@ -155,6 +162,34 @@ export async function spawnShip(
 					}
 					systemEntities.push(entity);
 				}
+				break;
+			}
+			case "phasers": {
+				phaseCapacitorCount += 1;
+				const phaser = spawnShipSystem(shipId, systemPlugin, system.overrides);
+				systemEntities.push(phaser);
+
+				if (params.playerShip) {
+					const capacitor = spawnShipSystem(shipId, { type: "battery" }, {});
+					capacitor.updateComponent("identity", {
+						name: `Phase Capacitor ${phaseCapacitorCount}`,
+					});
+					capacitor.addComponent("isPhaseCapacitor");
+					capacitor.updateComponent("isBattery", {
+						storage: 0,
+						// TODO: Make this configurable
+						capacity: 1,
+						outputRate: phaser.components.power?.defaultPower || 1,
+						chargeRate: phaser.components.power?.requiredPower || 1,
+					});
+					systemEntities.push(capacitor);
+					phaser.updateComponent("power", {
+						powerSources: Array.from({
+							length: phaser.components.power?.defaultPower || 0,
+						}).map(() => capacitor.id),
+					});
+				}
+
 				break;
 			}
 			default: {
@@ -217,6 +252,11 @@ export async function spawnShip(
 						e.components.isReactor &&
 						getPowerSupplierPowerNeeded(e) < e.components.isReactor.maxOutput,
 				);
+				// Don't fill up phase capacitors, since that basically equates to
+				// having the phasers charged immediately
+				if (entity.components.isPhaseCapacitor) {
+					return;
+				}
 				const reactor = randomFromList(reactors);
 				if (!reactor) return;
 				entity.updateComponent("isBattery", {
@@ -227,6 +267,10 @@ export async function spawnShip(
 				});
 			}
 			if (entity.components.power) {
+				if (entity.components.isPhasers) {
+					// Phasers are powered by phase capacitors, skip
+					return;
+				}
 				for (let i = 0; i < entity.components.power.defaultPower; i++) {
 					const reactors = systemEntities.filter(
 						(e) =>

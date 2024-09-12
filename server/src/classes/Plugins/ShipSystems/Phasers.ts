@@ -13,6 +13,7 @@ export default class PhasersPlugin extends BaseShipSystemPlugin {
 	headingDegree: number;
 	pitchDegree: number;
 
+	fullChargeYield: number;
 	yieldMultiplier: number;
 
 	constructor(params: Partial<PhasersPlugin>, plugin: BasePlugin) {
@@ -22,6 +23,8 @@ export default class PhasersPlugin extends BaseShipSystemPlugin {
 		this.maxArc = params.maxArc ?? 90;
 		this.headingDegree = params.headingDegree ?? 0;
 		this.pitchDegree = params.pitchDegree ?? 0;
+
+		this.fullChargeYield = params.fullChargeYield ?? 1;
 
 		this.yieldMultiplier = params.yieldMultiplier ?? 1;
 	}

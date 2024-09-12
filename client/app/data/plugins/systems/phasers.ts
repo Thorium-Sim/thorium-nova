@@ -31,6 +31,7 @@ export const phasers = t.router({
 				shipId: z.string().optional(),
 				maxRange: z.number().optional(),
 				maxArc: z.number().optional(),
+				fullChargeYield: z.number().optional(),
 				yieldMultiplier: z.number().optional(),
 				headingDegree: z.number().optional(),
 				pitchDegree: z.number().optional(),
@@ -46,6 +47,9 @@ export const phasers = t.router({
 			}
 			if (typeof input.maxArc === "number") {
 				shipSystem.maxArc = input.maxArc;
+			}
+			if (typeof input.fullChargeYield === "number") {
+				shipSystem.fullChargeYield = input.fullChargeYield;
 			}
 			if (typeof input.yieldMultiplier === "number") {
 				shipSystem.yieldMultiplier = input.yieldMultiplier;

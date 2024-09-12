@@ -113,10 +113,50 @@ export default function PhasersConfig() {
 							labelHidden={false}
 							inputMode="numeric"
 							pattern="[0-9]*"
+							label="Full Charge Yield"
+							placeholder={"0.75"}
+							helperText={
+								"Damage delivered when fully charged phasers are unloaded in MWh. Determined the capacity of the phase capacitors, which affects charge time."
+							}
+							defaultValue={system.fullChargeYield}
+							onBlur={async (e) => {
+								if (!e.target.value || Number.isNaN(Number(e.target.value)))
+									return;
+								try {
+									await q.plugin.systems.phasers.update.netSend({
+										pluginId,
+										systemId: systemId,
+										shipId,
+										shipPluginId,
+										fullChargeYield: Number(e.target.value),
+									});
+								} catch (err) {
+									if (err instanceof Error) {
+										toast({
+											title: "Error changing full charge yield",
+											body: err.message,
+											color: "error",
+										});
+									}
+								}
+							}}
+						/>
+						<OverrideResetButton
+							property="fullChargeYield"
+							setRekey={setRekey}
+							className="mt-6"
+						/>
+					</div>
+
+					<div className="pb-2 flex">
+						<Input
+							labelHidden={false}
+							inputMode="numeric"
+							pattern="[0-9]*"
 							label="Yield Multiplier"
 							placeholder={"1"}
 							helperText={
-								"Multiplies the power output from the phasers to determine the damage dealt."
+								"Multiplies the power output from the phasers to determine the actual damage dealt."
 							}
 							defaultValue={system.yieldMultiplier}
 							onBlur={async (e) => {
