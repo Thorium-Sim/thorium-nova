@@ -167,9 +167,15 @@ export async function spawnShip(
 			case "phasers": {
 				phaseCapacitorCount += 1;
 				const phaser = spawnShipSystem(shipId, systemPlugin, system.overrides);
+
 				systemEntities.push(phaser);
 
 				if (params.playerShip) {
+					const template = mergeDeep(
+						systemPlugin,
+						system.overrides || {},
+					) as PhasersPlugin;
+
 					const capacitor = spawnShipSystem(shipId, { type: "battery" }, {});
 					capacitor.updateComponent("identity", {
 						name: `Phase Capacitor ${phaseCapacitorCount}`,
@@ -177,8 +183,7 @@ export async function spawnShip(
 					capacitor.addComponent("isPhaseCapacitor");
 					capacitor.updateComponent("isBattery", {
 						storage: 0,
-						// TODO: Make this configurable
-						capacity: 1,
+						capacity: template.fullChargeYield,
 						outputRate: phaser.components.power?.defaultPower || 1,
 						chargeRate: phaser.components.power?.requiredPower || 1,
 					});

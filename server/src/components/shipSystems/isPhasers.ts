@@ -26,5 +26,9 @@ export const isPhasers = z
 		 * using space magic to make the phasers stronger or weaker
 		 */
 		yieldMultiplier: z.number().default(1),
+		/**
+		 * What percent the phasers are currently firing at
+		 */
+		firePercent: z.number().default(0),
 	})
 	.default({});

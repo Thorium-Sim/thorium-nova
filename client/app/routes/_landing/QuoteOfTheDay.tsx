@@ -339,6 +339,8 @@ const quotes = [
 	"The past and present wilt—I have fill'd them, emptied them. And proceed to fill my next fold of the future.",
 	// Buddhist Proverb
 	"With our thoughts we create the world.",
+	// The Alchemist
+	"Every moment will soon be a memory.",
 ];
 
 const QuoteOfTheDay = () => {
