@@ -144,6 +144,11 @@ export const systemsMonitor = t.router({
 				pubsub.publish.systemsMonitor.systems.get({ shipId });
 				pubsub.publish.systemsMonitor.reactors.get({ shipId });
 				pubsub.publish.systemsMonitor.batteries.get({ shipId });
+
+				if (system.components.isPhasers) {
+					// Update the output megawatts of the phasers
+					pubsub.publish.targeting.phasers.list({ shipId });
+				}
 			}),
 		addPowerSource: t.procedure
 			.input(
@@ -163,6 +168,16 @@ export const systemsMonitor = t.router({
 					throw new Error(
 						"Invalid power source. Power source must be a reactor or battery.",
 					);
+
+				if (
+					system.components.isPhasers &&
+					!powerSource.components.isPhaseCapacitor
+				) {
+					throw new Error(
+						"Invalid power source. Power source must be a phase capacitor.",
+					);
+				}
+
 				const powerSupplied = getPowerSupplierPowerNeeded(powerSource);
 
 				if (
@@ -200,6 +215,11 @@ export const systemsMonitor = t.router({
 				pubsub.publish.systemsMonitor.systems.get({ shipId });
 				pubsub.publish.systemsMonitor.reactors.get({ shipId });
 				pubsub.publish.systemsMonitor.batteries.get({ shipId });
+
+				if (system.components.isPhasers) {
+					// Update the output megawatts of the phasers
+					pubsub.publish.targeting.phasers.list({ shipId });
+				}
 			}),
 	}),
 	stream: t.procedure.dataStream(({ ctx, entity }) => {

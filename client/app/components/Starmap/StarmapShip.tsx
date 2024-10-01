@@ -10,6 +10,7 @@ import {
 	type MeshStandardMaterial,
 	Object3D,
 	type Sprite,
+	Vector3,
 } from "three";
 import { useFrame } from "@react-three/fiber";
 import { createAsset } from "use-asset";
@@ -53,7 +54,6 @@ export function StarmapShip({
 	);
 	const isCore = useStarmapStore((store) => store.viewingMode === "core");
 	const sensorsHidden = useStarmapStore((store) => store.sensorsHidden);
-
 	const group = useRef<Group>(null);
 	const shipMesh = useRef<Group>(null);
 	const shipSprite = useRef<Group>(null);

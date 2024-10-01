@@ -18,7 +18,6 @@ import { capitalCase } from "change-case";
 import path from "node:path";
 import { mergeDeep } from "@server/utils/mergeDeep";
 import type PhasersPlugin from "@server/classes/Plugins/ShipSystems/Phasers";
-import { phasers } from "@client/data/plugins/systems/phasers";
 
 const systemCache: Record<string, BaseShipSystemPlugin> = {};
 function getSystem(

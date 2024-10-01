@@ -116,7 +116,7 @@ export default function PhasersConfig() {
 							label="Full Charge Yield"
 							placeholder={"0.75"}
 							helperText={
-								"Damage delivered when fully charged phasers are unloaded in MWh. Determined the capacity of the phase capacitors, which affects charge time."
+								"Damage delivered when fully charged phasers are unloaded in MWh. Determines the capacity of the phase capacitors, which affects charge time."
 							}
 							defaultValue={system.fullChargeYield}
 							onBlur={async (e) => {

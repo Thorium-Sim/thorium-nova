@@ -96,6 +96,7 @@ export class PowerDrawSystem extends System {
 				powerDraw =
 					power.powerSources.length *
 					(entity.components.isPhasers?.firePercent || 0);
+
 				break;
 			}
 
@@ -106,9 +107,8 @@ export class PowerDrawSystem extends System {
 				return;
 		}
 
-		// Limit the power draw to the requested power, so we never go over it.
 		entity.updateComponent("power", {
-			powerDraw: Math.min(requestedPower, powerDraw * efficiencyMultiple),
+			powerDraw: powerDraw * efficiencyMultiple,
 		});
 	}
 }

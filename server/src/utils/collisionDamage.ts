@@ -5,11 +5,7 @@ import {
 	gigaJouleToMegaWattHour,
 	megaWattHourToGigaJoule,
 } from "@server/utils/unitTypes";
-import {
-	getWhichShield,
-	ShieldDirections,
-} from "@server/classes/Plugins/ShipSystems/Shields";
-import { getShipSystems } from "@server/utils/getShipSystem";
+import { getWhichShield } from "@server/classes/Plugins/ShipSystems/Shields";
 
 export function handleCollisionDamage(
 	entity: Entity | null,
@@ -99,7 +95,6 @@ export function applyDamage(
 			hull: entity.components.hull.hull - remainingDamage,
 		});
 		pubsub.publish.targeting.hull({ shipId: entity.id });
-
 		if (entity.components.hull.hull <= 0) {
 			const mass = entity.components.mass?.mass || 1;
 			const explosion =

@@ -235,6 +235,16 @@ kbd {
       @apply ring-2 ring-notice;
     }
   }
+  &-disabled {
+    @apply bg-neutral border-neutral text-neutral-content;
+    &:hover,
+    &-active {
+      @apply bg-neutral-focus border-neutral-focus;
+    }
+    &:focus-visible {
+      @apply ring-2 ring-neutral;
+    }
+  }
 
   /* glass */
   &.glass {
