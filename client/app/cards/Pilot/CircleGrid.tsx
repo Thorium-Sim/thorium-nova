@@ -47,7 +47,14 @@ const CameraEffects = () => {
 
 export function CircleGrid({
 	children,
-}: { children: ReactNode; rangeMin?: number; rangeMax?: number }) {
+	/** Children that are fixed with the ship */
+	fixedChildren,
+}: {
+	children: ReactNode;
+	fixedChildren?: ReactNode;
+	rangeMin?: number;
+	rangeMax?: number;
+}) {
 	const store = useCircleGridStore();
 
 	const tilt = store((store) => store.tilt);
@@ -108,6 +115,7 @@ export function CircleGrid({
 					))}
 
 				<PlayerArrow />
+				{fixedChildren}
 			</group>
 			<Suspense fallback={null}>{children}</Suspense>
 		</group>
@@ -157,7 +165,6 @@ export function GridCanvas({
 				camera={{
 					// position: [0, 300000, 0],
 					far: 200000,
-					zoom: 165,
 				}}
 				className="rounded-full"
 				orthographic

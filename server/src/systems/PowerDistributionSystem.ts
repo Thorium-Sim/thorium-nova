@@ -40,14 +40,27 @@ export class PowerDistributionSystem extends System {
 			const { powerDraw, powerSources } = power;
 			let suppliedPower = 0;
 			for (let i = 0; i < powerDraw; i++) {
+				let powerSupply = 1;
 				const source = powerSources[i];
 				if (typeof source === "number") {
 					const sourceEntity = this.ecs.getEntityById(source);
+					// Phasers can only get power from phase capacitors
+					if (
+						system.components.isPhasers &&
+						!sourceEntity?.components.isPhaseCapacitor
+					)
+						continue;
+					if (system.components.isPhasers) {
+						powerSupply = system.components.isPhasers.yieldMultiplier;
+					}
+
+					// If the battery is empty, don't supply power
 					if (sourceEntity?.components.isBattery?.storage === 0) continue;
-					suppliedPower++;
+
+					suppliedPower += powerSupply;
 					powerSuppliedSources.set(
 						source,
-						(powerSuppliedSources.get(source) || 0) + 1,
+						(powerSuppliedSources.get(source) || 0) + powerSupply,
 					);
 				}
 			}

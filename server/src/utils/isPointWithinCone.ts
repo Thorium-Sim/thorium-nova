@@ -28,6 +28,5 @@ export function isPointWithinCone(
 	const pointDistance = apexToPoint.dot(axis);
 	const isInFrontOfAxis = pointDistance >= 0;
 	const withinRange = pointDistance <= cone.direction.length();
-
 	return isInFrontOfAxis && withinRange;
 }

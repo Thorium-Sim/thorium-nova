@@ -43,7 +43,7 @@ export class TorpedoLoadingSystem extends System {
 					progress,
 					...(status === "ready" ? { torpedoEntity: null } : {}),
 				});
-				pubsub.publish.targeting.torpedoLaunchers({
+				pubsub.publish.targeting.torpedoes.launchers({
 					shipId: entity.components.isShipSystem?.shipId || 0,
 				});
 			} else {
