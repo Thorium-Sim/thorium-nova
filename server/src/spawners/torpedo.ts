@@ -1,5 +1,4 @@
 import { Entity } from "@server/utils/ecs";
-import { getShipSystem } from "@server/utils/getShipSystem";
 import { Euler, Quaternion, Vector3 } from "three";
 
 const positionVector = new Vector3();

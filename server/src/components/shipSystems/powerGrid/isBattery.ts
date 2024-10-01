@@ -34,11 +34,6 @@ export const isBattery = z
 		 */
 		outputAmount: z.number().default(0),
 		/**
-		 * Capacitors only discharge when toggled on. This is where that
-		 * toggling happens. Normal batteries won't ever adjust this.
-		 */
-		discharging: z.boolean().default(true),
-		/**
 		 * Which reactor each unit of power is coming from. One unit = 1MW
 		 */
 		powerSources: z.number().array().default([]),
