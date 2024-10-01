@@ -42,7 +42,6 @@ export class PhasersSystem extends System {
 		if (!target) return;
 		// Calculate the vector between the target and the ship
 		const vectorBetween = getVectorBetweenTargetAndShip(entity, target);
-		console.log(phaserDamage);
 		applyDamage(target, megaWattHourToGigaJoule(phaserDamage), vectorBetween);
 	}
 }
