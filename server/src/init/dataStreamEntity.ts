@@ -27,17 +27,8 @@ export function dataStreamEntity(e: Entity) {
 		};
 	}
 	if (e.components.isImpulseEngines) {
-		let { targetSpeed, cruisingSpeed } = e.components.isImpulseEngines;
-		if (e.components.power) {
-			const { currentPower, maxSafePower, requiredPower } =
-				e.components.power || {};
+		const { targetSpeed } = e.components.isImpulseEngines;
 
-			targetSpeed = Math.max(
-				0,
-				cruisingSpeed *
-					((currentPower - requiredPower) / (maxSafePower - requiredPower)),
-			);
-		}
 		return {
 			id: e.id.toString(),
 			x: targetSpeed,

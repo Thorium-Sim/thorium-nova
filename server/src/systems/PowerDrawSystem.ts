@@ -48,7 +48,9 @@ export class PowerDrawSystem extends System {
 					break;
 				}
 				if (targetSpeed === 0) break;
-				const impulseEngineUse = targetSpeed / cruisingSpeed;
+				// We divide the target speed in four, but we can't go below 1/4th
+				// So we scale it where 0.25 is 0, and 1 is 1
+				const impulseEngineUse = (targetSpeed / cruisingSpeed - 0.25) * (4 / 3);
 				powerDraw =
 					(maxSafePower - requiredPower) * impulseEngineUse + requiredPower;
 
