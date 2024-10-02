@@ -53,7 +53,7 @@ export class PhysicsMovementSystem extends System {
 		const worldEntity = getEntityWorld(this.ecs, entity);
 		const world = worldEntity?.components.physicsWorld?.world as World;
 		const handles = entity.components.physicsHandles?.handles || new Map();
-		handles.set("blah", entity.id);
+
 		// Nab some systems to use elsewhere.
 		const systems: Entity[] = [];
 		entity.components.shipSystems?.shipSystems.forEach((shipSystem, id) => {
@@ -157,7 +157,9 @@ export class PhysicsMovementSystem extends System {
 				 * Impulse Engines
 				 */
 				body.applyImpulse(
-					tempObj.localToWorld(tempVector.set(0, 0, forwardImpulse)),
+					// I don't know why, but for some reason the impulse needs to be doubled
+					// to reach the expected speed.
+					tempObj.localToWorld(tempVector.set(0, 0, forwardImpulse * 2)),
 					true,
 				);
 
