@@ -1,7 +1,7 @@
 import { Euler, Object3D, Quaternion, Vector3 } from "three";
 import { type Entity, System } from "../utils/ecs";
 import { RAPIER, getWorldPosition } from "../init/rapier";
-import { M_TO_KM } from "@server/utils/unitTypes";
+import { KM_TO_LM, M_TO_KM } from "@server/utils/unitTypes";
 import {
 	generateRigidBody,
 	getEntityWorld,
@@ -78,6 +78,8 @@ export class PhysicsMovementSystem extends System {
 		const isHighSpeed =
 			(warpEngines?.components.isWarpEngines?.forwardVelocity || 0) >
 			(warpEngines?.components.isWarpEngines?.solarCruisingSpeed || 0) / 2;
+		const isInterstellarSpace =
+			entity.components.position?.type === "interstellar";
 
 		if (entity.components.rotation) {
 			const { x, y, z, w } = entity.components.rotation;
@@ -142,15 +144,16 @@ export class PhysicsMovementSystem extends System {
 							warpEngines.components.isWarpEngines.forwardVelocity,
 						),
 					);
-					const linvel = body.linvel();
-					body.setLinvel(
-						{
-							x: warpVelocity.x + linvel.x,
-							y: warpVelocity.y + linvel.y,
-							z: warpVelocity.z + linvel.z,
-						},
-						true,
-					);
+					if (warpVelocity.lengthSq() > 0) {
+						body.setLinvel(
+							{
+								x: warpVelocity.x,
+								y: warpVelocity.y,
+								z: warpVelocity.z,
+							},
+							true,
+						);
+					}
 				}
 
 				/**
@@ -270,6 +273,12 @@ export class PhysicsMovementSystem extends System {
 						tempVector.divideScalar(mass).multiplyScalar(elapsedRatio),
 					);
 				}
+			}
+			/**
+			 * Translate velocity to LightMinutes if we're in interstellar space
+			 */
+			if (isInterstellarSpace) {
+				velocityVector.multiplyScalar(KM_TO_LM);
 			}
 			/**
 			 * Apply the velocity to the position
