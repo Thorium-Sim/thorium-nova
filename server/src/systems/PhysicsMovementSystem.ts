@@ -375,6 +375,21 @@ export class PhysicsMovementSystem extends System {
 				const entity1 = this.ecs.getEntityById(entityId1);
 				const entity2 = this.ecs.getEntityById(entityId2);
 
+				// Special handling to ignore torpedoes their own ships
+				if (entity1?.components.isTorpedo || entity2?.components.isTorpedo) {
+					const entity = entity1?.components.isTorpedo ? entity1 : entity2;
+					const otherEntity = entity1?.components.isTorpedo ? entity2 : entity1;
+					const launcher = this.ecs.getEntityById(
+						entity?.components.isTorpedo?.launcherId || -1,
+					);
+					const ship = this.ecs.getEntityById(
+						launcher?.components.isShipSystem?.shipId || -1,
+					);
+					if (ship?.id !== undefined && ship.id === otherEntity?.id) {
+						event.free();
+						return;
+					}
+				}
 				// This is the vector from entity1 to entity2,
 				const direction = new Vector3(
 					body1?.translation().x,
