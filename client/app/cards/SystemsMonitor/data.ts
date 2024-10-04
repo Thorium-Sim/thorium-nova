@@ -1,7 +1,6 @@
 import { pubsub } from "@server/init/pubsub";
 import { t } from "@server/init/t";
 import { getPowerSupplierPowerNeeded } from "@server/systems/ReactorFuelSystem";
-import type { Entity } from "@server/utils/ecs";
 import { getShipSystems } from "@server/utils/getShipSystem";
 import { getReactorInventory } from "@server/utils/getSystemInventory";
 import type { MegaWattHour } from "@server/utils/unitTypes";
