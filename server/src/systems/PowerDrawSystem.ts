@@ -89,6 +89,20 @@ export class PowerDrawSystem extends System {
 				}
 				break;
 			}
+			case "torpedoLauncher": {
+				if (!entity.components.isTorpedoLauncher) return;
+				const { status } = entity.components.isTorpedoLauncher;
+				if (
+					status === "loading" ||
+					status === "loaded" ||
+					status === "firing"
+				) {
+					powerDraw = requestedPower;
+				} else {
+					powerDraw = 0;
+				}
+				break;
+			}
 			case "phasers": {
 				// Only draw power if the current target is in range
 				if (!getTargetIsInPhaserRange(entity)) {

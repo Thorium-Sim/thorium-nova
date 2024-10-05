@@ -11,6 +11,7 @@ import {
 	getCurrentTarget,
 	getTargetIsInPhaserRange,
 } from "@server/systems/PhasersSystem";
+import { LiveQueryError } from "@thorium/live-query/client/client";
 
 export const targeting = t.router({
 	targetedContact: t.procedure
@@ -186,7 +187,15 @@ export const targeting = t.router({
 				if (launcher.components.isTorpedoLauncher.status !== "loaded") {
 					throw new Error("Torpedo launcher is not loaded");
 				}
-
+				const power = launcher.components.power;
+				const currentPower = power?.currentPower || 1;
+				const requiredPower = power?.requiredPower || 0;
+				const maxSafePower = power?.maxSafePower || 1;
+				// It takes longer to reload based on the efficiency of the torpedo launcher
+				// It will take min 1x and max 20x longer to fire a torpedo, depending on power
+				if (requiredPower > currentPower) {
+					throw new Error("Insufficient Power");
+				}
 				const inventoryTemplate = ctx.flight?.ecs.getEntityById(
 					launcher.components.isTorpedoLauncher.torpedoEntity!,
 				);
@@ -195,9 +204,20 @@ export const targeting = t.router({
 				const torpedo = spawnTorpedo(launcher);
 				launcher.ecs?.addEntity(torpedo);
 
+				const powerMultiplier =
+					1 /
+					Math.min(
+						1,
+						Math.max(
+							0.05,
+							(currentPower - requiredPower) / (maxSafePower - requiredPower),
+						),
+					);
+
 				launcher.updateComponent("isTorpedoLauncher", {
 					status: "firing",
-					progress: launcher.components.isTorpedoLauncher.fireTime,
+					progress:
+						launcher.components.isTorpedoLauncher.fireTime * powerMultiplier,
 				});
 				pubsub.publish.targeting.torpedoes.launchers({
 					shipId: ctx.ship!.id,
