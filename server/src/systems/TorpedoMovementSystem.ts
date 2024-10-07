@@ -6,8 +6,8 @@ import { Vector3 } from "three";
 const positionVector = new Vector3();
 const targetPositionVector = new Vector3();
 const velocityVector = new Vector3();
+const newVelocityVector = new Vector3();
 const targetVelocityVector = new Vector3();
-
 export class TorpedoMovementSystem extends System {
 	test(entity: Entity) {
 		return !!entity.components.isTorpedo;
@@ -55,7 +55,9 @@ export class TorpedoMovementSystem extends System {
 			.sub(velocityVector)
 			.normalize()
 			.multiplyScalar(((maxForce * 1000) / mass) * deltaInSeconds);
-		velocityVector.add(steering);
+		newVelocityVector.addVectors(velocityVector, steering);
+		// Smooth out the velocity change just a little bit.
+		velocityVector.lerp(newVelocityVector, 0.1);
 
 		entity.updateComponent("velocity", {
 			x: velocityVector.x,
