@@ -93,9 +93,9 @@ export async function spawnShip(
 	);
 	size.multiplyScalar(template.length || 1);
 	entity.addComponent("size", {
-		length: size.z,
-		width: size.x,
-		height: size.y,
+		length: size.x,
+		width: size.y,
+		height: size.z,
 	});
 
 	entity.addComponent("mass", { mass: template.mass });
@@ -420,5 +420,10 @@ async function getMeshSize(url: string | null): Promise<Vector3> {
 	if (!gltf) return new Vector3();
 	const box = new Box3().setFromObject(gltf.scene.children[0]);
 
-	return box.getSize(new Vector3());
+	const vector = box.getSize(new Vector3()).normalize();
+	const { x } = vector;
+	// Rearrange the vector to match the orientation of the ship
+	vector.normalize().multiplyScalar(1 / x);
+
+	return vector;
 }

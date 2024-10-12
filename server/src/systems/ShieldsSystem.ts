@@ -9,10 +9,11 @@ export class ShieldsSystem extends System {
 		const elapsedTimeHours = elapsed / 1000 / 60 / 60;
 
 		if (entity.components.power && entity.components.isShields) {
-			const { currentPower } = entity.components.power;
+			const { currentPower, requiredPower } = entity.components.power;
 			const { state, maxStrength, strength } = entity.components.isShields;
+			// Some space magic to make the shields more powerful.
 			let strengthToRecharge = currentPower * elapsedTimeHours * 10;
-			if (state === "down") {
+			if (state === "down" || currentPower < requiredPower) {
 				// Quickly drain shields when they are down
 				strengthToRecharge = (-maxStrength / SHIELD_DISCHARGE_TIME) * elapsed;
 			}
