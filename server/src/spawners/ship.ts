@@ -122,6 +122,7 @@ export async function spawnShip(
 					const entity = spawnShipSystem(
 						shipId,
 						systemPlugin,
+						params.playerShip,
 						system.overrides,
 					);
 					if (entity.components.isBattery) {
@@ -148,10 +149,15 @@ export async function spawnShip(
 					("shieldCount" in systemPlugin && systemPlugin.shieldCount) ||
 					1;
 				for (let i = 0; i < shieldCount; i++) {
-					const entity = spawnShipSystem(shipId, systemPlugin, {
-						...system.overrides,
-						direction: shieldDirections[i],
-					});
+					const entity = spawnShipSystem(
+						shipId,
+						systemPlugin,
+						params.playerShip,
+						{
+							...system.overrides,
+							direction: shieldDirections[i],
+						},
+					);
 					if (shieldCount > 1) {
 						entity.updateComponent("identity", {
 							name: `${capitalCase(shieldDirections[i])} ${
@@ -165,7 +171,12 @@ export async function spawnShip(
 			}
 			case "phasers": {
 				phaseCapacitorCount += 1;
-				const phaser = spawnShipSystem(shipId, systemPlugin, system.overrides);
+				const phaser = spawnShipSystem(
+					shipId,
+					systemPlugin,
+					params.playerShip,
+					system.overrides,
+				);
 
 				systemEntities.push(phaser);
 
@@ -175,7 +186,12 @@ export async function spawnShip(
 						system.overrides || {},
 					) as PhasersPlugin;
 
-					const capacitor = spawnShipSystem(shipId, { type: "battery" }, {});
+					const capacitor = spawnShipSystem(
+						shipId,
+						{ type: "battery" },
+						params.playerShip,
+						{},
+					);
 					capacitor.updateComponent("identity", {
 						name: `Phase Capacitor ${phaseCapacitorCount}`,
 					});
@@ -198,7 +214,12 @@ export async function spawnShip(
 			}
 			default: {
 				// TODO: Set up power from reactors and batteries
-				const entity = spawnShipSystem(shipId, systemPlugin, system.overrides);
+				const entity = spawnShipSystem(
+					shipId,
+					systemPlugin,
+					params.playerShip,
+					system.overrides,
+				);
 				systemEntities.push(entity);
 				break;
 			}
@@ -236,7 +257,12 @@ export async function spawnShip(
 			);
 			if (systemPlugin instanceof ReactorPlugin) {
 				Array.from({ length: systemPlugin.reactorCount }).forEach(() => {
-					const sys = spawnShipSystem(shipId, systemPlugin, system.overrides);
+					const sys = spawnShipSystem(
+						shipId,
+						systemPlugin,
+						params.playerShip,
+						system.overrides,
+					);
 					const maxOutput = reactorPower * systemPlugin.powerMultiplier;
 					sys.updateComponent("isReactor", {
 						maxOutput,

@@ -155,7 +155,7 @@ export function generateRigidBody(
 			const worldPosition = getWorldPosition(tempVector);
 			universeToWorld(tempVector, worldPosition);
 
-			const torpedoRadius = 0.002;
+			const torpedoRadius = 0.02;
 			const torpedoMass = entity.components.mass?.mass || 1500;
 
 			const bodyDesc = new RAPIER.RigidBodyDesc(

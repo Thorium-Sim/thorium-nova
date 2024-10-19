@@ -7,6 +7,7 @@ import { mergeDeep } from "../utils/mergeDeep";
 export function spawnShipSystem(
 	shipId: number,
 	systemPlugin: Partial<BaseShipSystemPlugin>,
+	isPlayerShip?: boolean,
 	overrides: Record<string, any> = {},
 ) {
 	const entity = new Entity();
@@ -41,23 +42,25 @@ export function spawnShipSystem(
 			defaultPower,
 			maxSafePower,
 		} = systemPlugin;
-		if (flags.includes("heat"))
-			entity.addComponent("heat", {
-				powerToHeat: overrides.powerToHeat || powerToHeat,
-				heatDissipationRate:
-					overrides.heatDissipationRate || heatDissipationRate,
-				maxHeat: overrides.maxHeat || maxHeat,
-				maxSafeHeat: overrides.maxSafeHeat || maxSafeHeat,
-				nominalHeat: overrides.nominalHeat || nominalHeat,
-				heat: overrides.nominalHeat || nominalHeat,
-			});
-		if (flags.includes("power"))
-			entity.addComponent("power", {
-				requiredPower: overrides.requiredPower || requiredPower,
-				defaultPower: overrides.defaultPower || defaultPower,
-				maxSafePower: overrides.maxSafePower || maxSafePower,
-			});
-		if (flags.includes("efficiency")) entity.addComponent("efficiency");
+		if (isPlayerShip) {
+			if (flags.includes("heat"))
+				entity.addComponent("heat", {
+					powerToHeat: overrides.powerToHeat || powerToHeat,
+					heatDissipationRate:
+						overrides.heatDissipationRate || heatDissipationRate,
+					maxHeat: overrides.maxHeat || maxHeat,
+					maxSafeHeat: overrides.maxSafeHeat || maxSafeHeat,
+					nominalHeat: overrides.nominalHeat || nominalHeat,
+					heat: overrides.nominalHeat || nominalHeat,
+				});
+			if (flags.includes("power"))
+				entity.addComponent("power", {
+					requiredPower: overrides.requiredPower || requiredPower,
+					defaultPower: overrides.defaultPower || defaultPower,
+					maxSafePower: overrides.maxSafePower || maxSafePower,
+				});
+			if (flags.includes("efficiency")) entity.addComponent("efficiency");
+		}
 	}
 
 	return entity;

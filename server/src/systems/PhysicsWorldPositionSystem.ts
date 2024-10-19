@@ -40,6 +40,7 @@ export class PhysicsWorldPositionSystem extends System {
 		entities.forEach((entities) => {
 			const iterator = entities.values();
 			const id = iterator.next().value;
+			if (!id) return;
 			this.ecs.getEntityById(id)?.updateComponent("physicsWorld", {
 				enabled: true,
 			});

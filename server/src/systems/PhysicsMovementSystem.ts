@@ -1,4 +1,4 @@
-import { Euler, Object3D, Quaternion, Vector3 } from "three";
+import { Box3, Euler, Object3D, Quaternion, Vector3 } from "three";
 import { type Entity, System } from "../utils/ecs";
 import { RAPIER, getWorldPosition } from "../init/rapier";
 import { KM_TO_LM, M_TO_KM } from "@server/utils/unitTypes";
@@ -8,7 +8,7 @@ import {
 	universeToWorld,
 	worldToUniverse,
 } from "@server/init/rapier";
-import type { World } from "@thorium-sim/rapier3d-node";
+import type { RigidBody, World } from "@thorium-sim/rapier3d-node";
 import {
 	handleCollisionDamage,
 	handleTorpedoDamage,
@@ -331,7 +331,8 @@ export class PhysicsMovementSystem extends System {
 			world.step(eventQueue);
 
 			// Copy over the properties of each of the bodies to the entities
-			world.bodies.forEach((body: any) => {
+			world.bodies.forEach((body: RigidBody) => {
+				// @ts-expect-error - A very narrow type
 				const entity = this.ecs.getEntityById(body.userData?.entityId);
 				// No need to update entities that aren't in the collision step.
 				if (!entity || !this.collisionStepEntities.has(entity.id)) return;
