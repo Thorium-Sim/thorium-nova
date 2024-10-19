@@ -7,6 +7,11 @@ import { getInventoryTemplates } from "@server/utils/getInventoryTemplates";
 import { randomFromList } from "@server/utils/randomFromList";
 import { spawnTorpedo } from "@server/spawners/torpedo";
 import type { Entity } from "@server/utils/ecs";
+import {
+	getCurrentTarget,
+	getTargetIsInPhaserRange,
+} from "@server/systems/PhasersSystem";
+import { LiveQueryError } from "@thorium/live-query/client/client";
 
 export const targeting = t.router({
 	targetedContact: t.procedure
@@ -44,163 +49,184 @@ export const targeting = t.router({
 				shipId: ctx.ship.id,
 			});
 		}),
-	torpedoList: t.procedure
-		.filter((publish: { shipId: number }, { ctx }) => {
-			if (publish && publish.shipId !== ctx.ship?.id) return false;
-			return true;
-		})
-		.request(({ ctx }) => {
-			if (!ctx.ship) throw new Error("No ship found.");
-			const templates = getInventoryTemplates(ctx.flight?.ecs);
-			const torpedoRooms = getRoomBySystem(ctx.ship, "torpedoLauncher");
-			const torpedoList: Record<
-				string,
-				{ count: number; yield: number; speed: number }
-			> = {};
-			for (const room of torpedoRooms) {
-				for (const item in room.contents) {
-					const template = templates[item];
-					if (
-						!template ||
-						!template.flags.torpedoCasing ||
-						!template.flags.torpedoWarhead
-					)
-						continue;
-					if (!torpedoList[item]) {
-						torpedoList[item] = {
-							count: 0,
-							yield: template.flags.torpedoWarhead.yield,
-							speed: template.flags.torpedoCasing.speed,
-						};
+	torpedoes: t.router({
+		list: t.procedure
+			.filter((publish: { shipId: number }, { ctx }) => {
+				if (publish && publish.shipId !== ctx.ship?.id) return false;
+				return true;
+			})
+			.request(({ ctx }) => {
+				if (!ctx.ship) throw new Error("No ship found.");
+				const templates = getInventoryTemplates(ctx.flight?.ecs);
+				const torpedoRooms = getRoomBySystem(ctx.ship, "torpedoLauncher");
+				const torpedoList: Record<
+					string,
+					{ count: number; yield: number; speed: number }
+				> = {};
+				for (const room of torpedoRooms) {
+					for (const item in room.contents) {
+						const template = templates[item];
+						if (
+							!template ||
+							!template.flags.torpedoCasing ||
+							!template.flags.torpedoWarhead
+						)
+							continue;
+						if (!torpedoList[item]) {
+							torpedoList[item] = {
+								count: 0,
+								yield: template.flags.torpedoWarhead.yield,
+								speed: template.flags.torpedoCasing.speed,
+							};
+						}
+						torpedoList[item].count += room.contents[item].count;
 					}
-					torpedoList[item].count += room.contents[item].count;
 				}
-			}
-			return torpedoList;
-		}),
-	torpedoLaunchers: t.procedure
-		.filter((publish: { shipId: number }, { ctx }) => {
-			if (publish && publish.shipId !== ctx.ship?.id) return false;
-			return true;
-		})
-		.request(({ ctx }) => {
-			const systems = getShipSystems(ctx, {
-				systemType: "TorpedoLauncher",
-			}).filter(
-				(system) => system.components.isShipSystem?.shipId === ctx.ship?.id,
-			);
-
-			return systems.flatMap((system) => {
-				if (!system.components.isTorpedoLauncher) return [];
-				const torpedoEntity =
-					system.components.isTorpedoLauncher?.torpedoEntity;
-				const torpedo = torpedoEntity
-					? ctx.flight?.ecs.getEntityById(torpedoEntity)
-					: null;
-				return {
-					id: system.id,
-					name: system.components.identity?.name || "Torpedo Launcher",
-					state: system.components.isTorpedoLauncher.status,
-					fireTime: system.components.isTorpedoLauncher.fireTime,
-					loadTime: system.components.isTorpedoLauncher.loadTime,
-					torpedo: torpedo
-						? {
-								id: torpedo.id,
-								casingColor:
-									torpedo.components.isInventory?.flags.torpedoCasing?.color,
-								warheadColor:
-									torpedo.components.isInventory?.flags.torpedoWarhead?.color,
-								warheadDamageType:
-									torpedo.components.isInventory?.flags.torpedoWarhead
-										?.damageType,
-								guidanceColor:
-									torpedo.components.isInventory?.flags.torpedoGuidance?.color,
-								guidanceMode:
-									torpedo.components.isInventory?.flags.torpedoGuidance
-										?.guidanceMode,
-						  }
-						: null,
-				};
-			});
-		}),
-	loadTorpedo: t.procedure
-		.input(
-			z.object({
-				launcherId: z.number(),
-				torpedoId: z.string().nullable(),
+				return torpedoList;
 			}),
-		)
-		.send(({ input, ctx }) => {
-			if (!ctx.ship) throw new Error("No ship found.");
-			const launcher = getShipSystem(ctx, {
-				systemId: input.launcherId,
-			});
-			if (!launcher.components.isTorpedoLauncher)
-				throw new Error("System is not a torpedo launcher");
-			if (
-				input.torpedoId &&
-				launcher.components.isTorpedoLauncher.status !== "ready"
-			) {
-				throw new Error("Torpedo launcher is not ready");
-			}
-			if (
-				!input.torpedoId &&
-				launcher.components.isTorpedoLauncher.status !== "loaded"
-			) {
-				throw new Error("Torpedo launcher is not loaded");
-			}
-			launcher.components.isTorpedoLauncher.torpedoEntity;
-			const torpedoEntity = adjustTorpedoInventory(
-				ctx.ship,
-				input.torpedoId,
-				launcher,
-			);
+		launchers: t.procedure
+			.filter((publish: { shipId: number }, { ctx }) => {
+				if (publish && publish.shipId !== ctx.ship?.id) return false;
+				return true;
+			})
+			.request(({ ctx }) => {
+				const systems = getShipSystems(ctx, {
+					systemType: "TorpedoLauncher",
+				}).filter(
+					(system) => system.components.isShipSystem?.shipId === ctx.ship?.id,
+				);
 
-			launcher.updateComponent("isTorpedoLauncher", {
-				status: torpedoEntity ? "loading" : "unloading",
-				progress: launcher.components.isTorpedoLauncher.loadTime,
-				...(torpedoEntity ? { torpedoEntity } : {}),
-			});
-			pubsub.publish.targeting.torpedoLaunchers({
-				shipId: ctx.ship!.id,
-			});
-		}),
-	fireTorpedo: t.procedure
-		.input(
-			z.object({
-				launcherId: z.number(),
+				return systems.flatMap((system) => {
+					if (!system.components.isTorpedoLauncher) return [];
+					const torpedoEntity =
+						system.components.isTorpedoLauncher?.torpedoEntity;
+					const torpedo = torpedoEntity
+						? ctx.flight?.ecs.getEntityById(torpedoEntity)
+						: null;
+					return {
+						id: system.id,
+						name: system.components.identity?.name || "Torpedo Launcher",
+						state: system.components.isTorpedoLauncher.status,
+						fireTime: system.components.isTorpedoLauncher.fireTime,
+						loadTime: system.components.isTorpedoLauncher.loadTime,
+						torpedo: torpedo
+							? {
+									id: torpedo.id,
+									casingColor:
+										torpedo.components.isInventory?.flags.torpedoCasing?.color,
+									warheadColor:
+										torpedo.components.isInventory?.flags.torpedoWarhead?.color,
+									warheadDamageType:
+										torpedo.components.isInventory?.flags.torpedoWarhead
+											?.damageType,
+									guidanceColor:
+										torpedo.components.isInventory?.flags.torpedoGuidance
+											?.color,
+									guidanceMode:
+										torpedo.components.isInventory?.flags.torpedoGuidance
+											?.guidanceMode,
+							  }
+							: null,
+					};
+				});
 			}),
-		)
-		.send(({ input, ctx }) => {
-			const launcher = getShipSystem(ctx, {
-				systemId: input.launcherId,
-			});
-			if (!launcher.components.isTorpedoLauncher)
-				throw new Error("System is not a torpedo launcher");
-			if (launcher.components.isTorpedoLauncher.status !== "loaded") {
-				throw new Error("Torpedo launcher is not loaded");
-			}
+		load: t.procedure
+			.input(
+				z.object({
+					launcherId: z.number(),
+					torpedoId: z.string().nullable(),
+				}),
+			)
+			.send(({ input, ctx }) => {
+				if (!ctx.ship) throw new Error("No ship found.");
+				const launcher = getShipSystem(ctx, {
+					systemId: input.launcherId,
+				});
+				if (!launcher.components.isTorpedoLauncher)
+					throw new Error("System is not a torpedo launcher");
+				if (
+					input.torpedoId &&
+					launcher.components.isTorpedoLauncher.status !== "ready"
+				) {
+					throw new Error("Torpedo launcher is not ready");
+				}
+				if (
+					!input.torpedoId &&
+					launcher.components.isTorpedoLauncher.status !== "loaded"
+				) {
+					throw new Error("Torpedo launcher is not loaded");
+				}
+				launcher.components.isTorpedoLauncher.torpedoEntity;
+				const torpedoEntity = adjustTorpedoInventory(
+					ctx.ship,
+					input.torpedoId,
+					launcher,
+				);
 
-			const inventoryTemplate = ctx.flight?.ecs.getEntityById(
-				launcher.components.isTorpedoLauncher.torpedoEntity!,
-			);
-			if (!inventoryTemplate) throw new Error("Torpedo not found");
+				launcher.updateComponent("isTorpedoLauncher", {
+					status: torpedoEntity ? "loading" : "unloading",
+					progress: launcher.components.isTorpedoLauncher.loadTime,
+					...(torpedoEntity ? { torpedoEntity } : {}),
+				});
+				pubsub.publish.targeting.torpedoes.launchers({
+					shipId: ctx.ship!.id,
+				});
+			}),
+		fire: t.procedure
+			.input(
+				z.object({
+					launcherId: z.number(),
+				}),
+			)
+			.send(({ input, ctx }) => {
+				const launcher = getShipSystem(ctx, {
+					systemId: input.launcherId,
+				});
+				if (!launcher.components.isTorpedoLauncher)
+					throw new Error("System is not a torpedo launcher");
+				if (launcher.components.isTorpedoLauncher.status !== "loaded") {
+					throw new Error("Torpedo launcher is not loaded");
+				}
+				const power = launcher.components.power;
+				const currentPower = power?.currentPower || 1;
+				const requiredPower = power?.requiredPower || 0;
+				const maxSafePower = power?.maxSafePower || 1;
+				// It takes longer to reload based on the efficiency of the torpedo launcher
+				// It will take min 1x and max 20x longer to fire a torpedo, depending on power
+				if (requiredPower > currentPower) {
+					throw new Error("Insufficient Power");
+				}
+				const inventoryTemplate = ctx.flight?.ecs.getEntityById(
+					launcher.components.isTorpedoLauncher.torpedoEntity!,
+				);
+				if (!inventoryTemplate) throw new Error("Torpedo not found");
 
-			const torpedo = spawnTorpedo(launcher);
-			launcher.ecs?.addEntity(torpedo);
+				const torpedo = spawnTorpedo(launcher);
+				launcher.ecs?.addEntity(torpedo);
 
-			launcher.updateComponent("isTorpedoLauncher", {
-				status: "firing",
-				progress: launcher.components.isTorpedoLauncher.fireTime,
-			});
-			pubsub.publish.targeting.torpedoLaunchers({
-				shipId: ctx.ship!.id,
-			});
-			pubsub.publish.starmapCore.torpedos({
-				systemId: torpedo.components.position?.parentId || null,
-			});
-		}),
+				const powerMultiplier =
+					1 /
+					Math.min(
+						1,
+						Math.max(
+							0.05,
+							(currentPower - requiredPower) / (maxSafePower - requiredPower),
+						),
+					);
 
+				launcher.updateComponent("isTorpedoLauncher", {
+					status: "firing",
+					progress:
+						launcher.components.isTorpedoLauncher.fireTime * powerMultiplier,
+				});
+				pubsub.publish.targeting.torpedoes.launchers({
+					shipId: ctx.ship!.id,
+				});
+				pubsub.publish.starmapCore.torpedos({
+					systemId: torpedo.components.position?.parentId || null,
+				});
+			}),
+	}),
 	hull: t.procedure
 		.filter((publish: { shipId: number }, { ctx }) => {
 			if (publish && publish.shipId !== ctx.ship?.id) return false;
@@ -269,9 +295,156 @@ export const targeting = t.router({
 				});
 			}),
 	}),
+	phasers: t.router({
+		list: t.procedure
+			.filter((publish: { shipId: number }, { ctx }) => {
+				if (publish && publish.shipId !== ctx.ship?.id) return false;
+				return true;
+			})
+			.request(({ ctx }) => {
+				const systems = getShipSystems(ctx, {
+					systemType: "Phasers",
+				}).filter(
+					(system) => system.components.isShipSystem?.shipId === ctx.ship?.id,
+				);
+
+				return systems.flatMap((system) => {
+					if (!system.components.isPhasers) return [];
+
+					return {
+						id: system.id,
+						name: system.components.identity?.name || "Phasers",
+						firePercent: system.components.isPhasers.firePercent,
+						arc: system.components.isPhasers.arc,
+						heading: system.components.isPhasers.headingDegree,
+						pitch: system.components.isPhasers.pitchDegree,
+						maxOutput: system.components.power?.powerSources.length || 0,
+						maxRange: system.components.isPhasers.maxRange,
+						maxArc: system.components.isPhasers.maxArc,
+						nominalHeat: system.components.heat?.nominalHeat || 0,
+						maxSafeHeat: system.components.heat?.maxSafeHeat || 1,
+					};
+				});
+			}),
+		/**
+		 * All of the phasers in a system or the same system as the requesting ship
+		 * which are currently being fired.
+		 */
+		firing: t.procedure
+			.input(
+				z
+					.object({
+						systemId: z.number().optional(),
+					})
+					.optional(),
+			)
+			.filter(
+				(
+					publish: { shipId: number; systemId: number | null },
+					{ ctx, input },
+				) => {
+					if (
+						(publish && publish.shipId !== ctx.ship?.id) ||
+						(input?.systemId && input.systemId !== publish.systemId)
+					)
+						return false;
+					return true;
+				},
+			)
+			.request(({ input, ctx }) => {
+				const systemId =
+					input?.systemId || ctx.ship?.components.position?.parentId || null;
+				// Get all of the ships in the system
+				const ships: Entity[] = [];
+				for (const ship of ctx.flight?.ecs.componentCache.get("isShip") || []) {
+					if (ship.components.position?.parentId === systemId) {
+						ships.push(ship);
+					}
+				}
+				const shipIds = ships.map((ship) => ship.id);
+
+				// Get all of the ship phasers that are currently firing
+				const firingPhasers: Entity[] = [];
+				const phaserEntities = ctx.flight?.ecs.componentCache.get("isPhasers");
+				for (const phaser of phaserEntities || []) {
+					if (
+						shipIds.includes(phaser.components.isShipSystem?.shipId || -1) &&
+						phaser.components.isPhasers &&
+						phaser.components.isPhasers.firePercent > 0
+					) {
+						firingPhasers.push(phaser);
+					}
+				}
+
+				return firingPhasers.flatMap((phaser) => {
+					const target = getCurrentTarget(
+						phaser.components.isShipSystem?.shipId || -1,
+						phaser.ecs!,
+					);
+					if (!target) return [];
+					return {
+						id: phaser.id,
+						shipId: phaser.components.isShipSystem?.shipId || -1,
+						targetId: target.id,
+						firePercent: phaser.components.isPhasers?.firePercent || 0,
+					};
+				});
+			}),
+		setArc: t.procedure
+			.input(
+				z.object({
+					phaserId: z.number(),
+					arc: z.number(),
+				}),
+			)
+			.send(({ input, ctx }) => {
+				const phaser = getShipSystem(ctx, {
+					systemId: input.phaserId,
+				});
+				if (!phaser.components.isPhasers)
+					throw new Error("System is not a phaser");
+				phaser.updateComponent("isPhasers", {
+					arc: input.arc,
+				});
+				pubsub.publish.targeting.phasers.list({
+					shipId: phaser.components.isShipSystem?.shipId || -1,
+				});
+			}),
+		fire: t.procedure
+			.input(
+				z.object({
+					phaserId: z.number(),
+					firePercent: z.number(),
+				}),
+			)
+			.send(({ input, ctx }) => {
+				const phaser = getShipSystem(ctx, {
+					systemId: input.phaserId,
+				});
+				if (!phaser.components.isPhasers)
+					throw new Error("System is not a phaser");
+
+				// TODO: Check if the phaser has sufficient power
+				// to be able to fire at the requested power level
+				phaser.updateComponent("isPhasers", {
+					firePercent: input.firePercent,
+				});
+
+				const ship = ctx.flight?.ecs.getEntityById(
+					phaser.components.isShipSystem?.shipId || -1,
+				);
+				pubsub.publish.targeting.phasers.firing({
+					shipId: ship!.id,
+					systemId: ship?.components.position?.parentId || null,
+				});
+				pubsub.publish.targeting.phasers.list({
+					shipId: phaser.components.isShipSystem?.shipId || -1,
+				});
+			}),
+	}),
 	stream: t.procedure.dataStream(({ entity, ctx }) => {
 		if (!entity) return false;
-		return Boolean(entity.components.isShields);
+		return Boolean(entity.components.isShields || entity.components.isPhasers);
 	}),
 });
 
@@ -320,7 +493,7 @@ function adjustTorpedoInventory(
 	pubsub.publish.cargoControl.rooms({
 		shipId: ship.id,
 	});
-	pubsub.publish.targeting.torpedoList({
+	pubsub.publish.targeting.torpedoes.list({
 		shipId: ship.id,
 	});
 

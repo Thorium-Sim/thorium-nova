@@ -1,14 +1,14 @@
-import { Euler, Object3D, Quaternion, Vector3 } from "three";
+import { Box3, Euler, Object3D, Quaternion, Vector3 } from "three";
 import { type Entity, System } from "../utils/ecs";
 import { RAPIER, getWorldPosition } from "../init/rapier";
-import { M_TO_KM } from "@server/utils/unitTypes";
+import { KM_TO_LM, M_TO_KM } from "@server/utils/unitTypes";
 import {
 	generateRigidBody,
 	getEntityWorld,
 	universeToWorld,
 	worldToUniverse,
 } from "@server/init/rapier";
-import type { World } from "@thorium-sim/rapier3d-node";
+import type { RigidBody, World } from "@thorium-sim/rapier3d-node";
 import {
 	handleCollisionDamage,
 	handleTorpedoDamage,
@@ -53,7 +53,7 @@ export class PhysicsMovementSystem extends System {
 		const worldEntity = getEntityWorld(this.ecs, entity);
 		const world = worldEntity?.components.physicsWorld?.world as World;
 		const handles = entity.components.physicsHandles?.handles || new Map();
-		handles.set("blah", entity.id);
+
 		// Nab some systems to use elsewhere.
 		const systems: Entity[] = [];
 		entity.components.shipSystems?.shipSystems.forEach((shipSystem, id) => {
@@ -78,6 +78,8 @@ export class PhysicsMovementSystem extends System {
 		const isHighSpeed =
 			(warpEngines?.components.isWarpEngines?.forwardVelocity || 0) >
 			(warpEngines?.components.isWarpEngines?.solarCruisingSpeed || 0) / 2;
+		const isInterstellarSpace =
+			entity.components.position?.type === "interstellar";
 
 		if (entity.components.rotation) {
 			const { x, y, z, w } = entity.components.rotation;
@@ -142,22 +144,25 @@ export class PhysicsMovementSystem extends System {
 							warpEngines.components.isWarpEngines.forwardVelocity,
 						),
 					);
-					const linvel = body.linvel();
-					body.setLinvel(
-						{
-							x: warpVelocity.x + linvel.x,
-							y: warpVelocity.y + linvel.y,
-							z: warpVelocity.z + linvel.z,
-						},
-						true,
-					);
+					if (warpVelocity.lengthSq() > 0) {
+						body.setLinvel(
+							{
+								x: warpVelocity.x,
+								y: warpVelocity.y,
+								z: warpVelocity.z,
+							},
+							true,
+						);
+					}
 				}
 
 				/**
 				 * Impulse Engines
 				 */
 				body.applyImpulse(
-					tempObj.localToWorld(tempVector.set(0, 0, forwardImpulse)),
+					// I don't know why, but for some reason the impulse needs to be doubled
+					// to reach the expected speed.
+					tempObj.localToWorld(tempVector.set(0, 0, forwardImpulse * 2)),
 					true,
 				);
 
@@ -270,6 +275,12 @@ export class PhysicsMovementSystem extends System {
 				}
 			}
 			/**
+			 * Translate velocity to LightMinutes if we're in interstellar space
+			 */
+			if (isInterstellarSpace) {
+				velocityVector.multiplyScalar(KM_TO_LM);
+			}
+			/**
 			 * Apply the velocity to the position
 			 */
 			{
@@ -320,7 +331,8 @@ export class PhysicsMovementSystem extends System {
 			world.step(eventQueue);
 
 			// Copy over the properties of each of the bodies to the entities
-			world.bodies.forEach((body: any) => {
+			world.bodies.forEach((body: RigidBody) => {
+				// @ts-expect-error - A very narrow type
 				const entity = this.ecs.getEntityById(body.userData?.entityId);
 				// No need to update entities that aren't in the collision step.
 				if (!entity || !this.collisionStepEntities.has(entity.id)) return;
@@ -364,6 +376,21 @@ export class PhysicsMovementSystem extends System {
 				const entity1 = this.ecs.getEntityById(entityId1);
 				const entity2 = this.ecs.getEntityById(entityId2);
 
+				// Special handling to ignore torpedoes their own ships
+				if (entity1?.components.isTorpedo || entity2?.components.isTorpedo) {
+					const entity = entity1?.components.isTorpedo ? entity1 : entity2;
+					const otherEntity = entity1?.components.isTorpedo ? entity2 : entity1;
+					const launcher = this.ecs.getEntityById(
+						entity?.components.isTorpedo?.launcherId || -1,
+					);
+					const ship = this.ecs.getEntityById(
+						launcher?.components.isShipSystem?.shipId || -1,
+					);
+					if (ship?.id !== undefined && ship.id === otherEntity?.id) {
+						event.free();
+						return;
+					}
+				}
 				// This is the vector from entity1 to entity2,
 				const direction = new Vector3(
 					body1?.translation().x,

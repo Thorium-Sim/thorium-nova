@@ -110,6 +110,7 @@ export class FlightDataModel extends FSDataStore {
 				const colliderDesc = await generateColliderDesc(
 					path.join(thoriumPath, ship.assets.model),
 					ship.mass,
+					ship.length,
 				);
 				if (!colliderDesc) return;
 				this.ecs.colliderCache.set(ship.assets.model, colliderDesc);
@@ -166,7 +167,11 @@ export class FlightDataModel extends FSDataStore {
 	}
 }
 
-async function generateColliderDesc(filePath: string, mass: number) {
+async function generateColliderDesc(
+	filePath: string,
+	mass: number,
+	size: number,
+) {
 	try {
 		const ConvexHull = await import("three-stdlib").then(
 			(res) => res.ConvexHull,
@@ -176,6 +181,9 @@ async function generateColliderDesc(filePath: string, mass: number) {
 		if (!gltf) {
 			throw new Error("Failed to load gltf");
 		}
+		// This properly scales the collider to the size of the ship
+		// gltf.scene.children[0].scale.multiplyScalar(size / 1000);
+
 		hull.setFromObject(gltf.scene.children[0]);
 		const vertices = [];
 		for (const vertex of hull.vertices) {

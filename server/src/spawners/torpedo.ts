@@ -1,5 +1,4 @@
 import { Entity } from "@server/utils/ecs";
-import { getShipSystem } from "@server/utils/getShipSystem";
 import { Euler, Quaternion, Vector3 } from "three";
 
 const positionVector = new Vector3();
@@ -79,6 +78,7 @@ export function spawnTorpedo(launcher: Entity) {
 		maxRange: flags?.torpedoCasing?.maxRange || 25000,
 	});
 	torpedoEntity.addComponent("mass", { mass: 1500 });
+	torpedoEntity.addComponent("physicsWorld");
 
 	return torpedoEntity;
 }

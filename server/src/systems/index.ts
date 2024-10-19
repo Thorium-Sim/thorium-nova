@@ -31,6 +31,7 @@ import { TorpedoMovementSystem } from "./TorpedoMovementSystem";
 import { IsDestroyedSystem } from "./IsDestroyedSystem";
 import { PowerDistributionSystem } from "@server/systems/PowerDistributionSystem";
 import { ShieldsSystem } from "@server/systems/ShieldsSystem";
+import { PhasersSystem } from "@server/systems/PhasersSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -52,6 +53,7 @@ const systems = [
 	ThrusterSystem,
 	ImpulseSystem,
 	WarpSystem,
+	PhasersSystem,
 	TorpedoMovementSystem,
 	PhysicsWorldPositionSystem,
 	PhysicsMovementSystem,

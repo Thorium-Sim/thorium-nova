@@ -51,6 +51,7 @@ class ECS {
 			for (let i = 0, entity: Entity; (entity = this.entities[i]); i += 1) {
 				if (entity.id === id) {
 					this.entityIndex.set(id, entity);
+					return entity;
 				}
 			}
 		}

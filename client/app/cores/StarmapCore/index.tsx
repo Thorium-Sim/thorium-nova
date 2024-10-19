@@ -37,6 +37,7 @@ import { Tooltip } from "@thorium/ui/Tooltip";
 import { Icon } from "@thorium/ui/Icon";
 import { keepPreviousData } from "@tanstack/react-query";
 import { Torpedo } from "@client/components/Starmap/Torpedo";
+import { FiringPhasers } from "./FiringPhasers";
 
 export function StarmapCore() {
 	const ref = useRef<HTMLDivElement>(null);
@@ -462,6 +463,7 @@ export function SolarSystemWrapper() {
 	const [torpedos] = q.starmapCore.torpedos.useNetRequest({
 		systemId: currentSystem,
 	});
+
 	const [waypoints] = q.waypoints.all.useNetRequest({
 		systemId: "all",
 	});
@@ -472,7 +474,6 @@ export function SolarSystemWrapper() {
 	const selectedObjectIds = useStarmapStore((store) => store.selectedObjectIds);
 	const planetsHidden = useStarmapStore((store) => store.planetsHidden);
 	const isCore = useStarmapStore((store) => store.viewingMode === "core");
-
 	const { interpolate } = useLiveQuery();
 	return (
 		<SolarSystemMap
@@ -563,6 +564,8 @@ export function SolarSystemWrapper() {
 					<Torpedo id={id} color={color} isDestroyed={isDestroyed} />
 				</Suspense>
 			))}
+
+			<FiringPhasers />
 			{/* {debugSpheres.map(sphere => (
         <DebugSphere key={sphere.id} id={sphere.id} />
       ))} */}

@@ -8,3 +8,5 @@ export * from "./powerGrid";
 export * from "./isTorpedoLauncher";
 export * from "./isTargeting";
 export * from "./isShields";
+export * from "./isPhasers";
+export * from "./isPhaseCapacitor";

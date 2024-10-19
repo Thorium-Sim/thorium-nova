@@ -1,3 +1,4 @@
+import { getTargetIsInPhaserRange } from "@server/systems/PhasersSystem";
 import { type Entity, System } from "../utils/ecs";
 
 /**
@@ -14,10 +15,14 @@ export class PowerDrawSystem extends System {
 	}
 	update(entity: Entity) {
 		const systemType = entity.components.isShipSystem;
+		const ship = entity.ecs?.getEntityById(systemType?.shipId || -1);
+		if (!ship) return;
+
 		const power = entity.components.power;
 		const efficiency = entity.components.efficiency?.efficiency || 1;
 		const efficiencyMultiple = 1 / efficiency;
 		if (!systemType?.type || !power) return;
+
 		const { maxSafePower, requiredPower, powerSources } = power;
 		const requestedPower = powerSources.length;
 		let powerDraw = 0;
@@ -43,7 +48,9 @@ export class PowerDrawSystem extends System {
 					break;
 				}
 				if (targetSpeed === 0) break;
-				const impulseEngineUse = targetSpeed / cruisingSpeed;
+				// We divide the target speed in four, but we can't go below 1/4th
+				// So we scale it where 0.25 is 0, and 1 is 1
+				const impulseEngineUse = (targetSpeed / cruisingSpeed - 0.25) * (4 / 3);
 				powerDraw =
 					(maxSafePower - requiredPower) * impulseEngineUse + requiredPower;
 
@@ -82,6 +89,33 @@ export class PowerDrawSystem extends System {
 				}
 				break;
 			}
+			case "torpedoLauncher": {
+				if (!entity.components.isTorpedoLauncher) return;
+				const { status } = entity.components.isTorpedoLauncher;
+				if (
+					status === "loading" ||
+					status === "loaded" ||
+					status === "firing"
+				) {
+					powerDraw = requestedPower;
+				} else {
+					powerDraw = 0;
+				}
+				break;
+			}
+			case "phasers": {
+				// Only draw power if the current target is in range
+				if (!getTargetIsInPhaserRange(entity)) {
+					powerDraw = 0;
+					break;
+				}
+				powerDraw =
+					power.powerSources.length *
+					(entity.components.isPhasers?.firePercent || 0);
+
+				break;
+			}
+
 			case "generic":
 				powerDraw = requestedPower;
 				break;
@@ -89,9 +123,8 @@ export class PowerDrawSystem extends System {
 				return;
 		}
 
-		// Limit the power draw to the requested power, so we never go over it.
 		entity.updateComponent("power", {
-			powerDraw: Math.min(requestedPower, powerDraw * efficiencyMultiple),
+			powerDraw: powerDraw * efficiencyMultiple,
 		});
 	}
 }

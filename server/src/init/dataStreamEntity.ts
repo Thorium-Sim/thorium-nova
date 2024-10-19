@@ -27,17 +27,8 @@ export function dataStreamEntity(e: Entity) {
 		};
 	}
 	if (e.components.isImpulseEngines) {
-		let { targetSpeed, cruisingSpeed } = e.components.isImpulseEngines;
-		if (e.components.power) {
-			const { currentPower, maxSafePower, requiredPower } =
-				e.components.power || {};
+		const { targetSpeed } = e.components.isImpulseEngines;
 
-			targetSpeed = Math.max(
-				0,
-				cruisingSpeed *
-					((currentPower - requiredPower) / (maxSafePower - requiredPower)),
-			);
-		}
 		return {
 			id: e.id.toString(),
 			x: targetSpeed,
@@ -58,6 +49,41 @@ export function dataStreamEntity(e: Entity) {
 		return {
 			id: e.id.toString(),
 			x: e.components.isShields.strength,
+			y: e.components.power?.currentPower,
+			z: e.components.heat?.heat || 0,
+		};
+	}
+	if (e.components.isPhasers) {
+		// We'll count the storage of any attached phase capacitor
+		const phaseCapacitors = e.components.power?.powerSources.reduce(
+			(prev, next) => {
+				if (prev.has(next)) return prev;
+				const entity = e.ecs?.getEntityById(next);
+				if (
+					!entity?.components.isPhaseCapacitor ||
+					!entity.components.isBattery
+				)
+					return prev;
+				prev.set(next, {
+					storage: entity.components.isBattery.storage,
+					capacity: entity.components.isBattery.capacity,
+				});
+				return prev;
+			},
+			new Map<number, { storage: number; capacity: number }>(),
+		);
+
+		let chargePercent = 0;
+		if (phaseCapacitors) {
+			for (const capacitor of phaseCapacitors.values()) {
+				chargePercent +=
+					capacitor.storage / capacitor.capacity / phaseCapacitors.size;
+			}
+		}
+
+		return {
+			id: e.id.toString(),
+			x: chargePercent,
 			y: e.components.power?.currentPower,
 			z: e.components.heat?.heat || 0,
 		};
