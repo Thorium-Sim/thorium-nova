@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.16](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.15...1.0.0-alpha.16) (2024-10-19)
+
+
+### Bug Fixes
+
+* Fix an issue where impulse engine speed isn't calculated correctly. ([dc46d8c](https://github.com/Thorium-Sim/thorium-nova/commit/dc46d8ccf966e213bebb3735e65d97d2833d681b))
+* Fix issues with shield power. ([d7c2864](https://github.com/Thorium-Sim/thorium-nova/commit/d7c28643518080384de4affe05e411185100db2e))
+* Fix issues with the ship sizing algorithm. ([31e1524](https://github.com/Thorium-Sim/thorium-nova/commit/31e15242549086a5390096ffd3b4925eff882d42))
+* Fix issues with torpedos not hitting their targets. ([9be6c21](https://github.com/Thorium-Sim/thorium-nova/commit/9be6c21e0e3faecea9ba5a8370d0e0a79b4b8423))
+* Fix warp engine movement ([60e6a6c](https://github.com/Thorium-Sim/thorium-nova/commit/60e6a6cfa7fb087a5c8ecdf96705c938723cbe7a))
+
+
+### Features
+
+* Phasers ([15fe864](https://github.com/Thorium-Sim/thorium-nova/commit/15fe8640fa4960de71421111a132159a48b580c0))
+
 # [1.0.0-alpha.15](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.14...1.0.0-alpha.15) (2024-09-06)
 
 
