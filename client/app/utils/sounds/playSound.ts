@@ -12,12 +12,13 @@ interface Sound {
 	paused?: boolean;
 	ambiance?: boolean;
 	channel: number[] | null;
-	source?: AudioBufferSourceNode | AudioLoopWithGap;
+	source?: AudioLoopWithGap;
 	gain?: GainNode;
 	onFinishedPlaying?: () => void;
 }
 
 const sounds = new Map<number, Sound>();
+const playingSounds = new Set<number>();
 
 function randomFromRange(rng: RNG, range: [number, number]) {
 	return Math.abs(rng.next()) * 2 * (range[1] - range[0]) + range[0];
@@ -28,6 +29,7 @@ export async function playSound(
 	onFinishedPlaying?: () => void,
 ) {
 	removeSound(opts.id, true);
+	playingSounds.add(opts.id);
 	const rng = createRNG(opts.id.toString());
 	const volume = randomFromRange(rng, opts.volume);
 	const playbackRate = randomFromRange(rng, opts.playbackRate);
@@ -39,9 +41,13 @@ export async function playSound(
 		if (!arrayBuffer) return;
 
 		if (!audioContext) return;
+
 		if (opts.delay) {
-			await new Promise((res) => setTimeout(res, opts.delay / 1000));
+			await new Promise((res) => setTimeout(res, opts.delay * 1000));
+			if (!playingSounds.has(opts.id)) return;
 		}
+		// If the sound was removed before the delay is over, don't play it.
+
 		audioContext.destination.channelCount =
 			audioContext.destination.maxChannelCount;
 		// Connect the sound source to the volume control.
@@ -64,8 +70,8 @@ export async function playSound(
 		sound.source = new AudioLoopWithGap(audioContext, buffer, {
 			loop: opts.loop,
 			loopStart: opts.loopStart || 0,
-			loopEnd: opts.loopEnd || buffer.duration,
-			loopGap: opts.gap || 0,
+			loopEnd: buffer.duration * (opts.loopEnd ?? 1),
+			loopGap: opts.loopGap || 0,
 			playbackRate,
 		});
 
@@ -76,6 +82,8 @@ export async function playSound(
 		sound.source.connect(sound.gain);
 
 		sound.source.onended = () => {
+			console.log("ended", sound.source?.loop);
+			if (sound.source?.loop) return;
 			removeSound(opts.id);
 			onFinishedPlaying?.();
 		};
@@ -90,6 +98,7 @@ export async function playSound(
 const fadeOutTime = 0.03;
 function removeSound(id: number, force?: boolean, ambiance?: boolean) {
 	const sound = sounds.get(id);
+	playingSounds.delete(id);
 	if (sound?.source) {
 		if (sound.ambiance && !ambiance) return;
 		if (force) {
@@ -109,13 +118,11 @@ function removeSound(id: number, force?: boolean, ambiance?: boolean) {
 			}, fadeOutTime * 1000);
 		} else {
 			sound.source.loop = false;
-			sound.source.onended = () => {
-				removeSound(id, true);
-				sound.onFinishedPlaying?.();
-			};
 		}
 	} else {
 		sounds.delete(id);
+		playingSounds.delete(id);
+		sound?.onFinishedPlaying?.();
 	}
 }
 
@@ -125,13 +132,19 @@ export function removeAllSounds(ambiance?: boolean) {
 	}
 }
 
-export function stopLooping(ambiance?: boolean) {
+export function stopAllLooping(ambiance?: boolean) {
 	for (const id of sounds.keys()) {
 		const sound = sounds.get(id);
 		if (sound?.source) {
 			if (sound.ambiance && !ambiance) return;
 			sound.source.loop = false;
-			sound.source.onended = () => removeSound(id, true);
 		}
+	}
+}
+
+export function stopLooping(id: number) {
+	const sound = sounds.get(id);
+	if (sound?.source) {
+		sound.source.loop = false;
 	}
 }

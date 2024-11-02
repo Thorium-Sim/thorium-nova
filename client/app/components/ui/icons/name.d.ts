@@ -3,9 +3,11 @@
 export const iconNames = [
 	"zap",
 	"x",
+	"volume-2",
 	"text-cursor-input",
 	"sword",
 	"star",
+	"speaker",
 	"sparkles",
 	"siren",
 	"shield-half",

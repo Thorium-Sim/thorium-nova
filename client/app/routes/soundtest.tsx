@@ -10,7 +10,7 @@ const defaultSound = {
 	url: "/assets/star-tours-chime-ringtone.ogg",
 	channel: null,
 	delay: 0,
-	gap: 0,
+	loopGap: 0,
 	loop: false,
 	loopEnd: null,
 	loopStart: null,

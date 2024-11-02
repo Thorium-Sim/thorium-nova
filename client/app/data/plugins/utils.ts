@@ -62,7 +62,6 @@ export function getShipSystem({
 	);
 	if (!shipSystem) throw new Error(`System not found: ${systemId}`);
 	const { plugin: sysPlugin, ...system } = shipSystem;
-
 	return {
 		...system,
 		...override,

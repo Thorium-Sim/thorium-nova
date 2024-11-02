@@ -1,10 +1,11 @@
+import type { Sound } from "@server/components/sound";
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 // TODO March 16, 2022: Add the necessary sound effects
 export default class PhasersPlugin extends BaseShipSystemPlugin {
-	static flags: ShipSystemFlags[] = ["efficiency", "heat", "power"];
+	static flags: ShipSystemFlags[] = ["efficiency", "heat", "power", "sounds"];
 	type = "phasers" as const;
 	allowMultiple = true;
 
@@ -15,6 +16,10 @@ export default class PhasersPlugin extends BaseShipSystemPlugin {
 
 	fullChargeYield: number;
 	yieldMultiplier: number;
+
+	soundEffects: {
+		fire: Sound[];
+	};
 
 	constructor(params: Partial<PhasersPlugin>, plugin: BasePlugin) {
 		super(params, plugin);
@@ -27,6 +32,10 @@ export default class PhasersPlugin extends BaseShipSystemPlugin {
 		this.fullChargeYield = params.fullChargeYield ?? 1;
 
 		this.yieldMultiplier = params.yieldMultiplier ?? 1;
+
+		this.soundEffects = params.soundEffects ?? {
+			fire: [],
+		};
 	}
 }
 registerSystem("phasersPlugin", PhasersPlugin);

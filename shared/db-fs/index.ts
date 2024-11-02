@@ -32,7 +32,7 @@ export abstract class FSDataStore {
 	#throttle: number;
 	#safeMode: boolean;
 	#writeThrottle: () => void;
-	initialData: unknown;
+	#initialData: unknown;
 	#handler: ProxyHandler<any> = {
 		get: (target, key) => {
 			if (key === "getData") return target[key];
@@ -68,7 +68,7 @@ export abstract class FSDataStore {
 		},
 	};
 	constructor(initialData: unknown, options: FSDataStoreOptions = {}) {
-		this.initialData = initialData;
+		this.#initialData = initialData;
 		this.#path = options.path || "db.json";
 		this.#throttle =
 			options.throttle || process.env.NODE_ENV === "production" ? 1000 * 30 : 0;
@@ -92,7 +92,7 @@ export abstract class FSDataStore {
 						json: true,
 						onWarning: (e) => console.warn("YAML load warning:", e),
 				  })
-				: this.initialData;
+				: this.#initialData;
 		} catch (err: any) {
 			if (err.code === "EACCES") {
 				err.message +=
@@ -101,7 +101,7 @@ export abstract class FSDataStore {
 			}
 		}
 		if (!data) {
-			data = Object.fromEntries(Object.entries(this.initialData as any));
+			data = Object.fromEntries(Object.entries(this.#initialData as any));
 		}
 		return data;
 	}

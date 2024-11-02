@@ -341,6 +341,9 @@ const quotes = [
 	"With our thoughts we create the world.",
 	// The Alchemist
 	"Every moment will soon be a memory.",
+	"Information is cheap. Truth is expensive.",
+	// R. Arnold
+	"So, if you are too tired to speak, sit next to me for I, too, am fluent in silence.",
 ];
 
 const QuoteOfTheDay = () => {

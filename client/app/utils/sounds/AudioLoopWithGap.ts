@@ -55,6 +55,7 @@ export class AudioLoopWithGap {
 		// Create and configure the source
 		const source = this.context.createBufferSource();
 		source.playbackRate.setValueAtTime(this.playbackRate, 0);
+		source.onended = this.onended;
 
 		source.buffer = this.buffer;
 		for (const connection of this.connections) {
@@ -99,6 +100,7 @@ export class AudioLoopWithGap {
 
 		// Create a new source for the final playthrough
 		const finalSource = this.context.createBufferSource();
+		finalSource.playbackRate.setValueAtTime(this.playbackRate, 0);
 		finalSource.buffer = this.buffer;
 		finalSource.connect(this.context.destination);
 
