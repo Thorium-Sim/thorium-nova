@@ -34,6 +34,7 @@ export const effects = t.router({
 			return true;
 		})
 		.request(({ publish }) => {
+			console.log(publish);
 			if (!publish) return null;
 
 			return { effect: publish.effect, config: publish.config };
@@ -72,6 +73,7 @@ export const effects = t.router({
 				shipId,
 				clientId,
 			};
+			console.log(payload);
 			// TODO: Properly handle all of the effects that are not handled client-side, such as
 			// offline card transitions.
 			pubsub.publish.effects.sub(payload);

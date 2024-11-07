@@ -39,6 +39,8 @@ const Login = () => {
 					label="Login Name"
 					className="w-72"
 					onChange={(e) => setLoginName(e.target.value)}
+					autoComplete="off"
+					autoCorrect="off"
 					value={loginName}
 				/>
 				<Button
@@ -47,6 +49,18 @@ const Login = () => {
 					disabled={loginName.trim().length === 0}
 				>
 					Login
+				</Button>
+				<Button
+					onClick={() =>
+						q.effects.trigger.netSend({
+							effect: "spark",
+							config: { duration: 1000 },
+							station: "all",
+							shipId: ship.id,
+						})
+					}
+				>
+					Effect
 				</Button>
 			</form>
 		</div>

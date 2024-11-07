@@ -344,6 +344,9 @@ const quotes = [
 	"Information is cheap. Truth is expensive.",
 	// R. Arnold
 	"So, if you are too tired to speak, sit next to me for I, too, am fluent in silence.",
+	// G'Kar, Babylon 5
+	"Greater than the death of flesh is the death of hope. The death of dreams. Against this peril we can never surrender.",
+	"The future is all around us, waiting in moments of transition, to be born in moments of revelation.",
 ];
 
 const QuoteOfTheDay = () => {
