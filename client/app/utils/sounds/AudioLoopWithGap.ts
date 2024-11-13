@@ -120,7 +120,9 @@ export class AudioLoopWithGap {
 	}
 	set loop(newLoop) {
 		this._loop = newLoop;
-		this.finish();
-		clearTimeout(this.timeout);
+		if (!newLoop) {
+			this.finish();
+			clearTimeout(this.timeout);
+		}
 	}
 }

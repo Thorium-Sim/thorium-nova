@@ -30,6 +30,17 @@ export class PhasersSystem extends System {
 				shipId: phaserShip?.id || -1,
 				systemId: phaserShip?.components.position?.parentId || null,
 			});
+
+			// Stop any phaser sounds
+			entity.components.soundEffects?.looping
+				.filter((s) => s.key === "fire")
+				.forEach((s) => {
+					pubsub.publish.effects.sounds({
+						type: "cancelLooping",
+						entityId: entity.id,
+						soundId: s.id,
+					});
+				});
 		}
 		const phaserDamage = power.currentPower * efficiency * elapsedHours;
 		if (phaserDamage === 0) return;

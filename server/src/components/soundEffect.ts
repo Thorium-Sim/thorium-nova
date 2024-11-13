@@ -1,5 +1,8 @@
+import { position } from "@server/components/position";
 import { sound } from "@server/components/sound";
 import z from "zod";
+
+export type SoundEffect = z.infer<typeof soundEffects>["looping"][number];
 
 /**
  * Types of sound effects:
@@ -22,21 +25,34 @@ import z from "zod";
  */
 
 /** Use the position component to determine the sound's position in space. */
-export const soundEffect = z
-	.object({
-		/** The sounds that will play simultaneously */
-		sounds: sound.array().default([]),
-		/** How many milliseconds since the sound was created. For determining when to remove a sound. */
-		playbackTime: z.number().default(0),
-		/** The max amount of time for the sounds to play. Null for looping sounds. */
-		maxPlaybackTime: z.number().nullish(),
-		/** The range of the sound in space in kilometers, for determining if the sound is in range. */
-		range: z.number().optional(),
-		/** The simulator where the sound will play */
-		simulatorId: z.number().optional(),
-		/** Which stations the sound plays on */
-		stations: z.number().array().optional(),
-		/** Which clients the sound plays on */
-		clients: z.string().array().optional(),
-	})
-	.default({});
+export const soundEffects = z.object({
+	/** The sounds at the disposal of this entity */
+	soundBank: z.record(sound.array()).default({}),
+	/** The currently looping sounds which eventually need to be cancelled */
+	looping: z
+		.object({
+			id: z.string(),
+			// Sounds of the same key will replace each other
+			key: z.string(),
+			/** The sounds that will play simultaneously when this sound is created. */
+			sounds: sound.array().default([]),
+			range: z
+				.object({
+					/** The range of the sound in space in kilometers, for determining if the sound is in range. */
+					distance: z.number(),
+					/** The position of the sound in space */
+					position,
+				})
+				.optional(),
+
+			/** Which stations the sound plays on. If stationId is not provided, it plays on all stations on the ship. */
+			stations: z
+				.object({ stationId: z.string().optional(), shipId: z.number() })
+				.array()
+				.optional(),
+			/** Which clients the sound plays on */
+			clients: z.string().array().optional(),
+		})
+		.array()
+		.default([]),
+});

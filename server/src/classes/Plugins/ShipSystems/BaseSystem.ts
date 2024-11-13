@@ -7,6 +7,7 @@ import type {
 	KelvinPerSecond,
 	MegaWatt,
 } from "@server/utils/unitTypes";
+import type { Sound } from "@server/components/sound";
 
 const systemPlugins: Record<string, typeof BaseShipSystemPlugin> = {};
 export function registerSystem(name: string, sys: typeof BaseShipSystemPlugin) {
@@ -31,6 +32,9 @@ export default class BaseShipSystemPlugin extends Aspect {
 	 * for this system
 	 */
 	assets: Record<string, string[]>;
+
+	soundEffects?: Record<string, Sound[]>;
+
 	allowMultiple: boolean;
 
 	///////////
@@ -87,6 +91,7 @@ export default class BaseShipSystemPlugin extends Aspect {
 		this.description = params.description || "";
 		this.tags = params.tags || [];
 		this.assets = params.assets || {};
+		this.soundEffects = params.soundEffects;
 		this.allowMultiple = params.allowMultiple ?? false;
 		this.requiredPower = params.requiredPower || 5;
 		this.defaultPower = params.defaultPower || 10;

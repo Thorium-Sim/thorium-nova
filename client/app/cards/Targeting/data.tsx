@@ -7,11 +7,8 @@ import { getInventoryTemplates } from "@server/utils/getInventoryTemplates";
 import { randomFromList } from "@server/utils/randomFromList";
 import { spawnTorpedo } from "@server/spawners/torpedo";
 import type { Entity } from "@server/utils/ecs";
-import {
-	getCurrentTarget,
-	getTargetIsInPhaserRange,
-} from "@server/systems/PhasersSystem";
-import { LiveQueryError } from "@thorium/live-query/client/client";
+import { getCurrentTarget } from "@server/systems/PhasersSystem";
+import uniqid from "@thorium/uniqid";
 
 export const targeting = t.router({
 	targetedContact: t.procedure
@@ -440,6 +437,54 @@ export const targeting = t.router({
 				pubsub.publish.targeting.phasers.list({
 					shipId: phaser.components.isShipSystem?.shipId || -1,
 				});
+				if (input.firePercent === 0) {
+					phaser.components.soundEffects?.looping
+						.filter((s) => s.key === "fire")
+						.forEach((s) => {
+							pubsub.publish.effects.sounds({
+								type: "cancelLooping",
+								entityId: phaser.id,
+								soundId: s.id,
+							});
+						});
+				} else if (phaser.components.soundEffects?.soundBank.fire) {
+					// Figure out the range of the phaser sound
+					const distance = phaser.components.isPhasers?.maxRange || 0;
+					const range = ship?.components.position
+						? { distance, position: ship.components.position }
+						: undefined;
+					const stations = ship?.id ? [{ shipId: ship.id }] : undefined;
+					// Play the phaser sound
+					const sound = {
+						sounds: phaser.components.soundEffects?.soundBank.fire,
+						range,
+						stations,
+						key: "fire",
+						id: uniqid("snd_"),
+					};
+					pubsub.publish.effects.sounds({
+						type: "sound",
+						entityId: phaser.id,
+						sound,
+					});
+
+					phaser.components.soundEffects.looping
+						.filter((s) => s.key === "fire")
+						.forEach((s) => {
+							pubsub.publish.effects.sounds({
+								type: "cancelLooping",
+								entityId: phaser.id,
+								soundId: s.id,
+							});
+						});
+
+					const newLooping = phaser.components.soundEffects.looping
+						.filter((s) => s.key !== "fire")
+						.concat(sound);
+					phaser.updateComponent("soundEffects", {
+						looping: newLooping,
+					});
+				}
 			}),
 	}),
 	stream: t.procedure.dataStream(({ entity, ctx }) => {

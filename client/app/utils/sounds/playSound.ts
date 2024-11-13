@@ -3,9 +3,11 @@ import { downMixBuffer } from "@client/utils/sounds/downmixBuffer";
 import { createRNG, type RNG } from "@thorium/rng";
 import type { sound } from "@server/components/sound";
 import { AudioLoopWithGap } from "@client/utils/sounds/AudioLoopWithGap";
+import { q } from "@client/context/AppContext";
+import { useLiveQuery } from "@thorium/live-query/client";
 
 interface Sound {
-	id: number;
+	id: string;
 	url: string;
 	volume: number;
 	playbackRate: number;
@@ -17,15 +19,15 @@ interface Sound {
 	onFinishedPlaying?: () => void;
 }
 
-const sounds = new Map<number, Sound>();
-const playingSounds = new Set<number>();
+const sounds = new Map<string, Sound>();
+const playingSounds = new Set<string>();
 
 function randomFromRange(rng: RNG, range: [number, number]) {
 	return Math.abs(rng.next()) * 2 * (range[1] - range[0]) + range[0];
 }
 
 export async function playSound(
-	opts: Zod.infer<typeof sound> & { id: number },
+	opts: Zod.infer<typeof sound> & { id: string },
 	onFinishedPlaying?: () => void,
 ) {
 	removeSound(opts.id, true);
@@ -82,7 +84,6 @@ export async function playSound(
 		sound.source.connect(sound.gain);
 
 		sound.source.onended = () => {
-			console.log("ended", sound.source?.loop);
 			if (sound.source?.loop) return;
 			removeSound(opts.id);
 			onFinishedPlaying?.();
@@ -96,7 +97,7 @@ export async function playSound(
 }
 
 const fadeOutTime = 0.03;
-function removeSound(id: number, force?: boolean, ambiance?: boolean) {
+function removeSound(id: string, force?: boolean, ambiance?: boolean) {
 	const sound = sounds.get(id);
 	playingSounds.delete(id);
 	if (sound?.source) {
@@ -139,12 +140,75 @@ export function stopAllLooping(ambiance?: boolean) {
 			if (sound.ambiance && !ambiance) return;
 			sound.source.loop = false;
 		}
+		sounds.delete(id);
+		playingSounds.delete(id);
 	}
 }
 
-export function stopLooping(id: number) {
+export function stopLooping(id: string) {
 	const sound = sounds.get(id);
 	if (sound?.source) {
 		sound.source.loop = false;
 	}
+	sounds.delete(id);
+	playingSounds.delete(id);
+}
+
+export function SoundPlayer() {
+	const [{ id }] = q.ship.player.useNetRequest();
+	const { interpolate } = useLiveQuery();
+
+	q.effects.sounds.useNetRequest(undefined, {
+		callback: (data) => {
+			if (!data) return;
+			switch (data.type) {
+				case "sound": {
+					console.log(data.type, data.sound.id);
+					const shipPosition = interpolate(id);
+					const { sounds, range } = data.sound;
+					// Calculate a volume multiplier based on the distance from the sound source.
+					const volumeMultiplier =
+						range && shipPosition
+							? Math.max(
+									0,
+									1 -
+										(Math.hypot(
+											range.position.x - shipPosition.x,
+											range.position.y - shipPosition.y,
+											range.position.z - shipPosition.z,
+										) /
+											range.distance) *
+											1.1,
+							  )
+							: 1;
+
+					if (volumeMultiplier <= 0) return;
+
+					sounds.forEach((sound) => {
+						playSound({
+							...sound,
+							id: data.sound.id,
+							volume: [
+								sound.volume[0] * volumeMultiplier,
+								sound.volume[1] * volumeMultiplier,
+							],
+						});
+					});
+
+					break;
+				}
+				case "cancelLooping":
+					stopLooping(data.soundId);
+					break;
+				case "stop":
+					removeSound(data.soundId);
+					break;
+				case "stopAll":
+					removeAllSounds();
+					break;
+			}
+		},
+	});
+
+	return null;
 }
