@@ -1,5 +1,6 @@
 import { pubsub } from "@server/init/pubsub";
 import { type Entity, System } from "../utils/ecs";
+import { cancelLoopingSound } from "@server/utils/playRangedSound";
 
 /**
  * Loads and unloads torpedoes
@@ -38,6 +39,12 @@ export class TorpedoLoadingSystem extends System {
 				} else if (status === "firing") {
 					status = "ready";
 				}
+
+				// Cancel any sounds the torpedo launcher might be looping
+				cancelLoopingSound(entity, "unload");
+				cancelLoopingSound(entity, "load");
+				cancelLoopingSound(entity, "fire");
+
 				entity.updateComponent("isTorpedoLauncher", {
 					status,
 					progress,

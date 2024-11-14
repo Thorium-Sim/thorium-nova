@@ -163,7 +163,6 @@ export function SoundPlayer() {
 			if (!data) return;
 			switch (data.type) {
 				case "sound": {
-					console.log(data.type, data.sound.id);
 					const shipPosition = interpolate(id);
 					const { sounds, range } = data.sound;
 					// Calculate a volume multiplier based on the distance from the sound source.

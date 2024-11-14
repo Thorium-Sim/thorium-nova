@@ -8,8 +8,10 @@ import { randomFromList } from "@server/utils/randomFromList";
 import { spawnTorpedo } from "@server/spawners/torpedo";
 import type { Entity } from "@server/utils/ecs";
 import { getCurrentTarget } from "@server/systems/PhasersSystem";
-import uniqid from "@thorium/uniqid";
-
+import {
+	cancelLoopingSound,
+	playShipSound,
+} from "@server/utils/playRangedSound";
 export const targeting = t.router({
 	targetedContact: t.procedure
 		.filter((publish: { shipId: number }, { ctx }) => {
@@ -153,7 +155,6 @@ export const targeting = t.router({
 				) {
 					throw new Error("Torpedo launcher is not loaded");
 				}
-				launcher.components.isTorpedoLauncher.torpedoEntity;
 				const torpedoEntity = adjustTorpedoInventory(
 					ctx.ship,
 					input.torpedoId,
@@ -168,6 +169,14 @@ export const targeting = t.router({
 				pubsub.publish.targeting.torpedoes.launchers({
 					shipId: ctx.ship!.id,
 				});
+
+				if (torpedoEntity) {
+					cancelLoopingSound(launcher, "unload");
+					playShipSound(launcher, ctx.ship, "load");
+				} else {
+					cancelLoopingSound(launcher, "load");
+					playShipSound(launcher, ctx.ship, "unload");
+				}
 			}),
 		fire: t.procedure
 			.input(
@@ -222,6 +231,8 @@ export const targeting = t.router({
 				pubsub.publish.starmapCore.torpedos({
 					systemId: torpedo.components.position?.parentId || null,
 				});
+
+				playShipSound(launcher, ctx.ship!, "fire");
 			}),
 	}),
 	hull: t.procedure
@@ -426,64 +437,34 @@ export const targeting = t.router({
 				phaser.updateComponent("isPhasers", {
 					firePercent: input.firePercent,
 				});
+				const currentPower =
+					phaser.components.power?.powerSources.reduce((acc, id) => {
+						const powerSource = ctx.flight?.ecs.getEntityById(id);
+						if (powerSource?.components.isPhaseCapacitor) {
+							return acc + (powerSource.components.isBattery?.storage || 0);
+						}
+						return acc;
+					}, 0) || 0;
 
 				const ship = ctx.flight?.ecs.getEntityById(
 					phaser.components.isShipSystem?.shipId || -1,
 				);
-				pubsub.publish.targeting.phasers.firing({
-					shipId: ship!.id,
-					systemId: ship?.components.position?.parentId || null,
-				});
+
 				pubsub.publish.targeting.phasers.list({
 					shipId: phaser.components.isShipSystem?.shipId || -1,
 				});
-				if (input.firePercent === 0) {
-					phaser.components.soundEffects?.looping
-						.filter((s) => s.key === "fire")
-						.forEach((s) => {
-							pubsub.publish.effects.sounds({
-								type: "cancelLooping",
-								entityId: phaser.id,
-								soundId: s.id,
-							});
-						});
-				} else if (phaser.components.soundEffects?.soundBank.fire) {
-					// Figure out the range of the phaser sound
-					const distance = phaser.components.isPhasers?.maxRange || 0;
-					const range = ship?.components.position
-						? { distance, position: ship.components.position }
-						: undefined;
-					const stations = ship?.id ? [{ shipId: ship.id }] : undefined;
-					// Play the phaser sound
-					const sound = {
-						sounds: phaser.components.soundEffects?.soundBank.fire,
-						range,
-						stations,
-						key: "fire",
-						id: uniqid("snd_"),
-					};
-					pubsub.publish.effects.sounds({
-						type: "sound",
-						entityId: phaser.id,
-						sound,
+
+				if (input.firePercent === 0 || currentPower < 0.01) {
+					cancelLoopingSound(phaser, "fire");
+				} else {
+					pubsub.publish.targeting.phasers.firing({
+						shipId: ship!.id,
+						systemId: ship?.components.position?.parentId || null,
 					});
 
-					phaser.components.soundEffects.looping
-						.filter((s) => s.key === "fire")
-						.forEach((s) => {
-							pubsub.publish.effects.sounds({
-								type: "cancelLooping",
-								entityId: phaser.id,
-								soundId: s.id,
-							});
-						});
-
-					const newLooping = phaser.components.soundEffects.looping
-						.filter((s) => s.key !== "fire")
-						.concat(sound);
-					phaser.updateComponent("soundEffects", {
-						looping: newLooping,
-					});
+					if (phaser.components.soundEffects?.soundBank.fire) {
+						playShipSound(phaser, ship!, "fire");
+					}
 				}
 			}),
 	}),

@@ -2,6 +2,7 @@ import { pubsub } from "@server/init/pubsub";
 import { applyDamage } from "@server/utils/collisionDamage";
 import { type ECS, type Entity, System } from "@server/utils/ecs";
 import { isPointWithinCone } from "@server/utils/isPointWithinCone";
+import { cancelLoopingSound } from "@server/utils/playRangedSound";
 import { degToRad, megaWattHourToGigaJoule } from "@server/utils/unitTypes";
 import { Quaternion, Vector3 } from "three";
 
@@ -32,15 +33,7 @@ export class PhasersSystem extends System {
 			});
 
 			// Stop any phaser sounds
-			entity.components.soundEffects?.looping
-				.filter((s) => s.key === "fire")
-				.forEach((s) => {
-					pubsub.publish.effects.sounds({
-						type: "cancelLooping",
-						entityId: entity.id,
-						soundId: s.id,
-					});
-				});
+			cancelLoopingSound(entity, "fire");
 		}
 		const phaserDamage = power.currentPower * efficiency * elapsedHours;
 		if (phaserDamage === 0) return;
