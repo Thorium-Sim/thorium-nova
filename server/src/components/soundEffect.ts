@@ -34,6 +34,8 @@ export const soundEffects = z.object({
 			id: z.string(),
 			// Sounds of the same key will replace each other
 			key: z.string(),
+			// Whether looping sounds will be considered ambiance and dynamically adjusted based on the properties of the system.
+			ambiance: z.boolean(),
 			/** The sounds that will play simultaneously when this sound is created. */
 			sounds: sound.array().default([]),
 			range: z

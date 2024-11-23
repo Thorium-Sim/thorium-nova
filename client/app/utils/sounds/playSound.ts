@@ -26,6 +26,45 @@ function randomFromRange(rng: RNG, range: [number, number]) {
 	return Math.abs(rng.next()) * 2 * (range[1] - range[0]) + range[0];
 }
 
+export function soundIsPlaying(id: string) {
+	return sounds.has(id);
+}
+
+// Playback rate will change over 2 seconds so it isn't too dramatic.
+const PLAYBACK_UPDATE_DURATION = 2;
+const VOLUME_UPDATE_DURATION = 2;
+export function updateSound(
+	id: string,
+	{ playbackRate, volume }: { playbackRate?: number; volume?: number },
+) {
+	const sound = sounds.get(id);
+	if (!sound || !sound.source?.source) return false;
+
+	if (playbackRate) {
+		sound.source.playbackRate = playbackRate;
+		sound.source.source?.playbackRate.linearRampToValueAtTime(
+			playbackRate,
+			audioContext.currentTime + PLAYBACK_UPDATE_DURATION,
+		);
+	}
+	if (typeof volume === "number") {
+		sound.volume = volume;
+		if (sound.gain) {
+			sound.gain.gain.setValueAtTime(
+				sound.gain.gain.value,
+				audioContext.currentTime,
+			);
+
+			sound.gain.gain.exponentialRampToValueAtTime(
+				volume * volume,
+				audioContext.currentTime + VOLUME_UPDATE_DURATION,
+			);
+		}
+	}
+
+	return true;
+}
+
 export async function playSound(
 	opts: Zod.infer<typeof sound> & { id: string },
 	onFinishedPlaying?: () => void,
@@ -97,7 +136,7 @@ export async function playSound(
 }
 
 const fadeOutTime = 0.03;
-function removeSound(id: string, force?: boolean, ambiance?: boolean) {
+export function removeSound(id: string, force?: boolean, ambiance?: boolean) {
 	const sound = sounds.get(id);
 	playingSounds.delete(id);
 	if (sound?.source) {

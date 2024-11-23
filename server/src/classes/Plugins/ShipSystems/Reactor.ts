@@ -1,9 +1,10 @@
+import type { Sound } from "@server/components/sound";
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class ReactorPlugin extends BaseShipSystemPlugin {
-	static flags: ShipSystemFlags[] = ["efficiency", "heat"];
+	static flags: ShipSystemFlags[] = ["efficiency", "heat", "sounds"];
 	type = "reactor" as const;
 
 	/**
@@ -24,12 +25,21 @@ export default class ReactorPlugin extends BaseShipSystemPlugin {
 	 * in case.
 	 */
 	reactorCount: number;
+
+	soundEffects: {
+		ambiance: Sound[];
+		overheatAlert: Sound[];
+	};
 	constructor(params: Partial<ReactorPlugin>, plugin: BasePlugin) {
 		super(params, plugin);
 
 		this.optimalOutputPercent = params.optimalOutputPercent || 0.7;
 		this.reactorCount = params.reactorCount || 4;
 		this.powerMultiplier = params.powerMultiplier || 1;
+		this.soundEffects = params.soundEffects || {
+			ambiance: [],
+			overheatAlert: [],
+		};
 	}
 }
 registerSystem("reactor", ReactorPlugin);

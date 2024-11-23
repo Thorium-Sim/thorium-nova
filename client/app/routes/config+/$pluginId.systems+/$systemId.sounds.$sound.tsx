@@ -37,7 +37,7 @@ export default function Sounds() {
 		shipId,
 		shipPluginId,
 	});
-	// @ts-expect-error
+
 	const soundEffects = system.soundEffects as Record<string, Sound[]>;
 
 	if (!system || !Array.isArray(soundEffects[sound]))
@@ -54,6 +54,7 @@ export default function Sounds() {
 							index={index}
 							sound={soundEffect}
 							soundCount={soundEffects[sound].length}
+							ambiance={sound === "ambiance"}
 						/>
 					))
 				)}
@@ -92,7 +93,8 @@ function SoundConfig({
 	sound,
 	index,
 	soundCount,
-}: { sound: Sound; index: number; soundCount: number }) {
+	ambiance,
+}: { sound: Sound; index: number; soundCount: number; ambiance?: boolean }) {
 	const {
 		pluginId,
 		systemId,
@@ -120,7 +122,7 @@ function SoundConfig({
 		shipId,
 		shipPluginId,
 	});
-	// @ts-expect-error
+
 	const soundEffects = system.soundEffects as Record<string, Sound[]>;
 
 	async function updateSound(
@@ -163,6 +165,7 @@ function SoundConfig({
 							onClick={() => {
 								const id = Math.random();
 								setPlaying(id);
+								//@ts-expect-error
 								playSound({ id, ...sound }, () => setPlaying(null));
 							}}
 						>
@@ -175,6 +178,7 @@ function SoundConfig({
 								onClick={() => {
 									if (playing) {
 										setPlaying(null);
+										//@ts-expect-error
 										stopLooping(playing);
 									}
 								}}
@@ -191,10 +195,18 @@ function SoundConfig({
 						label={
 							<>
 								Volume Range{" "}
-								<InfoTip>
-									Each time the sound is played it will randomly pick a value
-									from within the range.
-								</InfoTip>
+								{ambiance ? (
+									<InfoTip>
+										Ambiance volume is chosen based on the properties of the
+										system playing the ambiance. Eg. Reactors using more power
+										use the higher end of the range.
+									</InfoTip>
+								) : (
+									<InfoTip>
+										Each time the sound is played it will randomly pick a value
+										from within the range.
+									</InfoTip>
+								)}
 							</>
 						}
 						defaultValue={sound.volume}
@@ -207,7 +219,17 @@ function SoundConfig({
 						}
 					/>
 					<RangeInput
-						label="Playback Rate Range"
+						label={
+							<>
+								Playback Rate Range{" "}
+								{ambiance ? (
+									<InfoTip>
+										Ambiance playback rate is chosen based on the properties of
+										the system playing the ambiance.
+									</InfoTip>
+								) : null}
+							</>
+						}
 						defaultValue={sound.playbackRate}
 						placeholder={["1", "1"]}
 						onBlur={(values) =>
@@ -217,19 +239,21 @@ function SoundConfig({
 							})
 						}
 					/>
-					<div>
-						<Checkbox
-							name="loop"
-							checked={sound.loop}
-							onChange={(e) =>
-								updateSound((draft) => {
-									draft[soundName][index].loop = e.target.checked;
-								})
-							}
-							label="Loop"
-						/>
-					</div>
-					{sound.loop ? (
+					{!ambiance ? (
+						<div>
+							<Checkbox
+								name="loop"
+								checked={sound.loop}
+								onChange={(e) =>
+									updateSound((draft) => {
+										draft[soundName][index].loop = e.target.checked;
+									})
+								}
+								label="Loop"
+							/>
+						</div>
+					) : null}
+					{sound.loop && !ambiance ? (
 						<>
 							<div className="flex gap-2">
 								<Input
@@ -335,35 +359,39 @@ function SoundConfig({
 							/>
 						</>
 					) : null}
-					<Input
-						type="text"
-						placeholder="0"
-						invalidMessage="Delay must be a number greater than or equal to 0"
-						defaultValue={sound.delay?.toString()}
-						isInvalid={delayError}
-						onChange={() => setDelayError(false)}
-						onBlur={(e) => {
-							if (
-								(e.target.value !== "" &&
-									Number.isNaN(Number.parseFloat(e.target.value))) ||
-								Number.parseFloat(e.target.value) < 0
-							)
-								return setDelayError(true);
+					{!ambiance ? (
+						<Input
+							type="text"
+							placeholder="0"
+							invalidMessage="Delay must be a number greater than or equal to 0"
+							defaultValue={sound.delay?.toString()}
+							isInvalid={delayError}
+							onChange={() => setDelayError(false)}
+							onBlur={(e) => {
+								if (
+									(e.target.value !== "" &&
+										Number.isNaN(Number.parseFloat(e.target.value))) ||
+									Number.parseFloat(e.target.value) < 0
+								)
+									return setDelayError(true);
 
-							updateSound((draft) => {
-								draft[soundName][index].delay =
-									e.target.value === "" ? 0 : Number.parseFloat(e.target.value);
-							});
-						}}
-						label={
-							<>
-								Delay{" "}
-								<InfoTip>
-									How long to wait before playing the sound in seconds.
-								</InfoTip>
-							</>
-						}
-					/>
+								updateSound((draft) => {
+									draft[soundName][index].delay =
+										e.target.value === ""
+											? 0
+											: Number.parseFloat(e.target.value);
+								});
+							}}
+							label={
+								<>
+									Delay{" "}
+									<InfoTip>
+										How long to wait before playing the sound in seconds.
+									</InfoTip>
+								</>
+							}
+						/>
+					) : null}
 					<Input
 						type="text"
 						placeholder="0,1"

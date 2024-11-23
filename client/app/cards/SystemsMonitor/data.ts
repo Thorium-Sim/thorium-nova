@@ -41,9 +41,24 @@ export const systemsMonitor = t.router({
 						reserve,
 						fuel: r.components.isReactor!.unusedFuel.amount || 0,
 						efficiency: r.components.efficiency?.efficiency,
+						ambiance: r.components.soundEffects?.soundBank.ambiance,
 					};
 				});
 			}),
+		ambiance: t.procedure.request(({ ctx }) => {
+			const reactors = getShipSystems(ctx, { systemType: "reactor" });
+
+			return reactors.map((r) => ({
+				id: r.id,
+				// Reactor volume is based on the ratio of the current output to the max output
+				volumePercent:
+					r.components.isReactor!.currentOutput /
+					r.components.isReactor!.maxOutput,
+				// TODO Nov 2024: Figure out how to calculate the playback rate
+				playbackRate: 1,
+				ambiance: r.components.soundEffects?.soundBank.ambiance,
+			}));
+		}),
 	}),
 	batteries: t.router({
 		get: t.procedure
