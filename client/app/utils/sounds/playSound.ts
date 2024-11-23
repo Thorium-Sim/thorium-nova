@@ -5,6 +5,57 @@ import type { sound } from "@server/components/sound";
 import { AudioLoopWithGap } from "@client/utils/sounds/AudioLoopWithGap";
 import { q } from "@client/context/AppContext";
 import { useLiveQuery } from "@thorium/live-query/client";
+import { useAudioSettingsStore } from "@client/routes/flight.station.settings.audio";
+import { useEffect } from "react";
+
+export type SoundType = "ambiance" | "soundEffect" | "ui" | "music";
+
+const GainNode =
+	typeof window === "undefined"
+		? (class {
+				connect = () => {};
+				gain = { setValueAtTime: () => {} };
+		  } as any)
+		: window.GainNode;
+
+const volume = useAudioSettingsStore.getState();
+const gainNodes = {
+	main: new GainNode(audioContext, { gain: volume.mainVolume }),
+	ambiance: new GainNode(audioContext, { gain: volume.ambianceVolume }),
+	soundEffect: new GainNode(audioContext, { gain: volume.soundEffectVolume }),
+	ui: new GainNode(audioContext, { gain: volume.uiVolume }),
+	music: new GainNode(audioContext, { gain: volume.musicVolume }),
+};
+
+if (typeof window !== "undefined") {
+	gainNodes.main.connect(audioContext.destination);
+	gainNodes.ambiance.connect(gainNodes.main);
+	gainNodes.soundEffect.connect(gainNodes.main);
+	gainNodes.ui.connect(gainNodes.main);
+	gainNodes.music.connect(gainNodes.main);
+}
+
+useAudioSettingsStore.subscribe(
+	({
+		mainVolume,
+		ambianceVolume,
+		musicVolume,
+		soundEffectVolume,
+		uiVolume,
+	}) => {
+		gainNodes.main.gain.setValueAtTime(mainVolume, audioContext.currentTime);
+		gainNodes.ambiance.gain.setValueAtTime(
+			ambianceVolume,
+			audioContext.currentTime,
+		);
+		gainNodes.music.gain.setValueAtTime(musicVolume, audioContext.currentTime);
+		gainNodes.soundEffect.gain.setValueAtTime(
+			soundEffectVolume,
+			audioContext.currentTime,
+		);
+		gainNodes.ui.gain.setValueAtTime(uiVolume, audioContext.currentTime);
+	},
+);
 
 interface Sound {
 	id: string;
@@ -12,7 +63,7 @@ interface Sound {
 	volume: number;
 	playbackRate: number;
 	paused?: boolean;
-	ambiance?: boolean;
+	type: SoundType;
 	channel: number[] | null;
 	source?: AudioLoopWithGap;
 	gain?: GainNode;
@@ -66,7 +117,7 @@ export function updateSound(
 }
 
 export async function playSound(
-	opts: Zod.infer<typeof sound> & { id: string },
+	opts: Zod.infer<typeof sound> & { id: string; type: SoundType },
 	onFinishedPlaying?: () => void,
 ) {
 	removeSound(opts.id, true);
@@ -106,6 +157,7 @@ export async function playSound(
 			playbackRate,
 			channel,
 			onFinishedPlaying,
+			type: opts.type,
 		};
 		//Create a new buffer and set it to the specified channel.
 		sound.source = new AudioLoopWithGap(audioContext, buffer, {
@@ -127,7 +179,7 @@ export async function playSound(
 			removeSound(opts.id);
 			onFinishedPlaying?.();
 		};
-		sound.gain.connect(audioContext.destination);
+		sound.gain.connect(gainNodes[sound.type]);
 		sound.source.start();
 		sounds.set(opts.id, sound);
 	} catch (err) {
@@ -136,11 +188,10 @@ export async function playSound(
 }
 
 const fadeOutTime = 0.03;
-export function removeSound(id: string, force?: boolean, ambiance?: boolean) {
+export function removeSound(id: string, force?: boolean) {
 	const sound = sounds.get(id);
 	playingSounds.delete(id);
 	if (sound?.source) {
-		if (sound.ambiance && !ambiance) return;
 		if (force) {
 			// Setting the value immediately before ramping the value helps avoid popping.
 			sound.gain?.gain.setValueAtTime(
@@ -166,17 +217,20 @@ export function removeSound(id: string, force?: boolean, ambiance?: boolean) {
 	}
 }
 
-export function removeAllSounds(ambiance?: boolean) {
+export function removeAllSounds(types?: SoundType[]) {
 	for (const id of sounds.keys()) {
-		removeSound(id, true, ambiance);
+		const sound = sounds.get(id);
+		if (!sound) return;
+		if (types && !types.includes(sound.type)) return;
+		removeSound(id, true);
 	}
 }
 
-export function stopAllLooping(ambiance?: boolean) {
+export function stopAllLooping(types?: SoundType[]) {
 	for (const id of sounds.keys()) {
 		const sound = sounds.get(id);
 		if (sound?.source) {
-			if (sound.ambiance && !ambiance) return;
+			if (types && !types.includes(sound.type)) return;
 			sound.source.loop = false;
 		}
 		sounds.delete(id);
@@ -196,6 +250,14 @@ export function stopLooping(id: string) {
 export function SoundPlayer() {
 	const [{ id }] = q.ship.player.useNetRequest();
 	const { interpolate } = useLiveQuery();
+	const {
+		ambianceVolume,
+		mainVolume,
+		musicVolume,
+		soundEffectVolume,
+		uiVolume,
+	} = useAudioSettingsStore();
+	useEffect(() => {}, []);
 
 	q.effects.sounds.useNetRequest(undefined, {
 		callback: (data) => {
@@ -225,6 +287,7 @@ export function SoundPlayer() {
 					sounds.forEach((sound) => {
 						playSound({
 							...sound,
+							type: "soundEffect",
 							id: data.sound.id,
 							volume: [
 								sound.volume[0] * volumeMultiplier,

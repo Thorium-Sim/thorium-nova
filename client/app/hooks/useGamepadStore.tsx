@@ -3,7 +3,6 @@ import { persist } from "zustand/middleware";
 import { produce } from "immer";
 import {
 	type Dispatch,
-	Fragment,
 	type ReactNode,
 	type SetStateAction,
 	useEffect,
@@ -11,7 +10,6 @@ import {
 	useRef,
 	useState,
 } from "react";
-import Modal from "@thorium/ui/Modal";
 import Select from "@thorium/ui/Select";
 import { capitalCase } from "change-case";
 import Button from "@thorium/ui/Button";
@@ -378,13 +376,7 @@ export function useGamepadPress(
 	});
 }
 
-export function GamepadConfig({
-	isOpen,
-	setIsOpen,
-}: {
-	isOpen: boolean;
-	setIsOpen: () => void;
-}) {
+export function GamepadConfig() {
 	const gamepads = useGamepadStore((store) =>
 		store.gamepads.map((gamepad) => gamepad?.id).filter(filterNull),
 	);
@@ -429,33 +421,31 @@ export function GamepadConfig({
 		return () => unsub();
 	}, [assigningKey, gamepad]);
 	return (
-		<Modal isOpen={isOpen} setIsOpen={setIsOpen} title="Gamepad Config">
-			<div className="mt-4">
-				<Select
-					label="Gamepad"
-					items={gamepads.map((g) => ({ id: g, label: g }))}
-					selected={gamepad}
-					setSelected={(val) => {
-						if (Array.isArray(val)) return;
-						setGamepad(val);
-						setAssigningKey(null);
-					}}
-				/>
-				<small>Connect your gamepad and press a button to recognize it.</small>
-				<form className="divide-y divide-gray-800">
-					{gamepadKeys.map((key) => (
-						<GamepadAction
-							key={key}
-							width={Math.max(...gamepadKeys.map((key) => key.length))}
-							keyData={key}
-							gamepad={gamepad}
-							assigningKey={assigningKey}
-							setAssigningKey={setAssigningKey}
-						/>
-					))}
-				</form>
-			</div>
-		</Modal>
+		<>
+			<Select
+				label="Gamepad"
+				items={gamepads.map((g) => ({ id: g, label: g }))}
+				selected={gamepad}
+				setSelected={(val) => {
+					if (Array.isArray(val)) return;
+					setGamepad(val);
+					setAssigningKey(null);
+				}}
+			/>
+			<small>Connect your gamepad and press a button to recognize it.</small>
+			<form className="divide-y divide-gray-800">
+				{gamepadKeys.map((key) => (
+					<GamepadAction
+						key={key}
+						width={Math.max(...gamepadKeys.map((key) => key.length))}
+						keyData={key}
+						gamepad={gamepad}
+						assigningKey={assigningKey}
+						setAssigningKey={setAssigningKey}
+					/>
+				))}
+			</form>
+		</>
 	);
 }
 
@@ -480,7 +470,7 @@ function GamepadAction({
 		) || [];
 
 	return (
-		<div className="flex gap-2 items-center justify-between py-4">
+		<div className="flex gap-2 items-center justify-between py-1">
 			<div style={{ width: `${width}ch` }}>
 				{capitalCase(key)}
 				<small className="block text-gray-400">{keyLabels[key]}</small>

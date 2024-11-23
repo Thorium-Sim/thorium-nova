@@ -3,6 +3,7 @@ import { q } from "@client/context/AppContext";
 import StationLayout from "./StationLayout";
 import Effects from "./Effects";
 import { SoundPlayer } from "@client/utils/sounds/playSound";
+import { Outlet } from "@remix-run/react";
 
 export default function StationWrapper() {
 	const [client] = q.client.get.useNetRequest();
@@ -16,6 +17,7 @@ export default function StationWrapper() {
 					<Effects />
 					<SoundPlayer />
 					<StationLayout />
+					<Outlet />
 				</>
 			)}
 		</div>

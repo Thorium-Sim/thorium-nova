@@ -39,6 +39,7 @@ export function useReactorAmbiance() {
 					if (!soundIsPlaying(id)) {
 						playSound({
 							id,
+							type: "ambiance",
 							channel: sound.channel,
 							delay: 0,
 							url: sound.url,
@@ -63,7 +64,8 @@ export function useReactorAmbiance() {
 	useEffect(() => {
 		return () => {
 			for (const id of soundsRef.current) {
-				removeSound(id, true, true);
+				removeSound(id, true);
+				soundsRef.current.delete(id);
 			}
 		};
 	}, []);
