@@ -39,6 +39,8 @@ const Login = () => {
 					label="Login Name"
 					className="w-72"
 					onChange={(e) => setLoginName(e.target.value)}
+					autoComplete="off"
+					autoCorrect="off"
 					value={loginName}
 				/>
 				<Button

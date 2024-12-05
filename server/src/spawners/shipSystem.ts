@@ -19,6 +19,12 @@ export function spawnShipSystem(
 	});
 	entity.addComponent("tags", { tags: template.tags });
 
+	if (template.soundEffects) {
+		entity.addComponent("soundEffects", {
+			soundBank: template.soundEffects,
+		});
+	}
+
 	if (template.type) {
 		entity.addComponent("isShipSystem", { type: template.type, shipId });
 

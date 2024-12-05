@@ -8,7 +8,6 @@ import {
 	type ReactNode,
 	useState,
 } from "react";
-import { GamepadConfig, useGamepadStore } from "@client/hooks/useGamepadStore";
 import { Popover, Transition } from "@headlessui/react";
 import {
 	autoUpdate,
@@ -19,6 +18,7 @@ import {
 } from "@floating-ui/react";
 import { Icon, type IconName } from "@thorium/ui/Icon";
 import { cn } from "@client/utils/cn";
+import { useNavigate } from "@remix-run/react";
 
 type IconType = IconName | ReactElement;
 
@@ -46,7 +46,7 @@ export const Widgets = () => {
 					/>
 				);
 			})}
-			<GamepadWidget />
+			<SettingsWidget />
 			<ClickWidget icon="log-out" onClick={() => q.client.logout.netSend()} />
 		</>
 	);
@@ -147,19 +147,7 @@ export const Widget: FC<{
 	);
 };
 
-function GamepadWidget() {
-	const [configOpen, setConfigOpen] = useState(false);
-	const hasGamepad = useGamepadStore(
-		(store) => store.gamepads.filter(Boolean).length > 0,
-	);
-	if (!hasGamepad) return null;
-	return (
-		<>
-			<ClickWidget icon="joystick" onClick={() => setConfigOpen(true)} />
-			<GamepadConfig
-				isOpen={configOpen}
-				setIsOpen={() => setConfigOpen(false)}
-			/>
-		</>
-	);
+function SettingsWidget() {
+	const navigate = useNavigate();
+	return <ClickWidget icon="settings" onClick={() => navigate("settings")} />;
 }

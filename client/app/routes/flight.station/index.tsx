@@ -1,14 +1,13 @@
-import { Navigate } from "react-router-dom";
 import { q } from "@client/context/AppContext";
 
-// import FlightDirectorLayout from "../../../../client-old/src/components/FlightDirector";
 import StationLayout from "./StationLayout";
 import Effects from "./Effects";
+import { SoundPlayer } from "@client/utils/sounds/playSound";
+import { Outlet } from "@remix-run/react";
 
 export default function StationWrapper() {
 	const [client] = q.client.get.useNetRequest();
 	const [station] = q.station.get.useNetRequest();
-	// TODO November 29, 2021: Include sound player here
 	// TODO November 29, 2021: Include some kind of alert toast notification thing here
 	// The existing alerts won't be targeted by the theme, so we need to embed it here.
 	return (
@@ -16,7 +15,9 @@ export default function StationWrapper() {
 			{station && client && client.offlineState !== "blackout" && (
 				<>
 					<Effects />
+					<SoundPlayer />
 					<StationLayout />
+					<Outlet />
 				</>
 			)}
 		</div>

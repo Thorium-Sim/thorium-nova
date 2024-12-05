@@ -149,7 +149,7 @@ export function BeamVisualization() {
 	return (
 		<Line
 			ref={lineRef}
-			points={[0, 0, 0]}
+			points={[0, 0, 0, 0, 0, 0]}
 			segments
 			color="orange"
 			lineWidth={5}

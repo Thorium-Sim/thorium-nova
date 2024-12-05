@@ -32,10 +32,5 @@ window.addEventListener(
 );
 
 startTransition(() => {
-	hydrateRoot(
-		document,
-		<StrictMode>
-			<RemixBrowser />
-		</StrictMode>,
-	);
+	hydrateRoot(document, <RemixBrowser />);
 });

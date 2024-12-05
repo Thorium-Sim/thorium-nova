@@ -5,6 +5,7 @@ import "./effects.css";
 import { q } from "@client/context/AppContext";
 import type { EffectPayload } from "@client/utils/effects";
 import { useNavigate } from "@remix-run/react";
+import { useAmbiance } from "@client/utils/sounds/Ambiance/useAmbiance";
 
 let synth: SpeechSynthesis | undefined;
 try {
@@ -71,6 +72,7 @@ const Effects = () => {
 	const { doSpark, sparks } = useSpark();
 
 	useEscapeHotkey();
+	useAmbiance();
 
 	const doEffect = useCallback(
 		(payload: EffectPayload) => {

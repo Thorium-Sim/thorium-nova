@@ -10,7 +10,7 @@
 		{
 			"name": "lucide-icons",
 			"directory": "app/icons",
-			"postinstall": ["npm", "run", "build:icons"],
+			"postinstall": [],
 			"transformers": []
 		}
 	]

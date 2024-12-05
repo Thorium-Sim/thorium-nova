@@ -27,7 +27,7 @@ export const ShipSystemTypes = {
 	phasers: PhasersPlugin,
 };
 
-export type ShipSystemFlags = "power" | "heat" | "efficiency";
+export type ShipSystemFlags = "power" | "heat" | "efficiency" | "sounds";
 
 export type AllShipSystems = {
 	[k in keyof typeof ShipSystemTypes]: InstanceType<

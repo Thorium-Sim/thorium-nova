@@ -19,12 +19,6 @@ import {
 } from "react";
 import { Fragment } from "react/jsx-runtime";
 
-/**
- * TODO:
- * - Reactor boxes should turn yellow based on the amount of power being used by batteries or systems
- * - Which means there needs to be more data indicating where power is allocated
- *
- */
 export function SystemsMonitor({ cardLoaded }: CardProps) {
 	const [reactors] = q.systemsMonitor.reactors.get.useNetRequest();
 	const [batteries] = q.systemsMonitor.batteries.get.useNetRequest();

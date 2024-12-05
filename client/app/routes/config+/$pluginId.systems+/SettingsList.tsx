@@ -9,7 +9,7 @@ export function SettingsList() {
 		systemId: string;
 		shipId: string;
 	};
-	const setting = useLocation().pathname.split("/").pop() || "";
+	const setting = useLocation().pathname.split("/");
 	const shipPluginId = useContext(ShipPluginIdContext);
 
 	const [system] = q.plugin.systems.get.useNetRequest({
@@ -34,7 +34,9 @@ export function SettingsList() {
 					<Link
 						key={key}
 						to={key}
-						className={`list-group-item ${setting === key ? "selected" : ""}`}
+						className={`list-group-item ${
+							setting.includes(key) ? "selected" : ""
+						}`}
 					>
 						{value}
 					</Link>
@@ -48,4 +50,5 @@ const links = {
 	system: "System",
 	power: "Power",
 	heat: "Heat",
+	sounds: "Sound Effects",
 };

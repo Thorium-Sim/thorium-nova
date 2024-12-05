@@ -19,6 +19,10 @@ import { battery } from "./battery";
 import { torpedoLauncher } from "./torpedoLauncher";
 import { shields } from "./shields";
 import { phasers } from "@client/data/plugins/systems/phasers";
+import { sound } from "@server/components/sound";
+import path from "node:path";
+import fs from "node:fs/promises";
+import { thoriumPath } from "@server/utils/appPaths";
 
 const systemTypes = createUnionSchema(
 	Object.keys(ShipSystemTypes) as (keyof typeof ShipSystemTypes)[],
@@ -123,6 +127,7 @@ export const systems = t.router({
 				nominalHeat: z.number().optional(),
 				maxSafeHeat: z.number().optional(),
 				maxHeat: z.number().optional(),
+				soundEffects: z.record(sound.array()).optional(),
 			}),
 		)
 		.send(async ({ ctx, input }) => {
@@ -178,11 +183,74 @@ export const systems = t.router({
 			if (typeof input.maxHeat === "number") {
 				shipSystem.maxHeat = input.maxHeat;
 			}
+			if (
+				typeof input.soundEffects === "object" &&
+				"soundEffects" in shipSystem
+			) {
+				shipSystem.soundEffects = input.soundEffects;
+			}
 			pubsub.publish.plugin.systems.all({ pluginId: input.pluginId });
 			pubsub.publish.plugin.systems.get({
 				pluginId: input.pluginId,
 			});
 			return { shipSystemId: system.name };
+		}),
+	addSoundEffect: t.procedure
+		.input(
+			z.object({
+				pluginId: z.string(),
+				systemId: z.string(),
+				shipId: z.string().optional(),
+				shipPluginId: z.string().optional(),
+				fileName: z.string().optional(),
+				file: z.union([z.string(), z.instanceof(File)]),
+				soundEffect: z.string(),
+			}),
+		)
+		.send(async ({ ctx, input }) => {
+			inputAuth(ctx);
+			const [system, override] = getShipSystemForInput(ctx, input);
+			const shipSystem = override || system;
+			if (!shipSystem || "soundEffects" in shipSystem === false) {
+				return;
+			}
+			if (typeof input.file === "string") {
+				const filePath = path.basename(input.file);
+				const url = await moveFile(input.file, input.fileName || filePath);
+				if (!Array.isArray(shipSystem.soundEffects[input.soundEffect])) {
+					shipSystem.soundEffects[input.soundEffect] = [];
+				}
+				shipSystem.soundEffects[input.soundEffect].push({
+					url,
+					channel: null,
+					volume: [1, 1],
+					loop: false,
+					delay: 0,
+					gap: 0,
+					playbackRate: [1, 1],
+					loopEnd: null,
+					loopStart: null,
+				});
+			}
+
+			pubsub.publish.plugin.systems.all({ pluginId: input.pluginId });
+			pubsub.publish.plugin.systems.get({
+				pluginId: input.pluginId,
+			});
+
+			async function moveFile(file: Blob | File | string, filePath: string) {
+				if (!shipSystem) return;
+				if (typeof file === "string") {
+					await fs.mkdir(path.join(thoriumPath, shipSystem.assetPath), {
+						recursive: true,
+					});
+					await fs.rename(
+						file,
+						path.join(thoriumPath, shipSystem.assetPath, filePath),
+					);
+					return path.join(shipSystem.assetPath, filePath);
+				}
+			}
 		}),
 	restoreOverride: t.procedure
 		.input(

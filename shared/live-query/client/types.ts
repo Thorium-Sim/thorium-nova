@@ -42,7 +42,7 @@ type DecorateProcedure<
 						[TPath, inferProcedureInput<TProcedure>]
 					>,
 					"queryKey"
-				> & { callback?: (data: any) => void },
+				> & { callback?: (data: TData) => void },
 			) => [TData, UseQueryResult<TData, Error>];
 	  }
 	: TProcedure extends AnySendProcedure

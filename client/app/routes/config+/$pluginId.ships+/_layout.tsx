@@ -6,6 +6,7 @@ import Button from "@thorium/ui/Button";
 import { toast } from "@client/context/ToastContext";
 import SearchableList from "@thorium/ui/SearchableList";
 import { Fragment } from "react";
+import { useMenubar } from "@thorium/ui/Menubar";
 
 export default function ShipConfigLayout() {
 	const { pluginId, shipId } = useParams() as {
@@ -16,6 +17,7 @@ export default function ShipConfigLayout() {
 	const prompt = usePrompt();
 	const [ships] = q.plugin.ship.all.useNetRequest({ pluginId });
 	const ship = ships.find((d) => d.name === shipId);
+	useMenubar({ backTo: `/config/${pluginId}/list` });
 
 	return (
 		<DeckNodeContextProvider>

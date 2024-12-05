@@ -7,12 +7,11 @@ import { getInventoryTemplates } from "@server/utils/getInventoryTemplates";
 import { randomFromList } from "@server/utils/randomFromList";
 import { spawnTorpedo } from "@server/spawners/torpedo";
 import type { Entity } from "@server/utils/ecs";
+import { getCurrentTarget } from "@server/systems/PhasersSystem";
 import {
-	getCurrentTarget,
-	getTargetIsInPhaserRange,
-} from "@server/systems/PhasersSystem";
-import { LiveQueryError } from "@thorium/live-query/client/client";
-
+	cancelLoopingSound,
+	playShipSound,
+} from "@server/utils/playRangedSound";
 export const targeting = t.router({
 	targetedContact: t.procedure
 		.filter((publish: { shipId: number }, { ctx }) => {
@@ -156,7 +155,6 @@ export const targeting = t.router({
 				) {
 					throw new Error("Torpedo launcher is not loaded");
 				}
-				launcher.components.isTorpedoLauncher.torpedoEntity;
 				const torpedoEntity = adjustTorpedoInventory(
 					ctx.ship,
 					input.torpedoId,
@@ -171,6 +169,14 @@ export const targeting = t.router({
 				pubsub.publish.targeting.torpedoes.launchers({
 					shipId: ctx.ship!.id,
 				});
+
+				if (torpedoEntity) {
+					cancelLoopingSound(launcher, "unload");
+					playShipSound(launcher, ctx.ship, "load");
+				} else {
+					cancelLoopingSound(launcher, "load");
+					playShipSound(launcher, ctx.ship, "unload");
+				}
 			}),
 		fire: t.procedure
 			.input(
@@ -225,6 +231,8 @@ export const targeting = t.router({
 				pubsub.publish.starmapCore.torpedos({
 					systemId: torpedo.components.position?.parentId || null,
 				});
+
+				playShipSound(launcher, ctx.ship!, "fire");
 			}),
 	}),
 	hull: t.procedure
@@ -429,17 +437,35 @@ export const targeting = t.router({
 				phaser.updateComponent("isPhasers", {
 					firePercent: input.firePercent,
 				});
+				const currentPower =
+					phaser.components.power?.powerSources.reduce((acc, id) => {
+						const powerSource = ctx.flight?.ecs.getEntityById(id);
+						if (powerSource?.components.isPhaseCapacitor) {
+							return acc + (powerSource.components.isBattery?.storage || 0);
+						}
+						return acc;
+					}, 0) || 0;
 
 				const ship = ctx.flight?.ecs.getEntityById(
 					phaser.components.isShipSystem?.shipId || -1,
 				);
-				pubsub.publish.targeting.phasers.firing({
-					shipId: ship!.id,
-					systemId: ship?.components.position?.parentId || null,
-				});
+
 				pubsub.publish.targeting.phasers.list({
 					shipId: phaser.components.isShipSystem?.shipId || -1,
 				});
+
+				if (input.firePercent === 0 || currentPower < 0.01) {
+					cancelLoopingSound(phaser, "fire");
+				} else {
+					pubsub.publish.targeting.phasers.firing({
+						shipId: ship!.id,
+						systemId: ship?.components.position?.parentId || null,
+					});
+
+					if (phaser.components.soundEffects?.soundBank.fire) {
+						playShipSound(phaser, ship!, "fire");
+					}
+				}
 			}),
 	}),
 	stream: t.procedure.dataStream(({ entity, ctx }) => {

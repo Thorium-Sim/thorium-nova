@@ -11,6 +11,7 @@ import {
 } from "@remix-run/react";
 import { Navigate } from "@client/components/Navigate";
 import { Suspense } from "react";
+import { useMenubar } from "@thorium/ui/Menubar";
 
 export default function ShipLayout() {
 	const { pathname } = useLocation();
@@ -21,6 +22,8 @@ export default function ShipLayout() {
 	const navigate = useNavigate();
 	const confirm = useConfirm();
 	const [ship] = q.plugin.ship.get.useNetRequest({ pluginId, shipId });
+	useMenubar({ backTo: `/config/${pluginId}/list` });
+
 	if (!shipId || !ship) return <Navigate to={`/config/${pluginId}/ships`} />;
 	if (!pathname.endsWith(shipId)) {
 		return (

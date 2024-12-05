@@ -151,6 +151,10 @@ export async function liveQueryPlugin<TRouter extends AnyRouter, TContext>(
 							}),
 						);
 				}
+				// null indicates that there was no query data to begin with.
+				if (err === null) {
+					return res.code(204).send();
+				}
 				let message = err;
 				if (err instanceof Error) {
 					message = err.message;

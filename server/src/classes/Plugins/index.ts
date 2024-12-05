@@ -14,6 +14,7 @@ import InventoryPlugin from "./Inventory";
 import TimelinePlugin from "./Timeline";
 import { pubsub } from "@server/init/pubsub";
 import { MacroPlugin } from "./Macro";
+import { ShipSystemTypes } from "@server/classes/Plugins/ShipSystems/shipSystemTypes";
 
 export function pluginPublish(plugin: BasePlugin) {
 	pubsub.publish.plugin.all();
@@ -192,9 +193,9 @@ export default class BasePlugin extends FSDataStore {
 		// in the file system
 		return new BasePlugin(data, this.server);
 	}
-	static async loadAspect<T>(
+	static async loadAspect<N, T>(
 		plugin: BasePlugin,
-		aspectName: string,
+		aspectName: N,
 		aspect: {
 			new (
 				manifest: { name: string } & Record<string, any>,
@@ -206,7 +207,15 @@ export default class BasePlugin extends FSDataStore {
 		const data = await loadFolderYaml<{ name: string } & Record<string, any>>(
 			objectGlob,
 		);
+
 		return data.map((aspectData) => {
+			if (aspectName === "shipSystems") {
+				const systemClass =
+					ShipSystemTypes[aspectData.type as keyof typeof ShipSystemTypes];
+				return new systemClass(aspectData, plugin) as InstanceType<
+					typeof aspect
+				>;
+			}
 			return new aspect(aspectData, plugin);
 		});
 	}
