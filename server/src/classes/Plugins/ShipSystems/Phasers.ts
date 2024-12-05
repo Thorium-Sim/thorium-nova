@@ -3,7 +3,6 @@ import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
-// TODO March 16, 2022: Add the necessary sound effects
 export default class PhasersPlugin extends BaseShipSystemPlugin {
 	static flags: ShipSystemFlags[] = ["efficiency", "heat", "power", "sounds"];
 	type = "phasers" as const;

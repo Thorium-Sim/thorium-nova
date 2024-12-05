@@ -65,7 +65,7 @@ interface Sound {
 	paused?: boolean;
 	type: SoundType;
 	channel: number[] | null;
-	source?: AudioLoopWithGap;
+	source?: AudioLoopWithGap | AudioBufferSourceNode;
 	gain?: GainNode;
 	onFinishedPlaying?: () => void;
 }
@@ -78,10 +78,10 @@ function randomFromRange(rng: RNG, range: [number, number]) {
 }
 
 export function soundIsPlaying(id: string) {
-	return sounds.has(id);
+	return sounds.has(id) || playingSounds.has(id);
 }
 
-// Playback rate will change over 2 seconds so it isn't too dramatic.
+// Playback rate and volume will change over 2 seconds so it isn't too dramatic.
 const PLAYBACK_UPDATE_DURATION = 2;
 const VOLUME_UPDATE_DURATION = 2;
 export function updateSound(
@@ -89,14 +89,21 @@ export function updateSound(
 	{ playbackRate, volume }: { playbackRate?: number; volume?: number },
 ) {
 	const sound = sounds.get(id);
-	if (!sound || !sound.source?.source) return false;
-
+	if (!sound || !sound.source) return false;
 	if (playbackRate) {
-		sound.source.playbackRate = playbackRate;
-		sound.source.source?.playbackRate.linearRampToValueAtTime(
-			playbackRate,
-			audioContext.currentTime + PLAYBACK_UPDATE_DURATION,
-		);
+		if (sound.source instanceof AudioLoopWithGap) {
+			sound.source.playbackRate = playbackRate;
+			sound.source.source?.playbackRate.linearRampToValueAtTime(
+				playbackRate,
+				audioContext.currentTime + PLAYBACK_UPDATE_DURATION,
+			);
+		} else {
+			sound.playbackRate = playbackRate;
+			sound.source.playbackRate.linearRampToValueAtTime(
+				playbackRate,
+				audioContext.currentTime + PLAYBACK_UPDATE_DURATION,
+			);
+		}
 	}
 	if (typeof volume === "number") {
 		sound.volume = volume;
@@ -106,8 +113,8 @@ export function updateSound(
 				audioContext.currentTime,
 			);
 
-			sound.gain.gain.exponentialRampToValueAtTime(
-				volume * volume,
+			sound.gain.gain.linearRampToValueAtTime(
+				Math.max(volume * volume, Number.EPSILON),
 				audioContext.currentTime + VOLUME_UPDATE_DURATION,
 			);
 		}
@@ -126,40 +133,50 @@ export async function playSound(
 	const volume = randomFromRange(rng, opts.volume);
 	const playbackRate = randomFromRange(rng, opts.playbackRate);
 	const channel = opts.channel ?? [0, 1];
-	try {
-		const response = await fetch(opts.url);
-		if (!response.ok) return;
-		const arrayBuffer = await response.arrayBuffer();
-		if (!arrayBuffer) return;
+	const response = await fetch(opts.url);
+	if (!response.ok) return;
+	const arrayBuffer = await response.arrayBuffer();
+	if (!arrayBuffer) return;
 
-		if (!audioContext) return;
+	if (!audioContext) return;
 
-		if (opts.delay) {
-			await new Promise((res) => setTimeout(res, opts.delay * 1000));
-			if (!playingSounds.has(opts.id)) return;
-		}
-		// If the sound was removed before the delay is over, don't play it.
+	if (opts.delay) {
+		await new Promise((res) => setTimeout(res, opts.delay * 1000));
+		if (!playingSounds.has(opts.id)) return;
+	}
+	// If the sound was removed before the delay is over, don't play it.
 
-		audioContext.destination.channelCount =
-			audioContext.destination.maxChannelCount;
-		// Connect the sound source to the volume control.
-		// Create a buffer from the response ArrayBuffer.
-		let buffer = await new Promise<AudioBuffer>((resolve, reject) =>
-			audioContext.decodeAudioData(arrayBuffer, resolve, reject),
-		);
-		if (opts.channel) {
-			buffer = downMixBuffer(buffer, channel);
-		}
-		const sound: Sound = {
-			id: opts.id,
-			url: opts.url,
-			volume,
-			playbackRate,
-			channel,
-			onFinishedPlaying,
-			type: opts.type,
-		};
-		//Create a new buffer and set it to the specified channel.
+	audioContext.destination.channelCount =
+		audioContext.destination.maxChannelCount;
+	// Connect the sound source to the volume control.
+	// Create a buffer from the response ArrayBuffer.
+	let buffer = await new Promise<AudioBuffer>((resolve, reject) =>
+		audioContext.decodeAudioData(arrayBuffer, resolve, reject),
+	);
+	if (opts.channel) {
+		buffer = downMixBuffer(buffer, channel);
+	}
+	const sound: Sound = {
+		id: opts.id,
+		url: opts.url,
+		volume,
+		playbackRate,
+		channel,
+		onFinishedPlaying,
+		type: opts.type,
+	};
+	//Create a new buffer and set it to the specified channel.
+	// Ambiance doesn't need gaps, but also needs to work correctly
+	// with changing volumes and playback rates over time,
+	// so ambiance uses a default audio buffer
+	if (opts.type === "ambiance") {
+		sound.source = audioContext.createBufferSource();
+		sound.source.buffer = buffer;
+		sound.source.loop = opts.loop;
+		sound.source.loopStart = opts.loopStart || 0;
+		sound.source.loopEnd = buffer.duration * (opts.loopEnd ?? 1);
+		sound.source.playbackRate.setValueAtTime(playbackRate, 0);
+	} else {
 		sound.source = new AudioLoopWithGap(audioContext, buffer, {
 			loop: opts.loop,
 			loopStart: opts.loopStart || 0,
@@ -167,24 +184,20 @@ export async function playSound(
 			loopGap: opts.loopGap || 0,
 			playbackRate,
 		});
-
-		sound.gain = audioContext.createGain();
-		// Use an x * x curve, since linear isn't super great with volume.
-		sound.gain.gain.setValueAtTime(volume * volume, 0);
-
-		sound.source.connect(sound.gain);
-
-		sound.source.onended = () => {
-			if (sound.source?.loop) return;
-			removeSound(opts.id);
-			onFinishedPlaying?.();
-		};
-		sound.gain.connect(gainNodes[sound.type]);
-		sound.source.start();
-		sounds.set(opts.id, sound);
-	} catch (err) {
-		console.error("There was an error");
 	}
+
+	sound.gain = audioContext.createGain();
+	// Use an x * x curve, since linear isn't super great with volume.
+	sound.gain.gain.setValueAtTime(volume * volume, 0);
+	sound.source.connect(sound.gain);
+	sound.source.onended = () => {
+		if (sound.source?.loop) return;
+		removeSound(opts.id);
+		onFinishedPlaying?.();
+	};
+	sound.gain.connect(gainNodes[sound.type]);
+	sound.source.start();
+	sounds.set(opts.id, sound);
 }
 
 const fadeOutTime = 0.03;
@@ -250,14 +263,6 @@ export function stopLooping(id: string) {
 export function SoundPlayer() {
 	const [{ id }] = q.ship.player.useNetRequest();
 	const { interpolate } = useLiveQuery();
-	const {
-		ambianceVolume,
-		mainVolume,
-		musicVolume,
-		soundEffectVolume,
-		uiVolume,
-	} = useAudioSettingsStore();
-	useEffect(() => {}, []);
 
 	q.effects.sounds.useNetRequest(undefined, {
 		callback: (data) => {

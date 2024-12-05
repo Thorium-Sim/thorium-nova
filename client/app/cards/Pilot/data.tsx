@@ -3,6 +3,10 @@ import { pubsub } from "@server/init/pubsub";
 import { getShipSystem } from "@server/utils/getShipSystem";
 import { z } from "zod";
 import type { Entity } from "@server/utils/ecs";
+import {
+	cancelLoopingSound,
+	playShipSound,
+} from "@server/utils/playRangedSound";
 
 export const pilot = t.router({
 	impulseEngines: t.router({
@@ -29,6 +33,29 @@ export const pilot = t.router({
 						impulseEngines.components.isImpulseEngines?.emergencySpeed || 1,
 				};
 			}),
+		ambiance: t.procedure.request(({ ctx }) => {
+			const engine = getShipSystem(ctx, { systemType: "impulseEngines" });
+			const { currentPower, requiredPower, maxSafePower } = engine.components
+				.power || { currentPower: 0, requiredPower: 0, maxSafePower: 0 };
+			return [
+				{
+					id: engine.id,
+					volumePercent: Math.min(1, currentPower / requiredPower),
+					playbackRate: currentPower / maxSafePower,
+					ambiance: engine.components.soundEffects?.soundBank.ambiance,
+				},
+			];
+			// return reactors.map((r) => ({
+			// 	id: r.id,
+			// 	// Reactor volume is based on the ratio of the current output to the max output
+			// 	volumePercent:
+			// 		r.components.isReactor!.currentOutput /
+			// 		r.components.isReactor!.maxOutput,
+			// 	// TODO Nov 2024: Figure out how to calculate the playback rate
+			// 	playbackRate: 1,
+			// 	ambiance: r.components.soundEffects?.soundBank.ambiance,
+			// }));
+		}),
 		setSpeed: t.procedure
 			.input(z.object({ systemId: z.number().optional(), speed: z.number() }))
 			.send(({ ctx, input }) => {
@@ -244,6 +271,13 @@ export const pilot = t.router({
 					},
 				});
 
+				if (!input.direction.x && !input.direction.y && !input.direction.z) {
+					// Cancel the looping sound
+					cancelLoopingSound(system, "thrust");
+				} else if (system.components.soundEffects?.soundBank.thrust) {
+					playShipSound(system, ctx.ship!, "thrust");
+				}
+
 				return system;
 			}),
 		setRotationDelta: t.procedure
@@ -282,6 +316,13 @@ export const pilot = t.router({
 								: current.z,
 					},
 				});
+
+				if (!input.rotation.x && !input.rotation.y && !input.rotation.z) {
+					// Cancel the looping sound
+					cancelLoopingSound(system, "thrust");
+				} else if (system.components.soundEffects?.soundBank.thrust) {
+					playShipSound(system, ctx.ship!, "thrust");
+				}
 
 				// TODO: September 21 2022 - Deactivate the ships autopilot when the thruster rotation change
 				return system;

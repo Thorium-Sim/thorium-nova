@@ -166,7 +166,9 @@ function SoundConfig({
 								const id = Math.random();
 								setPlaying(id);
 								//@ts-expect-error
-								playSound({ id, ...sound }, () => setPlaying(null));
+								playSound({ id, ...sound, type: "soundEffect" }, () =>
+									setPlaying(null),
+								);
 							}}
 						>
 							<Icon name="volume-2" />

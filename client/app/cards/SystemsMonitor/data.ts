@@ -54,7 +54,6 @@ export const systemsMonitor = t.router({
 				volumePercent:
 					r.components.isReactor!.currentOutput /
 					r.components.isReactor!.maxOutput,
-				// TODO Nov 2024: Figure out how to calculate the playback rate
 				playbackRate: 1,
 				ambiance: r.components.soundEffects?.soundBank.ambiance,
 			}));

@@ -12,9 +12,9 @@ import { useEffect, useRef } from "react";
  * - Play ambiance sounds
  * - Update ambiance sounds whenever their properties change
  */
-export function useReactorAmbiance() {
-	const [reactors, { dataUpdatedAt }] =
-		q.systemsMonitor.reactors.ambiance.useNetRequest(undefined, {
+export function useImpulseEnginesAmbiance() {
+	const [impulseEngines, { dataUpdatedAt }] =
+		q.pilot.impulseEngines.ambiance.useNetRequest(undefined, {
 			refetchInterval: 2000,
 		});
 
@@ -24,16 +24,17 @@ export function useReactorAmbiance() {
 		// Making the useEffect hook dependent on dataUpdatedAt ensures that the
 		// hook runs whenever the data is updated.
 		dataUpdatedAt;
-		for (const reactor of reactors) {
-			if (reactor.ambiance) {
-				for (let i = 0; i < reactor.ambiance.length; i++) {
-					const id = `reactor-${reactor.id}-ambiance-${i}`;
-					const sound = reactor.ambiance[i];
-					const volume = interpolateToRange(
-						sound.volume,
-						reactor.volumePercent,
+		for (const engine of impulseEngines) {
+			if (engine.ambiance) {
+				for (let i = 0; i < engine.ambiance.length; i++) {
+					const id = `impulseEngines-${engine.id}-ambiance-${i}`;
+					const sound = engine.ambiance[i];
+					const volume = interpolateToRange(sound.volume, engine.volumePercent);
+					const playbackRate = interpolateToRange(
+						sound.playbackRate,
+						engine.playbackRate,
 					);
-					if (!soundIsPlaying(id)) {
+					if (!soundsRef.current.has(id)) {
 						playSound({
 							id,
 							type: "ambiance",
@@ -44,19 +45,23 @@ export function useReactorAmbiance() {
 							loopStart: 0,
 							loopEnd: 1,
 							loopGap: 0,
-							playbackRate: [1, 1],
-							volume: [volume / reactors.length, volume / reactors.length],
+							playbackRate: [playbackRate, playbackRate],
+							volume: [
+								volume / impulseEngines.length,
+								volume / impulseEngines.length,
+							],
 						});
 						soundsRef.current.add(id);
 					} else {
 						updateSound(id, {
-							volume: volume / reactors.length,
+							volume: volume / impulseEngines.length,
+							playbackRate,
 						});
 					}
 				}
 			}
 		}
-	}, [reactors, dataUpdatedAt]);
+	}, [impulseEngines, dataUpdatedAt]);
 
 	useEffect(() => {
 		return () => {

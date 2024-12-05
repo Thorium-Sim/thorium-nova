@@ -44,17 +44,15 @@ function ConnectionStatus() {
 export default function AppContext({ children }: { children: ReactNode }) {
 	useEasterEgg();
 	return (
-		<StrictMode>
-			<LiveQueryProvider getRequestContext={getRequestContext}>
-				<ConnectionStatus />
-				<ThoriumAccountContextProvider>
-					<AlertDialog>
-						<IssueTrackerProvider>{children}</IssueTrackerProvider>
-						<ToastContainer />
-					</AlertDialog>
-				</ThoriumAccountContextProvider>
-			</LiveQueryProvider>
-		</StrictMode>
+		<LiveQueryProvider getRequestContext={getRequestContext}>
+			<ConnectionStatus />
+			<ThoriumAccountContextProvider>
+				<AlertDialog>
+					<IssueTrackerProvider>{children}</IssueTrackerProvider>
+					<ToastContainer />
+				</AlertDialog>
+			</ThoriumAccountContextProvider>
+		</LiveQueryProvider>
 	);
 }
 
