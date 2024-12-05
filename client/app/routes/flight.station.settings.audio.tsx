@@ -57,10 +57,10 @@ export default function AudioSettings() {
 				minValue={0}
 				maxValue={1}
 				step={0.01}
-				defaultValue={store.soundEffectsVolume}
+				defaultValue={store.soundEffectVolume}
 				onChange={(value) =>
 					!Array.isArray(value) &&
-					useAudioSettingsStore.setState({ soundEffectsVolume: value })
+					useAudioSettingsStore.setState({ soundEffectVolume: value })
 				}
 				formatOptions={{ style: "percent" }}
 			/>
