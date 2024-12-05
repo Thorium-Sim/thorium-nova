@@ -45,16 +45,6 @@ export const pilot = t.router({
 					ambiance: engine.components.soundEffects?.soundBank.ambiance,
 				},
 			];
-			// return reactors.map((r) => ({
-			// 	id: r.id,
-			// 	// Reactor volume is based on the ratio of the current output to the max output
-			// 	volumePercent:
-			// 		r.components.isReactor!.currentOutput /
-			// 		r.components.isReactor!.maxOutput,
-			// 	// TODO Nov 2024: Figure out how to calculate the playback rate
-			// 	playbackRate: 1,
-			// 	ambiance: r.components.soundEffects?.soundBank.ambiance,
-			// }));
 		}),
 		setSpeed: t.procedure
 			.input(z.object({ systemId: z.number().optional(), speed: z.number() }))

@@ -1,38 +1,41 @@
-import { q } from "@client/context/AppContext";
 import { interpolateToRange } from "@client/utils/sounds/Ambiance/interpolateToRange";
 import {
 	playSound,
-	removeSound,
-	soundIsPlaying,
 	updateSound,
+	removeSound,
 } from "@client/utils/sounds/playSound";
-import { useEffect, useRef } from "react";
+import type { Sound } from "@server/components/sound";
+import { useRef, useEffect } from "react";
 
 /** This hook should do the following:
  * - Play ambiance sounds
  * - Update ambiance sounds whenever their properties change
  */
-export function useImpulseEnginesAmbiance() {
-	const [impulseEngines, { dataUpdatedAt }] =
-		q.pilot.impulseEngines.ambiance.useNetRequest(undefined, {
-			refetchInterval: 2000,
-		});
-
+export function usePlayAmbiance(
+	soundKey: string,
+	entities: {
+		id: number;
+		volumePercent: number;
+		playbackRate: number;
+		ambiance?: Sound[];
+	}[],
+	dataUpdatedAt: number,
+) {
 	const soundsRef = useRef(new Set<string>());
 
 	useEffect(() => {
 		// Making the useEffect hook dependent on dataUpdatedAt ensures that the
 		// hook runs whenever the data is updated.
 		dataUpdatedAt;
-		for (const engine of impulseEngines) {
-			if (engine.ambiance) {
-				for (let i = 0; i < engine.ambiance.length; i++) {
-					const id = `impulseEngines-${engine.id}-ambiance-${i}`;
-					const sound = engine.ambiance[i];
-					const volume = interpolateToRange(sound.volume, engine.volumePercent);
+		for (const entity of entities) {
+			if (entity.ambiance) {
+				for (let i = 0; i < entity.ambiance.length; i++) {
+					const id = `${soundKey}-${entity.id}-ambiance-${i}`;
+					const sound = entity.ambiance[i];
+					const volume = interpolateToRange(sound.volume, entity.volumePercent);
 					const playbackRate = interpolateToRange(
 						sound.playbackRate,
-						engine.playbackRate,
+						entity.playbackRate,
 					);
 					if (!soundsRef.current.has(id)) {
 						playSound({
@@ -46,22 +49,19 @@ export function useImpulseEnginesAmbiance() {
 							loopEnd: 1,
 							loopGap: 0,
 							playbackRate: [playbackRate, playbackRate],
-							volume: [
-								volume / impulseEngines.length,
-								volume / impulseEngines.length,
-							],
+							volume: [volume / entities.length, volume / entities.length],
 						});
 						soundsRef.current.add(id);
 					} else {
 						updateSound(id, {
-							volume: volume / impulseEngines.length,
+							volume: volume / entities.length,
 							playbackRate,
 						});
 					}
 				}
 			}
 		}
-	}, [impulseEngines, dataUpdatedAt]);
+	}, [entities, soundKey, dataUpdatedAt]);
 
 	useEffect(() => {
 		return () => {

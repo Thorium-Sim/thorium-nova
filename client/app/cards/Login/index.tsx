@@ -50,18 +50,6 @@ const Login = () => {
 				>
 					Login
 				</Button>
-				<Button
-					onClick={() =>
-						q.effects.trigger.netSend({
-							effect: "spark",
-							config: { duration: 1000 },
-							station: "all",
-							shipId: ship.id,
-						})
-					}
-				>
-					Effect
-				</Button>
 			</form>
 		</div>
 	);

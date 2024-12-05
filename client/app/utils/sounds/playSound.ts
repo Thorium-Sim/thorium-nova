@@ -165,7 +165,7 @@ export async function playSound(
 		onFinishedPlaying,
 		type: opts.type,
 	};
-	//Create a new buffer and set it to the specified channel.
+	// Create a new buffer and set it to the specified channel.
 	// Ambiance doesn't need gaps, but also needs to work correctly
 	// with changing volumes and playback rates over time,
 	// so ambiance uses a default audio buffer

@@ -36,7 +36,6 @@ export default function Sounds() {
 						{key}
 					</Link>
 				))}
-				{/* <Button className="btn-success">Add Sound Effect</Button> */}
 			</div>
 			<Outlet />
 		</>
