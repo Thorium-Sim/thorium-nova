@@ -224,8 +224,8 @@ export const starmapCore = t.router({
 			const entity = ctx.flight.ecs.getEntityById(input.entityId);
 			if (!entity?.components.reputation) return [];
 			const reputation: { id: number; name: string; value: number }[] = [];
-			for (const id in entity.components.reputation) {
-				const value = entity.components.reputation?.[id];
+			for (const id in entity.components.reputation.reputation) {
+				const value = entity.components.reputation.reputation?.[id];
 				const reputationEntity = ctx.flight.ecs.getEntityById(Number(id));
 				if (!reputationEntity) continue;
 				const name = reputationEntity.components.identity?.name;
@@ -247,12 +247,18 @@ export const starmapCore = t.router({
 			const entity = ctx.flight.ecs.getEntityById(input.entityId);
 			if (!entity) return;
 			entity.updateComponent("reputation", {
-				[input.targetId.toString()]: input.value,
+				reputation: {
+					...entity.components.reputation?.reputation,
+					[input.targetId.toString()]: input.value,
+				},
 			});
 			// We pretty much always want to make it mutual
 			const targetEntity = ctx.flight.ecs.getEntityById(input.targetId);
 			targetEntity?.updateComponent("reputation", {
-				[entity.id.toString()]: input.value,
+				reputation: {
+					...targetEntity.components.reputation?.reputation,
+					[entity.id.toString()]: input.value,
+				},
 			});
 			pubsub.publish.starmapCore.reputation({ entityId: input.entityId });
 			pubsub.publish.starmapCore.reputation({ entityId: input.targetId });
