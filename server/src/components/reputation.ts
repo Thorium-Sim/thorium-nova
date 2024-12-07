@@ -6,4 +6,6 @@ import z from "zod";
  * >= 1000 is an ally, and will assist if in trouble
  * <= -1000 is an enemy, and will attack on sight
  */
-export const reputation = z.record(z.number()).default({});
+export const reputation = z
+	.object({ reputation: z.record(z.number()) })
+	.default({ reputation: {} });
