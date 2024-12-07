@@ -7,7 +7,7 @@ export const alertLevel = t.router({
 		.meta({ action: true, event: true })
 		.input(
 			z.object({
-				shipId: z.string().optional(),
+				shipId: z.number().optional(),
 				alertLevel: z.union([
 					z.literal("5"),
 					z.literal("4"),
@@ -19,9 +19,12 @@ export const alertLevel = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
-			if (!ctx.ship) throw new Error("Ship not found");
+			const ship =
+				ctx.flight?.ecs.getEntityById(input.shipId || -1) ?? ctx.ship;
+			if (!ship?.components.isShip) return;
 
-			ctx.ship.updateComponent("isShip", { alertLevel: input.alertLevel });
-			pubsub.publish.ship.get({ shipId: ctx.ship.id });
+			ship.updateComponent("isShip", { alertLevel: input.alertLevel });
+			pubsub.publish.ship.get({ shipId: ship.id });
+			pubsub.publish.starmapCore.object({ objectId: ship.id });
 		}),
 });
