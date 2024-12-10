@@ -609,6 +609,12 @@ export const starmapCore = t.router({
 						});
 					}
 				}
+				if (input.behavior === "wander") {
+					entity?.updateComponent("shipBehavior", {
+						objective: input.behavior,
+						target: { ...entity.components.position! },
+					});
+				}
 				pubsub.publish.pilot.autopilot.get({ shipId });
 				pubsub.publish.ship.get({ shipId });
 				pubsub.publish.starmapCore.ship({ shipId });
