@@ -31,7 +31,11 @@ export class ImpulseSystem extends System {
 		if (entity.components.power) {
 			const { currentPower, maxSafePower, requiredPower } =
 				entity.components.power || {};
-			targetSpeed = cruisingSpeed * (Math.max(0, currentPower) / maxSafePower);
+			targetSpeed = Math.min(
+				targetSpeed,
+				cruisingSpeed * (Math.max(0, currentPower) / maxSafePower),
+			);
+
 			if (currentPower < requiredPower) targetSpeed = 0;
 		}
 		const forwardImpulse = (targetSpeed / cruisingSpeed) * thrust;

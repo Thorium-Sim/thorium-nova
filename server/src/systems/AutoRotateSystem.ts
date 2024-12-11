@@ -3,9 +3,7 @@ import { type Entity, System } from "../utils/ecs";
 import { autopilotGetCoordinates } from "../utils/autopilotGetCoordinates";
 import Controller from "node-pid-controller";
 
-const positionVec = new Vector3();
 const rotationQuat = new Quaternion();
-const desiredDestination = new Vector3();
 const desiredRotationQuat = new Quaternion();
 const up = new Vector3(0, 1, 0);
 const matrix = new Matrix4();
@@ -75,12 +73,10 @@ export class AutoRotateSystem extends System {
 			? this.ecs.getEntityById(entity.components.autopilot.desiredSolarSystemId)
 			: null;
 
-		autopilotGetCoordinates(
+		const { desiredDestination, positionVec } = autopilotGetCoordinates(
 			entity,
 			entitySystem,
 			destinationSystem,
-			desiredDestination,
-			positionVec,
 		);
 		const distance = positionVec.distanceTo(desiredDestination);
 		if (distance < 1) {
