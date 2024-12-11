@@ -134,7 +134,12 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 											{body || ""}
 											<input
 												{...inputProps}
-												ref={inputEl}
+												ref={(ref) => {
+													// @ts-expect-error
+													inputEl.current = ref;
+													ref?.focus();
+													ref?.select();
+												}}
 												className="input block w-full mt-4"
 												value={input}
 												onChange={(e) => setInput(e.currentTarget.value)}

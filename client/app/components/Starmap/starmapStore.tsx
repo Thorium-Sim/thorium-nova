@@ -41,6 +41,7 @@ interface StarmapStore {
 	setCameraFocus: (position: Coordinates<number>) => void;
 	planetsHidden: boolean;
 	sensorsHidden: boolean;
+	clickAction?: { label: string; action: (object: number | null) => void };
 }
 
 let storeCount = 0;

@@ -60,6 +60,7 @@ export function Planet({
 	isSatellite,
 	showSprite,
 	showMesh = true,
+	onClick,
 }: {
 	planet: {
 		id: string | number;
@@ -83,6 +84,7 @@ export function Planet({
 	origin?: Vector3;
 	showSprite?: boolean;
 	showMesh?: boolean;
+	onClick?: () => void;
 }) {
 	const useStarmapStore = useGetStarmapStore();
 
@@ -168,15 +170,16 @@ export function Planet({
 		// });
 		setCursor("auto");
 	}
-	const { camera } = useThree();
 
-	function onClick() {
-		if (viewingMode === "viewscreen") return;
-		useStarmapStore.getState().setCameraFocus(position);
-		useStarmapStore.setState({
-			selectedObjectIds: [planet.id],
+	onClick =
+		onClick ||
+		(() => {
+			if (viewingMode === "viewscreen") return;
+			useStarmapStore.getState().setCameraFocus(position);
+			useStarmapStore.setState({
+				selectedObjectIds: [planet.id],
+			});
 		});
-	}
 
 	const radiusY = semiMajorAxis - semiMajorAxis * eccentricity;
 

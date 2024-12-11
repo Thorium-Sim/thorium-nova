@@ -1,7 +1,7 @@
 import { InterstellarMap } from "@client/components/Starmap/InterstellarMap";
 import SystemMarker from "@client/components/Starmap/SystemMarker";
 import StarmapCanvas from "@client/components/Starmap/StarmapCanvas";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
 	StarmapStoreProvider,
 	useCalculateVerticalDistance,
@@ -9,7 +9,10 @@ import {
 } from "@client/components/Starmap/starmapStore";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { SolarSystemMap } from "@client/components/Starmap/SolarSystemMap";
+import {
+	PaletteDisclosure,
+	SolarSystemMap,
+} from "@client/components/Starmap/SolarSystemMap";
 import { Planet } from "@client/components/Starmap/Planet";
 import StarEntity from "@client/components/Starmap/Star";
 import { StarmapShip } from "@client/components/Starmap/StarmapShip";
@@ -38,6 +41,11 @@ import { Icon } from "@thorium/ui/Icon";
 import { keepPreviousData } from "@tanstack/react-query";
 import { Torpedo } from "@client/components/Starmap/Torpedo";
 import { FiringPhasers } from "./FiringPhasers";
+import { cn } from "@client/utils/cn";
+import { useLocalStorage } from "@client/hooks/useLocalStorage";
+import { Disclosure, Transition } from "@headlessui/react";
+import { getOrbitPosition } from "@server/utils/getOrbitPosition";
+import { usePrompt } from "@thorium/ui/AlertDialog";
 
 export function StarmapCore() {
 	const ref = useRef<HTMLDivElement>(null);
@@ -47,9 +55,16 @@ export function StarmapCore() {
 			<StarmapStoreProvider>
 				<StarmapCoreContextMenu parentRef={ref} />
 				<div className="border-b border-b-white/20 pb-0.5 px-2 flex gap-2 items-baseline">
-					<StarmapCoreMenubar />
+					<Suspense>
+						<StarmapCoreMenubar />
+					</Suspense>
 				</div>
-				<CanvasWrapper />
+				<div className="h-full relative overflow-hidden">
+					<CanvasWrapper />
+					<Suspense>
+						<EditorPalette />
+					</Suspense>
+				</div>
 				<div className="absolute left-4 bottom-0 flex gap-2 items-end">
 					<div className="w-96">
 						<ZoomSliderComp />
@@ -62,6 +77,377 @@ export function StarmapCore() {
 		</div>
 	);
 }
+
+function EditorPalette() {
+	const useStarmapStore = useGetStarmapStore();
+	const selectedObjectIds = useStarmapStore(
+		(store) => store.selectedObjectIds,
+	) as number[];
+
+	const firstObject = selectedObjectIds[0];
+
+	return (
+		<div
+			key={firstObject}
+			className={cn(
+				"bg-gray-800 h-full max-w-96 w-2/5 absolute top-0 right-0 shadow-lg transition-transform px-2 py-2 overflow-y-auto",
+				{
+					"translate-x-0": selectedObjectIds.length > 0,
+					"translate-x-full": selectedObjectIds.length === 0,
+				},
+			)}
+		>
+			<EditorProperties id={firstObject} />
+		</div>
+	);
+}
+
+function EditorProperties({ id }: { id: number }) {
+	const [starmapObject] = q.starmapCore.object.useNetRequest(
+		{
+			objectId: id,
+		},
+		{
+			placeholderData: keepPreviousData,
+		},
+	);
+
+	return (
+		<>
+			{starmapObject?.components.identity ? (
+				<Input
+					label="Name"
+					className="input-sm"
+					defaultValue={starmapObject?.components.identity?.name}
+				/>
+			) : null}
+			{starmapObject?.components.isShip ? (
+				<EditorDisclosure title="Ship">
+					<Input
+						label="Class"
+						className="input-sm"
+						defaultValue={starmapObject?.components.isShip.shipClass}
+					/>
+
+					<Input
+						label="Registry"
+						className="input-sm"
+						defaultValue={starmapObject?.components.isShip.registry}
+					/>
+					<label>Alert Level</label>
+					<div className="flex gap-1">
+						<button
+							className={cn(
+								"aspect-square w-6 rounded bg-error brightness-75",
+								{
+									"brightness-125":
+										starmapObject.components.isShip.alertLevel === "1",
+								},
+							)}
+							onClick={() => {
+								q.alertLevel.update.netSend({
+									shipId: id,
+									alertLevel: "1",
+								});
+							}}
+						>
+							1
+						</button>
+						<button
+							className={cn(
+								"aspect-square w-6 rounded bg-warning brightness-75",
+								{
+									"brightness-125":
+										starmapObject.components.isShip.alertLevel === "2",
+								},
+							)}
+							onClick={() => {
+								q.alertLevel.update.netSend({
+									shipId: id,
+									alertLevel: "2",
+								});
+							}}
+						>
+							2
+						</button>
+						<button
+							className={cn(
+								"aspect-square w-6 rounded bg-yellow-600 brightness-75",
+								{
+									"brightness-125":
+										starmapObject.components.isShip.alertLevel === "3",
+								},
+							)}
+							onClick={() => {
+								q.alertLevel.update.netSend({
+									shipId: id,
+									alertLevel: "3",
+								});
+							}}
+						>
+							3
+						</button>
+						<button
+							className={cn(
+								"aspect-square w-6 rounded bg-lime-600 brightness-75",
+								{
+									"brightness-125":
+										starmapObject.components.isShip.alertLevel === "4",
+								},
+							)}
+							onClick={() => {
+								q.alertLevel.update.netSend({
+									shipId: id,
+									alertLevel: "4",
+								});
+							}}
+						>
+							4
+						</button>
+						<button
+							className={cn(
+								"aspect-square w-6 rounded bg-green-600 brightness-75",
+								{
+									"brightness-125":
+										starmapObject.components.isShip.alertLevel === "5",
+								},
+							)}
+							onClick={() => {
+								q.alertLevel.update.netSend({
+									shipId: id,
+									alertLevel: "5",
+								});
+							}}
+						>
+							5
+						</button>
+					</div>
+					<Input
+						label="Category"
+						className="input-sm"
+						defaultValue={starmapObject?.components.isShip.category}
+					/>
+				</EditorDisclosure>
+			) : null}
+			{starmapObject?.components.reputation ? (
+				<EditorDisclosure title="Reputation">
+					<ReputationEditor id={id} />
+				</EditorDisclosure>
+			) : null}
+		</>
+	);
+}
+
+function ReputationEditor({ id }: { id: number }) {
+	const [reputation] = q.starmapCore.reputation.useNetRequest({ entityId: id });
+	const useStarmapStore = useGetStarmapStore();
+	const prompt = usePrompt();
+	return (
+		<div className="px-2 mt-1">
+			{reputation.length === 0 ? (
+				<p>No reputation</p>
+			) : (
+				reputation.map(({ id: targetId, name, value }) => {
+					return (
+						<div key={name} className="flex">
+							<label className="flex-1" htmlFor={`reputation-${targetId}`}>
+								{name}
+							</label>
+							<input
+								id={`reputation-${targetId}`}
+								className="input input-sm w-24"
+								value={value}
+							/>
+							<Button
+								className="btn-xs btn-warning"
+								onClick={async () => {
+									const stringValue = await prompt({
+										header: "Set Reputation",
+										body: "Enter the reputation value. 0 is neutral, positive is favorable, negative is unfavorable",
+										defaultValue: value.toString(),
+									});
+									if (stringValue === null) return;
+									const newValue = Number(stringValue);
+									if (Number.isNaN(newValue)) {
+										return;
+									}
+									q.starmapCore.setReputation.netSend({
+										entityId: id,
+										targetId,
+										value: newValue,
+									});
+								}}
+							>
+								<Icon name="pencil" />
+							</Button>
+						</div>
+					);
+				})
+			)}
+			<div className="flex gap-1 justify-between mt-1">
+				<Button
+					className="flex-1 btn-xs btn-primary"
+					onClick={() =>
+						useStarmapStore.setState({
+							clickAction: {
+								label: "Choose a ship or faction to become friends with.",
+								action: (object) => {
+									if (!object) {
+										useStarmapStore.setState({ clickAction: undefined });
+										return;
+									}
+									if (object === id) return;
+									q.starmapCore.setReputation.netSend({
+										entityId: id,
+										targetId: object,
+										value: 1000,
+									});
+									useStarmapStore.setState({ clickAction: undefined });
+								},
+							},
+						})
+					}
+				>
+					Friend
+				</Button>
+				<Button
+					className="flex-1 btn-xs btn-error"
+					onClick={() =>
+						useStarmapStore.setState({
+							clickAction: {
+								label: "Choose a ship or faction to become enemies with.",
+								action: (object) => {
+									if (!object) {
+										useStarmapStore.setState({ clickAction: undefined });
+										return;
+									}
+									if (object === id) return;
+									q.starmapCore.setReputation.netSend({
+										entityId: id,
+										targetId: object,
+										value: -1000,
+									});
+									useStarmapStore.setState({ clickAction: undefined });
+								},
+							},
+						})
+					}
+				>
+					Enemy
+				</Button>
+				<Button
+					className="flex-1 btn-xs btn-info"
+					onClick={() =>
+						useStarmapStore.setState({
+							clickAction: {
+								label:
+									"Choose a ship or faction to set a reputation value with.",
+								action: async (object) => {
+									if (!object) {
+										useStarmapStore.setState({ clickAction: undefined });
+										return;
+									}
+									if (object === id) return;
+									const stringValue = await prompt({
+										header: "Set Reputation",
+										body: "Enter the reputation value. 0 is neutral, positive is favorable, negative is unfavorable",
+										defaultValue: "0",
+									});
+									if (stringValue === null) return;
+									const value = Number(stringValue);
+									if (Number.isNaN(value)) {
+										return;
+									}
+									q.starmapCore.setReputation.netSend({
+										entityId: id,
+										targetId: object,
+										value,
+									});
+									useStarmapStore.setState({ clickAction: undefined });
+								},
+							},
+						})
+					}
+				>
+					Pick
+				</Button>
+			</div>
+		</div>
+	);
+}
+
+export function EditorDisclosure({
+	title,
+	children,
+	defaultOpen = false,
+}: {
+	title: string;
+	children: React.ReactNode;
+	defaultOpen?: boolean;
+}) {
+	const [isDefaultOpen] = useLocalStorage(
+		`core-editor-open-${title}`,
+		defaultOpen,
+	);
+	const disclosureRef = useRef<HTMLDivElement>(null);
+	return (
+		<Disclosure defaultOpen={isDefaultOpen}>
+			{({ open }) => (
+				<>
+					<HandleIsOpen open={open} title={title} scrollRef={disclosureRef} />
+					<div className="w-full sticky -top-1" ref={disclosureRef}>
+						<Disclosure.Button className="btn btn-xs justify-between btn-block">
+							<span>{title}</span>
+							<Icon
+								name="chevron-up"
+								className={` transition-transform${
+									open ? "transform rotate-180" : ""
+								} w-5 h-5`}
+							/>
+						</Disclosure.Button>
+					</div>
+					<Transition
+						enter="transition duration-100 ease-out"
+						enterFrom="transform scale-95 opacity-0"
+						enterTo="transform scale-100 opacity-100"
+						leave="transition duration-75 ease-out"
+						leaveFrom="transform scale-100 opacity-100"
+						leaveTo="transform scale-95 opacity-0"
+					>
+						<Disclosure.Panel className="pb-2">{children}</Disclosure.Panel>
+					</Transition>
+				</>
+			)}
+		</Disclosure>
+	);
+}
+const HandleIsOpen = ({
+	open,
+	title,
+	scrollRef,
+}: {
+	title: string;
+	open: boolean;
+	scrollRef: React.RefObject<HTMLDivElement>;
+}) => {
+	const hasMounted = useRef(false);
+	useEffect(() => {
+		localStorage.setItem(`core-editor-open-${title}`, JSON.stringify(open));
+	}, [title, open]);
+	useLayoutEffect(() => {
+		if (open && hasMounted.current) {
+			setTimeout(() => {
+				scrollRef.current?.scrollIntoView({
+					behavior: "smooth",
+					block: "start",
+				});
+			}, 100);
+		}
+		hasMounted.current = true;
+	}, [open, scrollRef]);
+
+	return null;
+};
 
 function ShipControls() {
 	const useStarmapStore = useGetStarmapStore();
@@ -77,8 +463,20 @@ function ShipControls() {
 		{ placeholderData: keepPreviousData },
 	);
 
+	const clickAction = useStarmapStore((store) => store.clickAction);
 	return (
 		<>
+			{clickAction ? (
+				<p className="absolute bottom-16 text-center pointer-events-none w-full">
+					{clickAction.label}{" "}
+					<Button
+						onClick={() => useStarmapStore.setState({ clickAction: undefined })}
+						className="btn-xs btn-error pointer-events-auto"
+					>
+						Cancel
+					</Button>
+				</p>
+			) : null}
 			{selectedObjectIds.length > 0 && starmapShip?.behavior ? (
 				<>
 					<Tooltip content="Patrol">
@@ -370,6 +768,10 @@ function CanvasWrapper() {
 				}}
 				onPointerMissed={(event) => {
 					if (event.button !== 2) {
+						const clickAction = useStarmapStore.getState().clickAction;
+						if (clickAction) {
+							clickAction.action(null);
+						}
 						// Ignore Right click
 						useStarmapStore.setState({ selectedObjectIds: [] });
 					}
@@ -475,6 +877,8 @@ export function SolarSystemWrapper() {
 	const planetsHidden = useStarmapStore((store) => store.planetsHidden);
 	const isCore = useStarmapStore((store) => store.viewingMode === "core");
 	const { interpolate } = useLiveQuery();
+	const viewingMode = useStarmapStore((state) => state.viewingMode);
+
 	return (
 		<SolarSystemMap
 			skyboxKey={system?.components.isSolarSystem?.skyboxKey || "Blank"}
@@ -513,6 +917,22 @@ export function SolarSystemWrapper() {
 								onError={(err) => console.error(err)}
 							>
 								<Planet
+									onClick={() => {
+										const clickAction = useStarmapStore.getState().clickAction;
+										if (clickAction) {
+											clickAction.action(entity.id);
+											return;
+										}
+										if (viewingMode === "viewscreen") return;
+										useStarmapStore
+											.getState()
+											.setCameraFocus(
+												getOrbitPosition(entity.components.satellite!),
+											);
+										useStarmapStore.setState({
+											selectedObjectIds: [entity.id],
+										});
+									}}
 									planet={{
 										id: entity.id,
 										satellite: entity.components.satellite,
@@ -545,6 +965,11 @@ export function SolarSystemWrapper() {
 								selectedObjectIds.includes(ship.id) ? "#0088ff" : "white"
 							}
 							onClick={() => {
+								const clickAction = useStarmapStore.getState().clickAction;
+								if (clickAction) {
+									clickAction.action(ship.id);
+									return;
+								}
 								const position = interpolate(ship.id);
 								if (position) {
 									useStarmapStore.getState().setCameraFocus(position);

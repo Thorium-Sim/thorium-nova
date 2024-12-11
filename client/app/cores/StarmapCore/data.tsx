@@ -12,6 +12,8 @@ import {
 import type { isDestroyed } from "@server/components/isDestroyed";
 import type { DataContext } from "@server/utils/types";
 import { Vector3 } from "three";
+import type { ComponentIds, ComponentProperties } from "@server/components";
+import { identity } from "@server/components/identity";
 
 type IsDestroyed = Zod.infer<typeof isDestroyed>;
 
@@ -165,6 +167,101 @@ export const starmapCore = t.router({
 				systemId: entity.components.position?.parentId,
 				behavior: entity.components.shipBehavior,
 			};
+		}),
+	/** Useful for displaying properties of any object in the starmap */
+	object: t.procedure
+		.input(z.object({ objectId: z.number().optional() }))
+		.filter((publish: { objectId: number | null }, { input }) => {
+			if (publish && publish.objectId !== input.objectId) return false;
+
+			return true;
+		})
+		.request(({ ctx, input }) => {
+			const components: ComponentIds[] = [
+				"isShip",
+				"position",
+				"velocity",
+				"rotation",
+				"rotationVelocity",
+				"hull",
+				"mass",
+				"size",
+				"tags",
+				"identity",
+				"theme",
+				"isStar",
+				"isPlanet",
+				"satellite",
+				"temperature",
+				"population",
+				"reputation",
+			];
+			if (!ctx.flight || !input.objectId) return null;
+			const entity = ctx.flight.ecs.getEntityById(input.objectId);
+			if (!entity) return null;
+			return {
+				id: entity.id,
+				components: components.reduce(
+					(acc: Partial<ComponentProperties>, key) => {
+						// @ts-expect-error
+						acc[key] = entity.components[key];
+						return acc;
+					},
+					{},
+				),
+			};
+		}),
+	reputation: t.procedure
+		.input(z.object({ entityId: z.number() }))
+		.filter((publish: { entityId: number | null }, { input }) => {
+			if (publish && publish.entityId !== input.entityId) return false;
+
+			return true;
+		})
+		.request(({ ctx, input }) => {
+			if (!ctx.flight || !input.entityId) return [];
+
+			const entity = ctx.flight.ecs.getEntityById(input.entityId);
+			if (!entity?.components.reputation) return [];
+			const reputation: { id: number; name: string; value: number }[] = [];
+			for (const id in entity.components.reputation.reputation) {
+				const value = entity.components.reputation.reputation?.[id];
+				const reputationEntity = ctx.flight.ecs.getEntityById(Number(id));
+				if (!reputationEntity) continue;
+				const name = reputationEntity.components.identity?.name;
+				if (!name) continue;
+				reputation.push({ id: Number(id), name, value });
+			}
+			return reputation;
+		}),
+	setReputation: t.procedure
+		.input(
+			z.object({
+				entityId: z.number(),
+				targetId: z.number(),
+				value: z.number(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			if (!ctx.flight) return;
+			const entity = ctx.flight.ecs.getEntityById(input.entityId);
+			if (!entity) return;
+			entity.updateComponent("reputation", {
+				reputation: {
+					...entity.components.reputation?.reputation,
+					[input.targetId.toString()]: input.value,
+				},
+			});
+			// We pretty much always want to make it mutual
+			const targetEntity = ctx.flight.ecs.getEntityById(input.targetId);
+			targetEntity?.updateComponent("reputation", {
+				reputation: {
+					...targetEntity.components.reputation?.reputation,
+					[entity.id.toString()]: input.value,
+				},
+			});
+			pubsub.publish.starmapCore.reputation({ entityId: input.entityId });
+			pubsub.publish.starmapCore.reputation({ entityId: input.targetId });
 		}),
 	debugSpheres: t.procedure
 		.input(z.object({ systemId: z.number().nullable() }))

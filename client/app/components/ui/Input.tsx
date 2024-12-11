@@ -1,4 +1,4 @@
-import React, { forwardRef, type ReactNode } from "react";
+import React, { forwardRef, useId, type ReactNode } from "react";
 
 interface CommonProps {
 	label: ReactNode;
@@ -34,10 +34,12 @@ const Input = forwardRef<
 		inputButton,
 		...inputProps
 	} = props;
+	const id = inputProps.id || useId();
 
 	return (
 		<div className={`flex flex-col ${fixed ? "" : "w-full"}`}>
 			<label
+				htmlFor={id}
 				{...labelProps}
 				className={`${labelProps?.className || ""} ${
 					labelHidden ? "hidden" : ""
@@ -50,6 +52,7 @@ const Input = forwardRef<
 					autoComplete: "off",
 					...(inputProps as React.InputHTMLAttributes<HTMLInputElement>),
 					ref,
+					id,
 					className: `flex-1 ${as === "textarea" ? "textarea" : "input"} ${
 						inputProps.className
 					} ${isInvalid ? "border-red-500" : ""} `,
