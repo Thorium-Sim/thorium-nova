@@ -8,6 +8,7 @@ declare global {
 	interface Window {
 		isHeadless: boolean;
 		thorium: {
+			clipboardWriteText: (text: string) => Promise<boolean>;
 			getAddress: () => Promise<string>;
 			getHostSecret: () => Promise<string>;
 			registerUpdateHandler: (handler: (update: string) => void) => void;
