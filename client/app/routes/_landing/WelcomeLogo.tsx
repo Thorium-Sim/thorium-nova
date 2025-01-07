@@ -4,19 +4,10 @@ import packageJson from "@client/../../package.json";
 import { ClientButton } from "@client/components/ClientButton";
 import { useEffect, useState } from "react";
 import Button from "@thorium/ui/Button";
-import { CopyToClipboard } from "@thorium/ui/CopyToClipboard";
 import { q } from "@client/context/AppContext";
+import { IPAddress } from "@client/routes/_landing/IPAddress";
 
-function useConnectionAddress() {
-	const [connectionAddress, setConnectionAddress] = useState("");
-
-	useEffect(() => {
-		window?.thorium?.getAddress().then(setConnectionAddress);
-	}, []);
-	return connectionAddress;
-}
 export const WelcomeLogo = ({ className }: { className?: string }) => {
-	const connectionAddress = useConnectionAddress();
 	const [hasHost] = q.thorium.hasHost.useNetRequest();
 	const [updateText, setUpdateText] = useState("");
 	useEffect(() => {
@@ -52,14 +43,7 @@ export const WelcomeLogo = ({ className }: { className?: string }) => {
 			</h2>
 			<div className="mt-6" />
 			<ClientButton />
-			{connectionAddress && (
-				<h3 className="text-xl font-semi-bold mt-2">
-					Connect:{" "}
-					<CopyToClipboard text={connectionAddress}>
-						{connectionAddress}
-					</CopyToClipboard>
-				</h3>
-			)}
+			<IPAddress />
 			{hasHost ? null : (
 				<Button
 					className="btn-warning btn-sm"
