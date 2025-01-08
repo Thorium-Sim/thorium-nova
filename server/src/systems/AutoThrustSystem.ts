@@ -2,23 +2,13 @@ import { Quaternion, Vector3, Matrix4 } from "three";
 import Controller from "node-pid-controller";
 import { type Entity, System } from "../utils/ecs";
 import { autopilotGetCoordinates } from "../utils/autopilotGetCoordinates";
-import {
-	kilometerToLightMinute,
-	KM_TO_LY,
-	lightMinuteToLightYear,
-	lightYearToLightMinute,
-	Radian,
-} from "../utils/unitTypes";
+import { KM_TO_LY, lightYearToLightMinute } from "../utils/unitTypes";
 import type { isWarpEngines } from "../components/shipSystems";
 import { pubsub } from "@server/init/pubsub";
 
 const positionVec = new Vector3();
 const rotationQuat = new Quaternion();
 const desiredDestination = new Vector3();
-const emptyVector = new Vector3(0, 0, 0);
-const scaleVector = new Vector3(1, 1, 1);
-const shipMatrix = new Matrix4();
-const lookVector = new Vector3(0, 0, 1);
 const up = new Vector3(0, 1, 0);
 const matrix = new Matrix4();
 const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
@@ -106,6 +96,15 @@ export class AutoThrustSystem extends System {
 			},
 			[null, null, null],
 		);
+
+		if (!autopilot.desiredCoordinates) {
+			impulseEngines?.updateComponent("isImpulseEngines", {
+				targetSpeed: 0,
+			});
+			warpEngines?.updateComponent("isWarpEngines", {
+				currentWarpFactor: 0,
+			});
+		}
 		// Get the current system the ship is in and the autopilot desired system
 		const entitySystem = entity.components.position?.parentId
 			? this.ecs.getEntityById(entity.components.position.parentId)
@@ -133,18 +132,9 @@ export class AutoThrustSystem extends System {
 			positionVec.distanceTo(desiredDestination) *
 			(isInInterstellar ? 1 / lightYearToLightMinute(KM_TO_LY) : 1);
 
-		shipMatrix.compose(emptyVector, rotationQuat, scaleVector);
-		const rotatedLookVector = lookVector
-			.clone()
-			.applyMatrix4(shipMatrix)
-			.normalize();
-
 		const rotationDifference =
 			(Math.abs(rotationQuat.angleTo(desiredRotationQuat)) / Math.PI) * 180;
 
-		const dotProd = rotatedLookVector.dot(
-			desiredDestination.clone().normalize(),
-		);
 		const impulseController = getImpulseController(impulseEngines?.id);
 		const warpController = getWarpController(warpEngines?.id);
 
@@ -169,10 +159,10 @@ export class AutoThrustSystem extends System {
 		// This will be 1 if the ship is pointing directly at the destination, and 0 if it's pointing directly away
 		const correctDirectionCoefficient = (180 - rotationDifference) / 180;
 		const inCorrectDirection = rotationDifference <= 0.5;
-		if (
-			warpEngines?.components.isWarpEngines &&
-			distanceInKM / impulseEngineSpeed > TRAVEL_TIME_THRESHOLD_SECONDS
-		) {
+
+		const shouldUseWarpEngines =
+			distanceInKM / impulseEngineSpeed > TRAVEL_TIME_THRESHOLD_SECONDS;
+		if (warpEngines?.components.isWarpEngines && shouldUseWarpEngines) {
 			impulseController?.reset();
 			impulseEngines?.updateComponent("isImpulseEngines", { targetSpeed: 0 });
 			// Use warp engines
@@ -221,7 +211,11 @@ export class AutoThrustSystem extends System {
 
 			// Arbitrary number that gets roughly close to 5 KM away
 			if (distanceInKM < 1) {
-				desiredSpeed = 0;
+				autopilot.desiredCoordinates = autopilot.path.pop()!;
+				if (!autopilot.desiredCoordinates) {
+					desiredSpeed = 0;
+					return;
+				}
 			}
 			impulseEngines.updateComponent("isImpulseEngines", {
 				targetSpeed: desiredSpeed,

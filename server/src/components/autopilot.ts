@@ -12,6 +12,9 @@ export const autopilot = z
 			})
 			.nullable()
 			.default(null),
+		path: z
+			.array(z.object({ x: z.number(), y: z.number(), z: z.number() }))
+			.default([]),
 		/** Desired interstellar system. For when we are traveling from one system to another. */
 		desiredSolarSystemId: z.number().nullable().default(null),
 		/** Whether the rotation autopilot is on. */

@@ -82,10 +82,14 @@ export class AutoRotateSystem extends System {
 			desiredDestination,
 			positionVec,
 		);
-		const distance = positionVec.distanceTo(desiredDestination);
+		const distance = positionVec.distanceToSquared(desiredDestination);
+
 		if (distance < 1) {
-			thrusters.components.isThrusters.autoRotationVelocity = 0;
-			return;
+			autopilot.desiredCoordinates = autopilot.path.pop()!;
+			if (!autopilot.desiredCoordinates) {
+				thrusters.components.isThrusters.autoRotationVelocity = 0;
+				return;
+			}
 		}
 
 		rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
