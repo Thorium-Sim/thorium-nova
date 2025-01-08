@@ -32,7 +32,7 @@ export class ShipBehaviorSystem extends System {
 					!destination ||
 					shipPosition.distanceTo(destinationVector) < patrolRadius / 10
 				) {
-					getTargetPoint(this.ecs, target, targetPoint);
+					const targetPoint = getTargetPoint(this.ecs, target);
 					// Pick a new destination
 					const [x, y, z] = randomPointInSphere(patrolRadius);
 					wanderVector.set(x, y, z).add(targetPoint);
@@ -70,15 +70,14 @@ export class ShipBehaviorSystem extends System {
 function getTargetPoint(
 	ecs: ECS,
 	target: Zod.infer<typeof shipBehavior>["target"],
-	targetPoint: Vector3,
-): void {
-	if (!target) return;
+) {
+	if (!target) return targetPoint;
 	if (typeof target === "object") {
 		targetPoint.set(target.x, target.y, target.z);
-		return;
+		return targetPoint;
 	}
 	const targetEntity = ecs.getEntityById(target);
-	if (!targetEntity) return;
+	if (!targetEntity) return targetPoint;
 
 	if (targetEntity.components.position) {
 		targetPoint.set(
@@ -92,4 +91,6 @@ function getTargetPoint(
 		const position = getOrbitPosition(targetEntity.components.satellite);
 		targetPoint.set(position.x, position.y, position.z);
 	}
+
+	return targetPoint;
 }
