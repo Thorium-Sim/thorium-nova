@@ -3,6 +3,7 @@ import { Matrix4, Quaternion, Vector3 } from "three";
 import { type Entity, System } from "../utils/ecs";
 import { getOrbitPosition } from "../utils/getOrbitPosition";
 import { lightMinuteToLightYear } from "../utils/unitTypes";
+import { pathfinder } from "@server/utils/pathfinder";
 
 const MIN_SYSTEM_SIZE = 10_000;
 const SYSTEM_PADDING = 1.05;
@@ -44,7 +45,6 @@ const desiredRotationQuat = new Quaternion();
 const up = new Vector3(0, 1, 0);
 const matrix = new Matrix4();
 const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
-const rotationQuat = new Quaternion();
 
 export class InterstellarTransitionSystem extends System {
 	test(entity: Entity) {
@@ -197,6 +197,17 @@ export class InterstellarTransitionSystem extends System {
 						y: desiredRotationQuat.y,
 						z: desiredRotationQuat.z,
 						w: desiredRotationQuat.w,
+					});
+				}
+
+				// Generate a path to get to the destination
+				if (entity.components.autopilot?.desiredCoordinates) {
+					const { x, y, z } = entity.components.autopilot.desiredCoordinates;
+					const path = pathfinder(entity, new Vector3(x, y, z));
+					const nextCoordinates = path?.shift();
+					entity.updateComponent("autopilot", {
+						path,
+						nextCoordinates,
 					});
 				}
 				pubsub.publish.starmapCore.ships({ systemId: destinationSystem.id });

@@ -1,6 +1,12 @@
 import { solarSystemsObjects } from "@server/systems/SolarSystemPositionSystem";
 import type { Entity } from "@server/utils/ecs";
-import { CatmullRomCurve3, type Object3D, Raycaster, Vector3 } from "three";
+import {
+	CatmullRomCurve3,
+	Mesh,
+	type Object3D,
+	Raycaster,
+	Vector3,
+} from "three";
 
 const raycaster = new Raycaster();
 const position = new Vector3();
@@ -34,18 +40,21 @@ export function pathfinder(entity: Entity, targetPosition: Vector3) {
 	const path = calculatePath(
 		position,
 		targetPosition,
-		objects.map((o) => ({
-			distance: o.position.distanceToSquared(position),
-			obstacle: o,
-			position: o.position,
-			radius: o.userData.radius,
-		})),
+		objects
+			.filter((o) => o.entityId !== entity.id)
+			.map((o) => ({
+				entityId: o.entityId,
+				distance: o.position.distanceToSquared(position),
+				position: o.position,
+				radius: o.radius,
+			})),
 	);
-	return path;
+	return path.map(({ x, y, z }) => ({ x, y, z }));
 }
 
 type Obstacle = {
-	obstacle: Object3D;
+	entityId: number;
+	position: Vector3;
 	radius: number;
 	distance: number;
 };
@@ -56,7 +65,7 @@ function calculatePath(start: Vector3, end: Vector3, obstacles: Obstacle[]) {
 	obstacles.sort((a, b) => a.distance - b.distance);
 	let previousObstacle = obstacles[0];
 	for (const obstacle of obstacles) {
-		const collision = detectCollision(current, end, obstacle.obstacle);
+		const collision = detectCollision(current, end, obstacle);
 		if (collision) {
 			const tangents = calculateTangents(current, obstacle);
 			const detour = chooseBestTangent(tangents, end);
@@ -65,7 +74,7 @@ function calculatePath(start: Vector3, end: Vector3, obstacles: Obstacle[]) {
 			const backwardsCollision = detectCollision(
 				prevPoint,
 				detour,
-				previousObstacle.obstacle,
+				previousObstacle,
 			);
 			if (backwardsCollision) {
 				const tangents = calculateTangents(prevPoint, previousObstacle);
@@ -82,15 +91,53 @@ function calculatePath(start: Vector3, end: Vector3, obstacles: Obstacle[]) {
 	return smoothPath(path);
 }
 
-function detectCollision(start: Vector3, end: Vector3, obstacle: Object3D) {
-	// Check if the line segment intersects the obstacle (bounding volume)
-	// Example using a sphere:
-	const direction = end.clone().sub(start).normalize();
-	raycaster.set(start, direction);
-	raycaster.near = 0;
-	raycaster.far = start.distanceTo(end);
-	const intersects = raycaster.intersectObject(obstacle);
-	return intersects.length > 0;
+function detectCollision(
+	point1: Vector3,
+	point2: Vector3,
+	obstacle: Obstacle,
+): boolean {
+	console.log({ point1, point2, obstacle });
+	// Calculate direction vector of the line
+	const dx = point2.x - point1.x;
+	const dy = point2.y - point1.y;
+	const dz = point2.z - point1.z;
+
+	// Vector from line start to sphere center
+	const cx = obstacle.position.x - point1.x;
+	const cy = obstacle.position.y - point1.y;
+	const cz = obstacle.position.z - point1.z;
+
+	// Length of direction vector
+	const lengthSquared = dx * dx + dy * dy + dz * dz;
+
+	// Early exit if points are the same
+	if (lengthSquared < Number.EPSILON) {
+		// Check if point1 is inside sphere
+		const distSquared = cx * cx + cy * cy + cz * cz;
+		return distSquared <= obstacle.radius * obstacle.radius;
+	}
+
+	// Project c onto d to find the closest point on the line to the sphere center
+	const dot = (cx * dx + cy * dy + cz * dz) / lengthSquared;
+
+	// Find the closest point on the line to the sphere center
+	const closestX = point1.x + dot * dx;
+	const closestY = point1.y + dot * dy;
+	const closestZ = point1.z + dot * dz;
+
+	// Calculate distance from closest point to sphere center
+	const distX = obstacle.position.x - closestX;
+	const distY = obstacle.position.y - closestY;
+	const distZ = obstacle.position.z - closestZ;
+	const distSquared = distX * distX + distY * distY + distZ * distZ;
+
+	// If closest point is further than radius, no intersection
+	if (distSquared > obstacle.radius * obstacle.radius) {
+		return false;
+	}
+
+	// Check if closest point lies within the line segment
+	return dot >= 0 && dot <= 1;
 }
 
 function calculateTangents(point: Vector3, obstacle: Obstacle) {
@@ -98,7 +145,7 @@ function calculateTangents(point: Vector3, obstacle: Obstacle) {
 	// point: THREE.Vector3 - the current position of the object navigating
 	// obstacle: { position: THREE.Vector3, radius: number } - sphere obstacle
 
-	const obstacleCenter = obstacle.obstacle.position;
+	const obstacleCenter = obstacle.position;
 	const radius = obstacle.radius;
 
 	// Vector from the point to the center of the sphere

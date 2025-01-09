@@ -9,7 +9,6 @@ const matrix = new Matrix4();
 const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
 const desiredRotationQuat = new Quaternion();
 
-/** This function has side effects - it sets the positionVec vector */
 export function autopilotGetCoordinates(
 	entity: Entity,
 	shipSystem: Entity | null,
@@ -26,13 +25,12 @@ export function autopilotGetCoordinates(
 		autopilotDesiredSystem?.id === entity.components.position?.parentId ||
 		(!autopilotDesiredSystem && !entity.components.position?.parentId)
 	) {
+		let nextCoordinates = autopilot.nextCoordinates;
+		if (!nextCoordinates) nextCoordinates = autopilot.path.shift() || null;
+		const coordinates = nextCoordinates || autopilot.desiredCoordinates;
 		// Within the system or within interstellar space.
-		if (autopilot.desiredCoordinates) {
-			desiredDestination.set(
-				autopilot.desiredCoordinates?.x,
-				autopilot.desiredCoordinates?.y,
-				autopilot.desiredCoordinates?.z,
-			);
+		if (coordinates) {
+			desiredDestination.set(coordinates.x, coordinates.y, coordinates.z);
 		}
 		positionVec.set(position.x, position.y, position.z);
 		return {

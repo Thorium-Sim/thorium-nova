@@ -1,16 +1,24 @@
 import { type Entity, System } from "@server/utils/ecs";
 import { getCompletePositionFromOrbit } from "@server/utils/position";
 import { solarRadiusToKilometers } from "@server/utils/unitTypes";
-import { Mesh, type Object3D, SphereGeometry } from "three";
+import { Mesh, type Object3D, SphereGeometry, Vector3 } from "three";
 
 /** Key is the solar system ID */
-export const solarSystemsObjects = new Map<number, Map<number, Object3D>>();
+export const solarSystemsObjects = new Map<number, Map<number, Sphere>>();
 /** Key is the object ID, value is the solar system ID */
 const objectSystem = new Map<number, number>();
 
+export interface Sphere {
+	entityId: number;
+	radius: number;
+	position: Vector3;
+}
 export class SolarSystemPositionSystem extends System {
 	test(entity: Entity) {
-		return !!(entity.components.position || entity.components.satellite);
+		return (
+			!!(entity.components.position || entity.components.satellite) &&
+			!entity.components.debugSphere
+		);
 	}
 	update(entity: Entity) {
 		// TODO January 2025: This will explode when moons become a thing
@@ -39,11 +47,17 @@ export class SolarSystemPositionSystem extends System {
 			);
 		} else if (entity.components.size) {
 			const { width, height, length } = entity.components.size;
-			radiusInKilometers = Math.max(width, height, length) / 2;
+			// Convert meters to kilometers
+			radiusInKilometers = Math.max(width, height, length) / 2 / 1000;
 		}
 
 		// We use spheres for simplicity. This system is mostly just used for pathfinding.
-		const object = new Mesh(new SphereGeometry(radiusInKilometers, 32, 32));
+		const object: Sphere = {
+			radius: radiusInKilometers,
+			entityId: entity.id,
+			position: new Vector3(),
+		};
+
 		// Get the position and radius of the object in the solar system
 		if (entity.components.satellite) {
 			object.position.copy(getCompletePositionFromOrbit(entity));

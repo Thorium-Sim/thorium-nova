@@ -132,8 +132,8 @@ export class AutoThrustSystem extends System {
 
 			// Arbitrary number that gets roughly close to 5 KM away
 			if (distanceInKM < 1) {
-				autopilot.desiredCoordinates = autopilot.path.pop()!;
-				if (!autopilot.desiredCoordinates) {
+				autopilot.nextCoordinates = autopilot.path.shift()!;
+				if (!autopilot.nextCoordinates) {
 					desiredSpeed = 0;
 					return;
 				}

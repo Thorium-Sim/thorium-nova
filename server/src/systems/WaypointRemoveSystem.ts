@@ -28,6 +28,8 @@ export class WaypointRemoveSystem extends System {
 				ship.updateComponent("autopilot", {
 					destinationWaypointId: null,
 					desiredCoordinates: undefined,
+					path: [],
+					nextCoordinates: undefined,
 					desiredSolarSystemId: undefined,
 					rotationAutopilot: false,
 					forwardAutopilot: false,
