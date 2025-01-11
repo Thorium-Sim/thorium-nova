@@ -73,12 +73,12 @@ export class AutoRotateSystem extends System {
 			? this.ecs.getEntityById(entity.components.autopilot.desiredSolarSystemId)
 			: null;
 
-		const { desiredDestination, positionVec } = autopilotGetCoordinates(
+		const { nextDestination, positionVec } = autopilotGetCoordinates(
 			entity,
 			entitySystem,
 			destinationSystem,
 		);
-		const distance = positionVec.distanceToSquared(desiredDestination);
+		const distance = positionVec.distanceToSquared(nextDestination);
 
 		if (distance < 1) {
 			autopilot.nextCoordinates = autopilot.path.shift()!;
@@ -91,7 +91,7 @@ export class AutoRotateSystem extends System {
 		rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
 		up.set(0, 1, 0).applyQuaternion(rotationQuat);
 
-		matrix.lookAt(positionVec, desiredDestination, up).multiply(rotationMatrix);
+		matrix.lookAt(positionVec, nextDestination, up).multiply(rotationMatrix);
 		// Use the thrusters to adjust the rotation of the ship to point towards the desired destination.
 		// First, determine the angle to the destination.
 		desiredRotationQuat.setFromRotationMatrix(matrix);

@@ -59,12 +59,17 @@ export class AutoThrustSystem extends System {
 		const {
 			isInInterstellar,
 			positionVec,
+			nextDestination,
 			desiredDestination,
 			rotationQuat,
 			desiredRotationQuat,
 		} = getAutopilotPositionAndRotation(entity);
 		const distanceInKM =
 			positionVec.distanceTo(desiredDestination) *
+			(isInInterstellar ? 1 / lightYearToLightMinute(KM_TO_LY) : 1);
+
+		const distanceToNextInKM =
+			positionVec.distanceTo(nextDestination) *
 			(isInInterstellar ? 1 / lightYearToLightMinute(KM_TO_LY) : 1);
 
 		shipMatrix.compose(emptyVector, rotationQuat, scaleVector);
@@ -102,6 +107,14 @@ export class AutoThrustSystem extends System {
 					Math.max(0, (distanceInKM - minWarpDistance) / 2),
 				);
 
+				// If we're within 2 seconds of the next point, then we can consider
+				// it safe to jump to the next point
+				const distanceToProceedToNextInPath = desiredSpeed * 2;
+
+				if (distanceToNextInKM < distanceToProceedToNextInPath) {
+					autopilot.nextCoordinates = autopilot.path.shift()!;
+				}
+
 				// Figure out an appropriate warp factor to get us to that speed.
 				const currentWarpFactor = getWarpFactorFromDesiredSpeed(
 					desiredSpeed,
@@ -122,21 +135,21 @@ export class AutoThrustSystem extends System {
 
 			// Decrease the slow-down slope
 			const slowDownSlope = 2;
-			let desiredSpeed = Math.min(
+			const desiredSpeed = Math.min(
 				impulseMaxSpeed,
 				Math.max(
 					0,
-					(correctDirectionCoefficient * distanceInKM) / slowDownSlope,
+					(correctDirectionCoefficient * distanceToNextInKM) / slowDownSlope,
 				),
 			);
 
+			// If we're within 5 seconds of the next point, then we can consider
+			// it safe to jump to the next point
+			const distanceToProceedToNextInPath = desiredSpeed * 5;
+
 			// Arbitrary number that gets roughly close to 5 KM away
-			if (distanceInKM < 1) {
+			if (distanceToNextInKM < distanceToProceedToNextInPath) {
 				autopilot.nextCoordinates = autopilot.path.shift()!;
-				if (!autopilot.nextCoordinates) {
-					desiredSpeed = 0;
-					return;
-				}
 			}
 			impulseEntity.updateComponent("isImpulseEngines", {
 				targetSpeed: desiredSpeed,

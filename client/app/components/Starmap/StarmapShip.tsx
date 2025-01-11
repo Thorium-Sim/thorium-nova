@@ -127,6 +127,7 @@ export function StarmapShip({
 				transparent
 				lineWidth={0.5} // In pixels (default)
 			/>
+
 			<group ref={group}>
 				{/* Ship sensor range */}
 				{!isCore || sensorsHidden ? null : (
@@ -273,6 +274,8 @@ const ShipSprite = ({
 				color={color}
 				sizeAttenuation={false}
 				needsUpdate={true}
+				depthTest={true}
+				depthWrite={false}
 			/>
 		</sprite>
 	);
