@@ -32,11 +32,13 @@ import { IsDestroyedSystem } from "./IsDestroyedSystem";
 import { PowerDistributionSystem } from "@server/systems/PowerDistributionSystem";
 import { ShieldsSystem } from "@server/systems/ShieldsSystem";
 import { PhasersSystem } from "@server/systems/PhasersSystem";
+import { SolarSystemPositionSystem } from "@server/systems/SolarSystemPositionSystem";
 
 const systems = [
 	FilterInventorySystem,
 	FilterShipsWithReactors,
 	InterstellarTransitionSystem,
+	SolarSystemPositionSystem,
 	PassengerDestinationSystem,
 	PassengerMovementSystem,
 	TimerSystem,

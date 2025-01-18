@@ -12,6 +12,19 @@ export const autopilot = z
 			})
 			.nullable()
 			.default(null),
+		/** The path the ship will take to reach the desired coordinates, to avoid any obstacles in the way. */
+		path: z
+			.array(z.object({ x: z.number(), y: z.number(), z: z.number() }))
+			.default([]),
+		/** The next coordinates the ship will move to as it follows the path */
+		nextCoordinates: z
+			.object({
+				x: z.number(),
+				y: z.number(),
+				z: z.number(),
+			})
+			.nullable()
+			.default(null),
 		/** Desired interstellar system. For when we are traveling from one system to another. */
 		desiredSolarSystemId: z.number().nullable().default(null),
 		/** Whether the rotation autopilot is on. */

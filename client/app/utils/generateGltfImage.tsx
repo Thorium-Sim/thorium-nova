@@ -7,6 +7,14 @@ import {
 	Group,
 	type Camera,
 	SRGBColorSpace,
+	PointLight,
+	AmbientLight,
+	ACESFilmicToneMapping,
+	type Object3D,
+	type Mesh,
+	type MeshStandardMaterial,
+	FrontSide,
+	Color,
 } from "three";
 import { GLTFLoader } from "three-stdlib";
 
@@ -15,7 +23,14 @@ let renderer: WebGLRenderer;
 /* istanbul ignore next */
 if (process.env.NODE_ENV !== "test" && typeof window !== "undefined") {
 	/* istanbul ignore next */
-	renderer = new WebGLRenderer({ alpha: true });
+	renderer = new WebGLRenderer({
+		alpha: true,
+		antialias: true,
+		preserveDrawingBuffer: true,
+	});
+	renderer.toneMapping = ACESFilmicToneMapping;
+	renderer.toneMappingExposure = 1;
+
 	/* istanbul ignore next */
 	renderer.outputColorSpace = SRGBColorSpace;
 	/* istanbul ignore next */
@@ -61,18 +76,46 @@ export async function generateScene(
 		camera.rotateY(cameraOptions?.rotateY ?? 0);
 		camera.rotateZ(cameraOptions?.rotateZ ?? 0);
 		const hemiLight = new HemisphereLight(0xffffff, 0xffffff, 0.6);
-		hemiLight.position.set(0, 500, 0);
+		hemiLight.position.set(0, 10, 0);
 		scene.add(hemiLight);
+
+		const pointLight = new PointLight(0xffffff, 1);
+		pointLight.position.set(0, 10, 0);
+		scene.add(pointLight);
+
+		const ambientLight = new AmbientLight(0x404040); // Soft white light
+		scene.add(ambientLight);
 
 		const objectGroup = new Group();
 
 		scene.add(objectGroup);
 		const loader = new GLTFLoader();
-		loader.load(assetPath, (gltf: any) => {
-			const obj = gltf.scene;
-			scene.add(obj);
-			resolve({ scene, camera });
-		});
+		loader.load(
+			assetPath,
+			(gltf: any) => {
+				const obj = gltf.scene;
+
+				if (obj.traverse) {
+					obj.traverse((object: Object3D | Mesh) => {
+						if ("material" in object) {
+							const material = object.material as MeshStandardMaterial;
+							material.emissiveMap = material.map;
+							material.emissiveIntensity = 0.3;
+							material.emissive = new Color(0xffffff);
+							material.side = FrontSide;
+
+							object.castShadow = true;
+							object.receiveShadow = true;
+						}
+					});
+				}
+
+				scene.add(obj);
+				resolve({ scene, camera });
+			},
+			undefined,
+			(error) => console.error("Error loading GLB", error),
+		);
 	});
 }
 

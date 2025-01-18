@@ -13,7 +13,11 @@ export const CopyToClipboard: React.FC<
 		event: React.MouseEvent<HTMLButtonElement>,
 		str: string,
 	) => {
-		await navigator.clipboard.writeText(str);
+		if ("clipboard" in navigator) {
+			await navigator.clipboard.writeText(str);
+		} else {
+			await window?.thorium?.clipboardWriteText?.(str);
+		}
 		setContents(copyContents);
 		clearTimeout(timeoutRef.current);
 		timeoutRef.current = setTimeout(() => {

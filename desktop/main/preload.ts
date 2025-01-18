@@ -9,6 +9,8 @@ ipcRenderer.on("update-message", (event, message) => {
 
 const thorium = {
 	getAddress: () => ipcRenderer.invoke("get-address"),
+	clipboardWriteText: (text: string) =>
+		ipcRenderer.invoke("clipboardWriteText", text),
 	getHostSecret: () => ipcRenderer.invoke("get-secret"),
 	registerUpdateHandler: (handler: typeof updateHandler) => {
 		updateHandler = handler;

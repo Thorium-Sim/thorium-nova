@@ -1,8 +1,9 @@
 import { randomPointInSphere } from "@thorium/randomPoint/randomPointInSphere";
 import { type Entity, System, type ECS } from "../utils/ecs";
-import { Vector3 } from "three";
+import { Vector3, Vector3Tuple } from "three";
 import type { shipBehavior } from "@server/components/shipBehavior";
 import { getOrbitPosition } from "@server/utils/getOrbitPosition";
+import { pathfinder } from "@server/utils/pathfinder";
 
 const wanderVector = new Vector3();
 const targetPoint = new Vector3();
@@ -47,6 +48,14 @@ export class ShipBehaviorSystem extends System {
 						},
 					});
 
+					let path: { x: number; y: number; z: number }[] = [];
+					if (
+						position.parentId === destination?.parentId &&
+						position.parentId
+					) {
+						path = pathfinder(entity, wanderVector) || [];
+					}
+					const nextCoordinates = path.shift();
 					entity.updateComponent("autopilot", {
 						rotationAutopilot: true,
 						forwardAutopilot: true,
@@ -55,6 +64,8 @@ export class ShipBehaviorSystem extends System {
 							y: wanderVector.y,
 							z: wanderVector.z,
 						},
+						path,
+						nextCoordinates,
 						desiredSolarSystemId: destination?.parentId || null,
 					});
 				}

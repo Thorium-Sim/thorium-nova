@@ -225,19 +225,36 @@ if (typeof window !== "undefined") {
 	requestAnimationFrame(updateGamepadStore);
 }
 
-function calculateHatDirection(input: number) {
+export function calculateHatDirection(num: number) {
 	let x = 0;
 	let y = 0;
-	if (input === -1 || input === -0.71429 || input === 1) {
+	const input = num.toFixed(5);
+	if (
+		input.startsWith("-1") ||
+		input.startsWith("-0.71429") ||
+		input.startsWith("1")
+	) {
 		y = 1;
 	}
-	if (input === -0.71429 || input === -0.42857 || input === -0.14286) {
+	if (
+		input.startsWith("-0.71429") ||
+		input.startsWith("-0.42857") ||
+		input.startsWith("-0.14286")
+	) {
 		x = 1;
 	}
-	if (input === -0.14286 || input === 0.14286 || input === 0.42857) {
+	if (
+		input.startsWith("-0.14286") ||
+		input.startsWith("0.14286") ||
+		input.startsWith("0.42857")
+	) {
 		y = -1;
 	}
-	if (input === 0.42857 || input === 0.71429 || input === 1) {
+	if (
+		input.startsWith("0.42857") ||
+		input.startsWith("0.71429") ||
+		input.startsWith("1")
+	) {
 		x = -1;
 	}
 	if (x && y) {

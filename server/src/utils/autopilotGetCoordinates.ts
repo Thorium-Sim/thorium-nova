@@ -3,13 +3,13 @@ import type { Entity } from "./ecs";
 
 const positionVec = new Vector3();
 const desiredDestination = new Vector3();
+const nextDestination = new Vector3();
 const rotationQuat = new Quaternion();
 const up = new Vector3(0, 1, 0);
 const matrix = new Matrix4();
 const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
 const desiredRotationQuat = new Quaternion();
 
-/** This function has side effects - it sets the positionVec vector */
 export function autopilotGetCoordinates(
 	entity: Entity,
 	shipSystem: Entity | null,
@@ -17,27 +17,47 @@ export function autopilotGetCoordinates(
 ): {
 	isInInterstellar: boolean;
 	desiredDestination: Vector3;
+	nextDestination: Vector3;
 	positionVec: Vector3;
 } {
 	const { position, rotation, autopilot } = entity.components;
 	if (!position || !rotation || !autopilot?.desiredCoordinates)
-		return { isInInterstellar: false, desiredDestination, positionVec };
+		return {
+			isInInterstellar: false,
+			desiredDestination,
+			nextDestination,
+			positionVec,
+		};
 	if (
 		autopilotDesiredSystem?.id === entity.components.position?.parentId ||
 		(!autopilotDesiredSystem && !entity.components.position?.parentId)
 	) {
-		// Within the system or within interstellar space.
-		if (autopilot.desiredCoordinates) {
-			desiredDestination.set(
-				autopilot.desiredCoordinates?.x,
-				autopilot.desiredCoordinates?.y,
-				autopilot.desiredCoordinates?.z,
-			);
+		desiredDestination.set(
+			autopilot.desiredCoordinates.x,
+			autopilot.desiredCoordinates.y,
+			autopilot.desiredCoordinates.z,
+		);
+		let nextCoordinates = autopilot.nextCoordinates;
+
+		if (!nextCoordinates) {
+			nextCoordinates = autopilot.path.shift() || null;
 		}
+		if (nextCoordinates) {
+			nextDestination.set(
+				nextCoordinates.x,
+				nextCoordinates.y,
+				nextCoordinates.z,
+			);
+		} else {
+			nextDestination.copy(desiredDestination);
+		}
+
+		// Within the system or within interstellar space.
 		positionVec.set(position.x, position.y, position.z);
 		return {
 			isInInterstellar: entity.components.position?.parentId === null,
 			desiredDestination,
+			nextDestination,
 			positionVec,
 		};
 	}
@@ -57,7 +77,13 @@ export function autopilotGetCoordinates(
 				shipSystem.components.position.z,
 			);
 		}
-		return { isInInterstellar: false, desiredDestination, positionVec };
+		nextDestination.copy(desiredDestination);
+		return {
+			isInInterstellar: false,
+			desiredDestination,
+			nextDestination,
+			positionVec,
+		};
 	}
 	// From within one system to within another system
 	if (autopilotDesiredSystem.components.position) {
@@ -73,11 +99,24 @@ export function autopilotGetCoordinates(
 			shipSystem.components.position.y,
 			shipSystem.components.position.z,
 		);
-		return { isInInterstellar: false, desiredDestination, positionVec };
+		nextDestination.copy(desiredDestination);
+		return {
+			isInInterstellar: false,
+			desiredDestination,
+			nextDestination,
+			positionVec,
+		};
 	}
 	// We are in interstellar space now, going to a system
 	positionVec.set(position.x, position.y, position.z);
-	return { isInInterstellar: true, desiredDestination, positionVec };
+	nextDestination.copy(desiredDestination);
+
+	return {
+		isInInterstellar: true,
+		desiredDestination,
+		nextDestination,
+		positionVec,
+	};
 }
 
 export function getAutopilotPositionAndRotation(entity: Entity) {
@@ -93,18 +132,19 @@ export function getAutopilotPositionAndRotation(entity: Entity) {
 		  )
 		: null;
 
-	const { isInInterstellar, desiredDestination, positionVec } =
+	const { isInInterstellar, desiredDestination, nextDestination, positionVec } =
 		autopilotGetCoordinates(entity, entitySystem, destinationSystem);
 	rotationQuat.set(rotation!.x, rotation!.y, rotation!.z, rotation!.w);
 
 	up.set(0, 1, 0).applyQuaternion(rotationQuat);
 
-	matrix.lookAt(positionVec, desiredDestination, up).multiply(rotationMatrix);
+	matrix.lookAt(positionVec, nextDestination, up).multiply(rotationMatrix);
 	desiredRotationQuat.setFromRotationMatrix(matrix);
 
 	return {
 		isInInterstellar,
 		positionVec,
+		nextDestination,
 		desiredDestination,
 		rotationQuat,
 		desiredRotationQuat,

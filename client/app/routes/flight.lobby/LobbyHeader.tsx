@@ -1,5 +1,6 @@
 import { ClientButton } from "@client/components/ClientButton";
 import { q } from "@client/context/AppContext";
+import { IPAddress } from "@client/routes/_landing/IPAddress";
 import { cn } from "@client/utils/cn";
 import { Link } from "@remix-run/react";
 
@@ -14,6 +15,7 @@ export function LobbyHeader() {
 				</h2>
 
 				<ClientButton />
+				<IPAddress />
 			</div>
 			{client.stationId === "Flight Director" ? (
 				<Link to="/flight/core" className="btn btn-lg btn-warning">

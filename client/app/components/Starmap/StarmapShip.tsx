@@ -90,18 +90,21 @@ export function StarmapShip({
 				// useConfigStore.getState().includeAutopilotData &&
 				shipAutopilot?.destinationPosition
 			) {
-				const destinationPosition = player.currentSystem
-					? shipAutopilot.destinationPosition
-					: shipAutopilot.destinationSystemPosition ||
-					  shipAutopilot.destinationPosition;
+				const destinationPosition =
+					shipAutopilot.path.length > 0
+						? shipAutopilot.path
+						: [
+								player.currentSystem
+									? shipAutopilot.destinationPosition
+									: shipAutopilot.destinationSystemPosition ||
+									  shipAutopilot.destinationPosition,
+						  ];
 
 				lineRef.current.geometry.setPositions([
 					group.current.position.x,
 					group.current.position.y,
 					group.current.position.z,
-					destinationPosition.x,
-					destinationPosition.y,
-					destinationPosition.z,
+					...destinationPosition.flatMap(({ x, y, z }) => [x, y, z]),
 				]);
 				lineRef.current.geometry.attributes.position.needsUpdate = true;
 				lineRef.current.visible = true;
@@ -124,6 +127,7 @@ export function StarmapShip({
 				transparent
 				lineWidth={0.5} // In pixels (default)
 			/>
+
 			<group ref={group}>
 				{/* Ship sensor range */}
 				{!isCore || sensorsHidden ? null : (
@@ -270,6 +274,8 @@ const ShipSprite = ({
 				color={color}
 				sizeAttenuation={false}
 				needsUpdate={true}
+				depthTest={true}
+				depthWrite={false}
 			/>
 		</sprite>
 	);

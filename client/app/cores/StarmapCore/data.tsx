@@ -14,6 +14,7 @@ import type { DataContext } from "@server/utils/types";
 import { Vector3 } from "three";
 import type { ComponentIds, ComponentProperties } from "@server/components";
 import { identity } from "@server/components/identity";
+import { pathfinder } from "@server/utils/pathfinder";
 
 type IsDestroyed = Zod.infer<typeof isDestroyed>;
 
@@ -341,6 +342,7 @@ export const starmapCore = t.router({
 				destinationPosition: Coordinates<number> | null;
 				destinationSystemPosition: Coordinates<number> | null;
 				locked: boolean;
+				path: { x: number; y: number; z: number }[];
 			};
 
 			return (
@@ -370,6 +372,7 @@ export const starmapCore = t.router({
 							ship.components.autopilot?.desiredCoordinates || null,
 						destinationSystemPosition: waypointSystemPosition,
 						locked: !!ship.components.autopilot?.desiredCoordinates,
+						path: ship.components.autopilot?.path || [],
 					};
 					return acc;
 				}, {}) || {}
@@ -392,9 +395,20 @@ export const starmapCore = t.router({
 
 			input.ships.forEach((ship) => {
 				const entity = ctx.flight?.ecs.getEntityById(ship.id);
+				const path =
+					ship.systemId === entity?.components.position?.parentId &&
+					ship.systemId
+						? pathfinder(
+								entity,
+								new Vector3(ship.position.x, ship.position.y, ship.position.z),
+						  )
+						: [];
+				const nextCoordinates = path?.shift();
 				entity?.updateComponent("autopilot", {
 					desiredCoordinates: ship.position,
 					desiredSolarSystemId: ship.systemId,
+					path,
+					nextCoordinates,
 				});
 				entity?.updateComponent("shipBehavior", {
 					destination: {
@@ -495,9 +509,16 @@ export const starmapCore = t.router({
 				throw new Error("Either position or entityId are required");
 			}
 
+			const path =
+				systemId === ship?.components.position?.parentId && systemId
+					? pathfinder(ship, new Vector3(position.x, position.y, position.z))
+					: [];
+			const nextCoordinates = path?.shift();
 			ship?.updateComponent("autopilot", {
 				desiredCoordinates: position,
 				desiredSolarSystemId: systemId,
+				path,
+				nextCoordinates,
 			});
 			ship?.updateComponent("shipBehavior", {
 				destination: {
@@ -536,6 +557,7 @@ export const starmapCore = t.router({
 				const entity = ctx.flight?.ecs.getEntityById(shipId);
 				if (!entity) continue;
 				const position = getObjectOffsetPosition(orbitedObject, entity);
+				// TODO January 2025: Generate a function which creates an orbit path which the ship can use.
 				entity.updateComponent("autopilot", {
 					desiredCoordinates: position,
 					desiredSolarSystemId: objectSystem.id,
@@ -698,6 +720,12 @@ export const starmapCore = t.router({
 							rotationAutopilot: true,
 							forwardAutopilot: true,
 							desiredCoordinates: {
+								x: position.x,
+								y: position.y,
+								z: position.z,
+							},
+							path: [],
+							nextCoordinates: {
 								x: position.x,
 								y: position.y,
 								z: position.z,

@@ -7,6 +7,8 @@ import {
 	cancelLoopingSound,
 	playShipSound,
 } from "@server/utils/playRangedSound";
+import { pathfinder } from "@server/utils/pathfinder";
+import { Vector3 } from "three";
 
 export const pilot = t.router({
 	impulseEngines: t.router({
@@ -160,9 +162,24 @@ export const pilot = t.router({
 				const position = waypoint?.components.position;
 				if (!waypoint || !position) throw new Error("Waypoint not found.");
 
+				const desiredCoordinates = {
+					x: position.x,
+					y: position.y,
+					z: position.z,
+				};
+				const path =
+					position.parentId === ctx.ship.components.position?.parentId
+						? pathfinder(
+								ctx.ship,
+								new Vector3(position.x, position.y, position.z),
+						  )
+						: [];
+				const nextCoordinates = path?.shift();
 				ctx.ship.updateComponent("autopilot", {
 					destinationWaypointId: input.waypointId,
-					desiredCoordinates: { x: position.x, y: position.y, z: position.z },
+					desiredCoordinates,
+					path,
+					nextCoordinates,
 					desiredSolarSystemId: position.parentId,
 					rotationAutopilot: true,
 					forwardAutopilot: false,
@@ -180,6 +197,8 @@ export const pilot = t.router({
 				destinationWaypointId: null,
 				desiredCoordinates: undefined,
 				desiredSolarSystemId: undefined,
+				path: [],
+				nextCoordinates: null,
 				rotationAutopilot: false,
 				forwardAutopilot: false,
 			});

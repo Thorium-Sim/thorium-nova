@@ -96,6 +96,12 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 	}, [isOpen, input, type, setIsOpen]);
 	const inputEl = React.useRef<HTMLInputElement>(null);
 	const okayButton = React.useRef<HTMLButtonElement>(null);
+
+	React.useEffect(() => {
+		const ref = inputEl.current;
+		ref?.focus();
+		ref?.select();
+	}, []);
 	return (
 		<DialogContext.Provider value={openConfirm}>
 			{children}
@@ -134,12 +140,7 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 											{body || ""}
 											<input
 												{...inputProps}
-												ref={(ref) => {
-													// @ts-expect-error
-													inputEl.current = ref;
-													ref?.focus();
-													ref?.select();
-												}}
+												ref={inputEl}
 												className="input block w-full mt-4"
 												value={input}
 												onChange={(e) => setInput(e.currentTarget.value)}

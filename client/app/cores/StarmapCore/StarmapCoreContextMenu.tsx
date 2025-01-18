@@ -108,6 +108,7 @@ export const StarmapCoreContextMenu = ({
 											.getState()
 											.translate2DTo3D?.(x, y);
 										if (!position) return;
+
 										q.starmapCore.setDestinations.netSend({
 											ships: selectedShips.map((id: any) => ({
 												id,

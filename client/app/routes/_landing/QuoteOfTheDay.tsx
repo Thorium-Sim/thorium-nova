@@ -347,6 +347,10 @@ const quotes = [
 	// G'Kar, Babylon 5
 	"Greater than the death of flesh is the death of hope. The death of dreams. Against this peril we can never surrender.",
 	"The future is all around us, waiting in moments of transition, to be born in moments of revelation.",
+	// https://ungated.life/p/the-source
+	"You are not broken, and the world is thirsting for your gifts.",
+	// I, Libertine
+	"'Gadzooks,' quoth I, 'but here's a saucy spaceship!'",
 ];
 
 const QuoteOfTheDay = () => {
