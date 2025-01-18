@@ -96,7 +96,6 @@ function detectCollision(
 	point2: Vector3,
 	obstacle: Obstacle,
 ): boolean {
-	console.log({ point1, point2, obstacle });
 	// Calculate direction vector of the line
 	const dx = point2.x - point1.x;
 	const dy = point2.y - point1.y;

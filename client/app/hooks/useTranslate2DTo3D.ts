@@ -15,7 +15,7 @@ export function useTranslate2DTo3D() {
 		raycaster.setFromCamera(mv, camera);
 		// For some reason, calling `intersectPlane` immediately after `setFromCamera` makes the operation fail
 		// But adding a log in between makes it work.
-		console.log("");
+		console.info("");
 		raycaster.ray.intersectPlane(planeY, pos);
 		return pos;
 	};

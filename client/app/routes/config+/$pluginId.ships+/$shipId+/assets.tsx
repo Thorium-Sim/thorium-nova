@@ -1,11 +1,20 @@
 import { useParams, Link } from "@remix-run/react";
-import { useReducer } from "react";
+import { useMemo, useReducer, useState } from "react";
 import InfoTip from "@thorium/ui/InfoTip";
 import UploadWell from "@thorium/ui/UploadWell";
 import { readFile } from "@client/utils/readFile";
 import { renderGLTFPreview } from "@client/utils/generateGltfImage";
 import { toast } from "@client/context/ToastContext";
 import { q } from "@client/context/AppContext";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, useGLTF } from "@react-three/drei";
+import {
+	Color,
+	FrontSide,
+	type Mesh,
+	type MeshStandardMaterial,
+	Object3D,
+} from "three";
 
 export default function Assets() {
 	const { pluginId, shipId } = useParams() as {
@@ -15,36 +24,43 @@ export default function Assets() {
 	const [ships] = q.plugin.ship.all.useNetRequest({ pluginId });
 	const ship = ships.find((d) => d.name === shipId);
 	const [, render] = useReducer(() => ({}), {});
+	const [path, setPath] = useState<string | null>(null);
 	return (
 		<div className="h-full grid grid-cols-2 grid-rows-2 gap-4 ">
-			<div className="max-w-md">
-				<h3 className="text-lg font-bold flex items-center">
-					Logo{" "}
-					<InfoTip>
-						Logos should be square and have a transparent background. SVGs work
-						best.
-					</InfoTip>
-				</h3>
-				<UploadWell
-					accept="image/*"
-					onChange={async (files) => {
-						await q.plugin.ship.update.netSend({
-							pluginId,
-							shipId,
-							logo: files[0],
-						});
-						render();
-					}}
-				>
-					{ship?.assets.logo && (
-						<img
-							src={`${ship.assets.logo}?${new Date().getTime()}`}
-							alt="Ship Logo"
-							className="w-5/6 h-5/6 object-contain aspect-square"
-						/>
-					)}
-				</UploadWell>
-			</div>
+			{path ? (
+				<Canvas>
+					<Preview path={path} />
+				</Canvas>
+			) : (
+				<div className="max-w-md">
+					<h3 className="text-lg font-bold flex items-center">
+						Logo{" "}
+						<InfoTip>
+							Logos should be square and have a transparent background. SVGs
+							work best.
+						</InfoTip>
+					</h3>
+					<UploadWell
+						accept="image/*"
+						onChange={async (files) => {
+							await q.plugin.ship.update.netSend({
+								pluginId,
+								shipId,
+								logo: files[0],
+							});
+							render();
+						}}
+					>
+						{ship?.assets.logo && (
+							<img
+								src={`${ship.assets.logo}?${new Date().getTime()}`}
+								alt="Ship Logo"
+								className="w-5/6 h-5/6 object-contain aspect-square"
+							/>
+						)}
+					</UploadWell>
+				</div>
+			)}
 			<div className="max-w-md">
 				<h3 className="text-lg font-bold flex items-center">
 					Model{" "}
@@ -71,6 +87,7 @@ export default function Assets() {
 						try {
 							const file = files[0];
 							const result = await readFile(file);
+							setPath(result);
 							const [topSrc, sideSrc, vanitySrc] = await Promise.all([
 								renderGLTFPreview(result, {
 									size: { width: 1200, height: 1200 },
@@ -148,4 +165,32 @@ export default function Assets() {
 			</div>
 		</div>
 	);
+}
+
+function Preview({ path }: { path: string }) {
+	const model = useGLTF(path);
+
+	const scene = useMemo(() => {
+		if (!model) return new Object3D();
+
+		const scene: Object3D = model.scene.clone(true);
+		if (scene.traverse) {
+			scene.traverse((object: Object3D | Mesh) => {
+				if ("material" in object) {
+					const material = object.material as MeshStandardMaterial;
+					material.emissiveMap = material.map;
+					material.emissiveIntensity = 0.3;
+					material.emissive = new Color(0xffffff);
+					material.side = FrontSide;
+
+					object.castShadow = true;
+					object.receiveShadow = true;
+				}
+			});
+		}
+
+		return scene;
+	}, [model]);
+
+	return <primitive object={scene} rotation={[Math.PI / 2, Math.PI, 0]} />;
 }
