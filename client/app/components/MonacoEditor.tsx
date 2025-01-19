@@ -9,8 +9,6 @@ import React, {
 } from "react";
 import type * as monaco from "monaco-editor";
 import type { editor, languages } from "monaco-editor";
-// import prettier from "prettier";
-// import pluginLess from "prettier/parser-postcss";
 import { suspend } from "suspend-react";
 function noop() {}
 
