@@ -1,0 +1,81 @@
+import type { EdgeFlag } from "@thorium/utils/flags/DeckEdge";
+import type { NodeFlag } from "@thorium/utils/flags/DeckNode";
+import type { Flavor, Kelvin, Liter } from "@thorium/utils/unitTypes";
+
+export default class DeckPlugin {
+	name: string;
+	backgroundUrl: string;
+	nodes: DeckNode[];
+	constructor(params: Partial<DeckPlugin>) {
+		this.name = params.name || "Deck";
+		this.backgroundUrl = params.backgroundUrl || "";
+		this.nodes = params.nodes?.map((node) => new DeckNode(node)) || [];
+	}
+}
+
+type DeckNodeId = Flavor<number, "deckNodeId">;
+export class DeckNode {
+	id: DeckNodeId;
+	name: string;
+	/** Only used for in-flight use, not in plugin configuration */
+	deckIndex!: number;
+	x: number;
+	y: number;
+	isRoom: boolean;
+	icon: string;
+	radius: number;
+	volume: Liter;
+	flags: NodeFlag[];
+	systems: string[];
+	contents: {
+		[inventoryTemplateName: string]: { count: number; temperature: Kelvin };
+	};
+	constructor(params: Partial<DeckNode>) {
+		this.id = params.id || 0;
+		this.name = params.name || "";
+		this.deckIndex = params.deckIndex!;
+		this.x = params.x || 0;
+		this.y = params.y || 0;
+		this.isRoom = params.isRoom || false;
+		this.icon = params.icon || "";
+		this.radius = params.radius || 0;
+		this.volume = params.volume || 12000;
+		this.flags = params.flags || [];
+		this.systems = params.systems || [];
+		this.contents = params.contents || {};
+	}
+}
+
+export class DeckEdge {
+	id: number;
+	to: DeckNodeId;
+	from: DeckNodeId;
+	/**
+	 * Multiplies how long it takes to traverse the edge.
+	 */
+	weight: number;
+	/**
+	 * Indicates whether the edge can be traversed. If closed, it's like
+	 * there is no edge there.
+	 */
+	isOpen: boolean;
+	flags: EdgeFlag[];
+	constructor(params: Partial<DeckEdge>) {
+		if (params.id === undefined) {
+			throw new Error("DeckEdge must have an id");
+		}
+		this.id = params.id;
+		this.to = params.to || 0;
+		this.from = params.from || 0;
+		this.weight = params.weight || 1;
+		this.isOpen = params.isOpen || true;
+		this.flags = params.flags || [];
+	}
+}
+
+export type ShipMapDeckNode = DeckPlugin["nodes"][0] & {
+	deckIndex: number;
+	contents: {
+		[inventoryTemplateName: string]: { count: number; temperature: Kelvin };
+	};
+};

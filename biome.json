@@ -10,7 +10,6 @@
 			"**/lensFlareImpl.js",
 			"**/Starmap/Disc.tsx",
 			"**/Nebula/*.js",
-			"**/utils/FlexLayout/**/*",
 			"**/loadGltf/GLTFLoader.ts"
 		],
 		"rules": {

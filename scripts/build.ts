@@ -1,26 +1,33 @@
-import concurrently from "concurrently";
+import type { BunPlugin } from "bun";
+import postcss from "postcss";
+import tailwindcss from "tailwindcss";
+import tailwindConfig from "../tailwind.config";
+const styleFilter = /.\.(css)$/;
 
-concurrently(
-	[
-		{
-			command: "npm run build --workspace server",
-			name: "server",
-			prefixColor: "blue.bold",
-		},
-		{
-			command: "npm run build --workspace desktop",
-			name: "desktop",
-			prefixColor: "green.bold",
-		},
-		{
-			command:
-				"NODE_OPTIONS=--max-old-space-size=32768 npm run build --workspace client",
-			name: "client",
-			prefixColor: "magenta.bold",
-		},
-	],
-	{
-		killOthers: "failure",
-		maxProcesses: 1,
+const cssPlugin: BunPlugin = {
+	name: "CSS Loader",
+	setup(build) {
+		build.onLoad({ filter: styleFilter }, async (args) => {
+			const css = await Bun.file(args.path).text();
+			const result = await postcss([tailwindcss(tailwindConfig)]).process(css, {
+				from: args.path,
+			});
+
+			return {
+				contents: result.css,
+				loader: "file",
+			};
+		});
 	},
+};
+console.log(
+	await Bun.build({
+		entrypoints: ["./app/client.tsx"],
+		html: true,
+		outdir: "./build",
+		minify: false,
+		experimentalCss: true,
+
+		plugins: [cssPlugin],
+	}),
 );

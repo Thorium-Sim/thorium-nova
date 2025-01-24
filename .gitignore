@@ -12,3 +12,7 @@ coverage
 client/public/docs
 icons/name.d.ts
 icons/sprite.svg
+
+# React Router
+/.react-router/
+/build/
