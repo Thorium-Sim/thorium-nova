@@ -13,6 +13,12 @@ import { createBunWebSocket } from "hono/bun";
 import type { ServerWebSocket } from "bun";
 import { readdir } from "node:fs/promises";
 import { vanity } from "@thorium/utils/.server/vanity";
+// @ts-expect-error
+import httpsCert from "./.server/server.cert" with { type: "file" };
+// @ts-expect-error
+import httpsKey from "./.server/server.key" with { type: "file" };
+import { getMimeType } from "hono/utils/mime";
+import { getClientBundleFile } from "@thorium/utils/.server/getClientBundleFile";
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>();
 
 console.info(`Starting Thorium...`);
@@ -71,13 +77,47 @@ app.use(
 	}),
 );
 
+if (process.env.NODE_ENV === "production") {
+	app.use(async (c) => {
+		const path = c.req.path.slice(1);
+		let bundle = await getClientBundleFile(path);
+		if (!bundle) {
+			bundle = (await getClientBundleFile("index.html"))!;
+		}
+		const mimeType = getMimeType(bundle.name);
+		const headers = new Headers();
+		headers.append("content-type", mimeType || "text/plain");
+		headers.append("content-disposition", `filename="${bundle.name}"`);
+		return new Response(bundle.file, { headers });
+	});
+}
+
 exitHandler();
 
+const port =
+	Number(process.env.PORT) || process.env.NODE_ENV === "production"
+		? 4444
+		: 3001;
+
 const server = Bun.serve({
-	port: process.env.PORT || 3001,
+	port,
 	fetch: app.fetch,
 	websocket,
+	reusePort: true,
 });
 
 vanity();
 console.info(`Server running on ${server.url.href}`);
+
+if (process.env.NODE_ENV === "production") {
+	const https = Bun.serve({
+		port: port + 1,
+		fetch: app.fetch,
+		websocket,
+		reusePort: true,
+		// TODO: Support user-provided TLS certificates
+		cert: await Bun.file(httpsCert).text(),
+		key: await Bun.file(httpsKey).text(),
+	});
+	console.info(`HTTPS Server running on ${https.url.href}`);
+}

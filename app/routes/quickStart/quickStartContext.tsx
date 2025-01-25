@@ -117,10 +117,9 @@ export function FlightQuickStartProvider({
 
 export const useFlightQuickStart = () => {
 	const returnVal = useContext(QuickStartContext);
-	console.log(use(QuickStartContext), useContext(QuickStartContext));
-	// if (!returnVal)
-	// 	throw new Error(
-	// 		"useFlightQuickStart must be used within a QuickStartProvider",
-	// 	);
+	if (!returnVal)
+		throw new Error(
+			"useFlightQuickStart must be used within a QuickStartProvider",
+		);
 	return returnVal;
 };

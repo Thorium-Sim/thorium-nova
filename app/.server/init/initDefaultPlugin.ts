@@ -1,17 +1,29 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { rootPath, thoriumPath } from "@thorium/utils/.server/appPaths";
+import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { unzip } from "@thorium/utils/.server/zip";
 
-const isHeadless = !process.env.FORK;
-
 export async function initDefaultPlugin() {
-	await fs.mkdir(thoriumPath, { recursive: true });
-	await fs.mkdir(path.join(thoriumPath, "plugins"), { recursive: true });
+	if (process.env.NODE_ENV !== "production") return;
 
-	// Initialize the default plugin
-	await unzip(
-		path.join(rootPath, isHeadless ? "./" : "../../app", "defaultPlugin.plug"),
-		path.join(thoriumPath, "plugins/Thorium Default"),
-	);
+	await fs.mkdir(path.join(thoriumPath, "plugins"), { recursive: true });
+	const tempPath = await fs.mkdtemp("thorium-nova");
+	const tempFile = path.join(tempPath, "defaultPlugin.plug");
+
+	// @ts-expect-error
+	const defaultPlugin = await import("../../../build/defaultPlugin.plug", {
+		with: { type: "file" },
+	});
+	try {
+		// Initialize the default plugin
+		await Bun.write(tempFile, Bun.file(defaultPlugin.default));
+
+		await unzip(tempFile, path.join(thoriumPath, "plugins/Thorium Default"));
+		await fs.rm(tempPath, { recursive: true, force: true });
+	} catch (e) {
+		console.error(e);
+		await fs.rm(thoriumPath, { recursive: true, force: true });
+		await fs.rm(tempPath, { recursive: true, force: true });
+		throw new Error("Error installing default plugins.");
+	}
 }
