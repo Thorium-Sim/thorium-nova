@@ -10,10 +10,15 @@ export async function initDefaultPlugin() {
 	const tempPath = await fs.mkdtemp("thorium-nova");
 	const tempFile = path.join(tempPath, "defaultPlugin.plug");
 
-	// @ts-expect-error
-	const defaultPlugin = await import("../../../build/defaultPlugin.plug", {
-		with: { type: "file" },
-	});
+	const defaultPlugin = await import(
+		// @ts-expect-error
+		"../../../build/defaultPlugin.plug",
+		// @ts-expect-error
+		{
+			with: { type: "file" },
+		}
+	);
+
 	try {
 		// Initialize the default plugin
 		await Bun.write(tempFile, Bun.file(defaultPlugin.default));

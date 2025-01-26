@@ -1,11 +1,12 @@
-import { DeckEdge, DeckNode } from "server/src/classes/Plugins/Ship/Deck";
-import { createMockDataContext } from "server/src/utils/createMockDataContext";
-import { ECS, Entity } from "server/src/utils/ecs";
+import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
+import { PassengerMovementSystem } from "../PassengerMovementSystem";
+import { beforeEach, describe, expect, it } from "vitest";
+import { ECS, Entity } from "@thorium/utils/ecs";
+import { DeckEdge, DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
 import {
 	calculateShipMapPath,
 	createShipMapGraph,
-} from "server/src/utils/shipMapPathfinder";
-import { PassengerMovementSystem } from "../PassengerMovementSystem";
+} from "@thorium/utils/.server/ship/shipMapPathfinder";
 
 describe("PassengerMovementSystem", () => {
 	let ecs: ECS;

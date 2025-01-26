@@ -1,7 +1,8 @@
-import { PowerDistributionSystem } from "@server/systems/PowerDistributionSystem";
-import { createMockDataContext } from "@server/utils/createMockDataContext";
+import { PowerDistributionSystem } from "@thorium/.server/systems/PowerDistributionSystem";
+import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
 import { ECS, Entity } from "@thorium/utils/ecs";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
+import { beforeEach, describe, expect, it } from "vitest";
 
 describe("PowerDistributionSystem", () => {
 	let ecs: ECS;

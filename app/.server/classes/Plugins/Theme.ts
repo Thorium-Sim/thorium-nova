@@ -38,7 +38,7 @@ export default class ThemePlugin extends Aspect {
 	}
 
 	async setCSS(rawCSS: string) {
-		const config = (await import("@thorium/../../tailwind.config")) as any;
+		const config = (await import("../../../../tailwind.config")) as any;
 		const postcssOutput = (
 			await postcss([tailwindcss(config.default)]).process(
 				`.theme-container {${rawCSS}}`,

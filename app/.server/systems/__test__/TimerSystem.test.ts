@@ -1,5 +1,6 @@
-import { ECS, Entity } from "server/src/utils/ecs";
+import { ECS, Entity } from "@thorium/utils/ecs";
 import { TimerSystem } from "../TimerSystem";
+import { beforeEach, describe, expect, it } from "vitest";
 
 const server: any = {};
 describe("TimerSystem", () => {

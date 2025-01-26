@@ -1,6 +1,7 @@
-import { createMockDataContext } from "server/src/utils/createMockDataContext";
-import { ECS, Entity } from "server/src/utils/ecs";
+import { ECS, Entity } from "@thorium/utils/ecs";
 import { WarpSystem } from "../WarpSystem";
+import { beforeEach, describe, expect, it } from "vitest";
+import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
 
 describe("WarpSystem", () => {
 	let ecs: ECS;

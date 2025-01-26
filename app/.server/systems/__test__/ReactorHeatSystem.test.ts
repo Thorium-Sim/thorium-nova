@@ -1,12 +1,12 @@
 import { DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
-import { createMockDataContext } from "@server/utils/createMockDataContext";
+import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
 import { ECS, Entity } from "@thorium/utils/ecs";
-import { getReactorInventory } from "@server/utils/getSystemInventory";
 import { FilterInventorySystem } from "../FilterInventorySystem";
 import { FilterShipsWithReactors } from "../FilterShipsWithReactors";
 import { HeatDispersionSystem } from "../HeatDispersionSystem";
 import { HeatToCoolantSystem } from "../HeatToCoolantSystem";
 import { ReactorHeatSystem } from "../ReactorHeatSystem";
+import { beforeEach, describe, expect, it } from "vitest";
 
 describe("ReactorHeatSystem", () => {
 	let ecs: ECS;

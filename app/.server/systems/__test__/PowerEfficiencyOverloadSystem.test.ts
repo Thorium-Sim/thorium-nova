@@ -1,4 +1,4 @@
-import { createMockDataContext } from "@server/utils/createMockDataContext";
+import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
 import { ECS, Entity } from "@thorium/utils/ecs";
 import { PowerEfficiencyOverloadSystem } from "../PowerEfficiencyOverloadSystem";
 
