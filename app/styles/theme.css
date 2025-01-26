@@ -935,7 +935,7 @@ input[type="range"].slider {
   &.selected {
     @apply bg-opacity-40 bg-white;
     &.subtle {
-      @apply bg-transparent shadow-inner shadow-blue-500 border-blue-500
+      @apply bg-transparent shadow-inner shadow-blue-500 border-blue-500;
     }
   }
   &:disabled,
@@ -1275,7 +1275,7 @@ textarea {
   bottom: anchor(bottom);
   position: absolute;
   left: anchor(left);
-  position-try-options: flip-block, flip-inline, flip-block flip-inline;;
+  position-try-options: flip-block, flip-inline, flip-block flip-inline;
 }
 
 @keyframes wait-cursor {

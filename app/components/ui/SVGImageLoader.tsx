@@ -27,7 +27,6 @@ export const SVGImageLoader = forwardRef<
 		);
 	}
 	return (
-		// biome-ignore lint/a11y/useAltText:
 		<img
 			draggable="false"
 			alt={alt}

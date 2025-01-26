@@ -58,7 +58,7 @@ function SearchableList<
 	return (
 		<>
 			<div className="form-control">
-				{showSearchLabel ? <label className="label">Search</label> : null}
+				{showSearchLabel ? <span className="label">Search</span> : null}
 				<input
 					type="search"
 					value={search}

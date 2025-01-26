@@ -12,7 +12,7 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 	return (
 		<PaletteDisclosure title="Planet Assets">
 			<div>
-				<label className="inline-flex items-center">
+				<label htmlFor="texture" className="inline-flex items-center">
 					Texture{" "}
 					<InfoTip>
 						Image aspect ratio should be 2x1, with the dimensions as powers of
@@ -20,6 +20,7 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 					</InfoTip>
 				</label>
 				<UploadWell
+					id="texture"
 					accept="image/*"
 					onChange={(files: FileList) => {
 						q.plugin.starmap.planet.update.netSend({
@@ -38,7 +39,7 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 				</UploadWell>
 			</div>
 			<div>
-				<label className="inline-flex items-center">
+				<label htmlFor="clouds" className="inline-flex items-center">
 					Clouds{" "}
 					<InfoTip>
 						Image should be a transparent PNG. The aspect ratio should be 2x1,
@@ -46,6 +47,7 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 					</InfoTip>
 				</label>
 				<UploadWell
+					id="clouds"
 					accept="image/*"
 					onChange={(files: FileList) => {
 						q.plugin.starmap.planet.update.netSend({
@@ -79,7 +81,7 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 				</Button>
 			</div>
 			<div>
-				<label className="inline-flex items-center">
+				<label htmlFor="rings" className="inline-flex items-center">
 					Rings{" "}
 					<InfoTip>
 						Image should be a transparent PNG. Vertical lines in the image
@@ -87,6 +89,7 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 					</InfoTip>
 				</label>
 				<UploadWell
+					id="rings"
 					accept="image/*"
 					onChange={(files: FileList) => {
 						q.plugin.starmap.planet.update.netSend({

@@ -39,7 +39,7 @@ function Slider(
 			{/* Create a container for the label and output element. */}
 			{props.label && (
 				<div className="label-container">
-					<label {...labelProps}>{props.label}</label>
+					<span {...labelProps}>{props.label}</span>
 					<output {...outputProps}>{state.getThumbValueLabel(0)}</output>
 				</div>
 			)}

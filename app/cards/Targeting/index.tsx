@@ -53,13 +53,7 @@ export function Targeting({ cardLoaded }: CardProps) {
 								}
 							}}
 						>
-							<CircleGrid
-								fixedChildren={
-									<>
-										<PhaserArcs />
-									</>
-								}
-							>
+							<CircleGrid fixedChildren={<PhaserArcs />}>
 								<BeamVisualization />
 								<CircleGridContacts
 									onContactClick={(contact) => {

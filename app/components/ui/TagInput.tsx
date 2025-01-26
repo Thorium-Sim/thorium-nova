@@ -38,9 +38,7 @@ const TagInput: React.FC<{
 	return (
 		<>
 			<div className={cn("form-control", className)}>
-				<label className={cn("label", { "sr-only": labelHidden })}>
-					{label}
-				</label>
+				<span className={cn("label", { "sr-only": labelHidden })}>{label}</span>
 				<input
 					disabled={disabled}
 					className="input"

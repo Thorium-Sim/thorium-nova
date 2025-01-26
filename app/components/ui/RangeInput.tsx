@@ -37,14 +37,14 @@ export const RangeInput = (
 
 	return (
 		<div className={`flex flex-col ${fixed ? "" : "w-full"}`}>
-			<label
+			<span
 				{...labelProps}
 				className={`${labelProps?.className || ""} ${
 					labelHidden ? "hidden" : ""
 				}`}
 			>
 				{label}
-			</label>
+			</span>
 			<div className="flex justify-between w-full gap-2">
 				<input
 					autoComplete="off"
