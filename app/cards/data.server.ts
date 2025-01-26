@@ -1,0 +1,10 @@
+export { pilot } from "./Pilot/data.server";
+export { officersLog } from "./OfficersLog/data.server";
+export { navigation, waypoints } from "./Navigation/data.server";
+export { cargoControl } from "./CargoControl/data.server";
+export { viewscreen } from "./Viewscreen/data.server";
+export { alertLevel } from "./AlertLevel/data.server";
+export { remoteAccess } from "./RemoteAccess/data.server";
+export { targeting } from "./Targeting/data.server";
+export { objectives } from "./Objectives/data.server";
+export { systemsMonitor } from "./SystemsMonitor/data.server";

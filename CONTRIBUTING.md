@@ -211,7 +211,7 @@ are doing.
 
 Before pushing your code to Github, make sure your passes our basic quality
 checks by running `npm validate`. This will run automated tests, lint your code
-with ESLint, run TypeScript's type checker, and format your code using Prettier.
+with Biome, run TypeScript's type checker, and format your code using Biome.
 
 Consider creating a feature branch and opening a draft pull request before you
 even start working on the task. That makes it possible for you to get code

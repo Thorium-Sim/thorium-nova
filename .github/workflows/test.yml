@@ -13,19 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v2
-      - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v1
-        with:
-          node-version: 18
+        uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
       - name: Install Dependencies
-        run: npm install
+        run: bun install
       - name: Lint
         run: |
-          npm run lint
+          bun run lint
       - name: TypeCheck
         run: |
-          npm run typecheck
+          bun run typecheck
       - name: Test
         run: |
-          npm run test
+          bun run test
