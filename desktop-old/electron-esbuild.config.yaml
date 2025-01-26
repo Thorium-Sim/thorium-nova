@@ -1,7 +1,0 @@
-mainConfig:
-  type: esbuild
-  path: esbuild.main.config.ts
-  src: main/electron.ts
-  output:
-    dir: ../dist
-    filename: electron.js

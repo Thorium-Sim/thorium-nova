@@ -1,6 +1,6 @@
 [package]
 name = "thorium-nova"
-version = "0.1.0"
+version = "1.0.0-alpha.16"
 description = "Starship Bridge Simulator"
 authors = ["Alex Anderson"]
 edition = "2021"

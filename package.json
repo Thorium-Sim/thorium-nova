@@ -19,6 +19,7 @@
 		"dev:client": "react-router dev",
 		"dev:server": "bun run --watch ./app/server.ts",
 		"start": "bun ./build/server/index.js",
+		"tauri": "tauri",
 		"typecheck": "react-router typegen && tsc",
 		"lint": "biome lint .",
 		"test": "is-ci-cli \"test:coverage\" \"test:watch\"",
@@ -148,5 +149,8 @@
 	},
 	"publishConfig": {
 		"access": "restricted"
+	},
+	"patchedDependencies": {
+		"@thorium-sim/rapier3d-node@0.13.2": "patches/@thorium-sim%2Frapier3d-node@0.13.2.patch"
 	}
 }

@@ -63,7 +63,7 @@ const arch = (process.env.BUILD_ARCH ||
 	`${targetArch}-${targetPlatform}`) as keyof typeof platformMap;
 
 // We have to run this next command using a shell since the --compile flag doesn't work with the Bun API.
-const command = `bun build --minify --define 'process.env.NODE_ENV="production"' --target=TARGET --sourcemap --outfile ./src-tauri/binaries/thoriumNovaServer-ARCH --compile ./app/server.ts`;
+const command = `bun build --minify --define "process.env.NODE_ENV='production'" --target=TARGET --sourcemap --outfile ./src-tauri/binaries/thoriumNovaServer-ARCH --compile ./app/server.ts`;
 const target = platformMap[arch];
 if (!target) {
 	throw new Error(
