@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.6.0/schema.json",
+	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
 	"organizeImports": {
 		"enabled": true
 	},
@@ -10,7 +10,6 @@
 			"**/lensFlareImpl.js",
 			"**/Starmap/Disc.tsx",
 			"**/Nebula/*.js",
-			"**/utils/FlexLayout/**/*",
 			"**/loadGltf/GLTFLoader.ts"
 		],
 		"rules": {
@@ -29,6 +28,9 @@
 			},
 			"complexity": {
 				"noForEach": "off"
+			},
+			"correctness": {
+				"noUnknownFunction": "off"
 			}
 		}
 	},
