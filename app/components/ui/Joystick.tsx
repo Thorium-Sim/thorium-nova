@@ -27,6 +27,7 @@ export const Joystick = ({
 				ref={containerRef}
 				className="top-0 absolute bg-black/50 border-2 border-white/50 rounded-full w-full h-full flex justify-center items-center"
 			>
+				{/* @ts-expect-error */}
 				<a.div
 					{...bind()}
 					style={{
@@ -71,6 +72,7 @@ export const LinearJoystick = ({
 				className,
 			)}
 		>
+			{/* @ts-expect-error */}
 			<a.div
 				{...bind()}
 				style={{ transform: xy?.to((x, y) => `translate3d(${x}px,${y}px,0)`) }}

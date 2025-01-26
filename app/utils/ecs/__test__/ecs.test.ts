@@ -1,7 +1,8 @@
 import ECS from "../ecs";
 import Entity from "../entity";
 import System from "../system";
-import { vi } from "vitest";
+import { beforeEach, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 const server: any = {};
 describe("ECS", () => {

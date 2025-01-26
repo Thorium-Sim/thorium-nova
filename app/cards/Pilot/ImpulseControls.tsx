@@ -291,6 +291,7 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 								ref={ref}
 								className="relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end"
 							>
+								{/* @ts-expect-error */}
 								<a.div
 									{...bind()}
 									style={{

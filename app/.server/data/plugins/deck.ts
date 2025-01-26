@@ -13,6 +13,7 @@ import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { DeckEdge, DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
 import { nodeFlagsSchema } from "@thorium/utils/flags/DeckNode";
 import { edgeFlagsSchema } from "@thorium/utils/flags/DeckEdge";
+import type { DataContext } from "@thorium/.server/DataContext";
 function getDeck(
 	context: DataContext,
 	{

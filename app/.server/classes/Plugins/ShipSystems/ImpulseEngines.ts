@@ -1,7 +1,4 @@
-import type {
-	KilometerPerSecond,
-	KiloNewtons,
-} from "server/src/utils/unitTypes";
+import type { KilometerPerSecond, KiloNewtons } from "@thorium/utils/unitTypes";
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";

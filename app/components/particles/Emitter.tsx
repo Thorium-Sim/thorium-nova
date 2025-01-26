@@ -1,4 +1,3 @@
-import type { GroupProps } from "@react-three/fiber";
 import {
 	type ReactNode,
 	useRef,
@@ -8,6 +7,7 @@ import {
 } from "react";
 import { Vector3, type Group } from "three";
 import type { Angle } from "./types";
+import type { ThreeElements } from "@react-three/fiber";
 
 const EmitterContext = createContext<{
 	emissionAngleRange: Angle;
@@ -37,7 +37,7 @@ export const Emitter = forwardRef<
 		children: ReactNode;
 		emissionAngleRange?: Angle;
 		onParticlesExpired?: () => void;
-	} & GroupProps
+	} & ThreeElements["group"]
 >(
 	(
 		{ children, emissionAngleRange = { longitude: 0, latitude: 0 }, ...props },

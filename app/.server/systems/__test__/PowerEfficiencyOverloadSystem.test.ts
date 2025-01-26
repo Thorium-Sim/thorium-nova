@@ -1,6 +1,7 @@
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
 import { ECS, Entity } from "@thorium/utils/ecs";
 import { PowerEfficiencyOverloadSystem } from "../PowerEfficiencyOverloadSystem";
+import { describe, expect, it, beforeEach } from "vitest";
 
 describe("PowerEfficiencyOverloadSystem", () => {
 	let ecs: ECS;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
 	AdditiveBlending,
 	Box2,

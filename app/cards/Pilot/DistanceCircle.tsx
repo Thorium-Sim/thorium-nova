@@ -7,7 +7,6 @@ import {
 	type Mesh,
 	type OrthographicCamera,
 } from "three";
-// @ts-expect-error
 import type { Line2 } from "three-stdlib";
 
 import FONT_URL from "./Teko-Light.ttf";

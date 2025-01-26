@@ -1,3 +1,4 @@
+import { expect, test } from "vitest";
 import { degreeLerp, lerp, radianLerp } from "../src/lerp";
 
 test("lerp should be 0.5", () => {

@@ -438,7 +438,7 @@ export const starmapCore = t.router({
 	// This one is just used for timeline actions
 	setShipDestination: t.procedure
 		.meta({
-			action: (ctx: DataContext) => {
+			action: () => {
 				return {
 					position: {
 						name: "Position",

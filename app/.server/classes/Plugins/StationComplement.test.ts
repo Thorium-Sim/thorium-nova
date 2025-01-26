@@ -1,6 +1,7 @@
 import StationComplementPlugin from "./StationComplement";
 import Plugin from "./index";
 import type { ServerDataModel } from "../ServerDataModel";
+import { describe, expect, it } from "vitest";
 
 describe("StationComplementPlugin", () => {
 	it("should instantiate correctly", async () => {

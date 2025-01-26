@@ -1,5 +1,6 @@
 import { readFile, rm } from "node:fs/promises";
 import { FSDataStore, setBasePath } from "./index";
+import { afterAll, describe, expect, it } from "vitest";
 interface TestStore {
 	a: number;
 	b: string;

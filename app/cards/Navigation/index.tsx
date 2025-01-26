@@ -15,7 +15,7 @@ import SearchableInput, {
 	DefaultResultLabel,
 } from "@thorium/ui/SearchableInput";
 import { capitalCase } from "change-case";
-import { useSpring, a } from "@react-spring/web";
+import { useSpring, animated } from "@react-spring/web";
 import SearchableList from "@thorium/ui/SearchableList";
 import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
 import { useFollowEntity } from "@thorium/components/Starmap/useFollowEntity";
@@ -77,7 +77,8 @@ function Waypoints() {
 			>
 				{toggle ? "Hide" : "Show"} Waypoints
 			</Button>
-			<a.div
+			{/* @ts-expect-error */}
+			<animated.div
 				className="overflow-hidden w-full mt-2"
 				style={{
 					...style,
@@ -144,7 +145,8 @@ function Waypoints() {
 						}}
 					/>
 				</div>
-			</a.div>
+				{/* @ts-expect-error */}
+			</animated.div>
 		</div>
 	);
 }

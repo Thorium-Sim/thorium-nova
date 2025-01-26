@@ -11,7 +11,6 @@ import { Icon } from "@thorium/ui/Icon";
 import Slider from "@thorium/ui/Slider";
 import { useEffect, useMemo, useRef } from "react";
 import { DoubleSide, Euler, type Group, Quaternion, Vector3 } from "three";
-// @ts-expect-error
 import type { Line2 } from "three-stdlib";
 
 export function PhaserArcs() {

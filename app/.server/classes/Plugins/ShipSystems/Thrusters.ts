@@ -2,7 +2,7 @@ import type {
 	KiloNewtons,
 	MetersPerSecond,
 	RotationsPerMinute,
-} from "server/src/utils/unitTypes";
+} from "@thorium/utils/unitTypes";
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";

@@ -1,15 +1,21 @@
 import { SnapshotInterpolation, Vault } from "../src";
+import { test, expect, it } from "vitest";
 
 const vault = new Vault();
 const tick = 1000 / 20;
+/**
+ * @type {string}
+ */
 let snapshotId;
 
 const delay = () => {
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			resolve();
-		}, tick);
-	});
+	return /** @type {Promise<void>} */ (
+		new Promise((resolve) => {
+			setTimeout(() => {
+				resolve();
+			}, tick);
+		})
+	);
 };
 
 test("empty vault size should be 0", () => {
@@ -75,5 +81,6 @@ test("get some closest snapshot to a specific time", () => {
 	const shot1 = vault.get(new Date().getTime() - tick * 3 + 10, true);
 	const shot2 = vault.get(new Date().getTime() - tick * 3 + 20, true);
 	const shot3 = vault.get(new Date().getTime() - tick * 3 + 30, true);
+	// @ts-ignore
 	expect(shot1.id.length + shot2.id.length + shot3.id.length).toBe(18);
 });

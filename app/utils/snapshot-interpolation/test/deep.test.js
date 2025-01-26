@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { SnapshotInterpolation } from "../src/index";
 
 const tick = 1000 / 20;

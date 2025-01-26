@@ -1,4 +1,5 @@
 import randomWords from ".";
+import { describe, expect, it } from "vitest";
 
 describe("random-words", () => {
 	it("should return one word when called with no arguments", () => {

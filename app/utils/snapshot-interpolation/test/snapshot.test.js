@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { SnapshotInterpolation } from "../src";
 
 const SI = new SnapshotInterpolation();

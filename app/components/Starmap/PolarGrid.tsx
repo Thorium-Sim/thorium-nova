@@ -1,13 +1,9 @@
-import {
-	type PolarGridHelperProps,
-	type GridHelperProps,
-	useFrame,
-} from "@react-three/fiber";
+import { useFrame, type ThreeElements } from "@react-three/fiber";
 import * as React from "react";
 import { AdditiveBlending, type PolarGridHelper, type GridHelper } from "three";
 import { useGetStarmapStore } from "./starmapStore";
 
-export function PolarGrid(props: PolarGridHelperProps) {
+export function PolarGrid(props: ThreeElements["polarGridHelper"]) {
 	const polarRef = React.useRef<PolarGridHelper>(null);
 	React.useLayoutEffect(() => {
 		if (polarRef.current && !Array.isArray(polarRef.current?.material)) {
@@ -20,7 +16,7 @@ export function PolarGrid(props: PolarGridHelperProps) {
 	});
 	return <polarGridHelper ref={polarRef} {...props} />;
 }
-export function Grid(props: GridHelperProps) {
+export function Grid(props: ThreeElements["gridHelper"]) {
 	const gridRef = React.useRef<GridHelper>(null);
 	const useStarmapStore = useGetStarmapStore();
 	const cameraControls = useStarmapStore((s) => s.cameraControls);

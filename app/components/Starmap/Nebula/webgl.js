@@ -1,3 +1,4 @@
+// @ts-nocheck
 /*...........................................................................*/
 export function buildAttribs(gl, layout) {
 	var attribs = {};

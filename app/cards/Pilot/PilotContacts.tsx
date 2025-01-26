@@ -21,7 +21,6 @@ import {
 	type Sprite,
 	Vector3,
 } from "three";
-// @ts-expect-error
 import type { Line2 } from "three-stdlib";
 import { useGetFacingWaypoint, useCircleGridStore } from "./useCircleGridStore";
 import { WaypointEntity } from "./Waypoint";

@@ -109,15 +109,7 @@ export const Widget: FC<{
 					icon
 				)}
 			</Popover.Button>
-			<Transition
-				className="relative z-40"
-				enter="transition duration-100 ease-out"
-				enterFrom="transform scale-95 opacity-0"
-				enterTo="transform scale-100 opacity-100"
-				leave="transition duration-75 ease-out"
-				leaveFrom="transform scale-100 opacity-100"
-				leaveTo="transform scale-95 opacity-0"
-			>
+			<Transition>
 				<Popover.Panel
 					className={cn(
 						"max-w-md absolute isolate right-0 max-h-96 z-50 !bg-black/90 panel backdrop-blur border border-white/50 rounded p-2 w-screen @container overflow-hidden",
@@ -127,6 +119,10 @@ export const Widget: FC<{
 							"max-w-xl": size === "lg",
 							"max-w-2xl": size === "xl",
 						},
+						"z-40 relative scale-100 ease-out",
+						"data-[closed]:opacity-0 data-[closed]:scale-95",
+						"data-[enter]:duration-100",
+						"data-[leave]:duration-75",
 					)}
 					ref={refs.setFloating}
 					style={{

@@ -31,6 +31,7 @@ export function EditorPalette({
 
 	return (
 		<Portal>
+			{/* @ts-expect-error */}
 			<animated.div
 				className="w-64 max-h-96 flex flex-col bg-gray-900 shadow-lg rounded-lg fixed left-[calc(50%-6rem)] top-[calc(50%-8rem)]"
 				style={{
@@ -61,6 +62,7 @@ export function EditorPalette({
 					</button>
 				</div>
 				{minimized ? null : children}
+				{/* @ts-expect-error */}
 			</animated.div>
 		</Portal>
 	);

@@ -4,6 +4,7 @@ import { ECS, Entity } from "@thorium/utils/ecs";
 import { FilterInventorySystem } from "../FilterInventorySystem";
 import { FilterShipsWithReactors } from "../FilterShipsWithReactors";
 import { HeatDispersionSystem } from "../HeatDispersionSystem";
+import { describe, expect, it, beforeEach } from "vitest";
 
 describe("HeatDispersionSystem", () => {
 	let ecs: ECS;

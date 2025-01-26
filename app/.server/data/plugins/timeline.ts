@@ -9,6 +9,7 @@ import path from "node:path";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
 import uniqid from "@thorium/utils/uniqid";
+import type { FlightStartingPoint } from "@thorium/.server/data/flight";
 
 const action = t.router({
 	add: t.procedure

@@ -1,4 +1,4 @@
-import { useFrame, type SpriteMaterialProps } from "@react-three/fiber";
+import { useFrame, type ThreeElements } from "@react-three/fiber";
 import { useRef } from "react";
 import type { Group } from "three";
 import { useParticles } from "./useParticles";
@@ -23,7 +23,7 @@ export function SpriteCell({
 	attachToEmitter = false,
 	rng = Math.random,
 	...spriteMaterialProps
-}: CellProps & SpriteMaterialProps) {
+}: CellProps & ThreeElements["spriteMaterial"]) {
 	const { maxParticles, updateParticle } = useParticles({
 		birthRatePerSecond,
 		birthRateVariance,

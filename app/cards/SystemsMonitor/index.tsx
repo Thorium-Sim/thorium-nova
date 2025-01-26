@@ -260,7 +260,9 @@ function Reactor({
 					}).map((_, i) => (
 						<Fragment key={i}>
 							<div
-								ref={(el) => el && elementRefs.current.set(i, el)}
+								ref={(el) => {
+									el && elementRefs.current.set(i, el);
+								}}
 								className={cn("w-3 h-3 mr-1 last-of-type:mr-0 bg-gray-500", {
 									"mr-0": i + 1 === maxOutput * optimalOutputPercent,
 								})}
@@ -475,7 +477,9 @@ function Battery({
 									});
 								}}
 								key={i}
-								ref={(el) => el && chargeElementRefs.current.set(i, el)}
+								ref={(el) => {
+									el && chargeElementRefs.current.set(i, el);
+								}}
 								className="w-3 h-3 mr-1 last-of-type:mr-0"
 							/>
 						))}
@@ -519,7 +523,9 @@ function Battery({
 						}).map((_, i) => (
 							<div
 								key={i}
-								ref={(el) => el && outputElementRefs.current.set(i, el)}
+								ref={(el) => {
+									el && outputElementRefs.current.set(i, el);
+								}}
 								className="w-3 h-3 mr-1 last-of-type:mr-0 bg-gray-600"
 							/>
 						))}
@@ -683,7 +689,9 @@ function System({
 
 									{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 									<div
-										ref={(el) => el && elementRefs.current.set(i, el)}
+										ref={(el) => {
+											el && elementRefs.current.set(i, el);
+										}}
 										onClick={(e) => {
 											e.stopPropagation();
 											q.systemsMonitor.systems.removePowerSource.netSend({
