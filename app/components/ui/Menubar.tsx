@@ -1,0 +1,70 @@
+import { useThoriumAccount } from "@thorium/context/ThoriumAccountContext";
+import {
+	type ReactNode,
+	createContext,
+	useContext,
+	useState,
+	type Dispatch,
+	type SetStateAction,
+	useEffect,
+} from "react";
+import { Link } from "react-router";
+import LoginButton from "../LoginButton";
+import { Icon } from "./Icon";
+
+const MenubarContext = createContext<
+	Dispatch<SetStateAction<MenubarContextProps[]>>
+>(null!);
+
+type MenubarContextProps = {
+	children?: ReactNode;
+	backTo?: string;
+};
+export default function Menubar({ children }: { children?: ReactNode }) {
+	const { account } = useThoriumAccount();
+	const [props, setProps] = useState<MenubarContextProps[]>([]);
+
+	const { backTo, menuChildren } = props.reduce(
+		(prev: { backTo?: string; menuChildren?: ReactNode }, curr) => {
+			if (curr.backTo) prev.backTo = curr.backTo;
+			if (curr.children) prev.menuChildren = curr.children;
+			return prev;
+		},
+		{},
+	);
+	return (
+		<>
+			<div className="h-8 px-4 bg-black/80 border-b border-white/25 flex gap-2 items-center">
+				<Link to="/" className="btn btn-primary btn-xs btn-outline">
+					<Icon name="home" className="text-base" />
+				</Link>
+				{backTo && (
+					<Link to={backTo} className="btn btn-primary btn-xs btn-outline">
+						<Icon name="arrow-left" />
+					</Link>
+				)}
+				{menuChildren}
+				<div className="flex-1" />
+				{account && <LoginButton size="sm" />}
+			</div>
+			<MenubarContext.Provider value={setProps}>
+				{children}
+			</MenubarContext.Provider>
+		</>
+	);
+}
+
+export function useMenubar(props: MenubarContextProps) {
+	const setProps = useContext(MenubarContext);
+	if (!setProps)
+		throw new Error(
+			"useMenubar must be used inside a child of a Menubar component.",
+		);
+
+	useEffect(() => {
+		setProps((oldProps) => [...oldProps, props]);
+		return () => {
+			setProps((oldProps) => oldProps.filter((p) => p !== props));
+		};
+	}, [props, setProps]);
+}

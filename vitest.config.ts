@@ -6,5 +6,8 @@ export default defineConfig({
 	test: {
 		environment: "happy-dom",
 		globals: true,
+		alias: {
+			"../../../build/defaultPlugin.plug": "./stub.js",
+		},
 	},
 });

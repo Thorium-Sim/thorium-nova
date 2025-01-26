@@ -36,21 +36,21 @@ individually.
 This project uses a number of tools to maintain code quality.
 
 - **TypeScript** - a superset of JavaScript that provides static type checking.
-- **ESlint** - checks code to make sure that good programming practices are
+- **Biome** - checks code to make sure that good programming practices are
   followed. The config is very open to change and interpretation. A frustrating
   linter is worse than no linter at all.
-- **Prettier** - Automatically formats code. Applies code style standards so we
+- **Biome** - Automatically formats code. Applies code style standards so we
   don't have to think or argue about it.
 - **Semantic Release** and **Conventional Commits** - Release management and
   changelog generation. When code is merged into `main`, Semantic Release will
   gather up all of the commits since the last release to generate the changelog.
   It will also take care of building and deploying the release artifacts.
-- **Jest** - Automated unit testing for the client, server, and shared project
+- **Vitest** - Automated unit testing for the client, server, and shared project
   folders.
 
 All of these tools will validate the code for every pull request, and pull
 requests won't be merged until they are all passing. Using an IDE like VS Code
-will help you catch TypeScript and ESLint issues, and automatically run Prettier
+will help you catch TypeScript and Biome lint issues, and automatically run Biome format
 when you save. It's still on the developer to run tests before they push their
 code.
 
