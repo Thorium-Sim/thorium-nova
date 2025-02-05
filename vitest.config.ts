@@ -9,5 +9,10 @@ export default defineConfig({
 		alias: {
 			"../../../build/defaultPlugin.plug": "./stub.js",
 		},
+		server: {
+			deps: {
+				external: ["@thorium-sim/rapier3d-node"],
+			},
+		},
 	},
 });

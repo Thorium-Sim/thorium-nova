@@ -10,7 +10,6 @@ import { exitHandler, snapshot } from "@thorium/.server/init/exitHandler";
 import { serveStatic } from "hono/bun";
 import { Hono } from "hono";
 import { createBunWebSocket } from "hono/bun";
-import type { ServerWebSocket } from "bun";
 import { readdir } from "node:fs/promises";
 import { vanity } from "@thorium/utils/.server/vanity";
 // @ts-expect-error
@@ -19,6 +18,8 @@ import httpsCert from "./.server/server.cert" with { type: "file" };
 import httpsKey from "./.server/server.key" with { type: "file" };
 import { getMimeType } from "hono/utils/mime";
 import { getClientBundleFile } from "@thorium/utils/.server/getClientBundleFile";
+import type { ServerWebSocket } from "bun";
+
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>();
 
 console.info(`Starting Thorium...`);

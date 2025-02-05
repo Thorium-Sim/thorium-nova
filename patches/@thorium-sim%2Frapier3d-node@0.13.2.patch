@@ -1,13 +1,24 @@
+diff --git a/node_modules/@thorium-sim/rapier3d-node/.bun-tag-a46edb8bb6b58a91 b/.bun-tag-a46edb8bb6b58a91
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/dist/rapier_wasm3d.js b/dist/rapier_wasm3d.js
-index f506e35499d4d419a211ac6c82e1753198dca1b4..1a63573071b632114a7b490f53f2f383543b7ea8 100644
+index f506e35499d4d419a211ac6c82e1753198dca1b4..967275b1e864dcfa2fb67f4794ced9b9e11642ff 100644
 --- a/dist/rapier_wasm3d.js
 +++ b/dist/rapier_wasm3d.js
-@@ -5797,7 +5797,7 @@ module.exports.__wbindgen_memory = function() {
+@@ -5797,8 +5797,14 @@ module.exports.__wbindgen_memory = function() {
      return addHeapObject(ret);
  };
  
 -const path = require('path').join(__dirname, 'rapier_wasm3d_bg.wasm');
-+import path from './rapier_wasm3d_bg.wasm' with { type: "file" } 
- const bytes = require('fs').readFileSync(path);
+-const bytes = require('fs').readFileSync(path);
++let bytes = new ArrayBuffer();
++if (process.env.NODE_ENV === "production") {
++    const {embeddedFiles, peek} = require('bun')
++    bytes = (peek(embeddedFiles.find(f => f.name === "rapier_wasm3d_bg.wasm").arrayBuffer()))
++} else {
++    const path = require('path').join(__dirname, 'rapier_wasm3d_bg.wasm');
++    bytes = require('fs').readFileSync(path);
++}
  
  const wasmModule = new WebAssembly.Module(bytes);
+ const wasmInstance = new WebAssembly.Instance(wasmModule, imports);
