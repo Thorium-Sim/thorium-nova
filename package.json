@@ -29,7 +29,7 @@
 		"format:different": "biome format .",
 		"semantic-release": "semantic-release",
 		"postinstall": "bun run init:plugin",
-		"validate": "concurrently --names \"lint,format,typecheck,test\" -c \"yellow.bold,magenta.bold,blue.bold,green.bold\" \"npm run lint\" \"npm run format:different\" \"npm run typecheck\" \"CI=true npm run test\"",
+		"validate": "concurrently --names \"lint,format,typecheck,test\" -c \"yellow.bold,magenta.bold,blue.bold,green.bold\" \"bun run lint\" \"bun run format:different\" \"bun run typecheck\" \"CI=true bun run test\"",
 		"init:plugin": "bun run scripts/pluginInit.ts",
 		"sly": "npx @sly-cli/sly"
 	},

@@ -22,11 +22,7 @@ Check out the [project roadmap](https://github.com/orgs/Thorium-Sim/projects/2)
 for tasks that are planned, but not yet assigned to anyone. Add a comment to an
 issue to ask to have that issue assigned to you.
 
-I recommend using [Volta](https://volta.sh) to manage your Node and NPM
-versions, since it will automatically install the correct version when you work
-on Thorium Nova. If you're on Windows, I also recommend
-[using WSL](https://docs.microsoft.com/en-us/windows/wsl/install), although
-others have had success in Windows.
+You'll need to install [Bun](https://bun.sh) to install dependencies and run and build Thorium Nova.
 
 First
 [install git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and
@@ -36,23 +32,23 @@ run this command to download the code:
 git clone https://github.com/Thorium-Sim/thorium-nova.git
 ```
 
-Once the project has been cloned, you can install dependencies using NPM. You
+Once the project has been cloned, you can install dependencies using Bun. You
 will also want to install the default plugin, which has the configuration and
 assets for the game itself. Once you've done these two things, you can start the
 project.
 
 ```bash
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 This will automatically start the client and development servers and open up the
 UI in your web browser. If it doesn't automatically open, you can open it
 yourself by going to http://localhost:3000.
 
-> Note: Running `npm install` will automatically update the default plugin with
+> Note: Running `bun install` will automatically update the default plugin with
 > the latest assets and configuration. If you want to manually pull the latest
-> default plugin from Github, you can run `npm run init:plugin`.
+> default plugin from Github, you can run `bun run init:plugin`.
 
 ## Project Vision
 

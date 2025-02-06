@@ -134,7 +134,7 @@ by developers as they work on implementing those screens.
 ## Contribute Code
 
 Thorium Nova is built using [TypeScript](http://typescriptlang.org),
-[React](https://reactjs.org), [Node.js](https://nodejs.org/en/), and
+[React](https://reactjs.org), [Bun](https://bun.sh), and
 [git](https://guides.github.com/activities/hello-world/). Before contributing
 code, make sure you are familiar with these technologies.
 
@@ -146,9 +146,7 @@ never used git before,
 
 ### Running Thorium Nova from Source
 
-I recommend using [Volta](https://volta.sh) to manage your Node and NPM
-versions, since it will automatically install the correct version when you work
-on Thorium Nova. I also recommend using the
+I recommend using the
 [VS Code](https://code.visualstudio.com) editor. Thorium Nova will automatically
 recommend extensions for VS Code that will help you during development.
 
@@ -159,12 +157,12 @@ do that by running this command after installing git:
 git clone https://github.com/Thorium-Sim/thorium-nova.git
 ```
 
-Once the project has been cloned, you can install dependencies using NPM and
+Once the project has been cloned, you can install dependencies using Bun and
 start the project.
 
 ```bash
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 This will automatically start the client and development servers and open up the
@@ -197,7 +195,7 @@ a new branch for your work, and installing any new dependencies.
 git checkout develop
 git pull
 git checkout -b :your branch name:
-npm install
+bun install
 ```
 
 From there, you can start making your changes, committing as you go and opening
@@ -210,7 +208,7 @@ are doing.
 ### Pull Request Review Guidelines
 
 Before pushing your code to Github, make sure your passes our basic quality
-checks by running `npm validate`. This will run automated tests, lint your code
+checks by running `bun run validate`. This will run automated tests, lint your code
 with Biome, run TypeScript's type checker, and format your code using Biome.
 
 Consider creating a feature branch and opening a draft pull request before you
