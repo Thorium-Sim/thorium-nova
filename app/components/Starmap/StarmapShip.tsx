@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Suspense } from "react";
 import { Line, useGLTF } from "@react-three/drei";
 import {
@@ -223,11 +223,11 @@ const ShipSprite = ({
 	spriteAsset: string;
 	userData?: any;
 }) => {
-	// TODO: Replace with a ship icon
-	const spriteMap = suspend(async () => {
-		const canvas = document.createElement("canvas");
+	const [canvas] = useState(() => document.createElement("canvas"));
+
+	useEffect(() => {
 		const ctx = canvas.getContext("2d");
-		await new Promise<void>((resolve, reject) => {
+		new Promise<void>((resolve, reject) => {
 			const img = new Image();
 			img.src = spriteAsset;
 			img.onload = () => {
@@ -251,8 +251,8 @@ const ShipSprite = ({
 				resolve();
 			};
 		});
-		return new CanvasTexture(canvas);
-	}, [spriteAsset]);
+	}, [spriteAsset, canvas]);
+	const spriteMap = new CanvasTexture(canvas);
 
 	const scale = 1 / 50;
 	const ref = useRef<Sprite>(null);

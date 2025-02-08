@@ -14,6 +14,8 @@ const shipSystemTypes = z.enum([
 	"phasers",
 ]);
 
+export type ShipSystemTypes = z.infer<typeof shipSystemTypes>;
+
 export const isShipSystem = z
 	.object({
 		type: shipSystemTypes.default("generic"),

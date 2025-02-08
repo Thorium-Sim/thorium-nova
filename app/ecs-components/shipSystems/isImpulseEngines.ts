@@ -1,6 +1,5 @@
 import z from "zod";
 
-// TODO April 27, 2022: Add the necessary sound effects
 export const isImpulseEngines = z
 	.object({
 		/** The max speed at full impulse in km/s. */

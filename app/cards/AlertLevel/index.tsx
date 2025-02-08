@@ -11,11 +11,11 @@ const alertLevelText = [
 	},
 	{
 		number: 4,
-		text: "This alert condition is used when the station has a minor problem. All crew except damage control is on standard duty.",
+		text: "This alert condition is used when the ship has a minor problem. All crew except damage control is on standard duty.",
 	},
 	{
 		number: 3,
-		text: "This alert condition is used when the ship needs to be ready for a crisis. All off duty personnel are put on stand by status.",
+		text: "This alert condition is used when the ship needs to be ready for a dangerous situation. All off duty personnel are put on stand by status.",
 	},
 	{
 		number: 2,
