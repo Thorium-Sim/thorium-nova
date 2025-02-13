@@ -8,3 +8,4 @@ export { remoteAccess } from "./RemoteAccess/data.server";
 export { targeting } from "./Targeting/data.server";
 export { objectives } from "./Objectives/data.server";
 export { systemsMonitor } from "./SystemsMonitor/data.server";
+export { sensors } from "./Sensors/data.server";

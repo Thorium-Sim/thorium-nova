@@ -14,7 +14,12 @@ export const systemsMonitor = t.router({
 				return true;
 			})
 			.request(({ ctx }) => {
-				const reactors = getShipSystems(ctx, { systemType: "reactor" });
+				if (!ctx.flight) return [];
+
+				const reactors = getShipSystems(ctx.flight.ecs, {
+					systemType: "reactor",
+					shipId: ctx.ship!.id,
+				});
 				return reactors.map((r) => {
 					const inventory = getReactorInventory(r);
 					const fuelPower: MegaWattHour =
@@ -46,7 +51,12 @@ export const systemsMonitor = t.router({
 				});
 			}),
 		ambiance: t.procedure.request(({ ctx }) => {
-			const reactors = getShipSystems(ctx, { systemType: "reactor" });
+			if (!ctx.flight) return [];
+
+			const reactors = getShipSystems(ctx.flight.ecs, {
+				systemType: "reactor",
+				shipId: ctx.ship!.id,
+			});
 
 			return reactors.map((r) => ({
 				id: r.id,
@@ -66,7 +76,12 @@ export const systemsMonitor = t.router({
 				return true;
 			})
 			.request(({ ctx }) => {
-				const batteries = getShipSystems(ctx, { systemType: "battery" });
+				if (!ctx.flight) return [];
+
+				const batteries = getShipSystems(ctx.flight.ecs, {
+					systemType: "battery",
+					shipId: ctx.ship!.id,
+				});
 				return batteries.map((b) => ({
 					id: b.id,
 					name: b.components.identity!.name,

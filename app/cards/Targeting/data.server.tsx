@@ -96,8 +96,10 @@ export const targeting = t.router({
 				return true;
 			})
 			.request(({ ctx }) => {
-				const systems = getShipSystems(ctx, {
+				if (!ctx.flight) return [];
+				const systems = getShipSystems(ctx.flight.ecs, {
 					systemType: "TorpedoLauncher",
+					shipId: ctx.ship!.id,
 				}).filter(
 					(system) => system.components.isShipSystem?.shipId === ctx.ship?.id,
 				);
@@ -257,8 +259,10 @@ export const targeting = t.router({
 				return true;
 			})
 			.request(({ ctx }) => {
-				const systems = getShipSystems(ctx, {
+				if (!ctx.flight) return [];
+				const systems = getShipSystems(ctx.flight.ecs, {
 					systemType: "Shields",
+					shipId: ctx.ship!.id,
 				}).filter(
 					(system) => system.components.isShipSystem?.shipId === ctx.ship?.id,
 				);
@@ -294,8 +298,10 @@ export const targeting = t.router({
 						state: input.state,
 					});
 				} else {
-					const shields = getShipSystems(ctx, {
+					if (!ctx.flight) return;
+					const shields = getShipSystems(ctx.flight.ecs, {
 						systemType: "Shields",
+						shipId: ctx.ship!.id,
 					}).filter(
 						(system) => system.components.isShipSystem?.shipId === ctx.ship?.id,
 					);
@@ -317,8 +323,10 @@ export const targeting = t.router({
 				return true;
 			})
 			.request(({ ctx }) => {
-				const systems = getShipSystems(ctx, {
+				if (!ctx.flight) return;
+				const systems = getShipSystems(ctx.flight.ecs, {
 					systemType: "Phasers",
+					shipId: ctx.ship!.id,
 				}).filter(
 					(system) => system.components.isShipSystem?.shipId === ctx.ship?.id,
 				);

@@ -1,3 +1,4 @@
+import { getPhaserCharge } from "@thorium/.server/systems/PhasersSystem";
 import type { Entity } from "@thorium/utils/ecs";
 import { Quaternion, Vector3 } from "three";
 
@@ -55,35 +56,10 @@ export function dataStreamEntity(e: Entity) {
 	}
 	if (e.components.isPhasers) {
 		// We'll count the storage of any attached phase capacitor
-		const phaseCapacitors = e.components.power?.powerSources.reduce(
-			(prev, next) => {
-				if (prev.has(next)) return prev;
-				const entity = e.ecs?.getEntityById(next);
-				if (
-					!entity?.components.isPhaseCapacitor ||
-					!entity.components.isBattery
-				)
-					return prev;
-				prev.set(next, {
-					storage: entity.components.isBattery.storage,
-					capacity: entity.components.isBattery.capacity,
-				});
-				return prev;
-			},
-			new Map<number, { storage: number; capacity: number }>(),
-		);
-
-		let chargePercent = 0;
-		if (phaseCapacitors) {
-			for (const capacitor of phaseCapacitors.values()) {
-				chargePercent +=
-					capacitor.storage / capacitor.capacity / phaseCapacitors.size;
-			}
-		}
 
 		return {
 			id: e.id.toString(),
-			x: chargePercent,
+			x: getPhaserCharge(e),
 			y: e.components.power?.currentPower,
 			z: e.components.heat?.heat || 0,
 		};

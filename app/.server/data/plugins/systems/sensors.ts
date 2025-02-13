@@ -32,6 +32,7 @@ export const sensors = t.router({
 				activeRange: z.number().optional(),
 				minScanEnergyCost: z.number().optional(),
 				maxScanEnergyCost: z.number().optional(),
+				shieldPenaltyMultiplier: z.number().optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -50,6 +51,12 @@ export const sensors = t.router({
 			}
 			if (typeof input.maxScanEnergyCost === "number") {
 				shipSystem.maxScanEnergyCost = Math.max(0, input.maxScanEnergyCost);
+			}
+			if (typeof input.shieldPenaltyMultiplier === "number") {
+				shipSystem.shieldPenaltyMultiplier = Math.max(
+					0,
+					input.shieldPenaltyMultiplier,
+				);
 			}
 
 			pubsub.publish.plugin.systems.get({

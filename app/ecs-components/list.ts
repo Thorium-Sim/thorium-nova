@@ -47,3 +47,6 @@ export * from "./isDestroyed";
 export * from "./isObjective";
 export * from "./soundEffect";
 export * from "./reputation";
+export * from "./shipSystems/isSensors";
+export * from "./shipSystems/scan";
+export * from "./isFaction";

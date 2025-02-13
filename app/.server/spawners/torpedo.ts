@@ -79,7 +79,9 @@ export function spawnTorpedo(launcher: Entity) {
 	});
 	torpedoEntity.addComponent("mass", { mass: 1500 });
 	torpedoEntity.addComponent("physicsWorld");
-
+	torpedoEntity.addComponent("identity", {
+		name: torpedoInventory.components.identity?.name || "Torpedo",
+	});
 	return torpedoEntity;
 }
 

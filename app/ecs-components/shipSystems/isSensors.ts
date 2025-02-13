@@ -48,6 +48,8 @@ export const isSensors = z
 		minScanEnergyCost: z.number().default(5),
 		/** How much energy is required to perform an active scan when the target is at the active range from the ship, in kilowatt hours. */
 		maxScanEnergyCost: z.number().default(15),
+		/** How much to multiply the energy cost when the target's shields are raised */
+		shieldPenaltyMultiplier: z.number().default(2),
 		/** Scan results database */
 		resultsDatabase: z
 			.union([

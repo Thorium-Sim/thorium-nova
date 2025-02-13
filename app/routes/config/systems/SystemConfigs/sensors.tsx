@@ -188,6 +188,45 @@ export default function SensorsConfig() {
 							className="mt-6"
 						/>
 					</div>
+					<div className="pb-2 flex items-start">
+						<Input
+							labelHidden={false}
+							inputMode="numeric"
+							pattern="[0-9]*"
+							label="Shield Penalty Multiplier"
+							placeholder={"2"}
+							helperText={
+								"How much scan energy costs are multiplied when the target's shields are raised. Should be greater than 1."
+							}
+							defaultValue={system.shieldPenaltyMultiplier}
+							onBlur={async (e) => {
+								if (!e.target.value || Number.isNaN(Number(e.target.value)))
+									return;
+								try {
+									await q.plugin.systems.sensors.update.netSend({
+										pluginId,
+										systemId: systemId,
+										shipId,
+										shipPluginId,
+										shieldPenaltyMultiplier: Number(e.target.value),
+									});
+								} catch (err) {
+									if (err instanceof Error) {
+										toast({
+											title: "Error changing shield penalty multiplier",
+											body: err.message,
+											color: "error",
+										});
+									}
+								}
+							}}
+						/>
+						<OverrideResetButton
+							property="shieldPenaltyMultiplier"
+							setRekey={setRekey}
+							className="mt-6"
+						/>
+					</div>
 				</div>
 			</div>
 		</fieldset>

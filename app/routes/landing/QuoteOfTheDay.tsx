@@ -351,6 +351,8 @@ const quotes = [
 	"You are not broken, and the world is thirsting for your gifts.",
 	// I, Libertine
 	"'Gadzooks,' quoth I, 'but here's a saucy spaceship!'",
+	// John Gruber
+	"Different doesn't always mean better. But better necessarily means different.",
 ];
 
 const QuoteOfTheDay = () => {

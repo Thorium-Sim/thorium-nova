@@ -11,6 +11,7 @@ export default class SensorsPlugin extends BaseShipSystemPlugin {
 	activeRange: number;
 	minScanEnergyCost: number;
 	maxScanEnergyCost: number;
+	shieldPenaltyMultiplier: number;
 
 	soundEffects: {
 		ambiance: Sound[];
@@ -23,6 +24,7 @@ export default class SensorsPlugin extends BaseShipSystemPlugin {
 		this.activeRange = params.activeRange || 100_000;
 		this.minScanEnergyCost = params.minScanEnergyCost || 5;
 		this.maxScanEnergyCost = params.maxScanEnergyCost || 15;
+		this.shieldPenaltyMultiplier = params.shieldPenaltyMultiplier || 2;
 
 		this.soundEffects = params.soundEffects || {
 			ambiance: [],

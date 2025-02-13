@@ -166,7 +166,7 @@ export function GridCanvas({
 			<Canvas
 				camera={{
 					// position: [0, 300000, 0],
-					far: 200000,
+					far: zoomMax * 2,
 				}}
 				className="rounded-full"
 				orthographic
