@@ -82,8 +82,6 @@ export default class BasePlugin extends FSDataStore {
 		this.active = data.active ?? true;
 		this.default = data.default ?? false;
 		storedServer = server;
-
-		this.loadAspects();
 	}
 	get server() {
 		return storedServer;

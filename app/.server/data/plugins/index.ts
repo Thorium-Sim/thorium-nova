@@ -43,9 +43,10 @@ export const plugin = t.router({
 		}),
 	create: t.procedure
 		.input(z.object({ name: z.string() }))
-		.send(({ ctx, input }) => {
+		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = new BasePlugin(input, ctx.server);
+			await plugin.loadAspects();
 			ctx.server.plugins.push(plugin);
 			publish(plugin.id);
 			return { pluginId: plugin.id };

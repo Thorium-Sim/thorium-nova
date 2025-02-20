@@ -45,7 +45,9 @@ export class ServerDataModel extends FSDataStore {
 		for await (const plugin of plugins) {
 			const name = pluginRegex.exec(plugin)![1];
 			try {
-				this.plugins.push(new BasePlugin({ name }, this));
+				const plugin = new BasePlugin({ name }, this);
+				await plugin.loadAspects();
+				this.plugins.push(plugin);
 			} catch (err) {
 				console.error(`Error loading plugin ${name}:`, err);
 			}
