@@ -19,6 +19,9 @@ const backgrounds = [
 	"/assets/backgrounds/background16.jpg",
 	"/assets/backgrounds/background17.jpg",
 	"/assets/backgrounds/background18.jpg",
+	"/assets/backgrounds/background19.jpg",
+	"/assets/backgrounds/background20.jpg",
+	"/assets/backgrounds/background12.jpg",
 ];
 
 export function getBackground() {
