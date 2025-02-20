@@ -86,6 +86,13 @@ export function dataStreamEntity(e: Entity) {
 		};
 	}
 
+	if (e.components.scan) {
+		return {
+			id: e.id.toString(),
+			x: e.components.scan.progress,
+		};
+	}
+
 	const { parentId, type, ...position } = e.components.position || {};
 	const shouldSnap = e.components.snapInterpolation ? 1 : 0;
 	e.removeComponent("snapInterpolation");

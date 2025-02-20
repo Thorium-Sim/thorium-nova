@@ -282,6 +282,10 @@ class Entity {
 			this.systems[0].removeEntity(this);
 			fastSplice(this.systems, 0, 1);
 		}
+
+		for (const component in this.components) {
+			this.removeComponentCache(component as any);
+		}
 	}
 }
 

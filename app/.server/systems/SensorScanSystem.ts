@@ -1,9 +1,14 @@
+import { pubsub } from "@thorium/.server/init/pubsub";
 import { getPhaserCharge } from "@thorium/.server/systems/PhasersSystem";
+import { getClassification } from "@thorium/cards/Navigation/getObjectClassification.server";
 import { efficiency } from "@thorium/ecs-components/efficiency";
 import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { type ECS, type Entity, System } from "@thorium/utils/ecs";
+import type { scanRecord } from "@thorium/utils/flags/scanTypes";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import type { KiloWattHour } from "@thorium/utils/unitTypes";
+import { capitalCase } from "change-case";
+import type { z } from "zod";
 
 export class SensorScanSystem extends System {
 	/** The number of concurrent sensor scans */
@@ -33,17 +38,17 @@ export class SensorScanSystem extends System {
 		if (!scan) return;
 		if (scan.progress >= 1) {
 			// Handle repeat scans
-			if (scan.repeatInterval === null) this.ecs.removeEntity(entity);
-			else {
-				const intervalTime = scan.intervalTime + elapsedTimeSeconds;
+			if (scan.repeatInterval === null) {
+				return;
+			}
+			const intervalTime = scan.intervalTime + elapsedTimeSeconds;
+			entity.updateComponent("scan", {
+				intervalTime,
+			});
+			if (intervalTime > scan.repeatInterval) {
 				entity.updateComponent("scan", {
-					intervalTime,
+					progress: 0,
 				});
-				if (intervalTime > scan.repeatInterval) {
-					entity.updateComponent("scan", {
-						progress: 0,
-					});
-				}
 			}
 
 			return;
@@ -68,8 +73,9 @@ export class SensorScanSystem extends System {
 			}
 		}
 		const sensorSystem = sensors?.components.isSensors;
-		if (!sensors || !sensorSystem) return;
-		const scanCount = this.sensorsScanCount.get(sensors.id);
+		const shipId = sensors?.components.isShipSystem?.shipId;
+		if (!sensors || !sensorSystem || !shipId) return;
+		const scanCount = this.sensorsScanCount.get(shipId);
 		if (!scanCount) return;
 
 		const shipPosition = parent.components.position;
@@ -93,16 +99,16 @@ export class SensorScanSystem extends System {
 			shieldPenaltyMultiplier,
 		} = sensorSystem;
 		let totalRequiredEnergy: KiloWattHour = Number.POSITIVE_INFINITY;
-		if (distance <= activeRange)
+		if (distance <= activeRange) {
 			totalRequiredEnergy =
 				(maxScanEnergyCost - minScanEnergyCost) * (distance / activeRange) +
 				minScanEnergyCost;
-		else if (distance <= passiveRange) {
+		} else if (distance <= passiveRange) {
 			const addedDistance = distance - activeRange;
 			const distanceRatio = passiveRange / activeRange;
 			// Exponential increase
 			totalRequiredEnergy =
-				maxScanEnergyCost + Math.E ** (addedDistance * distanceRatio) - 1;
+				maxScanEnergyCost + addedDistance * distanceRatio - 1;
 		}
 
 		// Multiply by the target's shields strength if shields are raised
@@ -118,7 +124,7 @@ export class SensorScanSystem extends System {
 			shieldStrength += shield.strength / shield.maxStrength / shields.length;
 			shieldStatus = shield.state === "up" ? "up" : shieldStatus;
 		}
-		totalRequiredEnergy *= shieldStrength * shieldPenaltyMultiplier;
+		totalRequiredEnergy *= 1 + shieldStrength * shieldPenaltyMultiplier;
 
 		const currentPower = sensors.components.power?.currentPower || 0;
 		const powerProvided = currentPower / scanCount;
@@ -126,12 +132,18 @@ export class SensorScanSystem extends System {
 		const energyProvided: KiloWattHour =
 			powerProvided * elapsedTimeHours * 1000;
 
-		const progress = energyProvided / totalRequiredEnergy;
+		const progress = Math.min(
+			1,
+			scan.progress + energyProvided / (totalRequiredEnergy || Number.EPSILON),
+		);
 		entity.updateComponent("scan", { progress });
 
 		if (scan.progress >= 1) {
 			// The scan is complete! Let's put some data in the database
-			const currentResults = sensorSystem.resultsDatabase.get(object.id) || {};
+			entity.updateComponent("scan", { timestamp: Date.now() });
+			const currentResults =
+				sensorSystem.resultsDatabase.get(object.id) ||
+				({} as z.infer<typeof scanRecord>);
 			switch (scan.type) {
 				case "cargo": {
 					const output: Record<string, number> = {};
@@ -159,11 +171,13 @@ export class SensorScanSystem extends System {
 						[]) {
 						const system = this.ecs.getEntityById(systemId);
 						if (!system) continue;
+						const efficiency = system.components.efficiency?.efficiency || 1;
+						if (efficiency > 0.9) continue;
 						systems.push({
 							name:
 								system?.components.identity?.name ||
 								system.components.isShipSystem?.type,
-							efficiency: system.components.efficiency?.efficiency || 1,
+							efficiency,
 						});
 					}
 					systems.sort((a, b) => a.efficiency - b.efficiency);
@@ -174,12 +188,14 @@ export class SensorScanSystem extends System {
 					}
 					break;
 				}
-				case "iff": {
+				case "identification": {
 					const faction = this.ecs.getEntityById(
 						object.components.faction?.factionId || -1,
 					);
 
-					currentResults.iff = {
+					currentResults.identification = {
+						name: object.components.identity?.name || "Unknown",
+						classification: getClassification(object) || "Unknown",
 						factionName: faction?.components.identity?.name || "Unknown",
 					};
 					break;
@@ -200,6 +216,8 @@ export class SensorScanSystem extends System {
 					);
 					currentResults.targeting = {
 						targetName: target?.components.identity?.name || "None",
+						// TODO February 18, 2025 - Add proper support for this once we have individual weapons targeting
+						targetedSystem: "General",
 					};
 					break;
 				}
@@ -225,7 +243,7 @@ export class SensorScanSystem extends System {
 								type: "torpedoes" as const,
 								loaded:
 									t.components.isTorpedoLauncher?.status === "loaded"
-										? torpedo?.components.identity?.name || "Unknown"
+										? `${capitalCase(torpedo?.components.identity?.name || "Unknown")} Loaded`
 										: "Unloaded",
 							};
 						}),
@@ -235,7 +253,8 @@ export class SensorScanSystem extends System {
 			}
 
 			sensorSystem.resultsDatabase.set(object.id, currentResults);
-			if (scan.repeatInterval === null) this.ecs.removeEntity(entity);
+			pubsub.publish.sensors.scanResult({ shipId, objectId: object.id });
+			pubsub.publish.sensors.scans({ shipId });
 		}
 	}
 }

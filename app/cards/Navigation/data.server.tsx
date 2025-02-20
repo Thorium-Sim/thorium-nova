@@ -11,6 +11,7 @@ import {
 	getObjectSystem,
 } from "@thorium/utils/starmap/position";
 import type { DataContext } from "@thorium/.server/DataContext";
+import { getClassification } from "@thorium/cards/Navigation/getObjectClassification.server";
 
 type Waypoint = {
 	id: number;
@@ -75,7 +76,7 @@ export const navigation = t.router({
 				object: {
 					position,
 					name: object.components.identity?.name,
-					classification: getClassification(),
+					classification: getClassification(object),
 					type: object.components.isShip
 						? "ship"
 						: object.components.isPlanet
@@ -99,22 +100,6 @@ export const navigation = t.router({
 					? { id: shipSystem?.id, ...shipSystem.components.position }
 					: null,
 			};
-
-			function getClassification() {
-				if (!object) return "";
-				if (object.components.isPlanet)
-					return `Class ${object.components.isPlanet.classification} Planet`;
-				if (object.components.isStar)
-					return `Class ${object.components.isStar.spectralType} Star`;
-				if (object.components.isShip)
-					return `${
-						object.components.isShip.shipClass
-							? `${object.components.isShip.shipClass} Class `
-							: ""
-					}${object.components.isShip.category}`;
-				if (object.components.isSolarSystem) return "Solar System";
-				return "";
-			}
 		}),
 
 	search: t.procedure

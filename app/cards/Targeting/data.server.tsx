@@ -323,7 +323,7 @@ export const targeting = t.router({
 				return true;
 			})
 			.request(({ ctx }) => {
-				if (!ctx.flight) return;
+				if (!ctx.flight) return [];
 				const systems = getShipSystems(ctx.flight.ecs, {
 					systemType: "Phasers",
 					shipId: ctx.ship!.id,

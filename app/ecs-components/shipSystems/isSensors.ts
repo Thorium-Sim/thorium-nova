@@ -1,42 +1,5 @@
+import { scanRecord } from "@thorium/utils/flags/scanTypes";
 import z from "zod";
-
-const scanRecord = z.object({
-	iff: z
-		.object({
-			factionName: z.string(),
-		})
-		.optional(),
-	crew: z
-		.object({
-			count: z.number(),
-		})
-		.optional(),
-	/** Key is the cargo name, value is the count */
-	cargo: z.record(z.number()).optional(),
-	shields: z
-		.object({
-			/** Whether shields are raised or lowered */
-			status: z.enum(["up", "down"]).optional(),
-			/** Aggregated strength of all the shields */
-			strength: z.number().optional(),
-		})
-		.optional(),
-	weapons: z
-		.array(
-			z.discriminatedUnion("type", [
-				z.object({ type: z.literal("phasers"), charge: z.number() }),
-				z.object({ type: z.literal("torpedoes"), loaded: z.string() }),
-			]),
-		)
-		.optional(),
-	targeting: z
-		.object({
-			targetName: z.string(),
-		})
-		.optional(),
-	/** Key is the system name, value is the efficiency percent. */
-	damage: z.record(z.number()).optional(),
-});
 
 export const isSensors = z
 	.object({

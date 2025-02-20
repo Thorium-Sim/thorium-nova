@@ -23,7 +23,6 @@ export default function OfficersLog() {
 					.concat()
 					.reverse()
 					.map((log, i) => (
-						// biome-ignore lint/a11y/useKeyWithClickEvents:
 						<li
 							key={`${log.timestamp}-${i}`}
 							className={`list-group-item ${

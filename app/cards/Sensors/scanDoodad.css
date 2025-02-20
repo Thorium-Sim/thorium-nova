@@ -1,0 +1,105 @@
+.scan-doodad {
+  height: 100%;
+  position: relative;
+  width: 100%;
+}
+.scan-doodad > * {
+  animation: scan_spin infinite 3.5s linear, rainbow infinite 7s linear;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-top: 1px solid transparent;
+  border-radius: 100%;
+}
+.scan-doodad .ring_1 {
+  animation-delay: 0.05s;
+  margin: -5%;
+  width: 10%;
+  height: 10%;
+}
+.scan-doodad .ring_2 {
+  animation-delay: 0.1s;
+  margin: -10%;
+  width: 20%;
+  height: 20%;
+}
+.scan-doodad .ring_3 {
+  animation-delay: 0.15s;
+  margin: -15%;
+  width: 30%;
+  height: 30%;
+}
+.scan-doodad .ring_4 {
+  animation-delay: 0.2s;
+  margin: -20%;
+  width: 40%;
+  height: 40%;
+}
+.scan-doodad .ring_5 {
+  animation-delay: 0.25s;
+  margin: -25%;
+  width: 50%;
+  height: 50%;
+}
+.scan-doodad .ring_6 {
+  animation-delay: 0.3s;
+  margin: -30%;
+  width: 60%;
+  height: 60%;
+}
+.scan-doodad .ring_7 {
+  animation-delay: 0.35s;
+  margin: -35%;
+  width: 70%;
+  height: 70%;
+}
+.scan-doodad .ring_8 {
+  animation-delay: 0.4s;
+  margin: -40%;
+  width: 80%;
+  height: 80%;
+}
+.scan-doodad .ring_9 {
+  animation-delay: 0.45s;
+  margin: -45%;
+  width: 90%;
+  height: 90%;
+}
+.scan-doodad .ring_10 {
+  animation-delay: 0.5s;
+  margin: -50%;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes rainbow {
+  0% {
+    border-color: rebeccapurple;
+  }
+  16.6666666667% {
+    border-color: #00ccff;
+  }
+  33.3333333333% {
+    border-color: #0044cc;
+  }
+  50% {
+    border-color: #00aaff;
+  }
+  66.6666666667% {
+    border-color: blue;
+  }
+  83.3333333333% {
+    border-color: indigo;
+  }
+  100% {
+    border-color: rebeccapurple;
+  }
+}
+@keyframes scan_spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

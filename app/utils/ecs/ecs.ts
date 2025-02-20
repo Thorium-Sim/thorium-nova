@@ -86,7 +86,11 @@ class ECS {
 				componentName as ComponentIds,
 			);
 			if (!componentCache) return;
-			componentCache.delete(entity);
+			componentCache.forEach((e) => {
+				if (e.id === entity.id) {
+					componentCache.delete(e);
+				}
+			});
 		});
 		return entityRemoved;
 	}

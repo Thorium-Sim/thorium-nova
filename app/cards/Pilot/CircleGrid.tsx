@@ -175,7 +175,9 @@ export function GridCanvas({
 				onContextMenu={(e) => {
 					e.preventDefault();
 				}}
-				onPointerDown={onBackgroundClick}
+				onPointerDown={() => {
+					onBackgroundClick?.();
+				}}
 			>
 				<CameraEffects />
 				<ContextBridge>
