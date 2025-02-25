@@ -4,7 +4,7 @@ import { getClassification } from "@thorium/cards/Navigation/getObjectClassifica
 import { efficiency } from "@thorium/ecs-components/efficiency";
 import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { type ECS, type Entity, System } from "@thorium/utils/ecs";
-import type { scanRecord } from "@thorium/utils/flags/scanTypes";
+import type { scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import type { KiloWattHour } from "@thorium/utils/unitTypes";
 import { capitalCase } from "change-case";
@@ -141,120 +141,163 @@ export class SensorScanSystem extends System {
 		if (scan.progress >= 1) {
 			// The scan is complete! Let's put some data in the database
 			entity.updateComponent("scan", { timestamp: Date.now() });
-			const currentResults =
-				sensorSystem.resultsDatabase.get(object.id) ||
-				({} as z.infer<typeof scanRecord>);
-			switch (scan.type) {
-				case "cargo": {
-					const output: Record<string, number> = {};
-					object.components.shipMap?.deckNodes.forEach((node) => {
-						if (node.isRoom && node.flags?.includes("cargo")) {
-							Object.entries(node.contents).forEach(([name, { count }], i) => {
-								if (count === 0) return;
-								if (!output[name]) output[name] = 0;
-								output[name] += count;
-							});
-						}
-					});
-					// All of the cargo on the target which has the "scanable" flag
-					currentResults.cargo = output;
-					break;
-				}
-				case "crew":
-					// TODO February 12, 2025: We currently don't track crew at all, but we should add it to sensor scans once we do
-					break;
-				case "damage": {
-					// We'll just include the top three damaged systems
-					const systems: { name: string | undefined; efficiency: number }[] =
-						[];
-					for (const [systemId] of object.components.shipSystems?.shipSystems ||
-						[]) {
-						const system = this.ecs.getEntityById(systemId);
-						if (!system) continue;
-						const efficiency = system.components.efficiency?.efficiency || 1;
-						if (efficiency > 0.9) continue;
-						systems.push({
-							name:
-								system?.components.identity?.name ||
-								system.components.isShipSystem?.type,
-							efficiency,
-						});
-					}
-					systems.sort((a, b) => a.efficiency - b.efficiency);
-					currentResults.damage = {};
-					for (const { name, efficiency } of systems.slice(0, 3)) {
-						if (!name) continue;
-						currentResults.damage[name] = efficiency;
-					}
-					break;
-				}
-				case "identification": {
-					const faction = this.ecs.getEntityById(
-						object.components.faction?.factionId || -1,
-					);
 
-					currentResults.identification = {
-						name: object.components.identity?.name || "Unknown",
-						classification: getClassification(object) || "Unknown",
-						factionName: faction?.components.identity?.name || "Unknown",
-					};
-					break;
-				}
-				case "shields":
-					currentResults.shields = {
-						strength: shieldStrength,
-						status: shieldStatus,
-					};
-					break;
-				case "targeting": {
-					const targeting = getShipSystems(this.ecs, {
-						shipId: object.id,
-						systemType: "Targeting",
-					});
-					const target = this.ecs.getEntityById(
-						targeting[0].components.isTargeting?.target || -1,
-					);
-					currentResults.targeting = {
-						targetName: target?.components.identity?.name || "None",
-						// TODO February 18, 2025 - Add proper support for this once we have individual weapons targeting
-						targetedSystem: "General",
-					};
-					break;
-				}
-				case "weapons": {
-					const phasers = getShipSystems(this.ecs, {
-						shipId: object.id,
-						systemType: "Phasers",
-					});
-					const torpedoes = getShipSystems(this.ecs, {
-						shipId: object.id,
-						systemType: "TorpedoLauncher",
-					});
-
-					currentResults.weapons = [
-						...phasers.map((p) => {
-							return { type: "phasers" as const, charge: getPhaserCharge(p) };
-						}),
-						...torpedoes.map((t) => {
-							const torpedo = this.ecs.getEntityById(
-								t.components.isTorpedoLauncher?.torpedoEntity || -1,
-							);
-							return {
-								type: "torpedoes" as const,
-								loaded:
-									t.components.isTorpedoLauncher?.status === "loaded"
-										? `${capitalCase(torpedo?.components.identity?.name || "Unknown")} Loaded`
-										: "Unloaded",
-							};
-						}),
-					];
-					break;
-				}
-			}
+			const currentResults = {
+				...(sensorSystem.resultsDatabase.get(object.id) ||
+					({} as z.infer<typeof scanRecord>)),
+				...generateScanResults(object, this.ecs, scan.type),
+			};
 
 			sensorSystem.resultsDatabase.set(object.id, currentResults);
 			pubsub.publish.sensors.scanResult({ shipId, objectId: object.id });
 			pubsub.publish.sensors.scans({ shipId });
 		}
 	}
+}
+
+export function generateScanResults(
+	object: Entity,
+	ecs: ECS,
+	scanType: z.infer<typeof scanTypes>,
+) {
+	const currentResults: Partial<z.infer<typeof scanRecord>> = {};
+	switch (scanType) {
+		case "cargo": {
+			const output: Record<string, number> = {};
+			object.components.shipMap?.deckNodes.forEach((node) => {
+				if (node.isRoom && node.flags?.includes("cargo")) {
+					Object.entries(node.contents).forEach(([name, { count }], i) => {
+						if (count === 0) return;
+						if (!output[name]) output[name] = 0;
+						output[name] += count;
+					});
+				}
+			});
+			// All of the cargo on the target which has the "scanable" flag
+			currentResults.cargo = output;
+			break;
+		}
+		case "crew":
+			// TODO February 12, 2025: We currently don't track crew at all, but we should add it to sensor scans once we do
+			break;
+		case "damage": {
+			// We'll just include the top three damaged systems
+			const systems: { name: string | undefined; efficiency: number }[] = [];
+			for (const [systemId] of object.components.shipSystems?.shipSystems ||
+				[]) {
+				const system = ecs.getEntityById(systemId);
+				if (!system) continue;
+				const efficiency = system.components.efficiency?.efficiency || 1;
+				if (efficiency > 0.9) continue;
+				systems.push({
+					name:
+						system?.components.identity?.name ||
+						system.components.isShipSystem?.type,
+					efficiency,
+				});
+			}
+			systems.sort((a, b) => a.efficiency - b.efficiency);
+			currentResults.damage = {};
+			for (const { name, efficiency } of systems.slice(0, 3)) {
+				if (!name) continue;
+				currentResults.damage[name] = efficiency;
+			}
+			break;
+		}
+		case "identification": {
+			const faction = ecs.getEntityById(
+				object.components.faction?.factionId || -1,
+			);
+
+			currentResults.identification = {
+				name: object.components.identity?.name || "Unknown",
+				classification: getClassification(object) || "Unknown",
+				factionName: faction?.components.identity?.name || "Unknown",
+				image: {
+					type: object.components.isShip
+						? "ship"
+						: object.components.isPlanet
+							? "planet"
+							: object.components.isStar
+								? "star"
+								: object.components.isSolarSystem
+									? "solarSystem"
+									: "unknown",
+					vanity: object.components.isShip?.assets.vanity,
+					hue: object.components.isStar?.hue,
+					isWhite: object.components.isStar?.isWhite,
+					cloudMapAsset: object.components.isPlanet?.cloudMapAsset,
+					ringMapAsset: object.components.isPlanet?.ringMapAsset,
+					textureMapAsset: object.components.isPlanet?.textureMapAsset,
+				},
+			};
+			break;
+		}
+		case "shields": {
+			let shieldStrength = 0;
+			let shieldStatus: "up" | "down" = "down";
+			const shields = getShipSystems(ecs, {
+				shipId: object.id,
+				systemType: "Shields",
+			});
+			for (const sys of shields) {
+				const shield = sys.components.isShields;
+				if (!shield) continue;
+				shieldStrength += shield.strength / shield.maxStrength / shields.length;
+				shieldStatus = shield.state === "up" ? "up" : shieldStatus;
+			}
+
+			currentResults.shields = {
+				strength: shieldStrength,
+				status: shieldStatus,
+			};
+			break;
+		}
+		case "targeting": {
+			const targeting = getShipSystems(ecs, {
+				shipId: object.id,
+				systemType: "Targeting",
+			});
+			const target = ecs.getEntityById(
+				targeting[0].components.isTargeting?.target || -1,
+			);
+			currentResults.targeting = {
+				targetName: target?.components.identity?.name || "None",
+				// TODO February 18, 2025 - Add proper support for this once we have individual weapons targeting
+				targetedSystem: "General",
+			};
+			break;
+		}
+		case "weapons": {
+			const phasers = getShipSystems(ecs, {
+				shipId: object.id,
+				systemType: "Phasers",
+			});
+			const torpedoes = getShipSystems(ecs, {
+				shipId: object.id,
+				systemType: "TorpedoLauncher",
+			});
+
+			currentResults.weapons = [
+				...phasers.map((p) => {
+					return { type: "phasers" as const, charge: getPhaserCharge(p) };
+				}),
+				...torpedoes.map((t) => {
+					const torpedo = ecs.getEntityById(
+						t.components.isTorpedoLauncher?.torpedoEntity || -1,
+					);
+					return {
+						type: "torpedoes" as const,
+						loaded:
+							t.components.isTorpedoLauncher?.status === "loaded"
+								? `${capitalCase(torpedo?.components.identity?.name || "Unknown")} Loaded`
+								: "Unloaded",
+					};
+				}),
+			];
+			break;
+		}
+	}
+
+	return currentResults;
 }

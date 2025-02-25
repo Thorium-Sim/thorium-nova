@@ -98,7 +98,10 @@ function ObjectData({ objectId }: { objectId: number }) {
 	const [object, distanceRef] = useObjectData(objectId);
 	return object ? (
 		<div className="flex items-center gap-2">
-			<ObjectImage object={object} className="border-0 border-r p-2" />
+			<ObjectImage
+				objectImage={object.image}
+				className="border-0 border-r p-2"
+			/>
 
 			<div>
 				<h3 className="text-lg">{object.name}</h3>

@@ -15,7 +15,10 @@ import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { Suspense, useRef, useState, type ReactNode } from "react";
 import "./scanDoodad.css";
 import { DistanceCircle } from "@thorium/cards/Pilot/DistanceCircle";
-import { ObjectData } from "@thorium/cards/Navigation/ObjectDetails";
+import {
+	ObjectData,
+	ObjectImage,
+} from "@thorium/cards/Navigation/ObjectDetails";
 // import Button from "@thorium/ui/Button";
 import { scanTypes } from "@thorium/utils/flags/scanTypes";
 import { capitalCase } from "change-case";
@@ -32,15 +35,22 @@ import { Icon } from "@thorium/ui/Icon";
 
 /**
  * TODO:
- * - Blobs or unidentifiable icons
- * - Passive sensors data for objects
+ * - Blobs or unidentifiable icons for passive sensors objects
+ * - Add waypoints from the sensors station
+ * - Planets and stars on the scannable objects list
+ * - Tune active scans of distant objects to make _some_ progress
+ * - Add some other kind of indicator to the circle grid to indicate forward movement
+ *			Vector indicators at the center that show direction and speed of movement (arrows that grow longer with increased velocity)
+ *			A small "drift indicator" that shows lateral motion as a dot that moves from the center when sideways movement occurs
+ *			Motion trails or particles that flow across the grid in the opposite direction of travel (similar to star movement in space games)
+ * - Passive sensors data for objects - maybe visual overlays next to the blob
  * 		- Heat signature (just temperature)
- * 		- Heading and velocity (how to represent this?)
- *		- Distance
+ * 		- When an object performs an active scan
+ *   	- When an object has an active communication
  *		- Size (probably just length)
- * 		- Name, Registry, other transponder details (Maybe this can be turned off or falsified?)
+ *		- Shields raised or lowered
+ *		- Transporters
  * - Configure a scan to re-run
- * - Zoom and tilt controls
  */
 export function Sensors({ cardLoaded }: CardProps) {
 	const [{ activeRange, passiveRange }] = q.sensors.get.useNetRequest();
@@ -125,7 +135,9 @@ function Scans({ cardLoaded }: { cardLoaded: boolean }) {
 	return (
 		<div className="panel panel-alert divide-y divide-white/50 overflow-y-auto max-h-full">
 			{scans.map((s) => (
-				<Scan key={s.id} {...s} cardLoaded={cardLoaded} />
+				<Suspense key={s.id}>
+					<Scan {...s} cardLoaded={cardLoaded} />
+				</Suspense>
 			))}
 		</div>
 	);
@@ -153,6 +165,7 @@ function Scan({
 	const { interpolate } = useLiveQuery();
 	const textRef = useRef<HTMLDivElement>(null);
 	const progressRef = useRef<HTMLProgressElement>(null);
+	const [results] = q.sensors.scanResult.useNetRequest({ objectId: target });
 
 	useAnimationFrame(() => {
 		const value = interpolate(id);
@@ -170,8 +183,12 @@ function Scan({
 		<div className="p-2 w-full">
 			<div className="flex w-full justify-between">
 				<div>
-					Scan for: <span className="font-bold">{capitalCase(type)}</span>
+					<div>
+						Scan: <span className="font-bold">{capitalCase(type)}</span>
+					</div>
+					<div>Target: {results.identification?.name || `Unknown ${id}`}</div>
 				</div>
+
 				{progress >= 1 ? (
 					<div>{time}</div>
 				) : (
@@ -240,8 +257,11 @@ function SensorsShipList({
 	occludedContacts: number[];
 }) {
 	q.sensors.stream.useDataStream({ systemId: null });
+	const useStarmapStore = useGetStarmapStore();
+	const systemId = useStarmapStore((store) => store.currentSystem);
+	const [{ id: playerShipId }] = q.ship.player.useNetRequest();
 
-	const [ships] = q.sensors.ships.useNetRequest();
+	const [ships] = q.starmapCore.ships.useNetRequest({ systemId });
 	if (ships.length === 0) {
 		return <h3 className="text-2xl p-2 text-center">No Ships in Range</h3>;
 	}
@@ -254,6 +274,7 @@ function SensorsShipList({
 			}
 		>
 			{ships.map((ship) =>
+				ship.id === playerShipId ||
 				occludedContacts.includes(ship.id) ? null : (
 					<SensorsShip {...ship} key={ship.id} />
 				),
@@ -263,9 +284,11 @@ function SensorsShipList({
 }
 
 function SensorsShip({ id }: { id: number }) {
+	const [{ passiveRange }] = q.sensors.get.useNetRequest();
 	const [{ id: playerShipId, currentSystem }] = q.ship.player.useNetRequest();
 	const distanceRef = useRef<HTMLSpanElement>(null);
 	const { interpolate } = useLiveQuery();
+	const [inRange, setInRange] = useState(false);
 	useAnimationFrame(() => {
 		const position = interpolate(id);
 		const shipPosition = interpolate(playerShipId);
@@ -277,18 +300,24 @@ function SensorsShip({ id }: { id: number }) {
 			);
 			const units = currentSystem ? "km" : "LY";
 			distanceRef.current.innerHTML = `${Math.round(distance).toLocaleString("en")} ${units}`;
+			if (distance > passiveRange && inRange) {
+				setInRange(false);
+			}
+			if (distance <= passiveRange && !inRange) {
+				setInRange(true);
+			}
 		}
 	});
 	const [results] = q.sensors.scanResult.useNetRequest({ objectId: id });
 
 	return (
-		<Disclosure id={id} className="group">
+		<Disclosure id={id} className={cn("group", inRange ? "block" : "hidden")}>
 			<Button
 				slot="trigger"
 				className="w-full outline-none focus-within:bg-white/20 px-2 group-data-[expanded]:border-b group-data-[expanded]:mb-2 border-white/50"
 			>
 				<div className="flex justify-between">
-					{results.identification?.name || "Unknown"}
+					{results.identification?.name || `Unknown ${id}`}
 					<span ref={distanceRef} />
 				</div>
 			</Button>
@@ -371,10 +400,17 @@ function IdentificationResults({ objectId }: { objectId: number }) {
 	if (!results.identification) return null;
 
 	return (
-		<div>
-			<div>Name: {results.identification.name}</div>
-			<div>Classification: {results.identification.classification}</div>
-			<div>Faction: {results.identification.factionName}</div>
+		<div className="flex gap-2">
+			<div className="aspect-square">
+				{results.identification.image ? (
+					<ObjectImage objectImage={results.identification.image} />
+				) : null}
+			</div>
+			<div>
+				<div>Name: {results.identification.name}</div>
+				<div>Classification: {results.identification.classification}</div>
+				<div>Faction: {results.identification.factionName}</div>
+			</div>
 		</div>
 	);
 }
@@ -431,7 +467,7 @@ function WeaponsResults({ objectId }: { objectId: number }) {
 					<span>
 						{weapon.type === "phasers"
 							? `${weapon.charge}%`
-							: `${weapon.loaded} loaded`}
+							: `${weapon.loaded}`}
 					</span>
 				</div>
 			))}

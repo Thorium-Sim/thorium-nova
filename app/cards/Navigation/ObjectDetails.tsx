@@ -42,7 +42,7 @@ export const ObjectData = ({ objectId }: { objectId: number | string }) => {
 	if (!object) return null;
 	return (
 		<div className="flex items-center gap-2">
-			<ObjectImage object={object} />
+			<ObjectImage objectImage={object.image} />
 			<div>
 				<h3 className="text-lg">{object.name}</h3>
 				<h4>{object.classification}</h4>
@@ -61,6 +61,9 @@ export function useObjectData(objectId: number | string) {
 	const [requestData] = q.navigation.object.useNetRequest({
 		objectId: Number(objectId) || undefined,
 	});
+	const [result] = q.sensors.scanResult.useNetRequest({
+		objectId: Number(objectId),
+	});
 	const object = requestData.object;
 	const objectSystem = requestData.objectSystem;
 	const shipSystem = requestData.shipSystem;
@@ -78,32 +81,38 @@ export function useObjectData(objectId: number | string) {
 			distanceRef.current.innerText = getDistanceLabel(distance);
 		}
 	});
-	return [object, distanceRef] as const;
+	return [result.identification, distanceRef] as const;
 }
 
 export function ObjectImage({
-	object,
+	objectImage,
 	className,
 }: {
-	object: NonNullable<
-		Awaited<ReturnType<typeof q.navigation.object.netRequest>>["object"]
-	>;
+	objectImage: NonNullable<
+		Awaited<
+			ReturnType<typeof q.sensors.scanResult.netRequest>
+		>["identification"]
+	>["image"];
 	className?: string;
 }) {
-	return object.type === "solarSystem" ? null : (
+	if (!objectImage) return null;
+	return objectImage.type === "solarSystem" ? null : (
 		<div
 			className={cn("w-24 h-24 border border-white/30 rounded-xl", className)}
 		>
-			{object.type === "planet" ? (
+			{objectImage.type === "planet" ? (
 				<PlanetCanvas
-					cloudMapAsset={object.cloudMapAsset}
-					textureMapAsset={object.textureMapAsset}
-					ringMapAsset={object.ringMapAsset}
+					cloudMapAsset={objectImage.cloudMapAsset}
+					textureMapAsset={objectImage.textureMapAsset}
+					ringMapAsset={objectImage.ringMapAsset}
 				/>
-			) : object.type === "star" ? (
-				<StarCanvas hue={object.hue || 30} isWhite={object.isWhite || false} />
-			) : object.type === "ship" ? (
-				<img draggable="false" alt={object.name} src={object?.vanity} />
+			) : objectImage.type === "star" ? (
+				<StarCanvas
+					hue={objectImage.hue || 30}
+					isWhite={objectImage.isWhite || false}
+				/>
+			) : objectImage.type === "ship" ? (
+				<img draggable="false" alt="" src={objectImage?.vanity} />
 			) : null}
 		</div>
 	);

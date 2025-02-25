@@ -6,6 +6,7 @@ import { type scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";
 import { Entity } from "@thorium/utils/ecs";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { fromDate } from "dot-beat-time";
+import { generateScanResults } from "@thorium/.server/systems/SensorScanSystem";
 
 type IsDestroyed = Zod.infer<typeof isDestroyed>;
 
@@ -37,72 +38,23 @@ export const sensors = t.router({
 			return true;
 		})
 		.request(({ ctx, input }) => {
+			const object = ctx.flight?.ecs.getEntityById(input.objectId);
+
 			const sensors = getShipSystem(ctx, {
 				systemType: "sensors",
 			});
-
-			return (
+			const result: z.infer<typeof scanRecord> =
 				sensors.components.isSensors?.resultsDatabase.get(input.objectId) ||
-				({} as z.infer<typeof scanRecord>)
-			);
-		}),
-	/** Includes all the ship within passive range of the ship */
-	ships: t.procedure
-		.filter((publish: { systemId: number | null }, { input, ctx }) => {
-			const systemId = ctx.ship?.components.position?.parentId || null;
-			if (!publish) return true;
-			if (!publish.systemId && !systemId) return true;
-			if (publish.systemId === systemId) return true;
-			return false;
-		})
-		.request(({ ctx, input }) => {
-			if (!ctx.flight) return [];
-			const shipEntities = ctx.flight.ecs.componentCache.get("isShip") || [];
-			const data: {
-				id: number;
-				modelUrl?: string;
-				logoUrl?: string;
-				size: number;
-				isDestroyed?: IsDestroyed;
-			}[] = [];
-			const shipPosition = ctx.ship?.components.position;
-			if (!shipPosition) return [];
-			const systemId = shipPosition.parentId || null;
-
-			const sensors = getShipSystem(ctx, {
-				systemType: "sensors",
-			});
-			const passiveRange = sensors.components.isSensors?.passiveRange;
-			if (!passiveRange) return [];
-
-			for (const { components, id } of shipEntities) {
-				const position = components.position;
-				if (!position) continue;
-				const distance = Math.hypot(
-					shipPosition.x - position.x,
-					shipPosition.y - position.y,
-					shipPosition.z - position.z,
-				);
-				if (
-					components.isShip &&
-					id !== ctx.ship.id &&
-					((typeof systemId === "number" &&
-						components.position?.parentId === systemId) ||
-						(systemId === undefined &&
-							components.position?.type === "interstellar")) &&
-					distance <= passiveRange
-				) {
-					data.push({
-						id,
-						modelUrl: components.isShip.assets.model,
-						logoUrl: components.isShip.assets.logo,
-						size: components.size?.length || 50,
-						isDestroyed: components.isDestroyed,
-					});
-				}
+				({} as z.infer<typeof scanRecord>);
+			if (object?.components.isPlanet || object?.components.isStar) {
+				// Include the identity by default, since planets and stars are well-known.
+				result.identification = generateScanResults(
+					object,
+					ctx.flight!.ecs,
+					"identification",
+				).identification;
 			}
-
-			return data;
+			return result;
 		}),
 	scans: t.procedure
 		.filter((publish: { shipId: number }, { ctx }) => {
