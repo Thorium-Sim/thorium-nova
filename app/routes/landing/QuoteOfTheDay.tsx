@@ -353,6 +353,15 @@ const quotes = [
 	"'Gadzooks,' quoth I, 'but here's a saucy spaceship!'",
 	// John Gruber
 	"Different doesn't always mean better. But better necessarily means different.",
+	"Simply making decisions, one after another, can be a form of art.",
+	// Richard Feynman
+	"What I cannot create, I do not understand.",
+	"Nobody ever figures out what life is all about, and it doesn't matter. Explore the world. Nearly everything is really interesting if you go into it deeply enough.",
+	"You have no responsibility to live up to what other people think you ought to accomplish. I have no responsibility to be like they expect me to be. It's their mistake, not my failing",
+	"The first principle is that you must not fool yourself and you are the easiest person to fool.",
+	"I would rather have questions that can't be answered than answers that can't be questioned.",
+	"I think it's much more interesting to live not knowing than to have answers which might be wrong.",
+	"Learn what the rest of the world is like. The variety is worthwhile.",
 ];
 
 const QuoteOfTheDay = () => {

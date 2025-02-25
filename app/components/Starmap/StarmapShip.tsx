@@ -45,7 +45,6 @@ export function StarmapShip({
 	const [autopilotData] = q.starmapCore.autopilot.useNetRequest({ systemId });
 
 	const shipAutopilot = autopilotData[id];
-
 	const [player] = q.ship.player.useNetRequest();
 	const playerId = player?.id;
 
@@ -141,7 +140,6 @@ export function StarmapShip({
 						/>
 					</mesh>
 				)}
-				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 				<group
 					onPointerOver={() => {
 						// set the cursor to pointer
