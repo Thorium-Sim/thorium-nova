@@ -28,7 +28,7 @@
 	},
 	"bundle": {
 		"active": true,
-		"targets": "all",
+		"targets": ["app", "deb", "rpm", "msi", "nsis"],
 		"externalBin": ["binaries/thoriumNovaServer"],
 		"icon": [
 			"icons/32x32.png",
