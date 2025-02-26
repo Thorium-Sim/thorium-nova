@@ -51,6 +51,8 @@ import { Icon } from "@thorium/ui/Icon";
  *		- Shields raised or lowered
  *		- Transporters
  * - Configure a scan to re-run
+ * - Change "Damage" to "Systems", provide a list of systems on the ship
+ *    (prerequisite for systems-based targeting). Systems-based targeting works by adjusting the frequency of the phasers, maybe?
  */
 export function Sensors({ cardLoaded }: CardProps) {
 	const [{ activeRange, passiveRange }] = q.sensors.get.useNetRequest();
