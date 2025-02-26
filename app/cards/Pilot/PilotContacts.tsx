@@ -17,6 +17,7 @@ import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { degToRad, solarRadiusToKilometers } from "@thorium/utils/unitTypes";
 import {
 	type BufferAttribute,
+	CylinderGeometry,
 	DoubleSide,
 	type Group,
 	type Mesh,
@@ -191,6 +192,7 @@ export const ShipEntity = ({
 
 	const spriteMap = useTexture(logoUrl);
 	const reticleMap = useTexture(ReticleTexture);
+	const showShipIcon = false;
 
 	const scale = 1 / 50;
 	const mesh = useRef<Mesh>(null);
@@ -199,6 +201,7 @@ export const ShipEntity = ({
 	const reticle = useRef<Sprite>(null);
 	const bracket = useRef<Group | null>(null);
 	const shipRef = useRef<Group>(null);
+	const arrowRef = useRef<Group>(null);
 	const isOccludedRef = useRef(false);
 	useFrame((props) => {
 		const camera = props.camera as OrthographicCamera;
@@ -213,8 +216,14 @@ export const ShipEntity = ({
 				if (sprite.current) {
 					sprite.current.visible = false;
 				}
+				if (arrowRef.current) {
+					arrowRef.current.visible = false;
+				}
 				shipRef.current.visible = true;
 			} else {
+				if (arrowRef.current) {
+					arrowRef.current.visible = true;
+				}
 				if (sprite.current) {
 					sprite.current.visible = true;
 				}
@@ -255,6 +264,9 @@ export const ShipEntity = ({
 				if (sprite.current) {
 					sprite.current.visible = false;
 				}
+				if (arrowRef.current) {
+					arrowRef.current.visible = false;
+				}
 				if (mesh.current && line.current) {
 					mesh.current.visible = false;
 					line.current.visible = false;
@@ -282,16 +294,23 @@ export const ShipEntity = ({
 			sprite.current?.position.copy(position);
 			reticle.current?.position.copy(position);
 			shipRef.current?.position.copy(position);
+			arrowRef.current?.position.copy(position);
 
 			shipRef.current?.scale.setScalar(size / 1000 || 0.5);
 			// This scale is helpful if we want to see the ships orientation in space.
-			// shipRef.current?.scale.setScalar((dx * 20) / 1000);
+			arrowRef.current?.scale.setScalar((dx * 20) / 1000);
 			if (ship.r) {
 				shipRef.current?.quaternion.set(ship.r.x, ship.r.y, ship.r.z, ship.r.w);
+				arrowRef.current?.quaternion.set(
+					ship.r.x,
+					ship.r.y,
+					ship.r.z,
+					ship.r.w,
+				);
 			}
 
 			// Draw the vertical line from the sensor plane to the ship
-			if (playerShip.r && sprite.current?.position && mesh.current?.position) {
+			if (playerShip.r && mesh.current?.position) {
 				playerQuaternion.set(
 					playerShip.r.x,
 					playerShip.r.y,
@@ -299,15 +318,17 @@ export const ShipEntity = ({
 					playerShip.r.w,
 				);
 
-				const planeVector = upVector.clone().applyQuaternion(playerQuaternion);
+				const planeVector = upVector
+					.set(0, 1, 0)
+					.applyQuaternion(playerQuaternion);
 				plane.set(planeVector, 0);
-				plane.projectPoint(sprite.current.position, mesh.current.position);
+				plane.projectPoint(position, mesh.current.position);
 				const positions = [
-					...sprite.current.position.toArray(),
+					...position.toArray(),
 					...mesh.current.position.toArray(),
 				];
 				line.current?.geometry.setPositions(positions);
-				if (mesh.current && line.current)
+				if (mesh.current && line.current) {
 					if (tilted) {
 						mesh.current.visible = true;
 						line.current.visible = true;
@@ -315,6 +336,7 @@ export const ShipEntity = ({
 						mesh.current.visible = false;
 						line.current.visible = false;
 					}
+				}
 			}
 		}
 		sprite.current?.scale.setScalar(dx * 3 * scale);
@@ -341,32 +363,42 @@ export const ShipEntity = ({
 		}
 	});
 
+	const eventHandlers = {
+		onPointerDown: () => onClick?.(id),
+		onPointerOver: () => {
+			if (onClick) {
+				setCursor("pointer");
+			}
+		},
+		onPointerOut: () => {
+			setCursor("auto");
+		},
+	};
 	return (
 		<Fragment>
-			<group ref={shipRef}>
+			<group ref={shipRef} {...eventHandlers}>
 				<primitive object={scene} rotation={[Math.PI / 2, Math.PI, 0]} />
 			</group>
 			{id !== playerId && (
 				<Fragment>
-					<sprite
-						ref={sprite}
-						onPointerDown={() => onClick?.(id)}
-						onPointerOver={(e) => {
-							if (onClick) {
-								setCursor("pointer");
-							}
-						}}
-						onPointerOut={(e) => {
-							setCursor("auto");
-						}}
-					>
-						<spriteMaterial
-							attach="material"
-							map={spriteMap}
-							color={"white"}
-							sizeAttenuation={true}
-						/>
-					</sprite>
+					{showShipIcon ? (
+						<sprite ref={sprite} {...eventHandlers}>
+							<spriteMaterial
+								attach="material"
+								map={spriteMap}
+								color={"white"}
+								sizeAttenuation={true}
+							/>
+						</sprite>
+					) : (
+						<group ref={arrowRef} {...eventHandlers}>
+							<mesh rotation={[Math.PI / 2, 0, 0]}>
+								<coneGeometry args={[1, 3, 4]} />
+								<meshBasicMaterial color={0x888888} />
+							</mesh>
+						</group>
+					)}
+
 					<sprite ref={reticle} visible={isTargeted}>
 						<spriteMaterial
 							depthTest={false}
@@ -434,6 +466,10 @@ export const PlanetaryEntity = memo(
 			inclination: satellite.inclination,
 		});
 
+		const store = useCircleGridStore();
+
+		const sensorRange = store((store) => store.zoomMax);
+
 		const ref = useRef<Group>(null);
 		useFrame((props) => {
 			const camera = props.camera as OrthographicCamera;
@@ -494,7 +530,12 @@ export const PlanetaryEntity = memo(
 				</group>
 				<SensorsBracket bracket={bracket} isSelected={isSelected} />
 				{isPlanet ? (
-					<OcclusionCone size={size} id={id} satellite={satellite} />
+					<OcclusionCone
+						size={size}
+						id={id}
+						sensorRange={sensorRange}
+						satellite={satellite}
+					/>
 				) : null}
 			</>
 		);
@@ -507,8 +548,14 @@ const direction = new Vector3();
 function OcclusionCone({
 	id,
 	size,
+	sensorRange,
 	satellite: sat,
-}: { id: number; size: number; satellite: Zod.infer<typeof satellite> }) {
+}: {
+	id: number;
+	sensorRange: number;
+	size: number;
+	satellite: Zod.infer<typeof satellite>;
+}) {
 	const position = getOrbitPosition({
 		semiMajorAxis: sat.semiMajorAxis,
 		eccentricity: sat.eccentricity,
@@ -519,112 +566,58 @@ function OcclusionCone({
 	const [{ id: playerId }] = q.ship.player.useNetRequest();
 	const { interpolate } = useLiveQuery();
 	const ref = useRef<Group>(null);
+	const cylinderRef = useRef<Mesh>(null);
+
 	useAnimationFrame(() => {
 		const playerShip = interpolate(playerId);
 		if (!playerShip) return;
 		position1.set(playerShip.x, playerShip.y, playerShip.z);
 		position2.set(position.x, position.y, position.z);
 		direction.subVectors(position2, position1);
+		const distance = direction.length();
 		ref.current?.position.copy(direction);
 		direction.normalize();
+		upVector.set(0, -1, 0);
 		ref.current?.quaternion.setFromUnitVectors(upVector, direction);
-		ref.current?.quaternion.invert();
+
+		const distantRadius =
+			(sensorRange * Math.sin(Math.atan2(size, distance))) / size;
+		const geometry = new CylinderGeometry(
+			1, // radius at top
+			distantRadius, // radius at bottom
+			sensorRange / size, // height
+			32, // radial segments
+		);
+		if (cylinderRef.current) {
+			cylinderRef.current.geometry.dispose();
+			cylinderRef.current.geometry = geometry;
+		}
 	});
 	return (
 		<group ref={ref} scale={[size, size, size]}>
-			<mesh position={[0, -0.5, 0]}>
-				<cylinderGeometry args={[1, 1, 2, 8]} />
-				<meshBasicMaterial color={0xff0000} wireframe />
+			<mesh
+				position={[0, -sensorRange / size / 2, 0]}
+				renderOrder={-1}
+				ref={cylinderRef}
+			>
+				<cylinderGeometry args={[1, 1, sensorRange / size, 8]} />
+				<meshBasicMaterial
+					color={0x333333}
+					depthTest={false}
+					side={DoubleSide}
+				/>
+			</mesh>
+			<mesh position={[0, 0, 0]} renderOrder={-1}>
+				<sphereGeometry args={[1]} />
+				<meshBasicMaterial
+					color={0x333333}
+					depthTest={false}
+					side={DoubleSide}
+				/>
 			</mesh>
 		</group>
 	);
 }
-
-// interface OcclusionConeParams {
-//   sensorRange: number;  // How far the cone extends
-//   sphereCenter: Vector3;
-//   sphereRadius: number;
-//   observerPosition: Vector3;
-// }
-
-// interface OcclusionConeGeometry {
-//   bottomRadius: number;  // Radius at the sphere
-//   topRadius: number;    // Radius at the far end
-//   height: number;       // Length of the cone
-//   position: Vector3;    // Where to place the cone
-//   rotation: Vector3;    // How to rotate the cone
-// }
-
-// function calculateOcclusionCone(params: OcclusionConeParams): OcclusionConeGeometry {
-//   const { sensorRange, sphereCenter, sphereRadius, observerPosition } = params;
-
-//   // Calculate distance from observer to sphere center
-//   const distanceToSphere = observerPosition.distanceTo(sphereCenter);
-
-//   // Calculate the angle formed by the sphere
-//   const angleToEdge = Math.asin(sphereRadius / distanceToSphere);
-
-//   // Calculate the radius at the sphere's surface
-//   const bottomRadius = sphereRadius;
-
-//   // Calculate how much the cone expands over distance
-//   const expansionRate = Math.tan(angleToEdge);
-
-//   // Calculate the distance the cone extends behind the sphere
-//   const coneHeight = sensorRange - distanceToSphere;
-
-//   // Calculate the radius at the far end
-//   const topRadius = bottomRadius + (coneHeight * expansionRate);
-
-//   // Calculate direction from observer to sphere
-//   const direction = new Vector3().subVectors(sphereCenter, observerPosition);
-//   direction.normalize();
-
-//   // Calculate rotation angles
-//   const phi = Math.acos(direction.y);
-//   const theta = Math.atan2(direction.z, direction.x);
-
-//   // The cone's position should be at the center point between its bases
-//   const position = new Vector3().copy(sphereCenter);
-//   position.add(direction.multiplyScalar(coneHeight / 2));
-
-//   return {
-//     bottomRadius,
-//     topRadius,
-//     height: coneHeight,
-//     position,
-//     rotation: new Vector3(
-//       Math.PI / 2 - phi,
-//       0,
-//       theta
-//     )
-//   };
-// }
-// // Create and update function for animation
-// function updateOcclusionCone(
-//   mesh: Mesh,
-//   params: OcclusionConeParams
-// ) {
-//   const coneGeometry = calculateOcclusionCone(params);
-
-//   // Update geometry
-//   const geometry = mesh.geometry as CylinderGeometry;
-//   geometry.dispose(); // Clean up old geometry
-
-//   // Create new geometry with updated dimensions
-//   const newGeometry = new CylinderGeometry(
-//     coneGeometry.topRadius,
-//     coneGeometry.bottomRadius,
-//     coneGeometry.height,
-//     32,
-//     1,
-//     false
-//   );
-
-//   mesh.geometry = newGeometry;
-//   mesh.position.copy(coneGeometry.position);
-//   mesh.rotation.setFromVector3(coneGeometry.rotation);
-// }
 
 function getBracketPosition(
 	positionScalar: number,
@@ -803,7 +796,7 @@ export function TorpedoEntity({
 			// Draw the vertical line from the sensor plane to the ship
 			if (playerShip.r && ref.current?.position && mesh.current?.position) {
 				const planeVector = upVector
-					.clone()
+					.set(0, 1, 0)
 					.applyQuaternion(
 						playerQuaternion.set(
 							playerShip.r.x,
