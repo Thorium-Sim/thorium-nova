@@ -19,7 +19,7 @@
          * ```typescript
          * import { listen } from '@tauri-apps/api/event';
          * const unlisten = await listen<string>('error', (event) => {
-         *   console.log(`Got error, payload: ${event.payload}`);
+         *   console.info(`Got error, payload: ${event.payload}`);
          * });
          *
          * // you need to call unlisten if your handler goes out of scope e.g. the component is unmounted

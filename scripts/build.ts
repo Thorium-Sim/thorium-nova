@@ -78,4 +78,4 @@ await new Promise<void>((res, rej) =>
 );
 
 console.info("Cleaning up");
-// await rm(path.join("./build"), { force: true, recursive: true });
+await rm(path.join("./build"), { force: true, recursive: true });

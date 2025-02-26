@@ -5,13 +5,21 @@ import { useQueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useWheel } from "@use-gesture/react";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import { logslider } from "@thorium/utils/logSlider";
-import { type ReactNode, useEffect, useRef, Suspense } from "react";
+import { type ReactNode, useEffect, useRef, Suspense, useState } from "react";
 import {
 	UNSAFE_LocationContext,
 	UNSAFE_NavigationContext,
 	UNSAFE_RouteContext,
 } from "react-router";
-import type { Group, OrthographicCamera } from "three";
+import {
+	Euler,
+	type Mesh,
+	Quaternion,
+	Vector2,
+	type Group,
+	type OrthographicCamera,
+	Vector3,
+} from "three";
 import { cameraQuaternionMultiplier, forwardQuaternion } from "./constants";
 import { DistanceCircle } from "./DistanceCircle";
 import { PlayerArrow } from "./PlayerArrow";
@@ -27,6 +35,13 @@ import { q } from "@thorium/context/AppContext";
 import { useGamepadPress } from "@thorium/hooks/useGamepadStore";
 import Button from "@thorium/ui/Button";
 import { useShallow } from "zustand/shallow";
+import { degToRad } from "@thorium/utils/unitTypes";
+import {
+	LineMaterial,
+	LineSegments2,
+	LineSegmentsGeometry,
+} from "three-stdlib";
+import { radToDeg } from "three/src/math/MathUtils.js";
 
 const CameraEffects = () => {
 	const store = useCircleGridStore();
@@ -116,14 +131,189 @@ export function CircleGrid({
 					.map((r) => (
 						<DistanceCircle key={r} radius={r} />
 					))}
-
 				<PlayerArrow />
+				<RotationLines id={id} />
 				{fixedChildren}
 			</group>
+			<MovementDots id={id} />
 			<Suspense fallback={null}>{children}</Suspense>
 		</group>
 	);
 }
+
+const prevQuat = new Quaternion();
+const quat = new Quaternion();
+const euler = new Euler();
+function RotationLines({ id }: { id: number }) {
+	const size = useThree((state) => state.size);
+	const { interpolate } = useLiveQuery();
+
+	const [geometry] = useState(() => new LineSegmentsGeometry());
+	const [line1] = useState(() => new LineSegments2());
+	const [line2] = useState(() => new LineSegments2());
+	const [line3] = useState(() => new LineSegments2());
+	const [lineMaterial1] = useState(
+		() =>
+			new LineMaterial({
+				color: 0x666666,
+				resolution: new Vector2(size.width, size.height),
+				transparent: true,
+				opacity: 1,
+			}),
+	);
+	const [lineMaterial2] = useState(
+		() =>
+			new LineMaterial({
+				color: 0x666666,
+				resolution: new Vector2(size.width, size.height),
+				transparent: true,
+				opacity: 1,
+			}),
+	);
+	const [lineMaterial3] = useState(
+		() =>
+			new LineMaterial({
+				color: 0x666666,
+				resolution: new Vector2(size.width, size.height),
+				transparent: true,
+				opacity: 1,
+			}),
+	);
+
+	useFrame((props) => {
+		const value = interpolate(id);
+
+		if (value?.r) {
+			quat.set(value.r.x, value.r.y, value.r.z, value.r.w);
+			prevQuat.invert().multiply(quat);
+			euler.setFromQuaternion(prevQuat);
+			prevQuat.set(value.r.x, value.r.y, value.r.z, value.r.w);
+			const rotations = {
+				pitch: euler.x,
+				yaw: euler.y,
+				roll: euler.z,
+			};
+			line1.rotateY(-rotations.yaw);
+			line2.rotateY(rotations.roll);
+			line3.rotateY(-rotations.pitch);
+			lineMaterial1.opacity = Math.min(
+				1,
+				Math.abs(radToDeg(rotations.yaw) * 20),
+			);
+			lineMaterial2.opacity = Math.min(
+				1,
+				Math.abs(radToDeg(rotations.roll) * 20),
+			);
+			lineMaterial3.opacity = Math.min(
+				1,
+				Math.abs(radToDeg(rotations.pitch) * 20),
+			);
+		}
+		const camera = props.camera as OrthographicCamera;
+		const dx = ((camera.right - camera.left) / (2 * camera.zoom)) * 0.98;
+		const points = Array.from({ length: 36 })
+			.flatMap((_, i) => [
+				[
+					Math.cos(degToRad(i * 10)) * dx * 0.98,
+					0,
+					Math.sin(degToRad(i * 10)) * dx * 0.98,
+				],
+				[Math.cos(degToRad(i * 10)) * dx, 0, Math.sin(degToRad(i * 10)) * dx],
+			])
+			.flat();
+		geometry.setPositions(points);
+	});
+
+	return (
+		<>
+			<primitive object={line1}>
+				<primitive object={geometry} attach="geometry" />
+				<primitive object={lineMaterial1} attach="material" />
+			</primitive>
+			<primitive object={line2} rotation={[Math.PI / 2, 0, 0]}>
+				<primitive object={geometry} attach="geometry" />
+				<primitive object={lineMaterial2} attach="material" />
+			</primitive>
+			<primitive object={line3} rotation={[0, 0, Math.PI / 2]}>
+				<primitive object={geometry} attach="geometry" />
+				<primitive object={lineMaterial3} attach="material" />
+			</primitive>
+		</>
+	);
+}
+
+const movementDotInterval = 3;
+const movementDotLifespan = 30;
+const movementDotCount = Math.ceil(movementDotLifespan / movementDotInterval);
+const diffVector = new Vector3();
+function MovementDots({ id }: { id: number }) {
+	const ref = useRef<Mesh[]>([]);
+	const previousPosition = useRef<{ x: number; y: number; z: number } | null>(
+		null,
+	);
+	const timerRef = useRef(0);
+	const refIndex = useRef(0);
+	const { interpolate } = useLiveQuery();
+
+	useFrame((props, delta) => {
+		const playerShip = interpolate(id);
+		if (!playerShip) return;
+		if (!previousPosition.current) {
+			previousPosition.current = playerShip;
+			return;
+		}
+
+		diffVector.set(
+			previousPosition.current.x - playerShip.x,
+			previousPosition.current.y - playerShip.y,
+			previousPosition.current.z - playerShip.z,
+		);
+
+		if (diffVector.lengthSq() > 0) {
+			timerRef.current += delta;
+		}
+		if (timerRef.current >= movementDotInterval) {
+			timerRef.current = 0;
+			const meshRef = ref.current[refIndex.current]!;
+			meshRef.position.set(0, 0, 0);
+			if (!Array.isArray(meshRef.material)) {
+				meshRef.material.opacity = 1;
+			}
+			refIndex.current = (refIndex.current + 1) % ref.current.length;
+		}
+
+		const camera = props.camera as OrthographicCamera;
+		const dx = ((camera.right - camera.left) / (2 * camera.zoom)) * 0.005;
+		for (const el of ref.current) {
+			if (!el) continue;
+			el.scale.setScalar(dx);
+			el.position.add(diffVector);
+			if (!Array.isArray(el.material)) {
+				el.material.opacity -= delta / movementDotLifespan;
+			}
+		}
+		previousPosition.current = playerShip;
+	});
+	return Array.from({ length: movementDotCount }).map((_, i) => (
+		<mesh
+			ref={(node) => {
+				if (node) {
+					ref.current[i] = node;
+				}
+			}}
+			key={i}
+		>
+			<icosahedronGeometry args={[1, 1]} />
+			<meshBasicMaterial
+				color={0x999999}
+				transparent
+				opacity={0}
+				depthWrite={false}
+			/>
+		</mesh>
+	));
+}
+
 export function GridCanvas({
 	shouldRender,
 	children,
@@ -166,7 +356,7 @@ export function GridCanvas({
 			<Canvas
 				camera={{
 					// position: [0, 300000, 0],
-					far: 200000,
+					far: zoomMax * 2,
 				}}
 				className="rounded-full"
 				orthographic
@@ -175,7 +365,9 @@ export function GridCanvas({
 				onContextMenu={(e) => {
 					e.preventDefault();
 				}}
-				onPointerDown={onBackgroundClick}
+				onPointerDown={() => {
+					onBackgroundClick?.();
+				}}
 			>
 				<CameraEffects />
 				<ContextBridge>

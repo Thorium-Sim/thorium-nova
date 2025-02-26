@@ -12,8 +12,12 @@ import type { Line2 } from "three-stdlib";
 import FONT_URL from "./Teko-Light.ttf";
 
 export const DistanceCircle: FC<
-	{ radius?: number } & ThreeElements["object3D"]
-> = ({ radius = 1 }) => {
+	{
+		radius?: number;
+		color?: string | number;
+		label?: string;
+	} & ThreeElements["object3D"]
+> = ({ radius = 1, color = 0x6666666, label }) => {
 	const points = useMemo(() => {
 		const curve = new EllipseCurve(
 			0,
@@ -65,7 +69,7 @@ export const DistanceCircle: FC<
 	return (
 		<group ref={groupRef} rotation={[-Math.PI / 2, 0, 0]}>
 			<Text
-				color="#666" // default
+				color={color} // default
 				anchorX="center" // default
 				anchorY="bottom-baseline" // default
 				fontSize={0.075}
@@ -73,14 +77,16 @@ export const DistanceCircle: FC<
 				position={[0, radius * 1.03, 0]}
 				ref={textRef}
 			>
-				{radius < 1
-					? `${(radius * 1000).toLocaleString()}m`
-					: `${radius.toLocaleString()}km`}
+				{label
+					? label
+					: radius < 1
+						? `${(radius * 1000).toLocaleString()}m`
+						: `${radius.toLocaleString()}km`}
 			</Text>
 			<Line
 				ref={lineRef}
 				points={points} // Array of points
-				color={0x666666} // Default
+				color={color} // Default
 				lineWidth={1} // In pixels (default)
 			/>
 		</group>

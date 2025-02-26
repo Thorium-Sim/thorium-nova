@@ -23,6 +23,7 @@ import { sound } from "@thorium/ecs-components/sound";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
+import { sensors } from "./sensors";
 
 const systemTypes = createUnionSchema(
 	Object.keys(ShipSystemTypes) as (keyof typeof ShipSystemTypes)[],
@@ -38,6 +39,7 @@ export const systems = t.router({
 	torpedoLauncher,
 	shields,
 	phasers,
+	sensors,
 	all: t.procedure
 		.input(z.object({ pluginId: z.string() }).optional())
 		.filter((publish: { pluginId: string } | null, { input }) => {

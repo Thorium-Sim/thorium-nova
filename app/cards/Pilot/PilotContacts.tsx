@@ -1,7 +1,15 @@
 import { Edges, Line, Outlines, useGLTF, useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
-import { useRef, Suspense, memo, useMemo, Fragment } from "react";
+import {
+	useRef,
+	Suspense,
+	memo,
+	useMemo,
+	Fragment,
+	type RefObject,
+	useImperativeHandle,
+} from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import type { isPlanet, isStar } from "@thorium/ecs-components/list";
 import type { satellite } from "@thorium/ecs-components/satellite";
@@ -9,6 +17,7 @@ import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { degToRad, solarRadiusToKilometers } from "@thorium/utils/unitTypes";
 import {
 	type BufferAttribute,
+	CylinderGeometry,
 	DoubleSide,
 	type Group,
 	type Mesh,
@@ -18,6 +27,7 @@ import {
 	Plane,
 	Quaternion,
 	RingGeometry,
+	Sphere,
 	type Sprite,
 	Vector3,
 } from "three";
@@ -28,11 +38,24 @@ import { useLiveQuery } from "@thorium/utils/live-query/client/liveQueryContext"
 import { q } from "@thorium/context/AppContext";
 import { setCursor } from "@thorium/utils/setCursor";
 import ReticleTexture from "@thorium/cards/Pilot/reticle.svg";
+import BracketTexture from "@thorium/cards/Pilot/bracket.svg";
 import Explosion from "@thorium/components/Starmap/Effects/Explosion";
+import { isObjectOccludedBySphere } from "@thorium/utils/starmap/isObjectOccludedBySphere";
+import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 
 export function CircleGridContacts({
 	onContactClick,
-}: { onContactClick?: (id: number) => void }) {
+	onPlanetClick,
+	targetedContactId,
+	selectedContactId,
+	onContactOcclusion,
+}: {
+	onContactClick?: (id: number) => void;
+	onPlanetClick?: (id: number) => void;
+	onContactOcclusion?: (id: number, occluded: boolean) => void;
+	targetedContactId?: number;
+	selectedContactId?: number | null;
+}) {
 	const store = useCircleGridStore();
 	const tilted = store((store) => store.tilt > 0);
 	const useStarmapStore = useGetStarmapStore();
@@ -42,7 +65,7 @@ export function CircleGridContacts({
 	});
 	const [ships] = q.starmapCore.ships.useNetRequest({ systemId });
 	const [torpedos] = q.starmapCore.torpedos.useNetRequest({ systemId });
-	const [targetedContact] = q.targeting.targetedContact.useNetRequest();
+
 	return (
 		<group>
 			{orbs.map((entity) => {
@@ -51,9 +74,12 @@ export function CircleGridContacts({
 				return (
 					<PlanetaryEntity
 						key={entity.id}
+						id={entity.id}
 						satellite={satellite}
 						isPlanet={isPlanet}
 						isStar={isStar}
+						onClick={onPlanetClick}
+						isSelected={selectedContactId === entity.id}
 					/>
 				);
 			})}
@@ -64,12 +90,15 @@ export function CircleGridContacts({
 						<ErrorBoundary FallbackComponent={fallback} onError={onError}>
 							<ShipEntity
 								id={id}
+								systemId={systemId}
 								modelUrl={modelUrl}
 								logoUrl={logoUrl}
 								size={size}
 								tilted={tilted}
 								onClick={onContactClick}
-								targeted={targetedContact?.id === id}
+								isTargeted={targetedContactId === id}
+								isSelected={selectedContactId === id}
+								onContactOcclusion={onContactOcclusion}
 							/>
 						</ErrorBoundary>
 					</Suspense>
@@ -108,24 +137,36 @@ const zeroVector = new Vector3();
 const upVector = new Vector3(0, 1, 0);
 const playerQuaternion = new Quaternion();
 const plane = new Plane();
+const position = new Vector3();
+const sphere = new Sphere();
 export const ShipEntity = ({
 	id,
+	systemId,
 	modelUrl,
 	logoUrl,
 	size,
 	tilted,
 	onClick,
-	targeted,
+	isTargeted,
+	isSelected,
+	onContactOcclusion,
 }: {
 	id: number;
+	systemId: number | null;
 	modelUrl: string;
 	logoUrl: string;
 	size: number;
 	tilted?: boolean;
 	onClick?: (id: number) => void;
-	targeted?: boolean;
+	isTargeted?: boolean;
+	isSelected?: boolean;
+	onContactOcclusion?: (id: number, occluded: boolean) => void;
 }) => {
 	const [{ id: playerId }] = q.ship.player.useNetRequest();
+	const [orbs] = q.starmapCore.entities.useNetRequest({
+		systemId,
+	});
+
 	// TODO: Use useGLTF.preload outside of this to preload the asset
 	const model = useGLTF(modelUrl || "", false);
 
@@ -151,28 +192,38 @@ export const ShipEntity = ({
 
 	const spriteMap = useTexture(logoUrl);
 	const reticleMap = useTexture(ReticleTexture);
+	const showShipIcon = false;
 
 	const scale = 1 / 50;
 	const mesh = useRef<Mesh>(null);
 	const line = useRef<Line2>(null);
 	const sprite = useRef<Sprite>(null);
 	const reticle = useRef<Sprite>(null);
+	const bracket = useRef<Group | null>(null);
 	const shipRef = useRef<Group>(null);
+	const arrowRef = useRef<Group>(null);
+	const isOccludedRef = useRef(false);
 	useFrame((props) => {
 		const camera = props.camera as OrthographicCamera;
 		const dx = (camera.right - camera.left) / (2 * camera.zoom);
 		const ship = interpolate(id);
 		const playerShip = interpolate(playerId);
-
 		const playerPosition = playerShip || zeroVector;
+
 		if (!ship || !playerPosition || !playerShip) return;
 		if (shipRef.current) {
 			if (size && dx / (size / 1000) < 50) {
 				if (sprite.current) {
 					sprite.current.visible = false;
 				}
+				if (arrowRef.current) {
+					arrowRef.current.visible = false;
+				}
 				shipRef.current.visible = true;
 			} else {
+				if (arrowRef.current) {
+					arrowRef.current.visible = true;
+				}
 				if (sprite.current) {
 					sprite.current.visible = true;
 				}
@@ -180,47 +231,104 @@ export const ShipEntity = ({
 			}
 		}
 		if (ship) {
+			// We calculate orbs for occlusion purposes. We only want orbs that are closer
+			// to the player ship than the current ship.
+			let isOccluded = false;
+			for (const orb of orbs) {
+				const { satellite, isPlanet, isStar } = orb.components;
+				if (!satellite) continue;
+				const size = isPlanet
+					? isPlanet.radius
+					: isStar
+						? solarRadiusToKilometers(isStar.radius)
+						: 0;
+				if (size === 0) continue;
+
+				const position = getOrbitPosition({
+					semiMajorAxis: satellite.semiMajorAxis,
+					eccentricity: satellite.eccentricity,
+					orbitalArc: satellite.orbitalArc,
+					inclination: satellite.inclination,
+				});
+
+				sphere.set(sphere.center.set(position.x, position.y, position.z), size);
+				isOccluded = isObjectOccludedBySphere(playerPosition, ship, sphere);
+
+				if (isOccluded) break;
+			}
+
+			if (isOccluded) {
+				if (shipRef.current) {
+					shipRef.current.visible = false;
+				}
+				if (sprite.current) {
+					sprite.current.visible = false;
+				}
+				if (arrowRef.current) {
+					arrowRef.current.visible = false;
+				}
+				if (mesh.current && line.current) {
+					mesh.current.visible = false;
+					line.current.visible = false;
+				}
+				if (isOccludedRef.current === false) {
+					onContactOcclusion?.(id, true);
+				}
+
+				isOccludedRef.current = true;
+				return;
+			}
+			if (isOccludedRef.current === true) {
+				onContactOcclusion?.(id, false);
+			}
+			isOccludedRef.current = false;
+
+			position.set(
+				ship.x - playerPosition.x,
+				ship.y - playerPosition.y,
+				ship.z - playerPosition.z,
+			);
 			// Since the sensor grid needs to be oriented at 0,0,0
 			// to properly tilt, we reposition the contacts relative
 			// to the player ship's position.
-			sprite.current?.position.set(
-				ship.x - playerPosition.x,
-				ship.y - playerPosition.y,
-				ship.z - playerPosition.z,
-			);
-			reticle.current?.position.set(
-				ship.x - playerPosition.x,
-				ship.y - playerPosition.y,
-				ship.z - playerPosition.z,
-			);
-			if (sprite.current?.position) {
-				shipRef.current?.position.copy(sprite.current?.position);
-			}
+			sprite.current?.position.copy(position);
+			reticle.current?.position.copy(position);
+			shipRef.current?.position.copy(position);
+			arrowRef.current?.position.copy(position);
+
 			shipRef.current?.scale.setScalar(size / 1000 || 0.5);
+			// This scale is helpful if we want to see the ships orientation in space.
+			arrowRef.current?.scale.setScalar((dx * 20) / 1000);
 			if (ship.r) {
 				shipRef.current?.quaternion.set(ship.r.x, ship.r.y, ship.r.z, ship.r.w);
+				arrowRef.current?.quaternion.set(
+					ship.r.x,
+					ship.r.y,
+					ship.r.z,
+					ship.r.w,
+				);
 			}
 
 			// Draw the vertical line from the sensor plane to the ship
-			if (playerShip.r && sprite.current?.position && mesh.current?.position) {
+			if (playerShip.r && mesh.current?.position) {
+				playerQuaternion.set(
+					playerShip.r.x,
+					playerShip.r.y,
+					playerShip.r.z,
+					playerShip.r.w,
+				);
+
 				const planeVector = upVector
-					.clone()
-					.applyQuaternion(
-						playerQuaternion.set(
-							playerShip.r.x,
-							playerShip.r.y,
-							playerShip.r.z,
-							playerShip.r.w,
-						),
-					);
+					.set(0, 1, 0)
+					.applyQuaternion(playerQuaternion);
 				plane.set(planeVector, 0);
-				plane.projectPoint(sprite.current.position, mesh.current.position);
+				plane.projectPoint(position, mesh.current.position);
 				const positions = [
-					...sprite.current.position.toArray(),
+					...position.toArray(),
 					...mesh.current.position.toArray(),
 				];
 				line.current?.geometry.setPositions(positions);
-				if (mesh.current && line.current)
+				if (mesh.current && line.current) {
 					if (tilted) {
 						mesh.current.visible = true;
 						line.current.visible = true;
@@ -228,10 +336,20 @@ export const ShipEntity = ({
 						mesh.current.visible = false;
 						line.current.visible = false;
 					}
+				}
 			}
 		}
 		sprite.current?.scale.setScalar(dx * 3 * scale);
 		reticle.current?.scale.setScalar(dx * 4 * scale);
+		bracket.current?.children.forEach((child, i) => {
+			const bracketPosition = getBracketPosition(
+				size / 1000,
+				i,
+				playerQuaternion,
+			);
+			child.position.copy(position).add(bracketPosition);
+			child.scale.setScalar(dx / 15);
+		});
 
 		mesh.current?.scale.setScalar(dx * 3);
 		if (playerShip.r) {
@@ -245,33 +363,43 @@ export const ShipEntity = ({
 		}
 	});
 
+	const eventHandlers = {
+		onPointerDown: () => onClick?.(id),
+		onPointerOver: () => {
+			if (onClick) {
+				setCursor("pointer");
+			}
+		},
+		onPointerOut: () => {
+			setCursor("auto");
+		},
+	};
 	return (
 		<Fragment>
-			<group ref={shipRef}>
+			<group ref={shipRef} {...eventHandlers}>
 				<primitive object={scene} rotation={[Math.PI / 2, Math.PI, 0]} />
 			</group>
 			{id !== playerId && (
 				<Fragment>
-					<sprite
-						ref={sprite}
-						onPointerDown={() => onClick?.(id)}
-						onPointerOver={(e) => {
-							if (onClick) {
-								setCursor("pointer");
-							}
-						}}
-						onPointerOut={(e) => {
-							setCursor("auto");
-						}}
-					>
-						<spriteMaterial
-							attach="material"
-							map={spriteMap}
-							color={"white"}
-							sizeAttenuation={true}
-						/>
-					</sprite>
-					<sprite ref={reticle} visible={targeted}>
+					{showShipIcon ? (
+						<sprite ref={sprite} {...eventHandlers}>
+							<spriteMaterial
+								attach="material"
+								map={spriteMap}
+								color={"white"}
+								sizeAttenuation={true}
+							/>
+						</sprite>
+					) : (
+						<group ref={arrowRef} {...eventHandlers}>
+							<mesh rotation={[Math.PI / 2, 0, 0]}>
+								<coneGeometry args={[1, 3, 4]} />
+								<meshBasicMaterial color={0x888888} />
+							</mesh>
+						</group>
+					)}
+
+					<sprite ref={reticle} visible={isTargeted}>
 						<spriteMaterial
 							depthTest={false}
 							attach="material"
@@ -280,6 +408,8 @@ export const ShipEntity = ({
 							sizeAttenuation={true}
 						/>
 					</sprite>
+					<SensorsBracket bracket={bracket} isSelected={isSelected} />
+
 					<Line
 						ref={line}
 						points={[
@@ -303,55 +433,275 @@ export const ShipEntity = ({
 	);
 };
 interface PlanetaryEntityProps {
+	id: number;
 	satellite: Zod.infer<typeof satellite>;
 	isPlanet?: Zod.infer<typeof isPlanet>;
 	isStar?: Zod.infer<typeof isStar>;
+	onClick?: (id: number) => void;
+	isSelected?: boolean;
 }
 
 export const PlanetaryEntity = memo(
-	({ satellite, isPlanet, isStar }: PlanetaryEntityProps) => {
+	({
+		id,
+		satellite,
+		isPlanet,
+		isStar,
+		onClick,
+		isSelected,
+	}: PlanetaryEntityProps) => {
 		const [{ id: playerId }] = q.ship.player.useNetRequest();
 		const { interpolate } = useLiveQuery();
 
-		const ref = useRef<Group>(null);
-		useFrame(() => {
-			const playerShip = interpolate(playerId);
-			if (!playerShip || (!isPlanet && !isStar) || !satellite) return;
-			const position = getOrbitPosition({
-				semiMajorAxis: satellite.semiMajorAxis,
-				eccentricity: satellite.eccentricity,
-				orbitalArc: satellite.orbitalArc,
-				inclination: satellite.inclination,
-			});
-			ref.current?.position.set(
-				position.x - playerShip.x,
-				position.y - playerShip.y,
-				position.z - playerShip.z,
-			);
-		});
-		if ((!isPlanet && !isStar) || !satellite) return null;
-
+		const bracket = useRef<Group>(null);
 		const size = isPlanet
 			? isPlanet.radius
 			: isStar
 				? solarRadiusToKilometers(isStar.radius)
 				: 0;
+		const position = getOrbitPosition({
+			semiMajorAxis: satellite.semiMajorAxis,
+			eccentricity: satellite.eccentricity,
+			orbitalArc: satellite.orbitalArc,
+			inclination: satellite.inclination,
+		});
+
+		const store = useCircleGridStore();
+
+		const sensorRange = store((store) => store.zoomMax);
+
+		const ref = useRef<Group>(null);
+		useFrame((props) => {
+			const camera = props.camera as OrthographicCamera;
+			const dx = (camera.right - camera.left) / (2 * camera.zoom);
+
+			const playerShip = interpolate(playerId);
+			if (!playerShip || (!isPlanet && !isStar) || !satellite) return;
+
+			ref.current?.position.set(
+				position.x - playerShip.x,
+				position.y - playerShip.y,
+				position.z - playerShip.z,
+			);
+			if (playerShip.r) {
+				playerQuaternion.set(
+					playerShip.r.x,
+					playerShip.r.y,
+					playerShip.r.z,
+					playerShip.r.w,
+				);
+			}
+			bracket.current?.children.forEach((child, i) => {
+				const bracketPosition = getBracketPosition(size, i, playerQuaternion);
+				child.position
+					.set(
+						position.x - playerShip.x,
+						position.y - playerShip.y,
+						position.z - playerShip.z,
+					)
+					.add(bracketPosition);
+				child.scale.setScalar(dx / 15);
+			});
+		});
+		if ((!isPlanet && !isStar) || !satellite) return null;
 
 		return (
-			<group
-				ref={ref}
-				scale={[size, size, size]}
-				rotation={[0, 0, degToRad(satellite.axialTilt)]}
-			>
-				<mesh>
-					<icosahedronGeometry args={[1, 3]} attach="geometry" />
-					<meshBasicMaterial wireframe color="white" attach="material" />
-				</mesh>
-				{isPlanet?.ringMapAsset && <BasicRings />}
-			</group>
+			<>
+				<group
+					ref={ref}
+					scale={[size, size, size]}
+					rotation={[0, 0, degToRad(satellite.axialTilt)]}
+				>
+					<mesh
+						onPointerDown={() => onClick?.(id)}
+						onPointerOver={(e) => {
+							if (onClick) {
+								setCursor("pointer");
+							}
+						}}
+						onPointerOut={(e) => {
+							setCursor("auto");
+						}}
+					>
+						<icosahedronGeometry args={[1, 3]} attach="geometry" />
+						<meshBasicMaterial wireframe color="white" attach="material" />
+					</mesh>
+					{isPlanet?.ringMapAsset && <BasicRings />}
+				</group>
+				<SensorsBracket bracket={bracket} isSelected={isSelected} />
+				{isPlanet ? (
+					<OcclusionCone
+						size={size}
+						id={id}
+						sensorRange={sensorRange}
+						satellite={satellite}
+					/>
+				) : null}
+			</>
 		);
 	},
 );
+
+const position1 = new Vector3();
+const position2 = new Vector3();
+const direction = new Vector3();
+function OcclusionCone({
+	id,
+	size,
+	sensorRange,
+	satellite: sat,
+}: {
+	id: number;
+	sensorRange: number;
+	size: number;
+	satellite: Zod.infer<typeof satellite>;
+}) {
+	const position = getOrbitPosition({
+		semiMajorAxis: sat.semiMajorAxis,
+		eccentricity: sat.eccentricity,
+		orbitalArc: sat.orbitalArc,
+		inclination: sat.inclination,
+	});
+
+	const [{ id: playerId }] = q.ship.player.useNetRequest();
+	const { interpolate } = useLiveQuery();
+	const ref = useRef<Group>(null);
+	const cylinderRef = useRef<Mesh>(null);
+
+	useAnimationFrame(() => {
+		const playerShip = interpolate(playerId);
+		if (!playerShip) return;
+		position1.set(playerShip.x, playerShip.y, playerShip.z);
+		position2.set(position.x, position.y, position.z);
+		direction.subVectors(position2, position1);
+		const distance = direction.length();
+		ref.current?.position.copy(direction);
+		direction.normalize();
+		upVector.set(0, -1, 0);
+		ref.current?.quaternion.setFromUnitVectors(upVector, direction);
+
+		const distantRadius =
+			(sensorRange * Math.sin(Math.atan2(size, distance))) / size;
+		const geometry = new CylinderGeometry(
+			1, // radius at top
+			distantRadius, // radius at bottom
+			sensorRange / size, // height
+			32, // radial segments
+		);
+		if (cylinderRef.current) {
+			cylinderRef.current.geometry.dispose();
+			cylinderRef.current.geometry = geometry;
+		}
+	});
+	return (
+		<group ref={ref} scale={[size, size, size]}>
+			<mesh
+				position={[0, -sensorRange / size / 2, 0]}
+				renderOrder={-1}
+				ref={cylinderRef}
+			>
+				<cylinderGeometry args={[1, 1, sensorRange / size, 8]} />
+				<meshBasicMaterial
+					color={0x333333}
+					depthTest={false}
+					side={DoubleSide}
+				/>
+			</mesh>
+			<mesh position={[0, 0, 0]} renderOrder={-1}>
+				<sphereGeometry args={[1]} />
+				<meshBasicMaterial
+					color={0x333333}
+					depthTest={false}
+					side={DoubleSide}
+				/>
+			</mesh>
+		</group>
+	);
+}
+
+function getBracketPosition(
+	positionScalar: number,
+	index: number,
+	quaternion: Quaternion,
+) {
+	return [
+		new Vector3(positionScalar, 0, positionScalar).applyQuaternion(quaternion),
+		new Vector3(positionScalar, 0, -positionScalar).applyQuaternion(quaternion),
+		new Vector3(-positionScalar, 0, -positionScalar).applyQuaternion(
+			quaternion,
+		),
+		new Vector3(-positionScalar, 0, positionScalar).applyQuaternion(quaternion),
+	][index];
+}
+
+const SensorsBracket = ({
+	bracket,
+	isSelected,
+}: { bracket: RefObject<Group | null>; isSelected?: boolean }) => {
+	const bracketMap = useTexture(BracketTexture);
+	const positionScalar = 0.05;
+	const scaleScalar = 0.15;
+	return (
+		<group ref={bracket} visible={isSelected}>
+			<sprite
+				scale={scaleScalar}
+				position={[positionScalar, 0, positionScalar]}
+			>
+				<spriteMaterial
+					depthTest={false}
+					attach="material"
+					map={bracketMap}
+					color={0x0088ff}
+					sizeAttenuation={false}
+					depthWrite={false}
+				/>
+			</sprite>
+			<sprite
+				scale={scaleScalar}
+				position={[positionScalar, 0, -positionScalar]}
+			>
+				<spriteMaterial
+					rotation={Math.PI / 2}
+					depthTest={false}
+					attach="material"
+					map={bracketMap}
+					color={0x0088ff}
+					sizeAttenuation={false}
+					depthWrite={false}
+				/>
+			</sprite>
+			<sprite
+				scale={scaleScalar}
+				position={[-positionScalar, 0, -positionScalar]}
+			>
+				<spriteMaterial
+					rotation={Math.PI}
+					depthTest={false}
+					attach="material"
+					map={bracketMap}
+					color={0x0088ff}
+					sizeAttenuation={false}
+					depthWrite={false}
+				/>
+			</sprite>
+			<sprite
+				scale={scaleScalar}
+				position={[-positionScalar, 0, positionScalar]}
+			>
+				<spriteMaterial
+					rotation={-Math.PI / 2}
+					depthTest={false}
+					attach="material"
+					map={bracketMap}
+					color={0x0088ff}
+					sizeAttenuation={false}
+					depthWrite={false}
+				/>
+			</sprite>
+		</group>
+	);
+};
+
 PlanetaryEntity.displayName = "PlanetaryEntity";
 function BasicRings() {
 	const geo = useMemo(() => {
@@ -367,12 +717,7 @@ function BasicRings() {
 		return geometry;
 	}, []);
 	return (
-		<mesh
-			rotation={[Math.PI / 2, 0, 0]}
-			scale={[0.7, 0.7, 0.7]}
-			geometry={geo}
-			receiveShadow
-		>
+		<mesh rotation={[Math.PI / 2, 0, 0]} scale={[0.7, 0.7, 0.7]} geometry={geo}>
 			<meshBasicMaterial
 				color={16777215}
 				side={DoubleSide}
@@ -451,7 +796,7 @@ export function TorpedoEntity({
 			// Draw the vertical line from the sensor plane to the ship
 			if (playerShip.r && ref.current?.position && mesh.current?.position) {
 				const planeVector = upVector
-					.clone()
+					.set(0, 1, 0)
 					.applyQuaternion(
 						playerQuaternion.set(
 							playerShip.r.x,

@@ -107,6 +107,7 @@ export const inventoryFlags = z
 			})
 			.optional(),
 		water: z.object({}).optional(),
+		scannable: z.object({}).optional(),
 	})
 	.default({});
 
@@ -217,4 +218,7 @@ export const InventoryFlagValues: {
 	},
 	probeCasing: { info: "Necessary to launch probes." },
 	probeEquipment: { info: "Used by the probe to carry equipment." },
+	scannable: {
+		info: "Whether this inventory will appear on scans of the ship. Use sparingly.",
+	},
 };

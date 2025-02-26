@@ -414,7 +414,9 @@ export function EditorDisclosure({
 						leaveFrom="transform scale-100 opacity-100"
 						leaveTo="transform scale-95 opacity-0"
 					>
-						<Disclosure.Panel className="pb-2">{children}</Disclosure.Panel>
+						<Disclosure.Panel className="pb-2 px-2">
+							{children}
+						</Disclosure.Panel>
 					</Transition>
 				</>
 			)}

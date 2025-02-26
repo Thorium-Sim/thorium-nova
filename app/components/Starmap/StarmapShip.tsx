@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Suspense } from "react";
 import { Line, useGLTF } from "@react-three/drei";
 import {
@@ -45,7 +45,6 @@ export function StarmapShip({
 	const [autopilotData] = q.starmapCore.autopilot.useNetRequest({ systemId });
 
 	const shipAutopilot = autopilotData[id];
-
 	const [player] = q.ship.player.useNetRequest();
 	const playerId = player?.id;
 
@@ -141,7 +140,6 @@ export function StarmapShip({
 						/>
 					</mesh>
 				)}
-				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 				<group
 					onPointerOver={() => {
 						// set the cursor to pointer
@@ -223,11 +221,11 @@ const ShipSprite = ({
 	spriteAsset: string;
 	userData?: any;
 }) => {
-	// TODO: Replace with a ship icon
-	const spriteMap = suspend(async () => {
-		const canvas = document.createElement("canvas");
+	const [canvas] = useState(() => document.createElement("canvas"));
+
+	useEffect(() => {
 		const ctx = canvas.getContext("2d");
-		await new Promise<void>((resolve, reject) => {
+		new Promise<void>((resolve, reject) => {
 			const img = new Image();
 			img.src = spriteAsset;
 			img.onload = () => {
@@ -251,8 +249,8 @@ const ShipSprite = ({
 				resolve();
 			};
 		});
-		return new CanvasTexture(canvas);
-	}, [spriteAsset]);
+	}, [spriteAsset, canvas]);
+	const spriteMap = new CanvasTexture(canvas);
 
 	const scale = 1 / 50;
 	const ref = useRef<Sprite>(null);

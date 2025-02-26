@@ -40,10 +40,11 @@ function UntouchableLabel({
 
 export function Pilot({ cardLoaded }: CardProps) {
 	q.pilot.stream.useDataStream({ systemId: null });
+	const [targetedContact] = q.targeting.targetedContact.useNetRequest();
 
 	return (
 		<CircleGridStoreProvider>
-			<div className="grid grid-cols-4 h-full place-content-center gap-4">
+			<div className="grid grid-cols-4 grid-rows-1 h-full place-content-center gap-4">
 				<div className="flex flex-col justify-between">
 					<ImpulseControls cardLoaded={cardLoaded} />
 					<div className="flex-1 mt-2">
@@ -76,7 +77,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 					<Suspense fallback={null}>
 						<GridCanvas shouldRender={cardLoaded}>
 							<CircleGrid>
-								<CircleGridContacts />
+								<CircleGridContacts targetedContactId={targetedContact?.id} />
 								<CircleGridWaypoints />
 							</CircleGrid>
 						</GridCanvas>

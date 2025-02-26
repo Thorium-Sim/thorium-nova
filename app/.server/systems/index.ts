@@ -33,6 +33,7 @@ import { PowerDistributionSystem } from "./PowerDistributionSystem";
 import { ShieldsSystem } from "./ShieldsSystem";
 import { PhasersSystem } from "./PhasersSystem";
 import { SolarSystemPositionSystem } from "./SolarSystemPositionSystem";
+import { SensorScanSystem } from "@thorium/.server/systems/SensorScanSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -59,6 +60,7 @@ const systems = [
 	TorpedoMovementSystem,
 	PhysicsWorldPositionSystem,
 	PhysicsMovementSystem,
+	SensorScanSystem,
 	WaypointRemoveSystem,
 	HeatToCoolantSystem,
 	HeatDispersionSystem,

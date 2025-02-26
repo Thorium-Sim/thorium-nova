@@ -9,6 +9,7 @@ import TorpedoLauncherPlugin from "./TorpedoLauncher";
 import TargetingSystemPlugin from "./Targeting";
 import ShieldsPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Shields";
 import PhasersPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Phasers";
+import SensorsPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Sensors";
 
 // Make sure you update the isShipSystem component when adding a new ship system type
 // We can't derive the isShipSystem list from this list because ECS components
@@ -25,6 +26,7 @@ export const ShipSystemTypes = {
 	targeting: TargetingSystemPlugin,
 	shields: ShieldsPlugin,
 	phasers: PhasersPlugin,
+	sensors: SensorsPlugin,
 };
 
 export type ShipSystemFlags = "power" | "heat" | "efficiency" | "sounds";

@@ -10,3 +10,4 @@ export * from "./RemoteAccess";
 export * from "./Targeting";
 export * from "./Objectives";
 export * from "./SystemsMonitor";
+export * from "./Sensors";

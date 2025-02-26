@@ -32,7 +32,7 @@ export function Targeting({ cardLoaded }: CardProps) {
 	const [hull] = q.targeting.hull.useNetRequest();
 	return (
 		<CircleGridStoreProvider zoomMax={25000}>
-			<div className="grid grid-cols-4 h-full place-content-center gap-4">
+			<div className="grid grid-cols-4 grid-rows-1 h-full place-content-center gap-4">
 				{/* Padding is protection from the bottom of the card container */}
 				<div className="flex flex-col justify-between pb-4">
 					<Shields cardLoaded={cardLoaded} />
@@ -56,6 +56,7 @@ export function Targeting({ cardLoaded }: CardProps) {
 							<CircleGrid fixedChildren={<PhaserArcs />}>
 								<BeamVisualization />
 								<CircleGridContacts
+									targetedContactId={targetedContact?.id}
 									onContactClick={(contact) => {
 										clickRef.current = true;
 										setTarget.mutate({ target: contact });
@@ -97,7 +98,10 @@ function ObjectData({ objectId }: { objectId: number }) {
 	const [object, distanceRef] = useObjectData(objectId);
 	return object ? (
 		<div className="flex items-center gap-2">
-			<ObjectImage object={object} className="border-0 border-r p-2" />
+			<ObjectImage
+				objectImage={object.image}
+				className="border-0 border-r p-2"
+			/>
 
 			<div>
 				<h3 className="text-lg">{object.name}</h3>

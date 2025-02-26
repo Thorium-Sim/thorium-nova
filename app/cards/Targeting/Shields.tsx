@@ -100,7 +100,7 @@ export function Shields({ cardLoaded }: { cardLoaded: boolean }) {
 					className="flex-1 aspect-square rounded-full p-4"
 					style={{ boxShadow: shieldStyle(shields) }}
 				>
-					<img src={ship.assets.topView} alt="Top" />
+					<img src={ship.assets?.topView} alt="Top" />
 				</div>
 				{shields.length === 6 ? (
 					<div
@@ -108,7 +108,7 @@ export function Shields({ cardLoaded }: { cardLoaded: boolean }) {
 						className="flex-1 aspect-square rounded-full p-4"
 						style={{ boxShadow: shieldStyle(shields, true) }}
 					>
-						<img src={ship.assets.sideView} alt="Side" />
+						<img src={ship.assets?.sideView} alt="Side" />
 					</div>
 				) : null}
 			</div>

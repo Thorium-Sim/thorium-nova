@@ -42,19 +42,39 @@ export const ship = t.router({
 		);
 	}),
 	player: t.procedure
-		.filter((publish: { shipId: number }, { ctx }) => {
-			if (publish && publish.shipId !== ctx.ship?.id) return false;
+		.input(z.object({ playerShipId: z.number().optional() }).optional())
+		.filter((publish: { shipId: number }, { ctx, input }) => {
+			if (
+				publish &&
+				publish.shipId !== ctx.ship?.id &&
+				publish.shipId !== input?.playerShipId
+			)
+				return false;
 			return true;
 		})
-		.request(({ ctx }) => {
-			if (!ctx.ship) throw new Error("Cannot find ship");
-			const systemId = ctx.ship.components.position?.parentId;
+		.request(({ ctx, input }) => {
+			const ship = input?.playerShipId
+				? ctx.flight?.ecs.getEntityById(input?.playerShipId)
+				: ctx.ship;
+			if (!ship)
+				return {
+					id: input?.playerShipId || -1,
+					currentSystem: null,
+					systemPosition: {
+						parentId: null,
+						type: "interstellar",
+						x: 0,
+						y: 0,
+						z: 0,
+					},
+				};
+			const systemId = ship.components.position?.parentId;
 			const systemPosition = systemId
 				? ctx.flight?.ecs.getEntityById(systemId)?.components.position || null
 				: null;
-			const assets = ctx.ship.components.isShip!.assets;
+			const assets = ship.components.isShip!.assets;
 			return {
-				id: ctx.ship.id,
+				id: ship.id,
 				currentSystem: systemId || null,
 				systemPosition,
 				assets,

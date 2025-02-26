@@ -118,3 +118,30 @@ export function getCurrentTarget(shipId: number, ecs: ECS) {
 		}
 	}
 }
+
+export function getPhaserCharge(e: Entity) {
+	const phaseCapacitors = e.components.power?.powerSources.reduce(
+		(prev, next) => {
+			if (prev.has(next)) return prev;
+			const entity = e.ecs?.getEntityById(next);
+			if (!entity?.components.isPhaseCapacitor || !entity.components.isBattery)
+				return prev;
+			prev.set(next, {
+				storage: entity.components.isBattery.storage,
+				capacity: entity.components.isBattery.capacity,
+			});
+			return prev;
+		},
+		new Map<number, { storage: number; capacity: number }>(),
+	);
+
+	let chargePercent = 0;
+	if (phaseCapacitors) {
+		for (const capacitor of phaseCapacitors.values()) {
+			chargePercent +=
+				capacitor.storage / capacitor.capacity / phaseCapacitors.size;
+		}
+	}
+
+	return chargePercent;
+}

@@ -75,7 +75,7 @@ export class LiveQueryClient {
 			if (!res.ok) {
 				try {
 					throw new LiveQueryError(
-						"Error in request",
+						`Error in request ${JSON.parse(response).error}`,
 						JSON.parse(response).error,
 					);
 				} catch (error) {
