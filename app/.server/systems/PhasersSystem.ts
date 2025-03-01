@@ -28,7 +28,6 @@ export class PhasersSystem extends System {
 			);
 			// TODO: Pubsub anywhere that needs to know phasers aren't firing
 			pubsub.publish.targeting.phasers.firing({
-				shipId: phaserShip?.id || -1,
 				systemId: phaserShip?.components.position?.parentId || null,
 			});
 

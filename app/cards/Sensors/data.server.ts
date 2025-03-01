@@ -12,13 +12,15 @@ type IsDestroyed = Zod.infer<typeof isDestroyed>;
 
 export const sensors = t.router({
 	get: t.procedure
-		.filter((publish: { shipId: number; systemId: number }, { ctx }) => {
-			if (publish && publish.shipId !== ctx.ship?.id) return false;
+		.input(z.object({ shipId: z.number() }))
+		.filter((publish: { shipId: number; systemId: number }, { ctx, input }) => {
+			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
-		.request(({ ctx }) => {
-			const sensors = getShipSystem(ctx, {
+		.request(({ ctx, input }) => {
+			const sensors = getShipSystem(ctx.ecs, {
 				systemType: "sensors",
+				shipId: input.shipId,
 			});
 
 			return {
@@ -28,11 +30,11 @@ export const sensors = t.router({
 			};
 		}),
 	scanResult: t.procedure
-		.input(z.object({ objectId: z.number() }))
-		.filter((publish: { objectId: number; shipId: number }, { input, ctx }) => {
+		.input(z.object({ shipId: z.number(), objectId: z.number() }))
+		.filter((publish: { objectId: number; shipId: number }, { input }) => {
 			if (
 				publish &&
-				(publish.objectId !== input.objectId || publish.shipId !== ctx.ship?.id)
+				(publish.objectId !== input.objectId || publish.shipId !== input.shipId)
 			)
 				return false;
 			return true;
@@ -40,8 +42,9 @@ export const sensors = t.router({
 		.request(({ ctx, input }) => {
 			const object = ctx.flight?.ecs.getEntityById(input.objectId);
 
-			const sensors = getShipSystem(ctx, {
+			const sensors = getShipSystem(ctx.ecs, {
 				systemType: "sensors",
+				shipId: input.shipId,
 			});
 			const result: z.infer<typeof scanRecord> =
 				sensors.components.isSensors?.resultsDatabase.get(input.objectId) ||
@@ -57,15 +60,16 @@ export const sensors = t.router({
 			return result;
 		}),
 	scans: t.procedure
-		.filter((publish: { shipId: number }, { ctx }) => {
-			if (publish && publish.shipId !== ctx.ship?.id) return false;
+		.input(z.object({ shipId: z.number() }))
+		.filter((publish: { shipId: number }, { input }) => {
+			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
 		.request(({ ctx, input }) => {
 			const scans = [];
 			for (const scan of ctx.flight?.ecs.componentCache.get("scan") || []) {
 				const scanData = scan.components.scan;
-				if (scanData && scanData.parentId === ctx.ship?.id) {
+				if (scanData && scanData.parentId === input.shipId) {
 					scans.unshift({
 						id: scan.id,
 						type: scanData.type,
@@ -83,22 +87,22 @@ export const sensors = t.router({
 	scanStart: t.procedure
 		.input(
 			z.object({
+				shipId: z.number(),
 				target: z.number(),
 				type: scanTypes,
 			}),
 		)
 		.send(({ ctx, input }) => {
-			if (!ctx.ship) return;
 			const scanEntity = new Entity();
 			scanEntity.addComponent("scan", {
 				type: input.type,
 				target: input.target,
-				parentId: ctx.ship.id,
+				parentId: input.shipId,
 				progress: 0,
 				timestamp: Date.now(),
 			});
 			ctx.flight?.ecs.addEntity(scanEntity);
-			pubsub.publish.sensors.scans({ shipId: ctx.ship.id });
+			pubsub.publish.sensors.scans({ shipId: input.shipId });
 		}),
 	scanCancel: t.procedure
 		.input(
@@ -107,17 +111,21 @@ export const sensors = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
-			if (!ctx.ship) return;
+			const shipId = ctx.ecs.getEntityById(input.scanId)?.components.scan
+				?.parentId;
 			ctx.flight?.ecs.removeEntityById(input.scanId);
-			pubsub.publish.sensors.scans({ shipId: ctx.ship?.id });
+			if (shipId) {
+				pubsub.publish.sensors.scans({ shipId });
+			}
 		}),
 	// scanRepeat: t.procedure,
 	stream: t.procedure
-		.input(z.object({ systemId: z.number().nullable() }))
+		.input(z.object({ systemId: z.number().nullable(), shipId: z.number() }))
 		.dataStream(({ ctx, input, entity }) => {
 			if (!entity) return false;
 			const systemId =
-				input?.systemId || ctx.ship?.components.position?.parentId;
+				input.systemId ||
+				ctx.ecs.getEntityById(input.shipId)?.components.position?.parentId;
 			if (typeof systemId === "undefined") {
 				return false;
 			}
@@ -125,7 +133,7 @@ export const sensors = t.router({
 				(entity.components.position &&
 					entity.components.position.parentId === systemId) ||
 					(entity.components.scan &&
-						entity.components.scan.parentId === ctx.ship?.id),
+						entity.components.scan.parentId === input.shipId),
 			);
 		}),
 });

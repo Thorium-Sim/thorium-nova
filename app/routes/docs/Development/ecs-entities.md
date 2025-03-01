@@ -72,15 +72,15 @@ component and might make certain systems not operate on that entity any more.
 entity.removeComponent("position");
 ```
 
-### Entity Factories
+### Entity Spawners
 
 There are some entities which have a specific purpose, such as planets, stars,
 or ships. These entities are always created with the same components, so it
 might be helpful to create a factory function to create them.
 
 ```ts
-// This is not a realistic example, but it shows how to create a factory
-function createPlanet({
+// This is not a realistic example, but it shows how to create a spawner
+function planetSpawner({
   name,
   description,
   position,

@@ -6,14 +6,16 @@ import { ErrorBoundary } from "react-error-boundary";
 import { StarmapShip } from "@thorium/components/Starmap/StarmapShip";
 import { WaypointEntity } from "@thorium/components/Starmap/WaypointEntity";
 import { q } from "@thorium/context/AppContext";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function InterstellarWrapper() {
+	const { shipId } = useStation();
 	const useStarmapStore = useGetStarmapStore();
 	// This netRequest comes from the starmap core.
 	const [starmapSystems] = q.starmapCore.systems.useNetRequest();
-	const [ship] = q.navigation.ship.useNetRequest();
+	const [ship] = q.navigation.ship.useNetRequest({ shipId });
 
-	const [waypoints] = q.waypoints.all.useNetRequest({ systemId: null });
+	const [waypoints] = q.waypoints.all.useNetRequest({ systemId: null, shipId });
 	useEffect(() => {
 		useStarmapStore.getState().currentSystemSet?.(null);
 	}, [useStarmapStore]);

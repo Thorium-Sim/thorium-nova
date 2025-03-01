@@ -2,6 +2,7 @@ import * as React from "react";
 import { q } from "@thorium/context/AppContext";
 import Button from "@thorium/ui/Button";
 import type { isShip } from "@thorium/ecs-components/isShip";
+import { useStation } from "@thorium/routes/station/useStation";
 
 type AlertLevelT = Zod.infer<typeof isShip>["alertLevel"];
 const alertLevelText = [
@@ -29,10 +30,12 @@ const alertLevelText = [
 
 export function AlertLevel() {
 	const [description, setDescription] = React.useState("");
+	const { shipId } = useStation();
 
 	const updateLevel = (newLevel: AlertLevelT) => {
 		q.alertLevel.update.netSend({
 			alertLevel: newLevel,
+			shipId,
 		});
 	};
 	const displayDesc = (level: number) => {

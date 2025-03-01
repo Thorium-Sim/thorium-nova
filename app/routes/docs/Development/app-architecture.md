@@ -5,14 +5,12 @@ title: App Architecture
 # App Architecture
 
 Thorium Nova is comprised of several parts that work together to create the
-complete package. These three pieces exist as separate workspaces in the
-`server`, `client`, and `desktop` folders in the repository.
+complete package.
 
 ## Server
 
-The Node.js server is the backbone of the entire game. It is written in
-TypeScript and uses esbuild to compile and bundle it into JavaScript. It
-includes the logic for opening the database and persisting data when it changes,
+The Bun server is the backbone of the entire game. It is written in
+TypeScript and includes the logic for opening the database and persisting data when it changes,
 both for the server itself, any plugins, and the currently running flight.
 
 It also runs the ECS frameworks that are embedded into each flight, which
@@ -31,21 +29,20 @@ HTTP server serves the client assets over HTTP. This also makes it almost
 trivial to create a headless version of Thorium Nova that can run for long
 periods of time in the cloud.
 
-## Desktop
+## Desktop App
 
-[Electron](https://www.electronjs.org/) is a framework for building
-cross-platform JavaScript applications by bundling Node.js and Chrome into a
-single executable. This allows the web technologies to access low-level APIs for
+[Tauri](https://tauri.app) is a framework for building
+cross-platform JavaScript applications using a Rust backend and the operating system's embedded browser. This allows the web technologies to access low-level APIs for
 the operating system that aren't normally available to web apps. It also makes
 for a nice tool to bundle the app into a distributable package.
 
-Thorium Nova's Electron wrapper doesn't actually need to do that much. Here's
+Thorium Nova's Tauri wrapper doesn't actually need to do that much. Here's
 the abbreviated list of capabilities it should provide:
 
-- Start up the HTTP server when it first launches, stop the server when Electron
-  connects to another server, and then start the HTTP server again when Electron
+- Start up the embedded Bun HTTP server when it first launches, stop the server when the client
+  connects to another server, and then start the HTTP server again when the client
   disconnects from another server.
-- Automatically connect to that HTTP server when Electron starts up.
+- Automatically connect to that HTTP server when Tauri starts up.
 - Connect to another Thorium server.
 - Bonjour auto-discovery for finding servers running on the network.
 - Opening up `.flight` files to automatically resume an existing flight.
@@ -56,14 +53,14 @@ the abbreviated list of capabilities it should provide:
 ## Client
 
 The client is a React application built using the
-[Vite bundler](https://vitejs.dev). Everything on the frontend viewed by the
+[Vite bundler](https://vitejs.dev) and React Router. Everything on the frontend viewed by the
 crew, flight directors, and plugin writers is part of the client. This includes
 the built-in documentation (maybe that you are reading right now on the client!)
 
 The client is organized into routes with React Router and much of its behavior
 is determined by the server. For example, when a flight has started, the client
 can be assigned to a ship and station. Once assigned, when the client navigates
-to the `/flight` page it should automatically display the controls for that
+to the `/flight/station` page it should automatically display the controls for that
 station on that ship.
 
 The Flight Director has a bit more agency when it comes to what their station

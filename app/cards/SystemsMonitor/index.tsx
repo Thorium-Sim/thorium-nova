@@ -18,19 +18,20 @@ import {
 } from "react";
 import { Fragment } from "react/jsx-runtime";
 import type { CardProps } from "@thorium/cards/CardProps";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function SystemsMonitor({ cardLoaded }: CardProps) {
-	const [reactors] = q.systemsMonitor.reactors.get.useNetRequest();
-	const [batteries] = q.systemsMonitor.batteries.get.useNetRequest();
-	const [systems] = q.systemsMonitor.systems.get.useNetRequest();
+	const { shipId } = useStation();
+	const [reactors] = q.systemsMonitor.reactors.get.useNetRequest({ shipId });
+	const [batteries] = q.systemsMonitor.batteries.get.useNetRequest({ shipId });
+	const [systems] = q.systemsMonitor.systems.get.useNetRequest({ shipId });
 
-	q.systemsMonitor.stream.useDataStream();
+	q.systemsMonitor.stream.useDataStream({ shipId });
 
 	const [selectedPowerSupplier, setSelectedPowerSupplier] = useState<
 		number | null
 	>(null);
 	return (
-		// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 		<div
 			className="relative grid grid-cols-5 gap-8 h-full"
 			onClick={() => {
@@ -467,7 +468,6 @@ function Battery({
 						{Array.from({
 							length: Math.floor(chargeRate),
 						}).map((_, i) => (
-							// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 							<div
 								onClick={(e) => {
 									e.stopPropagation();
@@ -687,7 +687,6 @@ function System({
 										</Tooltip>
 									)}
 
-									{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 									<div
 										ref={(el) => {
 											el && elementRefs.current.set(i, el);

@@ -3,9 +3,10 @@ import { downMixBuffer } from "./downmixBuffer";
 import { createRNG, type RNG } from "@thorium/utils/rng";
 import type { Sound as SoundComponent } from "@thorium/ecs-components/sound";
 import { AudioLoopWithGap } from "./AudioLoopWithGap";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { useAudioSettingsStore } from "./audioSettingsStore";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export type SoundType = "ambiance" | "soundEffect" | "ui" | "music";
 
@@ -260,60 +261,63 @@ export function stopLooping(id: string) {
 }
 
 export function SoundPlayer() {
-	const [{ id }] = q.ship.player.useNetRequest();
+	const { shipId } = useStation();
 	const { interpolate } = useLiveQuery();
 
-	q.effects.sounds.useNetRequest(undefined, {
-		callback: (data) => {
-			if (!data) return;
-			switch (data.type) {
-				case "sound": {
-					const shipPosition = interpolate(id);
-					const { sounds, range } = data.sound;
-					// Calculate a volume multiplier based on the distance from the sound source.
-					const volumeMultiplier =
-						range && shipPosition
-							? Math.max(
-									0,
-									1 -
-										(Math.hypot(
-											range.position.x - shipPosition.x,
-											range.position.y - shipPosition.y,
-											range.position.z - shipPosition.z,
-										) /
-											range.distance) *
-											1.1,
-								)
-							: 1;
+	q.effects.sounds.useNetRequest(
+		{ clientId },
+		{
+			callback: (data) => {
+				if (!data) return;
+				switch (data.type) {
+					case "sound": {
+						const shipPosition = interpolate(shipId);
+						const { sounds, range } = data.sound;
+						// Calculate a volume multiplier based on the distance from the sound source.
+						const volumeMultiplier =
+							range && shipPosition
+								? Math.max(
+										0,
+										1 -
+											(Math.hypot(
+												range.position.x - shipPosition.x,
+												range.position.y - shipPosition.y,
+												range.position.z - shipPosition.z,
+											) /
+												range.distance) *
+												1.1,
+									)
+								: 1;
 
-					if (volumeMultiplier <= 0) return;
+						if (volumeMultiplier <= 0) return;
 
-					sounds.forEach((sound) => {
-						playSound({
-							...sound,
-							type: "soundEffect",
-							id: data.sound.id,
-							volume: [
-								sound.volume[0] * volumeMultiplier,
-								sound.volume[1] * volumeMultiplier,
-							],
+						sounds.forEach((sound) => {
+							playSound({
+								...sound,
+								type: "soundEffect",
+								id: data.sound.id,
+								volume: [
+									sound.volume[0] * volumeMultiplier,
+									sound.volume[1] * volumeMultiplier,
+								],
+							});
 						});
-					});
 
-					break;
+						break;
+					}
+					case "cancelLooping":
+						stopLooping(data.soundId);
+						break;
+					case "stop":
+						removeSound(data.soundId);
+						break;
+					case "stopAll":
+						removeAllSounds();
+						break;
 				}
-				case "cancelLooping":
-					stopLooping(data.soundId);
-					break;
-				case "stop":
-					removeSound(data.soundId);
-					break;
-				case "stopAll":
-					removeAllSounds();
-					break;
-			}
+			},
 		},
-	});
+	);
 
 	return null;
 }

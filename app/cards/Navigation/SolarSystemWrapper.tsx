@@ -20,8 +20,10 @@ import { WaypointEntity } from "@thorium/components/Starmap/WaypointEntity";
 import { q } from "@thorium/context/AppContext";
 import { keepPreviousData } from "@tanstack/react-query";
 import { setCursor } from "@thorium/utils/setCursor";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function SolarSystemWrapper() {
+	const { shipId } = useStation();
 	const useStarmapStore = useGetStarmapStore();
 	const currentSystem = useStarmapStore((store) => store.currentSystem);
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -38,8 +40,9 @@ export function SolarSystemWrapper() {
 	const [starmapEntities] = q.starmapCore.entities.useNetRequest({
 		systemId: currentSystem,
 	});
-	const [ship] = q.navigation.ship.useNetRequest();
+	const [ship] = q.navigation.ship.useNetRequest({ shipId });
 	const [waypoints] = q.waypoints.all.useNetRequest({
+		shipId,
 		systemId: currentSystem,
 	});
 
@@ -62,7 +65,6 @@ export function SolarSystemWrapper() {
 					);
 					return (
 						<OrbitContainer key={entity.id} {...entity.components.satellite}>
-							{/* biome-ignore lint/a11y/useKeyWithClickEvents: */}
 							<group
 								scale={[size, size, size]}
 								onPointerOver={(e) => {
@@ -185,7 +187,6 @@ function PlanetRenderer({
 			</group>
 			<group position={position}>
 				<Suspense fallback={null}>
-					{/* biome-ignore lint/a11y/useKeyWithClickEvents: */}
 					<group
 						scale={[planetSpriteScale, planetSpriteScale, planetSpriteScale]}
 						onPointerOver={(e) => {

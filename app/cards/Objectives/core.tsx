@@ -1,4 +1,5 @@
 import { q } from "@thorium/context/AppContext";
+import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import Checkbox from "@thorium/ui/Checkbox";
 import Input from "@thorium/ui/Input";
@@ -6,7 +7,9 @@ import Select from "@thorium/ui/Select";
 import { useState } from "react";
 
 export function ObjectivesCore() {
-	const [objectives] = q.objectives.get.useNetRequest({});
+	const { shipId } = useStation();
+
+	const [objectives] = q.objectives.get.useNetRequest({ shipId });
 	const [adding, setAdding] = useState(false);
 	return (
 		<div className="flex flex-col gap-1 h-full">
@@ -62,7 +65,7 @@ export function ObjectivesCore() {
 						const description = form.description.value;
 						const priority = Number(form.priority.value) || 1;
 
-						q.objectives.add.netSend({ title, description, priority });
+						q.objectives.add.netSend({ shipId, title, description, priority });
 						e.currentTarget.reset();
 						setAdding(false);
 					}}

@@ -11,17 +11,34 @@ import { Joystick, LinearJoystick } from "@thorium/ui/Joystick";
 import type { ReactNode } from "react";
 import type { Coordinates } from "@thorium/utils/unitTypes";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { useGamepadPress } from "@thorium/hooks/useGamepadStore";
 import { CircleGridContacts, CircleGridWaypoints } from "./PilotContacts";
 import type { CardProps } from "@thorium/cards/CardProps";
+import { useStation } from "@thorium/routes/station/useStation";
 
-async function rotation({ x, y, z }: Partial<Coordinates<number>>) {
-	await q.pilot.thrusters.setRotationDelta.netSend({ rotation: { x, y, z } });
+async function rotation({
+	shipId,
+	x,
+	y,
+	z,
+}: { shipId: number } & Partial<Coordinates<number>>) {
+	await q.pilot.thrusters.setRotationDelta.netSend({
+		shipId,
+		rotation: { x, y, z },
+	});
 }
-async function direction({ x, y, z }: Partial<Coordinates<number>>) {
-	await q.pilot.thrusters.setDirection.netSend({ direction: { x, y, z } });
+async function direction({
+	shipId,
+	x,
+	y,
+	z,
+}: { shipId: number } & Partial<Coordinates<number>>) {
+	await q.pilot.thrusters.setDirection.netSend({
+		shipId,
+		direction: { x, y, z },
+	});
 }
 
 function UntouchableLabel({
@@ -39,8 +56,11 @@ function UntouchableLabel({
 }
 
 export function Pilot({ cardLoaded }: CardProps) {
-	q.pilot.stream.useDataStream({ systemId: null });
-	const [targetedContact] = q.targeting.targetedContact.useNetRequest();
+	const { shipId } = useStation();
+	q.pilot.stream.useDataStream({ systemId: null, shipId });
+	const [targetedContact] = q.targeting.targetedContact.useNetRequest({
+		shipId,
+	});
 
 	return (
 		<CircleGridStoreProvider>
@@ -51,7 +71,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 						<div className="flex items-stretch gap-4 ">
 							<LinearJoystick
 								className="h-auto"
-								onDrag={({ y }) => direction({ z: -y })}
+								onDrag={({ y }) => direction({ shipId, z: -y })}
 								vertical
 								gamepadKey="z-thrusters"
 							>
@@ -60,7 +80,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 							</LinearJoystick>
 							<Joystick
 								className="w-[calc(100%-2.5rem)] h-[calc(100%-2.5rem)]"
-								onDrag={({ x, y }) => direction({ y: -y, x: -x })}
+								onDrag={({ x, y }) => direction({ shipId, y: -y, x: -x })}
 								gamepadKeys={{ x: "x-thrusters", y: "y-thrusters" }}
 							>
 								<UntouchableLabel className="bottom-1">Down</UntouchableLabel>
@@ -92,7 +112,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 					</div>
 					<div className="flex-1" />
 					<Joystick
-						onDrag={({ x, y }) => rotation({ z: x, x: y })}
+						onDrag={({ x, y }) => rotation({ shipId, z: x, x: y })}
 						gamepadKeys={{ x: "roll", y: "pitch" }}
 					>
 						<UntouchableLabel className="bottom-1">Pitch Down</UntouchableLabel>
@@ -103,7 +123,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 						<UntouchableLabel className="left-1">Port Roll</UntouchableLabel>
 					</Joystick>
 					<LinearJoystick
-						onDrag={({ x }) => rotation({ y: -x })}
+						onDrag={({ x }) => rotation({ shipId, y: -x })}
 						gamepadKey="yaw"
 					>
 						<UntouchableLabel className="left-1">Port Yaw</UntouchableLabel>
@@ -155,11 +175,14 @@ function getInterstellarDistance(
 }
 
 const LockOnButton = () => {
+	const { shipId } = useStation();
 	const store = useCircleGridStore();
 	const waypoint = store((store) => store.facingWaypoints?.[0]);
-	const [autopilot] = q.pilot.autopilot.get.useNetRequest();
+	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
 	const distanceRef = useRef<HTMLSpanElement>(null);
-	const [{ id, currentSystem, systemPosition }] = q.ship.player.useNetRequest();
+	const [{ id, currentSystem, systemPosition }] = q.ship.player.useNetRequest({
+		clientId,
+	});
 	const { interpolate } = useLiveQuery();
 
 	useAnimationFrame(() => {
@@ -179,18 +202,18 @@ const LockOnButton = () => {
 	useGamepadPress("autopilot-lock-on", {
 		onDown: () => {
 			if (autopilot.locked) {
-				q.pilot.autopilot.unlockCourse.netSend();
+				q.pilot.autopilot.unlockCourse.netSend({ shipId });
 			} else if (typeof waypoint === "number") {
-				q.pilot.autopilot.lockCourse.netSend({ waypointId: waypoint });
+				q.pilot.autopilot.lockCourse.netSend({ shipId, waypointId: waypoint });
 			}
 		},
 	});
 	useGamepadPress("autopilot-activate", {
 		onDown: () => {
 			if (!autopilot.forwardAutopilot) {
-				q.pilot.autopilot.activate.netSend();
+				q.pilot.autopilot.activate.netSend({ shipId });
 			} else if (typeof waypoint === "number") {
-				q.pilot.autopilot.deactivate.netSend();
+				q.pilot.autopilot.deactivate.netSend({ shipId });
 			}
 		},
 	});
@@ -215,7 +238,7 @@ const LockOnButton = () => {
 			{autopilot.locked ? (
 				<Button
 					className="w-full btn-error"
-					onClick={() => q.pilot.autopilot.unlockCourse.netSend()}
+					onClick={() => q.pilot.autopilot.unlockCourse.netSend({ shipId })}
 				>
 					Unlock Course
 				</Button>
@@ -224,7 +247,10 @@ const LockOnButton = () => {
 					className="w-full btn-warning"
 					disabled={typeof waypoint !== "number"}
 					onClick={() =>
-						q.pilot.autopilot.lockCourse.netSend({ waypointId: waypoint })
+						q.pilot.autopilot.lockCourse.netSend({
+							waypointId: waypoint,
+							shipId,
+						})
 					}
 				>
 					Lock On Course
@@ -234,7 +260,7 @@ const LockOnButton = () => {
 				<Button
 					className="w-full btn-error"
 					disabled={!autopilot.locked}
-					onClick={() => q.pilot.autopilot.activate.netSend()}
+					onClick={() => q.pilot.autopilot.activate.netSend({ shipId })}
 				>
 					Activate Autopilot
 				</Button>
@@ -242,7 +268,7 @@ const LockOnButton = () => {
 				<Button
 					className="w-full btn-error"
 					disabled={!autopilot.locked}
-					onClick={() => q.pilot.autopilot.deactivate.netSend()}
+					onClick={() => q.pilot.autopilot.deactivate.netSend({ shipId })}
 				>
 					Deactivate Autopilot
 				</Button>

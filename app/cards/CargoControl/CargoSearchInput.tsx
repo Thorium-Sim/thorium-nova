@@ -3,8 +3,11 @@ import SearchableInput, {
 	DefaultResultLabel,
 } from "@thorium/ui/SearchableInput";
 import { useShipMapStore } from "./useShipMapStore";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function CargoSearchInput() {
+	const { shipId } = useStation();
+
 	return (
 		<SearchableInput<{
 			id: number;
@@ -20,7 +23,7 @@ export function CargoSearchInput() {
 			placeholder="Search for rooms, cargo, and containers"
 			getOptions={async ({ queryKey, signal }) => {
 				const result = await q.cargoControl.search.netRequest(
-					{ query: queryKey[1] },
+					{ query: queryKey[1], shipId },
 					{ signal },
 				);
 				return result;

@@ -8,7 +8,7 @@ import { CircleGridContacts } from "@thorium/cards/Pilot/PilotContacts";
 import { PilotZoomSlider } from "@thorium/cards/Pilot/PilotZoomSlider";
 import { CircleGridStoreProvider } from "@thorium/cards/Pilot/useCircleGridStore";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { cn } from "@thorium/utils/cn";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
@@ -32,6 +32,7 @@ import {
 } from "react-aria-components";
 import type { z } from "zod";
 import { Icon } from "@thorium/ui/Icon";
+import { useStation } from "@thorium/routes/station/useStation";
 
 /**
  * TODO:
@@ -55,7 +56,10 @@ import { Icon } from "@thorium/ui/Icon";
  *    (prerequisite for systems-based targeting). Systems-based targeting works by adjusting the frequency of the phasers, maybe?
  */
 export function Sensors({ cardLoaded }: CardProps) {
-	const [{ activeRange, passiveRange }] = q.sensors.get.useNetRequest();
+	const { shipId } = useStation();
+	const [{ activeRange, passiveRange }] = q.sensors.get.useNetRequest({
+		shipId,
+	});
 	const [selected, setSelected] = useState<number | null>(null);
 	const [occludedContacts, setOccludedContacts] = useState<number[]>([]);
 	const clickRef = useRef(false);
@@ -132,7 +136,8 @@ export function Sensors({ cardLoaded }: CardProps) {
 }
 
 function Scans({ cardLoaded }: { cardLoaded: boolean }) {
-	const [scans] = q.sensors.scans.useNetRequest();
+	const { shipId } = useStation();
+	const [scans] = q.sensors.scans.useNetRequest({ shipId });
 	if (scans.length === 0) return null;
 	return (
 		<div className="panel panel-alert divide-y divide-white/50 overflow-y-auto max-h-full">
@@ -164,10 +169,15 @@ function Scan({
 	time: string;
 	cardLoaded: boolean;
 }) {
+	const { shipId } = useStation();
+
 	const { interpolate } = useLiveQuery();
 	const textRef = useRef<HTMLDivElement>(null);
 	const progressRef = useRef<HTMLProgressElement>(null);
-	const [results] = q.sensors.scanResult.useNetRequest({ objectId: target });
+	const [results] = q.sensors.scanResult.useNetRequest({
+		objectId: target,
+		shipId,
+	});
 
 	useAnimationFrame(() => {
 		const value = interpolate(id);
@@ -258,10 +268,11 @@ function SensorsShipList({
 	setSelected: (id: number | null) => void;
 	occludedContacts: number[];
 }) {
-	q.sensors.stream.useDataStream({ systemId: null });
+	const { shipId } = useStation();
+
+	q.sensors.stream.useDataStream({ systemId: null, shipId });
 	const useStarmapStore = useGetStarmapStore();
 	const systemId = useStarmapStore((store) => store.currentSystem);
-	const [{ id: playerShipId }] = q.ship.player.useNetRequest();
 
 	const [ships] = q.starmapCore.ships.useNetRequest({ systemId });
 	if (ships.length === 0) {
@@ -276,8 +287,7 @@ function SensorsShipList({
 			}
 		>
 			{ships.map((ship) =>
-				ship.id === playerShipId ||
-				occludedContacts.includes(ship.id) ? null : (
+				ship.id === shipId || occludedContacts.includes(ship.id) ? null : (
 					<SensorsShip {...ship} key={ship.id} />
 				),
 			)}
@@ -286,8 +296,12 @@ function SensorsShipList({
 }
 
 function SensorsShip({ id }: { id: number }) {
-	const [{ passiveRange }] = q.sensors.get.useNetRequest();
-	const [{ id: playerShipId, currentSystem }] = q.ship.player.useNetRequest();
+	const { shipId } = useStation();
+
+	const [{ passiveRange }] = q.sensors.get.useNetRequest({ shipId });
+	const [{ id: playerShipId, currentSystem }] = q.ship.player.useNetRequest({
+		clientId,
+	});
 	const distanceRef = useRef<HTMLSpanElement>(null);
 	const { interpolate } = useLiveQuery();
 	const [inRange, setInRange] = useState(false);
@@ -310,7 +324,10 @@ function SensorsShip({ id }: { id: number }) {
 			}
 		}
 	});
-	const [results] = q.sensors.scanResult.useNetRequest({ objectId: id });
+	const [results] = q.sensors.scanResult.useNetRequest({
+		objectId: id,
+		shipId,
+	});
 
 	return (
 		<Disclosure id={id} className={cn("group", inRange ? "block" : "hidden")}>
@@ -367,7 +384,9 @@ function ResultsWrapper({
 	objectId: number;
 	children: ReactNode;
 }) {
-	const [scans] = q.sensors.scans.useNetRequest();
+	const { shipId } = useStation();
+
+	const [scans] = q.sensors.scans.useNetRequest({ shipId });
 	const isScanning = scans.some(
 		(scan) =>
 			scan.target === objectId && scan.type === scanType && scan.progress < 1,
@@ -384,7 +403,11 @@ function ResultsWrapper({
 					<Button
 						className="btn btn-xs btn-warning"
 						onPress={() =>
-							q.sensors.scanStart.netSend({ type: scanType, target: objectId })
+							q.sensors.scanStart.netSend({
+								shipId,
+								type: scanType,
+								target: objectId,
+							})
 						}
 					>
 						Begin Scan
@@ -397,7 +420,9 @@ function ResultsWrapper({
 }
 
 function IdentificationResults({ objectId }: { objectId: number }) {
-	const [results] = q.sensors.scanResult.useNetRequest({ objectId });
+	const { shipId } = useStation();
+
+	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
 
 	if (!results.identification) return null;
 
@@ -417,7 +442,9 @@ function IdentificationResults({ objectId }: { objectId: number }) {
 	);
 }
 function CargoResults({ objectId }: { objectId: number }) {
-	const [results] = q.sensors.scanResult.useNetRequest({ objectId });
+	const { shipId } = useStation();
+
+	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
 
 	if (!results.cargo) return null;
 	const cargoEntries = Object.entries(results.cargo);
@@ -434,7 +461,9 @@ function CargoResults({ objectId }: { objectId: number }) {
 	);
 }
 function TargetingResults({ objectId }: { objectId: number }) {
-	const [results] = q.sensors.scanResult.useNetRequest({ objectId });
+	const { shipId } = useStation();
+
+	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
 
 	if (!results.targeting) return null;
 
@@ -446,7 +475,9 @@ function TargetingResults({ objectId }: { objectId: number }) {
 	);
 }
 function CrewResults({ objectId }: { objectId: number }) {
-	const [results] = q.sensors.scanResult.useNetRequest({ objectId });
+	const { shipId } = useStation();
+
+	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
 
 	if (!results.crew) return null;
 
@@ -457,7 +488,9 @@ function CrewResults({ objectId }: { objectId: number }) {
 	);
 }
 function WeaponsResults({ objectId }: { objectId: number }) {
-	const [results] = q.sensors.scanResult.useNetRequest({ objectId });
+	const { shipId } = useStation();
+
+	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
 
 	if (!results.weapons) return null;
 
@@ -477,7 +510,9 @@ function WeaponsResults({ objectId }: { objectId: number }) {
 	);
 }
 function DamageResults({ objectId }: { objectId: number }) {
-	const [results] = q.sensors.scanResult.useNetRequest({ objectId });
+	const { shipId } = useStation();
+
+	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
 
 	if (!results.damage) return null;
 	const damageEntries = Object.entries(results.damage);
@@ -495,7 +530,9 @@ function DamageResults({ objectId }: { objectId: number }) {
 	);
 }
 function ShieldsResults({ objectId }: { objectId: number }) {
-	const [results] = q.sensors.scanResult.useNetRequest({ objectId });
+	const { shipId } = useStation();
+
+	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
 
 	if (!results.shields) return null;
 

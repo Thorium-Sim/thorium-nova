@@ -1,6 +1,6 @@
 import { Outlet } from "react-router";
 import { useNavigate, useMatch, Link } from "react-router";
-import { q } from "@thorium/context/AppContext";
+import { q, clientId } from "@thorium/context/AppContext";
 import Modal from "@thorium/ui/Modal";
 import { capitalCase } from "change-case";
 import Button from "@thorium/ui/Button";
@@ -11,7 +11,7 @@ import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerat
 
 export default function FlightQuickStart() {
 	const [flight] = q.flight.active.useNetRequest();
-	const [client] = q.client.get.useNetRequest();
+	const [client] = q.client.get.useNetRequest({ clientId });
 	const flightStart = q.flight.start.useNetSend();
 
 	const [state] = useFlightQuickStart();

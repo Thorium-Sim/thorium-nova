@@ -131,7 +131,7 @@ class MockFlightDataModel {
 	}
 }
 class MockDataContext {
-	id = "test" as const;
+	clientId = "test" as const;
 	database: { server: ServerDataModel; flight: FlightDataModel | null } = {
 		server: new MockServerDataModel() as any as ServerDataModel,
 		flight: null,
@@ -150,23 +150,32 @@ class MockDataContext {
 	set flight(flight: FlightDataModel | null) {
 		this.database.flight = flight;
 	}
+	get ecs() {
+		return this.database.flight!.ecs;
+	}
 	get server() {
 		return this.database.server;
 	}
-	get client() {
-		return this.server.clients[this.id];
+	getPlayerShip(clientId: string) {
+		return this.flight?.playerShips.find(
+			(s) => s.id === this.getFlightClient(clientId)?.shipId,
+		);
 	}
-	get flightClient() {
-		return this.findFlightClient(this.id);
+	getClient(clientId: string) {
+		return this.database.server.clients[clientId];
 	}
-	findFlightClient(clientId: string) {
-		return this.flight?.clients[clientId] || null;
+	getIsHost(clientId: string) {
+		return this.getClient(clientId).isHost;
 	}
-	get ship() {
-		return this.flight?.playerShips[0];
-	}
-	get isHost() {
-		return true;
+	getFlightClient(clientId: string) {
+		if (!this.database.flight) return null;
+		if (!this.database.flight.clients[clientId]) {
+			this.database.flight.clients[clientId] = new FlightClient({
+				id: clientId,
+				flightId: this.database.flight.name,
+			});
+		}
+		return this.database.flight.clients[clientId];
 	}
 }
 

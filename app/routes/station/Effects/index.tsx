@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import uuid from "@thorium/utils/uniqid";
 import Spark from "./spark";
 import "./effects.css";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useNavigate } from "react-router";
 import type { EffectPayload } from "@thorium/utils/flags/effects";
 import { useAmbiance } from "@thorium/utils/sounds/Ambiance/useAmbiance";
@@ -115,7 +115,7 @@ const Effects = () => {
 		[doFlash, doSpark],
 	);
 
-	q.effects.sub.useNetRequest(undefined, { callback: doEffect });
+	q.effects.sub.useNetRequest({ clientId }, { callback: doEffect });
 
 	return (
 		<div className={`actionsContainer ${flash ? "flash" : ""}`}>

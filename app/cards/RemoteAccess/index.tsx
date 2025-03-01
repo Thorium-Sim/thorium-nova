@@ -1,4 +1,5 @@
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
+import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import Input from "@thorium/ui/Input";
 import { useEffect, useState } from "react";
@@ -21,7 +22,10 @@ export function RemoteAccess() {
 			onSubmit={(e) => {
 				e.preventDefault();
 				setIsSent(true);
-				q.remoteAccess.send.netSend({ code: e.currentTarget.code.value });
+				q.remoteAccess.send.netSend({
+					clientId,
+					code: e.currentTarget.code.value,
+				});
 				e.currentTarget.code.value = "";
 			}}
 		>

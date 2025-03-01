@@ -3,9 +3,12 @@ import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { useShipMapStore } from "./useShipMapStore";
 import { Icon } from "@thorium/ui/Icon";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function CargoContainerList() {
-	const [cargoContainers] = q.cargoControl.containers.useNetRequest();
+	const { shipId } = useStation();
+
+	const [cargoContainers] = q.cargoControl.containers.useNetRequest({ shipId });
 
 	return (
 		<div className="flex flex-col h-full gap-4 justify-center row-span-2 cursor-pointer">
@@ -25,7 +28,9 @@ function CargoContainer({
 		entityState: "idle" | "enRoute";
 	};
 }) {
-	const [cargoRooms] = q.cargoControl.rooms.useNetRequest();
+	const { shipId } = useStation();
+
+	const [cargoRooms] = q.cargoControl.rooms.useNetRequest({ shipId });
 	const { rooms } = cargoRooms;
 
 	const selectedRoomId = useShipMapStore((state) => state.selectedRoomId);

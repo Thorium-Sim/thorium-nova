@@ -1,4 +1,4 @@
-import { q } from "@thorium/context/AppContext";
+import { q, clientId } from "@thorium/context/AppContext";
 import Menubar from "@thorium/ui/Menubar";
 import { WaitingForFlight } from "./WaitingForFlight";
 import { staticStations } from "./staticStations";
@@ -67,13 +67,13 @@ function PlayerStationItem({
 
 	return (
 		<>
-			{/* biome-ignore lint/a11y/useKeyWithClickEvents: */}
 			<li
 				className="list-group-item"
 				key={station.name}
 				onClick={async () => {
 					try {
 						await q.client.setStation.netSend({
+							clientId,
 							shipId: shipId,
 							stationId: station.name,
 						});

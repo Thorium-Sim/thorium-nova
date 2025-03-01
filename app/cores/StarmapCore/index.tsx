@@ -46,6 +46,7 @@ import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
 import { Disclosure, Transition } from "@headlessui/react";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { usePrompt } from "@thorium/ui/AlertDialog";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function StarmapCore() {
 	const ref = useRef<HTMLDivElement>(null);
@@ -851,6 +852,7 @@ export function InterstellarWrapper() {
 }
 
 export function SolarSystemWrapper() {
+	const { shipId } = useStation();
 	const useStarmapStore = useGetStarmapStore();
 	const currentSystem = useStarmapStore((store) => store.currentSystem);
 
@@ -869,10 +871,8 @@ export function SolarSystemWrapper() {
 	});
 
 	const [waypoints] = q.waypoints.all.useNetRequest({
+		shipId,
 		systemId: "all",
-	});
-	const [debugSpheres] = q.starmapCore.debugSpheres.useNetRequest({
-		systemId: currentSystem,
 	});
 
 	const selectedObjectIds = useStarmapStore((store) => store.selectedObjectIds);
@@ -992,30 +992,7 @@ export function SolarSystemWrapper() {
 				</Suspense>
 			))}
 
-			<FiringPhasers />
-			{/* {debugSpheres.map(sphere => (
-        <DebugSphere key={sphere.id} id={sphere.id} />
-      ))} */}
+			<FiringPhasers systemId={currentSystem} />
 		</SolarSystemMap>
-	);
-}
-
-function DebugSphere({ id }: { id: number }) {
-	const { interpolate } = useLiveQuery();
-	const sphere = useRef<Mesh>(null);
-	useFrame(({ camera }) => {
-		const position = interpolate(id);
-		if (position && sphere.current) {
-			sphere.current?.position.set(position.x, position.y, position.z);
-			const zoom = camera.position.distanceTo(sphere.current.position) + 500;
-			const zoomedScale = (zoom / 2) * 0.01;
-			sphere.current.scale.set(zoomedScale, zoomedScale, zoomedScale);
-		}
-	});
-	return (
-		<mesh ref={sphere} scale={[1000, 1000, 1000]}>
-			<sphereGeometry args={[1, 32, 32]} />
-			<meshBasicMaterial color="red" />
-		</mesh>
 	);
 }

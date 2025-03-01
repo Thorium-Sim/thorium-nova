@@ -9,16 +9,17 @@ import { z } from "zod";
 export const systemsMonitor = t.router({
 	reactors: t.router({
 		get: t.procedure
-			.filter((publish: { shipId: number }, { ctx }) => {
-				if (publish && publish.shipId !== ctx.ship?.id) return false;
+			.input(z.object({ shipId: z.number() }))
+			.filter((publish: { shipId: number }, { ctx, input }) => {
+				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
-			.request(({ ctx }) => {
+			.request(({ ctx, input: { shipId } }) => {
 				if (!ctx.flight) return [];
 
 				const reactors = getShipSystems(ctx.flight.ecs, {
 					systemType: "reactor",
-					shipId: ctx.ship!.id,
+					shipId,
 				});
 				return reactors.map((r) => {
 					const inventory = getReactorInventory(r);
@@ -50,37 +51,40 @@ export const systemsMonitor = t.router({
 					};
 				});
 			}),
-		ambiance: t.procedure.request(({ ctx }) => {
-			if (!ctx.flight) return [];
+		ambiance: t.procedure
+			.input(z.object({ shipId: z.number() }))
+			.request(({ ctx, input }) => {
+				if (!ctx.flight) return [];
 
-			const reactors = getShipSystems(ctx.flight.ecs, {
-				systemType: "reactor",
-				shipId: ctx.ship!.id,
-			});
+				const reactors = getShipSystems(ctx.flight.ecs, {
+					systemType: "reactor",
+					shipId: input.shipId,
+				});
 
-			return reactors.map((r) => ({
-				id: r.id,
-				// Reactor volume is based on the ratio of the current output to the max output
-				volumePercent:
-					r.components.isReactor!.currentOutput /
-					r.components.isReactor!.maxOutput,
-				playbackRate: 1,
-				ambiance: r.components.soundEffects?.soundBank.ambiance,
-			}));
-		}),
+				return reactors.map((r) => ({
+					id: r.id,
+					// Reactor volume is based on the ratio of the current output to the max output
+					volumePercent:
+						r.components.isReactor!.currentOutput /
+						r.components.isReactor!.maxOutput,
+					playbackRate: 1,
+					ambiance: r.components.soundEffects?.soundBank.ambiance,
+				}));
+			}),
 	}),
 	batteries: t.router({
 		get: t.procedure
-			.filter((publish: { shipId: number }, { ctx }) => {
-				if (publish && publish.shipId !== ctx.ship?.id) return false;
+			.input(z.object({ shipId: z.number() }))
+			.filter((publish: { shipId: number }, { ctx, input }) => {
+				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
-			.request(({ ctx }) => {
+			.request(({ ctx, input }) => {
 				if (!ctx.flight) return [];
 
 				const batteries = getShipSystems(ctx.flight.ecs, {
 					systemType: "battery",
-					shipId: ctx.ship!.id,
+					shipId: input.shipId,
 				});
 				return batteries.map((b) => ({
 					id: b.id,
@@ -99,13 +103,15 @@ export const systemsMonitor = t.router({
 
 	systems: t.router({
 		get: t.procedure
-			.filter((publish: { shipId: number }, { ctx }) => {
-				if (publish && publish.shipId !== ctx.ship?.id) return false;
+			.input(z.object({ shipId: z.number() }))
+			.filter((publish: { shipId: number }, { ctx, input }) => {
+				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
-			.request(({ ctx }) => {
+			.request(({ ctx, input }) => {
 				const systems = [];
-				for (const systemId of ctx.ship?.components.shipSystems?.shipSystems.keys() ||
+				const ship = ctx.ecs.getEntityById(input.shipId);
+				for (const systemId of ship?.components.shipSystems?.shipSystems.keys() ||
 					[]) {
 					const system = ctx.flight?.ecs.getEntityById(systemId);
 					if (!system?.components.isShipSystem) continue;
@@ -250,13 +256,15 @@ export const systemsMonitor = t.router({
 				}
 			}),
 	}),
-	stream: t.procedure.dataStream(({ ctx, entity }) => {
-		if (!entity) return false;
-		return Boolean(
-			ctx.ship?.components.shipSystems?.shipSystems.has(entity.id) &&
-				(entity.components.power ||
-					entity.components.isBattery ||
-					entity.components.isReactor),
-		);
-	}),
+	stream: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.dataStream(({ input, entity }) => {
+			if (!entity) return false;
+			return Boolean(
+				entity.components.isShipSystem?.shipId === input.shipId &&
+					(entity.components.power ||
+						entity.components.isBattery ||
+						entity.components.isReactor),
+			);
+		}),
 });

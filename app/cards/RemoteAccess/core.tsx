@@ -1,7 +1,10 @@
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 
 export function RemoteAccessCore() {
-	const [codes] = q.remoteAccess.codes.useNetRequest();
+	const [client] = q.client.get.useNetRequest({ clientId });
+	const [codes] = q.remoteAccess.codes.useNetRequest({
+		shipId: client.shipId || -1,
+	});
 	return (
 		<div className="flex flex-col gap-1 p-2">
 			{codes.map((code) => (

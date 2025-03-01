@@ -2,11 +2,11 @@ import * as React from "react";
 import Button from "@thorium/ui/Button";
 import { toast } from "@thorium/context/ToastContext";
 import { fromDate } from "dot-beat-time";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 
 export default function OfficersLog() {
-	const [client] = q.client.get.useNetRequest();
-	const [officersLog] = q.officersLog.get.useNetRequest();
+	const [client] = q.client.get.useNetRequest({ clientId });
+	const [officersLog] = q.officersLog.get.useNetRequest({ clientId });
 
 	const [stardate, setStardate] = React.useState(new Date());
 	const [logEntry, setLogEntry] = React.useState<string>("");
@@ -85,6 +85,7 @@ export default function OfficersLog() {
 							return;
 						}
 						await q.officersLog.add.netSend({
+							clientId,
 							message: logEntry,
 							timestamp: stardate.getTime(),
 						});

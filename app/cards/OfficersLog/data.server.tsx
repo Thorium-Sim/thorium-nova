@@ -4,23 +4,30 @@ import { z } from "zod";
 
 export const officersLog = t.router({
 	get: t.procedure
-		.filter((publish: { clientId: string }, { ctx }) => {
-			if (publish && ctx.id !== publish.clientId) return false;
+		.input(z.object({ clientId: z.string() }))
+		.filter((publish: { clientId: string }, { input }) => {
+			if (publish && input.clientId !== publish.clientId) return false;
 			return true;
 		})
-		.request(({ ctx }) => {
-			return ctx.flightClient?.officersLog || [];
+		.request(({ ctx, input }) => {
+			return ctx.getFlightClient(input.clientId)?.officersLog || [];
 		}),
 	add: t.procedure
-		.input(z.object({ message: z.string(), timestamp: z.number() }))
+		.input(
+			z.object({
+				clientId: z.string(),
+				message: z.string(),
+				timestamp: z.number(),
+			}),
+		)
 		.send(({ ctx, input }) => {
 			const { message, timestamp = Date.now() } = input;
 
-			ctx.flightClient?.officersLog.push({
+			ctx.getFlightClient(input.clientId)?.officersLog.push({
 				message,
 				timestamp,
 			});
 
-			pubsub.publish.officersLog.get({ clientId: ctx.id });
+			pubsub.publish.officersLog.get({ clientId: input.clientId });
 		}),
 });

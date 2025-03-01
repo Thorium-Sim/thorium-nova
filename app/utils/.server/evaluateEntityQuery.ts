@@ -494,8 +494,6 @@ export async function triggerSend(path: string, input: any, ctx?: DataContext) {
 			processTriggers(ecs, {
 				event: opts.path,
 				values: {
-					shipId: ctx.ship?.id,
-					clientId: ctx.client.id,
 					...(opts.rawInput as any),
 				},
 			});

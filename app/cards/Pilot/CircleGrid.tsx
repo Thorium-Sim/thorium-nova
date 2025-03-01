@@ -31,7 +31,7 @@ import {
 	LiveQueryContext,
 	useLiveQuery,
 } from "@thorium/utils/live-query/client/liveQueryContext";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useGamepadPress } from "@thorium/hooks/useGamepadStore";
 import Button from "@thorium/ui/Button";
 import { useShallow } from "zustand/shallow";
@@ -42,6 +42,7 @@ import {
 	LineSegmentsGeometry,
 } from "three-stdlib";
 import { radToDeg } from "three/src/math/MathUtils.js";
+import { StationContext } from "@thorium/routes/station/useStation";
 
 const CameraEffects = () => {
 	const store = useCircleGridStore();
@@ -87,7 +88,7 @@ export function CircleGrid({
 		},
 	});
 
-	const [{ id, currentSystem }] = q.ship.player.useNetRequest();
+	const [{ id, currentSystem }] = q.ship.player.useNetRequest({ clientId });
 
 	useEffect(() => {
 		useStarmapStore.getState().setCurrentSystem(currentSystem);
@@ -331,6 +332,7 @@ export function GridCanvas({
 
 	const ContextBridge = useContextBridge(
 		LiveQueryContext,
+		StationContext,
 		CircleGirdStoreContext,
 		UNSAFE_LocationContext,
 		UNSAFE_NavigationContext,

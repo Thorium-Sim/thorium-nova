@@ -1,12 +1,12 @@
 import { ClientButton } from "@thorium/components/ClientButton";
-import { q } from "@thorium/context/AppContext";
+import { q, clientId } from "@thorium/context/AppContext";
 import { IPAddress } from "@thorium/routes/landing/IPAddress";
 import { cn } from "@thorium/utils/cn";
 import { Link } from "react-router";
 
 export function LobbyHeader() {
 	const [flight] = q.flight.active.useNetRequest();
-	const [client] = q.client.get.useNetRequest();
+	const [client] = q.client.get.useNetRequest({ clientId });
 	return (
 		<div className="flex justify-between">
 			<div>

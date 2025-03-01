@@ -22,8 +22,10 @@ const axis = new Vector3();
 const direction = new Vector3();
 const quaternion = new Quaternion();
 
-export function FiringPhasers() {
-	const [firingPhasers] = q.targeting.phasers.firing.useNetRequest();
+export function FiringPhasers({ systemId }: { systemId: number }) {
+	const [firingPhasers] = q.targeting.phasers.firing.useNetRequest({
+		systemId,
+	});
 
 	return firingPhasers.map((phaser) => (
 		<PhaserDisplay

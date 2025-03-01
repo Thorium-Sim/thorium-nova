@@ -2,34 +2,17 @@
 
 ## Folder Structure
 
-Thorium Nova has five main folders for storing code. It uses NPM workspaces to
-manage dependencies and run tasks in each of the folders. Check the README files
-in each of these folders for more information about how they are set up
-individually.
-
-- **client** - Most of the code that is used for rendering the React frontend.
-- **server** - The HTTP and game server code written in Node.js.
-- **electron** - The code that runs the Electron app shell. This shell provides
+- **app** - The code that is used for rendering the React frontend. This includes server code that is run in the Bun runtime. Any code that should only run on the server should use the `.server.ts(x)` extension or be in a `.server` folder. Any other code is intended to be used in both the client and the server.
+- **src-tauri** - The code that runs the Tauri app shell, written in Rust. This shell provides
   a link between the client app and the user's underlying system. It also
   launches the HTTP server.
-- **shared** - Any generic code that is shared between the client and the
-  server. Any code in here can be imported from the other workspaces by using
-  `import x from "@thorium/x"`, with x being the name of the folder.
-- **cards** - Code for cards (see below). This includes the React components
-  that are rendered by the client and the data fetching functions which are
-  executed on the server.
+- **data** - Flights and plugins used during development. The `Thorium Default` plugin is its own git repository which is used as the template for the compiled version of Thorium Nova.
 
 ## Conventions
 
 - To make it easier to find the right input, input names should always start
   with a noun, like "phasersFire", not a verb, like "firePhasers". When sorted
   alphabetically, this groups inputs together by the thing they mutate.
-- Any unique ID should have a prefix unique to the thing that it is assigned to.
-  For example, `sh-4asj5n2` for ships, `sol-ln5izonl` for solar systems,
-  `sys-nsiune2` for ship systems (or maybe ship systems have more specific
-  prefixes, like `pha-` for phasers and `wrp-` for warp engines), etc. This even
-  applies to entities. This helps to recognize what a thing is just based on the
-  ID, which is crucial when every entity lives in the same bucket.
 
 ## Tooling
 
@@ -59,7 +42,7 @@ code.
 ### Database
 
 Thorium Nova uses a filesystem-based database, where the data for each saved
-flight is stored in its own JSON encoded file. When changes are made to the
+flight or plugin object is stored in its own JSON encoded file. When changes are made to the
 datastore variable created with the `db-fs` package, it automatically knows to
 persist the changes to the filesystem database. It uses a throttle to limit the
 number of filesystem writes to once every 30 seconds max.
@@ -75,7 +58,7 @@ component assigns a name and description to entities, while the `isShip`
 component identifies an entity as a ship.
 
 Systems are classes that define the behavior of entities that have certain
-components. For example, the "VelocityPosition" system only operates on entities
+components. For example, a "VelocityPosition" system only operates on entities
 that have the `velocity` and `position` components, and changes the `position`
 based on the `velocity`.
 
@@ -93,11 +76,7 @@ using HTTP and WebSockets.
 
 A Flight is a single instance of a game, usually coupled with a specific crew
 and flight director. The flight runs the ECS world, encapsulates the game state
-for the flight, and executes any systems in the simulation. Flights also contain
-a list of all of the game inputs which happened during the flight, along with
-the timestamp and game tick in which they happened. This should make it possible
-to replay events of the flight, or rewind a certain amount of time by replaying
-events
+for the flight, and executes any systems in the simulation. 
 
 When a flight is started or loaded from a save file, it starts up the HTTP
 server, which allows other clients to connect and start playing. A single server
@@ -115,7 +94,7 @@ controls for their role on the ship. Stations might include Flight Control,
 Weapons, Communications, or Sensors, although stations can be infinitely
 configured to support as many or few crew members as is necessary. Stations are
 designed such that two players can be assigned to the same station, which gives
-both of them the same controls on their client.
+both of them the same controls on each of their clients.
 
 ### Cards & Cores
 
@@ -130,11 +109,6 @@ A core is the Flight Directors control for a specific piece of the simulation.
 Cores operate similarly to cards - flight directors can easily change between
 them as needed and use them to control the flight.
 
-Thorium Nova uses state snapshots for sending data from the server to the
-client. Since the server already knows what station and cards are assigned to
-any given client, it is automatically able to send the correct state to each
-client based on the data needs of the cards that client is displaying.
-
 Each card or core is a React component. It also defines the server data which
 that component uses. The component is responsible for rendering whatever it
 needs, using the `useNetRequest` hook to request data and `netSend` to fire off
@@ -147,8 +121,9 @@ Inputs are sent over WebSockets. Inputs are defined separately from cards (since
 many cards may use the same input). They are defined as a map of functions, with
 the key being the name of the input. When a client needs to update server data,
 it sends a message to the server with the name of the input and any appropriate
-parameters. If the client is associated with a ship and station, those are
-included as context. The server will call the function for that input, which is
+parameters. The client also includes their clientId or shipId as part of the parameters to better isolate the data cached on the client.
+
+The server will call the function for that input, which is
 able to perform whatever mutations it needs and, optionally, return data back to
 the client. This return data could be useful for automatically selecting an item
 in a list after it has been created.
@@ -161,8 +136,7 @@ message. The error is returned to the client as `{error:string}`.
 
 High-frequency data includes anything that needs to update very quickly. This
 includes ship position and rotation in space and the position of crew members
-inside the ship. High-frequency data is sent over WebRTC, unless it isn't
-available and it falls back to WebSockets.
+inside the ship.
 
 Cards can define their high-frequency needs by exporting a function which is
 called every game loop. It receives the list of entities and filters that list
@@ -171,7 +145,7 @@ within sensor range of the player's ship. The server uses that list to know what
 entities to send to each client each frame. The client is then responsible for
 doing whatever it needs with that list.
 
-Each ECS component exports a schema which can be used to compress that entity to
+The `dataStreamEntity.ts` file defines what data each type of entity sends to the client. This data is compressed to
 save on bandwidth. Client-side, any numerical data, like positions and
 rotations, can be interpolated to keep animations running smooth.
 
@@ -186,34 +160,16 @@ larger low-frequency messages are sent less often. Instead of being sent every
 game frame, low-frequency data is published in response to an input or
 periodically by an infrequent update triggered by an ECS System.
 
-Low-frequency data is sent over WebSockets. Cards define which publishes they
-will subscribe to by including a file called "subscriptions.ts". This file
-exports a map where the keys are subscription names. The value is a function
-which is called with the data context and optionally any publish parameters.The
-function can optionally throw `null` based on the publish parameters to let the
-subscription handler know whether it should send the data to the client or not.
+Low-frequency data is sent over WebSockets. Clients automatically subscribe to data when they call `useNetRequest`.Any time data changes, it should call `pubsub.publish` for all of the appropriate queries that were affected. Each query procedure can define a `publish` function which determines send the data to the client or not for a given publish call.
 
 For example, a client might not care to receive updates about another player's
 ship. The first part of the subscription handler checks to see if the publish
-params includes the ID of the clients ship. If it does not, the subscription
-handler throws `null` and that client doesn't get that update. Otherwise, the
-subscription handler collect additional data deterministically from the
-database. Whatever the subscription handler ends up being sent back to the
-client.
+params includes the ID of the clients ship. If it does not, the publish function returns `false` and that client doesn't get that update.
 
-This means that the data collection process can't depend on publish parameters,
+This means that the data collection process shouldn't depend on publish parameters,
 since those don't exist when the client first connects and fetches initial data.
 If someone tries to do this, it should become apparent that it doesn't work by
 errors which are thrown when the client first connects.
-
-The benefit of this approach is the data fetching for a card is collocated with
-the card itself. The extra "data.ts" file makes it friendly with server
-auto-restart without making the server restart every time any card file is
-changed.
-
-This certainly could be improved, but at the same time both the filter and the
-fetch functions depend on specific context for each client. If there is any
-performance hits, this is a place that could be looked at.
 
 #### Theming and Styling
 

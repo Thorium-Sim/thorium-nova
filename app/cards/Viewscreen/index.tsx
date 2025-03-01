@@ -1,4 +1,4 @@
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useFrame } from "@react-three/fiber";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import Nebula from "@thorium/components/Starmap/Nebula";
@@ -13,12 +13,13 @@ import { Quaternion } from "three";
 import { Fuzz } from "./Fuzz";
 import { WarpStars } from "./WarpStars";
 import { CircleGridStoreProvider } from "@thorium/cards/Pilot/useCircleGridStore";
+import { useStation } from "@thorium/routes/station/useStation";
 
 const forwardQuaternion = new Quaternion(0, 1, 0, 0);
 
 function ViewscreenEffects({ onDone }: { onDone: () => void }) {
-	const [viewscreenSystem] = q.viewscreen.system.useNetRequest();
-	const [player] = q.ship.player.useNetRequest();
+	const [viewscreenSystem] = q.viewscreen.system.useNetRequest({ clientId });
+	const [player] = q.ship.player.useNetRequest({ clientId });
 	const { interpolate } = useLiveQuery();
 
 	const useStarmapStore = useGetStarmapStore();
@@ -55,7 +56,8 @@ export function Viewscreen() {
 	const useStarmapStore = useGetStarmapStore();
 	const currentSystem = useStarmapStore((store) => store.currentSystem);
 	const [initialized, setInitialized] = useState(false);
-	q.viewscreen.stream.useDataStream();
+	const { shipId } = useStation();
+	q.viewscreen.stream.useDataStream({ shipId });
 
 	return (
 		<div className="w-full h-full flex items-center justify-center text-white text-6xl">

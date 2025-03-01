@@ -19,24 +19,26 @@ type SoundPayload =
 
 export const effects = t.router({
 	sub: t.procedure
-		.filter((payload: EffectPayload | null, { ctx }) => {
+		.input(z.object({ clientId: z.string() }))
+		.filter((payload: EffectPayload | null, { ctx, input: { clientId } }) => {
 			if (!payload) return true;
 
-			if (payload.clientId !== ctx.id) {
-				if (ctx.flightClient?.shipId !== payload.shipId) return false;
+			if (payload.clientId !== clientId) {
+				const flightClient = ctx.getFlightClient(clientId);
+				if (flightClient?.shipId !== payload.shipId) return false;
 
 				switch (payload.station) {
 					case "all":
 						break;
 					case "bridge":
 						if (
-							!ctx.flightClient?.stationId ||
-							notBridgeStation.includes(ctx.flightClient.stationId)
+							!flightClient?.stationId ||
+							notBridgeStation.includes(flightClient.stationId)
 						)
 							return false;
 						break;
 					default:
-						if (ctx.flightClient.stationId !== payload.station) return false;
+						if (flightClient.stationId !== payload.station) return false;
 				}
 			}
 			return true;
@@ -47,7 +49,8 @@ export const effects = t.router({
 			return { effect: publish.effect, config: publish.config };
 		}),
 	sounds: t.procedure
-		.filter((payload: SoundPayload | null, { ctx }) => {
+		.input(z.object({ clientId: z.string() }))
+		.filter((payload: SoundPayload | null, { ctx, input: { clientId } }) => {
 			/**
 			 * Logic for filtering out sound payloads
 			 * - If the sound has `clients`, it only plays on those clients
@@ -76,12 +79,15 @@ export const effects = t.router({
 			}
 
 			if (!sound) return false;
+
+			const flightClient = ctx.getFlightClient(clientId);
+			const ship = ctx.ecs.getEntityById(flightClient?.shipId || -1);
 			return matchSound(
 				sound,
-				ctx.id,
-				ctx.ship?.id,
-				ctx.flightClient?.stationId,
-				ctx.ship?.components.position,
+				clientId,
+				flightClient?.shipId,
+				flightClient?.stationId,
+				ship?.components.position,
 			);
 		})
 		.request(({ publish }) => {
@@ -102,21 +108,30 @@ export const effects = t.router({
 	 * - Signal Jammer
 	 */
 	ambiance: t.procedure
-		.filter((publish: { shipId?: number; stationId?: string }, { ctx }) => {
-			if (publish && publish.shipId !== ctx.ship?.id) return false;
-			return true;
-		})
-		.request(({ ctx }) => {
+		.input(z.object({ clientId: z.string() }))
+		.filter(
+			(
+				publish: { shipId?: number; stationId?: string },
+				{ ctx, input: { clientId } },
+			) => {
+				const shipId = ctx.getFlightClient(clientId)?.shipId;
+				if (publish && publish.shipId !== shipId) return false;
+				return true;
+			},
+		)
+		.request(({ ctx, input: { clientId } }) => {
 			const loopingSounds: SoundEffect[] = [];
+			const flightClient = ctx.getFlightClient(clientId);
+			const ship = ctx.ecs.getEntityById(flightClient?.shipId || -1);
 			ctx.flight?.ecs.componentCache.get("soundEffects")?.forEach((entity) =>
 				entity.components.soundEffects?.looping.forEach((sound) => {
 					if (
 						matchSound(
 							sound,
-							ctx.id,
-							ctx.ship?.id,
-							ctx.flightClient?.stationId,
-							ctx.ship?.components.position,
+							clientId,
+							flightClient?.shipId,
+							flightClient?.stationId,
+							ship?.components.position,
 						)
 					) {
 						loopingSounds.push(sound);
@@ -167,7 +182,7 @@ export const effects = t.router({
 function matchSound(
 	sound: SoundEffect,
 	clientId?: string,
-	shipId?: number,
+	shipId?: number | null,
 	stationId?: string | null,
 	shipPosition?: z.infer<typeof positionComponent>,
 ) {

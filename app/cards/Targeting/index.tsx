@@ -19,17 +19,21 @@ import {
 } from "@thorium/cards/Targeting/Phasers";
 import { Torpedoes } from "@thorium/cards/Targeting/Torpedoes";
 import type { CardProps } from "@thorium/cards/CardProps";
+import { useStation } from "@thorium/routes/station/useStation";
 /**
  * TODO:
  * Add overlays to the targeting grid showing where the torpedo will fire from
  * Add explosions to the Viewscreen, and maybe even the targeting grid.
  */
 export function Targeting({ cardLoaded }: CardProps) {
+	const { shipId } = useStation();
 	const setTarget = q.targeting.setTarget.useNetSend();
-	const [targetedContact] = q.targeting.targetedContact.useNetRequest();
+	const [targetedContact] = q.targeting.targetedContact.useNetRequest({
+		shipId,
+	});
+	q.targeting.stream.useDataStream({ shipId });
+	const [hull] = q.targeting.hull.useNetRequest({ shipId });
 	const clickRef = React.useRef(false);
-	q.targeting.stream.useDataStream();
-	const [hull] = q.targeting.hull.useNetRequest();
 	return (
 		<CircleGridStoreProvider zoomMax={25000}>
 			<div className="grid grid-cols-4 grid-rows-1 h-full place-content-center gap-4">
@@ -49,7 +53,7 @@ export function Targeting({ cardLoaded }: CardProps) {
 									return;
 								}
 								if (targetedContact) {
-									setTarget.mutate({ target: null });
+									setTarget.mutate({ target: null, shipId });
 								}
 							}}
 						>
@@ -59,7 +63,7 @@ export function Targeting({ cardLoaded }: CardProps) {
 									targetedContactId={targetedContact?.id}
 									onContactClick={(contact) => {
 										clickRef.current = true;
-										setTarget.mutate({ target: contact });
+										setTarget.mutate({ target: contact, shipId });
 									}}
 								/>
 							</CircleGrid>

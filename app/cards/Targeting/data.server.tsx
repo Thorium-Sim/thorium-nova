@@ -21,13 +21,15 @@ import {
 
 export const targeting = t.router({
 	targetedContact: t.procedure
-		.filter((publish: { shipId: number }, { ctx }) => {
-			if (publish && publish.shipId !== ctx.ship?.id) return false;
+		.input(z.object({ shipId: z.number() }))
+		.filter((publish: { shipId: number }, { input }) => {
+			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
-		.request(({ ctx }) => {
-			const system = getShipSystem(ctx, {
+		.request(({ ctx, input }) => {
+			const system = getShipSystem(ctx.ecs, {
 				systemType: "targeting",
+				shipId: input.shipId,
 			});
 			const target = system.components.isTargeting?.target;
 			if (typeof target !== "number") return null;
@@ -41,30 +43,34 @@ export const targeting = t.router({
 				: null;
 		}),
 	setTarget: t.procedure
-		.input(z.object({ target: z.union([z.number(), z.null()]) }))
+		.input(
+			z.object({ shipId: z.number(), target: z.union([z.number(), z.null()]) }),
+		)
 		.send(({ input, ctx }) => {
-			if (!ctx.ship) throw new Error("No ship found.");
-			const targeting = getShipSystem(ctx, {
+			const { shipId } = input;
+			const targeting = getShipSystem(ctx.ecs, {
 				systemType: "targeting",
+				shipId,
 			});
 			if (!targeting.components.isTargeting)
 				throw new Error("System is not targeting");
 
 			targeting.updateComponent("isTargeting", { target: input.target });
 			pubsub.publish.targeting.targetedContact({
-				shipId: ctx.ship.id,
+				shipId,
 			});
 		}),
 	torpedoes: t.router({
 		list: t.procedure
-			.filter((publish: { shipId: number }, { ctx }) => {
-				if (publish && publish.shipId !== ctx.ship?.id) return false;
+			.input(z.object({ shipId: z.number() }))
+			.filter((publish: { shipId: number }, { input }) => {
+				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
-			.request(({ ctx }) => {
-				if (!ctx.ship) throw new Error("No ship found.");
-				const templates = getInventoryTemplates(ctx.flight?.ecs);
-				const torpedoRooms = getRoomBySystem(ctx.ship, "torpedoLauncher");
+			.request(({ ctx, input }) => {
+				const ship = ctx.ecs.getEntityById(input.shipId);
+				const templates = getInventoryTemplates(ctx.ecs);
+				const torpedoRooms = getRoomBySystem(ship, "torpedoLauncher");
 				const torpedoList: Record<
 					string,
 					{ count: number; yield: number; speed: number }
@@ -91,17 +97,18 @@ export const targeting = t.router({
 				return torpedoList;
 			}),
 		launchers: t.procedure
-			.filter((publish: { shipId: number }, { ctx }) => {
-				if (publish && publish.shipId !== ctx.ship?.id) return false;
+			.input(z.object({ shipId: z.number() }))
+			.filter((publish: { shipId: number }, { input }) => {
+				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
-			.request(({ ctx }) => {
+			.request(({ ctx, input: { shipId } }) => {
 				if (!ctx.flight) return [];
-				const systems = getShipSystems(ctx.flight.ecs, {
+				const systems = getShipSystems(ctx.ecs, {
 					systemType: "TorpedoLauncher",
-					shipId: ctx.ship!.id,
+					shipId,
 				}).filter(
-					(system) => system.components.isShipSystem?.shipId === ctx.ship?.id,
+					(system) => system.components.isShipSystem?.shipId === shipId,
 				);
 
 				return systems.flatMap((system) => {
@@ -146,11 +153,8 @@ export const targeting = t.router({
 				}),
 			)
 			.send(({ input, ctx }) => {
-				if (!ctx.ship) throw new Error("No ship found.");
-				const launcher = getShipSystem(ctx, {
-					systemId: input.launcherId,
-				});
-				if (!launcher.components.isTorpedoLauncher)
+				const launcher = ctx.ecs.getEntityById(input.launcherId);
+				if (!launcher?.components.isTorpedoLauncher)
 					throw new Error("System is not a torpedo launcher");
 				if (
 					input.torpedoId &&
@@ -164,27 +168,28 @@ export const targeting = t.router({
 				) {
 					throw new Error("Torpedo launcher is not loaded");
 				}
-				const torpedoEntity = adjustTorpedoInventory(
-					ctx.ship,
-					input.torpedoId,
-					launcher,
-				);
+				const torpedoEntity = adjustTorpedoInventory(input.torpedoId, launcher);
 
 				launcher.updateComponent("isTorpedoLauncher", {
 					status: torpedoEntity ? "loading" : "unloading",
 					progress: launcher.components.isTorpedoLauncher.loadTime,
 					...(torpedoEntity ? { torpedoEntity } : {}),
 				});
-				pubsub.publish.targeting.torpedoes.launchers({
-					shipId: ctx.ship!.id,
-				});
 
-				if (torpedoEntity) {
-					cancelLoopingSound(launcher, "unload");
-					playShipSound(launcher, ctx.ship, "load");
-				} else {
-					cancelLoopingSound(launcher, "load");
-					playShipSound(launcher, ctx.ship, "unload");
+				const ship = ctx.ecs.getEntityById(
+					launcher.components.isShipSystem?.shipId || -1,
+				);
+				if (ship) {
+					pubsub.publish.targeting.torpedoes.launchers({
+						shipId: ship.id,
+					});
+					if (torpedoEntity) {
+						cancelLoopingSound(launcher, "unload");
+						playShipSound(launcher, ship, "load");
+					} else {
+						cancelLoopingSound(launcher, "load");
+						playShipSound(launcher, ship, "unload");
+					}
 				}
 			}),
 		fire: t.procedure
@@ -194,10 +199,9 @@ export const targeting = t.router({
 				}),
 			)
 			.send(({ input, ctx }) => {
-				const launcher = getShipSystem(ctx, {
-					systemId: input.launcherId,
-				});
-				if (!launcher.components.isTorpedoLauncher)
+				const launcher = ctx.ecs.getEntityById(input.launcherId);
+
+				if (!launcher?.components.isTorpedoLauncher)
 					throw new Error("System is not a torpedo launcher");
 				if (launcher.components.isTorpedoLauncher.status !== "loaded") {
 					throw new Error("Torpedo launcher is not loaded");
@@ -234,37 +238,45 @@ export const targeting = t.router({
 					progress:
 						launcher.components.isTorpedoLauncher.fireTime * powerMultiplier,
 				});
-				pubsub.publish.targeting.torpedoes.launchers({
-					shipId: ctx.ship!.id,
-				});
+				const ship = ctx.ecs.getEntityById(
+					launcher.components.isShipSystem?.shipId || -1,
+				);
 				pubsub.publish.starmapCore.torpedos({
 					systemId: torpedo.components.position?.parentId || null,
 				});
+				if (ship) {
+					pubsub.publish.targeting.torpedoes.launchers({
+						shipId: ship.id,
+					});
 
-				playShipSound(launcher, ctx.ship!, "fire");
+					playShipSound(launcher, ship, "fire");
+				}
 			}),
 	}),
 	hull: t.procedure
-		.filter((publish: { shipId: number }, { ctx }) => {
-			if (publish && publish.shipId !== ctx.ship?.id) return false;
+		.input(z.object({ shipId: z.number() }))
+		.filter((publish: { shipId: number }, { ctx, input }) => {
+			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
-		.request(({ ctx }) => {
-			return ctx.ship?.components.hull?.hull || 0;
+		.request(({ ctx, input }) => {
+			const ship = ctx.ecs.getEntityById(input.shipId);
+			return ship?.components.hull?.hull || 0;
 		}),
 	shields: t.router({
 		get: t.procedure
-			.filter((publish: { shipId: number }, { ctx }) => {
-				if (publish && publish.shipId !== ctx.ship?.id) return false;
+			.input(z.object({ shipId: z.number() }))
+			.filter((publish: { shipId: number }, { ctx, input }) => {
+				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
-			.request(({ ctx }) => {
+			.request(({ ctx, input: { shipId } }) => {
 				if (!ctx.flight) return [];
-				const systems = getShipSystems(ctx.flight.ecs, {
+				const systems = getShipSystems(ctx.ecs, {
 					systemType: "Shields",
-					shipId: ctx.ship!.id,
+					shipId,
 				}).filter(
-					(system) => system.components.isShipSystem?.shipId === ctx.ship?.id,
+					(system) => system.components.isShipSystem?.shipId === shipId,
 				);
 
 				return systems.flatMap((system) => {
@@ -281,54 +293,64 @@ export const targeting = t.router({
 			}),
 		setState: t.procedure
 			.input(
-				z.object({
-					shieldId: z.number().optional(),
-					state: z.union([z.literal("up"), z.literal("down")]),
-				}),
+				z.union([
+					z.object({
+						shieldId: z.number(),
+						state: z.union([z.literal("up"), z.literal("down")]),
+					}),
+					z.object({
+						shipId: z.number(),
+						state: z.union([z.literal("up"), z.literal("down")]),
+					}),
+				]),
 			)
 			.send(({ input, ctx }) => {
-				const shieldId = input.shieldId;
-				if (shieldId) {
-					const shield = getShipSystem(ctx, {
-						systemId: shieldId,
+				if ("shieldId" in input) {
+					const shield = getShipSystem(ctx.ecs, {
+						systemId: input.shieldId,
 					});
 					if (!shield.components.isShields)
 						throw new Error("System is not a shield generator");
 					shield.updateComponent("isShields", {
 						state: input.state,
 					});
+					pubsub.publish.targeting.shields.get({
+						shipId: shield.components.isShipSystem?.shipId || -1,
+					});
 				} else {
+					const shipId = input.shipId;
 					if (!ctx.flight) return;
 					const shields = getShipSystems(ctx.flight.ecs, {
 						systemType: "Shields",
-						shipId: ctx.ship!.id,
+						shipId,
 					}).filter(
-						(system) => system.components.isShipSystem?.shipId === ctx.ship?.id,
+						(system) => system.components.isShipSystem?.shipId === shipId,
 					);
 					for (const shield of shields) {
 						shield.updateComponent("isShields", {
 							state: input.state,
 						});
 					}
+					pubsub.publish.targeting.shields.get({
+						shipId,
+					});
 				}
-				pubsub.publish.targeting.shields.get({
-					shipId: ctx.ship!.id,
-				});
 			}),
 	}),
 	phasers: t.router({
 		list: t.procedure
-			.filter((publish: { shipId: number }, { ctx }) => {
-				if (publish && publish.shipId !== ctx.ship?.id) return false;
+			.input(z.object({ shipId: z.number() }))
+			.filter((publish: { shipId: number }, { ctx, input }) => {
+				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
-			.request(({ ctx }) => {
+			.request(({ ctx, input }) => {
 				if (!ctx.flight) return [];
 				const systems = getShipSystems(ctx.flight.ecs, {
 					systemType: "Phasers",
-					shipId: ctx.ship!.id,
+					shipId: input.shipId,
 				}).filter(
-					(system) => system.components.isShipSystem?.shipId === ctx.ship?.id,
+					(system) => system.components.isShipSystem?.shipId === input.shipId,
 				);
 
 				return systems.flatMap((system) => {
@@ -355,28 +377,19 @@ export const targeting = t.router({
 		 */
 		firing: t.procedure
 			.input(
-				z
-					.object({
-						systemId: z.number().optional(),
-					})
-					.optional(),
+				z.object({
+					systemId: z.number().nullable(),
+				}),
 			)
-			.filter(
-				(
-					publish: { shipId: number; systemId: number | null },
-					{ ctx, input },
-				) => {
-					if (
-						(publish && publish.shipId !== ctx.ship?.id) ||
-						(input?.systemId && input.systemId !== publish.systemId)
-					)
-						return false;
-					return true;
-				},
-			)
+			.filter((publish: { systemId: number | null }, { ctx, input }) => {
+				if (!publish) return true;
+				if ("systemId" in input && publish.systemId !== input.systemId)
+					return false;
+				return true;
+			})
 			.request(({ input, ctx }) => {
-				const systemId =
-					input?.systemId || ctx.ship?.components.position?.parentId || null;
+				const systemId = input.systemId;
+
 				// Get all of the ships in the system
 				const ships: Entity[] = [];
 				for (const ship of ctx.flight?.ecs.componentCache.get("isShip") || []) {
@@ -421,7 +434,7 @@ export const targeting = t.router({
 				}),
 			)
 			.send(({ input, ctx }) => {
-				const phaser = getShipSystem(ctx, {
+				const phaser = getShipSystem(ctx.ecs, {
 					systemId: input.phaserId,
 				});
 				if (!phaser.components.isPhasers)
@@ -441,7 +454,7 @@ export const targeting = t.router({
 				}),
 			)
 			.send(({ input, ctx }) => {
-				const phaser = getShipSystem(ctx, {
+				const phaser = getShipSystem(ctx.ecs, {
 					systemId: input.phaserId,
 				});
 				if (!phaser.components.isPhasers)
@@ -473,7 +486,6 @@ export const targeting = t.router({
 					cancelLoopingSound(phaser, "fire");
 				} else {
 					pubsub.publish.targeting.phasers.firing({
-						shipId: ship!.id,
 						systemId: ship?.components.position?.parentId || null,
 					});
 
@@ -483,20 +495,24 @@ export const targeting = t.router({
 				}
 			}),
 	}),
-	stream: t.procedure.dataStream(({ entity, ctx }) => {
-		if (!entity) return false;
-		return Boolean(entity.components.isShields || entity.components.isPhasers);
-	}),
+	stream: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.dataStream(({ entity, input }) => {
+			if (!entity) return false;
+			return Boolean(
+				(entity.components.isShields || entity.components.isPhasers) &&
+					entity.components.isShipSystem?.shipId === input.shipId,
+			);
+		}),
 });
 
-function adjustTorpedoInventory(
-	ship: Entity,
-	torpedoId: string | null,
-	launcher: Entity,
-) {
+function adjustTorpedoInventory(torpedoId: string | null, launcher: Entity) {
 	let adjustment = -1;
-	const ecs = ship.ecs!;
-
+	const ecs = launcher.ecs!;
+	const ship = ecs.getEntityById(
+		launcher.components.isShipSystem?.shipId || -1,
+	);
+	if (!ship) throw new Error("Torpedo launcher ship not found");
 	if (!torpedoId) {
 		adjustment = 1;
 		const torpedo = ecs.getEntityById(

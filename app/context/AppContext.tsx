@@ -1,4 +1,4 @@
-import { type ReactNode, StrictMode } from "react";
+import { createContext, type ReactNode, StrictMode, use } from "react";
 import { AlertDialog } from "@thorium/ui/AlertDialog";
 import useEasterEgg from "../hooks/useEasterEgg";
 import ToastContainer from "./ToastContext";
@@ -14,7 +14,7 @@ import { Disconnected, Reconnecting } from "./ConnectionStatus";
 import { TabIdCoordinator } from "browser-tab-id";
 import { createRNG } from "@thorium/utils/rng";
 
-let tabId = "";
+export let clientId = "";
 if (typeof window !== "undefined") {
 	let browserId = localStorage.getItem("browserId");
 	const tabCoordinator = new TabIdCoordinator();
@@ -23,11 +23,11 @@ if (typeof window !== "undefined") {
 		localStorage.setItem("browserId", browserId);
 	}
 	const rng = createRNG(`${browserId}${tabCoordinator.tabId}`);
-	tabId = rng.nextString();
+	clientId = rng.nextString();
 }
 
 function getRequestContext() {
-	return { id: tabId };
+	return { id: clientId };
 }
 
 function ConnectionStatus() {
@@ -58,6 +58,6 @@ export default function AppContext({ children }: { children: ReactNode }) {
 
 export const q = createLiveQueryReact<AppRouter>({
 	headers: async () => ({
-		"client-id": tabId,
+		"client-id": clientId,
 	}),
 });

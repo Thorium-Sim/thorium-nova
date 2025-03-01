@@ -1,4 +1,4 @@
-import { q } from "@thorium/context/AppContext";
+import { q, clientId } from "@thorium/context/AppContext";
 import Menubar, { useMenubar } from "@thorium/ui/Menubar";
 import { WaitingForFlight } from "./WaitingForFlight";
 import { NavLink, useNavigate } from "react-router";
@@ -31,7 +31,7 @@ export function HostLobby() {
 function FlightButtons() {
 	const navigate = useNavigate();
 	const [flight] = q.flight.active.useNetRequest();
-	const [client] = q.client.get.useNetRequest();
+	const [client] = q.client.get.useNetRequest({ clientId });
 	useMenubar({
 		children: flight ? (
 			<>
@@ -86,7 +86,7 @@ function FlightButtons() {
 }
 function ClientAssignment() {
 	const [clients] = q.client.all.useNetRequest();
-	const [client] = q.client.get.useNetRequest();
+	const [client] = q.client.get.useNetRequest({ clientId });
 	const [playerShips] = q.ship.players.useNetRequest();
 	const [selectedClient, setSelectedClient] = useState(client.id);
 
@@ -185,7 +185,6 @@ function HostStationItem({
 			{clients
 				.filter((c) => c.shipId === shipId && c.stationId === station.name)
 				.map((client) => (
-					// biome-ignore lint/a11y/useKeyWithClickEvents:
 					<li
 						key={client.id}
 						className={`list-group-item list-group-item-small ${

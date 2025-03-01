@@ -1,4 +1,3 @@
-import type { FlightClient } from "@thorium/.server/classes/FlightClient";
 import Station, { staticStations } from "@thorium/.server/classes/Station";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
@@ -6,14 +5,20 @@ import { z } from "zod";
 
 export const client = t.router({
 	get: t.procedure
-		.filter((publish: { clientId: string } | null, { ctx }) => {
+		.input(z.object({ clientId: z.string() }))
+		.filter((publish: { clientId: string } | null, { input }) => {
 			if (!publish) return true;
-			if (publish.clientId === ctx.id) return true;
+			if (publish.clientId === input.clientId) return true;
 			return false;
 		})
-		.request(({ ctx }) => {
-			const { id, name, connected, isHost } = ctx.server.clients[ctx.id];
-			const { officersLog, id: _id, ...flightClient } = ctx.flightClient || {};
+		.request(({ ctx, input }) => {
+			const { id, name, connected, isHost } =
+				ctx.server.clients[input.clientId];
+			const {
+				officersLog,
+				id: _id,
+				...flightClient
+			} = ctx.getFlightClient(input.clientId) || {};
 			return { id, name, connected, isHost, ...flightClient };
 		}),
 	all: t.procedure.request(({ ctx }) => {
@@ -32,13 +37,14 @@ export const client = t.router({
 		return clients;
 	}),
 	setName: t.procedure
-		.input(z.object({ name: z.string().min(2) }))
+		.input(z.object({ clientId: z.string(), name: z.string().min(2) }))
 		.send(({ ctx, input }) => {
-			ctx.client.name = input.name;
+			const client = ctx.getClient(input.clientId);
+			client.name = input.name;
 			pubsub.publish.client.all();
-			pubsub.publish.client.get({ clientId: ctx.id });
+			pubsub.publish.client.get({ clientId: client.id });
 
-			return { clientId: ctx.id, name: ctx.client.name };
+			return { clientId: client.id, name: client.name };
 		}),
 	setStation: t.procedure
 		.input(
@@ -46,21 +52,18 @@ export const client = t.router({
 				z.object({
 					shipId: z.number(),
 					stationId: z.string(),
-					clientId: z.string().optional(),
+					clientId: z.string(),
 				}),
-				z.object({ shipId: z.null(), clientId: z.string().optional() }),
+				z.object({ shipId: z.null(), clientId: z.string() }),
 			]),
 		)
 		.send(({ ctx, input }) => {
-			let flightClient: FlightClient | null = ctx.flightClient;
-			if (input.clientId) {
-				// Only hosts can change other client's station assignment
-				if (!ctx.isHost || !input.clientId) {
-					throw new Error(
-						"You must be host to change other client's assignments.",
-					);
-				}
-				flightClient = ctx.findFlightClient(input.clientId);
+			const flightClient = ctx.getFlightClient(input.clientId);
+			// Only hosts can change other client's station assignment
+			if (!ctx.getIsHost(ctx.clientId) && input.clientId !== ctx.clientId) {
+				throw new Error(
+					"You must be host to change other client's assignments.",
+				);
 			}
 			if (!flightClient) {
 				throw new Error("No flight has been started.");
@@ -99,25 +102,30 @@ export const client = t.router({
 			return flightClient;
 		}),
 	login: t.procedure
-		.input(z.object({ name: z.string() }))
+		.input(z.object({ clientId: z.string(), name: z.string() }))
 		.send(({ ctx, input }) => {
-			if (ctx.flightClient) {
-				ctx.flightClient.loginName = input.name;
+			const flightClient = ctx.getFlightClient(input.clientId);
+			if (flightClient) {
+				flightClient.loginName = input.name;
 				pubsub.publish.client.all();
-				pubsub.publish.client.get({ clientId: ctx.id });
+				pubsub.publish.client.get({ clientId: input.clientId });
 			}
 		}),
-	logout: t.procedure.send(({ ctx }) => {
-		if (ctx.flightClient) {
-			ctx.flightClient.loginName = "";
-			pubsub.publish.client.all();
-			pubsub.publish.client.get({ clientId: ctx.id });
-		}
-	}),
-	testStation: t.procedure
-		.input(z.object({ component: z.string().nullable() }))
+	logout: t.procedure
+		.input(z.object({ clientId: z.string() }))
 		.send(({ ctx, input }) => {
-			if (!ctx.flightClient || !ctx.flight) {
+			const flightClient = ctx.getFlightClient(input.clientId);
+			if (flightClient) {
+				flightClient.loginName = "";
+				pubsub.publish.client.all();
+				pubsub.publish.client.get({ clientId: input.clientId });
+			}
+		}),
+	testStation: t.procedure
+		.input(z.object({ clientId: z.string(), component: z.string().nullable() }))
+		.send(({ ctx, input }) => {
+			const flightClient = ctx.getFlightClient(input.clientId);
+			if (!flightClient || !ctx.flight) {
 				throw new Error("No flight has been started.");
 			}
 			const component = input.component;
@@ -131,17 +139,17 @@ export const client = t.router({
 						},
 					],
 				});
-				ctx.flightClient.stationOverride = station;
-				ctx.flightClient.shipId = ctx.flight.playerShips[0].id;
-				pubsub.publish.ship.get({ shipId: ctx.flightClient.shipId });
-				ctx.flightClient.loginName = "Test User";
+				flightClient.stationOverride = station;
+				flightClient.shipId = ctx.flight.playerShips[0].id;
+				pubsub.publish.ship.get({ shipId: flightClient.shipId });
+				flightClient.loginName = "Test User";
 			} else {
-				ctx.flightClient.stationOverride = null;
-				ctx.flightClient.shipId = null;
-				ctx.flightClient.loginName = "";
+				flightClient.stationOverride = null;
+				flightClient.shipId = null;
+				flightClient.loginName = "";
 			}
-			pubsub.publish.client.get({ clientId: ctx.id });
-			pubsub.publish.station.get({ clientId: ctx.id });
-			pubsub.publish.theme.get({ clientId: ctx.id });
+			pubsub.publish.client.get({ clientId: input.clientId });
+			pubsub.publish.station.get({ clientId: input.clientId });
+			pubsub.publish.theme.get({ clientId: input.clientId });
 		}),
 });

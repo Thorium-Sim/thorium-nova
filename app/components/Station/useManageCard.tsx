@@ -1,9 +1,9 @@
-import { q } from "@thorium/context/AppContext";
+import { q, clientId } from "@thorium/context/AppContext";
 import { useSessionStorage } from "@thorium/hooks/useSessionStorage";
 import { useCallback, useEffect, useRef } from "react";
 
 export function useManageCard() {
-	const [station] = q.station.get.useNetRequest();
+	const [station] = q.station.get.useNetRequest({ clientId });
 	const [currentCard, setCurrentCard] = useSessionStorage(
 		`currentCard-${station?.name || ""}`,
 		station?.cards[0]?.component || "",

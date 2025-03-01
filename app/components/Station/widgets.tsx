@@ -1,5 +1,5 @@
 import * as Cards from "@thorium/cards";
-import { q } from "@thorium/context/AppContext";
+import { q, clientId } from "@thorium/context/AppContext";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import {
 	type ComponentType,
@@ -23,7 +23,7 @@ import { useNavigate } from "react-router";
 type IconType = IconName | ReactElement;
 
 export const Widgets = () => {
-	const [station] = q.station.get.useNetRequest();
+	const [station] = q.station.get.useNetRequest({ clientId });
 
 	return (
 		<>
@@ -47,7 +47,10 @@ export const Widgets = () => {
 				);
 			})}
 			<SettingsWidget />
-			<ClickWidget icon="log-out" onClick={() => q.client.logout.netSend()} />
+			<ClickWidget
+				icon="log-out"
+				onClick={() => q.client.logout.netSend({ clientId })}
+			/>
 		</>
 	);
 };

@@ -16,6 +16,7 @@ import {
 	useTranslate2DTo3D,
 } from "@thorium/hooks/useTranslate2DTo3D";
 import { LiveQueryContext } from "@thorium/utils/live-query/client/liveQueryContext";
+import { StationContext } from "@thorium/routes/station/useStation";
 
 const FAR = 1e27;
 
@@ -46,6 +47,7 @@ export default function StarmapCanvas({
 
 	const ContextBridge = useContextBridge(
 		LiveQueryContext,
+		StationContext,
 		UNSAFE_LocationContext,
 		UNSAFE_NavigationContext,
 		UNSAFE_RouteContext,

@@ -23,47 +23,46 @@ type Waypoint = {
 
 export const navigation = t.router({
 	ship: t.procedure
-		.filter((publish: { shipId: number } | { clientId: string }, { ctx }) => {
-			if (
-				publish &&
-				(("shipId" in publish && publish.shipId !== ctx.ship?.id) ||
-					("clientId" in publish && publish.clientId !== ctx.id))
-			)
+		.input(z.object({ shipId: z.number() }))
+		.filter((publish: { shipId: number }, { input }) => {
+			if (publish && "shipId" in publish && publish.shipId !== input.shipId)
 				return false;
 
 			return true;
 		})
-		.request(({ ctx }) => {
-			if (!ctx.ship) throw new Error("No ship assigned");
+		.request(({ ctx, input }) => {
+			const ship = ctx.ecs.getEntityById(input.shipId);
+			if (!ship) throw new Error("No ship assigned");
 			return {
-				id: ctx.ship.id,
-				name: ctx.ship.components.identity?.name,
-				position: ctx.ship.components.position,
-				icon: ctx.ship.components.isShip?.assets.logo,
-				size: ctx.ship.components.size?.length || 350,
+				id: ship.id,
+				name: ship.components.identity?.name,
+				position: ship.components.position,
+				icon: ship.components.isShip?.assets.logo,
+				size: ship.components.size?.length || 350,
 			};
 		}),
 	object: t.procedure
-		.input(z.object({ objectId: z.number().optional() }))
-		.filter((publish: { shipId: number }, { ctx }) => {
-			if (publish && publish.shipId !== ctx.ship?.id) return false;
+		.input(z.object({ shipId: z.number(), objectId: z.number().optional() }))
+		.filter((publish: { shipId: number }, { ctx, input }) => {
+			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
 		.request(({ ctx, input }) => {
-			if (!ctx.flight) throw new Error("No flight");
+			const ship = ctx.ecs.getEntityById(input.shipId);
+			if (!ship) throw new Error("Ship not found");
 
-			const shipSystem =
-				ctx.flight.ecs.entities.find(
-					(entity) => entity.id === ctx.ship?.components.position?.parentId,
-				) || null;
-			const object = ctx.flight.ecs.getEntityById(input?.objectId || -1);
+			const shipSolarSystem = getObjectSystem(ship);
+			const object = ctx.ecs.getEntityById(input?.objectId || -1);
 
 			if (!object)
 				return {
 					object: null,
 					objectSystem: null,
-					shipSystem: shipSystem?.components.position
-						? { id: shipSystem?.id, ...shipSystem?.components.position }
+					shipSystem: shipSolarSystem?.components.position
+						? {
+								id: shipSolarSystem?.id,
+								...shipSolarSystem?.components.position,
+							}
 						: null,
 				};
 			const objectSystem = getObjectSystem(object);
@@ -96,8 +95,8 @@ export const navigation = t.router({
 				objectSystem: objectSystem?.components.position
 					? { id: objectSystem?.id, ...objectSystem.components.position }
 					: null,
-				shipSystem: shipSystem?.components.position
-					? { id: shipSystem?.id, ...shipSystem.components.position }
+				shipSystem: shipSolarSystem?.components.position
+					? { id: shipSolarSystem?.id, ...shipSolarSystem.components.position }
 					: null,
 			};
 		}),
@@ -172,32 +171,32 @@ export const navigation = t.router({
 
 			return matchItems;
 		}),
-	stream: t.procedure.dataStream(({ entity, ctx }) => {
-		return Boolean(entity?.components.position && entity.id === ctx.ship?.id);
-	}),
+	stream: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.dataStream(({ entity, input }) => {
+			return Boolean(entity?.components.position && entity.id === input.shipId);
+		}),
 });
 
 export const waypoints = t.router({
 	all: t.procedure
 		.input(
 			z.object({
-				shipId: z.number().optional(),
+				shipId: z.number(),
 				systemId: z.union([z.literal("all"), z.number(), z.null()]),
 			}),
 		)
-		.filter((publish: { shipId: number } | null, { ctx, input }) => {
-			const shipId = input.shipId ?? ctx.ship?.id;
-			if (publish && shipId !== publish.shipId) return false;
+		.filter((publish: { shipId: number } | null, { input }) => {
+			if (publish && input.shipId !== publish.shipId) return false;
 			return true;
 		})
-		.request(({ ctx, input }) => {
-			const shipId = input.shipId ?? ctx.ship?.id;
+		.request(({ ctx, input: { shipId, systemId } }) => {
 			const waypoints = ctx.flight?.ecs.entities.reduce(
 				(prev: Waypoint[], next) => {
 					if (
 						next.components.isWaypoint?.assignedShipId === shipId &&
-						(input.systemId === "all" ||
-							next.components.position?.parentId === input.systemId)
+						(systemId === "all" ||
+							next.components.position?.parentId === systemId)
 					) {
 						if (next.components.position) {
 							const systemPosition =
@@ -240,7 +239,7 @@ export const waypoints = t.router({
 		})
 		.input(
 			z.object({
-				shipId: z.number().optional(),
+				shipId: z.number(),
 
 				entityId: z.number().optional(),
 				position: z
@@ -261,9 +260,7 @@ export const waypoints = t.router({
 		)
 		.send(({ ctx, input }) => {
 			if (!ctx.flight) throw new Error("No flight in progress");
-			const ship = input.shipId
-				? ctx.flight.ecs.getEntityById(input.shipId)
-				: ctx.ship;
+			const ship = ctx.flight.ecs.getEntityById(input.shipId);
 			if (!ship) throw new Error("No ship selected.");
 			const shipId = ship.id;
 			let position = { x: 0, y: 0, z: 0 };
@@ -374,19 +371,13 @@ export const waypoints = t.router({
 		}),
 	delete: t.procedure
 		.meta({ action: true, event: true })
-		.input(z.object({ waypointId: z.number() }))
-		.send(({ ctx, input }) => {
-			if (!ctx.flight) throw new Error("No flight in progress");
-			const ship = ctx.ship;
-			if (!ship) throw new Error("No ship selected.");
-			const shipId = ship.id;
-			const waypoint = ctx.flight.ecs.entities.find(
-				(e) => e.id === input.waypointId,
-			);
+		.input(z.object({ shipId: z.number(), waypointId: z.number() }))
+		.send(({ ctx, input: { waypointId, shipId } }) => {
+			const waypoint = ctx.ecs.getEntityById(waypointId);
 			if (!waypoint) throw new Error("No waypoint found.");
 			if (waypoint.components.isWaypoint?.assignedShipId !== shipId)
 				throw new Error("Waypoint is not assigned to this ship.");
-			ctx.flight.ecs.removeEntity(waypoint);
+			ctx.ecs.removeEntity(waypoint);
 			pubsub.publish.waypoints.all({
 				shipId,
 			});

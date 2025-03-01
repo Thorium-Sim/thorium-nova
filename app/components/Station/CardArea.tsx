@@ -7,8 +7,7 @@ import { Transition } from "@headlessui/react";
 import type { CardProps } from "../../cards/CardProps";
 import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
 import CardProvider from "@thorium/context/CardContext";
-import { q } from "@thorium/context/AppContext";
-import { cn } from "@thorium/utils/cn";
+import { q, clientId } from "@thorium/context/AppContext";
 
 const CardError = () => {
 	return (
@@ -26,8 +25,8 @@ const CardError = () => {
 export const CardArea: React.FC<{
 	card: { component: string };
 }> = ({ card }) => {
-	const [client] = q.client.get.useNetRequest();
-	const [station] = q.station.get.useNetRequest();
+	const [client] = q.client.get.useNetRequest({ clientId });
+	const [station] = q.station.get.useNetRequest({ clientId });
 	const CardComponents = station.cards.map((card) => ({
 		...card,
 		CardComponent: Cards[card.component as keyof typeof Cards],
@@ -65,8 +64,8 @@ const CardRenderer = ({
 	id: string;
 	currentCardId: string;
 }) => {
-	const [client] = q.client.get.useNetRequest();
-	const [station] = q.station.get.useNetRequest();
+	const [client] = q.client.get.useNetRequest({ clientId });
+	const [station] = q.station.get.useNetRequest({ clientId });
 	const allowCard =
 		(station.name === "Viewscreen" || Boolean(client.loginName)) &&
 		!client.offlineState;

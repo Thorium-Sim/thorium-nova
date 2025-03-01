@@ -23,9 +23,11 @@ import { useCancelFollow } from "@thorium/components/Starmap/useCancelFollow";
 import { q } from "@thorium/context/AppContext";
 import { Icon } from "@thorium/ui/Icon";
 import type { CardProps } from "@thorium/cards/CardProps";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function Navigation(props: CardProps) {
-	q.navigation.stream.useDataStream();
+	const { shipId } = useStation();
+	q.navigation.stream.useDataStream({ shipId });
 
 	return (
 		<StarmapStoreProvider>
@@ -57,6 +59,8 @@ export function Navigation(props: CardProps) {
 }
 
 function Waypoints() {
+	const { shipId } = useStation();
+
 	const useStarmapStore = useGetStarmapStore();
 	const [style, animate] = useSpring(() => ({ height: "0px" }), []);
 	const [toggle, setToggle] = useState(false);
@@ -68,7 +72,10 @@ function Waypoints() {
 			height: `${toggle ? 250 : 0}px`,
 		});
 	}, [animate, ref, toggle]);
-	const [waypoints] = q.waypoints.all.useNetRequest({ systemId: "all" });
+	const [waypoints] = q.waypoints.all.useNetRequest({
+		systemId: "all",
+		shipId,
+	});
 	return (
 		<div className="self-end justify-self-end w-96 pointer-events-auto">
 			<Button
@@ -105,7 +112,10 @@ function Waypoints() {
 											e.preventDefault();
 											e.stopPropagation();
 											try {
-												await q.waypoints.delete.netSend({ waypointId: id });
+												await q.waypoints.delete.netSend({
+													waypointId: id,
+													shipId,
+												});
 											} catch (err) {
 												if (err instanceof Error) {
 													toast({ color: "error", title: err.message });
@@ -152,6 +162,8 @@ function Waypoints() {
 }
 
 function AddWaypoint() {
+	const { shipId } = useStation();
+
 	const useStarmapStore = useGetStarmapStore();
 	const selectedObjectIds = useStarmapStore((store) => store.selectedObjectIds);
 	return (
@@ -165,6 +177,7 @@ function AddWaypoint() {
 					typeof selectedObjectIds[0] === "number" &&
 						(await q.waypoints.spawn.netSend({
 							entityId: selectedObjectIds[0],
+							shipId,
 						}));
 				} catch (error: unknown) {
 					if (error instanceof Error) {
@@ -179,10 +192,13 @@ function AddWaypoint() {
 }
 
 function EnterSystem() {
+	const { shipId } = useStation();
+
 	const useStarmapStore = useGetStarmapStore();
 	const [id] = useStarmapStore((store) => store.selectedObjectIds);
 	const [requestData] = q.navigation.object.useNetRequest({
 		objectId: Number(id) || undefined,
+		shipId,
 	});
 	const object = requestData.object;
 	if (!object) return null;

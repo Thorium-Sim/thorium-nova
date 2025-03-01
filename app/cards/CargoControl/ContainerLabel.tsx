@@ -1,12 +1,15 @@
 import { q } from "@thorium/context/AppContext";
 import { useShipMapStore } from "./useShipMapStore";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function ContainerLabel() {
+	const { shipId } = useStation();
+
 	const selectedContainerId = useShipMapStore(
 		(state) => state.selectedContainerId,
 	);
-	const [cargoRooms] = q.cargoControl.rooms.useNetRequest();
-	const [cargoContainers] = q.cargoControl.containers.useNetRequest();
+	const [cargoRooms] = q.cargoControl.rooms.useNetRequest({ shipId });
+	const [cargoContainers] = q.cargoControl.containers.useNetRequest({ shipId });
 
 	const selectedContainer = cargoContainers.find(
 		(c) => c.id === selectedContainerId,

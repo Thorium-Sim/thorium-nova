@@ -1,17 +1,17 @@
-import type { DataContext } from "@thorium/.server/DataContext";
+import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
 import type { ECS, Entity } from "@thorium/utils/ecs";
 import { pascalCase } from "change-case";
 export function getShipSystem(
-	context: DataContext,
-	param: { systemType: string } | { systemId: number },
+	ecs: ECS,
+	param: { systemType: ShipSystemTypes; shipId: number } | { systemId: number },
 ) {
 	let system: Entity | undefined | null;
 	if ("systemId" in param && param.systemId) {
-		system = context.flight?.ecs.getEntityById(param.systemId);
+		system = ecs.getEntityById(param.systemId);
 	} else if ("systemType" in param) {
-		const ship = context.ship;
-		for (const [id] of ship?.components.shipSystems?.shipSystems || []) {
-			const entity = context.flight?.ecs.getEntityById(id);
+		for (const [id] of ecs.getEntityById(param.shipId)?.components.shipSystems
+			?.shipSystems || []) {
+			const entity = ecs.getEntityById(id);
 			if (
 				entity?.components &&
 				`is${pascalCase(param.systemType)}` in entity.components

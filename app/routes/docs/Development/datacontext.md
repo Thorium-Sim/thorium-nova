@@ -37,17 +37,24 @@ A convenience property for accessing the server database.
 A convenience property for accessing the current flight database, if there is
 any.
 
-## `client`
+## `ecs`
 
-**Type**: `ServerClient`
+**Type**: `ECS`
+
+A convenience property for accessing the ECS instance of the current flight.
+
+## `getClient`
+
+**Type**: `(clientId:string) => ServerClient`
 
 A convenience property for accessing the permanent client object in the server
 database.
 
-## `flightClient`
+## `getFlightClient`
 
-**Type**: `FlightClient | null`
+**Type**: `(clientId:string) => FlightClient | null`
 
 A convenience property for accessing the flight client object in the current
 flight database, if there is any. It will automatically create an entry for the
 client in the flight database the first time it is accessed.
+

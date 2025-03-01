@@ -1,7 +1,7 @@
 import { NavLink } from "react-router";
 import Button from "@thorium/ui/Button";
 import { Disclosure } from "@headlessui/react";
-import { q } from "@thorium/context/AppContext";
+import { q, clientId } from "@thorium/context/AppContext";
 import { ErrorBoundary, useErrorBoundary } from "react-error-boundary";
 import { Suspense } from "react";
 
@@ -56,7 +56,7 @@ function FlightButtons() {
 }
 
 function ClientButtons() {
-	const [client] = q.client.get.useNetRequest();
+	const [client] = q.client.get.useNetRequest({ clientId });
 
 	return (
 		<>

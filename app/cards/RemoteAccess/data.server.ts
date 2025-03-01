@@ -5,13 +5,12 @@ import { z } from "zod";
 
 export const remoteAccess = t.router({
 	codes: t.procedure
-		.input(z.object({ shipId: z.number().optional() }).optional())
-		.filter((publish: { shipId?: number }, { ctx }) => {
-			if (publish && publish.shipId !== ctx.ship?.id) return false;
+		.input(z.object({ shipId: z.number() }))
+		.filter((publish: { shipId?: number }, { ctx, input }) => {
+			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
-		.request(({ ctx, input }) => {
-			const shipId = input?.shipId ?? ctx.ship?.id;
+		.request(({ ctx, input: { shipId } }) => {
 			const codes = (
 				ctx.flight?.ecs.entities.filter(
 					(e) => e.components.remoteAccessCode?.shipId === shipId,
@@ -35,21 +34,19 @@ export const remoteAccess = t.router({
 		}),
 	send: t.procedure
 		.meta({ event: true })
-		.input(z.object({ code: z.string().min(1) }))
-		.send(({ ctx, input }) => {
-			const { code } = input;
-			const clientId = ctx.id;
-			const shipId = ctx.ship?.id;
-			if (!shipId) return;
-
+		.input(z.object({ clientId: z.string(), code: z.string().min(1) }))
+		.send(({ ctx, input: { clientId, code } }) => {
 			const remoteAccessCode = new Entity();
+			const client = ctx.getFlightClient(clientId);
+			const shipId = client?.shipId;
+			if (!shipId) return;
 			remoteAccessCode.addComponent("remoteAccessCode", {
 				shipId,
 				clientId,
 				code,
 				state: "waiting",
 				timestamp: Date.now(),
-				station: ctx.flightClient?.stationId,
+				station: client?.stationId,
 			});
 			ctx.flight?.ecs.addEntity(remoteAccessCode);
 
