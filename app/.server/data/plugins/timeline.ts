@@ -10,6 +10,7 @@ import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
 import uniqid from "@thorium/utils/uniqid";
 import type { FlightStartingPoint } from "@thorium/.server/data/flight";
+import { moveFile } from "@thorium/utils/.server/moveFile";
 
 const action = t.router({
 	add: t.procedure
@@ -390,7 +391,11 @@ export const timeline = t.router({
 				timeline.isMission = input.isMission;
 			if (typeof input.cover === "string") {
 				const ext = path.extname(input.cover);
-				await moveFile(input.cover, `logo${ext}`, "cover");
+				timeline.assets.cover = await moveFile(
+					input.cover,
+					`logo${ext}`,
+					timeline.assetPath,
+				);
 			}
 
 			if (input.name !== timeline.name && input.name) {
@@ -402,27 +407,6 @@ export const timeline = t.router({
 				timelineId: timeline.name,
 			});
 			return { timelineId: timeline.name };
-
-			async function moveFile(
-				file: Blob | File | string,
-				filePath: string,
-				propertyName: "cover",
-			) {
-				if (!timeline) return;
-				if (typeof file === "string") {
-					await fs.mkdir(path.join(thoriumPath, timeline.assetPath), {
-						recursive: true,
-					});
-					await fs.rename(
-						file,
-						path.join(thoriumPath, timeline.assetPath, filePath),
-					);
-					timeline.assets[propertyName] = path.join(
-						timeline.assetPath,
-						filePath,
-					);
-				}
-			}
 		}),
 	step,
 	missions: t.procedure.request(({ ctx }) => {

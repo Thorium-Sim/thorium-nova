@@ -24,6 +24,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { sensors } from "./sensors";
+import { moveFile } from "@thorium/utils/.server/moveFile";
 
 const systemTypes = createUnionSchema(
 	Object.keys(ShipSystemTypes) as (keyof typeof ShipSystemTypes)[],
@@ -218,7 +219,11 @@ export const systems = t.router({
 			}
 			if (typeof input.file === "string") {
 				const filePath = path.basename(input.file);
-				const url = await moveFile(input.file, input.fileName || filePath);
+				const url = await moveFile(
+					input.file,
+					input.fileName || filePath,
+					shipSystem.assetPath,
+				);
 				if (!Array.isArray(shipSystem.soundEffects[input.soundEffect])) {
 					shipSystem.soundEffects[input.soundEffect] = [];
 				}
@@ -239,20 +244,6 @@ export const systems = t.router({
 			pubsub.publish.plugin.systems.get({
 				pluginId: input.pluginId,
 			});
-
-			async function moveFile(file: Blob | File | string, filePath: string) {
-				if (!shipSystem) return;
-				if (typeof file === "string") {
-					await fs.mkdir(path.join(thoriumPath, shipSystem.assetPath), {
-						recursive: true,
-					});
-					await fs.rename(
-						file,
-						path.join(thoriumPath, shipSystem.assetPath, filePath),
-					);
-					return path.join(shipSystem.assetPath, filePath);
-				}
-			}
 		}),
 	restoreOverride: t.procedure
 		.input(

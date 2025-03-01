@@ -7,6 +7,7 @@ import { getPlugin } from "./utils";
 import path from "node:path";
 import fs from "node:fs/promises";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
+import { moveFile } from "@thorium/utils/.server/moveFile";
 
 export const inventory = t.router({
 	all: t.procedure
@@ -125,7 +126,11 @@ export const inventory = t.router({
 			});
 			if (typeof input.image === "string") {
 				const ext = path.extname(input.image);
-				await moveFile(input.image, `image${ext}`, "image");
+				inventory.assets.image = await moveFile(
+					input.image,
+					`image${ext}`,
+					inventory.assetPath,
+				);
 			}
 
 			if (input.name !== inventory.name && input.name) {
@@ -137,26 +142,5 @@ export const inventory = t.router({
 				inventoryId: inventory.name,
 			});
 			return { inventoryId: inventory.name };
-
-			async function moveFile(
-				file: Blob | File | string,
-				filePath: string,
-				propertyName: "image",
-			) {
-				if (!inventory) return;
-				if (typeof file === "string") {
-					await fs.mkdir(path.join(thoriumPath, inventory.assetPath), {
-						recursive: true,
-					});
-					await fs.rename(
-						file,
-						path.join(thoriumPath, inventory.assetPath, filePath),
-					);
-					inventory.assets[propertyName] = path.join(
-						inventory.assetPath,
-						filePath,
-					);
-				}
-			}
 		}),
 });

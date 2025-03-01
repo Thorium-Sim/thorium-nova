@@ -54,7 +54,7 @@ async function processBody(req: HonoRequest) {
 	) {
 		const { params, ...tempBody } = await req.parseBody({ dot: true });
 		if (typeof params === "string") {
-			return { ...tempBody, ...JSON.parse(params) };
+			return { ...JSON.parse(params), ...tempBody };
 		}
 		return tempBody;
 	}

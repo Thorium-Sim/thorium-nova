@@ -20,6 +20,7 @@ import getHabitableZone from "@thorium/utils/starmap/getHabitableZone";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { randomFromRange } from "@thorium/utils/operations/randomFromRange";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+import { moveFile } from "@thorium/utils/.server/moveFile";
 
 // Just less than the orbit of Neptune 🥶
 const MAX_PLANET_DISTANCE: Kilometer = 4_000_000_000;
@@ -255,26 +256,26 @@ export const planet = t.router({
 
 			if (typeof input.textureMapAsset === "string") {
 				const ext = path.extname(input.textureMapAsset);
-				await moveFile(
+				planet.isPlanet.textureMapAsset = await moveFile(
 					input.textureMapAsset,
 					`texture-${planet.name}${ext}`,
-					"textureMapAsset",
+					system.assetPath,
 				);
 			}
 			if (typeof input.cloudMapAsset === "string") {
 				const ext = path.extname(input.cloudMapAsset);
-				await moveFile(
+				planet.isPlanet.cloudMapAsset = await moveFile(
 					input.cloudMapAsset,
 					`cloud-${planet.name}${ext}`,
-					"cloudMapAsset",
+					system.assetPath,
 				);
 			}
 			if (typeof input.ringMapAsset === "string") {
 				const ext = path.extname(input.ringMapAsset);
-				await moveFile(
+				planet.isPlanet.ringMapAsset = await moveFile(
 					input.ringMapAsset,
 					`ring-${planet.name}${ext}`,
-					"ringMapAsset",
+					system.assetPath,
 				);
 			}
 			if (input.cloudMapAsset === null) {
@@ -298,24 +299,6 @@ export const planet = t.router({
 				pluginId: input.pluginId,
 				solarSystemId: system.name,
 			});
-
-			async function moveFile(
-				file: Blob | File | string,
-				filePath: string,
-				propertyName: "textureMapAsset" | "cloudMapAsset" | "ringMapAsset",
-			) {
-				if (!system || !planet) return;
-				if (typeof file === "string") {
-					await fs.mkdir(path.join(thoriumPath, system.assetPath), {
-						recursive: true,
-					});
-					await fs.rename(
-						file,
-						path.join(thoriumPath, system.assetPath, filePath),
-					);
-					planet.isPlanet[propertyName] = path.join(system.assetPath, filePath);
-				}
-			}
 
 			return planet;
 		}),

@@ -72,9 +72,9 @@ export async function generateScene(
 		camera.position.z = cameraOptions?.z ?? 3;
 		camera.lookAt(new Vector3(0, 0, 0));
 
-		camera.rotateX(cameraOptions?.rotateX ?? 0);
-		camera.rotateY(cameraOptions?.rotateY ?? 0);
-		camera.rotateZ(cameraOptions?.rotateZ ?? 0);
+		if (cameraOptions?.rotateX) camera.rotateX(cameraOptions?.rotateX ?? 0);
+		if (cameraOptions?.rotateY) camera.rotateY(cameraOptions?.rotateY ?? 0);
+		if (cameraOptions?.rotateZ) camera.rotateZ(cameraOptions?.rotateZ ?? 0);
 		const hemiLight = new HemisphereLight(0xffffff, 0xffffff, 0.6);
 		hemiLight.position.set(0, 10, 0);
 		scene.add(hemiLight);

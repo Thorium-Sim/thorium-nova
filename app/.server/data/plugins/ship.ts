@@ -11,6 +11,7 @@ import path from "node:path";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { deck } from "./deck";
 import uniqid from "@thorium/utils/uniqid";
+import { moveFile } from "@thorium/utils/.server/moveFile";
 
 export const ship = t.router({
 	deck,
@@ -133,18 +134,40 @@ export const ship = t.router({
 			await fs.mkdir(path.join(thoriumPath, ship.assetPath), {
 				recursive: true,
 			});
-			if (typeof input.logo === "string") {
-				const ext = path.extname(input.logo);
-				await moveFile(input.logo, `logo${ext}`, "logo");
+			if (typeof input.logo !== "undefined") {
+				const ext = path.extname(
+					typeof input.logo === "string" ? input.logo : input.logo.name,
+				);
+				ship.assets.logo = await moveFile(
+					input.logo,
+					`logo${ext}`,
+					ship.assetPath,
+				);
 			}
-			if (typeof input.model === "string")
-				await moveFile(input.model, "model.glb", "model");
-			if (typeof input.top === "string")
-				await moveFile(input.top, "top.png", "topView");
-			if (typeof input.side === "string")
-				await moveFile(input.side, "side.png", "sideView");
-			if (typeof input.vanity === "string")
-				await moveFile(input.vanity, "vanity.png", "vanity");
+			if (typeof input.model !== "undefined")
+				ship.assets.model = await moveFile(
+					input.model,
+					"model.glb",
+					ship.assetPath,
+				);
+			if (typeof input.top !== "undefined")
+				ship.assets.topView = await moveFile(
+					input.top,
+					"top.png",
+					ship.assetPath,
+				);
+			if (typeof input.side !== "undefined")
+				ship.assets.sideView = await moveFile(
+					input.side,
+					"side.png",
+					ship.assetPath,
+				);
+			if (typeof input.vanity !== "undefined")
+				ship.assets.vanity = await moveFile(
+					input.vanity,
+					"vanity.png",
+					ship.assetPath,
+				);
 
 			if (input.theme) {
 				const themePlugin = getPlugin(ctx, input.theme.pluginId);
@@ -182,24 +205,6 @@ export const ship = t.router({
 				shipId: ship.name,
 			});
 			return { shipId: ship.name };
-
-			async function moveFile(
-				file: Blob | File | string,
-				filePath: string,
-				propertyName: "logo" | "model" | "topView" | "sideView" | "vanity",
-			) {
-				if (!ship) return;
-				if (typeof file === "string") {
-					await fs.mkdir(path.join(thoriumPath, ship.assetPath), {
-						recursive: true,
-					});
-					await fs.rename(
-						file,
-						path.join(thoriumPath, ship.assetPath, filePath),
-					);
-					ship.assets[propertyName] = path.join(ship.assetPath, filePath);
-				}
-			}
 		}),
 	addSystem: t.procedure
 		.input(
