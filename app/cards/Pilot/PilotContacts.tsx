@@ -17,6 +17,7 @@ import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { degToRad, solarRadiusToKilometers } from "@thorium/utils/unitTypes";
 import {
 	type BufferAttribute,
+	type Camera,
 	CylinderGeometry,
 	DoubleSide,
 	type Group,
@@ -197,7 +198,6 @@ export const ShipEntity = ({
 
 	const spriteMap = useTexture(logoUrl);
 	const reticleMap = useTexture(ReticleTexture);
-	const showShipIcon = false;
 
 	const scale = 1 / 50;
 	const mesh = useRef<Mesh>(null);
@@ -305,7 +305,14 @@ export const ShipEntity = ({
 			// This scale is helpful if we want to see the ships orientation in space.
 			arrowRef.current?.scale.setScalar((dx * 20) / 1000);
 			if (ship.r) {
-				shipRef.current?.quaternion.set(ship.r.x, ship.r.y, ship.r.z, ship.r.w);
+				if (shipRef.current) {
+					shipRef.current?.quaternion.set(
+						ship.r.x,
+						ship.r.y,
+						ship.r.z,
+						ship.r.w,
+					);
+				}
 				arrowRef.current?.quaternion.set(
 					ship.r.x,
 					ship.r.y,
@@ -386,23 +393,21 @@ export const ShipEntity = ({
 			</group>
 			{id !== shipId && (
 				<Fragment>
-					{showShipIcon ? (
-						<sprite ref={sprite} {...eventHandlers}>
-							<spriteMaterial
-								attach="material"
-								map={spriteMap}
-								color={"white"}
-								sizeAttenuation={true}
-							/>
-						</sprite>
-					) : (
-						<group ref={arrowRef} {...eventHandlers}>
-							<mesh rotation={[Math.PI / 2, 0, 0]}>
-								<coneGeometry args={[1, 3, 4]} />
-								<meshBasicMaterial color={0x888888} />
-							</mesh>
-						</group>
-					)}
+					<sprite ref={sprite} {...eventHandlers}>
+						<spriteMaterial
+							attach="material"
+							map={spriteMap}
+							color={"white"}
+							sizeAttenuation={true}
+						/>
+					</sprite>
+					{/* This could be an instance mesh for every contact if we wanted to be really fancy... */}
+					<group ref={arrowRef} {...eventHandlers}>
+						<mesh position={[0, 0, 3]} rotation={[Math.PI / 2, 0, 0]}>
+							<coneGeometry args={[1, 1, 2]} />
+							<meshBasicMaterial color={0x888888} wireframe />
+						</mesh>
+					</group>
 
 					<sprite ref={reticle} visible={isTargeted}>
 						<spriteMaterial
