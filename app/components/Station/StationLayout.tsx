@@ -94,7 +94,7 @@ const StationLayout = () => {
 						<CardArea card={card} />
 					</div>
 				</div>
-				<div className="widgets flex space-x-2 absolute bottom-8 right-[calc(2rem+50px)]">
+				<div className="widgets flex items-center gap-2 absolute bottom-8 right-[calc(2rem+50px)]">
 					<Widgets />
 				</div>
 			</div>

@@ -6,6 +6,7 @@ import {
 	type FC,
 	type ReactElement,
 	type ReactNode,
+	Suspense,
 	useState,
 } from "react";
 import { Popover, Transition } from "@headlessui/react";
@@ -100,7 +101,7 @@ export const Widget: FC<{
 	]);
 
 	return (
-		<Popover className="relative">
+		<Popover className="relative flex items-center">
 			<Popover.Button
 				className="widget"
 				ref={refs.setReference}
@@ -112,36 +113,38 @@ export const Widget: FC<{
 					icon
 				)}
 			</Popover.Button>
-			<Transition>
-				<Popover.Panel
-					className={cn(
-						"max-w-md absolute isolate right-0 max-h-96 z-50 !bg-black/90 panel backdrop-blur border border-white/50 rounded p-2 w-screen @container overflow-hidden",
-						{
-							"max-w-sm": size === "sm",
-							"max-w-lg": size === "md",
-							"max-w-xl": size === "lg",
-							"max-w-2xl": size === "xl",
-						},
-						"z-40 relative scale-100 ease-out",
-						"data-[closed]:opacity-0 data-[closed]:scale-95",
-						"data-[enter]:duration-100",
-						"data-[leave]:duration-75",
-					)}
-					ref={refs.setFloating}
-					style={{
-						position: strategy,
-						top: y ?? 0,
-						left: x ?? 0,
-					}}
-					{...getFloatingProps()}
-				>
-					<Component
-						cardLoaded={isOpen}
-						isOpen={isOpen}
-						onClose={() => setIsOpen(false)}
-					/>
-				</Popover.Panel>
-			</Transition>
+			<Suspense>
+				<Transition>
+					<Popover.Panel
+						className={cn(
+							"max-w-md absolute isolate right-0 max-h-96 z-50 !bg-black/90 panel backdrop-blur border border-white/50 rounded p-2 w-screen @container overflow-hidden",
+							{
+								"max-w-sm": size === "sm",
+								"max-w-lg": size === "md",
+								"max-w-xl": size === "lg",
+								"max-w-2xl": size === "xl",
+							},
+							"z-40 relative scale-100 ease-out",
+							"data-[closed]:opacity-0 data-[closed]:scale-95",
+							"data-[enter]:duration-100",
+							"data-[leave]:duration-75",
+						)}
+						ref={refs.setFloating}
+						style={{
+							position: strategy,
+							top: y ?? 0,
+							left: x ?? 0,
+						}}
+						{...getFloatingProps()}
+					>
+						<Component
+							cardLoaded={isOpen}
+							isOpen={isOpen}
+							onClose={() => setIsOpen(false)}
+						/>
+					</Popover.Panel>
+				</Transition>
+			</Suspense>
 		</Popover>
 	);
 };

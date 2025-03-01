@@ -405,7 +405,7 @@ export const ShipEntity = ({
 					<group ref={arrowRef} {...eventHandlers}>
 						<mesh position={[0, 0, 3]} rotation={[Math.PI / 2, 0, 0]}>
 							<coneGeometry args={[1, 1, 2]} />
-							<meshBasicMaterial color={0x888888} wireframe />
+							<meshBasicMaterial color={0xffffff} />
 						</mesh>
 					</group>
 

@@ -77,7 +77,6 @@ export const LinearJoystick = ({
 			: undefined,
 	});
 	const eventHandlers = bind();
-	console.log(xy.isAnimating);
 	return (
 		<div
 			ref={containerRef}
