@@ -28,10 +28,15 @@ export function useJoystick({
 	const containerRef = useRef<HTMLDivElement>(null);
 	const dragDown = useRef(false);
 	const maxDistance = useRef(0);
+	const offsetRef = useRef<[number, number]>([0, 0]);
 	const [{ xy }, set] = useSpring(() => ({
 		xy: [0, 0],
 		config: { mass: 1, tension: 280, friction: 30 },
 	}));
+	function startAtOffset(xy: [number, number]) {
+		offsetRef.current = xy;
+		set({ xy, immediate: true });
+	}
 	const bind = useDrag(
 		({ down, first, movement: [x, y] }) => {
 			if (first) {
@@ -41,6 +46,8 @@ export function useJoystick({
 					] || 0) / 2;
 			}
 			dragDown.current = down;
+			x += offsetRef.current[0];
+			y += offsetRef.current[1];
 			const dist = distance(x, y);
 			if (dist > maxDistance.current) {
 				const theta = Math.abs(Math.atan(y / x));
@@ -103,5 +110,5 @@ export function useJoystick({
 		gamepadValues.current[1] = value;
 		setGamepadValue();
 	});
-	return [xy, bind, containerRef] as const;
+	return [xy, bind, containerRef, startAtOffset] as const;
 }

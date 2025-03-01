@@ -40,10 +40,6 @@ import { useStation } from "@thorium/routes/station/useStation";
  * - Add waypoints from the sensors station
  * - Planets and stars on the scannable objects list
  * - Tune active scans of distant objects to make _some_ progress
- * - Add some other kind of indicator to the circle grid to indicate forward movement
- *			Vector indicators at the center that show direction and speed of movement (arrows that grow longer with increased velocity)
- *			A small "drift indicator" that shows lateral motion as a dot that moves from the center when sideways movement occurs
- *			Motion trails or particles that flow across the grid in the opposite direction of travel (similar to star movement in space games)
  * - Passive sensors data for objects - maybe visual overlays next to the blob
  * 		- Heat signature (just temperature)
  * 		- When an object performs an active scan

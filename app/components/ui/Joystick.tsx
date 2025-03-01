@@ -15,25 +15,38 @@ export const Joystick = ({
 	children?: ReactNode;
 	gamepadKeys?: { x: GamepadKey; y: GamepadKey };
 }) => {
-	const [xy, bind, containerRef] = useJoystick({
+	const [xy, bind, containerRef, set] = useJoystick({
 		axisSnap: true,
 		onDrag,
 		gamepadKeys,
 	});
 
+	const eventHandlers = bind();
 	return (
 		<div className={cn(`relative aspect-square`, className)}>
 			<div
 				ref={containerRef}
-				className="top-0 absolute bg-black/50 border-2 border-white/50 rounded-full w-full h-full flex justify-center items-center"
+				className="top-0 absolute bg-black/50 border-2 border-white/50 rounded-full w-full h-full flex justify-center items-center touch-none"
+				{...eventHandlers}
+				onPointerDown={(e) => {
+					// Find the offset from the center
+					const rect = containerRef.current?.getBoundingClientRect();
+					if (!rect) return;
+					const center = [
+						rect.left + rect.width / 2,
+						rect.top + rect.height / 2,
+					] as const;
+					set([e.clientX - center[0], e.clientY - center[1]]);
+					eventHandlers.onPointerDown?.(e);
+				}}
 			>
 				{/* @ts-expect-error */}
 				<a.div
-					{...bind()}
+					{...eventHandlers}
 					style={{
 						transform: xy?.to((x, y) => `translate3d(${x}px,${y}px,0)`),
 					}}
-					className="z-10 w-10 h-10 rounded-full border-black/50 border-2 bg-gray-500 shadow-md cursor-pointer"
+					className="z-10 w-10 h-10 rounded-full border-black/50 border-2 bg-gray-500 shadow-md cursor-pointer touch-none"
 				/>
 				{children}
 			</div>
@@ -54,7 +67,7 @@ export const LinearJoystick = ({
 	vertical?: boolean;
 	gamepadKey?: GamepadKey;
 }) => {
-	const [xy, bind, containerRef] = useJoystick({
+	const [xy, bind, containerRef, set] = useJoystick({
 		axis: vertical ? "y" : "x",
 		onDrag,
 		gamepadKeys: gamepadKey
@@ -63,20 +76,37 @@ export const LinearJoystick = ({
 				: { x: gamepadKey, y: "" as GamepadKey }
 			: undefined,
 	});
+	const eventHandlers = bind();
+	console.log(xy.isAnimating);
 	return (
 		<div
 			ref={containerRef}
 			className={cn(
 				vertical ? "h-full" : "w-full",
-				"relative bg-black/50 border-2 border-white/50 rounded-full flex justify-center items-center",
+				"relative bg-black/50 border-2 border-white/50 rounded-full flex justify-center items-center touch-none",
 				className,
 			)}
+			{...eventHandlers}
+			onPointerDown={(e) => {
+				// Find the offset from the center
+				const rect = containerRef.current?.getBoundingClientRect();
+				if (!rect) return;
+				const center = [
+					rect.left + rect.width / 2,
+					rect.top + rect.height / 2,
+				] as const;
+				set([
+					vertical ? 0 : e.clientX - center[0],
+					vertical ? e.clientY - center[1] : 0,
+				]);
+				eventHandlers.onPointerDown?.(e);
+			}}
 		>
 			{/* @ts-expect-error */}
 			<a.div
-				{...bind()}
+				{...eventHandlers}
 				style={{ transform: xy?.to((x, y) => `translate3d(${x}px,${y}px,0)`) }}
-				className="z-10 w-10 h-10 rounded-full border-black/50 border-2 bg-gray-500 shadow-md cursor-pointer"
+				className="z-10 w-10 h-10 rounded-full border-black/50 border-2 bg-gray-500 shadow-md cursor-pointer touch-none"
 			/>
 			{children}
 		</div>
