@@ -130,9 +130,7 @@ export class FlightDataModel extends FSDataStore {
 	 * All player ships in the universe.
 	 */
 	get playerShips() {
-		return this.ecs.entities.filter(
-			(f) => f.components.isShip && f.components.isPlayerShip,
-		);
+		return [...(this.ecs.componentCache.get("isPlayerShip") || [])];
 	}
 	/**
 	 * All ships in the universe.

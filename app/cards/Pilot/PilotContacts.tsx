@@ -42,6 +42,7 @@ import BracketTexture from "@thorium/cards/Pilot/bracket.svg";
 import Explosion from "@thorium/components/Starmap/Effects/Explosion";
 import { isObjectOccludedBySphere } from "@thorium/utils/starmap/isObjectOccludedBySphere";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function CircleGridContacts({
 	onContactClick,
@@ -120,7 +121,11 @@ export function CircleGridContacts({
 	);
 }
 export function CircleGridWaypoints() {
-	const [waypoints] = q.waypoints.all.useNetRequest({ systemId: "all" });
+	const { shipId } = useStation();
+	const [waypoints] = q.waypoints.all.useNetRequest({
+		systemId: "all",
+		shipId,
+	});
 	useGetFacingWaypoint();
 	return (
 		<group>
@@ -162,7 +167,7 @@ export const ShipEntity = ({
 	isSelected?: boolean;
 	onContactOcclusion?: (id: number, occluded: boolean) => void;
 }) => {
-	const [{ id: playerId }] = q.ship.player.useNetRequest();
+	const { shipId } = useStation();
 	const [orbs] = q.starmapCore.entities.useNetRequest({
 		systemId,
 	});
@@ -207,7 +212,7 @@ export const ShipEntity = ({
 		const camera = props.camera as OrthographicCamera;
 		const dx = (camera.right - camera.left) / (2 * camera.zoom);
 		const ship = interpolate(id);
-		const playerShip = interpolate(playerId);
+		const playerShip = interpolate(shipId);
 		const playerPosition = playerShip || zeroVector;
 
 		if (!ship || !playerPosition || !playerShip) return;
@@ -379,7 +384,7 @@ export const ShipEntity = ({
 			<group ref={shipRef} {...eventHandlers}>
 				<primitive object={scene} rotation={[Math.PI / 2, Math.PI, 0]} />
 			</group>
-			{id !== playerId && (
+			{id !== shipId && (
 				<Fragment>
 					{showShipIcon ? (
 						<sprite ref={sprite} {...eventHandlers}>
@@ -450,7 +455,7 @@ export const PlanetaryEntity = memo(
 		onClick,
 		isSelected,
 	}: PlanetaryEntityProps) => {
-		const [{ id: playerId }] = q.ship.player.useNetRequest();
+		const { shipId } = useStation();
 		const { interpolate } = useLiveQuery();
 
 		const bracket = useRef<Group>(null);
@@ -475,7 +480,7 @@ export const PlanetaryEntity = memo(
 			const camera = props.camera as OrthographicCamera;
 			const dx = (camera.right - camera.left) / (2 * camera.zoom);
 
-			const playerShip = interpolate(playerId);
+			const playerShip = interpolate(shipId);
 			if (!playerShip || (!isPlanet && !isStar) || !satellite) return;
 
 			ref.current?.position.set(
@@ -563,13 +568,13 @@ function OcclusionCone({
 		inclination: sat.inclination,
 	});
 
-	const [{ id: playerId }] = q.ship.player.useNetRequest();
+	const { shipId } = useStation();
 	const { interpolate } = useLiveQuery();
 	const ref = useRef<Group>(null);
 	const cylinderRef = useRef<Mesh>(null);
 
 	useAnimationFrame(() => {
-		const playerShip = interpolate(playerId);
+		const playerShip = interpolate(shipId);
 		if (!playerShip) return;
 		position1.set(playerShip.x, playerShip.y, playerShip.z);
 		position2.set(position.x, position.y, position.z);
@@ -748,7 +753,7 @@ export function TorpedoEntity({
 	const explosionRef = useRef<Group>(null);
 	const mesh = useRef<Mesh>(null);
 	const line = useRef<Line2>(null);
-	const [{ id: playerId }] = q.ship.player.useNetRequest();
+	const { shipId } = useStation();
 
 	useFrame((props) => {
 		const camera = props.camera as OrthographicCamera;
@@ -756,7 +761,7 @@ export function TorpedoEntity({
 		ref.current?.scale.set(0.5, 0.2, 1).multiplyScalar(dx * 0.02);
 
 		const torpedo = interpolate(id);
-		const playerShip = interpolate(playerId);
+		const playerShip = interpolate(shipId);
 		const isDestroyed = torpedo?.f === 1;
 		const playerPosition = playerShip || zeroVector;
 		if (!torpedo || !playerPosition || !playerShip) return;

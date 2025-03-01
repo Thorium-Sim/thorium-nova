@@ -22,7 +22,7 @@ fetching the data and subscribing to any changes.
 > networking messages. The programmer created an abstraction for peer-to-peer
 > communication which used the `netSend` command to send messages to another
 > station and `netRequest` to request data from another station. Thorium Nova
-> recognizes the these Hypercard controls by using a similar API.
+> pay homage the these Hypercard controls by using a similar API.
 
 ## Defining Routers
 
@@ -45,14 +45,16 @@ import {z} from "zod";
 export const pilot = t.router({
   impulseEngines: t.router({
     get: t.procedure
-      .filter((publish: {shipId: number; systemId: number}, {ctx}) => {
-        if (publish && publish.shipId !== ctx.ship?.id) return false;
+      .input(z.object({shipId:z.number()}))
+      .filter((publish: {shipId: number; systemId: number}, {input}) => {
+        if (publish && publish.shipId !== input.shipId) return false;
         return true;
       })
-      .request(({ctx}) => {
+      .request(({ctx, input}) => {
         // Currently only support one impulse engines
-        const impulseEngines = getShipSystem(ctx, {
+        const impulseEngines = getShipSystem(ctx.ecs, {
           systemType: "impulseEngines",
+          shipId:input.shipId
         });
         return {
           id: impulseEngines.id,
@@ -65,13 +67,13 @@ export const pilot = t.router({
         };
       }),
     setSpeed: t.procedure
-      .input(z.object({systemId: z.number().optional(), speed: z.number()}))
+      .input(z.object({shipId: z.number(), systemId: z.number().optional(), speed: z.number()}))
       .send(({ctx, input}) => {
-        if (!ctx.ship) throw new Error("No ship found.");
 
-        const system = getShipSystem(ctx, {
+        const system = getShipSystem(ctx.ecs, {
           systemId: input.systemId,
           systemType: "impulseEngines",
+          shipId: input.shipId
         });
 
         if (!system.components.isImpulseEngines)
@@ -82,7 +84,7 @@ export const pilot = t.router({
         });
 
         pubsub.publish.pilot.impulseEngines.get({
-          shipId: ctx.ship?.id,
+          shipId: input.shipId,
           systemId: system.id,
         });
         return system;

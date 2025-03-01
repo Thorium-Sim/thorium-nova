@@ -15,7 +15,7 @@ import {
 import { useFrame } from "@react-three/fiber";
 import { useGetStarmapStore } from "./starmapStore";
 import type { Line2 } from "three-stdlib";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { setCursor } from "@thorium/utils/setCursor";
 import type { Meter } from "@thorium/utils/unitTypes";
@@ -45,7 +45,7 @@ export function StarmapShip({
 	const [autopilotData] = q.starmapCore.autopilot.useNetRequest({ systemId });
 
 	const shipAutopilot = autopilotData[id];
-	const [player] = q.ship.player.useNetRequest();
+	const [player] = q.ship.player.useNetRequest({ clientId });
 	const playerId = player?.id;
 
 	const isNotViewscreen = useStarmapStore(

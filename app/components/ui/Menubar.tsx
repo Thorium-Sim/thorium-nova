@@ -44,8 +44,13 @@ export default function Menubar({ children }: { children?: ReactNode }) {
 					</Link>
 				)}
 				{menuChildren}
-				<div className="flex-1" />
-				{account && <LoginButton size="sm" />}
+
+				{account && (
+					<>
+						<div className="flex-1" />
+						<LoginButton size="sm" />
+					</>
+				)}
 			</div>
 			<MenubarContext.Provider value={setProps}>
 				{children}

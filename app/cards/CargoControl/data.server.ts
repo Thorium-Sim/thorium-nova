@@ -1,7 +1,7 @@
 import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { matchSorter } from "match-sorter";
-import type { Entity } from "@thorium/utils/ecs";
+import type { ECS, Entity } from "@thorium/utils/ecs";
 import { z } from "zod";
 import type { shipMap } from "@thorium/ecs-components/shipMap";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
@@ -26,6 +26,7 @@ type ShipMapDeckNode = Zod.infer<typeof shipMap>["deckNodes"][number];
 
 const transferId = z.object({
 	type: z.union([z.literal("room"), z.literal("entity")]),
+	shipId: z.number(),
 	id: z.number(),
 });
 
@@ -52,7 +53,7 @@ function getGraph(entity: Entity) {
 
 export const cargoControl = t.router({
 	inventoryTypes: t.procedure.request(({ ctx }) => {
-		const inventorySystem = ctx.flight?.ecs.systems.find(
+		const inventorySystem = ctx.ecs.systems.find(
 			(sys) => sys.constructor.name === "FilterInventorySystem",
 		);
 		return Object.fromEntries(
@@ -63,33 +64,36 @@ export const cargoControl = t.router({
 		);
 	}),
 	rooms: t.procedure
-		.filter((publish: { shipId: number } | null, { ctx }) => {
-			if (publish && publish.shipId !== ctx.ship?.id) return false;
+		.input(z.object({ shipId: z.number() }))
+		.filter((publish: { shipId: number } | null, { input }) => {
+			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
-		.request(({ ctx }) => {
-			if (!ctx.ship) throw new Error("No ship selected");
-			const rooms = getCargoRooms(ctx.ship);
-			const decks = ctx.ship.components.shipMap?.decks || [];
+		.request(({ ctx, input }) => {
+			const ship = ctx.ecs.getEntityById(input.shipId);
+			if (!ship) throw new Error("No ship selected");
+			const rooms = getCargoRooms(ship);
+			const decks = ship.components.shipMap?.decks || [];
 			return {
 				rooms,
 				decks,
-				shipLength: ctx.ship.components.size?.length || 100,
+				shipLength: ship.components.size?.length || 100,
 			};
 		}),
 	containers: t.procedure
-		.filter((publish: { shipId: number } | null, { ctx }) => {
-			if (publish && publish.shipId !== ctx.ship?.id) return false;
+		.input(z.object({ shipId: z.number() }))
+		.filter((publish: { shipId: number } | null, { input }) => {
+			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
-		.request(({ ctx }) => {
-			if (!ctx.ship) throw new Error("No ship selected");
-			const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
+		.request(({ ctx, input }) => {
+			const inventoryTemplates = getInventoryTemplates(ctx.ecs);
 
 			return (
-				ctx.flight?.ecs.entities
+				ctx.ecs.entities
 					.filter(
 						(entity) =>
+							entity.components.position?.parentId === input.shipId &&
 							entity.components.cargoContainer &&
 							entity.components.position &&
 							entity.components.passengerMovement,
@@ -118,9 +122,10 @@ export const cargoControl = t.router({
 			);
 		}),
 	search: t.procedure
-		.input(z.object({ query: z.string() }))
+		.input(z.object({ shipId: z.number(), query: z.string() }))
 		.request(({ ctx, input }) => {
-			if (!ctx.ship) throw new Error("No ship selected");
+			const ship = ctx.ecs.getEntityById(input.shipId);
+			if (!ship) throw new Error("No ship selected");
 
 			const output: {
 				id: number;
@@ -134,7 +139,7 @@ export const cargoControl = t.router({
 			}[] = [];
 			// We're searching for decks, rooms, and cargo items.
 			// First decks.
-			ctx.ship.components.shipMap?.decks.forEach((deck, i) => {
+			ship.components.shipMap?.decks.forEach((deck, i) => {
 				output.push({
 					id: i,
 					type: "deck",
@@ -145,15 +150,14 @@ export const cargoControl = t.router({
 			});
 
 			// Then rooms.
-			ctx.ship.components.shipMap?.deckNodes.forEach((node) => {
+			ship.components.shipMap?.deckNodes.forEach((node) => {
 				if (node.isRoom && node.flags?.includes("cargo")) {
 					output.push({
 						id: node.id,
 						type: "room",
 						name: node.name || "",
 						roomId: node.id,
-						deck:
-							ctx.ship?.components.shipMap?.decks[node.deckIndex].name || "",
+						deck: ship.components.shipMap?.decks[node.deckIndex].name || "",
 						deckIndex: node.deckIndex,
 					});
 
@@ -167,8 +171,7 @@ export const cargoControl = t.router({
 							room: node.name,
 							roomId: node.id,
 							count,
-							deck:
-								ctx.ship?.components.shipMap?.decks[node.deckIndex].name || "",
+							deck: ship.components.shipMap?.decks[node.deckIndex].name || "",
 							deckIndex: node.deckIndex,
 						});
 					});
@@ -177,21 +180,30 @@ export const cargoControl = t.router({
 
 			return matchSorter(output, input.query, { keys: ["name"] }).slice(0, 10);
 		}),
-	stream: t.procedure.dataStream(({ entity, ctx }) => {
-		if (!entity) return false;
-		return Boolean(
-			entity.components.cargoContainer &&
-				entity.components.position?.parentId === ctx.ship?.id &&
-				entity.components.passengerMovement,
-		);
-	}),
+	stream: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.dataStream(({ entity, input, ctx }) => {
+			if (!entity) return false;
+			return Boolean(
+				entity.components.cargoContainer &&
+					entity.components.position?.parentId === input.shipId &&
+					entity.components.passengerMovement,
+			);
+		}),
 	containerSummon: t.procedure
-		.input(z.object({ roomId: z.number(), containerId: z.number().optional() }))
+		.input(
+			z.object({
+				shipId: z.number(),
+				roomId: z.number(),
+				containerId: z.number().optional(),
+			}),
+		)
 		.send(({ ctx, input }) => {
-			if (!ctx.ship) throw new Error("You are not assigned to a ship.");
-			if (!ctx.ship.components.shipMap) throw new Error("Invalid ship map.");
-			const graph = getGraph(ctx.ship);
-			const room = ctx.ship?.components.shipMap?.deckNodes.find(
+			const ship = ctx.ecs.getEntityById(input.shipId);
+			if (!ship) throw new Error("No ship selected");
+			if (!ship.components.shipMap) throw new Error("Invalid ship map.");
+			const graph = getGraph(ship);
+			const room = ship.components.shipMap?.deckNodes.find(
 				(d) => d.id === input.roomId,
 			);
 			if (!room) throw new Error("No room found");
@@ -206,7 +218,7 @@ export const cargoControl = t.router({
 						if (
 							!entity.components.cargoContainer ||
 							!entity.components.position ||
-							entity.components.position.parentId !== ctx.ship?.id
+							entity.components.position.parentId !== input.shipId
 						)
 							return acc;
 						if (!acc) return entity;
@@ -248,7 +260,7 @@ export const cargoControl = t.router({
 				throw new Error("No container available.");
 
 			const closestNode = findClosestNode(
-				ctx.ship.components.shipMap.deckNodes,
+				ship.components.shipMap.deckNodes,
 				container.components.position,
 			);
 			if (!closestNode) throw new Error("No container available.");
@@ -284,12 +296,12 @@ export const cargoControl = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
-			const fromContainer = getCargoContents(ctx, input.fromId);
+			const fromContainer = getCargoContents(ctx.ecs, input.fromId);
 			if (!fromContainer) throw new Error("No source container found.");
-			const toContainer = getCargoContents(ctx, input.toId);
+			const toContainer = getCargoContents(ctx.ecs, input.toId);
 			if (!toContainer) throw new Error("No destination container found.");
 
-			const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
+			const inventoryTemplates = getInventoryTemplates(ctx.ecs);
 
 			const itemCounts: { [key: string]: number } = {};
 			let destinationVolume = toContainer.volume || 0;
@@ -353,12 +365,18 @@ export const cargoControl = t.router({
 					(T1 * C1 + T2 * C2) / (C1 + C2);
 			});
 
-			if (ctx.ship) {
+			pubsub.publish.cargoControl.containers({
+				shipId: input.fromId.shipId,
+			});
+			pubsub.publish.cargoControl.rooms({
+				shipId: input.fromId.shipId,
+			});
+			if (input.fromId.shipId !== input.toId.shipId) {
 				pubsub.publish.cargoControl.containers({
-					shipId: ctx.ship?.id,
+					shipId: input.toId.shipId,
 				});
 				pubsub.publish.cargoControl.rooms({
-					shipId: ctx.ship?.id,
+					shipId: input.toId.shipId,
 				});
 			}
 		}),
@@ -589,26 +607,27 @@ export function calculateCargoUsed(
 }
 
 export function getCargoContents(
-	context: DataContext,
-	{ type, id }: { type: "room" | "entity"; id: number },
+	ecs: ECS,
+	{ type, id, shipId }: { type: "room" | "entity"; shipId: number; id: number },
 ) {
 	if (type === "entity") {
-		const entity = context.flight?.ecs.getEntityById(id);
+		const entity = ecs.getEntityById(id);
 		const container = entity?.components.cargoContainer;
 		if (!container) return null;
 		return { volume: container.volume, contents: container.contents };
 	}
 	if (type === "room") {
-		const room = context.ship?.components.shipMap?.deckNodes.find(
-			(d) => d.id === id,
-		);
+		const room = ecs
+			.getEntityById(shipId)
+			?.components.shipMap?.deckNodes.find((d) => d.id === id);
 		if (!room) return null;
 		return { volume: room.volume, contents: room.contents };
 	}
 	return null;
 }
 
-function getCargoRooms(ship: Entity) {
+function getCargoRooms(ship: Entity | null) {
+	if (!ship) return [];
 	const inventoryTemplates = getInventoryTemplates(ship.ecs);
 
 	if (!cargoRoomsCache.get(ship)) {
@@ -643,7 +662,7 @@ export function getRoomByFlag(ship: Entity, flag: NodeFlag) {
 	return rooms.filter((room) => room.flags?.includes(flag));
 }
 
-export function getRoomBySystem(ship: Entity, system: string) {
+export function getRoomBySystem(ship: Entity | null, system: string) {
 	const rooms = getCargoRooms(ship);
 
 	return rooms.filter((room) => room.systems?.includes(system));

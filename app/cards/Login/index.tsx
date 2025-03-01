@@ -1,4 +1,4 @@
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import Button from "@thorium/ui/Button";
 import Input from "@thorium/ui/Input";
 import { useState } from "react";
@@ -6,11 +6,11 @@ import { useState } from "react";
 const Login = () => {
 	const [loginName, setLoginName] = useState("");
 	// TODO: Support logging in with a ThoriumSim account
-	const [ship] = q.ship.get.useNetRequest();
+	const [ship] = q.ship.get.useNetRequest({ clientId });
 	const login = () => {
 		if (loginName.trim().length > 0) {
 			// TODO: Play a sound effect when the user logs in
-			q.client.login.netSend({ name: loginName });
+			q.client.login.netSend({ name: loginName, clientId });
 		}
 	};
 	if (!ship) throw new Error("Station is not assigned to a ship.");

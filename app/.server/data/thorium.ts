@@ -24,18 +24,22 @@ export const thorium = t.router({
 		);
 		return hasHost;
 	}),
-	claimHost: t.procedure.send(({ ctx }) => {
-		const hasExistingHost = Object.values(ctx.server.clients).some((client) => {
-			return client.isHost && client.connected;
-		});
-		if (!hasExistingHost) {
-			ctx.client.isHost = true;
-		}
+	claimHost: t.procedure
+		.input(z.object({ clientId: z.string() }))
+		.send(({ ctx, input: { clientId } }) => {
+			const hasExistingHost = Object.values(ctx.server.clients).some(
+				(client) => {
+					return client.isHost && client.connected;
+				},
+			);
+			if (!hasExistingHost) {
+				ctx.getClient(clientId).isHost = true;
+			}
 
-		pubsub.publish.client.all();
-		pubsub.publish.client.get({ clientId: ctx.id });
-		pubsub.publish.thorium.hasHost();
-	}),
+			pubsub.publish.client.all();
+			pubsub.publish.client.get({ clientId });
+			pubsub.publish.thorium.hasHost();
+		}),
 	actions: t.procedure.request(function getActions({ ctx }) {
 		const actions = Object.entries(router._def.procedures)
 			// @ts-expect-error This does have the meta type

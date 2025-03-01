@@ -13,15 +13,26 @@ import type { DataContext } from "@thorium/.server/DataContext";
 
 export const ship = t.router({
 	get: t.procedure
-		.filter((publish: { shipId: number } | { clientId: string }, { ctx }) => {
-			if (!publish) return true;
-			if ("shipId" in publish && publish.shipId !== ctx.flightClient?.shipId)
-				return false;
-			if ("clientId" in publish && publish.clientId !== ctx.id) return false;
-			return true;
-		})
-		.request(({ ctx }) => {
-			const ship = ctx.ship?.toJSON() || null;
+		.input(z.object({ clientId: z.string() }))
+		.filter(
+			(publish: { shipId: number } | { clientId: string }, { ctx, input }) => {
+				if (!publish) return true;
+				if (
+					"shipId" in publish &&
+					publish.shipId !== ctx.getFlightClient(input.clientId)?.shipId
+				)
+					return false;
+				if ("clientId" in publish && publish.clientId !== input.clientId)
+					return false;
+				return true;
+			},
+		)
+		.request(({ ctx, input }) => {
+			// TODO February 28, 2025 - Replace this with a more carefully crafted object
+			const ship =
+				ctx.ecs
+					.getEntityById(ctx.getFlightClient(input.clientId)?.shipId || -1)
+					?.toJSON() || null;
 			return ship;
 		}),
 	players: t.procedure.request(({ ctx }) => {
@@ -42,20 +53,25 @@ export const ship = t.router({
 		);
 	}),
 	player: t.procedure
-		.input(z.object({ playerShipId: z.number().optional() }).optional())
+		.input(
+			z.object({ clientId: z.string(), playerShipId: z.number().optional() }),
+		)
 		.filter((publish: { shipId: number }, { ctx, input }) => {
+			const shipId = ctx.getFlightClient(input.clientId)?.shipId;
 			if (
 				publish &&
-				publish.shipId !== ctx.ship?.id &&
+				publish.shipId !== shipId &&
 				publish.shipId !== input?.playerShipId
 			)
 				return false;
 			return true;
 		})
 		.request(({ ctx, input }) => {
-			const ship = input?.playerShipId
-				? ctx.flight?.ecs.getEntityById(input?.playerShipId)
-				: ctx.ship;
+			const ship = ctx.flight?.ecs.getEntityById(
+				input?.playerShipId ||
+					ctx.getFlightClient(input.clientId)?.shipId ||
+					-1,
+			);
 			if (!ship)
 				return {
 					id: input?.playerShipId || -1,

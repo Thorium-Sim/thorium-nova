@@ -2,21 +2,21 @@ import type StationComplementPlugin from "@thorium/.server/classes/Plugins/Stati
 import type Station from "@thorium/.server/classes/Station";
 import { staticStations } from "@thorium/.server/classes/Station";
 import { t } from "@thorium/.server/init/t";
-
+import z from "zod";
 export const station = t.router({
 	get: t.procedure
-		.filter((publish: { clientId: string }, { ctx }) => {
-			if (publish && publish.clientId !== ctx.id) return false;
+		.input(z.object({ clientId: z.string() }))
+		.filter((publish: { clientId: string }, { input }) => {
+			if (publish && publish.clientId !== input.clientId) return false;
 			return true;
 		})
-		.request(({ ctx }) => {
-			if (ctx.flightClient?.stationOverride)
-				return ctx.flightClient.stationOverride;
+		.request(({ ctx, input }) => {
+			const flightClient = ctx.getFlightClient(input.clientId);
+			const ship = ctx.getPlayerShip(input.clientId);
+			if (flightClient?.stationOverride) return flightClient.stationOverride;
 			const station = staticStations
-				.concat(ctx.ship?.components.stationComplement?.stations || [])
-				.find(
-					(s) => s.name === ctx.flightClient?.stationId,
-				) as unknown as Station;
+				.concat(ship?.components.stationComplement?.stations || [])
+				.find((s) => s.name === flightClient?.stationId) as unknown as Station;
 			return station || null;
 		}),
 	available: t.procedure.request(({ ctx }) => {

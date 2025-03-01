@@ -8,6 +8,7 @@ import { pubsub } from "./pubsub";
 import { dataStreamEntity } from "./dataStreamEntity";
 import type { InitWebsocketParams } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
 import { ServerClient } from "@thorium/utils/live-query/.server/ServerClient";
+import { router } from "@thorium/.server/init/router";
 
 const dataContextCache = new Map<string, DataContext>();
 
@@ -24,6 +25,11 @@ export function createContext({
 }) {
 	let dataContext = dataContextCache.get(clientId);
 	if (!dataContext) {
+		// Let's generate a client if it doesn't already exist in the database
+		const client = context.server.clients[clientId];
+		if (!client) {
+			context.server.clients[clientId] = new Client(clientId, router, pubsub);
+		}
 		dataContext = new DataContext(clientId, context);
 		dataContextCache.set(clientId, dataContext);
 	}

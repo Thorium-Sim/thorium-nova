@@ -1,9 +1,10 @@
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import Button from "@thorium/ui/Button";
 import chroma from "chroma-js";
 import { useRef } from "react";
+import { useStation } from "@thorium/routes/station/useStation";
 
 const shieldColors = [
 	"oklch(10.86% 0.045 29.25)", // Black
@@ -64,8 +65,9 @@ const shieldStyle = (
 };
 
 export function Shields({ cardLoaded }: { cardLoaded: boolean }) {
-	const [ship] = q.ship.player.useNetRequest();
-	const [shields] = q.targeting.shields.get.useNetRequest();
+	const { shipId } = useStation();
+	const [ship] = q.ship.player.useNetRequest({ clientId });
+	const [shields] = q.targeting.shields.get.useNetRequest({ shipId });
 
 	const topViewRef = useRef<HTMLDivElement>(null);
 	const sideViewRef = useRef<HTMLDivElement>(null);
@@ -116,7 +118,7 @@ export function Shields({ cardLoaded }: { cardLoaded: boolean }) {
 				<Button
 					className="btn-primary btn-sm w-full"
 					onClick={() => {
-						q.targeting.shields.setState.netSend({ state: "up" });
+						q.targeting.shields.setState.netSend({ shipId, state: "up" });
 					}}
 				>
 					Raise Shields
@@ -125,7 +127,7 @@ export function Shields({ cardLoaded }: { cardLoaded: boolean }) {
 				<Button
 					className="btn-warning btn-sm w-full"
 					onClick={() => {
-						q.targeting.shields.setState.netSend({ state: "down" });
+						q.targeting.shields.setState.netSend({ shipId, state: "down" });
 					}}
 				>
 					Lower Shields

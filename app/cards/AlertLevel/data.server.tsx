@@ -7,7 +7,7 @@ export const alertLevel = t.router({
 		.meta({ action: true, event: true })
 		.input(
 			z.object({
-				shipId: z.number().optional(),
+				shipId: z.number(),
 				alertLevel: z.union([
 					z.literal("5"),
 					z.literal("4"),
@@ -19,8 +19,7 @@ export const alertLevel = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
-			const ship =
-				ctx.flight?.ecs.getEntityById(input.shipId || -1) ?? ctx.ship;
+			const ship = ctx.flight?.ecs.getEntityById(input.shipId || -1);
 			if (!ship?.components.isShip) return;
 
 			ship.updateComponent("isShip", { alertLevel: input.alertLevel });

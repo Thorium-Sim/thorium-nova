@@ -7,10 +7,14 @@ import href from "./assets/torpedoSprite.svg?url";
 import Button from "@thorium/ui/Button";
 import { toast } from "@thorium/context/ToastContext";
 import { LiveQueryError } from "@thorium/utils/live-query/client/client";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function Torpedoes() {
-	const [torpedoLaunchers] = q.targeting.torpedoes.launchers.useNetRequest();
-	const [torpedoList] = q.targeting.torpedoes.list.useNetRequest();
+	const { shipId } = useStation();
+	const [torpedoLaunchers] = q.targeting.torpedoes.launchers.useNetRequest({
+		shipId,
+	});
+	const [torpedoList] = q.targeting.torpedoes.list.useNetRequest({ shipId });
 	const [selectedTorpedo, setSelectedTorpedo] = useState<string | null>(null);
 
 	return (
@@ -18,7 +22,6 @@ export function Torpedoes() {
 			<ul className="relative panel panel-alert min-h-16 overflow-y-auto">
 				{Object.entries(torpedoList ?? {}).map(
 					([id, { count, yield: torpedoYield, speed }]) => (
-						// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 						<li
 							key={id}
 							className={cn(

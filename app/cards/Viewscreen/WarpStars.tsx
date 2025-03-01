@@ -1,4 +1,4 @@
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useFrame } from "@react-three/fiber";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { getSphericalPositionWithBias } from "@thorium/utils/starmap/getSphericalPositionWithBias";
@@ -39,7 +39,9 @@ const shipPosition = new Vector3();
 const movement = new Vector3();
 
 export const WarpStars = () => {
-	const [{ id: shipId, currentSystem }] = q.ship.player.useNetRequest();
+	const [{ id: shipId, currentSystem }] = q.ship.player.useNetRequest({
+		clientId,
+	});
 	const isInSystem = typeof currentSystem === "number";
 	const mesh = useMemo(() => {
 		const geometry = new CylinderGeometry(1, 0, 100, 16, 16);
@@ -59,7 +61,7 @@ export const WarpStars = () => {
 		return mesh;
 	}, []);
 	const [{ interstellarCruisingSpeed, solarCruisingSpeed }] =
-		q.pilot.warpEngines.get.useNetRequest();
+		q.pilot.warpEngines.get.useNetRequest({ shipId });
 
 	const getForwardVelocity = useForwardVelocity();
 	const { interpolate } = useLiveQuery();

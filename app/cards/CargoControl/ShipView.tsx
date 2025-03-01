@@ -7,6 +7,7 @@ import { CargoContainerDot } from "./CargoContainerDot";
 import { RoomDot } from "./RoomDot";
 import { q } from "@thorium/context/AppContext";
 import { pixelRatio } from "@thorium/utils/pixelRatio.client";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function ShipView({
 	deckIndex,
@@ -15,10 +16,11 @@ export function ShipView({
 	deckIndex: number;
 	cardLoaded: boolean;
 }) {
-	const [cargoRooms] = q.cargoControl.rooms.useNetRequest();
+	const { shipId } = useStation();
+	const [cargoRooms] = q.cargoControl.rooms.useNetRequest({ shipId });
 
 	const { decks, rooms, shipLength } = cargoRooms;
-	const [cargoContainers] = q.cargoControl.containers.useNetRequest();
+	const [cargoContainers] = q.cargoControl.containers.useNetRequest({ shipId });
 
 	const [ref, dims, measure] = useResizeObserver();
 	const [imgRef, imgDims, imgMeasure] = useResizeObserver();

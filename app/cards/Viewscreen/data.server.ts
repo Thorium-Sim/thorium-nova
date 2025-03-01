@@ -2,26 +2,27 @@ import { t } from "@thorium/.server/init/t";
 import { z } from "zod";
 
 export const viewscreen = t.router({
-	system: t.procedure.request(({ ctx }) => {
-		const systemId = ctx.ship?.components.position?.parentId;
-		if (typeof systemId !== "number") return null;
-		const system = ctx.flight?.ecs.getEntityById(systemId);
+	system: t.procedure
+		.input(z.object({ clientId: z.string() }))
+		.request(({ ctx, input }) => {
+			const systemId = ctx.getPlayerShip(input.clientId)?.components.position
+				?.parentId;
+			if (typeof systemId !== "number") return null;
+			const system = ctx.flight?.ecs.getEntityById(systemId);
 
-		if (!system) return null;
+			if (!system) return null;
 
-		return {
-			id: system.id,
-			name: system.components.identity?.name,
-			skyboxKey: system.components.isSolarSystem?.skyboxKey,
-		};
-	}),
+			return {
+				id: system.id,
+				name: system.components.identity?.name,
+				skyboxKey: system.components.isSolarSystem?.skyboxKey,
+			};
+		}),
 	stream: t.procedure
-		.input(z.object({ shipId: z.number() }).optional())
+		.input(z.object({ shipId: z.number() }))
 		.dataStream(({ ctx, input, entity }) => {
 			if (!entity) return false;
-			const ship = input?.shipId
-				? ctx.flight?.ecs.getEntityById(input.shipId)
-				: ctx.ship;
+			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
 			if (!ship) return false;
 			const systemId = ship.components.position?.parentId || null;
 

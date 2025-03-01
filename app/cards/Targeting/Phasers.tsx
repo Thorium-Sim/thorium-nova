@@ -1,4 +1,4 @@
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { Edges, Line } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
@@ -12,9 +12,11 @@ import Slider from "@thorium/ui/Slider";
 import { useEffect, useMemo, useRef } from "react";
 import { DoubleSide, Euler, type Group, Quaternion, Vector3 } from "three";
 import type { Line2 } from "three-stdlib";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function PhaserArcs() {
-	const [phasers] = q.targeting.phasers.list.useNetRequest();
+	const { shipId } = useStation();
+	const [phasers] = q.targeting.phasers.list.useNetRequest({ shipId });
 	return (
 		<>
 			{phasers.map((phaser) => (
@@ -114,8 +116,13 @@ function ConeVisualization({
 }
 
 export function BeamVisualization() {
-	const [firingPhasers] = q.targeting.phasers.firing.useNetRequest();
-	const [{ id: playerId }] = q.ship.player.useNetRequest();
+	const { shipId } = useStation();
+	const [{ id: playerId, currentSystem }] = q.ship.player.useNetRequest({
+		clientId,
+	});
+	const [firingPhasers] = q.targeting.phasers.firing.useNetRequest({
+		systemId: currentSystem,
+	});
 
 	const { interpolate } = useLiveQuery();
 	const lineRef = useRef<Line2>(null);
@@ -159,7 +166,8 @@ export function BeamVisualization() {
 }
 
 export function Phasers() {
-	const [phasers] = q.targeting.phasers.list.useNetRequest();
+	const { shipId } = useStation();
+	const [phasers] = q.targeting.phasers.list.useNetRequest({ shipId });
 	return (
 		<div className="flex flex-col gap-4">
 			{phasers.map((phaser) => (
@@ -192,11 +200,13 @@ function PhaserControl({
 	heading: number;
 	pitch: number;
 }) {
+	const { shipId } = useStation();
 	const { interpolate } = useLiveQuery();
 	const chargeRef = useRef<HTMLProgressElement>(null);
 	const heatRef = useRef<HTMLProgressElement>(null);
-	const [targetedContact] = q.targeting.targetedContact.useNetRequest();
-	const [{ id: playerId }] = q.ship.player.useNetRequest();
+	const [targetedContact] = q.targeting.targetedContact.useNetRequest({
+		shipId,
+	});
 	const buttonContainerRef = useRef<HTMLDivElement>(null);
 	useAnimationFrame(() => {
 		const values = interpolate(id);
@@ -214,7 +224,7 @@ function PhaserControl({
 		let inCone = false;
 		if (targetedContact) {
 			const target = interpolate(targetedContact.id);
-			const player = interpolate(playerId);
+			const player = interpolate(shipId);
 			if (target && player) {
 				targetVector.set(target.x, target.y, target.z);
 				playerVector.set(player.x, player.y, player.z);
@@ -287,7 +297,7 @@ function PhaserControl({
 				onChange={(val: number | number[]) => {
 					// Manually update the local cache with the arc value so it looks really smooth
 					cache.setQueryData(
-						q.targeting.phasers.list.getQueryKey(),
+						q.targeting.phasers.list.getQueryKey({ shipId }),
 						(data: any[]) => {
 							if (!data) return data;
 							return data.map((phaser) => {

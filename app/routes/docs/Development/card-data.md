@@ -69,12 +69,12 @@ Like the example above, it's most commonly used for filtering based on the ship
 the client is assigned to, though it could filter based on any other criteria.
 
 ```ts
-// /app/cards/Pilot/data.ts
+// /app/cards/Pilot/data.server.ts
 export const pilot = t.router({
   impulseEngines: t.router({
-    get: t.procedure
-      .filter((publish: {shipId: number; systemId: number} | null, {ctx}) => {
-        if (publish && publish.shipId !== ctx.ship?.id) return false;
+    get: t.input(z.object({shipId:z.number()})).procedure
+      .filter((publish: {shipId: number; systemId: number} | null, {input}) => {
+        if (publish && publish.shipId !== input.shipId) return false;
         return true;
       })
       .request(({ctx}) => {
@@ -100,14 +100,14 @@ Whatever the function returns is sent to the client and made available with the
 entities associated with the ship the client is assigned to.
 
 ```ts
-// /app/cards/Pilot/data.ts
+// /app/cards/Pilot/data.server.ts
 export const pilot = t.router({
   impulseEngines: t.router({
-    get: t.procedure
-      .filter((publish: {shipId: number; systemId: number} | null, {ctx}) => {
+   get: t.input(z.object({shipId:z.number()})).procedure
+      .filter((publish: {shipId: number; systemId: number} | null, {input}) => {
         // ...
       })
-      .request(({ctx}) => {
+      .request(({ctx, input}) => {
         const {
           impulseEngines: {
             id,
@@ -115,6 +115,7 @@ export const pilot = t.router({
           },
         } = getShipSystem(ctx, {
           systemType: "impulseEngines",
+          shipId: input.shipId
         });
         return {
           id: impulseEngines.id,
@@ -129,13 +130,13 @@ export const pilot = t.router({
 
 ### Suggestions for Writing Subscriptions
 
-Requests and Sends should be defined as narrowly as possible, and cards should
+NetRequests and NetSends should be defined as narrowly as possible, and cards should
 have as many subscriptions as are necessary to get all of the data. Since we can
 nest routers as much as we want, there's little concern about overlapping.
 
 Whenever creating a new request, it's important to make sure that
 `pubsub.publish` is being called any time the relevant data changes on the
-server. These `pubsub.publish` calls might be happening in sends or systems
+server. These `pubsub.publish` calls might be happening in netSend handlers or ECS systems
 elsewhere in the codebase, so keep this in mind and make sure they're always
 being called correctly.
 
@@ -158,7 +159,9 @@ the following data sent:
 - `x` - The x position of the entity
 - `y` - The y position of the entity
 - `z` - The z position of the entity
-- `rotation` - The rotation quaternion of the entity
+- `f` - Some extra numerical data that can be interpolated
+- `s` - A boolean value for whether the other data should immediately snap instead of interpolating
+- `r` - The rotation quaternion of the entity
 
 That means the rest of the data needs to be collected with a NetRequest.
 
@@ -180,16 +183,19 @@ receives an object with the `entity`, `ctx`, and optionally `input` as
 parameters and should return `true` if the entity should be sent to the client.
 
 ```ts
-export function dataStream(
-  entity: Entity,
-  context: DataContext,
-  params: {systemId: number | null}
-): boolean {
-  return Boolean(
-    entity.components.position?.parentId === systemId &&
-      entity.components.velocity
-  );
-}
+// /app/cards/Pilot/data.server.ts
+export const pilot = t.router({
+  // ...
+  stream: t.procedure
+		.input(z.object({ systemId: z.number().nullable() }))
+		.dataStream(({ ctx, input, entity }) => {
+			if (!entity) return false;
+			return Boolean(
+				entity.components.position &&
+					entity.components.position.parentId === input.systemId,
+			);
+		}),
+})
 ```
 
 Data Streams will only be active when `useDataStream` is called somewhere in the
@@ -234,7 +240,7 @@ Because of this, accessing the data from DataStreams is a two-part process:
    Object3Ds.
 3. In an animation loop, either with `useAnimationFrame` or the `useFrame` hook
    from React Three Fiber, loop over the entities.
-4. Access the entity in the DataStream and use the position and rotation data to
+4. Access the entity in the DataStream using the `interpolate` function provided by the `useLiveQuery` hook, and use the position and rotation data to
    update the properties of the DOM elements or Three.js Object3Ds directly.
 
 Even though DataStream frames are only sent from the server on an interval, we
@@ -243,8 +249,8 @@ can still render them at 60fps because of
 
 ## NetSends
 
-NetSends or Sends are the way clients can trigger mutations to server data.
-NetSends are messages sent from the client to the server over WebSockets to
+NetSends are the way clients can trigger mutations to server data.
+NetSends are messages sent from the client to the server as an HTTP POST to
 trigger events.
 
 When a client needs to update server data, it sends a message to the server with

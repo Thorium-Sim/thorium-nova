@@ -1,4 +1,4 @@
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import type { AppRouter } from "@thorium/.server/init/router";
@@ -51,7 +51,7 @@ export const WaypointEntity = ({
 	const scale = 1 / 40;
 
 	const [{ id, currentSystem: playerSystem, systemPosition }] =
-		q.ship.player.useNetRequest();
+		q.ship.player.useNetRequest({ clientId });
 
 	const { interpolate } = useLiveQuery();
 	useFrame((props) => {

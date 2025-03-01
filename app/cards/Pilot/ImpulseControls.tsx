@@ -13,6 +13,7 @@ import {
 	useGamepadPress,
 	useGamepadValue,
 } from "@thorium/hooks/useGamepadStore";
+import { useStation } from "@thorium/routes/station/useStation";
 
 const C_IN_METERS = 299792458;
 function formatSpeed(speed: KilometerPerSecond) {
@@ -36,10 +37,13 @@ function formatSpeed(speed: KilometerPerSecond) {
 }
 
 export function useForwardVelocity() {
-	const [{ id: impulseId }] = q.pilot.impulseEngines.get.useNetRequest();
+	const { shipId } = useStation();
+	const [{ id: impulseId }] = q.pilot.impulseEngines.get.useNetRequest({
+		shipId,
+	});
 	const [{ id: warpId, currentWarpFactor }] =
-		q.pilot.warpEngines.get.useNetRequest();
-	const [ship] = q.navigation.ship.useNetRequest();
+		q.pilot.warpEngines.get.useNetRequest({ shipId });
+	const [ship] = q.navigation.ship.useNetRequest({ shipId });
 	const { interpolate } = useLiveQuery();
 
 	return function getForwardVelocity(): [
@@ -102,11 +106,12 @@ const ForwardVelocity = () => {
 const KNOB_HEIGHT = 44;
 const BUTTON_OFFSET = 0.8;
 export const ImpulseControls = ({ cardLoaded = true }) => {
+	const { shipId } = useStation();
 	const [{ targetSpeed, cruisingSpeed, emergencySpeed }] =
-		q.pilot.impulseEngines.get.useNetRequest();
+		q.pilot.impulseEngines.get.useNetRequest({ shipId });
 
 	const [{ warpFactorCount, currentWarpFactor }] =
-		q.pilot.warpEngines.get.useNetRequest();
+		q.pilot.warpEngines.get.useNetRequest({ shipId });
 	const downRef = useRef(false);
 	const [ref, measurement, getMeasurements] = useMeasure<HTMLDivElement>();
 	const [{ y }, set] = useSpring(() => ({
@@ -118,9 +123,10 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 		throttle((speed: number) => {
 			q.pilot.impulseEngines.setSpeed.netSend({
 				speed: Math.min(emergencySpeed, Math.max(0, speed)),
+				shipId,
 			});
 			if (speed === 0) {
-				q.pilot.warpEngines.setWarpFactor.netSend({ factor: 0 });
+				q.pilot.warpEngines.setWarpFactor.netSend({ factor: 0, shipId });
 			}
 		}, 100),
 	);
@@ -227,6 +233,7 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 		onDown: () => {
 			q.pilot.warpEngines.setWarpFactor.netSend({
 				factor: warpFocus,
+				shipId,
 			});
 			setWarpFocus(0);
 		},
@@ -315,6 +322,7 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 								onClick={() =>
 									q.pilot.warpEngines.setWarpFactor.netSend({
 										factor: warpFactorCount + 1,
+										shipId,
 									})
 								}
 							>
@@ -333,6 +341,7 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 										onClick={() =>
 											q.pilot.warpEngines.setWarpFactor.netSend({
 												factor: warpFactor,
+												shipId,
 											})
 										}
 									>

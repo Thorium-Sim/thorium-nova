@@ -51,8 +51,6 @@ const middleware = await liveQueryPlugin({
 		processTriggers(ecs, {
 			event: opts.path,
 			values: {
-				shipId: opts.ctx.ship?.id,
-				clientId: opts.ctx.client.id,
 				...opts.rawInput,
 			},
 		});

@@ -1,8 +1,11 @@
 import { q } from "@thorium/context/AppContext";
+import { useStation } from "@thorium/routes/station/useStation";
 import { cn } from "@thorium/utils/cn";
 
 export function Objectives() {
-	const [objectives] = q.objectives.get.useNetRequest({});
+	const { shipId } = useStation();
+
+	const [objectives] = q.objectives.get.useNetRequest({ shipId });
 	const sortedObjectives = objectives
 		.concat()
 		.sort((a, b) => {

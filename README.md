@@ -18,10 +18,6 @@ https://thoriumsim.com.
 
 ## Development Quick Start
 
-Check out the [project roadmap](https://github.com/orgs/Thorium-Sim/projects/2)
-for tasks that are planned, but not yet assigned to anyone. Add a comment to an
-issue to ask to have that issue assigned to you.
-
 You'll need to install [Bun](https://bun.sh) to install dependencies and run and build Thorium Nova.
 
 First
@@ -62,7 +58,7 @@ behind the scenes.
 
 The purpose of Thorium Nova is to facilitate these experiences. This includes a
 simulated universe for the stories to take place in, controls for the crew
-members and flight director, a viewscreen and other methods for the crew to
+members and flight director, ship controls, a viewscreen and other methods for the crew to
 interact with the universe, a way to write and run mission storylines, show
 controls like lights, sound effects, music, and video to help the crew become
 immersed, automation to help the flight director, training and documentation for

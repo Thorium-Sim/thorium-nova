@@ -5,16 +5,13 @@ import { Entity } from "@thorium/utils/ecs";
 
 export const objectives = t.router({
 	get: t.procedure
-		.input(z.object({ shipId: z.number().optional() }))
+		.input(z.object({ shipId: z.number() }))
 		.filter((publish: { shipId: number }, { ctx, input }) => {
-			if (publish && (input.shipId || ctx.ship?.id) !== publish.shipId)
-				return false;
+			if (publish && input.shipId !== publish.shipId) return false;
 			return true;
 		})
 		.request(({ ctx, input }) => {
-			const ship = input.shipId
-				? ctx.flight?.ecs.getEntityById(input.shipId)
-				: ctx.ship;
+			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
 			if (!ship) return [];
 
 			const objectives: {
@@ -51,7 +48,7 @@ export const objectives = t.router({
 		.meta({ action: true, event: true })
 		.input(
 			z.object({
-				shipId: z.number().optional(),
+				shipId: z.number(),
 				title: z.string(),
 				description: z.string().optional(),
 				crewComplete: z.boolean().optional(),
@@ -59,9 +56,7 @@ export const objectives = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
-			const ship = input.shipId
-				? ctx.flight?.ecs.getEntityById(input.shipId)
-				: ctx.ship;
+			const ship = ctx.ecs.getEntityById(input.shipId);
 			if (!ship) return;
 
 			const objective = new Entity();

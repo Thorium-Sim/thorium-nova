@@ -6,17 +6,19 @@ import { useEffect, useRef } from "react";
 import { SOLAR_SYSTEM_MAX_DISTANCE } from "@thorium/components/Starmap/SolarSystemMap";
 import { INTERSTELLAR_MAX_DISTANCE } from "@thorium/components/Starmap/InterstellarMap";
 import { lightYearToLightMinute } from "@thorium/utils/unitTypes";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function MapControls() {
+	const { shipId } = useStation();
 	const useStarmapStore = useGetStarmapStore();
 	const systemId = useStarmapStore((state) => state.currentSystem);
-	const [ship] = q.navigation.ship.useNetRequest();
+	const [ship] = q.navigation.ship.useNetRequest({ shipId });
 
 	useEffect(() => {
-		q.navigation.ship.netRequest().then((res) => {
+		q.navigation.ship.netRequest({ shipId }).then((res) => {
 			useStarmapStore.setState({ followEntityId: res.id });
 		});
-	}, [useStarmapStore]);
+	}, [useStarmapStore, shipId]);
 
 	useEffect(() => {
 		if (useStarmapStore.getState().followEntityId === ship.id) {

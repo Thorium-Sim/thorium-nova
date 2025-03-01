@@ -12,17 +12,19 @@ import { useShipMapStore } from "./useShipMapStore";
 import { q } from "@thorium/context/AppContext";
 import { DeckPicker } from "./DeckPicker";
 import type { CardProps } from "@thorium/cards/CardProps";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function CargoControl(props: CardProps) {
+	const { shipId } = useStation();
 	const selectedRoomId = useShipMapStore((state) => state.selectedRoomId);
 	const selectedContainerId = useShipMapStore(
 		(state) => state.selectedContainerId,
 	);
 	const deckIndex = useShipMapStore((state) => state.deckIndex);
 
-	const [cargoRooms] = q.cargoControl.rooms.useNetRequest();
-	const [cargoContainers] = q.cargoControl.containers.useNetRequest();
-	q.cargoControl.stream.useDataStream();
+	const [cargoRooms] = q.cargoControl.rooms.useNetRequest({ shipId });
+	const [cargoContainers] = q.cargoControl.containers.useNetRequest({ shipId });
+	q.cargoControl.stream.useDataStream({ shipId });
 	const { rooms, decks } = cargoRooms;
 
 	const selectedRoom = rooms.find((r) => r.id === selectedRoomId);
@@ -80,8 +82,8 @@ export function CargoControl(props: CardProps) {
 						) {
 							try {
 								await q.cargoControl.transfer.netSend({
-									fromId: { type: "room", id: selectedRoom?.id },
-									toId: { type: "entity", id: selectedContainerId },
+									fromId: { type: "room", id: selectedRoom?.id, shipId },
+									toId: { type: "entity", id: selectedContainerId, shipId },
 									transfers: [{ item: key, count: transferAmount }],
 								});
 							} catch (err) {
@@ -115,6 +117,7 @@ export function CargoControl(props: CardProps) {
 									try {
 										await q.cargoControl.containerSummon.netSend({
 											roomId: selectedRoomId,
+											shipId,
 										});
 									} catch (err) {
 										if (err instanceof Error) {
@@ -146,8 +149,8 @@ export function CargoControl(props: CardProps) {
 						if (enRouteContainer?.id === selectedContainerId && selectedRoom) {
 							try {
 								await q.cargoControl.transfer.netSend({
-									toId: { type: "room", id: selectedRoom.id },
-									fromId: { type: "entity", id: selectedContainerId },
+									toId: { type: "room", id: selectedRoom.id, shipId },
+									fromId: { type: "entity", id: selectedContainerId, shipId },
 									transfers: [{ item: key, count: transferAmount }],
 								});
 							} catch (err) {
@@ -185,6 +188,7 @@ export function CargoControl(props: CardProps) {
 								await q.cargoControl.containerSummon.netSend({
 									roomId: selectedRoomId,
 									containerId: selectedContainerId,
+									shipId,
 								});
 							} catch (err) {
 								if (err instanceof Error) {

@@ -1,4 +1,4 @@
-import { q } from "@thorium/context/AppContext";
+import { q, clientId } from "@thorium/context/AppContext";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import { useThoriumAccount } from "@thorium/context/ThoriumAccountContext";
 import { CardArea } from "./CardArea";
@@ -7,10 +7,10 @@ import { useManageCard } from "./useManageCard";
 import { Widgets } from "./widgets";
 
 const StationLayout = () => {
-	const [ship] = q.ship.get.useNetRequest();
-	const [client] = q.client.get.useNetRequest();
-	const [station] = q.station.get.useNetRequest();
-	const [theme] = q.theme.get.useNetRequest();
+	const [ship] = q.ship.get.useNetRequest({ clientId });
+	const [client] = q.client.get.useNetRequest({ clientId });
+	const [station] = q.station.get.useNetRequest({ clientId });
+	const [theme] = q.theme.get.useNetRequest({ clientId });
 	const [card, changeCard] = useManageCard();
 
 	const { account } = useThoriumAccount();

@@ -4,7 +4,7 @@ import packageJson from "../../../package.json";
 import { ClientButton } from "@thorium/components/ClientButton";
 import { Suspense, useEffect, useState } from "react";
 import Button from "@thorium/ui/Button";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { IPAddress } from "./IPAddress";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -63,7 +63,7 @@ export function HostButton() {
 	return hasHost ? null : (
 		<Button
 			className="btn-warning btn-sm"
-			onClick={() => q.thorium.claimHost.netSend()}
+			onClick={() => q.thorium.claimHost.netSend({ clientId })}
 		>
 			Claim Host
 		</Button>

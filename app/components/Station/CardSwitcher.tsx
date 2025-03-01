@@ -1,4 +1,4 @@
-import { q } from "@thorium/context/AppContext";
+import { q, clientId } from "@thorium/context/AppContext";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 
 const CardButton: React.FC<{
@@ -28,7 +28,7 @@ export const CardSwitcher: React.FC<{
 	card: string;
 	changeCard: (id: string) => void;
 }> = ({ card, changeCard }) => {
-	const [station] = q.station.get.useNetRequest();
+	const [station] = q.station.get.useNetRequest({ clientId });
 	return (
 		<div className="card-switcher-holder absolute right-0">
 			<div className="card-switcher">
