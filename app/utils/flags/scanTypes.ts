@@ -1,5 +1,6 @@
 import { z } from "zod";
 export const scanTypes = z.enum([
+	// For ships
 	"identification",
 	"crew",
 	"cargo",
@@ -9,7 +10,31 @@ export const scanTypes = z.enum([
 	"damage",
 	"communications",
 	"lifeSupport",
+	// For planets and stars
+	"life",
+	"atmosphere",
+	"temperature",
 ]);
+
+export const shipScanTypes: z.infer<typeof scanTypes>[] = [
+	"identification",
+	"crew",
+	"cargo",
+	"shields",
+	"weapons",
+	"targeting",
+	"damage",
+	"communications",
+	"lifeSupport",
+	"temperature",
+];
+
+export const planetScanTypes: z.infer<typeof scanTypes>[] = [
+	"life",
+	"atmosphere",
+	"temperature",
+];
+export const starScanTypes: z.infer<typeof scanTypes>[] = ["temperature"];
 
 export const scanRecord = z.object({
 	identification: z
@@ -65,10 +90,20 @@ export const scanRecord = z.object({
 	communications: z.object({}),
 	// TODO February 15, 2025: Add this once we have a better idea what life support looks like
 	lifeSupport: z.object({}),
-	passive: z.object({
-		/** Temperature of the object in kelvin */
-		temperature: z.number(),
-		size: z.number(),
-		name: z.string(),
-	}),
+	life: z
+		.object({
+			isHabitable: z.boolean(),
+			lifeforms: z.string().array(),
+			population: z.number(),
+		})
+		.optional(),
+	atmosphere: z
+		.array(
+			z.object({
+				component: z.string(),
+				concentration: z.number(),
+			}),
+		)
+		.optional(),
+	temperature: z.object({ temperature: z.number() }),
 });

@@ -17,7 +17,6 @@ import { HeatToCoolantSystem } from "./HeatToCoolantSystem";
 import { HeatDispersionSystem } from "./HeatDispersionSystem";
 import { PowerDrawSystem } from "./PowerDrawSystem";
 import { WaypointRemoveSystem } from "./WaypointRemoveSystem";
-import { DebugSphereSystem } from "./DebugSphereSystem";
 import { ProcessTriggersSystem } from "./ProcessTriggersSystem";
 import { WarpSystem } from "./WarpSystem";
 import { ImpulseSystem } from "./ImpulseSystem";
@@ -64,7 +63,6 @@ const systems = [
 	WaypointRemoveSystem,
 	HeatToCoolantSystem,
 	HeatDispersionSystem,
-	DebugSphereSystem,
 	IsDestroyedSystem,
 	DataStreamSystem,
 	ProcessTriggersSystem,

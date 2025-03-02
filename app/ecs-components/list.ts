@@ -33,7 +33,6 @@ export * from "./shipMap/isRoom";
 export * from "./isWaypoint";
 export * from "./isStatic";
 export * from "./snapInterpolation";
-export * from "./debugSphere";
 export * from "./shipBehavior";
 export * from "./remoteAccessCode";
 export * from "./isTrigger";

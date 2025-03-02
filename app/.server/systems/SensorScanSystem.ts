@@ -1,7 +1,6 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { getPhaserCharge } from "@thorium/.server/systems/PhasersSystem";
 import { getClassification } from "@thorium/cards/Navigation/getObjectClassification.server";
-import { efficiency } from "@thorium/ecs-components/efficiency";
 import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { type ECS, type Entity, System } from "@thorium/utils/ecs";
 import type { scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";
@@ -99,16 +98,17 @@ export class SensorScanSystem extends System {
 			shieldPenaltyMultiplier,
 		} = sensorSystem;
 		let totalRequiredEnergy: KiloWattHour = Number.POSITIVE_INFINITY;
-		if (distance <= activeRange) {
-			totalRequiredEnergy =
-				(maxScanEnergyCost - minScanEnergyCost) * (distance / activeRange) +
-				minScanEnergyCost;
-		} else if (distance <= passiveRange) {
+		totalRequiredEnergy =
+			(maxScanEnergyCost - minScanEnergyCost) * (distance / activeRange) +
+			minScanEnergyCost;
+		if (distance > activeRange) {
 			const addedDistance = distance - activeRange;
-			const distanceRatio = passiveRange / activeRange;
-			// Exponential increase
-			totalRequiredEnergy =
-				maxScanEnergyCost + addedDistance * distanceRatio - 1;
+			const distanceRatio = (passiveRange + addedDistance) / distance;
+			// Quadratic increase
+			totalRequiredEnergy *= distanceRatio;
+		}
+		if (distance > passiveRange) {
+			totalRequiredEnergy = Number.POSITIVE_INFINITY;
 		}
 
 		// Multiply by the target's shields strength if shields are raised
@@ -296,6 +296,28 @@ export function generateScanResults(
 				}),
 			];
 			break;
+		}
+		case "life": {
+			currentResults.life = {
+				isHabitable: object.components.isPlanet?.isHabitable || false,
+				lifeforms: object.components.isPlanet?.lifeforms || ["None"],
+				population: object.components.population?.count || 0,
+			};
+			break;
+		}
+		case "atmosphere":
+			{
+				currentResults.atmosphere = [
+					...(object.components.isPlanet?.atmosphericComposition || []),
+				];
+			}
+			break;
+		case "temperature": {
+			if (object.components.temperature?.temperature) {
+				currentResults.temperature = {
+					temperature: object.components.temperature?.temperature,
+				};
+			}
 		}
 	}
 

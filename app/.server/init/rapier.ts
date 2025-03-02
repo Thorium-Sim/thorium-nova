@@ -67,9 +67,7 @@ export function generateRigidBody(
 				? "ship"
 				: entity.components.isTorpedo
 					? "torpedo"
-					: entity.components.debugSphere
-						? "debugSphere"
-						: "unknown";
+					: "unknown";
 	switch (type) {
 		case "planet": {
 			if (!entity.components.satellite || !entity.components.isPlanet) break;
@@ -174,8 +172,7 @@ export function generateRigidBody(
 
 			return body;
 		}
-		case "debugSphere":
-			break;
+
 		default:
 			if (process.env.NODE_ENV !== "production") {
 				console.warn("Unknown solar system physics entity", entity.components);

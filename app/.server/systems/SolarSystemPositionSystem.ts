@@ -15,10 +15,7 @@ export interface Sphere {
 }
 export class SolarSystemPositionSystem extends System {
 	test(entity: Entity) {
-		return (
-			!!(entity.components.position || entity.components.satellite) &&
-			!entity.components.debugSphere
-		);
+		return !!(entity.components.position || entity.components.satellite);
 	}
 	update(entity: Entity) {
 		// TODO January 2025: This will explode when moons become a thing

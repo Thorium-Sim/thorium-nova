@@ -265,39 +265,6 @@ export const starmapCore = t.router({
 			pubsub.publish.starmapCore.reputation({ entityId: input.entityId });
 			pubsub.publish.starmapCore.reputation({ entityId: input.targetId });
 		}),
-	debugSpheres: t.procedure
-		.input(z.object({ systemId: z.number().nullable() }))
-		.filter((publish: { systemId: number | null }, { input }) => {
-			if (publish && publish.systemId !== input.systemId) return false;
-			return true;
-		})
-		.request(({ ctx, input }) => {
-			if (!ctx.flight) return [];
-			const data = ctx.flight.ecs.entities.reduce(
-				(
-					prev: {
-						id: number;
-					}[],
-					{ components, id },
-				) => {
-					if (components.debugSphere) {
-						if (
-							(typeof input?.systemId === "number" &&
-								components.position?.parentId === input.systemId) ||
-							(input?.systemId === undefined &&
-								components.position?.type === "interstellar")
-						) {
-							prev.push({
-								id,
-							});
-						}
-					}
-					return prev;
-				},
-				[],
-			);
-			return data;
-		}),
 	spawnSearch: t.procedure
 		.input(z.object({ query: z.string(), allPlugins: z.boolean().optional() }))
 		.request(({ ctx, input }) => {
@@ -751,9 +718,7 @@ export const starmapCore = t.router({
 		.dataStream(({ entity, input }) => {
 			if (!entity) return false;
 			if (
-				(entity.components.isShip ||
-					entity.components.isTorpedo ||
-					entity.components.debugSphere) &&
+				(entity.components.isShip || entity.components.isTorpedo) &&
 				entity.components.position
 			) {
 				if (

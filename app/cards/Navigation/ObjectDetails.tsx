@@ -102,22 +102,27 @@ export function ObjectImage({
 	if (!objectImage) return null;
 	return objectImage.type === "solarSystem" ? null : (
 		<div
-			className={cn("w-24 h-24 border border-white/30 rounded-xl", className)}
+			className={cn(
+				"w-24 h-24 border border-white/30 rounded-xl overflow-hidden",
+				className,
+			)}
 		>
-			{objectImage.type === "planet" ? (
-				<PlanetCanvas
-					cloudMapAsset={objectImage.cloudMapAsset}
-					textureMapAsset={objectImage.textureMapAsset}
-					ringMapAsset={objectImage.ringMapAsset}
-				/>
-			) : objectImage.type === "star" ? (
-				<StarCanvas
-					hue={objectImage.hue || 30}
-					isWhite={objectImage.isWhite || false}
-				/>
-			) : objectImage.type === "ship" ? (
-				<img draggable="false" alt="" src={objectImage?.vanity} />
-			) : null}
+			<Suspense>
+				{objectImage.type === "planet" ? (
+					<PlanetCanvas
+						cloudMapAsset={objectImage.cloudMapAsset}
+						textureMapAsset={objectImage.textureMapAsset}
+						ringMapAsset={objectImage.ringMapAsset}
+					/>
+				) : objectImage.type === "star" ? (
+					<StarCanvas
+						hue={objectImage.hue || 30}
+						isWhite={objectImage.isWhite || false}
+					/>
+				) : objectImage.type === "ship" ? (
+					<img draggable="false" alt="" src={objectImage?.vanity} />
+				) : null}
+			</Suspense>
 		</div>
 	);
 }
@@ -168,7 +173,7 @@ const StarCanvas = ({ hue, isWhite }: { hue: number; isWhite: boolean }) => {
 	const color1 = new Color(`hsl(${hue}, 100%, ${isWhite ? 100 : 50}%)`);
 	const color2 = new Color(`hsl(${hue + 20}, 100%, ${isWhite ? 100 : 50}%)`);
 	return (
-		<Canvas camera={{ position: [0, 0, 1.2] }}>
+		<Canvas camera={{ position: [0, 0, 1.2] }} className="bg-black">
 			<Star color1={color1} color2={color2} size={1} noLensFlare showSprite />
 		</Canvas>
 	);

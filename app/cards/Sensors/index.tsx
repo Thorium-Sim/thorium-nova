@@ -12,34 +12,30 @@ import { clientId, q } from "@thorium/context/AppContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { cn } from "@thorium/utils/cn";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { Suspense, useRef, useState, type ReactNode } from "react";
-import "./scanDoodad.css";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { DistanceCircle } from "@thorium/cards/Pilot/DistanceCircle";
-import {
-	ObjectData,
-	ObjectImage,
-} from "@thorium/cards/Navigation/ObjectDetails";
-// import Button from "@thorium/ui/Button";
-import { scanTypes } from "@thorium/utils/flags/scanTypes";
+import type { scanTypes } from "@thorium/utils/flags/scanTypes";
 import { capitalCase } from "change-case";
-import Select from "@thorium/ui/Select";
 import {
 	Button,
 	Disclosure,
 	DisclosureGroup,
 	DisclosurePanel,
-	Heading,
 } from "react-aria-components";
 import type { z } from "zod";
 import { Icon } from "@thorium/ui/Icon";
 import { useStation } from "@thorium/routes/station/useStation";
+import {
+	ScanComponents,
+	ScanResults,
+} from "@thorium/cards/Sensors/ScanComponents";
+import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
+import { useQueryClient } from "@tanstack/react-query";
 
 /**
  * TODO:
  * - Blobs or unidentifiable icons for passive sensors objects
  * - Add waypoints from the sensors station
- * - Planets and stars on the scannable objects list
- * - Tune active scans of distant objects to make _some_ progress
  * - Passive sensors data for objects - maybe visual overlays next to the blob
  * 		- Heat signature (just temperature)
  * 		- When an object performs an active scan
@@ -228,33 +224,6 @@ function Scan({
 		</div>
 	);
 }
-function ScanDoodad() {
-	return (
-		<div className="scan-doodad">
-			<div className="ring_1" />
-			<div className="ring_2" />
-			<div className="ring_3" />
-			<div className="ring_4" />
-			<div className="ring_5" />
-			<div className="ring_6" />
-			<div className="ring_7" />
-			<div className="ring_8" />
-			<div className="ring_9" />
-			<div className="ring_10" />
-			<div className="ring_11" />
-			<div className="ring_12" />
-			<div className="ring_13" />
-			<div className="ring_14" />
-			<div className="ring_15" />
-			<div className="ring_16" />
-			<div className="ring_17" />
-			<div className="ring_18" />
-			<div className="ring_19" />
-			<div className="ring_20" />
-		</div>
-	);
-}
-
 function SensorsShipList({
 	selectedId,
 	setSelected,
@@ -271,8 +240,42 @@ function SensorsShipList({
 	const systemId = useStarmapStore((store) => store.currentSystem);
 
 	const [ships] = q.starmapCore.ships.useNetRequest({ systemId });
-	if (ships.length === 0) {
-		return <h3 className="text-2xl p-2 text-center">No Ships in Range</h3>;
+	const [orbs] = q.starmapCore.entities.useNetRequest({ systemId });
+	const scannableObjects = [
+		...ships.map((ship) => ({ ...ship, type: "ship" })),
+		...orbs.map((orb) => ({
+			id: orb.id,
+			position:
+				orb.components.position ||
+				(orb.components.satellite
+					? getOrbitPosition(orb.components.satellite)
+					: undefined),
+			type: orb.components.isPlanet
+				? "planet"
+				: orb.components.isStar
+					? "star"
+					: "unknown",
+		})),
+	];
+	// Preload all of the scan results
+	const queryClient = useQueryClient();
+	useEffect(() => {
+		for (const object of scannableObjects) {
+			queryClient.ensureQueryData({
+				queryKey: q.sensors.scanResult.getQueryKey({
+					shipId,
+					objectId: object.id,
+				}),
+				queryFn: ({ signal }) =>
+					q.sensors.scanResult.netRequest(
+						{ shipId, objectId: object.id },
+						{ signal },
+					),
+			});
+		}
+	});
+	if (scannableObjects.length === 0) {
+		return <h3 className="text-2xl p-2 text-center">No Objects in Range</h3>;
 	}
 	return (
 		<DisclosureGroup
@@ -282,18 +285,27 @@ function SensorsShipList({
 				setSelected(Number(keys.values().next().value) || null)
 			}
 		>
-			{ships.map((ship) =>
-				ship.id === shipId || occludedContacts.includes(ship.id) ? null : (
-					<SensorsShip {...ship} key={ship.id} />
+			{scannableObjects.map((object) =>
+				object.id === shipId || occludedContacts.includes(object.id) ? null : (
+					<Suspense key={object.id}>
+						<SensorsScannableObject {...object} />
+					</Suspense>
 				),
 			)}
 		</DisclosureGroup>
 	);
 }
 
-function SensorsShip({ id }: { id: number }) {
+function SensorsScannableObject({
+	id,
+	position: objectPosition,
+	type,
+}: {
+	id: number;
+	position?: { x: number; y: number; z: number };
+	type: string;
+}) {
 	const { shipId } = useStation();
-
 	const [{ passiveRange }] = q.sensors.get.useNetRequest({ shipId });
 	const [{ id: playerShipId, currentSystem }] = q.ship.player.useNetRequest({
 		clientId,
@@ -302,7 +314,7 @@ function SensorsShip({ id }: { id: number }) {
 	const { interpolate } = useLiveQuery();
 	const [inRange, setInRange] = useState(false);
 	useAnimationFrame(() => {
-		const position = interpolate(id);
+		const position = interpolate(id) || objectPosition;
 		const shipPosition = interpolate(playerShipId);
 		if (position && shipPosition && distanceRef.current) {
 			const distance = Math.hypot(
@@ -337,212 +349,8 @@ function SensorsShip({ id }: { id: number }) {
 				</div>
 			</Button>
 			<DisclosurePanel className="group-data-[expanded]:pb-2 px-2">
-				<ScanResults objectId={id} />
+				<ScanResults objectId={id} type={type} />
 			</DisclosurePanel>
 		</Disclosure>
-	);
-}
-
-const ScanComponents = {
-	shields: ShieldsResults,
-	cargo: CargoResults,
-	lifeSupport: null,
-	targeting: TargetingResults,
-	identification: IdentificationResults,
-	crew: CrewResults,
-	weapons: WeaponsResults,
-	damage: DamageResults,
-	communications: null,
-};
-
-function ScanResults({ objectId }: { objectId: number }) {
-	return (
-		<div className="flex flex-col gap-1">
-			{scanTypes.options.map((value) => {
-				const ScanComponent = ScanComponents[value];
-				if (!ScanComponent) return;
-				return (
-					<ResultsWrapper key={value} scanType={value} objectId={objectId}>
-						<ScanComponent objectId={objectId} />
-					</ResultsWrapper>
-				);
-			})}
-		</div>
-	);
-}
-
-function ResultsWrapper({
-	scanType,
-	children,
-	objectId,
-}: {
-	scanType: z.infer<typeof scanTypes>;
-	objectId: number;
-	children: ReactNode;
-}) {
-	const { shipId } = useStation();
-
-	const [scans] = q.sensors.scans.useNetRequest({ shipId });
-	const isScanning = scans.some(
-		(scan) =>
-			scan.target === objectId && scan.type === scanType && scan.progress < 1,
-	);
-	return (
-		<div>
-			<strong className="font-bold flex justify-between items-center">
-				<span>{capitalCase(scanType)}</span>
-				{isScanning ? (
-					<Button className="btn btn-xs btn-info" isDisabled>
-						In Progress...
-					</Button>
-				) : (
-					<Button
-						className="btn btn-xs btn-warning"
-						onPress={() =>
-							q.sensors.scanStart.netSend({
-								shipId,
-								type: scanType,
-								target: objectId,
-							})
-						}
-					>
-						Begin Scan
-					</Button>
-				)}
-			</strong>
-			<div className="ml-4">{children}</div>
-		</div>
-	);
-}
-
-function IdentificationResults({ objectId }: { objectId: number }) {
-	const { shipId } = useStation();
-
-	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
-
-	if (!results.identification) return null;
-
-	return (
-		<div className="flex gap-2">
-			<div className="aspect-square">
-				{results.identification.image ? (
-					<ObjectImage objectImage={results.identification.image} />
-				) : null}
-			</div>
-			<div>
-				<div>Name: {results.identification.name}</div>
-				<div>Classification: {results.identification.classification}</div>
-				<div>Faction: {results.identification.factionName}</div>
-			</div>
-		</div>
-	);
-}
-function CargoResults({ objectId }: { objectId: number }) {
-	const { shipId } = useStation();
-
-	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
-
-	if (!results.cargo) return null;
-	const cargoEntries = Object.entries(results.cargo);
-	return (
-		<div>
-			{cargoEntries.length === 0
-				? "No cargo detected."
-				: cargoEntries.map(([name, amount]) => (
-						<div key={name}>
-							{name}: {amount}
-						</div>
-					))}
-		</div>
-	);
-}
-function TargetingResults({ objectId }: { objectId: number }) {
-	const { shipId } = useStation();
-
-	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
-
-	if (!results.targeting) return null;
-
-	return (
-		<div>
-			<div>Target: {results.targeting.targetName}</div>
-			<div>Targeted System: {results.targeting.targetedSystem}</div>
-		</div>
-	);
-}
-function CrewResults({ objectId }: { objectId: number }) {
-	const { shipId } = useStation();
-
-	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
-
-	if (!results.crew) return null;
-
-	return (
-		<div>
-			<div>Population: {results.crew.count}</div>
-		</div>
-	);
-}
-function WeaponsResults({ objectId }: { objectId: number }) {
-	const { shipId } = useStation();
-
-	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
-
-	if (!results.weapons) return null;
-
-	return (
-		<div>
-			{results.weapons.map((weapon, index) => (
-				<div key={index} className="flex justify-between">
-					<span>{capitalCase(weapon.type)}</span>
-					<span>
-						{weapon.type === "phasers"
-							? `${weapon.charge}%`
-							: `${weapon.loaded}`}
-					</span>
-				</div>
-			))}
-		</div>
-	);
-}
-function DamageResults({ objectId }: { objectId: number }) {
-	const { shipId } = useStation();
-
-	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
-
-	if (!results.damage) return null;
-	const damageEntries = Object.entries(results.damage);
-
-	return (
-		<div>
-			{damageEntries.length === 0
-				? "No damage detected"
-				: damageEntries.map(([system, efficiency]) => (
-						<div key={system}>
-							{system}: {Math.round((1 - efficiency) * 100)}% Damaged
-						</div>
-					))}
-		</div>
-	);
-}
-function ShieldsResults({ objectId }: { objectId: number }) {
-	const { shipId } = useStation();
-
-	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
-
-	if (!results.shields) return null;
-
-	return (
-		<div>
-			<div>
-				Status: {results.shields.status === "up" ? "Raised" : "Lowered"}
-			</div>
-			<div>
-				Strength:{" "}
-				{typeof results.shields.strength === "number"
-					? `${Math.round(results.shields.strength * 100)}%`
-					: "0%"}
-			</div>
-		</div>
 	);
 }
