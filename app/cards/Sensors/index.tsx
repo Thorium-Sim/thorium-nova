@@ -336,7 +336,11 @@ function SensorsScannableObject({
 		objectId: id,
 		shipId,
 	});
-
+	const [waypoints] = q.waypoints.all.useNetRequest({
+		shipId,
+		systemId: currentSystem,
+	});
+	const hasWaypoint = waypoints.some((w) => w.objectId === id);
 	return (
 		<Disclosure id={id} className={cn("group", inRange ? "block" : "hidden")}>
 			<Button
@@ -350,6 +354,14 @@ function SensorsScannableObject({
 			</Button>
 			<DisclosurePanel className="group-data-[expanded]:pb-2 px-2">
 				<ScanResults objectId={id} type={type} />
+				{hasWaypoint ? null : (
+					<Button
+						className="btn btn-xs btn-info w-full"
+						onPress={() => q.waypoints.spawn.netSend({ shipId, entityId: id })}
+					>
+						Add Waypoint
+					</Button>
+				)}
 			</DisclosurePanel>
 		</Disclosure>
 	);

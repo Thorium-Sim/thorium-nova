@@ -313,6 +313,8 @@ export function generateScanResults(
 			}
 			break;
 		case "temperature": {
+			// TODO March 1, 2025: Figure out a way to calculate this based on the aggregate
+			// heat of all systems on the ship
 			if (object.components.temperature?.temperature) {
 				currentResults.temperature = {
 					temperature: object.components.temperature?.temperature,
