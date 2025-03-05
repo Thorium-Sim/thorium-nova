@@ -44,6 +44,16 @@ h6:hover .icon.icon-link {
   background-repeat: no-repeat;
   background-position: center;
 }
+.prose code:before, .prose code:after {
+  display:none;
+}
+.prose code {
+  font-family: monospace;
+  @apply p-1 rounded bg-purple-600/40;
+}
+.prose pre code {
+  @apply bg-transparent;
+}
 .prose a code {
   @apply text-purple-300;
 }

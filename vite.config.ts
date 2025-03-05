@@ -10,6 +10,7 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import rehypeShiki from "@shikijs/rehype";
 import { iconsSpritesheet } from "vite-plugin-icons-spritesheet";
+import { componentDocs } from "./scripts/componentDocs";
 
 setDefaultResultOrder("ipv4first");
 
@@ -45,6 +46,7 @@ export default defineConfig({
 		}),
 		reactRouter(),
 		tsconfigPaths(),
+		componentDocs(),
 	],
 	build: {
 		outDir: "../build",

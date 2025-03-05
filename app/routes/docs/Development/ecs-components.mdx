@@ -2,6 +2,8 @@
 title: ECS Components
 ---
 
+import {ECSComponentDocs} from './ECSComponentDocs'
+
 # ECS Components
 
 ECS Components are the building blocks of entities. They define the data
@@ -46,3 +48,7 @@ export const identity = z.object({
   description: z.string().optional()
 }).default({})
 ```
+
+## Component Properties
+
+<ECSComponentDocs />

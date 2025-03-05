@@ -19,6 +19,9 @@ export const isTimeline = z
 export const isTimelineStep = z
 	.object({
 		active: z.boolean().default(true),
+		/**
+		 * What actions are assigned to this timeline step
+		 */
 		actions: actionSchema.default([]),
 		timelineId: z.number().optional(),
 	})
