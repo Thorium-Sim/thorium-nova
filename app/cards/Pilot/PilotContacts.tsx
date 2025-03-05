@@ -40,6 +40,7 @@ import { q } from "@thorium/context/AppContext";
 import { setCursor } from "@thorium/utils/setCursor";
 import ReticleTexture from "@thorium/cards/Pilot/reticle.svg";
 import BracketTexture from "@thorium/cards/Pilot/bracket.svg";
+import UnidentifiedTexture from "@thorium/cards/Pilot/unidentified.svg";
 import Explosion from "@thorium/components/Starmap/Effects/Explosion";
 import { isObjectOccludedBySphere } from "@thorium/utils/starmap/isObjectOccludedBySphere";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
@@ -172,6 +173,11 @@ export const ShipEntity = ({
 	const [orbs] = q.starmapCore.entities.useNetRequest({
 		systemId,
 	});
+	const [scanResults] = q.sensors.scanResult.useNetRequest({
+		shipId,
+		objectId: id,
+	});
+	const isIdentified = scanResults.identification;
 
 	// TODO: Use useGLTF.preload outside of this to preload the asset
 	const model = useGLTF(modelUrl || "", false);
@@ -198,6 +204,7 @@ export const ShipEntity = ({
 
 	const spriteMap = useTexture(logoUrl);
 	const reticleMap = useTexture(ReticleTexture);
+	const unidentifiedMap = useTexture(UnidentifiedTexture);
 
 	const scale = 1 / 50;
 	const mesh = useRef<Mesh>(null);
@@ -214,7 +221,9 @@ export const ShipEntity = ({
 		const ship = interpolate(id);
 		const playerShip = interpolate(shipId);
 		const playerPosition = playerShip || zeroVector;
-
+		if (arrowRef.current) {
+			arrowRef.current.visible = true;
+		}
 		if (!ship || !playerPosition || !playerShip) return;
 		if (shipRef.current) {
 			if (size && dx / (size / 1000) < 50) {
@@ -301,6 +310,14 @@ export const ShipEntity = ({
 			shipRef.current?.position.copy(position);
 			arrowRef.current?.position.copy(position);
 
+			if (!isIdentified) {
+				if (shipRef.current) {
+					shipRef.current.visible = false;
+				}
+				if (arrowRef.current) {
+					arrowRef.current.visible = false;
+				}
+			}
 			shipRef.current?.scale.setScalar(size / 1000 || 0.5);
 			// This scale is helpful if we want to see the ships orientation in space.
 			arrowRef.current?.scale.setScalar((dx * 20) / 1000);
@@ -396,7 +413,7 @@ export const ShipEntity = ({
 					<sprite ref={sprite} {...eventHandlers}>
 						<spriteMaterial
 							attach="material"
-							map={spriteMap}
+							map={isIdentified ? spriteMap : unidentifiedMap}
 							color={"white"}
 							sizeAttenuation={true}
 						/>

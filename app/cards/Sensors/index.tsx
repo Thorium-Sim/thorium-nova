@@ -34,8 +34,6 @@ import { useQueryClient } from "@tanstack/react-query";
 
 /**
  * TODO:
- * - Blobs or unidentifiable icons for passive sensors objects
- * - Add waypoints from the sensors station
  * - Passive sensors data for objects - maybe visual overlays next to the blob
  * 		- Heat signature (just temperature)
  * 		- When an object performs an active scan
