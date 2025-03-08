@@ -432,7 +432,6 @@ export const TabSet = (props: ITabSetProps) => {
 		}
 
 		header = (
-			// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 			<div
 				className={tabHeaderClasses}
 				style={{ height: `${node.getHeaderHeight()}px` }}
@@ -455,7 +454,6 @@ export const TabSet = (props: ITabSetProps) => {
 		height: `${node.getTabStripHeight()}px`,
 	};
 	tabStrip = (
-		// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 		<div
 			className={tabStripClasses}
 			style={tabStripStyle}

@@ -5,9 +5,6 @@ import inputAuth from "@thorium/utils/.server/inputAuth";
 import { z } from "zod";
 import { getPlugin } from "./utils";
 import path from "node:path";
-import fs from "node:fs/promises";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
-import { moveFile } from "@thorium/utils/.server/moveFile";
 
 export const inventory = t.router({
 	all: t.procedure
@@ -77,7 +74,7 @@ export const inventory = t.router({
 				1,
 			);
 
-			await inventory?.removeFile();
+			await inventory?.remove();
 			pubsub.publish.plugin.inventory.all({ pluginId: input.pluginId });
 			pubsub.publish.plugin.inventory.get({
 				pluginId: input.pluginId,
@@ -97,7 +94,7 @@ export const inventory = t.router({
 				durability: z.number().optional(),
 				continuous: z.boolean().optional(),
 				flags: z.any().optional(),
-				image: z.union([z.string(), z.instanceof(File)]).optional(),
+				image: z.instanceof(File).optional(),
 			}),
 		)
 		.send(async ({ ctx, input }) => {
@@ -121,15 +118,12 @@ export const inventory = t.router({
 			if (input.name !== inventory.name && input.name) {
 				await inventory?.rename(input.name);
 			}
-			await fs.mkdir(path.join(".", thoriumPath, inventory.assetPath), {
-				recursive: true,
-			});
 			if (typeof input.image === "string") {
 				const ext = path.extname(input.image);
-				inventory.assets.image = await moveFile(
+				inventory.assets.image = await ctx.uploadFile.call(
+					inventory,
 					input.image,
 					`image${ext}`,
-					inventory.assetPath,
 				);
 			}
 

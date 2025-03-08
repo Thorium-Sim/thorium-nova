@@ -191,7 +191,6 @@ export function Planet({
 				</group>
 			)}
 			<group position={position}>
-				{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
 				<group
 					onPointerOver={onPointerOver}
 					onPointerOut={onPointerOut}

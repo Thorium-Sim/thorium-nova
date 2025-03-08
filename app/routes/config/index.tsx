@@ -283,6 +283,7 @@ function PluginDetails() {
 						id="cover-image"
 						className="max-w-sm aspect-square h-auto"
 						accept="image/*"
+						disabled={!plugin}
 						onChange={(files: FileList) => {
 							if (!plugin) return;
 							q.plugin.update.netSend({

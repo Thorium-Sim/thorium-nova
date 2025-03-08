@@ -188,6 +188,10 @@ export const ShipEntity = ({
 		if (scene.traverse) {
 			scene.traverse((object: Object3D | Mesh) => {
 				if ("material" in object) {
+					(Array.isArray(object.material)
+						? object.material
+						: [object.material]
+					).forEach((mat) => mat.dispose());
 					object.material = new MeshBasicMaterial({
 						color: "white",
 						wireframe: true,
@@ -199,7 +203,6 @@ export const ShipEntity = ({
 		return scene;
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [modelUrl]);
-
 	const { interpolate } = useLiveQuery();
 
 	const spriteMap = useTexture(logoUrl);
@@ -310,14 +313,6 @@ export const ShipEntity = ({
 			shipRef.current?.position.copy(position);
 			arrowRef.current?.position.copy(position);
 
-			if (!isIdentified) {
-				if (shipRef.current) {
-					shipRef.current.visible = false;
-				}
-				if (arrowRef.current) {
-					arrowRef.current.visible = false;
-				}
-			}
 			shipRef.current?.scale.setScalar(size / 1000 || 0.5);
 			// This scale is helpful if we want to see the ships orientation in space.
 			arrowRef.current?.scale.setScalar((dx * 20) / 1000);

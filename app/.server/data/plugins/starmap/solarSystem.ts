@@ -50,7 +50,7 @@ export const solarSystem = t.router({
 				1,
 			);
 
-			await solarSystem?.removeFile();
+			await solarSystem?.remove();
 
 			pubsub.publish.plugin.starmap.all({ pluginId: input.pluginId });
 		}),

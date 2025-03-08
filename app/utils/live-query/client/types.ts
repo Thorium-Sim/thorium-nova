@@ -44,9 +44,9 @@ type DecorateProcedure<
 					"queryKey"
 				> & { callback?: (data: TData) => void },
 			) => [TData, UseQueryResult<TData, Error>];
-	  }
+		}
 	: TProcedure extends AnySendProcedure
-	  ? {
+		? {
 				netSend: Resolver<TProcedure>;
 				useNetSend: <TContext = unknown>(
 					opts?: UseMutationOptions<
@@ -61,14 +61,14 @@ type DecorateProcedure<
 					inferProcedureInput<TProcedure>,
 					TContext
 				>;
-		  }
-	  : TProcedure extends AnyDataStreamProcedure
-		  ? {
+			}
+		: TProcedure extends AnyDataStreamProcedure
+			? {
 					useDataStream: (
 						input: inferProcedureInput<TProcedure>,
 					) => MaybePromise<void>;
-			  }
-		  : never;
+				}
+			: never;
 
 /**
  * @internal
@@ -81,10 +81,10 @@ export type DecoratedProcedureRecord<
 		? DecoratedProcedureRecord<
 				TProcedures[TKey]["_def"]["record"],
 				`${TPath}${TKey & string}.`
-		  >
+			>
 		: TProcedures[TKey] extends AnyProcedure
-		  ? DecorateProcedure<TProcedures[TKey], `${TPath}${TKey & string}`>
-		  : never;
+			? DecorateProcedure<TProcedures[TKey], `${TPath}${TKey & string}`>
+			: never;
 };
 
 export type CreateLiveQueryReact<TRouter extends AnyRouter> =

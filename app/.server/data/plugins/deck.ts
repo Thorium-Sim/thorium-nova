@@ -7,9 +7,7 @@ import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
 import { z } from "zod";
 import { getPlugin } from "./utils";
 import path from "node:path";
-import fs from "node:fs/promises";
 import uniqid from "@thorium/utils/uniqid";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { DeckEdge, DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
 import { nodeFlagsSchema } from "@thorium/utils/flags/DeckNode";
 import { edgeFlagsSchema } from "@thorium/utils/flags/DeckEdge";
@@ -99,11 +97,7 @@ export const deck = t.router({
 					z.object({ newName: z.string() }),
 					z.object({ newIndex: z.number() }),
 					z.object({
-						backgroundImage: z.union([
-							z.string(),
-							z.instanceof(File),
-							z.null(),
-						]),
+						backgroundImage: z.instanceof(File).nullish(),
 					}),
 				]),
 			),
@@ -127,33 +121,18 @@ export const deck = t.router({
 			if ("newIndex" in input && typeof input.newIndex === "number") {
 				moveArrayItem(ship.decks, deckIndex, input.newIndex);
 			}
-			if (
-				"backgroundImage" in input &&
-				typeof input.backgroundImage === "string"
-			) {
-				const ext = path.extname(input.backgroundImage);
+			if ("backgroundImage" in input && input.backgroundImage instanceof File) {
+				const ext = path.extname(input.backgroundImage.name);
 				const file = input.backgroundImage;
 				const filePath = `${uniqid(`deck-${deck.name}-`)}${ext}`;
 				if (!ship) return;
-				if (typeof file === "string") {
-					await fs.mkdir(path.join(thoriumPath, ship.assetPath), {
-						recursive: true,
-					});
-					await fs.rename(
-						file,
-						path.join(thoriumPath, ship.assetPath, filePath),
-					);
-					deck.backgroundUrl = path.join(ship.assetPath, filePath);
-					ship.writeFile(true);
-				}
+				deck.backgroundUrl = await ctx.uploadFile.call(ship, file, filePath);
+				ship.write();
 			}
 			if ("backgroundImage" in input && input.backgroundImage === null) {
-				const oldAsset = deck.backgroundUrl;
-				if (oldAsset) {
-					await fs.unlink(path.join(thoriumPath, oldAsset));
-				}
+				await ctx.removeFile(deck.backgroundUrl);
 				deck.backgroundUrl = "";
-				ship.writeFile(true);
+				ship.write(true);
 			}
 
 			pubsub.publish.plugin.ship.get({
@@ -230,7 +209,7 @@ export const deck = t.router({
 					z.object({ name: z.string() }),
 					z.object({ isRoom: z.boolean() }),
 					z.object({
-						icon: z.union([z.string(), z.instanceof(File), z.null()]),
+						icon: z.instanceof(File).nullish(),
 					}),
 					z.object({ radius: z.number() }),
 					z.object({ volume: z.number() }),
@@ -257,18 +236,11 @@ export const deck = t.router({
 			}
 			if ("icon" in input) {
 				const file = input.icon;
-				if (typeof file === "string") {
-					const ext = path.extname(file);
+				if (file instanceof File) {
+					const ext = path.extname(file.name);
 					const filePath = `${uniqid(`node-${node.id}`)}${ext}`;
-					await fs.mkdir(path.join(thoriumPath, ship.assetPath), {
-						recursive: true,
-					});
-					await fs.rename(
-						file,
-						path.join(thoriumPath, ship.assetPath, filePath),
-					);
-					node.icon = path.join(ship.assetPath, filePath);
-					ship.writeFile(true);
+					node.icon = await ctx.uploadFile.call(ship, file, filePath);
+					ship.write(true);
 				}
 			}
 			if ("radius" in input) {

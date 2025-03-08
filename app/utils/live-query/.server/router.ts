@@ -31,8 +31,8 @@ type DecoratedProcedureRecord<TProcedures extends ProcedureRouterRecord> = {
 	[TKey in keyof TProcedures]: TProcedures[TKey] extends AnyRouter
 		? DecoratedProcedureRecord<TProcedures[TKey]["_def"]["record"]>
 		: TProcedures[TKey] extends AnyProcedure
-		  ? DecorateProcedure<TProcedures[TKey]>
-		  : never;
+			? DecorateProcedure<TProcedures[TKey]>
+			: never;
 };
 
 /**

@@ -1,0 +1,25 @@
+{
+	"$schema": "https://unpkg.com/wrangler@latest/config-schema.json",
+	"name": "thorium-nova",
+	"main": "./app/cloudflareServer.tsx",
+	"compatibility_date": "2025-02-04",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"directory": "./public"
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "MyServer",
+				"class_name": "MyServer"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_classes": ["MyServer"]
+		}
+	],
+	"r2_buckets": [{ "binding": "assets", "bucket_name": "thorium" }]
+}

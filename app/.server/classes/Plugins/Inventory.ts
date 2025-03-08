@@ -27,7 +27,7 @@ export default class InventoryPlugin extends Aspect {
 			params.name || "New Inventory",
 			plugin.aspects.inventory.map((inventory) => inventory.name),
 		);
-		super({ ...params, name }, { kind: "inventory" }, plugin);
+		super({ ...params, name }, { kind: "inventory" }, plugin, {});
 		this.name = this.name || name;
 		this.plural = this.plural || params.plural || name;
 		this.description = this.description || params.description || "";

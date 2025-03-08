@@ -56,7 +56,7 @@ export default class SolarSystemPlugin extends Aspect {
 			plugin.aspects.solarSystems.map((solarSystem) => solarSystem.name),
 		);
 
-		super({ name, ...params }, { kind: "solarSystems" }, plugin);
+		super({ name, ...params }, { kind: "solarSystems" }, plugin, {});
 		this.name = name;
 		this.description = `A solar system named ${name}`;
 

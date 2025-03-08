@@ -222,7 +222,6 @@ export const TabButton = (props: ITabButtonProps) => {
 	if (node.isEnableClose() && !isStretch) {
 		const closeTitle = layout.i18nName(I18nLabel.Close_Tab);
 		renderState.buttons.push(
-			// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 			<div
 				key="close"
 				data-layout-path={`${path}/button/close`}
@@ -238,7 +237,6 @@ export const TabButton = (props: ITabButtonProps) => {
 	}
 
 	return (
-		// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 		<div
 			ref={selfRef}
 			data-layout-path={path}

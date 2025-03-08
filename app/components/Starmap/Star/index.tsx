@@ -49,7 +49,6 @@ const StarEntity: React.FC<{
 			inclination={inclination}
 			showOrbit={showOrbit}
 		>
-			{/* biome-ignore lint/a11y/useKeyWithClickEvents:  */}
 			<group
 				onPointerOver={() => {
 					if (viewingMode === "viewscreen") return;

@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+console.trace("Whatever");
 export let __dirname =
 	process.env.NODE_ENV === "production"
 		? path.join(fileURLToPath(new URL(".", import.meta.url)), "..")
@@ -37,12 +38,3 @@ if (process.env.THORIUM_PATH) {
 
 /* format path to function with windows machines */
 thoriumPath = thoriumPath.replaceAll("\\", "/");
-
-export const databaseName =
-	process.env.NODE_ENV === "production"
-		? /* istanbul ignore next */
-			"db.yml"
-		: process.env.NODE_ENV === "test"
-			? "db-test.yml"
-			: /* istanbul ignore next */
-				"db-dev.yml";

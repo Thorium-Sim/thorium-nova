@@ -18,7 +18,7 @@ export class MacroPlugin extends Aspect {
 			params.name || "New Timeline",
 			plugin.aspects.timelines.map((timeline) => timeline.name),
 		);
-		super({ name, ...params }, { kind: "macros" }, plugin);
+		super({ name, ...params }, { kind: "macros" }, plugin, {});
 		this.name = name;
 		this.description =
 			params.description || "Performs several actions at once.";

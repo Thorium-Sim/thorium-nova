@@ -39,7 +39,6 @@ export function CargoList({
 						);
 
 						return (
-							// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 							<li
 								key={key}
 								className={`px-4 py-2 select-none block w-full border border-solid bg-black border-white border-opacity-50 pointer-events-auto ${

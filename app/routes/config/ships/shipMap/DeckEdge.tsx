@@ -65,7 +65,7 @@ export function DeckEdge({
 	const { x: toX, y: toY } = toNode;
 	return (
 		<>
-			{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+			w
 			<path
 				ref={refs.setReference}
 				d={`M ${fromX * pixelRatio} ${fromY * pixelRatio} L ${

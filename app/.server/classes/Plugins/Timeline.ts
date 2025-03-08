@@ -59,7 +59,7 @@ export default class TimelinePlugin extends Aspect {
 			params.name || "New Timeline",
 			plugin.aspects.timelines.map((timeline) => timeline.name),
 		);
-		super({ name, ...params }, { kind: "timelines" }, plugin);
+		super({ name, ...params }, { kind: "timelines" }, plugin, {});
 		this.name = name;
 		this.description = params.description || "What could possibly go wrong?";
 

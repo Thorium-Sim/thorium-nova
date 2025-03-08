@@ -1,13 +1,13 @@
 .actionsContainer {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 10000000;
-  pointer-events: none;
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	z-index: 10000000;
+	pointer-events: none;
 }
 .actionsContainer.flash {
-  backdrop-filter: brightness(2) contrast(1.5) saturate(2);
-  /* mix-blend-mode: overlay; */
+	backdrop-filter: brightness(2) contrast(1.5) saturate(2);
+	/* mix-blend-mode: overlay; */
 }

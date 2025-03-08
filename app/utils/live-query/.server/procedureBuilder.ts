@@ -47,7 +47,7 @@ export interface BuildProcedure<
 						_output_in: TOutput;
 						_output_out: TOutput;
 					}
-			  >
+				>
 			: TParams
 	> {
 	_empty?: never;
@@ -72,7 +72,7 @@ type OverwriteIfDefined<TType, TWith> = UnsetMarker extends TType
 	? TWith
 	: Simplify<
 			InferOptional<Merge<TType, TWith>, UndefinedKeys<Merge<TType, TWith>>>
-	  >;
+		>;
 
 /**
  * @internal
@@ -108,10 +108,10 @@ export interface ProcedureBuilder<TParams extends ProcedureParams> {
 		schema: TParams["_input_out"] extends UnsetMarker
 			? $Parser
 			: inferParser<$Parser>["out"] extends Record<string, unknown>
-			  ? TParams["_input_out"] extends Record<string, unknown>
+				? TParams["_input_out"] extends Record<string, unknown>
 					? $Parser
 					: ErrorMessage<"All input parsers did not resolve to an object">
-			  : ErrorMessage<"All input parsers did not resolve to an object">,
+				: ErrorMessage<"All input parsers did not resolve to an object">,
 	): ProcedureBuilder<{
 		_config: TParams["_config"];
 		_meta: TParams["_meta"];

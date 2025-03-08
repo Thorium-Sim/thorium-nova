@@ -4,13 +4,10 @@ import { z } from "zod";
 import { getPlugin } from "./utils";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import { pubsub } from "@thorium/.server/init/pubsub";
-import fs from "node:fs/promises";
-import path from "node:path";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
 import uniqid from "@thorium/utils/uniqid";
 import type { FlightStartingPoint } from "@thorium/.server/data/flight";
-import { moveFile } from "@thorium/utils/.server/moveFile";
+import path from "node:path";
 
 const action = t.router({
 	add: t.procedure
@@ -359,7 +356,7 @@ export const timeline = t.router({
 				1,
 			);
 
-			await timeline?.removeFile();
+			await timeline?.remove();
 			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
 		}),
 
@@ -373,7 +370,7 @@ export const timeline = t.router({
 				tags: z.array(z.string()).optional(),
 				description: z.string().optional(),
 				isMission: z.boolean().optional(),
-				cover: z.union([z.string(), z.instanceof(File)]).optional(),
+				cover: z.instanceof(File).optional(),
 			}),
 		)
 		.send(async ({ ctx, input }) => {
@@ -391,10 +388,10 @@ export const timeline = t.router({
 				timeline.isMission = input.isMission;
 			if (typeof input.cover === "string") {
 				const ext = path.extname(input.cover);
-				timeline.assets.cover = await moveFile(
+				timeline.assets.cover = await ctx.uploadFile.call(
+					timeline,
 					input.cover,
 					`logo${ext}`,
-					timeline.assetPath,
 				);
 			}
 

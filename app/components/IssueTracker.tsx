@@ -157,7 +157,7 @@ function IssueTracker({
 									},
 								},
 							);
-							const result = await response.json();
+							const result = (await response.json()) as any;
 							if (!response.ok || result.error) {
 								toast({
 									title: "Error Submitting Issue",
@@ -211,7 +211,7 @@ function IssueTracker({
 										},
 									},
 								);
-								const uploadData = await uploadDataRequest.json();
+								const uploadData = (await uploadDataRequest.json()) as any;
 								if (!uploadDataRequest.ok) {
 									toast({
 										title: "Error Uploading File",
@@ -227,7 +227,7 @@ function IssueTracker({
 								const image = new File([new Blob([data])], `${name}.png`, {
 									type: "image/png",
 								});
-								const result = await fetch(uploadData.uploadUrl, {
+								const result = (await fetch(uploadData.uploadUrl, {
 									method: "POST",
 									body: image,
 									headers: {
@@ -239,7 +239,7 @@ function IssueTracker({
 										)}`,
 										"X-Bz-Content-Sha1": "do_not_verify",
 									},
-								}).then((res) => res.json());
+								}).then((res) => res.json())) as any;
 								const { fileName } = result;
 								const url = `https://files.thoriumsim.com/file/thorium-public/${fileName}`;
 								yield url;

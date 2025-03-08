@@ -30,11 +30,11 @@ export function exitHandler() {
 }
 
 export async function snapshot() {
-	await database.server.writeFile(true);
+	await database.server.write(true);
 	await Promise.all(
 		database.server.plugins.map(async (plugin) => {
-			await plugin.writeFile(true);
+			await plugin.write(true);
 		}),
 	);
-	await database.flight?.writeFile(true);
+	await database.flight?.write(true);
 }

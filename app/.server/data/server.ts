@@ -1,31 +1,19 @@
-import { initDefaultPlugin } from "@thorium/.server/init/initDefaultPlugin";
 import { t } from "@thorium/.server/init/t";
-import path from "node:path";
-import fs from "node:fs/promises";
-import { pubsub } from "@thorium/.server/init/pubsub";
 
 export const server = t.router({
 	snapshot: t.procedure.send(({ ctx }) => {
 		const server = ctx.server;
-		server.writeFile(true);
+		server.write(true);
 		server.plugins.forEach((plugin) => {
-			plugin.writeFile(true);
+			plugin.write(true);
 		});
 		const flight = ctx.flight;
-		flight?.writeFile(true);
+		flight?.write(true);
 	}),
 	restoreDefaultPlugin: t.procedure.send(async ({ ctx }) => {
-		// Delete any default plugins
-		const defaultPlugins = ctx.server.plugins.filter((p) => p.default);
-		await Promise.all(
-			defaultPlugins.map((p) =>
-				fs.rm(path.dirname(p.filePath), { recursive: true, force: true }),
-			),
+		throw new Error(
+			"Not implemented. Manually download the plugin from https://github.com/Thorium-Sim/thorium-nova-plugin",
 		);
-		await initDefaultPlugin();
-		pubsub.publish.plugin.all();
-		defaultPlugins.forEach((plugin) =>
-			pubsub.publish.plugin.get({ pluginId: plugin.id }),
-		);
+		// await ctx.server.restoreDefaultPlugin();
 	}),
 });

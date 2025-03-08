@@ -5,7 +5,6 @@ export function DeckPicker({ decks }: { decks: { name: string }[] }) {
 	return (
 		<ul className="row-span-2 self-center overflow-y-auto select-none">
 			{decks.map((deck, index) => (
-				// biome-ignore lint/a11y/useKeyWithClickEvents:
 				<li
 					key={deck.name}
 					onClick={() => useShipMapStore.setState({ deckIndex: index })}

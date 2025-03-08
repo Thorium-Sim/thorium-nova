@@ -1014,7 +1014,7 @@ class PanZoom extends React.Component<Props, State> {
 					? {}
 					: {
 							tabIndex: 0, // enable onKeyDown event
-					  })}
+						})}
 				onDoubleClick={this.onDoubleClick}
 				onMouseDown={this.onMouseDown}
 				// React onWheel event listener is broken on Chrome 73

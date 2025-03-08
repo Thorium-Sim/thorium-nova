@@ -1,6 +1,5 @@
 import { OrbitControls, Stars, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import Button from "@thorium/ui/Button";
 import { Suspense, useState } from "react";
 import { Matrix4 } from "three";
 

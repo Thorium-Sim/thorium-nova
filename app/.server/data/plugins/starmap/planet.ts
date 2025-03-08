@@ -6,8 +6,6 @@ import romanNumerals from "roman-numerals";
 import { z } from "zod";
 import { getSolarSystem } from "../utils";
 import path from "node:path";
-import fs from "node:fs/promises";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { satellite } from "@thorium/ecs-components/satellite";
 import type { Kelvin, Kilometer, SolarRadius } from "@thorium/utils/unitTypes";
 import {
@@ -20,7 +18,6 @@ import getHabitableZone from "@thorium/utils/starmap/getHabitableZone";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { randomFromRange } from "@thorium/utils/operations/randomFromRange";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-import { moveFile } from "@thorium/utils/.server/moveFile";
 
 // Just less than the orbit of Neptune 🥶
 const MAX_PLANET_DISTANCE: Kilometer = 4_000_000_000;
@@ -192,13 +189,9 @@ export const planet = t.router({
 				isHabitable: z.boolean().optional(),
 				lifeforms: z.string().array().optional(),
 				atmosphericComposition: atmosphericComposition.optional(),
-				textureMapAsset: z.union([z.string(), z.instanceof(File)]).optional(),
-				cloudMapAsset: z
-					.union([z.string(), z.instanceof(File), z.null()])
-					.optional(),
-				ringMapAsset: z
-					.union([z.string(), z.instanceof(File), z.null()])
-					.optional(),
+				textureMapAsset: z.instanceof(File).nullish(),
+				cloudMapAsset: z.instanceof(File).nullish(),
+				ringMapAsset: z.instanceof(File).nullish(),
 				population: z.number().optional(),
 				temperature: z.number().optional(),
 				satellite: z
@@ -256,26 +249,26 @@ export const planet = t.router({
 
 			if (typeof input.textureMapAsset === "string") {
 				const ext = path.extname(input.textureMapAsset);
-				planet.isPlanet.textureMapAsset = await moveFile(
+				planet.isPlanet.textureMapAsset = await ctx.uploadFile.call(
+					system,
 					input.textureMapAsset,
 					`texture-${planet.name}${ext}`,
-					system.assetPath,
 				);
 			}
 			if (typeof input.cloudMapAsset === "string") {
 				const ext = path.extname(input.cloudMapAsset);
-				planet.isPlanet.cloudMapAsset = await moveFile(
+				planet.isPlanet.cloudMapAsset = await ctx.uploadFile.call(
+					system,
 					input.cloudMapAsset,
 					`cloud-${planet.name}${ext}`,
-					system.assetPath,
 				);
 			}
 			if (typeof input.ringMapAsset === "string") {
 				const ext = path.extname(input.ringMapAsset);
-				planet.isPlanet.ringMapAsset = await moveFile(
+				planet.isPlanet.ringMapAsset = await ctx.uploadFile.call(
+					system,
 					input.ringMapAsset,
 					`ring-${planet.name}${ext}`,
-					system.assetPath,
 				);
 			}
 			if (input.cloudMapAsset === null) {

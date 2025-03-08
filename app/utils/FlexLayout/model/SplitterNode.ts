@@ -24,7 +24,7 @@ export class SplitterNode extends Node {
 		if (this.getOrientation() === Orientation.VERT) {
 			return this._model.getSplitterSize();
 		}
-			return 0;
+		return 0;
 	}
 
 	/** @internal */
@@ -37,7 +37,7 @@ export class SplitterNode extends Node {
 		if (this.getOrientation() === Orientation.HORZ) {
 			return this._model.getSplitterSize();
 		}
-			return 0;
+		return 0;
 	}
 
 	/** @internal */
@@ -45,7 +45,7 @@ export class SplitterNode extends Node {
 		if (orientation === Orientation.HORZ) {
 			return this.getMinWidth();
 		}
-			return this.getMinHeight();
+		return this.getMinHeight();
 	}
 
 	/** @internal */

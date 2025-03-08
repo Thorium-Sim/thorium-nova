@@ -35,7 +35,7 @@ export function useResizeObserver<T extends HTMLElement = any>() {
 								}
 							});
 						}
-				  })
+					})
 				: null,
 		[],
 	);

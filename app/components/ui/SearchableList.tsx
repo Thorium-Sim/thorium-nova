@@ -80,7 +80,6 @@ function SearchableList<
 							)}
 							{items.map((c) => {
 								return (
-									// biome-ignore lint/a11y/useKeyWithClickEvents:
 									<li
 										key={JSON.stringify(c.id)}
 										className={`list-group-item ${

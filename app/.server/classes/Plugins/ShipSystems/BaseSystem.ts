@@ -85,7 +85,7 @@ export default class BaseShipSystemPlugin extends Aspect {
 			params.name || `New ${params.type}`,
 			plugin.aspects.shipSystems.map((sys) => sys.name),
 		);
-		super({ name, ...params }, { kind: "shipSystems" }, plugin);
+		super({ name, ...params }, { kind: "shipSystems" }, plugin, {});
 		this.name = name || "";
 		this.type = params.type || "generic";
 		this.description = params.description || "";

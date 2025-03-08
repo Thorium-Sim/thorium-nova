@@ -10,6 +10,8 @@ import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
 import systems from "@thorium/.server/systems";
 import type { DataContext } from "@thorium/.server/DataContext";
 import { ECS, Entity } from "../ecs";
+import { DataStore } from "@thorium/utils/.server/db-fs";
+import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 
 class MockServerDataModel {
 	clients!: Record<string, Client<any>>;
@@ -177,12 +179,19 @@ class MockDataContext {
 		}
 		return this.database.flight.clients[clientId];
 	}
+	uploadFile = async () => "";
+	readFile = async () => "";
+	removeFile = async () => {};
 }
 
 export function createMockDataContext() {
-	return new MockDataContext();
+	return DataStore.operations.run(testDataStoreProps, () => {
+		return new MockDataContext();
+	});
 }
 
 export function createMockRouter(context: DataContext) {
-	return router.createCaller(context);
+	return DataStore.operations.run(testDataStoreProps, () => {
+		return router.createCaller(context);
+	});
 }
