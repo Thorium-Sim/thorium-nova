@@ -21,7 +21,7 @@
 		"dev-cloudflare": "wrangler dev",
 		"start": "bun ./build/server/index.js",
 		"tauri": "tauri",
-		"typecheck": "react-router typegen && tsc",
+		"typecheck": "wrangler types --experimental-include-runtime && react-router typegen && tsc",
 		"lint": "biome lint .",
 		"test": "is-ci-cli \"test:coverage\" \"test:watch\"",
 		"test:coverage": "vitest --coverage",
