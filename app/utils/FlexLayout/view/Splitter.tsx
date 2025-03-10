@@ -152,8 +152,7 @@ export const Splitter = (props: ISplitterProps) => {
 		cursor:
 			node.getOrientation() === Orientation.HORZ ? "ns-resize" : "ew-resize",
 	});
-	let className =
-		`${cm(CLASSES.FLEXLAYOUT__SPLITTER)} ${cm(CLASSES.FLEXLAYOUT__SPLITTER_ + node.getOrientation().getName())}`;
+	let className = `${cm(CLASSES.FLEXLAYOUT__SPLITTER)} ${cm(CLASSES.FLEXLAYOUT__SPLITTER_ + node.getOrientation().getName())}`;
 
 	if (parentNode instanceof BorderNode) {
 		className += ` ${cm(CLASSES.FLEXLAYOUT__SPLITTER_BORDER)}`;
@@ -175,31 +174,31 @@ export const Splitter = (props: ISplitterProps) => {
 			/>
 		);
 	}
-		// add extended transparent div for hit testing
-		// extends forward only, so as not to interfere with scrollbars
-		const r2 = r.clone();
-		r2.x = 0;
-		r2.y = 0;
-		if (node.getOrientation() === Orientation.VERT) {
-			r2.width += extra;
-		} else {
-			r2.height += extra;
-		}
-		const style2 = r2.styleWithPosition({
-			cursor:
-				node.getOrientation() === Orientation.HORZ ? "ns-resize" : "ew-resize",
-		});
+	// add extended transparent div for hit testing
+	// extends forward only, so as not to interfere with scrollbars
+	const r2 = r.clone();
+	r2.x = 0;
+	r2.y = 0;
+	if (node.getOrientation() === Orientation.VERT) {
+		r2.width += extra;
+	} else {
+		r2.height += extra;
+	}
+	const style2 = r2.styleWithPosition({
+		cursor:
+			node.getOrientation() === Orientation.HORZ ? "ns-resize" : "ew-resize",
+	});
 
-		const className2 = cm(CLASSES.FLEXLAYOUT__SPLITTER_EXTRA);
+	const className2 = cm(CLASSES.FLEXLAYOUT__SPLITTER_EXTRA);
 
-		return (
-			<div style={style} data-layout-path={path} className={className}>
-				<div
-					style={style2}
-					className={className2}
-					onTouchStart={onMouseDown}
-					onMouseDown={onMouseDown}
-				/>
-			</div>
-		);
+	return (
+		<div style={style} data-layout-path={path} className={className}>
+			<div
+				style={style2}
+				className={className2}
+				onTouchStart={onMouseDown}
+				onMouseDown={onMouseDown}
+			/>
+		</div>
+	);
 };

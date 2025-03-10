@@ -18,8 +18,8 @@ type FlatOverwrite<TType, TWith> = InferOptional<
 		[TKey in keyof TWith | keyof TType]: TKey extends keyof TWith
 			? TWith[TKey]
 			: TKey extends keyof TType
-			  ? TType[TKey]
-			  : never;
+				? TType[TKey]
+				: never;
 	},
 	UndefinedKeys<TType> | UndefinedKeys<TWith>
 >;
@@ -38,7 +38,7 @@ type CreateRootConfigTypesFromPartial<TTypes extends Partial<RootConfigTypes>> =
 		entity: TTypes["entity"] extends RootConfigTypes["entity"]
 			? TTypes["entity"]
 			: // biome-ignore lint/complexity/noBannedTypes: Necessary for these types to work
-			  {};
+				{};
 	}>;
 
 /**

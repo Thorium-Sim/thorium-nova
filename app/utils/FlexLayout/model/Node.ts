@@ -87,7 +87,7 @@ export abstract class Node {
 				? Orientation.VERT
 				: Orientation.HORZ;
 		}
-			return Orientation.flip(this._parent.getOrientation());
+		return Orientation.flip(this._parent.getOrientation());
 	}
 
 	// event can be: resize, visibility, maximize (on tabset), close

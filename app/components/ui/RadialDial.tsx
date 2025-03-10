@@ -45,9 +45,9 @@ const RadialDial = forwardRef<
 			marker && marker < endAngle
 				? `var(--radial-color, #fff000) ${(marker / max) * 100 - 1}%, yellow ${
 						(marker / max) * 100
-				  }%, yellow ${
+					}%, yellow ${
 						(marker / max) * 100 + 1
-				  }%, var(--radial-color, #fff000)  ${(marker / max) * 100 + 2}%,`
+					}%, var(--radial-color, #fff000)  ${(marker / max) * 100 + 2}%,`
 				: ""
 		}
     var(--radial-color, #fff000) var(--end-angle, 0%),
@@ -56,9 +56,9 @@ const RadialDial = forwardRef<
 			marker && marker > endAngle
 				? `var(--radial-background) ${(marker / max) * 100 - 1}%, yellow ${
 						(marker / max) * 100
-				  }%, yellow ${(marker / max) * 100 + 1}%,var(--radial-background) ${
+					}%, yellow ${(marker / max) * 100 + 1}%,var(--radial-background) ${
 						(marker / max) * 100 + 2
-				  }%,`
+					}%,`
 				: ""
 		}
     var(--radial-background) 100%

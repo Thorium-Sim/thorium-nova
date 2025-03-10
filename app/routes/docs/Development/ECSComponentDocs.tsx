@@ -3,8 +3,6 @@ import { docs } from "virtual:ecs-component-docs";
 import { Fragment } from "react";
 
 export function ECSComponentDocs() {
-	console.log(docs);
-
 	return Object.values(docs)
 		.sort((a: any, b: any) => (a.component > b.component ? 1 : -1))
 		.map((doc) => {

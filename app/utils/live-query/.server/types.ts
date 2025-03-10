@@ -126,10 +126,10 @@ type GetInferenceHelpers<
 		? TRouterOrProcedure extends AnyRouter
 			? GetInferenceHelpers<TType, TRouterOrProcedure>
 			: TRouterOrProcedure extends AnyProcedure
-			  ? TType extends "input"
+				? TType extends "input"
 					? inferProcedureInput<TRouterOrProcedure>
 					: inferTransformedProcedureOutput<TRouterOrProcedure>
-			  : never
+				: never
 		: never;
 };
 
@@ -168,10 +168,10 @@ export type RouterRequests<TRouter extends AnyRouter> = {
 		: never]: TRouter[P] extends Procedure<"request", ProcedureParams>
 		? (
 				params: TRouter[P]["_def"]["_input_in"],
-		  ) => TRouter[P]["_def"]["_output_out"]
+			) => TRouter[P]["_def"]["_output_out"]
 		: TRouter[P] extends AnyRouter
-		  ? RouterRequests<TRouter[P]>
-		  : never;
+			? RouterRequests<TRouter[P]>
+			: never;
 };
 export type RouterSends<TRouter extends AnyRouter> = {
 	[P in keyof TRouter as TRouter[P] extends
@@ -181,6 +181,6 @@ export type RouterSends<TRouter extends AnyRouter> = {
 		: never]: TRouter[P] extends Procedure<"send", ProcedureParams>
 		? TRouter[P]
 		: TRouter[P] extends AnyRouter
-		  ? RouterSends<TRouter[P]>
-		  : never;
+			? RouterSends<TRouter[P]>
+			: never;
 };

@@ -7,7 +7,8 @@ import {
 } from "@react-router/dev/routes";
 
 export default [
-	route("/", "routes/landing/route.tsx", [
+	layout("routes/landing/route.tsx", [
+		index("routes/blank.tsx"),
 		layout("routes/quickStart/layout.tsx", [
 			route("flight/quick", "routes/quickStart/quickStart.tsx", [
 				route("crew", "routes/quickStart/crew.tsx"),

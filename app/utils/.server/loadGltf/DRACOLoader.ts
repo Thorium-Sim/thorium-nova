@@ -2,7 +2,6 @@ import { dirname, sep } from "node:path";
 import { Worker } from "node:worker_threads";
 import { BufferAttribute, BufferGeometry, Loader } from "three";
 import { FileLoader } from "./FileLoader";
-import { __dirname } from "@thorium/utils/.server/appPaths";
 
 const _taskCache = new WeakMap();
 

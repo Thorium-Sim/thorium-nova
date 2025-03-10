@@ -113,6 +113,7 @@ export class FileLoader extends Loader {
 							`fetch for "${response.url}" responded with ${response.status}: ${response.statusText}`,
 						);
 					})
+					// @ts-expect-error
 					.then((response) => {
 						switch (responseType) {
 							case "arraybuffer":

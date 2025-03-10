@@ -1,11 +1,11 @@
 import type { ServerDataModel } from "../ServerDataModel";
 import { generateIncrementedName } from "../../../utils/generateIncrementedName";
 import ShipPlugin from "./Ship";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
-import fs from "node:fs/promises";
-import { FSDataStore } from "@thorium/utils/.server/db-fs";
-import { loadFolderYaml } from "@thorium/utils/.server/db-fs/loadFolderYaml";
-import path from "node:path";
+import {
+	DataStore,
+	type DataStoreOptions,
+	type LoadAspectFn,
+} from "@thorium/utils/.server/db-fs";
 import StationComplementPlugin from "./StationComplement";
 import ThemePlugin from "./Theme";
 import SolarSystemPlugin from "./Universe/SolarSystem";
@@ -14,7 +14,6 @@ import InventoryPlugin from "./Inventory";
 import TimelinePlugin from "./Timeline";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { MacroPlugin } from "./Macro";
-import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
 
 export function pluginPublish(plugin: BasePlugin) {
 	pubsub.publish.plugin.all();
@@ -40,48 +39,44 @@ let storedServer: ServerDataModel;
 // they'll be keyed to the plugin, but will automatically
 // be garbage collected if the plugin is ever deleted.
 const pluginAspects = new WeakMap<BasePlugin, Aspects>();
-export default class BasePlugin extends FSDataStore {
-	id: string;
-	name: string;
-	author: string;
-	description: string;
-	default: boolean;
-	active: boolean;
-	_coverImage: string;
-	get coverImage() {
-		if (!this._coverImage) return "";
-		// Allow images from the internet
-		if (this._coverImage.startsWith("http")) return this._coverImage;
-		// Allow absolute paths
-		if (this._coverImage.startsWith("/")) return this._coverImage;
-		// Otherwise, resolve and return the relative path
-		return `${this.pluginPath}/assets/${this._coverImage}`;
-	}
-	set coverImage(coverImage: string) {
-		this._coverImage = coverImage;
-	}
-	get pluginPath() {
-		return `/plugins/${this.name}`;
-	}
-	tags: string[];
-	constructor(params: Partial<BasePlugin>, server: ServerDataModel) {
+export default class BasePlugin extends DataStore {
+	id!: string;
+	name!: string;
+	author!: string;
+	description!: string;
+	default!: boolean;
+	active!: boolean;
+	coverImage!: string;
+	#loadAspect: LoadAspectFn;
+	#getDataPromise: Promise<void>;
+	tags!: string[];
+	constructor(
+		params: Partial<BasePlugin>,
+		server: ServerDataModel,
+		options: DataStoreOptions,
+	) {
 		const name = generateIncrementedName(
 			params.name || "New Plugin",
 			server.plugins.map((p) => p.name),
 		);
 		super(params, {
-			path: `/plugins/${name}/manifest.yml`,
+			meta: {
+				filePath: `/plugins/${name}/manifest.yml`,
+			},
+			...options,
 		});
-		const data = this.getData();
-		this.id = data.id || params.id || name;
-		this.name = name;
-		this.author = data.author || "";
-		this.description = data.description || "A great plugin";
-		this._coverImage = data.coverImage || "";
-		this.tags = data.tags || [];
-		this.active = data.active ?? true;
-		this.default = data.default ?? false;
-		storedServer = server;
+		this.#loadAspect = DataStore.operations.getStore()!.loadAspect;
+		this.#getDataPromise = this.getData<BasePlugin>().then((data) => {
+			this.id = data.id || params.id || name;
+			this.name = name;
+			this.author = data.author || "";
+			this.description = data.description || "A great plugin";
+			this.coverImage = data.coverImage || "";
+			this.tags = data.tags || [];
+			this.active = data.active ?? true;
+			this.default = data.default ?? false;
+			storedServer = server;
+		});
 	}
 	get server() {
 		return storedServer;
@@ -104,78 +99,43 @@ export default class BasePlugin extends FSDataStore {
 		return aspects;
 	}
 	async loadAspects() {
-		this.aspects.ships = await BasePlugin.loadAspect(this, "ships", ShipPlugin);
+		await this.#getDataPromise;
+		this.aspects.ships = await this.#loadAspect("ships", ShipPlugin);
 
-		this.aspects.shipSystems = await BasePlugin.loadAspect(
-			this,
+		this.aspects.shipSystems = await this.#loadAspect(
 			"shipSystems",
 			BaseShipSystemPlugin,
 		);
-		this.aspects.stationComplements = await BasePlugin.loadAspect(
-			this,
+		this.aspects.stationComplements = await this.#loadAspect(
 			"stationComplements",
 			StationComplementPlugin,
 		);
 
-		this.aspects.themes = await BasePlugin.loadAspect(
-			this,
-			"themes",
-			ThemePlugin,
-		);
-		this.aspects.solarSystems = await BasePlugin.loadAspect(
-			this,
+		this.aspects.themes = await this.#loadAspect("themes", ThemePlugin);
+		this.aspects.solarSystems = await this.#loadAspect(
 			"solarSystems",
 			SolarSystemPlugin,
 		);
-		this.aspects.inventory = await BasePlugin.loadAspect(
-			this,
+		this.aspects.inventory = await this.#loadAspect(
 			"inventory",
 			InventoryPlugin,
 		);
-		this.aspects.timelines = await BasePlugin.loadAspect(
-			this,
+		this.aspects.timelines = await this.#loadAspect(
 			"timelines",
 			TimelinePlugin,
 		);
-		this.aspects.macros = await BasePlugin.loadAspect(
-			this,
-			"macros",
-			MacroPlugin,
-		);
-	}
-	toJSON() {
-		const { _coverImage, ...data } = this;
-		return { ...data, coverImage: this.coverImage };
-	}
-	serialize() {
-		const { _coverImage, ...data } = this;
-		return { ...data, coverImage: _coverImage };
+		this.aspects.macros = await this.#loadAspect("macros", MacroPlugin);
 	}
 	async rename(name: string) {
-		if (name.trim() === this.name) return;
-		const newName = generateIncrementedName(
-			name.trim() || this.name,
-			this.server.plugins.map((p) => p.name),
-		);
-		await fs.rename(
-			`${thoriumPath}/plugins/${this.name}`,
-			`${thoriumPath}/plugins/${newName}`,
-		);
-		this.id = newName;
-		this.name = newName;
-		this.path = `/plugins/${newName}/manifest.yml`;
-
-		// Also rename the cover image
-		const coverImage = path.basename(this.coverImage);
-		this.coverImage = `${this.pluginPath}/assets/${coverImage}`;
-		await this.writeFile(true);
+		const otherNames = this.server.plugins.map((p) => p.name);
+		await DataStore.operations.getStore()!.rename.call(this, name, otherNames);
 	}
-	async writeFile(force = false) {
-		await super.writeFile(force);
+	async write(force = false) {
+		await super.write(force);
 		if (force) {
 			for (const aspect in this.aspects) {
 				for (const aspectInstance of this.aspects[aspect as keyof Aspects]) {
-					await aspectInstance.writeFile(force);
+					await aspectInstance.write(force);
 				}
 			}
 		}
@@ -189,32 +149,8 @@ export default class BasePlugin extends FSDataStore {
 		data.id = data.name;
 		// TODO October 23: Properly duplicate all of the files associated with this plugin
 		// in the file system
-		return new BasePlugin(data, this.server);
-	}
-	static async loadAspect<N, T>(
-		plugin: BasePlugin,
-		aspectName: N,
-		aspect: {
-			new (
-				manifest: { name: string } & Record<string, any>,
-				plugin: BasePlugin,
-			): T;
-		},
-	) {
-		const objectGlob = `${thoriumPath}/plugins/${plugin.id}/${aspectName}/*/manifest.yml`;
-		const data = await loadFolderYaml<{ name: string } & Record<string, any>>(
-			objectGlob,
-		);
-
-		return data.map((aspectData) => {
-			if (aspectName === "shipSystems") {
-				const systemClass =
-					ShipSystemTypes[aspectData.type as keyof typeof ShipSystemTypes];
-				return new systemClass(aspectData, plugin) as InstanceType<
-					typeof aspect
-				>;
-			}
-			return new aspect(aspectData, plugin);
+		return new BasePlugin(data, this.server, {
+			meta: this.meta,
 		});
 	}
 }

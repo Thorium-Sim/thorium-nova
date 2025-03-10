@@ -62,7 +62,6 @@ export function EditorPalette({
 					</button>
 				</div>
 				{minimized ? null : children}
-				{/* @ts-expect-error */}
 			</animated.div>
 		</Portal>
 	);

@@ -234,7 +234,6 @@ export const BorderButton = (props: IBorderButtonProps) => {
 	if (node.isEnableClose()) {
 		const closeTitle = layout.i18nName(I18nLabel.Close_Tab);
 		renderState.buttons.push(
-			// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 			<div
 				key="close"
 				data-layout-path={`${path}/button/close`}
@@ -250,7 +249,6 @@ export const BorderButton = (props: IBorderButtonProps) => {
 	}
 
 	return (
-		// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 		<div
 			ref={selfRef}
 			data-layout-path={path}

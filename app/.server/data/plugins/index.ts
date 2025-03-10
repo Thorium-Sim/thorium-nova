@@ -6,8 +6,6 @@ import inputAuth from "@thorium/utils/.server/inputAuth";
 import BasePlugin from "@thorium/.server/classes/Plugins";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import path from "node:path";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
-import fs from "node:fs/promises";
 import { ship } from "./ship";
 import { timeline } from "./timeline";
 import { theme } from "./themes";
@@ -45,7 +43,9 @@ export const plugin = t.router({
 		.input(z.object({ name: z.string() }))
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
-			const plugin = new BasePlugin(input, ctx.server);
+			const plugin = new BasePlugin(input, ctx.server, {
+				meta: { filePath: `/plugins/${input.name}/manifest.yml` },
+			});
 			await plugin.loadAspects();
 			ctx.server.plugins.push(plugin);
 			publish(plugin.id);
@@ -56,7 +56,7 @@ export const plugin = t.router({
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			await plugin.removeFile();
+			await plugin.remove();
 			ctx.server.plugins.splice(ctx.server.plugins.indexOf(plugin), 1);
 			publish(plugin.id);
 		}),
@@ -78,7 +78,7 @@ export const plugin = t.router({
 				name: z.string().optional(),
 				description: z.string().optional(),
 				tags: z.string().array().optional(),
-				coverImage: z.union([z.string(), z.instanceof(File)]).optional(),
+				coverImage: z.instanceof(File).optional(),
 				active: z.boolean().optional(),
 			}),
 		)
@@ -92,17 +92,13 @@ export const plugin = t.router({
 			if (input.tags) {
 				plugin.tags = input.tags;
 			}
-			if (typeof input.coverImage === "string") {
-				const ext = path.extname(input.coverImage);
-				const coverImagePath = path.join(
-					thoriumPath,
-					plugin.pluginPath,
-					`assets/coverImage${ext}`,
+			if (input.coverImage) {
+				const ext = path.extname(input.coverImage.name);
+				plugin.coverImage = await ctx.uploadFile.call(
+					plugin,
+					input.coverImage,
+					`coverImage${ext}`,
 				);
-
-				await fs.mkdir(path.dirname(coverImagePath), { recursive: true });
-				await fs.rename(input.coverImage, coverImagePath);
-				plugin.coverImage = `${plugin.pluginPath}/assets/coverImage${ext}`;
 			}
 			if (input.active !== undefined) {
 				plugin.active = input.active;

@@ -115,7 +115,6 @@ const PopupMenu = (props: IPopupMenuProps) => {
 	};
 
 	const itemElements = items.map((item, i) => (
-		// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 		<div
 			key={item.index}
 			className={classNameMapper(CLASSES.FLEXLAYOUT__POPUP_MENU_ITEM)}

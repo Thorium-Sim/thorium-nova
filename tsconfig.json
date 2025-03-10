@@ -16,7 +16,12 @@
 		"noEmit": true,
 		"composite": true,
 		"lib": ["DOM", "DOM.Iterable", "ES2022"],
-		"types": ["vite/client", "bun"],
+		"types": [
+			"vite/client",
+			"bun",
+			"./.wrangler/types/runtime.d.ts",
+			"./worker-configuration.d.ts"
+		],
 		"target": "ES2022",
 		"module": "ES2022",
 		"moduleResolution": "bundler",

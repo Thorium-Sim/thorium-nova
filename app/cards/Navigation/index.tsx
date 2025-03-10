@@ -155,7 +155,6 @@ function Waypoints() {
 						}}
 					/>
 				</div>
-				{/* @ts-expect-error */}
 			</animated.div>
 		</div>
 	);

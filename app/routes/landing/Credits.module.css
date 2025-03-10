@@ -1,19 +1,19 @@
 .credits {
-  --fade-distance: 2rem;
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0px,
-    #fff var(--fade-distance, 10px),
-    #fff calc(100% - var(--fade-distance, 10px)),
-    transparent 100%
-  );
+	--fade-distance: 2rem;
+	mask-image: linear-gradient(
+		to bottom,
+		transparent 0px,
+		#fff var(--fade-distance, 10px),
+		#fff calc(100% - var(--fade-distance, 10px)),
+		transparent 100%
+	);
 }
 .all-credits {
-  animation: scroll-up var(--credits-duration, 3s) linear infinite;
+	animation: scroll-up var(--credits-duration, 3s) linear infinite;
 }
 
 @keyframes scroll-up {
-  to {
-    transform: translateY(calc(-50% - 1rem));
-  }
+	to {
+		transform: translateY(calc(-50% - 1rem));
+	}
 }

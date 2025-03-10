@@ -1,10 +1,8 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { getFlights } from "@thorium/utils/.server/getFlights";
 import { t } from "@thorium/.server/init/t";
 import { z } from "zod";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import fs from "node:fs/promises";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import randomWords from "@thorium/utils/random-words";
 import { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
@@ -18,6 +16,7 @@ import { spawnShip } from "@thorium/.server/spawners/ship";
 import type BasePlugin from "@thorium/.server/classes/Plugins";
 import type StationComplementPlugin from "@thorium/.server/classes/Plugins/StationComplement";
 import { triggerSend } from "@thorium/utils/.server/evaluateEntityQuery";
+import { DataStore } from "@thorium/utils/.server/db-fs";
 
 function getPlanetSystem(ecs: ECS, planet: Entity): Entity {
 	const parentId = planet.components?.satellite?.parentId;
@@ -103,7 +102,7 @@ export const flight = t.router({
 		return { date, name, paused };
 	}),
 	all: t.procedure.request(() => {
-		return getFlights();
+		return DataStore.operations.getStore()!.getFlights();
 	}),
 	start: t.procedure
 		.input(
@@ -130,7 +129,7 @@ export const flight = t.router({
 			}) => {
 				inputAuth(ctx);
 				if (ctx.flight) return ctx.flight;
-				const flightData = await getFlights();
+				const flightData = await DataStore.operations.getStore()!.getFlights();
 				flightName = generateIncrementedName(
 					flightName || randomWords(3).join("-"),
 					flightData.map((f) => f.name),
@@ -142,7 +141,7 @@ export const flight = t.router({
 						entities: [],
 						serverDataModel: ctx.server,
 					},
-					{ path: `/flights/${flightName}.flight` },
+					{ meta: { filePath: `/flights/${flightName}.flight` } },
 				);
 
 				const activePlugins = ctx.server.plugins.filter((p) => p.active);
@@ -304,7 +303,7 @@ export const flight = t.router({
 		if (!ctx.flight) return null;
 		ctx.flight.paused = false;
 
-		ctx.flight.writeFile();
+		ctx.flight.write();
 
 		try {
 			ctx.flight.destroy();
@@ -329,7 +328,7 @@ export const flight = t.router({
 					initialLoad: false,
 					serverDataModel: ctx.server,
 				},
-				{ path: `/flights/${input.flightName}.flight` },
+				{ meta: { filePath: `/flights/${input.flightName}.flight` } },
 			);
 			await ctx.flight.initEcs(ctx.server);
 			await ctx.flight.initPhysics();
@@ -347,7 +346,7 @@ export const flight = t.router({
 				ctx.server.activeFlightName = null;
 			}
 			try {
-				await fs.unlink(`${thoriumPath}/flights/${input.name}.flight`);
+				await ctx.removeFile(`/flights/${input.name}.flight`);
 			} catch {
 				// Do nothing; the file probably didn't exist.
 			}

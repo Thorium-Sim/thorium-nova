@@ -13,7 +13,6 @@ import { getInventoryTemplates } from "@thorium/utils/.server/getInventoryTempla
 import { getPowerSupplierPowerNeeded } from "@thorium/.server/systems/ReactorFuelSystem";
 import { Box3, Vector3 } from "three";
 import { loadGltf } from "@thorium/utils/.server/loadGltf";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { capitalCase } from "change-case";
 import path from "node:path";
 import { mergeDeep } from "@thorium/utils/operations/mergeDeep";
@@ -83,15 +82,7 @@ export async function spawnShip(
 	entity.addComponent("rotationVelocity");
 	entity.addComponent("reputation");
 
-	const size = await getMeshSize(
-		template.assets?.model
-			? path.join(
-					thoriumPath.startsWith("/") ? "" : ".",
-					thoriumPath,
-					template.assets!.model,
-				)
-			: null,
-	);
+	const size = await getMeshSize(template.assets!.model);
 	size.multiplyScalar(template.length || 1);
 	entity.addComponent("size", {
 		length: size.x,

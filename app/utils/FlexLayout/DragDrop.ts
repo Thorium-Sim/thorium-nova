@@ -275,8 +275,7 @@ export class DragDrop {
 	}
 
 	toString() {
-		const rtn =
-			`(DragDrop: startX=${this._startX}, startY=${this._startY}, dragging=${this._dragging})`;
+		const rtn = `(DragDrop: startX=${this._startX}, startY=${this._startY}, dragging=${this._dragging})`;
 
 		return rtn;
 	}

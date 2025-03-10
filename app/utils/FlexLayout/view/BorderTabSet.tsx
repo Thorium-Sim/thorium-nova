@@ -267,7 +267,6 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 	}
 
 	return (
-		// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
 		<div
 			ref={selfRef}
 			dir="ltr"

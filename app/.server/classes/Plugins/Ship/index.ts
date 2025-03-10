@@ -92,7 +92,7 @@ export default class ShipPlugin extends Aspect {
 			params.name || "New Ship",
 			plugin.aspects.ships.map((ship) => ship.name),
 		);
-		super({ name, ...params }, { kind: "ships" }, plugin);
+		super({ name, ...params }, { kind: "ships" }, plugin, {});
 		this.name = name;
 		this.description =
 			params.description || "Boldly going where no one has gone before.";

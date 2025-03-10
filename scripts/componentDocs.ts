@@ -38,7 +38,6 @@ export function componentDocs() {
 					if (ts.SyntaxKind[node.kind] === "ExportKeyword") {
 						const keyword =
 							node.parent.declarationList.declarations[0].name.getText();
-						console.log(keyword);
 						if (keyword) {
 							currentExportKeyword = keyword;
 							docs[currentExportKeyword] = {

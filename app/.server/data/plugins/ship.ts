@@ -6,12 +6,9 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import { z } from "zod";
 import { getPlugin } from "./utils";
-import fs from "node:fs/promises";
-import path from "node:path";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { deck } from "./deck";
 import uniqid from "@thorium/utils/uniqid";
-import { moveFile } from "@thorium/utils/.server/moveFile";
+import path from "node:path";
 
 export const ship = t.router({
 	deck,
@@ -82,7 +79,7 @@ export const ship = t.router({
 			if (!ship) return;
 			plugin.aspects.ships.splice(plugin.aspects.ships.indexOf(ship), 1);
 
-			await ship?.removeFile();
+			await ship?.remove();
 			pubsub.publish.plugin.ship.all({ pluginId: input.pluginId });
 		}),
 	update: t.procedure
@@ -96,11 +93,11 @@ export const ship = t.router({
 				tags: z.string().array().optional(),
 				mass: z.number().optional(),
 				length: z.number().optional(),
-				logo: z.union([z.string(), z.instanceof(File)]).optional(),
-				model: z.union([z.string(), z.instanceof(File)]).optional(),
-				top: z.union([z.string(), z.instanceof(Blob)]).optional(),
-				side: z.union([z.string(), z.instanceof(Blob)]).optional(),
-				vanity: z.union([z.string(), z.instanceof(Blob)]).optional(),
+				logo: z.instanceof(File).optional(),
+				model: z.instanceof(File).optional(),
+				top: z.instanceof(Blob).optional(),
+				side: z.instanceof(Blob).optional(),
+				vanity: z.instanceof(Blob).optional(),
 				theme: z
 					.object({ themeId: z.string(), pluginId: z.string() })
 					.optional(),
@@ -131,42 +128,40 @@ export const ship = t.router({
 				}
 				ship.length = input.length;
 			}
-			await fs.mkdir(path.join(thoriumPath, ship.assetPath), {
-				recursive: true,
-			});
+
 			if (typeof input.logo !== "undefined") {
 				const ext = path.extname(
 					typeof input.logo === "string" ? input.logo : input.logo.name,
 				);
-				ship.assets.logo = await moveFile(
+				ship.assets.logo = await ctx.uploadFile.call(
+					ship,
 					input.logo,
 					`logo${ext}`,
-					ship.assetPath,
 				);
 			}
 			if (typeof input.model !== "undefined")
-				ship.assets.model = await moveFile(
+				ship.assets.model = await ctx.uploadFile.call(
+					ship,
 					input.model,
 					"model.glb",
-					ship.assetPath,
 				);
 			if (typeof input.top !== "undefined")
-				ship.assets.topView = await moveFile(
+				ship.assets.topView = await ctx.uploadFile.call(
+					ship,
 					input.top,
 					"top.png",
-					ship.assetPath,
 				);
 			if (typeof input.side !== "undefined")
-				ship.assets.sideView = await moveFile(
+				ship.assets.sideView = await ctx.uploadFile.call(
+					ship,
 					input.side,
 					"side.png",
-					ship.assetPath,
 				);
 			if (typeof input.vanity !== "undefined")
-				ship.assets.vanity = await moveFile(
+				ship.assets.vanity = await ctx.uploadFile.call(
+					ship,
 					input.vanity,
 					"vanity.png",
-					ship.assetPath,
 				);
 
 			if (input.theme) {

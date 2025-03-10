@@ -14,8 +14,8 @@ type RouterRequests<TRouter extends AnyRouter> = {
 			? (publishInput?: TRouter[P]["_def"]["_publish"]) => void
 			: (publishInput: TRouter[P]["_def"]["_publish"]) => void
 		: TRouter[P] extends AnyRouter
-		  ? RouterRequests<TRouter[P]>
-		  : never;
+			? RouterRequests<TRouter[P]>
+			: never;
 };
 
 type RouterSub<TRouter extends AnyRouter> = {
@@ -26,8 +26,8 @@ type RouterSub<TRouter extends AnyRouter> = {
 		: never]: TRouter[P] extends Procedure<"request", ProcedureParams>
 		? (publish: any) => () => void
 		: TRouter[P] extends AnyRouter
-		  ? RouterSub<TRouter[P]>
-		  : never;
+			? RouterSub<TRouter[P]>
+			: never;
 };
 
 export class PubSub<TRouter extends AnyRouter> {

@@ -3,18 +3,14 @@ import randomWords from "@thorium/utils/random-words";
 import type { ServerDataModel } from "./ServerDataModel";
 import systems from "@thorium/.server/systems";
 import { FlightClient } from "./FlightClient";
-import {
-	FSDataStore,
-	type FSDataStoreOptions,
-} from "@thorium/utils/.server/db-fs";
+import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
 import type ShipPlugin from "./Plugins/Ship";
 import { DefaultUIDGenerator } from "@thorium/utils/ecs/uid";
-import path from "node:path";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { loadGltf } from "@thorium/utils/.server/loadGltf";
 import RAPIER from "@thorium-sim/rapier3d-node";
+import path from "node:path";
 
-export class FlightDataModel extends FSDataStore {
+export class FlightDataModel extends DataStore {
 	static INTERVAL = 1000 / 60;
 	name!: string;
 	date!: number;
@@ -25,13 +21,14 @@ export class FlightDataModel extends FSDataStore {
 	private entities!: Entity[];
 	serverDataModel: ServerDataModel;
 	interval!: ReturnType<typeof setInterval>;
+	#getDataPromise: Promise<void>;
 	constructor(
 		params: Partial<FlightDataModel> & {
 			serverDataModel: ServerDataModel;
 			initialLoad?: boolean;
 			entities: Entity[];
 		},
-		storeOptions: FSDataStoreOptions = {},
+		storeOptions: DataStoreOptions,
 	) {
 		const flightName = params.name || randomWords(3).join("-");
 
@@ -43,20 +40,20 @@ export class FlightDataModel extends FSDataStore {
 			},
 			storeOptions,
 		);
-		const data = this.getData();
-		this.name ??= flightName;
-		this.paused ??= data.paused ?? true;
-		this.date ??= Number(data.date ? new Date(data.date) : new Date());
-		this.pluginIds ??= data.pluginIds || [];
 		this.serverDataModel = params.serverDataModel;
-		this.entities ??= data.entities || [];
+		this.#getDataPromise = this.getData<FlightDataModel>().then((data) => {
+			this.name ??= flightName;
+			this.paused ??= data.paused ?? true;
+			this.date ??= Number(data.date ? new Date(data.date) : new Date());
+			this.pluginIds ??= data.pluginIds || [];
+			this.entities ??= data.entities || [];
 
-		this.clients = Object.fromEntries(
-			Object.entries(this.clients || data.clients || {}).map(([id, client]) => [
-				id,
-				new FlightClient(client),
-			]),
-		);
+			this.clients = Object.fromEntries(
+				Object.entries(this.clients || data.clients || {}).map(
+					([id, client]) => [id, new FlightClient(client)],
+				),
+			);
+		});
 	}
 	run = () => {
 		// Run all the systems
@@ -72,8 +69,10 @@ export class FlightDataModel extends FSDataStore {
 		this.ecs.entities.forEach((entity) => {
 			entity.dispose();
 		});
+		this.remove(true);
 	}
 	async initEcs(server: ServerDataModel) {
+		await this.#getDataPromise;
 		this.ecs = new ECS(server);
 		systems.forEach((Sys) => {
 			this.ecs.addSystem(new Sys());
@@ -110,8 +109,10 @@ export class FlightDataModel extends FSDataStore {
 		await Promise.all(
 			ships.map(async (ship) => {
 				if (!ship.assets.model) return;
+				const assetUrl = path.join(await ship.getAssetUrl(), ship.assets.model);
+				if (!assetUrl) return;
 				const colliderDesc = await generateColliderDesc(
-					path.join(thoriumPath, ship.assets.model),
+					assetUrl,
 					ship.mass,
 					ship.length,
 				);

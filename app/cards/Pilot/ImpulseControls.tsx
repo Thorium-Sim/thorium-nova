@@ -298,12 +298,12 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 								ref={ref}
 								className="relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end"
 							>
-								{/* @ts-expect-error */}
 								<a.div
 									{...bind()}
 									style={{
 										transform: y?.to((y) => `translate3d(0px,${y}px,0)`),
 									}}
+									// @ts-expect-error
 									className="z-10 w-10 h-10 rounded-full border-black/50 border-2 bg-gray-500 shadow-md cursor-pointer touch-none"
 								/>
 							</div>

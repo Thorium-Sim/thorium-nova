@@ -88,6 +88,7 @@ const UploadWell: React.FC<{
 				accept={accept}
 				multiple={false}
 				value={""}
+				disabled={disabled}
 				onChange={(e) => {
 					if (e.target?.files?.length === 1) {
 						onChange(e.target.files);

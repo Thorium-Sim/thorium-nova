@@ -40,12 +40,12 @@ export const Joystick = ({
 					eventHandlers.onPointerDown?.(e);
 				}}
 			>
-				{/* @ts-expect-error */}
 				<a.div
 					{...eventHandlers}
 					style={{
 						transform: xy?.to((x, y) => `translate3d(${x}px,${y}px,0)`),
 					}}
+					// @ts-expect-error
 					className="z-10 w-10 h-10 rounded-full border-black/50 border-2 bg-gray-500 shadow-md cursor-pointer touch-none"
 				/>
 				{children}
@@ -101,10 +101,10 @@ export const LinearJoystick = ({
 				eventHandlers.onPointerDown?.(e);
 			}}
 		>
-			{/* @ts-expect-error */}
 			<a.div
 				{...eventHandlers}
 				style={{ transform: xy?.to((x, y) => `translate3d(${x}px,${y}px,0)`) }}
+				// @ts-expect-error
 				className="z-10 w-10 h-10 rounded-full border-black/50 border-2 bg-gray-500 shadow-md cursor-pointer touch-none"
 			/>
 			{children}

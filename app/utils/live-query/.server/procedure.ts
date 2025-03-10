@@ -125,11 +125,11 @@ export interface ProcedureOptions {
 export type ProcedureArgs<TParams extends ProcedureParams> =
 	TParams["_input_in"] extends UnsetMarker
 		? // biome-ignore lint/suspicious/noConfusingVoidType: Necessary for this to work correctly
-		  [input?: undefined | void, opts?: ProcedureOptions]
+			[input?: undefined | void, opts?: ProcedureOptions]
 		: undefined extends TParams["_input_in"]
-		  ? // biome-ignore lint/suspicious/noConfusingVoidType: Necessary for this to work correctly
-			  [input?: TParams["_input_in"] | void, opts?: ProcedureOptions]
-		  : [input: TParams["_input_in"], opts?: ProcedureOptions];
+			? // biome-ignore lint/suspicious/noConfusingVoidType: Necessary for this to work correctly
+				[input?: TParams["_input_in"] | void, opts?: ProcedureOptions]
+			: [input: TParams["_input_in"], opts?: ProcedureOptions];
 
 /**
  *

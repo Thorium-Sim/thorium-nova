@@ -36,10 +36,10 @@ export type inferParser<TParser extends Parser> =
 		? {
 				in: $TIn;
 				out: $TOut;
-		  }
+			}
 		: TParser extends ParserWithoutInput<infer $InOut>
-		  ? {
+			? {
 					in: $InOut;
 					out: $InOut;
-			  }
-		  : never;
+				}
+			: never;

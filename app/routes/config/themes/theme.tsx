@@ -377,7 +377,6 @@ const UploadedFile: React.FC<{ file: string }> = ({ file }) => {
 	const { copy, state } = useClipboard();
 
 	return (
-		// biome-ignore lint/a11y/useKeyWithClickEvents:
 		<li key={file} className="list-group-item" onClick={() => copy(file)}>
 			<div className="flex items-center justify-between w-full">
 				<AssetPreview url={file} className="max-h-8 text-2xl" />

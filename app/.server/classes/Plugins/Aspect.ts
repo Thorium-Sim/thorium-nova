@@ -1,8 +1,5 @@
 import type BasePlugin from "./index";
-import { FSDataStore } from "@thorium/utils/.server/db-fs";
-import path from "node:path";
-import { promises as fs } from "node:fs";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
+import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 
 type AspectKinds = keyof BasePlugin["aspects"];
@@ -11,7 +8,7 @@ type AspectAsset = {
 	[assetName: string]: string | string[];
 };
 
-export abstract class Aspect extends FSDataStore {
+export abstract class Aspect extends DataStore {
 	abstract apiVersion: string;
 	abstract kind: AspectKinds;
 	abstract name: string;
@@ -21,6 +18,7 @@ export abstract class Aspect extends FSDataStore {
 		params: { name: string },
 		aspectConfig: { kind: AspectKinds; subPath?: `/${string}` },
 		plugin: BasePlugin,
+		options: DataStoreOptions,
 	) {
 		const { kind, subPath = "/" } = aspectConfig;
 		const name = generateIncrementedName(
@@ -28,15 +26,15 @@ export abstract class Aspect extends FSDataStore {
 			plugin.aspects[kind].map((aspect) => aspect.name),
 		);
 		super(params, {
-			path: `/plugins/${plugin.id}/${kind}${subPath}${name}/manifest.yml`,
+			meta: {
+				filePath: `/plugins/${plugin.id}/${kind}${subPath}${name}/manifest.yml`,
+			},
+			...options,
 		});
 		this.plugin = plugin;
-		const data = this.getData();
-		Object.assign(this, data);
+		this.getData().then((data) => Object.assign(this, data));
 	}
-	get assetPath() {
-		return path.join(path.dirname(this.path), "assets");
-	}
+
 	get pluginName() {
 		return this.plugin.name;
 	}
@@ -56,35 +54,10 @@ export abstract class Aspect extends FSDataStore {
 	 */
 	toJSON() {
 		const { plugin, ...data } = this;
-
 		return data;
 	}
-	async removeFile() {
-		await super.removeFile();
-		await fs.rm(path.join(thoriumPath, path.dirname(this.path)), {
-			recursive: true,
-			force: true,
-		});
-	}
 	async rename(name: string) {
-		if (name.trim() === this.name) return;
-		const newName = generateIncrementedName(
-			name.trim() || this.name,
-			this.plugin.aspects[this.kind].map((item) => item.name),
-		);
-		const aspectPath = path.dirname(this.path);
-		const newAspectPath = path.join(aspectPath, "..", newName);
-		if (process.env.NODE_ENV !== "test") {
-			await fs.rename(
-				`${thoriumPath}/${aspectPath}`,
-				`${thoriumPath}/${newAspectPath}`,
-			);
-		}
-		this.path = path.join(newAspectPath, "manifest.yml");
-		this.name = newName;
-
-		// Assets should automatically be renamed by virtue of
-		// being relative links.
-		await this.writeFile(true);
+		const otherNames = this.plugin.aspects[this.kind].map((item) => item.name);
+		await DataStore.operations.getStore()!.rename.call(this, name, otherNames);
 	}
 }

@@ -218,7 +218,6 @@ function TriggerInput({
 							{/* @ts-expect-error Bad types */}
 							{action.values?.conditions?.map(
 								(condition: any, index: number) => (
-									// biome-ignore lint/a11y/useKeyWithClickEvents:
 									<li
 										key={index}
 										className={cn(

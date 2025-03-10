@@ -52,12 +52,12 @@ export function ThoriumAccountContextProvider({
 		}
 		async function refresh(accessToken?: string) {
 			if (!account?.access_token && !accessToken) return;
-			const user = await fetch(`${process.env.THORIUMSIM_URL}/api/identity`, {
+			const user = (await fetch(`${process.env.THORIUMSIM_URL}/api/identity`, {
 				headers: {
 					Authorization: `Bearer ${accessToken || account?.access_token}`,
 				},
 				credentials: "omit",
-			}).then((res) => res.json());
+			}).then((res) => res.json())) as any;
 			setAccount({
 				...account,
 				...user,
@@ -67,7 +67,7 @@ export function ThoriumAccountContextProvider({
 		async function login() {
 			setVerifying(true);
 			// Kick off the login process
-			const data = await fetch(
+			const data = (await fetch(
 				`${process.env.THORIUMSIM_URL}/oauth/device_request`,
 				{
 					method: "POST",
@@ -79,7 +79,7 @@ export function ThoriumAccountContextProvider({
 						"Content-Type": "application/json",
 					},
 				},
-			).then((res) => res.json());
+			).then((res) => res.json())) as any;
 			if (data.error) {
 				setVerifying(false);
 				throw new Error(data.error_description);
@@ -102,7 +102,7 @@ export function ThoriumAccountContextProvider({
 	useEffect(() => {
 		if (deviceCode) {
 			const interval = setInterval(async () => {
-				const data = await fetch(
+				const data = (await fetch(
 					`${process.env.THORIUMSIM_URL}/oauth/access_token`,
 					{
 						method: "POST",
@@ -115,7 +115,7 @@ export function ThoriumAccountContextProvider({
 							"Content-Type": "application/json",
 						},
 					},
-				).then((res) => res.json());
+				).then((res) => res.json())) as any;
 
 				if (data.error) {
 					if (data.error === "authorization_pending") return;

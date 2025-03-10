@@ -1,38 +1,69 @@
 /* istanbul ignore file */
-import fsCallback from "node:fs";
-import path from "node:path";
-import throttle from "lodash.throttle";
-import { load, dump } from "js-yaml";
 
-const fs =
-	process.env.NODE_ENV === "test"
-		? {
-				mkdir: () => {},
-				writeFile: () => {},
-				rename: () => {},
-				unlink: () => {},
-		  }
-		: fsCallback.promises;
-const readFileSync =
-	process.env.NODE_ENV === "test" ? () => "" : fsCallback.readFileSync;
+import type { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
+import type BasePlugin from "@thorium/.server/classes/Plugins";
+import type ThemePlugin from "@thorium/.server/classes/Plugins/Theme";
+import throttle from "lodash.throttle";
+import { AsyncLocalStorage } from "node:async_hooks";
+
 const isProxy = Symbol("isProxy");
 
-let basePath = "./";
-export function setBasePath(path: string) {
-	basePath = path;
-}
-
-export interface FSDataStoreOptions {
-	path?: string;
+export interface DataStoreOptions {
 	throttle?: number;
 	safeMode?: boolean;
+	meta?: any;
 }
-export abstract class FSDataStore {
-	#path: string;
+
+export type LoadAspectFn = <T>(
+	this: BasePlugin,
+	aspectName: string,
+	aspect: {
+		new (
+			manifest: {
+				name: string;
+			} & Record<string, any>,
+			plugin: BasePlugin,
+		): T;
+	},
+) => Promise<T[]>;
+export interface DataStoreOperations {
+	getData(this: DataStore): Promise<unknown>;
+	write(this: DataStore, force?: boolean): Promise<void>;
+	remove(this: DataStore, force?: boolean): Promise<void>;
+	getAssetUrl(this: DataStore): Promise<string>;
+	readAsset(this: DataStore, asset: string): Promise<string>;
+	uploadAsset(
+		this: DataStore,
+		asset: File | Blob,
+		fileName?: string,
+	): Promise<string>;
+	removeAsset(assetPath: string): Promise<void>;
+	loadAspect: LoadAspectFn;
+	processCSS: (
+		this: ThemePlugin,
+		css: string,
+	) => Promise<{ processedCSS: string; assetUrl: string }>;
+	rename: (
+		this: DataStore,
+		newName: string,
+		otherNames: string[],
+	) => Promise<void>;
+	getFlights: () => Promise<FlightDataModel[]>;
+}
+export abstract class DataStore {
+	static operations = new AsyncLocalStorage<DataStoreOperations>();
 	#throttle: number;
 	#safeMode: boolean;
-	#writeThrottle: () => void;
+	#writeThrottle: (force?: boolean) => Promise<void>;
 	initialData: unknown;
+	/** Useful for implementations to store arbitrary data */
+	#meta: any;
+	get meta(): any {
+		return this.#meta;
+	}
+	set meta(value) {
+		this.#meta = value;
+	}
 	#handler: ProxyHandler<any> = {
 		get: (target, key) => {
 			if (key === "getData") return target[key];
@@ -67,46 +98,23 @@ export abstract class FSDataStore {
 			return true;
 		},
 	};
-	constructor(initialData: unknown, options: FSDataStoreOptions = {}) {
+
+	constructor(initialData: unknown, options: DataStoreOptions) {
 		this.initialData = initialData;
-		this.#path = options.path || "db.json";
+		this.meta = options.meta;
 		this.#throttle =
 			options.throttle || process.env.NODE_ENV === "production" ? 1000 * 30 : 0;
 		this.#safeMode = options.safeMode || false;
 		this.#writeThrottle =
 			process.env.NODE_ENV === "test"
-				? this.writeFile
-				: throttle(this.writeFile, this.#throttle, {
+				? this.write
+				: throttle(this.write, this.#throttle, {
 						trailing: true,
-				  });
+					});
 
 		const proxy = new Proxy(this, this.#handler);
 		// biome-ignore lint/correctness/noConstructorReturn: We need to have the class become a proxy
 		return proxy;
-	}
-	getData() {
-		let data: any;
-		try {
-			data = this.filePath
-				? load(readFileSync(this.filePath, "utf8"), {
-						json: true,
-						onWarning: (e) => console.warn("YAML load warning:", e),
-				  })
-				: this.initialData;
-		} catch (err: any) {
-			if (err.code === "EACCES") {
-				err.message +=
-					"\ndata-store does not have permission to load this file\n";
-				throw err;
-			}
-		}
-		if (!data) {
-			data = Object.fromEntries(Object.entries(this.initialData as any));
-		}
-		return data;
-	}
-	get filePath() {
-		return path.join(basePath, this.#path);
 	}
 	get safeMode() {
 		return this.#safeMode;
@@ -114,53 +122,16 @@ export abstract class FSDataStore {
 	toJSON(): any {
 		return this;
 	}
-	get path() {
-		return this.#path;
+	async getData<T>(): Promise<T> {
+		return DataStore.operations.getStore()!.getData.apply(this) as Promise<T>;
 	}
-	set path(newPath: string) {
-		this.#path = newPath;
+	async write(force?: boolean): Promise<void> {
+		return DataStore.operations.getStore()!.write.call(this, force);
 	}
-	async writeFile(force = false) {
-		try {
-			if (this.safeMode && force === false) return;
-			if (
-				!this.safeMode &&
-				process.env.NODE_ENV !== "production" &&
-				process.env.NODE_ENV !== "test" &&
-				force === false
-			)
-				return;
-			if (process.env.NODE_ENV === "test") return;
-			if (!this.filePath) {
-				return;
-			}
-			await fs.mkdir(path.dirname(this.filePath), { recursive: true });
-			const serialized = this.toJSON();
-			serialized.initialData = undefined;
-			const data = dump(serialized, { skipInvalid: true });
-			await fs.writeFile(this.filePath, data, { mode: 0o0600 });
-		} catch (e: any) {
-			e.message = `db-fs: Error writing file:\n${e.message}`;
-			throw e;
-		}
+	async remove(force?: boolean): Promise<void> {
+		return DataStore.operations.getStore()!.remove.call(this, force);
 	}
-	async moveFile(newPath: string) {
-		if (!this.filePath) return;
-		try {
-			await fs.rename(this.filePath, newPath);
-		} catch (err: any) {
-			console.error("Error moving file: ", this.filePath, err);
-		}
-	}
-	async removeFile() {
-		if (!this.filePath) return;
-		try {
-			await fs.unlink(this.filePath);
-		} catch (err: any) {
-			if (err?.code === "ENOENT") {
-				return;
-			}
-			console.error("Error removing file: ", this.filePath, err);
-		}
+	async getAssetUrl() {
+		return DataStore.operations.getStore()!.getAssetUrl.call(this);
 	}
 }

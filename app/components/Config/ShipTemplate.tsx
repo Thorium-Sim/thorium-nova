@@ -17,7 +17,7 @@ export function ShipTemplate({
 				name: value.name,
 				category: "",
 				vanity: "",
-		  }
+			}
 		: null;
 	return (
 		<SearchableInput<{

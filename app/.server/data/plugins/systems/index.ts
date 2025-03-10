@@ -21,10 +21,7 @@ import { shields } from "./shields";
 import { phasers } from "./phasers";
 import { sound } from "@thorium/ecs-components/sound";
 import path from "node:path";
-import fs from "node:fs/promises";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { sensors } from "./sensors";
-import { moveFile } from "@thorium/utils/.server/moveFile";
 
 const systemTypes = createUnionSchema(
 	Object.keys(ShipSystemTypes) as (keyof typeof ShipSystemTypes)[],
@@ -206,7 +203,7 @@ export const systems = t.router({
 				shipId: z.string().optional(),
 				shipPluginId: z.string().optional(),
 				fileName: z.string().optional(),
-				file: z.union([z.string(), z.instanceof(File)]),
+				file: z.instanceof(File),
 				soundEffect: z.string(),
 			}),
 		)
@@ -219,10 +216,10 @@ export const systems = t.router({
 			}
 			if (typeof input.file === "string") {
 				const filePath = path.basename(input.file);
-				const url = await moveFile(
+				const url = await ctx.uploadFile.call(
+					system,
 					input.file,
 					input.fileName || filePath,
-					shipSystem.assetPath,
 				);
 				if (!Array.isArray(shipSystem.soundEffects[input.soundEffect])) {
 					shipSystem.soundEffects[input.soundEffect] = [];

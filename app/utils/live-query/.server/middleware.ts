@@ -143,7 +143,7 @@ export function createInputMiddleware<TInput>(parse: ParseFn<TInput>) {
 				? {
 						...input,
 						...parsedInput,
-				  }
+					}
 				: parsedInput;
 
 		// TODO fix this typing?
