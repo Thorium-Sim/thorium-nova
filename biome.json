@@ -3,6 +3,9 @@
 	"organizeImports": {
 		"enabled": true
 	},
+	"formatter": {
+		"ignore": ["./app/components/ui/icons/name.d.ts"]
+	},
 	"linter": {
 		"enabled": true,
 		"ignore": [
