@@ -362,6 +362,8 @@ const quotes = [
 	"I would rather have questions that can't be answered than answers that can't be questioned.",
 	"I think it's much more interesting to live not knowing than to have answers which might be wrong.",
 	"Learn what the rest of the world is like. The variety is worthwhile.",
+	// Ross Gay
+	"Isn’t efficiency almost always at the cost of care?",
 ];
 
 const QuoteOfTheDay = () => {

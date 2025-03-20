@@ -3,7 +3,6 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-console.trace("Whatever");
 export let __dirname =
 	process.env.NODE_ENV === "production"
 		? path.join(fileURLToPath(new URL(".", import.meta.url)), "..")
