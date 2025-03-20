@@ -82,9 +82,15 @@ export async function spawnShip(
 	entity.addComponent("rotationVelocity");
 	entity.addComponent("reputation");
 
-	const size = await getMeshSize(
-		path.join((await template.getAssetUrl!()) || "", template.assets!.model),
+	const modelPath = path.join(
+		(await template.getAssetUrl!()) || "",
+		template.assets!.model,
 	);
+	const size =
+		modelPath && modelPath !== "."
+			? await getMeshSize(modelPath)
+			: new Vector3(10, 10, 10);
+
 	size.multiplyScalar(template.length || 1);
 	entity.addComponent("size", {
 		length: size.x,
