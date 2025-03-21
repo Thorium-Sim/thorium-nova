@@ -6,7 +6,8 @@
 		"app/**/.client/**/*",
 		"tailwind.config.ts",
 		"vite.config.ts",
-		"scripts/**/*"
+		"scripts/**/*",
+		".github/actions/**/*"
 	],
 	"compilerOptions": {
 		"checkJs": true,

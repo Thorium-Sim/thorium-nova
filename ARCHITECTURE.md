@@ -3,9 +3,6 @@
 ## Folder Structure
 
 - **app** - The code that is used for rendering the React frontend. This includes server code that is run in the Bun runtime. Any code that should only run on the server should use the `.server.ts(x)` extension or be in a `.server` folder. Any other code is intended to be used in both the client and the server.
-- **src-tauri** - The code that runs the Tauri app shell, written in Rust. This shell provides
-  a link between the client app and the user's underlying system. It also
-  launches the HTTP server.
 - **data** - Flights and plugins used during development. The `Thorium Default` plugin is its own git repository which is used as the template for the compiled version of Thorium Nova.
 
 ## Conventions

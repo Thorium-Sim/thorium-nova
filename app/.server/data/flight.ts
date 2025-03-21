@@ -2,7 +2,6 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { z } from "zod";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import fs from "node:fs/promises";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import randomWords from "@thorium/utils/random-words";
 import { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
@@ -293,25 +292,21 @@ export const flight = t.router({
 				ctx.server.activeFlightName = flightName;
 				pubsub.publish.flight.active();
 				pubsub.publish.flight.all();
+				await ctx.flight.write(true);
 				return ctx.flight;
 			},
 		),
-	stop: t.procedure.send(({ ctx }) => {
+	stop: t.procedure.send(async ({ ctx }) => {
 		inputAuth(ctx);
 
 		// Save the flight, but don't delete it.
 		if (!ctx.flight) return null;
 		ctx.flight.paused = false;
 
-		ctx.flight.write();
-
-		try {
-			ctx.flight.destroy();
-		} catch (err) {
-			console.error(err);
-		}
 		ctx.flight = null;
 		ctx.server.activeFlightName = null;
+
+		await ctx.server.write(true);
 		// TODO September 1, 2021 - Stop broadcasting this flight with Bonjour.
 		pubsub.publish.flight.active();
 		return null;

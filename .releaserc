@@ -17,22 +17,17 @@
 				"changelogTitle": "# Changelog\n\nAll notable changes to this project will be documented in this file. See\n[Conventional Commits](https://conventionalcommits.org) for commit guidelines."
 			}
 		],
+		"@semantic-release/npm",
 		[
 			"@semantic-release/exec",
 			{
-				"prepareCmd": "bunx tauri-version ${nextRelease.version} --no-git --no-lock",
 				"publishCmd": "bun run build:client"
 			}
 		],
 		[
 			"@semantic-release/git",
 			{
-				"assets": [
-					"CHANGELOG.md",
-					"package.json",
-					"src-tauri/tauri.conf.json",
-					"src-tauri/Cargo.toml"
-				],
+				"assets": ["CHANGELOG.md", "package.json"],
 				"message": "chore(release): ${nextRelease.version}\n\n${nextRelease.notes}"
 			}
 		]
