@@ -56,6 +56,7 @@ export abstract class DataStore {
 	#safeMode: boolean;
 	#writeThrottle: (force?: boolean) => Promise<void>;
 	initialData: unknown;
+	private dataLoaded = false;
 	/** Useful for implementations to store arbitrary data */
 	#meta: any;
 	get meta(): any {
@@ -123,9 +124,15 @@ export abstract class DataStore {
 		return this;
 	}
 	async getData<T>(): Promise<T> {
-		return DataStore.operations.getStore()!.getData.apply(this) as Promise<T>;
+		const loadedData = (await DataStore.operations
+			.getStore()!
+			.getData.apply(this)) as Promise<T>;
+		this.dataLoaded = true;
+		return loadedData;
 	}
 	async write(force?: boolean): Promise<void> {
+		// Don't write if we haven't already loaded the data.
+		if (!this.dataLoaded) return;
 		return DataStore.operations.getStore()!.write.call(this, force);
 	}
 	async remove(force?: boolean): Promise<void> {

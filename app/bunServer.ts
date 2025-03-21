@@ -11,13 +11,9 @@ import { Hono } from "hono";
 import { createBunWebSocket } from "hono/bun";
 import { readdir } from "node:fs/promises";
 import { vanity } from "@thorium/utils/.server/vanity";
-// @ts-expect-error
-import httpsCert from "./.server/server.cert" with { type: "file" };
-// @ts-expect-error
-import httpsKey from "./.server/server.key" with { type: "file" };
 import { getMimeType } from "hono/utils/mime";
 import { getClientBundleFile } from "@thorium/utils/.server/getClientBundleFile";
-import type { ServerWebSocket } from "bun";
+import { embeddedFiles, type ServerWebSocket } from "bun";
 import {
 	bunDataStoreProps,
 	loadPlugins,
@@ -114,6 +110,15 @@ DataStore.operations.run(bunDataStoreProps, async () => {
 	console.info(`Server running on ${server.url.href}`);
 
 	if (process.env.NODE_ENV === "production") {
+		// @ts-expect-error
+		await import("./.server/server.cert", {
+			with: { type: "file" },
+		});
+		// @ts-expect-error
+		await import("./.server/server.key", {
+			with: { type: "file" },
+		});
+
 		const https = Bun.serve({
 			port: port + 1,
 			fetch: app.fetch,
@@ -122,8 +127,12 @@ DataStore.operations.run(bunDataStoreProps, async () => {
 			// @ts-expect-error
 			tls: {
 				// TODO: Support user-provided TLS certificates
-				cert: await Bun.file(httpsCert).text(),
-				key: await Bun.file(httpsKey).text(),
+				cert: await embeddedFiles
+					.find((file) => file.name === "server.cert")!
+					.text(),
+				key: await embeddedFiles
+					.find((file) => file.name === "server.key")!
+					.text(),
 			},
 		});
 		console.info(`HTTPS Server running on ${https.url.href}`);
