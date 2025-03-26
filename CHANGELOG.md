@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.17](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.16...1.0.0-alpha.17) (2025-03-26)
+
+
+### Bug Fixes
+
+* Autopilot improvements ([9c8ad05](https://github.com/Thorium-Sim/thorium-nova/commit/9c8ad056a6070b3934477f2b6f49ade20042e87f))
+* Improvements to how warp and impulse autopilot is implemented. ([7b6343a](https://github.com/Thorium-Sim/thorium-nova/commit/7b6343adc3831eb54543bfc442d51d7c31088ba7))
+* IP Address on the client app now copies properly ([a3cc357](https://github.com/Thorium-Sim/thorium-nova/commit/a3cc35746b592b64be3233a8712591994318501a))
+* Make gamepad hat code work for more gamepads. ([a10eda4](https://github.com/Thorium-Sim/thorium-nova/commit/a10eda423ec81e72a1be4c10fc2202862da36143))
+* Plugins now load in the correct order. ([6b9dec4](https://github.com/Thorium-Sim/thorium-nova/commit/6b9dec46b080ea08daffee38bd83fd9a94046879))
+* Ship image uploads now appear correctly ([0f0d422](https://github.com/Thorium-Sim/thorium-nova/commit/0f0d42247efcefbe3f2589c2d65aef855c5306ce))
+* Widget alignment ([5f856e8](https://github.com/Thorium-Sim/thorium-nova/commit/5f856e88ab25e79393423d3444a6a5d5f19c94f4))
+
+
+### Features
+
+* Add a pathfinding algorithm for navigating around objects. ([923b922](https://github.com/Thorium-Sim/thorium-nova/commit/923b92260114e2dfa6761e17f4b67dbe54531f52))
+* Add a small direction indicator to sensor contacts. ([e347ded](https://github.com/Thorium-Sim/thorium-nova/commit/e347ded8ad41800ea8c2d7eb98b3da84d543f659))
+* Add nav waypoint to ships on sensors. ([b90ba8c](https://github.com/Thorium-Sim/thorium-nova/commit/b90ba8c77038f5212a8ddda86754409120760fed))
+* Autopilot can now follow predetermined paths. ([efe4865](https://github.com/Thorium-Sim/thorium-nova/commit/efe4865fc8bc092c1b7cd7520cc8369ee3e5a4f9))
+* Makes it possible to click anywhere on the Pilot joysticks to control thrusters. ([ac395a1](https://github.com/Thorium-Sim/thorium-nova/commit/ac395a197e5cbf320cbdb2d5cdd2ec46e1b8e69b))
+* New App Architecture ([71d2ea4](https://github.com/Thorium-Sim/thorium-nova/commit/71d2ea481e57ba7e6d149881a034cb750e4af5fb))
+* Objects appear as generic icons when not identified by Sensors ([6a45da9](https://github.com/Thorium-Sim/thorium-nova/commit/6a45da9d77343baad872d0715699cd521c513261))
+* Pilot sensor array has better affordance for rotation and lateral movement ([e8cf755](https://github.com/Thorium-Sim/thorium-nova/commit/e8cf7558317161a72b0f637acca7fc1caf2dab19))
+* Sensors Card and Scanning system ([201f83d](https://github.com/Thorium-Sim/thorium-nova/commit/201f83dab67f891702359df211f3ff70a9bf22ce))
+
 # [1.0.0-alpha.17](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.16...1.0.0-alpha.17) (2025-01-26)
 
 
