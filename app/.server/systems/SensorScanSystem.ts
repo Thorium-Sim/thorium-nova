@@ -174,11 +174,12 @@ export function generateScanResults(
 				}
 			});
 			// All of the cargo on the target which has the "scanable" flag
-			currentResults.cargo = output;
+			currentResults.cargo = { cargo: output, scanTime: Date.now() };
 			break;
 		}
 		case "crew":
 			// TODO February 12, 2025: We currently don't track crew at all, but we should add it to sensor scans once we do
+			currentResults.crew = { count: 0, scanTime: Date.now() };
 			break;
 		case "damage": {
 			// We'll just include the top three damaged systems
@@ -197,11 +198,12 @@ export function generateScanResults(
 				});
 			}
 			systems.sort((a, b) => a.efficiency - b.efficiency);
-			currentResults.damage = {};
+			const damage: Record<string, number> = {};
 			for (const { name, efficiency } of systems.slice(0, 3)) {
 				if (!name) continue;
-				currentResults.damage[name] = efficiency;
+				damage[name] = efficiency;
 			}
+			currentResults.damage = { scanTime: Date.now(), damage };
 			break;
 		}
 		case "identification": {
@@ -210,6 +212,7 @@ export function generateScanResults(
 			);
 
 			currentResults.identification = {
+				scanTime: Date.now(),
 				name: object.components.identity?.name || "Unknown",
 				classification: getClassification(object) || "Unknown",
 				factionName: faction?.components.identity?.name || "Unknown",
@@ -248,6 +251,7 @@ export function generateScanResults(
 			}
 
 			currentResults.shields = {
+				scanTime: Date.now(),
 				strength: shieldStrength,
 				status: shieldStatus,
 			};
@@ -262,6 +266,8 @@ export function generateScanResults(
 				targeting[0].components.isTargeting?.target || -1,
 			);
 			currentResults.targeting = {
+				scanTime: Date.now(),
+				targetId: target?.id || -1,
 				targetName: target?.components.identity?.name || "None",
 				// TODO February 18, 2025 - Add proper support for this once we have individual weapons targeting
 				targetedSystem: "General",
@@ -278,27 +284,31 @@ export function generateScanResults(
 				systemType: "TorpedoLauncher",
 			});
 
-			currentResults.weapons = [
-				...phasers.map((p) => {
-					return { type: "phasers" as const, charge: getPhaserCharge(p) };
-				}),
-				...torpedoes.map((t) => {
-					const torpedo = ecs.getEntityById(
-						t.components.isTorpedoLauncher?.torpedoEntity || -1,
-					);
-					return {
-						type: "torpedoes" as const,
-						loaded:
-							t.components.isTorpedoLauncher?.status === "loaded"
-								? `${capitalCase(torpedo?.components.identity?.name || "Unknown")} Loaded`
-								: "Unloaded",
-					};
-				}),
-			];
+			currentResults.weapons = {
+				scanTime: Date.now(),
+				weapons: [
+					...phasers.map((p) => {
+						return { type: "phasers" as const, charge: getPhaserCharge(p) };
+					}),
+					...torpedoes.map((t) => {
+						const torpedo = ecs.getEntityById(
+							t.components.isTorpedoLauncher?.torpedoEntity || -1,
+						);
+						return {
+							type: "torpedoes" as const,
+							loaded:
+								t.components.isTorpedoLauncher?.status === "loaded"
+									? `${capitalCase(torpedo?.components.identity?.name || "Unknown")} Loaded`
+									: "Unloaded",
+						};
+					}),
+				],
+			};
 			break;
 		}
 		case "life": {
 			currentResults.life = {
+				scanTime: Date.now(),
 				isHabitable: object.components.isPlanet?.isHabitable || false,
 				lifeforms: object.components.isPlanet?.lifeforms || ["None"],
 				population: object.components.population?.count || 0,
@@ -307,9 +317,12 @@ export function generateScanResults(
 		}
 		case "atmosphere":
 			{
-				currentResults.atmosphere = [
-					...(object.components.isPlanet?.atmosphericComposition || []),
-				];
+				currentResults.atmosphere = {
+					scanTime: Date.now(),
+					atmosphere: [
+						...(object.components.isPlanet?.atmosphericComposition || []),
+					],
+				};
 			}
 			break;
 		case "temperature": {
@@ -317,6 +330,7 @@ export function generateScanResults(
 			// heat of all systems on the ship
 			if (object.components.temperature?.temperature) {
 				currentResults.temperature = {
+					scanTime: Date.now(),
 					temperature: object.components.temperature?.temperature,
 				};
 			}

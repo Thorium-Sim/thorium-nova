@@ -18,6 +18,7 @@ export function isFriendOrFoe(
 	// Reputation between the ship's faction and the target ship
 	if (typeof factionReputation[targetId.toString()] === "number")
 		return factionReputation[targetId.toString()];
+
 	// Reputation between the ship's faction and the target's faction
 	if (
 		targetFactionId &&

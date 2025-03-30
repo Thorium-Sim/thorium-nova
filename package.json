@@ -21,7 +21,7 @@
 		"dev:server": "bun run --watch ./app/bunServer.ts",
 		"dev-cloudflare": "wrangler dev",
 		"start": "bun ./build/server/index.js",
-		"typecheck": "wrangler types --experimental-include-runtime && react-router typegen && tsc",
+		"typecheck": "wrangler types && react-router typegen && tsc",
 		"lint": "biome lint .",
 		"test": "is-ci-cli \"test:coverage\" \"test:watch\"",
 		"test:coverage": "vitest --coverage",
@@ -144,7 +144,7 @@
 		"vite-plugin-icons-spritesheet": "^2.2.1",
 		"vite-tsconfig-paths": "^5.1.4",
 		"vitest": "^3.0.8",
-		"wrangler": "^3.114.0"
+		"wrangler": "4"
 	},
 	"publishConfig": {
 		"access": "restricted"

@@ -49,3 +49,4 @@ export * from "./reputation";
 export * from "./shipSystems/isSensors";
 export * from "./shipSystems/scan";
 export * from "./isFaction";
+export * from "./npcKnowledge";

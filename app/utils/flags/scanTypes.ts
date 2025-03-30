@@ -6,6 +6,7 @@ export const scanTypes = z.enum([
 	"cargo",
 	"shields",
 	"weapons",
+	"engines",
 	"targeting",
 	"damage",
 	"communications",
@@ -22,6 +23,7 @@ export const shipScanTypes: z.infer<typeof scanTypes>[] = [
 	"cargo",
 	"shields",
 	"weapons",
+	"engines",
 	"targeting",
 	"damage",
 	"communications",
@@ -39,6 +41,7 @@ export const starScanTypes: z.infer<typeof scanTypes>[] = ["temperature"];
 export const scanRecord = z.object({
 	identification: z
 		.object({
+			scanTime: z.number(),
 			name: z.string(),
 			classification: z.string(),
 			factionName: z.string(),
@@ -57,13 +60,22 @@ export const scanRecord = z.object({
 		.optional(),
 	crew: z
 		.object({
+			scanTime: z.number(),
 			count: z.number(),
 		})
 		.optional(),
-	/** Key is the cargo name, value is the count */
-	cargo: z.record(z.number()).optional(),
+	cargo: z
+		.object({
+			scanTime: z.number(),
+
+			/** Key is the cargo name, value is the count */
+			cargo: z.record(z.number()),
+		})
+		.optional(),
 	shields: z
 		.object({
+			scanTime: z.number(),
+
 			/** Whether shields are raised or lowered */
 			status: z.enum(["up", "down"]).optional(),
 			/** Aggregated strength of all the shields */
@@ -71,39 +83,72 @@ export const scanRecord = z.object({
 		})
 		.optional(),
 	weapons: z
-		.array(
-			z.discriminatedUnion("type", [
-				z.object({ type: z.literal("phasers"), charge: z.number() }),
-				z.object({ type: z.literal("torpedoes"), loaded: z.string() }),
-			]),
-		)
+		.object({
+			scanTime: z.number(),
+			weapons: z.array(
+				z.discriminatedUnion("type", [
+					z.object({ type: z.literal("phasers"), charge: z.number() }),
+					z.object({ type: z.literal("torpedoes"), loaded: z.string() }),
+				]),
+			),
+		})
+		.optional(),
+	engines: z
+		.object({
+			scanTime: z.number(),
+			// In km/s, factors in current power and efficiency
+			forwardSpeed: z.number(),
+			// In rotations/minute, factors in current power and efficiency
+			turnSpeed: z.number(),
+		})
 		.optional(),
 	targeting: z
 		.object({
+			scanTime: z.number(),
+			targetId: z.number(),
 			targetName: z.string(),
 			targetedSystem: z.string(),
 		})
 		.optional(),
-	/** Key is the system name, value is the efficiency percent. */
-	damage: z.record(z.number()).optional(),
+	damage: z
+		.object({
+			scanTime: z.number(),
+			/** Key is the system name, value is the efficiency percent. */
+			damage: z.record(z.number()),
+		})
+		.optional(),
 	// TODO February 15, 2025: Add this once we have a better idea what communications looks like
-	communications: z.object({}),
+	communications: z
+		.object({
+			scanTime: z.number(),
+		})
+		.optional(),
 	// TODO February 15, 2025: Add this once we have a better idea what life support looks like
-	lifeSupport: z.object({}),
+	lifeSupport: z
+		.object({
+			scanTime: z.number(),
+		})
+		.optional(),
 	life: z
 		.object({
+			scanTime: z.number(),
 			isHabitable: z.boolean(),
 			lifeforms: z.string().array(),
 			population: z.number(),
 		})
 		.optional(),
 	atmosphere: z
-		.array(
-			z.object({
-				component: z.string(),
-				concentration: z.number(),
-			}),
-		)
+		.object({
+			scanTime: z.number(),
+			atmosphere: z.array(
+				z.object({
+					component: z.string(),
+					concentration: z.number(),
+				}),
+			),
+		})
 		.optional(),
-	temperature: z.object({ temperature: z.number() }),
+	temperature: z
+		.object({ scanTime: z.number(), temperature: z.number() })
+		.optional(),
 });

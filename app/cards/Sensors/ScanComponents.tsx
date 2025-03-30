@@ -20,6 +20,7 @@ export const ScanComponents = {
 	identification: IdentificationResults,
 	crew: CrewResults,
 	weapons: WeaponsResults,
+	engines: null,
 	damage: DamageResults,
 	communications: null,
 	life: LifeResults,
@@ -126,7 +127,7 @@ function CargoResults({ objectId }: { objectId: number }) {
 	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
 
 	if (!results.cargo) return null;
-	const cargoEntries = Object.entries(results.cargo);
+	const cargoEntries = Object.entries(results.cargo.cargo);
 	return (
 		<div>
 			{cargoEntries.length === 0
@@ -175,7 +176,7 @@ function WeaponsResults({ objectId }: { objectId: number }) {
 
 	return (
 		<div>
-			{results.weapons.map((weapon, index) => (
+			{results.weapons.weapons.map((weapon, index) => (
 				<div key={index} className="flex justify-between">
 					<span>{capitalCase(weapon.type)}</span>
 					<span>
@@ -194,7 +195,7 @@ function DamageResults({ objectId }: { objectId: number }) {
 	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
 
 	if (!results.damage) return null;
-	const damageEntries = Object.entries(results.damage);
+	const damageEntries = Object.entries(results.damage.damage);
 
 	return (
 		<div>
@@ -258,7 +259,7 @@ function AtmosphereResults({ objectId }: { objectId: number }) {
 
 	return (
 		<ul className="list-disc ml-6">
-			{results.atmosphere.map((a) => (
+			{results.atmosphere.atmosphere.map((a) => (
 				<li key={a.component}>
 					{a.component}: {a.concentration}%
 				</li>

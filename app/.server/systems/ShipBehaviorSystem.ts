@@ -18,30 +18,32 @@ export class ShipBehaviorSystem extends System {
 	update(entity: Entity, elapsed: number) {
 		const { shipBehavior } = entity.components;
 		if (!shipBehavior) return;
-		const { objective, target, destination, patrolRadius } = shipBehavior;
+		const { objective, behaviorTarget, actionTarget, patrolRadius } =
+			shipBehavior;
 
 		switch (objective) {
-			case "wander": {
+			case "patrol": {
 				// If the ship is within 1/10 of the patrol radius, pick a new destination
 				const position = entity.components.position;
 				if (!position) return;
 				shipPosition.set(position.x, position.y, position.z);
-				if (destination) {
-					destinationVector.set(destination.x, destination.y, destination.z);
+				if (typeof actionTarget === "object" && actionTarget) {
+					destinationVector.set(actionTarget.x, actionTarget.y, actionTarget.z);
 				}
 				if (
-					!destination ||
+					!actionTarget ||
+					typeof actionTarget === "number" ||
 					shipPosition.distanceTo(destinationVector) < patrolRadius / 10
 				) {
-					const targetPoint = getTargetPoint(this.ecs, target);
+					const targetPoint = getTargetPoint(this.ecs, behaviorTarget);
 					// Pick a new destination
 					const [x, y, z] = randomPointInSphere(patrolRadius);
 					wanderVector.set(x, y, z).add(targetPoint);
 
 					// Set the new destination
 					entity.updateComponent("shipBehavior", {
-						destination: {
-							parentId: destination?.parentId || null,
+						actionTarget: {
+							parentId: position?.parentId || null,
 							x: wanderVector.x,
 							y: wanderVector.y,
 							z: wanderVector.z,
@@ -50,7 +52,8 @@ export class ShipBehaviorSystem extends System {
 
 					let path: { x: number; y: number; z: number }[] = [];
 					if (
-						position.parentId === destination?.parentId &&
+						typeof actionTarget === "object" &&
+						position.parentId === actionTarget?.parentId &&
 						position.parentId
 					) {
 						path = pathfinder(entity, wanderVector) || [];
@@ -66,7 +69,7 @@ export class ShipBehaviorSystem extends System {
 						},
 						path,
 						nextCoordinates,
-						desiredSolarSystemId: destination?.parentId || null,
+						desiredSolarSystemId: position?.parentId || null,
 					});
 				}
 
@@ -80,7 +83,7 @@ export class ShipBehaviorSystem extends System {
 
 function getTargetPoint(
 	ecs: ECS,
-	target: Zod.infer<typeof shipBehavior>["target"],
+	target: Zod.infer<typeof shipBehavior>["behaviorTarget"],
 ) {
 	if (!target) return targetPoint;
 	if (typeof target === "object") {

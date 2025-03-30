@@ -16,17 +16,9 @@ import type {
 	ComponentProperties,
 } from "@thorium/ecs-components";
 import { pathfinder } from "@thorium/utils/starmap/pathfinder.server";
+import { shipObjectives } from "@thorium/utils/flags/shipObjectives";
 
 type IsDestroyed = Zod.infer<typeof isDestroyed>;
-
-const behavior = z.enum([
-	"hold",
-	"patrol",
-	"wander",
-	"attack",
-	"defend",
-	"avoid",
-]);
 
 export const starmapCore = t.router({
 	systems: t.procedure.request(({ ctx }) => {
@@ -379,13 +371,13 @@ export const starmapCore = t.router({
 					nextCoordinates,
 				});
 				entity?.updateComponent("shipBehavior", {
-					destination: {
+					actionTarget: {
 						parentId: ship.systemId,
 						x: ship.position.x,
 						y: ship.position.y,
 						z: ship.position.z,
 					},
-					target: {
+					behaviorTarget: {
 						parentId: ship.systemId,
 						x: ship.position.x,
 						y: ship.position.y,
@@ -489,13 +481,13 @@ export const starmapCore = t.router({
 				nextCoordinates,
 			});
 			ship?.updateComponent("shipBehavior", {
-				destination: {
+				actionTarget: {
 					parentId: systemId,
 					x: position.x,
 					y: position.y,
 					z: position.z,
 				},
-				target: {
+				behaviorTarget: {
 					parentId: systemId,
 					x: position.x,
 					y: position.y,
@@ -531,13 +523,13 @@ export const starmapCore = t.router({
 					desiredSolarSystemId: objectSystem.id,
 				});
 				entity?.updateComponent("shipBehavior", {
-					destination: {
+					actionTarget: {
 						parentId: objectSystem.id,
 						x: position.x,
 						y: position.y,
 						z: position.z,
 					},
-					target: {
+					behaviorTarget: {
 						parentId: objectSystem.id,
 						x: position.x,
 						y: position.y,
@@ -558,7 +550,7 @@ export const starmapCore = t.router({
 		.meta({ action: true })
 		.input(
 			z.object({
-				objective: behavior,
+				objective: shipObjectives,
 				ships: z.union([z.number().array(), z.number()]),
 				objectId: z.number(),
 			}),
@@ -577,7 +569,7 @@ export const starmapCore = t.router({
 
 				entity.updateComponent("shipBehavior", {
 					objective: input.objective,
-					target: followedObject.id,
+					behaviorTarget: followedObject.id,
 				});
 
 				if (typeof entity?.components.position?.parentId !== "undefined") {
@@ -660,7 +652,7 @@ export const starmapCore = t.router({
 		.input(
 			z.object({
 				shipIds: z.union([z.number().array(), z.number()]),
-				behavior,
+				objective: shipObjectives,
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -670,14 +662,14 @@ export const starmapCore = t.router({
 			ids.forEach((shipId) => {
 				const entity = ctx.flight?.ecs.getEntityById(shipId);
 				entity?.updateComponent("shipBehavior", {
-					objective: input.behavior,
+					objective: input.objective,
 				});
 
-				if (input.behavior === "hold") {
+				if (input.objective === "hold") {
 					const position = entity?.components.position;
 					if (position) {
 						entity.updateComponent("shipBehavior", {
-							destination: {
+							actionTarget: {
 								parentId: position.parentId || null,
 								x: position.x,
 								y: position.y,
@@ -702,10 +694,10 @@ export const starmapCore = t.router({
 						});
 					}
 				}
-				if (input.behavior === "wander") {
+				if (input.objective === "patrol") {
 					entity?.updateComponent("shipBehavior", {
-						objective: input.behavior,
-						target: { ...entity.components.position! },
+						objective: input.objective,
+						behaviorTarget: { ...entity.components.position! },
 					});
 				}
 				pubsub.publish.pilot.autopilot.get({ shipId });

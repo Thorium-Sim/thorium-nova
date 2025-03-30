@@ -328,8 +328,8 @@ export async function spawnShip(
 	} else {
 		entity.addComponent("shipBehavior", {
 			objective: "hold",
-			target: entity.components.position,
-			destination: entity.components.position,
+			behaviorTarget: entity.components.position,
+			actionTarget: entity.components.position,
 		});
 		entity.addComponent("autopilot");
 	}

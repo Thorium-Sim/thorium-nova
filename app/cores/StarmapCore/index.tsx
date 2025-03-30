@@ -487,26 +487,11 @@ function ShipControls() {
 							onClick={() =>
 								q.starmapCore.setShipsBehavior.netSend({
 									shipIds: selectedObjectIds,
-									behavior: "patrol",
-								})
-							}
-							className={clsx("btn-sm btn-info btn-outline", {
-								"btn-active": starmapShip.behavior.objective === "patrol",
-							})}
-						>
-							<Icon name="siren" />
-						</Button>
-					</Tooltip>
-					<Tooltip content="Wander">
-						<Button
-							onClick={() =>
-								q.starmapCore.setShipsBehavior.netSend({
-									shipIds: selectedObjectIds,
-									behavior: "wander",
+									objective: "patrol",
 								})
 							}
 							className={clsx("btn-sm btn-notice btn-outline", {
-								"btn-active": starmapShip.behavior.objective === "wander",
+								"btn-active": starmapShip.behavior.objective === "patrol",
 							})}
 						>
 							<Icon name="route" />
@@ -517,7 +502,7 @@ function ShipControls() {
 							onClick={() =>
 								q.starmapCore.setShipsBehavior.netSend({
 									shipIds: selectedObjectIds,
-									behavior: "hold",
+									objective: "hold",
 								})
 							}
 							className={clsx("btn-sm btn-warning btn-outline", {
@@ -532,7 +517,7 @@ function ShipControls() {
 							onClick={() =>
 								q.starmapCore.setShipsBehavior.netSend({
 									shipIds: selectedObjectIds,
-									behavior: "attack",
+									objective: "attack",
 								})
 							}
 							className={clsx("btn-sm btn-error btn-outline", {
@@ -547,7 +532,7 @@ function ShipControls() {
 							onClick={() =>
 								q.starmapCore.setShipsBehavior.netSend({
 									shipIds: selectedObjectIds,
-									behavior: "defend",
+									objective: "defend",
 								})
 							}
 							className={clsx("btn-sm btn-primary btn-outline", {
