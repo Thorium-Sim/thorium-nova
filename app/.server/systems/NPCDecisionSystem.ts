@@ -59,8 +59,7 @@ function npcScan(entity: Entity) {
 		systemType: "sensors",
 		shipId: entity.id,
 	});
-	const scanResults = sensors.components.isSensors?.resultsDatabase;
-	const activeRange = sensors.components.isSensors?.activeRange || 0;
+
 	const activeScans = new Map<
 		number,
 		Set<(typeof scanTypes.options)[number]>
@@ -110,13 +109,30 @@ function npcScan(entity: Entity) {
 	>;
 	if (!nearbyObjects) return;
 	const objects = [...nearbyObjects.entries()].sort(([, a], [, b]) => a - b);
+
+	// Do the same thing for secondary scans
+	determineScan(primaryScans, entity, objects, sensors, scanCount);
+	if (scanCount >= CONCURRENT_SCANS) return;
+	determineScan(secondaryScans, entity, objects, sensors, scanCount);
+}
+
+function determineScan(
+	scanList: string[],
+	entity: Entity,
+	objects: [number, number][],
+	sensors: Entity,
+	scanCount: number,
+) {
+	const scanResults = sensors.components.isSensors?.resultsDatabase;
+	const activeRange = sensors.components.isSensors?.activeRange || 0;
+
 	for (const [objectId, distance] of objects) {
 		if (distance > activeRange) continue;
 		const results = scanResults?.get(objectId);
-		for (const t of primaryScans) {
+		for (const t of scanList) {
 			const type = t as keyof NonNullable<typeof results>;
 			const typeResults = results?.[type];
-			if (typeResults && typeResults.scanTime < Date.now() - SCAN_TIMEOUT)
+			if (typeResults && typeResults.scanTime > Date.now() - SCAN_TIMEOUT)
 				continue;
 			// Create a new scan for this scan type
 			const scanEntity = new Entity();

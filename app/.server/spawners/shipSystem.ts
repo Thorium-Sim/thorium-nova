@@ -59,14 +59,14 @@ export function spawnShipSystem(
 					nominalHeat: overrides.nominalHeat || nominalHeat,
 					heat: overrides.nominalHeat || nominalHeat,
 				});
-			if (flags.includes("power"))
-				entity.addComponent("power", {
-					requiredPower: overrides.requiredPower || requiredPower,
-					defaultPower: overrides.defaultPower || defaultPower,
-					maxSafePower: overrides.maxSafePower || maxSafePower,
-				});
 			if (flags.includes("efficiency")) entity.addComponent("efficiency");
 		}
+		if (flags.includes("power"))
+			entity.addComponent("power", {
+				requiredPower: overrides.requiredPower || requiredPower,
+				defaultPower: overrides.defaultPower || defaultPower,
+				maxSafePower: overrides.maxSafePower || maxSafePower,
+			});
 	}
 
 	return entity;

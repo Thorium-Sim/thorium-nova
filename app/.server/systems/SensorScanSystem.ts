@@ -97,6 +97,7 @@ export class SensorScanSystem extends System {
 			minScanEnergyCost,
 			shieldPenaltyMultiplier,
 		} = sensorSystem;
+
 		let totalRequiredEnergy: KiloWattHour = Number.POSITIVE_INFINITY;
 		totalRequiredEnergy =
 			(maxScanEnergyCost - minScanEnergyCost) * (distance / activeRange) +
@@ -126,7 +127,11 @@ export class SensorScanSystem extends System {
 		}
 		totalRequiredEnergy *= 1 + shieldStrength * shieldPenaltyMultiplier;
 
-		const currentPower = sensors.components.power?.currentPower || 0;
+		// Fudge it for non-player ships
+		const currentPower =
+			(parent.components.isPlayerShip
+				? sensors.components.power?.currentPower
+				: sensors.components.power?.defaultPower) || 0;
 		const powerProvided = currentPower / scanCount;
 		// The energy provided in kilowatt hours, by converting from megawatts
 		const energyProvided: KiloWattHour =
@@ -148,6 +153,10 @@ export class SensorScanSystem extends System {
 				...generateScanResults(object, this.ecs, scan.type),
 			};
 
+			// If it's not a player ship, delete the scan entity. We don't need to hang on to it.
+			if (!parent.components.isPlayerShip) {
+				this.ecs.removeEntity(entity);
+			}
 			sensorSystem.resultsDatabase.set(object.id, currentResults);
 			pubsub.publish.sensors.scanResult({ shipId, objectId: object.id });
 			pubsub.publish.sensors.scans({ shipId });
@@ -303,6 +312,29 @@ export function generateScanResults(
 						};
 					}),
 				],
+			};
+			break;
+		}
+		case "engines": {
+			// TODO March 31: Implement
+			currentResults.engines = {
+				scanTime: Date.now(),
+				forwardSpeed: 0,
+				turnSpeed: 0,
+			};
+			break;
+		}
+		case "communications": {
+			// TODO March 31: Implement
+			currentResults.communications = {
+				scanTime: Date.now(),
+			};
+			break;
+		}
+		case "lifeSupport": {
+			// TODO March 31: Implement
+			currentResults.lifeSupport = {
+				scanTime: Date.now(),
 			};
 			break;
 		}

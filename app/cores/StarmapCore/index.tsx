@@ -113,6 +113,7 @@ function EditorProperties({ id }: { id: number }) {
 		},
 	);
 
+	const [scans] = q.sensors.scans.useNetRequest({ shipId: id });
 	return (
 		<>
 			{starmapObject?.components.identity ? (
@@ -233,6 +234,17 @@ function EditorProperties({ id }: { id: number }) {
 			{starmapObject?.components.reputation ? (
 				<EditorDisclosure title="Reputation">
 					<ReputationEditor id={id} />
+				</EditorDisclosure>
+			) : null}
+			{scans.length > 0 ? (
+				<EditorDisclosure title="Scans">
+					<ul>
+						{scans.map((scan) => (
+							<li key={scan.id}>
+								{scan.type} - {scan.target} - {scan.progress * 100}%
+							</li>
+						))}
+					</ul>
 				</EditorDisclosure>
 			) : null}
 		</>

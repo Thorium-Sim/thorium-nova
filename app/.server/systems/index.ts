@@ -33,6 +33,8 @@ import { ShieldsSystem } from "./ShieldsSystem";
 import { PhasersSystem } from "./PhasersSystem";
 import { SolarSystemPositionSystem } from "./SolarSystemPositionSystem";
 import { SensorScanSystem } from "@thorium/.server/systems/SensorScanSystem";
+import { NPCKnowledgeSystem } from "@thorium/.server/systems/NPCKnowledgeSystem";
+import { NPCDecisionSystem } from "@thorium/.server/systems/NPCDecisionSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -48,6 +50,8 @@ const systems = [
 	PowerDistributionSystem,
 	TorpedoLoadingSystem,
 	NearbyObjectsSystem,
+	NPCKnowledgeSystem,
+	NPCDecisionSystem,
 	ShipBehaviorSystem,
 	AutoRotateSystem,
 	AutoThrustSystem,
