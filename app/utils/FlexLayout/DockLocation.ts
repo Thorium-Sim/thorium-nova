@@ -2,7 +2,7 @@ import { Orientation } from "./Orientation";
 import { Rect } from "./Rect";
 
 export class DockLocation {
-	static values: Record<string, DockLocation> = {};
+	static values = new Map<string, DockLocation>();
 	static TOP = new DockLocation("top", Orientation.VERT, 0);
 	static BOTTOM = new DockLocation("bottom", Orientation.VERT, 1);
 	static LEFT = new DockLocation("left", Orientation.HORZ, 0);
@@ -11,7 +11,7 @@ export class DockLocation {
 
 	/** @internal */
 	static getByName(name: string): DockLocation {
-		return DockLocation.values[name];
+		return DockLocation.values.get(name)!;
 	}
 
 	/** @internal */
@@ -46,47 +46,45 @@ export class DockLocation {
 		if (bl) {
 			return br ? DockLocation.BOTTOM : DockLocation.LEFT;
 		}
-		return br ? DockLocation.RIGHT : DockLocation.TOP;
+			return br ? DockLocation.RIGHT : DockLocation.TOP;
 	}
 
 	/** @internal */
-	_name: string;
+	name: string;
 	/** @internal */
-	_orientation: Orientation;
+	orientation: Orientation;
 	/** @internal */
-	_indexPlus: number;
+	indexPlus: number;
 
 	/** @internal */
-	constructor(name: string, orientation: Orientation, indexPlus: number) {
-		this._name = name;
-		this._orientation = orientation;
-		this._indexPlus = indexPlus;
-		DockLocation.values[this._name] = this;
+	constructor(_name: string, _orientation: Orientation, _indexPlus: number) {
+		this.name = _name;
+		this.orientation = _orientation;
+		this.indexPlus = _indexPlus;
+		DockLocation.values.set(this.name, this);
 	}
 
 	getName() {
-		return this._name;
+		return this.name;
 	}
 
 	getOrientation() {
-		return this._orientation;
+		return this.orientation;
 	}
 
 	/** @internal */
 	getDockRect(r: Rect) {
 		if (this === DockLocation.TOP) {
 			return new Rect(r.x, r.y, r.width, r.height / 2);
-		}
-		if (this === DockLocation.BOTTOM) {
+		}if (this === DockLocation.BOTTOM) {
 			return new Rect(r.x, r.getBottom() - r.height / 2, r.width, r.height / 2);
 		}
 		if (this === DockLocation.LEFT) {
 			return new Rect(r.x, r.y, r.width / 2, r.height);
-		}
-		if (this === DockLocation.RIGHT) {
+		}if (this === DockLocation.RIGHT) {
 			return new Rect(r.getRight() - r.width / 2, r.y, r.width / 2, r.height);
 		}
-		return r.clone();
+			return r.clone();
 	}
 
 	/** @internal */
@@ -100,8 +98,7 @@ export class DockLocation {
 				rect.height - size,
 			);
 			return { start: r1, end: r2 };
-		}
-		if (this === DockLocation.LEFT) {
+		}if (this === DockLocation.LEFT) {
 			const r1 = new Rect(rect.x, rect.y, size, rect.height);
 			const r2 = new Rect(
 				rect.x + size,
@@ -116,28 +113,29 @@ export class DockLocation {
 			const r2 = new Rect(rect.x, rect.y, rect.width - size, rect.height);
 			return { start: r1, end: r2 };
 		}
-		// if (this === DockLocation.BOTTOM) {
-		const r1 = new Rect(rect.x, rect.getBottom() - size, rect.width, size);
-		const r2 = new Rect(rect.x, rect.y, rect.width, rect.height - size);
-		return { start: r1, end: r2 };
+			// if (this === DockLocation.BOTTOM) {
+			const r1 = new Rect(rect.x, rect.getBottom() - size, rect.width, size);
+			const r2 = new Rect(rect.x, rect.y, rect.width, rect.height - size);
+			return { start: r1, end: r2 };
 	}
 
 	/** @internal */
 	reflect() {
 		if (this === DockLocation.TOP) {
 			return DockLocation.BOTTOM;
-		}
-		if (this === DockLocation.LEFT) {
+		}if (this === DockLocation.LEFT) {
 			return DockLocation.RIGHT;
 		}
 		if (this === DockLocation.RIGHT) {
 			return DockLocation.LEFT;
 		}
-		// if (this === DockLocation.BOTTOM) {
-		return DockLocation.TOP;
+			// if (this === DockLocation.BOTTOM) {
+			return DockLocation.TOP;
 	}
 
 	toString() {
-		return `(DockLocation: name=${this._name}, orientation=${this._orientation})`;
+		return (
+			`(DockLocation: name=${this.name}, orientation=${this.orientation})`
+		);
 	}
 }

@@ -1,44 +1,28 @@
 import type * as React from "react";
-import type { TabNode } from "../model/TabNode";
-import type {
-	IconFactory,
-	ILayoutCallbacks,
-	ITitleObject,
-	TitleFactory,
-} from "./Layout";
+import type { Node } from "../model/Node";
+import { TabNode } from "../model/TabNode";
+import type { LayoutInternal } from "./Layout";
+import { TabSetNode } from "../model/TabSetNode";
 
 /** @internal */
+export function isDesktop() {
+	const desktop =
+		typeof window !== "undefined" &&
+		window.matchMedia &&
+		window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+	return desktop;
+}
+/** @internal */
 export function getRenderStateEx(
-	layout: ILayoutCallbacks,
+	layout: LayoutInternal,
 	node: TabNode,
-	iconFactory?: IconFactory,
-	titleFactory?: TitleFactory,
 	iconAngle?: number,
 ) {
-	let leadingContent = iconFactory ? iconFactory(node) : undefined;
-	let titleContent: React.ReactNode = node.getName();
-	let name = node.getName();
+	let leadingContent = undefined;
+	const titleContent: React.ReactNode = node.getName();
+	const name = node.getName();
 	if (iconAngle === undefined) {
 		iconAngle = 0;
-	}
-
-	function isTitleObject(obj: any): obj is ITitleObject {
-		return obj.titleContent !== undefined;
-	}
-
-	if (titleFactory !== undefined) {
-		const titleObj = titleFactory(node);
-		if (titleObj !== undefined) {
-			if (typeof titleObj === "string") {
-				titleContent = titleObj as string;
-				name = titleObj as string;
-			} else if (isTitleObject(titleObj)) {
-				titleContent = titleObj.titleContent;
-				name = titleObj.name;
-			} else {
-				titleContent = titleObj;
-			}
-		}
 	}
 
 	if (leadingContent === undefined && node.getIcon() !== undefined) {
@@ -76,28 +60,16 @@ export function getRenderStateEx(
 	};
 	layout.customizeTab(node, renderState);
 
-	node._setRenderedName(renderState.name);
+	node.setRenderedName(renderState.name);
 
 	return renderState;
 }
 
 /** @internal */
-export function hideElement(
-	style: Record<string, any>,
-	useVisibility: ConstrainBoolean,
-) {
-	if (useVisibility) {
-		style.visibility = "hidden";
-	} else {
-		style.display = "none";
-	}
-}
-
-/** @internal */
 export function isAuxMouseEvent(
 	event:
-		| React.MouseEvent<HTMLDivElement, MouseEvent>
-		| React.TouchEvent<HTMLDivElement>,
+		| React.MouseEvent<HTMLElement, MouseEvent>
+		| React.TouchEvent<HTMLElement>,
 ) {
 	let auxEvent = false;
 	if (event.nativeEvent instanceof MouseEvent) {
@@ -112,4 +84,99 @@ export function isAuxMouseEvent(
 		}
 	}
 	return auxEvent;
+}
+
+export function enablePointerOnIFrames(
+	enable: boolean,
+	currentDocument: Document,
+) {
+	const iframes = [
+		...getElementsByTagName("iframe", currentDocument),
+		...getElementsByTagName("webview", currentDocument),
+	];
+
+	for (const iframe of iframes) {
+		(iframe as HTMLElement).style.pointerEvents = enable ? "auto" : "none";
+	}
+}
+
+export function getElementsByTagName(
+	tag: string,
+	currentDocument: Document,
+): Element[] {
+	return [...currentDocument.getElementsByTagName(tag)];
+}
+
+export function startDrag(
+	doc: Document,
+	event: React.PointerEvent<HTMLElement>,
+	drag: (x: number, y: number) => void,
+	dragEnd: () => void,
+	dragCancel: () => void,
+) {
+	event.preventDefault();
+
+	const pointerMove = (ev: PointerEvent) => {
+		ev.preventDefault();
+		drag(ev.clientX, ev.clientY);
+	};
+
+	const pointerCancel = (ev: PointerEvent) => {
+		ev.preventDefault();
+		dragCancel();
+	};
+	const pointerUp = () => {
+		doc.removeEventListener("pointermove", pointerMove);
+		doc.removeEventListener("pointerup", pointerUp);
+		doc.removeEventListener("pointercancel", pointerCancel);
+		dragEnd();
+	};
+
+	doc.addEventListener("pointermove", pointerMove);
+	doc.addEventListener("pointerup", pointerUp);
+	doc.addEventListener("pointercancel", pointerCancel);
+}
+
+export function canDockToWindow(node: Node) {
+	if (node instanceof TabNode) {
+		return node.isEnablePopout();
+	}if (node instanceof TabSetNode) {
+		for (const child of node.getChildren()) {
+			if ((child as TabNode).isEnablePopout() === false) {
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+export function copyInlineStyles(
+	source: HTMLElement,
+	target: HTMLElement,
+): boolean {
+	// Get the inline style attribute from the source element
+	const sourceStyle = source.getAttribute("style");
+	const targetStyle = target.getAttribute("style");
+	if (sourceStyle === targetStyle) return false;
+
+	// console.log("copyInlineStyles", sourceStyle);
+
+	if (sourceStyle) {
+		// Set the style attribute on the target element
+		target.setAttribute("style", sourceStyle);
+	} else {
+		// If the source has no inline style, clear the target's style attribute
+		target.removeAttribute("style");
+	}
+	return true;
+}
+
+export function isSafari() {
+	const userAgent = navigator.userAgent;
+	return (
+		userAgent.includes("Safari") &&
+		!userAgent.includes("Chrome") &&
+		!userAgent.includes("Chromium")
+	);
 }

@@ -1,34 +1,31 @@
 import * as React from "react";
 import type { TabNode } from "../model/TabNode";
-import type { IconFactory, ILayoutCallbacks, TitleFactory } from "./Layout";
+import type { LayoutInternal } from "./Layout";
 import { CLASSES } from "../Types";
 import { getRenderStateEx } from "./Utils";
 
 /** @internal */
 export interface ITabButtonStampProps {
 	node: TabNode;
-	layout: ILayoutCallbacks;
-	iconFactory?: IconFactory;
-	titleFactory?: TitleFactory;
+	layout: LayoutInternal;
 }
 
 /** @internal */
 export const TabButtonStamp = (props: ITabButtonStampProps) => {
-	const { layout, node, iconFactory, titleFactory } = props;
-	const selfRef = React.useRef<HTMLDivElement | null>(null);
+	const { layout, node } = props;
 
 	const cm = layout.getClassName;
 
 	const classNames = cm(CLASSES.FLEXLAYOUT__TAB_BUTTON_STAMP);
 
-	const renderState = getRenderStateEx(layout, node, iconFactory, titleFactory);
+	const renderState = getRenderStateEx(layout, node);
 
 	const content = renderState.content ? (
 		<div className={cm(CLASSES.FLEXLAYOUT__TAB_BUTTON_CONTENT)}>
 			{renderState.content}
 		</div>
 	) : (
-		node._getNameForOverflowMenu()
+		node.getNameForOverflowMenu()
 	);
 
 	const leading = renderState.leading ? (
@@ -38,7 +35,7 @@ export const TabButtonStamp = (props: ITabButtonStampProps) => {
 	) : null;
 
 	return (
-		<div ref={selfRef} className={classNames} title={node.getHelpText()}>
+		<div className={classNames} title={node.getHelpText()}>
 			{leading}
 			{content}
 		</div>

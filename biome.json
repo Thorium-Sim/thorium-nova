@@ -13,7 +13,8 @@
 			"**/lensFlareImpl.js",
 			"**/Starmap/Disc.tsx",
 			"**/Nebula/*.js",
-			"**/loadGltf/GLTFLoader.ts"
+			"**/loadGltf/GLTFLoader.ts",
+			"./worker-configuration.d.ts"
 		],
 		"rules": {
 			"recommended": true,
@@ -31,7 +32,8 @@
 				"useKeyWithClickEvents": "off"
 			},
 			"complexity": {
-				"noForEach": "off"
+				"noForEach": "off",
+				"noStaticOnlyClass": "off"
 			},
 			"correctness": {
 				"noUnknownFunction": "off"

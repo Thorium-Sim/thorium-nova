@@ -2,72 +2,50 @@ import * as React from "react";
 import { I18nLabel } from "../I18nLabel";
 import { Actions } from "../model/Actions";
 import type { TabNode } from "../model/TabNode";
-import { Rect } from "../Rect";
-import type {
-	IconFactory,
-	IIcons,
-	ILayoutCallbacks,
-	TitleFactory,
-} from "./Layout";
+import type { IIcons, LayoutInternal } from "./Layout";
 import { ICloseType } from "../model/ICloseType";
 import { CLASSES } from "../Types";
 import { getRenderStateEx, isAuxMouseEvent } from "./Utils";
 
 /** @internal */
 export interface IBorderButtonProps {
-	layout: ILayoutCallbacks;
+	layout: LayoutInternal;
 	node: TabNode;
 	selected: boolean;
 	border: string;
-	iconFactory?: IconFactory;
-	titleFactory?: TitleFactory;
 	icons: IIcons;
 	path: string;
 }
 
 /** @internal */
 export const BorderButton = (props: IBorderButtonProps) => {
-	const {
-		layout,
-		node,
-		selected,
-		border,
-		iconFactory,
-		titleFactory,
-		icons,
-		path,
-	} = props;
+	const { layout, node, selected, border, icons, path } = props;
 	const selfRef = React.useRef<HTMLDivElement | null>(null);
 	const contentRef = React.useRef<HTMLInputElement | null>(null);
 
-	const onMouseDown = (
-		event:
-			| React.MouseEvent<HTMLDivElement, MouseEvent>
-			| React.TouchEvent<HTMLDivElement>,
-	) => {
-		if (!isAuxMouseEvent(event) && !layout.getEditingTab()) {
-			layout.dragStart(
-				event,
-				undefined,
-				node,
-				node.isEnableDrag(),
-				onClick,
-				onDoubleClick,
-			);
+	const onDragStart = (event: React.DragEvent<HTMLElement>) => {
+		if (node.isEnableDrag()) {
+			event.stopPropagation();
+			layout.setDragNode(event.nativeEvent, node as TabNode);
+		} else {
+			event.preventDefault();
 		}
 	};
 
+	const onDragEnd = (event: React.DragEvent<HTMLElement>) => {
+		event.stopPropagation();
+		layout.clearDragMain();
+	};
+
 	const onAuxMouseClick = (
-		event: React.MouseEvent<HTMLDivElement, MouseEvent>,
+		event: React.MouseEvent<HTMLElement, MouseEvent>,
 	) => {
 		if (isAuxMouseEvent(event)) {
 			layout.auxMouseClick(node, event);
 		}
 	};
 
-	const onContextMenu = (
-		event: React.MouseEvent<HTMLDivElement, MouseEvent>,
-	) => {
+	const onContextMenu = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
 		layout.showContextMenu(node, event);
 	};
 
@@ -75,26 +53,22 @@ export const BorderButton = (props: IBorderButtonProps) => {
 		layout.doAction(Actions.selectTab(node.getId()));
 	};
 
-	const onDoubleClick = (event: Event) => {
-		// if (node.isEnableRename()) {
-		//     onRename();
-		// }
-	};
+	// const onDoubleClick = (event: Event) => {
+	//     // if (node.isEnableRename()) {
+	//     //     onRename();
+	//     // }
+	// };
 
 	// const onRename = () => {
 	//     layout.setEditingTab(node);
-	//     layout.getCurrentDocument()!.body.addEventListener("mousedown", onEndEdit);
-	//     layout.getCurrentDocument()!.body.addEventListener("touchstart", onEndEdit);
+	//     layout.getCurrentDocument()!.body.addEventListener("pointerdown", onEndEdit);
 	// };
 
 	const onEndEdit = (event: Event) => {
 		if (event.target !== contentRef.current!) {
 			layout
 				.getCurrentDocument()!
-				.body.removeEventListener("mousedown", onEndEdit);
-			layout
-				.getCurrentDocument()!
-				.body.removeEventListener("touchstart", onEndEdit);
+				.body.removeEventListener("pointerdown", onEndEdit);
 			layout.setEditingTab(undefined);
 		}
 	};
@@ -106,54 +80,35 @@ export const BorderButton = (props: IBorderButtonProps) => {
 		}
 		if (closeType === ICloseType.Visible) {
 			// not selected but x should be visible due to hover
-			if (window.matchMedia?.("(hover: hover) and (pointer: fine)").matches) {
+			if (
+				window.matchMedia?.("(hover: hover) and (pointer: fine)").matches
+			) {
 				return true;
 			}
 		}
 		return false;
 	};
 
-	const onClose = (event: React.MouseEvent<HTMLDivElement>) => {
+	const onClose = (event: React.MouseEvent<HTMLElement>) => {
 		if (isClosable()) {
 			layout.doAction(Actions.deleteTab(node.getId()));
-		} else {
-			onClick();
+			event.stopPropagation();
 		}
 	};
 
-	const onCloseMouseDown = (
-		event: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
-	) => {
+	const onClosePointerDown = (event: React.PointerEvent<HTMLElement>) => {
 		event.stopPropagation();
 	};
 
 	React.useLayoutEffect(() => {
-		updateRect();
+		node.setTabRect(layout.getBoundingClientRect(selfRef.current!));
 		if (layout.getEditingTab() === node) {
 			(contentRef.current! as HTMLInputElement).select();
 		}
 	});
 
-	const updateRect = () => {
-		// record position of tab in node
-		const layoutRect = layout.getDomRect();
-		const r = selfRef.current?.getBoundingClientRect();
-		if (r && layoutRect) {
-			node._setTabRect(
-				new Rect(
-					r.left - layoutRect.left,
-					r.top - layoutRect.top,
-					r.width,
-					r.height,
-				),
-			);
-		}
-	};
-
-	const onTextBoxMouseDown = (
-		event:
-			| React.MouseEvent<HTMLInputElement>
-			| React.TouchEvent<HTMLInputElement>,
+	const onTextBoxPointerDown = (
+		event: React.PointerEvent<HTMLInputElement>,
 	) => {
 		event.stopPropagation();
 	};
@@ -175,7 +130,8 @@ export const BorderButton = (props: IBorderButtonProps) => {
 	};
 
 	const cm = layout.getClassName;
-	let classNames = `${cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON)} ${cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON_ + border)}`;
+	let classNames =
+		`${cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON)} ${cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON_ + border)}`;
 
 	if (selected) {
 		classNames += ` ${cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON__SELECTED)}`;
@@ -196,13 +152,7 @@ export const BorderButton = (props: IBorderButtonProps) => {
 		}
 	}
 
-	const renderState = getRenderStateEx(
-		layout,
-		node,
-		iconFactory,
-		titleFactory,
-		iconAngle,
-	);
+	const renderState = getRenderStateEx(layout, node, iconAngle);
 
 	let content = renderState.content ? (
 		<div className={cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON_CONTENT)}>
@@ -225,8 +175,7 @@ export const BorderButton = (props: IBorderButtonProps) => {
 				type="text"
 				defaultValue={node.getName()}
 				onKeyDown={onTextBoxKeyPress}
-				onMouseDown={onTextBoxMouseDown}
-				onTouchStart={onTextBoxMouseDown}
+				onPointerDown={onTextBoxPointerDown}
 			/>
 		);
 	}
@@ -239,9 +188,8 @@ export const BorderButton = (props: IBorderButtonProps) => {
 				data-layout-path={`${path}/button/close`}
 				title={closeTitle}
 				className={cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON_TRAILING)}
-				onMouseDown={onCloseMouseDown}
+				onPointerDown={onClosePointerDown}
 				onClick={onClose}
-				onTouchStart={onCloseMouseDown}
 			>
 				{typeof icons.close === "function" ? icons.close(node) : icons.close}
 			</div>,
@@ -253,12 +201,13 @@ export const BorderButton = (props: IBorderButtonProps) => {
 			ref={selfRef}
 			data-layout-path={path}
 			className={classNames}
-			onMouseDown={onMouseDown}
-			onClick={onAuxMouseClick}
+			onClick={onClick}
 			onAuxClick={onAuxMouseClick}
 			onContextMenu={onContextMenu}
-			onTouchStart={onMouseDown}
 			title={node.getHelpText()}
+			draggable={true}
+			onDragStart={onDragStart}
+			onDragEnd={onDragEnd}
 		>
 			{leading}
 			{content}

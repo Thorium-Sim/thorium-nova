@@ -1,8 +1,13 @@
+import type { IJsonRect } from "./model/IJsonModel";
 import { Orientation } from "./Orientation";
 
 export class Rect {
 	static empty() {
 		return new Rect(0, 0, 0, 0);
+	}
+
+	static fromJson(json: IJsonRect): Rect {
+		return new Rect(json.x, json.y, json.width, json.height);
 	}
 
 	x: number;
@@ -17,9 +22,62 @@ export class Rect {
 		this.height = height;
 	}
 
-	static fromElement(element: Element) {
+	toJson() {
+		return { x: this.x, y: this.y, width: this.width, height: this.height };
+	}
+
+	snap(round: number) {
+		this.x = Math.round(this.x / round) * round;
+		this.y = Math.round(this.y / round) * round;
+		this.width = Math.round(this.width / round) * round;
+		this.height = Math.round(this.height / round) * round;
+	}
+
+	static getBoundingClientRect(element: Element) {
 		const { x, y, width, height } = element.getBoundingClientRect();
 		return new Rect(x, y, width, height);
+	}
+
+	static getContentRect(element: HTMLElement) {
+		const rect = element.getBoundingClientRect();
+		const style = window.getComputedStyle(element);
+
+		const paddingLeft = Number.parseFloat(style.paddingLeft);
+		const paddingRight = Number.parseFloat(style.paddingRight);
+		const paddingTop = Number.parseFloat(style.paddingTop);
+		const paddingBottom = Number.parseFloat(style.paddingBottom);
+		const borderLeftWidth = Number.parseFloat(style.borderLeftWidth);
+		const borderRightWidth = Number.parseFloat(style.borderRightWidth);
+		const borderTopWidth = Number.parseFloat(style.borderTopWidth);
+		const borderBottomWidth = Number.parseFloat(style.borderBottomWidth);
+
+		const contentWidth =
+			rect.width -
+			borderLeftWidth -
+			paddingLeft -
+			paddingRight -
+			borderRightWidth;
+		const contentHeight =
+			rect.height -
+			borderTopWidth -
+			paddingTop -
+			paddingBottom -
+			borderBottomWidth;
+
+		return new Rect(
+			rect.left + borderLeftWidth + paddingLeft,
+			rect.top + borderTopWidth + paddingTop,
+			contentWidth,
+			contentHeight,
+		);
+	}
+
+	static fromDomRect(domRect: DOMRect) {
+		return new Rect(domRect.x, domRect.y, domRect.width, domRect.height);
+	}
+
+	relativeTo(r: Rect | DOMRect) {
+		return new Rect(this.x - r.x, this.y - r.y, this.width, this.height);
 	}
 
 	clone() {
@@ -35,11 +93,23 @@ export class Rect {
 		);
 	}
 
+	equalSize(rect: Rect | null | undefined) {
+		return this.width === rect?.width && this.height === rect?.height;
+	}
+
 	getBottom() {
 		return this.y + this.height;
 	}
 
 	getRight() {
+		return this.x + this.width;
+	}
+
+	get bottom() {
+		return this.y + this.height;
+	}
+
+	get right() {
 		return this.x + this.width;
 	}
 
@@ -69,7 +139,7 @@ export class Rect {
 		) {
 			return true;
 		}
-		return false;
+			return false;
 	}
 
 	removeInsets(insets: {
@@ -101,6 +171,8 @@ export class Rect {
 	}
 
 	toString() {
-		return `(Rect: x=${this.x}, y=${this.y}, width=${this.width}, height=${this.height})`;
+		return (
+			`(Rect: x=${this.x}, y=${this.y}, width=${this.width}, height=${this.height})`
+		);
 	}
 }

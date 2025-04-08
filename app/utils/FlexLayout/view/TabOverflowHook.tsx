@@ -1,67 +1,278 @@
 import * as React from "react";
-import type { TabNode } from "../model/TabNode";
-import { Rect } from "../Rect";
-import { TabSetNode } from "../model/TabSetNode";
+import type { TabSetNode } from "../model/TabSetNode";
 import type { BorderNode } from "../model/BorderNode";
 import { Orientation } from "../Orientation";
+import type { LayoutInternal } from "./Layout";
+import type { TabNode } from "../model/TabNode";
+import { startDrag } from "./Utils";
+import type { Rect } from "../Rect";
 
 /** @internal */
 export const useTabOverflow = (
+	layout: LayoutInternal,
 	node: TabSetNode | BorderNode,
 	orientation: Orientation,
-	toolbarRef: React.MutableRefObject<HTMLDivElement | null>,
-	stickyButtonsRef: React.MutableRefObject<HTMLDivElement | null>,
+	tabStripRef: React.RefObject<HTMLElement | null>,
+	miniScrollRef: React.RefObject<HTMLElement | null>,
+	tabClassName: string,
 ) => {
-	const firstRender = React.useRef<boolean>(true);
-	const tabsTruncated = React.useRef<boolean>(false);
-	const lastRect = React.useRef<Rect>(new Rect(0, 0, 0, 0));
-	const selfRef = React.useRef<HTMLDivElement | null>(null);
+	const [hiddenTabs, setHiddenTabs] = React.useState<number[]>([]);
+	const [isShowHiddenTabs, setShowHiddenTabs] = React.useState<boolean>(false);
+	const [isDockStickyButtons, setDockStickyButtons] =
+		React.useState<boolean>(false);
 
-	const [position, setPosition] = React.useState<number>(0);
-	const userControlledLeft = React.useRef<boolean>(false);
-	const [hiddenTabs, setHiddenTabs] = React.useState<
-		{ node: TabNode; index: number }[]
-	>([]);
-	const lastHiddenCount = React.useRef<number>(0);
+	const selfRef = React.useRef<HTMLDivElement | null>(null);
+	const userControlledPositionRef = React.useRef<boolean>(false);
+	const updateHiddenTabsTimerRef = React.useRef<
+		ReturnType<typeof setTimeout> | undefined
+	>(undefined);
+	const hiddenTabsRef = React.useRef<number[]>([]);
+	const thumbInternalPos = React.useRef<number>(0);
+	const repositioningRef = React.useRef<boolean>(false);
+	hiddenTabsRef.current = hiddenTabs;
+
+	// if node id changes (new model) then reset scroll to 0
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	React.useLayoutEffect(() => {
+		if (tabStripRef.current) {
+			setScrollPosition(0);
+		}
+	}, [node.getId()]);
 
 	// if selected node or tabset/border rectangle change then unset usercontrolled (so selected tab will be kept in view)
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	React.useLayoutEffect(() => {
-		userControlledLeft.current = false;
+		userControlledPositionRef.current = false;
 	}, [node.getSelectedNode(), node.getRect().width, node.getRect().height]);
 
 	React.useLayoutEffect(() => {
-		updateVisibleTabs();
+		checkForOverflow(); // if tabs + sticky buttons length > scroll area => move sticky buttons to right buttons
+
+		if (userControlledPositionRef.current === false) {
+			scrollIntoView();
+		}
+
+		updateScrollMetrics();
+		updateHiddenTabs();
 	});
 
-	const instance = selfRef.current;
-	React.useEffect(() => {
-		if (!instance) {
-			return;
-		}
-		instance.addEventListener("wheel", onWheel, { passive: false });
-		return () => {
-			instance.removeEventListener("wheel", onWheel);
-		};
-	}, [instance]);
+	function scrollIntoView() {
+		const selectedTabNode = node.getSelectedNode() as TabNode;
+		if (selectedTabNode && tabStripRef.current) {
+			const stripRect = layout.getBoundingClientRect(tabStripRef.current);
+			const selectedRect = selectedTabNode.getTabRect()!;
 
-	// needed to prevent default mouse wheel over tabset/border (cannot do with react event?)
-	const onWheel = (event: Event) => {
-		event.preventDefault();
+			let shift = getNear(stripRect) - getNear(selectedRect);
+			if (shift > 0 || getSize(selectedRect) > getSize(stripRect)) {
+				setScrollPosition(getScrollPosition(tabStripRef.current) - shift);
+				repositioningRef.current = true; // prevent onScroll setting userControlledPosition
+			} else {
+				shift = getFar(selectedRect) - getFar(stripRect);
+				if (shift > 0) {
+					setScrollPosition(getScrollPosition(tabStripRef.current) + shift);
+					repositioningRef.current = true;
+				}
+			}
+		}
+	}
+
+	const updateScrollMetrics = () => {
+		if (tabStripRef.current && miniScrollRef.current) {
+			const t = tabStripRef.current;
+			const s = miniScrollRef.current;
+
+			const size = getElementSize(t);
+			const scrollSize = getScrollSize(t);
+			const position = getScrollPosition(t);
+
+			if (scrollSize > size && scrollSize > 0) {
+				let thumbSize = (size * size) / scrollSize;
+				let adjust = 0;
+				if (thumbSize < 20) {
+					adjust = 20 - thumbSize;
+					thumbSize = 20;
+				}
+				const thumbPos = (position * (size - adjust)) / scrollSize;
+				if (orientation === Orientation.HORZ) {
+					s.style.width = `${thumbSize}px`;
+					s.style.left = `${thumbPos}px`;
+				} else {
+					s.style.height = `${thumbSize}px`;
+					s.style.top = `${thumbPos}px`;
+				}
+				s.style.display = "block";
+			} else {
+				s.style.display = "none";
+			}
+
+			if (orientation === Orientation.HORZ) {
+				s.style.bottom = "0px";
+			} else {
+				s.style.right = "0px";
+			}
+		}
 	};
 
-	const getNear = (rect: Rect) => {
+	const updateHiddenTabs = () => {
+		const newHiddenTabs = findHiddenTabs();
+		const showHidden = newHiddenTabs.length > 0;
+
+		if (showHidden !== isShowHiddenTabs) {
+			setShowHiddenTabs(showHidden);
+		}
+
+		if (updateHiddenTabsTimerRef.current === undefined) {
+			// throttle updates to prevent Maximum update depth exceeded error
+			updateHiddenTabsTimerRef.current = setTimeout(() => {
+				const newHiddenTabs = findHiddenTabs();
+				if (!arraysEqual(newHiddenTabs, hiddenTabsRef.current)) {
+					setHiddenTabs(newHiddenTabs);
+				}
+
+				updateHiddenTabsTimerRef.current = undefined;
+			}, 100);
+		}
+	};
+
+	const onScroll = () => {
+		if (!repositioningRef.current) {
+			userControlledPositionRef.current = true;
+		}
+		repositioningRef.current = false;
+		updateScrollMetrics();
+		updateHiddenTabs();
+	};
+
+	const onScrollPointerDown = (event: React.PointerEvent<HTMLElement>) => {
+		event.stopPropagation();
+		miniScrollRef.current!.setPointerCapture(event.pointerId);
+		const r = miniScrollRef.current?.getBoundingClientRect()!;
+		if (orientation === Orientation.HORZ) {
+			thumbInternalPos.current = event.clientX - r.x;
+		} else {
+			thumbInternalPos.current = event.clientY - r.y;
+		}
+		startDrag(
+			event.currentTarget.ownerDocument,
+			event,
+			onDragMove,
+			onDragEnd,
+			onDragCancel,
+		);
+	};
+
+	const onDragMove = (x: number, y: number) => {
+		if (tabStripRef.current && miniScrollRef.current) {
+			const t = tabStripRef.current;
+			const s = miniScrollRef.current;
+			const size = getElementSize(t);
+			const scrollSize = getScrollSize(t);
+			const thumbSize = getElementSize(s);
+
+			const r = t.getBoundingClientRect()!;
+			let thumb = 0;
+			if (orientation === Orientation.HORZ) {
+				thumb = x - r.x - thumbInternalPos.current;
+			} else {
+				thumb = y - r.y - thumbInternalPos.current;
+			}
+
+			thumb = Math.max(0, Math.min(scrollSize - thumbSize, thumb));
+			if (size > 0) {
+				const scrollPos = (thumb * scrollSize) / size;
+				setScrollPosition(scrollPos);
+			}
+		}
+	};
+
+	const onDragEnd = () => {};
+
+	const onDragCancel = () => {};
+
+	const checkForOverflow = () => {
+		if (tabStripRef.current) {
+			const strip = tabStripRef.current;
+			const tabContainer = strip.firstElementChild!;
+
+			const offset = isDockStickyButtons ? 10 : 0; // prevents flashing, after sticky buttons docked set, must be 10 pixels smaller before unsetting
+			const dock =
+				getElementSize(tabContainer) + offset >
+				getElementSize(tabStripRef.current);
+			if (dock !== isDockStickyButtons) {
+				setDockStickyButtons(dock);
+			}
+		}
+	};
+
+	const findHiddenTabs: () => number[] = () => {
+		const hidden: number[] = [];
+		if (tabStripRef.current) {
+			const strip = tabStripRef.current;
+			const stripRect = strip.getBoundingClientRect();
+			const visibleNear = getNear(stripRect) - 1;
+			const visibleFar = getFar(stripRect) + 1;
+
+			const tabContainer = strip.firstElementChild!;
+
+			let i = 0;
+			Array.from(tabContainer.children).forEach((child) => {
+				const tabRect = child.getBoundingClientRect();
+
+				if (child.classList.contains(tabClassName)) {
+					if (getNear(tabRect) < visibleNear || getFar(tabRect) > visibleFar) {
+						hidden.push(i);
+					}
+					i++;
+				}
+			});
+		}
+
+		return hidden;
+	};
+
+	const onMouseWheel = (event: React.WheelEvent<HTMLElement>) => {
+		if (tabStripRef.current) {
+			if (node.getChildren().length === 0) return;
+
+			let delta = 0;
+			if (Math.abs(event.deltaY) > 0) {
+				delta = -event.deltaY;
+				if (event.deltaMode === 1) {
+					// DOM_DELTA_LINE	0x01	The delta values are specified in lines.
+					delta *= 40;
+				}
+				const newPos = getScrollPosition(tabStripRef.current) - delta;
+				const maxScroll =
+					getScrollSize(tabStripRef.current) -
+					getElementSize(tabStripRef.current);
+				const p = Math.max(0, Math.min(maxScroll, newPos));
+				setScrollPosition(p);
+				event.stopPropagation();
+			}
+		}
+	};
+
+	// orientation helpers:
+
+	const getNear = (rect: DOMRect | Rect) => {
 		if (orientation === Orientation.HORZ) {
 			return rect.x;
 		}
 		return rect.y;
 	};
 
-	const getFar = (rect: Rect) => {
+	const getFar = (rect: DOMRect | Rect) => {
 		if (orientation === Orientation.HORZ) {
-			return rect.getRight();
+			return rect.right;
 		}
-		return rect.getBottom();
+		return rect.bottom;
+	};
+
+	const getElementSize = (elm: Element) => {
+		if (orientation === Orientation.HORZ) {
+			return elm.clientWidth;
+		}
+		return elm.clientHeight;
 	};
 
 	const getSize = (rect: DOMRect | Rect) => {
@@ -71,127 +282,43 @@ export const useTabOverflow = (
 		return rect.height;
 	};
 
-	const updateVisibleTabs = () => {
-		const tabMargin = 2;
-		if (firstRender.current === true) {
-			tabsTruncated.current = false;
+	const getScrollSize = (elm: Element) => {
+		if (orientation === Orientation.HORZ) {
+			return elm.scrollWidth;
 		}
-		const nodeRect =
-			node instanceof TabSetNode
-				? node.getRect()
-				: (node as BorderNode).getTabHeaderRect()!;
-		const lastChild = node.getChildren()[
-			node.getChildren().length - 1
-		] as TabNode;
-		const stickyButtonsSize =
-			stickyButtonsRef.current === null
-				? 0
-				: getSize(stickyButtonsRef.current!.getBoundingClientRect());
+		return elm.scrollHeight;
+	};
 
-		if (
-			firstRender.current === true ||
-			(lastHiddenCount.current === 0 && hiddenTabs.length !== 0) ||
-			nodeRect.width !== lastRect.current.width || // incase rect changed between first render and second
-			nodeRect.height !== lastRect.current.height
-		) {
-			lastHiddenCount.current = hiddenTabs.length;
-			lastRect.current = nodeRect;
-			const enabled =
-				node instanceof TabSetNode ? node.isEnableTabStrip() === true : true;
-			let endPos = getFar(nodeRect) - stickyButtonsSize;
-			if (toolbarRef.current !== null) {
-				endPos -= getSize(toolbarRef.current.getBoundingClientRect());
-			}
-			if (enabled && node.getChildren().length > 0) {
-				if (
-					hiddenTabs.length === 0 &&
-					position === 0 &&
-					getFar(lastChild.getTabRect()!) + tabMargin < endPos
-				) {
-					return; // nothing to do all tabs are shown in available space
-				}
-
-				let shiftPos = 0;
-
-				const selectedTab = node.getSelectedNode() as TabNode;
-				if (selectedTab && !userControlledLeft.current) {
-					const selectedRect = selectedTab.getTabRect()!;
-					const selectedStart = getNear(selectedRect) - tabMargin;
-					const selectedEnd = getFar(selectedRect) + tabMargin;
-
-					// when selected tab is larger than available space then align left
-					if (
-						getSize(selectedRect) + 2 * tabMargin >=
-						endPos - getNear(nodeRect)
-					) {
-						shiftPos = getNear(nodeRect) - selectedStart;
-					} else {
-						if (selectedEnd > endPos || selectedStart < getNear(nodeRect)) {
-							if (selectedStart < getNear(nodeRect)) {
-								shiftPos = getNear(nodeRect) - selectedStart;
-							}
-							// use second if statement to prevent tab moving back then forwards if not enough space for single tab
-							if (selectedEnd + shiftPos > endPos) {
-								shiftPos = endPos - selectedEnd;
-							}
-						}
-					}
-				}
-
-				const extraSpace = Math.max(
-					0,
-					endPos - (getFar(lastChild.getTabRect()!) + tabMargin + shiftPos),
-				);
-				const newPosition = Math.min(0, position + shiftPos + extraSpace);
-
-				// find hidden tabs
-				const diff = newPosition - position;
-				const hidden: { node: TabNode; index: number }[] = [];
-				for (let i = 0; i < node.getChildren().length; i++) {
-					const child = node.getChildren()[i] as TabNode;
-					if (
-						getNear(child.getTabRect()!) + diff < getNear(nodeRect!) ||
-						getFar(child.getTabRect()!) + diff > endPos
-					) {
-						hidden.push({ node: child, index: i });
-					}
-				}
-
-				if (hidden.length > 0) {
-					tabsTruncated.current = true;
-				}
-
-				firstRender.current = false; // need to do a second render
-				setHiddenTabs(hidden);
-				setPosition(newPosition);
-			}
+	const setScrollPosition = (p: number) => {
+		if (orientation === Orientation.HORZ) {
+			tabStripRef.current!.scrollLeft = p;
 		} else {
-			firstRender.current = true;
+			tabStripRef.current!.scrollTop = p;
 		}
 	};
 
-	const onMouseWheel = (event: React.WheelEvent<HTMLDivElement>) => {
-		let delta = 0;
-		if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
-			delta = -event.deltaX;
-		} else {
-			delta = -event.deltaY;
+	const getScrollPosition = (elm: Element) => {
+		if (orientation === Orientation.HORZ) {
+			return elm.scrollLeft;
 		}
-		if (event.deltaMode === 1) {
-			// DOM_DELTA_LINE	0x01	The delta values are specified in lines.
-			delta *= 40;
-		}
-		setPosition(position + delta);
-		userControlledLeft.current = true;
-		event.stopPropagation();
+		return elm.scrollTop;
 	};
 
 	return {
 		selfRef,
-		position,
-		userControlledLeft,
+		userControlledPositionRef,
+		onScroll,
+		onScrollPointerDown,
 		hiddenTabs,
 		onMouseWheel,
-		tabsTruncated: tabsTruncated.current,
+		isDockStickyButtons,
+		isShowHiddenTabs,
 	};
 };
+
+function arraysEqual(arr1: number[], arr2: number[]) {
+	return (
+		arr1.length === arr2.length &&
+		arr1.every((val, index) => val === arr2[index])
+	);
+}

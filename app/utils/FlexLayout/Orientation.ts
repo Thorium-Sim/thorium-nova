@@ -6,7 +6,7 @@ export class Orientation {
 		if (from === Orientation.HORZ) {
 			return Orientation.VERT;
 		}
-		return Orientation.HORZ;
+			return Orientation.HORZ;
 	}
 
 	/** @internal */

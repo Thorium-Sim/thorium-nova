@@ -1,4 +1,4 @@
-import { forwardRef, Suspense, useContext } from "react";
+import { forwardRef, Suspense, useContext, useEffect, useState } from "react";
 import * as Cores from "@thorium/cores";
 import CardProvider from "@thorium/context/CardContext";
 import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
@@ -9,12 +9,16 @@ import { Layout, type TabNode } from "@thorium/utils/FlexLayout";
 export const CoreFlexLayout = forwardRef<Layout>((_, ref) => {
 	const { layoutModel, setInitialModel } = useContext(CoreFlexLayoutContext);
 
+	// A hack to make the layout properly render.
+	const [, setState] = useState({});
+	useEffect(() => {
+		setTimeout(() => {
+			setState({});
+		}, 500);
+	}, []);
 	return (
 		<Layout
 			ref={ref}
-			font={{
-				size: "x-small",
-			}}
 			factory={flexLayoutFactory}
 			model={layoutModel}
 			supportsPopout={false}
