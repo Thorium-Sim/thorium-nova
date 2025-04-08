@@ -43,7 +43,12 @@ import { Torpedo } from "@thorium/components/Starmap/Torpedo";
 import { FiringPhasers } from "./FiringPhasers";
 import { cn } from "@thorium/utils/cn";
 import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
-import { Disclosure, Transition } from "@headlessui/react";
+import {
+	Disclosure,
+	DisclosureButton,
+	DisclosurePanel,
+	Transition,
+} from "@headlessui/react";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { usePrompt } from "@thorium/ui/AlertDialog";
 import { useStation } from "@thorium/routes/station/useStation";
@@ -113,7 +118,6 @@ function EditorProperties({ id }: { id: number }) {
 		},
 	);
 
-	const [scans] = q.sensors.scans.useNetRequest({ shipId: id });
 	return (
 		<>
 			{starmapObject?.components.identity ? (
@@ -234,17 +238,6 @@ function EditorProperties({ id }: { id: number }) {
 			{starmapObject?.components.reputation ? (
 				<EditorDisclosure title="Reputation">
 					<ReputationEditor id={id} />
-				</EditorDisclosure>
-			) : null}
-			{scans.length > 0 ? (
-				<EditorDisclosure title="Scans">
-					<ul>
-						{scans.map((scan) => (
-							<li key={scan.id}>
-								{scan.type} - {scan.target} - {scan.progress * 100}%
-							</li>
-						))}
-					</ul>
 				</EditorDisclosure>
 			) : null}
 		</>
@@ -409,7 +402,7 @@ export function EditorDisclosure({
 				<>
 					<HandleIsOpen open={open} title={title} scrollRef={disclosureRef} />
 					<div className="w-full sticky -top-1" ref={disclosureRef}>
-						<Disclosure.Button className="btn btn-xs justify-between btn-block">
+						<DisclosureButton className="btn btn-xs justify-between btn-block">
 							<span>{title}</span>
 							<Icon
 								name="chevron-up"
@@ -417,19 +410,20 @@ export function EditorDisclosure({
 									open ? "transform rotate-180" : ""
 								} w-5 h-5`}
 							/>
-						</Disclosure.Button>
+						</DisclosureButton>
 					</div>
-					<Transition
-						enter="transition duration-100 ease-out"
-						enterFrom="transform scale-95 opacity-0"
-						enterTo="transform scale-100 opacity-100"
-						leave="transition duration-75 ease-out"
-						leaveFrom="transform scale-100 opacity-100"
-						leaveTo="transform scale-95 opacity-0"
-					>
-						<Disclosure.Panel className="pb-2 px-2">
+					<Transition>
+						<DisclosurePanel
+							className={cn(
+								"pb-2 px-2",
+								"relative scale-100 ease-out",
+								"data-[closed]:opacity-0 data-[closed]:scale-95",
+								"data-[enter]:duration-100",
+								"data-[leave]:duration-75",
+							)}
+						>
 							{children}
-						</Disclosure.Panel>
+						</DisclosurePanel>
 					</Transition>
 				</>
 			)}
@@ -526,12 +520,27 @@ function ShipControls() {
 					</Tooltip>
 					<Tooltip content="Attack">
 						<Button
-							onClick={() =>
-								q.starmapCore.setShipsBehavior.netSend({
-									shipIds: selectedObjectIds,
-									objective: "attack",
-								})
-							}
+							onClick={() => {
+								useStarmapStore.setState({
+									clickAction: {
+										label: "Choose a ship to attack.",
+										action: (object) => {
+											if (!object) {
+												useStarmapStore.setState({ clickAction: undefined });
+												return;
+											}
+											if (selectedObjectIds.includes(object)) return;
+
+											q.starmapCore.setShipsBehavior.netSend({
+												shipIds: selectedObjectIds,
+												objective: "attack",
+											});
+
+											useStarmapStore.setState({ clickAction: undefined });
+										},
+									},
+								});
+							}}
 							className={clsx("btn-sm btn-error btn-outline", {
 								"btn-active": starmapShip.behavior.objective === "attack",
 							})}

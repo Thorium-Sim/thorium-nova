@@ -38,31 +38,37 @@ export class PowerDistributionSystem extends System {
 			if (!power) continue;
 			const { powerDraw, powerSources } = power;
 			let suppliedPower = 0;
-			for (let i = 0; i < powerDraw; i++) {
-				let powerSupply = 1;
-				const source = powerSources[i];
-				if (typeof source === "number") {
-					const sourceEntity = this.ecs.getEntityById(source);
-					// Phasers can only get power from phase capacitors
-					if (
-						system.components.isPhasers &&
-						!sourceEntity?.components.isPhaseCapacitor
-					)
-						continue;
-					if (system.components.isPhasers) {
-						powerSupply = system.components.isPhasers.yieldMultiplier;
+			if (entity.components.isPlayerShip) {
+				for (let i = 0; i < powerDraw; i++) {
+					let powerSupply = 1;
+					const source = powerSources[i];
+					if (typeof source === "number") {
+						const sourceEntity = this.ecs.getEntityById(source);
+						// Phasers can only get power from phase capacitors
+						if (
+							system.components.isPhasers &&
+							!sourceEntity?.components.isPhaseCapacitor
+						)
+							continue;
+						if (system.components.isPhasers) {
+							powerSupply = system.components.isPhasers.yieldMultiplier;
+						}
+
+						// If the battery is empty, don't supply power
+						if (sourceEntity?.components.isBattery?.storage === 0) continue;
+
+						suppliedPower += powerSupply;
+						powerSuppliedSources.set(
+							source,
+							(powerSuppliedSources.get(source) || 0) + powerSupply,
+						);
 					}
-
-					// If the battery is empty, don't supply power
-					if (sourceEntity?.components.isBattery?.storage === 0) continue;
-
-					suppliedPower += powerSupply;
-					powerSuppliedSources.set(
-						source,
-						(powerSuppliedSources.get(source) || 0) + powerSupply,
-					);
 				}
+			} else {
+				// We allow NPC ships to cheat for simplicity
+				suppliedPower = powerDraw;
 			}
+
 			system.updateComponent("power", { currentPower: suppliedPower });
 		}
 		// Apply power to batteries from reactors

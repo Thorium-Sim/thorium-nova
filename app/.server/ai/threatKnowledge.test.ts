@@ -11,7 +11,7 @@ describe("threatKnowledge", () => {
 			const dataContext = createMockDataContext();
 			const ecs = dataContext.ecs;
 			const { ship, target } = setUpShipAndTarget(ecs);
-			expect(threatKnowledge(ship)?.get(target.id)).toEqual(0);
+			expect(threatKnowledge(ship)?.get(target.id)?.score).toEqual(0);
 		});
 	});
 	it("should develop a threat assessment for a neutral ship", () => {
@@ -29,7 +29,9 @@ describe("threatKnowledge", () => {
 
 			target.updateComponent("faction", { factionId: faction.id });
 
-			expect(threatKnowledge(ship)?.get(target.id)).toEqual(0.08881921);
+			expect(threatKnowledge(ship)?.get(target.id)?.score).toBeCloseTo(
+				0.222048,
+			);
 		});
 	});
 	it("should develop a threat assessment for a hostile ship", () => {
@@ -57,7 +59,9 @@ describe("threatKnowledge", () => {
 
 			target.updateComponent("faction", { factionId: hostileFaction.id });
 
-			expect(threatKnowledge(ship)?.get(target.id)).toEqual(0.17763842);
+			expect(threatKnowledge(ship)?.get(target.id)?.score).toBeCloseTo(
+				0.666144,
+			);
 		});
 	});
 });
@@ -99,7 +103,6 @@ function setUpShipAndTarget(ecs: ECS) {
 	ship.addComponent("npcKnowledge", {
 		activeRange: 100000,
 		passiveRange: 1000000,
-		alertLevel: "5",
 		weaponsRange: 250000,
 	});
 	ship.addComponent("nearbyObjects", {

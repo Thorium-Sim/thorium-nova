@@ -208,6 +208,7 @@ export class InterstellarTransitionSystem extends System {
 					entity.updateComponent("autopilot", {
 						path,
 						nextCoordinates,
+						desiredRotation: null,
 					});
 				}
 				pubsub.publish.starmapCore.ships({ systemId: destinationSystem.id });

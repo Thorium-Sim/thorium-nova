@@ -64,6 +64,7 @@ export class AutoThrustSystem extends System {
 			rotationQuat,
 			desiredRotationQuat,
 		} = getAutopilotPositionAndRotation(entity);
+
 		const distanceInKM =
 			positionVec.distanceTo(desiredDestination) *
 			(isInInterstellar ? 1 / lightYearToLightMinute(KM_TO_LY) : 1);
@@ -92,7 +93,6 @@ export class AutoThrustSystem extends System {
 
 		// We have to be within 0.5 degrees of the destination to be considered in the right direction
 		const inCorrectDirection = rotationDifference <= 5;
-
 		if (warpEngines && isWithinWarpDistance) {
 			impulseEntity?.updateComponent("isImpulseEngines", { targetSpeed: 0 });
 			// Use warp engines

@@ -10,8 +10,8 @@ const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
 
 /*
  * How auto-rotation works:
- * - Bail if there is no destination, if the autopilot is turned off
- *     or if the angle to the destination is 0.
+ * - Bail if there is no destination, if the autopilot is turned off,
+ *     if the angle to the destination is 0, or if there is no desired rotation.
  * - Calculate the max angular acceleration and velocity the
  *     thrusters can provide.
  * - Use a PID controller where the error input is the angle to the
@@ -43,9 +43,8 @@ export class AutoRotateSystem extends System {
 			!position ||
 			!rotation ||
 			!autopilot?.rotationAutopilot ||
-			!autopilot?.desiredCoordinates
+			(!autopilot?.desiredCoordinates && !autopilot.desiredRotation)
 		) {
-			thrusters.components.isThrusters.autoRotationVelocity = 0;
 			return;
 		}
 
@@ -63,25 +62,48 @@ export class AutoRotateSystem extends System {
 			destinationSystem,
 		);
 		const distance = positionVec.distanceToSquared(nextDestination);
+		desiredRotationQuat.identity();
 
-		if (distance < 1) {
-			autopilot.nextCoordinates = autopilot.path.shift()!;
-			if (!autopilot.nextCoordinates) {
-				thrusters.components.isThrusters.autoRotationVelocity = 0;
-				return;
+		if (autopilot.desiredCoordinates) {
+			if (distance < 1) {
+				autopilot.nextCoordinates = autopilot.path.shift()!;
+				if (!autopilot.nextCoordinates) {
+					if (autopilot.desiredRotation) {
+						desiredRotationQuat.set(
+							autopilot.desiredRotation.x,
+							autopilot.desiredRotation.y,
+							autopilot.desiredRotation.z,
+							autopilot.desiredRotation.w,
+						);
+					} else {
+						return;
+					}
+				} else {
+					nextDestination.set(
+						autopilot.nextCoordinates.x,
+						autopilot.nextCoordinates.y,
+						autopilot.nextCoordinates.z,
+					);
+				}
 			}
+			rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
+			up.set(0, 1, 0).applyQuaternion(rotationQuat);
+
+			matrix.lookAt(positionVec, nextDestination, up).multiply(rotationMatrix);
+			// Use the thrusters to adjust the rotation of the ship to point towards the desired destination.
+			// First, determine the angle to the destination.
+			desiredRotationQuat.setFromRotationMatrix(matrix);
+		} else if (autopilot.desiredRotation) {
+			desiredRotationQuat.set(
+				autopilot.desiredRotation.x,
+				autopilot.desiredRotation.y,
+				autopilot.desiredRotation.z,
+				autopilot.desiredRotation.w,
+			);
 		}
 
-		rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
-		up.set(0, 1, 0).applyQuaternion(rotationQuat);
-
-		matrix.lookAt(positionVec, nextDestination, up).multiply(rotationMatrix);
-		// Use the thrusters to adjust the rotation of the ship to point towards the desired destination.
-		// First, determine the angle to the destination.
-		desiredRotationQuat.setFromRotationMatrix(matrix);
-
 		// Apply the rotation
-		rotationQuat.slerp(desiredRotationQuat, 0.01);
+		rotationQuat.slerp(desiredRotationQuat, elapsed / (1000 / this.frequency));
 		entity.updateComponent("rotation", {
 			x: rotationQuat.x,
 			y: rotationQuat.y,

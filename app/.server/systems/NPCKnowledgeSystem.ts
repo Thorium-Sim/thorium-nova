@@ -1,7 +1,8 @@
 import { threatKnowledge } from "@thorium/.server/ai/threatKnowledge";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { type ECS, type Entity, System } from "@thorium/utils/ecs";
-
+import type { threatScores } from "@thorium/utils/flags/shipObjectives";
+import type z from "zod";
 export class NPCKnowledgeSystem extends System {
 	frequency = 10;
 	test(entity: Entity) {
@@ -25,16 +26,24 @@ export class NPCKnowledgeSystem extends System {
 		// TODO March 29, 2025 Make this configurable
 		const weaponsRange = 25_000; // targeting.components.isTargeting?.weaponsRange
 
-		const alertLevel = entity.components.isShip?.alertLevel || "5";
-
 		const threats = threatKnowledge(entity);
+		const goals = goalsKnowledge(entity);
 
 		entity.updateComponent("npcKnowledge", {
 			activeRange,
 			passiveRange,
 			weaponsRange,
-			alertLevel,
 			threats,
 		});
 	}
 }
+
+// Goals are for
+
+// Example goals
+// search a ship for cargo
+// pursue a suspicious ship
+// steal an item from a ship
+// move into combat position
+// flee when overly damaged
+function goalsKnowledge(entity: Entity) {}

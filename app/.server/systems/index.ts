@@ -23,7 +23,6 @@ import { ImpulseSystem } from "./ImpulseSystem";
 import { ThrusterSystem } from "./ThrusterSystem";
 import { PhysicsMovementSystem } from "./PhysicsMovementSystem";
 import { PhysicsWorldPositionSystem } from "./PhysicsWorldPositionSystem";
-import { ShipBehaviorSystem } from "./ShipBehaviorSystem";
 import { NearbyObjectsSystem } from "./NearbyObjectsSystem";
 import { TorpedoLoadingSystem } from "./TorpedoLoadingSystem";
 import { TorpedoMovementSystem } from "./TorpedoMovementSystem";
@@ -52,7 +51,6 @@ const systems = [
 	NearbyObjectsSystem,
 	NPCKnowledgeSystem,
 	NPCDecisionSystem,
-	ShipBehaviorSystem,
 	AutoRotateSystem,
 	AutoThrustSystem,
 	ShieldsSystem,

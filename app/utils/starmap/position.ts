@@ -2,9 +2,14 @@ import { Vector3 } from "three";
 import type { Entity } from "../ecs";
 import { solarRadiusToKilometers, type SolarRadius } from "../unitTypes";
 import { getOrbitPosition } from "./getOrbitPosition";
-
+import type { z } from "zod";
+import type { position as TPosition } from "@thorium/ecs-components/position";
 /** Gets a point that is some distance from object, in the direction of ship. Used for setting waypoints. */
-export function getObjectOffsetPosition(object: Entity, ship: Entity) {
+export function getObjectOffsetPosition(
+	object: Entity,
+	position: z.infer<typeof TPosition>,
+	size: number,
+) {
 	const objectCenter = new Vector3();
 	if (object.components.satellite) {
 		objectCenter.copy(getCompletePositionFromOrbit(object));
@@ -18,20 +23,16 @@ export function getObjectOffsetPosition(object: Entity, ship: Entity) {
 		throw new Error("Unable to determine object's position.");
 	}
 	const objectAngle = new Vector3(0, 0, 1);
-	const shipPosition = new Vector3(
-		ship.components.position?.x,
-		ship.components.position?.y,
-		ship.components.position?.z,
-	);
+	const shipPosition = new Vector3(position.x, position.y, position.z);
 	// Determine the angle between the ship's location and the waypoint
 	const objectSystem = getObjectSystem(object);
 	if (
-		objectSystem?.id === ship.components.position?.parentId ||
-		(!objectSystem?.id && !ship.components.position?.parentId)
+		objectSystem?.id === position.parentId ||
+		(!objectSystem?.id && !position.parentId)
 	) {
 		// The waypoint is in the same system as the ship or both the waypoint and ship are in interstellar space.
 		objectAngle.subVectors(shipPosition, objectCenter).normalize();
-	} else if (objectSystem && !ship.components.position?.parentId) {
+	} else if (objectSystem && !position.parentId) {
 		// The ship is in interstellar space, but the waypoint is in a system.
 		// Get the angle between the ship's position  and  the system's position.
 		const system = object.ecs?.entities.find(
@@ -51,12 +52,10 @@ export function getObjectOffsetPosition(object: Entity, ship: Entity) {
 				)
 				.normalize();
 		}
-	} else if (!objectSystem && ship.components.position?.parentId) {
+	} else if (!objectSystem && position.parentId) {
 		// The object is in interstellar space while the ship is in a system; use the angle from the ship's system
 		// to the object.
-		const system = object.ecs?.entities.find(
-			(e) => e.id === ship.components.position?.parentId,
-		);
+		const system = object.ecs?.entities.find((e) => e.id === position.parentId);
 		if (!system) {
 			// This is an unlikely case, so we'll just do nothing. It won't be the end of the world.
 		} else {
@@ -88,8 +87,7 @@ export function getObjectOffsetPosition(object: Entity, ship: Entity) {
 			(object.components.isStar?.radius || 1) as SolarRadius,
 		) ||
 		1;
-	const distanceFromCenter =
-		((ship.components.size?.length || 1) / 1000) * 2 + objectSize * 3;
+	const distanceFromCenter = (size / 1000) * 2 + objectSize * 3;
 
 	return objectAngle.multiplyScalar(distanceFromCenter).add(objectCenter);
 }

@@ -270,7 +270,20 @@ export const waypoints = t.router({
 				// This waypoint is being attached to a specific object in space.
 				object = ctx.flight?.ecs.entities.find((e) => e.id === input.entityId);
 				if (!object) throw new Error("No object found.");
-				position = getObjectOffsetPosition(object, ship);
+
+				const targetParentId = ship.components.position
+					? ship.components.position.parentId
+					: ship.components.satellite?.parentId || null;
+				const targetPosition = {
+					parentId: targetParentId,
+					type: targetParentId ? "solar" : "interstellar",
+					...(ship.components.position || getCompletePositionFromOrbit(ship)),
+				} as const;
+				position = getObjectOffsetPosition(
+					object,
+					targetPosition,
+					ship.components.size?.length || 1,
+				);
 				const sys = getObjectSystem(object);
 				systemId = sys?.id ?? null;
 				if (sys?.id === object.id) systemId = null;

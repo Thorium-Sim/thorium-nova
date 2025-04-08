@@ -6,6 +6,7 @@ import { Entity } from "@thorium/utils/ecs";
 import type { Coordinates } from "@thorium/utils/unitTypes";
 import { z } from "zod";
 import {
+	getCompletePositionFromOrbit,
 	getObjectOffsetPosition,
 	getObjectSystem,
 } from "@thorium/utils/starmap/position";
@@ -366,6 +367,7 @@ export const starmapCore = t.router({
 				const nextCoordinates = path?.shift();
 				entity?.updateComponent("autopilot", {
 					desiredCoordinates: ship.position,
+					desiredRotation: null,
 					desiredSolarSystemId: ship.systemId,
 					path,
 					nextCoordinates,
@@ -443,7 +445,19 @@ export const starmapCore = t.router({
 				// This ship is being sent close to an object
 				object = ctx.flight?.ecs.entities.find((e) => e.id === input.entityId);
 				if (!object) throw new Error("No object found.");
-				position = getObjectOffsetPosition(object, ship);
+				const targetParentId = ship.components.position
+					? ship.components.position.parentId
+					: ship.components.satellite?.parentId || null;
+				const targetPosition = {
+					parentId: targetParentId,
+					type: targetParentId ? "solar" : "interstellar",
+					...(ship.components.position || getCompletePositionFromOrbit(ship)),
+				} as const;
+				position = getObjectOffsetPosition(
+					object,
+					targetPosition,
+					ship.components.size?.length || 1,
+				);
 				const sys = getObjectSystem(object);
 				systemId = sys?.id ?? null;
 				if (sys?.id === object.id) systemId = null;
@@ -516,10 +530,24 @@ export const starmapCore = t.router({
 			for (const shipId of input.ships) {
 				const entity = ctx.flight?.ecs.getEntityById(shipId);
 				if (!entity) continue;
-				const position = getObjectOffsetPosition(orbitedObject, entity);
+				const targetParentId = entity.components.position
+					? entity.components.position.parentId
+					: entity.components.satellite?.parentId || null;
+				const targetPosition = {
+					parentId: targetParentId,
+					type: targetParentId ? "solar" : "interstellar",
+					...(entity.components.position ||
+						getCompletePositionFromOrbit(entity)),
+				} as const;
+				const position = getObjectOffsetPosition(
+					orbitedObject,
+					targetPosition,
+					entity.components.size?.length || 1,
+				);
 				// TODO January 2025: Generate a function which creates an orbit path which the ship can use.
 				entity.updateComponent("autopilot", {
 					desiredCoordinates: position,
+					desiredRotation: null,
 					desiredSolarSystemId: objectSystem.id,
 				});
 				entity?.updateComponent("shipBehavior", {
@@ -652,6 +680,7 @@ export const starmapCore = t.router({
 		.input(
 			z.object({
 				shipIds: z.union([z.number().array(), z.number()]),
+				targetId: z.number().optional(),
 				objective: shipObjectives,
 			}),
 		)
@@ -663,6 +692,7 @@ export const starmapCore = t.router({
 				const entity = ctx.flight?.ecs.getEntityById(shipId);
 				entity?.updateComponent("shipBehavior", {
 					objective: input.objective,
+					behaviorTarget: input.targetId,
 				});
 
 				if (input.objective === "hold") {
@@ -684,6 +714,7 @@ export const starmapCore = t.router({
 								y: position.y,
 								z: position.z,
 							},
+							desiredRotation: null,
 							path: [],
 							nextCoordinates: {
 								x: position.x,

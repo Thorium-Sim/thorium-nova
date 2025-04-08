@@ -4,26 +4,14 @@ export function isFriendOrFoe(
 	targetId: number,
 	targetFactionId: number | null,
 ) {
-	// The direct reputation between these two ships.
-	if (typeof shipReputation[targetId.toString()] === "number")
-		return shipReputation[targetId.toString()];
-	// Reputation between the ship and the target's faction
-	if (
-		targetFactionId &&
-		typeof shipReputation[targetFactionId?.toString()] === "number"
-	) {
-		return shipReputation[targetFactionId.toString()];
-	}
-	if (!factionReputation) return 0;
-	// Reputation between the ship's faction and the target ship
-	if (typeof factionReputation[targetId.toString()] === "number")
-		return factionReputation[targetId.toString()];
+	const shipToShip = shipReputation[targetId.toString()] || 0;
+	const shipToFaction = shipReputation[targetFactionId?.toString() || ""] || 0;
+	const factionToShip = factionReputation?.[targetId.toString()] || 0;
+	const factionToFaction =
+		factionReputation?.[targetFactionId?.toString() || ""] || 0;
 
-	// Reputation between the ship's faction and the target's faction
-	if (
-		targetFactionId &&
-		typeof factionReputation[targetFactionId.toString()] === "number"
-	)
-		return factionReputation[targetFactionId.toString()];
-	return 0;
+	// Add up all of the IFF values. This makes it possible to
+	// sway an individual ship to your side by overcoming your
+	// reputation in the eyes of their faction
+	return shipToShip + shipToFaction + factionToShip + factionToFaction;
 }

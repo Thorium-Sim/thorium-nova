@@ -224,6 +224,7 @@ export const pilot = t.router({
 				ship?.updateComponent("autopilot", {
 					destinationWaypointId: null,
 					desiredCoordinates: undefined,
+					desiredRotation: null,
 					desiredSolarSystemId: undefined,
 					path: [],
 					nextCoordinates: null,

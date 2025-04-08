@@ -23,11 +23,17 @@ export class WaypointRemoveSystem extends System {
 				ship.components.position.z - entity.components.position.z,
 			);
 
+			// TODO April 5, 2025 - Make it so the desired rotation is set to point the ship towards the object
+			const object = this.ecs.getEntityById(
+				entity.components.isWaypoint?.attachedObjectId || -1,
+			);
+
 			if (distance < 5) {
 				// Update the ship autopilot
 				ship.updateComponent("autopilot", {
 					destinationWaypointId: null,
 					desiredCoordinates: undefined,
+					desiredRotation: null,
 					path: [],
 					nextCoordinates: undefined,
 					desiredSolarSystemId: undefined,

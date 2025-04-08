@@ -9,6 +9,11 @@ export const hull = z
 		 * How much energy the hull is able to withstand before
 		 * being destroyed. Measured in gigajoules.
 		 */
+		maxHull: z.number().default(10),
+		/**
+		 * How much energy the hull is able to withstand before
+		 * being destroyed. Measured in gigajoules.
+		 */
 		hull: z.number().default(10),
 	})
 	.default({});

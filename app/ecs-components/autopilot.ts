@@ -3,6 +3,16 @@ import z from "zod";
 export const autopilot = z
 	.object({
 		destinationWaypointId: z.number().nullable().default(null),
+		/** The point that the this ship rotates towards after it has arrived at its desired coordinates */
+		desiredRotation: z
+			.object({
+				x: z.number().default(0),
+				y: z.number().default(0),
+				z: z.number().default(0),
+				w: z.number().default(1),
+			})
+			.nullable()
+			.default(null),
 		/** The desired coordinates of the ship in the current stage. If desiredSolarSystemId is null, then it's interstellar coordinates */
 		desiredCoordinates: z
 			.object({

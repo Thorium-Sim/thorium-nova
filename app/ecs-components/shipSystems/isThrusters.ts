@@ -33,8 +33,6 @@ export const isThrusters = z
 		rotationMaxSpeed: z.number().default(5),
 		/** The thrust applied by rotation thrusters in kilo-newtons, which affects how fast the rotation accelerates based on the mass of the ship. */
 		rotationThrust: z.number().default(12500),
-		/** Rotation velocity scalar used by the autopilot */
-		autoRotationVelocity: z.number().default(1),
 		/** The current direction thruster impulse vector*/
 		rotationImpulse: z
 			.object({
