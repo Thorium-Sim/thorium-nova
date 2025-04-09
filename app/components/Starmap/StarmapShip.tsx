@@ -221,36 +221,33 @@ const ShipSprite = ({
 	spriteAsset: string;
 	userData?: any;
 }) => {
-	const [canvas] = useState(() => document.createElement("canvas"));
-
+	const canvasDimensions = 2048;
+	const [canvas] = useState(() =>
+		Object.assign(document.createElement("canvas"), {
+			width: canvasDimensions,
+			height: canvasDimensions,
+		}),
+	);
+	const [spriteMap] = useState(() => new CanvasTexture(canvas));
 	useEffect(() => {
 		const ctx = canvas.getContext("2d");
-		new Promise<void>((resolve, reject) => {
-			const img = new Image();
-			img.src = spriteAsset;
-			img.onload = () => {
-				if (!ctx) return reject();
-				const scale = 4;
-				canvas.width = img.width * scale;
-				canvas.height = img.height * scale;
-				ctx.drawImage(img, 0, 0);
-				const imageData = ctx.getImageData(
-					0,
-					0,
-					img.width * scale,
-					img.height * scale,
-				);
-				const data = imageData.data;
-				for (let i = 0; i < data.length; i += 4) {
-					data[i] = data[i + 1] = data[i + 2] = data[i + 3];
-					data[i + 3] = 255;
-				}
-				ctx.putImageData(imageData, 0, 0);
-				resolve();
-			};
-		});
-	}, [spriteAsset, canvas]);
-	const spriteMap = new CanvasTexture(canvas);
+		const img = new Image();
+		img.src = spriteAsset;
+		img.onload = () => {
+			if (!ctx) return;
+			// Draw the canvas
+			ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+			const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+			const data = imageData.data;
+			// Convert to black and white
+			for (let i = 0; i < data.length; i += 4) {
+				data[i] = data[i + 1] = data[i + 2] = data[i + 3];
+				data[i + 3] = 255;
+			}
+			ctx.putImageData(imageData, 0, 0);
+			spriteMap.needsUpdate = true;
+		};
+	}, [spriteAsset, canvas, spriteMap]);
 
 	const scale = 1 / 50;
 	const ref = useRef<Sprite>(null);
@@ -264,6 +261,7 @@ const ShipSprite = ({
 			ref.current?.material.color.set(color);
 		}
 	});
+
 	return (
 		<sprite ref={ref} scale={[scale, scale, scale]} userData={userData}>
 			<spriteMaterial
