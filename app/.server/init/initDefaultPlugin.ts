@@ -2,6 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { unzip } from "@thorium/utils/.server/zip";
+import { embeddedFiles } from "bun";
 
 export async function initDefaultPlugin() {
 	if (process.env.NODE_ENV !== "production") return;
@@ -10,7 +11,8 @@ export async function initDefaultPlugin() {
 	const tempPath = await fs.mkdtemp("thorium-nova");
 	const tempFile = path.join(tempPath, "defaultPlugin.plug");
 
-	const defaultPlugin = await import(
+	// This is just necessary to embed the plugin, but we don't reference it this way.
+	await import(
 		// @ts-expect-error
 		"../../../build/defaultPlugin.plug",
 		// @ts-expect-error
@@ -21,7 +23,10 @@ export async function initDefaultPlugin() {
 
 	try {
 		// Initialize the default plugin
-		await Bun.write(tempFile, Bun.file(defaultPlugin.default));
+		await Bun.write(
+			tempFile,
+			embeddedFiles.find((file) => file.name === "defaultPlugin.plug")!,
+		);
 
 		await unzip(tempFile, path.join(thoriumPath, "plugins/Thorium Default"));
 		await fs.rm(tempPath, { recursive: true, force: true });
