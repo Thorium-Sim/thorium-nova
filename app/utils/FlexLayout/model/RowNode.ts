@@ -233,8 +233,6 @@ export class RowNode extends Node implements IDropTarget {
 		// 0.1 is to prevent weight ever going to zero
 		const weights = sizes.map((s) => (Math.max(0.1, s) * 100) / sum);
 
-		// console.log(splitterPos, startPosition, "sizes", sizes);
-		// console.log("weights",weights);
 		return weights;
 	}
 

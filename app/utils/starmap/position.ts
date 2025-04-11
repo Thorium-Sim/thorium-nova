@@ -81,7 +81,9 @@ export function getObjectOffsetPosition(
 	// with a bit of distance. The distance is proportional to the radius of the object itself
 	// and the size of the ship: distanceFromCenter = crewShipSize * 2 + objectSize * 2
 	const objectSize =
-		object.components.size?.length ||
+		(object.components.size?.length
+			? object.components.size.length / 1000
+			: null) ||
 		object.components.isPlanet?.radius ||
 		solarRadiusToKilometers(
 			(object.components.isStar?.radius || 1) as SolarRadius,

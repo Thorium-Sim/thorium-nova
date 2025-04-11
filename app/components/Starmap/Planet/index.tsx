@@ -13,9 +13,10 @@ import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { degToRad } from "@thorium/utils/unitTypes";
 import { OrbitLine } from "../OrbitContainer";
 import { setCursor } from "@thorium/utils/setCursor";
+import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
 
 export const PlanetSprite = ({ color = "white", userData = {} }) => {
-	const spriteMap = useTexture(Dot);
+	const spriteMap = useShipSprite(Dot);
 
 	return (
 		<sprite userData={userData}>

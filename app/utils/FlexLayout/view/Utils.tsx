@@ -140,7 +140,8 @@ export function startDrag(
 export function canDockToWindow(node: Node) {
 	if (node instanceof TabNode) {
 		return node.isEnablePopout();
-	}if (node instanceof TabSetNode) {
+	}
+	if (node instanceof TabSetNode) {
 		for (const child of node.getChildren()) {
 			if ((child as TabNode).isEnablePopout() === false) {
 				return false;
@@ -159,8 +160,6 @@ export function copyInlineStyles(
 	const sourceStyle = source.getAttribute("style");
 	const targetStyle = target.getAttribute("style");
 	if (sourceStyle === targetStyle) return false;
-
-	// console.log("copyInlineStyles", sourceStyle);
 
 	if (sourceStyle) {
 		// Set the style attribute on the target element

@@ -191,7 +191,6 @@ export class TabNode extends Node implements IDraggable {
 		if (this.moveableElement) {
 			this.scrollLeft = this.moveableElement.scrollLeft;
 			this.scrollTop = this.moveableElement.scrollTop;
-			// console.log("save", this.getName(), this.scrollTop);
 		}
 	}
 
@@ -201,7 +200,6 @@ export class TabNode extends Node implements IDraggable {
 			requestAnimationFrame(() => {
 				if (this.moveableElement) {
 					if (this.scrollTop) {
-						// console.log("restore", this.getName(), this.scrollTop);
 						this.moveableElement.scrollTop = this.scrollTop;
 						this.moveableElement.scrollLeft = this.scrollLeft!;
 					}

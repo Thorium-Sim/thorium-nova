@@ -40,6 +40,12 @@ export class NPCDecisionSystem extends System {
 			z: 0,
 			...position,
 		};
+		const desiredRotation: {
+			x: number;
+			y: number;
+			z: number;
+			w: number;
+		} | null = null;
 
 		function setMoveTowardsPosition(
 			target?: Entity | null,
@@ -51,6 +57,7 @@ export class NPCDecisionSystem extends System {
 					position,
 					(entity.components.size?.length || 1) * distanceMultiplier,
 				);
+
 				desiredPosition.parentId = position.parentId;
 				desiredPosition.x = offsetPosition.x;
 				desiredPosition.y = offsetPosition.y;
@@ -63,15 +70,16 @@ export class NPCDecisionSystem extends System {
 			entity,
 			knowledge.threats,
 		);
+
 		if (
 			combatAction === "attack" ||
 			objective === "attack" ||
 			objective === "defend"
 		) {
 			if (typeof targetId === "number") {
-				// TODO: April 1, 2025 Move into weapons range of the target
+				// When weapons are ready, move towards the target
 				const target = this.ecs.getEntityById(targetId);
-				setMoveTowardsPosition(target);
+				setMoveTowardsPosition(target, 200);
 				alertLevel = 1;
 			} else {
 				// TODO April 5, 2025: Figure out how to do formations
@@ -174,7 +182,7 @@ export class NPCDecisionSystem extends System {
 						z: desiredPosition.z,
 					}
 				: null,
-			desiredRotation: null,
+			desiredRotation,
 			path,
 			nextCoordinates,
 			desiredSolarSystemId: position?.parentId || null,

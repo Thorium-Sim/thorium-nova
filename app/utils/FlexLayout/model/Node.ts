@@ -80,7 +80,7 @@ export abstract class Node {
 				? Orientation.VERT
 				: Orientation.HORZ;
 		}
-			return Orientation.flip(this.parent.getOrientation());
+		return Orientation.flip(this.parent.getOrientation());
 	}
 
 	// event can be: resize, visibility, maximize (on tabset), close
@@ -106,7 +106,6 @@ export abstract class Node {
 
 	/** @internal */
 	fireEvent(event: string, params: any) {
-		// console.log(this._type, " fireEvent " + event + " " + JSON.stringify(params));
 		if (this.listeners.has(event)) {
 			this.listeners.get(event)!(params);
 		}
@@ -123,7 +122,6 @@ export abstract class Node {
 			}
 		}
 
-		// console.log(name + "=" + val);
 		return val;
 	}
 

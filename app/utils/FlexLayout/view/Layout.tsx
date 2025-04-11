@@ -374,7 +374,6 @@ export class LayoutInternal extends React.Component<
 	}
 
 	render() {
-		// console.log("render", this.windowId, this.state.revision, this.renderCount++);
 		// first render will be used to find the size (via selfRef)
 		if (!this.selfRef.current) {
 			return (
@@ -714,7 +713,6 @@ export class LayoutInternal extends React.Component<
 						rect.height > 0);
 
 				if (renderTab) {
-					//  console.log("rendertab", child.getName(), this.props.renderRevision);
 					const key =
 						child.getId() +
 						(child.isEnableWindowReMount() ? child.getWindowId() : "");
@@ -856,7 +854,6 @@ export class LayoutInternal extends React.Component<
 	};
 
 	tidyMoveablesMap() {
-		// console.log("tidyMoveablesMap");
 		const tabs = new Map<string, TabNode>();
 		this.props.model.visitNodes((node, _) => {
 			if (node instanceof TabNode) {
@@ -866,7 +863,6 @@ export class LayoutInternal extends React.Component<
 
 		for (const [nodeId, element] of this.moveableElementMap) {
 			if (!tabs.has(nodeId)) {
-				// console.log("delete", nodeId);
 				element.remove(); // remove from dom
 				this.moveableElementMap.delete(nodeId); // remove map entry
 			}
@@ -909,14 +905,12 @@ export class LayoutInternal extends React.Component<
 	};
 
 	redraw(type?: string) {
-		// console.log("redraw", this.windowId, type);
 		this.mainLayout.setState((state, props) => {
 			return { forceRevision: state.forceRevision + 1 };
 		});
 	}
 
 	redrawInternal(type: string) {
-		// console.log("redrawInternal", this.windowId, type);
 		this.mainLayout.setState((state, props) => {
 			return { layoutRevision: state.layoutRevision + 1 };
 		});
@@ -940,7 +934,6 @@ export class LayoutInternal extends React.Component<
 			rect.width !== 0 &&
 			rect.height !== 0
 		) {
-			// console.log("updateRect", rect.floor());
 			this.setState({ rect });
 			if (this.windowId !== Model.MAIN_WINDOW_ID) {
 				this.redrawInternal("rect updated");
@@ -1047,7 +1040,7 @@ export class LayoutInternal extends React.Component<
 		// const navWidth = Math.min(65, this.currentWindow!.outerWidth - this.currentWindow!.innerWidth);
 		const navHeight = 60;
 		const navWidth = 2;
-		// console.log(rect.y, this.currentWindow!.screenX,layoutRect.y);
+
 		rect.x =
 			this.currentWindow!.screenX +
 			this.currentWindow!.scrollX +
@@ -1305,7 +1298,6 @@ export class LayoutInternal extends React.Component<
 	}
 
 	setDraggingOverWindow(overWindow: boolean) {
-		// console.log("setDraggingOverWindow", overWindow);
 		if (this.isDraggingOverWindow !== overWindow) {
 			if (this.outlineDiv) {
 				this.outlineDiv!.style.visibility = overWindow ? "hidden" : "visible";
@@ -1339,19 +1331,16 @@ export class LayoutInternal extends React.Component<
 	};
 
 	clearDragMain() {
-		// console.log("clear drag main");
 		LayoutInternal.dragState = undefined;
 		if (this.windowId === Model.MAIN_WINDOW_ID) {
 			this.isDraggingOverWindow = false;
 		}
 		for (const [, layoutWindow] of this.props.model.getwindowsMap()) {
-			// console.log(layoutWindow);
 			layoutWindow.layout!.clearDragLocal();
 		}
 	}
 
 	clearDragLocal() {
-		// console.log("clear drag local", this.windowId);
 		this.setState({ showEdges: false });
 		this.showOverlay(false);
 		this.dragEnterCount = 0;
@@ -1363,8 +1352,6 @@ export class LayoutInternal extends React.Component<
 	}
 
 	onDragEnter = (event: React.DragEvent<HTMLElement>) => {
-		// console.log("onDragEnter", this.windowId, this.dragEnterCount);
-
 		if (!LayoutInternal.dragState && this.props.onExternalDrag) {
 			// not internal dragging
 			const externalDrag = this.props.onExternalDrag!(event);
@@ -1433,8 +1420,6 @@ export class LayoutInternal extends React.Component<
 
 	onDragOver = (event: React.DragEvent<HTMLElement>) => {
 		if (this.dragging && !this.isDraggingOverWindow) {
-			// console.log("onDragOver");
-
 			event.preventDefault();
 			const clientRect = this.selfRef.current?.getBoundingClientRect();
 			const pos = {
@@ -1462,7 +1447,6 @@ export class LayoutInternal extends React.Component<
 	};
 
 	onDragLeave = (event: React.DragEvent<HTMLElement>) => {
-		// console.log("onDragLeave", this.windowId, this.dragging);
 		if (this.dragging) {
 			if (this.windowId !== Model.MAIN_WINDOW_ID) {
 				LayoutInternal.dragState!.mainLayout.setDraggingOverWindow(false);
@@ -1473,8 +1457,6 @@ export class LayoutInternal extends React.Component<
 	};
 
 	onDrop = (event: React.DragEvent<HTMLElement>) => {
-		// console.log("ondrop", this.windowId, this.dragging, Layout.dragState);
-
 		if (this.dragging) {
 			event.preventDefault();
 

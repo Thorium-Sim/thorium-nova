@@ -1,4 +1,4 @@
-import { Edges, Line, Outlines, useGLTF, useTexture } from "@react-three/drei";
+import { Edges, Line, Outlines, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import {
@@ -45,6 +45,7 @@ import Explosion from "@thorium/components/Starmap/Effects/Explosion";
 import { isObjectOccludedBySphere } from "@thorium/utils/starmap/isObjectOccludedBySphere";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
+import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
 
 export function CircleGridContacts({
 	onContactClick,
@@ -205,9 +206,9 @@ export const ShipEntity = ({
 	}, [modelUrl]);
 	const { interpolate } = useLiveQuery();
 
-	const spriteMap = useTexture(logoUrl);
-	const reticleMap = useTexture(ReticleTexture);
-	const unidentifiedMap = useTexture(UnidentifiedTexture);
+	const spriteMap = useShipSprite(logoUrl);
+	const reticleMap = useShipSprite(ReticleTexture);
+	const unidentifiedMap = useShipSprite(UnidentifiedTexture);
 
 	const scale = 1 / 50;
 	const mesh = useRef<Mesh>(null);
@@ -660,7 +661,7 @@ const SensorsBracket = ({
 	bracket,
 	isSelected,
 }: { bracket: RefObject<Group | null>; isSelected?: boolean }) => {
-	const bracketMap = useTexture(BracketTexture);
+	const bracketMap = useShipSprite(BracketTexture);
 	const positionScalar = 0.05;
 	const scaleScalar = 0.15;
 	return (

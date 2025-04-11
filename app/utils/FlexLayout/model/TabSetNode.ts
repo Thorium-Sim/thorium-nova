@@ -478,12 +478,11 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 				if (select || (select !== false && this.isAutoSelectTab())) {
 					this.setSelected(insertPos);
 				}
-				// console.log("added child at : " + insertPos);
 			} else if (dragNode instanceof RowNode) {
 				(dragNode as RowNode).forEachNode((child, level) => {
 					if (child instanceof TabNode) {
 						this.addChild(child, insertPos);
-						// console.log("added child at : " + insertPos);
+
 						insertPos++;
 					}
 				}, 0);
@@ -491,7 +490,7 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 				for (let i = 0; i < dragNode.getChildren().length; i++) {
 					const child = dragNode.getChildren()[i];
 					this.addChild(child, insertPos);
-					// console.log("added child at : " + insertPos);
+
 					insertPos++;
 				}
 				if (this.getSelected() === -1 && this.children.length > 0) {
@@ -503,14 +502,14 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 			let moveNode = dragNode as TabSetNode | RowNode | TabNode;
 			if (dragNode instanceof TabNode) {
 				// create new tabset parent
-				// console.log("create a new tabset");
+
 				const callback = this.model.getOnCreateTabSet();
 				moveNode = new TabSetNode(
 					this.model,
 					callback ? callback(dragNode as TabNode) : {},
 				);
 				moveNode.addChild(dragNode);
-				// console.log("added child at end");
+
 				dragParent = moveNode;
 			} else if (dragNode instanceof RowNode) {
 				const parent = this.getParent()! as RowNode;
@@ -534,17 +533,17 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 			if (parentRow.getOrientation() === dockLocation.orientation) {
 				moveNode.setWeight(this.getWeight() / 2);
 				this.setWeight(this.getWeight() / 2);
-				// console.log("added child 50% size at: " +  pos + dockLocation.indexPlus);
+
 				parentRow.addChild(moveNode, pos + dockLocation.indexPlus);
 			} else {
 				// create a new row to host the new tabset (it will go in the opposite direction)
-				// console.log("create a new row");
+
 				const newRow = new RowNode(this.model, this.getWindowId(), {});
 				newRow.setWeight(this.getWeight());
 				newRow.addChild(this);
 				this.setWeight(50);
 				moveNode.setWeight(50);
-				// console.log("added child 50% size at: " +  dockLocation.indexPlus);
+
 				newRow.addChild(moveNode, dockLocation.indexPlus);
 
 				parentRow.removeChild(this);

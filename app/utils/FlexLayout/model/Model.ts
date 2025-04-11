@@ -71,7 +71,7 @@ export class Model {
 	 */
 	doAction(action: Action): any {
 		let returnVal = undefined;
-		// console.log(action);
+
 		switch (action.type) {
 			case Actions.ADD_NODE: {
 				const newNode = new TabNode(this, action.data.json, true);
@@ -343,13 +343,10 @@ export class Model {
 	 */
 	getActiveTabset(windowId: string = Model.MAIN_WINDOW_ID) {
 		const window = this.windows.get(windowId);
-		if (
-			window?.activeTabSet &&
-			this.getNodeById(window.activeTabSet.getId())
-		) {
+		if (window?.activeTabSet && this.getNodeById(window.activeTabSet.getId())) {
 			return window.activeTabSet;
 		}
-			return undefined;
+		return undefined;
 	}
 
 	/**
@@ -427,7 +424,7 @@ export class Model {
 		if (child instanceof TabSetNode) {
 			return child;
 		}
-			return this.getFirstTabSet(child);
+		return this.getFirstTabSet(child);
 	}
 
 	/**
@@ -593,7 +590,6 @@ export class Model {
 			//     node.normalizeWeights();
 			// }
 		});
-		// console.log(JSON.stringify(Object.keys(this._idMap)));
 	}
 
 	/** @internal */
@@ -629,11 +625,9 @@ export class Model {
 
 	/** @internal */
 	tidy() {
-		// console.log("before _tidy", this.toString());
 		for (const [_, window] of this.windows) {
 			window.root!.tidy();
 		}
-		// console.log("after _tidy", this.toString());
 	}
 
 	/** @internal */
@@ -707,7 +701,6 @@ export class Model {
 				Model.attributeDefinitions,
 			),
 		);
-		console.log(sb.join("\n"));
 	}
 
 	/** @internal */

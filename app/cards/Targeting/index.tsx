@@ -80,7 +80,7 @@ export function Targeting({ cardLoaded }: CardProps) {
 					>
 						{targetedContact?.id ? (
 							<React.Suspense
-								fallback={<h3 className="text-2xl">Accessing...</h3>}
+								fallback={<h3 className="text-2xl px-2">Accessing...</h3>}
 							>
 								<ObjectData objectId={targetedContact.id} />
 							</React.Suspense>
@@ -116,6 +116,6 @@ function ObjectData({ objectId }: { objectId: number }) {
 			</div>
 		</div>
 	) : (
-		<h3 className="text-2xl">Accessing...</h3>
+		<h3 className="text-2xl px-2">Unidentified</h3>
 	);
 }

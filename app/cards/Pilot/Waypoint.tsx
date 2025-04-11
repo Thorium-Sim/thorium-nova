@@ -1,5 +1,4 @@
 import { clientId, q } from "@thorium/context/AppContext";
-import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import type { AppRouter } from "@thorium/.server/init/router";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
@@ -20,6 +19,7 @@ import { getWaypointRelativePosition } from "./getWaypointRelativePosition";
 import { useCircleGridStore } from "./useCircleGridStore";
 import { degToRad } from "@thorium/utils/unitTypes";
 import type { inferTransformedProcedureOutput } from "@thorium/utils/live-query/.server/types";
+import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
 
 type WaypointItem = inferTransformedProcedureOutput<
 	AppRouter["waypoints"]["all"]
@@ -42,8 +42,8 @@ export const WaypointEntity = ({
 	waypoint: WaypointItem;
 	viewscreen?: boolean;
 }) => {
-	const spriteMap = useTexture(WaypointTexture);
-	const strokeMap = useTexture(StrokeTexture);
+	const spriteMap = useShipSprite(WaypointTexture);
+	const strokeMap = useShipSprite(StrokeTexture);
 	const store = useCircleGridStore();
 	const group = useRef<Group>(null);
 	const sprite = useRef<Sprite>(null);

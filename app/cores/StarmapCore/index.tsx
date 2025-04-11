@@ -534,6 +534,7 @@ function ShipControls() {
 											q.starmapCore.setShipsBehavior.netSend({
 												shipIds: selectedObjectIds,
 												objective: "attack",
+												targetId: object,
 											});
 
 											useStarmapStore.setState({ clickAction: undefined });

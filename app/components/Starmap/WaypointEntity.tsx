@@ -1,18 +1,18 @@
 import { useRef } from "react";
 import type { Group } from "three";
-import { useTexture } from "@react-three/drei";
 
 import WaypointSvg from "./Waypoint.svg";
 import WaypointStroke from "./WaypointStroke.svg";
 import { useFrame } from "@react-three/fiber";
 import type { Coordinates } from "@thorium/utils/unitTypes";
+import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
 
 export const WaypointEntity = ({
 	position,
 }: { position: Coordinates<number> }) => {
 	const color = "rgb(230,153,0)";
-	const spriteMap = useTexture(WaypointSvg);
-	const strokeMap = useTexture(WaypointStroke);
+	const spriteMap = useShipSprite(WaypointSvg);
+	const strokeMap = useShipSprite(WaypointStroke);
 	const group = useRef<Group>(null);
 	const scale = 1 / 10;
 

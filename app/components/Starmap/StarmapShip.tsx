@@ -221,34 +221,7 @@ const ShipSprite = ({
 	spriteAsset: string;
 	userData?: any;
 }) => {
-	const canvasDimensions = 2048;
-	const [canvas] = useState(() =>
-		Object.assign(document.createElement("canvas"), {
-			width: canvasDimensions,
-			height: canvasDimensions,
-		}),
-	);
-	const [spriteMap] = useState(() => new CanvasTexture(canvas));
-	useEffect(() => {
-		const ctx = canvas.getContext("2d");
-		const img = new Image();
-		img.src = spriteAsset;
-		img.onload = () => {
-			if (!ctx) return;
-			// Draw the canvas
-			ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-			const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-			const data = imageData.data;
-			// Convert to black and white
-			for (let i = 0; i < data.length; i += 4) {
-				data[i] = data[i + 1] = data[i + 2] = data[i + 3];
-				data[i + 3] = 255;
-			}
-			ctx.putImageData(imageData, 0, 0);
-			spriteMap.needsUpdate = true;
-		};
-	}, [spriteAsset, canvas, spriteMap]);
-
+	const spriteMap = useShipSprite(spriteAsset);
 	const scale = 1 / 50;
 	const ref = useRef<Sprite>(null);
 	useFrame(() => {
@@ -276,3 +249,35 @@ const ShipSprite = ({
 		</sprite>
 	);
 };
+
+export function useShipSprite(spriteAsset: string) {
+	const canvasDimensions = 2048;
+	const [canvas] = useState(() =>
+		Object.assign(document.createElement("canvas"), {
+			width: canvasDimensions,
+			height: canvasDimensions,
+		}),
+	);
+	const [spriteMap] = useState(() => new CanvasTexture(canvas));
+	useEffect(() => {
+		const ctx = canvas.getContext("2d");
+		const img = new Image();
+		img.src = spriteAsset;
+		img.onload = () => {
+			if (!ctx) return;
+			// Draw the canvas
+			ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+			const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+			const data = imageData.data;
+			// Convert to black and white
+			for (let i = 0; i < data.length; i += 4) {
+				data[i] = data[i + 1] = data[i + 2] = data[i + 3];
+				// data[i + 3] = 255;
+			}
+			ctx.putImageData(imageData, 0, 0);
+			spriteMap.needsUpdate = true;
+		};
+	}, [spriteAsset, canvas, spriteMap]);
+
+	return spriteMap;
+}

@@ -14,12 +14,12 @@ import LensFlare from "./lensFlare";
 import { fragment, vertex } from "./shaders";
 import getUniforms from "./uniforms";
 import ColorUtil from "chroma-js";
-import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useGetStarmapStore } from "../starmapStore";
 
 import texturePath from "./textures/01_Texture.jpg";
 import spritePath from "./textures/Star.svg";
+import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
 const distanceVector = new Vector3();
 
 const SPRITE_SCALE_FACTOR = 50;
@@ -151,7 +151,7 @@ const StarSpriteInner = ({
 	color1,
 	userData,
 }: { color1: Color | number; userData: any }) => {
-	const spriteMap = useTexture(spritePath) as Texture;
+	const spriteMap = useShipSprite(spritePath) as Texture;
 	return (
 		<sprite userData={userData}>
 			<spriteMaterial

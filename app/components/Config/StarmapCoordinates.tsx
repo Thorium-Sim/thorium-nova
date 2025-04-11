@@ -18,7 +18,6 @@ import StarmapCanvas from "../Starmap/StarmapCanvas";
 import { ClientOnly } from "remix-utils/client-only";
 import Nebula from "../Starmap/Nebula";
 import { useParams } from "react-router";
-import { useTexture } from "@react-three/drei";
 import FuzzTexture from "../../cards/Viewscreen/fuzz.png";
 import { Plane, Vector3 } from "three";
 import { q } from "@thorium/context/AppContext";
@@ -26,6 +25,7 @@ import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import SolarSystemWrapper from "@thorium/routes/config/starmap/system";
 import InterstellarWrapper from "@thorium/routes/config/starmap";
 import { StatusBar } from "@thorium/routes/config/starmap/layout";
+import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
 
 export function StarmapCoordinates({
 	value,
@@ -258,7 +258,7 @@ function StarmapCoordinatePicker({
 function PositionPoint({
 	position,
 }: { position: { x: number; y: number; z: number } }) {
-	const spriteMap = useTexture(FuzzTexture);
+	const spriteMap = useShipSprite(FuzzTexture);
 
 	return (
 		<sprite

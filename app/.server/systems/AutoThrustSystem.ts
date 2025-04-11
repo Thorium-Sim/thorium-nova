@@ -4,6 +4,7 @@ import { KM_TO_LY, lightYearToLightMinute } from "@thorium/utils/unitTypes";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { getAutopilotPositionAndRotation } from "@thorium/utils/starmap/autopilotGetCoordinates";
 import type { isWarpEngines } from "@thorium/ecs-components/shipSystems";
+import { lerp } from "three/src/math/MathUtils.js";
 
 const emptyVector = new Vector3(0, 0, 0);
 const scaleVector = new Vector3(1, 1, 1);
@@ -134,14 +135,22 @@ export class AutoThrustSystem extends System {
 			});
 
 			// Decrease the slow-down slope
-			const slowDownSlope = 2;
-			const desiredSpeed = Math.min(
+			const slowDownSlope = distanceInKM < 100 ? 2 : 1;
+			let desiredSpeed = Math.min(
 				impulseMaxSpeed,
 				Math.max(
 					0,
-					(correctDirectionCoefficient * distanceToNextInKM) / slowDownSlope,
+					(correctDirectionCoefficient * distanceInKM) / slowDownSlope,
 				),
 			);
+
+			// Smooth out the speed changes a little bit if we're increasing speed
+			const currentTargetSpeed =
+				impulseEntity.components.isImpulseEngines?.targetSpeed || 0;
+			desiredSpeed =
+				desiredSpeed > currentTargetSpeed
+					? lerp(currentTargetSpeed, desiredSpeed, 0.05)
+					: desiredSpeed;
 
 			// If we're within 5 seconds of the next point, then we can consider
 			// it safe to jump to the next point
