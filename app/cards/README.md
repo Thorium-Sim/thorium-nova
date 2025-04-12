@@ -80,7 +80,7 @@ export const subscriptions = {
 export const phasersInput = {
   phasersCharge(context: DataContext, params: {phaserId: number}) {
     const phaserEntity = context.flight.ecs.getEntityById(params.phaserId);
-    phaserEntity.components.phasers.charging = true;
+    phaserEntity.updateComponent("phasers", {charging: true});
     pubsub.publish("phasers", {
       shipId: phaserEntity.components.shipAssignment.shipId,
     });

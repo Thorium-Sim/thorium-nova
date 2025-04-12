@@ -180,35 +180,33 @@ export async function spawnShip(
 
 				systemEntities.push(phaser);
 
-				if (params.playerShip) {
-					const template = mergeDeep(
-						systemPlugin,
-						system.overrides || {},
-					) as PhasersPlugin;
+				const template = mergeDeep(
+					systemPlugin,
+					system.overrides || {},
+				) as PhasersPlugin;
 
-					const capacitor = spawnShipSystem(
-						shipId,
-						{ type: "battery" },
-						params.playerShip,
-						{},
-					);
-					capacitor.updateComponent("identity", {
-						name: `Phase Capacitor ${phaseCapacitorCount}`,
-					});
-					capacitor.addComponent("isPhaseCapacitor");
-					capacitor.updateComponent("isBattery", {
-						storage: 0,
-						capacity: template.fullChargeYield,
-						outputRate: phaser.components.power?.defaultPower || 1,
-						chargeRate: phaser.components.power?.requiredPower || 1,
-					});
-					systemEntities.push(capacitor);
-					phaser.updateComponent("power", {
-						powerSources: Array.from({
-							length: phaser.components.power?.defaultPower || 0,
-						}).map(() => capacitor.id),
-					});
-				}
+				const capacitor = spawnShipSystem(
+					shipId,
+					{ type: "battery" },
+					params.playerShip,
+					{},
+				);
+				capacitor.updateComponent("identity", {
+					name: `Phase Capacitor ${phaseCapacitorCount}`,
+				});
+				capacitor.addComponent("isPhaseCapacitor");
+				capacitor.updateComponent("isBattery", {
+					storage: 0,
+					capacity: template.fullChargeYield,
+					outputRate: phaser.components.power?.defaultPower || 1,
+					chargeRate: phaser.components.power?.requiredPower || 1,
+				});
+				systemEntities.push(capacitor);
+				phaser.updateComponent("power", {
+					powerSources: Array.from({
+						length: phaser.components.power?.defaultPower || 0,
+					}).map(() => capacitor.id),
+				});
 
 				break;
 			}
@@ -400,9 +398,9 @@ export async function spawnShip(
 				{
 					id: entity.id,
 					contents: entity.components.cargoContainer?.contents || {},
-					flags: ["cargo"],
+					flags: ["cargo", "torpedoStorage"],
 					volume: entity.components.cargoContainer?.volume || 500,
-					systems: [],
+					systems: ["torpedoLauncher"],
 				},
 			],
 			inventoryTemplates,

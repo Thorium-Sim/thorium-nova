@@ -72,6 +72,6 @@ export class HeatToCoolantSystem extends System {
 
 		const systemTemp =
 			(systemWatts * elapsedInSeconds) / (HEAT_CAPACITY * MASS * 1000);
-		entity.components.heat.heat = systemTemp;
+		entity.updateComponent("heat", { heat: systemTemp });
 	}
 }

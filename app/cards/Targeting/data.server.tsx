@@ -12,7 +12,7 @@ import {
 import { getInventoryTemplates } from "@thorium/utils/.server/getInventoryTemplates";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { spawnTorpedo } from "@thorium/.server/spawners/torpedo";
-import type { Entity } from "@thorium/utils/ecs";
+import type { ECS, Entity } from "@thorium/utils/ecs";
 import { getCurrentTarget } from "@thorium/.server/systems/PhasersSystem";
 import {
 	cancelLoopingSound,
@@ -68,33 +68,7 @@ export const targeting = t.router({
 				return true;
 			})
 			.request(({ ctx, input }) => {
-				const ship = ctx.ecs.getEntityById(input.shipId);
-				const templates = getInventoryTemplates(ctx.ecs);
-				const torpedoRooms = getRoomBySystem(ship, "torpedoLauncher");
-				const torpedoList: Record<
-					string,
-					{ count: number; yield: number; speed: number }
-				> = {};
-				for (const room of torpedoRooms) {
-					for (const item in room.contents) {
-						const template = templates[item];
-						if (
-							!template ||
-							!template.flags.torpedoCasing ||
-							!template.flags.torpedoWarhead
-						)
-							continue;
-						if (!torpedoList[item]) {
-							torpedoList[item] = {
-								count: 0,
-								yield: template.flags.torpedoWarhead.yield,
-								speed: template.flags.torpedoCasing.speed,
-							};
-						}
-						torpedoList[item].count += room.contents[item].count;
-					}
-				}
-				return torpedoList;
+				return getShipTorpedos(ctx.ecs, input.shipId);
 			}),
 		launchers: t.procedure
 			.input(z.object({ shipId: z.number() }))
@@ -173,7 +147,7 @@ export const targeting = t.router({
 				launcher.updateComponent("isTorpedoLauncher", {
 					status: torpedoEntity ? "loading" : "unloading",
 					progress: launcher.components.isTorpedoLauncher.loadTime,
-					...(torpedoEntity ? { torpedoEntity } : {}),
+					torpedoEntity,
 				});
 
 				const ship = ctx.ecs.getEntityById(
@@ -506,7 +480,10 @@ export const targeting = t.router({
 		}),
 });
 
-function adjustTorpedoInventory(torpedoId: string | null, launcher: Entity) {
+export function adjustTorpedoInventory(
+	torpedoId: string | null,
+	launcher: Entity,
+) {
 	let adjustment = -1;
 	const ecs = launcher.ecs!;
 	const ship = ecs.getEntityById(
@@ -555,4 +532,50 @@ function adjustTorpedoInventory(torpedoId: string | null, launcher: Entity) {
 	});
 
 	return torpedoEntity;
+}
+
+export function getShipTorpedos(ecs: ECS, shipId: number) {
+	const ship = ecs.getEntityById(shipId);
+	const templates = getInventoryTemplates(ecs);
+	const torpedoList: Record<
+		string,
+		{ count: number; yield: number; speed: number }
+	> = {};
+	function handleContents(
+		contents: Record<
+			string,
+			{
+				count: number;
+				temperature: number;
+			}
+		>,
+	) {
+		for (const item in contents) {
+			const template = templates[item];
+			if (
+				!template ||
+				!template.flags.torpedoCasing ||
+				!template.flags.torpedoWarhead
+			)
+				continue;
+			if (!torpedoList[item]) {
+				torpedoList[item] = {
+					count: 0,
+					yield: template.flags.torpedoWarhead.yield,
+					speed: template.flags.torpedoCasing.speed,
+				};
+			}
+			torpedoList[item].count += contents[item].count;
+		}
+	}
+	if (ship?.components.shipMap) {
+		const torpedoRooms = getRoomBySystem(ship, "torpedoLauncher");
+		for (const room of torpedoRooms) {
+			handleContents(room.contents);
+		}
+	} else if (ship?.components.cargoContainer) {
+		handleContents(ship.components.cargoContainer.contents);
+	}
+
+	return torpedoList;
 }

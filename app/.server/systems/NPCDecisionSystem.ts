@@ -1,8 +1,16 @@
+import {
+	adjustTorpedoInventory,
+	getShipTorpedos,
+} from "@thorium/cards/Targeting/data.server";
 import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
-import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import {
+	getShipSystem,
+	getShipSystems,
+} from "@thorium/utils/.server/ship/getShipSystem";
 import { type ECS, Entity, System } from "@thorium/utils/ecs";
 import type { scanTypes } from "@thorium/utils/flags/scanTypes";
 import type { threatScores } from "@thorium/utils/flags/shipObjectives";
+import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { randomPointInSphere } from "@thorium/utils/operations/randomPointInSphere";
 import { getTargetPoint } from "@thorium/utils/starmap/getTargetPoint";
 import { pathfinder } from "@thorium/utils/starmap/pathfinder.server";
@@ -80,6 +88,9 @@ export class NPCDecisionSystem extends System {
 				// When weapons are ready, move towards the target
 				const target = this.ecs.getEntityById(targetId);
 				setMoveTowardsPosition(target, 200);
+
+				// When weapons are not ready, move away from weapons range.
+
 				alertLevel = 1;
 			} else {
 				// TODO April 5, 2025: Figure out how to do formations
@@ -203,8 +214,43 @@ export class NPCDecisionSystem extends System {
 			}
 		}
 
+		const torpedoSystems = getSystemsOfType(
+			this.ecs,
+			entity.id,
+			"TorpedoLauncher",
+		);
 		if (alertLevel <= 2) {
 			// Charge the phasers, load the torpedoes
+			for (const sys of torpedoSystems) {
+				if (sys.components.isTorpedoLauncher?.status === "ready") {
+					const [torpedoId] = randomFromList(
+						Object.entries(getShipTorpedos(this.ecs, entity.id)).filter(
+							(e) => e[1].count > 0,
+						),
+					);
+					if (!torpedoId) continue;
+					const torpedoEntity = adjustTorpedoInventory(torpedoId, sys);
+					sys.updateComponent("isTorpedoLauncher", {
+						status: torpedoEntity ? "loading" : "unloading",
+						progress: sys.components.isTorpedoLauncher.loadTime,
+						...(torpedoEntity ? { torpedoEntity } : {}),
+					});
+				}
+			}
+
+			const phaserSystems = getSystemsOfType(this.ecs, entity.id, "Phasers");
+		} else {
+			// Unload torpedoes (can't discharge phasers)
+			for (const sys of torpedoSystems) {
+				if (sys.components.isTorpedoLauncher?.status === "loaded") {
+					const torpedoEntity = adjustTorpedoInventory(null, sys);
+					sys.updateComponent("isTorpedoLauncher", {
+						status: "unloading",
+						progress: sys.components.isTorpedoLauncher.loadTime,
+						torpedoEntity: null,
+					});
+				}
+			}
 		}
 	}
 }

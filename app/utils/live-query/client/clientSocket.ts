@@ -16,20 +16,16 @@ export class ClientSocket extends EventEmitter {
 		this.SI = new SnapshotInterpolation(fps);
 		socket.addEventListener("message", (event) => {
 			if (event.data instanceof Blob) {
-				const reader = new FileReader();
-				reader.addEventListener("loadend", () => {
-					if (reader.result instanceof ArrayBuffer) {
-						const data = decode(reader.result) as
-							| { type: string; data: any }
-							| Types.Snapshot;
-						if ("type" in data) {
-							this.emit(data.type, data.data);
-						} else {
-							this.SI.snapshot.add(data);
-						}
+				event.data.arrayBuffer().then((result) => {
+					const data = decode(result) as
+						| { type: string; data: any }
+						| Types.Snapshot;
+					if ("type" in data) {
+						this.emit(data.type, data.data);
+					} else {
+						this.SI.snapshot.add(data);
 					}
 				});
-				reader.readAsArrayBuffer(event.data);
 			} else if (typeof event.data === "string") {
 				try {
 					const data = JSON.parse(event.data);

@@ -46,7 +46,8 @@ class ECS {
 	 */
 	getEntityById(id: number) {
 		if (typeof id !== "number") return null;
-		if (!this.entityIndex.get(id)) {
+		const e = this.entityIndex.get(id);
+		if (!e) {
 			// biome-ignore lint/suspicious/noAssignInExpressions:
 			for (let i = 0, entity: Entity; (entity = this.entities[i]); i += 1) {
 				if (entity.id === id) {
@@ -55,7 +56,7 @@ class ECS {
 				}
 			}
 		}
-		return this.entityIndex.get(id) || null;
+		return e || null;
 	}
 	/**
 	 * Add an entity to the ecs.

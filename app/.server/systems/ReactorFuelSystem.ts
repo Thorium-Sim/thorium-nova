@@ -66,10 +66,15 @@ export class ReactorFuelSystem extends System {
 			entity.components.isReactor.unusedFuel.amount =
 				Math.abs(energyNeeded - energyProvided) /
 				entity.components.isReactor.unusedFuel.density;
-			entity.components.isReactor.currentOutput = powerNeeded;
+			entity.updateComponent("isReactor", { currentOutput: powerNeeded });
 			return;
 		}
-		entity.components.isReactor.unusedFuel.amount = 0;
+		entity.updateComponent("isReactor", {
+			unusedFuel: {
+				density: entity.components.isReactor.unusedFuel.density,
+				amount: 0,
+			},
+		});
 
 		const fuel =
 			getReactorInventory(entity)?.filter((item) => item.flags.fuel) || [];
@@ -108,7 +113,7 @@ export class ReactorFuelSystem extends System {
 				entity.components.isReactor.unusedFuel.amount =
 					Math.abs(energyNeeded - energyProvided) /
 					entity.components.isReactor.unusedFuel.density;
-				entity.components.isReactor.currentOutput = powerNeeded;
+				entity.updateComponent("isReactor", { currentOutput: powerNeeded });
 				return;
 			}
 		}
@@ -116,6 +121,6 @@ export class ReactorFuelSystem extends System {
 		const powerProvided: MegaWatt =
 			energyProvided / elapsedTimeHours / outputBonus;
 
-		entity.components.isReactor.currentOutput = powerProvided;
+		entity.updateComponent("isReactor", { currentOutput: powerProvided });
 	}
 }

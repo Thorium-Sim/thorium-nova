@@ -67,7 +67,9 @@ export const bunDataStoreProps: DataStoreOperations = {
 			}
 			await fs.mkdir(path.dirname(filePath), { recursive: true });
 			this.initialData = undefined;
-			const data = dump(this.toJSON(), { skipInvalid: true });
+			const jsonData = this.toJSON();
+			jsonData.dataLoaded = undefined;
+			const data = dump(jsonData, { skipInvalid: true });
 			await fs.writeFile(filePath, data, { mode: 0o0600 });
 		} catch (e: any) {
 			e.message = `db-fs: Error writing file:\n${e.message}`;

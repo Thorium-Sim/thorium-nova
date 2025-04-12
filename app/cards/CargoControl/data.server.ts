@@ -628,6 +628,7 @@ export function getCargoContents(
 
 function getCargoRooms(ship: Entity | null) {
 	if (!ship) return [];
+
 	const inventoryTemplates = getInventoryTemplates(ship.ecs);
 
 	if (!cargoRoomsCache.get(ship)) {
@@ -657,12 +658,20 @@ function getCargoRooms(ship: Entity | null) {
 }
 
 export function getRoomByFlag(ship: Entity, flag: NodeFlag) {
+	if (!ship.components.shipMap && ship.components.cargoContainer) {
+		return [ship.components.cargoContainer];
+	}
+
 	const rooms = getCargoRooms(ship);
 
 	return rooms.filter((room) => room.flags?.includes(flag));
 }
 
 export function getRoomBySystem(ship: Entity | null, system: string) {
+	if (!ship?.components.shipMap && ship?.components.cargoContainer) {
+		return [ship.components.cargoContainer];
+	}
+
 	const rooms = getCargoRooms(ship);
 
 	return rooms.filter((room) => room.systems?.includes(system));
@@ -673,6 +682,10 @@ function getRoomFromFlagsAndSystems(
 	flags?: NodeFlag[],
 	systems?: string[],
 ) {
+	if (!ship.components.shipMap && ship.components.cargoContainer) {
+		return ship.components.cargoContainer;
+	}
+
 	const rooms = getCargoRooms(ship).filter((room) => {
 		if (flags) {
 			for (const flag of flags) {
