@@ -123,8 +123,9 @@ export class DragDrop {
 	}
 
 	resizeGlass() {
-		const glassRect = Rect.fromElement(this._rootElement!);
-		glassRect.positionElement(this._glass!, "fixed");
+		// Not implemented
+		// const glassRect = Rect.fromElement(this._rootElement!);
+		// glassRect.positionElement(this._glass!, "fixed");
 	}
 
 	hideGlass() {

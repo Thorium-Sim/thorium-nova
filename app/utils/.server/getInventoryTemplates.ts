@@ -3,11 +3,14 @@ import type { ECS } from "@thorium/utils/ecs";
 import type { DataContext } from "@thorium/.server/DataContext";
 
 export function getInventoryTemplates(ecs?: ECS | null) {
-	const inventorySystem = ecs?.systems.find(
-		(sys) => sys.constructor.name === "FilterInventorySystem",
-	);
-	if (inventorySystem instanceof FilterInventorySystem)
-		return inventorySystem.getInventoryTemplates();
+	for (const system of ecs?.systems || []) {
+		if (
+			system.constructor.name === "FilterInventorySystem" &&
+			system instanceof FilterInventorySystem
+		) {
+			return system.getInventoryTemplates();
+		}
+	}
 
 	return {};
 }

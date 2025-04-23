@@ -14,6 +14,7 @@ describe("PowerDistributionSystem", () => {
 		ecs.addSystem(new PowerDistributionSystem());
 		ship = new Entity();
 		ship.addComponent("isShip");
+		ship.addComponent("isPlayerShip");
 		ship.addComponent("shipSystems");
 		ecs.addEntity(ship);
 	});
@@ -250,7 +251,7 @@ describe("PowerDistributionSystem", () => {
 			}).map(() => battery.id),
 		});
 		ecs.update(16);
-		expect(battery.components.isBattery?.storage).toBeLessThan(2);
+		expect(battery.components.isBattery?.storage).toEqual(1.9999733333333334);
 		expect(battery.components.isBattery?.outputAmount).toEqual(6);
 		expect(system.components.power?.currentPower).toEqual(6);
 		for (let i = 0; i < 60 * 60 * 21; i++) {

@@ -103,8 +103,10 @@ describe("ReactorFuelSystem", () => {
 
 		ecs.addEntity(ship2);
 
-		expect(filterShipsWithReactorSystem.entities).toHaveLength(1);
-		expect(filterShipsWithReactorSystem.entities[0]).toEqual(ship);
+		expect(filterShipsWithReactorSystem.entities.size).toEqual(1);
+		expect(filterShipsWithReactorSystem.entities.values().next().value).toEqual(
+			ship,
+		);
 	});
 	it("should detect the correct amount of items related to a system", () => {
 		const fuelList = getReactorInventory(reactor);

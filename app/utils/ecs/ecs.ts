@@ -19,11 +19,11 @@ class ECS {
 	/**
 	 * Store entities which need to be tested at beginning of next tick.
 	 */
-	entitiesSystemsDirty: Entity[] = [];
+	entitiesSystemsDirty = new Set<Entity>();
 	/**
 	 * Store all systems of the ECS.
 	 */
-	systems: System[] = [];
+	systems = new Set<System>();
 	/**
 	 * Count how many updates have been done.
 	 */
@@ -116,18 +116,14 @@ class ECS {
 	 * Remove an entity from dirty entities by reference.
 	 */
 	removeEntityIfDirty(entity: Entity) {
-		const index = this.entitiesSystemsDirty.indexOf(entity);
-
-		if (index !== -1) {
-			fastSplice(this.entities, index, 1);
-		}
+		this.entitiesSystemsDirty.delete(entity);
 	}
 	/**
 	 * Add a system to the ecs.
 	 */
 	addSystem(system: System) {
 		system.ecs = this;
-		this.systems.push(system);
+		this.systems.add(system);
 		system.attach();
 
 		// iterate over all entities to eventually add system
@@ -142,34 +138,24 @@ class ECS {
 	 * Remove a system from the ecs.
 	 */
 	removeSystem(system: System) {
-		const index = this.systems.indexOf(system);
-
-		if (index !== -1) {
-			fastSplice(this.systems, index, 1);
-			system.dispose();
-		}
+		this.systems.delete(system);
+		system.dispose();
 	}
 	/**
 	 * "Clean" entities flagged as dirty by removing unnecessary systems and
 	 * adding missing systems.
 	 */
 	cleanDirtyEntities() {
-		for (
-			let i = 0, entity: Entity;
-			// biome-ignore lint/suspicious/noAssignInExpressions:
-			(entity = this.entitiesSystemsDirty[i]);
-			i += 1
-		) {
-			// biome-ignore lint/suspicious/noAssignInExpressions:
-			for (let s = 0, system: System; (system = this.systems[s]); s += 1) {
+		for (const entity of this.entitiesSystemsDirty) {
+			for (const system of this.systems) {
 				// for each dirty entity for each system
-				const index = entity.systems.indexOf(system);
+				const entityHasSystem = entity.systems.has(system);
 				const entityTest = system.test(entity);
 
-				if (index === -1 && entityTest) {
+				if (!entityHasSystem && entityTest) {
 					// if the entity is not added to the system yet and should be, add it
 					system.addEntity(entity);
-				} else if (index !== -1 && !entityTest) {
+				} else if (entityHasSystem && !entityTest) {
 					// if the entity is added to the system but should not be, remove it
 					system.removeEntity(entity);
 				}
@@ -179,7 +165,7 @@ class ECS {
 			entity.systemsDirty = false;
 		}
 
-		this.entitiesSystemsDirty = [];
+		this.entitiesSystemsDirty.clear();
 	}
 	/**
 	 * Update the ecs.
@@ -189,23 +175,37 @@ class ECS {
 	update(testElapsed?: number) {
 		const now = performance.now();
 		const elapsed = testElapsed ?? now - this.lastUpdate;
-		if (this.entitiesSystemsDirty.length) {
+		if (this.entitiesSystemsDirty.size > 0) {
 			this.cleanDirtyEntities();
 		}
-		// biome-ignore lint/suspicious/noAssignInExpressions:
-		for (let i = 0, system: System; (system = this.systems[i]); i += 1) {
+		for (const system of this.systems) {
 			if (this.updateCounter % system.frequency > 0) {
 				continue;
 			}
-			if (this.entitiesSystemsDirty.length) {
+			if (this.entitiesSystemsDirty.size > 0) {
 				// if the last system flagged some entities as dirty check that case
 				this.cleanDirtyEntities();
 			}
+			if (!this.map.has(system.constructor.name)) {
+				this.map.set(system.constructor.name, []);
+			}
+			// const now = Bun.nanoseconds();
 			system.updateAll(elapsed);
+			// this.map.get(system.constructor.name)?.push(Bun.nanoseconds() - now);
 		}
+		// for (const [name, values] of this.map.entries()) {
+		// 	console.log(
+		// 		name,
+		// 		values.reduce((prev, next) => {
+		// 			prev += next / values.length;
+		// 			return prev;
+		// 		}, 0),
+		// 	);
+		// }
 		this.updateCounter += 1;
 		this.lastUpdate = now;
 	}
+	map = new Map<string, number[]>();
 }
 
 export default ECS;

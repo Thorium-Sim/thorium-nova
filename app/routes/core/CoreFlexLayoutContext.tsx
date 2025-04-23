@@ -35,7 +35,7 @@ export const defaultJson: IJsonModel = {
 	global: {
 		splitterSize: 1,
 		splitterExtra: 4,
-		tabEnableFloat: true,
+		tabEnablePopout: true,
 		tabSetEnableClose: true,
 		tabSetMinWidth: 100,
 		tabSetMinHeight: 100,

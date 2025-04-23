@@ -293,9 +293,12 @@ export const starmapCore = t.router({
 			const autopilotSystem = ctx.flight?.ecs.systems.find(
 				(system) => system.constructor.name === "AutoThrustSystem",
 			);
-			const ships = autopilotSystem?.entities.filter(
-				(entity) => entity.components.position?.parentId === input.systemId,
-			);
+			const ships: Entity[] = [];
+			for (const [id, entity] of autopilotSystem?.entities || []) {
+				if (entity?.components.position?.parentId === input.systemId) {
+					ships.push(entity);
+				}
+			}
 
 			type AutopilotInfo = {
 				forwardAutopilot: boolean;

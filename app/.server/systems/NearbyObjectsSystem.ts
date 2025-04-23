@@ -24,8 +24,8 @@ export class NearbyObjectsSystem extends System {
 		const systemId = getObjectSystem(entity)?.id || null;
 
 		// We'll clear our work every update.
-		for (const object of this.entities) {
-			if (object.id === entity.id) continue;
+		for (const [id, object] of this.entities) {
+			if (id === entity.id) continue;
 			const objectSystemId = getObjectSystem(object)?.id || null;
 			if (objectSystemId !== systemId) continue;
 

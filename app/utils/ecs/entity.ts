@@ -5,7 +5,6 @@
 import type ECS from "./ecs";
 import type System from "./system";
 import { UIDGenerator, DefaultUIDGenerator } from "./uid";
-import { fastSplice } from "./utils";
 import {
 	type ComponentProperties as Components,
 	type ComponentIds,
@@ -35,7 +34,7 @@ class Entity {
 	 */
 	id: number;
 	ecs: null | ECS;
-	systems: System[];
+	systems = new Set<System>();
 	systemsDirty: boolean;
 	components: Partial<Components>;
 	constructor(
@@ -67,7 +66,7 @@ class Entity {
 		 *
 		 * @property {Array[System]} systems
 		 */
-		this.systems = [];
+		this.systems = new Set();
 		/**
 		 * Indicate a change in components (a component was removed or added)
 		 * which require to re-compute entity eligibility to all systems.
@@ -168,7 +167,7 @@ class Entity {
 			this.systemsDirty = true;
 
 			// notify to parent ECS that this entity needs to be tested next tick
-			this.ecs.entitiesSystemsDirty.push(this);
+			this.ecs.entitiesSystemsDirty.add(this);
 		}
 	}
 	/**
@@ -178,7 +177,7 @@ class Entity {
 	 * @param {System} system The system to add.
 	 */
 	addSystem(system: System) {
-		this.systems.push(system);
+		this.systems.add(system);
 	}
 	/**
 	 * Remove a system from the entity.
@@ -187,11 +186,7 @@ class Entity {
 	 * @param  {System} system The system reference to remove.
 	 */
 	removeSystem(system: System) {
-		const index = this.systems.indexOf(system);
-
-		if (index !== -1) {
-			fastSplice(this.systems, index, 1);
-		}
+		this.systems.delete(system);
 	}
 	/**
 	 * Add a component to the entity. WARNING this method does not copy
@@ -278,9 +273,9 @@ class Entity {
 	 * @private
 	 */
 	dispose() {
-		while (this.systems.length > 0) {
-			this.systems[0].removeEntity(this);
-			fastSplice(this.systems, 0, 1);
+		for (const system of this.systems) {
+			system.removeEntity(this);
+			this.systems.delete(system);
 		}
 
 		for (const component in this.components) {

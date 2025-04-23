@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 
 function getFakeEntity() {
 	return {
+		id: Math.random(),
 		addSystem: vi.fn(),
 		removeSystem: vi.fn(),
 	} as unknown as Entity;
@@ -28,7 +29,7 @@ describe("System", () => {
 		it("should add an entity to the system", () => {
 			system.addEntity(entity);
 
-			expect(system.entities.length).toEqual(1);
+			expect(system.entities.size).toEqual(1);
 		});
 
 		it("should add the system to entity systems", () => {
@@ -59,7 +60,7 @@ describe("System", () => {
 		it("should remove an entity from the system", () => {
 			system.removeEntity(entity);
 
-			expect(system.entities.length).toEqual(0);
+			expect(system.entities.size).toEqual(0);
 		});
 
 		it("should remove the system from entity systems", () => {

@@ -57,10 +57,12 @@ export const cargoControl = t.router({
 			(sys) => sys.constructor.name === "FilterInventorySystem",
 		);
 		return Object.fromEntries(
-			inventorySystem?.entities.map((entity) => [
-				entity.components.identity?.name,
-				{ ...entity.components.identity, ...entity.components.isInventory },
-			]) || [],
+			inventorySystem?.entities
+				.entries()
+				.map(([id, entity]) => [
+					entity.components.identity?.name,
+					{ ...entity.components.identity, ...entity.components.isInventory },
+				]) || [],
 		);
 	}),
 	rooms: t.procedure

@@ -323,8 +323,8 @@ function getSystemsOfType(
 	return systemEntities;
 }
 
-const CONCURRENT_SCANS = 3;
-const SCAN_TIMEOUT = 1000 * 60; // 60 seconds before a ship's attribute can be scanned again
+const CONCURRENT_SCANS = 1;
+const SCAN_TIMEOUT = 1000 * 300; // 300 seconds before a ship's attribute can be scanned again
 function npcScan(entity: Entity) {
 	const sensors = getShipSystem(entity.ecs!, {
 		systemType: "sensors",
@@ -399,6 +399,7 @@ function determineScan(
 
 	for (const [objectId, distance] of objects) {
 		if (distance > activeRange) continue;
+		if (scanCount >= CONCURRENT_SCANS) break;
 		const results = scanResults?.get(objectId);
 		for (const t of scanList) {
 			const type = t as keyof NonNullable<typeof results>;

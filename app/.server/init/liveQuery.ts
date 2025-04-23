@@ -1,4 +1,3 @@
-import type { Entity } from "@thorium/utils/ecs";
 import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
 import type { inferAsyncReturnType } from "@thorium/utils/live-query/.server/index";
 import type { AnyRouter } from "@thorium/utils/live-query/.server/router";
@@ -56,23 +55,39 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 		const context = getDataContext(this.id);
 
 		if (!context?.flight || !this.connected) return;
-		const entities = context.flight.ecs.entities
-			.filter((entity: Entity) => {
-				for (const streamData of this.dataStreams.values()) {
-					if (!this.router._def.procedures[streamData.path]?._def.dataStream)
-						return false;
-					const cardStream =
-						this.router._def.procedures[streamData.path]?._def.resolver;
-					const includeEntity = cardStream?.({
-						entity,
-						ctx: context,
-						input: streamData.params,
-					});
-					if (includeEntity) return true;
-				}
-				return false;
-			})
-			.map(dataStreamEntity);
+		/**
+		 * All we care about are
+		 * - The client's ship itself
+		 * - Nearby ships
+		 * - The ship's own systems
+		 * - The ship's scans
+		 */
+		const entities = [];
+		const ship = context.getPlayerShip(this.id);
+		if (!ship) return;
+		entities.push(dataStreamEntity(ship));
+
+		for (const nearbyShipId of ship.components.nearbyObjects?.objects.keys() ||
+			[]) {
+			const entity = context.ecs.getEntityById(nearbyShipId);
+			if (entity) entities.push(dataStreamEntity(entity));
+		}
+
+		for (const systemId of ship?.components.shipSystems?.shipSystems.keys() ||
+			[]) {
+			const entity = context.ecs.getEntityById(systemId);
+			if (entity) entities.push(dataStreamEntity(entity));
+		}
+
+		for (const scanEntity of context.ecs.componentCache.get("scan") || []) {
+			if (
+				scanEntity.components.scan?.parentId === ship.id &&
+				scanEntity.components.scan.progress < 1
+			) {
+				entities.push(dataStreamEntity(scanEntity));
+			}
+		}
+
 		const snapshot = this.SI.snapshot.create(entities);
 		this.send(snapshot);
 	}

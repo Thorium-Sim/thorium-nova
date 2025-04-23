@@ -10,7 +10,7 @@ describe("ECS", () => {
 		const ecs = new ECS(server);
 
 		expect(Array.isArray(ecs.entities)).toBeTruthy();
-		expect(Array.isArray(ecs.systems)).toBeTruthy();
+		expect(ecs.systems).toBeInstanceOf(Set);
 	});
 
 	describe("getEntityById()", () => {

@@ -1,8 +1,6 @@
 import type ECS from "./ecs";
 import type Entity from "./entity";
 
-import { fastSplice } from "./utils";
-
 /**
  * @description  A system update all eligible entities at a given frequency.
  * This class is not meant to be used directly and should be sub-classed to
@@ -19,7 +17,17 @@ class System {
 	/**
 	 * Entities of the system.
 	 */
-	entities: Entity[] = [];
+	entities = new Map<number, Entity>();
+	/**
+	 * The amount of time per frame in milliseconds which this system
+	 * is allowed to run. Any entities it doesn't process will
+	 * be processed the following frame.
+	 */
+	budgetMs: number | null = null;
+
+	/**
+	 * Entities that were deferred for a future frame
+	 */
 	constructor(frequency = 1) {
 		this.frequency = frequency;
 	}
@@ -28,10 +36,11 @@ class System {
 	 */
 	addEntity(entity: Entity) {
 		entity.addSystem(this);
-		this.entities.push(entity);
+		this.entities.set(entity.id, entity);
 
 		this.enter(entity);
 	}
+
 	/**
 	 * Remove an entity from the system entities. exit() handler is executed
 	 * only if the entity actually exists in the system entities.
@@ -39,10 +48,9 @@ class System {
 	 * @param  {Entity} entity Reference of the entity to remove.
 	 */
 	removeEntity(entity: Entity) {
-		const index = this.entities.findIndex((e) => e.id === entity.id);
-		if (index !== -1) {
+		if (this.entities.has(entity.id)) {
 			entity.removeSystem(this);
-			fastSplice(this.entities, index, 1);
+			this.entities.delete(entity.id);
 
 			this.exit(entity);
 		}
@@ -53,8 +61,7 @@ class System {
 	updateAll(elapsed = 1) {
 		this.preUpdate(elapsed);
 
-		// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-		for (let i = 0, entity: Entity; (entity = this.entities[i]); i += 1) {
+		for (const [id, entity] of this.entities) {
 			this.update(entity, elapsed);
 		}
 
@@ -64,8 +71,7 @@ class System {
 	 * dispose the system by exiting all the entities
 	 */
 	dispose() {
-		// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-		for (let i = 0, entity: Entity; (entity = this.entities[i]); i += 1) {
+		for (const [id, entity] of this.entities) {
 			entity.removeSystem(this);
 			this.exit(entity);
 		}

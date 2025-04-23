@@ -4,24 +4,30 @@ import { getInventoryTemplates } from "../getInventoryTemplates";
 
 /**
  * Get the inventory currently located in the room associated with this reactor
- * @param system - An ECS entity
+ * @param reactor - An ECS entity
  * @returns
  */
-export function getReactorInventory(system: Entity) {
-	const shipFilterSystem = system.ecs?.systems.find(
-		(system) => system.constructor.name === "FilterShipsWithReactors",
-	);
-	const systemShip = shipFilterSystem?.entities.find((ship) =>
-		ship.components.shipSystems?.shipSystems.has(system.id),
-	);
+export function getReactorInventory(reactor: Entity) {
+	let systemShip: Entity | null = null;
+	for (const system of reactor.ecs?.systems || []) {
+		if (system.constructor.name === "FilterShipsWithReactors") {
+			for (const [id, ship] of system.entities || []) {
+				if (ship.components.shipSystems?.shipSystems.has(reactor.id)) {
+					systemShip = ship;
+					break;
+				}
+			}
+		}
+	}
+
 	if (!systemShip) return null;
 
 	const entityRoomId = systemShip.components.shipSystems?.shipSystems.get(
-		system.id,
+		reactor.id,
 	)?.roomId;
 	const entityRoom = getDeckNode(entityRoomId, systemShip);
 
-	const inventoryTemplates = getInventoryTemplates(system.ecs);
+	const inventoryTemplates = getInventoryTemplates(reactor.ecs);
 	const roomInventory = Object.entries(entityRoom?.contents || {}).map(
 		([key, { count, temperature }]) => {
 			const inventoryItem = inventoryTemplates[key];

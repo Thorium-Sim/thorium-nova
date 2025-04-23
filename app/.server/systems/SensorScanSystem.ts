@@ -35,9 +35,26 @@ export class SensorScanSystem extends System {
 		const elapsedTimeSeconds = elapsedMs / 1000;
 		const scan = entity.components.scan;
 		if (!scan) return;
+
+		const allSensors = this.ecs.componentCache.get("isSensors");
+		let sensors: Entity | null = null;
+		for (const sensorEntity of allSensors || []) {
+			if (sensorEntity.components.isShipSystem?.shipId === scan.parentId) {
+				sensors = sensorEntity;
+				break;
+			}
+		}
+		const sensorSystem = sensors?.components.isSensors;
+		const shipId = sensors?.components.isShipSystem?.shipId;
+
 		if (scan.progress >= 1) {
 			// Handle repeat scans
 			if (scan.repeatInterval === null) {
+				const ship = this.ecs.getEntityById(shipId || -1);
+				if (!ship?.components.isPlayerShip) {
+					// Remove scan entities from NPC ships
+					this.ecs.removeEntity(entity);
+				}
 				return;
 			}
 			const intervalTime = scan.intervalTime + elapsedTimeSeconds;
@@ -63,16 +80,6 @@ export class SensorScanSystem extends System {
 		)
 			return;
 
-		const allSensors = this.ecs.componentCache.get("isSensors");
-		let sensors: Entity | null = null;
-		for (const sensorEntity of allSensors || []) {
-			if (sensorEntity.components.isShipSystem?.shipId === scan.parentId) {
-				sensors = sensorEntity;
-				break;
-			}
-		}
-		const sensorSystem = sensors?.components.isSensors;
-		const shipId = sensors?.components.isShipSystem?.shipId;
 		if (!sensors || !sensorSystem || !shipId) return;
 		const scanCount = this.sensorsScanCount.get(shipId);
 		if (!scanCount) return;
@@ -90,6 +97,7 @@ export class SensorScanSystem extends System {
 		);
 		if (distance > sensorSystem.passiveRange) return;
 		// Increase the scan progress
+		// This part needs optimization
 		const {
 			activeRange,
 			passiveRange,
@@ -142,8 +150,10 @@ export class SensorScanSystem extends System {
 			scan.progress + energyProvided / (totalRequiredEnergy || Number.EPSILON),
 		);
 		entity.updateComponent("scan", { progress });
+		// End Optimization Part
 
 		if (scan.progress >= 1) {
+			console.time("Finish scan");
 			// The scan is complete! Let's put some data in the database
 			entity.updateComponent("scan", { timestamp: Date.now() });
 
@@ -160,6 +170,13 @@ export class SensorScanSystem extends System {
 			sensorSystem.resultsDatabase.set(object.id, currentResults);
 			pubsub.publish.sensors.scanResult({ shipId, objectId: object.id });
 			pubsub.publish.sensors.scans({ shipId });
+
+			const ship = this.ecs.getEntityById(shipId);
+			if (!ship?.components.isPlayerShip) {
+				// Remove scan entities from NPC ships
+				this.ecs.removeEntity(entity);
+			}
+			console.timeEnd("Finish scan");
 		}
 	}
 }
