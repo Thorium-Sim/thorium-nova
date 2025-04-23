@@ -163,20 +163,11 @@ class ECS {
 				// if the last system flagged some entities as dirty check that case
 				this.cleanDirtyEntities();
 			}
-			if (!this.map.has(system.constructor.name)) {
-				this.map.set(system.constructor.name, []);
-			}
-			const now = Bun.nanoseconds();
 			system.updateAll(elapsed);
-			this.map.get(system.constructor.name)?.push(Bun.nanoseconds() - now);
-		}
-		for (const [name, values] of this.map.entries()) {
-			console.log(name, Math.max(...values));
 		}
 		this.updateCounter += 1;
 		this.lastUpdate = now;
 	}
-	map = new Map<string, number[]>();
 }
 
 export default ECS;
