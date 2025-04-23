@@ -100,12 +100,10 @@ class MockFlightDataModel {
 		this.run();
 	}
 	get playerShips() {
-		return this.ecs.entities.filter(
-			(f) => f.components.isShip && f.components.isPlayerShip,
-		);
+		return [...(this.ecs.componentCache.get("isPlayerShip") || [])];
 	}
 	get ships() {
-		return this.ecs.entities.filter((f) => f.components.isShip);
+		return [...(this.ecs.componentCache.get("isShip") || [])];
 	}
 	get availableShips() {
 		const allShips = this.pluginIds.reduce((prev: ShipPlugin[], next) => {

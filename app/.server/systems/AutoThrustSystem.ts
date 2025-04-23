@@ -5,6 +5,7 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import { getAutopilotPositionAndRotation } from "@thorium/utils/starmap/autopilotGetCoordinates";
 import type { isWarpEngines } from "@thorium/ecs-components/shipSystems";
 import { lerp } from "three/src/math/MathUtils.js";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 
 const emptyVector = new Vector3(0, 0, 0);
 const scaleVector = new Vector3(1, 1, 1);
@@ -27,31 +28,18 @@ export class AutoThrustSystem extends System {
 		const { position, rotation, autopilot } = entity.components;
 		if (!position || !rotation || !autopilot?.forwardAutopilot) return;
 
-		const [impulseEntity, warpEntity, thrustersEntity] =
-			this.ecs.entities.reduce(
-				(acc: [Entity | null, Entity | null, Entity | null], sysEntity) => {
-					if (
-						!acc[0] &&
-						sysEntity.components.isImpulseEngines &&
-						entity.components.shipSystems?.shipSystems.has(sysEntity.id)
-					)
-						return [sysEntity, acc[1], acc[2]];
-					if (
-						!acc[1] &&
-						sysEntity.components.isWarpEngines &&
-						entity.components.shipSystems?.shipSystems.has(sysEntity.id)
-					)
-						return [acc[0], sysEntity, acc[2]];
-					if (
-						!acc[2] &&
-						sysEntity.components.isThrusters &&
-						entity.components.shipSystems?.shipSystems.has(sysEntity.id)
-					)
-						return [acc[0], acc[1], sysEntity];
-					return acc;
-				},
-				[null, null, null],
-			);
+		const impulseEntity = getShipSystem(this.ecs, {
+			systemType: "impulseEngines",
+			shipId: entity.id,
+		});
+		const warpEntity = getShipSystem(this.ecs, {
+			systemType: "warpEngines",
+			shipId: entity.id,
+		});
+		const thrustersEntity = getShipSystem(this.ecs, {
+			systemType: "thrusters",
+			shipId: entity.id,
+		});
 
 		const warpEngines = warpEntity?.components.isWarpEngines;
 		const impulseEngines = impulseEntity?.components.isImpulseEngines;

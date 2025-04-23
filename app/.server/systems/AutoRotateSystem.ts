@@ -1,6 +1,7 @@
 import { Quaternion, Vector3, Matrix4 } from "three";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { autopilotGetCoordinates } from "@thorium/utils/starmap/autopilotGetCoordinates";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 
 const rotationQuat = new Quaternion();
 const desiredRotationQuat = new Quaternion();
@@ -32,11 +33,11 @@ export class AutoRotateSystem extends System {
 
 	update(entity: Entity, elapsed: number) {
 		const { position, rotation, autopilot } = entity.components;
-		const thrusters = this.ecs.entities.find(
-			(sysEntity) =>
-				sysEntity.components.isThrusters &&
-				entity.components.shipSystems?.shipSystems.has(sysEntity.id),
-		);
+
+		const thrusters = getShipSystem(this.ecs, {
+			systemType: "thrusters",
+			shipId: entity.id,
+		});
 		if (!thrusters?.components?.isThrusters) return;
 
 		if (

@@ -19,8 +19,8 @@ export class ImpulseSystem extends System {
 		);
 	}
 	update(entity: Entity) {
-		const ship = this.ecs.entities.find((e) =>
-			e.components.shipSystems?.shipSystems.has(entity.id),
+		const ship = this.ecs.getEntityById(
+			entity.components.isShipSystem?.shipId || -1,
 		);
 		if (!ship || !ship.components.isShip || !entity.components.isImpulseEngines)
 			return;

@@ -81,8 +81,8 @@ export const client = t.router({
 				pubsub.publish.ship.get({ clientId: flightClient.id });
 				return flightClient;
 			}
-			const ship = ctx.flight?.ships.find((ship) => ship.id === input.shipId);
-			if (!ship) {
+			const ship = ctx.ecs.getEntityById(input.shipId);
+			if (!ship?.components.isShip) {
 				throw new Error("No ship with that ID exists.");
 			}
 			const station = staticStations

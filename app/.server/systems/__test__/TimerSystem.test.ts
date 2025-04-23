@@ -30,16 +30,16 @@ describe("TimerSystem", () => {
 		ecs.addSystem(timerSystem);
 		ecs.addEntity(entity);
 		ecs.update();
-		expect(ecs.entities.length).toEqual(1);
+		expect(ecs.entities.size).toEqual(1);
 		ecs.update(1000);
 		expect(entity.components.timer?.time).toEqual("00:00:00");
-		expect(ecs.entities.length).toEqual(0);
+		expect(ecs.entities.size).toEqual(0);
 
 		entity.updateComponent("timer", { time: "00:00:-10" });
 		ecs.addEntity(entity);
 		ecs.update();
-		expect(ecs.entities.length).toEqual(1);
+		expect(ecs.entities.size).toEqual(1);
 		ecs.update(1000);
-		expect(ecs.entities.length).toEqual(0);
+		expect(ecs.entities.size).toEqual(0);
 	});
 });

@@ -16,10 +16,13 @@ describe("WarpSystem", () => {
 		ecs.addSystem(warpSystem);
 	});
 	it("should properly update an entity with the warp engines component", async () => {
+		const ship = new Entity();
 		const entity = new Entity();
 		entity.addComponent("isWarpEngines");
-		entity.addComponent("isShipSystem");
-		const ship = new Entity();
+		entity.addComponent("isShipSystem", {
+			shipId: ship.id,
+			type: "warpEngines",
+		});
 		ship.addComponent("isShip");
 		ship.addComponent("mass", { mass: 2000 });
 		ship.addComponent("position", { type: "solar" });

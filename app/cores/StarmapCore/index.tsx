@@ -817,25 +817,23 @@ export function InterstellarWrapper() {
 			{isViewscreen
 				? null
 				: starmapSystems.map((sys) =>
-						sys.components.position && sys.components.identity ? (
+						sys.position && sys.identity ? (
 							<SystemMarker
 								key={sys.id}
 								systemId={sys.id}
 								position={
-									[
-										sys.components.position.x,
-										sys.components.position.y,
-										sys.components.position.z,
-									] as [number, number, number]
+									[sys.position.x, sys.position.y, sys.position.z] as [
+										number,
+										number,
+										number,
+									]
 								}
-								name={sys.components.identity.name}
+								name={sys.identity.name}
 								onClick={() => {
 									useStarmapStore.setState({ selectedObjectIds: [sys.id] });
 
-									if (sys.components.position) {
-										useStarmapStore
-											.getState()
-											.setCameraFocus(sys.components.position);
+									if (sys.position) {
+										useStarmapStore.getState().setCameraFocus(sys.position);
 									}
 								}}
 								onDoubleClick={() =>

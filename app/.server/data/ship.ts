@@ -163,10 +163,10 @@ export const ship = t.router({
 			// Set the position of the ship
 			let position = { x: 0, y: 0, z: 0 };
 			let systemId: number | null = null;
-			let object: Entity | undefined = undefined;
+			let object: Entity | null = null;
 			if ("entityId" in input) {
 				// This ship is being attached to a specific object in space.
-				object = ctx.flight?.ecs.entities.find((e) => e.id === input.entityId);
+				object = ctx.ecs.getEntityById(input.entityId || -1);
 				if (!object) throw new Error("No object found.");
 				position = getNearbyEntityPoint(object);
 				const sys = getObjectSystem(object);

@@ -106,49 +106,47 @@ export const navigation = t.router({
 		.request(({ ctx, input }) => {
 			const { query } = input;
 
+			const matchedEntities = [
+				...(ctx.ecs.componentCache.get("isStar") || []),
+				...(ctx.ecs.componentCache.get("isPlanet") || []),
+				...(ctx.ecs.componentCache.get("isSolarSystem") || []),
+			];
 			// Get all of the planet, star, and solar system entities that match the query.
 			const matchItems = matchSorter(
-				ctx.flight?.ecs.entities
-					.filter(
-						(e) =>
-							e.components.isStar ||
-							e.components.isPlanet ||
-							e.components.isSolarSystem,
-					)
-					.map((m) => {
-						let position = m.components.position;
-						if (!position) {
-							const { x, y, z } = getCompletePositionFromOrbit(m);
-							const parentId = getObjectSystem(m)?.id || null;
-							position = {
-								x,
-								y,
-								z,
-								type: m.components.isSolarSystem ? "interstellar" : "solar",
-								parentId: m.components.isSolarSystem ? null : parentId,
-							};
-						}
-						return {
-							...m,
-							type: m.components.isSolarSystem
-								? "solar"
-								: m.components.isPlanet
-									? "planet"
-									: m.components.isShip
-										? "ship"
-										: "star",
-							name: m.components.identity!.name,
-							description: m.components.identity?.description,
-							temperature: m.components.temperature?.temperature,
-							spectralType: m.components.isStar?.spectralType,
-							classification: m.components.isPlanet?.classification,
-							mass:
-								m.components.isStar?.solarMass ||
-								m.components.isPlanet?.terranMass,
-							population: m.components.population?.count,
-							position,
-						} as const;
-					}) || [],
+				matchedEntities.map((m) => {
+					let position = m.components.position;
+					if (!position) {
+						const { x, y, z } = getCompletePositionFromOrbit(m);
+						const parentId = getObjectSystem(m)?.id || null;
+						position = {
+							x,
+							y,
+							z,
+							type: m.components.isSolarSystem ? "interstellar" : "solar",
+							parentId: m.components.isSolarSystem ? null : parentId,
+						};
+					}
+					return {
+						...m,
+						type: m.components.isSolarSystem
+							? "solar"
+							: m.components.isPlanet
+								? "planet"
+								: m.components.isShip
+									? "ship"
+									: "star",
+						name: m.components.identity!.name,
+						description: m.components.identity?.description,
+						temperature: m.components.temperature?.temperature,
+						spectralType: m.components.isStar?.spectralType,
+						classification: m.components.isPlanet?.classification,
+						mass:
+							m.components.isStar?.solarMass ||
+							m.components.isPlanet?.terranMass,
+						population: m.components.population?.count,
+						position,
+					} as const;
+				}) || [],
 				query,
 				{
 					keys: [
@@ -191,33 +189,30 @@ export const waypoints = t.router({
 			return true;
 		})
 		.request(({ ctx, input: { shipId, systemId } }) => {
-			const waypoints = ctx.flight?.ecs.entities.reduce(
-				(prev: Waypoint[], next) => {
-					if (
-						next.components.isWaypoint?.assignedShipId === shipId &&
-						(systemId === "all" ||
-							next.components.position?.parentId === systemId)
-					) {
-						if (next.components.position) {
-							const systemPosition =
-								ctx.flight?.ecs.getEntityById(
-									next.components.position.parentId || -1,
-								)?.components.position || null;
-							prev.push({
-								id: next.id,
-								name: next.components.identity?.name || "",
-								objectId: next.components.isWaypoint?.attachedObjectId,
-								position: next.components.position,
-								systemPosition,
-							});
-						}
+			const waypoints: Waypoint[] = [];
+			for (const waypoint of ctx.ecs.componentCache.get("isWaypoint") || []) {
+				if (
+					waypoint.components.isWaypoint?.assignedShipId === shipId &&
+					(systemId === "all" ||
+						waypoint.components.position?.parentId === systemId)
+				) {
+					if (waypoint.components.position) {
+						const systemPosition =
+							ctx.flight?.ecs.getEntityById(
+								waypoint.components.position.parentId || -1,
+							)?.components.position || null;
+						waypoints.push({
+							id: waypoint.id,
+							name: waypoint.components.identity?.name || "",
+							objectId: waypoint.components.isWaypoint?.attachedObjectId,
+							position: waypoint.components.position,
+							systemPosition,
+						});
 					}
-					return prev;
-				},
-				[],
-			);
+				}
+			}
 
-			return waypoints || [];
+			return waypoints;
 		}),
 	spawn: t.procedure
 		.meta({
@@ -265,10 +260,10 @@ export const waypoints = t.router({
 			const shipId = ship.id;
 			let position = { x: 0, y: 0, z: 0 };
 			let systemId: number | null = null;
-			let object: Entity | undefined = undefined;
+			let object: Entity | null = null;
 			if ("entityId" in input) {
 				// This waypoint is being attached to a specific object in space.
-				object = ctx.flight?.ecs.entities.find((e) => e.id === input.entityId);
+				object = ctx.ecs.getEntityById(input.entityId || -1);
 				if (!object) throw new Error("No object found.");
 
 				const targetParentId = ship.components.position
@@ -287,30 +282,31 @@ export const waypoints = t.router({
 				const sys = getObjectSystem(object);
 				systemId = sys?.id ?? null;
 				if (sys?.id === object.id) systemId = null;
-				const maybeWaypoint = ctx.flight.ecs.entities.find(
-					(e) =>
-						e.components.isWaypoint?.assignedShipId === shipId &&
-						e.components.isWaypoint?.attachedObjectId === object?.id,
-				);
-				if (maybeWaypoint) {
-					maybeWaypoint.updateComponent("position", {
-						...position,
-						type: systemId ? "solar" : "interstellar",
-						parentId: systemId,
-					});
-					if (input.tags && input.tags.length > 0) {
-						maybeWaypoint.updateComponent("tags", {
-							tags: [
-								...(maybeWaypoint.components.tags?.tags || []),
-								...input.tags,
-							],
+				for (const maybeWaypoint of ctx.ecs.componentCache.get("isWaypoint") ||
+					[]) {
+					if (
+						maybeWaypoint.components.isWaypoint?.assignedShipId === shipId &&
+						maybeWaypoint.components.isWaypoint?.attachedObjectId === object?.id
+					) {
+						maybeWaypoint.updateComponent("position", {
+							...position,
+							type: systemId ? "solar" : "interstellar",
+							parentId: systemId,
 						});
+						if (input.tags && input.tags.length > 0) {
+							maybeWaypoint.updateComponent("tags", {
+								tags: [
+									...(maybeWaypoint.components.tags?.tags || []),
+									...input.tags,
+								],
+							});
+						}
+						pubsub.publish.waypoints.all({
+							shipId,
+						});
+						// TODO July 30, 2022: It might be necessary to publish to make this appear on the Pilot or Viewscreen.
+						return maybeWaypoint;
 					}
-					pubsub.publish.waypoints.all({
-						shipId,
-					});
-					// TODO July 30, 2022: It might be necessary to publish to make this appear on the Pilot or Viewscreen.
-					return maybeWaypoint;
 				}
 			} else if ("position" in input && input.position) {
 				// This waypoint is just being plopped at some random point in space.
@@ -347,17 +343,15 @@ export const waypoints = t.router({
 				});
 			} else {
 				// Count up the highest waypoint count and use that.
-				const waypointNum =
-					1 +
-					(ctx.flight.ecs.entities || []).reduce((prev, next) => {
-						if (next.components.isWaypoint?.assignedShipId === shipId) {
-							const nameWords = next.components.identity?.name.split(" ") || [];
-							const num = Number.parseInt(nameWords[nameWords.length - 1], 10);
-							if (!num || num < prev) return prev;
-							return num;
-						}
-						return prev;
-					}, 0);
+				let waypointNum = 1;
+				for (const waypoint of ctx.ecs.componentCache.get("isWaypoint") || []) {
+					if (waypoint.components.isWaypoint?.assignedShipId === shipId) {
+						const nameWords =
+							waypoint.components.identity?.name.split(" ") || [];
+						const num = Number.parseInt(nameWords[nameWords.length - 1], 10);
+						if (num && num >= waypointNum) waypointNum = num + 1;
+					}
+				}
 				newWaypoint.addComponent("identity", {
 					name: `Waypoint ${waypointNum}`,
 				});

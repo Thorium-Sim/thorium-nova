@@ -53,17 +53,21 @@ function getGraph(entity: Entity) {
 
 export const cargoControl = t.router({
 	inventoryTypes: t.procedure.request(({ ctx }) => {
-		const inventorySystem = ctx.ecs.systems.find(
-			(sys) => sys.constructor.name === "FilterInventorySystem",
-		);
-		return Object.fromEntries(
-			inventorySystem?.entities
-				.entries()
-				.map(([id, entity]) => [
-					entity.components.identity?.name,
-					{ ...entity.components.identity, ...entity.components.isInventory },
-				]) || [],
-		);
+		for (const system of ctx.ecs.systems) {
+			if (system.constructor.name === "FilterInventorySystem") {
+				return Object.fromEntries(
+					system?.entities.entries().map(([id, entity]) => [
+						entity.components.identity?.name,
+						{
+							...entity.components.identity,
+							...entity.components.isInventory,
+						},
+					]) || [],
+				);
+			}
+		}
+
+		return {};
 	}),
 	rooms: t.procedure
 		.input(z.object({ shipId: z.number() }))
@@ -90,9 +94,11 @@ export const cargoControl = t.router({
 		})
 		.request(({ ctx, input }) => {
 			const inventoryTemplates = getInventoryTemplates(ctx.ecs);
-
+			const matchEntities = [
+				...(ctx.ecs.componentCache.get("cargoContainer") || []),
+			];
 			return (
-				ctx.ecs.entities
+				matchEntities
 					.filter(
 						(entity) =>
 							entity.components.position?.parentId === input.shipId &&
@@ -214,48 +220,47 @@ export const cargoControl = t.router({
 			if (typeof input.containerId === "number") {
 				container = ctx.flight?.ecs.getEntityById(input.containerId);
 			} else {
+				const matchEntities = [
+					...(ctx.ecs.componentCache.get("cargoContainer") || []),
+				];
 				// Find the closest container.
-				container = ctx.flight?.ecs.entities.reduce(
-					(acc: Entity | null, entity) => {
-						if (
-							!entity.components.cargoContainer ||
-							!entity.components.position ||
-							entity.components.position.parentId !== input.shipId
-						)
-							return acc;
-						if (!acc) return entity;
-
-						// If the entity is busy, skip it
-						if (entity.components.passengerMovement?.nodePath.length)
-							return acc;
-
-						// Prioritize entities that are close to the target deck, but not busy.
-						if (
-							Math.abs(
-								room.deckIndex -
-									(acc.components.position?.z ?? Number.POSITIVE_INFINITY),
-							) < Math.abs(room.deckIndex - entity.components.position.z)
-						) {
-							// If the acc entity is not busy, use it.
-							return acc;
-						}
-						let accDistance = Number.POSITIVE_INFINITY;
-						if (acc?.components.position) {
-							const { x, y } = acc.components.position;
-							accDistance = Math.hypot(room.x - x, room.y - y);
-						}
-						let entityDistance = Number.POSITIVE_INFINITY;
-						if (entity.components.position) {
-							const { x, y } = entity.components.position;
-							entityDistance = Math.hypot(room.x - x, room.y - y);
-						}
-						if (entityDistance < accDistance) {
-							return entity;
-						}
+				container = matchEntities.reduce((acc: Entity | null, entity) => {
+					if (
+						!entity.components.cargoContainer ||
+						!entity.components.position ||
+						entity.components.position.parentId !== input.shipId
+					)
 						return acc;
-					},
-					null,
-				);
+					if (!acc) return entity;
+
+					// If the entity is busy, skip it
+					if (entity.components.passengerMovement?.nodePath.length) return acc;
+
+					// Prioritize entities that are close to the target deck, but not busy.
+					if (
+						Math.abs(
+							room.deckIndex -
+								(acc.components.position?.z ?? Number.POSITIVE_INFINITY),
+						) < Math.abs(room.deckIndex - entity.components.position.z)
+					) {
+						// If the acc entity is not busy, use it.
+						return acc;
+					}
+					let accDistance = Number.POSITIVE_INFINITY;
+					if (acc?.components.position) {
+						const { x, y } = acc.components.position;
+						accDistance = Math.hypot(room.x - x, room.y - y);
+					}
+					let entityDistance = Number.POSITIVE_INFINITY;
+					if (entity.components.position) {
+						const { x, y } = entity.components.position;
+						entityDistance = Math.hypot(room.x - x, room.y - y);
+					}
+					if (entityDistance < accDistance) {
+						return entity;
+					}
+					return acc;
+				}, null);
 			}
 
 			if (!container?.components.position)

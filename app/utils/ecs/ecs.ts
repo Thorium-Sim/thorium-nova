@@ -15,7 +15,7 @@ class ECS {
 	/**
 	 * Store all entities of the ECS.
 	 */
-	entities: Entity[] = [];
+	entities = new Map<number, Entity>();
 	/**
 	 * Store entities which need to be tested at beginning of next tick.
 	 */
@@ -31,7 +31,6 @@ class ECS {
 	lastUpdate = performance.now();
 	rng: RNG;
 	maxEntityId = 1;
-	entityIndex: Map<number, Entity> = new Map();
 	componentCache: Map<ComponentIds, Set<Entity>> = new Map();
 	colliderCache: Map<string, ColliderDesc> = new Map();
 	constructor(
@@ -45,24 +44,13 @@ class ECS {
 	 * Retrieve an entity by id
 	 */
 	getEntityById(id: number) {
-		if (typeof id !== "number") return null;
-		const e = this.entityIndex.get(id);
-		if (!e) {
-			// biome-ignore lint/suspicious/noAssignInExpressions:
-			for (let i = 0, entity: Entity; (entity = this.entities[i]); i += 1) {
-				if (entity.id === id) {
-					this.entityIndex.set(id, entity);
-					return entity;
-				}
-			}
-		}
-		return e || null;
+		return this.entities.get(id) || null;
 	}
 	/**
 	 * Add an entity to the ecs.
 	 */
 	addEntity(entity: Entity) {
-		this.entities.push(entity);
+		this.entities.set(entity.id, entity);
 		entity.addToECS(this);
 		this.maxEntityId = Math.max(this.maxEntityId, entity.id);
 	}
@@ -70,16 +58,12 @@ class ECS {
 	 * Remove an entity from the ecs by reference.
 	 */
 	removeEntity(entity: Entity) {
-		const index = this.entities.findIndex((e) => e.id === entity.id);
-		let entityRemoved = null;
+		const hasEntity = this.entities.has(entity.id);
 		// if the entity is not found do nothing
-		if (index !== -1) {
-			entityRemoved = this.entities[index];
-
+		if (hasEntity) {
 			entity.dispose();
-			this.removeEntityIfDirty(entityRemoved);
-
-			fastSplice(this.entities, index, 1);
+			this.removeEntityIfDirty(entity);
+			this.entities.delete(entity.id);
 		}
 
 		Object.keys(entity.components).forEach((componentName) => {
@@ -93,22 +77,16 @@ class ECS {
 				}
 			});
 		});
-		return entityRemoved;
+		return entity;
 	}
 	/**
 	 * Remove an entity from the ecs by entity id.
 	 */
 	removeEntityById(entityId: number) {
-		// biome-ignore lint/suspicious/noAssignInExpressions:
-		for (let i = 0, entity: Entity; (entity = this.entities[i]); i += 1) {
-			if (entity.id === entityId) {
-				entity.dispose();
-				this.removeEntity(entity);
-
-				fastSplice(this.entities, i, 1);
-
-				return entity;
-			}
+		const entity = this.entities.get(entityId);
+		if (entity) {
+			this.removeEntity(entity);
+			return entity;
 		}
 		return null;
 	}
@@ -127,8 +105,7 @@ class ECS {
 		system.attach();
 
 		// iterate over all entities to eventually add system
-		// biome-ignore lint/suspicious/noAssignInExpressions:
-		for (let i = 0, entity: Entity; (entity = this.entities[i]); i += 1) {
+		for (const [, entity] of this.entities) {
 			if (system.test(entity)) {
 				system.addEntity(entity);
 			}
@@ -189,19 +166,13 @@ class ECS {
 			if (!this.map.has(system.constructor.name)) {
 				this.map.set(system.constructor.name, []);
 			}
-			// const now = Bun.nanoseconds();
+			const now = Bun.nanoseconds();
 			system.updateAll(elapsed);
-			// this.map.get(system.constructor.name)?.push(Bun.nanoseconds() - now);
+			this.map.get(system.constructor.name)?.push(Bun.nanoseconds() - now);
 		}
-		// for (const [name, values] of this.map.entries()) {
-		// 	console.log(
-		// 		name,
-		// 		values.reduce((prev, next) => {
-		// 			prev += next / values.length;
-		// 			return prev;
-		// 		}, 0),
-		// 	);
-		// }
+		for (const [name, values] of this.map.entries()) {
+			console.log(name, Math.max(...values));
+		}
 		this.updateCounter += 1;
 		this.lastUpdate = now;
 	}

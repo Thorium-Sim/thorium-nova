@@ -12,7 +12,7 @@ export const remoteAccess = t.router({
 		})
 		.request(({ ctx, input: { shipId } }) => {
 			const codes = (
-				ctx.flight?.ecs.entities.filter(
+				[...(ctx.ecs.componentCache.get("remoteAccessCode") || [])].filter(
 					(e) => e.components.remoteAccessCode?.shipId === shipId,
 				) || []
 			).map((code) => ({

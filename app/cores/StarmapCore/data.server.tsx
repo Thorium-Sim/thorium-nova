@@ -24,14 +24,14 @@ type IsDestroyed = Zod.infer<typeof isDestroyed>;
 export const starmapCore = t.router({
 	systems: t.procedure.request(({ ctx }) => {
 		if (!ctx.flight) return [];
-		const data = ctx.flight.ecs.entities.reduce(
-			(prev: Pick<Entity, "components" | "id">[], { components, id }) => {
-				if (components.isSolarSystem) prev.push({ components, id });
-				return prev;
-			},
-			[],
+
+		return [...(ctx.ecs.componentCache.get("isSolarSystem") || [])].map(
+			(e) => ({
+				id: e.id,
+				position: e.components.position,
+				identity: e.components.identity,
+			}),
 		);
-		return data;
 	}),
 	system: t.procedure
 		.input(z.object({ systemId: z.number().nullish() }))
@@ -50,7 +50,11 @@ export const starmapCore = t.router({
 		.request(({ ctx, input }) => {
 			if (!ctx.flight) return [];
 			if (input?.systemId === null || input?.systemId === undefined) return [];
-			const data = ctx.flight.ecs.entities.reduce(
+			const checkEntities = [
+				...(ctx.ecs.componentCache.get("position") || []),
+				...(ctx.ecs.componentCache.get("satellite") || []),
+			];
+			const data = checkEntities.reduce(
 				(prev: Pick<Entity, "components" | "id">[], { components, id }) => {
 					if (components.isShip || components.isTorpedo) return prev;
 					if (
@@ -290,13 +294,14 @@ export const starmapCore = t.router({
 			return true;
 		})
 		.request(({ ctx, input }) => {
-			const autopilotSystem = ctx.flight?.ecs.systems.find(
-				(system) => system.constructor.name === "AutoThrustSystem",
-			);
 			const ships: Entity[] = [];
-			for (const [id, entity] of autopilotSystem?.entities || []) {
-				if (entity?.components.position?.parentId === input.systemId) {
-					ships.push(entity);
+			for (const system of ctx.ecs.systems) {
+				if (system.constructor.name === "AutoThrustSystem") {
+					for (const [id, entity] of system.entities) {
+						if (entity?.components.position?.parentId === input.systemId) {
+							ships.push(entity);
+						}
+					}
 				}
 			}
 
@@ -443,10 +448,10 @@ export const starmapCore = t.router({
 
 			let position = { x: 0, y: 0, z: 0 };
 			let systemId: number | null = null;
-			let object: Entity | undefined = undefined;
+			let object: Entity | null = null;
 			if ("entityId" in input) {
 				// This ship is being sent close to an object
-				object = ctx.flight?.ecs.entities.find((e) => e.id === input.entityId);
+				object = ctx.ecs.getEntityById(input.entityId || -1);
 				if (!object) throw new Error("No object found.");
 				const targetParentId = ship.components.position
 					? ship.components.position.parentId

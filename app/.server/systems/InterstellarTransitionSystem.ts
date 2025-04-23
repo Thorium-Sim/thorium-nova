@@ -57,8 +57,8 @@ export class InterstellarTransitionSystem extends System {
 	update(entity: Entity, elapsed: number) {
 		// const warpSystem = this.ecs.systems.find(sys =>sys.constructor.name === "WarpSystem")
 		if (!entity.components.position) return;
-		const system = this.ecs.entities.find(
-			(s) => s.id === entity.components.position?.parentId,
+		const system = this.ecs.getEntityById(
+			entity.components.position?.parentId || -1,
 		);
 		const autopilot = entity.components.autopilot;
 
@@ -67,8 +67,12 @@ export class InterstellarTransitionSystem extends System {
 			// If the entity's destination is inside the current solar system, don't leave it
 			if (system.id === autopilot?.desiredSolarSystemId) return;
 			// Check if the ship is on the outskirts of the solar system
+			const entitiesWithPosition = [
+				...(this.ecs.componentCache.get("position") || []),
+				...(this.ecs.componentCache.get("satellite") || []),
+			];
 			const maxDistance =
-				getMaxDistance(this.ecs.entities, system.id) * SYSTEM_PADDING;
+				getMaxDistance(entitiesWithPosition, system.id) * SYSTEM_PADDING;
 			const entityDistance = Math.hypot(
 				entity.components.position.x,
 				entity.components.position.y,
@@ -128,11 +132,11 @@ export class InterstellarTransitionSystem extends System {
 		} else {
 			// Transition from interstellar space to within a solar system
 			// Check if the ship has locked course on to a solar system, and is within range
-			const destinationWaypoint = this.ecs.entities.find(
-				(e) => e.id === autopilot?.destinationWaypointId,
+			const destinationWaypoint = this.ecs.getEntityById(
+				autopilot?.destinationWaypointId || -1,
 			);
-			const destinationSystem = this.ecs.entities.find(
-				(e) => e.id === autopilot?.desiredSolarSystemId,
+			const destinationSystem = this.ecs.getEntityById(
+				autopilot?.desiredSolarSystemId || -1,
 			);
 			if (
 				!destinationSystem?.components.position ||
@@ -146,9 +150,14 @@ export class InterstellarTransitionSystem extends System {
 			);
 			// 1/100th of a lightyear
 			if (lightMinuteToLightYear(distance) < 0.01) {
+				const entitiesWithPosition = [
+					...(this.ecs.componentCache.get("position") || []),
+					...(this.ecs.componentCache.get("satellite") || []),
+				];
+
 				// create a vector of the ship from the center of the system, and position it outside the heliopause
 				const maxDistance = getMaxDistance(
-					this.ecs.entities,
+					entitiesWithPosition,
 					destinationSystem.id,
 				);
 				shipPosition.set(

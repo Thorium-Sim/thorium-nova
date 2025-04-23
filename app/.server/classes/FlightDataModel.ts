@@ -137,7 +137,7 @@ export class FlightDataModel extends DataStore {
 	 * All ships in the universe.
 	 */
 	get ships() {
-		return this.ecs.entities.filter((f) => f.components.isShip);
+		return [...(this.ecs.componentCache.get("isShip") || [])];
 	}
 	/**
 	 * Ships that are available for spawning in the universe, based on the flight's plugins.
@@ -153,13 +153,17 @@ export class FlightDataModel extends DataStore {
 		return allShips;
 	}
 	toJSON() {
+		const entities = [];
+		for (const [, entity] of this.ecs.entities) {
+			entities.push(entity.toJSON());
+		}
 		// Get all of the entities in the world and serialize them into objects
 		const data = {
 			name: this.name,
 			paused: this.paused,
 			date: this.date,
 			pluginIds: this.pluginIds,
-			entities: this.ecs.entities.map((e) => e.toJSON()),
+			entities,
 			maxEntityId: this.ecs.maxEntityId,
 			clients: Object.fromEntries(
 				Object.entries(this.clients).map(([id, client]) => [id, client]),

@@ -35,8 +35,8 @@ export function getObjectOffsetPosition(
 	} else if (objectSystem && !position.parentId) {
 		// The ship is in interstellar space, but the waypoint is in a system.
 		// Get the angle between the ship's position  and  the system's position.
-		const system = object.ecs?.entities.find(
-			(e) => e.id === object.components.position?.parentId,
+		const system = object.ecs?.getEntityById(
+			object.components.position?.parentId || -1,
 		);
 		if (!system) {
 			// This is an unlikely case, so we'll just do nothing. It won't be the end of the world.
@@ -55,7 +55,7 @@ export function getObjectOffsetPosition(
 	} else if (!objectSystem && position.parentId) {
 		// The object is in interstellar space while the ship is in a system; use the angle from the ship's system
 		// to the object.
-		const system = object.ecs?.entities.find((e) => e.id === position.parentId);
+		const system = object.ecs?.getEntityById(position.parentId);
 		if (!system) {
 			// This is an unlikely case, so we'll just do nothing. It won't be the end of the world.
 		} else {
@@ -99,8 +99,8 @@ export function getCompletePositionFromOrbit(object: Entity) {
 	const origin = new Vector3(0, 0, 0);
 	if (object.components.satellite) {
 		if (object.components.satellite.parentId) {
-			const parent = object.ecs?.entities.find(
-				(e) => e.id === object.components.satellite?.parentId,
+			const parent = object.ecs?.getEntityById(
+				object.components.satellite?.parentId,
 			);
 			if (parent?.components?.satellite) {
 				const parentPosition = getOrbitPosition(parent.components.satellite);
@@ -120,13 +120,13 @@ export function getCompletePositionFromOrbit(object: Entity) {
 export function getObjectSystem(obj: Entity): Entity | null {
 	const objSystemId = obj.components.position?.parentId;
 	if (objSystemId) {
-		const parentObject = obj.ecs?.entities.find((e) => e.id === objSystemId);
+		const parentObject = obj.ecs?.getEntityById(objSystemId);
 		if (parentObject) return parentObject;
 	}
 
 	if (obj.components.isSolarSystem) return obj;
 	const parentObjId = obj.components?.satellite?.parentId;
-	const parent = obj.ecs?.entities.find((e) => e.id === parentObjId);
+	const parent = obj.ecs?.getEntityById(parentObjId || -1);
 	if (!parent) return null;
 	return getObjectSystem(parent);
 }

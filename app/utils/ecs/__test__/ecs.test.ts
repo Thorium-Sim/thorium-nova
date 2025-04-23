@@ -9,7 +9,7 @@ describe("ECS", () => {
 	it("should initialize", () => {
 		const ecs = new ECS(server);
 
-		expect(Array.isArray(ecs.entities)).toBeTruthy();
+		expect(ecs.entities).toBeInstanceOf(Map);
 		expect(ecs.systems).toBeInstanceOf(Set);
 	});
 

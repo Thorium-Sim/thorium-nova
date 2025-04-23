@@ -233,11 +233,10 @@ export const pilot = t.router({
 				});
 
 				// Clear out the current thruster adjustments
-				const thrusters = ctx.flight?.ecs.entities.find(
-					(e) =>
-						e.components.isThrusters &&
-						ship?.components.shipSystems?.shipSystems.has(e.id),
-				);
+				const thrusters = getShipSystem(ctx.ecs, {
+					systemType: "thrusters",
+					shipId: ship?.id || -1,
+				});
 				thrusters?.updateComponent("isThrusters", {
 					rotationDelta: { x: 0, y: 0, z: 0 },
 				});
