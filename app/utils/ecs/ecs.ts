@@ -33,6 +33,8 @@ class ECS {
 	maxEntityId = 1;
 	componentCache: Map<ComponentIds, Set<Entity>> = new Map();
 	colliderCache: Map<string, ColliderDesc> = new Map();
+	shipSystemCache = new Map<string, Entity>();
+
 	constructor(
 		public server: ServerDataModel,
 		seed: string | number = "thorium",
