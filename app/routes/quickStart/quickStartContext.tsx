@@ -12,7 +12,7 @@ import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerat
 
 export interface FlightConfigState {
 	crewCount: number;
-	flightDirector: boolean;
+	hasFlightDirector: boolean;
 	flightName: string;
 	shipId?: { pluginId: string; shipId: string };
 	shipName?: string;
@@ -23,7 +23,7 @@ export interface FlightConfigState {
 export type FlightConfigAction =
 	| { type: "increaseCrewCount"; availableCrewSizes: number[] }
 	| { type: "decreaseCrewCount"; availableCrewSizes: number[] }
-	| { type: "hasFlightDirector"; flightDirector: boolean }
+	| { type: "hasFlightDirector"; hasFlightDirector: boolean }
 	| { type: "flightName"; name: string }
 	| { type: "shipId"; shipId: { pluginId: string; shipId: string } | undefined }
 	| { type: "shipName"; name: string }
@@ -44,9 +44,10 @@ function quickStartReducer(
 		case "increaseCrewCount": {
 			const currentIndex = action.availableCrewSizes.indexOf(state.crewCount);
 			if (currentIndex < action.availableCrewSizes.length - 1) {
+				const crewCount = action.availableCrewSizes[currentIndex + 1];
 				return {
 					...state,
-					crewCount: action.availableCrewSizes[currentIndex + 1],
+					crewCount,
 				};
 			}
 			return state;
@@ -54,15 +55,16 @@ function quickStartReducer(
 		case "decreaseCrewCount": {
 			const currentIndex = action.availableCrewSizes.indexOf(state.crewCount);
 			if (currentIndex > 0) {
+				const crewCount = action.availableCrewSizes[currentIndex - 1];
 				return {
 					...state,
-					crewCount: action.availableCrewSizes[currentIndex - 1],
+					crewCount,
 				};
 			}
 			return state;
 		}
 		case "hasFlightDirector":
-			return { ...state, flightDirector: action.flightDirector };
+			return { ...state, hasFlightDirector: action.hasFlightDirector };
 		case "shipId":
 			return { ...state, shipId: action.shipId };
 		case "shipName":
@@ -93,7 +95,7 @@ export function FlightQuickStartProvider({
 		{
 			flightName: randomNameGenerator(),
 			crewCount: 1,
-			flightDirector: false,
+			hasFlightDirector: false,
 			shipName: "Voyager",
 			shipId: { pluginId: "Thorium Default", shipId: "Astra Frigate" },
 			missionId: { pluginId: "Thorium Default", missionId: "Sandbox" },

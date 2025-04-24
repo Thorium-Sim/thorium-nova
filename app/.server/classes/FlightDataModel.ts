@@ -15,6 +15,7 @@ export class FlightDataModel extends DataStore {
 	name!: string;
 	date!: number;
 	paused!: boolean;
+	hasFlightDirector!: boolean;
 	ecs!: ECS;
 	clients!: Record<string, FlightClient>;
 	pluginIds!: string[];
@@ -44,6 +45,8 @@ export class FlightDataModel extends DataStore {
 		this.#getDataPromise = this.getData<FlightDataModel>().then((data) => {
 			this.name ??= flightName;
 			this.paused ??= data.paused ?? true;
+			this.hasFlightDirector ??=
+				data.hasFlightDirector ?? params.hasFlightDirector ?? true;
 			this.date ??= Number(data.date ? new Date(data.date) : new Date());
 			this.pluginIds ??= data.pluginIds || [];
 			this.entities ??= data.entities || [];
@@ -162,6 +165,7 @@ export class FlightDataModel extends DataStore {
 			name: this.name,
 			paused: this.paused,
 			date: this.date,
+			hasFlightDirector: this.hasFlightDirector,
 			pluginIds: this.pluginIds,
 			entities,
 			maxEntityId: this.ecs.maxEntityId,

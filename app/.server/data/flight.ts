@@ -97,8 +97,8 @@ export const flight = t.router({
 	active: t.procedure.request(({ ctx }) => {
 		const flight = ctx.flight;
 		if (!flight) return null;
-		const { date, name, paused } = flight;
-		return { date, name, paused };
+		const { date, name, paused, hasFlightDirector } = flight;
+		return { date, name, paused, hasFlightDirector };
 	}),
 	all: t.procedure.request(() => {
 		return DataStore.operations.getStore()!.getFlights();
@@ -108,6 +108,7 @@ export const flight = t.router({
 			z.object({
 				flightName: z.string(),
 				ships: flightStartShips,
+				hasFlightDirector: z.boolean(),
 				missionId: z
 					.object({ pluginId: z.string(), missionId: z.string() })
 					.optional(),
@@ -124,7 +125,13 @@ export const flight = t.router({
 		.send(
 			async ({
 				ctx,
-				input: { flightName, ships, missionId, startingPoint },
+				input: {
+					flightName,
+					hasFlightDirector,
+					ships,
+					missionId,
+					startingPoint,
+				},
 			}) => {
 				inputAuth(ctx);
 				if (ctx.flight) return ctx.flight;
@@ -139,6 +146,7 @@ export const flight = t.router({
 						initialLoad: true,
 						entities: [],
 						serverDataModel: ctx.server,
+						hasFlightDirector,
 					},
 					{ meta: { filePath: `/flights/${flightName}.flight` } },
 				);

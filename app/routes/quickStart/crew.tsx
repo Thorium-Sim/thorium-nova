@@ -58,11 +58,11 @@ const CrewConfig = () => {
 			<div className="space-y-2 mt-4">
 				<Checkbox
 					label="Use Flight Director controls"
-					checked={state.flightDirector}
+					checked={state.hasFlightDirector}
 					onChange={(e) =>
 						dispatch({
 							type: "hasFlightDirector",
-							flightDirector: e.target.checked,
+							hasFlightDirector: e.target.checked,
 						})
 					}
 				/>

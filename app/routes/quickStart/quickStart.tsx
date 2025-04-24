@@ -72,9 +72,10 @@ export default function FlightQuickStart() {
 								shipId: shipTemplate,
 								flightName,
 								missionId,
-								flightDirector,
+								hasFlightDirector,
 								startingPointId: startingPoint,
 							} = state;
+
 							if (!shipTemplate) {
 								toast({
 									title: "Ship is required",
@@ -96,6 +97,7 @@ export default function FlightQuickStart() {
 										shipTemplate,
 									},
 								],
+								hasFlightDirector,
 								missionId,
 								startingPoint,
 							});

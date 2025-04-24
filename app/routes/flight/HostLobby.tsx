@@ -73,11 +73,6 @@ function FlightButtons() {
 				>
 					Reset
 				</Button>
-				{process.env.NODE_ENV !== "production" && (
-					<NavLink className="btn btn-xs btn-info btn-outline" to="/cards">
-						Cards
-					</NavLink>
-				)}
 			</>
 		) : null,
 	});
@@ -89,6 +84,7 @@ function ClientAssignment() {
 	const [client] = q.client.get.useNetRequest({ clientId });
 	const [playerShips] = q.ship.players.useNetRequest();
 	const [selectedClient, setSelectedClient] = useState(client.id);
+	const [flight] = q.flight.active.useNetRequest();
 
 	return (
 		<div className="flex justify-around gap-4 w-full">
@@ -120,16 +116,17 @@ function ClientAssignment() {
 									setSelectedClient={setSelectedClient}
 								/>
 							))}
-							{/* TODO April 23, 2022 - Hide this when the ship is configured to not have a flight director */}
-							{staticStations.map((station) => (
-								<HostStationItem
-									key={station.name}
-									shipId={ship.id}
-									station={station}
-									selectedClient={selectedClient}
-									setSelectedClient={setSelectedClient}
-								/>
-							))}
+							{flight?.hasFlightDirector
+								? staticStations.map((station) => (
+										<HostStationItem
+											key={station.name}
+											shipId={ship.id}
+											station={station}
+											selectedClient={selectedClient}
+											setSelectedClient={setSelectedClient}
+										/>
+									))
+								: null}
 						</ul>
 					</div>
 				))}
