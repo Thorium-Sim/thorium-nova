@@ -259,25 +259,7 @@ export const flight = t.router({
 					// that matches the specific one that was passed in
 					const stationComplement = getStationComplement(activePlugins, ship);
 					shipEntity.addComponent("stationComplement", {
-						stations:
-							stationComplement?.stations.map((s) => ({
-								...s,
-								logo: stationComplement?.assets[`${s.name}-logo`] || "",
-								cards: s.cards.map((c) => {
-									return {
-										...c,
-										icon: stationComplement?.assets[`${s.name}-${c.name}-icon`],
-									};
-								}),
-								widgets: s.widgets?.map((w) => {
-									return {
-										...w,
-										icon:
-											w.icon ||
-											stationComplement?.assets[`${s.name}-${w.name}-icon`],
-									};
-								}),
-							})) || [],
+						stations: stationComplement?.stations || [],
 					});
 
 					ctx.flight.ecs.addEntity(shipEntity);

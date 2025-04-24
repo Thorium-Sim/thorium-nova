@@ -5,7 +5,6 @@
 import type Entity from "./entity";
 import type System from "./system";
 import performance from "./performance";
-import { fastSplice } from "./utils";
 import { type RNG, createRNG } from "@thorium/utils/rng";
 import type { ColliderDesc } from "@thorium-sim/rapier3d-node";
 import type { ComponentIds } from "@thorium/ecs-components";
@@ -31,8 +30,8 @@ class ECS {
 	lastUpdate = performance.now();
 	rng: RNG;
 	maxEntityId = 1;
-	componentCache: Map<ComponentIds, Set<Entity>> = new Map();
-	colliderCache: Map<string, ColliderDesc> = new Map();
+	componentCache = new Map<ComponentIds, Set<Entity>>();
+	colliderCache = new Map<string, ColliderDesc>();
 	shipSystemCache = new Map<string, Entity>();
 
 	constructor(
