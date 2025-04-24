@@ -1,6 +1,6 @@
 import { useReducer, useEffect, useCallback, type Reducer } from "react";
 
-export function useLocalStorageReducer<R extends Reducer<I, any>, I>(
+export function useLocalStorageReducer<R extends Reducer<I, A>, I, A>(
 	reducer: R,
 	defaultState: I,
 	storageKey: string,
@@ -30,7 +30,7 @@ export function useLocalStorageReducer<R extends Reducer<I, any>, I>(
 
 export function useLocalStorage<T>(storageKey: string, defaultValue: T) {
 	return useLocalStorageReducer(
-		(state: T, action: T) => action,
+		(state: T, action: any) => action,
 		defaultValue,
 		storageKey,
 	);

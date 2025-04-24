@@ -14,13 +14,13 @@ export default function FlightQuickStart() {
 	const [client] = q.client.get.useNetRequest({ clientId });
 	const flightStart = q.flight.start.useNetSend();
 
-	const [state] = useFlightQuickStart();
+	const [state, dispatch] = useFlightQuickStart();
 
 	const navigate = useNavigate();
 
 	const match = useMatch("/flight/quick/:step");
 
-	if (!match) return <Navigate to="/flight/quick/crew" replace />;
+	if (!match) return <Navigate to="/flight/quick/ship" replace />;
 	if (flight) return <Navigate to="/flight/lobby" replace />;
 	if (!client.isHost) return <Navigate to="/" replace />;
 
@@ -32,28 +32,33 @@ export default function FlightQuickStart() {
 			setIsOpen={() => {
 				navigate("/");
 			}}
-			title={capitalCase(step || "Quick Start")}
+			title="Start Flight"
 		>
 			<div className="pt-4">
 				<Outlet />
 			</div>
 			<div className="flex justify-end mt-4 gap-4">
-				{step !== "crew" && (
-					<Link
-						className="btn btn-warning"
-						to={step === "mission" ? "ship" : "crew"}
-					>
+				{step !== "ship" && (
+					<Link className="btn btn-warning" to="ship">
 						Prev
 					</Link>
+				)}
+				{step === "ship" && (
+					<Button
+						className="btn-info"
+						onClick={() => dispatch({ type: "addShip" })}
+					>
+						Add Player Ship
+					</Button>
 				)}
 				{step !== "mission" && (
 					<Link
 						className={`btn btn-primary ${
-							step === "ship" && (!state.shipName || !state.shipId)
+							step === "ship" && (!state.ships || state.ships.length === 0)
 								? "btn-disabled"
 								: ""
 						}`}
-						to={step === "crew" ? "ship" : "mission"}
+						to="mission"
 					>
 						Next
 					</Link>
@@ -66,37 +71,31 @@ export default function FlightQuickStart() {
 							// TODO November 20, 2021 - Do something with the "Flight Director" parameter
 							// once we get Flight Director controls implemented.
 							// TODO September 6, 2023 - Add support for multiple player ships
-							let {
-								crewCount,
-								shipName,
-								shipId: shipTemplate,
+							const {
+								ships,
 								flightName,
 								missionId,
 								hasFlightDirector,
 								startingPointId: startingPoint,
 							} = state;
 
-							if (!shipTemplate) {
+							if (ships.length === 0) {
 								toast({
 									title: "Ship is required",
-									body: "You must select a ship template to start a flight.",
+									body: "You have at least one ship to start a flight.",
 									color: "warning",
 									action: () => navigate("ship"),
 								});
 								return;
 							}
-							if (!shipName) {
-								shipName = randomNameGenerator();
-							}
-							await flightStart.mutate({
+							const mappedShips = ships.map((ship) => ({
+								...ship,
+								shipName: ship.name,
+								shipTemplate: ship.shipId,
+							}));
+							flightStart.mutate({
 								flightName,
-								ships: [
-									{
-										crewCount,
-										shipName,
-										shipTemplate,
-									},
-								],
+								ships: mappedShips as unknown as [(typeof mappedShips)[0]],
 								hasFlightDirector,
 								missionId,
 								startingPoint,

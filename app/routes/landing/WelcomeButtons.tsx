@@ -62,7 +62,10 @@ function ClientButtons() {
 		<>
 			{client.isHost && (
 				<>
-					<NavLink className="btn btn-primary btn-outline" to="/flight/quick">
+					<NavLink
+						className="btn btn-primary btn-outline"
+						to="/flight/quick/ship"
+					>
 						Start Flight
 					</NavLink>
 					{/* <Disclosure>

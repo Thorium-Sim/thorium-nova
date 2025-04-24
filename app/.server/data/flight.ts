@@ -108,7 +108,7 @@ export const flight = t.router({
 			z.object({
 				flightName: z.string(),
 				ships: flightStartShips,
-				hasFlightDirector: z.boolean(),
+				hasFlightDirector: z.coerce.boolean(),
 				missionId: z
 					.object({ pluginId: z.string(), missionId: z.string() })
 					.optional(),
@@ -227,7 +227,7 @@ export const flight = t.router({
 					};
 					if (startingPoint) {
 						const startingPointPosition = findStartingPoint(
-							ctx.flight.ecs,
+							ctx.ecs,
 							startingPoint,
 							solarSystemMap,
 						);
@@ -244,7 +244,7 @@ export const flight = t.router({
 						},
 					);
 
-					extraEntities.forEach((s) => ctx.flight?.ecs.addEntity(s));
+					extraEntities.forEach((s) => ctx.ecs.addEntity(s));
 					let theme = ship.theme || null;
 					if (!theme) {
 						theme = activePlugins.reduce(
@@ -393,9 +393,9 @@ function findStartingPoint(
 					...startingEntity.components.satellite,
 					origin,
 				})) || {
-				x: -0.5 * Math.random() * 100000000,
-				y: -0.5 * Math.random() * 10000,
-				z: -0.5 * Math.random() * 100000000,
+				x: ecs.rng.next() * 100000000,
+				y: ecs.rng.next() * 10000,
+				z: ecs.rng.next() * 100000000,
 			};
 		const startObjectScale =
 			startingEntity.components?.isPlanet?.radius ||
@@ -407,9 +407,9 @@ function findStartingPoint(
 				) / 1000) ||
 			1;
 		const distanceVector = new Vector3(
-			startObjectScale * 2 + (Math.random() - 0.5) * startObjectScale,
+			startObjectScale * 2 + ecs.rng.next() * startObjectScale,
 			0,
-			startObjectScale * 2 + (Math.random() - 0.5) * startObjectScale,
+			startObjectScale * 2 + ecs.rng.next() * startObjectScale,
 		);
 		const parentSystem = getPlanetSystem(ecs, startingEntity);
 		return {

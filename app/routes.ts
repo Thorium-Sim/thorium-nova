@@ -11,7 +11,6 @@ export default [
 		index("routes/blank.tsx"),
 		layout("routes/quickStart/layout.tsx", [
 			route("flight/quick", "routes/quickStart/quickStart.tsx", [
-				route("crew", "routes/quickStart/crew.tsx"),
 				route("ship", "routes/quickStart/ship.tsx"),
 				route("mission", "routes/quickStart/mission.tsx"),
 			]),

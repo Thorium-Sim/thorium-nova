@@ -9,24 +9,35 @@ import {
 } from "react";
 import type { FlightStartingPoint } from "@thorium/.server/data";
 import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
+import { produce } from "immer";
+import uniqid from "@thorium/utils/uniqid";
 
 export interface FlightConfigState {
-	crewCount: number;
 	hasFlightDirector: boolean;
 	flightName: string;
-	shipId?: { pluginId: string; shipId: string };
-	shipName?: string;
+	ships: {
+		id: string;
+		shipId: { pluginId: string; shipId: string };
+		name: string;
+		crewCount: number;
+	}[];
 	missionId?: { pluginId: string; missionId: string };
 	startingPointId?: FlightStartingPoint;
 }
 
 export type FlightConfigAction =
-	| { type: "increaseCrewCount"; availableCrewSizes: number[] }
-	| { type: "decreaseCrewCount"; availableCrewSizes: number[] }
+	| { type: "increaseCrewCount"; id: string; availableCrewSizes: number[] }
+	| { type: "decreaseCrewCount"; id: string; availableCrewSizes: number[] }
 	| { type: "hasFlightDirector"; hasFlightDirector: boolean }
 	| { type: "flightName"; name: string }
-	| { type: "shipId"; shipId: { pluginId: string; shipId: string } | undefined }
-	| { type: "shipName"; name: string }
+	| { type: "shipId"; id: string; shipId: { pluginId: string; shipId: string } }
+	| { type: "shipName"; id: string; name: string }
+	| {
+			type: "addShip";
+			name?: string;
+			shipId?: { pluginId: string; shipId: string };
+	  }
+	| { type: "removeShip"; id: string }
 	| {
 			type: "missionId";
 			missionId: { pluginId: string; missionId: string } | undefined;
@@ -42,33 +53,61 @@ function quickStartReducer(
 ): FlightConfigState {
 	switch (action.type) {
 		case "increaseCrewCount": {
-			const currentIndex = action.availableCrewSizes.indexOf(state.crewCount);
-			if (currentIndex < action.availableCrewSizes.length - 1) {
-				const crewCount = action.availableCrewSizes[currentIndex + 1];
-				return {
-					...state,
-					crewCount,
-				};
-			}
-			return state;
+			return produce(state, (draft) => {
+				const ship = draft.ships.find((ship) => ship.id === action.id);
+				if (!ship) return;
+				const currentIndex = action.availableCrewSizes.indexOf(ship.crewCount);
+				if (currentIndex < action.availableCrewSizes.length - 1) {
+					ship.crewCount = action.availableCrewSizes[currentIndex + 1];
+				}
+			});
 		}
 		case "decreaseCrewCount": {
-			const currentIndex = action.availableCrewSizes.indexOf(state.crewCount);
-			if (currentIndex > 0) {
-				const crewCount = action.availableCrewSizes[currentIndex - 1];
-				return {
-					...state,
-					crewCount,
-				};
-			}
-			return state;
+			return produce(state, (draft) => {
+				const ship = draft.ships.find((ship) => ship.id === action.id);
+				if (!ship) return;
+				const currentIndex = action.availableCrewSizes.indexOf(ship.crewCount);
+				if (currentIndex > 0) {
+					ship.crewCount = action.availableCrewSizes[currentIndex - 1];
+				}
+			});
 		}
 		case "hasFlightDirector":
 			return { ...state, hasFlightDirector: action.hasFlightDirector };
 		case "shipId":
-			return { ...state, shipId: action.shipId };
+			return produce(state, (draft) => {
+				for (const ship of draft.ships) {
+					if (ship.id === action.id) {
+						ship.shipId = action.shipId;
+					}
+				}
+			});
 		case "shipName":
-			return { ...state, shipName: action.name };
+			return produce(state, (draft) => {
+				for (const ship of draft.ships) {
+					if (ship.id === action.id) {
+						ship.name = action.name;
+					}
+				}
+			});
+		case "addShip":
+			return {
+				...state,
+				ships: [
+					...(state.ships || []),
+					{
+						id: uniqid(),
+						name: action.name || randomNameGenerator(),
+						shipId: action.shipId || (state.ships || []).at(-1)!.shipId,
+						crewCount: (state.ships || []).at(-1)?.crewCount || 1,
+					},
+				],
+			};
+		case "removeShip":
+			return {
+				...state,
+				ships: state.ships.filter((ship) => ship.id !== action.id),
+			};
 		case "missionId":
 			return { ...state, missionId: action.missionId };
 		case "startingPointId":
@@ -89,26 +128,42 @@ export function FlightQuickStartProvider({
 }: { children: ReactNode }) {
 	const value = useLocalStorageReducer<
 		typeof quickStartReducer,
-		FlightConfigState
+		FlightConfigState,
+		FlightConfigAction
 	>(
 		quickStartReducer,
 		{
 			flightName: randomNameGenerator(),
-			crewCount: 1,
-			hasFlightDirector: false,
-			shipName: "Voyager",
-			shipId: { pluginId: "Thorium Default", shipId: "Astra Frigate" },
+			hasFlightDirector: true,
+			ships: [
+				{
+					id: uniqid(),
+					name: "Voyager",
+					crewCount: 1,
+					shipId: { pluginId: "Thorium Default", shipId: "Astra Frigate" },
+				},
+			],
 			missionId: { pluginId: "Thorium Default", missionId: "Sandbox" },
 		},
 		"flightConfig",
 	);
 	const set = value[1];
+	const ships = value[0].ships || [];
 	useEffect(() => {
 		set({
 			type: "flightName",
 			name: randomNameGenerator(),
 		});
 	}, [set]);
+	useEffect(() => {
+		if (ships.length === 0) {
+			set({
+				type: "addShip",
+				name: "Voyager",
+				shipId: { pluginId: "Thorium Default", shipId: "Astra Frigate" },
+			});
+		}
+	}, [ships, set]);
 
 	return (
 		<QuickStartContext.Provider value={value}>
