@@ -6,6 +6,7 @@ export async function getClientBundleFile(filePath: string) {
 	await import("../../../build/clientBundle.dat", {
 		with: { type: "file" },
 	});
+	// @ts-expect-error Bun adds the file name
 	const file = embeddedFiles.find((file) => file.name === "clientBundle.dat")!;
 
 	let startByte = 0;

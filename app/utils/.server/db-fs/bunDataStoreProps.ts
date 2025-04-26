@@ -111,6 +111,7 @@ export const bunDataStoreProps: DataStoreOperations = {
 		);
 		return moveFile(
 			file,
+			// @ts-expect-error Bun adds the file name
 			fileName || file.name,
 			path.join(path.dirname(this.meta.filePath), "assets"),
 		);

@@ -25,6 +25,7 @@ export async function initDefaultPlugin() {
 		// Initialize the default plugin
 		await Bun.write(
 			tempFile,
+			// @ts-expect-error Bun adds the file name
 			embeddedFiles.find((file) => file.name === "defaultPlugin.plug")!,
 		);
 

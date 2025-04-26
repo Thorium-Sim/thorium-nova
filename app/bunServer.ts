@@ -128,8 +128,10 @@ try {
 			});
 
 			const certFile = embeddedFiles.find(
+				// @ts-expect-error Bun adds the file name
 				(file) => file.name === "server.cert",
 			);
+			// @ts-expect-error Bun adds the file name
 			const keyFile = embeddedFiles.find((file) => file.name === "server.key");
 
 			if (certFile && keyFile) {
