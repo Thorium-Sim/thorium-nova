@@ -153,7 +153,6 @@ export class SensorScanSystem extends System {
 		// End Optimization Part
 
 		if (scan.progress >= 1) {
-			console.time("Finish scan");
 			// The scan is complete! Let's put some data in the database
 			entity.updateComponent("scan", { timestamp: Date.now() });
 
@@ -176,7 +175,6 @@ export class SensorScanSystem extends System {
 				// Remove scan entities from NPC ships
 				this.ecs.removeEntity(entity);
 			}
-			console.timeEnd("Finish scan");
 		}
 	}
 }

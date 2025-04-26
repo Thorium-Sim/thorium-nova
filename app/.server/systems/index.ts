@@ -61,7 +61,7 @@ const systems = [
 	TorpedoMovementSystem,
 	PhysicsWorldPositionSystem,
 	PhysicsMovementSystem,
-	// SensorScanSystem,
+	SensorScanSystem,
 	WaypointRemoveSystem,
 	HeatToCoolantSystem,
 	HeatDispersionSystem,

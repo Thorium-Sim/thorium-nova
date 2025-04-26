@@ -11,8 +11,11 @@ export function getShipSystem(
 		system = ecs.getEntityById(param.systemId);
 	} else if ("systemType" in param) {
 		const cacheKey = `${param.shipId}-${param.systemType}`;
-		if (ecs.shipSystemCache.has(cacheKey))
-			return ecs.shipSystemCache.get(cacheKey)!;
+		if (ecs.shipSystemCache.has(cacheKey)) {
+			const cacheEntry = ecs.shipSystemCache.get(cacheKey)!;
+			if (Array.isArray(cacheEntry)) return cacheEntry[0];
+			return cacheEntry;
+		}
 		for (const [id] of ecs.getEntityById(param.shipId)?.components.shipSystems
 			?.shipSystems || []) {
 			const entity = ecs.getEntityById(id);
@@ -36,6 +39,12 @@ export function getShipSystems(
 	ecs: ECS,
 	param: { systemType: string; shipId: number },
 ) {
+	const cacheKey = `${param.shipId}-${param.systemType}`;
+	if (ecs.shipSystemCache.has(cacheKey)) {
+		const cacheEntry = ecs.shipSystemCache.get(cacheKey)!;
+		if (Array.isArray(cacheEntry)) return cacheEntry;
+		return [cacheEntry];
+	}
 	const systems: Entity[] = [];
 	const ship = ecs.getEntityById(param.shipId);
 	for (const [id] of ship?.components.shipSystems?.shipSystems || []) {
@@ -47,5 +56,7 @@ export function getShipSystems(
 			systems.push(entity);
 		}
 	}
+	ecs.shipSystemCache.set(cacheKey, systems);
+
 	return systems;
 }

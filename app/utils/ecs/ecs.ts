@@ -32,7 +32,7 @@ class ECS {
 	maxEntityId = 1;
 	componentCache = new Map<ComponentIds, Set<Entity>>();
 	colliderCache = new Map<string, ColliderDesc>();
-	shipSystemCache = new Map<string, Entity>();
+	shipSystemCache = new Map<string, Entity | Entity[]>();
 
 	constructor(
 		public server: ServerDataModel,
