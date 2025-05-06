@@ -107,6 +107,32 @@ export const starmapCore = t.router({
 
 			return data;
 		}),
+	shipsSetPosition: t.procedure
+		.input(
+			z.object({
+				ships: z
+					.object({
+						x: z.number(),
+						y: z.number(),
+						z: z.number(),
+						id: z.number(),
+					})
+					.array(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			for (const ship of input.ships) {
+				const entity = ctx.ecs.getEntityById(ship.id);
+				if (entity) {
+					entity.updateComponent("position", {
+						x: ship.x,
+						y: ship.y,
+						z: ship.z,
+					});
+					entity.addComponent("snapInterpolation", { snapInterpolation: true });
+				}
+			}
+		}),
 	torpedos: t.procedure
 		.input(z.object({ systemId: z.number().nullable() }))
 		.filter((publish: { systemId: number | null }, { input }) => {

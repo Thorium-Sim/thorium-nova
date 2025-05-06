@@ -59,6 +59,7 @@ import { usePrompt } from "@thorium/ui/AlertDialog";
 import { useStation } from "@thorium/routes/station/useStation";
 import { useFrame } from "@react-three/fiber";
 import CameraControls from "camera-controls";
+import { useTranslate2DTo3D } from "@thorium/hooks/useTranslate2DTo3D";
 
 export function StarmapCore() {
 	const ref = useRef<HTMLDivElement>(null);
@@ -739,67 +740,12 @@ function YDimensionInput() {
 
 const vec = new Vector3();
 const vec2 = new Vector3();
-function StarmapCoreCanvasHooks({
-	movement,
-}: {
-	movement: Vector3;
-}) {
+function StarmapCoreCanvasHooks() {
 	useCancelFollow();
 	useFollowEntity();
 	useCalculateVerticalDistance();
-	useMouseSidePan(movement);
 
 	return null;
-}
-
-function useMouseSidePan(movement: Vector3) {
-	const useStarmapStore = useGetStarmapStore();
-	const cameraControls = useStarmapStore((store) => store.cameraControls);
-	const dragSelectEnabled = useStarmapStore((store) => store.dragSelectEnabled);
-
-	useFrame(({ camera }) => {
-		const MOVE_SPEED = 40;
-
-		if (cameraControls?.current) {
-			if (dragSelectEnabled) {
-				cameraControls.current.mouseButtons = {
-					left: CameraControls.ACTION.NONE,
-					right: CameraControls.ACTION.ROTATE,
-					wheel: CameraControls.ACTION.DOLLY,
-					middle: CameraControls.ACTION.DOLLY,
-				};
-			} else {
-				cameraControls.current.mouseButtons = {
-					left: CameraControls.ACTION.SCREEN_PAN,
-					right: CameraControls.ACTION.ROTATE,
-					wheel: CameraControls.ACTION.DOLLY,
-					middle: CameraControls.ACTION.DOLLY,
-				};
-			}
-		}
-
-		if (!dragSelectEnabled) return;
-		cameraControls?.current?.getPosition(vec);
-		cameraControls?.current?.getTarget(vec2);
-		const zoom = vec.distanceTo(vec2);
-		const moveVec = movement.clone();
-		if (movement.lengthSq() > 0) {
-			useStarmapStore.setState({ followEntityId: null });
-		}
-		moveVec
-			.applyQuaternion(camera.quaternion)
-			.multiplyScalar((MOVE_SPEED * zoom) / 5000);
-		vec.add(moveVec);
-		vec2.add(moveVec);
-		cameraControls?.current?.setLookAt(
-			vec.x,
-			vec.y,
-			vec.z,
-			vec2.x,
-			vec2.y,
-			vec2.z,
-		);
-	});
 }
 
 const startPoint = new Vector3();
@@ -842,7 +788,6 @@ function CanvasWrapper() {
 		onDragEnd: () => useStarmapStore.getState().setCameraControlsEnabled(true),
 	});
 
-	const movementRef = useRef(new Vector3());
 	useEffect(() => {
 		useStarmapStore.setState({ viewingMode: "core" });
 	}, [useStarmapStore]);
@@ -863,38 +808,9 @@ function CanvasWrapper() {
 						useStarmapStore.setState({ selectedObjectIds: [] });
 					}
 				}}
-				onPointerLeave={() => movementRef.current.set(0, 0, 0)}
-				onPointerMove={(event) => {
-					const bounds = event.currentTarget.getBoundingClientRect();
-					const moveMargin = 1 / 12;
-					movementRef.current.set(
-						-1 *
-							Math.max(
-								0,
-								1 - (event.clientX - bounds.left) / (bounds.width * moveMargin),
-							) +
-							Math.max(
-								0,
-								(event.clientX - bounds.left) / (bounds.width * moveMargin) -
-									(1 / moveMargin - 1),
-							),
-
-						Math.max(
-							0,
-							1 - (event.clientY - bounds.top) / (bounds.height * moveMargin),
-						) +
-							-1 *
-								Math.max(
-									0,
-									(event.clientY - bounds.top) / (bounds.height * moveMargin) -
-										(1 / moveMargin - 1),
-								),
-						0,
-					);
-				}}
 			>
 				<Suspense>
-					<StarmapCoreCanvasHooks movement={movementRef.current} />
+					<StarmapCoreCanvasHooks />
 				</Suspense>
 				<ambientLight intensity={0.2} />
 				<pointLight position={[10, 10, 10]} />
@@ -992,6 +908,8 @@ export function SolarSystemWrapper() {
 	const { interpolate } = useLiveQuery();
 	const viewingMode = useStarmapStore((state) => state.viewingMode);
 
+	const translate = useTranslate2DTo3D();
+	const pointerMovement = useRef<Vector3 | null>(null);
 	return (
 		<SolarSystemMap
 			skyboxKey={system?.components.isSolarSystem?.skyboxKey || "Blank"}
@@ -1073,25 +991,80 @@ export function SolarSystemWrapper() {
 					>
 						<StarmapShip
 							{...ship}
+							dragMovement={
+								selectedObjectIds.includes(ship.id) ? pointerMovement : null
+							}
 							// TODO September 10, 2022 - This should use the faction color, or display the color scheme the flight director chooses
 							spriteColor={
 								selectedObjectIds.includes(ship.id) ? "#0088ff" : "white"
 							}
-							onClick={() => {
+							onClick={(event) => event.stopPropagation()}
+							onPointerDown={(event) => {
+								event.stopPropagation();
 								const clickAction = useStarmapStore.getState().clickAction;
 								if (clickAction) {
 									clickAction.action(ship.id);
 									return;
 								}
-								const position = interpolate(ship.id);
-								if (position) {
-									useStarmapStore.getState().setCameraFocus(position);
+								if (!selectedObjectIds.includes(ship.id)) {
+									const position = interpolate(ship.id);
+									if (position) {
+										useStarmapStore.getState().setCameraFocus(position);
+									}
+									// TODO September 13, 2022 - Support shift/meta clicking to add or remove the ship from the selected objects list.
+									useStarmapStore.setState({
+										selectedObjectIds: [ship.id],
+										followEntityId: ship.id,
+									});
 								}
-								// TODO September 13, 2022 - Support shift/meta clicking to add or remove the ship from the selected objects list.
-								useStarmapStore.setState({
-									selectedObjectIds: [ship.id],
-									followEntityId: ship.id,
-								});
+								useStarmapStore.getState().setCameraControlsEnabled(false);
+
+								pointerMovement.current = new Vector3();
+								const abortController = new AbortController();
+
+								document.addEventListener(
+									"pointermove",
+									(event) => {
+										if (!pointerMovement.current) {
+											pointerMovement.current = new Vector3();
+										}
+										const position3d = translate(event.clientX, event.clientY);
+										const shipPosition = interpolate(ship.id);
+										if (!shipPosition) return;
+
+										pointerMovement.current.subVectors(
+											position3d,
+											shipPosition,
+										);
+									},
+									{ signal: abortController.signal },
+								);
+
+								// TODO May 5 2025: Show a popover to confirm the movement a la DreamFlight Adventures
+								document.addEventListener(
+									"pointerup",
+									() => {
+										useStarmapStore.getState().setCameraControlsEnabled(true);
+										abortController.abort();
+										q.starmapCore.shipsSetPosition.netSend({
+											ships: selectedObjectIds.flatMap((id) => {
+												if (typeof id === "string" || !pointerMovement.current)
+													return [];
+												const shipPosition = interpolate(id);
+												if (!shipPosition) return [];
+
+												return {
+													id,
+													x: shipPosition.x + pointerMovement.current.x,
+													y: shipPosition.y + pointerMovement.current.y,
+													z: shipPosition.z + pointerMovement.current.z,
+												};
+											}),
+										});
+										pointerMovement.current = null;
+									},
+									{ once: true },
+								);
 							}}
 						/>
 					</ErrorBoundary>

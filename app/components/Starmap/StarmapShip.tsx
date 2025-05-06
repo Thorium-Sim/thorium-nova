@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { Suspense } from "react";
 import { Line, useGLTF } from "@react-three/drei";
 import {
@@ -10,7 +10,7 @@ import {
 	type MeshStandardMaterial,
 	Object3D,
 	type Sprite,
-	Vector3,
+	type Vector3,
 } from "three";
 import { useFrame } from "@react-three/fiber";
 import { useGetStarmapStore } from "./starmapStore";
@@ -20,6 +20,7 @@ import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { setCursor } from "@thorium/utils/setCursor";
 import type { Meter } from "@thorium/utils/unitTypes";
 import { suspend } from "suspend-react";
+import { useTranslate2DTo3D } from "@thorium/hooks/useTranslate2DTo3D";
 
 export function StarmapShip({
 	id,
@@ -28,13 +29,21 @@ export function StarmapShip({
 	spriteColor = "white",
 	onClick,
 	size,
+	dragMovement,
+	onPointerDown,
+	onPointerUp,
+	onPointerMove,
 }: {
 	id: number;
 	modelUrl?: string;
 	logoUrl?: string;
 	spriteColor?: number | string;
 	size: Meter;
-	onClick?: () => void;
+	dragMovement?: RefObject<Vector3 | null> | null;
+	onClick?: (event: MouseEvent) => void;
+	onPointerDown?: (event: PointerEvent) => void;
+	onPointerMove?: (event: PointerEvent) => void;
+	onPointerUp?: (event: PointerEvent) => void;
 }) {
 	const model = useShipModel(modelUrl);
 
@@ -56,7 +65,9 @@ export function StarmapShip({
 	);
 	const isCore = useStarmapStore((store) => store.viewingMode === "core");
 	const sensorsHidden = useStarmapStore((store) => store.sensorsHidden);
+	const translate = useTranslate2DTo3D();
 	const group = useRef<Group>(null);
+	const dragging = useRef<Group>(null);
 	const shipMesh = useRef<Group>(null);
 	const shipSprite = useRef<Group>(null);
 	const { interpolate } = useLiveQuery();
@@ -70,6 +81,15 @@ export function StarmapShip({
 		}
 		group.current.visible = true;
 		group.current.position.set(state.x, state.y, state.z);
+		if (dragging.current && dragMovement?.current) {
+			dragging.current.position
+				.set(state.x, state.y, state.z)
+				.add(dragMovement.current);
+			dragging.current.visible = true;
+		}
+		if (dragging.current && !dragMovement?.current) {
+			dragging.current.visible = false;
+		}
 		shipMesh.current?.quaternion.set(
 			state.r.x,
 			state.r.y,
@@ -115,6 +135,7 @@ export function StarmapShip({
 			}
 		}
 	});
+
 	return (
 		<group>
 			{/* Points towards the current destination */}
@@ -130,6 +151,23 @@ export function StarmapShip({
 				lineWidth={0.5} // In pixels (default)
 			/>
 
+			<group ref={dragging}>
+				{isNotViewscreen && (
+					<Suspense fallback={null}>
+						<group ref={shipSprite}>
+							{logoUrl && (
+								<ShipSprite
+									// TODO June 9, 2022 - This color should represent the faction, with a toggle to make it show IFF for the current ship
+									color={spriteColor}
+									spriteAsset={logoUrl}
+									userData={{ type: "ship", id }}
+									opacity={0.5}
+								/>
+							)}
+						</group>
+					</Suspense>
+				)}
+			</group>
 			<group ref={group}>
 				{/* Ship sensor range */}
 				{!isCore || sensorsHidden ? null : (
@@ -153,6 +191,9 @@ export function StarmapShip({
 						setCursor("auto");
 					}}
 					onClick={onClick}
+					onPointerDown={onPointerDown}
+					onPointerMove={onPointerMove}
+					onPointerUp={onPointerUp}
 				>
 					{isNotViewscreen && (
 						<Suspense fallback={null}>
@@ -219,10 +260,12 @@ const ShipSprite = ({
 	color = "red",
 	spriteAsset,
 	userData,
+	opacity = 1,
 }: {
 	color?: string | number;
 	spriteAsset: string;
 	userData?: any;
+	opacity?: number;
 }) => {
 	const spriteMap = useShipSprite(spriteAsset);
 	const scale = 1 / 50;
@@ -244,6 +287,8 @@ const ShipSprite = ({
 				attach="material"
 				alphaMap={spriteMap}
 				color={color}
+				opacity={opacity}
+				transparent
 				sizeAttenuation={false}
 				needsUpdate={true}
 				depthTest={true}
