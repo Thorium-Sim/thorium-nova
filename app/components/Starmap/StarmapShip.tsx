@@ -19,8 +19,6 @@ import { clientId, q } from "@thorium/context/AppContext";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { setCursor } from "@thorium/utils/setCursor";
 import type { Meter } from "@thorium/utils/unitTypes";
-import { suspend } from "suspend-react";
-import { useTranslate2DTo3D } from "@thorium/hooks/useTranslate2DTo3D";
 
 export function StarmapShip({
 	id,
@@ -65,7 +63,6 @@ export function StarmapShip({
 	);
 	const isCore = useStarmapStore((store) => store.viewingMode === "core");
 	const sensorsHidden = useStarmapStore((store) => store.sensorsHidden);
-	const translate = useTranslate2DTo3D();
 	const group = useRef<Group>(null);
 	const dragging = useRef<Group>(null);
 	const shipMesh = useRef<Group>(null);

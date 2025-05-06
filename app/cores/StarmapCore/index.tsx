@@ -32,7 +32,7 @@ import useDragSelect, {
 	DragSelection,
 	get3dSelectedObjects,
 } from "@thorium/hooks/useDragSelect";
-import { type Mesh, MOUSE, type PerspectiveCamera, Vector3 } from "three";
+import { type PerspectiveCamera, Plane, Vector3 } from "three";
 import Button from "@thorium/ui/Button";
 import { useCancelFollow } from "@thorium/components/Starmap/useCancelFollow";
 import { useFollowEntity } from "@thorium/components/Starmap/useFollowEntity";
@@ -57,8 +57,6 @@ import {
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { usePrompt } from "@thorium/ui/AlertDialog";
 import { useStation } from "@thorium/routes/station/useStation";
-import { useFrame } from "@react-three/fiber";
-import CameraControls from "camera-controls";
 import { useTranslate2DTo3D } from "@thorium/hooks/useTranslate2DTo3D";
 
 export function StarmapCore() {
@@ -245,7 +243,9 @@ function EditorProperties({ id }: { id: number }) {
 			) : null}
 			{starmapObject?.components.reputation ? (
 				<EditorDisclosure title="Reputation">
-					<ReputationEditor id={id} />
+					<Suspense>
+						<ReputationEditor id={id} />
+					</Suspense>
 				</EditorDisclosure>
 			) : null}
 		</>
@@ -430,7 +430,7 @@ export function EditorDisclosure({
 								"data-[leave]:duration-75",
 							)}
 						>
-							{children}
+							<Suspense>{children}</Suspense>
 						</DisclosurePanel>
 					</Transition>
 				</>
@@ -596,7 +596,6 @@ function StarmapCoreMenubar() {
 	const followEntityId = useStarmapStore((store) => store.followEntityId);
 	const planetsHidden = useStarmapStore((store) => store.planetsHidden);
 	const sensorsHidden = useStarmapStore((store) => store.sensorsHidden);
-	const dragSelectEnabled = useStarmapStore((store) => store.dragSelectEnabled);
 
 	return (
 		<>
@@ -686,17 +685,6 @@ function StarmapCoreMenubar() {
 				) : (
 					<Icon name="circle-off" />
 				)}
-			</Button>
-			<Button
-				title="Drag Select"
-				className={`btn-xs btn-primary ${dragSelectEnabled ? "" : "btn-outline"}`}
-				onClick={() => {
-					useStarmapStore.setState((state) => ({
-						dragSelectEnabled: !state.dragSelectEnabled,
-					}));
-				}}
-			>
-				<Icon name="square-dashed" />
 			</Button>
 			<YDimensionInput />
 		</>
@@ -878,6 +866,9 @@ export function InterstellarWrapper() {
 	);
 }
 
+const plane = new Plane();
+const forward = new Vector3();
+const center = new Vector3();
 export function SolarSystemWrapper() {
 	const { shipId } = useStation();
 	const useStarmapStore = useGetStarmapStore();
@@ -1028,9 +1019,29 @@ export function SolarSystemWrapper() {
 										if (!pointerMovement.current) {
 											pointerMovement.current = new Vector3();
 										}
-										const position3d = translate(event.clientX, event.clientY);
+
+										const camera =
+											useStarmapStore.getState().cameraControls?.current
+												?.camera;
 										const shipPosition = interpolate(ship.id);
 										if (!shipPosition) return;
+										if (camera) {
+											center.set(
+												shipPosition.x,
+												shipPosition.y,
+												shipPosition.z,
+											);
+											camera.getWorldDirection(forward);
+											plane.setFromNormalAndCoplanarPoint(forward, center);
+										} else {
+											plane.setComponents(1, 0, 0, 0);
+										}
+
+										const position3d = translate(
+											event.clientX,
+											event.clientY,
+											plane,
+										);
 
 										pointerMovement.current.subVectors(
 											position3d,
