@@ -180,6 +180,7 @@ export class NPCDecisionSystem extends System {
 			desiredPosition.parentId === actionTarget?.parentId &&
 			desiredPosition.parentId
 		) {
+			wanderVector.set(desiredPosition.x, desiredPosition.y, desiredPosition.z);
 			path = pathfinder(entity, wanderVector) || [];
 		}
 		const nextCoordinates = path.shift();

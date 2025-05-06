@@ -6,6 +6,8 @@
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>Thorium Nova</title>
       <script type="module">
+        const logs = document.getElementById("logs");
+
         async function invoke(command, args, options) {
           // Using internals is generally a bad idea, but this removes the need for
           // an extra build process.
@@ -74,15 +76,19 @@
             eventId,
           });
         }
-        debugger;
+
+        logs.innerText = "Starting server...";
         const unlisten = await listen("backend_started", async (event) => {
+          logs.innerText = `Server started. Redirecting to ${event.payload}...`;
           window.location.replace(event.payload);
           await unlisten();
         });
 
+        logs.innerText = "Getting server address...";
         const serverLocation = await invoke("get_server_address", {}).catch(
           () => null
         );
+        logs.innerText = `Got server address: ${serverLocation} Redirecting...`;
         if (serverLocation) {
           window.location.replace(serverLocation);
         }

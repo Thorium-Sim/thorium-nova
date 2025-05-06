@@ -146,7 +146,7 @@ try {
 						key: await keyFile.text(),
 					},
 				});
-				console.info(`HTTPS Server running on ${https.url.href}`);
+				console.info(`HTTPS running on ${https.url.href}`);
 			}
 		}
 	});

@@ -143,7 +143,6 @@ export class AutoThrustSystem extends System {
 			// If we're within 5 seconds of the next point, then we can consider
 			// it safe to jump to the next point
 			const distanceToProceedToNextInPath = desiredSpeed * 5;
-
 			// Arbitrary number that gets roughly close to 5 KM away
 			if (distanceToNextInKM < distanceToProceedToNextInPath) {
 				autopilot.nextCoordinates = autopilot.path.shift()!;
