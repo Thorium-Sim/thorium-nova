@@ -41,6 +41,7 @@ interface StarmapStore {
 	setCameraFocus: (position: Coordinates<number>) => void;
 	planetsHidden: boolean;
 	sensorsHidden: boolean;
+	dragSelectEnabled: boolean;
 	clickAction?: { label: string; action: (object: number | null) => void };
 }
 
@@ -98,6 +99,7 @@ const createStarmapStore = () =>
 		},
 		planetsHidden: false,
 		sensorsHidden: true,
+		dragSelectEnabled: true,
 	}));
 
 const useStarmapStore = createStarmapStore();

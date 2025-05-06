@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Suspense } from "react";
-import { useThree } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect } from "react";
 import { useExternalCameraControl } from "./CameraControls";
 import { useGetStarmapStore } from "./starmapStore";
@@ -57,6 +57,7 @@ function HabitableZone({ systemId }: { systemId: string }) {
 	) : null;
 }
 
+const vec = new Vector3();
 export function SolarSystemMap({
 	systemId,
 	skyboxKey = "Basic",
@@ -85,7 +86,7 @@ export function SolarSystemMap({
 	// biome-ignore lint/correctness/useExhaustiveDependencies:
 	useEffect(() => {
 		// Set the initial camera position
-		orbitControls.current?.setPosition(0, SOLAR_SYSTEM_MAX_DISTANCE / 2, 0);
+		orbitControls.current?.setPosition(0, 50_000, 0);
 		const max = SOLAR_SYSTEM_MAX_DISTANCE * 0.75;
 		orbitControls.current?.setBoundary(
 			new Box3(new Vector3(-max, -max, -max), new Vector3(max, max, max)),

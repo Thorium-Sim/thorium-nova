@@ -7,6 +7,7 @@ export const iconNames = [
   "text-cursor-input",
   "sword",
   "star",
+  "square-dashed",
   "speaker",
   "sparkles",
   "siren",

@@ -34,6 +34,12 @@ export class IsDestroyedSystem extends System {
 					});
 				}
 				if (entity.components.isShip) {
+					// Also remove all the ship systems and crew
+					// TODO April 25, 2025 - Remove Crew
+					for (const shipSystem of entity.components.shipSystems?.shipSystems ||
+						[]) {
+						this.ecs.removeEntityById(shipSystem[0]);
+					}
 					pubsub.publish.starmapCore.ships({
 						systemId,
 					});

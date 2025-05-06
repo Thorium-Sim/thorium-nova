@@ -1,7 +1,13 @@
 import { InterstellarMap } from "@thorium/components/Starmap/InterstellarMap";
 import SystemMarker from "@thorium/components/Starmap/SystemMarker";
 import StarmapCanvas from "@thorium/components/Starmap/StarmapCanvas";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+	type RefObject,
+} from "react";
 import {
 	StarmapStoreProvider,
 	useCalculateVerticalDistance,
@@ -26,7 +32,7 @@ import useDragSelect, {
 	DragSelection,
 	get3dSelectedObjects,
 } from "@thorium/hooks/useDragSelect";
-import { type Mesh, type PerspectiveCamera, Vector3 } from "three";
+import { type Mesh, MOUSE, type PerspectiveCamera, Vector3 } from "three";
 import Button from "@thorium/ui/Button";
 import { useCancelFollow } from "@thorium/components/Starmap/useCancelFollow";
 import { useFollowEntity } from "@thorium/components/Starmap/useFollowEntity";
@@ -34,7 +40,6 @@ import { ZoomSliderComp } from "@thorium/cards/Navigation/MapControls";
 import type { Coordinates } from "@thorium/utils/unitTypes";
 import { q } from "@thorium/context/AppContext";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { useFrame } from "@react-three/fiber";
 import clsx from "clsx";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { Icon } from "@thorium/ui/Icon";
@@ -52,6 +57,8 @@ import {
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { usePrompt } from "@thorium/ui/AlertDialog";
 import { useStation } from "@thorium/routes/station/useStation";
+import { useFrame } from "@react-three/fiber";
+import CameraControls from "camera-controls";
 
 export function StarmapCore() {
 	const ref = useRef<HTMLDivElement>(null);
@@ -65,7 +72,7 @@ export function StarmapCore() {
 						<StarmapCoreMenubar />
 					</Suspense>
 				</div>
-				<div className="h-full relative overflow-hidden">
+				<div className="h-full relative flex overflow-hidden">
 					<CanvasWrapper />
 					<Suspense>
 						<EditorPalette />
@@ -96,10 +103,9 @@ function EditorPalette() {
 		<div
 			key={firstObject}
 			className={cn(
-				"bg-gray-800 h-full max-w-96 w-2/5 absolute top-0 right-0 shadow-lg transition-transform px-2 py-2 overflow-y-auto",
+				"bg-gray-800 h-full max-w-96 w-2/5 top-0 right-0 shadow-lg transition-transform px-2 py-2 overflow-y-auto",
 				{
-					"translate-x-0": selectedObjectIds.length > 0,
-					"translate-x-full": selectedObjectIds.length === 0,
+					hidden: selectedObjectIds.length === 0,
 				},
 			)}
 		>
@@ -588,6 +594,7 @@ function StarmapCoreMenubar() {
 	const followEntityId = useStarmapStore((store) => store.followEntityId);
 	const planetsHidden = useStarmapStore((store) => store.planetsHidden);
 	const sensorsHidden = useStarmapStore((store) => store.sensorsHidden);
+	const dragSelectEnabled = useStarmapStore((store) => store.dragSelectEnabled);
 
 	return (
 		<>
@@ -678,6 +685,17 @@ function StarmapCoreMenubar() {
 					<Icon name="circle-off" />
 				)}
 			</Button>
+			<Button
+				title="Drag Select"
+				className={`btn-xs btn-primary ${dragSelectEnabled ? "" : "btn-outline"}`}
+				onClick={() => {
+					useStarmapStore.setState((state) => ({
+						dragSelectEnabled: !state.dragSelectEnabled,
+					}));
+				}}
+			>
+				<Icon name="square-dashed" />
+			</Button>
 			<YDimensionInput />
 		</>
 	);
@@ -718,12 +736,70 @@ function YDimensionInput() {
 	);
 }
 
-function StarmapCoreCanvasHooks() {
+const vec = new Vector3();
+const vec2 = new Vector3();
+function StarmapCoreCanvasHooks({
+	movement,
+}: {
+	movement: Vector3;
+}) {
 	useCancelFollow();
 	useFollowEntity();
 	useCalculateVerticalDistance();
+	useMouseSidePan(movement);
 
 	return null;
+}
+
+function useMouseSidePan(movement: Vector3) {
+	const useStarmapStore = useGetStarmapStore();
+	const cameraControls = useStarmapStore((store) => store.cameraControls);
+	const followEntityId = useStarmapStore((store) => store.followEntityId);
+	const dragSelectEnabled = useStarmapStore((store) => store.dragSelectEnabled);
+
+	useFrame(({ camera }) => {
+		const MOVE_SPEED = 40;
+
+		if (cameraControls?.current) {
+			if (dragSelectEnabled) {
+				cameraControls.current.mouseButtons = {
+					left: CameraControls.ACTION.NONE,
+					right: CameraControls.ACTION.ROTATE,
+					wheel: CameraControls.ACTION.DOLLY,
+					middle: CameraControls.ACTION.DOLLY,
+				};
+			} else {
+				cameraControls.current.mouseButtons = {
+					left: CameraControls.ACTION.SCREEN_PAN,
+					right: CameraControls.ACTION.ROTATE,
+					wheel: CameraControls.ACTION.DOLLY,
+					middle: CameraControls.ACTION.DOLLY,
+				};
+			}
+		}
+
+		if (!dragSelectEnabled) return;
+		cameraControls?.current?.getPosition(vec);
+		cameraControls?.current?.getTarget(vec2);
+		const zoom = vec.distanceTo(vec2);
+		const moveVec = movement.clone();
+		if (movement.lengthSq() > 0) {
+			useStarmapStore.setState({ followEntityId: null });
+		}
+		moveVec
+			.applyQuaternion(camera.quaternion)
+			.multiplyScalar((MOVE_SPEED * zoom) / 5000);
+		vec.add(moveVec);
+		vec2.add(moveVec);
+		cameraControls?.current?.setLookAt(
+			vec.x,
+			vec.y,
+			vec.z,
+			vec2.x,
+			vec2.y,
+			vec2.z,
+		);
+	});
 }
 
 const startPoint = new Vector3();
@@ -766,6 +842,7 @@ function CanvasWrapper() {
 		onDragEnd: () => useStarmapStore.getState().setCameraControlsEnabled(true),
 	});
 
+	const movementRef = useRef(new Vector3());
 	useEffect(() => {
 		useStarmapStore.setState({ viewingMode: "core" });
 	}, [useStarmapStore]);
@@ -786,9 +863,38 @@ function CanvasWrapper() {
 						useStarmapStore.setState({ selectedObjectIds: [] });
 					}
 				}}
+				onPointerLeave={() => movementRef.current.set(0, 0, 0)}
+				onPointerMove={(event) => {
+					const bounds = event.currentTarget.getBoundingClientRect();
+					const moveMargin = 1 / 12;
+					movementRef.current.set(
+						-1 *
+							Math.max(
+								0,
+								1 - (event.clientX - bounds.left) / (bounds.width * moveMargin),
+							) +
+							Math.max(
+								0,
+								(event.clientX - bounds.left) / (bounds.width * moveMargin) -
+									(1 / moveMargin - 1),
+							),
+
+						Math.max(
+							0,
+							1 - (event.clientY - bounds.top) / (bounds.height * moveMargin),
+						) +
+							-1 *
+								Math.max(
+									0,
+									(event.clientY - bounds.top) / (bounds.height * moveMargin) -
+										(1 / moveMargin - 1),
+								),
+						0,
+					);
+				}}
 			>
 				<Suspense>
-					<StarmapCoreCanvasHooks />
+					<StarmapCoreCanvasHooks movement={movementRef.current} />
 				</Suspense>
 				<ambientLight intensity={0.2} />
 				<pointLight position={[10, 10, 10]} />
