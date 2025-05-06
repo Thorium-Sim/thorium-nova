@@ -22,7 +22,7 @@ export class AutoThrustSystem extends System {
 		);
 	}
 	preUpdate() {
-		this.updateCount = (this.updateCount + 1) % 3;
+		this.updateCount = (this.updateCount + 1) % 15;
 	}
 	update(entity: Entity, elapsed: number) {
 		const { position, rotation, autopilot } = entity.components;

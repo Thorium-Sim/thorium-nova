@@ -72,7 +72,7 @@ export function StarmapCore() {
 						<StarmapCoreMenubar />
 					</Suspense>
 				</div>
-				<div className="h-full relative flex overflow-hidden">
+				<div className="h-full relative overflow-hidden">
 					<CanvasWrapper />
 					<Suspense>
 						<EditorPalette />
@@ -103,9 +103,10 @@ function EditorPalette() {
 		<div
 			key={firstObject}
 			className={cn(
-				"bg-gray-800 h-full max-w-96 w-2/5 top-0 right-0 shadow-lg transition-transform px-2 py-2 overflow-y-auto",
+				"bg-gray-800 h-full max-w-96 w-2/5 absolute top-0 right-0 shadow-lg transition-transform px-2 py-2 overflow-y-auto",
 				{
-					hidden: selectedObjectIds.length === 0,
+					"translate-x-0": selectedObjectIds.length > 0,
+					"translate-x-full": selectedObjectIds.length === 0,
 				},
 			)}
 		>
@@ -754,7 +755,6 @@ function StarmapCoreCanvasHooks({
 function useMouseSidePan(movement: Vector3) {
 	const useStarmapStore = useGetStarmapStore();
 	const cameraControls = useStarmapStore((store) => store.cameraControls);
-	const followEntityId = useStarmapStore((store) => store.followEntityId);
 	const dragSelectEnabled = useStarmapStore((store) => store.dragSelectEnabled);
 
 	useFrame(({ camera }) => {
@@ -904,7 +904,7 @@ function CanvasWrapper() {
 					<SolarSystemWrapper />
 				)}
 			</StarmapCanvas>
-			{dragPosition && <DragSelection {...dragPosition} className="top-8" />}
+			{dragPosition && <DragSelection {...dragPosition} />}
 		</>
 	);
 }

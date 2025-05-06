@@ -42,7 +42,10 @@ export function StarmapShip({
 
 	const systemId = useStarmapStore((store) => store.currentSystem);
 
-	const [autopilotData] = q.starmapCore.autopilot.useNetRequest({ systemId });
+	const [autopilotData] = q.starmapCore.autopilot.useNetRequest(
+		{ systemId },
+		{ refetchInterval: 3000 },
+	);
 
 	const shipAutopilot = autopilotData[id];
 	const [player] = q.ship.player.useNetRequest({ clientId });
