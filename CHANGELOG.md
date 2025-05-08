@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.18](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.17...1.0.0-alpha.18) (2025-05-08)
+
+
+### Bug Fixes
+
+* Starmap Core Drag Selection improvements ([53f8222](https://github.com/Thorium-Sim/thorium-nova/commit/53f82223a11ce993c33803a4b5245a06c544c047))
+* Starmap core ship logos are no longer hidden when the starmap first loads. ([407bfd5](https://github.com/Thorium-Sim/thorium-nova/commit/407bfd51d3197e72a8cb260902314ba3fa8ecd9f))
+
+
+### Features
+
+* Drag contacts to instantly move them around the 3D canvas. ([ee4294a](https://github.com/Thorium-Sim/thorium-nova/commit/ee4294ab7e720e25e05839373f403bee7c018ae6))
+* Make it possible to spawn multiple player ships when starting flights. ([0e1c59d](https://github.com/Thorium-Sim/thorium-nova/commit/0e1c59dccd669bea0344354bd710ed82236d0296))
+* Make the "Use Flight Director Controls" checkbox actually do something. ([f4986b4](https://github.com/Thorium-Sim/thorium-nova/commit/f4986b4b3953b2bdbfedc8ddd9280a53905c76ee))
+
 # [1.0.0-alpha.17](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.16...1.0.0-alpha.17) (2025-03-26)
 
 
