@@ -124,6 +124,7 @@ function EditorProperties({ id }: { id: number }) {
 		},
 	);
 
+	const currentAlertLevel = starmapObject?.components.isShip?.alertLevel || "5";
 	return (
 		<>
 			{starmapObject?.components.identity ? (
@@ -148,91 +149,36 @@ function EditorProperties({ id }: { id: number }) {
 					/>
 					<span>Alert Level</span>
 					<div className="flex gap-1">
-						<button
-							className={cn(
-								"aspect-square w-6 rounded bg-error brightness-75",
-								{
-									"brightness-125":
-										starmapObject.components.isShip.alertLevel === "1",
-								},
-							)}
-							onClick={() => {
-								q.alertLevel.update.netSend({
-									shipId: id,
-									alertLevel: "1",
-								});
-							}}
-						>
-							1
-						</button>
-						<button
-							className={cn(
-								"aspect-square w-6 rounded bg-warning brightness-75",
-								{
-									"brightness-125":
-										starmapObject.components.isShip.alertLevel === "2",
-								},
-							)}
-							onClick={() => {
-								q.alertLevel.update.netSend({
-									shipId: id,
-									alertLevel: "2",
-								});
-							}}
-						>
-							2
-						</button>
-						<button
-							className={cn(
-								"aspect-square w-6 rounded bg-yellow-600 brightness-75",
-								{
-									"brightness-125":
-										starmapObject.components.isShip.alertLevel === "3",
-								},
-							)}
-							onClick={() => {
-								q.alertLevel.update.netSend({
-									shipId: id,
-									alertLevel: "3",
-								});
-							}}
-						>
-							3
-						</button>
-						<button
-							className={cn(
-								"aspect-square w-6 rounded bg-lime-600 brightness-75",
-								{
-									"brightness-125":
-										starmapObject.components.isShip.alertLevel === "4",
-								},
-							)}
-							onClick={() => {
-								q.alertLevel.update.netSend({
-									shipId: id,
-									alertLevel: "4",
-								});
-							}}
-						>
-							4
-						</button>
-						<button
-							className={cn(
-								"aspect-square w-6 rounded bg-green-600 brightness-75",
-								{
-									"brightness-125":
-										starmapObject.components.isShip.alertLevel === "5",
-								},
-							)}
-							onClick={() => {
-								q.alertLevel.update.netSend({
-									shipId: id,
-									alertLevel: "5",
-								});
-							}}
-						>
-							5
-						</button>
+						<AlertLevelButton
+							alertLevel="1"
+							color="bg-error"
+							currentLevel={currentAlertLevel}
+							shipId={id}
+						/>
+						<AlertLevelButton
+							alertLevel="2"
+							color="bg-warning"
+							currentLevel={currentAlertLevel}
+							shipId={id}
+						/>
+						<AlertLevelButton
+							alertLevel="3"
+							color="bg-yellow-600"
+							currentLevel={currentAlertLevel}
+							shipId={id}
+						/>
+						<AlertLevelButton
+							alertLevel="4"
+							color="bg-lime-600"
+							currentLevel={currentAlertLevel}
+							shipId={id}
+						/>
+						<AlertLevelButton
+							alertLevel="5"
+							color="bg-green-600"
+							currentLevel={currentAlertLevel}
+							shipId={id}
+						/>
 					</div>
 					<Input
 						label="Category"
@@ -249,6 +195,34 @@ function EditorProperties({ id }: { id: number }) {
 				</EditorDisclosure>
 			) : null}
 		</>
+	);
+}
+
+function AlertLevelButton({
+	color,
+	currentLevel,
+	alertLevel,
+	shipId,
+}: {
+	color: string;
+	currentLevel: "1" | "2" | "3" | "5" | "4" | "p";
+	alertLevel: "1" | "2" | "3" | "5" | "4" | "p";
+	shipId: number;
+}) {
+	return (
+		<button
+			className={cn("aspect-square w-6 rounded brightness-75", color, {
+				"brightness-125": currentLevel === alertLevel,
+			})}
+			onClick={() => {
+				q.alertLevel.update.netSend({
+					shipId,
+					alertLevel,
+				});
+			}}
+		>
+			{alertLevel}
+		</button>
 	);
 }
 

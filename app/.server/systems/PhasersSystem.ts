@@ -118,6 +118,7 @@ export function getCurrentTarget(shipId: number, ecs: ECS) {
 	}
 }
 
+/** Returns the average charge of all the phase capacitors connected this phaser system */
 export function getPhaserCharge(e: Entity) {
 	const phaseCapacitors = e.components.power?.powerSources.reduce(
 		(prev, next) => {

@@ -8,7 +8,7 @@ import type { position as TPosition } from "@thorium/ecs-components/position";
 export function getObjectOffsetPosition(
 	object: Entity,
 	position: z.infer<typeof TPosition>,
-	size: number,
+	distance: number,
 ) {
 	const objectCenter = new Vector3();
 	if (object.components.satellite) {
@@ -89,7 +89,7 @@ export function getObjectOffsetPosition(
 			(object.components.isStar?.radius || 1) as SolarRadius,
 		) ||
 		1;
-	const distanceFromCenter = (size / 1000) * 2 + objectSize * 3;
+	const distanceFromCenter = distance + objectSize * 3;
 
 	return objectAngle.multiplyScalar(distanceFromCenter).add(objectCenter);
 }

@@ -1,7 +1,10 @@
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { getPhaserCharge } from "@thorium/.server/systems/PhasersSystem";
 import {
 	adjustTorpedoInventory,
 	getShipTorpedos,
 } from "@thorium/cards/Targeting/data.server";
+import { starmapCore } from "@thorium/cores/data.server";
 import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
 import {
 	getShipSystem,
@@ -57,13 +60,16 @@ export class NPCDecisionSystem extends System {
 
 		function setMoveTowardsPosition(
 			target?: Entity | null,
-			distanceMultiplier = 1,
+			options?: { multiplier: number } | { distance: number },
 		) {
 			if (target && position) {
 				const offsetPosition = getObjectOffsetPosition(
 					target,
 					position,
-					(entity.components.size?.length || 1) * distanceMultiplier,
+					(options && "distance" in options
+						? options.distance
+						: ((entity.components.size?.length || 1) / 1000) * 2) *
+						(options && "multiplier" in options ? options.multiplier : 1),
 				);
 
 				desiredPosition.parentId = position.parentId;
@@ -72,6 +78,12 @@ export class NPCDecisionSystem extends System {
 				desiredPosition.z = offsetPosition.z;
 			}
 		}
+		const torpedoSystems = getSystemsOfType(
+			this.ecs,
+			entity.id,
+			"TorpedoLauncher",
+		);
+		const phaserSystems = getSystemsOfType(this.ecs, entity.id, "Phasers");
 
 		// Pick a ship to attack. If action is `null`, we're not in combat
 		const { action: combatAction, targetId } = pickCombatAction(
@@ -85,9 +97,29 @@ export class NPCDecisionSystem extends System {
 			objective === "defend"
 		) {
 			if (typeof targetId === "number") {
+				const torpedosReady = torpedoSystems.some(
+					(s) => s.components.isTorpedoLauncher?.status === "loaded",
+				);
+				const phasersReady = phaserSystems.some(
+					(s) =>
+						// TODO May 14, 2025 - Make this configurable maybe.
+						getPhaserCharge(s) > 0.5,
+				);
+
+				const weaponsReady = torpedosReady || phasersReady;
 				// When weapons are ready, move towards the target
 				const target = this.ecs.getEntityById(targetId);
-				setMoveTowardsPosition(target, 200);
+
+				if (weaponsReady) {
+					setMoveTowardsPosition(target, { multiplier: 10 });
+				} else {
+					setMoveTowardsPosition(
+						target,
+						knowledge.weaponsRange
+							? { distance: knowledge.weaponsRange }
+							: { multiplier: 200 },
+					);
+				}
 
 				// When weapons are not ready, move away from weapons range.
 
@@ -171,7 +203,7 @@ export class NPCDecisionSystem extends System {
 				typeof behaviorTarget === "number"
 					? this.ecs.getEntityById(behaviorTarget)
 					: null;
-			setMoveTowardsPosition(target, 5);
+			setMoveTowardsPosition(target, { multiplier: 5 });
 		}
 
 		let path: { x: number; y: number; z: number }[] = [];
@@ -215,11 +247,6 @@ export class NPCDecisionSystem extends System {
 			}
 		}
 
-		const torpedoSystems = getSystemsOfType(
-			this.ecs,
-			entity.id,
-			"TorpedoLauncher",
-		);
 		if (alertLevel <= 2) {
 			// Charge the phasers, load the torpedoes
 			for (const sys of torpedoSystems) {
@@ -238,8 +265,6 @@ export class NPCDecisionSystem extends System {
 					});
 				}
 			}
-
-			const phaserSystems = getSystemsOfType(this.ecs, entity.id, "Phasers");
 		} else {
 			// Unload torpedoes (can't discharge phasers)
 			for (const sys of torpedoSystems) {
@@ -252,6 +277,14 @@ export class NPCDecisionSystem extends System {
 					});
 				}
 			}
+		}
+
+		if (entity.components.isShip?.alertLevel !== alertLevel.toString()) {
+			entity.updateComponent("isShip", {
+				alertLevel: alertLevel.toString() as "5" | "4" | "3" | "2" | "1",
+			});
+
+			pubsub.publish.starmapCore.object({ objectId: entity.id });
 		}
 	}
 }

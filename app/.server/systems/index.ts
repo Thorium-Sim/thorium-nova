@@ -16,6 +16,7 @@ import { ReactorHeatSystem } from "./ReactorHeatSystem";
 import { HeatToCoolantSystem } from "./HeatToCoolantSystem";
 import { HeatDispersionSystem } from "./HeatDispersionSystem";
 import { PowerDrawSystem } from "./PowerDrawSystem";
+import { PhaserChargeNPCSystem } from "./PhaserChargeNPCSystem";
 import { WaypointRemoveSystem } from "./WaypointRemoveSystem";
 import { ProcessTriggersSystem } from "./ProcessTriggersSystem";
 import { WarpSystem } from "./WarpSystem";
@@ -47,6 +48,7 @@ const systems = [
 	ReactorHeatSystem,
 	PowerDrawSystem,
 	PowerDistributionSystem,
+	PhaserChargeNPCSystem,
 	TorpedoLoadingSystem,
 	NearbyObjectsSystem,
 	NPCKnowledgeSystem,

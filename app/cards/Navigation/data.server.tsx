@@ -277,7 +277,7 @@ export const waypoints = t.router({
 				position = getObjectOffsetPosition(
 					object,
 					targetPosition,
-					ship.components.size?.length || 1,
+					(ship.components.size?.length || 1 / 1000) * 2,
 				);
 				const sys = getObjectSystem(object);
 				systemId = sys?.id ?? null;
