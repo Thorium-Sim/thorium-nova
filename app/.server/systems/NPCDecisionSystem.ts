@@ -4,12 +4,8 @@ import {
 	adjustTorpedoInventory,
 	getShipTorpedos,
 } from "@thorium/cards/Targeting/data.server";
-import { starmapCore } from "@thorium/cores/data.server";
 import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
-import {
-	getShipSystem,
-	getShipSystems,
-} from "@thorium/utils/.server/ship/getShipSystem";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { type ECS, Entity, System } from "@thorium/utils/ecs";
 import type { scanTypes } from "@thorium/utils/flags/scanTypes";
 import type { threatScores } from "@thorium/utils/flags/shipObjectives";
@@ -25,8 +21,7 @@ const wanderVector = new Vector3();
 const shipPosition = new Vector3();
 const destinationVector = new Vector3();
 
-// TODO April 4, 2025 Hard-coding this to weapons range.
-const FLEE_DISTANCE = 25_000;
+const DEFAULT_FLEE_DISTANCE = 25_000;
 export class NPCDecisionSystem extends System {
 	test(entity: Entity) {
 		return !!(
@@ -84,6 +79,11 @@ export class NPCDecisionSystem extends System {
 			"TorpedoLauncher",
 		);
 		const phaserSystems = getSystemsOfType(this.ecs, entity.id, "Phasers");
+		const targetingSystem = getSystemsOfType(
+			this.ecs,
+			entity.id,
+			"Targeting",
+		)[0];
 
 		// Pick a ship to attack. If action is `null`, we're not in combat
 		const { action: combatAction, targetId } = pickCombatAction(
@@ -100,19 +100,23 @@ export class NPCDecisionSystem extends System {
 				const torpedosReady = torpedoSystems.some(
 					(s) => s.components.isTorpedoLauncher?.status === "loaded",
 				);
-				const phasersReady = phaserSystems.some(
-					(s) =>
-						// TODO May 14, 2025 - Make this configurable maybe.
-						getPhaserCharge(s) > 0.5,
-				);
+				const phasersReady = phaserSystems.some((s) => {
+					// TODO May 14, 2025 - Make this configurable maybe.
+					return (
+						s.components.isPhasers!.firePercent > 0 || getPhaserCharge(s) > 0.5
+					);
+				});
 
 				const weaponsReady = torpedosReady || phasersReady;
-				// When weapons are ready, move towards the target
 				const target = this.ecs.getEntityById(targetId);
 
+				// When weapons are ready, move towards the target
 				if (weaponsReady) {
-					setMoveTowardsPosition(target, { multiplier: 10 });
+					// TODO May 15 2025 - add in some kind of attack patterns
+					// where the ship moves back and forth
+					setMoveTowardsPosition(target, { multiplier: 2 });
 				} else {
+					// When weapons are not ready, move away from weapons range.
 					setMoveTowardsPosition(
 						target,
 						knowledge.weaponsRange
@@ -120,8 +124,6 @@ export class NPCDecisionSystem extends System {
 							: { multiplier: 200 },
 					);
 				}
-
-				// When weapons are not ready, move away from weapons range.
 
 				alertLevel = 1;
 			} else {
@@ -139,7 +141,10 @@ export class NPCDecisionSystem extends System {
 				const fleeDirection = calculateFleeDirection(entity, knowledge.threats);
 				destinationVector
 					.set(position.x, position.y, position.z)
-					.addScaledVector(fleeDirection, FLEE_DISTANCE);
+					.addScaledVector(
+						fleeDirection,
+						knowledge.weaponsRange || DEFAULT_FLEE_DISTANCE,
+					);
 				desiredPosition.x = destinationVector.x;
 				desiredPosition.y = destinationVector.y;
 				desiredPosition.z = destinationVector.z;
@@ -150,7 +155,10 @@ export class NPCDecisionSystem extends System {
 				const fleeDirection = calculateFleeDirection(entity, knowledge.threats);
 				destinationVector
 					.set(position.x, position.y, position.z)
-					.addScaledVector(fleeDirection, FLEE_DISTANCE);
+					.addScaledVector(
+						fleeDirection,
+						knowledge.weaponsRange || DEFAULT_FLEE_DISTANCE,
+					);
 				desiredPosition.x = destinationVector.x;
 				desiredPosition.y = destinationVector.y;
 				desiredPosition.z = destinationVector.z;
@@ -251,12 +259,12 @@ export class NPCDecisionSystem extends System {
 			// Charge the phasers, load the torpedoes
 			for (const sys of torpedoSystems) {
 				if (sys.components.isTorpedoLauncher?.status === "ready") {
-					const [torpedoId] = randomFromList(
-						Object.entries(getShipTorpedos(this.ecs, entity.id)).filter(
-							(e) => e[1].count > 0,
-						),
+					const torpedos = getShipTorpedos(this.ecs, entity.id);
+					const torpedo = randomFromList(
+						Object.entries(torpedos).filter((e) => e[1].count > 0),
 					);
-					if (!torpedoId) continue;
+					if (!torpedo) continue;
+					const [torpedoId] = torpedo;
 					const torpedoEntity = adjustTorpedoInventory(torpedoId, sys);
 					sys.updateComponent("isTorpedoLauncher", {
 						status: torpedoEntity ? "loading" : "unloading",
@@ -279,6 +287,14 @@ export class NPCDecisionSystem extends System {
 			}
 		}
 
+		if (
+			alertLevel === 1 &&
+			typeof targetId === "number" &&
+			targetingSystem.components.isTargeting?.target !== targetId
+		) {
+			targetingSystem.updateComponent("isTargeting", { target: targetId });
+			pubsub.publish.targeting.targetedContact({ shipId: entity.id });
+		}
 		if (entity.components.isShip?.alertLevel !== alertLevel.toString()) {
 			entity.updateComponent("isShip", {
 				alertLevel: alertLevel.toString() as "5" | "4" | "3" | "2" | "1",
@@ -342,16 +358,17 @@ function calculateFleeDirection(
 	return fleeVector;
 }
 
-function getSystemsOfType(
+export function getSystemsOfType(
 	ecs: ECS,
 	shipId: number,
 	systemType: Capitalize<Exclude<ShipSystemTypes, "generic">>,
 ) {
+	const ship = ecs.getEntityById(shipId);
 	const systemEntities: Entity[] = [];
-	for (const entity of ecs.componentCache.get(`is${systemType}`) || []) {
-		if (entity.components.isShipSystem?.shipId === shipId) {
+	for (const [entityId] of ship?.components.shipSystems?.shipSystems || []) {
+		const entity = ecs.getEntityById(entityId);
+		if (entity?.components[`is${systemType}`]) {
 			systemEntities.push(entity);
-			break;
 		}
 	}
 	return systemEntities;

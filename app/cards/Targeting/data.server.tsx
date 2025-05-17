@@ -387,10 +387,11 @@ export const targeting = t.router({
 				}
 
 				return firingPhasers.flatMap((phaser) => {
-					const target = getCurrentTarget(
+					const ship = phaser.ecs?.getEntityById(
 						phaser.components.isShipSystem?.shipId || -1,
-						phaser.ecs!,
 					);
+					if (!ship) return [];
+					const target = getCurrentTarget(ship);
 					if (!target) return [];
 					return {
 						id: phaser.id,

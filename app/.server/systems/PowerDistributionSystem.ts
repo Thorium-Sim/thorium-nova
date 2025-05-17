@@ -38,7 +38,10 @@ export class PowerDistributionSystem extends System {
 			if (!power) continue;
 			const { powerDraw, powerSources } = power;
 			let suppliedPower = 0;
-			if (entity.components.isPlayerShip) {
+			if (
+				entity.components.isPlayerShip ||
+				(!entity.components.isPlayerShip && powerSources.length > 0)
+			) {
 				for (let i = 0; i < powerDraw; i++) {
 					let powerSupply = 1;
 					const source = powerSources[i];

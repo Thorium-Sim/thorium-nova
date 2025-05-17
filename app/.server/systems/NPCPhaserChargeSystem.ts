@@ -1,7 +1,7 @@
 import { System, type Entity } from "@thorium/utils/ecs";
 
 /** Used for charging NPC phasers without too much processing */
-export class PhaserChargeNPCSystem extends System {
+export class NPCPhaserChargeSystem extends System {
 	test(entity: Entity) {
 		return !!entity.components.isShip && !entity.components.isPlayerShip;
 	}
@@ -19,7 +19,7 @@ export class PhaserChargeNPCSystem extends System {
 					} = sys.components.isBattery || {};
 					const newCharge = Math.min(
 						capacity,
-						storage + (chargeRate * elapsedHours) / 2,
+						storage + chargeRate * elapsedHours,
 					);
 					sys.updateComponent("isBattery", { storage: newCharge });
 				}

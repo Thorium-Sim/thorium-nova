@@ -16,7 +16,7 @@ import { ReactorHeatSystem } from "./ReactorHeatSystem";
 import { HeatToCoolantSystem } from "./HeatToCoolantSystem";
 import { HeatDispersionSystem } from "./HeatDispersionSystem";
 import { PowerDrawSystem } from "./PowerDrawSystem";
-import { PhaserChargeNPCSystem } from "./PhaserChargeNPCSystem";
+import { NPCPhaserChargeSystem } from "./NPCPhaserChargeSystem";
 import { WaypointRemoveSystem } from "./WaypointRemoveSystem";
 import { ProcessTriggersSystem } from "./ProcessTriggersSystem";
 import { WarpSystem } from "./WarpSystem";
@@ -35,6 +35,7 @@ import { SolarSystemPositionSystem } from "./SolarSystemPositionSystem";
 import { SensorScanSystem } from "@thorium/.server/systems/SensorScanSystem";
 import { NPCKnowledgeSystem } from "@thorium/.server/systems/NPCKnowledgeSystem";
 import { NPCDecisionSystem } from "@thorium/.server/systems/NPCDecisionSystem";
+import { NPCFireWeaponsSystem } from "@thorium/.server/systems/NPCFireWeaponsSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -43,12 +44,13 @@ const systems = [
 	SolarSystemPositionSystem,
 	PassengerDestinationSystem,
 	PassengerMovementSystem,
+	NPCFireWeaponsSystem,
 	TimerSystem,
 	ReactorFuelSystem,
 	ReactorHeatSystem,
 	PowerDrawSystem,
 	PowerDistributionSystem,
-	PhaserChargeNPCSystem,
+	NPCPhaserChargeSystem,
 	TorpedoLoadingSystem,
 	NearbyObjectsSystem,
 	NPCKnowledgeSystem,

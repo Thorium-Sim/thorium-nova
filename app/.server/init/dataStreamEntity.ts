@@ -60,6 +60,7 @@ export function dataStreamEntity(e: Entity) {
 		return {
 			id: e.id.toString(),
 			x: getPhaserCharge(e),
+			f: e.components.isPhasers.arc || 1,
 			y: e.components.power?.currentPower,
 			z: e.components.heat?.heat || 0,
 		};

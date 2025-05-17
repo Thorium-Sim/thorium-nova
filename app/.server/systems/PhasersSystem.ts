@@ -21,11 +21,11 @@ export class PhasersSystem extends System {
 		if (!power) return;
 		const efficiency = entity.components.efficiency?.efficiency ?? 1;
 		if (phasers.firePercent === 0) return;
+		const phaserShip = entity.ecs?.getEntityById(
+			entity.components.isShipSystem?.shipId || -1,
+		);
 		if (power.currentPower === 0) {
 			entity.updateComponent("isPhasers", { firePercent: 0 });
-			const phaserShip = entity.ecs?.getEntityById(
-				entity.components.isShipSystem?.shipId || -1,
-			);
 			// TODO: Pubsub anywhere that needs to know phasers aren't firing
 			pubsub.publish.targeting.phasers.firing({
 				systemId: phaserShip?.components.position?.parentId || null,
@@ -36,11 +36,8 @@ export class PhasersSystem extends System {
 		}
 		const phaserDamage = power.currentPower * efficiency * elapsedHours;
 		if (phaserDamage === 0) return;
-
-		const target = getCurrentTarget(
-			entity.components.isShipSystem?.shipId || -1,
-			entity.ecs!,
-		);
+		if (!phaserShip) return;
+		const target = getCurrentTarget(phaserShip);
 
 		if (!target) return;
 		// Calculate the vector between the target and the ship
@@ -74,7 +71,7 @@ export function getTargetIsInPhaserRange(phasers: Entity) {
 		phasers.components.isShipSystem?.shipId || -1,
 	);
 	if (!ship) return false;
-	const target = getCurrentTarget(ship.id, phasers.ecs!);
+	const target = getCurrentTarget(ship);
 	if (!target) return false;
 
 	const { maxRange, arc, maxArc, headingDegree, pitchDegree } =
@@ -110,10 +107,14 @@ export function getTargetIsInPhaserRange(phasers: Entity) {
 	});
 }
 
-export function getCurrentTarget(shipId: number, ecs: ECS) {
-	for (const entity of ecs?.componentCache.get("isTargeting") || []) {
-		if (entity.components.isShipSystem?.shipId === shipId) {
-			return ecs?.getEntityById(entity.components.isTargeting?.target || -1);
+export function getCurrentTarget(ship: Entity) {
+	for (const [entityId] of ship.components.shipSystems?.shipSystems || []) {
+		const entity = ship.ecs?.getEntityById(entityId);
+
+		if (entity?.components.isTargeting) {
+			return ship.ecs?.getEntityById(
+				entity.components.isTargeting?.target || -1,
+			);
 		}
 	}
 }
