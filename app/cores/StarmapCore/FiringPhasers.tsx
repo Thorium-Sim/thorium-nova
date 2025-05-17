@@ -1,5 +1,5 @@
 import { q } from "@thorium/context/AppContext";
-import { OrbitControls } from "@react-three/drei";
+import { Line, OrbitControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { useMemo, useRef } from "react";
@@ -11,6 +11,8 @@ import {
 	Texture,
 	Vector3,
 } from "three";
+import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
+import type { Line2 } from "three-stdlib";
 
 const thickness = 1;
 
@@ -23,9 +25,22 @@ const direction = new Vector3();
 const quaternion = new Quaternion();
 
 export function FiringPhasers({ systemId }: { systemId: number }) {
+	const useStarmapStore = useGetStarmapStore();
+	const viewingMode = useStarmapStore((state) => state.viewingMode);
+
 	const [firingPhasers] = q.targeting.phasers.firing.useNetRequest({
 		systemId,
 	});
+
+	if (viewingMode === "core") {
+		return firingPhasers.map((phaser) => (
+			<SimplePhasers
+				key={`${phaser.id}`}
+				targetId={phaser.targetId}
+				shipId={phaser.shipId}
+			/>
+		));
+	}
 
 	return firingPhasers.map((phaser) => (
 		<PhaserDisplay
@@ -35,6 +50,43 @@ export function FiringPhasers({ systemId }: { systemId: number }) {
 		/>
 	));
 }
+
+function SimplePhasers({
+	targetId,
+	shipId,
+}: { targetId: number; shipId: number }) {
+	const { interpolate } = useLiveQuery();
+	const lineRef = useRef<Line2>(null);
+
+	useFrame(() => {
+		const ship = interpolate(shipId);
+		const target = interpolate(targetId);
+		if (!ship || !target) return;
+		if (lineRef.current) {
+			lineRef.current.geometry.setPositions([
+				ship.x,
+				ship.y,
+				ship.z,
+				target.x,
+				target.y,
+				target.z,
+			]);
+		}
+	});
+
+	return (
+		<Line
+			ref={lineRef}
+			points={[
+				[0, 0, 0],
+				[0, 0, 0],
+			]}
+			color={0xff8800}
+			lineWidth={5}
+		/>
+	);
+}
+
 function PhaserDisplay({
 	targetId,
 	shipId,

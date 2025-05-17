@@ -30,13 +30,15 @@ const up = new Vector3(0, 1, 0);
 const cameraProjection = new Vector3();
 const planeVector = new Vector3(0, 1, 0);
 const directionVector = new Vector3();
-function ConeVisualization({
+export function ConeVisualization({
 	arc,
 	heading,
 	pitch,
 	maxArc,
 	maxRange,
+	id,
 }: {
+	id: number;
 	arc: number;
 	heading: number;
 	pitch: number;
@@ -71,7 +73,7 @@ function ConeVisualization({
 		const angle =
 			Math.atan2(cameraProjection.x, cameraProjection.y) + rotation.y;
 		if (coneRef.current) {
-			coneRef.current.rotation.y = angle;
+			coneRef.current.rotation.y = angle + Math.PI / 2;
 		}
 
 		groupRef.current?.quaternion.setFromUnitVectors(
