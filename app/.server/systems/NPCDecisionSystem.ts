@@ -1,4 +1,6 @@
+import { phasers } from "@thorium/.server/data/plugins/systems/phasers";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { TORPEDO_FIRE_DISTANCE_SECONDS } from "@thorium/.server/systems/NPCFireWeaponsSystem";
 import { getPhaserCharge } from "@thorium/.server/systems/PhasersSystem";
 import {
 	adjustTorpedoInventory,
@@ -112,9 +114,25 @@ export class NPCDecisionSystem extends System {
 
 				// When weapons are ready, move towards the target
 				if (weaponsReady) {
+					const launcher = torpedoSystems[0];
 					// TODO May 15 2025 - add in some kind of attack patterns
 					// where the ship moves back and forth
-					setMoveTowardsPosition(target, { multiplier: 2 });
+					const inventoryTemplate = this.ecs.getEntityById(
+						launcher.components.isTorpedoLauncher?.torpedoEntity || -1,
+					);
+
+					const speed =
+						inventoryTemplate?.components.isInventory?.flags.torpedoCasing
+							?.speed || 50;
+
+					const torpedoTravelDistance = speed * TORPEDO_FIRE_DISTANCE_SECONDS;
+
+					setMoveTowardsPosition(
+						target,
+						phasersReady
+							? { multiplier: 2 }
+							: { distance: torpedoTravelDistance * 1.1 },
+					);
 				} else {
 					// When weapons are not ready, move away from weapons range.
 					setMoveTowardsPosition(

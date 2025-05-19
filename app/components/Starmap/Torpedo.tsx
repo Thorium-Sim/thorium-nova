@@ -1,6 +1,6 @@
 import { useFrame } from "@react-three/fiber";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
 	DoubleSide,
 	Euler,
@@ -11,10 +11,12 @@ import {
 	PlaneGeometry,
 	Quaternion,
 	Vector3,
-	type Object3DEventMap,
 	AdditiveBlending,
+	type Sprite,
 } from "three";
 import Explosion from "./Effects/Explosion";
+import blob from "./Effects/blob.png?url";
+import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
 
 export function Torpedo({
 	color,
@@ -27,18 +29,33 @@ export function Torpedo({
 		explosion: string;
 	};
 }) {
+	const blur = useShipSprite(blob);
 	const { interpolate } = useLiveQuery();
-	const [target, setTarget] = useState<Group<Object3DEventMap> | null>(null);
+	const ref = useRef<Group>(null);
+	const sprite = useRef<Sprite>(null);
 
 	useFrame(() => {
 		const position = interpolate(id);
-		if (position && target) {
-			target.position.set(position.x, position.y, position.z);
+		if (position && ref.current) {
+			ref.current.position.set(position.x, position.y, position.z);
 		}
 	});
+	const scale = 1 / 100;
 	return (
-		<group ref={(node) => setTarget(node)}>
-			{isDestroyed ? <Explosion /> : <Nucleus color={color} />}
+		<group ref={ref}>
+			{isDestroyed ? (
+				<Explosion />
+			) : (
+				// <Nucleus color={color} />
+				<sprite scale={[scale, scale, scale]}>
+					<spriteMaterial
+						map={blur}
+						color={color}
+						sizeAttenuation={false}
+						depthWrite={false}
+					/>
+				</sprite>
+			)}
 
 			{/* TODO May 14, 2024 - Add some kind of cool trail. But it has to be with instanced meshes,
       since we're way past 32 bit numbers */}

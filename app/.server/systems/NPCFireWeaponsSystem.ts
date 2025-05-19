@@ -13,7 +13,7 @@ const shipPosition = new Vector3();
 const targetPosition = new Vector3();
 
 /** How many seconds the torpedo should travel before hitting the target */
-const TORPEDO_FIRE_DISTANCE_SECONDS = 10;
+export const TORPEDO_FIRE_DISTANCE_SECONDS = 10;
 
 export class NPCFireWeaponsSystem extends System {
 	test(entity: Entity) {
@@ -72,7 +72,7 @@ export class NPCFireWeaponsSystem extends System {
 
 			const torpedoTravelDistance = speed * TORPEDO_FIRE_DISTANCE_SECONDS;
 
-			if (distance >= torpedoTravelDistance) {
+			if (distance >= torpedoTravelDistance && distance <= weaponsRange) {
 				const torpedo = spawnTorpedo(launcher);
 				this.ecs.addEntity(torpedo);
 

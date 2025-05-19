@@ -784,7 +784,7 @@ export const starmapCore = t.router({
 				)
 					return true;
 				if (entity.components.position.parentId === input.systemId) {
-					return true;
+					if (entity.components.isTorpedo) return true;
 				}
 			}
 			return false;

@@ -88,6 +88,16 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 			}
 		}
 
+		for (const torpedoEntity of context.ecs.componentCache.get("isTorpedo") ||
+			[]) {
+			if (
+				torpedoEntity.components.position?.parentId ===
+				ship.components.position?.parentId
+			) {
+				entities.push(dataStreamEntity(torpedoEntity));
+			}
+		}
+
 		const snapshot = this.SI.snapshot.create(entities);
 		this.send(snapshot);
 	}
