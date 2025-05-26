@@ -51,7 +51,7 @@ const remarkMdxImages: Plugin<[RemarkMdxImagesOptions?], Root> =
 							local: { type: "Identifier", name },
 						},
 					],
-				});
+				} as any);
 				imported.set(url, name);
 			}
 

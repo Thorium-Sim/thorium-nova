@@ -90,11 +90,12 @@ export class AutoRotateSystem extends System {
 				}
 			}
 			if (!doneWithPath) {
-
 				rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
 				up.set(0, 1, 0).applyQuaternion(rotationQuat);
-				
-				matrix.lookAt(positionVec, nextDestination, up).multiply(rotationMatrix);
+
+				matrix
+					.lookAt(positionVec, nextDestination, up)
+					.multiply(rotationMatrix);
 				// Use the thrusters to adjust the rotation of the ship to point towards the desired destination.
 				// First, determine the angle to the destination.
 				desiredRotationQuat.setFromRotationMatrix(matrix);

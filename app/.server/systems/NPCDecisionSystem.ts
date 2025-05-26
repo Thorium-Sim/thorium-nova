@@ -88,7 +88,7 @@ export class NPCDecisionSystem extends System {
 				desiredPosition.z = offsetPosition.z;
 			}
 		}
-		function setLookAtPosition(target: Entity|null) {
+		function setLookAtPosition(target: Entity | null) {
 			if (!target) return;
 			if (target.components.satellite) {
 				targetPosition.copy(getCompletePositionFromOrbit(target));
@@ -148,11 +148,11 @@ export class NPCDecisionSystem extends System {
 			alertLevel = 1;
 		} else if (combatAction === "firePhasers") {
 			setMoveTowardsPosition(targetEntity, { multiplier: 2 });
-setLookAtPosition(targetEntity)
-alertLevel = 1;
-} else if (combatAction === "fireTorpedo") {
-	const launcher = torpedoSystems[0];
-	setLookAtPosition(targetEntity)
+			setLookAtPosition(targetEntity);
+			alertLevel = 1;
+		} else if (combatAction === "fireTorpedo") {
+			const launcher = torpedoSystems[0];
+			setLookAtPosition(targetEntity);
 
 			const inventoryTemplate = this.ecs.getEntityById(
 				launcher.components.isTorpedoLauncher?.torpedoEntity || -1,
