@@ -181,7 +181,7 @@ function WeaponsResults({ objectId }: { objectId: number }) {
 					<span>{capitalCase(weapon.type)}</span>
 					<span>
 						{weapon.type === "phasers"
-							? `${weapon.charge}%`
+							? `${Math.round(weapon.charge * 100)}%`
 							: `${weapon.loaded}`}
 					</span>
 				</div>
