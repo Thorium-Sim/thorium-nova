@@ -73,12 +73,13 @@ export function CargoControl(props: CardProps) {
 				</h3>
 				<CargoList
 					selectedRoom={selectedRoom}
-					enRouteContainerId={enRouteContainer?.id}
+					enRouteContainer={enRouteContainer}
 					selectedContainerId={selectedContainerId}
 					onClick={async (key: string) => {
 						if (
 							selectedRoom?.id &&
-							enRouteContainer?.id === selectedContainerId
+							enRouteContainer?.id === selectedContainerId &&
+							enRouteContainer?.entityState === "idle"
 						) {
 							try {
 								await q.cargoControl.transfer.netSend({
@@ -142,10 +143,14 @@ export function CargoControl(props: CardProps) {
 				<ContainerLabel />
 				<CargoList
 					selectedRoom={selectedContainer}
-					enRouteContainerId={enRouteContainer?.id}
+					enRouteContainer={enRouteContainer}
 					selectedContainerId={selectedContainerId}
 					onClick={async (key) => {
-						if (enRouteContainer?.id === selectedContainerId && selectedRoom) {
+						if (
+							enRouteContainer?.id === selectedContainerId &&
+							selectedRoom &&
+							enRouteContainer.entityState === "idle"
+						) {
 							try {
 								await q.cargoControl.transfer.netSend({
 									toId: { type: "room", id: selectedRoom.id, shipId },

@@ -33,6 +33,11 @@ export function ShipView({
 
 	const [transformationLoaded, setTransformationLoaded] = useState(true);
 
+	useEffect(() => {
+		if (cardLoaded) {
+			imgMeasure();
+		}
+	}, [cardLoaded, imgMeasure]);
 	return (
 		<div
 			id="deck-container"
