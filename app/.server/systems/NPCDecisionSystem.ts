@@ -341,7 +341,6 @@ export class NPCDecisionSystem extends System {
 			}
 		}
 
-		console.log(alertLevel, targetId);
 		if (
 			alertLevel === 1 &&
 			typeof targetId === "number" &&

@@ -25,7 +25,6 @@ export const objectives = t.router({
 			const objectiveEntities =
 				ctx.flight?.ecs.componentCache.get("isObjective") || [];
 			for (const objective of objectiveEntities) {
-				console.log(objective.id);
 				if (
 					objective.components.isObjective?.shipId === ship.id &&
 					objective.components.identity

@@ -11,7 +11,6 @@ export function ObjectivesCore() {
 	const { shipId } = useStation();
 
 	const [objectives] = q.objectives.get.useNetRequest({ shipId });
-	console.log(objectives);
 	const [adding, setAdding] = useState(false);
 	return (
 		<div className="flex flex-col gap-1 h-full">
