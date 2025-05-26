@@ -341,12 +341,20 @@ export class NPCDecisionSystem extends System {
 			}
 		}
 
+		console.log(alertLevel, targetId);
 		if (
 			alertLevel === 1 &&
 			typeof targetId === "number" &&
 			targetingSystem.components.isTargeting?.target !== targetId
 		) {
 			targetingSystem.updateComponent("isTargeting", { target: targetId });
+			pubsub.publish.targeting.targetedContact({ shipId: entity.id });
+		} else if (
+			alertLevel > 2 &&
+			typeof targetId !== "number" &&
+			targetingSystem.components.isTargeting?.target
+		) {
+			targetingSystem.updateComponent("isTargeting", { target: null });
 			pubsub.publish.targeting.targetedContact({ shipId: entity.id });
 		}
 		if (entity.components.isShip?.alertLevel !== alertLevel.toString()) {
