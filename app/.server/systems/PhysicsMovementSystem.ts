@@ -37,6 +37,7 @@ const eventQueue = new RAPIER.EventQueue(true);
  */
 export class PhysicsMovementSystem extends System {
 	collisionStepEntities = new Set<number>();
+	count = 0;
 	test(entity: Entity) {
 		return Boolean(
 			(entity.components.position && entity.components.velocity) ||
@@ -44,6 +45,7 @@ export class PhysicsMovementSystem extends System {
 		);
 	}
 	preUpdate(): void {
+		this.count += 1;
 		this.collisionStepEntities.clear();
 	}
 	update(entity: Entity, elapsed: number) {
@@ -86,6 +88,11 @@ export class PhysicsMovementSystem extends System {
 			tempObj.quaternion.set(x, y, z, w);
 		}
 		if (world) {
+			worldVector.set(
+				worldEntity?.components.physicsWorld?.location.x || 0,
+				worldEntity?.components.physicsWorld?.location.y || 0,
+				worldEntity?.components.physicsWorld?.location.z || 0,
+			);
 			// Make sure the entity in question has a corresponding body in the physics world.
 			const handle = handles?.get(worldEntity?.id);
 			const body =
@@ -111,8 +118,7 @@ export class PhysicsMovementSystem extends System {
 						entity.components.position.y,
 						entity.components.position.z,
 					);
-					const worldPosition = getWorldPosition(positionVector);
-					positionVector = universeToWorld(positionVector, worldPosition);
+					positionVector = universeToWorld(positionVector, worldVector);
 					body.setTranslation(positionVector, true);
 				}
 				if (entity.components.rotation) {
@@ -194,11 +200,11 @@ export class PhysicsMovementSystem extends System {
 						body.applyTorqueImpulse(tempObj.localToWorld(tempVector), true);
 					}
 				}
-
 				return;
 			}
 			// Fall back on simple physics if we can't get a physics body for the entity.
 		}
+
 		{
 			/**
 			 * Simple Physics
@@ -328,7 +334,12 @@ export class PhysicsMovementSystem extends System {
 				entity.components.physicsWorld?.location.y || 0,
 				entity.components.physicsWorld?.location.z || 0,
 			);
-			world.step(eventQueue);
+			try {
+				world.step(eventQueue);
+			} catch {
+				// Occasionally there's an odd error that throws
+				// We can mostly safely ignore it
+			}
 
 			// Copy over the properties of each of the bodies to the entities
 			world.bodies.forEach((body: RigidBody) => {
@@ -338,6 +349,7 @@ export class PhysicsMovementSystem extends System {
 				if (!entity || !this.collisionStepEntities.has(entity.id)) return;
 				// No need to update fixed bodies.
 				if (body.bodyType() === RAPIER.RigidBodyType.Fixed) return;
+
 				{
 					const translation = body.translation();
 					const { x, y, z } = worldToUniverse(
@@ -366,6 +378,8 @@ export class PhysicsMovementSystem extends System {
 						forwardVelocity: tempVector.set(x, y, z).length(),
 					});
 				}
+				// Only run the simulation for one of the worlds, not both
+				this.collisionStepEntities.delete(entity.id);
 			});
 
 			eventQueue.drainContactForceEvents((event) => {
