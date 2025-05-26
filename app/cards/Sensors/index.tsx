@@ -321,9 +321,10 @@ function SensorsScannableObject({
 				shipPosition.z - position.z,
 			);
 			const units = currentSystem ? "km" : "LY";
-			distanceRef.current.innerHTML = `${Math.round(distance).toLocaleString(
-				"en",
-			)} ${units}`;
+			distanceRef.current.innerHTML = `${(distance).toLocaleString("en", {
+				minimumFractionDigits: 1,
+				maximumFractionDigits: 1,
+			})} ${units}`;
 			if (distance > passiveRange && inRange) {
 				setInRange(false);
 			}
@@ -347,7 +348,7 @@ function SensorsScannableObject({
 				slot="trigger"
 				className="w-full outline-none focus-within:bg-white/20 px-2 group-data-[expanded]:border-b group-data-[expanded]:mb-2 border-white/50"
 			>
-				<div className="flex justify-between">
+				<div className="flex justify-between tabular-nums">
 					{results.identification?.name || `Unknown ${id}`}
 					<span ref={distanceRef} />
 				</div>
