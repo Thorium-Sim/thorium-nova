@@ -64,7 +64,7 @@ export default function SearchableInput<T extends { id: any }>({
 	const searchQuery = useQuery({
 		queryKey: [queryKey, query],
 		queryFn: getOptions,
-		placeholderData: (prev) => prev || [],
+		placeholderData: (prev) => (query === "" ? [] : prev || []),
 		enabled: query.length > 0,
 	});
 
@@ -99,12 +99,11 @@ export default function SearchableInput<T extends { id: any }>({
 					}}
 				>
 					<Combobox.Options className="absolute pointer-events-auto mt-1 max-h-60 w-full overflow-auto panel !bg-black/90 z-40">
-						{searchQuery.isLoading && searchQuery.isFetching && (
+						{searchQuery.data?.length === 0 && searchQuery.isFetching ? (
 							<div className="relative cursor-default select-none py-2 px-4">
 								<LoadingSpinner compact />
 							</div>
-						)}
-						{searchQuery.data?.length === 0 && query !== "" ? (
+						) : searchQuery.data?.length === 0 && query !== "" ? (
 							<div className="relative cursor-default select-none py-2 px-4">
 								Nothing found.
 							</div>

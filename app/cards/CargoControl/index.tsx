@@ -132,7 +132,6 @@ export function CargoControl(props: CardProps) {
 							}}
 						>
 							Summon Closest Container
-							{selectedRoom?.name ? ` to ${selectedRoom?.name}` : ""}
 						</Button>
 					)}
 				</div>
