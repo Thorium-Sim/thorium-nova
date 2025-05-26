@@ -32,7 +32,15 @@ export class TorpedoMovementSystem extends System {
 			? this.ecs.getEntityById(component.targetId)
 			: null;
 		// If there's no target, continue traveling at the current velocity
-		if (!target) return;
+		if (!target) {
+			this.handleTorpedoDistance(
+				entity,
+				component.distanceTraveled,
+				deltaInSeconds,
+				component.maxRange,
+			);
+			return;
+		}
 		{
 			const { x, y, z } = target.components.position || { x: 0, y: 0, z: 0 };
 			targetPositionVector.set(x, y, z);
@@ -65,12 +73,24 @@ export class TorpedoMovementSystem extends System {
 			y: velocityVector.y,
 			z: velocityVector.z,
 		});
+		this.handleTorpedoDistance(
+			entity,
+			component.distanceTraveled,
+			deltaInSeconds,
+			component.maxRange,
+		);
+	}
+	handleTorpedoDistance(
+		entity: Entity,
+		distanceTraveled: number,
+		deltaInSeconds: number,
+		maxRange: number,
+	) {
 		entity.updateComponent("isTorpedo", {
 			distanceTraveled:
-				(component.distanceTraveled || 0) +
-				velocityVector.length() * deltaInSeconds,
+				(distanceTraveled || 0) + velocityVector.length() * deltaInSeconds,
 		});
-		if (component.distanceTraveled > component.maxRange) {
+		if (distanceTraveled > maxRange) {
 			// TODO May 11, 2024: Make a small explosion on the viewscreen
 			const systemId = entity.components.position?.parentId || null;
 			this.ecs.removeEntity(entity);

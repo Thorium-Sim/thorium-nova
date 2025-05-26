@@ -89,7 +89,9 @@ export const Splitter = (props: ISplitterProps) => {
 
 		if (node.getModel().isSplitterEnableHandle()) {
 			handleDiv.current = layout.getCurrentDocument()!.createElement("div");
-			handleDiv.current.className = `${cm(CLASSES.FLEXLAYOUT__SPLITTER_HANDLE)} ${
+			handleDiv.current.className = `${cm(
+				CLASSES.FLEXLAYOUT__SPLITTER_HANDLE,
+			)} ${
 				horizontal
 					? cm(CLASSES.FLEXLAYOUT__SPLITTER_HANDLE_HORZ)
 					: cm(CLASSES.FLEXLAYOUT__SPLITTER_HANDLE_VERT)
@@ -132,9 +134,13 @@ export const Splitter = (props: ISplitterProps) => {
 				return;
 			}
 			if (node.getOrientation() === Orientation.VERT) {
-				outlineDiv.current!.style.top = `${getBoundPosition(y - clientRect.y - dragStartY.current)}px`;
+				outlineDiv.current!.style.top = `${getBoundPosition(
+					y - clientRect.y - dragStartY.current,
+				)}px`;
 			} else {
-				outlineDiv.current!.style.left = `${getBoundPosition(x - clientRect.x - dragStartX.current)}px`;
+				outlineDiv.current!.style.left = `${getBoundPosition(
+					x - clientRect.x - dragStartX.current,
+				)}px`;
 			}
 
 			if (layout.isRealtimeResize()) {
@@ -205,7 +211,9 @@ export const Splitter = (props: ISplitterProps) => {
 		cursor: horizontal ? "ew-resize" : "ns-resize",
 		flexDirection: horizontal ? "column" : "row",
 	};
-	let className = `${cm(CLASSES.FLEXLAYOUT__SPLITTER)} ${cm(CLASSES.FLEXLAYOUT__SPLITTER_ + node.getOrientation().getName())}`;
+	let className = `${cm(CLASSES.FLEXLAYOUT__SPLITTER)} ${cm(
+		CLASSES.FLEXLAYOUT__SPLITTER_ + node.getOrientation().getName(),
+	)}`;
 
 	if (node instanceof BorderNode) {
 		className += ` ${cm(CLASSES.FLEXLAYOUT__SPLITTER_BORDER)}`;

@@ -601,7 +601,9 @@ export class LayoutInternal extends React.Component<
 						borderBottomLeftRadius: radius,
 						borderBottomRightRadius: radius,
 					}}
-					className={`${className} ${this.getClassName(CLASSES.FLEXLAYOUT__EDGE_RECT_TOP)}`}
+					className={`${className} ${this.getClassName(
+						CLASSES.FLEXLAYOUT__EDGE_RECT_TOP,
+					)}`}
 				>
 					<div style={{ transform: "rotate(180deg)" }}>{arrowIcon}</div>
 				</div>,
@@ -617,7 +619,9 @@ export class LayoutInternal extends React.Component<
 						borderTopRightRadius: radius,
 						borderBottomRightRadius: radius,
 					}}
-					className={`${className} ${this.getClassName(CLASSES.FLEXLAYOUT__EDGE_RECT_LEFT)}`}
+					className={`${className} ${this.getClassName(
+						CLASSES.FLEXLAYOUT__EDGE_RECT_LEFT,
+					)}`}
 				>
 					<div style={{ transform: "rotate(90deg)" }}>{arrowIcon}</div>
 				</div>,
@@ -633,7 +637,9 @@ export class LayoutInternal extends React.Component<
 						borderTopLeftRadius: radius,
 						borderTopRightRadius: radius,
 					}}
-					className={`${className} ${this.getClassName(CLASSES.FLEXLAYOUT__EDGE_RECT_BOTTOM)}`}
+					className={`${className} ${this.getClassName(
+						CLASSES.FLEXLAYOUT__EDGE_RECT_BOTTOM,
+					)}`}
 				>
 					<div>{arrowIcon}</div>
 				</div>,
@@ -649,7 +655,9 @@ export class LayoutInternal extends React.Component<
 						borderTopLeftRadius: radius,
 						borderBottomLeftRadius: radius,
 					}}
-					className={`${className} ${this.getClassName(CLASSES.FLEXLAYOUT__EDGE_RECT_RIGHT)}`}
+					className={`${className} ${this.getClassName(
+						CLASSES.FLEXLAYOUT__EDGE_RECT_RIGHT,
+					)}`}
 				>
 					<div style={{ transform: "rotate(-90deg)" }}>{arrowIcon}</div>
 				</div>,
@@ -1277,7 +1285,9 @@ export class LayoutInternal extends React.Component<
 		const dragElement = (
 			<div
 				style={{ position: "unset" }}
-				className={`${this.getClassName(CLASSES.FLEXLAYOUT__LAYOUT)} ${this.getClassName(CLASSES.FLEXLAYOUT__DRAG_RECT)}`}
+				className={`${this.getClassName(
+					CLASSES.FLEXLAYOUT__LAYOUT,
+				)} ${this.getClassName(CLASSES.FLEXLAYOUT__DRAG_RECT)}`}
 			>
 				{component}
 			</div>

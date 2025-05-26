@@ -131,8 +131,9 @@ const PopupMenu = (props: IPopupMenuProps) => {
 	const itemElements = items.map((item, i) => {
 		let classes = classNameMapper(CLASSES.FLEXLAYOUT__POPUP_MENU_ITEM);
 		if (parentNode.getSelected() === item.index) {
-			classes +=
-				` ${classNameMapper(CLASSES.FLEXLAYOUT__POPUP_MENU_ITEM__SELECTED)}`;
+			classes += ` ${classNameMapper(
+				CLASSES.FLEXLAYOUT__POPUP_MENU_ITEM__SELECTED,
+			)}`;
 		}
 		return (
 			<div

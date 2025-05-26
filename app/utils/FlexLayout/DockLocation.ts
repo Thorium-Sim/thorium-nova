@@ -46,7 +46,7 @@ export class DockLocation {
 		if (bl) {
 			return br ? DockLocation.BOTTOM : DockLocation.LEFT;
 		}
-			return br ? DockLocation.RIGHT : DockLocation.TOP;
+		return br ? DockLocation.RIGHT : DockLocation.TOP;
 	}
 
 	/** @internal */
@@ -76,15 +76,17 @@ export class DockLocation {
 	getDockRect(r: Rect) {
 		if (this === DockLocation.TOP) {
 			return new Rect(r.x, r.y, r.width, r.height / 2);
-		}if (this === DockLocation.BOTTOM) {
+		}
+		if (this === DockLocation.BOTTOM) {
 			return new Rect(r.x, r.getBottom() - r.height / 2, r.width, r.height / 2);
 		}
 		if (this === DockLocation.LEFT) {
 			return new Rect(r.x, r.y, r.width / 2, r.height);
-		}if (this === DockLocation.RIGHT) {
+		}
+		if (this === DockLocation.RIGHT) {
 			return new Rect(r.getRight() - r.width / 2, r.y, r.width / 2, r.height);
 		}
-			return r.clone();
+		return r.clone();
 	}
 
 	/** @internal */
@@ -98,7 +100,8 @@ export class DockLocation {
 				rect.height - size,
 			);
 			return { start: r1, end: r2 };
-		}if (this === DockLocation.LEFT) {
+		}
+		if (this === DockLocation.LEFT) {
 			const r1 = new Rect(rect.x, rect.y, size, rect.height);
 			const r2 = new Rect(
 				rect.x + size,
@@ -113,29 +116,28 @@ export class DockLocation {
 			const r2 = new Rect(rect.x, rect.y, rect.width - size, rect.height);
 			return { start: r1, end: r2 };
 		}
-			// if (this === DockLocation.BOTTOM) {
-			const r1 = new Rect(rect.x, rect.getBottom() - size, rect.width, size);
-			const r2 = new Rect(rect.x, rect.y, rect.width, rect.height - size);
-			return { start: r1, end: r2 };
+		// if (this === DockLocation.BOTTOM) {
+		const r1 = new Rect(rect.x, rect.getBottom() - size, rect.width, size);
+		const r2 = new Rect(rect.x, rect.y, rect.width, rect.height - size);
+		return { start: r1, end: r2 };
 	}
 
 	/** @internal */
 	reflect() {
 		if (this === DockLocation.TOP) {
 			return DockLocation.BOTTOM;
-		}if (this === DockLocation.LEFT) {
+		}
+		if (this === DockLocation.LEFT) {
 			return DockLocation.RIGHT;
 		}
 		if (this === DockLocation.RIGHT) {
 			return DockLocation.LEFT;
 		}
-			// if (this === DockLocation.BOTTOM) {
-			return DockLocation.TOP;
+		// if (this === DockLocation.BOTTOM) {
+		return DockLocation.TOP;
 	}
 
 	toString() {
-		return (
-			`(DockLocation: name=${this.name}, orientation=${this.orientation})`
-		);
+		return `(DockLocation: name=${this.name}, orientation=${this.orientation})`;
 	}
 }

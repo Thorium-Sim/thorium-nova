@@ -37,7 +37,6 @@ const eventQueue = new RAPIER.EventQueue(true);
  */
 export class PhysicsMovementSystem extends System {
 	collisionStepEntities = new Set<number>();
-	count = 0;
 	test(entity: Entity) {
 		return Boolean(
 			(entity.components.position && entity.components.velocity) ||
@@ -45,7 +44,6 @@ export class PhysicsMovementSystem extends System {
 		);
 	}
 	preUpdate(): void {
-		this.count += 1;
 		this.collisionStepEntities.clear();
 	}
 	update(entity: Entity, elapsed: number) {
@@ -349,7 +347,6 @@ export class PhysicsMovementSystem extends System {
 				if (!entity || !this.collisionStepEntities.has(entity.id)) return;
 				// No need to update fixed bodies.
 				if (body.bodyType() === RAPIER.RigidBodyType.Fixed) return;
-
 				{
 					const translation = body.translation();
 					const { x, y, z } = worldToUniverse(

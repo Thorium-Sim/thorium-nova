@@ -99,9 +99,11 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 			}
 		}
 
-		for (const passengerEntity of context.ecs.componentCache.get("passengerMovement")||[]) {
+		for (const passengerEntity of context.ecs.componentCache.get(
+			"passengerMovement",
+		) || []) {
 			if (passengerEntity.components.position?.parentId === ship.id) {
-				entities.push(dataStreamEntity(passengerEntity))
+				entities.push(dataStreamEntity(passengerEntity));
 			}
 		}
 

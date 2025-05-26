@@ -70,17 +70,17 @@ export function BorderTab(props: IBorderTabProps) {
 			</>
 		);
 	}
-		return (
-			<>
-				{show && (
-					<Splitter
-						layout={layout}
-						node={border}
-						index={0}
-						horizontal={horizontal}
-					/>
-				)}
-				<div ref={selfRef} style={style} className={className} />
-			</>
-		);
+	return (
+		<>
+			{show && (
+				<Splitter
+					layout={layout}
+					node={border}
+					index={0}
+					horizontal={horizontal}
+				/>
+			)}
+			<div ref={selfRef} style={style} className={className} />
+		</>
+	);
 }

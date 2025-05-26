@@ -321,7 +321,9 @@ function SensorsScannableObject({
 				shipPosition.z - position.z,
 			);
 			const units = currentSystem ? "km" : "LY";
-			distanceRef.current.innerHTML = `${Math.round(distance).toLocaleString("en")} ${units}`;
+			distanceRef.current.innerHTML = `${Math.round(distance).toLocaleString(
+				"en",
+			)} ${units}`;
 			if (distance > passiveRange && inRange) {
 				setInRange(false);
 			}

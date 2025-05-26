@@ -133,7 +133,9 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 		layoutTab(i);
 	}
 
-	let borderClasses = `${cm(CLASSES.FLEXLAYOUT__BORDER)} ${cm(CLASSES.FLEXLAYOUT__BORDER_ + border.getLocation().getName())}`;
+	let borderClasses = `${cm(CLASSES.FLEXLAYOUT__BORDER)} ${cm(
+		CLASSES.FLEXLAYOUT__BORDER_ + border.getLocation().getName(),
+	)}`;
 	if (border.getClassName() !== undefined) {
 		borderClasses += ` ${border.getClassName()}`;
 	}
@@ -200,7 +202,9 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 			<button
 				key="overflowbutton"
 				ref={overflowbuttonRef}
-				className={`${cm(CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON)} ${cm(CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_OVERFLOW)} ${cm(
+				className={`${cm(CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON)} ${cm(
+					CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_OVERFLOW,
+				)} ${cm(
 					CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_OVERFLOW_ +
 						border.getLocation().getName(),
 				)}`}
@@ -226,7 +230,9 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 				<button
 					key="popout"
 					title={popoutTitle}
-					className={`${cm(CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON)} ${cm(CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_FLOAT)}`}
+					className={`${cm(CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON)} ${cm(
+						CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_FLOAT,
+					)}`}
 					onClick={onPopoutTab}
 					onPointerDown={onInterceptPointerDown}
 				>
@@ -241,7 +247,9 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 		<div
 			key="toolbar"
 			ref={toolbarRef}
-			className={`${cm(CLASSES.FLEXLAYOUT__BORDER_TOOLBAR)} ${cm(CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_ + border.getLocation().getName())}`}
+			className={`${cm(CLASSES.FLEXLAYOUT__BORDER_TOOLBAR)} ${cm(
+				CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_ + border.getLocation().getName(),
+			)}`}
 		>
 			{buttons}
 		</div>
@@ -298,7 +306,9 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 				>
 					<div
 						style={innerStyle}
-						className={`${cm(CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER)} ${cm(
+						className={`${cm(
+							CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER,
+						)} ${cm(
 							CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER_ +
 								border.getLocation().getName(),
 						)}`}
