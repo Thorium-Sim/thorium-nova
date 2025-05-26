@@ -2,6 +2,7 @@ import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import Checkbox from "@thorium/ui/Checkbox";
+import { Icon } from "@thorium/ui/Icon";
 import Input from "@thorium/ui/Input";
 import Select from "@thorium/ui/Select";
 import { useState } from "react";
@@ -10,6 +11,7 @@ export function ObjectivesCore() {
 	const { shipId } = useStation();
 
 	const [objectives] = q.objectives.get.useNetRequest({ shipId });
+	console.log(objectives);
 	const [adding, setAdding] = useState(false);
 	return (
 		<div className="flex flex-col gap-1 h-full">
@@ -24,24 +26,50 @@ export function ObjectivesCore() {
 							<div className="text-sm">{objective.description}</div>
 						</div>
 						<div>
-							<Select
-								label="State"
-								labelHidden
-								size="xs"
-								items={[
-									{ id: "active", label: "Active" },
-									{ id: "complete", label: "Complete" },
-									{ id: "cancelled", label: "Cancelled" },
-								]}
-								selected={objective.state}
-								setSelected={async (state) => {
-									if (Array.isArray(state)) return;
-									await q.objectives.setState.netSend({
-										objectiveId: objective.id,
-										state,
-									});
-								}}
-							/>
+							<div className="flex gap-0.5">
+								<Select
+									label="State"
+									labelHidden
+									size="xs"
+									items={[
+										{ id: "active", label: "Active" },
+										{ id: "complete", label: "Complete" },
+										{ id: "cancelled", label: "Cancelled" },
+									]}
+									selected={objective.state}
+									setSelected={async (state) => {
+										if (Array.isArray(state)) return;
+										await q.objectives.setState.netSend({
+											objectiveId: objective.id,
+											state,
+										});
+									}}
+								/>
+								<Button
+									className="btn-success btn-xs"
+									aria-label="Complete"
+									onClick={() =>
+										q.objectives.setState.netSend({
+											objectiveId: objective.id,
+											state: "complete",
+										})
+									}
+								>
+									<Icon name="check" />
+								</Button>
+								<Button
+									className="btn-error btn-xs"
+									aria-label="Cancel"
+									onClick={() =>
+										q.objectives.setState.netSend({
+											objectiveId: objective.id,
+											state: "cancelled",
+										})
+									}
+								>
+									<Icon name="x" />
+								</Button>
+							</div>
 							<Checkbox
 								label="Crew Complete"
 								checked={objective.crewComplete}
@@ -70,8 +98,8 @@ export function ObjectivesCore() {
 						setAdding(false);
 					}}
 				>
-					<div className="flex gap-1 flex-wrap items-start">
-						<div className="flex-1">
+					<div className="flex flex-col w-full gap-1 flex-wrap items-start">
+						<div className="flex-1 w-full">
 							<Input
 								label="Title"
 								name="objective"
@@ -79,15 +107,15 @@ export function ObjectivesCore() {
 								className="input-sm"
 							/>
 						</div>
-						<div className="flex-1">
+						<div className="flex-1 w-full">
 							<Input
 								as="textarea"
 								name="description"
 								label="Description"
-								className="input-sm"
+								className="textarea-sm"
 							/>
 						</div>
-						<div className="flex-1">
+						<div className="flex-1 w-full">
 							<Input
 								label="Priority"
 								className="input-sm"
