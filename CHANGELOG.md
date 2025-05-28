@@ -3,6 +3,35 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.19](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.18...1.0.0-alpha.19) (2025-05-28)
+
+
+### Bug Fixes
+
+* Address an issue with clicking the yaw or forward/reverse thruster controls. ([6f7c0b5](https://github.com/Thorium-Sim/thorium-nova/commit/6f7c0b554da3de9df41886844159e388c4afaac4))
+* Attempt to fix the issues preventing Thorium Nova from loading on Windows. ([d3e1958](https://github.com/Thorium-Sim/thorium-nova/commit/d3e1958ec103939d80e8283516d901fbb0e6b9ad))
+* Distances now display using tabular nums so they don't jump around as they change value. ([cea7bfb](https://github.com/Thorium-Sim/thorium-nova/commit/cea7bfbcf70478e799e35974bd5fe47e98a803e0))
+* Fix cargo containers not moving ([33b3a5e](https://github.com/Thorium-Sim/thorium-nova/commit/33b3a5e9098b1211d66621d6397abcd090cb0d9b))
+* Improve layout and rendering of widgets ([9924ff4](https://github.com/Thorium-Sim/thorium-nova/commit/9924ff4948f25037169733872e4ced80456d3c00))
+* Improve layout and UX of Cargo Control screen ([11a2977](https://github.com/Thorium-Sim/thorium-nova/commit/11a2977ac73af3c71ba6a5a1cd9fcb3fe5808e34))
+* Improve the layout and behavior of the Objectives core ([d5c7fd7](https://github.com/Thorium-Sim/thorium-nova/commit/d5c7fd76438a87a0db778f072b84e07188b4072e))
+* Improve the way ships move between physics blocks ([bc3ba3f](https://github.com/Thorium-Sim/thorium-nova/commit/bc3ba3fe6b625859fce4c187e8a5598e70c48b22))
+* It is not not possible to transfer cargo to a container before it arrives at the room. ([e5f12fd](https://github.com/Thorium-Sim/thorium-nova/commit/e5f12fdf3401c9bf1f2895ea777e4f65a762c03a))
+* NPCs un-target ships when they cease being hostile. ([943584e](https://github.com/Thorium-Sim/thorium-nova/commit/943584e40f0c5d60545f72fdb1481c0d5221b74c))
+* Phasers beams now properly disappear from the targeting screen when the crew ceases firing them ([4d53d29](https://github.com/Thorium-Sim/thorium-nova/commit/4d53d296da901dc443a57c3abc0c8b72042eda73))
+* Properly display phaser scan results ([2ccc0f7](https://github.com/Thorium-Sim/thorium-nova/commit/2ccc0f79e8dc58470c6230952d5e427e5824ac56))
+* Remove the battery numbering from the Systems Monitor card ([c1f9bef](https://github.com/Thorium-Sim/thorium-nova/commit/c1f9befc701ba3abf96f3a6aaa3505eb7f4bad95))
+* Torpedos will no longer teleport back and forth between two points in space. ([e06b9aa](https://github.com/Thorium-Sim/thorium-nova/commit/e06b9aa0b55838c3a56c3b6095a8509a471a61fd))
+
+
+### Features
+
+* Better NPC combat movement and behaviors. ([3c4424c](https://github.com/Thorium-Sim/thorium-nova/commit/3c4424cb512cdd7ea2e2eed0732fa2fa4487b8e5))
+* Improve torpedo core visualization. ([ce81f60](https://github.com/Thorium-Sim/thorium-nova/commit/ce81f60378286541d70d9b3dc1a6402680568116))
+* NPC entities now charge phasers, load torpedoes, and move to an aggressive position when ordered to attack. ([904c954](https://github.com/Thorium-Sim/thorium-nova/commit/904c954c5f8c694934f7b7301a7987cdc8bde539))
+* NPCs now fire phasers when ordered to attack ([9443fcd](https://github.com/Thorium-Sim/thorium-nova/commit/9443fcd632dd905bd96560a15f6d5edd95bb03a8))
+* Visualize weapons and phaser range on Starmap Core ([e983bcb](https://github.com/Thorium-Sim/thorium-nova/commit/e983bcb7dcc72d20aeedafa1696b844ec91d72fd))
+
 # [1.0.0-alpha.18](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.17...1.0.0-alpha.18) (2025-05-08)
 
 
