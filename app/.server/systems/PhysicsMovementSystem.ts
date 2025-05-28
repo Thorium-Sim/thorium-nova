@@ -326,58 +326,19 @@ export class PhysicsMovementSystem extends System {
 		// Run the physics simulation for all of the relevant worlds.
 		this.ecs.componentCache.get("physicsWorld")?.forEach((entity) => {
 			const world = entity.components.physicsWorld?.world as World;
-			if (!world) return;
-			worldVector.set(
-				entity.components.physicsWorld?.location.x || 0,
-				entity.components.physicsWorld?.location.y || 0,
-				entity.components.physicsWorld?.location.z || 0,
-			);
+			const enabled = entity.components.physicsWorld?.enabled;
+			if (!world || !enabled) return;
+			// worldVector.set(
+			// 	entity.components.physicsWorld?.location.x || 0,
+			// 	entity.components.physicsWorld?.location.y || 0,
+			// 	entity.components.physicsWorld?.location.z || 0,
+			// );
 			try {
 				world.step(eventQueue);
 			} catch {
 				// Occasionally there's an odd error that throws
 				// We can mostly safely ignore it
 			}
-
-			// Copy over the properties of each of the bodies to the entities
-			world.bodies.forEach((body: RigidBody) => {
-				// @ts-expect-error - A very narrow type
-				const entity = this.ecs.getEntityById(body.userData?.entityId);
-				// No need to update entities that aren't in the collision step.
-				if (!entity || !this.collisionStepEntities.has(entity.id)) return;
-				// No need to update fixed bodies.
-				if (body.bodyType() === RAPIER.RigidBodyType.Fixed) return;
-				{
-					const translation = body.translation();
-					const { x, y, z } = worldToUniverse(
-						tempVector.set(translation.x, translation.y, translation.z),
-						worldVector,
-					);
-					entity.updateComponent("position", { x, y, z });
-				}
-				{
-					const { x, y, z, w } = body.rotation();
-					entity.updateComponent("rotation", { x, y, z, w });
-				}
-				{
-					const { x, y, z } = body.linvel();
-					entity.updateComponent("velocity", { x, y, z });
-				}
-				{
-					const { x, y, z } = body.angvel();
-					entity.updateComponent("rotationVelocity", { x, y, z });
-				}
-
-				{
-					// Set the measured forward velocity
-					const { x, y, z } = body.linvel();
-					entity.updateComponent("velocity", {
-						forwardVelocity: tempVector.set(x, y, z).length(),
-					});
-				}
-				// Only run the simulation for one of the worlds, not both
-				this.collisionStepEntities.delete(entity.id);
-			});
 
 			eventQueue.drainContactForceEvents((event) => {
 				const body1 = world.getCollider(event.collider1()).parent();
@@ -446,5 +407,51 @@ export class PhysicsMovementSystem extends System {
 				event.free();
 			});
 		});
+
+		// Now loop over all of the collision step entities
+		// Copy over the properties of each of the bodies to the entities
+		for (const entityId of this.collisionStepEntities) {
+			const entity = this.ecs.getEntityById(entityId);
+			if (!entity) continue;
+			const worldEntity = getEntityWorld(this.ecs, entity);
+			const world = worldEntity?.components.physicsWorld?.world as World;
+			if (!world) continue;
+			const bodyHandle = entity.components.physicsHandles?.handles.get(
+				worldEntity?.id,
+			);
+			const body = world.bodies.get(bodyHandle);
+			if (!body) continue;
+			// No need to update fixed bodies.
+			if (body.bodyType() === RAPIER.RigidBodyType.Fixed) return;
+
+			{
+				const translation = body.translation();
+				const { x, y, z } = worldToUniverse(
+					tempVector.set(translation.x, translation.y, translation.z),
+					worldVector,
+				);
+				entity.updateComponent("position", { x, y, z });
+			}
+			{
+				const { x, y, z, w } = body.rotation();
+				entity.updateComponent("rotation", { x, y, z, w });
+			}
+			{
+				const { x, y, z } = body.linvel();
+				entity.updateComponent("velocity", { x, y, z });
+			}
+			{
+				const { x, y, z } = body.angvel();
+				entity.updateComponent("rotationVelocity", { x, y, z });
+			}
+
+			{
+				// Set the measured forward velocity
+				const { x, y, z } = body.linvel();
+				entity.updateComponent("velocity", {
+					forwardVelocity: tempVector.set(x, y, z).length(),
+				});
+			}
+		}
 	}
 }

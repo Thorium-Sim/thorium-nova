@@ -364,6 +364,8 @@ const quotes = [
 	"Learn what the rest of the world is like. The variety is worthwhile.",
 	// Ross Gay
 	"Isn’t efficiency almost always at the cost of care?",
+	// Ada Lovelace
+	"Understand well as I may, my comprehension can only be an infinitesimal fraction of all I want to understand.",
 ];
 
 const QuoteOfTheDay = () => {
