@@ -7,7 +7,9 @@
 		"tailwind.config.ts",
 		"vite.config.ts",
 		"scripts/**/*",
-		".github/actions/**/*"
+		".github/actions/**/*",
+		"package.json",
+		"app/components/NotFound/astronaut.json"
 	],
 	"compilerOptions": {
 		"checkJs": true,
@@ -17,7 +19,7 @@
 		"noEmit": true,
 		"composite": true,
 		"lib": ["DOM", "DOM.Iterable", "ES2022"],
-		"types": ["vite/client", "bun", "./worker-configuration.d.ts"],
+		"types": ["vite/client", "bun"],
 		"target": "ES2022",
 		"module": "ES2022",
 		"moduleResolution": "bundler",

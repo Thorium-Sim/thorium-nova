@@ -31,27 +31,23 @@ export function ShipView({
 		widthScale: imgDims.width / pixelRatio / shipLength,
 	};
 
-	const [transformationLoaded, setTransformationLoaded] = useState(false);
+	const [transformationLoaded, setTransformationLoaded] = useState(true);
 
 	useEffect(() => {
-		if (!cardLoaded) setTransformationLoaded(false);
-		else {
-			setTimeout(() => {
-				measure();
-				imgMeasure();
-				setTransformationLoaded(true);
-			}, 200);
+		if (cardLoaded) {
+			imgMeasure();
 		}
-	}, [cardLoaded, imgMeasure, measure]);
-
+	}, [cardLoaded, imgMeasure]);
 	return (
 		<div
+			id="deck-container"
 			className="h-full w-full justify-self-center overflow-hidden relative select-none"
 			ref={ref}
 		>
 			<Suspense fallback={null}>
 				{decks.map((d, i) => (
 					<div
+						id={d.name}
 						className="absolute w-full origin-top pointer-events-none"
 						key={d.name}
 						style={{
@@ -102,6 +98,7 @@ export function ShipView({
 									useShipMapStore.setState({ selectedRoomId: null })
 								}
 								className="pointer-events-auto"
+								onLoad={() => imgMeasure()}
 							/>
 						</div>
 					</div>

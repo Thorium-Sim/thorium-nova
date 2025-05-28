@@ -33,7 +33,7 @@ class Entity {
 	 * @param {Array[Component]} [components=[]] An array of initial components.
 	 */
 	id: number;
-	ecs: null | ECS;
+	ecs!: ECS;
 	systems = new Set<System>();
 	systemsDirty: boolean;
 	components: Partial<Components>;
@@ -97,11 +97,6 @@ class Entity {
 				console.error("Error initializing component:", componentId, err);
 			}
 		}
-		/**
-		 * A reference to parent ECS class.
-		 * @property {ECS} ecs
-		 */
-		this.ecs = null;
 	}
 	toJSON() {
 		return {

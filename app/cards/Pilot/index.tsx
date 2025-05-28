@@ -171,7 +171,7 @@ function getInterstellarDistance(
 			system1.z - position2.z,
 		);
 	}
-	return `${value.toLocaleString()} ${unit}`;
+	return `${value.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${unit}`;
 }
 
 const LockOnButton = () => {
@@ -225,7 +225,7 @@ const LockOnButton = () => {
 				<div className="font-bold text-3xl my-1 ">
 					{autopilot.destinationName || "No Course Set"}
 				</div>
-				<div>
+				<div className="tabular-nums">
 					{autopilot.destinationName ? (
 						<span>
 							Distance: <span ref={distanceRef} />

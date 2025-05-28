@@ -129,7 +129,13 @@ export const bunDataStoreProps: DataStoreOperations = {
 			): T;
 		},
 	) {
-		const objectGlob = `${thoriumPath}/plugins/${this.id}/${aspectName}/*/manifest.yml`;
+		const objectGlob = path.join(
+			thoriumPath,
+			"plugins",
+			this.id,
+			aspectName,
+			"/*/manifest.yml",
+		);
 		const data = await loadFolderYaml<{ name: string } & Record<string, any>>(
 			objectGlob,
 		);
@@ -193,9 +199,9 @@ export const bunDataStoreProps: DataStoreOperations = {
 	async getFlights() {
 		let files: string[];
 		try {
-			files = await fs.readdir(`${thoriumPath}/flights/`);
+			files = await fs.readdir(path.join(thoriumPath, "/flights/"));
 		} catch {
-			await fs.mkdir(`${thoriumPath}/flights/`);
+			await fs.mkdir(path.join(thoriumPath, "/flights/"));
 			files = [];
 		}
 		const flightFiles = files.filter((f) => f.includes(".flight"));
@@ -219,20 +225,24 @@ export const bunDataStoreProps: DataStoreOperations = {
 };
 
 export async function loadPlugins(this: ServerDataModel) {
-	const plugins = new Bun.Glob(`${thoriumPath}/plugins/*/manifest.yml`).scan({
+	const plugins = new Bun.Glob(
+		path.join(thoriumPath, "/plugins/*/manifest.yml"),
+	).scan({
 		onlyFiles: true,
 	});
-	const pluginRegex = new RegExp(`${thoriumPath}/plugins/(.*)/manifest.yml`);
 	for await (const plugin of plugins) {
-		const name = pluginRegex.exec(plugin)![1];
-		try {
-			const plugin = new BasePlugin({ name }, this, {
-				meta: { filePath: `/plugins/${name}/manifest.yml` },
-			});
-			await plugin.loadAspects();
-			this.plugins.push(plugin);
-		} catch (err) {
-			console.error(`Error loading plugin ${name}:`, err);
+		const splitPath = plugin.split(path.sep);
+		if (splitPath.at(-1) === "manifest.yml") {
+			const name = splitPath.at(-2);
+			try {
+				const plugin = new BasePlugin({ name }, this, {
+					meta: { filePath: `/plugins/${name}/manifest.yml` },
+				});
+				await plugin.loadAspects();
+				this.plugins.push(plugin);
+			} catch (err) {
+				console.error(`Error loading plugin ${name}:`, err);
+			}
 		}
 	}
 }

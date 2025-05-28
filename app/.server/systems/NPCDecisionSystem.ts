@@ -1,12 +1,13 @@
+import { phasers } from "@thorium/.server/data/plugins/systems/phasers";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { TORPEDO_FIRE_DISTANCE_SECONDS } from "@thorium/.server/systems/NPCFireWeaponsSystem";
+import { getPhaserCharge } from "@thorium/.server/systems/PhasersSystem";
 import {
 	adjustTorpedoInventory,
 	getShipTorpedos,
 } from "@thorium/cards/Targeting/data.server";
 import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
-import {
-	getShipSystem,
-	getShipSystems,
-} from "@thorium/utils/.server/ship/getShipSystem";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { type ECS, Entity, System } from "@thorium/utils/ecs";
 import type { scanTypes } from "@thorium/utils/flags/scanTypes";
 import type { threatScores } from "@thorium/utils/flags/shipObjectives";
@@ -14,16 +15,31 @@ import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { randomPointInSphere } from "@thorium/utils/operations/randomPointInSphere";
 import { getTargetPoint } from "@thorium/utils/starmap/getTargetPoint";
 import { pathfinder } from "@thorium/utils/starmap/pathfinder.server";
-import { getObjectOffsetPosition } from "@thorium/utils/starmap/position";
-import { Vector3 } from "three";
+import {
+	getCompletePositionFromOrbit,
+	getObjectOffsetPosition,
+} from "@thorium/utils/starmap/position";
+import { Quaternion, Vector3 } from "three";
 import type z from "zod";
 
 const wanderVector = new Vector3();
 const shipPosition = new Vector3();
+const targetPosition = new Vector3();
 const destinationVector = new Vector3();
+const defaultForward = new Vector3(0, 0, 1);
+const quaternion = new Quaternion();
 
-// TODO April 4, 2025 Hard-coding this to weapons range.
-const FLEE_DISTANCE = 25_000;
+const direction = new Vector3();
+
+/**
+ * TODO:
+ * - Convert tactical movements into actions
+ *   - firePhaser - Get into a position where the phasers can be fired
+ *   - fireTorpedo - Move to the TORPEDO_FIRE_DISTANCE and then turn to face the target
+ *   - regroup - Move away from the target and reload/recharge weapons. Include some kind of delay before transitioning into one of the other actions.
+ */
+
+const DEFAULT_FLEE_DISTANCE = 25_000;
 export class NPCDecisionSystem extends System {
 	test(entity: Entity) {
 		return !!(
@@ -40,15 +56,12 @@ export class NPCDecisionSystem extends System {
 		// Decide what ships to scan, and what to scan
 		npcScan(entity);
 		let alertLevel = 5;
-		const position = entity.components.position;
+		const position = entity.components.position!;
 
 		const desiredPosition = {
-			x: 0,
-			y: 0,
-			z: 0,
 			...position,
 		};
-		const desiredRotation: {
+		let desiredRotation: {
 			x: number;
 			y: number;
 			z: number;
@@ -57,13 +70,16 @@ export class NPCDecisionSystem extends System {
 
 		function setMoveTowardsPosition(
 			target?: Entity | null,
-			distanceMultiplier = 1,
+			options?: { multiplier: number } | { distance: number },
 		) {
 			if (target && position) {
 				const offsetPosition = getObjectOffsetPosition(
 					target,
 					position,
-					(entity.components.size?.length || 1) * distanceMultiplier,
+					(options && "distance" in options
+						? options.distance
+						: ((entity.components.size?.length || 1) / 1000) * 2) *
+						(options && "multiplier" in options ? options.multiplier : 1),
 				);
 
 				desiredPosition.parentId = position.parentId;
@@ -72,53 +88,130 @@ export class NPCDecisionSystem extends System {
 				desiredPosition.z = offsetPosition.z;
 			}
 		}
+		function setLookAtPosition(target: Entity | null) {
+			if (!target) return;
+			if (target.components.satellite) {
+				targetPosition.copy(getCompletePositionFromOrbit(target));
+			} else if (target.components.position) {
+				targetPosition.set(
+					target.components.position.x,
+					target.components.position.y,
+					target.components.position.z,
+				);
+			} else {
+				throw new Error("Unable to determine object's position.");
+			}
+			direction.subVectors(targetPosition, position).normalize();
+			quaternion.setFromUnitVectors(defaultForward, direction);
+			desiredRotation = {
+				x: quaternion.x,
+				y: quaternion.y,
+				z: quaternion.z,
+				w: quaternion.w,
+			};
+		}
+		const torpedoSystems = getSystemsOfType(
+			this.ecs,
+			entity.id,
+			"TorpedoLauncher",
+		);
+		const targetingSystem = getSystemsOfType(
+			this.ecs,
+			entity.id,
+			"Targeting",
+		)[0];
 
+		pickCombatAction(entity, knowledge.threats);
 		// Pick a ship to attack. If action is `null`, we're not in combat
-		const { action: combatAction, targetId } = pickCombatAction(
-			entity,
-			knowledge.threats,
+		let combatAction = entity.components.shipBehavior?.action || "hold";
+		const targetId = entity.components.shipBehavior?.actionTarget || "";
+		const targetEntity = this.ecs.getEntityById(
+			typeof targetId !== "number" ? -1 : targetId,
 		);
 
 		if (
-			combatAction === "attack" ||
-			objective === "attack" ||
-			objective === "defend"
+			!targetEntity &&
+			["attack", "firePhasers", "fireTorpedo", "regroup"].includes(combatAction)
 		) {
-			if (typeof targetId === "number") {
-				// When weapons are ready, move towards the target
-				const target = this.ecs.getEntityById(targetId);
-				setMoveTowardsPosition(target, 200);
+			combatAction = "hold";
+		}
 
-				// When weapons are not ready, move away from weapons range.
+		if (combatAction === "regroup") {
+			// TODO May 15 2025 - add in some kind of attack patterns
+			// where the ship moves back and forth
+			setMoveTowardsPosition(
+				targetEntity,
+				knowledge.weaponsRange
+					? { distance: knowledge.weaponsRange }
+					: { multiplier: 200 },
+			);
+			alertLevel = 1;
+		} else if (combatAction === "firePhasers") {
+			setMoveTowardsPosition(targetEntity, { multiplier: 2 });
+			setLookAtPosition(targetEntity);
+			alertLevel = 1;
+		} else if (combatAction === "fireTorpedo") {
+			const launcher = torpedoSystems[0];
+			setLookAtPosition(targetEntity);
 
-				alertLevel = 1;
+			const inventoryTemplate = this.ecs.getEntityById(
+				launcher.components.isTorpedoLauncher?.torpedoEntity || -1,
+			);
+
+			const speed =
+				inventoryTemplate?.components.isInventory?.flags.torpedoCasing?.speed ||
+				50;
+
+			const torpedoTravelDistance = speed * TORPEDO_FIRE_DISTANCE_SECONDS;
+			// Start moving towards the target if we're at the appropriate distance
+			const distance = Math.hypot(
+				desiredPosition.x - position.x,
+				desiredPosition.y - position.y,
+				desiredPosition.z - position.z,
+			);
+			if (distance >= torpedoTravelDistance) {
+				// Torpedo will be fired once the ship is pointed at the target
+				setMoveTowardsPosition(targetEntity, {
+					multiplier: 2,
+				});
 			} else {
-				// TODO April 5, 2025: Figure out how to do formations
-				const target =
-					typeof behaviorTarget === "number"
-						? this.ecs.getEntityById(behaviorTarget)
-						: null;
-				setMoveTowardsPosition(target);
-				alertLevel = 3;
+				setMoveTowardsPosition(targetEntity, {
+					distance: torpedoTravelDistance * 1.1,
+				});
 			}
+			alertLevel = 1;
 		} else if (combatAction === "flee" || action === "flee") {
-			alertLevel = 2;
+			alertLevel = 1;
 			if (position) {
 				const fleeDirection = calculateFleeDirection(entity, knowledge.threats);
 				destinationVector
 					.set(position.x, position.y, position.z)
-					.addScaledVector(fleeDirection, FLEE_DISTANCE);
+					.addScaledVector(
+						fleeDirection,
+						knowledge.weaponsRange || DEFAULT_FLEE_DISTANCE,
+					);
 				desiredPosition.x = destinationVector.x;
 				desiredPosition.y = destinationVector.y;
 				desiredPosition.z = destinationVector.z;
 			}
+		} else if (objective === "defend") {
+			// TODO April 5, 2025: Figure out how to do formations
+			const target =
+				typeof behaviorTarget === "number"
+					? this.ecs.getEntityById(behaviorTarget)
+					: null;
+			setMoveTowardsPosition(target);
+			alertLevel = 3;
 		} else if (objective === "avoid" || action === "avoid") {
 			alertLevel = 3;
 			if (position) {
 				const fleeDirection = calculateFleeDirection(entity, knowledge.threats);
 				destinationVector
 					.set(position.x, position.y, position.z)
-					.addScaledVector(fleeDirection, FLEE_DISTANCE);
+					.addScaledVector(
+						fleeDirection,
+						knowledge.weaponsRange || DEFAULT_FLEE_DISTANCE,
+					);
 				desiredPosition.x = destinationVector.x;
 				desiredPosition.y = destinationVector.y;
 				desiredPosition.z = destinationVector.z;
@@ -171,7 +264,7 @@ export class NPCDecisionSystem extends System {
 				typeof behaviorTarget === "number"
 					? this.ecs.getEntityById(behaviorTarget)
 					: null;
-			setMoveTowardsPosition(target, 5);
+			setMoveTowardsPosition(target, { multiplier: 5 });
 		}
 
 		let path: { x: number; y: number; z: number }[] = [];
@@ -181,6 +274,7 @@ export class NPCDecisionSystem extends System {
 			desiredPosition.parentId
 		) {
 			wanderVector.set(desiredPosition.x, desiredPosition.y, desiredPosition.z);
+
 			path = pathfinder(entity, wanderVector) || [];
 		}
 		const nextCoordinates = path.shift();
@@ -215,21 +309,16 @@ export class NPCDecisionSystem extends System {
 			}
 		}
 
-		const torpedoSystems = getSystemsOfType(
-			this.ecs,
-			entity.id,
-			"TorpedoLauncher",
-		);
 		if (alertLevel <= 2) {
 			// Charge the phasers, load the torpedoes
 			for (const sys of torpedoSystems) {
 				if (sys.components.isTorpedoLauncher?.status === "ready") {
-					const [torpedoId] = randomFromList(
-						Object.entries(getShipTorpedos(this.ecs, entity.id)).filter(
-							(e) => e[1].count > 0,
-						),
+					const torpedos = getShipTorpedos(this.ecs, entity.id);
+					const torpedo = randomFromList(
+						Object.entries(torpedos).filter((e) => e[1].count > 0),
 					);
-					if (!torpedoId) continue;
+					if (!torpedo) continue;
+					const [torpedoId] = torpedo;
 					const torpedoEntity = adjustTorpedoInventory(torpedoId, sys);
 					sys.updateComponent("isTorpedoLauncher", {
 						status: torpedoEntity ? "loading" : "unloading",
@@ -238,8 +327,6 @@ export class NPCDecisionSystem extends System {
 					});
 				}
 			}
-
-			const phaserSystems = getSystemsOfType(this.ecs, entity.id, "Phasers");
 		} else {
 			// Unload torpedoes (can't discharge phasers)
 			for (const sys of torpedoSystems) {
@@ -252,6 +339,29 @@ export class NPCDecisionSystem extends System {
 					});
 				}
 			}
+		}
+
+		if (
+			alertLevel === 1 &&
+			typeof targetId === "number" &&
+			targetingSystem.components.isTargeting?.target !== targetId
+		) {
+			targetingSystem.updateComponent("isTargeting", { target: targetId });
+			pubsub.publish.targeting.targetedContact({ shipId: entity.id });
+		} else if (
+			alertLevel > 2 &&
+			typeof targetId !== "number" &&
+			targetingSystem.components.isTargeting?.target
+		) {
+			targetingSystem.updateComponent("isTargeting", { target: null });
+			pubsub.publish.targeting.targetedContact({ shipId: entity.id });
+		}
+		if (entity.components.isShip?.alertLevel !== alertLevel.toString()) {
+			entity.updateComponent("isShip", {
+				alertLevel: alertLevel.toString() as "5" | "4" | "3" | "2" | "1",
+			});
+
+			pubsub.publish.starmapCore.object({ objectId: entity.id });
 		}
 	}
 }
@@ -309,16 +419,17 @@ function calculateFleeDirection(
 	return fleeVector;
 }
 
-function getSystemsOfType(
+export function getSystemsOfType(
 	ecs: ECS,
 	shipId: number,
 	systemType: Capitalize<Exclude<ShipSystemTypes, "generic">>,
 ) {
+	const ship = ecs.getEntityById(shipId);
 	const systemEntities: Entity[] = [];
-	for (const entity of ecs.componentCache.get(`is${systemType}`) || []) {
-		if (entity.components.isShipSystem?.shipId === shipId) {
+	for (const [entityId] of ship?.components.shipSystems?.shipSystems || []) {
+		const entity = ecs.getEntityById(entityId);
+		if (entity?.components[`is${systemType}`]) {
 			systemEntities.push(entity);
-			break;
 		}
 	}
 	return systemEntities;
@@ -427,13 +538,8 @@ function determineScan(
 function pickCombatAction(
 	entity: Entity,
 	threats: Map<number, z.infer<typeof threatScores>>,
-) {
-	if (entity.components.shipBehavior?.objective === "attack") {
-		return {
-			action: "attack",
-			targetId: entity.components.shipBehavior.behaviorTarget,
-		};
-	}
+): void {
+	const behaviorTarget = entity.components.shipBehavior?.behaviorTarget;
 
 	// Always defend the target. Address threats that are targeting the target
 	if (entity.components.shipBehavior?.objective === "defend") {
@@ -446,15 +552,31 @@ function pickCombatAction(
 		}
 		const threat = defenseThreats.sort(([, a], [, b]) => b - a)[0];
 		if (threat) {
-			return { action: "attack", targetId: threat[0] };
+			entity.updateComponent("shipBehavior", {
+				actionTarget: threat[0],
+				action: ["firePhasers", "fireTorpedo", "regroup"].includes(
+					entity.components.shipBehavior.action,
+				)
+					? entity.components.shipBehavior.action
+					: "attack",
+			});
+		} else {
+			entity.updateComponent("shipBehavior", {
+				action: "defend",
+			});
 		}
 	}
-
-	// Flee if hull is less than 50%
-	const hull = entity.components.hull;
-	if (hull) {
-		if (hull.hull < hull.maxHull / 2) {
-			return { action: "flee" };
+	if (entity.components.shipBehavior?.objective === "attack") {
+		// If the target is destroyed, transition to patrol
+		const targetEntity =
+			typeof behaviorTarget === "number"
+				? entity.ecs.getEntityById(behaviorTarget || -1)
+				: null;
+		if (!targetEntity || targetEntity.components.isDestroyed) {
+			entity.updateComponent("shipBehavior", {
+				behaviorTarget: null,
+				objective: "patrol",
+			});
 		}
 	}
 
@@ -479,10 +601,76 @@ function pickCombatAction(
 			b === a ? bb - aa : b - a,
 		)[0];
 		if (threat) {
-			return { action: "attack", targetId: threat[0] };
+			entity.updateComponent("shipBehavior", {
+				actionTarget: threat[0],
+				action: ["firePhasers", "fireTorpedo", "regroup"].includes(
+					entity.components.shipBehavior.action,
+				)
+					? entity.components.shipBehavior.action
+					: "attack",
+			});
+		}
+	}
+
+	const torpedoSystems = getSystemsOfType(
+		entity.ecs,
+		entity.id,
+		"TorpedoLauncher",
+	);
+
+	const torpedosReady = torpedoSystems.some(
+		(s) => s.components.isTorpedoLauncher?.status === "loaded",
+	);
+	const phaserSystems = getSystemsOfType(entity.ecs, entity.id, "Phasers");
+	const phasersReady = phaserSystems.every((s, i) => {
+		// TODO May 14, 2025 - Make this configurable maybe.
+		return s.components.isPhasers!.firePercent > 0 || getPhaserCharge(s) > 0.5;
+	});
+
+	if (
+		(entity.components.shipBehavior?.action === "firePhasers" &&
+			!phasersReady) ||
+		(entity.components.shipBehavior?.action === "fireTorpedo" && !torpedosReady)
+	) {
+		entity.updateComponent("shipBehavior", {
+			action: "attack",
+		});
+	}
+
+	if (
+		entity.components.shipBehavior?.objective === "attack" ||
+		entity.components.shipBehavior?.action === "attack"
+	) {
+		if (torpedosReady) {
+			entity.updateComponent("shipBehavior", {
+				action: "fireTorpedo",
+				actionTarget: behaviorTarget,
+			});
+			return;
+		}
+
+		if (phasersReady) {
+			entity.updateComponent("shipBehavior", {
+				action: "firePhasers",
+				actionTarget: behaviorTarget,
+			});
+			return;
+		}
+		entity.updateComponent("shipBehavior", {
+			action: "regroup",
+			actionTarget: behaviorTarget,
+		});
+	}
+
+	// Flee if hull is less than 50%
+	const hull = entity.components.hull;
+	if (hull) {
+		if (hull.hull < hull.maxHull / 2) {
+			entity.updateComponent("shipBehavior", {
+				action: "flee",
+			});
 		}
 	}
 
 	// Nothing to do, follow the objective
-	return { action: null };
 }

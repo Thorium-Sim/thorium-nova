@@ -4,7 +4,7 @@ import { cargoSort } from "./cargoSort";
 
 export function CargoList({
 	selectedRoom,
-	enRouteContainerId,
+	enRouteContainer,
 	selectedContainerId,
 	onClick,
 }: {
@@ -19,12 +19,11 @@ export function CargoList({
 				};
 		  }
 		| undefined;
-	enRouteContainerId: number | undefined;
+	enRouteContainer: { id: number; entityState: "idle" | "enRoute" } | undefined;
 	selectedContainerId: number | null;
 	onClick: (key: string) => Promise<void>;
 }) {
 	const [inventoryTypes] = q.cargoControl.inventoryTypes.useNetRequest();
-
 	return (
 		<ul className="panel panel-primary flex-1 overflow-y-auto">
 			{selectedRoom &&
@@ -42,7 +41,8 @@ export function CargoList({
 							<li
 								key={key}
 								className={`px-4 py-2 select-none block w-full border border-solid bg-black border-white border-opacity-50 pointer-events-auto ${
-									enRouteContainerId === selectedContainerId
+									enRouteContainer?.id === selectedContainerId &&
+									enRouteContainer?.entityState === "idle"
 										? "cursor-pointer hover:bg-opacity-50 active:bg-white/20"
 										: "cursor-not-allowed"
 								}`}

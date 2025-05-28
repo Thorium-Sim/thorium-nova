@@ -1,10 +1,23 @@
-import { type ComponentPropsWithoutRef, forwardRef } from "react";
+import {
+	type ComponentPropsWithoutRef,
+	forwardRef,
+	type Ref,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+} from "react";
 import { suspend } from "suspend-react";
 
-export const SVGImageLoader = forwardRef<
-	HTMLImageElement,
-	{ url: string; onLoad?: () => void } & ComponentPropsWithoutRef<"img">
->(function SVGImageLoader({ url, alt, ...props }, ref) {
+export function SVGImageLoader({
+	url,
+	alt,
+	ref,
+	...props
+}: {
+	url: string;
+	onLoad?: () => void;
+	ref?: Ref<HTMLDivElement>;
+} & ComponentPropsWithoutRef<"img">) {
 	const data = suspend(async () => {
 		const res = await fetch(url);
 		if (!res.ok) return;
@@ -15,6 +28,15 @@ export const SVGImageLoader = forwardRef<
 		return null;
 	}, [url]);
 
+	const onLoadCallback = useRef(props.onLoad);
+	useEffect(() => {
+		onLoadCallback.current = props.onLoad;
+	}, [props.onLoad]);
+	useLayoutEffect(() => {
+		if (data) {
+			onLoadCallback.current?.();
+		}
+	}, [data]);
 	if (data) {
 		return (
 			<div
@@ -33,7 +55,8 @@ export const SVGImageLoader = forwardRef<
 			aria-hidden
 			{...props}
 			src={url}
+			// @ts-expect-error
 			ref={ref}
 		/>
 	);
-});
+}

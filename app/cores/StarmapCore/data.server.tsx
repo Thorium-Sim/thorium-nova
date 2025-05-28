@@ -130,6 +130,7 @@ export const starmapCore = t.router({
 						z: ship.z,
 					});
 					entity.addComponent("snapInterpolation", { snapInterpolation: true });
+					// TODO May 28, 2025 - Also switch which physics world the ship is operating in
 				}
 			}
 		}),
@@ -490,7 +491,7 @@ export const starmapCore = t.router({
 				position = getObjectOffsetPosition(
 					object,
 					targetPosition,
-					ship.components.size?.length || 1,
+					(ship.components.size?.length || 1 / 1000) * 2,
 				);
 				const sys = getObjectSystem(object);
 				systemId = sys?.id ?? null;
@@ -576,7 +577,7 @@ export const starmapCore = t.router({
 				const position = getObjectOffsetPosition(
 					orbitedObject,
 					targetPosition,
-					entity.components.size?.length || 1,
+					(entity.components.size?.length || 1 / 1000) * 2,
 				);
 				// TODO January 2025: Generate a function which creates an orbit path which the ship can use.
 				entity.updateComponent("autopilot", {
@@ -784,7 +785,7 @@ export const starmapCore = t.router({
 				)
 					return true;
 				if (entity.components.position.parentId === input.systemId) {
-					return true;
+					if (entity.components.isTorpedo) return true;
 				}
 			}
 			return false;

@@ -322,7 +322,9 @@ export function generateScanResults(
 							type: "torpedoes" as const,
 							loaded:
 								t.components.isTorpedoLauncher?.status === "loaded"
-									? `${capitalCase(torpedo?.components.identity?.name || "Unknown")} Loaded`
+									? `${capitalCase(
+											torpedo?.components.identity?.name || "Unknown",
+										)} Loaded`
 									: "Unloaded",
 						};
 					}),

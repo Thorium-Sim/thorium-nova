@@ -387,10 +387,11 @@ export const targeting = t.router({
 				}
 
 				return firingPhasers.flatMap((phaser) => {
-					const target = getCurrentTarget(
+					const ship = phaser.ecs?.getEntityById(
 						phaser.components.isShipSystem?.shipId || -1,
-						phaser.ecs!,
 					);
+					if (!ship) return [];
+					const target = getCurrentTarget(ship);
 					if (!target) return [];
 					return {
 						id: phaser.id,
@@ -459,14 +460,13 @@ export const targeting = t.router({
 				if (input.firePercent === 0 || currentPower < 0.01) {
 					cancelLoopingSound(phaser, "fire");
 				} else {
-					pubsub.publish.targeting.phasers.firing({
-						systemId: ship?.components.position?.parentId || null,
-					});
-
 					if (phaser.components.soundEffects?.soundBank.fire) {
 						playShipSound(phaser, ship!, "fire");
 					}
 				}
+				pubsub.publish.targeting.phasers.firing({
+					systemId: ship?.components.position?.parentId || null,
+				});
 			}),
 	}),
 	stream: t.procedure

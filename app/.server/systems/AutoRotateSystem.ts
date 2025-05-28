@@ -66,9 +66,11 @@ export class AutoRotateSystem extends System {
 		desiredRotationQuat.identity();
 
 		if (autopilot.desiredCoordinates) {
+			let doneWithPath = false;
 			if (distance < 1) {
 				autopilot.nextCoordinates = autopilot.path.shift()!;
 				if (!autopilot.nextCoordinates) {
+					doneWithPath = true;
 					if (autopilot.desiredRotation) {
 						desiredRotationQuat.set(
 							autopilot.desiredRotation.x,
@@ -87,13 +89,17 @@ export class AutoRotateSystem extends System {
 					);
 				}
 			}
-			rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
-			up.set(0, 1, 0).applyQuaternion(rotationQuat);
+			if (!doneWithPath) {
+				rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
+				up.set(0, 1, 0).applyQuaternion(rotationQuat);
 
-			matrix.lookAt(positionVec, nextDestination, up).multiply(rotationMatrix);
-			// Use the thrusters to adjust the rotation of the ship to point towards the desired destination.
-			// First, determine the angle to the destination.
-			desiredRotationQuat.setFromRotationMatrix(matrix);
+				matrix
+					.lookAt(positionVec, nextDestination, up)
+					.multiply(rotationMatrix);
+				// Use the thrusters to adjust the rotation of the ship to point towards the desired destination.
+				// First, determine the angle to the destination.
+				desiredRotationQuat.setFromRotationMatrix(matrix);
+			}
 		} else if (autopilot.desiredRotation) {
 			desiredRotationQuat.set(
 				autopilot.desiredRotation.x,

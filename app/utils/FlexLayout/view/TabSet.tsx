@@ -265,7 +265,9 @@ export const TabSet = (props: ITabSetProps) => {
 					key="overflowbutton"
 					data-layout-path={`${path}/button/overflow`}
 					ref={overflowbuttonRef}
-					className={`${cm(CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON)} ${cm(CLASSES.FLEXLAYOUT__TAB_BUTTON_OVERFLOW)}`}
+					className={`${cm(CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON)} ${cm(
+						CLASSES.FLEXLAYOUT__TAB_BUTTON_OVERFLOW,
+					)}`}
 					title={overflowTitle}
 					onClick={onOverflowClick}
 					onPointerDown={onInterceptPointerDown}
@@ -288,7 +290,9 @@ export const TabSet = (props: ITabSetProps) => {
 				key="popout"
 				data-layout-path={`${path}/button/popout`}
 				title={popoutTitle}
-				className={`${cm(CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON)} ${cm(CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_FLOAT)}`}
+				className={`${cm(CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON)} ${cm(
+					CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_FLOAT,
+				)}`}
 				onClick={onPopoutTab}
 				onPointerDown={onInterceptPointerDown}
 			>
@@ -334,7 +338,9 @@ export const TabSet = (props: ITabSetProps) => {
 				key="close"
 				data-layout-path={`${path}/button/close`}
 				title={title}
-				className={`${cm(CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON)} ${cm(CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_CLOSE)}`}
+				className={`${cm(CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON)} ${cm(
+					CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_CLOSE,
+				)}`}
 				onClick={isTabStretch ? onCloseTab : onClose}
 				onPointerDown={onInterceptPointerDown}
 			>
@@ -381,7 +387,9 @@ export const TabSet = (props: ITabSetProps) => {
 	if (node.getClassNameTabStrip() !== undefined) {
 		tabStripClasses += ` ${node.getClassNameTabStrip()}`;
 	}
-	tabStripClasses += ` ${CLASSES.FLEXLAYOUT__TABSET_TABBAR_OUTER_}${node.getTabLocation()}`;
+	tabStripClasses += ` ${
+		CLASSES.FLEXLAYOUT__TABSET_TABBAR_OUTER_
+	}${node.getTabLocation()}`;
 
 	if (node.isActive()) {
 		tabStripClasses += ` ${cm(CLASSES.FLEXLAYOUT__TABSET_SELECTED)}`;
@@ -458,7 +466,9 @@ export const TabSet = (props: ITabSetProps) => {
 						>
 							<div
 								style={{ width: isTabStretch ? "100%" : "none" }}
-								className={`${cm(CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER)} ${cm(
+								className={`${cm(
+									CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER,
+								)} ${cm(
 									CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER_ +
 										node.getTabLocation(),
 								)}`}

@@ -81,7 +81,7 @@ export const Widget: FC<{
 		onClose: () => void;
 	}>;
 	size?: "sm" | "md" | "lg" | "xl";
-}> = ({ name, icon, component: Component, size = "sm" }) => {
+}> = ({ name, icon, component: Component, size = "md" }) => {
 	const [isOpen, setIsOpen] = useState(false);
 
 	const { x, y, strategy, refs, context, update } = useFloating({
@@ -117,7 +117,7 @@ export const Widget: FC<{
 				<Transition>
 					<Popover.Panel
 						className={cn(
-							"max-w-md absolute isolate right-0 max-h-96 z-50 !bg-black/90 panel backdrop-blur border border-white/50 rounded p-2 w-screen @container overflow-hidden",
+							"max-w-md absolute isolate right-0 max-h-96 z-50 !bg-black/70 panel backdrop-blur border border-white/50 rounded p-2 w-screen @container overflow-hidden",
 							{
 								"max-w-sm": size === "sm",
 								"max-w-lg": size === "md",

@@ -80,9 +80,7 @@ export const BorderButton = (props: IBorderButtonProps) => {
 		}
 		if (closeType === ICloseType.Visible) {
 			// not selected but x should be visible due to hover
-			if (
-				window.matchMedia?.("(hover: hover) and (pointer: fine)").matches
-			) {
+			if (window.matchMedia?.("(hover: hover) and (pointer: fine)").matches) {
 				return true;
 			}
 		}
@@ -130,8 +128,9 @@ export const BorderButton = (props: IBorderButtonProps) => {
 	};
 
 	const cm = layout.getClassName;
-	let classNames =
-		`${cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON)} ${cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON_ + border)}`;
+	let classNames = `${cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON)} ${cm(
+		CLASSES.FLEXLAYOUT__BORDER_BUTTON_ + border,
+	)}`;
 
 	if (selected) {
 		classNames += ` ${cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON__SELECTED)}`;

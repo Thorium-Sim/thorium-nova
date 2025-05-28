@@ -426,9 +426,7 @@ function Battery({
 			)}
 		>
 			<div className="font-medium w-full gap-1 self-start flex items-center bg-green">
-				<span className="truncate">
-					{name} {index + 1}
-				</span>
+				<span className="truncate">{name}</span>
 				<div className="flex-1" />
 
 				<Tooltip ref={storageRef} content={`Storage:  MW`}>

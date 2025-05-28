@@ -22,6 +22,10 @@ export const shipObjectives = z.enum([
  */
 export const shipActions = z.enum([
 	...shipObjectives.options,
+	"firePhasers",
+	"fireTorpedo",
+	// Move away from the target, load and charge weapons
+	"regroup",
 	"moveTo",
 	"scan",
 	"dock",

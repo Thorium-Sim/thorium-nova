@@ -532,6 +532,18 @@ kbd {
 
 .textarea {
 	@apply text-base bg-neutral rounded-btn border border-opacity-0 border-neutral-content;
+		&-md {
+		@apply p-2 text-sm leading-loose;
+	}
+	&-lg {
+		@apply p-3 text-lg leading-loose;
+	}
+	&-sm {
+		@apply p-1 text-sm leading-normal;
+	}
+	&-xs {
+		@apply p-0 text-xs leading-tight;
+	}
 	&-bordered {
 		@apply border-opacity-20;
 	}

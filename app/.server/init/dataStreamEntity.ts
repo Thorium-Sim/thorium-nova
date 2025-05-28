@@ -11,7 +11,6 @@ export function dataStreamEntity(e: Entity) {
 	// See https://github.com/geckosio/snapshot-interpolation#world-state
 	// We're also removing any components of the entity that don't update
 	// frequently to keep packet size down.
-
 	if (e.components.isReactor) {
 		return {
 			id: e.id.toString(),
@@ -60,6 +59,7 @@ export function dataStreamEntity(e: Entity) {
 		return {
 			id: e.id.toString(),
 			x: getPhaserCharge(e),
+			f: e.components.isPhasers.arc || 1,
 			y: e.components.power?.currentPower,
 			z: e.components.heat?.heat || 0,
 		};

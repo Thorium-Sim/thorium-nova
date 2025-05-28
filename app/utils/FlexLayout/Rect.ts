@@ -139,7 +139,7 @@ export class Rect {
 		) {
 			return true;
 		}
-			return false;
+		return false;
 	}
 
 	removeInsets(insets: {
@@ -171,8 +171,6 @@ export class Rect {
 	}
 
 	toString() {
-		return (
-			`(Rect: x=${this.x}, y=${this.y}, width=${this.width}, height=${this.height})`
-		);
+		return `(Rect: x=${this.x}, y=${this.y}, width=${this.width}, height=${this.height})`;
 	}
 }

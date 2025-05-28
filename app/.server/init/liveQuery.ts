@@ -61,6 +61,7 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 		 * - Nearby ships
 		 * - The ship's own systems
 		 * - The ship's scans
+		 * - Ship Passengers
 		 */
 		const entities = [];
 		const ship = context.getPlayerShip(this.id);
@@ -85,6 +86,24 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 				scanEntity.components.scan.progress < 1
 			) {
 				entities.push(dataStreamEntity(scanEntity));
+			}
+		}
+
+		for (const torpedoEntity of context.ecs.componentCache.get("isTorpedo") ||
+			[]) {
+			if (
+				torpedoEntity.components.position?.parentId ===
+				ship.components.position?.parentId
+			) {
+				entities.push(dataStreamEntity(torpedoEntity));
+			}
+		}
+
+		for (const passengerEntity of context.ecs.componentCache.get(
+			"passengerMovement",
+		) || []) {
+			if (passengerEntity.components.position?.parentId === ship.id) {
+				entities.push(dataStreamEntity(passengerEntity));
 			}
 		}
 

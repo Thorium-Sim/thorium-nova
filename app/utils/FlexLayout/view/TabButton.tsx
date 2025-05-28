@@ -89,9 +89,7 @@ export const TabButton = (props: ITabButtonProps) => {
 		}
 		if (closeType === ICloseType.Visible) {
 			// not selected but x should be visible due to hover
-			if (
-				window.matchMedia?.("(hover: hover) and (pointer: fine)").matches
-			) {
+			if (window.matchMedia?.("(hover: hover) and (pointer: fine)").matches) {
 				return true;
 			}
 		}
