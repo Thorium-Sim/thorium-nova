@@ -130,6 +130,7 @@ export const starmapCore = t.router({
 						z: ship.z,
 					});
 					entity.addComponent("snapInterpolation", { snapInterpolation: true });
+					// TODO May 28, 2025 - Also switch which physics world the ship is operating in
 				}
 			}
 		}),
