@@ -11,7 +11,8 @@ export const station = t.router({
 			return true;
 		})
 		.request(({ ctx, input }) => {
-			const flightClient = ctx.getFlightClient(input.clientId);
+			const flightClient = ctx.getFlightClient(input.clientId)?.components
+				.flightClient;
 			const ship = ctx.getPlayerShip(input.clientId);
 			if (flightClient?.stationOverride) return flightClient.stationOverride;
 			const station = staticStations

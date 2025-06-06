@@ -16,21 +16,20 @@ export const client = t.router({
 				ctx.server.clients[input.clientId];
 			const {
 				officersLog,
-				id: _id,
+				clientId: _id,
 				...flightClient
-			} = ctx.getFlightClient(input.clientId) || {};
+			} = ctx.getFlightClient(input.clientId)?.components.flightClient || {};
 			return { id, name, connected, isHost, ...flightClient };
 		}),
 	all: t.procedure.request(({ ctx }) => {
 		const serverClients = Object.values(ctx.server.clients);
-		const flightClients = ctx.flight?.clients || {};
 		const clients = serverClients
 			.map((client) => {
-				const flightClient = flightClients[client.id];
+				const flightClient = ctx.getFlightClient(client.id);
 				return {
 					name: client.name,
 					connected: client.connected,
-					...flightClient?.toJSON(),
+					...flightClient?.components.flightClient!,
 				};
 			})
 			.filter((client) => client.connected);
@@ -71,14 +70,16 @@ export const client = t.router({
 
 			// If shipId is null, we're removing ourselves from the flight.
 			if (input.shipId === null) {
-				flightClient.stationId = null;
-				flightClient.shipId = null;
-
+				flightClient.updateComponent("flightClient", {
+					stationId: null,
+					shipId: null,
+				});
+				const clientId = flightClient.components.flightClient!.clientId;
 				pubsub.publish.client.all();
-				pubsub.publish.client.get({ clientId: flightClient.id });
-				pubsub.publish.station.get({ clientId: flightClient.id });
-				pubsub.publish.theme.get({ clientId: flightClient.id });
-				pubsub.publish.ship.get({ clientId: flightClient.id });
+				pubsub.publish.client.get({ clientId });
+				pubsub.publish.station.get({ clientId });
+				pubsub.publish.theme.get({ clientId });
+				pubsub.publish.ship.get({ clientId });
 				return flightClient;
 			}
 			const ship = ctx.ecs.getEntityById(input.shipId);
@@ -92,13 +93,19 @@ export const client = t.router({
 			if (!station) {
 				throw new Error("No station with that ID exists.");
 			}
-			flightClient.stationId = input.stationId;
-			flightClient.shipId = input.shipId;
+
+			flightClient.updateComponent("flightClient", {
+				stationId: input.stationId,
+				shipId: input.shipId,
+			});
+
+			const clientId = flightClient.components.flightClient!.clientId;
+
 			pubsub.publish.client.all();
-			pubsub.publish.client.get({ clientId: flightClient.id });
-			pubsub.publish.station.get({ clientId: flightClient.id });
-			pubsub.publish.theme.get({ clientId: flightClient.id });
-			pubsub.publish.ship.get({ clientId: flightClient.id });
+			pubsub.publish.client.get({ clientId });
+			pubsub.publish.station.get({ clientId });
+			pubsub.publish.theme.get({ clientId });
+			pubsub.publish.ship.get({ clientId });
 			return flightClient;
 		}),
 	login: t.procedure
@@ -106,7 +113,10 @@ export const client = t.router({
 		.send(({ ctx, input }) => {
 			const flightClient = ctx.getFlightClient(input.clientId);
 			if (flightClient) {
-				flightClient.loginName = input.name;
+				flightClient.updateComponent("flightClient", {
+					loginName: input.name,
+				});
+
 				pubsub.publish.client.all();
 				pubsub.publish.client.get({ clientId: input.clientId });
 			}
@@ -116,7 +126,10 @@ export const client = t.router({
 		.send(({ ctx, input }) => {
 			const flightClient = ctx.getFlightClient(input.clientId);
 			if (flightClient) {
-				flightClient.loginName = "";
+				flightClient.updateComponent("flightClient", {
+					loginName: "",
+				});
+
 				pubsub.publish.client.all();
 				pubsub.publish.client.get({ clientId: input.clientId });
 			}
@@ -130,23 +143,27 @@ export const client = t.router({
 			}
 			const component = input.component;
 			if (component) {
-				const station = new Station({
-					name: "Test Station",
-					cards: [
-						{
-							name: component,
-							component,
-						},
-					],
+				flightClient.updateComponent("flightClient", {
+					stationOverride: {
+						name: "Test Station",
+						cards: [
+							{
+								name: component,
+								component,
+							},
+						],
+						widgets: [],
+					},
+					shipId: ctx.flight.playerShips[0].id,
+					loginName: "Test User",
 				});
-				flightClient.stationOverride = station;
-				flightClient.shipId = ctx.flight.playerShips[0].id;
-				pubsub.publish.ship.get({ shipId: flightClient.shipId });
-				flightClient.loginName = "Test User";
+				pubsub.publish.ship.get({ shipId: ctx.flight.playerShips[0].id });
 			} else {
-				flightClient.stationOverride = null;
-				flightClient.shipId = null;
-				flightClient.loginName = "";
+				flightClient.updateComponent("flightClient", {
+					stationOverride: null,
+					shipId: null,
+					loginName: "",
+				});
 			}
 			pubsub.publish.client.get({ clientId: input.clientId });
 			pubsub.publish.station.get({ clientId: input.clientId });

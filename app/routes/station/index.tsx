@@ -27,7 +27,8 @@ export default function StationWrapper() {
 
 function Blackout({ children }: { children: ReactNode }) {
 	const { station, client } = useStation();
-	if (station && client && client.offlineState !== "blackout") return children;
+	if (station && client && client.offlineState?.title !== "blackout")
+		return children;
 	return null;
 }
 

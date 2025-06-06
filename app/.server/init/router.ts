@@ -25,8 +25,12 @@ export const componentEntityMaps = new Map<
 >();
 
 for (const [name, route] of Object.entries(router._def.procedures) as any) {
-	if (!route._def.request || !route._def.components || !route._def.entityMap)
+	if (!route._def.request) continue;
+	if (!route._def.components || !route._def.entityMap) {
+		if (name.startsWith("plugin.")) continue;
+		console.log(`Route ${name} missing auto publish properties`);
 		continue;
+	}
 	for (const component of route._def.components) {
 		if (!componentEntityMaps.has(component)) {
 			componentEntityMaps.set(component, new Set());

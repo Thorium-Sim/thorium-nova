@@ -62,8 +62,7 @@ export const sensors = t.router({
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
-		.componentSubs(["scan"])
-		.entityMap((entity) => {
+		.autoPublish(["scan"], (entity) => {
 			return (
 				entity.components.scan && { shipId: entity.components.scan?.parentId }
 			);

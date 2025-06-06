@@ -19,9 +19,9 @@ export const remoteAccess = t.router({
 				id: code.id,
 				code: code.components.remoteAccessCode?.code,
 				state: code.components.remoteAccessCode?.state,
-				station:
-					ctx.flight?.clients[code.components.remoteAccessCode?.clientId || ""]
-						.stationId,
+				station: ctx.getFlightClient(
+					code.components.remoteAccessCode?.clientId || "",
+				)?.components.flightClient?.stationId,
 				timestamp: code.components.remoteAccessCode?.timestamp,
 				time: code.components.remoteAccessCode?.timestamp
 					? new Date(
@@ -37,7 +37,7 @@ export const remoteAccess = t.router({
 		.input(z.object({ clientId: z.string(), code: z.string().min(1) }))
 		.send(({ ctx, input: { clientId, code } }) => {
 			const remoteAccessCode = new Entity();
-			const client = ctx.getFlightClient(clientId);
+			const client = ctx.getFlightClient(clientId)?.components.flightClient;
 			const shipId = client?.shipId;
 			if (!shipId) return;
 			remoteAccessCode.addComponent("remoteAccessCode", {

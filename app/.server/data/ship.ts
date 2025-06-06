@@ -19,7 +19,8 @@ export const ship = t.router({
 				if (!publish) return true;
 				if (
 					"shipId" in publish &&
-					publish.shipId !== ctx.getFlightClient(input.clientId)?.shipId
+					publish.shipId !==
+						ctx.getFlightClient(input.clientId)?.components.flightClient?.shipId
 				)
 					return false;
 				if ("clientId" in publish && publish.clientId !== input.clientId)
@@ -31,7 +32,10 @@ export const ship = t.router({
 			// TODO February 28, 2025 - Replace this with a more carefully crafted object
 			const ship =
 				ctx.ecs
-					.getEntityById(ctx.getFlightClient(input.clientId)?.shipId || -1)
+					.getEntityById(
+						ctx.getFlightClient(input.clientId)?.components.flightClient
+							?.shipId || -1,
+					)
 					?.toJSON() || null;
 			return ship;
 		}),
@@ -57,7 +61,8 @@ export const ship = t.router({
 			z.object({ clientId: z.string(), playerShipId: z.number().optional() }),
 		)
 		.filter((publish: { shipId: number }, { ctx, input }) => {
-			const shipId = ctx.getFlightClient(input.clientId)?.shipId;
+			const shipId = ctx.getFlightClient(input.clientId)?.components
+				.flightClient?.shipId;
 			if (
 				publish &&
 				publish.shipId !== shipId &&
@@ -69,7 +74,8 @@ export const ship = t.router({
 		.request(({ ctx, input }) => {
 			const ship = ctx.flight?.ecs.getEntityById(
 				input?.playerShipId ||
-					ctx.getFlightClient(input.clientId)?.shipId ||
+					ctx.getFlightClient(input.clientId)?.components.flightClient
+						?.shipId ||
 					-1,
 			);
 			if (!ship)

@@ -25,20 +25,21 @@ export const effects = t.router({
 
 			if (payload.clientId !== clientId) {
 				const flightClient = ctx.getFlightClient(clientId);
-				if (flightClient?.shipId !== payload.shipId) return false;
+				const clientData = flightClient?.components.flightClient;
+				if (clientData?.shipId !== payload.shipId) return false;
 
 				switch (payload.station) {
 					case "all":
 						break;
 					case "bridge":
 						if (
-							!flightClient?.stationId ||
-							notBridgeStation.includes(flightClient.stationId)
+							!clientData?.stationId ||
+							notBridgeStation.includes(clientData.stationId)
 						)
 							return false;
 						break;
 					default:
-						if (flightClient.stationId !== payload.station) return false;
+						if (clientData.stationId !== payload.station) return false;
 				}
 			}
 			return true;
@@ -81,12 +82,13 @@ export const effects = t.router({
 			if (!sound) return false;
 
 			const flightClient = ctx.getFlightClient(clientId);
-			const ship = ctx.ecs.getEntityById(flightClient?.shipId || -1);
+			const clientData = flightClient?.components.flightClient;
+			const ship = ctx.ecs.getEntityById(clientData?.shipId || -1);
 			return matchSound(
 				sound,
 				clientId,
-				flightClient?.shipId,
-				flightClient?.stationId,
+				clientData?.shipId,
+				clientData?.stationId,
 				ship?.components.position,
 			);
 		})
@@ -114,7 +116,8 @@ export const effects = t.router({
 				publish: { shipId?: number; stationId?: string },
 				{ ctx, input: { clientId } },
 			) => {
-				const shipId = ctx.getFlightClient(clientId)?.shipId;
+				const shipId =
+					ctx.getFlightClient(clientId)?.components.flightClient?.shipId;
 				if (publish && publish.shipId !== shipId) return false;
 				return true;
 			},
@@ -122,15 +125,16 @@ export const effects = t.router({
 		.request(({ ctx, input: { clientId } }) => {
 			const loopingSounds: SoundEffect[] = [];
 			const flightClient = ctx.getFlightClient(clientId);
-			const ship = ctx.ecs.getEntityById(flightClient?.shipId || -1);
+			const clientData = flightClient?.components.flightClient;
+			const ship = ctx.ecs.getEntityById(clientData?.shipId || -1);
 			ctx.flight?.ecs.componentCache.get("soundEffects")?.forEach((entity) =>
 				entity.components.soundEffects?.looping.forEach((sound) => {
 					if (
 						matchSound(
 							sound,
 							clientId,
-							flightClient?.shipId,
-							flightClient?.stationId,
+							clientData?.shipId,
+							clientData?.stationId,
 							ship?.components.position,
 						)
 					) {

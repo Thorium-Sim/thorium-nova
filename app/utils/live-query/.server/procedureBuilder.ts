@@ -155,15 +155,16 @@ export interface ProcedureBuilder<TParams extends ProcedureParams> {
 	/**
 	 * Automatically trigger a publish call when these components change on entities.
 	 */
-	componentSubs(components: ComponentIds[]): ProcedureBuilder<TParams>;
-	/**
-	 * For component subs, map a changed entity to the filter params
-	 */
-	entityMap(
-		map: (
+	autoPublish(
+		components: ComponentIds[],
+		/**
+		 * For component subs, map a changed entity to the filter params
+		 */
+		entityMap: (
 			entity: Entity,
 		) => ResolveOptions<TParams>["publish"] | undefined | null,
 	): ProcedureBuilder<TParams>;
+
 	/**
 	 * Filter pubsub.publish calls so only certain clients get
 	 * subscription publishes
@@ -305,11 +306,11 @@ export function createBuilder<TConfig extends AnyRootConfig>(
 				],
 			}) as AnyProcedureBuilder;
 		},
-		componentSubs(components) {
-			return createNewBuilder(_def, { components }) as AnyProcedureBuilder;
-		},
-		entityMap(entityMap) {
-			return createNewBuilder(_def, { entityMap }) as AnyProcedureBuilder;
+		autoPublish(components, entityMap) {
+			return createNewBuilder(_def, {
+				components,
+				entityMap,
+			}) as AnyProcedureBuilder;
 		},
 		use(middleware) {
 			return createNewBuilder(_def, {

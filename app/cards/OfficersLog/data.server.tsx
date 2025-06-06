@@ -10,7 +10,10 @@ export const officersLog = t.router({
 			return true;
 		})
 		.request(({ ctx, input }) => {
-			return ctx.getFlightClient(input.clientId)?.officersLog || [];
+			return (
+				ctx.getFlightClient(input.clientId)?.components.flightClient
+					?.officersLog || []
+			);
 		}),
 	add: t.procedure
 		.input(
@@ -22,12 +25,14 @@ export const officersLog = t.router({
 		)
 		.send(({ ctx, input }) => {
 			const { message, timestamp = Date.now() } = input;
-
-			ctx.getFlightClient(input.clientId)?.officersLog.push({
-				message,
-				timestamp,
+			const flightClientEntity = ctx.getFlightClient(input.clientId);
+			flightClientEntity?.updateComponent("flightClient", {
+				officersLog:
+					flightClientEntity?.components.flightClient?.officersLog.concat({
+						message,
+						timestamp,
+					}) || [{ message, timestamp }],
 			});
-
 			pubsub.publish.officersLog.get({ clientId: input.clientId });
 		}),
 });

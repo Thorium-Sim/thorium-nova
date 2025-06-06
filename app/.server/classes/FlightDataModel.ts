@@ -2,13 +2,13 @@ import { ECS, Entity } from "@thorium/utils/ecs";
 import randomWords from "@thorium/utils/random-words";
 import type { ServerDataModel } from "./ServerDataModel";
 import systems from "@thorium/.server/systems";
-import { FlightClient } from "./FlightClient";
 import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
 import type ShipPlugin from "./Plugins/Ship";
 import { DefaultUIDGenerator } from "@thorium/utils/ecs/uid";
 import { loadGltf } from "@thorium/utils/.server/loadGltf";
 import RAPIER from "@thorium-sim/rapier3d-node";
 import path from "node:path";
+import type { flightClient } from "@thorium/ecs-components/flightClient";
 
 export class FlightDataModel extends DataStore {
 	static INTERVAL = 1000 / 60;
@@ -17,11 +17,12 @@ export class FlightDataModel extends DataStore {
 	paused!: boolean;
 	hasFlightDirector!: boolean;
 	ecs!: ECS;
-	clients!: Record<string, FlightClient>;
 	pluginIds!: string[];
 	private entities!: Entity[];
 	serverDataModel: ServerDataModel;
 	interval!: ReturnType<typeof setInterval>;
+	flightClientIndex: Map<string, number>;
+
 	#getDataPromise: Promise<void>;
 	constructor(
 		params: Partial<FlightDataModel> & {
@@ -41,6 +42,7 @@ export class FlightDataModel extends DataStore {
 			},
 			storeOptions,
 		);
+		this.flightClientIndex = new Map();
 		this.serverDataModel = params.serverDataModel;
 		this.#getDataPromise = this.getData<FlightDataModel>().then((data) => {
 			this.name ??= flightName;
@@ -50,12 +52,6 @@ export class FlightDataModel extends DataStore {
 			this.date ??= Number(data.date ? new Date(data.date) : new Date());
 			this.pluginIds ??= data.pluginIds || [];
 			this.entities ??= data.entities || [];
-
-			this.clients = Object.fromEntries(
-				Object.entries(this.clients || data.clients || {}).map(
-					([id, client]) => [id, new FlightClient(client)],
-				),
-			);
 		});
 	}
 	run = () => {
@@ -155,6 +151,15 @@ export class FlightDataModel extends DataStore {
 		}, []);
 		return allShips;
 	}
+	get clients() {
+		const clients: Record<string, Entity | undefined> = {};
+		for (const client of this.ecs.componentCache.get("flightClient") || []) {
+			if (client.components.flightClient) {
+				clients[client.components.flightClient.clientId] = client;
+			}
+		}
+		return clients;
+	}
 	toJSON() {
 		const entities = [];
 		for (const [, entity] of this.ecs.entities) {
@@ -169,9 +174,6 @@ export class FlightDataModel extends DataStore {
 			pluginIds: this.pluginIds,
 			entities,
 			maxEntityId: this.ecs.maxEntityId,
-			clients: Object.fromEntries(
-				Object.entries(this.clients).map(([id, client]) => [id, client]),
-			),
 		};
 		return data;
 	}

@@ -97,7 +97,7 @@ function ClientAssignment() {
 					items={clients
 						.filter((c) => c.shipId === null || c.shipId === undefined)
 						.map((c) => ({
-							id: c.id,
+							id: c.clientId,
 							label: c.name,
 						}))}
 				/>
@@ -183,11 +183,11 @@ function HostStationItem({
 				.filter((c) => c.shipId === shipId && c.stationId === station.name)
 				.map((client) => (
 					<li
-						key={client.id}
+						key={client.clientId}
 						className={`list-group-item list-group-item-small ${
-							selectedClient === client.id ? "selected" : ""
+							selectedClient === client.clientId ? "selected" : ""
 						}`}
-						onClick={() => setSelectedClient(client.id)}
+						onClick={() => setSelectedClient(client.clientId)}
 					>
 						<div className="pl-4 flex items-center justify-between">
 							{client.name}{" "}
@@ -199,7 +199,7 @@ function HostStationItem({
 									e.preventDefault();
 									q.client.setStation.netSend({
 										shipId: null,
-										clientId: client.id,
+										clientId: client.clientId,
 									});
 								}}
 							/>
