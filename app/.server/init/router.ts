@@ -2,6 +2,8 @@ import { t } from "./t";
 import * as client from "@thorium/.server/data";
 import * as cards from "@thorium/cards/data.server";
 import * as cores from "@thorium/cores/data.server";
+import type { ComponentIds } from "@thorium/ecs-components";
+import type { Entity } from "@thorium/utils/ecs";
 
 // @ts-expect-error TypeScript's being too helpful
 const { default: _, ...allCards } = cards;
@@ -16,5 +18,24 @@ export const router = t.router({
 	...allCards,
 	...allCores,
 });
+
+export const componentEntityMaps = new Map<
+	ComponentIds,
+	Set<{ procedure: string; entityMap: (entity: Entity) => any }>
+>();
+
+for (const [name, route] of Object.entries(router._def.procedures) as any) {
+	if (!route._def.request || !route._def.components || !route._def.entityMap)
+		continue;
+	for (const component of route._def.components) {
+		if (!componentEntityMaps.has(component)) {
+			componentEntityMaps.set(component, new Set());
+		}
+		componentEntityMaps.get(component)?.add({
+			procedure: name,
+			entityMap: route._def.entityMap,
+		});
+	}
+}
 
 export type AppRouter = typeof router;

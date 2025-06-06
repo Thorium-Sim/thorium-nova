@@ -44,25 +44,6 @@ entity.addComponent("identity", {
 });
 ```
 
-Multiple components can be added or updated at the same time with the
-`updateComponents` method, which takes an object where the key is the component
-id and the value is the component data.
-
-```js
-const entity = new Entity();
-
-entity.updateComponents({
-  identity: {
-    name: "Bob",
-    description: "A nice guy",
-  },
-  position: {
-    x: 0,
-    y: 0,
-    z: 0,
-  },
-});
-```
 
 And, if the need arises, components can be removed from an entity with the
 `removeComponent` method. Removing components both deletes the data in the

@@ -1,14 +1,11 @@
 import { z } from "zod";
 import { t } from "@thorium/.server/init/t";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
-import type { isDestroyed } from "@thorium/ecs-components/isDestroyed";
 import { type scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";
 import { Entity } from "@thorium/utils/ecs";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { fromDate } from "dot-beat-time";
 import { generateScanResults } from "@thorium/.server/systems/SensorScanSystem";
-
-type IsDestroyed = Zod.infer<typeof isDestroyed>;
 
 export const sensors = t.router({
 	get: t.procedure
@@ -64,6 +61,12 @@ export const sensors = t.router({
 		.filter((publish: { shipId: number }, { input }) => {
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
+		})
+		.componentSubs(["scan"])
+		.entityMap((entity) => {
+			return (
+				entity.components.scan && { shipId: entity.components.scan?.parentId }
+			);
 		})
 		.request(({ ctx, input }) => {
 			const scans = [];
