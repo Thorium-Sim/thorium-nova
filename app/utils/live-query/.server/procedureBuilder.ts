@@ -162,7 +162,11 @@ export interface ProcedureBuilder<TParams extends ProcedureParams> {
 		 */
 		entityMap: (
 			entity: Entity,
-		) => ResolveOptions<TParams>["publish"] | undefined | null,
+		) =>
+			| ResolveOptions<TParams>["publish"]
+			| ResolveOptions<TParams>["publish"][]
+			| undefined
+			| null,
 	): ProcedureBuilder<TParams>;
 
 	/**

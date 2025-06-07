@@ -18,6 +18,14 @@ export const pilot = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
+			.autoPublish(
+				["isImpulseEngines"],
+				(entity) =>
+					entity.components.isShipSystem && {
+						shipId: entity.components.isShipSystem.shipId,
+						systemId: entity.id,
+					},
+			)
 			.request(({ ctx, input: { shipId } }) => {
 				// Currently only support one impulse engines
 				const impulseEngines = getShipSystem(ctx.ecs, {
@@ -39,6 +47,8 @@ export const pilot = t.router({
 			}),
 		ambiance: t.procedure
 			.input(z.object({ shipId: z.number() }))
+			.autoPublish(["isImpulseEngines"], () => null)
+
 			.request(({ ctx, input: { shipId } }) => {
 				const engine = getShipSystem(ctx.ecs, {
 					systemType: "impulseEngines",
@@ -94,6 +104,15 @@ export const pilot = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
+			.autoPublish(
+				["isWarpEngines"],
+				(entity) =>
+					entity.components.isShipSystem && {
+						shipId: entity.components.isShipSystem.shipId,
+						systemId: entity.id,
+					},
+			)
+
 			.request(({ ctx, input }) => {
 				// Currently only support one warp engines
 				const warpEngines = getShipSystem(ctx.ecs, {
@@ -154,6 +173,8 @@ export const pilot = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
+			.autoPublish(["autopilot"], (entity) => ({ shipId: entity.id }))
+
 			.request(({ ctx, input }) => {
 				const ship = ctx.ecs.getEntityById(input.shipId);
 				const waypointId = ship?.components.autopilot?.destinationWaypointId;

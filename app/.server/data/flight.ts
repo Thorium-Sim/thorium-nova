@@ -94,15 +94,19 @@ function getStationComplement(
 }
 
 export const flight = t.router({
-	active: t.procedure.request(({ ctx }) => {
-		const flight = ctx.flight;
-		if (!flight) return null;
-		const { date, name, paused, hasFlightDirector } = flight;
-		return { date, name, paused, hasFlightDirector };
-	}),
-	all: t.procedure.request(() => {
-		return DataStore.operations.getStore()!.getFlights();
-	}),
+	active: t.procedure
+		.autoPublish(["isFlight"], () => null)
+		.request(({ ctx }) => {
+			const flight = ctx.flight;
+			if (!flight) return null;
+			const { date, name, paused, hasFlightDirector } = flight;
+			return { date, name, paused, hasFlightDirector };
+		}),
+	all: t.procedure
+		.autoPublish(["isFlight"], () => null)
+		.request(() => {
+			return DataStore.operations.getStore()!.getFlights();
+		}),
 	start: t.procedure
 		.input(
 			z.object({

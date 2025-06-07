@@ -28,6 +28,14 @@ export const ship = t.router({
 				return true;
 			},
 		)
+		.autoPublish(["isShip", "flightClient"], (entity) => {
+			if (entity.components.flightClient) {
+				return { clientId: entity.components.flightClient.clientId };
+			}
+			if (entity.components.isShip) {
+				return { shipId: entity.id };
+			}
+		})
 		.request(({ ctx, input }) => {
 			// TODO February 28, 2025 - Replace this with a more carefully crafted object
 			const ship =
@@ -39,23 +47,26 @@ export const ship = t.router({
 					?.toJSON() || null;
 			return ship;
 		}),
-	players: t.procedure.request(({ ctx }) => {
-		return (
-			ctx.flight?.playerShips.map((ship) => {
-				const systemId = ship.components.position?.parentId;
-				const systemPosition = systemId
-					? ctx.flight?.ecs.getEntityById(systemId)?.components.position || null
-					: null;
-				return {
-					id: ship.id,
-					name: ship.components.identity?.name,
-					currentSystem: systemId || null,
-					systemPosition,
-					stations: ship.components.stationComplement?.stations || [],
-				};
-			}) || []
-		);
-	}),
+	players: t.procedure
+		.autoPublish(["isPlayerShip"], () => null)
+		.request(({ ctx }) => {
+			return (
+				ctx.flight?.playerShips.map((ship) => {
+					const systemId = ship.components.position?.parentId;
+					const systemPosition = systemId
+						? ctx.flight?.ecs.getEntityById(systemId)?.components.position ||
+							null
+						: null;
+					return {
+						id: ship.id,
+						name: ship.components.identity?.name,
+						currentSystem: systemId || null,
+						systemPosition,
+						stations: ship.components.stationComplement?.stations || [],
+					};
+				}) || []
+			);
+		}),
 	player: t.procedure
 		.input(
 			z.object({ clientId: z.string(), playerShipId: z.number().optional() }),
@@ -71,6 +82,9 @@ export const ship = t.router({
 				return false;
 			return true;
 		})
+		.autoPublish(["position", "isShip"], (entity) =>
+			entity.components.isPlayerShip ? { shipId: entity.id } : null,
+		)
 		.request(({ ctx, input }) => {
 			const ship = ctx.flight?.ecs.getEntityById(
 				input?.playerShipId ||

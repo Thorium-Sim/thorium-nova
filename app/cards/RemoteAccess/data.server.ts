@@ -10,6 +10,13 @@ export const remoteAccess = t.router({
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
+		.autoPublish(
+			["remoteAccessCode"],
+			(entity) =>
+				entity.components.remoteAccessCode && {
+					shipId: entity.components.remoteAccessCode.shipId,
+				},
+		)
 		.request(({ ctx, input: { shipId } }) => {
 			const codes = (
 				[...(ctx.ecs.componentCache.get("remoteAccessCode") || [])].filter(

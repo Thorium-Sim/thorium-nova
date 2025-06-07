@@ -52,29 +52,35 @@ function getGraph(entity: Entity) {
 }
 
 export const cargoControl = t.router({
-	inventoryTypes: t.procedure.request(({ ctx }) => {
-		for (const system of ctx.ecs.systems) {
-			if (system.constructor.name === "FilterInventorySystem") {
-				return Object.fromEntries(
-					Array.from(system?.entities.entries()).map(([id, entity]) => [
-						entity.components.identity?.name,
-						{
-							...entity.components.identity,
-							...entity.components.isInventory,
-						},
-					]) || [],
-				);
+	inventoryTypes: t.procedure
+		.autoPublish([], () => null)
+		.request(({ ctx }) => {
+			for (const system of ctx.ecs.systems) {
+				if (system.constructor.name === "FilterInventorySystem") {
+					return Object.fromEntries(
+						Array.from(system?.entities.entries()).map(([id, entity]) => [
+							entity.components.identity?.name,
+							{
+								...entity.components.identity,
+								...entity.components.isInventory,
+							},
+						]) || [],
+					);
+				}
 			}
-		}
 
-		return {};
-	}),
+			return {};
+		}),
 	rooms: t.procedure
 		.input(z.object({ shipId: z.number() }))
 		.filter((publish: { shipId: number } | null, { input }) => {
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
+		.autoPublish(
+			["shipMap"],
+			(entity) => entity.components.shipMap && { shipId: entity.id },
+		)
 		.request(({ ctx, input }) => {
 			const ship = ctx.ecs.getEntityById(input.shipId);
 			if (!ship) throw new Error("No ship selected");
@@ -92,6 +98,11 @@ export const cargoControl = t.router({
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
+		.autoPublish(["cargoContainer", "passengerMovement"], (entity) =>
+			entity.components.cargoContainer && entity.components.position?.parentId
+				? { shipId: entity.components.position.parentId }
+				: null,
+		)
 		.request(({ ctx, input }) => {
 			const inventoryTemplates = getInventoryTemplates(ctx.ecs);
 			const matchEntities = [
@@ -131,6 +142,7 @@ export const cargoControl = t.router({
 		}),
 	search: t.procedure
 		.input(z.object({ shipId: z.number(), query: z.string() }))
+		.autoPublish([], () => null)
 		.request(({ ctx, input }) => {
 			const ship = ctx.ecs.getEntityById(input.shipId);
 			if (!ship) throw new Error("No ship selected");

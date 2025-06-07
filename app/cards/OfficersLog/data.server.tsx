@@ -9,6 +9,13 @@ export const officersLog = t.router({
 			if (publish && input.clientId !== publish.clientId) return false;
 			return true;
 		})
+		.autoPublish(
+			["flightClient"],
+			(entity) =>
+				entity.components.flightClient && {
+					clientId: entity.components.flightClient.clientId,
+				},
+		)
 		.request(({ ctx, input }) => {
 			return (
 				ctx.getFlightClient(input.clientId)?.components.flightClient

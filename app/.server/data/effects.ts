@@ -20,6 +20,8 @@ type SoundPayload =
 export const effects = t.router({
 	sub: t.procedure
 		.input(z.object({ clientId: z.string() }))
+		// This request can only be triggered by a publish.
+		.autoPublish([], () => null)
 		.filter((payload: EffectPayload | null, { ctx, input: { clientId } }) => {
 			if (!payload) return true;
 
@@ -51,6 +53,8 @@ export const effects = t.router({
 		}),
 	sounds: t.procedure
 		.input(z.object({ clientId: z.string() }))
+		// This request can only be triggered by a publish.
+		.autoPublish([], () => null)
 		.filter((payload: SoundPayload | null, { ctx, input: { clientId } }) => {
 			/**
 			 * Logic for filtering out sound payloads
@@ -111,6 +115,8 @@ export const effects = t.router({
 	 */
 	ambiance: t.procedure
 		.input(z.object({ clientId: z.string() }))
+		// This request can only be triggered by a publish.
+		.autoPublish([], () => null)
 		.filter(
 			(
 				publish: { shipId?: number; stationId?: string },

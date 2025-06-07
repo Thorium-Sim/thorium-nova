@@ -11,6 +11,11 @@ export const client = t.router({
 			if (publish.clientId === input.clientId) return true;
 			return false;
 		})
+		.autoPublish(["flightClient"], (entity) =>
+			entity.components.flightClient
+				? { clientId: entity.components.flightClient?.clientId }
+				: null,
+		)
 		.request(({ ctx, input }) => {
 			const { id, name, connected, isHost } =
 				ctx.server.clients[input.clientId];
@@ -21,20 +26,22 @@ export const client = t.router({
 			} = ctx.getFlightClient(input.clientId)?.components.flightClient || {};
 			return { id, name, connected, isHost, ...flightClient };
 		}),
-	all: t.procedure.request(({ ctx }) => {
-		const serverClients = Object.values(ctx.server.clients);
-		const clients = serverClients
-			.map((client) => {
-				const flightClient = ctx.getFlightClient(client.id);
-				return {
-					name: client.name,
-					connected: client.connected,
-					...flightClient?.components.flightClient!,
-				};
-			})
-			.filter((client) => client.connected);
-		return clients;
-	}),
+	all: t.procedure
+		.autoPublish(["flightClient"], () => null)
+		.request(({ ctx }) => {
+			const serverClients = Object.values(ctx.server.clients);
+			const clients = serverClients
+				.map((client) => {
+					const flightClient = ctx.getFlightClient(client.id);
+					return {
+						name: client.name,
+						connected: client.connected,
+						...flightClient?.components.flightClient!,
+					};
+				})
+				.filter((client) => client.connected);
+			return clients;
+		}),
 	setName: t.procedure
 		.input(z.object({ clientId: z.string(), name: z.string().min(2) }))
 		.send(({ ctx, input }) => {

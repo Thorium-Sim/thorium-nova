@@ -14,6 +14,14 @@ export const systemsMonitor = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
+			.autoPublish(
+				["isReactor"],
+				(entity) =>
+					entity.components.isShipSystem && {
+						shipId: entity.components.isShipSystem.shipId,
+					},
+			)
+
 			.request(({ ctx, input: { shipId } }) => {
 				if (!ctx.flight) return [];
 
@@ -53,6 +61,8 @@ export const systemsMonitor = t.router({
 			}),
 		ambiance: t.procedure
 			.input(z.object({ shipId: z.number() }))
+			.autoPublish([], () => null)
+
 			.request(({ ctx, input }) => {
 				if (!ctx.flight) return [];
 
@@ -79,6 +89,14 @@ export const systemsMonitor = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
+			.autoPublish(
+				["isBattery"],
+				(entity) =>
+					entity.components.isShipSystem && {
+						shipId: entity.components.isShipSystem.shipId,
+					},
+			)
+
 			.request(({ ctx, input }) => {
 				if (!ctx.flight) return [];
 
@@ -108,6 +126,14 @@ export const systemsMonitor = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
+			.autoPublish(
+				["isShipSystem"],
+				(entity) =>
+					entity.components.isShipSystem && {
+						shipId: entity.components.isShipSystem.shipId,
+					},
+			)
+
 			.request(({ ctx, input }) => {
 				const systems = [];
 				const ship = ctx.ecs.getEntityById(input.shipId);

@@ -10,6 +10,11 @@ export const station = t.router({
 			if (publish && publish.clientId !== input.clientId) return false;
 			return true;
 		})
+		.autoPublish(["flightClient"], (entity) => {
+			if (entity.components.flightClient) {
+				return { clientId: entity.components.flightClient.clientId };
+			}
+		})
 		.request(({ ctx, input }) => {
 			const flightClient = ctx.getFlightClient(input.clientId)?.components
 				.flightClient;
@@ -20,17 +25,19 @@ export const station = t.router({
 				.find((s) => s.name === flightClient?.stationId) as unknown as Station;
 			return station || null;
 		}),
-	available: t.procedure.request(({ ctx }) => {
-		return ctx.server.plugins
-			.reduce((stations: StationComplementPlugin[], plugin) => {
-				if (!plugin.active) return stations;
-				return stations.concat(plugin.aspects.stationComplements);
-			}, [])
-			.map((station) => ({
-				name: station.name,
-				pluginName: station.pluginName,
-				stationCount: station.stationCount,
-				hasShipMap: station.hasShipMap,
-			}));
-	}),
+	available: t.procedure
+		.autoPublish([], () => null)
+		.request(({ ctx }) => {
+			return ctx.server.plugins
+				.reduce((stations: StationComplementPlugin[], plugin) => {
+					if (!plugin.active) return stations;
+					return stations.concat(plugin.aspects.stationComplements);
+				}, [])
+				.map((station) => ({
+					name: station.name,
+					pluginName: station.pluginName,
+					stationCount: station.stationCount,
+					hasShipMap: station.hasShipMap,
+				}));
+		}),
 });

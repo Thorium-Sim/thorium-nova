@@ -18,12 +18,14 @@ export type ActionOverrides = {
 };
 
 export const thorium = t.router({
-	hasHost: t.procedure.request(({ ctx }) => {
-		const hasHost = Object.values(ctx.server.clients).some(
-			(client) => client.isHost && client.connected,
-		);
-		return hasHost;
-	}),
+	hasHost: t.procedure
+		.autoPublish([], () => null)
+		.request(({ ctx }) => {
+			const hasHost = Object.values(ctx.server.clients).some(
+				(client) => client.isHost && client.connected,
+			);
+			return hasHost;
+		}),
 	claimHost: t.procedure
 		.input(z.object({ clientId: z.string() }))
 		.send(({ ctx, input: { clientId } }) => {
@@ -40,83 +42,87 @@ export const thorium = t.router({
 			pubsub.publish.client.get({ clientId });
 			pubsub.publish.thorium.hasHost();
 		}),
-	actions: t.procedure.request(function getActions({ ctx }) {
-		const actions = Object.entries(router._def.procedures)
-			// @ts-expect-error This does have the meta type
-			.filter(([name, p]) => p._def.meta?.action)
-			.map(([name, p]) => {
+	actions: t.procedure
+		.autoPublish([], () => null)
+		.request(function getActions({ ctx }) {
+			const actions = Object.entries(router._def.procedures)
 				// @ts-expect-error This does have the meta type
-				const meta = p._def.meta;
+				.filter(([name, p]) => p._def.meta?.action)
+				.map(([name, p]) => {
+					// @ts-expect-error This does have the meta type
+					const meta = p._def.meta;
 
-				// @ts-expect-error This does have the input type
-				let input = p._def.inputs[0];
-				const inputs = meta?.inputs;
-				if (inputs) {
-					input = input.pick(
-						inputs.reduce((acc: Record<string, boolean>, i: string) => {
-							acc[i] = true;
-							return acc;
-						}, {}),
-					);
-				}
+					// @ts-expect-error This does have the input type
+					let input = p._def.inputs[0];
+					const inputs = meta?.inputs;
+					if (inputs) {
+						input = input.pick(
+							inputs.reduce((acc: Record<string, boolean>, i: string) => {
+								acc[i] = true;
+								return acc;
+							}, {}),
+						);
+					}
 
-				let actionOverrides: ActionOverrides = {};
-				if (typeof meta?.action === "function") {
-					actionOverrides = meta?.action(ctx);
-				}
+					let actionOverrides: ActionOverrides = {};
+					if (typeof meta?.action === "function") {
+						actionOverrides = meta?.action(ctx);
+					}
 
-				return {
-					action: name,
-					name: name
-						.split(".")
-						.map((s) => capitalCase(s))
-						.join(": "),
-					input: input ? zodToJsonSchema(input) : {},
-					actionOverrides,
-				};
-			}) as any;
+					return {
+						action: name,
+						name: name
+							.split(".")
+							.map((s) => capitalCase(s))
+							.join(": "),
+						input: input ? zodToJsonSchema(input) : {},
+						actionOverrides,
+					};
+				}) as any;
 
-		return actions as {
-			name: string;
-			action: string;
-			input: any;
-			actionOverrides?: Record<string, ActionOverrides>;
-		}[];
-	}),
+			return actions as {
+				name: string;
+				action: string;
+				input: any;
+				actionOverrides?: Record<string, ActionOverrides>;
+			}[];
+		}),
 	executeActions: t.procedure
 		.input(z.object({ actions: actionItem.array() }))
 		.send(async ({ input, ctx }) => {
 			await executeActions(ctx, input.actions);
 		}),
-	events: t.procedure.request(function getEvents() {
-		const events = Object.entries(router._def.procedures)
-			// @ts-expect-error This does have the meta type
-			.filter(([name, p]) => p._def.meta?.event)
-			.map(([name, p]) => {
-				// @ts-expect-error This does have the input type
-				let input = p._def.inputs[0];
+	events: t.procedure
+		.autoPublish([], () => null)
+		.request(function getEvents() {
+			const events = Object.entries(router._def.procedures)
 				// @ts-expect-error This does have the meta type
-				const inputs = p._def.meta?.inputs;
-				if (inputs) {
-					input = input.pick(
-						inputs.reduce((acc: Record<string, boolean>, i: string) => {
-							acc[i] = true;
-							return acc;
-						}, {}),
-					);
-				}
-				return {
-					event: name,
-					name: name
-						.split(".")
-						.map((s) => capitalCase(s))
-						.join(": "),
-					input: input ? zodToJsonSchema(input) : {},
-				};
-			}) as any;
+				.filter(([name, p]) => p._def.meta?.event)
+				.map(([name, p]) => {
+					// @ts-expect-error This does have the input type
+					let input = p._def.inputs[0];
+					// @ts-expect-error This does have the meta type
+					const inputs = p._def.meta?.inputs;
+					if (inputs) {
+						input = input.pick(
+							inputs.reduce((acc: Record<string, boolean>, i: string) => {
+								acc[i] = true;
+								return acc;
+							}, {}),
+						);
+					}
+					return {
+						event: name,
+						name: name
+							.split(".")
+							.map((s) => capitalCase(s))
+							.join(": "),
+						input: input ? zodToJsonSchema(input) : {},
+					};
+				}) as any;
 
-		return events as { name: string; event: string; input: any }[];
-	}),
+			return events as { name: string; event: string; input: any }[];
+		}),
 	delay: t.procedure
 		.meta({ action: true })
 		.input(

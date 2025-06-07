@@ -14,6 +14,15 @@ export const sensors = t.router({
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
+		.autoPublish(
+			["isSensors"],
+			(entity) =>
+				entity.components.isShipSystem && {
+					shipId: entity.components.isShipSystem.shipId,
+					systemId: entity.id,
+				},
+		)
+
 		.request(({ ctx, input }) => {
 			const sensors = getShipSystem(ctx.ecs, {
 				systemType: "sensors",
@@ -36,6 +45,8 @@ export const sensors = t.router({
 				return false;
 			return true;
 		})
+		.autoPublish([], () => null)
+
 		.request(({ ctx, input }) => {
 			const object = ctx.flight?.ecs.getEntityById(input.objectId);
 

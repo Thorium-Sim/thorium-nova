@@ -21,14 +21,14 @@ export const router = t.router({
 
 export const componentEntityMaps = new Map<
 	ComponentIds,
-	Set<{ procedure: string; entityMap: (entity: Entity) => any }>
+	Set<{ procedure: string; entityMap: (entity: Entity) => any | any[] }>
 >();
 
 for (const [name, route] of Object.entries(router._def.procedures) as any) {
 	if (!route._def.request) continue;
 	if (!route._def.components || !route._def.entityMap) {
 		if (name.startsWith("plugin.")) continue;
-		console.log(`Route ${name} missing auto publish properties`);
+		console.warn(`Route ${name} missing auto publish properties`);
 		continue;
 	}
 	for (const component of route._def.components) {

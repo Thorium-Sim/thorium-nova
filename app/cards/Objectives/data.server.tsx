@@ -10,6 +10,14 @@ export const objectives = t.router({
 			if (publish && input.shipId !== publish.shipId) return false;
 			return true;
 		})
+		.autoPublish(
+			["isObjective"],
+			(entity) =>
+				entity.components.isObjective && {
+					shipId: entity.components.isObjective.shipId,
+				},
+		)
+
 		.request(({ ctx, input }) => {
 			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
 			if (!ship) return [];

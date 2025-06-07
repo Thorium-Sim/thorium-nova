@@ -8,6 +8,11 @@ export const theme = t.router({
 			if (publish && publish.clientId !== input.clientId) return false;
 			return true;
 		})
+		.autoPublish(["flightClient"], (entity) =>
+			entity.components.flightClient
+				? { clientId: entity.components.flightClient.clientId }
+				: null,
+		)
 		.request(({ ctx, input }) => {
 			const ship = ctx.ecs.getEntityById(
 				ctx.getFlightClient(input.clientId)?.components.flightClient?.shipId ||

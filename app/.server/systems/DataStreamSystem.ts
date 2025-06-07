@@ -25,8 +25,13 @@ export class DataStreamSystem extends System {
 				.get(component as ComponentIds)
 				?.forEach(({ entityMap, procedure }) => {
 					const filter = entityMap(entity);
-					if (!filter) return;
-					pubsub.directPublish(procedure, filter);
+					if (Array.isArray(filter)) {
+						for (const f of filter) {
+							pubsub.directPublish(procedure, f);
+						}
+					} else {
+						pubsub.directPublish(procedure, filter);
+					}
 				});
 		}
 		this.ecs.changeBatch.clear();
