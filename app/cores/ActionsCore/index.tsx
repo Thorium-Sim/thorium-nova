@@ -13,8 +13,8 @@ import type { DragEndEvent } from "@dnd-kit/core";
 import Button from "@thorium/ui/Button";
 import { q } from "@thorium/context/AppContext";
 import { ErrorBoundary } from "react-error-boundary";
-import { actionReducer } from "@thorium/routes/config/timelines/actionReducer";
-import { TriggerAction } from "@thorium/routes/config/timelines/action";
+import { actionReducer } from "@thorium/cores/ActionsCore/actionReducer";
+import { TriggerAction } from "@thorium/cores/ActionsCore/TriggerAction";
 
 type ActionsState = (ActionState & { id: string })[];
 function actionsReducer(

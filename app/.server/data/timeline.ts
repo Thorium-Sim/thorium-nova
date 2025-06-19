@@ -24,15 +24,25 @@ export const timeline = t.router({
 			triggerStep(ctx.flight.ecs.getEntityById(stepIds[0])!);
 		}),
 	advance: t.procedure
-		.meta({ action: true, inputs: ["timelineId"] })
+		.meta({
+			action: () => {
+				return {
+					timelineId: {
+						name: "Timeline ID",
+						helper:
+							"If using in a timeline action trigger, leave blank to advance the current timeline.",
+					},
+					stepId: {
+						name: "Step ID",
+						helper:
+							"Advance to this step and activate immediately. Leave blank to advance to the next step in the timeline.",
+					},
+				};
+			},
+		})
 		.input(
 			z.object({
-				timelineId: z
-					.number()
-					.optional()
-					.describe(
-						"If using in a timeline action trigger, leave blank to advance the current timeline.",
-					),
+				timelineId: z.number().optional(),
 				stepId: z.number().optional(),
 			}),
 		)

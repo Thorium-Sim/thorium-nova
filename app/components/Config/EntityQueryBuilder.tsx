@@ -5,6 +5,7 @@ import {
 	ZOD_COMPARISONS,
 	getInputType,
 	parseSchema,
+	schemaWithoutDefault,
 } from "@thorium/utils/zodAutoForm";
 import Checkbox from "@thorium/ui/Checkbox";
 import Input from "@thorium/ui/Input";
@@ -610,12 +611,6 @@ function PropertyCombobox({
 			</div>
 		</Combobox>
 	);
-}
-
-function schemaWithoutDefault(component: keyof typeof components) {
-	const schema = components[component];
-	if (schema && "removeDefault" in schema) return schema.removeDefault();
-	return schema;
 }
 
 export function PropertyInput({

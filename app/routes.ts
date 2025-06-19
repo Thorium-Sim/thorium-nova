@@ -7,6 +7,7 @@ import {
 } from "@react-router/dev/routes";
 
 export default [
+	route("debug", "routes/debug.tsx"),
 	layout("routes/landing/route.tsx", [
 		index("routes/blank.tsx"),
 		layout("routes/quickStart/layout.tsx", [
@@ -92,9 +93,7 @@ export default [
 			route("timelines", "routes/config/timelines/layout.tsx", [
 				route(":timelineId", "routes/config/timelines/timeline.tsx", [
 					route("details", "routes/config/timelines/details.tsx"),
-					route(":stepId", "routes/config/timelines/step.tsx", [
-						route(":actionId", "routes/config/timelines/action.tsx"),
-					]),
+					route(":stepId", "routes/config/timelines/step.tsx"),
 				]),
 			]),
 			route("themes", "routes/config/themes/layout.tsx", [

@@ -16,7 +16,7 @@ export function spawnTimeline(
 		});
 		step.addComponent("tags", { tags: stepItem.tags });
 		step.addComponent("isTimelineStep", {
-			actions: stepItem.actions,
+			blocks: stepItem.blocks,
 			active: false,
 			timelineId: timelineEntity.id,
 		});

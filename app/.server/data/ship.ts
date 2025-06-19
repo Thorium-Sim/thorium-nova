@@ -159,6 +159,7 @@ export const ship = t.router({
 				tags: z.array(z.string()).optional(),
 			}),
 		)
+		.output(z.object({ id: z.number() }))
 		.send(async ({ ctx, input }) => {
 			if (!ctx.flight) throw new Error("Flight not found.");
 
@@ -177,8 +178,6 @@ export const ship = t.router({
 					tags: input.tags,
 				},
 			);
-			extraEntities.forEach((s) => ctx.flight?.ecs.addEntity(s));
-			ctx.flight?.ecs.addEntity(shipEntity);
 
 			// Set the position of the ship
 			let position = { x: 0, y: 0, z: 0 };
@@ -219,9 +218,13 @@ export const ship = t.router({
 				type: systemId ? "solar" : "interstellar",
 			});
 
+			extraEntities.forEach((s) => ctx.flight?.ecs.addEntity(s));
+			ctx.flight?.ecs.addEntity(shipEntity);
+
 			pubsub.publish.starmapCore.ships({
 				systemId: shipEntity.components.position?.parentId || null,
 			});
+			return { id: shipEntity.id };
 		}),
 });
 

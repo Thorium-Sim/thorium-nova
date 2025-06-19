@@ -1,4 +1,5 @@
 import type { ActionOverrides } from "@thorium/.server/data";
+import { components } from "@thorium/ecs-components";
 import type z from "zod";
 type ZodObjectOrWrapped =
 	| z.ZodObject<any, any>
@@ -285,4 +286,10 @@ export function parseSchema(
 		});
 		return output;
 	});
+}
+
+export function schemaWithoutDefault(component: keyof typeof components) {
+	const schema = components[component];
+	if (schema && "removeDefault" in schema) return schema.removeDefault();
+	return schema;
 }

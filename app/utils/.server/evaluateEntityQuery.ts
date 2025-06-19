@@ -412,7 +412,8 @@ function generatePermutations(inputMap: Map<string, Set<any>>) {
 	return permutations;
 }
 
-export async function executeActions(
+// TODO June 17, 2025 - Make this properly execute all blocks, and not just actions
+export async function executeBlocks(
 	context: DataContext,
 	actions: Zod.infer<typeof actionSchema>,
 	stepId?: number,
@@ -435,10 +436,10 @@ export async function executeActions(
 }
 
 export function triggerStep(step: Entity) {
-	const actions = step?.components.isTimelineStep?.actions;
+	const actions = step?.components.isTimelineStep?.blocks;
 	if (!actions) return;
 	const context = new DataContext("thorium", database);
-	executeActions(context, actions, step.id);
+	executeBlocks(context, actions, step.id);
 }
 
 export async function processTriggers(
@@ -454,7 +455,7 @@ export async function processTriggers(
 			const { conditions, actions, stepId } = trigger.components.isTrigger;
 			const match = evaluateTriggerCondition(ecs, conditions, event);
 			if (match) {
-				await executeActions(
+				await executeBlocks(
 					new DataContext("thorium", database),
 					actions.map((action) => {
 						if (action.action === "timeline.advance") {

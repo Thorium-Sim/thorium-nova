@@ -1,4 +1,3 @@
-import { actionSchema } from "@thorium/utils/flags/actionSchema";
 import z from "zod";
 
 export const isTimeline = z
@@ -16,13 +15,14 @@ export const isTimeline = z
 	})
 	.default({});
 
+// TODO June 17, 2025 - Make a proper schema for blocks
 export const isTimelineStep = z
 	.object({
 		active: z.boolean().default(true),
 		/**
-		 * What actions are assigned to this timeline step
+		 * What blocks will be executed when this timeline step activates
 		 */
-		actions: actionSchema.default([]),
+		blocks: z.any().array().default([]),
 		timelineId: z.number().optional(),
 	})
 	.default({});

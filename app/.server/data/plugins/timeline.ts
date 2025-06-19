@@ -8,16 +8,20 @@ import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
 import uniqid from "@thorium/utils/uniqid";
 import type { FlightStartingPoint } from "@thorium/.server/data/flight";
 import path from "node:path";
+import {
+	timelineBlockDefaults,
+	timelineBlockTypes,
+	type TimelineBlock,
+} from "@thorium/.server/classes/Plugins/TimelineBlockTypes";
 
-const action = t.router({
+const block = t.router({
 	add: t.procedure
 		.input(
 			z.object({
 				pluginId: z.string(),
 				timelineId: z.string(),
 				stepId: z.string(),
-				action: z.string(),
-				name: z.string(),
+				blockType: z.enum(timelineBlockTypes),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -31,12 +35,13 @@ const action = t.router({
 			if (!input.stepId) throw new Error("Step ID is required");
 			const step = timeline.steps.find((step) => step.id === input.stepId);
 			if (!step) throw new Error("Step not found");
-			const id = uniqid("act-");
-			step.actions.push({
+			const id = uniqid("blo-");
+			const blockDefault = timelineBlockDefaults[input.blockType] as any;
+			if (!step.blocks) step.blocks = [];
+			step.blocks.push({
+				...blockDefault,
 				id,
-				name: input.name,
-				action: input.action,
-				values: {},
+				type: input.blockType,
 			});
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
@@ -50,7 +55,7 @@ const action = t.router({
 				pluginId: z.string(),
 				timelineId: z.string(),
 				stepId: z.string(),
-				actionId: z.string(),
+				blockId: z.string(),
 				newIndex: z.number(),
 			}),
 		)
@@ -64,15 +69,15 @@ const action = t.router({
 			if (!input.stepId) throw new Error("Step ID is required");
 			const step = timeline.steps.find((step) => step.id === input.stepId);
 			if (!step) throw new Error("Step not found");
-			const actionIndex = step.actions.findIndex(
-				(action) => action.id === input.actionId,
+			const blockIndex = step.blocks.findIndex(
+				(action) => action.id === input.blockId,
 			);
-			moveArrayItem(step.actions, actionIndex, input.newIndex);
+			moveArrayItem(step.blocks, blockIndex, input.newIndex);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
-			return { actionId: input.actionId };
+			return { actionId: input.blockId };
 		}),
 	delete: t.procedure
 		.input(
@@ -80,7 +85,7 @@ const action = t.router({
 				pluginId: z.string(),
 				timelineId: z.string(),
 				stepId: z.string(),
-				actionId: z.string(),
+				blockId: z.string(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -93,15 +98,15 @@ const action = t.router({
 			if (!input.stepId) throw new Error("Step ID is required");
 			const step = timeline.steps.find((step) => step.id === input.stepId);
 			if (!step) throw new Error("Step not found");
-			const actionIndex = step.actions.findIndex(
-				(action) => action.id === input.actionId,
+			const blockIndex = step.blocks.findIndex(
+				(action) => action.id === input.blockId,
 			);
-			step.actions.splice(actionIndex, 1);
+			step.blocks.splice(blockIndex, 1);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
-			return { actionId: input.actionId };
+			return { actionId: input.blockId };
 		}),
 	update: t.procedure
 		.input(
@@ -109,9 +114,9 @@ const action = t.router({
 				pluginId: z.string(),
 				timelineId: z.string(),
 				stepId: z.string(),
-				actionId: z.string(),
+				blockId: z.string(),
 				name: z.string().optional(),
-				values: z.record(z.any()).optional(),
+				properties: z.record(z.any()).optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -123,17 +128,14 @@ const action = t.router({
 			if (!timeline) throw new Error("Timeline not found");
 			const step = timeline.steps.find((step) => step.id === input.stepId);
 			if (!step) throw new Error("Step not found");
-			const action = step.actions.find(
-				(action) => action.id === input.actionId,
-			);
-			if (!action) throw new Error("Action not found");
-			if (input.name) action.name = input.name;
-			if (input.values) action.values = input.values;
+			const block = step.blocks.find((action) => action.id === input.blockId);
+			if (!block) throw new Error("Block not found");
+			Object.assign(block, input.properties);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
-			return { actionId: action.id };
+			return { actionId: block.id };
 		}),
 });
 
@@ -297,7 +299,7 @@ const step = t.router({
 			});
 			return { stepId: step.id };
 		}),
-	action,
+	block,
 });
 
 export const timeline = t.router({
