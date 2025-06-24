@@ -1,7 +1,7 @@
 import { isTrigger } from "@thorium/ecs-components/isTrigger";
 import { t } from "@thorium/.server/init/t";
-import { Entity } from "@thorium/utils/ecs";
 import { z } from "zod";
+import { spawnTrigger } from "@thorium/.server/spawners/trigger";
 
 export const triggers = t.router({
 	create: t.procedure
@@ -17,10 +17,7 @@ export const triggers = t.router({
 		)
 		.send(async ({ ctx, input }) => {
 			const { name, tags, ...trigger } = input;
-			const entity = new Entity();
-			entity.addComponent("identity", { name });
-			entity.addComponent("isTrigger", trigger);
-			entity.addComponent("tags", { tags });
+			const entity = spawnTrigger({ name, tags, trigger });
 			ctx.flight?.ecs.addEntity(entity);
 
 			return { triggerId: entity.id };

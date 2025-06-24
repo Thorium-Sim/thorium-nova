@@ -1,22 +1,13 @@
-import { ActionCombobox } from "@thorium/components/Config/ActionBuilder";
 import { q } from "@thorium/context/AppContext";
 import { toast } from "@thorium/context/ToastContext";
-import type { DragEndEvent } from "@dnd-kit/core";
-import { useConfirm } from "@thorium/ui/AlertDialog";
 import Input from "@thorium/ui/Input";
-import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
 import TagInput from "@thorium/ui/TagInput";
-import { Suspense } from "react";
-import { Outlet, useMatch, useNavigate, useParams } from "react-router";
+import { Outlet, useParams } from "react-router";
 import { Navigate } from "@thorium/components/Navigate";
-import {
-	AddBlockButton,
-	AddBlockMenu,
-} from "@thorium/routes/config/timelines/builder/AddBlockMenu";
+import { AddBlockButton } from "@thorium/routes/config/timelines/builder/AddBlockMenu";
 import { Button } from "react-aria-components";
-import { RenderBlock } from "@thorium/routes/config/timelines/builder/blocks";
 import InfoTip from "@thorium/ui/InfoTip";
-import type { TimelineBlock } from "@thorium/.server/classes/Plugins/TimelineBlockTypes";
+import { SortableBlocks } from "@thorium/routes/config/timelines/builder/SortableBlocks";
 
 export default function TimelineStep() {
 	const { pluginId, timelineId, stepId } = useParams() as {
@@ -29,30 +20,10 @@ export default function TimelineStep() {
 		timelineId,
 	});
 
-	const navigate = useNavigate();
 	const step = timeline.steps.find((s) => s.id === stepId);
 
 	if (!step)
 		return <Navigate to={`/config/${pluginId}/timelines/${timelineId}`} />;
-
-	async function handleDragEnd({
-		active,
-		overIndex,
-	}: {
-		active: DragEndEvent["active"];
-		overIndex: number;
-	}) {
-		const result = await q.plugin.timeline.step.block.reorder.netSend({
-			pluginId,
-			timelineId,
-			stepId,
-			blockId: active.id as string,
-			newIndex: Number(overIndex),
-		});
-		if (result) {
-			navigate(result.actionId);
-		}
-	}
 
 	return (
 		<div className="flex-1 flex flex-col">
@@ -134,11 +105,39 @@ export default function TimelineStep() {
 					actions.
 				</InfoTip>
 			</h3>
-			<div className="flex flex-col gap-2 py-2 pr-2 overflow-y-auto">
-				{step.blocks?.map((block, index) => (
-					<RenderBlock
-						key={block.id}
-						update={(property, value) => {
+			<div className="flex-1 overflow-y-auto overflow-x-hidden">
+				{!step?.blocks || step?.blocks?.length === 0 ? (
+					<div>
+						<p>No blocks added to step.</p>
+						<AddBlockButton
+							onAddBlock={async (type, init) => {
+								await q.plugin.timeline.step.block.add.netSend({
+									pluginId,
+									timelineId,
+									stepId,
+									blockType: type,
+									init,
+								});
+							}}
+						>
+							<Button className="btn btn-sm btn-outline btn-success">
+								Add Block
+							</Button>
+						</AddBlockButton>
+					</div>
+				) : (
+					<SortableBlocks
+						blocks={step?.blocks || []}
+						onDragEnd={({ active, overIndex }) =>
+							q.plugin.timeline.step.block.reorder.netSend({
+								pluginId,
+								timelineId,
+								stepId,
+								blockId: active.id as string,
+								newIndex: Number(overIndex),
+							})
+						}
+						onUpdate={(block, property, value) => {
 							const { id, type, ...properties } = block;
 							q.plugin.timeline.step.block.update.netSend({
 								pluginId,
@@ -148,34 +147,25 @@ export default function TimelineStep() {
 								properties: { ...properties, [property]: value },
 							});
 						}}
-						{...block}
-						onRemove={async (id) => {
-							await q.plugin.timeline.step.block.delete.netSend({
+						onRemove={(id) =>
+							q.plugin.timeline.step.block.delete.netSend({
 								pluginId,
 								timelineId,
 								stepId,
 								blockId: id,
-							});
-						}}
-						previousActionBlock={step.blocks.reduceRight(
-							(prev: TimelineBlock | undefined, next, i) => {
-								if (prev) return prev;
-								if (i < index && next.type === "Action") return next;
-								return prev;
-							},
-							undefined,
-						)}
+							})
+						}
 					/>
-				))}
+				)}
 			</div>
-			<div className="flex-1" />
 			<AddBlockButton
-				onAddBlock={async (type) => {
+				onAddBlock={async (type, init) => {
 					await q.plugin.timeline.step.block.add.netSend({
 						pluginId,
 						timelineId,
 						stepId,
 						blockType: type,
+						init,
 					});
 				}}
 			>

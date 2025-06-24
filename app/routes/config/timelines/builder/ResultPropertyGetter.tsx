@@ -1,4 +1,4 @@
-import type { TimelineBlock } from "@thorium/.server/classes/Plugins/TimelineBlockTypes";
+import type { TimelineBlock } from "@thorium/routes/config/timelines/builder/TimelineBlockTypes";
 import { q } from "@thorium/context/AppContext";
 import {
 	MadLibsCombobox,
@@ -12,22 +12,31 @@ import { parseSchema as parseJsonSchema } from "json-schema-to-zod";
 export function ResultPropertyIntoVariable({
 	property,
 	variable,
-	previousActionBlock,
+	previousActionOrEventBlock,
 	update,
 }: BlockProps<"ResultPropertyIntoVariable"> & {
-	previousActionBlock: TimelineBlock | undefined;
+	previousActionOrEventBlock: TimelineBlock | undefined;
 }) {
 	const [availableActions] = q.thorium.actions.useNetRequest();
+	const [availableEvents] = q.thorium.events.useNetRequest();
 	const previousAction = availableActions.find(
 		(a) =>
-			previousActionBlock?.type === "Action" &&
-			a.action === previousActionBlock.action,
+			previousActionOrEventBlock?.type === "Action" &&
+			a.action === previousActionOrEventBlock.action,
+	);
+	const previousEvent = availableEvents.find(
+		(a) =>
+			previousActionOrEventBlock?.type === "EventCondition" &&
+			a.event === previousActionOrEventBlock.event,
 	);
 	const actionOutputSchema = previousAction
 		? // biome-ignore lint/security/noGlobalEval:
 			parseSchema(eval(parseJsonSchema(previousAction.output)), {})
-		: [];
-	console.log(actionOutputSchema);
+		: previousEvent
+			? // biome-ignore lint/security/noGlobalEval:
+				parseSchema(eval(parseJsonSchema(previousEvent.output)))
+			: [];
+
 	return (
 		<>
 			<div className="flex items-center gap-x-1 gap-y-5 flex-wrap">
@@ -41,7 +50,11 @@ export function ResultPropertyIntoVariable({
 				/>{" "}
 				from{" "}
 				<Tooltip
-					content={previousAction?.action || "No previous action"}
+					content={
+						previousAction?.action ||
+						previousEvent?.event ||
+						"No previous action or event"
+					}
 					className="text-purple-200"
 				>
 					the result
@@ -52,13 +65,13 @@ export function ResultPropertyIntoVariable({
 					onChange={(value) => update("variable", value)}
 				/>
 			</div>
-			{previousAction ? null : (
+			{previousAction || previousEvent ? null : (
 				<small>
 					There isn't any action block before this block, so there isn't any
 					result to pick a property from.
 				</small>
 			)}
-			{actionOutputSchema.length === 0 ? (
+			{(previousAction || previousEvent) && actionOutputSchema.length === 0 ? (
 				<small>
 					There aren't any output properties from the previous{" "}
 					{previousAction?.action} action

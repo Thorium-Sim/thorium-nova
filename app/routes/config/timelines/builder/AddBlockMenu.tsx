@@ -9,7 +9,7 @@ import {
 	type MenuItemProps,
 	MenuItem,
 } from "react-aria-components";
-import type { TimelineBlock } from "@thorium/.server/classes/Plugins/TimelineBlockTypes";
+import type { TimelineBlock } from "@thorium/routes/config/timelines/builder/TimelineBlockTypes";
 import type { ReactNode } from "react";
 
 function StyledMenuItem(props: MenuItemProps) {
@@ -24,9 +24,16 @@ function StyledMenuItem(props: MenuItemProps) {
 export function AddBlockButton({
 	onAddBlock,
 	children,
+	omitBlocks,
 }: {
-	onAddBlock: (blockType: TimelineBlock["type"]) => void;
+	onAddBlock: <T extends TimelineBlock["type"]>(
+		blockType: T,
+		initParams?: Partial<
+			Omit<Extract<TimelineBlock, { type: T }>, "id" | "type">
+		>,
+	) => void;
 	children: ReactNode;
+	omitBlocks?: boolean;
 }) {
 	return (
 		<MenuTrigger>
@@ -38,6 +45,13 @@ export function AddBlockButton({
 				<Menu>
 					<StyledMenuItem onAction={() => onAddBlock("Action")}>
 						Action
+					</StyledMenuItem>
+					<StyledMenuItem
+						onAction={() =>
+							onAddBlock("Action", { action: "timeline.advance" })
+						}
+					>
+						Advance Timeline
 					</StyledMenuItem>
 					<MenuSection>
 						<Header className="font-bold pl-2">Control Flow</Header>
@@ -64,21 +78,29 @@ export function AddBlockButton({
 							Set Entity Variable
 						</StyledMenuItem>
 					</MenuSection>
-					<MenuSection>
-						<Header className="font-bold pl-2">Checks</Header>
-						<StyledMenuItem onAction={() => onAddBlock("DistanceCondition")}>
-							Distance Condition
-						</StyledMenuItem>
-						<StyledMenuItem onAction={() => onAddBlock("EntityCondition")}>
-							Entity Condition
-						</StyledMenuItem>
-						<StyledMenuItem onAction={() => onAddBlock("EventCondition")}>
-							Event Condition
-						</StyledMenuItem>
-						<StyledMenuItem onAction={() => onAddBlock("IfCondition")}>
-							If Condition
-						</StyledMenuItem>
-					</MenuSection>
+					{omitBlocks ? (
+						<MenuSection>
+							<StyledMenuItem onAction={() => onAddBlock("IfCondition")}>
+								If Condition
+							</StyledMenuItem>
+						</MenuSection>
+					) : (
+						<MenuSection>
+							<Header className="font-bold pl-2">Checks</Header>
+							<StyledMenuItem onAction={() => onAddBlock("DistanceCondition")}>
+								Distance Condition
+							</StyledMenuItem>
+							<StyledMenuItem onAction={() => onAddBlock("EntityCondition")}>
+								Entity Condition
+							</StyledMenuItem>
+							<StyledMenuItem onAction={() => onAddBlock("EventCondition")}>
+								Event Condition
+							</StyledMenuItem>
+							<StyledMenuItem onAction={() => onAddBlock("IfCondition")}>
+								If Condition
+							</StyledMenuItem>
+						</MenuSection>
+					)}
 				</Menu>
 			</Popover>
 		</MenuTrigger>
@@ -87,11 +109,16 @@ export function AddBlockButton({
 export function AddBlockMenu({
 	onAddBlock,
 }: {
-	onAddBlock: (blockType: TimelineBlock["type"]) => void;
+	onAddBlock: <T extends TimelineBlock["type"]>(
+		blockType: T,
+		initParams?: Partial<
+			Omit<Extract<TimelineBlock, { type: T }>, "id" | "type">
+		>,
+	) => void;
 }) {
 	return (
-		<div className="group-hover:opacity-100 group-focus-within:opacity-100 opacity-0 absolute p-2 bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-10">
-			<AddBlockButton onAddBlock={onAddBlock}>
+		<div className="absolute p-2 bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-10">
+			<AddBlockButton onAddBlock={onAddBlock} omitBlocks>
 				<Button
 					aria-label="Add block"
 					className="flex rounded-full w-6 h-6 cursor-pointer bg-black/20 hover:bg-white/20 hover:backdrop-brightness-200 hover:backdrop-saturate-200 border border-white/50  items-center justify-center"

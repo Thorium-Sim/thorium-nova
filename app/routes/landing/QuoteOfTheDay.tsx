@@ -368,6 +368,8 @@ const quotes = [
 	"Understand well as I may, my comprehension can only be an infinitesimal fraction of all I want to understand.",
 	// John W. Tukey
 	"Far better an approximate answer to the right question, which is often vague, than an exact answer to the wrong question, which can always be made precise.",
+	// From the Dunning Kruger paper
+	"But I wore the juice.",
 ];
 
 const QuoteOfTheDay = () => {

@@ -5,7 +5,10 @@
  * can then be used throughout the entire timeline.
  */
 
-import type { TimelineBlock } from "@thorium/.server/classes/Plugins/TimelineBlockTypes";
+import {
+	timelineBlockDefaults,
+	type TimelineBlock,
+} from "@thorium/routes/config/timelines/builder/TimelineBlockTypes";
 import { ActionBlock } from "@thorium/routes/config/timelines/builder/ActionBlock";
 import type { BlockProps } from "@thorium/routes/config/timelines/builder/BlockInputs";
 import { BlockWrapper } from "@thorium/routes/config/timelines/builder/BlockWrapper";
@@ -20,6 +23,10 @@ import { VariableGetter } from "@thorium/routes/config/timelines/builder/Variabl
 import { SetVariable } from "@thorium/routes/config/timelines/builder/VariableSetter";
 import { WaitBlock } from "@thorium/routes/config/timelines/builder/WaitBlock";
 import { Suspense } from "react";
+import { SortableBlocks } from "@thorium/routes/config/timelines/builder/SortableBlocks";
+import { arrayMove } from "@dnd-kit/sortable";
+import { AddBlockMenu } from "@thorium/routes/config/timelines/builder/AddBlockMenu";
+import uniqid from "@thorium/utils/uniqid";
 
 export function RenderBlock<T extends TimelineBlock["type"]>({
 	onRemove,
@@ -49,7 +56,7 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 				) : block.type === "ResultPropertyIntoVariable" ? (
 					<ResultPropertyIntoVariable
 						{...block}
-						previousActionBlock={previousActionBlock}
+						previousActionOrEventBlock={previousActionBlock}
 						update={update}
 					/>
 				) : block.type === "EntityPropertyIntoVariable" ? (
@@ -64,6 +71,54 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 					<div>Unknown block type</div>
 				)}
 			</BlockWrapper>
+			{"triggerBlocks" in block ? (
+				<div className="relative mb-8">
+					<div className="h-[calc(100%-1rem)] w-4 left-2  border-white/50 border-l border-b absolute rounded-bl-full" />
+					<div className="pl-8">
+						<SortableBlocks
+							parentBlock={block}
+							blocks={block.triggerBlocks}
+							onRemove={(id) =>
+								(update as any)(
+									"triggerBlocks",
+									block.triggerBlocks.filter((t) => t.id !== id),
+								)
+							}
+							onDragEnd={({ activeIndex, overIndex }) => {
+								(update as any)(
+									"triggerBlocks",
+									arrayMove(block.triggerBlocks, activeIndex, overIndex),
+								);
+							}}
+							onUpdate={(innerBlock, property, value) => {
+								const { id, type, ...properties } = innerBlock;
+								(update as any)(
+									"triggerBlocks",
+									block.triggerBlocks.map((b) => {
+										if (b.id === id) {
+											return { ...b, ...properties, [property]: value };
+										}
+										return b;
+									}),
+								);
+							}}
+						/>
+					</div>
+					<AddBlockMenu
+						onAddBlock={(type, init) =>
+							(update as any)("triggerBlocks", [
+								...block.triggerBlocks,
+								{
+									id: uniqid("blo-"),
+									type,
+									...(timelineBlockDefaults[type] as any),
+									...init,
+								},
+							])
+						}
+					/>
+				</div>
+			) : null}
 		</Suspense>
 	);
 }

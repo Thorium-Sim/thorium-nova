@@ -1,5 +1,3 @@
-import type { TimelineBlock } from "@thorium/.server/classes/Plugins/TimelineBlockTypes";
-import { AddBlockMenu } from "@thorium/routes/config/timelines/builder/AddBlockMenu";
 import {
 	EntityInput,
 	MadLibSelect,
@@ -15,7 +13,6 @@ export function DistanceCondition({
 	entity1,
 	entity2,
 	persist,
-	triggerBlocks,
 	update,
 }: BlockProps<"DistanceCondition">) {
 	return (
@@ -61,7 +58,6 @@ export function DistanceCondition({
 					}
 				/>
 			</div>
-			<AddBlockMenu onAddBlock={() => {}} />
 		</>
 	);
 }

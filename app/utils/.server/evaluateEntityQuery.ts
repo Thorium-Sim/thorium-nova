@@ -20,6 +20,7 @@ import {
 	getObjectSystem,
 } from "../starmap/position";
 import { callProcedure } from "@thorium/utils/live-query/.server/router";
+import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 
 export function evaluateEntityQuery(ecs: ECS, query: EntityQuery): Entity[] {
 	const output: Entity[] = [];
@@ -185,7 +186,7 @@ export function evaluateTriggerCondition(
 	conditions: Zod.infer<typeof conditionSchema>[],
 	event?: { event: string; values: any },
 ) {
-	let match = true;
+	let match: any = true;
 	for (const condition of conditions) {
 		if (condition.type === "eventListener") {
 			if (event?.event === condition.event) {
@@ -204,7 +205,7 @@ export function evaluateTriggerCondition(
 							let conditionMatch = false;
 							for (const value of conditionValue) {
 								if (event.values[key] === value) {
-									conditionMatch = true;
+									conditionMatch = event.values;
 									break;
 								}
 							}
@@ -219,20 +220,25 @@ export function evaluateTriggerCondition(
 						}
 					}
 				}
+				match = event.values;
 			} else {
 				match = false;
 				break;
 			}
 		}
 		if (condition.type === "distance") {
-			const entityA = evaluateEntityQuery(ecs, condition.entityA as any);
-			const entityB = evaluateEntityQuery(ecs, condition.entityB as any);
-			if (entityA.length === 0 || entityB.length === 0) {
+			const entityA = ecs.getEntityById(condition.entityA);
+			const entityB = ecs.getEntityById(condition.entityB);
+			if (!entityA || !entityB) {
 				match = false;
 				break;
 			}
-			const distance = getEntityDistance(entityA, entityB, condition.condition);
-			if (condition.condition === "lessThan") {
+			const distance = getEntityDistance(
+				[entityA],
+				[entityB],
+				condition.condition,
+			);
+			if (condition.condition === "less than") {
 				if (distance > condition.distance) {
 					match = false;
 					break;
@@ -246,20 +252,21 @@ export function evaluateTriggerCondition(
 		}
 		if (condition.type === "entityMatch") {
 			const entities = evaluateEntityQuery(ecs, condition.query as any);
-			if (condition.matchCount === ">=1") {
+			if (condition.matchCount === "any") {
 				if (entities.length < 1) {
 					match = false;
 					break;
 				}
-			} else if (condition.matchCount === "0" && entities.length !== 0) {
+				match = entities;
+			} else if (condition.matchCount === "no" && entities.length !== 0) {
 				match = false;
 				break;
-			} else {
-				const matchCount = Number.parseInt(condition.matchCount);
-				if (entities.length !== matchCount) {
+			} else if (condition.matchCount === "one") {
+				if (entities.length !== 1) {
 					match = false;
 					break;
 				}
+				match = entities[0];
 			}
 		}
 	}
@@ -269,7 +276,7 @@ export function evaluateTriggerCondition(
 function getEntityDistance(
 	entityA: Entity[],
 	entityB: Entity[],
-	condition: "lessThan" | "greaterThan",
+	condition: "less than" | "more than",
 ) {
 	// Calculate positions
 	const positionsA = entityA.map(getEntityPosition).filter(Boolean);
@@ -312,7 +319,7 @@ function getEntityDistance(
 		}
 	}
 
-	if (condition === "lessThan") {
+	if (condition === "less than") {
 		return Math.min(...distances);
 	}
 	return Math.max(...distances);
@@ -412,34 +419,11 @@ function generatePermutations(inputMap: Map<string, Set<any>>) {
 	return permutations;
 }
 
-// TODO June 17, 2025 - Make this properly execute all blocks, and not just actions
-export async function executeBlocks(
-	context: DataContext,
-	actions: Zod.infer<typeof actionSchema>,
-	stepId?: number,
-) {
-	if (!context.flight) return;
-	for (const action of actions) {
-		const values = evaluateAction(context.flight.ecs, action);
-		for (const value of values) {
-			try {
-				// This await is mostly so we can do a delay action
-				if (action.action === "triggers.create") {
-					value.stepId = stepId;
-				}
-				await triggerSend(action.action, value, context);
-			} catch (error) {
-				console.error("Error executing action:", action.action, error);
-			}
-		}
-	}
-}
-
 export function triggerStep(step: Entity) {
-	const actions = step?.components.isTimelineStep?.blocks;
-	if (!actions) return;
+	const blocks = step?.components.isTimelineStep?.blocks;
+	if (!blocks) return;
 	const context = new DataContext("thorium", database);
-	executeBlocks(context, actions, step.id);
+	executeBlocks(context, blocks, step.id);
 }
 
 export async function processTriggers(
@@ -452,12 +436,13 @@ export async function processTriggers(
 		Array.from(triggers).map(async (trigger) => {
 			if (!trigger.components.isTrigger || !trigger.components.isTrigger.active)
 				return false;
-			const { conditions, actions, stepId } = trigger.components.isTrigger;
+			const { conditions, blocks, stepId, localVariables } =
+				trigger.components.isTrigger;
 			const match = evaluateTriggerCondition(ecs, conditions, event);
 			if (match) {
 				await executeBlocks(
 					new DataContext("thorium", database),
-					actions.map((action) => {
+					blocks.map((action) => {
 						if (action.action === "timeline.advance") {
 							return {
 								...action,
@@ -469,6 +454,9 @@ export async function processTriggers(
 						}
 						return action;
 					}),
+					stepId,
+					localVariables,
+					match,
 				);
 				trigger.updateComponent("isTrigger", {
 					triggeredAt: new Date(),
@@ -482,7 +470,7 @@ export async function processTriggers(
 export async function triggerSend(path: string, input: any, ctx?: DataContext) {
 	const context = ctx || new DataContext("thorium", database);
 
-	await callProcedure({
+	return await callProcedure({
 		procedures: router._def.procedures,
 		type: "send",
 		path: path,

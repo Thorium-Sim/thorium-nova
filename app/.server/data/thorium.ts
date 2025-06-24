@@ -3,12 +3,13 @@ import { router } from "@thorium/.server/init/router";
 import { t } from "@thorium/.server/init/t";
 import { actionItem } from "@thorium/utils/flags/actionSchema";
 import {
-	executeBlocks,
 	selectValueQuery,
+	triggerSend,
 } from "@thorium/utils/.server/evaluateEntityQuery";
 import { capitalCase } from "change-case";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
+import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 
 export type ActionOverrides = {
 	name?: string;
@@ -66,9 +67,6 @@ export const thorium = t.router({
 
 					// @ts-expect-error This does have the output type
 					const output = p._def.output;
-					if (name === "ship.spawn") {
-						console.log(output);
-					}
 					let actionOverrides: ActionOverrides = {};
 					if (typeof meta?.action === "function") {
 						actionOverrides = meta?.action(ctx);
@@ -97,7 +95,11 @@ export const thorium = t.router({
 	executeActions: t.procedure
 		.input(z.object({ actions: actionItem.array() }))
 		.send(async ({ input, ctx }) => {
-			await executeBlocks(ctx, input.actions);
+			await Promise.all(
+				input.actions.map((action) =>
+					triggerSend(action.action, action.values, ctx),
+				),
+			);
 		}),
 	events: t.procedure
 		.autoPublish([], () => null)
@@ -118,6 +120,8 @@ export const thorium = t.router({
 							}, {}),
 						);
 					}
+					// @ts-expect-error This does have the output type
+					const output = p._def.output;
 					return {
 						event: name,
 						name: name
@@ -125,10 +129,16 @@ export const thorium = t.router({
 							.map((s) => capitalCase(s))
 							.join(": "),
 						input: input ? zodToJsonSchema(input) : {},
+						output: output ? zodToJsonSchema(output) : {},
 					};
 				}) as any;
 
-			return events as { name: string; event: string; input: any }[];
+			return events as {
+				name: string;
+				event: string;
+				input: any;
+				output: any;
+			}[];
 		}),
 	delay: t.procedure
 		.meta({ action: true })

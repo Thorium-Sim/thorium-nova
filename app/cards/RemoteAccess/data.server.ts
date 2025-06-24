@@ -42,11 +42,12 @@ export const remoteAccess = t.router({
 	send: t.procedure
 		.meta({ event: true })
 		.input(z.object({ clientId: z.string(), code: z.string().min(1) }))
+		.output(z.object({ remoteAccessCodeId: z.number() }))
 		.send(({ ctx, input: { clientId, code } }) => {
 			const remoteAccessCode = new Entity();
 			const client = ctx.getFlightClient(clientId)?.components.flightClient;
 			const shipId = client?.shipId;
-			if (!shipId) return;
+			if (!shipId) throw new Error("Ship not found");
 			remoteAccessCode.addComponent("remoteAccessCode", {
 				shipId,
 				clientId,
@@ -58,7 +59,7 @@ export const remoteAccess = t.router({
 			ctx.flight?.ecs.addEntity(remoteAccessCode);
 
 			pubsub.publish.remoteAccess.codes({ shipId });
-			return remoteAccessCode.id;
+			return { remoteAccessCodeId: remoteAccessCode.id };
 		}),
 
 	accept: t.procedure

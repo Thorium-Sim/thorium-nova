@@ -54,7 +54,6 @@ export function EventCondition({
 					}
 				/>
 			</div>
-			<AddBlockMenu onAddBlock={() => {}} />
 		</>
 	);
 }

@@ -12,7 +12,7 @@ import {
 	timelineBlockDefaults,
 	timelineBlockTypes,
 	type TimelineBlock,
-} from "@thorium/.server/classes/Plugins/TimelineBlockTypes";
+} from "@thorium/routes/config/timelines/builder/TimelineBlockTypes";
 
 const block = t.router({
 	add: t.procedure
@@ -22,6 +22,7 @@ const block = t.router({
 				timelineId: z.string(),
 				stepId: z.string(),
 				blockType: z.enum(timelineBlockTypes),
+				init: z.any().optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -40,6 +41,7 @@ const block = t.router({
 			if (!step.blocks) step.blocks = [];
 			step.blocks.push({
 				...blockDefault,
+				...input.init,
 				id,
 				type: input.blockType,
 			});

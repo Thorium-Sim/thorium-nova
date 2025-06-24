@@ -16,7 +16,6 @@ export function EntityCondition({
 	checks,
 	match,
 	persist,
-	triggerBlocks,
 	update,
 }: BlockProps<"EntityCondition">) {
 	return (
@@ -109,6 +108,8 @@ export function EntityCondition({
 			</div>
 			<div className="flex items-end gap-2 self-end">
 				<Checkbox
+					checked={persist}
+					onChange={(e) => update("persist", e.currentTarget.checked)}
 					label={
 						<>
 							Persist{" "}
@@ -122,7 +123,6 @@ export function EntityCondition({
 					}
 				/>
 			</div>
-			<AddBlockMenu onAddBlock={() => {}} />
 		</>
 	);
 }

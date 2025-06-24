@@ -4,30 +4,61 @@ import {
 	MadLibSelect,
 	type BlockProps,
 } from "@thorium/routes/config/timelines/builder/BlockInputs";
-import { BlockWrapper } from "@thorium/routes/config/timelines/builder/BlockWrapper";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
-import { useState } from "react";
+import { produce } from "immer";
 
-export function IfCondition({}: BlockProps<"IfCondition">) {
-	const [conditions, setConditions] = useState([{}]);
-
+export function IfCondition({ conditions, update }: BlockProps<"IfCondition">) {
 	return (
 		<>
 			<div className="flex gap-2">
 				If{" "}
 				<div className="flex flex-col gap-2">
-					{conditions.map((c, i) => (
+					{conditions.map(({ value1, value2, comparison }, i) => (
 						<div key={i} className="flex items-center gap-1">
-							<ValueInput />{" "}
+							<ValueInput
+								value={value1}
+								onChange={(value) =>
+									update(
+										"conditions",
+										produce(conditions, (draft) => {
+											draft[i].value1 = value;
+										}),
+									)
+								}
+							/>{" "}
 							<MadLibSelect
+								value={comparison}
+								onChange={(value) =>
+									update(
+										"conditions",
+										produce(conditions, (draft) => {
+											draft[i].comparison = value;
+										}),
+									)
+								}
 								options={["=", "!=", ">", ">=", "<", "<=", "contains"]}
 							/>{" "}
-							<ValueInput />
+							<ValueInput
+								value={value2}
+								onChange={(value) =>
+									update(
+										"conditions",
+										produce(conditions, (draft) => {
+											draft[i].value2 = value;
+										}),
+									)
+								}
+							/>
 							{i === conditions.length - 1 ? (
 								<Button
 									className="btn-circle btn-success btn-xs !text-lg !p-0"
-									onClick={() => setConditions((c) => [...c, {}])}
+									onClick={() =>
+										update("conditions", [
+											...conditions,
+											{ value1: "", value2: "", comparison: "=" },
+										])
+									}
 								>
 									<Icon name="plus" />
 								</Button>
@@ -40,7 +71,12 @@ export function IfCondition({}: BlockProps<"IfCondition">) {
 									<Button
 										className="btn-circle btn-error btn-xs !text-lg !p-0"
 										onClick={() =>
-											setConditions((c) => c.slice(0, conditions.length - 1))
+											update(
+												"conditions",
+												produce(conditions, (draft) => {
+													draft.splice(i, 1);
+												}),
+											)
 										}
 									>
 										<Icon name="minus" />
@@ -51,7 +87,6 @@ export function IfCondition({}: BlockProps<"IfCondition">) {
 					))}
 				</div>
 			</div>
-			<AddBlockMenu onAddBlock={() => {}} />
 		</>
 	);
 }

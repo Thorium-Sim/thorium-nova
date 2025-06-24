@@ -1,13 +1,20 @@
 import { Icon } from "@thorium/ui/Icon";
+import { cn } from "@thorium/utils/cn";
 import type { ReactNode } from "react";
 import { Button } from "react-aria-components";
 
 export function BlockWrapper({
 	children,
 	onRemove,
-}: { children: ReactNode; onRemove: () => void }) {
+	className,
+}: { children: ReactNode; onRemove: () => void; className?: string }) {
 	return (
-		<div className="border w-fit border-transparent shadow-[2px_2px_10px_rgba(0,0,0,0.5)] backdrop-brightness-200 rounded">
+		<div
+			className={cn(
+				"border w-fit border-white/10 shadow-[2px_2px_10px_rgba(0,0,0,0.5)] backdrop-brightness-200 rounded",
+				className,
+			)}
+		>
 			<div className="bg-black/80 backdrop-blur-md p-4 rounded flex flex-col items-start relative group w-fit">
 				{children}
 				<div className="group-hover:opacity-100 group-focus-within:opacity-100 opacity-0 absolute p-3 top-0 right-0 translate-x-1/2 -translate-y-1/2 ">

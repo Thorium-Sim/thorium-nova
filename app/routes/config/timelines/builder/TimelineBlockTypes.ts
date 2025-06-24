@@ -26,7 +26,7 @@ export const timelineBlockDefaults: {
 		triggerBlocks: [],
 	},
 	EntityCondition: {
-		checks: [],
+		checks: [{ component: "", property: "" }],
 		match: "any",
 		persist: false,
 		triggerBlocks: [],
@@ -38,9 +38,7 @@ export const timelineBlockDefaults: {
 		triggerBlocks: [],
 	},
 	IfCondition: {
-		comparison: "=",
-		value1: "",
-		value2: "",
+		conditions: [{ comparison: "=", value1: "", value2: "" }],
 		triggerBlocks: [],
 	},
 	Wait: {
@@ -109,9 +107,11 @@ interface EventConditionBlock extends ConditionBlock {
 
 interface IfConditionBlock extends ConditionBlock {
 	type: "IfCondition";
-	value1: string;
-	value2: string;
-	comparison: string;
+	conditions: {
+		value1: string;
+		value2: string;
+		comparison: string;
+	}[];
 }
 
 interface WaitBlock extends BaseBlock {

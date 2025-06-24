@@ -639,7 +639,6 @@ export function PropertyInput({
 					id={id}
 					className="input-sm"
 					fixed
-					type="number"
 					label={label}
 					labelHidden={labelHidden}
 					onChange={(e) => setValue(e.target.value)}

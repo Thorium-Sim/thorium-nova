@@ -3,7 +3,7 @@ import { Aspect } from "./Aspect";
 import type { components } from "@thorium/ecs-components";
 import uniqid from "@thorium/utils/uniqid";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-import type { TimelineBlock } from "@thorium/.server/classes/Plugins/TimelineBlockTypes";
+import type { TimelineBlock } from "@thorium/routes/config/timelines/builder/TimelineBlockTypes";
 
 export type EntityQuery = ComponentQuery[];
 

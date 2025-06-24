@@ -12,6 +12,7 @@ import {
 	useParams,
 } from "react-router";
 import { Navigate } from "@thorium/components/Navigate";
+import { useMenubar } from "@thorium/ui/Menubar";
 
 export default function TimelineLayout() {
 	const { pathname } = useLocation();
@@ -20,6 +21,10 @@ export default function TimelineLayout() {
 		timelineId: string;
 		pluginId: string;
 	};
+
+	useMenubar({
+		backTo: `/config/${pluginId}/timelines`,
+	});
 
 	const navigate = useNavigate();
 	const confirm = useConfirm();
@@ -60,8 +65,9 @@ export default function TimelineLayout() {
 
 	if (!pathname.endsWith(timelineId)) {
 		return (
-			<>
+			<div className="p-8 h-[calc(100%-2rem)] flex gap-8">
 				<div className="h-full w-72 flex flex-col">
+					<h1 className="font-bold text-white text-xl mb-2">{item.name}</h1>
 					<Link
 						to="details"
 						className={`list-group-item ${
@@ -169,7 +175,7 @@ export default function TimelineLayout() {
 					</Button>
 				</div>
 				<Outlet />
-			</>
+			</div>
 		);
 	}
 	return <Navigate to={`details`} />;

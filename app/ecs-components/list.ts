@@ -52,3 +52,4 @@ export * from "./isFaction";
 export * from "./npcKnowledge";
 export * from "./isFlight";
 export * from "./flightClient";
+export * from "./variables";

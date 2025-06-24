@@ -241,7 +241,7 @@ describe("evaluate trigger condition", () => {
 		const condition = [
 			{
 				type: "entityMatch" as const,
-				matchCount: ">=1",
+				matchCount: "any" as const,
 				query: [
 					{
 						component: "identity",

@@ -1,7 +1,4 @@
-import {
-	actionSchema,
-	conditionSchema,
-} from "@thorium/utils/flags/actionSchema";
+import { conditionSchema } from "@thorium/utils/flags/actionSchema";
 import z from "zod";
 
 export const isTrigger = z
@@ -13,7 +10,8 @@ export const isTrigger = z
 			.nullable()
 			.default(null),
 		conditions: z.array(conditionSchema).default([]),
-		actions: actionSchema,
+		blocks: z.any().array().default([]),
 		stepId: z.number().optional(),
+		localVariables: z.any().optional(),
 	})
 	.default({});

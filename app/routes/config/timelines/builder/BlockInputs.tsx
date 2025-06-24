@@ -1,4 +1,4 @@
-import type { TimelineBlock } from "@thorium/.server/classes/Plugins/TimelineBlockTypes";
+import type { TimelineBlock } from "@thorium/routes/config/timelines/builder/TimelineBlockTypes";
 import { components } from "@thorium/ecs-components";
 import { Icon } from "@thorium/ui/Icon";
 import { cn } from "@thorium/utils/cn";
@@ -111,19 +111,20 @@ export function ValueInput(
 		onChange: (value: string) => void;
 	},
 ) {
+	const value = props.value || "";
 	return (
 		<span className="relative w-min">
 			<input
 				placeholder="Value"
 				{...props}
-				size={Math.max(props.value.length + 3, 5)}
+				size={Math.max(value.length + 3, 5)}
 				onChange={(e) => {
 					props.onChange(e.currentTarget.value);
 				}}
 				className={cn(madLibInput, props.className)}
 			/>
 			<div className="peer-focus-within:block hidden pointer-events-none absolute top-full pt-1 left-1/2 -translate-x-1/2 text-xs whitespace-nowrap text-blue-200">
-				{props.value.startsWith("$") ? "Local Variable" : "Literal Value"}
+				{value.startsWith("$") ? "Local Variable" : "Literal Value"}
 			</div>
 		</span>
 	);
