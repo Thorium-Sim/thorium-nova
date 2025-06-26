@@ -2,7 +2,9 @@ import z from "zod";
 
 export const isTimeline = z
 	.object({
-		isMission: z.boolean().default(false),
+		type: z
+			.enum(["mission", "macro", "trigger", "training", "report"])
+			.default("macro"),
 		/**
 		 * References to the isTimelineStep entities associated
 		 * with this timeline.

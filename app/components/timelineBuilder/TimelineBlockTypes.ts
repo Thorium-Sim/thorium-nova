@@ -10,6 +10,8 @@ export const timelineBlockTypes = [
 	"VariableIntoVariable",
 	"SetVariable",
 	"Action",
+	"RandomIntoVariable",
+	"MathIntoVariable",
 ] as const;
 
 type BlockTypes = (typeof timelineBlockTypes)[number];
@@ -65,6 +67,18 @@ export const timelineBlockDefaults: {
 	},
 	SetVariable: { entity: "this timeline", variable: "", value: "" },
 	Action: { action: "", values: {} },
+	RandomIntoVariable: {
+		number1: "0",
+		number2: "10",
+		numberType: "integer",
+		variable: "",
+	},
+	MathIntoVariable: {
+		number1: "0",
+		number2: "0",
+		operation: "+",
+		variable: "",
+	},
 };
 
 interface BaseBlock {
@@ -162,6 +176,21 @@ interface ActionBlock extends BaseBlock {
 	values: Record<string, any>;
 }
 
+interface RandomIntoVariableBlock extends BaseBlock {
+	type: "RandomIntoVariable";
+	number1: string;
+	number2: string;
+	numberType: "integer" | "decimal";
+	variable: string;
+}
+interface MathIntoVariableBlock extends BaseBlock {
+	type: "MathIntoVariable";
+	number1: string;
+	number2: string;
+	operation: "+" | "-" | "×" | "÷";
+	variable: string;
+}
+
 export type TimelineBlock =
 	| DistanceConditionBlock
 	| EntityConditionBlock
@@ -173,4 +202,6 @@ export type TimelineBlock =
 	| EntityPropertyIntoVariableBlock
 	| VariableIntoVariableBlock
 	| SetVariableBlock
-	| ActionBlock;
+	| ActionBlock
+	| RandomIntoVariableBlock
+	| MathIntoVariableBlock;

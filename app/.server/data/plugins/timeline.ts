@@ -11,8 +11,7 @@ import path from "node:path";
 import {
 	timelineBlockDefaults,
 	timelineBlockTypes,
-	type TimelineBlock,
-} from "@thorium/routes/config/timelines/builder/TimelineBlockTypes";
+} from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 
 const block = t.router({
 	add: t.procedure
@@ -332,11 +331,20 @@ export const timeline = t.router({
 			return timeline;
 		}),
 	create: t.procedure
-		.input(z.object({ pluginId: z.string(), name: z.string() }))
+		.input(
+			z.object({
+				pluginId: z.string(),
+				name: z.string(),
+				type: z.enum(["mission", "macro", "trigger", "training", "report"]),
+			}),
+		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const timeline = new TimelinePlugin({ name: input.name }, plugin);
+			const timeline = new TimelinePlugin(
+				{ name: input.name, type: input.type },
+				plugin,
+			);
 			plugin.aspects.timelines.push(timeline);
 
 			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
@@ -373,7 +381,6 @@ export const timeline = t.router({
 				category: z.string().optional(),
 				tags: z.array(z.string()).optional(),
 				description: z.string().optional(),
-				isMission: z.boolean().optional(),
 				cover: z.instanceof(File).optional(),
 			}),
 		)
@@ -388,8 +395,6 @@ export const timeline = t.router({
 			if (input.category) timeline.category = input.category;
 			if (input.description) timeline.description = input.description;
 			if (input.tags) timeline.tags = input.tags;
-			if (typeof input.isMission === "boolean")
-				timeline.isMission = input.isMission;
 			if (typeof input.cover === "string") {
 				const ext = path.extname(input.cover);
 				timeline.assets.cover = await ctx.uploadFile.call(
@@ -410,34 +415,37 @@ export const timeline = t.router({
 			return { timelineId: timeline.name };
 		}),
 	step,
-	missions: t.procedure.request(({ ctx }) => {
-		return ctx.server.plugins.reduce(
-			(
-				acc: {
-					name: string;
-					description: string;
-					category: string;
-					cover: string;
-					pluginId: string;
-				}[],
-				plugin,
-			) => {
-				if (!plugin.active) return acc;
-				const missions = plugin.aspects.timelines
-					.filter((timeline) => timeline.isMission)
-					.map(({ name, description, category, assets }) => ({
-						name,
-						description,
-						category,
-						cover: assets.cover,
-						pluginId: plugin.id,
-					}));
-				// biome-ignore lint/performance/noAccumulatingSpread:
-				return [...acc, ...missions];
-			},
-			[],
-		);
-	}),
+	missions: t.procedure
+		.input(z.object({ pluginId: z.string().optional() }).optional())
+		.request(({ ctx, input }) => {
+			return ctx.server.plugins.reduce(
+				(
+					acc: {
+						name: string;
+						description: string;
+						category: string;
+						cover: string;
+						pluginId: string;
+					}[],
+					plugin,
+				) => {
+					const missions = plugin.aspects.timelines
+						.filter((timeline) => timeline.type === "mission")
+						.map(({ name, description, category, assets }) => ({
+							name,
+							description,
+							category,
+							cover: assets.cover,
+							pluginId: plugin.id,
+						}));
+					if (input?.pluginId && plugin.name !== input?.pluginId) return acc;
+					if (plugin.name === input?.pluginId) return acc.concat(missions);
+					if (!plugin.active) return acc;
+					return acc.concat(missions);
+				},
+				[],
+			);
+		}),
 	startingPoints: t.procedure.request(({ ctx }) => {
 		return ctx.server.plugins.reduce(
 			(points: FlightStartingPoint[], plugin) => {

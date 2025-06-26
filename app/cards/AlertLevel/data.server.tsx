@@ -19,7 +19,7 @@ export const alertLevel = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
-			const ship = ctx.flight?.ecs.getEntityById(input.shipId || -1);
+			const ship = ctx.ecs.getEntityById(input.shipId || -1);
 			if (!ship?.components.isShip) return;
 
 			ship.updateComponent("isShip", { alertLevel: input.alertLevel });

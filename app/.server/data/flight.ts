@@ -14,7 +14,7 @@ import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { spawnShip } from "@thorium/.server/spawners/ship";
 import type BasePlugin from "@thorium/.server/classes/Plugins";
 import type StationComplementPlugin from "@thorium/.server/classes/Plugins/StationComplement";
-import { triggerSend } from "@thorium/utils/.server/evaluateEntityQuery";
+import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { DataStore } from "@thorium/utils/.server/db-fs";
 
 function getPlanetSystem(ecs: ECS, planet: Entity): Entity {
@@ -278,7 +278,7 @@ export const flight = t.router({
 				}
 				// Add the mission if it exists
 				if (missionId) {
-					triggerSend("timeline.activate", {
+					triggerAction("timeline.activate", {
 						pluginId: missionId.pluginId,
 						timelineId: missionId.missionId,
 					});

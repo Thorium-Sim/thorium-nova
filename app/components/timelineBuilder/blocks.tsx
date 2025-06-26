@@ -8,25 +8,27 @@
 import {
 	timelineBlockDefaults,
 	type TimelineBlock,
-} from "@thorium/routes/config/timelines/builder/TimelineBlockTypes";
-import { ActionBlock } from "@thorium/routes/config/timelines/builder/ActionBlock";
-import type { BlockProps } from "@thorium/routes/config/timelines/builder/BlockInputs";
-import { BlockWrapper } from "@thorium/routes/config/timelines/builder/BlockWrapper";
-import { DistanceCondition } from "@thorium/routes/config/timelines/builder/DistanceCondition";
-import { EntityCondition } from "@thorium/routes/config/timelines/builder/EntityCondition";
-import { EntityPropertyIntoVariable } from "@thorium/routes/config/timelines/builder/EntityPropertyIntoVariable";
-import { EventCondition } from "@thorium/routes/config/timelines/builder/EventCondition";
-import { IfCondition } from "@thorium/routes/config/timelines/builder/IfCondition";
-import { ResultPropertyIntoVariable } from "@thorium/routes/config/timelines/builder/ResultPropertyGetter";
-import { ShipSystemGetter } from "@thorium/routes/config/timelines/builder/ShipSystemGetter";
-import { VariableGetter } from "@thorium/routes/config/timelines/builder/VariableGetter";
-import { SetVariable } from "@thorium/routes/config/timelines/builder/VariableSetter";
-import { WaitBlock } from "@thorium/routes/config/timelines/builder/WaitBlock";
+} from "@thorium/components/timelineBuilder/TimelineBlockTypes";
+import { ActionBlock } from "@thorium/components/timelineBuilder/ActionBlock";
+import type { BlockProps } from "@thorium/components/timelineBuilder/BlockInputs";
+import { BlockWrapper } from "@thorium/components/timelineBuilder/BlockWrapper";
+import { DistanceCondition } from "@thorium/components/timelineBuilder/DistanceCondition";
+import { EntityCondition } from "@thorium/components/timelineBuilder/EntityCondition";
+import { EntityPropertyIntoVariable } from "@thorium/components/timelineBuilder/EntityPropertyIntoVariable";
+import { EventCondition } from "@thorium/components/timelineBuilder/EventCondition";
+import { IfCondition } from "@thorium/components/timelineBuilder/IfCondition";
+import { ResultPropertyIntoVariable } from "@thorium/components/timelineBuilder/ResultPropertyGetter";
+import { ShipSystemGetter } from "@thorium/components/timelineBuilder/ShipSystemGetter";
+import { VariableGetter } from "@thorium/components/timelineBuilder/VariableGetter";
+import { SetVariable } from "@thorium/components/timelineBuilder/VariableSetter";
+import { WaitBlock } from "@thorium/components/timelineBuilder/WaitBlock";
 import { Suspense } from "react";
-import { SortableBlocks } from "@thorium/routes/config/timelines/builder/SortableBlocks";
+import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
 import { arrayMove } from "@dnd-kit/sortable";
-import { AddBlockMenu } from "@thorium/routes/config/timelines/builder/AddBlockMenu";
+import { AddBlockMenu } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import uniqid from "@thorium/utils/uniqid";
+import { RandomIntoVariable } from "@thorium/components/timelineBuilder/RandomBlock";
+import { MathIntoVariable } from "@thorium/components/timelineBuilder/MathIntoVariableBlock";
 
 export function RenderBlock<T extends TimelineBlock["type"]>({
 	onRemove,
@@ -67,6 +69,10 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 					<SetVariable {...block} update={update} />
 				) : block.type === "Action" ? (
 					<ActionBlock {...block} update={update} />
+				) : block.type === "RandomIntoVariable" ? (
+					<RandomIntoVariable {...block} update={update} />
+				) : block.type === "MathIntoVariable" ? (
+					<MathIntoVariable {...block} update={update} />
 				) : (
 					<div>Unknown block type</div>
 				)}

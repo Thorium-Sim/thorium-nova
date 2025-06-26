@@ -31,7 +31,7 @@ export function spawnTimeline(
 	timelineEntity.addComponent("tags", { tags: timeline.tags });
 	timelineEntity.addComponent("isTimeline", {
 		steps: stepIds,
-		isMission: timeline.isMission,
+		type: timeline.type,
 	});
 	addEntity(timelineEntity);
 

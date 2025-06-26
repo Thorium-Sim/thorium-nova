@@ -54,6 +54,7 @@ class MockFlightDataModel {
 	pluginIds: string[] = [];
 	private initEntities: Entity[] = [];
 	serverDataModel: ServerDataModel;
+	flightClientIndex = new Map();
 	inventoryTemplates: {
 		[key: string]: {
 			name: string;

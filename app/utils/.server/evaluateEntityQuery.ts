@@ -12,14 +12,12 @@ import type {
 } from "../flags/actionSchema";
 import { getNavigationDistance } from "../starmap/getNavigationDistance";
 import { lightMinuteToKilometer, lightYearToLightMinute } from "../unitTypes";
-import { router } from "@thorium/.server/init/router";
 import { DataContext } from "../../.server/DataContext";
 import { database } from "@thorium/.server/init/buildDatabase";
 import {
 	getCompletePositionFromOrbit,
 	getObjectSystem,
 } from "../starmap/position";
-import { callProcedure } from "@thorium/utils/live-query/.server/router";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 
 export function evaluateEntityQuery(ecs: ECS, query: EntityQuery): Entity[] {
@@ -423,7 +421,7 @@ export function triggerStep(step: Entity) {
 	const blocks = step?.components.isTimelineStep?.blocks;
 	if (!blocks) return;
 	const context = new DataContext("thorium", database);
-	executeBlocks(context, blocks, step.id);
+	executeBlocks(context.ecs, blocks, step.id);
 }
 
 export async function processTriggers(
@@ -441,7 +439,7 @@ export async function processTriggers(
 			const match = evaluateTriggerCondition(ecs, conditions, event);
 			if (match) {
 				await executeBlocks(
-					new DataContext("thorium", database),
+					ecs,
 					blocks.map((action) => {
 						if (action.action === "timeline.advance") {
 							return {
@@ -465,27 +463,4 @@ export async function processTriggers(
 			}
 		}),
 	);
-}
-
-export async function triggerSend(path: string, input: any, ctx?: DataContext) {
-	const context = ctx || new DataContext("thorium", database);
-
-	return await callProcedure({
-		procedures: router._def.procedures,
-		type: "send",
-		path: path,
-		rawInput: input,
-		ctx: context,
-		onCall: (opts) => {
-			const ecs = ctx?.flight?.ecs;
-			if (!ecs || opts.type !== "send") return;
-
-			processTriggers(ecs, {
-				event: opts.path,
-				values: {
-					...(opts.rawInput as any),
-				},
-			});
-		},
-	});
 }

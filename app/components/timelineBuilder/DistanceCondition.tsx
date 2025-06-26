@@ -3,7 +3,7 @@ import {
 	MadLibSelect,
 	ValueInput,
 	type BlockProps,
-} from "@thorium/routes/config/timelines/builder/BlockInputs";
+} from "@thorium/components/timelineBuilder/BlockInputs";
 import Checkbox from "@thorium/ui/Checkbox";
 import InfoTip from "@thorium/ui/InfoTip";
 

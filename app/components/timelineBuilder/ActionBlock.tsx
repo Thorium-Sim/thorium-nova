@@ -16,7 +16,7 @@ import {
 	DisclosurePanel,
 } from "react-aria-components";
 import { PropertyInput } from "@thorium/components/Config/EntityQueryBuilder";
-import type { BlockProps } from "@thorium/routes/config/timelines/builder/BlockInputs";
+import type { BlockProps } from "@thorium/components/timelineBuilder/BlockInputs";
 
 export function ActionBlock({ action, values, update }: BlockProps<"Action">) {
 	const [availableActions] = q.thorium.actions.useNetRequest();

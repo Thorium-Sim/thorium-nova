@@ -4,10 +4,10 @@ import Input from "@thorium/ui/Input";
 import TagInput from "@thorium/ui/TagInput";
 import { Outlet, useParams } from "react-router";
 import { Navigate } from "@thorium/components/Navigate";
-import { AddBlockButton } from "@thorium/routes/config/timelines/builder/AddBlockMenu";
 import { Button } from "react-aria-components";
 import InfoTip from "@thorium/ui/InfoTip";
-import { SortableBlocks } from "@thorium/routes/config/timelines/builder/SortableBlocks";
+import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
+import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
 
 export default function TimelineStep() {
 	const { pluginId, timelineId, stepId } = useParams() as {

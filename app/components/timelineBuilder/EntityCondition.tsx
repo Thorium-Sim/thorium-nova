@@ -1,10 +1,10 @@
-import { AddBlockMenu } from "@thorium/routes/config/timelines/builder/AddBlockMenu";
+import { AddBlockMenu } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import {
 	ComponentPropertySelect,
 	MadLibSelect,
 	type BlockProps,
-} from "@thorium/routes/config/timelines/builder/BlockInputs";
-import { BlockWrapper } from "@thorium/routes/config/timelines/builder/BlockWrapper";
+} from "@thorium/components/timelineBuilder/BlockInputs";
+import { BlockWrapper } from "@thorium/components/timelineBuilder/BlockWrapper";
 import Checkbox from "@thorium/ui/Checkbox";
 import { Icon } from "@thorium/ui/Icon";
 import InfoTip from "@thorium/ui/InfoTip";

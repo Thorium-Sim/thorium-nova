@@ -90,10 +90,10 @@ export default [
 					route("system", "routes/config/systems/system.tsx"),
 				]),
 			]),
-			route("timelines", "routes/config/timelines/layout.tsx", []),
-			route("timelines/:timelineId", "routes/config/timelines/timeline.tsx", [
-				route("details", "routes/config/timelines/details.tsx"),
-				route(":stepId", "routes/config/timelines/step.tsx"),
+			route("missions", "routes/config/missions/layout.tsx", []),
+			route("missions/:timelineId", "routes/config/missions/mission.tsx", [
+				route("details", "routes/config/missions/details.tsx"),
+				route(":stepId", "routes/config/missions/step.tsx"),
 			]),
 			route("themes", "routes/config/themes/layout.tsx", [
 				route(":themeId", "routes/config/themes/theme.tsx"),

@@ -1,4 +1,4 @@
-import type { TimelineBlock } from "@thorium/routes/config/timelines/builder/TimelineBlockTypes";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { useSortable } from "@dnd-kit/sortable";
 
 import { CSS } from "@dnd-kit/utilities";
@@ -20,7 +20,7 @@ import {
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { cn } from "@thorium/utils/cn";
-import { RenderBlock } from "@thorium/routes/config/timelines/builder/blocks";
+import { RenderBlock } from "@thorium/components/timelineBuilder/blocks";
 import type { ReactNode } from "react";
 
 export function SortableBlocks({

@@ -256,7 +256,7 @@ describe("evaluate trigger condition", () => {
 
 		entity.updateComponent("identity", { name: "Test" });
 
-		expect(evaluateTriggerCondition(ecs, condition)).toEqual(true);
+		expect(evaluateTriggerCondition(ecs, condition)).toBeTruthy();
 	});
 	it("should evaluate multiple match conditions", () => {
 		const ecs = new ECS(server);
@@ -276,7 +276,7 @@ describe("evaluate trigger condition", () => {
 		const condition = [
 			{
 				type: "entityMatch" as const,
-				matchCount: ">=1",
+				matchCount: "any",
 				query: [
 					{
 						component: "identity",
@@ -288,7 +288,7 @@ describe("evaluate trigger condition", () => {
 			},
 			{
 				type: "entityMatch" as const,
-				matchCount: ">=1",
+				matchCount: "any",
 				query: [
 					{
 						component: "isPlayerShip",
@@ -301,7 +301,7 @@ describe("evaluate trigger condition", () => {
 
 		entity.addComponent("isPlayerShip");
 
-		expect(evaluateTriggerCondition(ecs, condition as any)).toEqual(true);
+		expect(evaluateTriggerCondition(ecs, condition as any)).toBeTruthy();
 	});
 	it("should evaluate distance conditions", () => {
 		const ecs = new ECS(server);
@@ -346,35 +346,21 @@ describe("evaluate trigger condition", () => {
 		const condition = [
 			{
 				type: "distance" as const,
-				entityA: [
-					{
-						component: "identity",
-						property: "name",
-						comparison: "=",
-						value: "Test",
-					},
-				],
-				entityB: [
-					{
-						component: "identity",
-						property: "name",
-						comparison: "=",
-						value: "Test2",
-					},
-				],
+				entityA: entity2.id,
+				entityB: entity3.id,
 				distance: 200,
-				condition: "lessThan",
+				condition: "less than",
 			},
 		];
-		expect(evaluateTriggerCondition(ecs, condition as any)).toEqual(true);
+		expect(evaluateTriggerCondition(ecs, condition as any)).toBeTruthy();
 		condition[0].distance = 75;
-		expect(evaluateTriggerCondition(ecs, condition as any)).toEqual(true);
+		expect(evaluateTriggerCondition(ecs, condition as any)).toBeTruthy();
 		condition[0].distance = 25;
 		expect(evaluateTriggerCondition(ecs, condition as any)).toEqual(false);
-		condition[0].condition = "greaterThan";
-		expect(evaluateTriggerCondition(ecs, condition as any)).toEqual(true);
+		condition[0].condition = "more than";
+		expect(evaluateTriggerCondition(ecs, condition as any)).toBeTruthy();
 		condition[0].distance = 75;
-		expect(evaluateTriggerCondition(ecs, condition as any)).toEqual(true);
+		expect(evaluateTriggerCondition(ecs, condition as any)).toEqual(false);
 		condition[0].distance = 150;
 		expect(evaluateTriggerCondition(ecs, condition as any)).toEqual(false);
 	});
@@ -418,7 +404,7 @@ describe("evaluate trigger condition", () => {
 					values: {},
 				},
 			),
-		).toBe(true);
+		).toBeTruthy();
 		expect(
 			evaluateTriggerCondition(
 				ecs,
@@ -439,7 +425,10 @@ describe("evaluate trigger condition", () => {
 					},
 				},
 			),
-		).toBe(false);
+		).toEqual({
+			test: "Whatever",
+			other: true,
+		});
 		expect(
 			evaluateTriggerCondition(
 				ecs,
@@ -460,7 +449,7 @@ describe("evaluate trigger condition", () => {
 					},
 				},
 			),
-		).toBe(true);
+		).toBeTruthy();
 	});
 });
 describe("evaluate action", () => {

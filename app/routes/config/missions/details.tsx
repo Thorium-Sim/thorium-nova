@@ -9,18 +9,18 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Navigate } from "@thorium/components/Navigate";
 
-export default function TimelineDetails() {
+export default function MissionDetails() {
 	const { pluginId, timelineId } = useParams() as {
 		pluginId: string;
 		timelineId: string;
 	};
-	const [timeline] = q.plugin.timeline.get.useNetRequest({
+	const [mission] = q.plugin.timeline.get.useNetRequest({
 		pluginId,
 		timelineId,
 	});
 	const [error, setError] = useState(false);
 	const navigate = useNavigate();
-	if (!timeline) return <Navigate to={`/config/${pluginId}/timelines`} />;
+	if (!mission) return <Navigate to={`/config/${pluginId}/timelines`} />;
 	return (
 		<fieldset
 			key={timelineId}
@@ -33,9 +33,9 @@ export default function TimelineDetails() {
 							labelHidden={false}
 							isInvalid={error}
 							invalidMessage="Name is required"
-							label="Timeline Name"
+							label="Mission Name"
 							placeholder="Eclipse"
-							defaultValue={timeline.name}
+							defaultValue={mission.name}
 							onChange={() => setError(false)}
 							onBlur={async (e: any) => {
 								if (!e.target.value) return setError(true);
@@ -66,7 +66,7 @@ export default function TimelineDetails() {
 							className="!h-32"
 							labelHidden={false}
 							label="Description"
-							defaultValue={timeline.description}
+							defaultValue={mission.description}
 							onBlur={(e: any) =>
 								q.plugin.timeline.update.netSend({
 									pluginId,
@@ -83,7 +83,7 @@ export default function TimelineDetails() {
 								labelHidden={false}
 								label="Category"
 								type="textarea"
-								defaultValue={timeline.category}
+								defaultValue={mission.category}
 								onBlur={(e: any) =>
 									q.plugin.timeline.update.netSend({
 										pluginId,
@@ -96,68 +96,54 @@ export default function TimelineDetails() {
 						<div className="flex-1">
 							<TagInput
 								label="Tags"
-								tags={timeline.tags}
+								tags={mission.tags}
 								onAdd={(tag) => {
-									if (timeline.tags.includes(tag)) return;
+									if (mission.tags.includes(tag)) return;
 									q.plugin.timeline.update.netSend({
 										pluginId,
 										timelineId,
-										tags: [...timeline.tags, tag],
+										tags: [...mission.tags, tag],
 									});
 								}}
 								onRemove={(tag) => {
-									if (!timeline.tags.includes(tag)) return;
+									if (!mission.tags.includes(tag)) return;
 									q.plugin.timeline.update.netSend({
 										pluginId,
 										timelineId,
-										tags: timeline.tags.filter((t) => t !== tag),
+										tags: mission.tags.filter((t) => t !== tag),
 									});
 								}}
 							/>
 						</div>
 					</div>
-					<Checkbox
-						label="Mission"
-						helperText="Check this box to include this mission option when starting a flight."
-						checked={timeline.isMission}
-						onChange={(event) =>
-							q.plugin.timeline.update.netSend({
-								pluginId,
-								timelineId,
-								isMission: event.target.checked,
-							})
-						}
-					/>
-					{timeline.isMission ? (
-						<div className="max-w-sm">
-							<h3 className="text-lg font-bold flex items-center">
-								Cover Image{" "}
-								<InfoTip>
-									This is the image that will be displayed on the mission list.
-									Should be landscape and 16x9 aspect ratio.
-								</InfoTip>
-							</h3>
-							<UploadWell
-								className="aspect-video"
-								accept="image/*"
-								onChange={async (files) => {
-									await q.plugin.timeline.update.netSend({
-										pluginId,
-										timelineId,
-										cover: files[0],
-									});
-								}}
-							>
-								{timeline?.assets.cover && (
-									<img
-										src={`${timeline.assets.cover}?${new Date().getTime()}`}
-										alt="Mission Cover"
-										className="w-5/6  object-contain aspect-video"
-									/>
-								)}
-							</UploadWell>
-						</div>
-					) : null}
+					<div className="max-w-sm">
+						<h3 className="text-lg font-bold flex items-center">
+							Cover Image{" "}
+							<InfoTip>
+								This is the image that will be displayed on the mission list.
+								Should be landscape and 16x9 aspect ratio.
+							</InfoTip>
+						</h3>
+						<UploadWell
+							className="aspect-video"
+							accept="image/*"
+							onChange={async (files) => {
+								await q.plugin.timeline.update.netSend({
+									pluginId,
+									timelineId,
+									cover: files[0],
+								});
+							}}
+						>
+							{mission?.assets.cover && (
+								<img
+									src={`${mission.assets.cover}?${new Date().getTime()}`}
+									alt="Mission Cover"
+									className="w-5/6  object-contain aspect-video"
+								/>
+							)}
+						</UploadWell>
+					</div>
 				</div>
 			</div>
 		</fieldset>

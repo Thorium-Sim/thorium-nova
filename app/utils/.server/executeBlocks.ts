@@ -1,24 +1,22 @@
 import type { DataContext } from "@thorium/.server/DataContext";
 import { spawnTrigger } from "@thorium/.server/spawners/trigger";
 import type { ComponentProperties } from "@thorium/ecs-components";
-import type { TimelineBlock } from "@thorium/routes/config/timelines/builder/TimelineBlockTypes";
-import { triggerSend } from "@thorium/utils/.server/evaluateEntityQuery";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
+import { triggerAction } from "./triggerAction";
 import {
 	getShipSystem,
 	getShipSystems,
 } from "@thorium/utils/.server/ship/getShipSystem";
-import type { Entity } from "@thorium/utils/ecs";
+import type { ECS, Entity } from "@thorium/utils/ecs";
 import { produce } from "immer";
 
 export async function executeBlocks(
-	context: DataContext,
+	ecs: ECS,
 	blocks: TimelineBlock[],
 	stepId?: number,
 	localVariables: Record<string, any> = {},
 	theResult: any = null,
 ) {
-	if (!context.flight) return;
-
 	for (const block of blocks) {
 		switch (block.type) {
 			case "Wait": {
@@ -35,7 +33,7 @@ export async function executeBlocks(
 			case "VariableIntoVariable": {
 				const entity = getEntityReference(
 					block.entity,
-					context,
+					ecs,
 					stepId,
 					localVariables,
 				);
@@ -46,27 +44,37 @@ export async function executeBlocks(
 				localVariables[block.variable] =
 					entity.components.variables?.variables.find(
 						(v) => v.name === block.getVariable,
-					);
+					)?.value;
 				break;
 			}
 			case "EntityPropertyIntoVariable": {
 				const entity = getEntityReference(
 					block.entity,
-					context,
+					ecs,
 					stepId,
 					localVariables,
 				);
-				const component = entity?.components[
-					block.component as keyof ComponentProperties
-				] as any;
-				localVariables[block.variable] = component?.[block.property];
+				let value: any = "";
+				if (block.component === "id") {
+					value = entity?.id;
+				} else {
+					const component = entity?.components[
+						block.component as keyof ComponentProperties
+					] as any;
+					value = component?.[block.property];
+				}
+				localVariables[block.variable] = value;
 				break;
 			}
 			case "IfCondition": {
 				for (const condition of block.conditions) {
 					if (evaluateCondition(condition, localVariables)) {
-						// We don't await this so we can run concurrently with the parent blocks
-						executeBlocks(context, block.triggerBlocks, stepId, localVariables);
+						await executeBlocks(
+							ecs,
+							block.triggerBlocks,
+							stepId,
+							localVariables,
+						);
 					}
 				}
 				break;
@@ -78,7 +86,7 @@ export async function executeBlocks(
 			case "SetVariable": {
 				const entity = getEntityReference(
 					block.entity,
-					context,
+					ecs,
 					stepId,
 					localVariables,
 				);
@@ -103,18 +111,18 @@ export async function executeBlocks(
 			case "ShipSystemGetter": {
 				const entity = getEntityReference(
 					block.entity,
-					context,
+					ecs,
 					stepId,
 					localVariables,
 				);
 				if (!entity) return;
 				if (block.count === "one") {
-					localVariables[block.variable] = getShipSystem(context.ecs, {
+					localVariables[block.variable] = getShipSystem(ecs, {
 						systemType: block.systemType as any,
 						shipId: entity.id,
 					});
 				} else {
-					localVariables[block.variable] = getShipSystems(context.ecs, {
+					localVariables[block.variable] = getShipSystems(ecs, {
 						systemType: block.systemType as any,
 						shipId: entity.id,
 					});
@@ -124,13 +132,13 @@ export async function executeBlocks(
 			case "DistanceCondition": {
 				const entityA = getEntityReference(
 					block.entity1,
-					context,
+					ecs,
 					stepId,
 					localVariables,
 				);
 				const entityB = getEntityReference(
 					block.entity2,
-					context,
+					ecs,
 					stepId,
 					localVariables,
 				);
@@ -153,7 +161,7 @@ export async function executeBlocks(
 						localVariables,
 					},
 				});
-				context.ecs.addEntity(triggerEntity);
+				ecs.addEntity(triggerEntity);
 				break;
 			}
 			case "EntityCondition": {
@@ -173,7 +181,7 @@ export async function executeBlocks(
 						localVariables,
 					},
 				});
-				context.ecs.addEntity(triggerEntity);
+				ecs.addEntity(triggerEntity);
 
 				break;
 			}
@@ -193,26 +201,62 @@ export async function executeBlocks(
 						localVariables,
 					},
 				});
-				context.ecs.addEntity(triggerEntity);
+				ecs.addEntity(triggerEntity);
 				break;
 			}
 			case "Action": {
-				theResult = await triggerSend(block.action, block.values);
+				const values = Object.fromEntries(
+					Object.entries(block.values).map(([key, value]) => {
+						let val = getValueReference(value, localVariables);
+						// Special handling for certain keys we know are entity id references
+						if (key === "shipId") {
+							val = Number(val);
+						}
+						return [key, val];
+					}),
+				);
+				theResult = await triggerAction(block.action, values);
+				break;
+			}
+			case "RandomIntoVariable": {
+				const number1 = Number(
+					getValueReference(block.number1, localVariables),
+				);
+				const number2 = Number(
+					getValueReference(block.number2, localVariables),
+				);
+				const min = number1 < number2 ? number1 : number2;
+				const max = number1 < number2 ? number2 : number1;
+				if (block.numberType === "integer") {
+					localVariables[block.variable] = ecs.rng.nextInt(min, max).toString();
+				} else {
+					localVariables[block.variable] = String(
+						ecs.rng.next() * (max - min) + min,
+					);
+				}
+				break;
+			}
+			case "MathIntoVariable": {
+				const num1 = Number(getValueReference(block.number1, localVariables));
+				const num2 = Number(getValueReference(block.number2, localVariables));
+				switch (block.operation) {
+					case "+":
+						localVariables[block.variable] = String(num1 + num2);
+						break;
+					case "-":
+						localVariables[block.variable] = String(num1 - num2);
+						break;
+					case "×":
+						localVariables[block.variable] = String(num1 * num2);
+						break;
+					case "÷":
+						localVariables[block.variable] = String(num1 / num2);
+						break;
+				}
+
 				break;
 			}
 		}
-		// const values = evaluateAction(context.flight.ecs, action);
-		// for (const value of values) {
-		// 	try {
-		// 		// This await is mostly so we can do a delay action
-		// 		if (action.action === "triggers.create") {
-		// 			value.stepId = stepId;
-		// 		}
-		// 		await triggerSend(action.action, value, context);
-		// 	} catch (error) {
-		// 		console.error("Error executing action:", action.action, error);
-		// 	}
-		// }
 	}
 }
 
@@ -226,6 +270,7 @@ function evaluateCondition(
 ) {
 	const val1 = getValueReference(condition.value1, localVariables);
 	const val2 = getValueReference(condition.value2, localVariables);
+
 	switch (condition.comparison) {
 		case "=": {
 			// biome-ignore lint/suspicious/noDoubleEquals: <explanation>
@@ -254,15 +299,15 @@ function evaluateCondition(
 	return false;
 }
 
-function getValueReference(ref: string, variables: Record<string, any>) {
-	if (ref.startsWith("$")) {
-		return variables[ref.replace("$", "")];
+function getValueReference(ref: string, variables: Record<string, any>): any {
+	if (typeof ref === "string" && ref.startsWith("$")) {
+		return getValueReference(variables[ref.replace("$", "")], variables);
 	}
 	return ref;
 }
 function getEntityReference(
 	ref: any,
-	ctx: DataContext,
+	ecs: ECS,
 	stepId: number | undefined,
 	variables: Record<string, any>,
 ): Entity | null {
@@ -277,32 +322,36 @@ function getEntityReference(
 				"Attempted to access timeline reference, but no stepId was provided. Is this block in a timeline?",
 			);
 		}
-		const stepEntity = ctx.ecs.getEntityById(stepId);
-		const timelineEntity = ctx.ecs.getEntityById(
+		const stepEntity = ecs.getEntityById(stepId);
+		const timelineEntity = ecs.getEntityById(
 			stepEntity?.components.isTimelineStep?.timelineId || -1,
 		);
 		return timelineEntity;
+	}
+	if (typeof ref === "number") {
+		return ecs.getEntityById(ref);
 	}
 	if (typeof ref === "string") {
 		// Tag
 		if (ref.startsWith("#")) {
 			const tag = ref.replace("#", "");
-			for (const entity of ctx.ecs.componentCache.get("tags") || []) {
+			for (const entity of ecs.componentCache.get("tags") || []) {
 				if (entity.components.tags?.tags.includes(tag)) return entity;
 			}
 		}
 		// Variable
 		if (ref.startsWith("$")) {
 			const varItem = variables[ref.replace("$", "")];
-			return getEntityReference(varItem, ctx, stepId, variables);
+			return getEntityReference(varItem, ecs, stepId, variables);
 		}
 		// ID
 		if (!Number.isNaN(Number(ref))) {
-			return ctx.ecs.getEntityById(Number(ref));
+			return ecs.getEntityById(Number(ref));
 		}
-		for (const entity of ctx.ecs.componentCache.get("identity") || []) {
+		for (const entity of ecs.componentCache.get("identity") || []) {
 			if (entity.components.identity?.name === ref) return entity;
 		}
 	}
+
 	return null;
 }

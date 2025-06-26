@@ -3,7 +3,7 @@ import { Aspect } from "./Aspect";
 import type { components } from "@thorium/ecs-components";
 import uniqid from "@thorium/utils/uniqid";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-import type { TimelineBlock } from "@thorium/routes/config/timelines/builder/TimelineBlockTypes";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 
 export type EntityQuery = ComponentQuery[];
 
@@ -42,7 +42,7 @@ export default class TimelinePlugin extends Aspect {
 	description: string;
 	category: string;
 	tags: string[];
-	isMission: boolean;
+	type: "mission" | "macro" | "trigger" | "training" | "report";
 
 	steps: TimelineStep[];
 	/**
@@ -66,7 +66,7 @@ export default class TimelinePlugin extends Aspect {
 
 		this.category = params.category || "";
 		this.tags = params.tags || [];
-		this.isMission = params.isMission || false;
+		this.type = params.type || "macro";
 
 		this.assets = params.assets || {
 			cover: "",

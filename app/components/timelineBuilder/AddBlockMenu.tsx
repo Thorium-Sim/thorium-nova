@@ -9,7 +9,7 @@ import {
 	type MenuItemProps,
 	MenuItem,
 } from "react-aria-components";
-import type { TimelineBlock } from "@thorium/routes/config/timelines/builder/TimelineBlockTypes";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import type { ReactNode } from "react";
 
 function StyledMenuItem(props: MenuItemProps) {
@@ -76,6 +76,12 @@ export function AddBlockButton({
 						</StyledMenuItem>
 						<StyledMenuItem onAction={() => onAddBlock("SetVariable")}>
 							Set Entity Variable
+						</StyledMenuItem>
+						<StyledMenuItem onAction={() => onAddBlock("RandomIntoVariable")}>
+							Save Random Value as Variable
+						</StyledMenuItem>
+						<StyledMenuItem onAction={() => onAddBlock("MathIntoVariable")}>
+							Save Math Operation as Variable
 						</StyledMenuItem>
 					</MenuSection>
 					{omitBlocks ? (

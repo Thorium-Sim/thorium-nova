@@ -1,9 +1,9 @@
-import { AddBlockMenu } from "@thorium/routes/config/timelines/builder/AddBlockMenu";
+import { AddBlockMenu } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import {
 	ValueInput,
 	MadLibSelect,
 	type BlockProps,
-} from "@thorium/routes/config/timelines/builder/BlockInputs";
+} from "@thorium/components/timelineBuilder/BlockInputs";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
 import { produce } from "immer";

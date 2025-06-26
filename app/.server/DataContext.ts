@@ -30,9 +30,9 @@ export class DataContext {
 	get ecs() {
 		return this.database.flight!.ecs;
 	}
-	readFile = DataStore.operations.getStore()!.readAsset;
-	uploadFile = DataStore.operations.getStore()!.uploadAsset;
-	removeFile = DataStore.operations.getStore()!.removeAsset;
+	readFile = DataStore.operations.getStore()?.readAsset!;
+	uploadFile = DataStore.operations.getStore()?.uploadAsset!;
+	removeFile = DataStore.operations.getStore()?.removeAsset!;
 	getPlayerShip(clientId: string) {
 		return this.flight?.playerShips.find(
 			(s) =>

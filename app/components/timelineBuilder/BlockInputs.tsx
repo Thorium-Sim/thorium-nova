@@ -1,4 +1,4 @@
-import type { TimelineBlock } from "@thorium/routes/config/timelines/builder/TimelineBlockTypes";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { components } from "@thorium/ecs-components";
 import { Icon } from "@thorium/ui/Icon";
 import { cn } from "@thorium/utils/cn";
@@ -8,7 +8,7 @@ import {
 	ZOD_COMPARISONS,
 } from "@thorium/utils/zodAutoForm";
 import { matchSorter } from "match-sorter";
-import { useId, useState, type ComponentProps } from "react";
+import { useEffect, useId, useRef, useState, type ComponentProps } from "react";
 import {
 	type Key,
 	ComboBox,
@@ -116,7 +116,7 @@ export function ValueInput(
 		<span className="relative w-min">
 			<input
 				placeholder="Value"
-				{...props}
+				value={value}
 				size={Math.max(value.length + 3, 5)}
 				onChange={(e) => {
 					props.onChange(e.currentTarget.value);

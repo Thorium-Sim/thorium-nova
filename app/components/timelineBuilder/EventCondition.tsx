@@ -1,7 +1,7 @@
 import { EventCombobox } from "@thorium/components/Config/EventCombobox";
 import { q } from "@thorium/context/AppContext";
-import { AddBlockMenu } from "@thorium/routes/config/timelines/builder/AddBlockMenu";
-import type { BlockProps } from "@thorium/routes/config/timelines/builder/BlockInputs";
+import { AddBlockMenu } from "@thorium/components/timelineBuilder/AddBlockMenu";
+import type { BlockProps } from "@thorium/components/timelineBuilder/BlockInputs";
 import Checkbox from "@thorium/ui/Checkbox";
 import InfoTip from "@thorium/ui/InfoTip";
 

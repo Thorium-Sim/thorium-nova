@@ -2,10 +2,8 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import { router } from "@thorium/.server/init/router";
 import { t } from "@thorium/.server/init/t";
 import { actionItem } from "@thorium/utils/flags/actionSchema";
-import {
-	selectValueQuery,
-	triggerSend,
-} from "@thorium/utils/.server/evaluateEntityQuery";
+import { selectValueQuery } from "@thorium/utils/.server/evaluateEntityQuery";
+import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { capitalCase } from "change-case";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
@@ -97,7 +95,7 @@ export const thorium = t.router({
 		.send(async ({ input, ctx }) => {
 			await Promise.all(
 				input.actions.map((action) =>
-					triggerSend(action.action, action.values, ctx),
+					triggerAction(action.action, action.values, ctx),
 				),
 			);
 		}),

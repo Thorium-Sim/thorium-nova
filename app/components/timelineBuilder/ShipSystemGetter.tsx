@@ -5,7 +5,7 @@ import {
 	EntityInput,
 	ValueInput,
 	type BlockProps,
-} from "@thorium/routes/config/timelines/builder/BlockInputs";
+} from "@thorium/components/timelineBuilder/BlockInputs";
 
 export function ShipSystemGetter({
 	count,

@@ -1,10 +1,10 @@
-import type { TimelineBlock } from "@thorium/routes/config/timelines/builder/TimelineBlockTypes";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { q } from "@thorium/context/AppContext";
 import {
 	MadLibsCombobox,
 	ValueInput,
 	type BlockProps,
-} from "@thorium/routes/config/timelines/builder/BlockInputs";
+} from "@thorium/components/timelineBuilder/BlockInputs";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { parseSchema } from "@thorium/utils/zodAutoForm";
 import { parseSchema as parseJsonSchema } from "json-schema-to-zod";

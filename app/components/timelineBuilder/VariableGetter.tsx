@@ -2,7 +2,7 @@ import {
 	ValueInput,
 	EntityInput,
 	type BlockProps,
-} from "@thorium/routes/config/timelines/builder/BlockInputs";
+} from "@thorium/components/timelineBuilder/BlockInputs";
 
 export function VariableGetter({
 	entity,

@@ -14,7 +14,7 @@ import {
 import { Navigate } from "@thorium/components/Navigate";
 import { useMenubar } from "@thorium/ui/Menubar";
 
-export default function TimelineLayout() {
+export default function MissionLayout() {
 	const { pathname } = useLocation();
 
 	const { timelineId, pluginId } = useParams() as {
@@ -23,7 +23,7 @@ export default function TimelineLayout() {
 	};
 
 	useMenubar({
-		backTo: `/config/${pluginId}/timelines`,
+		backTo: `/config/${pluginId}/missions`,
 	});
 
 	const navigate = useNavigate();
@@ -35,13 +35,13 @@ export default function TimelineLayout() {
 		timelineId,
 	});
 
-	const match = useMatch("config/:pluginId/timelines/:timelineId/:stepId/*")
+	const match = useMatch("config/:pluginId/missions/:timelineId/:stepId/*")
 		?.params.stepId;
 
 	const stepId = match === "details" ? undefined : match;
 
 	if (!timelineId || !item)
-		return <Navigate to={`/config/${pluginId}/timelines`} />;
+		return <Navigate to={`/config/${pluginId}/missions`} />;
 
 	const steps = item.steps.map((s) => ({ id: s.id, children: s.name }));
 
@@ -74,7 +74,7 @@ export default function TimelineLayout() {
 							match === "details" ? "selected" : ""
 						}`}
 					>
-						Timeline Details
+						Mission Details
 					</Link>
 					<hr className="my-2" />
 					<SortableList
@@ -145,7 +145,7 @@ export default function TimelineLayout() {
 								if (alternateStep) {
 									navigate(alternateStep);
 								} else {
-									navigate(`/config/${pluginId}/timelines/${timelineId}`);
+									navigate(`/config/${pluginId}/missions/${timelineId}`);
 								}
 							}}
 						>
@@ -159,8 +159,8 @@ export default function TimelineLayout() {
 							if (
 								!timelineId ||
 								!(await confirm({
-									header: "Are you sure you want to delete this timeline?",
-									body: "All content for this timeline, including images and other assets, will be gone forever.",
+									header: "Are you sure you want to delete this mission?",
+									body: "All content for this mission, including images and other assets, will be gone forever.",
 								}))
 							)
 								return;
@@ -168,10 +168,10 @@ export default function TimelineLayout() {
 								pluginId,
 								timelineId,
 							});
-							navigate(`/config/${pluginId}/timelines`);
+							navigate(`/config/${pluginId}/missions`);
 						}}
 					>
-						Delete Timeline
+						Delete Mission
 					</Button>
 				</div>
 				<Outlet />
