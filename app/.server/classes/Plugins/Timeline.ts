@@ -42,7 +42,7 @@ export default class TimelinePlugin extends Aspect {
 	description: string;
 	category: string;
 	tags: string[];
-	type: "mission" | "macro" | "trigger" | "training" | "report";
+	type: "mission" | "trigger" | "training" | "report";
 
 	steps: TimelineStep[];
 	/**
@@ -66,7 +66,7 @@ export default class TimelinePlugin extends Aspect {
 
 		this.category = params.category || "";
 		this.tags = params.tags || [];
-		this.type = params.type || "macro";
+		this.type = params.type || "mission";
 
 		this.assets = params.assets || {
 			cover: "",

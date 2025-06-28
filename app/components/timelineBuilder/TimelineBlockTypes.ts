@@ -12,6 +12,7 @@ export const timelineBlockTypes = [
 	"Action",
 	"RandomIntoVariable",
 	"MathIntoVariable",
+	"Macro",
 ] as const;
 
 type BlockTypes = (typeof timelineBlockTypes)[number];
@@ -78,6 +79,10 @@ export const timelineBlockDefaults: {
 		number2: "0",
 		operation: "+",
 		variable: "",
+	},
+	Macro: {
+		pluginId: "",
+		macroId: "",
 	},
 };
 
@@ -191,6 +196,12 @@ interface MathIntoVariableBlock extends BaseBlock {
 	variable: string;
 }
 
+interface MacroBlock extends BaseBlock {
+	type: "Macro";
+	pluginId: string;
+	macroId: string;
+}
+
 export type TimelineBlock =
 	| DistanceConditionBlock
 	| EntityConditionBlock
@@ -204,4 +215,5 @@ export type TimelineBlock =
 	| SetVariableBlock
 	| ActionBlock
 	| RandomIntoVariableBlock
-	| MathIntoVariableBlock;
+	| MathIntoVariableBlock
+	| MacroBlock;

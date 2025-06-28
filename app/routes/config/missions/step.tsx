@@ -147,6 +147,15 @@ export default function TimelineStep() {
 								properties: { ...properties, [property]: value },
 							});
 						}}
+						onReplace={(id, blocks) => {
+							q.plugin.timeline.step.block.replace.netSend({
+								pluginId,
+								timelineId,
+								stepId,
+								blockId: id,
+								blocks,
+							});
+						}}
 						onRemove={(id) =>
 							q.plugin.timeline.step.block.delete.netSend({
 								pluginId,

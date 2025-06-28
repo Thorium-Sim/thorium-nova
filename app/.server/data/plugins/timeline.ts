@@ -138,6 +138,36 @@ const block = t.router({
 			});
 			return { actionId: block.id };
 		}),
+	replace: t.procedure
+		.input(
+			z.object({
+				pluginId: z.string(),
+				timelineId: z.string(),
+				stepId: z.string(),
+				blockId: z.string(),
+				blocks: z.any(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			inputAuth(ctx);
+			const plugin = getPlugin(ctx, input.pluginId);
+			const timeline = plugin.aspects.timelines.find(
+				(timeline) => timeline.name === input.timelineId,
+			);
+			if (!timeline) throw new Error("Timeline not found");
+			const step = timeline.steps.find((step) => step.id === input.stepId);
+			if (!step) throw new Error("Step not found");
+			const blockIndex = step.blocks.findIndex(
+				(action) => action.id === input.blockId,
+			);
+			if (blockIndex === -1) throw new Error("Block not found");
+			step.blocks.splice(blockIndex, 1, ...input.blocks);
+			pubsub.publish.plugin.timeline.get({
+				pluginId: input.pluginId,
+				timelineId: timeline.name,
+			});
+			return {};
+		}),
 });
 
 const step = t.router({
@@ -335,7 +365,7 @@ export const timeline = t.router({
 			z.object({
 				pluginId: z.string(),
 				name: z.string(),
-				type: z.enum(["mission", "macro", "trigger", "training", "report"]),
+				type: z.enum(["mission", "trigger", "training", "report"]),
 			}),
 		)
 		.send(({ ctx, input }) => {

@@ -95,6 +95,9 @@ export default [
 				route("details", "routes/config/missions/details.tsx"),
 				route(":stepId", "routes/config/missions/step.tsx"),
 			]),
+			route("macros", "routes/config/macros/layout.tsx", [
+				route(":macroId", "routes/config/macros/macro.tsx"),
+			]),
 			route("themes", "routes/config/themes/layout.tsx", [
 				route(":themeId", "routes/config/themes/theme.tsx"),
 			]),

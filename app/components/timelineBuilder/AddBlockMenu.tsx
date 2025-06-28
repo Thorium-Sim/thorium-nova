@@ -8,18 +8,28 @@ import {
 	Header,
 	type MenuItemProps,
 	MenuItem,
+	SubmenuTrigger,
 } from "react-aria-components";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import type { ReactNode } from "react";
+import { cn } from "@thorium/utils/cn";
+import { q } from "@thorium/context/AppContext";
+import type { MacroPlugin } from "@thorium/.server/classes/Plugins/Macro";
 
 function StyledMenuItem(props: MenuItemProps) {
 	return (
 		<MenuItem
 			{...props}
-			className="group flex w-full text-sm items-center rounded-md pl-4 px-2 py-1 box-border outline-hidden cursor-default text-gray-200 focus:bg-violet-500 focus:text-white"
+			className={cn(
+				"group flex w-full text-sm items-center rounded-md pl-4 px-2 py-1 box-border outline-hidden cursor-default text-gray-200 focus:bg-violet-500 focus:text-white",
+				props.className,
+			)}
 		/>
 	);
 }
+
+const popoverClass =
+	"p-1 w-64 overflow-auto rounded-md bg-black/60 border-2 border-white/10 shadow-[2px_2px_10px_rgba(0,0,0,0.5)] backdrop-brightness-200 text-white backdrop-blur ring-1 ring-white/5 entering:animate-in entering:fade-in entering:zoom-in-95 exiting:animate-out exiting:fade-out exiting:zoom-out-95 fill-mode-forwards origin-top-left";
 
 export function AddBlockButton({
 	onAddBlock,
@@ -35,13 +45,21 @@ export function AddBlockButton({
 	children: ReactNode;
 	omitBlocks?: boolean;
 }) {
+	const [macros] = q.plugin.macro.all.useNetRequest();
+
+	const groupedMacros = macros.reduce(
+		(prev: Record<string, MacroPlugin[]>, next) => {
+			if (!prev[next.category]) prev[next.category] = [];
+			prev[next.category].push(next);
+			return prev;
+		},
+		{},
+	);
+
 	return (
 		<MenuTrigger>
 			{children}
-			<Popover
-				placement="bottom"
-				className="p-1 w-64 overflow-auto rounded-md bg-black/60 text-white backdrop-blur shadow-lg ring-1 ring-black/5 entering:animate-in entering:fade-in entering:zoom-in-95 exiting:animate-out exiting:fade-out exiting:zoom-out-95 fill-mode-forwards origin-top-left"
-			>
+			<Popover placement="bottom" className={popoverClass}>
 				<Menu>
 					<StyledMenuItem onAction={() => onAddBlock("Action")}>
 						Action
@@ -53,6 +71,37 @@ export function AddBlockButton({
 					>
 						Advance Timeline
 					</StyledMenuItem>
+					<SubmenuTrigger>
+						<StyledMenuItem className="flex justify-between">
+							Macros <Icon name="chevron-right" />{" "}
+						</StyledMenuItem>
+						<Popover className={popoverClass}>
+							<Menu>
+								{Object.entries(groupedMacros).map(([category, macros]) => (
+									<SubmenuTrigger key={category}>
+										<StyledMenuItem>{category}</StyledMenuItem>
+										<Popover className={popoverClass}>
+											<Menu>
+												{macros.map((m) => (
+													<StyledMenuItem
+														key={`${m.plugin?.id}-${m.name}`}
+														onAction={() => {
+															onAddBlock("Macro", {
+																pluginId: m.plugin?.id,
+																macroId: m.name,
+															});
+														}}
+													>
+														{m.name}
+													</StyledMenuItem>
+												))}
+											</Menu>
+										</Popover>
+									</SubmenuTrigger>
+								))}
+							</Menu>
+						</Popover>
+					</SubmenuTrigger>
 					<MenuSection>
 						<Header className="font-bold pl-2">Control Flow</Header>
 						<StyledMenuItem onAction={() => onAddBlock("Wait")}>

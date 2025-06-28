@@ -22,12 +22,15 @@ import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { cn } from "@thorium/utils/cn";
 import { RenderBlock } from "@thorium/components/timelineBuilder/blocks";
 import type { ReactNode } from "react";
+import { Icon } from "@thorium/ui/Icon";
+import { SortableListenerContext } from "@thorium/components/timelineBuilder/SortableListenerContext";
 
 export function SortableBlocks({
 	parentBlock,
 	blocks,
 	onDragEnd,
 	onUpdate,
+	onReplace,
 	onRemove,
 }: {
 	parentBlock?: TimelineBlock;
@@ -42,6 +45,7 @@ export function SortableBlocks({
 		activeIndex: number;
 	}) => void;
 	onUpdate: (block: TimelineBlock, property: any, value: any) => void;
+	onReplace: (id: string, blocks: TimelineBlock[]) => void;
 	onRemove: (id: string) => void;
 }) {
 	const sensors = useSensors(
@@ -83,6 +87,7 @@ export function SortableBlocks({
 						<SortableBlock id={block.id} key={block.id}>
 							<RenderBlock
 								{...block}
+								replace={(blocks) => onReplace(block.id, blocks)}
 								update={(property, value) => onUpdate(block, property, value)}
 								onRemove={onRemove}
 								previousActionBlock={
@@ -122,11 +127,12 @@ function SortableBlock({ id, children }: { id: string; children: ReactNode }) {
 			ref={setNodeRef}
 			style={style}
 			{...attributes}
-			{...listeners}
-			className={cn(isDragging ? "isolate" : "")}
+			className={cn(isDragging ? "isolate" : "", "w-fit relative")}
 		>
-			<div className={`block ${isDragging ? "pointer-events-none" : ""}`}>
-				{children}
+			<div className={`block  ${isDragging ? "pointer-events-none" : ""}`}>
+				<SortableListenerContext value={listeners}>
+					{children}
+				</SortableListenerContext>
 			</div>
 		</div>
 	);

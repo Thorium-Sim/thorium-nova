@@ -29,16 +29,20 @@ import { AddBlockMenu } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import uniqid from "@thorium/utils/uniqid";
 import { RandomIntoVariable } from "@thorium/components/timelineBuilder/RandomBlock";
 import { MathIntoVariable } from "@thorium/components/timelineBuilder/MathIntoVariableBlock";
+import { MacroBlock } from "@thorium/components/timelineBuilder/MacroBlock";
 
 export function RenderBlock<T extends TimelineBlock["type"]>({
 	onRemove,
 	update,
 	previousActionBlock,
+	replace,
 	...block
 }: TimelineBlock & {
 	onRemove: (id: string) => void;
 	previousActionBlock?: TimelineBlock;
 	update: BlockProps<T>["update"];
+	/** Replace this block with some other blocks */
+	replace: (blocks: TimelineBlock[]) => void;
 }) {
 	return (
 		<Suspense>
@@ -73,6 +77,8 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 					<RandomIntoVariable {...block} update={update} />
 				) : block.type === "MathIntoVariable" ? (
 					<MathIntoVariable {...block} update={update} />
+				) : block.type === "Macro" ? (
+					<MacroBlock {...block} update={update} replace={replace} />
 				) : (
 					<div>Unknown block type</div>
 				)}
@@ -103,6 +109,17 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 									block.triggerBlocks.map((b) => {
 										if (b.id === id) {
 											return { ...b, ...properties, [property]: value };
+										}
+										return b;
+									}),
+								);
+							}}
+							onReplace={(id, blocks) => {
+								(update as any)(
+									"triggerBlocks",
+									block.triggerBlocks.flatMap((b) => {
+										if (b.id === id) {
+											return blocks;
 										}
 										return b;
 									}),
