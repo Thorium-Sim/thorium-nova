@@ -1,0 +1,67 @@
+{
+  "name": "Thorium Nova AI Development (GPU-Enabled)",
+  "dockerFile": "Dockerfile.gpu",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/nvidia-cuda:1": {
+      "installCudnn": true,
+      "installNvtx": true,
+      "cudaVersion": "11.8",
+      "cudnnVersion": "8.6.0.163"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "ms-vscode.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ],
+      "settings": {
+        "typescript.preferences.includePackageJsonAutoImports": "on",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      }
+    }
+  },
+
+  "forwardPorts": [3000, 11434, 8188, 8000],
+  
+  "portsAttributes": {
+    "3000": {"label": "Thorium Nova"},
+    "11434": {"label": "Ollama"},
+    "8188": {"label": "ComfyUI"},
+    "8000": {"label": "DeepSeek API"}
+  },
+
+  "postCreateCommand": "bash .devcontainer/setup-single-gpu.sh",
+  "remoteUser": "node",
+  
+  "runArgs": [
+    "--gpus", "all",
+    "--shm-size=1g",
+    "--ulimit", "memlock=-1",
+    "--ulimit", "stack=67108864"
+  ],
+  
+  "containerEnv": {
+    "NVIDIA_VISIBLE_DEVICES": "all",
+    "NVIDIA_DRIVER_CAPABILITIES": "compute,utility",
+    "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+  },
+  
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
+  ],
+  
+  "hostRequirements": {
+    "gpu": "optional"
+  }
+}

@@ -5,6 +5,7 @@ import { CardArea } from "./CardArea";
 import { CardSwitcher } from "./CardSwitcher";
 import { useManageCard } from "./useManageCard";
 import { Widgets } from "./widgets";
+import { FlightPauseIndicator } from "@thorium/ui/FlightPauseIndicator";
 
 const StationLayout = () => {
 	const [ship] = q.ship.get.useNetRequest({ clientId });
@@ -97,6 +98,7 @@ const StationLayout = () => {
 				<div className="widgets flex items-center gap-2 absolute bottom-8 right-[calc(2rem+50px)]">
 					<Widgets />
 				</div>
+				<FlightPauseIndicator />
 			</div>
 		</div>
 	);

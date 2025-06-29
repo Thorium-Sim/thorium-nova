@@ -1,0 +1,48 @@
+// .vscode/launch.json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Thorium Nova Server",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/server/index.ts",
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "thorium:*"
+      },
+      "console": "integratedTerminal",
+      "restart": true,
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["--inspect=0.0.0.0:9229", "run"],
+      "skipFiles": ["<node_internals>/**"],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ]
+    },
+    {
+      "name": "Debug AI Agent System",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/server/src/systems/AIAgentSystem.ts",
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "thorium:ai,thorium:agents"
+      },
+      "console": "integratedTerminal",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["--inspect=0.0.0.0:9229", "run"]
+    },
+    {
+      "name": "Test AI Integration",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/test-ai-integration.js",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal"
+    }
+  ]
+}

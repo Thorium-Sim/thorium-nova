@@ -1,0 +1,80 @@
+// .vscode/tasks.json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Thorium Nova",
+      "type": "shell",
+      "command": "bun",
+      "args": ["run", "dev"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "Test AI Services",
+      "type": "shell",
+      "command": "node",
+      "args": ["-e", "require('./scripts/test-ai-services.js')"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Setup Ollama Models",
+      "type": "shell",
+      "command": "bash",
+      "args": ["scripts/setup-ollama-models.sh"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Test Ollama Generation",
+      "type": "shell",
+      "command": "curl",
+      "args": [
+        "-X", "POST",
+        "http://localhost:11434/api/generate",
+        "-H", "Content-Type: application/json",
+        "-d", "{\"model\":\"llama3.2:3b\",\"prompt\":\"Hello! Respond as a starship tactical officer.\",\"stream\":false}"
+      ],
+      "group": "test"
+    },
+    {
+      "label": "Reset AI Cache",
+      "type": "shell",
+      "command": "rm",
+      "args": ["-rf", "/home/node/.ai-cache/*"],
+      "group": "build"
+    },
+    {
+      "label": "Restart AI Services",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": ["-f", ".devcontainer/docker-compose.yml", "restart", "deepseek-api", "ollama", "comfyui"],
+      "group": "build"
+    }
+  ]
+}
