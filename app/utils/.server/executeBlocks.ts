@@ -256,6 +256,23 @@ export async function executeBlocks(
 
 				break;
 			}
+			case "Macro": {
+				// Execute all of the blocks of the macro
+				const macro = ecs?.server.plugins
+					.find((p) => p.id === block.pluginId)
+					?.aspects.macros.find((m) => m.name === block.macroId);
+				if (!macro)
+					throw new Error(
+						`Attempted to execute macro ${block.macroId} from plugin ${block.pluginId}, but it wasn't found.`,
+					);
+				await executeBlocks(
+					ecs,
+					macro.blocks,
+					stepId,
+					localVariables,
+					theResult,
+				);
+			}
 		}
 	}
 }
