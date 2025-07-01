@@ -35,12 +35,14 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 	onRemove,
 	update,
 	previousActionBlock,
+	definedVariables,
 	replace,
 	...block
 }: TimelineBlock & {
 	onRemove: (id: string) => void;
 	previousActionBlock?: TimelineBlock;
 	update: BlockProps<T>["update"];
+	definedVariables: string[];
 	/** Replace this block with some other blocks */
 	replace: (blocks: TimelineBlock[]) => void;
 }) {
@@ -78,7 +80,12 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 				) : block.type === "MathIntoVariable" ? (
 					<MathIntoVariable {...block} update={update} />
 				) : block.type === "Macro" ? (
-					<MacroBlock {...block} update={update} replace={replace} />
+					<MacroBlock
+						{...block}
+						update={update}
+						replace={replace}
+						definedVariables={definedVariables}
+					/>
 				) : (
 					<div>Unknown block type</div>
 				)}

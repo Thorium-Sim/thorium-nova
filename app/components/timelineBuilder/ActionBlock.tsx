@@ -46,7 +46,6 @@ export function ActionBlock({ action, values, update }: BlockProps<"Action">) {
 					<ActionInput
 						action={{ ...chosenAction, values }}
 						dispatch={(params) => {
-							console.log(params);
 							if (params.type === "value") {
 								update("values", {
 									...values,

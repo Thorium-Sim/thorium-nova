@@ -87,6 +87,11 @@ export function SortableBlocks({
 						<SortableBlock id={block.id} key={block.id}>
 							<RenderBlock
 								{...block}
+								definedVariables={blocks.reduce((prev: string[], next, i) => {
+									if (i >= index) return prev;
+									if ("variable" in next) prev.push(next.variable);
+									return prev;
+								}, [])}
 								replace={(blocks) => onReplace(block.id, blocks)}
 								update={(property, value) => onUpdate(block, property, value)}
 								onRemove={onRemove}
