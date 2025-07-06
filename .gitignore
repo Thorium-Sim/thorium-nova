@@ -21,3 +21,8 @@ icons/sprite.svg
 /binaries/
 
 .wrangler
+
+.devcontainer/
+.claude/
+*.code-workspace
+
