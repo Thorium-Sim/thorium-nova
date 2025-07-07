@@ -30,6 +30,10 @@ export const navigation = t.router({
 
 			return true;
 		})
+		.autoPublish(
+			["isShip", "size", "identity", "position"],
+			(entity) => entity.components.isShip && { shipId: entity.id },
+		)
 		.request(({ ctx, input }) => {
 			const ship = ctx.ecs.getEntityById(input.shipId);
 			if (!ship) throw new Error("No ship assigned");
@@ -47,6 +51,9 @@ export const navigation = t.router({
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
+		// No need to auto-publish this one.
+		.autoPublish([], () => null)
+
 		.request(({ ctx, input }) => {
 			const ship = ctx.ecs.getEntityById(input.shipId);
 			if (!ship) throw new Error("Ship not found");
@@ -103,6 +110,8 @@ export const navigation = t.router({
 
 	search: t.procedure
 		.input(z.object({ query: z.string() }))
+		// No need to auto-publish this one.
+		.autoPublish([], () => null)
 		.request(({ ctx, input }) => {
 			const { query } = input;
 
@@ -188,6 +197,13 @@ export const waypoints = t.router({
 			if (publish && input.shipId !== publish.shipId) return false;
 			return true;
 		})
+		.autoPublish(
+			["isWaypoint", "identity", "position"],
+			(entity) =>
+				entity.components.isWaypoint && {
+					shipId: entity.components.isWaypoint.assignedShipId,
+				},
+		)
 		.request(({ ctx, input: { shipId, systemId } }) => {
 			const waypoints: Waypoint[] = [];
 			for (const waypoint of ctx.ecs.componentCache.get("isWaypoint") || []) {

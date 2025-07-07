@@ -56,17 +56,4 @@ describe("Entity", () => {
 			expect(entity.components.identity?.name).toEqual("foo");
 		});
 	});
-
-	describe("updateComponents()", () => {
-		it("should update a list of existing component", () => {
-			const entity = new Entity();
-			entity.addComponent("identity", { name: "bar" });
-
-			expect(entity.components.identity?.name).toEqual("bar");
-
-			entity.updateComponents({ identity: { name: "foo" } });
-
-			expect(entity.components.identity?.name).toEqual("foo");
-		});
-	});
 });

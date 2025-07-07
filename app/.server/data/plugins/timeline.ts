@@ -8,16 +8,20 @@ import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
 import uniqid from "@thorium/utils/uniqid";
 import type { FlightStartingPoint } from "@thorium/.server/data/flight";
 import path from "node:path";
+import {
+	timelineBlockDefaults,
+	timelineBlockTypes,
+} from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 
-const action = t.router({
+const block = t.router({
 	add: t.procedure
 		.input(
 			z.object({
 				pluginId: z.string(),
 				timelineId: z.string(),
 				stepId: z.string(),
-				action: z.string(),
-				name: z.string(),
+				blockType: z.enum(timelineBlockTypes),
+				init: z.any().optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -31,12 +35,14 @@ const action = t.router({
 			if (!input.stepId) throw new Error("Step ID is required");
 			const step = timeline.steps.find((step) => step.id === input.stepId);
 			if (!step) throw new Error("Step not found");
-			const id = uniqid("act-");
-			step.actions.push({
+			const id = uniqid("blo-");
+			const blockDefault = timelineBlockDefaults[input.blockType] as any;
+			if (!step.blocks) step.blocks = [];
+			step.blocks.push({
+				...blockDefault,
+				...input.init,
 				id,
-				name: input.name,
-				action: input.action,
-				values: {},
+				type: input.blockType,
 			});
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
@@ -50,7 +56,7 @@ const action = t.router({
 				pluginId: z.string(),
 				timelineId: z.string(),
 				stepId: z.string(),
-				actionId: z.string(),
+				blockId: z.string(),
 				newIndex: z.number(),
 			}),
 		)
@@ -64,15 +70,15 @@ const action = t.router({
 			if (!input.stepId) throw new Error("Step ID is required");
 			const step = timeline.steps.find((step) => step.id === input.stepId);
 			if (!step) throw new Error("Step not found");
-			const actionIndex = step.actions.findIndex(
-				(action) => action.id === input.actionId,
+			const blockIndex = step.blocks.findIndex(
+				(action) => action.id === input.blockId,
 			);
-			moveArrayItem(step.actions, actionIndex, input.newIndex);
+			moveArrayItem(step.blocks, blockIndex, input.newIndex);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
-			return { actionId: input.actionId };
+			return { actionId: input.blockId };
 		}),
 	delete: t.procedure
 		.input(
@@ -80,7 +86,7 @@ const action = t.router({
 				pluginId: z.string(),
 				timelineId: z.string(),
 				stepId: z.string(),
-				actionId: z.string(),
+				blockId: z.string(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -93,15 +99,15 @@ const action = t.router({
 			if (!input.stepId) throw new Error("Step ID is required");
 			const step = timeline.steps.find((step) => step.id === input.stepId);
 			if (!step) throw new Error("Step not found");
-			const actionIndex = step.actions.findIndex(
-				(action) => action.id === input.actionId,
+			const blockIndex = step.blocks.findIndex(
+				(action) => action.id === input.blockId,
 			);
-			step.actions.splice(actionIndex, 1);
+			step.blocks.splice(blockIndex, 1);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
-			return { actionId: input.actionId };
+			return { actionId: input.blockId };
 		}),
 	update: t.procedure
 		.input(
@@ -109,9 +115,9 @@ const action = t.router({
 				pluginId: z.string(),
 				timelineId: z.string(),
 				stepId: z.string(),
-				actionId: z.string(),
+				blockId: z.string(),
 				name: z.string().optional(),
-				values: z.record(z.any()).optional(),
+				properties: z.record(z.any()).optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -123,17 +129,44 @@ const action = t.router({
 			if (!timeline) throw new Error("Timeline not found");
 			const step = timeline.steps.find((step) => step.id === input.stepId);
 			if (!step) throw new Error("Step not found");
-			const action = step.actions.find(
-				(action) => action.id === input.actionId,
-			);
-			if (!action) throw new Error("Action not found");
-			if (input.name) action.name = input.name;
-			if (input.values) action.values = input.values;
+			const block = step.blocks.find((action) => action.id === input.blockId);
+			if (!block) throw new Error("Block not found");
+			Object.assign(block, input.properties);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
-			return { actionId: action.id };
+			return { actionId: block.id };
+		}),
+	replace: t.procedure
+		.input(
+			z.object({
+				pluginId: z.string(),
+				timelineId: z.string(),
+				stepId: z.string(),
+				blockId: z.string(),
+				blocks: z.any(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			inputAuth(ctx);
+			const plugin = getPlugin(ctx, input.pluginId);
+			const timeline = plugin.aspects.timelines.find(
+				(timeline) => timeline.name === input.timelineId,
+			);
+			if (!timeline) throw new Error("Timeline not found");
+			const step = timeline.steps.find((step) => step.id === input.stepId);
+			if (!step) throw new Error("Step not found");
+			const blockIndex = step.blocks.findIndex(
+				(action) => action.id === input.blockId,
+			);
+			if (blockIndex === -1) throw new Error("Block not found");
+			step.blocks.splice(blockIndex, 1, ...input.blocks);
+			pubsub.publish.plugin.timeline.get({
+				pluginId: input.pluginId,
+				timelineId: timeline.name,
+			});
+			return {};
 		}),
 });
 
@@ -297,7 +330,7 @@ const step = t.router({
 			});
 			return { stepId: step.id };
 		}),
-	action,
+	block,
 });
 
 export const timeline = t.router({
@@ -328,11 +361,20 @@ export const timeline = t.router({
 			return timeline;
 		}),
 	create: t.procedure
-		.input(z.object({ pluginId: z.string(), name: z.string() }))
+		.input(
+			z.object({
+				pluginId: z.string(),
+				name: z.string(),
+				type: z.enum(["mission", "trigger", "training", "report"]),
+			}),
+		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const timeline = new TimelinePlugin({ name: input.name }, plugin);
+			const timeline = new TimelinePlugin(
+				{ name: input.name, type: input.type },
+				plugin,
+			);
 			plugin.aspects.timelines.push(timeline);
 
 			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
@@ -369,7 +411,6 @@ export const timeline = t.router({
 				category: z.string().optional(),
 				tags: z.array(z.string()).optional(),
 				description: z.string().optional(),
-				isMission: z.boolean().optional(),
 				cover: z.instanceof(File).optional(),
 			}),
 		)
@@ -384,8 +425,6 @@ export const timeline = t.router({
 			if (input.category) timeline.category = input.category;
 			if (input.description) timeline.description = input.description;
 			if (input.tags) timeline.tags = input.tags;
-			if (typeof input.isMission === "boolean")
-				timeline.isMission = input.isMission;
 			if (typeof input.cover === "string") {
 				const ext = path.extname(input.cover);
 				timeline.assets.cover = await ctx.uploadFile.call(
@@ -406,34 +445,37 @@ export const timeline = t.router({
 			return { timelineId: timeline.name };
 		}),
 	step,
-	missions: t.procedure.request(({ ctx }) => {
-		return ctx.server.plugins.reduce(
-			(
-				acc: {
-					name: string;
-					description: string;
-					category: string;
-					cover: string;
-					pluginId: string;
-				}[],
-				plugin,
-			) => {
-				if (!plugin.active) return acc;
-				const missions = plugin.aspects.timelines
-					.filter((timeline) => timeline.isMission)
-					.map(({ name, description, category, assets }) => ({
-						name,
-						description,
-						category,
-						cover: assets.cover,
-						pluginId: plugin.id,
-					}));
-				// biome-ignore lint/performance/noAccumulatingSpread:
-				return [...acc, ...missions];
-			},
-			[],
-		);
-	}),
+	missions: t.procedure
+		.input(z.object({ pluginId: z.string().optional() }).optional())
+		.request(({ ctx, input }) => {
+			return ctx.server.plugins.reduce(
+				(
+					acc: {
+						name: string;
+						description: string;
+						category: string;
+						cover: string;
+						pluginId: string;
+					}[],
+					plugin,
+				) => {
+					const missions = plugin.aspects.timelines
+						.filter((timeline) => timeline.type === "mission")
+						.map(({ name, description, category, assets }) => ({
+							name,
+							description,
+							category,
+							cover: assets.cover,
+							pluginId: plugin.id,
+						}));
+					if (input?.pluginId && plugin.name !== input?.pluginId) return acc;
+					if (plugin.name === input?.pluginId) return acc.concat(missions);
+					if (!plugin.active) return acc;
+					return acc.concat(missions);
+				},
+				[],
+			);
+		}),
 	startingPoints: t.procedure.request(({ ctx }) => {
 		return ctx.server.plugins.reduce(
 			(points: FlightStartingPoint[], plugin) => {

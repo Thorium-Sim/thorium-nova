@@ -14,7 +14,7 @@ export function LoginCore() {
 				</thead>
 				<tbody>
 					{clients.map((client) => (
-						<tr key={client.id}>
+						<tr key={client.clientId}>
 							<td>{client.name}</td>
 							<td>{client.stationId}</td>
 							<td>{client.loginName}</td>

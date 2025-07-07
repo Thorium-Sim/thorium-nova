@@ -63,7 +63,7 @@ const arch = (process.env.BUILD_ARCH ||
 	`${targetArch}-${targetPlatform}`) as keyof typeof platformMap;
 
 // We have to run this next command using a shell since the --compile flag doesn't work with the Bun API.
-const command = `bun build --minify --define "process.env.NODE_ENV='production'" --asset-naming="[name].[ext]" --target=TARGET --sourcemap --outfile ./binaries/server-ARCH --compile ./app/bunServer.ts ./node_modules/@thorium-sim/rapier3d-node/dist/rapier_wasm3d_bg.wasm`;
+const command = `bun build --minify --define "process.env.NODE_ENV='production'" --asset-naming="[name].[ext]" --target=TARGET --outfile ./binaries/server-ARCH --compile ./app/bunServer.ts ./node_modules/@thorium-sim/rapier3d-node/dist/rapier_wasm3d_bg.wasm`;
 const target = platformMap[arch];
 if (!target) {
 	throw new Error(

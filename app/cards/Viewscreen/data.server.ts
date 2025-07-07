@@ -4,12 +4,12 @@ import { z } from "zod";
 export const viewscreen = t.router({
 	system: t.procedure
 		.input(z.object({ clientId: z.string() }))
+		.autoPublish([], () => null)
 		.request(({ ctx, input }) => {
 			const systemId = ctx.getPlayerShip(input.clientId)?.components.position
 				?.parentId;
 			if (typeof systemId !== "number") return null;
 			const system = ctx.flight?.ecs.getEntityById(systemId);
-
 			if (!system) return null;
 
 			return {

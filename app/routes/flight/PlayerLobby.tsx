@@ -97,7 +97,7 @@ function PlayerStationItem({
 				.filter((c) => c.shipId === shipId && c.stationId === station.name)
 				.map((client) => (
 					<li
-						key={client.id}
+						key={client.clientId}
 						className={`list-group-item list-group-item-small`}
 					>
 						<div className="pl-4 flex items-center justify-between">

@@ -1,7 +1,7 @@
-import { FlightClient } from "./classes/FlightClient";
 import type { ServerDataModel } from "./classes/ServerDataModel";
 import type { FlightDataModel } from "./classes/FlightDataModel";
 import { DataStore } from "@thorium/utils/.server/db-fs";
+import { Entity } from "@thorium/utils/ecs";
 
 /**
  * An instance of this class is available in every input and subscription handler
@@ -30,12 +30,14 @@ export class DataContext {
 	get ecs() {
 		return this.database.flight!.ecs;
 	}
-	readFile = DataStore.operations.getStore()!.readAsset;
-	uploadFile = DataStore.operations.getStore()!.uploadAsset;
-	removeFile = DataStore.operations.getStore()!.removeAsset;
+	readFile = DataStore.operations.getStore()?.readAsset!;
+	uploadFile = DataStore.operations.getStore()?.uploadAsset!;
+	removeFile = DataStore.operations.getStore()?.removeAsset!;
 	getPlayerShip(clientId: string) {
 		return this.flight?.playerShips.find(
-			(s) => s.id === this.getFlightClient(clientId)?.shipId,
+			(s) =>
+				s.id ===
+				this.getFlightClient(clientId)?.components.flightClient?.shipId,
 		);
 	}
 	getClient(clientId: string) {
@@ -46,12 +48,25 @@ export class DataContext {
 	}
 	getFlightClient(clientId: string) {
 		if (!this.database.flight) return null;
-		if (!this.database.flight.clients[clientId]) {
-			this.database.flight.clients[clientId] = new FlightClient({
-				id: clientId,
+		if (!this.database.flight.flightClientIndex.has(clientId)) {
+			for (const entity of this.ecs.componentCache.get("flightClient") || []) {
+				if (entity.components.flightClient?.clientId === clientId) {
+					this.database.flight.flightClientIndex.set(clientId, entity.id);
+				}
+			}
+		}
+		let flightClientEntity = this.ecs.getEntityById(
+			this.database.flight.flightClientIndex.get(clientId) || -1,
+		);
+
+		if (!flightClientEntity) {
+			flightClientEntity = new Entity();
+			flightClientEntity.addComponent("flightClient", {
+				clientId,
 				flightId: this.database.flight.name,
 			});
+			this.ecs.addEntity(flightClientEntity);
 		}
-		return this.database.flight.clients[clientId];
+		return flightClientEntity!;
 	}
 }

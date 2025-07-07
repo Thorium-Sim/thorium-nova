@@ -21,20 +21,43 @@ import { shipObjectives } from "@thorium/utils/flags/shipObjectives";
 
 type IsDestroyed = Zod.infer<typeof isDestroyed>;
 
-export const starmapCore = t.router({
-	systems: t.procedure.request(({ ctx }) => {
-		if (!ctx.flight) return [];
+const objectDetailsComponents: ComponentIds[] = [
+	"isShip",
+	"position",
+	"velocity",
+	"rotation",
+	"rotationVelocity",
+	"hull",
+	"mass",
+	"size",
+	"tags",
+	"identity",
+	"theme",
+	"isStar",
+	"isPlanet",
+	"satellite",
+	"temperature",
+	"population",
+	"reputation",
+];
 
-		return [...(ctx.ecs.componentCache.get("isSolarSystem") || [])].map(
-			(e) => ({
-				id: e.id,
-				position: e.components.position,
-				identity: e.components.identity,
-			}),
-		);
-	}),
+export const starmapCore = t.router({
+	systems: t.procedure
+		.autoPublish(["isSolarSystem"], () => null)
+		.request(({ ctx }) => {
+			if (!ctx.flight) return [];
+
+			return [...(ctx.ecs.componentCache.get("isSolarSystem") || [])].map(
+				(e) => ({
+					id: e.id,
+					position: e.components.position,
+					identity: e.components.identity,
+				}),
+			);
+		}),
 	system: t.procedure
 		.input(z.object({ systemId: z.number().nullish() }))
+		.autoPublish(["isSolarSystem"], () => null)
 		.request(({ ctx, input }) => {
 			if (!ctx.flight) throw new Error("No flight in progress");
 			if (input?.systemId === null || input?.systemId === undefined)
@@ -47,6 +70,7 @@ export const starmapCore = t.router({
 	/** Includes all the things in a system that isn't a ship */
 	entities: t.procedure
 		.input(z.object({ systemId: z.number().nullable() }))
+		.autoPublish([], () => null)
 		.request(({ ctx, input }) => {
 			if (!ctx.flight) return [];
 			if (input?.systemId === null || input?.systemId === undefined) return [];
@@ -77,6 +101,14 @@ export const starmapCore = t.router({
 			if (publish.systemId === input.systemId) return true;
 			return false;
 		})
+		.autoPublish(
+			["isShip"],
+			(entity) =>
+				entity.components.position && {
+					systemId: entity.components.position.parentId,
+				},
+		)
+
 		.request(({ ctx, input }) => {
 			if (!ctx.flight) return [];
 			const shipEntities = ctx.flight.ecs.componentCache.get("isShip") || [];
@@ -142,6 +174,14 @@ export const starmapCore = t.router({
 			if (publish.systemId === input.systemId) return true;
 			return false;
 		})
+		.autoPublish(
+			["isTorpedo"],
+			(entity) =>
+				entity.components.position && {
+					systemId: entity.components.position.parentId,
+				},
+		)
+
 		.request(({ ctx, input }) => {
 			if (!ctx.flight) return [];
 			const torpedoEntities =
@@ -182,6 +222,11 @@ export const starmapCore = t.router({
 
 			return true;
 		})
+		.autoPublish(
+			["isShip"],
+			(entity) => entity.components.position && { shipId: entity.id },
+		)
+
 		.request(({ ctx, input }) => {
 			if (!input.shipId) return null;
 			if (!ctx.flight) return null;
@@ -202,32 +247,15 @@ export const starmapCore = t.router({
 
 			return true;
 		})
+		.autoPublish(objectDetailsComponents, (entity) => ({ objectId: entity.id }))
+
 		.request(({ ctx, input }) => {
-			const components: ComponentIds[] = [
-				"isShip",
-				"position",
-				"velocity",
-				"rotation",
-				"rotationVelocity",
-				"hull",
-				"mass",
-				"size",
-				"tags",
-				"identity",
-				"theme",
-				"isStar",
-				"isPlanet",
-				"satellite",
-				"temperature",
-				"population",
-				"reputation",
-			];
 			if (!ctx.flight || !input.objectId) return null;
 			const entity = ctx.flight.ecs.getEntityById(input.objectId);
 			if (!entity) return null;
 			return {
 				id: entity.id,
-				components: components.reduce(
+				components: objectDetailsComponents.reduce(
 					(acc: Partial<ComponentProperties>, key) => {
 						// @ts-expect-error
 						acc[key] = entity.components[key];
@@ -244,6 +272,7 @@ export const starmapCore = t.router({
 
 			return true;
 		})
+		.autoPublish(["reputation"], (entity) => ({ entityId: entity.id }))
 		.request(({ ctx, input }) => {
 			if (!ctx.flight || !input.entityId) return [];
 
@@ -291,6 +320,8 @@ export const starmapCore = t.router({
 		}),
 	spawnSearch: t.procedure
 		.input(z.object({ query: z.string(), allPlugins: z.boolean().optional() }))
+		.autoPublish([], () => null)
+
 		.request(({ ctx, input }) => {
 			if (!input.allPlugins && !ctx.flight) return [];
 			const shipTemplates = ctx.server.plugins
@@ -320,6 +351,14 @@ export const starmapCore = t.router({
 			if (publish && publish.systemId !== input.systemId) return false;
 			return true;
 		})
+		.autoPublish(
+			["autopilot"],
+			(entity) =>
+				entity.components.position && {
+					systemId: entity.components.position.parentId,
+				},
+		)
+
 		.request(({ ctx, input }) => {
 			const ships: Entity[] = [];
 			for (const system of ctx.ecs.systems) {

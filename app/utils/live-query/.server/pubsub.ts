@@ -45,6 +45,11 @@ export class PubSub<TRouter extends AnyRouter> {
 		this.ee.emit(trigger, payload);
 	}) as RouterRequests<TRouter>;
 
+	public directPublish(path: string, payload: unknown) {
+		const trigger = path.split(".").join("/");
+		this.ee.emit(trigger, payload);
+	}
+
 	public subscribe = createRecursiveProxy(
 		({ path, args: [onMessage, id] }: any) => {
 			const trigger = path.join("/");

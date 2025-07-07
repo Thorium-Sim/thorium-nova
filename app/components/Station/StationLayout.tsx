@@ -52,12 +52,14 @@ const StationLayout = () => {
 						<div className="card-frame-station-name select-none">
 							{station.name}
 						</div>
-						<div className="card-frame-station-logo text-white w-24 h-24">
-							<SVGImageLoader
-								className="card-frame-station-logo-image"
-								url={station.logo}
-							/>
-						</div>
+						{station.logo ? (
+							<div className="card-frame-station-logo text-white w-24 h-24">
+								<SVGImageLoader
+									className="card-frame-station-logo-image"
+									url={station.logo}
+								/>
+							</div>
+						) : null}
 						<div className="card-frame-card-name select-none">{card.name}</div>
 						<div className="card-frame-card-icon w-24 h-24">
 							<SVGImageLoader

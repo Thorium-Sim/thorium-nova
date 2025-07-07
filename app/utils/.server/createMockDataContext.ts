@@ -2,7 +2,6 @@ import type { InventoryFlags } from "@thorium/utils/flags/InventoryFlags";
 import { Client } from "@thorium/.server/init/liveQuery";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { router } from "@thorium/.server/init/router";
-import { FlightClient } from "@thorium/.server/classes/FlightClient";
 import type { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
 import type BasePlugin from "@thorium/.server/classes/Plugins";
 import ShipPlugin from "@thorium/.server/classes/Plugins/Ship";
@@ -52,10 +51,10 @@ class MockFlightDataModel {
 	date: number = Date.now();
 	paused = false;
 	ecs!: ECS;
-	clients: Record<string, FlightClient> = {};
 	pluginIds: string[] = [];
 	private initEntities: Entity[] = [];
 	serverDataModel: ServerDataModel;
+	flightClientIndex = new Map();
 	inventoryTemplates: {
 		[key: string]: {
 			name: string;
@@ -73,12 +72,6 @@ class MockFlightDataModel {
 	) {
 		this.serverDataModel = params.serverDataModel;
 		this.initEntities = params.entities || [];
-		this.clients = {
-			test: new FlightClient({
-				id: "test",
-				flightId: this.id,
-			}),
-		};
 	}
 	run = () => {
 		// Run all the systems
@@ -115,6 +108,15 @@ class MockFlightDataModel {
 		}, []);
 		return allShips;
 	}
+	get clients() {
+		const clients: Record<string, Entity> = {};
+		for (const client of this.ecs.componentCache.get("flightClient") || []) {
+			if (client.components.flightClient) {
+				clients[client.components.flightClient.clientId] = client;
+			}
+		}
+		return clients;
+	}
 	toJSON() {
 		// Get all of the entities in the world and serialize them into objects
 		return {
@@ -124,9 +126,6 @@ class MockFlightDataModel {
 			date: this.date,
 			pluginIds: this.pluginIds,
 			entities: this.ecs.entities,
-			flightClients: Object.fromEntries(
-				Object.entries(this.clients).map(([id, client]) => [id, client]),
-			),
 		};
 	}
 }
@@ -158,7 +157,9 @@ class MockDataContext {
 	}
 	getPlayerShip(clientId: string) {
 		return this.flight?.playerShips.find(
-			(s) => s.id === this.getFlightClient(clientId)?.shipId,
+			(s) =>
+				s.id ===
+				this.getFlightClient(clientId)?.components.flightClient?.shipId,
 		);
 	}
 	getClient(clientId: string) {
@@ -169,13 +170,26 @@ class MockDataContext {
 	}
 	getFlightClient(clientId: string) {
 		if (!this.database.flight) return null;
-		if (!this.database.flight.clients[clientId]) {
-			this.database.flight.clients[clientId] = new FlightClient({
-				id: clientId,
+		if (!this.database.flight.flightClientIndex.has(clientId)) {
+			for (const entity of this.ecs.componentCache.get("flightClient") || []) {
+				if (entity.components.flightClient?.clientId === clientId) {
+					this.database.flight.flightClientIndex.set(clientId, entity.id);
+				}
+			}
+		}
+		let flightClientEntity = this.ecs.getEntityById(
+			this.database.flight.flightClientIndex.get(clientId) || -1,
+		);
+
+		if (!flightClientEntity) {
+			flightClientEntity = new Entity();
+			flightClientEntity.addComponent("flightClient", {
+				clientId,
 				flightId: this.database.flight.name,
 			});
+			this.ecs.addEntity(flightClientEntity);
 		}
-		return this.database.flight.clients[clientId];
+		return flightClientEntity!;
 	}
 	uploadFile = async () => "";
 	readFile = async () => "";

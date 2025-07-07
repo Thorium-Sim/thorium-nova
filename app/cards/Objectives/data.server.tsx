@@ -10,6 +10,14 @@ export const objectives = t.router({
 			if (publish && input.shipId !== publish.shipId) return false;
 			return true;
 		})
+		.autoPublish(
+			["isObjective"],
+			(entity) =>
+				entity.components.isObjective && {
+					shipId: entity.components.isObjective.shipId,
+				},
+		)
+
 		.request(({ ctx, input }) => {
 			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
 			if (!ship) return [];
@@ -55,9 +63,10 @@ export const objectives = t.router({
 				priority: z.number().optional(),
 			}),
 		)
+		.output(z.object({ objectiveId: z.number() }))
 		.send(({ ctx, input }) => {
 			const ship = ctx.ecs.getEntityById(input.shipId);
-			if (!ship) return;
+			if (!ship) throw new Error("Unable to create objective: Ship not found");
 
 			const objective = new Entity();
 			objective.addComponent("isObjective", {
@@ -73,6 +82,7 @@ export const objectives = t.router({
 			ctx.flight?.ecs.addEntity(objective);
 
 			pubsub.publish.objectives.get({ shipId: ship.id });
+			return { objectiveId: objective.id };
 		}),
 	setState: t.procedure
 		.meta({ action: true, event: true })

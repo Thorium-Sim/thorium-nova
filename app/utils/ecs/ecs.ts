@@ -33,6 +33,7 @@ class ECS {
 	componentCache = new Map<ComponentIds, Set<Entity>>();
 	colliderCache = new Map<string, ColliderDesc>();
 	shipSystemCache = new Map<string, Entity | Entity[]>();
+	changeBatch = new Set<`${number}-${ComponentIds}`>();
 
 	constructor(
 		public server: ServerDataModel,
@@ -54,6 +55,9 @@ class ECS {
 		this.entities.set(entity.id, entity);
 		entity.addToECS(this);
 		this.maxEntityId = Math.max(this.maxEntityId, entity.id);
+		Object.keys(entity.components).forEach((componentName) => {
+			this.batchChange(entity.id, componentName as ComponentIds);
+		});
 	}
 	/**
 	 * Remove an entity from the ecs by reference.
@@ -77,6 +81,7 @@ class ECS {
 					componentCache.delete(e);
 				}
 			});
+			this.batchChange(entity.id, componentName as ComponentIds);
 		});
 		return entity;
 	}
@@ -168,6 +173,9 @@ class ECS {
 		}
 		this.updateCounter += 1;
 		this.lastUpdate = now;
+	}
+	batchChange(entityId: number, component: ComponentIds) {
+		this.changeBatch.add(`${entityId}-${component}`);
 	}
 }
 

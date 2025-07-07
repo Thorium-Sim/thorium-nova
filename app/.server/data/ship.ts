@@ -19,7 +19,8 @@ export const ship = t.router({
 				if (!publish) return true;
 				if (
 					"shipId" in publish &&
-					publish.shipId !== ctx.getFlightClient(input.clientId)?.shipId
+					publish.shipId !==
+						ctx.getFlightClient(input.clientId)?.components.flightClient?.shipId
 				)
 					return false;
 				if ("clientId" in publish && publish.clientId !== input.clientId)
@@ -27,37 +28,52 @@ export const ship = t.router({
 				return true;
 			},
 		)
+		.autoPublish(["isShip", "flightClient"], (entity) => {
+			if (entity.components.flightClient) {
+				return { clientId: entity.components.flightClient.clientId };
+			}
+			if (entity.components.isShip) {
+				return { shipId: entity.id };
+			}
+		})
 		.request(({ ctx, input }) => {
 			// TODO February 28, 2025 - Replace this with a more carefully crafted object
 			const ship =
 				ctx.ecs
-					.getEntityById(ctx.getFlightClient(input.clientId)?.shipId || -1)
+					.getEntityById(
+						ctx.getFlightClient(input.clientId)?.components.flightClient
+							?.shipId || -1,
+					)
 					?.toJSON() || null;
 			return ship;
 		}),
-	players: t.procedure.request(({ ctx }) => {
-		return (
-			ctx.flight?.playerShips.map((ship) => {
-				const systemId = ship.components.position?.parentId;
-				const systemPosition = systemId
-					? ctx.flight?.ecs.getEntityById(systemId)?.components.position || null
-					: null;
-				return {
-					id: ship.id,
-					name: ship.components.identity?.name,
-					currentSystem: systemId || null,
-					systemPosition,
-					stations: ship.components.stationComplement?.stations || [],
-				};
-			}) || []
-		);
-	}),
+	players: t.procedure
+		.autoPublish(["isPlayerShip"], () => null)
+		.request(({ ctx }) => {
+			return (
+				ctx.flight?.playerShips.map((ship) => {
+					const systemId = ship.components.position?.parentId;
+					const systemPosition = systemId
+						? ctx.flight?.ecs.getEntityById(systemId)?.components.position ||
+							null
+						: null;
+					return {
+						id: ship.id,
+						name: ship.components.identity?.name,
+						currentSystem: systemId || null,
+						systemPosition,
+						stations: ship.components.stationComplement?.stations || [],
+					};
+				}) || []
+			);
+		}),
 	player: t.procedure
 		.input(
 			z.object({ clientId: z.string(), playerShipId: z.number().optional() }),
 		)
 		.filter((publish: { shipId: number }, { ctx, input }) => {
-			const shipId = ctx.getFlightClient(input.clientId)?.shipId;
+			const shipId = ctx.getFlightClient(input.clientId)?.components
+				.flightClient?.shipId;
 			if (
 				publish &&
 				publish.shipId !== shipId &&
@@ -66,10 +82,14 @@ export const ship = t.router({
 				return false;
 			return true;
 		})
+		.autoPublish(["position", "isShip"], (entity) =>
+			entity.components.isPlayerShip ? { shipId: entity.id } : null,
+		)
 		.request(({ ctx, input }) => {
 			const ship = ctx.flight?.ecs.getEntityById(
 				input?.playerShipId ||
-					ctx.getFlightClient(input.clientId)?.shipId ||
+					ctx.getFlightClient(input.clientId)?.components.flightClient
+						?.shipId ||
 					-1,
 			);
 			if (!ship)
@@ -139,6 +159,7 @@ export const ship = t.router({
 				tags: z.array(z.string()).optional(),
 			}),
 		)
+		.output(z.object({ id: z.number() }))
 		.send(async ({ ctx, input }) => {
 			if (!ctx.flight) throw new Error("Flight not found.");
 
@@ -157,8 +178,6 @@ export const ship = t.router({
 					tags: input.tags,
 				},
 			);
-			extraEntities.forEach((s) => ctx.flight?.ecs.addEntity(s));
-			ctx.flight?.ecs.addEntity(shipEntity);
 
 			// Set the position of the ship
 			let position = { x: 0, y: 0, z: 0 };
@@ -199,9 +218,13 @@ export const ship = t.router({
 				type: systemId ? "solar" : "interstellar",
 			});
 
+			extraEntities.forEach((s) => ctx.flight?.ecs.addEntity(s));
+			ctx.flight?.ecs.addEntity(shipEntity);
+
 			pubsub.publish.starmapCore.ships({
 				systemId: shipEntity.components.position?.parentId || null,
 			});
+			return { id: shipEntity.id };
 		}),
 });
 

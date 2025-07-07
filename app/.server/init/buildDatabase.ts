@@ -14,7 +14,7 @@ export const databaseName =
 export let database: {
 	server: ServerDataModel;
 	flight: FlightDataModel | null;
-};
+} = {} as any;
 export async function buildDatabase(
 	loadPlugins: (this: ServerDataModel) => Promise<void>,
 ) {

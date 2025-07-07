@@ -7,42 +7,43 @@ import { toast } from "@thorium/context/ToastContext";
 import SearchableList from "@thorium/ui/SearchableList";
 import { Fragment } from "react";
 
-export default function TimelinesConfig() {
-	const { pluginId, timelineId } = useParams() as {
+export default function MacrosConfig() {
+	const { pluginId, macroId } = useParams() as {
 		pluginId: string;
-		timelineId?: string;
+		macroId?: string;
 	};
 	useMenubar({
 		backTo: `/config/${pluginId}/list`,
 	});
 	const prompt = usePrompt();
 	const navigate = useNavigate();
-	const [data] = q.plugin.timeline.all.useNetRequest({ pluginId });
+	const [data] = q.plugin.macro.all.useNetRequest({ pluginId, type: "macro" });
 
-	const timeline = data.find((d) => d.name === timelineId);
+	const macro = data.find((d) => d.name === macroId);
 
 	return (
 		<div className="p-8 h-[calc(100%-2rem)]">
-			<h1 className="font-bold text-white text-3xl mb-4">Timelines Config</h1>
+			<h1 className="font-bold text-white text-3xl mb-4">Macro Config</h1>
 			<div className="flex gap-8 h-[calc(100%-3rem)]">
 				<div className="flex flex-col w-80 h-full">
 					<Button
 						className="btn-success btn-sm w-full"
 						onClick={async () => {
 							const name = await prompt({
-								header: "Enter timeline name",
+								header: "Enter macro name",
 							});
 							if (typeof name !== "string") return;
 							try {
-								const result = await q.plugin.timeline.create.netSend({
+								const result = await q.plugin.macro.create.netSend({
 									name,
 									pluginId,
+									type: "macro",
 								});
-								navigate(`${result.timelineId}`);
+								navigate(`${result.macroId}`);
 							} catch (err) {
 								if (err instanceof Error) {
 									toast({
-										title: "Error creating timeline",
+										title: "Error creating macro",
 										body: err.message,
 										color: "error",
 									});
@@ -51,7 +52,7 @@ export default function TimelinesConfig() {
 							}
 						}}
 					>
-						New Timeline
+						New Macro
 					</Button>
 
 					<SearchableList
@@ -59,9 +60,10 @@ export default function TimelinesConfig() {
 							id: d.name,
 							name: d.name,
 							description: d.description,
+							category: d.category,
 						}))}
 						searchKeys={["name"]}
-						selectedItem={timelineId || null}
+						selectedItem={macroId || null}
 						setSelectedItem={({ id }) => navigate(`${id}`)}
 						renderItem={(c) => (
 							<div className="flex justify-between items-center" key={c.id}>
@@ -70,7 +72,7 @@ export default function TimelinesConfig() {
 						)}
 					/>
 				</div>
-				<Fragment key={timeline?.name}>
+				<Fragment key={macro?.name}>
 					<Outlet />
 				</Fragment>
 			</div>

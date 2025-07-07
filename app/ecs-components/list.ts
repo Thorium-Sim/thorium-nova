@@ -50,3 +50,6 @@ export * from "./shipSystems/isSensors";
 export * from "./shipSystems/scan";
 export * from "./isFaction";
 export * from "./npcKnowledge";
+export * from "./isFlight";
+export * from "./flightClient";
+export * from "./variables";

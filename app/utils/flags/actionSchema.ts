@@ -3,7 +3,7 @@ import z from "zod";
 export const componentQuery = z.object({
 	component: z.string(),
 	property: z.string(),
-	comparison: z.string().nullable(),
+	comparison: z.string().nullish(),
 	value: z.any(),
 });
 
@@ -36,16 +36,16 @@ const eventListener = z.object({
 
 const distance = z.object({
 	type: z.literal("distance"),
-	entityA: z.array(componentQuery),
-	entityB: z.array(componentQuery),
+	entityA: z.number(),
+	entityB: z.number(),
 	distance: z.coerce.number(),
-	condition: z.union([z.literal("lessThan"), z.literal("greaterThan")]),
+	condition: z.union([z.literal("less than"), z.literal("more than")]),
 });
 
 const entityMatch = z.object({
 	type: z.literal("entityMatch"),
 	query: z.array(componentQuery),
-	matchCount: z.union([z.literal(">=1"), z.string()]),
+	matchCount: z.union([z.literal("any"), z.literal("one"), z.literal("no")]),
 });
 
 export const conditionSchema = z.discriminatedUnion("type", [
