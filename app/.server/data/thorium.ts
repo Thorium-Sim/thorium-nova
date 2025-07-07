@@ -19,7 +19,7 @@ export type ActionOverrides = {
 	helper?: string;
 };
 
-interface FileOrFolder {
+export interface FileOrFolder {
 	name: string;
 	fullPath: string;
 	contents?: FileOrFolder[] | null;

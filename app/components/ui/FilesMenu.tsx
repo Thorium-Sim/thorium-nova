@@ -21,13 +21,7 @@ import { OrbitControls } from "@react-three/drei";
 import { useShipModel } from "@thorium/components/Starmap/StarmapShip";
 import { useRef } from "react";
 import type { Group } from "three";
-import Input from "@thorium/ui/Input";
-
-interface FileOrFolder {
-	name: string;
-	fullPath: string;
-	contents?: FileOrFolder[] | null;
-}
+import type { FileOrFolder } from "@thorium/.server/data";
 
 export function FilesMenu({
 	value,
