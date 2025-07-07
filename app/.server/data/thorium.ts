@@ -7,7 +7,10 @@ import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { capitalCase } from "change-case";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
+
+import path from "node:path";
+import { lstat, readdir } from "node:fs/promises";
+import { getPlugin } from "@thorium/.server/data/plugins/utils";
 
 export type ActionOverrides = {
 	name?: string;
@@ -15,6 +18,12 @@ export type ActionOverrides = {
 	values?: string[];
 	helper?: string;
 };
+
+interface FileOrFolder {
+	name: string;
+	fullPath: string;
+	contents?: FileOrFolder[] | null;
+}
 
 export const thorium = t.router({
 	hasHost: t.procedure
@@ -184,6 +193,81 @@ export const thorium = t.router({
 			// TODO June 28, 2024: Figure out some way to notify the client that the entity has been updated
 			// Maybe we have a special publish method that forces all clients to revalidate all their queries
 		}),
+	pluginAssets: t.procedure
+		.input(
+			z
+				.object({
+					pluginId: z.string().optional(),
+					extensions: z.string().array().optional(),
+					aspect: z
+						.object({ type: z.string(), aspectId: z.string() })
+						.optional(),
+				})
+				.optional(),
+		)
+		.filter(() => true)
+		.autoPublish([], () => null)
+		.request(async ({ input, ctx }) => {
+			const output: Record<
+				string,
+				{
+					basePath: string;
+					files: FileOrFolder[];
+				}
+			> = {};
+			for (const plugin of ctx.server.plugins) {
+				if (input?.pluginId && plugin.id !== input.pluginId) continue;
+				const pluginPath = path.join("plugins", plugin.id, "assets");
+				const assetUrl = (await plugin?.getAssetUrl()) || "";
+				const basePath = path.join(assetUrl, pluginPath);
+				output[plugin.id] = {
+					basePath,
+					files: await traverseFiles(basePath, assetUrl, input?.extensions),
+				};
+
+				const aspectType = (input?.aspect?.type ||
+					"") as keyof typeof plugin.aspects;
+				if (aspectType in plugin.aspects) {
+					const aspectObject = plugin.aspects[aspectType]?.find(
+						(aspect) => aspect.name === input?.aspect?.aspectId,
+					);
+					if (aspectObject) {
+						const basePath = path.join(
+							assetUrl,
+							"plugins",
+							plugin.id,
+							aspectObject.name,
+							"assets",
+						);
+						output[aspectObject.name] = {
+							basePath,
+							files: await traverseFiles(basePath, assetUrl, input?.extensions),
+						};
+					}
+				}
+			}
+
+			// Now traverse the sorted files, remove the ones with no contents, sort them properly
+			return output;
+		}),
+	uploadAsset: t.procedure
+		.input(
+			z.object({
+				pluginId: z.string(),
+				assetPath: z.string(),
+				asset: z.instanceof(File),
+			}),
+		)
+		.send(async ({ input, ctx }) => {
+			const plugin = getPlugin(ctx, input.pluginId);
+			const assetPath = await ctx.uploadFile.call(
+				plugin,
+				input.asset,
+				input.assetPath,
+			);
+			pubsub.publish.thorium.pluginAssets({});
+			return { asset: assetPath };
+		}),
 	debug: t.procedure
 		.meta({ action: true })
 		.input(z.object({ message: z.string() }))
@@ -191,3 +275,62 @@ export const thorium = t.router({
 			console.debug(input.message);
 		}),
 });
+
+async function traverseFiles(
+	basePath: string,
+	rootPath: string,
+	extensions: string[] = [],
+) {
+	const folderFiles = await readdir(basePath);
+	const files: FileOrFolder[] = [];
+	for (const file of folderFiles) {
+		if (file.includes(".DS_Store")) continue;
+		const filePath = path.join(basePath, file);
+		const isDirectory = (await lstat(filePath)).isDirectory();
+		if (isDirectory) {
+			files.push({
+				name: file,
+				fullPath: filePath.replace(rootPath, ""),
+				contents: await traverseFiles(filePath, rootPath, extensions),
+			});
+		} else if (
+			!extensions ||
+			extensions.length === 0 ||
+			extensions.includes(path.extname(filePath).replace(".", ""))
+		) {
+			files.push({
+				name: file,
+				fullPath: filePath.replace(rootPath, ""),
+				contents: null,
+			});
+		}
+	}
+
+	// Traverse again to sort and filter
+	return sortFiles(files);
+}
+
+function sortFiles(files: FileOrFolder[]) {
+	const output: FileOrFolder[] = [];
+	for (const file of files) {
+		if (Array.isArray(file.contents)) {
+			if (file.contents.length === 0) continue;
+			file.contents = sortFiles(file.contents);
+		}
+		output.push(file);
+	}
+	return output.sort((a, b) => (a.name > b.name ? 1 : -1));
+}
+
+// function traverseFiles(files: FileOrFolder[] | null | undefined) {
+// 	if (!files) return null;
+// 	const output: FileOrFolder[] = [];
+// 	for (const file of files) {
+// 		file.contents?.sort();
+// 		if (!file.contents || file.contents.length > 0) {
+// 			file.contents = traverseFiles(file.contents);
+// 			output.push(file);
+// 		}
+// 	}
+// 	return output;
+// }

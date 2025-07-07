@@ -1,4 +1,5 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
+import type { Sound } from "@thorium/ecs-components/sound";
 import type { Entity } from "@thorium/utils/ecs";
 import uniqid from "@thorium/utils/uniqid";
 
@@ -52,6 +53,48 @@ export function playShipSound(
 	}
 
 	return sound;
+}
+
+export function playServerSound(
+	ship: Entity,
+	sound: Sound,
+	stations?: string[],
+) {
+	const playStations = stations
+		? stations.map((s) => ({ shipId: ship.id, station: s }))
+		: [{ shipId: ship.id }];
+	const soundKey = sound.url;
+	// Play the sound
+	const soundEffect = {
+		sounds: [sound],
+		stations: playStations,
+		key: soundKey,
+		id: uniqid("snd_"),
+	};
+	pubsub.publish.effects.sounds({
+		type: "sound",
+		entityId: ship.id,
+		sound: soundEffect,
+	});
+
+	if (soundEffect.sounds.some((sound) => sound.loop)) {
+		ship.components.soundEffects?.looping
+			.filter((s) => s.key === soundKey)
+			.forEach((s) => {
+				pubsub.publish.effects.sounds({
+					type: "cancelLooping",
+					entityId: ship.id,
+					soundId: s.id,
+				});
+			});
+
+		const newLooping = ship.components.soundEffects?.looping
+			.filter((s) => s.key !== soundKey)
+			.concat(soundEffect);
+		ship.updateComponent("soundEffects", {
+			looping: newLooping,
+		});
+	}
 }
 
 export function cancelLoopingSound(entity: Entity, soundKey: string) {

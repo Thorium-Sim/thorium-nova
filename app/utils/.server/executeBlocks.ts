@@ -158,6 +158,7 @@ export async function executeBlocks(
 							},
 						],
 						blocks: block.triggerBlocks,
+						multiple: false,
 						localVariables,
 					},
 				});
@@ -178,6 +179,7 @@ export async function executeBlocks(
 							},
 						],
 						blocks: block.triggerBlocks,
+						multiple: false,
 						localVariables,
 					},
 				});
@@ -198,6 +200,7 @@ export async function executeBlocks(
 							},
 						],
 						blocks: block.triggerBlocks,
+						multiple: block.multiple,
 						localVariables,
 					},
 				});
@@ -290,6 +293,8 @@ function evaluateCondition(
 
 	switch (condition.comparison) {
 		case "=": {
+			if (typeof val1 === "boolean") return val1 === Boolean(val2);
+			if (typeof val2 === "boolean") return Boolean(val1) === val2;
 			// biome-ignore lint/suspicious/noDoubleEquals: <explanation>
 			return val1 == val2;
 		}

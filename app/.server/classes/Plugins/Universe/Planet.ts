@@ -36,7 +36,7 @@ export default class PlanetPlugin {
 			atmosphericComposition: params.isPlanet?.atmosphericComposition || [],
 			textureMapAsset:
 				params.isPlanet?.textureMapAsset ||
-				"/plugins/Thorium Default/assets/default/planets/planet_textureAuric.jpg",
+				"/plugins/Thorium Default/assets/planets/planet_textureAuric.jpg",
 			cloudMapAsset: params.isPlanet?.cloudMapAsset || null,
 			ringMapAsset: params.isPlanet?.ringMapAsset || null,
 		};

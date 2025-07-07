@@ -7,8 +7,11 @@ export class MacroPlugin extends Aspect {
 	apiVersion = "ships/v1" as const;
 	kind = "macros" as const;
 	name: string;
+	type: "macro" | "trigger";
 	description: string;
 	category: string;
+	/** Used for trigger type macros. */
+	active: boolean;
 
 	blocks: TimelineBlock[];
 
@@ -20,10 +23,13 @@ export class MacroPlugin extends Aspect {
 		);
 		super({ name, ...params }, { kind: "macros" }, plugin, {});
 		this.name = name;
+		this.type = params.type || "macro";
 		this.description =
-			params.description || "Performs several actions at once.";
+			params.description || this.type === "macro"
+				? "Performs several actions at once."
+				: "Responds to events.";
 		this.category = params.category || "";
-
+		this.active = params.active ?? true;
 		this.blocks = params.blocks || [];
 	}
 }

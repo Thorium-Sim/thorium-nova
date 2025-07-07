@@ -8,8 +8,9 @@ import InfoTip from "@thorium/ui/InfoTip";
 import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
 import { Button } from "react-aria-components";
+import Checkbox from "@thorium/ui/Checkbox";
 
-export default function MacroLayout() {
+export default function TriggerLayout() {
 	const { macroId, pluginId } = useParams() as {
 		macroId: string;
 		pluginId: string;
@@ -17,13 +18,14 @@ export default function MacroLayout() {
 
 	const navigate = useNavigate();
 
-	const [macro] = q.plugin.macro.get.useNetRequest({
+	const [trigger] = q.plugin.macro.get.useNetRequest({
 		pluginId,
 		macroId,
 	});
 	const [error, setError] = useState(false);
 
-	if (!macroId || !macro) return <Navigate to={`/config/${pluginId}/macros`} />;
+	if (!macroId || !trigger)
+		return <Navigate to={`/config/${pluginId}/trigger`} />;
 
 	return (
 		<div className="flex-1 flex flex-col">
@@ -34,9 +36,9 @@ export default function MacroLayout() {
 							labelHidden={false}
 							isInvalid={error}
 							invalidMessage="Name is required"
-							label="Macro Name"
-							placeholder="Pre-launch"
-							defaultValue={macro.name}
+							label="Trigger Name"
+							placeholder="Trigger"
+							defaultValue={trigger.name}
 							onChange={() => setError(false)}
 							onBlur={async (e: any) => {
 								if (!e.target.value) return setError(true);
@@ -46,11 +48,11 @@ export default function MacroLayout() {
 										macroId,
 										name: e.target.value,
 									});
-									navigate(`/config/${pluginId}/macro/${result.macroId}`);
+									navigate(`/config/${pluginId}/trigger/${result.macroId}`);
 								} catch (err) {
 									if (err instanceof Error) {
 										toast({
-											title: "Error renaming macro",
+											title: "Error renaming trigger",
 											body: err.message,
 											color: "error",
 										});
@@ -65,12 +67,27 @@ export default function MacroLayout() {
 								labelHidden={false}
 								label="Category"
 								type="textarea"
-								defaultValue={macro.category}
+								defaultValue={trigger.category}
 								onBlur={(e: any) =>
 									q.plugin.macro.update.netSend({
 										pluginId,
 										macroId,
 										category: e.target.value,
+									})
+								}
+							/>
+						</div>
+						<div className="flex-1">
+							<Checkbox
+								labelHidden={false}
+								label="Active"
+								helperText="Whether the trigger will be immediately activated when a flight starts."
+								defaultChecked={trigger.active}
+								onChange={(e: any) =>
+									q.plugin.macro.update.netSend({
+										pluginId,
+										macroId,
+										active: e.target.checked,
 									})
 								}
 							/>
@@ -83,7 +100,7 @@ export default function MacroLayout() {
 						className="!h-32"
 						labelHidden={false}
 						label="Description"
-						defaultValue={macro.description}
+						defaultValue={trigger.description}
 						onBlur={(e: any) =>
 							q.plugin.macro.update.netSend({
 								pluginId,
@@ -97,15 +114,14 @@ export default function MacroLayout() {
 			<h3 className="text-xl font-semibold">
 				Blocks{" "}
 				<InfoTip>
-					Compose blocks together to create the logic for your timeline step.
-					Get entity references, store properties in variables, and execute
-					actions.
+					Compose blocks together to create the logic for your trigger. Get
+					entity references, store properties in variables, and execute actions.
 				</InfoTip>
 			</h3>
 			<div className="flex-1 overflow-y-auto overflow-x-hidden">
-				{!macro?.blocks || macro?.blocks?.length === 0 ? (
+				{!trigger?.blocks || trigger?.blocks?.length === 0 ? (
 					<div>
-						<p>No blocks added to macro.</p>
+						<p>No blocks added to trigger.</p>
 						<AddBlockButton
 							onAddBlock={async (type, init) => {
 								await q.plugin.macro.block.add.netSend({
@@ -123,7 +139,7 @@ export default function MacroLayout() {
 					</div>
 				) : (
 					<SortableBlocks
-						blocks={macro?.blocks || []}
+						blocks={trigger?.blocks || []}
 						onDragEnd={({ active, overIndex }) =>
 							q.plugin.macro.block.reorder.netSend({
 								pluginId,

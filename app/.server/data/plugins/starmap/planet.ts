@@ -247,24 +247,24 @@ export const planet = t.router({
 				planet.isPlanet.atmosphericComposition = input.atmosphericComposition;
 			}
 
-			if (typeof input.textureMapAsset === "string") {
-				const ext = path.extname(input.textureMapAsset);
+			if (input.textureMapAsset instanceof File) {
+				const ext = path.extname(input.textureMapAsset.name);
 				planet.isPlanet.textureMapAsset = await ctx.uploadFile.call(
 					system,
 					input.textureMapAsset,
 					`texture-${planet.name}${ext}`,
 				);
 			}
-			if (typeof input.cloudMapAsset === "string") {
-				const ext = path.extname(input.cloudMapAsset);
+			if (input.cloudMapAsset instanceof File) {
+				const ext = path.extname(input.cloudMapAsset.name);
 				planet.isPlanet.cloudMapAsset = await ctx.uploadFile.call(
 					system,
 					input.cloudMapAsset,
 					`cloud-${planet.name}${ext}`,
 				);
 			}
-			if (typeof input.ringMapAsset === "string") {
-				const ext = path.extname(input.ringMapAsset);
+			if (input.ringMapAsset instanceof File) {
+				const ext = path.extname(input.ringMapAsset.name);
 				planet.isPlanet.ringMapAsset = await ctx.uploadFile.call(
 					system,
 					input.ringMapAsset,

@@ -24,6 +24,8 @@ import { Icon } from "@thorium/ui/Icon";
 import { cn } from "@thorium/utils/cn";
 import { StarmapCoordinates } from "./StarmapCoordinates";
 import { ShipTemplate } from "./ShipTemplate";
+import { SoundConfigForm } from "@thorium/routes/config/systems/soundId";
+import { playbackRate } from "happy-dom/lib/PropertySymbol.js";
 
 type QueryReducerAction =
 	| { type: "add"; component?: keyof typeof components | ""; path?: string }
@@ -705,6 +707,27 @@ export function PropertyInput({
 			return <ShipTemplate value={value} setValue={setValue} />;
 		case "components":
 			return <ComponentsEditor components={value} setValue={setValue} />;
+		case "sound": {
+			const sound = value || {
+				url: "",
+				volume: [1, 1],
+				playbackRate: [1, 1],
+				loop: false,
+				loopStart: null,
+				loopEnd: null,
+				delay: 0,
+				loopGap: 0,
+				channel: null,
+			};
+			return (
+				<SoundConfigForm
+					sound={sound}
+					updateSound={(property, value) =>
+						setValue({ ...sound, [property]: value })
+					}
+				/>
+			);
+		}
 		default:
 			if (inputType !== "text") {
 				console.warn("Unknown input type", inputType);
@@ -716,8 +739,8 @@ export function PropertyInput({
 					fixed
 					label={label}
 					labelHidden={labelHidden}
-					onChange={(e) => setValue(e.target.value)}
-					value={value}
+					onBlur={(e) => setValue(e.target.value)}
+					defaultValue={value}
 				/>
 			);
 	}

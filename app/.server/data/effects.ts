@@ -10,6 +10,9 @@ import { t } from "@thorium/.server/init/t";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { z } from "zod";
 import type { position as positionComponent } from "@thorium/ecs-components/position";
+import { sound } from "@thorium/ecs-components/sound";
+import type { DataContext } from "@thorium/.server/DataContext";
+import { playServerSound } from "@thorium/utils/.server/playRangedSound";
 
 type SoundPayload =
 	| { type: "sound"; entityId: number; sound: SoundEffect & { id: string } }
@@ -147,6 +150,41 @@ export const effects = t.router({
 						loopingSounds.push(sound);
 					}
 				}),
+			);
+		}),
+	playSound: t.procedure
+		.meta({
+			action: (ctx: DataContext) => ({
+				sound: {
+					name: "Sound Effect",
+					type: "sound",
+				},
+				station: {
+					name: "Station",
+					type: "text",
+					helper: "Leave blank to play on all stations.",
+				},
+			}),
+			event: true,
+		})
+		.input(
+			z.object({
+				shipId: z.number(),
+				station: z.union([z.string(), z.string().array()]).optional(),
+				sound,
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const ship = ctx.ecs.getEntityById(input.shipId);
+			if (!ship) return;
+			playServerSound(
+				ship,
+				input.sound,
+				Array.isArray(input.station)
+					? input.station
+					: input.station
+						? [input.station]
+						: undefined,
 			);
 		}),
 	trigger: t.procedure

@@ -458,7 +458,7 @@ export async function processTriggers(
 				);
 				trigger.updateComponent("isTrigger", {
 					triggeredAt: new Date(),
-					active: false,
+					...(trigger.components.isTrigger.multiple ? {} : { active: false }),
 				});
 			}
 		}),

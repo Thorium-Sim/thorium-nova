@@ -7,7 +7,7 @@ import { toast } from "@thorium/context/ToastContext";
 import SearchableList from "@thorium/ui/SearchableList";
 import { Fragment } from "react";
 
-export default function MacrosConfig() {
+export default function TriggerConfig() {
 	const { pluginId, macroId } = useParams() as {
 		pluginId: string;
 		macroId?: string;
@@ -17,33 +17,36 @@ export default function MacrosConfig() {
 	});
 	const prompt = usePrompt();
 	const navigate = useNavigate();
-	const [data] = q.plugin.macro.all.useNetRequest({ pluginId, type: "macro" });
+	const [data] = q.plugin.macro.all.useNetRequest({
+		pluginId,
+		type: "trigger",
+	});
 
-	const macro = data.find((d) => d.name === macroId);
+	const trigger = data.find((d) => d.name === macroId);
 
 	return (
 		<div className="p-8 h-[calc(100%-2rem)]">
-			<h1 className="font-bold text-white text-3xl mb-4">Macro Config</h1>
+			<h1 className="font-bold text-white text-3xl mb-4">Trigger Config</h1>
 			<div className="flex gap-8 h-[calc(100%-3rem)]">
 				<div className="flex flex-col w-80 h-full">
 					<Button
 						className="btn-success btn-sm w-full"
 						onClick={async () => {
 							const name = await prompt({
-								header: "Enter macro name",
+								header: "Enter trigger name",
 							});
 							if (typeof name !== "string") return;
 							try {
 								const result = await q.plugin.macro.create.netSend({
 									name,
 									pluginId,
-									type: "macro",
+									type: "trigger",
 								});
 								navigate(`${result.macroId}`);
 							} catch (err) {
 								if (err instanceof Error) {
 									toast({
-										title: "Error creating macro",
+										title: "Error creating trigger",
 										body: err.message,
 										color: "error",
 									});
@@ -52,7 +55,7 @@ export default function MacrosConfig() {
 							}
 						}}
 					>
-						New Macro
+						New Trigger
 					</Button>
 
 					<SearchableList
@@ -72,7 +75,7 @@ export default function MacrosConfig() {
 						)}
 					/>
 				</div>
-				<Fragment key={macro?.name}>
+				<Fragment key={trigger?.name}>
 					<Outlet />
 				</Fragment>
 			</div>

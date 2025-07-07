@@ -16,6 +16,8 @@ import type BasePlugin from "@thorium/.server/classes/Plugins";
 import type StationComplementPlugin from "@thorium/.server/classes/Plugins/StationComplement";
 import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { DataStore } from "@thorium/utils/.server/db-fs";
+import { spawnTrigger } from "@thorium/.server/spawners/trigger";
+import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 
 function getPlanetSystem(ecs: ECS, planet: Entity): Entity {
 	const parentId = planet.components?.satellite?.parentId;
@@ -283,6 +285,16 @@ export const flight = t.router({
 						timelineId: missionId.missionId,
 					});
 				}
+				// Activate any active triggers
+				for (const plugin of ctx.server.plugins) {
+					if (!plugin.active) continue;
+					for (const macro of plugin.aspects.macros) {
+						if (!macro.active || macro.type !== "trigger") continue;
+						// Execute the trigger blocks
+						executeBlocks(ctx.ecs, macro.blocks);
+					}
+				}
+
 				ctx.server.activeFlightName = flightName;
 				pubsub.publish.flight.active();
 				pubsub.publish.flight.all();

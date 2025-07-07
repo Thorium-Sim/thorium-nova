@@ -1,6 +1,6 @@
 import { q } from "@thorium/context/AppContext";
 import Input from "@thorium/ui/Input";
-import { type ReactNode, useContext, useReducer, useState } from "react";
+import { type ReactNode, useContext, useId, useReducer, useState } from "react";
 import { Link, useParams } from "react-router";
 import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
 import { OverrideResetButton } from "./OverrideResetButton";
@@ -18,6 +18,18 @@ import {
 	removeAllSounds,
 	stopLooping,
 } from "@thorium/utils/sounds/playSound";
+import {
+	MenuTrigger,
+	Button as RAButton,
+	Popover,
+	Menu,
+	SubmenuTrigger,
+} from "react-aria-components";
+import {
+	popoverClass,
+	StyledMenuItem,
+} from "@thorium/components/timelineBuilder/AddBlockMenu";
+import { FilesMenu } from "@thorium/ui/FilesMenu";
 export default function Sounds() {
 	const [rekey, setRekey] = useReducer(() => Math.random(), Math.random());
 
@@ -106,14 +118,8 @@ function SoundConfig({
 		sound: string;
 	};
 	const shipPluginId = useContext(ShipPluginIdContext);
-	const [loopStartError, setLoopStartError] = useState(false);
-	const [loopEndError, setLoopEndError] = useState(false);
-	const [loopGapError, setLoopGapError] = useState(false);
-	const [delayError, setDelayError] = useState(false);
-	const [channelError, setChannelError] = useState(false);
-	const [isOpen, setIsOpen] = useState(true);
 
-	const [playing, setPlaying] = useState<null | number>(null);
+	const [isOpen, setIsOpen] = useState(true);
 
 	const [system] = q.plugin.systems.get.useNetRequest({
 		pluginId,
@@ -149,47 +155,90 @@ function SoundConfig({
 					)}
 				</Button>
 			) : null}
-			<Input
-				value={sound.url.split("/").at(-1)}
-				readOnly
-				label={
-					<>
-						Sound URL{" "}
-						<Button
-							disabled={playing !== null}
-							className={cn("btn-xs", {
-								"btn-success": !playing,
-								"btn-warning": playing,
-							})}
-							onClick={() => {
-								const id = Math.random();
-								setPlaying(id);
-								//@ts-expect-error
-								playSound({ id, ...sound, type: "soundEffect" }, () =>
-									setPlaying(null),
-								);
-							}}
-						>
-							<Icon name="volume-2" />
-						</Button>
-						{sound.loop ? (
-							<Button
-								disabled={!playing}
-								className="btn-xs btn-warning"
-								onClick={() => {
-									if (playing) {
-										setPlaying(null);
-										//@ts-expect-error
-										stopLooping(playing);
-									}
-								}}
-							>
-								<Icon name="ban" />
-							</Button>
-						) : null}
-					</>
+			<SoundConfigForm
+				sound={sound}
+				isOpen={isOpen}
+				ambiance={ambiance}
+				updateSound={(property, value) =>
+					updateSound((draft) => {
+						draft[soundName][index][property] = value;
+					})
+				}
+				removeSound={() =>
+					updateSound((draft) => {
+						draft[soundName].splice(index, 1);
+					})
 				}
 			/>
+		</div>
+	);
+}
+
+export function SoundConfigForm({
+	sound,
+	isOpen = true,
+	ambiance,
+	updateSound,
+	removeSound,
+}: {
+	sound: Sound;
+	isOpen?: boolean;
+	ambiance?: boolean;
+	updateSound: <K extends keyof Sound>(property: K, value: Sound[K]) => void;
+	removeSound?: () => void;
+}) {
+	const [loopStartError, setLoopStartError] = useState(false);
+	const [loopEndError, setLoopEndError] = useState(false);
+	const [loopGapError, setLoopGapError] = useState(false);
+	const [delayError, setDelayError] = useState(false);
+	const [channelError, setChannelError] = useState(false);
+	const [playing, setPlaying] = useState<null | number>(null);
+	const id = useId();
+	return (
+		<>
+			<div>
+				<label htmlFor={id}>
+					Sound URL{" "}
+					<Button
+						disabled={playing !== null}
+						className={cn("btn-xs", {
+							"btn-success": !playing,
+							"btn-warning": playing,
+						})}
+						onClick={() => {
+							const id = Math.random();
+							setPlaying(id);
+							//@ts-expect-error
+							playSound({ id, ...sound, type: "soundEffect" }, () =>
+								setPlaying(null),
+							);
+						}}
+					>
+						<Icon name="volume-2" />
+					</Button>
+					{sound.loop ? (
+						<Button
+							disabled={!playing}
+							className="btn-xs btn-warning"
+							onClick={() => {
+								if (playing) {
+									setPlaying(null);
+									//@ts-expect-error
+									stopLooping(playing);
+								}
+							}}
+						>
+							<Icon name="ban" />
+						</Button>
+					) : null}
+				</label>
+				<FilesMenu
+					types="sounds"
+					canUpload
+					value={sound.url}
+					setValue={(url) => updateSound("url", url)}
+				/>
+			</div>
 			{isOpen ? (
 				<>
 					<RangeInput
@@ -213,10 +262,7 @@ function SoundConfig({
 						defaultValue={sound.volume}
 						placeholder={["1", "1"]}
 						onBlur={(values) =>
-							updateSound((draft) => {
-								const newValue = [...values].sort() as [number, number];
-								draft[soundName][index].volume = newValue;
-							})
+							updateSound("volume", [...values].sort() as [number, number])
 						}
 					/>
 					<RangeInput
@@ -234,10 +280,10 @@ function SoundConfig({
 						defaultValue={sound.playbackRate}
 						placeholder={["1", "1"]}
 						onBlur={(values) =>
-							updateSound((draft) => {
-								const newValue = [...values].sort() as [number, number];
-								draft[soundName][index].playbackRate = newValue;
-							})
+							updateSound(
+								"playbackRate",
+								[...values].sort() as [number, number],
+							)
 						}
 					/>
 					{!ambiance ? (
@@ -245,11 +291,7 @@ function SoundConfig({
 							<Checkbox
 								name="loop"
 								checked={sound.loop}
-								onChange={(e) =>
-									updateSound((draft) => {
-										draft[soundName][index].loop = e.target.checked;
-									})
-								}
+								onChange={(e) => updateSound("loop", e.target.checked)}
 								label="Loop"
 							/>
 						</div>
@@ -274,12 +316,12 @@ function SoundConfig({
 										)
 											return setLoopStartError(true);
 
-										updateSound((draft) => {
-											draft[soundName][index].loopStart =
-												e.target.value === ""
-													? null
-													: Number.parseFloat(e.target.value);
-										});
+										updateSound(
+											"loopStart",
+											e.target.value === ""
+												? null
+												: Number.parseFloat(e.target.value),
+										);
 									}}
 									label={
 										<>
@@ -309,12 +351,12 @@ function SoundConfig({
 										)
 											return setLoopEndError(true);
 
-										updateSound((draft) => {
-											draft[soundName][index].loopEnd =
-												e.target.value === ""
-													? null
-													: Number.parseFloat(e.target.value);
-										});
+										updateSound(
+											"loopEnd",
+											e.target.value === ""
+												? null
+												: Number.parseFloat(e.target.value),
+										);
 									}}
 									label={
 										<>
@@ -342,12 +384,12 @@ function SoundConfig({
 									)
 										return setLoopGapError(true);
 
-									updateSound((draft) => {
-										draft[soundName][index].loopGap =
-											e.target.value === ""
-												? 0
-												: Number.parseFloat(e.target.value);
-									});
+									updateSound(
+										"loopGap",
+										e.target.value === ""
+											? 0
+											: Number.parseFloat(e.target.value),
+									);
 								}}
 								label={
 									<>
@@ -376,12 +418,10 @@ function SoundConfig({
 								)
 									return setDelayError(true);
 
-								updateSound((draft) => {
-									draft[soundName][index].delay =
-										e.target.value === ""
-											? 0
-											: Number.parseFloat(e.target.value);
-								});
+								updateSound(
+									"delay",
+									e.target.value === "" ? 0 : Number.parseFloat(e.target.value),
+								);
 							}}
 							label={
 								<>
@@ -402,9 +442,7 @@ function SoundConfig({
 						onChange={() => setChannelError(false)}
 						onBlur={(e) => {
 							if (e.target.value.trim() === "") {
-								return updateSound((draft) => {
-									draft[soundName][index].channel = null;
-								});
+								return updateSound("channel", null);
 							}
 							const channels = e.target.value
 								.trim()
@@ -414,9 +452,7 @@ function SoundConfig({
 							if (channels.some(Number.isNaN)) return setChannelError(true);
 							if (channels.some((channel) => channel < 0))
 								return setChannelError(true);
-							updateSound((draft) => {
-								draft[soundName][index].channel = channels;
-							});
+							updateSound("channel", channels);
 						}}
 						label={
 							<>
@@ -425,8 +461,10 @@ function SoundConfig({
 									Which audio channels the sound should play on, numerical and
 									separated by commas. Leave blank to leave the sound's channels
 									unchanged. If set, the sound is downmixed to the number of
-									channels. If the sound is stereo and just one channel is set,
-									the channels are mixed to mono. If the sound is mono and two
+									channels. <br />
+									<br />
+									If the sound is stereo and just one channel is set, the
+									channels are mixed to mono. If the sound is mono and two
 									channels are set, the sound is copied to both channels. If the
 									number of channels specified is the same as the channels in
 									the sound, the channels of the sound are copied to the
@@ -436,21 +474,19 @@ function SoundConfig({
 							</>
 						}
 					/>
-					<div className="px-2 pb-2">
-						<Button
-							className="btn-error btn-sm w-full "
-							onClick={() => {
-								updateSound((draft) => {
-									draft[soundName].splice(index, 1);
-								});
-							}}
-						>
-							Remove Sound
-						</Button>
-					</div>
+					{removeSound ? (
+						<div className="px-2 pb-2">
+							<Button
+								className="btn-error btn-sm w-full "
+								onClick={removeSound}
+							>
+								Remove Sound
+							</Button>
+						</div>
+					) : null}
 				</>
 			) : null}
-		</div>
+		</>
 	);
 }
 

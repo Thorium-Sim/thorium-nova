@@ -16,7 +16,7 @@ import { cn } from "@thorium/utils/cn";
 import { q } from "@thorium/context/AppContext";
 import type { MacroPlugin } from "@thorium/.server/classes/Plugins/Macro";
 
-function StyledMenuItem(props: MenuItemProps) {
+export function StyledMenuItem(props: MenuItemProps) {
 	return (
 		<MenuItem
 			{...props}
@@ -28,7 +28,7 @@ function StyledMenuItem(props: MenuItemProps) {
 	);
 }
 
-const popoverClass =
+export const popoverClass =
 	"p-1 w-64 overflow-auto rounded-md bg-black/60 border-2 border-white/10 shadow-[2px_2px_10px_rgba(0,0,0,0.5)] backdrop-brightness-200 text-white backdrop-blur ring-1 ring-white/5 entering:animate-in entering:fade-in entering:zoom-in-95 exiting:animate-out exiting:fade-out exiting:zoom-out-95 fill-mode-forwards origin-top-left";
 
 export function AddBlockButton({
@@ -45,7 +45,7 @@ export function AddBlockButton({
 	children: ReactNode;
 	omitBlocks?: boolean;
 }) {
-	const [macros] = q.plugin.macro.all.useNetRequest();
+	const [macros] = q.plugin.macro.all.useNetRequest({ type: "macro" });
 
 	const groupedMacros = macros.reduce(
 		(prev: Record<string, MacroPlugin[]>, next) => {

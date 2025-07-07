@@ -152,7 +152,12 @@ const block = t.router({
 
 export const macro = t.router({
 	all: t.procedure
-		.input(z.object({ pluginId: z.string().optional() }).optional())
+		.input(
+			z.object({
+				pluginId: z.string().optional(),
+				type: z.enum(["macro", "trigger"]),
+			}),
+		)
 		.filter((publish: { pluginId: string } | null, { input }) => {
 			if (!publish || publish.pluginId === input?.pluginId) return true;
 			return false;
@@ -160,10 +165,12 @@ export const macro = t.router({
 		.request(({ ctx, input }) => {
 			if (input?.pluginId) {
 				const plugin = getPlugin(ctx, input.pluginId);
-				return plugin.aspects.macros;
+				return plugin.aspects.macros.filter((t) => t.type === input.type);
 			}
 			return ctx.server.plugins.reduce((prev: MacroPlugin[], next) => {
-				return prev.concat(next.aspects.macros);
+				return prev.concat(
+					next.aspects.macros.filter((t) => t.type === input.type),
+				);
 			}, []);
 		}),
 	get: t.procedure
@@ -187,12 +194,16 @@ export const macro = t.router({
 			z.object({
 				pluginId: z.string(),
 				name: z.string(),
+				type: z.enum(["macro", "trigger"]),
 			}),
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const macro = new MacroPlugin({ name: input.name }, plugin);
+			const macro = new MacroPlugin(
+				{ name: input.name, type: input.type },
+				plugin,
+			);
 			plugin.aspects.macros.push(macro);
 
 			pubsub.publish.plugin.macro.all({ pluginId: input.pluginId });
@@ -225,6 +236,7 @@ export const macro = t.router({
 				name: z.string().optional(),
 				category: z.string().optional(),
 				description: z.string().optional(),
+				active: z.boolean().optional(),
 			}),
 		)
 		.send(async ({ ctx, input }) => {
@@ -237,6 +249,7 @@ export const macro = t.router({
 			if (!macro) return { macroId: "" };
 			if (input.category) macro.category = input.category;
 			if (input.description) macro.description = input.description;
+			if (typeof input.active === "boolean") macro.active = input.active;
 
 			if (input.name !== macro.name && input.name) {
 				await macro?.rename(input.name);

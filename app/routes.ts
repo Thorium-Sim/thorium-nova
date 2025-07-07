@@ -98,6 +98,9 @@ export default [
 			route("macros", "routes/config/macros/layout.tsx", [
 				route(":macroId", "routes/config/macros/macro.tsx"),
 			]),
+			route("triggers", "routes/config/triggers/layout.tsx", [
+				route(":macroId", "routes/config/triggers/trigger.tsx"),
+			]),
 			route("themes", "routes/config/themes/layout.tsx", [
 				route(":themeId", "routes/config/themes/theme.tsx"),
 			]),

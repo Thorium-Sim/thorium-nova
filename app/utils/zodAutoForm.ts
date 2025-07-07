@@ -187,7 +187,8 @@ export type InputTypes =
 	| "room"
 	| "starmapCoordinates"
 	| "shipTemplate"
-	| "components";
+	| "components"
+	| "sound";
 
 export function getInputType<T extends keyof typeof ZOD_COMPARISONS>(
 	item: {
