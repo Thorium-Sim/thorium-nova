@@ -1,6 +1,5 @@
 import { q } from "@thorium/context/AppContext";
-import { Combobox, Transition } from "@headlessui/react";
-import { Fragment, useReducer, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { parseSchema as parseJsonSchema } from "json-schema-to-zod";
 // biome-ignore lint/style/useImportType: <explanation>
 import z from "zod";
@@ -11,6 +10,17 @@ import type { ValueQuery } from "@thorium/.server/classes/Plugins/Timeline";
 import { matchSorter } from "match-sorter";
 import { cn } from "@thorium/utils/cn";
 import { Icon } from "@thorium/ui/Icon";
+import {
+	Button,
+	ComboBox,
+	Group,
+	Input,
+	Label,
+	ListBox,
+	ListBoxItem,
+	Popover,
+} from "react-aria-components";
+import type { Key } from "react-aria-components";
 
 type ZodType = typeof z;
 declare global {
@@ -59,66 +69,63 @@ export function ActionCombobox({
 	className?: string;
 }) {
 	const [availableActions] = q.thorium.actions.useNetRequest();
-
 	const [query, setQuery] = useState("");
-
+	const [selectedKey, setSelectedKey] = useState<Key | null>(null);
 	const filteredActions = matchSorter(availableActions, query, {
 		keys: ["name", "action"],
-	});
+	}).map((a) => ({ ...a, key: a.action }));
 
 	return (
-		<Combobox value={value} onChange={onChange}>
-			<div className={cn("relative flex-1", className)}>
-				<div className="cursor-pointer min-h-6 h-6 leading-5 relative border-success border rounded-lg">
-					<Combobox.Input
-						placeholder={placeholder}
-						className="w-full bg-transparent placeholder:text-success placeholder:font-semibold text-success border-none outline-none focus:ring-0 pl-3 pr-10 text-xs leading-5"
-						onChange={(event) => setQuery(event.target.value)}
-						autoComplete="off"
-						// @ts-expect-error The types are wrong
-						displayValue={(event) => event?.name}
-					/>
-					<Combobox.Button className="absolute w-10 bg-success/20 hover:bg-success/50 cursor-pointer rounded inset-y-0 right-0 flex items-center justify-center">
-						<Icon
-							name="chevrons-up-down"
-							className="w-5 h-5 text-success"
-							aria-hidden="true"
-						/>
-					</Combobox.Button>
-				</div>
-				<Transition
-					as={Fragment}
-					leave="transition ease-in duration-100"
-					leaveFrom="opacity-100"
-					leaveTo="opacity-0"
-					afterLeave={() => setQuery("")}
-				>
-					<Combobox.Options className="absolute w-full mt-1 overflow-auto text-base bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-10">
-						{filteredActions.length === 0 && query !== "" ? (
-							<div className="cursor-default select-none relative py-1 px-1 text-gray-300">
-								Nothing found.
-							</div>
-						) : (
-							filteredActions.map((action) => (
-								<Combobox.Option
-									key={action.name}
-									className={({ active }: { active: boolean }) =>
-										`cursor-default select-none relative py-1 px-2 ${
-											active ? "text-white bg-success" : ""
-										}`
-									}
-									value={action}
-								>
-									<span className={`block truncate font-normal`}>
-										{action.name}
+		<ComboBox
+			className="group flex flex-col gap-1"
+			inputValue={query}
+			onInputChange={setQuery}
+			selectedKey={selectedKey}
+			allowsCustomValue={false}
+			onSelectionChange={(key) => {
+				setSelectedKey(key);
+				onChange(availableActions.find((a) => a.action === key)!);
+				setQuery("");
+			}}
+			aria-label={placeholder}
+		>
+			<Group className="flex rounded-lg border-success border transition shadow-md ring-1 min-h-6 h-6 ring-black/10 focus-visible:ring-2 focus-visible:ring-black">
+				<Input
+					placeholder={value?.name || placeholder}
+					className="flex-1 w-full min-w-56 border-none py-2 px-3 leading-5 placeholder:text-success placeholder:font-semibold text-success bg-transparent outline-none focus:ring-0 pl-3 pr-0 text-xs "
+				/>
+				<Button className="px-3 flex items-center text-success transition border-0 border-solid border-l border-l-success rounded-r-lg pressed:bg-success/50 bg-success/20 hover:bg-success/50 cursor-pointer">
+					<Icon name="chevrons-up-down" />
+				</Button>
+			</Group>
+			<Popover className="max-h-60 w-(--trigger-width) overflow-auto rounded-md bg-gray-900/90 border-gray-400 border text-base shadow-lg ring-1 ring-black/5 entering:animate-in entering:fade-in exiting:animate-out exiting:fade-out">
+				<ListBox className="outline-hidden p-1" items={filteredActions}>
+					{(item) => (
+						<ListBoxItem
+							textValue={item.name}
+							key={item.key}
+							className="group flex items-center gap-0.5 cursor-default select-none outline-hidden rounded-sm text-gray-900 focus:bg-sky-600 focus:text-white"
+						>
+							{({ isFocusVisible, isHovered }) => (
+								<>
+									<span
+										className={cn(
+											"flex-1 flex items-center gap-1 truncate font-normal group-selected:font-medium text-white py-1 pl-1 pr-2 rounded",
+											{
+												"text-white bg-success": isFocusVisible,
+												" bg-success/40": isHovered,
+											},
+										)}
+									>
+										{item.name}
 									</span>
-								</Combobox.Option>
-							))
-						)}
-					</Combobox.Options>
-				</Transition>
-			</div>
-		</Combobox>
+								</>
+							)}
+						</ListBoxItem>
+					)}
+				</ListBox>
+			</Popover>
+		</ComboBox>
 	);
 }
 

@@ -26,6 +26,13 @@ export const targeting = t.router({
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
+		.autoPublish(
+			["isTargeting"],
+			(entity) =>
+				entity.components.isShipSystem && {
+					shipId: entity.components.isShipSystem.shipId,
+				},
+		)
 		.request(({ ctx, input }) => {
 			const system = getShipSystem(ctx.ecs, {
 				systemType: "targeting",
@@ -67,6 +74,7 @@ export const targeting = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
+			.autoPublish([], () => null)
 			.request(({ ctx, input }) => {
 				return getShipTorpedos(ctx.ecs, input.shipId);
 			}),
@@ -76,6 +84,13 @@ export const targeting = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
+			.autoPublish(
+				["isTorpedoLauncher"],
+				(entity) =>
+					entity.components.isShipSystem && {
+						shipId: entity.components.isShipSystem.shipId,
+					},
+			)
 			.request(({ ctx, input: { shipId } }) => {
 				if (!ctx.flight) return [];
 				const systems = getShipSystems(ctx.ecs, {
@@ -233,6 +248,8 @@ export const targeting = t.router({
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
+		.autoPublish(["hull"], (entity) => ({ shipId: entity.id }))
+
 		.request(({ ctx, input }) => {
 			const ship = ctx.ecs.getEntityById(input.shipId);
 			return ship?.components.hull?.hull || 0;
@@ -244,6 +261,14 @@ export const targeting = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
+			.autoPublish(
+				["isShields"],
+				(entity) =>
+					entity.components.isShipSystem && {
+						shipId: entity.components.isShipSystem.shipId,
+					},
+			)
+
 			.request(({ ctx, input: { shipId } }) => {
 				if (!ctx.flight) return [];
 				const systems = getShipSystems(ctx.ecs, {
@@ -318,6 +343,14 @@ export const targeting = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
+			.autoPublish(
+				["isPhasers"],
+				(entity) =>
+					entity.components.isShipSystem && {
+						shipId: entity.components.isShipSystem.shipId,
+					},
+			)
+
 			.request(({ ctx, input }) => {
 				if (!ctx.flight) return [];
 				const systems = getShipSystems(ctx.flight.ecs, {
@@ -361,6 +394,14 @@ export const targeting = t.router({
 					return false;
 				return true;
 			})
+			.autoPublish(["isPhasers"], (entity) => {
+				const systemId = entity.ecs.getEntityById(
+					entity.components.isShipSystem?.shipId || -1,
+				)?.components.position?.parentId;
+				if (systemId) return { systemId };
+				return null;
+			})
+
 			.request(({ input, ctx }) => {
 				const systemId = input.systemId;
 

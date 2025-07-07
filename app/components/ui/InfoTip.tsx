@@ -54,7 +54,7 @@ const InfoTip = ({ children }: { children: ReactNode }) => {
 	return (
 		<>
 			<Button
-				className="btn btn-ghost btn-xs p-0"
+				className="btn btn-ghost btn-xs p-0 !px-0 !min-h-4 !h-4 w-4"
 				ref={refs.setReference}
 				onClick={(e) => {
 					e.preventDefault();

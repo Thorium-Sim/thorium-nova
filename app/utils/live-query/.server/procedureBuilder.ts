@@ -1,3 +1,4 @@
+import type { ComponentIds } from "@thorium/ecs-components";
 import { getParseFn } from "./getParseFn";
 import {
 	createInputMiddleware,
@@ -28,6 +29,7 @@ import type {
 	Simplify,
 	UndefinedKeys,
 } from "./types";
+import type { Entity } from "@thorium/utils/ecs";
 
 type ErrorMessage<TMessage extends string> = TMessage;
 
@@ -151,6 +153,23 @@ export interface ProcedureBuilder<TParams extends ProcedureParams> {
 	 */
 	meta(meta: TParams["_meta"]): ProcedureBuilder<TParams>;
 	/**
+	 * Automatically trigger a publish call when these components change on entities.
+	 */
+	autoPublish(
+		components: ComponentIds[],
+		/**
+		 * For component subs, map a changed entity to the filter params
+		 */
+		entityMap: (
+			entity: Entity,
+		) =>
+			| ResolveOptions<TParams>["publish"]
+			| ResolveOptions<TParams>["publish"][]
+			| undefined
+			| null,
+	): ProcedureBuilder<TParams>;
+
+	/**
 	 * Filter pubsub.publish calls so only certain clients get
 	 * subscription publishes
 	 */
@@ -176,15 +195,6 @@ export interface ProcedureBuilder<TParams extends ProcedureParams> {
 	use<$Params extends ProcedureParams>(
 		fn: MiddlewareFunction<TParams, $Params>,
 	): CreateProcedureReturnInput<TParams, $Params>;
-	/**
-	 * Extend the procedure with another procedure.
-	 * @warning The TypeScript inference fails when chaining concatenated procedures.
-	 */
-	unstable_concat<$ProcedureBuilder extends AnyProcedureBuilder>(
-		proc: $ProcedureBuilder,
-	): $ProcedureBuilder extends ProcedureBuilder<infer $TParams>
-		? CreateProcedureReturnInput<TParams, $TParams>
-		: never;
 	/**
 	 * Request procedure
 	 */
@@ -300,8 +310,11 @@ export function createBuilder<TConfig extends AnyRootConfig>(
 				],
 			}) as AnyProcedureBuilder;
 		},
-		unstable_concat(builder) {
-			return createNewBuilder(_def, builder._def) as any;
+		autoPublish(components, entityMap) {
+			return createNewBuilder(_def, {
+				components,
+				entityMap,
+			}) as AnyProcedureBuilder;
 		},
 		use(middleware) {
 			return createNewBuilder(_def, {

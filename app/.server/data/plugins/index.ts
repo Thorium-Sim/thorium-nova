@@ -11,6 +11,7 @@ import { timeline } from "./timeline";
 import { theme } from "./themes";
 import { inventory } from "./inventory";
 import { getPlugin } from "./utils";
+import { macro } from "@thorium/.server/data/plugins/macro";
 
 export function publish(pluginId: string) {
 	pubsub.publish.plugin.all();
@@ -20,6 +21,7 @@ export function publish(pluginId: string) {
 export const plugin = t.router({
 	ship,
 	timeline,
+	macro,
 	theme,
 	systems,
 	starmap,

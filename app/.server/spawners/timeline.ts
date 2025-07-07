@@ -16,7 +16,7 @@ export function spawnTimeline(
 		});
 		step.addComponent("tags", { tags: stepItem.tags });
 		step.addComponent("isTimelineStep", {
-			actions: stepItem.actions,
+			blocks: structuredClone(stepItem.blocks),
 			active: false,
 			timelineId: timelineEntity.id,
 		});
@@ -31,7 +31,7 @@ export function spawnTimeline(
 	timelineEntity.addComponent("tags", { tags: timeline.tags });
 	timelineEntity.addComponent("isTimeline", {
 		steps: stepIds,
-		isMission: timeline.isMission,
+		type: timeline.type,
 	});
 	addEntity(timelineEntity);
 

@@ -10,6 +10,9 @@ import { t } from "@thorium/.server/init/t";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { z } from "zod";
 import type { position as positionComponent } from "@thorium/ecs-components/position";
+import { sound } from "@thorium/ecs-components/sound";
+import type { DataContext } from "@thorium/.server/DataContext";
+import { playServerSound } from "@thorium/utils/.server/playRangedSound";
 
 type SoundPayload =
 	| { type: "sound"; entityId: number; sound: SoundEffect & { id: string } }
@@ -20,25 +23,28 @@ type SoundPayload =
 export const effects = t.router({
 	sub: t.procedure
 		.input(z.object({ clientId: z.string() }))
+		// This request can only be triggered by a publish.
+		.autoPublish([], () => null)
 		.filter((payload: EffectPayload | null, { ctx, input: { clientId } }) => {
 			if (!payload) return true;
 
 			if (payload.clientId !== clientId) {
 				const flightClient = ctx.getFlightClient(clientId);
-				if (flightClient?.shipId !== payload.shipId) return false;
+				const clientData = flightClient?.components.flightClient;
+				if (clientData?.shipId !== payload.shipId) return false;
 
 				switch (payload.station) {
 					case "all":
 						break;
 					case "bridge":
 						if (
-							!flightClient?.stationId ||
-							notBridgeStation.includes(flightClient.stationId)
+							!clientData?.stationId ||
+							notBridgeStation.includes(clientData.stationId)
 						)
 							return false;
 						break;
 					default:
-						if (flightClient.stationId !== payload.station) return false;
+						if (clientData.stationId !== payload.station) return false;
 				}
 			}
 			return true;
@@ -50,6 +56,8 @@ export const effects = t.router({
 		}),
 	sounds: t.procedure
 		.input(z.object({ clientId: z.string() }))
+		// This request can only be triggered by a publish.
+		.autoPublish([], () => null)
 		.filter((payload: SoundPayload | null, { ctx, input: { clientId } }) => {
 			/**
 			 * Logic for filtering out sound payloads
@@ -81,12 +89,13 @@ export const effects = t.router({
 			if (!sound) return false;
 
 			const flightClient = ctx.getFlightClient(clientId);
-			const ship = ctx.ecs.getEntityById(flightClient?.shipId || -1);
+			const clientData = flightClient?.components.flightClient;
+			const ship = ctx.ecs.getEntityById(clientData?.shipId || -1);
 			return matchSound(
 				sound,
 				clientId,
-				flightClient?.shipId,
-				flightClient?.stationId,
+				clientData?.shipId,
+				clientData?.stationId,
 				ship?.components.position,
 			);
 		})
@@ -109,12 +118,15 @@ export const effects = t.router({
 	 */
 	ambiance: t.procedure
 		.input(z.object({ clientId: z.string() }))
+		// This request can only be triggered by a publish.
+		.autoPublish([], () => null)
 		.filter(
 			(
 				publish: { shipId?: number; stationId?: string },
 				{ ctx, input: { clientId } },
 			) => {
-				const shipId = ctx.getFlightClient(clientId)?.shipId;
+				const shipId =
+					ctx.getFlightClient(clientId)?.components.flightClient?.shipId;
 				if (publish && publish.shipId !== shipId) return false;
 				return true;
 			},
@@ -122,21 +134,57 @@ export const effects = t.router({
 		.request(({ ctx, input: { clientId } }) => {
 			const loopingSounds: SoundEffect[] = [];
 			const flightClient = ctx.getFlightClient(clientId);
-			const ship = ctx.ecs.getEntityById(flightClient?.shipId || -1);
+			const clientData = flightClient?.components.flightClient;
+			const ship = ctx.ecs.getEntityById(clientData?.shipId || -1);
 			ctx.flight?.ecs.componentCache.get("soundEffects")?.forEach((entity) =>
 				entity.components.soundEffects?.looping.forEach((sound) => {
 					if (
 						matchSound(
 							sound,
 							clientId,
-							flightClient?.shipId,
-							flightClient?.stationId,
+							clientData?.shipId,
+							clientData?.stationId,
 							ship?.components.position,
 						)
 					) {
 						loopingSounds.push(sound);
 					}
 				}),
+			);
+		}),
+	playSound: t.procedure
+		.meta({
+			action: (ctx: DataContext) => ({
+				sound: {
+					name: "Sound Effect",
+					type: "sound",
+				},
+				station: {
+					name: "Station",
+					type: "text",
+					helper: "Leave blank to play on all stations.",
+				},
+			}),
+			event: true,
+		})
+		.input(
+			z.object({
+				shipId: z.number(),
+				station: z.union([z.string(), z.string().array()]).optional(),
+				sound,
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const ship = ctx.ecs.getEntityById(input.shipId);
+			if (!ship) return;
+			playServerSound(
+				ship,
+				input.sound,
+				Array.isArray(input.station)
+					? input.station
+					: input.station
+						? [input.station]
+						: undefined,
 			);
 		}),
 	trigger: t.procedure

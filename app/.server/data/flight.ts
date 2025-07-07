@@ -14,8 +14,10 @@ import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { spawnShip } from "@thorium/.server/spawners/ship";
 import type BasePlugin from "@thorium/.server/classes/Plugins";
 import type StationComplementPlugin from "@thorium/.server/classes/Plugins/StationComplement";
-import { triggerSend } from "@thorium/utils/.server/evaluateEntityQuery";
+import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { DataStore } from "@thorium/utils/.server/db-fs";
+import { spawnTrigger } from "@thorium/.server/spawners/trigger";
+import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 
 function getPlanetSystem(ecs: ECS, planet: Entity): Entity {
 	const parentId = planet.components?.satellite?.parentId;
@@ -94,15 +96,19 @@ function getStationComplement(
 }
 
 export const flight = t.router({
-	active: t.procedure.request(({ ctx }) => {
-		const flight = ctx.flight;
-		if (!flight) return null;
-		const { date, name, paused, hasFlightDirector } = flight;
-		return { date, name, paused, hasFlightDirector };
-	}),
-	all: t.procedure.request(() => {
-		return DataStore.operations.getStore()!.getFlights();
-	}),
+	active: t.procedure
+		.autoPublish(["isFlight"], () => null)
+		.request(({ ctx }) => {
+			const flight = ctx.flight;
+			if (!flight) return null;
+			const { date, name, paused, hasFlightDirector } = flight;
+			return { date, name, paused, hasFlightDirector };
+		}),
+	all: t.procedure
+		.autoPublish(["isFlight"], () => null)
+		.request(() => {
+			return DataStore.operations.getStore()!.getFlights();
+		}),
 	start: t.procedure
 		.input(
 			z.object({
@@ -274,11 +280,21 @@ export const flight = t.router({
 				}
 				// Add the mission if it exists
 				if (missionId) {
-					triggerSend("timeline.activate", {
+					triggerAction("timeline.activate", {
 						pluginId: missionId.pluginId,
 						timelineId: missionId.missionId,
 					});
 				}
+				// Activate any active triggers
+				for (const plugin of ctx.server.plugins) {
+					if (!plugin.active) continue;
+					for (const macro of plugin.aspects.macros) {
+						if (!macro.active || macro.type !== "trigger") continue;
+						// Execute the trigger blocks
+						executeBlocks(ctx.ecs, macro.blocks);
+					}
+				}
+
 				ctx.server.activeFlightName = flightName;
 				pubsub.publish.flight.active();
 				pubsub.publish.flight.all();

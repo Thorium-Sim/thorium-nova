@@ -3,6 +3,7 @@ import { Aspect } from "./Aspect";
 import type { components } from "@thorium/ecs-components";
 import uniqid from "@thorium/utils/uniqid";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 
 export type EntityQuery = ComponentQuery[];
 
@@ -31,7 +32,7 @@ interface TimelineStep {
 	name: string;
 	description: string;
 	tags: string[];
-	actions: TimelineAction[];
+	blocks: TimelineBlock[];
 }
 
 export default class TimelinePlugin extends Aspect {
@@ -41,7 +42,7 @@ export default class TimelinePlugin extends Aspect {
 	description: string;
 	category: string;
 	tags: string[];
-	isMission: boolean;
+	type: "mission" | "trigger" | "training" | "report";
 
 	steps: TimelineStep[];
 	/**
@@ -65,13 +66,12 @@ export default class TimelinePlugin extends Aspect {
 
 		this.category = params.category || "";
 		this.tags = params.tags || [];
-		this.isMission = params.isMission || false;
+		this.type = params.type || "mission";
 
 		this.assets = params.assets || {
 			cover: "",
 		};
 
-		// TODO: Add a default step
 		this.steps = params.steps || [
 			{
 				id: uniqid("ms-"),
@@ -79,7 +79,7 @@ export default class TimelinePlugin extends Aspect {
 				description:
 					"Initialize anything that needs to be present at the beginning of this timeline.",
 				tags: [],
-				actions: [this.defaultAction],
+				blocks: [],
 			},
 		];
 	}
@@ -90,7 +90,7 @@ export default class TimelinePlugin extends Aspect {
 			name,
 			description: "",
 			tags: [],
-			actions: [this.defaultAction],
+			blocks: [],
 		});
 		return id;
 	}
@@ -105,7 +105,7 @@ export default class TimelinePlugin extends Aspect {
 			name,
 			tags: [],
 			description: "",
-			actions: [this.defaultAction],
+			blocks: [],
 		});
 		return id;
 	}
@@ -116,25 +116,5 @@ export default class TimelinePlugin extends Aspect {
 		const newStep = { ...step, id: uniqid("ms-") };
 		this.steps.splice(index, 0, newStep);
 		return newStep.id;
-	}
-	get defaultAction() {
-		return {
-			id: uniqid("act-"),
-			name: "Trigger: Advance Timeline",
-			action: "triggers.create",
-			values: {
-				name: "Advance Timeline",
-				active: true,
-				conditions: [],
-				actions: [
-					{
-						id: uniqid("act-"),
-						name: "Timeline: Advance",
-						action: "timeline.advance",
-						values: {},
-					},
-				],
-			},
-		};
 	}
 }

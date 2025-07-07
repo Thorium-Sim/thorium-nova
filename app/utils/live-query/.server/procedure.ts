@@ -1,3 +1,4 @@
+import type { Entity } from "@thorium/utils/ecs";
 import type { HeadersResolver } from "../client/client";
 import type { MiddlewareFunction } from "./middleware";
 import type { Parser } from "./parser";
@@ -33,6 +34,8 @@ export type ProcedureBuilderDef<TParams extends ProcedureParams> = {
 	send?: boolean;
 	request?: boolean;
 	dataStream?: boolean;
+	components?: string[];
+	entityMap?: (entity: Entity) => TParams["_publish"];
 };
 
 /**

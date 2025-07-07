@@ -3,7 +3,7 @@ import { Fragment } from "react";
 
 // Messages go here
 const messages: Record<string, { title: string; message: string }> = {
-	blackout: { title: "", message: "" },
+	blackout: { title: "blackout", message: "" },
 	offline: {
 		title: "Station Offline",
 		message:
@@ -31,7 +31,7 @@ const Offline: React.FC = () => {
 	if (!client.offlineState) return null;
 	return (
 		<div className="card-offline">
-			{client.offlineState === "blackout" ? (
+			{client.offlineState.title === "blackout" ? (
 				<div className="blackout-back fixed z-50 top-0 w-full h-full" />
 			) : (
 				<Fragment>

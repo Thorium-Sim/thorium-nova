@@ -195,7 +195,7 @@ class Entity {
 	async addComponent<
 		Name extends keyof Components,
 		Data extends Components[Name],
-	>(name: Name, data: Partial<Data> = {}) {
+	>(name: Name, data: Partial<Data> = {}, autoPublish?: boolean) {
 		const component = allComponents[name as ComponentIds];
 		try {
 			const componentData = component.parse(data) as Data;
@@ -205,6 +205,9 @@ class Entity {
 		}
 		this.addComponentCache(name);
 		this.setSystemsDirty();
+		if (autoPublish) {
+			this.ecs?.batchChange(this.id, name);
+		}
 	}
 	/**
 	 * Remove a component from the entity. To preserve performances, we
@@ -213,9 +216,13 @@ class Entity {
 	 *
 	 * @param  {String} name Name of the component to remove.
 	 */
-	removeComponent(name: keyof Components) {
+	removeComponent(name: keyof Components, autoPublish?: boolean) {
 		if (!this.components[name]) {
 			return;
+		}
+
+		if (autoPublish) {
+			this.ecs?.batchChange(this.id, name);
 		}
 
 		delete this.components[name];
@@ -238,6 +245,7 @@ class Entity {
 	updateComponent<Name extends keyof Components, Data extends Components[Name]>(
 		name: Name,
 		data: Partial<Data>,
+		autoPublish?: boolean,
 	) {
 		const component = this.components[name];
 
@@ -246,22 +254,11 @@ class Entity {
 		} else {
 			Object.assign(component, data);
 		}
-	}
-	/**
-	 * Update a set of components.
-	 *
-	 * @param  {Object} componentsData Dict of components to update.
-	 */
-	updateComponents<K extends keyof ComponentInputs>(
-		componentsData: Partial<ComponentInputs>,
-	) {
-		const components = Object.keys(componentsData) as K[];
-
-		// biome-ignore lint/suspicious/noAssignInExpressions:
-		for (let i = 0, component: K; (component = components[i] as K); i += 1) {
-			this.updateComponent(component, (componentsData[component] || {}) as any);
+		if (autoPublish) {
+			this.ecs?.batchChange(this.id, name);
 		}
 	}
+
 	/**
 	 * Dispose the entity.
 	 *

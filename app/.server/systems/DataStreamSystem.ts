@@ -1,3 +1,6 @@
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { componentEntityMaps } from "@thorium/.server/init/router";
+import type { ComponentIds } from "@thorium/ecs-components";
 import { System } from "@thorium/utils/ecs";
 import { SERVER_FPS } from "@thorium/utils/live-query/constants";
 
@@ -13,5 +16,24 @@ export class DataStreamSystem extends System {
 				client.sendDataStream();
 			}
 		}
+
+		for (const key of this.ecs.changeBatch) {
+			const [entityId, component] = key.split("-");
+			const entity = this.ecs.getEntityById(Number(entityId));
+			if (!entity) continue;
+			componentEntityMaps
+				.get(component as ComponentIds)
+				?.forEach(({ entityMap, procedure }) => {
+					const filter = entityMap(entity);
+					if (Array.isArray(filter)) {
+						for (const f of filter) {
+							pubsub.directPublish(procedure, f);
+						}
+					} else {
+						pubsub.directPublish(procedure, filter);
+					}
+				});
+		}
+		this.ecs.changeBatch.clear();
 	}
 }

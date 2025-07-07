@@ -1,29 +1,35 @@
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import type BasePlugin from ".";
 import { Aspect } from "./Aspect";
-import type { TimelineAction } from "./Timeline";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 
 export class MacroPlugin extends Aspect {
 	apiVersion = "ships/v1" as const;
 	kind = "macros" as const;
 	name: string;
+	type: "macro" | "trigger";
 	description: string;
+	category: string;
+	/** Used for trigger type macros. */
+	active: boolean;
 
-	inputs: { id: string; name: string; type: string }[];
-	actions: TimelineAction[];
+	blocks: TimelineBlock[];
 
 	assets = {};
 	constructor(params: Partial<MacroPlugin>, plugin: BasePlugin) {
 		const name = generateIncrementedName(
-			params.name || "New Timeline",
-			plugin.aspects.timelines.map((timeline) => timeline.name),
+			params.name || "New Macro",
+			plugin.aspects.macros.map((macro) => macro.name),
 		);
 		super({ name, ...params }, { kind: "macros" }, plugin, {});
 		this.name = name;
+		this.type = params.type || "macro";
 		this.description =
-			params.description || "Performs several actions at once.";
-
-		this.inputs = params.inputs || [];
-		this.actions = params.actions || [];
+			params.description || this.type === "macro"
+				? "Performs several actions at once."
+				: "Responds to events.";
+		this.category = params.category || "";
+		this.active = params.active ?? true;
+		this.blocks = params.blocks || [];
 	}
 }

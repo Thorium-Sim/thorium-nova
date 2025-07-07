@@ -35,7 +35,7 @@ const ConfigList = () => {
 		<div className="p-8 h-[calc(100%-2rem)] overflow-y-auto">
 			<h1 className="font-bold text-white text-3xl mb-4">Plugin Aspects</h1>
 
-			<div className="h-full grid grid-cols-4 gap-16">
+			<div className="grid grid-cols-4 gap-16 pb-16">
 				<ConfigIcon to={`/config/${pluginId}/starmap`}>
 					<Icon name="star" className="text-6xl mb-4" />
 					<p className="font-bold text-2xl">Universe</p>
@@ -48,9 +48,25 @@ const ConfigList = () => {
 					<Icon name="drafting-compass" className="text-6xl mb-4" />
 					<p className="font-bold text-2xl">Ship Systems</p>
 				</ConfigIcon>
-				<ConfigIcon to={`/config/${pluginId}/timelines`}>
+				<ConfigIcon to={`/config/${pluginId}/missions`}>
+					<Icon name="map" className="text-6xl mb-4" />
+					<p className="font-bold text-2xl">Missions</p>
+				</ConfigIcon>
+				<ConfigIcon to={`/config/${pluginId}/macros`}>
 					<Icon name="git-branch" className="text-6xl mb-4" />
-					<p className="font-bold text-2xl">Timelines</p>
+					<p className="font-bold text-2xl">Macros</p>
+				</ConfigIcon>
+				<ConfigIcon to={`/config/${pluginId}/triggers`}>
+					<Icon name="circle-fading-arrow-up" className="text-6xl mb-4" />
+					<p className="font-bold text-2xl">Triggers</p>
+				</ConfigIcon>
+				<ConfigIcon to={`/config/${pluginId}/reports`}>
+					<Icon name="clipboard-list" className="text-6xl mb-4" />
+					<p className="font-bold text-2xl">Reports</p>
+				</ConfigIcon>
+				<ConfigIcon to={`/config/${pluginId}/trainings`}>
+					<Icon name="graduation-cap" className="text-6xl mb-4" />
+					<p className="font-bold text-2xl">Trainings</p>
 				</ConfigIcon>
 				<ConfigIcon to={`/config/${pluginId}/themes`}>
 					<Icon name="brush" className="text-6xl mb-4" />

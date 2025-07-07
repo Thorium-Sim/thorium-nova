@@ -1,3 +1,4 @@
+import { cn } from "@thorium/utils/cn";
 import type React from "react";
 import type { ReactNode } from "react";
 
@@ -16,7 +17,11 @@ const Checkbox = (
 					{...otherProps}
 					className={`${props.className} form-checkbox mr-2 text-blue-600`}
 				/>
-				<span className={labelHidden ? "sr-only" : ""}>{label}</span>
+				<span
+					className={cn("flex items-center gap-1", { "sr-only": labelHidden })}
+				>
+					{label}
+				</span>
 			</label>
 			{helperText && (
 				<p className="text-white text-sm leading-tight mb-2">{helperText}</p>
