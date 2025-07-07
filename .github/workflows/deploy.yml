@@ -171,4 +171,5 @@ jobs:
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v2
+        timeout-minutes: 10
         if: failure()
