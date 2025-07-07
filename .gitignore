@@ -26,3 +26,7 @@ icons/sprite.svg
 .claude/
 *.code-workspace
 
+CLAUDE.md
+server.log
+package-lock.json
+

@@ -1,5 +1,6 @@
 import { q, clientId } from "@thorium/context/AppContext";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
+import { FlightPauseIndicator } from "@thorium/ui/FlightPauseIndicator";
 import { useThoriumAccount } from "@thorium/context/ThoriumAccountContext";
 import { CardArea } from "./CardArea";
 import { CardSwitcher } from "./CardSwitcher";
@@ -97,6 +98,7 @@ const StationLayout = () => {
 				<div className="widgets flex items-center gap-2 absolute bottom-8 right-[calc(2rem+50px)]">
 					<Widgets />
 				</div>
+				<FlightPauseIndicator />
 			</div>
 		</div>
 	);
