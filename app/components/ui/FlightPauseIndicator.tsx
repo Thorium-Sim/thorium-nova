@@ -33,18 +33,30 @@ export function FlightPauseIndicator() {
   }
   
   return (
-    <div 
-      className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50"
-      role="alert"
-      aria-live="polite"
-    >
-      <div className="panel panel-warning px-4 py-2 flex items-center gap-2 shadow-lg">
-        <Icon name="ban" size="sm" aria-hidden="true" />
-        <span className="font-semibold text-sm select-none">
-          FLIGHT PAUSED
-        </span>
+    <>
+      {/* Black background overlay to prevent interaction */}
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-75 z-40"
+        aria-hidden="true"
+      />
+      
+      {/* Large pause indicator */}
+      <div 
+        className="fixed inset-0 flex items-center justify-center z-50"
+        role="alert"
+        aria-live="polite"
+      >
+        <div className="panel panel-warning px-12 py-8 flex flex-col items-center gap-6 shadow-2xl max-w-md mx-4">
+          <Icon name="ban" size="2xl" aria-hidden="true" className="text-warning" />
+          <span className="font-bold text-4xl select-none text-center">
+            FLIGHT PAUSED
+          </span>
+          <span className="text-lg text-center opacity-80 select-none">
+            Please wait for the flight director to resume the simulation
+          </span>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
