@@ -2,7 +2,7 @@ import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class GenericSystemPlugin extends BaseShipSystemPlugin {
-	static flags: ShipSystemFlags[] = ["efficiency", "heat", "power"];
+	static flags: ShipSystemFlags[] = ["damage", "heat", "power"];
 	type = "generic" as const;
 	allowMultiple = true;
 	// constructor(params: Partial<GenericSystemPlugin>, plugin: BasePlugin) {

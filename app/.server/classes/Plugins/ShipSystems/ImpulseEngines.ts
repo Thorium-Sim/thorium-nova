@@ -5,7 +5,7 @@ import type { ShipSystemFlags } from "./shipSystemTypes";
 import type { Sound } from "@thorium/ecs-components/sound";
 
 export default class ImpulseEnginesPlugin extends BaseShipSystemPlugin {
-	static flags: ShipSystemFlags[] = ["efficiency", "heat", "power", "sounds"];
+	static flags: ShipSystemFlags[] = ["damage", "heat", "power", "sounds"];
 	type = "impulseEngines" as const;
 	cruisingSpeed: KilometerPerSecond;
 	emergencySpeed: KilometerPerSecond;

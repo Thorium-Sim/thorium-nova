@@ -20,7 +20,7 @@ export function registerSystem(name: string, sys: typeof BaseShipSystemPlugin) {
  * Eventually this will include generic properties for power, heat, and efficiency
  */
 export default class BaseShipSystemPlugin extends Aspect {
-	static flags: ShipSystemFlags[] = ["efficiency", "heat", "power"];
+	static flags: ShipSystemFlags[] = ["damage", "heat", "power"];
 	apiVersion = "shipSystems/v1" as const;
 	kind = "shipSystems" as const;
 	name: string;

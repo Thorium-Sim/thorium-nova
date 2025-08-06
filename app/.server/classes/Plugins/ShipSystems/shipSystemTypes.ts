@@ -29,7 +29,7 @@ export const ShipSystemTypes = {
 	sensors: SensorsPlugin,
 };
 
-export type ShipSystemFlags = "power" | "heat" | "efficiency" | "sounds";
+export type ShipSystemFlags = "power" | "heat" | "damage" | "sounds";
 
 export type AllShipSystems = {
 	[k in keyof typeof ShipSystemTypes]: InstanceType<

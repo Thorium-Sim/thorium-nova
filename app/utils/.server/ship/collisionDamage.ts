@@ -6,6 +6,7 @@ import {
 	megaWattHourToGigaJoule,
 } from "@thorium/utils/unitTypes";
 import { getWhichShield } from "@thorium/.server/classes/Plugins/ShipSystems/Shields";
+import type { damageTypes as damageType } from "@thorium/utils/flags/damageTypes";
 
 export function handleCollisionDamage(
 	entity: Entity | null,
@@ -21,7 +22,10 @@ export function handleCollisionDamage(
 	// But I've condensed it a bit.
 	const kineticEnergyInJoules = (elapsed ** 2 * force ** 2) / (2 * m);
 	// Convert the kinetic energy to gigajoules
-	applyDamage(entity, kineticEnergyInJoules / 1e9, direction);
+	applyDamage(entity, kineticEnergyInJoules / 1e9, direction, [
+		"Structural",
+		"Fatigue",
+	]);
 }
 
 export function handleTorpedoDamage(
@@ -33,6 +37,7 @@ export function handleTorpedoDamage(
 	// Yield is in megawatt hours, convert to gigajoules
 	const damage = megaWattHourToGigaJoule(torpedoYield);
 
+	torpedo.components.isTorpedo?.damageType;
 	// TODO May 11, 2024: Apply other damage based on the damage type of the torpedo
 	applyDamage(other, damage, direction);
 
@@ -82,12 +87,15 @@ export function applyDamage(
 	damageInGigajoules: number,
 	// The vector from the ship to the impact point.
 	direction: Vector3,
+	damageTypes?: Zod.infer<typeof damageType>[],
 ) {
-	const remainingDamage = applyShieldDamage(
+	const { remainingDamage, systemDamage } = applyShieldDamage(
 		entity,
 		damageInGigajoules,
 		direction,
 	);
+
+	// Apply system damage
 
 	// Apply damage to the hull
 	if (remainingDamage > 0 && entity.components.hull) {
@@ -134,6 +142,7 @@ function applyShieldDamage(
 		}
 	}
 	let remainingDamage = 0;
+	let systemDamage = 0;
 	if (shieldSystem?.components.isShields) {
 		// TODO August 22, 2024: Have the shield frequency affect the damage
 		const { strength, maxStrength, deflectionEfficiencyMultiplier } =
@@ -147,19 +156,12 @@ function applyShieldDamage(
 			strength: shieldStrength,
 		});
 
-		const efficiencyHit =
+		systemDamage =
 			(1 - shieldStrength / maxStrength) * deflectionEfficiencyMultiplier;
-		if (shieldSystem.components.efficiency) {
-			shieldSystem.updateComponent("efficiency", {
-				efficiency: Math.max(
-					0,
-					shieldSystem.components.efficiency.efficiency - efficiencyHit,
-				),
-			});
-		}
 	} else {
 		remainingDamage = damageInGigajoules;
+		systemDamage = 1;
 	}
 
-	return remainingDamage;
+	return { remainingDamage, systemDamage };
 }

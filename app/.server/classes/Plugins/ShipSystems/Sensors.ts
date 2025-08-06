@@ -4,7 +4,7 @@ import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class SensorsPlugin extends BaseShipSystemPlugin {
-	static flags: ShipSystemFlags[] = ["efficiency", "heat", "power", "sounds"];
+	static flags: ShipSystemFlags[] = ["damage", "heat", "power", "sounds"];
 	type = "sensors" as const;
 
 	passiveRange: number;

@@ -16,7 +16,7 @@ export function skipN(rng: RNG, num: number): RNG {
 export interface RNG {
 	next: () => number;
 	nextInt: (min: number, max: number) => number;
-	nextFromList: <T>(list: T[]) => T;
+	nextFromList: <T>(list: T[] | readonly T[]) => T;
 	nextBoolean: () => boolean;
 	nextChar: (input?: string) => string;
 	nextString: (length?: number, input?: string) => string;
@@ -80,7 +80,7 @@ export function createRNG(seed: number | string, skip = 0): RNG {
 		nextFromList: function nextFromList(list) {
 			const length = list.length;
 			const value = this.next();
-			const index = Math.floor(value * length);
+			const index = Math.floor((value + 0.5) * length);
 			return list[index];
 		},
 		nextBoolean: function nextBoolean(): boolean {

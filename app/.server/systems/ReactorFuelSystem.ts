@@ -37,7 +37,7 @@ export class ReactorFuelSystem extends System {
 	}
 	update(entity: Entity, elapsed: number) {
 		if (!entity.components.isReactor) return;
-		const efficiency = entity.components.efficiency?.efficiency ?? 1;
+		const efficiency = entity.components.damage?.efficiency ?? 1;
 		if (efficiency === 0) {
 			entity.updateComponent("isReactor", {
 				currentOutput: 0,

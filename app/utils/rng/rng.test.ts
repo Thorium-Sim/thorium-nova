@@ -71,7 +71,7 @@ describe("rng", () => {
 		values.push(rng.nextFromList(list));
 		values.push(rng.nextFromList(list));
 		expect(JSON.stringify(values).replace(/"/g, "'")).toMatchInlineSnapshot(
-			`"['c',null,null,null,'a','a','b',null,'a','b']"`,
+			`"['e','c','b','c','c','d','e','c','d','d']"`,
 		);
 	});
 	it("should work with different iterations of value generation", () => {
