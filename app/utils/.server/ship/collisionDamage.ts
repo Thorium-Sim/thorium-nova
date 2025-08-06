@@ -6,7 +6,10 @@ import {
 	megaWattHourToGigaJoule,
 } from "@thorium/utils/unitTypes";
 import { getWhichShield } from "@thorium/.server/classes/Plugins/ShipSystems/Shields";
-import type { damageTypes as damageType } from "@thorium/utils/flags/damageTypes";
+import {
+	damageEffects,
+	type damageTypes as damageType,
+} from "@thorium/utils/flags/damageTypes";
 
 export function handleCollisionDamage(
 	entity: Entity | null,
@@ -37,9 +40,9 @@ export function handleTorpedoDamage(
 	// Yield is in megawatt hours, convert to gigajoules
 	const damage = megaWattHourToGigaJoule(torpedoYield);
 
-	torpedo.components.isTorpedo?.damageType;
-	// TODO May 11, 2024: Apply other damage based on the damage type of the torpedo
-	applyDamage(other, damage, direction);
+	applyDamage(other, damage, direction, [
+		torpedo.components.isTorpedo?.damageType || "Structural",
+	]);
 
 	const vector3 = new Vector3();
 	const otherVector = new Vector3();
@@ -96,6 +99,88 @@ export function applyDamage(
 	);
 
 	// Apply system damage
+	const damagableSystems = [
+		...(entity.components.shipSystems?.shipSystems.keys() || []),
+	].flatMap((id) => {
+		const sys = entity.ecs.getEntityById(id);
+		if (
+			sys?.components.damage &&
+			sys.components.damage.vulnerability !== "invulnerable"
+		)
+			return sys;
+		return [];
+	});
+	const vulnerableSystems = damagableSystems.filter(
+		(d) => d.components.damage?.vulnerability === "vulnerable",
+	);
+
+	// Split the system damage semi-randomly between a handful of systems.
+	const damageSplit: number[] = [];
+
+	while (damageSplit.length < damagableSystems.length) {
+		const totalDamage = damageSplit.reduce((p, n) => p + n, 0);
+		// This ensures we will be spreading damage between at least three systems
+		const nextDamage = (entity.ecs.rng.next() + 0.5) * 0.5;
+
+		if (totalDamage + nextDamage >= 1) {
+			damageSplit.push(1 - totalDamage);
+			break;
+		}
+
+		damageSplit.push(nextDamage);
+	}
+	for (const damage of damageSplit) {
+		// Target vulnerable systems first
+		let system: Entity | undefined = undefined;
+		if (vulnerableSystems.length > 0) {
+			system = entity.ecs.rng.nextFromList(vulnerableSystems);
+			vulnerableSystems.splice(vulnerableSystems.indexOf(system), 1);
+		}
+
+		if (!system) {
+			system = entity.ecs.rng.nextFromList(damagableSystems);
+		}
+		if (!system) break;
+		const damageMultiplier =
+			damageTypes?.reduce((prev, next, i, arr) => {
+				return (
+					prev +
+					(system?.components.damage?.damageMultipliers[next] || 1) / arr.length
+				);
+			}, 1) || 1;
+
+		const appliedDamage = systemDamage * damage * damageMultiplier;
+		// Do the same thing, but for the damage metrics. Efficiency is always one of them, though.
+		const effectSplit: number[] = [];
+		while (effectSplit.length < damageEffects.length) {
+			const totalDamage = effectSplit.reduce((p, n) => p + n, 0);
+			const nextDamage = entity.ecs.rng.next() + 0.5;
+
+			if (totalDamage + nextDamage >= 1) {
+				effectSplit.push(1 - totalDamage);
+				break;
+			}
+			effectSplit.push(nextDamage);
+		}
+		effectSplit.sort((a, b) => b - a);
+
+		const damageAppliedToSystem: Record<string, number> = {};
+		for (let i = 0; i < effectSplit.length; i++) {
+			const effect =
+				i === 0
+					? "efficiency"
+					: entity.ecs.rng.nextFromList(
+							damageEffects.filter((f) => f !== "efficiency"),
+						);
+			const damageAppliedToEffect =
+				appliedDamage * effectSplit[i] * (effect === "efficiency" ? -1 : 1);
+			if (!damageAppliedToSystem[effect]) {
+				damageAppliedToSystem[effect] = system.components.damage?.[effect] || 0;
+			}
+			damageAppliedToSystem[effect] += damageAppliedToEffect;
+		}
+		system.updateComponent("damage", damageAppliedToSystem);
+	}
 
 	// Apply damage to the hull
 	if (remainingDamage > 0 && entity.components.hull) {
@@ -125,6 +210,7 @@ function applyShieldDamage(
 	damageInGigajoules: number,
 	// The vector from the ship to the impact point.
 	direction: Vector3,
+	damageTypes?: Zod.infer<typeof damageType>[],
 ) {
 	const size = /*entity.components.size ||*/ { length: 1, width: 1, height: 1 };
 	const shieldDirection = getWhichShield(direction, {
@@ -142,26 +228,42 @@ function applyShieldDamage(
 		}
 	}
 	let remainingDamage = 0;
-	let systemDamage = 0;
+	let systemDamageMultiplier = 0;
+	// Average the damage multipliers if there are multiple damage types
+	const damageMultiplier =
+		damageTypes?.reduce((prev, next, i, arr) => {
+			return (
+				prev +
+				(shieldSystem?.components.damage?.damageMultipliers[next] || 1) /
+					arr.length
+			);
+		}, 1) || 1;
+
 	if (shieldSystem?.components.isShields) {
 		// TODO August 22, 2024: Have the shield frequency affect the damage
 		const { strength, maxStrength, deflectionEfficiencyMultiplier } =
 			shieldSystem.components.isShields;
-		let shieldStrength = strength - gigaJouleToMegaWattHour(damageInGigajoules);
+		let shieldStrength =
+			strength - gigaJouleToMegaWattHour(damageInGigajoules) * damageMultiplier;
+
 		if (shieldStrength < 0) {
-			remainingDamage = -megaWattHourToGigaJoule(shieldStrength);
+			remainingDamage =
+				-megaWattHourToGigaJoule(shieldStrength) * damageMultiplier;
 			shieldStrength = 0;
 		}
 		shieldSystem.updateComponent("isShields", {
 			strength: shieldStrength,
 		});
 
-		systemDamage =
+		systemDamageMultiplier =
 			(1 - shieldStrength / maxStrength) * deflectionEfficiencyMultiplier;
 	} else {
 		remainingDamage = damageInGigajoules;
-		systemDamage = 1;
+		systemDamageMultiplier = 1;
 	}
 
-	return { remainingDamage, systemDamage };
+	return {
+		remainingDamage,
+		systemDamage: damageInGigajoules * systemDamageMultiplier,
+	};
 }

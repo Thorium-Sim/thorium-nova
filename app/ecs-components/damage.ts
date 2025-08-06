@@ -81,5 +81,10 @@ export const damage = z
 		 * This multiplier defines how much will decrease every frame.
 		 */
 		entropyMultiplier: z.number().min(0).default(0.00005),
+
+		/**
+		 * Multipliers for different damage types for applying weakness or resistance
+		 */
+		damageMultipliers: z.record(z.number()).default({}),
 	})
 	.default({});

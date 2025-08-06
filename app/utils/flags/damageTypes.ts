@@ -14,7 +14,7 @@ export const damageTypes = z.enum([
 	"Cryogenic",
 ]);
 
-const damageEffects = [
+export const damageEffects = [
 	"efficiency",
 	"heatMultiplier",
 	"instability",
