@@ -72,13 +72,17 @@ export function getReportEffects(
 				: // Remove effects that have already been chosen
 					rng.nextFromList(damageEffects.filter((e) => !effects[e]));
 
+		// TODO August 7, 2025 - There should be a global multiplier to make the effect bigger or smaller,
+		// so flight directors can make repairs easier or harder for the crew
 		let effectAmount = rng.next() * 0.2;
+
 		if (i === 0 || sideEffectType === "positive")
 			effectAmount =
 				Math.abs(effectAmount) * (effect === "efficiency" ? 1 : -1);
 		if (sideEffectType === "negative")
+			// We decrease the effect slightly if it's a negative effect to ensure that we can always make things overall better
 			effectAmount =
-				Math.abs(effectAmount) * (effect === "efficiency" ? -1 : 1);
+				Math.abs(effectAmount) * (effect === "efficiency" ? -0.9 : 0.9);
 
 		effects[effect] = effectAmount;
 	}

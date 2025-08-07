@@ -135,7 +135,6 @@ export const systems = t.router({
 				signatureSpike: z.number().optional(),
 				signatureSpikeDuration: z.number().optional(),
 				entropyMultiplier: z.number().optional(),
-				damageTypeMultipliers: z.record(z.number()).optional(),
 				soundEffects: z.record(sound.array()).optional(),
 			}),
 		)
@@ -221,9 +220,6 @@ export const systems = t.router({
 			}
 			if (typeof input.entropyMultiplier === "number") {
 				shipSystem.entropyMultiplier = input.entropyMultiplier;
-			}
-			if (typeof input.damageTypeMultipliers === "object") {
-				shipSystem.damageTypeMultipliers = input.damageTypeMultipliers;
 			}
 			if (
 				typeof input.soundEffects === "object" &&

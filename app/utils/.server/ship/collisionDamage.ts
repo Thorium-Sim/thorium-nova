@@ -145,7 +145,8 @@ export function applyDamage(
 			damageTypes?.reduce((prev, next, i, arr) => {
 				return (
 					prev +
-					(system?.components.damage?.damageMultipliers[next] || 1) / arr.length
+					(system?.components.damage?.damageTypeMultipliers[next] || 1) /
+						arr.length
 				);
 			}, 1) || 1;
 

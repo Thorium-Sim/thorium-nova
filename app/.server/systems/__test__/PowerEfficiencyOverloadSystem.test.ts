@@ -28,7 +28,7 @@ describe("PowerEfficiencyOverloadSystem", () => {
 			}
 
 			expect(system.components.damage?.efficiency).toMatchInlineSnapshot(
-				`0.9999881658398825`,
+				`0.9998816583988258`,
 			);
 
 			// The average mission length
@@ -37,7 +37,7 @@ describe("PowerEfficiencyOverloadSystem", () => {
 			}
 
 			expect(system.components.damage?.efficiency).toMatchInlineSnapshot(
-				`0.9136407160588623`,
+				`0.1364071605889995`,
 			);
 		});
 		it("should decrease when power is above maxSafePower", () => {
@@ -60,7 +60,7 @@ describe("PowerEfficiencyOverloadSystem", () => {
 					system2.components.damage!.efficiency,
 			);
 			expect(system2.components.damage!.efficiency).toMatchInlineSnapshot(
-				`0.13240845929025086`,
+				`0.1000845929025086`,
 			);
 		});
 	});

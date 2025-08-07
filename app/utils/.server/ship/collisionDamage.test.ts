@@ -73,10 +73,10 @@ it("should apply less damage to systems when shields are raised", () => {
 it("should apply extra damage to systems that are weak to the damage type", () => {
 	checkSystems();
 	systems.targeting.updateComponent("damage", {
-		damageMultipliers: { Electrical: 2 },
+		damageTypeMultipliers: { Electrical: 2 },
 	});
 	systems.shields.updateComponent("damage", {
-		damageMultipliers: { Electrical: 0.5 },
+		damageTypeMultipliers: { Electrical: 0.5 },
 	});
 
 	applyDamage(ship, 1, new Vector3(0, 0, 1), ["Electrical"]);

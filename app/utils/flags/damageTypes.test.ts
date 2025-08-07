@@ -34,17 +34,17 @@ it("should generate negative side effects", () => {
 		getReportEffects(system, "efficiency", "negative"),
 	).toMatchInlineSnapshot(`
 		{
-		  "cascadeRisk": 0.07173778462962661,
-		  "efficiency": -0.049242199037513285,
-		  "heatMultiplier": 0.006743309182753627,
+		  "cascadeRisk": 0.06456400616666395,
+		  "efficiency": -0.04431797913376196,
+		  "heatMultiplier": 0.006068978264478264,
 		}
 	`);
 	expect(
 		getReportEffects(system, "efficiency", "negative"),
 	).toMatchInlineSnapshot(`
 		{
-		  "efficiency": -0.05023621196165593,
-		  "failureRisk": 0.04736061674714103,
+		  "efficiency": -0.04521259076549034,
+		  "failureRisk": 0.04262455507242693,
 		}
 	`);
 });
