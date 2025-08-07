@@ -27,7 +27,7 @@ export const damage = z
 		 * By default, this is set to 0.1, which allows systems to
 		 * overload by x2 for 10 seconds.
 		 */
-		efficiencyMultiplier: z.number().min(0).default(0.015),
+		overloadDamageMultiplier: z.number().min(0).default(0.015),
 
 		/**
 		 * A multiplier for how quickly heat is generated.
@@ -80,11 +80,11 @@ export const damage = z
 		 * Systems should slowly, randomly take damage to entropy.
 		 * This multiplier defines how much will decrease every frame.
 		 */
-		entropyMultiplier: z.number().min(0).default(0.00005),
+		entropyMultiplier: z.number().min(0).default(0.0005),
 
 		/**
 		 * Multipliers for different damage types for applying weakness or resistance
 		 */
-		damageMultipliers: z.record(z.number()).default({}),
+		damageTypeMultipliers: z.record(z.number()).default({}),
 	})
 	.default({});

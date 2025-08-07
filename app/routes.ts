@@ -83,6 +83,7 @@ export default [
 				route(":systemId", "routes/config/systems/systemLayout.tsx", [
 					route("basic", "routes/config/systems/basic.tsx"),
 					route("heat", "routes/config/systems/heat.tsx"),
+					route("damage", "routes/config/systems/damage.tsx"),
 					route("power", "routes/config/systems/power.tsx"),
 					route("sounds", "routes/config/systems/sounds.tsx", [
 						route(":sound", "routes/config/systems/soundId.tsx"),

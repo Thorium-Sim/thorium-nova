@@ -234,7 +234,7 @@ function applyShieldDamage(
 		damageTypes?.reduce((prev, next, i, arr) => {
 			return (
 				prev +
-				(shieldSystem?.components.damage?.damageMultipliers[next] || 1) /
+				(shieldSystem?.components.damage?.damageTypeMultipliers[next] || 1) /
 					arr.length
 			);
 		}, 1) || 1;

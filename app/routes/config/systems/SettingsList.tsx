@@ -50,5 +50,6 @@ const links = {
 	system: "System",
 	power: "Power",
 	heat: "Heat",
+	damage: "Damage",
 	sounds: "Sound Effects",
 };

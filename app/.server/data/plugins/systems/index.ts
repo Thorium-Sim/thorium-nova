@@ -127,6 +127,15 @@ export const systems = t.router({
 				nominalHeat: z.number().optional(),
 				maxSafeHeat: z.number().optional(),
 				maxHeat: z.number().optional(),
+				offlineEfficiency: z.number().optional(),
+				onlineEfficiency: z.number().optional(),
+				overloadDamageMultiplier: z.number().optional(),
+				minSignature: z.number().optional(),
+				maxSignature: z.number().optional(),
+				signatureSpike: z.number().optional(),
+				signatureSpikeDuration: z.number().optional(),
+				entropyMultiplier: z.number().optional(),
+				damageTypeMultipliers: z.record(z.number()).optional(),
 				soundEffects: z.record(sound.array()).optional(),
 			}),
 		)
@@ -182,6 +191,39 @@ export const systems = t.router({
 			}
 			if (typeof input.maxHeat === "number") {
 				shipSystem.maxHeat = input.maxHeat;
+			}
+			if (typeof input.offlineEfficiency === "number") {
+				shipSystem.offlineEfficiency = Math.min(
+					1,
+					Math.max(0, input.offlineEfficiency),
+				);
+			}
+			if (typeof input.onlineEfficiency === "number") {
+				shipSystem.onlineEfficiency = Math.min(
+					1,
+					Math.max(0, input.onlineEfficiency),
+				);
+			}
+			if (typeof input.overloadDamageMultiplier === "number") {
+				shipSystem.overloadDamageMultiplier = input.overloadDamageMultiplier;
+			}
+			if (typeof input.minSignature === "number") {
+				shipSystem.minSignature = input.minSignature;
+			}
+			if (typeof input.maxSignature === "number") {
+				shipSystem.maxSignature = input.maxSignature;
+			}
+			if (typeof input.signatureSpike === "number") {
+				shipSystem.signatureSpike = input.signatureSpike;
+			}
+			if (typeof input.signatureSpikeDuration === "number") {
+				shipSystem.signatureSpikeDuration = input.signatureSpikeDuration;
+			}
+			if (typeof input.entropyMultiplier === "number") {
+				shipSystem.entropyMultiplier = input.entropyMultiplier;
+			}
+			if (typeof input.damageTypeMultipliers === "object") {
+				shipSystem.damageTypeMultipliers = input.damageTypeMultipliers;
 			}
 			if (
 				typeof input.soundEffects === "object" &&
