@@ -4,7 +4,7 @@ import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class ReactorPlugin extends BaseShipSystemPlugin {
-	static flags: ShipSystemFlags[] = ["efficiency", "heat", "sounds"];
+	static flags: ShipSystemFlags[] = ["damage", "heat", "sounds"];
 	type = "reactor" as const;
 
 	/**

@@ -20,7 +20,7 @@ export function registerSystem(name: string, sys: typeof BaseShipSystemPlugin) {
  * Eventually this will include generic properties for power, heat, and efficiency
  */
 export default class BaseShipSystemPlugin extends Aspect {
-	static flags: ShipSystemFlags[] = ["efficiency", "heat", "power"];
+	static flags: ShipSystemFlags[] = ["damage", "heat", "power"];
 	apiVersion = "shipSystems/v1" as const;
 	kind = "shipSystems" as const;
 	name: string;
@@ -80,6 +80,18 @@ export default class BaseShipSystemPlugin extends Aspect {
 	 */
 	maxHeat: Kelvin;
 
+	////////////
+	// Damage //
+	////////////
+	offlineEfficiency: number;
+	onlineEfficiency: number;
+	overloadDamageMultiplier: number;
+	minSignature: number;
+	maxSignature: number;
+	signatureSpike: number;
+	signatureSpikeDuration: number;
+	entropyMultiplier: number;
+
 	constructor(params: Partial<BaseShipSystemPlugin>, plugin: BasePlugin) {
 		const name = generateIncrementedName(
 			params.name || `New ${params.type}`,
@@ -101,6 +113,14 @@ export default class BaseShipSystemPlugin extends Aspect {
 		this.nominalHeat = params.nominalHeat || 295.37;
 		this.maxSafeHeat = params.maxSafeHeat || 1000;
 		this.maxHeat = params.maxHeat || 2500;
+		this.offlineEfficiency = params.offlineEfficiency || 0.5;
+		this.onlineEfficiency = params.onlineEfficiency || 0.8;
+		this.overloadDamageMultiplier = params.overloadDamageMultiplier || 0.015;
+		this.minSignature = params.minSignature || 0;
+		this.maxSignature = params.maxSignature || 1;
+		this.signatureSpike = params.signatureSpike || 2;
+		this.signatureSpikeDuration = params.signatureSpikeDuration || 5;
+		this.entropyMultiplier = params.entropyMultiplier || 0.0005;
 
 		if (this.constructor.name === "BaseShipSystemPlugin") {
 			if (systemPlugins[this.type]) {

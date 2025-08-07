@@ -11,7 +11,7 @@ export const isShields = z
 		/** The maximum blocking energy of the shields in MegaWatt Hours */
 		maxStrength: z.number().default(5),
 		/**
-		 * Efficiency drop for every hit is calculated based on the max strength, current strength.
+		 * Damage to ship systems, regardless of whether shields are raised or not, is calculated based on the max strength, current strength.
 		 * E = (1 - (Current / Max)) * Multiplier
 		 * So max = 5, current = 3, Multiplier = 0.5  == 0.2
 		 * If shields are fully raised, efficiency drop is 0

@@ -12,7 +12,7 @@ export type ShieldDirections =
 
 // TODO March 16, 2022: Add the necessary sound effects
 export default class ShieldsPlugin extends BaseShipSystemPlugin {
-	static flags: ShipSystemFlags[] = ["efficiency", "heat", "power"];
+	static flags: ShipSystemFlags[] = ["damage", "heat", "power"];
 	type = "shields" as const;
 
 	maxStrength: number;

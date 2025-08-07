@@ -212,7 +212,7 @@ export function generateScanResults(
 				[]) {
 				const system = ecs.getEntityById(systemId);
 				if (!system) continue;
-				const efficiency = system.components.efficiency?.efficiency || 1;
+				const efficiency = system.components.damage?.efficiency || 1;
 				if (efficiency > 0.9) continue;
 				systems.push({
 					name:

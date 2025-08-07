@@ -19,7 +19,7 @@ export class PowerDrawSystem extends System {
 		if (!ship) return;
 
 		const power = entity.components.power;
-		const efficiency = entity.components.efficiency?.efficiency || 1;
+		const efficiency = entity.components.damage?.efficiency || 1;
 		const efficiencyMultiple = 1 / efficiency;
 		if (!systemType?.type || !power) return;
 

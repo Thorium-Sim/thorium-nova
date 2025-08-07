@@ -1,3 +1,4 @@
+import { damageTypes } from "@thorium/utils/flags/damageTypes";
 import z from "zod";
 
 /**
@@ -23,9 +24,9 @@ const repairTypes = z.union([
 	z.null(),
 ]);
 
-export const torpedoDamageType = z
-	.enum(["explosive", "radiation", "electrical"])
-	.default("explosive");
+export const torpedoDamageType = damageTypes
+	.extract(["Structural", "Radiation", "Electrical", "Corrosion", "Heat"])
+	.default("Structural");
 export type TorpedoDamageType = z.infer<typeof torpedoDamageType>;
 const torpedoDamageTypeValues = torpedoDamageType._def.innerType._def.values;
 export const torpedoGuidanceMode = z
@@ -192,7 +193,7 @@ export const InventoryFlagValues: {
 		},
 		damageType: {
 			info: "The type of damage the warhead inflicts.",
-			defaultValue: "explosive",
+			defaultValue: "Structural",
 			options: torpedoDamageTypeValues,
 		},
 		color: {

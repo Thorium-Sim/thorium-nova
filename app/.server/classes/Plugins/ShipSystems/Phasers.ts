@@ -4,7 +4,7 @@ import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class PhasersPlugin extends BaseShipSystemPlugin {
-	static flags: ShipSystemFlags[] = ["efficiency", "heat", "power", "sounds"];
+	static flags: ShipSystemFlags[] = ["damage", "heat", "power", "sounds"];
 	type = "phasers" as const;
 	allowMultiple = true;
 

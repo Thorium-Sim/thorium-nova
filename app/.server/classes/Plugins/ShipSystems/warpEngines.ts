@@ -5,7 +5,7 @@ import type { ShipSystemFlags } from "./shipSystemTypes";
 
 // TODO May 3, 2022: Add the necessary sound effects
 export default class WarpEnginesPlugin extends BaseShipSystemPlugin {
-	static flags: ShipSystemFlags[] = ["efficiency", "heat", "power"];
+	static flags: ShipSystemFlags[] = ["damage", "heat", "power"];
 	type = "warpEngines" as const;
 	/** The cruising speed in interstellar space in km/s */
 	interstellarCruisingSpeed: KilometerPerSecond;

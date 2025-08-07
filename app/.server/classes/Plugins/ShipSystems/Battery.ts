@@ -4,7 +4,7 @@ import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class BatteryPlugin extends BaseShipSystemPlugin {
-	static flags: ShipSystemFlags[] = ["efficiency"];
+	static flags: ShipSystemFlags[] = ["damage"];
 	type = "battery" as const;
 	allowMultiple = true;
 

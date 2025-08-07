@@ -59,7 +59,7 @@ export function spawnShipSystem(
 					nominalHeat: overrides.nominalHeat || nominalHeat,
 					heat: overrides.nominalHeat || nominalHeat,
 				});
-			if (flags.includes("efficiency")) entity.addComponent("efficiency");
+			if (flags.includes("damage")) entity.addComponent("damage");
 		}
 		if (flags.includes("power"))
 			entity.addComponent("power", {

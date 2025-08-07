@@ -54,7 +54,7 @@ export const systemsMonitor = t.router({
 						maxHeat: r.components.heat!.maxHeat,
 						reserve,
 						fuel: r.components.isReactor!.unusedFuel.amount || 0,
-						efficiency: r.components.efficiency?.efficiency,
+						efficiency: r.components.damage?.efficiency,
 						ambiance: r.components.soundEffects?.soundBank.ambiance,
 					};
 				});
@@ -155,7 +155,7 @@ export const systemsMonitor = t.router({
 								}
 							: undefined,
 
-						efficiency: system.components.efficiency?.efficiency,
+						efficiency: system.components.damage?.efficiency,
 						heat: system.components.heat
 							? {
 									heat: system.components.heat.heat,

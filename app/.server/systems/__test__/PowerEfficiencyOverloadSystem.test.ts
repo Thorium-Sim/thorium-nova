@@ -16,19 +16,19 @@ describe("PowerEfficiencyOverloadSystem", () => {
 			ecs.addSystem(new PowerEfficiencyOverloadSystem());
 			system = new Entity();
 			system.addComponent("power");
-			system.addComponent("efficiency");
+			system.addComponent("damage");
 			ecs.addEntity(system);
 		});
 		it("should slowly decrease when power is below the maxSafePower", () => {
 			expect(system.components.power?.maxSafePower).toEqual(20);
 			expect(system.components.power?.currentPower).toEqual(10);
-			expect(system.components.efficiency?.efficiency).toEqual(1);
+			expect(system.components.damage?.efficiency).toEqual(1);
 			for (let i = 0; i < 60; i++) {
 				ecs.update(16);
 			}
 
-			expect(system.components.efficiency?.efficiency).toMatchInlineSnapshot(
-				`0.9999881658398825`,
+			expect(system.components.damage?.efficiency).toMatchInlineSnapshot(
+				`0.9998816583988258`,
 			);
 
 			// The average mission length
@@ -36,17 +36,17 @@ describe("PowerEfficiencyOverloadSystem", () => {
 				ecs.update(16);
 			}
 
-			expect(system.components.efficiency?.efficiency).toMatchInlineSnapshot(
-				`0.9136407160588623`,
+			expect(system.components.damage?.efficiency).toMatchInlineSnapshot(
+				`0.1364071605889995`,
 			);
 		});
 		it("should decrease when power is above maxSafePower", () => {
 			expect(system.components.power?.maxSafePower).toEqual(20);
-			expect(system.components.efficiency?.efficiency).toEqual(1);
+			expect(system.components.damage?.efficiency).toEqual(1);
 
 			const system2 = new Entity();
 			system2.addComponent("power");
-			system2.addComponent("efficiency");
+			system2.addComponent("damage");
 			ecs.addEntity(system2);
 			system2.updateComponent("power", { currentPower: 24 });
 
@@ -56,11 +56,11 @@ describe("PowerEfficiencyOverloadSystem", () => {
 			}
 
 			expect(
-				system.components.efficiency!.efficiency >
-					system2.components.efficiency!.efficiency,
+				system.components.damage!.efficiency >
+					system2.components.damage!.efficiency,
 			);
-			expect(system2.components.efficiency!.efficiency).toMatchInlineSnapshot(
-				`0.13240845929025086`,
+			expect(system2.components.damage!.efficiency).toMatchInlineSnapshot(
+				`0.1000845929025086`,
 			);
 		});
 	});

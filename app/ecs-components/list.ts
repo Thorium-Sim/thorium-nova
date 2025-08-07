@@ -16,7 +16,7 @@ export * from "./theme";
 export * from "./shipSystems";
 export * from "./heat";
 export * from "./power";
-export * from "./efficiency";
+export * from "./damage";
 export * from "./mass";
 export * from "./solarSystem/isSolarSystem";
 export * from "./solarSystem/isStar";

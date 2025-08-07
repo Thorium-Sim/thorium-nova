@@ -10,7 +10,7 @@ import type { Sound } from "@thorium/ecs-components/sound";
 
 // TODO March 16, 2022: Add the necessary sound effects
 export default class ThrustersPlugin extends BaseShipSystemPlugin {
-	static flags: ShipSystemFlags[] = ["efficiency", "heat", "power", "sounds"];
+	static flags: ShipSystemFlags[] = ["damage", "heat", "power", "sounds"];
 	type = "thrusters" as const;
 	directionMaxSpeed: MetersPerSecond;
 	directionThrust: KiloNewtons;

@@ -19,7 +19,7 @@ export class PhasersSystem extends System {
 		//  of the phaser system
 		const power = entity.components.power;
 		if (!power) return;
-		const efficiency = entity.components.efficiency?.efficiency ?? 1;
+		const efficiency = entity.components.damage?.efficiency ?? 1;
 		if (phasers.firePercent === 0) return;
 		const phaserShip = entity.ecs?.getEntityById(
 			entity.components.isShipSystem?.shipId || -1,

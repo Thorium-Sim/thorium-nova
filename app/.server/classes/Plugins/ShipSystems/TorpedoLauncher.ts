@@ -5,7 +5,7 @@ import type { ShipSystemFlags } from "./shipSystemTypes";
 
 // TODO March 16, 2022: Add the necessary sound effects
 export default class TorpedoLauncherPlugin extends BaseShipSystemPlugin {
-	static flags: ShipSystemFlags[] = ["efficiency", "heat", "power", "sounds"];
+	static flags: ShipSystemFlags[] = ["damage", "heat", "power", "sounds"];
 	type = "torpedoLauncher" as const;
 	allowMultiple = true;
 
