@@ -8,6 +8,7 @@ import {
 import { getWhichShield } from "@thorium/.server/classes/Plugins/ShipSystems/Shields";
 import {
 	damageEffects,
+	getDamageMetricMultipliers,
 	type damageTypes as damageType,
 } from "@thorium/utils/flags/damageTypes";
 
@@ -132,6 +133,7 @@ export function applyDamage(
 	for (const damage of damageSplit) {
 		// Target vulnerable systems first
 		let system: Entity | undefined = undefined;
+
 		if (vulnerableSystems.length > 0) {
 			system = entity.ecs.rng.nextFromList(vulnerableSystems);
 			vulnerableSystems.splice(vulnerableSystems.indexOf(system), 1);
@@ -141,6 +143,9 @@ export function applyDamage(
 			system = entity.ecs.rng.nextFromList(damagableSystems);
 		}
 		if (!system) break;
+
+		const damageMetricMultipliers = getDamageMetricMultipliers(system);
+
 		const damageMultiplier =
 			damageTypes?.reduce((prev, next, i, arr) => {
 				return (
@@ -174,7 +179,10 @@ export function applyDamage(
 							damageEffects.filter((f) => f !== "efficiency"),
 						);
 			const damageAppliedToEffect =
-				appliedDamage * effectSplit[i] * (effect === "efficiency" ? -1 : 1);
+				appliedDamage *
+				effectSplit[i] *
+				(effect === "efficiency" ? -1 : 1) *
+				damageMetricMultipliers[effect];
 			if (!damageAppliedToSystem[effect]) {
 				damageAppliedToSystem[effect] = system.components.damage?.[effect] || 0;
 			}

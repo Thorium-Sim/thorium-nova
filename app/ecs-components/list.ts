@@ -53,3 +53,5 @@ export * from "./npcKnowledge";
 export * from "./isFlight";
 export * from "./flightClient";
 export * from "./variables";
+export * from "./tweaks";
+export * from "./damageReport";

@@ -4,6 +4,7 @@ const CardContext = createContext({ cardName: "allData", cardLoaded: false });
 
 export default function CardProvider({
 	children,
+	cardLoaded,
 	cardName,
 	cardLoaded,
 }: {

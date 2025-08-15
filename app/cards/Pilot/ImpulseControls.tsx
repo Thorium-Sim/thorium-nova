@@ -14,6 +14,7 @@ import {
 	useGamepadValue,
 } from "@thorium/hooks/useGamepadStore";
 import { useStation } from "@thorium/routes/station/useStation";
+import { useCardContext } from "@thorium/context/CardContext";
 
 const C_IN_METERS = 299792458;
 function formatSpeed(speed: KilometerPerSecond) {
@@ -60,6 +61,7 @@ export function useForwardVelocity() {
 	};
 }
 const ForwardVelocity = () => {
+	const { cardLoaded } = useCardContext();
 	const forwardRef = useRef<HTMLDivElement>(null);
 	const targetRef = useRef<HTMLDivElement>(null);
 	const getForwardVelocity = useForwardVelocity();
@@ -72,7 +74,7 @@ const ForwardVelocity = () => {
 		if (forwardRef.current) {
 			forwardRef.current.textContent = formatSpeed(forwardVelocity);
 		}
-	});
+	}, cardLoaded);
 
 	return (
 		<>
@@ -198,15 +200,18 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 		impulseAdjustVelocity.current = 0;
 	});
 
-	useAnimationFrame(() => {
-		const adjust =
-			Math.min(
-				Math.abs(impulseAdjustVelocity.current),
-				Math.abs(impulseAdjust),
-			) * Math.sign(impulseAdjust);
-		callback.current(targetSpeed + adjust);
-		impulseAdjustVelocity.current += impulseAdjust / 500;
-	}, impulseAdjust !== 0);
+	useAnimationFrame(
+		() => {
+			const adjust =
+				Math.min(
+					Math.abs(impulseAdjustVelocity.current),
+					Math.abs(impulseAdjust),
+				) * Math.sign(impulseAdjust);
+			callback.current(targetSpeed + adjust);
+			impulseAdjustVelocity.current += impulseAdjust / 500;
+		},
+		impulseAdjust !== 0 && cardLoaded,
+	);
 
 	// Warp Gamepad Control
 	const [warpFocus, setWarpFocus] = useState(0);

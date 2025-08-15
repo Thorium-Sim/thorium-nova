@@ -3,6 +3,7 @@ import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useRef } from "react";
 import { useShipMapStore } from "./useShipMapStore";
 import { pixelRatio } from "@thorium/utils/pixelRatio.client";
+import { useCardContext } from "@thorium/context/CardContext";
 
 export function CargoContainerDot(props: {
 	id: number;
@@ -11,6 +12,7 @@ export function CargoContainerDot(props: {
 	widthScale: number;
 }) {
 	const { interpolate } = useLiveQuery();
+	const { cardLoaded } = useCardContext();
 	const dotRef = useRef<HTMLDivElement>(null);
 	const selectedContainerId = useShipMapStore(
 		(state) => state.selectedContainerId,
@@ -32,7 +34,7 @@ export function CargoContainerDot(props: {
 				position.y * pixelRatio * props.widthScale
 			}px - 0.25rem))`;
 		}
-	});
+	}, cardLoaded);
 
 	return (
 		<div
