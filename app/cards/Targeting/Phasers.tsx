@@ -13,6 +13,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { DoubleSide, Euler, type Group, Quaternion, Vector3 } from "three";
 import type { Line2 } from "three-stdlib";
 import { useStation } from "@thorium/routes/station/useStation";
+import { useCardContext } from "@thorium/context/CardContext";
 
 export function PhaserArcs() {
 	const { shipId } = useStation();
@@ -202,6 +203,7 @@ function PhaserControl({
 	heading: number;
 	pitch: number;
 }) {
+	const { cardLoaded } = useCardContext();
 	const { shipId } = useStation();
 	const { interpolate } = useLiveQuery();
 	const chargeRef = useRef<HTMLProgressElement>(null);
@@ -261,7 +263,7 @@ function PhaserControl({
 				}
 			});
 		}
-	});
+	}, cardLoaded);
 
 	const cache = useQueryClient();
 	const getFirePhasers = (firePercent: number) => {

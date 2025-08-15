@@ -1,7 +1,13 @@
 import Login from "@thorium/cards/Login";
 import Offline from "@thorium/cards/Offline";
 import * as Cards from "@thorium/cards";
-import { type ComponentType, Fragment, Suspense, useState } from "react";
+import {
+	type ComponentType,
+	Fragment,
+	Suspense,
+	useMemo,
+	useState,
+} from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Transition } from "@headlessui/react";
 import type { CardProps } from "../../cards/CardProps";
@@ -72,7 +78,7 @@ const CardRenderer = ({
 	const show = allowCard && currentCardId === id;
 	const [cardLoaded, setCardLoaded] = useState(show);
 	return (
-		<CardProvider cardName={id}>
+		<CardProvider cardName={id} cardLoaded={cardLoaded}>
 			<Transition
 				key={id}
 				show={show}
