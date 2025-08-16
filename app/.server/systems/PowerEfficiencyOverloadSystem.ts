@@ -1,3 +1,7 @@
+import {
+	applyDamage,
+	applySystemDamage,
+} from "@thorium/utils/.server/ship/collisionDamage";
 import { type Entity, System } from "@thorium/utils/ecs";
 
 export class PowerEfficiencyOverloadSystem extends System {
@@ -12,8 +16,6 @@ export class PowerEfficiencyOverloadSystem extends System {
 		const damage = entity.components.damage;
 		if (!power || !damage) return;
 
-		// TODO: Make this also decrease other damage metrics, not just entropy
-		// A very small random efficiency drop every frame
 		const entropy = Math.abs(this.ecs.rng.next()) * damage.entropyMultiplier;
 		const maxSafePower = power.powerLevels[power.powerLevels.length - 1];
 		const overloadPercent = Math.max(
@@ -23,8 +25,6 @@ export class PowerEfficiencyOverloadSystem extends System {
 		const overloadDecrease =
 			(overloadPercent * damage.overloadDamageMultiplier + entropy) *
 			elapsedRatio;
-		entity.updateComponent("damage", {
-			efficiency: Math.max(0, damage.efficiency - overloadDecrease),
-		});
+		applySystemDamage(entity, overloadDecrease, ["Fatigue"]);
 	}
 }

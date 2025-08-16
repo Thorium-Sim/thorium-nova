@@ -282,7 +282,6 @@ function Reactor({
 function Battery({
 	id,
 	name,
-	index,
 	setSelectedPowerSupplier,
 	selectedPowerSupplier,
 	chargeRate,
@@ -533,7 +532,6 @@ function System({
 	id,
 	name,
 	power,
-	efficiency,
 	heat,
 	selectedPowerSupplier,
 	cardLoaded,
@@ -544,7 +542,6 @@ function System({
 		powerLevels: number[];
 		powerSources: number[];
 	};
-	efficiency?: number;
 	heat?: {
 		heat: number;
 		maxSafeHeat: number;
@@ -619,7 +616,7 @@ function System({
 		}
 	}, cardLoaded);
 
-	if (!power && !efficiency && !heat) return null;
+	if (!power && !heat) return null;
 	return (
 		<div
 			key={id}

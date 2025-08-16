@@ -11,10 +11,10 @@ export const damage = z
 			.default("normal"),
 		/** Whether the system is not operable. */
 		offline: z.boolean().default(false),
-		/** How low the aggregate damage must get before the system goes offline */
+		/** How high the aggregate damage must get before the system goes offline */
 		offlineDamage: z.number().default(0.5),
-		/** How high the aggregate damage must get through repair before the system goes online */
-		onlineDamage: z.number().default(0.8),
+		/** How low the aggregate damage must get through repair before the system goes online */
+		onlineDamage: z.number().default(0.2),
 
 		/** A proxy for overall damage. Power applied to ship systems is multiplied by this value */
 		efficiency: z.number().min(0).max(1).default(1),

@@ -68,7 +68,7 @@ it("should generate negative side effects", () => {
 	expect(effects1.get(system.id)).toMatchInlineSnapshot(`
 		{
 		  "efficiency": 0.049242199037513285,
-		  "failureRisk": 0.03341756014931425,
+		  "failureRisk": 0.0003341756014931425,
 		  "signature": 0.04521259076549034,
 		}
 	`);
@@ -80,7 +80,7 @@ it("should generate negative side effects", () => {
 	`);
 	expect(effects2.get(otherSystem.id)).toMatchInlineSnapshot(`
 		{
-		  "crewSafetyRating": 0.039645994775846134,
+		  "crewSafetyRating": 0.019822997387923067,
 		}
 	`);
 });
@@ -89,7 +89,7 @@ it("should generate positive side effects", () => {
 	expect(effects1.get(system.id)).toMatchInlineSnapshot(`
 		{
 		  "efficiency": 0.049242199037513285,
-		  "failureRisk": -0.03713062238812694,
+		  "failureRisk": -0.00037130622388126944,
 		  "signature": -0.05023621196165593,
 		}
 	`);
@@ -101,7 +101,7 @@ it("should generate positive side effects", () => {
 	`);
 	expect(effects2.get(otherSystem.id)).toMatchInlineSnapshot(`
 		{
-		  "crewSafetyRating": -0.044051105306495704,
+		  "crewSafetyRating": -0.022025552653247852,
 		}
 	`);
 });

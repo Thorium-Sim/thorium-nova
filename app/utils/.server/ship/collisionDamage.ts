@@ -92,13 +92,19 @@ export function applyDamage(
 	// The vector from the ship to the impact point.
 	direction: Vector3,
 	damageTypes?: Zod.infer<typeof damageType>[],
+	ignoreShields?: boolean,
 ) {
-	const { remainingDamage, systemDamage } = applyShieldDamage(
-		entity,
-		damageInGigajoules,
-		direction,
-	);
-
+	let remainingDamage = damageInGigajoules;
+	let systemDamage = damageInGigajoules;
+	if (!ignoreShields) {
+		const afterShields = applyShieldDamage(
+			entity,
+			damageInGigajoules,
+			direction,
+		);
+		remainingDamage = afterShields.remainingDamage;
+		systemDamage = afterShields.systemDamage;
+	}
 	// Apply system damage
 	const damagableSystems = [
 		...(entity.components.shipSystems?.shipSystems.keys() || []),
@@ -143,52 +149,8 @@ export function applyDamage(
 			system = entity.ecs.rng.nextFromList(damagableSystems);
 		}
 		if (!system) break;
-
-		const damageMetricMultipliers = getDamageMetricMultipliers(system);
-
-		const damageMultiplier =
-			damageTypes?.reduce((prev, next, i, arr) => {
-				return (
-					prev +
-					(system?.components.damage?.damageTypeMultipliers[next] || 1) /
-						arr.length
-				);
-			}, 1) || 1;
-
-		const appliedDamage = systemDamage * damage * damageMultiplier;
-		// Do the same thing, but for the damage metrics. Efficiency is always one of them, though.
-		const effectSplit: number[] = [];
-		while (effectSplit.length < damageEffects.length) {
-			const totalDamage = effectSplit.reduce((p, n) => p + n, 0);
-			const nextDamage = entity.ecs.rng.next() + 0.5;
-
-			if (totalDamage + nextDamage >= 1) {
-				effectSplit.push(1 - totalDamage);
-				break;
-			}
-			effectSplit.push(nextDamage);
-		}
-		effectSplit.sort((a, b) => b - a);
-
-		const damageAppliedToSystem: Record<string, number> = {};
-		for (let i = 0; i < effectSplit.length; i++) {
-			const effect =
-				i === 0
-					? "efficiency"
-					: entity.ecs.rng.nextFromList(
-							damageEffects.filter((f) => f !== "efficiency"),
-						);
-			const damageAppliedToEffect =
-				appliedDamage *
-				effectSplit[i] *
-				(effect === "efficiency" ? -1 : 1) *
-				damageMetricMultipliers[effect];
-			if (!damageAppliedToSystem[effect]) {
-				damageAppliedToSystem[effect] = system.components.damage?.[effect] || 0;
-			}
-			damageAppliedToSystem[effect] += damageAppliedToEffect;
-		}
-		system.updateComponent("damage", damageAppliedToSystem);
+		console.log(system.components.isShipSystem?.type);
+		applySystemDamage(system, systemDamage * damage, damageTypes);
 	}
 
 	// Apply damage to the hull
@@ -212,6 +174,53 @@ export function applyDamage(
 			});
 		}
 	}
+}
+
+export function applySystemDamage(
+	system: Entity,
+	damage: number,
+	damageTypes?: Zod.infer<typeof damageType>[],
+) {
+	const damageMetricMultipliers = getDamageMetricMultipliers(system);
+
+	const damageMultiplier =
+		damageTypes?.reduce((prev, next, i, arr) => {
+			return (
+				prev +
+				(system?.components.damage?.damageTypeMultipliers[next] || 1) /
+					arr.length
+			);
+		}, 1) || 1;
+
+	const appliedDamage = damage * damageMultiplier;
+	// Do the same thing, but for the damage metrics. Efficiency is always one of them, though.
+	const effectSplit: number[] = [];
+	while (effectSplit.length < damageEffects.length) {
+		const totalDamage = effectSplit.reduce((p, n) => p + n, 0);
+		const nextDamage = system.ecs.rng.next() + 0.5;
+
+		if (totalDamage + nextDamage >= 1) {
+			effectSplit.push(1 - totalDamage);
+			break;
+		}
+		effectSplit.push(nextDamage);
+	}
+	effectSplit.sort((a, b) => b - a);
+
+	const damageAppliedToSystem: Record<string, number> = {};
+	for (let i = 0; i < effectSplit.length; i++) {
+		const effect = system.ecs.rng.nextFromList(damageEffects);
+		const damageAppliedToEffect =
+			appliedDamage *
+			effectSplit[i] *
+			(effect === "efficiency" ? -1 : 1) *
+			damageMetricMultipliers[effect];
+		if (!damageAppliedToSystem[effect]) {
+			damageAppliedToSystem[effect] = system.components.damage?.[effect] || 0;
+		}
+		damageAppliedToSystem[effect] += damageAppliedToEffect;
+	}
+	system.updateComponent("damage", damageAppliedToSystem);
 }
 
 function applyShieldDamage(

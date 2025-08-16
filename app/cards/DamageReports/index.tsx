@@ -32,38 +32,13 @@ import type { ReactNode } from "react";
 
 export function DamageReports() {
 	const { shipId } = useStation();
-	const [systems] = q.damageReports.systems.useNetRequest({ shipId });
+	const [systems] = q.damageReports.systems.useNetRequest(
+		{ shipId },
+		{ refetchInterval: 1000 },
+	);
 
 	return (
 		<div className="w-full h-full grid grid-cols-4">
-			{/* <h1 className="w-full text-center text-2xl font-medium">Efficiency</h1>
-			<div className="flex-1 bg">
-				<div className="flex h-full justify-between ">
-					{systems.map((sys) => {
-						const efficiency = Math.random();
-						return (
-							<div className="flex flex-col">
-								<div className="flex-1 relative">
-									<div
-										className={cn("bg-green-500 absolute bottom-0 w-full", {
-											"bg-green-500": efficiency > 0.8,
-											"bg-yellow-500": efficiency <= 0.8 && efficiency > 0.5,
-											"bg-red-500": efficiency < 0.5,
-										})}
-										style={{
-											height: `${efficiency * 100}%`,
-										}}
-									/>
-								</div>
-								<div className="border-t" />
-								<div className="-rotate-90 w-[2rem] h-[12ch] whitespace-nowrap translate-x-[4.5ch] translate-y-[4.5ch] text-right">
-									{sys.name}
-								</div>
-							</div>
-						);
-					})}
-				</div>
-			</div> */}
 			<div className="flex flex-col gap-2 col-span-1 overflow-hidden">
 				<h3>Reports</h3>
 				<ul className="list-group panel w-full overflow-y-auto flex-1">
@@ -90,9 +65,6 @@ export function DamageReports() {
 						</li>
 					))}
 				</ul>
-				{/* {systems.map((s) => (
-					<SystemCard key={s.id} name={s.name} efficiency={s.efficiency} />
-				))} */}
 				<div className="flex gap-2 justify-start flex-wrap justify-self-end">
 					<Button className="btn-sm">All</Button>
 					<Button className="btn-sm btn-primary">Propulsion</Button>

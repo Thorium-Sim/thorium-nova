@@ -4,6 +4,7 @@ import { PowerEfficiencyOverloadSystem } from "../PowerEfficiencyOverloadSystem"
 import { describe, expect, it, beforeEach } from "vitest";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { DataStore } from "@thorium/utils/.server/db-fs";
+import { getAggregateDamage } from "@thorium/utils/flags/damageTypes";
 
 describe("PowerEfficiencyOverloadSystem", () => {
 	DataStore.operations.run(testDataStoreProps, () => {
@@ -28,16 +29,15 @@ describe("PowerEfficiencyOverloadSystem", () => {
 			}
 
 			expect(system.components.damage?.efficiency).toMatchInlineSnapshot(
-				`0.9998816583988258`,
+				`0.999959304016354`,
 			);
 
 			// The average mission length
 			for (let i = 0; i < 60 * 60 * 60 * 2; i++) {
 				ecs.update(16);
 			}
-
 			expect(system.components.damage?.efficiency).toMatchInlineSnapshot(
-				`0.1364071605889995`,
+				`0.7527000312104539`,
 			);
 		});
 		it("should decrease when power is above maxSafePower", () => {
@@ -55,13 +55,11 @@ describe("PowerEfficiencyOverloadSystem", () => {
 				ecs.update(16);
 			}
 
-			expect(
-				system.components.damage!.efficiency >
-					system2.components.damage!.efficiency,
-			);
-			expect(system2.components.damage!.efficiency).toMatchInlineSnapshot(
-				`0.1000845929025086`,
-			);
+			const systemDamage = getAggregateDamage(system);
+			const system2Damage = getAggregateDamage(system2);
+			expect(systemDamage > system2Damage);
+			expect(system2Damage).toMatchInlineSnapshot(`0.15995357108963942`);
 		});
+		it("should apply entropy, even when the system isn't overloaded at all", () => {});
 	});
 });
