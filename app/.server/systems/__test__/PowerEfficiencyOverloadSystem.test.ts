@@ -58,7 +58,7 @@ describe("PowerEfficiencyOverloadSystem", () => {
 			const systemDamage = getAggregateDamage(system);
 			const system2Damage = getAggregateDamage(system2);
 			expect(systemDamage > system2Damage);
-			expect(system2Damage).toMatchInlineSnapshot(`0.15995357108963942`);
+			expect(system2Damage).toMatchInlineSnapshot(`0.2571257088981171`);
 		});
 		it("should apply entropy, even when the system isn't overloaded at all", () => {});
 	});

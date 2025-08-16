@@ -168,12 +168,13 @@ export function getAggregateDamage(sys: Entity) {
 	output +=
 		(damage.heatMultiplier - MIN_HEAT_MULTIPLIER) *
 		damageMultipliers.heatMultiplier;
-	output += damage.instability * damageMultipliers.instability;
+	output += damage.instability * (1 / damageMultipliers.instability);
 	output +=
-		(damage.signature - damage.minSignature) * damageMultipliers.signature;
-	output += damage.failureRisk * damageMultipliers.failureRisk;
-	output += damage.cascadeRisk * damageMultipliers.cascadeRisk;
-	output += damage.crewSafetyRating * damageMultipliers.crewSafetyRating;
+		(damage.signature - damage.minSignature) *
+		(1 / damageMultipliers.signature);
+	output += damage.failureRisk * (1 / damageMultipliers.failureRisk);
+	output += damage.cascadeRisk * (1 / damageMultipliers.cascadeRisk);
+	output += damage.crewSafetyRating * (1 / damageMultipliers.crewSafetyRating);
 
 	output /= 7;
 
