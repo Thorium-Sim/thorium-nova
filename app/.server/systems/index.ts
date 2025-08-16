@@ -36,6 +36,7 @@ import { SensorScanSystem } from "@thorium/.server/systems/SensorScanSystem";
 import { NPCKnowledgeSystem } from "@thorium/.server/systems/NPCKnowledgeSystem";
 import { NPCDecisionSystem } from "@thorium/.server/systems/NPCDecisionSystem";
 import { NPCFireWeaponsSystem } from "@thorium/.server/systems/NPCFireWeaponsSystem";
+import { PowerEfficiencyOverloadSystem } from "@thorium/.server/systems/PowerEfficiencyOverloadSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -50,6 +51,7 @@ const systems = [
 	ReactorHeatSystem,
 	PowerDrawSystem,
 	PowerDistributionSystem,
+	PowerEfficiencyOverloadSystem,
 	NPCPhaserChargeSystem,
 	TorpedoLoadingSystem,
 	NearbyObjectsSystem,

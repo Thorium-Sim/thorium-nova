@@ -120,7 +120,8 @@ export default class BaseShipSystemPlugin extends Aspect {
 		this.maxSignature = params.maxSignature || 1;
 		this.signatureSpike = params.signatureSpike || 2;
 		this.signatureSpikeDuration = params.signatureSpikeDuration || 5;
-		this.entropyMultiplier = params.entropyMultiplier || 0.0005;
+		// This provides about 15% damage to all systems over the course of a 2.5 hour mission
+		this.entropyMultiplier = params.entropyMultiplier || 0.00025;
 
 		if (this.constructor.name === "BaseShipSystemPlugin") {
 			if (systemPlugins[this.type]) {
