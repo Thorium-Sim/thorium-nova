@@ -149,7 +149,6 @@ export function applyDamage(
 			system = entity.ecs.rng.nextFromList(damagableSystems);
 		}
 		if (!system) break;
-		console.log(system.components.isShipSystem?.type);
 		applySystemDamage(system, systemDamage * damage, damageTypes);
 	}
 
