@@ -131,6 +131,21 @@ export class PowerDrawSystem extends System {
 				);
 				break;
 			}
+			case "mainComputer": {
+				// If there is an active scan, just draw the full amount of power
+				let activeDiagnostic = false;
+				for (const diagnostic of this.ecs.componentCache.get("diagnostic") ||
+					[]) {
+					if (diagnostic.components.diagnostic?.shipId === ship.id)
+						activeDiagnostic = true;
+					break;
+				}
+				powerDraw = Math.max(
+					power.requiredPower,
+					activeDiagnostic ? requestedPower : 0,
+				);
+				break;
+			}
 			case "generic":
 				powerDraw = requestedPower;
 				break;

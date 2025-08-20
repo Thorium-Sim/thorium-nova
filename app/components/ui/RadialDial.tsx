@@ -1,45 +1,37 @@
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import { forwardRef, useImperativeHandle, useRef, type Ref } from "react";
 
-const RadialDial = forwardRef<
-	{ setValue: (value: number) => void },
-	{
-		label: string;
-		count: number;
-		max?: number;
-		marker?: number;
-		color?: string;
-		backgroundColor?: string;
-		children?: React.ReactNode;
-	}
->(
-	(
-		{
-			label,
-			count,
-			max = 100,
-			marker,
-			color = "#fff000",
-			backgroundColor,
-			children,
-		},
+export default function RadialDial({
+	label,
+	count,
+	max = 100,
+	marker,
+	color = "#fff000",
+	backgroundColor,
+	children,
+	ref,
+}: {
+	label: string;
+	count: number;
+	max?: number;
+	marker?: number;
+	color?: string;
+	backgroundColor?: string;
+	children?: React.ReactNode;
+	ref?: Ref<{ setValue: (value: number) => void }>;
+}) {
+	const divRef = useRef<HTMLDivElement>(null);
+	useImperativeHandle(
 		ref,
-	) => {
-		const divRef = useRef<HTMLDivElement>(null);
-		useImperativeHandle(
-			ref,
-			() => {
-				return {
-					setValue(value: number) {
-						if (!divRef.current) return;
-						const endAngle = value / max;
-						divRef.current.style.setProperty(
-							"--end-angle",
-							`${endAngle * 100}%`,
-						);
+		() => {
+			return {
+				setValue(value: number) {
+					if (!divRef.current) return;
+					const endAngle = value / max;
+					divRef.current.style.setProperty("--end-angle", `${endAngle * 100}%`);
 
-						divRef.current.style.setProperty(
-							"background",
-							`conic-gradient(
+					divRef.current.style.setProperty(
+						"background",
+						`conic-gradient(
     var(--radial-color, #fff000) 0%,
 		${
 			marker && marker < endAngle
@@ -63,38 +55,33 @@ const RadialDial = forwardRef<
 		}
     var(--radial-background) 100%
   )`,
-						);
-					},
-				};
-			},
-			[max, marker],
-		);
+					);
+				},
+			};
+		},
+		[max, marker],
+	);
 
-		return (
-			<div className="radial-dial">
-				<div
-					className="radial-indicator"
-					ref={divRef}
-					style={{
-						background: `conic-gradient(
+	return (
+		<div className="radial-dial">
+			<div
+				className="radial-indicator"
+				ref={divRef}
+				style={{
+					background: `conic-gradient(
     var(--radial-color, #fff000) 0%,
     var(--radial-color, #fff000) var(--end-angle, 0%),
     var(--radial-background) var(--end-angle, 0%),
     var(--radial-background) 100%
   )`,
-						["--radial-color" as any]: color,
-						["--radial-background" as any]: backgroundColor,
-						["--end-angle" as any]: `${(count / max) * 100}%`,
-					}}
-				>
-					<div className="radial-inner">{children || Math.round(count)}</div>
-				</div>
-				<div className="label">{label}</div>
+					["--radial-color" as any]: color,
+					["--radial-background" as any]: backgroundColor,
+					["--end-angle" as any]: `${(count / max) * 100}%`,
+				}}
+			>
+				<div className="radial-inner">{children || Math.round(count)}</div>
 			</div>
-		);
-	},
-);
-
-RadialDial.displayName = "RadialDial";
-
-export default RadialDial;
+			<div className="label">{label}</div>
+		</div>
+	);
+}

@@ -89,6 +89,17 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 			}
 		}
 
+		for (const diagnosticEntity of context.ecs.componentCache.get(
+			"diagnostic",
+		) || []) {
+			if (
+				diagnosticEntity.components.diagnostic?.shipId === ship.id &&
+				diagnosticEntity.components.diagnostic.progress < 1
+			) {
+				entities.push(dataStreamEntity(diagnosticEntity));
+			}
+		}
+
 		for (const torpedoEntity of context.ecs.componentCache.get("isTorpedo") ||
 			[]) {
 			if (

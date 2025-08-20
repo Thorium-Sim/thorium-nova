@@ -10,3 +10,4 @@ export * from "./isTargeting";
 export * from "./isShields";
 export * from "./isPhasers";
 export * from "./isPhaseCapacitor";
+export * from "./isMainComputer";
