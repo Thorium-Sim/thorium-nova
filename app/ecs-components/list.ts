@@ -55,3 +55,4 @@ export * from "./flightClient";
 export * from "./variables";
 export * from "./tweaks";
 export * from "./damageReport";
+export * from "./shipSystems/diagnostic";

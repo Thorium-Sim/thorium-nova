@@ -87,7 +87,8 @@ export function getReportEffects(
 	const val = rng.next() + 0.5;
 	const numberOfEffects = val < 0.1 ? 1 : val > 0.7 ? 3 : 2;
 
-	const output = new Map();
+	/** <systemId, Damage Effects> */
+	const output = new Map<number, Partial<DamageEffectsObject>>();
 	const damageMetricMultipliers = getDamageMetricMultipliers(system);
 
 	for (let i = 0; i < numberOfEffects; i++) {
@@ -95,12 +96,12 @@ export function getReportEffects(
 		if (!output.has(sysId)) {
 			output.set(sysId, {});
 		}
-		const effects = output.get(sysId);
+		const effects = output.get(sysId)!;
 		const effect =
 			i === 0
 				? mainEffect
 				: // Remove effects that have already been chosen
-					rng.nextFromList(damageEffects.filter((e) => !effects[e]));
+					rng.nextFromList(damageEffects.filter((e) => !effects?.[e]));
 
 		let effectAmount =
 			rng.next() *
@@ -180,3 +181,13 @@ export function getAggregateDamage(sys: Entity) {
 
 	return output;
 }
+
+export const diagnosticRecord = z.object({
+	efficiency: z.number(),
+	heatMultiplier: z.number(),
+	instability: z.number(),
+	signature: z.number(),
+	failureRisk: z.number(),
+	cascadeRisk: z.number(),
+	crewSafetyRating: z.number(),
+});

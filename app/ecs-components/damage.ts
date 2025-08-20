@@ -16,7 +16,7 @@ export const damage = z
 		/** How low the aggregate damage must get through repair before the system goes online */
 		onlineDamage: z.number().default(0.2),
 
-		/** A proxy for overall damage. Power applied to ship systems is multiplied by this value */
+		/** Power applied to ship systems is multiplied by this value */
 		efficiency: z.number().min(0).max(1).default(1),
 		/**
 		 * A multiplier to determine how much the efficiency will drop
