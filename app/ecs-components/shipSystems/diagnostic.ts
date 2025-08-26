@@ -1,5 +1,20 @@
-import { diagnosticRecord } from "@thorium/utils/flags/damageTypes";
+import {
+	damageTypes,
+	diagnosticRecord,
+} from "@thorium/utils/flags/damageTypes";
 import z from "zod";
+
+const damageEffectsObject = z
+	.object({
+		efficiency: z.number(),
+		heatMultiplier: z.number(),
+		instability: z.number(),
+		signature: z.number(),
+		failureRisk: z.number(),
+		cascadeRisk: z.number(),
+		crewSafetyRating: z.number(),
+	})
+	.partial();
 
 export const diagnostic = z
 	.object({
@@ -13,5 +28,20 @@ export const diagnostic = z
 		targetSystemId: z.number().default(-1),
 		/** The damage metrics when the diagnostic completed */
 		results: diagnosticRecord.optional(),
+		/** The damage report candidates for this diagnostic */
+		reportCandidates: z
+			.object({
+				id: z.string(),
+				type: damageTypes,
+				affectedSystems: z
+					.object({
+						id: z.number(),
+						name: z.string(),
+						metrics: damageEffectsObject,
+					})
+					.array(),
+			})
+			.array()
+			.optional(),
 	})
 	.default({});

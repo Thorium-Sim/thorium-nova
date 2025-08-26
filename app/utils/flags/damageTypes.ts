@@ -26,7 +26,7 @@ export const damageEffects = [
 
 export const damageTypeValues = Object.values(damageTypes.Values);
 
-type DamageEffects = (typeof damageEffects)[number];
+export type DamageEffects = (typeof damageEffects)[number];
 
 type DamageEffectsObject = { [K in DamageEffects]: number };
 /**
