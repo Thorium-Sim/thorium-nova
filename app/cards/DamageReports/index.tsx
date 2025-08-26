@@ -7,7 +7,9 @@ import { Icon } from "@thorium/ui/Icon";
 import RadialDial from "@thorium/ui/RadialDial";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { cn } from "@thorium/utils/cn";
+import type { DamageEffects } from "@thorium/utils/flags/damageTypes";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { capitalCase } from "change-case";
 import { Suspense, useRef, useState, type ReactNode } from "react";
 
 /**
@@ -217,6 +219,14 @@ function SystemDetails({ systemId, name }: { systemId: number; name: string }) {
 		);
 	}
 
+	if (diagnostic.reportCandidates) {
+		return <ReportCandidates systemId={systemId} />;
+	}
+
+	if (diagnostic.results) {
+		return <SystemCard systemId={systemId} />;
+	}
+
 	if (diagnostic.progress < 1) {
 		return (
 			<div className="flex flex-col gap-4 items-center justify-center w-1/2 mx-auto col-span-3">
@@ -237,9 +247,6 @@ function SystemDetails({ systemId, name }: { systemId: number; name: string }) {
 				</Button>
 			</div>
 		);
-	}
-	if (diagnostic.progress >= 1) {
-		return <SystemCard systemId={systemId} />;
 	}
 }
 
@@ -282,7 +289,8 @@ function SystemCard({ systemId }: { systemId: number }) {
 		<div className="col-span-3 w-5/6 mx-auto h-full overflow-hidden">
 			<div className="flex flex-col gap-2">
 				<MetricPanel
-					format={(val) => `${Math.floor(val * 100)}%`}
+					id="efficiency"
+					diagnosticId={diagnostic.id}
 					upperThreshold={0.8}
 					lowerThreshold={0.5}
 					value={metrics.efficiency}
@@ -294,7 +302,8 @@ function SystemCard({ systemId }: { systemId: number }) {
 					<Icon name="power-node" className="size-5" />
 				</MetricPanel>
 				<MetricPanel
-					format={(val) => <>&times;{Math.round(val * 100) / 100}</>}
+					id="heatMultiplier"
+					diagnosticId={diagnostic.id}
 					upperThreshold={1.7}
 					lowerThreshold={1.3}
 					value={metrics.heatMultiplier}
@@ -305,7 +314,8 @@ function SystemCard({ systemId }: { systemId: number }) {
 					<Icon name="flame" className="size-5" />
 				</MetricPanel>
 				<MetricPanel
-					format={(val) => `${Math.round(val * 100)}%`}
+					id="instability"
+					diagnosticId={diagnostic.id}
 					upperThreshold={0.8}
 					lowerThreshold={0.5}
 					value={metrics.instability}
@@ -316,7 +326,8 @@ function SystemCard({ systemId }: { systemId: number }) {
 					<Icon name="diamond-minus" className="size-5" />
 				</MetricPanel>
 				<MetricPanel
-					format={(val) => Math.round(val * 100)}
+					id="signature"
+					diagnosticId={diagnostic.id}
 					upperThreshold={0.8}
 					lowerThreshold={0.5}
 					value={metrics.signature}
@@ -327,7 +338,8 @@ function SystemCard({ systemId }: { systemId: number }) {
 					<Icon name="eye" className="size-5" />
 				</MetricPanel>
 				<MetricPanel
-					format={(val) => `${Math.round(val * 10000) / 100}%`}
+					id="failureRisk"
+					diagnosticId={diagnostic.id}
 					upperThreshold={0.8}
 					lowerThreshold={0.5}
 					value={metrics.failureRisk}
@@ -338,7 +350,8 @@ function SystemCard({ systemId }: { systemId: number }) {
 					<Icon name="circle-slash" className="size-5" />
 				</MetricPanel>
 				<MetricPanel
-					format={(val) => `${Math.round(val * 1000) / 10}%`}
+					id="cascadeRisk"
+					diagnosticId={diagnostic.id}
 					upperThreshold={0.8}
 					lowerThreshold={0.5}
 					value={metrics.cascadeRisk}
@@ -349,7 +362,8 @@ function SystemCard({ systemId }: { systemId: number }) {
 					<Icon name="octagon-alert" className="size-5" />
 				</MetricPanel>
 				<MetricPanel
-					format={(val) => `${Math.round(val * 100)}%`}
+					id="crewSafetyRating"
+					diagnosticId={diagnostic.id}
 					upperThreshold={0.8}
 					lowerThreshold={0.5}
 					value={metrics.crewSafetyRating}
@@ -375,9 +389,10 @@ function SystemCard({ systemId }: { systemId: number }) {
 }
 
 function MetricPanel({
+	id,
+	diagnosticId,
 	children,
 	value,
-	format,
 	reverseThresholds,
 	upperThreshold,
 	lowerThreshold,
@@ -385,8 +400,9 @@ function MetricPanel({
 	description,
 	reportCount,
 }: {
+	id: DamageEffects;
+	diagnosticId: number;
 	children: ReactNode;
-	format: (val: number) => ReactNode;
 	value: number;
 	reverseThresholds?: boolean;
 	upperThreshold: number;
@@ -427,13 +443,6 @@ function MetricPanel({
 				<p className="font-medium text-xl">{name}</p>
 				<p className="text-gray-300">{description}</p>
 			</div>
-			{/* <div className="overflow-hidden relative">
-					<Icon
-						name="wrench"
-						className="size-5 -translate-y-full group-hover:translate-y-0 transition-transform absolute top-0 left-0"
-					/>
-				
-				</div> */}
 			<div
 				className={cn(
 					"text-lg w-[5ch] text-right",
@@ -444,7 +453,7 @@ function MetricPanel({
 							: "text-error",
 				)}
 			>
-				{format(value)}
+				{damageMetricFormats[id](value)}
 			</div>
 			<Tooltip
 				content={
@@ -459,6 +468,12 @@ function MetricPanel({
 				<Button
 					className={cn("btn-sm w-[23ch]", { "btn-info": reportCount > 0 })}
 					disabled={reportCount === 0}
+					onClick={() => {
+						q.damageReports.diagnosticReportCandidateCreate.netSend({
+							damageMetric: id,
+							diagnosticId,
+						});
+					}}
 				>
 					<Icon name="wrench" className="size-5 mr-2" />
 					Generate Report{reportCount > 1 ? "s" : ""}
@@ -467,3 +482,74 @@ function MetricPanel({
 		</div>
 	);
 }
+
+function ReportCandidates({ systemId }: { systemId: number }) {
+	const [diagnostic] = q.damageReports.systemDiagnostic.useNetRequest({
+		systemId: systemId,
+	});
+
+	const reports = diagnostic?.reportCandidates;
+	if (!reports) return null;
+
+	return (
+		<div className="flex flex-col justify-around col-span-3 w-5/6 mx-auto h-full overflow-hidden">
+			<div className="flex gap-4 justify-center items-center">
+				{reports.map((report) => (
+					<div key={report.id} className="panel p-4">
+						<h2 className="text-xl text-center font-bold">
+							{report.type} Maintenance
+						</h2>
+						<ul>
+							{report.affectedSystems.map((sys) => (
+								<li
+									key={`${sys.id}${Object.keys(sys.metrics).join("")}`}
+									className="mb-4"
+								>
+									<span className="text-lg">{sys.name}</span>
+									<ul className="ml-4 list-disc">
+										{Object.entries(sys.metrics).map(([name, value]) => (
+											<li
+												key={`${name}${value}`}
+												className={cn({
+													"text-red-500":
+														name === "efficiency" ? value < 0 : value > 0,
+													"text-green-500":
+														name === "efficiency" ? value > 0 : value < 0,
+												})}
+											>
+												{capitalCase(name)}: {value > 0 ? "+" : ""}
+												{damageMetricFormats[name as DamageEffects](value)}
+											</li>
+										))}
+									</ul>
+								</li>
+							))}
+						</ul>
+						<Button className="btn-success w-full">Begin Report</Button>
+					</div>
+				))}
+			</div>
+			<Button
+				className="mx-auto btn-warning"
+				onClick={() =>
+					q.damageReports.diagnosticAbort.netSend({
+						diagnosticId: diagnostic.id,
+					})
+				}
+			>
+				Reset Diagnostic
+			</Button>
+		</div>
+	);
+}
+
+const damageMetricFormats: Record<DamageEffects, (value: number) => ReactNode> =
+	{
+		efficiency: (val) => `${Math.floor(val * 100)}%`,
+		heatMultiplier: (val) => <>&times;{Math.round(val * 100) / 100}</>,
+		instability: (val) => `${Math.round(val * 100)}%`,
+		signature: (val) => Math.round(val * 100),
+		failureRisk: (val) => `${Math.round(val * 10000) / 100}%`,
+		cascadeRisk: (val) => `${Math.round(val * 1000) / 10}%`,
+		crewSafetyRating: (val) => `${Math.round(val * 100)}%`,
+	};

@@ -1,6 +1,11 @@
 import z from "zod";
 import { t } from "@thorium/.server/init/t";
-import { getAggregateDamage } from "@thorium/utils/flags/damageTypes";
+import {
+	damageEffects,
+	damageTypeValues,
+	getAggregateDamage,
+	getReportEffects,
+} from "@thorium/utils/flags/damageTypes";
 import { Entity } from "@thorium/utils/ecs";
 import { pubsub } from "@thorium/.server/init/pubsub";
 
@@ -55,6 +60,7 @@ export const damageReports = t.router({
 						level: diagnostic.level,
 						results: diagnostic.results,
 						progress: diagnostic.progress,
+						reportCandidates: diagnostic.reportCandidates,
 					};
 				}
 			}
@@ -106,12 +112,48 @@ export const damageReports = t.router({
 	diagnosticReportCandidateCreate: t.procedure
 		.input(
 			z.object({
-				systemId: z.number(),
-				damageMetric: z.number(),
-				reportCount: z.number(),
+				diagnosticId: z.number(),
+				damageMetric: z.enum(damageEffects),
 			}),
 		)
-		.send(({ ctx, input }) => {}),
+		.send(({ ctx, input }) => {
+			const diagnostic = ctx.ecs.getEntityById(input.diagnosticId);
+			if (!diagnostic) return;
+
+			const reportCount =
+				Number(diagnostic.components.diagnostic?.level || 1) - 1;
+			if (reportCount <= 0) return;
+
+			const system = ctx.ecs.getEntityById(
+				diagnostic.components.diagnostic?.targetSystemId || -1,
+			);
+			if (!system) return;
+
+			diagnostic.updateComponent("diagnostic", {
+				reportCandidates: Array.from({ length: reportCount }).map(() => {
+					const result = [];
+					const report = getReportEffects(system, input.damageMetric);
+					for (const [systemId, metrics] of report.entries()) {
+						const sys = ctx.ecs.getEntityById(systemId);
+						if (!sys) continue;
+						result.push({
+							id: systemId,
+							name: sys.components.identity?.name || "",
+							metrics,
+						});
+					}
+					return {
+						id: ctx.ecs.rng.nextString(),
+						type: ctx.ecs.rng.nextFromList(damageTypeValues),
+						affectedSystems: result,
+					};
+				}),
+			});
+
+			pubsub.publish.damageReports.systemDiagnostic({
+				systemId: diagnostic.components.diagnostic?.targetSystemId || -1,
+			});
+		}),
 	damageReports: t.procedure
 		.input(z.object({ shipId: z.number() }))
 		.filter((publish: { shipId: number }, { ctx, input }) => {
