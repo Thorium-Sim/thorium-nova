@@ -18,6 +18,7 @@ import postcss from "postcss";
 import postcssLess from "postcss-less";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import type { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
+import * as Ink from "inkjs/full";
 
 let basePath = "./";
 export function setBasePath(path: string) {
@@ -26,17 +27,34 @@ export function setBasePath(path: string) {
 
 const flightMap = new Map<string, FlightDataModel>();
 
+function loadInk(fileData: string) {
+	const story = new Ink.Compiler(fileData).Compile();
+	const data = parseTags(story.globalTags);
+	data.inkText = fileData;
+	data.story = story;
+
+	return data;
+}
+
+function loadYml(fileData: string | undefined, initialData?: any) {
+	return fileData
+		? load(fileData, {
+				json: true,
+				onWarning: (e) => console.warn("YAML load warning:", e),
+			})
+		: initialData;
+}
 export const bunDataStoreProps: DataStoreOperations = {
 	async getData() {
 		const filePath = path.join(basePath, this.meta.filePath);
 		let data: any;
 		try {
-			data = filePath
-				? load(await fs.readFile(filePath, "utf8"), {
-						json: true,
-						onWarning: (e) => console.warn("YAML load warning:", e),
-					})
-				: this.initialData;
+			const fileData = await fs.readFile(filePath, "utf8");
+			if (this.meta.isInk) {
+				data = loadInk(fileData);
+			} else {
+				data = loadYml(fileData);
+			}
 		} catch (err: any) {
 			if (err.code === "EACCES") {
 				err.message +=
@@ -67,9 +85,15 @@ export const bunDataStoreProps: DataStoreOperations = {
 			}
 			await fs.mkdir(path.dirname(filePath), { recursive: true });
 			this.initialData = undefined;
-			const jsonData = this.toJSON();
-			jsonData.dataLoaded = undefined;
-			const data = dump(jsonData, { skipInvalid: true });
+			let data = "";
+			if (this.meta.isInk) {
+				// @ts-expect-error
+				data = this.inkText;
+			} else {
+				const jsonData = this.toJSON();
+				jsonData.dataLoaded = undefined;
+				data = dump(jsonData, { skipInvalid: true });
+			}
 			await fs.writeFile(filePath, data, { mode: 0o0600 });
 		} catch (e: any) {
 			e.message = `db-fs: Error writing file:\n${e.message}`;
@@ -134,20 +158,44 @@ export const bunDataStoreProps: DataStoreOperations = {
 			"plugins",
 			this.id,
 			aspectName,
-			"/*/manifest.yml",
+			"/*/manifest.{yml,ink}",
 		);
-		const data = await loadFolderYaml<{ name: string } & Record<string, any>>(
-			objectGlob,
-		);
-
-		return data.map((aspectData) => {
-			if (aspectName === "shipSystems") {
-				const systemClass =
-					ShipSystemTypes[aspectData.type as keyof typeof ShipSystemTypes];
-				return new systemClass(aspectData, this) as InstanceType<typeof aspect>;
-			}
-			return new aspect(aspectData, this);
+		const aspectPaths = new Bun.Glob(objectGlob).scan({
+			onlyFiles: true,
 		});
+		const aspects = [];
+		try {
+			for await (const filePath of aspectPaths) {
+				const fileData = await fs.readFile(filePath, "utf8");
+				let aspectData: any;
+
+				// @ts-expect-error
+				if (aspect.isInk) {
+					aspectData = loadInk(fileData);
+				} else {
+					aspectData = loadYml(fileData);
+				}
+				if (aspectName === "shipSystems") {
+					const systemClass =
+						ShipSystemTypes[aspectData.type as keyof typeof ShipSystemTypes];
+					aspects.push(
+						new systemClass(aspectData, this) as InstanceType<typeof aspect>,
+					);
+				}
+				aspects.push(new aspect(aspectData, this));
+			}
+		} catch (error) {
+			if (
+				error instanceof Error &&
+				"code" in error &&
+				error.code === "ENOENT"
+			) {
+				// Ignore, the folder we're globbing doesn't exist
+			} else {
+				throw error;
+			}
+		}
+		return aspects;
 	},
 	async processCSS(rawCSS) {
 		const config = (await import("../../../../tailwind.config")) as any;
@@ -245,4 +293,26 @@ export async function loadPlugins(this: ServerDataModel) {
 			}
 		}
 	}
+}
+
+function parseTags(tags: string[] | null) {
+	if (!tags) return {};
+	return Object.fromEntries(
+		tags.map((tag) => {
+			const parts = tag.split(":");
+			const key = parts.shift()?.trim();
+			let value: unknown | unknown[] = parseValue(parts.join("").trim());
+			if (typeof value === "string" && value.indexOf(",") !== -1) {
+				value = value.split(",").map((v) => parseValue(v.trim()));
+			}
+			return [key, value];
+		}),
+	);
+}
+
+function parseValue(value: unknown) {
+	if (value === "true") return true;
+	if (value === "false") return false;
+	if (!Number.isNaN(Number(value))) return Number(value);
+	return value;
 }
