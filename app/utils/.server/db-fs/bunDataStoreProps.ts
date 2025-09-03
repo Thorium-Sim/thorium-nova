@@ -1,10 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { load, dump } from "js-yaml";
-import type {
-	DataStoreOperations,
-	DataStoreOptions,
-} from "@thorium/utils/.server/db-fs";
+import type { DataStoreOperations } from "@thorium/utils/.server/db-fs";
 import BasePlugin from "@thorium/.server/classes/Plugins";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { loadFolderYaml } from "@thorium/utils/.server/db-fs/loadFolderYaml";
