@@ -21,3 +21,6 @@ icons/sprite.svg
 /binaries/
 
 .wrangler
+
+# Playwright
+test-results

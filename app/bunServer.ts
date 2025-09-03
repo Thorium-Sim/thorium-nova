@@ -101,9 +101,8 @@ try {
 		exitHandler();
 
 		const port =
-			Number(process.env.PORT) || process.env.NODE_ENV === "production"
-				? 4444
-				: 3001;
+			Number(process.env.PORT) + (process.env.NODE_ENV === "test" ? 1 : 0) ||
+			(process.env.NODE_ENV === "production" ? 4444 : 3001);
 
 		const server = Bun.serve({
 			port,

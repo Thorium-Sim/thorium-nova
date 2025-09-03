@@ -17,12 +17,45 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - name: Install Dependencies
         run: bun install
-      - name: Lint
-        run: |
-          bun run lint
-      - name: TypeCheck
-        run: |
-          bun run typecheck
       - name: Test
         run: |
           bun run test
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install Dependencies
+        run: bun install
+      - name: Lint
+        run: |
+          bun run lint
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install Dependencies
+        run: bun install
+      - name: TypeCheck
+        run: |
+          bun run typecheck
+  e2e:
+    name: E2E
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - name: Install Dependencies
+        run: bun install
+      - name: Build
+        run: |
+          bun run build
+      - name: Test
+        run: |
+          bun run test:e2e
