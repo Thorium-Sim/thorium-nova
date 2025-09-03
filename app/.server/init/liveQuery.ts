@@ -48,7 +48,6 @@ export function initWebsocket({
 export type Context = inferAsyncReturnType<typeof createContext>;
 
 export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
-	isHost = false;
 	name: string = randomNameGenerator();
 
 	public async sendDataStream() {
@@ -111,29 +110,15 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 		this.send(snapshot);
 	}
 	toJSON() {
-		const { id, name, isHost } = this;
-		return { id, name, isHost };
+		const { id, name } = this;
+		return { id, name };
 	}
 	connectionOpened(): void {
-		// Claim host if there isn't one already claimed
-		const ctx = getDataContext(this.id);
-		if (ctx) {
-			const hasHost = Object.values(ctx.server.clients).some(
-				(client) => client.isHost && client.connected,
-			);
-			if (!hasHost) {
-				this.isHost = true;
-			}
-		}
 		pubsub.publish.client.get({ clientId: this.id });
 		pubsub.publish.client.all();
-		pubsub.publish.thorium.hasHost();
 	}
 	connectionClosed(): void {
 		pubsub.publish.client.get({ clientId: this.id });
 		pubsub.publish.client.all();
-		if (this.isHost) {
-			pubsub.publish.thorium.hasHost();
-		}
 	}
 }

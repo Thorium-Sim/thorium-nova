@@ -60,15 +60,14 @@ function ClientButtons() {
 
 	return (
 		<>
-			{client.isHost && (
-				<>
-					<NavLink
-						className="btn btn-primary btn-outline"
-						to="/flight/quick/ship"
-					>
-						Start Flight
-					</NavLink>
-					{/* <Disclosure>
+			<>
+				<NavLink
+					className="btn btn-primary btn-outline"
+					to="/flight/quick/ship"
+				>
+					Start Flight
+				</NavLink>
+				{/* <Disclosure>
 			<Disclosure.Button className="btn btn-info btn-outline">
 				Load a Saved Flight
 			</Disclosure.Button>
@@ -86,15 +85,12 @@ function ClientButtons() {
 				<Flights />
 			</Suspense>
 		</Disclosure> */}
-				</>
-			)}
+			</>
 
 			{/* <Button className="btn btn-warning btn-outline">Join a Server</Button> */}
-			{client.isHost && (
-				<NavLink className="btn btn-notice btn-outline" to="/config">
-					Configure Plugins
-				</NavLink>
-			)}
+			<NavLink className="btn btn-notice btn-outline" to="/config">
+				Configure Plugins
+			</NavLink>
 
 			{/* {process.env.NODE_ENV === "production" &&
 	location.protocol !== "https:" && (

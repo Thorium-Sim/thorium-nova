@@ -35,17 +35,15 @@ function FlightButtons() {
 	useMenubar({
 		children: flight ? (
 			<>
-				{client.isHost && (
-					<Button
-						className="btn btn-outline btn-xs btn-error"
-						onClick={async () => {
-							await q.flight.stop.netSend();
-							navigate("/");
-						}}
-					>
-						End
-					</Button>
-				)}
+				<Button
+					className="btn btn-outline btn-xs btn-error"
+					onClick={async () => {
+						await q.flight.stop.netSend();
+						navigate("/");
+					}}
+				>
+					End
+				</Button>
 				{flight?.paused ? (
 					<Button
 						className="btn btn-outline btn-xs btn-success"
