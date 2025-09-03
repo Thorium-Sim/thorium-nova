@@ -17,14 +17,13 @@ export const client = t.router({
 				: null,
 		)
 		.request(({ ctx, input }) => {
-			const { id, name, connected, isHost } =
-				ctx.server.clients[input.clientId];
+			const { id, name, connected } = ctx.server.clients[input.clientId];
 			const {
 				officersLog,
 				clientId: _id,
 				...flightClient
 			} = ctx.getFlightClient(input.clientId)?.components.flightClient || {};
-			return { id, name, connected, isHost, ...flightClient };
+			return { id, name, connected, ...flightClient };
 		}),
 	all: t.procedure
 		.autoPublish(["flightClient"], () => null)
@@ -65,12 +64,6 @@ export const client = t.router({
 		)
 		.send(({ ctx, input }) => {
 			const flightClient = ctx.getFlightClient(input.clientId);
-			// Only hosts can change other client's station assignment
-			if (!ctx.getIsHost(ctx.clientId) && input.clientId !== ctx.clientId) {
-				throw new Error(
-					"You must be host to change other client's assignments.",
-				);
-			}
 			if (!flightClient) {
 				throw new Error("No flight has been started.");
 			}

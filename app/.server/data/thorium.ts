@@ -26,30 +26,6 @@ export interface FileOrFolder {
 }
 
 export const thorium = t.router({
-	hasHost: t.procedure
-		.autoPublish([], () => null)
-		.request(({ ctx }) => {
-			const hasHost = Object.values(ctx.server.clients).some(
-				(client) => client.isHost && client.connected,
-			);
-			return hasHost;
-		}),
-	claimHost: t.procedure
-		.input(z.object({ clientId: z.string() }))
-		.send(({ ctx, input: { clientId } }) => {
-			const hasExistingHost = Object.values(ctx.server.clients).some(
-				(client) => {
-					return client.isHost && client.connected;
-				},
-			);
-			if (!hasExistingHost) {
-				ctx.getClient(clientId).isHost = true;
-			}
-
-			pubsub.publish.client.all();
-			pubsub.publish.client.get({ clientId });
-			pubsub.publish.thorium.hasHost();
-		}),
 	actions: t.procedure
 		.autoPublish([], () => null)
 		.request(function getActions({ ctx }) {

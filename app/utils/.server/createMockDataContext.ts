@@ -165,9 +165,6 @@ class MockDataContext {
 	getClient(clientId: string) {
 		return this.database.server.clients[clientId];
 	}
-	getIsHost(clientId: string) {
-		return this.getClient(clientId).isHost;
-	}
 	getFlightClient(clientId: string) {
 		if (!this.database.flight) return null;
 		if (!this.database.flight.flightClientIndex.has(clientId)) {

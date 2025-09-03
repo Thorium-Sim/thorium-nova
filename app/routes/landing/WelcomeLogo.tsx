@@ -48,24 +48,6 @@ export const WelcomeLogo = ({ className }: { className?: string }) => {
 				</Suspense>
 			</ErrorBoundary>
 			<IPAddress />
-			<ErrorBoundary fallback={null}>
-				<Suspense>
-					<HostButton />
-				</Suspense>
-			</ErrorBoundary>
 		</div>
 	);
 };
-
-export function HostButton() {
-	const [hasHost] = q.thorium.hasHost.useNetRequest();
-
-	return hasHost ? null : (
-		<Button
-			className="btn-warning btn-sm"
-			onClick={() => q.thorium.claimHost.netSend({ clientId })}
-		>
-			Claim Host
-		</Button>
-	);
-}
