@@ -14,6 +14,8 @@ import { componentDocs } from "./scripts/componentDocs";
 
 setDefaultResultOrder("ipv4first");
 
+const port = Number(process.env.PORT) || 3000;
+
 export default defineConfig({
 	plugins: [
 		mdx({
@@ -62,7 +64,7 @@ export default defineConfig({
 	},
 	base: "/",
 	server: {
-		port: 3000,
+		port,
 		host: "0.0.0.0",
 		open: true,
 		fs: {
@@ -72,11 +74,11 @@ export default defineConfig({
 			allow: [".."],
 		},
 		proxy: {
-			"/netSend": "http://localhost:3001",
-			"/netRequest": "http://localhost:3001",
-			"/plugins": "http://localhost:3001",
+			"/netSend": `http://localhost:${port + 1}`,
+			"/netRequest": `http://localhost:${port + 1}`,
+			"/plugins": `http://localhost:${port + 1}`,
 			"/ws": {
-				target: "ws://localhost:3001/ws",
+				target: `ws://localhost:${port + 1}/ws`,
 				ws: true,
 			},
 		},
