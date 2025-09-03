@@ -28,7 +28,13 @@ const ShipConfig = () => {
 	if (!startingPoints || startingPoints.length === 0)
 		return <div>No starting points are present in the active plugins.</div>;
 
-	const mission = missions.find(
+	const allowedMissions = missions.filter(
+		({ flightMode, pluginId, name }) =>
+			flightMode === state.mode ||
+			(pluginId === "Thorium Default" && name === "Sandbox"),
+	);
+
+	const mission = allowedMissions.find(
 		(mission) =>
 			mission.pluginId === state.missionId?.pluginId &&
 			mission.name === state.missionId.missionId,
@@ -36,7 +42,8 @@ const ShipConfig = () => {
 
 	const isSandbox =
 		state.missionId?.pluginId === "Thorium Default" &&
-		state.missionId.missionId === "Sandbox";
+		state.missionId.missionId === "Sandbox" &&
+		state.mode !== "legacy";
 
 	return (
 		<div className="h-[70vh] grid grid-cols-3 grid-rows-[auto_1fr] w-[60vw] gap-8">
@@ -46,7 +53,7 @@ const ShipConfig = () => {
 					setSelectedItem={({ id }) =>
 						dispatch({ type: "missionId", missionId: id })
 					}
-					items={missions.map((item) => ({
+					items={allowedMissions.map((item) => ({
 						id: { pluginId: item.pluginId, missionId: item.name },
 						label: item.name,
 						description: item.description,

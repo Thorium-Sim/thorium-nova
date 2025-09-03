@@ -27,6 +27,7 @@ export const Joystick = ({
 			<div
 				ref={containerRef}
 				className="top-0 absolute bg-black/50 border-2 border-white/50 rounded-full w-full h-full flex justify-center items-center touch-none"
+				draggable={false}
 				{...eventHandlers}
 				onPointerDown={(e) => {
 					// Find the offset from the center
@@ -85,6 +86,7 @@ export const LinearJoystick = ({
 				"relative bg-black/50 border-2 border-white/50 rounded-full flex justify-center items-center touch-none",
 				className,
 			)}
+			draggable={false}
 			{...eventHandlers}
 			onPointerDown={(e) => {
 				// Find the offset from the center

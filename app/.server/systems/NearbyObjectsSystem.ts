@@ -5,6 +5,7 @@ import {
 } from "@thorium/utils/starmap/position";
 
 export class NearbyObjectsSystem extends System {
+	static flightMode = ["nova"];
 	frequency = 5;
 	test(entity: Entity) {
 		return !!(entity.components.nearbyObjects && entity.components.position);

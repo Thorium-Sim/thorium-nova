@@ -36,6 +36,7 @@ import { SensorScanSystem } from "@thorium/.server/systems/SensorScanSystem";
 import { NPCKnowledgeSystem } from "@thorium/.server/systems/NPCKnowledgeSystem";
 import { NPCDecisionSystem } from "@thorium/.server/systems/NPCDecisionSystem";
 import { NPCFireWeaponsSystem } from "@thorium/.server/systems/NPCFireWeaponsSystem";
+import { legacySystems } from "@thorium/.server/systems/Legacy";
 
 const systems = [
 	FilterInventorySystem,
@@ -70,6 +71,8 @@ const systems = [
 	HeatToCoolantSystem,
 	HeatDispersionSystem,
 	IsDestroyedSystem,
+	// We slot the legacy systems in right before these two shared systems
+	...legacySystems,
 	DataStreamSystem,
 	ProcessTriggersSystem,
 ];

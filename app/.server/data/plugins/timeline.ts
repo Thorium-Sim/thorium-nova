@@ -456,17 +456,19 @@ export const timeline = t.router({
 						category: string;
 						cover: string;
 						pluginId: string;
+						flightMode: "nova" | "legacy";
 					}[],
 					plugin,
 				) => {
 					const missions = plugin.aspects.timelines
 						.filter((timeline) => timeline.type === "mission")
-						.map(({ name, description, category, assets }) => ({
+						.map(({ name, description, category, assets, flightMode }) => ({
 							name,
 							description,
 							category,
 							cover: assets.cover,
 							pluginId: plugin.id,
+							flightMode,
 						}));
 					if (input?.pluginId && plugin.name !== input?.pluginId) return acc;
 					if (plugin.name === input?.pluginId) return acc.concat(missions);

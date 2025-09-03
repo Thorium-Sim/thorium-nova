@@ -10,6 +10,7 @@ const velocityVector = new Vector3();
 const newVelocityVector = new Vector3();
 const targetVelocityVector = new Vector3();
 export class TorpedoMovementSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!entity.components.isTorpedo;
 	}

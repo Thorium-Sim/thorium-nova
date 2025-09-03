@@ -6,6 +6,7 @@ import { cancelLoopingSound } from "@thorium/utils/.server/playRangedSound";
  * Loads and unloads torpedoes
  */
 export class TorpedoLoadingSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!(
 			entity.components.isTorpedoLauncher && entity.components.isShipSystem

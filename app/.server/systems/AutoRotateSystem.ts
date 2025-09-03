@@ -23,6 +23,7 @@ const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
  */
 
 export class AutoRotateSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!(
 			entity.components.isShip &&
@@ -110,7 +111,7 @@ export class AutoRotateSystem extends System {
 		}
 
 		// Apply the rotation
-		rotationQuat.slerp(desiredRotationQuat, elapsed / (1000 / this.frequency));
+		rotationQuat.slerp(desiredRotationQuat, elapsed / 1000);
 		entity.updateComponent("rotation", {
 			x: rotationQuat.x,
 			y: rotationQuat.y,

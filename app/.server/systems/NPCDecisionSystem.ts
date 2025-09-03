@@ -41,6 +41,7 @@ const direction = new Vector3();
 
 const DEFAULT_FLEE_DISTANCE = 25_000;
 export class NPCDecisionSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!(
 			entity.components.isShip && !entity.components.isPlayerShip?.value

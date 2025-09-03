@@ -10,6 +10,7 @@ import { type Entity, System } from "@thorium/utils/ecs";
  */
 
 export class PowerDrawSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!entity.components.power && !!entity.components.isShipSystem;
 	}
@@ -61,8 +62,7 @@ export class PowerDrawSystem extends System {
 			}
 			case "thrusters": {
 				if (!entity.components.isThrusters) return;
-				const { direction, rotationDelta, thrusting } =
-					entity.components.isThrusters;
+				const { direction, rotationDelta } = entity.components.isThrusters;
 				const directionOutput = Math.hypot(
 					direction.x,
 					direction.y,

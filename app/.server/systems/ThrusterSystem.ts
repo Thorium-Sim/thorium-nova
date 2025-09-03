@@ -1,6 +1,7 @@
 import { type Entity, System } from "@thorium/utils/ecs";
 
 export class ThrusterSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!(entity.components.isThrusters && entity.components.isShipSystem);
 	}

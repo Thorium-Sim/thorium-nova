@@ -13,6 +13,7 @@ const shipMatrix = new Matrix4();
 const steeringForce = new Vector3();
 
 export class AutoThrustSystem extends System {
+	static flightMode = ["nova"];
 	updateCount = 0;
 	test(entity: Entity) {
 		return !!(
@@ -162,7 +163,6 @@ export class AutoThrustSystem extends System {
 
 			// Apply the steering force to the thrusters
 			thrustersEntity.updateComponent("isThrusters", {
-				thrusting: steeringForce.lengthSq() > 0,
 				direction: {
 					x: steeringForce.x,
 					y: steeringForce.y,

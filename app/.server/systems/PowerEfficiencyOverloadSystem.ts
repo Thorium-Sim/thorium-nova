@@ -1,6 +1,7 @@
 import { type Entity, System } from "@thorium/utils/ecs";
 
 export class PowerEfficiencyOverloadSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return Boolean(entity.components.damage && entity.components.power);
 	}

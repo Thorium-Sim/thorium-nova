@@ -13,6 +13,11 @@ class System {
 	 */
 	frequency: number;
 
+	/**
+	 * For frequency > 1, we need to accumulate the elapsed time
+	 */
+	elapsedAccumulation = 0;
+
 	ecs!: ECS;
 	/**
 	 * Entities of the system.
@@ -24,6 +29,8 @@ class System {
 	 * be processed the following frame.
 	 */
 	budgetMs: number | null = null;
+
+	static flightMode: string[];
 
 	/**
 	 * Entities that were deferred for a future frame
@@ -58,14 +65,21 @@ class System {
 	/**
 	 * Apply update to each entity of this system.
 	 */
-	updateAll(elapsed = 1) {
-		this.preUpdate(elapsed);
-
-		for (const [id, entity] of this.entities) {
-			this.update(entity, elapsed);
+	updateAll(elapsed: number, updateCounter: number) {
+		if (updateCounter % this.frequency > 0) {
+			this.elapsedAccumulation += elapsed;
+			return;
 		}
 
-		this.postUpdate(elapsed);
+		this.preUpdate(elapsed + this.elapsedAccumulation);
+
+		for (const [id, entity] of this.entities) {
+			this.update(entity, elapsed + this.elapsedAccumulation);
+		}
+
+		this.postUpdate(elapsed + this.elapsedAccumulation);
+
+		this.elapsedAccumulation = 0;
 	}
 	/**
 	 * dispose the system by exiting all the entities

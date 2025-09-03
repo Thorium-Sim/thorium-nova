@@ -68,15 +68,13 @@ export default function FlightQuickStart() {
 						className="btn-success"
 						disabled={flightStart.isPending}
 						onClick={async () => {
-							// TODO November 20, 2021 - Do something with the "Flight Director" parameter
-							// once we get Flight Director controls implemented.
-							// TODO September 6, 2023 - Add support for multiple player ships
 							const {
 								ships,
 								flightName,
 								missionId,
 								hasFlightDirector,
 								startingPointId: startingPoint,
+								mode,
 							} = state;
 
 							if (ships.length === 0) {
@@ -99,6 +97,7 @@ export default function FlightQuickStart() {
 								hasFlightDirector,
 								missionId,
 								startingPoint,
+								mode,
 							});
 						}}
 					>

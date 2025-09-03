@@ -16,6 +16,7 @@ type DeckNodeMap = {
 const deckNodeCache = new Map<number, DeckNodeMap>();
 
 export class PassengerMovementSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!(
 			entity.components.passengerMovement && entity.components.position
@@ -23,7 +24,7 @@ export class PassengerMovementSystem extends System {
 	}
 	frequency = 5;
 	update(entity: Entity, elapsed: number) {
-		const elapsedRatio = elapsed / (1000 / this.frequency);
+		const elapsedRatio = elapsed / 1000;
 		const { position, passengerMovement } = entity.components;
 		if (!position || !passengerMovement) return;
 		const { x, y, z, parentId } = position;

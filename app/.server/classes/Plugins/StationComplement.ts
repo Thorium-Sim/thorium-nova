@@ -9,6 +9,7 @@ export default class StationComplementPlugin extends Aspect {
 	name!: string;
 	hasShipMap!: boolean;
 	stations!: Station[];
+	flightMode!: "nova" | "legacy";
 	get stationCount() {
 		return this.stations.length;
 	}
@@ -23,27 +24,6 @@ export default class StationComplementPlugin extends Aspect {
 		this.stations = this.stations || params.stations || [];
 		this.hasShipMap = this.hasShipMap || params.hasShipMap || false;
 		this.assets = this.assets || params.assets || {};
-
-		this.assets = this.stations.reduce(
-			(assets: Record<string, string>, station) => {
-				const cardIcons = station.cards.reduce(
-					(icons: Record<string, string>, card) => {
-						if (card.icon) {
-							icons[`${station.name}-${card.name}-icon`] = card.icon;
-						}
-						return icons;
-					},
-					{},
-				);
-
-				assets[`${station.name}-logo`] = station.logo;
-				for (const key in cardIcons) {
-					assets[key] = cardIcons[key];
-				}
-
-				return assets;
-			},
-			{},
-		);
+		this.flightMode = this.flightMode || params.flightMode || "nova";
 	}
 }

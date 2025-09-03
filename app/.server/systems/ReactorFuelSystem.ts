@@ -32,6 +32,7 @@ export function getPowerSupplierPowerNeeded(entity: Entity) {
 	}, 0);
 }
 export class ReactorFuelSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!entity.components.isReactor;
 	}

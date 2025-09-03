@@ -1,9 +1,8 @@
 import { threatKnowledge } from "@thorium/.server/ai/threatKnowledge";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
-import { type ECS, type Entity, System } from "@thorium/utils/ecs";
-import type { threatScores } from "@thorium/utils/flags/shipObjectives";
-import type z from "zod";
+import { type Entity, System } from "@thorium/utils/ecs";
 export class NPCKnowledgeSystem extends System {
+	static flightMode = ["nova"];
 	frequency = 10;
 	test(entity: Entity) {
 		return !!(

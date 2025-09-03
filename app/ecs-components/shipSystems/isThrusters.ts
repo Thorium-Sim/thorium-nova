@@ -10,8 +10,6 @@ const coordinates = z
 
 export const isThrusters = z
 	.object({
-		/** Whether the thrusters are currently thrusting */
-		thrusting: z.boolean().default(false),
 		/** The currently applied direction thruster vector in m/s */
 		direction: coordinates,
 		/** The maximum speed which can be applied by direction thrusters in m/s */
@@ -39,6 +37,15 @@ export const isThrusters = z
 				x: z.number().default(0),
 				y: z.number().default(0),
 				z: z.number().default(0),
+			})
+			.default({}),
+
+		// For Legacy
+		requiredRotation: z
+			.object({
+				yaw: z.number().default(0),
+				pitch: z.number().default(0),
+				roll: z.number().default(0),
 			})
 			.default({}),
 	})

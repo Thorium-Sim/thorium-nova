@@ -3,6 +3,7 @@ import { type Entity, System } from "@thorium/utils/ecs";
 import type { World } from "@thorium-sim/rapier3d-node";
 
 export class IsDestroyedSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!entity.components.isDestroyed;
 	}

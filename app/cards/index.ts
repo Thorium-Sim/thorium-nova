@@ -1,3 +1,4 @@
+export * from "./Legacy";
 export { default as Login } from "./Login";
 export * from "./Pilot";
 export { default as OfficersLog } from "./OfficersLog";

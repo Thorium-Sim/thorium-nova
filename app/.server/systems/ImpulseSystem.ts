@@ -13,6 +13,7 @@ import { type Entity, System } from "@thorium/utils/ecs";
  * it also might not be necessary.
  */
 export class ImpulseSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!(
 			entity.components.isImpulseEngines && entity.components.isShipSystem

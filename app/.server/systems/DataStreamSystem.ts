@@ -5,6 +5,7 @@ import { System } from "@thorium/utils/ecs";
 import { SERVER_FPS } from "@thorium/utils/live-query/constants";
 
 export class DataStreamSystem extends System {
+	static flightMode = ["nova", "legacy"];
 	elapsed = 0;
 	postUpdate(elapsed: number) {
 		this.elapsed += elapsed;

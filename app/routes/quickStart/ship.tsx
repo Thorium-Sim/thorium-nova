@@ -6,11 +6,22 @@ import {
 import Button from "@thorium/ui/Button";
 import Checkbox from "@thorium/ui/Checkbox";
 import { Icon } from "@thorium/ui/Icon";
+import InfoTip from "@thorium/ui/InfoTip";
 import Input from "@thorium/ui/Input";
 import SearchableList from "@thorium/ui/SearchableList";
+import { cn } from "@thorium/utils/cn";
 import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
 import * as React from "react";
-import { type Key, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
+import {
+	type Key,
+	Label,
+	Radio,
+	RadioGroup,
+	Tab,
+	TabList,
+	TabPanel,
+	Tabs,
+} from "react-aria-components";
 
 interface Ship {
 	id: string;
@@ -27,8 +38,9 @@ const FleetConfig = () => {
 
 	const ships = state.ships || [];
 	return (
-		<div>
+		<div className="w-[40vw]">
 			<Input
+				className="mb-4"
 				label="Flight Name"
 				value={state.flightName}
 				onChange={(e) => dispatch({ type: "flightName", name: e.target.value })}
@@ -43,10 +55,65 @@ const FleetConfig = () => {
 					</Button>
 				}
 			/>
+			<RadioGroup
+				className="mb-4"
+				value={state.mode}
+				onChange={(mode) =>
+					dispatch({ type: "mode", mode: mode as "nova" | "legacy" })
+				}
+			>
+				<Label>Mode</Label>
+				<div className="flex gap-2">
+					<Radio
+						value="nova"
+						className={({ isSelected, isPressed, isFocusVisible }) =>
+							cn("flex-auto p-4 border border-white/30 rounded", {
+								"bg-purple-500/10 border-purple-500": isSelected,
+								"bg-purple-500/20": isPressed,
+								"ring ring-purple-100": isFocusVisible,
+							})
+						}
+					>
+						<div className="text-lg flex justify-between">
+							Nova
+							<InfoTip>
+								Currently under development. Play Thorium in a realistic
+								simulation. 3D space, ship systems, heat, power distribution,
+								crew members, NPC ships, and everything else is modeled and
+								simulated. Once you understand the rules of the simulation, you
+								can exploit them to your advantage. Flight Director optional.
+							</InfoTip>
+						</div>
+					</Radio>
+					<Radio
+						value="legacy"
+						className={({ isSelected, isPressed, isFocusVisible }) =>
+							cn("flex-auto p-4 border border-white/30 rounded", {
+								"bg-purple-500/10 border-purple-500": isSelected,
+								"bg-purple-500/20": isPressed,
+								"ring ring-purple-100": isFocusVisible,
+							})
+						}
+					>
+						<div className="text-lg flex justify-between">
+							Legacy
+							<InfoTip>
+								Currently under development. Grab a Flight Director and play
+								Thorium more like a tabletop roleplaying game. The Flight
+								Director controls the entire simulation, which is more ephemeral
+								and less fixed. Great if you have an experienced Flight Director
+								or want to have experiences that aren't possible in the Nova
+								game engine.
+							</InfoTip>
+						</div>
+					</Radio>
+				</div>
+			</RadioGroup>
 			<div className="mt-1">
 				<Checkbox
 					label="Use Flight Director controls"
 					checked={state.hasFlightDirector}
+					disabled={state.mode === "legacy"}
 					onChange={(e) =>
 						dispatch({
 							type: "hasFlightDirector",
@@ -74,10 +141,7 @@ function ShipsList({
 	const [selectedKey, onSelectionChange] = React.useState<Key>(ships[0].id);
 	return (
 		<Tabs selectedKey={selectedKey} onSelectionChange={onSelectionChange}>
-			<TabList
-				aria-label="Player Ships"
-				className="flex gap-1 flex-wrap w-[24rem] max-w-[24rem]"
-			>
+			<TabList aria-label="Player Ships" className="flex gap-1 flex-wrap">
 				{ships.map((ship) => (
 					<Tab
 						id={ship.id}
@@ -134,7 +198,7 @@ function ShipConfig({
 	);
 
 	return (
-		<div className="w-[24rem] max-w-[24rem]">
+		<div>
 			<div className="flex gap-4">
 				<Input
 					placeholder="Ship Name Here"

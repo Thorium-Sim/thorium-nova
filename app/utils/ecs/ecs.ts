@@ -162,20 +162,29 @@ class ECS {
 			this.cleanDirtyEntities();
 		}
 		for (const system of this.systems) {
-			if (this.updateCounter % system.frequency > 0) {
-				continue;
-			}
 			if (this.entitiesSystemsDirty.size > 0) {
 				// if the last system flagged some entities as dirty check that case
 				this.cleanDirtyEntities();
 			}
-			system.updateAll(elapsed);
+			system.updateAll(elapsed, this.updateCounter);
 		}
 		this.updateCounter += 1;
 		this.lastUpdate = now;
 	}
 	batchChange(entityId: number, component: ComponentIds) {
 		this.changeBatch.add(`${entityId}-${component}`);
+	}
+	dispose() {
+		for (const sys of this.systems) {
+			this.removeSystem(sys);
+		}
+		for (const [, entity] of this.entities) {
+			this.removeEntity(entity);
+		}
+		this.colliderCache.clear();
+		this.componentCache.clear();
+		this.shipSystemCache.clear();
+		this.changeBatch.clear();
 	}
 }
 

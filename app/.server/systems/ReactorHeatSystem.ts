@@ -24,6 +24,7 @@ const HEAT_CAPACITY: HeatCapacity = 0.475;
 const MASS: Kilograms = 10000;
 
 export class ReactorHeatSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!entity.components.isReactor && !!entity.components.heat;
 	}

@@ -14,7 +14,7 @@ export default function OfficersLog() {
 	const textRef = React.useRef<HTMLTextAreaElement>(null);
 	const entry = officersLog.find((e) => e.timestamp === selectedEntry);
 	return (
-		<div className="mx-auto h-screen max-w-5xl w-full grid grid-cols-3 grid-rows-[2.5rem_1fr_auto] @2xl:max-h-max max-h-[calc(22rem)] @2xl:py-4 @2xl:gap-8 gap-4">
+		<div className="mx-auto h-screen max-w-5xl w-full grid grid-cols-3 grid-rows-[2.5rem_1fr_auto] @2xl:max-h-full max-h-[calc(22rem)] @2xl:py-4 @2xl:gap-8 gap-4">
 			<h2 className="@2xl:text-4xl text-2xl font-bold h-10 col-start-1">
 				Officers Log
 			</h2>
