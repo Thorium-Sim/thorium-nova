@@ -329,6 +329,8 @@ export const pilot = t.router({
 					},
 				});
 
+				pubsub.publish.legacy.thrusters.get({ shipId });
+
 				if (!direction.x && !direction.y && !direction.z) {
 					// Cancel the looping sound
 					cancelLoopingSound(system, "thrust");
@@ -336,8 +338,6 @@ export const pilot = t.router({
 					const ship = ctx.ecs.getEntityById(shipId);
 					playShipSound(system, ship!, "thrust");
 				}
-
-				return system;
 			}),
 		setRotationDelta: t.procedure
 			.input(

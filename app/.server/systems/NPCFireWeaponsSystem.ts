@@ -20,6 +20,7 @@ const shipQuaternion = new Quaternion();
 export const TORPEDO_FIRE_DISTANCE_SECONDS = 10;
 
 export class NPCFireWeaponsSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!(
 			entity.components.isShip && !entity.components.isPlayerShip?.value

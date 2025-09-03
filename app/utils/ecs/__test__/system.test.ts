@@ -87,7 +87,7 @@ describe("System", () => {
 
 			system.addEntity(entity1);
 			system.addEntity(entity2);
-			system.updateAll();
+			system.updateAll(0, 0);
 
 			expect(system.update).toBeCalledTimes(2);
 		});
@@ -96,7 +96,7 @@ describe("System", () => {
 			const system = new System();
 			system.preUpdate = vi.fn();
 
-			system.updateAll();
+			system.updateAll(0, 0);
 
 			expect(system.preUpdate).toBeCalled();
 		});
@@ -105,7 +105,7 @@ describe("System", () => {
 			const system = new System();
 			system.postUpdate = vi.fn();
 
-			system.updateAll();
+			system.updateAll(0, 0);
 
 			expect(system.postUpdate).toBeCalled();
 		});

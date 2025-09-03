@@ -52,6 +52,8 @@ export const iconNames = [
   "circle-off",
   "circle-fading-arrow-up",
   "circle-dot",
+  "circle-arrow-up",
+  "circle-arrow-down",
   "chevrons-up-down",
   "chevron-up",
   "chevron-right",
@@ -72,6 +74,7 @@ export const iconNames = [
   "atomic-slashes",
   "atom",
   "arrow-up",
+  "arrow-right",
   "arrow-left",
   "arrow-down",
 ] as const

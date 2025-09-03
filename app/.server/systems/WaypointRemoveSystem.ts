@@ -2,6 +2,7 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import { type Entity, System } from "@thorium/utils/ecs";
 
 export class WaypointRemoveSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!entity.components.isWaypoint;
 	}

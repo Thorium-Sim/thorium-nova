@@ -36,6 +36,7 @@ const eventQueue = new RAPIER.EventQueue(true);
  *  physics world as the player.
  */
 export class PhysicsMovementSystem extends System {
+	static flightMode = ["nova"];
 	collisionStepEntities = new Set<number>();
 	test(entity: Entity) {
 		return Boolean(

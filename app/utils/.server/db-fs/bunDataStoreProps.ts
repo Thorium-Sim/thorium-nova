@@ -140,10 +140,11 @@ export const bunDataStoreProps: DataStoreOperations = {
 			objectGlob,
 		);
 
-		return data.map((aspectData) => {
+		return data.flatMap((aspectData) => {
 			if (aspectName === "shipSystems") {
 				const systemClass =
 					ShipSystemTypes[aspectData.type as keyof typeof ShipSystemTypes];
+				if (!systemClass) return [];
 				return new systemClass(aspectData, this) as InstanceType<typeof aspect>;
 			}
 			return new aspect(aspectData, this);

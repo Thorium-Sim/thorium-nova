@@ -5,6 +5,7 @@ const HARD_BRAKE_CONST = 5;
 const SOFT_BRAKE_CONST = 5;
 
 export class WarpSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!(
 			entity.components.isWarpEngines && entity.components.isShipSystem

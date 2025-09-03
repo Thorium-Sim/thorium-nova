@@ -10,6 +10,7 @@ import { capitalCase } from "change-case";
 import type { z } from "zod";
 
 export class SensorScanSystem extends System {
+	static flightMode = ["nova"];
 	/** The number of concurrent sensor scans */
 	sensorsScanCount = new Map<number, number>();
 	test(entity: Entity) {

@@ -2,6 +2,7 @@ import { type Entity, System } from "@thorium/utils/ecs";
 
 const SHIELD_DISCHARGE_TIME = 5 * 1000; // 5 seconds
 export class ShieldsSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!entity.components.isShields;
 	}

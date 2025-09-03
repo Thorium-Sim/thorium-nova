@@ -6,6 +6,7 @@ import { type Entity, System } from "@thorium/utils/ecs";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 
 export class PhysicsWorldPositionSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!(
 			entity.components.physicsWorld &&

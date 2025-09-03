@@ -15,7 +15,7 @@ export function useLocalStorageReducer<R extends Reducer<I, A>, I, A>(
 		} catch (e) {
 			// ignore
 		}
-		return preloadedState || defaultState;
+		return { ...defaultState, ...preloadedState };
 	}, [storageKey, defaultState]);
 
 	const hookVars = useReducer(reducer, null, init);

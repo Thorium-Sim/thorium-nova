@@ -68,7 +68,7 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 		if (!ship) return;
 		entities.push(dataStreamEntity(ship));
 
-		for (const nearbyShipId of ship.components.nearbyObjects?.objects.keys() ||
+		for (const nearbyShipId of ship.components.nearbyObjects?.objects?.keys() ||
 			[]) {
 			const entity = context.ecs.getEntityById(nearbyShipId);
 			if (entity) entities.push(dataStreamEntity(entity));

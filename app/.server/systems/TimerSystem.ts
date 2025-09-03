@@ -18,6 +18,7 @@ function subtractTimer(timer: string) {
 	return dur;
 }
 export class TimerSystem extends System {
+	static flightMode = ["nova", "legacy"];
 	timeCount = 0;
 	test(entity: Entity) {
 		return !!entity.components.timer;

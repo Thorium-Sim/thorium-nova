@@ -14,6 +14,7 @@ export interface Sphere {
 	position: Vector3;
 }
 export class SolarSystemPositionSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!(entity.components.position || entity.components.satellite);
 	}

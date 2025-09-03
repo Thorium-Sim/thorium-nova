@@ -50,6 +50,7 @@ const flightStartShips = z
 	.nonempty();
 
 function getStationComplement(
+	mode: "nova" | "legacy",
 	activePlugins: BasePlugin[],
 	ship: Zod.infer<typeof flightStartShips>[0],
 ) {
@@ -85,6 +86,7 @@ function getStationComplement(
 				return (
 					plugin.aspects.stationComplements.find(
 						(pluginStationComplement) =>
+							pluginStationComplement.flightMode === mode &&
 							pluginStationComplement.stationCount === ship.crewCount,
 					) || null
 				);
@@ -101,8 +103,8 @@ export const flight = t.router({
 		.request(({ ctx }) => {
 			const flight = ctx.flight;
 			if (!flight) return null;
-			const { date, name, paused, hasFlightDirector } = flight;
-			return { date, name, paused, hasFlightDirector };
+			const { date, name, paused, hasFlightDirector, mode } = flight;
+			return { date, name, paused, hasFlightDirector, mode };
 		}),
 	all: t.procedure
 		.autoPublish(["isFlight"], () => null)
@@ -113,6 +115,7 @@ export const flight = t.router({
 		.input(
 			z.object({
 				flightName: z.string(),
+				mode: z.enum(["nova", "legacy"]),
 				ships: flightStartShips,
 				hasFlightDirector: z.coerce.boolean(),
 				missionId: z
@@ -137,6 +140,7 @@ export const flight = t.router({
 					ships,
 					missionId,
 					startingPoint,
+					mode,
 				},
 			}) => {
 				inputAuth(ctx);
@@ -153,6 +157,7 @@ export const flight = t.router({
 						entities: [],
 						serverDataModel: ctx.server,
 						hasFlightDirector,
+						mode,
 					},
 					{ meta: { filePath: `/flights/${flightName}.flight` } },
 				);
@@ -160,31 +165,36 @@ export const flight = t.router({
 				const activePlugins = ctx.server.plugins.filter((p) => p.active);
 				ctx.flight.pluginIds = activePlugins.map((p) => p.id);
 				await ctx.flight.initEcs(ctx.server);
-				await ctx.flight.initPhysics();
-				// This will spawn all of the systems and planets bundled with the plugins
-				const solarSystemMap = ctx.flight.pluginIds.reduce(
-					(map: Record<string, Entity>, pluginId) => {
-						const plugin = ctx.server.plugins.find(
-							(plugin) => plugin.id === pluginId,
-						);
-						if (!plugin) return map;
-						// Create entities for the universe objects
-						plugin.aspects.solarSystems.forEach((solarSystem) => {
-							const entities = spawnSolarSystem(solarSystem);
-							entities.forEach((object) => {
-								const { entity } = object;
-								ctx.flight?.ecs.addEntity(entity);
-								let key = `${object.pluginId}-${object.pluginSystemId}`;
-								if (object.type === "planet" || object.type === "star") {
-									key += `-${object.objectId}`;
-								}
-								map[key] = entity;
+
+				let solarSystemMap: Record<string, Entity> | null = null;
+				if (mode === "nova") {
+					await ctx.flight.initPhysics();
+
+					// This will spawn all of the systems and planets bundled with the plugins
+					solarSystemMap = ctx.flight.pluginIds.reduce(
+						(map: Record<string, Entity>, pluginId) => {
+							const plugin = ctx.server.plugins.find(
+								(plugin) => plugin.id === pluginId,
+							);
+							if (!plugin) return map;
+							// Create entities for the universe objects
+							plugin.aspects.solarSystems.forEach((solarSystem) => {
+								const entities = spawnSolarSystem(solarSystem);
+								entities.forEach((object) => {
+									const { entity } = object;
+									ctx.flight?.ecs.addEntity(entity);
+									let key = `${object.pluginId}-${object.pluginSystemId}`;
+									if (object.type === "planet" || object.type === "star") {
+										key += `-${object.objectId}`;
+									}
+									map[key] = entity;
+								});
 							});
-						});
-						return map;
-					},
-					{},
-				);
+							return map;
+						},
+						{},
+					);
+				}
 
 				// Duplicate the inventory templates in the active plugins
 				activePlugins.forEach((plugin) => {
@@ -209,6 +219,7 @@ export const flight = t.router({
 				});
 				// Add inventory entities to their appropriate system
 				ctx.flight.ecs.cleanDirtyEntities();
+
 				// Spawn the ships that were defined when the flight was started
 				for (const ship of ships) {
 					const shipTemplate = activePlugins.reduce(
@@ -224,6 +235,7 @@ export const flight = t.router({
 						null,
 					);
 					if (!shipTemplate) continue;
+
 					let position: Zod.infer<typeof positionComponent> = {
 						x: 0,
 						y: 0,
@@ -231,7 +243,7 @@ export const flight = t.router({
 						type: "interstellar",
 						parentId: null,
 					};
-					if (startingPoint) {
+					if (startingPoint && mode === "nova" && solarSystemMap) {
 						const startingPointPosition = findStartingPoint(
 							ctx.ecs,
 							startingPoint,
@@ -271,7 +283,11 @@ export const flight = t.router({
 
 					// First see if there is a station complement
 					// that matches the specific one that was passed in
-					const stationComplement = getStationComplement(activePlugins, ship);
+					const stationComplement = getStationComplement(
+						mode,
+						activePlugins,
+						ship,
+					);
 					shipEntity.addComponent("stationComplement", {
 						stations: stationComplement?.stations || [],
 					});
@@ -304,11 +320,11 @@ export const flight = t.router({
 		),
 	stop: t.procedure.send(async ({ ctx }) => {
 		inputAuth(ctx);
-
 		// Save the flight, but don't delete it.
 		if (!ctx.flight) return null;
 		ctx.flight.paused = false;
 
+		ctx.flight.stop();
 		ctx.flight = null;
 		ctx.server.activeFlightName = null;
 

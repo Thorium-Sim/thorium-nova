@@ -43,6 +43,7 @@ export default class TimelinePlugin extends Aspect {
 	category: string;
 	tags: string[];
 	type: "mission" | "trigger" | "training" | "report";
+	flightMode: "nova" | "legacy";
 
 	steps: TimelineStep[];
 	/**
@@ -67,6 +68,7 @@ export default class TimelinePlugin extends Aspect {
 		this.category = params.category || "";
 		this.tags = params.tags || [];
 		this.type = params.type || "mission";
+		this.flightMode = params.flightMode || "nova";
 
 		this.assets = params.assets || {
 			cover: "",

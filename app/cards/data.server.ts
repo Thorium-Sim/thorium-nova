@@ -1,3 +1,4 @@
+export { legacy } from "./Legacy/data.server";
 export { pilot } from "./Pilot/data.server";
 export { officersLog } from "./OfficersLog/data.server";
 export { navigation, waypoints } from "./Navigation/data.server";

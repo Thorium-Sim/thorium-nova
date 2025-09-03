@@ -13,17 +13,32 @@ import type { DataContext } from "@thorium/.server/DataContext";
 
 export const ship = t.router({
 	get: t.procedure
-		.input(z.object({ clientId: z.string() }))
+		.input(
+			z.union([
+				z.object({ clientId: z.string() }),
+				z.object({ shipId: z.number() }),
+			]),
+		)
 		.filter(
 			(publish: { shipId: number } | { clientId: string }, { ctx, input }) => {
 				if (!publish) return true;
 				if (
 					"shipId" in publish &&
 					publish.shipId !==
-						ctx.getFlightClient(input.clientId)?.components.flightClient?.shipId
+						("shipId" in input
+							? input.shipId
+							: ctx.getFlightClient(input.clientId)?.components.flightClient
+									?.shipId)
 				)
 					return false;
-				if ("clientId" in publish && publish.clientId !== input.clientId)
+				if (
+					"clientId" in publish &&
+					("clientId" in input
+						? publish.clientId !== input.clientId
+						: Object.values(ctx.flight?.clients || {}).some(
+								(c) => c?.components.flightClient?.shipId === input.shipId,
+							))
+				)
 					return false;
 				return true;
 			},
@@ -41,8 +56,10 @@ export const ship = t.router({
 			const ship =
 				ctx.ecs
 					.getEntityById(
-						ctx.getFlightClient(input.clientId)?.components.flightClient
-							?.shipId || -1,
+						"shipId" in input
+							? input.shipId
+							: ctx.getFlightClient(input.clientId)?.components.flightClient
+									?.shipId || -1,
 					)
 					?.toJSON() || null;
 			return ship;

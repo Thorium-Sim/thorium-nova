@@ -72,7 +72,7 @@ const CardRenderer = ({
 	const show = allowCard && currentCardId === id;
 	const [cardLoaded, setCardLoaded] = useState(show);
 	return (
-		<CardProvider cardName={id}>
+		<CardProvider cardName={id} cardLoaded={cardLoaded}>
 			<Transition
 				key={id}
 				show={show}

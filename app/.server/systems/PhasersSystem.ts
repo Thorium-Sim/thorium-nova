@@ -7,11 +7,12 @@ import { applyDamage } from "@thorium/utils/.server/ship/collisionDamage";
 import { isPointWithinCone } from "@thorium/utils/starmap/isPointWithinCone";
 
 export class PhasersSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!entity.components.isPhasers;
 	}
 	update(entity: Entity, elapsed: number) {
-		const elapsedHours = elapsed / (1000 / this.frequency) / 3600;
+		const elapsedHours = elapsed / 1000 / 3600;
 		const phasers = entity.components.isPhasers;
 		if (!phasers) return;
 

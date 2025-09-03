@@ -23,6 +23,7 @@ export interface FlightConfigState {
 	}[];
 	missionId?: { pluginId: string; missionId: string };
 	startingPointId?: FlightStartingPoint;
+	mode: "nova" | "legacy";
 }
 
 export type FlightConfigAction =
@@ -45,6 +46,10 @@ export type FlightConfigAction =
 	| {
 			type: "startingPointId";
 			startingPointId: FlightStartingPoint | undefined;
+	  }
+	| {
+			type: "mode";
+			mode: "nova" | "legacy";
 	  };
 
 function quickStartReducer(
@@ -114,6 +119,14 @@ function quickStartReducer(
 			return { ...state, startingPointId: action.startingPointId };
 		case "flightName":
 			return { ...state, flightName: action.name };
+		case "mode":
+			return {
+				...state,
+				mode: action.mode,
+				hasFlightDirector:
+					action.mode === "legacy" ? true : state.hasFlightDirector,
+				missionId: undefined,
+			};
 		default:
 			return state;
 	}
@@ -135,6 +148,7 @@ export function FlightQuickStartProvider({
 		{
 			flightName: randomNameGenerator(),
 			hasFlightDirector: true,
+			mode: "nova",
 			ships: [
 				{
 					id: uniqid(),

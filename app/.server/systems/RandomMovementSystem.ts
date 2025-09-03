@@ -2,6 +2,7 @@ import { type Entity, System } from "@thorium/utils/ecs";
 
 const constant = 5000000;
 export class RandomMovementSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!(entity.components.position && entity.components.velocity);
 	}

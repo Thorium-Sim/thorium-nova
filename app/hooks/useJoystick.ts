@@ -47,11 +47,17 @@ export function useJoystick({
 		dragDown.current = down;
 		x += offsetRef.current[0];
 		y += offsetRef.current[1];
+
 		const dist = distance(x, y);
 		if (dist > maxDistance.current) {
-			const theta = Math.abs(Math.atan(y / x));
-			x = maxDistance.current * Math.cos(theta) * (x > 0 ? 1 : -1);
-			y = maxDistance.current * Math.sin(theta) * (y > 0 ? 1 : -1);
+			if (axis) {
+				x = maxDistance.current * (x > 0 ? 1 : -1);
+				y = maxDistance.current * (y > 0 ? 1 : -1);
+			} else {
+				const theta = Math.abs(Math.atan(y / x));
+				x = maxDistance.current * Math.cos(theta) * (x > 0 ? 1 : -1);
+				y = maxDistance.current * Math.sin(theta) * (y > 0 ? 1 : -1);
+			}
 		}
 		if (axisSnap && (Math.abs(x) > minDistance || Math.abs(y) > minDistance)) {
 			if (x < minDistance && x > minDistance * -1) x = 0;

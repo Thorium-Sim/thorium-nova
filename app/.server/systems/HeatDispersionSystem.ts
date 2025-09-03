@@ -26,6 +26,7 @@ import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInvent
 const RADIATOR_AREA: MeterSquared = 1;
 
 export class HeatDispersionSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!entity.components.heat;
 	}

@@ -8,7 +8,6 @@ import { DefaultUIDGenerator } from "@thorium/utils/ecs/uid";
 import { loadGltf } from "@thorium/utils/.server/loadGltf";
 import RAPIER from "@thorium-sim/rapier3d-node";
 import path from "node:path";
-import type { flightClient } from "@thorium/ecs-components/flightClient";
 
 export class FlightDataModel extends DataStore {
 	static INTERVAL = 1000 / 60;
@@ -22,6 +21,7 @@ export class FlightDataModel extends DataStore {
 	serverDataModel: ServerDataModel;
 	interval!: ReturnType<typeof setInterval>;
 	flightClientIndex: Map<string, number>;
+	mode!: "nova" | "legacy";
 
 	#getDataPromise: Promise<void>;
 	constructor(
@@ -44,9 +44,11 @@ export class FlightDataModel extends DataStore {
 		);
 		this.flightClientIndex = new Map();
 		this.serverDataModel = params.serverDataModel;
+
 		this.#getDataPromise = this.getData<FlightDataModel>().then((data) => {
 			this.name ??= flightName;
 			this.paused ??= data.paused ?? true;
+			this.mode ??= data.mode ?? params.mode ?? "nova";
 			this.hasFlightDirector ??=
 				data.hasFlightDirector ?? params.hasFlightDirector ?? true;
 			this.date ??= Number(data.date ? new Date(data.date) : new Date());
@@ -73,9 +75,11 @@ export class FlightDataModel extends DataStore {
 	async initEcs(server: ServerDataModel) {
 		await this.#getDataPromise;
 		this.ecs = new ECS(server);
-		systems.forEach((Sys) => {
-			this.ecs.addSystem(new Sys());
-		});
+		for (const Sys of systems) {
+			if (Sys.flightMode?.includes(this.mode)) {
+				this.ecs.addSystem(new Sys());
+			}
+		}
 		// We need to selectively add certain entities first
 		this.entities.forEach(({ id, components }) => {
 			if (components.isSolarSystem) {
@@ -119,6 +123,13 @@ export class FlightDataModel extends DataStore {
 				this.ecs.colliderCache.set(ship.assets.model, colliderDesc);
 			}),
 		);
+	}
+
+	stop() {
+		this.paused = true;
+		clearTimeout(this.interval);
+		this.ecs.dispose();
+		this.flightClientIndex.clear();
 	}
 
 	reset() {
@@ -174,6 +185,7 @@ export class FlightDataModel extends DataStore {
 			pluginIds: this.pluginIds,
 			entities,
 			maxEntityId: this.ecs.maxEntityId,
+			mode: this.mode,
 		};
 		return data;
 	}

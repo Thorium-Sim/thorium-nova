@@ -24,6 +24,7 @@ const COOLANT_AREA: MeterSquared = 1;
 const THERMAL_CONDUCTIVITY = 46.6; // W/(mK)
 const THERMAL_DISTANCE = 1e-3;
 export class HeatToCoolantSystem extends System {
+	static flightMode = ["nova"];
 	test(entity: Entity) {
 		return !!entity.components.heat;
 	}

@@ -2,6 +2,7 @@ import type { InventoryFlags } from "@thorium/utils/flags/InventoryFlags";
 import { type Entity, System } from "@thorium/utils/ecs";
 
 export class FilterInventorySystem extends System {
+	static flightMode = ["nova"];
 	inventoryTemplates!: Record<
 		string,
 		{
