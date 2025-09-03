@@ -53,6 +53,8 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - name: Install Dependencies
         run: bun install
+      - name: Install Playwright
+        run: bunx playwright install
       - name: Build
         run: |
           bun run build
