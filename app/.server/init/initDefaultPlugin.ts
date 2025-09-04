@@ -15,7 +15,6 @@ export async function initDefaultPlugin() {
 	await import(
 		// @ts-expect-error
 		"../../../build/defaultPlugin.plug",
-		// @ts-expect-error
 		{
 			with: { type: "file" },
 		}

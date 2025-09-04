@@ -21,7 +21,7 @@
 		"lib": ["DOM", "DOM.Iterable", "ES2022"],
 		"types": ["vite/client", "bun"],
 		"target": "ES2022",
-		"module": "ES2022",
+		"module": "esnext",
 		"moduleResolution": "bundler",
 		"jsx": "react-jsx",
 		"baseUrl": ".",

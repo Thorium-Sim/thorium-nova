@@ -26,9 +26,11 @@ if (process.env.NODE_ENV === "production") {
 }
 /* istanbul ignore next */
 if (process.env.THORIUM_PATH) {
-	const testPath = String(process.env.THORIUM_PATH).replace("~", os.homedir());
+	let testPath = String(process.env.THORIUM_PATH).replace("~", os.homedir());
+	if (testPath.startsWith("/")) testPath = path.join(__dirname, testPath);
 	try {
-		fs.mkdirSync(testPath, { recursive: true });
+		fs.mkdirSync(path.join(testPath, "plugins"), { recursive: true });
+		fs.mkdirSync(path.join(testPath, "flights"), { recursive: true });
 		thoriumPath = testPath;
 	} catch {
 		// Do nothing.

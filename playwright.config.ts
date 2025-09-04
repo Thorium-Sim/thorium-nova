@@ -42,41 +42,19 @@ const config: PlaywrightTestConfig = {
 	},
 	testMatch: "**/*.e2e.ts",
 	// Don't run in parallel
-	fullyParallel: false,
-	workers: 1,
+	fullyParallel: IS_CI,
+	workers: 4,
 	use: {
+		headless: true,
 		trace: "retain-on-failure",
 		baseURL: `http://localhost:${TEST_SERVER_PORT}`,
 	},
 	projects: [
 		{
-			name: "global setup",
-			testMatch: "playwright.setup.ts",
-			teardown: "global teardown",
-		},
-		{
 			name: "Chromium",
 			use: { ...devices["Desktop Chrome"] },
-			dependencies: ["global setup"],
-		},
-		{
-			name: "global teardown",
-			testMatch: "playwright.teardown.ts",
 		},
 	],
-	// Run server before starting the tests
-	...(NO_SERVER
-		? {}
-		: {
-				webServer: {
-					reuseExistingServer: true,
-					command: IS_CI ? `./binaries/${binaryName}` : "bun run dev",
-					port: TEST_SERVER_PORT,
-					env: { PORT: TEST_SERVER_PORT.toString(), NODE_ENV: "test" },
-					stdout: IS_CI ? "ignore" : "pipe",
-					stderr: "pipe",
-				},
-			}),
 };
 
 export default config;
