@@ -1,10 +1,8 @@
 import { Link } from "react-router";
 import Logo from "@thorium/images/logo.svg?url";
-import packageJson from "../../../package.json";
+import packageJson from "../../../package.json" with { type: "json" };
 import { ClientButton } from "@thorium/components/ClientButton";
 import { Suspense, useEffect, useState } from "react";
-import Button from "@thorium/ui/Button";
-import { clientId, q } from "@thorium/context/AppContext";
 import { IPAddress } from "./IPAddress";
 import { ErrorBoundary } from "react-error-boundary";
 

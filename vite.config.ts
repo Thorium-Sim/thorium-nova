@@ -66,7 +66,7 @@ export default defineConfig({
 	server: {
 		port,
 		host: "0.0.0.0",
-		open: true,
+		open: process.env.NODE_ENV !== "test",
 		fs: {
 			strict: false,
 

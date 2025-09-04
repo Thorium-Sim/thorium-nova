@@ -2,6 +2,7 @@ import { ClientButton } from "@thorium/components/ClientButton";
 import { q, clientId } from "@thorium/context/AppContext";
 import { IPAddress } from "@thorium/routes/landing/IPAddress";
 import { cn } from "@thorium/utils/cn";
+import { capitalCase } from "change-case";
 import { Link } from "react-router";
 
 export function LobbyHeader() {
@@ -13,6 +14,9 @@ export function LobbyHeader() {
 				<h2 className="text-white font-bold text-xl mb-2">
 					Flight Name: <em>{flight?.name}</em>
 				</h2>
+				<h3 className="text-white font-bold text-lg mb-2">
+					Flight Mode: <em>{capitalCase(flight?.mode || "")}</em>
+				</h3>
 
 				<ClientButton />
 				<IPAddress />

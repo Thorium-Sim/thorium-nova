@@ -15,7 +15,7 @@ import Input from "@thorium/ui/Input";
 import MarkdownInput from "@thorium/ui/MarkdownInput";
 import randomWords from "@thorium/utils/random-words";
 import { toast } from "@thorium/context/ToastContext";
-import packageJson from "../../package.json";
+import packageJson from "../../package.json" with { type: "json" };
 import { Icon } from "./ui/Icon";
 
 const availableLabels = [
