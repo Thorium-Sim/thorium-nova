@@ -70,6 +70,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 					<div className="flex-1 mt-2">
 						<div className="flex items-stretch gap-4 ">
 							<LinearJoystick
+								id="direction-foreaft"
 								className="h-auto"
 								onDrag={({ y }) => direction({ shipId, z: -y })}
 								vertical
@@ -79,6 +80,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 								<UntouchableLabel className="bottom-1">Aft</UntouchableLabel>
 							</LinearJoystick>
 							<Joystick
+								id="direction"
 								className="w-[calc(100%-2.5rem)] h-[calc(100%-2.5rem)]"
 								onDrag={({ x, y }) => direction({ shipId, y: -y, x: -x })}
 								gamepadKeys={{ x: "x-thrusters", y: "y-thrusters" }}
@@ -112,6 +114,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 					</div>
 					<div className="flex-1" />
 					<Joystick
+						id="rotation"
 						onDrag={({ x, y }) => rotation({ shipId, z: x, x: y })}
 						gamepadKeys={{ x: "roll", y: "pitch" }}
 					>
@@ -123,6 +126,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 						<UntouchableLabel className="left-1">Port Roll</UntouchableLabel>
 					</Joystick>
 					<LinearJoystick
+						id="rotation-yaw"
 						onDrag={({ x }) => rotation({ shipId, y: -x })}
 						gamepadKey="yaw"
 					>
