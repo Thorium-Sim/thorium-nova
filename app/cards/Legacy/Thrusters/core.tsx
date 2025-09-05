@@ -1,11 +1,11 @@
 import { clientId, q } from "@thorium/context/AppContext";
+import { useStation } from "@thorium/routes/station/useStation";
 import { InputField, OutputField } from "@thorium/ui/Core";
 import { Icon } from "@thorium/ui/Icon";
 import { Tooltip } from "@thorium/ui/Tooltip";
 
 export function LegacyThrusterCore() {
-	const [client] = q.client.get.useNetRequest({ clientId });
-	const shipId = client.shipId || -1;
+	const { shipId } = useStation();
 	const [thrusters] = q.legacy.thrusters.get.useNetRequest({ shipId });
 	const { mutate: updateRotation } =
 		q.legacy.thrusters.setRequiredRotation.useNetSend();
@@ -17,10 +17,17 @@ export function LegacyThrusterCore() {
 			<div className="grid grid-cols-3 grid-rows-3 grid-flow-col text-xs">
 				<>
 					<p>Yaw</p>
-					<OutputField>{Math.round(thrusters.rotation.yaw)}˚</OutputField>
+					<OutputField data-testid="yaw-value">
+						{Math.round(thrusters.rotation.yaw)}˚
+					</OutputField>
 					<InputField
+						data-testid="yaw-required"
 						prompt="What is the required yaw?"
-						promptValue={thrusters.rotation.yaw}
+						promptValue={thrusters.requiredRotation.yaw}
+						alert={
+							Math.round(thrusters.rotation.yaw) !==
+							Math.round(thrusters.requiredRotation.yaw)
+						}
 						onClick={(value) =>
 							updateRotation({
 								shipId,
@@ -38,7 +45,11 @@ export function LegacyThrusterCore() {
 					<OutputField>{Math.round(thrusters.rotation.pitch)}˚</OutputField>
 					<InputField
 						prompt="What is the required pitch?"
-						promptValue={thrusters.rotation.pitch}
+						promptValue={thrusters.requiredRotation.pitch}
+						alert={
+							Math.round(thrusters.rotation.pitch) !==
+							Math.round(thrusters.requiredRotation.pitch)
+						}
 						onClick={(value) =>
 							updateRotation({
 								shipId,
@@ -56,7 +67,11 @@ export function LegacyThrusterCore() {
 					<OutputField>{Math.round(thrusters.rotation.roll)}˚</OutputField>
 					<InputField
 						prompt="What is the required roll?"
-						promptValue={thrusters.rotation.roll}
+						promptValue={thrusters.requiredRotation.roll}
+						alert={
+							Math.round(thrusters.rotation.roll) !==
+							Math.round(thrusters.requiredRotation.roll)
+						}
 						onClick={(value) =>
 							updateRotation({
 								shipId,
@@ -73,6 +88,7 @@ export function LegacyThrusterCore() {
 			<div className="grid grid-cols-3 grid-rows-2 grid-f justify-items-center text-2xl">
 				<Tooltip content="Down">
 					<Icon
+						data-testid="direction-down"
 						style={{
 							color: `oklch(${thrusters.direction.y * 0.6235} 0.2203 256.91)`,
 						}}
@@ -89,6 +105,7 @@ export function LegacyThrusterCore() {
 				</Tooltip>
 				<Tooltip content="Up">
 					<Icon
+						data-testid="direction-up"
 						style={{
 							color: `oklch(${-thrusters.direction.y * 0.6235} 0.2203 256.91)`,
 						}}
