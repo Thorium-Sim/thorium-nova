@@ -79,7 +79,7 @@ export const test = base.extend<
 							server.on("error", errorListener);
 						}),
 						new Promise<ChildProcessWithoutNullStreams>((res, rej) =>
-							setTimeout(rej, 2000, "Starting server timed out"),
+							setTimeout(rej, 3000, "Starting server timed out"),
 						),
 					]);
 					server.on("error", (error) => {
