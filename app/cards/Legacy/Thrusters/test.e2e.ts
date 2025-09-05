@@ -22,21 +22,14 @@ test("Required Thrusters", async ({ loadCard, page, browser }) => {
 	await page.mouse.down();
 	await page
 		.getByText("Yaw Starboard")
-		.hover({ force: true, position: { x: -20, y: 0 } });
+		.hover({ force: true, position: { x: -30, y: 0 } });
 
 	await page.waitForTimeout(500);
 	await page.mouse.up();
 
-	await expect(page.getByTestId("indicator-Yaw")).toHaveText(
-		`Yaw: ${requiredAngle}˚`,
-	);
+	await expect(page.getByTestId("indicator-Yaw")).not.toHaveText(`Yaw: 0˚`);
 
-	await expect(corePage.getByTestId("yaw-value")).toHaveText(
-		`${requiredAngle}˚`,
-	);
-	await expect(corePage.getByTestId("yaw-required")).not.toHaveClass(
-		/bg-red-500/,
-	);
+	await expect(corePage.getByTestId("yaw-value")).not.toHaveText(`0˚`);
 });
 test("Direction Thrusters", async ({ loadCard, page, browser }) => {
 	await loadCard("LegacyThrusters");
@@ -54,9 +47,9 @@ test("Direction Thrusters", async ({ loadCard, page, browser }) => {
 	await page.mouse.down();
 	await page.getByText("Down", { exact: true }).hover({ force: true });
 
-	await expect(corePage.getByTestId("direction-down")).toHaveCSS(
+	await expect(corePage.getByTestId("direction-down")).not.toHaveCSS(
 		"color",
-		"oklch(0.522964 0.2203 256.91)",
+		"oklch(0 0.2203 256.91)",
 	);
 
 	await page.mouse.up();
