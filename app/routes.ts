@@ -27,6 +27,7 @@ export default [
 		]),
 	]),
 	route("flight/core", "routes/core/index.tsx"),
+	route("flight/core/preview/:component", "routes/core/Preview.tsx"),
 	route("config", "routes/config/layout.tsx", [
 		route(":pluginId?", "routes/config/index.tsx"),
 		...prefix(":pluginId", [

@@ -73,6 +73,7 @@ export function LegacyThrusters() {
 				<p className="text-center mb-2">Direction</p>
 				<div className="flex flex-col gap-4">
 					<Joystick
+						id="direction"
 						className="w-full aspect-square flex-grow-0 flex-shrink-0"
 						onDrag={({ x, y }) => direction({ shipId, z: -y, x: -x })}
 						gamepadKeys={{ x: "x-thrusters", y: "y-thrusters" }}
@@ -83,6 +84,7 @@ export function LegacyThrusters() {
 						<UntouchableLabel className="left-1">Port</UntouchableLabel>
 					</Joystick>
 					<LinearJoystick
+						id="direction-updown"
 						className="w-full"
 						onDrag={({ x }) => direction({ shipId, y: -x })}
 						gamepadKey="z-thrusters"
@@ -103,6 +105,7 @@ export function LegacyThrusters() {
 
 				<div className="flex flex-col gap-4">
 					<Joystick
+						id="rotation"
 						className="w-full aspect-square flex-grow-0 flex-shrink-0"
 						onDrag={({ x, y }) => rotation({ shipId, z: x, x: y })}
 						gamepadKeys={{ x: "x-thrusters", y: "y-thrusters" }}
@@ -113,6 +116,7 @@ export function LegacyThrusters() {
 						<UntouchableLabel className="left-1">Roll Left</UntouchableLabel>
 					</Joystick>
 					<LinearJoystick
+						id="rotate-yaw"
 						className="w-full"
 						onDrag={({ x }) => {
 							rotation({ shipId, y: x });
@@ -181,7 +185,7 @@ function RotationIndicator({
 					}}
 				/>
 			</div>
-			<p className="text-center">
+			<p className="text-center" data-testid={`indicator-${children}`}>
 				{children}: {Math.round(rotation)}˚
 			</p>
 		</div>

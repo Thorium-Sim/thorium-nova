@@ -123,7 +123,9 @@ export class LiveQueryClient {
 			} else if (value instanceof Blob) {
 				body.append(key, value, `blob-${count++}`);
 				opts.input[key] = {} as any;
-			} else if (value instanceof FileList) {
+			}
+			// Duck type the value into a FileList
+			else if (typeof value === "object" && value.length && "item" in value) {
 				for (let i = 0; i < value.length; i++) {
 					body.append(`${key}[]`, value[i]);
 				}

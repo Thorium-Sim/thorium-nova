@@ -16,14 +16,18 @@ import { createRNG } from "@thorium/utils/rng";
 
 export let clientId = "";
 if (typeof window !== "undefined") {
-	let browserId = localStorage.getItem("browserId");
-	const tabCoordinator = new TabIdCoordinator();
-	if (!browserId) {
-		browserId = tabCoordinator.generateUUID();
-		localStorage.setItem("browserId", browserId);
+	if (sessionStorage.getItem("test-clientId")) {
+		clientId = sessionStorage.getItem("test-clientId") || "";
+	} else {
+		let browserId = localStorage.getItem("browserId");
+		const tabCoordinator = new TabIdCoordinator();
+		if (!browserId) {
+			browserId = tabCoordinator.generateUUID();
+			localStorage.setItem("browserId", browserId);
+		}
+		const rng = createRNG(`${browserId}${tabCoordinator.tabId}`);
+		clientId = rng.nextString();
 	}
-	const rng = createRNG(`${browserId}${tabCoordinator.tabId}`);
-	clientId = rng.nextString();
 }
 
 function getRequestContext() {

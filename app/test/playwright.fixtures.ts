@@ -10,6 +10,7 @@ export const test = base.extend<
 	{
 		// biome-ignore lint/suspicious/noConfusingVoidType:
 		forEachTest: void;
+		loadCard: (cardName: string) => Promise<void>;
 	},
 	{
 		serverURL: string;
@@ -119,11 +120,37 @@ export const test = base.extend<
 		{ scope: "test" },
 	],
 	forEachTest: [
-		async ({ q }, use) => {
+		async ({ q, page }, use) => {
 			await q.flight.stop.netSend();
-
+			await page.context().addInitScript(() => {
+				window.sessionStorage.setItem("test-clientId", "test");
+			});
 			await use();
 		},
 		{ auto: true, scope: "test" },
 	],
+	loadCard: async ({ q, page }, use) => {
+		await use(async (cardName: string) => {
+			await q.flight.start.netSend({
+				flightName: "Test",
+				hasFlightDirector: true,
+				mode: "legacy",
+				ships: [
+					{
+						shipName: "Testing",
+						crewCount: 1,
+						shipTemplate: {
+							pluginId: "Thorium Default",
+							shipId: "Astra Frigate",
+						},
+					},
+				],
+			});
+			await q.client.testStation.netSend({
+				clientId: "test",
+				component: cardName,
+			});
+			await page.goto("/flight/station");
+		});
+	},
 });

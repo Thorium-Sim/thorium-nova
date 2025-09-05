@@ -9,11 +9,16 @@ export const StationContext = createContext<{
 	shipId: number;
 } | null>(null);
 
-export function StationData({ children }: { children: ReactNode }) {
+export function StationData({
+	children,
+	shipId,
+}: { children: ReactNode; shipId?: number }) {
 	const [client] = q.client.get.useNetRequest({ clientId });
 	const [station] = q.station.get.useNetRequest({ clientId });
 	return (
-		<StationContext value={{ client, station, shipId: client.shipId! }}>
+		<StationContext
+			value={{ client, station, shipId: shipId || client.shipId! }}
+		>
 			{children}
 		</StationContext>
 	);

@@ -9,7 +9,9 @@ export const Joystick = ({
 	className,
 	onDrag,
 	gamepadKeys,
+	id,
 }: {
+	id: string;
 	onDrag: (dir: { x: number; y: number }) => void;
 	className?: string;
 	children?: ReactNode;
@@ -42,6 +44,7 @@ export const Joystick = ({
 				}}
 			>
 				<a.div
+					data-testid={id}
 					{...eventHandlers}
 					style={{
 						transform: xy?.to((x, y) => `translate3d(${x}px,${y}px,0)`),
@@ -56,12 +59,14 @@ export const Joystick = ({
 };
 
 export const LinearJoystick = ({
+	id,
 	className,
 	onDrag,
 	children,
 	vertical,
 	gamepadKey,
 }: {
+	id: string;
 	className?: string;
 	onDrag: (dirs: { x: number; y: number }) => void;
 	children: ReactNode;
@@ -104,6 +109,7 @@ export const LinearJoystick = ({
 			}}
 		>
 			<a.div
+				data-testid={id}
 				{...eventHandlers}
 				style={{ transform: xy?.to((x, y) => `translate3d(${x}px,${y}px,0)`) }}
 				// @ts-expect-error
