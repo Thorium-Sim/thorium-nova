@@ -13,6 +13,7 @@ const shipSystemTypes = z.enum([
 	"shields",
 	"phasers",
 	"sensors",
+	"mainComputer",
 ]);
 
 export type ShipSystemTypes = z.infer<typeof shipSystemTypes>;

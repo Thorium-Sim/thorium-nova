@@ -14,6 +14,7 @@ import InventoryPlugin from "./Inventory";
 import TimelinePlugin from "./Timeline";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { MacroPlugin } from "./Macro";
+import { ReportPlugin } from "@thorium/.server/classes/Plugins/Report";
 
 export function pluginPublish(plugin: BasePlugin) {
 	pubsub.publish.plugin.all();
@@ -31,6 +32,7 @@ interface Aspects {
 	inventory: InventoryPlugin[];
 	timelines: TimelinePlugin[];
 	macros: MacroPlugin[];
+	reports: ReportPlugin[];
 }
 // Storing the server here so it doesn't get
 // serialized with the plugin.
@@ -93,6 +95,7 @@ export default class BasePlugin extends DataStore {
 				inventory: [],
 				timelines: [],
 				macros: [],
+				reports: [],
 			};
 			pluginAspects.set(this, aspects);
 		}
@@ -125,6 +128,7 @@ export default class BasePlugin extends DataStore {
 			TimelinePlugin,
 		);
 		this.aspects.macros = await this.#loadAspect("macros", MacroPlugin);
+		this.aspects.reports = await this.#loadAspect("reports", ReportPlugin);
 	}
 	async rename(name: string) {
 		const otherNames = this.server.plugins.map((p) => p.name);

@@ -135,7 +135,21 @@ export const systemsMonitor = t.router({
 			)
 
 			.request(({ ctx, input }) => {
-				const systems = [];
+				const systems: {
+					id: number;
+					name: string;
+					power?: {
+						maxSafePower: number;
+						requiredPower: number;
+						powerSources: number[];
+					};
+					heat?: {
+						heat: number;
+						maxHeat: number;
+						maxSafeHeat: number;
+						nominalHeat: number;
+					};
+				}[] = [];
 				const ship = ctx.ecs.getEntityById(input.shipId);
 				for (const systemId of ship?.components.shipSystems?.shipSystems.keys() ||
 					[]) {
@@ -155,7 +169,6 @@ export const systemsMonitor = t.router({
 								}
 							: undefined,
 
-						efficiency: system.components.damage?.efficiency,
 						heat: system.components.heat
 							? {
 									heat: system.components.heat.heat,

@@ -287,7 +287,6 @@ function Reactor({
 function Battery({
 	id,
 	name,
-	index,
 	setSelectedPowerSupplier,
 	selectedPowerSupplier,
 	chargeRate,
@@ -538,7 +537,6 @@ function System({
 	id,
 	name,
 	power,
-	efficiency,
 	heat,
 	selectedPowerSupplier,
 	cardLoaded,
@@ -550,7 +548,6 @@ function System({
 		requiredPower: number;
 		powerSources: number[];
 	};
-	efficiency?: number;
 	heat?: {
 		heat: number;
 		maxSafeHeat: number;
@@ -625,7 +622,7 @@ function System({
 		}
 	}, cardLoaded);
 
-	if (!power && !efficiency && !heat) return null;
+	if (!power && !heat) return null;
 	return (
 		<div
 			key={id}
@@ -649,19 +646,6 @@ function System({
 							backgroundColor="#888"
 						>
 							<Icon name="flame" />
-						</RadialDial>
-					</Tooltip>
-				) : null}
-				{typeof efficiency === "number" ? (
-					<Tooltip content={`Efficiency: ${Math.round(efficiency * 100)}%`}>
-						<RadialDial
-							label=""
-							count={efficiency}
-							max={1}
-							color="rgb(221 107 32)"
-							backgroundColor="#888"
-						>
-							<Icon name="power-node" />
 						</RadialDial>
 					</Tooltip>
 				) : null}

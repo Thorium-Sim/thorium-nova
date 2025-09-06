@@ -39,6 +39,7 @@ export const Tooltip = forwardRef<
 			useHover(context),
 			useRole(context, { role: "tooltip" }),
 		]);
+		if (!content) return children;
 		return (
 			<>
 				<div ref={refs.setReference} {...props} {...getReferenceProps()}>

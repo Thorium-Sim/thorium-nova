@@ -5,9 +5,11 @@ import { useState } from "react";
 import { useCircleGridStore } from "./useCircleGridStore";
 import { logslider } from "@thorium/utils/logSlider";
 import { useShallow } from "zustand/shallow";
+import { useCardContext } from "@thorium/context/CardContext";
 
 export function PilotZoomSlider() {
 	const store = useCircleGridStore();
+	const { cardLoaded } = useCardContext();
 	const zoom = store((store) => store.zoom);
 	const [zoomMin, zoomMax] = store(
 		useShallow((store) => [store.zoomMin, store.zoomMax]),
@@ -29,20 +31,23 @@ export function PilotZoomSlider() {
 			),
 		});
 	});
-	useAnimationFrame(() => {
-		const max = width / (zoomMax * 1.1 * 2);
-		const min = width / (zoomMin * 1.1 * 2);
-		store.setState({
-			zoom: logslider(
-				max,
-				min,
-				Math.min(
-					100,
-					Math.max(0, logslider(max, min, zoom, true) + zoomAdjust),
+	useAnimationFrame(
+		() => {
+			const max = width / (zoomMax * 1.1 * 2);
+			const min = width / (zoomMin * 1.1 * 2);
+			store.setState({
+				zoom: logslider(
+					max,
+					min,
+					Math.min(
+						100,
+						Math.max(0, logslider(max, min, zoom, true) + zoomAdjust),
+					),
 				),
-			),
-		});
-	}, zoomAdjust !== 0);
+			});
+		},
+		zoomAdjust !== 0 && cardLoaded,
+	);
 	return (
 		<>
 			<p className="text-xl">Zoom:</p>

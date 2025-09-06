@@ -46,6 +46,7 @@ import { isObjectOccludedBySphere } from "@thorium/utils/starmap/isObjectOcclude
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
 import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
+import { useCardContext } from "@thorium/context/CardContext";
 
 export function CircleGridContacts({
 	onContactClick,
@@ -579,6 +580,7 @@ function OcclusionCone({
 	size: number;
 	satellite: Zod.infer<typeof satellite>;
 }) {
+	const { cardLoaded } = useCardContext();
 	const position = getOrbitPosition({
 		semiMajorAxis: sat.semiMajorAxis,
 		eccentricity: sat.eccentricity,
@@ -615,7 +617,7 @@ function OcclusionCone({
 			cylinderRef.current.geometry.dispose();
 			cylinderRef.current.geometry = geometry;
 		}
-	});
+	}, cardLoaded);
 	return (
 		<group ref={ref} scale={[size, size, size]}>
 			<mesh
