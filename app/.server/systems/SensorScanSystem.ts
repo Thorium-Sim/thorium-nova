@@ -170,12 +170,6 @@ export class SensorScanSystem extends System {
 			sensorSystem.resultsDatabase.set(object.id, currentResults);
 			pubsub.publish.sensors.scanResult({ shipId, objectId: object.id });
 			pubsub.publish.sensors.scans({ shipId });
-
-			const ship = this.ecs.getEntityById(shipId);
-			if (!ship?.components.isPlayerShip) {
-				// Remove scan entities from NPC ships
-				this.ecs.removeEntity(entity);
-			}
 		}
 	}
 }

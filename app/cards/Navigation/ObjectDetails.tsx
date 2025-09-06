@@ -11,6 +11,7 @@ import { q } from "@thorium/context/AppContext";
 import { getNavigationDistance } from "@thorium/utils/starmap/getNavigationDistance";
 import { cn } from "@thorium/utils/cn";
 import { useStation } from "@thorium/routes/station/useStation";
+import { useCardContext } from "@thorium/context/CardContext";
 
 function getDistanceLabel(input: { distance: number; unit: string } | null) {
 	if (!input) return "Unknown";
@@ -57,6 +58,7 @@ export const ObjectData = ({ objectId }: { objectId: number | string }) => {
 
 export function useObjectData(objectId: number | string) {
 	const { shipId } = useStation();
+	const { cardLoaded } = useCardContext();
 	const [ship] = q.navigation.ship.useNetRequest({ shipId });
 	const { interpolate } = useLiveQuery();
 	const distanceRef = useRef<HTMLSpanElement>(null);
@@ -84,7 +86,7 @@ export function useObjectData(objectId: number | string) {
 			);
 			distanceRef.current.innerText = getDistanceLabel(distance);
 		}
-	});
+	}, cardLoaded);
 	return [result.identification, distanceRef] as const;
 }
 

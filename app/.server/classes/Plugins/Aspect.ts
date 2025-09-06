@@ -8,7 +8,7 @@ type AspectAsset = {
 	[assetName: string]: string | string[];
 };
 
-export abstract class Aspect extends DataStore {
+abstract class BaseAspect extends DataStore {
 	abstract apiVersion: string;
 	abstract kind: AspectKinds;
 	abstract name: string;
@@ -16,21 +16,10 @@ export abstract class Aspect extends DataStore {
 	plugin: BasePlugin;
 	constructor(
 		params: { name: string },
-		aspectConfig: { kind: AspectKinds; subPath?: `/${string}` },
 		plugin: BasePlugin,
 		options: DataStoreOptions,
 	) {
-		const { kind, subPath = "/" } = aspectConfig;
-		const name = generateIncrementedName(
-			params.name || `New ${kind}`,
-			plugin.aspects[kind].map((aspect) => aspect.name),
-		);
-		super(params, {
-			meta: {
-				filePath: `/plugins/${plugin.id}/${kind}${subPath}${name}/manifest.yml`,
-			},
-			...options,
-		});
+		super(params, options);
 		this.plugin = plugin;
 		this.getData().then((data) => Object.assign(this, data));
 	}
@@ -59,5 +48,50 @@ export abstract class Aspect extends DataStore {
 	async rename(name: string) {
 		const otherNames = this.plugin.aspects[this.kind].map((item) => item.name);
 		await DataStore.operations.getStore()!.rename.call(this, name, otherNames);
+	}
+}
+
+export abstract class Aspect extends BaseAspect {
+	constructor(
+		params: { name: string },
+		aspectConfig: { kind: AspectKinds; subPath?: `/${string}` },
+		plugin: BasePlugin,
+		options: DataStoreOptions,
+	) {
+		const { kind, subPath = "/" } = aspectConfig;
+		const name = generateIncrementedName(
+			params.name || `New ${kind}`,
+			plugin.aspects[kind].map((aspect) => aspect.name),
+		);
+		super(params, plugin, {
+			meta: {
+				filePath: `/plugins/${plugin.id}/${kind}${subPath}${name}/manifest.yml`,
+			},
+			...options,
+		});
+	}
+}
+
+export abstract class InkAspect extends BaseAspect {
+	abstract inkText: string;
+	static isInk = true;
+	constructor(
+		params: { name: string },
+		aspectConfig: { kind: AspectKinds; subPath?: `/${string}` },
+		plugin: BasePlugin,
+		options: DataStoreOptions,
+	) {
+		const { kind, subPath = "/" } = aspectConfig;
+		const name = generateIncrementedName(
+			params.name || `New ${kind}`,
+			plugin.aspects[kind].map((aspect) => aspect.name),
+		);
+		super(params, plugin, {
+			meta: {
+				filePath: `/plugins/${plugin.id}/${kind}${subPath}${name}/manifest.ink`,
+				isInk: true,
+			},
+			...options,
+		});
 	}
 }

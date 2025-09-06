@@ -17,6 +17,7 @@ import { useGamepadPress } from "@thorium/hooks/useGamepadStore";
 import { CircleGridContacts, CircleGridWaypoints } from "./PilotContacts";
 import type { CardProps } from "@thorium/cards/CardProps";
 import { useStation } from "@thorium/routes/station/useStation";
+import { useCardContext } from "@thorium/context/CardContext";
 
 async function rotation({
 	shipId,
@@ -179,6 +180,7 @@ function getInterstellarDistance(
 }
 
 const LockOnButton = () => {
+	const { cardLoaded } = useCardContext();
 	const { shipId } = useStation();
 	const store = useCircleGridStore();
 	const waypoint = store((store) => store.facingWaypoints?.[0]);
@@ -201,7 +203,7 @@ const LockOnButton = () => {
 		if (distanceRef.current) {
 			distanceRef.current.textContent = distance;
 		}
-	});
+	}, cardLoaded);
 
 	useGamepadPress("autopilot-lock-on", {
 		onDown: () => {

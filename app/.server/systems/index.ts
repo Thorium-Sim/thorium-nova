@@ -37,6 +37,8 @@ import { NPCKnowledgeSystem } from "@thorium/.server/systems/NPCKnowledgeSystem"
 import { NPCDecisionSystem } from "@thorium/.server/systems/NPCDecisionSystem";
 import { NPCFireWeaponsSystem } from "@thorium/.server/systems/NPCFireWeaponsSystem";
 import { legacySystems } from "@thorium/.server/systems/Legacy";
+import { PowerEfficiencyOverloadSystem } from "@thorium/.server/systems/PowerEfficiencyOverloadSystem";
+import { MainComputerDiagnosticSystem } from "@thorium/.server/systems/MainComputerDiagnosticSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -51,6 +53,7 @@ const systems = [
 	ReactorHeatSystem,
 	PowerDrawSystem,
 	PowerDistributionSystem,
+	PowerEfficiencyOverloadSystem,
 	NPCPhaserChargeSystem,
 	TorpedoLoadingSystem,
 	NearbyObjectsSystem,
@@ -67,6 +70,7 @@ const systems = [
 	PhysicsWorldPositionSystem,
 	PhysicsMovementSystem,
 	SensorScanSystem,
+	MainComputerDiagnosticSystem,
 	WaypointRemoveSystem,
 	HeatToCoolantSystem,
 	HeatDispersionSystem,

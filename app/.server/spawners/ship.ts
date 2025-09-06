@@ -323,6 +323,7 @@ export async function spawnShip(
 	if (params.playerShip) {
 		entity.addComponent("isPlayerShip");
 		entity.addComponent("physicsWorld");
+		entity.addComponent("tweaks");
 	} else {
 		entity.addComponent("shipBehavior", {
 			objective: "hold",

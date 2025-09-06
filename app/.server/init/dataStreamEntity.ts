@@ -92,6 +92,12 @@ export function dataStreamEntity(e: Entity) {
 			x: e.components.scan.progress,
 		};
 	}
+	if (e.components.diagnostic) {
+		return {
+			id: e.id.toString(),
+			x: e.components.diagnostic.progress,
+		};
+	}
 
 	const { parentId, type, ...position } = e.components.position || {};
 	const shouldSnap = e.components.snapInterpolation ? 1 : 0;

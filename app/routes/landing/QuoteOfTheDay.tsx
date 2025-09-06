@@ -370,6 +370,10 @@ const quotes = [
 	"Far better an approximate answer to the right question, which is often vague, than an exact answer to the wrong question, which can always be made precise.",
 	// From the Dunning Kruger paper
 	"But I wore the juice.",
+	// Harold Kessinger
+	"No man who has spent all of his life in a crowd ever amounts to anything.",
+	// Dad
+	"There's a reason we don’t teach gorillas to play the bagpipes. It would be futile and annoy the gorilla, especially the required kilt.",
 ];
 
 const QuoteOfTheDay = () => {

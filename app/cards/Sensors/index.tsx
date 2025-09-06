@@ -31,6 +31,7 @@ import {
 } from "@thorium/cards/Sensors/ScanComponents";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCardContext } from "@thorium/context/CardContext";
 
 /**
  * TODO:
@@ -303,6 +304,7 @@ function SensorsScannableObject({
 	position?: { x: number; y: number; z: number };
 	type: string;
 }) {
+	const { cardLoaded } = useCardContext();
 	const { shipId } = useStation();
 	const [{ passiveRange }] = q.sensors.get.useNetRequest({ shipId });
 	const [{ id: playerShipId, currentSystem }] = q.ship.player.useNetRequest({
@@ -332,7 +334,7 @@ function SensorsScannableObject({
 				setInRange(true);
 			}
 		}
-	});
+	}, cardLoaded);
 	const [results] = q.sensors.scanResult.useNetRequest({
 		objectId: id,
 		shipId,
