@@ -196,9 +196,10 @@ export const targeting = t.router({
 					throw new Error("Torpedo launcher is not loaded");
 				}
 				const power = launcher.components.power;
+				const powerLevels = power?.powerLevels || [0];
 				const currentPower = power?.currentPower || 1;
-				const requiredPower = power?.requiredPower || 0;
-				const maxSafePower = power?.maxSafePower || 1;
+				const maxSafePower = powerLevels[powerLevels.length - 1] || 1;
+				const requiredPower = powerLevels[0];
 				// It takes longer to reload based on the efficiency of the torpedo launcher
 				// It will take min 1x and max 20x longer to fire a torpedo, depending on power
 				if (requiredPower > currentPower) {

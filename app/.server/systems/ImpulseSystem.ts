@@ -30,8 +30,9 @@ export class ImpulseSystem extends System {
 			entity.components.isImpulseEngines;
 
 		if (entity.components.power) {
-			const { currentPower, maxSafePower, requiredPower } =
-				entity.components.power || {};
+			const { currentPower, powerLevels } = entity.components.power || {};
+			const requiredPower = powerLevels[0];
+			const maxSafePower = powerLevels[powerLevels.length - 1];
 			targetSpeed = Math.min(
 				targetSpeed,
 				cruisingSpeed * (Math.max(0, currentPower) / maxSafePower),

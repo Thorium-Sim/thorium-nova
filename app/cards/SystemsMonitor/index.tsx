@@ -63,12 +63,7 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 					/>
 				))}
 			</div>
-			<div
-				className="grid grid-cols-3 gap-4 col-span-3 place-content-center"
-				style={{
-					gridAutoRows: "min-content",
-				}}
-			>
+			<div className="grid grid-cols-[auto_2rem_1fr_2rem_2rem] gap-2 col-span-3 items-center">
 				{systems.map((system) => (
 					<System
 						key={system.id}
@@ -546,8 +541,7 @@ function System({
 	id: number;
 	name: string;
 	power?: {
-		maxSafePower: number;
-		requiredPower: number;
+		powerLevels: number[];
 		powerSources: number[];
 	};
 	efficiency?: number;
@@ -629,119 +623,111 @@ function System({
 	return (
 		<div
 			key={id}
-			className="relative group transition-all aria-expanded:cursor-default w-full h-fit p-2 panel panel-success flex flex-col justify-between"
+			className="relative group transition-all aria-expanded:cursor-default w-full h-fit contents"
 		>
-			<div className="font-medium w-full gap-1 self-start flex items-center">
-				<span className="truncate">{name}</span>
-				<div className="flex-1" />
-				{heat ? (
-					<Tooltip ref={heatRef} content={`Heat: K`}>
-						<RadialDial
-							ref={heatProgressRef}
-							marker={
-								(heat.maxSafeHeat - heat.nominalHeat) /
-								(heat.maxHeat - heat.nominalHeat)
-							}
-							label=""
-							count={(0 - heat.nominalHeat) / (heat.maxHeat - heat.nominalHeat)}
-							max={1}
-							color="rgb(293,68,68)"
-							backgroundColor="#888"
-						>
-							<Icon name="flame" />
-						</RadialDial>
-					</Tooltip>
-				) : null}
-				{typeof efficiency === "number" ? (
-					<Tooltip content={`Efficiency: ${Math.round(efficiency * 100)}%`}>
-						<RadialDial
-							label=""
-							count={efficiency}
-							max={1}
-							color="rgb(221 107 32)"
-							backgroundColor="#888"
-						>
-							<Icon name="power-node" />
-						</RadialDial>
-					</Tooltip>
-				) : null}
-			</div>
+			<span className="truncate">{name}</span>
 
 			{power ? (
-				<div className="flex flex-col mt-2">
-					<div className="flex gap-1 items-center">
-						<div className="flex-1 flex flex-wrap gap-y-1">
-							{Array.from({
-								length: Math.max(
-									power.requiredPower,
-									power.powerSources.length,
-								),
-							}).map((_, i) => (
-								<Fragment key={i}>
-									{/* Display a warning indicator if we're past the max safe power */}
-									{i + 1 === power.maxSafePower + 1 && (
+				<>
+					<Tooltip content="Allocate Power">
+						<Button
+							className={cn("btn-xs", {
+								"btn-disabled": selectedPowerSupplier === null,
+								"btn-primary": selectedPowerSupplier !== null,
+							})}
+							disabled={selectedPowerSupplier === null}
+							onClick={(e) => {
+								e.stopPropagation();
+								if (selectedPowerSupplier !== null) {
+									q.systemsMonitor.systems.addPowerSource
+										.netSend({
+											systemId: id,
+											powerSourceId: selectedPowerSupplier,
+										})
+										.catch((error) => {
+											if (error instanceof LiveQueryError) {
+												toast({ title: error.error, color: "error" });
+											}
+										});
+								}
+							}}
+						>
+							<Icon name="plus" />
+						</Button>
+					</Tooltip>
+					<div className="flex-1 flex flex-wrap gap-y-1">
+						{Array.from({
+							length: Math.max(...power.powerLevels, power.powerSources.length),
+						}).map((_, i) => (
+							<Fragment key={i}>
+								<div
+									ref={(el) => {
+										el && elementRefs.current.set(i, el);
+									}}
+									onClick={(e) => {
+										e.stopPropagation();
+										q.systemsMonitor.systems.removePowerSource.netSend({
+											systemId: id,
+											powerSourceIndex: i,
+										});
+									}}
+									className={cn(
+										"w-3 h-3 mr-1 last-of-type:mr-0 cursor-pointer text-[9px] flex items-center justify-center",
+										{
+											"mr-0": power.powerLevels.includes(i + 1),
+										},
+									)}
+								/>
+
+								{power.powerLevels.includes(i + 1) &&
+									(power.powerLevels.indexOf(i + 1) === 0 ? (
+										<Tooltip content="Required Power">
+											<div className="w-0.5 ml-px !mr-px h-3 last-of-type:mr-0 bg-yellow-500 rounded" />
+											{/* Display a warning indicator if we're past the max safe power */}
+										</Tooltip>
+									) : power.powerLevels.indexOf(i + 1) ===
+										power.powerLevels.length - 1 ? (
 										<Tooltip content="Max Safe Power">
 											<div className="w-0.5 ml-px !mr-px h-3 last-of-type:mr-0 bg-red-500 rounded" />
 										</Tooltip>
-									)}
-
-									<div
-										ref={(el) => {
-											el && elementRefs.current.set(i, el);
-										}}
-										onClick={(e) => {
-											e.stopPropagation();
-											q.systemsMonitor.systems.removePowerSource.netSend({
-												systemId: id,
-												powerSourceIndex: i,
-											});
-										}}
-										className={cn(
-											"w-3 h-3 mr-1 last-of-type:mr-0 cursor-pointer text-[9px] flex items-center justify-center",
-											{
-												"mr-0":
-													i + 1 === power.requiredPower ||
-													i + 1 === power.maxSafePower,
-											},
-										)}
-									/>
-
-									{i + 1 === power.requiredPower && (
-										<Tooltip content="Required Power">
-											<div className="w-0.5 ml-px !mr-px h-3 last-of-type:mr-0 bg-yellow-500 rounded" />
-										</Tooltip>
-									)}
-								</Fragment>
-							))}
-						</div>
-						<Tooltip content="Allocate Power">
-							<Button
-								className={cn("btn-xs", {
-									"btn-disabled": selectedPowerSupplier === null,
-									"btn-primary": selectedPowerSupplier !== null,
-								})}
-								disabled={selectedPowerSupplier === null}
-								onClick={(e) => {
-									e.stopPropagation();
-									if (selectedPowerSupplier !== null) {
-										q.systemsMonitor.systems.addPowerSource
-											.netSend({
-												systemId: id,
-												powerSourceId: selectedPowerSupplier,
-											})
-											.catch((error) => {
-												if (error instanceof LiveQueryError) {
-													toast({ title: error.error, color: "error" });
-												}
-											});
-									}
-								}}
-							>
-								<Icon name="plus" />
-							</Button>
-						</Tooltip>
+									) : (
+										<div className="w-0.5 ml-px !mr-px h-3 last-of-type:mr-0 bg-yellow-500 rounded" />
+									))}
+							</Fragment>
+						))}
 					</div>
-				</div>
+				</>
+			) : null}
+			{heat ? (
+				<Tooltip ref={heatRef} content={`Heat: K`}>
+					<RadialDial
+						ref={heatProgressRef}
+						marker={
+							(heat.maxSafeHeat - heat.nominalHeat) /
+							(heat.maxHeat - heat.nominalHeat)
+						}
+						label=""
+						count={(0 - heat.nominalHeat) / (heat.maxHeat - heat.nominalHeat)}
+						max={1}
+						color="rgb(293,68,68)"
+						backgroundColor="#888"
+					>
+						<Icon name="flame" />
+					</RadialDial>
+				</Tooltip>
+			) : null}
+			{typeof efficiency === "number" ? (
+				<Tooltip content={`Efficiency: ${Math.round(efficiency * 100)}%`}>
+					<RadialDial
+						label=""
+						count={efficiency}
+						max={1}
+						color="rgb(221 107 32)"
+						backgroundColor="#888"
+					>
+						<Icon name="power-node" />
+					</RadialDial>
+				</Tooltip>
 			) : null}
 		</div>
 	);

@@ -40,12 +40,15 @@ export default class BaseShipSystemPlugin extends Aspect {
 	///////////
 	// Power //
 	///////////
-	/** The minimum amount of power required to make this system operate */
-	requiredPower: MegaWatt;
+	/**
+	 * The power levels for a system. If no entries are provided, the system will operate
+	 * without any power. The lowest entry is the minimum amount of power required to
+	 * make this system operate in megawatts. The highest is the maximum threshold of power
+	 * usage for safely using this system in megawatts
+	 **/
+	powerLevels: MegaWatt[];
 	/** The normal amount of power this system will request  */
 	defaultPower: MegaWatt;
-	/** The threshold of power usage for safely using this system */
-	maxSafePower: MegaWatt;
 
 	//////////
 	// Heat //
@@ -105,9 +108,8 @@ export default class BaseShipSystemPlugin extends Aspect {
 		this.assets = params.assets || {};
 		this.soundEffects = params.soundEffects;
 		this.allowMultiple = params.allowMultiple ?? false;
-		this.requiredPower = params.requiredPower || 5;
+		this.powerLevels = params.powerLevels || [5, 20];
 		this.defaultPower = params.defaultPower || 10;
-		this.maxSafePower = params.maxSafePower || 20;
 		this.powerToHeat = params.powerToHeat || 10;
 		this.heatDissipationRate = params.heatDissipationRate || 1;
 		this.nominalHeat = params.nominalHeat || 295.37;

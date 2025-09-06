@@ -54,8 +54,12 @@ export const pilot = t.router({
 					systemType: "impulseEngines",
 					shipId,
 				});
-				const { currentPower, requiredPower, maxSafePower } = engine.components
-					.power || { currentPower: 0, requiredPower: 0, maxSafePower: 0 };
+				const { currentPower, powerLevels } = engine.components.power || {
+					currentPower: 0,
+					powerLevels: [0],
+				};
+				const maxSafePower = powerLevels[powerLevels.length - 1];
+				const requiredPower = powerLevels[0];
 				return [
 					{
 						id: engine.id,

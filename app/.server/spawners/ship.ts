@@ -199,7 +199,7 @@ export async function spawnShip(
 					storage: 0,
 					capacity: template.fullChargeYield,
 					outputRate: phaser.components.power?.defaultPower || 1,
-					chargeRate: phaser.components.power?.requiredPower || 1,
+					chargeRate: phaser.components.power?.powerLevels[0] || 1,
 				});
 				systemEntities.push(capacitor);
 				phaser.updateComponent("power", {

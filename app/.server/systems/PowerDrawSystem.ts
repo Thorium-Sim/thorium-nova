@@ -24,7 +24,9 @@ export class PowerDrawSystem extends System {
 		const efficiencyMultiple = 1 / efficiency;
 		if (!systemType?.type || !power) return;
 
-		const { maxSafePower, requiredPower, powerSources } = power;
+		const { powerLevels, powerSources } = power;
+		const requiredPower = powerLevels[0];
+		const maxSafePower = powerLevels[powerLevels.length - 1];
 		const requestedPower = powerSources.length;
 		let powerDraw = 0;
 		switch (systemType.type) {
@@ -86,7 +88,7 @@ export class PowerDrawSystem extends System {
 				if (state === "down") {
 					powerDraw = 0;
 				} else if (strength === maxStrength) {
-					powerDraw = power.requiredPower;
+					powerDraw = requiredPower;
 				} else {
 					powerDraw = requestedPower;
 				}
@@ -125,10 +127,7 @@ export class PowerDrawSystem extends System {
 					if (scan.components.scan?.parentId === ship.id) activeScans = true;
 					break;
 				}
-				powerDraw = Math.max(
-					power.requiredPower,
-					activeScans ? requestedPower : 0,
-				);
+				powerDraw = Math.max(requiredPower, activeScans ? requestedPower : 0);
 				break;
 			}
 			case "generic":

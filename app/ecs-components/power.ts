@@ -2,12 +2,15 @@ import z from "zod";
 
 export const power = z
 	.object({
-		/** The minimum amount of power required to make this system operate in megawatts */
-		requiredPower: z.number().default(5),
+		/**
+		 * The power levels for a system. If no entries are provided, the system will operate
+		 * without any power. The lowest entry is the minimum amount of power required to
+		 * make this system operate in megawatts. The highest is the maximum threshold of power
+		 * usage for safely using this system in megawatts
+		 **/
+		powerLevels: z.array(z.number()).default([5, 20]),
 		/** The normal amount of power this system will request in megawatts  */
 		defaultPower: z.number().default(10),
-		/** The threshold of power usage for safely using this system in megawatts */
-		maxSafePower: z.number().default(20),
 		/** The current power in megawatts provided to this system, calculated every frame. */
 		currentPower: z.number().default(10),
 		/**
