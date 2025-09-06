@@ -139,8 +139,7 @@ export const systemsMonitor = t.router({
 					id: number;
 					name: string;
 					power?: {
-						maxSafePower: number;
-						requiredPower: number;
+						powerLevels: number[];
 						powerSources: number[];
 					};
 					heat?: {
