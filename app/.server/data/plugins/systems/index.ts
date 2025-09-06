@@ -119,7 +119,7 @@ export const systems = t.router({
 				name: z.string().optional(),
 				description: z.string().optional(),
 				tags: z.string().array().optional(),
-				requiredPower: z.number().optional(),
+				powerLevels: z.number().array().optional(),
 				defaultPower: z.number().optional(),
 				maxSafePower: z.number().optional(),
 				powerToHeat: z.number().optional(),
@@ -167,14 +167,11 @@ export const systems = t.router({
 				});
 			}
 
-			if (typeof input.requiredPower === "number") {
-				shipSystem.requiredPower = input.requiredPower;
+			if (Array.isArray(input.powerLevels)) {
+				shipSystem.powerLevels = input.powerLevels;
 			}
 			if (typeof input.defaultPower === "number") {
 				shipSystem.defaultPower = input.defaultPower;
-			}
-			if (typeof input.maxSafePower === "number") {
-				shipSystem.maxSafePower = input.maxSafePower;
 			}
 			if (typeof input.powerToHeat === "number") {
 				shipSystem.powerToHeat = input.powerToHeat;

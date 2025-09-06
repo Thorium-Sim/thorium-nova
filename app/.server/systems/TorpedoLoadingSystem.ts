@@ -19,8 +19,10 @@ export class TorpedoLoadingSystem extends System {
 		// Decrease the deltaTime based on how well the power to the torpedoes is satisfied.
 		let adjustedTime = deltaTime;
 		if (entity.components.power) {
-			const { currentPower, maxSafePower, requiredPower } =
-				entity.components.power || {};
+			const { currentPower, powerLevels } = entity.components.power || {};
+
+			const maxSafePower = powerLevels[powerLevels.length - 1];
+			const requiredPower = powerLevels[0];
 			adjustedTime =
 				deltaTime +
 				deltaTime *

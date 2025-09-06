@@ -144,13 +144,13 @@ export const systemsMonitor = t.router({
 					// Filter out reactors and batteries
 					if (system.components.isReactor || system.components.isBattery)
 						continue;
+
 					systems.push({
 						id: systemId,
 						name: system.components.identity!.name,
 						power: system.components.power
 							? {
-									maxSafePower: system.components.power.maxSafePower,
-									requiredPower: system.components.power.requiredPower,
+									powerLevels: system.components.power.powerLevels,
 									powerSources: system.components.power.powerSources,
 								}
 							: undefined,

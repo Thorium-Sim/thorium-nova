@@ -11,9 +11,10 @@ export class ThrusterSystem extends System {
 		const { direction, directionThrust, rotationDelta, rotationThrust } =
 			entity.components.isThrusters;
 
+		const powerLevels = entity.components.power?.powerLevels || [1];
 		const currentPower = entity.components.power?.currentPower || 1;
-		const maxSafePower = entity.components.power?.maxSafePower || 1;
-		const requiredPower = entity.components.power?.requiredPower || 1;
+		const maxSafePower = powerLevels[powerLevels.length - 1];
+		const requiredPower = powerLevels[0];
 
 		const powerRatio = currentPower / maxSafePower;
 

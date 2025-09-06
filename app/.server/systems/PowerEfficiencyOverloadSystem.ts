@@ -15,9 +15,10 @@ export class PowerEfficiencyOverloadSystem extends System {
 		// TODO: Make this also decrease other damage metrics, not just entropy
 		// A very small random efficiency drop every frame
 		const entropy = Math.abs(this.ecs.rng.next()) * damage.entropyMultiplier;
+		const maxSafePower = power.powerLevels[power.powerLevels.length - 1];
 		const overloadPercent = Math.max(
 			0,
-			(power.currentPower - power.maxSafePower) / power.maxSafePower,
+			(power.currentPower - maxSafePower) / maxSafePower,
 		);
 		const overloadDecrease =
 			(overloadPercent * damage.overloadDamageMultiplier + entropy) *

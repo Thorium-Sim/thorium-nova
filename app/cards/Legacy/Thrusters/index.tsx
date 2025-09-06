@@ -1,5 +1,5 @@
-import { Line, OrbitControls, useGLTF } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Line, useGLTF } from "@react-three/drei";
+import { Canvas } from "@react-three/fiber";
 import { Arrow } from "@thorium/cards/Legacy/Thrusters/Arrow";
 import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
@@ -15,7 +15,7 @@ import {
 	type ReactNode,
 	type Ref,
 } from "react";
-import { Color, type Group, Material, Mesh, MeshBasicMaterial } from "three";
+import { Color, type Group, Mesh, MeshBasicMaterial } from "three";
 
 async function rotation({
 	shipId,

@@ -10,7 +10,8 @@ export class ShieldsSystem extends System {
 		const elapsedTimeHours = elapsed / 1000 / 60 / 60;
 
 		if (entity.components.power && entity.components.isShields) {
-			const { currentPower, requiredPower } = entity.components.power;
+			const { currentPower, powerLevels } = entity.components.power;
+			const requiredPower = powerLevels[0];
 			const { state, maxStrength, strength } = entity.components.isShields;
 			// Some space magic to make the shields more powerful.
 			let strengthToRecharge = currentPower * elapsedTimeHours * 10;

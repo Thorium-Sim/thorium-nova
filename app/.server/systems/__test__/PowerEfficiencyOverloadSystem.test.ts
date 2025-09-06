@@ -20,7 +20,7 @@ describe("PowerEfficiencyOverloadSystem", () => {
 			ecs.addEntity(system);
 		});
 		it("should slowly decrease when power is below the maxSafePower", () => {
-			expect(system.components.power?.maxSafePower).toEqual(20);
+			expect(Math.max(...system.components.power!.powerLevels)).toEqual(20);
 			expect(system.components.power?.currentPower).toEqual(10);
 			expect(system.components.damage?.efficiency).toEqual(1);
 			for (let i = 0; i < 60; i++) {
@@ -41,7 +41,7 @@ describe("PowerEfficiencyOverloadSystem", () => {
 			);
 		});
 		it("should decrease when power is above maxSafePower", () => {
-			expect(system.components.power?.maxSafePower).toEqual(20);
+			expect(Math.max(...system.components.power!.powerLevels)).toEqual(20);
 			expect(system.components.damage?.efficiency).toEqual(1);
 
 			const system2 = new Entity();

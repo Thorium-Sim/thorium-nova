@@ -44,9 +44,8 @@ export function spawnShipSystem(
 			maxHeat,
 			maxSafeHeat,
 			nominalHeat,
-			requiredPower,
+			powerLevels,
 			defaultPower,
-			maxSafePower,
 		} = systemPlugin;
 		if (isPlayerShip) {
 			if (flags.includes("heat"))
@@ -63,9 +62,8 @@ export function spawnShipSystem(
 		}
 		if (flags.includes("power"))
 			entity.addComponent("power", {
-				requiredPower: overrides.requiredPower || requiredPower,
+				powerLevels: overrides.powerLevels || powerLevels,
 				defaultPower: overrides.defaultPower || defaultPower,
-				maxSafePower: overrides.maxSafePower || maxSafePower,
 			});
 	}
 
