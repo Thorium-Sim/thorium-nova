@@ -8,4 +8,4 @@ export const edgeFlagsSchema = z.union([
 export const edgeFlags = edgeFlagsSchema._def.options.map(
 	(flag) => flag._def.value,
 );
-export type EdgeFlag = Zod.infer<typeof edgeFlagsSchema>;
+export type EdgeFlag = z.infer<typeof edgeFlagsSchema>;

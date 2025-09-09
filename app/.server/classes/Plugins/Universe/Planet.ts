@@ -1,22 +1,22 @@
 import type { isPlanet } from "@thorium/ecs-components/list";
 import type { satellite } from "@thorium/ecs-components/satellite";
-import z from "zod";
+import type z from "zod";
 
 export default class PlanetPlugin {
 	name: string;
 	description: string;
 	tags: string[];
-	satellite: Omit<Zod.infer<typeof satellite>, "parentId"> & {
+	satellite: Omit<z.infer<typeof satellite>, "parentId"> & {
 		parentId: string | null;
 	};
-	isPlanet: Zod.infer<typeof isPlanet>;
+	isPlanet: z.infer<typeof isPlanet>;
 	population: number;
 	temperature: number;
 	constructor(
 		params: { name: string } & Partial<
 			Omit<PlanetPlugin, "satellite"> & {
 				satellite: Partial<
-					Omit<Zod.infer<typeof satellite>, "parentId"> & {
+					Omit<z.infer<typeof satellite>, "parentId"> & {
 						parentId: string | null;
 					}
 				>;

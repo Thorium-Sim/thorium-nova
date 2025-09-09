@@ -108,8 +108,12 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
 		useNetSend: (path: string, ...args: unknown[]) =>
 			useMutation({
 				mutationFn: (input) => client.netSend({ path, input }),
+				mutationKey: getArrayQueryKey(getQueryKey(path, null)),
 				...(args[0] as any),
 			}),
+		getMutationKey: (path: string, input: any) => {
+			return getArrayQueryKey(getQueryKey(path, input));
+		},
 		useDataStream: (path: string, ...args: unknown[]) => {
 			const params = args[0];
 			const id = stableValueHash({ path, params });

@@ -3,8 +3,9 @@ import { q } from "@thorium/context/AppContext";
 import Button from "@thorium/ui/Button";
 import type { isShip } from "@thorium/ecs-components/isShip";
 import { useStation } from "@thorium/routes/station/useStation";
+import type z from "zod";
 
-type AlertLevelT = Zod.infer<typeof isShip>["alertLevel"];
+type AlertLevelT = z.infer<typeof isShip>["alertLevel"];
 const alertLevelText = [
 	{
 		number: 5,

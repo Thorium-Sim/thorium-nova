@@ -47,6 +47,7 @@ import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
 import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
 import { useCardContext } from "@thorium/context/CardContext";
+import type z from "zod";
 
 export function CircleGridContacts({
 	onContactClick,
@@ -458,9 +459,9 @@ export const ShipEntity = ({
 };
 interface PlanetaryEntityProps {
 	id: number;
-	satellite: Zod.infer<typeof satellite>;
-	isPlanet?: Zod.infer<typeof isPlanet>;
-	isStar?: Zod.infer<typeof isStar>;
+	satellite: z.infer<typeof satellite>;
+	isPlanet?: z.infer<typeof isPlanet>;
+	isStar?: z.infer<typeof isStar>;
 	onClick?: (id: number) => void;
 	isSelected?: boolean;
 }
@@ -578,7 +579,7 @@ function OcclusionCone({
 	id: number;
 	sensorRange: number;
 	size: number;
-	satellite: Zod.infer<typeof satellite>;
+	satellite: z.infer<typeof satellite>;
 }) {
 	const { cardLoaded } = useCardContext();
 	const position = getOrbitPosition({

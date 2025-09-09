@@ -17,6 +17,7 @@ import { capitalCase } from "change-case";
 import path from "node:path";
 import { mergeDeep } from "@thorium/utils/operations/mergeDeep";
 import type PhasersPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Phasers";
+import type z from "zod";
 
 const systemCache: Record<string, BaseShipSystemPlugin> = {};
 function getSystem(
@@ -43,10 +44,11 @@ export async function spawnShip(
 		name?: string;
 		description?: string;
 		registry?: string;
-		position?: Zod.infer<typeof position>;
+		position?: z.infer<typeof position>;
 		tags?: string[];
 		assets?: Partial<InstanceType<typeof ShipPlugin>["assets"]>;
 		playerShip?: boolean;
+		flightMode: "nova" | "legacy";
 	},
 ) {
 	if (!dataContext.flight) throw new Error("No flight has been started.");
@@ -230,19 +232,22 @@ export async function spawnShip(
 	}, 0);
 	if (params.playerShip) {
 		const reactorCount =
-			template.shipSystems?.reduce((prev, system) => {
-				const systemPlugin = getSystem(
-					dataContext,
-					system.systemId,
-					system.pluginId,
-				);
-				if (systemPlugin instanceof ReactorPlugin) {
-					return (
-						prev + (system.overrides?.reactorCount || systemPlugin.reactorCount)
-					);
-				}
-				return prev;
-			}, 0) || 1;
+			params.flightMode === "legacy"
+				? 1
+				: template.shipSystems?.reduce((prev, system) => {
+						const systemPlugin = getSystem(
+							dataContext,
+							system.systemId,
+							system.pluginId,
+						);
+						if (systemPlugin instanceof ReactorPlugin) {
+							return (
+								prev +
+								(system.overrides?.reactorCount || systemPlugin.reactorCount)
+							);
+						}
+						return prev;
+					}, 0) || 1;
 
 		// Split amongst the reactors and generously make it a nice round number
 		const reactorPower = Math.ceil(totalPower / reactorCount / 10) * 10;

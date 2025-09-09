@@ -10,24 +10,7 @@ function envToBool(value: string | undefined) {
 
 const TEST_SERVER_PORT = Number(process.env.PORT || "4010");
 const IS_CI = envToBool(process.env.CI);
-const NO_SERVER = envToBool(process.env.NO_SERVER);
 
-const targetArch =
-	process.arch === "arm64"
-		? "aarch64"
-		: process.arch === "x64"
-			? "x86_64"
-			: "unknown";
-const targetPlatform =
-	process.platform === "darwin"
-		? "apple-darwin"
-		: process.platform === "linux"
-			? "unknown-linux-gnu"
-			: process.platform === "win32"
-				? "pc-windows-msvc"
-				: "unknown";
-
-const binaryName = `server-${targetArch}-${targetPlatform}`;
 const config: PlaywrightTestConfig = {
 	// exit CI with error if any tests are marked as `.only`
 	forbidOnly: IS_CI,
@@ -43,7 +26,7 @@ const config: PlaywrightTestConfig = {
 	testMatch: "**/*.e2e.ts",
 	// Don't run in parallel
 	fullyParallel: IS_CI,
-	workers: 4,
+	workers: IS_CI ? 4 : 1,
 	use: {
 		headless: true,
 		trace: "retain-on-failure",

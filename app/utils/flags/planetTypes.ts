@@ -21,12 +21,12 @@ export const planetClasses = z.union([
 	z.literal("P"),
 	z.literal("S"),
 ]);
-export type PlanetClasses = Zod.infer<typeof planetClasses>;
+export type PlanetClasses = z.infer<typeof planetClasses>;
 export type Zone = ("hot" | "cold" | "habitable")[];
 export const atmosphericComposition = z
 	.object({ component: z.string(), concentration: z.number() })
 	.array();
-export type AtmosphericComposition = Zod.infer<typeof atmosphericComposition>;
+export type AtmosphericComposition = z.infer<typeof atmosphericComposition>;
 
 const possibleRingMaps = [
 	"/plugins/Thorium Default/assets/rings/rings1.png",

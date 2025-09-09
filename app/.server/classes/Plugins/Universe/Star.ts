@@ -8,6 +8,7 @@ import type {
 import type SolarSystemPlugin from "./SolarSystem";
 import type { SpectralTypes } from "@thorium/utils/flags/starTypes";
 import type { satellite } from "@thorium/ecs-components/satellite";
+import type z from "zod";
 
 const ALPHABET = "ABC";
 
@@ -52,7 +53,7 @@ export default class StarPlugin {
 	 */
 	temperature: Kelvin;
 
-	satellite: Omit<Zod.infer<typeof satellite>, "parentId"> & {
+	satellite: Omit<z.infer<typeof satellite>, "parentId"> & {
 		parentId: string;
 	};
 
@@ -60,7 +61,7 @@ export default class StarPlugin {
 		params: Partial<
 			Omit<StarPlugin, "satellite"> & {
 				satellite: Partial<
-					Omit<Zod.infer<typeof satellite>, "parentId"> & {
+					Omit<z.infer<typeof satellite>, "parentId"> & {
 						parentId: string;
 					}
 				>;

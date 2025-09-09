@@ -17,7 +17,7 @@ export const spectralTypes = z.union([
 	z.literal("M"),
 	z.literal("D"),
 ]);
-export type SpectralTypes = Zod.infer<typeof spectralTypes>;
+export type SpectralTypes = z.infer<typeof spectralTypes>;
 
 interface StarType {
 	name: string;

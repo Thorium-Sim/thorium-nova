@@ -2,11 +2,12 @@ import type { shipBehavior } from "@thorium/ecs-components/shipBehavior";
 import type { ECS } from "@thorium/utils/ecs";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { Vector3 } from "three";
+import type z from "zod";
 
 const targetPoint = new Vector3();
 export function getTargetPoint(
 	ecs: ECS,
-	target: Zod.infer<typeof shipBehavior>["behaviorTarget"],
+	target: z.infer<typeof shipBehavior>["behaviorTarget"],
 ) {
 	if (!target) return targetPoint;
 	if (typeof target === "object") {

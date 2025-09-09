@@ -4,7 +4,6 @@ import { load, dump } from "js-yaml";
 import type { DataStoreOperations } from "@thorium/utils/.server/db-fs";
 import BasePlugin from "@thorium/.server/classes/Plugins";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
-import { loadFolderYaml } from "@thorium/utils/.server/db-fs/loadFolderYaml";
 import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
 import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
 import { moveFile } from "@thorium/utils/.server/moveFile";

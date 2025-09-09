@@ -6,7 +6,6 @@ export default function CardProvider({
 	children,
 	cardLoaded,
 	cardName,
-	cardLoaded,
 }: {
 	cardName: string;
 	cardLoaded: boolean;

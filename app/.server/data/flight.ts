@@ -52,7 +52,7 @@ const flightStartShips = z
 function getStationComplement(
 	mode: "nova" | "legacy",
 	activePlugins: BasePlugin[],
-	ship: Zod.infer<typeof flightStartShips>[0],
+	ship: z.infer<typeof flightStartShips>[0],
 ) {
 	let stationComplement = activePlugins.reduce(
 		(acc: StationComplementPlugin | null, plugin) => {
@@ -236,7 +236,7 @@ export const flight = t.router({
 					);
 					if (!shipTemplate) continue;
 
-					let position: Zod.infer<typeof positionComponent> = {
+					let position: z.infer<typeof positionComponent> = {
 						x: 0,
 						y: 0,
 						z: 0,
@@ -259,6 +259,7 @@ export const flight = t.router({
 							position,
 							tags: ["player"],
 							playerShip: true,
+							flightMode: mode,
 						},
 					);
 

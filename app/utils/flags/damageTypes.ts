@@ -26,7 +26,7 @@ export const damageEffects = [
 
 export const damageTypeValues = Object.values(damageTypes.Values);
 
-export type DamageTypes = Zod.infer<typeof damageTypes>;
+export type DamageTypes = z.infer<typeof damageTypes>;
 
 export type DamageEffects = (typeof damageEffects)[number];
 

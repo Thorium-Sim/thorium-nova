@@ -24,8 +24,8 @@ export const effectConfig = z.object({
 });
 
 export interface EffectPayload {
-	effect: Zod.infer<typeof effectOptions>;
-	config: Zod.infer<typeof effectConfig> | null;
+	effect: z.infer<typeof effectOptions>;
+	config: z.infer<typeof effectConfig> | null;
 	station: string | null;
 	shipId: number | null;
 	clientId: string | null;

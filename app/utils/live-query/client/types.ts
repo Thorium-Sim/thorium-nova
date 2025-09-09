@@ -47,6 +47,7 @@ type DecorateProcedure<
 		}
 	: TProcedure extends AnySendProcedure
 		? {
+				getMutationKey: (input?: inferProcedureInput<TProcedure>) => string[];
 				netSend: Resolver<TProcedure>;
 				useNetSend: <TContext = unknown>(
 					opts?: UseMutationOptions<

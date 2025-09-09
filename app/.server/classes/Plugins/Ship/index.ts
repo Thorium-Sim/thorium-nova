@@ -12,7 +12,7 @@ export const shipCategories = z.union([
 	z.literal("Scout"),
 	z.literal("Shuttle"),
 ]);
-export type ShipCategories = Zod.infer<typeof shipCategories>;
+export type ShipCategories = z.infer<typeof shipCategories>;
 
 export default class ShipPlugin extends Aspect {
 	apiVersion = "ships/v1" as const;

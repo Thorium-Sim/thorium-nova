@@ -6,6 +6,7 @@ import { getAutopilotPositionAndRotation } from "@thorium/utils/starmap/autopilo
 import type { isWarpEngines } from "@thorium/ecs-components/shipSystems";
 import { lerp } from "three/src/math/MathUtils.js";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import type z from "zod";
 
 const emptyVector = new Vector3(0, 0, 0);
 const scaleVector = new Vector3(1, 1, 1);
@@ -233,7 +234,7 @@ function leaderFollowing(entity: Entity) {
 
 function getWarpFactorFromDesiredSpeed(
 	desiredSpeed: number,
-	warp: Zod.infer<typeof isWarpEngines>,
+	warp: z.infer<typeof isWarpEngines>,
 	isInterstellar = false,
 ) {
 	const {

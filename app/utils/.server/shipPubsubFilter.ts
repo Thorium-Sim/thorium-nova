@@ -7,3 +7,13 @@ export function shipPubsubFilter(
 
 	return true;
 }
+
+export function systemPubsubFilter(
+	publish: { systemId: number },
+	{ input }: { input: { systemId: number } },
+): boolean {
+	if (publish && "systemId" in publish && publish.systemId !== input.systemId)
+		return false;
+
+	return true;
+}

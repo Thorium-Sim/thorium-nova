@@ -22,7 +22,7 @@ import {
 	type NodeFlag,
 } from "@thorium/utils/flags/DeckNode";
 
-type ShipMapDeckNode = Zod.infer<typeof shipMap>["deckNodes"][number];
+type ShipMapDeckNode = z.infer<typeof shipMap>["deckNodes"][number];
 
 const transferId = z.object({
 	type: z.union([z.literal("room"), z.literal("entity")]),

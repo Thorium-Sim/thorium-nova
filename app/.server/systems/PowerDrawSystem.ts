@@ -140,7 +140,7 @@ export class PowerDrawSystem extends System {
 					break;
 				}
 				powerDraw = Math.max(
-					power.requiredPower,
+					power.powerLevels[0],
 					activeDiagnostic ? requestedPower : 0,
 				);
 				break;

@@ -19,7 +19,7 @@ import type {
 import { pathfinder } from "@thorium/utils/starmap/pathfinder.server";
 import { shipObjectives } from "@thorium/utils/flags/shipObjectives";
 
-type IsDestroyed = Zod.infer<typeof isDestroyed>;
+type IsDestroyed = z.infer<typeof isDestroyed>;
 
 const objectDetailsComponents: ComponentIds[] = [
 	"isShip",

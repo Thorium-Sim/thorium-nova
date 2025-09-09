@@ -19,6 +19,7 @@ import {
 	getObjectSystem,
 } from "../starmap/position";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
+import type z from "zod";
 
 export function evaluateEntityQuery(ecs: ECS, query: EntityQuery): Entity[] {
 	const output: Entity[] = [];
@@ -181,7 +182,7 @@ export function selectValueQuery(ecs: ECS, entityQuery: ValueQuery): any[] {
 
 export function evaluateTriggerCondition(
 	ecs: ECS,
-	conditions: Zod.infer<typeof conditionSchema>[],
+	conditions: z.infer<typeof conditionSchema>[],
 	event?: { event: string; values: any },
 ) {
 	let match: any = true;
@@ -371,7 +372,7 @@ function getEntityPosition(e: Entity) {
 }
 
 // Action evaluator and executor.
-export function evaluateAction(ecs: ECS, action: Zod.infer<typeof actionItem>) {
+export function evaluateAction(ecs: ECS, action: z.infer<typeof actionItem>) {
 	// Based on the results of the entity queries, we might execute this
 	// action multiple times with different values.
 	const actionValues: Map<string, Set<any>> = new Map();

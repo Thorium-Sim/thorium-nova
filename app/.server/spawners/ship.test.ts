@@ -59,6 +59,7 @@ describe("Ship Spawner", () => {
 				name: "Spawned Ship",
 				position: { x: 10, y: 20, z: 30, type: "interstellar", parentId: null },
 				playerShip: true,
+				flightMode: "nova",
 			});
 			expect(ship.components.identity?.name).toEqual("Spawned Ship");
 			expect(ship.components.position?.x).toEqual(10);

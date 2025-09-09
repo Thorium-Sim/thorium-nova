@@ -21,4 +21,4 @@ export const nodeFlagsSchema = z.union([
 export const nodeFlags = nodeFlagsSchema._def.options.map(
 	(flag) => flag._def.value,
 );
-export type NodeFlag = Zod.infer<typeof nodeFlagsSchema>;
+export type NodeFlag = z.infer<typeof nodeFlagsSchema>;

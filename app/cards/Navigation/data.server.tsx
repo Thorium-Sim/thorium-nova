@@ -17,8 +17,8 @@ type Waypoint = {
 	id: number;
 	name: string;
 	objectId?: number;
-	position: Zod.infer<typeof position>;
-	systemPosition: Zod.infer<typeof position> | null;
+	position: z.infer<typeof position>;
+	systemPosition: z.infer<typeof position> | null;
 };
 
 export const navigation = t.router({

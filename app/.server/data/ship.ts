@@ -193,6 +193,7 @@ export const ship = t.router({
 					// TODO: August 20, 2022 - Generate a name for this ship somehow
 					name: randomNameGenerator(),
 					tags: input.tags,
+					flightMode: ctx.flight.mode,
 				},
 			);
 

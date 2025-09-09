@@ -11,6 +11,7 @@ import {
 	getDamageMetricMultipliers,
 	type damageTypes as damageType,
 } from "@thorium/utils/flags/damageTypes";
+import type z from "zod";
 
 export function handleCollisionDamage(
 	entity: Entity | null,
@@ -91,7 +92,7 @@ export function applyDamage(
 	damageInGigajoules: number,
 	// The vector from the ship to the impact point.
 	direction: Vector3,
-	damageTypes?: Zod.infer<typeof damageType>[],
+	damageTypes?: z.infer<typeof damageType>[],
 	ignoreShields?: boolean,
 ) {
 	let remainingDamage = damageInGigajoules;
@@ -178,7 +179,7 @@ export function applyDamage(
 export function applySystemDamage(
 	system: Entity,
 	damage: number,
-	damageTypes?: Zod.infer<typeof damageType>[],
+	damageTypes?: z.infer<typeof damageType>[],
 ) {
 	const damageMetricMultipliers = getDamageMetricMultipliers(system);
 
@@ -227,7 +228,7 @@ function applyShieldDamage(
 	damageInGigajoules: number,
 	// The vector from the ship to the impact point.
 	direction: Vector3,
-	damageTypes?: Zod.infer<typeof damageType>[],
+	damageTypes?: z.infer<typeof damageType>[],
 ) {
 	const size = /*entity.components.size ||*/ { length: 1, width: 1, height: 1 };
 	const shieldDirection = getWhichShield(direction, {
