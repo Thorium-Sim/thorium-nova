@@ -16,7 +16,7 @@ export class ReportPlugin extends Aspect {
 			params.name || "New Report",
 			plugin.aspects.macros.map((macro) => macro.name),
 		);
-		super({ name, ...params }, { kind: "macros" }, plugin, {});
+		super({ name, ...params }, { kind: "reports" }, plugin, {});
 		this.name = name;
 		this.category = params.category || "";
 		this.damageTypes = params.damageTypes || [];

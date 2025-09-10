@@ -3,6 +3,62 @@ import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
+type LegacySetting = {
+	name: string;
+	efficiency: number | null;
+	color:
+		| "primary"
+		| "secondary"
+		| "success"
+		| "warning"
+		| "error"
+		| "accent"
+		| "info"
+		| "notice";
+};
+
+const defaultLegacySettings: LegacySetting[] = [
+	{
+		name: "Overload",
+		color: "error",
+		efficiency: 1.25,
+	},
+	{
+		name: "Cruise",
+		color: "primary",
+		efficiency: 1,
+	},
+	{
+		name: "Silent Running",
+		color: "notice",
+		efficiency: 0.87,
+	},
+	{
+		name: "Reduced",
+		color: "secondary",
+		efficiency: 0.5,
+	},
+	{
+		name: "Auxiliary",
+		color: "info",
+		efficiency: 0.38,
+	},
+	{
+		name: "Minimal",
+		color: "warning",
+		efficiency: 0.27,
+	},
+	{
+		name: "Power Down",
+		color: "error",
+		efficiency: 0,
+	},
+	{
+		name: "External Power",
+		color: "success",
+		efficiency: null,
+	},
+];
 export default class ReactorPlugin extends BaseShipSystemPlugin {
 	static flags: ShipSystemFlags[] = ["damage", "heat", "sounds"];
 	type = "reactor" as const;
@@ -25,7 +81,10 @@ export default class ReactorPlugin extends BaseShipSystemPlugin {
 	 * in case.
 	 */
 	reactorCount: number;
-
+	/**
+	 * For legacy mode: Settings for adjusting the reactor efficiency/output
+	 */
+	legacySettings: LegacySetting[];
 	soundEffects: {
 		ambiance: Sound[];
 		overheatAlert: Sound[];
@@ -36,6 +95,8 @@ export default class ReactorPlugin extends BaseShipSystemPlugin {
 		this.optimalOutputPercent = params.optimalOutputPercent || 0.7;
 		this.reactorCount = params.reactorCount || 4;
 		this.powerMultiplier = params.powerMultiplier || 1;
+		this.legacySettings =
+			params.legacySettings || structuredClone(defaultLegacySettings);
 		this.soundEffects = params.soundEffects || {
 			ambiance: [],
 			overheatAlert: [],

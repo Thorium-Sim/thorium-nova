@@ -29,5 +29,9 @@ export const heat = z
 		 * of the heat bar graph.
 		 */
 		maxHeat: z.number().min(0).default(2500),
+		/**
+		 * Legacy: Multiplier for heat increasing or decreasing in ship systems
+		 */
+		legacyHeatRate: z.number().default(1),
 	})
 	.default({});

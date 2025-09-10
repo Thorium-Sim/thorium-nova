@@ -1,4 +1,5 @@
 import { useMutationState } from "@tanstack/react-query";
+import { Batteries } from "@thorium/cards/Legacy/PowerDistribution/Batteries";
 import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import { cn } from "@thorium/utils/cn";
@@ -10,9 +11,6 @@ export function LegacyPowerDistribution() {
 		shipId,
 	});
 	const [reactors] = q.legacy.powerDistribution.reactors.useNetRequest({
-		shipId,
-	});
-	const [batteries] = q.legacy.powerDistribution.batteries.useNetRequest({
 		shipId,
 	});
 
@@ -40,26 +38,7 @@ export function LegacyPowerDistribution() {
 				))}
 			</div>
 			<div className="col-span-2 flex flex-col justify-around">
-				{batteries.length > 0 ? (
-					<div className="panel h-96 px-8 flex flex-col text-center">
-						Batteries
-						<div className="flex justify-between gap-8 flex-auto pt-4">
-							{batteries.map((battery) => (
-								<div key={battery.id} className="w-full flex h-full flex-col">
-									<div className="flex-auto">
-										<div
-											className="rounded-xl bg-green-500 striped-gradient border-2 border-green-900"
-											style={{ height: `${battery.capacity * 100}%` }}
-										/>
-									</div>
-									<p className="tabular-nums text-center">
-										{Math.round(battery.capacity * 100)}%
-									</p>
-								</div>
-							))}
-						</div>
-					</div>
-				) : null}
+				<Batteries />
 				<div>
 					<p className="font-semibold text-2xl">
 						Total Power Available: {reactorPower}

@@ -156,6 +156,9 @@ export const powerDistribution = t.router({
 				pubsub.publish.legacy.powerDistribution.reactors({
 					shipId: system.components.isShipSystem?.shipId || -1,
 				});
+				pubsub.publish.legacy.reactorControl.reactors({
+					shipId: system.components.isShipSystem?.shipId || -1,
+				});
 			}
 		}),
 	reactors: t.procedure
@@ -191,16 +194,53 @@ export const powerDistribution = t.router({
 			pubsub.publish.legacy.powerDistribution.reactors({
 				shipId: system.components.isShipSystem?.shipId || -1,
 			});
-		}),
-	setReactorEfficiency: t.procedure
-		.input(z.object({ systemId: z.number(), efficiency: z.number() }))
-		.send(({ ctx, input }) => {
-			const system = getShipSystem(ctx.ecs, { systemId: input.systemId });
-			system.updateComponent("damage", { efficiency: input.efficiency });
-
-			pubsub.publish.legacy.powerDistribution.reactors({
+			pubsub.publish.legacy.reactorControl.reactors({
 				shipId: system.components.isShipSystem?.shipId || -1,
 			});
+		}),
+	setReactorEfficiency: t.procedure
+		.input(
+			z.union([
+				z.object({ systemId: z.number(), efficiency: z.number().nullable() }),
+				z.object({ shipId: z.number(), efficiency: z.number().nullable() }),
+			]),
+		)
+		.send(({ ctx, input }) => {
+			if ("systemId" in input) {
+				const system = getShipSystem(ctx.ecs, { systemId: input.systemId });
+				if (typeof input.efficiency === "number") {
+					system.updateComponent("damage", { efficiency: input.efficiency });
+					system.updateComponent("isReactor", { externalPower: false });
+				} else {
+					system.updateComponent("isReactor", { externalPower: true });
+				}
+
+				pubsub.publish.legacy.powerDistribution.reactors({
+					shipId: system.components.isShipSystem?.shipId || -1,
+				});
+				pubsub.publish.legacy.reactorControl.reactors({
+					shipId: system.components.isShipSystem?.shipId || -1,
+				});
+			} else {
+				const systems = getShipSystems(ctx.ecs, {
+					systemType: "reactor",
+					shipId: input.shipId,
+				});
+				for (const system of systems) {
+					if (typeof input.efficiency === "number") {
+						system.updateComponent("damage", { efficiency: input.efficiency });
+						system.updateComponent("isReactor", { externalPower: false });
+					} else {
+						system.updateComponent("isReactor", { externalPower: true });
+					}
+				}
+				pubsub.publish.legacy.powerDistribution.reactors({
+					shipId: input.shipId,
+				});
+				pubsub.publish.legacy.reactorControl.reactors({
+					shipId: input.shipId,
+				});
+			}
 		}),
 	batteries: t.procedure
 		.input(z.object({ shipId: z.number() }))
@@ -222,9 +262,7 @@ export const powerDistribution = t.router({
 				battery.components.isBattery && !battery.components.isPhaseCapacitor
 					? {
 							id: battery.id,
-							capacity:
-								battery.components.isBattery?.storage /
-								battery.components.isBattery?.capacity,
+							capacity: battery.components.isBattery?.capacity || 1,
 						}
 					: [],
 			);

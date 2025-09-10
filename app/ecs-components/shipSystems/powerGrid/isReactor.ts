@@ -1,4 +1,4 @@
-import z from "zod";
+import z, { ZodEnum } from "zod";
 
 export const isReactor = z
 	.object({
@@ -31,5 +31,31 @@ export const isReactor = z
 				density: z.number().default(1),
 			})
 			.default({}),
+
+		/**
+		 * Whether the power is provided by an external connection because the ship is docked
+		 */
+		externalPower: z.boolean().default(false),
+
+		/**
+		 * For legacy mode: Settings for adjusting the reactor efficiency/output
+		 */
+		legacySettings: z
+			.object({
+				name: z.string(),
+				efficiency: z.number().nullable(),
+				color: z.enum([
+					"primary",
+					"secondary",
+					"success",
+					"warning",
+					"error",
+					"accent",
+					"info",
+					"notice",
+				]),
+			})
+			.array()
+			.default([]),
 	})
 	.default({});
