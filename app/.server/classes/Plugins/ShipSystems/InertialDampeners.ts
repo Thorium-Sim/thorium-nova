@@ -4,6 +4,7 @@ import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class InertialDampenersPlugin extends BaseShipSystemPlugin {
 	static flags: ShipSystemFlags[] = [];
+	static flightModes = ["nova"];
 	type = "inertialDampeners" as const;
 	/**
 	 * A number > 0. Pulls the ship's velocity to make it match the current heading

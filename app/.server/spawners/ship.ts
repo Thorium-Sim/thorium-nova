@@ -114,6 +114,9 @@ export async function spawnShip(
 			system.pluginId,
 		);
 		if (!systemPlugin) return;
+		// @ts-expect-error
+		if (!systemPlugin.constructor.flightModes.includes(params.flightMode))
+			return;
 		switch (systemPlugin.type) {
 			case "reactor":
 				// Reactors are special, so take care of them later.
@@ -121,9 +124,10 @@ export async function spawnShip(
 				break;
 			case "battery": {
 				if (params.playerShip) {
-					const entity = spawnShipSystem(
+					const [entity, ...rest] = spawnShipSystem(
 						shipId,
 						systemPlugin,
+						params.flightMode,
 						params.playerShip,
 						system.overrides,
 					);
@@ -131,7 +135,7 @@ export async function spawnShip(
 						entity.components.isBattery.storage =
 							entity.components.isBattery.capacity;
 					}
-					systemEntities.push(entity);
+					systemEntities.push(entity, ...rest);
 				}
 
 				break;
@@ -151,9 +155,10 @@ export async function spawnShip(
 					("shieldCount" in systemPlugin && systemPlugin.shieldCount) ||
 					1;
 				for (let i = 0; i < shieldCount; i++) {
-					const entity = spawnShipSystem(
+					const [entity, ...rest] = spawnShipSystem(
 						shipId,
 						systemPlugin,
+						params.flightMode,
 						params.playerShip,
 						{
 							...system.overrides,
@@ -167,60 +172,65 @@ export async function spawnShip(
 							}`,
 						});
 					}
-					systemEntities.push(entity);
+					systemEntities.push(entity, ...rest);
 				}
 				break;
 			}
 			case "phasers": {
 				phaseCapacitorCount += 1;
-				const phaser = spawnShipSystem(
+				const [phaser, ...rest] = spawnShipSystem(
 					shipId,
 					systemPlugin,
+					params.flightMode,
 					params.playerShip,
 					system.overrides,
 				);
 
-				systemEntities.push(phaser);
+				systemEntities.push(phaser, ...rest);
 
 				const template = mergeDeep(
 					systemPlugin,
 					system.overrides || {},
 				) as PhasersPlugin;
 
-				const capacitor = spawnShipSystem(
-					shipId,
-					{ type: "battery" },
-					params.playerShip,
-					{},
-				);
-				capacitor.updateComponent("identity", {
-					name: `Phase Capacitor ${phaseCapacitorCount}`,
-				});
-				capacitor.addComponent("isPhaseCapacitor");
-				capacitor.updateComponent("isBattery", {
-					storage: 0,
-					capacity: template.fullChargeYield,
-					outputRate: phaser.components.power?.defaultPower || 1,
-					chargeRate: phaser.components.power?.powerLevels[0] || 1,
-				});
-				systemEntities.push(capacitor);
-				phaser.updateComponent("power", {
-					powerSources: Array.from({
-						length: phaser.components.power?.defaultPower || 0,
-					}).map(() => capacitor.id),
-				});
+				if (params.flightMode === "nova") {
+					const [capacitor] = spawnShipSystem(
+						shipId,
+						{ type: "battery" },
+						params.flightMode,
+						params.playerShip,
+						{},
+					);
+					capacitor.updateComponent("identity", {
+						name: `Phase Capacitor ${phaseCapacitorCount}`,
+					});
+					capacitor.addComponent("isPhaseCapacitor");
+					capacitor.updateComponent("isBattery", {
+						storage: 0,
+						capacity: template.fullChargeYield,
+						outputRate: phaser.components.power?.defaultPower || 1,
+						chargeRate: phaser.components.power?.powerLevels[0] || 1,
+					});
+					systemEntities.push(capacitor, ...rest);
+					phaser.updateComponent("power", {
+						powerSources: Array.from({
+							length: phaser.components.power?.defaultPower || 0,
+						}).map(() => capacitor.id),
+					});
+				}
 
 				break;
 			}
 			default: {
 				// TODO: Set up power from reactors and batteries
-				const entity = spawnShipSystem(
+				const [entity, ...rest] = spawnShipSystem(
 					shipId,
 					systemPlugin,
+					params.flightMode,
 					params.playerShip,
 					system.overrides,
 				);
-				systemEntities.push(entity);
+				systemEntities.push(entity, ...rest);
 				break;
 			}
 		}
@@ -259,10 +269,11 @@ export async function spawnShip(
 				system.pluginId,
 			);
 			if (systemPlugin instanceof ReactorPlugin) {
-				Array.from({ length: systemPlugin.reactorCount }).forEach(() => {
-					const sys = spawnShipSystem(
+				Array.from({ length: reactorCount }).forEach(() => {
+					const [sys, ...rest] = spawnShipSystem(
 						shipId,
 						systemPlugin,
+						params.flightMode,
 						params.playerShip,
 						system.overrides,
 					);
@@ -272,7 +283,7 @@ export async function spawnShip(
 						currentOutput: maxOutput * systemPlugin.optimalOutputPercent,
 						optimalOutputPercent: systemPlugin.optimalOutputPercent,
 					});
-					systemEntities.push(sys);
+					systemEntities.push(sys, ...rest);
 				});
 			}
 		});

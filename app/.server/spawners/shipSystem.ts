@@ -7,10 +7,13 @@ import { mergeDeep } from "@thorium/utils/operations/mergeDeep";
 export function spawnShipSystem(
 	shipId: number,
 	systemPlugin: Partial<BaseShipSystemPlugin>,
+	flightMode: "legacy" | "nova",
 	isPlayerShip?: boolean,
 	overrides: Record<string, any> = {},
 ) {
 	const entity = new Entity();
+	const entities = [entity];
+
 	const template = mergeDeep(systemPlugin, overrides);
 
 	entity.addComponent("identity", {
@@ -35,6 +38,28 @@ export function spawnShipSystem(
 
 		const flags = ShipSystemTypes[template.type].flags;
 
+		if (
+			flightMode === "legacy" &&
+			template.type === "phasers" &&
+			"legacyPhaserBanks" in template &&
+			typeof template.legacyPhaserBanks === "number"
+		) {
+			const phaserBanks: number[] = [];
+			for (let i = 0; i < template.legacyPhaserBanks; i++) {
+				// Create phaser banks for each phaser system
+				const phaserBank = new Entity();
+				phaserBank.addComponent("isPhaserBank", {
+					// @ts-expect-error
+					chargeSpeed: template.legacyChargeSpeed,
+					phaserId: entity.id,
+					shipId,
+				});
+				phaserBank.addComponent("heat");
+				entities.push(phaserBank);
+				phaserBanks.push(phaserBank.id);
+			}
+			template.legacyPhaserBanks = phaserBanks;
+		}
 		if (template.type !== "generic" && componentName in components)
 			entity.addComponent(componentName as ComponentIds, template);
 
@@ -46,9 +71,11 @@ export function spawnShipSystem(
 			nominalHeat,
 			powerLevels,
 			defaultPower,
+			coolantConsumptionRate,
+			coolantTransferRate,
 		} = systemPlugin;
 		if (isPlayerShip) {
-			if (flags.includes("heat"))
+			if (flags.includes("heat")) {
 				entity.addComponent("heat", {
 					powerToHeat: overrides.powerToHeat || powerToHeat,
 					heatDissipationRate:
@@ -58,14 +85,33 @@ export function spawnShipSystem(
 					nominalHeat: overrides.nominalHeat || nominalHeat,
 					heat: overrides.nominalHeat || nominalHeat,
 				});
+				if (flightMode === "legacy") {
+					entity.addComponent("legacyCoolant", {
+						coolantConsumptionRate:
+							overrides.coolantConsumptionRate || coolantConsumptionRate,
+						coolantTransferRate:
+							overrides.coolantTransferRate || coolantTransferRate,
+					});
+				}
+			}
+			if (flightMode === "legacy" && template.type === "coolantTank") {
+				entity.addComponent("legacyCoolant", {
+					coolantConsumptionRate:
+						overrides.coolantConsumptionRate || coolantConsumptionRate,
+					coolantTransferRate:
+						overrides.coolantTransferRate || coolantTransferRate,
+				});
+			}
+
 			if (flags.includes("damage")) entity.addComponent("damage");
 		}
-		if (flags.includes("power"))
+		if (flags.includes("power")) {
 			entity.addComponent("power", {
 				powerLevels: overrides.powerLevels || powerLevels,
 				defaultPower: overrides.defaultPower || defaultPower,
 			});
+		}
 	}
 
-	return entity;
+	return entities;
 }

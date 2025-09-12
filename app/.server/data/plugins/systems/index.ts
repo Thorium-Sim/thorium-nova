@@ -23,6 +23,7 @@ import { sound } from "@thorium/ecs-components/sound";
 import path from "node:path";
 import { sensors } from "./sensors";
 import { mainComputer } from "./mainComputer";
+import type BaseShipSystemPlugin from "@thorium/.server/classes/Plugins/ShipSystems/BaseSystem";
 
 const systemTypes = createUnionSchema(
 	Object.keys(ShipSystemTypes) as (keyof typeof ShipSystemTypes)[],
@@ -54,14 +55,19 @@ export const systems = t.router({
 						(acc, plugin) => acc.concat(plugin.aspects.shipSystems),
 						[] as typeof plugin.aspects.shipSystems,
 					)
-					.map(({ plugin, ...shipSystem }) => ({
+					.map((shipSystem) => ({
 						...shipSystem,
-						pluginName: plugin.name,
+						pluginName: shipSystem.plugin.name,
+						// @ts-expect-error
+						flightModes: shipSystem.constructor.flightModes,
 					}));
 			const plugin = getPlugin(ctx, input.pluginId);
-			return plugin.aspects.shipSystems.map(({ plugin, ...shipSystem }) => ({
+
+			return plugin.aspects.shipSystems.map((shipSystem) => ({
 				...shipSystem,
-				pluginName: plugin.name,
+				pluginName: shipSystem.plugin.name,
+				// @ts-expect-error
+				flightModes: shipSystem.constructor.flightModes,
 			}));
 		}),
 	get: t.procedure
@@ -138,6 +144,8 @@ export const systems = t.router({
 				signatureSpikeDuration: z.number().optional(),
 				entropyMultiplier: z.number().optional(),
 				soundEffects: z.record(sound.array()).optional(),
+				coolantTransferRate: z.number().optional(),
+				coolantConsumptionRate: z.number().optional(),
 			}),
 		)
 		.send(async ({ ctx, input }) => {
@@ -225,6 +233,14 @@ export const systems = t.router({
 				"soundEffects" in shipSystem
 			) {
 				shipSystem.soundEffects = input.soundEffects;
+			}
+
+			// Legacy Properties
+			if (typeof input.coolantConsumptionRate === "number") {
+				shipSystem.coolantConsumptionRate = input.coolantConsumptionRate;
+			}
+			if (typeof input.coolantTransferRate === "number") {
+				shipSystem.coolantTransferRate = input.coolantTransferRate;
 			}
 			pubsub.publish.plugin.systems.all({ pluginId: input.pluginId });
 			pubsub.publish.plugin.systems.get({

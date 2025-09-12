@@ -21,6 +21,7 @@ export function registerSystem(name: string, sys: typeof BaseShipSystemPlugin) {
  */
 export default class BaseShipSystemPlugin extends Aspect {
 	static flags: ShipSystemFlags[] = ["damage", "heat", "power"];
+	static flightModes = ["nova", "legacy"];
 	apiVersion = "shipSystems/v1" as const;
 	kind = "shipSystems" as const;
 	name: string;
@@ -83,6 +84,8 @@ export default class BaseShipSystemPlugin extends Aspect {
 	 */
 	maxHeat: Kelvin;
 
+	coolantTransferRate: number;
+	coolantConsumptionRate: number;
 	////////////
 	// Damage //
 	////////////
@@ -125,6 +128,8 @@ export default class BaseShipSystemPlugin extends Aspect {
 		// This provides about 15% damage to all systems over the course of a 2.5 hour mission
 		this.entropyMultiplier = params.entropyMultiplier || 0.00025;
 
+		this.coolantTransferRate = params.coolantTransferRate || 1;
+		this.coolantConsumptionRate = params.coolantConsumptionRate || 1;
 		if (this.constructor.name === "BaseShipSystemPlugin") {
 			if (systemPlugins[this.type]) {
 				// biome-ignore lint/correctness/noConstructorReturn: <explanation>

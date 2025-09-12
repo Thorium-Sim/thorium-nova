@@ -11,6 +11,7 @@ import ShieldsPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Shields"
 import PhasersPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Phasers";
 import SensorsPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Sensors";
 import MainComputerPlugin from "@thorium/.server/classes/Plugins/ShipSystems/MainComputer";
+import CoolantTankSystemPlugin from "@thorium/.server/classes/Plugins/ShipSystems/CoolantTank";
 
 // Make sure you update the isShipSystem component when adding a new ship system type
 // We can't derive the isShipSystem list from this list because ECS components
@@ -29,6 +30,7 @@ export const ShipSystemTypes = {
 	phasers: PhasersPlugin,
 	sensors: SensorsPlugin,
 	mainComputer: MainComputerPlugin,
+	coolantTank: CoolantTankSystemPlugin,
 };
 
 export type ShipSystemFlags = "power" | "heat" | "damage" | "sounds";

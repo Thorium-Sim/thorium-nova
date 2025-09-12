@@ -203,7 +203,7 @@ export default function PhasersConfig() {
 								if (!e.target.value || Number.isNaN(Number(e.target.value)))
 									return;
 								try {
-									await q.plugin.systems.torpedoLauncher.update.netSend({
+									await q.plugin.systems.phasers.update.netSend({
 										pluginId,
 										systemId: systemId,
 										shipId,
@@ -243,7 +243,7 @@ export default function PhasersConfig() {
 								if (!e.target.value || Number.isNaN(Number(e.target.value)))
 									return;
 								try {
-									await q.plugin.systems.torpedoLauncher.update.netSend({
+									await q.plugin.systems.phasers.update.netSend({
 										pluginId,
 										systemId: systemId,
 										shipId,
@@ -263,6 +263,45 @@ export default function PhasersConfig() {
 						/>
 						<OverrideResetButton
 							property="pitchDegree"
+							setRekey={setRekey}
+							className="mt-6"
+						/>
+					</div>
+					<div className="pb-2 flex">
+						<Input
+							labelHidden={false}
+							inputMode="numeric"
+							pattern="[0-9]*"
+							label="Phaser Banks (legacy)"
+							placeholder={"0"}
+							helperText={
+								"How many phaser banks are attached to this phaser system"
+							}
+							defaultValue={system.legacyPhaserBanks}
+							onBlur={async (e) => {
+								if (!e.target.value || Number.isNaN(Number(e.target.value)))
+									return;
+								try {
+									await q.plugin.systems.phasers.update.netSend({
+										pluginId,
+										systemId: systemId,
+										shipId,
+										shipPluginId,
+										legacyPhaserBanks: Number(e.target.value),
+									});
+								} catch (err) {
+									if (err instanceof Error) {
+										toast({
+											title: "Error changing phaser banks",
+											body: err.message,
+											color: "error",
+										});
+									}
+								}
+							}}
+						/>
+						<OverrideResetButton
+							property="legacyPhaserBanks"
 							setRekey={setRekey}
 							className="mt-6"
 						/>

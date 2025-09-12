@@ -163,6 +163,59 @@ export default function Heat() {
 							className="mt-6"
 						/>
 					</div>
+					<p>Legacy Settings</p>
+					<div className="pb-4 flex">
+						<Input
+							labelHidden={false}
+							label="Coolant Transfer Rate"
+							helperText="A multiplier for how fast coolant is transferred out of this system."
+							type="text"
+							inputMode="numeric"
+							pattern="[0-9]*"
+							defaultValue={system.coolantTransferRate}
+							onBlur={(e: any) => {
+								if (Number.isNaN(Number(e.target.value))) return;
+								q.plugin.systems.update.netSend({
+									pluginId,
+									systemId: systemId,
+									shipId,
+									shipPluginId,
+									coolantTransferRate: Number(e.target.value),
+								});
+							}}
+						/>
+						<OverrideResetButton
+							property="coolantTransferRate"
+							setRekey={setRekey}
+							className="mt-6"
+						/>
+					</div>
+					<div className="pb-4 flex">
+						<Input
+							labelHidden={false}
+							label="Coolant Consumption Rate"
+							helperText="A multiplier for how fast coolant is consumed as a system is cooled."
+							type="text"
+							inputMode="numeric"
+							pattern="[0-9]*"
+							defaultValue={system.coolantConsumptionRate}
+							onBlur={(e: any) => {
+								if (Number.isNaN(Number(e.target.value))) return;
+								q.plugin.systems.update.netSend({
+									pluginId,
+									systemId: systemId,
+									shipId,
+									shipPluginId,
+									coolantConsumptionRate: Number(e.target.value),
+								});
+							}}
+						/>
+						<OverrideResetButton
+							property="coolantConsumptionRate"
+							setRekey={setRekey}
+							className="mt-6"
+						/>
+					</div>
 				</div>
 			</div>
 		</fieldset>

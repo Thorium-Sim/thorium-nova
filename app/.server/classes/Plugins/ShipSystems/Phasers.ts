@@ -16,6 +16,9 @@ export default class PhasersPlugin extends BaseShipSystemPlugin {
 	fullChargeYield: number;
 	yieldMultiplier: number;
 
+	legacyPhaserBanks: number;
+	legacyChargeSpeed: number;
+
 	soundEffects: {
 		fire: Sound[];
 	};
@@ -31,6 +34,9 @@ export default class PhasersPlugin extends BaseShipSystemPlugin {
 		this.fullChargeYield = params.fullChargeYield ?? 1;
 
 		this.yieldMultiplier = params.yieldMultiplier ?? 1;
+
+		this.legacyPhaserBanks = params.legacyPhaserBanks ?? 2;
+		this.legacyChargeSpeed = params.legacyChargeSpeed ?? 1;
 
 		this.soundEffects = params.soundEffects ?? {
 			fire: [],

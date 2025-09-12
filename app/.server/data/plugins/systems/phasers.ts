@@ -34,6 +34,8 @@ export const phasers = t.router({
 				yieldMultiplier: z.number().optional(),
 				headingDegree: z.number().optional(),
 				pitchDegree: z.number().optional(),
+				legacyPhaserBanks: z.number().optional(),
+				legacyChargeSpeed: z.number().optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -58,6 +60,12 @@ export const phasers = t.router({
 			}
 			if (typeof input.pitchDegree === "number") {
 				shipSystem.pitchDegree = input.pitchDegree;
+			}
+			if (typeof input.legacyPhaserBanks === "number") {
+				shipSystem.legacyPhaserBanks = input.legacyPhaserBanks;
+			}
+			if (typeof input.legacyChargeSpeed === "number") {
+				shipSystem.legacyChargeSpeed = input.legacyChargeSpeed;
 			}
 
 			pubsub.publish.plugin.systems.get({

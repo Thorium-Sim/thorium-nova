@@ -88,6 +88,7 @@ function ShipSystemsInner() {
 							name: d.name,
 							description: d.description,
 							category: capitalCase(d.type),
+							flightModes: d.flightModes,
 							tags: d.tags,
 						}))}
 						searchKeys={["name", "category", "tags"]}
@@ -99,6 +100,15 @@ function ShipSystemsInner() {
 									{c.name}
 									<div>
 										<small>{c.category}</small>
+										{c.flightModes.length === 1 ? (
+											<>
+												{" "}
+												-{" "}
+												<small className="italic">
+													{capitalCase(c.flightModes[0])}
+												</small>
+											</>
+										) : null}
 									</div>
 								</div>
 							</div>

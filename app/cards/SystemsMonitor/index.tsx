@@ -33,7 +33,7 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 	>(null);
 	return (
 		<div
-			className="relative grid grid-cols-5 gap-8 h-full"
+			className="relative grid grid-cols-6 gap-8 h-full"
 			onClick={() => {
 				setSelectedPowerSupplier(null);
 			}}
@@ -50,7 +50,7 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 					/>
 				))}
 			</div>
-			<div className="flex flex-col justify-around gap-4">
+			<div className="grid grid-cols-[auto_2rem_1fr_1rem_1rem_1rem] gap-2 gap-x-4 items-center col-span-2">
 				{batteries.map((battery, i) => (
 					<Battery
 						{...battery}
@@ -63,7 +63,7 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 					/>
 				))}
 			</div>
-			<div className="grid grid-cols-[auto_2rem_1fr_2rem_2rem] gap-2 col-span-3 items-center">
+			<div className="grid grid-cols-[auto_2rem_1fr_2rem] gap-2 col-span-3 items-center">
 				{systems.map((system) => (
 					<System
 						key={system.id}
@@ -402,53 +402,34 @@ function Battery({
 	}, cardLoaded);
 
 	return (
-		<div
-			onClick={(e) => {
-				e.stopPropagation();
-				setSelectedPowerSupplier(id);
-			}}
-			onKeyDown={(e) => {
-				if (e.key === "Enter") {
-					setSelectedPowerSupplier(id);
-				}
-			}}
-			className={cn(
-				"relative w-full flex flex-col items-start justify-start py-2 px-4 panel panel-warning col-start-2",
-				{
-					"brightness-150": selectedPowerSupplier === id,
-				},
-			)}
-		>
-			<div className="font-medium w-full gap-1 self-start flex items-center bg-green">
-				<span className="truncate">{name}</span>
-				<div className="flex-1" />
-
-				<Tooltip ref={storageRef} content={`Storage:  MW`}>
-					<RadialDial
-						ref={storageProgressRef}
-						label=""
-						count={0}
-						max={1}
-						color="rgb(74,222,128)"
-						backgroundColor="#888"
-					>
-						<BatteryIcon percentage={0} ref={batteryIconRef} />
-					</RadialDial>
-				</Tooltip>
-				<Tooltip ref={outputRef} content={`Output:  MW`}>
-					<RadialDial
-						ref={outputProgressRef}
-						label=""
-						count={0}
-						max={1}
-						color="rgb(250,204,21)"
-						backgroundColor="#888"
-					>
-						<Icon name="zap" />
-					</RadialDial>
-				</Tooltip>
-			</div>
-			<div className="flex w-full flex-col mt-2">
+		<div className="relative contents">
+			<span className="font-medium truncate">{name}</span>
+			<Tooltip content="Allocate Power">
+				<Button
+					className={cn("btn-xs", {
+						"btn-disabled": !reactorIds.includes(selectedPowerSupplier!),
+						"btn-primary": reactorIds.includes(selectedPowerSupplier!),
+					})}
+					onClick={(e) => {
+						e.stopPropagation();
+						if (selectedPowerSupplier !== null) {
+							q.systemsMonitor.systems.addPowerSource
+								.netSend({
+									systemId: id,
+									powerSourceId: selectedPowerSupplier,
+								})
+								.catch((error) => {
+									if (error instanceof LiveQueryError) {
+										toast({ title: error.error, color: "error" });
+									}
+								});
+						}
+					}}
+				>
+					<Icon name="plus" />
+				</Button>
+			</Tooltip>
+			<div className="flex flex-col mt-2">
 				<div className="flex gap-1 items-center">
 					<div className="flex-1 flex items-center flex-wrap gap-y-1">
 						<Tooltip
@@ -476,31 +457,6 @@ function Battery({
 							/>
 						))}
 					</div>
-					<Tooltip content="Allocate Power">
-						<Button
-							className={cn("btn-xs", {
-								"btn-disabled": !reactorIds.includes(selectedPowerSupplier!),
-								"btn-primary": reactorIds.includes(selectedPowerSupplier!),
-							})}
-							onClick={(e) => {
-								e.stopPropagation();
-								if (selectedPowerSupplier !== null) {
-									q.systemsMonitor.systems.addPowerSource
-										.netSend({
-											systemId: id,
-											powerSourceId: selectedPowerSupplier,
-										})
-										.catch((error) => {
-											if (error instanceof LiveQueryError) {
-												toast({ title: error.error, color: "error" });
-											}
-										});
-								}
-							}}
-						>
-							<Icon name="plus" />
-						</Button>
-					</Tooltip>
 				</div>
 				<div className="flex gap-1 items-center">
 					<div className="flex-1 flex items-center flex-wrap gap-y-1">
@@ -524,6 +480,47 @@ function Battery({
 					</div>
 				</div>
 			</div>
+
+			<Tooltip ref={storageRef} content={`Storage:  MW`}>
+				<RadialDial
+					ref={storageProgressRef}
+					label=""
+					count={0}
+					max={1}
+					color="rgb(74,222,128)"
+					backgroundColor="#888"
+				>
+					<BatteryIcon percentage={0} ref={batteryIconRef} />
+				</RadialDial>
+			</Tooltip>
+			<Tooltip ref={outputRef} content={`Output:  MW`}>
+				<RadialDial
+					ref={outputProgressRef}
+					label=""
+					count={0}
+					max={1}
+					color="rgb(250,204,21)"
+					backgroundColor="#888"
+				>
+					<Icon name="zap" />
+				</RadialDial>
+			</Tooltip>
+			<Tooltip content="Transfer Power">
+				<Button
+					className="btn-xs btn-primary"
+					onClick={(e) => {
+						e.stopPropagation();
+						setSelectedPowerSupplier(id);
+					}}
+					onKeyDown={(e) => {
+						if (e.key === "Enter") {
+							setSelectedPowerSupplier(id);
+						}
+					}}
+				>
+					<Icon name="arrow-right" />
+				</Button>
+			</Tooltip>
 		</div>
 	);
 }

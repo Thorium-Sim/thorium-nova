@@ -34,7 +34,7 @@ export default function Damage() {
 						<Input
 							labelHidden={false}
 							label="Offline Efficiency"
-							helperText="How low the system efficiency must get before the system goes offline."
+							helperText="How low the total system damage must get before the system goes offline."
 							type="text"
 							inputMode="numeric"
 							pattern="[0-9]*"
@@ -60,7 +60,7 @@ export default function Damage() {
 						<Input
 							labelHidden={false}
 							label="Online Efficiency"
-							helperText="How high the system efficiency must get before the system goes from offline to online."
+							helperText="How high the total system damage must get before the system goes from offline to online."
 							type="text"
 							inputMode="numeric"
 							pattern="[0-9]*"

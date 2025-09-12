@@ -30,5 +30,9 @@ export const isPhasers = z
 		 * What percent the phasers are currently firing at
 		 */
 		firePercent: z.number().default(0),
+		/**
+		 * The IDs of the phaser banks attached to this system
+		 */
+		legacyPhaserBanks: z.number().array().default([]),
 	})
 	.default({});

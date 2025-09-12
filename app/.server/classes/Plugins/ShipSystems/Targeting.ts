@@ -10,4 +10,4 @@ export default class TargetingSystemPlugin extends BaseShipSystemPlugin {
 	//   super(params, plugin);
 	// }
 }
-registerSystem("generic", TargetingSystemPlugin);
+registerSystem("targeting", TargetingSystemPlugin);

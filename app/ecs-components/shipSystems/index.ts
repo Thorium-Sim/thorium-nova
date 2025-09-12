@@ -11,3 +11,5 @@ export * from "./isShields";
 export * from "./isPhasers";
 export * from "./isPhaseCapacitor";
 export * from "./isMainComputer";
+export * from "./isCoolantTank";
+export * from "./isPhaserBank";
