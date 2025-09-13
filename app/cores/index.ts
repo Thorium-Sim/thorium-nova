@@ -5,3 +5,4 @@ export { ObjectivesCore } from "../cards/Objectives/core";
 export { ActionsCore } from "./ActionsCore";
 export { LegacyThrusterCore } from "../cards/Legacy/Thrusters/core";
 export { LegacySystemsCore } from "../cards/Legacy/PowerDistribution/core";
+export { LegacyHeatCore } from "../cards/Legacy/CoolantControl/core";

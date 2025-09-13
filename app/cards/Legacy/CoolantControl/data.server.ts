@@ -30,6 +30,7 @@ export const coolantControl = t.router({
 				if (system?.components.isCoolantTank) {
 					return {
 						id: system.id,
+						name: system.components.identity?.name || "Coolant Tank",
 						transferSystem: system.components.isCoolantTank.transferSystem,
 						transferDirection:
 							system.components.isCoolantTank.transferDirection,
@@ -53,6 +54,9 @@ export const coolantControl = t.router({
 			const systems: {
 				id: number;
 				name: string;
+				heatRate: number;
+				nominalHeat: number;
+				maxHeat: number;
 			}[] = [];
 			for (const systemId of ship?.components.shipSystems?.shipSystems.keys() ||
 				[]) {
@@ -69,6 +73,9 @@ export const coolantControl = t.router({
 							system.components.identity?.name ||
 							system.components.isShipSystem?.type ||
 							"",
+						heatRate: system.components.heat.legacyHeatRate || 1,
+						nominalHeat: system.components.heat?.nominalHeat || 295,
+						maxHeat: system.components.heat?.maxHeat || 1000,
 					});
 				}
 			}
@@ -94,6 +101,63 @@ export const coolantControl = t.router({
 
 			pubsub.publish.legacy.coolantControl.tank({
 				shipId: coolantTank.components.isShipSystem?.shipId || -1,
+			});
+		}),
+
+	setHeat: t.procedure
+		.input(
+			z.object({
+				systemId: z.number(),
+				heat: z.number(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const system = ctx.ecs.getEntityById(input.systemId);
+			const heat = system?.components.heat;
+			if (!system || !heat) return;
+			const { nominalHeat, maxHeat } = heat;
+			system.updateComponent("heat", {
+				heat: Math.min(
+					maxHeat,
+					Math.max(
+						nominalHeat,
+						input.heat * (maxHeat - nominalHeat) + nominalHeat,
+					),
+				),
+			});
+		}),
+	setHeatRate: t.procedure
+		.input(
+			z.object({
+				systemId: z.number(),
+				heatRate: z.number(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const system = ctx.ecs.getEntityById(input.systemId);
+			if (!system) return;
+			system.updateComponent("heat", {
+				legacyHeatRate: input.heatRate,
+			});
+			pubsub.publish.legacy.coolantControl.systems({
+				shipId: system.components.isShipSystem?.shipId || -1,
+			});
+		}),
+	setCoolant: t.procedure
+		.input(
+			z.object({
+				systemId: z.number(),
+				coolant: z.number(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const system = ctx.ecs.getEntityById(input.systemId);
+			if (!system) return;
+			system.updateComponent("legacyCoolant", {
+				coolant: input.coolant / 100,
+			});
+			pubsub.publish.legacy.coolantControl.systems({
+				shipId: system.components.isShipSystem?.shipId || -1,
 			});
 		}),
 
