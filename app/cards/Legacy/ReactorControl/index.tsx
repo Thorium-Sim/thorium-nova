@@ -10,6 +10,7 @@ import { Batteries } from "@thorium/cards/Legacy/PowerDistribution/Batteries";
 import { q } from "@thorium/context/AppContext";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import { DamageOverlay } from "@thorium/components/DamageOverlay";
 export function LegacyReactorControl() {
 	const { shipId } = useStation();
 
@@ -39,7 +40,8 @@ export function LegacyReactorControl() {
 			<HeatBars />
 			<ReactorModel />
 			<Batteries />
-			<div className="flex flex-row gap-2 col-span-2 flex-wrap justify-between">
+			<div className="flex flex-row gap-2 col-span-2 flex-wrap justify-between relative p-4">
+				<DamageOverlay systemId={reactors[0].id} />
 				{reactors[0].settings.map((s) => (
 					<Button
 						key={`${s.name}-${s.efficiency}`}
@@ -115,15 +117,21 @@ function HeatBars() {
 	const { interpolate } = useLiveQuery();
 
 	const heatBarRef = useRef<HTMLDivElement>(null);
+	const coolantBarRef = useRef<HTMLDivElement>(null);
 
 	useAnimationFrame(() => {
 		if (!reactors[0]) return;
-		const heat = interpolate(reactors[0].id)?.z || 0;
+		const entity = interpolate(reactors[0].id);
+		const heat = entity?.z || 0;
+		const coolant = entity?.c || 0;
 		const heatPercent =
 			(heat - reactors[0].nominalHeat) /
 			(reactors[0].maxHeat - reactors[0].nominalHeat);
 		if (heatBarRef.current) {
 			heatBarRef.current.style.height = `${heatPercent * 100}%`;
+		}
+		if (coolantBarRef.current) {
+			coolantBarRef.current.style.height = `${coolant * 100}%`;
 		}
 	}, cardLoaded);
 
@@ -140,11 +148,32 @@ function HeatBars() {
 			</div>
 			<div className="relative border border-white/50 flex flex-col justify-end">
 				<div
+					ref={coolantBarRef}
 					className="striped-gradient striped-cyan"
-					style={{ height: "50%" }}
+					style={{ height: "0%" }}
 				/>
 			</div>
-			<Button className="btn-info col-span-2">Coolant</Button>
+			<Button
+				className="btn-info col-span-2"
+				onPointerDown={() => {
+					q.legacy.coolantControl.coolSystem.netSend({
+						systemId: reactors[0].id,
+						cooling: true,
+					});
+					document.addEventListener(
+						"pointerup",
+						() => {
+							q.legacy.coolantControl.coolSystem.netSend({
+								systemId: reactors[0].id,
+								cooling: false,
+							});
+						},
+						{ once: true },
+					);
+				}}
+			>
+				Coolant
+			</Button>
 		</div>
 	);
 }

@@ -99,7 +99,7 @@ function SystemRow({
 						if (Number.isNaN(Number(heat))) return;
 						q.legacy.coolantControl.setHeat.netSend({
 							systemId: id,
-							heat: Number(heat),
+							heat: Number(heat) / 100,
 						});
 					}}
 				/>

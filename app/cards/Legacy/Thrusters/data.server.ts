@@ -27,6 +27,7 @@ export const thrusters = t.router({
 					`No thrusters assigned to ship ${ship?.components.identity?.name || input.shipId}`,
 				);
 			return {
+				id: thrusters.id,
 				rotation: {
 					yaw: rotation?.yaw || 0,
 					pitch: rotation?.pitch || 0,

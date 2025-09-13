@@ -160,7 +160,20 @@ export const coolantControl = t.router({
 				shipId: system.components.isShipSystem?.shipId || -1,
 			});
 		}),
-
+	coolSystem: t.procedure
+		.input(
+			z.object({
+				systemId: z.number(),
+				cooling: z.boolean(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const system = ctx.ecs.getEntityById(input.systemId);
+			if (!system) return;
+			system.updateComponent("legacyCoolant", {
+				cooling: input.cooling,
+			});
+		}),
 	stream: t.procedure
 		.input(z.object({ shipId: z.number() }))
 		.dataStream(({ ctx, input, entity }) => {

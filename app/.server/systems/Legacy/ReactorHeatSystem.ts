@@ -14,12 +14,15 @@ export class LegacyReactorHeatSystem extends System {
 
 		if (!isReactor || !heatComp || !damage) return;
 
-		const { efficiency } = damage;
+		const { efficiency, offline } = damage;
 		const { externalPower } = isReactor;
 		const { heat, maxHeat, nominalHeat, legacyHeatRate } = heatComp;
 
 		const heatAdjustment = maxHeat - nominalHeat;
-		if (externalPower) {
+
+		// On external power or when the reactor is offline from damage,
+		// we'll let the Reactor cool down.
+		if (externalPower || offline) {
 			entity.updateComponent("heat", {
 				heat: heat - 0.005 * heatAdjustment * elapsedRatio,
 			});

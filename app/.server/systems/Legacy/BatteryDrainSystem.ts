@@ -41,7 +41,8 @@ export class LegacyBatteryDrainSystem extends System {
 					ship.id,
 					(this.shipReactorPower.get(ship.id) || 0) +
 						(reactor.components.isReactor?.maxOutput || 0) *
-							(reactor.components.damage?.efficiency || 0),
+							(reactor.components.damage?.efficiency || 0) *
+							(reactor.components.damage?.offline ? 0 : 1),
 				);
 			}
 		}

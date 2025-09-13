@@ -1,6 +1,7 @@
 import { Line, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Arrow } from "@thorium/cards/Legacy/Thrusters/Arrow";
+import { DamageOverlay } from "@thorium/components/DamageOverlay";
 import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
 import { useStation } from "@thorium/routes/station/useStation";
@@ -69,6 +70,7 @@ export function LegacyThrusters() {
 
 	return (
 		<div className="grid grid-cols-7 grid-rows-3 items-center h-full gap-4">
+			<DamageOverlay systemId={thrusters.id} />
 			<div className="col-span-2 row-span-3">
 				<p className="text-center mb-2">Direction</p>
 				<div className="flex flex-col gap-4">

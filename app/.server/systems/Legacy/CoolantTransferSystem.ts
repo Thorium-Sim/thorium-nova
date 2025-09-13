@@ -1,7 +1,6 @@
 import { type Entity, System } from "@thorium/utils/ecs";
-import { i } from "node_modules/react-router/dist/development/context-jKip1TFB.mjs";
 
-const transferRate = 0.04;
+const transferRate = 0.12;
 export class LegacyCoolantTransferSystem extends System {
 	static flightMode = ["legacy"];
 	test(entity: Entity) {

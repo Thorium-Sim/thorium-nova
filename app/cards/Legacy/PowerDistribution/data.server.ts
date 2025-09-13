@@ -67,6 +67,9 @@ export const powerDistribution = t.router({
 			const system = getShipSystem(ctx.ecs, { systemId: input.systemId });
 
 			return {
+				name:
+					system.components.identity?.name ||
+					capitalCase(system.components.isShipSystem?.type || ""),
 				powerLevels: system.components.power?.powerLevels,
 				currentPower: system.components.power?.currentPower,
 				offline: system.components.damage?.offline || false,
