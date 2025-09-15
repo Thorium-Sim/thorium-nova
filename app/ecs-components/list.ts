@@ -57,3 +57,4 @@ export * from "./tweaks";
 export * from "./damageReport";
 export * from "./shipSystems/diagnostic";
 export * from "./legacyCoolant";
+export * from "./legacySensorContact";

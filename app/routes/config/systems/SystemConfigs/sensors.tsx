@@ -6,6 +6,7 @@ import { useParams } from "react-router";
 import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
 import { OverrideResetButton } from "../OverrideResetButton";
 import { Navigate } from "@thorium/components/Navigate";
+import Checkbox from "@thorium/ui/Checkbox";
 
 export default function SensorsConfig() {
 	const { pluginId, systemId, shipId } = useParams() as {
@@ -225,6 +226,135 @@ export default function SensorsConfig() {
 							property="shieldPenaltyMultiplier"
 							setRekey={setRekey}
 							className="mt-6"
+						/>
+					</div>
+					<div className="pb-2">
+						<Checkbox
+							labelHidden={false}
+							label="Use Sensor Ping (legacy)"
+							helperText="Whether sensors use a regular ping to reveal contacts."
+							defaultChecked={system.pingActive}
+							onChange={async (e) => {
+								try {
+									await q.plugin.systems.sensors.update.netSend({
+										pluginId,
+										systemId: systemId,
+										shipId,
+										shipPluginId,
+										pingActive: e.target.checked,
+									});
+								} catch (err) {
+									if (err instanceof Error) {
+										toast({
+											title: "Error changing sensor ping",
+											body: err.message,
+											color: "error",
+										});
+									}
+								}
+							}}
+						/>
+						<OverrideResetButton
+							property="pingActive"
+							setRekey={setRekey}
+							className="mt-6"
+						/>
+					</div>
+					<div className="pb-2">
+						<Checkbox
+							labelHidden={false}
+							label="Auto-add to targeting (legacy)"
+							helperText="Whether contacts within the center targeting range are automatically added to the targeting grid."
+							defaultChecked={system.autoTargeting}
+							onChange={async (e) => {
+								try {
+									await q.plugin.systems.sensors.update.netSend({
+										pluginId,
+										systemId: systemId,
+										shipId,
+										shipPluginId,
+										autoTargeting: e.target.checked,
+									});
+								} catch (err) {
+									if (err instanceof Error) {
+										toast({
+											title: "Error changing auto targeting",
+											body: err.message,
+											color: "error",
+										});
+									}
+								}
+							}}
+						/>
+						<OverrideResetButton
+							property="autoTargeting"
+							setRekey={setRekey}
+							className="mt-6"
+						/>
+					</div>
+					<div className="pb-2">
+						<Checkbox
+							labelHidden={false}
+							label="Scan History (legacy)"
+							helperText="Allow multiple concurrent sensor scans and show history of previous sensor scans."
+							defaultChecked={system.scanHistory}
+							onChange={async (e) => {
+								try {
+									await q.plugin.systems.sensors.update.netSend({
+										pluginId,
+										systemId: systemId,
+										shipId,
+										shipPluginId,
+										scanHistory: e.target.checked,
+									});
+								} catch (err) {
+									if (err instanceof Error) {
+										toast({
+											title: "Error changing scan history.",
+											body: err.message,
+											color: "error",
+										});
+									}
+								}
+							}}
+						/>
+						<OverrideResetButton
+							property="scanHistory"
+							setRekey={setRekey}
+							className="mt-6"
+						/>
+					</div>
+					<div>
+						<Input
+							as="textarea"
+							label="Scan Answers (legacy)"
+							helperText="Easily available scan answers. Place each answer on its own line. Separate labels from answers with a semicolon. #SIM = ship name, #omnicourse for random coordinates, #thrusterdodge for random thruster direction, and #weakness for random targeting weakness."
+							defaultValue={system.scanAnswers
+								.map((a) => `${a.label};${a.value}`)
+								.join("\n")}
+							rows={8}
+							onBlur={async (e) => {
+								try {
+									await q.plugin.systems.sensors.update.netSend({
+										pluginId,
+										systemId: systemId,
+										shipId,
+										shipPluginId,
+										scanAnswers: e.target.value.split("\n").map((v) => {
+											const [label, ...value] = v.split(";");
+											return { label, value: value.join(";") };
+										}),
+									});
+								} catch (err) {
+									if (err instanceof Error) {
+										toast({
+											title: "Error changing scan answers",
+											body: err.message,
+											color: "error",
+										});
+									}
+								}
+							}}
 						/>
 					</div>
 				</div>

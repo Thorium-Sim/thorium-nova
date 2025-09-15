@@ -1,6 +1,12 @@
 import { Fragment, useId } from "react";
-import { Listbox, Portal, Transition } from "@headlessui/react";
+import {
+	Listbox,
+	Portal,
+	Transition,
+	type LabelProps,
+} from "@headlessui/react";
 import { Icon } from "./Icon";
+import { cn } from "@thorium/utils/cn";
 
 function classNames(...classes: string[]) {
 	return classes.filter(Boolean).join(" ");
@@ -18,6 +24,7 @@ export default function Select<I extends string | number>({
 	placeholder,
 	multiple,
 	id,
+	labelProps,
 }: {
 	label: string;
 	labelHidden?: boolean;
@@ -25,8 +32,9 @@ export default function Select<I extends string | number>({
 	items: { id: I; label: string }[];
 	selected: I | I[] | null;
 	setSelected: (value: I | I[]) => void;
-	size?: "xs" | "sm" | "md";
+	size?: "xxs" | "xs" | "sm" | "md";
 	className?: string;
+	labelProps?: LabelProps;
 	placeholder?: string;
 	multiple?: boolean;
 	id?: string;
@@ -36,7 +44,7 @@ export default function Select<I extends string | number>({
 	);
 	return (
 		<Listbox
-			value={selected}
+			value={selected as I | I[] | undefined}
 			onChange={setSelected}
 			disabled={disabled}
 			multiple={multiple}
@@ -44,9 +52,13 @@ export default function Select<I extends string | number>({
 			{({ open }) => (
 				<>
 					<Listbox.Label
-						className={classNames(
+						{...labelProps}
+						className={cn(
 							"select-label block text-sm font-medium text-gray-200",
 							labelHidden ? "sr-only" : "",
+							typeof labelProps?.className === "function"
+								? labelProps.className({})
+								: labelProps?.className || "",
 						)}
 					>
 						{label}
@@ -57,11 +69,13 @@ export default function Select<I extends string | number>({
 					>
 						<Listbox.Button
 							className={classNames(
-								size === "xs"
-									? "select-xs py-0"
-									: size === "sm"
-										? "select-sm py-1"
-										: "py-2",
+								size === "xxs"
+									? "select-xxs h-5 min-h-5 py-0"
+									: size === "xs"
+										? "select-xs py-0"
+										: size === "sm"
+											? "select-sm py-1"
+											: "py-2",
 								"select-button bg-gray-900 text-gray-100 relative w-full border border-gray-700 rounded-md shadow-sm pl-3 pr-10 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
 								className || "",
 							)}

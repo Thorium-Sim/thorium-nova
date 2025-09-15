@@ -17,6 +17,8 @@ export const iconNames = [
   "shield-half",
   "settings",
   "route",
+  "rotate-cw",
+  "rotate-ccw",
   "rocket",
   "repeat-2",
   "reactor",

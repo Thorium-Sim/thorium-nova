@@ -6,12 +6,26 @@ const Checkbox = (
 	props: React.DetailedHTMLProps<
 		React.InputHTMLAttributes<HTMLInputElement>,
 		HTMLInputElement
-	> & { label: ReactNode; labelHidden?: boolean; helperText?: string },
+	> & {
+		label: ReactNode;
+		labelHidden?: boolean;
+		labelProps?: React.DetailedHTMLProps<
+			React.LabelHTMLAttributes<HTMLLabelElement>,
+			HTMLLabelElement
+		>;
+		helperText?: string;
+	},
 ) => {
 	const { label, labelHidden, helperText, ...otherProps } = props;
 	return (
 		<>
-			<label className="flex items-center select-none">
+			<label
+				{...props.labelProps}
+				className={cn(
+					"flex items-center select-none",
+					props.labelProps?.className,
+				)}
+			>
 				<input
 					type="checkbox"
 					{...otherProps}

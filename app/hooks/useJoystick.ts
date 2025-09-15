@@ -1,7 +1,7 @@
 import throttle from "lodash.throttle";
 import { useSpring } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
-import { useRef } from "react";
+import { useImperativeHandle, useRef } from "react";
 import { type GamepadKey, useGamepadValue } from "./useGamepadStore";
 
 function distance(x1: number, y1: number, x2 = 0, y2 = 0) {
@@ -17,12 +17,16 @@ export function useJoystick({
 	onDrag = () => {},
 	throttleMs = 100,
 	gamepadKeys,
+	sticky,
+	ref,
 }: {
 	axisSnap?: boolean;
 	axis?: "x" | "y" | undefined;
 	onDrag?: (values: { x: number; y: number }) => void;
 	throttleMs?: number;
 	gamepadKeys?: { x: GamepadKey; y: GamepadKey };
+	sticky?: boolean;
+	ref?: React.RefObject<{ reset: () => void } | null>;
 } = {}) {
 	const callback = useRef(throttle(onDrag, throttleMs));
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -33,6 +37,14 @@ export function useJoystick({
 		xy: [0, 0],
 		config: { mass: 1, tension: 280, friction: 30 },
 	}));
+
+	useImperativeHandle(ref, () => ({
+		reset() {
+			set({ xy: [0, 0] });
+			callback.current({ x: 0, y: 0 });
+		},
+	}));
+
 	function startAtOffset(xy: [number, number]) {
 		offsetRef.current = xy;
 		set({ xy, immediate: true });
@@ -63,6 +75,7 @@ export function useJoystick({
 			if (x < minDistance && x > minDistance * -1) x = 0;
 			if (y < minDistance && y > minDistance * -1) y = 0;
 		}
+		if (!down && sticky) return;
 		set({
 			xy: down
 				? axis

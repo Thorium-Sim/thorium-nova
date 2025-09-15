@@ -1,5 +1,4 @@
 import { type Entity, System } from "@thorium/utils/ecs";
-import { i } from "node_modules/react-router/dist/development/context-jKip1TFB.mjs";
 
 const coolRate = 0.15;
 const heatRemoveRate = 0.3;

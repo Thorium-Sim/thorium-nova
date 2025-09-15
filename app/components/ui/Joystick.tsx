@@ -1,7 +1,7 @@
 import type { GamepadKey } from "@thorium/hooks/useGamepadStore";
 import { animated as a } from "@react-spring/web";
 import { useJoystick } from "@thorium/hooks/useJoystick";
-import type { ReactNode } from "react";
+import { useImperativeHandle, type ReactNode } from "react";
 import { cn } from "@thorium/utils/cn";
 
 export const Joystick = ({
@@ -10,17 +10,23 @@ export const Joystick = ({
 	onDrag,
 	gamepadKeys,
 	id,
+	sticky,
+	ref,
 }: {
 	id: string;
 	onDrag: (dir: { x: number; y: number }) => void;
 	className?: string;
 	children?: ReactNode;
 	gamepadKeys?: { x: GamepadKey; y: GamepadKey };
+	sticky?: boolean;
+	ref?: React.RefObject<{ reset: () => void } | null>;
 }) => {
 	const [xy, bind, containerRef, set] = useJoystick({
 		axisSnap: true,
 		onDrag,
 		gamepadKeys,
+		sticky,
+		ref,
 	});
 
 	const eventHandlers = bind();
@@ -50,7 +56,7 @@ export const Joystick = ({
 						transform: xy?.to((x, y) => `translate3d(${x}px,${y}px,0)`),
 					}}
 					// @ts-expect-error
-					className="z-10 w-10 h-10 rounded-full border-black/50 border-2 bg-gray-500 shadow-md cursor-pointer touch-none"
+					className="z-10 w-1/12 aspect-square rounded-full border-black/50 border-2 bg-gray-500 shadow-md cursor-pointer touch-none"
 				/>
 				{children}
 			</div>

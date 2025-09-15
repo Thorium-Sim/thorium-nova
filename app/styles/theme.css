@@ -193,7 +193,7 @@ kbd {
 		@apply bg-info border-info text-base-200;
 		&:hover,
 		&.btn-active {
-			@apply bg-info border-info;
+			@apply bg-info-focus border-info-focus;
 		}
 		&:focus-visible {
 			@apply ring-2 ring-info;
@@ -203,7 +203,7 @@ kbd {
 		@apply bg-success border-success text-success-content;
 		&:hover,
 		&.btn-active {
-			@apply bg-success border-success;
+			@apply bg-success-focus border-success-focus;
 		}
 		&:focus-visible {
 			@apply ring-2 ring-success;
@@ -213,7 +213,7 @@ kbd {
 		@apply bg-warning border-warning text-warning-content;
 		&:hover,
 		&.btn-active {
-			@apply bg-warning border-warning text-warning-content;
+			@apply bg-warning-focus border-warning-focus text-warning-content;
 		}
 		&:focus-visible {
 			@apply ring-2 ring-warning;
@@ -223,7 +223,7 @@ kbd {
 		@apply bg-error border-error text-error-content;
 		&:hover,
 		&.btn-active {
-			@apply bg-error border-error;
+			@apply bg-error-focus border-error-focus;
 		}
 		&:focus-visible {
 			@apply ring-2 ring-error;
@@ -233,7 +233,7 @@ kbd {
 		@apply bg-notice border-notice text-notice-content;
 		&:hover,
 		&.btn-active {
-			@apply bg-notice border-notice;
+			@apply bg-notice-focus border-notice-focus;
 		}
 		&:focus-visible {
 			@apply ring-2 ring-notice;
@@ -408,13 +408,7 @@ kbd {
 	& > .btn:not(:last-child) {
 		@apply rounded-r-none;
 	}
-	& > input[type="radio"]:checked.btn,
-	& > .btn-active {
-		@apply bg-primary border-primary text-primary-content;
-		&:focus-visible {
-			@apply ring-2 ring-primary-highlight;
-		}
-	}
+
 	& > .btn:not(:first-child) {
 		@apply rounded-l-none -ml-px;
 	}

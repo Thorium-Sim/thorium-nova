@@ -15,7 +15,15 @@ export class LegacyThrustersSystem extends System {
 		const rotation = ship?.components.rotation;
 
 		const isThrusters = entity.components.isThrusters;
-		if (!rotation || !isThrusters) return;
+		if (
+			!rotation ||
+			!isThrusters ||
+			entity.components.damage?.offline ||
+			(entity.components.power &&
+				entity.components.power.currentPower <
+					entity.components.power.powerLevels[0])
+		)
+			return;
 		let { yaw, pitch, roll } = rotation;
 
 		const { rotationDelta, rotationMaxSpeed } = isThrusters;

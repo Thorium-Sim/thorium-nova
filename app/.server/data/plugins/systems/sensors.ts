@@ -33,6 +33,13 @@ export const sensors = t.router({
 				minScanEnergyCost: z.number().optional(),
 				maxScanEnergyCost: z.number().optional(),
 				shieldPenaltyMultiplier: z.number().optional(),
+				pingActive: z.boolean().optional(),
+				autoTargeting: z.boolean().optional(),
+				scanHistory: z.boolean().optional(),
+				scanAnswers: z
+					.object({ label: z.string(), value: z.string() })
+					.array()
+					.optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -57,6 +64,18 @@ export const sensors = t.router({
 					0,
 					input.shieldPenaltyMultiplier,
 				);
+			}
+			if (typeof input.pingActive === "boolean") {
+				shipSystem.pingActive = input.pingActive;
+			}
+			if (typeof input.autoTargeting === "boolean") {
+				shipSystem.autoTargeting = input.autoTargeting;
+			}
+			if (typeof input.scanHistory === "boolean") {
+				shipSystem.scanHistory = input.scanHistory;
+			}
+			if (Array.isArray(input.scanAnswers)) {
+				shipSystem.scanAnswers = input.scanAnswers;
 			}
 
 			pubsub.publish.plugin.systems.get({

@@ -60,6 +60,12 @@ export function spawnShipSystem(
 			}
 			template.legacyPhaserBanks = phaserBanks;
 		}
+
+		if (flightMode === "legacy" && template.type === "sensors") {
+			entity.addComponent("isLegacySensors", template as any);
+			entity.addComponent("isLegacySensorScanning", template as any);
+		}
+
 		if (template.type !== "generic" && componentName in components)
 			entity.addComponent(componentName as ComponentIds, template);
 

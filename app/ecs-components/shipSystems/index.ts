@@ -13,3 +13,5 @@ export * from "./isPhaseCapacitor";
 export * from "./isMainComputer";
 export * from "./isCoolantTank";
 export * from "./isPhaserBank";
+export * from "./isLegacySensors";
+export * from "./isLegacySensorScanning";

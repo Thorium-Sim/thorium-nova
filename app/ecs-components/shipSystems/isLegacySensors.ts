@@ -1,0 +1,30 @@
+import { z } from "zod";
+
+export const isLegacySensors = z
+	.object({
+		pingActive: z.boolean().default(false),
+		pingMode: z.enum(["active", "passive", "manual"]).default("active"),
+		timeSincePingMs: z.number().default(0),
+
+		autoTargeting: z.boolean().default(false),
+		autoThrusters: z.boolean().default(false),
+		defaultSpeed: z.number().default(0.4),
+
+		defaultHitpoints: z.number().default(5),
+		missPercent: z.number().default(0.25),
+
+		frozen: z.boolean().default(false),
+		interference: z.number().default(0),
+		movement: z
+			.object({ x: z.number(), y: z.number() })
+			.default({ x: 0, y: 0 }),
+		thrusterMovement: z
+			.object({ x: z.number(), y: z.number() })
+			.default({ x: 0, y: 0 }),
+
+		segments: z
+			.object({ ring: z.number(), line: z.number(), state: z.boolean() })
+			.array()
+			.default([]),
+	})
+	.default({});

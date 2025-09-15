@@ -25,7 +25,6 @@ import { cn } from "@thorium/utils/cn";
 import { StarmapCoordinates } from "./StarmapCoordinates";
 import { ShipTemplate } from "./ShipTemplate";
 import { SoundConfigForm } from "@thorium/routes/config/systems/soundId";
-import { playbackRate } from "happy-dom/lib/PropertySymbol.js";
 
 type QueryReducerAction =
 	| { type: "add"; component?: keyof typeof components | ""; path?: string }
@@ -483,7 +482,7 @@ function ComponentCombobox({
 	return (
 		<Combobox
 			value={component ? capitalCase(component) : ""}
-			onChange={onChange}
+			onChange={onChange as (value: string | null) => void}
 		>
 			<div className="relative">
 				<div className="cursor-pointer min-h-6 h-6 leading-5 relative border-secondary border rounded-lg">
@@ -562,7 +561,11 @@ function PropertyCombobox({
 			].filter((name) => name?.toLowerCase().includes(query.toLowerCase()));
 
 	return (
-		<Combobox value={property} onChange={onChange} disabled={!component}>
+		<Combobox
+			value={property}
+			onChange={onChange as (value: string | null) => void}
+			disabled={!component}
+		>
 			<div className="relative">
 				<div className="cursor-pointer min-h-6 h-6 leading-5 relative border-secondary border rounded-lg">
 					<Combobox.Input

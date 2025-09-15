@@ -40,10 +40,12 @@ function CoreMenubar({
 			<>
 				<AddCoreCombobox
 					onChange={(coreName) => {
-						layoutRef.current?.addTabToActiveTabSet?.({
-							component: coreName,
-							name: capitalCase(coreName.replace("Core", "")),
-						});
+						if (coreName) {
+							layoutRef.current?.addTabToActiveTabSet?.({
+								component: coreName,
+								name: capitalCase(coreName.replace("Core", "")),
+							});
+						}
 					}}
 				/>
 				<ErrorBoundary fallback={null}>

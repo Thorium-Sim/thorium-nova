@@ -9,7 +9,7 @@ export const coreNames = Object.keys(Cores);
 export function AddCoreCombobox({
 	onChange,
 }: {
-	onChange: (coreName: string) => void;
+	onChange: (coreName: string | null) => void;
 }) {
 	const [query, setQuery] = useState("");
 	const filteredCores = coreNames.filter((name) =>
