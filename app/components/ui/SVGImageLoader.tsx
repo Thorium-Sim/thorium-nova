@@ -19,6 +19,7 @@ export function SVGImageLoader({
 	ref?: Ref<HTMLDivElement>;
 } & ComponentPropsWithoutRef<"img">) {
 	const data = suspend(async () => {
+		if (!url) return null;
 		const res = await fetch(url);
 		if (!res.ok) return;
 		const data = await res.text();
@@ -54,7 +55,7 @@ export function SVGImageLoader({
 			alt={alt}
 			aria-hidden
 			{...props}
-			src={url}
+			src={url || undefined}
 			// @ts-expect-error
 			ref={ref}
 		/>

@@ -3,6 +3,7 @@ import { LegacyReactorHeatSystem } from "@thorium/.server/systems/Legacy/Reactor
 import { LegacyBatteryDrainSystem } from "@thorium/.server/systems/Legacy/BatteryDrainSystem";
 import { LegacyCoolantTransferSystem } from "@thorium/.server/systems/Legacy/CoolantTransferSystem";
 import { LegacyCoolantSystem } from "@thorium/.server/systems/Legacy/CoolantSystem";
+import { LegacySensorContactMovementSystem } from "@thorium/.server/systems/Legacy/SensorContactMovementSystem";
 
 export const legacySystems = [
 	LegacyReactorHeatSystem,
@@ -10,4 +11,5 @@ export const legacySystems = [
 	LegacyThrustersSystem,
 	LegacyCoolantTransferSystem,
 	LegacyCoolantSystem,
+	LegacySensorContactMovementSystem,
 ];

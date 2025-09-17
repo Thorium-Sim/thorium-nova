@@ -19,9 +19,10 @@ import { cn } from "@thorium/utils/cn";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { useShipModel } from "@thorium/components/Starmap/StarmapShip";
-import { useRef } from "react";
+import { Suspense, useRef, type ReactNode } from "react";
 import type { Group } from "three";
 import type { FileOrFolder } from "@thorium/.server/data";
+import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 
 export function FilesMenu({
 	value,
@@ -29,12 +30,16 @@ export function FilesMenu({
 	pluginId,
 	canUpload,
 	types,
+	children,
+	root,
 }: {
 	value?: string;
 	setValue?: (value: string) => void;
 	pluginId?: string;
 	canUpload?: boolean;
 	types: "models" | "sounds" | "videos" | "images" | "pdf";
+	children?: ReactNode;
+	root?: string;
 }) {
 	const extensions =
 		types === "models"
@@ -69,19 +74,33 @@ export function FilesMenu({
 	return (
 		<>
 			<MenuTrigger>
-				<RAButton className="flex-1 btn btn-sm text-left justify-start w-full">
-					{value || "Pick File"}
-				</RAButton>
+				{children || (
+					<RAButton className="flex-1 btn btn-sm text-left justify-start w-full">
+						{value || "Pick File"}
+					</RAButton>
+				)}
 				<Popover placement="bottom" className={popoverClass}>
 					<Menu>
 						{Object.entries(files).map(([plugin, files]) => (
 							<MenuSection key={plugin}>
 								<Header>{plugin}</Header>
 								<NestedFilesMenu
-									files={files.files}
+									files={
+										root
+											? files.files.find((file) => file.name === root)
+													?.contents || files.files
+											: files.files
+									}
 									onAction={(path) => setValue?.(path)}
 									pluginId={plugin}
 									pickFile={canUpload ? pickFile : undefined}
+									path={
+										root
+											? files.files.find((file) => file.name === root)
+												? `${root}/`
+												: undefined
+											: undefined
+									}
 								/>
 							</MenuSection>
 						))}
@@ -217,6 +236,11 @@ function FilePreview({ url }: { url: string }) {
 				</Button>
 			);
 		case "svg":
+			return (
+				<Suspense>
+					<SVGImageLoader url={url} className="w-16 text-white" alt="" />
+				</Suspense>
+			);
 		case "jpg":
 		case "jpeg":
 		case "png":

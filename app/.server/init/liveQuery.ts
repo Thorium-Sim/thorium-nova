@@ -109,6 +109,17 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 			}
 		}
 
+		for (const legacySensorContact of context.ecs.componentCache.get(
+			"isSensorContact",
+		) || []) {
+			if (
+				legacySensorContact.components.isSensorContact?.shipId === ship.id &&
+				!legacySensorContact.components.isArmyContact
+			) {
+				entities.push(dataStreamEntity(legacySensorContact));
+			}
+		}
+
 		for (const passengerEntity of context.ecs.componentCache.get(
 			"passengerMovement",
 		) || []) {

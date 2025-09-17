@@ -26,7 +26,7 @@ export class SnapshotInterpolation {
 	public config: Config;
 
 	constructor(serverFPS?: number | null, config: Config = {}) {
-		if (serverFPS) this._interpolationBuffer = (1000 / serverFPS) * 3;
+		if (serverFPS) this._interpolationBuffer = 1000 / serverFPS;
 		this.config = { autoCorrectTimeOffset: true, ...config };
 	}
 

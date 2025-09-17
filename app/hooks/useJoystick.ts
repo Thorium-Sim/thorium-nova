@@ -22,11 +22,14 @@ export function useJoystick({
 }: {
 	axisSnap?: boolean;
 	axis?: "x" | "y" | undefined;
-	onDrag?: (values: { x: number; y: number }) => void;
+	onDrag?: (values: { x: number; y: number }, down: boolean) => void;
 	throttleMs?: number;
 	gamepadKeys?: { x: GamepadKey; y: GamepadKey };
 	sticky?: boolean;
-	ref?: React.RefObject<{ reset: () => void } | null>;
+	ref?: React.RefObject<{
+		reset: () => void;
+		set: (x: number, y: number) => void;
+	} | null>;
 } = {}) {
 	const callback = useRef(throttle(onDrag, throttleMs));
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -41,7 +44,10 @@ export function useJoystick({
 	useImperativeHandle(ref, () => ({
 		reset() {
 			set({ xy: [0, 0] });
-			callback.current({ x: 0, y: 0 });
+			callback.current({ x: 0, y: 0 }, false);
+		},
+		set(x, y) {
+			set({ xy: [x, y] });
 		},
 	}));
 
@@ -88,6 +94,7 @@ export function useJoystick({
 			down
 				? { x: x / maxDistance.current, y: y / maxDistance.current }
 				: { x: 0, y: 0 },
+			down,
 		);
 	});
 
@@ -114,10 +121,13 @@ export function useJoystick({
 			xy: [x, y],
 			immediate: true,
 		});
-		callback.current?.({
-			x: x / maxDistance.current,
-			y: y / maxDistance.current,
-		});
+		callback.current?.(
+			{
+				x: x / maxDistance.current,
+				y: y / maxDistance.current,
+			},
+			true,
+		);
 	}
 	useGamepadValue(gamepadKeys?.x, (value) => {
 		gamepadValues.current[0] = value;

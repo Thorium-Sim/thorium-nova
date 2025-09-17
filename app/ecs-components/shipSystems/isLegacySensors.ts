@@ -8,7 +8,7 @@ export const isLegacySensors = z
 
 		autoTargeting: z.boolean().default(false),
 		autoThrusters: z.boolean().default(false),
-		defaultSpeed: z.number().default(0.4),
+		defaultSpeed: z.number().default(0.2),
 
 		defaultHitpoints: z.number().default(5),
 		missPercent: z.number().default(0.25),
