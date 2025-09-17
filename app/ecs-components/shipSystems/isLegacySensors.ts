@@ -22,9 +22,6 @@ export const isLegacySensors = z
 			.object({ x: z.number(), y: z.number() })
 			.default({ x: 0, y: 0 }),
 
-		segments: z
-			.object({ ring: z.number(), line: z.number(), state: z.boolean() })
-			.array()
-			.default([]),
+		segments: z.record(z.boolean()).default({}),
 	})
 	.default({});

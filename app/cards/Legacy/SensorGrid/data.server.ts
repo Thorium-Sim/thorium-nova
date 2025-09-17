@@ -220,6 +220,15 @@ export const sensorGrid = t.router({
 				shipId: system.components.isShipSystem?.shipId || -1,
 			});
 		}),
+	// Just lets the station know to fire off the sonar ping
+	sonarPing: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.filter(shipPubsubFilter)
+		.autoPublish([], () => null)
+		.request(({ ctx, input, publish }) => {
+			if (!publish) return null;
+			return true;
+		}),
 	freezeSensors: t.procedure
 		.input(z.object({ shipId: z.number() }))
 		.send(({ ctx, input }) => {
@@ -272,6 +281,30 @@ export const sensorGrid = t.router({
 				shipId: input.shipId,
 			});
 			pubsub.publish.legacy.sensorGrid.sensorContactsDestination({
+				shipId: input.shipId,
+			});
+		}),
+	setSegment: t.procedure
+		.input(
+			z.object({
+				shipId: z.number(),
+				ring: z.number(),
+				line: z.number(),
+				blocked: z.boolean(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const sensorsSys = getShipSystem(ctx.ecs, {
+				systemType: "sensors",
+				shipId: input.shipId,
+			});
+			sensorsSys.updateComponent("isLegacySensors", {
+				segments: {
+					...sensorsSys.components.isLegacySensors?.segments,
+					[`${input.ring}-${input.line}`]: input.blocked,
+				},
+			});
+			pubsub.publish.legacy.sensorGrid.sensors({
 				shipId: input.shipId,
 			});
 		}),

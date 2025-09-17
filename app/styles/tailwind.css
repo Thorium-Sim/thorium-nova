@@ -70,13 +70,3 @@
 	background-color: oklch(0.6308 0.2171 254.09);
 }
 
-.sensors-ping {
-	--scale: 1;
-	transform: translate(-50%, -50%) scale(var(--scale));
-	transform-origin: center;
-	opacity: 0;
-	@starting-style {
-		opacity: 1;
-		transform: translate(-50%, -50%) scale(0);
-	}
-}

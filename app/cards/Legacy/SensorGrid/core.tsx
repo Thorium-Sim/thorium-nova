@@ -36,6 +36,7 @@ import maskUrl from "./mask.svg?url";
 import { Explosion } from "@thorium/cards/Legacy/SensorGrid/Explosion";
 import chroma from "chroma-js";
 import { capitalCase } from "change-case";
+import "./style.css";
 
 const useSensorsStore = create(
 	persist<{
@@ -99,7 +100,8 @@ const speeds = [
 
 export function LegacySensorGridCore() {
 	const [page, setPage] = useState<"Icons" | "Extras" | "Move">("Icons");
-	const { shipId } = useStation();
+	const { station, shipId } = useStation();
+	const isCore = station.name === "Flight Director";
 	const sensorsStore = useSensorsStore();
 
 	const [armyContacts] = q.legacy.sensorGrid.armyContacts.useNetRequest({
@@ -113,6 +115,19 @@ export function LegacySensorGridCore() {
 
 	const gridRef = useRef<HTMLDivElement>(null);
 	const draggingRef = useRef<HTMLDivElement>(null);
+
+	q.legacy.sensorGrid.sonarPing.useNetRequest(
+		{ shipId },
+		{
+			callback(data) {
+				if (!data) return;
+				gridRef.current?.classList.remove("ping");
+				requestAnimationFrame(() => {
+					gridRef.current?.classList.add("ping");
+				});
+			},
+		},
+	);
 
 	const [dragging, setDragging] = useState<
 		number | "planet" | "border" | "ping" | null
@@ -330,11 +345,17 @@ export function LegacySensorGridCore() {
 				) : null}
 			</div>
 			<div
-				className="col-span-2 aspect-square max-h-full max-w-full p-8 bg-gray-950 rounded-full"
+				className="col-span-2 aspect-square max-h-full max-w-full p-8 bg-[rgb(8,13,19)] rounded-full"
 				onClick={() => useSensorsStore.setState({ selectedContact: null })}
 			>
 				<div
-					className="aspect-square relative max-h-full max-w-full"
+					className={cn(
+						"aspect-square relative max-h-full max-w-full rounded-full",
+						{
+							"sonar-background": sensors.pingActive,
+							"is-core": isCore,
+						},
+					)}
 					ref={gridRef}
 				>
 					<div className="absolute flex items-center justify-center w-full h-full z-20  pointer-events-none">
@@ -349,11 +370,11 @@ export function LegacySensorGridCore() {
 							) : null}
 						</div>
 					</div>
-					<div className="absolute flex items-center justify-center w-full h-full z-0">
+					<div className="absolute flex items-center justify-center w-full h-full z-0 pointer-events-none sensor-contacts">
 						<SensorContacts gridRef={gridRef} />
 					</div>
 					<GridLines />
-
+					<GridSegments />
 					<Interference interference={sensors.interference} />
 				</div>
 			</div>
@@ -473,7 +494,6 @@ function SensorContact({
 	useAnimationFrame(() => {
 		const position = interpolate(id);
 
-		console.log(Date.now(), frozenState, destination, draggingRef.current);
 		if (iconRef.current && !draggingRef.current) {
 			iconRef.current.style.transform = `translate(${(frozenState?.destination?.x ?? destination.x) * 100}%, ${(frozenState?.destination?.y ?? destination.y) * 100}%)`;
 		}
@@ -1473,5 +1493,110 @@ function GridLines({
 					/>
 				))}
 		</>
+	);
+}
+
+function polarToCartesian(
+	centerX: number,
+	centerY: number,
+	radius: number,
+	angleInDegrees: number,
+) {
+	const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+
+	return {
+		x: centerX + radius * Math.cos(angleInRadians),
+		y: centerY + radius * Math.sin(angleInRadians),
+	};
+}
+
+function describeArc(
+	x: number,
+	y: number,
+	innerRadius: number,
+	outerRadius: number,
+	startAngle: number,
+	endAngle: number,
+) {
+	const innerStart = polarToCartesian(x, y, innerRadius, endAngle);
+	const innerEnd = polarToCartesian(x, y, innerRadius, startAngle);
+	const outerStart = polarToCartesian(x, y, outerRadius, endAngle);
+	const outerEnd = polarToCartesian(x, y, outerRadius, startAngle);
+
+	const d = [
+		"M",
+		outerStart.x,
+		outerStart.y,
+		"A",
+		outerRadius,
+		outerRadius,
+		0,
+		0,
+		0,
+		outerEnd.x,
+		outerEnd.y,
+		"L",
+		innerEnd.x,
+		innerEnd.y,
+		"A",
+		innerRadius,
+		innerRadius,
+		0,
+		0,
+		1,
+		innerStart.x,
+		innerStart.y,
+		"L",
+		outerStart.x,
+		outerStart.y,
+	].join(" ");
+
+	return d;
+}
+
+function GridSegments({
+	rings = 3,
+	lines = 12,
+	aligned = false,
+}: { rings?: number; lines?: number; aligned?: boolean }) {
+	const { shipId, station } = useStation();
+	const isCore = station.name === "Flight Director";
+	const [sensors] = q.legacy.sensorGrid.sensors.useNetRequest({ shipId });
+	const segments = sensors.segments;
+	return (
+		// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
+		<svg viewBox="0 0 100 100" className="w-full">
+			{Array.from({ length: rings }).map((_, i) =>
+				Array.from({ length: lines }).map((_, ii) => (
+					<path
+						key={`blackout-${i}-${ii}`}
+						fill="black"
+						onClick={(event) => {
+							if (!isCore) return;
+							if (event.altKey) {
+								q.legacy.sensorGrid.setSegment.netSend({
+									shipId,
+									ring: i,
+									line: ii,
+									blocked: !segments[`${i}-${ii}`],
+								});
+							}
+						}}
+						className={cn("opacity-0 pointer-events-none", {
+							"opacity-100": segments[`${i}-${ii}`],
+							"pointer-events-auto": isCore,
+						})}
+						d={describeArc(
+							50,
+							50,
+							(50 / rings) * i,
+							(50 / rings) * (1 + i),
+							((ii - (aligned ? 0 : 0.5)) * 360) / lines,
+							((ii + 1 - (aligned ? 0 : 0.5)) * 360) / lines,
+						)}
+					/>
+				)),
+			)}
+		</svg>
 	);
 }
