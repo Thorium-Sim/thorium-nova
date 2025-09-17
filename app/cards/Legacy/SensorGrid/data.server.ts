@@ -251,14 +251,16 @@ export const sensorGrid = t.router({
 				)
 					continue;
 
+				const data = contact.components.isSensorContact.frozenState;
+				if (!data) continue;
 				if (input.apply) {
-					const data = contact.components.isSensorContact.frozenState;
-					if (!data) continue;
 					if (data.removed) {
 						ctx.ecs.removeEntity(contact);
 					} else {
 						updateContact(contact, data);
 					}
+				} else if (data.new) {
+					ctx.ecs.removeEntity(contact);
 				}
 				contact.updateComponent("isSensorContact", { frozenState: null });
 			}
@@ -705,7 +707,7 @@ export const sensorGrid = t.router({
 							? (contact.components.size?.length || 1) / 2
 							: 0.02;
 
-					contact.updateComponent("isSensorContact", {
+					updateContact(contact, {
 						speed:
 							sensors.components.isLegacySensors?.defaultSpeed ||
 							contact.components.isSensorContact.speed,

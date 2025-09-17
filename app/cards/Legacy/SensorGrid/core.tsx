@@ -24,10 +24,8 @@ import {
 	type RefObject,
 } from "react";
 import {
-	Dialog,
 	Menu,
 	MenuItem,
-	OverlayArrow,
 	Popover,
 	Button as RAButton,
 	Separator,
@@ -169,9 +167,9 @@ export function LegacySensorGridCore() {
 						position: [x, y],
 					});
 				}
-				setDragging(null);
 			}
 
+			setDragging(null);
 			return;
 		}
 
@@ -228,7 +226,7 @@ export function LegacySensorGridCore() {
 					{sensors.frozen ? (
 						<>
 							<Button
-								className="flex-1 btn-xs btn-notice"
+								className="flex-1 btn-xs btn-info"
 								onClick={() =>
 									q.legacy.sensorGrid.unfreezeSensors.netSend({
 										shipId,
@@ -236,7 +234,7 @@ export function LegacySensorGridCore() {
 									})
 								}
 							>
-								Cancel Freeze
+								Cancel
 							</Button>
 							<Button
 								className="flex-1 btn-xs btn-success"
@@ -457,7 +455,7 @@ function SensorContact({
 	frozenState: any;
 	gridRef: RefObject<HTMLDivElement | null>;
 }) {
-	const { station } = useStation();
+	const { station, shipId } = useStation();
 	const isCore = station.name === "Flight Director";
 	const iconRef = useRef<HTMLDivElement>(null);
 	const contactRef = useRef<HTMLDivElement>(null);
@@ -470,6 +468,7 @@ function SensorContact({
 		y: number;
 	} | null>(null);
 	const sensorsStore = useSensorsStore();
+	const [sensors] = q.legacy.sensorGrid.sensors.useNetRequest({ shipId });
 
 	useAnimationFrame(() => {
 		const position = interpolate(id);
@@ -567,6 +566,7 @@ function SensorContact({
 					await q.legacy.sensorGrid.updateContact.netSend({
 						contactId: id,
 						destination: { x, y },
+						speed: sensors.defaultSpeed,
 					});
 					q.legacy.sensorGrid.removeContact.netSend({
 						contactId: id,
@@ -581,6 +581,7 @@ function SensorContact({
 					await q.legacy.sensorGrid.updateContact.netSend({
 						contactId: id,
 						destination: { x, y },
+						speed: sensors.defaultSpeed,
 					});
 					draggingRef.current = false;
 				}
