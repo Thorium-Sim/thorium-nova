@@ -16,19 +16,20 @@ const frames = Object.values(frameImports)
 		const bNum = Number(b.replace(/.*frame(.*)\.avif/, "$1"));
 		return aNum - bNum;
 	});
-export function Explosion(
-	props: DetailedHTMLProps<
-		ImgHTMLAttributes<HTMLImageElement>,
-		HTMLImageElement
-	>,
-) {
+export function Explosion({
+	loop,
+	...props
+}: { loop?: boolean } & DetailedHTMLProps<
+	ImgHTMLAttributes<HTMLImageElement>,
+	HTMLImageElement
+>) {
 	const [frame, setFrame] = useState(0);
 
 	useInterval(
 		() => {
 			setFrame((frame) => frame + 1);
 		},
-		frame < frames.length - 1 ? 50 : null,
+		loop || frame < frames.length - 1 ? 50 : null,
 	);
 
 	return <img {...props} src={frames[frame]} draggable={false} alt="" />;

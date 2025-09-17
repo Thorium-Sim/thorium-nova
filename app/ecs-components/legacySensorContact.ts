@@ -63,6 +63,25 @@ export const isSensorContact = z
 		hostile: z.boolean().default(false),
 		autoFire: z.boolean().default(false),
 		miss: z.boolean().default(false),
+
+		frozenState: z
+			.object({
+				new: z.boolean().optional(),
+				name: z.string().optional(),
+				icon: z.string().optional(),
+				picture: z.string().nullable().optional(),
+				speed: z.number().optional(),
+				infrared: z.boolean().optional(),
+				cloaked: z.boolean().optional(),
+				locked: z.boolean().optional(),
+				disabled: z.boolean().optional(),
+				destroyed: z.boolean().optional(),
+				removed: z.boolean().optional(),
+				size: z.number().optional(),
+				destination: z.object({ x: z.number(), y: z.number() }).optional(),
+			})
+			.nullable()
+			.default(null),
 	})
 	.default({});
 

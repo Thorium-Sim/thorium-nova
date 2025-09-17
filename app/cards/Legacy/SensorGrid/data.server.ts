@@ -1,5 +1,6 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
+import { isSensorContact } from "@thorium/ecs-components/legacySensorContact";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
 import { Entity, type ECS } from "@thorium/utils/ecs";
@@ -19,6 +20,24 @@ function getArmyContacts(ecs: ECS, shipId: number) {
 	}
 
 	return contacts;
+}
+
+interface ContactProperties {
+	id: number;
+	name: string;
+	type: "contact" | "border" | "planet" | "ping" | "projectile";
+	icon: string;
+	picture: string | null;
+	color: string;
+	size: number;
+	locked: boolean;
+	disabled: boolean;
+	hostile: boolean;
+	cloaked: boolean;
+	infrared: boolean;
+	destroyed: boolean;
+	position: { x: number; y: number };
+	destination: { x: number; y: number };
 }
 
 function createContact(
@@ -54,6 +73,70 @@ function createContact(
 	contact.addComponent("color", lastContact?.components.color);
 
 	return contact;
+}
+
+function updateContact(
+	contact: Entity,
+	properties: Partial<
+		Pick<
+			ContactProperties,
+			| "name"
+			| "icon"
+			| "picture"
+			| "color"
+			| "size"
+			| "locked"
+			| "disabled"
+			| "hostile"
+			| "cloaked"
+			| "infrared"
+			| "destination"
+			| "destroyed"
+		> & { speed: number }
+	>,
+) {
+	const sensors = contact.ecs.getEntityById(
+		contact?.components.isSensorContact?.sensorsId || -1,
+	);
+	if (sensors?.components.isLegacySensors?.frozen) {
+		contact.updateComponent("isSensorContact", {
+			frozenState: {
+				...contact.components.isSensorContact?.frozenState,
+				...properties,
+				...(properties.destination ? { removed: false } : {}),
+			},
+		});
+	} else {
+		for (const property of Object.entries(properties)) {
+			switch (property[0]) {
+				case "name":
+					contact.updateComponent("identity", { name: properties.name });
+					break;
+				case "size":
+					contact.updateComponent("size", { length: properties.size });
+					break;
+				case "color":
+					contact.updateComponent("color", { color: properties.color });
+					break;
+				case "destination":
+					contact.updateComponent("isSensorContact", {
+						destination: properties.destination,
+						speed:
+							properties.speed ||
+							sensors?.components.isLegacySensors?.defaultSpeed,
+					});
+					pubsub.publish.legacy.sensorGrid.sensorContactsDestination({
+						shipId: contact.components.isSensorContact?.shipId || -1,
+					});
+					break;
+				default:
+					contact.updateComponent("isSensorContact", {
+						[property[0]]: property[1],
+					});
+					break;
+			}
+		}
+	}
 }
 
 export const sensorGrid = t.router({
@@ -137,6 +220,59 @@ export const sensorGrid = t.router({
 				shipId: system.components.isShipSystem?.shipId || -1,
 			});
 		}),
+	freezeSensors: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.send(({ ctx, input }) => {
+			const sensorsSys = getShipSystem(ctx.ecs, {
+				systemType: "sensors",
+				shipId: input.shipId,
+			});
+
+			sensorsSys.updateComponent("isLegacySensors", { frozen: true });
+			pubsub.publish.legacy.sensorGrid.sensors({
+				shipId: input.shipId,
+			});
+		}),
+	unfreezeSensors: t.procedure
+		.input(z.object({ shipId: z.number(), apply: z.boolean() }))
+		.send(({ ctx, input }) => {
+			const sensorsSys = getShipSystem(ctx.ecs, {
+				systemType: "sensors",
+				shipId: input.shipId,
+			});
+
+			sensorsSys.updateComponent("isLegacySensors", { frozen: false });
+
+			for (const contact of ctx.ecs.componentCache.get("isSensorContact") ||
+				[]) {
+				if (
+					contact.components.isArmyContact ||
+					contact.components.isSensorContact?.sensorsId !== sensorsSys.id
+				)
+					continue;
+
+				if (input.apply) {
+					const data = contact.components.isSensorContact.frozenState;
+					if (!data) continue;
+					if (data.removed) {
+						ctx.ecs.removeEntity(contact);
+					} else {
+						updateContact(contact, data);
+					}
+				}
+				contact.updateComponent("isSensorContact", { frozenState: null });
+			}
+
+			pubsub.publish.legacy.sensorGrid.sensors({
+				shipId: input.shipId,
+			});
+			pubsub.publish.legacy.sensorGrid.sensorContacts({
+				shipId: input.shipId,
+			});
+			pubsub.publish.legacy.sensorGrid.sensorContactsDestination({
+				shipId: input.shipId,
+			});
+		}),
 	sensorContacts: t.procedure
 		.input(z.object({ shipId: z.number() }))
 		.filter(shipPubsubFilter)
@@ -146,23 +282,27 @@ export const sensorGrid = t.router({
 				: null,
 		)
 		.request(({ ctx, input }) => {
-			const contacts: {
-				id: number;
-				name: string;
-				type: "contact" | "border" | "planet" | "ping" | "projectile";
-				icon: string;
-				picture: string | null;
-				color: string;
-				size: number;
-				locked: boolean;
-				disabled: boolean;
-				hostile: boolean;
-				cloaked: boolean;
-				infrared: boolean;
-				destroyed: boolean;
-				position: { x: number; y: number };
-				destination: { x: number; y: number };
-			}[] = [];
+			const contacts: (ContactProperties & {
+				frozenState: Partial<
+					Pick<
+						ContactProperties,
+						| "name"
+						| "icon"
+						| "picture"
+						| "infrared"
+						| "cloaked"
+						| "locked"
+						| "disabled"
+						| "destination"
+						| "destroyed"
+						| "size"
+					> & {
+						new: boolean;
+						speed: number;
+						removed: boolean;
+					}
+				> | null;
+			})[] = [];
 			for (const contact of ctx.ecs.componentCache.get("isSensorContact") ||
 				[]) {
 				if (
@@ -188,6 +328,7 @@ export const sensorGrid = t.router({
 							x: contact.components.position?.x || 0,
 							y: contact.components.position?.y || 0,
 						},
+						frozenState: contact.components.isSensorContact.frozenState,
 					});
 				}
 			}
@@ -349,6 +490,9 @@ export const sensorGrid = t.router({
 		)
 		.send(({ ctx, input }) => {
 			const armyContact = ctx.ecs.getEntityById(input.armyContactId);
+			const sensors = ctx.ecs.getEntityById(
+				armyContact?.components.isSensorContact?.sensorsId || -1,
+			);
 
 			if (!armyContact) return;
 			const contact = createContact(
@@ -364,6 +508,12 @@ export const sensorGrid = t.router({
 			contact.updateComponent("isSensorContact", {
 				destination: { x: input.position[0], y: input.position[1] },
 			});
+			if (sensors?.components.isLegacySensors?.frozen) {
+				contact.updateComponent("isSensorContact", {
+					frozenState: { new: true },
+				});
+			}
+
 			ctx.ecs.addEntity(contact);
 
 			pubsub.publish.legacy.sensorGrid.sensorContacts({
@@ -400,6 +550,11 @@ export const sensorGrid = t.router({
 				x: input.position[0],
 				y: input.position[1],
 			});
+			if (sensors?.components.isLegacySensors?.frozen) {
+				contact.updateComponent("isSensorContact", {
+					frozenState: { new: true },
+				});
+			}
 			ctx.ecs.addEntity(contact);
 
 			pubsub.publish.legacy.sensorGrid.sensorContacts({
@@ -431,77 +586,7 @@ export const sensorGrid = t.router({
 				contact?.components.isSensorContact?.sensorsId || -1,
 			);
 			if (!contact || !sensors) return;
-
-			if (typeof input.speed !== "undefined") {
-				contact.updateComponent("isSensorContact", {
-					speed: input.speed,
-				});
-			}
-			if (typeof input.destroyed !== "undefined") {
-				contact.updateComponent("isSensorContact", {
-					destroyed: input.destroyed,
-				});
-			}
-			if (typeof input.name !== "undefined") {
-				contact.updateComponent("identity", {
-					name: input.name,
-				});
-			}
-			if (typeof input.icon !== "undefined") {
-				contact.updateComponent("isSensorContact", {
-					icon: input.icon,
-				});
-			}
-			if (typeof input.picture !== "undefined") {
-				contact.updateComponent("isSensorContact", {
-					picture: input.picture,
-				});
-			}
-			if (typeof input.color !== "undefined") {
-				contact.updateComponent("color", {
-					color: input.color,
-				});
-			}
-			if (typeof input.size !== "undefined") {
-				contact.updateComponent("size", {
-					length: input.size,
-				});
-			}
-			if (typeof input.locked !== "undefined") {
-				contact.updateComponent("isSensorContact", {
-					locked: input.locked,
-				});
-			}
-			if (typeof input.disabled !== "undefined") {
-				contact.updateComponent("isSensorContact", {
-					disabled: input.disabled,
-				});
-			}
-			if (typeof input.hostile !== "undefined") {
-				contact.updateComponent("isSensorContact", {
-					hostile: input.hostile,
-				});
-			}
-			if (typeof input.cloaked !== "undefined") {
-				contact.updateComponent("isSensorContact", {
-					cloaked: input.cloaked,
-				});
-			}
-			if (typeof input.infrared !== "undefined") {
-				contact.updateComponent("isSensorContact", {
-					infrared: input.infrared,
-				});
-			}
-			if (typeof input.destination !== "undefined") {
-				contact.updateComponent("isSensorContact", {
-					destination: input.destination,
-					speed:
-						input.speed || sensors.components.isLegacySensors?.defaultSpeed,
-				});
-				pubsub.publish.legacy.sensorGrid.sensorContactsDestination({
-					shipId: contact.components.isSensorContact?.shipId || -1,
-				});
-			}
+			updateContact(contact, input);
 			pubsub.publish.legacy.sensorGrid.sensorContacts({
 				shipId: contact.components.isSensorContact?.shipId || -1,
 			});
@@ -511,7 +596,19 @@ export const sensorGrid = t.router({
 		.send(({ ctx, input }) => {
 			const contact = ctx.ecs.getEntityById(input.contactId);
 			if (!contact) return;
-			ctx.ecs.removeEntity(contact);
+			const sensors = ctx.ecs.getEntityById(
+				contact?.components.isSensorContact?.sensorsId || -1,
+			);
+			if (sensors?.components.isLegacySensors?.frozen) {
+				contact.updateComponent("isSensorContact", {
+					frozenState: {
+						...contact.components.isSensorContact?.frozenState,
+						removed: true,
+					},
+				});
+			} else {
+				ctx.ecs.removeEntity(contact);
+			}
 
 			pubsub.publish.legacy.sensorGrid.sensorContactsDestination({
 				shipId: contact.components.isSensorContact?.shipId || -1,
@@ -642,12 +739,11 @@ export const sensorGrid = t.router({
 		}),
 	stream: t.procedure
 		.input(z.object({ shipId: z.number() }))
-		.dataStream(({ ctx, input, entity }) => {
-			return (
+		.dataStream(
+			({ ctx, input, entity }) =>
 				entity?.components.isSensorContact?.shipId === input.shipId &&
-				!entity.components.isArmyContact
-			);
-		}),
+				!entity.components.isArmyContact,
+		),
 });
 
 function rotatePoint({ x, y }: { x: number; y: number }, angle: number) {

@@ -61,7 +61,7 @@ const useSensorsStore = create(
 			picture: string;
 		};
 	}>(
-		(set, get) => ({
+		() => ({
 			askForSpeed: false,
 			nudgeDistance: 5,
 			showContactLabels: false,
@@ -225,6 +225,41 @@ export function LegacySensorGridCore() {
 					>
 						Stop
 					</Button>
+					{sensors.frozen ? (
+						<>
+							<Button
+								className="flex-1 btn-xs btn-notice"
+								onClick={() =>
+									q.legacy.sensorGrid.unfreezeSensors.netSend({
+										shipId,
+										apply: false,
+									})
+								}
+							>
+								Cancel Freeze
+							</Button>
+							<Button
+								className="flex-1 btn-xs btn-success"
+								onClick={() =>
+									q.legacy.sensorGrid.unfreezeSensors.netSend({
+										shipId,
+										apply: true,
+									})
+								}
+							>
+								Apply
+							</Button>
+						</>
+					) : (
+						<Button
+							className="flex-1 btn-xs btn-info"
+							onClick={() =>
+								q.legacy.sensorGrid.freezeSensors.netSend({ shipId })
+							}
+						>
+							Freeze
+						</Button>
+					)}
 				</div>
 				<div className="flex btn-group">
 					<Button
@@ -256,6 +291,7 @@ export function LegacySensorGridCore() {
 					<ContactEditor
 						close={() => useSensorsStore.setState({ selectedContact: null })}
 						{...selectedContact}
+						{...selectedContact.frozenState}
 						update={(params) =>
 							q.legacy.sensorGrid.updateContact.netSend({
 								contactId: selectedContact.id,
@@ -404,6 +440,7 @@ function SensorContact({
 	size,
 	gridRef,
 	destroyed,
+	frozenState,
 	...props
 }: {
 	id: number;
@@ -417,6 +454,7 @@ function SensorContact({
 	disabled: boolean;
 	hostile: boolean;
 	destroyed: boolean;
+	frozenState: any;
 	gridRef: RefObject<HTMLDivElement | null>;
 }) {
 	const { station } = useStation();
@@ -436,8 +474,9 @@ function SensorContact({
 	useAnimationFrame(() => {
 		const position = interpolate(id);
 
+		console.log(Date.now(), frozenState, destination, draggingRef.current);
 		if (iconRef.current && !draggingRef.current) {
-			iconRef.current.style.transform = `translate(${destination.x * 100}%, ${destination.y * 100}%)`;
+			iconRef.current.style.transform = `translate(${(frozenState?.destination?.x ?? destination.x) * 100}%, ${(frozenState?.destination?.y ?? destination.y) * 100}%)`;
 		}
 		if (!position || !contactRef.current) return;
 		contactRef.current.style.transform = `translate(${position.x * 100}%, ${position.y * 100}%)`;
@@ -525,9 +564,15 @@ function SensorContact({
 						draggingDimensions.top > gridParentDimensions.bottom ||
 						draggingDimensions.bottom < gridParentDimensions.top)
 				) {
+					await q.legacy.sensorGrid.updateContact.netSend({
+						contactId: id,
+						destination: { x, y },
+					});
 					q.legacy.sensorGrid.removeContact.netSend({
 						contactId: id,
 					});
+					draggingRef.current = false;
+
 					return;
 				}
 				if (sensorsStore.askForSpeed) {
@@ -545,23 +590,24 @@ function SensorContact({
 	}
 	return (
 		<>
-			<div
-				className="absolute w-full h-full pointer-events-none select-none"
-				ref={contactRef}
-				style={{
-					transform: `translate(${position.x * 100}%, ${position.y * 100}%)`,
-				}}
-			>
-				{destroyed ? (
-					<Explosion
-						className="w-[5%] h-[5%]"
-						style={{ transform: `translate(-50%, -50%) scale(${size})` }}
-					/>
-				) : (
-					<ContactImage size={size} isCore {...props} />
-				)}
-			</div>
-
+			{frozenState?.new ? null : (
+				<div
+					className="absolute w-full h-full pointer-events-none select-none"
+					ref={contactRef}
+					style={{
+						transform: `translate(${position.x * 100}%, ${position.y * 100}%)`,
+					}}
+				>
+					{destroyed ? (
+						<Explosion
+							className="w-[5%] h-[5%]"
+							style={{ transform: `translate(-50%, -50%) scale(${size})` }}
+						/>
+					) : (
+						<ContactImage size={size} isCore {...props} />
+					)}
+				</div>
+			)}
 			{isCore && !destroyed ? (
 				<div
 					className="absolute w-full h-full pointer-events-none select-none"
@@ -569,13 +615,13 @@ function SensorContact({
 				>
 					{sensorsStore.showContactLabels && (
 						<p className="w-min text-nowrap select-none absolute border-white/20 border bg-black text-xs px-1 pointer-events-none z-10 left-1 top-1">
-							{name}
+							{frozenState?.name ?? name}
 						</p>
 					)}
 					{sensorsStore.selectedContact === id ? (
 						<div
 							className="absolute top-0 left-0 w-[2.5%] h-[2.5%] origin-top-left"
-							style={{ transform: `scale(${size})` }}
+							style={{ transform: `scale(${frozenState?.size ?? size})` }}
 						>
 							<div className="absolute border-t-2 border-l-2 w-full h-full border-blue-500 -translate-x-[120%] -translate-y-[120%]" />
 							<div className="absolute border-b-2 border-l-2 w-full h-full border-blue-500 -translate-x-[120%] translate-y-[20%]" />
@@ -587,6 +633,7 @@ function SensorContact({
 						size={size}
 						ref={triggerRef}
 						{...props}
+						{...frozenState}
 						onPointerDown={handleDrag}
 					/>
 					<Popover
