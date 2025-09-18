@@ -1,7 +1,7 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { type Entity, System } from "@thorium/utils/ecs";
 
-const activePingInterval = 6500;
+export const activePingInterval = 6500;
 const passivePingInterval = 15000;
 export class LegacySensorSonarSystem extends System {
 	static flightMode = ["legacy"];

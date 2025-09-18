@@ -126,7 +126,6 @@
 		"alias-hq": "^6.2.4",
 		"autoprefixer": "^10.4.21",
 		"concurrently": "^7.6.0",
-		"daisyui": "^4.12.23",
 		"get-port": "^7.1.0",
 		"happy-dom": "^17.4.4",
 		"is-ci-cli": "^2.2.0",

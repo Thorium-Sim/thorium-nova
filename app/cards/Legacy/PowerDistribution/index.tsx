@@ -32,7 +32,7 @@ export function LegacyPowerDistribution() {
 	});
 	return (
 		<div className="grid grid-cols-5 h-full">
-			<div className="grid grid-cols-[auto_auto_1fr] h-full gap-x-4 gap-y-0.5 col-span-3 select-none content-between overflow-y-auto">
+			<div className="grid grid-cols-[auto_auto_1fr] h-full gap-x-4 gap-y-0.5 col-span-3 select-none content-between overflow-y-auto overflow-x-hidden">
 				{systems.map((system) => (
 					<SystemBar key={system.id} {...system} maxPower={maxPower} />
 				))}

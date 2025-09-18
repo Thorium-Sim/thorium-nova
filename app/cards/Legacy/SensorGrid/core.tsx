@@ -1,6 +1,4 @@
 import { q } from "@thorium/context/AppContext";
-import { useCardContext } from "@thorium/context/CardContext";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import Checkbox from "@thorium/ui/Checkbox";
@@ -11,133 +9,40 @@ import { Joystick } from "@thorium/ui/Joystick";
 import Select from "@thorium/ui/Select";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import { cn } from "@thorium/utils/cn";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
 import {
 	Suspense,
 	useEffect,
 	useRef,
 	useState,
-	type DetailedHTMLProps,
-	type HTMLAttributes,
 	type PointerEvent,
 	type ReactNode,
-	type RefObject,
 } from "react";
-import {
-	Menu,
-	MenuItem,
-	Popover,
-	Button as RAButton,
-	Separator,
-} from "react-aria-components";
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import maskUrl from "./mask.svg?url";
-import { Explosion } from "@thorium/cards/Legacy/SensorGrid/Explosion";
+import { Button as RAButton } from "react-aria-components";
 import chroma from "chroma-js";
 import { capitalCase } from "change-case";
 import "./style.css";
-
-const useSensorsStore = create(
-	persist<{
-		askForSpeed: boolean;
-		nudgeDistance: number;
-		showContactLabels: boolean;
-		selectedContact: number | null;
-		planet: {
-			name: string;
-			color: string;
-			size: number;
-			icon: "";
-			picture: string;
-		};
-		border: { name: string; color: string; size: 1; icon: ""; picture: string };
-		ping: {
-			name: string;
-			color: string;
-			size: number;
-			icon: "";
-			picture: string;
-		};
-	}>(
-		() => ({
-			askForSpeed: false,
-			nudgeDistance: 5,
-			showContactLabels: false,
-			selectedContact: null,
-			planet: {
-				name: "Planet",
-				color: "#663399",
-				size: 0.75,
-				icon: "",
-				picture: "",
-			},
-			border: {
-				name: "Border",
-				color: "#663399",
-				size: 1,
-				icon: "",
-				picture: "",
-			},
-			ping: { name: "", color: "#663399", size: 5, icon: "", picture: "" },
-		}),
-		{
-			name: "legacy-sensors-store",
-			version: 1,
-		},
-	),
-);
-
-const speeds = [
-	{ id: 1000, label: "Instant" },
-	{ id: 1, label: "Warp" },
-	{ id: 0.3, label: "Very Fast" },
-	{ id: 0.1, label: "Fast" },
-	{ id: 0.05, label: "Moderate" },
-	{ id: 0.025, label: "Slow" },
-	{ id: 0.01, label: "Very Slow" },
-];
+import { SensorGrid } from "@thorium/cards/Legacy/SensorGrid/SensorGrid";
+import {
+	sensorsSpeeds,
+	useSensorsStore,
+} from "@thorium/cards/Legacy/SensorGrid/useSensorsStore";
 
 export function LegacySensorGridCore() {
 	const [page, setPage] = useState<"Icons" | "Extras" | "Move">("Icons");
-	const { station, shipId } = useStation();
-	const isCore = station.name === "Flight Director";
+	const { shipId } = useStation();
 	const sensorsStore = useSensorsStore();
 
-	const [armyContacts] = q.legacy.sensorGrid.armyContacts.useNetRequest({
-		shipId,
-	});
 	const [contacts] = q.legacy.sensorGrid.sensorContacts.useNetRequest({
 		shipId,
 	});
 	const [sensors] = q.legacy.sensorGrid.sensors.useNetRequest({ shipId });
-	q.legacy.sensorGrid.stream.useDataStream({ shipId });
 
 	const gridRef = useRef<HTMLDivElement>(null);
 	const draggingRef = useRef<HTMLDivElement>(null);
 
-	q.legacy.sensorGrid.sonarPing.useNetRequest(
-		{ shipId },
-		{
-			callback(data) {
-				if (!data) return;
-				gridRef.current?.classList.remove("ping");
-				requestAnimationFrame(() => {
-					gridRef.current?.classList.add("ping");
-				});
-			},
-		},
-	);
-
 	const [dragging, setDragging] = useState<
 		number | "planet" | "border" | "ping" | null
 	>(null);
-
-	const draggingContact = !dragging
-		? null
-		: typeof dragging === "number"
-			? armyContacts.find((c) => c.id === dragging)
-			: sensorsStore[dragging];
 
 	async function setDraggingContact(
 		armyContactId: number | "planet" | "border" | "ping",
@@ -210,7 +115,7 @@ export function LegacySensorGridCore() {
 			<div className="w-full flex flex-col max-h-full h-full min-h-0 bg-black z-20">
 				<Select
 					size="xxs"
-					items={speeds}
+					items={sensorsSpeeds}
 					label="Speed"
 					labelHidden
 					selected={sensors.defaultSpeed}
@@ -344,469 +249,13 @@ export function LegacySensorGridCore() {
 					<MovePage />
 				) : null}
 			</div>
-			<div
-				className="col-span-2 aspect-square max-h-full max-w-full p-8 bg-[rgb(8,13,19)] rounded-full"
-				onClick={() => useSensorsStore.setState({ selectedContact: null })}
-			>
-				<div
-					className={cn(
-						"aspect-square relative max-h-full max-w-full rounded-full",
-						{
-							"sonar-background": sensors.pingActive,
-							"is-core": isCore,
-						},
-					)}
-					ref={gridRef}
-				>
-					<div className="absolute flex items-center justify-center w-full h-full z-20  pointer-events-none">
-						<div ref={draggingRef} className="absolute w-full h-full">
-							{dragging && draggingContact ? (
-								<ContactImage
-									color={draggingContact.color}
-									icon={draggingContact.icon}
-									type={typeof dragging === "number" ? "contact" : dragging}
-									size={draggingContact.size}
-								/>
-							) : null}
-						</div>
-					</div>
-					<div className="absolute flex items-center justify-center w-full h-full z-0 pointer-events-none sensor-contacts">
-						<SensorContacts gridRef={gridRef} />
-					</div>
-					<GridLines />
-					<GridSegments />
-					<Interference interference={sensors.interference} />
-				</div>
-			</div>
+			<SensorGrid
+				gridRef={gridRef}
+				draggingRef={draggingRef}
+				dragging={dragging}
+				className="col-span-2 p-8 bg-[rgb(8,13,19)]"
+			/>
 		</div>
-	);
-}
-
-function Interference({ interference }: { interference: number }) {
-	const { cardLoaded } = useCardContext();
-	const { station } = useStation();
-	const ref = useRef<HTMLCanvasElement>(null);
-	const ctx = ref.current?.getContext("2d");
-
-	useEffect(() => {
-		if (ref.current) {
-			const dims = ref.current.getBoundingClientRect();
-			ref.current.width = dims.width;
-			ref.current.height = dims.height;
-		}
-	}, []);
-	useAnimationFrame(
-		() => {
-			if (!ctx) return;
-			const w = ctx.canvas.width;
-			const h = ctx.canvas.height;
-			const image = ctx.createImageData(w, h);
-			for (let i = 0; i < image.data.length; i += 4) {
-				const val = 255 * Math.random();
-				image.data[i] = val;
-				image.data[i + 1] = val;
-				image.data[i + 2] = val;
-				image.data[i + 3] = 255;
-			}
-			ctx.putImageData(image, 0, 0);
-		},
-		cardLoaded && interference > 0,
-	);
-
-	return (
-		<canvas
-			ref={ref}
-			className={cn("absolute w-full h-full bg-white rounded-full", {
-				"pointer-events-none":
-					interference < 0.5 || station.name === "Flight Director",
-			})}
-			style={{
-				opacity: interference * (station.name === "Flight Director" ? 0.5 : 1),
-			}}
-		/>
-	);
-}
-
-function SensorContacts({
-	gridRef,
-}: { gridRef: RefObject<HTMLDivElement | null> }) {
-	const { shipId } = useStation();
-
-	const [contacts] = q.legacy.sensorGrid.sensorContacts.useNetRequest({
-		shipId,
-	});
-	const [destinations] =
-		q.legacy.sensorGrid.sensorContactsDestination.useNetRequest({
-			shipId,
-		});
-
-	const destinationMap = new Map(destinations);
-	return contacts.map((c) => (
-		<SensorContact
-			key={c.id}
-			{...c}
-			destination={destinationMap.get(c.id) || c.destination}
-			gridRef={gridRef}
-		/>
-	));
-}
-
-function SensorContact({
-	id,
-	name,
-	position,
-	destination,
-	size,
-	gridRef,
-	destroyed,
-	frozenState,
-	...props
-}: {
-	id: number;
-	name: string;
-	type: "contact" | "border" | "planet" | "ping" | "projectile";
-	color: string;
-	size: number;
-	icon: string;
-	position: { x: number; y: number };
-	destination: { x: number; y: number };
-	disabled: boolean;
-	hostile: boolean;
-	destroyed: boolean;
-	frozenState: any;
-	gridRef: RefObject<HTMLDivElement | null>;
-}) {
-	const { station, shipId } = useStation();
-	const isCore = station.name === "Flight Director";
-	const iconRef = useRef<HTMLDivElement>(null);
-	const contactRef = useRef<HTMLDivElement>(null);
-	const triggerRef = useRef<HTMLDivElement>(null);
-	const draggingRef = useRef(false);
-	const { interpolate } = useLiveQuery();
-	const { cardLoaded } = useCardContext();
-	const [pickingSpeed, setPickingSpeed] = useState<{
-		x: number;
-		y: number;
-	} | null>(null);
-	const sensorsStore = useSensorsStore();
-	const [sensors] = q.legacy.sensorGrid.sensors.useNetRequest({ shipId });
-
-	useAnimationFrame(() => {
-		const position = interpolate(id);
-
-		if (iconRef.current && !draggingRef.current) {
-			iconRef.current.style.transform = `translate(${(frozenState?.destination?.x ?? destination.x) * 100}%, ${(frozenState?.destination?.y ?? destination.y) * 100}%)`;
-		}
-		if (!position || !contactRef.current) return;
-		contactRef.current.style.transform = `translate(${position.x * 100}%, ${position.y * 100}%)`;
-	}, cardLoaded);
-
-	async function pickSpeed(speed: number) {
-		if (pickingSpeed) {
-			await q.legacy.sensorGrid.updateContact.netSend({
-				contactId: id,
-				destination: pickingSpeed,
-				speed,
-			});
-		}
-		setPickingSpeed(null);
-		draggingRef.current = false;
-	}
-
-	function handleDrag(event: PointerEvent) {
-		event.stopPropagation();
-
-		const iconDimensions = iconRef.current?.getBoundingClientRect();
-		if (!iconDimensions) return;
-
-		const offset = [
-			iconDimensions.left - event.clientX,
-			iconDimensions.top - event.clientY,
-		];
-		const abortController = new AbortController();
-		const dimensions = gridRef.current?.getBoundingClientRect();
-
-		if (!dimensions) return;
-
-		document.addEventListener(
-			"pointermove",
-			(moveEvent) => {
-				if (
-					Math.hypot(
-						moveEvent.clientX - event.clientX,
-						moveEvent.clientY - event.clientY,
-					) < 2
-				) {
-					return;
-				}
-				draggingRef.current = true;
-				const x =
-					(moveEvent.clientX + offset[0] - dimensions.left) / dimensions.width;
-				const y =
-					(moveEvent.clientY + offset[1] - dimensions.top) / dimensions.height;
-				if (iconRef.current) {
-					iconRef.current.style.transform = `translate(${x * 100}%, ${y * 100}%)`;
-				}
-			},
-			{ signal: abortController.signal },
-		);
-		document.addEventListener(
-			"pointerup",
-			async (upEvent) => {
-				abortController.abort();
-
-				if (
-					Math.hypot(
-						upEvent.clientX - event.clientX,
-						upEvent.clientY - event.clientY,
-					) < 2
-				) {
-					useSensorsStore.setState({ selectedContact: id });
-					draggingRef.current = false;
-					return;
-				}
-				const x =
-					(upEvent.clientX + offset[0] - dimensions.left) / dimensions.width;
-				const y =
-					(upEvent.clientY + offset[1] - dimensions.top) / dimensions.height;
-
-				// Check if the contact is within the sensor grid area
-				const gridParentDimensions =
-					gridRef.current?.parentElement?.getBoundingClientRect();
-				const draggingDimensions =
-					iconRef.current?.children[0]?.getBoundingClientRect();
-				if (
-					draggingDimensions &&
-					gridParentDimensions &&
-					(draggingDimensions.left > gridParentDimensions.right ||
-						draggingDimensions.right < gridParentDimensions.left ||
-						draggingDimensions.top > gridParentDimensions.bottom ||
-						draggingDimensions.bottom < gridParentDimensions.top)
-				) {
-					await q.legacy.sensorGrid.updateContact.netSend({
-						contactId: id,
-						destination: { x, y },
-						speed: sensors.defaultSpeed,
-					});
-					q.legacy.sensorGrid.removeContact.netSend({
-						contactId: id,
-					});
-					draggingRef.current = false;
-
-					return;
-				}
-				if (sensorsStore.askForSpeed) {
-					setPickingSpeed({ x, y });
-				} else {
-					await q.legacy.sensorGrid.updateContact.netSend({
-						contactId: id,
-						destination: { x, y },
-						speed: sensors.defaultSpeed,
-					});
-					draggingRef.current = false;
-				}
-			},
-			{ once: true },
-		);
-	}
-	return (
-		<>
-			{frozenState?.new ? null : (
-				<div
-					className="absolute w-full h-full pointer-events-none select-none"
-					ref={contactRef}
-					style={{
-						transform: `translate(${position.x * 100}%, ${position.y * 100}%)`,
-					}}
-				>
-					{destroyed ? (
-						<Explosion
-							className="w-[5%] h-[5%]"
-							style={{ transform: `translate(-50%, -50%) scale(${size})` }}
-						/>
-					) : (
-						<ContactImage size={size} isCore {...props} />
-					)}
-				</div>
-			)}
-			{isCore && !destroyed ? (
-				<div
-					className="absolute w-full h-full pointer-events-none select-none"
-					ref={iconRef}
-				>
-					{sensorsStore.showContactLabels && (
-						<p className="w-min text-nowrap select-none absolute border-white/20 border bg-black text-xs px-1 pointer-events-none z-10 left-1 top-1">
-							{frozenState?.name ?? name}
-						</p>
-					)}
-					{sensorsStore.selectedContact === id ? (
-						<div
-							className="absolute top-0 left-0 w-[2.5%] h-[2.5%] origin-top-left"
-							style={{ transform: `scale(${frozenState?.size ?? size})` }}
-						>
-							<div className="absolute border-t-2 border-l-2 w-full h-full border-blue-500 -translate-x-[120%] -translate-y-[120%]" />
-							<div className="absolute border-b-2 border-l-2 w-full h-full border-blue-500 -translate-x-[120%] translate-y-[20%]" />
-							<div className="absolute border-b-2 border-r-2 w-full h-full border-blue-500 translate-x-[20%] translate-y-[20%]" />
-							<div className="absolute border-t-2 border-r-2 w-full h-full border-blue-500 translate-x-[20%] -translate-y-[120%]" />
-						</div>
-					) : null}
-					<ContactImage
-						size={size}
-						ref={triggerRef}
-						{...props}
-						{...frozenState}
-						onPointerDown={handleDrag}
-					/>
-					<Popover
-						isOpen={!!pickingSpeed}
-						triggerRef={triggerRef}
-						onOpenChange={() => {
-							setPickingSpeed(null);
-							draggingRef.current = false;
-						}}
-						crossOffset={100}
-					>
-						<Menu className="text-xs text-white bg-gray-900">
-							{speeds.map((speed) => (
-								<MenuItem key={speed.id} onAction={() => pickSpeed(speed.id)}>
-									{speed.label}
-								</MenuItem>
-							))}
-							<Separator className="border-b border-white" />
-							<MenuItem
-								onAction={() => {
-									setPickingSpeed(null);
-									draggingRef.current = false;
-								}}
-							>
-								Cancel
-							</MenuItem>
-							<MenuItem
-								onAction={() => {
-									q.legacy.sensorGrid.removeContact.netSend({ contactId: id });
-									setPickingSpeed(null);
-								}}
-							>
-								Remove
-							</MenuItem>
-							<MenuItem
-								onAction={async () => {
-									await q.legacy.sensorGrid.updateContact.netSend({
-										contactId: id,
-										destroyed: true,
-									});
-									setPickingSpeed(null);
-									draggingRef.current = false;
-								}}
-							>
-								Destroy
-							</MenuItem>
-						</Menu>
-					</Popover>
-				</div>
-			) : null}
-		</>
-	);
-}
-
-function ContactImage({
-	type,
-	icon,
-	color,
-	disabled,
-	size,
-	hostile,
-	ref,
-	isCore,
-	...props
-}: {
-	type: "contact" | "border" | "ping" | "planet" | "projectile";
-	icon: string;
-	color: string;
-	size: number;
-	hostile?: boolean;
-	disabled?: boolean;
-	ref?: RefObject<HTMLDivElement | null>;
-	isCore?: boolean;
-	dimmed?: boolean;
-} & DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>) {
-	if (type === "contact") {
-		return (
-			<SVGImageLoader
-				url={icon}
-				ref={ref}
-				{...props}
-				onLoad={() => {}}
-				className={cn(
-					"w-[5%] h-[5%] object-contain cursor-pointer pointer-events-auto",
-					{
-						"opacity-50": isCore,
-						"drop-shadow-[0_0_3px_red]": hostile,
-					},
-				)}
-				style={{
-					color: color,
-					transform: `translate(-50%, -50%) scale(${size})`,
-					...(disabled
-						? { maskImage: `url("${maskUrl}")`, maskSize: `${2 / size}px` }
-						: {}),
-				}}
-			/>
-		);
-	}
-	if (type === "planet") {
-		return (
-			<div
-				ref={ref}
-				{...props}
-				className={cn(
-					"w-[5%] h-[5%] bg-white border border-gray-300 rounded-full pointer-events-auto opacity-60",
-					{
-						"opacity-30": isCore,
-					},
-				)}
-				style={{
-					transform: `translate(-50%, -50%) scale(${size * 20})`,
-					backgroundColor: color,
-					borderColor: chroma(color).darken().css("rgb"),
-				}}
-			/>
-		);
-	}
-	if (type === "border") {
-		return (
-			<div
-				ref={ref}
-				{...props}
-				className={cn(
-					"h-[3%] w-[150%] bg-white border-4 border-gray-300 -translate-x-1/2 -translate-y-1/2 pointer-events-auto opacity-60",
-					{
-						"opacity-30": isCore,
-					},
-				)}
-				style={{
-					backgroundColor: color,
-					borderColor: chroma(color).darken().css("rgb"),
-				}}
-			/>
-		);
-	}
-	if (type === "ping") {
-		return <SensorPing color={color} size={size} />;
-	}
-	return null;
-}
-
-function SensorPing({ color, size }: { color: string; size: number }) {
-	return (
-		<div
-			className="sensors-ping h-full w-full rounded-full duration-[3s] transition-all bg-transparent"
-			style={{
-				// @ts-expect-error
-				"--scale": size,
-				boxShadow: `inset 0px 0px 100px ${color}`,
-			}}
-		/>
 	);
 }
 
@@ -1446,10 +895,13 @@ function MovePage() {
 					downRef.current = down;
 					q.legacy.sensorGrid.updateSensors.netSend({
 						sensorsId: sensors.id,
-						movement: { x, y },
+						movement: { x: x / 2, y: y / 2 },
 					});
 				}}
-			/>
+			>
+				<div className="bg-white/50 w-full h-px absolute" />
+				<div className="bg-white/50 w-px h-full absolute" />
+			</Joystick>
 			<Button
 				className="btn-xs btn-warning"
 				onClick={() => ref.current?.reset()}
@@ -1457,146 +909,5 @@ function MovePage() {
 				Reset
 			</Button>
 		</div>
-	);
-}
-
-function GridLines({
-	rings = 3,
-	lines = 12,
-	aligned = false,
-}: { rings?: number; lines?: number; aligned?: boolean }) {
-	return (
-		<>
-			{Array(rings)
-				.fill(0)
-				.map((_, i, array) => (
-					<div
-						key={`ring-${i}`}
-						className="border border-white/20 rounded-full pointer-events-none absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2"
-						style={{
-							width: `${((i + 1) / array.length) * 100}%`,
-							height: `${((i + 1) / array.length) * 100}%`,
-						}}
-					/>
-				))}
-			{Array(lines)
-				.fill(0)
-				.map((_, i, array) => (
-					<div
-						key={`line-${i}`}
-						className="bg-white/10 w-full h-px pointer-events-none absolute top-1/2 -translate-y-1/2"
-						style={{
-							transform: `rotate(${
-								((i + (aligned ? 0 : 0.5)) / array.length) * 360
-							}deg)`,
-						}}
-					/>
-				))}
-		</>
-	);
-}
-
-function polarToCartesian(
-	centerX: number,
-	centerY: number,
-	radius: number,
-	angleInDegrees: number,
-) {
-	const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
-
-	return {
-		x: centerX + radius * Math.cos(angleInRadians),
-		y: centerY + radius * Math.sin(angleInRadians),
-	};
-}
-
-function describeArc(
-	x: number,
-	y: number,
-	innerRadius: number,
-	outerRadius: number,
-	startAngle: number,
-	endAngle: number,
-) {
-	const innerStart = polarToCartesian(x, y, innerRadius, endAngle);
-	const innerEnd = polarToCartesian(x, y, innerRadius, startAngle);
-	const outerStart = polarToCartesian(x, y, outerRadius, endAngle);
-	const outerEnd = polarToCartesian(x, y, outerRadius, startAngle);
-
-	const d = [
-		"M",
-		outerStart.x,
-		outerStart.y,
-		"A",
-		outerRadius,
-		outerRadius,
-		0,
-		0,
-		0,
-		outerEnd.x,
-		outerEnd.y,
-		"L",
-		innerEnd.x,
-		innerEnd.y,
-		"A",
-		innerRadius,
-		innerRadius,
-		0,
-		0,
-		1,
-		innerStart.x,
-		innerStart.y,
-		"L",
-		outerStart.x,
-		outerStart.y,
-	].join(" ");
-
-	return d;
-}
-
-function GridSegments({
-	rings = 3,
-	lines = 12,
-	aligned = false,
-}: { rings?: number; lines?: number; aligned?: boolean }) {
-	const { shipId, station } = useStation();
-	const isCore = station.name === "Flight Director";
-	const [sensors] = q.legacy.sensorGrid.sensors.useNetRequest({ shipId });
-	const segments = sensors.segments;
-	return (
-		// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
-		<svg viewBox="0 0 100 100" className="w-full">
-			{Array.from({ length: rings }).map((_, i) =>
-				Array.from({ length: lines }).map((_, ii) => (
-					<path
-						key={`blackout-${i}-${ii}`}
-						fill="black"
-						onClick={(event) => {
-							if (!isCore) return;
-							if (event.altKey) {
-								q.legacy.sensorGrid.setSegment.netSend({
-									shipId,
-									ring: i,
-									line: ii,
-									blocked: !segments[`${i}-${ii}`],
-								});
-							}
-						}}
-						className={cn("opacity-0 pointer-events-none", {
-							"opacity-100": segments[`${i}-${ii}`],
-							"pointer-events-auto": isCore,
-						})}
-						d={describeArc(
-							50,
-							50,
-							(50 / rings) * i,
-							(50 / rings) * (1 + i),
-							((ii - (aligned ? 0 : 0.5)) * 360) / lines,
-							((ii + 1 - (aligned ? 0 : 0.5)) * 360) / lines,
-						)}
-					/>
-				)),
-			)}
-		</svg>
 	);
 }

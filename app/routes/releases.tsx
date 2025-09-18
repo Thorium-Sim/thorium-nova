@@ -36,7 +36,7 @@ const Releases = () => {
 				>
 					<Icon name="arrow-left" className="inline -mt-1" /> Go Back
 				</Link>
-				<div className="p-8 rounded-box md:mt-16 mb-16 backdrop-filter backdrop-blur backdrop-brightness-[0.25] backdrop-contrast-125 prose-h1:text-xl">
+				<div className="p-8 rounded-xl md:mt-16 mb-16 backdrop-filter backdrop-blur backdrop-brightness-[0.25] backdrop-contrast-125 prose-h1:text-xl">
 					{/* biome-ignore lint/security/noDangerouslySetInnerHtml:*/}
 					<div dangerouslySetInnerHTML={{ __html: html }} />
 				</div>

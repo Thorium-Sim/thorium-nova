@@ -32,11 +32,11 @@ kbd {
 	box-shadow: 0px 2px grey;
 }
 .alert {
-	@apply relative flex items-center justify-between p-4 rounded-box bg-neutral text-neutral-content bg-opacity-50;
+	@apply relative flex items-center justify-between p-4 rounded-xl bg-neutral text-neutral-content bg-opacity-50;
 	&::after {
 		content: "";
 		z-index: -1;
-		@apply absolute inset-0 bg-black/80 rounded-box;
+		@apply absolute inset-0 bg-black/80 rounded-xl;
 	}
 	&-sm {
 		@apply p-2;
@@ -58,7 +58,8 @@ kbd {
 	}
 }
 .badge {
-	@apply bg-neutral border border-neutral text-neutral-content rounded-badge;
+	@apply bg-neutral border border-neutral text-neutral-content;
+	border-radius: 1.9rem;
 	&-xs {
 		@apply text-xs leading-3 h-3;
 		padding-left: 0.313rem;
@@ -122,7 +123,7 @@ kbd {
 .btn {
 	&,
 	&-md {
-		@apply px-4 leading-loose h-10 text-base min-h-[2.5rem] cursor-pointer;
+		@apply px-4 leading-loose h-10 text-base min-h-[2.5rem] rounded-lg cursor-pointer;
 	}
 	&-xs {
 		@apply px-2 text-xs leading-relaxed h-6 min-h-6;
@@ -135,7 +136,6 @@ kbd {
 	}
 	@apply font-semibold;
 	border-width: var(--border-btn, 1px);
-	animation: button-pop var(--animation-btn, 0.25s) ease-out;
 	&:active:hover,
 	&:active:focus {
 		animation: none;
@@ -147,7 +147,7 @@ kbd {
 
 	/* default btn */
 	& {
-		@apply bg-neutral border-neutral text-neutral-content;
+		@apply bg-neutral border-neutral text-neutral-content inline-flex select-none justify-center items-center gap-2;
 		&:hover,
 		&-active {
 			@apply bg-neutral-focus border-neutral-focus;
@@ -447,7 +447,7 @@ kbd {
 }
 
 .input {
-	@apply h-8 px-2 text-neutral-content bg-neutral rounded-btn border border-opacity-0 border-neutral-focus cursor-text;
+	@apply h-8 px-2 text-neutral-content bg-neutral rounded-lg border border-opacity-0 border-neutral-focus cursor-text;
 	&-md {
 		@apply px-2 h-8 text-sm leading-loose;
 	}
@@ -529,7 +529,7 @@ kbd {
 }
 
 .textarea {
-	@apply text-base bg-neutral rounded-btn border border-opacity-0 border-neutral-content;
+	@apply text-base bg-neutral rounded-lg border border-opacity-0 border-neutral-content;
 		&-md {
 		@apply p-2 text-sm leading-loose;
 	}
@@ -642,7 +642,7 @@ kbd {
 		@apply bg-alert-color;
 	}
 	&::-webkit-progress-bar {
-		@apply bg-neutral bg-opacity-20 rounded-box;
+		@apply bg-neutral bg-opacity-20 rounded-xl;
 	}
 	&::-webkit-progress-value {
 		@apply rounded-sm bg-neutral-focus;
@@ -941,7 +941,7 @@ input[type="range"].slider {
 	&:focus-visible {
 		@apply ring-2 ring-neutral;
 	}
-	@apply border transition duration-200 ease-in-out rounded-btn font-semibold  border-opacity-0 pr-10;
+	@apply border transition duration-200 ease-in-out rounded-lg font-semibold  border-opacity-0 pr-10;
 	&-bordered {
 		@apply border-opacity-20;
 	}
@@ -1008,7 +1008,7 @@ input[type="range"].slider {
 	}
 }
 .panel {
-	@apply bg-neutral rounded-btn border border-opacity-0 border-neutral-content;
+	@apply bg-neutral rounded-lg border border-opacity-0 border-neutral-content;
 	&-ghost {
 		@apply bg-opacity-5;
 	}
@@ -1042,7 +1042,7 @@ input[type="range"].slider {
 }
 @container (min-width: 42rem) {
 	.\@2xl\:panel {
-		@apply text-base bg-neutral rounded-btn border border-opacity-0 border-neutral-content;
+		@apply text-base bg-neutral rounded-lg border border-opacity-0 border-neutral-content;
 	}
 }
 .menu-dropdown .btn {

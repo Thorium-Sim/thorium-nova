@@ -1,6 +1,4 @@
-import plugin, { type Config } from "tailwindcss";
-import { tailwindComponents } from "./scripts/tailwindComponents";
-import daisyUi from "daisyui";
+import type { Config } from "tailwindcss";
 import typography from "@tailwindcss/typography";
 import containerQueries from "@tailwindcss/container-queries";
 export default {
@@ -100,10 +98,5 @@ export default {
 	variants: {
 		extend: {},
 	},
-	plugins: [daisyUi, typography, containerQueries],
-	daisyui: {
-		logs: false,
-		styled: false,
-		themes: [],
-	},
+	plugins: [typography, containerQueries],
 } satisfies Config;

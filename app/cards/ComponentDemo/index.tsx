@@ -231,11 +231,11 @@ export function ComponentDemo() {
 			<div>
 				<h2 className="text-3xl">Divider</h2>
 				<div className="flex flex-col w-full">
-					<div className="grid h-20 card bg-neutral rounded-box place-items-center">
+					<div className="grid h-20 card bg-neutral rounded-xl place-items-center">
 						content
 					</div>
 					<div className="divider">OR</div>
-					<div className="grid h-20 card bg-neutral rounded-box place-items-center">
+					<div className="grid h-20 card bg-neutral rounded-xl place-items-center">
 						content
 					</div>
 				</div>

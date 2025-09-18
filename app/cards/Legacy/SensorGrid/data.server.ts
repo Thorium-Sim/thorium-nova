@@ -1,5 +1,6 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
+import { activePingInterval } from "@thorium/.server/systems/Legacy/SensorSonarSystem";
 import { isSensorContact } from "@thorium/ecs-components/legacySensorContact";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
@@ -283,6 +284,51 @@ export const sensorGrid = t.router({
 			pubsub.publish.legacy.sensorGrid.sensorContactsDestination({
 				shipId: input.shipId,
 			});
+		}),
+	setPingMode: t.procedure
+		.input(
+			z.object({
+				shipId: z.number(),
+				pingMode: z.enum(["active", "passive", "manual"]),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const sensorsSys = getShipSystem(ctx.ecs, {
+				systemType: "sensors",
+				shipId: input.shipId,
+			});
+
+			sensorsSys.updateComponent("isLegacySensors", {
+				pingMode: input.pingMode,
+			});
+			pubsub.publish.legacy.sensorGrid.sensors({
+				shipId: input.shipId,
+			});
+		}),
+	triggerPing: t.procedure
+		.input(
+			z.object({
+				shipId: z.number(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const sensorsSys = getShipSystem(ctx.ecs, {
+				systemType: "sensors",
+				shipId: input.shipId,
+			});
+
+			if (
+				sensorsSys.components.isLegacySensors &&
+				sensorsSys.components.isLegacySensors.timeSincePingMs >=
+					activePingInterval
+			) {
+				pubsub.publish.legacy.sensorGrid.sonarPing({
+					shipId: input.shipId,
+				});
+				sensorsSys.updateComponent("isLegacySensors", {
+					timeSincePingMs: 0,
+				});
+			}
 		}),
 	setSegment: t.procedure
 		.input(

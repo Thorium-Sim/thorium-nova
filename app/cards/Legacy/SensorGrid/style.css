@@ -29,8 +29,8 @@
 	background-size: 600% 600%;
 }
 
-.sonar-background .sensor-contacts {
-	animation-iteration-count: infinite;
+.sonar-background:not(.is-core) .sensor-contacts {
+	animation-iteration-count: 1;
 	animation-play-state: paused;
 	animation-duration: 6.5s;
 	animation-timing-function: cubic-bezier(1, 0, 0, 1);
@@ -43,27 +43,28 @@
 	mask-size: 1% 1%;
 	mask-repeat: no-repeat;
 	mask-position: center;
-	pointer-events: none;
 }
-.sonar-background.ping .sensor-contacts {
+.sonar-background:not(.is-core).ping .sensor-contacts {
 	animation-name: sensors-ping-mask;
 	animation-play-state: running;
+}
+.sonar-background:not(.is-core) .sensor-contacts div {
+	pointer-events: none;
+}
+.sonar-background:not(.is-core) .sensor-contacts.can-hover div {
+	pointer-events: auto;
 }
 @keyframes sensors-ping-mask {
 	0% {
 		mask-size: 1% 1%;
-		pointer-events: auto;
 	}
 	40% {
 		mask-size: 2000% 2000%;
-		pointer-events: auto;
 	}
 	60% {
 		mask-size: 2000% 2000%;
-		pointer-events: none;
 	}
 	100% {
 		mask-size: 2000000% 2000000%;
-		pointer-events: none;
 	}
 }
