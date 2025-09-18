@@ -9,6 +9,7 @@ import { useLiveQuery } from "@thorium/utils/live-query/client";
 import {
 	Suspense,
 	useEffect,
+	useImperativeHandle,
 	useRef,
 	useState,
 	type DetailedHTMLProps,
@@ -21,6 +22,7 @@ import maskUrl from "./mask.svg?url";
 import { Explosion } from "@thorium/cards/Legacy/SensorGrid/Explosion";
 import chroma from "chroma-js";
 import "./style.css";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function SensorGrid({
 	gridRef,
@@ -160,6 +162,7 @@ export function Interference({ interference }: { interference: number }) {
 	);
 }
 
+const destinationMap = new Map<number, { x: number; y: number }>();
 export function SensorContacts({
 	gridRef,
 	onContactHover,
@@ -172,17 +175,25 @@ export function SensorContacts({
 	const [contacts] = q.legacy.sensorGrid.sensorContacts.useNetRequest({
 		shipId,
 	});
-	const [destinations] =
-		q.legacy.sensorGrid.sensorContactsDestination.useNetRequest({
-			shipId,
-		});
 
-	const destinationMap = new Map(destinations);
+	q.legacy.sensorGrid.sensorContactsDestination.useNetSubscribe(
+		{
+			shipId,
+		},
+
+		(data) => {
+			destinationMap.clear();
+			for (const [id, destination] of data) {
+				destinationMap.set(id, destination);
+			}
+		},
+	);
+
 	return contacts.map((c) => (
 		<SensorContact
 			key={c.id}
 			{...c}
-			destination={destinationMap.get(c.id) || c.destination}
+			destination={c.destination}
 			gridRef={gridRef}
 			onPointerMove={(event) => {
 				if (onContactHover) {
@@ -240,10 +251,13 @@ function SensorContact({
 		const position = interpolate(id);
 
 		if (iconRef.current && !draggingRef.current) {
-			iconRef.current.style.transform = `translate(${(frozenState?.destination?.x ?? destination.x) * 100}%, ${(frozenState?.destination?.y ?? destination.y) * 100}%)`;
+			const dest = destinationMap.get(id);
+			iconRef.current.style.transform = `translate(${(frozenState?.destination?.x ?? dest?.x ?? destination.x) * 100}%, ${(frozenState?.destination?.y ?? dest?.y ?? destination.y) * 100}%)`;
+			iconRef.current.style.opacity = "1";
 		}
 		if (!position || !contactRef.current) return;
 		contactRef.current.style.transform = `translate(${position.x * 100}%, ${position.y * 100}%)`;
+		contactRef.current.style.opacity = "1";
 	}, cardLoaded);
 
 	async function pickSpeed(speed: number) {
@@ -358,7 +372,7 @@ function SensorContact({
 		<>
 			{frozenState?.new ? null : (
 				<div
-					className="absolute w-full h-full pointer-events-none select-none"
+					className="absolute w-full h-full pointer-events-none select-none opacity-0"
 					ref={contactRef}
 					style={{
 						transform: `translate(${position.x * 100}%, ${position.y * 100}%)`,
@@ -381,7 +395,7 @@ function SensorContact({
 			)}
 			{isCore && !destroyed ? (
 				<div
-					className="absolute w-full h-full pointer-events-none select-none"
+					className="absolute w-full h-full pointer-events-none select-none opacity-0"
 					ref={iconRef}
 				>
 					{sensorsStore.showContactLabels && (

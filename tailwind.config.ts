@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 import typography from "@tailwindcss/typography";
 import containerQueries from "@tailwindcss/container-queries";
+import reactAriaComponents from "tailwindcss-react-aria-components";
 export default {
 	content: ["./app/**/*.{js,ts,jsx,tsx}"],
 	theme: {
@@ -98,5 +99,5 @@ export default {
 	variants: {
 		extend: {},
 	},
-	plugins: [typography, containerQueries],
+	plugins: [typography, containerQueries, reactAriaComponents],
 } satisfies Config;

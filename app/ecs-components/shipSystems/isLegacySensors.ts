@@ -23,5 +23,13 @@ export const isLegacySensors = z
 			.default({ x: 0, y: 0 }),
 
 		segments: z.record(z.boolean()).default({}),
+
+		program: z
+			.object({
+				type: z.literal("field"),
+				density: z.number(),
+			})
+			.nullable()
+			.default(null),
 	})
 	.default({});

@@ -1,4 +1,5 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { Vector2 } from "three";
 
@@ -9,8 +10,14 @@ export class LegacySensorContactMovementSystem extends System {
 	static flightMode = ["legacy"];
 	destroyedCounter = new Map<number, number>();
 	frequency = 2;
+	destinationUpdates = new Set<number>();
+	sensorsUpdates = new Set<number>();
 	test(entity: Entity) {
 		return !!entity.components.isSensorContact;
+	}
+	preUpdate(_elapsed: number): void {
+		this.destinationUpdates.clear();
+		this.sensorsUpdates.clear();
 	}
 	update(entity: Entity, elapsed: number) {
 		const elapsedRatio = elapsed / 1000;
@@ -20,16 +27,51 @@ export class LegacySensorContactMovementSystem extends System {
 
 		const sensors = sensorsSys?.components.isLegacySensors;
 		if (!sensors) return;
-
-		let destinationUpdate = false;
-		if ((sensors.movement.x || sensors.movement.y) && !isSensorContact.locked) {
+		const maxDistance =
+			isSensorContact.type === "planet"
+				? (entity.components.size?.length || 1) / 2
+				: 0.03;
+		const { x: movementX, y: movementY } = getSensorGridMovement(sensorsSys);
+		if ((movementX || movementY) && !isSensorContact.locked) {
 			// Apply the movement vector to the contact's position and destination
-			position.x += sensors.movement.x / 100;
-			position.y += sensors.movement.y / 100;
-			isSensorContact.destination.x += sensors.movement.x / 100;
-			isSensorContact.destination.y += sensors.movement.y / 100;
-			destinationUpdate = true;
+
+			position.x += movementX;
+			position.y += movementY;
+			if (entity.components.isProgramContact) {
+				// Delete program contacts when the reach the edge of sensors
+				if (
+					isSensorContact.destination.x + movementX > 1 + maxDistance ||
+					isSensorContact.destination.x + movementX < -1 * maxDistance ||
+					isSensorContact.destination.y + movementY > 1 + maxDistance ||
+					isSensorContact.destination.y + movementY < -1 * maxDistance
+				) {
+					this.ecs.removeEntity(entity);
+					this.sensorsUpdates.add(isSensorContact.shipId);
+
+					return;
+				}
+			}
+			entity.updateComponent("isSensorContact", {
+				destination: {
+					x: Math.max(
+						-1 * maxDistance,
+						Math.min(
+							1 + maxDistance,
+							isSensorContact.destination.x + movementX,
+						),
+					),
+					y: Math.max(
+						-1 * maxDistance,
+						Math.min(
+							1 + maxDistance,
+							isSensorContact.destination.y + movementY,
+						),
+					),
+				},
+			});
+			this.destinationUpdates.add(isSensorContact.shipId);
 		}
+
 		positionVec.set(position.x, position.y);
 		destinationVec.set(
 			isSensorContact.destination.x,
@@ -54,8 +96,14 @@ export class LegacySensorContactMovementSystem extends System {
 				.multiplyScalar(isSensorContact.speed * elapsedRatio);
 
 			entity.updateComponent("position", {
-				x: position.x + directionVec.x,
-				y: position.y + directionVec.y,
+				x: Math.max(
+					-1 * maxDistance,
+					Math.min(1 + maxDistance, position.x + directionVec.x),
+				),
+				y: Math.max(
+					-1 * maxDistance,
+					Math.min(1 + maxDistance, position.y + directionVec.y),
+				),
 			});
 		}
 
@@ -72,20 +120,46 @@ export class LegacySensorContactMovementSystem extends System {
 				const timer = this.destroyedCounter.get(entity.id) || 0;
 				if (timer > timerLimit) {
 					this.ecs.removeEntity(entity);
-					pubsub.publish.legacy.sensorGrid.sensorContacts({
-						shipId: isSensorContact.shipId,
-					});
-					destinationUpdate = true;
+					this.sensorsUpdates.add(isSensorContact.shipId);
+					this.destinationUpdates.add(isSensorContact.shipId);
 					this.destroyedCounter.delete(entity.id);
 				} else {
 					this.destroyedCounter.set(entity.id, timer + elapsed);
 				}
 			}
 		}
-		if (destinationUpdate) {
+	}
+	postUpdate(_elapsed: number): void {
+		for (const shipId of this.destinationUpdates) {
 			pubsub.publish.legacy.sensorGrid.sensorContactsDestination({
-				shipId: isSensorContact.shipId,
+				shipId,
+			});
+		}
+		for (const shipId of this.sensorsUpdates) {
+			pubsub.publish.legacy.sensorGrid.sensorContacts({
+				shipId,
 			});
 		}
 	}
+}
+
+export function getSensorGridMovement(sensors: Entity) {
+	if (!sensors.components.isLegacySensors) return { x: 0, y: 0 };
+	let movementX = sensors.components.isLegacySensors.movement.x / 100;
+	let movementY = sensors.components.isLegacySensors.movement.y / 100;
+
+	if (sensors.components.isLegacySensors.autoThrusters) {
+		const thrustersSystem = getShipSystem(sensors.ecs, {
+			systemType: "thrusters",
+			shipId: sensors.components.isShipSystem?.shipId || -1,
+		});
+		if (thrustersSystem?.components.isThrusters) {
+			const maxSpeed = thrustersSystem.components.isThrusters.directionMaxSpeed;
+			movementX +=
+				(thrustersSystem.components.isThrusters.direction.x * maxSpeed) / 1000;
+			movementY +=
+				(thrustersSystem.components.isThrusters.direction.z * maxSpeed) / 1000;
+		}
+	}
+	return { x: movementX, y: movementY };
 }

@@ -125,7 +125,12 @@ export class LiveQueryClient {
 				opts.input[key] = {} as any;
 			}
 			// Duck type the value into a FileList
-			else if (typeof value === "object" && value.length && "item" in value) {
+			else if (
+				value &&
+				typeof value === "object" &&
+				value.length &&
+				"item" in value
+			) {
 				for (let i = 0; i < value.length; i++) {
 					body.append(`${key}[]`, value[i]);
 				}

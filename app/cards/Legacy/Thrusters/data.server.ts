@@ -36,6 +36,7 @@ export const thrusters = t.router({
 				direction: thrusters.components.isThrusters!.direction,
 				requiredRotation: thrusters.components.isThrusters!.requiredRotation,
 				rotationSpeed: thrusters.components.isThrusters!.rotationMaxSpeed,
+				directionSpeed: thrusters.components.isThrusters!.directionMaxSpeed,
 			};
 		}),
 	setRequiredRotation: t.procedure
@@ -95,6 +96,30 @@ export const thrusters = t.router({
 
 			thrusters.updateComponent("isThrusters", {
 				rotationMaxSpeed: input.rotationSpeed,
+			});
+			pubsub.publish.legacy.thrusters.get({ shipId: input.shipId });
+		}),
+	setDirectionSpeed: t.procedure
+		.input(
+			z.object({
+				shipId: z.number(),
+				directionSpeed: z.number(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const thrusters = getShipSystem(ctx.ecs, {
+				systemType: "thrusters",
+				shipId: input.shipId,
+			});
+			const ship = ctx.ecs.getEntityById(input.shipId);
+
+			if (!thrusters)
+				throw new Error(
+					`No thrusters assigned to ship ${ship?.components.identity?.name || input.shipId}`,
+				);
+
+			thrusters.updateComponent("isThrusters", {
+				directionMaxSpeed: input.directionSpeed,
 			});
 			pubsub.publish.legacy.thrusters.get({ shipId: input.shipId });
 		}),

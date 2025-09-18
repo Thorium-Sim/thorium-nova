@@ -85,4 +85,7 @@ export const isSensorContact = z
 	})
 	.default({});
 
-export const isArmyContact = z.object({});
+export const isArmyContact = z.object({
+	omitFromProgram: z.boolean().default(false),
+});
+export const isProgramContact = z.object({});

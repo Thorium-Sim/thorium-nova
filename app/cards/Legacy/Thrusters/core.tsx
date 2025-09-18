@@ -156,9 +156,14 @@ export function LegacyThrusterCore() {
 					<InputField
 						id="movement-speed"
 						prompt="What would you like to change the movement speed to?"
-						onClick={() => {}}
+						onClick={(value) =>
+							q.legacy.thrusters.setDirectionSpeed.netSend({
+								shipId,
+								directionSpeed: Number(value) || 5,
+							})
+						}
 					>
-						Not Implemented
+						{thrusters.directionSpeed}
 					</InputField>
 				</label>
 			</div>

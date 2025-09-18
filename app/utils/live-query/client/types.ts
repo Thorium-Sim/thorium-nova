@@ -44,6 +44,11 @@ type DecorateProcedure<
 					"queryKey"
 				> & { callback?: (data: TData) => void },
 			) => [TData, UseQueryResult<TData, Error>];
+			/** Subscribe to data without mounting a React query instance. Useful for frequent data that doesn't fit in a data stream. */
+			useNetSubscribe: <TData = inferTransformedProcedureOutput<TProcedure>>(
+				input: inferProcedureInput<TProcedure>,
+				callback: (data: TData) => void,
+			) => void;
 		}
 	: TProcedure extends AnySendProcedure
 		? {

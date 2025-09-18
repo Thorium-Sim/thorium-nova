@@ -1,27 +1,17 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { activePingInterval } from "@thorium/.server/systems/Legacy/SensorSonarSystem";
-import { isSensorContact } from "@thorium/ecs-components/legacySensorContact";
+import {
+	createContact,
+	defaultIcon,
+	defaultPicture,
+	getArmyContacts,
+} from "@thorium/cards/Legacy/SensorGrid/createContact.server";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
 import { Entity, type ECS } from "@thorium/utils/ecs";
 import { degToRad } from "@thorium/utils/unitTypes";
 import { z } from "zod";
-
-const defaultIcon =
-	"/plugins/Thorium Default/assets/Sensor Contacts/Icons/dot.svg";
-const defaultPicture =
-	"/plugins/Thorium Default/assets/Sensor Contacts/Pictures/Astra Battleship.avif";
-function getArmyContacts(ecs: ECS, shipId: number) {
-	const contacts: Entity[] = [];
-	for (const contact of ecs.componentCache.get("isArmyContact") || []) {
-		if (contact.components.isSensorContact?.shipId === shipId) {
-			contacts.push(contact);
-		}
-	}
-
-	return contacts;
-}
 
 interface ContactProperties {
 	id: number;
@@ -39,41 +29,6 @@ interface ContactProperties {
 	destroyed: boolean;
 	position: { x: number; y: number };
 	destination: { x: number; y: number };
-}
-
-function createContact(
-	shipId: number,
-	sensorsId: number,
-	lastContact?: Entity,
-) {
-	const contact = new Entity();
-
-	contact.addComponent("isSensorContact", {
-		shipId,
-		sensorsId,
-		type: "contact",
-		icon: defaultIcon,
-		picture: defaultPicture,
-		autoFire: false,
-		cloaked: false,
-		disabled: false,
-		hitpoints: 5,
-		hostile: false,
-		infrared: false,
-		miss: false,
-		particle: "AntiMatter",
-		...lastContact?.components.isSensorContact,
-	});
-	contact.addComponent("identity", {
-		name: lastContact?.components.identity?.name || "Contact",
-	});
-	contact.addComponent("rotation", lastContact?.components.rotation);
-	contact.addComponent("size", {
-		length: lastContact?.components.size?.length || 1,
-	});
-	contact.addComponent("color", lastContact?.components.color);
-
-	return contact;
 }
 
 function updateContact(
@@ -168,6 +123,7 @@ export const sensorGrid = t.router({
 				interference: sensors.interference,
 				movement: sensors.movement,
 				segments: sensors.segments,
+				program: sensors.program,
 			};
 		}),
 	updateSensors: t.procedure
@@ -330,6 +286,26 @@ export const sensorGrid = t.router({
 				});
 			}
 		}),
+	setProgram: t.procedure
+		.input(
+			z.object({
+				shipId: z.number(),
+				program: z
+					.object({ type: z.literal("field"), density: z.number() })
+					.nullable(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const sensorsSys = getShipSystem(ctx.ecs, {
+				systemType: "sensors",
+				shipId: input.shipId,
+			});
+
+			sensorsSys.updateComponent("isLegacySensors", { program: input.program });
+			pubsub.publish.legacy.sensorGrid.sensors({
+				shipId: input.shipId,
+			});
+		}),
 	setSegment: t.procedure
 		.input(
 			z.object({
@@ -464,6 +440,8 @@ export const sensorGrid = t.router({
 				hostile: contact.components.isSensorContact?.hostile || false,
 				cloaked: contact.components.isSensorContact?.cloaked || false,
 				infrared: contact.components.isSensorContact?.infrared || false,
+				omitFromProgram:
+					contact.components.isArmyContact?.omitFromProgram || false,
 			}));
 		}),
 
@@ -482,7 +460,10 @@ export const sensorGrid = t.router({
 				sensors.id,
 				lastContact,
 			);
-			contact.addComponent("isArmyContact");
+			contact.addComponent(
+				"isArmyContact",
+				lastContact?.components.isArmyContact,
+			);
 
 			ctx.ecs.addEntity(contact);
 			pubsub.publish.legacy.sensorGrid.armyContacts({ shipId: input.shipId });
@@ -502,6 +483,7 @@ export const sensorGrid = t.router({
 				hostile: z.boolean().optional(),
 				cloaked: z.boolean().optional(),
 				infrared: z.boolean().optional(),
+				omitFromProgram: z.boolean().optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -541,6 +523,11 @@ export const sensorGrid = t.router({
 			if (typeof input.infrared === "boolean") {
 				contact.updateComponent("isSensorContact", {
 					infrared: input.infrared,
+				});
+			}
+			if (typeof input.omitFromProgram === "boolean") {
+				contact.updateComponent("isArmyContact", {
+					omitFromProgram: input.omitFromProgram,
 				});
 			}
 

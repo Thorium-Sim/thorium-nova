@@ -138,6 +138,7 @@
 		"remark-mdx-frontmatter": "^5.2.0",
 		"semantic-release": "^20.0.1",
 		"tailwindcss": "^3.4.16",
+		"tailwindcss-react-aria-components": "^2.0.1",
 		"typescript": "^5.9.2",
 		"vite": "^7.1.4",
 		"vite-plugin-icons-spritesheet": "^2.2.1",

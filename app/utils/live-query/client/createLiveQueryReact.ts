@@ -17,6 +17,19 @@ import { useLiveQuery } from "./liveQueryContext";
 import uniqid from "@thorium/utils/uniqid";
 import { stableValueHash } from "./stableValueHash";
 
+function useQueryCallback(key: string, callback?: (data: unknown) => void) {
+	const callbackRef = useRef<(data: unknown) => void>(callback);
+	useEffect(() => {
+		callbackRef.current = callback;
+	}, [callback]);
+	useEffect(() => {
+		if (callbackRef.current) {
+			const unsub = addDataCallback(key, callbackRef.current);
+
+			return () => unsub();
+		}
+	}, [key]);
+}
 export function createReactProxyDecoration(name: string, fns: any) {
 	return createRecursiveProxy((opts) => {
 		const args = opts.args;
@@ -83,19 +96,22 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
 			});
 			const key = JSON.stringify(queryKey);
 
-			const callbackRef = useRef<(data: unknown) => void>(callback);
-			useEffect(() => {
-				callbackRef.current = callback;
-			}, [callback]);
-			useEffect(() => {
-				if (callbackRef.current) {
-					const unsub = addDataCallback(key, callbackRef.current);
-
-					return () => unsub();
-				}
-			}, [key]);
+			useQueryCallback(key, callback);
 
 			return [result.data, result];
+		},
+		useNetSubscribe: (
+			path: string,
+			input: any,
+			callback: (data: unknown) => void,
+		) => {
+			const queryKey = getArrayQueryKey(getQueryKey(path, input));
+			const key = JSON.stringify(queryKey);
+
+			const data = useContext(MockNetRequestContext);
+			useRequestSub({ path, params: input }, data);
+
+			useQueryCallback(key, callback);
 		},
 		netSend: (
 			path: string,

@@ -17,7 +17,14 @@ import {
 	type PointerEvent,
 	type ReactNode,
 } from "react";
-import { Button as RAButton } from "react-aria-components";
+import {
+	Header,
+	Menu,
+	MenuItem,
+	MenuTrigger,
+	Popover,
+	Button as RAButton,
+} from "react-aria-components";
 import chroma from "chroma-js";
 import { capitalCase } from "change-case";
 import "./style.css";
@@ -26,6 +33,7 @@ import {
 	sensorsSpeeds,
 	useSensorsStore,
 } from "@thorium/cards/Legacy/SensorGrid/useSensorsStore";
+import { isArmyContact } from "@thorium/ecs-components/legacySensorContact";
 
 export function LegacySensorGridCore() {
 	const [page, setPage] = useState<"Icons" | "Extras" | "Move">("Icons");
@@ -274,6 +282,8 @@ function IconsPage({
 
 	const { shipId } = useStation();
 	const [contacts] = q.legacy.sensorGrid.armyContacts.useNetRequest({ shipId });
+	const [sensors] = q.legacy.sensorGrid.sensors.useNetRequest({ shipId });
+
 	const sensorsStore = useSensorsStore();
 
 	const contact = contacts.find((c) => c.id === editContact);
@@ -282,6 +292,7 @@ function IconsPage({
 			<ContactEditor
 				close={() => setEditContact(null)}
 				{...contact}
+				isArmyContact
 				update={(params) =>
 					q.legacy.sensorGrid.updateArmyContact.netSend({
 						contactId: contact.id,
@@ -377,6 +388,66 @@ function IconsPage({
 						)}
 					/>
 				</div>
+				<div>
+					Program
+					<div>
+						{sensors.program ? (
+							<Button
+								className="btn-xs btn-error"
+								onClick={() =>
+									q.legacy.sensorGrid.setProgram.netSend({
+										shipId,
+										program: null,
+									})
+								}
+							>
+								Stop
+							</Button>
+						) : (
+							<MenuTrigger>
+								<RAButton className="btn flex btn-xs btn-success">Go</RAButton>
+								<Popover>
+									<Menu className="text-sm bg-black text-white border border-white/50 rounded py-2">
+										<Header className="font-bold px-2">Density</Header>
+										<MenuItem
+											className="px-2"
+											onAction={() =>
+												q.legacy.sensorGrid.setProgram.netSend({
+													shipId,
+													program: { type: "field", density: 0.05 },
+												})
+											}
+										>
+											Light
+										</MenuItem>
+										<MenuItem
+											className="px-2"
+											onAction={() =>
+												q.legacy.sensorGrid.setProgram.netSend({
+													shipId,
+													program: { type: "field", density: 0.125 },
+												})
+											}
+										>
+											Moderate
+										</MenuItem>
+										<MenuItem
+											className="px-2"
+											onAction={() =>
+												q.legacy.sensorGrid.setProgram.netSend({
+													shipId,
+													program: { type: "field", density: 0.2 },
+												})
+											}
+										>
+											Dense
+										</MenuItem>
+									</Menu>
+								</Popover>
+							</MenuTrigger>
+						)}
+					</div>
+				</div>
 			</div>
 		</div>
 	);
@@ -471,7 +542,6 @@ function SpecialEditor({
 }
 function ContactEditor({
 	close,
-	id,
 	name,
 	icon,
 	picture,
@@ -484,8 +554,9 @@ function ContactEditor({
 	infrared,
 	update,
 	children,
+	omitFromProgram,
+	isArmyContact,
 }: {
-	id: number;
 	name: string;
 	icon: string;
 	picture: string | null;
@@ -496,6 +567,8 @@ function ContactEditor({
 	hostile: boolean;
 	cloaked: boolean;
 	infrared: boolean;
+	omitFromProgram?: boolean;
+	isArmyContact?: boolean;
 	close: () => void;
 	update: (
 		props: Partial<{
@@ -509,6 +582,7 @@ function ContactEditor({
 			hostile: boolean;
 			cloaked: boolean;
 			infrared: boolean;
+			omitFromProgram: boolean;
 		}>,
 	) => void;
 	children?: ReactNode;
@@ -652,6 +726,17 @@ function ContactEditor({
 					})
 				}
 			/>
+			{isArmyContact ? (
+				<Checkbox
+					label="Omit From Programs"
+					defaultChecked={omitFromProgram}
+					onChange={(event) =>
+						update({
+							omitFromProgram: event.currentTarget.checked,
+						})
+					}
+				/>
+			) : null}
 			<div className="flex-1" />
 			<div className="flex gap-2">
 				{children}
