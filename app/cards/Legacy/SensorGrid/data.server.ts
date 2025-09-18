@@ -814,7 +814,7 @@ export const sensorGrid = t.router({
 		),
 });
 
-function rotatePoint({ x, y }: { x: number; y: number }, angle: number) {
+export function rotatePoint({ x, y }: { x: number; y: number }, angle: number) {
 	const rad = degToRad(angle);
 	x -= 0.5;
 	y -= 0.5;

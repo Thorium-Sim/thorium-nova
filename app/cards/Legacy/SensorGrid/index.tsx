@@ -61,7 +61,7 @@ export function LegacySensorGrid() {
 							</div>
 						</div>
 						<div className="panel p-4 h-20">{contactInfo?.name}</div>
-						{sensors.pingMode === "manual" ? (
+						{sensors.pingActive && sensors.pingMode === "manual" ? (
 							<Button
 								className="w-full btn-success"
 								onClick={() =>

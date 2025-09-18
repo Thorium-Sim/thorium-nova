@@ -1,4 +1,5 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { rotatePoint } from "@thorium/cards/Legacy/SensorGrid/data.server";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { Vector2 } from "three";
@@ -31,7 +32,36 @@ export class LegacySensorContactMovementSystem extends System {
 			isSensorContact.type === "planet"
 				? (entity.components.size?.length || 1) / 2
 				: 0.03;
-		const { x: movementX, y: movementY } = getSensorGridMovement(sensorsSys);
+		const {
+			x: movementX,
+			y: movementY,
+			thrustersSystem,
+		} = getSensorGridMovement(sensorsSys);
+
+		// Rotate contact based on the thruster yaw
+		const elapsedMinutes = elapsedRatio / 60;
+		if (!isSensorContact.locked && thrustersSystem?.components.isThrusters) {
+			const yawDiff =
+				-1 *
+				thrustersSystem.components.isThrusters.rotationDelta.y *
+				(thrustersSystem.components.isThrusters.rotationMaxSpeed * 360) *
+				elapsedMinutes;
+			if (yawDiff !== 0) {
+				const newPosition = rotatePoint(position, yawDiff);
+				position.x = newPosition.x;
+				position.y = newPosition.y;
+
+				const newDestination = rotatePoint(
+					isSensorContact.destination,
+					yawDiff,
+				);
+				entity.updateComponent("isSensorContact", {
+					destination: newDestination,
+				});
+				this.destinationUpdates.add(isSensorContact.shipId);
+			}
+		}
+
 		if ((movementX || movementY) && !isSensorContact.locked) {
 			// Apply the movement vector to the contact's position and destination
 
@@ -148,11 +178,11 @@ export function getSensorGridMovement(sensors: Entity) {
 	let movementX = sensors.components.isLegacySensors.movement.x / 100;
 	let movementY = sensors.components.isLegacySensors.movement.y / 100;
 
+	const thrustersSystem = getShipSystem(sensors.ecs, {
+		systemType: "thrusters",
+		shipId: sensors.components.isShipSystem?.shipId || -1,
+	});
 	if (sensors.components.isLegacySensors.autoThrusters) {
-		const thrustersSystem = getShipSystem(sensors.ecs, {
-			systemType: "thrusters",
-			shipId: sensors.components.isShipSystem?.shipId || -1,
-		});
 		if (thrustersSystem?.components.isThrusters) {
 			const maxSpeed = thrustersSystem.components.isThrusters.directionMaxSpeed;
 			movementX +=
@@ -161,5 +191,5 @@ export function getSensorGridMovement(sensors: Entity) {
 				(thrustersSystem.components.isThrusters.direction.z * maxSpeed) / 1000;
 		}
 	}
-	return { x: movementX, y: movementY };
+	return { x: movementX, y: movementY, thrustersSystem };
 }
