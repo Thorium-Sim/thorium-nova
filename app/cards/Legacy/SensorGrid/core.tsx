@@ -723,16 +723,18 @@ function ArmyContact({
 }) {
 	return (
 		<div key={id} className="flex gap-2" onPointerDown={onSelect}>
-			<SVGImageLoader
-				url={icon}
-				className="h-4 aspect-square cursor-pointer object-contain"
-				style={{ color }}
-				onPointerDown={handleArmyDrag(
-					(pos, down) => setDraggingContact(id, pos, down),
-					onSelect,
-				)}
-				onLoad={() => {}}
-			/>
+			<Suspense fallback={<div className="h-4 w-4" />}>
+				<SVGImageLoader
+					url={icon}
+					className="h-4 aspect-square cursor-pointer object-contain"
+					style={{ color }}
+					onPointerDown={handleArmyDrag(
+						(pos, down) => setDraggingContact(id, pos, down),
+						onSelect,
+					)}
+					onLoad={() => {}}
+				/>
+			</Suspense>
 			<span className="select-none">{name}</span>
 		</div>
 	);

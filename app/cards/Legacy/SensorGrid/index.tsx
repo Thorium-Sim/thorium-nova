@@ -18,9 +18,9 @@ export function LegacySensorGrid() {
 	const page = sensors.pingActive ? pageVal : "contacts";
 
 	return (
-		<div className="h-full grid grid-cols-4 overflow-hidden justify-items-center">
+		<div className="h-full grid grid-cols-5 overflow-hidden justify-items-center">
 			<SensorGrid
-				className="col-span-3 bg-black/50 overflow-hidden"
+				className="col-span-4 bg-black/50 overflow-hidden"
 				gridRef={gridRef}
 				onContactHover={(name, picture) => setContactInfo({ name, picture })}
 				onGridHover={() => setContactInfo(null)}

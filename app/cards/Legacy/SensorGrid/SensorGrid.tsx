@@ -7,6 +7,7 @@ import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import {
+	Suspense,
 	useEffect,
 	useRef,
 	useState,
@@ -484,26 +485,28 @@ export function ContactImage({
 
 	if (type === "contact") {
 		return (
-			<SVGImageLoader
-				url={icon}
-				ref={ref}
-				{...props}
-				onLoad={() => {}}
-				className={cn(
-					"w-[5%] h-[5%] object-contain cursor-pointer pointer-events-auto",
-					{
-						"opacity-50": isGhost,
-						"drop-shadow-[0_0_3px_red]": hostile,
-					},
-				)}
-				style={{
-					color: color,
-					transform: `translate(-50%, -50%) scale(${size})`,
-					...(disabled
-						? { maskImage: `url("${maskUrl}")`, maskSize: `${2 / size}px` }
-						: {}),
-				}}
-			/>
+			<Suspense>
+				<SVGImageLoader
+					url={icon}
+					ref={ref}
+					{...props}
+					onLoad={() => {}}
+					className={cn(
+						"w-[5%] h-[5%] object-contain cursor-pointer pointer-events-auto",
+						{
+							"opacity-50": isGhost,
+							"drop-shadow-[0_0_3px_red]": hostile,
+						},
+					)}
+					style={{
+						color: color,
+						transform: `translate(-50%, -50%) scale(${size})`,
+						...(disabled
+							? { maskImage: `url("${maskUrl}")`, maskSize: `${2 / size}px` }
+							: {}),
+					}}
+				/>
+			</Suspense>
 		);
 	}
 	if (type === "planet") {
