@@ -1,6 +1,7 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { activePingInterval } from "@thorium/.server/systems/Legacy/SensorSonarSystem";
+import type { ContactProperties } from "@thorium/cards/Legacy/SensorGrid/ContactProperties";
 import {
 	createContact,
 	defaultIcon,
@@ -9,27 +10,9 @@ import {
 } from "@thorium/cards/Legacy/SensorGrid/createContact.server";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
-import { Entity, type ECS } from "@thorium/utils/ecs";
+import { Entity } from "@thorium/utils/ecs";
 import { degToRad } from "@thorium/utils/unitTypes";
 import { z } from "zod";
-
-interface ContactProperties {
-	id: number;
-	name: string;
-	type: "contact" | "border" | "planet" | "ping" | "projectile";
-	icon: string;
-	picture: string | null;
-	color: string;
-	size: number;
-	locked: boolean;
-	disabled: boolean;
-	hostile: boolean;
-	cloaked: boolean;
-	infrared: boolean;
-	destroyed: boolean;
-	position: { x: number; y: number };
-	destination: { x: number; y: number };
-}
 
 function updateContact(
 	contact: Entity,

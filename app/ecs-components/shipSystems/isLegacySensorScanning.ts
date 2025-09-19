@@ -11,7 +11,13 @@ export const isLegacySensorScanning = z
 			.object({ label: z.string(), value: z.string() })
 			.array()
 			.default([]),
-		isScanning: z.boolean().default(false),
 		scanHistory: z.boolean().default(false),
+		processedData: z
+			.object({
+				data: z.string(),
+				timestamp: z.number(),
+			})
+			.array()
+			.default([]),
 	})
 	.default({});

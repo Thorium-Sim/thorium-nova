@@ -7,3 +7,4 @@ export { LegacyThrusterCore } from "../cards/Legacy/Thrusters/core";
 export { LegacySystemsCore } from "../cards/Legacy/PowerDistribution/core";
 export { LegacyHeatCore } from "../cards/Legacy/CoolantControl/core";
 export { LegacySensorGridCore } from "../cards/Legacy/SensorGrid/core";
+export { LegacySensorScansCore } from "../cards/Legacy/SensorScans/core";

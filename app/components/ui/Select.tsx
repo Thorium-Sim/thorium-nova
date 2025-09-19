@@ -64,7 +64,10 @@ export default function Select<I extends string | number>({
 						{label}
 					</Listbox.Label>
 					<div
-						className={classNames(labelHidden ? "" : "mt-1", "relative")}
+						className={classNames(
+							labelHidden ? "" : "mt-1",
+							"relative leading-none",
+						)}
 						id={`${id}-toggle`}
 					>
 						<Listbox.Button

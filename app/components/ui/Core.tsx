@@ -1,5 +1,9 @@
 import { cn } from "@thorium/utils/cn";
-import type { DetailedHTMLProps, HTMLAttributes } from "react";
+import type {
+	DetailedHTMLProps,
+	HTMLAttributes,
+	TextareaHTMLAttributes,
+} from "react";
 
 export function InputField({
 	children,
@@ -59,11 +63,34 @@ export function OutputField({
 				{
 					"bg-red-500 border-red-700": alert,
 				},
+				className,
 			)}
 			{...props}
 		>
 			{children}
 		</div>
+	);
+}
+
+export function TypingField({
+	alert,
+	className,
+	...props
+}: DetailedHTMLProps<
+	TextareaHTMLAttributes<HTMLTextAreaElement>,
+	HTMLTextAreaElement
+> & { alert?: boolean }) {
+	return (
+		<textarea
+			{...props}
+			className={cn(
+				"resize-none text-center border border-gray-700 bg-slate-400 text-black",
+				{
+					"bg-red-500 border-red-700": alert,
+				},
+				className,
+			)}
+		/>
 	);
 }
 
