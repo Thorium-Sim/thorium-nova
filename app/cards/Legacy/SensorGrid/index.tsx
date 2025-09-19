@@ -1,4 +1,5 @@
 import { SensorGrid } from "@thorium/cards/Legacy/SensorGrid/SensorGrid";
+import { DamageOverlay } from "@thorium/components/DamageOverlay";
 import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
@@ -18,9 +19,15 @@ export function LegacySensorGrid() {
 	const page = sensors.pingActive ? pageVal : "contacts";
 
 	return (
-		<div className="h-full grid grid-cols-5 overflow-hidden justify-items-center">
+		<div className="h-full grid gap-8 grid-cols-4  justify-items-center">
+			<div className="relative col-span-3 col-start-1 row-start-1  aspect-square">
+				<DamageOverlay
+					systemId={sensors.id}
+					className="rounded-full bg-black"
+				/>
+			</div>
 			<SensorGrid
-				className="col-span-4 bg-black/50 overflow-hidden"
+				className="row-start-1 col-start-1 col-span-3 bg-black/50 overflow-hidden"
 				gridRef={gridRef}
 				onContactHover={(name, picture) => setContactInfo({ name, picture })}
 				onGridHover={() => setContactInfo(null)}
@@ -50,17 +57,17 @@ export function LegacySensorGrid() {
 					<>
 						<div>
 							<p>Contact Info</p>
-							<div className="panel aspect-video p-4">
-								{contactInfo?.picture ? (
-									<img
-										src={contactInfo?.picture}
-										alt=""
-										className="w-full h-full object-contain"
-									/>
-								) : null}
-							</div>
+							<div className="panel p-4 h-20">{contactInfo?.name}</div>
 						</div>
-						<div className="panel p-4 h-20">{contactInfo?.name}</div>
+						<div className="panel aspect-video p-4">
+							{contactInfo?.picture ? (
+								<img
+									src={contactInfo?.picture}
+									alt=""
+									className="w-full h-full object-contain"
+								/>
+							) : null}
+						</div>
 						{sensors.pingActive && sensors.pingMode === "manual" ? (
 							<Button
 								className="w-full btn-success"
