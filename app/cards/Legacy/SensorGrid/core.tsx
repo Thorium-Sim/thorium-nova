@@ -128,7 +128,7 @@ export function LegacySensorGridCore() {
 					labelHidden
 					selected={sensors.defaultSpeed}
 					setSelected={(value) =>
-						Array.isArray(value)
+						Array.isArray(value) || !value
 							? null
 							: q.legacy.sensorGrid.updateSensors.netSend({
 									sensorsId: sensors.id,
@@ -859,6 +859,7 @@ function ExtrasPage() {
 						selected={store.nudgeDistance}
 						setSelected={(value) => {
 							!Array.isArray(value) &&
+								value &&
 								useSensorsStore.setState({ nudgeDistance: value });
 						}}
 					/>

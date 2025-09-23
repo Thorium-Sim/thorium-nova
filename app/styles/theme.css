@@ -58,7 +58,7 @@ kbd {
 	}
 }
 .badge {
-	@apply bg-neutral border border-neutral text-neutral-content;
+	@apply bg-neutral border border-neutral text-neutral-content px-2 text-sm;
 	border-radius: 1.9rem;
 	&-xs {
 		@apply text-xs leading-3 h-3;
@@ -1045,20 +1045,7 @@ input[type="range"].slider {
 		@apply text-base bg-neutral rounded-lg border border-opacity-0 border-neutral-content;
 	}
 }
-.menu-dropdown .btn {
-	line-height: 1;
-}
-.menu-dropdown .btn:not(:first-child):not(:last-child) {
-	border-radius: 0;
-}
-.menu-dropdown .btn:last-child {
-	border-top-left-radius: 0;
-	border-top-right-radius: 0;
-}
-.menu-dropdown .btn:first-child {
-	border-bottom-left-radius: 0;
-	border-bottom-right-radius: 0;
-}
+
 
 /* Slider */
 input[type="range"].slider {

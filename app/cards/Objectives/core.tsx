@@ -37,7 +37,7 @@ export function ObjectivesCore() {
 									]}
 									selected={objective.state}
 									setSelected={async (state) => {
-										if (Array.isArray(state)) return;
+										if (Array.isArray(state) || !state) return;
 										await q.objectives.setState.netSend({
 											objectiveId: objective.id,
 											state,

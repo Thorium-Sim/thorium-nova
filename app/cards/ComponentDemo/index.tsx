@@ -1,4 +1,3 @@
-import { Menu } from "@headlessui/react";
 import Dropdown, { DropdownItem } from "@thorium/ui/Dropdown";
 import LinearDotIndicator from "@thorium/ui/LinearDotIndicator";
 import RadialDial from "@thorium/ui/RadialDial";
@@ -15,7 +14,7 @@ import SearchableInput, {
 } from "@thorium/ui/SearchableInput";
 import type { QueryFunctionContext } from "@tanstack/react-query";
 import { Icon } from "@thorium/ui/Icon";
-
+import { Button as RAButton } from "react-aria-components";
 const ModalDemo = ({
 	title,
 	children,
@@ -495,9 +494,9 @@ export function ComponentDemo() {
 				</Dropdown>
 				<Dropdown
 					triggerEl={
-						<Menu.Button className="btn btn-primary">
+						<RAButton className="btn btn-primary">
 							Open Me <Icon name="chevron-down" />
-						</Menu.Button>
+						</RAButton>
 					}
 				>
 					<DropdownItem>Item 1</DropdownItem>

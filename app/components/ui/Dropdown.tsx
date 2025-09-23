@@ -1,11 +1,16 @@
 import { Fragment, type ReactNode } from "react";
-import { Menu, Transition } from "@headlessui/react";
-import Button from "./Button";
-import { Icon } from "./Icon";
 
-function classNames(...classes: (string | null | undefined)[]) {
-	return classes.filter(Boolean).join(" ");
-}
+import { Icon } from "./Icon";
+import {
+	Button,
+	Menu,
+	MenuItem,
+	MenuTrigger,
+	Popover,
+	type MenuItemProps,
+} from "react-aria-components";
+import { cn } from "@thorium/utils/cn";
+
 type Origins =
 	| "left"
 	| "right"
@@ -27,70 +32,48 @@ type DropdownProps = TriggerProps & {
 export default function Dropdown({
 	triggerLabel,
 	triggerEl,
-	origin = "origin-bottom-left",
 	children,
 }: DropdownProps) {
 	return (
-		<Menu as="div" className="relative inline-block text-left menu-container">
-			<div>
-				{triggerEl ? (
-					triggerEl
-				) : (
-					<Menu.Button className="menu-trigger inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
-						{triggerLabel}
-						<Icon
-							name="chevron-down"
-							className="-mr-1 ml-2 h-5 w-5"
-							aria-hidden="true"
-						/>
-					</Menu.Button>
-				)}
-			</div>
-
-			<Transition
-				as={Fragment}
-				enter="transition ease-out duration-100"
-				enterFrom="transform opacity-0 scale-95"
-				enterTo="transform opacity-100 scale-100"
-				leave="transition ease-in duration-75"
-				leaveFrom="transform opacity-100 scale-100"
-				leaveTo="transform opacity-0 scale-95"
-			>
-				<Menu.Items
-					className={`z-20 ${origin} absolute ${
-						origin.includes("right") ? "right-0" : "left-0"
-					} mt-2 w-56 text-base bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 ring-1
-          ring-black ring-opacity-5 focus:outline-none sm:text-sm overflow-y-auto overflow-x-hidden`}
-				>
-					<div className="menu-dropdown">{children}</div>
-				</Menu.Items>
-			</Transition>
-		</Menu>
+		<MenuTrigger>
+			{triggerEl || (
+				<Button className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
+					{triggerLabel}
+					<Icon
+						name="chevron-down"
+						className="-mr-1 ml-2 h-5 w-5"
+						aria-hidden="true"
+					/>
+				</Button>
+			)}
+			<Popover className={popoverTransitionClasses}>
+				<Menu className="mt-2 w-56 text-base bg-gray-900/90 text-white border-gray-400 border rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm overflow-y-auto overflow-x-hidden">
+					{children}
+				</Menu>
+			</Popover>
+		</MenuTrigger>
 	);
 }
 
 export const DropdownItem = ({
 	activeClass = "bg-gray-100 text-gray-900",
-	inactiveClass = "text-gray-700",
+	inactiveClass = "text-gray-100",
 	className,
-	ref,
 	...props
-}: { activeClass?: string; inactiveClass?: string } & React.DetailedHTMLProps<
-	React.ButtonHTMLAttributes<HTMLButtonElement>,
-	HTMLButtonElement
->) => {
+}: { activeClass?: string; inactiveClass?: string } & MenuItemProps) => {
 	return (
-		<Menu.Item>
-			{({ active }) => (
-				<Button
-					className={classNames(
-						active ? activeClass : inactiveClass,
-						"block px-4 py-2 text-sm w-full text-left",
-						className,
-					)}
-					{...props}
-				/>
-			)}
-		</Menu.Item>
+		<MenuItem
+			className={({ isFocused }) =>
+				cn(
+					"block px-4 py-2 text-sm w-full text-left",
+					isFocused ? activeClass : inactiveClass,
+					className,
+				)
+			}
+			{...props}
+		/>
 	);
 };
+
+export const popoverTransitionClasses =
+	"transition-all duration-200 origin-[var(--trigger-anchor-point)] data-[entering]:opacity-0 data-[entering]:scale-90 data-[exiting]:opacity-0 data-[exiting]:scale-90";

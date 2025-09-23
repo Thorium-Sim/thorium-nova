@@ -1,9 +1,16 @@
 import Button from "@thorium/ui/Button";
+import {
+	Menu,
+	MenuItem,
+	MenuTrigger,
+	Popover,
+	Button as RAButton,
+} from "react-aria-components";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useThoriumAccount } from "../context/ThoriumAccountContext";
-import { Menu, Transition } from "@headlessui/react";
 import { useIssueTracker } from "./IssueTracker";
 import { Icon } from "./ui/Icon";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
 // https://stackoverflow.com/a/16861050/4697675
 const popupCenter = ({
 	url,
@@ -58,8 +65,8 @@ function AccountMenu({ size = "md" }) {
 	const [noImg, setNoImg] = useState(!account?.profilePictureUrl);
 	if (!account) return null;
 	return (
-		<Menu as="div">
-			<Menu.Button className="inline-flex justify-center">
+		<MenuTrigger>
+			<RAButton className="inline-flex justify-center">
 				{noImg ? (
 					"Thorium Account"
 				) : (
@@ -73,48 +80,26 @@ function AccountMenu({ size = "md" }) {
 						onError={() => setNoImg(true)}
 					/>
 				)}
-			</Menu.Button>
-			<Transition
-				as={Fragment}
-				enter="transition ease-out duration-100"
-				enterFrom="transform opacity-0 scale-95"
-				enterTo="transform opacity-100 scale-100"
-				leave="transition ease-in duration-75"
-				leaveFrom="transform opacity-100 scale-100"
-				leaveTo="transform opacity-0 scale-95"
-			>
-				<Menu.Items className="z-10 absolute right-8 w-56 mt-2 origin-top-right bg-gray-900 divide-y divide-gray-700 rounded-md shadow-lg ring-1 ring-gray-300 ring-opacity-5 focus:outline-none text-lg">
-					<div className="px-1 py-1 ">
-						<Menu.Item>
-							{({ active }) => (
-								<button
-									onClick={() => {
-										setOpen(true);
-									}}
-									className={`${
-										active ? "bg-purple-900 text-white" : "text-white"
-									} group flex rounded-md items-center w-full px-2 py-2 text-sm`}
-								>
-									<Icon name="circle-dot" className="mr-2" /> Issue Tracker
-								</button>
-							)}
-						</Menu.Item>
-						<Menu.Item>
-							{({ active }) => (
-								<button
-									onClick={() => logout()}
-									className={`${
-										active ? "bg-purple-900 text-white" : "text-white"
-									} group flex rounded-md items-center w-full px-2 py-2 text-sm`}
-								>
-									<Icon name="log-out" className="mr-2" /> Logout
-								</button>
-							)}
-						</Menu.Item>
-					</div>
-				</Menu.Items>
-			</Transition>
-		</Menu>
+			</RAButton>
+			<Popover className={popoverTransitionClasses}>
+				<Menu className="z-10 w-56 mt-2 px-1 py-1  bg-gray-900 divide-y divide-gray-700 rounded-md shadow-lg ring-1 ring-gray-300 ring-opacity-5 focus:outline-none text-lg">
+					<MenuItem
+						className="text-white group flex rounded-md items-center w-full px-2 py-2 text-sm data-[isFocused]:bg-purple-900"
+						onAction={() => {
+							setOpen(true);
+						}}
+					>
+						<Icon name="circle-dot" className="mr-2" /> Issue Tracker
+					</MenuItem>
+					<MenuItem
+						className="text-white group flex rounded-md items-center w-full px-2 py-2 text-sm data-[isFocused]:bg-purple-900"
+						onAction={() => logout()}
+					>
+						<Icon name="log-out" className="mr-2" /> Logout
+					</MenuItem>
+				</Menu>
+			</Popover>
+		</MenuTrigger>
 	);
 }
 
