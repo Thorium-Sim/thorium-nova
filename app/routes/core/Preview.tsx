@@ -23,7 +23,7 @@ export default function Preview({ params }: Route.ComponentProps) {
 
 	return (
 		<StationData shipId={player[0]?.id}>
-			<CardProvider cardName={params.component} cardLoaded>
+			<CardProvider cardName={params.component} cardLoaded isWidget={false}>
 				<div className="bg-gray-800 w-full h-full p-16">
 					<Suspense fallback={<LoadingSpinner compact />}>
 						<Comp />

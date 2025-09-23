@@ -20,6 +20,7 @@ import {
 import { Icon, type IconName } from "@thorium/ui/Icon";
 import { cn } from "@thorium/utils/cn";
 import { useNavigate } from "react-router";
+import CardProvider from "@thorium/context/CardContext";
 
 type IconType = IconName | ReactElement;
 
@@ -137,11 +138,13 @@ export const Widget: FC<{
 						}}
 						{...getFloatingProps()}
 					>
-						<Component
-							cardLoaded={isOpen}
-							isOpen={isOpen}
-							onClose={() => setIsOpen(false)}
-						/>
+						<CardProvider cardLoaded={isOpen} cardName={name} isWidget>
+							<Component
+								cardLoaded={isOpen}
+								isOpen={isOpen}
+								onClose={() => setIsOpen(false)}
+							/>
+						</CardProvider>
 					</Popover.Panel>
 				</Transition>
 			</Suspense>

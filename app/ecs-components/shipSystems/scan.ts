@@ -16,5 +16,11 @@ export const scan = z
 		/** Duration in seconds since the last scan completed, used for repeating */
 		intervalTime: z.number().default(0),
 		timestamp: z.number().default(0),
+
+		/** The request made as part of a legacy mode scan */
+		legacyRequest: z.string().default(""),
+		/** The response provided as part of a legacy mode scan */
+		legacyResponse: z.string().default(""),
+		legacyScanType: z.string().default("Standard"),
 	})
 	.default({});

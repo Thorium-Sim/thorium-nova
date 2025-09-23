@@ -35,7 +35,7 @@ function flexLayoutFactory(node: TabNode) {
 	const Core = Cores[compName];
 	if (Core)
 		return (
-			<CardProvider cardName={compName} cardLoaded>
+			<CardProvider cardName={compName} cardLoaded isWidget={false}>
 				<Suspense fallback={<LoadingSpinner compact />}>
 					<Core />
 				</Suspense>

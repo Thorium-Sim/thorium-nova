@@ -115,7 +115,7 @@ const Effects = () => {
 		[doFlash, doSpark],
 	);
 
-	q.effects.sub.useNetRequest({ clientId }, { callback: doEffect });
+	q.effects.sub.useNetSubscribe({ clientId }, doEffect);
 
 	return (
 		<div className={`actionsContainer ${flash ? "flash" : ""}`}>

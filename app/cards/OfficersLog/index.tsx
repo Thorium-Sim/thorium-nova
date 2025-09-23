@@ -56,7 +56,7 @@ export default function OfficersLog() {
 			</h3>
 			<textarea
 				ref={textRef}
-				className="textarea textarea-alert text-xl col-span-2 row-start-2 col-start-2"
+				className="textarea textarea-alert text-xl @2xl:p-4 p-2 col-span-2 row-start-2 col-start-2"
 				onChange={(e) => setLogEntry(e.target.value)}
 				readOnly={!!entry}
 				value={entry?.message || logEntry}

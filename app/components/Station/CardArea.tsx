@@ -78,7 +78,7 @@ const CardRenderer = ({
 	const show = allowCard && currentCardId === id;
 	const [cardLoaded, setCardLoaded] = useState(show);
 	return (
-		<CardProvider cardName={id} cardLoaded={cardLoaded}>
+		<CardProvider cardName={id} cardLoaded={cardLoaded} isWidget={false}>
 			<Transition
 				key={id}
 				show={show}

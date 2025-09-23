@@ -43,7 +43,7 @@ export function InputField({
 				onClick(String(parseValue));
 			}}
 		>
-			{children}
+			{children || <>&nbsp;</>}
 		</div>
 	);
 }
@@ -67,7 +67,7 @@ export function OutputField({
 			)}
 			{...props}
 		>
-			{children}
+			{children || <>&nbsp;</>}
 		</div>
 	);
 }
