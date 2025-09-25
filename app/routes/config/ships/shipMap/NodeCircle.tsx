@@ -12,7 +12,6 @@ import { useDrag } from "@use-gesture/react";
 import { autoUpdate, offset, shift, useFloating } from "@floating-ui/react-dom";
 import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
-import { Disclosure, Portal, Transition } from "@headlessui/react";
 import useOnClickOutside from "@thorium/hooks/useClickOutside";
 import type { PanStateI, updateNodeParams } from "./deckConfig";
 import { useTriggerEdgeRender } from "./EdgeContextProvider";
@@ -22,6 +21,13 @@ import { q } from "@thorium/context/AppContext";
 import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
 import { Icon } from "@thorium/ui/Icon";
 import { nodeFlags } from "@thorium/utils/flags/DeckNode";
+import {
+	Disclosure,
+	DisclosurePanel,
+	Heading,
+	Button as RAButton,
+} from "react-aria-components";
+import { Portal } from "@thorium/ui/Portal";
 
 const pixelRatio = typeof window === "undefined" ? 1 : window.devicePixelRatio;
 
@@ -65,36 +71,34 @@ function NodeDisclosure({
 	const [isDefaultOpen] = useLocalStorage(`node-palette-${title}`, defaultOpen);
 	const disclosureRef = useRef<HTMLDivElement | null>(null);
 	return (
-		<Disclosure defaultOpen={isDefaultOpen}>
-			{({ open }) => (
+		<Disclosure defaultExpanded={isDefaultOpen}>
+			{({ isExpanded }) => (
 				<>
-					<HandleIsOpen open={open} title={title} scrollRef={disclosureRef} />
-					<div
-						className="w-full py-1 px-2 bg-gray-900 sticky z-10 -top-1"
-						ref={disclosureRef}
-					>
-						<Disclosure.Button className="btn btn-notice btn-sm justify-between btn-block">
-							<span>{title}</span>
-							<Icon
-								name="chevron-up"
-								className={` transition-transform${
-									open ? "transform rotate-180" : ""
-								} w-5 h-5`}
-							/>
-						</Disclosure.Button>
+					<HandleIsOpen
+						open={isExpanded}
+						title={title}
+						scrollRef={disclosureRef}
+					/>
+					<div className="w-full px-2 sticky z-10 -top-1" ref={disclosureRef}>
+						<Heading>
+							<RAButton
+								slot="trigger"
+								className="btn btn-notice btn-sm justify-between btn-block"
+							>
+								<span>{title}</span>
+								<Icon
+									name="chevron-up"
+									className={` transition-transform${
+										isExpanded ? "transform rotate-180" : ""
+									} w-5 h-5`}
+								/>
+							</RAButton>
+						</Heading>
 					</div>
-					<Transition
-						enter="transition duration-100 ease-out"
-						enterFrom="transform scale-95 opacity-0"
-						enterTo="transform scale-100 opacity-100"
-						leave="transition duration-75 ease-out"
-						leaveFrom="transform scale-100 opacity-100"
-						leaveTo="transform scale-95 opacity-0"
-					>
-						<Disclosure.Panel className="pt-4 pb-2 px-2 border-b border-b-gray-700">
-							{children}
-						</Disclosure.Panel>
-					</Transition>
+
+					<DisclosurePanel className="px-2 pt-2 border-b border-b-gray-700">
+						{children}
+					</DisclosurePanel>
 				</>
 			)}
 		</Disclosure>
@@ -172,6 +176,7 @@ export function NodeCircle({
 	});
 	const confirm = useConfirm();
 	const [availableSystems] = q.plugin.systems.available.useNetRequest();
+	const events = bind();
 	return (
 		<>
 			<div
@@ -181,8 +186,14 @@ export function NodeCircle({
 				} w-2 h-2 absolute -top-1 -left-1 cursor-grab touch-none ${
 					hasCrossDeckConnection ? "ring-1" : ""
 				} ring-white ring-offset-1 ring-offset-black`}
-				onMouseDown={(e) => e.stopPropagation()}
-				{...bind()}
+				onMouseDown={(e) => {
+					e.stopPropagation();
+				}}
+				{...events}
+				onPointerDown={(event) => {
+					events.onPointerDown?.(event);
+					selectNode();
+				}}
 				style={{
 					transform: `translate(${x * pixelRatio}px, ${y * pixelRatio}px)`,
 				}}

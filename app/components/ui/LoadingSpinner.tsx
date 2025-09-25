@@ -14,7 +14,7 @@ export const LoadingSpinner = ({ compact = false }) => {
 				compact ? "" : "h-screen"
 			} w-full flex justify-center items-center`}
 		>
-			<Icon name="loader" className="animate-spin-step text-4xl text-white" />
+			<Icon name="loader" className="animate-spin text-4xl text-white" />
 		</div>
 	);
 };

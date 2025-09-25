@@ -5,15 +5,16 @@ import {
 	type ComponentType,
 	Fragment,
 	Suspense,
+	useCallback,
 	useMemo,
 	useState,
 } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { Transition } from "@headlessui/react";
 import type { CardProps } from "../../cards/CardProps";
 import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
 import CardProvider from "@thorium/context/CardContext";
 import { q, clientId } from "@thorium/context/AppContext";
+import { Transition } from "@thorium/ui/Transition";
 
 const CardError = () => {
 	return (
@@ -39,15 +40,17 @@ export const CardArea: React.FC<{
 	}));
 	return (
 		<Fragment>
-			<Transition show={!client.loginName && station.name !== "Viewscreen"}>
-				<div className="w-full h-full absolute card-transition">
-					<Login />
-				</div>
+			<Transition
+				isOpen={!client.loginName && station.name !== "Viewscreen"}
+				className="w-full h-full absolute card-transition"
+			>
+				<Login />
 			</Transition>
-			<Transition show={Boolean(client.offlineState)}>
-				<div className="w-full h-full absolute card-transition">
-					<Offline />
-				</div>
+			<Transition
+				isOpen={Boolean(client.offlineState)}
+				className="w-full h-full absolute card-transition"
+			>
+				<Offline />
 			</Transition>
 			{CardComponents.map(({ CardComponent, component, name }) => (
 				<CardRenderer
@@ -81,22 +84,20 @@ const CardRenderer = ({
 		<CardProvider cardName={id} cardLoaded={cardLoaded} isWidget={false}>
 			<Transition
 				key={id}
-				show={show}
-				unmount={false}
-				afterLeave={() => {
+				isOpen={show}
+				afterLeave={useCallback(() => {
 					setCardLoaded(false);
-				}}
-				beforeEnter={() => {
+				}, [])}
+				beforeEnter={useCallback(() => {
 					setCardLoaded(true);
-				}}
+				}, [])}
+				className="w-full h-full absolute @container card-transition"
 			>
-				<div className="w-full h-full absolute @container card-transition">
-					<Suspense fallback={<LoadingSpinner />}>
-						<ErrorBoundary fallback={<CardError />}>
-							<CardComponent cardLoaded={cardLoaded} />
-						</ErrorBoundary>
-					</Suspense>
-				</div>
+				<Suspense fallback={<LoadingSpinner />}>
+					<ErrorBoundary fallback={<CardError />}>
+						<CardComponent cardLoaded={cardLoaded} />
+					</ErrorBoundary>
+				</Suspense>
 			</Transition>
 		</CardProvider>
 	);

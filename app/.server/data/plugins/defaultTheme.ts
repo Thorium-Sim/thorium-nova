@@ -260,17 +260,17 @@ const defaultTheme = `@alert5: #2ba1cb;
   opacity: 1;
   transform: translateX(0);
 }
-.card-transition[data-enter] {
+.card-transition[data-entering] {
   transition: opacity 0.2s ease 0.2s, transform 0.2s ease 0.2s;
 }
-.card-transition[data-closed][data-enter] {
+.card-transition[data-exiting][data-entering] {
   opacity: 0;
   transform: translateX(-100%);
 }
-.card-transition[data-leave] {
+.card-transition[data-exiting] {
   transition: opacity 1s ease, transform 1s ease;
 }
-.card-transition[data-leave][data-closed] {
+.card-transition[data-exiting][data-exited] {
   opacity: 0;
   transform: translateX(100%);
 }

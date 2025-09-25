@@ -1,6 +1,5 @@
 import { NavLink } from "react-router";
 import Button from "@thorium/ui/Button";
-import { Disclosure } from "@headlessui/react";
 import { q, clientId } from "@thorium/context/AppContext";
 import { ErrorBoundary, useErrorBoundary } from "react-error-boundary";
 import { Suspense } from "react";
@@ -104,30 +103,5 @@ function ClientButtons() {
 		</a>
 	)} */}
 		</>
-	);
-}
-
-function Flights() {
-	const [flights] = q.flight.all.useNetRequest();
-
-	return (
-		<Disclosure.Panel
-			className="text-white list-none max-h-full overflow-y-auto"
-			as="ul"
-		>
-			{flights.length ? (
-				flights.map((f) => (
-					<li className="list-group-item" key={f.name}>
-						<strong>{f.name}</strong>
-						<br />
-						<small>{new Date(f.date).toLocaleDateString()}</small>
-					</li>
-				))
-			) : (
-				<>
-					<li className="list-group-item">No Saved Flights</li>
-				</>
-			)}
-		</Disclosure.Panel>
 	);
 }

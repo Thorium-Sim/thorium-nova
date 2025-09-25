@@ -3,11 +3,11 @@ import { useContext, useState } from "react";
 import { useThoriumAccount } from "@thorium/context/ThoriumAccountContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Dropdown, { DropdownItem } from "@thorium/ui/Dropdown";
-import { Menu } from "@headlessui/react";
 import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
 import { toast } from "@thorium/context/ToastContext";
 import { CoreFlexLayoutContext, defaultJson } from "./CoreFlexLayoutContext";
 import { Icon } from "@thorium/ui/Icon";
+import { Button } from "react-aria-components";
 
 export function CoreFlexLayoutDropdown() {
 	const { layoutModel, setLayoutModel } = useContext(CoreFlexLayoutContext);
@@ -66,7 +66,7 @@ export function CoreFlexLayoutDropdown() {
 	return (
 		<Dropdown
 			triggerEl={
-				<Menu.Button className="btn btn-xs btn-outline btn-warning">
+				<Button className="btn btn-xs btn-outline btn-warning">
 					<span>
 						{coreLayoutQuery.isLoading
 							? "Loading Flex Layouts..."
@@ -77,7 +77,7 @@ export function CoreFlexLayoutDropdown() {
 						className="-mr-1 ml-2 h-5 w-5"
 						aria-hidden="true"
 					/>
-				</Menu.Button>
+				</Button>
 			}
 		>
 			<DropdownItem

@@ -9,18 +9,12 @@ import {
 	Suspense,
 	useState,
 } from "react";
-import { Popover, Transition } from "@headlessui/react";
-import {
-	autoUpdate,
-	useClick,
-	useDismiss,
-	useFloating,
-	useInteractions,
-} from "@floating-ui/react";
 import { Icon, type IconName } from "@thorium/ui/Icon";
 import { cn } from "@thorium/utils/cn";
 import { useNavigate } from "react-router";
 import CardProvider from "@thorium/context/CardContext";
+import { Button, Dialog, DialogTrigger, Popover } from "react-aria-components";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
 
 type IconType = IconName | ReactElement;
 
@@ -85,58 +79,27 @@ export const Widget: FC<{
 }> = ({ name, icon, component: Component, size = "md" }) => {
 	const [isOpen, setIsOpen] = useState(false);
 
-	const { x, y, strategy, refs, context, update } = useFloating({
-		open: isOpen,
-		onOpenChange: setIsOpen,
-		placement: "top-end",
-		whileElementsMounted: autoUpdate,
-	});
-
-	const dismiss = useDismiss(context);
-
-	const click = useClick(context);
-
-	const { getReferenceProps, getFloatingProps } = useInteractions([
-		click,
-		dismiss,
-	]);
-
 	return (
-		<Popover className="relative flex items-center">
-			<Popover.Button
-				className="widget"
-				ref={refs.setReference}
-				{...getReferenceProps()}
-			>
+		<DialogTrigger>
+			<Button className="widget">
 				{typeof icon === "string" ? (
 					<Icon name={icon} className="widget-icon h-6 w-6 cursor-pointer" />
 				) : (
 					icon
 				)}
-			</Popover.Button>
-			<Suspense>
-				<Transition>
-					<Popover.Panel
+			</Button>
+			<Popover className={cn("theme-container", popoverTransitionClasses)}>
+				<Suspense>
+					<Dialog
 						className={cn(
-							"max-w-md absolute isolate right-0 max-h-96 z-50 !bg-black/70 panel backdrop-blur border border-white/50 rounded p-2 w-screen @container overflow-hidden",
+							"max-w-md isolate max-h-96 !bg-black/70 panel backdrop-blur border border-white/50 rounded p-2 w-screen @container overflow-hidden",
 							{
 								"max-w-sm": size === "sm",
 								"max-w-lg": size === "md",
 								"max-w-xl": size === "lg",
 								"max-w-2xl": size === "xl",
 							},
-							"z-40 relative scale-100 ease-out",
-							"data-[closed]:opacity-0 data-[closed]:scale-95",
-							"data-[enter]:duration-100",
-							"data-[leave]:duration-75",
 						)}
-						ref={refs.setFloating}
-						style={{
-							position: strategy,
-							top: y ?? 0,
-							left: x ?? 0,
-						}}
-						{...getFloatingProps()}
 					>
 						<CardProvider cardLoaded={isOpen} cardName={name} isWidget>
 							<Component
@@ -145,10 +108,10 @@ export const Widget: FC<{
 								onClose={() => setIsOpen(false)}
 							/>
 						</CardProvider>
-					</Popover.Panel>
-				</Transition>
-			</Suspense>
-		</Popover>
+					</Dialog>
+				</Suspense>
+			</Popover>
+		</DialogTrigger>
 	);
 };
 

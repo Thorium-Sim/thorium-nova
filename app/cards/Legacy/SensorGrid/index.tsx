@@ -11,6 +11,7 @@ import { ProcessedData } from "@thorium/cards/Legacy/SensorScans/ProcessedData";
 import Input from "@thorium/ui/Input";
 import { TypingText } from "@thorium/components/TypingText";
 import { SensorScans } from "@thorium/cards/Legacy/SensorScans/SensorScans";
+import InfoTip from "@thorium/ui/InfoTip";
 
 export function LegacySensorGrid() {
 	const { shipId, station } = useStation();

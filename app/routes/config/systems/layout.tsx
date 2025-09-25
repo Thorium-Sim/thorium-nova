@@ -5,10 +5,10 @@ import { Outlet, useParams, useNavigate } from "react-router";
 import { Fragment, Suspense } from "react";
 import { toast } from "@thorium/context/ToastContext";
 import Dropdown, { DropdownItem } from "@thorium/ui/Dropdown";
-import { Menu } from "@headlessui/react";
 import { capitalCase } from "change-case";
 import { q } from "@thorium/context/AppContext";
 import { Icon } from "@thorium/ui/Icon";
+import { Button } from "react-aria-components";
 
 export default function ShipSystemsList() {
 	const { pluginId } = useParams() as {
@@ -44,9 +44,9 @@ function ShipSystemsInner() {
 				<div className="flex flex-col w-80 h-full">
 					<Dropdown
 						triggerEl={
-							<Menu.Button className="btn btn-success btn-sm w-full">
+							<Button className="btn btn-success btn-sm w-full">
 								New Ship System <Icon name="chevron-down" />
-							</Menu.Button>
+							</Button>
 						}
 					>
 						{availableShipSystems.map((system) => (

@@ -529,7 +529,7 @@ kbd {
 }
 
 .textarea {
-	@apply text-base bg-neutral rounded-lg border border-opacity-0 border-neutral-content;
+	@apply text-base bg-neutral rounded-lg border border-opacity-0 border-neutral-content p-2;
 		&-md {
 		@apply p-2 text-sm leading-loose;
 	}

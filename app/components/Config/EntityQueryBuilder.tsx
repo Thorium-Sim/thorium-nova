@@ -1,4 +1,3 @@
-import { Combobox, Transition } from "@headlessui/react";
 import { components, type ComponentIds } from "@thorium/ecs-components";
 import {
 	type InputTypes,
@@ -25,6 +24,15 @@ import { cn } from "@thorium/utils/cn";
 import { StarmapCoordinates } from "./StarmapCoordinates";
 import { ShipTemplate } from "./ShipTemplate";
 import { SoundConfigForm } from "@thorium/routes/config/systems/soundId";
+import {
+	Button,
+	ComboBox,
+	ListBox,
+	ListBoxItem,
+	Popover,
+	Input as RAInput,
+} from "react-aria-components";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
 
 type QueryReducerAction =
 	| { type: "add"; component?: keyof typeof components | ""; path?: string }
@@ -102,41 +110,13 @@ export function getObject(object: any, path: string | null) {
 	return target;
 }
 
-export function EntityQueryBuilder({
-	state,
-	dispatch,
-}: {
-	state: EntityQuery;
-	dispatch: Dispatch<QueryReducerAction>;
-}) {
-	return (
-		<div className="flex flex-col gap-2">
-			{state.map((q, i) => (
-				<QueryComponent
-					key={i}
-					{...q}
-					path={i.toString()}
-					dispatch={dispatch}
-					showDelete={state.length > 1}
-				/>
-			))}
-			<button
-				className="btn btn-xs btn-primary max-w-fit"
-				onClick={() => dispatch({ type: "add" })}
-			>
-				Add Query
-			</button>
-		</div>
-	);
-}
-
 const matchItems = [
 	{ id: "all", label: "All Matches" },
 	{ id: "first", label: "First Match" },
 	{ id: "random", label: "Random Match" },
 ];
 
-export function QueryComponent({
+function QueryComponent({
 	component,
 	property,
 	value,
@@ -474,69 +454,44 @@ function ComponentCombobox({
 	onChange: (value: keyof typeof components | "") => void;
 	isSelect?: boolean;
 }) {
-	const [query, setQuery] = useState("");
-	const filteredComponents = [
-		isSelect ? "id" : "",
-		...Object.keys(components),
-	].filter((name) => name?.toLowerCase().includes(query.toLowerCase()));
 	return (
-		<Combobox
-			value={component ? capitalCase(component) : ""}
-			onChange={onChange as (value: string | null) => void}
+		<ComboBox
+			aria-label="Component"
+			selectedKey={component}
+			onSelectionChange={(selection) =>
+				onChange(selection as keyof typeof components)
+			}
 		>
-			<div className="relative">
-				<div className="cursor-pointer min-h-6 h-6 leading-5 relative border-secondary border rounded-lg">
-					<Combobox.Input
-						placeholder="Component"
-						className="w-full bg-transparent placeholder:text-secondary placeholder:font-semibold text-secondary-content border-none outline-none focus:ring-0 pl-3 pr-10 text-xs leading-5"
-						onChange={(event) => setQuery(event.target.value)}
+			<div className="cursor-pointer min-h-6 h-6 leading-5 relative border-secondary border rounded-lg">
+				<RAInput className="w-full bg-transparent placeholder:text-secondary placeholder:font-semibold text-secondary-content border-none outline-none focus:ring-0 pl-3 pr-10 text-xs leading-5" />
+				<Button className="absolute w-10 bg-secondary/20 hover:bg-secondary/50 cursor-pointer rounded inset-y-0 right-0 flex items-center justify-center">
+					<Icon
+						name="chevron-down"
+						className="w-5 h-5 text-secondary-content"
+						aria-hidden="true"
 					/>
-					<Combobox.Button className="absolute w-10 bg-secondary/20 hover:bg-secondary/50 cursor-pointer rounded inset-y-0 right-0 flex items-center justify-center">
-						<Icon
-							name="chevrons-up-down"
-							className="w-5 h-5 text-secondary-content"
-							aria-hidden="true"
-						/>
-					</Combobox.Button>
-				</div>
-				<Transition
-					as={Fragment}
-					leave="transition ease-in duration-100"
-					leaveFrom="opacity-100"
-					leaveTo="opacity-0"
-					afterLeave={() => setQuery("")}
-				>
-					<Combobox.Options className="absolute w-full mt-1 overflow-auto text-base bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-10">
-						{filteredComponents.length === 0 && query !== "" ? (
-							<div className="cursor-default select-none relative py-1 px-1 text-gray-300">
-								Nothing found.
-							</div>
-						) : (
-							filteredComponents.map((component) => (
-								<Combobox.Option
-									key={component}
-									className={({ active }) =>
-										`cursor-default select-none relative py-1 px-2 ${
-											active ? "text-white bg-secondary" : ""
-										}`
-									}
-									value={component}
-									title={capitalCase(component)}
-								>
-									<span className={`block truncate font-normal`}>
-										{capitalCase(component)}
-									</span>
-								</Combobox.Option>
-							))
-						)}
-					</Combobox.Options>
-				</Transition>
+				</Button>
 			</div>
-		</Combobox>
+			<Popover className={popoverTransitionClasses}>
+				<ListBox
+					className="bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 w-full overflow-auto text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+					items={[
+						isSelect ? { id: "id" } : [],
+						...Object.keys(components).map((id) => ({ id })),
+					].flat()}
+				>
+					{(item) => (
+						<ListBoxItem className="font-normal truncate cursor-default select-none py-1 px-2 data-[focused]:bg-secondary text-white">
+							{capitalCase(item.id)}
+						</ListBoxItem>
+					)}
+				</ListBox>
+			</Popover>
+		</ComboBox>
 	);
 }
 
-function PropertyCombobox({
+export function PropertyCombobox({
 	component,
 	property,
 	onChange,
@@ -547,74 +502,49 @@ function PropertyCombobox({
 	onChange: (value: string) => void;
 	onlyShowProperties?: boolean;
 }) {
-	const [query, setQuery] = useState("");
 	if (component === "id") return null;
-	const filteredProperties = !component
+	const properties = !component
 		? []
 		: [
 				...(onlyShowProperties ? [] : ["isPresent", "isNotPresent"]),
 				...parseSchema(schemaWithoutDefault(component)).map((item) =>
 					ZOD_COMPARISONS[item.type as keyof typeof ZOD_COMPARISONS]
 						? item.key
-						: "",
+						: [],
 				),
-			].filter((name) => name?.toLowerCase().includes(query.toLowerCase()));
+			]
+				.flat()
+				.map((id) => ({ id }));
 
 	return (
-		<Combobox
-			value={property}
-			onChange={onChange as (value: string | null) => void}
-			disabled={!component}
+		<ComboBox
+			aria-label="Property"
+			selectedKey={property}
+			onSelectionChange={(selection) => onChange(selection as string)}
 		>
-			<div className="relative">
-				<div className="cursor-pointer min-h-6 h-6 leading-5 relative border-secondary border rounded-lg">
-					<Combobox.Input
-						placeholder="Property"
-						className="w-full bg-transparent placeholder:text-secondary placeholder:font-semibold text-secondary-content border-none outline-none focus:ring-0 pl-3 pr-10 text-xs leading-5"
-						onChange={(event) => setQuery(event.target.value)}
+			<div className="cursor-pointer min-h-6 h-6 leading-5 relative border-secondary border rounded-lg">
+				<RAInput className="w-full bg-transparent placeholder:text-secondary placeholder:font-semibold text-secondary-content border-none outline-none focus:ring-0 pl-3 pr-10 text-xs leading-5" />
+				<Button className="absolute w-10 bg-secondary/20 hover:bg-secondary/50 cursor-pointer rounded inset-y-0 right-0 flex items-center justify-center">
+					<Icon
+						name="chevron-down"
+						className="w-5 h-5 text-secondary-content"
+						aria-hidden="true"
 					/>
-					<Combobox.Button className="absolute w-10 bg-secondary/20 hover:bg-secondary/50 cursor-pointer rounded inset-y-0 right-0 flex items-center justify-center">
-						<Icon
-							name="chevrons-up-down"
-							className="w-5 h-5 text-secondary-content"
-							aria-hidden="true"
-						/>
-					</Combobox.Button>
-				</div>
-				<Transition
-					as={Fragment}
-					leave="transition ease-in duration-100"
-					leaveFrom="opacity-100"
-					leaveTo="opacity-0"
-					afterLeave={() => setQuery("")}
-				>
-					<Combobox.Options className="absolute w-full mt-1 overflow-auto text-base bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm z-10">
-						{filteredProperties.length === 0 && query !== "" ? (
-							<div className="cursor-default select-none relative py-1 px-1 text-gray-300">
-								Nothing found.
-							</div>
-						) : (
-							filteredProperties.map((property) => (
-								<Combobox.Option
-									key={property}
-									className={({ active }) =>
-										`cursor-default select-none relative py-1 px-2 ${
-											active ? "text-white bg-secondary" : ""
-										}`
-									}
-									value={property}
-									title={property}
-								>
-									<span className={`block truncate font-normal`}>
-										{property}
-									</span>
-								</Combobox.Option>
-							))
-						)}
-					</Combobox.Options>
-				</Transition>
+				</Button>
 			</div>
-		</Combobox>
+			<Popover className={popoverTransitionClasses}>
+				<ListBox
+					className="bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 w-full overflow-auto text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+					items={properties}
+				>
+					{(item) => (
+						<ListBoxItem className="font-normal truncate cursor-default select-none py-1 px-2 data-[focused]:bg-secondary text-white">
+							{capitalCase(item.id)}
+						</ListBoxItem>
+					)}
+				</ListBox>
+			</Popover>
+		</ComboBox>
 	);
 }
 

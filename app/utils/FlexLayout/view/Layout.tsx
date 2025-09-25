@@ -19,7 +19,6 @@ import { TabSetNode } from "../model/TabSetNode";
 import { BorderTab } from "./BorderTab";
 import { BorderTabSet } from "./BorderTabSet";
 import { DragContainer } from "./DragContainer";
-import { ErrorBoundary } from "./ErrorBoundary";
 import { PopoutWindow } from "./PopoutWindow";
 import {
 	AsterickIcon,
@@ -733,11 +732,7 @@ export class LayoutInternal extends React.Component<
 								tabsRevision={this.props.renderRevision}
 								key={key}
 							>
-								<ErrorBoundary
-									message={this.i18nName(I18nLabel.Error_rendering_component)}
-								>
-									{this.props.factory(child)}
-								</ErrorBoundary>
+								{this.props.factory(child)}
 							</SizeTracker>,
 							element,
 							key,

@@ -5,6 +5,8 @@ import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
 import { CoreFlexLayoutContext } from "./CoreFlexLayoutContext";
 
 import { Layout, type TabNode } from "@thorium/utils/FlexLayout";
+import { ErrorBoundary, useErrorBoundary } from "react-error-boundary";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export const CoreFlexLayout = forwardRef<Layout>((_, ref) => {
 	const { layoutModel, setInitialModel } = useContext(CoreFlexLayoutContext);
@@ -36,10 +38,30 @@ function flexLayoutFactory(node: TabNode) {
 	if (Core)
 		return (
 			<CardProvider cardName={compName} cardLoaded isWidget={false}>
-				<Suspense fallback={<LoadingSpinner compact />}>
-					<Core />
-				</Suspense>
+				<ErrorBoundary
+					fallback={
+						<div className="p-4">
+							Error loading core.
+							<ErrorReset />
+						</div>
+					}
+				>
+					<Suspense fallback={<LoadingSpinner compact />}>
+						<Core />
+					</Suspense>
+				</ErrorBoundary>
 			</CardProvider>
 		);
+	return null;
+}
+
+function ErrorReset() {
+	const { shipId } = useStation();
+	const { resetBoundary } = useErrorBoundary();
+	useEffect(() => {
+		if (shipId) {
+			resetBoundary();
+		}
+	}, [shipId, resetBoundary]);
 	return null;
 }

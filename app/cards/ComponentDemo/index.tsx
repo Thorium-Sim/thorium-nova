@@ -4,7 +4,7 @@ import RadialDial from "@thorium/ui/RadialDial";
 import Select from "@thorium/ui/Select";
 import SineWave from "@thorium/ui/SineWave";
 import Modal from "@thorium/ui/Modal";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import SearchableList from "@thorium/ui/SearchableList";
 import InfoTip from "@thorium/ui/InfoTip";
 import TagInput from "@thorium/ui/TagInput";
@@ -15,6 +15,9 @@ import SearchableInput, {
 import type { QueryFunctionContext } from "@tanstack/react-query";
 import { Icon } from "@thorium/ui/Icon";
 import { Button as RAButton } from "react-aria-components";
+import { PropertyCombobox } from "@thorium/components/Config/EntityQueryBuilder";
+import { useTransition } from "@thorium/ui/Transition";
+import { cn } from "@thorium/utils/cn";
 const ModalDemo = ({
 	title,
 	children,
@@ -116,8 +119,25 @@ export function ComponentDemo() {
 	const [selected, setSelected] = useState<null | { id: number; name: string }>(
 		null,
 	);
+
+	const ref = useRef<HTMLDivElement>(null);
+	const [isOpen, setIsOpen] = useState(false);
+	const transitionState = useTransition(ref, isOpen);
+	console.log(transitionState);
 	return (
 		<div className="flex flex-col gap-8 text-white h-full overflow-y-auto p-4">
+			<Button onClick={() => setIsOpen((o) => !o)}>Toggle</Button>
+			<div
+				ref={ref}
+				className={cn(
+					"transition-all w-8 h-8 rounded bg-pink-500 opacity-0 duration-1000 scale-100 rotate-0",
+					{
+						"opacity-100": isOpen,
+						"scale-150": transitionState === "entering",
+						"rotate-90": transitionState === "exiting",
+					},
+				)}
+			/>
 			<div className="flex flex-col gap-4">
 				<h2 className="text-3xl">Alert</h2>
 				<div className="alert">
