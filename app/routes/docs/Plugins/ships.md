@@ -12,11 +12,11 @@ correct rotation and scale when you export it:
 
 - Rotated with the front facing +Z and the top facing -Y
 
-![Rotation](./images/rotation.jpg)
+![Rotation](./images/rotation.avif)
 
 - Scaled so the ship is roughly 1 meter long.
 
-![scale](./images/scale.jpg)
+![scale](./images/scale.avif)
 
 Ships will automatically be scaled up or down based on the configuration of the
 ship itself, not the size of the model. Having all ship models be 1 meter long

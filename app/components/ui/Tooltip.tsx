@@ -9,8 +9,9 @@ import {
 	useRole,
 	type Placement,
 } from "@floating-ui/react";
-import { Portal } from "@headlessui/react";
+
 import { forwardRef, type ReactNode, useState } from "react";
+import { Portal } from "@thorium/ui/Portal";
 
 export const Tooltip = forwardRef<
 	HTMLDivElement,

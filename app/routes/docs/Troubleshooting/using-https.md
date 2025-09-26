@@ -33,7 +33,7 @@ The first time you do this, you will likely see a warning from the browser about
 the security of the connection. Different browsers provide different ways to
 ignore this warning.
 
-![Google Chrome showing a security warning](./insecure.png)
+![Google Chrome showing a security warning](./insecure.avif)
 
 In Google Chrome, you need to click on the page and type `thisisunsafe` into the
 window. There isn't a text box to type it into, you just type it on the window.

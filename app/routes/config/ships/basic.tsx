@@ -3,11 +3,11 @@ import { Fragment, useState } from "react";
 import Input from "@thorium/ui/Input";
 import TagInput from "@thorium/ui/TagInput";
 import { toast } from "@thorium/context/ToastContext";
-import { Popover, Transition } from "@headlessui/react";
 import SearchableList from "@thorium/ui/SearchableList";
 import { q } from "@thorium/context/AppContext";
 import { Icon } from "@thorium/ui/Icon";
 import { Navigate } from "@thorium/components/Navigate";
+import Select from "@thorium/ui/Select";
 
 export default function Basic() {
 	const { pluginId, shipId } = useParams() as {
@@ -106,69 +106,31 @@ export default function Basic() {
 							});
 						}}
 					/>
-					<span>Theme</span>
-					<div className="flex flex-wrap items-center">
-						<p>
-							{ship.theme?.themeId ? (
-								<>
-									{ship.theme.themeId} ({ship.theme.pluginId})
-								</>
-							) : (
-								"Default Theme"
-							)}
-						</p>
-						<Popover className="relative">
-							{({ open, close }) => (
-								<>
-									<Popover.Button
-										className={`btn btn-primary ml-4
-             ${open ? "" : "text-opacity-90"}
-             group`}
-									>
-										<span>Change Theme</span>
-										<Icon
-											name="chevron-down"
-											className={`${open ? "" : "text-opacity-70"}
-               ml-2 h-5 w-5 group-hover:text-opacity-80 transition ease-in-out duration-150`}
-											aria-hidden="true"
-										/>
-									</Popover.Button>
-									<Transition
-										as={Fragment}
-										enter="transition ease-out duration-200"
-										enterFrom="opacity-0 translate-y-1"
-										enterTo="opacity-100 translate-y-0"
-										leave="transition ease-in duration-150"
-										leaveFrom="opacity-100 translate-y-0"
-										leaveTo="opacity-0 translate-y-1"
-									>
-										<Popover.Panel className="absolute z-10 w-screen max-w-sm mt-3 sm:px-0">
-											<div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5  backdrop-filter backdrop-blur bg-black/70 p-4">
-												<SearchableList
-													items={
-														allThemes.map((t) => ({
-															id: t,
-															label: t.themeId,
-															category: t.pluginId,
-														})) || []
-													}
-													selectedItem={ship.theme}
-													setSelectedItem={({ id }) => {
-														q.plugin.ship.update.netSend({
-															pluginId,
-															shipId,
-															theme: id,
-														});
-														close();
-													}}
-												/>
-											</div>
-										</Popover.Panel>
-									</Transition>
-								</>
-							)}
-						</Popover>
-					</div>
+
+					<Select
+						label="Theme"
+						selected={
+							ship.theme
+								? [ship.theme.themeId, ship.theme.pluginId].join(":::")
+								: null
+						}
+						setSelected={(id) => {
+							if (typeof id !== "string") return;
+							const [themeId, themePlugin] = id.split(":::");
+							q.plugin.ship.update.netSend({
+								pluginId,
+								shipId,
+								theme: { themeId, pluginId: themePlugin },
+							});
+						}}
+						items={
+							allThemes.map((t) => ({
+								id: `${t.themeId}:::${t.pluginId}`,
+								label: t.themeId,
+								category: t.pluginId,
+							})) || []
+						}
+					/>
 				</div>
 			</div>
 		</fieldset>

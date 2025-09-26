@@ -1,8 +1,18 @@
 import { Fragment, type ReactElement, type ReactNode, useState } from "react";
-import { Combobox, Transition } from "@headlessui/react";
 import { type QueryFunctionContext, useQuery } from "@tanstack/react-query";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { Icon } from "./Icon";
+import {
+	Button,
+	Collection,
+	ComboBox,
+	Input,
+	ListBox,
+	ListBoxItem,
+	Popover,
+} from "react-aria-components";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
+import { useAsyncList } from "react-stately";
 
 export function DefaultResultLabel({
 	children,
@@ -51,87 +61,87 @@ export default function SearchableInput<T extends { id: any }>({
 		disabled: boolean;
 		active: boolean;
 	}) => ReactElement;
-	getOptions: (
-		queryOptions: QueryFunctionContext<[string, string]>,
-	) => Promise<T[]>;
+	getOptions: (queryOptions: {
+		queryKey: [string, string];
+		signal?: AbortSignal;
+	}) => Promise<T[]>;
 	selected?: T | null;
 	setSelected?: (item: T | null) => void;
 	placeholder?: string;
 	inputClassName?: string;
 }) {
-	const [query, setQuery] = useState("");
-
-	const searchQuery = useQuery({
-		queryKey: [queryKey, query],
-		queryFn: getOptions,
-		placeholderData: (prev) => (query === "" ? [] : prev || []),
-		enabled: query.length > 0,
+	const list = useAsyncList<T>({
+		async load({ signal, cursor, filterText = "" }) {
+			const result = await getOptions({
+				signal,
+				queryKey: ["queryKey", filterText],
+			});
+			return {
+				items: result,
+			};
+		},
 	});
 
 	return (
-		<Combobox value={selected} onChange={setSelected || (() => {})}>
+		<ComboBox
+			inputValue={list.filterText}
+			onInputChange={list.setFilterText}
+			selectedKey={selected?.id}
+			onSelectionChange={(key) => {
+				const item = list.items.find((d) => d.id === key) || null;
+				setSelected?.(item);
+				list.setFilterText(displayValue(item as T));
+			}}
+			menuTrigger="focus"
+		>
 			<div className="relative mt-1">
 				<div className="relative w-full cursor-default overflow-hidden rounded-lg text-left focus:outline-none sm:text-sm">
-					<Combobox.Input
+					<Input
+						aria-label="Search"
 						className={`input w-full pointer-events-auto ${
 							inputClassName || ""
 						}`}
-						displayValue={displayValue}
-						defaultValue={query as unknown as T}
-						onChange={(event) => setQuery(event.target.value)}
 						placeholder={placeholder}
 					/>
-					<Combobox.Button className="absolute pointer-events-auto inset-y-0 right-0 flex items-center pr-2">
+					<Button className="absolute pointer-events-auto inset-y-0 right-0 flex items-center pr-2">
 						<Icon
 							name="chevrons-up-down"
 							className="h-5 w-5 text-gray-400"
 							aria-hidden="true"
 						/>
-					</Combobox.Button>
+					</Button>
 				</div>
-				<Transition
-					as={Fragment}
-					leave="transition ease-in duration-100"
-					leaveFrom="opacity-100"
-					leaveTo="opacity-0"
-					afterLeave={() => {
-						setQuery("");
-					}}
-				>
-					<Combobox.Options className="absolute pointer-events-auto mt-1 max-h-60 w-full overflow-auto panel !bg-black/90 z-40">
-						{searchQuery.data?.length === 0 && searchQuery.isFetching ? (
-							<div className="relative cursor-default select-none py-2 px-4">
-								<LoadingSpinner compact />
-							</div>
-						) : searchQuery.data?.length === 0 && query !== "" ? (
-							<div className="relative cursor-default select-none py-2 px-4">
-								Nothing found.
-							</div>
-						) : (
-							searchQuery.data?.map((result) => (
-								<Combobox.Option
-									key={result.id}
-									className={({ active }) =>
-										`relative cursor-default select-none py-2 pl-2 pr-4 ${
-											active ? "bg-primary text-white" : "text-gray-200"
-										}`
-									}
-									value={result}
-								>
-									{({ active, disabled, selected }) => (
-										<ResultLabel
-											result={result}
-											active={active}
-											disabled={disabled}
-											selected={selected}
-										/>
-									)}
-								</Combobox.Option>
-							))
+				<Popover className={popoverTransitionClasses}>
+					<ListBox
+						items={list.items}
+						className=" mt-1 max-h-60 w-full overflow-auto panel !bg-black/90"
+						renderEmptyState={() => (
+							<div className="my-item">No results found</div>
 						)}
-					</Combobox.Options>
-				</Transition>
+					>
+						{(item) => (
+							<ListBoxItem
+								id={item.id}
+								className={({ isFocused }) =>
+									`relative cursor-default select-none py-2 pl-2 pr-4 ${
+										isFocused ? "bg-primary text-white" : "text-gray-200"
+									}`
+								}
+								textValue={displayValue(item)}
+							>
+								{({ isSelected, isFocused, isDisabled }) => (
+									<ResultLabel
+										result={item}
+										active={isFocused}
+										disabled={isDisabled}
+										selected={isSelected}
+									/>
+								)}
+							</ListBoxItem>
+						)}
+					</ListBox>
+				</Popover>
 			</div>
-		</Combobox>
+		</ComboBox>
 	);
 }

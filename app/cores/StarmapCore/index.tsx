@@ -48,16 +48,16 @@ import { Torpedo } from "@thorium/components/Starmap/Torpedo";
 import { FiringPhasers } from "./FiringPhasers";
 import { cn } from "@thorium/utils/cn";
 import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
-import {
-	Disclosure,
-	DisclosureButton,
-	DisclosurePanel,
-	Transition,
-} from "@headlessui/react";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { usePrompt } from "@thorium/ui/AlertDialog";
 import { useStation } from "@thorium/routes/station/useStation";
 import { useTranslate2DTo3D } from "@thorium/hooks/useTranslate2DTo3D";
+import {
+	Disclosure,
+	DisclosurePanel,
+	Heading,
+	Button as RAButton,
+} from "react-aria-components";
 
 export function StarmapCore() {
 	const ref = useRef<HTMLDivElement>(null);
@@ -379,34 +379,39 @@ export function EditorDisclosure({
 	);
 	const disclosureRef = useRef<HTMLDivElement>(null);
 	return (
-		<Disclosure defaultOpen={isDefaultOpen}>
-			{({ open }) => (
+		<Disclosure defaultExpanded={isDefaultOpen}>
+			{({ isExpanded }) => (
 				<>
-					<HandleIsOpen open={open} title={title} scrollRef={disclosureRef} />
-					<div className="w-full sticky -top-1" ref={disclosureRef}>
-						<DisclosureButton className="btn btn-xs justify-between btn-block">
+					<HandleIsOpen
+						open={isExpanded}
+						title={title}
+						scrollRef={disclosureRef}
+					/>
+					<Heading className="w-full sticky -top-1" ref={disclosureRef}>
+						<RAButton
+							slot="trigger"
+							className="btn btn-xs justify-between btn-block"
+						>
 							<span>{title}</span>
 							<Icon
 								name="chevron-up"
 								className={` transition-transform${
-									open ? "transform rotate-180" : ""
+									isExpanded ? "transform rotate-180" : ""
 								} w-5 h-5`}
 							/>
-						</DisclosureButton>
-					</div>
-					<Transition>
-						<DisclosurePanel
-							className={cn(
-								"pb-2 px-2",
-								"relative scale-100 ease-out",
-								"data-[closed]:opacity-0 data-[closed]:scale-95",
-								"data-[enter]:duration-100",
-								"data-[leave]:duration-75",
-							)}
-						>
-							<Suspense>{children}</Suspense>
-						</DisclosurePanel>
-					</Transition>
+						</RAButton>
+					</Heading>
+					<DisclosurePanel
+						className={cn(
+							"pb-2 px-2",
+							"relative scale-100 ease-out",
+							"data-[closed]:opacity-0 data-[closed]:scale-95",
+							"data-[enter]:duration-100",
+							"data-[leave]:duration-75",
+						)}
+					>
+						<Suspense>{children}</Suspense>
+					</DisclosurePanel>
 				</>
 			)}
 		</Disclosure>

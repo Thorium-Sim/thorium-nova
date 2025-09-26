@@ -12,7 +12,6 @@ import {
 } from "@thorium/utils/unitTypes";
 import { Box3, type Camera, Vector3 } from "three";
 import Button from "../ui/Button";
-import { Menu, Transition, Disclosure } from "@headlessui/react";
 import { useConfirm } from "@thorium/ui/AlertDialog";
 import Disc from "./Disc";
 import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
@@ -34,6 +33,18 @@ import { starTypes } from "@thorium/utils/flags/starTypes";
 import { planetTypes } from "@thorium/utils/flags/planetTypes";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { CameraControls } from "@react-three/drei";
+import {
+	Disclosure,
+	DisclosurePanel,
+	Heading,
+	Menu,
+	MenuItem,
+	MenuTrigger,
+	Popover,
+	Button as RAButton,
+} from "react-aria-components";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
+
 const ACTION = CameraControlsClass.ACTION;
 
 // 10% further than Neptune's orbit
@@ -218,57 +229,43 @@ function AddStarMenu() {
 	const useStarmapStore = useGetStarmapStore();
 
 	return (
-		<Menu as="div" className="relative inline-block text-left">
-			<div>
-				<Menu.Button className="btn btn-error btn-outline btn-xs">
-					Add Star
-					<Icon
-						name="chevron-down"
-						className="w-5 h-5 ml-2 -mr-1"
-						aria-hidden="true"
-					/>
-				</Menu.Button>
-			</div>
-			<Transition
-				as={React.Fragment}
-				enter="transition ease-out duration-100"
-				enterFrom="transform opacity-0 scale-95"
-				enterTo="transform opacity-100 scale-100"
-				leave="transition ease-in duration-75"
-				leaveFrom="transform opacity-100 scale-100"
-				leaveTo="transform opacity-0 scale-95"
-			>
-				<Menu.Items
-					static
-					className="z-30 absolute left-0 w-56 mt-2 origin-top-right bg-gray-900 divide-y divide-gray-800 rounded-md shadow-lg ring-1 ring-white ring-opacity-5 focus:outline-none"
-				>
+		<MenuTrigger>
+			<RAButton className="btn btn-error btn-outline btn-xs">
+				Add Star
+				<Icon
+					name="chevron-down"
+					className="w-5 h-5 ml-2 -mr-1"
+					aria-hidden="true"
+				/>
+			</RAButton>
+			<Popover className={popoverTransitionClasses}>
+				<Menu className="w-56 mt-2 origin-top-right bg-gray-900 divide-y divide-gray-800 rounded-md shadow-lg ring-1 ring-white ring-opacity-5 focus:outline-none">
 					{starTypes.map((starType) => (
-						<Menu.Item key={starType.spectralType}>
-							{({ active }) => (
-								<button
-									className={`${
-										active ? "bg-violet-900 text-white" : "text-gray-200"
-									} group flex items-center w-full px-2 py-2 text-sm`}
-									onClick={async () => {
-										const result = await q.plugin.starmap.star.create.netSend({
-											pluginId,
-											solarSystemId,
-											spectralType: starType.spectralType,
-										});
-										useStarmapStore.setState({
-											selectedObjectIds: [result.name],
-										});
-									}}
-								>
-									{starType.spectralType} - {starType.name} (
-									{Math.round(starType.prevalence * 1000) / 10}% Common)
-								</button>
-							)}
-						</Menu.Item>
+						<MenuItem
+							key={starType.spectralType}
+							className={({ isFocused }) =>
+								`${
+									isFocused ? "bg-violet-900 text-white" : "text-gray-200"
+								} group flex items-center w-full px-2 py-2 text-sm`
+							}
+							onAction={async () => {
+								const result = await q.plugin.starmap.star.create.netSend({
+									pluginId,
+									solarSystemId,
+									spectralType: starType.spectralType,
+								});
+								useStarmapStore.setState({
+									selectedObjectIds: [result.name],
+								});
+							}}
+						>
+							{starType.spectralType} - {starType.name} (
+							{Math.round(starType.prevalence * 1000) / 10}% Common)
+						</MenuItem>
 					))}
-				</Menu.Items>
-			</Transition>
-		</Menu>
+				</Menu>
+			</Popover>
+		</MenuTrigger>
 	);
 }
 
@@ -277,58 +274,44 @@ function AddPlanetMenu() {
 	const useStarmapStore = useGetStarmapStore();
 
 	return (
-		<Menu as="div" className="relative inline-block text-left">
+		<MenuTrigger>
 			<div>
-				<Menu.Button className="btn btn-primary btn-outline btn-xs">
+				<RAButton className="btn btn-primary btn-outline btn-xs">
 					Add Planet
 					<Icon
 						name="chevron-down"
 						className="w-5 h-5 ml-2 -mr-1"
 						aria-hidden="true"
 					/>
-				</Menu.Button>
+				</RAButton>
 			</div>
-			<Transition
-				as={React.Fragment}
-				enter="transition ease-out duration-100"
-				enterFrom="transform opacity-0 scale-95"
-				enterTo="transform opacity-100 scale-100"
-				leave="transition ease-in duration-75"
-				leaveFrom="transform opacity-100 scale-100"
-				leaveTo="transform opacity-0 scale-95"
-			>
-				<Menu.Items
-					static
-					className="z-30 absolute left-0 w-56 mt-2 origin-top-right bg-gray-900 divide-y divide-gray-800 rounded-md shadow-lg ring-1 ring-white ring-opacity-5 focus:outline-none"
-				>
+			<Popover className={popoverTransitionClasses}>
+				<Menu className="w-56 mt-2 origin-top-right bg-gray-900 divide-y divide-gray-800 rounded-md shadow-lg ring-1 ring-white ring-opacity-5 focus:outline-none">
 					{planetTypes.map((planetType) => (
-						<Menu.Item key={planetType.classification}>
-							{({ active }) => (
-								<button
-									className={`${
-										active ? "bg-violet-900 text-white" : "text-gray-200"
-									} group flex items-center w-full px-2 py-2 text-sm`}
-									onClick={async () => {
-										const result = await q.plugin.starmap.planet.create.netSend(
-											{
-												pluginId,
-												solarSystemId,
-												planetType: planetType.classification,
-											},
-										);
-										useStarmapStore.setState({
-											selectedObjectIds: [result.name],
-										});
-									}}
-								>
-									{planetType.classification} - {planetType.name}
-								</button>
-							)}
-						</Menu.Item>
+						<MenuItem
+							key={planetType.classification}
+							className={({ isFocused }) =>
+								`${
+									isFocused ? "bg-violet-900 text-white" : "text-gray-200"
+								} group flex items-center w-full px-2 py-2 text-sm`
+							}
+							onAction={async () => {
+								const result = await q.plugin.starmap.planet.create.netSend({
+									pluginId,
+									solarSystemId,
+									planetType: planetType.classification,
+								});
+								useStarmapStore.setState({
+									selectedObjectIds: [result.name],
+								});
+							}}
+						>
+							{planetType.classification} - {planetType.name}
+						</MenuItem>
 					))}
-				</Menu.Items>
-			</Transition>
-		</Menu>
+				</Menu>
+			</Popover>
+		</MenuTrigger>
 	);
 }
 
@@ -374,36 +357,32 @@ export function PaletteDisclosure({
 	);
 	const disclosureRef = React.useRef<HTMLDivElement>(null);
 	return (
-		<Disclosure defaultOpen={isDefaultOpen}>
-			{({ open }) => (
+		<Disclosure defaultExpanded={isDefaultOpen}>
+			{({ isExpanded }) => (
 				<>
-					<HandleIsOpen open={open} title={title} scrollRef={disclosureRef} />
-					<div
+					<HandleIsOpen
+						open={isExpanded}
+						title={title}
+						scrollRef={disclosureRef}
+					/>
+					<Heading
 						className="w-full py-1 px-2 bg-gray-900 sticky -top-1"
 						ref={disclosureRef}
 					>
-						<Disclosure.Button className="btn btn-notice btn-sm justify-between btn-block">
+						<RAButton className="btn btn-notice btn-sm justify-between btn-block">
 							<span>{title}</span>
 							<Icon
 								name="chevron-up"
 								className={` transition-transform${
-									open ? "transform rotate-180" : ""
+									isExpanded ? "transform rotate-180" : ""
 								} w-5 h-5`}
 							/>
-						</Disclosure.Button>
-					</div>
-					<Transition
-						enter="transition duration-100 ease-out"
-						enterFrom="transform scale-95 opacity-0"
-						enterTo="transform scale-100 opacity-100"
-						leave="transition duration-75 ease-out"
-						leaveFrom="transform scale-100 opacity-100"
-						leaveTo="transform scale-95 opacity-0"
-					>
-						<Disclosure.Panel className="pt-4 pb-2 px-2 border-b border-b-gray-700">
-							{children}
-						</Disclosure.Panel>
-					</Transition>
+						</RAButton>
+					</Heading>
+
+					<DisclosurePanel className="pt-4 pb-2 px-2 border-b border-b-gray-700">
+						{children}
+					</DisclosurePanel>
 				</>
 			)}
 		</Disclosure>

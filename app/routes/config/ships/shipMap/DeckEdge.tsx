@@ -1,11 +1,11 @@
 import Button from "@thorium/ui/Button";
 import { useConfirm } from "@thorium/ui/AlertDialog";
 import { offset, shift, useFloating } from "@floating-ui/react-dom";
-import { Portal } from "@headlessui/react";
 import { useDeckNode } from "./DeckNodeContext";
 import { useEdgeRerender } from "./EdgeContextProvider";
 import type { DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
 import type { EdgeFlag } from "@thorium/utils/flags/DeckEdge";
+import { Portal } from "@thorium/ui/Portal";
 
 const pixelRatio = typeof window === "undefined" ? 1 : window.devicePixelRatio;
 export function DeckEdge({

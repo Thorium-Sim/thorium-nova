@@ -39,14 +39,14 @@ you can add a description, tags, and a cover image. These last two items won't
 really be useful until the Thorium Plugin Registry is available, which lets
 users share the plugins that they've created.
 
-![Plugin Config](./images/plugin-config.jpg)
+![Plugin Config](./images/plugin-config.avif)
 
 The actual content of the plugin is handled by "Plugin Aspects", which are the
 different pieces that can be configured. You can see the aspects that can be
 configured by clicking the edit icon next to the plugin in the list, or by
 clicking the "Edit Plugin" button.
 
-![Plugin Aspects](./images/aspects.jpg)
+![Plugin Aspects](./images/aspects.avif)
 
 Currently, only the "Ships" aspect is available, since it's the only one that
 has been developed. You can learn more about editing aspects on the

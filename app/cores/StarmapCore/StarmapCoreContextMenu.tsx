@@ -1,11 +1,11 @@
 import { autoPlacement, useFloating } from "@floating-ui/react";
-import { Portal } from "@headlessui/react";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import { toast } from "@thorium/context/ToastContext";
 import useEventListener from "@thorium/hooks/useEventListener";
 import { useRightClick } from "@thorium/hooks/useRightClick";
 import { type RefObject, useState } from "react";
 import { q } from "@thorium/context/AppContext";
+import { Portal } from "@thorium/ui/Portal";
 
 function makeVirtualEl({ x: X, y: Y }: { x: number; y: number }) {
 	const virtualEl = {

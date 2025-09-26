@@ -18,6 +18,7 @@ import { Button as RAButton } from "react-aria-components";
 import { PropertyCombobox } from "@thorium/components/Config/EntityQueryBuilder";
 import { useTransition } from "@thorium/ui/Transition";
 import { cn } from "@thorium/utils/cn";
+import { useAlert, useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
 const ModalDemo = ({
 	title,
 	children,
@@ -90,7 +91,7 @@ const TagInputDemo = () => {
 
 async function searchableInputQuery({
 	queryKey,
-}: QueryFunctionContext<[string, string]>) {
+}: { queryKey: [string, string] }) {
 	await new Promise((res) => setTimeout(res, 1000 + Math.random() * 500));
 	const [key, query] = queryKey;
 	const people = [
@@ -123,9 +124,35 @@ export function ComponentDemo() {
 	const ref = useRef<HTMLDivElement>(null);
 	const [isOpen, setIsOpen] = useState(false);
 	const transitionState = useTransition(ref, isOpen);
-	console.log(transitionState);
+
+	const alert = useAlert();
+	const prompt = usePrompt();
+	const confirm = useConfirm();
+
 	return (
 		<div className="flex flex-col gap-8 text-white h-full overflow-y-auto p-4">
+			<div className="flex gap-4">
+				<Button onClick={() => alert({ header: "This is an alert" })}>
+					Alert
+				</Button>
+				<Button
+					onClick={() =>
+						prompt({
+							header: "What do you want to write?",
+							body: "You can write anything you like.",
+						})
+					}
+				>
+					Prompt
+				</Button>
+				<Button
+					onClick={() =>
+						confirm({ header: "Yes or no?", body: "Choose carefully." })
+					}
+				>
+					Confirm
+				</Button>
+			</div>
 			<Button onClick={() => setIsOpen((o) => !o)}>Toggle</Button>
 			<div
 				ref={ref}

@@ -1,9 +1,9 @@
 import * as React from "react";
-import { Portal } from "@headlessui/react";
 import { useDrag } from "@use-gesture/react";
 import { animated } from "@react-spring/web";
 import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
 import { Icon } from "./Icon";
+import { Portal } from "@thorium/ui/Portal";
 
 export function EditorPalette({
 	isOpen,
@@ -14,7 +14,9 @@ export function EditorPalette({
 	onClose: () => void;
 	children: React.ReactNode;
 }) {
-	const [[x, y], setXY] = useLocalStorage("editorPalettePosition", [0, 0]);
+	const [position, setXY] = useLocalStorage("editorPalettePosition", [0, 0]);
+	const x = position[0];
+	const y = position[1];
 
 	const bind = useDrag(
 		({ offset: [x, y] }) => {

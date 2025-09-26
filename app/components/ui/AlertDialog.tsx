@@ -1,6 +1,9 @@
 import * as React from "react";
-import { Dialog, DialogBackdrop, Transition } from "@headlessui/react";
+
 import Button from "./Button";
+import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
+import { cn } from "@thorium/utils/cn";
 interface DialogI {
 	header: string;
 	body?: string;
@@ -105,35 +108,23 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 	return (
 		<DialogContext.Provider value={openConfirm}>
 			{children}
-			<Transition show={isOpen} as={React.Fragment}>
-				<Dialog
-					initialFocus={type === "prompt" ? inputEl : okayButton}
-					open={isOpen}
-					onClose={() => close()}
-					className="theme-container fixed z-10 inset-0 overflow-y-auto"
-				>
-					<div className="flex items-center justify-center min-h-screen">
-						<Transition.Child
-							enter="ease-out duration-300"
-							enterFrom="opacity-0"
-							enterTo="opacity-100"
-							leave="ease-in duration-200"
-							leaveFrom="opacity-100"
-							leaveTo="opacity-0"
-						>
-							<DialogBackdrop className="fixed inset-0 bg-black opacity-30" />
-						</Transition.Child>
-						<Transition.Child
-							as={React.Fragment}
-							enter="ease-out duration-300"
-							enterFrom="opacity-0 scale-95"
-							enterTo="opacity-100 scale-100"
-							leave="ease-in duration-200"
-							leaveFrom="opacity-100 scale-100"
-							leaveTo="opacity-0 scale-95"
-						>
-							<div className="z-10 alert-dialog bg-gray-900 text-gray-50 rounded max-w-sm w-full mx-auto p-4 shadow-lg">
-								<Dialog.Title className="text-2xl mb-2">{header}</Dialog.Title>
+			<ModalOverlay
+				isOpen={isOpen}
+				onOpenChange={(isOpen) => setIsOpen(isOpen)}
+				className={cn(
+					"fixed inset-0 z-10 overflow-y-auto bg-black/40 flex min-h-full w-full items-center justify-center p-4 backdrop-blur",
+					"transition-all duration-200 data-[entering]:opacity-0 data-[exiting]:opacity-0",
+				)}
+			>
+				<Modal className={`theme-container ${popoverTransitionClasses} w-full`}>
+					<Dialog
+						role="alertdialog"
+						className="alert-dialog bg-gray-900 text-gray-50 border border-white/20 rounded max-w-sm w-full mx-auto p-4 shadow-lg"
+					>
+						{({ close }) => (
+							<>
+								<Heading slot="title">{header}</Heading>
+
 								{type === "prompt" ? (
 									<div>
 										<label>
@@ -148,7 +139,7 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 										</label>
 									</div>
 								) : (
-									<Dialog.Description>{body}</Dialog.Description>
+									<p>{body}</p>
 								)}
 								<div className="flex justify-end mt-4 space-x-4">
 									{type !== "alert" && (
@@ -172,12 +163,50 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 										OK
 									</Button>
 								</div>
-							</div>
-						</Transition.Child>
-					</div>
-				</Dialog>
-			</Transition>
+							</>
+						)}
+					</Dialog>
+				</Modal>
+			</ModalOverlay>
 		</DialogContext.Provider>
+
+		// <DialogContext.Provider value={openConfirm}>
+		// 	{children}
+		// 	<Transition show={isOpen} as={React.Fragment}>
+		// 		<Dialog
+		// 			initialFocus={type === "prompt" ? inputEl : okayButton}
+		// 			open={isOpen}
+		// 			onClose={() => close()}
+		// 			className="theme-container fixed z-10 inset-0 overflow-y-auto"
+		// 		>
+		// 			<div className="flex items-center justify-center min-h-screen">
+		// 				<Transition.Child
+		// 					enter="ease-out duration-300"
+		// 					enterFrom="opacity-0"
+		// 					enterTo="opacity-100"
+		// 					leave="ease-in duration-200"
+		// 					leaveFrom="opacity-100"
+		// 					leaveTo="opacity-0"
+		// 				>
+		// 					<DialogBackdrop className="fixed inset-0 bg-black opacity-30" />
+		// 				</Transition.Child>
+		// 				<Transition.Child
+		// 					as={React.Fragment}
+		// 					enter="ease-out duration-300"
+		// 					enterFrom="opacity-0 scale-95"
+		// 					enterTo="opacity-100 scale-100"
+		// 					leave="ease-in duration-200"
+		// 					leaveFrom="opacity-100 scale-100"
+		// 					leaveTo="opacity-0 scale-95"
+		// 				>
+		// 					<div className="z-10 alert-dialog bg-gray-900 text-gray-50 rounded max-w-sm w-full mx-auto p-4 shadow-lg">
+		// 						<Dialog.Title className="text-2xl mb-2">{header}</Dialog.Title>
+
+		// 				</Transition.Child>
+		// 			</div>
+		// 		</Dialog>
+		// 	</Transition>
+		// </DialogContext.Provider>
 	);
 };
 

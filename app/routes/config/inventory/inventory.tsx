@@ -10,10 +10,18 @@ import UploadWell from "@thorium/ui/UploadWell";
 import { capitalCase } from "change-case";
 import InfoTip from "@thorium/ui/InfoTip";
 import { q } from "@thorium/context/AppContext";
-import { Popover, Transition } from "@headlessui/react";
+
 import { Icon } from "@thorium/ui/Icon";
 import Select from "@thorium/ui/Select";
 import { InventoryFlagValues } from "@thorium/utils/flags/InventoryFlags";
+import {
+	Dialog,
+	DialogTrigger,
+	OverlayArrow,
+	Popover,
+	Button as RAButton,
+} from "react-aria-components";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
 
 export default function InventoryLayout() {
 	const { inventoryId, pluginId } = useParams() as {
@@ -249,22 +257,21 @@ export default function InventoryLayout() {
 							/>
 							{defaultValue &&
 							Object.keys(value).filter((t) => t !== "info").length > 0 ? (
-								<Popover className="relative">
-									<Popover.Button
-										as={Button}
-										className="btn-xs btn-warning btn-outline"
+								<DialogTrigger>
+									<RAButton
+										aria-label="Configure Flag"
+										className="btn btn-xs btn-warning btn-outline"
 									>
 										<Icon name="pencil" />
-									</Popover.Button>
-									<Transition
-										enter="transition duration-100 ease-out"
-										enterFrom="transform scale-95 opacity-0"
-										enterTo="transform scale-100 opacity-100"
-										leave="transition duration-75 ease-out"
-										leaveFrom="transform scale-100 opacity-100"
-										leaveTo="transform scale-95 opacity-0"
-									>
-										<Popover.Panel className="absolute right-0 z-10 bg-black/90 border border-white/50 rounded p-2 w-max max-w-lg">
+									</RAButton>
+									<Popover className={popoverTransitionClasses}>
+										<OverlayArrow>
+											{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
+											<svg width={12} height={12} viewBox="0 0 12 12">
+												<path d="M0 0 L6 6 L12 0" />
+											</svg>
+										</OverlayArrow>
+										<Dialog className="bg-black/90 border border-white/50 rounded p-2 w-max max-w-lg text-white">
 											{Object.entries(value).map(([config, value]) => {
 												if (config === "info") return null;
 												function updateValue(value: any) {
@@ -343,9 +350,9 @@ export default function InventoryLayout() {
 													);
 												return null;
 											})}
-										</Popover.Panel>
-									</Transition>
-								</Popover>
+										</Dialog>
+									</Popover>
+								</DialogTrigger>
 							) : null}
 							<InfoTip>{value.info}</InfoTip>
 						</div>

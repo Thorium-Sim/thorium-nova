@@ -141,6 +141,7 @@
 		"tailwindcss-react-aria-components": "^2.0.1",
 		"typescript": "^5.9.2",
 		"vite": "^7.1.4",
+		"vite-bundle-analyzer": "^1.2.3",
 		"vite-plugin-icons-spritesheet": "^2.2.1",
 		"vite-tsconfig-paths": "^5.1.4",
 		"vitest": "^3.2.4"

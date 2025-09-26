@@ -1,9 +1,10 @@
 import { type ReactNode, useEffect, useReducer, useState } from "react";
 import uniqid from "@thorium/utils/uniqid";
-import { Transition } from "@headlessui/react";
 import { createPortal } from "react-dom";
 import { Icon } from "@thorium/ui/Icon";
+import { Transition } from "@thorium/ui/Transition";
 
+// TODO September 25, 2025 - Replace this with React Aria Components
 const Toast = ({
 	title,
 	body = null,
@@ -17,18 +18,8 @@ const Toast = ({
 	dismiss: () => void;
 }) => {
 	return (
-		<Transition
-			as="div"
-			appear={true}
-			show={visible}
-			enter="transition-all duration-500"
-			enterFrom="opacity-0 max-h-0"
-			enterTo="opacity-100 max-h-[10rem]"
-			leave="transition-all duration-250"
-			leaveFrom="opacity-100"
-			leaveTo="opacity-0"
-		>
-			<button
+		<Transition isOpen={visible}>
+			<div
 				className={`toast alert ${
 					color === "success"
 						? "alert-success"
@@ -62,7 +53,7 @@ const Toast = ({
 					</button>
 				</div>
 				<p className="whitespace-pre-wrap">{body}</p>
-			</button>
+			</div>
 		</Transition>
 	);
 };
@@ -96,6 +87,7 @@ function toastReducer(state: Notification[], action: Notification | string) {
 export let toast = (
 	notification: Omit<Notification, "id" | "visible" | "pause" | "resume">,
 ) => {};
+
 export default function ToastContainer() {
 	const [toasts, dispatch] = useReducer(toastReducer, []);
 	useEffect(() => {
@@ -118,6 +110,7 @@ export default function ToastContainer() {
 				timeouts[uniqid()] = setTimeout(() => dispatch(id), 1000);
 			}, duration);
 		};
+
 		return () => {
 			for (const timeout in timeouts) {
 				clearTimeout(timeouts[timeout]);
