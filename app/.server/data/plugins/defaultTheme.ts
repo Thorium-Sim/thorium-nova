@@ -256,7 +256,7 @@ const defaultTheme = `@alert5: #2ba1cb;
 }
 
 // Card Transitions
-.card-transition {
+.card-transition[data-entered] {
   opacity: 1;
   transform: translateX(0);
 }

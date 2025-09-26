@@ -15,6 +15,7 @@ import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
 import CardProvider from "@thorium/context/CardContext";
 import { q, clientId } from "@thorium/context/AppContext";
 import { Transition } from "@thorium/ui/Transition";
+import Button from "@thorium/ui/Button";
 
 const CardError = () => {
 	return (
@@ -38,8 +39,9 @@ export const CardArea: React.FC<{
 		...card,
 		CardComponent: Cards[card.component as keyof typeof Cards],
 	}));
+
 	return (
-		<Fragment>
+		<div className="fade-in">
 			<Transition
 				isOpen={!client.loginName && station.name !== "Viewscreen"}
 				className="w-full h-full absolute card-transition"
@@ -60,7 +62,7 @@ export const CardArea: React.FC<{
 					key={name}
 				/>
 			))}
-		</Fragment>
+		</div>
 	);
 };
 
@@ -84,6 +86,7 @@ const CardRenderer = ({
 		<CardProvider cardName={id} cardLoaded={cardLoaded} isWidget={false}>
 			<Transition
 				key={id}
+				id={id}
 				isOpen={show}
 				afterLeave={useCallback(() => {
 					setCardLoaded(false);

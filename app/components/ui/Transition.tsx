@@ -40,6 +40,7 @@ export function Transition({
 			? { "data-exited": true, "data-exiting": true }
 			: {}),
 	};
+
 	return <div ref={ref} {...props} {...propsState} />;
 }
 
