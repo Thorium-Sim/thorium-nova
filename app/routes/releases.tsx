@@ -1,30 +1,7 @@
-import changelog from "../../CHANGELOG.md?raw";
+// @ts-expect-error
+import Changelog from "../../CHANGELOG.md";
 import { Link } from "react-router";
 import { Icon } from "@thorium/ui/Icon";
-import markdown from "markdown-it";
-
-const md = markdown();
-
-const defaultRender =
-	md.renderer.rules.link_open ||
-	((tokens, idx, options, env, self) => self.renderToken(tokens, idx, options));
-
-md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
-	// If you are sure other plugins can't add `target` - drop check below
-	const aIndex = tokens[idx].attrIndex("target");
-
-	if (aIndex < 0) {
-		tokens[idx].attrPush(["target", "_blank"]); // add new attribute
-	} else {
-		// @ts-expect-error
-		tokens[idx].attrs[aIndex][1] = "_blank"; // replace value of existing attr
-	}
-
-	// pass token to default renderer.
-	return defaultRender(tokens, idx, options, env, self);
-};
-
-const html = md.render(changelog);
 
 const Releases = () => {
 	return (
@@ -37,8 +14,7 @@ const Releases = () => {
 					<Icon name="arrow-left" className="inline -mt-1" /> Go Back
 				</Link>
 				<div className="p-8 rounded-xl md:mt-16 mb-16 backdrop-filter backdrop-blur backdrop-brightness-[0.25] backdrop-contrast-125 prose-h1:text-xl">
-					{/* biome-ignore lint/security/noDangerouslySetInnerHtml:*/}
-					<div dangerouslySetInnerHTML={{ __html: html }} />
+					<Changelog />
 				</div>
 			</div>
 		</div>

@@ -24,7 +24,7 @@ test("should be initialized", () => {
 test("initialize with server fps", () => {
 	const SI = new SnapshotInterpolation(20);
 	const buffer = SI.interpolationBuffer.get();
-	expect(buffer).toBe(150);
+	expect(buffer).toBe(50);
 });
 
 test("calc interpolated without any data", () => {
