@@ -23,7 +23,7 @@ import { sound } from "@thorium/ecs-components/sound";
 import path from "node:path";
 import { sensors } from "./sensors";
 import { mainComputer } from "./mainComputer";
-import type BaseShipSystemPlugin from "@thorium/.server/classes/Plugins/ShipSystems/BaseSystem";
+import { navigation } from "@thorium/.server/data/plugins/systems/navigation";
 
 const systemTypes = createUnionSchema(
 	Object.keys(ShipSystemTypes) as (keyof typeof ShipSystemTypes)[],
@@ -41,6 +41,7 @@ export const systems = t.router({
 	phasers,
 	sensors,
 	mainComputer,
+	navigation,
 	all: t.procedure
 		.input(z.object({ pluginId: z.string() }).optional())
 		.filter((publish: { pluginId: string } | null, { input }) => {

@@ -374,6 +374,8 @@ const quotes = [
 	"No man who has spent all of his life in a crowd ever amounts to anything.",
 	// Dad
 	"There's a reason we don’t teach gorillas to play the bagpipes. It would be futile and annoy the gorilla, especially the required kilt.",
+	// Benjamin Brewster, via Dan Abramov
+	"In theory, there is no difference between theory and practice, but in practice there is.",
 ];
 
 const QuoteOfTheDay = () => {

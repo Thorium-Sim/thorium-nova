@@ -14,6 +14,7 @@ export const iconNames = [
   "speaker",
   "sparkles",
   "siren",
+  "shuffle",
   "shield-half",
   "settings",
   "route",

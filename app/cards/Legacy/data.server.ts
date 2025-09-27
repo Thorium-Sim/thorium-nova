@@ -5,6 +5,7 @@ import { reactorControl } from "@thorium/cards/Legacy/ReactorControl/data.server
 import { sensorGrid } from "@thorium/cards/Legacy/SensorGrid/data.server";
 import { thrusters } from "@thorium/cards/Legacy/Thrusters/data.server";
 import { sensorScans } from "@thorium/cards/Legacy/SensorScans/data.server";
+import { navigation } from "@thorium/cards/Legacy/Navigation/data.server";
 
 export const legacy = t.router({
 	thrusters,
@@ -13,4 +14,5 @@ export const legacy = t.router({
 	coolantControl,
 	sensorGrid,
 	sensorScans,
+	navigation,
 });
