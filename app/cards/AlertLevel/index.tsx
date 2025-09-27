@@ -50,63 +50,48 @@ export function AlertLevel() {
 		setDescription("");
 	};
 	return (
-		<div className="flex flex-row h-full gap-4">
-			<div className="flex-1">
-				<div className="flex flex-col justify-between h-full gap-4">
-					<Button
-						className="btn-primary flex-1"
-						type="button"
-						onClick={() => updateLevel("5")}
-						onMouseEnter={() => displayDesc(5)}
-						onMouseLeave={() => clearDesc()}
-					>
-						Alert Condition 5
-					</Button>
-					<Button
-						className="btn-success flex-1"
-						type="button"
-						onClick={() => updateLevel("4")}
-						onMouseEnter={() => displayDesc(4)}
-						onMouseLeave={() => clearDesc()}
-					>
-						Alert Condition 4
-					</Button>
-					<Button
-						className="btn-warning flex-1"
-						type="button"
-						onClick={() => updateLevel("3")}
-						onMouseEnter={() => displayDesc(3)}
-						onMouseLeave={() => clearDesc()}
-					>
-						Alert Condition 3
-					</Button>
-					<Button
-						className="btn-secondary flex-1"
-						type="button"
-						onClick={() => updateLevel("2")}
-						onMouseEnter={() => displayDesc(2)}
-						onMouseLeave={() => clearDesc()}
-					>
-						Alert Condition 2
-					</Button>
-					<Button
-						className="btn-error flex-1"
-						type="button"
-						onClick={() => updateLevel("1")}
-						onMouseEnter={() => displayDesc(1)}
-						onMouseLeave={() => clearDesc()}
-					>
-						Alert Condition 1
-					</Button>
-				</div>
-			</div>
-			<div className="form-control flex flex-1 h-64">
-				<textarea
-					className="textarea h-full w-full"
-					value={description}
-					disabled
-				/>
-			</div>
-		</div>
+		<ul className="flex flex-col justify-between h-full gap-4">
+			<li
+				className="text-5xl font-bold text-green-500 w-fit"
+				onClick={() => updateLevel("5")}
+				onMouseEnter={() => displayDesc(5)}
+				onMouseLeave={() => clearDesc()}
+			>
+				Alert Condition 5
+			</li>
+			<li
+				className="text-5xl font-bold text-lime-300 w-fit"
+				onClick={() => updateLevel("4")}
+				onMouseEnter={() => displayDesc(4)}
+				onMouseLeave={() => clearDesc()}
+			>
+				Alert Condition 4
+			</li>
+			<li
+				className="text-5xl font-bold text-yellow-400 w-fit"
+				onClick={() => updateLevel("3")}
+				onMouseEnter={() => displayDesc(3)}
+				onMouseLeave={() => clearDesc()}
+			>
+				Alert Condition 3
+			</li>
+			<li
+				className="text-5xl font-bold text-orange-400 w-fit"
+				onClick={() => updateLevel("2")}
+				onMouseEnter={() => displayDesc(2)}
+				onMouseLeave={() => clearDesc()}
+			>
+				Alert Condition 2
+			</li>
+			<li
+				className="text-5xl font-bold text-red-500 w-fit"
+				onClick={() => updateLevel("1")}
+				onMouseEnter={() => displayDesc(1)}
+				onMouseLeave={() => clearDesc()}
+			>
+				Alert Condition 1
+			</li>
+			<div className="panel p-4 text-3xl w-1/2 h-48">{description}</div>
+		</ul>
 	);
 }
