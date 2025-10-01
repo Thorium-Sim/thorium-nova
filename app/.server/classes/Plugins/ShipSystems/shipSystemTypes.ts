@@ -13,6 +13,7 @@ import SensorsPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Sensors"
 import MainComputerPlugin from "@thorium/.server/classes/Plugins/ShipSystems/MainComputer";
 import CoolantTankSystemPlugin from "@thorium/.server/classes/Plugins/ShipSystems/CoolantTank";
 import NavigationPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Navigation";
+import LongRangeCommPlugin from "@thorium/.server/classes/Plugins/ShipSystems/LongRangeComm";
 
 // Make sure you update the isShipSystem component when adding a new ship system type
 // We can't derive the isShipSystem list from this list because ECS components
@@ -33,6 +34,7 @@ export const ShipSystemTypes = {
 	mainComputer: MainComputerPlugin,
 	coolantTank: CoolantTankSystemPlugin,
 	navigation: NavigationPlugin,
+	longRangeComm: LongRangeCommPlugin,
 };
 
 export type ShipSystemFlags = "power" | "heat" | "damage" | "sounds";

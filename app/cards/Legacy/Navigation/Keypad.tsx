@@ -55,73 +55,73 @@ const Keypad = ({
 		>
 			<div
 				onClick={() => handleClick("7")}
-				className="keypad btn btn-lg aspect-square"
+				className="keypad btn btn-lg aspect-square w-full"
 			>
 				7
 			</div>
 			<div
 				onClick={() => handleClick("8")}
-				className="keypad btn btn-lg aspect-square"
+				className="keypad btn btn-lg aspect-square w-full"
 			>
 				8
 			</div>
 			<div
 				onClick={() => handleClick("9")}
-				className="keypad btn btn-lg aspect-square"
+				className="keypad btn btn-lg aspect-square w-full"
 			>
 				9
 			</div>
 			<div
 				onClick={() => handleClick("4")}
-				className="keypad btn btn-lg aspect-square"
+				className="keypad btn btn-lg aspect-square w-full"
 			>
 				4
 			</div>
 			<div
 				onClick={() => handleClick("5")}
-				className="keypad btn btn-lg aspect-square"
+				className="keypad btn btn-lg aspect-square w-full"
 			>
 				5
 			</div>
 			<div
 				onClick={() => handleClick("6")}
-				className="keypad btn btn-lg aspect-square"
+				className="keypad btn btn-lg aspect-square w-full"
 			>
 				6
 			</div>
 			<div
 				onClick={() => handleClick("1")}
-				className="keypad btn btn-lg aspect-square"
+				className="keypad btn btn-lg aspect-square w-full"
 			>
 				1
 			</div>
 			<div
 				onClick={() => handleClick("2")}
-				className="keypad btn btn-lg aspect-square"
+				className="keypad btn btn-lg aspect-square w-full"
 			>
 				2
 			</div>
 			<div
 				onClick={() => handleClick("3")}
-				className="keypad btn btn-lg aspect-square"
+				className="keypad btn btn-lg aspect-square w-full"
 			>
 				3
 			</div>
 			<div
 				onClick={() => handleClick(".")}
-				className="keypad btn btn-lg aspect-square"
+				className="keypad btn btn-lg aspect-square w-full"
 			>
 				.
 			</div>
 			<div
 				onClick={() => handleClick("0")}
-				className="keypad btn btn-lg aspect-square"
+				className="keypad btn btn-lg aspect-square w-full"
 			>
 				0
 			</div>
 			<div
 				onClick={() => handleClick("clear")}
-				className="keypad btn btn-warning clearButton btn-lg aspect-square"
+				className="keypad btn btn-warning clearButton btn-lg aspect-square w-full"
 			>
 				C
 			</div>

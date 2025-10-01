@@ -11,3 +11,4 @@ export { objectives } from "./Objectives/data.server";
 export { systemsMonitor } from "./SystemsMonitor/data.server";
 export { sensors } from "./Sensors/data.server";
 export { damageReports } from "./DamageReports/data.server";
+export { codeCyphers } from "./CodeCyphers/data.server";

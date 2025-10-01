@@ -7,12 +7,7 @@ import { getSolarSystem } from "../utils";
 import { spectralTypes, starTypes } from "@thorium/utils/flags/starTypes";
 import { randomFromRange } from "@thorium/utils/operations/randomFromRange";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-
-function getAlphabet(index: number): string {
-	if (index > 26)
-		return `${getAlphabet(Math.floor(index / 26))}${getAlphabet(index % 26)}`;
-	return String.fromCharCode(index + 65);
-}
+import { getAlphabet } from "@thorium/utils/getAlphabet";
 
 /**
  * The distance between stars in the same system.

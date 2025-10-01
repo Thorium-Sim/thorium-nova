@@ -1,0 +1,50 @@
+.printable {
+	visibility: hidden;
+	color: black;
+}
+
+@media print {
+	* {
+		visibility: hidden;
+	}
+
+	html,
+	body {
+		background: white;
+	}
+	body > * {
+		display: none; /* Speeds up printing as most of the DOM is not displayed */
+	}
+
+	.printable,
+	.printable * {
+		visibility: visible;
+	}
+	.printable {
+		display: block;
+		min-height: 100vh;
+	}
+	.printable h1 {
+		font-size: 2.5rem;
+	}
+	.printable .code-list {
+		font-size: 2.5rem;
+		max-height: 90vh;
+		height: 100%;
+		width: 100% !important;
+		grid-template-columns: repeat(4, 1fr);
+		grid-template-rows: repeat(10, 1fr);
+		grid-auto-flow: column;
+	}
+	.printable .code-list div {
+		line-height: 1.5;
+		margin: 0 30px;
+		text-align: center;
+		display: flex;
+		align-items: center;
+		text-transform: uppercase !important;
+	}
+	.printable .code-list div span {
+		text-transform: lowercase !important;
+	}
+}

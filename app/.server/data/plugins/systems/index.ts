@@ -24,6 +24,7 @@ import path from "node:path";
 import { sensors } from "./sensors";
 import { mainComputer } from "./mainComputer";
 import { navigation } from "@thorium/.server/data/plugins/systems/navigation";
+import { longRangeComm } from "@thorium/.server/data/plugins/systems/longRangeComm";
 
 const systemTypes = createUnionSchema(
 	Object.keys(ShipSystemTypes) as (keyof typeof ShipSystemTypes)[],
@@ -42,6 +43,7 @@ export const systems = t.router({
 	sensors,
 	mainComputer,
 	navigation,
+	longRangeComm,
 	all: t.procedure
 		.input(z.object({ pluginId: z.string() }).optional())
 		.filter((publish: { pluginId: string } | null, { input }) => {

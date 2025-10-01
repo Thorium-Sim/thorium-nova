@@ -16,3 +16,4 @@ export * from "./isPhaserBank";
 export * from "./isLegacySensors";
 export * from "./isLegacySensorScanning";
 export * from "./isNavigation";
+export * from "./isLongRangeComm";

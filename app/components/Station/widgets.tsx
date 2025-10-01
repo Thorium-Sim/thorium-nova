@@ -92,7 +92,7 @@ export const Widget: FC<{
 				<Suspense>
 					<Dialog
 						className={cn(
-							"max-w-md isolate max-h-96 !bg-black/70 panel backdrop-blur border border-white/50 rounded p-2 w-screen @container overflow-hidden",
+							"max-w-md isolate max-h-96 !bg-black/70 panel backdrop-blur border border-white/50 rounded p-2 w-screen @container overflow-hidden flex flex-col",
 							{
 								"max-w-sm": size === "sm",
 								"max-w-lg": size === "md",

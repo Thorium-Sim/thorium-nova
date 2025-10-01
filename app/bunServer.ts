@@ -20,6 +20,7 @@ import {
 	setBasePath,
 } from "@thorium/utils/.server/db-fs/bunDataStoreProps";
 import { DataStore } from "@thorium/utils/.server/db-fs";
+import type LongRangeCommPlugin from "@thorium/.server/classes/Plugins/ShipSystems/LongRangeComm";
 
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>();
 try {
@@ -76,6 +77,32 @@ try {
 				},
 			}),
 		);
+
+		app.get("/plugins/:pluginId/:systemId/cypher.css", ({ req }) => {
+			const plugin = database.server.plugins.find(
+				(p) => p.id === req.param("pluginId"),
+			);
+			const system = plugin?.aspects.shipSystems.find(
+				(p) => p.name === req.param("systemId"),
+			) as LongRangeCommPlugin;
+
+			if (!system) return new Response("Not found", { status: 404 });
+			return new Response(
+				system?.cyphers
+					.map(
+						({ font, name }) => `@font-face {
+  font-family: "${name}";
+	font-style: normal;
+	font-weight: 400;
+	src: url("${font}") format(${getFontFormat(font)})
+}\n`,
+					)
+					.join("") || "",
+				{
+					headers: { "content-type": "text/css" },
+				},
+			);
+		});
 
 		if (process.env.NODE_ENV === "production") {
 			app.use(async (c) => {
@@ -151,4 +178,28 @@ try {
 	});
 } catch (error) {
 	console.error("Error Starting Server:", error);
+}
+
+function getFontFormat(file: string) {
+	const extension = file?.split(".").at(-1);
+
+	switch (extension) {
+		case "otf":
+			return "opentype";
+		case "eot":
+			return "embedded-opentype";
+		case "otc":
+		case "ttc":
+			return "collection";
+		case "svg":
+			return "svg";
+		case "ttf":
+			return "truetype";
+		case "woff":
+			return "woff";
+		case "woff2":
+			return "woff2";
+		default:
+			return "unknown";
+	}
 }
