@@ -1,0 +1,6 @@
+.message::after {
+	clip-path: path("M 0 16 Q 12 16 12 8 L 12 0 L 10 0 Q 6 16 0 16");
+}
+.message.station::after {
+	clip-path: path("M 12 16 Q 0 16 0 8 L 0 0 L 2 0 Q 6 16 12 16");
+}

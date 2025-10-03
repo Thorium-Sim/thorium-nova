@@ -15,7 +15,7 @@ import { ClientOnly } from "remix-utils/client-only";
 import { NoMatch } from "@thorium/components/NotFound";
 import "./styles/tailwind.css";
 import "./styles/theme.css";
-import "@fontsource/outfit";
+import "@fontsource-variable/outfit";
 import icon from "./images/logo.svg?url";
 import type { Route } from ".react-router/types/app/+types/root";
 import AppContext, { q } from "@thorium/context/AppContext";

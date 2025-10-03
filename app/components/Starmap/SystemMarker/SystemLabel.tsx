@@ -30,7 +30,7 @@ const SystemLabel: React.FC<{
 	const textTexture = React.useMemo(() => {
 		const texture = new TextTexture({
 			color,
-			fontFamily: 'Electrolize, "Outfit", sans-serif',
+			fontFamily: 'Electrolize, "Outfit Variable", sans-serif',
 			fontSize: 128,
 			alignment: "right",
 			text: name,

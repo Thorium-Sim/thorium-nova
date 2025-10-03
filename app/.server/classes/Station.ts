@@ -28,6 +28,8 @@ export default class Station {
 
 	widgets: Widget[];
 
+	messageGroups: string[];
+
 	constructor(params: Partial<Station>) {
 		this.name = params.name || "Station";
 		this.description = params.description || "";
@@ -36,6 +38,7 @@ export default class Station {
 		this.theme = params.theme || "Default";
 		this.cards = [];
 		this.widgets = [];
+		this.messageGroups = params.messageGroups || [];
 		params.cards?.forEach((c) => this.cards.push(new Card(c)));
 		params.widgets?.forEach((w) => this.widgets.push(new Widget(w)));
 	}

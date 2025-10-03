@@ -41,7 +41,7 @@
 		"@dnd-kit/utilities": "^3.2.2",
 		"@floating-ui/react": "^0.27.16",
 		"@floating-ui/react-dom": "^2.1.6",
-		"@fontsource/outfit": "^5.2.6",
+		"@fontsource-variable/outfit": "^5.2.8",
 		"@msgpack/msgpack": "^3.1.2",
 		"@octokit/action": "^7.0.2",
 		"@react-router/node": "^7.8.2",

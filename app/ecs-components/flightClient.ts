@@ -38,6 +38,7 @@ export const flightClient = z
 						size: z.enum(["sm", "md", "lg", "xl"]),
 					})
 					.array(),
+				messageGroups: z.string().array(),
 			})
 			.nullable()
 			.optional(),

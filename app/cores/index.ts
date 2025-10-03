@@ -10,3 +10,4 @@ export { LegacySensorGridCore } from "../cards/Legacy/SensorGrid/core";
 export { LegacySensorScansCore } from "../cards/Legacy/SensorScans/core";
 export { LegacyNavigationCore } from "../cards/Legacy/Navigation/core";
 export { CodeCyphersCore } from "../cards/CodeCyphers/core";
+export { MessagingCore } from "../cards/Messaging/core";

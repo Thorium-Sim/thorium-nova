@@ -1,7 +1,6 @@
 import { Editor } from "@monaco-editor/react";
 import { editor, MarkerSeverity } from "monaco-editor";
 import { useState } from "react";
-import ink from "ink-tmlanguage/grammars/Ink.tmlanguage?raw";
 
 export default function Report() {
 	const [editor, setEditor] = useState<editor.IStandaloneCodeEditor | null>(

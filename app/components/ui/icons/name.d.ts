@@ -85,6 +85,7 @@ export const iconNames = [
   "arrow-up",
   "arrow-right",
   "arrow-left",
+  "arrow-left-right",
   "arrow-down",
 ] as const
 

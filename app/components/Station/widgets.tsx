@@ -88,8 +88,8 @@ export const Widget: FC<{
 					icon
 				)}
 			</Button>
-			<Popover className={cn("theme-container", popoverTransitionClasses)}>
-				<Suspense>
+			<Suspense>
+				<Popover className={cn("theme-container", popoverTransitionClasses)}>
 					<Dialog
 						className={cn(
 							"max-w-md isolate max-h-96 !bg-black/70 panel backdrop-blur border border-white/50 rounded p-2 w-screen @container overflow-hidden flex flex-col",
@@ -109,8 +109,8 @@ export const Widget: FC<{
 							/>
 						</CardProvider>
 					</Dialog>
-				</Suspense>
-			</Popover>
+				</Popover>
+			</Suspense>
 		</DialogTrigger>
 	);
 };

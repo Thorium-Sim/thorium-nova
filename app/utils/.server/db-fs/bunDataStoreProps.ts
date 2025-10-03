@@ -36,9 +36,7 @@ export const bunDataStoreProps: DataStoreOperations = {
 		let data: any;
 		try {
 			const fileData = await fs.readFile(filePath, "utf8");
-			if (this.meta.isInk) {
-				data = loadYml(fileData);
-			}
+			data = loadYml(fileData);
 		} catch (err: any) {
 			if (err.code === "EACCES") {
 				err.message +=
@@ -69,15 +67,9 @@ export const bunDataStoreProps: DataStoreOperations = {
 			}
 			await fs.mkdir(path.dirname(filePath), { recursive: true });
 			this.initialData = undefined;
-			let data = "";
-			if (this.meta.isInk) {
-				// @ts-expect-error
-				data = this.inkText;
-			} else {
-				const jsonData = this.toJSON();
-				jsonData.dataLoaded = undefined;
-				data = dump(jsonData, { skipInvalid: true });
-			}
+			const jsonData = this.toJSON();
+			jsonData.dataLoaded = undefined;
+			const data = dump(jsonData, { skipInvalid: true });
 			await fs.writeFile(filePath, data, { mode: 0o0600 });
 		} catch (e: any) {
 			e.message = `db-fs: Error writing file:\n${e.message}`;

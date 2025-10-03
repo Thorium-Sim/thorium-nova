@@ -24,6 +24,8 @@ const station = z.object({
 	tags: z.array(z.string()).default([]),
 	cards: z.array(card).default([]),
 	widgets: z.array(widget).default([]),
+	/** Which groups this station will receive messages for. */
+	messageGroups: z.array(z.string()).default([]),
 });
 
 export const stationComplement = z

@@ -43,11 +43,9 @@ export const longRangeComm = t.router({
 			if (!shipSystem || "soundEffects" in shipSystem === false) {
 				return;
 			}
-			console.log(input.file);
 			const filePath = input.file.name;
 			const url = await ctx.uploadFile.call(system, input.file, filePath);
 
-			console.log(shipSystem.cyphers);
 			if (!shipSystem.cyphers) {
 				shipSystem.cyphers = [];
 			}
@@ -66,7 +64,6 @@ export const longRangeComm = t.router({
 				font: url,
 				active: true,
 			});
-			console.log(shipSystem.cyphers);
 			pubsub.publish.plugin.systems.get({
 				pluginId: input.pluginId,
 			});

@@ -14,3 +14,4 @@ export * from "./SystemsMonitor";
 export * from "./Sensors";
 export * from "./DamageReports";
 export * from "./CodeCyphers";
+export * from "./Messaging";
