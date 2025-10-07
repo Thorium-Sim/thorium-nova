@@ -9,8 +9,8 @@ import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
 import path from "node:path";
-import { lstat, readdir } from "node:fs/promises";
 import { getPlugin } from "@thorium/.server/data/plugins/utils";
+import { traverseFiles } from "@thorium/.server/data/traverseFiles";
 
 export type ActionOverrides = {
 	name?: string;
@@ -163,11 +163,8 @@ export const thorium = t.router({
 					value = selectValueQuery(entity.ecs!, value)[0];
 				}
 				// @ts-expect-error
-				entity.updateComponent(component, { [property]: value });
+				entity.updateComponent(component, { [property]: value }, true);
 			}
-
-			// TODO June 28, 2024: Figure out some way to notify the client that the entity has been updated
-			// Maybe we have a special publish method that forces all clients to revalidate all their queries
 		}),
 	pluginAssets: t.procedure
 		.input(
@@ -251,62 +248,3 @@ export const thorium = t.router({
 			console.debug(input.message);
 		}),
 });
-
-async function traverseFiles(
-	basePath: string,
-	rootPath: string,
-	extensions: string[] = [],
-) {
-	const folderFiles = await readdir(basePath);
-	const files: FileOrFolder[] = [];
-	for (const file of folderFiles) {
-		if (file.includes(".DS_Store")) continue;
-		const filePath = path.join(basePath, file);
-		const isDirectory = (await lstat(filePath)).isDirectory();
-		if (isDirectory) {
-			files.push({
-				name: file,
-				fullPath: filePath.replace(rootPath, ""),
-				contents: await traverseFiles(filePath, rootPath, extensions),
-			});
-		} else if (
-			!extensions ||
-			extensions.length === 0 ||
-			extensions.includes(path.extname(filePath).replace(".", ""))
-		) {
-			files.push({
-				name: file,
-				fullPath: filePath.replace(rootPath, ""),
-				contents: null,
-			});
-		}
-	}
-
-	// Traverse again to sort and filter
-	return sortFiles(files);
-}
-
-function sortFiles(files: FileOrFolder[]) {
-	const output: FileOrFolder[] = [];
-	for (const file of files) {
-		if (Array.isArray(file.contents)) {
-			if (file.contents.length === 0) continue;
-			file.contents = sortFiles(file.contents);
-		}
-		output.push(file);
-	}
-	return output.sort((a, b) => (a.name > b.name ? 1 : -1));
-}
-
-// function traverseFiles(files: FileOrFolder[] | null | undefined) {
-// 	if (!files) return null;
-// 	const output: FileOrFolder[] = [];
-// 	for (const file of files) {
-// 		file.contents?.sort();
-// 		if (!file.contents || file.contents.length > 0) {
-// 			file.contents = traverseFiles(file.contents);
-// 			output.push(file);
-// 		}
-// 	}
-// 	return output;
-// }

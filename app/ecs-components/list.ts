@@ -59,3 +59,4 @@ export * from "./shipSystems/diagnostic";
 export * from "./legacyCoolant";
 export * from "./legacySensorContact";
 export * from "./isInternalMessage";
+export * from "./isDocument";

@@ -1,3 +1,4 @@
+import { PDFViewer } from "@thorium/components/PDFViewer";
 import {
 	Button,
 	Menu,
@@ -7,20 +8,7 @@ import {
 } from "react-aria-components";
 
 export default function () {
-	return (
-		<MenuTrigger>
-			<Button aria-label="Menu">Open Menu</Button>
-			<Popover>
-				<Menu>
-					<MenuItem onAction={() => alert("open")}>Open</MenuItem>
-					<MenuItem onAction={() => alert("rename")}>Rename…</MenuItem>
-					<MenuItem onAction={() => alert("duplicate")}>Duplicate</MenuItem>
-					<MenuItem onAction={() => alert("share")}>Share…</MenuItem>
-					<MenuItem onAction={() => alert("delete")}>Delete…</MenuItem>
-				</Menu>
-			</Popover>
-		</MenuTrigger>
-	);
+	return <div />;
 	// return (
 	// 		<Editor
 	// 			defaultValue={`# Title: Remote Access Code

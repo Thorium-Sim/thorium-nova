@@ -37,22 +37,29 @@ export function FilesMenu({
 	setValue?: (value: string) => void;
 	pluginId?: string;
 	canUpload?: boolean;
-	types: "models" | "sounds" | "videos" | "images" | "pdf";
+	types: ("models" | "sounds" | "videos" | "images" | "pdf")[];
 	children?: ReactNode;
 	root?: string;
 }) {
-	const extensions =
-		types === "models"
-			? ["glb", "gltf"]
-			: types === "videos"
-				? ["mov", "mp4", "ogv", "webm", "m4v"]
-				: types === "sounds"
-					? ["m4a", "wav", "mp3", "ogg", "aiff", "aif"]
-					: types === "images"
-						? ["svg", "jpg", "jpeg", "png", "apng", "gif", "webp", "avif"]
-						: types === "pdf"
-							? ["pdf"]
-							: undefined;
+	const extensions: string[] = [];
+	if (types.includes("models")) {
+		extensions.push(...["glb", "gltf"]);
+	}
+	if (types.includes("videos")) {
+		extensions.push(...["mov", "mp4", "ogv", "webm", "m4v"]);
+	}
+	if (types.includes("sounds")) {
+		extensions.push(...["m4a", "wav", "mp3", "ogg", "aiff", "aif"]);
+	}
+	if (types.includes("images")) {
+		extensions.push(
+			...["svg", "jpg", "jpeg", "png", "apng", "gif", "webp", "avif"],
+		);
+	}
+	if (types.includes("pdf")) {
+		extensions.push(...["pdf"]);
+	}
+	const [flightFiles] = q.flight.assets.useNetRequest();
 	const [files] = q.thorium.pluginAssets.useNetRequest({
 		pluginId,
 		extensions,
@@ -81,6 +88,28 @@ export function FilesMenu({
 				)}
 				<Popover placement="bottom" className={popoverClass}>
 					<Menu>
+						{flightFiles ? (
+							<MenuSection>
+								<Header>Flight</Header>
+								<NestedFilesMenu
+									files={
+										root
+											? flightFiles.find((file) => file.name === root)
+													?.contents || flightFiles
+											: flightFiles
+									}
+									onAction={(path) => setValue?.(path)}
+									pickFile={canUpload ? pickFile : undefined}
+									path={
+										root
+											? flightFiles.find((file) => file.name === root)
+												? `${root}/`
+												: undefined
+											: undefined
+									}
+								/>
+							</MenuSection>
+						) : null}
 						{Object.entries(files).map(([plugin, files]) => (
 							<MenuSection key={plugin}>
 								<Header>{plugin}</Header>
@@ -134,7 +163,7 @@ function NestedFilesMenu({
 	files: FileOrFolder[];
 	onAction: (path: string) => void;
 	path?: string;
-	pluginId: string;
+	pluginId?: string;
 	pickFile?: () => Promise<File | null>;
 }) {
 	return (
@@ -174,12 +203,22 @@ function NestedFilesMenu({
 					onAction={async () => {
 						const asset = await pickFile();
 						if (!asset) return;
-						await q.thorium.uploadAsset.netSend({
-							pluginId,
-							assetPath: `${path}${asset.name}`,
-							asset,
-						});
-						onAction(asset.name);
+						if (pluginId) {
+							await q.thorium.uploadAsset.netSend({
+								pluginId,
+								assetPath: `${path}${asset.name}`,
+								asset,
+							});
+						} else {
+							// Uploading to an active flight
+							const { asset: assetPath } = await q.flight.uploadAsset.netSend({
+								assetPath: `${path}${asset.name}`,
+								asset,
+							});
+							onAction(assetPath);
+							return;
+						}
+						onAction(path);
 					}}
 				>
 					Upload File <Icon name="file-up" />
@@ -254,7 +293,7 @@ function FilePreview({ url }: { url: string }) {
 	}
 }
 
-function GlbLivePreview({
+export function GlbLivePreview({
 	url,
 	className,
 }: { url: string; className?: string }) {
@@ -264,7 +303,9 @@ function GlbLivePreview({
 				<ambientLight intensity={0.5} />
 				<pointLight position={[0, 0.5, 1.5]} intensity={1} />
 				<OrbitControls />
-				<Model url={url} />
+				<Suspense>
+					<Model url={url} />
+				</Suspense>
 			</Canvas>
 		</div>
 	);

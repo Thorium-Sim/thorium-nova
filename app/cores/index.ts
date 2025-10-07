@@ -11,3 +11,4 @@ export { LegacySensorScansCore } from "../cards/Legacy/SensorScans/core";
 export { LegacyNavigationCore } from "../cards/Legacy/Navigation/core";
 export { CodeCyphersCore } from "../cards/CodeCyphers/core";
 export { MessagingCore } from "../cards/Messaging/core";
+export { DocumentsCore } from "../cards/Documents/core";

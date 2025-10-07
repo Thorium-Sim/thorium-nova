@@ -77,6 +77,15 @@ try {
 				},
 			}),
 		);
+		app.use(
+			"/flights/*",
+			serveStatic({
+				root: `${thoriumPath}`,
+				onFound(path, c) {
+					c.header("Cache-Control", `public, max-age=60`);
+				},
+			}),
+		);
 
 		app.get("/plugins/:pluginId/:systemId/cypher.css", ({ req }) => {
 			const plugin = database.server.plugins.find(

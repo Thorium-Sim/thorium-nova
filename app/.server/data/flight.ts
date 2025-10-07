@@ -18,6 +18,9 @@ import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { DataStore } from "@thorium/utils/.server/db-fs";
 import { spawnTrigger } from "@thorium/.server/spawners/trigger";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
+import path from "node:path";
+import type { FileOrFolder } from "@thorium/.server/data/thorium";
+import { traverseFiles } from "@thorium/.server/data/traverseFiles";
 
 function getPlanetSystem(ecs: ECS, planet: Entity): Entity {
 	const parentId = planet.components?.satellite?.parentId;
@@ -106,6 +109,21 @@ export const flight = t.router({
 			const { date, name, paused, hasFlightDirector, mode } = flight;
 			return { date, name, paused, hasFlightDirector, mode };
 		}),
+	assets: t.procedure
+		.input(z.object({ extensions: z.string().array().optional() }).optional())
+		.autoPublish(["isFlight"], () => null)
+		.request(async ({ ctx, input }) => {
+			const flight = ctx.flight;
+			if (!flight) return null;
+			const assetUrl = await flight.getAssetUrl();
+			const scannedFiles = await traverseFiles(
+				path.join(assetUrl, `flights`, flight.name, `assets`),
+				assetUrl,
+				input?.extensions,
+			);
+			return scannedFiles;
+		}),
+
 	all: t.procedure
 		.autoPublish(["isFlight"], () => null)
 		.request(() => {
@@ -159,7 +177,7 @@ export const flight = t.router({
 						hasFlightDirector,
 						mode,
 					},
-					{ meta: { filePath: `/flights/${flightName}.flight` } },
+					{ meta: { filePath: `/flights/${flightName}/data.yml` } },
 				);
 
 				const activePlugins = ctx.server.plugins.filter((p) => p.active);
@@ -346,7 +364,7 @@ export const flight = t.router({
 					initialLoad: false,
 					serverDataModel: ctx.server,
 				},
-				{ meta: { filePath: `/flights/${input.flightName}.flight` } },
+				{ meta: { filePath: `/flights/${input.flightName}/data.yml` } },
 			);
 			await ctx.flight.initEcs(ctx.server);
 			await ctx.flight.initPhysics();
@@ -391,6 +409,24 @@ export const flight = t.router({
 		pubsub.publish.flight.active();
 		return ctx.flight;
 	}),
+	uploadAsset: t.procedure
+		.input(
+			z.object({
+				assetPath: z.string(),
+				asset: z.instanceof(File),
+			}),
+		)
+		.send(async ({ input, ctx }) => {
+			if (!ctx.flight) throw new Error("Flight not found.");
+			const assetPath = await ctx.uploadFile.call(
+				ctx.flight,
+				input.asset,
+				input.assetPath,
+			);
+			console.log({ assetPath });
+			pubsub.publish.flight.assets();
+			return { asset: assetPath };
+		}),
 });
 
 export type FlightStartingPoint = {

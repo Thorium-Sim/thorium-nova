@@ -10,7 +10,9 @@ export interface Dimensions {
 	right: number;
 	bottom: number;
 }
-function getDimensionObject<T extends HTMLElement>(node: T): Dimensions {
+function getDimensionObject<T extends HTMLElement | SVGElement>(
+	node: T,
+): Dimensions {
 	const rect = node.getBoundingClientRect();
 
 	if (rect.toJSON) {
@@ -28,7 +30,7 @@ function getDimensionObject<T extends HTMLElement>(node: T): Dimensions {
 	};
 }
 
-function useMeasure<Element extends HTMLElement = HTMLElement>(): [
+function useMeasure<Element extends HTMLElement | SVGElement = HTMLElement>(): [
 	(node: Element) => void,
 	Dimensions,
 	() => void,

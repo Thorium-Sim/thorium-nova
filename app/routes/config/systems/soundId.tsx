@@ -233,7 +233,7 @@ export function SoundConfigForm({
 					) : null}
 				</label>
 				<FilesMenu
-					types="sounds"
+					types={["sounds"]}
 					canUpload
 					value={sound.url}
 					setValue={(url) => updateSound("url", url)}

@@ -1,4 +1,4 @@
-import Station, { staticStations } from "@thorium/.server/classes/Station";
+import { staticStations } from "@thorium/.server/classes/Station";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { z } from "zod";
@@ -153,6 +153,7 @@ export const client = t.router({
 							},
 						],
 						widgets: [],
+						messageGroups: [],
 					},
 					shipId: ctx.flight.playerShips[0].id,
 					loginName: "Test User",

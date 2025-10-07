@@ -133,6 +133,8 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 												{...inputProps}
 												ref={inputEl}
 												className="input block w-full mt-4"
+												// biome-ignore lint/a11y/noAutofocus: This is inside a dialog, but Biome doesn't know it
+												autoFocus
 												value={input}
 												onChange={(e) => setInput(e.currentTarget.value)}
 											/>

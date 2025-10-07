@@ -79,6 +79,7 @@ export default defineConfig({
 			"/netSend": `http://localhost:${port + 1}`,
 			"/netRequest": `http://localhost:${port + 1}`,
 			"/plugins": `http://localhost:${port + 1}`,
+			"/flights": `http://localhost:${port + 1}`,
 			"/ws": {
 				target: `ws://localhost:${port + 1}/ws`,
 				ws: true,

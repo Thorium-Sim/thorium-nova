@@ -480,7 +480,7 @@ function SpecialEditor({
 						<p>Picture</p>
 						<FilesMenu
 							root="Sensor Contacts"
-							types="images"
+							types={["images"]}
 							canUpload
 							setValue={(value) =>
 								useSensorsStore.setState((store) => ({
@@ -608,7 +608,7 @@ function ContactEditor({
 					<Suspense>
 						<FilesMenu
 							root="Sensor Contacts"
-							types="images"
+							types={["images"]}
 							canUpload
 							setValue={(value) =>
 								update({
@@ -631,7 +631,7 @@ function ContactEditor({
 					<Suspense>
 						<FilesMenu
 							root="Sensor Contacts"
-							types="images"
+							types={["images"]}
 							canUpload
 							setValue={(value) =>
 								update({
