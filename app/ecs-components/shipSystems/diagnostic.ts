@@ -1,20 +1,10 @@
+import { damageEffectsObject } from "@thorium/ecs-components/shipSystems/damageEffectsObject";
 import {
+	damageEffects,
 	damageTypes,
 	diagnosticRecord,
 } from "@thorium/utils/flags/damageTypes";
 import z from "zod";
-
-const damageEffectsObject = z
-	.object({
-		efficiency: z.number(),
-		heatMultiplier: z.number(),
-		instability: z.number(),
-		signature: z.number(),
-		failureRisk: z.number(),
-		cascadeRisk: z.number(),
-		crewSafetyRating: z.number(),
-	})
-	.partial();
 
 export const diagnostic = z
 	.object({
@@ -33,11 +23,12 @@ export const diagnostic = z
 			.object({
 				id: z.string(),
 				type: damageTypes,
+				primaryEffect: z.enum(damageEffects),
 				affectedSystems: z
 					.object({
 						id: z.number(),
 						name: z.string(),
-						metrics: damageEffectsObject,
+						effects: damageEffectsObject,
 					})
 					.array(),
 			})

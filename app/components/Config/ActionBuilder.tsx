@@ -6,7 +6,7 @@ import z from "zod";
 import { parseSchema } from "@thorium/utils/zodAutoForm";
 import { ValueInput } from "@thorium/components/Config/EntityQueryBuilder";
 import type { components } from "@thorium/ecs-components";
-import type { ValueQuery } from "@thorium/.server/classes/Plugins/Timeline";
+import type { ValueQuery } from "@thorium/.server/classes/Plugins/TimelineStep";
 import { matchSorter } from "match-sorter";
 import { cn } from "@thorium/utils/cn";
 import { Icon } from "@thorium/ui/Icon";

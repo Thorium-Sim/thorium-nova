@@ -1,6 +1,8 @@
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { components } from "@thorium/ecs-components";
+import { InterpolateInfo } from "@thorium/routes/config/reports/InterpolateInfo";
 import { Icon } from "@thorium/ui/Icon";
+import InfoTip from "@thorium/ui/InfoTip";
 import { cn } from "@thorium/utils/cn";
 import {
 	parseSchema,
@@ -19,6 +21,7 @@ import {
 	ListBox,
 	ListBoxItem,
 } from "react-aria-components";
+import { flushSync } from "react-dom";
 
 export type BlockProps<T extends TimelineBlock["type"]> = Extract<
 	TimelineBlock,
@@ -89,6 +92,31 @@ export function EntityInput({
 				placeholder="Entity"
 				className={madLibInput}
 			/>
+			<InfoTip className="absolute -bottom-4 -right-4">
+				You can use the following conventions:
+				<ul className="ml-4 list-disc">
+					<li>
+						<code className="bg-notice rounded">this step</code> - a local
+						variable on the current timeline step
+					</li>
+					<li>
+						<code className="bg-notice rounded">this timeline</code> - a
+						variable on the current timeline
+					</li>
+					<li>
+						<code className="bg-notice rounded">#tag</code> - entity by tag name
+					</li>
+					<li>
+						<code className="bg-notice rounded">$variableName</code> - entity
+						from a local variable
+					</li>
+					<li>
+						anything else - entity by its{" "}
+						<code className="bg-notice rounded">identity.name</code> component
+						value
+					</li>
+				</ul>
+			</InfoTip>
 			<div className="peer-focus-within:block hidden pointer-events-none absolute top-full pt-1 left-1/2 -translate-x-1/2 text-xs whitespace-nowrap text-blue-200">
 				{value.toLowerCase() === "this timeline"
 					? "The current timeline"
@@ -111,18 +139,57 @@ export function ValueInput(
 		onChange: (value: string) => void;
 	},
 ) {
+	const inputRef = useRef<HTMLInputElement>(null);
+	const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const cursor = useRef<[number | null, number | null]>([null, null]);
 	const value = props.value || "";
+
+	useEffect(() => {
+		if (value.length === 50) {
+			inputRef.current?.focus();
+			inputRef.current?.setSelectionRange(cursor.current[0], cursor.current[1]);
+		}
+		if (value.length === 51) {
+			textareaRef.current?.focus();
+			textareaRef.current?.setSelectionRange(
+				cursor.current[0],
+				cursor.current[1],
+			);
+		}
+	}, [value]);
 	return (
 		<span className="relative w-min">
-			<input
-				placeholder="Value"
-				value={value}
-				size={Math.max(value.length + 3, 5)}
-				onChange={(e) => {
-					props.onChange(e.currentTarget.value);
-				}}
-				className={cn(madLibInput, props.className)}
-			/>
+			{value.length > 50 ? (
+				<textarea
+					ref={textareaRef}
+					placeholder="Value"
+					defaultValue={value}
+					onChange={(e) => {
+						props.onChange(e.currentTarget.value);
+						cursor.current = [
+							e.currentTarget.selectionStart,
+							e.currentTarget.selectionEnd,
+						];
+					}}
+					className={cn(madLibInput, "h-40 w-96 resize-none", props.className)}
+				/>
+			) : (
+				<input
+					ref={inputRef}
+					placeholder="Value"
+					defaultValue={value}
+					size={Math.max(value.length + 3, 5)}
+					onChange={(e) => {
+						props.onChange(e.currentTarget.value);
+						cursor.current = [
+							e.currentTarget.selectionStart,
+							e.currentTarget.selectionEnd,
+						];
+					}}
+					className={cn(madLibInput, props.className)}
+				/>
+			)}
+			<InterpolateInfo />
 			<div className="peer-focus-within:block hidden pointer-events-none absolute top-full pt-1 left-1/2 -translate-x-1/2 text-xs whitespace-nowrap text-blue-200">
 				{value.startsWith("$") ? "Local Variable" : "Literal Value"}
 			</div>

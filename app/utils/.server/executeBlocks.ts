@@ -9,13 +9,27 @@ import {
 } from "@thorium/utils/.server/ship/getShipSystem";
 import type { ECS, Entity } from "@thorium/utils/ecs";
 import { produce } from "immer";
+import { evaluateTriggerCondition } from "@thorium/utils/.server/evaluateEntityQuery";
+import { interpolate } from "@thorium/utils/interpolationEngine";
+
+export class TimelineAvailability {
+	constructor(public isAvailable: boolean) {}
+}
 
 export async function executeBlocks(
 	ecs: ECS,
 	blocks: TimelineBlock[],
-	stepId?: number,
-	localVariables: Record<string, any> = {},
-	theResult: any = null,
+	{
+		stepId,
+		localVariables = {},
+		theResult = null,
+		executionType = "main",
+	}: {
+		stepId?: number;
+		localVariables?: Record<string, any>;
+		theResult?: any;
+		executionType?: "prerequisite" | "main";
+	} = {},
 ) {
 	for (const block of blocks) {
 		switch (block.type) {
@@ -67,15 +81,20 @@ export async function executeBlocks(
 				break;
 			}
 			case "IfCondition": {
+				let response = true;
+
 				for (const condition of block.conditions) {
-					if (evaluateCondition(condition, localVariables)) {
-						await executeBlocks(
-							ecs,
-							block.triggerBlocks,
-							stepId,
-							localVariables,
-						);
+					if (!evaluateCondition(condition, localVariables)) {
+						response = false;
+						break;
 					}
+				}
+				if (response) {
+					await executeBlocks(ecs, block.triggerBlocks, {
+						stepId,
+						localVariables,
+						executionType,
+					});
 				}
 				break;
 			}
@@ -84,6 +103,14 @@ export async function executeBlocks(
 				break;
 			}
 			case "SetVariable": {
+				const value = interpolate(block.value, localVariables);
+				if (
+					block.entity.toLowerCase() === "this step" ||
+					block.entity.toLowerCase() === "step"
+				) {
+					localVariables[block.variable] = value;
+					break;
+				}
 				const entity = getEntityReference(
 					block.entity,
 					ecs,
@@ -96,12 +123,12 @@ export async function executeBlocks(
 						entity.components.variables?.variables || [],
 						(draft) => {
 							const variable = draft.find((d) => d.name === block.variable);
-							if (variable) variable.value = block.value;
+							if (variable) variable.value = value;
 							else
 								draft.push({
 									name: block.variable,
 									type: "any",
-									value: block.value,
+									value: value,
 								});
 						},
 					),
@@ -143,68 +170,102 @@ export async function executeBlocks(
 					localVariables,
 				);
 				if (!entityA || !entityB) return;
-				const triggerEntity = spawnTrigger({
-					trigger: {
-						stepId,
-						triggeredAt: null,
-						active: true,
-						conditions: [
-							{
-								type: "distance",
-								distance: block.distance,
-								condition: block.comparison,
-								entityA: entityA.id,
-								entityB: entityB.id,
-							},
-						],
-						blocks: block.triggerBlocks,
-						multiple: false,
-						localVariables,
+				const conditions = [
+					{
+						type: "distance" as const,
+						distance: block.distance,
+						condition: block.comparison,
+						entityA: entityA.id,
+						entityB: entityB.id,
 					},
-				});
-				ecs.addEntity(triggerEntity);
+				];
+				if (executionType === "main") {
+					const triggerEntity = spawnTrigger({
+						trigger: {
+							stepId,
+							triggeredAt: null,
+							active: true,
+							conditions,
+							blocks: block.triggerBlocks,
+							multiple: false,
+							localVariables,
+						},
+					});
+					ecs.addEntity(triggerEntity);
+				}
+				if (executionType === "prerequisite") {
+					// Evaluate prerequisites immediately
+					const match = evaluateTriggerCondition(ecs, conditions);
+					if (match) {
+						await executeBlocks(ecs, block.triggerBlocks, {
+							stepId,
+							localVariables,
+							theResult: match,
+							executionType,
+						});
+					}
+				}
 				break;
 			}
 			case "EntityCondition": {
-				const triggerEntity = spawnTrigger({
-					trigger: {
-						stepId,
-						triggeredAt: null,
-						active: true,
-						conditions: [
-							{
-								type: "entityMatch",
-								matchCount: block.match,
-								query: block.checks,
-							},
-						],
-						blocks: block.triggerBlocks,
-						multiple: false,
-						localVariables,
+				const conditions = [
+					{
+						type: "entityMatch" as const,
+						matchCount: block.match,
+						query: block.checks,
 					},
-				});
-				ecs.addEntity(triggerEntity);
-
+				];
+				if (executionType === "main") {
+					const triggerEntity = spawnTrigger({
+						trigger: {
+							stepId,
+							triggeredAt: null,
+							active: true,
+							conditions,
+							blocks: block.triggerBlocks,
+							multiple: false,
+							localVariables,
+						},
+					});
+					ecs.addEntity(triggerEntity);
+				}
+				if (executionType === "prerequisite") {
+					// Evaluate prerequisites immediately
+					const match = evaluateTriggerCondition(ecs, conditions);
+					if (match) {
+						await executeBlocks(ecs, block.triggerBlocks, {
+							stepId,
+							localVariables,
+							theResult: match,
+							executionType,
+						});
+					}
+				}
 				break;
 			}
 			case "EventCondition": {
-				const triggerEntity = spawnTrigger({
-					trigger: {
-						stepId,
-						triggeredAt: null,
-						active: true,
-						conditions: [
-							{
-								type: "eventListener",
-								event: block.event,
-							},
-						],
-						blocks: block.triggerBlocks,
-						multiple: block.multiple,
-						localVariables,
+				const conditions = [
+					{
+						type: "eventListener" as const,
+						event: block.event,
 					},
-				});
-				ecs.addEntity(triggerEntity);
+				];
+				// We don't evaluate event conditions for prerequisites.
+				if (executionType === "prerequisite") break;
+				if (executionType === "main") {
+					const triggerEntity = spawnTrigger({
+						trigger: {
+							stepId,
+							triggeredAt: null,
+							active: true,
+							conditions,
+							blocks: block.triggerBlocks,
+							multiple: block.multiple,
+							localVariables,
+						},
+					});
+					ecs.addEntity(triggerEntity);
+				}
 				break;
 			}
 			case "Action": {
@@ -214,7 +275,11 @@ export async function executeBlocks(
 						// Special handling for certain keys we know are entity id references
 						if (key === "shipId") {
 							val = Number(val);
+						} else if (typeof val === "string") {
+							// Other values get interpolated automatically
+							val = interpolate(val, localVariables);
 						}
+
 						return [key, val];
 					}),
 				);
@@ -268,14 +333,27 @@ export async function executeBlocks(
 					throw new Error(
 						`Attempted to execute macro ${block.macroId} from plugin ${block.pluginId}, but it wasn't found.`,
 					);
-				await executeBlocks(
-					ecs,
-					macro.blocks,
+				await executeBlocks(ecs, macro.blocks, {
 					stepId,
 					localVariables,
 					theResult,
-				);
+					executionType,
+				});
+				break;
 			}
+			case "TimelineAvailability": {
+				if (executionType === "prerequisite") {
+					throw new TimelineAvailability(block.isAvailable);
+				}
+				break;
+			}
+			case "Debug": {
+				console.info(block.variable);
+				break;
+			}
+			default:
+				block satisfies never;
+				break;
 		}
 	}
 }
@@ -325,6 +403,9 @@ function getValueReference(ref: string, variables: Record<string, any>): any {
 	if (typeof ref === "string" && ref.startsWith("$")) {
 		return getValueReference(variables[ref.replace("$", "")], variables);
 	}
+	if (typeof ref === "string") {
+		return interpolate(ref, variables);
+	}
 	return ref;
 }
 function getEntityReference(
@@ -337,8 +418,20 @@ function getEntityReference(
 	if (typeof ref === "object" && "id" in ref && "components" in ref) {
 		return ref;
 	}
+	if (
+		typeof ref === "string" &&
+		["this step", "step"].includes(ref.toLowerCase().trim())
+	) {
+		throw new Error(
+			"Attempted to access a step reference, but that logic should be handled in the function that calls getEntityReference. If you're seeing this message, you've found a bug. Hooray!",
+		);
+	}
 	// Getting the timeline itself
-	if (!ref || ref === "this timeline" || ref === "timeline") {
+	if (
+		!ref ||
+		(typeof ref === "string" &&
+			["this timeline", "timeline"].includes(ref.toLowerCase().trim()))
+	) {
 		if (!stepId) {
 			throw new Error(
 				"Attempted to access timeline reference, but no stepId was provided. Is this block in a timeline?",

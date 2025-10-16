@@ -3,7 +3,7 @@ import type {
 	ComponentQuery,
 	EntityQuery,
 	ValueQuery,
-} from "@thorium/.server/classes/Plugins/Timeline";
+} from "@thorium/.server/classes/Plugins/TimelineStep";
 import type { ECS, Entity } from "../ecs";
 import type {
 	actionItem,
@@ -20,6 +20,8 @@ import {
 } from "../starmap/position";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import type z from "zod";
+import { interpolate } from "@thorium/utils/interpolationEngine";
+import { pubsub } from "@thorium/.server/init/pubsub";
 
 export function evaluateEntityQuery(ecs: ECS, query: EntityQuery): Entity[] {
 	const output: Entity[] = [];
@@ -418,11 +420,37 @@ function generatePermutations(inputMap: Map<string, Set<any>>) {
 	return permutations;
 }
 
-export function triggerStep(step: Entity) {
+export async function triggerStep(step: Entity) {
+	const timeline = step.ecs.getEntityById(
+		step.components.isTimelineStep?.timelineId || -1,
+	);
+	const localVariables =
+		timeline?.components.variables?.variables.reduce(
+			(prev: Record<string, any>, next) => {
+				prev[next.name] = next.value;
+				return prev;
+			},
+			{},
+		) || {};
+
 	const blocks = step?.components.isTimelineStep?.blocks;
 	if (!blocks) return;
 	const context = new DataContext("thorium", database);
-	executeBlocks(context.ecs, blocks, step.id);
+	step.updateComponent("isTimelineStep", { state: "executing" });
+	await executeBlocks(context.ecs, blocks, { stepId: step.id, localVariables });
+	step.updateComponent("identity", {
+		description: interpolate(
+			step.components.identity?.description || "",
+			localVariables,
+		),
+	});
+	step.updateComponent("isTimelineStep", { state: "executed" });
+
+	if (timeline?.components.isTimeline?.type === "report") {
+		pubsub.publish.damageReports.damageReports({
+			shipId: timeline?.components.isTimeline?.shipId || -1,
+		});
+	}
 }
 
 export async function processTriggers(
@@ -438,6 +466,7 @@ export async function processTriggers(
 			const { conditions, blocks, stepId, localVariables } =
 				trigger.components.isTrigger;
 			const match = evaluateTriggerCondition(ecs, conditions, event);
+
 			if (match) {
 				await executeBlocks(
 					ecs,
@@ -453,9 +482,7 @@ export async function processTriggers(
 						}
 						return action;
 					}),
-					stepId,
-					localVariables,
-					match,
+					{ stepId, localVariables, theResult: match },
 				);
 				trigger.updateComponent("isTrigger", {
 					triggeredAt: new Date(),

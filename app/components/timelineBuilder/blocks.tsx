@@ -30,6 +30,8 @@ import uniqid from "@thorium/utils/uniqid";
 import { RandomIntoVariable } from "@thorium/components/timelineBuilder/RandomBlock";
 import { MathIntoVariable } from "@thorium/components/timelineBuilder/MathIntoVariableBlock";
 import { MacroBlock } from "@thorium/components/timelineBuilder/MacroBlock";
+import { TimelineAvailabilityBlock } from "@thorium/components/timelineBuilder/TimelineAvailabilityBlock";
+import { DebugBlock } from "@thorium/components/timelineBuilder/DebugBlock";
 
 export function RenderBlock<T extends TimelineBlock["type"]>({
 	onRemove,
@@ -37,6 +39,7 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 	previousActionBlock,
 	definedVariables,
 	replace,
+	executionType,
 	...block
 }: TimelineBlock & {
 	onRemove: (id: string) => void;
@@ -45,6 +48,7 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 	definedVariables: string[];
 	/** Replace this block with some other blocks */
 	replace: (blocks: TimelineBlock[]) => void;
+	executionType: ("main" | "prerequisite")[];
 }) {
 	return (
 		<Suspense>
@@ -58,7 +62,11 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 				) : block.type === "EventCondition" ? (
 					<EventCondition {...block} update={update} />
 				) : block.type === "IfCondition" ? (
-					<IfCondition {...block} update={update} />
+					<IfCondition
+						{...block}
+						definedVariables={definedVariables}
+						update={update}
+					/>
 				) : block.type === "ShipSystemGetter" ? (
 					<ShipSystemGetter {...block} update={update} />
 				) : block.type === "ResultPropertyIntoVariable" ? (
@@ -86,8 +94,12 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 						replace={replace}
 						definedVariables={definedVariables}
 					/>
+				) : block.type === "TimelineAvailability" ? (
+					<TimelineAvailabilityBlock {...block} update={update} />
+				) : block.type === "Debug" ? (
+					<DebugBlock {...block} update={update} />
 				) : (
-					<div>Unknown block type</div>
+					(block satisfies never)
 				)}
 			</BlockWrapper>
 			{"triggerBlocks" in block ? (
@@ -95,6 +107,7 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 					<div className="h-[calc(100%-1rem)] w-4 left-2  border-white/50 border-l border-b absolute rounded-bl-full" />
 					<div className="pl-8">
 						<SortableBlocks
+							executionType={executionType}
 							parentBlock={block}
 							blocks={block.triggerBlocks}
 							onRemove={(id) =>
@@ -135,6 +148,7 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 						/>
 					</div>
 					<AddBlockMenu
+						executionType={executionType}
 						onAddBlock={(type, init) =>
 							(update as any)("triggerBlocks", [
 								...block.triggerBlocks,

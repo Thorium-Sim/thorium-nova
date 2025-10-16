@@ -6,11 +6,28 @@ import {
 } from "@thorium/components/timelineBuilder/BlockInputs";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
+import InfoTip from "@thorium/ui/InfoTip";
 import { produce } from "immer";
 
-export function IfCondition({ conditions, update }: BlockProps<"IfCondition">) {
+export function IfCondition({
+	conditions,
+	update,
+	definedVariables = [],
+}: BlockProps<"IfCondition"> & { definedVariables: string[] }) {
 	return (
 		<>
+			<div className="absolute left-0 top-0">
+				<InfoTip>
+					<p>The following variables are available:</p>
+					<ul className="ml-4">
+						{definedVariables.map((d) => (
+							<li key={d} className="list-disc">
+								<code>{d}</code>
+							</li>
+						))}
+					</ul>
+				</InfoTip>
+			</div>
 			<div className="flex gap-2">
 				If{" "}
 				<div className="flex flex-col gap-2">

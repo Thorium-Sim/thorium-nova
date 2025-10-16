@@ -1,12 +1,9 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { type Entity, System } from "@thorium/utils/ecs";
-import {
-	getReportEffects,
-	type diagnosticRecord,
-} from "@thorium/utils/flags/damageTypes";
 import type { KiloWattHour } from "@thorium/utils/unitTypes";
 
 export class MainComputerDiagnosticSystem extends System {
+	static flightMode = ["nova"];
 	/** The number of concurrent diagnostics */
 	diagnosticCount = new Map<number, number>();
 	test(entity: Entity) {

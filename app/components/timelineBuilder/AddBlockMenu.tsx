@@ -35,6 +35,7 @@ export function AddBlockButton({
 	onAddBlock,
 	children,
 	omitBlocks,
+	executionType,
 }: {
 	onAddBlock: <T extends TimelineBlock["type"]>(
 		blockType: T,
@@ -44,6 +45,7 @@ export function AddBlockButton({
 	) => void;
 	children: ReactNode;
 	omitBlocks?: boolean;
+	executionType: ("main" | "prerequisite")[];
 }) {
 	const [macros] = q.plugin.macro.all.useNetRequest({ type: "macro" });
 
@@ -61,16 +63,25 @@ export function AddBlockButton({
 			{children}
 			<Popover placement="bottom" className={popoverClass}>
 				<Menu>
-					<StyledMenuItem onAction={() => onAddBlock("Action")}>
-						Action
-					</StyledMenuItem>
-					<StyledMenuItem
-						onAction={() =>
-							onAddBlock("Action", { action: "timeline.advance" })
-						}
-					>
-						Advance Timeline
-					</StyledMenuItem>
+					{executionType.includes("main") ? (
+						<>
+							<StyledMenuItem onAction={() => onAddBlock("Action")}>
+								Action
+							</StyledMenuItem>
+							<StyledMenuItem
+								onAction={() =>
+									onAddBlock("Action", { action: "timeline.advance" })
+								}
+							>
+								Advance Timeline
+							</StyledMenuItem>
+						</>
+					) : null}
+					{executionType.includes("prerequisite") ? (
+						<StyledMenuItem onAction={() => onAddBlock("TimelineAvailability")}>
+							Mark Timeline Availability
+						</StyledMenuItem>
+					) : null}
 					<SubmenuTrigger>
 						<StyledMenuItem className="flex justify-between">
 							Macros <Icon name="chevron-right" />{" "}
@@ -104,9 +115,12 @@ export function AddBlockButton({
 					</SubmenuTrigger>
 					<MenuSection>
 						<Header className="font-bold pl-2">Control Flow</Header>
-						<StyledMenuItem onAction={() => onAddBlock("Wait")}>
-							Wait
-						</StyledMenuItem>
+
+						{executionType.includes("main") ? (
+							<StyledMenuItem onAction={() => onAddBlock("Wait")}>
+								Wait
+							</StyledMenuItem>
+						) : null}
 						<StyledMenuItem
 							onAction={() => onAddBlock("ResultPropertyIntoVariable")}
 						>
@@ -148,9 +162,11 @@ export function AddBlockButton({
 							<StyledMenuItem onAction={() => onAddBlock("EntityCondition")}>
 								Entity Condition
 							</StyledMenuItem>
-							<StyledMenuItem onAction={() => onAddBlock("EventCondition")}>
-								Event Condition
-							</StyledMenuItem>
+							{executionType.includes("main") ? (
+								<StyledMenuItem onAction={() => onAddBlock("EventCondition")}>
+									Event Condition
+								</StyledMenuItem>
+							) : null}
 							<StyledMenuItem onAction={() => onAddBlock("IfCondition")}>
 								If Condition
 							</StyledMenuItem>
@@ -163,6 +179,7 @@ export function AddBlockButton({
 }
 export function AddBlockMenu({
 	onAddBlock,
+	executionType,
 }: {
 	onAddBlock: <T extends TimelineBlock["type"]>(
 		blockType: T,
@@ -170,10 +187,15 @@ export function AddBlockMenu({
 			Omit<Extract<TimelineBlock, { type: T }>, "id" | "type">
 		>,
 	) => void;
+	executionType: ("main" | "prerequisite")[];
 }) {
 	return (
 		<div className="absolute p-2 bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-10">
-			<AddBlockButton onAddBlock={onAddBlock} omitBlocks>
+			<AddBlockButton
+				onAddBlock={onAddBlock}
+				omitBlocks
+				executionType={executionType}
+			>
 				<Button
 					aria-label="Add block"
 					className="flex rounded-full w-6 h-6 cursor-pointer bg-black/20 hover:bg-white/20 hover:backdrop-brightness-200 hover:backdrop-saturate-200 border border-white/50  items-center justify-center"

@@ -376,6 +376,13 @@ const quotes = [
 	"There's a reason we don’t teach gorillas to play the bagpipes. It would be futile and annoy the gorilla, especially the required kilt.",
 	// Benjamin Brewster, via Dan Abramov
 	"In theory, there is no difference between theory and practice, but in practice there is.",
+	// E.B. White
+	"I arise in the morning torn between a desire to improve save the world and a desire to savor the world. This makes it hard to plan the day.",
+	// Winnie the Pooh
+	"Rivers know this: there is no hurry. We shall get there someday.",
+	"People say nothing is impossible, but I do nothing every day.",
+	"They’re funny things, Accidents. You never have them till you’re having them.",
+	"Could be worse. Not sure how, but it could be.",
 ];
 
 const QuoteOfTheDay = () => {

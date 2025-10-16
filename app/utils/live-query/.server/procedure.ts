@@ -99,7 +99,10 @@ export interface ProcedureCallOptions {
 	entity?: unknown;
 	path: string;
 	type: ProcedureType;
-	onCall?: (opts: ProcedureCallOptions) => void | Promise<void>;
+	onCall?: (
+		opts: ProcedureCallOptions,
+		result: unknown,
+	) => void | Promise<void>;
 }
 
 /**

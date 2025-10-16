@@ -33,6 +33,7 @@ export default function MissionLayout() {
 	const [item] = q.plugin.timeline.get.useNetRequest({
 		pluginId,
 		timelineId,
+		timelineType: "missions",
 	});
 
 	const match = useMatch("config/:pluginId/missions/:timelineId/:stepId/*")
@@ -55,6 +56,7 @@ export default function MissionLayout() {
 		const result = await q.plugin.timeline.step.reorder.netSend({
 			pluginId,
 			timelineId,
+			timelineType: "missions",
 			stepId: active.id as string,
 			newIndex: Number(overIndex),
 		});
@@ -92,6 +94,7 @@ export default function MissionLayout() {
 								const step = await q.plugin.timeline.step.add.netSend({
 									pluginId,
 									timelineId,
+									timelineType: "missions",
 									name,
 								});
 								navigate(`${step.stepId}`);
@@ -108,6 +111,7 @@ export default function MissionLayout() {
 								const step = await q.plugin.timeline.step.insert.netSend({
 									pluginId,
 									timelineId,
+									timelineType: "missions",
 									stepId,
 									name,
 								});
@@ -124,6 +128,7 @@ export default function MissionLayout() {
 								const step = await q.plugin.timeline.step.duplicate.netSend({
 									pluginId,
 									timelineId,
+									timelineType: "missions",
 									stepId,
 								});
 								navigate(`${step.stepId}`);
@@ -140,6 +145,7 @@ export default function MissionLayout() {
 									await q.plugin.timeline.step.delete.netSend({
 										pluginId,
 										timelineId,
+										timelineType: "missions",
 										stepId,
 									});
 								if (alternateStep) {
@@ -167,6 +173,7 @@ export default function MissionLayout() {
 							q.plugin.timeline.delete.netSend({
 								pluginId,
 								timelineId,
+								timelineType: "missions",
 							});
 							navigate(`/config/${pluginId}/missions`);
 						}}

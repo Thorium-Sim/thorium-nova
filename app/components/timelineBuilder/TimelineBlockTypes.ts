@@ -13,9 +13,44 @@ export const timelineBlockTypes = [
 	"RandomIntoVariable",
 	"MathIntoVariable",
 	"Macro",
+	"TimelineAvailability",
+	"Debug",
 ] as const;
 
 type BlockTypes = (typeof timelineBlockTypes)[number];
+
+export const prerequisiteBlockTypes: BlockTypes[] = [
+	"DistanceCondition",
+	"EntityCondition",
+	"IfCondition",
+	"ShipSystemGetter",
+	"ResultPropertyIntoVariable",
+	"EntityPropertyIntoVariable",
+	"VariableIntoVariable",
+	"SetVariable",
+	"RandomIntoVariable",
+	"MathIntoVariable",
+	"Macro",
+	"TimelineAvailability",
+	"Debug",
+];
+export const mainBlockTypes: BlockTypes[] = [
+	"DistanceCondition",
+	"EntityCondition",
+	"EventCondition",
+	"IfCondition",
+	"Wait",
+	"ShipSystemGetter",
+	"ResultPropertyIntoVariable",
+	"EntityPropertyIntoVariable",
+	"VariableIntoVariable",
+	"SetVariable",
+	"Action",
+	"RandomIntoVariable",
+	"MathIntoVariable",
+	"Macro",
+	"Debug",
+];
 
 export const timelineBlockDefaults: {
 	[K in BlockTypes]: Omit<Extract<TimelineBlock, { type: K }>, "type" | "id">;
@@ -83,6 +118,12 @@ export const timelineBlockDefaults: {
 	Macro: {
 		pluginId: "",
 		macroId: "",
+	},
+	TimelineAvailability: {
+		isAvailable: true,
+	},
+	Debug: {
+		variable: "",
 	},
 };
 
@@ -202,6 +243,15 @@ interface MacroBlock extends BaseBlock {
 	macroId: string;
 }
 
+interface TimelineAvailabilityBlock extends BaseBlock {
+	type: "TimelineAvailability";
+	isAvailable: boolean;
+}
+interface DebugBlock extends BaseBlock {
+	type: "Debug";
+	variable: string;
+}
+
 export type TimelineBlock =
 	| DistanceConditionBlock
 	| EntityConditionBlock
@@ -216,4 +266,6 @@ export type TimelineBlock =
 	| ActionBlock
 	| RandomIntoVariableBlock
 	| MathIntoVariableBlock
-	| MacroBlock;
+	| MacroBlock
+	| TimelineAvailabilityBlock
+	| DebugBlock;

@@ -11,22 +11,23 @@ import { Navigate } from "@thorium/components/Navigate";
 import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { Button } from "react-aria-components";
 import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
+import { reportVariableNames } from "@thorium/routes/config/reports/reportAvailableVariables";
 
-export default function MissionDetails() {
+export default function ReportDetails() {
 	const { pluginId, timelineId } = useParams() as {
 		pluginId: string;
 		timelineId: string;
 	};
-	const [mission] = q.plugin.timeline.get.useNetRequest({
+	const [report] = q.plugin.timeline.get.useNetRequest({
 		pluginId,
 		timelineId,
-		timelineType: "missions",
+		timelineType: "reports",
 	});
 	const [error, setError] = useState(false);
 	const navigate = useNavigate();
-	if (!mission) return <Navigate to={`/config/${pluginId}/timelines`} />;
+	if (!report) return <Navigate to={`/config/${pluginId}/reports`} />;
 
-	const { prerequisiteBlocks } = mission;
+	const { prerequisiteBlocks } = report;
 	return (
 		<fieldset
 			key={timelineId}
@@ -38,9 +39,9 @@ export default function MissionDetails() {
 						labelHidden={false}
 						isInvalid={error}
 						invalidMessage="Name is required"
-						label="Mission Name"
-						placeholder="Eclipse"
-						defaultValue={mission.name}
+						label="Report Name"
+						placeholder="Damage Repair"
+						defaultValue={report.name}
 						onChange={() => setError(false)}
 						onBlur={async (e: any) => {
 							if (!e.target.value) return setError(true);
@@ -48,14 +49,14 @@ export default function MissionDetails() {
 								const result = await q.plugin.timeline.update.netSend({
 									pluginId,
 									timelineId,
-									timelineType: "missions",
+									timelineType: "reports",
 									name: e.target.value,
 								});
 								navigate(`/config/${pluginId}/timelines/${result.timelineId}`);
 							} catch (err) {
 								if (err instanceof Error) {
 									toast({
-										title: "Error renaming timeline",
+										title: "Error renaming report",
 										body: err.message,
 										color: "error",
 									});
@@ -70,12 +71,12 @@ export default function MissionDetails() {
 						className="!h-32"
 						labelHidden={false}
 						label="Description"
-						defaultValue={mission.description}
+						defaultValue={report.description}
 						onBlur={(e: any) =>
 							q.plugin.timeline.update.netSend({
 								pluginId,
 								timelineId,
-								timelineType: "missions",
+								timelineType: "reports",
 								description: e.target.value,
 							})
 						}
@@ -89,12 +90,12 @@ export default function MissionDetails() {
 							labelHidden={false}
 							label="Category"
 							type="textarea"
-							defaultValue={mission.category}
+							defaultValue={report.category}
 							onBlur={(e: any) =>
 								q.plugin.timeline.update.netSend({
 									pluginId,
 									timelineId,
-									timelineType: "missions",
+									timelineType: "reports",
 									category: e.target.value,
 								})
 							}
@@ -103,56 +104,27 @@ export default function MissionDetails() {
 					<div className="flex-1">
 						<TagInput
 							label="Tags"
-							tags={mission.tags}
+							tags={report.tags}
 							onAdd={(tag) => {
-								if (mission.tags.includes(tag)) return;
+								if (report.tags.includes(tag)) return;
 								q.plugin.timeline.update.netSend({
 									pluginId,
 									timelineId,
-									timelineType: "missions",
-									tags: [...mission.tags, tag],
+									timelineType: "reports",
+									tags: [...report.tags, tag],
 								});
 							}}
 							onRemove={(tag) => {
-								if (!mission.tags.includes(tag)) return;
+								if (!report.tags.includes(tag)) return;
 								q.plugin.timeline.update.netSend({
 									pluginId,
 									timelineId,
-									timelineType: "missions",
-									tags: mission.tags.filter((t) => t !== tag),
+									timelineType: "reports",
+									tags: report.tags.filter((t) => t !== tag),
 								});
 							}}
 						/>
 					</div>
-				</div>
-				<div>
-					<h3 className="text-lg font-medium flex items-center">
-						Cover Image{" "}
-						<InfoTip>
-							This is the image that will be displayed on the mission list.
-							Should be landscape and 16x9 aspect ratio.
-						</InfoTip>
-					</h3>
-					<UploadWell
-						className="aspect-video"
-						accept="image/*"
-						onChange={async (files) => {
-							await q.plugin.timeline.update.netSend({
-								pluginId,
-								timelineId,
-								timelineType: "missions",
-								cover: files[0],
-							});
-						}}
-					>
-						{"cover" in mission.assets && mission?.assets.cover && (
-							<img
-								src={`${mission.assets.cover}?${new Date().getTime()}`}
-								alt="Mission Cover"
-								className="w-5/6  object-contain aspect-video"
-							/>
-						)}
-					</UploadWell>
 				</div>
 			</div>
 			<div className="col-span-2 flex flex-col">
@@ -174,7 +146,7 @@ export default function MissionDetails() {
 									await q.plugin.timeline.prerequisiteBlock.add.netSend({
 										pluginId,
 										timelineId,
-										timelineType: "missions",
+										timelineType: "reports",
 										blockType: type,
 										init,
 									});
@@ -189,11 +161,12 @@ export default function MissionDetails() {
 						<SortableBlocks
 							executionType={["prerequisite"]}
 							blocks={prerequisiteBlocks}
+							availableVariableNames={reportVariableNames}
 							onDragEnd={({ active, overIndex }) =>
 								q.plugin.timeline.prerequisiteBlock.reorder.netSend({
 									pluginId,
 									timelineId,
-									timelineType: "missions",
+									timelineType: "reports",
 									blockId: active.id as string,
 									newIndex: Number(overIndex),
 								})
@@ -203,7 +176,7 @@ export default function MissionDetails() {
 								q.plugin.timeline.prerequisiteBlock.update.netSend({
 									pluginId,
 									timelineId,
-									timelineType: "missions",
+									timelineType: "reports",
 									blockId: block.id,
 									properties: { ...properties, [property]: value },
 								});
@@ -212,7 +185,7 @@ export default function MissionDetails() {
 								q.plugin.timeline.prerequisiteBlock.replace.netSend({
 									pluginId,
 									timelineId,
-									timelineType: "missions",
+									timelineType: "reports",
 									blockId: id,
 									blocks,
 								});
@@ -221,7 +194,7 @@ export default function MissionDetails() {
 								q.plugin.timeline.prerequisiteBlock.delete.netSend({
 									pluginId,
 									timelineId,
-									timelineType: "missions",
+									timelineType: "reports",
 									blockId: id,
 								})
 							}
@@ -234,7 +207,7 @@ export default function MissionDetails() {
 						await q.plugin.timeline.prerequisiteBlock.add.netSend({
 							pluginId,
 							timelineId,
-							timelineType: "missions",
+							timelineType: "reports",
 							blockType: type,
 							init,
 						});

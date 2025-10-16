@@ -1,3 +1,7 @@
+import {
+	systemCategories,
+	systemFilterValues,
+} from "@thorium/cards/DamageReports/systemCategories";
 import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
@@ -44,43 +48,78 @@ export function DamageReports() {
 		{ refetchInterval: 1000 },
 	);
 
-	const [selectedSystem, setSelectedSystem] = useState<number | null>(181);
+	const [selectedFilter, setSelectedFilter] = useState("All");
+
+	const [selectedEntity, setSelectedEntity] = useState<number | null>(null);
+	const [damageReports] = q.damageReports.damageReports.useNetRequest({
+		shipId,
+	});
+
+	const selectedReport = damageReports.find((d) => d.id === selectedEntity);
+	const selectedSystem = systems.find((d) => d.id === selectedEntity);
 
 	return (
 		<div className="w-full h-full grid grid-cols-4 gap-4">
 			<div className="flex flex-col gap-2 col-span-1 overflow-hidden">
 				<h3>Reports</h3>
 				<ul className="list-group panel w-full overflow-y-auto flex-1">
-					<li className="list-group-item">Warp Engines Electrical Repair</li>
-					<li className="list-group-item">Thrusters Plumbing Repair</li>
+					{damageReports.map((d) => (
+						<li
+							key={d.id}
+							className={cn("list-group-item", {
+								selected: selectedEntity === d.id,
+							})}
+							onClick={() => setSelectedEntity(d.id)}
+						>
+							{d.name}
+						</li>
+					))}
 				</ul>
 				<h3>Systems</h3>
 				<ul className="list-group panel w-full min-h-0 overflow-y-auto flex-1">
-					{systems.map((s) => (
-						<SystemItem
-							key={s.id}
-							{...s}
-							isSelected={selectedSystem === s.id}
-							onClick={() => setSelectedSystem(s.id)}
-						/>
-					))}
+					{systems
+						.filter(
+							(s) =>
+								selectedFilter === "All" ||
+								systemCategories[s.type] === selectedFilter,
+						)
+						.map((s) => (
+							<SystemItem
+								key={s.id}
+								{...s}
+								isSelected={selectedEntity === s.id}
+								onClick={() => setSelectedEntity(s.id)}
+							/>
+						))}
 				</ul>
 				<div className="flex gap-2 justify-start flex-wrap justify-self-end">
-					<Button className="btn-sm">All</Button>
-					<Button className="btn-sm btn-primary">Propulsion</Button>
-					<Button className="btn-sm">Defense</Button>
-					<Button className="btn-sm">Power</Button>
-					<Button className="btn-sm">Communications</Button>
-					<Button className="btn-sm">Science</Button>
-					<Button className="btn-sm">Misc.</Button>
+					<Button
+						className={cn("btn-sm", {
+							"btn-primary": selectedFilter === "All",
+						})}
+						onClick={() => setSelectedFilter("All")}
+					>
+						All
+					</Button>
+					{systemFilterValues.map((f) => (
+						<Button
+							onClick={() => setSelectedFilter(f)}
+							key={f}
+							className={cn("btn-sm", { "btn-primary": selectedFilter === f })}
+						>
+							{f}
+						</Button>
+					))}
 				</div>
 			</div>
 			{selectedSystem ? (
 				<SystemDetails
-					systemId={selectedSystem}
-					name={systems.find((s) => s.id === selectedSystem)?.name || ""}
+					systemId={selectedSystem.id}
+					name={selectedSystem.name || ""}
+					setSelectedReportId={(id) => setSelectedEntity(id)}
 				/>
 			) : null}
+			{selectedReport ? <DamageReport {...selectedReport} /> : null}
 		</div>
 	);
 }
@@ -163,11 +202,39 @@ function SystemDiagnosticIndicator({ id }: { id: number }) {
 	);
 }
 
-function SystemDetails({ systemId, name }: { systemId: number; name: string }) {
+function SystemDetails({
+	systemId,
+	name,
+	setSelectedReportId,
+}: {
+	systemId: number;
+	name: string;
+	setSelectedReportId: (id: number) => void;
+}) {
+	const { shipId } = useStation();
+
 	const [diagnostic] = q.damageReports.systemDiagnostic.useNetRequest({
 		systemId: systemId,
 	});
+	const [damageReports] = q.damageReports.damageReports.useNetRequest({
+		shipId,
+	});
+	if (!systemId) return null;
 
+	const systemDamageReport = damageReports.find((s) => s.systemId === systemId);
+	if (systemDamageReport) {
+		return (
+			<div className="flex flex-col gap-4 col-span-3 items-center justify-center">
+				<h2 className="text-4xl">Damage Report In Progress...</h2>
+				<Button
+					className="btn-alert"
+					onClick={() => setSelectedReportId(systemDamageReport.id)}
+				>
+					Go To Report
+				</Button>
+			</div>
+		);
+	}
 	if (!diagnostic) {
 		return (
 			<div className="flex flex-col gap-4 col-span-3 items-center justify-center">
@@ -220,7 +287,12 @@ function SystemDetails({ systemId, name }: { systemId: number; name: string }) {
 	}
 
 	if (diagnostic.reportCandidates) {
-		return <ReportCandidates systemId={systemId} />;
+		return (
+			<ReportCandidates
+				systemId={systemId}
+				setSelectedReportId={setSelectedReportId}
+			/>
+		);
 	}
 
 	if (diagnostic.results) {
@@ -483,7 +555,10 @@ function MetricPanel({
 	);
 }
 
-function ReportCandidates({ systemId }: { systemId: number }) {
+function ReportCandidates({
+	systemId,
+	setSelectedReportId,
+}: { systemId: number; setSelectedReportId: (id: number) => void }) {
 	const [diagnostic] = q.damageReports.systemDiagnostic.useNetRequest({
 		systemId: systemId,
 	});
@@ -502,12 +577,12 @@ function ReportCandidates({ systemId }: { systemId: number }) {
 						<ul>
 							{report.affectedSystems.map((sys) => (
 								<li
-									key={`${sys.id}${Object.keys(sys.metrics).join("")}`}
+									key={`${sys.id}${Object.keys(sys.effects).join("")}`}
 									className="mb-4"
 								>
 									<span className="text-lg">{sys.name}</span>
 									<ul className="ml-4 list-disc">
-										{Object.entries(sys.metrics).map(([name, value]) => (
+										{Object.entries(sys.effects).map(([name, value]) => (
 											<li
 												key={`${name}${value}`}
 												className={cn({
@@ -525,7 +600,20 @@ function ReportCandidates({ systemId }: { systemId: number }) {
 								</li>
 							))}
 						</ul>
-						<Button className="btn-success w-full">Begin Report</Button>
+						<Button
+							className="btn-success w-full"
+							onClick={async () => {
+								const { reportId } =
+									await q.damageReports.beginDamageReport.netSend({
+										diagnosticId: diagnostic.id,
+										reportCandidateId: report.id,
+									});
+
+								setSelectedReportId(reportId);
+							}}
+						>
+							Begin Report
+						</Button>
 					</div>
 				))}
 			</div>
@@ -553,3 +641,39 @@ const damageMetricFormats: Record<DamageEffects, (value: number) => ReactNode> =
 		cascadeRisk: (val) => `${Math.round(val * 1000) / 10}%`,
 		crewSafetyRating: (val) => `${Math.round(val * 100)}%`,
 	};
+
+function DamageReport({
+	id,
+	name,
+	stepCount,
+	currentStepIndex,
+	currentStepText,
+}: {
+	id: number;
+	name: string;
+	stepCount: number;
+	currentStepIndex: number;
+	currentStepText: string;
+}) {
+	return (
+		<div className="flex flex-col col-span-3 text-xl gap-2">
+			<div>{name}</div>
+			<div className="panel flex-1 p-4 text-2xl whitespace-pre-wrap overflow-y-auto">
+				{currentStepText}
+			</div>
+			<div className="flex justify-between items-center gap-2">
+				<div className="text-xl">
+					Step {currentStepIndex + 1} / {stepCount}
+				</div>
+				<Button
+					className="btn-error"
+					onClick={() =>
+						q.damageReports.abortDamageReport.netSend({ reportId: id })
+					}
+				>
+					Abort Report
+				</Button>
+			</div>
+		</div>
+	);
+}

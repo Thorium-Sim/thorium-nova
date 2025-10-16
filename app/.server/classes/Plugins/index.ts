@@ -11,10 +11,10 @@ import ThemePlugin from "./Theme";
 import SolarSystemPlugin from "./Universe/SolarSystem";
 import BaseShipSystemPlugin from "./ShipSystems/BaseSystem";
 import InventoryPlugin from "./Inventory";
-import TimelinePlugin from "./Timeline";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { MacroPlugin } from "./Macro";
-import { ReportPlugin } from "@thorium/.server/classes/Plugins/Report";
+import ReportPlugin from "@thorium/.server/classes/Plugins/Report";
+import MissionPlugin from "./Mission";
 
 export function pluginPublish(plugin: BasePlugin) {
 	pubsub.publish.plugin.all();
@@ -30,7 +30,7 @@ interface Aspects {
 	themes: ThemePlugin[];
 	solarSystems: SolarSystemPlugin[];
 	inventory: InventoryPlugin[];
-	timelines: TimelinePlugin[];
+	missions: MissionPlugin[];
 	macros: MacroPlugin[];
 	reports: ReportPlugin[];
 }
@@ -93,7 +93,7 @@ export default class BasePlugin extends DataStore {
 				themes: [],
 				solarSystems: [],
 				inventory: [],
-				timelines: [],
+				missions: [],
 				macros: [],
 				reports: [],
 			};
@@ -123,10 +123,7 @@ export default class BasePlugin extends DataStore {
 			"inventory",
 			InventoryPlugin,
 		);
-		this.aspects.timelines = await this.#loadAspect(
-			"timelines",
-			TimelinePlugin,
-		);
+		this.aspects.missions = await this.#loadAspect("missions", MissionPlugin);
 		this.aspects.macros = await this.#loadAspect("macros", MacroPlugin);
 		this.aspects.reports = await this.#loadAspect("reports", ReportPlugin);
 	}

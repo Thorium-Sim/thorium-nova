@@ -423,7 +423,6 @@ export const flight = t.router({
 				input.asset,
 				input.assetPath,
 			);
-			console.log({ assetPath });
 			pubsub.publish.flight.assets();
 			return { asset: assetPath };
 		}),

@@ -7,7 +7,7 @@ import { toast } from "@thorium/context/ToastContext";
 import SearchableList from "@thorium/ui/SearchableList";
 import { Fragment } from "react";
 
-export default function MissionsConfig() {
+export default function ReportsConfig() {
 	const { pluginId, timelineId } = useParams() as {
 		pluginId: string;
 		timelineId?: string;
@@ -17,33 +17,36 @@ export default function MissionsConfig() {
 	});
 	const prompt = usePrompt();
 	const navigate = useNavigate();
-	const [data] = q.plugin.timeline.missions.useNetRequest({ pluginId });
+	const [data] = q.plugin.timeline.all.useNetRequest({
+		pluginId,
+		timelineType: "reports",
+	});
 
-	const mission = data.find((d) => d.name === timelineId);
+	const report = data.find((d) => d.name === timelineId);
 
 	return (
 		<div className="p-8 h-[calc(100%-2rem)]">
-			<h1 className="font-bold text-white text-3xl mb-4">Mission Config</h1>
+			<h1 className="font-bold text-white text-3xl mb-4">Report Config</h1>
 			<div className="flex gap-8 h-[calc(100%-3rem)]">
 				<div className="flex flex-col w-80 h-full">
 					<Button
 						className="btn-success btn-sm w-full"
 						onClick={async () => {
 							const name = await prompt({
-								header: "Enter mission name",
+								header: "Enter report name",
 							});
 							if (typeof name !== "string") return;
 							try {
 								const result = await q.plugin.timeline.create.netSend({
 									name,
 									pluginId,
-									timelineType: "missions",
+									timelineType: "reports",
 								});
 								navigate(`${result.timelineId}`);
 							} catch (err) {
 								if (err instanceof Error) {
 									toast({
-										title: "Error creating mission",
+										title: "Error creating report",
 										body: err.message,
 										color: "error",
 									});
@@ -52,7 +55,7 @@ export default function MissionsConfig() {
 							}
 						}}
 					>
-						New Mission
+						New Report
 					</Button>
 
 					<SearchableList
@@ -71,7 +74,7 @@ export default function MissionsConfig() {
 						)}
 					/>
 				</div>
-				<Fragment key={mission?.name}>
+				<Fragment key={report?.name}>
 					<Outlet />
 				</Fragment>
 			</div>

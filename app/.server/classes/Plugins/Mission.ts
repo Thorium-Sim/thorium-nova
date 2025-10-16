@@ -1,49 +1,20 @@
 import type BasePlugin from "./index";
 import { Aspect } from "./Aspect";
-import type { components } from "@thorium/ecs-components";
 import uniqid from "@thorium/utils/uniqid";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
-
-export type EntityQuery = ComponentQuery[];
-
-export type ValueQuery = {
-	query: EntityQuery;
-	select: Pick<ComponentQuery, "component" | "property"> & {
-		matchType?: "all" | "first" | "random";
-	};
-};
-export type ComponentQuery = {
-	component: keyof typeof components | "";
-	property: string | "";
-	comparison: string | null;
-	value: string | ValueQuery;
-};
-
-export interface TimelineAction {
-	id: string;
-	name: string;
-	action: string;
-	values: Record<string, (any & {}) | ValueQuery>;
-}
-
-interface TimelineStep {
-	id: string;
-	name: string;
-	description: string;
-	tags: string[];
-	blocks: TimelineBlock[];
-}
-
-export default class TimelinePlugin extends Aspect {
-	apiVersion = "ships/v1" as const;
-	kind = "timelines" as const;
+import type { TimelineStep } from "@thorium/.server/classes/Plugins/TimelineStep";
+export default class MissionPlugin extends Aspect {
+	apiVersion = "timeline/v1" as const;
+	kind = "missions" as const;
 	name: string;
 	description: string;
 	category: string;
 	tags: string[];
-	type: "mission" | "trigger" | "training" | "report";
 	flightMode: "nova" | "legacy";
+
+	/** Blocks that are executed when checking to see if a timeline is valid. */
+	prerequisiteBlocks: TimelineBlock[];
 
 	steps: TimelineStep[];
 	/**
@@ -56,18 +27,17 @@ export default class TimelinePlugin extends Aspect {
 		cover: string;
 	};
 
-	constructor(params: Partial<TimelinePlugin>, plugin: BasePlugin) {
+	constructor(params: Partial<MissionPlugin>, plugin: BasePlugin) {
 		const name = generateIncrementedName(
-			params.name || "New Timeline",
-			plugin.aspects.timelines.map((timeline) => timeline.name),
+			params.name || "New Mission",
+			plugin.aspects.missions.map((timeline) => timeline.name),
 		);
-		super({ name, ...params }, { kind: "timelines" }, plugin, {});
+		super({ name, ...params }, { kind: "missions" }, plugin, {});
 		this.name = name;
 		this.description = params.description || "What could possibly go wrong?";
 
 		this.category = params.category || "";
 		this.tags = params.tags || [];
-		this.type = params.type || "mission";
 		this.flightMode = params.flightMode || "nova";
 
 		this.assets = params.assets || {
@@ -84,6 +54,8 @@ export default class TimelinePlugin extends Aspect {
 				blocks: [],
 			},
 		];
+
+		this.prerequisiteBlocks = params.prerequisiteBlocks || [];
 	}
 	addStep(name: string) {
 		const id = uniqid("ms-");

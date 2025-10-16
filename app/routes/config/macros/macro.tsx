@@ -107,6 +107,7 @@ export default function MacroLayout() {
 					<div>
 						<p>No blocks added to macro.</p>
 						<AddBlockButton
+							executionType={["main", "prerequisite"]}
 							onAddBlock={async (type, init) => {
 								await q.plugin.macro.block.add.netSend({
 									pluginId,
@@ -123,6 +124,7 @@ export default function MacroLayout() {
 					</div>
 				) : (
 					<SortableBlocks
+						executionType={["main", "prerequisite"]}
 						blocks={macro?.blocks || []}
 						onDragEnd={({ active, overIndex }) =>
 							q.plugin.macro.block.reorder.netSend({
@@ -160,6 +162,7 @@ export default function MacroLayout() {
 				)}
 			</div>
 			<AddBlockButton
+				executionType={["main", "prerequisite"]}
 				onAddBlock={async (type, init) => {
 					await q.plugin.macro.block.add.netSend({
 						pluginId,

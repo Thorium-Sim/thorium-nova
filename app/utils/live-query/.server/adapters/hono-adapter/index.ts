@@ -43,7 +43,10 @@ export interface HonoHandlerOptions<TRouter extends AnyRouter, TContext> {
 	initWebsocket?: InitWebsocket;
 	upgradeWebSocket: UpgradeWebSocket;
 	extraContext: TContext;
-	onCall?: (opts: ProcedureCallOptions) => void | Promise<void>;
+	onCall?: (
+		opts: ProcedureCallOptions,
+		result: unknown,
+	) => void | Promise<void>;
 }
 
 async function processBody(req: HonoRequest) {

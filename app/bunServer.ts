@@ -47,13 +47,16 @@ try {
 			router,
 			upgradeWebSocket,
 			extraContext: database,
-			onCall: (opts: any) => {
+			onCall: (opts: any, result: unknown) => {
 				const ecs = database?.flight?.ecs;
 				if (!ecs || opts.type !== "send") return;
 				processTriggers(ecs, {
 					event: opts.path,
 					values: {
 						...opts.rawInput,
+						...(typeof result === "object" && !Array.isArray(result)
+							? result
+							: {}),
 					},
 				});
 			},

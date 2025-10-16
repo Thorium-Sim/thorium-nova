@@ -1,6 +1,7 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { getPowerSupplierPowerNeeded } from "@thorium/.server/systems/ReactorFuelSystem";
+import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
 import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInventory";
 import type { MegaWattHour } from "@thorium/utils/unitTypes";
@@ -138,6 +139,7 @@ export const systemsMonitor = t.router({
 				const systems: {
 					id: number;
 					name: string;
+					type: ShipSystemTypes;
 					power?: {
 						powerLevels: number[];
 						powerSources: number[];
@@ -161,6 +163,7 @@ export const systemsMonitor = t.router({
 					systems.push({
 						id: systemId,
 						name: system.components.identity!.name,
+						type: system.components.isShipSystem.type,
 						power: system.components.power
 							? {
 									powerLevels: system.components.power.powerLevels,

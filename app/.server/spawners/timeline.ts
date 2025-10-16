@@ -1,9 +1,11 @@
-import type TimelinePlugin from "@thorium/.server/classes/Plugins/Timeline";
+import type MissionPlugin from "@thorium/.server/classes/Plugins/Mission";
+import type ReportPlugin from "@thorium/.server/classes/Plugins/Report";
 import { Entity } from "@thorium/utils/ecs";
 
 export function spawnTimeline(
-	timeline: TimelinePlugin,
+	timeline: MissionPlugin | ReportPlugin,
 	addEntity: (entity: Entity) => void,
+	shipId?: number,
 ) {
 	// Create the timeline entity
 	const timelineEntity = new Entity();
@@ -16,8 +18,7 @@ export function spawnTimeline(
 		});
 		step.addComponent("tags", { tags: stepItem.tags });
 		step.addComponent("isTimelineStep", {
-			blocks: structuredClone(stepItem.blocks),
-			active: false,
+			blocks: JSON.parse(JSON.stringify(stepItem.blocks)),
 			timelineId: timelineEntity.id,
 		});
 		addEntity(step);
@@ -30,11 +31,17 @@ export function spawnTimeline(
 	});
 	timelineEntity.addComponent("tags", { tags: timeline.tags });
 	timelineEntity.addComponent("isTimeline", {
+		shipId,
 		steps: stepIds,
-		type: timeline.type,
+		type:
+			timeline.kind === "missions"
+				? "mission"
+				: timeline.kind === "reports"
+					? "report"
+					: undefined,
 	});
 	addEntity(timelineEntity);
 
 	// August 25, 2023 - Send the necessary pubsub updates
-	return stepIds;
+	return timelineEntity;
 }

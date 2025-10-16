@@ -2,9 +2,8 @@ import z from "zod";
 
 export const isTimeline = z
 	.object({
-		type: z
-			.enum(["mission", "macro", "trigger", "training", "report"])
-			.default("macro"),
+		shipId: z.number().optional(),
+		type: z.enum(["mission", "training", "report"]).default("mission"),
 		/**
 		 * References to the isTimelineStep entities associated
 		 * with this timeline.
@@ -20,7 +19,8 @@ export const isTimeline = z
 // TODO June 17, 2025 - Make a proper schema for blocks
 export const isTimelineStep = z
 	.object({
-		active: z.boolean().default(true),
+		/** Whether the timeline step has been executed */
+		state: z.enum(["pending", "executing", "executed"]).default("pending"),
 		/**
 		 * What blocks will be executed when this timeline step activates
 		 */

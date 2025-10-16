@@ -3,11 +3,15 @@ import {
 	ValueInput,
 	type BlockProps,
 } from "@thorium/components/timelineBuilder/BlockInputs";
+import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { q } from "@thorium/context/AppContext";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
 import { Icon } from "@thorium/ui/Icon";
 import { Tooltip } from "@thorium/ui/Tooltip";
+import { Button, Dialog, DialogTrigger, Popover } from "react-aria-components";
 
+function noop() {}
 export function MacroBlock({
 	pluginId,
 	macroId,
@@ -29,7 +33,24 @@ export function MacroBlock({
 			<div className="flex items-center gap-x-1 gap-y-5 flex-wrap">
 				{macro ? (
 					<>
-						Run macro <code className="text-purple-200">{macro.name}</code>{" "}
+						Run macro
+						<DialogTrigger>
+							<Button>
+								<code className="text-purple-200">{macro.name}</code>
+							</Button>
+							<Popover className={popoverTransitionClasses}>
+								<Dialog className="isolate scale-50 -translate-y-1/4 bg-black/70 border border-white/50 text-white rounded p-2">
+									<SortableBlocks
+										blocks={macro.blocks}
+										executionType={["main", "prerequisite"]}
+										onDragEnd={noop}
+										onUpdate={noop}
+										onRemove={noop}
+										onReplace={noop}
+									/>
+								</Dialog>
+							</Popover>
+						</DialogTrigger>{" "}
 						<Tooltip content="Expand macro into blocks">
 							<button
 								className="btn btn-outline btn-xs btn-info"

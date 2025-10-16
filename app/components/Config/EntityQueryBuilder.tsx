@@ -17,7 +17,7 @@ import type {
 	ComponentQuery,
 	EntityQuery,
 	ValueQuery,
-} from "@thorium/.server/classes/Plugins/Timeline";
+} from "@thorium/.server/classes/Plugins/TimelineStep";
 import TagInput from "@thorium/ui/TagInput";
 import { Icon } from "@thorium/ui/Icon";
 import { cn } from "@thorium/utils/cn";

@@ -123,6 +123,7 @@ export default function TriggerLayout() {
 					<div>
 						<p>No blocks added to trigger.</p>
 						<AddBlockButton
+							executionType={["main"]}
 							onAddBlock={async (type, init) => {
 								await q.plugin.macro.block.add.netSend({
 									pluginId,
@@ -139,6 +140,7 @@ export default function TriggerLayout() {
 					</div>
 				) : (
 					<SortableBlocks
+						executionType={["main"]}
 						blocks={trigger?.blocks || []}
 						onDragEnd={({ active, overIndex }) =>
 							q.plugin.macro.block.reorder.netSend({
@@ -176,6 +178,7 @@ export default function TriggerLayout() {
 				)}
 			</div>
 			<AddBlockButton
+				executionType={["main"]}
 				onAddBlock={async (type, init) => {
 					await q.plugin.macro.block.add.netSend({
 						pluginId,

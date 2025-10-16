@@ -12,24 +12,26 @@ export async function traverseFiles(
 	for (const file of folderFiles) {
 		if (file.includes(".DS_Store")) continue;
 		const filePath = path.join(basePath, file);
-		const isDirectory = (await lstat(filePath)).isDirectory();
-		if (isDirectory) {
-			files.push({
-				name: file,
-				fullPath: filePath.replace(rootPath, ""),
-				contents: await traverseFiles(filePath, rootPath, extensions),
-			});
-		} else if (
-			!extensions ||
-			extensions.length === 0 ||
-			extensions.includes(path.extname(filePath).replace(".", ""))
-		) {
-			files.push({
-				name: file,
-				fullPath: filePath.replace(rootPath, ""),
-				contents: null,
-			});
-		}
+		try {
+			const isDirectory = (await lstat(filePath)).isDirectory();
+			if (isDirectory) {
+				files.push({
+					name: file,
+					fullPath: filePath.replace(rootPath, ""),
+					contents: await traverseFiles(filePath, rootPath, extensions),
+				});
+			} else if (
+				!extensions ||
+				extensions.length === 0 ||
+				extensions.includes(path.extname(filePath).replace(".", ""))
+			) {
+				files.push({
+					name: file,
+					fullPath: filePath.replace(rootPath, ""),
+					contents: null,
+				});
+			}
+		} catch {}
 	}
 
 	// Traverse again to sort and filter

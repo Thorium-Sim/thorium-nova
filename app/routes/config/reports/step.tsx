@@ -8,8 +8,12 @@ import { Button } from "react-aria-components";
 import InfoTip from "@thorium/ui/InfoTip";
 import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
+import { reportVariableNames } from "@thorium/routes/config/reports/reportAvailableVariables";
+import type { DetailedHTMLProps, HTMLAttributes } from "react";
+import { cn } from "@thorium/utils/cn";
+import { InterpolateInfo } from "@thorium/routes/config/reports/InterpolateInfo";
 
-export default function TimelineStep() {
+export default function ReportStep() {
 	const { pluginId, timelineId, stepId } = useParams() as {
 		pluginId: string;
 		timelineId: string;
@@ -18,7 +22,7 @@ export default function TimelineStep() {
 	const [timeline] = q.plugin.timeline.get.useNetRequest({
 		pluginId,
 		timelineId,
-		timelineType: "missions",
+		timelineType: "reports",
 	});
 
 	const step = timeline.steps.find((s) => s.id === stepId);
@@ -41,7 +45,7 @@ export default function TimelineStep() {
 								await q.plugin.timeline.step.update.netSend({
 									pluginId,
 									timelineId,
-									timelineType: "missions",
+									timelineType: "reports",
 									stepId,
 									name: e.target.value,
 								});
@@ -65,7 +69,7 @@ export default function TimelineStep() {
 							q.plugin.timeline.step.update.netSend({
 								pluginId,
 								timelineId,
-								timelineType: "missions",
+								timelineType: "reports",
 								stepId,
 								tags: [...step.tags, tag],
 							});
@@ -75,7 +79,7 @@ export default function TimelineStep() {
 							q.plugin.timeline.step.update.netSend({
 								pluginId,
 								timelineId,
-								timelineType: "missions",
+								timelineType: "reports",
 								stepId,
 								tags: step.tags.filter((t) => t !== tag),
 							});
@@ -87,14 +91,20 @@ export default function TimelineStep() {
 						as="textarea"
 						className="!h-24"
 						labelHidden={false}
-						label="Description"
+						label={
+							<>
+								Instructions
+								<InterpolateInfo />
+							</>
+						}
+						helperText="The instructions that will be displayed to the crew in the damage report for this step. You can use variables from your blocks in this field."
 						key={step.id}
 						defaultValue={step.description}
 						onBlur={(e: any) =>
 							q.plugin.timeline.step.update.netSend({
 								pluginId,
 								timelineId,
-								timelineType: "missions",
+								timelineType: "reports",
 								stepId,
 								description: e.target.value,
 							})
@@ -105,9 +115,17 @@ export default function TimelineStep() {
 			<h3 className="text-xl font-semibold">
 				Blocks{" "}
 				<InfoTip>
-					Compose blocks together to create the logic for your timeline step.
-					Get entity references, store properties in variables, and execute
-					actions.
+					<p>
+						Compose blocks together to create the logic for your timeline step.
+						Get entity references, store properties in variables, and execute
+						actions.
+					</p>
+					<p>The following variables are available:</p>
+					<ul className="ml-4 list-disc">
+						{reportVariableNames.map((a) => (
+							<li key={a}>{a}</li>
+						))}
+					</ul>
 				</InfoTip>
 			</h3>
 			<div className="flex-1 overflow-y-auto overflow-x-hidden">
@@ -120,7 +138,7 @@ export default function TimelineStep() {
 								await q.plugin.timeline.step.block.add.netSend({
 									pluginId,
 									timelineId,
-									timelineType: "missions",
+									timelineType: "reports",
 									stepId,
 									blockType: type,
 									init,
@@ -136,11 +154,12 @@ export default function TimelineStep() {
 					<SortableBlocks
 						executionType={["main"]}
 						blocks={step?.blocks || []}
+						availableVariableNames={reportVariableNames}
 						onDragEnd={({ active, overIndex }) =>
 							q.plugin.timeline.step.block.reorder.netSend({
 								pluginId,
 								timelineId,
-								timelineType: "missions",
+								timelineType: "reports",
 								stepId,
 								blockId: active.id as string,
 								newIndex: Number(overIndex),
@@ -151,7 +170,7 @@ export default function TimelineStep() {
 							q.plugin.timeline.step.block.update.netSend({
 								pluginId,
 								timelineId,
-								timelineType: "missions",
+								timelineType: "reports",
 								stepId,
 								blockId: block.id,
 								properties: { ...properties, [property]: value },
@@ -161,7 +180,7 @@ export default function TimelineStep() {
 							q.plugin.timeline.step.block.replace.netSend({
 								pluginId,
 								timelineId,
-								timelineType: "missions",
+								timelineType: "reports",
 								stepId,
 								blockId: id,
 								blocks,
@@ -171,7 +190,7 @@ export default function TimelineStep() {
 							q.plugin.timeline.step.block.delete.netSend({
 								pluginId,
 								timelineId,
-								timelineType: "missions",
+								timelineType: "reports",
 								stepId,
 								blockId: id,
 							})
@@ -185,7 +204,7 @@ export default function TimelineStep() {
 					await q.plugin.timeline.step.block.add.netSend({
 						pluginId,
 						timelineId,
-						timelineType: "missions",
+						timelineType: "reports",
 						stepId,
 						blockType: type,
 						init,

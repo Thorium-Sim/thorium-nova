@@ -174,7 +174,6 @@ export const bunDataStoreProps: DataStoreOperations = {
 	},
 	async processCSS(rawCSS) {
 		const config = (await import("../../../../tailwind.config")) as any;
-		// @ts-expect-error
 		const postCSSAction = postcss([tailwindcss(config.default)]);
 		const postcssOutput = (
 			await postCSSAction.process(`.theme-container {${rawCSS}}`, {

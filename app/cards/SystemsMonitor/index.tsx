@@ -19,6 +19,10 @@ import {
 import { Fragment } from "react/jsx-runtime";
 import type { CardProps } from "@thorium/cards/CardProps";
 import { useStation } from "@thorium/routes/station/useStation";
+import {
+	systemCategories,
+	systemFilterValues,
+} from "@thorium/cards/DamageReports/systemCategories";
 
 export function SystemsMonitor({ cardLoaded }: CardProps) {
 	const { shipId } = useStation();
@@ -31,6 +35,7 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 	const [selectedPowerSupplier, setSelectedPowerSupplier] = useState<
 		number | null
 	>(null);
+	const [selectedFilter, setSelectedFilter] = useState("All");
 	return (
 		<div
 			className="relative grid grid-cols-6 gap-8 h-full"
@@ -64,14 +69,43 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 				))}
 			</div>
 			<div className="grid grid-cols-[auto_2rem_1fr_2rem] gap-2 col-span-3 items-center">
-				{systems.map((system) => (
-					<System
-						key={system.id}
-						{...system}
-						cardLoaded={cardLoaded}
-						selectedPowerSupplier={selectedPowerSupplier}
-					/>
-				))}
+				{systems
+					.filter(
+						(s) =>
+							selectedFilter === "All" ||
+							systemCategories[s.type] === selectedFilter,
+					)
+					.map((system) => (
+						<System
+							key={system.id}
+							{...system}
+							cardLoaded={cardLoaded}
+							selectedPowerSupplier={selectedPowerSupplier}
+						/>
+					))}
+				<div className="flex gap-2 justify-start flex-wrap justify-self-end col-span-4">
+					<Button
+						className={cn("btn-sm", {
+							"btn-primary": selectedFilter === "All",
+						})}
+						onClick={() => setSelectedFilter("All")}
+					>
+						All
+					</Button>
+					{systemFilterValues
+						.filter((f) => f !== "Power")
+						.map((f) => (
+							<Button
+								onClick={() => setSelectedFilter(f)}
+								key={f}
+								className={cn("btn-sm", {
+									"btn-primary": selectedFilter === f,
+								})}
+							>
+								{f}
+							</Button>
+						))}
+				</div>
 			</div>
 		</div>
 	);
@@ -709,7 +743,9 @@ function System({
 						<Icon name="flame" />
 					</RadialDial>
 				</Tooltip>
-			) : null}
+			) : (
+				<div />
+			)}
 		</div>
 	);
 }

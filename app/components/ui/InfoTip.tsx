@@ -4,11 +4,18 @@ import { Button, Dialog, DialogTrigger, Popover } from "react-aria-components";
 import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
 import { cn } from "@thorium/utils/cn";
 
-const InfoTip = ({ children }: { children: ReactNode }) => {
+const InfoTip = ({
+	children,
+	className,
+	dialogClassName,
+}: { children: ReactNode; className?: string; dialogClassName?: string }) => {
 	return (
 		<DialogTrigger>
 			<Button
-				className="btn btn-ghost btn-xs p-0 !px-0 !min-h-4 !h-4 w-4"
+				className={cn(
+					"btn btn-ghost btn-xs p-0 !px-0 !min-h-4 !h-4 w-4",
+					className,
+				)}
 				aria-label="More Info"
 			>
 				<Icon
@@ -17,7 +24,12 @@ const InfoTip = ({ children }: { children: ReactNode }) => {
 				/>
 			</Button>
 			<Popover className={cn("theme-container", popoverTransitionClasses)}>
-				<Dialog className="max-w-xs w-max panel !bg-black/90 text-white p-2">
+				<Dialog
+					className={cn(
+						"max-w-xs w-max panel !bg-black/90 text-white p-2",
+						dialogClassName,
+					)}
+				>
 					{children}
 				</Dialog>
 			</Popover>

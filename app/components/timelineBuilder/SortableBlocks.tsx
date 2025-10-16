@@ -22,7 +22,6 @@ import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { cn } from "@thorium/utils/cn";
 import { RenderBlock } from "@thorium/components/timelineBuilder/blocks";
 import type { ReactNode } from "react";
-import { Icon } from "@thorium/ui/Icon";
 import { SortableListenerContext } from "@thorium/components/timelineBuilder/SortableListenerContext";
 
 export function SortableBlocks({
@@ -32,6 +31,8 @@ export function SortableBlocks({
 	onUpdate,
 	onReplace,
 	onRemove,
+	executionType,
+	availableVariableNames = [],
 }: {
 	parentBlock?: TimelineBlock;
 	blocks: TimelineBlock[];
@@ -47,6 +48,8 @@ export function SortableBlocks({
 	onUpdate: (block: TimelineBlock, property: any, value: any) => void;
 	onReplace: (id: string, blocks: TimelineBlock[]) => void;
 	onRemove: (id: string) => void;
+	executionType: ("main" | "prerequisite")[];
+	availableVariableNames?: string[] | readonly string[];
 }) {
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
@@ -87,11 +90,15 @@ export function SortableBlocks({
 						<SortableBlock id={block.id} key={block.id}>
 							<RenderBlock
 								{...block}
-								definedVariables={blocks.reduce((prev: string[], next, i) => {
-									if (i >= index) return prev;
-									if ("variable" in next) prev.push(next.variable);
-									return prev;
-								}, [])}
+								executionType={executionType}
+								definedVariables={blocks.reduce(
+									(prev: string[], next, i) => {
+										if (i >= index) return prev;
+										if ("variable" in next) prev.push(next.variable);
+										return prev;
+									},
+									[...availableVariableNames],
+								)}
 								replace={(blocks) => onReplace(block.id, blocks)}
 								update={(property, value) => onUpdate(block, property, value)}
 								onRemove={onRemove}

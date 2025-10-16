@@ -17,7 +17,7 @@ export async function triggerAction(
 		path: path,
 		rawInput: input,
 		ctx: context,
-		onCall: (opts) => {
+		onCall: (opts, result) => {
 			const ecs = ctx?.flight?.ecs;
 			if (!ecs || opts.type !== "send") return;
 
@@ -25,6 +25,9 @@ export async function triggerAction(
 				event: opts.path,
 				values: {
 					...(opts.rawInput as any),
+					...(typeof result === "object" && !Array.isArray(result)
+						? result
+						: {}),
 				},
 			});
 		},
