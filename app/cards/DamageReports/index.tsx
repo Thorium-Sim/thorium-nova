@@ -1,6 +1,7 @@
 import {
 	systemCategories,
 	systemFilterValues,
+	systemSortValues,
 } from "@thorium/cards/DamageReports/systemCategories";
 import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
@@ -9,6 +10,7 @@ import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
 import RadialDial from "@thorium/ui/RadialDial";
+import Select from "@thorium/ui/Select";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { cn } from "@thorium/utils/cn";
 import type { DamageEffects } from "@thorium/utils/flags/damageTypes";
@@ -49,6 +51,7 @@ export function DamageReports() {
 	);
 
 	const [selectedFilter, setSelectedFilter] = useState("All");
+	const [selectedSort, setSelectedSort] = useState("Damage");
 
 	const [selectedEntity, setSelectedEntity] = useState<number | null>(null);
 	const [damageReports] = q.damageReports.damageReports.useNetRequest({
@@ -62,7 +65,7 @@ export function DamageReports() {
 		<div className="w-full h-full grid grid-cols-4 gap-4">
 			<div className="flex flex-col gap-2 col-span-1 overflow-hidden">
 				<h3>Reports</h3>
-				<ul className="list-group panel w-full overflow-y-auto flex-1">
+				<ul className="list-group panel w-full overflow-y-auto flex-[2]">
 					{damageReports.map((d) => (
 						<li
 							key={d.id}
@@ -76,13 +79,36 @@ export function DamageReports() {
 					))}
 				</ul>
 				<h3>Systems</h3>
-				<ul className="list-group panel w-full min-h-0 overflow-y-auto flex-1">
+				<ul className="list-group panel w-full min-h-0 overflow-y-auto flex-[5]">
 					{systems
 						.filter(
 							(s) =>
 								selectedFilter === "All" ||
 								systemCategories[s.type] === selectedFilter,
 						)
+						.sort((a, b) => {
+							switch (selectedSort) {
+								case "Name":
+									if (a.name > b.name) return 1;
+									if (a.name < b.name) return -1;
+									return 0;
+								case "Type":
+									if (systemCategories[a.type] > systemCategories[b.type])
+										return 1;
+									if (systemCategories[a.type] < systemCategories[b.type])
+										return -1;
+									return 0;
+								case "Offline":
+									if (a.offline && b.offline) return 0;
+									if (a.offline) return 1;
+									if (b.offline) return -1;
+									return 0;
+								case "Damage":
+									return b.damage - a.damage;
+								default:
+									return 0;
+							}
+						})
 						.map((s) => (
 							<SystemItem
 								key={s.id}
@@ -92,24 +118,24 @@ export function DamageReports() {
 							/>
 						))}
 				</ul>
-				<div className="flex gap-2 justify-start flex-wrap justify-self-end">
-					<Button
-						className={cn("btn-sm", {
-							"btn-primary": selectedFilter === "All",
-						})}
-						onClick={() => setSelectedFilter("All")}
-					>
-						All
-					</Button>
-					{systemFilterValues.map((f) => (
-						<Button
-							onClick={() => setSelectedFilter(f)}
-							key={f}
-							className={cn("btn-sm", { "btn-primary": selectedFilter === f })}
-						>
-							{f}
-						</Button>
-					))}
+				<div className="flex gap-2 justify-between">
+					<Select
+						className="select-alert flex-1"
+						label="Filter"
+						selected={selectedFilter}
+						items={[
+							{ id: "All", label: "All" },
+							...systemFilterValues.map((f) => ({ id: f, label: f })),
+						]}
+						setSelected={(f) => setSelectedFilter(f || "All")}
+					/>
+					<Select
+						className="select-alert flex-1"
+						label="Sort"
+						selected={selectedSort}
+						items={[...systemSortValues.map((f) => ({ id: f, label: f }))]}
+						setSelected={(f) => setSelectedSort(f || "Name")}
+					/>
 				</div>
 			</div>
 			{selectedSystem ? (
@@ -127,12 +153,14 @@ export function DamageReports() {
 function SystemItem({
 	id,
 	damage,
+	offline,
 	name,
 	isSelected,
 	onClick,
 }: {
 	id: number;
 	damage: number;
+	offline: boolean;
 	name: string;
 	isSelected: boolean;
 	onClick: () => void;
@@ -142,7 +170,7 @@ function SystemItem({
 			className={cn("list-group-item", { selected: isSelected })}
 			onClick={onClick}
 		>
-			{name}
+			<span className={offline ? "text-red-500" : ""}>{name}</span>
 			<span className="flex items-center gap-2">
 				<span className="w-[4ch] tabular-nums text-right">
 					<Tooltip content="Aggregate Damage">

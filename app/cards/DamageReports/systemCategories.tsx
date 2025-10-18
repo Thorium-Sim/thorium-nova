@@ -29,3 +29,5 @@ export const systemCategories: Record<
 	torpedoLauncher: "Defense",
 	warpEngines: "Propulsion",
 };
+
+export const systemSortValues = ["Name", "Type", "Offline", "Damage"];
