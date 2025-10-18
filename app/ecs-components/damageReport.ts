@@ -7,6 +7,7 @@ export const damageReport = z.object({
 	shipId: z.number(),
 	systemId: z.number(),
 	damageType: damageTypes,
+	autoApplyWhenCompleted: z.boolean().default(true),
 	affectedSystems: z
 		.object({
 			id: z.number(),

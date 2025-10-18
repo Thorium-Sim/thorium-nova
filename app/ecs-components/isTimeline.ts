@@ -13,6 +13,10 @@ export const isTimeline = z
 		 * The current step of the timeline. Used for automatically advancing.
 		 */
 		currentStep: z.number().default(0),
+		/**
+		 * Whether the timeline has advanced past its final step.
+		 */
+		isComplete: z.boolean().default(false),
 	})
 	.default({});
 

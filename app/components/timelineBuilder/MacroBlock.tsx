@@ -17,9 +17,11 @@ export function MacroBlock({
 	macroId,
 	replace,
 	definedVariables,
+	macro: isMacro,
 }: BlockProps<"Macro"> & {
 	replace: (blocks: TimelineBlock[]) => void;
 	definedVariables: string[];
+	macro?: boolean;
 }) {
 	const [macro] = q.plugin.macro.get.useNetRequest({ pluginId, macroId });
 
@@ -41,6 +43,7 @@ export function MacroBlock({
 							<Popover className={popoverTransitionClasses}>
 								<Dialog className="isolate scale-50 -translate-y-1/4 bg-black/70 border border-white/50 text-white rounded p-2">
 									<SortableBlocks
+										macro={isMacro}
 										blocks={macro.blocks}
 										executionType={["main", "prerequisite"]}
 										onDragEnd={noop}
@@ -54,7 +57,9 @@ export function MacroBlock({
 						<Tooltip content="Expand macro into blocks">
 							<button
 								className="btn btn-outline btn-xs btn-info"
-								onClick={() => replace(macro.blocks)}
+								onClick={() => {
+									replace(macro.blocks);
+								}}
 							>
 								<Icon name="unfold-vertical" />
 							</button>

@@ -32,6 +32,7 @@ export function SortableBlocks({
 	onReplace,
 	onRemove,
 	executionType,
+	macro,
 	availableVariableNames = [],
 }: {
 	parentBlock?: TimelineBlock;
@@ -49,6 +50,7 @@ export function SortableBlocks({
 	onReplace: (id: string, blocks: TimelineBlock[]) => void;
 	onRemove: (id: string) => void;
 	executionType: ("main" | "prerequisite")[];
+	macro?: boolean;
 	availableVariableNames?: string[] | readonly string[];
 }) {
 	const sensors = useSensors(
@@ -102,6 +104,7 @@ export function SortableBlocks({
 								replace={(blocks) => onReplace(block.id, blocks)}
 								update={(property, value) => onUpdate(block, property, value)}
 								onRemove={onRemove}
+								macro={macro}
 								previousActionBlock={
 									blocks.reduceRight(
 										(prev: TimelineBlock | undefined, next, i) => {

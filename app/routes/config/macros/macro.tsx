@@ -116,6 +116,7 @@ export default function MacroLayout() {
 									init,
 								});
 							}}
+							macro
 						>
 							<Button className="btn btn-sm btn-outline btn-success">
 								Add Block
@@ -126,6 +127,7 @@ export default function MacroLayout() {
 					<SortableBlocks
 						executionType={["main", "prerequisite"]}
 						blocks={macro?.blocks || []}
+						macro
 						onDragEnd={({ active, overIndex }) =>
 							q.plugin.macro.block.reorder.netSend({
 								pluginId,
@@ -171,6 +173,7 @@ export default function MacroLayout() {
 						init,
 					});
 				}}
+				macro
 			>
 				<Button className="btn btn-sm btn-outline btn-success">
 					Add Block

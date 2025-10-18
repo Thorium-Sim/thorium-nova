@@ -19,6 +19,7 @@ import {
 } from "@thorium/utils/.server/executeBlocks";
 import { spawnTimeline } from "@thorium/.server/spawners/timeline";
 import { triggerStep } from "@thorium/utils/.server/evaluateEntityQuery";
+import { applyDamageReportMetrics } from "@thorium/utils/.server/applyDamageReportMetrics";
 
 export const damageReports = t.router({
 	systems: t.procedure
@@ -194,7 +195,8 @@ export const damageReports = t.router({
 				const timeline = report.components.isTimeline;
 				if (
 					report.components.damageReport?.shipId !== input.shipId ||
-					!timeline
+					!timeline ||
+					timeline.isComplete
 				)
 					continue;
 
@@ -340,6 +342,31 @@ export const damageReports = t.router({
 			pubsub.publish.damageReports.damageReports({
 				shipId: damageReport.components.damageReport?.shipId || -1,
 			});
+		}),
+	applyDamageReportMetrics: t.procedure
+		.meta({
+			action: () => {
+				return {
+					timelineId: {
+						name: "Damage Report ID ID",
+						helper:
+							"If using in damage report timeline action trigger, leave blank to complete the current damage report.",
+					},
+				};
+			},
+		})
+		.input(
+			z.object({
+				timelineId: z.number(),
+			}),
+		)
+		.send(async ({ ctx, input }) => {
+			const timeline = ctx.flight?.ecs.getEntityById(input.timelineId);
+			if (!timeline) throw new Error("Timeline not found.");
+
+			// Report timelines might apply their damage metrics upon completion
+			applyDamageReportMetrics(timeline);
+			return;
 		}),
 	stream: t.procedure
 		.input(z.object({ shipId: z.number() }))

@@ -18,6 +18,8 @@ export default class ReportPlugin extends Aspect {
 	/** Blocks that are executed when checking to see if a timeline is valid. */
 	prerequisiteBlocks: TimelineBlock[];
 
+	/** Apply the report effects automatically when timeline advances past the final step. */
+	autoApplyWhenCompleted: boolean;
 	steps: TimelineStep[];
 
 	constructor(params: Partial<ReportPlugin>, plugin: BasePlugin) {
@@ -45,6 +47,7 @@ export default class ReportPlugin extends Aspect {
 		];
 
 		this.prerequisiteBlocks = params.prerequisiteBlocks || [];
+		this.autoApplyWhenCompleted = params.autoApplyWhenCompleted ?? true;
 	}
 	addStep(name: string) {
 		const id = uniqid("ms-");

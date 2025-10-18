@@ -107,7 +107,7 @@ export function getReportEffects(
 
 		let effectAmount =
 			rng.next() *
-			0.2 *
+			0.3 *
 			(ship?.components.tweaks?.damageReportEffectMultiplier || 1);
 
 		if (i === 0 || sideEffectType === "positive")

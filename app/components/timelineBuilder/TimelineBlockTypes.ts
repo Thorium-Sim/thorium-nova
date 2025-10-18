@@ -14,6 +14,7 @@ export const timelineBlockTypes = [
 	"MathIntoVariable",
 	"Macro",
 	"TimelineAvailability",
+	"MacroSlot",
 	"Debug",
 ] as const;
 
@@ -118,10 +119,12 @@ export const timelineBlockDefaults: {
 	Macro: {
 		pluginId: "",
 		macroId: "",
+		triggerBlocks: [],
 	},
 	TimelineAvailability: {
 		isAvailable: true,
 	},
+	MacroSlot: {},
 	Debug: {
 		variable: "",
 	},
@@ -241,11 +244,16 @@ interface MacroBlock extends BaseBlock {
 	type: "Macro";
 	pluginId: string;
 	macroId: string;
+	triggerBlocks: TimelineBlock[];
 }
 
 interface TimelineAvailabilityBlock extends BaseBlock {
 	type: "TimelineAvailability";
 	isAvailable: boolean;
+}
+
+interface MacroSlot extends BaseBlock {
+	type: "MacroSlot";
 }
 interface DebugBlock extends BaseBlock {
 	type: "Debug";
@@ -268,4 +276,5 @@ export type TimelineBlock =
 	| MathIntoVariableBlock
 	| MacroBlock
 	| TimelineAvailabilityBlock
+	| MacroSlot
 	| DebugBlock;

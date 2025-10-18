@@ -12,6 +12,7 @@ export const isTrigger = z
 			.default(null),
 		conditions: z.array(conditionSchema).default([]),
 		blocks: z.any().array().default([]),
+		callReturnBlocks: z.any().array().optional(),
 		stepId: z.number().optional(),
 		localVariables: z.any().optional(),
 	})

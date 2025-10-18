@@ -11,8 +11,10 @@ import path from "node:path";
 import {
 	timelineBlockDefaults,
 	timelineBlockTypes,
+	type TimelineBlock,
 } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import ReportPlugin from "@thorium/.server/classes/Plugins/Report";
+import { replace } from "react-router";
 
 const timelineType = z.enum(["missions", "reports"]);
 const block = t.router({
@@ -168,6 +170,12 @@ const block = t.router({
 				(action) => action.id === input.blockId,
 			);
 			if (blockIndex === -1) throw new Error("Block not found");
+			const replacedBlock = step.blocks[blockIndex];
+			if (replacedBlock.type === "Macro") {
+				const slotBlocks = replacedBlock.triggerBlocks;
+				replaceSlotBlocks(input.blocks, slotBlocks);
+			}
+			// traverse the incoming blocks to put the slot block in.
 			step.blocks.splice(blockIndex, 1, ...input.blocks);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
@@ -176,6 +184,22 @@ const block = t.router({
 			return {};
 		}),
 });
+
+function replaceSlotBlocks(
+	inputBlocks: TimelineBlock[],
+	slotBlocks: TimelineBlock[],
+): void {
+	for (let i = 0; i < inputBlocks.length; i++) {
+		const block = inputBlocks[i];
+		if (block.type === "MacroSlot") {
+			inputBlocks.splice(i, 1, ...slotBlocks);
+			return;
+		}
+		if ("triggerBlocks" in block) {
+			replaceSlotBlocks(block.triggerBlocks, slotBlocks);
+		}
+	}
+}
 
 const prerequisiteBlock = t.router({
 	add: t.procedure
@@ -581,6 +605,7 @@ export const timeline = t.router({
 				tags: z.array(z.string()).optional(),
 				description: z.string().optional(),
 				cover: z.instanceof(File).optional(),
+				autoApplyWhenCompleted: z.boolean().optional(),
 			}),
 		)
 		.send(async ({ ctx, input }) => {
@@ -594,6 +619,11 @@ export const timeline = t.router({
 			if (input.category) timeline.category = input.category;
 			if (input.description) timeline.description = input.description;
 			if (input.tags) timeline.tags = input.tags;
+			if (
+				typeof input.autoApplyWhenCompleted !== "undefined" &&
+				timeline.kind === "reports"
+			)
+				timeline.autoApplyWhenCompleted = input.autoApplyWhenCompleted;
 			if (
 				timeline instanceof MissionPlugin &&
 				typeof input.cover === "string"

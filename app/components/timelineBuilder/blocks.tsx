@@ -32,22 +32,25 @@ import { MathIntoVariable } from "@thorium/components/timelineBuilder/MathIntoVa
 import { MacroBlock } from "@thorium/components/timelineBuilder/MacroBlock";
 import { TimelineAvailabilityBlock } from "@thorium/components/timelineBuilder/TimelineAvailabilityBlock";
 import { DebugBlock } from "@thorium/components/timelineBuilder/DebugBlock";
+import { MacroSlotBlock } from "@thorium/components/timelineBuilder/MacroSlotBlock";
 
-export function RenderBlock<T extends TimelineBlock["type"]>({
+export function RenderBlock({
 	onRemove,
 	update,
 	previousActionBlock,
 	definedVariables,
 	replace,
 	executionType,
+	macro,
 	...block
 }: TimelineBlock & {
 	onRemove: (id: string) => void;
 	previousActionBlock?: TimelineBlock;
-	update: BlockProps<T>["update"];
+	update: (property: string, value: any) => void;
 	definedVariables: string[];
 	/** Replace this block with some other blocks */
 	replace: (blocks: TimelineBlock[]) => void;
+	macro?: boolean;
 	executionType: ("main" | "prerequisite")[];
 }) {
 	return (
@@ -90,12 +93,15 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 				) : block.type === "Macro" ? (
 					<MacroBlock
 						{...block}
+						macro={macro}
 						update={update}
 						replace={replace}
 						definedVariables={definedVariables}
 					/>
 				) : block.type === "TimelineAvailability" ? (
 					<TimelineAvailabilityBlock {...block} update={update} />
+				) : block.type === "MacroSlot" ? (
+					<MacroSlotBlock />
 				) : block.type === "Debug" ? (
 					<DebugBlock {...block} update={update} />
 				) : (
@@ -110,6 +116,7 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 							executionType={executionType}
 							parentBlock={block}
 							blocks={block.triggerBlocks}
+							macro={macro}
 							onRemove={(id) =>
 								(update as any)(
 									"triggerBlocks",
@@ -148,6 +155,7 @@ export function RenderBlock<T extends TimelineBlock["type"]>({
 						/>
 					</div>
 					<AddBlockMenu
+						macro={macro}
 						executionType={executionType}
 						onAddBlock={(type, init) =>
 							(update as any)("triggerBlocks", [

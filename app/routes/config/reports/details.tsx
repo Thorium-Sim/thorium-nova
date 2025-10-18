@@ -84,48 +84,60 @@ export default function ReportDetails() {
 				</div>
 			</div>
 			<div>
-				<div className="pb-4 flex gap-2">
-					<div className="flex-1">
-						<Input
-							labelHidden={false}
-							label="Category"
-							type="textarea"
-							defaultValue={report.category}
-							onBlur={(e: any) =>
+				<Input
+					labelHidden={false}
+					label="Category"
+					type="textarea"
+					defaultValue={report.category}
+					onBlur={(e: any) =>
+						q.plugin.timeline.update.netSend({
+							pluginId,
+							timelineId,
+							timelineType: "reports",
+							category: e.target.value,
+						})
+					}
+				/>
+
+				<TagInput
+					label="Tags"
+					tags={report.tags}
+					onAdd={(tag) => {
+						if (report.tags.includes(tag)) return;
+						q.plugin.timeline.update.netSend({
+							pluginId,
+							timelineId,
+							timelineType: "reports",
+							tags: [...report.tags, tag],
+						});
+					}}
+					onRemove={(tag) => {
+						if (!report.tags.includes(tag)) return;
+						q.plugin.timeline.update.netSend({
+							pluginId,
+							timelineId,
+							timelineType: "reports",
+							tags: report.tags.filter((t) => t !== tag),
+						});
+					}}
+				/>
+				{report.kind === "reports" && (
+					<div className="mt-2">
+						<Checkbox
+							defaultChecked={report.autoApplyWhenCompleted}
+							onChange={(event) =>
 								q.plugin.timeline.update.netSend({
 									pluginId,
 									timelineId,
 									timelineType: "reports",
-									category: e.target.value,
+									autoApplyWhenCompleted: event.target.checked,
 								})
 							}
+							label="Auto-apply Damage Metrics when report is completed."
+							helperText="When the timeline advances past its final step, it will improve the damage metrics for the system it is intended to repair."
 						/>
 					</div>
-					<div className="flex-1">
-						<TagInput
-							label="Tags"
-							tags={report.tags}
-							onAdd={(tag) => {
-								if (report.tags.includes(tag)) return;
-								q.plugin.timeline.update.netSend({
-									pluginId,
-									timelineId,
-									timelineType: "reports",
-									tags: [...report.tags, tag],
-								});
-							}}
-							onRemove={(tag) => {
-								if (!report.tags.includes(tag)) return;
-								q.plugin.timeline.update.netSend({
-									pluginId,
-									timelineId,
-									timelineType: "reports",
-									tags: report.tags.filter((t) => t !== tag),
-								});
-							}}
-						/>
-					</div>
-				</div>
+				)}
 			</div>
 			<div className="col-span-2 flex flex-col">
 				<h3 className="text-lg font-medium flex items-center">

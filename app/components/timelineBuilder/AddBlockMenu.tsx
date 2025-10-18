@@ -36,6 +36,7 @@ export function AddBlockButton({
 	children,
 	omitBlocks,
 	executionType,
+	macro,
 }: {
 	onAddBlock: <T extends TimelineBlock["type"]>(
 		blockType: T,
@@ -45,6 +46,7 @@ export function AddBlockButton({
 	) => void;
 	children: ReactNode;
 	omitBlocks?: boolean;
+	macro?: boolean;
 	executionType: ("main" | "prerequisite")[];
 }) {
 	const [macros] = q.plugin.macro.all.useNetRequest({ type: "macro" });
@@ -113,6 +115,11 @@ export function AddBlockButton({
 							</Menu>
 						</Popover>
 					</SubmenuTrigger>
+					{macro && (
+						<StyledMenuItem onAction={() => onAddBlock("MacroSlot")}>
+							Macro Slot
+						</StyledMenuItem>
+					)}
 					<MenuSection>
 						<Header className="font-bold pl-2">Control Flow</Header>
 
@@ -179,6 +186,7 @@ export function AddBlockButton({
 }
 export function AddBlockMenu({
 	onAddBlock,
+	macro,
 	executionType,
 }: {
 	onAddBlock: <T extends TimelineBlock["type"]>(
@@ -187,6 +195,7 @@ export function AddBlockMenu({
 			Omit<Extract<TimelineBlock, { type: T }>, "id" | "type">
 		>,
 	) => void;
+	macro?: boolean;
 	executionType: ("main" | "prerequisite")[];
 }) {
 	return (
@@ -194,6 +203,7 @@ export function AddBlockMenu({
 			<AddBlockButton
 				onAddBlock={onAddBlock}
 				omitBlocks
+				macro={macro}
 				executionType={executionType}
 			>
 				<Button

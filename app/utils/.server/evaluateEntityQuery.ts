@@ -20,7 +20,7 @@ import {
 } from "../starmap/position";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import type z from "zod";
-import { interpolate } from "@thorium/utils/interpolationEngine";
+import { interpolateText } from "@thorium/utils/interpolationEngine";
 import { pubsub } from "@thorium/.server/init/pubsub";
 
 export function evaluateEntityQuery(ecs: ECS, query: EntityQuery): Entity[] {
@@ -439,9 +439,10 @@ export async function triggerStep(step: Entity) {
 	step.updateComponent("isTimelineStep", { state: "executing" });
 	await executeBlocks(context.ecs, blocks, { stepId: step.id, localVariables });
 	step.updateComponent("identity", {
-		description: interpolate(
+		description: interpolateText(
 			step.components.identity?.description || "",
 			localVariables,
+			step.ecs.rng,
 		),
 	});
 	step.updateComponent("isTimelineStep", { state: "executed" });
@@ -463,7 +464,7 @@ export async function processTriggers(
 		Array.from(triggers).map(async (trigger) => {
 			if (!trigger.components.isTrigger || !trigger.components.isTrigger.active)
 				return false;
-			const { conditions, blocks, stepId, localVariables } =
+			const { conditions, blocks, stepId, localVariables, callReturnBlocks } =
 				trigger.components.isTrigger;
 			const match = evaluateTriggerCondition(ecs, conditions, event);
 
@@ -482,7 +483,7 @@ export async function processTriggers(
 						}
 						return action;
 					}),
-					{ stepId, localVariables, theResult: match },
+					{ stepId, localVariables, theResult: match, callReturnBlocks },
 				);
 				trigger.updateComponent("isTrigger", {
 					triggeredAt: new Date(),

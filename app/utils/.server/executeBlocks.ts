@@ -1,4 +1,3 @@
-import type { DataContext } from "@thorium/.server/DataContext";
 import { spawnTrigger } from "@thorium/.server/spawners/trigger";
 import type { ComponentProperties } from "@thorium/ecs-components";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
@@ -10,7 +9,8 @@ import {
 import type { ECS, Entity } from "@thorium/utils/ecs";
 import { produce } from "immer";
 import { evaluateTriggerCondition } from "@thorium/utils/.server/evaluateEntityQuery";
-import { interpolate } from "@thorium/utils/interpolationEngine";
+import { interpolateText } from "@thorium/utils/interpolationEngine";
+import type { RNG } from "@thorium/utils/rng";
 
 export class TimelineAvailability {
 	constructor(public isAvailable: boolean) {}
@@ -24,13 +24,17 @@ export async function executeBlocks(
 		localVariables = {},
 		theResult = null,
 		executionType = "main",
+		callReturnBlocks,
 	}: {
 		stepId?: number;
 		localVariables?: Record<string, any>;
 		theResult?: any;
 		executionType?: "prerequisite" | "main";
+		callReturnBlocks?: TimelineBlock[];
 	} = {},
 ) {
+	const rng = ecs.rng;
+
 	for (const block of blocks) {
 		switch (block.type) {
 			case "Wait": {
@@ -84,7 +88,7 @@ export async function executeBlocks(
 				let response = true;
 
 				for (const condition of block.conditions) {
-					if (!evaluateCondition(condition, localVariables)) {
+					if (!evaluateCondition(condition, localVariables, rng)) {
 						response = false;
 						break;
 					}
@@ -94,6 +98,7 @@ export async function executeBlocks(
 						stepId,
 						localVariables,
 						executionType,
+						callReturnBlocks,
 					});
 				}
 				break;
@@ -103,7 +108,7 @@ export async function executeBlocks(
 				break;
 			}
 			case "SetVariable": {
-				const value = interpolate(block.value, localVariables);
+				const value = interpolateText(block.value, localVariables, ecs.rng);
 				if (
 					block.entity.toLowerCase() === "this step" ||
 					block.entity.toLowerCase() === "step"
@@ -187,6 +192,7 @@ export async function executeBlocks(
 							active: true,
 							conditions,
 							blocks: block.triggerBlocks,
+							callReturnBlocks,
 							multiple: false,
 							localVariables,
 						},
@@ -202,6 +208,7 @@ export async function executeBlocks(
 							localVariables,
 							theResult: match,
 							executionType,
+							callReturnBlocks,
 						});
 					}
 				}
@@ -223,6 +230,7 @@ export async function executeBlocks(
 							active: true,
 							conditions,
 							blocks: block.triggerBlocks,
+							callReturnBlocks,
 							multiple: false,
 							localVariables,
 						},
@@ -238,6 +246,7 @@ export async function executeBlocks(
 							localVariables,
 							theResult: match,
 							executionType,
+							callReturnBlocks,
 						});
 					}
 				}
@@ -260,6 +269,7 @@ export async function executeBlocks(
 							active: true,
 							conditions,
 							blocks: block.triggerBlocks,
+							callReturnBlocks,
 							multiple: block.multiple,
 							localVariables,
 						},
@@ -269,29 +279,35 @@ export async function executeBlocks(
 				break;
 			}
 			case "Action": {
-				const values = Object.fromEntries(
-					Object.entries(block.values).map(([key, value]) => {
-						let val = getValueReference(value, localVariables);
-						// Special handling for certain keys we know are entity id references
-						if (key === "shipId") {
-							val = Number(val);
-						} else if (typeof val === "string") {
-							// Other values get interpolated automatically
-							val = interpolate(val, localVariables);
-						}
+				const step = ecs.getEntityById(stepId || -1);
+				const values = {
+					...(step?.components.isTimelineStep?.timelineId
+						? { timelineId: step?.components.isTimelineStep?.timelineId }
+						: {}),
+					...Object.fromEntries(
+						Object.entries(block.values).map(([key, value]) => {
+							let val = getValueReference(value, localVariables, rng);
+							// Special handling for certain keys we know are entity id references
+							if (key === "shipId") {
+								val = Number(val);
+							} else if (typeof val === "string") {
+								// Other values get interpolated automatically
+								val = interpolateText(val, localVariables, ecs.rng);
+							}
 
-						return [key, val];
-					}),
-				);
+							return [key, val];
+						}),
+					),
+				};
 				theResult = await triggerAction(block.action, values);
 				break;
 			}
 			case "RandomIntoVariable": {
 				const number1 = Number(
-					getValueReference(block.number1, localVariables),
+					getValueReference(block.number1, localVariables, rng),
 				);
 				const number2 = Number(
-					getValueReference(block.number2, localVariables),
+					getValueReference(block.number2, localVariables, rng),
 				);
 				const min = number1 < number2 ? number1 : number2;
 				const max = number1 < number2 ? number2 : number1;
@@ -305,8 +321,12 @@ export async function executeBlocks(
 				break;
 			}
 			case "MathIntoVariable": {
-				const num1 = Number(getValueReference(block.number1, localVariables));
-				const num2 = Number(getValueReference(block.number2, localVariables));
+				const num1 = Number(
+					getValueReference(block.number1, localVariables, rng),
+				);
+				const num2 = Number(
+					getValueReference(block.number2, localVariables, rng),
+				);
 				switch (block.operation) {
 					case "+":
 						localVariables[block.variable] = String(num1 + num2);
@@ -338,6 +358,7 @@ export async function executeBlocks(
 					localVariables,
 					theResult,
 					executionType,
+					callReturnBlocks: block.triggerBlocks,
 				});
 				break;
 			}
@@ -347,6 +368,19 @@ export async function executeBlocks(
 				}
 				break;
 			}
+			case "MacroSlot":
+				// Execute the blocks defined by the timeline that called this macro.
+				if (!callReturnBlocks)
+					throw new Error(
+						"Encountered MacroSlot block but no call return blocks are defined. Was this MacroSlot block not inside a macro?",
+					);
+				await executeBlocks(ecs, callReturnBlocks, {
+					stepId,
+					localVariables,
+					theResult,
+					executionType,
+				});
+				break;
 			case "Debug": {
 				console.info(block.variable);
 				break;
@@ -365,9 +399,10 @@ function evaluateCondition(
 		comparison: string;
 	},
 	localVariables: Record<string, any>,
+	rng: RNG,
 ) {
-	const val1 = getValueReference(condition.value1, localVariables);
-	const val2 = getValueReference(condition.value2, localVariables);
+	const val1 = getValueReference(condition.value1, localVariables, rng);
+	const val2 = getValueReference(condition.value2, localVariables, rng);
 
 	switch (condition.comparison) {
 		case "=": {
@@ -399,12 +434,16 @@ function evaluateCondition(
 	return false;
 }
 
-function getValueReference(ref: string, variables: Record<string, any>): any {
+function getValueReference(
+	ref: string,
+	variables: Record<string, any>,
+	rng: RNG,
+): any {
 	if (typeof ref === "string" && ref.startsWith("$")) {
-		return getValueReference(variables[ref.replace("$", "")], variables);
+		return getValueReference(variables[ref.replace("$", "")], variables, rng);
 	}
 	if (typeof ref === "string") {
-		return interpolate(ref, variables);
+		return interpolateText(ref, variables, rng);
 	}
 	return ref;
 }

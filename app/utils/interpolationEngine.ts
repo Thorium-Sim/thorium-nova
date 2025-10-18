@@ -1,7 +1,7 @@
 import { createRNG } from "@thorium/utils/rng";
 import { capitalCase } from "change-case";
 
-export function interpolate(
+export function interpolateText(
 	template: string,
 	vars: Record<string, any> = {},
 	rng = createRNG(Math.random()),

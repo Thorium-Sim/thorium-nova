@@ -58,7 +58,8 @@ export class MainComputerDiagnosticSystem extends System {
 		const level = Number(diagnostic.level);
 		totalRequiredEnergy =
 			// Divide by three, since the minimum is what a level 1 diagnostic costs anyway
-			((maxDiagnosticEnergyCost - minDiagnosticEnergyCost) / 3) * (level - 1) +
+			((maxDiagnosticEnergyCost - minDiagnosticEnergyCost) / 3) **
+				(level - 0.5) +
 			minDiagnosticEnergyCost;
 
 		// Fudge it for non-player ships
