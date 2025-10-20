@@ -18,7 +18,7 @@ export function spawnTimeline(
 		});
 		step.addComponent("tags", { tags: stepItem.tags });
 		step.addComponent("isTimelineStep", {
-			blocks: JSON.parse(JSON.stringify(stepItem.blocks)),
+			blocks: JSON.parse(JSON.stringify(stepItem.blocks || {})),
 			timelineId: timelineEntity.id,
 		});
 		addEntity(step);
