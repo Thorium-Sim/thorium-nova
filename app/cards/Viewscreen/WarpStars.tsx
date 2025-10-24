@@ -17,6 +17,7 @@ import {
 } from "three";
 import { useForwardVelocity } from "../Pilot/ImpulseControls";
 import { randomPointInSphere } from "@thorium/utils/operations/randomPointInSphere";
+import { useStation } from "@thorium/routes/station/useStation";
 
 const STAR_COUNT = 5000;
 const FORWARD_DISTANCE = 10000;
@@ -39,9 +40,10 @@ const shipPosition = new Vector3();
 const movement = new Vector3();
 
 export const WarpStars = () => {
-	const [{ id: shipId, currentSystem }] = q.ship.player.useNetRequest({
-		clientId,
-	});
+	const {
+		shipId,
+		ship: { currentSystem },
+	} = useStation();
 	const isInSystem = typeof currentSystem === "number";
 	const mesh = useMemo(() => {
 		const geometry = new CylinderGeometry(1, 0, 100, 16, 16);

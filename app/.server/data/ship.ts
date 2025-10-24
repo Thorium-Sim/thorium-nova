@@ -131,6 +131,7 @@ export const ship = t.router({
 				currentSystem: systemId || null,
 				systemPosition,
 				assets,
+				isDestroyed: !!ship.components.isDestroyed,
 			};
 		}),
 	spawn: t.procedure

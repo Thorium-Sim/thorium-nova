@@ -6,7 +6,7 @@ import CardProvider from "@thorium/context/CardContext";
 import { StationData } from "@thorium/routes/station/useStation";
 import { q } from "@thorium/context/AppContext";
 
-export default function Preview({ params }: Route.ComponentProps) {
+export default function TestCoreComponent({ params }: Route.ComponentProps) {
 	const Comp = Cores[params.component as keyof typeof Cores];
 	const [player] = q.ship.players.useNetRequest();
 	if (!Comp)

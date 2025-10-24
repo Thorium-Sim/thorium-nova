@@ -181,18 +181,19 @@ function getInterstellarDistance(
 
 const LockOnButton = () => {
 	const { cardLoaded } = useCardContext();
-	const { shipId } = useStation();
+	const {
+		shipId,
+		ship: { currentSystem, systemPosition },
+	} = useStation();
 	const store = useCircleGridStore();
 	const waypoint = store((store) => store.facingWaypoints?.[0]);
 	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
 	const distanceRef = useRef<HTMLSpanElement>(null);
-	const [{ id, currentSystem, systemPosition }] = q.ship.player.useNetRequest({
-		clientId,
-	});
+
 	const { interpolate } = useLiveQuery();
 
 	useAnimationFrame(() => {
-		const shipPosition = interpolate(id);
+		const shipPosition = interpolate(shipId);
 		if (!shipPosition || !autopilot.destinationPosition) return;
 		const distance = getInterstellarDistance(
 			{ ...shipPosition, parentId: currentSystem },

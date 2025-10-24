@@ -19,7 +19,7 @@ const forwardQuaternion = new Quaternion(0, 1, 0, 0);
 
 function ViewscreenEffects({ onDone }: { onDone: () => void }) {
 	const [viewscreenSystem] = q.viewscreen.system.useNetRequest({ clientId });
-	const [player] = q.ship.player.useNetRequest({ clientId });
+	const { shipId } = useStation();
 	const { interpolate } = useLiveQuery();
 
 	const useStarmapStore = useGetStarmapStore();
@@ -40,7 +40,7 @@ function ViewscreenEffects({ onDone }: { onDone: () => void }) {
 		onDone();
 	});
 	useFrame(({ camera }) => {
-		const position = interpolate(player.id);
+		const position = interpolate(shipId);
 		if (!position) return;
 
 		camera.position.set(position.x, position.y, position.z);

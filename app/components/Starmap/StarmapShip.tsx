@@ -20,6 +20,7 @@ import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { setCursor } from "@thorium/utils/setCursor";
 import type { Meter } from "@thorium/utils/unitTypes";
 import { ConeVisualization } from "@thorium/cards/Targeting/Phasers";
+import { useStation } from "@thorium/routes/station/useStation";
 
 export function StarmapShip({
 	id,
@@ -58,8 +59,7 @@ export function StarmapShip({
 	);
 
 	const shipAutopilot = autopilotData[id];
-	const [player] = q.ship.player.useNetRequest({ clientId });
-	const playerId = player?.id;
+	const { shipId, ship } = useStation();
 
 	const isNotViewscreen = useStarmapStore(
 		(store) => store.viewingMode !== "viewscreen",
@@ -104,7 +104,7 @@ export function StarmapShip({
 			state.r.w,
 		);
 		if (shipMesh.current) {
-			if (!isNotViewscreen && playerId === id) {
+			if (!isNotViewscreen && shipId === id) {
 				shipMesh.current.visible = false;
 			} else {
 				shipMesh.current.visible = true;
@@ -123,7 +123,7 @@ export function StarmapShip({
 					shipAutopilot.path.length > 0
 						? shipAutopilot.path
 						: [
-								player.currentSystem
+								ship.currentSystem
 									? shipAutopilot.destinationPosition
 									: shipAutopilot.destinationSystemPosition ||
 										shipAutopilot.destinationPosition,

@@ -15,6 +15,7 @@ export class FlightDataModel extends DataStore {
 	date!: number;
 	paused!: boolean;
 	hasFlightDirector!: boolean;
+	state!: "in-progress" | "success" | "failure";
 	ecs!: ECS;
 	pluginIds!: string[];
 	private entities!: Entity[];
@@ -54,6 +55,7 @@ export class FlightDataModel extends DataStore {
 			this.date ??= Number(data.date ? new Date(data.date) : new Date());
 			this.pluginIds ??= data.pluginIds || [];
 			this.entities ??= data.entities || [];
+			this.state = data.state || "in-progress";
 		});
 	}
 	run = () => {

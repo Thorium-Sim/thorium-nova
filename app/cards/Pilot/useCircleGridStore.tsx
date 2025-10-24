@@ -5,6 +5,7 @@ import { Matrix4, Quaternion, Vector3 } from "three";
 import { create } from "zustand";
 import { getWaypointRelativePosition } from "./getWaypointRelativePosition";
 import { type ReactNode, createContext, useContext, useState } from "react";
+import { useStation } from "@thorium/routes/station/useStation";
 
 function createCircleGridStore({
 	zoomMin = 0.01,
@@ -69,9 +70,8 @@ const desiredRotationQuat = new Quaternion();
 export function useGetFacingWaypoint() {
 	const store = useCircleGridStore();
 	const { interpolate } = useLiveQuery();
-	const [{ id, currentSystem, systemPosition }] = q.ship.player.useNetRequest({
-		clientId,
-	});
+	const { id, currentSystem, systemPosition } = useStation().ship;
+
 	const [waypoints] = q.waypoints.all.useNetRequest({
 		systemId: "all",
 		shipId: id,

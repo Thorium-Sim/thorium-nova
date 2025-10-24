@@ -119,10 +119,10 @@ export function ConeVisualization({
 }
 
 export function BeamVisualization() {
-	const { shipId } = useStation();
-	const [{ id: playerId, currentSystem }] = q.ship.player.useNetRequest({
-		clientId,
-	});
+	const {
+		shipId,
+		ship: { currentSystem },
+	} = useStation();
 	const [firingPhasers] = q.targeting.phasers.firing.useNetRequest({
 		systemId: currentSystem,
 	});
@@ -133,7 +133,7 @@ export function BeamVisualization() {
 	useFrame(() => {
 		if (!lineRef.current) return;
 		const points: number[] = [];
-		const player = interpolate(playerId);
+		const player = interpolate(shipId);
 		if (!player) return;
 		firingPhasers.forEach((phaser) => {
 			const ship = interpolate(phaser.shipId);

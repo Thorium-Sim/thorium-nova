@@ -172,6 +172,10 @@ export function applyDamage(
 				timeToDestroy: 5000,
 				explosion,
 			});
+
+			if (entity.components.isPlayerShip) {
+				pubsub.publish.ship.player({ shipId: entity.id });
+			}
 		}
 	}
 }

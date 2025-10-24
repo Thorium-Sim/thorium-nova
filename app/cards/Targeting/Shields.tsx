@@ -65,8 +65,7 @@ const shieldStyle = (
 };
 
 export function Shields({ cardLoaded }: { cardLoaded: boolean }) {
-	const { shipId } = useStation();
-	const [ship] = q.ship.player.useNetRequest({ clientId });
+	const { shipId, ship } = useStation();
 	const [shields] = q.targeting.shields.get.useNetRequest({ shipId });
 
 	const topViewRef = useRef<HTMLDivElement>(null);

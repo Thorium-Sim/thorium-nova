@@ -42,7 +42,7 @@ import {
 	LineSegmentsGeometry,
 } from "three-stdlib";
 import { radToDeg } from "three/src/math/MathUtils.js";
-import { StationContext } from "@thorium/routes/station/useStation";
+import { StationContext, useStation } from "@thorium/routes/station/useStation";
 
 const CameraEffects = () => {
 	const store = useCircleGridStore();
@@ -88,7 +88,7 @@ export function CircleGrid({
 		},
 	});
 
-	const [{ id, currentSystem }] = q.ship.player.useNetRequest({ clientId });
+	const { id, currentSystem } = useStation().ship;
 
 	useEffect(() => {
 		useStarmapStore.getState().setCurrentSystem(currentSystem);

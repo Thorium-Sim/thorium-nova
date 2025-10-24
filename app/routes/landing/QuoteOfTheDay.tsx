@@ -383,6 +383,8 @@ const quotes = [
 	"People say nothing is impossible, but I do nothing every day.",
 	"They’re funny things, Accidents. You never have them till you’re having them.",
 	"Could be worse. Not sure how, but it could be.",
+	// Hank Green
+	"We have never uncovered any truth without first going through a period of uncertainty.",
 ];
 
 const QuoteOfTheDay = () => {

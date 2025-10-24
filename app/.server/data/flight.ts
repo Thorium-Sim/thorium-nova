@@ -16,10 +16,8 @@ import type BasePlugin from "@thorium/.server/classes/Plugins";
 import type StationComplementPlugin from "@thorium/.server/classes/Plugins/StationComplement";
 import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { DataStore } from "@thorium/utils/.server/db-fs";
-import { spawnTrigger } from "@thorium/.server/spawners/trigger";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import path from "node:path";
-import type { FileOrFolder } from "@thorium/.server/data/thorium";
 import { traverseFiles } from "@thorium/.server/data/traverseFiles";
 
 function getPlanetSystem(ecs: ECS, planet: Entity): Entity {

@@ -305,17 +305,17 @@ function SensorsScannableObject({
 	type: string;
 }) {
 	const { cardLoaded } = useCardContext();
-	const { shipId } = useStation();
+	const {
+		shipId,
+		ship: { currentSystem },
+	} = useStation();
 	const [{ passiveRange }] = q.sensors.get.useNetRequest({ shipId });
-	const [{ id: playerShipId, currentSystem }] = q.ship.player.useNetRequest({
-		clientId,
-	});
 	const distanceRef = useRef<HTMLSpanElement>(null);
 	const { interpolate } = useLiveQuery();
 	const [inRange, setInRange] = useState(false);
 	useAnimationFrame(() => {
 		const position = interpolate(id) || objectPosition;
-		const shipPosition = interpolate(playerShipId);
+		const shipPosition = interpolate(shipId);
 		if (position && shipPosition && distanceRef.current) {
 			const distance = Math.hypot(
 				shipPosition.x - position.x,

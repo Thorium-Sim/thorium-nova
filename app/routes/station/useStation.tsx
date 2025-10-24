@@ -6,6 +6,7 @@ import { createContext, use, type ReactNode } from "react";
 export const StationContext = createContext<{
 	client: inferTransformedProcedureOutput<AppRouter["client"]["get"]>;
 	station: inferTransformedProcedureOutput<AppRouter["station"]["get"]>;
+	ship: inferTransformedProcedureOutput<AppRouter["ship"]["player"]>;
 	shipId: number;
 } | null>(null);
 
@@ -15,9 +16,11 @@ export function StationData({
 }: { children: ReactNode; shipId?: number }) {
 	const [client] = q.client.get.useNetRequest({ clientId });
 	const [station] = q.station.get.useNetRequest({ clientId });
+	const [ship] = q.ship.player.useNetRequest({ clientId });
+
 	return (
 		<StationContext
-			value={{ client, station, shipId: shipId || client.shipId! }}
+			value={{ client, station, ship, shipId: shipId || client.shipId! }}
 		>
 			{children}
 		</StationContext>

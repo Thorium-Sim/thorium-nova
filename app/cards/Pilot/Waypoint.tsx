@@ -20,6 +20,7 @@ import { useCircleGridStore } from "./useCircleGridStore";
 import { degToRad } from "@thorium/utils/unitTypes";
 import type { inferTransformedProcedureOutput } from "@thorium/utils/live-query/.server/types";
 import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
+import { useStation } from "@thorium/routes/station/useStation";
 
 type WaypointItem = inferTransformedProcedureOutput<
 	AppRouter["waypoints"]["all"]
@@ -50,8 +51,7 @@ export const WaypointEntity = ({
 	const stroke = useRef<Sprite>(null);
 	const scale = 1 / 40;
 
-	const [{ id, currentSystem: playerSystem, systemPosition }] =
-		q.ship.player.useNetRequest({ clientId });
+	const { id, currentSystem: playerSystem, systemPosition } = useStation().ship;
 
 	const { interpolate } = useLiveQuery();
 	useFrame((props) => {
