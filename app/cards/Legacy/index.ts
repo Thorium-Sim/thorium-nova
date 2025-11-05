@@ -5,3 +5,4 @@ export * from "./CoolantControl";
 export * from "./SensorGrid";
 export * from "./SensorScans";
 export * from "./Navigation";
+export * from "./EngineControl";

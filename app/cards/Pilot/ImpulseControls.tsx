@@ -15,6 +15,7 @@ import {
 } from "@thorium/hooks/useGamepadStore";
 import { useStation } from "@thorium/routes/station/useStation";
 import { useCardContext } from "@thorium/context/CardContext";
+import { cn } from "@thorium/utils/cn";
 
 const C_IN_METERS = 299792458;
 function formatSpeed(speed: KilometerPerSecond) {
@@ -109,10 +110,10 @@ const KNOB_HEIGHT = 44;
 const BUTTON_OFFSET = 0.8;
 export const ImpulseControls = ({ cardLoaded = true }) => {
 	const { shipId } = useStation();
-	const [{ targetSpeed, cruisingSpeed, emergencySpeed }] =
+	const [{ targetSpeed, cruisingSpeed, emergencySpeed, name, speeds }] =
 		q.pilot.impulseEngines.get.useNetRequest({ shipId });
 
-	const [{ warpFactorCount, currentWarpFactor }] =
+	const [{ currentWarpFactor, speeds: warpSpeeds }] =
 		q.pilot.warpEngines.get.useNetRequest({ shipId });
 	const downRef = useRef(false);
 	const [ref, measurement, getMeasurements] = useMeasure<HTMLDivElement>();
@@ -221,8 +222,8 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 			Math.max(
 				0,
 				Math.min(
-					warpFactorCount + 1,
-					Math.round(((value + 1) / 2) * (warpFactorCount + 1)),
+					warpSpeeds.length + 1,
+					Math.round(((value + 1) / 2) * (warpSpeeds.length + 1)),
 				),
 			),
 		);
@@ -230,7 +231,7 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 	useGamepadPress("warp-focus-adjust", {
 		onDown: (val) => {
 			setWarpFocus((focus) =>
-				Math.max(0, Math.min(warpFactorCount + 1, Math.round(val + focus))),
+				Math.max(0, Math.min(warpSpeeds.length + 1, Math.round(val + focus))),
 			);
 		},
 	});
@@ -257,48 +258,37 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 				</div>
 				{/* TODO: Include heat indicator here eventually. */}
 
-				<div className="flex mt-2 gap-1">
+				<div className="flex mt-2">
 					<div className="flex-1">
 						<p className="text-xl">Impulse Speed:</p>
 						<div className="flex">
-							<div className="flex flex-1 flex-col justify-around text-right gap-1">
-								<Button
-									onClick={() => callback.current(emergencySpeed)}
-									className="btn-error btn-sm"
-								>
-									Emergency
-								</Button>
-								<Button
-									onClick={() => callback.current(cruisingSpeed)}
-									className="btn-warning btn-sm"
-								>
-									Full
-								</Button>
-								<Button
-									className="btn-primary btn-sm"
-									onClick={() => callback.current((cruisingSpeed * 3) / 4)}
-								>
-									3/4
-								</Button>
-								<Button
-									className="btn-primary btn-sm"
-									onClick={() => callback.current((cruisingSpeed * 1) / 2)}
-								>
-									1/2
-								</Button>
-								<Button
-									className="btn-primary btn-sm"
-									onClick={() => callback.current((cruisingSpeed * 1) / 4)}
-								>
-									1/4
-								</Button>
+							<div className="flex flex-1 justify-around flex-col-reverse text-right gap-1">
 								<Button
 									className="btn-notice w-full"
 									onClick={() => callback.current(0)}
 								>
 									Full Stop
 								</Button>
+								{speeds.map((speed, i) => (
+									<Button
+										key={`${speed}${i}`}
+										onClick={() =>
+											callback.current(
+												i === speeds.length - 1
+													? emergencySpeed
+													: cruisingSpeed * ((i + 1) / (speeds.length - 1)),
+											)
+										}
+										className={cn("btn-primary btn-sm", {
+											"btn-error": i === speeds.length - 1,
+											"btn-warning": i === speeds.length - 2,
+										})}
+									>
+										{speed.label}
+									</Button>
+								))}
 							</div>
+							<div className="w-1" />
 							<div
 								ref={ref}
 								className="relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end"
@@ -314,28 +304,14 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 							</div>
 						</div>
 					</div>
-					<div className="w-2" />
-					<div className="flex flex-1 flex-col justify-around">
-						<p className="text-xl">Warp Speed:</p>
-						<div className="flex flex-col justify-around h-full gap-1">
-							<Button
-								className={`btn-sm btn-error ${
-									warpFocus === warpFactorCount + 1 ? "gamepad-focus" : ""
-								}${
-									currentWarpFactor === warpFactorCount + 1 ? "btn-active" : ""
-								}`}
-								onClick={() =>
-									q.pilot.warpEngines.setWarpFactor.netSend({
-										factor: warpFactorCount + 1,
-										shipId,
-									})
-								}
-							>
-								Emergency Warp
-							</Button>
-							{Array.from({
-								length: warpFactorCount,
-							}).map((_, i, arr) => {
+					<div className="w-1" />
+					<div className="flex-1">
+						<div
+							className={cn("grid h-full max-h-56 gap-1 flex-wrap", {
+								"grid-cols-2": warpSpeeds.length > 5,
+							})}
+						>
+							{warpSpeeds.map(({ label }, i, arr) => {
 								const warpFactor = arr.length - i;
 								return (
 									<Button
@@ -350,7 +326,7 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 											})
 										}
 									>
-										Warp {warpFactor}
+										{label}
 									</Button>
 								);
 							})}

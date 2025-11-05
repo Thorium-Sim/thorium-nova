@@ -9,6 +9,7 @@ import {
 	pluginFilter,
 	systemInput,
 } from "../utils";
+import { engineSpeeds } from "@thorium/ecs-components/shipSystems/engineSpeeds";
 
 export const warp = t.router({
 	get: t.procedure
@@ -32,7 +33,7 @@ export const warp = t.router({
 				interstellarCruisingSpeed: z.number().optional(),
 				solarCruisingSpeed: z.number().optional(),
 				minSpeedMultiplier: z.number().optional(),
-				warpFactorCount: z.number().optional(),
+				speeds: engineSpeeds.optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -55,12 +56,8 @@ export const warp = t.router({
 			if (typeof input.solarCruisingSpeed === "number") {
 				shipSystem.solarCruisingSpeed = input.solarCruisingSpeed;
 			}
-			if (typeof input.warpFactorCount === "number") {
-				if (input.warpFactorCount < 2)
-					throw new Error("warpFactorCount must be >= 2");
-				if (Math.round(input.warpFactorCount) !== input.warpFactorCount)
-					throw new Error("warpFactorCount must be an integer");
-				shipSystem.warpFactorCount = input.warpFactorCount;
+			if (Array.isArray(input.speeds)) {
+				shipSystem.speeds = input.speeds;
 			}
 
 			pubsub.publish.plugin.systems.get({

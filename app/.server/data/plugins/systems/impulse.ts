@@ -9,6 +9,7 @@ import {
 	pluginFilter,
 	systemInput,
 } from "../utils";
+import { engineSpeeds } from "@thorium/ecs-components/shipSystems/engineSpeeds";
 
 export const impulse = t.router({
 	get: t.procedure
@@ -32,6 +33,7 @@ export const impulse = t.router({
 				cruisingSpeed: z.number().optional(),
 				emergencySpeed: z.number().optional(),
 				thrust: z.number().optional(),
+				speeds: engineSpeeds.optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -50,6 +52,13 @@ export const impulse = t.router({
 			}
 			if (typeof input.thrust === "number") {
 				shipSystem.thrust = input.thrust;
+			}
+			if (Array.isArray(input.speeds)) {
+				shipSystem.speeds = input.speeds;
+				pubsub.publish.plugin.systems.impulse.get({
+					pluginId: input.shipPluginId || "",
+				});
+				pubsub.publish.plugin.systems.impulse.get({ pluginId: input.pluginId });
 			}
 
 			pubsub.publish.plugin.systems.get({

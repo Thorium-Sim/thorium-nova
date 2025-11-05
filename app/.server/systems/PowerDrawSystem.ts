@@ -32,8 +32,9 @@ export class PowerDrawSystem extends System {
 		switch (systemType.type) {
 			case "warpEngines": {
 				if (!entity.components.isWarpEngines) return;
-				const { currentWarpFactor, warpFactorCount } =
-					entity.components.isWarpEngines;
+				const { currentWarpFactor, speeds } = entity.components.isWarpEngines;
+				// The highest warp factor is the destructive speed, so we don't count that one.
+				const warpFactorCount = speeds.length - 1;
 				if (currentWarpFactor === 0) break;
 				const warpEngineUse = currentWarpFactor / warpFactorCount;
 				powerDraw =

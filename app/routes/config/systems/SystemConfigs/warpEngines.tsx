@@ -6,6 +6,10 @@ import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext"
 import { OverrideResetButton } from "../OverrideResetButton";
 import { q } from "@thorium/context/AppContext";
 import { Navigate } from "@thorium/components/Navigate";
+import type { EngineSpeed } from "@thorium/ecs-components/shipSystems/engineSpeeds";
+import { produce } from "immer";
+import { Icon } from "@thorium/ui/Icon";
+import Button from "@thorium/ui/Button";
 
 export default function WarpEngines() {
 	const { pluginId, systemId, shipId } = useParams() as {
@@ -25,6 +29,26 @@ export default function WarpEngines() {
 
 	const key = `${systemId}${rekey}`;
 	if (!system) return <Navigate to={`/config/${pluginId}/systems`} />;
+
+	async function updateSpeeds(speeds: EngineSpeed[]) {
+		try {
+			await q.plugin.systems.warp.update.netSend({
+				pluginId,
+				systemId: systemId,
+				shipId,
+				shipPluginId,
+				speeds,
+			});
+		} catch (err) {
+			if (err instanceof Error) {
+				toast({
+					title: "Error changing speeds",
+					body: err.message,
+					color: "error",
+				});
+			}
+		}
+	}
 
 	// TODO: May 3, 2022 - Add sound effects configuration here
 	// TODO: May 3, 2022 - Figure out how to model the warp dynamo too
@@ -145,41 +169,73 @@ export default function WarpEngines() {
 							className="mt-6"
 						/>
 					</div>
-					<div className="pb-2 flex">
-						<Input
-							labelHidden={false}
-							inputMode="numeric"
-							pattern="[0-9]*"
-							label="Warp Factor Count"
-							placeholder={"5"}
-							helperText={
-								"The number of warp factors available. Does not include emergency or destructive warp. Must be greater than 2"
-							}
-							defaultValue={system.warpFactorCount}
-							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
-								try {
-									await q.plugin.systems.warp.update.netSend({
-										pluginId,
-										systemId: systemId,
-										shipId,
-										shipPluginId,
-										warpFactorCount: Math.round(Number(e.target.value)),
-									});
-								} catch (err) {
-									if (err instanceof Error) {
-										toast({
-											title: "Error changing warp factor count",
-											body: err.message,
-											color: "error",
-										});
-									}
-								}
-							}}
-						/>
+					<div>
+						<div>
+							<label htmlFor="power-levels">Speeds</label>
+							<div className="flex gap-2">
+								{system.speeds.map(({ label, number }, i) => (
+									<div key={`${i}`} className="relative group flex flex-col">
+										<Input
+											label="Label"
+											placeholder="Label"
+											labelHidden
+											className="input w-[4ch] text-center tabular-nums"
+											max={40}
+											defaultValue={label}
+											onBlur={(event) => {
+												updateSpeeds(
+													produce(system.speeds, (draft) => {
+														draft[i].label = event.currentTarget.value;
+													}),
+												);
+											}}
+										/>
+										<Input
+											label="Number"
+											placeholder="Number"
+											labelHidden
+											className="input w-[4ch] text-center tabular-nums"
+											max={40}
+											defaultValue={number}
+											onBlur={(event) => {
+												updateSpeeds(
+													produce(system.speeds, (draft) => {
+														draft[i].number = event.currentTarget.value;
+													}),
+												);
+											}}
+										/>
+										<button
+											className="hidden group-hover:flex absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 bg-gray-300 items-center justify-center rounded-full w-5 h-5"
+											onClick={() =>
+												updateSpeeds(
+													produce(system.speeds, (draft) => {
+														draft.splice(i, 1);
+													}),
+												)
+											}
+										>
+											<Icon name="ban" className="text-red-500" />
+										</button>
+									</div>
+								))}
+								<Button
+									className="btn-sm btn-info"
+									onClick={() => {
+										updateSpeeds([...system.speeds, { label: "", number: "" }]);
+									}}
+								>
+									+
+								</Button>
+							</div>
+							<p className="text-gray-400 text-sm leading-tight mb-2">
+								Names of the speed values. The second to last speed is cruising
+								speed, and speeds below that divide the cruising speed evenly.
+								The last speed uses emergency speed.
+							</p>
+						</div>
 						<OverrideResetButton
-							property="warpFactorCount"
+							property="speeds"
 							setRekey={setRekey}
 							className="mt-6"
 						/>

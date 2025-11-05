@@ -3,6 +3,7 @@ import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 import type { Sound } from "@thorium/ecs-components/sound";
+import type { EngineSpeed } from "@thorium/ecs-components/shipSystems/engineSpeeds";
 
 export default class ImpulseEnginesPlugin extends BaseShipSystemPlugin {
 	static flags: ShipSystemFlags[] = ["damage", "heat", "power", "sounds"];
@@ -10,6 +11,8 @@ export default class ImpulseEnginesPlugin extends BaseShipSystemPlugin {
 	cruisingSpeed: KilometerPerSecond;
 	emergencySpeed: KilometerPerSecond;
 	thrust: KiloNewtons;
+
+	speeds: EngineSpeed[];
 
 	soundEffects: {
 		powerUp: Sound[];
@@ -21,6 +24,13 @@ export default class ImpulseEnginesPlugin extends BaseShipSystemPlugin {
 		this.cruisingSpeed = params.cruisingSpeed || 1500;
 		this.emergencySpeed = params.emergencySpeed || 2000;
 		this.thrust = params.thrust || 12500;
+		this.speeds = params.speeds || [
+			{ label: "1/4 Impulse", number: "0.25" },
+			{ label: "1/2 Impulse", number: "0.5" },
+			{ label: "3/4 Impulse", number: "0.75" },
+			{ label: "Full Impulse", number: "1.0" },
+			{ label: "Destructive", number: "1.25" },
+		];
 		this.soundEffects = params.soundEffects ?? {
 			powerUp: [],
 			powerDown: [],

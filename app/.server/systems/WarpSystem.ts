@@ -25,7 +25,7 @@ export class WarpSystem extends System {
 			solarCruisingSpeed,
 			minSpeedMultiplier,
 			currentWarpFactor,
-			warpFactorCount,
+			speeds,
 		} = entity.components.isWarpEngines;
 
 		const cruisingSpeed =
@@ -34,6 +34,9 @@ export class WarpSystem extends System {
 				: solarCruisingSpeed;
 
 		const minWarp = cruisingSpeed * minSpeedMultiplier;
+
+		// The highest warp factor is the destructive speed, so we don't count that one.
+		const warpFactorCount = speeds.length - 1;
 
 		// Calculate max warp speed based on the factor and the number of warp factors
 		let warpSpeed = 0;

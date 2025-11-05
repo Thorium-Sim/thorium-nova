@@ -8,9 +8,8 @@ import type { Object3D } from "three";
 import Button from "@thorium/ui/Button";
 import { Batteries } from "@thorium/cards/Legacy/PowerDistribution/Batteries";
 import { q } from "@thorium/context/AppContext";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { DamageOverlay } from "@thorium/components/DamageOverlay";
+import { HeatBars } from "@thorium/cards/Legacy/ReactorControl/HeatBars";
 export function LegacyReactorControl() {
 	const { shipId } = useStation();
 
@@ -37,7 +36,11 @@ export function LegacyReactorControl() {
 
 	return (
 		<div className="grid grid-cols-5 grid-rows-3 gap-8 h-full">
-			<HeatBars />
+			<HeatBars
+				id={reactors[0].id}
+				nominalHeat={reactors[0].nominalHeat}
+				maxHeat={reactors[0].maxHeat}
+			/>
 			<ReactorModel />
 			<Batteries />
 			<div className="flex flex-row gap-2 col-span-2 flex-wrap justify-between relative p-4">
@@ -104,76 +107,4 @@ function Model() {
 		ref.current?.rotateY(0.002);
 	});
 	return <primitive object={model.scene} ref={ref} />;
-}
-
-function HeatBars() {
-	const { shipId } = useStation();
-	const { cardLoaded } = useCardContext();
-
-	const [reactors] = q.legacy.reactorControl.reactors.useNetRequest({
-		shipId,
-	});
-
-	const { interpolate } = useLiveQuery();
-
-	const heatBarRef = useRef<HTMLDivElement>(null);
-	const coolantBarRef = useRef<HTMLDivElement>(null);
-
-	useAnimationFrame(() => {
-		if (!reactors[0]) return;
-		const entity = interpolate(reactors[0].id);
-		const heat = entity?.z || 0;
-		const coolant = entity?.c || 0;
-		const heatPercent =
-			(heat - reactors[0].nominalHeat) /
-			(reactors[0].maxHeat - reactors[0].nominalHeat);
-		if (heatBarRef.current) {
-			heatBarRef.current.style.height = `${heatPercent * 100}%`;
-		}
-		if (coolantBarRef.current) {
-			coolantBarRef.current.style.height = `${coolant * 100}%`;
-		}
-	}, cardLoaded);
-
-	return (
-		<div className="grid grid-cols-2 grid-rows-[auto_1fr_auto] row-span-3 gap-4 gap-x-8 h-full">
-			<p className="text-center">Heat</p>
-			<p className="text-center">Coolant</p>
-			<div className="relative border border-white/50 flex flex-col justify-end">
-				<div
-					ref={heatBarRef}
-					className="striped-gradient striped-red"
-					style={{ height: "0%" }}
-				/>
-			</div>
-			<div className="relative border border-white/50 flex flex-col justify-end">
-				<div
-					ref={coolantBarRef}
-					className="striped-gradient striped-cyan"
-					style={{ height: "0%" }}
-				/>
-			</div>
-			<Button
-				className="btn-info col-span-2"
-				onPointerDown={() => {
-					q.legacy.coolantControl.coolSystem.netSend({
-						systemId: reactors[0].id,
-						cooling: true,
-					});
-					document.addEventListener(
-						"pointerup",
-						() => {
-							q.legacy.coolantControl.coolSystem.netSend({
-								systemId: reactors[0].id,
-								cooling: false,
-							});
-						},
-						{ once: true },
-					);
-				}}
-			>
-				Coolant
-			</Button>
-		</div>
-	);
 }

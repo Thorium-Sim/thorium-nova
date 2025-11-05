@@ -43,7 +43,7 @@ export function InputField({
 				onClick(String(parseValue));
 			}}
 		>
-			{children || <>&nbsp;</>}
+			{children ?? <>&nbsp;</>}
 		</div>
 	);
 }

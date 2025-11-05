@@ -1,3 +1,4 @@
+import { engineSpeeds } from "@thorium/ecs-components/shipSystems/engineSpeeds";
 import z from "zod";
 
 export const isImpulseEngines = z
@@ -14,5 +15,13 @@ export const isImpulseEngines = z
 		forwardAcceleration: z.number().default(0),
 		/** The measured forward thrust of the ship. */
 		forwardImpulse: z.number().default(0),
+		/** Names for how the impulse speed is divided. Highest speed is emergency speed. */
+		speeds: engineSpeeds.default([
+			{ label: "1/4 Impulse", number: "0.25" },
+			{ label: "1/2 Impulse", number: "0.5" },
+			{ label: "3/4 Impulse", number: "0.75" },
+			{ label: "Full Impulse", number: "1.0" },
+			{ label: "Destructive", number: "1.25" },
+		]),
 	})
 	.default({});

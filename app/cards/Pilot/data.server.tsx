@@ -39,10 +39,12 @@ export const pilot = t.router({
 
 				return {
 					id: impulseEngines.id,
+					name: impulseEngines.components.identity?.name || "Impulse",
 					targetSpeed,
 					cruisingSpeed,
 					emergencySpeed:
 						impulseEngines.components.isImpulseEngines?.emergencySpeed || 1,
+					speeds: impulseEngines.components.isImpulseEngines?.speeds || [],
 				};
 			}),
 		ambiance: t.procedure
@@ -125,8 +127,6 @@ export const pilot = t.router({
 				});
 				return {
 					id: warpEngines.id,
-					warpFactorCount:
-						warpEngines.components.isWarpEngines?.warpFactorCount || 5,
 					maxVelocity: warpEngines.components.isWarpEngines?.maxVelocity || 0,
 					currentWarpFactor:
 						warpEngines.components.isWarpEngines?.currentWarpFactor || 0,
@@ -136,6 +136,7 @@ export const pilot = t.router({
 					solarCruisingSpeed:
 						warpEngines.components.isWarpEngines?.solarCruisingSpeed ||
 						29980000,
+					speeds: warpEngines.components.isWarpEngines?.speeds || [],
 				};
 			}),
 		setWarpFactor: t.procedure

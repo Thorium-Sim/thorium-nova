@@ -241,7 +241,7 @@ function getWarpFactorFromDesiredSpeed(
 		interstellarCruisingSpeed,
 		solarCruisingSpeed,
 		minSpeedMultiplier,
-		warpFactorCount,
+		speeds,
 	} = warp;
 	const cruisingSpeed = isInterstellar
 		? interstellarCruisingSpeed
@@ -249,6 +249,8 @@ function getWarpFactorFromDesiredSpeed(
 
 	const minWarp = cruisingSpeed * minSpeedMultiplier;
 
+	// The highest warp factor is the destructive speed, so we don't count that one.
+	const warpFactorCount = speeds.length - 1;
 	// Calculate max warp speed based on the factor and the number of warp factors
 	if (desiredSpeed < 1000) return 0;
 	if (desiredSpeed > 1000 && desiredSpeed < minWarp) return 1;
