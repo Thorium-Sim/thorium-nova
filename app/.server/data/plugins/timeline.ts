@@ -6,7 +6,6 @@ import inputAuth from "@thorium/utils/.server/inputAuth";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
 import uniqid from "@thorium/utils/uniqid";
-import type { FlightStartingPoint } from "@thorium/.server/data/flight";
 import path from "node:path";
 import {
 	timelineBlockDefaults,
@@ -14,7 +13,7 @@ import {
 	type TimelineBlock,
 } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import ReportPlugin from "@thorium/.server/classes/Plugins/Report";
-import { replace } from "react-router";
+import type { FlightStartingPoint } from "@thorium/.server/spawners/flight";
 
 const timelineType = z.enum(["missions", "reports"]);
 const block = t.router({

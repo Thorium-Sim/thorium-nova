@@ -7,10 +7,10 @@ import {
 	useEffect,
 	type ReactNode,
 } from "react";
-import type { FlightStartingPoint } from "@thorium/.server/data";
 import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
 import { produce } from "immer";
 import uniqid from "@thorium/utils/uniqid";
+import type { FlightStartingPoint } from "@thorium/.server/spawners/flight";
 
 export interface FlightConfigState {
 	hasFlightDirector: boolean;

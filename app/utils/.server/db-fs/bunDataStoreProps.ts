@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { load, dump } from "js-yaml";
+import { dump } from "js-yaml";
 import type { DataStoreOperations } from "@thorium/utils/.server/db-fs";
 import BasePlugin from "@thorium/.server/classes/Plugins";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
@@ -13,23 +13,13 @@ import postcss from "postcss";
 // @ts-expect-error - No types
 import postcssLess from "postcss-less";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-import type { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
+import { loadYml } from "@thorium/utils/.server/db-fs/loadYml";
 
 let basePath = "./";
 export function setBasePath(path: string) {
 	basePath = path;
 }
 
-const flightMap = new Map<string, FlightDataModel>();
-
-function loadYml(fileData: string | undefined, initialData?: any) {
-	return fileData
-		? load(fileData, {
-				json: true,
-				onWarning: (e) => console.warn("YAML load warning:", e),
-			})
-		: initialData;
-}
 export const bunDataStoreProps: DataStoreOperations = {
 	async getData() {
 		const filePath = path.join(basePath, this.meta.filePath);
@@ -49,8 +39,8 @@ export const bunDataStoreProps: DataStoreOperations = {
 		}
 		return data;
 	},
-	async write(force = false) {
-		const filePath = path.join(basePath, this.meta.filePath);
+	async write(force = false, name?: string) {
+		let filePath = path.join(basePath, this.meta.filePath);
 
 		try {
 			if (this.safeMode && force === false) return;
@@ -65,9 +55,19 @@ export const bunDataStoreProps: DataStoreOperations = {
 			if (!filePath) {
 				return;
 			}
+			// Named snapshots are only for flights.
+			if (name && this.meta.flightName) {
+				filePath = path.join(
+					basePath,
+					"flights",
+					this.meta.flightName,
+					`${name}.yml`,
+				);
+			}
 			await fs.mkdir(path.dirname(filePath), { recursive: true });
 			this.initialData = undefined;
 			const jsonData = this.toJSON();
+			jsonData.lastSaved = Date.now();
 			jsonData.dataLoaded = undefined;
 			const data = dump(jsonData, { skipInvalid: true });
 			await fs.writeFile(filePath, data, { mode: 0o0600 });
@@ -97,7 +97,7 @@ export const bunDataStoreProps: DataStoreOperations = {
 		return path.join(thoriumPath);
 	},
 	async readAsset(assetUrl) {
-		return fs.readFile(assetUrl, "utf-8") || "";
+		return Bun.file(assetUrl).text();
 	},
 	async uploadAsset(file, fileName) {
 		await fs.mkdir(
@@ -227,23 +227,18 @@ export const bunDataStoreProps: DataStoreOperations = {
 			await fs.mkdir(path.join(thoriumPath, "/flights/"));
 			files = [];
 		}
-		const flightFiles = files.filter((f) => f.includes(".flight"));
-		const flightData = await Promise.all(
-			flightFiles.map(async (flightName) => {
-				if (flightMap.has(flightName)) return flightMap.get(flightName);
-				const raw = await fs.readFile(
-					`${thoriumPath}/flights/${flightName}`,
-					"utf-8",
-				);
-				const data = load(raw) as any;
-				flightMap.set(flightName, {
-					...data,
-					date: new Date(data?.date),
-				} as FlightDataModel);
-				return flightMap.get(flightName);
-			}),
-		);
-		return flightData as FlightDataModel[];
+		return files.filter((f) => !f.startsWith("."));
+	},
+	async getFlightSnapshots(name: string) {
+		let files: string[];
+		try {
+			files = await fs.readdir(path.join(thoriumPath, "/flights/", name));
+		} catch {
+			files = [];
+		}
+		return files
+			.filter((f) => !f.startsWith(".") && f !== "data.yml" && f !== "assets")
+			.map((f) => f.replace(".yml", ""));
 	},
 };
 

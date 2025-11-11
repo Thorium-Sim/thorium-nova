@@ -7,32 +7,34 @@ export async function traverseFiles(
 	rootPath: string,
 	extensions: string[] = [],
 ) {
-	const folderFiles = await readdir(basePath);
 	const files: FileOrFolder[] = [];
-	for (const file of folderFiles) {
-		if (file.includes(".DS_Store")) continue;
-		const filePath = path.join(basePath, file);
-		try {
-			const isDirectory = (await lstat(filePath)).isDirectory();
-			if (isDirectory) {
-				files.push({
-					name: file,
-					fullPath: filePath.replace(rootPath, ""),
-					contents: await traverseFiles(filePath, rootPath, extensions),
-				});
-			} else if (
-				!extensions ||
-				extensions.length === 0 ||
-				extensions.includes(path.extname(filePath).replace(".", ""))
-			) {
-				files.push({
-					name: file,
-					fullPath: filePath.replace(rootPath, ""),
-					contents: null,
-				});
-			}
-		} catch {}
-	}
+	try {
+		const folderFiles = await readdir(basePath);
+		for (const file of folderFiles) {
+			if (file.includes(".DS_Store")) continue;
+			const filePath = path.join(basePath, file);
+			try {
+				const isDirectory = (await lstat(filePath)).isDirectory();
+				if (isDirectory) {
+					files.push({
+						name: file,
+						fullPath: filePath.replace(rootPath, ""),
+						contents: await traverseFiles(filePath, rootPath, extensions),
+					});
+				} else if (
+					!extensions ||
+					extensions.length === 0 ||
+					extensions.includes(path.extname(filePath).replace(".", ""))
+				) {
+					files.push({
+						name: file,
+						fullPath: filePath.replace(rootPath, ""),
+						contents: null,
+					});
+				}
+			} catch {}
+		}
+	} catch {}
 
 	// Traverse again to sort and filter
 	return sortFiles(files);

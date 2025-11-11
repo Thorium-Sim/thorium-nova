@@ -72,7 +72,9 @@ export function ActionsCore() {
 		children: (
 			<div>
 				<span className="flex">
-					<span className="flex-1">{a.name}</span>
+					<span className="flex-1" onClick={() => setSelectedAction(a.id)}>
+						{a.name}
+					</span>
 					<Tooltip content="Delete Action">
 						<button
 							className=""

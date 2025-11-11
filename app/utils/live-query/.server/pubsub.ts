@@ -45,6 +45,15 @@ export class PubSub<TRouter extends AnyRouter> {
 		this.ee.emit(trigger, payload);
 	}) as RouterRequests<TRouter>;
 
+	/** Tells every connected client to revalidate all of its queries */
+	public publishAll = () => {
+		this.ee.emit("all");
+	};
+
+	public subscribeAll = (listener: () => void) => {
+		this.ee.addListener("all", listener);
+		return () => this.ee.removeListener("all", listener);
+	};
 	public directPublish(path: string, payload: unknown) {
 		const trigger = path.split(".").join("/");
 		this.ee.emit(trigger, payload);

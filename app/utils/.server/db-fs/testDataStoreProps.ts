@@ -26,4 +26,7 @@ export const testDataStoreProps: DataStoreOperations = {
 	async getFlights() {
 		return [];
 	},
+	async getFlightSnapshots(flightName) {
+		return [];
+	},
 };

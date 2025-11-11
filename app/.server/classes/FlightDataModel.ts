@@ -1,13 +1,12 @@
-import { ECS, Entity } from "@thorium/utils/ecs";
+import { ECS, type Entity } from "@thorium/utils/ecs";
 import randomWords from "@thorium/utils/random-words";
 import type { ServerDataModel } from "./ServerDataModel";
-import systems from "@thorium/.server/systems";
 import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
 import type ShipPlugin from "./Plugins/Ship";
-import { DefaultUIDGenerator } from "@thorium/utils/ecs/uid";
 import { loadGltf } from "@thorium/utils/.server/loadGltf";
 import RAPIER from "@thorium-sim/rapier3d-node";
 import path from "node:path";
+import { initECS } from "@thorium/.server/classes/initECS";
 
 export class FlightDataModel extends DataStore {
 	static INTERVAL = 1000 / 60;
@@ -16,11 +15,13 @@ export class FlightDataModel extends DataStore {
 	paused!: boolean;
 	hasFlightDirector!: boolean;
 	state!: "in-progress" | "success" | "failure";
+	stateReason!: string;
 	ecs!: ECS;
 	pluginIds!: string[];
 	private entities!: Entity[];
 	serverDataModel: ServerDataModel;
 	interval!: ReturnType<typeof setInterval>;
+	startInput!: { ships: any[]; missionId: any; startingPoint: any };
 	flightClientIndex: Map<string, number>;
 	mode!: "nova" | "legacy";
 
@@ -56,6 +57,8 @@ export class FlightDataModel extends DataStore {
 			this.pluginIds ??= data.pluginIds || [];
 			this.entities ??= data.entities || [];
 			this.state = data.state || "in-progress";
+			this.stateReason = data.stateReason || "";
+			this.startInput = data.startInput || {};
 		});
 	}
 	run = () => {
@@ -69,36 +72,13 @@ export class FlightDataModel extends DataStore {
 	destroy() {
 		clearInterval(this.interval);
 
-		this.ecs.entities.forEach((entity) => {
-			entity.dispose();
-		});
+		this.ecs.dispose();
 		this.remove(true);
 	}
 	async initEcs(server: ServerDataModel) {
 		await this.#getDataPromise;
 		this.ecs = new ECS(server);
-		for (const Sys of systems) {
-			if (Sys.flightMode?.includes(this.mode)) {
-				this.ecs.addSystem(new Sys());
-			}
-		}
-		// We need to selectively add certain entities first
-		this.entities.forEach(({ id, components }) => {
-			if (components.isSolarSystem) {
-				const e = new Entity(id, components);
-				this.ecs.addEntity(e);
-			}
-		});
-		this.entities.forEach(({ id, components }) => {
-			if (components.isSolarSystem) return;
-			const e = new Entity(id, components);
-			this.ecs.addEntity(e);
-		});
-		const maxId = this.entities.reduce(
-			(acc, { id }) => Math.max(acc, id),
-			DefaultUIDGenerator.uid,
-		);
-		DefaultUIDGenerator.uid = maxId + 1;
+		initECS(this.ecs, this.entities, this.mode);
 		this.run();
 	}
 	async initPhysics() {
@@ -134,10 +114,6 @@ export class FlightDataModel extends DataStore {
 		this.flightClientIndex.clear();
 	}
 
-	reset() {
-		// TODO: Flight Reset Handling
-	}
-
 	// Helper Getters
 	/**
 	 * All player ships in the universe.
@@ -150,6 +126,9 @@ export class FlightDataModel extends DataStore {
 	 */
 	get ships() {
 		return [...(this.ecs.componentCache.get("isShip") || [])];
+	}
+	async getSnapshots() {
+		return DataStore.operations.getStore()!.getFlightSnapshots(this.name);
 	}
 	/**
 	 * Ships that are available for spawning in the universe, based on the flight's plugins.
@@ -186,8 +165,11 @@ export class FlightDataModel extends DataStore {
 			hasFlightDirector: this.hasFlightDirector,
 			pluginIds: this.pluginIds,
 			entities,
-			maxEntityId: this.ecs.maxEntityId,
+			rng: { seed: this.ecs.rng.seed, skip: this.ecs.rng.iterationCount },
 			mode: this.mode,
+			state: this.state,
+			stateReason: this.stateReason,
+			startInput: this.startInput,
 		};
 		return data;
 	}

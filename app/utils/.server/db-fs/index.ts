@@ -28,10 +28,14 @@ export type LoadAspectFn = <T>(
 ) => Promise<T[]>;
 export interface DataStoreOperations {
 	getData(this: DataStore): Promise<unknown>;
-	write(this: DataStore, force?: boolean): Promise<void>;
+	write(
+		this: Pick<DataStore, "safeMode" | "meta" | "initialData" | "toJSON">,
+		force?: boolean,
+		name?: string,
+	): Promise<void>;
 	remove(this: DataStore, force?: boolean): Promise<void>;
 	getAssetUrl(this: DataStore): Promise<string>;
-	readAsset(this: DataStore, asset: string): Promise<string>;
+	readAsset(asset: string): Promise<string>;
 	uploadAsset(
 		this: DataStore,
 		asset: File | Blob,
@@ -48,7 +52,8 @@ export interface DataStoreOperations {
 		newName: string,
 		otherNames: string[],
 	) => Promise<void>;
-	getFlights: () => Promise<FlightDataModel[]>;
+	getFlights: () => Promise<string[]>;
+	getFlightSnapshots: (flightName: string) => Promise<string[]>;
 }
 export abstract class DataStore {
 	static operations = new AsyncLocalStorage<DataStoreOperations>();
@@ -130,10 +135,10 @@ export abstract class DataStore {
 		this.dataLoaded = true;
 		return loadedData;
 	}
-	async write(force?: boolean): Promise<void> {
+	async write(force?: boolean, name?: string): Promise<void> {
 		// Don't write if we haven't already loaded the data.
 		if (!this.dataLoaded) return;
-		return DataStore.operations.getStore()!.write.call(this, force);
+		return DataStore.operations.getStore()!.write.call(this, force, name);
 	}
 	async remove(force?: boolean): Promise<void> {
 		return DataStore.operations.getStore()!.remove.call(this, force);

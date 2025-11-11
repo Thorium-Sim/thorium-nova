@@ -5,8 +5,10 @@ import { CardArea } from "./CardArea";
 import { CardSwitcher } from "./CardSwitcher";
 import { useManageCard } from "./useManageCard";
 import { Widgets } from "./widgets";
+import { cn } from "@thorium/utils/cn";
 
 const StationLayout = () => {
+	const [flight] = q.flight.active.useNetRequest();
 	const [ship] = q.ship.get.useNetRequest({ clientId });
 	const [client] = q.client.get.useNetRequest({ clientId });
 	const [station] = q.station.get.useNetRequest({ clientId });
@@ -94,6 +96,27 @@ const StationLayout = () => {
 					</div>
 					<div className="card-area relative h-full">
 						<CardArea card={card} />
+					</div>
+					<div
+						className={cn(
+							"absolute z-[500] inset-0 bg-black/50 backdrop-blur transition-all opacity-0 pointer-events-none flex items-center justify-center",
+							{
+								"opacity-100 pointer-events-auto":
+									flight?.state !== "in-progress",
+							},
+						)}
+					>
+						<div
+							className={cn("panel p-6 text-center", {
+								"panel-success": flight?.state === "success",
+								"panel-error": flight?.state === "failure",
+							})}
+						>
+							<p className="text-6xl mb-2">
+								Mission {flight?.state === "success" ? "Success" : "Failure"}
+							</p>
+							<p className="text-4xl">{flight?.stateReason}</p>
+						</div>
 					</div>
 				</div>
 				<div className="widgets flex items-center gap-2 absolute bottom-8 right-[calc(2rem+50px)]">

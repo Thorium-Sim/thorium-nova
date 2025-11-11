@@ -9,8 +9,12 @@ import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
 import systems from "@thorium/.server/systems";
 import type { DataContext } from "@thorium/.server/DataContext";
 import { ECS, Entity } from "../ecs";
-import { DataStore } from "@thorium/utils/.server/db-fs";
+import {
+	DataStore,
+	type DataStoreOperations,
+} from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
+import { AsyncLocalStorage } from "node:async_hooks";
 
 class MockServerDataModel {
 	clients!: Record<string, Client<any>>;
@@ -45,6 +49,8 @@ class MockServerDataModel {
 	}
 }
 class MockFlightDataModel {
+	static operations = new AsyncLocalStorage<DataStoreOperations>();
+
 	static INTERVAL = 1000 / 60;
 	id = "Test Flight";
 	name = "Test Flight";
@@ -55,14 +61,11 @@ class MockFlightDataModel {
 	private initEntities: Entity[] = [];
 	serverDataModel: ServerDataModel;
 	flightClientIndex = new Map();
-	inventoryTemplates: {
-		[key: string]: {
-			name: string;
-			volume: number;
-			abundance: number;
-			flags: InventoryFlags;
-		};
-	} = {};
+	state!: "in-progress" | "success" | "failure";
+	stateReason!: string;
+	startInput!: { ships: any[]; missionId: any; startingPoint: any };
+	mode!: "nova" | "legacy";
+
 	constructor(
 		params: Partial<MockFlightDataModel> & {
 			serverDataModel: ServerDataModel;
@@ -118,6 +121,10 @@ class MockFlightDataModel {
 		return clients;
 	}
 	toJSON() {
+		const entities = [];
+		for (const [, entity] of this.ecs.entities) {
+			entities.push(entity.toJSON());
+		}
 		// Get all of the entities in the world and serialize them into objects
 		return {
 			id: this.id,
@@ -125,11 +132,34 @@ class MockFlightDataModel {
 			paused: this.paused,
 			date: this.date,
 			pluginIds: this.pluginIds,
-			entities: this.ecs.entities,
+			entities,
+			maxEntityId: this.ecs.maxEntityId,
+			rng: { seed: this.ecs.rng.seed, skip: this.ecs.rng.iterationCount },
+			mode: this.mode,
+			state: this.state,
+			stateReason: this.stateReason,
+			startInput: this.startInput,
 		};
 	}
+	safeMode = false;
+	get meta() {
+		return {
+			flightName: this.name,
+			filePath: `/flights/${this.name}/data.yml`,
+		};
+	}
+	initialData = {};
+	write(force?: boolean, name?: string) {
+		return DataStore.operations.getStore()!.write.call(this, force, name);
+	}
+	getSnapshots() {
+		return DataStore.operations
+			.getStore()!
+			.getFlightSnapshots.call(this, this.name);
+	}
+	getAssetUrl = async () => "";
 }
-class MockDataContext {
+export class MockDataContext {
 	clientId = "test" as const;
 	database: { server: ServerDataModel; flight: FlightDataModel | null } = {
 		server: new MockServerDataModel() as any as ServerDataModel,
@@ -188,9 +218,9 @@ class MockDataContext {
 		}
 		return flightClientEntity!;
 	}
-	uploadFile = async () => "";
-	readFile = async () => "";
-	removeFile = async () => {};
+	uploadFile = DataStore.operations.getStore()!.uploadAsset;
+	readFile = DataStore.operations.getStore()!.readAsset;
+	removeFile = DataStore.operations.getStore()!.removeAsset;
 }
 
 export function createMockDataContext() {

@@ -11,8 +11,6 @@ export class IsDestroyedSystem extends System {
 		const { timeToDestroy, timer } = entity.components.isDestroyed!;
 		if (timeToDestroy > 0) {
 			entity.updateComponent("isDestroyed", { timer: timer + elapsed });
-			// We don't automatically destroy player ships
-			if (entity.components.isPlayerShip) return;
 
 			if (timer + elapsed >= timeToDestroy) {
 				// Remove the entity from any physics worlds it is a part of

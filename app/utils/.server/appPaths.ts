@@ -5,8 +5,8 @@ import { fileURLToPath } from "node:url";
 
 export let __dirname =
 	process.env.NODE_ENV === "production"
-		? path.join(fileURLToPath(new URL(".", import.meta.url)), "..")
-		: path.join(fileURLToPath(new URL(".", import.meta.url)), "../../..");
+		? path.join(fileURLToPath(import.meta.url), "..")
+		: path.join(fileURLToPath(import.meta.url), "../../..");
 
 __dirname = __dirname.replaceAll("%20", " ");
 const isHeadless = !process.env.FORK;

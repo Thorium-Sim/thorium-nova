@@ -70,11 +70,17 @@ export function useDataResponse() {
 			function handleReady() {
 				queryClient.refetchQueries(undefined, { cancelRefetch: false });
 			}
+			function handleRevalidateAll() {
+				queryClient.refetchQueries(undefined);
+			}
+
 			socket.on("netRequestData", handleNetRequestData);
 			socket.on("connected", handleReady);
+			socket.on("revalidateAll", handleRevalidateAll);
 			return () => {
 				socket.off("netRequestData", handleNetRequestData);
 				socket.off("connected", handleReady);
+				socket.off("revalidateAll", handleRevalidateAll);
 			};
 		}
 	}, [socket, queryClient]);

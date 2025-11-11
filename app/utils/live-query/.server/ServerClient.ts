@@ -15,6 +15,7 @@ type SocketMessages =
 			type: "netRequestData";
 			data: { id: string; error: any } | { id: string; data: any };
 	  }
+	| { type: "revalidateAll" }
 	| Snapshot;
 type IncomingMessage =
 	| {
@@ -73,6 +74,12 @@ export class ServerClient<TRouter extends AnyRouter> {
 			this.connectionClosed();
 		});
 
+		this.subscriptions.set(
+			"all",
+			this.pubsub.subscribeAll(() => {
+				sendData({ type: "revalidateAll" });
+			}),
+		);
 		// Set up the whole netSend process for calling input functions
 		socketEmitter.on("message", async (data) => {
 			try {

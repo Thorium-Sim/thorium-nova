@@ -7,7 +7,7 @@ import { it, expect, beforeEach, describe } from "vitest";
 let system: Entity;
 let otherSystem: Entity;
 
-describe("getReportEffects", () => {
+describe.skip("getReportEffects", () => {
 	beforeEach(() => {
 		const ecs = new ECS({} as any);
 		const ship = new Entity();

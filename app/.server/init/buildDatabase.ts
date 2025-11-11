@@ -42,7 +42,7 @@ export async function buildDatabase(
 				entities: [],
 				serverDataModel: serverModel,
 			},
-			{ meta: { filePath: `/flights/${flightName}/data.yml` } },
+			{ meta: { filePath: `/flights/${flightName}/data.yml`, flightName } },
 		);
 
 		await flight.initEcs(serverModel);
