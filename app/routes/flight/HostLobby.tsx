@@ -1,7 +1,7 @@
 import { q, clientId } from "@thorium/context/AppContext";
 import Menubar, { useMenubar } from "@thorium/ui/Menubar";
 import { WaitingForFlight } from "./WaitingForFlight";
-import { NavLink, useNavigate } from "react-router";
+import { Link, NavLink, useNavigate } from "react-router";
 import Button from "@thorium/ui/Button";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import SearchableList from "@thorium/ui/SearchableList";
@@ -10,19 +10,37 @@ import { toast } from "@thorium/context/ToastContext";
 import { Icon } from "@thorium/ui/Icon";
 import { staticStations } from "./staticStations";
 import { LobbyHeader } from "./LobbyHeader";
+import { cn } from "@thorium/utils/cn";
 
 export function HostLobby() {
 	const [flight] = q.flight.active.useNetRequest();
+	const [client] = q.client.get.useNetRequest({ clientId });
 
 	return (
 		<>
 			<Menubar>
-				<div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur flex flex-col">
+				<div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur flex">
 					<LobbyHeader />
 					<div className="flex-1 flex flex-col pt-16">
 						{flight ? <ClientAssignment /> : <WaitingForFlight />}
 					</div>
+					{client.stationId === "Flight Director" ? (
+						<Link to="/flight/core" className="btn btn-lg btn-warning">
+							Go To Core
+						</Link>
+					) : (
+						<Link
+							to="/flight/station"
+							className={cn("btn btn-lg btn-success", {
+								"btn-disabled": !client.stationId,
+							})}
+							aria-disabled={!client.stationId}
+						>
+							Go To Station
+						</Link>
+					)}
 				</div>
+
 				<FlightButtons />
 			</Menubar>
 		</>
@@ -31,7 +49,6 @@ export function HostLobby() {
 function FlightButtons() {
 	const navigate = useNavigate();
 	const [flight] = q.flight.active.useNetRequest();
-	const [client] = q.client.get.useNetRequest({ clientId });
 	useMenubar({
 		children: flight ? (
 			<>

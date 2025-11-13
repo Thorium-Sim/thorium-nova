@@ -1,13 +1,14 @@
 import { ClientButton } from "@thorium/components/ClientButton";
-import { q, clientId } from "@thorium/context/AppContext";
+import { q } from "@thorium/context/AppContext";
 import { IPAddress } from "@thorium/routes/landing/IPAddress";
-import { cn } from "@thorium/utils/cn";
+import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
+import Button from "@thorium/ui/Button";
 import { capitalCase } from "change-case";
-import { Link } from "react-router";
 
 export function LobbyHeader() {
 	const [flight] = q.flight.active.useNetRequest();
-	const [client] = q.client.get.useNetRequest({ clientId });
+	const prompt = usePrompt();
+	const confirm = useConfirm();
 	return (
 		<div className="flex justify-between">
 			<div>
@@ -20,22 +21,38 @@ export function LobbyHeader() {
 
 				<ClientButton />
 				<IPAddress />
-			</div>
-			{client.stationId === "Flight Director" ? (
-				<Link to="/flight/core" className="btn btn-lg btn-warning">
-					Go To Core
-				</Link>
-			) : (
-				<Link
-					to="/flight/station"
-					className={cn("btn btn-lg btn-success", {
-						"btn-disabled": !client.stationId,
-					})}
-					aria-disabled={!client.stationId}
+				<h4 className="text-white font-semibold text-lg mb-1">Snapshots</h4>
+				<ul className="panel h-32 overflow-y-auto mb-1">
+					{flight?.snapshots.map((s) => (
+						<li
+							key={s}
+							className="list-group-item list-group-item-small"
+							onClick={async () => {
+								if (
+									!(await confirm({
+										header: "Are you sure you want to restore this snapshot?",
+										body: "This will overwrite the flight data with the snapshot.",
+									}))
+								)
+									return;
+								await q.flight.restoreSnapshot.netSend({ name: s });
+							}}
+						>
+							{s}
+						</li>
+					))}
+				</ul>
+				<Button
+					className="btn-success btn-sm w-full"
+					onClick={async () => {
+						const name = await prompt("What is the name of the snapshot?");
+						if (!name) return;
+						await q.flight.snapshot.netSend({ name });
+					}}
 				>
-					Go To Station
-				</Link>
-			)}
+					New Snapshot
+				</Button>
+			</div>
 		</div>
 	);
 }

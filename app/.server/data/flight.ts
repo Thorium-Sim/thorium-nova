@@ -19,7 +19,7 @@ import { initECS } from "@thorium/.server/classes/initECS";
 export const flight = t.router({
 	active: t.procedure
 		.autoPublish(["isFlight"], () => null)
-		.request(({ ctx }) => {
+		.request(async ({ ctx }) => {
 			const flight = ctx.flight;
 			if (!flight) return null;
 			const {
@@ -39,6 +39,7 @@ export const flight = t.router({
 				mode,
 				state,
 				stateReason,
+				snapshots: await flight.getSnapshots(),
 			};
 		}),
 	assets: t.procedure
@@ -152,14 +153,16 @@ export const flight = t.router({
 	snapshot: t.procedure
 		.input(z.object({ name: z.string().optional() }))
 		.meta({ action: true })
-		.send(({ ctx, input }) => {
-			ctx.flight?.write(true, input.name || new Date().toISOString());
+		.send(async ({ ctx, input }) => {
+			await ctx.flight?.write(true, input.name || new Date().toISOString());
+			pubsub.publish.flight.active();
 		}),
 	restoreSnapshot: t.procedure
 		.input(z.object({ name: z.string().optional() }))
 		.meta({ action: true })
 		.send(async ({ ctx, input }) => {
 			if (!ctx.flight) return;
+
 			const assetUrl = await ctx.flight.getAssetUrl();
 			const snapshotNames = await ctx.flight.getSnapshots();
 			let snapshotPath = "";
@@ -201,9 +204,10 @@ export const flight = t.router({
 			if (!snapshotPath) {
 				throw new Error(`No snapshot available.`);
 			}
-
-			const snapshot = loadYml(await ctx.readFile(snapshotPath));
-			if (!("id" in snapshot)) throw new Error("Invalid snapshot format.");
+			const file = await ctx.readFile(snapshotPath);
+			const snapshot = loadYml(file);
+			if (!("entities" in snapshot))
+				throw new Error("Invalid snapshot format.");
 			// Replace the properties of the flight with the snapshot properties
 			ctx.flight.paused = true;
 			ctx.flight.ecs.dispose();
