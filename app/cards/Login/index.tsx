@@ -1,12 +1,13 @@
 import { clientId, q } from "@thorium/context/AppContext";
+import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import Input from "@thorium/ui/Input";
 import { useState } from "react";
 
 const Login = () => {
+	const { ship } = useStation();
 	const [loginName, setLoginName] = useState("");
 	// TODO: Support logging in with a ThoriumSim account
-	const [ship] = q.ship.get.useNetRequest({ clientId });
 	const login = () => {
 		if (loginName.trim().length > 0) {
 			// TODO: Play a sound effect when the user logs in
@@ -16,17 +17,19 @@ const Login = () => {
 	if (!ship) throw new Error("Station is not assigned to a ship.");
 	return (
 		<div className="card-login flex flex-col items-center justify-center h-full">
-			<img
-				className="card-login-image max-h-72 mb-8"
-				draggable={false}
-				src={ship.components.isShip?.assets.logo}
-				alt={ship.components.identity?.name}
-			/>
+			{ship.assets?.logo ? (
+				<img
+					className="card-login-image max-h-72 mb-8"
+					draggable={false}
+					src={ship.assets?.logo}
+					alt={ship.name}
+				/>
+			) : null}
 			<h2 className="card-login-ship-name text-6xl font-bold mb-4">
-				{ship.components.identity?.name}
+				{ship.name}
 			</h2>
 			<h3 className="card-login-ship-registry text-4xl font-bold mb-8">
-				{ship.components.isShip?.registry}
+				{ship.registry}
 			</h3>
 			<form
 				onSubmit={(e) => {

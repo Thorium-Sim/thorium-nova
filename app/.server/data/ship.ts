@@ -10,6 +10,7 @@ import {
 } from "@thorium/utils/starmap/position";
 import { Vector3 } from "three";
 import type { DataContext } from "@thorium/.server/DataContext";
+import { destroyShip } from "@thorium/utils/.server/ship/collisionDamage";
 
 export const ship = t.router({
 	get: t.procedure
@@ -112,7 +113,10 @@ export const ship = t.router({
 			if (!ship)
 				return {
 					id: input?.playerShipId || -1,
+					name: "",
+					registry: "",
 					currentSystem: null,
+					alertLevel: "5",
 					systemPosition: {
 						parentId: null,
 						type: "interstellar",
@@ -128,10 +132,13 @@ export const ship = t.router({
 			const assets = ship.components.isShip!.assets;
 			return {
 				id: ship.id,
+				name: ship.components.identity!.name,
+				registry: ship.components.isShip!.registry,
+				alertLevel: ship.components.isShip!.alertLevel,
 				currentSystem: systemId || null,
 				systemPosition,
 				assets,
-				isDestroyed: !!ship.components.isDestroyed,
+				isDestroyed: ship.components.isDestroyed,
 			};
 		}),
 	spawn: t.procedure
@@ -244,6 +251,15 @@ export const ship = t.router({
 				systemId: shipEntity.components.position?.parentId || null,
 			});
 			return { id: shipEntity.id };
+		}),
+	destroy: t.procedure
+		.meta({ action: true })
+		.input(z.object({ shipId: z.number() }))
+		.send(({ ctx, input }) => {
+			const ship = ctx.ecs.getEntityById(input.shipId);
+			if (!ship) throw new Error("Ship not found");
+
+			destroyShip(ship);
 		}),
 });
 

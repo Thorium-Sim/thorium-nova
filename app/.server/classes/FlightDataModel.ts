@@ -1,4 +1,4 @@
-import { ECS, type Entity } from "@thorium/utils/ecs";
+import { ECS, Entity } from "@thorium/utils/ecs";
 import randomWords from "@thorium/utils/random-words";
 import type { ServerDataModel } from "./ServerDataModel";
 import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
@@ -15,7 +15,10 @@ export class FlightDataModel extends DataStore {
 	paused!: boolean;
 	hasFlightDirector!: boolean;
 	state!: "in-progress" | "success" | "failure";
+	/** Why the flight was successful or failed */
 	stateReason!: string;
+	/** How long destroyed player ships must wait before respawning. Null means no respawns. */
+	defaultRespawnTimeMs!: null | number;
 	ecs!: ECS;
 	pluginIds!: string[];
 	private entities!: Entity[];
@@ -79,7 +82,16 @@ export class FlightDataModel extends DataStore {
 		await this.#getDataPromise;
 		this.ecs = new ECS(server);
 		initECS(this.ecs, this.entities, this.mode);
-		this.run();
+		if (!this.flightEntity) {
+			const flight = new Entity();
+			flight.addComponent("isFlight", {
+				respawnTimeMs: this.defaultRespawnTimeMs,
+			});
+			this.ecs.addEntity(flight);
+		}
+		if (!this.interval) {
+			this.run();
+		}
 	}
 	async initPhysics() {
 		// Fetch and calculate all of the colliders for the ships in the plugins
@@ -130,6 +142,9 @@ export class FlightDataModel extends DataStore {
 	async getSnapshots() {
 		return DataStore.operations.getStore()!.getFlightSnapshots(this.name);
 	}
+	get flightEntity() {
+		return this.ecs.componentCache.get("isFlight")?.values().next().value;
+	}
 	/**
 	 * Ships that are available for spawning in the universe, based on the flight's plugins.
 	 */
@@ -170,6 +185,7 @@ export class FlightDataModel extends DataStore {
 			state: this.state,
 			stateReason: this.stateReason,
 			startInput: this.startInput,
+			defaultRespawnTimeMs: this.defaultRespawnTimeMs,
 		};
 		return data;
 	}

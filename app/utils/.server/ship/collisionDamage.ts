@@ -12,6 +12,7 @@ import {
 	type damageTypes as damageType,
 } from "@thorium/utils/flags/damageTypes";
 import type z from "zod";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 
 export function handleCollisionDamage(
 	entity: Entity | null,
@@ -78,6 +79,7 @@ export function handleTorpedoDamage(
 					? "small"
 					: "none";
 	torpedo.addComponent("isDestroyed", {
+		destroyedTimestamp: Date.now(),
 		timeToDestroy: explosion !== "none" ? 5000 : 0,
 		explosion,
 	});
@@ -160,26 +162,86 @@ export function applyDamage(
 		});
 		pubsub.publish.targeting.hull({ shipId: entity.id });
 		if (entity.components.hull.hull <= 0) {
-			const mass = entity.components.mass?.mass || 1;
-			const explosion =
-				mass > 1_000_000_000
-					? "large"
-					: mass > 100_000_000
-						? "medium"
-						: "small";
-
-			entity.addComponent("isDestroyed", {
-				timeToDestroy: 5000,
-				explosion,
-			});
-
-			if (entity.components.isPlayerShip) {
-				pubsub.publish.ship.player({ shipId: entity.id });
-			}
+			destroyShip(entity);
 		}
 	}
 }
 
+export function destroyShip(entity: Entity) {
+	const mass = entity.components.mass?.mass || 1;
+	const explosion =
+		mass > 1_000_000_000 ? "large" : mass > 100_000_000 ? "medium" : "small";
+
+	const flightEntity = entity.ecs.componentCache
+		.get("isFlight")
+		?.values()
+		.next().value;
+
+	entity.addComponent("isDestroyed", {
+		destroyedTimestamp: Date.now(),
+		timeToDestroy: entity.components.isPlayerShip
+			? flightEntity?.components.isFlight?.respawnTimeMs
+			: 5000,
+		explosion,
+	});
+
+	// Stop the engines
+	const impulse = getShipSystem(entity.ecs, {
+		systemType: "impulseEngines",
+		shipId: entity.id,
+	});
+	impulse?.updateComponent("isImpulseEngines", { targetSpeed: 0 });
+	const warp = getShipSystem(entity.ecs, {
+		systemType: "warpEngines",
+		shipId: entity.id,
+	});
+	warp?.updateComponent("isWarpEngines", { currentWarpFactor: 0 });
+	const thrusters = getShipSystem(entity.ecs, {
+		systemType: "thrusters",
+		shipId: entity.id,
+	});
+	thrusters?.updateComponent("isThrusters", {
+		direction: { x: 0, y: 0, z: 0 },
+		rotationDelta: { x: 0, y: 0, z: 0 },
+	});
+
+	entity.updateComponent("autopilot", {
+		destinationWaypointId: null,
+		desiredCoordinates: undefined,
+		desiredRotation: null,
+		desiredSolarSystemId: undefined,
+		path: [],
+		nextCoordinates: null,
+		rotationAutopilot: false,
+		forwardAutopilot: false,
+	});
+	pubsub.publish.pilot.impulseEngines.get({
+		shipId: entity.id,
+		systemId: impulse.id,
+	});
+	pubsub.publish.pilot.warpEngines.get({
+		shipId: entity.id,
+		systemId: warp.id,
+	});
+	pubsub.publish.pilot.autopilot.get({ shipId: entity.id });
+
+	const systemId = entity.components.position?.parentId || null;
+
+	pubsub.publish.starmapCore.autopilot({
+		systemId,
+	});
+	if (entity.components.isPlayerShip) {
+		pubsub.publish.ship.player({ shipId: entity.id });
+	}
+	if (entity.components.isTorpedo) {
+		pubsub.publish.starmapCore.torpedos({
+			systemId,
+		});
+	}
+	pubsub.publish.starmapCore.ships({
+		systemId,
+	});
+}
 export function applySystemDamage(
 	system: Entity,
 	damage: number,

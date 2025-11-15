@@ -60,3 +60,4 @@ export * from "./legacyCoolant";
 export * from "./legacySensorContact";
 export * from "./isInternalMessage";
 export * from "./isDocument";
+export * from "./isStarbase";

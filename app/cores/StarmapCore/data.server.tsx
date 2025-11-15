@@ -200,7 +200,7 @@ export const starmapCore = t.router({
 							components.position?.type === "interstellar"))
 				) {
 					if (
-						components.isDestroyed &&
+						typeof components.isDestroyed?.timeToDestroy === "number" &&
 						components.isDestroyed.timer > components.isDestroyed.timeToDestroy
 					)
 						continue;

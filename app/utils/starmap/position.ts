@@ -113,6 +113,13 @@ export function getCompletePositionFromOrbit(object: Entity) {
 		});
 		return position;
 	}
+	if (object.components.position) {
+		return new Vector3(
+			object.components.position.x,
+			object.components.position.y,
+			object.components.position.z,
+		);
+	}
 	return new Vector3();
 }
 
