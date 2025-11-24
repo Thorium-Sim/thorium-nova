@@ -1,6 +1,6 @@
-import { Box3, Euler, Object3D, Quaternion, Vector3 } from "three";
+import { Euler, Object3D, Quaternion, Vector3 } from "three";
 import { type Entity, System } from "@thorium/utils/ecs";
-import { RAPIER, getWorldPosition } from "../init/rapier";
+import { getSectorNumber, getWorldPosition, RAPIER } from "../init/rapier";
 import { KM_TO_LM, M_TO_KM } from "@thorium/utils/unitTypes";
 import {
 	generateRigidBody,
@@ -8,11 +8,12 @@ import {
 	universeToWorld,
 	worldToUniverse,
 } from "@thorium/.server/init/rapier";
-import type { RigidBody, World } from "@thorium-sim/rapier3d-node";
+import type { World } from "@thorium-sim/rapier3d-node";
 import {
 	handleCollisionDamage,
 	handleTorpedoDamage,
 } from "@thorium/utils/.server/ship/collisionDamage";
+import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 
 const tempObj = new Object3D();
 const tempVector = new Vector3();
@@ -24,6 +25,7 @@ const velocityQuaternion = new Quaternion();
 const BRAKE_CONSTANT = 0.99;
 const eventQueue = new RAPIER.EventQueue(true);
 
+const map = new Map<number, { x: number; y: number; z: number }>();
 /**
  * This system applies the physics of anything flying through space
  * So ships, asteroids, projectiles, etc.
@@ -46,13 +48,21 @@ export class PhysicsMovementSystem extends System {
 	}
 	preUpdate(): void {
 		this.collisionStepEntities.clear();
+		map.clear();
 	}
 	update(entity: Entity, elapsed: number) {
 		if (this.ecs.colliderCache.size === 0) return;
 		// Determine whether the entity is using collision or simple physics
 		// and update the position accordingly.
-		const worldEntity = getEntityWorld(this.ecs, entity);
-		const world = worldEntity?.components.physicsWorld?.world as World;
+		const world = getEntityWorld(this.ecs, entity);
+		const position =
+			entity.components.position ||
+			(entity.components.satellite && {
+				...getOrbitPosition(entity.components.satellite),
+				parentId: entity.components.satellite.parentId,
+			});
+		if (!position) return;
+
 		const handles = entity.components.physicsHandles?.handles || new Map();
 
 		// Nab some systems to use elsewhere.
@@ -87,19 +97,17 @@ export class PhysicsMovementSystem extends System {
 			tempObj.quaternion.set(x, y, z, w);
 		}
 		if (world) {
-			worldVector.set(
-				worldEntity?.components.physicsWorld?.location.x || 0,
-				worldEntity?.components.physicsWorld?.location.y || 0,
-				worldEntity?.components.physicsWorld?.location.z || 0,
-			);
+			const worldPosition = getWorldPosition(position);
+			const worldSector = getSectorNumber(position);
+			worldVector.copy(worldPosition);
 			// Make sure the entity in question has a corresponding body in the physics world.
-			const handle = handles?.get(worldEntity?.id);
+			const handle = handles?.get(worldSector);
 			const body =
 				typeof handle === "number"
 					? world.getRigidBody(handle)
 					: generateRigidBody(world, entity, this.ecs.colliderCache) || null;
 			if (typeof body?.handle === "number") {
-				handles?.set(worldEntity?.id, body.handle);
+				handles?.set(worldSector, body.handle);
 				entity.updateComponent("physicsHandles", { handles });
 			}
 
@@ -164,12 +172,14 @@ export class PhysicsMovementSystem extends System {
 				/**
 				 * Impulse Engines
 				 */
-				body.applyImpulse(
-					// I don't know why, but for some reason the impulse needs to be doubled
-					// to reach the expected speed.
-					tempObj.localToWorld(tempVector.set(0, 0, forwardImpulse * 2)),
-					true,
-				);
+				if (forwardImpulse) {
+					body.applyImpulse(
+						// I don't know why, but for some reason the impulse needs to be doubled
+						// to reach the expected speed.
+						tempObj.localToWorld(tempVector.set(0, 0, forwardImpulse * 2)),
+						true,
+					);
+				}
 
 				/**
 				 * Thrusters
@@ -184,8 +194,9 @@ export class PhysicsMovementSystem extends System {
 
 					// Set the max rotation velocity
 					const { x, y, z } = body.angvel();
+					tempVector.set(x, y, z);
 					if (
-						tempVector.set(x, y, z).lengthSq() >
+						tempVector.lengthSq() >
 						thrusters.components.isThrusters.rotationMaxSpeed
 					) {
 						tempVector.multiplyScalar(BRAKE_CONSTANT);
@@ -199,6 +210,7 @@ export class PhysicsMovementSystem extends System {
 						body.applyTorqueImpulse(tempObj.localToWorld(tempVector), true);
 					}
 				}
+				map.set(entity.id, position);
 				return;
 			}
 			// Fall back on simple physics if we can't get a physics body for the entity.
@@ -325,15 +337,7 @@ export class PhysicsMovementSystem extends System {
 	postUpdate(elapsed: number): void {
 		const elapsedSeconds = elapsed / 1000;
 		// Run the physics simulation for all of the relevant worlds.
-		this.ecs.componentCache.get("physicsWorld")?.forEach((entity) => {
-			const world = entity.components.physicsWorld?.world as World;
-			const enabled = entity.components.physicsWorld?.enabled;
-			if (!world || !enabled) return;
-			// worldVector.set(
-			// 	entity.components.physicsWorld?.location.x || 0,
-			// 	entity.components.physicsWorld?.location.y || 0,
-			// 	entity.components.physicsWorld?.location.z || 0,
-			// );
+		this.ecs.worlds.forEach((world) => {
 			try {
 				world.step(eventQueue);
 			} catch {
@@ -414,11 +418,20 @@ export class PhysicsMovementSystem extends System {
 		for (const entityId of this.collisionStepEntities) {
 			const entity = this.ecs.getEntityById(entityId);
 			if (!entity) continue;
-			const worldEntity = getEntityWorld(this.ecs, entity);
-			const world = worldEntity?.components.physicsWorld?.world as World;
+			const position =
+				entity.components.position ||
+				(entity.components.satellite && {
+					...getOrbitPosition(entity.components.satellite),
+					parentId: entity.components.satellite.parentId,
+				});
+			if (!position) continue;
+
+			const world = getEntityWorld(this.ecs, entity);
 			if (!world) continue;
+			const worldPosition = getWorldPosition(position);
+
 			const bodyHandle = entity.components.physicsHandles?.handles.get(
-				worldEntity?.id,
+				getSectorNumber(position),
 			);
 			const body = world.bodies.get(bodyHandle);
 			if (!body) continue;
@@ -427,10 +440,8 @@ export class PhysicsMovementSystem extends System {
 
 			{
 				const translation = body.translation();
-				const { x, y, z } = worldToUniverse(
-					tempVector.set(translation.x, translation.y, translation.z),
-					worldVector,
-				);
+				tempVector.set(translation.x, translation.y, translation.z);
+				const { x, y, z } = worldToUniverse(tempVector, worldPosition);
 				entity.updateComponent("position", { x, y, z });
 			}
 			{

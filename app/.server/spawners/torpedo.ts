@@ -78,7 +78,7 @@ export function spawnTorpedo(launcher: Entity) {
 		maxRange: flags?.torpedoCasing?.maxRange || 25000,
 	});
 	torpedoEntity.addComponent("mass", { mass: 1500 });
-	torpedoEntity.addComponent("physicsWorld");
+	torpedoEntity.addComponent("physicsHandles");
 	torpedoEntity.addComponent("identity", {
 		name: torpedoInventory.components.identity?.name || "Torpedo",
 	});

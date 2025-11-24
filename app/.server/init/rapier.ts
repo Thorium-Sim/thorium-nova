@@ -35,12 +35,13 @@ export function getSectorNumber(entityPosition: {
 	x: number;
 	y: number;
 	z: number;
+	parentId: number | null;
 }) {
 	// World positions snap to the center of grid segments.
 	const x = Math.floor(entityPosition.x / SECTOR_GRID_SIZE);
 	const y = Math.floor(entityPosition.y / SECTOR_GRID_SIZE);
 	const z = Math.floor(entityPosition.z / SECTOR_GRID_SIZE);
-	return [x, y, z].join(":");
+	return [entityPosition.parentId, x, y, z].join(":");
 }
 
 export function universeToWorld(objectVector: Vector3, worldVector: Vector3) {
@@ -201,62 +202,7 @@ function generateShipRigidBody(
 	return { collider, body: rigidBody, world };
 }
 
-export function getEntitiesInWorld(
-	ecs: ECS,
-	position: Vector3,
-	parentId: number | null,
-) {
-	const worldPosition = { ...getWorldPosition(position), parentId };
-	// Get all entities within the cube defined by the world position +/- the collision limit.
-	let entities: Entity[] = [];
-	ecs.componentCache.get("position")?.forEach((entity) => {
-		if (entityInWorld(entity, worldPosition)) {
-			entities.push(entity);
-		}
-	});
-	ecs.componentCache.get("satellite")?.forEach((entity) => {
-		if (entityInWorld(entity, worldPosition)) {
-			entities.push(entity);
-		}
-	});
-	entities = entities.filter(
-		(a, i, arr) => arr.findIndex((b) => b.id === a.id) === i,
-	);
-	return entities;
-}
-
-export function entityInWorld(
-	entity: Entity,
-	worldPosition: { x: number; y: number; z: number; parentId: number | null },
-) {
-	let position: {
-		x: number;
-		y: number;
-		z: number;
-		parentId: number | null;
-	} | null = null;
-	if (
-		entity.components.position &&
-		entity.components.position.type !== "ship"
-	) {
-		position = entity.components.position;
-	} else if (entity.components.satellite) {
-		const orbitPosition = getOrbitPosition(entity.components.satellite);
-		position = {
-			...orbitPosition,
-			parentId: entity.components.satellite.parentId,
-		};
-	}
-	if (!position) return false;
-	return (
-		position.x > worldPosition.x - COLLISION_PHYSICS_LIMIT &&
-		position.x < worldPosition.x + COLLISION_PHYSICS_LIMIT &&
-		position.y > worldPosition.y - COLLISION_PHYSICS_LIMIT &&
-		position.y < worldPosition.y + COLLISION_PHYSICS_LIMIT &&
-		position.z > worldPosition.z - COLLISION_PHYSICS_LIMIT &&
-		position.z < worldPosition.z + COLLISION_PHYSICS_LIMIT
-	);
-}
+const previousPosition = new Map<number, { x: number; y: number; z: number }>();
 
 /** Returns the world that contains this entity */
 export function getEntityWorld(ecs: ECS, entity: Entity) {
@@ -268,21 +214,18 @@ export function getEntityWorld(ecs: ECS, entity: Entity) {
 		});
 	if (typeof position?.parentId !== "number") return null;
 	const entitySector = getSectorNumber(position);
-	for (const worldEntity of ecs.componentCache.get("physicsWorld") || []) {
-		let {
-			location,
-			world: physicsWorld,
-			enabled,
-		} = worldEntity.components.physicsWorld || {};
-		if (!physicsWorld) {
-			worldEntity.updateComponent("physicsWorld", {
-				world: new RAPIER.World({ x: 0, y: 0, z: 0 }),
-			});
-			physicsWorld = entity.components.physicsWorld?.world;
+	const prev = previousPosition.get(entity.id);
+	if (prev) {
+		if (Math.abs(prev.x - position.x) > 100) {
+			console.log(entity.id, "X", Math.abs(prev.x - position.x));
 		}
-		if (!location || !enabled) continue;
-		const key = getSectorNumber(location);
-		if (key === entitySector) return worldEntity;
+		if (Math.abs(prev.y - position.y) > 100) {
+			console.log(entity.id, "Y", Math.abs(prev.y - position.y));
+		}
+		if (Math.abs(prev.z - position.z) > 100) {
+			console.log(entity.id, "Z", Math.abs(prev.z - position.z));
+		}
 	}
-	return null;
+	previousPosition.set(entity.id, JSON.parse(JSON.stringify(position)));
+	return ecs.getWorld(entitySector);
 }

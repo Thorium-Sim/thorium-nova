@@ -23,7 +23,6 @@ import { WarpSystem } from "./WarpSystem";
 import { ImpulseSystem } from "./ImpulseSystem";
 import { ThrusterSystem } from "./ThrusterSystem";
 import { PhysicsMovementSystem } from "./PhysicsMovementSystem";
-import { PhysicsWorldPositionSystem } from "./PhysicsWorldPositionSystem";
 import { NearbyObjectsSystem } from "./NearbyObjectsSystem";
 import { TorpedoLoadingSystem } from "./TorpedoLoadingSystem";
 import { TorpedoMovementSystem } from "./TorpedoMovementSystem";
@@ -67,7 +66,6 @@ const systems = [
 	WarpSystem,
 	PhasersSystem,
 	TorpedoMovementSystem,
-	PhysicsWorldPositionSystem,
 	PhysicsMovementSystem,
 	SensorScanSystem,
 	MainComputerDiagnosticSystem,

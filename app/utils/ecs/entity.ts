@@ -109,9 +109,6 @@ class Entity {
 							{ ...comp, shipSystems: Array.from(comp.shipSystems.entries()) },
 						];
 					}
-					if (comp && "world" in comp && key === "physicsWorld") {
-						return [key, { ...comp, world: null }];
-					}
 					if (key === "physicsHandles") {
 						return [key, { handles: new Map() }];
 					}

@@ -6,9 +6,10 @@ import type Entity from "./entity";
 import type System from "./system";
 import performance from "./performance";
 import { type RNG, createRNG } from "@thorium/utils/rng";
-import type { ColliderDesc } from "@thorium-sim/rapier3d-node";
+import type { ColliderDesc, World } from "@thorium-sim/rapier3d-node";
 import type { ComponentIds } from "@thorium/ecs-components";
 import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
+import RAPIER from "@thorium-sim/rapier3d-node";
 
 class ECS {
 	/**
@@ -34,6 +35,8 @@ class ECS {
 	colliderCache = new Map<string, ColliderDesc>();
 	shipSystemCache = new Map<string, Entity | Entity[]>();
 	changeBatch = new Set<`${number}-${ComponentIds}`>();
+	// The key is the sector number based on the location of this physics world
+	worlds = new Map<string, World>();
 
 	constructor(
 		public server: ServerDataModel,
@@ -185,6 +188,12 @@ class ECS {
 		this.componentCache.clear();
 		this.shipSystemCache.clear();
 		this.changeBatch.clear();
+	}
+	getWorld(key: string) {
+		if (!this.worlds.has(key)) {
+			this.worlds.set(key, new RAPIER.World({ x: 0, y: 0, z: 0 }));
+		}
+		return this.worlds.get(key)!;
 	}
 }
 

@@ -38,7 +38,6 @@ export * from "./remoteAccessCode";
 export * from "./isTrigger";
 export * from "./isTimeline";
 export * from "./physicsHandles";
-export * from "./physicsWorld";
 export * from "./nearbyObjects";
 export * from "./isTorpedo";
 export * from "./hull";

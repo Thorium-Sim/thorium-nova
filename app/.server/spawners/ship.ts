@@ -338,7 +338,7 @@ export async function spawnShip(
 	// Now we can add the ship to the ECS
 	if (params.playerShip) {
 		entity.addComponent("isPlayerShip");
-		entity.addComponent("physicsWorld");
+		entity.addComponent("physicsHandles");
 		entity.addComponent("tweaks");
 	} else {
 		entity.addComponent("shipBehavior", {
