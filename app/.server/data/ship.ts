@@ -3,7 +3,7 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import { spawnShip } from "@thorium/.server/spawners/ship";
 import { z } from "zod";
 import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
-import type { Entity } from "@thorium/utils/ecs";
+import type { ECS, Entity } from "@thorium/utils/ecs";
 import {
 	getCompletePositionFromOrbit,
 	getObjectSystem,
@@ -205,39 +205,7 @@ export const ship = t.router({
 				},
 			);
 
-			// Set the position of the ship
-			let position = { x: 0, y: 0, z: 0 };
-			let systemId: number | null = null;
-			let object: Entity | null = null;
-			if ("entityId" in input) {
-				// This ship is being attached to a specific object in space.
-				object = ctx.ecs.getEntityById(input.entityId || -1);
-				if (!object) throw new Error("No object found.");
-				position = getNearbyEntityPoint(object);
-				const sys = getObjectSystem(object);
-				systemId = sys?.id ?? null;
-				if (sys?.id === object.id) systemId = null;
-			} else if ("position" in input && input.position) {
-				// This ship is just being plopped at some random point in space.
-				position = input.position;
-				const parentId = input.position.parentId;
-				if (parentId && typeof parentId === "object") {
-					// This ship is probably defined in a timeline action, so we need
-					// to find which system matches the name.
-					const solarSystems =
-						ctx.flight.ecs.componentCache.get("isSolarSystem") || [];
-					for (const entity of solarSystems) {
-						if (entity.components.identity?.name === parentId.name) {
-							systemId = entity.id;
-							break;
-						}
-					}
-				} else {
-					systemId = parentId;
-				}
-			} else {
-				throw new Error("Either position or entityId are required");
-			}
+			const { position, systemId } = getPosition(ctx.ecs, input);
 			shipEntity.updateComponent("position", {
 				...position,
 				parentId: systemId,
@@ -252,6 +220,54 @@ export const ship = t.router({
 			});
 			return { id: shipEntity.id };
 		}),
+	move: t.procedure
+		.meta({
+			action: () => ({
+				position: {
+					name: "Position",
+					type: "starmapCoordinates",
+					helper:
+						"A specific point in space to place the ship. Use as an alternative to Nearby Entity.",
+				},
+				entityId: {
+					name: "Nearby Entity",
+					helper:
+						"Place the ship nearby this entity. This option is preferred.",
+				},
+			}),
+		})
+		.input(
+			z.object({
+				shipId: z.number(),
+				entityId: z.number().optional(),
+				position: z
+					.object({
+						parentId: z
+							.union([
+								z.number(),
+								z.object({ name: z.string(), pluginId: z.string() }),
+							])
+							.nullable(),
+						x: z.number(),
+						y: z.number(),
+						z: z.number(),
+					})
+					.optional(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const entity = ctx.ecs.getEntityById(input.shipId);
+			if (!entity) return;
+
+			const { position, systemId } = getPosition(ctx.ecs, input);
+			entity.updateComponent("position", {
+				...position,
+				parentId: systemId,
+				type: systemId === null ? "interstellar" : "solar",
+			});
+			pubsub.publish.ship.player({ shipId: entity.id });
+			pubsub.publish.ship.players();
+		}),
 	destroy: t.procedure
 		.meta({ action: true })
 		.input(z.object({ shipId: z.number() }))
@@ -263,6 +279,62 @@ export const ship = t.router({
 		}),
 });
 
+function getPosition(
+	ecs: ECS,
+	input:
+		| { entityId: number }
+		| {
+				position?:
+					| {
+							parentId:
+								| number
+								| {
+										name: string;
+										pluginId: string;
+								  }
+								| null;
+							x: number;
+							y: number;
+							z: number;
+					  }
+					| undefined;
+		  },
+) {
+	// Set the position of the ship
+	let position = { x: 0, y: 0, z: 0 };
+	let systemId: number | null = null;
+	let object: Entity | null = null;
+	if ("entityId" in input) {
+		// This ship is being attached to a specific object in space.
+		object = ecs.getEntityById(input.entityId || -1);
+		if (!object) throw new Error("No object found.");
+		position = getNearbyEntityPoint(object);
+		const sys = getObjectSystem(object);
+		systemId = sys?.id ?? null;
+		if (sys?.id === object.id) systemId = null;
+	} else if ("position" in input && input.position) {
+		// This ship is just being plopped at some random point in space.
+		position = input.position;
+		const parentId = input.position.parentId;
+		if (parentId && typeof parentId === "object") {
+			// This ship is probably defined in a timeline action, so we need
+			// to find which system matches the name.
+			const solarSystems = ecs.componentCache.get("isSolarSystem") || [];
+			for (const entity of solarSystems) {
+				if (entity.components.identity?.name === parentId.name) {
+					systemId = entity.id;
+					break;
+				}
+			}
+		} else {
+			systemId = parentId;
+		}
+	} else {
+		throw new Error("Either position or entityId are required");
+	}
+
+	return { position, systemId };
+}
 const objectPosition = new Vector3();
 function getNearbyEntityPoint(objectEntity: Entity) {
 	if (objectEntity.components.position) {
