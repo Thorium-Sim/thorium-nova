@@ -33,8 +33,6 @@ export async function executeBlocks(
 		callReturnBlocks?: TimelineBlock[];
 	} = {},
 ) {
-	const rng = ecs.rng;
-
 	for (const block of blocks) {
 		switch (block.type) {
 			case "Wait": {
@@ -88,7 +86,7 @@ export async function executeBlocks(
 				let response = true;
 
 				for (const condition of block.conditions) {
-					if (!evaluateCondition(condition, localVariables, rng)) {
+					if (!evaluateCondition(condition, localVariables, ecs)) {
 						response = false;
 						break;
 					}
@@ -286,9 +284,9 @@ export async function executeBlocks(
 						: {}),
 					...Object.fromEntries(
 						Object.entries(block.values).map(([key, value]) => {
-							let val = getValueReference(value, localVariables, rng);
+							let val = getValueReference(value, localVariables, ecs);
 							// Special handling for certain keys we know are entity id references
-							if (key === "shipId") {
+							if (key === "shipId" || key === "entityId") {
 								val = Number(val);
 							} else if (typeof val === "string") {
 								// Other values get interpolated automatically
@@ -299,15 +297,16 @@ export async function executeBlocks(
 						}),
 					),
 				};
+				console.log(block.action, block.values, values);
 				theResult = await triggerAction(block.action, values);
 				break;
 			}
 			case "RandomIntoVariable": {
 				const number1 = Number(
-					getValueReference(block.number1, localVariables, rng),
+					getValueReference(block.number1, localVariables, ecs),
 				);
 				const number2 = Number(
-					getValueReference(block.number2, localVariables, rng),
+					getValueReference(block.number2, localVariables, ecs),
 				);
 				const min = number1 < number2 ? number1 : number2;
 				const max = number1 < number2 ? number2 : number1;
@@ -322,10 +321,10 @@ export async function executeBlocks(
 			}
 			case "MathIntoVariable": {
 				const num1 = Number(
-					getValueReference(block.number1, localVariables, rng),
+					getValueReference(block.number1, localVariables, ecs),
 				);
 				const num2 = Number(
-					getValueReference(block.number2, localVariables, rng),
+					getValueReference(block.number2, localVariables, ecs),
 				);
 				switch (block.operation) {
 					case "+":
@@ -399,10 +398,10 @@ function evaluateCondition(
 		comparison: string;
 	},
 	localVariables: Record<string, any>,
-	rng: RNG,
+	ecs: ECS,
 ) {
-	const val1 = getValueReference(condition.value1, localVariables, rng);
-	const val2 = getValueReference(condition.value2, localVariables, rng);
+	const val1 = getValueReference(condition.value1, localVariables, ecs);
+	const val2 = getValueReference(condition.value2, localVariables, ecs);
 
 	switch (condition.comparison) {
 		case "=": {
@@ -437,14 +436,42 @@ function evaluateCondition(
 function getValueReference(
 	ref: string,
 	variables: Record<string, any>,
-	rng: RNG,
+	ecs: ECS,
 ): any {
-	if (typeof ref === "string" && ref.startsWith("$")) {
-		return getValueReference(variables[ref.replace("$", "")], variables, rng);
-	}
 	if (typeof ref === "string") {
-		return interpolateText(ref, variables, rng);
+		// Local variables
+		if (ref.startsWith("$")) {
+			return getValueReference(variables[ref.replace("$", "")], variables, ecs);
+		}
+
+		// Entity Tags
+		if (ref.startsWith("#") && !ref.includes(" ")) {
+			if (ref === "#playerShip") {
+				const playerShips = ecs.componentCache.get("isPlayerShip");
+				const shipId = playerShips?.values().next().value?.id;
+				if (shipId) return shipId;
+			}
+			const taggedEntities = ecs.componentCache.get("tags");
+			const tag = ref.replace("#", "").trim();
+			for (const entity of taggedEntities || []) {
+				if (entity.components.tags?.tags.includes(tag)) {
+					return entity.id;
+				}
+			}
+		}
+
+		// Entity Names
+		const namedEntities = ecs.componentCache.get("identity");
+		const name = ref.trim();
+		for (const entity of namedEntities || []) {
+			if (entity.components.identity?.name === name) {
+				return entity.id;
+			}
+		}
+
+		return interpolateText(ref, variables, ecs.rng);
 	}
+
 	return ref;
 }
 function getEntityReference(
