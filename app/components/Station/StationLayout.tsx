@@ -9,6 +9,7 @@ import { cn } from "@thorium/utils/cn";
 import { useStation } from "@thorium/routes/station/useStation";
 import { useRef } from "react";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import Button from "@thorium/ui/Button";
 
 const StationLayout = () => {
 	const { client, station, ship } = useStation();
@@ -114,7 +115,9 @@ function FlightStatus() {
 				"absolute z-[500] inset-0 bg-black/50 backdrop-blur transition-all opacity-0 pointer-events-none flex items-center justify-center",
 				{
 					"opacity-100 pointer-events-auto":
-						flight?.state !== "in-progress" || ship.isDestroyed,
+						flight?.state !== "in-progress" ||
+						ship.isDestroyed ||
+						flight.paused,
 				},
 			)}
 		>
@@ -144,6 +147,16 @@ function FlightStatus() {
 					) : (
 						<p className="text-4xl">Game Over</p>
 					)}
+				</div>
+			) : flight.paused ? (
+				<div className="panel p-6 text-center panel-alert">
+					<p className="text-6xl mb-4">Flight Paused</p>
+					<Button
+						className="btn-alert"
+						onClick={() => q.flight.resume.netSend()}
+					>
+						Resume Flight
+					</Button>
 				</div>
 			) : null}
 		</div>

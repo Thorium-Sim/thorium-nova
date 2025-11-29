@@ -202,8 +202,6 @@ function generateShipRigidBody(
 	return { collider, body: rigidBody, world };
 }
 
-const previousPosition = new Map<number, { x: number; y: number; z: number }>();
-
 /** Returns the world that contains this entity */
 export function getEntityWorld(ecs: ECS, entity: Entity) {
 	const position =
@@ -214,18 +212,6 @@ export function getEntityWorld(ecs: ECS, entity: Entity) {
 		});
 	if (typeof position?.parentId !== "number") return null;
 	const entitySector = getSectorNumber(position);
-	const prev = previousPosition.get(entity.id);
-	if (prev) {
-		if (Math.abs(prev.x - position.x) > 100) {
-			console.log(entity.id, "X", Math.abs(prev.x - position.x));
-		}
-		if (Math.abs(prev.y - position.y) > 100) {
-			console.log(entity.id, "Y", Math.abs(prev.y - position.y));
-		}
-		if (Math.abs(prev.z - position.z) > 100) {
-			console.log(entity.id, "Z", Math.abs(prev.z - position.z));
-		}
-	}
-	previousPosition.set(entity.id, JSON.parse(JSON.stringify(position)));
+
 	return ecs.getWorld(entitySector);
 }

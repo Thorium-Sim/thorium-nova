@@ -134,7 +134,7 @@ export const flight = t.router({
 			pubsub.publish.flight.all();
 			return null;
 		}),
-	pause: t.procedure.send(({ ctx }) => {
+	pause: t.procedure.meta({ action: true }).send(({ ctx }) => {
 		if (ctx.flight) {
 			ctx.flight.paused = true;
 			pubsub.publish.flight.active();

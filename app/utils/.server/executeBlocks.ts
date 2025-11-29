@@ -297,7 +297,6 @@ export async function executeBlocks(
 						}),
 					),
 				};
-				console.log(block.action, block.values, values);
 				theResult = await triggerAction(block.action, values);
 				break;
 			}

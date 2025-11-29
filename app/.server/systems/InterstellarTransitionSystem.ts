@@ -83,7 +83,6 @@ export class InterstellarTransitionSystem extends System {
 			if (maxDistance - entityDistance < 0 && system.components.position) {
 				// Transition time!
 				const { x, y, z } = system.components.position;
-				console.log("UPDATING POSITION");
 				entity.updateComponent("position", {
 					x,
 					y,
@@ -176,7 +175,6 @@ export class InterstellarTransitionSystem extends System {
 					.subVectors(shipPosition, systemPosition)
 					.normalize()
 					.multiplyScalar(maxDistance);
-				console.log("UPDATING POSITION");
 				entity.updateComponent("position", {
 					x: direction.x,
 					y: direction.y,
