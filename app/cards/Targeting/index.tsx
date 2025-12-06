@@ -39,7 +39,7 @@ export function Targeting({ cardLoaded }: CardProps) {
 			<div className="grid grid-cols-4 grid-rows-1 h-full place-content-center gap-4">
 				{/* Padding is protection from the bottom of the card container */}
 				<div className="flex flex-col justify-between pb-4">
-					<Shields cardLoaded={cardLoaded} />
+					<Shields />
 					<div>Hull: {hull}</div>
 					<Phasers />
 				</div>

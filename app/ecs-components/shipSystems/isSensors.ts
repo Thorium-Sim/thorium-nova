@@ -21,5 +21,6 @@ export const isSensors = z
 			])
 			.default([])
 			.transform((val) => (val instanceof Map ? val : new Map(val))),
+		selectedContact: z.number().nullable().default(null),
 	})
 	.default({});

@@ -33,6 +33,7 @@ export const sensors = t.router({
 				id: sensors.id,
 				passiveRange: sensors.components.isSensors?.passiveRange || 10_000,
 				activeRange: sensors.components.isSensors?.activeRange || 100_000,
+				selectedContact: sensors.components.isSensors?.selectedContact || null,
 			};
 		}),
 	scanResult: t.procedure
@@ -130,6 +131,21 @@ export const sensors = t.router({
 			if (shipId) {
 				pubsub.publish.sensors.scans({ shipId });
 			}
+		}),
+	selectContact: t.procedure
+		.input(z.object({ shipId: z.number(), contactId: z.number().nullable() }))
+		.send(({ ctx, input }) => {
+			const sensors = getShipSystem(ctx.ecs, {
+				systemType: "sensors",
+				shipId: input.shipId,
+			});
+			sensors.updateComponent("isSensors", {
+				selectedContact: input.contactId,
+			});
+			pubsub.publish.sensors.get({
+				shipId: input.shipId,
+				systemId: sensors.id,
+			});
 		}),
 	// scanRepeat: t.procedure,
 	stream: t.procedure

@@ -1,10 +1,11 @@
-import { clientId, q } from "@thorium/context/AppContext";
+import { q } from "@thorium/context/AppContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import Button from "@thorium/ui/Button";
 import chroma from "chroma-js";
 import { useRef } from "react";
 import { useStation } from "@thorium/routes/station/useStation";
+import { useCardContext } from "@thorium/context/CardContext";
 
 const shieldColors = [
 	"oklch(10.86% 0.045 29.25)", // Black
@@ -64,7 +65,43 @@ const shieldStyle = (
 	return output.join(",");
 };
 
-export function Shields({ cardLoaded }: { cardLoaded: boolean }) {
+export function Shields() {
+	const { shipId, ship } = useStation();
+	const [shields] = q.targeting.shields.get.useNetRequest({ shipId });
+
+	if (!ship) return null;
+	if (shields.length === 0) return null;
+	return (
+		<div>
+			<div className="flex w-full gap-8 mb-4">
+				<ShieldView />
+			</div>
+			{shields[0].state === "down" ? (
+				<Button
+					className="btn-primary btn-sm w-full"
+					onClick={() => {
+						q.targeting.shields.setState.netSend({ shipId, state: "up" });
+					}}
+				>
+					Raise Shields
+				</Button>
+			) : (
+				<Button
+					className="btn-warning btn-sm w-full"
+					onClick={() => {
+						q.targeting.shields.setState.netSend({ shipId, state: "down" });
+					}}
+				>
+					Lower Shields
+				</Button>
+			)}
+		</div>
+	);
+}
+
+export function ShieldView() {
+	const { cardLoaded } = useCardContext();
+
 	const { shipId, ship } = useStation();
 	const [shields] = q.targeting.shields.get.useNetRequest({ shipId });
 
@@ -91,47 +128,25 @@ export function Shields({ cardLoaded }: { cardLoaded: boolean }) {
 			shieldStyle(shieldItems, true),
 		);
 	}, cardLoaded);
-	if (!ship) return null;
-	if (shields.length === 0) return null;
+
 	return (
-		<div>
-			<div className="flex w-full gap-8 mb-4">
-				<div
-					ref={topViewRef}
-					className="flex-1 aspect-square rounded-full p-4"
-					style={{ boxShadow: shieldStyle(shields) }}
-				>
-					<img src={ship.assets?.topView} alt="Top" />
-				</div>
-				{shields.length === 6 ? (
-					<div
-						ref={sideViewRef}
-						className="flex-1 aspect-square rounded-full p-4"
-						style={{ boxShadow: shieldStyle(shields, true) }}
-					>
-						<img src={ship.assets?.sideView} alt="Side" />
-					</div>
-				) : null}
+		<>
+			<div
+				ref={topViewRef}
+				className="flex-1 aspect-square rounded-full p-4"
+				style={{ boxShadow: shieldStyle(shields) }}
+			>
+				<img src={ship.assets?.topView} alt="Top" />
 			</div>
-			{shields[0].state === "down" ? (
-				<Button
-					className="btn-primary btn-sm w-full"
-					onClick={() => {
-						q.targeting.shields.setState.netSend({ shipId, state: "up" });
-					}}
+			{shields.length === 6 ? (
+				<div
+					ref={sideViewRef}
+					className="flex-1 aspect-square rounded-full p-4"
+					style={{ boxShadow: shieldStyle(shields, true) }}
 				>
-					Raise Shields
-				</Button>
-			) : (
-				<Button
-					className="btn-warning btn-sm w-full"
-					onClick={() => {
-						q.targeting.shields.setState.netSend({ shipId, state: "down" });
-					}}
-				>
-					Lower Shields
-				</Button>
-			)}
-		</div>
+					<img src={ship.assets?.sideView} alt="Side" />
+				</div>
+			) : null}
+		</>
 	);
 }

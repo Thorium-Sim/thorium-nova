@@ -18,7 +18,7 @@ import { useCardContext } from "@thorium/context/CardContext";
 import { cn } from "@thorium/utils/cn";
 
 const C_IN_METERS = 299792458;
-function formatSpeed(speed: KilometerPerSecond) {
+export function formatSpeed(speed: KilometerPerSecond) {
 	if (Math.abs(speed) > C_IN_METERS / 1000 / 2) {
 		return `${(speed / (C_IN_METERS / 1000)).toLocaleString(undefined, {
 			minimumFractionDigits: 1,

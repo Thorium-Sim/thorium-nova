@@ -48,10 +48,10 @@ import { useCardContext } from "@thorium/context/CardContext";
  */
 export function Sensors({ cardLoaded }: CardProps) {
 	const { shipId } = useStation();
-	const [{ activeRange, passiveRange }] = q.sensors.get.useNetRequest({
-		shipId,
-	});
-	const [selected, setSelected] = useState<number | null>(null);
+	const [{ activeRange, passiveRange, selectedContact }] =
+		q.sensors.get.useNetRequest({
+			shipId,
+		});
 	const [occludedContacts, setOccludedContacts] = useState<number[]>([]);
 	const clickRef = useRef(false);
 
@@ -61,8 +61,7 @@ export function Sensors({ cardLoaded }: CardProps) {
 				<div className="flex flex-col justify-between">
 					<Suspense>
 						<SensorsShipList
-							selectedId={selected}
-							setSelected={setSelected}
+							selectedId={selectedContact}
 							occludedContacts={occludedContacts}
 						/>
 					</Suspense>
@@ -80,7 +79,7 @@ export function Sensors({ cardLoaded }: CardProps) {
 									clickRef.current = false;
 									return;
 								}
-								setSelected(null);
+								q.sensors.selectContact.netSend({ shipId, contactId: null });
 							}}
 						>
 							<CircleGrid
@@ -93,18 +92,27 @@ export function Sensors({ cardLoaded }: CardProps) {
 								}
 							>
 								<CircleGridContacts
-									selectedContactId={selected}
+									selectedContactId={selectedContact}
 									onContactClick={(contact) => {
 										clickRef.current = true;
-										setSelected(contact);
+										q.sensors.selectContact.netSend({
+											shipId,
+											contactId: contact,
+										});
 									}}
 									onPlanetClick={(contact) => {
 										clickRef.current = true;
-										setSelected(contact);
+										q.sensors.selectContact.netSend({
+											shipId,
+											contactId: contact,
+										});
 									}}
 									onContactOcclusion={(contact, occluded) => {
-										if (selected === contact) {
-											setSelected(null);
+										if (selectedContact === contact) {
+											q.sensors.selectContact.netSend({
+												shipId,
+												contactId: null,
+											});
 										}
 										setOccludedContacts((contacts) => {
 											if (occluded) {
@@ -204,7 +212,7 @@ function Scan({
 				<div className="flex gap-2 items-center">
 					<progress
 						ref={progressRef}
-						className="progress progress-info"
+						className="progress progress-info flex-auto"
 						value={0}
 						max={1}
 					/>
@@ -225,11 +233,9 @@ function Scan({
 }
 function SensorsShipList({
 	selectedId,
-	setSelected,
 	occludedContacts,
 }: {
 	selectedId: number | null;
-	setSelected: (id: number | null) => void;
 	occludedContacts: number[];
 }) {
 	const { shipId } = useStation();
@@ -281,7 +287,10 @@ function SensorsShipList({
 			className="panel panel-alert divide-y divide-white/50 overflow-y-auto"
 			expandedKeys={selectedId ? [selectedId] : []}
 			onExpandedChange={(keys) =>
-				setSelected(Number(keys.values().next().value) || null)
+				q.sensors.selectContact.netSend({
+					shipId,
+					contactId: Number(keys.values().next().value) || null,
+				})
 			}
 		>
 			{scannableObjects.map((object) =>

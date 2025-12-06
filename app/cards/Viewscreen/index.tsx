@@ -14,6 +14,7 @@ import { Fuzz } from "./Fuzz";
 import { WarpStars } from "./WarpStars";
 import { CircleGridStoreProvider } from "@thorium/cards/Pilot/useCircleGridStore";
 import { useStation } from "@thorium/routes/station/useStation";
+import { Gizmos } from "./gizmos";
 
 const forwardQuaternion = new Quaternion(0, 1, 0, 0);
 
@@ -66,16 +67,6 @@ export function Viewscreen() {
 					<ViewscreenEffects onDone={() => setInitialized(true)} />
 					{initialized ? (
 						<>
-							<pointLight
-								intensity={0.2}
-								decay={2}
-								position={[10000000, 10000000, 1000000]}
-							/>
-							<pointLight
-								intensity={0.1}
-								decay={2}
-								position={[-10000000, -10000000, -1000000]}
-							/>
 							<ambientLight intensity={0.5} />
 							<Suspense fallback={null}>
 								<Fuzz />
@@ -95,6 +86,7 @@ export function Viewscreen() {
 					) : null}
 				</StarmapCanvas>
 			</CircleGridStoreProvider>
+			<Gizmos />
 		</div>
 	);
 }
