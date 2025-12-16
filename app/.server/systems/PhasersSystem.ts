@@ -15,7 +15,6 @@ export class PhasersSystem extends System {
 		const elapsedHours = elapsed / 1000 / 3600;
 		const phasers = entity.components.isPhasers;
 		if (!phasers) return;
-
 		// Phaser damage is calculated based on the power output and efficiency
 		//  of the phaser system
 		const power = entity.components.power;
@@ -35,7 +34,8 @@ export class PhasersSystem extends System {
 			// Stop any phaser sounds
 			cancelLoopingSound(entity, "fire");
 		}
-		const phaserDamage = power.currentPower * efficiency * elapsedHours;
+		const phaserDamage =
+			power.currentPower * efficiency * elapsedHours * phasers.yieldMultiplier;
 		if (phaserDamage === 0) return;
 		if (!phaserShip) return;
 		const target = getCurrentTarget(phaserShip);

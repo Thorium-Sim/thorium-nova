@@ -1225,6 +1225,7 @@ input[type="range"].slider.zoom:focus::-webkit-slider-runnable-track {
 	}
 }
 
+
 body.drag-active * {
 	user-select: none;
 	cursor: grabbing;

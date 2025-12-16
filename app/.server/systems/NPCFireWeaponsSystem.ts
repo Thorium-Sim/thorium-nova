@@ -146,7 +146,8 @@ export class NPCFireWeaponsSystem extends System {
 				this.ecs.addEntity(torpedo);
 
 				// NPCs have a static torpedo reload time multiplier so they don't fire too often
-				const powerMultiplier = 5;
+				// Increase this number to fire less often
+				const powerMultiplier = 10;
 
 				launcher.updateComponent("isTorpedoLauncher", {
 					status: "firing",
