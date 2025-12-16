@@ -1,4 +1,4 @@
-import { Objective } from "@thorium/cards/Objectives";
+import { Objective } from "@thorium/cards/Objectives/Objective";
 import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import { cn } from "@thorium/utils/cn";

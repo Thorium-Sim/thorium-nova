@@ -211,7 +211,7 @@ function ShipConfig({
 					}
 				/>
 				<div>
-					<p className="text-nowrap">Crew Count</p>
+					<p className="text-nowrap">Station Count</p>
 					<div className="flex justify-around items-center select-none">
 						<button
 							className="text-2xl cursor-pointer hover:text-white/80 active:text-white/50 focus:outline-none focus:ring rounded-full appearance-none"
