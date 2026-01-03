@@ -253,18 +253,17 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 	return (
 		<div className="select-none flex-1">
 			<div>
-				<div className="flex flex-col gap-1">
+				<div className="flex flex-col gap-1 forward-velocity">
 					<ForwardVelocity />
 				</div>
 				{/* TODO: Include heat indicator here eventually. */}
 
 				<div className="flex mt-2">
 					<div className="flex-1">
-						<p className="text-xl">Impulse Speed:</p>
 						<div className="flex">
-							<div className="flex flex-1 justify-around flex-col-reverse text-right gap-1">
+							<div className="flex flex-1 justify-around flex-col-reverse text-right gap-1 impulse-speeds">
 								<Button
-									className="btn-notice w-full"
+									className="btn-notice w-full full-stop"
 									onClick={() => callback.current(0)}
 								>
 									Full Stop
@@ -291,7 +290,7 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 							<div className="w-1" />
 							<div
 								ref={ref}
-								className="relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end"
+								className="relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end impulse-bar"
 							>
 								<a.div
 									{...bind()}
@@ -307,9 +306,12 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 					<div className="w-1" />
 					<div className="flex-1">
 						<div
-							className={cn("grid h-full max-h-56 gap-1 flex-wrap", {
-								"grid-cols-2": warpSpeeds.length > 5,
-							})}
+							className={cn(
+								"grid h-full max-h-56 gap-1 flex-wrap warp-speeds",
+								{
+									"grid-cols-2": warpSpeeds.length > 6,
+								},
+							)}
 						>
 							{warpSpeeds.map(({ label }, i, arr) => {
 								const warpFactor = arr.length - i;

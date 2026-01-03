@@ -74,6 +74,7 @@ export function useGetFacingWaypoint() {
 
 	const [waypoints] = q.waypoints.all.useNetRequest({
 		systemId: "all",
+		active: true,
 		shipId: id,
 	});
 	// This needs some work

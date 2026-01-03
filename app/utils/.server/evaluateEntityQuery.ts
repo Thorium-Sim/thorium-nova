@@ -5,11 +5,7 @@ import type {
 	ValueQuery,
 } from "@thorium/.server/classes/Plugins/TimelineStep";
 import type { ECS, Entity } from "../ecs";
-import type {
-	actionItem,
-	actionSchema,
-	conditionSchema,
-} from "../flags/actionSchema";
+import type { actionItem, conditionSchema } from "../flags/actionSchema";
 import { getNavigationDistance } from "../starmap/getNavigationDistance";
 import { lightMinuteToKilometer, lightYearToLightMinute } from "../unitTypes";
 import { DataContext } from "../../.server/DataContext";
@@ -141,6 +137,15 @@ function evaluateComponentQuery(
 			}
 		} else if (componentQuery.comparison === "<=") {
 			if (property <= value) {
+				return true;
+			}
+		} else if (componentQuery.comparison === "is empty") {
+			if (!property || (Array.isArray(property) && property.length === 0)) {
+				return true;
+			}
+		} else if (componentQuery.comparison === "is not empty") {
+			if (!property || (Array.isArray(property) && property.length === 0)) {
+			} else {
 				return true;
 			}
 		}

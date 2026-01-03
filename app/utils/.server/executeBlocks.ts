@@ -192,6 +192,7 @@ export async function executeBlocks(
 							blocks: block.triggerBlocks,
 							callReturnBlocks,
 							multiple: false,
+							persist: block.persist,
 							localVariables,
 						},
 					});
@@ -230,6 +231,7 @@ export async function executeBlocks(
 							blocks: block.triggerBlocks,
 							callReturnBlocks,
 							multiple: false,
+							persist: block.persist,
 							localVariables,
 						},
 					});
@@ -269,6 +271,7 @@ export async function executeBlocks(
 							blocks: block.triggerBlocks,
 							callReturnBlocks,
 							multiple: block.multiple,
+							persist: block.persist,
 							localVariables,
 						},
 					});
@@ -428,6 +431,17 @@ function evaluateCondition(
 		case "contains": {
 			return "contains" in val1 && val1.contains(val2);
 		}
+		case "is not empty": {
+			if (typeof val1 === "undefined" || val1 === null) return false;
+			if (typeof val1 === "string" || Array.isArray(val1))
+				return val1.length > 0;
+			return true;
+		}
+		case "is empty":
+			if (typeof val1 === "undefined" || val1 === null) return true;
+			if (typeof val1 === "string" || Array.isArray(val1))
+				return val1.length < 0;
+			return false;
 	}
 	return false;
 }
@@ -534,4 +548,33 @@ function getEntityReference(
 	}
 
 	return null;
+}
+
+export async function selectAvailableTimelines<
+	T extends {
+		prerequisiteBlocks: TimelineBlock[];
+		tags: string[];
+		flightMode: "nova" | "legacy";
+	},
+>(
+	ecs: ECS,
+	timelines: T[],
+	flightMode: "nova" | "legacy",
+	variables: Record<string, any>,
+) {
+	const availableTimelines = [];
+	for (const t of timelines) {
+		if (t.flightMode !== flightMode) continue;
+		try {
+			await executeBlocks(ecs, t.prerequisiteBlocks, {
+				localVariables: variables,
+				executionType: "prerequisite",
+			});
+		} catch (error) {
+			if (error instanceof TimelineAvailability && error.isAvailable) {
+				availableTimelines.push(t);
+			}
+		}
+	}
+	return availableTimelines;
 }

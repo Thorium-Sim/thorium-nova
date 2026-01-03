@@ -69,6 +69,7 @@ export const timeline = t.router({
 					timeline.components.isTimeline?.steps.includes(input.stepId!),
 				);
 			}
+
 			if (!timeline) return;
 			const stepIndex = timeline?.components.isTimeline?.currentStep;
 			if (stepIndex === undefined) return;
@@ -86,8 +87,16 @@ export const timeline = t.router({
 				return;
 			}
 			timeline.updateComponent("isTimeline", { currentStep: stepIndex + 1 });
-
 			await triggerStep(ctx.flight!.ecs.getEntityById(steps[stepIndex + 1])!);
+			// Deactivate all of the triggers associated with this timeline step
+			for (const trigger of ctx.ecs.componentCache.get("isTrigger") || []) {
+				if (
+					trigger.components.isTrigger?.stepId === steps[stepIndex] &&
+					!trigger.components.isTrigger.persist
+				) {
+					trigger.updateComponent("isTrigger", { active: false });
+				}
+			}
 			// TODO: August 25, 2023 Send the necessary pubsub updates
 		}),
 	goToStep: t.procedure

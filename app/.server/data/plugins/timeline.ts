@@ -14,8 +14,16 @@ import {
 } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import ReportPlugin from "@thorium/.server/classes/Plugins/Report";
 import type { FlightStartingPoint } from "@thorium/.server/spawners/flight";
+import TrainingPlugin from "@thorium/.server/classes/Plugins/Training";
+import type { Aspect } from "@thorium/.server/classes/Plugins/Aspect";
 
-const timelineType = z.enum(["missions", "reports"]);
+const timelineType = z.enum(["missions", "reports", "trainings"]);
+const timelineClasses: Record<z.infer<typeof timelineType>, any> = {
+	missions: MissionPlugin,
+	reports: ReportPlugin,
+	trainings: TrainingPlugin,
+};
+
 const block = t.router({
 	add: t.procedure
 		.input(
@@ -363,7 +371,14 @@ const step = t.router({
 				(timeline) => timeline.name === input.timelineId,
 			);
 			if (!timeline) throw new Error("Timeline not found");
-			const stepId = timeline.addStep(input.name);
+			const stepId = timeline.addStep(input.name, [
+				{
+					id: uniqid("blo-"),
+					type: "Action",
+					action: "client.setTraining",
+					values: { clientId: "$clientId" },
+				},
+			]);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
@@ -555,16 +570,12 @@ export const timeline = t.router({
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
 			let name = input.name;
-			if (input.timelineType === "missions") {
-				const timeline = new MissionPlugin({ name: input.name }, plugin);
-				plugin.aspects.missions.push(timeline);
-				name = timeline.name;
-			}
-			if (input.timelineType === "reports") {
-				const timeline = new ReportPlugin({ name: input.name }, plugin);
-				plugin.aspects.reports.push(timeline);
-				name = timeline.name;
-			}
+			const timeline = new timelineClasses[input.timelineType](
+				{ name: input.name },
+				plugin,
+			);
+			plugin.aspects[input.timelineType].push(timeline);
+			name = timeline.name;
 
 			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
 			pubsub.publish.plugin.timeline.get({

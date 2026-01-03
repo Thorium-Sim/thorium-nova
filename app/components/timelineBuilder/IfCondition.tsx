@@ -54,19 +54,31 @@ export function IfCondition({
 										}),
 									)
 								}
-								options={["=", "!=", ">", ">=", "<", "<=", "contains"]}
+								options={[
+									"=",
+									"!=",
+									">",
+									">=",
+									"<",
+									"<=",
+									"contains",
+									"is empty",
+									"is not empty",
+								]}
 							/>{" "}
-							<ValueInput
-								value={value2}
-								onChange={(value) =>
-									update(
-										"conditions",
-										produce(conditions, (draft) => {
-											draft[i].value2 = value;
-										}),
-									)
-								}
-							/>
+							{["is empty", "is not empty"].includes(comparison) ? null : (
+								<ValueInput
+									value={value2}
+									onChange={(value) =>
+										update(
+											"conditions",
+											produce(conditions, (draft) => {
+												draft[i].value2 = value;
+											}),
+										)
+									}
+								/>
+							)}
 							{i === conditions.length - 1 ? (
 								<Button
 									className="btn-circle btn-success btn-xs !text-lg !p-0"

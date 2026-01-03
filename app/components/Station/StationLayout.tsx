@@ -7,9 +7,10 @@ import { useManageCard } from "./useManageCard";
 import { Widgets } from "./widgets";
 import { cn } from "@thorium/utils/cn";
 import { useStation } from "@thorium/routes/station/useStation";
-import { useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import Button from "@thorium/ui/Button";
+import { useResizeObserver } from "@thorium/hooks/useResizeObserver";
 
 const StationLayout = () => {
 	const { client, station, ship } = useStation();
@@ -100,10 +101,87 @@ const StationLayout = () => {
 				<div className="widgets flex items-center gap-2 absolute bottom-8 right-[calc(2rem+50px)]">
 					<Widgets />
 				</div>
+				{client.training ? (
+					<div className="training">
+						<div className="training-overlay" />
+						{client.training?.selector?.map((selector, index) => (
+							<TrainingHighlight
+								key={selector}
+								selector={selector}
+								index={index}
+							/>
+						))}
+						<div className="training-infobox panel backdrop-blur flex flex-col items-end gap-2">
+							<div
+								className="whitespace-pre-wrap max-w-lg"
+								// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+								dangerouslySetInnerHTML={{ __html: client.training?.text }}
+							/>
+							{client.training.allowAdvance ? (
+								<Button
+									className="btn-sm btn-primary pointer-events-auto"
+									onClick={() => {
+										q.timeline.advance.netSend({
+											timelineId: client.training?.timelineId,
+										});
+									}}
+								>
+									Next
+								</Button>
+							) : null}
+						</div>
+					</div>
+				) : null}
 			</div>
 		</div>
 	);
 };
+
+const padding = 8;
+function TrainingHighlight({
+	selector,
+	index,
+}: { selector: string; index: number }) {
+	const ref = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		const el = document.querySelector(selector);
+		if (!el) return;
+		const observer = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				if (ref.current) {
+					ref.current.style.height = `${entry.borderBoxSize[0].blockSize + padding}px`;
+					ref.current.style.width = `${entry.borderBoxSize[0].inlineSize + padding}px`;
+				}
+			}
+		});
+
+		observer.observe(el);
+
+		return () => {
+			observer.unobserve(el);
+		};
+	}, [selector]);
+	return (
+		<>
+			<style>{`
+${selector} {
+anchor-name: --training-highlight-${index};
+}
+`}</style>
+			<div
+				ref={ref}
+				className={cn("training-highlight", {
+					"highlight-target": index === 0,
+				})}
+				style={{
+					// @ts-expect-error
+					positionAnchor: `--training-highlight-${index}`,
+				}}
+			/>
+		</>
+	);
+}
 
 function FlightStatus() {
 	const [flight] = q.flight.active.useNetRequest();

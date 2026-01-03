@@ -79,6 +79,14 @@ export const pilot = t.router({
 					speed: z.number(),
 				}),
 			)
+			.output(
+				z.object({
+					shipId: z.number(),
+					systemId: z.number().optional(),
+					speed: z.number(),
+				}),
+			)
+			.meta({ event: true })
 			.send(({ ctx, input: { shipId, systemId, speed } }) => {
 				const system = systemId
 					? getShipSystem(ctx.ecs, {
@@ -100,7 +108,7 @@ export const pilot = t.router({
 					shipId,
 					systemId: system.id,
 				});
-				return system;
+				return { shipId, systemId, speed };
 			}),
 	}),
 	warpEngines: t.router({
@@ -147,6 +155,14 @@ export const pilot = t.router({
 					factor: z.number(),
 				}),
 			)
+			.output(
+				z.object({
+					shipId: z.number(),
+					systemId: z.number().optional(),
+					factor: z.number(),
+				}),
+			)
+			.meta({ event: true })
 			.send(({ ctx, input: { systemId, shipId, factor } }) => {
 				const system = systemId
 					? getShipSystem(ctx.ecs, {
@@ -167,7 +183,7 @@ export const pilot = t.router({
 					shipId,
 					systemId: system.id,
 				});
-				return system;
+				return { systemId, shipId, factor };
 			}),
 	}),
 	autopilot: t.router({
@@ -302,7 +318,19 @@ export const pilot = t.router({
 	}),
 	thrusters: t.router({
 		setDirection: t.procedure
+			.meta({ event: true })
 			.input(
+				z.object({
+					shipId: z.number(),
+					systemId: z.number().optional(),
+					direction: z.object({
+						x: z.number().optional(),
+						y: z.number().optional(),
+						z: z.number().optional(),
+					}),
+				}),
+			)
+			.output(
 				z.object({
 					shipId: z.number(),
 					systemId: z.number().optional(),
@@ -343,6 +371,8 @@ export const pilot = t.router({
 					const ship = ctx.ecs.getEntityById(shipId);
 					playShipSound(system, ship!, "thrust");
 				}
+
+				return { systemId, shipId, direction };
 			}),
 		setRotationDelta: t.procedure
 			.input(
@@ -356,6 +386,18 @@ export const pilot = t.router({
 					}),
 				}),
 			)
+			.output(
+				z.object({
+					shipId: z.number(),
+					systemId: z.number().optional(),
+					rotation: z.object({
+						x: z.number().optional(),
+						y: z.number().optional(),
+						z: z.number().optional(),
+					}),
+				}),
+			)
+			.meta({ event: true })
 			.send(({ ctx, input: { systemId, shipId, rotation } }) => {
 				const system = systemId
 					? getShipSystem(ctx.ecs, {
@@ -386,7 +428,7 @@ export const pilot = t.router({
 				}
 
 				// TODO: September 21 2022 - Deactivate the ships autopilot when the thruster rotation change
-				return system;
+				return { systemId, shipId, rotation };
 			}),
 	}),
 	stream: t.procedure

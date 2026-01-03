@@ -15,7 +15,11 @@ export function InterstellarWrapper() {
 	const [starmapSystems] = q.starmapCore.systems.useNetRequest();
 	const [ship] = q.navigation.ship.useNetRequest({ shipId });
 
-	const [waypoints] = q.waypoints.all.useNetRequest({ systemId: null, shipId });
+	const [waypoints] = q.waypoints.all.useNetRequest({
+		systemId: null,
+		active: false,
+		shipId,
+	});
 	useEffect(() => {
 		useStarmapStore.getState().currentSystemSet?.(null);
 	}, [useStarmapStore]);
@@ -38,9 +42,10 @@ export function InterstellarWrapper() {
 						onClick={() =>
 							useStarmapStore.setState({ selectedObjectIds: [sys.id] })
 						}
-						onDoubleClick={() =>
-							useStarmapStore.getState().setCurrentSystem(sys.id)
-						}
+						onDoubleClick={() => {
+							useStarmapStore.getState().setCurrentSystem(sys.id);
+							useStarmapStore.setState({ selectedObjectIds: [] });
+						}}
 					/>
 				) : null,
 			)}

@@ -30,6 +30,7 @@ const station = z.object({
 
 export const stationComplement = z
 	.object({
+		name: z.string().default("Station Complement"),
 		stations: z.array(station).default([]),
 	})
 	.default({});

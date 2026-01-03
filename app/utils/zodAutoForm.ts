@@ -167,8 +167,8 @@ const DEFAULT_ZOD_HANDLERS = {
 export const ZOD_COMPARISONS = {
 	ZodNumber: ["=", "!=", ">", "<", "<=", ">="],
 	ZodBoolean: ["true", "false"],
-	ZodString: ["=", "!=", "contains"],
-	ZodArray: ["contains", "length"],
+	ZodString: ["=", "!=", "contains", "is empty", "is not empty"],
+	ZodArray: ["contains", "length", "is empty", "is not empty"],
 	ZodLiteral: ["=", "!="],
 	ZodEnum: ["=", "!="],
 	ZodUnion: ["=", "!="],
@@ -179,6 +179,7 @@ export const ZOD_COMPARISONS = {
 export type InputTypes =
 	| "object"
 	| "text"
+	| "textarea"
 	| "number"
 	| "select"
 	| "checkbox"
@@ -270,7 +271,10 @@ export function parseSchema(
 			(getBaseSchema(item) as unknown as z.ZodEnum<any>)._def.values;
 
 		const fieldConfigItem = fieldConfig?.[name] ?? {};
-		const inputProps = zodToHtmlInputProps(item);
+		const inputProps = {
+			...zodToHtmlInputProps(item),
+			...overrides[name]?.inputProps,
+		};
 		const isRequired =
 			inputProps.required ?? fieldConfigItem.inputProps?.required ?? false;
 

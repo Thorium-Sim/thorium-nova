@@ -4,6 +4,7 @@ import { SoundPlayer } from "@thorium/utils/sounds/playSound";
 import StationLayout from "@thorium/components/Station/StationLayout";
 import { StationData, useStation } from "@thorium/routes/station/useStation";
 import { Suspense, type ReactNode } from "react";
+import Stars from "@thorium/components/Station/Stars";
 
 export default function StationWrapper() {
 	useEscapeHotkey();
@@ -27,8 +28,14 @@ export default function StationWrapper() {
 
 function Blackout({ children }: { children: ReactNode }) {
 	const { station, client } = useStation();
-	if (station && client && client.offlineState?.title !== "blackout")
-		return children;
+	if (!station) {
+		return (
+			<Stars className="bg-gradient-to-b from-black to-slate-950">
+				<h1 className="font-bold text-4xl">Awaiting Station Assignment...</h1>
+			</Stars>
+		);
+	}
+	if (client?.offlineState?.title !== "blackout") return children;
 	return null;
 }
 

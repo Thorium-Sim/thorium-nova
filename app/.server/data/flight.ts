@@ -80,7 +80,6 @@ export const flight = t.router({
 		inputAuth(ctx);
 		// Save the flight, but don't delete it.
 		if (!ctx.flight) return null;
-		ctx.flight.paused = false;
 
 		ctx.flight.stop();
 		ctx.flight = null;
@@ -144,6 +143,7 @@ export const flight = t.router({
 	resume: t.procedure.send(({ ctx }) => {
 		if (ctx.flight) {
 			ctx.flight.paused = false;
+			ctx.ecs.lastUpdate = performance.now();
 			ctx.flight.state = "in-progress";
 			ctx.flight.stateReason = "";
 			pubsub.publish.flight.active();

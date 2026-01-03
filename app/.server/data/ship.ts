@@ -11,6 +11,7 @@ import {
 import { Vector3 } from "three";
 import type { DataContext } from "@thorium/.server/DataContext";
 import { destroyShip } from "@thorium/utils/.server/ship/collisionDamage";
+import type { RNG } from "@thorium/utils/rng";
 
 export const ship = t.router({
 	get: t.procedure
@@ -161,6 +162,11 @@ export const ship = t.router({
 						helper:
 							"Place the ship nearby this entity. This option is preferred.",
 					},
+					distance: {
+						type: "number",
+						helper:
+							"How far to place the ship from the nearby entity in kilometers.",
+					},
 				};
 			},
 		})
@@ -168,6 +174,7 @@ export const ship = t.router({
 			z.object({
 				template: z.object({ name: z.string(), pluginId: z.string() }),
 				entityId: z.number().optional(),
+				distance: z.number().optional(),
 				position: z
 					.object({
 						parentId: z
@@ -282,7 +289,7 @@ export const ship = t.router({
 function getPosition(
 	ecs: ECS,
 	input:
-		| { entityId: number }
+		| { entityId: number; distance?: number }
 		| {
 				position?:
 					| {
@@ -308,7 +315,7 @@ function getPosition(
 		// This ship is being attached to a specific object in space.
 		object = ecs.getEntityById(input.entityId || -1);
 		if (!object) throw new Error("No object found.");
-		position = getNearbyEntityPoint(object);
+		position = getNearbyEntityPoint(object, ecs.rng, input.distance);
 		const sys = getObjectSystem(object);
 		systemId = sys?.id ?? null;
 		if (sys?.id === object.id) systemId = null;
@@ -336,7 +343,11 @@ function getPosition(
 	return { position, systemId };
 }
 const objectPosition = new Vector3();
-function getNearbyEntityPoint(objectEntity: Entity) {
+function getNearbyEntityPoint(
+	objectEntity: Entity,
+	rng: RNG,
+	distance?: number,
+) {
 	if (objectEntity.components.position) {
 		objectPosition.set(
 			objectEntity.components.position.x,
@@ -357,11 +368,14 @@ function getNearbyEntityPoint(objectEntity: Entity) {
 			) / 1000) ||
 		1;
 
-	const distanceVector = {
-		x: objectScale * 2 + (Math.random() - 0.5) * objectScale,
-		y: 0,
-		z: objectScale * 2 + (Math.random() - 0.5) * objectScale,
-	};
+	const distanceVector = new Vector3(
+		objectScale * 2 + rng.next() * objectScale,
+		0,
+		objectScale * 2 + rng.next() * objectScale,
+	);
+	if (distance) {
+		distanceVector.normalize().multiplyScalar(distance);
+	}
 	return {
 		x: objectPosition.x + distanceVector.x,
 		y: objectPosition.y,

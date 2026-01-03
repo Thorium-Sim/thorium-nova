@@ -382,25 +382,28 @@ export function GridCanvas({
 
 export function CircleGridTiltButton() {
 	const circleGridStore = useCircleGridStore();
+	function handleTilt() {
+		const t = circleGridStore.getState().tilt;
+		const tilt = t === 0 ? 0.5 : t === 0.5 ? 1 : 0;
+		circleGridStore.setState(() => ({
+			tilt,
+		}));
+		q.thorium.genericEvent.netSend({
+			clientId,
+			eventName: "radar-tilt",
+			properties: `${tilt}`,
+		});
+	}
 	useGamepadPress("pilot-sensor-tilt", {
 		onDown: () => {
-			circleGridStore.setState(({ tilt: t }) => ({
-				tilt: t === 0 ? 0.5 : t === 0.5 ? 1 : 0,
-			}));
+			handleTilt();
 		},
 		// TODO: Make it so the button on the webpage responds to the joystick being pressed
 		onUp: () => {},
 	});
 
 	return (
-		<Button
-			className="w-full btn-primary"
-			onClick={() =>
-				circleGridStore.setState(({ tilt: t }) => ({
-					tilt: t === 0 ? 0.5 : t === 0.5 ? 1 : 0,
-				}))
-			}
-		>
+		<Button className="w-full btn-primary" onClick={() => handleTilt()}>
 			Tilt Sensor View
 		</Button>
 	);

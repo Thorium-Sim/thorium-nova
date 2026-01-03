@@ -1,9 +1,10 @@
 import type MissionPlugin from "@thorium/.server/classes/Plugins/Mission";
 import type ReportPlugin from "@thorium/.server/classes/Plugins/Report";
+import type TrainingPlugin from "@thorium/.server/classes/Plugins/Training";
 import { Entity } from "@thorium/utils/ecs";
 
 export function spawnTimeline(
-	timeline: MissionPlugin | ReportPlugin,
+	timeline: MissionPlugin | ReportPlugin | TrainingPlugin,
 	addEntity: (entity: Entity) => void,
 	shipId?: number,
 ) {
@@ -18,7 +19,7 @@ export function spawnTimeline(
 		});
 		step.addComponent("tags", { tags: stepItem.tags });
 		step.addComponent("isTimelineStep", {
-			blocks: JSON.parse(JSON.stringify(stepItem.blocks || {})),
+			blocks: JSON.parse(JSON.stringify(stepItem.blocks || [])),
 			timelineId: timelineEntity.id,
 		});
 		addEntity(step);

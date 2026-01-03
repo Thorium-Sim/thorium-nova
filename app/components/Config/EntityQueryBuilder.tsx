@@ -557,6 +557,7 @@ export function PropertyInput({
 	labelHidden = true,
 	multiple,
 	id,
+	...inputProps
 }: {
 	inputType: InputTypes;
 	inputValues?: string[];
@@ -578,6 +579,7 @@ export function PropertyInput({
 					labelHidden={labelHidden}
 					onChange={(e) => setValue(e.target.value)}
 					value={value}
+					{...inputProps}
 				/>
 			);
 		case "checkbox":
@@ -588,6 +590,7 @@ export function PropertyInput({
 					labelHidden={labelHidden}
 					onChange={(e) => setValue(e.target.checked)}
 					checked={value}
+					{...inputProps}
 				/>
 			);
 		case "select":
@@ -603,6 +606,7 @@ export function PropertyInput({
 						setValue(newValue);
 					}}
 					multiple={multiple}
+					{...inputProps}
 				/>
 			);
 		case "date":
@@ -616,6 +620,7 @@ export function PropertyInput({
 					labelHidden={labelHidden}
 					onChange={(e) => setValue(e.target.value)}
 					value={value}
+					{...inputProps}
 				/>
 			);
 		case "tags":
@@ -630,6 +635,7 @@ export function PropertyInput({
 						)
 					}
 					onRemove={(t) => setValue(value?.filter((v: any) => v !== t) || [])}
+					{...inputProps}
 				/>
 			);
 		case "object":
@@ -661,6 +667,18 @@ export function PropertyInput({
 				/>
 			);
 		}
+		case "textarea":
+			return (
+				<Input
+					as="textarea"
+					fixed
+					label={label}
+					labelHidden={labelHidden}
+					onBlur={(e) => setValue(e.target.value)}
+					defaultValue={value}
+					{...inputProps}
+				/>
+			);
 		default:
 			if (inputType !== "text") {
 				console.warn("Unknown input type", inputType);
@@ -674,6 +692,7 @@ export function PropertyInput({
 					labelHidden={labelHidden}
 					onBlur={(e) => setValue(e.target.value)}
 					defaultValue={value}
+					{...inputProps}
 				/>
 			);
 	}

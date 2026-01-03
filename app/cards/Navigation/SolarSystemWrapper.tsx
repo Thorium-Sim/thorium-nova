@@ -26,10 +26,6 @@ export function SolarSystemWrapper() {
 	const { shipId } = useStation();
 	const useStarmapStore = useGetStarmapStore();
 	const currentSystem = useStarmapStore((store) => store.currentSystem);
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	useEffect(() => {
-		useStarmapStore.getState().currentSystemSet?.(currentSystem);
-	}, [useStarmapStore]);
 
 	const [system] = q.starmapCore.system.useNetRequest(
 		{
@@ -43,8 +39,13 @@ export function SolarSystemWrapper() {
 	const [ship] = q.navigation.ship.useNetRequest({ shipId });
 	const [waypoints] = q.waypoints.all.useNetRequest({
 		shipId,
+		active: false,
 		systemId: currentSystem,
 	});
+
+	useEffect(() => {
+		useStarmapStore.getState().currentSystemSet?.(currentSystem);
+	}, [useStarmapStore, currentSystem]);
 
 	if (currentSystem === null) return null;
 

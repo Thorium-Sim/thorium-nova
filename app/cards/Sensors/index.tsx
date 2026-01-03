@@ -350,6 +350,7 @@ function SensorsScannableObject({
 	});
 	const [waypoints] = q.waypoints.all.useNetRequest({
 		shipId,
+		active: true,
 		systemId: currentSystem,
 	});
 	const hasWaypoint = waypoints.some((w) => w.objectId === id);
@@ -369,7 +370,9 @@ function SensorsScannableObject({
 				{hasWaypoint ? null : (
 					<Button
 						className="btn btn-xs btn-info w-full"
-						onPress={() => q.waypoints.spawn.netSend({ shipId, entityId: id })}
+						onPress={() =>
+							q.waypoints.spawn.netSend({ shipId, entityId: id, active: false })
+						}
 					>
 						Add Waypoint
 					</Button>

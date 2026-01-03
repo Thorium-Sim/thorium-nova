@@ -1,6 +1,5 @@
 import { EventCombobox } from "@thorium/components/Config/EventCombobox";
 import { q } from "@thorium/context/AppContext";
-import { AddBlockMenu } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import type { BlockProps } from "@thorium/components/timelineBuilder/BlockInputs";
 import Checkbox from "@thorium/ui/Checkbox";
 import InfoTip from "@thorium/ui/InfoTip";
@@ -48,7 +47,7 @@ export function EventCondition({
 								Whether this trigger condition will continue to exist after the
 								timeline step has proceeded. Set this to true if you want the
 								trigger remain active. It will still automatically deactivate
-								once it has been triggered once.
+								once it has been triggered once (unless "multiple" is on).
 							</InfoTip>
 						</>
 					}

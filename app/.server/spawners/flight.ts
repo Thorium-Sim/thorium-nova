@@ -197,6 +197,7 @@ export async function startFlight(
 		// that matches the specific one that was passed in
 		const stationComplement = getStationComplement(mode, activePlugins, ship);
 		shipEntity.addComponent("stationComplement", {
+			name: stationComplement?.name || "Station Complement",
 			stations: stationComplement?.stations || [],
 		});
 

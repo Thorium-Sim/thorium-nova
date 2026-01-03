@@ -6,17 +6,13 @@ import {
 	getAggregateDamage,
 	getReportEffects,
 } from "@thorium/utils/flags/damageTypes";
-import { type ECS, Entity } from "@thorium/utils/ecs";
+import { Entity } from "@thorium/utils/ecs";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
 import type ReportPlugin from "@thorium/.server/classes/Plugins/Report";
-import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { capitalCase } from "change-case";
 import type { ReportVariables } from "@thorium/routes/config/reports/reportAvailableVariables";
-import {
-	executeBlocks,
-	TimelineAvailability,
-} from "@thorium/utils/.server/executeBlocks";
+import { selectAvailableTimelines } from "@thorium/utils/.server/executeBlocks";
 import { spawnTimeline } from "@thorium/.server/spawners/timeline";
 import { triggerStep } from "@thorium/utils/.server/evaluateEntityQuery";
 import { applyDamageReportMetrics } from "@thorium/utils/.server/applyDamageReportMetrics";
@@ -378,32 +374,3 @@ export const damageReports = t.router({
 			);
 		}),
 });
-
-async function selectAvailableTimelines<
-	T extends {
-		prerequisiteBlocks: TimelineBlock[];
-		tags: string[];
-		flightMode: "nova" | "legacy";
-	},
->(
-	ecs: ECS,
-	timelines: T[],
-	flightMode: "nova" | "legacy",
-	variables: Record<string, any>,
-) {
-	const availableTimelines = [];
-	for (const t of timelines) {
-		if (t.flightMode !== flightMode) continue;
-		try {
-			await executeBlocks(ecs, t.prerequisiteBlocks, {
-				localVariables: variables,
-				executionType: "prerequisite",
-			});
-		} catch (error) {
-			if (error instanceof TimelineAvailability && error.isAvailable) {
-				availableTimelines.push(t);
-			}
-		}
-	}
-	return availableTimelines;
-}

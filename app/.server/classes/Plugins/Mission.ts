@@ -57,14 +57,14 @@ export default class MissionPlugin extends Aspect {
 
 		this.prerequisiteBlocks = params.prerequisiteBlocks || [];
 	}
-	addStep(name: string) {
+	addStep(name: string, blocks?: TimelineBlock[]) {
 		const id = uniqid("ms-");
 		this.steps.push({
 			id,
 			name,
 			description: "",
 			tags: [],
-			blocks: [],
+			blocks: blocks || [],
 		});
 		return id;
 	}

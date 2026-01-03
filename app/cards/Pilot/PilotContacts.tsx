@@ -129,6 +129,7 @@ export function CircleGridWaypoints() {
 	const { shipId } = useStation();
 	const [waypoints] = q.waypoints.all.useNetRequest({
 		systemId: "all",
+		active: true,
 		shipId,
 	});
 	useGetFacingWaypoint();

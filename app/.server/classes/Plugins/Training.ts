@@ -5,9 +5,9 @@ import { generateIncrementedName } from "@thorium/utils/generateIncrementedName"
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import type { TimelineStep } from "@thorium/.server/classes/Plugins/TimelineStep";
 
-export default class ReportPlugin extends Aspect {
+export default class TrainingPlugin extends Aspect {
 	apiVersion = "timeline/v1" as const;
-	kind = "reports" as const;
+	kind = "trainings" as const;
 	name: string;
 	description: string;
 	category: string;
@@ -18,19 +18,17 @@ export default class ReportPlugin extends Aspect {
 	/** Blocks that are executed when checking to see if a timeline is valid. */
 	prerequisiteBlocks: TimelineBlock[];
 
-	/** Apply the report effects automatically when timeline advances past the final step. */
-	autoApplyWhenCompleted: boolean;
 	steps: TimelineStep[];
 
-	constructor(params: Partial<ReportPlugin>, plugin: BasePlugin) {
+	constructor(params: Partial<TrainingPlugin>, plugin: BasePlugin) {
 		const name = generateIncrementedName(
-			params.name || "New Report",
+			params.name || "New Training",
 			plugin.aspects.reports.map((timeline) => timeline.name),
 		);
-		super({ name, ...params }, { kind: "reports" }, plugin, {});
+		super({ name, ...params }, { kind: "trainings" }, plugin, {});
 		this.name = name;
 		this.description =
-			params.description || "A report for repairing damaged systems.";
+			params.description || "A training for learning how to use a station.";
 
 		this.category = params.category || "";
 		this.tags = params.tags || [];
@@ -38,7 +36,7 @@ export default class ReportPlugin extends Aspect {
 
 		this.steps = params.steps || [
 			{
-				id: uniqid("dr-"),
+				id: uniqid("tr-"),
 				name: "Step 1",
 				description: "",
 				tags: [],
@@ -47,7 +45,6 @@ export default class ReportPlugin extends Aspect {
 		];
 
 		this.prerequisiteBlocks = params.prerequisiteBlocks || [];
-		this.autoApplyWhenCompleted = params.autoApplyWhenCompleted ?? true;
 	}
 	addStep(name: string, blocks?: TimelineBlock[]) {
 		const id = uniqid("ms-");
@@ -64,7 +61,7 @@ export default class ReportPlugin extends Aspect {
 		this.steps = this.steps.filter((step) => step.id !== id);
 	}
 	insertStep(name: string, selectedStepId: string) {
-		const id = uniqid("ms-");
+		const id = uniqid("ts-");
 		const index = this.steps.findIndex((s) => s.id === selectedStepId);
 		this.steps.splice(index, 0, {
 			id,

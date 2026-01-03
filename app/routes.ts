@@ -102,6 +102,11 @@ export default [
 				route("details", "routes/config/reports/details.tsx"),
 				route(":stepId", "routes/config/reports/step.tsx"),
 			]),
+			route("trainings", "routes/config/trainings/layout.tsx", []),
+			route("trainings/:timelineId", "routes/config/trainings/training.tsx", [
+				route("details", "routes/config/trainings/details.tsx"),
+				route(":stepId", "routes/config/trainings/step.tsx"),
+			]),
 			route("macros", "routes/config/macros/layout.tsx", [
 				route(":macroId", "routes/config/macros/macro.tsx"),
 			]),

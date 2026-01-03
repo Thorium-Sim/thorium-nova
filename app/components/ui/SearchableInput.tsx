@@ -86,7 +86,7 @@ export default function SearchableInput<T extends { id: any }>({
 		<ComboBox
 			inputValue={list.filterText}
 			onInputChange={list.setFilterText}
-			selectedKey={selected?.id}
+			selectedKey={selected === null ? null : selected?.id}
 			onSelectionChange={(key) => {
 				const item = list.items.find((d) => d.id === key) || null;
 				setSelected?.(item);
@@ -114,7 +114,7 @@ export default function SearchableInput<T extends { id: any }>({
 				<Popover className={popoverTransitionClasses}>
 					<ListBox
 						items={list.items}
-						className=" mt-1 max-h-60 w-full overflow-auto panel !bg-black/90"
+						className=" mt-1 max-h-60 w-[--trigger-width] overflow-auto panel !bg-black/90"
 						renderEmptyState={() => (
 							<div className="my-item">No results found</div>
 						)}

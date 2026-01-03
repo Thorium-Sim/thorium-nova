@@ -1,5 +1,5 @@
 import Button from "@thorium/ui/Button";
-import { Fragment, Suspense, useRef } from "react";
+import { Fragment, Suspense, useRef, useState } from "react";
 import { GridCanvas, CircleGrid, CircleGridTiltButton } from "./CircleGrid";
 import { PilotZoomSlider } from "./PilotZoomSlider";
 import {
@@ -18,6 +18,17 @@ import { CircleGridContacts, CircleGridWaypoints } from "./PilotContacts";
 import type { CardProps } from "@thorium/cards/CardProps";
 import { useStation } from "@thorium/routes/station/useStation";
 import { useCardContext } from "@thorium/context/CardContext";
+import {
+	Dialog,
+	DialogTrigger,
+	ModalOverlay,
+	Modal,
+	Button as RAButton,
+} from "react-aria-components";
+import { cn } from "@thorium/utils/cn";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
+import { Navigation } from "@thorium/cards/Navigation";
+import useEventListener from "@thorium/hooks/useEventListener";
 
 async function rotation({
 	shipId,
@@ -69,7 +80,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 				<div className="flex flex-col justify-between">
 					<ImpulseControls cardLoaded={cardLoaded} />
 					<div className="flex-1 mt-2">
-						<div className="flex items-stretch gap-4 ">
+						<div className="flex items-stretch gap-4 direction-thrusters">
 							<LinearJoystick
 								id="direction-foreaft"
 								className="h-auto"
@@ -96,7 +107,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 						</div>
 					</div>
 				</div>
-				<div className="col-span-2 w-full aspect-square self-center">
+				<div className="col-span-2 w-full aspect-square self-center pilot-radar">
 					<Suspense fallback={null}>
 						<GridCanvas shouldRender={cardLoaded}>
 							<CircleGrid>
@@ -110,32 +121,40 @@ export function Pilot({ cardLoaded }: CardProps) {
 				<div className="h-full flex flex-col justify-between gap-2">
 					<LockOnButton />
 					<div>
-						<PilotZoomSlider />
-						<CircleGridTiltButton />
+						<div className="pilot-slider">
+							<PilotZoomSlider />
+						</div>
+						<div className="pilot-tilt">
+							<CircleGridTiltButton />
+						</div>
 					</div>
 					<div className="flex-1" />
-					<Joystick
-						id="rotation"
-						onDrag={({ x, y }) => rotation({ shipId, z: x, x: y })}
-						gamepadKeys={{ x: "roll", y: "pitch" }}
-					>
-						<UntouchableLabel className="bottom-1">Pitch Down</UntouchableLabel>
-						<UntouchableLabel className="top-1">Pitch Up</UntouchableLabel>
-						<UntouchableLabel className="right-1">
-							Starboard Roll
-						</UntouchableLabel>
-						<UntouchableLabel className="left-1">Port Roll</UntouchableLabel>
-					</Joystick>
-					<LinearJoystick
-						id="rotation-yaw"
-						onDrag={({ x }) => rotation({ shipId, y: -x })}
-						gamepadKey="yaw"
-					>
-						<UntouchableLabel className="left-1">Port Yaw</UntouchableLabel>
-						<UntouchableLabel className="right-1">
-							Starboard Yaw
-						</UntouchableLabel>
-					</LinearJoystick>
+					<div className="flex flex-col gap-2 rotation-thrusters">
+						<Joystick
+							id="rotation"
+							onDrag={({ x, y }) => rotation({ shipId, z: x, x: y })}
+							gamepadKeys={{ x: "roll", y: "pitch" }}
+						>
+							<UntouchableLabel className="bottom-1">
+								Pitch Down
+							</UntouchableLabel>
+							<UntouchableLabel className="top-1">Pitch Up</UntouchableLabel>
+							<UntouchableLabel className="right-1">
+								Starboard Roll
+							</UntouchableLabel>
+							<UntouchableLabel className="left-1">Port Roll</UntouchableLabel>
+						</Joystick>
+						<LinearJoystick
+							id="rotation-yaw"
+							onDrag={({ x }) => rotation({ shipId, y: -x })}
+							gamepadKey="yaw"
+						>
+							<UntouchableLabel className="left-1">Port Yaw</UntouchableLabel>
+							<UntouchableLabel className="right-1">
+								Starboard Yaw
+							</UntouchableLabel>
+						</LinearJoystick>
+					</div>
 				</div>
 			</div>
 		</CircleGridStoreProvider>
@@ -225,6 +244,12 @@ const LockOnButton = () => {
 		},
 	});
 
+	const [isNavOpen, setIsNavOpen] = useState(false);
+	useEventListener("waypoint-activated", () => {
+		console.log("Waypoint Activated Event");
+		setIsNavOpen(false);
+	});
+
 	return (
 		<Fragment>
 			<div className="text-center panel panel-primary h-24">
@@ -242,44 +267,78 @@ const LockOnButton = () => {
 					)}
 				</div>
 			</div>
-			{autopilot.locked ? (
-				<Button
-					className="w-full btn-error"
-					onClick={() => q.pilot.autopilot.unlockCourse.netSend({ shipId })}
+			<DialogTrigger isOpen={isNavOpen} onOpenChange={setIsNavOpen}>
+				<RAButton className="btn w-full btn-info">Set Course</RAButton>
+
+				<ModalOverlay
+					isDismissable
+					className={cn(
+						"fixed inset-0 z-20 overflow-y-auto bg-black/40 flex min-h-full w-full items-center justify-center p-4 backdrop-blur overflow-hidden",
+						"transition-all duration-200 data-[entering]:opacity-0 data-[exiting]:opacity-0",
+					)}
 				>
-					Unlock Course
-				</Button>
-			) : (
-				<Button
-					className="w-full btn-warning"
-					disabled={typeof waypoint !== "number"}
-					onClick={() =>
-						q.pilot.autopilot.lockCourse.netSend({
-							waypointId: waypoint,
-							shipId,
-						})
-					}
-				>
-					Lock On Course
-				</Button>
-			)}
-			{!autopilot.forwardAutopilot ? (
-				<Button
-					className="w-full btn-error"
-					disabled={!autopilot.locked}
-					onClick={() => q.pilot.autopilot.activate.netSend({ shipId })}
-				>
-					Activate Autopilot
-				</Button>
-			) : (
-				<Button
-					className="w-full btn-error"
-					disabled={!autopilot.locked}
-					onClick={() => q.pilot.autopilot.deactivate.netSend({ shipId })}
-				>
-					Deactivate Autopilot
-				</Button>
-			)}
+					<Modal
+						className={cn(
+							"theme-container transition-opacity duration-200 data-[entering]:opacity-0 data-[exiting]:opacity-0",
+						)}
+					>
+						<Dialog className="z-30 relative outline-none w-[90vw] h-[90vh] inline-block align-bottom rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle m:w-full mx-8">
+							<Navigation cardLoaded />
+							<div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+								<RAButton
+									slot="close"
+									className="btn btn-error"
+									onPress={() => {
+										q.waypoints.deactivate.netSend({ shipId });
+									}}
+								>
+									Clear Waypoint
+								</RAButton>
+							</div>
+						</Dialog>
+					</Modal>
+				</ModalOverlay>
+			</DialogTrigger>
+			<div className="flex gap-2">
+				{autopilot.locked ? (
+					<Button
+						className="w-full btn-error"
+						onClick={() => q.pilot.autopilot.unlockCourse.netSend({ shipId })}
+					>
+						Unlock Course
+					</Button>
+				) : (
+					<Button
+						className="w-full btn-warning lock-on-course"
+						disabled={typeof waypoint !== "number"}
+						onClick={() =>
+							q.pilot.autopilot.lockCourse.netSend({
+								waypointId: waypoint,
+								shipId,
+							})
+						}
+					>
+						Lock On Course
+					</Button>
+				)}
+				{!autopilot.forwardAutopilot ? (
+					<Button
+						className="w-full btn-error activate-autopilot"
+						disabled={!autopilot.locked}
+						onClick={() => q.pilot.autopilot.activate.netSend({ shipId })}
+					>
+						Activate Autopilot
+					</Button>
+				) : (
+					<Button
+						className="w-full btn-error"
+						disabled={!autopilot.locked}
+						onClick={() => q.pilot.autopilot.deactivate.netSend({ shipId })}
+					>
+						Deactivate Autopilot
+					</Button>
+				)}
+			</div>
 		</Fragment>
 	);
 };

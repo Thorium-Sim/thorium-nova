@@ -24,7 +24,6 @@ import { q } from "@thorium/context/AppContext";
 import { Icon } from "@thorium/ui/Icon";
 import type { CardProps } from "@thorium/cards/CardProps";
 import { useStation } from "@thorium/routes/station/useStation";
-
 export function Navigation(props: CardProps) {
 	const { shipId } = useStation();
 	q.navigation.stream.useDataStream({ shipId });
@@ -62,20 +61,17 @@ function Waypoints() {
 	const { shipId } = useStation();
 
 	const useStarmapStore = useGetStarmapStore();
-	const [style, animate] = useSpring(() => ({ height: "0px" }), []);
 	const [toggle, setToggle] = useState(false);
 	const ref = useRef<HTMLDivElement>(null);
+	const selectedObjectIds = useStarmapStore((store) => store.selectedObjectIds);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: Update when the ref is set
-	useEffect(() => {
-		animate({
-			height: `${toggle ? 250 : 0}px`,
-		});
-	}, [animate, ref, toggle]);
 	const [waypoints] = q.waypoints.all.useNetRequest({
 		systemId: "all",
 		shipId,
+		active: false,
 	});
+	const activeWaypoint = waypoints.find((w) => w.isActive);
+
 	return (
 		<div className="self-end justify-self-end w-96 pointer-events-auto">
 			<Button
@@ -84,13 +80,7 @@ function Waypoints() {
 			>
 				{toggle ? "Hide" : "Show"} Waypoints
 			</Button>
-			{/* @ts-expect-error */}
-			<animated.div
-				className="overflow-hidden w-full mt-2"
-				style={{
-					...style,
-				}}
-			>
+			<div className="overflow-hidden w-full mt-2">
 				<div ref={ref} className="flex flex-col h-full">
 					<SearchableList
 						items={
@@ -103,8 +93,7 @@ function Waypoints() {
 						}
 						renderItem={({ id, label }) => (
 							<span className="flex">
-								<span className="flex-1">{label}</span>
-								{/* TODO Aug 1 2022 - Add some method for marking waypoints as non-deletable for mission purposes. */}
+								<span className="flex-1 text-white">{label}</span>
 								{id > -1 && (
 									<button
 										className="appearance-none"
@@ -128,9 +117,12 @@ function Waypoints() {
 								)}
 							</span>
 						)}
+						selectedItem={activeWaypoint?.id}
 						setSelectedItem={async ({ id }) => {
 							const waypoint = waypoints.find((w) => w.id === id);
 							if (waypoint) {
+								await q.waypoints.activate.netSend({ waypointId: waypoint.id });
+								window.dispatchEvent(new CustomEvent("waypoint-activated"));
 								if (
 									useStarmapStore.getState().currentSystem !==
 									waypoint?.position.parentId
@@ -155,7 +147,7 @@ function Waypoints() {
 						}}
 					/>
 				</div>
-			</animated.div>
+			</div>
 		</div>
 	);
 }
@@ -165,6 +157,16 @@ function AddWaypoint() {
 
 	const useStarmapStore = useGetStarmapStore();
 	const selectedObjectIds = useStarmapStore((store) => store.selectedObjectIds);
+
+	const [waypoints] = q.waypoints.all.useNetRequest({
+		systemId: "all",
+		shipId,
+		active: false,
+	});
+
+	const waypoint = waypoints.find((w) => w.id === selectedObjectIds[0]);
+	if (!selectedObjectIds[0] || waypoint?.isActive) return null;
+
 	return (
 		<Button
 			className={`pointer-events-auto flex-1 btn-primary ${
@@ -177,7 +179,10 @@ function AddWaypoint() {
 						(await q.waypoints.spawn.netSend({
 							entityId: selectedObjectIds[0],
 							shipId,
+							active: true,
 						}));
+
+					window.dispatchEvent(new CustomEvent("waypoint-activated"));
 				} catch (error: unknown) {
 					if (error instanceof Error) {
 						toast({ title: error.message, color: "error" });
@@ -185,7 +190,7 @@ function AddWaypoint() {
 				}
 			}}
 		>
-			Add Waypoint
+			Set Waypoint
 		</Button>
 	);
 }
@@ -244,6 +249,7 @@ function StarmapSearch() {
 					</p>
 				</DefaultResultLabel>
 			)}
+			selected={null}
 			setSelected={async (item) => {
 				if (!item) return;
 				if (
@@ -259,11 +265,11 @@ function StarmapSearch() {
 					item.position.x,
 					item.position.y,
 					item.position.z,
-					true,
+					false,
 				);
 			}}
 			placeholder="Search..."
-			displayValue={(item) => item.name}
+			displayValue={(item) => item?.name}
 		/>
 	);
 }

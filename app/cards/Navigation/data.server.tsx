@@ -1,5 +1,5 @@
 import type { position } from "@thorium/ecs-components/position";
-import { Entity } from "@thorium/utils/ecs";
+import { type ECS, Entity } from "@thorium/utils/ecs";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { matchSorter } from "match-sorter";
 import { t } from "@thorium/.server/init/t";
@@ -17,6 +17,8 @@ type Waypoint = {
 	id: number;
 	name: string;
 	objectId?: number;
+	permanent: boolean;
+	isActive: boolean;
 	position: z.infer<typeof position>;
 	systemPosition: z.infer<typeof position> | null;
 };
@@ -190,6 +192,7 @@ export const waypoints = t.router({
 		.input(
 			z.object({
 				shipId: z.number(),
+				active: z.boolean(),
 				systemId: z.union([z.literal("all"), z.number(), z.null()]),
 			}),
 		)
@@ -204,7 +207,7 @@ export const waypoints = t.router({
 					shipId: entity.components.isWaypoint.assignedShipId,
 				},
 		)
-		.request(({ ctx, input: { shipId, systemId } }) => {
+		.request(({ ctx, input: { shipId, systemId, active } }) => {
 			const waypoints: Waypoint[] = [];
 			for (const waypoint of ctx.ecs.componentCache.get("isWaypoint") || []) {
 				if (
@@ -212,6 +215,7 @@ export const waypoints = t.router({
 					(systemId === "all" ||
 						waypoint.components.position?.parentId === systemId)
 				) {
+					if (active && !waypoint.components.isWaypoint.isActive) continue;
 					if (waypoint.components.position) {
 						const systemPosition =
 							ctx.flight?.ecs.getEntityById(
@@ -222,6 +226,8 @@ export const waypoints = t.router({
 							name: waypoint.components.identity?.name || "",
 							objectId: waypoint.components.isWaypoint?.attachedObjectId,
 							position: waypoint.components.position,
+							permanent: waypoint.components.isWaypoint.permanent,
+							isActive: waypoint.components.isWaypoint.isActive,
 							systemPosition,
 						});
 					}
@@ -247,6 +253,7 @@ export const waypoints = t.router({
 					},
 				};
 			},
+			event: true,
 		})
 		.input(
 			z.object({
@@ -266,7 +273,14 @@ export const waypoints = t.router({
 						z: z.number(),
 					})
 					.optional(),
+				permanent: z.boolean().optional(),
+				active: z.boolean().optional(),
 				tags: z.array(z.string()).optional(),
+			}),
+		)
+		.output(
+			z.object({
+				waypointId: z.number(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -320,8 +334,7 @@ export const waypoints = t.router({
 						pubsub.publish.waypoints.all({
 							shipId,
 						});
-						// TODO July 30, 2022: It might be necessary to publish to make this appear on the Pilot or Viewscreen.
-						return maybeWaypoint;
+						return { waypointId: maybeWaypoint.id };
 					}
 				}
 			} else if ("position" in input && input.position) {
@@ -346,10 +359,15 @@ export const waypoints = t.router({
 				throw new Error("Either position or entityId are required");
 			}
 
+			if (input.active) {
+				deactivateWaypoints(ctx.ecs, shipId);
+			}
 			const newWaypoint = new Entity();
 			newWaypoint.addComponent("isWaypoint", {
 				assignedShipId: shipId,
 				attachedObjectId: object?.id,
+				permanent: input.permanent,
+				isActive: input.active,
 			});
 			// If we have an object, set the name to the name of that object
 			if (object?.components.identity?.name) {
@@ -390,19 +408,70 @@ export const waypoints = t.router({
 				shipId,
 			});
 
-			return newWaypoint;
+			return { waypointId: newWaypoint.id };
+		}),
+	activate: t.procedure
+		.meta({ action: true, event: true })
+		.input(z.object({ waypointId: z.number() }))
+		.output(z.object({ waypointId: z.number() }))
+		.send(({ ctx, input }) => {
+			const waypoint = ctx.ecs.getEntityById(input.waypointId);
+			if (!waypoint?.components.isWaypoint)
+				throw new Error("Waypoint not found.");
+			deactivateWaypoints(
+				ctx.ecs,
+				waypoint.components.isWaypoint.assignedShipId,
+			);
+			waypoint.updateComponent("isWaypoint", { isActive: true });
+			pubsub.publish.waypoints.all({
+				shipId: waypoint.components.isWaypoint.assignedShipId,
+			});
+			return { waypointId: input.waypointId };
+		}),
+	deactivate: t.procedure
+		.meta({ action: true, event: true })
+		.input(z.object({ shipId: z.number() }))
+		.output(z.object({ shipId: z.number() }))
+		.send(({ ctx, input }) => {
+			deactivateWaypoints(ctx.ecs, input.shipId);
+			pubsub.publish.waypoints.all({
+				shipId: input.shipId,
+			});
+			return { shipId: input.shipId };
 		}),
 	delete: t.procedure
 		.meta({ action: true, event: true })
-		.input(z.object({ shipId: z.number(), waypointId: z.number() }))
-		.send(({ ctx, input: { waypointId, shipId } }) => {
+		.input(
+			z.object({
+				shipId: z.number(),
+				waypointId: z.number(),
+				overridePermanent: z.boolean().optional(),
+			}),
+		)
+		.send(({ ctx, input: { waypointId, shipId, overridePermanent } }) => {
 			const waypoint = ctx.ecs.getEntityById(waypointId);
 			if (!waypoint) throw new Error("No waypoint found.");
 			if (waypoint.components.isWaypoint?.assignedShipId !== shipId)
 				throw new Error("Waypoint is not assigned to this ship.");
+			if (waypoint.components.isWaypoint.permanent && !overridePermanent) {
+				throw new Error("Waypoint cannot be deleted.");
+			}
 			ctx.ecs.removeEntity(waypoint);
 			pubsub.publish.waypoints.all({
 				shipId,
 			});
 		}),
 });
+
+function deactivateWaypoints(ecs: ECS, shipId: number) {
+	for (const waypoint of ecs.componentCache.get("isWaypoint") || []) {
+		if (waypoint.components.isWaypoint?.assignedShipId === shipId) {
+			waypoint.updateComponent("isWaypoint", {
+				isActive: false,
+			});
+		}
+	}
+	pubsub.publish.waypoints.all({
+		shipId,
+	});
+}

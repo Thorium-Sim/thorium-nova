@@ -6,12 +6,23 @@ export const flightClient = z
 		flightId: z.string().default(""),
 		shipId: z.number().nullable().default(null),
 		stationId: z.string().nullable().default(null),
+		currentCard: z.string().nullable().default(null),
 		loginName: z.string().default(""),
 		offlineState: z
 			.object({ title: z.string(), message: z.string().optional() })
 			.nullable()
 			.default(null),
-		training: z.boolean().default(false),
+		training: z
+			.object({
+				card: z.string().optional(),
+				selector: z.string().array().optional(),
+				text: z.string(),
+				mediaUrl: z.string().optional(),
+				timelineId: z.number().optional(),
+				allowAdvance: z.boolean().default(false),
+			})
+			.nullable()
+			.default(null),
 		officersLog: z
 			.object({
 				timestamp: z.number(),

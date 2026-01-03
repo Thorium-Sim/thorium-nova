@@ -17,6 +17,7 @@ export type ActionOverrides = {
 	type?: string;
 	values?: string[];
 	helper?: string;
+	inputProps?: Record<string, any>;
 };
 
 export interface FileOrFolder {
@@ -84,6 +85,10 @@ export const thorium = t.router({
 				),
 			);
 		}),
+	note: t.procedure
+		.input(z.object({ note: z.string() }))
+		.meta({ action: () => ({ note: { type: "textarea" } }) })
+		.send(() => {}),
 	events: t.procedure
 		.autoPublish([], () => null)
 		.request(function getEvents() {
@@ -166,6 +171,24 @@ export const thorium = t.router({
 				entity.updateComponent(component, { [property]: value }, true);
 			}
 		}),
+	/** Use this to fire events that can be responded to in timeline and trigger blocks */
+	genericEvent: t.procedure
+		.meta({ event: true })
+		.input(
+			z.object({
+				clientId: z.string(),
+				eventName: z.string(),
+				properties: z.string(),
+			}),
+		)
+		.output(
+			z.object({
+				clientId: z.string(),
+				eventName: z.string(),
+				properties: z.string(),
+			}),
+		)
+		.send(({ input }) => input),
 	pluginAssets: t.procedure
 		.input(
 			z

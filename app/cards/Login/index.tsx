@@ -36,6 +36,7 @@ const Login = () => {
 					e.preventDefault();
 					login();
 				}}
+				className="login-form"
 			>
 				<Input
 					fixed

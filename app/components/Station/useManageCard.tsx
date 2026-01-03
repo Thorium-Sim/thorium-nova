@@ -1,26 +1,15 @@
 import { q, clientId } from "@thorium/context/AppContext";
-import { useSessionStorage } from "@thorium/hooks/useSessionStorage";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useRef } from "react";
 
 export function useManageCard() {
 	const [station] = q.station.get.useNetRequest({ clientId });
-	const [currentCard, setCurrentCard] = useSessionStorage(
-		`currentCard-${station?.name || ""}`,
-		station?.cards[0]?.component || "",
-	);
+	const [client] = q.client.get.useNetRequest({ clientId });
+	const currentCard = client.currentCard || station.cards[0].component;
 
-	useEffect(() => {
-		if (
-			currentCard !== "" &&
-			!station?.cards.some((c) => c.component === currentCard)
-		) {
-			setCurrentCard(station?.cards[0]?.component || "");
-		}
-	}, [currentCard, station?.cards, setCurrentCard]);
 	const cardChanged = useRef(false);
 
 	const changeCard = useCallback(
-		(component: string) => {
+		async (component: string) => {
 			const card = station.cards.find((c) => c.component === component);
 			if (cardChanged.current || !card || currentCard === component) return;
 			cardChanged.current = true;
@@ -28,14 +17,13 @@ export function useManageCard() {
 				cardChanged.current = false;
 			}, 500);
 			// TODO: Add handler for card change sound effect
-			setCurrentCard(component);
+			q.client.setCard.netSend({ clientId, card: component });
 		},
-		[currentCard, station?.cards, setCurrentCard],
+		[currentCard, station?.cards],
 	);
 	const card =
 		station?.cards.find((c) => c.component === currentCard) ||
 		station?.cards[0];
 
-	// TODO: Add something to manage remotely changing cards from core, if we ever add that ability.
 	return [card, changeCard] as const;
 }

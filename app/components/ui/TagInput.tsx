@@ -20,11 +20,13 @@ const Tag: React.FC<{ tag: string; onClick: () => void }> = ({
 const TagInput: React.FC<{
 	label: ReactNode;
 	labelHidden?: boolean;
+	placeholder?: string;
 	tags: string[];
 	disabled?: boolean;
 	onRemove: (t: string) => void;
 	onAdd: (t: string) => void;
 	className?: string;
+	omitChars?: string[];
 }> = ({
 	tags = [],
 	onRemove,
@@ -32,6 +34,8 @@ const TagInput: React.FC<{
 	label,
 	labelHidden,
 	disabled,
+	placeholder = "Type and press return to add a tag",
+	omitChars = [".", ","],
 	className,
 }) => {
 	const [tagInput, setTagInput] = React.useState("");
@@ -42,7 +46,7 @@ const TagInput: React.FC<{
 				<input
 					disabled={disabled}
 					className="input"
-					placeholder="Type and press return to add a tag"
+					placeholder={placeholder}
 					value={tagInput}
 					onChange={(e) => setTagInput(e.currentTarget.value)}
 					onBlur={() => {
@@ -52,7 +56,7 @@ const TagInput: React.FC<{
 						}
 					}}
 					onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-						if (e.key === "," || e.key === "." || e.key === "Enter") {
+						if (omitChars.includes(e.key) || e.key === "Enter") {
 							e.preventDefault();
 							if (tagInput) {
 								onAdd(tagInput);

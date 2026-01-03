@@ -202,7 +202,6 @@ export function AddBlockMenu({
 		<div className="absolute p-2 bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-10">
 			<AddBlockButton
 				onAddBlock={onAddBlock}
-				omitBlocks
 				macro={macro}
 				executionType={executionType}
 			>

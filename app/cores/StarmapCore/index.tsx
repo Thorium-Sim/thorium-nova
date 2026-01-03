@@ -869,6 +869,7 @@ export function SolarSystemWrapper() {
 
 	const [waypoints] = q.waypoints.all.useNetRequest({
 		shipId,
+		active: true,
 		systemId: "all",
 	});
 
