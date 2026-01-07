@@ -36,50 +36,48 @@ const SystemMarker: React.FC<
 	const positionVector = new Vector3(...position);
 	if (cameraView === "2d") positionVector.setY(0);
 	return (
-		<>
-			<group position={positionVector} ref={group}>
-				{draggable ? (
-					<DraggableSystemCircle
-						systemId={systemId}
-						hoveringDirection={direction}
-						parentObject={group}
-						position={position}
-						{...props}
-						onPointerOver={(e) => {
-							props?.onPointerOver?.(e);
-							direction.current = 1;
-							setCursor("pointer");
-						}}
-						onPointerOut={(e) => {
-							props?.onPointerOut?.(e);
-							direction.current = -1;
-							setCursor("auto");
-						}}
-					/>
-				) : (
-					<SystemCircle
-						systemId={systemId}
-						hoveringDirection={direction}
-						{...props}
-						onPointerOver={(e) => {
-							props?.onPointerOver?.(e);
-							direction.current = 1;
-							setCursor("pointer");
-						}}
-						onPointerOut={(e) => {
-							props?.onPointerOut?.(e);
-							direction.current = -1;
-							setCursor("auto");
-						}}
-					/>
-				)}
-				<SystemLabel
+		<group position={positionVector} ref={group}>
+			{draggable ? (
+				<DraggableSystemCircle
 					systemId={systemId}
 					hoveringDirection={direction}
-					name={name}
+					parentObject={group}
+					position={position}
+					{...props}
+					onPointerOver={(e) => {
+						props?.onPointerOver?.(e);
+						direction.current = 1;
+						setCursor("pointer");
+					}}
+					onPointerOut={(e) => {
+						props?.onPointerOut?.(e);
+						direction.current = -1;
+						setCursor("auto");
+					}}
 				/>
-			</group>
-		</>
+			) : (
+				<SystemCircle
+					systemId={systemId}
+					hoveringDirection={direction}
+					{...props}
+					onPointerOver={(e) => {
+						props?.onPointerOver?.(e);
+						direction.current = 1;
+						setCursor("pointer");
+					}}
+					onPointerOut={(e) => {
+						props?.onPointerOut?.(e);
+						direction.current = -1;
+						setCursor("auto");
+					}}
+				/>
+			)}
+			<SystemLabel
+				systemId={systemId}
+				hoveringDirection={direction}
+				name={name}
+			/>
+		</group>
 	);
 };
 

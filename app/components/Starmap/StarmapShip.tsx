@@ -254,7 +254,7 @@ export function StarmapShip({
 
 export function useShipModel(modelAsset: string | undefined) {
 	const model = useGLTF(modelAsset || "/assets/Empty.glb", false);
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to update when modelAsset changes
 	const scene = useMemo(() => {
 		if (!model) return new Object3D();
 

@@ -33,7 +33,7 @@ import { MacroBlock } from "@thorium/components/timelineBuilder/MacroBlock";
 import { TimelineAvailabilityBlock } from "@thorium/components/timelineBuilder/TimelineAvailabilityBlock";
 import { DebugBlock } from "@thorium/components/timelineBuilder/DebugBlock";
 import { MacroSlotBlock } from "@thorium/components/timelineBuilder/MacroSlotBlock";
-import { NoteBlock } from "@thorium/components/timelineBuilder/NoteBLock";
+import { NoteBlock } from "@thorium/components/timelineBuilder/NoteBlock";
 
 export function RenderBlock({
 	onRemove,

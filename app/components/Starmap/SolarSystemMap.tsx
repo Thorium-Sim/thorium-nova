@@ -94,7 +94,7 @@ export function SolarSystemMap({
 		useStarmapStore.setState({ skyboxKey: skyboxKey || "blank" });
 	}, [skyboxKey, useStarmapStore]);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to update when the camera changes
 	useEffect(() => {
 		// Set the initial camera position
 		orbitControls.current?.setPosition(0, 50_000, 0);
@@ -105,13 +105,12 @@ export function SolarSystemMap({
 		useStarmapStore.getState().setCameraControlsEnabled(true);
 	}, [camera, useStarmapStore]);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
 	useEffect(() => {
 		if (cameraView === "2d") {
 			orbitControls.current?.rotatePolarTo(0, true);
 			orbitControls.current?.rotateAzimuthTo(0, true);
 		}
-	}, [camera, cameraView]);
+	}, [cameraView]);
 
 	useExternalCameraControl(orbitControls);
 	const viewingMode = useStarmapStore((store) => store.viewingMode);

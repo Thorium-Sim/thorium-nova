@@ -78,35 +78,33 @@ const ShipConfig = () => {
 				{mission?.description}
 			</p>
 			{isSandbox ? (
-				<>
-					<div className="col-start-3 row-span-2">
-						<p className="font-bold text-lg">Starting Point</p>
-						<SearchableList
-							selectedItem={state.startingPointId}
-							setSelectedItem={({ id }) =>
-								dispatch({ type: "startingPointId", startingPointId: id })
-							}
-							items={startingPoints.map((item) => ({
-								id: item,
-								label: item.objectId,
-								description: item.solarSystemId,
-								category: item.pluginId,
-								// image: item.vanityUrl,
-							}))}
-							renderItem={(item) => (
-								<div>
-									{/* <img
+				<div className="col-start-3 row-span-2">
+					<p className="font-bold text-lg">Starting Point</p>
+					<SearchableList
+						selectedItem={state.startingPointId}
+						setSelectedItem={({ id }) =>
+							dispatch({ type: "startingPointId", startingPointId: id })
+						}
+						items={startingPoints.map((item) => ({
+							id: item,
+							label: item.objectId,
+							description: item.solarSystemId,
+							category: item.pluginId,
+							// image: item.vanityUrl,
+						}))}
+						renderItem={(item) => (
+							<div>
+								{/* <img
               src={item.image}
               alt={item.label}
               className="float-left h-12 w-12 mr-2 bg-black/80 rounded-full"
             /> */}
-									<p className="font-bold">{item.label}</p>
-									<p className="text-sm">{item.description}</p>
-								</div>
-							)}
-						/>
-					</div>
-				</>
+								<p className="font-bold">{item.label}</p>
+								<p className="text-sm">{item.description}</p>
+							</div>
+						)}
+					/>
+				</div>
 			) : null}
 		</div>
 	);

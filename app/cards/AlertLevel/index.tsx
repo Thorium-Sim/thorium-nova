@@ -50,7 +50,7 @@ export function AlertLevel() {
 		setDescription("");
 	};
 	return (
-		<ul className="flex flex-col justify-between h-full gap-4">
+		<ul className="flex flex-col justify-between h-full gap-4 cursor-pointer">
 			<li
 				className="text-5xl font-bold text-green-500 w-fit"
 				onClick={() => updateLevel("5")}

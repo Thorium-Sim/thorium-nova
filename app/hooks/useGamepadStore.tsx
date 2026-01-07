@@ -324,7 +324,7 @@ export function useGamepadValue(
 
 	const oldValue = useRef(0);
 	const actions = config?.actions[key || ("" as GamepadKey)];
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Update when key changes
 	useEffect(() => {
 		if (!actions) return;
 		const unsubscribe = useGamepadStore.subscribe((store) => {

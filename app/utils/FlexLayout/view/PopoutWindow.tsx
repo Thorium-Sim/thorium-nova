@@ -34,7 +34,7 @@ export const PopoutWindow = (
 	// map from main docs style -> this docs equivalent style
 	const styleMap = new Map<HTMLElement, HTMLElement>();
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We don't mess around with FlexLayout
 	React.useLayoutEffect(() => {
 		if (!popoutWindow.current) {
 			// only create window once, even in strict mode

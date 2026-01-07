@@ -585,7 +585,11 @@ export function GridLines({
 	rings = 3,
 	lines = 12,
 	aligned = false,
-}: { rings?: number; lines?: number; aligned?: boolean }) {
+}: {
+	rings?: number;
+	lines?: number;
+	aligned?: boolean;
+}) {
 	return (
 		<>
 			{Array(rings)
@@ -679,13 +683,16 @@ export function GridSegments({
 	rings = 3,
 	lines = 12,
 	aligned = false,
-}: { rings?: number; lines?: number; aligned?: boolean }) {
+}: {
+	rings?: number;
+	lines?: number;
+	aligned?: boolean;
+}) {
 	const { shipId, station } = useStation();
 	const isCore = station.name === "Flight Director";
 	const [sensors] = q.legacy.sensorGrid.sensors.useNetRequest({ shipId });
 	const segments = sensors.segments;
 	return (
-		// biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
 		<svg
 			viewBox="0 0 100 100"
 			className={cn("w-full pointer-events-none", { absolute: !isCore })}

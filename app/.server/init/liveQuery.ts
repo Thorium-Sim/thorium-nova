@@ -1,48 +1,60 @@
+import {isDatabaseContext} from "@thorium/typeguards/isDatabaseContext";
 import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
-import type { inferAsyncReturnType } from "@thorium/utils/live-query/.server/index";
+import type { inferAsyncReturnType } from "@thorium/utils/live-query/.server";
 import type { AnyRouter } from "@thorium/utils/live-query/.server/router";
-import { DataContext } from "../DataContext";
-import type { buildDatabase } from "./buildDatabase";
+import {DataContext} from "../DataContext";
 import { pubsub } from "./pubsub";
 import { dataStreamEntity } from "./dataStreamEntity";
-import type { InitWebsocketParams } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
+import type {
+	CreateContextOpts, InitWebsocket,
+	InitWebsocketParams
+} from "@thorium/utils/live-query/.server/adapters/hono-adapter";
 import { ServerClient } from "@thorium/utils/live-query/.server/ServerClient";
 import { router } from "@thorium/.server/init/router";
 
+type InitWebsocketReturnType = ReturnType<InitWebsocket>;
 const dataContextCache = new Map<string, DataContext>();
 
 export function getDataContext(id: string) {
 	return dataContextCache.get(id) || null;
 }
-type ExtraContext = Awaited<ReturnType<typeof buildDatabase>>;
-export function createContext({
+export function createContext<TContext>({
 	clientId,
 	context,
-}: {
-	clientId: string;
-	context: ExtraContext;
-}) {
+}: CreateContextOpts<TContext>) {
 	let dataContext = dataContextCache.get(clientId);
 	if (!dataContext) {
-		// Let's generate a client if it doesn't already exist in the database
-		const client = context.server.clients[clientId];
-		if (!client) {
-			context.server.clients[clientId] = new Client(clientId, router, pubsub);
+		if (!isDatabaseContext(context)) {
+			throw new Error("Database context is required to create data context");
 		}
-		dataContext = new DataContext(clientId, context);
-		dataContextCache.set(clientId, dataContext);
+		else {
+			// Let's generate a client if it doesn't already exist in the database
+			const client = context.server.clients[clientId];
+			if (!client) {
+				context.server.clients[clientId] = new Client(clientId, router, pubsub);
+			}
+			dataContext = new DataContext(clientId, context);
+			dataContextCache.set(clientId, dataContext);
+		}
 	}
 	return dataContext;
 }
 
-export function initWebsocket({
+export function initWebsocket<TContext>({
 	clientId,
 	send,
 	socketEmitter,
-	context,
-}: InitWebsocketParams<ExtraContext>) {
+	extraContext,
+}: InitWebsocketParams<TContext>): InitWebsocketReturnType {
+	if (!isDatabaseContext(extraContext)) {
+		throw new Error("Database context is required to initialize websocket");
+	}
+	const context = createContext({ clientId, context: extraContext });
 	const client = context.server.clients[clientId];
-	client.initWebSocket(send, socketEmitter, context);
+	client.initWebSocket(send, socketEmitter, context).catch((err) => {
+		throw new Error(err);
+	});
+	return { ...context, id: clientId };
 }
 
 export type Context = inferAsyncReturnType<typeof createContext>;

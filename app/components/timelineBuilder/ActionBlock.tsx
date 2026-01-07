@@ -157,7 +157,7 @@ function ActionInput({
 	input = input || actionDef?.input;
 	const overrides = actionDef?.actionOverrides || {};
 	const actionSchema = action
-		? // biome-ignore lint/security/noGlobalEval:
+		? // biome-ignore lint/security/noGlobalEval: Eval is necessary
 			parseSchema(eval(parseJsonSchema(input)), overrides)
 		: [];
 

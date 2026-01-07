@@ -1,4 +1,5 @@
 import { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
+import type {DatabaseContext} from "@thorium/typeguards/isDatabaseContext";
 import randomWords from "@thorium/utils/random-words";
 import { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
 
@@ -11,10 +12,8 @@ export const databaseName =
 			: /* istanbul ignore next */
 				"db-dev.yml";
 
-export let database: {
-	server: ServerDataModel;
-	flight: FlightDataModel | null;
-} = {} as any;
+export let database: DatabaseContext = {} as DatabaseContext;
+
 export async function buildDatabase(
 	loadPlugins: (this: ServerDataModel) => Promise<void>,
 ) {

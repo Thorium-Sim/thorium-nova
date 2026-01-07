@@ -30,10 +30,10 @@ export function ResultPropertyIntoVariable({
 			a.event === previousActionOrEventBlock.event,
 	);
 	const actionOutputSchema = previousAction
-		? // biome-ignore lint/security/noGlobalEval:
+		? // biome-ignore lint/security/noGlobalEval: Necessary
 			parseSchema(eval(parseJsonSchema(previousAction.output)), {})
 		: previousEvent
-			? // biome-ignore lint/security/noGlobalEval:
+			? // biome-ignore lint/security/noGlobalEval: Necessary
 				parseSchema(eval(parseJsonSchema(previousEvent.output)))
 			: [];
 

@@ -82,8 +82,7 @@ export default function DeckConfig() {
 
 	const deckNodes = data.decks.reduce((acc: DeckNode[], deck) => {
 		if (deckName !== deck.name) return acc;
-		// biome-ignore lint/performance/noAccumulatingSpread:
-		return [...acc, ...deck.nodes];
+		return acc.concat(...deck.nodes);
 	}, []);
 	const deckNodeIds = deckNodes.map((node) => node.id);
 
@@ -105,8 +104,6 @@ export default function DeckConfig() {
 			</div>
 		);
 	}
-
-	const prompt = usePrompt();
 
 	return (
 		<div className="flex-1 flex flex-col gap-4 h-full " ref={ref}>

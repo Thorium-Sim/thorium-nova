@@ -98,7 +98,6 @@ export function ThoriumAccountContextProvider({
 		};
 	}, [account, setAccount, deviceCode, verifying]);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
 	useEffect(() => {
 		if (deviceCode) {
 			const interval = setInterval(async () => {
@@ -142,7 +141,7 @@ export function ThoriumAccountContextProvider({
 
 			return () => clearInterval(interval);
 		}
-	}, [deviceCode, setAccount, value]);
+	}, [deviceCode, value]);
 
 	return (
 		<ThoriumAccountContext.Provider value={value}>

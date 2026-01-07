@@ -34,6 +34,8 @@ const Input = forwardRef<
 		inputButton,
 		...inputProps
 	} = props;
+
+	// biome-ignore lint/correctness/useHookAtTopLevel: Unlikely to cause problems since ID won't change
 	const id = inputProps.id || useId();
 
 	return (

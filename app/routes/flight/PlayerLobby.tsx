@@ -10,16 +10,14 @@ export function PlayerLobby() {
 	const [flight] = q.flight.active.useNetRequest();
 
 	return (
-		<>
-			<Menubar>
-				<div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur">
-					<LobbyHeader />
-					<div className="flex-1 flex flex-col pt-16">
-						{flight ? <PlayerStationSelection /> : <WaitingForFlight />}
-					</div>
+		<Menubar>
+			<div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur">
+				<LobbyHeader />
+				<div className="flex-1 flex flex-col pt-16">
+					{flight ? <PlayerStationSelection /> : <WaitingForFlight />}
 				</div>
-			</Menubar>
-		</>
+			</div>
+		</Menubar>
 	);
 }
 

@@ -126,7 +126,7 @@ export default function LoginButton({
 			// linkRef.current?.click();
 		}
 	}, [verificationUrl]);
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Close as soon as account is set
 	useEffect(() => {
 		if (windowRef.current) {
 			windowRef.current.close();

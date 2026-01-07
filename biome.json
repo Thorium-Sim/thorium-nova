@@ -1,20 +1,25 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-	"organizeImports": {
-		"enabled": true
-	},
+	"$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"formatter": {
-		"ignore": ["./app/components/ui/icons/name.d.ts"]
+		"includes": ["**", "!app/components/ui/icons/name.d.ts"]
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		}
 	},
 	"linter": {
 		"enabled": true,
-		"ignore": [
-			"**/simplexNoise.js",
-			"**/lensFlareImpl.js",
-			"**/Starmap/Disc.tsx",
-			"**/Nebula/*.js",
-			"**/loadGltf/GLTFLoader.ts",
-			"./worker-configuration.d.ts"
+		"includes": [
+			"**",
+			"!**/simplexNoise.js",
+			"!**/lensFlareImpl.js",
+			"!**/Starmap/Disc.tsx",
+			"!**/Nebula/**/*.js",
+			"!**/loadGltf/GLTFLoader.ts",
+			"!worker-configuration.d.ts",
+			"!vite.config.ts"
 		],
 		"rules": {
 			"recommended": true,
@@ -25,18 +30,32 @@
 			},
 			"suspicious": {
 				"noExplicitAny": "off",
-				"noArrayIndexKey": "off"
+				"noArrayIndexKey": "off",
+				"useIterableCallbackReturn": "off",
+				"noNonNullAssertedOptionalChain": "off",
+				"noUnknownAtRules": "off"
 			},
 			"a11y": {
 				"useButtonType": "off",
-				"useKeyWithClickEvents": "off"
+				"useKeyWithClickEvents": "off",
+				"noStaticElementInteractions": "off",
+				"noSvgWithoutTitle": "off",
+				"useMediaCaption": "off"
 			},
 			"complexity": {
 				"noForEach": "off",
-				"noStaticOnlyClass": "off"
+				"noStaticOnlyClass": "off",
+				"noImportantStyles": "off"
 			},
 			"correctness": {
-				"noUnknownFunction": "off"
+				"noUnknownFunction": "off",
+				"noUnusedFunctionParameters": "off",
+				"noUnusedVariables": "off",
+				"noUnusedImports": "off",
+				"noUnknownProperty": "off"
+			},
+			"performance": {
+				"noDynamicNamespaceImportAccess": "off"
 			}
 		}
 	},

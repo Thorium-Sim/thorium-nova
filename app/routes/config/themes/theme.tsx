@@ -142,7 +142,7 @@ export default function ThemeLayout() {
 								transform: `scale(0.2) translate(-200%, -200%)`,
 							}}
 						>
-							{/* biome-ignore lint/security/noDangerouslySetInnerHtml: */}
+							{/* biome-ignore lint/security/noDangerouslySetInnerHtml: Required to render the CSS */}
 							<style dangerouslySetInnerHTML={{ __html: theme.processedCSS }} />
 							<MockNetRequestContext.Provider
 								value={{

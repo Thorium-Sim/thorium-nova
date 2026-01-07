@@ -210,7 +210,6 @@ function Reactor({
 
 	return (
 		<div
-			aria-label={name}
 			onClick={(e) => {
 				e.stopPropagation();
 				setSelectedPowerSupplier(id);

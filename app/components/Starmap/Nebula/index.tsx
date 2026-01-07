@@ -36,20 +36,18 @@ function Nebula() {
 		mesh.current?.position.copy(camera.position);
 	});
 	return (
-		<>
-			<mesh
-				ref={mesh}
-				geometry={nebulaGeometry}
-				scale={radius}
-				renderOrder={-100}
-				dispose={null}
-			>
-				{/* TODO: Throw a nice default skybox in here for browsers that don't support the worker. */}
-				{canvas && "transferControlToOffscreen" in canvas ? (
-					<NebulaShader skyboxKey={skyboxKey} />
-				) : null}
-			</mesh>
-		</>
+		<mesh
+			ref={mesh}
+			geometry={nebulaGeometry}
+			scale={radius}
+			renderOrder={-100}
+			dispose={null}
+		>
+			{/* TODO: Throw a nice default skybox in here for browsers that don't support the worker. */}
+			{canvas && "transferControlToOffscreen" in canvas ? (
+				<NebulaShader skyboxKey={skyboxKey} />
+			) : null}
+		</mesh>
 	);
 }
 

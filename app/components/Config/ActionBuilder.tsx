@@ -1,7 +1,6 @@
 import { q } from "@thorium/context/AppContext";
 import { Fragment, useEffect, useState } from "react";
 import { parseSchema as parseJsonSchema } from "json-schema-to-zod";
-// biome-ignore lint/style/useImportType: <explanation>
 import z from "zod";
 import { parseSchema } from "@thorium/utils/zodAutoForm";
 import { ValueInput } from "@thorium/components/Config/EntityQueryBuilder";
@@ -22,13 +21,10 @@ import {
 } from "react-aria-components";
 import type { Key } from "react-aria-components";
 
-type ZodType = typeof z;
 declare global {
 	interface Window {
 		z: typeof z;
 	}
-	// biome-ignore lint/suspicious/noRedeclare:
-	var z: ZodType;
 }
 if (typeof window !== "undefined") {
 	window.z = z;
@@ -145,7 +141,7 @@ export function ActionInput({
 	input = input || actionDef?.input;
 	const overrides = actionDef?.actionOverrides || {};
 	const actionSchema = action
-		? // biome-ignore lint/security/noGlobalEval:
+		? // biome-ignore lint/security/noGlobalEval: Necessary
 			parseSchema(eval(parseJsonSchema(input)), overrides)
 		: [];
 

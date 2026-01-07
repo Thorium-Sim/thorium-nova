@@ -228,7 +228,7 @@ function Message({
 						isStation,
 				},
 			)}
-			// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+			// biome-ignore lint/security/noDangerouslySetInnerHtml: We want to include markdown syntax here.
 			dangerouslySetInnerHTML={{ __html: message }}
 		/>
 	);

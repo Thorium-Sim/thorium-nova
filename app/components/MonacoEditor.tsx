@@ -189,7 +189,7 @@ export const Editor = React.forwardRef<RefEditorInstance, MonacoEditorProps>(
 			monaco,
 		}));
 
-		// biome-ignore lint/correctness/useExhaustiveDependencies:
+		// biome-ignore lint/correctness/useExhaustiveDependencies: Way too complicated
 		useEffect(() => {
 			if (monaco && container.current && !editor.current) {
 				editor.current = monaco.editor.create(container.current, {

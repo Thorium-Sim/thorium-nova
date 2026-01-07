@@ -430,7 +430,7 @@ export const TabSet = (props: ITabSetProps) => {
 		}
 	} else {
 		if (node.isEnableTabStrip()) {
-			let miniScrollbar = undefined;
+			let miniScrollbar: any;
 			if (node.isEnableTabScrollbar()) {
 				miniScrollbar = (
 					<div

@@ -62,7 +62,7 @@ export class DRACOLoader extends Loader {
 					useUniqueIDs: false,
 				};
 
-				// @ts-ignore
+				// @ts-expect-error
 				this.decodeGeometry(buffer, taskConfig).then(onLoad).catch(onError);
 			},
 			onProgress,
@@ -219,11 +219,11 @@ export class DRACOLoader extends Loader {
 			if (this.workerPool.length < this.workerLimit) {
 				const worker = new Worker(this.workerSourceURL);
 
-				// @ts-ignore
+				// @ts-expect-error
 				worker._callbacks = {};
-				// @ts-ignore
+				// @ts-expect-error
 				worker._taskCosts = {};
-				// @ts-ignore
+				// @ts-expect-error
 				worker._taskLoad = 0;
 
 				worker.postMessage({ type: "init", decoderConfig: this.decoderConfig });
@@ -231,12 +231,12 @@ export class DRACOLoader extends Loader {
 				worker.on("message", (message) => {
 					switch (message.type) {
 						case "decode":
-							// @ts-ignore
+							// @ts-expect-error
 							worker._callbacks[message.id].resolve(message);
 							break;
 
 						case "error":
-							// @ts-ignore
+							// @ts-expect-error
 							worker._callbacks[message.id].reject(message);
 							break;
 

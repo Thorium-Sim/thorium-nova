@@ -316,6 +316,10 @@ export class TabNode extends Node implements IDraggable {
 	getAttributeDefinitions() {
 		return TabNode.attributeDefinitions;
 	}
+	/** @internal */
+	static getAttributeDefinitions() {
+		return TabNode.attributeDefinitions;
+	}
 
 	/** @internal */
 	setBorderWidth(width: number) {
@@ -325,11 +329,6 @@ export class TabNode extends Node implements IDraggable {
 	/** @internal */
 	setBorderHeight(height: number) {
 		this.attributes.borderHeight = height;
-	}
-
-	/** @internal */
-	static getAttributeDefinitions() {
-		return TabNode.attributeDefinitions;
 	}
 
 	/** @internal */

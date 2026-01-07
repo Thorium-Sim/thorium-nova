@@ -13,8 +13,18 @@ class Vector {
 	static sub(a: Vector, b: Vector) {
 		return new Vector(a.x - b.x, a.y - b.y);
 	}
+	sub(v: Vector) {
+		this.x -= v.x;
+		this.y -= v.y;
+		return this;
+	}
 	static add(a: Vector, b: Vector) {
 		return new Vector(a.x + b.x, a.y + b.y);
+	}
+	add(v: Vector) {
+		this.x += v.x;
+		this.y += v.y;
+		return this;
 	}
 	set(x: number | Vector, y?: number) {
 		if (typeof x === "object") {
@@ -25,16 +35,7 @@ class Vector {
 		this.y = y || 0;
 		return this;
 	}
-	add(v: Vector) {
-		this.x += v.x;
-		this.y += v.y;
-		return this;
-	}
-	sub(v: Vector) {
-		this.x -= v.x;
-		this.y -= v.y;
-		return this;
-	}
+
 	scale(s: number) {
 		this.x *= s;
 		this.y *= s;

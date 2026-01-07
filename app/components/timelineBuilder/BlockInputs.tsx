@@ -42,7 +42,11 @@ export function MadLibSelect({
 	options,
 	value,
 	onChange,
-}: { options: string[]; value: string; onChange: (value: string) => void }) {
+}: {
+	options: string[];
+	value: string;
+	onChange: (value: string) => void;
+}) {
 	return (
 		<select
 			className={madLibInput}
@@ -59,7 +63,11 @@ function MadLibDatalist({
 	options,
 	value,
 	onChange,
-}: { options: string[]; value: string; onChange: (value: string) => void }) {
+}: {
+	options: string[];
+	value: string;
+	onChange: (value: string) => void;
+}) {
 	const id = useId();
 	return (
 		<>
@@ -80,7 +88,10 @@ function MadLibDatalist({
 export function EntityInput({
 	value = "entity 1",
 	onChange,
-}: { value?: string; onChange: (value: string) => void }) {
+}: {
+	value?: string;
+	onChange: (value: string) => void;
+}) {
 	return (
 		<span className="relative w-min">
 			<input
@@ -249,32 +260,26 @@ export function ComponentPropertySelect({
 			property === "isPresent" ||
 			property === "isNotPresent" ||
 			!setComparison ||
-			!setValue ? null : (
+			!setValue ? null : comparisonType === "ZodBoolean" ? (
+				<MadLibDatalist
+					value={comparison!}
+					onChange={setComparison}
+					options={
+						ZOD_COMPARISONS[selectedItem?.type as keyof typeof ZOD_COMPARISONS]
+					}
+				/>
+			) : (
 				<>
-					{comparisonType === "ZodBoolean" ? (
-						<MadLibDatalist
-							value={comparison!}
-							onChange={setComparison}
-							options={
-								ZOD_COMPARISONS[
-									selectedItem?.type as keyof typeof ZOD_COMPARISONS
-								]
-							}
-						/>
-					) : (
-						<>
-							<MadLibSelect
-								value={comparison!}
-								onChange={setComparison}
-								options={
-									ZOD_COMPARISONS[
-										selectedItem?.type as keyof typeof ZOD_COMPARISONS
-									]
-								}
-							/>
-							<ValueInput value={value!} onChange={setValue!} />
-						</>
-					)}
+					<MadLibSelect
+						value={comparison!}
+						onChange={setComparison}
+						options={
+							ZOD_COMPARISONS[
+								selectedItem?.type as keyof typeof ZOD_COMPARISONS
+							]
+						}
+					/>
+					<ValueInput value={value!} onChange={setValue!} />
 				</>
 			)}
 		</>

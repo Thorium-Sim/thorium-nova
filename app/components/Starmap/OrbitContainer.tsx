@@ -26,7 +26,7 @@ export const OrbitLine: React.FC<{ radiusX: number; radiusY: number }> = ({
 	}, [radiusX, radiusY]);
 
 	return (
-		// @ts-ignore
+		// @ts-expect-error
 		<line geometry={geometry} rotation={[Math.PI / 2, 0, 0]}>
 			<lineBasicMaterial
 				attach="material"

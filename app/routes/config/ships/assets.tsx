@@ -54,7 +54,7 @@ export default function Assets() {
 						>
 							{ship?.assets.logo && (
 								<img
-									src={`${ship.assets.logo}?${new Date().getTime()}`}
+									src={`${ship.assets.logo}?${Date.now()}`}
 									alt="Ship Logo"
 									className="w-5/6 h-5/6 object-contain aspect-square"
 								/>
@@ -133,7 +133,7 @@ export default function Assets() {
 					>
 						{ship?.assets.vanity && (
 							<img
-								src={`${ship.assets.vanity}?${new Date().getTime()}`}
+								src={`${ship.assets.vanity}?${Date.now()}`}
 								alt="Ship Vanity View"
 								className="w-5/6 h-5/6 object-contain aspect-square"
 							/>
@@ -145,7 +145,7 @@ export default function Assets() {
 					<UploadWell disabled>
 						{ship?.assets.sideView && (
 							<img
-								src={`${ship.assets.sideView}?${new Date().getTime()}`}
+								src={`${ship.assets.sideView}?${Date.now()}`}
 								alt="Ship Side View"
 								className="w-5/6 h-5/6 object-contain aspect-square"
 							/>
@@ -157,7 +157,7 @@ export default function Assets() {
 					<UploadWell disabled>
 						{ship?.assets.topView && (
 							<img
-								src={`${ship.assets.topView}?${new Date().getTime()}`}
+								src={`${ship.assets.topView}?${Date.now()}`}
 								alt="Ship Top View"
 								className="w-5/6 h-5/6 object-contain aspect-square"
 							/>

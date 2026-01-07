@@ -15,75 +15,71 @@ export function LegacyThrusterCore() {
 	return (
 		<div>
 			<div className="grid grid-cols-3 grid-rows-3 grid-flow-col text-xs">
-				<>
-					<p>Yaw</p>
-					<OutputField data-testid="yaw-value">
-						{Math.round(thrusters.rotation.yaw)}˚
-					</OutputField>
-					<InputField
-						data-testid="yaw-required"
-						prompt="What is the required yaw?"
-						promptValue={thrusters.requiredRotation.yaw}
-						alert={
-							Math.round(thrusters.rotation.yaw) !==
-							Math.round(thrusters.requiredRotation.yaw)
-						}
-						onClick={(value) =>
-							updateRotation({
-								shipId,
-								rotation: {
-									yaw: Math.min(359, Math.max(0, Number(value) || 0)),
-								},
-							})
-						}
-					>
-						{thrusters.requiredRotation.yaw}˚
-					</InputField>
-				</>
-				<>
-					<p>Pitch</p>
-					<OutputField>{Math.round(thrusters.rotation.pitch)}˚</OutputField>
-					<InputField
-						prompt="What is the required pitch?"
-						promptValue={thrusters.requiredRotation.pitch}
-						alert={
-							Math.round(thrusters.rotation.pitch) !==
-							Math.round(thrusters.requiredRotation.pitch)
-						}
-						onClick={(value) =>
-							updateRotation({
-								shipId,
-								rotation: {
-									pitch: Math.min(359, Math.max(0, Number(value) || 0)),
-								},
-							})
-						}
-					>
-						{thrusters.requiredRotation.pitch}˚
-					</InputField>
-				</>
-				<>
-					<p>Roll</p>
-					<OutputField>{Math.round(thrusters.rotation.roll)}˚</OutputField>
-					<InputField
-						prompt="What is the required roll?"
-						promptValue={thrusters.requiredRotation.roll}
-						alert={
-							Math.round(thrusters.rotation.roll) !==
-							Math.round(thrusters.requiredRotation.roll)
-						}
-						onClick={(value) =>
-							updateRotation({
-								shipId,
-								rotation: {
-									roll: Math.min(359, Math.max(0, Number(value) || 0)),
-								},
-							})
-						}
-					>
-						{thrusters.requiredRotation.roll}˚
-					</InputField>
-				</>
+				<p>Yaw</p>
+				<OutputField data-testid="yaw-value">
+					{Math.round(thrusters.rotation.yaw)}˚
+				</OutputField>
+				<InputField
+					data-testid="yaw-required"
+					prompt="What is the required yaw?"
+					promptValue={thrusters.requiredRotation.yaw}
+					alert={
+						Math.round(thrusters.rotation.yaw) !==
+						Math.round(thrusters.requiredRotation.yaw)
+					}
+					onClick={(value) =>
+						updateRotation({
+							shipId,
+							rotation: {
+								yaw: Math.min(359, Math.max(0, Number(value) || 0)),
+							},
+						})
+					}
+				>
+					{thrusters.requiredRotation.yaw}˚
+				</InputField>
+
+				<p>Pitch</p>
+				<OutputField>{Math.round(thrusters.rotation.pitch)}˚</OutputField>
+				<InputField
+					prompt="What is the required pitch?"
+					promptValue={thrusters.requiredRotation.pitch}
+					alert={
+						Math.round(thrusters.rotation.pitch) !==
+						Math.round(thrusters.requiredRotation.pitch)
+					}
+					onClick={(value) =>
+						updateRotation({
+							shipId,
+							rotation: {
+								pitch: Math.min(359, Math.max(0, Number(value) || 0)),
+							},
+						})
+					}
+				>
+					{thrusters.requiredRotation.pitch}˚
+				</InputField>
+
+				<p>Roll</p>
+				<OutputField>{Math.round(thrusters.rotation.roll)}˚</OutputField>
+				<InputField
+					prompt="What is the required roll?"
+					promptValue={thrusters.requiredRotation.roll}
+					alert={
+						Math.round(thrusters.rotation.roll) !==
+						Math.round(thrusters.requiredRotation.roll)
+					}
+					onClick={(value) =>
+						updateRotation({
+							shipId,
+							rotation: {
+								roll: Math.min(359, Math.max(0, Number(value) || 0)),
+							},
+						})
+					}
+				>
+					{thrusters.requiredRotation.roll}˚
+				</InputField>
 			</div>
 			<div className="grid grid-cols-3 grid-rows-2 grid-f justify-items-center text-2xl">
 				<Tooltip content="Down">

@@ -142,7 +142,7 @@ test("timeOffset should >= 0", () => {
 });
 
 test("custom interpolation", () => {
-	const shots = SI.vault.get(new Date().getTime() - 50);
+	const shots = SI.vault.get(Date.now() - 50);
 	const interpolated = SI.interpolate(shots.older, shots.newer, 0.5, "x y");
 
 	const x = interpolated.state[0].x;
@@ -151,7 +151,7 @@ test("custom interpolation", () => {
 });
 
 test("custom interpolation (with deep)", () => {
-	const shots = SI.vault.get(new Date().getTime() - 50);
+	const shots = SI.vault.get(Date.now() - 50);
 
 	expect(() => {
 		SI.interpolate(shots.older, shots.newer, 0.5, "x y", "players");

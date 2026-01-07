@@ -430,7 +430,7 @@ export class DragDrop {
 				Math.abs(this._startY - posEvent.clientY) <= 5
 			) {
 				let isDoubleClick = false;
-				const clickTime = new Date().getTime();
+				const clickTime = Date.now();
 				// check for double click
 				if (
 					Math.abs(this._clickX - posEvent.clientX) <= 5 &&

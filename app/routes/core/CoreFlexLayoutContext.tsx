@@ -10,7 +10,9 @@ export const CoreFlexLayoutContext = createContext<{
 
 export const CoreFlexLayoutProvider = ({
 	children,
-}: { children: ReactNode }) => {
+}: {
+	children: ReactNode;
+}) => {
 	const [initialModel, setInitialModel] = useLocalStorage<IJsonModel>(
 		"core-flexLayout",
 		defaultJson,
@@ -18,10 +20,9 @@ export const CoreFlexLayoutProvider = ({
 	const [layoutModel, setLayoutModel] = useState(() =>
 		Model.fromJson(initialModel),
 	);
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
 	const value = useMemo(
 		() => ({ layoutModel, setLayoutModel, setInitialModel }),
-		[layoutModel, setLayoutModel, setInitialModel],
+		[layoutModel, setInitialModel],
 	);
 
 	return (

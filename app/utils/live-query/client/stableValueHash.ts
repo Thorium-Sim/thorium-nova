@@ -60,8 +60,7 @@ export function isPlainObject(o: any): o is Object {
 	}
 
 	// If constructor does not have an Object-specific method
-	// biome-ignore lint/suspicious/noPrototypeBuiltins: <explanation>
-	if (!prot.hasOwnProperty("isPrototypeOf")) {
+	if (!Object.hasOwn(prot, "isPrototypeOf")) {
 		return false;
 	}
 

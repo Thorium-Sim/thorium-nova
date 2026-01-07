@@ -147,7 +147,7 @@ export default function MissionDetails() {
 					>
 						{"cover" in mission.assets && mission?.assets.cover && (
 							<img
-								src={`${mission.assets.cover}?${new Date().getTime()}`}
+								src={`${mission.assets.cover}?${Date.now()}`}
 								alt="Mission Cover"
 								className="w-5/6  object-contain aspect-video"
 							/>

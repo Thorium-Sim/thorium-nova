@@ -18,7 +18,7 @@ export function getRenderStateEx(
 	node: TabNode,
 	iconAngle?: number,
 ) {
-	let leadingContent = undefined;
+	let leadingContent: any;
 	const titleContent: React.ReactNode = node.getName();
 	const name = node.getName();
 	if (iconAngle === undefined) {
