@@ -15,12 +15,11 @@ import SearchableInput, {
 	DefaultResultLabel,
 } from "@thorium/ui/SearchableInput";
 import { capitalCase } from "change-case";
-import { useSpring, animated } from "@react-spring/web";
 import SearchableList from "@thorium/ui/SearchableList";
 import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
 import { useFollowEntity } from "@thorium/components/Starmap/useFollowEntity";
 import { useCancelFollow } from "@thorium/components/Starmap/useCancelFollow";
-import { q } from "@thorium/context/AppContext";
+import { q, clientId } from "@thorium/context/AppContext";
 import { Icon } from "@thorium/ui/Icon";
 import type { CardProps } from "@thorium/cards/CardProps";
 import { useStation } from "@thorium/routes/station/useStation";
@@ -30,15 +29,15 @@ export function Navigation(props: CardProps) {
 
 	return (
 		<StarmapStoreProvider>
-			<div className="mx-auto h-full bg-black/70 border border-white/50 relative">
+			<div className="mx-auto h-full bg-black/70 border border-white/50 relative navigation-card">
 				<Suspense fallback={<LoadingSpinner />}>
 					<CanvasWrapper shouldRender={props.cardLoaded} />
 				</Suspense>
 				<div className="grid grid-cols-2 grid-rows-2 absolute inset-0 pointer-events-none p-4">
-					<div className="max-w-sm">
+					<div className="max-w-sm navigation-search">
 						<StarmapSearch />
 					</div>
-					<div className="w-96 self-start justify-self-end max-h-min">
+					<div className="w-96 self-start justify-self-end max-h-min navigation-object">
 						<Suspense fallback={null}>
 							<ObjectDetails />
 							<div className="flex gap-4 w-full mt-2">
@@ -63,7 +62,6 @@ function Waypoints() {
 	const useStarmapStore = useGetStarmapStore();
 	const [toggle, setToggle] = useState(false);
 	const ref = useRef<HTMLDivElement>(null);
-	const selectedObjectIds = useStarmapStore((store) => store.selectedObjectIds);
 
 	const [waypoints] = q.waypoints.all.useNetRequest({
 		systemId: "all",
@@ -267,6 +265,11 @@ function StarmapSearch() {
 					item.position.z,
 					false,
 				);
+				q.thorium.genericEvent.netSend({
+					clientId,
+					eventName: "starmap-selected",
+					properties: `${item.id}`,
+				});
 			}}
 			placeholder="Search..."
 			displayValue={(item) => item?.name}

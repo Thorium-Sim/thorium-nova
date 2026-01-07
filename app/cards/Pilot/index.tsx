@@ -244,7 +244,15 @@ const LockOnButton = () => {
 		},
 	});
 
-	const [isNavOpen, setIsNavOpen] = useState(false);
+	const [isNavOpen, setIsNavOpenState] = useState(false);
+	function setIsNavOpen(open: boolean) {
+		q.thorium.genericEvent.netSend({
+			clientId,
+			eventName: "navigation-open",
+			properties: `${open}`,
+		});
+		setIsNavOpenState(open);
+	}
 	useEventListener("waypoint-activated", () => {
 		console.log("Waypoint Activated Event");
 		setIsNavOpen(false);
@@ -268,7 +276,9 @@ const LockOnButton = () => {
 				</div>
 			</div>
 			<DialogTrigger isOpen={isNavOpen} onOpenChange={setIsNavOpen}>
-				<RAButton className="btn w-full btn-info">Set Course</RAButton>
+				<RAButton className="btn w-full btn-info set-course">
+					Set Course
+				</RAButton>
 
 				<ModalOverlay
 					isDismissable
@@ -287,7 +297,7 @@ const LockOnButton = () => {
 							<div className="absolute bottom-4 left-1/2 -translate-x-1/2">
 								<RAButton
 									slot="close"
-									className="btn btn-error"
+									className="btn btn-error clear-waypoint"
 									onPress={() => {
 										q.waypoints.deactivate.netSend({ shipId });
 									}}

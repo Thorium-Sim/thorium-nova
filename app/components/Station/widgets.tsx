@@ -15,6 +15,7 @@ import { useNavigate } from "react-router";
 import CardProvider from "@thorium/context/CardContext";
 import { Button, Dialog, DialogTrigger, Popover } from "react-aria-components";
 import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
+import { pascalCase } from "change-case";
 
 type IconType = IconName | ReactElement;
 
@@ -55,9 +56,10 @@ export const ClickWidget: FC<{
 	icon: IconType;
 	onClick: () => void;
 	children?: ReactNode;
-}> = ({ icon, onClick, children }) => {
+	className?: string;
+}> = ({ icon, onClick, children, className }) => {
 	return (
-		<button className="widget" onClick={onClick}>
+		<button className={cn("widget", className)} onClick={onClick}>
 			{typeof icon === "string" ? (
 				<Icon name={icon} className="widget-icon h-6 w-6 cursor-pointer" />
 			) : (
@@ -81,7 +83,7 @@ export const Widget: FC<{
 
 	return (
 		<DialogTrigger>
-			<Button className="widget">
+			<Button className={`widget widget-${pascalCase(name)}`}>
 				{typeof icon === "string" ? (
 					<Icon name={icon} className="widget-icon h-6 w-6 cursor-pointer" />
 				) : (
@@ -117,5 +119,11 @@ export const Widget: FC<{
 
 function SettingsWidget() {
 	const navigate = useNavigate();
-	return <ClickWidget icon="settings" onClick={() => navigate("settings")} />;
+	return (
+		<ClickWidget
+			icon="settings"
+			className="widget-Settings"
+			onClick={() => navigate("settings")}
+		/>
+	);
 }

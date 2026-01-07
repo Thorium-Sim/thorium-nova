@@ -16,6 +16,7 @@ export const timelineBlockTypes = [
 	"TimelineAvailability",
 	"MacroSlot",
 	"Debug",
+	"Note",
 ] as const;
 
 type BlockTypes = (typeof timelineBlockTypes)[number];
@@ -127,6 +128,9 @@ export const timelineBlockDefaults: {
 	MacroSlot: {},
 	Debug: {
 		variable: "",
+	},
+	Note: {
+		note: "",
 	},
 };
 
@@ -260,6 +264,11 @@ interface DebugBlock extends BaseBlock {
 	variable: string;
 }
 
+interface NoteBlock extends BaseBlock {
+	type: "Note";
+	note: string;
+}
+
 export type TimelineBlock =
 	| DistanceConditionBlock
 	| EntityConditionBlock
@@ -277,4 +286,5 @@ export type TimelineBlock =
 	| MacroBlock
 	| TimelineAvailabilityBlock
 	| MacroSlot
-	| DebugBlock;
+	| DebugBlock
+	| NoteBlock;

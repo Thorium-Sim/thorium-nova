@@ -33,6 +33,7 @@ import { MacroBlock } from "@thorium/components/timelineBuilder/MacroBlock";
 import { TimelineAvailabilityBlock } from "@thorium/components/timelineBuilder/TimelineAvailabilityBlock";
 import { DebugBlock } from "@thorium/components/timelineBuilder/DebugBlock";
 import { MacroSlotBlock } from "@thorium/components/timelineBuilder/MacroSlotBlock";
+import { NoteBlock } from "@thorium/components/timelineBuilder/NoteBLock";
 
 export function RenderBlock({
 	onRemove,
@@ -104,6 +105,8 @@ export function RenderBlock({
 					<MacroSlotBlock />
 				) : block.type === "Debug" ? (
 					<DebugBlock {...block} update={update} />
+				) : block.type === "Note" ? (
+					<NoteBlock {...block} update={update} />
 				) : (
 					(block satisfies never)
 				)}
