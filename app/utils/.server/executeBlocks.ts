@@ -382,6 +382,9 @@ export async function executeBlocks(
 					executionType,
 				});
 				break;
+			case "Note": {
+				break;
+			}
 			case "Debug": {
 				console.info(block.variable);
 				break;
