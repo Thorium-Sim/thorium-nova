@@ -18,16 +18,19 @@ import type { UpgradeWebSocket } from "hono/ws";
 import EventEmitter from "eventemitter3";
 import { initWebsocket } from "@thorium/.server/init/liveQuery";
 
-export type CreateContext = <TRouter extends AnyRouter, TContext>(opts: {
+export type CreateContextOpts<TContext> = {
 	clientId: string;
 	context: TContext;
-}) => MaybePromise<inferRouterContext<TRouter>>;
+}
+
+export type CreateContext = <TRouter extends AnyRouter, TContext>
+	(opts: CreateContextOpts<TContext>) => MaybePromise<inferRouterContext<TRouter>>;
 
 export type InitWebsocketParams<TContext> = {
 	clientId: string;
 	send: (data: any) => void;
 	socketEmitter: EventEmitter;
-	context: TContext;
+	extraContext: TContext;
 };
 
 export type InitWebsocket = <TContext, TRouter extends AnyRouter>(
@@ -167,17 +170,11 @@ export async function liveQueryPlugin<TRouter extends AnyRouter, TContext>({
 									setTimeout(() => rej(`Client Connect Timeout`), 60 * 1000),
 								),
 							]);
-
-							const context = createContext?.({
-								clientId: result,
-								context: extraContext,
-							});
-
 							initWebsocket({
 								clientId: result,
 								send: (data) => ws.send(data),
 								socketEmitter,
-								context,
+								extraContext,
 							});
 						},
 					};

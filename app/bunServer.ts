@@ -1,7 +1,7 @@
 import { buildDatabase } from "@thorium/.server/init/buildDatabase";
 import { initDefaultPlugin } from "@thorium/.server/init/initDefaultPlugin";
 import { router } from "@thorium/.server/init/router";
-import { createContext, initWebsocket } from "@thorium/.server/init/liveQuery";
+import {createContext, initWebsocket } from "@thorium/.server/init/liveQuery";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
 import { liveQueryPlugin } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
@@ -21,6 +21,8 @@ import {
 } from "@thorium/utils/.server/db-fs/bunDataStoreProps";
 import { DataStore } from "@thorium/utils/.server/db-fs";
 import type LongRangeCommPlugin from "@thorium/.server/classes/Plugins/ShipSystems/LongRangeComm";
+import type { ProcedureCallOptions } from "@thorium/utils/live-query/.server/procedure";
+import { isObject } from "./typeguards/isObject";
 
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>();
 try {
@@ -40,20 +42,19 @@ try {
 		const app = new Hono();
 		const database = await buildDatabase(loadPlugins);
 		const middleware = await liveQueryPlugin({
-			// @ts-expect-error
 			createContext,
-			// @ts-expect-error
 			initWebsocket,
 			router,
 			upgradeWebSocket,
 			extraContext: database,
-			onCall: (opts: any, result: unknown) => {
+			onCall: (opts: ProcedureCallOptions, result: unknown) => {
 				const ecs = database?.flight?.ecs;
 				if (!ecs || opts.type !== "send") return;
+				const rawInputObj = isObject(opts.rawInput) ? opts.rawInput : {};
 				processTriggers(ecs, {
 					event: opts.path,
 					values: {
-						...opts.rawInput,
+						...rawInputObj,
 						...(typeof result === "object" && !Array.isArray(result)
 							? result
 							: {}),

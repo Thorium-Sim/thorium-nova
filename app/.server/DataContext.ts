@@ -1,3 +1,4 @@
+import type {DatabaseContext} from "@thorium/typeguards/isDatabaseContext";
 import type { ServerDataModel } from "./classes/ServerDataModel";
 import type { FlightDataModel } from "./classes/FlightDataModel";
 import { DataStore } from "@thorium/utils/.server/db-fs";
@@ -13,10 +14,7 @@ import { Entity } from "@thorium/utils/ecs";
 export class DataContext {
 	constructor(
 		public clientId: string,
-		public database: {
-			server: ServerDataModel;
-			flight: FlightDataModel | null;
-		},
+		public database: DatabaseContext,
 	) {}
 	get server() {
 		return this.database.server;

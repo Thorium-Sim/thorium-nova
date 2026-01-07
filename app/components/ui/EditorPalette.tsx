@@ -33,8 +33,8 @@ export function EditorPalette({
 
 	return (
 		<Portal>
+			{/* @ts-expect-error */}
 			<animated.div
-				// @ts-expect-error
 				className="w-64 max-h-96 flex flex-col bg-gray-900 shadow-lg rounded-lg fixed left-[calc(50%-6rem)] top-[calc(50%-8rem)]"
 				style={{
 					x,
