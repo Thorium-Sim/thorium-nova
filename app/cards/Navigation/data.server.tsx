@@ -281,6 +281,7 @@ export const waypoints = t.router({
 		.output(
 			z.object({
 				waypointId: z.number(),
+				shipId: z.number(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -334,7 +335,7 @@ export const waypoints = t.router({
 						pubsub.publish.waypoints.all({
 							shipId,
 						});
-						return { waypointId: maybeWaypoint.id };
+						return { waypointId: maybeWaypoint.id, shipId };
 					}
 				}
 			} else if ("position" in input && input.position) {
@@ -408,12 +409,12 @@ export const waypoints = t.router({
 				shipId,
 			});
 
-			return { waypointId: newWaypoint.id };
+			return { waypointId: newWaypoint.id, shipId };
 		}),
 	activate: t.procedure
 		.meta({ action: true, event: true })
 		.input(z.object({ waypointId: z.number() }))
-		.output(z.object({ waypointId: z.number() }))
+		.output(z.object({ shipId: z.number(), waypointId: z.number() }))
 		.send(({ ctx, input }) => {
 			const waypoint = ctx.ecs.getEntityById(input.waypointId);
 			if (!waypoint?.components.isWaypoint)
@@ -426,7 +427,10 @@ export const waypoints = t.router({
 			pubsub.publish.waypoints.all({
 				shipId: waypoint.components.isWaypoint.assignedShipId,
 			});
-			return { waypointId: input.waypointId };
+			return {
+				waypointId: input.waypointId,
+				shipId: waypoint.components.isWaypoint.assignedShipId,
+			};
 		}),
 	deactivate: t.procedure
 		.meta({ action: true, event: true })

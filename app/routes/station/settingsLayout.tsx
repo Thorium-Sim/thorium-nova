@@ -19,7 +19,7 @@ export default function SettingsOptions() {
 					<SettingListItem path="audio">Audio</SettingListItem>
 					<SettingListItem path="gamepad">Gamepad</SettingListItem>
 				</div>
-				<div className="flex-1">
+				<div className="flex-1 max-h-[80vh] overflow-y-auto">
 					<Outlet />
 				</div>
 			</div>

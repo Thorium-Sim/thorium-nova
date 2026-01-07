@@ -120,6 +120,9 @@ export function AddBlockButton({
 							Macro Slot
 						</StyledMenuItem>
 					)}
+					<StyledMenuItem onAction={() => onAddBlock("Note")}>
+						Note
+					</StyledMenuItem>
 					<MenuSection>
 						<Header className="font-bold pl-2">Control Flow</Header>
 
