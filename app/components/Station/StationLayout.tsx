@@ -114,7 +114,7 @@ const StationLayout = () => {
 						<div className="training-infobox panel backdrop-blur flex flex-col items-end gap-2">
 							<div
 								className="whitespace-pre-wrap max-w-lg"
-								// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+								// biome-ignore lint/security/noDangerouslySetInnerHtml: Training supports markdown
 								dangerouslySetInnerHTML={{ __html: client.training?.text }}
 							/>
 							{client.training.allowAdvance ? (
@@ -141,7 +141,10 @@ const padding = 8;
 function TrainingHighlight({
 	selector,
 	index,
-}: { selector: string; index: number }) {
+}: {
+	selector: string;
+	index: number;
+}) {
 	const ref = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -244,7 +247,10 @@ function FlightStatus() {
 function Countdown({
 	startTime,
 	duration,
-}: { startTime: number; duration: number }) {
+}: {
+	startTime: number;
+	duration: number;
+}) {
 	const ref = useRef<HTMLSpanElement>(null);
 
 	useAnimationFrame(() => {

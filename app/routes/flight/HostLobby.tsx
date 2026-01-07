@@ -17,33 +17,31 @@ export function HostLobby() {
 	const [client] = q.client.get.useNetRequest({ clientId });
 
 	return (
-		<>
-			<Menubar>
-				<div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur flex">
-					<LobbyHeader />
-					<div className="flex-1 flex flex-col pt-16">
-						{flight ? <ClientAssignment /> : <WaitingForFlight />}
-					</div>
-					{client.stationId === "Flight Director" ? (
-						<Link to="/flight/core" className="btn btn-lg btn-warning">
-							Go To Core
-						</Link>
-					) : (
-						<Link
-							to="/flight/station"
-							className={cn("btn btn-lg btn-success", {
-								"btn-disabled": !client.stationId,
-							})}
-							aria-disabled={!client.stationId}
-						>
-							Go To Station
-						</Link>
-					)}
+		<Menubar>
+			<div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur flex">
+				<LobbyHeader />
+				<div className="flex-1 flex flex-col pt-16">
+					{flight ? <ClientAssignment /> : <WaitingForFlight />}
 				</div>
+				{client.stationId === "Flight Director" ? (
+					<Link to="/flight/core" className="btn btn-lg btn-warning">
+						Go To Core
+					</Link>
+				) : (
+					<Link
+						to="/flight/station"
+						className={cn("btn btn-lg btn-success", {
+							"btn-disabled": !client.stationId,
+						})}
+						aria-disabled={!client.stationId}
+					>
+						Go To Station
+					</Link>
+				)}
+			</div>
 
-				<FlightButtons />
-			</Menubar>
-		</>
+			<FlightButtons />
+		</Menubar>
 	);
 }
 function FlightButtons() {

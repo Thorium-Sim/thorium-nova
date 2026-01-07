@@ -121,7 +121,6 @@ function AudioPlayer({ src }: { src: string }) {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	return (
 		<div className="w-full h-full relative group flex items-center justify-center">
-			{/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
 			<audio
 				src={src}
 				ref={audioRef}
@@ -166,7 +165,6 @@ function VideoPlayer({ src }: { src: string }) {
 	});
 	return (
 		<div className="w-full h-full relative group flex items-center justify-center">
-			{/* biome-ignore lint/a11y/useMediaCaption: <explanation> */}
 			<video
 				ref={videoRef}
 				src={src}

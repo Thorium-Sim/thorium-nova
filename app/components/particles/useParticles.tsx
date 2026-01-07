@@ -78,7 +78,7 @@ export function useParticles({
 
 	useFrame((state, delta) => {
 		if (!userDataRef.current) {
-			// @ts-ignore
+			// @ts-expect-error
 			userDataRef.current = {};
 		}
 		const userData = userDataRef.current;

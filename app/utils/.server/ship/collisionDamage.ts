@@ -141,7 +141,7 @@ export function applyDamage(
 	}
 	for (const damage of damageSplit) {
 		// Target vulnerable systems first
-		let system: Entity | undefined = undefined;
+		let system: Entity | undefined;
 
 		if (vulnerableSystems.length > 0) {
 			system = entity.ecs.rng.nextFromList(vulnerableSystems);

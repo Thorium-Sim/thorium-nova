@@ -23,7 +23,7 @@ test("empty vault size should be 0", () => {
 });
 
 test("get a snapshot that does not yet exist", () => {
-	const shot = vault.get(new Date().getTime() - tick * 3, true);
+	const shot = vault.get(Date.now()- tick * 3, true);
 	expect(shot).toBeUndefined();
 });
 
@@ -78,9 +78,9 @@ test("add more snapshots to the vault", async () => {
 });
 
 test("get some closest snapshot to a specific time", () => {
-	const shot1 = vault.get(new Date().getTime() - tick * 3 + 10, true);
-	const shot2 = vault.get(new Date().getTime() - tick * 3 + 20, true);
-	const shot3 = vault.get(new Date().getTime() - tick * 3 + 30, true);
-	// @ts-ignore
+	const shot1 = vault.get(Date.now() - tick * 3 + 10, true);
+	const shot2 = vault.get(Date.now() - tick * 3 + 20, true);
+	const shot3 = vault.get(Date.now() - tick * 3 + 30, true);
+	// @ts-expect-error
 	expect(shot1.id.length + shot2.id.length + shot3.id.length).toBe(18);
 });

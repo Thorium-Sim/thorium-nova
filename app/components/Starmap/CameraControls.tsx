@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 export function useExternalCameraControl(controls: React.RefObject<any>) {
 	const useStarmapStore = useGetStarmapStore();
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
+	// biome-ignore lint/correctness/useExhaustiveDependencies: useStarmapStore is stable
 	useEffect(() => {
 		if (controls) {
 			useStarmapStore.setState({

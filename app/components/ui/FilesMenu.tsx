@@ -240,7 +240,6 @@ function FilePreview({ url }: { url: string }) {
 		case "ogv":
 		case "webm":
 		case "m4v":
-			// biome-ignore lint/a11y/useMediaCaption: <explanation>
 			return <video src={url} className="w-32" controls />;
 		case "pdf":
 			return;
@@ -296,7 +295,10 @@ function FilePreview({ url }: { url: string }) {
 export function GlbLivePreview({
 	url,
 	className,
-}: { url: string; className?: string }) {
+}: {
+	url: string;
+	className?: string;
+}) {
 	return (
 		<div className={className}>
 			<Canvas camera={{ position: [0, 0, 2] }}>

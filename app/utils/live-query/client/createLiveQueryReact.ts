@@ -137,7 +137,7 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
 			const { socket, reconnectionState } = useLiveQuery();
 			const isConnected = reconnectionState === "connected";
 
-			// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+			// biome-ignore lint/correctness/useExhaustiveDependencies: Params is unstable
 			useEffect(() => {
 				if (!socket || !isConnected) return;
 				if (!dataStreamMap.has(id)) {
@@ -172,8 +172,7 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
 		//   };
 		// }
 
-		// biome-ignore lint/suspicious/noPrototypeBuiltins:
-		if (fns.hasOwnProperty(key)) {
+		if (Object.hasOwn(fns, key)) {
 			return (fns as any)[key];
 		}
 

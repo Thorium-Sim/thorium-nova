@@ -8,7 +8,7 @@ import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import path from "node:path";
 export const test = base.extend<
 	{
-		// biome-ignore lint/suspicious/noConfusingVoidType:
+		// biome-ignore lint/suspicious/noConfusingVoidType: Override
 		forEachTest: void;
 		loadCard: (cardName: string) => Promise<void>;
 	},

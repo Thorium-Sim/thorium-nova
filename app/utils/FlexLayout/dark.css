@@ -617,9 +617,9 @@
 	overflow: auto;
 	padding: 2px;
 }
-.flexlayout__floating_window _body {
+/* .flexlayout__floating_window _body {
 	height: 100%;
-}
+} */
 .flexlayout__floating_window_content {
 	left: 0;
 	top: 0;

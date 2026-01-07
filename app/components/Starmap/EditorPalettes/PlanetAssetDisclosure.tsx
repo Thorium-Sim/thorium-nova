@@ -32,7 +32,7 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 					}}
 				>
 					<img
-						src={`${object.isPlanet.textureMapAsset}?${new Date().getTime()}`}
+						src={`${object.isPlanet.textureMapAsset}?${Date.now()}`}
 						className="w-[90%] h-[90%] object-contain"
 						alt="Planet Texture"
 					/>
@@ -60,7 +60,7 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 				>
 					{object.isPlanet.cloudMapAsset && (
 						<img
-							src={`${object.isPlanet.cloudMapAsset}?${new Date().getTime()}`}
+							src={`${object.isPlanet.cloudMapAsset}?${Date.now()}`}
 							className="w-[90%] h-[90%] object-contain"
 							alt="Clouds Texture"
 						/>
@@ -102,7 +102,7 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 				>
 					{object.isPlanet.ringMapAsset && (
 						<img
-							src={`${object.isPlanet.ringMapAsset}?${new Date().getTime()}`}
+							src={`${object.isPlanet.ringMapAsset}?${Date.now()}`}
 							className="w-[90%] h-[90%] object-contain"
 							alt="Clouds Texture"
 						/>

@@ -409,11 +409,11 @@ function evaluateCondition(
 		case "=": {
 			if (typeof val1 === "boolean") return val1 === Boolean(val2);
 			if (typeof val2 === "boolean") return Boolean(val1) === val2;
-			// biome-ignore lint/suspicious/noDoubleEquals: <explanation>
+			// biome-ignore lint/suspicious/noDoubleEquals: Necessary for this fuzzy comparison
 			return val1 == val2;
 		}
 		case "!=": {
-			// biome-ignore lint/suspicious/noDoubleEquals: <explanation>
+			// biome-ignore lint/suspicious/noDoubleEquals: Necessary for this fuzzy comparison
 			return val1 != val2;
 		}
 		case ">": {

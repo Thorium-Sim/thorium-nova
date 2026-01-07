@@ -32,7 +32,7 @@ export const useTabOverflow = (
 	hiddenTabsRef.current = hiddenTabs;
 
 	// if node id changes (new model) then reset scroll to 0
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We don't mess around with FlexLayout
 	React.useLayoutEffect(() => {
 		if (tabStripRef.current) {
 			setScrollPosition(0);
@@ -40,7 +40,7 @@ export const useTabOverflow = (
 	}, [node.getId()]);
 
 	// if selected node or tabset/border rectangle change then unset usercontrolled (so selected tab will be kept in view)
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We don't mess around with FlexLayout
 	React.useLayoutEffect(() => {
 		userControlledPositionRef.current = false;
 	}, [node.getSelectedNode(), node.getRect().width, node.getRect().height]);

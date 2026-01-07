@@ -186,7 +186,7 @@ export const ShipEntity = ({
 	// TODO: Use useGLTF.preload outside of this to preload the asset
 	const model = useGLTF(modelUrl || "", false);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
+	// biome-ignore lint/correctness/useExhaustiveDependencies: No need for over-rendering
 	const scene = useMemo(() => {
 		const scene: Object3D = model.scene.clone(true);
 		if (scene.traverse) {
@@ -205,7 +205,6 @@ export const ShipEntity = ({
 		}
 
 		return scene;
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [modelUrl]);
 	const { interpolate } = useLiveQuery();
 
@@ -664,7 +663,10 @@ function getBracketPosition(
 const SensorsBracket = ({
 	bracket,
 	isSelected,
-}: { bracket: RefObject<Group | null>; isSelected?: boolean }) => {
+}: {
+	bracket: RefObject<Group | null>;
+	isSelected?: boolean;
+}) => {
 	const bracketMap = useShipSprite(BracketTexture);
 	const positionScalar = 0.05;
 	const scaleScalar = 0.15;

@@ -51,7 +51,7 @@ export function SpriteCell({
 			const child = ref.current.children[i];
 			if (!child) continue;
 			if ("material" in child) {
-				// @ts-ignore
+				// @ts-expect-error
 				updateParticle(i, child, child.material.color, delta);
 			}
 		}

@@ -269,7 +269,7 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 		outerStyle = { height: borderHeight, overflowX: "auto" };
 	}
 
-	let miniScrollbar = undefined;
+	let miniScrollbar: any;
 	if (border.isEnableTabScrollbar()) {
 		miniScrollbar = (
 			<div

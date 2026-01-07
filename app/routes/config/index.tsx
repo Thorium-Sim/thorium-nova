@@ -294,7 +294,7 @@ function PluginDetails() {
 					>
 						{plugin?.coverImage && (
 							<img
-								src={`${plugin.coverImage}?${new Date().getTime()}`}
+								src={`${plugin.coverImage}?${Date.now()}`}
 								className="w-[90%] h-[90%] object-cover"
 								alt="Cover"
 							/>

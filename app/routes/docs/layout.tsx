@@ -164,17 +164,13 @@ export default function DocLayout() {
 		}, {}),
 	);
 	const docRef = React.useRef<HTMLDivElement>(null);
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
-	const scrollToHeading = React.useCallback(
-		(id: string) => {
-			if (!docRef.current) return;
-			docRef.current.querySelector(`#${id}`)?.scrollIntoView({
-				behavior: "smooth",
-				block: "start",
-			});
-		},
-		[docRef],
-	);
+	const scrollToHeading = React.useCallback((id: string) => {
+		if (!docRef.current) return;
+		docRef.current.querySelector(`#${id}`)?.scrollIntoView({
+			behavior: "smooth",
+			block: "start",
+		});
+	}, []);
 	const location = useLocation();
 	const currentRoute = routes.find((r) =>
 		decodeURIComponent(location.pathname).endsWith(r.path),
@@ -184,7 +180,7 @@ export default function DocLayout() {
 		{ level: HeadingLevel; content: string }[]
 	>([]);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Run when the current route changes
 	React.useEffect(() => {
 		if (docRef.current) {
 			setToc(generateTOC(docRef.current));

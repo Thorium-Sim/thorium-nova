@@ -15,7 +15,7 @@ export const DragContainer = (props: IDragContainerProps) => {
 	const { layout, node } = props;
 	const selfRef = React.useRef<HTMLDivElement | null>(null);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We don't mess around with FlexLayout
 	React.useEffect(() => {
 		node.setTabStamp(selfRef.current);
 	}, [node, selfRef.current]);

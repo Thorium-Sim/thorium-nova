@@ -65,6 +65,6 @@ function CustomInputs({
 }) {
 	switch (action.action) {
 		default:
-			return <></>;
+			return null;
 	}
 }

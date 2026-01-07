@@ -59,14 +59,10 @@ function ClientButtons() {
 
 	return (
 		<>
-			<>
-				<NavLink
-					className="btn btn-primary btn-outline"
-					to="/flight/quick/ship"
-				>
-					Start Flight
-				</NavLink>
-				{/* <Disclosure>
+			<NavLink className="btn btn-primary btn-outline" to="/flight/quick/ship">
+				Start Flight
+			</NavLink>
+			{/* <Disclosure>
 			<Disclosure.Button className="btn btn-info btn-outline">
 				Load a Saved Flight
 			</Disclosure.Button>
@@ -84,7 +80,6 @@ function ClientButtons() {
 				<Flights />
 			</Suspense>
 		</Disclosure> */}
-			</>
 
 			{/* <Button className="btn btn-warning btn-outline">Join a Server</Button> */}
 			<NavLink className="btn btn-notice btn-outline" to="/config">

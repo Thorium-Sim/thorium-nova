@@ -40,7 +40,6 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 	const cancelRef = React.useRef<HTMLButtonElement>(null);
 
 	const resolveRef = React.useRef<(tf: boolean | string) => void>(undefined);
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
 	const openConfirm = React.useCallback(
 		({ header, body, defaultValue, type, inputProps }: DialogI) => {
 			if (isOpen) return Promise.resolve(false);
@@ -57,7 +56,7 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 				resolveRef.current = resolve;
 			});
 		},
-		[isOpen, setIsOpen],
+		[isOpen],
 	);
 
 	function close() {
@@ -77,7 +76,6 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 	//   }
 	// }, [inputEl, isOpen, type]);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
 	React.useEffect(() => {
 		function handleReturn(e: KeyboardEvent) {
 			if (e.key === "Enter") {
@@ -96,7 +94,7 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 			document.addEventListener("keydown", handleReturn);
 			return () => document.removeEventListener("keydown", handleReturn);
 		}
-	}, [isOpen, input, type, setIsOpen]);
+	}, [isOpen, input, type]);
 	const inputEl = React.useRef<HTMLInputElement>(null);
 	const okayButton = React.useRef<HTMLButtonElement>(null);
 
@@ -133,7 +131,6 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 												{...inputProps}
 												ref={inputEl}
 												className="input block w-full mt-4"
-												// biome-ignore lint/a11y/noAutofocus: This is inside a dialog, but Biome doesn't know it
 												autoFocus
 												value={input}
 												onChange={(e) => setInput(e.currentTarget.value)}
@@ -260,6 +257,9 @@ export function useAlert() {
 	return ({
 		header,
 		body,
-	}: { header: string; body?: string }): Promise<string> =>
+	}: {
+		header: string;
+		body?: string;
+	}): Promise<string> =>
 		dialog({ header, body, type: "alert" }) as Promise<string>;
 }

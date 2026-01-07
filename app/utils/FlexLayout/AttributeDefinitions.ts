@@ -67,7 +67,7 @@ export class AttributeDefinitions {
 
 	update(jsonObj: any, obj: any) {
 		for (const attr of this.attributes) {
-			// biome-ignore lint/suspicious/noPrototypeBuiltins: <explanation>
+			// biome-ignore lint/suspicious/noPrototypeBuiltins: We don't mess around with FlexLayout
 			if (jsonObj.hasOwnProperty(attr.name)) {
 				const fromValue = jsonObj[attr.name];
 				if (fromValue === undefined) {
@@ -107,10 +107,10 @@ export class AttributeDefinitions {
 		for (let i = 0; i < sorted.length; i++) {
 			const c = sorted[i];
 			let type = c.type;
-			let defaultValue = undefined;
+			let defaultValue: any;
 
 			let attr = c;
-			let inherited = undefined;
+			let inherited: any;
 			if (attr.defaultValue !== undefined) {
 				defaultValue = attr.defaultValue;
 			} else if (

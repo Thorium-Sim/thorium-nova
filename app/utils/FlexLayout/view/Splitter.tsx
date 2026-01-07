@@ -43,6 +43,7 @@ export const Splitter = (props: ISplitterProps) => {
 		extra = Math.max(20, extra + size) - size;
 	}
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We don't mess around with FlexLayout
 	React.useEffect(() => {
 		// Android fix: must have passive touchstart handler to prevent default handling
 		selfRef.current?.addEventListener("touchstart", onTouchStart, {

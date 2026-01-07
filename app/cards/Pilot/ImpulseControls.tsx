@@ -165,7 +165,7 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 	);
 
 	const height = measurement.height;
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to re-run this when the card re-loads
 	useEffect(() => {
 		if (downRef.current) return;
 		getMeasurements();

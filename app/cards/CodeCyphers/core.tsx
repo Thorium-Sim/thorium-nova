@@ -35,141 +35,137 @@ export function CodeCyphersCore() {
 		message: "",
 	});
 	return (
-		<>
-			<div className="text-sm flex flex-col h-full">
-				<div className="sticky top-0">
-					<Button
-						className={cn("btn-xs", { "btn-active": page === "codes" })}
-						onClick={() => setPage({ page: "codes" })}
-					>
-						Codes
-					</Button>
-					<Button
-						className={cn("btn-xs", { "btn-active": page === "compose" })}
-						onClick={() => setPage({ page: "compose" })}
-					>
-						Compose
-					</Button>
-				</div>
-				{page === "codes" ? (
-					<div className="grid grid-cols-4">
-						{cyphers.map((c) => (
-							<Fragment key={c.font}>
-								<span>{c.name}</span>
-								<Tooltip
-									content={
-										<span style={{ fontFamily: c.name }}>
-											the quick fox jumps over the lazy dog.
-										</span>
-									}
-								>
-									<span>{c.code}</span>
-								</Tooltip>
-								<Checkbox
-									label="Active"
-									checked={c.active}
-									onChange={(event) =>
-										q.codeCyphers.setCypherAvailable.netSend({
-											shipId,
-											cypherFont: c.font,
-											active: event.currentTarget.checked,
-										})
-									}
-								/>
-								<Button
-									className="btn-xs"
-									onClick={() => {
-										flushSync(() => {
-											setSelectedCypher({ selectedCypher: c.name });
-										});
-										window.print();
-									}}
-								>
-									Print
-								</Button>
-							</Fragment>
-						))}
-						<Printable>
-							<div className="cypher-printing col-span-2 grid grid-cols-4 code-list">
-								<h1 className="col-span-4 text-center font-medium text-lg">
-									=== Code Cypher ===
-								</h1>
-								<CodeList font={selectedCypher || ""} />
-							</div>
-						</Printable>
-					</div>
-				) : (
-					<>
-						<InputField
-							prompt="What heading would you like your coded message to have?"
-							promptValue={heading}
-							onClick={(value) => setHeading({ heading: value })}
-						>
-							{heading}
-						</InputField>
-						<TypingField
-							className="w-full flex-1 text-left"
-							value={message}
-							onChange={(event) =>
-								setMessage({ message: event.currentTarget.value })
-							}
-						/>
-						<div className="flex">
-							<Select
-								size="xs"
-								className="flex-1"
-								label="Code Cypher"
-								labelHidden
-								selected={selectedCypher}
-								setSelected={(value) =>
-									setSelectedCypher({ selectedCypher: value })
+		<div className="text-sm flex flex-col h-full">
+			<div className="sticky top-0">
+				<Button
+					className={cn("btn-xs", { "btn-active": page === "codes" })}
+					onClick={() => setPage({ page: "codes" })}
+				>
+					Codes
+				</Button>
+				<Button
+					className={cn("btn-xs", { "btn-active": page === "compose" })}
+					onClick={() => setPage({ page: "compose" })}
+				>
+					Compose
+				</Button>
+			</div>
+			{page === "codes" ? (
+				<div className="grid grid-cols-4">
+					{cyphers.map((c) => (
+						<Fragment key={c.font}>
+							<span>{c.name}</span>
+							<Tooltip
+								content={
+									<span style={{ fontFamily: c.name }}>
+										the quick fox jumps over the lazy dog.
+									</span>
 								}
-								items={cyphers.map((c) => ({
-									id: c.name,
-									label: `${c.code} - ${c.name} ${c.active ? "✅" : "🚫"}`,
-								}))}
+							>
+								<span>{c.code}</span>
+							</Tooltip>
+							<Checkbox
+								label="Active"
+								checked={c.active}
+								onChange={(event) =>
+									q.codeCyphers.setCypherAvailable.netSend({
+										shipId,
+										cypherFont: c.font,
+										active: event.currentTarget.checked,
+									})
+								}
 							/>
 							<Button
-								className="btn-warning btn-xs"
-								onClick={async () => {
-									const name = await prompt(
-										"What is the name of the document?",
-									);
-									if (!name) return;
-									await q.documents.renderPdf.netSend({
-										shipId,
-										name,
-										heading,
-										message,
-										fontName: selectedCypher,
-									});
-								}}
-							>
-								Add Document
-							</Button>
-							<Button
-								className="btn-success btn-xs"
+								className="btn-xs"
 								onClick={() => {
+									flushSync(() => {
+										setSelectedCypher({ selectedCypher: c.name });
+									});
 									window.print();
 								}}
 							>
 								Print
 							</Button>
-							<Printable>
-								<div>
-									<h1 className="text-center font-medium text-lg">{heading}</h1>
-									<div
-										className="!text-left mt-8 print:leading-[3] text-2xl whitespace-pre-wrap"
-										style={{ fontFamily: selectedCypher || "" }}
-									>
-										{message}
-									</div>
-								</div>
-							</Printable>
+						</Fragment>
+					))}
+					<Printable>
+						<div className="cypher-printing col-span-2 grid grid-cols-4 code-list">
+							<h1 className="col-span-4 text-center font-medium text-lg">
+								=== Code Cypher ===
+							</h1>
+							<CodeList font={selectedCypher || ""} />
 						</div>
-					</>
-				)}
-			</div>
-		</>
+					</Printable>
+				</div>
+			) : (
+				<>
+					<InputField
+						prompt="What heading would you like your coded message to have?"
+						promptValue={heading}
+						onClick={(value) => setHeading({ heading: value })}
+					>
+						{heading}
+					</InputField>
+					<TypingField
+						className="w-full flex-1 text-left"
+						value={message}
+						onChange={(event) =>
+							setMessage({ message: event.currentTarget.value })
+						}
+					/>
+					<div className="flex">
+						<Select
+							size="xs"
+							className="flex-1"
+							label="Code Cypher"
+							labelHidden
+							selected={selectedCypher}
+							setSelected={(value) =>
+								setSelectedCypher({ selectedCypher: value })
+							}
+							items={cyphers.map((c) => ({
+								id: c.name,
+								label: `${c.code} - ${c.name} ${c.active ? "✅" : "🚫"}`,
+							}))}
+						/>
+						<Button
+							className="btn-warning btn-xs"
+							onClick={async () => {
+								const name = await prompt("What is the name of the document?");
+								if (!name) return;
+								await q.documents.renderPdf.netSend({
+									shipId,
+									name,
+									heading,
+									message,
+									fontName: selectedCypher,
+								});
+							}}
+						>
+							Add Document
+						</Button>
+						<Button
+							className="btn-success btn-xs"
+							onClick={() => {
+								window.print();
+							}}
+						>
+							Print
+						</Button>
+						<Printable>
+							<div>
+								<h1 className="text-center font-medium text-lg">{heading}</h1>
+								<div
+									className="!text-left mt-8 print:leading-[3] text-2xl whitespace-pre-wrap"
+									style={{ fontFamily: selectedCypher || "" }}
+								>
+									{message}
+								</div>
+							</div>
+						</Printable>
+					</div>
+				</>
+			)}
+		</div>
 	);
 }

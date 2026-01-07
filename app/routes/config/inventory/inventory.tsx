@@ -221,7 +221,7 @@ export default function InventoryLayout() {
 					>
 						{item.assets.image && (
 							<img
-								src={`${item.assets.image}?${new Date().getTime()}`}
+								src={`${item.assets.image}?${Date.now()}`}
 								alt="Inventory Item"
 								className="w-10/12 h-10/12 object-cover"
 							/>
@@ -266,7 +266,6 @@ export default function InventoryLayout() {
 									</RAButton>
 									<Popover className={popoverTransitionClasses}>
 										<OverlayArrow>
-											{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
 											<svg width={12} height={12} viewBox="0 0 12 12">
 												<path d="M0 0 L6 6 L12 0" />
 											</svg>
@@ -318,6 +317,7 @@ export default function InventoryLayout() {
 														}));
 													return (
 														<Select
+															key={config}
 															label={capitalCase(config)}
 															items={items}
 															selected={

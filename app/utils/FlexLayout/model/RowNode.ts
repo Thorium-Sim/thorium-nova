@@ -579,15 +579,14 @@ export class RowNode extends Node implements IDropTarget {
 	getAttributeDefinitions() {
 		return RowNode.attributeDefinitions;
 	}
+	/** @internal */
+	static getAttributeDefinitions() {
+		return RowNode.attributeDefinitions;
+	}
 
 	/** @internal */
 	updateAttrs(json: any) {
 		RowNode.attributeDefinitions.update(json, this.attributes);
-	}
-
-	/** @internal */
-	static getAttributeDefinitions() {
-		return RowNode.attributeDefinitions;
 	}
 
 	// NOTE:  flex-grow cannot have values < 1 otherwise will not fill parent, need to normalize

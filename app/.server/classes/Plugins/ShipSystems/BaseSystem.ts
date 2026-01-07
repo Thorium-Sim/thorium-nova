@@ -132,7 +132,7 @@ export default class BaseShipSystemPlugin extends Aspect {
 		this.coolantConsumptionRate = params.coolantConsumptionRate || 1;
 		if (this.constructor.name === "BaseShipSystemPlugin") {
 			if (systemPlugins[this.type]) {
-				// biome-ignore lint/correctness/noConstructorReturn: <explanation>
+				// biome-ignore lint/correctness/noConstructorReturn: Necessary
 				return new systemPlugins[this.type](params, plugin);
 			}
 		}

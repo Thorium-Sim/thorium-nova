@@ -13,7 +13,7 @@ export function useRequestSub(
 	const [hookId] = useState(uniqid());
 	const { socket, reconnectionState } = useLiveQuery();
 	const isConnected = reconnectionState === "connected";
-	// biome-ignore lint/correctness/useExhaustiveDependencies:
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We don't need to update when mockData changes
 	useEffect(() => {
 		if (!socket || !isConnected || mockData) return;
 		if (!requestMap.has(id)) {

@@ -639,7 +639,7 @@ export function PropertyInput({
 				/>
 			);
 		case "object":
-			return <></>;
+			return null;
 		case "starmapCoordinates":
 			return <StarmapCoordinates value={value} setValue={setValue} />;
 		case "shipTemplate":

@@ -43,7 +43,7 @@ export function SVGImageLoader({
 			<div
 				role="img"
 				{...props}
-				// biome-ignore lint/security/noDangerouslySetInnerHtml:
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: Necessary for rendering the loaded SVG
 				dangerouslySetInnerHTML={{ __html: data }}
 				ref={ref}
 			/>

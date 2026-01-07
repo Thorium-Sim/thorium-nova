@@ -116,74 +116,72 @@ export function LegacySensorGrid() {
 							) : null}
 						</>
 					) : page === "options" ? (
-						<>
-							<div>
-								<p>Sensor Options</p>
-								<Button
-									className={cn("w-full btn-warning mb-2", {
-										"btn-active": sensors.pingMode === "active",
-									})}
-									onClick={() =>
-										q.legacy.sensorGrid.setPingMode.netSend({
-											shipId,
-											pingMode: "active",
-										})
-									}
-								>
-									Active Scan
-								</Button>
-								<Button
-									className={cn("w-full btn-primary mb-2", {
-										"btn-active": sensors.pingMode === "passive",
-									})}
-									onClick={() =>
-										q.legacy.sensorGrid.setPingMode.netSend({
-											shipId,
-											pingMode: "passive",
-										})
-									}
-								>
-									Passive Scan
-								</Button>
-								<Button
-									className={cn("w-full btn-notice", {
-										"btn-active": sensors.pingMode === "manual",
-									})}
-									onClick={() =>
-										q.legacy.sensorGrid.setPingMode.netSend({
-											shipId,
-											pingMode: "manual",
-										})
-									}
-								>
-									Manual Scan
-								</Button>
-								<hr
-									className={cn(
-										"my-2 opacity-0 transition-opacity duration-300",
-										{
-											"opacity-100": sensors.pingMode === "manual",
-										},
-									)}
-								/>
-								<Button
-									className={cn(
-										"w-full btn-success opacity-0 !transition-opacity !duration-300 pointer-events-none",
-										{
-											"opacity-100 pointer-events-auto":
-												sensors.pingMode === "manual",
-										},
-									)}
-									onClick={() =>
-										q.legacy.sensorGrid.triggerPing.netSend({
-											shipId,
-										})
-									}
-								>
-									Sonar Ping
-								</Button>
-							</div>
-						</>
+						<div>
+							<p>Sensor Options</p>
+							<Button
+								className={cn("w-full btn-warning mb-2", {
+									"btn-active": sensors.pingMode === "active",
+								})}
+								onClick={() =>
+									q.legacy.sensorGrid.setPingMode.netSend({
+										shipId,
+										pingMode: "active",
+									})
+								}
+							>
+								Active Scan
+							</Button>
+							<Button
+								className={cn("w-full btn-primary mb-2", {
+									"btn-active": sensors.pingMode === "passive",
+								})}
+								onClick={() =>
+									q.legacy.sensorGrid.setPingMode.netSend({
+										shipId,
+										pingMode: "passive",
+									})
+								}
+							>
+								Passive Scan
+							</Button>
+							<Button
+								className={cn("w-full btn-notice", {
+									"btn-active": sensors.pingMode === "manual",
+								})}
+								onClick={() =>
+									q.legacy.sensorGrid.setPingMode.netSend({
+										shipId,
+										pingMode: "manual",
+									})
+								}
+							>
+								Manual Scan
+							</Button>
+							<hr
+								className={cn(
+									"my-2 opacity-0 transition-opacity duration-300",
+									{
+										"opacity-100": sensors.pingMode === "manual",
+									},
+								)}
+							/>
+							<Button
+								className={cn(
+									"w-full btn-success opacity-0 !transition-opacity !duration-300 pointer-events-none",
+									{
+										"opacity-100 pointer-events-auto":
+											sensors.pingMode === "manual",
+									},
+								)}
+								onClick={() =>
+									q.legacy.sensorGrid.triggerPing.netSend({
+										shipId,
+									})
+								}
+							>
+								Sonar Ping
+							</Button>
+						</div>
 					) : null}
 					<div className="flex-1 flex flex-col min-h-0">
 						<p>Processed Data</p>

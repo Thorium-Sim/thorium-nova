@@ -70,7 +70,7 @@ export class FileLoader extends Loader {
 					case "document": {
 						const text = buffer.toString();
 						const parser = new DOMParser();
-						// @ts-ignore
+						// @ts-expect-error
 						result = parser.parseFromString(text, mimeType);
 						break;
 					}
@@ -91,7 +91,6 @@ export class FileLoader extends Loader {
 				// create request
 				const req = new Request(url, {
 					headers: new Headers(this.requestHeader),
-					// @ts-ignore
 					credentials: this.withCredentials ? "include" : "same-origin",
 					// An abort controller could be added within a future PR
 				});
@@ -124,7 +123,7 @@ export class FileLoader extends Loader {
 							case "document":
 								return response.text().then((text) => {
 									const parser = new DOMParser();
-									// @ts-ignore
+									// @ts-expect-error
 									return parser.parseFromString(text, mimeType);
 								});
 

@@ -23,7 +23,7 @@ export const Tab = (props: ITabProps) => {
 	const parentNode = node.getParent() as TabSetNode | BorderNode;
 	const rect = parentNode.getContentRect()!;
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: We don't mess around with FlexLayout
 	React.useLayoutEffect(() => {
 		const element = node.getMoveableElement()!;
 		selfRef.current!.appendChild(element);

@@ -70,7 +70,7 @@ export class Model {
 	 * @returns added Node for Actions.addNode, windowId for createWindow
 	 */
 	doAction(action: Action): any {
-		let returnVal = undefined;
+		let returnVal: any;
 
 		switch (action.type) {
 			case Actions.ADD_NODE: {
@@ -523,7 +523,7 @@ export class Model {
 	}
 
 	removeChangeListener(listener: (action: Action) => void) {
-		const pos = this.changeListeners.findIndex((l) => l === listener);
+		const pos = this.changeListeners.indexOf(listener);
 		if (pos !== -1) {
 			this.changeListeners.splice(pos, 1);
 		}

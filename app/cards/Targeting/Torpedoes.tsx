@@ -88,7 +88,6 @@ function Launcher({
 			<div className="relative">
 				<img draggable={false} src={LauncherImage} alt="Torpedo Launcher" />
 				<div className="absolute w-[54%] h-[calc(65%)] top-[4%] left-[39%] overflow-hidden pointer-events-none">
-					{/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
 					<svg
 						className="absolute w-full h-full"
 						ref={torpedoRef}
