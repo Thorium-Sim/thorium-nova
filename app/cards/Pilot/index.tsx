@@ -26,7 +26,6 @@ import {
 	Button as RAButton,
 } from "react-aria-components";
 import { cn } from "@thorium/utils/cn";
-import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
 import { Navigation } from "@thorium/cards/Navigation";
 import useEventListener from "@thorium/hooks/useEventListener";
 

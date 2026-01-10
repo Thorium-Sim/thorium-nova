@@ -69,10 +69,14 @@ export const bunDataStoreProps: DataStoreOperations = {
 			const jsonData = this.toJSON();
 			jsonData.lastSaved = Date.now();
 			jsonData.dataLoaded = undefined;
-			const data = dump(jsonData, { skipInvalid: true });
+
+			const data = dump(jsonData, {
+				skipInvalid: true,
+			});
 			await fs.writeFile(filePath, data, { mode: 0o0600 });
 		} catch (e: any) {
 			e.message = `db-fs: Error writing file:\n${e.message}`;
+
 			throw e;
 		}
 	},

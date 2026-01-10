@@ -60,7 +60,6 @@ function Waypoints() {
 	const { shipId } = useStation();
 
 	const useStarmapStore = useGetStarmapStore();
-	const [toggle, setToggle] = useState(false);
 	const ref = useRef<HTMLDivElement>(null);
 
 	const [waypoints] = q.waypoints.all.useNetRequest({
@@ -72,14 +71,8 @@ function Waypoints() {
 
 	return (
 		<div className="self-end justify-self-end w-96 pointer-events-auto">
-			<Button
-				className="btn-primary w-full"
-				onClick={() => setToggle((t) => !t)}
-			>
-				{toggle ? "Hide" : "Show"} Waypoints
-			</Button>
 			<div className="overflow-hidden w-full mt-2">
-				<div ref={ref} className="flex flex-col h-full">
+				<div ref={ref} className="flex flex-col h-full max-h-72">
 					<SearchableList
 						items={
 							waypoints.length === 0

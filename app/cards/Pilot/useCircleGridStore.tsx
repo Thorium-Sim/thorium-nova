@@ -10,7 +10,10 @@ import { useStation } from "@thorium/routes/station/useStation";
 function createCircleGridStore({
 	zoomMin = 0.01,
 	zoomMax = 10000,
-}: { zoomMin?: number; zoomMax?: number }) {
+}: {
+	zoomMin?: number;
+	zoomMax?: number;
+}) {
 	return create<{
 		zoom: number;
 		zoomMin: number;
@@ -38,7 +41,11 @@ export function CircleGridStoreProvider({
 	zoomMin = 0.01,
 	zoomMax = 10000,
 	children,
-}: { zoomMin?: number; zoomMax?: number; children: ReactNode }) {
+}: {
+	zoomMin?: number;
+	zoomMax?: number;
+	children: ReactNode;
+}) {
 	const [useCircleGridStore] = useState(() =>
 		createCircleGridStore({ zoomMin, zoomMax }),
 	);
@@ -77,7 +84,7 @@ export function useGetFacingWaypoint() {
 		active: true,
 		shipId: id,
 	});
-	// This needs some work
+	// TODO January 7, 2026 - This needs some work, mostly with dynamically updating the waypoint's appearance without triggering a state update
 	useFrame(() => {
 		const playerShip = interpolate(id);
 		if (!playerShip) return;
@@ -104,6 +111,14 @@ export function useGetFacingWaypoint() {
 			// 3 Degrees of difference
 			if (angle < Math.PI / 60) {
 				facingWaypoints.push(waypoint.id);
+			}
+			if (!store.getState().facingWaypoints.includes(waypoint.id)) {
+				// We're facing a new waypoint, so we can trigger this event
+				q.thorium.genericEvent.netSend({
+					clientId,
+					eventName: "facing-waypoint",
+					properties: `${waypoint.id}`,
+				});
 			}
 		}
 		store.setState({ facingWaypoints });

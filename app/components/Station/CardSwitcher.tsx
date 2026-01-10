@@ -29,6 +29,7 @@ export const CardSwitcher: React.FC<{
 	changeCard: (id: string) => void;
 }> = ({ card, changeCard }) => {
 	const [station] = q.station.get.useNetRequest({ clientId });
+	if (station.cards.length < 2) return null;
 	return (
 		<div className="card-switcher-holder absolute right-0">
 			<div className="card-switcher">

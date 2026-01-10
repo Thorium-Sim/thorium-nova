@@ -6,11 +6,10 @@ import {
 	getShipSystem,
 	getShipSystems,
 } from "@thorium/utils/.server/ship/getShipSystem";
-import type { ECS, Entity } from "@thorium/utils/ecs";
+import { Entity, type ECS } from "@thorium/utils/ecs";
 import { produce } from "immer";
 import { evaluateTriggerCondition } from "@thorium/utils/.server/evaluateEntityQuery";
 import { interpolateText } from "@thorium/utils/interpolationEngine";
-import type { RNG } from "@thorium/utils/rng";
 
 export class TimelineAvailability {
 	constructor(public isAvailable: boolean) {}
@@ -150,12 +149,12 @@ export async function executeBlocks(
 					localVariables[block.variable] = getShipSystem(ecs, {
 						systemType: block.systemType as any,
 						shipId: entity.id,
-					});
+					}).id;
 				} else {
 					localVariables[block.variable] = getShipSystems(ecs, {
 						systemType: block.systemType as any,
 						shipId: entity.id,
-					});
+					}).map((e) => e.id);
 				}
 				break;
 			}
@@ -412,6 +411,19 @@ function evaluateCondition(
 		case "=": {
 			if (typeof val1 === "boolean") return val1 === Boolean(val2);
 			if (typeof val2 === "boolean") return Boolean(val1) === val2;
+
+			// Handle matching entity IDs to entities
+			if (val2 instanceof Entity && typeof val1 === "number")
+				return val1 === val2.id;
+			if (val1 instanceof Entity && typeof val2 === "number")
+				return val2 === val1.id;
+			if (val2 instanceof Entity && typeof val1 === "string")
+				return Number(val1) === val2.id;
+			if (val1 instanceof Entity && typeof val2 === "string")
+				return Number(val2) === val1.id;
+			if (val1 instanceof Entity && val2 instanceof Entity)
+				return val1.id === val2.id;
+
 			// biome-ignore lint/suspicious/noDoubleEquals: Necessary for this fuzzy comparison
 			return val1 == val2;
 		}
