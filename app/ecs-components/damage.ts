@@ -91,3 +91,5 @@ export const damage = z
 		damageTypeMultipliers: z.record(z.number()).default({}),
 	})
 	.default({});
+
+export type DamageComponentType = z.infer<typeof damage>;

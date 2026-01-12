@@ -67,7 +67,7 @@ class ECS {
 	 */
 	removeEntity(entity: Entity) {
 		const hasEntity = this.entities.has(entity.id);
-		// if the entity is not found do nothing
+		// if the entity is not found, do nothing
 		if (hasEntity) {
 			entity.dispose();
 			this.removeEntityIfDirty(entity);

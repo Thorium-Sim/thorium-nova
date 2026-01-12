@@ -46,6 +46,13 @@ yourself by going to http://localhost:3000.
 > the latest assets and configuration. If you want to manually pull the latest
 > default plugin from Github, you can run `bun run init:plugin`.
 
+## Tests
+You may need to install playwright for running e2e tests locally. You can do this by running:
+```bash
+npx playwright install
+npx playwright install-deps
+``` 
+
 ## Project Vision
 
 Thorium Nova is a platform for creating powerful narrative experiences in a

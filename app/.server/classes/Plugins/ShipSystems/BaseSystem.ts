@@ -1,13 +1,13 @@
-import { Aspect } from "../Aspect";
-import type BasePlugin from "..";
-import type { ShipSystemTypes, ShipSystemFlags } from "./shipSystemTypes";
+import type { Sound } from "@thorium/ecs-components/sound";
+import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import type {
 	Kelvin,
 	KelvinPerSecond,
 	MegaWatt,
 } from "@thorium/utils/unitTypes";
-import type { Sound } from "@thorium/ecs-components/sound";
-import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+import type BasePlugin from "..";
+import { Aspect } from "../Aspect";
+import type { ShipSystemFlags, ShipSystemTypes } from "./shipSystemTypes";
 
 const systemPlugins: Record<string, typeof BaseShipSystemPlugin> = {};
 export function registerSystem(name: string, sys: typeof BaseShipSystemPlugin) {
@@ -29,7 +29,7 @@ export default class BaseShipSystemPlugin extends Aspect {
 	type: keyof typeof ShipSystemTypes;
 	tags: string[];
 	/**
-	 * Extend the sub-class to include the specific images and sound effects
+	 * Extend the subclass to include the specific images and sound effects
 	 * for this system
 	 */
 	assets: Record<string, string[]>;

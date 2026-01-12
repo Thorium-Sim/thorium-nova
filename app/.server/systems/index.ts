@@ -2,42 +2,43 @@
  * Since the order of system execution matters, we need to import all
  * of the systems and re-export them in an array
  */
+import { DamageCheckSystem } from "@thorium/.server/systems/DamageCheckSystem";
+import { legacySystems } from "@thorium/.server/systems/Legacy";
+import { MainComputerDiagnosticSystem } from "@thorium/.server/systems/MainComputerDiagnosticSystem";
+import { NPCDecisionSystem } from "@thorium/.server/systems/NPCDecisionSystem";
+import { NPCFireWeaponsSystem } from "@thorium/.server/systems/NPCFireWeaponsSystem";
+import { NPCKnowledgeSystem } from "@thorium/.server/systems/NPCKnowledgeSystem";
+import { PowerEfficiencyOverloadSystem } from "@thorium/.server/systems/PowerEfficiencyOverloadSystem";
+import { SensorScanSystem } from "@thorium/.server/systems/SensorScanSystem";
 import { AutoRotateSystem } from "./AutoRotateSystem";
 import { AutoThrustSystem } from "./AutoThrustSystem";
 import { DataStreamSystem } from "./DataStreamSystem";
+import { FilterInventorySystem } from "./FilterInventorySystem";
+import { FilterShipsWithReactors } from "./FilterShipsWithReactors";
+import { HeatDispersionSystem } from "./HeatDispersionSystem";
+import { HeatToCoolantSystem } from "./HeatToCoolantSystem";
+import { ImpulseSystem } from "./ImpulseSystem";
+import { InterstellarTransitionSystem } from "./InterstellarTransitionSystem";
+import { IsDestroyedSystem } from "./IsDestroyedSystem";
+import { NearbyObjectsSystem } from "./NearbyObjectsSystem";
+import { NPCPhaserChargeSystem } from "./NPCPhaserChargeSystem";
 import { PassengerDestinationSystem } from "./PassengerDestinationSystem";
 import { PassengerMovementSystem } from "./PassengerMovementSystem";
-import { TimerSystem } from "./TimerSystem";
-import { InterstellarTransitionSystem } from "./InterstellarTransitionSystem";
-import { ReactorFuelSystem } from "./ReactorFuelSystem";
-import { FilterShipsWithReactors } from "./FilterShipsWithReactors";
-import { FilterInventorySystem } from "./FilterInventorySystem";
-import { ReactorHeatSystem } from "./ReactorHeatSystem";
-import { HeatToCoolantSystem } from "./HeatToCoolantSystem";
-import { HeatDispersionSystem } from "./HeatDispersionSystem";
-import { PowerDrawSystem } from "./PowerDrawSystem";
-import { NPCPhaserChargeSystem } from "./NPCPhaserChargeSystem";
-import { WaypointRemoveSystem } from "./WaypointRemoveSystem";
-import { ProcessTriggersSystem } from "./ProcessTriggersSystem";
-import { WarpSystem } from "./WarpSystem";
-import { ImpulseSystem } from "./ImpulseSystem";
-import { ThrusterSystem } from "./ThrusterSystem";
+import { PhasersSystem } from "./PhasersSystem";
 import { PhysicsMovementSystem } from "./PhysicsMovementSystem";
-import { NearbyObjectsSystem } from "./NearbyObjectsSystem";
+import { PowerDistributionSystem } from "./PowerDistributionSystem";
+import { PowerDrawSystem } from "./PowerDrawSystem";
+import { ProcessTriggersSystem } from "./ProcessTriggersSystem";
+import { ReactorFuelSystem } from "./ReactorFuelSystem";
+import { ReactorHeatSystem } from "./ReactorHeatSystem";
+import { ShieldsSystem } from "./ShieldsSystem";
+import { SolarSystemPositionSystem } from "./SolarSystemPositionSystem";
+import { ThrusterSystem } from "./ThrusterSystem";
+import { TimerSystem } from "./TimerSystem";
 import { TorpedoLoadingSystem } from "./TorpedoLoadingSystem";
 import { TorpedoMovementSystem } from "./TorpedoMovementSystem";
-import { IsDestroyedSystem } from "./IsDestroyedSystem";
-import { PowerDistributionSystem } from "./PowerDistributionSystem";
-import { ShieldsSystem } from "./ShieldsSystem";
-import { PhasersSystem } from "./PhasersSystem";
-import { SolarSystemPositionSystem } from "./SolarSystemPositionSystem";
-import { SensorScanSystem } from "@thorium/.server/systems/SensorScanSystem";
-import { NPCKnowledgeSystem } from "@thorium/.server/systems/NPCKnowledgeSystem";
-import { NPCDecisionSystem } from "@thorium/.server/systems/NPCDecisionSystem";
-import { NPCFireWeaponsSystem } from "@thorium/.server/systems/NPCFireWeaponsSystem";
-import { legacySystems } from "@thorium/.server/systems/Legacy";
-import { PowerEfficiencyOverloadSystem } from "@thorium/.server/systems/PowerEfficiencyOverloadSystem";
-import { MainComputerDiagnosticSystem } from "@thorium/.server/systems/MainComputerDiagnosticSystem";
+import { WarpSystem } from "./WarpSystem";
+import { WaypointRemoveSystem } from "./WaypointRemoveSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -72,6 +73,7 @@ const systems = [
 	WaypointRemoveSystem,
 	HeatToCoolantSystem,
 	HeatDispersionSystem,
+	DamageCheckSystem,
 	IsDestroyedSystem,
 	// We slot the legacy systems in right before these two shared systems
 	...legacySystems,
