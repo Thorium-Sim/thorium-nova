@@ -7,10 +7,7 @@ export class DamageCheckSystem extends System {
 	static flightMode = ["nova"];
 
 	test(entity: Entity) {
-		return Boolean(
-			entity.components.isPlayerShip &&
-				entity.components.damage?.vulnerability !== "invulnerable",
-		);
+		return Boolean(entity.components.isPlayerShip);
 	}
 
 	update(entity: Entity, elapsed: number) {
