@@ -18,7 +18,7 @@ export function ShipSystemGetter({
 
 	return (
 		<div className="flex gap-1">
-			Save{" "}
+			Save the ID from{" "}
 			<MadLibSelect
 				value={count}
 				onChange={(value) => update("count", value as any)}

@@ -13,3 +13,4 @@ export { LegacyEngineControlCore } from "../cards/Legacy/EngineControl/core";
 export { CodeCyphersCore } from "../cards/CodeCyphers/core";
 export { MessagingCore } from "../cards/Messaging/core";
 export { DocumentsCore } from "../cards/Documents/core";
+export { TrainingCore } from "./TrainingCore";

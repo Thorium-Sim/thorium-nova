@@ -56,6 +56,7 @@ export function useDataConnection<TContext extends RequestContext>(
 		[getRequestContext],
 	);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Causes infinite websocket connections
 	useEffect(() => {
 		if (isTestEnv) return;
 		startDataConnection();
@@ -64,7 +65,7 @@ export function useDataConnection<TContext extends RequestContext>(
 			socketSet.current = false;
 			setSocket(null!);
 		};
-	}, [startDataConnection, socket]);
+	}, [startDataConnection]);
 
 	return { reconnectionState, socket };
 }

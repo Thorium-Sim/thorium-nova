@@ -8,7 +8,7 @@ import {
 	type MetaFunction,
 } from "react-router";
 import { Icon, href as iconsHref } from "@thorium/ui/Icon";
-
+import { UNSAFE_PortalProvider } from "@react-aria/overlays";
 import { getBackground } from "@thorium/utils/getBackground";
 import Button from "@thorium/ui/Button";
 import { ClientOnly } from "remix-utils/client-only";
@@ -19,6 +19,7 @@ import "@fontsource-variable/outfit";
 import icon from "./images/logo.svg?url";
 import type { Route } from ".react-router/types/app/+types/root";
 import AppContext, { q } from "@thorium/context/AppContext";
+import { useRef } from "react";
 
 export const meta: MetaFunction = () => {
 	return [{ title: "Thorium Nova" }, {}];
@@ -48,6 +49,7 @@ url(${bg})`,
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
+	const container = useRef<HTMLDivElement>(null);
 	return (
 		<html lang="en">
 			<head>
@@ -58,9 +60,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 			</head>
 			<body>
 				<ClientOnly>{() => <Background />}</ClientOnly>
-				<div className="z-0 absolute top-0  w-full h-full text-white">
-					{children}
-				</div>
+				<UNSAFE_PortalProvider getContainer={() => container.current}>
+					<div className="z-0 absolute top-0  w-full h-full text-white">
+						{children}
+					</div>
+				</UNSAFE_PortalProvider>
+				<div ref={container} />
 				<Snapshot />
 				<ScrollRestoration />
 				<Scripts />

@@ -84,6 +84,7 @@ export const timeline = t.router({
 				if (timeline.components.damageReport?.autoApplyWhenCompleted) {
 					applyDamageReportMetrics(timeline);
 				}
+				// TODO January 7, 2026 - Training timelines should clear the client's training
 				return;
 			}
 			timeline.updateComponent("isTimeline", { currentStep: stepIndex + 1 });

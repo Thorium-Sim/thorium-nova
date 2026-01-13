@@ -108,7 +108,7 @@ export const pilot = t.router({
 					shipId,
 					systemId: system.id,
 				});
-				return { shipId, systemId, speed };
+				return { shipId, systemId: system.id, speed };
 			}),
 	}),
 	warpEngines: t.router({
@@ -183,7 +183,7 @@ export const pilot = t.router({
 					shipId,
 					systemId: system.id,
 				});
-				return { systemId, shipId, factor };
+				return { systemId: system.id, shipId, factor };
 			}),
 	}),
 	autopilot: t.router({
@@ -225,7 +225,9 @@ export const pilot = t.router({
 				};
 			}),
 		lockCourse: t.procedure
+			.meta({ event: true })
 			.input(z.object({ waypointId: z.number(), shipId: z.number() }))
+			.output(z.object({ waypointId: z.number(), shipId: z.number() }))
 			.send(({ ctx, input }) => {
 				const waypoint = ctx.flight?.ecs.getEntityById(input.waypointId);
 				if (waypoint?.components.isWaypoint?.assignedShipId !== input.shipId)
@@ -258,9 +260,12 @@ export const pilot = t.router({
 				pubsub.publish.starmapCore.autopilot({
 					systemId: ship?.components.position?.parentId || null,
 				});
+				return input;
 			}),
 		unlockCourse: t.procedure
+			.meta({ event: true })
 			.input(z.object({ shipId: z.number() }))
+			.output(z.object({ shipId: z.number() }))
 			.send(({ ctx, input }) => {
 				const ship = ctx.ecs.getEntityById(input.shipId);
 				ship?.updateComponent("autopilot", {
@@ -287,9 +292,12 @@ export const pilot = t.router({
 				pubsub.publish.starmapCore.autopilot({
 					systemId: ship?.components.position?.parentId || null,
 				});
+				return input;
 			}),
 		activate: t.procedure
+			.meta({ event: true })
 			.input(z.object({ shipId: z.number() }))
+			.output(z.object({ shipId: z.number() }))
 			.send(({ ctx, input }) => {
 				const ship = ctx.ecs.getEntityById(input.shipId);
 
@@ -300,9 +308,12 @@ export const pilot = t.router({
 				pubsub.publish.starmapCore.autopilot({
 					systemId: ship?.components.position?.parentId || null,
 				});
+				return input;
 			}),
 		deactivate: t.procedure
+			.meta({ event: true })
 			.input(z.object({ shipId: z.number() }))
+			.output(z.object({ shipId: z.number() }))
 			.send(({ ctx, input }) => {
 				const ship = ctx.ecs.getEntityById(input.shipId);
 				ship?.updateComponent("autopilot", {
@@ -314,6 +325,8 @@ export const pilot = t.router({
 				pubsub.publish.starmapCore.autopilot({
 					systemId: ship?.components.position?.parentId || null,
 				});
+
+				return input;
 			}),
 	}),
 	thrusters: t.router({

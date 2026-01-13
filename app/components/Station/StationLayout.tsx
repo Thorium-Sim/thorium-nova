@@ -7,10 +7,10 @@ import { useManageCard } from "./useManageCard";
 import { Widgets } from "./widgets";
 import { cn } from "@thorium/utils/cn";
 import { useStation } from "@thorium/routes/station/useStation";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import Button from "@thorium/ui/Button";
-import { useResizeObserver } from "@thorium/hooks/useResizeObserver";
+import { Portal } from "@thorium/ui/Portal";
 
 const StationLayout = () => {
 	const { client, station, ship } = useStation();
@@ -102,35 +102,37 @@ const StationLayout = () => {
 					<Widgets />
 				</div>
 				{client.training ? (
-					<div className="training">
-						<div className="training-overlay" />
-						{client.training?.selector?.map((selector, index) => (
-							<TrainingHighlight
-								key={selector}
-								selector={selector}
-								index={index}
-							/>
-						))}
-						<div className="training-infobox panel backdrop-blur flex flex-col items-end gap-2">
-							<div
-								className="whitespace-pre-wrap max-w-lg"
-								// biome-ignore lint/security/noDangerouslySetInnerHtml: Training supports markdown
-								dangerouslySetInnerHTML={{ __html: client.training?.text }}
-							/>
-							{client.training.allowAdvance ? (
-								<Button
-									className="btn-sm btn-primary pointer-events-auto"
-									onClick={() => {
-										q.timeline.advance.netSend({
-											timelineId: client.training?.timelineId,
-										});
-									}}
-								>
-									Next
-								</Button>
-							) : null}
+					<Portal>
+						<div className="theme-container training z-40">
+							<div className="training-overlay" />
+							{client.training?.selector?.map((selector, index) => (
+								<TrainingHighlight
+									key={selector}
+									selector={selector}
+									index={index}
+								/>
+							))}
+							<div className="training-infobox panel backdrop-blur flex flex-col items-end gap-2">
+								<div
+									className="whitespace-pre-wrap max-w-lg"
+									// biome-ignore lint/security/noDangerouslySetInnerHtml: Training supports markdown
+									dangerouslySetInnerHTML={{ __html: client.training?.text }}
+								/>
+								{client.training.allowAdvance ? (
+									<Button
+										className="btn-sm btn-primary pointer-events-auto"
+										onClick={() => {
+											q.timeline.advance.netSend({
+												timelineId: client.training?.timelineId,
+											});
+										}}
+									>
+										Next
+									</Button>
+								) : null}
+							</div>
 						</div>
-					</div>
+					</Portal>
 				) : null}
 			</div>
 		</div>
@@ -178,7 +180,6 @@ anchor-name: --training-highlight-${index};
 					"highlight-target": index === 0,
 				})}
 				style={{
-					// @ts-expect-error
 					positionAnchor: `--training-highlight-${index}`,
 				}}
 			/>

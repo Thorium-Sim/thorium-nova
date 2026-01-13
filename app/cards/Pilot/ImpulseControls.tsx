@@ -313,7 +313,7 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 								},
 							)}
 						>
-							{warpSpeeds.map(({ label }, i, arr) => {
+							{warpSpeeds.slice().reverse().map(({ label }, i, arr) => {
 								const warpFactor = arr.length - i;
 								return (
 									<Button
