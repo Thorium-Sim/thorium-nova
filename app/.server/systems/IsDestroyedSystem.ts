@@ -1,6 +1,5 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { type Entity, System } from "@thorium/utils/ecs";
-import type { World } from "@thorium-sim/rapier3d-node";
 import {
 	getCompletePositionFromOrbit,
 	getObjectOffsetPosition,

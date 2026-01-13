@@ -2,15 +2,14 @@
  * @module  ecs
  */
 
+import {
+	components as allComponents,
+	type ComponentIds,
+	type ComponentProperties as Components,
+} from "@thorium/ecs-components";
 import type ECS from "./ecs";
 import type System from "./system";
-import { UIDGenerator, DefaultUIDGenerator } from "./uid";
-import {
-	type ComponentProperties as Components,
-	type ComponentIds,
-	components as allComponents,
-	type ComponentInputs,
-} from "@thorium/ecs-components";
+import { DefaultUIDGenerator, UIDGenerator } from "./uid";
 
 type DeepPartial<T> = Partial<{
 	[P in keyof T]: Partial<T[P]>;
@@ -188,6 +187,7 @@ class Entity {
 	 *
 	 * @param {String} name Attribute name of the component to add.
 	 * @param {Object} data Component data.
+	 * @param autoPublish
 	 */
 	async addComponent<
 		Name extends keyof Components,
@@ -208,10 +208,11 @@ class Entity {
 	}
 	/**
 	 * Remove a component from the entity. To preserve performances, we
-	 * simple set the component property to `undefined`. Therefore the
+	 * simple set the component property to `undefined`. Therefore, the
 	 * property is still enumerable after a call to removeComponent()
 	 *
 	 * @param  {String} name Name of the component to remove.
+	 * @param autoPublish
 	 */
 	removeComponent(name: keyof Components, autoPublish?: boolean) {
 		if (!this.components[name]) {
@@ -233,6 +234,7 @@ class Entity {
 	 * @method updateComponent
 	 * @param  {String} name Name of the component
 	 * @param  {Object} data Dict of attributes to update
+	 * @param autoPublish
 	 * @example
 	 *   entity.addComponent('kite', {vel: 0, pos: {x: 1}});
 	 *   // entity.component.pos is '{vel: 0, pos: {x: 1}}'
