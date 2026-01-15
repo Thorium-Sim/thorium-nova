@@ -18,7 +18,7 @@ vi.mock("@thorium/utils/flags/damageTypes", async (importOriginal) => {
 	};
 });
 
-function makeEntity({
+function makeEntity(ecs: ECS, {
 	isPlayerShip = true,
 	vulnerability = "normal",
 	offline = false,
@@ -44,6 +44,7 @@ function makeEntity({
 		offlineDamage,
 		cascadeRisk,
 	});
+	ecs.addEntity(entity);
 	return entity;
 }
 
@@ -62,56 +63,48 @@ describe("DamageCheck", () => {
 
 	describe("update()", () => {
 		it("brings system online if offline and aggregateDamage <= onlineDamage", () => {
-			const entity = makeEntity({ offline: true, onlineDamage: 10 });
-			ecs.addEntity(entity);
+			const entity = makeEntity(ecs, { offline: true, onlineDamage: 10 });
 			(getAggregateDamage as any).mockReturnValue(5);
 			ecs.update(1);
 			expect(entity.components.damage?.offline).toBe(false);
 		});
 		it("keeps system offline if aggregateDamage > onlineDamage", () => {
-			const entity = makeEntity({ offline: true, onlineDamage: 10 });
-			ecs.addEntity(entity);
+			const entity = makeEntity(ecs, { offline: true, onlineDamage: 10 });
 			(getAggregateDamage as any).mockReturnValue(15);
 			ecs.update(1);
 			expect(entity.components.damage?.offline).toBe(true);
 		});
 		it("takes system offline if offlineDamage <= aggregateDamage", () => {
-			const entity = makeEntity({ offline: false, offlineDamage: 10 });
-			ecs.addEntity(entity);
-
+			const entity = makeEntity(ecs, { offline: false, offlineDamage: 10 });
 			(getAggregateDamage as any).mockReturnValue(15);
 			ecs.update(1);
 			expect(entity.components.damage?.offline).toBe(true);
 		});
 		it("keeps system online if offlineDamage > aggregateDamage", () => {
-			const entity = makeEntity({ offline: false, offlineDamage: 10 });
-			ecs.addEntity(entity);
+			const entity = makeEntity(ecs, { offline: false, offlineDamage: 10 });
 
 			(getAggregateDamage as any).mockReturnValue(5);
 			ecs.update(1);
 			expect(entity.components.damage?.offline).toBe(false);
 		});
 		it("triggers cascade if system goes offline and cascadeRisk > 0 and randomRoll < cascadeRisk * elapsed", () => {
-			const entity = makeEntity({
+			const _entity = makeEntity(ecs, {
 				offline: false,
 				offlineDamage: 10,
 				cascadeRisk: 100,
 			});
-			ecs.addEntity(entity);
 
 			(getAggregateDamage as any).mockReturnValue(15);
-			vi.spyOn(Math, "random").mockReturnValue(0);
 			ecs.update(2);
 			expect((applyDamage as any).mock.calls.length).toBeGreaterThan(0);
 			vi.restoreAllMocks();
 		});
 		it("does not trigger cascade if randomRoll >= cascadeRisk * elapsed", () => {
-			const entity = makeEntity({
+			const _entity = makeEntity(ecs, {
 				offline: false,
 				offlineDamage: 10,
 				cascadeRisk: 10,
 			});
-			ecs.addEntity(entity);
 
 			(getAggregateDamage as any).mockReturnValue(15);
 			vi.spyOn(Math, "random").mockReturnValue(0.2); // 0.2*100 = 20 > 10*1

@@ -10,6 +10,7 @@ import { NPCFireWeaponsSystem } from "@thorium/.server/systems/NPCFireWeaponsSys
 import { NPCKnowledgeSystem } from "@thorium/.server/systems/NPCKnowledgeSystem";
 import { PowerEfficiencyOverloadSystem } from "@thorium/.server/systems/PowerEfficiencyOverloadSystem";
 import { SensorScanSystem } from "@thorium/.server/systems/SensorScanSystem";
+import {SpontaneousFailureSystem} from "@thorium/.server/systems/SpontaneousFailureSystem";
 import { AutoRotateSystem } from "./AutoRotateSystem";
 import { AutoThrustSystem } from "./AutoThrustSystem";
 import { DataStreamSystem } from "./DataStreamSystem";
@@ -74,6 +75,7 @@ const systems = [
 	HeatToCoolantSystem,
 	HeatDispersionSystem,
 	DamageCheckSystem,
+	SpontaneousFailureSystem,
 	IsDestroyedSystem,
 	// We slot the legacy systems in right before these two shared systems
 	...legacySystems,

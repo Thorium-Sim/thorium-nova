@@ -14,7 +14,14 @@ export function skipN(rng: RNG, num: number): RNG {
 }
 
 export interface RNG {
+	/**
+	 * Returns a number between -0.5 and 0.5
+	 */
 	next: () => number;
+	/**
+	 * Returns a number between 0 and 1
+	 */
+	nextAsPercentage: () => number;
 	nextInt: (min: number, max: number) => number;
 	nextFromList: <T>(list: T[] | readonly T[]) => T;
 	nextBoolean: () => boolean;
@@ -70,6 +77,9 @@ export function createRNG(seed: number | string, skip = 0): RNG {
 			rng = next;
 			this.iterationCount++;
 			return value / maxNum;
+		},
+		nextAsPercentage: function nextAsPercentage() {
+			return this.next() + 0.5;
 		},
 		nextInt: function nextInt(min, max) {
 			const [value, next] = prand.uniformIntDistribution(min, max)(rng);

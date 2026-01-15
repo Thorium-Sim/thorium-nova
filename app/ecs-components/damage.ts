@@ -64,7 +64,7 @@ export const damage = z
 		signatureSpikeDuration: z.number().default(5),
 
 		/**
-		 * The probability the system will spontaneously go offline
+		 * The probability the system will spontaneously go offline as a percentage. 0.0-1.0
 		 */
 		failureRisk: z.number().min(0).default(0),
 
