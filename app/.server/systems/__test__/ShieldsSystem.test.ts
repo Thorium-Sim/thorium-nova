@@ -143,11 +143,22 @@ describe("ShieldsSystem", () => {
 		it("shields will drain when there is insufficient power", () => {
 			const { ecs, shieldsEntity } = setupShieldsSystemTest({
 				shields: { maxStrength: 5, strength: 5, state: "up" },
-				power: { currentPower: 5, powerLevels: [10] },
+				power: { currentPower: 10, powerLevels: [20] },
 			});
 			expect(shieldsEntity.components.isShields?.strength).toBe(5);
 			ecs.update(1000); // 1 second
 			expect(shieldsEntity.components.isShields?.strength).toBe(4); // has drained
 		});
+
+		it("shields will still charge even if powerLevels is an empty array", () => {
+			const { ecs, shieldsEntity } = setupShieldsSystemTest({
+				shields: { maxStrength: 5, strength: 3, state: "up" },
+				power: { currentPower: 10, powerLevels: [] },
+			});
+			expect(shieldsEntity.components.isShields?.strength).toBe(3);
+			ecs.update(18000); // 18 seconds
+			expect(shieldsEntity.components.isShields?.strength).toBe(3.5); // has recharged
+		});
+
 	});
 });
