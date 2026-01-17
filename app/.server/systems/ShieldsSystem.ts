@@ -13,9 +13,11 @@ export class ShieldsSystem extends System {
 			const { currentPower, powerLevels } = entity.components.power;
 			const requiredPower = powerLevels[0];
 			const { state, maxStrength, strength } = entity.components.isShields;
+			const efficiencyMultiplier = entity.components.damage?.efficiency ?? 1;
 			// Some space magic to make the shields more powerful.
 			// Increase this number to make shields recharge faster
-			let strengthToRecharge = currentPower * elapsedTimeHours * 10;
+			let strengthToRecharge =
+				currentPower * efficiencyMultiplier * elapsedTimeHours * 10;
 			if (state === "down" || currentPower < requiredPower) {
 				// Quickly drain shields when they are down
 				strengthToRecharge = (-maxStrength / SHIELD_DISCHARGE_TIME) * elapsed;
