@@ -385,6 +385,7 @@ const quotes = [
 	"Could be worse. Not sure how, but it could be.",
 	// Hank Green
 	"We have never uncovered any truth without first going through a period of uncertainty.",
+	"Everything we know is something we figured out.",
 	// Turkish Saying
 	"The uncaught fish is always a big fish",
 ];
