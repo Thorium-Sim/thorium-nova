@@ -159,6 +159,5 @@ describe("ShieldsSystem", () => {
 			ecs.update(18000); // 18 seconds
 			expect(shieldsEntity.components.isShields?.strength).toBe(3.5); // has recharged
 		});
-
 	});
 });
