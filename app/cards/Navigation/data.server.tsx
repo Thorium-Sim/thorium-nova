@@ -464,6 +464,7 @@ export const waypoints = t.router({
 			pubsub.publish.waypoints.all({
 				shipId,
 			});
+			return null;
 		}),
 });
 

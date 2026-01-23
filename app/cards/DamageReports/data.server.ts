@@ -74,6 +74,7 @@ export const damageReports = t.router({
 					};
 				}
 			}
+			return null;
 		}),
 	diagnosticCreate: t.procedure
 		.input(
@@ -164,6 +165,7 @@ export const damageReports = t.router({
 			pubsub.publish.damageReports.systemDiagnostic({
 				systemId: diagnostic.components.diagnostic?.targetSystemId || -1,
 			});
+			return null;
 		}),
 	damageReports: t.procedure
 		.input(z.object({ shipId: z.number() }))
@@ -338,6 +340,7 @@ export const damageReports = t.router({
 			pubsub.publish.damageReports.damageReports({
 				shipId: damageReport.components.damageReport?.shipId || -1,
 			});
+			return null;
 		}),
 	applyDamageReportMetrics: t.procedure
 		.meta({

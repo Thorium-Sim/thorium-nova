@@ -134,7 +134,6 @@ export const systemsMonitor = t.router({
 						shipId: entity.components.isShipSystem.shipId,
 					},
 			)
-
 			.request(({ ctx, input }) => {
 				const systems: {
 					id: number;
@@ -224,6 +223,7 @@ export const systemsMonitor = t.router({
 					// Update the output megawatts of the phasers
 					pubsub.publish.targeting.phasers.list({ shipId });
 				}
+				return null;
 			}),
 		addPowerSource: t.procedure
 			.input(
@@ -295,6 +295,7 @@ export const systemsMonitor = t.router({
 					// Update the output megawatts of the phasers
 					pubsub.publish.targeting.phasers.list({ shipId });
 				}
+				return null;
 			}),
 	}),
 	stream: t.procedure
