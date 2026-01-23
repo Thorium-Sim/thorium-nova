@@ -320,6 +320,7 @@ export const client = t.router({
 				pubsub.publish.client.all();
 				pubsub.publish.client.get({ clientId: input.clientId });
 			}
+			return null;
 		}),
 	testStation: t.procedure
 		.input(z.object({ clientId: z.string(), component: z.string().nullable() }))
