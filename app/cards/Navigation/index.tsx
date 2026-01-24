@@ -70,7 +70,7 @@ function Waypoints() {
 	const activeWaypoint = waypoints.find((w) => w.isActive);
 
 	return (
-		<div className="self-end justify-self-end w-96 pointer-events-auto">
+		<div className="self-end justify-self-end w-96 pointer-events-auto waypoints-container">
 			<div className="overflow-hidden w-full mt-2">
 				<div ref={ref} className="flex flex-col h-full max-h-72">
 					<SearchableList

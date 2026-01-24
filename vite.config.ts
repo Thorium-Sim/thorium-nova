@@ -11,7 +11,8 @@ import rehypeSlug from "rehype-slug";
 import rehypeShiki from "@shikijs/rehype";
 import { iconsSpritesheet } from "vite-plugin-icons-spritesheet";
 import { componentDocs } from "./scripts/componentDocs";
-import { analyzer } from "vite-bundle-analyzer";
+// import { analyzer } from "vite-bundle-analyzer";
+// import Inspect from "vite-plugin-inspect";
 
 setDefaultResultOrder("ipv4first");
 
@@ -19,7 +20,8 @@ const port = Number(process.env.PORT) || 3000;
 
 export default defineConfig({
 	plugins: [
-		analyzer(),
+		// Inspect(),
+		// analyzer(),
 		mdx({
 			remarkPlugins: [
 				remarkFrontmatter,

@@ -114,7 +114,7 @@ const StationLayout = () => {
 							))}
 							<div className="training-infobox panel backdrop-blur flex flex-col items-end gap-2">
 								<div
-									className="whitespace-pre-wrap max-w-lg"
+									className="whitespace-pre-wrap max-w-lg min-w-48"
 									// biome-ignore lint/security/noDangerouslySetInnerHtml: Training supports markdown
 									dangerouslySetInnerHTML={{ __html: client.training?.text }}
 								/>

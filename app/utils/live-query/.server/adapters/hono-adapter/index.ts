@@ -21,10 +21,11 @@ import { initWebsocket } from "@thorium/.server/init/liveQuery";
 export type CreateContextOpts<TContext> = {
 	clientId: string;
 	context: TContext;
-}
+};
 
-export type CreateContext = <TRouter extends AnyRouter, TContext>
-	(opts: CreateContextOpts<TContext>) => MaybePromise<inferRouterContext<TRouter>>;
+export type CreateContext = <TRouter extends AnyRouter, TContext>(
+	opts: CreateContextOpts<TContext>,
+) => MaybePromise<inferRouterContext<TRouter>>;
 
 export type InitWebsocketParams<TContext> = {
 	clientId: string;
@@ -97,7 +98,7 @@ export async function liveQueryPlugin<TRouter extends AnyRouter, TContext>({
 				});
 
 				// Send the result back to the client, regardless of what it is.
-				return Response.json(response);
+				return Response.json(response || null);
 			} catch (err) {
 				if (err instanceof ZodError) {
 					return Response.json(

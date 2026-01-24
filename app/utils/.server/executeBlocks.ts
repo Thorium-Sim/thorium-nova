@@ -105,7 +105,7 @@ export async function executeBlocks(
 				break;
 			}
 			case "SetVariable": {
-				const value = interpolateText(block.value, localVariables, ecs.rng);
+				const value = getValueReference(block.value, localVariables, ecs);
 				if (
 					block.entity.toLowerCase() === "this step" ||
 					block.entity.toLowerCase() === "step"

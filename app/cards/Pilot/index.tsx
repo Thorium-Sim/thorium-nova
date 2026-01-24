@@ -72,6 +72,38 @@ export function Pilot({ cardLoaded }: CardProps) {
 	const [targetedContact] = q.targeting.targetedContact.useNetRequest({
 		shipId,
 	});
+	const [showNavigation, setShowNavigation] = useState(false);
+
+	function setIsNavOpen(open: boolean) {
+		q.thorium.genericEvent.netSend({
+			clientId,
+			eventName: "navigation-open",
+			properties: `${open}`,
+		});
+		setShowNavigation(open);
+	}
+	useEventListener("waypoint-activated", () => {
+		setShowNavigation(false);
+	});
+
+	if (showNavigation) {
+		return (
+			<div className="relative h-full">
+				<Navigation cardLoaded={cardLoaded} />
+				<div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+					<RAButton
+						className="btn btn-error clear-waypoint"
+						onPress={() => {
+							q.waypoints.deactivate.netSend({ shipId });
+							setShowNavigation(false);
+						}}
+					>
+						Clear Waypoint
+					</RAButton>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<CircleGridStoreProvider>
@@ -118,7 +150,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 				</div>
 
 				<div className="h-full flex flex-col justify-between gap-2">
-					<LockOnButton />
+					<LockOnButton setShowNavigation={setIsNavOpen} />
 					<div>
 						<div className="pilot-slider">
 							<PilotZoomSlider />
@@ -197,7 +229,11 @@ function getInterstellarDistance(
 	return `${value.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${unit}`;
 }
 
-const LockOnButton = () => {
+const LockOnButton = ({
+	setShowNavigation,
+}: {
+	setShowNavigation: (value: boolean) => void;
+}) => {
 	const { cardLoaded } = useCardContext();
 	const {
 		shipId,
@@ -243,20 +279,6 @@ const LockOnButton = () => {
 		},
 	});
 
-	const [isNavOpen, setIsNavOpenState] = useState(false);
-	function setIsNavOpen(open: boolean) {
-		q.thorium.genericEvent.netSend({
-			clientId,
-			eventName: "navigation-open",
-			properties: `${open}`,
-		});
-		setIsNavOpenState(open);
-	}
-	useEventListener("waypoint-activated", () => {
-		console.log("Waypoint Activated Event");
-		setIsNavOpen(false);
-	});
-
 	return (
 		<Fragment>
 			<div className="text-center panel panel-primary h-24">
@@ -274,40 +296,14 @@ const LockOnButton = () => {
 					)}
 				</div>
 			</div>
-			<DialogTrigger isOpen={isNavOpen} onOpenChange={setIsNavOpen}>
-				<RAButton className="btn w-full btn-info set-course">
-					Set Course
-				</RAButton>
 
-				<ModalOverlay
-					isDismissable
-					className={cn(
-						"fixed inset-0 z-20 overflow-y-auto bg-black/40 flex min-h-full w-full items-center justify-center p-4 backdrop-blur overflow-hidden",
-						"transition-all duration-200 data-[entering]:opacity-0 data-[exiting]:opacity-0",
-					)}
-				>
-					<Modal
-						className={cn(
-							"theme-container transition-opacity duration-200 data-[entering]:opacity-0 data-[exiting]:opacity-0",
-						)}
-					>
-						<Dialog className="z-30 relative outline-none w-[90vw] h-[90vh] inline-block align-bottom rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle m:w-full mx-8">
-							<Navigation cardLoaded />
-							<div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-								<RAButton
-									slot="close"
-									className="btn btn-error clear-waypoint"
-									onPress={() => {
-										q.waypoints.deactivate.netSend({ shipId });
-									}}
-								>
-									Clear Waypoint
-								</RAButton>
-							</div>
-						</Dialog>
-					</Modal>
-				</ModalOverlay>
-			</DialogTrigger>
+			<RAButton
+				className="btn w-full btn-info set-course"
+				onPress={() => setShowNavigation(true)}
+			>
+				Set Course
+			</RAButton>
+
 			<div className="flex gap-2">
 				{autopilot.locked ? (
 					<Button

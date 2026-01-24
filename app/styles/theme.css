@@ -1253,7 +1253,7 @@ textarea {
 	position: fixed;
 	inset: 0;
 	anchor-name: --parent;
-	pointer-events: none;
+	pointer-events:none;
 }
 .training-overlay {
   position: fixed;
@@ -1265,7 +1265,7 @@ textarea {
   position: fixed;
   width: 1px;
   height: 1px;
-  backdrop-filter: brightness(2);
+  backdrop-filter: brightness(3);
   pointer-events: none;
   transition: all 0.3s ease;
   transform-origin: top left;

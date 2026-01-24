@@ -4,6 +4,7 @@ import type { Entity } from "@thorium/utils/ecs";
 import { z } from "zod";
 import { triggerStep } from "@thorium/utils/.server/evaluateEntityQuery";
 import { applyDamageReportMetrics } from "@thorium/utils/.server/applyDamageReportMetrics";
+import { pubsub } from "@thorium/.server/init/pubsub";
 
 export const timeline = t.router({
 	activate: t.procedure
@@ -76,6 +77,7 @@ export const timeline = t.router({
 			const steps = timeline.components.isTimeline?.steps;
 			if (!steps) return;
 			const nextStep = steps[stepIndex + 1];
+
 			if (nextStep === undefined) {
 				// The timeline is advancing beyond its final step, which indicates it is completed.
 				timeline.updateComponent("isTimeline", { isComplete: true });
@@ -84,7 +86,23 @@ export const timeline = t.router({
 				if (timeline.components.damageReport?.autoApplyWhenCompleted) {
 					applyDamageReportMetrics(timeline);
 				}
-				// TODO January 7, 2026 - Training timelines should clear the client's training
+				if (timeline.components.isTimeline?.type === "training") {
+					let clientId = "";
+					for (const client of ctx.ecs.componentCache.get("flightClient") ||
+						[]) {
+						if (
+							client.components.flightClient?.training?.timelineId ===
+							timeline.id
+						) {
+							client.updateComponent("flightClient", { training: null });
+							clientId = client.components.flightClient.clientId;
+						}
+					}
+					pubsub.publish.client.all();
+					pubsub.publish.client.get({
+						clientId,
+					});
+				}
 				return;
 			}
 			timeline.updateComponent("isTimeline", { currentStep: stepIndex + 1 });

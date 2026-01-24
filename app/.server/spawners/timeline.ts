@@ -39,7 +39,9 @@ export function spawnTimeline(
 				? "mission"
 				: timeline.kind === "reports"
 					? "report"
-					: undefined,
+					: timeline.kind === "trainings"
+						? "training"
+						: undefined,
 	});
 	addEntity(timelineEntity);
 

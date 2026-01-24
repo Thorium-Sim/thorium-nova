@@ -4,8 +4,15 @@ import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { Matrix4, Quaternion, Vector3 } from "three";
 import { create } from "zustand";
 import { getWaypointRelativePosition } from "./getWaypointRelativePosition";
-import { type ReactNode, createContext, useContext, useState } from "react";
+import {
+	type ReactNode,
+	createContext,
+	useCallback,
+	useContext,
+	useState,
+} from "react";
 import { useStation } from "@thorium/routes/station/useStation";
+import throttle from "lodash.throttle";
 
 function createCircleGridStore({
 	zoomMin = 0.01,
@@ -84,6 +91,18 @@ export function useGetFacingWaypoint() {
 		active: true,
 		shipId: id,
 	});
+
+	const sendFacingWaypoint = useCallback(
+		throttle((waypointId) => {
+			q.thorium.genericEvent.netSend({
+				clientId,
+				eventName: "facing-waypoint",
+				properties: `${waypointId}`,
+			});
+		}, 1000),
+		[],
+	);
+
 	// TODO January 7, 2026 - This needs some work, mostly with dynamically updating the waypoint's appearance without triggering a state update
 	useFrame(() => {
 		const playerShip = interpolate(id);
@@ -112,13 +131,9 @@ export function useGetFacingWaypoint() {
 			if (angle < Math.PI / 60) {
 				facingWaypoints.push(waypoint.id);
 			}
-			if (!store.getState().facingWaypoints.includes(waypoint.id)) {
+			if (store.getState().facingWaypoints.includes(waypoint.id)) {
 				// We're facing a new waypoint, so we can trigger this event
-				q.thorium.genericEvent.netSend({
-					clientId,
-					eventName: "facing-waypoint",
-					properties: `${waypoint.id}`,
-				});
+				sendFacingWaypoint(waypoint.id);
 			}
 		}
 		store.setState({ facingWaypoints });
