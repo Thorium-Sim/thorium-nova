@@ -42,7 +42,16 @@ export async function executeBlocks(
 						: block.unit === "minutes"
 							? 60 * 1000
 							: 1);
+
 				await new Promise((res) => setTimeout(res, timer));
+				// If the timeline step is already marked as completed
+				// then we should skip executing the rest of the blocks
+				if (
+					ecs.getEntityById(stepId || -1)?.components.isTimelineStep?.state ===
+					"executed"
+				) {
+					return;
+				}
 				break;
 			}
 			case "VariableIntoVariable": {

@@ -440,9 +440,8 @@ export async function triggerStep(step: Entity) {
 
 	const blocks = step?.components.isTimelineStep?.blocks;
 	if (!blocks) return;
-	const context = new DataContext("thorium", database);
 	step.updateComponent("isTimelineStep", { state: "executing" });
-	await executeBlocks(context.ecs, blocks, { stepId: step.id, localVariables });
+	await executeBlocks(step.ecs, blocks, { stepId: step.id, localVariables });
 	step.updateComponent("identity", {
 		description: interpolateText(
 			step.components.identity?.description || "",
@@ -450,7 +449,22 @@ export async function triggerStep(step: Entity) {
 			step.ecs.rng,
 		),
 	});
-	step.updateComponent("isTimelineStep", { state: "executed" });
+	// If there are no triggers associated with this timeline step, then we can consider it executed
+	let hasTrigger = false;
+
+	for (const entity of step.ecs.componentCache.get("isTrigger") || []) {
+		if (
+			entity.components.isTrigger?.stepId === step.id &&
+			entity.components.isTrigger.triggeredAt === null
+		) {
+			hasTrigger = true;
+			break;
+		}
+	}
+
+	if (!hasTrigger) {
+		step.updateComponent("isTimelineStep", { state: "executed" });
+	}
 
 	if (timeline?.components.isTimeline?.type === "report") {
 		pubsub.publish.damageReports.damageReports({

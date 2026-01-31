@@ -76,6 +76,7 @@ export const timeline = t.router({
 			if (stepIndex === undefined) return;
 			const steps = timeline.components.isTimeline?.steps;
 			if (!steps) return;
+			const currentStep = steps[stepIndex];
 			const nextStep = steps[stepIndex + 1];
 
 			if (nextStep === undefined) {
@@ -104,6 +105,9 @@ export const timeline = t.router({
 					});
 				}
 				return;
+			} else {
+				const step = ctx.ecs.getEntityById(currentStep);
+				step?.updateComponent("isTimelineStep", { state: "executed" });
 			}
 			timeline.updateComponent("isTimeline", { currentStep: stepIndex + 1 });
 			await triggerStep(ctx.flight!.ecs.getEntityById(steps[stepIndex + 1])!);
