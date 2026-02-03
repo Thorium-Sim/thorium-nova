@@ -14,3 +14,4 @@ export { damageReports } from "./DamageReports/data.server";
 export { codeCyphers } from "./CodeCyphers/data.server";
 export { messaging } from "./Messaging/data.server";
 export { documents } from "./Documents/data.server";
+export { longRangeComm } from "./LongRangeComm/data.server";
