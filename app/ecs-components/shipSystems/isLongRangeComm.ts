@@ -19,11 +19,15 @@ export const isLongRangeComm = z
 				/**
 				 * When long range messages are sent to this destination, we match the message contents against
 				 * this list of actions to determine which action to perform.
+				 *
+				 * This depends on some kind of classification engine, which doesn't exist yet. For now,
+				 * either messages sent by the crew are addressed by a Flight Director or ignored.
 				 */
 				actions: z
 					.object({
 						intent: z.string(),
 						params: z.string().array(),
+						blocks: z.any().array(),
 					})
 					.array(),
 			})
@@ -41,12 +45,31 @@ export const isLongRangeMessage = z
 		state: z.enum(["draft", "review", "sent", "deleted"]).default("draft"),
 
 		// Decoding parameters
-		amplitude: z.number().default(10),
-		frequency: z.number().default(10),
-		phase: z.number().default(10),
-		requiredAmplitude: z.number().default(10),
-		requiredFrequency: z.number().default(10),
-		requiredPhase: z.number().default(10),
+		encoding: z
+			.union([
+				z.object({
+					type: z.literal("waves"),
+					waves: z
+						.object({
+							amplitude: z.number().default(10),
+							frequency: z.number().default(10),
+							phase: z.number().default(10),
+							requiredAmplitude: z.number().default(10),
+							requiredFrequency: z.number().default(10),
+							requiredPhase: z.number().default(10),
+						})
+						.array(),
+				}),
+				z.object({
+					type: z.literal("replacement"),
+					letterMap: z.record(z.string()),
+					requiredLetterMap: z.record(z.string()),
+				}),
+				z.object({
+					type: z.literal("decoded"),
+				}),
+			])
+			.default({ type: "decoded" }),
 	})
 	.default({});
 

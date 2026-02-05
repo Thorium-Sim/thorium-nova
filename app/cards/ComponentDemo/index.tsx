@@ -22,7 +22,10 @@ import { useAlert, useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
 const ModalDemo = ({
 	title,
 	children,
-}: { title: string; children: ReactNode }) => {
+}: {
+	title: string;
+	children: ReactNode;
+}) => {
 	const [isOpen, setIsOpen] = useState(false);
 	return (
 		<div>
@@ -91,7 +94,9 @@ const TagInputDemo = () => {
 
 async function searchableInputQuery({
 	queryKey,
-}: { queryKey: [string, string] }) {
+}: {
+	queryKey: [string, string];
+}) {
 	await new Promise((res) => setTimeout(res, 1000 + Math.random() * 500));
 	const [key, query] = queryKey;
 	const people = [
@@ -129,6 +134,7 @@ export function ComponentDemo() {
 	const prompt = usePrompt();
 	const confirm = useConfirm();
 
+	const lineRef = useRef(0);
 	return (
 		<div className="flex flex-col gap-8 text-white h-full overflow-y-auto p-4">
 			<div className="flex gap-4">
@@ -523,10 +529,51 @@ export function ComponentDemo() {
 				<h2 className="text-3xl">Sine Wave</h2>
 				<div className="flex flex-wrap">
 					<div className="w-[250px] h-48 bg-gray-800">
-						<SineWave />
+						<SineWave
+							waves={[
+								{
+									amplitude: 0.25,
+									frequency: 50,
+									phase: Math.PI / 2,
+								},
+							]}
+							callFrame={(ctx, width, height) => {
+								if (lineRef.current > width) {
+									lineRef.current = 0;
+								}
+								ctx.fillStyle = "rgba(255,255,0,0.5)";
+								ctx.fillRect(lineRef.current - 1, 0, 4, height);
+								lineRef.current += 1;
+							}}
+						/>
 					</div>
 					<div className="w-48 h-[250px] bg-gray-800">
-						<SineWave color="blue" frequency={2} orientation="vertical" />
+						<SineWave
+							color="blue"
+							waves={[
+								{
+									amplitude: 0.25,
+									frequency: 24,
+									phase: Math.PI / 2,
+								},
+								{
+									amplitude: 0.25,
+									frequency: 12,
+									phase: Math.PI / 2,
+								},
+								{
+									amplitude: 0.125,
+									frequency: 6,
+									phase: Math.PI / 2,
+								},
+								{
+									amplitude: 0.25,
+									frequency: 3,
+									phase: Math.PI / 2,
+								},
+							]}
+							orientation="vertical"
+						/>
 					</div>
 				</div>
 			</div>

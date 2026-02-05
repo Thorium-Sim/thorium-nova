@@ -388,6 +388,10 @@ const quotes = [
 	"Everything we know is something we figured out.",
 	// Turkish Saying
 	"The uncaught fish is always a big fish",
+	// Kohor
+	"You should have savored the good things in life. Now, you must ponder thoughtfully the end of all pleasure that comes with DEATH.",
+	// Random post
+	"A revolution must be started by yourself. An egg, opened from the outside, is food; opened from the inside, it is a new life.",
 ];
 
 const QuoteOfTheDay = () => {
