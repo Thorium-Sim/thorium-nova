@@ -18,9 +18,7 @@ export default {
 		// 		external: [],
 		// 	},
 		// },
-		copy: {
-			"build/clientBundle.dat": "clientBundle.dat",
-		},
+		copy: {},
 		mac: {
 			bundleCEF: false,
 			codesign: false,

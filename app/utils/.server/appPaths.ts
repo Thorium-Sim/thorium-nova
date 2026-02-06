@@ -10,7 +10,6 @@ export let __dirname =
 			? path.join(fileURLToPath(import.meta.url), "../../../../../../../..")
 			: path.join(fileURLToPath(import.meta.url), "../../../..");
 
-console.log(__dirname, process.env.IS_KIOSK, import.meta.url);
 __dirname = __dirname.replaceAll("%20", " ");
 
 export let thoriumPath = path.join(__dirname, "data");

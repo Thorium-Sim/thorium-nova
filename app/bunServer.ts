@@ -12,8 +12,6 @@ import { websocket, upgradeWebSocket } from "hono/bun";
 import { readdir } from "node:fs/promises";
 import { vanity } from "@thorium/utils/.server/vanity";
 import { getMimeType } from "hono/utils/mime";
-import { getClientBundleFile } from "@thorium/utils/.server/getClientBundleFile";
-import { embeddedFiles, type ServerWebSocket } from "bun";
 import {
 	bunDataStoreProps,
 	loadPlugins,
@@ -23,8 +21,15 @@ import { DataStore } from "@thorium/utils/.server/db-fs";
 import type LongRangeCommPlugin from "@thorium/.server/classes/Plugins/ShipSystems/LongRangeComm";
 import type { ProcedureCallOptions } from "@thorium/utils/live-query/.server/procedure";
 import { isObject } from "./typeguards/isObject";
+import path from "node:path";
 
-export async function startHttpServer(isProd: boolean) {
+export async function startHttpServer({
+	isProd,
+	isKiosk,
+}: {
+	isProd: boolean;
+	isKiosk: boolean;
+}) {
 	try {
 		console.info(`Starting Thorium...`);
 		return DataStore.operations.run(bunDataStoreProps, async () => {
@@ -118,6 +123,9 @@ export async function startHttpServer(isProd: boolean) {
 			});
 
 			if (isProd) {
+				const getClientBundleFile = (
+					await import("./utils/.server/embeddedUtils")
+				).getClientBundleFile;
 				app.use(async (c) => {
 					const path = c.req.path.slice(1);
 					try {
@@ -129,7 +137,7 @@ export async function startHttpServer(isProd: boolean) {
 						const headers = new Headers();
 						headers.append("content-type", mimeType || "text/plain");
 						headers.append("content-disposition", `filename="${bundle.name}"`);
-						return new Response(bundle, { headers });
+						return new Response(bundle.file, { headers });
 					} catch (error) {
 						console.error("Error retrieving client bundle file", error);
 
@@ -157,35 +165,44 @@ export async function startHttpServer(isProd: boolean) {
 			console.info(`Server running on ${server.url.href}`);
 
 			if (isProd) {
-				// @ts-expect-error
-				await import("./.server/server.cert", {
-					with: { type: "file" },
-				});
-				// @ts-expect-error
-				await import("./.server/server.key", {
-					with: { type: "file" },
-				});
-
-				const certFile = embeddedFiles.find(
-					// @ts-expect-error Bun adds the file name
-					(file) => file.name === "server.cert",
-				);
-				const keyFile = embeddedFiles.find(
-					// @ts-expect-error Bun adds the file name
-					(file) => file.name === "server.key",
-				);
-
-				if (certFile && keyFile) {
+				let tls: { cert: string; key: string } | undefined;
+				if (isKiosk) {
+					const bundledFiles = await readdir(import.meta.dirname);
+					const certFile = bundledFiles.find(
+						(f) => f.startsWith("server") && f.endsWith(".cert"),
+					);
+					const keyFile = bundledFiles.find(
+						(f) => f.startsWith("server") && f.endsWith(".key"),
+					);
+					if (certFile && keyFile) {
+						tls = {
+							cert: await Bun.file(
+								path.join(import.meta.dirname, certFile),
+							).text(),
+							key: await Bun.file(
+								path.join(import.meta.dirname, keyFile),
+							).text(),
+						};
+					}
+				} else {
+					const { certFile, keyFile } = await (
+						await import("./utils/.server/embeddedUtils")
+					).getSSLCert();
+					if (certFile && keyFile) {
+						tls = {
+							// TODO: Support user-provided TLS certificates
+							cert: await certFile.text(),
+							key: await keyFile.text(),
+						};
+					}
+				}
+				if (tls) {
 					const https = Bun.serve({
 						port: port + 1,
 						fetch: app.fetch,
 						websocket,
 						reusePort: true,
-						tls: {
-							// TODO: Support user-provided TLS certificates
-							cert: await certFile.text(),
-							key: await keyFile.text(),
-						},
+						tls,
 					});
 					console.info(`HTTPS running on ${https.url.href}`);
 				}

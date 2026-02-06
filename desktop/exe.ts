@@ -1,3 +1,3 @@
 import { startHttpServer } from "../app/bunServer";
 
-startHttpServer();
+startHttpServer({ isKiosk: false, isProd: true });

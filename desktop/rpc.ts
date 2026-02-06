@@ -4,14 +4,18 @@ export type ThoriumRPC = {
 	bun: RPCSchema<{
 		requests: {
 			getServerAddress: {
+				params: unknown;
 				response: { address: string };
 			};
 			getIPAddress: {
+				params: unknown;
 				response: { address: string };
 			};
-			startServer: {};
-			stopServer: {};
-			restartServer: {};
+			startServer: { params: unknown; response: unknown };
+			stopServer: { params: unknown; response: unknown };
+			restartServer: { params: unknown; response: unknown };
+			quit: { params: unknown; response: unknown };
+			kiosk: { params: unknown; response: unknown };
 		};
 		messages: {};
 	}>;

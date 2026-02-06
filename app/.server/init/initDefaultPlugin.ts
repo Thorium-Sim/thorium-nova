@@ -3,6 +3,7 @@ import path from "node:path";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { unzip } from "@thorium/utils/.server/zip";
 import { embeddedFiles } from "bun";
+import { readdir } from "node:fs/promises";
 
 export async function initDefaultPlugin() {
 	if (process.env.NODE_ENV !== "production") return;
@@ -22,11 +23,23 @@ export async function initDefaultPlugin() {
 
 	try {
 		// Initialize the default plugin
-		await Bun.write(
-			tempFile,
-			// @ts-expect-error Bun adds the file name
-			embeddedFiles.find((file) => file.name === "defaultPlugin.plug")!,
-		);
+		if (embeddedFiles.length === 0) {
+			const filename = (await readdir(import.meta.dirname)).find(
+				(f) => f.startsWith("clientBundle") && f.endsWith(".dat"),
+			);
+			if (!filename)
+				throw new Error("Client assets are not bundled for an unknown reason");
+			await Bun.write(
+				tempFile,
+				Bun.file(path.join(import.meta.dirname, filename)),
+			);
+		} else {
+			await Bun.write(
+				tempFile,
+				// @ts-expect-error Bun adds the file name
+				embeddedFiles.find((file) => file.name === "defaultPlugin.plug")!,
+			);
+		}
 
 		await unzip(tempFile, path.join(thoriumPath, "plugins/Thorium Default"));
 		await fs.rm(tempPath, { recursive: true, force: true });
