@@ -6,13 +6,12 @@ import { fileURLToPath } from "node:url";
 export let __dirname =
 	process.env.NODE_ENV === "production"
 		? path.join(fileURLToPath(import.meta.url), "../..")
-		: path.join(fileURLToPath(import.meta.url), "../../../..");
+		: process.env.IS_KIOSK
+			? path.join(fileURLToPath(import.meta.url), "../../../../../../../..")
+			: path.join(fileURLToPath(import.meta.url), "../../../..");
 
+console.log(__dirname, process.env.IS_KIOSK, import.meta.url);
 __dirname = __dirname.replaceAll("%20", " ");
-const isHeadless = !process.env.FORK;
-export const rootPath = isHeadless
-	? process.env.NODE_PATH || path.join(__dirname, "./build")
-	: path.join(__dirname, "./build");
 
 export let thoriumPath = path.join(__dirname, "data");
 /* istanbul ignore next */

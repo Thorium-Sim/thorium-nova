@@ -24,7 +24,7 @@ import type LongRangeCommPlugin from "@thorium/.server/classes/Plugins/ShipSyste
 import type { ProcedureCallOptions } from "@thorium/utils/live-query/.server/procedure";
 import { isObject } from "./typeguards/isObject";
 
-export async function startHttpServer() {
+export async function startHttpServer(isProd: boolean) {
 	try {
 		console.info(`Starting Thorium...`);
 		return DataStore.operations.run(bunDataStoreProps, async () => {
@@ -117,7 +117,7 @@ export async function startHttpServer() {
 				);
 			});
 
-			if (process.env.NODE_ENV === "production") {
+			if (isProd) {
 				app.use(async (c) => {
 					const path = c.req.path.slice(1);
 					try {
@@ -129,7 +129,7 @@ export async function startHttpServer() {
 						const headers = new Headers();
 						headers.append("content-type", mimeType || "text/plain");
 						headers.append("content-disposition", `filename="${bundle.name}"`);
-						return new Response(bundle.file, { headers });
+						return new Response(bundle, { headers });
 					} catch (error) {
 						console.error("Error retrieving client bundle file", error);
 
@@ -142,7 +142,7 @@ export async function startHttpServer() {
 
 			const port =
 				Number(process.env.PORT) + (process.env.NODE_ENV === "test" ? 1 : 0) ||
-				(process.env.NODE_ENV === "production" ? 4444 : 3001);
+				(isProd ? Number(process.env.PORT) || 4444 : 3001);
 
 			const server = Bun.serve({
 				port,
@@ -156,7 +156,7 @@ export async function startHttpServer() {
 			// that the server has started.
 			console.info(`Server running on ${server.url.href}`);
 
-			if (process.env.NODE_ENV === "production") {
+			if (isProd) {
 				// @ts-expect-error
 				await import("./.server/server.cert", {
 					with: { type: "file" },

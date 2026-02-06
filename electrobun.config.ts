@@ -2,31 +2,29 @@ import type { ElectrobunConfig } from "electrobun";
 
 export default {
 	app: {
-		name: "Thorium Nova",
-		identifier: "com.thoriumsim.nova",
+		name: "photo-booth",
+		identifier: "photobooth.electrobun.dev",
 		version: "0.0.1",
 	},
 	build: {
-		useAsar: true,
 		bun: {
-			entrypoint: "desktop/desktop.ts",
+			entrypoint: "desktop/index.ts",
 			external: [],
+			tsconfig: "./tsconfig.json",
 		},
 		// views: {
-		//   mainview: {
-		//     entrypoint: "src/mainview/index.ts",
-		//     external: [],
-		//   },
+		// 	mainview: {
+		// 		entrypoint: "mainview/index.ts",
+		// 		external: [],
+		// 	},
 		// },
 		copy: {
-			"src/mainview/index.html": "views/mainview/index.html",
-			"src/mainview/index.css": "views/mainview/index.css",
-			"assets/tray-icon.png": "views/assets/tray-icon.png",
+			"build/clientBundle.dat": "clientBundle.dat",
 		},
 		mac: {
-			codesign: true,
-			notarize: false,
 			bundleCEF: false,
+			codesign: false,
+			notarize: false,
 			entitlements: {},
 		},
 		linux: {
