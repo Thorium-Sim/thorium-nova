@@ -39,6 +39,8 @@ export default class SolarSystemPlugin extends Aspect {
 	skyboxKey: string;
 	stars!: StarPlugin[];
 	planets!: PlanetPlugin[];
+
+	commSatellite: { radius: number } | null = null;
 	assets = {};
 
 	constructor(params: Partial<SolarSystemPlugin>, plugin: BasePlugin) {
@@ -76,5 +78,7 @@ export default class SolarSystemPlugin extends Aspect {
 			params.stars?.map((star) => new StarPlugin(star, this)) ?? [];
 		this.planets ??=
 			params.planets?.map((planet) => new PlanetPlugin(planet)) ?? [];
+
+		this.commSatellite = params.commSatellite || null;
 	}
 }

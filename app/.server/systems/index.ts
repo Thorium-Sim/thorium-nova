@@ -10,7 +10,7 @@ import { NPCFireWeaponsSystem } from "@thorium/.server/systems/NPCFireWeaponsSys
 import { NPCKnowledgeSystem } from "@thorium/.server/systems/NPCKnowledgeSystem";
 import { PowerEfficiencyOverloadSystem } from "@thorium/.server/systems/PowerEfficiencyOverloadSystem";
 import { SensorScanSystem } from "@thorium/.server/systems/SensorScanSystem";
-import {SpontaneousFailureSystem} from "@thorium/.server/systems/SpontaneousFailureSystem";
+import { SpontaneousFailureSystem } from "@thorium/.server/systems/SpontaneousFailureSystem";
 import { AutoRotateSystem } from "./AutoRotateSystem";
 import { AutoThrustSystem } from "./AutoThrustSystem";
 import { DataStreamSystem } from "./DataStreamSystem";
@@ -40,6 +40,7 @@ import { TorpedoLoadingSystem } from "./TorpedoLoadingSystem";
 import { TorpedoMovementSystem } from "./TorpedoMovementSystem";
 import { WarpSystem } from "./WarpSystem";
 import { WaypointRemoveSystem } from "./WaypointRemoveSystem";
+import { CommSatelliteSystem } from "@thorium/.server/systems/CommSatelliteSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -68,6 +69,7 @@ const systems = [
 	WarpSystem,
 	PhasersSystem,
 	TorpedoMovementSystem,
+	CommSatelliteSystem,
 	PhysicsMovementSystem,
 	SensorScanSystem,
 	MainComputerDiagnosticSystem,

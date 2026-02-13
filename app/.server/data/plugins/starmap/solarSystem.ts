@@ -73,6 +73,8 @@ export const solarSystem = t.router({
 				habitableZoneInner: z.number().optional(),
 				habitableZoneOuter: z.number().optional(),
 				skyboxKey: z.string().optional(),
+				commSatellite: z.boolean().optional(),
+				commSatelliteRadius: z.number().optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -98,6 +100,17 @@ export const solarSystem = t.router({
 			if (input.habitableZoneOuter)
 				solarSystem.habitableZoneOuter = input.habitableZoneOuter;
 			if (input.skyboxKey) solarSystem.skyboxKey = input.skyboxKey;
+			if (input.commSatellite === false) {
+				solarSystem.commSatellite = null;
+			} else if (input.commSatellite === true) {
+				solarSystem.commSatellite = { radius: 10 };
+			}
+			if (input.commSatelliteRadius) {
+				solarSystem.commSatellite = {
+					...solarSystem.commSatellite,
+					radius: input.commSatelliteRadius,
+				};
+			}
 
 			pubsub.publish.plugin.starmap.all({ pluginId: input.pluginId });
 			pubsub.publish.plugin.starmap.get({

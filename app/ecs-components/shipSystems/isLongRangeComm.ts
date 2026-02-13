@@ -33,6 +33,8 @@ export const isLongRangeComm = z
 			})
 			.array()
 			.default([]),
+		/** The number of comm satellites to display in legacy mode */
+		legacyCommSatellites: z.number().default(3),
 	})
 	.default({});
 
@@ -40,9 +42,21 @@ export const isLongRangeMessage = z
 	.object({
 		timestamp: z.number().default(0),
 		message: z.string().default(""),
-		destinationShipId: z.number().int().default(-1),
-		senderShipId: z.number().int().default(-1),
-		state: z.enum(["draft", "review", "sent", "deleted"]).default("draft"),
+		destinationId: z.number().int().default(-1),
+		senderId: z.number().int().default(-1),
+		interceptorId: z.number().nullable().default(null),
+		senderStation: z.string().default(""),
+		state: z
+			.enum([
+				"pending",
+				"sending",
+				"failing",
+				"intercepted",
+				"sent",
+				"deleted",
+				"undelivered",
+			])
+			.default("pending"),
 
 		// Decoding parameters
 		encoding: z
@@ -52,7 +66,7 @@ export const isLongRangeMessage = z
 					waves: z
 						.object({
 							amplitude: z.number().default(10),
-							frequency: z.number().default(10),
+							frequency: z.number().default(5),
 							phase: z.number().default(10),
 							requiredAmplitude: z.number().default(10),
 							requiredFrequency: z.number().default(10),
@@ -62,18 +76,33 @@ export const isLongRangeMessage = z
 				}),
 				z.object({
 					type: z.literal("replacement"),
-					letterMap: z.record(z.string()),
-					requiredLetterMap: z.record(z.string()),
+					/** A string of the 26 letters and 10 numbers in the cypher order */
+					letterMap: z.string(),
+					requiredLetterMap: z.string(),
+				}),
+				z.object({
+					type: z.literal("rotation"),
+					requiredRotation: z.number(),
+					rotation: z.number(),
 				}),
 				z.object({
 					type: z.literal("decoded"),
 				}),
 			])
 			.default({ type: "decoded" }),
+
+		/** Used for simulating the transmission of the message through the comm satellite network */
+		nextNodeId: z.number().default(-1),
+		/** Track the nodes that have been visited so we don't get into a loop */
+		visitedNodeIds: z.number().array().default([]),
+		/** Speed of movement in lightyears per second */
+		transmissionSpeed: z.number().default(0.1),
 	})
 	.default({});
 
 export const isCommSatellite = z.object({
 	/** The comm satellite's radius in Light Years. It can send and receive messages from ships and other comm satellites within this radius */
 	radius: z.number().default(10),
+	/** What frequency to adjust the long range comm array to in order to connect to this satellite */
+	frequency: z.number().default(276.25),
 });

@@ -8,6 +8,7 @@ import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import Starfield from "@thorium/components/Starmap/Starfield";
 import {
 	type LightMinute,
+	lightMinuteToLightYear,
 	type LightYear,
 	lightYearToLightMinute,
 } from "@thorium/utils/unitTypes";
@@ -21,6 +22,7 @@ import Input from "@thorium/ui/Input";
 import { PolarGrid } from "./PolarGrid";
 import { q } from "@thorium/context/AppContext";
 import { CameraControls } from "@react-three/drei";
+import Checkbox from "@thorium/ui/Checkbox";
 
 const ACTION = CameraControlsClass.ACTION;
 
@@ -109,7 +111,7 @@ interface SceneRef {
 export function InterstellarMenuButtons({
 	sceneRef,
 }: {
-	sceneRef: React.MutableRefObject<SceneRef | undefined>;
+	sceneRef: React.RefObject<SceneRef | undefined>;
 }) {
 	const { pluginId } = useParams() as {
 		pluginId: string;
@@ -210,10 +212,15 @@ export const InterstellarPalette = ({
 		name: string;
 		position: Record<"x" | "y" | "z", LightMinute>;
 		description: string;
+		commSatellite: boolean;
+		commSatelliteRadius?: number;
 	};
 	update: (params: {
 		name?: string | undefined;
 		description?: string | undefined;
+		commSatellite?: boolean;
+		commSatelliteRadius?: number;
+		position?: { x: number; y: number; z: number };
 	}) => Promise<void>;
 }) => {
 	const useStarmapStore = useGetStarmapStore();
@@ -241,7 +248,10 @@ export const InterstellarPalette = ({
 	}, [selectedStar, selectedStar?.name, selectedStar?.description]);
 
 	return (
-		<div className="w-full h-full overflow-y-auto p-2 text-white">
+		<div
+			className="w-full h-full overflow-y-auto p-2 text-white"
+			key={selectedStar?.name}
+		>
 			<Input
 				label="Name"
 				value={name}
@@ -263,6 +273,71 @@ export const InterstellarPalette = ({
 				}}
 				name="description"
 			/>
+			{/** biome-ignore lint/a11y/noLabelWithoutControl: Multiple inputs for this label */}
+			<label>Position</label>
+			<div className="flex gap-0.5">
+				<input
+					className="input flex-1"
+					inputMode="numeric"
+					pattern="[0-9]*"
+					defaultValue={lightMinuteToLightYear(selectedStar.position.x)}
+					onChange={(e) => {
+						update({
+							position: {
+								...selectedStar.position,
+								x: lightYearToLightMinute(Number(e.currentTarget.value)),
+							},
+						});
+					}}
+				></input>
+				<input
+					className="input flex-1"
+					inputMode="numeric"
+					pattern="[0-9]*"
+					defaultValue={lightMinuteToLightYear(selectedStar.position.y)}
+					onChange={(e) => {
+						update({
+							position: {
+								...selectedStar.position,
+								y: lightYearToLightMinute(Number(e.currentTarget.value)),
+							},
+						});
+					}}
+				></input>
+				<input
+					className="input flex-1"
+					inputMode="numeric"
+					pattern="[0-9]*"
+					defaultValue={lightMinuteToLightYear(selectedStar.position.z)}
+					onChange={(e) => {
+						update({
+							position: {
+								...selectedStar.position,
+								z: lightYearToLightMinute(Number(e.currentTarget.value)),
+							},
+						});
+					}}
+				></input>
+			</div>
+			<Checkbox
+				label="Comm Satellite"
+				defaultChecked={selectedStar?.commSatellite}
+				onChange={(e) => update({ commSatellite: e.currentTarget.checked })}
+			/>
+			{selectedStar.commSatellite && (
+				<Input
+					label="Comm Satellite Radius"
+					helperText="The radius for how far this comm satellite can receive messages, in light years"
+					inputMode="numeric"
+					pattern="[0-9]*"
+					key={selectedStar?.name}
+					defaultValue={selectedStar.commSatelliteRadius}
+					onChange={(e) => {
+						update({ commSatelliteRadius: Number(e.currentTarget.value) });
+					}}
+					name="description"
+				/>
+			)}
 		</div>
 	);
 };

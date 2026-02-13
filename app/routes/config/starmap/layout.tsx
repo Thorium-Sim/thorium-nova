@@ -139,7 +139,12 @@ export function InterstellarPaletteWrapper() {
 	const selectedStar = stars.find((s) => selectedObjectIds?.includes(s.name));
 
 	const update = useCallback(
-		async (params: { name?: string; description?: string }) => {
+		async (params: {
+			name?: string;
+			description?: string;
+			commSatellite?: boolean;
+			commSatelliteRadius?: number;
+		}) => {
 			if (
 				!selectedObjectIds?.length ||
 				selectedObjectIds.length > 1 ||

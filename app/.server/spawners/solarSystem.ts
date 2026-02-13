@@ -12,7 +12,11 @@ export function spawnSolarSystem(systemPlugin: SolarSystemPlugin) {
 	system.addComponent("tags", { tags: systemPlugin.tags });
 	system.addComponent("isSolarSystem", { ...systemPlugin });
 	system.addComponent("position", systemPlugin.position);
-
+	if (systemPlugin.commSatellite) {
+		system.addComponent("isCommSatellite", {
+			radius: systemPlugin.commSatellite.radius,
+		});
+	}
 	// Spawn all the stars and planets
 	const stars = systemPlugin.stars.map((star) => {
 		return {

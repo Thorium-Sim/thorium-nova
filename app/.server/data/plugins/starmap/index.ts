@@ -19,6 +19,8 @@ export const starmap = t.router({
 				name: solarSystem.name,
 				position: solarSystem.position,
 				description: solarSystem.description,
+				commSatellite: !!solarSystem.commSatellite,
+				commSatelliteRadius: solarSystem.commSatellite?.radius,
 			}));
 		}),
 	get: t.procedure

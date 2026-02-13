@@ -3,7 +3,7 @@ import { useFrame, type ElementProps } from "@react-three/fiber";
 import useObjectDrag from "@thorium/hooks/useObjectDrag";
 import * as React from "react";
 import { useCallback } from "react";
-import { useNavigate, useParams } from "react-router";
+import { href, useNavigate, useParams } from "react-router";
 import { CanvasTexture, type Group, type Mesh, Vector3 } from "three";
 import { useGetStarmapStore } from "../starmapStore";
 
@@ -28,6 +28,8 @@ export const DraggableSystemCircle: React.FC<
 	const { pluginId } = useParams() as {
 		pluginId: string;
 	};
+	const navigate = useNavigate();
+
 	const bind = useObjectDrag(parent, {
 		onMouseUp: (newPosition: Vector3) => {
 			useStarmapStore.getState().setCameraControlsEnabled(true);
@@ -48,7 +50,12 @@ export const DraggableSystemCircle: React.FC<
 		},
 		onMouseDown: () => {
 			if (Date.now() - 200 <= doubleClickRef.current) {
-				navigate(systemId.toString());
+				navigate(
+					href("/config/:pluginId/starmap/:systemId", {
+						systemId: systemId.toString(),
+						pluginId,
+					}),
+				);
 				return;
 			}
 			doubleClickRef.current = Date.now();
@@ -65,7 +72,6 @@ export const DraggableSystemCircle: React.FC<
 			});
 		},
 	});
-	const navigate = useNavigate();
 
 	return (
 		<SystemCircle

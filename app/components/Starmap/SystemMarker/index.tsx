@@ -5,15 +5,24 @@ import SystemCircle, { DraggableSystemCircle } from "./SystemCircle";
 import { useFrame, type ElementProps } from "@react-three/fiber";
 import { useGetStarmapStore } from "../starmapStore";
 import { setCursor } from "@thorium/utils/setCursor";
+import { lightYearToLightMinute } from "@thorium/utils/unitTypes";
 const SystemMarker: React.FC<
 	{
 		systemId: string | number;
 		name: string;
 		position: [number, number, number];
 		draggable?: boolean;
+		commSatelliteRadius: number | null;
 		onPointerDown?: () => void;
 	} & ElementProps<typeof Mesh>
-> = ({ systemId, name, position, draggable, ...props }) => {
+> = ({
+	systemId,
+	name,
+	position,
+	draggable,
+	commSatelliteRadius,
+	...props
+}) => {
 	const group = React.useRef<Group>(new Group());
 	const useStarmapStore = useGetStarmapStore();
 
@@ -36,26 +45,45 @@ const SystemMarker: React.FC<
 	const positionVector = new Vector3(...position);
 	if (cameraView === "2d") positionVector.setY(0);
 	return (
-		<group position={positionVector} ref={group}>
-			{draggable ? (
-				<DraggableSystemCircle
-					systemId={systemId}
-					hoveringDirection={direction}
-					parentObject={group}
-					position={position}
-					{...props}
-					onPointerOver={(e) => {
-						props?.onPointerOver?.(e);
-						direction.current = 1;
-						setCursor("pointer");
-					}}
-					onPointerOut={(e) => {
-						props?.onPointerOut?.(e);
-						direction.current = -1;
-						setCursor("auto");
-					}}
-				/>
-			) : (
+		<>
+			{commSatelliteRadius ? (
+				<mesh
+					position={positionVector}
+					scale={[
+						commSatelliteRadius,
+						commSatelliteRadius,
+						commSatelliteRadius,
+					]}
+				>
+					<sphereGeometry args={[lightYearToLightMinute(1), 16, 16]} />
+					<meshBasicMaterial
+						color={0xff8800}
+						transparent
+						opacity={0.2}
+						depthTest={false}
+					/>
+				</mesh>
+			) : null}
+			<group position={positionVector} ref={group}>
+				{/* {draggable ? (
+					<DraggableSystemCircle
+						systemId={systemId}
+						hoveringDirection={direction}
+						parentObject={group}
+						position={position}
+						{...props}
+						onPointerOver={(e) => {
+							props?.onPointerOver?.(e);
+							direction.current = 1;
+							setCursor("pointer");
+						}}
+						onPointerOut={(e) => {
+							props?.onPointerOut?.(e);
+							direction.current = -1;
+							setCursor("auto");
+						}}
+					/>
+				) : ( */}
 				<SystemCircle
 					systemId={systemId}
 					hoveringDirection={direction}
@@ -71,13 +99,14 @@ const SystemMarker: React.FC<
 						setCursor("auto");
 					}}
 				/>
-			)}
-			<SystemLabel
-				systemId={systemId}
-				hoveringDirection={direction}
-				name={name}
-			/>
-		</group>
+				{/* )} */}
+				<SystemLabel
+					systemId={systemId}
+					hoveringDirection={direction}
+					name={name}
+				/>
+			</group>{" "}
+		</>
 	);
 };
 

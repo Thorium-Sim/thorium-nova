@@ -125,13 +125,14 @@ export function getCompletePositionFromOrbit(object: Entity) {
 
 /** Gets the system entity which an object resides in, including if it is a satellite */
 export function getObjectSystem(obj: Entity): Entity | null {
+	if (obj.components.isSolarSystem) return obj;
+
 	const objSystemId = obj.components.position?.parentId;
 	if (objSystemId) {
 		const parentObject = obj.ecs?.getEntityById(objSystemId);
 		if (parentObject) return parentObject;
 	}
 
-	if (obj.components.isSolarSystem) return obj;
 	const parentObjId = obj.components?.satellite?.parentId;
 	const parent = obj.ecs?.getEntityById(parentObjId || -1);
 	if (!parent) return null;

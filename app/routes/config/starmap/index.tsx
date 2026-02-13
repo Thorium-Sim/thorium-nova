@@ -1,7 +1,8 @@
 import { InterstellarMap } from "@thorium/components/Starmap/InterstellarMap";
+import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import SystemMarker from "@thorium/components/Starmap/SystemMarker";
 import { q } from "@thorium/context/AppContext";
-import { useParams } from "react-router";
+import { href, useNavigate, useParams } from "react-router";
 
 export default function InterstellarWrapper({
 	draggable = true,
@@ -16,6 +17,9 @@ export default function InterstellarWrapper({
 		pluginId: string;
 	};
 
+	const navigate = useNavigate();
+	const useStarmapStore = useGetStarmapStore();
+
 	const [stars] = q.plugin.starmap.all.useNetRequest({ pluginId });
 	return (
 		<InterstellarMap>
@@ -25,8 +29,19 @@ export default function InterstellarWrapper({
 					systemId={star.name}
 					position={Object.values(star.position) as [number, number, number]}
 					name={star.name}
+					commSatelliteRadius={star.commSatelliteRadius || null}
 					draggable={draggable}
-					onDoubleClick={() => onDoubleClick?.(star.name)}
+					onPointerDown={() => {
+						useStarmapStore.setState({ selectedObjectIds: [star.name] });
+					}}
+					onDoubleClick={() =>
+						navigate(
+							href("/config/:pluginId/starmap/:systemId", {
+								pluginId,
+								systemId: star.name,
+							}),
+						)
+					}
 				/>
 			))}
 			{children}

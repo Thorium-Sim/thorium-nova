@@ -13,6 +13,8 @@ import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import type { DataContext } from "@thorium/.server/DataContext";
+import { calculateShipMapPath } from "@thorium/utils/.server/ship/shipMapPathfinder";
+import { generateSatelliteGraph } from "@thorium/cards/LongRangeComm/data.server";
 
 const flightStartShips = z
 	.array(
@@ -225,6 +227,14 @@ export async function startFlight(
 	pubsub.publish.flight.all();
 	await ctx.flight.write(true);
 
+	const satellites = Array.from(
+		ctx.ecs.componentCache.get("isCommSatellite") || [],
+	);
+	console.log(
+		calculateShipMapPath(generateSatelliteGraph(satellites), 10, 14, {
+			trim: true,
+		}),
+	);
 	return ctx.flight;
 }
 

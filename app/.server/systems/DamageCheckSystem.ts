@@ -7,7 +7,7 @@ export class DamageCheckSystem extends System {
 	static flightMode = ["nova"];
 
 	test(entity: Entity) {
-		return Boolean(entity.components.isPlayerShip);
+		return Boolean(entity.components.isShipSystem);
 	}
 
 	update(entity: Entity, elapsed: number) {
