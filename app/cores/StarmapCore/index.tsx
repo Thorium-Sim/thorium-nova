@@ -787,7 +787,9 @@ function CanvasWrapper() {
 				{currentSystem === null ? (
 					<InterstellarWrapper />
 				) : (
-					<SolarSystemWrapper />
+					<ErrorBoundary fallback={null}>
+						<SolarSystemWrapper />
+					</ErrorBoundary>
 				)}
 			</StarmapCanvas>
 			{dragPosition && <DragSelection {...dragPosition} />}
@@ -859,7 +861,7 @@ export function SolarSystemWrapper() {
 	const useStarmapStore = useGetStarmapStore();
 	const currentSystem = useStarmapStore((store) => store.currentSystem);
 
-	if (currentSystem === null) return null;
+	if (currentSystem === null) throw new Error("No current system");
 	const [system] = q.starmapCore.system.useNetRequest({
 		systemId: currentSystem,
 	});
