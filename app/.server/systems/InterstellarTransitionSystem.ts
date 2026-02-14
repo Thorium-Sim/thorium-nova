@@ -128,6 +128,7 @@ export class InterstellarTransitionSystem extends System {
 				if (entity.components.isPlayerShip) {
 					pubsub.publish.navigation.ship({ shipId: entity.id });
 					pubsub.publish.ship.player({ shipId: entity.id });
+					pubsub.publish.ship.players();
 				}
 			}
 		} else {
@@ -227,6 +228,7 @@ export class InterstellarTransitionSystem extends System {
 				if (entity.components.isPlayerShip) {
 					pubsub.publish.navigation.ship({ shipId: entity.id });
 					pubsub.publish.ship.player({ shipId: entity.id });
+					pubsub.publish.ship.players();
 				}
 				// // Update the warp engines
 				// const warpEngines = this.ecs.entities.find(
