@@ -242,9 +242,10 @@ export class PhysicsMovementSystem extends System {
 
 			/**
 			 * Warp Engines
+			 * They ignore mass, so we set the velocity directly.
 			 */
 			if (warpEngines?.components.isWarpEngines?.forwardVelocity) {
-				velocityVector.add(
+				velocityVector.copy(
 					tempObj.localToWorld(
 						tempVector.set(
 							0,
@@ -292,6 +293,10 @@ export class PhysicsMovementSystem extends System {
 				}
 			}
 			/**
+			 * Compute forward velocity (km/s) before unit conversion
+			 */
+			const forwardVelocity = velocityVector.length();
+			/**
 			 * Translate velocity to LightMinutes if we're in interstellar space
 			 */
 			if (isInterstellarSpace) {
@@ -305,6 +310,7 @@ export class PhysicsMovementSystem extends System {
 					x: velocityVector.x,
 					y: velocityVector.y,
 					z: velocityVector.z,
+					forwardVelocity,
 				});
 				const { x, y, z } = entity.components.position || { x: 0, y: 0, z: 0 };
 				tempVector.set(x, y, z);
@@ -436,7 +442,7 @@ export class PhysicsMovementSystem extends System {
 			const body = world.bodies.get(bodyHandle);
 			if (!body) continue;
 			// No need to update fixed bodies.
-			if (body.bodyType() === RAPIER.RigidBodyType.Fixed) return;
+			if (body.bodyType() === RAPIER.RigidBodyType.Fixed) continue;
 
 			{
 				const translation = body.translation();

@@ -722,9 +722,12 @@ function CanvasWrapper() {
 	const useStarmapStore = useGetStarmapStore();
 	const currentSystem = useStarmapStore((store) => store.currentSystem);
 	q.starmapCore.stream.useDataStream({ systemId: currentSystem });
-	const [starmapShips] = q.starmapCore.ships.useNetRequest({
-		systemId: currentSystem,
-	});
+	const [starmapShips] = q.starmapCore.ships.useNetRequest(
+		{
+			systemId: currentSystem,
+		},
+		{ placeholderData: keepPreviousData },
+	);
 	const { interpolate } = useLiveQuery();
 
 	const cameraRef = useRef<PerspectiveCamera>(undefined);
@@ -796,9 +799,12 @@ export function InterstellarWrapper() {
 	const currentSystem = useStarmapStore((store) => store.currentSystem);
 	const isViewscreen = useStarmapStore((store) => store.viewingMode);
 
-	const [starmapShips] = q.starmapCore.ships.useNetRequest({
-		systemId: currentSystem,
-	});
+	const [starmapShips] = q.starmapCore.ships.useNetRequest(
+		{
+			systemId: currentSystem,
+		},
+		{ placeholderData: keepPreviousData },
+	);
 	const [starmapSystems] = q.starmapCore.systems.useNetRequest();
 
 	return (
@@ -853,7 +859,7 @@ export function SolarSystemWrapper() {
 	const useStarmapStore = useGetStarmapStore();
 	const currentSystem = useStarmapStore((store) => store.currentSystem);
 
-	if (currentSystem === null) throw new Error("No current system");
+	if (currentSystem === null) return null;
 	const [system] = q.starmapCore.system.useNetRequest({
 		systemId: currentSystem,
 	});

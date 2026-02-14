@@ -124,7 +124,7 @@ export const starmapCore = t.router({
 					components.isShip &&
 					((typeof input?.systemId === "number" &&
 						components.position?.parentId === input.systemId) ||
-						(input?.systemId === undefined &&
+						(input?.systemId == null &&
 							components.position?.type === "interstellar"))
 				) {
 					data.push({
@@ -196,7 +196,7 @@ export const starmapCore = t.router({
 					components.isTorpedo &&
 					((typeof input?.systemId === "number" &&
 						components.position?.parentId === input.systemId) ||
-						(input?.systemId === undefined &&
+						(input?.systemId == null &&
 							components.position?.type === "interstellar"))
 				) {
 					if (
