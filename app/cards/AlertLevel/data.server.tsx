@@ -25,6 +25,7 @@ export const alertLevel = t.router({
 			if (!ship?.components.isShip) throw new Error("Ship not found");
 
 			ship.updateComponent("isShip", { alertLevel: input.alertLevel });
+			pubsub.publish.ship.player({ shipId: ship.id });
 			pubsub.publish.ship.get({ shipId: ship.id });
 			pubsub.publish.starmapCore.object({ objectId: ship.id });
 
