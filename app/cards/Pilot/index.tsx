@@ -261,7 +261,7 @@ const LockOnButton = () => {
 					</Button>
 				) : (
 					<Button
-						className={`w-full lock-on-course ${typeof waypoint === "number" ? "btn-warning" : "btn-disabled opacity-50"}`}
+						className={cn("w-full lock-on-course", typeof waypoint === "number" ? "btn-warning" : "btn-disabled opacity-50")}
 						disabled={typeof waypoint !== "number"}
 						onClick={() =>
 							q.pilot.autopilot.lockCourse.netSend({
@@ -275,7 +275,7 @@ const LockOnButton = () => {
 				)}
 				{!autopilot.forwardAutopilot ? (
 					<Button
-						className={`w-full activate-autopilot ${autopilot.locked ? "btn-warning" : "btn-disabled opacity-50"}`}
+						className={cn("w-full activate-autopilot", autopilot.locked ? "btn-warning" : "btn-disabled opacity-50")}
 						disabled={!autopilot.locked}
 						onClick={() => q.pilot.autopilot.activate.netSend({ shipId })}
 					>
