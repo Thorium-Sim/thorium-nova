@@ -113,7 +113,6 @@ function Waypoints() {
 							const waypoint = waypoints.find((w) => w.id === id);
 							if (waypoint) {
 								await q.waypoints.activate.netSend({ waypointId: waypoint.id });
-								window.dispatchEvent(new CustomEvent("waypoint-activated"));
 								if (
 									useStarmapStore.getState().currentSystem !==
 									waypoint?.position.parentId
@@ -172,8 +171,6 @@ function AddWaypoint() {
 							shipId,
 							active: true,
 						}));
-
-					window.dispatchEvent(new CustomEvent("waypoint-activated"));
 				} catch (error: unknown) {
 					if (error instanceof Error) {
 						toast({ title: error.message, color: "error" });
