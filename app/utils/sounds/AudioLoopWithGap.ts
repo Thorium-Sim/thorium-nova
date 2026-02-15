@@ -102,7 +102,9 @@ export class AudioLoopWithGap {
 		const finalSource = this.context.createBufferSource();
 		finalSource.playbackRate.setValueAtTime(this.playbackRate, 0);
 		finalSource.buffer = this.buffer;
-		finalSource.connect(this.context.destination);
+		for (const connection of this.connections) {
+			finalSource.connect(connection);
+		}
 
 		// Start from loopEnd and play to the end of the buffer
 		const remainingDuration = this.buffer.duration - this.loopEnd;

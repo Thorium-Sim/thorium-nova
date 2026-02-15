@@ -1,5 +1,5 @@
 import Button from "@thorium/ui/Button";
-import { Fragment, Suspense, useRef, useState } from "react";
+import { Fragment, Suspense, useRef } from "react";
 import { GridCanvas, CircleGrid, CircleGridTiltButton } from "./CircleGrid";
 import { PilotZoomSlider } from "./PilotZoomSlider";
 import {
@@ -11,23 +11,14 @@ import { Joystick, LinearJoystick } from "@thorium/ui/Joystick";
 import type { ReactNode } from "react";
 import type { Coordinates } from "@thorium/utils/unitTypes";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
-import { clientId, q } from "@thorium/context/AppContext";
+import { q } from "@thorium/context/AppContext";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { useGamepadPress } from "@thorium/hooks/useGamepadStore";
 import { CircleGridContacts, CircleGridWaypoints } from "./PilotContacts";
 import type { CardProps } from "@thorium/cards/CardProps";
 import { useStation } from "@thorium/routes/station/useStation";
 import { useCardContext } from "@thorium/context/CardContext";
-import {
-	Dialog,
-	DialogTrigger,
-	ModalOverlay,
-	Modal,
-	Button as RAButton,
-} from "react-aria-components";
 import { cn } from "@thorium/utils/cn";
-import { Navigation } from "@thorium/cards/Navigation";
-import useEventListener from "@thorium/hooks/useEventListener";
 
 async function rotation({
 	shipId,
@@ -72,39 +63,6 @@ export function Pilot({ cardLoaded }: CardProps) {
 	const [targetedContact] = q.targeting.targetedContact.useNetRequest({
 		shipId,
 	});
-	const [showNavigation, setShowNavigation] = useState(false);
-
-	function setIsNavOpen(open: boolean) {
-		q.thorium.genericEvent.netSend({
-			clientId,
-			eventName: "navigation-open",
-			properties: `${open}`,
-		});
-		setShowNavigation(open);
-	}
-	useEventListener("waypoint-activated", () => {
-		setShowNavigation(false);
-	});
-
-	if (showNavigation) {
-		return (
-			<div className="relative h-full">
-				<Navigation cardLoaded={cardLoaded} />
-				<div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-					<RAButton
-						className="btn btn-error clear-waypoint"
-						onPress={() => {
-							q.waypoints.deactivate.netSend({ shipId });
-							setShowNavigation(false);
-						}}
-					>
-						Clear Waypoint
-					</RAButton>
-				</div>
-			</div>
-		);
-	}
-
 	return (
 		<CircleGridStoreProvider>
 			<div className="grid grid-cols-4 grid-rows-1 h-full place-content-center gap-4">
@@ -150,7 +108,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 				</div>
 
 				<div className="h-full flex flex-col justify-between gap-2">
-					<LockOnButton setShowNavigation={setIsNavOpen} />
+					<LockOnButton />
 					<div>
 						<div className="pilot-slider">
 							<PilotZoomSlider />
@@ -229,11 +187,7 @@ function getInterstellarDistance(
 	return `${value.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${unit}`;
 }
 
-const LockOnButton = ({
-	setShowNavigation,
-}: {
-	setShowNavigation: (value: boolean) => void;
-}) => {
+const LockOnButton = () => {
 	const { cardLoaded } = useCardContext();
 	const {
 		shipId,
@@ -297,13 +251,6 @@ const LockOnButton = ({
 				</div>
 			</div>
 
-			<RAButton
-				className="btn w-full btn-info set-course"
-				onPress={() => setShowNavigation(true)}
-			>
-				Set Course
-			</RAButton>
-
 			<div className="flex gap-2">
 				{autopilot.locked ? (
 					<Button
@@ -314,7 +261,7 @@ const LockOnButton = ({
 					</Button>
 				) : (
 					<Button
-						className="w-full btn-warning lock-on-course"
+						className={`w-full lock-on-course ${typeof waypoint === "number" ? "btn-warning" : "btn-disabled opacity-50"}`}
 						disabled={typeof waypoint !== "number"}
 						onClick={() =>
 							q.pilot.autopilot.lockCourse.netSend({
@@ -328,7 +275,7 @@ const LockOnButton = ({
 				)}
 				{!autopilot.forwardAutopilot ? (
 					<Button
-						className="w-full btn-error activate-autopilot"
+						className={`w-full activate-autopilot ${autopilot.locked ? "btn-warning" : "btn-disabled opacity-50"}`}
 						disabled={!autopilot.locked}
 						onClick={() => q.pilot.autopilot.activate.netSend({ shipId })}
 					>
