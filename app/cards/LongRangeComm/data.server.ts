@@ -48,10 +48,10 @@ export const longRangeComm = t.router({
 			return lrcomm.components.isLongRangeComm.addressBook.map((m) => {
 				let name = m.name;
 				if (!name) {
-					const entity = ctx.ecs.getEntityById(m.destinationId);
+					const entity = ctx.ecs.getEntityById(m.contactId);
 					name = entity?.components.identity?.name || "Unknown";
 				}
-				return { id: m.destinationId, name };
+				return { id: m.contactId, name };
 			});
 		}),
 	outgoingMessages: t.procedure
@@ -94,7 +94,7 @@ export const longRangeComm = t.router({
 					message.components.isLongRangeMessage.destinationId;
 				let destinationShipName =
 					lrcomm.components.isLongRangeComm?.addressBook.find(
-						(f) => f.destinationId === destinationId,
+						(f) => f.contactId === destinationId,
 					)?.name;
 				if (!destinationShipName) {
 					const destination = ctx.ecs.getEntityById(destinationId);
@@ -151,11 +151,11 @@ export const longRangeComm = t.router({
 					message.components.isLongRangeMessage.destinationId;
 				let senderShipName =
 					lrcomm.components.isLongRangeComm?.addressBook.find(
-						(f) => f.destinationId === senderId,
+						(f) => f.contactId === senderId,
 					)?.name;
 				let destinationShipName =
 					lrcomm.components.isLongRangeComm?.addressBook.find(
-						(f) => f.destinationId === destinationId,
+						(f) => f.contactId === destinationId,
 					)?.name;
 				if (!senderShipName) {
 					const sender = ctx.ecs.getEntityById(senderId);
@@ -175,6 +175,56 @@ export const longRangeComm = t.router({
 			}
 
 			return messages;
+		}),
+	addToAddressBook: t.procedure
+		.input(
+			z.object({
+				shipId: z.number(),
+				contactId: z.number(),
+				name: z.string().optional(),
+				actions: z
+					.object({
+						params: z.string().array(),
+						intent: z.string(),
+						blocks: z.any().array(),
+					})
+					.array()
+					.optional(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const lrcomm = getShipSystem(ctx.ecs, {
+				systemType: "longRangeComm",
+				shipId: input.shipId,
+			});
+			lrcomm.updateComponent("isLongRangeComm", {
+				addressBook: [
+					...(lrcomm.components.isLongRangeComm?.addressBook || []),
+					{
+						contactId: input.contactId,
+						actions: input.actions || [],
+						name: input.name,
+					},
+				],
+			});
+		}),
+	removeFromAddressBook: t.procedure
+		.input(
+			z.object({
+				shipId: z.number(),
+				contactId: z.number(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const lrcomm = getShipSystem(ctx.ecs, {
+				systemType: "longRangeComm",
+				shipId: input.shipId,
+			});
+			lrcomm.updateComponent("isLongRangeComm", {
+				addressBook: (
+					lrcomm.components.isLongRangeComm?.addressBook || []
+				).filter((a) => a.contactId !== input.contactId),
+			});
 		}),
 	composeMessage: t.procedure
 		.input(
