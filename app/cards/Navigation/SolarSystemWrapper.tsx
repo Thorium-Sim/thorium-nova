@@ -42,6 +42,7 @@ export function SolarSystemWrapper() {
 		active: false,
 		systemId: currentSystem,
 	});
+	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
 
 	useEffect(() => {
 		useStarmapStore.getState().currentSystemSet?.(currentSystem);
@@ -83,6 +84,11 @@ export function SolarSystemWrapper() {
 									}
 
 									useStarmapStore.setState({ selectedObjectIds: [entity.id] });
+									q.waypoints.spawn.netSend({
+										entityId: entity.id,
+										shipId,
+										active: false,
+									});
 								}}
 							>
 								<StarSprite
@@ -116,6 +122,11 @@ export function SolarSystemWrapper() {
 							onClick={() => {
 								useStarmapStore.setState({ selectedObjectIds: [entity.id] });
 								useStarmapStore.getState().setCameraFocus(position);
+								q.waypoints.spawn.netSend({
+									entityId: entity.id,
+									shipId,
+									active: false,
+								});
 							}}
 						/>
 					);
@@ -143,7 +154,7 @@ export function SolarSystemWrapper() {
 						FallbackComponent={() => <></>}
 						onError={(err) => console.error(err)}
 					>
-						<WaypointEntity position={waypoint.position} />
+						<WaypointEntity position={waypoint.position} isActive={waypoint.isActive} isFacing={waypoint.id === autopilot.facingWaypointIds[0]} isLocked={waypoint.id === autopilot.destinationWaypointId} />
 					</ErrorBoundary>
 				</Suspense>
 			))}

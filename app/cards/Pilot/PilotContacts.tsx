@@ -33,7 +33,7 @@ import {
 	Vector3,
 } from "three";
 import type { Line2 } from "three-stdlib";
-import { useGetFacingWaypoint, useCircleGridStore } from "./useCircleGridStore";
+import { useCircleGridStore } from "./useCircleGridStore";
 import { WaypointEntity } from "./Waypoint";
 import { useLiveQuery } from "@thorium/utils/live-query/client/liveQueryContext";
 import { q } from "@thorium/context/AppContext";
@@ -132,11 +132,11 @@ export function CircleGridWaypoints() {
 		active: true,
 		shipId,
 	});
-	useGetFacingWaypoint();
+	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
 	return (
 		<group>
 			{waypoints.map((waypoint) => (
-				<WaypointEntity key={waypoint.id} waypoint={waypoint} />
+				<WaypointEntity key={waypoint.id} waypoint={waypoint} isLocked={waypoint.id === autopilot.destinationWaypointId} isFacing={waypoint.id === autopilot.facingWaypointIds[0]} />
 			))}
 		</group>
 	);

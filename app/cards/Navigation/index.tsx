@@ -21,6 +21,8 @@ import { useFollowEntity } from "@thorium/components/Starmap/useFollowEntity";
 import { useCancelFollow } from "@thorium/components/Starmap/useCancelFollow";
 import { q, clientId } from "@thorium/context/AppContext";
 import { Icon } from "@thorium/ui/Icon";
+import { useConfirm } from "@thorium/ui/AlertDialog";
+import { Switch } from "react-aria-components";
 import type { CardProps } from "@thorium/cards/CardProps";
 import { useStation } from "@thorium/routes/station/useStation";
 export function Navigation(props: CardProps) {
@@ -58,7 +60,7 @@ export function Navigation(props: CardProps) {
 
 function Waypoints() {
 	const { shipId } = useStation();
-
+	const confirm = useConfirm();
 	const useStarmapStore = useGetStarmapStore();
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -67,52 +69,91 @@ function Waypoints() {
 		shipId,
 		active: false,
 	});
-	const activeWaypoint = waypoints.find((w) => w.isActive);
+	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
+	const nearestFacingId = autopilot.facingWaypointIds[0] ?? null;
+	const lockedWaypointId = autopilot.destinationWaypointId;
 
 	return (
 		<div className="self-end justify-self-end w-96 pointer-events-auto waypoints-container">
 			<div className="overflow-hidden w-full mt-2">
 				<div ref={ref} className="flex flex-col h-full max-h-72">
 					<SearchableList
+						showSearchLabel={false}
+						searchPlaceholder="Search Waypoint History..."
 						items={
 							waypoints.length === 0
-								? [{ id: -1, label: "No waypoints set." }]
-								: waypoints.map((w) => ({
-										id: w.id,
-										label: w.name,
-									}))
+								? [{ id: -1, label: "No waypoints set.", isActive: false, isBlue: false, isLocked: false }]
+								: waypoints
+										.map((w) => ({
+											id: w.id,
+											label: w.name,
+											isActive: w.isActive,
+											isBlue: w.id === nearestFacingId || w.id === lockedWaypointId,
+											isLocked: w.id === lockedWaypointId,
+										}))
+										.sort((a, b) => (a.isLocked === b.isLocked ? 0 : a.isLocked ? -1 : 1))
 						}
-						renderItem={({ id, label }) => (
-							<span className="flex">
+						renderItem={({ id, label, isActive, isBlue, isLocked }) => (
+							<span className="flex items-center">
 								<span className="flex-1 text-white">{label}</span>
-								{id > -1 && (
-									<button
-										className="appearance-none"
-										onClick={async (e) => {
-											e.preventDefault();
-											e.stopPropagation();
-											try {
-												await q.waypoints.delete.netSend({
-													waypointId: id,
-													shipId,
-												});
-											} catch (err) {
-												if (err instanceof Error) {
-													toast({ color: "error", title: err.message });
+								{id > -1 && !isLocked && (
+									<>
+										<Switch
+											isSelected={isActive}
+											onChange={async (selected) => {
+												if (selected) {
+													await q.waypoints.activate.netSend({ waypointId: id });
+												} else {
+													await q.waypoints.deactivate.netSend({ waypointId: id });
 												}
-											}
-										}}
-									>
-										<Icon name="ban" className="text-red-500" />
-									</button>
+											}}
+											className="group mr-2 flex items-center"
+										>
+											<div className={`flex h-4 w-7 items-center rounded-full border transition ${
+												isBlue
+													? "border-waypoint-facing bg-waypoint-facing/30"
+													: "border-waypoint-inactive bg-waypoint-inactive/30 group-data-[selected]:border-waypoint-active group-data-[selected]:bg-waypoint-active/30"
+											}`}>
+												<span className={`block h-3 w-3 ml-0.5 rounded-full transition-all ${
+													isBlue
+														? "ml-3 bg-waypoint-facing"
+														: "bg-waypoint-inactive group-data-[selected]:ml-3 group-data-[selected]:bg-waypoint-active"
+												}`} />
+											</div>
+										</Switch>
+										<button
+											className="appearance-none"
+											onClick={async (e) => {
+												e.preventDefault();
+												e.stopPropagation();
+												try {
+													await q.waypoints.delete.netSend({
+														waypointId: id,
+														shipId,
+													});
+												} catch (err) {
+													if (err instanceof Error) {
+														toast({ color: "error", title: err.message });
+													}
+												}
+											}}
+										>
+											<Icon name="ban" className="text-red-500" />
+										</button>
+									</>
 								)}
 							</span>
 						)}
-						selectedItem={activeWaypoint?.id}
+						getItemClassName={({ isActive, isBlue }) =>
+							isBlue
+								? "!border-waypoint-facing !bg-waypoint-facing/10"
+								: isActive
+									? "!border-waypoint-active !bg-waypoint-active/10"
+									: "!border-waypoint-inactive !bg-waypoint-inactive/10"
+						}
 						setSelectedItem={async ({ id }) => {
 							const waypoint = waypoints.find((w) => w.id === id);
 							if (waypoint) {
-								await q.waypoints.activate.netSend({ waypointId: waypoint.id });
 								if (
 									useStarmapStore.getState().currentSystem !==
 									waypoint?.position.parentId
@@ -138,6 +179,29 @@ function Waypoints() {
 					/>
 				</div>
 			</div>
+			{waypoints.length > 0 && (
+				<div className="flex gap-2 mt-2">
+					<Button
+						className="btn-error flex-1"
+						onClick={async () => {
+							const result = await confirm({
+								header: "All active and inactive waypoints will be cleared. Proceed?",
+							});
+							if (result) {
+								q.waypoints.deleteAll.netSend({ shipId });
+							}
+						}}
+					>
+						Clear All
+					</Button>
+					<Button
+						className="btn-warning flex-1"
+						onClick={() => q.waypoints.deactivateAll.netSend({ shipId })}
+					>
+						Deactivate All
+					</Button>
+				</div>
+			)}
 		</div>
 	);
 }
@@ -154,14 +218,27 @@ function AddWaypoint() {
 		active: false,
 	});
 
-	const waypoint = waypoints.find((w) => w.id === selectedObjectIds[0]);
-	if (!selectedObjectIds[0] || waypoint?.isActive) return null;
+	const existingWaypoint = waypoints.find((w) => w.id === selectedObjectIds[0] || w.objectId === selectedObjectIds[0]);
+
+	if (!selectedObjectIds[0]) return null;
+	if (existingWaypoint?.isActive) return null;
+
+	if (existingWaypoint) {
+		return (
+			<Button
+				className="pointer-events-auto flex-1 btn-warning"
+				onClick={() =>
+					q.waypoints.activate.netSend({ waypointId: existingWaypoint.id })
+				}
+			>
+				Activate Waypoint
+			</Button>
+		);
+	}
 
 	return (
 		<Button
-			className={`pointer-events-auto flex-1 btn-primary ${
-				!selectedObjectIds ? "btn-disabled" : ""
-			}`}
+			className="pointer-events-auto flex-1 btn-primary"
 			disabled={selectedObjectIds.length === 0}
 			onClick={async () => {
 				try {
@@ -169,7 +246,7 @@ function AddWaypoint() {
 						(await q.waypoints.spawn.netSend({
 							entityId: selectedObjectIds[0],
 							shipId,
-							active: true,
+							active: false,
 						}));
 				} catch (error: unknown) {
 					if (error instanceof Error) {
@@ -261,7 +338,7 @@ function StarmapSearch() {
 					properties: `${item.id}`,
 				});
 			}}
-			placeholder="Search..."
+			placeholder="Search Navigational Records..."
 			displayValue={(item) => item?.name}
 		/>
 	);

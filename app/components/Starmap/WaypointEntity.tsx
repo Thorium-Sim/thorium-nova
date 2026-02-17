@@ -9,8 +9,22 @@ import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
 
 export const WaypointEntity = ({
 	position,
-}: { position: Coordinates<number> }) => {
-	const color = "rgb(230,153,0)";
+	isActive,
+	isFacing,
+	isLocked,
+}: { position: Coordinates<number>; isActive: boolean; isFacing?: boolean; isLocked?: boolean }) => {
+	const isBlue = isFacing || isLocked;
+	// These colors match the waypoint-* tokens in tailwind.config.ts
+	const color = isBlue
+		? "rgb(0,136,255)"
+		: isActive
+			? "rgb(230,153,0)"
+			: "rgb(206,164,255)";
+	const strokeColor = isBlue
+		? "rgb(0,68,128)"
+		: isActive
+			? "rgb(110,73,0)"
+			: "#663399";
 	const spriteMap = useShipSprite(WaypointSvg);
 	const strokeMap = useShipSprite(WaypointStroke);
 	const group = useRef<Group>(null);
@@ -41,7 +55,7 @@ export const WaypointEntity = ({
 				<spriteMaterial
 					attach="material"
 					map={strokeMap}
-					color={"rgb(110,73,0)"}
+					color={strokeColor}
 					sizeAttenuation={true}
 				/>
 			</sprite>

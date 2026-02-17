@@ -880,6 +880,7 @@ export function SolarSystemWrapper() {
 		active: true,
 		systemId: "all",
 	});
+	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
 
 	const selectedObjectIds = useStarmapStore((store) => store.selectedObjectIds);
 	const planetsHidden = useStarmapStore((store) => store.planetsHidden);
@@ -960,7 +961,7 @@ export function SolarSystemWrapper() {
 			{isCore
 				? null
 				: waypoints.map((waypoint) => (
-						<WaypointEntity key={waypoint.id} waypoint={waypoint} viewscreen />
+						<WaypointEntity key={waypoint.id} waypoint={waypoint} viewscreen isLocked={waypoint.id === autopilot.destinationWaypointId} isFacing={waypoint.id === autopilot.facingWaypointIds[0]} />
 					))}
 			{starmapShips.map((ship) => (
 				<Suspense key={ship.id} fallback={null}>

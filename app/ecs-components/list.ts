@@ -39,6 +39,7 @@ export * from "./isTrigger";
 export * from "./isTimeline";
 export * from "./physicsHandles";
 export * from "./nearbyObjects";
+export * from "./facingWaypoints";
 export * from "./isTorpedo";
 export * from "./hull";
 export * from "./isDestroyed";

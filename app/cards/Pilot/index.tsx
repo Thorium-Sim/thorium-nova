@@ -2,10 +2,7 @@ import Button from "@thorium/ui/Button";
 import { Fragment, Suspense, useRef } from "react";
 import { GridCanvas, CircleGrid, CircleGridTiltButton } from "./CircleGrid";
 import { PilotZoomSlider } from "./PilotZoomSlider";
-import {
-	CircleGridStoreProvider,
-	useCircleGridStore,
-} from "./useCircleGridStore";
+import { CircleGridStoreProvider } from "./useCircleGridStore";
 import { ImpulseControls } from "./ImpulseControls";
 import { Joystick, LinearJoystick } from "@thorium/ui/Joystick";
 import type { ReactNode } from "react";
@@ -193,9 +190,8 @@ const LockOnButton = () => {
 		shipId,
 		ship: { currentSystem, systemPosition },
 	} = useStation();
-	const store = useCircleGridStore();
-	const waypoint = store((store) => store.facingWaypoints?.[0]);
 	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
+	const waypoint = autopilot.facingWaypointIds[0] ?? undefined;
 	const distanceRef = useRef<HTMLSpanElement>(null);
 
 	const { interpolate } = useLiveQuery();
