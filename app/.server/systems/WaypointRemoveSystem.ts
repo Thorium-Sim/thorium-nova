@@ -45,7 +45,7 @@ export class WaypointRemoveSystem extends System {
 					forwardAutopilot: false,
 				});
 
-				// Deactivate the waypoint instead of deleting it
+				// Deactivate the waypoint
 				entity.updateComponent("isWaypoint", { isActive: false });
 
 				pubsub.publish.pilot.autopilot.get({ shipId: ship.id });
