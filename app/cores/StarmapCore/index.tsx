@@ -810,6 +810,7 @@ export function InterstellarWrapper() {
 							<SystemMarker
 								key={sys.id}
 								systemId={sys.id}
+								commSatelliteRadius={null}
 								position={
 									[sys.position.x, sys.position.y, sys.position.z] as [
 										number,

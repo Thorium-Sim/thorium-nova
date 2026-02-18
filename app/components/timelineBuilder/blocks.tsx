@@ -10,7 +10,6 @@ import {
 	type TimelineBlock,
 } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { ActionBlock } from "@thorium/components/timelineBuilder/ActionBlock";
-import type { BlockProps } from "@thorium/components/timelineBuilder/BlockInputs";
 import { BlockWrapper } from "@thorium/components/timelineBuilder/BlockWrapper";
 import { DistanceCondition } from "@thorium/components/timelineBuilder/DistanceCondition";
 import { EntityCondition } from "@thorium/components/timelineBuilder/EntityCondition";
@@ -34,6 +33,7 @@ import { TimelineAvailabilityBlock } from "@thorium/components/timelineBuilder/T
 import { DebugBlock } from "@thorium/components/timelineBuilder/DebugBlock";
 import { MacroSlotBlock } from "@thorium/components/timelineBuilder/MacroSlotBlock";
 import { NoteBlock } from "@thorium/components/timelineBuilder/NoteBlock";
+import { ForEachEntity } from "@thorium/components/timelineBuilder/ForEachEntity";
 
 export function RenderBlock({
 	onRemove,
@@ -91,6 +91,8 @@ export function RenderBlock({
 					<RandomIntoVariable {...block} update={update} />
 				) : block.type === "MathIntoVariable" ? (
 					<MathIntoVariable {...block} update={update} />
+				) : block.type === "ForEachEntity" ? (
+					<ForEachEntity {...block} update={update} />
 				) : block.type === "Macro" ? (
 					<MacroBlock
 						{...block}

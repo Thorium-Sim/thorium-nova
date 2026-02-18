@@ -122,6 +122,19 @@ export function EntityInput({
 						from a local variable
 					</li>
 					<li>
+						<code className="bg-notice rounded">%component:property=value</code>{" "}
+						- entity based on the name of the component, or optionally if the
+						component's property matches some value. For example,{" "}
+						<code className="bg-notice rounded">%isPlayerShip</code> for any
+						entities with the "isPlayerShip" component, or{" "}
+						<code className="bg-notice rounded">
+							%faction:factionId=$faction
+						</code>{" "}
+						for any entities that have the "faction" component with the
+						"factionId" property that equals the value of the "$faction"
+						variable.
+					</li>
+					<li>
 						anything else - entity by its{" "}
 						<code className="bg-notice rounded">identity.name</code> component
 						value
@@ -135,10 +148,12 @@ export function EntityInput({
 						? "Entity by Tag"
 						: value.startsWith("$")
 							? "Entity by Local Variable"
-							: value.toLowerCase().startsWith("entity") &&
-									!Number.isNaN(Number(value.split(" ").at(-1)?.trim()))
-								? "Entity by ID"
-								: "Entity by Name"}
+							: value.startsWith("%")
+								? "Entity by Component"
+								: value.toLowerCase().startsWith("entity") &&
+										!Number.isNaN(Number(value.split(" ").at(-1)?.trim()))
+									? "Entity by ID"
+									: "Entity by Name"}
 			</div>
 		</span>
 	);
@@ -247,14 +262,19 @@ export function ComponentPropertySelect({
 				placeholder="Component"
 				value={component}
 				onChange={setComponent}
-				items={Object.keys(components).map((c) => ({ id: c }))}
+				items={[
+					{ id: "id" },
+					...Object.keys(components).map((c) => ({ id: c })),
+				]}
 			/>
-			<MadLibsCombobox
-				placeholder="Property"
-				value={property}
-				onChange={setProperty}
-				items={properties.map((c) => ({ id: c }))}
-			/>
+			{component !== "id" && (
+				<MadLibsCombobox
+					placeholder="Property"
+					value={property}
+					onChange={setProperty}
+					items={properties.map((c) => ({ id: c }))}
+				/>
+			)}
 			{onlyShowProperties ||
 			!property ||
 			property === "isPresent" ||

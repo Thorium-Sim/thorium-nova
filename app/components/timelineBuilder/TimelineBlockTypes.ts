@@ -12,6 +12,7 @@ export const timelineBlockTypes = [
 	"Action",
 	"RandomIntoVariable",
 	"MathIntoVariable",
+	"ForEachEntity",
 	"Macro",
 	"TimelineAvailability",
 	"MacroSlot",
@@ -116,6 +117,11 @@ export const timelineBlockDefaults: {
 		number2: "0",
 		operation: "+",
 		variable: "",
+	},
+	ForEachEntity: {
+		entity: "",
+		variable: "entityId",
+		triggerBlocks: [],
 	},
 	Macro: {
 		pluginId: "",
@@ -243,6 +249,12 @@ interface MathIntoVariableBlock extends BaseBlock {
 	operation: "+" | "-" | "×" | "÷";
 	variable: string;
 }
+interface ForEachEntityBlock extends BaseBlock {
+	type: "ForEachEntity";
+	entity: string;
+	variable: string;
+	triggerBlocks: TimelineBlock[];
+}
 
 interface MacroBlock extends BaseBlock {
 	type: "Macro";
@@ -283,6 +295,7 @@ export type TimelineBlock =
 	| ActionBlock
 	| RandomIntoVariableBlock
 	| MathIntoVariableBlock
+	| ForEachEntityBlock
 	| MacroBlock
 	| TimelineAvailabilityBlock
 	| MacroSlot
