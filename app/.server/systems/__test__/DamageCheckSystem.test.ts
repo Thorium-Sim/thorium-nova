@@ -18,25 +18,23 @@ vi.mock("@thorium/utils/flags/damageTypes", async (importOriginal) => {
 	};
 });
 
-function makeEntity(ecs: ECS, {
-	isPlayerShip = true,
-	vulnerability = "normal",
-	offline = false,
-	onlineDamage = 10,
-	offlineDamage = 20,
-	cascadeRisk = 0,
-}: {
-	isPlayerShip?: boolean;
-	vulnerability?: "normal" | "vulnerable" | "invulnerable";
-	offline?: boolean;
-	offlineDamage?: number;
-	onlineDamage?: number;
-	cascadeRisk?: number;
-} = {}) {
+function makeEntity(
+	ecs: ECS,
+	{
+		vulnerability = "normal",
+		offline = false,
+		onlineDamage = 10,
+		offlineDamage = 20,
+		cascadeRisk = 0,
+	}: {
+		vulnerability?: "normal" | "vulnerable" | "invulnerable";
+		offline?: boolean;
+		offlineDamage?: number;
+		onlineDamage?: number;
+		cascadeRisk?: number;
+	} = {},
+) {
 	const entity = new Entity();
-	if (isPlayerShip) {
-		entity.addComponent("isPlayerShip", { value: true });
-	}
 	entity.addComponent("damage", {
 		vulnerability,
 		offline,
