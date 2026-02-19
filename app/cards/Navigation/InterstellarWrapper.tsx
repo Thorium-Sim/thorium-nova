@@ -42,12 +42,6 @@ export function InterstellarWrapper() {
 						name={sys.identity.name}
 						onClick={() => {
 							useStarmapStore.setState({ selectedObjectIds: [sys.id] });
-							q.waypoints.spawn.netSend({
-								entityId: sys.id,
-								shipId,
-								active: false,
-							});
-						}}
 						onDoubleClick={() => {
 							useStarmapStore.getState().setCurrentSystem(sys.id);
 							useStarmapStore.setState({ selectedObjectIds: [] });
