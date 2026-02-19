@@ -28,6 +28,8 @@ export default function Select<I extends string | number>({
 	multiple,
 	id,
 	labelProps,
+	hideIcon,
+	buttonClassName,
 }: {
 	label: string;
 	labelHidden?: boolean;
@@ -40,10 +42,12 @@ export default function Select<I extends string | number>({
 	setSelected: (value: I | null) => void;
 	size?: "xxs" | "xs" | "sm" | "md";
 	className?: string;
+	buttonClassName?: string;
 	labelProps?: LabelProps;
 	placeholder?: string;
 	multiple?: boolean;
 	id?: string;
+	hideIcon?: boolean;
 }) {
 	return (
 		<RASelect
@@ -72,20 +76,22 @@ export default function Select<I extends string | number>({
 						"select-xs py-0": size === "xs",
 						"select-sm py-1": size === "sm",
 					},
-					className || "",
+					buttonClassName || "",
 				)}
 			>
 				<SelectValue />
-				<Icon
-					name="chevrons-up-down"
-					className="h-5 w-5 text-gray-400"
-					aria-hidden="true"
-				/>
+				{hideIcon ? null : (
+					<Icon
+						name="chevrons-up-down"
+						className="h-5 w-5 text-gray-400"
+						aria-hidden="true"
+					/>
+				)}
 			</Button>
 			<Popover className={popoverTransitionClasses}>
 				<ListBox
 					selectionMode={multiple ? "multiple" : "single"}
-					className="select-options isolate w-fit min-w-32 bg-gray-900 shadow-lg rounded-md py-1 px-0.5 text-sm ring-2 ring-gray-400 ring-opacity-5 text-white max-h-96 overflow-y-auto outline-none data-[focused]:ring-opacity-50"
+					className="select-options isolate w-fit min-w-32 bg-gray-900 shadow-lg rounded-md py-1 px-2 text-sm ring-2 ring-gray-400 ring-opacity-5 text-white max-h-96 overflow-y-auto outline-none data-[focused]:ring-opacity-50"
 				>
 					{items.map((item) =>
 						"header" in item ? (

@@ -2,6 +2,10 @@ import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
+import SearchableInput, {
+	DefaultResultLabel,
+} from "@thorium/ui/SearchableInput";
+import Select from "@thorium/ui/Select";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { cn } from "@thorium/utils/cn";
 import { useState } from "react";
@@ -13,6 +17,7 @@ import {
 	ListBoxItem,
 	Popover,
 	Button as RAButton,
+	TextArea,
 } from "react-aria-components";
 
 type Pages = "inbox" | "archive" | "sent" | "compose";
@@ -43,7 +48,7 @@ export function LongRangeComm() {
 	}
 
 	return (
-		<div className="flex gap-4">
+		<div className="flex gap-4 h-full">
 			<Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
 			{page}
 		</div>
@@ -110,30 +115,99 @@ function ArchivePage() {
 	return <div></div>;
 }
 function ComposePage() {
-	const { shipId } = useStation();
+	const { shipId, station } = useStation();
 
 	const [addressBook] = q.longRangeComm.addressBook.useNetRequest({ shipId });
-
+	const [contactId, setContactId] = useState(-1);
+	const [message, setMessage] = useState("");
 	return (
-		<div>
-			<ComboBox>
-				<div className="flex items-center gap-2">
-					<Label>To:</Label>
-					<div className="combobox-field">
-						<Input className="react-aria-Input inset" />
-						<RAButton>
-							<Icon name="chevron-down" />
-						</RAButton>
-					</div>
-				</div>
-				<Popover className="combobox-popover">
-					<ListBox>
-						{addressBook.map((contact) => (
-							<ListBoxItem key={contact.id}>{contact.name}</ListBoxItem>
-						))}
-					</ListBox>
-				</Popover>
-			</ComboBox>
+		<div className="w-full max-w-xl mx-auto flex flex-col">
+			<div className="w-full flex items-center gap-2">
+				<Label className="text-xl">To:</Label>
+				<SearchableInput
+					className="w-full"
+					inputClassName="input-lg"
+					queryKey="address-book"
+					placeholder="Search Address Book"
+					getOptions={async ({ queryKey, signal }) => {
+						return addressBook;
+					}}
+					ResultLabel={({ active, result, selected }) => (
+						<DefaultResultLabel active={active} selected={selected}>
+							<p>{result.name}</p>
+						</DefaultResultLabel>
+					)}
+					selected={addressBook.find((a) => a.id === contactId) || null}
+					setSelected={(value) => {
+						if (!value) return;
+						setContactId(value.id);
+					}}
+					displayValue={(item) => item?.name || ""}
+				/>
+			</div>
+
+			<Label className="text-xl mt-4">Message:</Label>
+			<TextArea
+				className="textarea resize-none flex-1"
+				value={message}
+				onChange={(e) => setMessage(e.currentTarget.value)}
+			/>
+			<div className="flex gap-2 mt-4">
+				<Button
+					className="flex-1 btn-warning"
+					onClick={() => {
+						setContactId(-1);
+						setMessage("");
+					}}
+				>
+					Clear
+				</Button>
+				{/* TODO February 18, 2026 - Make this work once we have the concept of files */}
+				{/* <Button className="flex-1 btn-info">Attach...</Button> */}
+				<Select
+					className="flex-1"
+					disabled={message.trim().length === 0 || contactId === -1}
+					buttonClassName="btn-success btn"
+					label="Queue Message"
+					placeholder="Queue Message"
+					labelHidden
+					selected={null}
+					setSelected={(value) => {
+						if (!value) return;
+						q.longRangeComm.composeMessage.netSend({
+							senderId: shipId,
+							senderStation: station.name,
+							destinationId: contactId,
+							message,
+							encoding: value,
+						});
+					}}
+					hideIcon
+					items={[
+						{
+							header: "Select Message Encoding",
+							items: [
+								{
+									id: "decoded",
+									label: "No Encoding",
+								},
+								{
+									id: "waves",
+									label: "Marconi",
+								},
+								{
+									id: "rotation",
+									label: "Haartsen",
+								},
+								{
+									id: "replacement",
+									label: "Lamarr",
+								},
+							],
+						},
+					]}
+				/>
+			</div>
 		</div>
 	);
 }

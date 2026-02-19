@@ -1,4 +1,4 @@
-import { Fragment, type ReactElement, type ReactNode, useState } from "react";
+import { type ReactElement, type ReactNode, useEffect } from "react";
 import { type QueryFunctionContext, useQuery } from "@tanstack/react-query";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { Icon } from "./Icon";
@@ -52,6 +52,7 @@ export default function SearchableInput<T extends { id: any }>({
 	setSelected,
 	placeholder,
 	inputClassName,
+	className,
 }: {
 	queryKey?: string;
 	displayValue?: (item: T) => string;
@@ -64,17 +65,18 @@ export default function SearchableInput<T extends { id: any }>({
 	getOptions: (queryOptions: {
 		queryKey: [string, string];
 		signal?: AbortSignal;
-	}) => Promise<T[]>;
+	}) => T[] | Promise<T[]>;
 	selected?: T | null;
 	setSelected?: (item: T | null) => void;
 	placeholder?: string;
 	inputClassName?: string;
+	className?: string;
 }) {
 	const list = useAsyncList<T>({
 		async load({ signal, cursor, filterText = "" }) {
 			const result = await getOptions({
 				signal,
-				queryKey: ["queryKey", filterText],
+				queryKey: [queryKey, filterText],
 			});
 			return {
 				items: result,
@@ -82,6 +84,11 @@ export default function SearchableInput<T extends { id: any }>({
 		},
 	});
 
+	useEffect(() => {
+		if (selected === null && list.filterText) {
+			list.setFilterText("");
+		}
+	}, [selected, list.filterText, list.setFilterText]);
 	return (
 		<ComboBox
 			inputValue={list.filterText}
@@ -93,6 +100,7 @@ export default function SearchableInput<T extends { id: any }>({
 				list.setFilterText(displayValue(item as T));
 			}}
 			menuTrigger="focus"
+			className={className}
 		>
 			<div className="relative mt-1">
 				<div className="relative w-full cursor-default overflow-hidden rounded-lg text-left focus:outline-none sm:text-sm">
