@@ -177,6 +177,7 @@ export const longRangeComm = t.router({
 			return messages;
 		}),
 	addToAddressBook: t.procedure
+		.meta({ action: true })
 		.input(
 			z.object({
 				shipId: z.number(),
@@ -193,6 +194,8 @@ export const longRangeComm = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
+			if (input.shipId === input.contactId) return;
+
 			const lrcomm = getShipSystem(ctx.ecs, {
 				systemType: "longRangeComm",
 				shipId: input.shipId,
