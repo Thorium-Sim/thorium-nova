@@ -117,11 +117,6 @@ export function SolarSystemWrapper() {
 							onClick={() => {
 								useStarmapStore.setState({ selectedObjectIds: [entity.id] });
 								useStarmapStore.getState().setCameraFocus(position);
-								q.waypoints.spawn.netSend({
-									entityId: entity.id,
-									shipId,
-									active: false,
-								});
 							}}
 						/>
 					);
