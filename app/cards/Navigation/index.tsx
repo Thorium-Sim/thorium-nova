@@ -218,10 +218,35 @@ function AddWaypoint() {
 		active: false,
 	});
 
+	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
+
 	const existingWaypoint = waypoints.find((w) => w.id === selectedObjectIds[0] || w.objectId === selectedObjectIds[0]);
+	const isLocked = existingWaypoint?.id === autopilot.destinationWaypointId;
 
 	if (!selectedObjectIds[0]) return null;
-	if (existingWaypoint?.isActive) return null;
+
+	if (isLocked) {
+		return (
+			<Button
+				className="pointer-events-none flex-1 btn-locked"
+			>
+				Waypoint Locked
+			</Button>
+		);
+	}
+
+	if (existingWaypoint?.isActive) {
+		return (
+			<Button
+				className="pointer-events-auto flex-1 btn-notice"
+				onClick={() =>
+					q.waypoints.deactivate.netSend({ waypointId: existingWaypoint.id })
+				}
+			>
+				Deactivate Waypoint
+			</Button>
+		);
+	}
 
 	if (existingWaypoint) {
 		return (
@@ -255,7 +280,7 @@ function AddWaypoint() {
 				}
 			}}
 		>
-			Set Waypoint
+			Create Waypoint
 		</Button>
 	);
 }
