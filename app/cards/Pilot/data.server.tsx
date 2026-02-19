@@ -194,7 +194,7 @@ export const pilot = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
-			.autoPublish(["autopilot"], (entity) => ({ shipId: entity.id }))
+			.autoPublish(["autopilot", "facingWaypoints"], (entity) => ({ shipId: entity.id }))
 
 			.request(({ ctx, input }) => {
 				const ship = ctx.ecs.getEntityById(input.shipId);
@@ -219,9 +219,11 @@ export const pilot = t.router({
 				return {
 					forwardAutopilot: ship?.components.autopilot?.forwardAutopilot,
 					destinationName,
+					destinationWaypointId: waypointId ?? null,
 					destinationPosition: waypoint?.components.position || null,
 					destinationSystemPosition: waypointSystemPosition,
 					locked: !!ship?.components.autopilot?.desiredCoordinates,
+					facingWaypointIds: ship?.components.facingWaypoints?.ids ?? [],
 				};
 			}),
 		lockCourse: t.procedure

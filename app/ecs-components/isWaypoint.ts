@@ -7,5 +7,7 @@ export const isWaypoint = z
 		attachedObjectId: z.number().optional(),
 		/** Whether the crew member can delete the waypoint */
 		permanent: z.boolean().default(false),
+		/** Timestamp for ordering waypoints by most recently interacted */
+		lastInteractedAt: z.number().default(0),
 	})
 	.default({});

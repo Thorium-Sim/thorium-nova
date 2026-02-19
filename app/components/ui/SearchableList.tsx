@@ -15,10 +15,14 @@ interface SearchableListProps<
 > {
 	items: L[];
 	selectedItem?: ID | null;
+	selectedItems?: ID[];
 	setSelectedItem?: (item: L) => void;
 	renderItem?: (item: L) => ReactNode;
+	getItemClassName?: (item: L) => string;
 	searchKeys?: OnlyString<keyof L>[];
 	showSearchLabel?: boolean;
+	searchLabel?: string;
+	searchPlaceholder?: string;
 	categorySort?: (a: [string, L[]], b: [string, L[]]) => number;
 }
 interface ListItem {
@@ -31,10 +35,14 @@ function SearchableList<
 >({
 	items,
 	selectedItem,
+	selectedItems,
 	setSelectedItem,
 	renderItem,
+	getItemClassName,
 	searchKeys = ["label", "category"] as OnlyString<keyof Item>[],
 	showSearchLabel = true,
+	searchLabel = "Search",
+	searchPlaceholder = "Search...",
 	categorySort = ([a], [b]) => {
 		if (a > b) return 1;
 		if (b > a) return -1;
@@ -43,7 +51,10 @@ function SearchableList<
 }: SearchableListProps<ID, Item>) {
 	const [search, setSearch] = useState<string>("");
 	const filteredObjects = useMemo(
-		() => matchSorter(items, search, { keys: searchKeys }),
+		() =>
+			search
+				? matchSorter(items, search, { keys: searchKeys })
+				: items,
 		[items, search, searchKeys],
 	);
 	const sortedIntoCategories = filteredObjects.reduce(
@@ -58,13 +69,13 @@ function SearchableList<
 	return (
 		<>
 			<div className="form-control">
-				{showSearchLabel ? <span className="label">Search</span> : null}
+				{showSearchLabel ? <span className="label">{searchLabel}</span> : null}
 				<input
 					type="search"
 					value={search}
 					onChange={(e) => setSearch(e.currentTarget.value)}
 					className="input"
-					placeholder="Search..."
+					placeholder={searchPlaceholder}
 				/>
 			</div>
 			<ul className="flex-1 overflow-y-auto select-none">
@@ -83,8 +94,8 @@ function SearchableList<
 									<li
 										key={JSON.stringify(c.id)}
 										className={`list-group-item ${
-											deepEqual(c.id, selectedItem) ? "selected" : ""
-										}`}
+											deepEqual(c.id, selectedItem) || selectedItems?.some(id => deepEqual(c.id, id)) ? "selected" : ""
+										} ${getItemClassName?.(c) ?? ""}`}
 										onClick={() => {
 											setSelectedItem?.(c);
 										}}

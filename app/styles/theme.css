@@ -8,6 +8,12 @@
 	--warning: theme("colors.warning");
 	--error: theme("colors.error");
 	--notice: theme("colors.notice");
+	--waypoint-facing: theme("colors.waypoint-facing");
+	--waypoint-facing-focus: theme("colors.waypoint-facing-focus");
+	--waypoint-active: theme("colors.waypoint-active");
+	--waypoint-active-focus: theme("colors.waypoint-active-focus");
+	--waypoint-inactive: theme("colors.waypoint-inactive");
+	--waypoint-inactive-focus: theme("colors.waypoint-inactive-focus");
 }
 
 html,
@@ -351,7 +357,7 @@ kbd {
 	/* disabled */
 	&-disabled,
 	&[disabled] {
-		@apply bg-neutral border-opacity-0 bg-opacity-20 text-base-300 text-opacity-20 pointer-events-none cursor-not-allowed;
+		@apply bg-neutral border-opacity-0 bg-opacity-20 text-base-300 text-opacity-20 opacity-50 pointer-events-none cursor-not-allowed;
 	}
 
 	/* loading */

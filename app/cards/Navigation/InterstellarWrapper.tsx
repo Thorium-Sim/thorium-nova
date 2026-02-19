@@ -20,6 +20,7 @@ export function InterstellarWrapper() {
 		active: false,
 		shipId,
 	});
+	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
 	useEffect(() => {
 		useStarmapStore.getState().currentSystemSet?.(null);
 	}, [useStarmapStore]);
@@ -39,9 +40,9 @@ export function InterstellarWrapper() {
 							]
 						}
 						name={sys.identity.name}
-						onClick={() =>
-							useStarmapStore.setState({ selectedObjectIds: [sys.id] })
-						}
+						onClick={() => {
+							useStarmapStore.setState({ selectedObjectIds: [sys.id] });
+						}}
 						onDoubleClick={() => {
 							useStarmapStore.getState().setCurrentSystem(sys.id);
 							useStarmapStore.setState({ selectedObjectIds: [] });
@@ -65,7 +66,12 @@ export function InterstellarWrapper() {
 						FallbackComponent={() => <></>}
 						onError={(err) => console.error(err)}
 					>
-						<WaypointEntity position={waypoint.position} />
+						<WaypointEntity
+							position={waypoint.position}
+							isActive={waypoint.isActive}
+							isFacing={waypoint.id === autopilot.facingWaypointIds[0]}
+							isLocked={waypoint.id === autopilot.destinationWaypointId}
+						/>
 					</ErrorBoundary>
 				</Suspense>
 			))}

@@ -104,6 +104,7 @@ export async function spawnShip(
 
 	entity.addComponent("shipSystems");
 	entity.addComponent("nearbyObjects", { objects: new Map() });
+	entity.addComponent("facingWaypoints");
 
 	const systemEntities: Entity[] = [];
 	let phaseCapacitorCount = 0;

@@ -16,7 +16,6 @@ import {
 import WaypointTexture from "@thorium/components/Starmap/Waypoint.svg";
 import StrokeTexture from "@thorium/components/Starmap/WaypointStroke.svg";
 import { getWaypointRelativePosition } from "./getWaypointRelativePosition";
-import { useCircleGridStore } from "./useCircleGridStore";
 import { degToRad } from "@thorium/utils/unitTypes";
 import type { inferTransformedProcedureOutput } from "@thorium/utils/live-query/.server/types";
 import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
@@ -39,13 +38,16 @@ const LY_IN_KM = 9460730472580.8;
 export const WaypointEntity = ({
 	waypoint,
 	viewscreen,
+	isLocked,
+	isFacing,
 }: {
 	waypoint: WaypointItem;
 	viewscreen?: boolean;
+	isLocked?: boolean;
+	isFacing?: boolean;
 }) => {
 	const spriteMap = useShipSprite(WaypointTexture);
 	const strokeMap = useShipSprite(StrokeTexture);
-	const store = useCircleGridStore();
 	const group = useRef<Group>(null);
 	const sprite = useRef<Sprite>(null);
 	const stroke = useRef<Sprite>(null);
@@ -141,11 +143,6 @@ export const WaypointEntity = ({
 						if (sprite.current && stroke.current) {
 							sprite.current.material.rotation = angle + Math.PI / 2;
 							stroke.current.material.rotation = angle + Math.PI / 2;
-							if (store.getState().facingWaypoints.includes(waypoint.id)) {
-								sprite.current.material.color.setRGB(0, 0.5, 1);
-							} else {
-								sprite.current.material.color.setRGB(0.9, 0.6, 0);
-							}
 						}
 					}
 				}
@@ -160,6 +157,15 @@ export const WaypointEntity = ({
 				if (sprite.current && stroke.current) {
 					sprite.current.material.rotation = 0;
 					stroke.current.material.rotation = 0;
+				}
+			}
+
+			// Colors match the waypoint-* tokens in tailwind.config.ts
+			if (sprite.current) {
+				if (isLocked || isFacing) {
+					sprite.current.material.color.setRGB(0, 0.5, 1);
+				} else {
+					sprite.current.material.color.setRGB(0.9, 0.6, 0);
 				}
 			}
 		}

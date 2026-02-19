@@ -13,6 +13,9 @@ export class WaypointRemoveSystem extends System {
 
 		if (!ship) return;
 
+		// Only remove waypoints that are the ship's active autopilot destination
+		if (ship.components.autopilot?.destinationWaypointId !== entity.id) return;
+
 		if (!ship.components.position || !entity.components.position) return;
 		if (
 			ship.components.position?.parentId ===
@@ -42,8 +45,8 @@ export class WaypointRemoveSystem extends System {
 					forwardAutopilot: false,
 				});
 
-				// Delete the waypoint
-				this.ecs.removeEntity(entity);
+				// Deactivate the waypoint
+				entity.updateComponent("isWaypoint", { isActive: false });
 
 				pubsub.publish.pilot.autopilot.get({ shipId: ship.id });
 				pubsub.publish.waypoints.all({ shipId: ship.id });
