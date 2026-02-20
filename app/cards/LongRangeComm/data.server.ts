@@ -26,6 +26,42 @@ const encodingSchema = z.union([
 ]);
 
 export const longRangeComm = t.router({
+	get: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.filter((publish: { shipId: number }, { ctx, input }) => {
+			if (publish && publish.shipId !== input.shipId) return false;
+			return true;
+		})
+		.autoPublish(
+			["isLongRangeComm"],
+			(entity) =>
+				entity.components.isLongRangeComm && [
+					{ shipId: entity.components.isShipSystem?.shipId || -1 },
+				],
+		)
+		.request(({ input, ctx }) => {
+			const lrcomm = getShipSystem(ctx.ecs, {
+				systemType: "longRangeComm",
+				shipId: input.shipId,
+			});
+
+			return {
+				id: lrcomm.id,
+				requiredPower: lrcomm.components.power?.powerLevels[0] || 0,
+				maxSafePower: lrcomm.components.power?.powerLevels.at(-1) || 1,
+				currentPower: lrcomm.components.power?.powerSources.length || 0,
+			};
+		}),
+	systemStream: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.dataStream(({ input, entity }) => {
+			if (!entity) return false;
+			return Boolean(
+				entity.components.isShipSystem?.shipId === input.shipId &&
+					entity.components.power &&
+					entity.components.isLongRangeComm,
+			);
+		}),
 	addressBook: t.procedure
 		.input(z.object({ shipId: z.number() }))
 		.filter((publish: { shipId: number }, { ctx, input }) => {
