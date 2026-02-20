@@ -474,7 +474,7 @@ function ComponentCombobox({
 			</div>
 			<Popover className={popoverTransitionClasses}>
 				<ListBox
-					className="bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 w-full overflow-auto text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+					className="bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 w-full overflow-auto text-base ring-1 ring-black/5 focus:outline-none sm:text-sm"
 					items={[
 						isSelect ? { id: "id" } : [],
 						...Object.keys(components).map((id) => ({ id })),
@@ -534,7 +534,7 @@ export function PropertyCombobox({
 			</div>
 			<Popover className={popoverTransitionClasses}>
 				<ListBox
-					className="bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 w-full overflow-auto text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+					className="bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 w-full overflow-auto text-base ring-1 ring-black/5 focus:outline-none sm:text-sm"
 					items={properties}
 				>
 					{(item) => (

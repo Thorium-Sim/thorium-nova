@@ -631,7 +631,7 @@ function ActionConfig({ children }: { children: ReactNode }) {
 					top: y ?? "",
 					left: x ?? "",
 				}}
-				className={`max-w-xs w-max z-10 border-transparent shadow-lg bg-opacity-90 bg-black rounded-lg p-2 ${
+				className={`max-w-xs w-max z-10 border-transparent shadow-lg bg-black/90 rounded-lg p-2 ${
 					visible ? "block" : "hidden"
 				}`}
 			>

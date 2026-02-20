@@ -238,7 +238,7 @@ function AddStarMenu() {
 				/>
 			</RAButton>
 			<Popover className={popoverTransitionClasses}>
-				<Menu className="w-56 mt-2 origin-top-right bg-gray-900 divide-y divide-gray-800 rounded-md shadow-lg ring-1 ring-white ring-opacity-5 focus:outline-none">
+				<Menu className="w-56 mt-2 origin-top-right bg-gray-900 divide-y divide-gray-800 rounded-md shadow-lg ring-1 ring-white/5 focus:outline-none">
 					{starTypes.map((starType) => (
 						<MenuItem
 							key={starType.spectralType}
@@ -285,7 +285,7 @@ function AddPlanetMenu() {
 				</RAButton>
 			</div>
 			<Popover className={popoverTransitionClasses}>
-				<Menu className="w-56 mt-2 origin-top-right bg-gray-900 divide-y divide-gray-800 rounded-md shadow-lg ring-1 ring-white ring-opacity-5 focus:outline-none">
+				<Menu className="w-56 mt-2 origin-top-right bg-gray-900 divide-y divide-gray-800 rounded-md shadow-lg ring-1 ring-white/5 focus:outline-none">
 					{planetTypes.map((planetType) => (
 						<MenuItem
 							key={planetType.classification}

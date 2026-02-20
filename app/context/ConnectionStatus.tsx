@@ -17,7 +17,7 @@ export const Reconnecting = () => {
 	if (!timeoutPassed) return null;
 
 	return (
-		<div className="fixed inset-0 z-30 bg-black bg-opacity-70 flex flex-col items-center justify-center space-y-8">
+		<div className="fixed inset-0 z-30 bg-black/70 flex flex-col items-center justify-center space-y-8">
 			<h2 className="text-6xl font-bold text-error">
 				Reconnecting to Server...
 			</h2>
@@ -35,7 +35,7 @@ export const Reconnecting = () => {
 };
 export const Disconnected = () => {
 	return (
-		<div className="fixed inset-0 z-30 bg-black bg-opacity-70 flex flex-col items-center justify-center">
+		<div className="fixed inset-0 z-30 bg-black/70 flex flex-col items-center justify-center">
 			<h2 className="text-6xl font-bold drop-shadow-md filter text-error">
 				Disconnected from Server
 			</h2>

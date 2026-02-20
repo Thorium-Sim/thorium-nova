@@ -24,7 +24,8 @@ body {
 }
 
 body {
-	font-family: "Outfit Variable", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+	font-family:
+		"Outfit Variable", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
 		Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
 }
 button,
@@ -435,23 +436,6 @@ kbd {
 	}
 }
 
-.divider {
-	@apply my-4 h-4;
-	&:before,
-	&:after {
-		@apply h-0.5 bg-base-content;
-		--tw-bg-opacity: var(--tw-border-opacity, 0.1);
-	}
-	&:not(:empty) {
-		&:before {
-			@apply mr-4;
-		}
-		&:after {
-			@apply ml-4;
-		}
-	}
-}
-
 .input {
 	@apply h-8 w-full px-2 text-neutral-content bg-neutral rounded-lg border border-opacity-0 border-neutral-focus cursor-text;
 	&-md {
@@ -615,72 +599,6 @@ kbd {
 	}
 }
 
-.progress {
-	@apply rounded-sm h-2;
-	&::-moz-progress-bar {
-		@apply bg-neutral;
-	}
-	&-primary::-moz-progress-bar {
-		@apply bg-primary;
-	}
-	&-secondary::-moz-progress-bar {
-		@apply bg-secondary;
-	}
-	&-accent::-moz-progress-bar {
-		@apply bg-accent;
-	}
-	&-info::-moz-progress-bar {
-		@apply bg-info;
-	}
-	&-success::-moz-progress-bar {
-		@apply bg-success;
-	}
-	&-warning::-moz-progress-bar {
-		@apply bg-warning;
-	}
-	&-error::-moz-progress-bar {
-		@apply bg-error;
-	}
-	&-notice::-moz-progress-bar {
-		@apply bg-notice;
-	}
-	&-notice::-moz-progress-bar {
-		@apply bg-alert-color;
-	}
-	&::-webkit-progress-bar {
-		@apply bg-neutral bg-opacity-20 rounded-xl;
-	}
-	&::-webkit-progress-value {
-		@apply rounded-sm bg-neutral-focus;
-	}
-	&-primary::-webkit-progress-value {
-		@apply bg-primary;
-	}
-	&-secondary::-webkit-progress-value {
-		@apply bg-secondary;
-	}
-	&-accent::-webkit-progress-value {
-		@apply bg-accent;
-	}
-	&-info::-webkit-progress-value {
-		@apply bg-info;
-	}
-	&-success::-webkit-progress-value {
-		@apply bg-success;
-	}
-	&-warning::-webkit-progress-value {
-		@apply bg-warning;
-	}
-	&-error::-webkit-progress-value {
-		@apply bg-error;
-	}
-	&-notice::-webkit-progress-value {
-		@apply bg-notice;
-	}
-	&-alert::-webkit-progress-value {
-		@apply bg-alert-color;
-	}
-}
 .radial-dial {
 	@apply flex flex-col items-center;
 	--radial-radius: 25px;
@@ -947,18 +865,24 @@ input[type="range"].slider {
 	&:focus-visible {
 		@apply ring-2 ring-neutral;
 	}
-	@apply border transition duration-200 ease-in-out rounded-lg font-semibold  border-opacity-0 pr-10;
+	@apply border transition duration-200 ease-in-out rounded-lg font-semibold border-opacity-0 pr-10;
 	&-bordered {
 		@apply border-opacity-20;
 	}
-	background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+	background-image:
+		linear-gradient(45deg, transparent 50%, currentColor 50%),
 		linear-gradient(135deg, currentColor 50%, transparent 50%);
-	background-position: calc(100% - 20px) calc(1px + 50%), calc(100% - 16px)
-		calc(1px + 50%);
-	background-size: 4px 4px, 4px 4px;
+	background-position:
+		calc(100% - 20px) calc(1px + 50%),
+		calc(100% - 16px) calc(1px + 50%);
+	background-size:
+		4px 4px,
+		4px 4px;
 	background-repeat: no-repeat;
 	&:focus {
-		box-shadow: 0 0 0 2px hsl(var(--b1)), 0 0 0 4px hsla(var(--bc) / 0.2);
+		box-shadow:
+			0 0 0 2px hsl(var(--b1)),
+			0 0 0 4px hsla(var(--bc) / 0.2);
 	}
 	&-ghost {
 		@apply bg-opacity-5;
@@ -969,43 +893,57 @@ input[type="range"].slider {
 	&-primary {
 		@apply border-primary;
 		&:focus {
-			box-shadow: 0 0 0 2px hsl(var(--b1)), 0 0 0 4px hsl(var(--p));
+			box-shadow:
+				0 0 0 2px hsl(var(--b1)),
+				0 0 0 4px hsl(var(--p));
 		}
 	}
 	&-secondary {
 		@apply border-secondary;
 		&:focus {
-			box-shadow: 0 0 0 2px hsl(var(--b1)), 0 0 0 4px hsl(var(--s));
+			box-shadow:
+				0 0 0 2px hsl(var(--b1)),
+				0 0 0 4px hsl(var(--s));
 		}
 	}
 	&-accent {
 		@apply border-accent;
 		&:focus {
-			box-shadow: 0 0 0 2px hsl(var(--b1)), 0 0 0 4px hsl(var(--a));
+			box-shadow:
+				0 0 0 2px hsl(var(--b1)),
+				0 0 0 4px hsl(var(--a));
 		}
 	}
 	&-info {
 		@apply border-info;
 		&:focus {
-			box-shadow: 0 0 0 2px hsl(var(--b1)), 0 0 0 4px hsl(var(--in));
+			box-shadow:
+				0 0 0 2px hsl(var(--b1)),
+				0 0 0 4px hsl(var(--in));
 		}
 	}
 	&-success {
 		@apply border-success;
 		&:focus {
-			box-shadow: 0 0 0 2px hsl(var(--b1)), 0 0 0 4px hsl(var(--su));
+			box-shadow:
+				0 0 0 2px hsl(var(--b1)),
+				0 0 0 4px hsl(var(--su));
 		}
 	}
 	&-warning {
 		@apply border-warning;
 		&:focus {
-			box-shadow: 0 0 0 2px hsl(var(--b1)), 0 0 0 4px hsl(var(--wa));
+			box-shadow:
+				0 0 0 2px hsl(var(--b1)),
+				0 0 0 4px hsl(var(--wa));
 		}
 	}
 	&-error {
 		@apply border-error;
 		&:focus {
-			box-shadow: 0 0 0 2px hsl(var(--b1)), 0 0 0 4px hsl(var(--er));
+			box-shadow:
+				0 0 0 2px hsl(var(--b1)),
+				0 0 0 4px hsl(var(--er));
 		}
 	}
 	&-disabled,
@@ -1102,16 +1040,19 @@ input[type="range"].slider.zoom::-webkit-slider-thumb {
 	margin-top: 0px;
 	cursor: pointer;
 	/* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
-	--tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px
-		rgba(0, 0, 0, 0.06);
-	box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
-		var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+	--tw-shadow:
+		0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	box-shadow:
+		var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000),
+		var(--tw-shadow);
 }
 input[type="range"].slider.zoom::-webkit-slider-runnable-track {
 	width: 100%;
 	height: calc(1.5rem + 4px);
 	cursor: pointer;
-	box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+	box-shadow:
+		1px 1px 1px #000000,
+		0px 0px 1px #0d0d0d;
 	background: rgba(0, 0, 0, 0.36);
 	border-radius: 9999px;
 	border: 2px rgba(255, 255, 255, 0.36) solid;
@@ -1163,7 +1104,9 @@ input[type="range"].slider.zoom:focus::-webkit-slider-runnable-track {
 	transform: translateY(-50%);
 	height: calc(1.5rem + 4px);
 	cursor: pointer;
-	box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+	box-shadow:
+		1px 1px 1px #000000,
+		0px 0px 1px #0d0d0d;
 	background: rgba(0, 0, 0, 0.36);
 	border-radius: 9999px;
 	border: 2px rgba(255, 255, 255, 0.36) solid;
@@ -1231,7 +1174,6 @@ input[type="range"].slider.zoom:focus::-webkit-slider-runnable-track {
 	}
 }
 
-
 body.drag-active * {
 	user-select: none;
 	cursor: grabbing;
@@ -1243,41 +1185,40 @@ textarea {
 :disabled {
 	@apply cursor-not-allowed;
 }
-.cursor-wait {
-	cursor: url(/assets/cursors/wait/01.png), wait;
-	animation: wait-cursor 1.5s steps(77) infinite;
-}
 
 [anchor] {
 	bottom: anchor(bottom);
 	position: absolute;
 	left: anchor(left);
-	position-try-options: flip-block, flip-inline, flip-block flip-inline;
+	position-try-options:
+		flip-block,
+		flip-inline,
+		flip-block flip-inline;
 }
 
 .training {
 	position: fixed;
 	inset: 0;
 	anchor-name: --parent;
-	pointer-events:none;
+	pointer-events: none;
 }
 .training-overlay {
-  position: fixed;
-  inset: 0;
-  backdrop-filter: brightness(0.5);
-  pointer-events: none;
+	position: fixed;
+	inset: 0;
+	backdrop-filter: brightness(0.5);
+	pointer-events: none;
 }
 .training-highlight {
-  position: fixed;
-  width: 1px;
-  height: 1px;
-  backdrop-filter: brightness(3);
-  pointer-events: none;
-  transition: all 0.3s ease;
-  transform-origin: top left;
-  padding: 1rem;
-  border-radius: 10px;
-  will-change: height, width, transform;
+	position: fixed;
+	width: 1px;
+	height: 1px;
+	backdrop-filter: brightness(3);
+	pointer-events: none;
+	transition: all 0.3s ease;
+	transform-origin: top left;
+	padding: 1rem;
+	border-radius: 10px;
+	will-change: height, width, transform;
 	position-anchor: --training-highlight;
 	position-area: center;
 }
@@ -1285,254 +1226,20 @@ textarea {
 	anchor-name: --highlight;
 }
 .training-infobox {
-  position: fixed;
-  position-anchor: --parent;
-  background: white;
-  color: black;
-  box-shadow: 5px 5px 5px rgba(0,0,0,0.5);
-  border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
-  position-area: center;
-  position-try-fallbacks: flip-inline;
-  white-space: pre-line;
-  min-width: fit-content;
-  margin: 0 0.5rem;
+	position: fixed;
+	position-anchor: --parent;
+	background: white;
+	color: black;
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+	border-radius: 0.5rem;
+	padding: 0.5rem 1rem;
+	position-area: center;
+	position-try-fallbacks: flip-inline;
+	white-space: pre-line;
+	min-width: fit-content;
+	margin: 0 0.5rem;
 }
 .training-highlight ~ .training-infobox {
 	position-area: right;
 	position-anchor: --highlight;
-}
-
-@keyframes wait-cursor {
-	0% {
-		cursor: url(/assets/cursors/wait/01.png), wait;
-	}
-	1.298% {
-		cursor: url(/assets/cursors/wait/02.png), wait;
-	}
-	2.597% {
-		cursor: url(/assets/cursors/wait/03.png), wait;
-	}
-	3.896% {
-		cursor: url(/assets/cursors/wait/04.png), wait;
-	}
-	5.194% {
-		cursor: url(/assets/cursors/wait/05.png), wait;
-	}
-	6.493% {
-		cursor: url(/assets/cursors/wait/06.png), wait;
-	}
-	7.792% {
-		cursor: url(/assets/cursors/wait/07.png), wait;
-	}
-	9.090% {
-		cursor: url(/assets/cursors/wait/08.png), wait;
-	}
-	10.389% {
-		cursor: url(/assets/cursors/wait/09.png), wait;
-	}
-	11.688% {
-		cursor: url(/assets/cursors/wait/10.png), wait;
-	}
-	12.987% {
-		cursor: url(/assets/cursors/wait/11.png), wait;
-	}
-	14.285% {
-		cursor: url(/assets/cursors/wait/12.png), wait;
-	}
-	15.584% {
-		cursor: url(/assets/cursors/wait/13.png), wait;
-	}
-	16.883% {
-		cursor: url(/assets/cursors/wait/14.png), wait;
-	}
-	18.181% {
-		cursor: url(/assets/cursors/wait/15.png), wait;
-	}
-	19.480% {
-		cursor: url(/assets/cursors/wait/16.png), wait;
-	}
-	20.779% {
-		cursor: url(/assets/cursors/wait/17.png), wait;
-	}
-	22.077% {
-		cursor: url(/assets/cursors/wait/18.png), wait;
-	}
-	23.376% {
-		cursor: url(/assets/cursors/wait/19.png), wait;
-	}
-	24.675% {
-		cursor: url(/assets/cursors/wait/20.png), wait;
-	}
-	25.974% {
-		cursor: url(/assets/cursors/wait/21.png), wait;
-	}
-	27.272% {
-		cursor: url(/assets/cursors/wait/22.png), wait;
-	}
-	28.571% {
-		cursor: url(/assets/cursors/wait/23.png), wait;
-	}
-	29.870% {
-		cursor: url(/assets/cursors/wait/24.png), wait;
-	}
-	31.168% {
-		cursor: url(/assets/cursors/wait/25.png), wait;
-	}
-	32.467% {
-		cursor: url(/assets/cursors/wait/26.png), wait;
-	}
-	33.766% {
-		cursor: url(/assets/cursors/wait/27.png), wait;
-	}
-	35.064% {
-		cursor: url(/assets/cursors/wait/28.png), wait;
-	}
-	36.363% {
-		cursor: url(/assets/cursors/wait/29.png), wait;
-	}
-	37.662% {
-		cursor: url(/assets/cursors/wait/30.png), wait;
-	}
-	38.961% {
-		cursor: url(/assets/cursors/wait/31.png), wait;
-	}
-	40.259% {
-		cursor: url(/assets/cursors/wait/32.png), wait;
-	}
-	41.558% {
-		cursor: url(/assets/cursors/wait/33.png), wait;
-	}
-	42.857% {
-		cursor: url(/assets/cursors/wait/34.png), wait;
-	}
-	44.155% {
-		cursor: url(/assets/cursors/wait/35.png), wait;
-	}
-	45.454% {
-		cursor: url(/assets/cursors/wait/36.png), wait;
-	}
-	46.753% {
-		cursor: url(/assets/cursors/wait/37.png), wait;
-	}
-	48.051% {
-		cursor: url(/assets/cursors/wait/38.png), wait;
-	}
-	49.350% {
-		cursor: url(/assets/cursors/wait/39.png), wait;
-	}
-	50.649% {
-		cursor: url(/assets/cursors/wait/40.png), wait;
-	}
-	51.948% {
-		cursor: url(/assets/cursors/wait/41.png), wait;
-	}
-	53.246% {
-		cursor: url(/assets/cursors/wait/42.png), wait;
-	}
-	54.545% {
-		cursor: url(/assets/cursors/wait/43.png), wait;
-	}
-	55.844% {
-		cursor: url(/assets/cursors/wait/44.png), wait;
-	}
-	57.142% {
-		cursor: url(/assets/cursors/wait/45.png), wait;
-	}
-	58.441% {
-		cursor: url(/assets/cursors/wait/46.png), wait;
-	}
-	59.740% {
-		cursor: url(/assets/cursors/wait/47.png), wait;
-	}
-	61.038% {
-		cursor: url(/assets/cursors/wait/48.png), wait;
-	}
-	62.337% {
-		cursor: url(/assets/cursors/wait/49.png), wait;
-	}
-	63.636% {
-		cursor: url(/assets/cursors/wait/50.png), wait;
-	}
-	64.935% {
-		cursor: url(/assets/cursors/wait/51.png), wait;
-	}
-	66.233% {
-		cursor: url(/assets/cursors/wait/52.png), wait;
-	}
-	67.532% {
-		cursor: url(/assets/cursors/wait/53.png), wait;
-	}
-	68.831% {
-		cursor: url(/assets/cursors/wait/54.png), wait;
-	}
-	70.129% {
-		cursor: url(/assets/cursors/wait/55.png), wait;
-	}
-	71.428% {
-		cursor: url(/assets/cursors/wait/56.png), wait;
-	}
-	72.727% {
-		cursor: url(/assets/cursors/wait/57.png), wait;
-	}
-	74.025% {
-		cursor: url(/assets/cursors/wait/58.png), wait;
-	}
-	75.324% {
-		cursor: url(/assets/cursors/wait/59.png), wait;
-	}
-	76.623% {
-		cursor: url(/assets/cursors/wait/60.png), wait;
-	}
-	77.922% {
-		cursor: url(/assets/cursors/wait/61.png), wait;
-	}
-	79.220% {
-		cursor: url(/assets/cursors/wait/62.png), wait;
-	}
-	80.519% {
-		cursor: url(/assets/cursors/wait/63.png), wait;
-	}
-	81.818% {
-		cursor: url(/assets/cursors/wait/64.png), wait;
-	}
-	83.116% {
-		cursor: url(/assets/cursors/wait/65.png), wait;
-	}
-	84.415% {
-		cursor: url(/assets/cursors/wait/66.png), wait;
-	}
-	85.714% {
-		cursor: url(/assets/cursors/wait/67.png), wait;
-	}
-	87.012% {
-		cursor: url(/assets/cursors/wait/68.png), wait;
-	}
-	88.311% {
-		cursor: url(/assets/cursors/wait/69.png), wait;
-	}
-	89.610% {
-		cursor: url(/assets/cursors/wait/70.png), wait;
-	}
-	90.909% {
-		cursor: url(/assets/cursors/wait/71.png), wait;
-	}
-	92.207% {
-		cursor: url(/assets/cursors/wait/72.png), wait;
-	}
-	93.506% {
-		cursor: url(/assets/cursors/wait/73.png), wait;
-	}
-	94.805% {
-		cursor: url(/assets/cursors/wait/74.png), wait;
-	}
-	96.103% {
-		cursor: url(/assets/cursors/wait/75.png), wait;
-	}
-	97.402% {
-		cursor: url(/assets/cursors/wait/76.png), wait;
-	}
-	98.701% {
-		cursor: url(/assets/cursors/wait/77.png), wait;
-	}
 }

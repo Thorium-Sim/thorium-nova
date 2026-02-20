@@ -129,7 +129,7 @@ export default function ThemeLayout() {
 						</Button>
 					</div>
 				</div>
-				<div className="flex-1 flex flex-grow-0 flex-col w-[384px]">
+				<div className="flex-1 flex grow-0 flex-col w-[384px]">
 					<div
 						className="border border-white bg-black w-[384px] overflow-hidden relative z-10 transition-transform transform hover:scale-[3] origin-top-right"
 						style={{
@@ -380,7 +380,7 @@ const UploadedFile: React.FC<{ file: string }> = ({ file }) => {
 		<li key={file} className="list-group-item" onClick={() => copy(file)}>
 			<div className="flex items-center justify-between w-full">
 				<AssetPreview url={file} className="max-h-8 text-2xl" />
-				<span className=" mx-2 flex-1 overflow-x-hidden overflow-ellipsis">
+				<span className=" mx-2 flex-1 overflow-x-hidden text-ellipsis">
 					{state === "copied"
 						? "Copied!"
 						: file.split("/")[file.split("/").length - 1]}

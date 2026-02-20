@@ -138,6 +138,26 @@ export function ComponentDemo() {
 	return (
 		<div className="flex flex-col gap-8 text-white h-full overflow-y-auto p-4">
 			<div className="flex gap-4">
+				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-default">
+					cursor-default
+				</div>
+				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-pointer">
+					cursor-pointer
+				</div>
+				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-text">
+					cursor-text
+				</div>
+				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-progress ">
+					cursor-progress{" "}
+				</div>
+				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-not-allowed">
+					cursor-not-allowed
+				</div>
+				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-wait">
+					cursor-wait
+				</div>
+			</div>
+			<div className="flex gap-4">
 				<Button onClick={() => alert({ header: "This is an alert" })}>
 					Alert
 				</Button>
@@ -189,7 +209,10 @@ export function ComponentDemo() {
 					<div className="flex-1">This is an error alert</div>
 				</div>
 				<div className="alert alert-notice">
-					<div className="flex-1">This is an alert alert</div>
+					<div className="flex-1">This is a notice alert</div>
+				</div>
+				<div className="alert alert-alert">
+					<div className="flex-1">This is a alert alert</div>
 				</div>
 			</div>
 			<div>
@@ -236,9 +259,7 @@ export function ComponentDemo() {
 					<Button className="btn-error">Error</Button>
 					<Button className="btn-notice">Notice</Button>
 					<Button className="btn-alert">Alert</Button>
-					<Button className="btn-ghost">Ghost</Button>
 					<Button className="btn-link">Link</Button>
-					<Button className="glass">Glass</Button>
 				</div>
 			</div>
 			<div>
@@ -254,9 +275,23 @@ export function ComponentDemo() {
 					<Button className="btn-outline btn-error">Error</Button>
 					<Button className="btn-outline btn-notice">Notice</Button>
 					<Button className="btn-outline btn-alert">Alert</Button>
-					<Button className="btn-outline btn-ghost">Ghost</Button>
 					<Button className="btn-outline btn-link">Link</Button>
-					<Button className="btn-outline glass">Glass</Button>
+				</div>
+			</div>
+			<div>
+				<h2 className="text-3xl">Dash Buttons</h2>
+				<div className="flex gap-4 w-full flex-wrap">
+					<Button className="btn-dash">Button</Button>
+					<Button className="btn-dash btn-primary">Primary</Button>
+					<Button className="btn-dash btn-secondary">Secondary</Button>
+					<Button className="btn-dash btn-accent">Accent</Button>
+					<Button className="btn-dash btn-info">Info</Button>
+					<Button className="btn-dash btn-success">Success</Button>
+					<Button className="btn-dash btn-warning">Warning</Button>
+					<Button className="btn-dash btn-error">Error</Button>
+					<Button className="btn-dash btn-notice">Notice</Button>
+					<Button className="btn-dash btn-alert">Alert</Button>
+					<Button className="btn-dash btn-link">Link</Button>
 				</div>
 			</div>
 			<div>
@@ -270,7 +305,7 @@ export function ComponentDemo() {
 			</div>
 			<div>
 				<h2 className="text-3xl">Button Groups</h2>
-				<div className="btn-group">
+				<div className="join">
 					<Button className="btn-active">Item 1</Button>
 					<Button>Item 2</Button>
 					<Button>Item 3</Button>
@@ -279,18 +314,6 @@ export function ComponentDemo() {
 			<div>
 				<h2 className="text-3xl">Gamepad Focus Border</h2>
 				<Button className="btn-active gamepad-focus">I am focused</Button>
-			</div>
-			<div>
-				<h2 className="text-3xl">Divider</h2>
-				<div className="flex flex-col w-full">
-					<div className="grid h-20 card bg-neutral rounded-xl place-items-center">
-						content
-					</div>
-					<div className="divider">OR</div>
-					<div className="grid h-20 card bg-neutral rounded-xl place-items-center">
-						content
-					</div>
-				</div>
 			</div>
 			<div className="w-full">
 				<h2 className="text-3xl">Form Input</h2>

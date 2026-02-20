@@ -37,7 +37,7 @@ export default function Dropdown({
 	return (
 		<MenuTrigger>
 			{triggerEl || (
-				<Button className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
+				<Button className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-xs px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
 					{triggerLabel}
 					<Icon
 						name="chevron-down"
@@ -47,7 +47,7 @@ export default function Dropdown({
 				</Button>
 			)}
 			<Popover className={popoverTransitionClasses}>
-				<Menu className="mt-2 w-56 text-base bg-gray-900/90 text-white border-gray-400 border rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm overflow-y-auto overflow-x-hidden">
+				<Menu className="mt-2 w-56 text-base bg-gray-900/90 text-white border-gray-400 border rounded-md shadow-lg max-h-60 ring-1 ring-black/5 focus:outline-none sm:text-sm overflow-y-auto overflow-x-hidden">
 					{children}
 				</Menu>
 			</Popover>

@@ -456,7 +456,10 @@ function IconsPage({
 function SpecialEditor({
 	close,
 	type,
-}: { type: "planet" | "border" | "ping"; close: () => void }) {
+}: {
+	type: "planet" | "border" | "ping";
+	close: () => void;
+}) {
 	const sensorStore = useSensorsStore();
 	const contact = sensorStore[type];
 
@@ -835,7 +838,11 @@ function ExtrasPage() {
 		x = 0,
 		y = 0,
 		yaw = 0,
-	}: { x?: number; y?: number; yaw?: number }) {
+	}: {
+		x?: number;
+		y?: number;
+		yaw?: number;
+	}) {
 		q.legacy.sensorGrid.nudge.netSend({
 			shipId,
 			nudge: {

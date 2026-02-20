@@ -41,7 +41,9 @@ export default function FlightDirectorLayout() {
 
 function CoreMenubar({
 	layoutRef,
-}: { layoutRef: React.RefObject<Layout | null> }) {
+}: {
+	layoutRef: React.RefObject<Layout | null>;
+}) {
 	useMenubar({
 		backTo: "/flight/lobby",
 		children: (
@@ -103,7 +105,7 @@ function ShipSelector() {
 			</div>
 			<Popover className={popoverTransitionClasses}>
 				<ListBox
-					className="w-full overflow-auto text-base bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+					className="w-full overflow-auto text-base bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 ring-1 ring-black/5 focus:outline-none sm:text-sm"
 					items={playerShips}
 				>
 					{(item) => (

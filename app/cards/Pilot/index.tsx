@@ -250,14 +250,17 @@ const LockOnButton = () => {
 			<div className="flex gap-2">
 				{autopilot.locked ? (
 					<Button
-						className="w-full btn-error"
+						className="flex-auto btn-error"
 						onClick={() => q.pilot.autopilot.unlockCourse.netSend({ shipId })}
 					>
 						Unlock Course
 					</Button>
 				) : (
 					<Button
-						className={cn("w-full lock-on-course", typeof waypoint === "number" ? "btn-warning" : "btn-disabled")}
+						className={cn(
+							"flex-auto lock-on-course",
+							typeof waypoint === "number" ? "btn-warning" : "btn-disabled",
+						)}
 						disabled={typeof waypoint !== "number"}
 						onClick={() =>
 							q.pilot.autopilot.lockCourse.netSend({
@@ -271,7 +274,10 @@ const LockOnButton = () => {
 				)}
 				{!autopilot.forwardAutopilot ? (
 					<Button
-						className={cn("w-full activate-autopilot", autopilot.locked ? "btn-warning" : "btn-disabled")}
+						className={cn(
+							"flex-auto activate-autopilot",
+							autopilot.locked ? "btn-warning" : "btn-disabled",
+						)}
 						disabled={!autopilot.locked}
 						onClick={() => q.pilot.autopilot.activate.netSend({ shipId })}
 					>
@@ -279,7 +285,7 @@ const LockOnButton = () => {
 					</Button>
 				) : (
 					<Button
-						className="w-full btn-error"
+						className="flex-auto btn-error"
 						disabled={!autopilot.locked}
 						onClick={() => q.pilot.autopilot.deactivate.netSend({ shipId })}
 					>

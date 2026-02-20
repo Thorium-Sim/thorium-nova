@@ -66,7 +66,7 @@ export default function Select<I extends string | number>({
 			</Label>
 			<Button
 				className={cn(
-					"py-2 px-2 flex justify-between items-center select-button bg-gray-900 text-gray-100 relative w-full border border-gray-700 rounded-md shadow-sm text-left cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+					"py-2 px-2 flex justify-between items-center select-button bg-gray-900 text-gray-100 relative w-full border border-gray-700 rounded-md shadow-xs text-left cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
 					{
 						"select-xxs h-5 min-h-5 py-0": size === "xxs",
 						"select-xs py-0": size === "xs",
@@ -85,7 +85,7 @@ export default function Select<I extends string | number>({
 			<Popover className={popoverTransitionClasses}>
 				<ListBox
 					selectionMode={multiple ? "multiple" : "single"}
-					className="select-options isolate w-fit min-w-32 bg-gray-900 shadow-lg rounded-md py-1 px-0.5 text-sm ring-2 ring-gray-400 ring-opacity-5 text-white max-h-96 overflow-y-auto outline-none data-[focused]:ring-opacity-50"
+					className="select-options isolate w-fit min-w-32 bg-gray-900 shadow-lg rounded-md py-1 px-0.5 text-sm ring-2 ring-gray-400/5 text-white max-h-96 overflow-y-auto outline-none data-[focused]:ring-gray-400/50"
 				>
 					{items.map((item) =>
 						"header" in item ? (
