@@ -1,5 +1,5 @@
 import Button from "@thorium/ui/Button";
-import { Fragment, Suspense, useRef } from "react";
+import { Fragment, Suspense, useCallback, useRef, useState } from "react";
 import { GridCanvas, CircleGrid, CircleGridTiltButton } from "./CircleGrid";
 import { PilotZoomSlider } from "./PilotZoomSlider";
 import { CircleGridStoreProvider } from "./useCircleGridStore";
@@ -16,6 +16,7 @@ import type { CardProps } from "@thorium/cards/CardProps";
 import { useStation } from "@thorium/routes/station/useStation";
 import { useCardContext } from "@thorium/context/CardContext";
 import { cn } from "@thorium/utils/cn";
+import { Portal } from "@thorium/ui/Portal";
 
 async function rotation({
 	shipId,
@@ -60,13 +61,33 @@ export function Pilot({ cardLoaded }: CardProps) {
 	const [targetedContact] = q.targeting.targetedContact.useNetRequest({
 		shipId,
 	});
+	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
+	const [showAutopilotAlert, setShowAutopilotAlert] = useState(false);
+	const autopilotActiveRef = useRef(false);
+	autopilotActiveRef.current = !!autopilot.forwardAutopilot;
+	const alertActiveRef = useRef(false);
+	const alertTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+	const onFlightControlInteraction = useCallback(() => {
+		if (autopilotActiveRef.current && !alertActiveRef.current) {
+			alertActiveRef.current = true;
+			q.pilot.autopilot.deactivate.netSend({ shipId });
+			setShowAutopilotAlert(true);
+			clearTimeout(alertTimeoutRef.current);
+			alertTimeoutRef.current = setTimeout(() => {
+				setShowAutopilotAlert(false);
+				alertActiveRef.current = false;
+			}, 5000);
+		}
+	}, [shipId]);
+
 	return (
 		<CircleGridStoreProvider>
 			<div className="grid grid-cols-4 grid-rows-1 h-full place-content-center gap-4">
 				<div className="flex flex-col justify-between">
-					<ImpulseControls cardLoaded={cardLoaded} />
+					<ImpulseControls cardLoaded={cardLoaded} onFlightControlInteraction={onFlightControlInteraction} forwardAutopilot={!!autopilot.forwardAutopilot} />
 					<div className="flex-1 mt-2">
-						<div className="flex items-stretch gap-4 direction-thrusters">
+						<div className="flex items-stretch gap-4 direction-thrusters" onPointerDown={onFlightControlInteraction}>
 							<LinearJoystick
 								id="direction-foreaft"
 								className="h-auto"
@@ -115,7 +136,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 						</div>
 					</div>
 					<div className="flex-1" />
-					<div className="flex flex-col gap-2 rotation-thrusters">
+					<div className="flex flex-col gap-2 rotation-thrusters" onPointerDown={onFlightControlInteraction}>
 						<Joystick
 							id="rotation"
 							onDrag={({ x, y }) => rotation({ shipId, z: x, x: y })}
@@ -143,6 +164,16 @@ export function Pilot({ cardLoaded }: CardProps) {
 					</div>
 				</div>
 			</div>
+			{showAutopilotAlert && (
+				<Portal>
+					<div
+						className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 text-red-500 text-3xl tracking-wide animate-autopilot-flash select-none pointer-events-none whitespace-nowrap"
+						style={{ fontFamily: '"Battlefield"' }}
+					>
+						AUTOPILOT DEACTIVATED
+					</div>
+				</Portal>
+			)}
 		</CircleGridStoreProvider>
 	);
 }
@@ -279,7 +310,7 @@ const LockOnButton = () => {
 					</Button>
 				) : (
 					<Button
-						className="w-full btn-error"
+						className="w-full btn-error animate-autopilot-pulse"
 						disabled={!autopilot.locked}
 						onClick={() => q.pilot.autopilot.deactivate.netSend({ shipId })}
 					>

@@ -108,7 +108,7 @@ const ForwardVelocity = () => {
 
 const KNOB_HEIGHT = 44;
 const BUTTON_OFFSET = 0.8;
-export const ImpulseControls = ({ cardLoaded = true }) => {
+export const ImpulseControls = ({ cardLoaded = true, onFlightControlInteraction, forwardAutopilot }: { cardLoaded?: boolean; onFlightControlInteraction?: () => void; forwardAutopilot?: boolean }) => {
 	const { shipId } = useStation();
 	const [{ targetSpeed, cruisingSpeed, emergencySpeed, name, speeds }] =
 		q.pilot.impulseEngines.get.useNetRequest({ shipId });
@@ -136,6 +136,7 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 
 	const bind = useDrag(
 		({ down, first, offset: [_, yVal] }) => {
+			if (first) onFlightControlInteraction?.();
 			downRef.current = down;
 			set({
 				y: yVal,
@@ -264,23 +265,28 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 							<div className="flex flex-1 justify-around flex-col-reverse text-right gap-1 impulse-speeds">
 								<Button
 									className="btn-notice w-full full-stop"
-									onClick={() => callback.current(0)}
+									onClick={() => {
+										onFlightControlInteraction?.();
+										callback.current(0);
+									}}
 								>
 									Full Stop
 								</Button>
 								{speeds.map((speed, i) => (
 									<Button
 										key={`${speed}${i}`}
-										onClick={() =>
+										onClick={() => {
+											onFlightControlInteraction?.();
 											callback.current(
 												i === speeds.length - 1
 													? emergencySpeed
 													: cruisingSpeed * ((i + 1) / (speeds.length - 1)),
-											)
-										}
+											);
+										}}
 										className={cn("btn-primary btn-sm", {
 											"btn-error": i === speeds.length - 1,
 											"btn-warning": i === speeds.length - 2,
+											"opacity-50": forwardAutopilot,
 										})}
 									>
 										{speed.label}
@@ -290,7 +296,7 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 							<div className="w-1" />
 							<div
 								ref={ref}
-								className="relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end impulse-bar"
+								className={cn("relative bg-blackAlpha-500 border-2 border-whiteAlpha-500 rounded-full flex justify-center items-end impulse-bar", { "opacity-50": forwardAutopilot })}
 							>
 								<a.div
 									{...bind()}
@@ -320,13 +326,14 @@ export const ImpulseControls = ({ cardLoaded = true }) => {
 										key={`warp-${warpFactor}`}
 										className={`btn-sm btn-primary ${
 											warpFocus === warpFactor ? "gamepad-focus" : ""
-										} ${warpFactor === currentWarpFactor ? "btn-active" : ""}`}
-										onClick={() =>
+										} ${warpFactor === currentWarpFactor ? "btn-active" : ""} ${forwardAutopilot ? "opacity-50" : ""}`}
+										onClick={() => {
+											onFlightControlInteraction?.();
 											q.pilot.warpEngines.setWarpFactor.netSend({
 												factor: warpFactor,
 												shipId,
-											})
-										}
+											});
+										}}
 									>
 										{label}
 									</Button>

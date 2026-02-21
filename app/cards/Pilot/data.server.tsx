@@ -100,6 +100,15 @@ export const pilot = t.router({
 				if (!system.components.isImpulseEngines)
 					throw new Error("System is not a impulse engine");
 
+				// Deactivate autopilot when manually setting impulse speed
+				const ship = ctx.ecs.getEntityById(shipId);
+				if (ship?.components.autopilot?.forwardAutopilot) {
+					ship.updateComponent("autopilot", {
+						forwardAutopilot: false,
+					});
+					pubsub.publish.pilot.autopilot.get({ shipId });
+				}
+
 				system.updateComponent("isImpulseEngines", {
 					targetSpeed: speed,
 				});
@@ -174,6 +183,15 @@ export const pilot = t.router({
 						});
 				if (!system.components.isWarpEngines)
 					throw new Error("System is not a warp engine");
+
+				// Deactivate autopilot when manually setting warp factor
+				const ship = ctx.ecs.getEntityById(shipId);
+				if (ship?.components.autopilot?.forwardAutopilot) {
+					ship.updateComponent("autopilot", {
+						forwardAutopilot: false,
+					});
+					pubsub.publish.pilot.autopilot.get({ shipId });
+				}
 
 				system.updateComponent("isWarpEngines", {
 					currentWarpFactor: factor,
@@ -368,6 +386,15 @@ export const pilot = t.router({
 				if (!system.components.isThrusters)
 					throw new Error("System is not thrusters");
 
+				// Deactivate autopilot when manually using direction thrusters
+				const ship = ctx.ecs.getEntityById(shipId);
+				if (ship?.components.autopilot?.forwardAutopilot) {
+					ship.updateComponent("autopilot", {
+						forwardAutopilot: false,
+					});
+					pubsub.publish.pilot.autopilot.get({ shipId });
+				}
+
 				const current = system.components.isThrusters.direction;
 				system.updateComponent("isThrusters", {
 					direction: {
@@ -425,6 +452,15 @@ export const pilot = t.router({
 				if (!system.components.isThrusters)
 					throw new Error("System is not thrusters");
 
+				// Deactivate autopilot when manually using rotation thrusters
+				const ship = ctx.ecs.getEntityById(shipId);
+				if (ship?.components.autopilot?.forwardAutopilot) {
+					ship.updateComponent("autopilot", {
+						forwardAutopilot: false,
+					});
+					pubsub.publish.pilot.autopilot.get({ shipId });
+				}
+
 				const current = system.components.isThrusters.rotationDelta;
 				system.updateComponent("isThrusters", {
 					rotationDelta: {
@@ -438,11 +474,9 @@ export const pilot = t.router({
 					// Cancel the looping sound
 					cancelLoopingSound(system, "thrust");
 				} else if (system.components.soundEffects?.soundBank.thrust) {
-					const ship = ctx.ecs.getEntityById(shipId);
 					playShipSound(system, ship!, "thrust");
 				}
 
-				// TODO: September 21 2022 - Deactivate the ships autopilot when the thruster rotation change
 				return { systemId, shipId, rotation };
 			}),
 	}),

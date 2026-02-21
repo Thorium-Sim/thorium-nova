@@ -1231,6 +1231,22 @@ input[type="range"].slider.zoom:focus::-webkit-slider-runnable-track {
 	}
 }
 
+@keyframes autopilot-flash {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0; }
+}
+.animate-autopilot-flash {
+	animation: autopilot-flash 0.65s infinite;
+}
+
+@keyframes autopilot-pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.6; }
+}
+.animate-autopilot-pulse {
+	animation: autopilot-pulse 2s ease-in-out infinite;
+}
+
 
 body.drag-active * {
 	user-select: none;
