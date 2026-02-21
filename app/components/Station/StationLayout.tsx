@@ -11,6 +11,7 @@ import { useEffect, useRef } from "react";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import Button from "@thorium/ui/Button";
 import { Portal } from "@thorium/ui/Portal";
+import "./training.css";
 
 const StationLayout = () => {
 	const { client, station, ship } = useStation();

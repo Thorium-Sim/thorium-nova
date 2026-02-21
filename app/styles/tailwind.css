@@ -6,8 +6,13 @@
 @import "./badge.css";
 @import "./button.css";
 @import "./cursor.css";
+@import "./faded-scroll.css";
 @import "./input.css";
+@import "./panel.css";
 @import "./progress.css";
+@import "./range.css";
+@import "./slider.css";
+@import "./textarea.css";
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/container-queries";
 @plugin "tailwindcss-react-aria-components";
@@ -18,6 +23,9 @@
 	--radius-selector: 0.5rem;
 	--radius-box: 1rem;
 	--border: 1px;
+	--size-field: 0.25rem;
+	--size-selector: 0.25rem;
+
 	--color-primary: #60a5fa;
 	--color-primary-focus: #2563eb;
 	--color-primary-content: #ffffff;

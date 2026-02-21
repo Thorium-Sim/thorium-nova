@@ -1,8 +1,8 @@
 @utility input {
 	cursor: text;
 	border: var(--border) solid #0000;
-	@apply bg-base-100 relative inline-flex shrink appearance-none items-center gap-2 px-3 align-middle whitespace-nowrap;
-	width: clamp(3rem, 20rem, 100%);
+	@apply bg-base-100 relative flex shrink appearance-none items-center gap-2 px-3 align-middle whitespace-nowrap;
+	width: clamp(3rem, 100%, 100%);
 	height: var(--size);
 	font-size: max(var(--font-size, 0.875rem), 0.875rem);
 	touch-action: manipulation;
@@ -63,7 +63,7 @@
 	&:has(> input[disabled]),
 	&:is(:disabled, [disabled]),
 	fieldset:disabled & {
-		@apply border-base-200 bg-base-200 placeholder-base-content text-base-content/40 placeholder-base-content/20 cursor-not-allowed;
+		@apply border-base-200 bg-base-200 text-base-content/40 placeholder-base-content/20 cursor-not-allowed;
 		box-shadow: none;
 	}
 
@@ -184,6 +184,13 @@
 	&:focus,
 	&:focus-within {
 		--input-color: var(--color-notice);
+	}
+}
+@utility input-alert {
+	&,
+	&:focus,
+	&:focus-within {
+		--input-color: var(--color-alert-color);
 	}
 }
 

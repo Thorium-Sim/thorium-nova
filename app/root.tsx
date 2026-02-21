@@ -114,12 +114,12 @@ function Snapshot() {
 	if (process.env.NODE_ENV === "production") return null;
 	return (
 		<Button
-			className="btn-circle btn-sm fixed bottom-2 left-2 w-11 h-11 btn-ghost z-50 "
+			className="btn-circle btn-sm fixed bottom-2 left-2 bg-neutral/20 backdrop-blur z-50 "
 			onClick={() => {
 				q.server.snapshot.netSend();
 			}}
 		>
-			<Icon name="camera" size="xl" className="text-white" />
+			<Icon name="camera" size="md" className="text-white" />
 		</Button>
 	);
 }

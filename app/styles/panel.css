@@ -1,0 +1,30 @@
+@utility panel {
+	@apply bg-neutral rounded-lg border border-neutral-content/0;
+}
+@utility panel-primary {
+	@apply border-primary;
+}
+@utility panel-secondary {
+	@apply border-secondary;
+}
+@utility panel-accent {
+	@apply border-accent;
+}
+@utility panel-info {
+	@apply border-info;
+}
+@utility panel-success {
+	@apply border-success;
+}
+@utility panel-warning {
+	@apply border-warning;
+}
+@utility panel-error {
+	@apply border-error;
+}
+@utility panel-notice {
+	@apply border-notice;
+}
+@utility panel-alert {
+	@apply border-alert-color;
+}
