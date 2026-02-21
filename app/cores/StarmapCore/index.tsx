@@ -130,7 +130,7 @@ function EditorProperties({ id }: { id: number }) {
 			{starmapObject?.components.identity ? (
 				<Input
 					label="Name"
-					className="input-sm"
+					className="input-xs"
 					defaultValue={starmapObject?.components.identity?.name}
 				/>
 			) : null}
@@ -138,13 +138,13 @@ function EditorProperties({ id }: { id: number }) {
 				<EditorDisclosure title="Ship">
 					<Input
 						label="Class"
-						className="input-sm"
+						className="input-xs"
 						defaultValue={starmapObject?.components.isShip.shipClass}
 					/>
 
 					<Input
 						label="Registry"
-						className="input-sm"
+						className="input-xs"
 						defaultValue={starmapObject?.components.isShip.registry}
 					/>
 					<span>Alert Level</span>
@@ -182,7 +182,7 @@ function EditorProperties({ id }: { id: number }) {
 					</div>
 					<Input
 						label="Category"
-						className="input-sm"
+						className="input-xs"
 						defaultValue={starmapObject?.components.isShip.category}
 					/>
 				</EditorDisclosure>
@@ -243,7 +243,7 @@ function ReputationEditor({ id }: { id: number }) {
 							</label>
 							<input
 								id={`reputation-${targetId}`}
-								className="input input-sm w-24"
+								className="input input-xs w-24"
 								value={value}
 							/>
 							<Button
@@ -594,7 +594,7 @@ function StarmapCoreMenubar() {
 				category: string;
 				vanity: string;
 			}>
-				inputClassName="input-sm"
+				inputClassName="input-xs"
 				queryKey="spawn"
 				getOptions={async ({ queryKey, signal }) => {
 					const result = await q.starmapCore.spawnSearch.netRequest(
@@ -681,7 +681,7 @@ function YDimensionInput() {
 	}, [yDimension]);
 	return (
 		<Input
-			className="input-sm"
+			className="input-xs"
 			label="Y Dimension"
 			title="Y Dimension"
 			labelHidden
@@ -961,7 +961,13 @@ export function SolarSystemWrapper() {
 			{isCore
 				? null
 				: waypoints.map((waypoint) => (
-						<WaypointEntity key={waypoint.id} waypoint={waypoint} viewscreen isLocked={waypoint.id === autopilot.destinationWaypointId} isFacing={waypoint.id === autopilot.facingWaypointIds[0]} />
+						<WaypointEntity
+							key={waypoint.id}
+							waypoint={waypoint}
+							viewscreen
+							isLocked={waypoint.id === autopilot.destinationWaypointId}
+							isFacing={waypoint.id === autopilot.facingWaypointIds[0]}
+						/>
 					))}
 			{starmapShips.map((ship) => (
 				<Suspense key={ship.id} fallback={null}>

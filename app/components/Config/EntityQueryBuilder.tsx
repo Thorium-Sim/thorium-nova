@@ -573,7 +573,7 @@ export function PropertyInput({
 			return (
 				<Input
 					id={id}
-					className="input-sm"
+					className="input-xs"
 					fixed
 					label={label}
 					labelHidden={labelHidden}
@@ -614,7 +614,7 @@ export function PropertyInput({
 				<Input
 					id={id}
 					fixed
-					className="input-sm"
+					className="input-xs"
 					type="date"
 					label={label}
 					labelHidden={labelHidden}
@@ -686,7 +686,7 @@ export function PropertyInput({
 			return (
 				<Input
 					id={id}
-					className="input-sm"
+					className="input-xs"
 					fixed
 					label={label}
 					labelHidden={labelHidden}

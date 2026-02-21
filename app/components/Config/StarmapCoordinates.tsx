@@ -44,7 +44,7 @@ export function StarmapCoordinates({
 			<div className="flex">
 				<StarmapPicker value={value} setValue={setValue} />
 				<Input
-					className="input-sm w-32"
+					className="input-xs w-32"
 					label="X"
 					value={value?.x || ""}
 					onChange={(event) =>
@@ -53,7 +53,7 @@ export function StarmapCoordinates({
 					}
 				/>
 				<Input
-					className="input-sm w-32"
+					className="input-xs w-32"
 					label="Y"
 					value={value?.y || ""}
 					onChange={(event) =>
@@ -62,7 +62,7 @@ export function StarmapCoordinates({
 					}
 				/>
 				<Input
-					className="input-sm w-32"
+					className="input-xs w-32"
 					label="Z"
 					value={value?.z || ""}
 					onChange={(event) =>
@@ -257,7 +257,9 @@ function StarmapCoordinatePicker({
 }
 function PositionPoint({
 	position,
-}: { position: { x: number; y: number; z: number } }) {
+}: {
+	position: { x: number; y: number; z: number };
+}) {
 	const spriteMap = useShipSprite(FuzzTexture);
 
 	return (

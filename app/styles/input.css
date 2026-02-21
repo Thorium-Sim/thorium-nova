@@ -196,7 +196,7 @@
 
 @utility input-xs {
 	--size: calc(var(--size-field, 0.25rem) * 6);
-	font-size: max(var(--font-size, 0.6875rem), 0.6875rem);
+	font-size: max(var(--font-size, 0.75rem), 0.6875rem);
 
 	&[type="number"] {
 		&::-webkit-inner-spin-button {
