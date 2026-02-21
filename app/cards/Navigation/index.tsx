@@ -3,7 +3,7 @@ import {
 	useCalculateVerticalDistance,
 	useGetStarmapStore,
 } from "@thorium/components/Starmap/starmapStore";
-import { useEffect, useRef, useState, Suspense } from "react";
+import { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import StarmapCanvas from "@thorium/components/Starmap/StarmapCanvas";
 import { MapControls } from "./MapControls";
 import { InterstellarWrapper } from "./InterstellarWrapper";
@@ -25,6 +25,7 @@ import { useConfirm } from "@thorium/ui/AlertDialog";
 import { Switch } from "react-aria-components";
 import type { CardProps } from "@thorium/cards/CardProps";
 import { useStation } from "@thorium/routes/station/useStation";
+import { getThemeButtonBorderColor } from "@thorium/utils/processThemeColor";
 export function Navigation(props: CardProps) {
 	const { shipId } = useStation();
 	q.navigation.stream.useDataStream({ shipId });
@@ -58,11 +59,21 @@ export function Navigation(props: CardProps) {
 	);
 }
 
+function useWaypointColors() {
+	return useMemo(() => {
+		const primary = getThemeButtonBorderColor("btn-primary", "#65abc4");
+		const warning = getThemeButtonBorderColor("btn-warning", "#c7935e");
+		const notice = getThemeButtonBorderColor("btn-notice", "#935dc9");
+		return { primary, warning, notice };
+	}, []);
+}
+
 function Waypoints() {
 	const { shipId } = useStation();
 	const confirm = useConfirm();
 	const useStarmapStore = useGetStarmapStore();
 	const ref = useRef<HTMLDivElement>(null);
+	const colors = useWaypointColors();
 
 	const [waypoints] = q.waypoints.all.useNetRequest({
 		systemId: "all",
@@ -82,18 +93,18 @@ function Waypoints() {
 						searchPlaceholder="Search Waypoint History..."
 						items={
 							waypoints.length === 0
-								? [{ id: -1, label: "No waypoints set.", isActive: false, isBlue: false, isLocked: false }]
+								? [{ id: -1, label: "No waypoints set.", isActive: false, isFacingOrLocked: false, isLocked: false }]
 								: waypoints
 										.map((w) => ({
 											id: w.id,
 											label: w.name,
 											isActive: w.isActive,
-											isBlue: w.id === nearestFacingId || w.id === lockedWaypointId,
+											isFacingOrLocked: w.id === nearestFacingId || w.id === lockedWaypointId,
 											isLocked: w.id === lockedWaypointId,
 										}))
 										.sort((a, b) => (a.isLocked === b.isLocked ? 0 : a.isLocked ? -1 : 1))
 						}
-						renderItem={({ id, label, isActive, isBlue, isLocked }) => (
+						renderItem={({ id, label, isActive, isFacingOrLocked, isLocked }) => (
 							<span className="flex items-center">
 								<span className="flex-1 text-white">{label}</span>
 								{id > -1 && !isLocked && (
@@ -109,20 +120,22 @@ function Waypoints() {
 											}}
 											className="group mr-2 flex items-center"
 										>
-											<div className={`flex h-4 w-7 items-center rounded-full border transition ${
-												isBlue
-													? "border-waypoint-facing bg-waypoint-facing/30"
-													: "border-waypoint-inactive bg-waypoint-inactive/30 group-data-[selected]:border-waypoint-active group-data-[selected]:bg-waypoint-active/30"
-											}`}>
-												<span className={`block h-3 w-3 ml-0.5 rounded-full transition-all ${
-													isBlue
-														? "ml-3 bg-waypoint-facing"
-														: "bg-waypoint-inactive group-data-[selected]:ml-3 group-data-[selected]:bg-waypoint-active"
+												<div
+												className="flex h-4 w-7 items-center rounded-full border transition"
+												style={{
+													borderColor: isFacingOrLocked ? colors.primary : isActive ? colors.warning : colors.notice,
+													backgroundColor: `${isFacingOrLocked ? colors.primary : isActive ? colors.warning : colors.notice}4d`,
+												}}
+											>
+												<span className={`block h-3 w-3 ml-0.5 rounded-full transition-all bg-white ${
+													isFacingOrLocked
+														? "ml-3"
+														: "group-data-[selected]:ml-3"
 												}`} />
 											</div>
 										</Switch>
 										<button
-											className="appearance-none"
+											className="appearance-none flex items-center"
 											onClick={async (e) => {
 												e.preventDefault();
 												e.stopPropagation();
@@ -138,19 +151,20 @@ function Waypoints() {
 												}
 											}}
 										>
-											<Icon name="ban" className="text-red-500" />
+											<Icon name="ban" className="text-white drop-shadow-[0_0_4px_white] drop-shadow-[0_0_2px_white]" />
 										</button>
 									</>
 								)}
 							</span>
 						)}
-						getItemClassName={({ isActive, isBlue }) =>
-							isBlue
-								? "!border-waypoint-facing !bg-waypoint-facing/10"
-								: isActive
-									? "!border-waypoint-active !bg-waypoint-active/10"
-									: "!border-waypoint-inactive !bg-waypoint-inactive/10"
-						}
+						getItemStyle={({ isActive, isFacingOrLocked }) => {
+							const color = isFacingOrLocked ? colors.primary : isActive ? colors.warning : colors.notice;
+							return {
+								borderColor: color,
+								background: `${color}4d`,
+								boxShadow: `inset 0px 0px 20px -5px ${color}80`,
+							};
+						}}
 						setSelectedItem={async ({ id }) => {
 							const waypoint = waypoints.find((w) => w.id === id);
 							if (waypoint) {
@@ -218,10 +232,36 @@ function AddWaypoint() {
 		active: false,
 	});
 
+	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
+
 	const existingWaypoint = waypoints.find((w) => w.id === selectedObjectIds[0] || w.objectId === selectedObjectIds[0]);
+	const isLocked = existingWaypoint?.id === autopilot.destinationWaypointId;
 
 	if (!selectedObjectIds[0]) return null;
-	if (existingWaypoint?.isActive) return null;
+
+	if (isLocked) {
+		return (
+			<Button
+				className="pointer-events-auto flex-1 btn-primary"
+				disabled
+			>
+				Waypoint Locked
+			</Button>
+		);
+	}
+
+	if (existingWaypoint?.isActive) {
+		return (
+			<Button
+				className="pointer-events-auto flex-1 btn-notice"
+				onClick={() =>
+					q.waypoints.deactivate.netSend({ waypointId: existingWaypoint.id })
+				}
+			>
+				Deactivate Waypoint
+			</Button>
+		);
+	}
 
 	if (existingWaypoint) {
 		return (
@@ -255,7 +295,7 @@ function AddWaypoint() {
 				}
 			}}
 		>
-			Set Waypoint
+			Create Waypoint
 		</Button>
 	);
 }

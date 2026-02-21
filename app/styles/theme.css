@@ -8,12 +8,6 @@
 	--warning: theme("colors.warning");
 	--error: theme("colors.error");
 	--notice: theme("colors.notice");
-	--waypoint-facing: theme("colors.waypoint-facing");
-	--waypoint-facing-focus: theme("colors.waypoint-facing-focus");
-	--waypoint-active: theme("colors.waypoint-active");
-	--waypoint-active-focus: theme("colors.waypoint-active-focus");
-	--waypoint-inactive: theme("colors.waypoint-inactive");
-	--waypoint-inactive-focus: theme("colors.waypoint-inactive-focus");
 }
 
 html,
@@ -126,6 +120,11 @@ kbd {
 		@apply bg-opacity-10 bg-error border-transparent text-error;
 	}
 }
+/* Button variant colors (btn-primary, btn-error, etc.) are overridden at runtime
+   by the active theme plugin's processed.css under .theme-container with higher
+   specificity. To add or change button variant colors, update the theme's raw.css
+   (e.g. data/plugins/Thorium Default/themes/Default/assets/raw.css) and regenerate
+   processed.css. The styles below serve as base/fallback definitions. */
 .btn {
 	&,
 	&-md {

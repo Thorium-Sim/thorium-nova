@@ -1,5 +1,5 @@
 import { matchSorter } from "match-sorter";
-import { Fragment, type ReactNode } from "react";
+import { Fragment, type CSSProperties, type ReactNode } from "react";
 import { useMemo, useState } from "react";
 import deepEqual from "fast-deep-equal";
 
@@ -19,6 +19,7 @@ interface SearchableListProps<
 	setSelectedItem?: (item: L) => void;
 	renderItem?: (item: L) => ReactNode;
 	getItemClassName?: (item: L) => string;
+	getItemStyle?: (item: L) => CSSProperties;
 	searchKeys?: OnlyString<keyof L>[];
 	showSearchLabel?: boolean;
 	searchLabel?: string;
@@ -39,6 +40,7 @@ function SearchableList<
 	setSelectedItem,
 	renderItem,
 	getItemClassName,
+	getItemStyle,
 	searchKeys = ["label", "category"] as OnlyString<keyof Item>[],
 	showSearchLabel = true,
 	searchLabel = "Search",
@@ -96,6 +98,7 @@ function SearchableList<
 										className={`list-group-item ${
 											deepEqual(c.id, selectedItem) || selectedItems?.some(id => deepEqual(c.id, id)) ? "selected" : ""
 										} ${getItemClassName?.(c) ?? ""}`}
+										style={getItemStyle?.(c)}
 										onClick={() => {
 											setSelectedItem?.(c);
 										}}
