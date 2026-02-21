@@ -21,10 +21,47 @@ const encodingSchema = z.union([
 		type: z.literal("replacement"),
 		includedLetters: z.number(),
 	}),
+	z.object({ type: z.literal("rotation"), rotation: z.number() }),
 	z.object({ type: z.literal("decoded") }),
 ]);
 
 export const longRangeComm = t.router({
+	get: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.filter((publish: { shipId: number }, { ctx, input }) => {
+			if (publish && publish.shipId !== input.shipId) return false;
+			return true;
+		})
+		.autoPublish(
+			["isLongRangeComm"],
+			(entity) =>
+				entity.components.isLongRangeComm && [
+					{ shipId: entity.components.isShipSystem?.shipId || -1 },
+				],
+		)
+		.request(({ input, ctx }) => {
+			const lrcomm = getShipSystem(ctx.ecs, {
+				systemType: "longRangeComm",
+				shipId: input.shipId,
+			});
+
+			return {
+				id: lrcomm.id,
+				requiredPower: lrcomm.components.power?.powerLevels[0] || 0,
+				maxSafePower: lrcomm.components.power?.powerLevels.at(-1) || 1,
+				currentPower: lrcomm.components.power?.powerSources.length || 0,
+			};
+		}),
+	systemStream: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.dataStream(({ input, entity }) => {
+			if (!entity) return false;
+			return Boolean(
+				entity.components.isShipSystem?.shipId === input.shipId &&
+					entity.components.power &&
+					entity.components.isLongRangeComm,
+			);
+		}),
 	addressBook: t.procedure
 		.input(z.object({ shipId: z.number() }))
 		.filter((publish: { shipId: number }, { ctx, input }) => {
@@ -177,6 +214,7 @@ export const longRangeComm = t.router({
 			return messages;
 		}),
 	addToAddressBook: t.procedure
+		.meta({ action: true })
 		.input(
 			z.object({
 				shipId: z.number(),
@@ -193,6 +231,8 @@ export const longRangeComm = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
+			if (input.shipId === input.contactId) return;
+
 			const lrcomm = getShipSystem(ctx.ecs, {
 				systemType: "longRangeComm",
 				shipId: input.shipId,
@@ -234,12 +274,29 @@ export const longRangeComm = t.router({
 				message: z.string(),
 				state: z.enum(["pending", "sent"]).optional(),
 				senderStation: z.string().optional(),
-				encoding: encodingSchema,
+				encoding: z.enum(["decoded", "waves", "replacement", "rotation"]),
 			}),
 		)
 		.send(({ ctx, input }) => {
 			const message = new Entity();
 
+			let encoding: z.infer<typeof encodingSchema> = { type: "decoded" };
+			switch (input.encoding) {
+				case "waves":
+					encoding = { type: "waves", hasPhase: false, waveCount: 1 };
+					break;
+				case "rotation":
+					encoding = {
+						type: "rotation",
+						rotation: ctx.ecs.rng.nextAsPercentage() * 36,
+					};
+					break;
+				case "replacement":
+					encoding = { type: "replacement", includedLetters: 10 };
+					break;
+				case "decoded":
+					break;
+			}
 			message.addComponent("isLongRangeMessage", {
 				destinationId: input.destinationId,
 				senderId: input.senderId,
@@ -247,7 +304,7 @@ export const longRangeComm = t.router({
 				state: input.state || "pending",
 				timestamp: Date.now(),
 				senderStation: input.senderStation,
-				encoding: generateEncoding(input.encoding, ctx.ecs.rng),
+				encoding: generateEncoding(encoding, ctx.ecs.rng),
 			});
 			ctx.ecs.addEntity(message);
 			pubsub.publish.longRangeComm.outgoingMessages({ shipId: input.senderId });
@@ -338,7 +395,16 @@ function generateEncoding(
 			}
 			return { type: "waves", waves };
 		}
+		case "decoded":
+			return { type: "decoded" };
+		case "rotation":
+			return {
+				type: "rotation",
+				rotation: 0,
+				requiredRotation: encoding.rotation,
+			};
 		default:
+			encoding satisfies never;
 			return { type: "decoded" };
 	}
 }

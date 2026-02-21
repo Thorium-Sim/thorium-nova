@@ -11,6 +11,7 @@ export const iconNames = [
   "sword",
   "star",
   "square-dashed",
+  "square-arrow-out-up-right",
   "speaker",
   "sparkles",
   "siren",

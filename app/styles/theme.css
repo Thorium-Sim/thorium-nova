@@ -108,16 +108,22 @@ kbd {
 	}
 
 	&-info {
-		@apply bg-opacity-10 bg-info border-transparent text-info;
+		@apply bg-info border-transparent text-info-content;
 	}
 	&-success {
-		@apply bg-opacity-10 bg-success border-transparent text-success;
+		@apply bg-success border-transparent text-success-content;
 	}
 	&-warning {
-		@apply bg-opacity-10 bg-warning border-transparent text-warning;
+		@apply bg-warning border-transparent text-warning-content;
 	}
 	&-error {
-		@apply bg-opacity-10 bg-error border-transparent text-error;
+		@apply bg-error border-transparent text-error-content;
+	}
+	&-notice {
+		@apply bg-notice border-transparent text-notice-content;
+	}
+	&-alert {
+		@apply bg-alert-color border-transparent text-info-content;
 	}
 }
 /* Button variant colors (btn-primary, btn-error, etc.) are overridden at runtime
@@ -646,7 +652,7 @@ kbd {
 	&-notice::-moz-progress-bar {
 		@apply bg-notice;
 	}
-	&-notice::-moz-progress-bar {
+	&-alert::-moz-progress-bar {
 		@apply bg-alert-color;
 	}
 	&::-webkit-progress-bar {
@@ -900,20 +906,7 @@ input[type="range"].slider {
 			@apply bg-warning bg-opacity-50;
 		}
 	}
-	&-error {
-		&::-webkit-slider-runnable-track {
-			@apply border-error-highlight border-opacity-50;
-		}
-		&::-moz-range-track {
-			@apply border-error-highlight border-opacity-50;
-		}
-		&:focus::-webkit-slider-runnable-track {
-			@apply bg-error bg-opacity-50;
-		}
-		&:focus::-moz-range-track {
-			@apply bg-error bg-opacity-50;
-		}
-	}
+
 	&-notice {
 		&::-webkit-slider-runnable-track {
 			@apply border-notice-highlight border-opacity-50;
@@ -929,6 +922,23 @@ input[type="range"].slider {
 		}
 	}
 }
+.slider-error::-webkit-slider-runnable-track {
+			@apply border-error-highlight border-opacity-50;
+		}
+.slider-error {
+		&::-webkit-slider-runnable-track {
+			@apply border-error-highlight border-opacity-50;
+		}
+		&::-moz-range-track {
+			@apply border-error-highlight border-opacity-50;
+		}
+		&:focus::-webkit-slider-runnable-track {
+			@apply bg-error bg-opacity-50;
+		}
+		&:focus::-moz-range-track {
+			@apply bg-error bg-opacity-50;
+		}
+	}
 
 .animate-spin-step {
 	animation: spin-step 1s steps(8, end) infinite;

@@ -11,6 +11,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import path from "node:path";
 import { getPlugin } from "@thorium/.server/data/plugins/utils";
 import { traverseFiles } from "@thorium/.server/data/traverseFiles";
+import { Entity } from "@thorium/utils/ecs";
 
 export type ActionOverrides = {
 	name?: string;
@@ -137,6 +138,14 @@ export const thorium = t.router({
 		)
 		.send(async ({ input }) => {
 			await new Promise((resolve) => setTimeout(resolve, input.milliseconds));
+		}),
+	spawnEntity: t.procedure
+		.meta({ action: true })
+		.output(z.object({ id: z.number() }))
+		.send(({ ctx }) => {
+			const entity = new Entity();
+			ctx.ecs.addEntity(entity);
+			return { id: entity.id };
 		}),
 	setEntityComponent: t.procedure
 		.meta({
