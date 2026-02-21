@@ -139,6 +139,9 @@ kbd {
 	&-lg {
 		@apply px-6 leading-loose h-12 text-lg min-h-12;
 	}
+	&-round {
+		@apply aspect-square rounded-full;
+	}
 	@apply font-semibold;
 	border-width: var(--border-btn, 1px);
 	&:active:hover,

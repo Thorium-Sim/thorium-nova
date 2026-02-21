@@ -353,6 +353,23 @@ export async function executeBlocks(
 
 				break;
 			}
+			case "ForEachEntity": {
+				const entityIds = getEntitiesReference(
+					block.entity,
+					localVariables,
+					ecs,
+				);
+				for (const entityId of entityIds) {
+					localVariables[block.variable] = entityId;
+					await executeBlocks(ecs, block.triggerBlocks, {
+						stepId,
+						localVariables,
+						executionType,
+						callReturnBlocks,
+					});
+				}
+				break;
+			}
 			case "Macro": {
 				// Execute all of the blocks of the macro
 				const macro = ecs?.server.plugins
@@ -470,6 +487,59 @@ function evaluateCondition(
 	return false;
 }
 
+function getEntitiesReference(
+	ref: string,
+	variables: Record<string, any>,
+	ecs: ECS,
+) {
+	const entityIds: number[] = [];
+	// Entity Tags
+	if (ref.startsWith("#") && !ref.includes(" ")) {
+		if (ref === "#playerShip") {
+			const playerShips = ecs.componentCache.get("isPlayerShip");
+			const shipId = playerShips?.values().next().value?.id;
+			if (shipId) {
+				entityIds.push(shipId);
+			}
+		}
+		const taggedEntities = ecs.componentCache.get("tags");
+		const tag = ref.replace("#", "").trim();
+		for (const entity of taggedEntities || []) {
+			if (entity.components.tags?.tags.includes(tag)) {
+				entityIds.push(entity.id);
+			}
+		}
+	}
+
+	if (ref.startsWith("%")) {
+		const [component, property] = ref.trim().slice(1).split(":");
+		const entities = ecs.componentCache.get(component as any) || [];
+
+		for (const entity of entities) {
+			if (property) {
+				const [propName, value] = property.split("=");
+				const valueRef = getValueReference(value, variables, ecs);
+				// @ts-expect-error
+				if (entity.components[component]?.[propName] === valueRef)
+					entityIds.push(entity.id);
+				entity;
+				continue;
+			}
+			entityIds.push(entity.id);
+		}
+	}
+
+	// Entity Names
+	const namedEntities = ecs.componentCache.get("identity");
+	const name = ref.trim();
+	for (const entity of namedEntities || []) {
+		if (entity.components.identity?.name === name) {
+			entityIds.push(entity.id);
+		}
+	}
+	return entityIds;
+}
+
 function getValueReference(
 	ref: string,
 	variables: Record<string, any>,
@@ -481,30 +551,8 @@ function getValueReference(
 			return getValueReference(variables[ref.replace("$", "")], variables, ecs);
 		}
 
-		// Entity Tags
-		if (ref.startsWith("#") && !ref.includes(" ")) {
-			if (ref === "#playerShip") {
-				const playerShips = ecs.componentCache.get("isPlayerShip");
-				const shipId = playerShips?.values().next().value?.id;
-				if (shipId) return shipId;
-			}
-			const taggedEntities = ecs.componentCache.get("tags");
-			const tag = ref.replace("#", "").trim();
-			for (const entity of taggedEntities || []) {
-				if (entity.components.tags?.tags.includes(tag)) {
-					return entity.id;
-				}
-			}
-		}
-
-		// Entity Names
-		const namedEntities = ecs.componentCache.get("identity");
-		const name = ref.trim();
-		for (const entity of namedEntities || []) {
-			if (entity.components.identity?.name === name) {
-				return entity.id;
-			}
-		}
+		const entities = getEntitiesReference(ref, variables, ecs);
+		if (entities.length > 0) return entities[0];
 
 		return interpolateText(ref, variables, ecs.rng);
 	}

@@ -17,6 +17,7 @@ export const iconNames = [
   "shuffle",
   "shield-half",
   "settings",
+  "send",
   "route",
   "rotate-cw",
   "rotate-ccw",
@@ -30,6 +31,7 @@ export const iconNames = [
   "play",
   "picture-in-picture",
   "pencil",
+  "pencil-line",
   "pause",
   "package-open",
   "orbit",
@@ -40,6 +42,7 @@ export const iconNames = [
   "loader",
   "joystick",
   "info",
+  "inbox",
   "home",
   "hand",
   "grip-vertical",
@@ -89,6 +92,7 @@ export const iconNames = [
   "arrow-left",
   "arrow-left-right",
   "arrow-down",
+  "archive",
 ] as const
 
 export type IconName = typeof iconNames[number]
