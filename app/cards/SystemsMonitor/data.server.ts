@@ -223,6 +223,9 @@ export const systemsMonitor = t.router({
 					// Update the output megawatts of the phasers
 					pubsub.publish.targeting.phasers.list({ shipId });
 				}
+				if (system.components.isLongRangeComm) {
+					pubsub.publish.longRangeComm.get({ shipId });
+				}
 				return null;
 			}),
 		addPowerSource: t.procedure
@@ -294,6 +297,9 @@ export const systemsMonitor = t.router({
 				if (system.components.isPhasers) {
 					// Update the output megawatts of the phasers
 					pubsub.publish.targeting.phasers.list({ shipId });
+				}
+				if (system.components.isLongRangeComm) {
+					pubsub.publish.longRangeComm.get({ shipId });
 				}
 				return null;
 			}),

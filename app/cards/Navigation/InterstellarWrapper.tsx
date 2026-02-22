@@ -42,16 +42,12 @@ export function InterstellarWrapper() {
 						name={sys.identity.name}
 						onClick={() => {
 							useStarmapStore.setState({ selectedObjectIds: [sys.id] });
-							q.waypoints.spawn.netSend({
-								entityId: sys.id,
-								shipId,
-								active: false,
-							});
 						}}
 						onDoubleClick={() => {
 							useStarmapStore.getState().setCurrentSystem(sys.id);
 							useStarmapStore.setState({ selectedObjectIds: [] });
 						}}
+						commSatelliteRadius={null}
 					/>
 				) : null,
 			)}
@@ -71,7 +67,12 @@ export function InterstellarWrapper() {
 						FallbackComponent={() => <></>}
 						onError={(err) => console.error(err)}
 					>
-						<WaypointEntity position={waypoint.position} isActive={waypoint.isActive} isFacing={waypoint.id === autopilot.facingWaypointIds[0]} isLocked={waypoint.id === autopilot.destinationWaypointId} />
+						<WaypointEntity
+							position={waypoint.position}
+							isActive={waypoint.isActive}
+							isFacing={waypoint.id === autopilot.facingWaypointIds[0]}
+							isLocked={waypoint.id === autopilot.destinationWaypointId}
+						/>
 					</ErrorBoundary>
 				</Suspense>
 			))}

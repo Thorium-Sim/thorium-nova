@@ -2,7 +2,8 @@ import { clientId, q } from "@thorium/context/AppContext";
 import { useFrame } from "@react-three/fiber";
 import type { AppRouter } from "@thorium/.server/init/router";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
+import { getThemeButtonBorderColor, deriveDarkerThemeColor } from "@thorium/utils/processThemeColor";
 import {
 	type Camera,
 	Frustum,
@@ -52,6 +53,15 @@ export const WaypointEntity = ({
 	const sprite = useRef<Sprite>(null);
 	const stroke = useRef<Sprite>(null);
 	const scale = 1 / 40;
+
+	const { primaryHex, primaryFocusHex, warningHex, warningFocusHex } = useMemo(() => {
+		return {
+			primaryHex: getThemeButtonBorderColor("btn-primary", "#65abc4"),
+			warningHex: getThemeButtonBorderColor("btn-warning", "#c7935e"),
+			primaryFocusHex: deriveDarkerThemeColor(getThemeButtonBorderColor("btn-primary", "#65abc4")),
+			warningFocusHex: deriveDarkerThemeColor(getThemeButtonBorderColor("btn-warning", "#c7935e")),
+		};
+	}, []);
 
 	const { id, currentSystem: playerSystem, systemPosition } = useStation().ship;
 
@@ -160,12 +170,18 @@ export const WaypointEntity = ({
 				}
 			}
 
-			// Colors match the waypoint-* tokens in tailwind.config.ts
 			if (sprite.current) {
 				if (isLocked || isFacing) {
-					sprite.current.material.color.setRGB(0, 0.5, 1);
+					sprite.current.material.color.set(primaryHex);
 				} else {
-					sprite.current.material.color.setRGB(0.9, 0.6, 0);
+					sprite.current.material.color.set(warningHex);
+				}
+			}
+			if (stroke.current) {
+				if (isLocked || isFacing) {
+					stroke.current.material.color.set(primaryFocusHex);
+				} else {
+					stroke.current.material.color.set(warningFocusHex);
 				}
 			}
 		}
@@ -176,18 +192,20 @@ export const WaypointEntity = ({
 				<spriteMaterial
 					attach="material"
 					map={spriteMap}
-					color={"rgb(230,153,0)"}
+					color={warningHex}
 					sizeAttenuation={false}
 					depthTest={false}
+					toneMapped={false}
 				/>
 			</sprite>
 			<sprite ref={stroke} renderOrder={100} position={[0, 0, -0.5]}>
 				<spriteMaterial
 					attach="material"
 					map={strokeMap}
-					color={"rgb(110,73,0)"}
+					color={warningFocusHex}
 					sizeAttenuation={false}
 					depthTest={false}
+					toneMapped={false}
 				/>
 			</sprite>
 		</group>

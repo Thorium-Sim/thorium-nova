@@ -137,7 +137,10 @@ const FleetConfig = () => {
 function ShipsList({
 	ships,
 	dispatch,
-}: { dispatch: React.Dispatch<FlightConfigAction>; ships: Ship[] }) {
+}: {
+	dispatch: React.Dispatch<FlightConfigAction>;
+	ships: Ship[];
+}) {
 	const [selectedKey, onSelectionChange] = React.useState<Key>(ships[0].id);
 	return (
 		<Tabs selectedKey={selectedKey} onSelectionChange={onSelectionChange}>
@@ -153,11 +156,7 @@ function ShipsList({
 				))}
 			</TabList>
 			{ships.map((ship) => (
-				<TabPanel
-					id={ship.id}
-					key={ship.id}
-					className="w-[24rem] max-w-[24rem]"
-				>
+				<TabPanel id={ship.id} key={ship.id}>
 					<ShipConfig dispatch={dispatch} ship={ship} />
 					{ships.length > 1 && (
 						<Button
