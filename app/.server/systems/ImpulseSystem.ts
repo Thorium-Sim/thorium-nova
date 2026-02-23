@@ -1,4 +1,5 @@
 import { type Entity, System } from "@thorium/utils/ecs";
+import { pubsub } from "@thorium/.server/init/pubsub";
 
 /**
  * Determines the forward velocity applied by the impulse engines
@@ -30,9 +31,26 @@ export class ImpulseSystem extends System {
 			entity.components.isImpulseEngines;
 
 		if (entity.components.power) {
-			const { currentPower, powerLevels } = entity.components.power || {};
+			const { currentPower, powerLevels, powerSources } =
+				entity.components.power || {};
 			const requiredPower = powerLevels[0];
 			const maxSafePower = powerLevels[powerLevels.length - 1];
+
+			// Clamp and persist targetSpeed based on allocated power
+			const allocatedPower = powerSources.length;
+			const maxAllocatedSpeed =
+				cruisingSpeed * (allocatedPower / maxSafePower);
+			if (targetSpeed > maxAllocatedSpeed) {
+				targetSpeed = maxAllocatedSpeed;
+				entity.updateComponent("isImpulseEngines", {
+					targetSpeed,
+				});
+				pubsub.publish.pilot.impulseEngines.get({
+					shipId: ship.id,
+					systemId: entity.id,
+				});
+			}
+
 			targetSpeed = Math.min(
 				targetSpeed,
 				cruisingSpeed * (Math.max(0, currentPower) / maxSafePower),

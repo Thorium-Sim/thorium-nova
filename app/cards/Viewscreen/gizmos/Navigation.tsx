@@ -28,7 +28,7 @@ export function NavigationGizmo({ className }: { className?: string }) {
 	return (
 		<div
 			className={cn(
-				"flex flex-col items-center justify-center text-center text-base",
+				"flex flex-col items-start text-left text-base",
 				className,
 			)}
 		>

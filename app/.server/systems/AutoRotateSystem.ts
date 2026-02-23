@@ -3,6 +3,7 @@ import { type Entity, System } from "@thorium/utils/ecs";
 import { autopilotGetCoordinates } from "@thorium/utils/starmap/autopilotGetCoordinates";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { KM_TO_LY, lightYearToLightMinute } from "@thorium/utils/unitTypes";
+import { pubsub } from "@thorium/.server/init/pubsub";
 
 const rotationQuat = new Quaternion();
 const desiredRotationQuat = new Quaternion();
@@ -95,8 +96,41 @@ export class AutoRotateSystem extends System {
 				distanceToNextInKM < Math.max(1, distanceThreshold) ||
 				waypointIsBehind
 			) {
+				// Check if we're already at the final leg of the journey (no intermediate
+				// waypoints left). If nextCoordinates was null and path is empty,
+				// autopilotGetCoordinates used desiredDestination as nextDestination.
+				const wasAtFinalLeg =
+					!autopilot.nextCoordinates && autopilot.path.length === 0;
+
 				autopilot.nextCoordinates = autopilot.path.shift()!;
 				if (!autopilot.nextCoordinates) {
+					if (
+						wasAtFinalLeg &&
+						!autopilot.forwardAutopilot &&
+						waypointIsBehind
+					) {
+						// Ship has blown past the final destination while using manual
+						// engine controls. Deactivate autopilot and unlock the course,
+						// similar to arriving normally via WaypointRemoveSystem.
+						const waypointId = autopilot.destinationWaypointId;
+						entity.updateComponent("autopilot", {
+							destinationWaypointId: null,
+							desiredCoordinates: undefined,
+							desiredRotation: null,
+							path: [],
+							nextCoordinates: undefined,
+							desiredSolarSystemId: undefined,
+							rotationAutopilot: false,
+							forwardAutopilot: false,
+						});
+						if (typeof waypointId === "number") {
+							const waypoint = this.ecs.getEntityById(waypointId);
+							waypoint?.updateComponent("isWaypoint", { isActive: false });
+						}
+						pubsub.publish.pilot.autopilot.get({ shipId: entity.id });
+						pubsub.publish.waypoints.all({ shipId: entity.id });
+						return;
+					}
 					if (autopilot.desiredRotation) {
 						doneWithPath = true;
 						desiredRotationQuat.set(

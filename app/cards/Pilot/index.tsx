@@ -1,5 +1,5 @@
 import Button from "@thorium/ui/Button";
-import { Fragment, Suspense, useCallback, useRef, useState } from "react";
+import { Fragment, Suspense, useCallback, useEffect, useRef } from "react";
 import { GridCanvas, CircleGrid, CircleGridTiltButton } from "./CircleGrid";
 import { PilotZoomSlider } from "./PilotZoomSlider";
 import { CircleGridStoreProvider } from "./useCircleGridStore";
@@ -16,7 +16,7 @@ import type { CardProps } from "@thorium/cards/CardProps";
 import { useStation } from "@thorium/routes/station/useStation";
 import { useCardContext } from "@thorium/context/CardContext";
 import { cn } from "@thorium/utils/cn";
-import { Portal } from "@thorium/ui/Portal";
+import { useShipWarnings, ShipWarning } from "@thorium/ui/ShipWarning";
 
 async function rotation({
 	shipId,
@@ -62,30 +62,136 @@ export function Pilot({ cardLoaded }: CardProps) {
 		shipId,
 	});
 	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
-	const [showAutopilotAlert, setShowAutopilotAlert] = useState(false);
+	const [collisionWarning] = q.pilot.collisionWarning.get.useNetRequest({ shipId });
+	const collisionCountdownRef = useRef<HTMLSpanElement>(null);
+	const collisionBaselineRef = useRef({ ttc: 0, timestamp: 0 });
+	const collisionInitialTtcRef = useRef(0);
+	const collisionDigitSpansRef = useRef<HTMLSpanElement[]>([]);
+	const collisionMaxDigitWidthRef = useRef(0);
+
+	const { showWarning, dismissWarning, displayedWarning, fadingOut } = useShipWarnings();
+
+	// Detect when the course is unlocked server-side while forward autopilot was off
+	// (e.g., ship overshot the final waypoint with manual engine controls).
+	const prevLockedRef = useRef(autopilot.locked);
+	const prevForwardAutopilotRef = useRef(!!autopilot.forwardAutopilot);
+	useEffect(() => {
+		if (
+			prevLockedRef.current &&
+			!autopilot.locked &&
+			!prevForwardAutopilotRef.current
+		) {
+			showWarning({
+				id: "autopilot-deactivated",
+				priority: 5,
+				content: "AUTOPILOT DEACTIVATED",
+				duration: 5000,
+			});
+		}
+		prevLockedRef.current = autopilot.locked;
+		prevForwardAutopilotRef.current = !!autopilot.forwardAutopilot;
+	}, [autopilot.locked, autopilot.forwardAutopilot, showWarning]);
+
+	if (collisionWarning.timeToCollision !== collisionBaselineRef.current.ttc) {
+		collisionBaselineRef.current = { ttc: collisionWarning.timeToCollision, timestamp: Date.now() };
+	}
+
+	useEffect(() => {
+		if (collisionWarning.objectId !== null) {
+			collisionInitialTtcRef.current = collisionWarning.timeToCollision;
+			collisionDigitSpansRef.current = [];
+			showWarning({
+				id: "collision",
+				priority: 10,
+				content: <>COLLISION WARNING — {collisionWarning.objectName} — <span ref={collisionCountdownRef} /></>,
+			});
+		} else {
+			dismissWarning("collision");
+			collisionDigitSpansRef.current = [];
+		}
+	}, [collisionWarning.objectId, showWarning, dismissWarning]);
+
+	useAnimationFrame(() => {
+		const el = collisionCountdownRef.current;
+		if (!el || collisionWarning.objectId === null) return;
+
+		// Lazily create fixed-width digit spans on first frame the ref is available
+		if (collisionDigitSpansRef.current.length === 0) {
+			if (collisionMaxDigitWidthRef.current === 0) {
+				const parent = el.closest("[style]");
+				const fontFamily = parent ? getComputedStyle(parent).fontFamily : '"Battlefield"';
+				const fontSize = parent ? getComputedStyle(parent).fontSize : "1.875rem";
+				const measurer = document.createElement("span");
+				measurer.style.fontFamily = fontFamily;
+				measurer.style.fontSize = fontSize;
+				measurer.style.position = "absolute";
+				measurer.style.visibility = "hidden";
+				document.body.appendChild(measurer);
+				let maxWidth = 0;
+				for (let i = 0; i <= 9; i++) {
+					measurer.textContent = String(i);
+					maxWidth = Math.max(maxWidth, measurer.getBoundingClientRect().width);
+				}
+				document.body.removeChild(measurer);
+				collisionMaxDigitWidthRef.current = maxWidth;
+			}
+
+			const padWidth = collisionInitialTtcRef.current.toFixed(1).length;
+			const text = `${collisionInitialTtcRef.current.toFixed(1).padStart(padWidth, "0")}s`;
+			el.textContent = "";
+			const spans: HTMLSpanElement[] = [];
+			for (const char of text) {
+				const span = document.createElement("span");
+				span.textContent = char;
+				if (char >= "0" && char <= "9") {
+					span.style.display = "inline-block";
+					span.style.width = `${collisionMaxDigitWidthRef.current}px`;
+					span.style.textAlign = "center";
+				}
+				el.appendChild(span);
+				spans.push(span);
+			}
+			collisionDigitSpansRef.current = spans;
+		}
+
+		const spans = collisionDigitSpansRef.current;
+		const elapsed = (Date.now() - collisionBaselineRef.current.timestamp) / 1000;
+		const remaining = Math.max(0, collisionBaselineRef.current.ttc - elapsed);
+		const padWidth = collisionInitialTtcRef.current.toFixed(1).length;
+		const text = `${remaining.toFixed(1).padStart(padWidth, "0")}s`;
+		for (let i = 0; i < spans.length && i < text.length; i++) {
+			if (spans[i].textContent !== text[i]) {
+				spans[i].textContent = text[i];
+			}
+		}
+	}, cardLoaded);
+
 	const autopilotActiveRef = useRef(false);
 	autopilotActiveRef.current = !!autopilot.forwardAutopilot;
 	const alertActiveRef = useRef(false);
-	const alertTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
 	const onFlightControlInteraction = useCallback(() => {
 		if (autopilotActiveRef.current && !alertActiveRef.current) {
 			alertActiveRef.current = true;
 			q.pilot.autopilot.deactivate.netSend({ shipId });
-			setShowAutopilotAlert(true);
-			clearTimeout(alertTimeoutRef.current);
-			alertTimeoutRef.current = setTimeout(() => {
-				setShowAutopilotAlert(false);
+			showWarning({
+				id: "autopilot-deactivated",
+				priority: 5,
+				content: "AUTOPILOT DEACTIVATED",
+				duration: 5000,
+			});
+			// Reset the guard after the warning duration so it can trigger again
+			setTimeout(() => {
 				alertActiveRef.current = false;
 			}, 5000);
 		}
-	}, [shipId]);
+	}, [shipId, showWarning]);
 
 	return (
 		<CircleGridStoreProvider>
 			<div className="grid grid-cols-4 grid-rows-1 h-full place-content-center gap-4">
 				<div className="flex flex-col justify-between">
-					<ImpulseControls cardLoaded={cardLoaded} onFlightControlInteraction={onFlightControlInteraction} forwardAutopilot={!!autopilot.forwardAutopilot} />
+					<ImpulseControls cardLoaded={cardLoaded} onFlightControlInteraction={onFlightControlInteraction} forwardAutopilot={!!autopilot.forwardAutopilot} showWarning={showWarning} />
 					<div className="flex-1 mt-2">
 						<div className="flex items-stretch gap-4 direction-thrusters" onPointerDown={onFlightControlInteraction}>
 							<LinearJoystick
@@ -164,16 +270,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 					</div>
 				</div>
 			</div>
-			{showAutopilotAlert && (
-				<Portal>
-					<div
-						className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 text-red-500 text-3xl tracking-wide animate-autopilot-flash select-none pointer-events-none whitespace-nowrap"
-						style={{ fontFamily: '"Battlefield"' }}
-					>
-						AUTOPILOT DEACTIVATED
-					</div>
-				</Portal>
-			)}
+			<ShipWarning warning={displayedWarning} fadingOut={fadingOut} />
 		</CircleGridStoreProvider>
 	);
 }

@@ -69,7 +69,11 @@ export class AutoThrustSystem extends System {
 		const rotationDifference =
 			(Math.abs(rotationQuat.angleTo(desiredRotationQuat)) / Math.PI) * 180;
 
-		const impulseMaxSpeed = impulseEngines?.cruisingSpeed || 1;
+		const powerLevels = impulseEntity?.components.power?.powerLevels || [0];
+		const maxSafePower = powerLevels[powerLevels.length - 1] || 1;
+		const allocatedPower = impulseEntity?.components.power?.powerSources.length || 0;
+		const impulseMaxSpeed =
+			(impulseEngines?.cruisingSpeed || 1) * (allocatedPower / maxSafePower);
 
 		// There's a heuristic here for which engine to choose to reach a given destination.
 		// Basically, if it would take 15 seconds or less to reach the destination at cruising

@@ -153,7 +153,9 @@ function calculateTangents(point: Vector3, obstacle: Obstacle) {
 
 	// Check if the point is inside the obstacle
 	if (distanceToCenter <= radius) {
-		throw new Error("Point is inside or too close to the obstacle");
+		throw new Error(
+			`Point (${point.x.toFixed(1)}, ${point.y.toFixed(1)}, ${point.z.toFixed(1)}) is inside obstacle entityId=${obstacle.entityId} (radius=${radius.toFixed(1)}km, center=(${obstacleCenter.x.toFixed(1)}, ${obstacleCenter.y.toFixed(1)}, ${obstacleCenter.z.toFixed(1)}), distance=${distanceToCenter.toFixed(1)}km)`,
+		);
 	}
 
 	// Calculate the tangent distance

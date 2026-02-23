@@ -19,7 +19,7 @@ export const pilot = t.router({
 				return true;
 			})
 			.autoPublish(
-				["isImpulseEngines"],
+				["isImpulseEngines", "power"],
 				(entity) =>
 					entity.components.isShipSystem && {
 						shipId: entity.components.isShipSystem.shipId,
@@ -37,6 +37,10 @@ export const pilot = t.router({
 				const cruisingSpeed =
 					impulseEngines.components.isImpulseEngines?.cruisingSpeed || 1;
 
+				const powerLevels = impulseEngines.components.power?.powerLevels || [0];
+				const maxSafePower = powerLevels[powerLevels.length - 1] || 1;
+				const allocatedPower = impulseEngines.components.power?.powerSources.length || 0;
+
 				return {
 					id: impulseEngines.id,
 					name: impulseEngines.components.identity?.name || "Impulse",
@@ -45,6 +49,8 @@ export const pilot = t.router({
 					emergencySpeed:
 						impulseEngines.components.isImpulseEngines?.emergencySpeed || 1,
 					speeds: impulseEngines.components.isImpulseEngines?.speeds || [],
+					allocatedPower,
+					maxSafePower,
 				};
 			}),
 		ambiance: t.procedure
@@ -347,6 +353,29 @@ export const pilot = t.router({
 				});
 
 				return input;
+			}),
+	}),
+	collisionWarning: t.router({
+		get: t.procedure
+			.input(z.object({ shipId: z.number() }))
+			.filter((publish: { shipId: number }, { input }) => {
+				if (publish && publish.shipId !== input.shipId) return false;
+				return true;
+			})
+			.autoPublish(
+				["collisionWarning"],
+				(entity) =>
+					entity.components.isPlayerShip && { shipId: entity.id },
+			)
+			.request(({ ctx, input }) => {
+				const ship = ctx.ecs.getEntityById(input.shipId);
+				return {
+					objectId: ship?.components.collisionWarning?.objectId ?? null,
+					timeToCollision:
+						ship?.components.collisionWarning?.timeToCollision ?? 0,
+					objectName:
+						ship?.components.collisionWarning?.objectName ?? "",
+				};
 			}),
 	}),
 	thrusters: t.router({

@@ -203,7 +203,7 @@ export const systemsMonitor = t.router({
 					newPowerSources.splice(input.powerSourceIndex, 1);
 					system.updateComponent("power", {
 						powerSources: newPowerSources,
-					});
+					}, true);
 				}
 				if (system.components.isBattery) {
 					const newPowerSources = [
@@ -279,7 +279,7 @@ export const systemsMonitor = t.router({
 
 					system.updateComponent("power", {
 						powerSources: newPowerSources,
-					});
+					}, true);
 				} else if (system.components.isBattery) {
 					const newPowerSources = [
 						...(system?.components.isBattery?.powerSources || []),
