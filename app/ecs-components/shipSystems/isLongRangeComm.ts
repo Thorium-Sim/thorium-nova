@@ -13,7 +13,7 @@ export const isLongRangeComm = z
 			.default([]),
 		addressBook: z
 			.object({
-				destinationId: z.number().int(),
+				contactId: z.number().int(),
 				/** Typically it uses the destination's name, but for narrative purposes we can override it */
 				name: z.string().optional(),
 				/**
@@ -53,6 +53,7 @@ export const isLongRangeMessage = z
 				"failing",
 				"intercepted",
 				"sent",
+				"archived",
 				"deleted",
 				"undelivered",
 			])

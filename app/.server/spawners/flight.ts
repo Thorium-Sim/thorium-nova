@@ -227,14 +227,6 @@ export async function startFlight(
 	pubsub.publish.flight.all();
 	await ctx.flight.write(true);
 
-	const satellites = Array.from(
-		ctx.ecs.componentCache.get("isCommSatellite") || [],
-	);
-	console.log(
-		calculateShipMapPath(generateSatelliteGraph(satellites), 10, 14, {
-			trim: true,
-		}),
-	);
 	return ctx.flight;
 }
 

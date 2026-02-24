@@ -36,9 +36,7 @@ const testDataStoreProps: DataStoreOperations = {
 		return [];
 	},
 	async rename(newName, otherNames) {},
-	async processCSS(css) {
-		return { assetUrl: "", processedCSS: "" };
-	},
+
 	async getFlights() {
 		return [];
 	},

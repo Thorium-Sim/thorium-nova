@@ -67,12 +67,6 @@
 	--color-notice-focus: #553c9a;
 	--color-notice-content: #ffffff;
 	--color-notice-highlight: #9f83df;
-	--color-waypoint-facing: rgb(0, 136, 255);
-	--color-waypoint-facing-focus: rgb(0, 68, 128);
-	--color-waypoint-active: rgb(230, 153, 0);
-	--color-waypoint-active-focus: rgb(110, 73, 0);
-	--color-waypoint-inactive: #663399;
-	--color-waypoint-inactive-focus: #331a4d;
 	--color-alert-color: var(--alert-color, #60a5fa);
 }
 

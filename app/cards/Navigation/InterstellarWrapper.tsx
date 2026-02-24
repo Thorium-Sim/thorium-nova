@@ -47,6 +47,7 @@ export function InterstellarWrapper() {
 							useStarmapStore.getState().setCurrentSystem(sys.id);
 							useStarmapStore.setState({ selectedObjectIds: [] });
 						}}
+						commSatelliteRadius={null}
 					/>
 				) : null,
 			)}

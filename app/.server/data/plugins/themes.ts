@@ -3,10 +3,8 @@ import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import { z } from "zod";
 import { getPlugin } from "./utils";
-import defaultCSS from "./defaultTheme";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import path from "node:path";
-import { DataStore } from "@thorium/utils/.server/db-fs";
 
 export const theme = t.router({
 	all: t.procedure
@@ -21,17 +19,14 @@ export const theme = t.router({
 			return Promise.all(
 				plugin.aspects.themes.map(async (theme) => {
 					const assetPath = await theme.getAssetUrl();
-					const [rawCSS, processedCSS] = await Promise.all([
-						ctx.readFile.call(theme, path.join(assetPath, theme.assets.rawCSS)),
-						ctx.readFile.call(
-							theme,
-							path.join(assetPath, theme.assets.processedCSS),
-						),
-					]);
+					const rawCSS = await ctx.readFile.call(
+						theme,
+						path.join(assetPath, theme.assets.rawCSS),
+					);
+
 					return {
 						...theme,
 						rawCSS,
-						processedCSS,
 					};
 				}),
 			);
@@ -57,18 +52,14 @@ export const theme = t.router({
 			if (!theme) throw new Error("Theme not found");
 			const assetPath = await theme.getAssetUrl();
 
-			const [rawCSS, processedCSS] = await Promise.all([
-				ctx.readFile.call(theme, path.join(assetPath, theme.assets.rawCSS)),
-				ctx.readFile.call(
-					theme,
-					path.join(assetPath, theme.assets.processedCSS),
-				),
-			]);
+			const rawCSS = await ctx.readFile.call(
+				theme,
+				path.join(assetPath, theme.assets.rawCSS),
+			);
 
 			return {
 				...theme,
 				rawCSS,
-				processedCSS,
 			};
 		}),
 	available: t.procedure.request(({ ctx }) => {
@@ -91,11 +82,6 @@ export const theme = t.router({
 			const plugin = getPlugin(ctx, input.pluginId);
 			const theme = new ThemePlugin({ name: input.name }, plugin);
 			plugin.aspects.themes.push(theme);
-
-			const { assetUrl } = await DataStore.operations
-				.getStore()!
-				.processCSS.call(theme, defaultCSS);
-			theme.assets.processedCSS = assetUrl;
 
 			pubsub.publish.plugin.theme.all({ pluginId: input.pluginId });
 			return { themeId: theme.name };
@@ -132,18 +118,12 @@ export const theme = t.router({
 				(theme) => theme.name === input.themeId,
 			);
 			if (!theme) throw new Error("Theme not found.");
-			let processedCSS = "";
 			if ("rawCSS" in input) {
-				const { processedCSS: css, assetUrl } = await DataStore.operations
-					.getStore()!
-					.processCSS.call(theme, input.rawCSS);
-				theme.assets.processedCSS = assetUrl;
 				theme.assets.rawCSS = await ctx.uploadFile.call(
 					theme,
 					new Blob([input.rawCSS], { type: "text/css" }),
 					"raw.css",
 				);
-				processedCSS = css;
 			}
 			if ("name" in input) {
 				await theme.rename(input.name);
@@ -153,7 +133,10 @@ export const theme = t.router({
 				pluginId: input.pluginId,
 				themeId: theme.name,
 			});
-			return { themeId: theme.name, processedCSS };
+			return {
+				themeId: theme.name,
+				...("rawCSS" in input ? { rawCSS: input.rawCSS } : {}),
+			};
 		}),
 	duplicate: t.procedure
 		.input(

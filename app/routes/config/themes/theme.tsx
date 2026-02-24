@@ -16,6 +16,8 @@ import { MockNetRequestContext } from "@thorium/utils/live-query/client/mockCont
 import { Icon } from "@thorium/ui/Icon";
 import type ThemePlugin from "@thorium/.server/classes/Plugins/Theme";
 import StationLayout from "@thorium/components/Station/StationLayout";
+import { StationData } from "@thorium/routes/station/useStation";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function ThemeLayout() {
 	const { themeId, pluginId } = useParams() as {
@@ -42,12 +44,13 @@ export default function ThemeLayout() {
 
 	const [previewViewscreen, setPreviewViewscreen] = useState(false);
 
-	if (!themeId || !theme) return <Navigate to={`/config/${pluginId}/themes`} />;
+	const queryClient = useQueryClient();
 
+	if (!themeId || !theme) return <Navigate to={`/config/${pluginId}/themes`} />;
 	return (
 		<>
 			<div className="flex w-full gap-8">
-				<div className="flex-col flex-grow flex gap-2 h-full">
+				<div className="flex-col grow flex gap-2 h-full">
 					<Editor
 						className="flex-1"
 						defaultValue={theme.rawCSS}
@@ -142,8 +145,12 @@ export default function ThemeLayout() {
 								transform: `scale(0.2) translate(-200%, -200%)`,
 							}}
 						>
-							{/* biome-ignore lint/security/noDangerouslySetInnerHtml: Required to render the CSS */}
-							<style dangerouslySetInnerHTML={{ __html: theme.processedCSS }} />
+							<style
+								// biome-ignore lint/security/noDangerouslySetInnerHtml: Required to render the CSS
+								dangerouslySetInnerHTML={{
+									__html: theme.rawCSS,
+								}}
+							/>
 							<MockNetRequestContext.Provider
 								value={{
 									client: {
@@ -154,7 +161,12 @@ export default function ThemeLayout() {
 											loginName: "Test User",
 										},
 									} as any,
-									flight: null,
+									flight: {
+										active: {
+											state: "in-progress",
+											paused: false,
+										},
+									},
 									ship: {
 										get: {
 											id: 0,
@@ -171,6 +183,32 @@ export default function ThemeLayout() {
 												},
 											},
 											alertLevel,
+										},
+										player: {
+											id: 481,
+											name: shipName,
+											registry: "",
+											alertLevel: alertLevel,
+											currentSystem: 310,
+											systemPosition: {
+												parentId: null,
+												type: "interstellar",
+												x: 0,
+												y: 0,
+												z: 0,
+											},
+											assets: {
+												logo: normalLogo,
+												model:
+													"/plugins/Thorium Default/ships/Astra Frigate/assets/model.glb",
+												vanity:
+													"/plugins/Thorium Default/ships/Astra Frigate/assets/vanity.png",
+												topView:
+													"/plugins/Thorium Default/ships/Astra Frigate/assets/topView.png",
+												sideView:
+													"/plugins/Thorium Default/ships/Astra Frigate/assets/sideView.png",
+											},
+											isDestroyed: null,
 										},
 									} as any,
 									station: {
@@ -202,7 +240,9 @@ export default function ThemeLayout() {
 									theme: { get: null },
 								}}
 							>
-								<StationLayout />
+								<StationData>
+									<StationLayout />
+								</StationData>
 							</MockNetRequestContext.Provider>
 						</div>
 					</div>

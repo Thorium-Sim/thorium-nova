@@ -131,6 +131,9 @@ export function AddBlockButton({
 								Wait
 							</StyledMenuItem>
 						) : null}
+						<StyledMenuItem onAction={() => onAddBlock("ForEachEntity")}>
+							For Each Entity
+						</StyledMenuItem>
 						<StyledMenuItem
 							onAction={() => onAddBlock("ResultPropertyIntoVariable")}
 						>
