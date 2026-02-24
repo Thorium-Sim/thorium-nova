@@ -38,6 +38,7 @@ export class WaypointRemoveSystem extends System {
 					destinationWaypointId: null,
 					desiredCoordinates: undefined,
 					desiredRotation: null,
+					cachedRoll: null,
 					path: [],
 					nextCoordinates: undefined,
 					desiredSolarSystemId: undefined,

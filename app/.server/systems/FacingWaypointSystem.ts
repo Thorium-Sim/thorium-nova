@@ -87,7 +87,8 @@ export class FacingWaypointSystem extends System {
 				}
 			}
 
-			// Compute the facing angle
+			// Compute the facing angle using the ship's own up vector so
+			// the check is roll-agnostic (only yaw/pitch matter for locking on).
 			rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
 			up.set(0, 1, 0).applyQuaternion(rotationQuat);
 			matrix

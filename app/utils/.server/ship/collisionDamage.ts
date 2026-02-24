@@ -209,6 +209,7 @@ export function destroyShip(entity: Entity) {
 		destinationWaypointId: null,
 		desiredCoordinates: undefined,
 		desiredRotation: null,
+		cachedRoll: null,
 		desiredSolarSystemId: undefined,
 		path: [],
 		nextCoordinates: null,

@@ -119,6 +119,8 @@ export function autopilotGetCoordinates(
 	};
 }
 
+const cachedRollQuat = new Quaternion();
+
 export function getAutopilotPositionAndRotation(entity: Entity) {
 	const { rotation } = entity.components;
 
@@ -136,10 +138,17 @@ export function getAutopilotPositionAndRotation(entity: Entity) {
 		autopilotGetCoordinates(entity, entitySystem, destinationSystem);
 	rotationQuat.set(rotation!.x, rotation!.y, rotation!.z, rotation!.w);
 
-	up.set(0, 1, 0).applyQuaternion(rotationQuat);
+	up.set(0, 1, 0);
 
 	matrix.lookAt(positionVec, nextDestination, up).multiply(rotationMatrix);
 	desiredRotationQuat.setFromRotationMatrix(matrix);
+
+	// Compose cached roll so the rotation difference stays consistent with AutoRotateSystem
+	const cachedRoll = entity.components.autopilot?.cachedRoll;
+	if (cachedRoll) {
+		cachedRollQuat.set(cachedRoll.x, cachedRoll.y, cachedRoll.z, cachedRoll.w);
+		desiredRotationQuat.multiply(cachedRollQuat);
+	}
 
 	return {
 		isInInterstellar,

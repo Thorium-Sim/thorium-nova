@@ -7,6 +7,7 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 
 const rotationQuat = new Quaternion();
 const desiredRotationQuat = new Quaternion();
+const cachedRollQuat = new Quaternion();
 const up = new Vector3(0, 1, 0);
 const forward = new Vector3();
 const toWaypoint = new Vector3();
@@ -52,6 +53,35 @@ export class AutoRotateSystem extends System {
 			(!autopilot?.desiredCoordinates && !autopilot.desiredRotation)
 		) {
 			return;
+		}
+
+		// Lazily cache the ship's current roll (twist around local Z axis)
+		// when autopilot first activates, so we can preserve it during heading changes.
+		if (!autopilot.cachedRoll) {
+			// Twist-swing decomposition: extract the twist (roll) around the forward axis (0,0,1)
+			const len = Math.sqrt(
+				rotation.z * rotation.z + rotation.w * rotation.w,
+			);
+			if (len > 1e-8) {
+				cachedRollQuat.set(0, 0, rotation.z / len, rotation.w / len);
+			} else {
+				cachedRollQuat.identity();
+			}
+			entity.updateComponent("autopilot", {
+				cachedRoll: {
+					x: cachedRollQuat.x,
+					y: cachedRollQuat.y,
+					z: cachedRollQuat.z,
+					w: cachedRollQuat.w,
+				},
+			});
+		} else {
+			cachedRollQuat.set(
+				autopilot.cachedRoll.x,
+				autopilot.cachedRoll.y,
+				autopilot.cachedRoll.z,
+				autopilot.cachedRoll.w,
+			);
 		}
 
 		// Get the current system the ship is in and the autopilot desired system
@@ -117,6 +147,7 @@ export class AutoRotateSystem extends System {
 							destinationWaypointId: null,
 							desiredCoordinates: undefined,
 							desiredRotation: null,
+							cachedRoll: null,
 							path: [],
 							nextCoordinates: undefined,
 							desiredSolarSystemId: undefined,
@@ -160,6 +191,8 @@ export class AutoRotateSystem extends System {
 				// Use the thrusters to adjust the rotation of the ship to point towards the desired destination.
 				// First, determine the angle to the destination.
 				desiredRotationQuat.setFromRotationMatrix(matrix);
+				// Compose the cached roll so the ship preserves its roll during heading changes.
+				desiredRotationQuat.multiply(cachedRollQuat);
 			}
 		} else if (autopilot.desiredRotation) {
 			desiredRotationQuat.set(
