@@ -1,0 +1,6 @@
+@utility rounded-box {
+	border-radius: var(--radius-box);
+}
+@utility rounded-selector {
+	border-radius: var(--radius-selector);
+}

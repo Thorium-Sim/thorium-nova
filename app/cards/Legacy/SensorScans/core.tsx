@@ -88,14 +88,14 @@ export function LegacySensorScansCore() {
 					})}
 				>
 					<OutputField
-						className="flex-grow-[2] h-4 break-words whitespace-pre-wrap"
+						className="grow-[2] h-4 break-words whitespace-pre-wrap"
 						alert={selectedScan?.inProgress}
 					>
 						{selectedScan
 							? `${selectedScan?.scanType} - ${selectedScan?.request}`
 							: ""}
 					</OutputField>
-					<TypingField className="flex-grow-[4] h-4" ref={inputRef} />
+					<TypingField className="grow-[4] h-4" ref={inputRef} />
 				</div>
 				{processedDataHistory ? (
 					<div className="bg-gray-900 p-2 overflow-y-auto">

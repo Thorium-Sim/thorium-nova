@@ -12,7 +12,7 @@
 	--color-drag2: rgb(183, 209, 181);
 	--color-drag1-background: rgba(128, 128, 128, 0.15);
 	--color-drag2-background: rgba(128, 128, 128, 0.15);
-	--font-size: x-small;
+	--flex-font-size: x-small;
 	--font-family: Roboto, Arial, sans-serif;
 	--color-overflow: gray;
 	--color-icon: gray;
@@ -190,7 +190,7 @@
 	overflow: hidden;
 	padding: 0.3em 0.8em;
 	word-wrap: break-word;
-	font-size: var(--font-size);
+	font-size: var(--flex-font-size);
 	font-family: var(--font-family);
 }
 .flexlayout__row {
@@ -241,7 +241,7 @@
 	border-bottom: 1px solid var(--color-tabset-divider-line);
 	color: var(--color-tabset-header);
 	background-color: var(--color-tabset-header-background);
-	font-size: var(--font-size);
+	font-size: var(--flex-font-size);
 }
 .flexlayout__tabset_header_content {
 	flex-grow: 1;
@@ -251,7 +251,7 @@
 	background-color: var(--color-tabset-background);
 	overflow: hidden;
 	display: flex;
-	font-size: var(--font-size);
+	font-size: var(--flex-font-size);
 }
 .flexlayout__tabset_tabbar_outer_top {
 	padding: 0px 2px 0px 2px;
@@ -370,7 +370,7 @@
 .flexlayout__tab_button_textbox {
 	border: none;
 	font-family: var(--font-family);
-	font-size: var(--font-size);
+	font-size: var(--flex-font-size);
 	color: var(--color-tab-textbox);
 	background-color: var(--color-tab-textbox-background);
 	border: 1px inset var(--color-1);
@@ -445,7 +445,7 @@
 	box-sizing: border-box;
 	overflow: hidden;
 	display: flex;
-	font-size: var(--font-size);
+	font-size: var(--flex-font-size);
 	font-family: var(--font-family);
 	color: var(--color-border);
 	background-color: var(--color-border-background);
@@ -585,7 +585,7 @@
 	width: 1.5em;
 }
 .flexlayout__popup_menu {
-	font-size: var(--font-size);
+	font-size: var(--flex-font-size);
 	font-family: var(--font-family);
 }
 .flexlayout__popup_menu_item {
@@ -645,7 +645,7 @@
 	top: -30000px;
 	padding-top: 6px;
 	padding-bottom: 5px;
-	font-size: var(--font-size);
+	font-size: var(--flex-font-size);
 	font-family: var(--font-family);
 }
 .flexlayout__mini_scrollbar {
@@ -656,7 +656,9 @@
 	height: var(--size-mini-scroll-indicator);
 	visibility: hidden;
 	opacity: 0;
-	transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+	transition:
+		opacity 0.3s ease-in-out,
+		visibility 0.3s ease-in-out;
 }
 .flexlayout__mini_scrollbar:hover {
 	background-color: var(--color-mini-scroll-indicator-hovered);

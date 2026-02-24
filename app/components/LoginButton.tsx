@@ -82,7 +82,7 @@ function AccountMenu({ size = "md" }) {
 				)}
 			</RAButton>
 			<Popover className={popoverTransitionClasses}>
-				<Menu className="z-10 w-56 mt-2 px-1 py-1  bg-gray-900 divide-y divide-gray-700 rounded-md shadow-lg ring-1 ring-gray-300 ring-opacity-5 focus:outline-none text-lg">
+				<Menu className="z-10 w-56 mt-2 px-1 py-1 bg-gray-900 divide-y divide-gray-700 rounded-md shadow-lg ring-1 ring-gray-300/5 focus:outline-none text-lg">
 					<MenuItem
 						className="text-white group flex rounded-md items-center w-full px-2 py-2 text-sm data-[isFocused]:bg-purple-900"
 						onAction={() => {

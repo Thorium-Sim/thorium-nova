@@ -15,6 +15,8 @@ export function useLocalStorageReducer<R extends Reducer<I, A>, I, A>(
 		} catch (e) {
 			// ignore
 		}
+		if (typeof preloadedState === "string") return preloadedState;
+		if (typeof defaultState === "string") return defaultState;
 		return { ...defaultState, ...preloadedState };
 	}, [storageKey, defaultState]);
 

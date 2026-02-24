@@ -26,7 +26,7 @@ function makeVirtualEl({ x: X, y: Y }: { x: number; y: number }) {
 }
 
 const menuItemClass =
-	"px-2 py-1 text-left cursor-pointer hover:bg-purple-700 hover:bg-opacity-50 focus:outline-none focus:ring transition-all";
+	"px-2 py-1 text-left cursor-pointer hover:bg-purple-700/50 focus:outline-none focus:ring transition-all";
 
 export const StarmapCoreContextMenu = ({
 	parentRef,
@@ -94,7 +94,7 @@ export const StarmapCoreContextMenu = ({
 					top: y ?? "",
 					left: x ?? "",
 				}}
-				className="text-white bg-opacity-50 bg-black border border-opacity-25 border-white rounded-sm  divide-y divide-purple-500 divide-opacity-25 flex flex-col"
+				className="text-white bg-black/50 border border-white/25 rounded-sm divide-y divide-purple-500/25 flex flex-col"
 			>
 				{/* TODO March 11, 2024: Add commands for when right clicking on another object, such as following or attacking the target */}
 				{selectedShips.length > 0 ? (
