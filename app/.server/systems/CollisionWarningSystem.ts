@@ -193,6 +193,13 @@ export class CollisionWarningSystem extends System {
 					continue;
 				}
 
+				// Broad-phase cone filter — skip objects clearly off to the side
+				toObject.subVectors(objectPos, shipPosition);
+				const dist = toObject.length();
+				if (dist > coneHeight || dist < 0.0001) continue;
+				const dot = forward.dot(toObject) / dist;
+				if (dot < CONE_COS_HALF_ANGLE) continue;
+
 				const radius = this.getCollisionRadius(candidate, false);
 
 				this.testRaySphereCollision(
