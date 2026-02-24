@@ -19,7 +19,7 @@ export const pilot = t.router({
 				return true;
 			})
 			.autoPublish(
-				["isImpulseEngines", "power"],
+				["isImpulseEngines"],
 				(entity) =>
 					entity.components.isShipSystem && {
 						shipId: entity.components.isShipSystem.shipId,
@@ -37,10 +37,6 @@ export const pilot = t.router({
 				const cruisingSpeed =
 					impulseEngines.components.isImpulseEngines?.cruisingSpeed || 1;
 
-				const powerLevels = impulseEngines.components.power?.powerLevels || [0];
-				const maxSafePower = powerLevels[powerLevels.length - 1] || 1;
-				const allocatedPower = impulseEngines.components.power?.powerSources.length || 0;
-
 				return {
 					id: impulseEngines.id,
 					name: impulseEngines.components.identity?.name || "Impulse",
@@ -49,8 +45,6 @@ export const pilot = t.router({
 					emergencySpeed:
 						impulseEngines.components.isImpulseEngines?.emergencySpeed || 1,
 					speeds: impulseEngines.components.isImpulseEngines?.speeds || [],
-					allocatedPower,
-					maxSafePower,
 				};
 			}),
 		ambiance: t.procedure

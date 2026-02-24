@@ -108,30 +108,10 @@ const ForwardVelocity = () => {
 
 const KNOB_HEIGHT = 44;
 const BUTTON_OFFSET = 0.8;
-export const ImpulseControls = ({ cardLoaded = true, onFlightControlInteraction, forwardAutopilot, showWarning }: { cardLoaded?: boolean; onFlightControlInteraction?: () => void; forwardAutopilot?: boolean; showWarning?: (entry: { id: string; priority: number; content: string; duration?: number }) => void }) => {
+export const ImpulseControls = ({ cardLoaded = true, onFlightControlInteraction, forwardAutopilot }: { cardLoaded?: boolean; onFlightControlInteraction?: () => void; forwardAutopilot?: boolean }) => {
 	const { shipId } = useStation();
-	const [{ targetSpeed, cruisingSpeed, emergencySpeed, name, speeds, allocatedPower, maxSafePower }] =
+	const [{ targetSpeed, cruisingSpeed, emergencySpeed, name, speeds }] =
 		q.pilot.impulseEngines.get.useNetRequest({ shipId });
-
-	const maxAchievableSpeed = cruisingSpeed * (allocatedPower / maxSafePower);
-
-	const prevAllocatedPowerRef = useRef(allocatedPower);
-	const prevTargetSpeedRef = useRef(targetSpeed);
-	useEffect(() => {
-		if (allocatedPower < prevAllocatedPowerRef.current) {
-			const maxAchievable = cruisingSpeed * (allocatedPower / maxSafePower);
-			if (prevTargetSpeedRef.current > maxAchievable) {
-				showWarning?.({
-					id: "insufficient-impulse-power",
-					priority: 5,
-					content: "INSUFFICIENT IMPULSE POWER",
-					duration: 5000,
-				});
-			}
-		}
-		prevAllocatedPowerRef.current = allocatedPower;
-		prevTargetSpeedRef.current = targetSpeed;
-	}, [allocatedPower, targetSpeed, cruisingSpeed, maxSafePower, showWarning]);
 
 	const [{ currentWarpFactor, speeds: warpSpeeds }] =
 		q.pilot.warpEngines.get.useNetRequest({ shipId });
@@ -297,11 +277,9 @@ export const ImpulseControls = ({ cardLoaded = true, onFlightControlInteraction,
 										i === speeds.length - 1
 											? emergencySpeed
 											: cruisingSpeed * ((i + 1) / (speeds.length - 1));
-									const insufficientPower = buttonSpeed > maxAchievableSpeed;
 									return (
 									<Button
 										key={`${speed}${i}`}
-										disabled={insufficientPower}
 										onClick={() => {
 											onFlightControlInteraction?.();
 											callback.current(buttonSpeed);
@@ -309,7 +287,6 @@ export const ImpulseControls = ({ cardLoaded = true, onFlightControlInteraction,
 										className={cn("btn-primary btn-sm", {
 											"btn-error": i === speeds.length - 1,
 											"btn-warning": i === speeds.length - 2,
-											"btn-disabled": insufficientPower,
 											"opacity-50": forwardAutopilot,
 										})}
 									>
