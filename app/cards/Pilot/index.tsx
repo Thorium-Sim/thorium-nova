@@ -17,6 +17,7 @@ import { useStation } from "@thorium/routes/station/useStation";
 import { useCardContext } from "@thorium/context/CardContext";
 import { cn } from "@thorium/utils/cn";
 import { useShipWarnings, ShipWarning } from "@thorium/ui/ShipWarning";
+import { useServerAlerts } from "@thorium/ui/useServerAlerts";
 
 async function rotation({
 	shipId,
@@ -62,14 +63,11 @@ export function Pilot({ cardLoaded }: CardProps) {
 		shipId,
 	});
 	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
-	const [collisionWarning] = q.pilot.collisionWarning.get.useNetRequest({ shipId });
-	const collisionCountdownRef = useRef<HTMLSpanElement>(null);
-	const collisionBaselineRef = useRef({ ttc: 0, timestamp: 0 });
-	const collisionInitialTtcRef = useRef(0);
-	const collisionDigitSpansRef = useRef<HTMLSpanElement[]>([]);
-	const collisionMaxDigitWidthRef = useRef(0);
 
 	const { showWarning, dismissWarning, displayedWarning, fadingOut } = useShipWarnings();
+
+	// Bridge server-side ship alerts (collision warnings, etc.) into the warning system
+	useServerAlerts(shipId, showWarning, dismissWarning);
 
 	// Detect when the course is unlocked server-side while forward autopilot was off
 	// (e.g., ship overshot the final waypoint with manual engine controls).
@@ -92,80 +90,6 @@ export function Pilot({ cardLoaded }: CardProps) {
 		prevForwardAutopilotRef.current = !!autopilot.forwardAutopilot;
 	}, [autopilot.locked, autopilot.forwardAutopilot, showWarning]);
 
-	if (collisionWarning.timeToCollision !== collisionBaselineRef.current.ttc) {
-		collisionBaselineRef.current = { ttc: collisionWarning.timeToCollision, timestamp: Date.now() };
-	}
-
-	useEffect(() => {
-		if (collisionWarning.objectId !== null) {
-			collisionInitialTtcRef.current = collisionWarning.timeToCollision;
-			collisionDigitSpansRef.current = [];
-			showWarning({
-				id: "collision",
-				priority: 10,
-				content: <>COLLISION WARNING — {collisionWarning.objectName} — <span ref={collisionCountdownRef} /></>,
-			});
-		} else {
-			dismissWarning("collision");
-			collisionDigitSpansRef.current = [];
-		}
-	}, [collisionWarning.objectId, showWarning, dismissWarning]);
-
-	useAnimationFrame(() => {
-		const el = collisionCountdownRef.current;
-		if (!el || collisionWarning.objectId === null) return;
-
-		// Lazily create fixed-width digit spans on first frame the ref is available
-		if (collisionDigitSpansRef.current.length === 0) {
-			if (collisionMaxDigitWidthRef.current === 0) {
-				const parent = el.closest("[style]");
-				const fontFamily = parent ? getComputedStyle(parent).fontFamily : '"Battlefield"';
-				const fontSize = parent ? getComputedStyle(parent).fontSize : "1.875rem";
-				const measurer = document.createElement("span");
-				measurer.style.fontFamily = fontFamily;
-				measurer.style.fontSize = fontSize;
-				measurer.style.position = "absolute";
-				measurer.style.visibility = "hidden";
-				document.body.appendChild(measurer);
-				let maxWidth = 0;
-				for (let i = 0; i <= 9; i++) {
-					measurer.textContent = String(i);
-					maxWidth = Math.max(maxWidth, measurer.getBoundingClientRect().width);
-				}
-				document.body.removeChild(measurer);
-				collisionMaxDigitWidthRef.current = maxWidth;
-			}
-
-			const padWidth = collisionInitialTtcRef.current.toFixed(1).length;
-			const text = `${collisionInitialTtcRef.current.toFixed(1).padStart(padWidth, "0")}s`;
-			el.textContent = "";
-			const spans: HTMLSpanElement[] = [];
-			for (const char of text) {
-				const span = document.createElement("span");
-				span.textContent = char;
-				if (char >= "0" && char <= "9") {
-					span.style.display = "inline-block";
-					span.style.width = `${collisionMaxDigitWidthRef.current}px`;
-					span.style.textAlign = "center";
-				}
-				el.appendChild(span);
-				spans.push(span);
-			}
-			collisionDigitSpansRef.current = spans;
-		}
-
-		const spans = collisionDigitSpansRef.current;
-		const elapsed = (Date.now() - collisionBaselineRef.current.timestamp) / 1000;
-		const remaining = Math.max(0, collisionBaselineRef.current.ttc - elapsed);
-		const padWidth = collisionInitialTtcRef.current.toFixed(1).length;
-		const text = `${remaining.toFixed(1).padStart(padWidth, "0")}s`;
-		for (let i = 0; i < spans.length && i < text.length; i++) {
-			if (spans[i].textContent !== text[i]) {
-				spans[i].textContent = text[i];
-			}
-		}
-	}, cardLoaded);
-
 	const autopilotActiveRef = useRef(false);
 	autopilotActiveRef.current = !!autopilot.forwardAutopilot;
 	const alertActiveRef = useRef(false);
@@ -173,7 +97,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 	const onFlightControlInteraction = useCallback(() => {
 		if (autopilotActiveRef.current && !alertActiveRef.current) {
 			alertActiveRef.current = true;
-			q.pilot.autopilot.deactivate.netSend({ shipId });
+			// Server-side handlers deactivate forwardAutopilot; just show the warning here.
 			showWarning({
 				id: "autopilot-deactivated",
 				priority: 5,
@@ -185,7 +109,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 				alertActiveRef.current = false;
 			}, 5000);
 		}
-	}, [shipId, showWarning]);
+	}, [showWarning]);
 
 	return (
 		<CircleGridStoreProvider>

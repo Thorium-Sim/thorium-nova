@@ -69,14 +69,10 @@ export class AutoThrustSystem extends System {
 		const rotationDifference =
 			(Math.abs(rotationQuat.angleTo(desiredRotationQuat)) / Math.PI) * 180;
 
-		const powerLevels = impulseEntity?.components.power?.powerLevels || [0];
-		const maxSafePower = powerLevels[powerLevels.length - 1] || 1;
-		const allocatedPower = impulseEntity?.components.power?.powerSources.length || 0;
-		const impulseMaxSpeed =
-			(impulseEngines?.cruisingSpeed || 1) * (allocatedPower / maxSafePower);
+		const impulseMaxSpeed = impulseEngines?.cruisingSpeed || 1;
 
 		// There's a heuristic here for which engine to choose to reach a given destination.
-		// Basically, if it would take 30 seconds or less to reach the destination at cruising
+		// Basically, if it would take 15 seconds or less to reach the destination at cruising
 		// impulse speed, we should use that. Otherwise, we should use warp.
 		const TRAVEL_TIME_THRESHOLD_SECONDS = 30;
 		/** How close the ship is to the destination before deactivating warp engines */
@@ -95,19 +91,8 @@ export class AutoThrustSystem extends System {
 				? warpEngines.interstellarCruisingSpeed
 				: warpEngines.solarCruisingSpeed;
 
-			// Check if the ship's warp braking distance exceeds the remaining room
-			// before the impulse zone. WarpSystem soft brakes at constant 5,
-			// giving stopping distance ≈ V/5. If we can't stop in time, cut warp
-			// now and coast into the impulse zone.
-			const currentWarpVelocity =
-				warpEntity.components.isWarpEngines?.forwardVelocity || 0;
-			const warpBrakingDistance = currentWarpVelocity / 5;
-			const distanceToImpulseZone = distanceInKM - minWarpDistance;
-
-			if (warpBrakingDistance >= distanceToImpulseZone) {
-				warpEntity.updateComponent("isWarpEngines", { currentWarpFactor: 0 });
-			} else if (inCorrectDirection) {
-				// Warp is so fast, we'll still require a full rotation before activating.
+			// Warp is so fast, we'll still require a full rotation before activating.
+			if (inCorrectDirection) {
 				const desiredSpeed = Math.min(
 					warpCruisingSpeed,
 					Math.max(0, (distanceInKM - minWarpDistance) / 2),
@@ -139,10 +124,8 @@ export class AutoThrustSystem extends System {
 				maxVelocity: 0,
 			});
 
-			// Graduated deceleration: gentler far away, steeper close in.
-			// Avoids the old slope-1→slope-2 discontinuity at 100 km.
-			const slowDownSlope =
-				distanceInKM < 10 ? 4 : distanceInKM < 50 ? 3 : distanceInKM < 200 ? 2 : 1;
+			// Decrease the slow-down slope
+			const slowDownSlope = distanceInKM < 100 ? 2 : 1;
 			let desiredSpeed = Math.min(
 				impulseMaxSpeed,
 				Math.max(

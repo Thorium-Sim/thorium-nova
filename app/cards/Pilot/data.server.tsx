@@ -1,6 +1,7 @@
 import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import { clearAutopilotState } from "@thorium/utils/.server/ship/clearAutopilotState";
 import { z } from "zod";
 import type { Entity } from "@thorium/utils/ecs";
 import {
@@ -288,17 +289,7 @@ export const pilot = t.router({
 			.output(z.object({ shipId: z.number() }))
 			.send(({ ctx, input }) => {
 				const ship = ctx.ecs.getEntityById(input.shipId);
-				ship?.updateComponent("autopilot", {
-					destinationWaypointId: null,
-					desiredCoordinates: undefined,
-					desiredRotation: null,
-					cachedRoll: null,
-					desiredSolarSystemId: undefined,
-					path: [],
-					nextCoordinates: null,
-					rotationAutopilot: false,
-					forwardAutopilot: false,
-				});
+				if (ship) clearAutopilotState(ship);
 
 				// Clear out the current thruster adjustments
 				const thrusters = getShipSystem(ctx.ecs, {
@@ -350,7 +341,7 @@ export const pilot = t.router({
 				return input;
 			}),
 	}),
-	collisionWarning: t.router({
+	shipAlerts: t.router({
 		get: t.procedure
 			.input(z.object({ shipId: z.number() }))
 			.filter((publish: { shipId: number }, { input }) => {
@@ -358,18 +349,14 @@ export const pilot = t.router({
 				return true;
 			})
 			.autoPublish(
-				["collisionWarning"],
+				["shipAlerts"],
 				(entity) =>
 					entity.components.isPlayerShip && { shipId: entity.id },
 			)
 			.request(({ ctx, input }) => {
 				const ship = ctx.ecs.getEntityById(input.shipId);
 				return {
-					objectId: ship?.components.collisionWarning?.objectId ?? null,
-					timeToCollision:
-						ship?.components.collisionWarning?.timeToCollision ?? 0,
-					objectName:
-						ship?.components.collisionWarning?.objectName ?? "",
+					alerts: ship?.components.shipAlerts?.alerts ?? [],
 				};
 			}),
 	}),

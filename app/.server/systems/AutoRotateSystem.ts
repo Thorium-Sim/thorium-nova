@@ -2,6 +2,7 @@ import { Quaternion, Vector3, Matrix4 } from "three";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { autopilotGetCoordinates } from "@thorium/utils/starmap/autopilotGetCoordinates";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import { clearAutopilotState } from "@thorium/utils/.server/ship/clearAutopilotState";
 import { KM_TO_LY, lightYearToLightMinute } from "@thorium/utils/unitTypes";
 import { pubsub } from "@thorium/.server/init/pubsub";
 
@@ -143,17 +144,7 @@ export class AutoRotateSystem extends System {
 						// engine controls. Deactivate autopilot and unlock the course,
 						// similar to arriving normally via WaypointRemoveSystem.
 						const waypointId = autopilot.destinationWaypointId;
-						entity.updateComponent("autopilot", {
-							destinationWaypointId: null,
-							desiredCoordinates: undefined,
-							desiredRotation: null,
-							cachedRoll: null,
-							path: [],
-							nextCoordinates: undefined,
-							desiredSolarSystemId: undefined,
-							rotationAutopilot: false,
-							forwardAutopilot: false,
-						});
+						clearAutopilotState(entity);
 						if (typeof waypointId === "number") {
 							const waypoint = this.ecs.getEntityById(waypointId);
 							waypoint?.updateComponent("isWaypoint", { isActive: false });

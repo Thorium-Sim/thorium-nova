@@ -61,4 +61,4 @@ export * from "./legacySensorContact";
 export * from "./isInternalMessage";
 export * from "./isDocument";
 export * from "./isStarbase";
-export * from "./collisionWarning";
+export * from "./shipAlerts";

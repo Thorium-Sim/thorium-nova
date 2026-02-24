@@ -1,17 +1,21 @@
 import { Quaternion, Vector3 } from "three";
 import { type Entity, System } from "@thorium/utils/ecs";
-import { pubsub } from "@thorium/.server/init/pubsub";
 import {
 	getCompletePositionFromOrbit,
 	getObjectSystem,
 } from "@thorium/utils/starmap/position";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import {
+	setShipAlert,
+	clearShipAlert,
+} from "@thorium/utils/.server/ship/shipAlertHelpers";
+import {
 	kilometerToLightMinute,
 	solarRadiusToKilometers,
 	type SolarRadius,
 } from "@thorium/utils/unitTypes";
 
+const COLLISION_ALERT_ID = "collision";
 const MIN_SPEED_THRESHOLD = 0.5; // km/s
 const COLLISION_WARNING_SECONDS = 20;
 // Broad-phase cone filter — skip objects clearly off to the side before
@@ -36,25 +40,18 @@ export class CollisionWarningSystem extends System {
 			entity.components.position &&
 			entity.components.rotation &&
 			entity.components.velocity &&
-			entity.components.collisionWarning
+			entity.components.shipAlerts
 		);
 	}
 
 	update(entity: Entity) {
-		const { position, rotation, velocity, collisionWarning, autopilot } =
+		const { position, rotation, velocity, shipAlerts, autopilot } =
 			entity.components;
-		if (!position || !rotation || !velocity || !collisionWarning) return;
+		if (!position || !rotation || !velocity || !shipAlerts) return;
 
 		// Skip if autopilot is handling navigation
 		if (autopilot?.forwardAutopilot) {
-			if (collisionWarning.objectId !== null) {
-				entity.updateComponent("collisionWarning", {
-					objectId: null,
-					timeToCollision: 0,
-					objectName: "",
-				});
-				pubsub.publish.pilot.collisionWarning.get({ shipId: entity.id });
-			}
+			clearShipAlert(entity, COLLISION_ALERT_ID);
 			return;
 		}
 
@@ -62,14 +59,7 @@ export class CollisionWarningSystem extends System {
 
 		// Skip at very low speeds (thruster-only)
 		if (currentSpeed < MIN_SPEED_THRESHOLD) {
-			if (collisionWarning.objectId !== null) {
-				entity.updateComponent("collisionWarning", {
-					objectId: null,
-					timeToCollision: 0,
-					objectName: "",
-				});
-				pubsub.publish.pilot.collisionWarning.get({ shipId: entity.id });
-			}
+			clearShipAlert(entity, COLLISION_ALERT_ID);
 			return;
 		}
 
@@ -78,11 +68,7 @@ export class CollisionWarningSystem extends System {
 		forwardDir.set(0, 0, 1).applyQuaternion(rotationQuat);
 
 		// Compute cone height (detection range)
-		const dt = this.frequency / 60;
-		const maxAccel = this.getMaxAcceleration(entity);
-		const coneHeight =
-			currentSpeed * COLLISION_WARNING_SECONDS +
-			0.5 * maxAccel * dt * dt;
+		const coneHeight = currentSpeed * COLLISION_WARNING_SECONDS;
 
 		shipPos.set(position.x, position.y, position.z);
 
@@ -135,22 +121,36 @@ export class CollisionWarningSystem extends System {
 		}
 
 		// Determine if state has changed enough to publish
-		const prevId = collisionWarning.objectId;
-		const prevTTC = collisionWarning.timeToCollision;
+		const existingAlert = shipAlerts.alerts.find(
+			(a: { id: string }) => a.id === COLLISION_ALERT_ID,
+		);
+		const prevObjectId =
+			(existingAlert?.metadata?.objectId as number | null) ?? null;
+		const prevTTC =
+			(existingAlert?.metadata?.timeToCollision as number) ?? 0;
 
 		const hasNewThreat = closestId !== null;
-		const hadThreat = prevId !== null;
-		const idChanged = closestId !== prevId;
+		const idChanged = closestId !== prevObjectId;
 		const ttcShifted =
-			hasNewThreat && hadThreat && Math.abs(closestTTC - prevTTC) > 0.5;
+			hasNewThreat &&
+			prevObjectId !== null &&
+			Math.abs(closestTTC - prevTTC) > 0.5;
 
-		if (idChanged || ttcShifted) {
-			entity.updateComponent("collisionWarning", {
-				objectId: closestId,
-				timeToCollision: hasNewThreat ? closestTTC : 0,
-				objectName: closestName,
+		if (hasNewThreat && (idChanged || ttcShifted)) {
+			setShipAlert(entity, {
+				id: COLLISION_ALERT_ID,
+				type: "collision",
+				priority: 10,
+				message: `COLLISION WARNING — ${closestName}`,
+				metadata: {
+					objectId: closestId,
+					objectName: closestName,
+					timeToCollision: closestTTC,
+					baselineTimestamp: Date.now(),
+				},
 			});
-			pubsub.publish.pilot.collisionWarning.get({ shipId: entity.id });
+		} else if (!hasNewThreat && existingAlert) {
+			clearShipAlert(entity, COLLISION_ALERT_ID);
 		}
 	}
 

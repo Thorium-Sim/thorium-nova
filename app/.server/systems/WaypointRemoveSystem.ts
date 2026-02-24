@@ -1,5 +1,6 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { type Entity, System } from "@thorium/utils/ecs";
+import { clearAutopilotState } from "@thorium/utils/.server/ship/clearAutopilotState";
 
 export class WaypointRemoveSystem extends System {
 	static flightMode = ["nova"];
@@ -33,18 +34,7 @@ export class WaypointRemoveSystem extends System {
 			);
 
 			if (distance < 5) {
-				// Update the ship autopilot
-				ship.updateComponent("autopilot", {
-					destinationWaypointId: null,
-					desiredCoordinates: undefined,
-					desiredRotation: null,
-					cachedRoll: null,
-					path: [],
-					nextCoordinates: undefined,
-					desiredSolarSystemId: undefined,
-					rotationAutopilot: false,
-					forwardAutopilot: false,
-				});
+				clearAutopilotState(ship);
 
 				// Deactivate the waypoint
 				entity.updateComponent("isWaypoint", { isActive: false });
