@@ -2,7 +2,7 @@ import { type Entity, System } from "@thorium/utils/ecs";
 
 const PEDAL_TO_THE_METAL_CONST = 10;
 const HARD_BRAKE_CONST = 5;
-export const SOFT_BRAKE_CONST = 5;
+const SOFT_BRAKE_CONST = 5;
 
 export class WarpSystem extends System {
 	static flightMode = ["nova"];

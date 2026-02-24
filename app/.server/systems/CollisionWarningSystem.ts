@@ -4,7 +4,6 @@ import {
 	getCompletePositionFromOrbit,
 	getObjectSystem,
 } from "@thorium/utils/starmap/position";
-import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import {
 	setShipAlert,
 	clearShipAlert,
@@ -152,43 +151,6 @@ export class CollisionWarningSystem extends System {
 		} else if (!hasNewThreat && existingAlert) {
 			clearShipAlert(entity, COLLISION_ALERT_ID);
 		}
-	}
-
-	private getMaxAcceleration(entity: Entity): number {
-		// Try warp engines first
-		try {
-			const warpEngine = getShipSystem(this.ecs, {
-				systemType: "warpEngines",
-				shipId: entity.id,
-			});
-			if (warpEngine?.components.isWarpEngines) {
-				const position = entity.components.position;
-				const cruisingSpeed =
-					position?.type === "interstellar"
-						? warpEngine.components.isWarpEngines.interstellarCruisingSpeed
-						: warpEngine.components.isWarpEngines.solarCruisingSpeed;
-				return cruisingSpeed / 10;
-			}
-		} catch {
-			// No warp engines
-		}
-
-		// Fall back to impulse engines
-		try {
-			const impulseEngine = getShipSystem(this.ecs, {
-				systemType: "impulseEngines",
-				shipId: entity.id,
-			});
-			if (impulseEngine?.components.isImpulseEngines) {
-				const thrust = impulseEngine.components.isImpulseEngines.thrust;
-				const mass = entity.components.mass?.mass || 1;
-				return thrust / mass;
-			}
-		} catch {
-			// No impulse engines
-		}
-
-		return 0;
 	}
 
 	private checkSolarCandidates(
