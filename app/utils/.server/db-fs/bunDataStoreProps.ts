@@ -7,11 +7,6 @@ import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
 import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
 import { moveFile } from "@thorium/utils/.server/moveFile";
-import less from "less";
-import tailwindcss from "tailwindcss";
-import postcss from "postcss";
-// @ts-expect-error - No types
-import postcssLess from "postcss-less";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import { loadYml } from "@thorium/utils/.server/db-fs/loadYml";
 
@@ -175,32 +170,6 @@ export const bunDataStoreProps: DataStoreOperations = {
 			}
 		}
 		return aspects;
-	},
-	async processCSS(rawCSS) {
-		const config = (await import("../../../../tailwind.config")) as any;
-		const postCSSAction = postcss([tailwindcss(config.default)]);
-		const postcssOutput = (
-			await postCSSAction.process(`.theme-container {${rawCSS}}`, {
-				syntax: postcssLess,
-				from: "tailwind-default",
-			})
-		).css;
-		const processedCSS = (await less.render(postcssOutput)).css;
-		await fs.mkdir(
-			path.join(thoriumPath, path.dirname(this.meta.filePath), "assets"),
-			{ recursive: true },
-		);
-		await fs.writeFile(path.join(thoriumPath, "raw.css"), rawCSS);
-		await fs.writeFile(
-			path.join(
-				thoriumPath,
-				path.dirname(this.meta.filePath),
-				"assets",
-				"processed.css",
-			),
-			processedCSS,
-		);
-		return { processedCSS, assetUrl: "processed.css" };
 	},
 	async rename(name, otherNames) {
 		if (!("name" in this) || typeof this.name !== "string") return;

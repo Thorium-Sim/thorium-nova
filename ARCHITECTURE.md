@@ -175,11 +175,10 @@ custom CSS which is applied to the stations and cards to give them a unique look
 and feel. This has a few implications.
 
 Common elements, like buttons, inputs, and panels need to have static classes to
-be used as CSS selectors. Thorium Nova will use [DaisyUI](https://daisyui.com)
-as a base for most elements. DaisyUI is helpful, because it uses generic names
+be used as CSS selectors. Thorium Nova will use generic names
 for states, such as 'success', 'info', and 'primary' instead of referencing
 colors directly, which makes it easier to adjust the colors for each of those
-states. Any elements that need extra scripting will be included in the project
+states in themes. Any elements that need extra scripting will be included in the project
 as React components.
 
 That means utility-first CSS, like Tailwind, must be used carefully to make it
@@ -187,8 +186,7 @@ easy for themes to override built-in styles. CSS-in-JS solutions aren't really
 viable because of their opaque selectors.
 
 Tailwind can be useful as a way maintain consistent design tokens while writing
-CSS styles. Using Tailwind's `@apply` directive with specific classes for
-elements, custom theme writers can easily target component styles and make sure
+CSS styles. Using Tailwind's CSS variables, custom theme writers can easily target component styles and make sure
 the design tokens they use in their styles are consistent.
 
 When creating new themes in the Thorium Nova config screen, authors will write

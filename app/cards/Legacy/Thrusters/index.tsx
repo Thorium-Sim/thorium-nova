@@ -76,7 +76,7 @@ export function LegacyThrusters() {
 				<div className="flex flex-col gap-4">
 					<Joystick
 						id="direction"
-						className="w-full aspect-square flex-grow-0 flex-shrink-0"
+						className="w-full aspect-square grow-0 shrink-0"
 						onDrag={({ x, y }) => direction({ shipId, z: -y, x: -x })}
 						gamepadKeys={{ x: "x-thrusters", y: "y-thrusters" }}
 					>
@@ -108,7 +108,7 @@ export function LegacyThrusters() {
 				<div className="flex flex-col gap-4">
 					<Joystick
 						id="rotation"
-						className="w-full aspect-square flex-grow-0 flex-shrink-0"
+						className="w-full aspect-square grow-0 shrink-0"
 						onDrag={({ x, y }) => rotation({ shipId, z: x, x: y })}
 						gamepadKeys={{ x: "x-thrusters", y: "y-thrusters" }}
 					>
@@ -158,7 +158,11 @@ function RotationIndicator({
 	children,
 	rotation,
 	required,
-}: { children: ReactNode; rotation: number; required: number }) {
+}: {
+	children: ReactNode;
+	rotation: number;
+	required: number;
+}) {
 	return (
 		<div>
 			<div className="bg-gray-500 rounded-full aspect-square w-full border-2 border-gray-400 shadow-[inset_0_0_30px_rgba(0,0,0,0.5)] relative">
@@ -324,7 +328,10 @@ function ShipView({ ref }: { ref: Ref<ShipViewRef> }) {
 function Circle({
 	color,
 	rotation,
-}: { color: number; rotation?: [x: number, y: number, z: number] }) {
+}: {
+	color: number;
+	rotation?: [x: number, y: number, z: number];
+}) {
 	const points = useMemo(() => {
 		const points: [number, number, number][] = [];
 		const scale = 0.5;

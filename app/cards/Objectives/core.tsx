@@ -103,7 +103,7 @@ export function ObjectivesCore() {
 								label="Title"
 								name="objective"
 								required
-								className="input-sm"
+								className="input-xs"
 							/>
 						</div>
 						<div className="flex-1 w-full">
@@ -117,7 +117,7 @@ export function ObjectivesCore() {
 						<div className="flex-1 w-full">
 							<Input
 								label="Priority"
-								className="input-sm"
+								className="input-xs"
 								name="priority"
 								type="number"
 								defaultValue={1}

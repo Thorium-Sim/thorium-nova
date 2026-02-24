@@ -27,7 +27,7 @@ export function ShipTemplate({
 			category: string;
 			vanity: string;
 		}>
-			inputClassName="input-sm"
+			inputClassName="input-xs"
 			queryKey="spawn"
 			getOptions={async ({ queryKey, signal }) => {
 				const result = await q.starmapCore.spawnSearch.netRequest(

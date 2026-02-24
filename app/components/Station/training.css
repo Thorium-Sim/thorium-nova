@@ -1,0 +1,57 @@
+[anchor] {
+	bottom: anchor(bottom);
+	position: absolute;
+	left: anchor(left);
+	position-try-options:
+		flip-block,
+		flip-inline,
+		flip-block flip-inline;
+}
+
+.training {
+	position: fixed;
+	inset: 0;
+	anchor-name: --parent;
+	pointer-events: none;
+}
+.training-overlay {
+	position: fixed;
+	inset: 0;
+	backdrop-filter: brightness(0.5);
+	pointer-events: none;
+}
+.training-highlight {
+	position: fixed;
+	width: 1px;
+	height: 1px;
+	backdrop-filter: brightness(3);
+	pointer-events: none;
+	transition: all 0.3s ease;
+	transform-origin: top left;
+	padding: 1rem;
+	border-radius: 10px;
+	will-change: height, width, transform;
+	position-anchor: --training-highlight;
+	position-area: center;
+}
+.highlight-target {
+	anchor-name: --highlight;
+}
+.training-infobox {
+	position: fixed;
+	position-anchor: --parent;
+	background: white;
+	color: black;
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+	border-radius: 0.5rem;
+	padding: 0.5rem 1rem;
+	position-area: center;
+	position-try-fallbacks: flip-inline;
+	white-space: pre-line;
+	min-width: fit-content;
+	margin: 0 0.5rem;
+}
+.training-highlight ~ .training-infobox {
+	position-area: right;
+	position-anchor: --highlight;
+}

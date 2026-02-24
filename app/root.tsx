@@ -14,7 +14,6 @@ import Button from "@thorium/ui/Button";
 import { ClientOnly } from "remix-utils/client-only";
 import { NoMatch } from "@thorium/components/NotFound";
 import "./styles/tailwind.css";
-import "./styles/theme.css";
 import "@fontsource-variable/outfit";
 import icon from "./images/logo.svg?url";
 import type { Route } from ".react-router/types/app/+types/root";
@@ -115,12 +114,12 @@ function Snapshot() {
 	if (process.env.NODE_ENV === "production") return null;
 	return (
 		<Button
-			className="btn-circle btn-sm fixed bottom-2 left-2 w-11 h-11 btn-ghost z-50 "
+			className="btn-circle btn-sm fixed bottom-2 left-2 bg-neutral/20 backdrop-blur z-50 "
 			onClick={() => {
 				q.server.snapshot.netSend();
 			}}
 		>
-			<Icon name="camera" size="xl" className="text-white" />
+			<Icon name="camera" size="md" className="text-white" />
 		</Button>
 	);
 }

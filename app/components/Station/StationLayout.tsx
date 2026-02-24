@@ -11,6 +11,7 @@ import { useEffect, useRef } from "react";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import Button from "@thorium/ui/Button";
 import { Portal } from "@thorium/ui/Portal";
+import "./training.css";
 
 const StationLayout = () => {
 	const { client, station, ship } = useStation();
@@ -37,7 +38,7 @@ const StationLayout = () => {
 					} as any
 				}
 			>
-				<link rel="stylesheet" href={theme?.assets.processedCSS} />
+				<link rel="stylesheet" href={theme?.assets.rawCSS} />
 				<CardSwitcher card={card.name} changeCard={changeCard} />
 				<div className="card-frame h-screen">
 					<div className="card-frame-inner h-full w-full absolute">

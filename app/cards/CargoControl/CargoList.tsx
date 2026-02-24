@@ -40,10 +40,10 @@ export function CargoList({
 						return (
 							<li
 								key={key}
-								className={`px-4 py-2 select-none block w-full border border-solid bg-black border-white border-opacity-50 pointer-events-auto ${
+								className={`px-4 py-2 select-none block w-full border border-solid bg-black border-white/50 pointer-events-auto ${
 									enRouteContainer?.id === selectedContainerId &&
 									enRouteContainer?.entityState === "idle"
-										? "cursor-pointer hover:bg-opacity-50 active:bg-white/20"
+										? "cursor-pointer hover:bg-black/50 active:bg-white/20"
 										: "cursor-not-allowed"
 								}`}
 								onClick={() => onClick(key)}

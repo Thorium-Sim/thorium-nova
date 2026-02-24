@@ -1,6 +1,5 @@
 import * as React from "react";
 import { q } from "@thorium/context/AppContext";
-import Button from "@thorium/ui/Button";
 import type { isShip } from "@thorium/ecs-components/isShip";
 import { useStation } from "@thorium/routes/station/useStation";
 import type z from "zod";

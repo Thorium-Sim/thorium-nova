@@ -43,10 +43,6 @@ export interface DataStoreOperations {
 	): Promise<string>;
 	removeAsset(assetPath: string): Promise<void>;
 	loadAspect: LoadAspectFn;
-	processCSS: (
-		this: ThemePlugin,
-		css: string,
-	) => Promise<{ processedCSS: string; assetUrl: string }>;
 	rename: (
 		this: DataStore,
 		newName: string,

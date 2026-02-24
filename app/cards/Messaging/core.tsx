@@ -138,7 +138,7 @@ export function MessagingCore() {
 					>
 						<Input
 							disabled={!selectedConversationDestination}
-							className="input-sm flex-1"
+							className="input-xs flex-1"
 							label="Message Input"
 							labelHidden
 							name="message"
@@ -159,7 +159,7 @@ export function MessagingCore() {
 							typeof value === "string" ? setSender(value) : null
 						}
 					>
-						{sender}
+						{sender || <>&nbsp;</>}
 					</InputField>
 				</div>
 			</div>

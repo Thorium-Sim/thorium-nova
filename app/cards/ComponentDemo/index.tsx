@@ -12,13 +12,15 @@ import Button from "@thorium/ui/Button";
 import SearchableInput, {
 	DefaultResultLabel,
 } from "@thorium/ui/SearchableInput";
-import type { QueryFunctionContext } from "@tanstack/react-query";
 import { Icon } from "@thorium/ui/Icon";
 import { Button as RAButton } from "react-aria-components";
-import { PropertyCombobox } from "@thorium/components/Config/EntityQueryBuilder";
 import { useTransition } from "@thorium/ui/Transition";
 import { cn } from "@thorium/utils/cn";
 import { useAlert, useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
+import Checkbox from "@thorium/ui/Checkbox";
+import { InputField, OutputField, TypingField } from "@thorium/ui/Core";
+import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
+import { ScanDoodad } from "@thorium/ui/ScanDoodad";
 const ModalDemo = ({
 	title,
 	children,
@@ -138,6 +140,26 @@ export function ComponentDemo() {
 	return (
 		<div className="flex flex-col gap-8 text-white h-full overflow-y-auto p-4">
 			<div className="flex gap-4">
+				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-default">
+					cursor-default
+				</div>
+				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-pointer">
+					cursor-pointer
+				</div>
+				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-text">
+					cursor-text
+				</div>
+				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-progress ">
+					cursor-progress{" "}
+				</div>
+				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-not-allowed">
+					cursor-not-allowed
+				</div>
+				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-wait">
+					cursor-wait
+				</div>
+			</div>
+			<div className="flex gap-4">
 				<Button onClick={() => alert({ header: "This is an alert" })}>
 					Alert
 				</Button>
@@ -189,7 +211,10 @@ export function ComponentDemo() {
 					<div className="flex-1">This is an error alert</div>
 				</div>
 				<div className="alert alert-notice">
-					<div className="flex-1">This is an alert alert</div>
+					<div className="flex-1">This is a notice alert</div>
+				</div>
+				<div className="alert alert-alert">
+					<div className="flex-1">This is a alert alert</div>
 				</div>
 			</div>
 			<div>
@@ -236,9 +261,53 @@ export function ComponentDemo() {
 					<Button className="btn-error">Error</Button>
 					<Button className="btn-notice">Notice</Button>
 					<Button className="btn-alert">Alert</Button>
-					<Button className="btn-ghost">Ghost</Button>
 					<Button className="btn-link">Link</Button>
-					<Button className="glass">Glass</Button>
+				</div>
+				<div className="flex gap-4 w-full flex-wrap">
+					<Button className="btn-active">Button</Button>
+					<Button className="btn-active btn-primary">Primary</Button>
+					<Button className="btn-active btn-secondary">Secondary</Button>
+					<Button className="btn-active btn-accent">Accent</Button>
+					<Button className="btn-active btn-info">Info</Button>
+					<Button className="btn-active btn-success">Success</Button>
+					<Button className="btn-active btn-warning">Warning</Button>
+					<Button className="btn-active btn-error">Error</Button>
+					<Button className="btn-active btn-notice">Notice</Button>
+					<Button className="btn-active btn-alert">Alert</Button>
+					<Button className="btn-active btn-link">Link</Button>
+				</div>
+				<div className="flex gap-4 w-full flex-wrap">
+					<Button disabled>Button</Button>
+					<Button disabled className="btn-primary">
+						Primary
+					</Button>
+					<Button disabled className="btn-secondary">
+						Secondary
+					</Button>
+					<Button disabled className="btn-accent">
+						Accent
+					</Button>
+					<Button disabled className="btn-info">
+						Info
+					</Button>
+					<Button disabled className="btn-success">
+						Success
+					</Button>
+					<Button disabled className="btn-warning">
+						Warning
+					</Button>
+					<Button disabled className="btn-error">
+						Error
+					</Button>
+					<Button disabled className="btn-notice">
+						Notice
+					</Button>
+					<Button disabled className="btn-alert">
+						Alert
+					</Button>
+					<Button disabled className="btn-link">
+						Link
+					</Button>
 				</div>
 			</div>
 			<div>
@@ -254,9 +323,23 @@ export function ComponentDemo() {
 					<Button className="btn-outline btn-error">Error</Button>
 					<Button className="btn-outline btn-notice">Notice</Button>
 					<Button className="btn-outline btn-alert">Alert</Button>
-					<Button className="btn-outline btn-ghost">Ghost</Button>
 					<Button className="btn-outline btn-link">Link</Button>
-					<Button className="btn-outline glass">Glass</Button>
+				</div>
+			</div>
+			<div>
+				<h2 className="text-3xl">Dash Buttons</h2>
+				<div className="flex gap-4 w-full flex-wrap">
+					<Button className="btn-dash">Button</Button>
+					<Button className="btn-dash btn-primary">Primary</Button>
+					<Button className="btn-dash btn-secondary">Secondary</Button>
+					<Button className="btn-dash btn-accent">Accent</Button>
+					<Button className="btn-dash btn-info">Info</Button>
+					<Button className="btn-dash btn-success">Success</Button>
+					<Button className="btn-dash btn-warning">Warning</Button>
+					<Button className="btn-dash btn-error">Error</Button>
+					<Button className="btn-dash btn-notice">Notice</Button>
+					<Button className="btn-dash btn-alert">Alert</Button>
+					<Button className="btn-dash btn-link">Link</Button>
 				</div>
 			</div>
 			<div>
@@ -270,7 +353,7 @@ export function ComponentDemo() {
 			</div>
 			<div>
 				<h2 className="text-3xl">Button Groups</h2>
-				<div className="btn-group">
+				<div className="join">
 					<Button className="btn-active">Item 1</Button>
 					<Button>Item 2</Button>
 					<Button>Item 3</Button>
@@ -279,18 +362,6 @@ export function ComponentDemo() {
 			<div>
 				<h2 className="text-3xl">Gamepad Focus Border</h2>
 				<Button className="btn-active gamepad-focus">I am focused</Button>
-			</div>
-			<div>
-				<h2 className="text-3xl">Divider</h2>
-				<div className="flex flex-col w-full">
-					<div className="grid h-20 card bg-neutral rounded-xl place-items-center">
-						content
-					</div>
-					<div className="divider">OR</div>
-					<div className="grid h-20 card bg-neutral rounded-xl place-items-center">
-						content
-					</div>
-				</div>
 			</div>
 			<div className="w-full">
 				<h2 className="text-3xl">Form Input</h2>
@@ -433,10 +504,12 @@ export function ComponentDemo() {
 				</div>
 			</div>
 			<div>
-				<h2 className="text-3xl">Readonly Field</h2>
+				<h2 className="text-3xl">Checkbox</h2>
+				<Checkbox label="Checkbox" />
 			</div>
+
 			<div>
-				<h2 className="text-3xl">Panel</h2>
+				<h2 className="text-3xl">Panels</h2>
 				<div className="flex gap-4">
 					<div className="panel h-32 w-64 p-4">Panel</div>
 					<div className="panel panel-ghost h-32 w-64 p-4">Panel</div>
@@ -450,9 +523,6 @@ export function ComponentDemo() {
 					<div className="panel panel-notice h-32 w-64 p-4">Panel</div>
 					<div className="panel panel-alert h-32 w-64 p-4">Panel</div>
 				</div>
-			</div>
-			<div>
-				<h2 className="text-3xl">Keypad</h2>
 			</div>
 			<div>
 				<h2 className="text-3xl">Colored Bar</h2>
@@ -470,15 +540,6 @@ export function ComponentDemo() {
 				<progress className="progress progress-error" value={50} max={100} />
 				<progress className="progress progress-notice" value={50} max={100} />
 				<progress className="progress progress-alert" value={50} max={100} />
-			</div>
-			<div>
-				<h2 className="text-3xl">Scrollable List</h2>
-			</div>
-			<div>
-				<h2 className="text-3xl">Table</h2>
-			</div>
-			<div>
-				<h2 className="text-3xl">Joystick</h2>
 			</div>
 			<div>
 				<h2 className="text-3xl">Radial Dial</h2>
@@ -502,15 +563,15 @@ export function ComponentDemo() {
 			</div>
 			<div>
 				<h2 className="text-3xl">Range Slider</h2>
-				<input type="range" className="slider max-w-sm" />
-				<input type="range" className="slider slider-primary max-w-sm" />
-				<input type="range" className="slider slider-secondary max-w-sm" />
-				<input type="range" className="slider slider-accent max-w-sm" />
-				<input type="range" className="slider slider-info max-w-sm" />
-				<input type="range" className="slider slider-success max-w-sm" />
-				<input type="range" className="slider slider-warning max-w-sm" />
-				<input type="range" className="slider slider-error max-w-sm" />
-				<input type="range" className="slider slider-notice max-w-sm" />
+				<input type="range" className="range max-w-sm" />
+				<input type="range" className="range range-primary max-w-sm" />
+				<input type="range" className="range range-secondary max-w-sm" />
+				<input type="range" className="range range-accent max-w-sm" />
+				<input type="range" className="range range-info max-w-sm" />
+				<input type="range" className="range range-success max-w-sm" />
+				<input type="range" className="range range-warning max-w-sm" />
+				<input type="range" className="range range-error max-w-sm" />
+				<input type="range" className="range range-notice max-w-sm" />
 			</div>
 			<div>
 				<h2 className="text-3xl">Modal</h2>
@@ -656,15 +717,20 @@ export function ComponentDemo() {
 					<LinearDotIndicator color="red" level={0.25} dotCount={30} />
 				</div>
 			</div>
-		</div>
-	);
-}
-
-export function ViewscreenDemo() {
-	// TODO August 23, 2022 - This is a good place to add viewscreen overlays and HUD when those end up getting developed
-	return (
-		<div className="w-full h-full flex items-center justify-center text-white bg-purple-500/20 text-6xl">
-			Viewscreen
+			<div>
+				<h2 className="text-3xl">Core Inputs</h2>
+				<div className="text-xs w-sm">
+					<InputField onClick={() => {}} prompt="Testing">
+						Testing
+					</InputField>
+					<OutputField>Testing</OutputField>
+					<TypingField value={"Testing"} />
+				</div>
+			</div>
+			<div>
+				<h2 className="text-3xl">Loading Spinner</h2>
+				<LoadingSpinner compact />
+			</div>
 		</div>
 	);
 }
