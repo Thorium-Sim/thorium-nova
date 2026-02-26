@@ -37,16 +37,6 @@ export const autopilot = z
 			.default(null),
 		/** Desired interstellar system. For when we are traveling from one system to another. */
 		desiredSolarSystemId: z.number().nullable().default(null),
-		/** Cached roll quaternion (twist around local Z) preserved during autopilot heading changes. */
-		cachedRoll: z
-			.object({
-				x: z.number().default(0),
-				y: z.number().default(0),
-				z: z.number().default(0),
-				w: z.number().default(1),
-			})
-			.nullable()
-			.default(null),
 		/** Whether the rotation autopilot is on. */
 		rotationAutopilot: z.boolean().default(true),
 		/** Whether the forward movement autopilot is on. */

@@ -10,7 +10,6 @@ export function clearAutopilotState(entity: Entity) {
 		destinationWaypointId: null,
 		desiredCoordinates: null,
 		desiredRotation: null,
-		cachedRoll: null,
 		desiredSolarSystemId: null,
 		path: [],
 		nextCoordinates: null,

@@ -219,7 +219,6 @@ export class InterstellarTransitionSystem extends System {
 						path,
 						nextCoordinates,
 						desiredRotation: null,
-						cachedRoll: null,
 					});
 				}
 				pubsub.publish.starmapCore.ships({ systemId: destinationSystem.id });

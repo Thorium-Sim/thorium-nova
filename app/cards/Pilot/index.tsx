@@ -337,7 +337,7 @@ const LockOnButton = () => {
 					</Button>
 				) : (
 					<Button
-						className="w-full btn-error animate-autopilot-pulse"
+						className="flex-auto btn-error animate-autopilot-pulse"
 						disabled={!autopilot.locked}
 						onClick={() => q.pilot.autopilot.deactivate.netSend({ shipId })}
 					>
