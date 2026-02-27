@@ -24,6 +24,7 @@
 
 	[dir="rtl"] & {
 		--range-dir: -1;
+		writing-mode: vertical-lr;
 	}
 
 	&:focus {

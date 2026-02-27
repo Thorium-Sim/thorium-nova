@@ -44,13 +44,45 @@ export const longRangeComm = t.router({
 				systemType: "longRangeComm",
 				shipId: input.shipId,
 			});
-
+			if (!lrcomm?.components.isLongRangeComm)
+				throw new Error("No Long Range Comm System");
 			return {
 				id: lrcomm.id,
 				requiredPower: lrcomm.components.power?.powerLevels[0] || 0,
 				maxSafePower: lrcomm.components.power?.powerLevels.at(-1) || 1,
 				currentPower: lrcomm.components.power?.powerSources.length || 0,
+				frequency: lrcomm.components.isLongRangeComm.antennaFrequency,
+				gain: lrcomm.components.isLongRangeComm.antennaGain,
+				minSatelliteRange: lrcomm.components.isLongRangeComm.minSatelliteRange,
+				maxSatelliteRange: lrcomm.components.isLongRangeComm.maxSatelliteRange,
 			};
+		}),
+		commSatellites
+	setFrequency: t.procedure
+		.input(z.object({ shipId: z.number(), frequency: z.number() }))
+		.send(({ ctx, input }) => {
+			const lrcomm = getShipSystem(ctx.ecs, {
+				systemType: "longRangeComm",
+				shipId: input.shipId,
+			});
+			if (!lrcomm?.components.isLongRangeComm)
+				throw new Error("No Long Range Comm System");
+			lrcomm.updateComponent("isLongRangeComm", {
+				antennaFrequency: input.frequency,
+			});
+			pubsub.publish.longRangeComm.get({ shipId: input.shipId });
+		}),
+	setGain: t.procedure
+		.input(z.object({ shipId: z.number(), gain: z.number() }))
+		.send(({ ctx, input }) => {
+			const lrcomm = getShipSystem(ctx.ecs, {
+				systemType: "longRangeComm",
+				shipId: input.shipId,
+			});
+			if (!lrcomm?.components.isLongRangeComm)
+				throw new Error("No Long Range Comm System");
+			lrcomm.updateComponent("isLongRangeComm", { antennaGain: input.gain });
+			pubsub.publish.longRangeComm.get({ shipId: input.shipId });
 		}),
 	systemStream: t.procedure
 		.input(z.object({ shipId: z.number() }))

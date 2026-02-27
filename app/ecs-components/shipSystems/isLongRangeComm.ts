@@ -33,6 +33,12 @@ export const isLongRangeComm = z
 			})
 			.array()
 			.default([]),
+		antennaFrequency: z.number().default(276.25),
+		antennaGain: z.number().default(0.1),
+		/** The satellite detection radius in light years at required power */
+		minSatelliteRange: z.number().default(1),
+		/** The satellite detection radius in light years at max safe power */
+		maxSatelliteRange: z.number().default(10),
 		/** The number of comm satellites to display in legacy mode */
 		legacyCommSatellites: z.number().default(3),
 	})

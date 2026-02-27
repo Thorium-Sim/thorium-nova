@@ -152,6 +152,9 @@
 .striped-cyan {
 	background-color: oklch(0.6308 0.2171 254.09);
 }
+.striped-yellow {
+	background-color: oklch(0.8949 0.2127 96.67);
+}
 
 @layer utilities {
 	.animate-pong {
@@ -163,4 +166,8 @@
 	100% {
 		opacity: 0;
 	}
+}
+
+.select-button {
+	@apply text-center;
 }

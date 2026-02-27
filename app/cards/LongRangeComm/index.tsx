@@ -1,3 +1,7 @@
+import { Canvas } from "@react-three/fiber";
+import { PlayerArrow } from "@thorium/cards/Pilot/PlayerArrow";
+import { PolarGrid } from "@thorium/components/Starmap/PolarGrid";
+import Starfield from "@thorium/components/Starmap/Starfield";
 import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
@@ -12,7 +16,8 @@ import SineWave from "@thorium/ui/SineWave";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { cn } from "@thorium/utils/cn";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { useRef, useState } from "react";
+import throttle from "lodash.throttle";
+import { Suspense, useCallback, useRef, useState } from "react";
 import {
 	ComboBox,
 	Input,
@@ -23,6 +28,7 @@ import {
 	Button as RAButton,
 	TextArea,
 } from "react-aria-components";
+import { Mesh } from "three";
 
 type Pages = "inbox" | "archive" | "sent" | "compose" | "outbox";
 export function LongRangeComm() {
@@ -148,16 +154,51 @@ function OutboxPage() {
 	const { shipId } = useStation();
 	const { cardLoaded } = useCardContext();
 	const { interpolate } = useLiveQuery();
-	const [longRangeComm] = q.longRangeComm.get.useNetRequest({ shipId });
+	const [longRangeComm] = q.longRangeComm.get.useNetRequest(
+		{ shipId },
+		{
+			callback: (data) => {
+				if (draggingRef.current) return;
+				setFrequencyValue(data.frequency);
+				setGainValue(data.gain);
+			},
+		},
+	);
 	const [outgoingMessages] = q.longRangeComm.outgoingMessages.useNetRequest({
 		shipId,
 	});
+
+	const draggingRef = useRef(false);
+	const [frequency, setFrequencyValue] = useState(
+		longRangeComm.frequency || 276.25,
+	);
+	const [gain, setGainValue] = useState(longRangeComm.gain || 1);
+
 	q.longRangeComm.systemStream.useDataStream({ shipId });
 
 	const powerBarRef = useRef<HTMLDivElement>(null);
 	const shadeCountRef = useRef(0);
-	const [frequency, setFrequency] = useState(276.25);
-	const [amplitude, setAmplitude] = useState(1);
+
+	const setFrequencyRemote = useCallback(
+		throttle((value: number) => {
+			q.longRangeComm.setFrequency.netSend({ shipId, frequency: value });
+		}, 100),
+		[],
+	);
+	const setGainRemote = useCallback(
+		throttle((value: number) => {
+			q.longRangeComm.setGain.netSend({ shipId, gain: value });
+		}, 100),
+		[],
+	);
+	function setFrequency(value: number) {
+		setFrequencyValue(value);
+		setFrequencyRemote(value);
+	}
+	function setGain(value: number) {
+		setGainValue(value);
+		setGainRemote(value);
+	}
 
 	useAnimationFrame(() => {
 		const data = interpolate(longRangeComm.id);
@@ -167,33 +208,41 @@ function OutboxPage() {
 	}, cardLoaded);
 
 	return (
-		<div className="flex w-full gap-8">
-			<div className="flex-auto">
-				<p className="text-4xl text-center font-bold mb-8">
+		<div className="w-full grid grid-cols-[16rem_1fr_auto_4rem] gap-8">
+			<div className="panel max-w-64"></div>
+
+			<SatelliteMap
+				className="w-full h-full panel panel-black panel-opaque aspect-square rounded-full"
+				radius={gain * longRangeComm.maxSatelliteRange}
+				shouldRender={cardLoaded}
+			/>
+
+			<div>
+				<p className="mt-8 text-4xl text-center font-bold mb-8">
 					Scanning For Satellites
 				</p>
-				<div className="w-full h-56">
+				<div className="w-full aspect-video panel panel-neutral panel-opaque">
 					<SineWave
 						className="faded-scroll-x"
 						waves={[
 							{
-								amplitude: amplitude * 0.15,
+								amplitude: gain * 0.15,
 								frequency: frequency / 10,
 								phase: Math.PI / 2,
 							},
 							{
-								amplitude: amplitude * 0.1,
+								amplitude: gain * 0.1,
 								frequency: (frequency / 100) ** 2,
 								phase: Math.PI / 4,
 							},
 							{
-								amplitude: amplitude * 0.2,
+								amplitude: gain * 0.2,
 								frequency: (frequency / 50) ** 2,
 								phase: Math.PI / 3,
 							},
 						]}
 						callFrame={(ctx, width, height) => {
-							const widthDivisor = 10;
+							const widthDivisor = 4;
 							const shadeCount = shadeCountRef.current;
 							const shade_grad = ctx.createLinearGradient(
 								shadeCount,
@@ -201,47 +250,80 @@ function OutboxPage() {
 								shadeCount + width / widthDivisor,
 								height / widthDivisor,
 							);
-							shade_grad.addColorStop(0, "rgba(255,255,255,0.5)");
-							shade_grad.addColorStop(0.1, "transparent");
-							shade_grad.addColorStop(0.9, "transparent");
-							shade_grad.addColorStop(1, "rgba(255,255,255,0.5)");
+							shade_grad.addColorStop(0, "rgba(255,255,255,1)");
+							shade_grad.addColorStop(0.1, `rgba(255,255,255,${0.5 - gain})`);
+							shade_grad.addColorStop(0.9, `rgba(255,255,255,${0.5 - gain})`);
+							shade_grad.addColorStop(1, "rgba(255,255,255,1)");
 
 							ctx.fillStyle = shade_grad;
 							// new opaque pixels "erase" previous content
 							ctx.globalCompositeOperation = "destination-out";
 							ctx.fillRect(0, 0, width, height);
 
-							shadeCountRef.current = shadeCount + 10;
-							if (shadeCountRef.current > width) {
+							shadeCountRef.current = shadeCount + 3;
+							if (shadeCountRef.current > width * 1.2) {
 								shadeCountRef.current = -width / widthDivisor;
 							}
 						}}
 					/>
 				</div>
-				<label htmlFor="frequency">Frequency</label>
+				<label htmlFor="frequency" className="block mt-4">
+					Frequency
+				</label>
 				<input
 					id="frequency"
 					type="range"
-					className="range range-error text-blue-500"
+					className="range range-primary w-full block"
 					min={100}
 					max={350}
 					step={0.25}
+					dir="rtl"
 					value={frequency}
+					onPointerDown={() => {
+						draggingRef.current = true;
+						window.addEventListener(
+							"pointerup",
+							() => {
+								draggingRef.current = false;
+							},
+							{ once: true },
+						);
+					}}
 					onInput={(e) => setFrequency(Number(e.currentTarget.value))}
 				/>
-				<label htmlFor="amplitude">Gain</label>
+				<label htmlFor="amplitude" className="block mt-4">
+					Gain
+				</label>
 				<input
 					id="amplitude"
 					type="range"
-					className="slider slider-error"
-					min={0.01}
+					className="range range-error w-full block"
+					min={0}
 					max={1}
 					step={0.01}
-					value={amplitude}
-					onInput={(e) => setAmplitude(Number(e.currentTarget.value))}
+					value={gain}
+					onPointerDown={() => {
+						draggingRef.current = true;
+						window.addEventListener(
+							"pointerup",
+							() => {
+								draggingRef.current = false;
+							},
+							{ once: true },
+						);
+					}}
+					onInput={(e) =>
+						setGain(
+							Math.min(
+								Number(e.currentTarget.value),
+								(longRangeComm.currentPower - longRangeComm.requiredPower) /
+									(longRangeComm.maxSafePower - longRangeComm.requiredPower),
+							),
+						)
+					}
 				/>
 			</div>
-			<div className="flex flex-col min-w-32">
+			<div className="flex flex-col min-w-16">
 				<div className="flex-auto w-full border relative overflow-hidden">
 					<Tooltip content="Required Power">
 						<div
@@ -261,12 +343,66 @@ function OutboxPage() {
 					</Tooltip>
 
 					<div
-						className="absolute w-full bottom-0 border-black border-2 bg-yellow-400 h-1/2"
+						className="absolute w-full bottom-0 border-black border-2 striped-gradient striped-yellow h-1/2 transition-all"
 						ref={powerBarRef}
 					></div>
 				</div>
 				<p className="text-center">Power Level</p>
 			</div>
+		</div>
+	);
+}
+
+function SatelliteMap({
+	className,
+	radius,
+	shouldRender,
+}: {
+	className?: string;
+	radius: number;
+	shouldRender: boolean;
+}) {
+	const { shipId } = useStation();
+
+	const [longRangeComm] = q.longRangeComm.get.useNetRequest({ shipId });
+	const range = longRangeComm.maxSatelliteRange;
+	return (
+		<div className={className}>
+			<Canvas
+				onContextMenu={(e) => {
+					e.preventDefault();
+				}}
+				gl={{ antialias: true, logarithmicDepthBuffer: true, alpha: true }}
+				orthographic
+				camera={{
+					position: [0, range, 0],
+					left: -range,
+					right: range,
+					top: range,
+					bottom: -range,
+					far: range * 2,
+				}}
+				frameloop={shouldRender ? "always" : "demand"}
+			>
+				<Suspense fallback={null}>
+					<group scale={[0.5, 0.5, 0.5]}>
+						<PlayerArrow />
+					</group>
+					<mesh scale={[radius, radius, radius]}>
+						<sphereGeometry />
+						<meshBasicMaterial
+							color={0x2288ff}
+							transparent
+							opacity={0.2}
+							depthWrite={false}
+						/>
+					</mesh>
+					<PolarGrid
+						rotation={[0, (2 * Math.PI) / 12, 0]}
+						args={[range, 12, range, 64, 0xffffff, 0xffffff]}
+					/>
+				</Suspense>
+			</Canvas>
 		</div>
 	);
 }
@@ -304,7 +440,7 @@ function ComposePage() {
 
 			<Label className="text-xl mt-4">Message:</Label>
 			<TextArea
-				className="textarea resize-none flex-1"
+				className="textarea resize-none flex-1 w-full"
 				value={message}
 				onChange={(e) => setMessage(e.currentTarget.value)}
 			/>
