@@ -5,27 +5,22 @@ import { CollisionCountdown } from "@thorium/ui/CollisionCountdown";
 import { useCardContext } from "@thorium/context/CardContext";
 import type { ShipAlert } from "@thorium/ecs-components/shipAlerts";
 
-type AlertContentRenderer = (alert: ShipAlert, cardLoaded: boolean) => ReactNode;
-
-const alertRenderers: Record<string, AlertContentRenderer> = {
-	collision: (alert, cardLoaded) => {
-		return (
-			<>
-				Collision Warning — {alert.objectName} —{" "}
-				<CollisionCountdown
-					timeToCollision={alert.timeToCollision}
-					baselineTimestamp={alert.baselineTimestamp}
-					cardLoaded={cardLoaded}
-				/>
-			</>
-		);
-	},
-};
-
 function renderAlertContent(alert: ShipAlert, cardLoaded: boolean): ReactNode {
-	const renderer = alertRenderers[alert.type];
-	if (renderer) return renderer(alert, cardLoaded);
-	return alert.message;
+	switch (alert.type) {
+		case "collision":
+			return (
+				<>
+					Collision Warning — {alert.objectName} —{" "}
+					<CollisionCountdown
+						timeToCollision={alert.timeToCollision}
+						baselineTimestamp={alert.baselineTimestamp}
+						cardLoaded={cardLoaded}
+					/>
+				</>
+			);
+		default:
+			return alert.message;
+	}
 }
 
 /**

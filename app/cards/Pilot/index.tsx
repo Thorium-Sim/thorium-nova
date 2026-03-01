@@ -98,8 +98,15 @@ export function Pilot({ cardLoaded }: CardProps) {
 	}, [autopilot.locked, autopilot.forwardAutopilot, showWarning]);
 
 	const autopilotActiveRef = useRef(false);
+	const prevAutopilotActiveRef = useRef(false);
 	autopilotActiveRef.current = !!autopilot.forwardAutopilot;
 	const alertActiveRef = useRef(false);
+
+	// Reset the guard when autopilot is re-engaged so the warning can trigger again
+	if (autopilotActiveRef.current && !prevAutopilotActiveRef.current) {
+		alertActiveRef.current = false;
+	}
+	prevAutopilotActiveRef.current = autopilotActiveRef.current;
 
 	const onFlightControlInteraction = useCallback(() => {
 		if (autopilotActiveRef.current && !alertActiveRef.current) {
@@ -111,10 +118,6 @@ export function Pilot({ cardLoaded }: CardProps) {
 				content: "Autopilot Deactivated",
 				duration: 5000,
 			});
-			// Reset the guard after the warning duration so it can trigger again
-			setTimeout(() => {
-				alertActiveRef.current = false;
-			}, 5000);
 		}
 	}, [showWarning]);
 
@@ -124,11 +127,14 @@ export function Pilot({ cardLoaded }: CardProps) {
 				<div className="flex flex-col justify-between">
 					<ImpulseControls cardLoaded={cardLoaded} onFlightControlInteraction={onFlightControlInteraction} forwardAutopilot={!!autopilot.forwardAutopilot} />
 					<div className="flex-1 mt-2">
-						<div className="flex items-stretch gap-4 direction-thrusters" onPointerDown={onFlightControlInteraction}>
+						<div className="flex items-stretch gap-4 direction-thrusters">
 							<LinearJoystick
 								id="direction-foreaft"
 								className="h-auto"
-								onDrag={({ y }) => direction({ shipId, z: -y })}
+								onDrag={({ y }) => {
+									onFlightControlInteraction();
+									direction({ shipId, z: -y });
+								}}
 								vertical
 								gamepadKey="z-thrusters"
 							>
@@ -138,7 +144,10 @@ export function Pilot({ cardLoaded }: CardProps) {
 							<Joystick
 								id="direction"
 								className="w-[calc(100%-2.5rem)] h-[calc(100%-2.5rem)]"
-								onDrag={({ x, y }) => direction({ shipId, y: -y, x: -x })}
+								onDrag={({ x, y }) => {
+									onFlightControlInteraction();
+									direction({ shipId, y: -y, x: -x });
+								}}
 								gamepadKeys={{ x: "x-thrusters", y: "y-thrusters" }}
 							>
 								<UntouchableLabel className="bottom-1">Down</UntouchableLabel>
@@ -173,10 +182,13 @@ export function Pilot({ cardLoaded }: CardProps) {
 						</div>
 					</div>
 					<div className="flex-1" />
-					<div className="flex flex-col gap-2 rotation-thrusters" onPointerDown={onFlightControlInteraction}>
+					<div className="flex flex-col gap-2 rotation-thrusters">
 						<Joystick
 							id="rotation"
-							onDrag={({ x, y }) => rotation({ shipId, z: x, x: y })}
+							onDrag={({ x, y }) => {
+								onFlightControlInteraction();
+								rotation({ shipId, z: x, x: y });
+							}}
 							gamepadKeys={{ x: "roll", y: "pitch" }}
 						>
 							<UntouchableLabel className="bottom-1">
@@ -190,7 +202,10 @@ export function Pilot({ cardLoaded }: CardProps) {
 						</Joystick>
 						<LinearJoystick
 							id="rotation-yaw"
-							onDrag={({ x }) => rotation({ shipId, y: -x })}
+							onDrag={({ x }) => {
+								onFlightControlInteraction();
+								rotation({ shipId, y: -x });
+							}}
 							gamepadKey="yaw"
 						>
 							<UntouchableLabel className="left-1">Port Yaw</UntouchableLabel>
