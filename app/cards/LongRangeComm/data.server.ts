@@ -5,11 +5,17 @@ import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { calculateShipMapPath } from "@thorium/utils/.server/ship/shipMapPathfinder";
 import { type ECS, Entity } from "@thorium/utils/ecs";
 import type { RNG } from "@thorium/utils/rng";
-import { getObjectSystem } from "@thorium/utils/starmap/position";
+import {
+	getCompletePositionFromOrbit,
+	getObjectSystem,
+} from "@thorium/utils/starmap/position";
 import z from "zod";
 import { createShipMapGraph } from "@thorium/utils/.server/ship/shipMapPathfinder";
 
-import { lightYearToLightMinute } from "@thorium/utils/unitTypes";
+import {
+	lightMinuteToLightYear,
+	lightYearToLightMinute,
+} from "@thorium/utils/unitTypes";
 
 const encodingSchema = z.union([
 	z.object({
@@ -57,7 +63,35 @@ export const longRangeComm = t.router({
 				maxSatelliteRange: lrcomm.components.isLongRangeComm.maxSatelliteRange,
 			};
 		}),
-		commSatellites
+	commSatellites: t.procedure.request(({ ctx }) => {
+		const satellites = ctx.ecs.componentCache.get("isCommSatellite") || [];
+		const output: {
+			id: number;
+			frequency: number;
+			radius: number;
+			position: [number, number, number];
+		}[] = [];
+
+		for (const satellite of satellites) {
+			const commSatellite = satellite.components.isCommSatellite;
+			if (!commSatellite) continue;
+			const commSatelliteSystem = getObjectSystem(satellite);
+			if (!commSatelliteSystem?.components.position) continue;
+			const { x, y, z } = commSatelliteSystem.components.position;
+			output.push({
+				id: satellite.id,
+				frequency: commSatellite.frequency,
+				radius: commSatellite.radius,
+				position: [
+					lightMinuteToLightYear(x),
+					lightMinuteToLightYear(y),
+					lightMinuteToLightYear(z),
+				],
+			});
+		}
+
+		return output;
+	}),
 	setFrequency: t.procedure
 		.input(z.object({ shipId: z.number(), frequency: z.number() }))
 		.send(({ ctx, input }) => {

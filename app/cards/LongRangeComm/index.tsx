@@ -1,8 +1,9 @@
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { forwardQuaternion } from "@thorium/cards/Pilot/constants";
 import { PlayerArrow } from "@thorium/cards/Pilot/PlayerArrow";
 import { PolarGrid } from "@thorium/components/Starmap/PolarGrid";
 import Starfield from "@thorium/components/Starmap/Starfield";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
@@ -28,7 +29,8 @@ import {
 	Button as RAButton,
 	TextArea,
 } from "react-aria-components";
-import { Mesh } from "three";
+import type { OrthographicCamera } from "three";
+import { type Group, Mesh, Vector3 } from "three";
 
 type Pages = "inbox" | "archive" | "sent" | "compose" | "outbox";
 export function LongRangeComm() {
@@ -179,13 +181,13 @@ function OutboxPage() {
 	const powerBarRef = useRef<HTMLDivElement>(null);
 	const shadeCountRef = useRef(0);
 
-	const setFrequencyRemote = useCallback(
+	const setFrequencyNetSend = useCallback(
 		throttle((value: number) => {
 			q.longRangeComm.setFrequency.netSend({ shipId, frequency: value });
 		}, 100),
 		[],
 	);
-	const setGainRemote = useCallback(
+	const setGainNetSend = useCallback(
 		throttle((value: number) => {
 			q.longRangeComm.setGain.netSend({ shipId, gain: value });
 		}, 100),
@@ -193,11 +195,11 @@ function OutboxPage() {
 	);
 	function setFrequency(value: number) {
 		setFrequencyValue(value);
-		setFrequencyRemote(value);
+		setFrequencyNetSend(value);
 	}
 	function setGain(value: number) {
 		setGainValue(value);
-		setGainRemote(value);
+		setGainNetSend(value);
 	}
 
 	useAnimationFrame(() => {
@@ -215,6 +217,7 @@ function OutboxPage() {
 				className="w-full h-full panel panel-black panel-opaque aspect-square rounded-full"
 				radius={gain * longRangeComm.maxSatelliteRange}
 				shouldRender={cardLoaded}
+				frequency={frequency}
 			/>
 
 			<div>
@@ -356,16 +359,24 @@ function OutboxPage() {
 function SatelliteMap({
 	className,
 	radius,
+	frequency,
 	shouldRender,
 }: {
 	className?: string;
 	radius: number;
+	frequency: number;
 	shouldRender: boolean;
 }) {
 	const { shipId } = useStation();
 
 	const [longRangeComm] = q.longRangeComm.get.useNetRequest({ shipId });
+	const [commSatellites] = q.longRangeComm.commSatellites.useNetRequest();
+	const [playerShip] = q.ship.player.useNetRequest({ clientId });
+	// Get the updates of the ship's position
+	q.pilot.stream.useDataStream({ systemId: null, shipId });
+
 	const range = longRangeComm.maxSatelliteRange;
+
 	return (
 		<div className={className}>
 			<Canvas
@@ -383,29 +394,127 @@ function SatelliteMap({
 					far: range * 2,
 				}}
 				frameloop={shouldRender ? "always" : "demand"}
+				className="rounded-full overflow-hidden"
 			>
-				<Suspense fallback={null}>
-					<group scale={[0.5, 0.5, 0.5]}>
-						<PlayerArrow />
-					</group>
-					<mesh scale={[radius, radius, radius]}>
-						<sphereGeometry />
-						<meshBasicMaterial
-							color={0x2288ff}
-							transparent
-							opacity={0.2}
-							depthWrite={false}
-						/>
-					</mesh>
-					<PolarGrid
-						rotation={[0, (2 * Math.PI) / 12, 0]}
-						args={[range, 12, range, 64, 0xffffff, 0xffffff]}
-					/>
-				</Suspense>
+				<SatelliteView
+					radius={radius}
+					range={range}
+					commSatellites={commSatellites}
+					frequency={frequency}
+					shipId={shipId}
+					systemPosition={playerShip.systemPosition}
+				/>
 			</Canvas>
 		</div>
 	);
 }
+
+interface CommSatellite {
+	id: number;
+	position: [number, number, number];
+	frequency: number;
+}
+const playerPosition = new Vector3();
+function SatelliteView({
+	radius,
+	range,
+	commSatellites,
+	frequency,
+	shipId,
+	systemPosition,
+}: {
+	radius: number;
+	range: number;
+	commSatellites: CommSatellite[];
+	frequency: number;
+	shipId: number;
+	systemPosition: { x: number; y: number; z: number } | null;
+}) {
+	const fixedRef = useRef<Group>(null);
+	const relativeRef = useRef<Group>(null);
+	const { interpolate } = useLiveQuery();
+	const LIGHT_YEAR_TO_LIGHT_MINUTE = 60 * 24 * 365.25;
+
+	useFrame((props) => {
+		if (!fixedRef.current) return;
+		const playerShip = interpolate(shipId);
+		if (!playerShip) return;
+
+		const { x, y, z, r } = playerShip;
+		fixedRef.current.position.set(0, 0, 0);
+		fixedRef.current.quaternion
+			.set(r.x, r.y, r.z, r.w)
+			.multiply(forwardQuaternion);
+
+		const camera = props.camera as OrthographicCamera;
+		camera.position
+			.set(0, range, 0)
+			.applyQuaternion(fixedRef.current.quaternion);
+
+		camera.quaternion.set(r.x, r.y, r.z, r.w);
+		camera.rotateX(-Math.PI / 2);
+		camera.rotateZ(Math.PI);
+		if (systemPosition) {
+			playerPosition.set(systemPosition.x, systemPosition.y, systemPosition.z);
+		} else {
+			playerPosition.set(x, y, z);
+		}
+		relativeRef.current?.position.copy(
+			playerPosition.multiplyScalar(1 / LIGHT_YEAR_TO_LIGHT_MINUTE).negate(),
+		);
+	});
+
+	return (
+		<Suspense fallback={null}>
+			<group ref={fixedRef}>
+				<group scale={[0.5, 0.5, 0.5]}>
+					<PlayerArrow />
+				</group>
+
+				<mesh scale={[radius, radius, radius]}>
+					<sphereGeometry />
+					<meshBasicMaterial
+						transparent
+						opacity={0.2}
+						color={0x2288ff}
+						depthWrite={false}
+					/>
+				</mesh>
+
+				<PolarGrid
+					rotation={[0, (2 * Math.PI) / 12, 0]}
+					args={[range, 12, range, 64, 0xffffff, 0xffffff]}
+				/>
+			</group>
+			<group ref={relativeRef}>
+				{commSatellites.map((c) => (
+					<SatelliteDot key={c.id} {...c} crewFrequency={frequency} />
+				))}
+			</group>
+		</Suspense>
+	);
+}
+
+function SatelliteDot({
+	position,
+	frequency,
+	crewFrequency,
+}: CommSatellite & { crewFrequency: number }) {
+	const frequencyDistance = Math.abs(frequency - crewFrequency) / 10;
+	const scale = Math.min(0.5, Math.max(1 - frequencyDistance, 0));
+	return (
+		<mesh position={position} scale={[scale, scale, scale]}>
+			<sphereGeometry args={[0.5]} />
+			<meshBasicMaterial
+				color={0xffffff}
+				transparent
+				opacity={scale}
+				depthWrite={false}
+			/>
+		</mesh>
+	);
+}
+
 function ComposePage() {
 	const { shipId, station } = useStation();
 
