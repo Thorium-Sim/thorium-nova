@@ -1,7 +1,10 @@
 import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
-import { clearAutopilotState } from "@thorium/utils/.server/ship/clearAutopilotState";
+import {
+	clearAutopilotState,
+	deactivateForwardAutopilot,
+} from "@thorium/utils/.server/ship/clearAutopilotState";
 import { z } from "zod";
 import type { Entity } from "@thorium/utils/ecs";
 import {
@@ -103,12 +106,7 @@ export const pilot = t.router({
 
 				// Deactivate autopilot when manually setting impulse speed
 				const ship = ctx.ecs.getEntityById(shipId);
-				if (ship?.components.autopilot?.forwardAutopilot) {
-					ship.updateComponent("autopilot", {
-						forwardAutopilot: false,
-					});
-					pubsub.publish.pilot.autopilot.get({ shipId });
-				}
+				if (ship) deactivateForwardAutopilot(ship);
 
 				system.updateComponent("isImpulseEngines", {
 					targetSpeed: speed,
@@ -187,12 +185,7 @@ export const pilot = t.router({
 
 				// Deactivate autopilot when manually setting warp factor
 				const ship = ctx.ecs.getEntityById(shipId);
-				if (ship?.components.autopilot?.forwardAutopilot) {
-					ship.updateComponent("autopilot", {
-						forwardAutopilot: false,
-					});
-					pubsub.publish.pilot.autopilot.get({ shipId });
-				}
+				if (ship) deactivateForwardAutopilot(ship);
 
 				system.updateComponent("isWarpEngines", {
 					currentWarpFactor: factor,
@@ -380,12 +373,7 @@ export const pilot = t.router({
 
 				// Deactivate autopilot when manually using direction thrusters
 				const ship = ctx.ecs.getEntityById(shipId);
-				if (ship?.components.autopilot?.forwardAutopilot) {
-					ship.updateComponent("autopilot", {
-						forwardAutopilot: false,
-					});
-					pubsub.publish.pilot.autopilot.get({ shipId });
-				}
+				if (ship) deactivateForwardAutopilot(ship);
 
 				const current = system.components.isThrusters.direction;
 				system.updateComponent("isThrusters", {
@@ -446,12 +434,7 @@ export const pilot = t.router({
 
 				// Deactivate autopilot when manually using rotation thrusters
 				const ship = ctx.ecs.getEntityById(shipId);
-				if (ship?.components.autopilot?.forwardAutopilot) {
-					ship.updateComponent("autopilot", {
-						forwardAutopilot: false,
-					});
-					pubsub.publish.pilot.autopilot.get({ shipId });
-				}
+				if (ship) deactivateForwardAutopilot(ship);
 
 				const current = system.components.isThrusters.rotationDelta;
 				system.updateComponent("isThrusters", {
