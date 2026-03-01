@@ -3,32 +3,18 @@ import type { ReactNode } from "react";
 import { q } from "@thorium/context/AppContext";
 import { CollisionCountdown } from "@thorium/ui/CollisionCountdown";
 import { useCardContext } from "@thorium/context/CardContext";
+import type { ShipAlert } from "@thorium/ecs-components/shipAlerts";
 
-type ServerAlert = {
-	id: string;
-	type: string;
-	priority: number;
-	message: string;
-	duration: number | null;
-	metadata: Record<string, unknown>;
-};
-
-type AlertContentRenderer = (alert: ServerAlert, cardLoaded: boolean) => ReactNode;
+type AlertContentRenderer = (alert: ShipAlert, cardLoaded: boolean) => ReactNode;
 
 const alertRenderers: Record<string, AlertContentRenderer> = {
 	collision: (alert, cardLoaded) => {
-		const { objectName, timeToCollision, baselineTimestamp } =
-			alert.metadata as {
-				objectName: string;
-				timeToCollision: number;
-				baselineTimestamp: number;
-			};
 		return (
 			<>
-				COLLISION WARNING — {objectName} —{" "}
+				Collision Warning — {alert.objectName} —{" "}
 				<CollisionCountdown
-					timeToCollision={timeToCollision}
-					baselineTimestamp={baselineTimestamp}
+					timeToCollision={alert.timeToCollision}
+					baselineTimestamp={alert.baselineTimestamp}
 					cardLoaded={cardLoaded}
 				/>
 			</>
@@ -36,7 +22,7 @@ const alertRenderers: Record<string, AlertContentRenderer> = {
 	},
 };
 
-function renderAlertContent(alert: ServerAlert, cardLoaded: boolean): ReactNode {
+function renderAlertContent(alert: ShipAlert, cardLoaded: boolean): ReactNode {
 	const renderer = alertRenderers[alert.type];
 	if (renderer) return renderer(alert, cardLoaded);
 	return alert.message;
@@ -57,7 +43,7 @@ export function useServerAlerts(
 	dismissWarning: (id: string) => void,
 ) {
 	const { cardLoaded } = useCardContext();
-	const [data] = q.pilot.shipAlerts.get.useNetRequest({ shipId });
+	const [data] = q.ship.shipAlerts.get.useNetRequest({ shipId });
 	const prevAlertIdsRef = useRef(new Set<string>());
 
 	useEffect(() => {

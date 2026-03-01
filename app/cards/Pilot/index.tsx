@@ -5,7 +5,7 @@ import { PilotZoomSlider } from "./PilotZoomSlider";
 import { CircleGridStoreProvider } from "./useCircleGridStore";
 import { ImpulseControls } from "./ImpulseControls";
 import { Joystick, LinearJoystick } from "@thorium/ui/Joystick";
-import type { ReactNode } from "react";
+import type { MutableRefObject, ReactNode } from "react";
 import type { Coordinates } from "@thorium/utils/unitTypes";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { q } from "@thorium/context/AppContext";
@@ -64,13 +64,16 @@ export function Pilot({ cardLoaded }: CardProps) {
 	});
 	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
 
-	const { showWarning, dismissWarning, displayedWarning, fadingOut } = useShipWarnings();
+	const { showWarning, dismissWarning, displayedWarning, isEntering, isExiting, onEntryComplete, onExitComplete } = useShipWarnings();
 
 	// Bridge server-side ship alerts (collision warnings, etc.) into the warning system
 	useServerAlerts(shipId, showWarning, dismissWarning);
 
 	// Detect when the course is unlocked server-side while forward autopilot was off
 	// (e.g., ship overshot the final waypoint with manual engine controls).
+	// userUnlockedRef distinguishes user-initiated unlocks (button/gamepad) from
+	// server-initiated unlocks (overshoot detection) so only the latter shows a warning.
+	const userUnlockedRef = useRef(false);
 	const prevLockedRef = useRef(autopilot.locked);
 	const prevForwardAutopilotRef = useRef(!!autopilot.forwardAutopilot);
 	useEffect(() => {
@@ -79,12 +82,16 @@ export function Pilot({ cardLoaded }: CardProps) {
 			!autopilot.locked &&
 			!prevForwardAutopilotRef.current
 		) {
-			showWarning({
-				id: "autopilot-deactivated",
-				priority: 5,
-				content: "AUTOPILOT DEACTIVATED",
-				duration: 5000,
-			});
+			if (userUnlockedRef.current) {
+				userUnlockedRef.current = false;
+			} else {
+				showWarning({
+					id: "course-lock-released",
+					priority: 5,
+					content: "Course Lock Released",
+					duration: 5000,
+				});
+			}
 		}
 		prevLockedRef.current = autopilot.locked;
 		prevForwardAutopilotRef.current = !!autopilot.forwardAutopilot;
@@ -101,7 +108,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 			showWarning({
 				id: "autopilot-deactivated",
 				priority: 5,
-				content: "AUTOPILOT DEACTIVATED",
+				content: "Autopilot Deactivated",
 				duration: 5000,
 			});
 			// Reset the guard after the warning duration so it can trigger again
@@ -156,7 +163,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 				</div>
 
 				<div className="h-full flex flex-col justify-between gap-2">
-					<LockOnButton />
+					<LockOnButton userUnlockedRef={userUnlockedRef} />
 					<div>
 						<div className="pilot-slider">
 							<PilotZoomSlider />
@@ -194,7 +201,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 					</div>
 				</div>
 			</div>
-			<ShipWarning warning={displayedWarning} fadingOut={fadingOut} />
+			<ShipWarning warning={displayedWarning} isEntering={isEntering} isExiting={isExiting} onEntryComplete={onEntryComplete} onExitComplete={onExitComplete} />
 		</CircleGridStoreProvider>
 	);
 }
@@ -236,7 +243,7 @@ function getInterstellarDistance(
 	return `${value.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${unit}`;
 }
 
-const LockOnButton = () => {
+const LockOnButton = ({ userUnlockedRef }: { userUnlockedRef: MutableRefObject<boolean> }) => {
 	const { cardLoaded } = useCardContext();
 	const {
 		shipId,
@@ -265,6 +272,7 @@ const LockOnButton = () => {
 	useGamepadPress("autopilot-lock-on", {
 		onDown: () => {
 			if (autopilot.locked) {
+				userUnlockedRef.current = true;
 				q.pilot.autopilot.unlockCourse.netSend({ shipId });
 			} else if (typeof waypoint === "number") {
 				q.pilot.autopilot.lockCourse.netSend({ shipId, waypointId: waypoint });
@@ -303,7 +311,10 @@ const LockOnButton = () => {
 				{autopilot.locked ? (
 					<Button
 						className="flex-auto btn-error"
-						onClick={() => q.pilot.autopilot.unlockCourse.netSend({ shipId })}
+						onClick={() => {
+							userUnlockedRef.current = true;
+							q.pilot.autopilot.unlockCourse.netSend({ shipId });
+						}}
 					>
 						Unlock Course
 					</Button>
@@ -337,7 +348,7 @@ const LockOnButton = () => {
 					</Button>
 				) : (
 					<Button
-						className="flex-auto btn-error animate-autopilot-pulse"
+						className="flex-auto btn-error deactivate-autopilot"
 						disabled={!autopilot.locked}
 						onClick={() => q.pilot.autopilot.deactivate.netSend({ shipId })}
 					>

@@ -4,14 +4,24 @@ import { useServerAlerts } from "@thorium/ui/useServerAlerts";
 
 export function CollisionWarningGizmo({ className }: { className?: string }) {
 	const { shipId } = useStation();
-	const { showWarning, dismissWarning, displayedWarning, fadingOut } =
-		useShipWarnings();
+	const {
+		showWarning,
+		dismissWarning,
+		displayedWarning,
+		isEntering,
+		isExiting,
+		onEntryComplete,
+		onExitComplete,
+	} = useShipWarnings();
 	useServerAlerts(shipId, showWarning, dismissWarning);
 
 	return (
 		<ShipWarning
 			warning={displayedWarning}
-			fadingOut={fadingOut}
+			isEntering={isEntering}
+			isExiting={isExiting}
+			onEntryComplete={onEntryComplete}
+			onExitComplete={onExitComplete}
 			mode="inline"
 			className={className}
 		/>

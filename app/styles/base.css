@@ -49,29 +49,6 @@ body {
 	}
 }
 
-@keyframes autopilot-pulse {
-	0%, 100% { opacity: 1; }
-	50% { opacity: 0.6; }
-}
-.animate-autopilot-pulse {
-	animation: autopilot-pulse 2s ease-in-out infinite;
-}
-
-@keyframes ship-warning-pulse {
-	0%, 100% { opacity: 1; }
-	50% { opacity: 0.7; }
-}
-@keyframes ship-warning-fade-out {
-	from { opacity: 1; }
-	to { opacity: 0; }
-}
-.animate-ship-warning {
-	animation: fadeIn 0.5s ease, ship-warning-pulse 2s ease-in-out 0.5s infinite;
-}
-.animate-ship-warning-out {
-	animation: ship-warning-fade-out 0.5s ease forwards;
-}
-
 body.drag-active * {
 	user-select: none;
 	cursor: grabbing;

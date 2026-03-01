@@ -341,25 +341,6 @@ export const pilot = t.router({
 				return input;
 			}),
 	}),
-	shipAlerts: t.router({
-		get: t.procedure
-			.input(z.object({ shipId: z.number() }))
-			.filter((publish: { shipId: number }, { input }) => {
-				if (publish && publish.shipId !== input.shipId) return false;
-				return true;
-			})
-			.autoPublish(
-				["shipAlerts"],
-				(entity) =>
-					entity.components.isPlayerShip && { shipId: entity.id },
-			)
-			.request(({ ctx, input }) => {
-				const ship = ctx.ecs.getEntityById(input.shipId);
-				return {
-					alerts: ship?.components.shipAlerts?.alerts ?? [],
-				};
-			}),
-	}),
 	thrusters: t.router({
 		setDirection: t.procedure
 			.meta({ event: true })

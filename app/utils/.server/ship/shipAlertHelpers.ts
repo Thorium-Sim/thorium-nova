@@ -2,21 +2,25 @@ import type { Entity } from "@thorium/utils/ecs";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import type { ShipAlert } from "@thorium/ecs-components/shipAlerts";
 
+/** Active duration timers keyed by `${entityId}:${alertId}` */
+const durationTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
 /**
  * Set or update a ship alert by id. If an alert with the same id already
  * exists it is replaced; otherwise a new alert is appended.
+ *
+ * When `duration` is non-null, a server-side timer auto-removes the alert
+ * after that many milliseconds to prevent stale alerts from stacking up.
  */
 export function setShipAlert(
 	entity: Entity,
-	alert: Omit<ShipAlert, "duration" | "metadata"> &
-		Partial<Pick<ShipAlert, "duration" | "metadata">>,
+	alert: Omit<ShipAlert, "duration"> & Partial<Pick<ShipAlert, "duration">>,
 ) {
 	const shipAlerts = entity.components.shipAlerts;
 	if (!shipAlerts) return;
 
 	const fullAlert: ShipAlert = {
 		duration: null,
-		metadata: {},
 		...alert,
 	};
 
@@ -29,7 +33,22 @@ export function setShipAlert(
 		shipAlerts.alerts.push(fullAlert);
 	}
 	entity.updateComponent("shipAlerts", { alerts: [...shipAlerts.alerts] });
-	pubsub.publish.pilot.shipAlerts.get({ shipId: entity.id });
+	pubsub.publish.ship.shipAlerts.get({ shipId: entity.id });
+
+	// Manage duration-based auto-removal
+	const timerKey = `${entity.id}:${alert.id}`;
+	const existingTimer = durationTimers.get(timerKey);
+	if (existingTimer) {
+		clearTimeout(existingTimer);
+		durationTimers.delete(timerKey);
+	}
+	if (fullAlert.duration != null) {
+		const timer = setTimeout(() => {
+			durationTimers.delete(timerKey);
+			clearShipAlert(entity, alert.id);
+		}, fullAlert.duration);
+		durationTimers.set(timerKey, timer);
+	}
 }
 
 /**
@@ -44,7 +63,15 @@ export function clearShipAlert(entity: Entity, alertId: string) {
 	);
 	if (idx === -1) return;
 
+	// Clean up any duration timer
+	const timerKey = `${entity.id}:${alertId}`;
+	const timer = durationTimers.get(timerKey);
+	if (timer) {
+		clearTimeout(timer);
+		durationTimers.delete(timerKey);
+	}
+
 	shipAlerts.alerts.splice(idx, 1);
 	entity.updateComponent("shipAlerts", { alerts: [...shipAlerts.alerts] });
-	pubsub.publish.pilot.shipAlerts.get({ shipId: entity.id });
+	pubsub.publish.ship.shipAlerts.get({ shipId: entity.id });
 }
