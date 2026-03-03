@@ -2,6 +2,7 @@ import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { spawnShip } from "@thorium/.server/spawners/ship";
 import { z } from "zod";
+import { alertTypes } from "@thorium/ecs-components/shipAlerts";
 import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
 import type { ECS, Entity } from "@thorium/utils/ecs";
 import {
@@ -284,6 +285,32 @@ export const ship = t.router({
 
 			destroyShip(ship);
 		}),
+	shipAlerts: t.router({
+		get: t.procedure
+			.input(
+				z.object({
+					shipId: z.number(),
+					types: z.array(alertTypes).optional(),
+				}),
+			)
+			.filter((publish: { shipId: number }, { input }) => {
+				if (publish && publish.shipId !== input.shipId) return false;
+				return true;
+			})
+			.autoPublish(
+				["shipAlerts"],
+				(entity) =>
+					entity.components.isPlayerShip && { shipId: entity.id },
+			)
+			.request(({ ctx, input }) => {
+				const ship = ctx.ecs.getEntityById(input.shipId);
+				const allAlerts = ship?.components.shipAlerts?.alerts ?? [];
+				const alerts = input.types
+					? allAlerts.filter((a) => input.types!.includes(a.type))
+					: allAlerts;
+				return { alerts };
+			}),
+	}),
 });
 
 function getPosition(

@@ -41,6 +41,7 @@ import { TorpedoMovementSystem } from "./TorpedoMovementSystem";
 import { WarpSystem } from "./WarpSystem";
 import { WaypointRemoveSystem } from "./WaypointRemoveSystem";
 import { FacingWaypointSystem } from "./FacingWaypointSystem";
+import { CollisionWarningSystem } from "./CollisionWarningSystem";
 import { CommSatelliteSystem } from "@thorium/.server/systems/CommSatelliteSystem";
 
 const systems = [
@@ -76,6 +77,7 @@ const systems = [
 	MainComputerDiagnosticSystem,
 	WaypointRemoveSystem,
 	FacingWaypointSystem,
+	CollisionWarningSystem,
 	HeatToCoolantSystem,
 	HeatDispersionSystem,
 	DamageCheckSystem,

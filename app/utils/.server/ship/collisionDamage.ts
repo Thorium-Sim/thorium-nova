@@ -1,5 +1,6 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import type { Entity } from "@thorium/utils/ecs";
+import { clearAutopilotState } from "@thorium/utils/.server/ship/clearAutopilotState";
 import { Vector3 } from "three";
 import {
 	gigaJouleToMegaWattHour,
@@ -205,16 +206,7 @@ export function destroyShip(entity: Entity) {
 		rotationDelta: { x: 0, y: 0, z: 0 },
 	});
 
-	entity.updateComponent("autopilot", {
-		destinationWaypointId: null,
-		desiredCoordinates: undefined,
-		desiredRotation: null,
-		desiredSolarSystemId: undefined,
-		path: [],
-		nextCoordinates: null,
-		rotationAutopilot: false,
-		forwardAutopilot: false,
-	});
+	clearAutopilotState(entity);
 	pubsub.publish.pilot.impulseEngines.get({
 		shipId: entity.id,
 		systemId: impulse.id,
