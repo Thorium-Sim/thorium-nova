@@ -63,35 +63,37 @@ export const longRangeComm = t.router({
 				maxSatelliteRange: lrcomm.components.isLongRangeComm.maxSatelliteRange,
 			};
 		}),
-	commSatellites: t.procedure.request(({ ctx }) => {
-		const satellites = ctx.ecs.componentCache.get("isCommSatellite") || [];
-		const output: {
-			id: number;
-			frequency: number;
-			radius: number;
-			position: [number, number, number];
-		}[] = [];
+	commSatellites: t.procedure
+		.autoPublish(["isCommSatellite"], (entity) => null)
+		.request(({ ctx }) => {
+			const satellites = ctx.ecs.componentCache.get("isCommSatellite") || [];
+			const output: {
+				id: number;
+				frequency: number;
+				radius: number;
+				position: [number, number, number];
+			}[] = [];
 
-		for (const satellite of satellites) {
-			const commSatellite = satellite.components.isCommSatellite;
-			if (!commSatellite) continue;
-			const commSatelliteSystem = getObjectSystem(satellite);
-			if (!commSatelliteSystem?.components.position) continue;
-			const { x, y, z } = commSatelliteSystem.components.position;
-			output.push({
-				id: satellite.id,
-				frequency: commSatellite.frequency,
-				radius: commSatellite.radius,
-				position: [
-					lightMinuteToLightYear(x),
-					lightMinuteToLightYear(y),
-					lightMinuteToLightYear(z),
-				],
-			});
-		}
+			for (const satellite of satellites) {
+				const commSatellite = satellite.components.isCommSatellite;
+				if (!commSatellite) continue;
+				const commSatelliteSystem = getObjectSystem(satellite);
+				if (!commSatelliteSystem?.components.position) continue;
+				const { x, y, z } = commSatelliteSystem.components.position;
+				output.push({
+					id: satellite.id,
+					frequency: commSatellite.frequency,
+					radius: commSatellite.radius,
+					position: [
+						lightMinuteToLightYear(x),
+						lightMinuteToLightYear(y),
+						lightMinuteToLightYear(z),
+					],
+				});
+			}
 
-		return output;
-	}),
+			return output;
+		}),
 	setFrequency: t.procedure
 		.input(z.object({ shipId: z.number(), frequency: z.number() }))
 		.send(({ ctx, input }) => {
@@ -158,7 +160,12 @@ export const longRangeComm = t.router({
 			});
 		}),
 	outgoingMessages: t.procedure
-		.input(z.object({ shipId: z.number(), all: z.boolean().optional() }))
+		.input(
+			z.object({
+				shipId: z.number(),
+				filter: z.enum(["pending", "sent", "all"]),
+			}),
+		)
 		.filter((publish: { shipId: number }, { ctx, input }) => {
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
@@ -173,7 +180,11 @@ export const longRangeComm = t.router({
 		.request(({ input, ctx }) => {
 			const messages: (Pick<
 				z.infer<typeof isLongRangeMessage>,
-				"message" | "senderStation" | "state" | "destinationId"
+				| "message"
+				| "senderStation"
+				| "state"
+				| "destinationId"
+				| "failureReason"
 			> & {
 				id: number;
 				destinationShipName: string;
@@ -187,12 +198,16 @@ export const longRangeComm = t.router({
 				if (message.components.isLongRangeMessage?.senderId !== input.shipId)
 					continue;
 				if (
-					!input.all &&
-					!["draft", "pending", "sending"].includes(
-						message.components.isLongRangeMessage.state,
-					)
+					input.filter === "sent" &&
+					message.components.isLongRangeMessage.state === "pending"
 				)
 					continue;
+				if (
+					input.filter === "pending" &&
+					message.components.isLongRangeMessage.state !== "pending"
+				)
+					continue;
+
 				const destinationId =
 					message.components.isLongRangeMessage.destinationId;
 				let destinationShipName =
@@ -211,6 +226,7 @@ export const longRangeComm = t.router({
 					destinationId: message.components.isLongRangeMessage.destinationId,
 					senderStation: message.components.isLongRangeMessage.senderStation,
 					state: message.components.isLongRangeMessage.state,
+					failureReason: message.components.isLongRangeMessage.failureReason,
 				});
 			}
 
@@ -338,7 +354,7 @@ export const longRangeComm = t.router({
 				senderId: z.number(),
 				destinationId: z.number(),
 				message: z.string(),
-				state: z.enum(["pending", "sent"]).optional(),
+				state: z.enum(["pending", "sending"]).optional(),
 				senderStation: z.string().optional(),
 				encoding: z.enum(["decoded", "waves", "replacement", "rotation"]),
 			}),
@@ -405,9 +421,13 @@ export const longRangeComm = t.router({
 					nextNodeId,
 					state: "sending",
 				});
-			} catch {
+			} catch (e) {
+				console.error(e);
 				message.removeComponent("position");
-				message.updateComponent("isLongRangeMessage", { state: "undelivered" });
+				message.updateComponent("isLongRangeMessage", {
+					state: "undelivered",
+					failureReason: "Failed to find route through communications network",
+				});
 			} finally {
 				pubsub.publish.longRangeComm.outgoingMessages({ shipId });
 			}
@@ -493,6 +513,10 @@ export function pickNextLongRangeMessageNode(
 		throw new Error(
 			"Unable to send long range message: Unable to find comm satellite route",
 		);
+
+	if (startId === closestEndNode.id) {
+		return startId;
+	}
 
 	// Create the graph and determine the path
 	const graph = generateSatelliteGraph(satellites);

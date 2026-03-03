@@ -58,13 +58,12 @@ export const isLongRangeMessage = z
 				"sending",
 				"failing",
 				"intercepted",
-				"sent",
-				"archived",
+				"delivered",
 				"deleted",
 				"undelivered",
 			])
 			.default("pending"),
-
+		failureReason: z.string().nullable().default(null),
 		// Decoding parameters
 		encoding: z
 			.union([

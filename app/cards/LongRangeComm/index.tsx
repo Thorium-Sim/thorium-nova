@@ -5,10 +5,12 @@ import { PolarGrid } from "@thorium/components/Starmap/PolarGrid";
 import Starfield from "@thorium/components/Starmap/Starfield";
 import { clientId, q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
+import type { isLongRangeMessage } from "@thorium/ecs-components/shipSystems";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
+import InfoTip from "@thorium/ui/InfoTip";
 import SearchableInput, {
 	DefaultResultLabel,
 } from "@thorium/ui/SearchableInput";
@@ -17,55 +19,44 @@ import SineWave from "@thorium/ui/SineWave";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { cn } from "@thorium/utils/cn";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { setCursor } from "@thorium/utils/setCursor";
 import throttle from "lodash.throttle";
-import { Suspense, useCallback, useRef, useState } from "react";
 import {
-	ComboBox,
-	Input,
-	Label,
-	ListBox,
-	ListBoxItem,
-	Popover,
-	Button as RAButton,
-	TextArea,
-} from "react-aria-components";
+	Suspense,
+	useCallback,
+	useImperativeHandle,
+	useRef,
+	useState,
+	Activity,
+} from "react";
+import { Label, TextArea } from "react-aria-components";
 import type { OrthographicCamera } from "three";
-import { type Group, Mesh, Vector3 } from "three";
+import { type Group, type Mesh, Vector3 } from "three";
+import type z from "zod";
 
-type Pages = "inbox" | "archive" | "sent" | "compose" | "outbox";
+type Pages = "inbox" | "sent" | "compose" | "outbox";
 export function LongRangeComm() {
-	const { shipId } = useStation();
-	const [incomingMessages] = q.longRangeComm.incomingMessages.useNetRequest({
-		shipId,
-	});
-	const [outgoingMessages] = q.longRangeComm.outgoingMessages.useNetRequest({
-		shipId,
-	});
-	const [currentPage, setCurrentPage] = useState<Pages>("outbox");
-
-	let page = <div />;
-	switch (currentPage) {
-		case "inbox":
-			page = <InboxPage />;
-			break;
-		case "archive":
-			page = <ArchivePage />;
-			break;
-		case "compose":
-			page = <ComposePage />;
-			break;
-		case "sent":
-			page = <SentPage />;
-			break;
-		case "outbox":
-			page = <OutboxPage />;
-			break;
-	}
+	const [currentPage, setCurrentPage] = useState<Pages>("sent");
 
 	return (
 		<div className="flex gap-4 h-full">
 			<Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
-			{page}
+			<Activity mode={currentPage === "inbox" ? "visible" : "hidden"}>
+				<InboxPage />
+			</Activity>
+			<Activity mode={currentPage === "compose" ? "visible" : "hidden"}>
+				<ComposePage />
+			</Activity>
+			<Activity mode={currentPage === "sent" ? "visible" : "hidden"}>
+				<SentPage />
+			</Activity>
+			<div
+				className={
+					currentPage === "outbox" ? "h-full" : "sr-only pointer-events-none"
+				}
+			>
+				<OutboxPage pageLoaded={currentPage === "outbox"} />
+			</div>
 		</div>
 	);
 }
@@ -79,13 +70,12 @@ function Sidebar({
 }) {
 	const { shipId } = useStation();
 
-	const [outgoingMessages] = q.longRangeComm.outgoingMessages.useNetRequest({
+	const [pendingMessages] = q.longRangeComm.outgoingMessages.useNetRequest({
 		shipId,
+		filter: "pending",
 	});
 
-	const outboxLabel = outgoingMessages.filter(
-		(f) => f.state === "pending",
-	).length;
+	const outboxLabel = pendingMessages.length;
 
 	return (
 		<div className="flex flex-col items-center gap-4">
@@ -97,26 +87,6 @@ function Sidebar({
 					onClick={() => setCurrentPage("inbox")}
 				>
 					<Icon name="inbox" />
-				</Button>
-			</Tooltip>
-			<Tooltip content="Sent" placement="right">
-				<Button
-					className={cn("btn-round btn-alert", {
-						active: currentPage === "sent",
-					})}
-					onClick={() => setCurrentPage("sent")}
-				>
-					<Icon name="send" />
-				</Button>
-			</Tooltip>
-			<Tooltip content="Archive" placement="right">
-				<Button
-					className={cn("btn-round btn-alert", {
-						active: currentPage === "archive",
-					})}
-					onClick={() => setCurrentPage("archive")}
-				>
-					<Icon name="archive" />
 				</Button>
 			</Tooltip>
 			<Tooltip content="Compose Message" placement="right">
@@ -136,10 +106,23 @@ function Sidebar({
 					})}
 					onClick={() => setCurrentPage("outbox")}
 				>
-					<Icon name="square-arrow-out-up-right" />
-					<div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 badge badge-error">
-						{outboxLabel}
-					</div>
+					<Icon name="archive" />
+
+					{outboxLabel > 0 ? (
+						<div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 badge badge-error rounded-full">
+							{outboxLabel}
+						</div>
+					) : null}
+				</Button>
+			</Tooltip>
+			<Tooltip content="Sent" placement="right">
+				<Button
+					className={cn("btn-round btn-alert", {
+						active: currentPage === "sent",
+					})}
+					onClick={() => setCurrentPage("sent")}
+				>
+					<Icon name="send" />
 				</Button>
 			</Tooltip>
 		</div>
@@ -149,10 +132,7 @@ function Sidebar({
 function InboxPage() {
 	return <div></div>;
 }
-function ArchivePage() {
-	return <div></div>;
-}
-function OutboxPage() {
+function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 	const { shipId } = useStation();
 	const { cardLoaded } = useCardContext();
 	const { interpolate } = useLiveQuery();
@@ -168,6 +148,7 @@ function OutboxPage() {
 	);
 	const [outgoingMessages] = q.longRangeComm.outgoingMessages.useNetRequest({
 		shipId,
+		filter: "pending",
 	});
 
 	const draggingRef = useRef(false);
@@ -175,7 +156,10 @@ function OutboxPage() {
 		longRangeComm.frequency || 276.25,
 	);
 	const [gain, setGainValue] = useState(longRangeComm.gain || 1);
-
+	const [selectedMessage, setSelectedMessage] = useState<number | null>(null);
+	const [selectedSatellite, setSelectedSatellite] = useState<number | null>(
+		null,
+	);
 	q.longRangeComm.systemStream.useDataStream({ shipId });
 
 	const powerBarRef = useRef<HTMLDivElement>(null);
@@ -207,26 +191,50 @@ function OutboxPage() {
 		if (!data || !powerBarRef.current) return;
 		const currentPower = data.y;
 		powerBarRef.current.style.height = `${(currentPower / longRangeComm.maxSafePower) * 100}%`;
-	}, cardLoaded);
+	}, cardLoaded && pageLoaded);
+
+	const scanningTextRef = useRef<HTMLDivElement>(null);
+	function updateSatelliteText(text: string) {
+		if (scanningTextRef.current) {
+			scanningTextRef.current.innerText = text;
+		}
+	}
 
 	return (
-		<div className="w-full grid grid-cols-[16rem_1fr_auto_4rem] gap-8">
-			<div className="panel max-w-64"></div>
+		<div className="w-full h-full grid grid-cols-[16rem_1fr_auto_4rem] gap-8">
+			<div className="flex flex-col h-full">
+				<h3>Outgoing Messages</h3>
+				<ul className="panel flex-auto">
+					{outgoingMessages.map((o) => (
+						<li
+							key={o.id}
+							className={cn("list-group-item cursor-pointer", {
+								selected: selectedMessage === o.id,
+							})}
+							onClick={() => setSelectedMessage(o.id)}
+						>
+							{o.destinationShipName}
+							<small className="block">{o.senderStation}</small>
+						</li>
+					))}
+				</ul>
+			</div>
 
 			<SatelliteMap
 				className="w-full h-full panel panel-black panel-opaque aspect-square rounded-full"
 				radius={gain * longRangeComm.maxSatelliteRange}
-				shouldRender={cardLoaded}
+				shouldRender={cardLoaded && pageLoaded}
 				frequency={frequency}
+				updateSatelliteText={updateSatelliteText}
+				selectedSatellite={selectedSatellite}
+				setSelectedSatellite={setSelectedSatellite}
 			/>
 
 			<div>
-				<p className="mt-8 text-4xl text-center font-bold mb-8">
-					Scanning For Satellites
-				</p>
 				<div className="w-full aspect-video panel panel-neutral panel-opaque">
 					<SineWave
 						className="faded-scroll-x"
+						shouldRender={cardLoaded && pageLoaded}
 						waves={[
 							{
 								amplitude: gain * 0.15,
@@ -315,16 +323,36 @@ function OutboxPage() {
 							{ once: true },
 						);
 					}}
-					onInput={(e) =>
+					onInput={(e) => {
 						setGain(
 							Math.min(
 								Number(e.currentTarget.value),
 								(longRangeComm.currentPower - longRangeComm.requiredPower) /
 									(longRangeComm.maxSafePower - longRangeComm.requiredPower),
 							),
-						)
-					}
+						);
+					}}
 				/>
+				<Button
+					className="w-full btn-lg mt-8 btn-info"
+					disabled={selectedMessage === null || selectedSatellite === null}
+					onClick={() => {
+						if (selectedMessage === null || selectedSatellite === null) return;
+						q.longRangeComm.sendMessage.netSend({
+							messageId: selectedMessage,
+							satelliteId: selectedSatellite,
+						});
+						setSelectedMessage(null);
+					}}
+				>
+					Send Message
+				</Button>
+				<p
+					className="mt-8 text-4xl text-center font-bold mb-8"
+					ref={scanningTextRef}
+				>
+					Scanning For Satellites
+				</p>
 			</div>
 			<div className="flex flex-col min-w-16">
 				<div className="flex-auto w-full border relative overflow-hidden">
@@ -361,11 +389,17 @@ function SatelliteMap({
 	radius,
 	frequency,
 	shouldRender,
+	updateSatelliteText,
+	selectedSatellite,
+	setSelectedSatellite,
 }: {
 	className?: string;
 	radius: number;
 	frequency: number;
 	shouldRender: boolean;
+	updateSatelliteText: (text: string) => void;
+	selectedSatellite: number | null;
+	setSelectedSatellite: (id: number | null) => void;
 }) {
 	const { shipId } = useStation();
 
@@ -386,23 +420,27 @@ function SatelliteMap({
 				gl={{ antialias: true, logarithmicDepthBuffer: true, alpha: true }}
 				orthographic
 				camera={{
-					position: [0, range, 0],
+					position: [0, range * 2, 0],
 					left: -range,
 					right: range,
 					top: range,
 					bottom: -range,
 					far: range * 2,
+					near: 0.01,
 				}}
 				frameloop={shouldRender ? "always" : "demand"}
 				className="rounded-full overflow-hidden"
 			>
 				<SatelliteView
-					radius={radius}
+					gainRadius={radius}
 					range={range}
 					commSatellites={commSatellites}
 					frequency={frequency}
 					shipId={shipId}
 					systemPosition={playerShip.systemPosition}
+					updateSatelliteText={updateSatelliteText}
+					selectedSatellite={selectedSatellite}
+					setSelectedSatellite={setSelectedSatellite}
 				/>
 			</Canvas>
 		</div>
@@ -414,26 +452,33 @@ interface CommSatellite {
 	position: [number, number, number];
 	frequency: number;
 }
-const playerPosition = new Vector3();
 function SatelliteView({
-	radius,
+	gainRadius,
 	range,
 	commSatellites,
 	frequency,
 	shipId,
 	systemPosition,
+	updateSatelliteText,
+	selectedSatellite,
+	setSelectedSatellite,
 }: {
-	radius: number;
+	gainRadius: number;
 	range: number;
 	commSatellites: CommSatellite[];
 	frequency: number;
 	shipId: number;
 	systemPosition: { x: number; y: number; z: number } | null;
+	updateSatelliteText: (text: string) => void;
+	selectedSatellite: number | null;
+	setSelectedSatellite: (id: number | null) => void;
 }) {
 	const fixedRef = useRef<Group>(null);
 	const relativeRef = useRef<Group>(null);
 	const { interpolate } = useLiveQuery();
 	const LIGHT_YEAR_TO_LIGHT_MINUTE = 60 * 24 * 365.25;
+	const [playerPosition] = useState(new Vector3());
+	const [meshes] = useState(new Map());
 
 	useFrame((props) => {
 		if (!fixedRef.current) return;
@@ -455,13 +500,49 @@ function SatelliteView({
 		camera.rotateX(-Math.PI / 2);
 		camera.rotateZ(Math.PI);
 		if (systemPosition) {
-			playerPosition.set(systemPosition.x, systemPosition.y, systemPosition.z);
+			playerPosition
+				.set(systemPosition.x, systemPosition.y, systemPosition.z)
+				.multiplyScalar(1 / LIGHT_YEAR_TO_LIGHT_MINUTE);
 		} else {
-			playerPosition.set(x, y, z);
+			playerPosition
+				.set(x, y, z)
+				.multiplyScalar(1 / LIGHT_YEAR_TO_LIGHT_MINUTE);
 		}
-		relativeRef.current?.position.copy(
-			playerPosition.multiplyScalar(1 / LIGHT_YEAR_TO_LIGHT_MINUTE).negate(),
-		);
+		relativeRef.current?.position.copy(playerPosition).negate();
+
+		let inRangeSatellites = 0;
+		for (const {
+			id,
+			position,
+			frequency: satelliteFrequency,
+		} of commSatellites) {
+			const shipDistance = Math.hypot(
+				playerPosition.x - position[0],
+				playerPosition.y - position[1],
+				playerPosition.z - position[2],
+			);
+			const inRange = shipDistance <= gainRadius;
+			if (inRange) inRangeSatellites++;
+			const frequencyDistance = Math.abs(satelliteFrequency - frequency) / 10;
+			const scale = Math.min(
+				0.5,
+				Math.max((1 - frequencyDistance) * (inRange ? 1 : 0), 0),
+			);
+
+			if ((!inRange || frequencyDistance > 0.75) && selectedSatellite === id) {
+				setSelectedSatellite(null);
+			}
+			lerpVector.setScalar(scale);
+			const mesh = meshes.get(id);
+			mesh?.scale.lerp(lerpVector, 0.1);
+		}
+		if (inRangeSatellites === 0) {
+			updateSatelliteText("Scanning For Satellites...");
+		} else {
+			updateSatelliteText(
+				`${inRangeSatellites} Satellite${inRangeSatellites === 1 ? "" : "s"} Found`,
+			);
+		}
 	});
 
 	return (
@@ -471,7 +552,7 @@ function SatelliteView({
 					<PlayerArrow />
 				</group>
 
-				<mesh scale={[radius, radius, radius]}>
+				<mesh scale={[gainRadius, gainRadius, gainRadius]}>
 					<sphereGeometry />
 					<meshBasicMaterial
 						transparent
@@ -488,27 +569,56 @@ function SatelliteView({
 			</group>
 			<group ref={relativeRef}>
 				{commSatellites.map((c) => (
-					<SatelliteDot key={c.id} {...c} crewFrequency={frequency} />
+					<SatelliteDot
+						key={c.id}
+						{...c}
+						ref={(ref) => {
+							if (!ref) return;
+							meshes.set(ref.id, ref.mesh);
+						}}
+						selected={c.id === selectedSatellite}
+						onClick={() => setSelectedSatellite(c.id)}
+					/>
 				))}
 			</group>
 		</Suspense>
 	);
 }
 
+const lerpVector = new Vector3();
 function SatelliteDot({
+	id,
 	position,
-	frequency,
-	crewFrequency,
-}: CommSatellite & { crewFrequency: number }) {
-	const frequencyDistance = Math.abs(frequency - crewFrequency) / 10;
-	const scale = Math.min(0.5, Math.max(1 - frequencyDistance, 0));
+	ref,
+	selected,
+	onClick,
+}: CommSatellite & {
+	ref: (params: { id: number; mesh: Mesh }) => void;
+	selected: boolean;
+	onClick: () => void;
+}) {
+	const meshRef = useRef<Mesh>(null);
+
+	useImperativeHandle(ref, () => {
+		return { id, mesh: meshRef.current! };
+	});
 	return (
-		<mesh position={position} scale={[scale, scale, scale]}>
+		<mesh
+			position={position}
+			ref={meshRef}
+			scale={[0, 0, 0]}
+			onClick={onClick}
+			onPointerOver={(e) => {
+				console.log("over");
+				setCursor("pointer");
+			}}
+			onPointerOut={(e) => {
+				setCursor("auto");
+			}}
+		>
 			<sphereGeometry args={[0.5]} />
 			<meshBasicMaterial
-				color={0xffffff}
-				transparent
-				opacity={scale}
+				color={selected ? 0xff8800 : 0xffffff}
 				depthWrite={false}
 			/>
 		</mesh>
@@ -582,6 +692,8 @@ function ComposePage() {
 							message,
 							encoding: value,
 						});
+						setContactId(-1);
+						setMessage("");
 					}}
 					hideIcon
 					items={[
@@ -612,6 +724,62 @@ function ComposePage() {
 		</div>
 	);
 }
+const stateMap: Record<z.infer<typeof isLongRangeMessage>["state"], string> = {
+	deleted: "Deleted",
+	delivered: "Delivered",
+	failing: "Failing",
+	intercepted: "Intercepted",
+	pending: "Pending",
+	sending: "Sending",
+	undelivered: "Undelivered",
+};
 function SentPage() {
-	return <div></div>;
+	const { shipId } = useStation();
+	const [outgoingMessages] = q.longRangeComm.outgoingMessages.useNetRequest({
+		filter: "sent",
+		shipId,
+	});
+	const [selectedMessageId, setSelectedMessageId] = useState<number | null>(
+		null,
+	);
+	const selectedMessage = outgoingMessages.find(
+		(o) => o.id === selectedMessageId,
+	);
+	return (
+		<div className="w-full h-full grid grid-cols-[16rem_1fr] gap-8">
+			<div className="flex flex-col h-full">
+				<h3>Sent Messages</h3>
+				<ul className="panel flex-auto">
+					{outgoingMessages.map((o) => (
+						<li
+							key={o.id}
+							className={cn("list-group-item cursor-pointer", {
+								selected: selectedMessageId === o.id,
+							})}
+							onClick={() => setSelectedMessageId(o.id)}
+						>
+							To: {o.destinationShipName}
+							<small className="block">From: {o.senderStation}</small>
+						</li>
+					))}
+				</ul>
+			</div>
+			{selectedMessage ? (
+				<div className="grid gap-x-2 gap-y-4 grid-cols-[auto_1fr] grid-rows-[auto_auto_auto_1fr]">
+					<p className="text-xl">To:</p>
+					<p className="text-xl">{selectedMessage.destinationShipName}</p>
+					<p className="text-xl">From:</p>
+					<p className="text-xl">{selectedMessage.senderStation}</p>
+					<p className="text-xl">State:</p>
+					<p className="text-xl">
+						{stateMap[selectedMessage.state]}
+						{selectedMessage.state === "undelivered" ? (
+							<InfoTip>{selectedMessage.failureReason}</InfoTip>
+						) : null}
+					</p>
+					<p className="col-span-2 panel p-4">{selectedMessage.message}</p>
+				</div>
+			) : null}
+		</div>
+	);
 }

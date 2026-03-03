@@ -72,6 +72,7 @@ const SineWave = ({
 	color = "red",
 	strokeWidth = 2,
 	orientation = "horizontal",
+	shouldRender,
 }: {
 	waves: { amplitude: number; frequency: number; phase: number }[];
 	callFrame?: (
@@ -83,6 +84,7 @@ const SineWave = ({
 	color?: string;
 	strokeWidth?: number;
 	orientation?: "vertical" | "horizontal";
+	shouldRender?: boolean;
 }) => {
 	const [ref, { width, height }] = useMeasure<HTMLDivElement>();
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -135,7 +137,7 @@ const SineWave = ({
 		ctx.stroke();
 
 		callFrame?.(ctx, width, height);
-	});
+	}, shouldRender !== false);
 	return (
 		<div ref={ref} className={`w-full h-full ${className}`}>
 			<canvas ref={canvasRef} className="w-full h-full" />
