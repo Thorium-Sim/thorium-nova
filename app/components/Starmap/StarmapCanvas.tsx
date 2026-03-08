@@ -36,12 +36,14 @@ export default function StarmapCanvas({
 	shouldRender = true,
 	alpha = true,
 	className = "",
+	fov = 45,
 	...props
 }: {
 	children: ReactNode;
 	shouldRender?: boolean;
 	alpha?: boolean;
 	className?: string;
+	fov?: number;
 } & CanvasProps) {
 	const client = useQueryClient();
 
@@ -61,7 +63,7 @@ export default function StarmapCanvas({
 				e.preventDefault();
 			}}
 			gl={{ antialias: true, logarithmicDepthBuffer: true, alpha }}
-			camera={{ fov: 45, near: 0.01, far: FAR }}
+			camera={{ fov, near: 0.01, far: FAR }}
 			frameloop={shouldRender ? "always" : "demand"}
 			{...props}
 		>

@@ -58,12 +58,17 @@ export function Viewscreen() {
 	const currentSystem = useStarmapStore((store) => store.currentSystem);
 	const [initialized, setInitialized] = useState(false);
 	const { shipId } = useStation();
+	const [camera] = q.viewscreen.camera.useNetRequest({ shipId });
 	q.viewscreen.stream.useDataStream({ shipId });
+
+	if (!camera) {
+		return <div className="w-full h-full bg-black" />;
+	}
 
 	return (
 		<div className="w-full h-full flex items-center justify-center text-white text-6xl">
 			<CircleGridStoreProvider>
-				<StarmapCanvas>
+				<StarmapCanvas fov={camera.fov}>
 					<ViewscreenEffects onDone={() => setInitialized(true)} />
 					{initialized ? (
 						<>

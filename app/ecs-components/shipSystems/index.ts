@@ -17,3 +17,4 @@ export * from "./isLegacySensors";
 export * from "./isLegacySensorScanning";
 export * from "./isNavigation";
 export * from "./isLongRangeComm";
+export * from "./isCameras";

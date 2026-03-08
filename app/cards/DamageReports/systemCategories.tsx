@@ -28,6 +28,7 @@ export const systemCategories: Record<
 	thrusters: "Propulsion",
 	torpedoLauncher: "Defense",
 	warpEngines: "Propulsion",
+	cameras: "Misc.",
 };
 
 export const systemSortValues = ["Name", "Type", "Offline", "Damage"];

@@ -55,7 +55,7 @@ function ShipSystemsInner() {
 								onClick={async () => {
 									const name = await prompt({
 										header: "Enter system name",
-										defaultValue: capitalCase(system.type),
+										defaultValue: system.type === "cameras" ? "Main Camera" : capitalCase(system.type),
 									});
 									if (typeof name !== "string") return;
 									try {

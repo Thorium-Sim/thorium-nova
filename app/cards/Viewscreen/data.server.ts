@@ -2,6 +2,21 @@ import { t } from "@thorium/.server/init/t";
 import { z } from "zod";
 
 export const viewscreen = t.router({
+	camera: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.request(({ ctx, input }) => {
+			if (!ctx.flight?.ecs) return null;
+			for (const [, entity] of ctx.flight.ecs.entities) {
+				if (
+					entity.components.isShipSystem?.type === "cameras" &&
+					entity.components.isShipSystem?.shipId === input.shipId &&
+					entity.components.isCameras
+				) {
+					return { fov: entity.components.isCameras.fov };
+				}
+			}
+			return null;
+		}),
 	system: t.procedure
 		.input(z.object({ clientId: z.string() }))
 		.autoPublish([], () => null)
