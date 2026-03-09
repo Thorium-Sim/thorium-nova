@@ -15,6 +15,7 @@ import { WarpStars } from "./WarpStars";
 import { CircleGridStoreProvider } from "@thorium/cards/Pilot/useCircleGridStore";
 import { useStation } from "@thorium/routes/station/useStation";
 import { Gizmos } from "./gizmos";
+import { NoSignal } from "./NoSignal";
 
 const forwardQuaternion = new Quaternion(0, 1, 0, 0);
 
@@ -62,7 +63,7 @@ export function Viewscreen() {
 	q.viewscreen.stream.useDataStream({ shipId });
 
 	if (!camera) {
-		return <div className="w-full h-full bg-black" />;
+		return <NoSignal />;
 	}
 
 	return (

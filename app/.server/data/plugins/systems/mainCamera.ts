@@ -8,19 +8,19 @@ import {
 	pluginFilter,
 	systemInput,
 } from "../utils";
-import type CamerasPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Cameras";
+import type MainCameraPlugin from "@thorium/.server/classes/Plugins/ShipSystems/MainCamera";
 
-export const cameras = t.router({
+export const mainCamera = t.router({
 	get: t.procedure
 		.input(systemInput)
 		.filter(pluginFilter)
 		.request(({ ctx, input }) => {
 			const system = getShipSystem({ input, ctx });
 
-			if (system.type !== "cameras")
-				throw new Error("System is not Cameras");
+			if (system.type !== "mainCamera")
+				throw new Error("System is not Main Camera");
 
-			return system as CamerasPlugin;
+			return system as MainCameraPlugin;
 		}),
 	update: t.procedure
 		.input(
@@ -34,7 +34,7 @@ export const cameras = t.router({
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
-			const [system, override] = getShipSystemForInput<"cameras">(
+			const [system, override] = getShipSystemForInput<"mainCamera">(
 				ctx,
 				input,
 			);

@@ -2,14 +2,14 @@ import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
-export default class CamerasPlugin extends BaseShipSystemPlugin {
+export default class MainCameraPlugin extends BaseShipSystemPlugin {
 	static flags: ShipSystemFlags[] = [];
-	type = "cameras" as const;
+	type = "mainCamera" as const;
 	fov: number;
 
-	constructor(params: Partial<CamerasPlugin>, plugin: BasePlugin) {
+	constructor(params: Partial<MainCameraPlugin>, plugin: BasePlugin) {
 		super(params, plugin);
 		this.fov = params.fov ?? 45;
 	}
 }
-registerSystem("cameras", CamerasPlugin);
+registerSystem("mainCamera", MainCameraPlugin);

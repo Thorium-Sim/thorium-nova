@@ -6,7 +6,7 @@ import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext"
 import { OverrideResetButton } from "../OverrideResetButton";
 import { Navigate } from "@thorium/components/Navigate";
 
-export default function CamerasConfig() {
+export default function MainCameraConfig() {
 	const { pluginId, systemId, shipId } = useParams() as {
 		pluginId: string;
 		systemId: string;
@@ -14,7 +14,7 @@ export default function CamerasConfig() {
 	};
 	const shipPluginId = useContext(ShipPluginIdContext);
 
-	const [system] = q.plugin.systems.cameras.get.useNetRequest({
+	const [system] = q.plugin.systems.mainCamera.get.useNetRequest({
 		pluginId,
 		systemId,
 		shipId,
@@ -28,7 +28,7 @@ export default function CamerasConfig() {
 		<fieldset key={key} className="flex-1 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
-					<div className="pb-2">
+					<div className="pb-2 flex">
 						<Input
 							label="Viewscreen FOV"
 							labelHidden={false}
@@ -41,7 +41,7 @@ export default function CamerasConfig() {
 							onBlur={(e: any) => {
 								const val = Number(e.target.value);
 								if (!Number.isNaN(val) && val >= 10 && val <= 120) {
-									q.plugin.systems.cameras.update.netSend({
+									q.plugin.systems.mainCamera.update.netSend({
 										pluginId,
 										systemId,
 										shipId,

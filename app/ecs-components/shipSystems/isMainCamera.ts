@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const isCameras = z
+export const isMainCamera = z
 	.object({
 		fov: z.number().default(45),
 	})

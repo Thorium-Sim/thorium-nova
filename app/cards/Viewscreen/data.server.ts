@@ -8,11 +8,11 @@ export const viewscreen = t.router({
 			if (!ctx.flight?.ecs) return null;
 			for (const [, entity] of ctx.flight.ecs.entities) {
 				if (
-					entity.components.isShipSystem?.type === "cameras" &&
+					entity.components.isShipSystem?.type === "mainCamera" &&
 					entity.components.isShipSystem?.shipId === input.shipId &&
-					entity.components.isCameras
+					entity.components.isMainCamera
 				) {
-					return { fov: entity.components.isCameras.fov };
+					return { fov: entity.components.isMainCamera.fov };
 				}
 			}
 			return null;
