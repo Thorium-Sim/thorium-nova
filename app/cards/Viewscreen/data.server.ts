@@ -4,6 +4,7 @@ import { z } from "zod";
 export const viewscreen = t.router({
 	camera: t.procedure
 		.input(z.object({ shipId: z.number() }))
+		.autoPublish([], () => null)
 		.request(({ ctx, input }) => {
 			if (!ctx.flight?.ecs) return null;
 			for (const [, entity] of ctx.flight.ecs.entities) {
