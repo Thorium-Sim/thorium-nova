@@ -120,6 +120,7 @@ export const longRangeComm = t.router({
 			lrcomm.updateComponent("isLongRangeComm", { antennaGain: input.gain });
 			pubsub.publish.longRangeComm.get({ shipId: input.shipId });
 		}),
+
 	systemStream: t.procedure
 		.input(z.object({ shipId: z.number() }))
 		.dataStream(({ input, entity }) => {
@@ -151,12 +152,13 @@ export const longRangeComm = t.router({
 			if (!lrcomm?.components.isLongRangeComm)
 				throw new Error("Long Range Comm system not found");
 			return lrcomm.components.isLongRangeComm.addressBook.map((m) => {
-				let name = m.name;
-				if (!name) {
-					const entity = ctx.ecs.getEntityById(m.contactId);
-					name = entity?.components.identity?.name || "Unknown";
-				}
-				return { id: m.contactId, name };
+				const entity = ctx.ecs.getEntityById(m.contactId);
+				return {
+					id: m.contactId,
+					name: m.name,
+					entityName: entity?.components.identity?.name || "Unknown",
+					actions: m.actions,
+				};
 			});
 		}),
 	outgoingMessages: t.procedure
@@ -185,9 +187,12 @@ export const longRangeComm = t.router({
 				| "state"
 				| "destinationId"
 				| "failureReason"
+				| "timestamp"
 			> & {
 				id: number;
 				destinationShipName: string;
+				encodedMessage: string;
+				encodingType: z.infer<typeof isLongRangeMessage>["encoding"]["type"];
 			})[] = [];
 			const lrcomm = getShipSystem(ctx.ecs, {
 				systemType: "longRangeComm",
@@ -223,10 +228,16 @@ export const longRangeComm = t.router({
 					id: message.id,
 					destinationShipName,
 					message: message.components.isLongRangeMessage.message,
+					encodedMessage: encodeMessage(
+						message.components.isLongRangeMessage.message,
+						message.components.isLongRangeMessage.encoding,
+					),
+					encodingType: message.components.isLongRangeMessage.encoding.type,
 					destinationId: message.components.isLongRangeMessage.destinationId,
 					senderStation: message.components.isLongRangeMessage.senderStation,
 					state: message.components.isLongRangeMessage.state,
 					failureReason: message.components.isLongRangeMessage.failureReason,
+					timestamp: message.components.isLongRangeMessage.timestamp,
 				});
 			}
 
@@ -329,6 +340,7 @@ export const longRangeComm = t.router({
 					},
 				],
 			});
+			pubsub.publish.longRangeComm.addressBook({ shipId: input.shipId });
 		}),
 	removeFromAddressBook: t.procedure
 		.input(
@@ -347,6 +359,7 @@ export const longRangeComm = t.router({
 					lrcomm.components.isLongRangeComm?.addressBook || []
 				).filter((a) => a.contactId !== input.contactId),
 			});
+			pubsub.publish.longRangeComm.addressBook({ shipId: input.shipId });
 		}),
 	composeMessage: t.procedure
 		.input(
@@ -356,11 +369,33 @@ export const longRangeComm = t.router({
 				message: z.string(),
 				state: z.enum(["pending", "sending"]).optional(),
 				senderStation: z.string().optional(),
-				encoding: z.enum(["decoded", "waves", "replacement", "rotation"]),
 			}),
 		)
 		.send(({ ctx, input }) => {
 			const message = new Entity();
+
+			message.addComponent("isLongRangeMessage", {
+				destinationId: input.destinationId,
+				senderId: input.senderId,
+				message: input.message,
+				state: input.state || "pending",
+				timestamp: Date.now(),
+				senderStation: input.senderStation,
+			});
+			ctx.ecs.addEntity(message);
+			pubsub.publish.longRangeComm.outgoingMessages({ shipId: input.senderId });
+		}),
+	setMessageEncoding: t.procedure
+		.input(
+			z.object({
+				messageId: z.number(),
+				encoding: z.enum(["decoded", "waves", "replacement", "rotation"]),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const message = ctx.ecs.getEntityById(input.messageId);
+			if (!message?.components.isLongRangeMessage)
+				throw new Error("Invalid Long Range Message");
 
 			let encoding: z.infer<typeof encodingSchema> = { type: "decoded" };
 			switch (input.encoding) {
@@ -379,17 +414,21 @@ export const longRangeComm = t.router({
 				case "decoded":
 					break;
 			}
-			message.addComponent("isLongRangeMessage", {
-				destinationId: input.destinationId,
-				senderId: input.senderId,
-				message: input.message,
-				state: input.state || "pending",
-				timestamp: Date.now(),
-				senderStation: input.senderStation,
+
+			message.updateComponent("isLongRangeMessage", {
 				encoding: generateEncoding(encoding, ctx.ecs.rng),
 			});
-			ctx.ecs.addEntity(message);
-			pubsub.publish.longRangeComm.outgoingMessages({ shipId: input.senderId });
+
+			const shipId = message.components.isLongRangeMessage.senderId;
+
+			pubsub.publish.longRangeComm.outgoingMessages({ shipId });
+
+			return {
+				encodedMessage: encodeMessage(
+					message.components.isLongRangeMessage.message,
+					message.components.isLongRangeMessage.encoding,
+				),
+			};
 		}),
 	sendMessage: t.procedure
 		.input(
@@ -434,7 +473,9 @@ export const longRangeComm = t.router({
 		}),
 });
 
-const letters = "abcdefghijklmnopqrstuvwxyz1234567890";
+const rotateCharacters =
+	"abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const replaceCharacters = "abcdefghijklmnopqrstuvwxyz1234567890";
 function generateEncoding(
 	encoding: z.infer<typeof encodingSchema>,
 	rng: RNG,
@@ -442,7 +483,7 @@ function generateEncoding(
 	switch (encoding.type) {
 		case "replacement": {
 			let requiredLetterMap = "";
-			const requiredLetters = letters.split("");
+			const requiredLetters = replaceCharacters.split("");
 			while (requiredLetters.length > 0) {
 				const letterIndex = Math.trunc(
 					rng.nextAsPercentage() * requiredLetters.length,
@@ -450,7 +491,7 @@ function generateEncoding(
 				const letter = requiredLetters.splice(letterIndex, 1);
 				requiredLetterMap = `${requiredLetterMap}${letter.join("")}`;
 			}
-			let letterMap = letters;
+			let letterMap = replaceCharacters;
 			for (let i = 0; i < encoding.includedLetters; i++) {
 				const splitLetters = letterMap.split("");
 				const correctLetterIndex = Math.trunc(
@@ -481,18 +522,116 @@ function generateEncoding(
 			}
 			return { type: "waves", waves };
 		}
-		case "decoded":
-			return { type: "decoded" };
 		case "rotation":
 			return {
 				type: "rotation",
 				rotation: 0,
 				requiredRotation: encoding.rotation,
 			};
+		case "decoded":
+			return { type: "decoded" };
 		default:
 			encoding satisfies never;
 			return { type: "decoded" };
 	}
+}
+
+function encodeMessage(
+	message: string,
+	encoding: z.infer<typeof isLongRangeMessage>["encoding"],
+) {
+	switch (encoding.type) {
+		case "rotation": {
+			const encodedMessage = rotateMessage(
+				message,
+				rotateCharacters.length - encoding.requiredRotation,
+			);
+			const decodedMessage = rotateMessage(encodedMessage, encoding.rotation);
+			return decodedMessage;
+		}
+		case "replacement": {
+			const encodedMessage = replaceMessage(
+				message,
+				replaceCharacters,
+				encoding.requiredLetterMap,
+			);
+			return replaceMessage(
+				encodedMessage,
+				encoding.requiredLetterMap,
+				encoding.letterMap,
+			);
+		}
+		case "waves": {
+			function getWavePoint(
+				i: number,
+				waves: { frequency: number; phase: number; amplitude: number }[],
+			) {
+				let point = 0;
+				for (const { frequency, phase, amplitude } of waves) {
+					point += Math.sin(i / 2 / frequency + phase) * amplitude;
+				}
+				return point;
+			}
+
+			console.log(encoding);
+
+			const output = message
+				.split("")
+				.map((letter, i) => {
+					const letterIndex = rotateCharacters.indexOf(letter);
+					if (letterIndex === -1) return letter;
+					const diff =
+						getWavePoint(
+							i,
+							encoding.waves.map((w) => ({
+								frequency: w.requiredFrequency,
+								amplitude: w.requiredAmplitude,
+								phase: w.requiredPhase,
+							})),
+						) - getWavePoint(i, encoding.waves);
+					const newLetterIndex =
+						Math.round(letterIndex + diff * rotateCharacters.length) %
+						rotateCharacters.length;
+					const newLetter = rotateCharacters.split("").at(newLetterIndex);
+					return newLetter;
+				})
+				.join("");
+
+			console.log(output);
+			return output;
+		}
+		case "decoded":
+			return message;
+	}
+}
+function rotateMessage(message: string, rotation: number) {
+	let output = "";
+	const rotatedCharacters =
+		rotateCharacters.slice(rotation) + rotateCharacters.slice(0, rotation);
+
+	for (const letter of message.split("")) {
+		const index = rotateCharacters.indexOf(letter);
+		if (index === -1) {
+			output = output + letter;
+			continue;
+		}
+		output = output + rotatedCharacters[index];
+	}
+	return output;
+}
+function replaceMessage(
+	message: string,
+	originalLetterMap: string,
+	letterMap: string,
+) {
+	const splitMessage = message.split("");
+	return splitMessage
+		.map((letter) => {
+			const mapIndex = originalLetterMap.indexOf(letter.toLowerCase());
+			if (mapIndex === -1) return letter;
+			return letterMap[mapIndex].toUpperCase();
+		})
+		.join("");
 }
 
 export function pickNextLongRangeMessageNode(

@@ -60,7 +60,7 @@ export default function AppContext({ children }: { children: ReactNode }) {
 	);
 }
 
-export const q = createLiveQueryReact<AppRouter>({
+export const [q, liveQueryClient] = createLiveQueryReact<AppRouter>({
 	headers: async () => ({
 		"client-id": clientId,
 	}),

@@ -1,4 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber";
+import { lrmStateMap } from "@thorium/cards/LongRangeComm/events";
 import { forwardQuaternion } from "@thorium/cards/Pilot/constants";
 import { PlayerArrow } from "@thorium/cards/Pilot/PlayerArrow";
 import { PolarGrid } from "@thorium/components/Starmap/PolarGrid";
@@ -28,15 +29,17 @@ import {
 	useRef,
 	useState,
 	Activity,
+	useMemo,
+	useEffect,
 } from "react";
 import { Label, TextArea } from "react-aria-components";
 import type { OrthographicCamera } from "three";
-import { type Group, type Mesh, Vector3 } from "three";
+import { BufferGeometry, type Group, type Mesh, Path, Vector3 } from "three";
 import type z from "zod";
 
 type Pages = "inbox" | "sent" | "compose" | "outbox";
 export function LongRangeComm() {
-	const [currentPage, setCurrentPage] = useState<Pages>("sent");
+	const [currentPage, setCurrentPage] = useState<Pages>("outbox");
 
 	return (
 		<div className="flex gap-4 h-full">
@@ -52,7 +55,9 @@ export function LongRangeComm() {
 			</Activity>
 			<div
 				className={
-					currentPage === "outbox" ? "h-full" : "sr-only pointer-events-none"
+					currentPage === "outbox"
+						? "h-full w-full"
+						: "sr-only pointer-events-none"
 				}
 			>
 				<OutboxPage pageLoaded={currentPage === "outbox"} />
@@ -156,10 +161,17 @@ function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 		longRangeComm.frequency || 276.25,
 	);
 	const [gain, setGainValue] = useState(longRangeComm.gain || 1);
-	const [selectedMessage, setSelectedMessage] = useState<number | null>(null);
+	const [selectedMessageId, setSelectedMessageId] = useState<number | null>(
+		null,
+	);
 	const [selectedSatellite, setSelectedSatellite] = useState<number | null>(
 		null,
 	);
+
+	const selectedMessage = outgoingMessages.find(
+		(m) => m.id === selectedMessageId,
+	);
+
 	q.longRangeComm.systemStream.useDataStream({ shipId });
 
 	const powerBarRef = useRef<HTMLDivElement>(null);
@@ -190,7 +202,7 @@ function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 		const data = interpolate(longRangeComm.id);
 		if (!data || !powerBarRef.current) return;
 		const currentPower = data.y;
-		powerBarRef.current.style.height = `${(currentPower / longRangeComm.maxSafePower) * 100}%`;
+		powerBarRef.current.style.width = `${(currentPower / longRangeComm.maxSafePower) * 100}%`;
 	}, cardLoaded && pageLoaded);
 
 	const scanningTextRef = useRef<HTMLDivElement>(null);
@@ -200,18 +212,29 @@ function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 		}
 	}
 
+	const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
+	const [encodedMessage, setEncodedMessage] = useState(
+		selectedMessage?.message || "",
+	);
 	return (
-		<div className="w-full h-full grid grid-cols-[16rem_1fr_auto_4rem] gap-8">
-			<div className="flex flex-col h-full">
+		<div className="w-full h-full grid grid-cols-[16rem_auto_1fr] overflow-hidden gap-8">
+			<div className="flex flex-col h-full row-span-2 min-h-0">
 				<h3>Outgoing Messages</h3>
-				<ul className="panel flex-auto">
+				<ul className="panel panel-alert flex-auto overflow-y-auto">
 					{outgoingMessages.map((o) => (
 						<li
 							key={o.id}
 							className={cn("list-group-item cursor-pointer", {
-								selected: selectedMessage === o.id,
+								selected: selectedMessageId === o.id,
 							})}
-							onClick={() => setSelectedMessage(o.id)}
+							onClick={() => {
+								setSelectedMessageId(o.id);
+								setEncodedMessage(o.encodedMessage);
+								for (const timeout of timeouts.current) {
+									clearTimeout(timeout);
+								}
+								timeouts.current = [];
+							}}
 						>
 							{o.destinationShipName}
 							<small className="block">{o.senderStation}</small>
@@ -219,9 +242,8 @@ function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 					))}
 				</ul>
 			</div>
-
 			<SatelliteMap
-				className="w-full h-full panel panel-black panel-opaque aspect-square rounded-full"
+				className="w-full panel panel-black panel-opaque aspect-square rounded-full"
 				radius={gain * longRangeComm.maxSatelliteRange}
 				shouldRender={cardLoaded && pageLoaded}
 				frequency={frequency}
@@ -230,8 +252,8 @@ function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 				setSelectedSatellite={setSelectedSatellite}
 			/>
 
-			<div>
-				<div className="w-full aspect-video panel panel-neutral panel-opaque">
+			<div className="row-span-2 flex flex-col gap-4 max-h-full  min-h-0">
+				<div className="w-full aspect-16/7 panel panel-neutral panel-opaque">
 					<SineWave
 						className="faded-scroll-x"
 						shouldRender={cardLoaded && pageLoaded}
@@ -278,108 +300,188 @@ function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 						}}
 					/>
 				</div>
-				<label htmlFor="frequency" className="block mt-4">
-					Frequency
-				</label>
-				<input
-					id="frequency"
-					type="range"
-					className="range range-primary w-full block"
-					min={100}
-					max={350}
-					step={0.25}
-					dir="rtl"
-					value={frequency}
-					onPointerDown={() => {
-						draggingRef.current = true;
-						window.addEventListener(
-							"pointerup",
-							() => {
-								draggingRef.current = false;
-							},
-							{ once: true },
-						);
+				<div>
+					<label htmlFor="frequency" className="block">
+						Frequency
+					</label>
+					<input
+						id="frequency"
+						type="range"
+						className="range range-primary w-full block"
+						min={100}
+						max={350}
+						step={0.25}
+						dir="rtl"
+						value={frequency}
+						onPointerDown={() => {
+							draggingRef.current = true;
+							window.addEventListener(
+								"pointerup",
+								() => {
+									draggingRef.current = false;
+								},
+								{ once: true },
+							);
+						}}
+						onInput={(e) => setFrequency(Number(e.currentTarget.value))}
+					/>
+				</div>
+				<div>
+					<label htmlFor="amplitude" className="block">
+						Gain
+					</label>
+					<input
+						id="amplitude"
+						type="range"
+						className="range range-error w-full block"
+						min={0}
+						max={1}
+						step={0.01}
+						value={gain}
+						onPointerDown={() => {
+							draggingRef.current = true;
+							window.addEventListener(
+								"pointerup",
+								() => {
+									draggingRef.current = false;
+								},
+								{ once: true },
+							);
+						}}
+						onInput={(e) => {
+							setGain(
+								Math.min(
+									Number(e.currentTarget.value),
+									(longRangeComm.currentPower - longRangeComm.requiredPower) /
+										(longRangeComm.maxSafePower - longRangeComm.requiredPower),
+								),
+							);
+						}}
+					/>
+				</div>
+				<div>
+					<p className="whitespace-nowrap">Power Level</p>
+					<div className="flex gap-2 h-4">
+						<div className="flex-auto w-full panel rounded-none panel-neutral relative overflow-hidden">
+							<Tooltip content="Required Power">
+								<div
+									className="absolute h-full border-green-400 border border-dashed z-10 translate-x-1/2 transition-all"
+									style={{
+										left: `${(longRangeComm.requiredPower / longRangeComm.maxSafePower) * 100}%`,
+									}}
+								/>
+							</Tooltip>
+							<Tooltip content="Alloted Power">
+								<div
+									className="absolute h-full border-warning border border-dashed z-10 translate-x-1/2 transition-all"
+									style={{
+										left: `${(longRangeComm.currentPower / longRangeComm.maxSafePower) * 100}%`,
+									}}
+								/>
+							</Tooltip>
+
+							<div
+								className="absolute h-full w-1/2 bottom-0  striped-gradient-horizontal striped-gradient-yellow-300 transition-all"
+								ref={powerBarRef}
+							></div>
+						</div>
+					</div>
+				</div>
+
+				<div className="panel panel-alert p-4 flex-auto whitespace-pre-line overflow-y-auto hyphens-auto wrap-anywhere">
+					{encodedMessage}
+				</div>
+				<Select
+					disabled={selectedMessage === null}
+					className="select-primary"
+					label="Encoding"
+					placeholder="Encoding"
+					labelHidden
+					selected={selectedMessage?.encodingType || "decoded"}
+					setSelected={async (value) => {
+						if (!value || !selectedMessage?.id) return;
+						const { encodedMessage } =
+							await q.longRangeComm.setMessageEncoding.netSend({
+								messageId: selectedMessage.id,
+								encoding: value,
+							});
+
+						for (const timeout of timeouts.current) {
+							clearTimeout(timeout);
+						}
+						timeouts.current = [];
+						if (selectedMessage) {
+							const randomOrder = Array.from({
+								length: selectedMessage.message.length,
+							})
+								.map((_, i) => i)
+								.sort(() => Math.random() - 0.5);
+							randomOrder.forEach((index, i) => {
+								let message = selectedMessage.message;
+								for (let j = 0; j < i; j++) {
+									const index = randomOrder[j];
+									message =
+										message.slice(0, Math.max(index - 1, 0)) +
+										encodedMessage[index] +
+										message.slice(index);
+								}
+								timeouts.current.push(
+									setTimeout(() => {
+										setEncodedMessage(message);
+									}, 10 * i),
+								);
+							});
+							timeouts.current.push(
+								setTimeout(
+									() => {
+										setEncodedMessage(encodedMessage);
+									},
+									10 * (randomOrder.length + 1),
+								),
+							);
+						}
 					}}
-					onInput={(e) => setFrequency(Number(e.currentTarget.value))}
-				/>
-				<label htmlFor="amplitude" className="block mt-4">
-					Gain
-				</label>
-				<input
-					id="amplitude"
-					type="range"
-					className="range range-error w-full block"
-					min={0}
-					max={1}
-					step={0.01}
-					value={gain}
-					onPointerDown={() => {
-						draggingRef.current = true;
-						window.addEventListener(
-							"pointerup",
-							() => {
-								draggingRef.current = false;
-							},
-							{ once: true },
-						);
-					}}
-					onInput={(e) => {
-						setGain(
-							Math.min(
-								Number(e.currentTarget.value),
-								(longRangeComm.currentPower - longRangeComm.requiredPower) /
-									(longRangeComm.maxSafePower - longRangeComm.requiredPower),
-							),
-						);
-					}}
+					items={[
+						{
+							id: "decoded",
+							label: "No Encoding",
+						},
+						{
+							id: "waves",
+							label: "Marconi Encoding",
+						},
+						{
+							id: "rotation",
+							label: "Haartsen Encoding",
+						},
+						{
+							id: "replacement",
+							label: "Lamarr Encoding",
+						},
+					]}
 				/>
 				<Button
-					className="w-full btn-lg mt-8 btn-info"
-					disabled={selectedMessage === null || selectedSatellite === null}
+					className="w-full btn-lg btn-info"
+					disabled={!selectedMessage || selectedSatellite === null}
 					onClick={() => {
-						if (selectedMessage === null || selectedSatellite === null) return;
+						if (!selectedMessage || selectedSatellite === null) return;
 						q.longRangeComm.sendMessage.netSend({
-							messageId: selectedMessage,
+							messageId: selectedMessage.id,
 							satelliteId: selectedSatellite,
 						});
-						setSelectedMessage(null);
+						setSelectedMessageId(null);
+						setEncodedMessage("");
 					}}
 				>
 					Send Message
 				</Button>
-				<p
-					className="mt-8 text-4xl text-center font-bold mb-8"
-					ref={scanningTextRef}
-				>
-					Scanning For Satellites
-				</p>
 			</div>
-			<div className="flex flex-col min-w-16">
-				<div className="flex-auto w-full border relative overflow-hidden">
-					<Tooltip content="Required Power">
-						<div
-							className="absolute w-full border-success border-2 border-dashed z-10 translate-y-1/2 transition-all"
-							style={{
-								bottom: `${(longRangeComm.requiredPower / longRangeComm.maxSafePower) * 100}%`,
-							}}
-						/>
-					</Tooltip>
-					<Tooltip content="Alloted Power">
-						<div
-							className="absolute w-full border-warning border-2 border-dashed z-10 translate-y-1/2 transition-all"
-							style={{
-								bottom: `${(longRangeComm.currentPower / longRangeComm.maxSafePower) * 100}%`,
-							}}
-						/>
-					</Tooltip>
-
-					<div
-						className="absolute w-full bottom-0 border-black border-2 striped-gradient striped-yellow h-1/2 transition-all"
-						ref={powerBarRef}
-					></div>
-				</div>
-				<p className="text-center">Power Level</p>
-			</div>
+			<p
+				className="mt-4 text-4xl text-center font-bold col-start-2"
+				ref={scanningTextRef}
+			>
+				Scanning For Satellites
+			</p>
 		</div>
 	);
 }
@@ -480,7 +582,23 @@ function SatelliteView({
 	const [playerPosition] = useState(new Vector3());
 	const [meshes] = useState(new Map());
 
-	useFrame((props) => {
+	const gainRadiusRef = useRef<Mesh>(null);
+	const pulseProgress = useRef(0);
+	useFrame((props, delta) => {
+		pulseProgress.current =
+			(pulseProgress.current + (delta * 2) / Math.max(gainRadius, 1)) % 1;
+		const sineProgress = Math.sin(pulseProgress.current * Math.PI);
+		gainRadiusRef.current?.scale.setScalar(
+			gainRadius * (sineProgress > 0 ? sineProgress : 0),
+		);
+		const gainRadiusMaterial = gainRadiusRef.current?.material;
+		if (gainRadiusMaterial && !Array.isArray(gainRadiusMaterial)) {
+			gainRadiusMaterial.opacity =
+				0.2 * Math.sin(pulseProgress.current * Math.PI + Math.PI / 2);
+		}
+	});
+
+	useFrame((props, delta) => {
 		if (!fixedRef.current) return;
 		const playerShip = interpolate(shipId);
 		if (!playerShip) return;
@@ -545,6 +663,12 @@ function SatelliteView({
 		}
 	});
 
+	const circleGeometry = useMemo(() => {
+		const path = new Path();
+		path.absarc(0, 0, 1, 0, Math.PI * 2, false);
+		const points = path.getPoints(120);
+		return new BufferGeometry().setFromPoints(points);
+	}, []);
 	return (
 		<Suspense fallback={null}>
 			<group ref={fixedRef}>
@@ -552,7 +676,7 @@ function SatelliteView({
 					<PlayerArrow />
 				</group>
 
-				<mesh scale={[gainRadius, gainRadius, gainRadius]}>
+				<mesh scale={0} ref={gainRadiusRef}>
 					<sphereGeometry />
 					<meshBasicMaterial
 						transparent
@@ -562,6 +686,13 @@ function SatelliteView({
 					/>
 				</mesh>
 
+				<lineLoop
+					geometry={circleGeometry}
+					rotation={[Math.PI / 2, 0, 0]}
+					scale={gainRadius}
+				>
+					<lineBasicMaterial color={0x2288ff} transparent opacity={0.8} />
+				</lineLoop>
 				<PolarGrid
 					rotation={[0, (2 * Math.PI) / 12, 0]}
 					args={[range, 12, range, 64, 0xffffff, 0xffffff]}
@@ -609,7 +740,6 @@ function SatelliteDot({
 			scale={[0, 0, 0]}
 			onClick={onClick}
 			onPointerOver={(e) => {
-				console.log("over");
 				setCursor("pointer");
 			}}
 			onPointerOut={(e) => {
@@ -645,7 +775,7 @@ function ComposePage() {
 					}}
 					ResultLabel={({ active, result, selected }) => (
 						<DefaultResultLabel active={active} selected={selected}>
-							<p>{result.name}</p>
+							<p>{result.name || result.entityName}</p>
 						</DefaultResultLabel>
 					)}
 					selected={addressBook.find((a) => a.id === contactId) || null}
@@ -675,64 +805,26 @@ function ComposePage() {
 				</Button>
 				{/* TODO February 18, 2026 - Make this work once we have the concept of files */}
 				{/* <Button className="flex-1 btn-info">Attach...</Button> */}
-				<Select
-					className="flex-1"
-					disabled={message.trim().length === 0 || contactId === -1}
-					buttonClassName="btn-success btn"
-					label="Queue Message"
-					placeholder="Queue Message"
-					labelHidden
-					selected={null}
-					setSelected={(value) => {
-						if (!value) return;
+				<Button
+					className="flex-1 btn-success"
+					onClick={() => {
 						q.longRangeComm.composeMessage.netSend({
 							senderId: shipId,
 							senderStation: station.name,
 							destinationId: contactId,
 							message,
-							encoding: value,
 						});
 						setContactId(-1);
 						setMessage("");
 					}}
-					hideIcon
-					items={[
-						{
-							header: "Select Message Encoding",
-							items: [
-								{
-									id: "decoded",
-									label: "No Encoding",
-								},
-								{
-									id: "waves",
-									label: "Marconi",
-								},
-								{
-									id: "rotation",
-									label: "Haartsen",
-								},
-								{
-									id: "replacement",
-									label: "Lamarr",
-								},
-							],
-						},
-					]}
-				/>
+				>
+					Queue Message
+				</Button>
 			</div>
 		</div>
 	);
 }
-const stateMap: Record<z.infer<typeof isLongRangeMessage>["state"], string> = {
-	deleted: "Deleted",
-	delivered: "Delivered",
-	failing: "Failing",
-	intercepted: "Intercepted",
-	pending: "Pending",
-	sending: "Sending",
-	undelivered: "Undelivered",
-};
+
 function SentPage() {
 	const { shipId } = useStation();
 	const [outgoingMessages] = q.longRangeComm.outgoingMessages.useNetRequest({
@@ -772,7 +864,7 @@ function SentPage() {
 					<p className="text-xl">{selectedMessage.senderStation}</p>
 					<p className="text-xl">State:</p>
 					<p className="text-xl">
-						{stateMap[selectedMessage.state]}
+						{lrmStateMap[selectedMessage.state]}
 						{selectedMessage.state === "undelivered" ? (
 							<InfoTip>{selectedMessage.failureReason}</InfoTip>
 						) : null}

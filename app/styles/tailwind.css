@@ -95,7 +95,7 @@
 		}
 	}
 	&.list-group-item-xs {
-		@apply text-sm;
+		@apply text-xs;
 		& > div,
 		& > a,
 		&:not(&:has(> div), &:has(> a)) {
@@ -129,7 +129,8 @@
 	}
 }
 
-.striped-gradient {
+@utility striped-gradient {
+	--striped-gradient-color: oklch(0.8691 0.3248 141.96);
 	background:
 		linear-gradient(
 			to bottom,
@@ -141,17 +142,30 @@
 	background-size:
 		5px 3px,
 		100%;
-	background-color: oklch(0.8691 0.3248 141.96);
+	background-color: var(--striped-gradient-color);
+}
+@utility striped-gradient-horizontal {
+	--striped-gradient-color: oklch(0.8691 0.3248 141.96);
+	background:
+		linear-gradient(
+			to right,
+			rgba(0, 0, 0, 0.5) 0%,
+			rgba(0, 0, 0, 0) 50%,
+			rgba(0, 0, 0, 0.5) 100%
+		),
+		linear-gradient(
+			to left,
+			rgba(0, 0, 0, 0.75) 0%,
+			rgba(255, 255, 255, 0) 100%
+		);
+	background-size:
+		3px 5px,
+		100%;
+	background-color: var(--striped-gradient-color);
 }
 
-.striped-red {
-	background-color: oklch(0.6558 0.2906 29.23);
-}
-.striped-cyan {
-	background-color: oklch(0.6308 0.2171 254.09);
-}
-.striped-yellow {
-	background-color: oklch(0.8949 0.2127 96.67);
+@utility striped-gradient-* {
+	--striped-gradient-color: --value(--color-*);
 }
 
 @layer utilities {

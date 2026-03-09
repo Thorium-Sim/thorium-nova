@@ -56,7 +56,7 @@ export default function Select<I extends string | number>({
 			placeholder={placeholder}
 			selectedKey={selected}
 			onSelectionChange={(selected) => setSelected(selected as I)}
-			className={className}
+			className={`select ${className}`}
 		>
 			<Label
 				className={cn(
@@ -117,6 +117,7 @@ function SelectItem<I extends string | number>(item: { id: I; label: string }) {
 			key={item.id}
 			id={item.id}
 			className="flex justify-between cursor-default py-0.5 px-2 min-w-fit data-[focused]:text-white data-[focused]:bg-blue-600 text-gray-100 outline-none rounded"
+			textValue={item.label}
 		>
 			{({ isSelected }) => (
 				<>

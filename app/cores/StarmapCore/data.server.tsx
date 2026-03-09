@@ -253,6 +253,8 @@ export const starmapCore = t.router({
 			if (!ctx.flight || !input.objectId) return null;
 			const entity = ctx.flight.ecs.getEntityById(input.objectId);
 			if (!entity) return null;
+			const position = getCompletePositionFromOrbit(entity);
+			const system = getObjectSystem(entity);
 			return {
 				id: entity.id,
 				components: objectDetailsComponents.reduce(
@@ -263,6 +265,12 @@ export const starmapCore = t.router({
 					},
 					{},
 				),
+				position: {
+					x: position.x,
+					y: position.y,
+					z: position.z,
+					parentId: system?.id || null,
+				},
 			};
 		}),
 	reputation: t.procedure

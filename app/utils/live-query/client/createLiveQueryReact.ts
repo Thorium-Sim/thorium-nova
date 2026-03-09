@@ -186,5 +186,5 @@ export function createLiveQueryReact<TRouter extends AnyRouter>(
 	const client = new LiveQueryClient(opts);
 	const proxy = createHooksInternalProxy<TRouter>(client);
 
-	return proxy;
+	return [proxy, client] as const;
 }

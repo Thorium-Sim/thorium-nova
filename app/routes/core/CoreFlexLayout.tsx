@@ -4,7 +4,7 @@ import CardProvider from "@thorium/context/CardContext";
 import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
 import { CoreFlexLayoutContext } from "./CoreFlexLayoutContext";
 
-import { Layout, type TabNode } from "@thorium/utils/FlexLayout";
+import { Layout, TabNode } from "@thorium/utils/FlexLayout";
 import { ErrorBoundary, useErrorBoundary } from "react-error-boundary";
 import { useStation } from "@thorium/routes/station/useStation";
 
@@ -16,7 +16,7 @@ export const CoreFlexLayout = forwardRef<Layout>((_, ref) => {
 	useEffect(() => {
 		setTimeout(() => {
 			setState({});
-		}, 500);
+		}, 100);
 	}, []);
 	return (
 		<Layout
@@ -64,4 +64,24 @@ function ErrorReset() {
 		}
 	}, [shipId, resetBoundary]);
 	return null;
+}
+
+export function useActiveCores() {
+	const { layoutModel } = useContext(CoreFlexLayoutContext);
+
+	const nodes: { component: string; activate: () => void }[] = [];
+	layoutModel.visitNodes((node) => {
+		const component = node.getAttr("component");
+		if (component) {
+			nodes.push({
+				component,
+				activate() {
+					if (node instanceof TabNode) {
+						node.activate();
+					}
+				},
+			});
+		}
+	});
+	return nodes;
 }

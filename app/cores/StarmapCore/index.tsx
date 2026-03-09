@@ -58,6 +58,17 @@ import {
 	Heading,
 	Button as RAButton,
 } from "react-aria-components";
+import useEventListener from "@thorium/hooks/useEventListener";
+import { useActiveCores } from "@thorium/routes/core/CoreFlexLayout";
+import { CoreComposeLongRangeMessageEvent } from "@thorium/cards/LongRangeComm/events";
+import { flushSync } from "react-dom";
+
+export class SelectStarmapEntityEvent extends Event {
+	static name = "select-starmap-entity";
+	constructor(public entityId: number) {
+		super(SelectStarmapEntityEvent.name);
+	}
+}
 
 export function StarmapCore() {
 	const ref = useRef<HTMLDivElement>(null);
@@ -115,6 +126,7 @@ function EditorPalette() {
 }
 
 function EditorProperties({ id }: { id: number }) {
+	const { shipId } = useStation();
 	const [starmapObject] = q.starmapCore.object.useNetRequest(
 		{
 			objectId: id,
@@ -192,6 +204,14 @@ function EditorProperties({ id }: { id: number }) {
 					<Suspense>
 						<ReputationEditor id={id} />
 					</Suspense>
+				</EditorDisclosure>
+			) : null}
+			{starmapObject?.id !== shipId ? (
+				<EditorDisclosure title="Long Range Comm">
+					<LongRangeCommEditor
+						id={id}
+						name={starmapObject?.components.identity?.name || ""}
+					/>
 				</EditorDisclosure>
 			) : null}
 		</>
@@ -360,6 +380,52 @@ function ReputationEditor({ id }: { id: number }) {
 					Pick
 				</Button>
 			</div>
+		</div>
+	);
+}
+function LongRangeCommEditor({ id, name }: { id: number; name: string }) {
+	const { shipId } = useStation();
+	const activeCores = useActiveCores();
+	const [addressBook] = q.longRangeComm.addressBook.useNetRequest({ shipId });
+	const prompt = usePrompt();
+	const longRangeComposerComponent = activeCores.find(
+		(c) => c.component === "LongRangeCommComposerCore",
+	);
+	return (
+		<div className="mt-2 flex gap-1">
+			{!addressBook.some((a) => a.id === id) ? (
+				<Button
+					className="btn-info btn-xs flex-auto"
+					onClick={async () => {
+						const contactName = await prompt({
+							header:
+								"What is the name shown for this contact in the address book?",
+							defaultValue: name,
+						});
+						await q.longRangeComm.addToAddressBook.netSend({
+							shipId,
+							contactId: id,
+							name: contactName,
+						});
+					}}
+				>
+					Add to Address Book
+				</Button>
+			) : null}
+			{longRangeComposerComponent ? (
+				<Button
+					title="Send Long Range Message"
+					className="btn-success btn-xs flex-auto"
+					onClick={() => {
+						flushSync(() => {
+							longRangeComposerComponent.activate();
+						});
+						window.dispatchEvent(new CoreComposeLongRangeMessageEvent(id));
+					}}
+				>
+					Send LRM
+				</Button>
+			) : null}
 		</div>
 	);
 }
@@ -711,8 +777,30 @@ function StarmapCoreCanvasHooks() {
 	useCancelFollow();
 	useFollowEntity();
 	useCalculateVerticalDistance();
+	useSelectEntityEvent();
 
 	return null;
+}
+
+function useSelectEntityEvent() {
+	const useStarmapStore = useGetStarmapStore();
+
+	useEventListener<SelectStarmapEntityEvent>(
+		SelectStarmapEntityEvent.name,
+		async (event) => {
+			const starmapObject = await q.starmapCore.object.netRequest({
+				objectId: event.entityId,
+			});
+
+			useStarmapStore.setState({ selectedObjectIds: [event.entityId] });
+			if (starmapObject) {
+				await useStarmapStore
+					.getState()
+					.setCurrentSystem(starmapObject.position.parentId);
+				useStarmapStore.getState().setCameraFocus(starmapObject.position);
+			}
+		},
+	);
 }
 
 const startPoint = new Vector3();
