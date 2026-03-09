@@ -21,8 +21,8 @@ export function NoSignal() {
 						/>
 					))}
 				</div>
-				<span className="block text-white text-3xl tracking-[0.3em] font-bold text-center mt-4">
-					NO SIGNAL FOUND
+				<span className="block text-white text-3xl tracking-[0.3em] font-bold text-center mt-4 uppercase">
+					No Signal Found
 				</span>
 				<p className="text-white/60 text-sm tracking-widest text-center mt-2 uppercase">
 					Main Camera System Missing
