@@ -1,12 +1,15 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { lrmStateMap } from "@thorium/cards/LongRangeComm/events";
+import type { AppRouter } from "@thorium/.server/init/router";
+import {
+	lrmStateMap,
+	replaceCharacters,
+	rotateCharacters,
+} from "@thorium/cards/LongRangeComm/events";
 import { forwardQuaternion } from "@thorium/cards/Pilot/constants";
 import { PlayerArrow } from "@thorium/cards/Pilot/PlayerArrow";
 import { PolarGrid } from "@thorium/components/Starmap/PolarGrid";
-import Starfield from "@thorium/components/Starmap/Starfield";
 import { clientId, q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
-import type { isLongRangeMessage } from "@thorium/ecs-components/shipSystems";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
@@ -19,8 +22,13 @@ import Select from "@thorium/ui/Select";
 import SineWave from "@thorium/ui/SineWave";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { cn } from "@thorium/utils/cn";
+import type {
+	inferProcedureInput,
+	inferTransformedProcedureOutput,
+} from "@thorium/utils/live-query/.server/types";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { setCursor } from "@thorium/utils/setCursor";
+import { fromDate } from "dot-beat-time";
 import throttle from "lodash.throttle";
 import {
 	Suspense,
@@ -30,16 +38,14 @@ import {
 	useState,
 	Activity,
 	useMemo,
-	useEffect,
 } from "react";
 import { Label, TextArea } from "react-aria-components";
 import type { OrthographicCamera } from "three";
 import { BufferGeometry, type Group, type Mesh, Path, Vector3 } from "three";
-import type z from "zod";
 
 type Pages = "inbox" | "sent" | "compose" | "outbox";
 export function LongRangeComm() {
-	const [currentPage, setCurrentPage] = useState<Pages>("outbox");
+	const [currentPage, setCurrentPage] = useState<Pages>("inbox");
 
 	return (
 		<div className="flex gap-4 h-full">
@@ -79,19 +85,30 @@ function Sidebar({
 		shipId,
 		filter: "pending",
 	});
+	const [encodedMessages] = q.longRangeComm.incomingMessages.useNetRequest({
+		shipId,
+	});
 
 	const outboxLabel = pendingMessages.length;
+	const inboxLabel = encodedMessages.filter(
+		(e) => !isDecoded(e.encoding),
+	).length;
 
 	return (
 		<div className="flex flex-col items-center gap-4">
 			<Tooltip content="Inbox" placement="right">
 				<Button
-					className={cn("btn-round btn-alert", {
+					className={cn("relative btn-round btn-alert", {
 						active: currentPage === "inbox",
 					})}
 					onClick={() => setCurrentPage("inbox")}
 				>
 					<Icon name="inbox" />
+					{inboxLabel > 0 ? (
+						<div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 badge badge-error rounded-full">
+							{inboxLabel}
+						</div>
+					) : null}
 				</Button>
 			</Tooltip>
 			<Tooltip content="Compose Message" placement="right">
@@ -134,8 +151,266 @@ function Sidebar({
 	);
 }
 
+function isDecoded(
+	encoding: inferTransformedProcedureOutput<
+		AppRouter["longRangeComm"]["incomingMessages"]
+	>[number]["encoding"],
+) {
+	switch (encoding.type) {
+		case "rotation":
+			return encoding.rotation === encoding.requiredRotation;
+		case "replacement":
+			return encoding.letterMap === encoding.requiredLetterMap;
+		case "waves":
+			return encoding.waves.every(
+				(w) =>
+					w.amplitude === w.requiredAmplitude &&
+					w.frequency === w.requiredFrequency &&
+					w.phase === w.requiredPhase,
+			);
+		case "decoded":
+			return true;
+	}
+}
+
 function InboxPage() {
-	return <div></div>;
+	const { shipId } = useStation();
+	const [incomingMessages] = q.longRangeComm.incomingMessages.useNetRequest({
+		shipId,
+	});
+
+	const [selectedMessageId, setSelectedMessageId] = useState<number | null>(
+		null,
+	);
+	const selectedMessage = incomingMessages.find(
+		(s) => s.id === selectedMessageId,
+	);
+
+	const [encodedMessage, setEncodedMessage] = useRandomCharacterState(
+		selectedMessage?.encodedMessage || "",
+	);
+
+	const [localDecoding, setLocalDecoding] = useState<
+		| inferProcedureInput<
+				AppRouter["longRangeComm"]["updateMessageDecoding"]
+		  >["decoding"]
+		| undefined
+	>(selectedMessage?.encoding);
+
+	const updateMessageDecoding = useMemo(
+		() =>
+			async (
+				messageId: number,
+				decoding: inferProcedureInput<
+					AppRouter["longRangeComm"]["updateMessageDecoding"]
+				>["decoding"],
+			) => {
+				const { encodedMessage: newMessage } =
+					await q.longRangeComm.updateMessageDecoding.netSend({
+						messageId,
+						decoding,
+					});
+
+				return newMessage;
+			},
+		[],
+	);
+
+	return (
+		<div className="w-full h-full grid grid-cols-[16rem_1fr] grid-rows-2 overflow-hidden gap-8">
+			<div className="flex flex-col h-full row-span-2 min-h-0">
+				<h3>Incoming Messages</h3>
+				<ul className="panel panel-alert flex-auto overflow-y-auto">
+					{incomingMessages.map((m) => (
+						<li
+							key={m.id}
+							className={cn(
+								"list-group-item cursor-pointer flex items-center",
+								{
+									selected: selectedMessageId === m.id,
+									"border-error": m.destinationId !== shipId,
+								},
+							)}
+							onClick={() => {
+								setSelectedMessageId(m.id);
+								const selectedMessage = incomingMessages.find(
+									(s) => s.id === m.id,
+								);
+								const message = selectedMessage?.encodedMessage || "";
+								setEncodedMessage(message, message, true);
+								setLocalDecoding(selectedMessage?.encoding);
+							}}
+						>
+							<div className="flex-auto">
+								{m.senderShipName}
+								{m.destinationId !== shipId ? (
+									<small>To: {m.destinationShipName}</small>
+								) : null}
+							</div>
+							<div>{fromDate(new Date(m.timestamp))}</div>
+						</li>
+					))}
+				</ul>
+			</div>
+			<div>
+				{selectedMessage ? (
+					localDecoding?.type === "rotation" ? (
+						<RotationDecoder
+							rotation={localDecoding.rotation}
+							updateMessageDecoding={async (decoding) => {
+								setLocalDecoding(decoding);
+								const newMessage = await updateMessageDecoding(
+									selectedMessage.id,
+									decoding,
+								);
+								if (newMessage) {
+									setEncodedMessage(encodedMessage, newMessage);
+								}
+							}}
+						/>
+					) : localDecoding?.type === "replacement" ? (
+						<ReplacementDecoder
+							letterMap={localDecoding.letterMap}
+							updateMessageDecoding={async (decoding) => {
+								setLocalDecoding(decoding);
+								const newMessage = await updateMessageDecoding(
+									selectedMessage.id,
+									decoding,
+								);
+								if (newMessage) {
+									setEncodedMessage(newMessage, newMessage, true);
+								}
+							}}
+						/>
+					) : null
+				) : null}
+			</div>
+			<div className="panel panel-alert w-full p-4 text-lg whitespace-pre-line overflow-y-auto">
+				{encodedMessage}
+			</div>
+		</div>
+	);
+}
+
+function RotationDecoder({
+	rotation,
+	updateMessageDecoding,
+}: {
+	rotation: number;
+	updateMessageDecoding: (
+		decoding: Extract<
+			inferProcedureInput<
+				AppRouter["longRangeComm"]["updateMessageDecoding"]
+			>["decoding"],
+			{ type: "rotation" }
+		>,
+	) => Promise<void>;
+}) {
+	return (
+		<div className="flex flex-col justify-center h-full gap-8">
+			<div
+				className="grid text-xl"
+				style={{
+					gridTemplateColumns: `repeat(${rotateCharacters.length}, minmax(0, 1fr))`,
+				}}
+			>
+				<div className="contents">
+					{rotateCharacters.split("").map((l) => (
+						<span
+							key={l}
+							className="not-last:border-r border-white/50 text-center"
+						>
+							{l}
+						</span>
+					))}
+				</div>
+				<div className="contents">
+					{(
+						rotateCharacters.slice(rotation) +
+						rotateCharacters.slice(0, rotation)
+					)
+						.split("")
+						.map((l) => (
+							<span
+								key={l}
+								className="not-last:border-r border-white/50 text-center"
+							>
+								{l}
+							</span>
+						))}
+				</div>
+			</div>
+			<input
+				type="range"
+				className="range range-primary range-xl w-full"
+				min={0}
+				max={rotateCharacters.length - 1}
+				step={1}
+				value={rotateCharacters.length - rotation}
+				onInput={async (event) =>
+					updateMessageDecoding({
+						type: "rotation",
+						rotation:
+							rotateCharacters.length - Number(event.currentTarget.value),
+					})
+				}
+			/>
+		</div>
+	);
+}
+
+function ReplacementDecoder({
+	letterMap,
+	updateMessageDecoding,
+}: {
+	letterMap: string;
+	updateMessageDecoding: (
+		decoding: Extract<
+			inferProcedureInput<
+				AppRouter["longRangeComm"]["updateMessageDecoding"]
+			>["decoding"],
+			{ type: "replacement" }
+		>,
+	) => Promise<void>;
+}) {
+	console.log(letterMap);
+	return (
+		<div className="grid grid-cols-9 grid-rows-4 grid-flow-col-dense items-center h-full gap-8 py-4">
+			{replaceCharacters.split("").map((l, i) => (
+				<div key={l} className="flex gap-2">
+					<div className="p-2 panel w-[3ch] text-center">{l}</div>
+					<input
+						className={cn("input w-[3ch] p-2 h-full text-center text-base", {
+							"input-error":
+								letterMap.indexOf(letterMap[i]) !==
+								letterMap.lastIndexOf(letterMap[i]),
+							"input-alert":
+								letterMap.indexOf(letterMap[i]) ===
+								letterMap.lastIndexOf(letterMap[i]),
+						})}
+						defaultValue={letterMap[i]}
+						maxLength={1}
+						onChange={(event) => {
+							const newLetterMap = letterMap.split("");
+							const newChar = event.currentTarget.value
+								.slice(0, 1)
+								.toLowerCase()
+								.trim();
+							if (newChar) {
+								newLetterMap[i] = newChar;
+								updateMessageDecoding({
+									type: "replacement",
+									letterMap: newLetterMap
+										.slice(0, replaceCharacters.length)
+										.join(""),
+								});
+							}
+						}}
+					/>
+				</div>
+			))}
+		</div>
+	);
 }
 function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 	const { shipId } = useStation();
@@ -212,10 +487,8 @@ function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 		}
 	}
 
-	const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
-	const [encodedMessage, setEncodedMessage] = useState(
-		selectedMessage?.message || "",
-	);
+	const [encodedMessage, setEncodedMessage] = useRandomCharacterState();
+
 	return (
 		<div className="w-full h-full grid grid-cols-[16rem_auto_1fr] overflow-hidden gap-8">
 			<div className="flex flex-col h-full row-span-2 min-h-0">
@@ -229,11 +502,7 @@ function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 							})}
 							onClick={() => {
 								setSelectedMessageId(o.id);
-								setEncodedMessage(o.encodedMessage);
-								for (const timeout of timeouts.current) {
-									clearTimeout(timeout);
-								}
-								timeouts.current = [];
+								setEncodedMessage(o.encodedMessage, o.encodedMessage, true);
 							}}
 						>
 							{o.destinationShipName}
@@ -405,41 +674,7 @@ function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 								messageId: selectedMessage.id,
 								encoding: value,
 							});
-
-						for (const timeout of timeouts.current) {
-							clearTimeout(timeout);
-						}
-						timeouts.current = [];
-						if (selectedMessage) {
-							const randomOrder = Array.from({
-								length: selectedMessage.message.length,
-							})
-								.map((_, i) => i)
-								.sort(() => Math.random() - 0.5);
-							randomOrder.forEach((index, i) => {
-								let message = selectedMessage.message;
-								for (let j = 0; j < i; j++) {
-									const index = randomOrder[j];
-									message =
-										message.slice(0, Math.max(index - 1, 0)) +
-										encodedMessage[index] +
-										message.slice(index);
-								}
-								timeouts.current.push(
-									setTimeout(() => {
-										setEncodedMessage(message);
-									}, 10 * i),
-								);
-							});
-							timeouts.current.push(
-								setTimeout(
-									() => {
-										setEncodedMessage(encodedMessage);
-									},
-									10 * (randomOrder.length + 1),
-								),
-							);
-						}
+						setEncodedMessage(selectedMessage.message, encodedMessage);
 					}}
 					items={[
 						{
@@ -470,7 +705,7 @@ function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 							satelliteId: selectedSatellite,
 						});
 						setSelectedMessageId(null);
-						setEncodedMessage("");
+						setEncodedMessage("", "");
 					}}
 				>
 					Send Message
@@ -484,6 +719,58 @@ function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 			</p>
 		</div>
 	);
+}
+
+function useRandomCharacterState(defaultMessage: string = "") {
+	const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
+	const [encodedMessage, setEncodedMessage] = useState(defaultMessage);
+
+	function setMessage(
+		previousMessage: string,
+		nextMessage: string,
+		immediate?: boolean,
+	) {
+		for (const timeout of timeouts.current) {
+			clearTimeout(timeout);
+		}
+		timeouts.current = [];
+
+		if (immediate || !nextMessage) {
+			setEncodedMessage(nextMessage);
+			return;
+		}
+
+		const randomOrder = Array.from({
+			length: nextMessage.length,
+		})
+			.map((_, i) => i)
+			.sort(() => Math.random() - 0.5);
+		randomOrder.forEach((index, i) => {
+			let message = previousMessage;
+			for (let j = 0; j < i; j++) {
+				const index = randomOrder[j];
+				message =
+					message.slice(0, Math.max(index - 1, 0)) +
+					nextMessage[index] +
+					message.slice(index);
+			}
+			timeouts.current.push(
+				setTimeout(() => {
+					setEncodedMessage(message);
+				}, 5 * i),
+			);
+		});
+		timeouts.current.push(
+			setTimeout(
+				() => {
+					setEncodedMessage(nextMessage);
+				},
+				5 * (randomOrder.length + 1),
+			),
+		);
+	}
+
+	return [encodedMessage, setMessage] as const;
 }
 
 function SatelliteMap({

@@ -33,6 +33,7 @@ export class CommSatelliteSystem extends System {
 			getObjectSystem(currentNode)?.components.position ||
 			currentNode.components.position;
 		if (!nodePosition) return;
+
 		const velocity =
 			lightYearToLightMinute(isLongRangeMessage.transmissionSpeed) *
 			elapsedRatio;
@@ -61,7 +62,7 @@ export class CommSatelliteSystem extends System {
 
 		// If we begin moving _away_ from the node, then that means we overshot and should
 		// move on to the next node
-		if (newDistance > currentDistance) {
+		if (newDistance >= currentDistance) {
 			entity.updateComponent("position", {
 				x: nodePosition.x,
 				y: nodePosition.y,

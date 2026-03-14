@@ -16,6 +16,10 @@ import {
 	lightMinuteToLightYear,
 	lightYearToLightMinute,
 } from "@thorium/utils/unitTypes";
+import {
+	replaceCharacters,
+	rotateCharacters,
+} from "@thorium/cards/LongRangeComm/events";
 
 const encodingSchema = z.union([
 	z.object({
@@ -145,21 +149,25 @@ export const longRangeComm = t.router({
 				],
 		)
 		.request(({ input, ctx }) => {
-			const lrcomm = getShipSystem(ctx.ecs, {
-				systemType: "longRangeComm",
-				shipId: input.shipId,
-			});
-			if (!lrcomm?.components.isLongRangeComm)
-				throw new Error("Long Range Comm system not found");
-			return lrcomm.components.isLongRangeComm.addressBook.map((m) => {
-				const entity = ctx.ecs.getEntityById(m.contactId);
-				return {
-					id: m.contactId,
-					name: m.name,
-					entityName: entity?.components.identity?.name || "Unknown",
-					actions: m.actions,
-				};
-			});
+			try {
+				const lrcomm = getShipSystem(ctx.ecs, {
+					systemType: "longRangeComm",
+					shipId: input.shipId,
+				});
+				return (
+					lrcomm.components.isLongRangeComm?.addressBook.map((m) => {
+						const entity = ctx.ecs.getEntityById(m.contactId);
+						return {
+							id: m.contactId,
+							name: m.name,
+							entityName: entity?.components.identity?.name || "Unknown",
+							actions: m.actions,
+						};
+					}) || []
+				);
+			} catch {
+				return [];
+			}
 		}),
 	outgoingMessages: t.procedure
 		.input(
@@ -257,28 +265,32 @@ export const longRangeComm = t.router({
 				],
 		)
 		.request(({ input, ctx }) => {
-			const messages: (z.infer<typeof isLongRangeMessage> & {
+			const messages: {
 				id: number;
 				senderShipName: string;
 				destinationShipName: string;
-			})[] = [];
+				destinationId: number;
+				timestamp: number;
+				encodedMessage: string;
+				encoding: z.infer<typeof isLongRangeMessage>["encoding"];
+			}[] = [];
 			const lrcomm = getShipSystem(ctx.ecs, {
 				systemType: "longRangeComm",
 				shipId: input.shipId,
 			});
-			for (const message of ctx.ecs.componentCache.get("isLongRangeMessage") ||
-				[]) {
+			for (const longRangeMessage of ctx.ecs.componentCache.get(
+				"isLongRangeMessage",
+			) || []) {
+				const isLongRangeMessage =
+					longRangeMessage.components.isLongRangeMessage;
+				if (!isLongRangeMessage) continue;
+				const { destinationId, senderId, timestamp, state, message, encoding } =
+					isLongRangeMessage;
 				if (
-					message.components.isLongRangeMessage?.destinationId !==
-						input.shipId ||
-					!["sent", "intercepted"].includes(
-						message.components.isLongRangeMessage.state,
-					)
+					destinationId !== input.shipId ||
+					!["delivered", "intercepted"].includes(state)
 				)
 					continue;
-				const senderId = message.components.isLongRangeMessage.senderId;
-				const destinationId =
-					message.components.isLongRangeMessage.destinationId;
 				let senderShipName =
 					lrcomm.components.isLongRangeComm?.addressBook.find(
 						(f) => f.contactId === senderId,
@@ -297,10 +309,13 @@ export const longRangeComm = t.router({
 						destination?.components.identity?.name || "Unknown";
 				}
 				messages.push({
-					id: message.id,
+					id: longRangeMessage.id,
 					senderShipName,
 					destinationShipName,
-					...message.components.isLongRangeMessage,
+					destinationId,
+					timestamp,
+					encodedMessage: encodeMessage(message, encoding),
+					encoding,
 				});
 			}
 
@@ -369,10 +384,15 @@ export const longRangeComm = t.router({
 				message: z.string(),
 				state: z.enum(["pending", "sending"]).optional(),
 				senderStation: z.string().optional(),
+				encoding: z
+					.enum(["decoded", "waves", "replacement", "rotation"])
+					.optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
 			const message = new Entity();
+
+			const encoding = getEncodingSettings(input.encoding, ctx.ecs.rng);
 
 			message.addComponent("isLongRangeMessage", {
 				destinationId: input.destinationId,
@@ -381,7 +401,43 @@ export const longRangeComm = t.router({
 				state: input.state || "pending",
 				timestamp: Date.now(),
 				senderStation: input.senderStation,
+				encoding: generateEncoding(encoding, ctx.ecs.rng),
 			});
+			if (input.state === "sending") {
+				const ship = ctx.ecs.getEntityById(input.senderId);
+
+				if (!ship) throw new Error("Invalid Long Range Message");
+				const system = getObjectSystem(ship);
+				const position =
+					system?.components.position || ship.components.position;
+				message.addComponent("position", { ...position });
+
+				try {
+					// Find the closest satellite to the position
+					const satellites = Array.from(
+						ctx.ecs.componentCache.get("isCommSatellite") || [],
+					);
+					const satellite = findClosestSatellite(satellites, ship);
+					if (!satellite) throw new Error("First satellite not found");
+					const nextNodeId = pickNextLongRangeMessageNode(
+						ctx.ecs,
+						satellite.id,
+						input.destinationId,
+						[],
+					);
+					message.updateComponent("isLongRangeMessage", {
+						nextNodeId,
+					});
+				} catch (e) {
+					console.error(e);
+					message.removeComponent("position");
+					message.updateComponent("isLongRangeMessage", {
+						state: "undelivered",
+						failureReason:
+							"Failed to find route through communications network",
+					});
+				}
+			}
 			ctx.ecs.addEntity(message);
 			pubsub.publish.longRangeComm.outgoingMessages({ shipId: input.senderId });
 		}),
@@ -397,24 +453,7 @@ export const longRangeComm = t.router({
 			if (!message?.components.isLongRangeMessage)
 				throw new Error("Invalid Long Range Message");
 
-			let encoding: z.infer<typeof encodingSchema> = { type: "decoded" };
-			switch (input.encoding) {
-				case "waves":
-					encoding = { type: "waves", hasPhase: false, waveCount: 1 };
-					break;
-				case "rotation":
-					encoding = {
-						type: "rotation",
-						rotation: ctx.ecs.rng.nextAsPercentage() * 36,
-					};
-					break;
-				case "replacement":
-					encoding = { type: "replacement", includedLetters: 10 };
-					break;
-				case "decoded":
-					break;
-			}
-
+			const encoding = getEncodingSettings(input.encoding, ctx.ecs.rng);
 			message.updateComponent("isLongRangeMessage", {
 				encoding: generateEncoding(encoding, ctx.ecs.rng),
 			});
@@ -471,11 +510,66 @@ export const longRangeComm = t.router({
 				pubsub.publish.longRangeComm.outgoingMessages({ shipId });
 			}
 		}),
+	updateMessageDecoding: t.procedure
+		.input(
+			z.object({
+				messageId: z.number(),
+				decoding: z.union([
+					z.object({ type: z.literal("rotation"), rotation: z.number() }),
+					z.object({ type: z.literal("replacement"), letterMap: z.string() }),
+					z.object({ type: z.literal("decoded") }),
+				]),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const message = ctx.ecs.getEntityById(input.messageId);
+			if (!message?.components.isLongRangeMessage)
+				throw new Error("Invalid Long Range Message");
+
+			const { type, ...properties } = input.decoding;
+			message.updateComponent("isLongRangeMessage", {
+				encoding: {
+					...message.components.isLongRangeMessage.encoding,
+					...properties,
+				},
+			});
+
+			pubsub.publish.longRangeComm.incomingMessages({
+				shipId: message.components.isLongRangeMessage.destinationId,
+			});
+			return {
+				encodedMessage: encodeMessage(
+					message.components.isLongRangeMessage.message,
+					message.components.isLongRangeMessage.encoding,
+				),
+			};
+		}),
 });
 
-const rotateCharacters =
-	"abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const replaceCharacters = "abcdefghijklmnopqrstuvwxyz1234567890";
+function getEncodingSettings(
+	encodingType: "decoded" | "waves" | "replacement" | "rotation" | undefined,
+	rng: RNG,
+) {
+	let encoding: z.infer<typeof encodingSchema> = { type: "decoded" };
+	switch (encodingType) {
+		case "waves":
+			encoding = { type: "waves", hasPhase: false, waveCount: 1 };
+			break;
+		case "rotation":
+			encoding = {
+				type: "rotation",
+				rotation: Math.floor(rng.nextAsPercentage() * rotateCharacters.length),
+			};
+			break;
+		case "replacement":
+			encoding = { type: "replacement", includedLetters: 10 };
+			break;
+		case "decoded":
+			break;
+	}
+	return encoding;
+}
+
 function generateEncoding(
 	encoding: z.infer<typeof encodingSchema>,
 	rng: RNG,
@@ -557,7 +651,7 @@ function encodeMessage(
 			);
 			return replaceMessage(
 				encodedMessage,
-				encoding.requiredLetterMap,
+				replaceCharacters,
 				encoding.letterMap,
 			);
 		}
@@ -572,8 +666,6 @@ function encodeMessage(
 				}
 				return point;
 			}
-
-			console.log(encoding);
 
 			const output = message
 				.split("")
@@ -597,7 +689,6 @@ function encodeMessage(
 				})
 				.join("");
 
-			console.log(output);
 			return output;
 		}
 		case "decoded":
@@ -629,7 +720,7 @@ function replaceMessage(
 		.map((letter) => {
 			const mapIndex = originalLetterMap.indexOf(letter.toLowerCase());
 			if (mapIndex === -1) return letter;
-			return letterMap[mapIndex].toUpperCase();
+			return letterMap[mapIndex].toLowerCase();
 		})
 		.join("");
 }

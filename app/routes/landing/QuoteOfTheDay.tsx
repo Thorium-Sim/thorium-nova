@@ -392,6 +392,8 @@ const quotes = [
 	"You should have savored the good things in life. Now, you must ponder thoughtfully the end of all pleasure that comes with DEATH.",
 	// Random post
 	"A revolution must be started by yourself. An egg, opened from the outside, is food; opened from the inside, it is a new life.",
+	// Niko Stratis https://bsky.app/profile/nikostratis.com/post/3mgpgk4ivzk25
+	"You can't critique anything if you don't know how to love something.",
 ];
 
 const QuoteOfTheDay = () => {

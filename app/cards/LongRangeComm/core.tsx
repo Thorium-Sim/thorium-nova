@@ -1,5 +1,11 @@
-import { lrmStateMap } from "@thorium/cards/LongRangeComm/events";
-import { CoreComposeLongRangeMessageEvent } from "@thorium/cards/LongRangeComm/events";
+import { keepPreviousData } from "@tanstack/react-query";
+import {
+	CoreLongRangeMessageDestinationEvent,
+	CoreLongRangeMessagePickDestinationEvent,
+	CoreLongRangeMessagePickSenderEvent,
+	lrmStateMap,
+} from "@thorium/cards/LongRangeComm/events";
+import { CoreLongRangeMessageSenderEvent } from "@thorium/cards/LongRangeComm/events";
 import { q } from "@thorium/context/AppContext";
 import { SelectStarmapEntityEvent } from "@thorium/cores/StarmapCore";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
@@ -13,8 +19,9 @@ import Input from "@thorium/ui/Input";
 import SearchableInput, {
 	DefaultResultLabel,
 } from "@thorium/ui/SearchableInput";
+import Select from "@thorium/ui/Select";
 import { cn } from "@thorium/utils/cn";
-import { useEffect, useId, useState } from "react";
+import { startTransition, Suspense, useEffect, useId, useState } from "react";
 
 export function LongRangeCommMessagesCore() {
 	const { shipId } = useStation();
@@ -89,84 +96,46 @@ export function LongRangeCommMessagesCore() {
 export function LongRangeCommComposerCore() {
 	const { shipId } = useStation();
 
-	const [sender, setSender] = useState<number>();
-	const [outgoingMessage, setOutgoingMessage] = useState("");
-	const [incomingMessage, setIncomingMessage] = useState("");
-	const [addressBookName, setAddressBookName] = useState("");
-	const [sendingMode, setSendingMode] = useState<"outgoing" | "incoming">(
-		"incoming",
-	);
-
+	const [senderId, setSenderId] = useState<number>();
 	const [senderStation, setSenderStation] = useState("");
-	const [destinationId, setDestinationId] = useState<number | null>();
+	const [addressBookName, setAddressBookName] = useState("");
+	const [destinationId, setDestinationId] = useState<number>();
+	const [message, setMessage] = useState("");
+	const [encoding, setEncoding] = useState<
+		"decoded" | "waves" | "replacement" | "rotation"
+	>("decoded");
 
-	const [addressBook] = q.longRangeComm.addressBook.useNetRequest({ shipId });
-	const [senderObject] = q.starmapCore.object.useNetRequest(
-		{ objectId: sender },
-		{ enabled: !!sender },
-	);
-
-	useEventListener<CoreComposeLongRangeMessageEvent>(
-		CoreComposeLongRangeMessageEvent.name,
+	useEventListener<CoreLongRangeMessageSenderEvent>(
+		CoreLongRangeMessageSenderEvent.name,
 		(event) => {
-			setSender(event.senderId);
+			startTransition(() => {
+				setSenderId(event.senderId);
+			});
+		},
+	);
+	useEventListener<CoreLongRangeMessageDestinationEvent>(
+		CoreLongRangeMessageDestinationEvent.name,
+		(event) => {
+			startTransition(() => {
+				setDestinationId(event.destinationId);
+			});
 		},
 	);
 
-	const addressBookEntry = addressBook.find((a) => a.id === sender);
-
 	return (
 		<div className="flex flex-col text-sm h-full">
-			<div className="flex gap-1">
-				<Button
-					className={cn("btn-xs", { "btn-active": sendingMode === "incoming" })}
-					onClick={() => setSendingMode("incoming")}
-				>
-					Incoming
-				</Button>
-				<Button
-					className={cn("btn-xs", { "btn-active": sendingMode === "outgoing" })}
-					onClick={() => setSendingMode("outgoing")}
-				>
-					Outgoing
-				</Button>
-			</div>
-			{sendingMode === "incoming" ? (
+			<Suspense>
+				<SenderInput
+					destinationId={destinationId}
+					senderId={senderId}
+					setSenderId={setSenderId}
+					addressBookName={addressBookName}
+					setAddressBookName={setAddressBookName}
+				/>
+			</Suspense>
+			{senderId === shipId && (
 				<>
-					<p className="text-xs">
-						Sender <InfoTip>Use the Starmap core to select a sender</InfoTip>
-					</p>
-					<OutputField
-						alert={!!sender && !addressBookEntry}
-						title="Sender will be added to the ship's address book"
-					>
-						{sender
-							? addressBookEntry?.name ||
-								senderObject?.components.identity?.name ||
-								`Entity ID ${sender}`
-							: ""}
-					</OutputField>
-					{sender && !addressBookEntry ? (
-						<>
-							<p className="text-xs">
-								Address Book Name{" "}
-								<InfoTip>
-									Name used for this sender when added to the ship's address
-									book. Leave blank to use the sender's actual name.
-								</InfoTip>
-							</p>
-							<InputField
-								onClick={(val) => setAddressBookName(val)}
-								prompt="What name should this sender have when added to the ship's address book?"
-							>
-								{addressBookName}
-							</InputField>
-						</>
-					) : null}
-				</>
-			) : (
-				<>
-					<p className="text-xs">Sender</p>
+					<p className="text-xs">Sender Station</p>
 					<InputField
 						className="text-xs"
 						onClick={(val) => setSenderStation(val)}
@@ -174,80 +143,276 @@ export function LongRangeCommComposerCore() {
 					>
 						{senderStation}
 					</InputField>
-					<p className="text-xs">Destination</p>
-					<SearchableInput
-						className="w-full"
-						inputClassName="input-xs"
-						queryKey="address-book"
-						placeholder="Search Address Book"
-						getOptions={async ({ queryKey, signal }) => {
-							return addressBook;
-						}}
-						ResultLabel={({ active, result, selected }) => (
-							<DefaultResultLabel active={active} selected={selected}>
-								<p>{result.name || result.entityName}</p>
-							</DefaultResultLabel>
-						)}
-						selected={addressBook.find((a) => a.id === destinationId) || null}
-						setSelected={(value) => {
-							if (!value) return;
-							setDestinationId(value.id);
-						}}
-						displayValue={(item) => item?.name || ""}
-					/>
 				</>
 			)}
+
+			<Suspense>
+				<DestinationInput
+					destinationId={destinationId}
+					setDestinationId={setDestinationId}
+					senderId={senderId}
+				/>
+			</Suspense>
+
 			<TypingField
 				className="w-full flex-auto text-sm text-left px-2"
-				value={sendingMode === "incoming" ? incomingMessage : outgoingMessage}
-				onChange={(e) =>
-					sendingMode === "incoming"
-						? setIncomingMessage(e.currentTarget.value)
-						: setOutgoingMessage(e.currentTarget.value)
-				}
+				value={message}
+				onChange={(e) => setMessage(e.currentTarget.value)}
 			/>
-			<div className="flex gap-1">
+			<div className="flex flex-wrap items-center gap-1">
 				<Button
 					className="flex-auto btn-xs btn-error"
 					onClick={() => {
-						if (sendingMode === "outgoing") {
-							setDestinationId(null);
-							setSenderStation("");
-						} else {
-							setSender(undefined);
-						}
-						setOutgoingMessage("");
+						setSenderId(undefined);
+						setDestinationId(undefined);
+						setSenderStation("");
+						setAddressBookName("");
+						setMessage("");
 					}}
 				>
 					Clear
+				</Button>{" "}
+				<Select
+					items={[
+						{ id: "decoded", label: "Decoded" },
+						{ id: "waves", label: "Waves" },
+						{ id: "replacement", label: "Replacement" },
+						{ id: "rotation", label: "Rotation" },
+					]}
+					label="Encoding"
+					labelHidden
+					size="xs"
+					selected={encoding}
+					setSelected={(value) => setEncoding(value || "decoded")}
+				/>
+				<Button
+					className="flex-auto btn-xs btn-info"
+					disabled={
+						(senderId === shipId && !senderStation) ||
+						!destinationId ||
+						!senderId ||
+						!message.trim()
+					}
+					onClick={() => {
+						if (
+							(senderId === shipId && !senderStation) ||
+							!destinationId ||
+							!senderId ||
+							!message
+						)
+							return;
+						q.longRangeComm.composeMessage.netSend({
+							senderId,
+							destinationId,
+							message,
+							senderStation,
+							state: "pending",
+							encoding,
+						});
+						setSenderId(undefined);
+						setDestinationId(undefined);
+						setSenderStation("");
+						setAddressBookName("");
+						setMessage("");
+					}}
+				>
+					Queue
 				</Button>
-				{sendingMode === "outgoing" ? (
-					<Button
-						className="flex-auto btn-xs btn-success"
-						disabled={
-							!senderStation || !destinationId || !outgoingMessage.trim()
-						}
-						onClick={() => {
-							if (!senderStation || !destinationId || !outgoingMessage) return;
-							q.longRangeComm.composeMessage.netSend({
-								senderId: shipId,
-								destinationId,
-								message: outgoingMessage,
-								senderStation,
-								state: "pending",
-							});
-							setDestinationId(null);
-							setSenderStation("");
-							setOutgoingMessage("");
-						}}
-					>
-						Send
-					</Button>
-				) : (
-					<div />
-				)}
+				<Button
+					className="flex-auto btn-xs btn-success"
+					disabled={
+						(senderId === shipId && !senderStation) ||
+						!destinationId ||
+						!senderId ||
+						!message.trim()
+					}
+					onClick={() => {
+						if (
+							(senderId === shipId && !senderStation) ||
+							!destinationId ||
+							!senderId ||
+							!message
+						)
+							return;
+						q.longRangeComm.composeMessage.netSend({
+							senderId,
+							destinationId,
+							message,
+							senderStation,
+							state: "sending",
+							encoding,
+						});
+						setSenderId(undefined);
+						setDestinationId(undefined);
+						setSenderStation("");
+						setAddressBookName("");
+						setMessage("");
+					}}
+				>
+					Send Now
+				</Button>
 			</div>
 		</div>
+	);
+}
+
+function SenderInput({
+	destinationId,
+	senderId,
+	setSenderId,
+	addressBookName,
+	setAddressBookName,
+}: {
+	destinationId: number | undefined;
+	senderId: number | undefined;
+	setSenderId: (value: number) => void;
+	addressBookName: string;
+	setAddressBookName: (value: string) => void;
+}) {
+	const { shipId } = useStation();
+
+	const [addressBook] = q.longRangeComm.addressBook.useNetRequest(
+		{
+			shipId: destinationId || shipId,
+		},
+		{
+			placeholderData: keepPreviousData,
+		},
+	);
+	const [senderObject] = q.starmapCore.object.useNetRequest({
+		objectId: senderId,
+	});
+	const addressBookEntry = addressBook.find((a) => a.id === senderId);
+
+	const isNewAddressBookEntry =
+		!!senderId &&
+		!addressBookEntry &&
+		senderId !== shipId &&
+		destinationId === shipId;
+
+	return (
+		<>
+			<p className="text-xs">
+				Sender <InfoTip>Use the Starmap core to select a sender</InfoTip>
+			</p>
+			<div className="flex">
+				{/* TODO March 10, 2026 - This should support both picking from the starmap AND searching through the ship's address book */}
+				<OutputField
+					className="flex-auto"
+					alert={isNewAddressBookEntry}
+					title={
+						isNewAddressBookEntry
+							? "Sender will be added to the ship's address book"
+							: ""
+					}
+				>
+					{senderId
+						? addressBookEntry?.name ||
+							senderObject?.components.identity?.name ||
+							`Entity ID ${senderId}`
+						: ""}
+					{senderId && addressBookEntry?.name
+						? ` (${senderObject?.components.identity?.name})`
+						: ""}
+				</OutputField>
+				<Button
+					className={cn("btn-xs btn-info", {
+						"rounded-r-none": destinationId !== shipId,
+					})}
+					onClick={() => {
+						window.dispatchEvent(new CoreLongRangeMessagePickSenderEvent());
+					}}
+				>
+					Pick from Starmap
+				</Button>
+				{destinationId !== shipId && (
+					<Button
+						className="btn-xs btn-success rounded-l-none"
+						onClick={() => setSenderId(shipId)}
+					>
+						Player Ship
+					</Button>
+				)}
+			</div>
+			{isNewAddressBookEntry && (
+				<>
+					<p className="text-xs">
+						Address Book Name{" "}
+						<InfoTip>
+							Name used for this sender when added to the ship's address book.
+							Leave blank to use the sender's actual name.
+						</InfoTip>
+					</p>
+					<InputField
+						onClick={(val) => setAddressBookName(val)}
+						prompt="What name should this sender have when added to the ship's address book?"
+					>
+						{addressBookName}
+					</InputField>
+				</>
+			)}
+		</>
+	);
+}
+function DestinationInput({
+	destinationId,
+	setDestinationId,
+	senderId,
+}: {
+	senderId: number | undefined;
+	destinationId: number | undefined;
+	setDestinationId: (value: number) => void;
+}) {
+	const { shipId } = useStation();
+
+	const [destinationObject] = q.starmapCore.object.useNetRequest(
+		{ objectId: destinationId },
+		{ placeholderData: keepPreviousData },
+	);
+
+	const [addressBook] = q.longRangeComm.addressBook.useNetRequest(
+		{
+			shipId: senderId || shipId,
+		},
+		{
+			placeholderData: keepPreviousData,
+		},
+	);
+	const addressBookEntry = addressBook.find((a) => a.id === destinationId);
+
+	return (
+		<>
+			<p className="text-xs">Destination</p>
+			<div className="flex items-center">
+				<OutputField className="flex-auto">
+					{destinationId
+						? addressBookEntry?.name ||
+							destinationObject?.components.identity?.name ||
+							`Entity ID ${senderId}`
+						: ""}
+				</OutputField>
+				<Button
+					className={cn("btn-xs btn-info", {
+						"rounded-r-none": senderId !== shipId,
+					})}
+					onClick={() => {
+						window.dispatchEvent(
+							new CoreLongRangeMessagePickDestinationEvent(),
+						);
+					}}
+				>
+					Pick from Starmap
+				</Button>
+				{senderId !== shipId && (
+					<Button
+						className="btn-xs btn-success rounded-l-none"
+						onClick={() => setDestinationId(shipId)}
+					>
+						Player Ship
+					</Button>
+				)}
+			</div>
+		</>
 	);
 }
 

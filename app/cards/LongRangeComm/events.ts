@@ -1,10 +1,30 @@
 import type { isLongRangeMessage } from "@thorium/ecs-components/shipSystems";
 import type z from "zod";
 
-export class CoreComposeLongRangeMessageEvent extends Event {
-	static name = "core-compose-long-range-message";
+export class CoreLongRangeMessageSenderEvent extends Event {
+	static name = "core-long-range-message-sender";
 	constructor(public senderId: number) {
-		super(CoreComposeLongRangeMessageEvent.name);
+		super(CoreLongRangeMessageSenderEvent.name);
+	}
+}
+export class CoreLongRangeMessagePickSenderEvent extends Event {
+	static name = "core-long-range-message-pick-sender";
+	constructor() {
+		super(CoreLongRangeMessagePickSenderEvent.name);
+	}
+}
+
+export class CoreLongRangeMessageDestinationEvent extends Event {
+	static name = "core-long-range-message-destination";
+	constructor(public destinationId: number) {
+		super(CoreLongRangeMessageDestinationEvent.name);
+	}
+}
+
+export class CoreLongRangeMessagePickDestinationEvent extends Event {
+	static name = "core-long-range-message-pick-destination";
+	constructor() {
+		super(CoreLongRangeMessagePickDestinationEvent.name);
 	}
 }
 
@@ -20,3 +40,6 @@ export const lrmStateMap: Record<
 	sending: "Sending",
 	undelivered: "Undelivered",
 };
+
+export const rotateCharacters = "abcdefghijklmnopqrstuvwxyz1234567890";
+export const replaceCharacters = "abcdefghijklmnopqrstuvwxyz1234567890";

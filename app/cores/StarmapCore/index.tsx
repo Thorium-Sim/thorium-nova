@@ -60,7 +60,12 @@ import {
 } from "react-aria-components";
 import useEventListener from "@thorium/hooks/useEventListener";
 import { useActiveCores } from "@thorium/routes/core/CoreFlexLayout";
-import { CoreComposeLongRangeMessageEvent } from "@thorium/cards/LongRangeComm/events";
+import {
+	CoreLongRangeMessageDestinationEvent,
+	CoreLongRangeMessagePickDestinationEvent,
+	CoreLongRangeMessagePickSenderEvent,
+	CoreLongRangeMessageSenderEvent,
+} from "@thorium/cards/LongRangeComm/events";
 import { flushSync } from "react-dom";
 
 export class SelectStarmapEntityEvent extends Event {
@@ -391,8 +396,9 @@ function LongRangeCommEditor({ id, name }: { id: number; name: string }) {
 	const longRangeComposerComponent = activeCores.find(
 		(c) => c.component === "LongRangeCommComposerCore",
 	);
+
 	return (
-		<div className="mt-2 flex gap-1">
+		<div className="mt-2 flex flex-wrap gap-1">
 			{!addressBook.some((a) => a.id === id) ? (
 				<Button
 					className="btn-info btn-xs flex-auto"
@@ -413,21 +419,77 @@ function LongRangeCommEditor({ id, name }: { id: number; name: string }) {
 				</Button>
 			) : null}
 			{longRangeComposerComponent ? (
-				<Button
-					title="Send Long Range Message"
-					className="btn-success btn-xs flex-auto"
-					onClick={() => {
-						flushSync(() => {
-							longRangeComposerComponent.activate();
-						});
-						window.dispatchEvent(new CoreComposeLongRangeMessageEvent(id));
-					}}
-				>
-					Send LRM
-				</Button>
+				<>
+					<Button
+						title="Send Long Range Message"
+						className="btn-success btn-xs flex-auto"
+						onClick={() => {
+							flushSync(() => {
+								longRangeComposerComponent.activate();
+							});
+							window.dispatchEvent(new CoreLongRangeMessageSenderEvent(id));
+						}}
+					>
+						Send LRM From Entity
+					</Button>
+					<Button
+						title="Send Long Range Message"
+						className="btn-success btn-xs flex-auto"
+						onClick={() => {
+							flushSync(() => {
+								longRangeComposerComponent.activate();
+							});
+							window.dispatchEvent(
+								new CoreLongRangeMessageDestinationEvent(id),
+							);
+						}}
+					>
+						Send LRM To Entity
+					</Button>
+				</>
 			) : null}
 		</div>
 	);
+}
+
+function usePickLongRangeComm() {
+	const useStarmapStore = useGetStarmapStore();
+	useEventListener(CoreLongRangeMessagePickSenderEvent.name, () => {
+		useStarmapStore.setState({
+			clickAction: {
+				label: "Choose a ship to send the long range message.",
+				action: (object) => {
+					if (!object) {
+						useStarmapStore.setState({ clickAction: undefined });
+						return;
+					}
+
+					window.dispatchEvent(new CoreLongRangeMessageSenderEvent(object));
+
+					useStarmapStore.setState({ clickAction: undefined });
+				},
+			},
+		});
+	});
+	useEventListener(CoreLongRangeMessagePickDestinationEvent.name, () => {
+		useStarmapStore.setState({
+			clickAction: {
+				label: "Choose a ship to receive the long range message.",
+				action: (object) => {
+					if (!object) {
+						useStarmapStore.setState({ clickAction: undefined });
+						return;
+					}
+
+					window.dispatchEvent(
+						new CoreLongRangeMessageDestinationEvent(object),
+					);
+
+					useStarmapStore.setState({ clickAction: undefined });
+				},
+			},
+		});
+	});
 }
 
 export function EditorDisclosure({
@@ -641,6 +703,8 @@ function StarmapCoreMenubar() {
 	const followEntityId = useStarmapStore((store) => store.followEntityId);
 	const planetsHidden = useStarmapStore((store) => store.planetsHidden);
 	const sensorsHidden = useStarmapStore((store) => store.sensorsHidden);
+
+	usePickLongRangeComm();
 
 	return (
 		<>
