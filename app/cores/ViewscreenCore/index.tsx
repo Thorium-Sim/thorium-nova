@@ -2,8 +2,8 @@ import { q } from "@thorium/context/AppContext";
 import { useState } from "react";
 
 const brokenModeLabels: Record<string, string> = {
-	fullyBroken: "Fully Broken",
-	cameraBrokenOnly: "Camera Broken Only",
+	fullyBroken: "Fully Breakable",
+	cameraBrokenOnly: "Only Camera Breakable",
 	invincible: "Invincible",
 };
 
