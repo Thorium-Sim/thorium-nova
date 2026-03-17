@@ -56,7 +56,7 @@ export default function Select<I extends string | number>({
 			placeholder={placeholder}
 			selectedKey={selected}
 			onSelectionChange={(selected) => setSelected(selected as I)}
-			className={className}
+			className={`select ${className}`}
 		>
 			<Label
 				className={cn(
@@ -70,7 +70,7 @@ export default function Select<I extends string | number>({
 			</Label>
 			<Button
 				className={cn(
-					"py-2 px-2 flex justify-between items-center select-button bg-gray-900 text-gray-100 relative w-full border border-gray-700 rounded-md shadow-xs text-left cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+					"py-2 px-2 flex justify-around items-center select-button bg-gray-900 text-gray-100 relative w-full border border-gray-700 rounded-md shadow-xs text-left cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
 					{
 						"select-xxs h-5 min-h-5 py-0": size === "xxs",
 						"select-xs py-0": size === "xs",
@@ -118,6 +118,7 @@ function SelectItem<I extends string | number>(item: { id: I; label: string; dis
 			id={item.id}
 			isDisabled={item.disabled}
 			className="flex justify-between cursor-default py-0.5 px-2 min-w-fit data-[focused]:text-white data-[focused]:bg-blue-600 text-gray-100 outline-none rounded aria-disabled:text-gray-500 aria-disabled:cursor-not-allowed"
+			textValue={item.label}
 		>
 			{({ isSelected }) => (
 				<>

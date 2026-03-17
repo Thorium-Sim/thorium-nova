@@ -44,6 +44,7 @@ import { FacingWaypointSystem } from "./FacingWaypointSystem";
 import { CollisionWarningSystem } from "./CollisionWarningSystem";
 import { CommSatelliteSystem } from "@thorium/.server/systems/CommSatelliteSystem";
 import { ViewscreenDamageSystem } from "@thorium/.server/systems/ViewscreenDamageSystem";
+import { LongRangeCommPowerSystem } from "@thorium/.server/systems/LongRangeCommPowerSystem";
 
 const systems = [
 	FilterInventorySystem,
@@ -71,6 +72,7 @@ const systems = [
 	ImpulseSystem,
 	WarpSystem,
 	PhasersSystem,
+	LongRangeCommPowerSystem,
 	TorpedoMovementSystem,
 	CommSatelliteSystem,
 	PhysicsMovementSystem,

@@ -1,3 +1,4 @@
+import { Actions } from "@thorium/utils/FlexLayout/model/Actions";
 import { Attribute } from "../Attribute";
 import { AttributeDefinitions } from "../AttributeDefinitions";
 import { Rect } from "../Rect";
@@ -108,6 +109,10 @@ export class TabNode extends Node implements IDraggable {
 		);
 	}
 
+	activate() {
+		const layoutWindow = this.model.getwindowsMap().get(this.getWindowId());
+		layoutWindow?.layout?.doAction(Actions.selectTab(this.getId()));
+	}
 	getIcon() {
 		return this.getAttr("icon") as string | undefined;
 	}

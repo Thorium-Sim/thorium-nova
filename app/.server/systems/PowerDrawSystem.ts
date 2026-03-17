@@ -146,6 +146,12 @@ export class PowerDrawSystem extends System {
 				);
 				break;
 			}
+			case "longRangeComm": {
+				// Pretty much just the antenna gain affects power
+				const gain = entity.components.isLongRangeComm?.antennaGain || 0;
+				powerDraw = (maxSafePower - requiredPower) * gain + requiredPower;
+				break;
+			}
 			case "generic":
 				powerDraw = requestedPower;
 				break;

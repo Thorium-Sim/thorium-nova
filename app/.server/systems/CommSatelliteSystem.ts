@@ -33,6 +33,7 @@ export class CommSatelliteSystem extends System {
 			getObjectSystem(currentNode)?.components.position ||
 			currentNode.components.position;
 		if (!nodePosition) return;
+
 		const velocity =
 			lightYearToLightMinute(isLongRangeMessage.transmissionSpeed) *
 			elapsedRatio;
@@ -61,7 +62,7 @@ export class CommSatelliteSystem extends System {
 
 		// If we begin moving _away_ from the node, then that means we overshot and should
 		// move on to the next node
-		if (newDistance > currentDistance) {
+		if (newDistance >= currentDistance) {
 			entity.updateComponent("position", {
 				x: nodePosition.x,
 				y: nodePosition.y,
@@ -79,13 +80,19 @@ export class CommSatelliteSystem extends System {
 			const currentNode = this.ecs.getEntityById(
 				entity.components.isLongRangeMessage?.nextNodeId || -1,
 			);
-			if (currentNode?.components.isPlayerShip) {
+			if (
+				currentNode?.components.isPlayerShip &&
+				!isLongRangeMessage.interceptorId
+			) {
 				entity.updateComponent("isLongRangeMessage", {
 					interceptorId: currentNode.id,
 					state: "intercepted",
 				});
 				pubsub.publish.longRangeComm.outgoingMessages({ shipId });
 				pubsub.publish.longRangeComm.incomingMessages({ shipId });
+				pubsub.publish.longRangeComm.incomingMessages({
+					shipId: currentNode.id,
+				});
 
 				return;
 			}
@@ -98,12 +105,14 @@ export class CommSatelliteSystem extends System {
 				isLongRangeMessage.destinationId,
 			);
 			if (!destination) {
-				fail();
+				fail("Unable to determine destination");
 				return;
 			}
 			const closestEndNode = findClosestSatellite(satellites, destination);
 			if (!closestEndNode) {
-				fail();
+				fail(
+					"Unable to find route to destination through communications network",
+				);
 				return;
 			}
 
@@ -111,7 +120,7 @@ export class CommSatelliteSystem extends System {
 			if (closestEndNode.id === isLongRangeMessage.nextNodeId) {
 				// If its already failing, we'll just mark it as "undeliverable" and call it a day
 				if (isLongRangeMessage.state === "failing") {
-					fail();
+					fail("Failed to reach destination");
 					return;
 				}
 
@@ -121,7 +130,9 @@ export class CommSatelliteSystem extends System {
 				);
 				const finalNode = this.ecs.getEntityById(isLongRangeMessage.nextNodeId);
 				if (!finalNode || !destinationEntity) {
-					fail();
+					fail(
+						"Unable to find route to destination through communications network",
+					);
 					return;
 				}
 
@@ -133,7 +144,7 @@ export class CommSatelliteSystem extends System {
 					getObjectSystem(destinationEntity)?.components.position ||
 					destinationEntity?.components.position;
 				if (!nodePosition || !destinationPosition) {
-					fail();
+					fail("Unable to determine destination position");
 					return;
 				}
 
@@ -146,11 +157,11 @@ export class CommSatelliteSystem extends System {
 				// The ship is outside the range of the final node
 				if (distance > (finalNode.components.isCommSatellite?.radius || -1)) {
 					// It failed!
-					fail();
+					fail("Destination is outside communications network");
 					return;
 				} else {
 					// Consider it sent!
-					entity.updateComponent("isLongRangeMessage", { state: "sent" });
+					entity.updateComponent("isLongRangeMessage", { state: "delivered" });
 					entity.removeComponent("position");
 					pubsub.publish.longRangeComm.outgoingMessages({ shipId });
 					pubsub.publish.longRangeComm.incomingMessages({ shipId });
@@ -171,9 +182,10 @@ export class CommSatelliteSystem extends System {
 			entity.updateComponent("position", { x: newX, y: newY, z: newZ });
 		}
 
-		function fail() {
+		function fail(reason: string) {
 			entity.updateComponent("isLongRangeMessage", {
 				state: "undelivered",
+				failureReason: reason,
 			});
 			entity.removeComponent("position");
 			pubsub.publish.longRangeComm.outgoingMessages({ shipId });

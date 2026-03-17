@@ -17,8 +17,13 @@ import "./styles/tailwind.css";
 import "@fontsource-variable/outfit";
 import icon from "./images/logo.svg?url";
 import type { Route } from ".react-router/types/app/+types/root";
-import AppContext, { q } from "@thorium/context/AppContext";
+import AppContext, {
+	clientId,
+	liveQueryClient,
+	q,
+} from "@thorium/context/AppContext";
 import { useRef } from "react";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 
 export const meta: MetaFunction = () => {
 	return [{ title: "Thorium Nova" }, {}];
@@ -73,9 +78,44 @@ export function Layout({ children }: { children: React.ReactNode }) {
 	);
 }
 
+function Preload() {
+	const preloadOptions = {
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		refetchOnWindowFocus: false,
+		staleTime: Number.POSITIVE_INFINITY,
+		queryFn: ({
+			signal,
+			queryKey: [pathKey, input],
+		}: {
+			signal: any;
+			queryKey: any;
+		}) => {
+			const path = pathKey.join(".");
+			return liveQueryClient.netRequest({ path, ...input, signal });
+		},
+	};
+	useQueries({
+		queries: [
+			{
+				queryKey: q.ship.players.getQueryKey(),
+				...preloadOptions,
+			},
+			{ queryKey: q.ship.player.getQueryKey({ clientId }), ...preloadOptions },
+			{ queryKey: q.ship.get.getQueryKey({ clientId }), ...preloadOptions },
+			{ queryKey: q.station.get.getQueryKey({ clientId }), ...preloadOptions },
+			{ queryKey: q.client.get.getQueryKey({ clientId }), ...preloadOptions },
+			{ queryKey: q.flight.active.getQueryKey(), ...preloadOptions },
+		],
+	});
+
+	return null;
+}
+
 export default function Root() {
 	return (
 		<AppContext>
+			<Preload />
 			<Outlet />
 		</AppContext>
 	);

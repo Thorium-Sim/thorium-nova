@@ -15,3 +15,8 @@ export { MessagingCore } from "../cards/Messaging/core";
 export { DocumentsCore } from "../cards/Documents/core";
 export { TrainingCore } from "./TrainingCore";
 export { ViewscreenCore } from "./ViewscreenCore";
+export {
+	LongRangeCommMessagesCore,
+	LongRangeCommComposerCore,
+	LongRangeCommAddressBookCore,
+} from "../cards/LongRangeComm/core";
