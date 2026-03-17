@@ -9,7 +9,11 @@ export function HeatBars({
 	id,
 	nominalHeat,
 	maxHeat,
-}: { id: number; nominalHeat: number; maxHeat: number }) {
+}: {
+	id: number;
+	nominalHeat: number;
+	maxHeat: number;
+}) {
 	const { cardLoaded } = useCardContext();
 
 	const { interpolate } = useLiveQuery();
@@ -37,14 +41,14 @@ export function HeatBars({
 			<div className="relative border border-white/50 flex flex-col justify-end">
 				<div
 					ref={heatBarRef}
-					className="striped-gradient striped-red"
+					className="striped-gradient striped-gradient-error"
 					style={{ height: "0%" }}
 				/>
 			</div>
 			<div className="relative border border-white/50 flex flex-col justify-end">
 				<div
 					ref={coolantBarRef}
-					className="striped-gradient striped-cyan"
+					className="striped-gradient striped-gradient-cyan-300"
 					style={{ height: "0%" }}
 				/>
 			</div>

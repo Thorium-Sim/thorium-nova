@@ -79,59 +79,58 @@
 	--tw-prose-bold: var(--color-gray-100);
 }
 
-@layer components {
-	.list-group-item {
-		@apply select-none block w-full border border-solid bg-black border-white/50 pointer-events-auto cursor-pointer;
+@utility list-group-item {
+	@apply select-none block w-full border border-solid bg-black border-white/50 pointer-events-auto cursor-pointer;
+	& > div,
+	& > a,
+	&:not(&:has(> div), &:has(> a)) {
+		@apply px-4 py-2;
+	}
+	&.list-group-item-small {
+		@apply text-sm;
 		& > div,
 		& > a,
 		&:not(&:has(> div), &:has(> a)) {
-			@apply px-4 py-2;
+			@apply px-2 py-1;
 		}
-		&.list-group-item-small {
-			@apply text-sm;
-			& > div,
-			& > a,
-			&:not(&:has(> div), &:has(> a)) {
-				@apply px-2 py-1;
-			}
+	}
+	&.list-group-item-xs {
+		@apply text-xs;
+		& > div,
+		& > a,
+		&:not(&:has(> div), &:has(> a)) {
+			@apply px-1 py-0.5;
 		}
-		&.list-group-item-xs {
-			@apply text-sm;
-			& > div,
-			& > a,
-			&:not(&:has(> div), &:has(> a)) {
-				@apply px-1 py-0.5;
-			}
+	}
+	&:hover {
+		@apply bg-black/50;
+	}
+	&.selected {
+		@apply bg-white/40;
+		&.subtle {
+			@apply bg-transparent shadow-inner shadow-blue-500 border-blue-500;
 		}
-		&:hover {
-			@apply bg-black/50;
-		}
-		&.selected {
-			@apply bg-white/40;
-			&.subtle {
-				@apply bg-transparent shadow-inner shadow-blue-500 border-blue-500;
-			}
-		}
-		&.selected:hover {
-			@apply bg-white/50;
-		}
-		&:disabled,
-		&.disabled {
-			@apply text-gray-400 pointer-events-none;
-		}
-		& + .list-group-item {
-			@apply border-t-0;
-		}
-		&:first-of-type {
-			@apply rounded-t-md;
-		}
-		&:last-of-type {
-			@apply rounded-b-md;
-		}
+	}
+	&.selected:hover {
+		@apply bg-white/50;
+	}
+	&:disabled,
+	&.disabled {
+		@apply text-gray-400 pointer-events-none;
+	}
+	& + .list-group-item {
+		@apply border-t-0;
+	}
+	&:first-of-type {
+		@apply rounded-t-md;
+	}
+	&:last-of-type {
+		@apply rounded-b-md;
 	}
 }
 
-.striped-gradient {
+@utility striped-gradient {
+	--striped-gradient-color: oklch(0.8691 0.3248 141.96);
 	background:
 		linear-gradient(
 			to bottom,
@@ -143,14 +142,30 @@
 	background-size:
 		5px 3px,
 		100%;
-	background-color: oklch(0.8691 0.3248 141.96);
+	background-color: var(--striped-gradient-color);
+}
+@utility striped-gradient-horizontal {
+	--striped-gradient-color: oklch(0.8691 0.3248 141.96);
+	background:
+		linear-gradient(
+			to right,
+			rgba(0, 0, 0, 0.5) 0%,
+			rgba(0, 0, 0, 0) 50%,
+			rgba(0, 0, 0, 0.5) 100%
+		),
+		linear-gradient(
+			to left,
+			rgba(0, 0, 0, 0.75) 0%,
+			rgba(255, 255, 255, 0) 100%
+		);
+	background-size:
+		3px 5px,
+		100%;
+	background-color: var(--striped-gradient-color);
 }
 
-.striped-red {
-	background-color: oklch(0.6558 0.2906 29.23);
-}
-.striped-cyan {
-	background-color: oklch(0.6308 0.2171 254.09);
+@utility striped-gradient-* {
+	--striped-gradient-color: --value(--color-*);
 }
 
 @layer utilities {
@@ -163,4 +178,8 @@
 	100% {
 		opacity: 0;
 	}
+}
+
+.select-button {
+	@apply text-center;
 }

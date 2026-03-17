@@ -1,3 +1,4 @@
+import { usePrompt } from "@thorium/ui/AlertDialog";
 import { cn } from "@thorium/utils/cn";
 import type {
 	DetailedHTMLProps,
@@ -13,12 +14,16 @@ export function InputField({
 	onClick,
 	className,
 	...props
-}: DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> & {
+}: Omit<
+	DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>,
+	"onClick"
+> & {
 	promptValue?: string | number;
 	prompt: string;
 	alert?: boolean;
-	onClick: (value: string | number) => void;
+	onClick: (value: string) => void;
 }) {
+	const prompt = usePrompt();
 	return (
 		<div
 			className={cn(
@@ -29,21 +34,25 @@ export function InputField({
 				className,
 			)}
 			{...props}
-			onClick={() => {
+			onClick={async () => {
 				const childrenValue =
 					typeof children === "string" || typeof children === "number"
 						? children
 						: null;
-				const value = prompt(
-					inputPrompt,
-					String(promptValue || childrenValue || ""),
-				);
+				const value = await prompt({
+					header: inputPrompt,
+					defaultValue: String(promptValue || childrenValue || ""),
+				});
 				if (value === null) return;
+				if (value === "") {
+					onClick("");
+					return;
+				}
 				const parseValue = Number.isNaN(Number(value)) ? value : Number(value);
 				onClick(String(parseValue));
 			}}
 		>
-			{children ?? <>&nbsp;</>}
+			{children || <>&nbsp;</>}
 		</div>
 	);
 }
