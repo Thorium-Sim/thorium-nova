@@ -273,6 +273,7 @@ export const longRangeComm = t.router({
 				timestamp: number;
 				encodedMessage: string;
 				encoding: z.infer<typeof isLongRangeMessage>["encoding"];
+				unread: boolean;
 			}[] = [];
 			const lrcomm = getShipSystem(ctx.ecs, {
 				systemType: "longRangeComm",
@@ -284,13 +285,23 @@ export const longRangeComm = t.router({
 				const isLongRangeMessage =
 					longRangeMessage.components.isLongRangeMessage;
 				if (!isLongRangeMessage) continue;
-				const { destinationId, senderId, timestamp, state, message, encoding } =
-					isLongRangeMessage;
+				const {
+					destinationId,
+					senderId,
+					interceptorId,
+					timestamp,
+					state,
+					message,
+					encoding,
+				} = isLongRangeMessage;
 				if (
-					destinationId !== input.shipId ||
-					!["delivered", "intercepted"].includes(state)
+					(destinationId !== input.shipId && interceptorId !== input.shipId) ||
+					!["delivered", "intercepted", "read"].includes(state)
 				)
 					continue;
+
+				if (interceptorId === input.shipId && state !== "intercepted") continue;
+
 				let senderShipName =
 					lrcomm.components.isLongRangeComm?.addressBook.find(
 						(f) => f.contactId === senderId,
@@ -316,8 +327,11 @@ export const longRangeComm = t.router({
 					timestamp,
 					encodedMessage: encodeMessage(message, encoding),
 					encoding,
+					unread: state !== "read",
 				});
 			}
+
+			messages.sort((a, b) => b.timestamp - a.timestamp);
 
 			return messages;
 		}),
@@ -517,6 +531,16 @@ export const longRangeComm = t.router({
 				decoding: z.union([
 					z.object({ type: z.literal("rotation"), rotation: z.number() }),
 					z.object({ type: z.literal("replacement"), letterMap: z.string() }),
+					z.object({
+						type: z.literal("waves"),
+						waves: z
+							.object({
+								amplitude: z.number(),
+								frequency: z.number(),
+								phase: z.number(),
+							})
+							.array(),
+					}),
 					z.object({ type: z.literal("decoded") }),
 				]),
 			}),
@@ -527,22 +551,66 @@ export const longRangeComm = t.router({
 				throw new Error("Invalid Long Range Message");
 
 			const { type, ...properties } = input.decoding;
+			const newEncoding = {
+				...message.components.isLongRangeMessage.encoding,
+				...("waves" in properties &&
+				message.components.isLongRangeMessage.encoding.type === "waves"
+					? {
+							waves: message.components.isLongRangeMessage.encoding.waves.map(
+								(wave, i) => ({ ...wave, ...properties.waves[i] }),
+							),
+						}
+					: properties),
+			};
+			const encodedMessage = encodeMessage(
+				message.components.isLongRangeMessage.message,
+				newEncoding,
+			);
+			const { state, message: lrmMessage } =
+				message.components.isLongRangeMessage;
 			message.updateComponent("isLongRangeMessage", {
-				encoding: {
-					...message.components.isLongRangeMessage.encoding,
-					...properties,
-				},
+				encoding: newEncoding,
+				state:
+					state !== "intercepted" &&
+					encodedMessage.toLowerCase() === lrmMessage.toLowerCase()
+						? "read"
+						: state,
 			});
 
 			pubsub.publish.longRangeComm.incomingMessages({
 				shipId: message.components.isLongRangeMessage.destinationId,
 			});
+			if (message.components.isLongRangeMessage.interceptorId) {
+				pubsub.publish.longRangeComm.incomingMessages({
+					shipId: message.components.isLongRangeMessage.interceptorId,
+				});
+			}
 			return {
-				encodedMessage: encodeMessage(
-					message.components.isLongRangeMessage.message,
-					message.components.isLongRangeMessage.encoding,
-				),
+				encodedMessage,
 			};
+		}),
+	forwardInterceptedMessage: t.procedure
+		.input(z.object({ messageId: z.number() }))
+		.send(({ ctx, input }) => {
+			const message = ctx.ecs.getEntityById(input.messageId);
+			if (!message?.components.isLongRangeMessage)
+				throw new Error("Invalid Long Range Message");
+			const shipId = message.components.isLongRangeMessage.interceptorId;
+			if (!shipId) throw new Error("Invalid Long Range Message");
+
+			message.updateComponent("isLongRangeMessage", {
+				state: "sending",
+			});
+			pubsub.publish.longRangeComm.incomingMessages({
+				shipId: message.components.isLongRangeMessage.destinationId,
+			});
+
+			pubsub.publish.longRangeComm.incomingMessages({
+				shipId: message.components.isLongRangeMessage.destinationId,
+			});
+			pubsub.publish.longRangeComm.incomingMessages({
+				shipId,
+			});
 		}),
 });
 
@@ -825,8 +893,9 @@ export function findClosestSatellite(
 		objectSystem?.components.position || object.components.position;
 
 	if (!objectPosition) return null;
-	let minDistance: { distance: number; id: number } = {
+	let minDistance: { distance: number; playerShip: boolean; id: number } = {
 		distance: Number.POSITIVE_INFINITY,
+		playerShip: false,
 		id: -1,
 	};
 	for (const node of nodes) {
@@ -845,8 +914,17 @@ export function findClosestSatellite(
 			if (distance > lightYearToLightMinute(range)) continue;
 		}
 
-		if (distance < minDistance.distance) {
-			minDistance = { distance, id: node.id };
+		if (
+			distance < minDistance.distance ||
+			(distance === minDistance.distance &&
+				node.components.isPlayerShip &&
+				!minDistance.playerShip)
+		) {
+			minDistance = {
+				distance,
+				playerShip: !!node.components.isPlayerShip,
+				id: node.id,
+			};
 		}
 	}
 

@@ -48,7 +48,7 @@ const sinePoints = ({
 	return points;
 };
 
-function getPoint(
+export function getSinePoint(
 	i: number,
 	waves: {
 		amplitude: number;
@@ -104,8 +104,12 @@ const SineWave = ({
 		ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 		ctx.beginPath();
 		ctx.moveTo(
-			orientation === "vertical" ? getPoint(0, waves) * width + width / 2 : 0,
-			orientation === "vertical" ? 0 : getPoint(0, waves) * height + height / 2,
+			orientation === "vertical"
+				? getSinePoint(0, waves) * width + width / 2
+				: 0,
+			orientation === "vertical"
+				? 0
+				: getSinePoint(0, waves) * height + height / 2,
 		);
 		for (
 			let i = -10;
@@ -116,11 +120,11 @@ const SineWave = ({
 		) {
 			ctx.lineTo(
 				orientation === "vertical"
-					? getPoint(i, waves) * width + width / 2
+					? getSinePoint(i, waves) * width + width / 2
 					: i / 2,
 				orientation === "vertical"
 					? i / 2
-					: getPoint(i, waves) * height + height / 2,
+					: getSinePoint(i, waves) * height + height / 2,
 			);
 		}
 

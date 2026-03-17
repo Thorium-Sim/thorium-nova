@@ -80,13 +80,19 @@ export class CommSatelliteSystem extends System {
 			const currentNode = this.ecs.getEntityById(
 				entity.components.isLongRangeMessage?.nextNodeId || -1,
 			);
-			if (currentNode?.components.isPlayerShip) {
+			if (
+				currentNode?.components.isPlayerShip &&
+				!isLongRangeMessage.interceptorId
+			) {
 				entity.updateComponent("isLongRangeMessage", {
 					interceptorId: currentNode.id,
 					state: "intercepted",
 				});
 				pubsub.publish.longRangeComm.outgoingMessages({ shipId });
 				pubsub.publish.longRangeComm.incomingMessages({ shipId });
+				pubsub.publish.longRangeComm.incomingMessages({
+					shipId: currentNode.id,
+				});
 
 				return;
 			}
@@ -181,7 +187,6 @@ export class CommSatelliteSystem extends System {
 				state: "undelivered",
 				failureReason: reason,
 			});
-			console.error(reason);
 			entity.removeComponent("position");
 			pubsub.publish.longRangeComm.outgoingMessages({ shipId });
 		}

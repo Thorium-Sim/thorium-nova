@@ -59,6 +59,7 @@ export const isLongRangeMessage = z
 				"failing",
 				"intercepted",
 				"delivered",
+				"read",
 				"deleted",
 				"undelivered",
 			])
