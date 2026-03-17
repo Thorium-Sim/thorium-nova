@@ -8,6 +8,7 @@ import { Vector3 } from "three";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { spawnShip } from "@thorium/.server/spawners/ship";
 import type BasePlugin from "@thorium/.server/classes/Plugins";
+import type BridgePlugin from "@thorium/.server/classes/Plugins/Bridge";
 import type StationComplementPlugin from "@thorium/.server/classes/Plugins/StationComplement";
 import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
@@ -22,6 +23,7 @@ const flightStartShips = z
 			crewCount: z.number(),
 			shipName: z.string(),
 			theme: z.object({ pluginId: z.string(), themeId: z.string() }).optional(),
+			bridge: z.object({ pluginId: z.string(), bridgeId: z.string() }).optional(),
 			shipTemplate: z.object({
 				pluginId: z.string(),
 				shipId: z.string(),
@@ -194,6 +196,9 @@ export async function startFlight(
 		if (theme) {
 			shipEntity.addComponent("theme", theme);
 		}
+		if (ship.bridge) {
+			shipEntity.addComponent("shipBridge", ship.bridge);
+		}
 
 		// First see if there is a station complement
 		// that matches the specific one that was passed in
@@ -204,6 +209,110 @@ export async function startFlight(
 		});
 
 		ctx.flight.ecs.addEntity(shipEntity);
+
+		// Spawn viewscreen entities from bridge config
+		if (ship.bridge) {
+			const bridgeConfig = activePlugins.reduce(
+				(acc: BridgePlugin | null, plugin) => {
+					if (acc || plugin.id !== ship.bridge!.pluginId) return acc;
+					return (
+						plugin.aspects.bridges.find(
+							(b) => b.name === ship.bridge!.bridgeId,
+						) || null
+					);
+				},
+				null,
+			);
+
+			if (bridgeConfig) {
+				// Collect viewscreen elements with their config
+				const viewscreenPairs: Array<{
+					vs: (typeof bridgeConfig.viewscreens)[number];
+					element: (typeof bridgeConfig.levels)[number]["elements"][number];
+				}> = [];
+				for (const level of bridgeConfig.levels) {
+					for (const element of level.elements) {
+						if (element.type !== "viewscreen" || !element.viewscreenId)
+							continue;
+						const vs = bridgeConfig.viewscreens.find(
+							(v) => v.id === element.viewscreenId,
+						);
+						if (!vs) continue;
+						viewscreenPairs.push({ vs, element });
+					}
+				}
+
+				// Create a single parent "Viewscreens" system entity that owns the shared damage
+				const viewscreenSystemEntity = new Entity();
+				viewscreenSystemEntity.addComponent("identity", { name: "Viewscreens" });
+				viewscreenSystemEntity.addComponent("isShipSystem", {
+					type: "generic",
+					shipId: shipEntity.id,
+				});
+				viewscreenSystemEntity.addComponent("damage", { vulnerability: "invulnerable" });
+				ctx.flight.ecs.addEntity(viewscreenSystemEntity);
+				shipEntity.components.shipSystems?.shipSystems.set(viewscreenSystemEntity.id, {});
+
+				// If no viewscreen is designated as main, name the first one "Main Viewscreen"
+				const hasMain = viewscreenPairs.some(
+					({ vs }) => vs.isMainViewscreen,
+				);
+
+				const viewscreenStations: Array<{
+					name: string;
+					description: string;
+					logo: string;
+					theme: string;
+					tags: string[];
+					cards: Array<{ name: string; component: string }>;
+					widgets: Array<{ name: string; component: string }>;
+					messageGroups: string[];
+				}> = [];
+				for (let i = 0; i < viewscreenPairs.length; i++) {
+					const { vs, element } = viewscreenPairs[i];
+					const isMain = vs.isMainViewscreen ?? (!hasMain && i === 0);
+					const name = !hasMain && i === 0 ? "Main Viewscreen" : vs.name;
+
+					const viewscreenEntity = new Entity();
+					const brokenMode = vs.brokenMode ?? "fullyBroken";
+					viewscreenEntity.addComponent("isViewscreen", {
+						shipId: shipEntity.id,
+						viewscreenId: vs.id,
+						name,
+						tags: vs.tags,
+						isMainViewscreen: isMain,
+						cameraYaw: element.rotation,
+						cameraPitch: element.pitch ?? 0,
+						showGizmos: vs.showGizmos ?? true,
+						showLayout: vs.showLayout ?? true,
+						brokenMode,
+						camerasOffline: false,
+						damageBroken: false,
+						viewscreenSystemId: viewscreenSystemEntity.id,
+					});
+					viewscreenEntity.addComponent("identity", { name });
+					ctx.flight.ecs.addEntity(viewscreenEntity);
+
+					viewscreenStations.push({
+						name,
+						description: "",
+						logo: "",
+						theme: "Default",
+						tags: vs.tags,
+						cards: [{ name: "Viewscreen", component: "Viewscreen" }],
+						widgets: [],
+						messageGroups: [],
+					});
+				}
+			if (viewscreenStations.length > 0) {
+					const existing =
+						shipEntity.components.stationComplement?.stations || [];
+					shipEntity.updateComponent("stationComplement", {
+						stations: [...existing, ...viewscreenStations],
+					});
+				}
+			}
+		}
 	}
 	// Add the mission if it exists
 	if (missionId) {

@@ -89,6 +89,7 @@ export default function FlightQuickStart() {
 								...ship,
 								shipName: ship.name,
 								shipTemplate: ship.shipId,
+								bridge: ship.bridgeId,
 							}));
 							flightStart.mutate({
 								flightName,

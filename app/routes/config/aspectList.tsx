@@ -76,6 +76,10 @@ const ConfigList = () => {
 					<Icon name="package-open" className="text-6xl mb-4" />
 					<p className="font-bold text-2xl">Inventory</p>
 				</ConfigIcon>
+				<ConfigIcon to={`/config/${pluginId}/bridges`}>
+					<Icon name="theater" className="text-6xl mb-4" />
+					<p className="font-bold text-2xl">Bridges</p>
+				</ConfigIcon>
 			</div>
 		</div>
 	);

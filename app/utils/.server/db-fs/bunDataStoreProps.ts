@@ -21,7 +21,11 @@ export const bunDataStoreProps: DataStoreOperations = {
 		let data: any;
 		try {
 			const fileData = await fs.readFile(filePath, "utf8");
-			data = loadYml(fileData);
+			if (filePath.endsWith('.json')) {
+				data = JSON.parse(fileData);
+			} else {
+				data = loadYml(fileData);
+			}
 		} catch (err: any) {
 			if (err.code === "EACCES") {
 				err.message +=
@@ -65,9 +69,14 @@ export const bunDataStoreProps: DataStoreOperations = {
 			jsonData.lastSaved = Date.now();
 			jsonData.dataLoaded = undefined;
 
-			const data = dump(jsonData, {
-				skipInvalid: true,
-			});
+			let data: string;
+			if (filePath.endsWith('.json')) {
+				data = JSON.stringify(jsonData, null, 2);
+			} else {
+				data = dump(jsonData, {
+					skipInvalid: true,
+				});
+			}
 			await fs.writeFile(filePath, data, { mode: 0o0600 });
 		} catch (e: any) {
 			e.message = `db-fs: Error writing file:\n${e.message}`;
@@ -133,7 +142,7 @@ export const bunDataStoreProps: DataStoreOperations = {
 			"plugins",
 			this.id,
 			aspectName,
-			"/*/manifest.{yml,ink}",
+			"/*/manifest.{yml,ink,json}",
 		);
 		const aspectPaths = new Bun.Glob(objectGlob).scan({
 			onlyFiles: true,
@@ -143,7 +152,9 @@ export const bunDataStoreProps: DataStoreOperations = {
 			for await (const filePath of aspectPaths) {
 				const fileData = await fs.readFile(filePath, "utf8");
 
-				const aspectData = loadYml(fileData);
+				const aspectData = filePath.endsWith('.json')
+					? JSON.parse(fileData)
+					: loadYml(fileData);
 				if (aspectName === "shipSystems") {
 					const systemClass =
 						ShipSystemTypes[aspectData.type as keyof typeof ShipSystemTypes];
@@ -188,7 +199,7 @@ export const bunDataStoreProps: DataStoreOperations = {
 			this.id = newName;
 		}
 		this.name = newName;
-		this.meta.filePath = path.join(newPath, "manifest.yml");
+		this.meta.filePath = path.join(newPath, path.basename(this.meta.filePath));
 
 		await this.write(true);
 	},

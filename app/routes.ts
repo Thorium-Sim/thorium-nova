@@ -119,6 +119,9 @@ export default [
 			route("inventory", "routes/config/inventory/layout.tsx", [
 				route(":inventoryId", "routes/config/inventory/inventory.tsx"),
 			]),
+			route("bridges", "routes/config/bridges/layout.tsx", [
+				route(":bridgeId", "routes/config/bridges/bridge.tsx"),
+			]),
 		]),
 	]),
 	route("releases", "routes/releases.tsx"),

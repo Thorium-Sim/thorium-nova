@@ -20,8 +20,15 @@ export const station = t.router({
 				.flightClient;
 			const ship = ctx.getPlayerShip(input.clientId);
 			if (flightClient?.stationOverride) return flightClient.stationOverride;
-			const station = staticStations
-				.concat(ship?.components.stationComplement?.stations || [])
+			const complementStations = ship?.components.stationComplement?.stations || [];
+			const hasViewscreenStations = complementStations.some(
+				(s) => s.cards.some((c) => c.component === "Viewscreen"),
+			);
+			const filteredStatic = hasViewscreenStations
+				? staticStations.filter((s) => s.name !== "Viewscreen")
+				: staticStations;
+			const station = filteredStatic
+				.concat(complementStations)
 				.find((s) => s.name === flightClient?.stationId) as unknown as Station;
 			return station || null;
 		}),

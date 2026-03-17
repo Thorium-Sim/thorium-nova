@@ -35,8 +35,8 @@ export default function Select<I extends string | number>({
 	labelHidden?: boolean;
 	disabled?: boolean;
 	items: (
-		| { id: I; label: string }
-		| { header: string; items: { id: I; label: string }[] }
+		| { id: I; label: string; disabled?: boolean }
+		| { header: string; items: { id: I; label: string; disabled?: boolean }[] }
 	)[];
 	selected: I | null;
 	setSelected: (value: I | null) => void;
@@ -111,12 +111,13 @@ export default function Select<I extends string | number>({
 	);
 }
 
-function SelectItem<I extends string | number>(item: { id: I; label: string }) {
+function SelectItem<I extends string | number>(item: { id: I; label: string; disabled?: boolean }) {
 	return (
 		<ListBoxItem
 			key={item.id}
 			id={item.id}
-			className="flex justify-between cursor-default py-0.5 px-2 min-w-fit data-[focused]:text-white data-[focused]:bg-blue-600 text-gray-100 outline-none rounded"
+			isDisabled={item.disabled}
+			className="flex justify-between cursor-default py-0.5 px-2 min-w-fit data-[focused]:text-white data-[focused]:bg-blue-600 text-gray-100 outline-none rounded aria-disabled:text-gray-500 aria-disabled:cursor-not-allowed"
 		>
 			{({ isSelected }) => (
 				<>

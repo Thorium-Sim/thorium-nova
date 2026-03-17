@@ -16,6 +16,7 @@ import { MacroPlugin } from "./Macro";
 import ReportPlugin from "@thorium/.server/classes/Plugins/Report";
 import MissionPlugin from "./Mission";
 import TrainingPlugin from "@thorium/.server/classes/Plugins/Training";
+import BridgePlugin from "./Bridge";
 
 export function pluginPublish(plugin: BasePlugin) {
 	pubsub.publish.plugin.all();
@@ -35,6 +36,7 @@ interface Aspects {
 	macros: MacroPlugin[];
 	reports: ReportPlugin[];
 	trainings: TrainingPlugin[];
+	bridges: BridgePlugin[];
 }
 // Storing the server here so it doesn't get
 // serialized with the plugin.
@@ -99,6 +101,7 @@ export default class BasePlugin extends DataStore {
 				macros: [],
 				reports: [],
 				trainings: [],
+				bridges: [],
 			};
 			pluginAspects.set(this, aspects);
 		}
@@ -133,6 +136,7 @@ export default class BasePlugin extends DataStore {
 			"trainings",
 			TrainingPlugin,
 		);
+		this.aspects.bridges = await this.#loadAspect("bridges", BridgePlugin);
 	}
 	async rename(name: string) {
 		const otherNames = this.server.plugins.map((p) => p.name);

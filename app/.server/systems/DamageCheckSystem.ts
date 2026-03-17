@@ -15,6 +15,7 @@ export class DamageCheckSystem extends System {
 
 		// If a component is online, check if it should be taken offline
 		if (damageComponent) {
+			if (damageComponent.vulnerability === "invulnerable") return;
 			const aggregateDamage = getAggregateDamage(entity);
 			if (damageComponent.offline) {
 				if (damageComponent.onlineDamage < aggregateDamage) {

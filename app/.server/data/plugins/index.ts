@@ -12,6 +12,7 @@ import { theme } from "./themes";
 import { inventory } from "./inventory";
 import { getPlugin } from "./utils";
 import { macro } from "@thorium/.server/data/plugins/macro";
+import { bridge } from "@thorium/.server/data/plugins/bridge";
 
 export function publish(pluginId: string) {
 	pubsub.publish.plugin.all();
@@ -26,6 +27,7 @@ export const plugin = t.router({
 	systems,
 	starmap,
 	inventory,
+	bridge,
 	all: t.procedure.request(({ ctx }) => {
 		return ctx.server.plugins;
 	}),

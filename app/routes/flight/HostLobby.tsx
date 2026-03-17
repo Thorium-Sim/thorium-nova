@@ -130,7 +130,11 @@ function ClientAssignment() {
 								/>
 							))}
 							{flight?.hasFlightDirector
-								? staticStations.map((station) => (
+								? staticStations
+									.filter((s) => s.name !== "Viewscreen" || !ship.stations.some(
+										(st) => st.cards.some((c) => c.component === "Viewscreen"),
+									))
+									.map((station) => (
 										<HostStationItem
 											key={station.name}
 											shipId={ship.id}

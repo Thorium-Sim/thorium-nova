@@ -17,6 +17,9 @@ const StationLayout = () => {
 	const { client, station, ship } = useStation();
 	const [theme] = q.theme.get.useNetRequest({ clientId });
 	const [card, changeCard] = useManageCard();
+	const isViewscreen = station.cards.some(c => c.component === "Viewscreen");
+	const [vsConfig] = q.viewscreen.viewscreenConfig.useNetRequest({ clientId });
+	const showLayout = !isViewscreen || (vsConfig?.showLayout !== false);
 
 	const { account } = useThoriumAccount();
 	if (!ship) return null;
@@ -24,7 +27,7 @@ const StationLayout = () => {
 	return (
 		<div
 			className={`theme-container h-full w-full ${
-				station.name === "Viewscreen" ? "viewscreen" : ""
+				isViewscreen ? "viewscreen" : ""
 			}`}
 		>
 			<div
@@ -41,7 +44,7 @@ const StationLayout = () => {
 				<link rel="stylesheet" href={theme?.assets.rawCSS} />
 				<CardSwitcher card={card.name} changeCard={changeCard} />
 				<div className="card-frame h-screen">
-					<div className="card-frame-inner h-full w-full absolute">
+					{showLayout && <div className="card-frame-inner h-full w-full absolute">
 						<div className="card-frame-ship-name select-none">{ship.name}</div>
 						{ship.assets?.logo && (
 							<div className="card-frame-ship-logo w-24 h-24">
@@ -93,7 +96,7 @@ const StationLayout = () => {
 						<div className="doodad-8 absolute" />
 						<div className="doodad-9 absolute" />
 						<div className="doodad-10 absolute" />
-					</div>
+					</div>}
 					<div className="card-area relative h-full">
 						<CardArea card={card} />
 					</div>
