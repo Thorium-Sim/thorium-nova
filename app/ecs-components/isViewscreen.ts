@@ -9,6 +9,8 @@ export const isViewscreen = z
 		isMainViewscreen: z.boolean().default(false),
 		cameraYaw: z.number().default(0),
 		cameraPitch: z.number().default(0),
+		/** Camera field of view in degrees (10–80). */
+		cameraFov: z.number().min(10).max(80).default(45),
 		showGizmos: z.boolean().default(true),
 		showLayout: z.boolean().default(true),
 		brokenMode: z.enum(["fullyBroken", "cameraBrokenOnly", "invincible"]).default("fullyBroken"),

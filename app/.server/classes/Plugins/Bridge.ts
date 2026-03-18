@@ -21,6 +21,8 @@ export interface BridgeViewscreen {
 	showGizmos?: boolean;
 	showLayout?: boolean;
 	brokenMode?: "fullyBroken" | "cameraBrokenOnly" | "invincible";
+	/** Camera field of view in degrees (10–80). Defaults to 45. */
+	fov?: number;
 }
 
 export type BridgeMapElementType = "station" | "viewscreen";
@@ -69,10 +71,7 @@ export default class BridgePlugin extends Aspect {
 			params.name || "New Bridge",
 			plugin.aspects.bridges.map((b) => b.name),
 		);
-		super({ ...params, name }, { kind: "bridges" }, plugin, {});
-
-		// Use JSON instead of YAML for bridge manifests
-		this.meta.filePath = this.meta.filePath.replace('manifest.yml', 'manifest.json');
+		super({ ...params, name }, { kind: "bridges", manifestFile: "manifest.json" }, plugin, {});
 
 		this.name = this.name || name;
 		this.description = this.description || params.description || "";

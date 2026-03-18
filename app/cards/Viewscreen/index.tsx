@@ -8,7 +8,8 @@ import {
 	InterstellarWrapper,
 	SolarSystemWrapper,
 } from "@thorium/cores/StarmapCore";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import * as THREE from "three";
 import { Quaternion, Vector3 } from "three";
 import { Fuzz } from "./Fuzz";
 import { WarpStars } from "./WarpStars";
@@ -39,9 +40,35 @@ function ViewscreenEffects({ onDone }: { onDone: () => void }) {
 		});
 	}, [viewscreenSystem?.skyboxKey, useStarmapStore]);
 
+	// Precompute the camera offset quaternion; recomputes only when yaw/pitch change
+	const cameraOffsetQuat = useMemo(() => {
+		if (!vsConfig?.cameraYaw && !vsConfig?.cameraPitch) return null;
+		const offset = new Quaternion();
+		// Negate yaw because Three.js Y-axis rotation is counterclockwise,
+		// but positive yaw should mean starboard (right) in the UI
+		if (vsConfig.cameraYaw) {
+			offset.multiply(
+				new Quaternion().setFromAxisAngle(
+					new Vector3(0, 1, 0),
+					(-vsConfig.cameraYaw * Math.PI) / 180,
+				),
+			);
+		}
+		if (vsConfig.cameraPitch) {
+			offset.multiply(
+				new Quaternion().setFromAxisAngle(
+					new Vector3(1, 0, 0),
+					(vsConfig.cameraPitch * Math.PI) / 180,
+				),
+			);
+		}
+		return offset;
+	}, [vsConfig?.cameraYaw, vsConfig?.cameraPitch]);
+
 	useEffect(() => {
 		onDone();
 	});
+	const cameraFov = vsConfig?.cameraFov ?? 45;
 	useFrame(({ camera }) => {
 		const position = interpolate(shipId);
 		if (!position) return;
@@ -50,19 +77,12 @@ function ViewscreenEffects({ onDone }: { onDone: () => void }) {
 		camera.quaternion
 			.set(position.r.x, position.r.y, position.r.z, position.r.w)
 			.multiply(forwardQuaternion);
-		// Apply per-viewscreen camera offsets from bridge config
-		if (vsConfig) {
-			// Negate yaw because Three.js Y-axis rotation is counterclockwise,
-			// but positive yaw should mean starboard (right) in the UI
-			const yawQuat = new Quaternion().setFromAxisAngle(
-				new Vector3(0, 1, 0),
-				(-vsConfig.cameraYaw * Math.PI) / 180,
-			);
-			const pitchQuat = new Quaternion().setFromAxisAngle(
-				new Vector3(1, 0, 0),
-				(vsConfig.cameraPitch * Math.PI) / 180,
-			);
-			camera.quaternion.multiply(yawQuat).multiply(pitchQuat);
+		if (cameraOffsetQuat) {
+			camera.quaternion.multiply(cameraOffsetQuat);
+		}
+		if ((camera as THREE.PerspectiveCamera).fov !== cameraFov) {
+			(camera as THREE.PerspectiveCamera).fov = cameraFov;
+			(camera as THREE.PerspectiveCamera).updateProjectionMatrix();
 		}
 	});
 

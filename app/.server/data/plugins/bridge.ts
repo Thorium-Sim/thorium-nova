@@ -263,6 +263,7 @@ export const bridge = t.router({
 				showGizmos: z.boolean().optional(),
 				showLayout: z.boolean().optional(),
 				brokenMode: z.enum(["fullyBroken", "cameraBrokenOnly", "invincible"]).optional(),
+				fov: z.number().min(10).max(80).optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -294,6 +295,7 @@ export const bridge = t.router({
 			if (typeof input.showLayout === "boolean")
 				vs.showLayout = input.showLayout;
 			if (input.brokenMode) vs.brokenMode = input.brokenMode;
+			if (typeof input.fov === "number") vs.fov = input.fov;
 			pubsub.publish.plugin.bridge.get({
 				pluginId: input.pluginId,
 				bridgeId: b.name,

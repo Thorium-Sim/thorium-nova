@@ -41,6 +41,7 @@ export const viewscreen = t.router({
 					return {
 						cameraYaw: vs.cameraYaw,
 						cameraPitch: vs.cameraPitch,
+						cameraFov: vs.cameraFov,
 						showGizmos: vs.showGizmos,
 						showLayout: vs.showLayout,
 						isMainViewscreen: vs.isMainViewscreen,

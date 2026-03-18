@@ -113,6 +113,23 @@ export function MapElementEditor({
 							</svg>
 						</div>
 					</div>
+					<label className="flex flex-col gap-1 text-xs">
+						<span className="text-gray-300">Camera FOV: {linkedViewscreen.fov ?? 45}°</span>
+						<input
+							type="range"
+							min={10}
+							max={80}
+							value={linkedViewscreen.fov ?? 45}
+							onChange={(e) =>
+								q.plugin.bridge.updateViewscreen.netSend({
+									pluginId,
+									bridgeId,
+									viewscreenId: linkedViewscreen.id,
+									fov: Number(e.target.value),
+								})
+							}
+						/>
+					</label>
 					<label className="flex items-center gap-2 text-xs">
 						<input
 							type="checkbox"
@@ -183,9 +200,7 @@ export function MapElementEditor({
 									strokeLinejoin="round"
 									className="text-gray-400 cursor-help"
 								>
-									<circle cx="12" cy="12" r="10" />
-									<path d="M12 16v-4" />
-									<path d="M12 8h.01" />
+									<use href={`${iconsHref}#info`} />
 								</svg>
 							</Tooltip>
 						</div>

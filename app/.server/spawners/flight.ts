@@ -265,15 +265,10 @@ export async function startFlight(
 				}
 			}
 
-			// If no viewscreen is designated as main, name the first one "Main Viewscreen"
-			const hasMain = viewscreenPairs.some(
-				({ vs }) => vs.isMainViewscreen,
-			);
-
 			for (let i = 0; i < viewscreenPairs.length; i++) {
 				const { vs, element } = viewscreenPairs[i];
-				const isMain = vs.isMainViewscreen ?? (!hasMain && i === 0);
-				const name = !hasMain && i === 0 ? "Main Viewscreen" : vs.name;
+				const isMain = vs.isMainViewscreen ?? false;
+				const name = vs.name;
 
 				const viewscreenEntity = new Entity();
 				const brokenMode = vs.brokenMode ?? "fullyBroken";
@@ -281,10 +276,13 @@ export async function startFlight(
 					shipId: shipEntity.id,
 					viewscreenId: vs.id,
 					name,
-					tags: vs.tags,
+					tags: isMain && !vs.tags.includes("main-viewscreen")
+						? [...vs.tags, "main-viewscreen"]
+						: vs.tags,
 					isMainViewscreen: isMain,
 					cameraYaw: element.rotation,
 					cameraPitch: element.pitch ?? 0,
+					cameraFov: vs.fov ?? 45,
 					showGizmos: vs.showGizmos ?? true,
 					showLayout: vs.showLayout ?? true,
 					brokenMode,
@@ -318,6 +316,7 @@ export async function startFlight(
 				isMainViewscreen: true,
 				cameraYaw: 0,
 				cameraPitch: 0,
+				cameraFov: 45,
 				showGizmos: true,
 				showLayout: true,
 				brokenMode: "fullyBroken",
