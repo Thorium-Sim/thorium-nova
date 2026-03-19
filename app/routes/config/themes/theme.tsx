@@ -44,8 +44,6 @@ export default function ThemeLayout() {
 
 	const [previewViewscreen, setPreviewViewscreen] = useState(false);
 
-	const queryClient = useQueryClient();
-
 	if (!themeId || !theme) return <Navigate to={`/config/${pluginId}/themes`} />;
 	return (
 		<>

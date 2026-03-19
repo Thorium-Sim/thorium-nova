@@ -21,17 +21,6 @@ h5,
 h6 {
 	position: relative;
 }
-h1:hover .icon.icon-link,
-h2:hover .icon.icon-link,
-h3:hover .icon.icon-link,
-h4:hover .icon.icon-link,
-h5:hover .icon.icon-link,
-h6:hover .icon.icon-link {
-	opacity: 1;
-}
-.icon.icon-link:hover {
-	opacity: 1;
-}
 .icon.icon-link {
 	opacity: 0;
 	position: absolute;
@@ -44,26 +33,14 @@ h6:hover .icon.icon-link {
 	background-repeat: no-repeat;
 	background-position: center;
 }
-.prose code:before,
-.prose code:after {
-	display: none;
+h1:hover .icon.icon-link,
+h2:hover .icon.icon-link,
+h3:hover .icon.icon-link,
+h4:hover .icon.icon-link,
+h5:hover .icon.icon-link,
+h6:hover .icon.icon-link {
+	opacity: 1;
 }
-.prose code {
-	font-family: monospace;
-	@apply p-1 rounded bg-purple-600/40;
-}
-.prose pre code {
-	@apply bg-transparent;
-}
-.prose a code {
-	@apply text-purple-300;
-}
-.prose h1 {
-	@apply font-bold;
-}
-.prose {
-	@apply text-xl leading-relaxed;
-}
-.prose pre {
-	@apply text-base;
+.icon.icon-link:hover {
+	opacity: 1;
 }
