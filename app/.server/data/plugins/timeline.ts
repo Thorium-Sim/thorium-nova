@@ -16,6 +16,7 @@ import ReportPlugin from "@thorium/.server/classes/Plugins/Report";
 import type { FlightStartingPoint } from "@thorium/.server/spawners/flight";
 import TrainingPlugin from "@thorium/.server/classes/Plugins/Training";
 import type { Aspect } from "@thorium/.server/classes/Plugins/Aspect";
+import ConversationPlugin from "@thorium/.server/classes/Plugins/Conversation";
 
 const timelineType = z.enum(["missions", "reports", "trainings"]);
 const timelineClasses: Record<z.infer<typeof timelineType>, any> = {
@@ -529,6 +530,233 @@ const step = t.router({
 	block,
 });
 
+const conversations = t.router({
+	list: t.procedure
+		.input(z.object({ pluginId: z.string(), timelineId: z.string() }))
+		.filter(
+			(
+				publish: { pluginId: string; timelineId?: string } | null,
+				{ input },
+			) => {
+				if (
+					!publish ||
+					(publish.pluginId === input.pluginId &&
+						publish.timelineId === input.timelineId)
+				)
+					return true;
+				return false;
+			},
+		)
+		.request(({ ctx, input }) => {
+			const plugin = getPlugin(ctx, input.pluginId);
+			return plugin.aspects.conversations.filter(
+				(c) => c.timelineId === input.timelineId,
+			);
+		}),
+	get: t.procedure
+		.input(z.object({ pluginId: z.string(), conversationId: z.string() }))
+		.filter(
+			(
+				publish: { pluginId: string; conversationId: string } | null,
+				{ input },
+			) => {
+				if (
+					!publish ||
+					(publish.pluginId === input.pluginId &&
+						publish.conversationId === input.conversationId)
+				)
+					return true;
+				return false;
+			},
+		)
+		.request(async ({ ctx, input }) => {
+			const plugin = getPlugin(ctx, input.pluginId);
+			const conversation = plugin.aspects.conversations.find(
+				(conversation) => conversation.name === input.conversationId,
+			);
+			if (!conversation) throw null;
+			const assetPath = await conversation.getAssetUrl();
+			// TODO March 19, 2026 - Replace this with the default conversation template
+			let text = "";
+			try {
+				text = await ctx.readFile.call(
+					conversation,
+					path.join(assetPath, conversation.assets.conversation),
+				);
+			} catch {}
+			return { ...conversation, text };
+		}),
+	create: t.procedure
+		.input(
+			z.object({
+				pluginId: z.string(),
+				timelineId: z.string(),
+				name: z.string(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			inputAuth(ctx);
+			const plugin = getPlugin(ctx, input.pluginId);
+			const conversation = new ConversationPlugin(
+				{ name: input.name, timelineId: input.timelineId },
+				plugin,
+			);
+			plugin.aspects.conversations.push(conversation);
+			const name = conversation.name;
+
+			pubsub.publish.plugin.timeline.conversations.list({
+				timelineId: input.timelineId,
+				pluginId: input.pluginId,
+			});
+			pubsub.publish.plugin.timeline.conversations.get({
+				pluginId: input.pluginId,
+				conversationId: name,
+			});
+			return { conversationId: name };
+		}),
+	delete: t.procedure
+		.input(z.object({ pluginId: z.string(), conversationId: z.string() }))
+		.send(async ({ ctx, input }) => {
+			inputAuth(ctx);
+			const plugin = getPlugin(ctx, input.pluginId);
+			const conversation = plugin.aspects.conversations.find(
+				(conversation) => conversation.name === input.conversationId,
+			) as any;
+			if (!conversation) return;
+			plugin.aspects.conversations.splice(
+				plugin.aspects.conversations.indexOf(conversation),
+				1,
+			);
+
+			await conversation?.remove();
+			pubsub.publish.plugin.timeline.conversations.list({
+				pluginId: input.pluginId,
+				timelineId: conversation.timelineId,
+			});
+		}),
+	update: t.procedure
+		.input(
+			z.intersection(
+				z.object({ pluginId: z.string(), conversationId: z.string() }),
+				z.union([
+					z.object({ name: z.string() }),
+					z.object({ text: z.string() }),
+				]),
+			),
+		)
+		.send(async ({ ctx, input }) => {
+			inputAuth(ctx);
+			const plugin = getPlugin(ctx, input.pluginId);
+			const conversation = plugin.aspects.conversations.find(
+				(conversation) => conversation.name === input.conversationId,
+			);
+			if (!conversation) throw new Error("Theme not found.");
+			if ("text" in input) {
+				conversation.assets.conversation = await ctx.uploadFile.call(
+					conversation,
+					new Blob([input.text], { type: "text/css" }),
+					"conversation.ink",
+				);
+			}
+			if ("name" in input) {
+				await conversation.rename(input.name);
+			}
+			pubsub.publish.plugin.timeline.conversations.list({
+				timelineId: conversation.timelineId,
+				pluginId: input.pluginId,
+			});
+			pubsub.publish.plugin.timeline.conversations.get({
+				pluginId: input.pluginId,
+				conversationId: conversation.name,
+			});
+			return {
+				conversationId: conversation.name,
+				...("text" in input ? { text: input.text } : {}),
+			};
+		}),
+	duplicate: t.procedure
+		.input(
+			z.object({
+				pluginId: z.string(),
+				conversationId: z.string(),
+				name: z.string(),
+			}),
+		)
+		.send(async ({ ctx, input }) => {
+			inputAuth(ctx);
+			const plugin = getPlugin(ctx, input.pluginId);
+			const conversation = plugin.aspects.conversations.find(
+				(conversation) => conversation.name === input.conversationId,
+			);
+			if (!conversation) throw new Error("Conversation not found.");
+			const conversationCopy = await conversation.duplicate(input.name);
+			pubsub.publish.plugin.timeline.conversations.list({
+				timelineId: conversation.timelineId,
+				pluginId: input.pluginId,
+			});
+			return { conversationId: conversationCopy.name };
+		}),
+	uploadFile: t.procedure
+		.input(
+			z.object({
+				pluginId: z.string(),
+				conversationId: z.string(),
+				file: z.instanceof(File),
+				fileName: z.string(),
+			}),
+		)
+		.send(async ({ ctx, input }) => {
+			inputAuth(ctx);
+			const plugin = getPlugin(ctx, input.pluginId);
+			const conversation = plugin.aspects.conversations.find(
+				(conversation) => conversation.name === input.conversationId,
+			);
+			if (!conversation) throw new Error("Conversation not found.");
+
+			conversation.assets.files.push(
+				await ctx.uploadFile.call(conversation, input.file, input.fileName),
+			);
+
+			pubsub.publish.plugin.timeline.conversations.list({
+				timelineId: conversation.timelineId,
+				pluginId: input.pluginId,
+			});
+			pubsub.publish.plugin.timeline.conversations.get({
+				pluginId: input.pluginId,
+				conversationId: conversation.name,
+			});
+			return { conversationId: conversation.name };
+		}),
+	removeFile: t.procedure
+		.input(
+			z.object({
+				pluginId: z.string(),
+				conversationId: z.string(),
+				file: z.string(),
+			}),
+		)
+		.send(async ({ ctx, input }) => {
+			inputAuth(ctx);
+			const plugin = getPlugin(ctx, input.pluginId);
+			const conversation = plugin.aspects.conversations.find(
+				(conversation) => conversation.name === input.conversationId,
+			);
+			if (!conversation) throw new Error("Conversation not found.");
+			if (typeof input.file !== "string") throw new Error("Invalid file.");
+			await conversation.removeAsset(input.file);
+
+			pubsub.publish.plugin.timeline.conversations.list({
+				timelineId: conversation.timelineId,
+				pluginId: input.pluginId,
+			});
+			pubsub.publish.plugin.timeline.conversations.get({
+				pluginId: input.pluginId,
+				conversationId: conversation.name,
+			});
+			return { conversationId: conversation.name };
+		}),
+});
+
 export const timeline = t.router({
 	all: t.procedure
 		.input(z.object({ pluginId: z.string(), timelineType }))
@@ -712,4 +940,5 @@ export const timeline = t.router({
 			[],
 		);
 	}),
+	conversations,
 });

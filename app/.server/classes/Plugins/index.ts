@@ -1,11 +1,7 @@
 import type { ServerDataModel } from "../ServerDataModel";
 import { generateIncrementedName } from "../../../utils/generateIncrementedName";
 import ShipPlugin from "./Ship";
-import {
-	DataStore,
-	type DataStoreOptions,
-	type LoadAspectFn,
-} from "@thorium/utils/.server/db-fs";
+import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
 import StationComplementPlugin from "./StationComplement";
 import ThemePlugin from "./Theme";
 import SolarSystemPlugin from "./Universe/SolarSystem";
@@ -16,6 +12,8 @@ import { MacroPlugin } from "./Macro";
 import ReportPlugin from "@thorium/.server/classes/Plugins/Report";
 import MissionPlugin from "./Mission";
 import TrainingPlugin from "@thorium/.server/classes/Plugins/Training";
+import ConversationPlugin from "@thorium/.server/classes/Plugins/Conversation";
+import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
 
 export function pluginPublish(plugin: BasePlugin) {
 	pubsub.publish.plugin.all();
@@ -24,34 +22,50 @@ export function pluginPublish(plugin: BasePlugin) {
 	});
 }
 
-interface Aspects {
-	ships: ShipPlugin[];
-	shipSystems: BaseShipSystemPlugin[];
-	stationComplements: StationComplementPlugin[];
-	themes: ThemePlugin[];
-	solarSystems: SolarSystemPlugin[];
-	inventory: InventoryPlugin[];
-	missions: MissionPlugin[];
-	macros: MacroPlugin[];
-	reports: ReportPlugin[];
-	trainings: TrainingPlugin[];
-}
+const Aspects = {
+	ships: ShipPlugin,
+	shipSystems: BaseShipSystemPlugin,
+	stationComplements: StationComplementPlugin,
+	themes: ThemePlugin,
+	solarSystems: SolarSystemPlugin,
+	inventory: InventoryPlugin,
+	missions: MissionPlugin,
+	macros: MacroPlugin,
+	reports: ReportPlugin,
+	trainings: TrainingPlugin,
+	conversations: ConversationPlugin,
+};
+
+export type AspectsMap = {
+	[k in keyof typeof Aspects]: InstanceType<(typeof Aspects)[k]>[];
+};
+
 // Storing the server here so it doesn't get
 // serialized with the plugin.
 let storedServer: ServerDataModel;
 // Same with plugin aspects. By storing them in a WeakMap,
 // they'll be keyed to the plugin, but will automatically
 // be garbage collected if the plugin is ever deleted.
-const pluginAspects = new WeakMap<BasePlugin, Aspects>();
+const pluginAspects = new WeakMap<BasePlugin, AspectsMap>();
 export default class BasePlugin extends DataStore {
 	id!: string;
 	name!: string;
+	kind: "plugins" = "plugins";
 	author!: string;
 	description!: string;
 	default!: boolean;
 	active!: boolean;
 	coverImage!: string;
-	#loadAspect: LoadAspectFn;
+	#loadAllAspects: (
+		this: BasePlugin,
+		aspectClasses: Record<
+			string,
+			new (
+				manifest: { name: string } & Record<string, any>,
+				plugin: BasePlugin,
+			) => unknown
+		>,
+	) => Promise<void>;
 	#getDataPromise: Promise<void>;
 	tags!: string[];
 	constructor(
@@ -69,7 +83,7 @@ export default class BasePlugin extends DataStore {
 			},
 			...options,
 		});
-		this.#loadAspect = DataStore.operations.getStore()!.loadAspect;
+		this.#loadAllAspects = DataStore.operations.getStore()!.loadAllAspects;
 		this.#getDataPromise = this.getData<BasePlugin>().then((data) => {
 			this.id = data.id || params.id || name;
 			this.name = name;
@@ -85,7 +99,7 @@ export default class BasePlugin extends DataStore {
 	get server() {
 		return storedServer;
 	}
-	get aspects(): Aspects {
+	get aspects(): AspectsMap {
 		let aspects = pluginAspects.get(this);
 		if (!aspects) {
 			aspects = {
@@ -99,6 +113,7 @@ export default class BasePlugin extends DataStore {
 				macros: [],
 				reports: [],
 				trainings: [],
+				conversations: [],
 			};
 			pluginAspects.set(this, aspects);
 		}
@@ -106,33 +121,7 @@ export default class BasePlugin extends DataStore {
 	}
 	async loadAspects() {
 		await this.#getDataPromise;
-		this.aspects.ships = await this.#loadAspect("ships", ShipPlugin);
-
-		this.aspects.shipSystems = await this.#loadAspect(
-			"shipSystems",
-			BaseShipSystemPlugin,
-		);
-		this.aspects.stationComplements = await this.#loadAspect(
-			"stationComplements",
-			StationComplementPlugin,
-		);
-
-		this.aspects.themes = await this.#loadAspect("themes", ThemePlugin);
-		this.aspects.solarSystems = await this.#loadAspect(
-			"solarSystems",
-			SolarSystemPlugin,
-		);
-		this.aspects.inventory = await this.#loadAspect(
-			"inventory",
-			InventoryPlugin,
-		);
-		this.aspects.missions = await this.#loadAspect("missions", MissionPlugin);
-		this.aspects.macros = await this.#loadAspect("macros", MacroPlugin);
-		this.aspects.reports = await this.#loadAspect("reports", ReportPlugin);
-		this.aspects.trainings = await this.#loadAspect(
-			"trainings",
-			TrainingPlugin,
-		);
+		await this.#loadAllAspects({ ...Aspects, ...ShipSystemTypes });
 	}
 	async rename(name: string) {
 		const otherNames = this.server.plugins.map((p) => p.name);
@@ -142,7 +131,7 @@ export default class BasePlugin extends DataStore {
 		await super.write(force);
 		if (force) {
 			for (const aspect in this.aspects) {
-				for (const aspectInstance of this.aspects[aspect as keyof Aspects]) {
+				for (const aspectInstance of this.aspects[aspect as keyof AspectsMap]) {
 					await aspectInstance.write(force);
 				}
 			}

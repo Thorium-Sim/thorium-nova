@@ -95,6 +95,16 @@ export default [
 			route("missions", "routes/config/missions/layout.tsx", []),
 			route("missions/:timelineId", "routes/config/missions/mission.tsx", [
 				route("details", "routes/config/missions/details.tsx"),
+				route(
+					"conversations",
+					"routes/config/missions/conversations/list.tsx",
+					[
+						route(
+							":conversationId",
+							"routes/config/missions/conversations/conversation.tsx",
+						),
+					],
+				),
 				route(":stepId", "routes/config/missions/step.tsx"),
 			]),
 			route("reports", "routes/config/reports/layout.tsx", []),

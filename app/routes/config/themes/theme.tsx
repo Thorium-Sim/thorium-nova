@@ -17,7 +17,6 @@ import { Icon } from "@thorium/ui/Icon";
 import type ThemePlugin from "@thorium/.server/classes/Plugins/Theme";
 import StationLayout from "@thorium/components/Station/StationLayout";
 import { StationData } from "@thorium/routes/station/useStation";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function ThemeLayout() {
 	const { themeId, pluginId } = useParams() as {
