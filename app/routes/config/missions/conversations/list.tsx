@@ -28,9 +28,9 @@ export default function MissionsConfig({
 	const conversation = data.find((d) => d.name === conversationId);
 
 	return (
-		<div className="pt-10 h-[calc(100%-2rem)]">
-			<div className="flex gap-4 h-[calc(100%-3rem)]">
-				<div className="flex flex-col w-56 h-full">
+		<div className="pt-10 w-full h-[calc(100%-2rem)]">
+			<div className="grid grid-cols-[14rem_1fr] gap-4 h-[calc(100%-3rem)]">
+				<div className="flex flex-col w-56 h-full row-span-2">
 					<Button
 						className="btn-success btn-sm w-full"
 						onClick={async () => {
