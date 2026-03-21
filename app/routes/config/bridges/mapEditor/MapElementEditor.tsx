@@ -223,6 +223,15 @@ export function MapElementEditor({
 							}
 						/>
 					</div>
+					<Input
+						labelHidden={false}
+						label="Client Name"
+						defaultValue={element.clientName ?? ""}
+						onBlur={(e: any) => {
+							update({ clientName: e.target.value.trim() });
+						}}
+						onKeyDown={(e: any) => { if (e.key === "Enter") e.target.blur(); }}
+					/>
 				</>
 			)}
 			{/* Station element: station name dropdown + client assignment */}

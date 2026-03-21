@@ -42,7 +42,22 @@ export function tryBridgeAutoAssign(ctx: DataContext, clientId: string): void {
 
 		for (const level of bridgeConfig.levels) {
 			for (const element of level.elements) {
-				if (element.type !== "station" || !element.clientName || !element.stationName) continue;
+				if (!element.clientName) continue;
+
+				let assignStationId: string | undefined;
+
+				if (element.type === "station" && element.stationName) {
+					assignStationId = element.stationName;
+				} else if (element.type === "viewscreen" && element.viewscreenId) {
+					const viewscreen = bridgeConfig.viewscreens?.find(
+						(v: any) => v.id === element.viewscreenId,
+					);
+					if (viewscreen?.name) {
+						assignStationId = viewscreen.name;
+					}
+				}
+
+				if (!assignStationId) continue;
 
 				// Compute expected client name
 				const expectedName =
@@ -56,7 +71,7 @@ export function tryBridgeAutoAssign(ctx: DataContext, clientId: string): void {
 				// Verify the station exists on this ship's stationComplement
 				const stations = ship.components.stationComplement?.stations || [];
 				const stationExists = stations.some(
-					(s) => s.name === element.stationName,
+					(s) => s.name === assignStationId,
 				);
 				if (!stationExists) continue;
 
@@ -68,7 +83,7 @@ export function tryBridgeAutoAssign(ctx: DataContext, clientId: string): void {
 					if (
 						fc &&
 						fc.shipId === ship.id &&
-						fc.stationId === element.stationName &&
+						fc.stationId === assignStationId &&
 						!fc.bridgeAssigned
 					) {
 						entity.updateComponent("flightClient", {
@@ -83,7 +98,7 @@ export function tryBridgeAutoAssign(ctx: DataContext, clientId: string): void {
 				if (flightClient) {
 					flightClient.updateComponent("flightClient", {
 						shipId: ship.id,
-						stationId: element.stationName,
+						stationId: assignStationId,
 						bridgeAssigned: true,
 					});
 				}

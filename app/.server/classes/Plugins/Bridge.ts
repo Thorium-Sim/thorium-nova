@@ -1,9 +1,6 @@
 import type BasePlugin from ".";
 import { Aspect } from "./Aspect";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-import fs from "node:fs";
-import path from "node:path";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
 
 export interface BridgeClientAssignment {
 	clientName: string;
@@ -84,42 +81,5 @@ export default class BridgePlugin extends Aspect {
 			{ id: crypto.randomUUID(), name: "Main", backgroundUrl: "", imageWidth: 800, imageHeight: 800, elements: [] },
 		];
 		this.assets = this.assets || {};
-
-		// Migrate clientId → clientName in client assignments
-		for (const ca of this.clientAssignments) {
-			if ('clientId' in ca && !(ca as any).clientName) {
-				(ca as any).clientName = (ca as any).clientId;
-				delete (ca as any).clientId;
-			}
-		}
-
-		// Migrate existing file-path backgroundUrls to base64 data URIs
-		this.migrateBackgroundImages();
-	}
-
-	private migrateBackgroundImages() {
-		for (const level of this.levels) {
-			if (level.backgroundUrl && !level.backgroundUrl.startsWith('data:')) {
-				try {
-					const imagePath = path.join(thoriumPath, level.backgroundUrl);
-					const imageData = fs.readFileSync(imagePath);
-					const ext = path.extname(level.backgroundUrl).toLowerCase();
-					const mimeMap: Record<string, string> = {
-						'.png': 'image/png',
-						'.jpg': 'image/jpeg',
-						'.jpeg': 'image/jpeg',
-						'.gif': 'image/gif',
-						'.webp': 'image/webp',
-						'.svg': 'image/svg+xml',
-					};
-					const mimeType = mimeMap[ext] || 'image/png';
-					const base64 = imageData.toString('base64');
-					level.backgroundUrl = `data:${mimeType};base64,${base64}`;
-				} catch {
-					// If file doesn't exist, clear the URL
-					level.backgroundUrl = '';
-				}
-			}
-		}
 	}
 }
