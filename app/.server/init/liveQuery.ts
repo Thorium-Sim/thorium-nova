@@ -1,14 +1,13 @@
-import { isDatabaseContext } from "@thorium/typeguards/isDatabaseContext";
+import {isDatabaseContext} from "@thorium/typeguards/isDatabaseContext";
 import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
 import type { inferAsyncReturnType } from "@thorium/utils/live-query/.server";
 import type { AnyRouter } from "@thorium/utils/live-query/.server/router";
-import { DataContext } from "../DataContext";
+import {DataContext} from "../DataContext";
 import { pubsub } from "./pubsub";
 import { dataStreamEntity } from "./dataStreamEntity";
 import type {
-	CreateContextOpts,
-	InitWebsocket,
-	InitWebsocketParams,
+	CreateContextOpts, InitWebsocket,
+	InitWebsocketParams
 } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
 import { ServerClient } from "@thorium/utils/live-query/.server/ServerClient";
 import { router } from "@thorium/.server/init/router";
@@ -28,7 +27,8 @@ export function createContext<TContext>({
 	if (!dataContext) {
 		if (!isDatabaseContext(context)) {
 			throw new Error("Database context is required to create data context");
-		} else {
+		}
+		else {
 			// Let's generate a client if it doesn't already exist in the database
 			const client = context.server.clients[clientId];
 			if (!client) {

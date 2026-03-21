@@ -43,10 +43,7 @@ export const CardArea: React.FC<{
 	return (
 		<div className="fade-in">
 			<Transition
-				isOpen={
-					!client.loginName &&
-					!station.cards.some((c) => c.component === "Viewscreen")
-				}
+				isOpen={!client.loginName && !station.cards.some(c => c.component === "Viewscreen")}
 				className="w-full h-full absolute card-transition"
 			>
 				<Login />
@@ -81,8 +78,7 @@ const CardRenderer = ({
 	const [client] = q.client.get.useNetRequest({ clientId });
 	const [station] = q.station.get.useNetRequest({ clientId });
 	const allowCard =
-		(station.cards.some((c) => c.component === "Viewscreen") ||
-			Boolean(client.loginName)) &&
+		(station.cards.some(c => c.component === "Viewscreen") || Boolean(client.loginName)) &&
 		!client.offlineState;
 	const show = allowCard && currentCardId === id;
 	const [cardLoaded, setCardLoaded] = useState(show);

@@ -105,12 +105,7 @@ function SoundConfig({
 	index,
 	soundCount,
 	ambiance,
-}: {
-	sound: Sound;
-	index: number;
-	soundCount: number;
-	ambiance?: boolean;
-}) {
+}: { sound: Sound; index: number; soundCount: number; ambiance?: boolean }) {
 	const {
 		pluginId,
 		systemId,

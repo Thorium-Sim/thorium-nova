@@ -7,11 +7,7 @@ export function LightsOut({
 	rows = 5,
 	difficulty = 4,
 	onComplete,
-}: {
-	rows?: number;
-	difficulty?: number;
-	onComplete?: () => void;
-}) {
+}: { rows?: number; difficulty?: number; onComplete?: () => void }) {
 	const [cells, setCells] = useState(() => {
 		let cells = Array.from({ length: rows ** 2 }).fill(false) as boolean[];
 

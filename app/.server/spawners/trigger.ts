@@ -6,11 +6,7 @@ export function spawnTrigger({
 	name,
 	trigger,
 	tags,
-}: {
-	name?: string;
-	trigger: z.infer<typeof isTrigger>;
-	tags?: string[];
-}) {
+}: { name?: string; trigger: z.infer<typeof isTrigger>; tags?: string[] }) {
 	const entity = new Entity();
 	entity.addComponent("isTrigger", trigger);
 	if (name) {

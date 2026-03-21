@@ -20,12 +20,7 @@ import type { BridgeMapElement } from "@thorium/.server/classes/Plugins/Bridge";
 
 const ROTATION_HANDLE_OFFSET = 30;
 
-function getElementBounds(el: BridgeMapElement): {
-	w: number;
-	h: number;
-	ox: number;
-	oy: number;
-} {
+function getElementBounds(el: BridgeMapElement): { w: number; h: number; ox: number; oy: number } {
 	return { w: el.width ?? 20, h: el.height ?? 20, ox: 0, oy: 0 };
 }
 
@@ -64,12 +59,8 @@ export function MapCanvas({
 	const activeToolRef = useRef(activeTool);
 	activeToolRef.current = activeTool;
 
-	const canvasWidth = level.backgroundUrl
-		? level.imageWidth
-		: DEFAULT_CANVAS_SIZE;
-	const canvasHeight = level.backgroundUrl
-		? level.imageHeight
-		: DEFAULT_CANVAS_SIZE;
+	const canvasWidth = level.backgroundUrl ? level.imageWidth : DEFAULT_CANVAS_SIZE;
+	const canvasHeight = level.backgroundUrl ? level.imageHeight : DEFAULT_CANVAS_SIZE;
 
 	// Intercept wheel events: stop outer scroll and force zoom behavior
 	const canvasWrapperRef = useRef<HTMLDivElement>(null);
@@ -105,23 +96,23 @@ export function MapCanvas({
 	const dragElementStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 	const dragStartRotation = useRef<number>(0);
 	const scaleCorner = useRef<ScaleCorner>(0);
-	const dragElementSize = useRef<{ width: number; height: number }>({
-		width: 0,
-		height: 0,
-	});
+	const dragElementSize = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
 	const [isDragging, setIsDragging] = useState(false);
 
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const selectedElement = level.elements.find((e) => e.id === selectedId);
 
-	const getSvgPoint = useCallback((clientX: number, clientY: number) => {
-		const svg = svgRef.current;
-		if (!svg) return { x: 0, y: 0 };
-		const rect = svg.getBoundingClientRect();
-		const x = (clientX - rect.left) / panState.current.scale;
-		const y = (clientY - rect.top) / panState.current.scale;
-		return { x, y };
-	}, []);
+	const getSvgPoint = useCallback(
+		(clientX: number, clientY: number) => {
+			const svg = svgRef.current;
+			if (!svg) return { x: 0, y: 0 };
+			const rect = svg.getBoundingClientRect();
+			const x = (clientX - rect.left) / panState.current.scale;
+			const y = (clientY - rect.top) / panState.current.scale;
+			return { x, y };
+		},
+		[],
+	);
 
 	const handleElementMouseDown = useCallback(
 		(elementId: string, e: React.MouseEvent) => {
@@ -195,7 +186,10 @@ export function MapCanvas({
 				el.y = dragElementStart.current.y + dy;
 				setIsDragging((v) => !v);
 			} else if (dragMode.current === "rotate") {
-				const angle = Math.atan2(pt.y - el.y, pt.x - el.x);
+				const angle = Math.atan2(
+					pt.y - el.y,
+					pt.x - el.x,
+				);
 				const startAngle = Math.atan2(
 					dragStart.current.y - el.y,
 					dragStart.current.x - el.x,
@@ -286,15 +280,7 @@ export function MapCanvas({
 				await q.plugin.bridge.addElement.netSend(params);
 			}
 		},
-		[
-			activeTool,
-			pluginId,
-			bridgeId,
-			level.id,
-			level.elements,
-			getSvgPoint,
-			canvasWidth,
-		],
+		[activeTool, pluginId, bridgeId, level.id, level.elements, getSvgPoint, canvasWidth],
 	);
 
 	const handleDeleteElement = useCallback(async () => {
@@ -373,30 +359,14 @@ export function MapCanvas({
 								{ length: Math.floor(canvasWidth / GRID_SIZE_PX) + 1 },
 								(_, i) => {
 									const pos = i * GRID_SIZE_PX;
-									return (
-										<line
-											key={`v${i}`}
-											x1={pos}
-											y1={0}
-											x2={pos}
-											y2={canvasHeight}
-										/>
-									);
+									return <line key={`v${i}`} x1={pos} y1={0} x2={pos} y2={canvasHeight} />;
 								},
 							)}
 							{Array.from(
 								{ length: Math.floor(canvasHeight / GRID_SIZE_PX) + 1 },
 								(_, i) => {
 									const pos = i * GRID_SIZE_PX;
-									return (
-										<line
-											key={`h${i}`}
-											x1={0}
-											y1={pos}
-											x2={canvasWidth}
-											y2={pos}
-										/>
-									);
+									return <line key={`h${i}`} x1={0} y1={pos} x2={canvasWidth} y2={pos} />;
 								},
 							)}
 						</g>
@@ -411,91 +381,88 @@ export function MapCanvas({
 
 						{/* Elements */}
 						{level.elements.map((el) => {
-							const linkedVs =
-								el.type === "viewscreen" && el.viewscreenId
-									? viewscreens.find((v) => v.id === el.viewscreenId)
-									: null;
-							return (
-								<MapElementRenderer
-									key={el.id}
-									element={el}
-									selected={selectedId === el.id}
-									onMouseDown={(e) => handleElementMouseDown(el.id, e)}
-									isMainViewscreen={linkedVs?.isMainViewscreen}
-									viewscreenName={linkedVs?.name}
-								/>
-							);
-						})}
+						const linkedVs = el.type === "viewscreen" && el.viewscreenId
+							? viewscreens.find((v) => v.id === el.viewscreenId)
+							: null;
+						return (
+							<MapElementRenderer
+								key={el.id}
+								element={el}
+								selected={selectedId === el.id}
+								onMouseDown={(e) => handleElementMouseDown(el.id, e)}
+								isMainViewscreen={linkedVs?.isMainViewscreen}
+								viewscreenName={linkedVs?.name}
+							/>
+						);
+					})}
 
 						{/* Selection overlay: scale handles + rotation handle */}
-						{selectedElement &&
-							activeTool === "select" &&
-							(() => {
-								const el = selectedElement;
-								const { w, h, ox, oy } = getElementBounds(el);
-								const hw = w / 2;
-								const hh = h / 2;
-								const corners: [number, number, ScaleCorner, string][] = [
-									[-hw, -hh, 0, "nwse-resize"],
-									[hw, -hh, 1, "nesw-resize"],
-									[hw, hh, 2, "nwse-resize"],
-									[-hw, hh, 3, "nesw-resize"],
-								];
-								return (
-									<g
-										transform={`translate(${el.x}, ${el.y}) rotate(${el.rotation})`}
-										pointerEvents="all"
-									>
-										<g transform={`translate(${ox}, ${oy})`}>
+						{selectedElement && activeTool === "select" && (() => {
+							const el = selectedElement;
+							const { w, h, ox, oy } = getElementBounds(el);
+							const hw = w / 2;
+							const hh = h / 2;
+							const corners: [number, number, ScaleCorner, string][] = [
+								[-hw, -hh, 0, "nwse-resize"],
+								[hw, -hh, 1, "nesw-resize"],
+								[hw, hh, 2, "nwse-resize"],
+								[-hw, hh, 3, "nesw-resize"],
+							];
+							return (
+								<g
+									transform={`translate(${el.x}, ${el.y}) rotate(${el.rotation})`}
+									pointerEvents="all"
+								>
+									<g transform={`translate(${ox}, ${oy})`}>
+										<rect
+											x={-hw}
+											y={-hh}
+											width={w}
+											height={h}
+											fill="none"
+											stroke="#60a5fa"
+											strokeWidth={1}
+											strokeDasharray="3,3"
+											pointerEvents="none"
+										/>
+										{corners.map(([cx, cy, corner, cursor]) => (
 											<rect
-												x={-hw}
-												y={-hh}
-												width={w}
-												height={h}
-												fill="none"
+												key={corner}
+												x={cx - HANDLE_SIZE / 2}
+												y={cy - HANDLE_SIZE / 2}
+												width={HANDLE_SIZE}
+												height={HANDLE_SIZE}
+												fill="white"
 												stroke="#60a5fa"
 												strokeWidth={1}
-												strokeDasharray="3,3"
-												pointerEvents="none"
+												style={{ cursor }}
+												onMouseDown={(e) => handleScaleMouseDown(corner, e)}
 											/>
-											{corners.map(([cx, cy, corner, cursor]) => (
-												<rect
-													key={corner}
-													x={cx - HANDLE_SIZE / 2}
-													y={cy - HANDLE_SIZE / 2}
-													width={HANDLE_SIZE}
-													height={HANDLE_SIZE}
-													fill="white"
-													stroke="#60a5fa"
-													strokeWidth={1}
-													style={{ cursor }}
-													onMouseDown={(e) => handleScaleMouseDown(corner, e)}
-												/>
-											))}
-											<line
-												x1={0}
-												y1={-hh}
-												x2={0}
-												y2={-hh - ROTATION_HANDLE_OFFSET}
-												stroke="#60a5fa"
-												strokeWidth={1}
-												strokeDasharray="3,3"
-												pointerEvents="none"
-											/>
-											<circle
-												cx={0}
-												cy={-hh - ROTATION_HANDLE_OFFSET}
-												r={5}
-												fill="#60a5fa"
-												stroke="white"
-												strokeWidth={1}
-												style={{ cursor: "grab" }}
-												onMouseDown={handleRotateMouseDown}
-											/>
-										</g>
+										))}
+										<line
+											x1={0}
+											y1={-hh}
+											x2={0}
+											y2={-hh - ROTATION_HANDLE_OFFSET}
+											stroke="#60a5fa"
+											strokeWidth={1}
+											strokeDasharray="3,3"
+											pointerEvents="none"
+										/>
+										<circle
+											cx={0}
+											cy={-hh - ROTATION_HANDLE_OFFSET}
+											r={5}
+											fill="#60a5fa"
+											stroke="white"
+											strokeWidth={1}
+											style={{ cursor: "grab" }}
+											onMouseDown={handleRotateMouseDown}
+										/>
 									</g>
-								);
-							})()}
+								</g>
+							);
+						})()}
 					</svg>
 				</PanZoom>
 

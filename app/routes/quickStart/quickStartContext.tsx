@@ -151,9 +151,7 @@ const QuickStartContext = createContext<
 
 export function FlightQuickStartProvider({
 	children,
-}: {
-	children: ReactNode;
-}) {
+}: { children: ReactNode }) {
 	const value = useLocalStorageReducer<
 		typeof quickStartReducer,
 		FlightConfigState,

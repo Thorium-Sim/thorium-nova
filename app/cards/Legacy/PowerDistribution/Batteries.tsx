@@ -27,10 +27,7 @@ export function Batteries() {
 function Battery({
 	index,
 	batteries,
-}: {
-	index: number;
-	batteries: { id: number; capacity: number }[];
-}) {
+}: { index: number; batteries: { id: number; capacity: number }[] }) {
 	const { cardLoaded } = useCardContext();
 	const { interpolate } = useLiveQuery();
 	const textRef = useRef<HTMLParagraphElement>(null);

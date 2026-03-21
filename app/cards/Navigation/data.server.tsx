@@ -13,11 +13,7 @@ import {
 import type { DataContext } from "@thorium/.server/DataContext";
 import { getClassification } from "@thorium/cards/Navigation/getObjectClassification.server";
 
-function isWaypointLocked(
-	ecs: ECS,
-	waypointId: number,
-	shipId: number,
-): boolean {
+function isWaypointLocked(ecs: ECS, waypointId: number, shipId: number): boolean {
 	const ship = ecs.getEntityById(shipId);
 	return ship?.components.autopilot?.destinationWaypointId === waypointId;
 }

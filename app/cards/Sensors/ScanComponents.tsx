@@ -30,10 +30,7 @@ export const ScanComponents = {
 export function ScanResults({
 	objectId,
 	type,
-}: {
-	objectId: number;
-	type: string;
-}) {
+}: { objectId: number; type: string }) {
 	const scans =
 		type === "ship"
 			? shipScanTypes

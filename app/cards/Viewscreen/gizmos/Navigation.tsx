@@ -27,7 +27,10 @@ export function NavigationGizmo({ className }: { className?: string }) {
 
 	return (
 		<div
-			className={cn("flex flex-col items-start text-left text-base", className)}
+			className={cn(
+				"flex flex-col items-start text-left text-base",
+				className,
+			)}
 		>
 			{autopilot.destinationName ? (
 				<div>Destination: {autopilot.destinationName}</div>

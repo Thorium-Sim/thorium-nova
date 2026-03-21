@@ -74,11 +74,14 @@ export class AutoRotateSystem extends System {
 			// next waypoint, matching AutoThrustSystem's approach. This prevents
 			// chaotic rotation at warp when the ship overshoots closely-spaced
 			// intermediate waypoints.
-			const currentSpeed = entity.components.velocity?.forwardVelocity || 0;
+			const currentSpeed =
+				entity.components.velocity?.forwardVelocity || 0;
 			const distanceToNext = positionVec.distanceTo(nextDestination);
 			const distanceToNextInKM =
 				distanceToNext *
-				(isInInterstellar ? 1 / lightYearToLightMinute(KM_TO_LY) : 1);
+				(isInInterstellar
+					? 1 / lightYearToLightMinute(KM_TO_LY)
+					: 1);
 			const distanceThreshold = currentSpeed * 2;
 
 			// Check if the ship has passed the waypoint by testing if it's behind

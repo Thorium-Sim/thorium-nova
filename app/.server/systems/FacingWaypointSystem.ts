@@ -56,7 +56,8 @@ export class FacingWaypointSystem extends System {
 				const wpSystemEntity = wpParentId
 					? this.ecs.getEntityById(wpParentId)
 					: null;
-				const wpSystemPosition = wpSystemEntity?.components.position || null;
+				const wpSystemPosition =
+					wpSystemEntity?.components.position || null;
 
 				if (position.parentId === null && wpSystemPosition) {
 					// Ship is in interstellar space

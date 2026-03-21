@@ -20,7 +20,7 @@ export const bunDataStoreProps: DataStoreOperations = {
 		let data: any;
 		try {
 			const fileData = await fs.readFile(filePath, "utf8");
-			if (filePath.endsWith(".json")) {
+			if (filePath.endsWith('.json')) {
 				data = JSON.parse(fileData);
 			} else {
 				data = loadYml(fileData);
@@ -68,7 +68,7 @@ export const bunDataStoreProps: DataStoreOperations = {
 			jsonData.dataLoaded = undefined;
 
 			let data: string;
-			if (filePath.endsWith(".json")) {
+			if (filePath.endsWith('.json')) {
 				data = JSON.stringify(jsonData, null, 2);
 			} else {
 				data = dump(jsonData, {
@@ -136,19 +136,12 @@ export const bunDataStoreProps: DataStoreOperations = {
 		>,
 	) {
 		const glob = new Bun.Glob(
-			path.join(
-				thoriumPath,
-				"plugins",
-				this.id,
-				"*",
-				"**",
-				"manifest.{yml,json}",
-			),
+			path.join(thoriumPath, "plugins", this.id, "*", "**", "manifest.{yml,json}"),
 		);
 		for await (const filePath of glob.scan({ onlyFiles: true })) {
 			try {
 				const fileData = await Bun.file(filePath).text();
-				const aspectData = filePath.endsWith(".json")
+				const aspectData = filePath.endsWith('.json')
 					? JSON.parse(fileData)
 					: loadYml(fileData);
 				const kind = aspectData.kind as keyof AspectsMap;

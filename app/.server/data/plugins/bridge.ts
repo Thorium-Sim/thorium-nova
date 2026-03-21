@@ -39,14 +39,19 @@ export const bridge = t.router({
 	get: t.procedure
 		.input(z.object({ pluginId: z.string(), bridgeId: z.string() }))
 		.filter(
-			(publish: { pluginId: string; bridgeId: string } | null, { input }) => {
+			(
+				publish: { pluginId: string; bridgeId: string } | null,
+				{ input },
+			) => {
 				if (publish && input.pluginId !== publish.pluginId) return false;
 				return true;
 			},
 		)
 		.request(({ ctx, input }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) return null;
 			return {
 				name: b.name,
@@ -58,7 +63,7 @@ export const bridge = t.router({
 					id: level.id,
 					name: level.name,
 					backgroundUrl: level.backgroundUrl,
-
+					
 					imageWidth: level.imageWidth,
 					imageHeight: level.imageHeight,
 					elements: level.elements,
@@ -80,7 +85,9 @@ export const bridge = t.router({
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) return;
 			plugin.aspects.bridges.splice(plugin.aspects.bridges.indexOf(b), 1);
 			await b.remove();
@@ -102,7 +109,9 @@ export const bridge = t.router({
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) return { bridgeId: "" };
 			if (typeof input.description === "string")
 				b.description = input.description;
@@ -153,7 +162,9 @@ export const bridge = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) throw new Error("Bridge not found");
 			// Save current assignments for the current complement
 			const oldKey = b.stationComplementRef
@@ -209,21 +220,27 @@ export const bridge = t.router({
 	getStationComplementStations: t.procedure
 		.input(z.object({ pluginId: z.string(), bridgeId: z.string() }))
 		.filter(
-			(publish: { pluginId: string; bridgeId: string } | null, { input }) => {
+			(
+				publish: { pluginId: string; bridgeId: string } | null,
+				{ input },
+			) => {
 				if (publish && input.pluginId !== publish.pluginId) return false;
 				return true;
 			},
 		)
 		.request(({ ctx, input }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b || !b.stationComplementRef) return [];
 			const complementPlugin = ctx.server.plugins.find(
 				(p) => p.id === b.stationComplementRef!.pluginId,
 			);
 			if (!complementPlugin) return [];
 			const complement = complementPlugin.aspects.stationComplements.find(
-				(sc) => sc.name === b.stationComplementRef!.stationComplementId,
+				(sc) =>
+					sc.name === b.stationComplementRef!.stationComplementId,
 			);
 			if (!complement) return [];
 			return complement.stations.map((s) => s.name);
@@ -245,16 +262,16 @@ export const bridge = t.router({
 					.optional(),
 				showGizmos: z.boolean().optional(),
 				showLayout: z.boolean().optional(),
-				brokenMode: z
-					.enum(["fullyBroken", "cameraBrokenOnly", "invincible"])
-					.optional(),
+				brokenMode: z.enum(["fullyBroken", "cameraBrokenOnly", "invincible"]).optional(),
 				fov: z.number().min(10).max(80).optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) throw new Error("Bridge not found");
 			const vs = b.viewscreens.find((v) => v.id === input.viewscreenId);
 			if (!vs) throw new Error("Viewscreen not found");
@@ -271,7 +288,8 @@ export const bridge = t.router({
 			if (input.tags) vs.tags = input.tags;
 			if (typeof input.isMainViewscreen === "boolean")
 				vs.isMainViewscreen = input.isMainViewscreen;
-			if (input.defaultPose !== undefined) vs.defaultPose = input.defaultPose;
+			if (input.defaultPose !== undefined)
+				vs.defaultPose = input.defaultPose;
 			if (typeof input.showGizmos === "boolean")
 				vs.showGizmos = input.showGizmos;
 			if (typeof input.showLayout === "boolean")
@@ -294,9 +312,13 @@ export const bridge = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) throw new Error("Bridge not found");
-			const idx = b.viewscreens.findIndex((v) => v.id === input.viewscreenId);
+			const idx = b.viewscreens.findIndex(
+				(v) => v.id === input.viewscreenId,
+			);
 			if (idx >= 0) b.viewscreens.splice(idx, 1);
 			pubsub.publish.plugin.bridge.get({
 				pluginId: input.pluginId,
@@ -316,7 +338,9 @@ export const bridge = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) throw new Error("Bridge not found");
 			b.clientAssignments.push({
 				clientName: input.clientName,
@@ -344,14 +368,15 @@ export const bridge = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) throw new Error("Bridge not found");
 			const ca = b.clientAssignments.find(
 				(c) => c.clientName === input.clientName,
 			);
 			if (!ca) throw new Error("Client assignment not found");
-			if (typeof input.newClientName === "string")
-				ca.clientName = input.newClientName;
+			if (typeof input.newClientName === "string") ca.clientName = input.newClientName;
 			if (input.stationId !== undefined) ca.stationId = input.stationId;
 			if (typeof input.isSoundPlayer === "boolean")
 				ca.isSoundPlayer = input.isSoundPlayer;
@@ -372,7 +397,9 @@ export const bridge = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) throw new Error("Bridge not found");
 			const idx = b.clientAssignments.findIndex(
 				(c) => c.clientName === input.clientName,
@@ -396,7 +423,9 @@ export const bridge = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) throw new Error("Bridge not found");
 			const level = {
 				id: crypto.randomUUID(),
@@ -425,7 +454,9 @@ export const bridge = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) throw new Error("Bridge not found");
 			const level = b.levels.find((f) => f.id === input.levelId);
 			if (!level) throw new Error("Level not found");
@@ -446,7 +477,9 @@ export const bridge = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) throw new Error("Bridge not found");
 			const idx = b.levels.findIndex((f) => f.id === input.levelId);
 			if (idx >= 0) b.levels.splice(idx, 1);
@@ -471,14 +504,16 @@ export const bridge = t.router({
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) throw new Error("Bridge not found");
 			const level = b.levels.find((f) => f.id === input.levelId);
 			if (!level) throw new Error("Level not found");
 
 			const arrayBuffer = await input.file.arrayBuffer();
-			const base64 = Buffer.from(arrayBuffer).toString("base64");
-			const mimeType = input.file.type || "image/png";
+			const base64 = Buffer.from(arrayBuffer).toString('base64');
+			const mimeType = input.file.type || 'image/png';
 			level.backgroundUrl = `data:${mimeType};base64,${base64}`;
 			level.imageWidth = input.imageWidth;
 			level.imageHeight = input.imageHeight;
@@ -499,7 +534,9 @@ export const bridge = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) throw new Error("Bridge not found");
 			const level = b.levels.find((f) => f.id === input.levelId);
 			if (!level) throw new Error("Level not found");
@@ -530,7 +567,9 @@ export const bridge = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) throw new Error("Bridge not found");
 			const floor = b.levels.find((f) => f.id === input.levelId);
 			if (!floor) throw new Error("Level not found");
@@ -600,7 +639,9 @@ export const bridge = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) throw new Error("Bridge not found");
 			const floor = b.levels.find((f) => f.id === input.levelId);
 			if (!floor) throw new Error("Level not found");
@@ -619,8 +660,7 @@ export const bridge = t.router({
 				el.stationName = input.stationName;
 				el.label = input.stationName || "";
 			}
-			if (typeof input.clientName === "string")
-				el.clientName = input.clientName;
+			if (typeof input.clientName === "string") el.clientName = input.clientName;
 			pubsub.publish.plugin.bridge.get({
 				pluginId: input.pluginId,
 				bridgeId: b.name,
@@ -638,11 +678,15 @@ export const bridge = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const b = plugin.aspects.bridges.find((b) => b.name === input.bridgeId);
+			const b = plugin.aspects.bridges.find(
+				(b) => b.name === input.bridgeId,
+			);
 			if (!b) throw new Error("Bridge not found");
 			const floor = b.levels.find((f) => f.id === input.levelId);
 			if (!floor) throw new Error("Level not found");
-			const idx = floor.elements.findIndex((e) => e.id === input.elementId);
+			const idx = floor.elements.findIndex(
+				(e) => e.id === input.elementId,
+			);
 			if (idx >= 0) {
 				const removed = floor.elements[idx];
 				// Auto-remove linked BridgeViewscreen when removing a viewscreen element

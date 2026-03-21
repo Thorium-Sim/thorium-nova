@@ -23,7 +23,7 @@ test("empty vault size should be 0", () => {
 });
 
 test("get a snapshot that does not yet exist", () => {
-	const shot = vault.get(Date.now() - tick * 3, true);
+	const shot = vault.get(Date.now()- tick * 3, true);
 	expect(shot).toBeUndefined();
 });
 

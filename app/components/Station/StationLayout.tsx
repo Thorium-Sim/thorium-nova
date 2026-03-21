@@ -17,9 +17,9 @@ const StationLayout = () => {
 	const { client, station, ship } = useStation();
 	const [theme] = q.theme.get.useNetRequest({ clientId });
 	const [card, changeCard] = useManageCard();
-	const isViewscreen = station.cards.some((c) => c.component === "Viewscreen");
+	const isViewscreen = station.cards.some(c => c.component === "Viewscreen");
 	const [vsConfig] = q.viewscreen.viewscreenConfig.useNetRequest({ clientId });
-	const showLayout = !isViewscreen || vsConfig?.showLayout !== false;
+	const showLayout = !isViewscreen || (vsConfig?.showLayout !== false);
 
 	const { account } = useThoriumAccount();
 	if (!ship) return null;
@@ -44,65 +44,59 @@ const StationLayout = () => {
 				<link rel="stylesheet" href={theme?.assets.rawCSS} />
 				<CardSwitcher card={card.name} changeCard={changeCard} />
 				<div className="card-frame h-screen">
-					{showLayout && (
-						<div className="card-frame-inner h-full w-full absolute">
-							<div className="card-frame-ship-name select-none">
-								{ship.name}
-							</div>
-							{ship.assets?.logo && (
-								<div className="card-frame-ship-logo w-24 h-24">
-									<SVGImageLoader
-										className="card-frame-ship-logo-image"
-										url={ship.assets.logo}
-									/>
-								</div>
-							)}
-							<div className="card-frame-station-name select-none">
-								{station.name}
-							</div>
-							{station.logo ? (
-								<div className="card-frame-station-logo text-white w-24 h-24">
-									<SVGImageLoader
-										className="card-frame-station-logo-image"
-										url={station.logo}
-									/>
-								</div>
-							) : null}
-							<div className="card-frame-card-name select-none">
-								{card.name}
-							</div>
-							<div className="card-frame-card-icon w-24 h-24">
+					{showLayout && <div className="card-frame-inner h-full w-full absolute">
+						<div className="card-frame-ship-name select-none">{ship.name}</div>
+						{ship.assets?.logo && (
+							<div className="card-frame-ship-logo w-24 h-24">
 								<SVGImageLoader
-									className="card-frame-card-icon-image"
-									url={card.icon || ""}
+									className="card-frame-ship-logo-image"
+									url={ship.assets.logo}
 								/>
 							</div>
-							<div className="card-frame-login-name select-none">
-								{client.loginName}
-							</div>
-							{account && (
-								<div className="card-frame-login-profile w-24 h-24">
-									<img
-										draggable="false"
-										aria-hidden
-										className="card-frame-login-profile-image"
-										src={account.profilePictureUrl}
-										alt={account.displayName}
-									/>
-								</div>
-							)}
-							<div className="doodad-1 absolute" />
-							<div className="doodad-2 absolute" />
-							<div className="doodad-3 absolute" />
-							<div className="doodad-4 absolute" />
-							<div className="doodad-5 absolute" />
-							<div className="doodad-6 absolute" />
-							<div className="doodad-7 absolute" />
-							<div className="doodad-8 absolute" />
-							<div className="doodad-9 absolute" />
-							<div className="doodad-10 absolute" />
+						)}
+						<div className="card-frame-station-name select-none">
+							{station.name}
 						</div>
-					)}
+						{station.logo ? (
+							<div className="card-frame-station-logo text-white w-24 h-24">
+								<SVGImageLoader
+									className="card-frame-station-logo-image"
+									url={station.logo}
+								/>
+							</div>
+						) : null}
+						<div className="card-frame-card-name select-none">{card.name}</div>
+						<div className="card-frame-card-icon w-24 h-24">
+							<SVGImageLoader
+								className="card-frame-card-icon-image"
+								url={card.icon || ""}
+							/>
+						</div>
+						<div className="card-frame-login-name select-none">
+							{client.loginName}
+						</div>
+						{account && (
+							<div className="card-frame-login-profile w-24 h-24">
+								<img
+									draggable="false"
+									aria-hidden
+									className="card-frame-login-profile-image"
+									src={account.profilePictureUrl}
+									alt={account.displayName}
+								/>
+							</div>
+						)}
+						<div className="doodad-1 absolute" />
+						<div className="doodad-2 absolute" />
+						<div className="doodad-3 absolute" />
+						<div className="doodad-4 absolute" />
+						<div className="doodad-5 absolute" />
+						<div className="doodad-6 absolute" />
+						<div className="doodad-7 absolute" />
+						<div className="doodad-8 absolute" />
+						<div className="doodad-9 absolute" />
+						<div className="doodad-10 absolute" />
+					</div>}
 					<div className="card-area relative h-full">
 						<CardArea card={card} />
 					</div>

@@ -30,10 +30,7 @@ export default function SettingsOptions() {
 function SettingListItem({
 	children,
 	path,
-}: {
-	children: ReactNode;
-	path: string;
-}) {
+}: { children: ReactNode; path: string }) {
 	const setting = matchPath(
 		"/flight/station/settings/:setting",
 		useLocation().pathname,

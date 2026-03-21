@@ -10,20 +10,17 @@ vi.mock("@thorium/utils/.server/ship/collisionDamage", () => {
 	};
 });
 
-function makeEntity(
-	ecs: ECS,
-	{
-		isPlayerShip = true,
-		offline = false,
-		offlineDamage = 20,
-		failureRisk = 0,
-	}: {
-		isPlayerShip?: boolean;
-		offline?: boolean;
-		offlineDamage?: number;
-		failureRisk?: number;
-	} = {},
-) {
+function makeEntity(ecs: ECS, {
+	isPlayerShip = true,
+	offline = false,
+	offlineDamage = 20,
+	failureRisk = 0,
+}: {
+	isPlayerShip?: boolean;
+	offline?: boolean;
+	offlineDamage?: number;
+	failureRisk?: number;
+} = {}) {
 	const entity = new Entity();
 	if (isPlayerShip) {
 		entity.addComponent("isPlayerShip", { value: true });
@@ -74,11 +71,12 @@ describe("SpontaneousFailureSystem", () => {
 			expect((applySystemDamage as any).mock.calls.length).toBe(0);
 		});
 
+
 		it("applies damage if randomRoll < failureRisk", () => {
 			const entity = makeEntity(ecs, {
 				offline: false,
 				failureRisk: 0.5,
-				offlineDamage: 20,
+				offlineDamage: 20
 			});
 
 			// Mock RNG to return a value less than failureRisk
@@ -95,7 +93,7 @@ describe("SpontaneousFailureSystem", () => {
 		it("does not apply damage if randomRoll >= failureRisk", () => {
 			const _entity = makeEntity(ecs, {
 				offline: false,
-				failureRisk: 0.5,
+				failureRisk: 0.5
 			});
 
 			// Mock RNG to return a value greater than or equal to failureRisk
@@ -119,3 +117,4 @@ describe("SpontaneousFailureSystem", () => {
 		});
 	});
 });
+

@@ -6,13 +6,7 @@ export function MapElementDefs() {
 	return (
 		<defs>
 			<filter id="element-shadow" x="-20%" y="-20%" width="140%" height="140%">
-				<feDropShadow
-					dx="0"
-					dy="1"
-					stdDeviation="2"
-					floodColor="#000"
-					floodOpacity="0.6"
-				/>
+				<feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#000" floodOpacity="0.6" />
 			</filter>
 		</defs>
 	);

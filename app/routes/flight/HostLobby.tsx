@@ -108,11 +108,7 @@ function ClientAssignment() {
 					selectedItem={selectedClient}
 					setSelectedItem={({ id }) => setSelectedClient(id)}
 					items={clients
-						.filter(
-							(c) =>
-								(c.shipId === null || c.shipId === undefined) &&
-								!c.bridgeAssigned,
-						)
+						.filter((c) => (c.shipId === null || c.shipId === undefined) && !c.bridgeAssigned)
 						.map((c) => ({
 							id: c.clientId,
 							label: c.name,
@@ -135,22 +131,18 @@ function ClientAssignment() {
 							))}
 							{flight?.hasFlightDirector
 								? staticStations
-										.filter(
-											(s) =>
-												s.name !== "Viewscreen" ||
-												!ship.stations.some((st) =>
-													st.cards.some((c) => c.component === "Viewscreen"),
-												),
-										)
-										.map((station) => (
-											<HostStationItem
-												key={station.name}
-												shipId={ship.id}
-												station={station}
-												selectedClient={selectedClient}
-												setSelectedClient={setSelectedClient}
-											/>
-										))
+									.filter((s) => s.name !== "Viewscreen" || !ship.stations.some(
+										(st) => st.cards.some((c) => c.component === "Viewscreen"),
+									))
+									.map((station) => (
+										<HostStationItem
+											key={station.name}
+											shipId={ship.id}
+											station={station}
+											selectedClient={selectedClient}
+											setSelectedClient={setSelectedClient}
+										/>
+									))
 								: null}
 						</ul>
 					</div>
@@ -210,9 +202,7 @@ function HostStationItem({
 					<li
 						key={client.clientId}
 						className={`list-group-item list-group-item-small ${
-							!client.bridgeAssigned && selectedClient === client.clientId
-								? "selected"
-								: ""
+							!client.bridgeAssigned && selectedClient === client.clientId ? "selected" : ""
 						}`}
 						onClick={() => {
 							if (!client.bridgeAssigned) setSelectedClient(client.clientId);

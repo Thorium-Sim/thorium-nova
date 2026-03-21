@@ -24,7 +24,9 @@ export function setShipAlert(
 		...alert,
 	};
 
-	const idx = shipAlerts.alerts.findIndex((a: ShipAlert) => a.id === alert.id);
+	const idx = shipAlerts.alerts.findIndex(
+		(a: ShipAlert) => a.id === alert.id,
+	);
 	if (idx !== -1) {
 		shipAlerts.alerts[idx] = fullAlert;
 	} else {
@@ -56,7 +58,9 @@ export function clearShipAlert(entity: Entity, alertId: string) {
 	const shipAlerts = entity.components.shipAlerts;
 	if (!shipAlerts) return;
 
-	const idx = shipAlerts.alerts.findIndex((a: ShipAlert) => a.id === alertId);
+	const idx = shipAlerts.alerts.findIndex(
+		(a: ShipAlert) => a.id === alertId,
+	);
 	if (idx === -1) return;
 
 	// Clean up any duration timer

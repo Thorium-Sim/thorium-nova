@@ -13,9 +13,7 @@ export const isViewscreen = z
 		cameraFov: z.number().min(10).max(80).default(45),
 		showGizmos: z.boolean().default(true),
 		showLayout: z.boolean().default(true),
-		brokenMode: z
-			.enum(["fullyBroken", "cameraBrokenOnly", "invincible"])
-			.default("fullyBroken"),
+		brokenMode: z.enum(["fullyBroken", "cameraBrokenOnly", "invincible"]).default("fullyBroken"),
 		/**
 		 * FD manual override — independently disables cameras regardless of brokenMode.
 		 * This is NOT related to in-game damage; the Flight Director toggles this directly.

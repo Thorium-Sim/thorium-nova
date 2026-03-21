@@ -5,10 +5,7 @@ import { useEffect, useRef, useState } from "react";
 export function TypingText({
 	children,
 	keyDelay = 20,
-}: {
-	keyDelay?: number;
-	children: string;
-}) {
+}: { keyDelay?: number; children: string }) {
 	const { cardLoaded } = useCardContext();
 	const ref = useRef<HTMLDivElement>(null);
 	const renderTime = useRef(Date.now());

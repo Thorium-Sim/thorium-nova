@@ -150,10 +150,7 @@ StarSprite.displayName = "StarSprite";
 const StarSpriteInner = ({
 	color1,
 	userData,
-}: {
-	color1: Color | number;
-	userData: any;
-}) => {
+}: { color1: Color | number; userData: any }) => {
 	const spriteMap = useShipSprite(spritePath) as Texture;
 	return (
 		<sprite userData={userData}>

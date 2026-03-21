@@ -1,4 +1,5 @@
-import { isObject } from "@thorium/typeguards/isObject";
+import {isObject} from "@thorium/typeguards/isObject";
+
 
 /**
  * Deep merge two objects.

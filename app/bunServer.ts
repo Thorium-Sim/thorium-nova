@@ -1,7 +1,7 @@
 import { buildDatabase } from "@thorium/.server/init/buildDatabase";
 import { initDefaultPlugin } from "@thorium/.server/init/initDefaultPlugin";
 import { router } from "@thorium/.server/init/router";
-import { createContext, initWebsocket } from "@thorium/.server/init/liveQuery";
+import {createContext, initWebsocket } from "@thorium/.server/init/liveQuery";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
 import { liveQueryPlugin } from "@thorium/utils/live-query/.server/adapters/hono-adapter";

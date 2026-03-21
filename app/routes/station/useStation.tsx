@@ -13,10 +13,7 @@ export const StationContext = createContext<{
 export function StationData({
 	children,
 	shipId,
-}: {
-	children: ReactNode;
-	shipId?: number;
-}) {
+}: { children: ReactNode; shipId?: number }) {
 	const [client] = q.client.get.useNetRequest({ clientId });
 	const [station] = q.station.get.useNetRequest({ clientId });
 	const [ship] = q.ship.player.useNetRequest({ clientId });

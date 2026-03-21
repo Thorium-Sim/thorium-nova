@@ -1,5 +1,5 @@
 import { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
-import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
+import type {DatabaseContext} from "@thorium/typeguards/isDatabaseContext";
 import randomWords from "@thorium/utils/random-words";
 import { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
 

@@ -70,9 +70,7 @@ export type MiddlewareFunction<
 		entity: TParams["_entity"];
 		next: {
 			(): Promise<MiddlewareResult<TParams>>;
-			<$Context>(opts: {
-				ctx: $Context;
-			}): Promise<
+			<$Context>(opts: { ctx: $Context }): Promise<
 				MiddlewareResult<{
 					_config: TParams["_config"];
 					_ctx_out: $Context;

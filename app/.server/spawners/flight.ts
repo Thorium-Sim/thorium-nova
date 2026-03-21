@@ -24,9 +24,7 @@ const flightStartShips = z
 			crewCount: z.number(),
 			shipName: z.string(),
 			theme: z.object({ pluginId: z.string(), themeId: z.string() }).optional(),
-			bridge: z
-				.object({ pluginId: z.string(), bridgeId: z.string() })
-				.optional(),
+			bridge: z.object({ pluginId: z.string(), bridgeId: z.string() }).optional(),
 			shipTemplate: z.object({
 				pluginId: z.string(),
 				shipId: z.string(),
@@ -216,25 +214,23 @@ export async function startFlight(
 			type: "generic",
 			shipId: shipEntity.id,
 		});
-		viewscreenSystemEntity.addComponent("damage", {
-			vulnerability: "invulnerable",
-		});
+		viewscreenSystemEntity.addComponent("damage", { vulnerability: "invulnerable" });
 		ctx.flight.ecs.addEntity(viewscreenSystemEntity);
-		shipEntity.components.shipSystems?.shipSystems.set(
-			viewscreenSystemEntity.id,
-			{},
-		);
+		shipEntity.components.shipSystems?.shipSystems.set(viewscreenSystemEntity.id, {});
 
 		// Spawn viewscreen entities from bridge config, or a default if no bridge
 		const bridgeConfig = ship.bridge
-			? activePlugins.reduce((acc: BridgePlugin | null, plugin) => {
-					if (acc || plugin.id !== ship.bridge!.pluginId) return acc;
-					return (
-						plugin.aspects.bridges.find(
-							(b) => b.name === ship.bridge!.bridgeId,
-						) || null
-					);
-				}, null)
+			? activePlugins.reduce(
+					(acc: BridgePlugin | null, plugin) => {
+						if (acc || plugin.id !== ship.bridge!.pluginId) return acc;
+						return (
+							plugin.aspects.bridges.find(
+								(b) => b.name === ship.bridge!.bridgeId,
+							) || null
+						);
+					},
+					null,
+				)
 			: null;
 
 		if (ship.bridge) {
@@ -260,7 +256,8 @@ export async function startFlight(
 			}> = [];
 			for (const level of bridgeConfig.levels) {
 				for (const element of level.elements) {
-					if (element.type !== "viewscreen" || !element.viewscreenId) continue;
+					if (element.type !== "viewscreen" || !element.viewscreenId)
+						continue;
 					const vs = bridgeConfig.viewscreens.find(
 						(v) => v.id === element.viewscreenId,
 					);
@@ -280,10 +277,9 @@ export async function startFlight(
 					shipId: shipEntity.id,
 					viewscreenId: vs.id,
 					name,
-					tags:
-						isMain && !vs.tags.includes("main-viewscreen")
-							? [...vs.tags, "main-viewscreen"]
-							: vs.tags,
+					tags: isMain && !vs.tags.includes("main-viewscreen")
+						? [...vs.tags, "main-viewscreen"]
+						: vs.tags,
 					isMainViewscreen: isMain,
 					cameraYaw: element.rotation,
 					cameraPitch: element.pitch ?? 0,
@@ -334,7 +330,8 @@ export async function startFlight(
 		}
 
 		if (viewscreenStations.length > 0) {
-			const existing = shipEntity.components.stationComplement?.stations || [];
+			const existing =
+				shipEntity.components.stationComplement?.stations || [];
 			shipEntity.updateComponent("stationComplement", {
 				stations: [...existing, ...viewscreenStations],
 			});

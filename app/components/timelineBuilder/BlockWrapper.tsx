@@ -8,11 +8,7 @@ export function BlockWrapper({
 	children,
 	onRemove,
 	className,
-}: {
-	children: ReactNode;
-	onRemove: () => void;
-	className?: string;
-}) {
+}: { children: ReactNode; onRemove: () => void; className?: string }) {
 	const listeners = useSortableListener();
 	return (
 		<div

@@ -4,9 +4,7 @@
 	width: 100%;
 }
 .scan-doodad > * {
-	animation:
-		scan_spin infinite 3.5s linear,
-		rainbow infinite 7s linear;
+	animation: scan_spin infinite 3.5s linear, rainbow infinite 7s linear;
 	position: absolute;
 	left: 50%;
 	top: 50%;
