@@ -11,6 +11,7 @@ import type {
 } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
 import { ServerClient } from "@thorium/utils/live-query/.server/ServerClient";
 import { router } from "@thorium/.server/init/router";
+import { tryBridgeAutoAssign } from "@thorium/.server/init/bridgeAutoAssign";
 
 type InitWebsocketReturnType = ReturnType<InitWebsocket>;
 const dataContextCache = new Map<string, DataContext>();
@@ -150,6 +151,11 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 	connectionOpened(): void {
 		pubsub.publish.client.get({ clientId: this.id });
 		pubsub.publish.client.all();
+		// Auto-assign if this client's name matches a bridge assignment
+		const ctx = getDataContext(this.id);
+		if (ctx?.flight) {
+			tryBridgeAutoAssign(ctx, this.id);
+		}
 	}
 	connectionClosed(): void {
 		pubsub.publish.client.get({ clientId: this.id });

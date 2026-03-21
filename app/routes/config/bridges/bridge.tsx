@@ -162,6 +162,7 @@ function DetailsTab({
 					})
 				}
 			/>
+
 		</div>
 	);
 }

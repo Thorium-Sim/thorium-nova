@@ -108,7 +108,7 @@ function ClientAssignment() {
 					selectedItem={selectedClient}
 					setSelectedItem={({ id }) => setSelectedClient(id)}
 					items={clients
-						.filter((c) => c.shipId === null || c.shipId === undefined)
+						.filter((c) => (c.shipId === null || c.shipId === undefined) && !c.bridgeAssigned)
 						.map((c) => ({
 							id: c.clientId,
 							label: c.name,
@@ -202,24 +202,30 @@ function HostStationItem({
 					<li
 						key={client.clientId}
 						className={`list-group-item list-group-item-small ${
-							selectedClient === client.clientId ? "selected" : ""
+							!client.bridgeAssigned && selectedClient === client.clientId ? "selected" : ""
 						}`}
-						onClick={() => setSelectedClient(client.clientId)}
+						onClick={() => {
+							if (!client.bridgeAssigned) setSelectedClient(client.clientId);
+						}}
 					>
 						<div className="pl-4 flex items-center justify-between">
 							{client.name}{" "}
-							<Icon
-								name="ban"
-								className="text-red-600 cursor-pointer"
-								onClick={(e) => {
-									e.stopPropagation();
-									e.preventDefault();
-									q.client.setStation.netSend({
-										shipId: null,
-										clientId: client.clientId,
-									});
-								}}
-							/>
+							{client.bridgeAssigned ? (
+								<span className="text-xs text-blue-400">Auto-assigned</span>
+							) : (
+								<Icon
+									name="ban"
+									className="text-red-600 cursor-pointer"
+									onClick={(e) => {
+										e.stopPropagation();
+										e.preventDefault();
+										q.client.setStation.netSend({
+											shipId: null,
+											clientId: client.clientId,
+										});
+									}}
+								/>
+							)}
 						</div>
 					</li>
 				))}

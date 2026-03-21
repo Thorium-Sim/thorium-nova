@@ -32,11 +32,35 @@ export const WelcomeButtons = ({ className }: { className?: string }) => {
 function FlightButtons() {
 	const [flight] = q.flight.active.useNetRequest();
 
-	return flight ? (
+	return flight ? <ActiveFlightButtons /> : <ClientButtons />;
+}
+
+function ActiveFlightButtons() {
+	const [client] = q.client.get.useNetRequest({ clientId });
+
+	const hasStation = client.shipId && client.stationId;
+	const isFlightDirector = client.stationId === "Flight Director";
+	const isBridgeAssigned = client.bridgeAssigned;
+
+	return (
 		<>
-			<NavLink className="btn btn-primary btn-outline" to="/flight">
-				Go To Flight Lobby
-			</NavLink>
+			{isFlightDirector ? (
+				<NavLink className="btn btn-primary btn-outline" to="/flight/core">
+					Go To Core
+				</NavLink>
+			) : hasStation ? (
+				<NavLink className="btn btn-primary btn-outline" to="/flight/station">
+					Go To Station
+				</NavLink>
+			) : null}
+			{!isBridgeAssigned && (
+				<NavLink
+					className={`btn btn-outline ${hasStation || isFlightDirector ? "btn-secondary" : "btn-primary"}`}
+					to="/flight/lobby"
+				>
+					Go To Flight Lobby
+				</NavLink>
+			)}
 			{process.env.NODE_ENV !== "production" && (
 				<NavLink className="btn btn-info btn-outline" to="/cards">
 					Go To Card Development
@@ -49,8 +73,6 @@ function FlightButtons() {
 				Stop Flight
 			</Button>
 		</>
-	) : (
-		<ClientButtons />
 	);
 }
 

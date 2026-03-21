@@ -23,6 +23,7 @@ export const flightClient = z
 			})
 			.nullable()
 			.default(null),
+		bridgeAssigned: z.boolean().default(false),
 		officersLog: z
 			.object({
 				timestamp: z.number(),

@@ -10,6 +10,7 @@ import { selectAvailableTimelines } from "@thorium/utils/.server/executeBlocks";
 import type { Entity } from "@thorium/utils/ecs";
 import { z } from "zod";
 import MarkdownIt from "markdown-it";
+import { tryBridgeAutoAssign } from "@thorium/.server/init/bridgeAutoAssign";
 const md = MarkdownIt();
 
 export const client = t.router({
@@ -51,12 +52,17 @@ export const client = t.router({
 			return clients;
 		}),
 	setName: t.procedure
-		.input(z.object({ clientId: z.string(), name: z.string().min(2) }))
+		.input(z.object({ clientId: z.string(), name: z.string().min(1) }))
 		.send(({ ctx, input }) => {
 			const client = ctx.getClient(input.clientId);
 			client.name = input.name;
 			pubsub.publish.client.all();
 			pubsub.publish.client.get({ clientId: client.id });
+
+			// Auto-assign if the new name matches a bridge assignment
+			if (ctx.flight) {
+				tryBridgeAutoAssign(ctx, client.id);
+			}
 
 			return { clientId: client.id, name: client.name };
 		}),
@@ -75,6 +81,11 @@ export const client = t.router({
 			const flightClient = ctx.getFlightClient(input.clientId);
 			if (!flightClient) {
 				throw new Error("No flight has been started.");
+			}
+
+			// Prevent reassignment of bridge-assigned clients
+			if (flightClient.components.flightClient?.bridgeAssigned) {
+				throw new Error("Cannot reassign a bridge-assigned client");
 			}
 
 			// If shipId is null, we're removing ourselves from the flight.

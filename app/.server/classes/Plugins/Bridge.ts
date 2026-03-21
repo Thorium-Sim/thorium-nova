@@ -6,7 +6,7 @@ import path from "node:path";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
 
 export interface BridgeClientAssignment {
-	clientId: string;
+	clientName: string;
 	stationId: string | null;
 	isSoundPlayer: boolean;
 	tags: string[];
@@ -39,6 +39,7 @@ export interface BridgeMapElement {
 	label?: string;
 	viewscreenId?: string;
 	stationName?: string;
+	clientName?: string;
 }
 
 export interface BridgeLevel {
@@ -83,6 +84,14 @@ export default class BridgePlugin extends Aspect {
 			{ id: crypto.randomUUID(), name: "Main", backgroundUrl: "", imageWidth: 800, imageHeight: 800, elements: [] },
 		];
 		this.assets = this.assets || {};
+
+		// Migrate clientId → clientName in client assignments
+		for (const ca of this.clientAssignments) {
+			if ('clientId' in ca && !(ca as any).clientName) {
+				(ca as any).clientName = (ca as any).clientId;
+				delete (ca as any).clientId;
+			}
+		}
 
 		// Migrate existing file-path backgroundUrls to base64 data URIs
 		this.migrateBackgroundImages();

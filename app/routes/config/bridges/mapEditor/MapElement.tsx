@@ -70,11 +70,21 @@ export function MapElementRenderer({
 					{element.label && (
 						<text
 							textAnchor="middle"
-							dy={h / 2 + w * 0.18}
+							dy={-(h / 2 + w * 0.08)}
 							fill="white"
 							fontSize={w * 0.16}
 						>
 							{element.label}
+						</text>
+					)}
+					{element.clientName && (
+						<text
+							textAnchor="middle"
+							dy={h / 2 + w * 0.18}
+							fill="white"
+							fontSize={w * 0.14}
+						>
+							{element.clientName}
 						</text>
 					)}
 				</g>

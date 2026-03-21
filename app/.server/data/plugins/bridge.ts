@@ -332,7 +332,7 @@ export const bridge = t.router({
 			z.object({
 				pluginId: z.string(),
 				bridgeId: z.string(),
-				clientId: z.string(),
+				clientName: z.string(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -343,7 +343,7 @@ export const bridge = t.router({
 			);
 			if (!b) throw new Error("Bridge not found");
 			b.clientAssignments.push({
-				clientId: input.clientId,
+				clientName: input.clientName,
 				stationId: null,
 				isSoundPlayer: false,
 				tags: [],
@@ -358,7 +358,8 @@ export const bridge = t.router({
 			z.object({
 				pluginId: z.string(),
 				bridgeId: z.string(),
-				clientId: z.string(),
+				clientName: z.string(),
+				newClientName: z.string().optional(),
 				stationId: z.string().nullable().optional(),
 				isSoundPlayer: z.boolean().optional(),
 				tags: z.string().array().optional(),
@@ -372,9 +373,10 @@ export const bridge = t.router({
 			);
 			if (!b) throw new Error("Bridge not found");
 			const ca = b.clientAssignments.find(
-				(c) => c.clientId === input.clientId,
+				(c) => c.clientName === input.clientName,
 			);
 			if (!ca) throw new Error("Client assignment not found");
+			if (typeof input.newClientName === "string") ca.clientName = input.newClientName;
 			if (input.stationId !== undefined) ca.stationId = input.stationId;
 			if (typeof input.isSoundPlayer === "boolean")
 				ca.isSoundPlayer = input.isSoundPlayer;
@@ -389,7 +391,7 @@ export const bridge = t.router({
 			z.object({
 				pluginId: z.string(),
 				bridgeId: z.string(),
-				clientId: z.string(),
+				clientName: z.string(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -400,7 +402,7 @@ export const bridge = t.router({
 			);
 			if (!b) throw new Error("Bridge not found");
 			const idx = b.clientAssignments.findIndex(
-				(c) => c.clientId === input.clientId,
+				(c) => c.clientName === input.clientName,
 			);
 			if (idx >= 0) b.clientAssignments.splice(idx, 1);
 			pubsub.publish.plugin.bridge.get({
@@ -631,6 +633,7 @@ export const bridge = t.router({
 				label: z.string().optional(),
 				viewscreenId: z.string().optional(),
 				stationName: z.string().optional(),
+				clientName: z.string().optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -657,6 +660,7 @@ export const bridge = t.router({
 				el.stationName = input.stationName;
 				el.label = input.stationName || "";
 			}
+			if (typeof input.clientName === "string") el.clientName = input.clientName;
 			pubsub.publish.plugin.bridge.get({
 				pluginId: input.pluginId,
 				bridgeId: b.name,

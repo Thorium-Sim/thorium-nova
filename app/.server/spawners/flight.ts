@@ -16,6 +16,7 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import type { DataContext } from "@thorium/.server/DataContext";
 import { calculateShipMapPath } from "@thorium/utils/.server/ship/shipMapPathfinder";
 import { generateSatelliteGraph } from "@thorium/cards/LongRangeComm/data.server";
+import { tryBridgeAutoAssign } from "@thorium/.server/init/bridgeAutoAssign";
 
 const flightStartShips = z
 	.array(
@@ -336,6 +337,13 @@ export async function startFlight(
 			});
 		}
 	}
+	// Auto-assign clients based on bridge configurations
+	for (const id of Object.keys(ctx.server.clients)) {
+		if (ctx.server.clients[id].connected) {
+			tryBridgeAutoAssign(ctx, id);
+		}
+	}
+
 	// Add the mission if it exists
 	if (missionId) {
 		triggerAction("timeline.activate", {

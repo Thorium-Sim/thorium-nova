@@ -104,6 +104,9 @@ function PlayerStationItem({
 					>
 						<div className="pl-4 flex items-center justify-between">
 							{client.name}
+							{client.bridgeAssigned && (
+								<span className="text-xs text-blue-400">Auto-assigned</span>
+							)}
 						</div>
 					</li>
 				))}
