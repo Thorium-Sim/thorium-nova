@@ -23,8 +23,9 @@ export type WarningEntry = {
  */
 export function useShipWarnings() {
 	const warningsRef = useRef(new Map<string, WarningEntry>());
-	const [displayedWarning, setDisplayedWarning] =
-		useState<WarningEntry | null>(null);
+	const [displayedWarning, setDisplayedWarning] = useState<WarningEntry | null>(
+		null,
+	);
 	const [isEntering, setIsEntering] = useState(false);
 	const [isExiting, setIsExiting] = useState(false);
 	const durationTimersRef = useRef(
@@ -66,56 +67,53 @@ export function useShipWarnings() {
 	}, []);
 
 	// Stable callback — reads from refs, never goes stale
-	const showWarning = useCallback(
-		(entry: WarningEntry) => {
-			const existing = warningsRef.current.get(entry.id);
-			warningsRef.current.set(entry.id, entry);
+	const showWarning = useCallback((entry: WarningEntry) => {
+		const existing = warningsRef.current.get(entry.id);
+		warningsRef.current.set(entry.id, entry);
 
-			// Start or reset duration timer (runs independently of display)
-			if (entry.duration) {
-				const existingTimer = durationTimersRef.current.get(entry.id);
-				if (existingTimer) clearTimeout(existingTimer);
-				const timerId = setTimeout(() => {
-					durationTimersRef.current.delete(entry.id);
-					dismissWarningRef.current(entry.id);
-				}, entry.duration);
-				durationTimersRef.current.set(entry.id, timerId);
-			}
+		// Start or reset duration timer (runs independently of display)
+		if (entry.duration) {
+			const existingTimer = durationTimersRef.current.get(entry.id);
+			if (existingTimer) clearTimeout(existingTimer);
+			const timerId = setTimeout(() => {
+				durationTimersRef.current.delete(entry.id);
+				dismissWarningRef.current(entry.id);
+			}, entry.duration);
+			durationTimersRef.current.set(entry.id, timerId);
+		}
 
-			// If we're mid-exit, update pending if this is higher priority
-			if (isExitingRef.current) {
-				const pending = pendingNextRef.current;
-				if (!pending || entry.priority >= pending.priority) {
-					pendingNextRef.current = entry;
-				}
-				return;
+		// If we're mid-exit, update pending if this is higher priority
+		if (isExitingRef.current) {
+			const pending = pendingNextRef.current;
+			if (!pending || entry.priority >= pending.priority) {
+				pendingNextRef.current = entry;
 			}
+			return;
+		}
 
-			// Same warning updated in place — just update content
-			if (existing && displayedWarningRef.current?.id === entry.id) {
-				setDisplayedWarning({ ...entry });
-				return;
-			}
+		// Same warning updated in place — just update content
+		if (existing && displayedWarningRef.current?.id === entry.id) {
+			setDisplayedWarning({ ...entry });
+			return;
+		}
 
-			// No warning currently displayed — show immediately
-			if (!displayedWarningRef.current) {
-				setDisplayedWarning({ ...entry });
-				setIsEntering(true);
-				return;
-			}
+		// No warning currently displayed — show immediately
+		if (!displayedWarningRef.current) {
+			setDisplayedWarning({ ...entry });
+			setIsEntering(true);
+			return;
+		}
 
-			// Higher or equal priority than current — exit current, then show new
-			if (entry.priority >= displayedWarningRef.current.priority) {
-				if (entry.id !== displayedWarningRef.current.id) {
-					pendingNextRef.current = entry;
-					setIsExiting(true);
-				}
-				return;
+		// Higher or equal priority than current — exit current, then show new
+		if (entry.priority >= displayedWarningRef.current.priority) {
+			if (entry.id !== displayedWarningRef.current.id) {
+				pendingNextRef.current = entry;
+				setIsExiting(true);
 			}
-			// Lower priority — just store, don't display
-		},
-		[],
-	);
+			return;
+		}
+		// Lower priority — just store, don't display
+	}, []);
 
 	// Stable callback — reads from refs, never goes stale
 	const dismissWarning = useCallback(
@@ -220,8 +218,7 @@ export function ShipWarning({
 				// Without theme animations, the rAF fallback above handles transitions.
 				isEntering && "ship-alert-entering",
 				isExiting && "ship-alert-exiting",
-				mode === "portal" &&
-					"fixed bottom-8 left-1/2 -translate-x-1/2 z-50",
+				mode === "portal" && "fixed bottom-8 left-1/2 -translate-x-1/2 z-50",
 				mode === "inline" && className,
 			)}
 			// When a theme CSS animation finishes, this bridges back to the

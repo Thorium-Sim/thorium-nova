@@ -6,14 +6,22 @@ import WaypointStroke from "./WaypointStroke.svg";
 import { useFrame } from "@react-three/fiber";
 import type { Coordinates } from "@thorium/utils/unitTypes";
 import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
-import { getThemeButtonBorderColor, deriveDarkerThemeColor } from "@thorium/utils/processThemeColor";
+import {
+	getThemeButtonBorderColor,
+	deriveDarkerThemeColor,
+} from "@thorium/utils/processThemeColor";
 
 export const WaypointEntity = ({
 	position,
 	isActive,
 	isFacing,
 	isLocked,
-}: { position: Coordinates<number>; isActive: boolean; isFacing?: boolean; isLocked?: boolean }) => {
+}: {
+	position: Coordinates<number>;
+	isActive: boolean;
+	isFacing?: boolean;
+	isLocked?: boolean;
+}) => {
 	const isFacingOrLocked = isFacing || isLocked;
 	const { color, strokeColor } = useMemo(() => {
 		const primary = getThemeButtonBorderColor("btn-primary", "#65abc4");
@@ -24,7 +32,11 @@ export const WaypointEntity = ({
 		const noticeFocus = deriveDarkerThemeColor(notice);
 		return {
 			color: isFacingOrLocked ? primary : isActive ? warning : notice,
-			strokeColor: isFacingOrLocked ? primaryFocus : isActive ? warningFocus : noticeFocus,
+			strokeColor: isFacingOrLocked
+				? primaryFocus
+				: isActive
+					? warningFocus
+					: noticeFocus,
 		};
 	}, [isFacingOrLocked, isActive]);
 	const spriteMap = useShipSprite(WaypointSvg);

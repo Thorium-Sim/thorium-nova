@@ -93,18 +93,35 @@ function Waypoints() {
 						searchPlaceholder="Search Waypoint History..."
 						items={
 							waypoints.length === 0
-								? [{ id: -1, label: "No waypoints set.", isActive: false, isFacingOrLocked: false, isLocked: false }]
+								? [
+										{
+											id: -1,
+											label: "No waypoints set.",
+											isActive: false,
+											isFacingOrLocked: false,
+											isLocked: false,
+										},
+									]
 								: waypoints
 										.map((w) => ({
 											id: w.id,
 											label: w.name,
 											isActive: w.isActive,
-											isFacingOrLocked: w.id === nearestFacingId || w.id === lockedWaypointId,
+											isFacingOrLocked:
+												w.id === nearestFacingId || w.id === lockedWaypointId,
 											isLocked: w.id === lockedWaypointId,
 										}))
-										.sort((a, b) => (a.isLocked === b.isLocked ? 0 : a.isLocked ? -1 : 1))
+										.sort((a, b) =>
+											a.isLocked === b.isLocked ? 0 : a.isLocked ? -1 : 1,
+										)
 						}
-						renderItem={({ id, label, isActive, isFacingOrLocked, isLocked }) => (
+						renderItem={({
+							id,
+							label,
+							isActive,
+							isFacingOrLocked,
+							isLocked,
+						}) => (
 							<span className="flex items-center">
 								<span className="flex-1 text-white">{label}</span>
 								{id > -1 && !isLocked && (
@@ -113,25 +130,35 @@ function Waypoints() {
 											isSelected={isActive}
 											onChange={async (selected) => {
 												if (selected) {
-													await q.waypoints.activate.netSend({ waypointId: id });
+													await q.waypoints.activate.netSend({
+														waypointId: id,
+													});
 												} else {
-													await q.waypoints.deactivate.netSend({ waypointId: id });
+													await q.waypoints.deactivate.netSend({
+														waypointId: id,
+													});
 												}
 											}}
 											className="group mr-2 flex items-center"
 										>
-												<div
+											<div
 												className="flex h-4 w-7 items-center rounded-full border transition"
 												style={{
-													borderColor: isFacingOrLocked ? colors.primary : isActive ? colors.warning : colors.notice,
+													borderColor: isFacingOrLocked
+														? colors.primary
+														: isActive
+															? colors.warning
+															: colors.notice,
 													backgroundColor: `${isFacingOrLocked ? colors.primary : isActive ? colors.warning : colors.notice}4d`,
 												}}
 											>
-												<span className={`block h-3 w-3 ml-0.5 rounded-full transition-all bg-white ${
-													isFacingOrLocked
-														? "ml-3"
-														: "group-data-[selected]:ml-3"
-												}`} />
+												<span
+													className={`block h-3 w-3 ml-0.5 rounded-full transition-all bg-white ${
+														isFacingOrLocked
+															? "ml-3"
+															: "group-data-[selected]:ml-3"
+													}`}
+												/>
 											</div>
 										</Switch>
 										<button
@@ -151,14 +178,21 @@ function Waypoints() {
 												}
 											}}
 										>
-											<Icon name="ban" className="text-white drop-shadow-[0_0_4px_white] drop-shadow-[0_0_2px_white]" />
+											<Icon
+												name="ban"
+												className="text-white drop-shadow-[0_0_4px_white] drop-shadow-[0_0_2px_white]"
+											/>
 										</button>
 									</>
 								)}
 							</span>
 						)}
 						getItemStyle={({ isActive, isFacingOrLocked }) => {
-							const color = isFacingOrLocked ? colors.primary : isActive ? colors.warning : colors.notice;
+							const color = isFacingOrLocked
+								? colors.primary
+								: isActive
+									? colors.warning
+									: colors.notice;
 							return {
 								borderColor: color,
 								background: `${color}4d`,
@@ -199,7 +233,8 @@ function Waypoints() {
 						className="btn-error flex-1"
 						onClick={async () => {
 							const result = await confirm({
-								header: "All active and inactive waypoints will be cleared. Proceed?",
+								header:
+									"All active and inactive waypoints will be cleared. Proceed?",
 							});
 							if (result) {
 								q.waypoints.deleteAll.netSend({ shipId });
@@ -234,17 +269,16 @@ function AddWaypoint() {
 
 	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
 
-	const existingWaypoint = waypoints.find((w) => w.id === selectedObjectIds[0] || w.objectId === selectedObjectIds[0]);
+	const existingWaypoint = waypoints.find(
+		(w) => w.id === selectedObjectIds[0] || w.objectId === selectedObjectIds[0],
+	);
 	const isLocked = existingWaypoint?.id === autopilot.destinationWaypointId;
 
 	if (!selectedObjectIds[0]) return null;
 
 	if (isLocked) {
 		return (
-			<Button
-				className="pointer-events-auto flex-1 btn-primary"
-				disabled
-			>
+			<Button className="pointer-events-auto flex-1 btn-primary" disabled>
 				Waypoint Locked
 			</Button>
 		);

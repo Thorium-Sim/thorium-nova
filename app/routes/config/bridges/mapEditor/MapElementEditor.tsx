@@ -39,9 +39,10 @@ export function MapElementEditor({
 	}
 
 	// Find linked viewscreen for viewscreen elements
-	const linkedViewscreen = element.type === "viewscreen" && element.viewscreenId
-		? viewscreens.find((v) => v.id === element.viewscreenId)
-		: null;
+	const linkedViewscreen =
+		element.type === "viewscreen" && element.viewscreenId
+			? viewscreens.find((v) => v.id === element.viewscreenId)
+			: null;
 
 	const headerLabel = element.type === "station" ? "Client" : "Viewscreen";
 
@@ -75,20 +76,27 @@ export function MapElementEditor({
 								name: newName,
 							});
 						}}
-						onKeyDown={(e: any) => { if (e.key === "Enter") e.target.blur(); }}
+						onKeyDown={(e: any) => {
+							if (e.key === "Enter") e.target.blur();
+						}}
 					/>
 					<label className="flex flex-col gap-1 text-xs">
-						<span className="text-gray-300">Default Yaw Angle: {((((element.rotation % 360) + 540) % 360) - 180).toFixed(0)}°</span>
+						<span className="text-gray-300">
+							Default Yaw Angle:{" "}
+							{((((element.rotation % 360) + 540) % 360) - 180).toFixed(0)}°
+						</span>
 						<input
 							type="range"
 							min={-180}
 							max={180}
-							value={((((element.rotation % 360) + 540) % 360) - 180)}
+							value={(((element.rotation % 360) + 540) % 360) - 180}
 							onChange={(e) => update({ rotation: Number(e.target.value) })}
 						/>
 					</label>
 					<div className="flex flex-col gap-1 text-xs">
-						<span className="text-gray-300">Default Camera Pitch Angle: {(element.pitch ?? 0)}°</span>
+						<span className="text-gray-300">
+							Default Camera Pitch Angle: {element.pitch ?? 0}°
+						</span>
 						<div className="flex items-center gap-2">
 							<input
 								type="range"
@@ -107,14 +115,19 @@ export function MapElementEditor({
 								strokeWidth={2}
 								strokeLinecap="round"
 								strokeLinejoin="round"
-								style={{ transform: `rotate(${-(element.pitch ?? 0)}deg)`, flexShrink: 0 }}
+								style={{
+									transform: `rotate(${-(element.pitch ?? 0)}deg)`,
+									flexShrink: 0,
+								}}
 							>
 								<use href={`${iconsHref}#video`} />
 							</svg>
 						</div>
 					</div>
 					<label className="flex flex-col gap-1 text-xs">
-						<span className="text-gray-300">Camera FOV: {linkedViewscreen.fov ?? 45}°</span>
+						<span className="text-gray-300">
+							Camera FOV: {linkedViewscreen.fov ?? 45}°
+						</span>
 						<input
 							type="range"
 							min={10}
@@ -134,7 +147,12 @@ export function MapElementEditor({
 						<input
 							type="checkbox"
 							checked={linkedViewscreen.isMainViewscreen ?? false}
-							disabled={!linkedViewscreen.isMainViewscreen && viewscreens.some(v => v.id !== linkedViewscreen.id && v.isMainViewscreen)}
+							disabled={
+								!linkedViewscreen.isMainViewscreen &&
+								viewscreens.some(
+									(v) => v.id !== linkedViewscreen.id && v.isMainViewscreen,
+								)
+							}
 							onChange={(e) =>
 								q.plugin.bridge.updateViewscreen.netSend({
 									pluginId,
@@ -182,9 +200,18 @@ export function MapElementEditor({
 							<Tooltip
 								content={
 									<div className="text-xs max-w-48 space-y-1">
-										<p><strong>Fully Broken:</strong> No cameras, no gizmos, no displays when offline.</p>
-										<p><strong>Camera Broken Only:</strong> Cameras go offline but gizmos and displays still work.</p>
-										<p><strong>Invincible:</strong> Cannot be broken by in-game damage events.</p>
+										<p>
+											<strong>Fully Broken:</strong> No cameras, no gizmos, no
+											displays when offline.
+										</p>
+										<p>
+											<strong>Camera Broken Only:</strong> Cameras go offline
+											but gizmos and displays still work.
+										</p>
+										<p>
+											<strong>Invincible:</strong> Cannot be broken by in-game
+											damage events.
+										</p>
 									</div>
 								}
 								placement="left"
@@ -218,7 +245,10 @@ export function MapElementEditor({
 									pluginId,
 									bridgeId,
 									viewscreenId: linkedViewscreen.id,
-									brokenMode: val as "fullyBroken" | "cameraBrokenOnly" | "invincible",
+									brokenMode: val as
+										| "fullyBroken"
+										| "cameraBrokenOnly"
+										| "invincible",
 								})
 							}
 						/>
@@ -230,7 +260,9 @@ export function MapElementEditor({
 						onBlur={(e: any) => {
 							update({ clientName: e.target.value.trim() });
 						}}
-						onKeyDown={(e: any) => { if (e.key === "Enter") e.target.blur(); }}
+						onKeyDown={(e: any) => {
+							if (e.key === "Enter") e.target.blur();
+						}}
 					/>
 				</>
 			)}
@@ -245,7 +277,8 @@ export function MapElementEditor({
 							...stationNames.map((name) => ({
 								id: name,
 								label: name,
-								disabled: name !== element.stationName && assignedStations.has(name),
+								disabled:
+									name !== element.stationName && assignedStations.has(name),
 							})),
 						]}
 						selected={element.stationName ?? "__none__"}
@@ -262,9 +295,11 @@ export function MapElementEditor({
 						onBlur={(e: any) => {
 							update({ clientName: e.target.value.trim() });
 						}}
-						onKeyDown={(e: any) => { if (e.key === "Enter") e.target.blur(); }}
+						onKeyDown={(e: any) => {
+							if (e.key === "Enter") e.target.blur();
+						}}
 					/>
-					</>
+				</>
 			)}
 			<Button className="btn-error btn-xs w-full" onClick={onDelete}>
 				{element.type === "station" ? "Delete Client" : "Delete Viewscreen"}

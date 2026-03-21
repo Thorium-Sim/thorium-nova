@@ -332,28 +332,31 @@ export const ImpulseControls = ({
 								},
 							)}
 						>
-							{warpSpeeds.slice().reverse().map(({ label }, i, arr) => {
-								const warpFactor = arr.length - i;
-								return (
-									<Button
-										key={`warp-${warpFactor}`}
-										className={`btn-sm btn-primary ${
-											warpFocus === warpFactor ? "gamepad-focus" : ""
-										} ${warpFactor === currentWarpFactor ? "btn-active" : ""} ${
-											forwardAutopilot ? "opacity-50" : ""
-										}`}
-										onClick={() => {
-											onFlightControlInteraction?.();
-											q.pilot.warpEngines.setWarpFactor.netSend({
-												factor: warpFactor,
-												shipId,
-											});
-										}}
-									>
-										{label}
-									</Button>
-								);
-							})}
+							{warpSpeeds
+								.slice()
+								.reverse()
+								.map(({ label }, i, arr) => {
+									const warpFactor = arr.length - i;
+									return (
+										<Button
+											key={`warp-${warpFactor}`}
+											className={`btn-sm btn-primary ${
+												warpFocus === warpFactor ? "gamepad-focus" : ""
+											} ${warpFactor === currentWarpFactor ? "btn-active" : ""} ${
+												forwardAutopilot ? "opacity-50" : ""
+											}`}
+											onClick={() => {
+												onFlightControlInteraction?.();
+												q.pilot.warpEngines.setWarpFactor.netSend({
+													factor: warpFactor,
+													shipId,
+												});
+											}}
+										>
+											{label}
+										</Button>
+									);
+								})}
 						</div>
 					</div>
 				</div>

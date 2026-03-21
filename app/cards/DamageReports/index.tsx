@@ -353,7 +353,10 @@ function SystemDetails({
 function DiagnosticProgress({
 	diagnosticId,
 	progress,
-}: { diagnosticId: number; progress: number }) {
+}: {
+	diagnosticId: number;
+	progress: number;
+}) {
 	const ref = useRef<HTMLProgressElement>(null);
 	const { interpolate } = useLiveQuery();
 	const { cardLoaded } = useCardContext();
@@ -586,7 +589,10 @@ function MetricPanel({
 function ReportCandidates({
 	systemId,
 	setSelectedReportId,
-}: { systemId: number; setSelectedReportId: (id: number) => void }) {
+}: {
+	systemId: number;
+	setSelectedReportId: (id: number) => void;
+}) {
 	const [diagnostic] = q.damageReports.systemDiagnostic.useNetRequest({
 		systemId: systemId,
 	});

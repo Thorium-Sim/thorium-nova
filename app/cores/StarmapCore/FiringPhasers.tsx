@@ -54,7 +54,10 @@ export function FiringPhasers({ systemId }: { systemId: number }) {
 function SimplePhasers({
 	targetId,
 	shipId,
-}: { targetId: number; shipId: number }) {
+}: {
+	targetId: number;
+	shipId: number;
+}) {
 	const { interpolate } = useLiveQuery();
 	const lineRef = useRef<Line2>(null);
 
@@ -90,7 +93,10 @@ function SimplePhasers({
 function PhaserDisplay({
 	targetId,
 	shipId,
-}: { targetId: number; shipId: number }) {
+}: {
+	targetId: number;
+	shipId: number;
+}) {
 	const planeTexture = useMemo(() => {
 		const c = document.createElement("canvas").getContext("2d")!;
 

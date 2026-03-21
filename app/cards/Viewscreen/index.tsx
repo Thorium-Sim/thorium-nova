@@ -102,7 +102,8 @@ export function Viewscreen() {
 	// Damage system — what breaks depends on brokenMode
 	const damageBroken = vsConfig?.damageBroken;
 	const showCamera = !isCameraOffline && !damageBroken;
-	const showGizmos = vsConfig?.showGizmos !== false &&
+	const showGizmos =
+		vsConfig?.showGizmos !== false &&
 		!(damageBroken && vsConfig?.brokenMode === "fullyBroken");
 
 	return (

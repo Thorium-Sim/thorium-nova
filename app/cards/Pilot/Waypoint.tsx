@@ -3,7 +3,10 @@ import { useFrame } from "@react-three/fiber";
 import type { AppRouter } from "@thorium/.server/init/router";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { useMemo, useRef } from "react";
-import { getThemeButtonBorderColor, deriveDarkerThemeColor } from "@thorium/utils/processThemeColor";
+import {
+	getThemeButtonBorderColor,
+	deriveDarkerThemeColor,
+} from "@thorium/utils/processThemeColor";
 import {
 	type Camera,
 	Frustum,
@@ -54,14 +57,19 @@ export const WaypointEntity = ({
 	const stroke = useRef<Sprite>(null);
 	const scale = 1 / 40;
 
-	const { primaryHex, primaryFocusHex, warningHex, warningFocusHex } = useMemo(() => {
-		return {
-			primaryHex: getThemeButtonBorderColor("btn-primary", "#65abc4"),
-			warningHex: getThemeButtonBorderColor("btn-warning", "#c7935e"),
-			primaryFocusHex: deriveDarkerThemeColor(getThemeButtonBorderColor("btn-primary", "#65abc4")),
-			warningFocusHex: deriveDarkerThemeColor(getThemeButtonBorderColor("btn-warning", "#c7935e")),
-		};
-	}, []);
+	const { primaryHex, primaryFocusHex, warningHex, warningFocusHex } =
+		useMemo(() => {
+			return {
+				primaryHex: getThemeButtonBorderColor("btn-primary", "#65abc4"),
+				warningHex: getThemeButtonBorderColor("btn-warning", "#c7935e"),
+				primaryFocusHex: deriveDarkerThemeColor(
+					getThemeButtonBorderColor("btn-primary", "#65abc4"),
+				),
+				warningFocusHex: deriveDarkerThemeColor(
+					getThemeButtonBorderColor("btn-warning", "#c7935e"),
+				),
+			};
+		}, []);
 
 	const { id, currentSystem: playerSystem, systemPosition } = useStation().ship;
 

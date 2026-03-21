@@ -69,17 +69,33 @@ export default class BridgePlugin extends Aspect {
 			params.name || "New Bridge",
 			plugin.aspects.bridges.map((b) => b.name),
 		);
-		super({ ...params, name }, { kind: "bridges", manifestFile: "manifest.json" }, plugin, {});
+		super(
+			{ ...params, name },
+			{ kind: "bridges", manifestFile: "manifest.json" },
+			plugin,
+			{},
+		);
 
 		this.name = this.name || name;
 		this.description = this.description || params.description || "";
-		this.stationComplementRef = this.stationComplementRef || params.stationComplementRef || undefined;
-		this.clientAssignments = this.clientAssignments || params.clientAssignments || [];
-		this.savedStationAssignments = this.savedStationAssignments || params.savedStationAssignments || {};
+		this.stationComplementRef =
+			this.stationComplementRef || params.stationComplementRef || undefined;
+		this.clientAssignments =
+			this.clientAssignments || params.clientAssignments || [];
+		this.savedStationAssignments =
+			this.savedStationAssignments || params.savedStationAssignments || {};
 		this.viewscreens = this.viewscreens || params.viewscreens || [];
-		this.levels = this.levels || params.levels || [
-			{ id: crypto.randomUUID(), name: "Main", backgroundUrl: "", imageWidth: 800, imageHeight: 800, elements: [] },
-		];
+		this.levels = this.levels ||
+			params.levels || [
+				{
+					id: crypto.randomUUID(),
+					name: "Main",
+					backgroundUrl: "",
+					imageWidth: 800,
+					imageHeight: 800,
+					elements: [],
+				},
+			];
 		this.assets = this.assets || {};
 	}
 }

@@ -144,7 +144,12 @@ export function SolarSystemWrapper() {
 						FallbackComponent={() => <></>}
 						onError={(err) => console.error(err)}
 					>
-						<WaypointEntity position={waypoint.position} isActive={waypoint.isActive} isFacing={waypoint.id === autopilot.facingWaypointIds[0]} isLocked={waypoint.id === autopilot.destinationWaypointId} />
+						<WaypointEntity
+							position={waypoint.position}
+							isActive={waypoint.isActive}
+							isFacing={waypoint.id === autopilot.facingWaypointIds[0]}
+							isLocked={waypoint.id === autopilot.destinationWaypointId}
+						/>
 					</ErrorBoundary>
 				</Suspense>
 			))}

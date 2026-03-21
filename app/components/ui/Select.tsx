@@ -111,7 +111,11 @@ export default function Select<I extends string | number>({
 	);
 }
 
-function SelectItem<I extends string | number>(item: { id: I; label: string; disabled?: boolean }) {
+function SelectItem<I extends string | number>(item: {
+	id: I;
+	label: string;
+	disabled?: boolean;
+}) {
 	return (
 		<ListBoxItem
 			key={item.id}

@@ -5,7 +5,10 @@ import { useState } from "react";
 export function DamageOverlay({
 	systemId,
 	className,
-}: { systemId: number; className?: string }) {
+}: {
+	systemId: number;
+	className?: string;
+}) {
 	const [reason, setReason] = useState("");
 	const [system] = q.legacy.powerDistribution.systemPower.useNetRequest(
 		{

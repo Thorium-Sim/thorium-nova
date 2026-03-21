@@ -42,10 +42,7 @@ export function getThemeButtonBorderColor(
 	for (const sheet of document.styleSheets) {
 		try {
 			for (const rule of sheet.cssRules) {
-				if (
-					rule instanceof CSSStyleRule &&
-					rule.selectorText === selector
-				) {
+				if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
 					const border = rule.style.getPropertyValue("border");
 					const match = border.match(/#[0-9a-fA-F]{6}/);
 					if (match) return match[0];

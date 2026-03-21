@@ -288,12 +288,12 @@ export class CollisionWarningSystem extends System {
 		if (perpDistSq > combinedRadius * combinedRadius) return;
 
 		// TTC based on distance along the ray to sphere entry point
-		const entryDistance = along - Math.sqrt(combinedRadius * combinedRadius - perpDistSq);
+		const entryDistance =
+			along - Math.sqrt(combinedRadius * combinedRadius - perpDistSq);
 		const ttc = Math.max(0, entryDistance) / currentSpeed;
 
 		if (ttc <= COLLISION_WARNING_SECONDS) {
-			const name =
-				candidate.components.identity?.name || "Unknown Object";
+			const name = candidate.components.identity?.name || "Unknown Object";
 			onCandidate(candidate.id, name, ttc);
 		}
 	}

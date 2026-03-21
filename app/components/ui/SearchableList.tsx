@@ -53,10 +53,7 @@ function SearchableList<
 }: SearchableListProps<ID, Item>) {
 	const [search, setSearch] = useState<string>("");
 	const filteredObjects = useMemo(
-		() =>
-			search
-				? matchSorter(items, search, { keys: searchKeys })
-				: items,
+		() => (search ? matchSorter(items, search, { keys: searchKeys }) : items),
 		[items, search, searchKeys],
 	);
 	const sortedIntoCategories = filteredObjects.reduce(
@@ -96,7 +93,10 @@ function SearchableList<
 									<li
 										key={JSON.stringify(c.id)}
 										className={`list-group-item ${
-											deepEqual(c.id, selectedItem) || selectedItems?.some(id => deepEqual(c.id, id)) ? "selected" : ""
+											deepEqual(c.id, selectedItem) ||
+											selectedItems?.some((id) => deepEqual(c.id, id))
+												? "selected"
+												: ""
 										} ${getItemClassName?.(c) ?? ""}`}
 										style={getItemStyle?.(c)}
 										onClick={() => {

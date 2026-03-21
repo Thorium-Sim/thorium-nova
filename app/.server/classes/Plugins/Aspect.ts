@@ -16,7 +16,11 @@ export abstract class Aspect extends DataStore {
 	plugin: BasePlugin;
 	constructor(
 		params: { name: string },
-		aspectConfig: { kind: AspectKinds; subPath?: `/${string}`; manifestFile?: string },
+		aspectConfig: {
+			kind: AspectKinds;
+			subPath?: `/${string}`;
+			manifestFile?: string;
+		},
 		plugin: BasePlugin,
 		options: DataStoreOptions,
 	) {

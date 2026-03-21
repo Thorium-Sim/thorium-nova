@@ -299,8 +299,7 @@ export const ship = t.router({
 			})
 			.autoPublish(
 				["shipAlerts"],
-				(entity) =>
-					entity.components.isPlayerShip && { shipId: entity.id },
+				(entity) => entity.components.isPlayerShip && { shipId: entity.id },
 			)
 			.request(({ ctx, input }) => {
 				const ship = ctx.ecs.getEntityById(input.shipId);

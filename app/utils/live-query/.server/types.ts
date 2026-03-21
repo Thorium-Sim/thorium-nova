@@ -90,13 +90,12 @@ export type UndefinedKeys<TType> = {
 	[K in keyof TType]: undefined extends TType[K] ? K : never;
 }[keyof TType];
 
-export type inferRouterDef<TRouter extends AnyRouter> = TRouter extends Router<
-	infer TParams
->
-	? TParams extends AnyRouterDef<any>
-		? TParams
-		: never
-	: never;
+export type inferRouterDef<TRouter extends AnyRouter> =
+	TRouter extends Router<infer TParams>
+		? TParams extends AnyRouterDef<any>
+			? TParams
+			: never
+		: never;
 
 export type inferRouterContext<TRouter extends AnyRouter> =
 	inferRouterDef<TRouter>["_config"]["$types"]["ctx"];
@@ -114,9 +113,8 @@ export type inferAsyncReturnType<TFunction extends (...args: any) => any> =
 /**
  * @internal
  */
-export type ThenArg<TType> = TType extends PromiseLike<infer U>
-	? ThenArg<U>
-	: TType;
+export type ThenArg<TType> =
+	TType extends PromiseLike<infer U> ? ThenArg<U> : TType;
 
 type GetInferenceHelpers<
 	TType extends "input" | "output",

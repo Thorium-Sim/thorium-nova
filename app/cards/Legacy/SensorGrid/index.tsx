@@ -17,13 +17,11 @@ export function LegacySensorGrid() {
 	const { shipId, station } = useStation();
 	const { isWidget } = useCardContext();
 
-	const layout =
-		station.cards.some((c) => c.component === "Viewscreen")
-			? "viewscreen"
-			: isWidget ||
-					station.cards.some((c) => c.component === "LegacySensorScans")
-				? "noScans"
-				: "full";
+	const layout = station.cards.some((c) => c.component === "Viewscreen")
+		? "viewscreen"
+		: isWidget || station.cards.some((c) => c.component === "LegacySensorScans")
+			? "noScans"
+			: "full";
 
 	const gridRef = useRef<HTMLDivElement>(null);
 	const [contactInfo, setContactInfo] = useState<{

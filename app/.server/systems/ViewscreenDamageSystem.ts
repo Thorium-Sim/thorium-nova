@@ -33,9 +33,13 @@ export class ViewscreenDamageSystem extends System {
 		const shouldBeBroken = parentDamage?.offline ?? false;
 
 		if (vs.damageBroken !== shouldBeBroken) {
-			entity.updateComponent("isViewscreen", {
-				damageBroken: shouldBeBroken,
-			}, true);
+			entity.updateComponent(
+				"isViewscreen",
+				{
+					damageBroken: shouldBeBroken,
+				},
+				true,
+			);
 		}
 	}
 }

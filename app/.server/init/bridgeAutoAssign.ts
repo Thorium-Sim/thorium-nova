@@ -25,17 +25,12 @@ export function tryBridgeAutoAssign(ctx: DataContext, clientId: string): void {
 		if (!bridge) continue;
 
 		// Look up bridge config from plugins
-		const bridgeConfig = activePlugins.reduce(
-			(acc: any, plugin) => {
-				if (acc || plugin.id !== bridge.pluginId) return acc;
-				return (
-					plugin.aspects.bridges.find(
-						(b) => b.name === bridge.bridgeId,
-					) || null
-				);
-			},
-			null,
-		);
+		const bridgeConfig = activePlugins.reduce((acc: any, plugin) => {
+			if (acc || plugin.id !== bridge.pluginId) return acc;
+			return (
+				plugin.aspects.bridges.find((b) => b.name === bridge.bridgeId) || null
+			);
+		}, null);
 		if (!bridgeConfig) continue;
 
 		const shipName = ship.components.identity?.name || "";
@@ -70,9 +65,7 @@ export function tryBridgeAutoAssign(ctx: DataContext, clientId: string): void {
 
 				// Verify the station exists on this ship's stationComplement
 				const stations = ship.components.stationComplement?.stations || [];
-				const stationExists = stations.some(
-					(s) => s.name === assignStationId,
-				);
+				const stationExists = stations.some((s) => s.name === assignStationId);
 				if (!stationExists) continue;
 
 				// Evict any non-bridge-assigned client currently at this station

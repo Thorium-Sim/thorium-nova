@@ -7,7 +7,10 @@ import { q } from "@thorium/context/AppContext";
 export default function SolarSystemWrapper({
 	systemId,
 	children,
-}: { systemId?: string; children?: React.ReactNode }) {
+}: {
+	systemId?: string;
+	children?: React.ReactNode;
+}) {
 	let [pluginId, solarSystemId] = useSystemIds() as [string, string];
 	if (systemId) {
 		solarSystemId = systemId;

@@ -136,7 +136,12 @@ export function CircleGridWaypoints() {
 	return (
 		<group>
 			{waypoints.map((waypoint) => (
-				<WaypointEntity key={waypoint.id} waypoint={waypoint} isLocked={waypoint.id === autopilot.destinationWaypointId} isFacing={waypoint.id === autopilot.facingWaypointIds[0]} />
+				<WaypointEntity
+					key={waypoint.id}
+					waypoint={waypoint}
+					isLocked={waypoint.id === autopilot.destinationWaypointId}
+					isFacing={waypoint.id === autopilot.facingWaypointIds[0]}
+				/>
 			))}
 		</group>
 	);

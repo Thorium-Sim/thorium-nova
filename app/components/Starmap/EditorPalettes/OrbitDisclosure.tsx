@@ -8,7 +8,9 @@ import { q } from "@thorium/context/AppContext";
 
 export function OrbitDisclosure({
 	object,
-}: { object: PlanetPlugin | StarPlugin }) {
+}: {
+	object: PlanetPlugin | StarPlugin;
+}) {
 	const [pluginId, solarSystemId] = useSystemIds();
 
 	return (

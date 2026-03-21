@@ -162,7 +162,6 @@ function DetailsTab({
 					})
 				}
 			/>
-
 		</div>
 	);
 }
@@ -200,7 +199,9 @@ function MapTab({
 			pluginId,
 			bridgeId,
 		});
-	const stations = ((stationNames ?? []) as string[]).slice().sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+	const stations = ((stationNames ?? []) as string[])
+		.slice()
+		.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
 	// Collect all station names that have been assigned to a client element across all levels
 	const assignedStations = new Set<string>();
@@ -387,7 +388,9 @@ function MapTab({
 						className="btn-primary btn-xs"
 						onClick={() => fileInputRef.current?.click()}
 					>
-						{activeLevel.backgroundUrl ? "Replace Background" : "Upload Background"}
+						{activeLevel.backgroundUrl
+							? "Replace Background"
+							: "Upload Background"}
 					</Button>
 					{activeLevel.backgroundUrl && (
 						<Button
@@ -429,7 +432,9 @@ function MapTab({
 }
 
 /** Read image dimensions client-side using an Image element */
-function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+function getImageDimensions(
+	file: File,
+): Promise<{ width: number; height: number }> {
 	return new Promise((resolve) => {
 		const url = URL.createObjectURL(file);
 		const img = new Image();

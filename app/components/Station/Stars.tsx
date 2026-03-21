@@ -5,7 +5,10 @@ import { cn } from "@thorium/utils/cn";
 const Stars = ({
 	children,
 	className,
-}: { children?: ReactNode; className?: string }) => {
+}: {
+	children?: ReactNode;
+	className?: string;
+}) => {
 	return (
 		<div
 			className={cn(

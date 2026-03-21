@@ -206,7 +206,9 @@ export const pilot = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
-			.autoPublish(["autopilot", "facingWaypoints"], (entity) => ({ shipId: entity.id }))
+			.autoPublish(["autopilot", "facingWaypoints"], (entity) => ({
+				shipId: entity.id,
+			}))
 
 			.request(({ ctx, input }) => {
 				const ship = ctx.ecs.getEntityById(input.shipId);

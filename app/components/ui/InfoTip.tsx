@@ -8,7 +8,11 @@ const InfoTip = ({
 	children,
 	className,
 	dialogClassName,
-}: { children: ReactNode; className?: string; dialogClassName?: string }) => {
+}: {
+	children: ReactNode;
+	className?: string;
+	dialogClassName?: string;
+}) => {
 	return (
 		<DialogTrigger>
 			<Button

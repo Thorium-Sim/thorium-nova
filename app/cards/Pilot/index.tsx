@@ -64,7 +64,15 @@ export function Pilot({ cardLoaded }: CardProps) {
 	});
 	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
 
-	const { showWarning, dismissWarning, displayedWarning, isEntering, isExiting, onEntryComplete, onExitComplete } = useShipWarnings();
+	const {
+		showWarning,
+		dismissWarning,
+		displayedWarning,
+		isEntering,
+		isExiting,
+		onEntryComplete,
+		onExitComplete,
+	} = useShipWarnings();
 
 	// Bridge server-side ship alerts (collision warnings, etc.) into the warning system
 	useServerAlerts(shipId, showWarning, dismissWarning);
@@ -125,7 +133,11 @@ export function Pilot({ cardLoaded }: CardProps) {
 		<CircleGridStoreProvider>
 			<div className="grid grid-cols-4 grid-rows-1 h-full place-content-center gap-4">
 				<div className="flex flex-col justify-between">
-					<ImpulseControls cardLoaded={cardLoaded} onFlightControlInteraction={onFlightControlInteraction} forwardAutopilot={!!autopilot.forwardAutopilot} />
+					<ImpulseControls
+						cardLoaded={cardLoaded}
+						onFlightControlInteraction={onFlightControlInteraction}
+						forwardAutopilot={!!autopilot.forwardAutopilot}
+					/>
 					<div className="flex-1 mt-2">
 						<div className="flex items-stretch gap-4 direction-thrusters">
 							<LinearJoystick
@@ -216,7 +228,13 @@ export function Pilot({ cardLoaded }: CardProps) {
 					</div>
 				</div>
 			</div>
-			<ShipWarning warning={displayedWarning} isEntering={isEntering} isExiting={isExiting} onEntryComplete={onEntryComplete} onExitComplete={onExitComplete} />
+			<ShipWarning
+				warning={displayedWarning}
+				isEntering={isEntering}
+				isExiting={isExiting}
+				onEntryComplete={onEntryComplete}
+				onExitComplete={onExitComplete}
+			/>
 		</CircleGridStoreProvider>
 	);
 }
@@ -258,7 +276,11 @@ function getInterstellarDistance(
 	return `${value.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${unit}`;
 }
 
-const LockOnButton = ({ userUnlockedRef }: { userUnlockedRef: MutableRefObject<boolean> }) => {
+const LockOnButton = ({
+	userUnlockedRef,
+}: {
+	userUnlockedRef: MutableRefObject<boolean>;
+}) => {
 	const { cardLoaded } = useCardContext();
 	const {
 		shipId,

@@ -106,9 +106,10 @@ export const client = t.router({
 			if (!ship?.components.isShip) {
 				throw new Error("No ship with that ID exists.");
 			}
-			const complementStations = ship.components.stationComplement?.stations || [];
-			const hasViewscreenStations = complementStations.some(
-				(s) => s.cards.some((c) => c.component === "Viewscreen"),
+			const complementStations =
+				ship.components.stationComplement?.stations || [];
+			const hasViewscreenStations = complementStations.some((s) =>
+				s.cards.some((c) => c.component === "Viewscreen"),
 			);
 			const filteredStatic = hasViewscreenStations
 				? staticStations.filter((s) => s.name !== "Viewscreen")
