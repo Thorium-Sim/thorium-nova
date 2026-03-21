@@ -14,18 +14,6 @@ export interface DataStoreOptions {
 	meta?: any;
 }
 
-export type LoadAspectFn = <T>(
-	this: BasePlugin,
-	aspectName: string,
-	aspect: {
-		new (
-			manifest: {
-				name: string;
-			} & Record<string, any>,
-			plugin: BasePlugin,
-		): T;
-	},
-) => Promise<T[]>;
 export interface DataStoreOperations {
 	getData(this: DataStore): Promise<unknown>;
 	write(
@@ -42,7 +30,18 @@ export interface DataStoreOperations {
 		fileName?: string,
 	): Promise<string>;
 	removeAsset(assetPath: string): Promise<void>;
-	loadAspect: LoadAspectFn;
+	loadAllAspects(
+		this: BasePlugin,
+		aspectClasses: Record<
+			string,
+			new (
+				manifest: {
+					name: string;
+				} & Record<string, any>,
+				plugin: BasePlugin,
+			) => unknown
+		>,
+	): Promise<void>;
 	rename: (
 		this: DataStore,
 		newName: string,

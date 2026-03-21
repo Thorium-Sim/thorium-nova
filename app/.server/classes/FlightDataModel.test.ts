@@ -32,9 +32,7 @@ const testDataStoreProps: DataStoreOperations = {
 	async write(force, name) {
 		fileMap.set(name || this.meta.flightName, JSON.stringify(this.toJSON()));
 	},
-	async loadAspect() {
-		return [];
-	},
+	async loadAllAspects(aspectClasses) {},
 	async rename(newName, otherNames) {},
 
 	async getFlights() {

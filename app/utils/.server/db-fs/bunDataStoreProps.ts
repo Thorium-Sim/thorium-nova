@@ -2,9 +2,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { dump } from "js-yaml";
 import type { DataStoreOperations } from "@thorium/utils/.server/db-fs";
-import BasePlugin from "@thorium/.server/classes/Plugins";
+import BasePlugin, { type AspectsMap } from "@thorium/.server/classes/Plugins";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
-import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
 import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
 import { moveFile } from "@thorium/utils/.server/moveFile";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
@@ -66,7 +65,6 @@ export const bunDataStoreProps: DataStoreOperations = {
 			await fs.mkdir(path.dirname(filePath), { recursive: true });
 			this.initialData = undefined;
 			const jsonData = this.toJSON();
-			jsonData.lastSaved = Date.now();
 			jsonData.dataLoaded = undefined;
 
 			let data: string;
@@ -127,60 +125,42 @@ export const bunDataStoreProps: DataStoreOperations = {
 	async removeAsset(filePath) {
 		await fs.unlink(path.join(thoriumPath, filePath));
 	},
-	async loadAspect<T>(
+	async loadAllAspects(
 		this: BasePlugin,
-		aspectName: string,
-		aspect: {
+		aspectClasses: Record<
+			string,
 			new (
 				manifest: { name: string } & Record<string, any>,
 				plugin: BasePlugin,
-			): T;
-		},
+			) => unknown
+		>,
 	) {
-		const objectGlob = path.join(
-			thoriumPath,
-			"plugins",
-			this.id,
-			aspectName,
-			"/*/manifest.{yml,ink,json}",
+		const glob = new Bun.Glob(
+			path.join(thoriumPath, "plugins", this.id, "*", "**", "manifest.{yml,json}"),
 		);
-		const aspectPaths = new Bun.Glob(objectGlob).scan({
-			onlyFiles: true,
-		});
-		const aspects = [];
-		try {
-			for await (const filePath of aspectPaths) {
-				const fileData = await fs.readFile(filePath, "utf8");
-
+		for await (const filePath of glob.scan({ onlyFiles: true })) {
+			try {
+				const fileData = await Bun.file(filePath).text();
 				const aspectData = filePath.endsWith('.json')
 					? JSON.parse(fileData)
 					: loadYml(fileData);
-				if (aspectName === "shipSystems") {
-					const systemClass =
-						ShipSystemTypes[aspectData.type as keyof typeof ShipSystemTypes];
-					if (systemClass) {
-						aspects.push(
-							new systemClass(aspectData, this) as InstanceType<typeof aspect>,
-						);
-					} else {
-						console.error("Invalid system class:", aspectData.type);
-					}
-					continue;
+				const kind = aspectData.kind as keyof AspectsMap;
+				const className =
+					aspectData.kind === "shipSystems" ? aspectData.type : aspectData.kind;
+				// Ignore the plugins themselves
+				if (className === "plugins") continue;
+				const aspectClass = aspectClasses[className];
+				if (!aspectClass) {
+					throw new Error(`Invalid aspect class: ${className}`);
 				}
-				aspects.push(new aspect(aspectData, this));
-			}
-		} catch (error) {
-			if (
-				error instanceof Error &&
-				"code" in error &&
-				error.code === "ENOENT"
-			) {
-				// Ignore, the folder we're globbing doesn't exist
-			} else {
-				throw error;
+				if (!this.aspects[kind])
+					throw new Error(`Invalid aspect kind: ${kind}`);
+				// @ts-expect-error
+				this.aspects[kind].push(new aspectClass(aspectData, this));
+			} catch (error) {
+				console.error(error);
 			}
 		}
-		return aspects;
 	},
 	async rename(name, otherNames) {
 		if (!("name" in this) || typeof this.name !== "string") return;

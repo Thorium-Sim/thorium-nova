@@ -186,6 +186,7 @@ export class FlightDataModel extends DataStore {
 			stateReason: this.stateReason,
 			startInput: this.startInput,
 			defaultRespawnTimeMs: this.defaultRespawnTimeMs,
+			lastSaved: Date.now(),
 		};
 		return data;
 	}

@@ -183,3 +183,30 @@
 .select-button {
 	@apply text-center;
 }
+
+.prose code:before,
+.prose code:after {
+	display: none;
+}
+.prose code {
+	font-family: monospace;
+	@apply p-1 rounded bg-purple-600/40 text-white;
+}
+.prose pre code {
+	@apply bg-transparent;
+}
+.prose a code {
+	@apply text-purple-300;
+}
+.prose h1 {
+	@apply font-bold;
+}
+.prose {
+	@apply text-xl leading-relaxed;
+}
+.prose pre {
+	@apply text-base;
+}
+.prose blockquote {
+	@apply text-white;
+}

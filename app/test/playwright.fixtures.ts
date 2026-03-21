@@ -14,7 +14,7 @@ export const test = base.extend<
 	},
 	{
 		serverURL: string;
-		q: ReturnType<typeof createLiveQueryReact<AppRouter>>;
+		q: ReturnType<typeof createLiveQueryReact<AppRouter>>[0];
 	}
 >({
 	serverURL: [
@@ -102,13 +102,12 @@ export const test = base.extend<
 	],
 	q: [
 		async ({ serverURL }, use) => {
-			const q = createLiveQueryReact<AppRouter>({
+			const [q] = createLiveQueryReact<AppRouter>({
 				baseUrl: serverURL,
 				headers: async () => ({
 					"client-id": "test",
 				}),
 			});
-
 			await use(q);
 		},
 		{ scope: "worker" },

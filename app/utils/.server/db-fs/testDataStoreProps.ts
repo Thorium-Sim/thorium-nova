@@ -16,9 +16,7 @@ export const testDataStoreProps: DataStoreOperations = {
 		return "";
 	},
 	async write(force) {},
-	async loadAspect() {
-		return [];
-	},
+	async loadAllAspects(aspectClasses) {},
 	async rename(newName, otherNames) {},
 	async getFlights() {
 		return [];

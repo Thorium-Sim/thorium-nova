@@ -39,6 +39,7 @@ export const lrmStateMap: Record<
 	pending: "Pending",
 	sending: "Sending",
 	undelivered: "Undelivered",
+	read: "Read",
 };
 
 export const rotateCharacters = "abcdefghijklmnopqrstuvwxyz1234567890";

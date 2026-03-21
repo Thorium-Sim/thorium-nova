@@ -39,7 +39,8 @@ export default function MissionLayout() {
 	const match = useMatch("config/:pluginId/missions/:timelineId/:stepId/*")
 		?.params.stepId;
 
-	const stepId = match === "details" ? undefined : match;
+	const stepId =
+		!match || ["details", "conversations"].includes(match) ? undefined : match;
 
 	if (!timelineId || !item)
 		return <Navigate to={`/config/${pluginId}/missions`} />;
@@ -77,6 +78,14 @@ export default function MissionLayout() {
 						}`}
 					>
 						Mission Details
+					</Link>
+					<Link
+						to="conversations"
+						className={`list-group-item ${
+							match === "conversations" ? "selected" : ""
+						}`}
+					>
+						Conversations
 					</Link>
 					<hr className="my-2" />
 					<SortableList
