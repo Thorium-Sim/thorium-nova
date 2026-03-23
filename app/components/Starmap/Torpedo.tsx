@@ -1,7 +1,9 @@
 import { useFrame } from "@react-three/fiber";
+import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { useMemo, useRef, useState } from "react";
 import {
+	AdditiveBlending,
 	DoubleSide,
 	Euler,
 	type Group,
@@ -10,13 +12,11 @@ import {
 	MeshBasicMaterial,
 	PlaneGeometry,
 	Quaternion,
-	Vector3,
-	AdditiveBlending,
 	type Sprite,
+	Vector3,
 } from "three";
-import Explosion from "./Effects/Explosion";
 import blob from "./Effects/blob.png?url";
-import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
+import Explosion from "./Effects/Explosion";
 
 export function Torpedo({
 	color,
