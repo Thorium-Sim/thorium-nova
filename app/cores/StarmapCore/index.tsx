@@ -1,72 +1,62 @@
-import { InterstellarMap } from "@thorium/components/Starmap/InterstellarMap";
-import SystemMarker from "@thorium/components/Starmap/SystemMarker";
-import StarmapCanvas from "@thorium/components/Starmap/StarmapCanvas";
-import {
-	useEffect,
-	useLayoutEffect,
-	useRef,
-	useState,
-	type RefObject,
-} from "react";
-import {
-	StarmapStoreProvider,
-	useCalculateVerticalDistance,
-	useGetStarmapStore,
-} from "@thorium/components/Starmap/starmapStore";
-import { Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
-import {
-	PaletteDisclosure,
-	SolarSystemMap,
-} from "@thorium/components/Starmap/SolarSystemMap";
-import { Planet } from "@thorium/components/Starmap/Planet";
-import StarEntity from "@thorium/components/Starmap/Star";
-import { StarmapShip } from "@thorium/components/Starmap/StarmapShip";
-import SearchableInput, {
-	DefaultResultLabel,
-} from "@thorium/ui/SearchableInput";
-import Input from "@thorium/ui/Input";
-import { StarmapCoreContextMenu } from "./StarmapCoreContextMenu";
-import { WaypointEntity } from "@thorium/cards/Pilot/Waypoint";
-import useDragSelect, {
-	DragSelection,
-	get3dSelectedObjects,
-} from "@thorium/hooks/useDragSelect";
-import { type PerspectiveCamera, Plane, Vector3 } from "three";
-import Button from "@thorium/ui/Button";
-import { useCancelFollow } from "@thorium/components/Starmap/useCancelFollow";
-import { useFollowEntity } from "@thorium/components/Starmap/useFollowEntity";
-import { ZoomSliderComp } from "@thorium/cards/Navigation/MapControls";
-import type { Coordinates } from "@thorium/utils/unitTypes";
-import { q } from "@thorium/context/AppContext";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
-import clsx from "clsx";
-import { Tooltip } from "@thorium/ui/Tooltip";
-import { Icon } from "@thorium/ui/Icon";
 import { keepPreviousData } from "@tanstack/react-query";
-import { Torpedo } from "@thorium/components/Starmap/Torpedo";
-import { FiringPhasers } from "./FiringPhasers";
-import { cn } from "@thorium/utils/cn";
-import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
-import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
-import { usePrompt } from "@thorium/ui/AlertDialog";
-import { useStation } from "@thorium/routes/station/useStation";
-import { useTranslate2DTo3D } from "@thorium/hooks/useTranslate2DTo3D";
-import {
-	Disclosure,
-	DisclosurePanel,
-	Heading,
-	Button as RAButton,
-} from "react-aria-components";
-import useEventListener from "@thorium/hooks/useEventListener";
-import { useActiveCores } from "@thorium/routes/core/CoreFlexLayout";
 import {
 	CoreLongRangeMessageDestinationEvent,
 	CoreLongRangeMessagePickDestinationEvent,
 	CoreLongRangeMessagePickSenderEvent,
 	CoreLongRangeMessageSenderEvent,
 } from "@thorium/cards/LongRangeComm/events";
+import { ZoomSliderComp } from "@thorium/cards/Navigation/MapControls";
+import { WaypointEntity } from "@thorium/cards/Pilot/Waypoint";
+import { InterstellarMap } from "@thorium/components/Starmap/InterstellarMap";
+import { Planet } from "@thorium/components/Starmap/Planet";
+import { SolarSystemMap } from "@thorium/components/Starmap/SolarSystemMap";
+import StarEntity from "@thorium/components/Starmap/Star";
+import StarmapCanvas from "@thorium/components/Starmap/StarmapCanvas";
+import { StarmapShip } from "@thorium/components/Starmap/StarmapShip";
+import SystemMarker from "@thorium/components/Starmap/SystemMarker";
+import {
+	StarmapStoreProvider,
+	useCalculateVerticalDistance,
+	useGetStarmapStore,
+} from "@thorium/components/Starmap/starmapStore";
+import { Torpedo } from "@thorium/components/Starmap/Torpedo";
+import { useCancelFollow } from "@thorium/components/Starmap/useCancelFollow";
+import { useFollowEntity } from "@thorium/components/Starmap/useFollowEntity";
+import { q } from "@thorium/context/AppContext";
+import useDragSelect, {
+	DragSelection,
+	get3dSelectedObjects,
+} from "@thorium/hooks/useDragSelect";
+import useEventListener from "@thorium/hooks/useEventListener";
+import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
+import { useTranslate2DTo3D } from "@thorium/hooks/useTranslate2DTo3D";
+import { useActiveCores } from "@thorium/routes/core/CoreFlexLayout";
+import { useStation } from "@thorium/routes/station/useStation";
+import { usePrompt } from "@thorium/ui/AlertDialog";
+import Button from "@thorium/ui/Button";
+import { Icon } from "@thorium/ui/Icon";
+import Input from "@thorium/ui/Input";
+import SearchableInput, {
+	DefaultResultLabel,
+} from "@thorium/ui/SearchableInput";
+import { Tooltip } from "@thorium/ui/Tooltip";
+import { cn } from "@thorium/utils/cn";
+import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
+import type { Coordinates } from "@thorium/utils/unitTypes";
+import clsx from "clsx";
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+	Disclosure,
+	DisclosurePanel,
+	Heading,
+	Button as RAButton,
+} from "react-aria-components";
 import { flushSync } from "react-dom";
+import { ErrorBoundary } from "react-error-boundary";
+import { type PerspectiveCamera, Plane, Vector3 } from "three";
+import { FiringPhasers } from "./FiringPhasers";
+import { StarmapCoreContextMenu } from "./StarmapCoreContextMenu";
 
 export class SelectStarmapEntityEvent extends Event {
 	static name = "select-starmap-entity";

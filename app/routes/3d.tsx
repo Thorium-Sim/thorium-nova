@@ -1,7 +1,7 @@
-import { OrbitControls, Stars, useGLTF } from "@react-three/drei";
+import { OrbitControls, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
-import { Suspense, useState } from "react";
+import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
+import { Suspense } from "react";
 import { Matrix4 } from "three";
 
 export const instanceMatrix = new Matrix4();

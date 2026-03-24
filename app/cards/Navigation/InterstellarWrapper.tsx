@@ -1,12 +1,12 @@
-import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import { InterstellarMap } from "@thorium/components/Starmap/InterstellarMap";
-import SystemMarker from "@thorium/components/Starmap/SystemMarker";
-import { Suspense, useEffect } from "react";
-import { ErrorBoundary } from "react-error-boundary";
 import { StarmapShip } from "@thorium/components/Starmap/StarmapShip";
+import SystemMarker from "@thorium/components/Starmap/SystemMarker";
+import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import { WaypointEntity } from "@thorium/components/Starmap/WaypointEntity";
 import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
+import { Suspense, useEffect } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
 export function InterstellarWrapper() {
 	const { shipId } = useStation();
@@ -32,13 +32,7 @@ export function InterstellarWrapper() {
 					<SystemMarker
 						key={sys.id}
 						systemId={sys.id}
-						position={
-							[sys.position.x, sys.position.y, sys.position.z] as [
-								number,
-								number,
-								number,
-							]
-						}
+						position={[sys.position.x, sys.position.y, sys.position.z]}
 						name={sys.identity.name}
 						onClick={() => {
 							useStarmapStore.setState({ selectedObjectIds: [sys.id] });

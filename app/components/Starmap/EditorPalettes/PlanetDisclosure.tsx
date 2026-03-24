@@ -2,7 +2,7 @@ import * as React from "react";
 import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
 import type PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
-import { PaletteDisclosure } from "../SolarSystemMap";
+import { PaletteDisclosure } from "./PaletteDisclosure";
 import { useSystemIds } from "../useSystemIds";
 import { q } from "@thorium/context/AppContext";
 

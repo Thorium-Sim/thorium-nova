@@ -1,9 +1,18 @@
-import { clientId, q } from "@thorium/context/AppContext";
 import { useFrame } from "@react-three/fiber";
 import type { AppRouter } from "@thorium/.server/init/router";
+import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
+import WaypointTexture from "@thorium/components/Starmap/Waypoint.svg";
+import StrokeTexture from "@thorium/components/Starmap/WaypointStroke.svg";
+import { clientId, q } from "@thorium/context/AppContext";
+import { useStation } from "@thorium/routes/station/useStation";
+import type { inferTransformedProcedureOutput } from "@thorium/utils/live-query/.server/types";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
+import {
+	deriveDarkerThemeColor,
+	getThemeButtonBorderColor,
+} from "@thorium/utils/processThemeColor";
+import { degToRad } from "@thorium/utils/unitTypes";
 import { useMemo, useRef } from "react";
-import { getThemeButtonBorderColor, deriveDarkerThemeColor } from "@thorium/utils/processThemeColor";
 import {
 	type Camera,
 	Frustum,
@@ -14,13 +23,7 @@ import {
 	type Sprite,
 	Vector3,
 } from "three";
-import WaypointTexture from "@thorium/components/Starmap/Waypoint.svg";
-import StrokeTexture from "@thorium/components/Starmap/WaypointStroke.svg";
 import { getWaypointRelativePosition } from "./getWaypointRelativePosition";
-import { degToRad } from "@thorium/utils/unitTypes";
-import type { inferTransformedProcedureOutput } from "@thorium/utils/live-query/.server/types";
-import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
-import { useStation } from "@thorium/routes/station/useStation";
 
 type WaypointItem = inferTransformedProcedureOutput<
 	AppRouter["waypoints"]["all"]
@@ -54,14 +57,19 @@ export const WaypointEntity = ({
 	const stroke = useRef<Sprite>(null);
 	const scale = 1 / 40;
 
-	const { primaryHex, primaryFocusHex, warningHex, warningFocusHex } = useMemo(() => {
-		return {
-			primaryHex: getThemeButtonBorderColor("btn-primary", "#65abc4"),
-			warningHex: getThemeButtonBorderColor("btn-warning", "#c7935e"),
-			primaryFocusHex: deriveDarkerThemeColor(getThemeButtonBorderColor("btn-primary", "#65abc4")),
-			warningFocusHex: deriveDarkerThemeColor(getThemeButtonBorderColor("btn-warning", "#c7935e")),
-		};
-	}, []);
+	const { primaryHex, primaryFocusHex, warningHex, warningFocusHex } =
+		useMemo(() => {
+			return {
+				primaryHex: getThemeButtonBorderColor("btn-primary", "#65abc4"),
+				warningHex: getThemeButtonBorderColor("btn-warning", "#c7935e"),
+				primaryFocusHex: deriveDarkerThemeColor(
+					getThemeButtonBorderColor("btn-primary", "#65abc4"),
+				),
+				warningFocusHex: deriveDarkerThemeColor(
+					getThemeButtonBorderColor("btn-warning", "#c7935e"),
+				),
+			};
+		}, []);
 
 	const { id, currentSystem: playerSystem, systemPosition } = useStation().ship;
 
