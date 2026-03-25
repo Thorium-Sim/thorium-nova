@@ -1,6 +1,6 @@
 import MissionPlugin from "@thorium/.server/classes/Plugins/Mission";
 import { t } from "@thorium/.server/init/t";
-import { z } from "zod";
+import z from "zod";
 import { getPlugin } from "./utils";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import { pubsub } from "@thorium/.server/init/pubsub";

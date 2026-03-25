@@ -1,5 +1,5 @@
 import { t } from "@thorium/.server/init/t";
-import { z } from "zod";
+import z from "zod";
 
 export const viewscreen = t.router({
 	system: t.procedure

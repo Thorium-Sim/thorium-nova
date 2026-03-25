@@ -3,7 +3,7 @@ import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import romanNumerals from "roman-numerals";
-import { z } from "zod";
+import z from "zod";
 import { getSolarSystem } from "../utils";
 import path from "node:path";
 import { satellite } from "@thorium/ecs-components/satellite";

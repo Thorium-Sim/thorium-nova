@@ -8,7 +8,7 @@ import type { TrainingVariables } from "@thorium/routes/config/trainings/trainin
 import { triggerStep } from "@thorium/utils/.server/evaluateEntityQuery";
 import { selectAvailableTimelines } from "@thorium/utils/.server/executeBlocks";
 import type { Entity } from "@thorium/utils/ecs";
-import { z } from "zod";
+import z from "zod";
 import MarkdownIt from "markdown-it";
 const md = MarkdownIt();
 

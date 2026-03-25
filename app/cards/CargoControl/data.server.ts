@@ -2,7 +2,7 @@ import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { matchSorter } from "match-sorter";
 import type { ECS, Entity } from "@thorium/utils/ecs";
-import { z } from "zod";
+import z from "zod";
 import type { shipMap } from "@thorium/ecs-components/shipMap";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";

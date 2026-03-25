@@ -1,4 +1,4 @@
-import { z } from "zod";
+import z from "zod";
 export const scanTypes = z.enum([
 	// For ships
 	"identification",

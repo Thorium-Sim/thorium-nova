@@ -1,7 +1,7 @@
 import ThemePlugin from "@thorium/.server/classes/Plugins/Theme";
 import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
+import z from "zod";
 import { getPlugin } from "./utils";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import path from "node:path";

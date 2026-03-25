@@ -2,7 +2,7 @@ import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/sh
 import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { type Primitive, z, type ZodLiteral } from "zod";
+import z, { type Primitive, type ZodLiteral } from "zod";
 import {
 	getPlugin,
 	getShipSystem,

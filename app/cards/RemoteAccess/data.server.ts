@@ -1,7 +1,7 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { Entity } from "@thorium/utils/ecs";
-import { z } from "zod";
+import z from "zod";
 
 export const remoteAccess = t.router({
 	codes: t.procedure

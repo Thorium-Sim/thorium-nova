@@ -1,7 +1,7 @@
 import type { AllShipSystems } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
 import type { DataContext } from "@thorium/.server/DataContext";
 
-import { z } from "zod";
+import z from "zod";
 
 export function getPlugin(context: DataContext, pluginId: string) {
 	const plugin = context.server.plugins.find(

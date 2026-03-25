@@ -1,6 +1,6 @@
 import { isTrigger } from "@thorium/ecs-components/isTrigger";
 import { t } from "@thorium/.server/init/t";
-import { z } from "zod";
+import z from "zod";
 import { spawnTrigger } from "@thorium/.server/spawners/trigger";
 
 export const triggers = t.router({

@@ -2,7 +2,7 @@ import StarPlugin from "@thorium/.server/classes/Plugins/Universe/Star";
 import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
+import z from "zod";
 import { getSolarSystem } from "../utils";
 import { spectralTypes, starTypes } from "@thorium/utils/flags/starTypes";
 import { randomFromRange } from "@thorium/utils/operations/randomFromRange";

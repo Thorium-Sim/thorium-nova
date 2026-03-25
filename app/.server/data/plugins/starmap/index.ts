@@ -1,5 +1,5 @@
 import { t } from "@thorium/.server/init/t";
-import { z } from "zod";
+import z from "zod";
 import { getPlugin, pluginFilter } from "../utils";
 import { solarSystem } from "./solarSystem";
 import { star } from "./star";
