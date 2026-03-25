@@ -1,7 +1,9 @@
 import { InterstellarMap } from "@thorium/components/Starmap/InterstellarMap";
-import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import SystemMarker from "@thorium/components/Starmap/SystemMarker";
+import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import { q } from "@thorium/context/AppContext";
+import { computeNetworkColors } from "@thorium/routes/config/starmap/starmapUtils";
+import { useMemo } from "react";
 import { href, useNavigate, useParams } from "react-router";
 
 export default function InterstellarWrapper({
@@ -21,6 +23,7 @@ export default function InterstellarWrapper({
 	const useStarmapStore = useGetStarmapStore();
 
 	const [stars] = q.plugin.starmap.all.useNetRequest({ pluginId });
+	const networkColors = useMemo(() => computeNetworkColors(stars), [stars]);
 	return (
 		<InterstellarMap>
 			{stars.map((star) => (
@@ -30,6 +33,7 @@ export default function InterstellarWrapper({
 					position={Object.values(star.position) as [number, number, number]}
 					name={star.name}
 					commSatelliteRadius={star.commSatelliteRadius || null}
+					commSatelliteColor={networkColors.get(star.name) ?? null}
 					draggable={draggable}
 					onPointerDown={() => {
 						useStarmapStore.setState({ selectedObjectIds: [star.name] });

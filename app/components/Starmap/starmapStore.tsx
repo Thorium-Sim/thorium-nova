@@ -1,4 +1,5 @@
 import { useFrame } from "@react-three/fiber";
+import type { Coordinates } from "@thorium/utils/unitTypes";
 import type CameraControls from "camera-controls";
 import {
 	createContext,
@@ -7,7 +8,6 @@ import {
 	useContext,
 	useState,
 } from "react";
-import type { Coordinates } from "@thorium/utils/unitTypes";
 import { type Plane, Vector3 } from "three";
 import { create } from "zustand";
 
@@ -41,6 +41,7 @@ interface StarmapStore {
 	setCameraFocus: (position: Coordinates<number>) => void;
 	planetsHidden: boolean;
 	sensorsHidden: boolean;
+	showSatelliteRange: boolean;
 	clickAction?: { label: string; action: (object: number | null) => void };
 }
 
@@ -98,6 +99,7 @@ const createStarmapStore = () =>
 		},
 		planetsHidden: false,
 		sensorsHidden: true,
+		showSatelliteRange: true,
 	}));
 
 const useStarmapStore = createStarmapStore();

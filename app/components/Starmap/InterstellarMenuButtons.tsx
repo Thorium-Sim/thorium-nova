@@ -1,12 +1,13 @@
-import * as React from "react";
-import { useParams } from "react-router";
-import { Vector3 } from "three";
-import type { Camera } from "three";
-import { useConfirm } from "@thorium/ui/AlertDialog";
-import Button from "../ui/Button";
 import { q } from "@thorium/context/AppContext";
 import { toast } from "@thorium/context/ToastContext";
+import { useConfirm } from "@thorium/ui/AlertDialog";
 import { lightYearToLightMinute } from "@thorium/utils/unitTypes";
+import type * as React from "react";
+import { ToggleButton } from "react-aria-components";
+import { useParams } from "react-router";
+import type { Camera } from "three";
+import { Vector3 } from "three";
+import Button from "../ui/Button";
 import { useGetStarmapStore } from "./starmapStore";
 
 interface SceneRef {
@@ -25,6 +26,7 @@ export function InterstellarMenuButtons({
 
 	const selectedObjectIds = useStarmapStore((s) => s.selectedObjectIds);
 	const cameraView = useStarmapStore((s) => s.cameraView);
+	const showSatelliteRange = useStarmapStore((s) => s.showSatelliteRange);
 	const confirm = useConfirm();
 	async function deleteObject() {
 		const selectedObjectIds = useStarmapStore.getState().selectedObjectIds;
@@ -105,6 +107,15 @@ export function InterstellarMenuButtons({
 			>
 				Go to {cameraView === "2d" ? "3D" : "2D"}
 			</Button>
+			<ToggleButton
+				isSelected={showSatelliteRange}
+				onChange={(selected) =>
+					useStarmapStore.setState({ showSatelliteRange: selected })
+				}
+				className="btn btn-xs btn-outline btn-info selected:btn-accent"
+			>
+				Satellite Range
+			</ToggleButton>
 		</>
 	);
 }
