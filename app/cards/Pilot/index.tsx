@@ -1,23 +1,25 @@
+import type { CardProps } from "@thorium/cards/CardProps";
+import { q } from "@thorium/context/AppContext";
+import { useCardContext } from "@thorium/context/CardContext";
+import { toast } from "@thorium/context/ToastContext";
+import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import { useGamepadPress } from "@thorium/hooks/useGamepadStore";
+import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
+import { Joystick, LinearJoystick } from "@thorium/ui/Joystick";
+import { ShipWarning, useShipWarnings } from "@thorium/ui/ShipWarning";
+import { useServerAlerts } from "@thorium/ui/useServerAlerts";
+import { SystemStabilityError } from "@thorium/utils/live-query/client/SystemStabilityError";
+import { cn } from "@thorium/utils/cn";
+import { useLiveQuery } from "@thorium/utils/live-query/client";
+import type { Coordinates } from "@thorium/utils/unitTypes";
+import type { MutableRefObject, ReactNode } from "react";
 import { Fragment, Suspense, useCallback, useEffect, useRef } from "react";
-import { GridCanvas, CircleGrid, CircleGridTiltButton } from "./CircleGrid";
+import { CircleGrid, CircleGridTiltButton, GridCanvas } from "./CircleGrid";
+import { ImpulseControls } from "./ImpulseControls";
+import { CircleGridContacts, CircleGridWaypoints } from "./PilotContacts";
 import { PilotZoomSlider } from "./PilotZoomSlider";
 import { CircleGridStoreProvider } from "./useCircleGridStore";
-import { ImpulseControls } from "./ImpulseControls";
-import { Joystick, LinearJoystick } from "@thorium/ui/Joystick";
-import type { MutableRefObject, ReactNode } from "react";
-import type { Coordinates } from "@thorium/utils/unitTypes";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
-import { q } from "@thorium/context/AppContext";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { useGamepadPress } from "@thorium/hooks/useGamepadStore";
-import { CircleGridContacts, CircleGridWaypoints } from "./PilotContacts";
-import type { CardProps } from "@thorium/cards/CardProps";
-import { useStation } from "@thorium/routes/station/useStation";
-import { useCardContext } from "@thorium/context/CardContext";
-import { cn } from "@thorium/utils/cn";
-import { useShipWarnings, ShipWarning } from "@thorium/ui/ShipWarning";
-import { useServerAlerts } from "@thorium/ui/useServerAlerts";
 
 async function rotation({
 	shipId,
@@ -25,10 +27,20 @@ async function rotation({
 	y,
 	z,
 }: { shipId: number } & Partial<Coordinates<number>>) {
-	await q.pilot.thrusters.setRotationDelta.netSend({
-		shipId,
-		rotation: { x, y, z },
-	});
+	try {
+		await q.pilot.thrusters.setRotationDelta.netSend({
+			shipId,
+			rotation: { x, y, z },
+		});
+	} catch (err) {
+		if (err instanceof SystemStabilityError) {
+			toast({
+				title: "Thrusters command failed",
+				body: err.message,
+				color: "error",
+			});
+		}
+	}
 }
 async function direction({
 	shipId,
@@ -36,10 +48,20 @@ async function direction({
 	y,
 	z,
 }: { shipId: number } & Partial<Coordinates<number>>) {
-	await q.pilot.thrusters.setDirection.netSend({
-		shipId,
-		direction: { x, y, z },
-	});
+	try {
+		await q.pilot.thrusters.setDirection.netSend({
+			shipId,
+			direction: { x, y, z },
+		});
+	} catch (err) {
+		if (err instanceof SystemStabilityError) {
+			toast({
+				title: "Thrusters command failed",
+				body: err.message,
+				color: "error",
+			});
+		}
+	}
 }
 
 function UntouchableLabel({
@@ -64,7 +86,15 @@ export function Pilot({ cardLoaded }: CardProps) {
 	});
 	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
 
-	const { showWarning, dismissWarning, displayedWarning, isEntering, isExiting, onEntryComplete, onExitComplete } = useShipWarnings();
+	const {
+		showWarning,
+		dismissWarning,
+		displayedWarning,
+		isEntering,
+		isExiting,
+		onEntryComplete,
+		onExitComplete,
+	} = useShipWarnings();
 
 	// Bridge server-side ship alerts (collision warnings, etc.) into the warning system
 	useServerAlerts(shipId, showWarning, dismissWarning);
@@ -125,7 +155,11 @@ export function Pilot({ cardLoaded }: CardProps) {
 		<CircleGridStoreProvider>
 			<div className="grid grid-cols-4 grid-rows-1 h-full place-content-center gap-4">
 				<div className="flex flex-col justify-between">
-					<ImpulseControls cardLoaded={cardLoaded} onFlightControlInteraction={onFlightControlInteraction} forwardAutopilot={!!autopilot.forwardAutopilot} />
+					<ImpulseControls
+						cardLoaded={cardLoaded}
+						onFlightControlInteraction={onFlightControlInteraction}
+						forwardAutopilot={!!autopilot.forwardAutopilot}
+					/>
 					<div className="flex-1 mt-2">
 						<div className="flex items-stretch gap-4 direction-thrusters">
 							<LinearJoystick
@@ -216,7 +250,13 @@ export function Pilot({ cardLoaded }: CardProps) {
 					</div>
 				</div>
 			</div>
-			<ShipWarning warning={displayedWarning} isEntering={isEntering} isExiting={isExiting} onEntryComplete={onEntryComplete} onExitComplete={onExitComplete} />
+			<ShipWarning
+				warning={displayedWarning}
+				isEntering={isEntering}
+				isExiting={isExiting}
+				onEntryComplete={onEntryComplete}
+				onExitComplete={onExitComplete}
+			/>
 		</CircleGridStoreProvider>
 	);
 }
@@ -258,7 +298,11 @@ function getInterstellarDistance(
 	return `${value.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${unit}`;
 }
 
-const LockOnButton = ({ userUnlockedRef }: { userUnlockedRef: MutableRefObject<boolean> }) => {
+const LockOnButton = ({
+	userUnlockedRef,
+}: {
+	userUnlockedRef: MutableRefObject<boolean>;
+}) => {
 	const { cardLoaded } = useCardContext();
 	const {
 		shipId,
