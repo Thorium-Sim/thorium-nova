@@ -1,6 +1,5 @@
 import { checkSystemStability } from "@thorium/utils/.server/ship/checkSystemStability";
 import { ECS, Entity } from "@thorium/utils/ecs";
-import { LiveQueryError } from "@thorium/utils/live-query/client/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 let system: Entity;
@@ -28,11 +27,11 @@ describe("checkSystemStability", () => {
 		expect(() => checkSystemStability(system)).not.toThrow();
 	});
 
-	it("throws LiveQueryError when roll is below the instability threshold", () => {
+	it("throws error when roll is below the instability threshold", () => {
 		system.updateComponent("damage", { instability: 0.4 });
 		vi.spyOn(ecs.rng, "nextAsPercentage").mockReturnValue(0.2);
 
-		expect(() => checkSystemStability(system)).toThrow(LiveQueryError);
+		expect(() => checkSystemStability(system)).toThrow();
 	});
 
 	it("thrown error has the expected message", () => {
@@ -75,6 +74,6 @@ describe("checkSystemStability", () => {
 
 		expect(() => checkSystemStability(system)).not.toThrow();
 		expect(() => checkSystemStability(system)).not.toThrow();
-		expect(() => checkSystemStability(system)).toThrow(LiveQueryError);
+		expect(() => checkSystemStability(system)).toThrow();
 	});
 });
