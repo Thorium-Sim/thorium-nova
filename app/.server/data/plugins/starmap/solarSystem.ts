@@ -2,7 +2,7 @@ import SolarSystemPlugin from "@thorium/.server/classes/Plugins/Universe/SolarSy
 import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
+import z from "zod";
 import { getPlugin } from "../utils";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 

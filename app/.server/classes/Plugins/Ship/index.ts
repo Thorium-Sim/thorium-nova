@@ -2,7 +2,7 @@ import type BasePlugin from "../index";
 import { Aspect } from "../Aspect";
 
 import DeckPlugin, { DeckEdge } from "./Deck";
-import { z } from "zod";
+import z from "zod";
 import type { Liter } from "@thorium/utils/unitTypes";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 

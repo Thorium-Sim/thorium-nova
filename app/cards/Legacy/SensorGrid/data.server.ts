@@ -12,7 +12,7 @@ import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
 import { Entity } from "@thorium/utils/ecs";
 import { degToRad } from "@thorium/utils/unitTypes";
-import { z } from "zod";
+import z from "zod";
 
 function updateContact(
 	contact: Entity,

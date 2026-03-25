@@ -1,6 +1,6 @@
 import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { z } from "zod";
+import z from "zod";
 
 const alertLevelValues = z.union([
 	z.literal("5"),

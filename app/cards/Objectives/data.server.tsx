@@ -1,6 +1,6 @@
 import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { z } from "zod";
+import z from "zod";
 import { Entity } from "@thorium/utils/ecs";
 
 export const objectives = t.router({

@@ -8,7 +8,7 @@ import type { SoundEffect } from "@thorium/ecs-components/soundEffect";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
-import { z } from "zod";
+import z from "zod";
 import type { position as positionComponent } from "@thorium/ecs-components/position";
 import { sound } from "@thorium/ecs-components/sound";
 import type { DataContext } from "@thorium/.server/DataContext";

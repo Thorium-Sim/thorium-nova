@@ -4,7 +4,7 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
-import { z } from "zod";
+import z from "zod";
 import { getPlugin } from "./utils";
 import path from "node:path";
 import uniqid from "@thorium/utils/uniqid";

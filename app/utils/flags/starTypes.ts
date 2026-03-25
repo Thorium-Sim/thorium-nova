@@ -6,7 +6,7 @@ import type {
 	SolarRadius,
 	Year,
 } from "../unitTypes";
-import { z } from "zod";
+import z from "zod";
 export const spectralTypes = z.union([
 	z.literal("O"),
 	z.literal("B"),

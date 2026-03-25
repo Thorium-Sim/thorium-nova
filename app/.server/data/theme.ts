@@ -1,6 +1,6 @@
 import type ThemePlugin from "@thorium/.server/classes/Plugins/Theme";
 import { t } from "@thorium/.server/init/t";
-import { z } from "zod";
+import z from "zod";
 export const theme = t.router({
 	get: t.procedure
 		.input(z.object({ clientId: z.string() }))

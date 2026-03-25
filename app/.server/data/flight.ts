@@ -1,6 +1,6 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
-import { z } from "zod";
+import z from "zod";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import randomWords from "@thorium/utils/random-words";

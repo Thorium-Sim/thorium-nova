@@ -8,7 +8,7 @@ import {
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
+import z from "zod";
 
 export const sensors = t.router({
 	get: t.procedure

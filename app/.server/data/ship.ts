@@ -1,7 +1,7 @@
 import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { spawnShip } from "@thorium/.server/spawners/ship";
-import { z } from "zod";
+import z from "zod";
 import { alertTypes } from "@thorium/ecs-components/shipAlerts";
 import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
 import type { ECS, Entity } from "@thorium/utils/ecs";
@@ -299,8 +299,7 @@ export const ship = t.router({
 			})
 			.autoPublish(
 				["shipAlerts"],
-				(entity) =>
-					entity.components.isPlayerShip && { shipId: entity.id },
+				(entity) => entity.components.isPlayerShip && { shipId: entity.id },
 			)
 			.request(({ ctx, input }) => {
 				const ship = ctx.ecs.getEntityById(input.shipId);
