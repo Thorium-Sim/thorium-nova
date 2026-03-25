@@ -1,19 +1,19 @@
-import { Suspense, useRef } from "react";
 import { useTexture } from "@react-three/drei";
-import type PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
-import { Rings } from "./Rings";
-import { Clouds } from "./Clouds";
-import Selected from "../Selected";
-import Dot from "./Dot.svg";
-import { useGetStarmapStore } from "../starmapStore";
-import SystemLabel from "../SystemMarker/SystemLabel";
-import type { Group, Vector3 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
+import type PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
+import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
+import { setCursor } from "@thorium/utils/setCursor";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { degToRad } from "@thorium/utils/unitTypes";
+import { Suspense, useRef } from "react";
+import type { Group, Vector3 } from "three";
 import { OrbitLine } from "../OrbitContainer";
-import { setCursor } from "@thorium/utils/setCursor";
-import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
+import Selected from "../Selected";
+import SystemLabel from "../SystemMarker/SystemLabel";
+import { useGetStarmapStore } from "../starmapStore";
+import { Clouds } from "./Clouds";
+import Dot from "./Dot.svg";
+import { Rings } from "./Rings";
 
 export const PlanetSprite = ({ color = "white", userData = {} }) => {
 	const spriteMap = useShipSprite(Dot);

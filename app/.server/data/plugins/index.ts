@@ -1,7 +1,7 @@
 import { t } from "@thorium/.server/init/t";
 import { systems } from "./systems";
 import { starmap } from "./starmap";
-import { z } from "zod";
+import z from "zod";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import BasePlugin from "@thorium/.server/classes/Plugins";
 import { pubsub } from "@thorium/.server/init/pubsub";

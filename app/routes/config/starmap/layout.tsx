@@ -1,28 +1,26 @@
-import { InterstellarMenuButtons } from "@thorium/components/Starmap/InterstellarMap";
-import {
-	SolarSystemMenuButtons,
-	SolarSystemPalette,
-} from "@thorium/components/Starmap/SolarSystemMap";
+import { useThree } from "@react-three/fiber";
+import { InterstellarMenuButtons } from "@thorium/components/Starmap/InterstellarMenuButtons";
+import { InterstellarPalette } from "@thorium/components/Starmap/InterstellarPalette";
+import Nebula from "@thorium/components/Starmap/Nebula";
+import { SolarSystemMenuButtons } from "@thorium/components/Starmap/SolarSystemMenuButtons";
+import { SolarSystemPalette } from "@thorium/components/Starmap/SolarSystemPalette";
+import StarmapCanvas from "@thorium/components/Starmap/StarmapCanvas";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
-import { Outlet, useMatch, useParams } from "react-router";
+import { q } from "@thorium/context/AppContext";
 import { EditorPalette } from "@thorium/ui/EditorPalette";
 import { useMenubar } from "@thorium/ui/Menubar";
+import { lightMinuteToLightYear } from "@thorium/utils/unitTypes";
 import {
-	Suspense,
 	forwardRef,
+	Suspense,
+	useCallback,
 	useEffect,
 	useImperativeHandle,
 	useRef,
 } from "react";
-import type { Camera } from "three";
-import { lightMinuteToLightYear } from "@thorium/utils/unitTypes";
-import Nebula from "@thorium/components/Starmap/Nebula";
-import { useThree } from "@react-three/fiber";
-import StarmapCanvas from "@thorium/components/Starmap/StarmapCanvas";
+import { Outlet, useMatch, useParams } from "react-router";
 import { ClientOnly } from "remix-utils/client-only";
-import { InterstellarPalette } from "@thorium/components/Starmap/InterstellarMap";
-import { q } from "@thorium/context/AppContext";
-import { useCallback } from "react";
+import type { Camera } from "three";
 
 interface SceneRef {
 	camera: () => Camera;

@@ -2,7 +2,7 @@ import InventoryPlugin from "@thorium/.server/classes/Plugins/Inventory";
 import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
+import z from "zod";
 import { getPlugin } from "./utils";
 import path from "node:path";
 

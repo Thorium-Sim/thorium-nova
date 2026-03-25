@@ -2,7 +2,7 @@ import Button from "../../ui/Button";
 import UploadWell from "@thorium/ui/UploadWell";
 import InfoTip from "@thorium/ui/InfoTip";
 import type PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
-import { PaletteDisclosure } from "../SolarSystemMap";
+import { PaletteDisclosure } from "./PaletteDisclosure";
 import { useSystemIds } from "../useSystemIds";
 import { q } from "@thorium/context/AppContext";
 

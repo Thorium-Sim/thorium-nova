@@ -11,7 +11,7 @@ import {
 import type { Entity } from "@thorium/utils/ecs";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { capitalCase } from "change-case";
-import { z } from "zod";
+import z from "zod";
 
 export const powerDistribution = t.router({
 	systems: t.procedure

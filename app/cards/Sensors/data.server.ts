@@ -1,4 +1,4 @@
-import { z } from "zod";
+import z from "zod";
 import { t } from "@thorium/.server/init/t";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { type scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";

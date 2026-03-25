@@ -3,7 +3,7 @@ import { t } from "@thorium/.server/init/t";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
 import { produce } from "immer";
-import { z } from "zod";
+import z from "zod";
 
 export const codeCyphers = t.router({
 	availableCyphers: t.procedure

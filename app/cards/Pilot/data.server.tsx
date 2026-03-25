@@ -5,7 +5,7 @@ import {
 	clearAutopilotState,
 	deactivateForwardAutopilot,
 } from "@thorium/utils/.server/ship/clearAutopilotState";
-import { z } from "zod";
+import z from "zod";
 import type { Entity } from "@thorium/utils/ecs";
 import {
 	cancelLoopingSound,
@@ -206,7 +206,9 @@ export const pilot = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
-			.autoPublish(["autopilot", "facingWaypoints"], (entity) => ({ shipId: entity.id }))
+			.autoPublish(["autopilot", "facingWaypoints"], (entity) => ({
+				shipId: entity.id,
+			}))
 
 			.request(({ ctx, input }) => {
 				const ship = ctx.ecs.getEntityById(input.shipId);

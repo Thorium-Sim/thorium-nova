@@ -1,25 +1,25 @@
+import { useFrame } from "@react-three/fiber";
+import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
+import ColorUtil from "chroma-js";
 import React, { forwardRef, Suspense } from "react";
 import {
-	TextureLoader,
-	RepeatWrapping,
-	type Mesh,
-	type ShaderMaterial,
-	type Color,
-	Vector3,
 	AdditiveBlending,
+	type Color,
 	type Group,
+	type Mesh,
+	RepeatWrapping,
+	type ShaderMaterial,
 	type Texture,
+	TextureLoader,
+	Vector3,
 } from "three";
+import { useGetStarmapStore } from "../starmapStore";
 import LensFlare from "./lensFlare";
 import { fragment, vertex } from "./shaders";
-import getUniforms from "./uniforms";
-import ColorUtil from "chroma-js";
-import { useFrame } from "@react-three/fiber";
-import { useGetStarmapStore } from "../starmapStore";
-
 import texturePath from "./textures/01_Texture.jpg";
 import spritePath from "./textures/Star.svg";
-import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
+import getUniforms from "./uniforms";
+
 const distanceVector = new Vector3();
 
 const SPRITE_SCALE_FACTOR = 50;
@@ -150,7 +150,10 @@ StarSprite.displayName = "StarSprite";
 const StarSpriteInner = ({
 	color1,
 	userData,
-}: { color1: Color | number; userData: any }) => {
+}: {
+	color1: Color | number;
+	userData: any;
+}) => {
 	const spriteMap = useShipSprite(spritePath) as Texture;
 	return (
 		<sprite userData={userData}>

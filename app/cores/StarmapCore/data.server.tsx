@@ -4,7 +4,7 @@ import { matchSorter } from "match-sorter";
 import type ShipPlugin from "@thorium/.server/classes/Plugins/Ship";
 import { Entity } from "@thorium/utils/ecs";
 import type { Coordinates } from "@thorium/utils/unitTypes";
-import { z } from "zod";
+import z from "zod";
 import {
 	getCompletePositionFromOrbit,
 	getObjectOffsetPosition,

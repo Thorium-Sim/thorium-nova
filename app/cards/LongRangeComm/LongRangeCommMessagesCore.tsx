@@ -3,25 +3,19 @@ import {
 	CoreLongRangeMessageDestinationEvent,
 	CoreLongRangeMessagePickDestinationEvent,
 	CoreLongRangeMessagePickSenderEvent,
+	CoreLongRangeMessageSenderEvent,
 	lrmStateMap,
 } from "@thorium/cards/LongRangeComm/events";
-import { CoreLongRangeMessageSenderEvent } from "@thorium/cards/LongRangeComm/events";
 import { q } from "@thorium/context/AppContext";
 import { SelectStarmapEntityEvent } from "@thorium/cores/StarmapCore";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import useEventListener from "@thorium/hooks/useEventListener";
-import useInterval from "@thorium/hooks/useInterval";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { InputField, OutputField, TypingField } from "@thorium/ui/Core";
 import InfoTip from "@thorium/ui/InfoTip";
-import Input from "@thorium/ui/Input";
-import SearchableInput, {
-	DefaultResultLabel,
-} from "@thorium/ui/SearchableInput";
 import Select from "@thorium/ui/Select";
 import { cn } from "@thorium/utils/cn";
-import { startTransition, Suspense, useEffect, useId, useState } from "react";
+import { Suspense, startTransition, useState } from "react";
 
 export function LongRangeCommMessagesCore() {
 	const { shipId } = useStation();

@@ -1,6 +1,6 @@
 import type { Kelvin, Kilometer, TerranMass, Year } from "../unitTypes";
 import type { Range } from "@thorium/utils/operations/randomFromRange";
-import { z } from "zod";
+import z from "zod";
 
 export const planetClasses = z.union([
 	z.literal("A"),

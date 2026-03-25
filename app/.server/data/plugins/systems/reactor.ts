@@ -2,7 +2,7 @@ import type ReactorPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Rea
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
+import z from "zod";
 import {
 	getShipSystem,
 	getShipSystemForInput,

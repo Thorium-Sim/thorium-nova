@@ -1,20 +1,32 @@
 import { Edges, Line, Outlines, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
+import BracketTexture from "@thorium/cards/Pilot/bracket.svg";
+import ReticleTexture from "@thorium/cards/Pilot/reticle.svg";
+import UnidentifiedTexture from "@thorium/cards/Pilot/unidentified.svg";
+import Explosion from "@thorium/components/Starmap/Effects/Explosion";
+import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
-import {
-	useRef,
-	Suspense,
-	memo,
-	useMemo,
-	Fragment,
-	type RefObject,
-	useImperativeHandle,
-} from "react";
-import { ErrorBoundary } from "react-error-boundary";
+import { q } from "@thorium/context/AppContext";
+import { useCardContext } from "@thorium/context/CardContext";
 import type { isPlanet, isStar } from "@thorium/ecs-components/list";
 import type { satellite } from "@thorium/ecs-components/satellite";
+import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import { useStation } from "@thorium/routes/station/useStation";
+import { useLiveQuery } from "@thorium/utils/live-query/client/liveQueryContext";
+import { setCursor } from "@thorium/utils/setCursor";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
+import { isObjectOccludedBySphere } from "@thorium/utils/starmap/isObjectOccludedBySphere";
 import { degToRad, solarRadiusToKilometers } from "@thorium/utils/unitTypes";
+import {
+	Fragment,
+	memo,
+	type RefObject,
+	Suspense,
+	useImperativeHandle,
+	useMemo,
+	useRef,
+} from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import {
 	type BufferAttribute,
 	type Camera,
@@ -33,21 +45,9 @@ import {
 	Vector3,
 } from "three";
 import type { Line2 } from "three-stdlib";
+import type z from "zod";
 import { useCircleGridStore } from "./useCircleGridStore";
 import { WaypointEntity } from "./Waypoint";
-import { useLiveQuery } from "@thorium/utils/live-query/client/liveQueryContext";
-import { q } from "@thorium/context/AppContext";
-import { setCursor } from "@thorium/utils/setCursor";
-import ReticleTexture from "@thorium/cards/Pilot/reticle.svg";
-import BracketTexture from "@thorium/cards/Pilot/bracket.svg";
-import UnidentifiedTexture from "@thorium/cards/Pilot/unidentified.svg";
-import Explosion from "@thorium/components/Starmap/Effects/Explosion";
-import { isObjectOccludedBySphere } from "@thorium/utils/starmap/isObjectOccludedBySphere";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
-import { useStation } from "@thorium/routes/station/useStation";
-import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
-import { useCardContext } from "@thorium/context/CardContext";
-import type z from "zod";
 
 export function CircleGridContacts({
 	onContactClick,
@@ -136,7 +136,12 @@ export function CircleGridWaypoints() {
 	return (
 		<group>
 			{waypoints.map((waypoint) => (
-				<WaypointEntity key={waypoint.id} waypoint={waypoint} isLocked={waypoint.id === autopilot.destinationWaypointId} isFacing={waypoint.id === autopilot.facingWaypointIds[0]} />
+				<WaypointEntity
+					key={waypoint.id}
+					waypoint={waypoint}
+					isLocked={waypoint.id === autopilot.destinationWaypointId}
+					isFacing={waypoint.id === autopilot.facingWaypointIds[0]}
+				/>
 			))}
 		</group>
 	);

@@ -1,7 +1,7 @@
 import { t } from "@thorium/.server/init/t";
 import { spawnTimeline } from "@thorium/.server/spawners/timeline";
 import type { Entity } from "@thorium/utils/ecs";
-import { z } from "zod";
+import z from "zod";
 import { triggerStep } from "@thorium/utils/.server/evaluateEntityQuery";
 import { applyDamageReportMetrics } from "@thorium/utils/.server/applyDamageReportMetrics";
 import { pubsub } from "@thorium/.server/init/pubsub";

@@ -5,7 +5,7 @@ import { actionItem } from "@thorium/utils/flags/actionSchema";
 import { selectValueQuery } from "@thorium/utils/.server/evaluateEntityQuery";
 import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { capitalCase } from "change-case";
-import { z } from "zod";
+import z from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
 import path from "node:path";

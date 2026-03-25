@@ -5,7 +5,7 @@ import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
 import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInventory";
 import type { MegaWattHour } from "@thorium/utils/unitTypes";
-import { z } from "zod";
+import z from "zod";
 
 export const systemsMonitor = t.router({
 	reactors: t.router({

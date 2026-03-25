@@ -1,3 +1,4 @@
+.claude
 .idea
 dist
 packages
@@ -8,6 +9,9 @@ tsconfig.tsbuildinfo
 coverage
 .env
 .turbo
+openspec
+.github/skills
+.github/prompts
 
 # Copied docs images
 client/public/docs
