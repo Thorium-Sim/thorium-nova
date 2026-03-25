@@ -1,7 +1,3 @@
-import Input from "@thorium/ui/Input";
-import { useState, useEffect, Suspense } from "react";
-import { Icon } from "@thorium/ui/Icon";
-import Button from "@thorium/ui/Button";
 import {
 	flip,
 	offset,
@@ -10,22 +6,26 @@ import {
 	useFloating,
 	useInteractions,
 } from "@floating-ui/react";
+import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
+import { q } from "@thorium/context/AppContext";
+import InterstellarWrapper from "@thorium/routes/config/starmap";
+import { StatusBar } from "@thorium/routes/config/starmap/layout";
+import SolarSystemWrapper from "@thorium/routes/config/starmap/system";
+import Button from "@thorium/ui/Button";
+import { Icon } from "@thorium/ui/Icon";
+import Input from "@thorium/ui/Input";
+import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
+import { Suspense, useEffect, useState } from "react";
+import { useParams } from "react-router";
+import { ClientOnly } from "remix-utils/client-only";
+import { Plane, Vector3 } from "three";
+import FuzzTexture from "../../cards/Viewscreen/fuzz.png";
+import Nebula from "../Starmap/Nebula";
+import StarmapCanvas from "../Starmap/StarmapCanvas";
 import {
 	StarmapStoreProvider,
 	useGetStarmapStore,
 } from "../Starmap/starmapStore";
-import StarmapCanvas from "../Starmap/StarmapCanvas";
-import { ClientOnly } from "remix-utils/client-only";
-import Nebula from "../Starmap/Nebula";
-import { useParams } from "react-router";
-import FuzzTexture from "../../cards/Viewscreen/fuzz.png";
-import { Plane, Vector3 } from "three";
-import { q } from "@thorium/context/AppContext";
-import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
-import SolarSystemWrapper from "@thorium/routes/config/starmap/system";
-import InterstellarWrapper from "@thorium/routes/config/starmap";
-import { StatusBar } from "@thorium/routes/config/starmap/layout";
-import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
 
 export function StarmapCoordinates({
 	value,
