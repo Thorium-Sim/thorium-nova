@@ -1,6 +1,8 @@
 import { ObjectImage } from "@thorium/cards/Navigation/ObjectDetails";
 import { q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
 import { useStation } from "@thorium/routes/station/useStation";
+import { LiveQueryError } from "@thorium/utils/live-query/client/client";
 import {
 	planetScanTypes,
 	scanTypes,
@@ -8,9 +10,9 @@ import {
 	starScanTypes,
 } from "@thorium/utils/flags/scanTypes";
 import { capitalCase } from "change-case";
-import type { z } from "zod";
 import type { ReactNode } from "react";
 import { Button } from "react-aria-components";
+import type { z } from "zod";
 
 export const ScanComponents = {
 	shields: ShieldsResults,
@@ -30,7 +32,10 @@ export const ScanComponents = {
 export function ScanResults({
 	objectId,
 	type,
-}: { objectId: number; type: string }) {
+}: {
+	objectId: number;
+	type: string;
+}) {
 	const scans =
 		type === "ship"
 			? shipScanTypes
@@ -83,13 +88,23 @@ function ResultsWrapper({
 				) : (
 					<Button
 						className="btn btn-xs btn-warning"
-						onPress={() =>
-							q.sensors.scanStart.netSend({
-								shipId,
-								type: scanType,
-								target: objectId,
-							})
-						}
+						onPress={async () => {
+							try {
+								await q.sensors.scanStart.netSend({
+									shipId,
+									type: scanType,
+									target: objectId,
+								});
+							} catch (err) {
+								if (err instanceof LiveQueryError) {
+									toast({
+										title: "Sensors command failed",
+										body: err.message,
+										color: "error",
+									});
+								}
+							}
+						}}
 					>
 						Begin Scan
 					</Button>

@@ -1,21 +1,32 @@
+import { useQueryClient } from "@tanstack/react-query";
 import type { CardProps } from "@thorium/cards/CardProps";
 import {
 	CircleGrid,
 	CircleGridTiltButton,
 	GridCanvas,
 } from "@thorium/cards/Pilot/CircleGrid";
+import { DistanceCircle } from "@thorium/cards/Pilot/DistanceCircle";
 import { CircleGridContacts } from "@thorium/cards/Pilot/PilotContacts";
 import { PilotZoomSlider } from "@thorium/cards/Pilot/PilotZoomSlider";
 import { CircleGridStoreProvider } from "@thorium/cards/Pilot/useCircleGridStore";
+import {
+	ScanComponents,
+	ScanResults,
+} from "@thorium/cards/Sensors/ScanComponents";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
-import { clientId, q } from "@thorium/context/AppContext";
+import { q } from "@thorium/context/AppContext";
+import { useCardContext } from "@thorium/context/CardContext";
+import { toast } from "@thorium/context/ToastContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import { useStation } from "@thorium/routes/station/useStation";
+import { Icon } from "@thorium/ui/Icon";
+import { LiveQueryError } from "@thorium/utils/live-query/client/client";
 import { cn } from "@thorium/utils/cn";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { Suspense, useEffect, useRef, useState } from "react";
-import { DistanceCircle } from "@thorium/cards/Pilot/DistanceCircle";
 import type { scanTypes } from "@thorium/utils/flags/scanTypes";
+import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { capitalCase } from "change-case";
+import { Suspense, useEffect, useRef, useState } from "react";
 import {
 	Button,
 	Disclosure,
@@ -23,15 +34,6 @@ import {
 	DisclosurePanel,
 } from "react-aria-components";
 import type { z } from "zod";
-import { Icon } from "@thorium/ui/Icon";
-import { useStation } from "@thorium/routes/station/useStation";
-import {
-	ScanComponents,
-	ScanResults,
-} from "@thorium/cards/Sensors/ScanComponents";
-import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
-import { useQueryClient } from "@tanstack/react-query";
-import { useCardContext } from "@thorium/context/CardContext";
 
 /**
  * TODO:
@@ -218,7 +220,19 @@ function Scan({
 					/>
 					<Button
 						className="btn btn-xs btn-error"
-						onPress={() => q.sensors.scanCancel.netSend({ scanId: id })}
+						onPress={async () => {
+							try {
+								await q.sensors.scanCancel.netSend({ scanId: id });
+							} catch (err) {
+								if (err instanceof LiveQueryError) {
+									toast({
+										title: "Sensors command failed",
+										body: err.message,
+										color: "error",
+									});
+								}
+							}
+						}}
 					>
 						<Icon name="ban" />
 					</Button>

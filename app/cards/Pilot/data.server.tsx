@@ -1,18 +1,19 @@
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
-import {
-	clearAutopilotState,
-	deactivateForwardAutopilot,
-} from "@thorium/utils/.server/ship/clearAutopilotState";
-import { z } from "zod";
-import type { Entity } from "@thorium/utils/ecs";
+import { t } from "@thorium/.server/init/t";
 import {
 	cancelLoopingSound,
 	playShipSound,
 } from "@thorium/utils/.server/playRangedSound";
-import { Vector3 } from "three";
+import { checkSystemStability } from "@thorium/utils/.server/ship/checkSystemStability";
+import {
+	clearAutopilotState,
+	deactivateForwardAutopilot,
+} from "@thorium/utils/.server/ship/clearAutopilotState";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import type { Entity } from "@thorium/utils/ecs";
 import { pathfinder } from "@thorium/utils/starmap/pathfinder.server";
+import { Vector3 } from "three";
+import { z } from "zod";
 
 export const pilot = t.router({
 	impulseEngines: t.router({
@@ -104,6 +105,8 @@ export const pilot = t.router({
 				if (!system.components.isImpulseEngines)
 					throw new Error("System is not a impulse engine");
 
+				checkSystemStability(system);
+
 				// Deactivate autopilot when manually setting impulse speed
 				const ship = ctx.ecs.getEntityById(shipId);
 				if (ship) deactivateForwardAutopilot(ship);
@@ -183,6 +186,8 @@ export const pilot = t.router({
 				if (!system.components.isWarpEngines)
 					throw new Error("System is not a warp engine");
 
+				checkSystemStability(system);
+
 				// Deactivate autopilot when manually setting warp factor
 				const ship = ctx.ecs.getEntityById(shipId);
 				if (ship) deactivateForwardAutopilot(ship);
@@ -206,7 +211,9 @@ export const pilot = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
-			.autoPublish(["autopilot", "facingWaypoints"], (entity) => ({ shipId: entity.id }))
+			.autoPublish(["autopilot", "facingWaypoints"], (entity) => ({
+				shipId: entity.id,
+			}))
 
 			.request(({ ctx, input }) => {
 				const ship = ctx.ecs.getEntityById(input.shipId);
@@ -371,6 +378,8 @@ export const pilot = t.router({
 				if (!system.components.isThrusters)
 					throw new Error("System is not thrusters");
 
+				checkSystemStability(system);
+
 				// Deactivate autopilot when manually using direction thrusters
 				const ship = ctx.ecs.getEntityById(shipId);
 				if (ship) deactivateForwardAutopilot(ship);
@@ -431,6 +440,8 @@ export const pilot = t.router({
 						});
 				if (!system.components.isThrusters)
 					throw new Error("System is not thrusters");
+
+				checkSystemStability(system);
 
 				// Deactivate autopilot when manually using rotation thrusters
 				const ship = ctx.ecs.getEntityById(shipId);

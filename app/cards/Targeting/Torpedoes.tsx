@@ -1,13 +1,13 @@
 import { q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
+import { useStation } from "@thorium/routes/station/useStation";
+import Button from "@thorium/ui/Button";
 import { cn } from "@thorium/utils/cn";
+import { LiveQueryError } from "@thorium/utils/live-query/client/client";
 import { megaWattHourToGigaJoule } from "@thorium/utils/unitTypes";
 import { useRef, useState } from "react";
 import LauncherImage from "./assets/launcher.svg";
 import href from "./assets/torpedoSprite.svg?url";
-import Button from "@thorium/ui/Button";
-import { toast } from "@thorium/context/ToastContext";
-import { LiveQueryError } from "@thorium/utils/live-query/client/client";
-import { useStation } from "@thorium/routes/station/useStation";
 
 export function Torpedoes() {
 	const { shipId } = useStation();
@@ -145,12 +145,23 @@ function Launcher({
 							? "btn-primary"
 							: "btn-disabled",
 					)}
-					onClick={() => {
-						if (selectedTorpedo || state === "loaded")
-							q.targeting.torpedoes.load.netSend({
-								launcherId,
-								torpedoId: state === "loaded" ? null : selectedTorpedo,
-							});
+					onClick={async () => {
+						if (selectedTorpedo || state === "loaded") {
+							try {
+								await q.targeting.torpedoes.load.netSend({
+									launcherId,
+									torpedoId: state === "loaded" ? null : selectedTorpedo,
+								});
+							} catch (err) {
+								if (err instanceof LiveQueryError) {
+									toast({
+										title: "Torpedo launcher command failed",
+										body: err.message,
+										color: "error",
+									});
+								}
+							}
+						}
 					}}
 				>
 					{state === "loaded" ? "Unload" : "Load"}
@@ -171,7 +182,7 @@ function Launcher({
 							if (err instanceof LiveQueryError) {
 								toast({
 									title: "Unable to fire torpedoes",
-									body: err.error,
+									body: err.message,
 									color: "error",
 								});
 							}

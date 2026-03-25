@@ -5,6 +5,7 @@ import {
 	getShipSystem,
 	getShipSystems,
 } from "@thorium/utils/.server/ship/getShipSystem";
+import { checkSystemStability } from "@thorium/utils/.server/ship/checkSystemStability";
 import {
 	calculateCargoUsed,
 	getRoomBySystem,
@@ -145,6 +146,9 @@ export const targeting = t.router({
 				const launcher = ctx.ecs.getEntityById(input.launcherId);
 				if (!launcher?.components.isTorpedoLauncher)
 					throw new Error("System is not a torpedo launcher");
+
+				checkSystemStability(launcher);
+
 				if (
 					input.torpedoId &&
 					launcher.components.isTorpedoLauncher.status !== "ready"
@@ -192,6 +196,9 @@ export const targeting = t.router({
 
 				if (!launcher?.components.isTorpedoLauncher)
 					throw new Error("System is not a torpedo launcher");
+
+				checkSystemStability(launcher);
+
 				if (launcher.components.isTorpedoLauncher.status !== "loaded") {
 					throw new Error("Torpedo launcher is not loaded");
 				}
@@ -456,6 +463,9 @@ export const targeting = t.router({
 				});
 				if (!phaser.components.isPhasers)
 					throw new Error("System is not a phaser");
+
+				checkSystemStability(phaser);
+
 				phaser.updateComponent("isPhasers", {
 					arc: input.arc,
 				});
@@ -476,6 +486,8 @@ export const targeting = t.router({
 				});
 				if (!phaser.components.isPhasers)
 					throw new Error("System is not a phaser");
+
+				checkSystemStability(phaser);
 
 				// TODO: Check if the phaser has sufficient power
 				// to be able to fire at the requested power level

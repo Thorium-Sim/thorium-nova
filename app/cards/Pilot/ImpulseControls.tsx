@@ -1,21 +1,22 @@
-import { useEffect, useRef, useState } from "react";
-
-import { useSpring, animated as a } from "@react-spring/web";
-import { useDrag } from "@use-gesture/react";
-import throttle from "lodash.throttle";
-import type { KilometerPerSecond } from "@thorium/utils/unitTypes";
-import useMeasure from "@thorium/hooks/useMeasure";
-import Button from "@thorium/ui/Button";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { animated as a, useSpring } from "@react-spring/web";
 import { q } from "@thorium/context/AppContext";
+import { useCardContext } from "@thorium/context/CardContext";
+import { toast } from "@thorium/context/ToastContext";
+import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import {
 	useGamepadPress,
 	useGamepadValue,
 } from "@thorium/hooks/useGamepadStore";
+import useMeasure from "@thorium/hooks/useMeasure";
 import { useStation } from "@thorium/routes/station/useStation";
-import { useCardContext } from "@thorium/context/CardContext";
+import Button from "@thorium/ui/Button";
 import { cn } from "@thorium/utils/cn";
+import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { LiveQueryError } from "@thorium/utils/live-query/client/client";
+import type { KilometerPerSecond } from "@thorium/utils/unitTypes";
+import { useDrag } from "@use-gesture/react";
+import throttle from "lodash.throttle";
+import { useEffect, useRef, useState } from "react";
 
 const C_IN_METERS = 299792458;
 export function formatSpeed(speed: KilometerPerSecond) {
@@ -131,13 +132,36 @@ export const ImpulseControls = ({
 	}));
 
 	const callback = useRef(
-		throttle((speed: number) => {
-			q.pilot.impulseEngines.setSpeed.netSend({
-				speed: Math.min(emergencySpeed, Math.max(0, speed)),
-				shipId,
-			});
+		throttle(async (speed: number) => {
+			try {
+				await q.pilot.impulseEngines.setSpeed.netSend({
+					speed: Math.min(emergencySpeed, Math.max(0, speed)),
+					shipId,
+				});
+			} catch (err) {
+				if (err instanceof LiveQueryError) {
+					toast({
+						title: "Impulse engine command failed",
+						body: err.message,
+						color: "error",
+					});
+				}
+			}
 			if (speed === 0) {
-				q.pilot.warpEngines.setWarpFactor.netSend({ factor: 0, shipId });
+				try {
+					await q.pilot.warpEngines.setWarpFactor.netSend({
+						factor: 0,
+						shipId,
+					});
+				} catch (err) {
+					if (err instanceof LiveQueryError) {
+						toast({
+							title: "Warp engines command failed",
+							body: err.message,
+							color: "error",
+						});
+					}
+				}
 			}
 		}, 100),
 	);
@@ -245,11 +269,21 @@ export const ImpulseControls = ({
 		},
 	});
 	useGamepadPress("warp-engage", {
-		onDown: () => {
-			q.pilot.warpEngines.setWarpFactor.netSend({
-				factor: warpFocus,
-				shipId,
-			});
+		onDown: async () => {
+			try {
+				await q.pilot.warpEngines.setWarpFactor.netSend({
+					factor: warpFocus,
+					shipId,
+				});
+			} catch (err) {
+				if (err instanceof LiveQueryError) {
+					toast({
+						title: "Warp engines command failed",
+						body: err.message,
+						color: "error",
+					});
+				}
+			}
 			setWarpFocus(0);
 		},
 	});
@@ -332,28 +366,41 @@ export const ImpulseControls = ({
 								},
 							)}
 						>
-							{warpSpeeds.slice().reverse().map(({ label }, i, arr) => {
-								const warpFactor = arr.length - i;
-								return (
-									<Button
-										key={`warp-${warpFactor}`}
-										className={`btn-sm btn-primary ${
-											warpFocus === warpFactor ? "gamepad-focus" : ""
-										} ${warpFactor === currentWarpFactor ? "btn-active" : ""} ${
-											forwardAutopilot ? "opacity-50" : ""
-										}`}
-										onClick={() => {
-											onFlightControlInteraction?.();
-											q.pilot.warpEngines.setWarpFactor.netSend({
-												factor: warpFactor,
-												shipId,
-											});
-										}}
-									>
-										{label}
-									</Button>
-								);
-							})}
+							{warpSpeeds
+								.slice()
+								.reverse()
+								.map(({ label }, i, arr) => {
+									const warpFactor = arr.length - i;
+									return (
+										<Button
+											key={`warp-${warpFactor}`}
+											className={`btn-sm btn-primary ${
+												warpFocus === warpFactor ? "gamepad-focus" : ""
+											} ${warpFactor === currentWarpFactor ? "btn-active" : ""} ${
+												forwardAutopilot ? "opacity-50" : ""
+											}`}
+											onClick={async () => {
+												onFlightControlInteraction?.();
+												try {
+													await q.pilot.warpEngines.setWarpFactor.netSend({
+														factor: warpFactor,
+														shipId,
+													});
+												} catch (err) {
+													if (err instanceof LiveQueryError) {
+														toast({
+															title: "Warp engines command failed",
+															body: err.message,
+															color: "error",
+														});
+													}
+												}
+											}}
+										>
+											{label}
+										</Button>
+									);
+								})}
 						</div>
 					</div>
 				</div>
