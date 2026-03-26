@@ -22,7 +22,7 @@
  *   Choice line  * / +   Knot names (for inline diverts), conditional vars
  *   After INCLUDE        (filename — left to IDE filesystem integration)
  *   Bare identifier      All declared symbols that match the typed prefix
- *   # Action …           Action name list, then named-parameter snippet
+ *   Action …             Action name list, then named-parameter snippet
  *
  * Usage
  * ─────
@@ -39,7 +39,7 @@
  *   ]);
  *
  * Each action produces a snippet like:
- *   # Action camera.shake intensity: ${1:intensity} duration: ${2:duration}
+ *   Action camera.shake intensity: ${1:intensity} duration: ${2:duration}
  *
  * The provider is self-contained: it re-scans the model on every completion
  * request so suggestions always reflect the current document state.
@@ -326,49 +326,41 @@ export function extractSymbols(lines) {
 /**
  * Detect the completion context from the text before the cursor.
  *
- * NEW contexts (in addition to original ones):
- *   { type: 'action_keyword' }              — line is exactly "# Action" (or leading up to it)
- *   { type: 'action_name', prefix: string } — after "# Action ", choosing an action name
+ * Contexts:
+ *   { type: 'action_keyword' }              — line contains a partial "Action" or "Event" keyword
+ *   { type: 'action_name', prefix: string } — after "Action ", choosing an action name
  *   { type: 'none' }
  */
 function detectContext(lineText, column) {
   const before = lineText.slice(0, column - 1);
 
-  // ── # Action contexts ─────────────────────────────────────────────────────
+  // ── Action / Event keyword contexts ──────────────────────────────────────
   //
-  // We match the line from its start so we don't fire inside ink logic braces.
-  // The line must begin with optional whitespace then "#".
+  // These constructs live at the start of a line (no # prefix).
 
-  // Stage 1: user has typed "# Action " (with trailing space) or more —
+  // Stage 1: user has typed "Action " (with trailing space) or more —
   //          they are now choosing / have chosen the action name.
-  //          Capture everything after "# Action " as the name prefix.
-  const actionNameMatch = /^\s*#\s*Action\s+([a-zA-Z0-9._-]*)$/.exec(before);
+  const actionNameMatch = /^\s*Action:\s+([a-zA-Z0-9._-]*)$/.exec(before);
   if (actionNameMatch) {
     return { type: "action_name", prefix: actionNameMatch[1] };
   }
 
-  // Stage 2+3: user has typed "#", "# ", or "# Act…".
-  // Capture everything from "#" onwards so the range replaces it all with "# Action ".
-  const actionKwMatch = /^\s*(#\s*[A-Za-z]*)$/.exec(before);
+  // Stage 2+3: user has typed a partial "Action" or "Event" keyword at line start.
+  // Only fire when the line is solely this partial keyword — avoids colliding with
+  // ink logic or narrative text that happens to start with those letters.
+  const actionKwMatch =
+    /^\s*((?:Action:|Event:)\w*|Act\w*|Eve\w*|Ac\w?|Ev\w?)$/.exec(before);
   if (actionKwMatch) {
     return { type: "action_keyword", matched: actionKwMatch[1] };
   }
 
-  // ── # Event contexts ──────────────────────────────────────────────────────
+  // ── Event sub-contexts ────────────────────────────────────────────────────
   //
-  // Full shape: # Event event.name param: {var} [persist] events.divertTarget
-  //
-  // We detect four sub-stages by how much of the line is present:
-  //
-  //   event_keyword  — "#", "# ", or "# Ev…"  → offer "# Event"
-  //   event_name     — "# Event "              → offer event name list
-  //   event_persist  — "# Event name …params…" → offer "persist" + divert targets
-  //   event_divert   — "# Event name …params… persist " (or after last param value)
-  //                                            → offer divert targets only
+  // Full shape: Event event.name param: {var} [persist] divertTarget
 
-  // Stage E4: cursor is after "persist " (with trailing space) — only divert targets.
+  // Stage E4: cursor is after "persist " — only divert targets.
   const eventDivertMatch =
-    /^\s*#\s*Event\s+[a-zA-Z0-9._-]+(\s+[a-zA-Z_][a-zA-Z0-9_]*:\s*\{[^}]*\})*\s+persist\s+([a-zA-Z_][a-zA-Z0-9_.]*)?$/.exec(
+    /^\s*Event:\s+[a-zA-Z0-9._-]+(\s+[a-zA-Z_][a-zA-Z0-9_]*:\s*\{[^}]*\})*\s+persist\s+([a-zA-Z_][a-zA-Z0-9_.]*)?$/.exec(
       before,
     );
   if (eventDivertMatch) {
@@ -378,24 +370,18 @@ function detectContext(lineText, column) {
   // Stage E3: event name + zero-or-more params typed, no "persist" yet —
   //           offer "persist" keyword AND divert targets.
   const eventPersistMatch =
-    /^\s*#\s*Event\s+[a-zA-Z0-9._-]+(\s+[a-zA-Z_][a-zA-Z0-9_]*:\s*\{[^}]*\})*\s+([a-zA-Z_][a-zA-Z0-9_.]*)?$/.exec(
+    /^\s*Event:\s+[a-zA-Z0-9._-]+(\s+[a-zA-Z_][a-zA-Z0-9_]*:\s*\{[^}]*\})*\s+([a-zA-Z_][a-zA-Z0-9_.]*)?$/.exec(
       before,
     );
   if (eventPersistMatch) {
     return { type: "event_persist", prefix: eventPersistMatch[2] || "" };
   }
 
-  // Stage E2: "# Event " typed — user is choosing the event name.
-  const eventNameMatch = /^\s*#\s*Event\s+([a-zA-Z0-9._-]*)$/.exec(before);
+  // Stage E2: "Event " typed — user is choosing the event name.
+  const eventNameMatch = /^\s*Event:\s+([a-zA-Z0-9._-]*)$/.exec(before);
   if (eventNameMatch) {
     return { type: "event_name", prefix: eventNameMatch[1] };
   }
-
-  // Stage E1: "#", "# ", or "# Ev…" — but only when NOT already matched by
-  //           action_keyword above (action_keyword fires on any single word after #,
-  //           so we rely on insertion order: Event stages are checked after Action).
-  // (No extra regex needed — action_keyword handles "#" + partial word for both
-  //  keywords; the "# Action" and "# Event" items are both offered together.)
 
   // ── Original contexts (unchanged) ─────────────────────────────────────────
   if (/->->/.test(before)) return { type: "none" };
@@ -454,12 +440,12 @@ function detectContext(lineText, column) {
 // ─── Action completion builders ───────────────────────────────────────────────
 
 /**
- * Build the "# Action" and "# Event" keyword items.
+ * Build the "Action" and "Event" keyword items.
  *
- * The range covers everything from "#" to the cursor so the replacement is
- * always the complete keyword string regardless of how much the user typed.
+ * The range covers the partial keyword the user has typed so the replacement
+ * always produces the complete keyword string.
  *
- * @param {string} matched    - the text from "#" to cursor (ctx.matched)
+ * @param {string} matched    - the partial text the user has typed (ctx.matched)
  * @param {number} lineNumber
  * @param {number} column     - cursor column (1-based)
  * @returns {object[]}
@@ -477,26 +463,26 @@ function hashKeywordItems(matched, lineNumber, column) {
 
   return [
     {
-      label: "# Action",
+      label: "Action",
       kind: CIK.Keyword,
-      detail: "Ink action tag",
+      detail: "Ink action",
       documentation: {
         value:
           "Trigger a named action with parameters.\nAfter selecting, choose an action name from the list.",
       },
-      insertText: "# Action ",
+      insertText: "Action: ",
       range,
       sortText: "0_action_keyword",
     },
     {
-      label: "# Event",
+      label: "Event",
       kind: CIK.Keyword,
-      detail: "Ink event listener tag",
+      detail: "Ink event listener",
       documentation: {
         value:
-          "Listen for a named event, optionally matching parameters.\nSyntax: `# Event event.name param: {var} [persist] divertTarget`",
+          "Listen for a named event, optionally matching parameters.\nSyntax: `Event: event.name param: {var} [persist] divertTarget`",
       },
-      insertText: "# Event ",
+      insertText: "Event: ",
       range,
       sortText: "0_event_keyword",
     },
@@ -528,9 +514,9 @@ function actionNameItems(actions, range) {
       ? `${name} ${params.map((p) => `${p}: …`).join(" ")}`
       : name;
 
-    // Build the snippet body — only the part after "# Action "
+    // Build the snippet body — only the part after "Action "
     // because by the time we're in action_name context the prefix
-    // "# Action " is already on the line.
+    // "Action " is already on the line.
     let insertText;
     let insertTextRules;
     if (params.length) {
@@ -550,8 +536,8 @@ function actionNameItems(actions, range) {
       detail: signature,
       documentation: {
         value: params.length
-          ? `**Action:** \`${name}\`\n\n**Parameters:** ${params.map((p) => `\`${p}\``).join(", ")}\n\n**Usage:**\n\`# Action ${signature}\``
-          : `**Action:** \`${name}\`\n\n**Usage:**\n\`# Action ${name}\``,
+          ? `**Action:** \`${name}\`\n\n**Parameters:** ${params.map((p) => `\`${p}\``).join(", ")}\n\n**Usage:**\n\`Action: ${signature}\``
+          : `**Action:** \`${name}\`\n\n**Usage:**\n\`Action ${name}\``,
       },
       insertText,
       insertTextRules,
@@ -595,6 +581,7 @@ function eventNameItems(events, range) {
 
     const insertText = `${name} ${snippetParts.join(" ")}`;
 
+    console.log(signature);
     return {
       label: name,
       kind: CIK.Event,
@@ -607,7 +594,7 @@ function eventNameItems(events, range) {
             : "",
           "**Optional:** `persist` — keep this listener active across knots/stitches.",
           "**Required:** divert target knot or stitch name.",
-          `\n**Usage:**\n\`# Event ${signature}\``,
+          `\n**Usage:**\n\`Event: ${signature}\``,
         ]
           .filter(Boolean)
           .join("\n\n"),
@@ -621,7 +608,7 @@ function eventNameItems(events, range) {
 }
 
 /**
- * Items shown after "# Event name …params…" — "persist" keyword plus all
+ * Items shown after "Event name …params…" — "persist" keyword plus all
  * knot/stitch divert targets (the user may skip persist and go straight to target).
  *
  * @param {InkSymbol[]} symbols
@@ -663,7 +650,7 @@ function eventPersistItems(symbols, range) {
 }
 
 /**
- * Items shown after "# Event name …params… persist " — only divert targets.
+ * Items shown after "Event name …params… persist " — only divert targets.
  *
  * @param {InkSymbol[]} symbols
  * @param {object}      range
@@ -1151,7 +1138,7 @@ function declarationRhsItems(symbols, range) {
  */
 export function createInkCompletionProvider(monaco, actions = [], events = []) {
   return {
-    triggerCharacters: ["-", ">", "<", ".", "{", "~", "=", " ", "#"],
+    triggerCharacters: ["-", ">", "<", ".", "{", "~", "=", " "],
 
     provideCompletionItems(model, position) {
       const lineText = model.getLineContent(position.lineNumber);
@@ -1162,7 +1149,7 @@ export function createInkCompletionProvider(monaco, actions = [], events = []) {
       const { symbols } = extractSymbols(model.getLinesContent());
       const range = makeRange(model, position);
 
-      // ── # Action keyword (user typed "#" or "# Act…") ────────────────────
+      // ── Action / Event keyword (user typed "Act…" or "Eve…") ─────────────
       if (ctx.type === "action_keyword") {
         return {
           suggestions: hashKeywordItems(
@@ -1173,22 +1160,22 @@ export function createInkCompletionProvider(monaco, actions = [], events = []) {
         };
       }
 
-      // ── # Action <name> (user is choosing / has typed the action name) ───
+      // ── Action <name> (user is choosing / has typed the action name) ──────
       if (ctx.type === "action_name") {
         return { suggestions: actionNameItems(actions, range) };
       }
 
-      // ── # Event <n> ──────────────────────────────────────────────────────
+      // ── Event <name> ──────────────────────────────────────────────────────
       if (ctx.type === "event_name") {
         return { suggestions: eventNameItems(events, range) };
       }
 
-      // ── # Event name …params… → offer "persist" + divert targets ─────────
+      // ── Event name …params… → offer "persist" + divert targets ───────────
       if (ctx.type === "event_persist") {
         return { suggestions: eventPersistItems(symbols, range) };
       }
 
-      // ── # Event name …params… persist → divert targets only ──────────────
+      // ── Event name …params… persist → divert targets only ─────────────────
       if (ctx.type === "event_divert") {
         return { suggestions: eventDivertItems(symbols, range) };
       }
