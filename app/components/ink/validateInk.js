@@ -173,6 +173,19 @@ function processBraces(line, lineNum, rawLine, markers, startDepth) {
   return d;
 }
 
+/** Count [ and ] in a string WITHOUT skipping string literals.
+ *  Ink's choice brackets are not string-aware: ["text"] is valid syntax
+ *  where the " characters are literal content inside the bracket. */
+function countSquareBrackets(str) {
+  let opens = 0,
+    closes = 0;
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === "[") opens++;
+    else if (str[i] === "]") closes++;
+  }
+  return { opens, closes };
+}
+
 // ─── Divert validation helpers ────────────────────────────────────────────────
 
 function validateTarget(bare, lineNum, rawLine, markers) {
@@ -629,8 +642,8 @@ export class InkValidator {
           );
         }
 
-        const opens = countChar(stripped, "[");
-        const closes = countChar(stripped, "]");
+        const { opens, closes } = countSquareBrackets(stripped);
+
         if (opens !== closes) {
           markers.push(
             lineMarker(

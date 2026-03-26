@@ -13,6 +13,19 @@ import { Activity, useState } from "react";
 import { cn } from "@thorium/utils/cn";
 import { registerInkCompletions } from "@thorium/components/ink/inkCompletions";
 
+function parseInputProperties(value: any) {
+	return value.input.properties
+		? Object.entries(value.input.properties).flatMap(([name, value]) =>
+				["number", "string", "boolean"].includes((value as any).type)
+					? name
+					: (value as any).anyOf?.some((v: { type: string }) =>
+								["number", "string", "boolean"].includes(v.type),
+							)
+						? name
+						: [],
+			)
+		: [];
+}
 export default function Conversations({
 	params: { pluginId, timelineId, conversationId },
 }: Route.ComponentProps) {
@@ -20,11 +33,22 @@ export default function Conversations({
 		pluginId,
 		conversationId,
 	});
+	const [actions] = q.thorium.actions.useNetRequest();
+	const actionsMap = actions.map((a) => ({
+		name: a.action,
+		params: parseInputProperties(a),
+	}));
+
+	const [events] = q.thorium.events.useNetRequest();
+	const eventsMap = events.map((e) => ({
+		name: e.event,
+		params: parseInputProperties(e),
+	}));
+
 	const navigate = useNavigate();
 	const confirm = useConfirm();
 	const prompt = usePrompt();
 	const [assetsShown, setAssetsShown] = useState(false);
-
 	return (
 		<>
 			<div className="relative">
@@ -53,7 +77,7 @@ export default function Conversations({
 					onMount={(editor, monaco) => {
 						registerInk(monaco);
 						registerInkValidator(monaco);
-						registerInkCompletions(monaco);
+						registerInkCompletions(monaco, actionsMap, eventsMap);
 					}}
 				/>
 				<Activity mode={assetsShown ? "visible" : "hidden"}>
