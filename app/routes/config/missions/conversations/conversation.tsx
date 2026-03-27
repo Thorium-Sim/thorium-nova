@@ -13,16 +13,21 @@ import { Activity, useState } from "react";
 import { cn } from "@thorium/utils/cn";
 import { registerInkCompletions } from "@thorium/components/ink/inkCompletions";
 
-function parseInputProperties(value: any) {
-	return value.input.properties
-		? Object.entries(value.input.properties).flatMap(([name, value]) =>
+function parseParams(value: any) {
+	return value.properties
+		? Object.entries(value.properties).flatMap(([name, value]) =>
 				["number", "string", "boolean"].includes((value as any).type)
 					? name
-					: (value as any).anyOf?.some((v: { type: string }) =>
-								["number", "string", "boolean"].includes(v.type),
+					: Array.isArray((value as any).type) &&
+							(value as any).type.some((v) =>
+								["number", "string", "boolean"].includes(v),
 							)
 						? name
-						: [],
+						: (value as any).anyOf?.some((v: { type: string }) =>
+									["number", "string", "boolean"].includes(v.type),
+								)
+							? name
+							: [],
 			)
 		: [];
 }
@@ -36,13 +41,13 @@ export default function Conversations({
 	const [actions] = q.thorium.actions.useNetRequest();
 	const actionsMap = actions.map((a) => ({
 		name: a.action,
-		params: parseInputProperties(a),
+		params: parseParams(a.input),
 	}));
 
 	const [events] = q.thorium.events.useNetRequest();
 	const eventsMap = events.map((e) => ({
 		name: e.event,
-		params: parseInputProperties(e),
+		params: parseParams(e.output),
 	}));
 
 	const navigate = useNavigate();

@@ -53,6 +53,8 @@ export const targeting = t.router({
 		.input(
 			z.object({ shipId: z.number(), target: z.union([z.number(), z.null()]) }),
 		)
+		.output(z.object({ shipId: z.number(), targetId: z.number().nullable() }))
+		.meta({ event: true })
 		.send(({ input, ctx }) => {
 			const { shipId } = input;
 			const targeting = getShipSystem(ctx.ecs, {
@@ -66,6 +68,7 @@ export const targeting = t.router({
 			pubsub.publish.targeting.targetedContact({
 				shipId,
 			});
+			return { shipId, targetId: input.target };
 		}),
 	torpedoes: t.router({
 		list: t.procedure
