@@ -1,3 +1,4 @@
+import { toast } from "@thorium/context/ToastContext";
 import { NETREQUEST_PATH, NETSEND_PATH } from "../constants";
 
 type HTTPHeaders = Record<string, string>;
@@ -23,6 +24,14 @@ export class LiveQueryError extends Error {
 	constructor(message: string, remoteError: string) {
 		super(message);
 		this.error = remoteError;
+	}
+}
+class SystemStabilityError extends Error {
+	constructor(
+		message: string,
+		public title: string,
+	) {
+		super(message);
 	}
 }
 export class LiveQueryClient {
@@ -74,11 +83,22 @@ export class LiveQueryClient {
 
 			if (!res.ok) {
 				try {
+					const parsed = JSON.parse(response);
+					if (parsed.errorType === "SystemStabilityError") {
+						throw new SystemStabilityError(parsed.error, parsed.title);
+					}
 					throw new LiveQueryError(
-						`Error in request ${JSON.parse(response).error}`,
-						JSON.parse(response).error,
+						`Error in request ${parsed.error}`,
+						parsed.error,
 					);
 				} catch (error) {
+					if (error instanceof SystemStabilityError) {
+						toast({
+							title: error.title,
+							body: error.message,
+							color: "error",
+						});
+					}
 					if (error instanceof LiveQueryError) throw error;
 					throw new Error(
 						`${res.status} Error in request: ${

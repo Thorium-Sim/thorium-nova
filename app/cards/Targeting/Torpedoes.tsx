@@ -145,23 +145,12 @@ function Launcher({
 							? "btn-primary"
 							: "btn-disabled",
 					)}
-					onClick={async () => {
-						if (selectedTorpedo || state === "loaded") {
-							try {
-								await q.targeting.torpedoes.load.netSend({
-									launcherId,
-									torpedoId: state === "loaded" ? null : selectedTorpedo,
-								});
-							} catch (err) {
-								if (err instanceof LiveQueryError) {
-									toast({
-										title: "Torpedo launcher command failed",
-										body: err.message,
-										color: "error",
-									});
-								}
-							}
-						}
+					onClick={() => {
+						if (selectedTorpedo || state === "loaded")
+							q.targeting.torpedoes.load.netSend({
+								launcherId,
+								torpedoId: state === "loaded" ? null : selectedTorpedo,
+							});
 					}}
 				>
 					{state === "loaded" ? "Unload" : "Load"}
@@ -182,7 +171,7 @@ function Launcher({
 							if (err instanceof LiveQueryError) {
 								toast({
 									title: "Unable to fire torpedoes",
-									body: err.message,
+									body: err.error,
 									color: "error",
 								});
 							}

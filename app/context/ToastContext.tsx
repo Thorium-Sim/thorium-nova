@@ -1,8 +1,8 @@
-import { type ReactNode, useEffect, useReducer, useState } from "react";
-import uniqid from "@thorium/utils/uniqid";
-import { createPortal } from "react-dom";
 import { Icon } from "@thorium/ui/Icon";
 import { Transition } from "@thorium/ui/Transition";
+import uniqid from "@thorium/utils/uniqid";
+import { type ReactNode, useEffect, useReducer, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 // TODO September 25, 2025 - Replace this with React Aria Components
 const Toast = ({
@@ -82,7 +82,7 @@ function toastReducer(state: Notification[], action: Notification | string) {
 			return notification;
 		});
 	}
-	return [action, ...state];
+	return [...state, action];
 }
 export let toast = (
 	notification: Omit<Notification, "id" | "visible" | "pause" | "resume">,
@@ -90,11 +90,22 @@ export let toast = (
 
 export default function ToastContainer() {
 	const [toasts, dispatch] = useReducer(toastReducer, []);
+	const toastsRef = useRef(toasts);
+	toastsRef.current = toasts;
+
 	useEffect(() => {
 		const timeouts: Record<string, ReturnType<typeof setTimeout>> = {};
 		toast = (
 			notification: Omit<Notification, "id" | "visible" | "pause" | "resume">,
 		) => {
+			if (
+				toastsRef.current.some(
+					(t) => t.visible && t.title === notification.title,
+				)
+			) {
+				return;
+			}
+
 			const id = uniqid("tst-");
 			const { duration = 5000 } = notification;
 			dispatch({

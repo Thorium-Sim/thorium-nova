@@ -16,7 +16,7 @@ describe("checkSystemStability", () => {
 		system.updateComponent("damage", { instability: 0 });
 		const spy = vi.spyOn(ecs.rng, "nextAsPercentage");
 
-		expect(() => checkSystemStability(system)).not.toThrow();
+		expect(() => checkSystemStability(system, "")).not.toThrow();
 		expect(spy).not.toHaveBeenCalled();
 	});
 
@@ -24,30 +24,38 @@ describe("checkSystemStability", () => {
 		system.updateComponent("damage", { instability: 0.4 });
 		vi.spyOn(ecs.rng, "nextAsPercentage").mockReturnValue(0.6);
 
-		expect(() => checkSystemStability(system)).not.toThrow();
+		expect(() => checkSystemStability(system, "")).not.toThrow();
 	});
 
 	it("throws error when roll is below the instability threshold", () => {
 		system.updateComponent("damage", { instability: 0.4 });
 		vi.spyOn(ecs.rng, "nextAsPercentage").mockReturnValue(0.2);
 
-		expect(() => checkSystemStability(system)).toThrow();
+		expect(() => checkSystemStability(system, "")).toThrow();
 	});
 
 	it("thrown error has the expected message", () => {
 		system.updateComponent("damage", { instability: 0.4 });
 		vi.spyOn(ecs.rng, "nextAsPercentage").mockReturnValue(0.2);
 
-		expect(() => checkSystemStability(system)).toThrow(
+		expect(() => checkSystemStability(system, "Failed to set damage")).toThrow(
 			"System instability caused the command to fail. Please try again.",
 		);
+
+		let caughtError: unknown;
+		try {
+			checkSystemStability(system, "Failed to set damage");
+		} catch (err) {
+			caughtError = err;
+		}
+		expect(caughtError).toHaveProperty("title", "Failed to set damage");
 	});
 
 	it("calls RNG exactly once per check when instability is greater than 0", () => {
 		system.updateComponent("damage", { instability: 0.4 });
 		const spy = vi.spyOn(ecs.rng, "nextAsPercentage").mockReturnValue(0.6);
 
-		checkSystemStability(system);
+		checkSystemStability(system, "");
 
 		expect(spy).toHaveBeenCalledTimes(1);
 	});
@@ -57,7 +65,7 @@ describe("checkSystemStability", () => {
 		const spy = vi.spyOn(ecs.rng, "nextAsPercentage").mockReturnValue(0.2);
 
 		try {
-			checkSystemStability(system);
+			checkSystemStability(system, "");
 		} catch {
 			// expected
 		}
@@ -72,8 +80,8 @@ describe("checkSystemStability", () => {
 			.mockReturnValueOnce(0.6) // second check passes
 			.mockReturnValueOnce(0.2); // third check fails
 
-		expect(() => checkSystemStability(system)).not.toThrow();
-		expect(() => checkSystemStability(system)).not.toThrow();
-		expect(() => checkSystemStability(system)).toThrow();
+		expect(() => checkSystemStability(system, "")).not.toThrow();
+		expect(() => checkSystemStability(system, "")).not.toThrow();
+		expect(() => checkSystemStability(system, "")).toThrow();
 	});
 });

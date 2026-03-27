@@ -1,12 +1,12 @@
-import z from "zod";
-import { t } from "@thorium/.server/init/t";
-import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
-import { checkSystemStability } from "@thorium/utils/.server/ship/checkSystemStability";
-import { type scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";
-import { Entity } from "@thorium/utils/ecs";
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { fromDate } from "dot-beat-time";
+import { t } from "@thorium/.server/init/t";
 import { generateScanResults } from "@thorium/.server/systems/SensorScanSystem";
+import { checkSystemStability } from "@thorium/utils/.server/ship/checkSystemStability";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import { Entity } from "@thorium/utils/ecs";
+import { type scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";
+import { fromDate } from "dot-beat-time";
+import z from "zod";
 
 export const sensors = t.router({
 	get: t.procedure
@@ -112,7 +112,7 @@ export const sensors = t.router({
 				systemType: "sensors",
 				shipId: input.shipId,
 			});
-			checkSystemStability(sensorsSystem);
+			checkSystemStability(sensorsSystem, "Failed to start scanning");
 
 			const scanEntity = new Entity();
 			scanEntity.addComponent("scan", {
@@ -139,7 +139,7 @@ export const sensors = t.router({
 					systemType: "sensors",
 					shipId,
 				});
-				checkSystemStability(sensorsSystem);
+				checkSystemStability(sensorsSystem, "Failed to cancel scanning");
 			}
 			ctx.flight?.ecs.removeEntityById(input.scanId);
 			if (shipId) {

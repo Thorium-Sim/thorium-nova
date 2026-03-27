@@ -14,13 +14,11 @@ import {
 	ScanResults,
 } from "@thorium/cards/Sensors/ScanComponents";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
-import { toast } from "@thorium/context/ToastContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
 import { Icon } from "@thorium/ui/Icon";
-import { LiveQueryError } from "@thorium/utils/live-query/client/client";
 import { cn } from "@thorium/utils/cn";
 import type { scanTypes } from "@thorium/utils/flags/scanTypes";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
@@ -220,19 +218,7 @@ function Scan({
 					/>
 					<Button
 						className="btn btn-xs btn-error"
-						onPress={async () => {
-							try {
-								await q.sensors.scanCancel.netSend({ scanId: id });
-							} catch (err) {
-								if (err instanceof LiveQueryError) {
-									toast({
-										title: "Sensors command failed",
-										body: err.message,
-										color: "error",
-									});
-								}
-							}
-						}}
+						onPress={() => q.sensors.scanCancel.netSend({ scanId: id })}
 					>
 						<Icon name="ban" />
 					</Button>

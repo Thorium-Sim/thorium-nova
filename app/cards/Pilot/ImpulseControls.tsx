@@ -1,7 +1,6 @@
 import { animated as a, useSpring } from "@react-spring/web";
 import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
-import { toast } from "@thorium/context/ToastContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import {
 	useGamepadPress,
@@ -12,7 +11,6 @@ import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { cn } from "@thorium/utils/cn";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { LiveQueryError } from "@thorium/utils/live-query/client/client";
 import type { KilometerPerSecond } from "@thorium/utils/unitTypes";
 import { useDrag } from "@use-gesture/react";
 import throttle from "lodash.throttle";
@@ -132,36 +130,13 @@ export const ImpulseControls = ({
 	}));
 
 	const callback = useRef(
-		throttle(async (speed: number) => {
-			try {
-				await q.pilot.impulseEngines.setSpeed.netSend({
-					speed: Math.min(emergencySpeed, Math.max(0, speed)),
-					shipId,
-				});
-			} catch (err) {
-				if (err instanceof LiveQueryError) {
-					toast({
-						title: "Impulse engine command failed",
-						body: err.message,
-						color: "error",
-					});
-				}
-			}
+		throttle((speed: number) => {
+			q.pilot.impulseEngines.setSpeed.netSend({
+				speed: Math.min(emergencySpeed, Math.max(0, speed)),
+				shipId,
+			});
 			if (speed === 0) {
-				try {
-					await q.pilot.warpEngines.setWarpFactor.netSend({
-						factor: 0,
-						shipId,
-					});
-				} catch (err) {
-					if (err instanceof LiveQueryError) {
-						toast({
-							title: "Warp engines command failed",
-							body: err.message,
-							color: "error",
-						});
-					}
-				}
+				q.pilot.warpEngines.setWarpFactor.netSend({ factor: 0, shipId });
 			}
 		}, 100),
 	);
@@ -269,21 +244,11 @@ export const ImpulseControls = ({
 		},
 	});
 	useGamepadPress("warp-engage", {
-		onDown: async () => {
-			try {
-				await q.pilot.warpEngines.setWarpFactor.netSend({
-					factor: warpFocus,
-					shipId,
-				});
-			} catch (err) {
-				if (err instanceof LiveQueryError) {
-					toast({
-						title: "Warp engines command failed",
-						body: err.message,
-						color: "error",
-					});
-				}
-			}
+		onDown: () => {
+			q.pilot.warpEngines.setWarpFactor.netSend({
+				factor: warpFocus,
+				shipId,
+			});
 			setWarpFocus(0);
 		},
 	});
@@ -379,22 +344,12 @@ export const ImpulseControls = ({
 											} ${warpFactor === currentWarpFactor ? "btn-active" : ""} ${
 												forwardAutopilot ? "opacity-50" : ""
 											}`}
-											onClick={async () => {
+											onClick={() => {
 												onFlightControlInteraction?.();
-												try {
-													await q.pilot.warpEngines.setWarpFactor.netSend({
-														factor: warpFactor,
-														shipId,
-													});
-												} catch (err) {
-													if (err instanceof LiveQueryError) {
-														toast({
-															title: "Warp engines command failed",
-															body: err.message,
-															color: "error",
-														});
-													}
-												}
+												q.pilot.warpEngines.setWarpFactor.netSend({
+													factor: warpFactor,
+													shipId,
+												});
 											}}
 										>
 											{label}

@@ -1,8 +1,6 @@
 import { ObjectImage } from "@thorium/cards/Navigation/ObjectDetails";
 import { q } from "@thorium/context/AppContext";
-import { toast } from "@thorium/context/ToastContext";
 import { useStation } from "@thorium/routes/station/useStation";
-import { LiveQueryError } from "@thorium/utils/live-query/client/client";
 import {
 	planetScanTypes,
 	scanTypes,
@@ -88,23 +86,13 @@ function ResultsWrapper({
 				) : (
 					<Button
 						className="btn btn-xs btn-warning"
-						onPress={async () => {
-							try {
-								await q.sensors.scanStart.netSend({
-									shipId,
-									type: scanType,
-									target: objectId,
-								});
-							} catch (err) {
-								if (err instanceof LiveQueryError) {
-									toast({
-										title: "Sensors command failed",
-										body: err.message,
-										color: "error",
-									});
-								}
-							}
-						}}
+						onPress={() =>
+							q.sensors.scanStart.netSend({
+								shipId,
+								type: scanType,
+								target: objectId,
+							})
+						}
 					>
 						Begin Scan
 					</Button>

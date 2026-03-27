@@ -105,7 +105,7 @@ export const pilot = t.router({
 				if (!system.components.isImpulseEngines)
 					throw new Error("System is not a impulse engine");
 
-				checkSystemStability(system);
+				checkSystemStability(system, "Failed to set impulse speed");
 
 				// Deactivate autopilot when manually setting impulse speed
 				const ship = ctx.ecs.getEntityById(shipId);
@@ -186,7 +186,7 @@ export const pilot = t.router({
 				if (!system.components.isWarpEngines)
 					throw new Error("System is not a warp engine");
 
-				checkSystemStability(system);
+				checkSystemStability(system, "Failed to set warp engine factor");
 
 				// Deactivate autopilot when manually setting warp factor
 				const ship = ctx.ecs.getEntityById(shipId);
@@ -378,7 +378,7 @@ export const pilot = t.router({
 				if (!system.components.isThrusters)
 					throw new Error("System is not thrusters");
 
-				checkSystemStability(system);
+				checkSystemStability(system, "Failed to set thruster direction");
 
 				// Deactivate autopilot when manually using direction thrusters
 				const ship = ctx.ecs.getEntityById(shipId);
@@ -441,7 +441,7 @@ export const pilot = t.router({
 				if (!system.components.isThrusters)
 					throw new Error("System is not thrusters");
 
-				checkSystemStability(system);
+				checkSystemStability(system, "Failed to rotate");
 
 				// Deactivate autopilot when manually using rotation thrusters
 				const ship = ctx.ecs.getEntityById(shipId);

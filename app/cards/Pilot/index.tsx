@@ -1,7 +1,6 @@
 import type { CardProps } from "@thorium/cards/CardProps";
 import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
-import { toast } from "@thorium/context/ToastContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useGamepadPress } from "@thorium/hooks/useGamepadStore";
 import { useStation } from "@thorium/routes/station/useStation";
@@ -11,7 +10,6 @@ import { ShipWarning, useShipWarnings } from "@thorium/ui/ShipWarning";
 import { useServerAlerts } from "@thorium/ui/useServerAlerts";
 import { cn } from "@thorium/utils/cn";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { LiveQueryError } from "@thorium/utils/live-query/client/client";
 import type { Coordinates } from "@thorium/utils/unitTypes";
 import type { MutableRefObject, ReactNode } from "react";
 import { Fragment, Suspense, useCallback, useEffect, useRef } from "react";
@@ -27,41 +25,22 @@ async function rotation({
 	y,
 	z,
 }: { shipId: number } & Partial<Coordinates<number>>) {
-	try {
-		await q.pilot.thrusters.setRotationDelta.netSend({
-			shipId,
-			rotation: { x, y, z },
-		});
-	} catch (err) {
-		if (err instanceof LiveQueryError) {
-			toast({
-				title: "Thrusters command failed",
-				body: err.message,
-				color: "error",
-			});
-		}
-	}
+	await q.pilot.thrusters.setRotationDelta.netSend({
+		shipId,
+		rotation: { x, y, z },
+	});
 }
+
 async function direction({
 	shipId,
 	x,
 	y,
 	z,
 }: { shipId: number } & Partial<Coordinates<number>>) {
-	try {
-		await q.pilot.thrusters.setDirection.netSend({
-			shipId,
-			direction: { x, y, z },
-		});
-	} catch (err) {
-		if (err instanceof LiveQueryError) {
-			toast({
-				title: "Thrusters command failed",
-				body: err.message,
-				color: "error",
-			});
-		}
-	}
+	await q.pilot.thrusters.setDirection.netSend({
+		shipId,
+		direction: { x, y, z },
+	});
 }
 
 function UntouchableLabel({

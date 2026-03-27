@@ -1,16 +1,14 @@
 import { Edges, Line } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useQueryClient } from "@tanstack/react-query";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
-import { toast } from "@thorium/context/ToastContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
 import Slider from "@thorium/ui/Slider";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { LiveQueryError } from "@thorium/utils/live-query/client/client";
 import { isPointWithinCone } from "@thorium/utils/starmap/isPointWithinCone";
 import { degToRad } from "@thorium/utils/unitTypes";
 import { useEffect, useMemo, useRef } from "react";
@@ -270,18 +268,7 @@ function PhaserControl({
 	const cache = useQueryClient();
 	const getFirePhasers = (firePercent: number) => {
 		return async function firePhasers() {
-			try {
-				await q.targeting.phasers.fire.netSend({ phaserId: id, firePercent });
-			} catch (err) {
-				if (err instanceof LiveQueryError) {
-					toast({
-						title: "Phasers command failed",
-						body: err.message,
-						color: "error",
-					});
-					return;
-				}
-			}
+			await q.targeting.phasers.fire.netSend({ phaserId: id, firePercent });
 			document.addEventListener(
 				"pointerup",
 				() => {
@@ -325,17 +312,10 @@ function PhaserControl({
 							});
 						},
 					);
-					q.targeting.phasers.setArc
-						.netSend({ phaserId: id, arc: val as number })
-						.catch((err) => {
-							if (err instanceof LiveQueryError) {
-								toast({
-									title: "Phasers command failed",
-									body: err.message,
-									color: "error",
-								});
-							}
-						});
+					q.targeting.phasers.setArc.netSend({
+						phaserId: id,
+						arc: val as number,
+					});
 				}}
 			/>
 			<div
