@@ -13,7 +13,7 @@ import SearchableInput, {
 	DefaultResultLabel,
 } from "@thorium/ui/SearchableInput";
 import { Icon } from "@thorium/ui/Icon";
-import { Button as RAButton } from "react-aria-components";
+import { Button as RAButton, type Selection } from "react-aria-components";
 import { useTransition } from "@thorium/ui/Transition";
 import { cn } from "@thorium/utils/cn";
 import { useAlert, useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
@@ -21,6 +21,7 @@ import Checkbox from "@thorium/ui/Checkbox";
 import { InputField, OutputField, TypingField } from "@thorium/ui/Core";
 import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
 import { ScanDoodad } from "@thorium/ui/ScanDoodad";
+import { Menu, MenuItem, MenuTrigger } from "@thorium/ui/Menu";
 const ModalDemo = ({
 	title,
 	children,
@@ -137,8 +138,29 @@ export function ComponentDemo() {
 	const confirm = useConfirm();
 
 	const lineRef = useRef(0);
+
+	const [menuSelected, setMenuSelected] = useState<Selection>(
+		new Set(["rulers"]),
+	);
+
 	return (
 		<div className="flex flex-col gap-8 text-white h-full overflow-y-auto p-4">
+			<MenuTrigger>
+				<RAButton className="btn w-min whitespace-nowrap">Open Menu</RAButton>
+				<Menu
+					selectionMode="multiple"
+					selectedKeys={menuSelected}
+					onSelectionChange={setMenuSelected}
+				>
+					<MenuItem id="grid">Pixel grid</MenuItem>
+					<MenuItem id="rulers">Rulers</MenuItem>
+					<MenuItem id="comments" isDisabled>
+						Comments
+					</MenuItem>
+					<MenuItem id="layout">Layout guides</MenuItem>
+					<MenuItem id="toolbar">Toolbar</MenuItem>
+				</Menu>
+			</MenuTrigger>
 			<div className="flex gap-4">
 				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-default">
 					cursor-default

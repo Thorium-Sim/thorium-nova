@@ -1,16 +1,19 @@
-import {isDatabaseContext} from "@thorium/typeguards/isDatabaseContext";
+import { isDatabaseContext } from "@thorium/typeguards/isDatabaseContext";
 import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
 import type { inferAsyncReturnType } from "@thorium/utils/live-query/.server";
 import type { AnyRouter } from "@thorium/utils/live-query/.server/router";
-import {DataContext} from "../DataContext";
+import { DataContext } from "../DataContext";
 import { pubsub } from "./pubsub";
 import { dataStreamEntity } from "./dataStreamEntity";
 import type {
-	CreateContextOpts, InitWebsocket,
-	InitWebsocketParams
+	CreateContextOpts,
+	InitWebsocket,
+	InitWebsocketParams,
 } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
 import { ServerClient } from "@thorium/utils/live-query/.server/ServerClient";
 import { router } from "@thorium/.server/init/router";
+import z from "zod";
+import type { ClientSettings } from "@thorium/.server/data";
 
 type InitWebsocketReturnType = ReturnType<InitWebsocket>;
 const dataContextCache = new Map<string, DataContext>();
@@ -26,8 +29,7 @@ export function createContext<TContext>({
 	if (!dataContext) {
 		if (!isDatabaseContext(context)) {
 			throw new Error("Database context is required to create data context");
-		}
-		else {
+		} else {
 			// Let's generate a client if it doesn't already exist in the database
 			const client = context.server.clients[clientId];
 			if (!client) {
@@ -61,7 +63,12 @@ export type Context = inferAsyncReturnType<typeof createContext>;
 
 export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 	name: string = randomNameGenerator();
-
+	settings: ClientSettings = {
+		soundPlayer: true,
+		ambiancePlayer: true,
+		musicPlayer: true,
+		dialoguePlayer: true,
+	};
 	public async sendDataStream() {
 		const context = getDataContext(this.id);
 
@@ -144,8 +151,8 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 		this.send(snapshot);
 	}
 	toJSON() {
-		const { id, name } = this;
-		return { id, name };
+		const { id, name, settings } = this;
+		return { id, name, settings };
 	}
 	connectionOpened(): void {
 		pubsub.publish.client.get({ clientId: this.id });

@@ -2,6 +2,7 @@ import { interpolateToRange } from "./interpolateToRange";
 import { playSound, updateSound, removeSound } from "../playSound";
 import type { Sound } from "@thorium/ecs-components/sound";
 import { useRef, useEffect } from "react";
+import { clientId, q } from "@thorium/context/AppContext";
 
 /** This hook should do the following:
  * - Play ambiance sounds
@@ -19,7 +20,10 @@ export function usePlayAmbiance(
 ) {
 	const soundsRef = useRef(new Set<string>());
 
+	const [client] = q.client.get.useNetRequest({ clientId });
+	const noAmbiance = !client.settings.ambiancePlayer;
 	useEffect(() => {
+		if (noAmbiance) return;
 		// Making the useEffect hook dependent on dataUpdatedAt ensures that the
 		// hook runs whenever the data is updated.
 		dataUpdatedAt;
@@ -57,7 +61,7 @@ export function usePlayAmbiance(
 				}
 			}
 		}
-	}, [entities, soundKey, dataUpdatedAt]);
+	}, [entities, soundKey, dataUpdatedAt, noAmbiance]);
 
 	useEffect(() => {
 		return () => {

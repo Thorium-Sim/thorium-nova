@@ -59,6 +59,7 @@ export const effects = t.router({
 		// This request can only be triggered by a publish.
 		.autoPublish([], () => null)
 		.filter((payload: SoundPayload | null, { ctx, input: { clientId } }) => {
+			const clientSettings = ctx.getClient(clientId)?.settings || {};
 			/**
 			 * Logic for filtering out sound payloads
 			 * - If the sound has `clients`, it only plays on those clients
@@ -75,6 +76,15 @@ export const effects = t.router({
 			let sound: SoundEffect | null = null;
 
 			if (payload.type === "sound") {
+				// Cancel starting a new sound if the the sound isn't targeted to a specific station or client,
+				// and if the client has sound effects turned off
+				if (
+					!payload.sound.stations &&
+					!payload.sound.clients &&
+					!clientSettings.soundPlayer
+				) {
+					return false;
+				}
 				sound = payload.sound;
 			}
 			const entity = ctx.flight?.ecs.getEntityById(payload.entityId);
@@ -84,6 +94,13 @@ export const effects = t.router({
 					entity.components.soundEffects?.looping?.find(
 						(s) => s.id === payload.soundId,
 					) || null;
+
+				entity.updateComponent("soundEffects", {
+					looping:
+						entity.components.soundEffects?.looping.filter(
+							(s) => s.key !== sound?.key,
+						) || [],
+				});
 			}
 
 			if (!sound) return false;
