@@ -1,13 +1,13 @@
+import { Navigate } from "@thorium/components/Navigate";
 import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+import Button from "@thorium/ui/Button";
+import { Icon } from "@thorium/ui/Icon";
 import Input from "@thorium/ui/Input";
+import { produce } from "immer";
 import { useContext, useReducer } from "react";
 import { useParams } from "react-router";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
 import { OverrideResetButton } from "./OverrideResetButton";
-import { Navigate } from "@thorium/components/Navigate";
-import { Icon } from "@thorium/ui/Icon";
-import { produce } from "immer";
-import Button from "@thorium/ui/Button";
 
 const numSort = (a: number, b: number) => a - b;
 export default function Power() {
@@ -41,7 +41,7 @@ export default function Power() {
 								{system.powerLevels.sort(numSort).map((p, i) => (
 									<div key={`${p}-${i}`} className="relative group">
 										<input
-											className="input w-[4ch] text-center tabular-nums"
+											className="input w-[5ch] text-center tabular-nums"
 											max={40}
 											defaultValue={p}
 											onBlur={(event) => {

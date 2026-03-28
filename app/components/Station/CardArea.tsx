@@ -1,6 +1,10 @@
+import * as Cards from "@thorium/cards";
 import Login from "@thorium/cards/Login";
 import Offline from "@thorium/cards/Offline";
-import * as Cards from "@thorium/cards";
+import { clientId, q } from "@thorium/context/AppContext";
+import CardProvider from "@thorium/context/CardContext";
+import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
+import { Transition } from "@thorium/ui/Transition";
 import {
 	type ComponentType,
 	Fragment,
@@ -11,11 +15,6 @@ import {
 } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import type { CardProps } from "../../cards/CardProps";
-import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
-import CardProvider from "@thorium/context/CardContext";
-import { q, clientId } from "@thorium/context/AppContext";
-import { Transition } from "@thorium/ui/Transition";
-import Button from "@thorium/ui/Button";
 
 const CardError = () => {
 	return (
