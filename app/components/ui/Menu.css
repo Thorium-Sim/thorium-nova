@@ -1,0 +1,186 @@
+:root {
+	--spacing-1: var(--spacing);
+	--spacing-2: calc(2 * var(--spacing));
+	--spacing-3: calc(3 * var(--spacing));
+	--spacing-4: calc(4 * var(--spacing));
+	--spacing-5: calc(5 * var(--spacing));
+	--spacing-6: calc(6 * var(--spacing));
+	--spacing-7: calc(7 * var(--spacing));
+	--spacing-8: calc(8 * var(--spacing));
+	--spacing-9: calc(9 * var(--spacing));
+	--spacing-10: calc(10 * var(--spacing));
+}
+.react-aria-Menu {
+	min-height: 0;
+	max-height: inherit;
+	box-sizing: border-box;
+	overflow: auto;
+	min-width: 150px;
+	outline: none;
+	display: grid;
+	--check-width: 0;
+	grid-template-columns: var(--spacing-3) var(--check-width) auto 1fr auto var(
+			--spacing-3
+		);
+	grid-auto-rows: max-content;
+
+	&:has(> [data-selection-mode]) {
+		--check-width: var(--spacing-6);
+	}
+
+	&[data-empty] {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-style: italic;
+		min-height: var(--spacing-8);
+	}
+}
+
+.react-aria-MenuItem {
+	margin-inline: var(--spacing-1);
+	padding: calc((var(--spacing-8) - 1lh) / 2) 0;
+	border-radius: calc(var(--radius-lg) - var(--spacing-1));
+	outline: none;
+	cursor: default;
+	color: var(--text-color);
+	font: var(--font-size) system-ui;
+	position: relative;
+	display: grid;
+	grid-column-start: 1;
+	grid-column-end: -1;
+	grid-template-areas:
+		". check icon label end ."
+		". . . desc end .";
+	grid-template-columns: subgrid;
+	align-items: center;
+	forced-color-adjust: none;
+	-webkit-tap-highlight-color: transparent;
+
+	> svg:not(.icon-check, .icon-dot, .icon-chevron-right) {
+		grid-area: icon;
+		width: var(--spacing-4);
+		height: var(--spacing-4);
+		justify-self: center;
+		margin-inline-end: var(--spacing-2);
+	}
+
+	&:first-of-type {
+		margin-top: var(--spacing);
+	}
+
+	&:last-of-type {
+		margin-bottom: var(--spacing);
+	}
+
+	&[data-open],
+	&[data-pressed] {
+		background: var(--color-primary);
+	}
+
+	&[data-focused] {
+		background: var(--color-primary-focus);
+		color: var(--color-primary-content);
+	}
+
+	&[data-selection-mode] {
+		.icon-check,
+		.icon-dot {
+			grid-area: check;
+			width: var(--spacing-4);
+			height: var(--spacing-4);
+		}
+
+		.icon-check {
+			stroke-width: 3px;
+		}
+
+		.icon-dot {
+			scale: 3;
+		}
+	}
+
+	&[href] {
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	&[data-disabled] {
+		color: var(--color-gray-400);
+	}
+
+	.react-aria-Text:not([slot]),
+	[slot="label"] {
+		grid-area: label;
+		font-weight: 500;
+	}
+
+	[slot="description"] {
+		font-size: var(--font-size-sm);
+		grid-area: desc;
+	}
+
+	.icon-chevron-right {
+		grid-area: end;
+		margin-left: var(--spacing-1);
+		justify-self: end;
+		width: var(--spacing-4);
+		height: var(--spacing-4);
+	}
+}
+
+.react-aria-MenuSection {
+	display: grid;
+	grid-column-start: 1;
+	grid-column-end: -1;
+	--check-width: 0;
+	grid-template-columns: var(--spacing-3) var(--check-width) auto 1fr auto var(
+			--spacing-3
+		);
+
+	&:has(> [data-selection-mode]) {
+		--check-width: var(--spacing-6);
+	}
+
+	.react-aria-Header {
+		grid-column-start: 1;
+		grid-column-end: -1;
+		font-size: var(--font-size-sm);
+		font-weight: 600;
+		font-variation-settings: initial;
+		padding: var(--spacing-1) var(--spacing-3);
+		background: var(--gray-100);
+		border-block: 0.5px solid var(--color-gray-400);
+		cursor: default;
+		user-select: none;
+		box-shadow:
+			inset 0px 1px 0px white,
+			inset 0px -4px 8px var(--color-gray-200);
+
+		@media (prefers-color-scheme: dark) {
+			box-shadow: inset 0px 4px 8px var(--color-gray-200);
+		}
+	}
+
+	&:first-child .react-aria-Header {
+		margin-top: -0.5px;
+	}
+}
+
+.react-aria-Menu .react-aria-Separator {
+	grid-column-start: 1;
+	grid-column-end: -1;
+	margin: 0 var(--spacing-2);
+	border: 0;
+	border-top: 0.5px solid var(--color-gray-200);
+	height: auto;
+	width: auto;
+
+	.react-aria-MenuItem + & {
+		margin-block-start: var(--spacing-1);
+	}
+
+	&:has(+ .react-aria-MenuItem) {
+		margin-block-end: var(--spacing-1);
+	}
+}

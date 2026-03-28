@@ -56,6 +56,7 @@ export const pilot = t.router({
 			.autoPublish(["isImpulseEngines"], () => null)
 
 			.request(({ ctx, input: { shipId } }) => {
+				ctx.clientId;
 				const engine = getShipSystem(ctx.ecs, {
 					systemType: "impulseEngines",
 					shipId,
@@ -392,8 +393,15 @@ export const pilot = t.router({
 					// Cancel the looping sound
 					cancelLoopingSound(system, "thrust");
 				} else if (system.components.soundEffects?.soundBank.thrust) {
-					const ship = ctx.ecs.getEntityById(shipId);
-					playShipSound(system, ship!, "thrust");
+					// Only play one instance of the sound
+					if (
+						!system.components.soundEffects.looping.some(
+							(s) => s.key === "thrust",
+						)
+					) {
+						const ship = ctx.ecs.getEntityById(shipId);
+						playShipSound(system, ship!, "thrust");
+					}
 				}
 
 				return { systemId, shipId, direction };
@@ -451,7 +459,15 @@ export const pilot = t.router({
 					// Cancel the looping sound
 					cancelLoopingSound(system, "thrust");
 				} else if (system.components.soundEffects?.soundBank.thrust) {
-					playShipSound(system, ship!, "thrust");
+					// Only play one instance of the sound
+					if (
+						!system.components.soundEffects.looping.some(
+							(s) => s.key === "thrust",
+						)
+					) {
+						const ship = ctx.ecs.getEntityById(shipId);
+						playShipSound(system, ship!, "thrust");
+					}
 				}
 
 				return { systemId, shipId, rotation };

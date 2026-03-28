@@ -18,24 +18,18 @@ export class ServerDataModel extends DataStore {
 		this.getData<ServerDataModel>().then((data) => {
 			this.activeFlightName = data.activeFlightName || null;
 			this.thoriumId = data.thoriumId || randomWords(3).join("-");
-			if (this.clients) {
-				this.clients = Object.fromEntries(
-					Object.entries(this.clients).map(([id, client]) => {
-						const c = new Client(client.id, router, pubsub);
-						c.name = client.name;
-						return [id, c];
-					}),
-				);
-			} else {
-				this.clients = Object.fromEntries(
-					Object.entries(data.clients || {}).map(([id, client]: any) => {
-						const c = new Client(client.id, router, pubsub);
-						c.name = client.name;
-						return [id, c];
-					}),
-				);
-			}
+			this.spawnClients(this.clients || data.clients || {});
 		});
+	}
+	spawnClients(clients: Record<string, Client<any>>) {
+		this.clients = Object.fromEntries(
+			Object.entries(clients).map(([id, client]: any) => {
+				const c = new Client(client.id, router, pubsub);
+				c.name = client.name;
+				c.settings = client.settings || c.settings;
+				return [id, c];
+			}),
+		);
 	}
 	async loadPlugins() {
 		await this.loadPluginsImpl.apply(this);
