@@ -1,5 +1,4 @@
 import { initWebsocket } from "@thorium/.server/init/liveQuery";
-import { SystemStabilityError } from "@thorium/utils/.server/ship/SystemInstabilityError";
 import type { ProcedureCallOptions } from "@thorium/utils/live-query/.server/procedure";
 import {
 	type AnyRouter,
@@ -9,6 +8,7 @@ import type {
 	inferRouterContext,
 	MaybePromise,
 } from "@thorium/utils/live-query/.server/types";
+import { SystemStabilityError } from "@thorium/utils/live-query/client/client";
 import {
 	NETREQUEST_PATH,
 	NETSEND_PATH,

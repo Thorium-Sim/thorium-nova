@@ -1,5 +1,5 @@
-import { SystemStabilityError } from "@thorium/utils/.server/ship/SystemInstabilityError";
 import type { Entity } from "@thorium/utils/ecs";
+import { SystemStabilityError } from "@thorium/utils/live-query/client/client";
 
 /**
  * Check if a command to a system failed because of system instability.
