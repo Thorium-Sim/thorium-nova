@@ -173,7 +173,7 @@ function SatelliteView({
 				playerPosition.z - position[2],
 			);
 			const inRange = shipDistance <= gainRadius;
-			if (inRange) inRangeSatellites++;
+			if (inRange && id !== shipId) inRangeSatellites++;
 			const frequencyDistance = Math.abs(satelliteFrequency - frequency) / 10;
 			const scale = Math.min(
 				0.5,

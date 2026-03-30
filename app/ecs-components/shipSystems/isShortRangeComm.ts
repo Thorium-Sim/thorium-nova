@@ -9,7 +9,12 @@ export const isShortRangeComm = z
 		/** The minimum comm radius in Kilometers at maximum power */
 		maxRadius: z.number().default(1_000_000),
 		state: z.enum(["idle", "scanning", "calling", "connected"]).default("idle"),
-		/** Reference to the isShortRangeCommConversation entity */
+		/**
+		 * Reference to the isShortRangeCommConversation entity.
+		 * For a player ship, this is the current conversation that they are connected to.
+		 * For a NPC, this is either the current conversation or a conversation they are
+		 * going to have when they are called or their hail is connected.
+		 */
 		conversationId: z.number().default(-1),
 		/**
 		 * How the ship attached to this system is referenced in the Ink conversation,
@@ -26,6 +31,7 @@ export const isShortRangeComm = z
  **/
 export const isShortRangeCommConversation = z
 	.object({
+		frequency: z.number().default(276.25),
 		conversationTemplateId: z.number().nullable().default(null),
 		/**
 		 * The Ink story class that runs the conversation. Not persisted,

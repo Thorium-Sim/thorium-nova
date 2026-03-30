@@ -17,6 +17,7 @@ const shipSystemTypes = z.enum([
 	"coolantTank",
 	"navigation",
 	"longRangeComm",
+	"shortRangeComm",
 ]);
 
 export type ShipSystemTypes = z.infer<typeof shipSystemTypes>;

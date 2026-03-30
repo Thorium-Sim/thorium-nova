@@ -152,6 +152,18 @@ export class PowerDrawSystem extends System {
 				powerDraw = (maxSafePower - requiredPower) * gain + requiredPower;
 				break;
 			}
+			case "shortRangeComm": {
+				// Pretty much just the antenna gain affects power, but only when calling or connected
+				if (
+					["calling", "connected"].includes(
+						entity.components.isShortRangeComm?.state || "",
+					)
+				) {
+					const gain = entity.components.isShortRangeComm?.antennaGain || 0;
+					powerDraw = (maxSafePower - requiredPower) * gain + requiredPower;
+				}
+				break;
+			}
 			case "generic":
 				powerDraw = requestedPower;
 				break;

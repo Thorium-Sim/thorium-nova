@@ -76,6 +76,7 @@
 		"luxon": "^3.7.2",
 		"markdown-it": "^14.1.0",
 		"match-sorter": "^8.2.0",
+		"music-metadata": "^11.12.3",
 		"pdfkit": "^0.17.2",
 		"perfect-freehand": "^1.2.2",
 		"pure-rand": "^7.0.1",
