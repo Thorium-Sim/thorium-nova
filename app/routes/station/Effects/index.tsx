@@ -6,6 +6,7 @@ import { clientId, q } from "@thorium/context/AppContext";
 import { useNavigate } from "react-router";
 import type { EffectPayload } from "@thorium/utils/flags/effects";
 import { useAmbiance } from "@thorium/utils/sounds/Ambiance/useAmbiance";
+import { toast } from "@thorium/context/ToastContext";
 
 let synth: SpeechSynthesis | undefined;
 try {
@@ -97,6 +98,10 @@ const Effects = () => {
 						}
 						return synth?.speak(words);
 					} catch {}
+					break;
+				}
+				case "message": {
+					toast(effect);
 					break;
 				}
 				// case "shutdown":

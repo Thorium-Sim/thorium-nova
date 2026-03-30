@@ -15,7 +15,12 @@ export const effectOptions = z.union([
 		message: z.string(),
 		voice: z.string().optional(),
 	}),
-	z.object({ type: z.literal("message"), message: z.string() }),
+	z.object({
+		type: z.literal("message"),
+		title: z.string(),
+		body: z.string().optional(),
+		duration: z.number().optional(),
+	}),
 ]);
 
 // TODO November 29, 2021 - Make these effects only work
@@ -26,11 +31,8 @@ export const effectOptions = z.union([
 // "sleep"
 // "quit"
 
-export interface EffectPayload {
+export type EffectPayload = {
 	effect: z.infer<typeof effectOptions>;
-	station: string | null;
-	shipId: number | null;
-	clientId: string | null;
-}
+} & ({ station?: string | null; shipId: number } | { clientId: string });
 
 export const notBridgeStation = ["Viewscreen", "Blackout", "Flight Director"];

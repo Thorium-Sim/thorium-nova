@@ -20,10 +20,21 @@ export const station = t.router({
 				.flightClient;
 			const ship = ctx.getPlayerShip(input.clientId);
 			if (flightClient?.stationOverride) return flightClient.stationOverride;
-			const station = staticStations
-				.concat(ship?.components.stationComplement?.stations || [])
-				.find((s) => s.name === flightClient?.stationId) as unknown as Station;
-			return station || null;
+			const stations = ship?.components.stationComplement?.stations || [];
+			for (const staticStation of staticStations) {
+				stations.push({
+					cards: staticStation.cards,
+					description: "",
+					logo: "",
+					messageGroups: [],
+					name: staticStation.name,
+					tags: [],
+					theme: "",
+					widgets: [],
+				});
+			}
+			const station = stations.find((s) => s.name === flightClient?.stationId)!;
+			return station;
 		}),
 	available: t.procedure
 		.autoPublish([], () => null)
