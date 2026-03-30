@@ -1,21 +1,20 @@
-import { useEffect, useRef, useState } from "react";
-
-import { useSpring, animated as a } from "@react-spring/web";
-import { useDrag } from "@use-gesture/react";
-import throttle from "lodash.throttle";
-import type { KilometerPerSecond } from "@thorium/utils/unitTypes";
-import useMeasure from "@thorium/hooks/useMeasure";
-import Button from "@thorium/ui/Button";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { animated as a, useSpring } from "@react-spring/web";
 import { q } from "@thorium/context/AppContext";
+import { useCardContext } from "@thorium/context/CardContext";
+import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import {
 	useGamepadPress,
 	useGamepadValue,
 } from "@thorium/hooks/useGamepadStore";
+import useMeasure from "@thorium/hooks/useMeasure";
 import { useStation } from "@thorium/routes/station/useStation";
-import { useCardContext } from "@thorium/context/CardContext";
+import Button from "@thorium/ui/Button";
 import { cn } from "@thorium/utils/cn";
+import { useLiveQuery } from "@thorium/utils/live-query/client";
+import type { KilometerPerSecond } from "@thorium/utils/unitTypes";
+import { useDrag } from "@use-gesture/react";
+import throttle from "lodash.throttle";
+import { useEffect, useRef, useState } from "react";
 
 const C_IN_METERS = 299792458;
 export function formatSpeed(speed: KilometerPerSecond) {
@@ -332,28 +331,31 @@ export const ImpulseControls = ({
 								},
 							)}
 						>
-							{warpSpeeds.slice().reverse().map(({ label }, i, arr) => {
-								const warpFactor = arr.length - i;
-								return (
-									<Button
-										key={`warp-${warpFactor}`}
-										className={`btn-sm btn-primary ${
-											warpFocus === warpFactor ? "gamepad-focus" : ""
-										} ${warpFactor === currentWarpFactor ? "btn-active" : ""} ${
-											forwardAutopilot ? "opacity-50" : ""
-										}`}
-										onClick={() => {
-											onFlightControlInteraction?.();
-											q.pilot.warpEngines.setWarpFactor.netSend({
-												factor: warpFactor,
-												shipId,
-											});
-										}}
-									>
-										{label}
-									</Button>
-								);
-							})}
+							{warpSpeeds
+								.slice()
+								.reverse()
+								.map(({ label }, i, arr) => {
+									const warpFactor = arr.length - i;
+									return (
+										<Button
+											key={`warp-${warpFactor}`}
+											className={`btn-sm btn-primary ${
+												warpFocus === warpFactor ? "gamepad-focus" : ""
+											} ${warpFactor === currentWarpFactor ? "btn-active" : ""} ${
+												forwardAutopilot ? "opacity-50" : ""
+											}`}
+											onClick={() => {
+												onFlightControlInteraction?.();
+												q.pilot.warpEngines.setWarpFactor.netSend({
+													factor: warpFactor,
+													shipId,
+												});
+											}}
+										>
+											{label}
+										</Button>
+									);
+								})}
 						</div>
 					</div>
 				</div>

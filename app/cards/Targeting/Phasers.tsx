@@ -1,19 +1,19 @@
-import { clientId, q } from "@thorium/context/AppContext";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { Edges, Line } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { isPointWithinCone } from "@thorium/utils/starmap/isPointWithinCone";
-import { degToRad } from "@thorium/utils/unitTypes";
 import { useQueryClient } from "@tanstack/react-query";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { clientId, q } from "@thorium/context/AppContext";
+import { useCardContext } from "@thorium/context/CardContext";
+import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
 import Slider from "@thorium/ui/Slider";
+import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { isPointWithinCone } from "@thorium/utils/starmap/isPointWithinCone";
+import { degToRad } from "@thorium/utils/unitTypes";
 import { useEffect, useMemo, useRef } from "react";
 import { DoubleSide, Euler, type Group, Quaternion, Vector3 } from "three";
 import type { Line2 } from "three-stdlib";
-import { useStation } from "@thorium/routes/station/useStation";
-import { useCardContext } from "@thorium/context/CardContext";
 
 export function PhaserArcs() {
 	const { shipId } = useStation();

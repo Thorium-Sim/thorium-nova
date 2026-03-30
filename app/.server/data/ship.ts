@@ -1,18 +1,18 @@
-import { t } from "@thorium/.server/init/t";
+import type { DataContext } from "@thorium/.server/DataContext";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
 import { spawnShip } from "@thorium/.server/spawners/ship";
-import z from "zod";
 import { alertTypes } from "@thorium/ecs-components/shipAlerts";
-import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
+import { destroyShip } from "@thorium/utils/.server/ship/collisionDamage";
 import type { ECS, Entity } from "@thorium/utils/ecs";
+import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
+import type { RNG } from "@thorium/utils/rng";
 import {
 	getCompletePositionFromOrbit,
 	getObjectSystem,
 } from "@thorium/utils/starmap/position";
 import { Vector3 } from "three";
-import type { DataContext } from "@thorium/.server/DataContext";
-import { destroyShip } from "@thorium/utils/.server/ship/collisionDamage";
-import type { RNG } from "@thorium/utils/rng";
+import { z } from "zod";
 
 export const ship = t.router({
 	get: t.procedure
