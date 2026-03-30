@@ -5,6 +5,7 @@ import StationLayout from "@thorium/components/Station/StationLayout";
 import { StationData, useStation } from "@thorium/routes/station/useStation";
 import { Suspense, type ReactNode } from "react";
 import Stars from "@thorium/components/Station/Stars";
+
 export default function StationWrapper() {
 	useEscapeHotkey();
 	// TODO November 29, 2021: Include some kind of alert toast notification thing here

@@ -1,6 +1,5 @@
 import {
 	type EffectPayload,
-	effectConfig,
 	effectOptions,
 	notBridgeStation,
 } from "@thorium/utils/flags/effects";
@@ -52,7 +51,7 @@ export const effects = t.router({
 		.request(({ publish }) => {
 			if (!publish) return null;
 
-			return { effect: publish.effect, config: publish.config };
+			return { effect: publish.effect };
 		}),
 	sounds: t.procedure
 		.input(z.object({ clientId: z.string() }))
@@ -209,7 +208,6 @@ export const effects = t.router({
 		.input(
 			z.object({
 				effect: effectOptions,
-				config: effectConfig,
 				shipId: z.number().optional(),
 				station: z
 					.union([z.literal("all"), z.literal("bridge"), z.string()])
@@ -233,7 +231,6 @@ export const effects = t.router({
 			}
 			const payload = {
 				effect: input.effect,
-				config: input.config,
 				station,
 				shipId,
 				clientId,

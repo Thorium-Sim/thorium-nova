@@ -1,12 +1,21 @@
 import z from "zod";
 
 export const effectOptions = z.union([
-	z.literal("flash"),
-	z.literal("spark"),
-	z.literal("reload"),
-	z.literal("speak"),
-	z.literal("message"),
-	z.literal("sound"),
+	z.object({
+		type: z.literal("flash"),
+		duration: z.number().optional(),
+	}),
+	z.object({
+		type: z.literal("spark"),
+		duration: z.number().optional(),
+	}),
+	z.object({ type: z.literal("reload") }),
+	z.object({
+		type: z.literal("speak"),
+		message: z.string(),
+		voice: z.string().optional(),
+	}),
+	z.object({ type: z.literal("message"), message: z.string() }),
 ]);
 
 // TODO November 29, 2021 - Make these effects only work
@@ -17,15 +26,8 @@ export const effectOptions = z.union([
 // "sleep"
 // "quit"
 
-export const effectConfig = z.object({
-	message: z.string().optional(),
-	voice: z.string().optional(),
-	duration: z.number().optional(),
-});
-
 export interface EffectPayload {
 	effect: z.infer<typeof effectOptions>;
-	config: z.infer<typeof effectConfig> | null;
 	station: string | null;
 	shipId: number | null;
 	clientId: string | null;

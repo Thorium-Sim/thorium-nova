@@ -75,22 +75,22 @@ const Effects = () => {
 	const doEffect = useCallback(
 		(payload: EffectPayload) => {
 			if (typeof payload === "boolean" || !payload) return;
-			const { effect, config } = payload;
-			switch (effect) {
+			const { effect } = payload;
+			switch (effect.type) {
 				case "flash":
-					return doFlash(config?.duration || 1000);
+					return doFlash(effect.duration || 1000);
 				case "spark":
-					return doSpark(config?.duration || 5000);
+					return doSpark(effect.duration || 5000);
 				case "reload":
 					return window.location.reload();
 				case "speak": {
 					try {
 						const voices = synth?.getVoices() || [];
-						if (!config?.message) return;
-						const words = new SpeechSynthesisUtterance(config.message);
+						if (!effect?.message) return;
+						const words = new SpeechSynthesisUtterance(effect.message);
 						if (words) {
 							const voice =
-								voices.find((v) => v.name === config.voice) || voices[0];
+								voices.find((v) => v.name === effect.voice) || voices[0];
 							if (voice) {
 								words.voice = voice;
 							}
