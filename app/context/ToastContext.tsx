@@ -18,42 +18,42 @@ const Toast = ({
 	dismiss: () => void;
 }) => {
 	return (
-		<Transition isOpen={visible}>
-			<div
-				className={`toast alert ${
-					color === "success"
-						? "alert-success"
-						: color === "warning"
-							? "alert-warning"
-							: color === "error"
-								? "alert-error"
-								: color === "info"
-									? "alert-info"
-									: color === "notice"
-										? "alert-notice"
-										: ""
-				} block! m-4 min-h-16 max-w-md ${
-					action ? "cursor-pointer" : "pointer-events-none"
-				}`}
-				onClick={() => {
-					action?.();
-					dismiss();
-				}}
-				onMouseEnter={() => pause()}
-				onMouseLeave={() => resume()}
-			>
-				<div className="w-full flex items-center justify-between">
-					<h5 className="font-bold text-xl whitespace-pre-wrap">{title}</h5>
-					<button
-						className="close p-1 rounded-full hover:bg-white/30 transition-colors pointer-events-auto ml-2"
-						aria-label="close"
-						onClick={() => dismiss()}
-					>
-						<Icon name="x" />
-					</button>
-				</div>
-				<p className="whitespace-pre-wrap">{body}</p>
+		<Transition
+			isOpen={visible}
+			className={`toast alert ${
+				color === "success"
+					? "alert-success"
+					: color === "warning"
+						? "alert-warning"
+						: color === "error"
+							? "alert-error"
+							: color === "info"
+								? "alert-info"
+								: color === "notice"
+									? "alert-notice"
+									: ""
+			} block! m-4 min-h-16 max-w-md ${
+				action ? "cursor-pointer" : "pointer-events-none"
+			} duration-500 transition-all entering:opacity-0 data-entered:opacity-100! exiting:opacity-0 exiting:pointer-events-none data-exited:hidden`}
+			onClick={() => {
+				action?.();
+				dismiss();
+			}}
+			onMouseEnter={() => pause()}
+			onMouseLeave={() => resume()}
+			afterLeave={() => dismiss()}
+		>
+			<div className="w-full flex items-center justify-between">
+				<h5 className="font-bold text-xl whitespace-pre-wrap">{title}</h5>
+				<button
+					className="close p-1 rounded-full hover:bg-white/30 transition-colors pointer-events-auto ml-2"
+					aria-label="close"
+					onClick={() => dismiss()}
+				>
+					<Icon name="x" />
+				</button>
 			</div>
+			<p className="whitespace-pre-wrap">{body}</p>
 		</Transition>
 	);
 };
