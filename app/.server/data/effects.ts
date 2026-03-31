@@ -13,6 +13,7 @@ import { sound } from "@thorium/ecs-components/sound";
 import type { DataContext } from "@thorium/.server/DataContext";
 import { playServerSound } from "@thorium/utils/.server/playRangedSound";
 import type { ECS } from "@thorium/utils/ecs";
+import { applyCardHighlight } from "@thorium/utils/.server/applyCardHighlight";
 
 type SoundPayload =
 	| { type: "sound"; entityId: number; sound: SoundEffect & { id: string } }
@@ -286,7 +287,11 @@ export const effects = t.router({
 			if ("clientId" in input) {
 				const { clientId, ...notification } = input;
 				pubsub.publish.effects.sub({
-					effect: { type: "message", ...notification },
+					effect: {
+						type: "message",
+						...notification,
+						action: { type: "cardChange", cards: input.cards || [] },
+					},
 					clientId,
 				});
 
@@ -304,7 +309,11 @@ export const effects = t.router({
 				const { shipId, station, ...notification } = input;
 
 				pubsub.publish.effects.sub({
-					effect: { type: "message", ...notification },
+					effect: {
+						type: "message",
+						...notification,
+						action: { type: "cardChange", cards: input.cards || [] },
+					},
 					shipId,
 					station,
 				});
@@ -324,23 +333,6 @@ export const effects = t.router({
 			}
 		}),
 });
-
-function applyCardHighlight(
-	ecs: ECS,
-	shipId: number,
-	station?: string | null,
-	cards?: string[],
-) {
-	const ship = ecs.getEntityById(shipId);
-	const stationObject = ship?.components.stationComplement?.stations.find(
-		(s) => s.name === station,
-	);
-	for (const card of stationObject?.cards || []) {
-		if (cards?.includes(card.name)) {
-			card.highlight = true;
-		}
-	}
-}
 
 function matchSound(
 	sound: SoundEffect,

@@ -10,6 +10,7 @@ import { selectAvailableTimelines } from "@thorium/utils/.server/executeBlocks";
 import type { Entity } from "@thorium/utils/ecs";
 import z from "zod";
 import MarkdownIt from "markdown-it";
+import { applyCardHighlight } from "@thorium/utils/.server/applyCardHighlight";
 const md = MarkdownIt();
 
 const clientSettings = z.object({
@@ -150,13 +151,26 @@ export const client = t.router({
 			const flightClient = getFlightClient(ctx, input);
 			flightClient.updateComponent("flightClient", { currentCard: input.card });
 
+			// Turn off the highlight for this card
+			applyCardHighlight(
+				ctx.ecs,
+				flightClient.components.flightClient?.shipId || -1,
+				flightClient.components.flightClient?.stationId,
+				[input.card],
+				false,
+			);
+
+			const clientId = flightClient.components.flightClient?.clientId || "";
 			pubsub.publish.client.all();
 			pubsub.publish.client.get({
-				clientId: flightClient.components.flightClient?.clientId || "",
+				clientId,
+			});
+			pubsub.publish.station.get({
+				clientId,
 			});
 			return {
 				card: input.card,
-				clientId: flightClient.components.flightClient?.clientId,
+				clientId,
 				station: flightClient.components.flightClient?.stationId,
 				shipId: flightClient.components.flightClient?.shipId,
 			};
