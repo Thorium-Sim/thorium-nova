@@ -20,6 +20,15 @@ export const effectOptions = z.union([
 		title: z.string(),
 		body: z.string().optional(),
 		duration: z.number().optional(),
+
+		action: z
+			.union([
+				/** Change cards to the first card listed here which is present on the station */
+				z.object({ type: z.literal("cardChange"), cards: z.string().array() }),
+				// Placeholder until another action is encoded here
+				z.object({ type: z.literal("unknown") }),
+			])
+			.optional(),
 	}),
 ]);
 
