@@ -22,7 +22,6 @@ export function TriggerAction({
 	const [availableActions] = q.thorium.actions.useNetRequest();
 	if (!action) return null;
 	const input = availableActions.find((a) => a.action === action.action)?.input;
-
 	return (
 		<>
 			{rename ? (

@@ -39,6 +39,7 @@ export const flightClient = z
 						name: z.string(),
 						icon: z.string().optional(),
 						component: z.string(),
+						highlight: z.boolean().optional(),
 					})
 					.array(),
 				widgets: z

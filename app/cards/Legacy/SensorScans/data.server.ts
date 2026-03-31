@@ -130,8 +130,7 @@ export const sensorScans = t.router({
 				for (const station of stations) {
 					pubsub.publish.effects.sub({
 						clientId: null,
-						effect: "flash",
-						config: {},
+						effect: { type: "flash" },
 						shipId: input.shipId,
 						station: station.name,
 					});

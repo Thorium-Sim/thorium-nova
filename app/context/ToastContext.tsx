@@ -32,7 +32,7 @@ const Toast = ({
 									: color === "notice"
 										? "alert-notice"
 										: ""
-				} !block m-4 min-h-16 max-w-md ${
+				} block! m-4 min-h-16 max-w-md ${
 					action ? "cursor-pointer" : "pointer-events-none"
 				}`}
 				onClick={() => {
@@ -133,7 +133,7 @@ export default function ToastContainer() {
 	useEffect(() => {
 		if (!portalRef) {
 			const div = document.createElement("div");
-			div.className = "toast-container";
+			div.className = "toast-container theme-container";
 			document.body.appendChild(div);
 			setPortalRef(div);
 		}
