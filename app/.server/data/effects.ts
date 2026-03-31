@@ -22,7 +22,7 @@ type SoundPayload =
 	| { type: "stopAll" };
 
 const stationOrClient = z.union([
-	z.object({ clientId: z.string() }),
+	z.object({ clientName: z.string() }),
 	z.object({
 		shipId: z.number(),
 		station: z
@@ -284,8 +284,9 @@ export const effects = t.router({
 				.and(stationOrClient),
 		)
 		.send(({ ctx, input }) => {
-			if ("clientId" in input) {
-				const { clientId, ...notification } = input;
+			if ("clientName" in input) {
+				const { clientName, ...notification } = input;
+				const clientId = ctx.server.getClientByName(input.clientName)?.id || "";
 				pubsub.publish.effects.sub({
 					effect: {
 						type: "message",
@@ -296,7 +297,8 @@ export const effects = t.router({
 				});
 
 				// Add the card highlight to this client's station
-				const flightClient = ctx.getFlightClient(input.clientId);
+				const flightClient = ctx.getFlightClient(input.clientName);
+				console.log(flightClient?.components.flightClient);
 				applyCardHighlight(
 					ctx.ecs,
 					flightClient?.components.flightClient?.shipId || -1,

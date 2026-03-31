@@ -1,4 +1,4 @@
-import type {DatabaseContext} from "@thorium/typeguards/isDatabaseContext";
+import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
 import type { ServerDataModel } from "./classes/ServerDataModel";
 import type { FlightDataModel } from "./classes/FlightDataModel";
 import { DataStore } from "@thorium/utils/.server/db-fs";
@@ -42,6 +42,10 @@ export class DataContext {
 		return this.database.server.clients[clientId];
 	}
 	getFlightClient(clientId: string) {
+		const serverClient = this.database.server.getClientByName(clientId);
+		if (serverClient) {
+			clientId = serverClient.id;
+		}
 		if (!this.database.flight) return null;
 		if (!this.database.flight.flightClientIndex.has(clientId)) {
 			for (const entity of this.ecs.componentCache.get("flightClient") || []) {

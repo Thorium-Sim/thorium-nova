@@ -31,6 +31,12 @@ export class ServerDataModel extends DataStore {
 			}),
 		);
 	}
+	getClientByName(clientName: string) {
+		for (const client in this.clients) {
+			if (this.clients[client].name === clientName) return this.clients[client];
+		}
+		return null;
+	}
 	async loadPlugins() {
 		await this.loadPluginsImpl.apply(this);
 
