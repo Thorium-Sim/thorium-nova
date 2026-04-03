@@ -43,6 +43,12 @@ class MockServerDataModel {
 			test: new Client("test", router, pubsub),
 		};
 	}
+	getClientByName(clientName: string) {
+		for (const client in this.clients) {
+			if (this.clients[client].name === clientName) return this.clients[client];
+		}
+		return null;
+	}
 	toJSON() {
 		const { plugins, ...data } = this;
 		return data;

@@ -327,7 +327,7 @@ export async function executeBlocks(
 						}),
 					),
 				};
-				theResult = await triggerAction(block.action, values, ecs);
+				theResult = await triggerAction(block.action, values);
 				break;
 			}
 			case "RandomIntoVariable": {
