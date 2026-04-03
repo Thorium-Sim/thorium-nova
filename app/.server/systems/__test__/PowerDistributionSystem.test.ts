@@ -319,14 +319,8 @@ describe("PowerDistributionSystem", () => {
 			return system;
 		});
 
-		if (typeof Bun === "undefined") {
-			const time = performance.now();
-			ecs.update(16);
-			expect(performance.now() - time).toBeLessThan(1);
-		} else {
-			const time = Bun.nanoseconds() / 1_000_000;
-			ecs.update(16);
-			expect(Bun.nanoseconds() / 1_000_000 - time).toBeLessThan(1);
-		}
+		const time = ecs.now();
+		ecs.update(16);
+		expect(ecs.now() - time).toBeLessThan(1);
 	});
 });
