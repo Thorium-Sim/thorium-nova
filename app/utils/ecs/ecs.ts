@@ -28,7 +28,7 @@ class ECS {
 	 * Count how many updates have been done.
 	 */
 	updateCounter = 0;
-	lastUpdate = performance.now();
+	lastUpdate = Bun.nanoseconds() / 1_000_000;
 	rng: RNG;
 	maxEntityId = 1;
 	componentCache = new Map<ComponentIds, Set<Entity>>();
@@ -159,7 +159,7 @@ class ECS {
 	 * @method update
 	 */
 	update(testElapsed?: number) {
-		const now = performance.now();
+		const now = Bun.nanoseconds() / 1_000_000;
 		const elapsed = testElapsed ?? now - this.lastUpdate;
 		if (this.entitiesSystemsDirty.size > 0) {
 			this.cleanDirtyEntities();

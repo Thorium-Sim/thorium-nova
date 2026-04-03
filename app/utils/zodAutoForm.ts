@@ -257,11 +257,6 @@ export function parseSchema(
 		}
 
 		if (schema._def.typeName === "ZodUnion") {
-			console.log(
-				schema._def.options.map((option: any) =>
-					parseSchema(option, overrides, nestedName),
-				),
-			);
 			return schema._def.options.flatMap((option: any) =>
 				parseSchema(option, overrides, nestedName),
 			);

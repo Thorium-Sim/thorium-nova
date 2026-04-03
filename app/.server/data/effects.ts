@@ -298,7 +298,6 @@ export const effects = t.router({
 
 				// Add the card highlight to this client's station
 				const flightClient = ctx.getFlightClient(input.clientName);
-				console.log(flightClient?.components.flightClient);
 				applyCardHighlight(
 					ctx.ecs,
 					flightClient?.components.flightClient?.shipId || -1,

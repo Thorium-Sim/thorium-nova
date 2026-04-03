@@ -4,6 +4,7 @@ export const timelineBlockTypes = [
 	"EventCondition",
 	"IfCondition",
 	"Wait",
+	"WaitComplete",
 	"ShipSystemGetter",
 	"ResultPropertyIntoVariable",
 	"EntityPropertyIntoVariable",
@@ -86,6 +87,7 @@ export const timelineBlockDefaults: {
 		time: 5,
 		unit: "seconds",
 	},
+	WaitComplete: {},
 	ShipSystemGetter: {
 		count: "all",
 		entity: "",
@@ -192,6 +194,9 @@ interface WaitBlock extends BaseBlock {
 	time: number;
 	unit: "milliseconds" | "seconds" | "minutes";
 }
+interface WaitCompleteBlock extends BaseBlock {
+	type: "WaitComplete";
+}
 
 interface ShipSystemsBlock extends BaseBlock {
 	type: "ShipSystemGetter";
@@ -287,6 +292,7 @@ export type TimelineBlock =
 	| EventConditionBlock
 	| IfConditionBlock
 	| WaitBlock
+	| WaitCompleteBlock
 	| ShipSystemsBlock
 	| ResultPropertyIntoVariableBlock
 	| EntityPropertyIntoVariableBlock

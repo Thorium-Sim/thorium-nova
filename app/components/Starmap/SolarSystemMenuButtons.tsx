@@ -1,4 +1,4 @@
-import * as React from "react";
+import type * as React from "react";
 import { useConfirm } from "@thorium/ui/AlertDialog";
 import Button from "../ui/Button";
 import { q } from "@thorium/context/AppContext";

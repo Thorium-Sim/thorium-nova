@@ -13,7 +13,7 @@ import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import type { Entity } from "@thorium/utils/ecs";
 import { pathfinder } from "@thorium/utils/starmap/pathfinder.server";
 import { Vector3 } from "three";
-import { z } from "zod";
+import z from "zod";
 
 export const pilot = t.router({
 	impulseEngines: t.router({

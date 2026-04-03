@@ -12,7 +12,7 @@ import {
 	getObjectSystem,
 } from "@thorium/utils/starmap/position";
 import { Vector3 } from "three";
-import { z } from "zod";
+import z from "zod";
 
 export const ship = t.router({
 	get: t.procedure
