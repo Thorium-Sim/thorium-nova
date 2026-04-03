@@ -56,7 +56,13 @@ export async function executeBlocks(
 						{ id: uniqid("blk-"), type: "WaitComplete" },
 						...blocks.slice(blockIndex + 1),
 					],
-					blockMetadata,
+					{
+						stepId,
+						localVariables,
+						theResult,
+						executionType,
+						callReturnBlocks,
+					},
 					timer,
 				);
 
