@@ -394,6 +394,8 @@ const quotes = [
 	"A revolution must be started by yourself. An egg, opened from the outside, is food; opened from the inside, it is a new life.",
 	// Niko Stratis https://bsky.app/profile/nikostratis.com/post/3mgpgk4ivzk25
 	"You can't critique anything if you don't know how to love something.",
+	// Gwendolyn Brooks
+	"Go ahead and live your life. You might be surprised. The world might continue.",
 ];
 
 const QuoteOfTheDay = () => {
