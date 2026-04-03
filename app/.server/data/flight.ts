@@ -143,8 +143,7 @@ export const flight = t.router({
 	resume: t.procedure.send(({ ctx }) => {
 		if (ctx.flight) {
 			ctx.flight.paused = false;
-			// Convert nanoseconds to milliseconds
-			ctx.ecs.lastUpdate = Bun.nanoseconds() / 1_000_000;
+			ctx.ecs.lastUpdate = ctx.ecs.now();
 			ctx.flight.state = "in-progress";
 			ctx.flight.stateReason = "";
 			pubsub.publish.flight.active();
