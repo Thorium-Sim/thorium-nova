@@ -59,7 +59,8 @@ export function RenderBlock({
 			<BlockWrapper onRemove={() => onRemove(block.id)}>
 				{block.type === "Wait" ? (
 					<WaitBlock {...block} update={update} />
-				) : block.type === "DistanceCondition" ? (
+				) : block.type === "WaitComplete" ? null : block.type ===
+					"DistanceCondition" ? (
 					<DistanceCondition {...block} update={update} />
 				) : block.type === "EntityCondition" ? (
 					<EntityCondition {...block} update={update} />

@@ -8,8 +8,6 @@ import type { ECS, Entity } from "../ecs";
 import type { actionItem, conditionSchema } from "../flags/actionSchema";
 import { getNavigationDistance } from "../starmap/getNavigationDistance";
 import { lightMinuteToKilometer, lightYearToLightMinute } from "../unitTypes";
-import { DataContext } from "../../.server/DataContext";
-import { database } from "@thorium/.server/init/buildDatabase";
 import {
 	getCompletePositionFromOrbit,
 	getObjectSystem,
