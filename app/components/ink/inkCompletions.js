@@ -581,7 +581,6 @@ function eventNameItems(events, range) {
 
     const insertText = `${name} ${snippetParts.join(" ")}`;
 
-    console.log(signature);
     return {
       label: name,
       kind: CIK.Event,

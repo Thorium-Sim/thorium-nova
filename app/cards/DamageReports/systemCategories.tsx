@@ -18,6 +18,7 @@ export const systemCategories: Record<
 	impulseEngines: "Propulsion",
 	inertialDampeners: "Propulsion",
 	longRangeComm: "Communications",
+	shortRangeComm: "Communications",
 	mainComputer: "Science",
 	navigation: "Propulsion",
 	phasers: "Defense",

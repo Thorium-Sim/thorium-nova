@@ -12,7 +12,6 @@ import type { position as positionComponent } from "@thorium/ecs-components/posi
 import { sound } from "@thorium/ecs-components/sound";
 import type { DataContext } from "@thorium/.server/DataContext";
 import { playServerSound } from "@thorium/utils/.server/playRangedSound";
-import type { ECS } from "@thorium/utils/ecs";
 import { applyCardHighlight } from "@thorium/utils/.server/applyCardHighlight";
 
 type SoundPayload =
@@ -20,6 +19,15 @@ type SoundPayload =
 	| { type: "cancelLooping"; entityId: number; soundId: string }
 	| { type: "stop"; entityId: number; soundId: string }
 	| { type: "stopAll" };
+
+type DialoguePayload =
+	| {
+			type: "dialogue";
+			conversationId: number;
+			audioFilepath: string;
+			shipId: number;
+	  }
+	| { type: "stopDialogue"; conversationId: number; shipId: number };
 
 const stationOrClient = z.union([
 	z.object({ clientName: z.string() }),
@@ -189,6 +197,21 @@ export const effects = t.router({
 					}
 				}),
 			);
+		}),
+	dialogue: t.procedure
+		.input(z.object({ clientId: z.string() })) // This request can only be triggered by a publish.
+		.autoPublish([], () => null)
+		.filter((publish: DialoguePayload, { ctx, input: { clientId } }) => {
+			const shipId =
+				ctx.getFlightClient(clientId)?.components.flightClient?.shipId;
+			const dialoguePlayer = ctx.getClient(clientId).settings.dialoguePlayer;
+			if (!dialoguePlayer) return false;
+
+			if (publish && publish.shipId !== shipId) return false;
+			return true;
+		})
+		.request(({ publish }) => {
+			return publish;
 		}),
 	playSound: t.procedure
 		.meta({

@@ -8,19 +8,17 @@ export const isShortRangeComm = z
 		minRadius: z.number().default(10_000),
 		/** The minimum comm radius in Kilometers at maximum power */
 		maxRadius: z.number().default(1_000_000),
-		state: z.enum(["idle", "scanning", "calling", "connected"]).default("idle"),
+		state: z.enum(["idle", "hailing", "connected"]).default("idle"),
 		/**
-		 * Reference to the isShortRangeCommConversation entity.
-		 * For a player ship, this is the current conversation that they are connected to.
-		 * For a NPC, this is either the current conversation or a conversation they are
-		 * going to have when they are called or their hail is connected.
+		 * Reference to the isShortRangeCommConversation entity for an active conversation..
 		 */
-		conversationId: z.number().default(-1),
+		conversationId: z.number().nullable().default(null),
 		/**
-		 * How the ship attached to this system is referenced in the Ink conversation,
-		 * for conversations between more than two player or NPC ships
+		 * Reference to a isConversationTemplate entity.
+		 * When hailing an NPC ship, this is the conversation which will ensue.
+		 * If not set, the hail will be rejected.
 		 **/
-		conversationTag: z.string().default("Crew"),
+		templateConversationId: z.number().nullable().default(null),
 	})
 	.default({});
 
@@ -32,34 +30,9 @@ export const isShortRangeComm = z
 export const isShortRangeCommConversation = z
 	.object({
 		frequency: z.number().default(276.25),
-		conversationTemplateId: z.number().nullable().default(null),
-		/**
-		 * The Ink story class that runs the conversation. Not persisted,
-		 * it should be re-created using the conversation template and the conversationState
-		 */
-		inkStory: z.any().default(null),
-		/** The current line of dialogue being delivered */
-		currentDialogue: z
-			.object({
-				text: z.string(),
-				/** For more than one speakers in the conversation, this is the ID of the conversation partner delivering the dialogue */
-				speakerId: z.number(),
-			})
-			.default({ text: "", speakerId: -1 }),
-		/** The choices that are available for the player ships to choose from */
-		currentChoices: z
-			.object({
-				text: z.string(),
-				/** For more than one player ship in the conversation, this is the ID of the conversation partner that is able to deliver this line of dialogue.
-				 * If null, any player ship may deliver the line.
-				 */
-				speakerId: z.number().nullable(),
-				/** If this choice was selected, we keep the remaining choices on the screen while the next line of dialogue is delivered */
-				selected: z.boolean().default(false),
-			})
-			.array()
-			.default([]),
-		/** The saved conversation state from Ink */
-		conversationState: z.any(),
+		hostId: z.number().default(-1),
+		targetId: z.number().default(-1),
+		/** Allow other participants to join in this conversation */
+		allowAdditionalParticipants: z.boolean().default(false),
 	})
 	.default({});

@@ -150,7 +150,7 @@ export const inkLanguage = {
 		// ─── INCLUDE path ────────────────────────────────────────────────────────
 		include: [
 			[/\s+/, ""],
-			[/[a-zA-Z0-9_./\\-]+(?:\.ink)?/, "string.unquoted.filename"],
+			[/[a-zA-Z0-9_./\-]+(?:\.ink)?/, "string.unquoted.filename"],
 			[/$/, "", "@pop"],
 		],
 
@@ -311,7 +311,7 @@ export const inkLanguage = {
 
 export function registerInk(monaco: Monaco) {
 	monaco.languages.register({ id: "ink" });
-	monaco.languages.setMonarchTokensProvider("ink", inkLanguage);
+	monaco.languages.setMonarchTokensProvider("ink", inkLanguage as any);
 
 	// Basic language configuration (brackets, comments, auto-closing pairs)
 	monaco.languages.setLanguageConfiguration("ink", {

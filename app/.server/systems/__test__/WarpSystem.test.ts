@@ -1,8 +1,15 @@
 import { ECS, Entity } from "@thorium/utils/ecs";
 import { WarpSystem } from "../WarpSystem";
-import { beforeEach, describe, expect, it } from "vitest";
+import { aroundEach, beforeEach, describe, expect, it } from "vitest";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
+import { DataStore } from "@thorium/utils/.server/db-fs";
+import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 
+aroundEach(async (runTest) => {
+	await DataStore.operations.run(testDataStoreProps, async () => {
+		runTest();
+	});
+});
 describe("WarpSystem", () => {
 	let ecs: ECS;
 	let warpSystem: WarpSystem;

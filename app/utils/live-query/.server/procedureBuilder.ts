@@ -30,6 +30,7 @@ import type {
 	UndefinedKeys,
 } from "./types";
 import type { Entity } from "@thorium/utils/ecs";
+import { DataStore } from "@thorium/utils/.server/db-fs";
 
 type ErrorMessage<TMessage extends string> = TMessage;
 

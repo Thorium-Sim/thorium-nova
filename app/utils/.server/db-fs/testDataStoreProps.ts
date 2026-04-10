@@ -1,6 +1,8 @@
+import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
 import type { DataStoreOperations } from "@thorium/utils/.server/db-fs";
 
 export const testDataStoreProps: DataStoreOperations = {
+	database: {} as DatabaseContext,
 	async getData() {
 		return "";
 	},

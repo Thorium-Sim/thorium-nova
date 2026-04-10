@@ -1,0 +1,472 @@
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
+import { loadInkStory } from "@thorium/utils/.server/ink/loadInkStory";
+import {
+	doForEachConversationPartner,
+	runInkStory,
+} from "@thorium/utils/.server/ink/runInkStory";
+import {
+	cancelLoopingSound,
+	playShipSound,
+} from "@thorium/utils/.server/playRangedSound";
+import { scheduleAction } from "@thorium/utils/.server/scheduleAction";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import { triggerAction } from "@thorium/utils/.server/triggerAction";
+import { Entity } from "@thorium/utils/ecs";
+import type { Story } from "inkjs";
+import z from "zod";
+
+export const shortRangeComm = t.router({
+	get: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.filter((publish: { shipId: number }, { ctx, input }) => {
+			if (publish && publish.shipId !== input.shipId) return false;
+			return true;
+		})
+		.autoPublish(
+			["isShortRangeComm"],
+			(entity) =>
+				entity.components.isShortRangeComm && [
+					{ shipId: entity.components.isShipSystem?.shipId || -1 },
+				],
+		)
+		.request(({ input, ctx }) => {
+			const srcomm = getShipSystem(ctx.ecs, {
+				systemType: "shortRangeComm",
+				shipId: input.shipId,
+			});
+			if (!srcomm?.components.isShortRangeComm)
+				throw new Error("No Short Range Comm System");
+			return {
+				id: srcomm.id,
+				requiredPower: srcomm.components.power?.powerLevels[0] || 0,
+				maxSafePower: srcomm.components.power?.powerLevels.at(-1) || 1,
+				currentPower: srcomm.components.power?.powerSources.length || 0,
+				frequency: srcomm.components.isShortRangeComm.antennaFrequency,
+				gain: srcomm.components.isShortRangeComm.antennaGain,
+				minRadius: srcomm.components.isShortRangeComm.minRadius,
+				maxRadius: srcomm.components.isShortRangeComm.maxRadius,
+			};
+		}),
+	/**
+	 * Get all of the conversations happening in the solar system.
+	 * We'll filter them client-side based on the position of the ship
+	 * and use these to connect to existing conversations between two other ships
+	 */
+	conversations: t.procedure
+		.input(z.object({ systemId: z.number().nullable() }))
+		.filter((publish: { systemId: number | null }, { ctx, input }) => {
+			if (publish && publish.systemId !== input.systemId) return false;
+			return true;
+		})
+		.autoPublish(
+			["isShortRangeCommConversation"],
+			(entity) =>
+				entity.components.position && [
+					{ systemId: entity.components.position.parentId },
+				],
+		)
+		.request(({ input, ctx }) => {
+			const conversations = [];
+			for (const conversation of ctx.ecs.componentCache.get(
+				"isShortRangeCommConversation",
+			) || []) {
+				const convo = conversation.components.isShortRangeCommConversation;
+				// Conversation's position is based on the host's position
+				const host = ctx.ecs.getEntityById(convo?.hostId || -1);
+				if (convo && host?.components.position?.parentId === input.systemId) {
+					conversations.push({
+						id: conversation.id,
+						targetId: convo.targetId,
+						frequency: convo.frequency,
+					});
+				}
+			}
+			return conversations;
+		}),
+	conversation: t.procedure
+		.input(z.object({ conversationId: z.number() }))
+		.filter((publish: { conversationId: number }, { ctx, input }) => {
+			if (publish && publish.conversationId !== input.conversationId)
+				return false;
+			return true;
+		})
+		.autoPublish(["isShortRangeCommConversation"], (entity) => [
+			{ conversationId: entity.id },
+		])
+		.request(({ ctx, input }) => {
+			const conversation = ctx.ecs.getEntityById(input.conversationId);
+			const srConvo = conversation?.components.isShortRangeCommConversation;
+			if (!srConvo) throw new Error("Conversation not found.");
+			return {
+				id: conversation.id,
+				frequency: srConvo.frequency,
+				hostId: srConvo.hostId,
+			};
+		}),
+	setFrequency: t.procedure
+		.input(z.object({ shipId: z.number(), frequency: z.number() }))
+		.send(({ ctx, input }) => {
+			const srcomm = getShipSystem(ctx.ecs, {
+				systemType: "shortRangeComm",
+				shipId: input.shipId,
+			});
+			if (!srcomm?.components.isShortRangeComm)
+				throw new Error("No Short Range Comm System");
+			srcomm.updateComponent("isShortRangeComm", {
+				antennaFrequency: input.frequency,
+			});
+			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
+		}),
+	setGain: t.procedure
+		.input(z.object({ shipId: z.number(), gain: z.number() }))
+		.send(({ ctx, input }) => {
+			const srcomm = getShipSystem(ctx.ecs, {
+				systemType: "shortRangeComm",
+				shipId: input.shipId,
+			});
+			if (!srcomm?.components.isShortRangeComm)
+				throw new Error("No Short Range Comm System");
+			srcomm.updateComponent("isShortRangeComm", { antennaGain: input.gain });
+			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
+		}),
+	/**
+	 * Defines the conversation that will happen when an NPC is hailed.
+	 * If no conversation is set, the NPC will reject the hail.
+	 */
+	setTemplateConversation: t.procedure
+		.input(
+			z.object({
+				shipId: z.number(),
+				templateConversationId: z.number().nullable(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			const srcomm = getShipSystem(ctx.ecs, {
+				systemType: "shortRangeComm",
+				shipId: input.shipId,
+			});
+			if (!srcomm?.components.isShortRangeComm)
+				throw new Error("No Short Range Comm System");
+			srcomm.updateComponent("isShortRangeComm", {
+				templateConversationId: input.templateConversationId,
+			});
+		}),
+	/**
+	 * Creating a new conversation between two ships
+	 */
+	hail: t.procedure
+		.input(
+			z.object({
+				shipId: z.number(),
+				targetId: z.number(),
+				conversationTemplateId: z.number().optional(),
+				allowOtherParticipants: z.boolean().optional(),
+			}),
+		)
+		.output(z.object({ conversationId: z.number() }))
+		.send(({ ctx, input }) => {
+			const srcomm = getShipSystem(ctx.ecs, {
+				systemType: "shortRangeComm",
+				shipId: input.shipId,
+			});
+			if (!srcomm?.components.isShortRangeComm)
+				throw new Error("No Short Range Comm System");
+
+			const targetSrComm = getShipSystem(ctx.ecs, {
+				systemType: "shortRangeComm",
+				shipId: input.targetId,
+			});
+
+			const conversationTemplateId =
+				input.conversationTemplateId ||
+				targetSrComm.components.isShortRangeComm?.templateConversationId;
+			const conversationTemplate = ctx.ecs.getEntityById(
+				conversationTemplateId || -1,
+			);
+
+			const conversation = new Entity();
+			conversation.addComponent("isShortRangeCommConversation", {
+				hostId: input.shipId,
+				targetId: input.targetId,
+				frequency: srcomm.components.isShortRangeComm.antennaFrequency,
+				conversationTemplateId: input.conversationTemplateId,
+				allowAdditionalParticipants: input.allowOtherParticipants || false,
+			});
+			conversation.addComponent("isConversation", {
+				inkFilePath:
+					conversationTemplate?.components.isConversationTemplate?.inkFilePath,
+			});
+			ctx.ecs.addEntity(conversation);
+
+			// Set the conversation here, but don't kick off the Ink script until its properly connected
+			srcomm.updateComponent("isShortRangeComm", {
+				state: "hailing",
+				conversationId: conversation.id,
+			});
+
+			// When hailing an NPC, if that NPC is already in a conversation, reject it immediately.
+			if (
+				targetSrComm.components.isShortRangeComm?.conversationId &&
+				targetSrComm.components.isShortRangeComm.state === "connected"
+			) {
+				// Swap the target and ship, since in this case, the target is the one doing the rejecting
+				triggerAction("shortRangeComm.reject", {
+					shipId: input.targetId,
+					conversationId: conversation.id,
+				});
+				return { conversationId: -1 };
+			}
+
+			const hostShip = ctx.ecs.getEntityById(input.shipId || -1);
+			const targetShip = ctx.ecs.getEntityById(input.targetId || -1);
+
+			// If an NPC has no conversation template, the hail will be rejected after a few seconds
+			if (!conversationTemplate?.components.isConversationTemplate) {
+				// Swap the target and ship, since in this case, the target is the one doing the rejecting
+				scheduleAction(
+					ctx.ecs,
+					"shortRangeComm.reject",
+					{ shipId: input.targetId, conversationId: conversation.id },
+					3000 + ctx.ecs.rng.nextInt(2000, 4000),
+				);
+			}
+
+			// Automatically have the NPC connect the hail
+			else if (!targetShip?.components.isPlayerShip) {
+				scheduleAction(
+					ctx.ecs,
+					"shortRangeComm.connect",
+					{ shipId: input.targetId, conversationId: conversation.id },
+					3000 + ctx.ecs.rng.nextInt(2000, 4000),
+				);
+			}
+
+			if (hostShip) {
+				// Play hailing sounds for both ships
+				cancelLoopingSound(srcomm, "outgoingHail");
+				playShipSound(srcomm, hostShip, "outgoingHail");
+			}
+			if (targetShip) {
+				cancelLoopingSound(targetSrComm, "incomingHail");
+				playShipSound(targetSrComm, targetShip, "incomingHail");
+			}
+
+			pubsub.publish.shortRangeComm.conversation({
+				conversationId: conversation.id,
+			});
+			pubsub.publish.conversation.conversation({
+				conversationId: conversation.id,
+			});
+			pubsub.publish.shortRangeComm.conversations({
+				systemId: hostShip?.components.position?.parentId || null,
+			});
+			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
+			pubsub.publish.shortRangeComm.get({ shipId: input.targetId });
+
+			return { conversationId: conversation.id };
+		}),
+	reject: t.procedure
+		.input(z.object({ shipId: z.number(), conversationId: z.number() }))
+		.send(({ ctx, input }) => {
+			const srcomm = getShipSystem(ctx.ecs, {
+				systemType: "shortRangeComm",
+				shipId: input.shipId,
+			});
+			const conversation = ctx.ecs.getEntityById(input.conversationId);
+			const srConvo = conversation?.components.isShortRangeCommConversation;
+
+			if (!conversation || !srConvo || !srcomm.components.isShortRangeComm)
+				throw new Error("Unable to reject");
+
+			const hostShip = ctx.ecs.getEntityById(srConvo.hostId);
+			// Cancel the hailing sound for both ships
+			const hostShortRangeComm = getShipSystem(ctx.ecs, {
+				systemType: "shortRangeComm",
+				shipId: srConvo.hostId,
+			});
+
+			if (hostShortRangeComm) {
+				cancelLoopingSound(hostShortRangeComm, "outgoingHail");
+				if (hostShip) {
+					playShipSound(hostShortRangeComm, hostShip, "rejected");
+				}
+			}
+
+			const rejectingShip = ctx.ecs.getEntityById(input.shipId);
+			cancelLoopingSound(srcomm, "incomingHail");
+			if (rejectingShip) {
+				playShipSound(srcomm, rejectingShip, "rejected");
+			}
+
+			hostShortRangeComm?.updateComponent("isShortRangeComm", {
+				conversationId: null,
+				state: "idle",
+			});
+			ctx.ecs.removeEntity(conversation);
+			pubsub.publish.shortRangeComm.conversation({
+				conversationId: conversation.id,
+			});
+			pubsub.publish.conversation.conversation({
+				conversationId: conversation.id,
+			});
+			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
+			if (hostShip) {
+				pubsub.publish.shortRangeComm.conversations({
+					systemId: hostShip.components.position?.parentId || null,
+				});
+				pubsub.publish.shortRangeComm.get({ shipId: hostShip.id });
+			}
+		}),
+	connect: t.procedure
+		.input(z.object({ shipId: z.number(), conversationId: z.number() }))
+		.send(async ({ ctx, input }) => {
+			const srcomm = getShipSystem(ctx.ecs, {
+				systemType: "shortRangeComm",
+				shipId: input.shipId,
+			});
+
+			// Only connect if the conversation still exists
+			const conversation = ctx.ecs.getEntityById(input.conversationId);
+			const srConvo = conversation?.components.isShortRangeCommConversation;
+			const convo = conversation?.components.isConversation;
+
+			if (
+				!convo ||
+				!srConvo ||
+				!conversation ||
+				!srcomm.components.isShortRangeComm
+			)
+				throw new Error("Unable to connect");
+
+			// If the connecting ship is neither the host nor the target, only allow the connection
+			// if the conversation allows connections
+			if (
+				input.shipId !== srConvo.hostId &&
+				input.shipId !== srConvo.targetId &&
+				!srConvo.allowAdditionalParticipants
+			) {
+				throw new Error(
+					"Unable to connect — communication only allows two participants.",
+				);
+			}
+
+			// If the conversation has no Ink story, instantiate it
+			let story = convo.inkStory as Story;
+			if (!story) {
+				const hostShip = ctx.ecs.getEntityById(srConvo.hostId);
+				const targetShip = ctx.ecs.getEntityById(srConvo.targetId);
+				const playerShip = hostShip?.components.isPlayerShip
+					? hostShip
+					: targetShip;
+				const npcShip = hostShip?.components.isPlayerShip
+					? targetShip
+					: hostShip;
+				story = await loadInkStory(convo.inkFilePath, convo.conversationState, {
+					playerShipName: playerShip?.components.identity?.name || "Captain",
+					playerShipId: playerShip?.id || -1,
+					npcShipId: npcShip?.id || -1,
+					conversationId: conversation.id,
+				});
+				conversation.updateComponent("isConversation", {
+					inkStory: story,
+				});
+			}
+			// Run the story, executing any actions and events until we get to some actual dialogue.
+			await runInkStory(conversation);
+
+			srcomm.updateComponent("isShortRangeComm", {
+				conversationId: conversation.id,
+				state: "connected",
+			});
+			cancelLoopingSound(srcomm, "incomingHail");
+			const targetShip = ctx.ecs.getEntityById(input.shipId);
+			if (targetShip) {
+				playShipSound(srcomm, targetShip, "connected");
+			}
+			// Update the host to be connected too, and play the connected sound effect
+			doForEachConversationPartner(conversation, (entity, shipId) => {
+				const ship = ctx.ecs.getEntityById(shipId);
+				if (ship) {
+					if (entity.components.isShortRangeComm?.state === "connected") {
+						playShipSound(entity, ship, "incomingConnection");
+					} else {
+						playShipSound(entity, ship, "connected");
+					}
+				}
+				cancelLoopingSound(entity, "outgoingHail");
+				cancelLoopingSound(entity, "incomingHail");
+
+				entity.updateComponent("isShortRangeComm", { state: "connected" });
+			});
+
+			pubsub.publish.shortRangeComm.conversation({
+				conversationId: conversation.id,
+			});
+			pubsub.publish.conversation.conversation({
+				conversationId: conversation.id,
+			});
+			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
+		}),
+	disconnect: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.output(z.object({ shipId: z.number(), previousState: z.string() }))
+		.meta({ action: true, event: true })
+		.send(({ ctx, input }) => {
+			const srcomm = getShipSystem(ctx.ecs, {
+				systemType: "shortRangeComm",
+				shipId: input.shipId,
+			});
+			if (!srcomm?.components.isShortRangeComm)
+				throw new Error("No Short Range Comm System");
+
+			const conversation = ctx.ecs.getEntityById(
+				srcomm.components.isShortRangeComm.conversationId || -1,
+			);
+
+			// Play the disconnect sound for all ships connected to this conversation
+			// to indicate that another ship disconnected
+			if (srcomm.components.isShortRangeComm?.state === "hailing") {
+				const targetSrComm = ctx.ecs.getEntityById(
+					conversation?.components.isShortRangeCommConversation?.targetId || -1,
+				);
+				const ship = ctx.ecs.getEntityById(input.shipId);
+
+				cancelLoopingSound(srcomm, "outgoingHail");
+				if (ship) {
+					playShipSound(srcomm, ship, "cancelled");
+				}
+				if (targetSrComm) {
+					cancelLoopingSound(targetSrComm, "incomingHail");
+					const targetShip = ctx.ecs.getEntityById(
+						targetSrComm.components.isShipSystem?.shipId || -1,
+					);
+					if (targetShip) {
+						playShipSound(targetSrComm, targetShip, "cancelled");
+					}
+				}
+			} else if (srcomm.components.isShortRangeComm.state === "connected") {
+				if (conversation) {
+					doForEachConversationPartner(conversation, (entity, shipId) => {
+						const ship = ctx.ecs.getEntityById(shipId);
+						if (ship) {
+							playShipSound(entity, ship, "disconnected");
+						}
+					});
+				}
+			}
+
+			// When only one participant remains, the conversation remains active so the participant that
+			// left can rejoin the conversation later on. This means that if an NPC disconnects, the player ship
+			// will also have to disconnect. This does provide them with the ability to see the history of the conversation
+			// after the conversation has ended.
+			const previousState = srcomm.components.isShortRangeComm.state;
+			srcomm.updateComponent("isShortRangeComm", {
+				conversationId: null,
+				state: "idle",
+			});
+			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
+
+			return { shipId: input.shipId, previousState };
+		}),
+});

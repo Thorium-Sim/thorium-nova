@@ -8,7 +8,7 @@ import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStorePr
 import { DataStore } from "@thorium/utils/.server/db-fs";
 describe("Ship Spawner", () => {
 	it("should spawn a ship from a template", async () => {
-		DataStore.operations.run(testDataStoreProps, async () => {
+		await DataStore.operations.run(testDataStoreProps, async () => {
 			const dataContext = createMockDataContext();
 			const router = createMockRouter(dataContext);
 

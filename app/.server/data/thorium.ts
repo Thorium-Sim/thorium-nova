@@ -1,5 +1,5 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { router } from "@thorium/.server/init/router";
+import { router, type AllSends } from "@thorium/.server/init/router";
 import { t } from "@thorium/.server/init/t";
 import { actionItem } from "@thorium/utils/flags/actionSchema";
 import { selectValueQuery } from "@thorium/utils/.server/evaluateEntityQuery";
@@ -82,7 +82,7 @@ export const thorium = t.router({
 		.send(async ({ input, ctx }) => {
 			await Promise.all(
 				input.actions.map((action) =>
-					triggerAction(action.action, action.values, ctx),
+					triggerAction(action.action as AllSends, action.values, ctx),
 				),
 			);
 		}),

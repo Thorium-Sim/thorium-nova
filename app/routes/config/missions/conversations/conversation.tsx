@@ -19,7 +19,7 @@ function parseParams(value: any) {
 				["number", "string", "boolean"].includes((value as any).type)
 					? name
 					: Array.isArray((value as any).type) &&
-							(value as any).type.some((v) =>
+							(value as any).type.some((v: any) =>
 								["number", "string", "boolean"].includes(v),
 							)
 						? name

@@ -10,7 +10,7 @@ import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStorePr
 
 describe("StationComplementPlugin", () => {
 	it("should instantiate correctly", async () => {
-		DataStore.operations.run(testDataStoreProps, () => {
+		await DataStore.operations.run(testDataStoreProps, async () => {
 			const plugin = new Plugin(
 				{},
 				{

@@ -6,7 +6,15 @@ import { FilterShipsWithReactors } from "../FilterShipsWithReactors";
 import { HeatDispersionSystem } from "../HeatDispersionSystem";
 import { HeatToCoolantSystem } from "../HeatToCoolantSystem";
 import { ReactorHeatSystem } from "../ReactorHeatSystem";
-import { beforeEach, describe, expect, it } from "vitest";
+import { aroundEach, beforeEach, describe, expect, it } from "vitest";
+import { DataStore } from "@thorium/utils/.server/db-fs";
+import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
+
+aroundEach(async (runTest) => {
+	await DataStore.operations.run(testDataStoreProps, async () => {
+		runTest();
+	});
+});
 
 describe("ReactorHeatSystem", () => {
 	let ecs: ECS;

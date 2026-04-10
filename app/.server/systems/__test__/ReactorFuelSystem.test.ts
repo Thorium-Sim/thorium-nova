@@ -4,8 +4,16 @@ import { ECS, Entity } from "@thorium/utils/ecs";
 import { FilterInventorySystem } from "../FilterInventorySystem";
 import { FilterShipsWithReactors } from "../FilterShipsWithReactors";
 import { ReactorFuelSystem } from "../ReactorFuelSystem";
-import { beforeEach, describe, expect, it } from "vitest";
+import { aroundEach, beforeEach, describe, expect, it } from "vitest";
 import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInventory";
+import { DataStore } from "@thorium/utils/.server/db-fs";
+import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
+
+aroundEach(async (runTest) => {
+	await DataStore.operations.run(testDataStoreProps, async () => {
+		runTest();
+	});
+});
 
 describe("ReactorFuelSystem", () => {
 	let ecs: ECS;

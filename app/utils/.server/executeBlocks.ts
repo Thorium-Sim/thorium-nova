@@ -13,6 +13,7 @@ import { interpolateText } from "@thorium/utils/interpolationEngine";
 import { scheduleBlocks } from "./scheduleAction";
 import uniqid from "../uniqid";
 import type { DataContext } from "@thorium/.server/DataContext";
+import type { AllSends } from "@thorium/.server/init/router";
 
 export class TimelineAvailability {
 	constructor(public isAvailable: boolean) {}
@@ -333,7 +334,7 @@ export async function executeBlocks(
 						}),
 					),
 				};
-				theResult = await triggerAction(block.action, values);
+				theResult = await triggerAction(block.action as AllSends, values);
 				break;
 			}
 			case "RandomIntoVariable": {
@@ -566,7 +567,7 @@ function getEntitiesReference(
 	return entityIds;
 }
 
-function getValueReference(
+export function getValueReference(
 	ref: string,
 	variables: Record<string, any>,
 	ecs: ECS,

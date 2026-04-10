@@ -1,4 +1,4 @@
-import { database } from "./buildDatabase";
+import { DataStore } from "@thorium/utils/.server/db-fs";
 
 export function exitHandler() {
 	if (process.env.NODE_ENV === "production") {
@@ -30,6 +30,7 @@ export function exitHandler() {
 }
 
 export async function snapshot() {
+	const database = DataStore.operations.getStore()!.database;
 	await database.server.write(true);
 	await Promise.all(
 		database.server.plugins.map(async (plugin) => {

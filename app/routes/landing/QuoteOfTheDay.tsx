@@ -396,6 +396,10 @@ const quotes = [
 	"You can't critique anything if you don't know how to love something.",
 	// Gwendolyn Brooks
 	"Go ahead and live your life. You might be surprised. The world might continue.",
+	// Bill McKibben
+	"What's the best thing I can do as an individual? Stop being an individual.",
+	// Rebecca Solnit
+	"Optimism and pessimism all assume we know the future, and therefore nothing is required from us. I think the future is radically uncertain, and therefore much is required of us.",
 ];
 
 const QuoteOfTheDay = () => {

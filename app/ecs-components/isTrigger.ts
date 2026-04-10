@@ -5,6 +5,12 @@ export const isTrigger = z
 	.object({
 		active: z.boolean().default(true),
 		multiple: z.boolean().default(false),
+		/**
+		 * Whether this trigger condition will continue to exist after the
+		 * timeline step has proceeded. Set this to true if you want the
+		 * trigger remain active. It will still automatically deactivate
+		 * once it has been triggered once (unless "multiple" is on).
+		 **/
 		persist: z.boolean().default(false),
 		triggeredAt: z
 			.union([z.string(), z.date()])

@@ -1,8 +1,7 @@
 /* istanbul ignore file */
 
-import type { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
 import type BasePlugin from "@thorium/.server/classes/Plugins";
-import type ThemePlugin from "@thorium/.server/classes/Plugins/Theme";
+import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
 import throttle from "lodash.throttle";
 import { AsyncLocalStorage } from "node:async_hooks";
 
@@ -15,6 +14,7 @@ export interface DataStoreOptions {
 }
 
 export interface DataStoreOperations {
+	database: DatabaseContext;
 	getData(this: DataStore): Promise<unknown>;
 	write(
 		this: Pick<DataStore, "safeMode" | "meta" | "initialData" | "toJSON">,

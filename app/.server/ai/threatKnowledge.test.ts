@@ -3,66 +3,62 @@ import { createMockDataContext } from "@thorium/utils/.server/createMockDataCont
 import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { type ECS, Entity } from "@thorium/utils/ecs";
-import { describe, expect, it } from "vitest";
+import { aroundEach, describe, expect, it } from "vitest";
+
+aroundEach(async (runTest) => {
+	await DataStore.operations.run(testDataStoreProps, async () => {
+		runTest();
+	});
+});
 
 describe("threatKnowledge", () => {
 	it("should develop a threat assessment for a friendly ship", () => {
-		DataStore.operations.run(testDataStoreProps, () => {
-			const dataContext = createMockDataContext();
-			const ecs = dataContext.ecs;
-			const { ship, target } = setUpShipAndTarget(ecs);
-			expect(threatKnowledge(ship)?.get(target.id)?.score).toEqual(0);
-		});
+		const dataContext = createMockDataContext();
+		const ecs = dataContext.ecs;
+		const { ship, target } = setUpShipAndTarget(ecs);
+		expect(threatKnowledge(ship)?.get(target.id)?.score).toEqual(0);
 	});
 	it("should develop a threat assessment for a neutral ship", () => {
-		DataStore.operations.run(testDataStoreProps, () => {
-			const dataContext = createMockDataContext();
-			const ecs = dataContext.ecs;
-			const { ship, target } = setUpShipAndTarget(ecs);
+		const dataContext = createMockDataContext();
+		const ecs = dataContext.ecs;
+		const { ship, target } = setUpShipAndTarget(ecs);
 
-			const faction = new Entity();
-			faction.addComponent("isFaction");
-			faction.addComponent("reputation", {
-				reputation: { [faction.id.toString()]: 1000 },
-			});
-			ecs.addEntity(faction);
-
-			target.updateComponent("faction", { factionId: faction.id });
-
-			expect(threatKnowledge(ship)?.get(target.id)?.score).toBeCloseTo(
-				0.222048,
-			);
+		const faction = new Entity();
+		faction.addComponent("isFaction");
+		faction.addComponent("reputation", {
+			reputation: { [faction.id.toString()]: 1000 },
 		});
+		ecs.addEntity(faction);
+
+		target.updateComponent("faction", { factionId: faction.id });
+
+		expect(threatKnowledge(ship)?.get(target.id)?.score).toBeCloseTo(0.222048);
 	});
 	it("should develop a threat assessment for a hostile ship", () => {
-		DataStore.operations.run(testDataStoreProps, () => {
-			const dataContext = createMockDataContext();
-			const ecs = dataContext.ecs;
-			const { ship, target, faction } = setUpShipAndTarget(ecs);
+		const dataContext = createMockDataContext();
+		const ecs = dataContext.ecs;
+		const { ship, target, faction } = setUpShipAndTarget(ecs);
 
-			const hostileFaction = new Entity();
-			hostileFaction.addComponent("isFaction");
-			hostileFaction.addComponent("reputation", {
-				reputation: {
-					[hostileFaction.id.toString()]: 1000,
-					[faction.id.toString()]: -1000,
-				},
-			});
-			ecs.addEntity(hostileFaction);
-
-			faction.updateComponent("reputation", {
-				reputation: {
-					...faction.components.reputation?.reputation,
-					[hostileFaction.id.toString()]: -1000,
-				},
-			});
-
-			target.updateComponent("faction", { factionId: hostileFaction.id });
-
-			expect(threatKnowledge(ship)?.get(target.id)?.score).toBeCloseTo(
-				0.666144,
-			);
+		const hostileFaction = new Entity();
+		hostileFaction.addComponent("isFaction");
+		hostileFaction.addComponent("reputation", {
+			reputation: {
+				[hostileFaction.id.toString()]: 1000,
+				[faction.id.toString()]: -1000,
+			},
 		});
+		ecs.addEntity(hostileFaction);
+
+		faction.updateComponent("reputation", {
+			reputation: {
+				...faction.components.reputation?.reputation,
+				[hostileFaction.id.toString()]: -1000,
+			},
+		});
+
+		target.updateComponent("faction", { factionId: hostileFaction.id });
+
+		expect(threatKnowledge(ship)?.get(target.id)?.score).toBeCloseTo(0.666144);
 	});
 });
 

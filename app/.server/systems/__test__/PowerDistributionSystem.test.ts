@@ -1,8 +1,16 @@
 import { PowerDistributionSystem } from "@thorium/.server/systems/PowerDistributionSystem";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
+import { DataStore } from "@thorium/utils/.server/db-fs";
+import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { ECS, Entity } from "@thorium/utils/ecs";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
-import { beforeEach, describe, expect, it } from "vitest";
+import { aroundEach, beforeEach, describe, expect, it } from "vitest";
+
+aroundEach(async (runTest) => {
+	await DataStore.operations.run(testDataStoreProps, async () => {
+		runTest();
+	});
+});
 
 describe("PowerDistributionSystem", () => {
 	let ecs: ECS;

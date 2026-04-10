@@ -10,6 +10,7 @@ import {
 import type ECS from "./ecs";
 import type System from "./system";
 import { DefaultUIDGenerator, UIDGenerator } from "./uid";
+import { loadInkStory } from "../.server/ink/loadInkStory";
 
 type DeepPartial<T> = Partial<{
 	[P in keyof T]: Partial<T[P]>;
@@ -92,6 +93,16 @@ class Entity {
 				this.components[componentId as ComponentIds] = component.parse(
 					data,
 				) as any;
+
+				if (componentId === "isConversation") {
+					// Reinstantiate the Ink story
+					loadInkStory(
+						this.components.isConversation!.inkFilePath,
+						this.components.isConversation?.conversationState,
+					).then((story) => {
+						this.components.isConversation!.inkStory = story;
+					});
+				}
 			} catch (err) {
 				console.error("Error initializing component:", componentId, err);
 			}
@@ -113,6 +124,25 @@ class Entity {
 					}
 					if (key === "nearbyObjects") {
 						return [key, { objects: new Map() }];
+					}
+					if (key === "isConversation" && comp && "inkStory" in comp) {
+						const {
+							conversationState,
+							inkFilePath,
+							currentChoices,
+							currentDialogue,
+							inkStory,
+						} = comp;
+						const state = inkStory?.state.ToJson() || conversationState;
+						return [
+							key,
+							{
+								conversationState: state,
+								inkFilePath,
+								currentChoices,
+								currentDialogue,
+							},
+						];
 					}
 					return [key, comp];
 				}),

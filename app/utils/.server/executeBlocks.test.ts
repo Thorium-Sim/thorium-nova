@@ -1,4 +1,3 @@
-import { database } from "@thorium/.server/init/buildDatabase";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
 import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
@@ -18,8 +17,11 @@ aroundEach(async (runTest) => {
 // Sorry for the inconvenience
 it("should perform simple actions", async () => {
 	const dataContext = createMockDataContext();
-	database.server = dataContext.database.server;
-	database.flight = dataContext.database.flight;
+	DataStore.operations.getStore()!.database = {
+		server: dataContext.server,
+		flight: dataContext.flight,
+	};
+	const database = DataStore.operations.getStore()!.database;
 	const ecs = database.flight!.ecs;
 
 	const ship = new Entity();

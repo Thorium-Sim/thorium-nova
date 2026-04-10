@@ -40,6 +40,12 @@ type DecoratedProcedureRecord<TProcedures extends ProcedureRouterRecord> = {
  */
 export type RouterCaller<TDef extends AnyRouterDef> = (
 	ctx: TDef["_config"]["$types"]["ctx"],
+	opts: {
+		onCall?: (
+			opts: ProcedureCallOptions,
+			result: unknown,
+		) => void | Promise<void>;
+	},
 ) => DecoratedProcedureRecord<TDef["record"]>;
 
 export interface Router<TDef extends AnyRouterDef> {
@@ -153,38 +159,57 @@ export function createRouterFactory<TConfig extends AnyRootConfig>(
 		const router: AnyRouter = {
 			...procedures,
 			_def,
-			createCaller(ctx) {
-				const proxy = createRecursiveProxy(({ path, args }) => {
+			createCaller(
+				ctx,
+				opts: {
+					onCall?: (
+						opts: ProcedureCallOptions,
+						result: unknown,
+					) => void | Promise<void>;
+				} = {},
+			) {
+				const proxy = createRecursiveProxy(async ({ path, args }) => {
 					// interop mode
 					if (
 						path.length === 1 &&
 						procedureTypes.includes(path[0] as ProcedureType)
 					) {
-						return callProcedure({
-							procedures: _def.procedures,
+						const procedureOpts = {
 							path: args[0] as string,
 							rawInput: args[1],
 							ctx,
 							type: path[0] as ProcedureType,
+						};
+						const result = await callProcedure({
+							procedures: _def.procedures,
+							...procedureOpts,
 						});
+
+						opts.onCall?.(procedureOpts, result);
+						return result;
 					}
 
 					const fullPath = path.join(".");
 					const procedure = _def.procedures[fullPath] as AnyProcedure;
 
 					let type: ProcedureType = "request";
-					if (procedure._def.input) {
+					if (procedure._def.send) {
 						type = "send";
 					} else if (procedure._def.dataStream) {
 						type = "dataStream";
 					}
 
-					return procedure({
+					const procedureOpts = {
 						path: fullPath,
 						rawInput: args[0],
 						ctx,
 						type,
-					});
+					};
+					const result = await procedure(procedureOpts);
+
+					opts.onCall?.(procedureOpts, result);
+
+					return result;
 				});
 
 				return proxy as ReturnType<RouterCaller<any>>;

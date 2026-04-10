@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 
 describe("impulse engines plugin input", () => {
 	it("should create a new impulse engine system", async () => {
-		DataStore.operations.run(testDataStoreProps, async () => {
+		await DataStore.operations.run(testDataStoreProps, async () => {
 			const dataContext = createMockDataContext();
 			const router = createMockRouter(dataContext);
 			const created = await router.plugin.systems.create({
@@ -28,7 +28,7 @@ describe("impulse engines plugin input", () => {
 		});
 	});
 	it("should update an impulse engine system", async () => {
-		DataStore.operations.run(testDataStoreProps, async () => {
+		await DataStore.operations.run(testDataStoreProps, async () => {
 			const dataContext = createMockDataContext();
 			const router = createMockRouter(dataContext);
 			const created = await router.plugin.systems.create({

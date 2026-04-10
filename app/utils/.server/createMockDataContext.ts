@@ -15,6 +15,7 @@ import {
 } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { AsyncLocalStorage } from "node:async_hooks";
+import type { ProcedureCallOptions } from "../live-query/.server/procedure";
 
 class MockServerDataModel {
 	clients!: Record<string, Client<any>>;
@@ -230,13 +231,19 @@ export class MockDataContext {
 }
 
 export function createMockDataContext() {
-	return DataStore.operations.run(testDataStoreProps, () => {
-		return new MockDataContext();
-	});
+	const dataContext = new MockDataContext();
+	DataStore.operations.getStore()!.database = dataContext.database;
+	return dataContext;
 }
 
-export function createMockRouter(context: DataContext) {
-	return DataStore.operations.run(testDataStoreProps, () => {
-		return router.createCaller(context);
-	});
+export function createMockRouter(
+	context: DataContext,
+	opts: {
+		onCall?: (
+			opts: ProcedureCallOptions,
+			result: unknown,
+		) => void | Promise<void>;
+	} = {},
+) {
+	return router.createCaller(context, opts);
 }

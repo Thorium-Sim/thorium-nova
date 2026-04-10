@@ -8,6 +8,7 @@ import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
 import { moveFile } from "@thorium/utils/.server/moveFile";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import { loadYml } from "@thorium/utils/.server/db-fs/loadYml";
+import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
 
 let basePath = "./";
 export function setBasePath(path: string) {
@@ -15,6 +16,7 @@ export function setBasePath(path: string) {
 }
 
 export const bunDataStoreProps: DataStoreOperations = {
+	database: {} as DatabaseContext,
 	async getData() {
 		const filePath = path.join(basePath, this.meta.filePath);
 		let data: any;

@@ -15,3 +15,4 @@ export { sensors } from "./Sensors/data.server";
 export { systemsMonitor } from "./SystemsMonitor/data.server";
 export { targeting } from "./Targeting/data.server";
 export { viewscreen } from "./Viewscreen/data.server";
+export { shortRangeComm } from "./ShortRangeComm/data.server";
