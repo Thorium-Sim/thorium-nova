@@ -10,6 +10,7 @@ import { selectAvailableTimelines } from "@thorium/utils/.server/executeBlocks";
 import type { Entity } from "@thorium/utils/ecs";
 import z from "zod";
 import MarkdownIt from "markdown-it";
+import { claimBridgeFlightClient } from "@thorium/.server/init/bridgeAutoAssign";
 import { applyCardHighlight } from "@thorium/utils/.server/applyCardHighlight";
 const md = MarkdownIt();
 
@@ -63,10 +64,26 @@ export const client = t.router({
 			return clients;
 		}),
 	setName: t.procedure
-		.input(z.object({ clientId: z.string(), name: z.string().min(2) }))
+		.input(z.object({ clientId: z.string(), name: z.string().min(1) }))
 		.send(({ ctx, input }) => {
 			const client = ctx.getClient(input.clientId);
+
+			// Un-claim current bridge entity if exists
+			if (ctx.flight) {
+				const flightClient = ctx.getFlightClient(client.id);
+				if (flightClient?.components.flightClient?.bridgeAssigned) {
+					flightClient.updateComponent("flightClient", { clientId: "" });
+					ctx.flight.flightClientIndex.delete(client.id);
+				}
+			}
+
 			client.name = input.name;
+
+			// Try to claim a bridge entity matching the new name
+			if (ctx.flight) {
+				claimBridgeFlightClient(ctx, client.id);
+			}
+
 			pubsub.publish.client.all();
 			pubsub.publish.client.get({ clientId: client.id });
 
@@ -94,6 +111,7 @@ export const client = t.router({
 				flightClient.updateComponent("flightClient", {
 					stationId: null,
 					shipId: null,
+					bridgeAssigned: false,
 				});
 				const clientId = flightClient.components.flightClient!.clientId;
 				pubsub.publish.client.all();
@@ -107,9 +125,28 @@ export const client = t.router({
 			if (!ship?.components.isShip) {
 				throw new Error("No ship with that ID exists.");
 			}
-			const station = staticStations
-				.concat(ship.components.stationComplement?.stations || [])
-				.find((station) => station.name === input.stationId);
+			const complementStations =
+				ship.components.stationComplement?.stations || [];
+			const hasViewscreenStations = complementStations.some((s) =>
+				s.cards.some((c) => c.component === "Viewscreen"),
+			);
+			const filteredStatic = hasViewscreenStations
+				? staticStations.filter((s) => s.name !== "Viewscreen")
+				: staticStations;
+			const stations = [...complementStations];
+			for (const staticStation of filteredStatic) {
+				stations.push({
+					cards: staticStation.cards,
+					description: "",
+					logo: "",
+					messageGroups: [],
+					name: staticStation.name,
+					tags: [],
+					theme: "",
+					widgets: [],
+				});
+			}
+			const station = stations.find((station) => station.name === input.stationId);
 
 			if (!station) {
 				throw new Error("No station with that ID exists.");

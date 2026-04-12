@@ -26,6 +26,7 @@ icons/sprite.svg
 /binaries/
 
 .wrangler
+.claude/
 
 # Playwright
 test-results

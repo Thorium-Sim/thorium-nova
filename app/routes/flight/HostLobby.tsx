@@ -182,15 +182,23 @@ function ClientAssignment() {
 								/>
 							))}
 							{flight?.hasFlightDirector
-								? staticStations.map((station) => (
-										<HostStationItem
-											key={station.name}
-											shipId={ship.id}
-											station={station}
-											selectedClient={selectedClient}
-											setSelectedClient={setSelectedClient}
-										/>
-									))
+								? staticStations
+										.filter(
+											(s) =>
+												s.name !== "Viewscreen" ||
+												!ship.stations.some((st) =>
+													st.cards.some((c) => c.component === "Viewscreen"),
+												),
+										)
+										.map((station) => (
+											<HostStationItem
+												key={station.name}
+												shipId={ship.id}
+												station={station}
+												selectedClient={selectedClient}
+												setSelectedClient={setSelectedClient}
+											/>
+										))
 								: null}
 						</ul>
 					</div>
@@ -252,7 +260,9 @@ function HostStationItem({
 						className={`list-group-item list-group-item-small ${
 							selectedClient === client.clientId ? "selected" : ""
 						}`}
-						onClick={() => setSelectedClient(client.clientId)}
+						onClick={() => {
+							setSelectedClient(client.clientId);
+						}}
 					>
 						<div className="pl-4 flex items-center gap-2">
 							{client.name} <div className="grow" />

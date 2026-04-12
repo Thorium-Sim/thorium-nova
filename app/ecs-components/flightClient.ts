@@ -23,6 +23,9 @@ export const flightClient = z
 			})
 			.nullable()
 			.default(null),
+		bridgeAssigned: z.boolean().default(false),
+		expectedClientName: z.string().default(""),
+		isSoundPlayer: z.boolean().default(false),
 		officersLog: z
 			.object({
 				timestamp: z.number(),

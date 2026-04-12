@@ -8,6 +8,7 @@ import Checkbox from "@thorium/ui/Checkbox";
 import { Icon } from "@thorium/ui/Icon";
 import InfoTip from "@thorium/ui/InfoTip";
 import Input from "@thorium/ui/Input";
+import Select from "@thorium/ui/Select";
 import SearchableList from "@thorium/ui/SearchableList";
 import { cn } from "@thorium/utils/cn";
 import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
@@ -28,6 +29,7 @@ interface Ship {
 	name: string;
 	shipId: { pluginId: string; shipId: string };
 	crewCount: number;
+	bridgeId?: { pluginId: string; bridgeId: string };
 }
 const FleetConfig = () => {
 	const [state, dispatch] = useFlightQuickStart();
@@ -184,6 +186,7 @@ function ShipConfig({
 	const [pickingShip, setPickingShip] = React.useState(false);
 	const [pluginShips] = q.plugin.ship.available.useNetRequest();
 	const [availableStations] = q.station.available.useNetRequest();
+	const [availableBridges] = q.plugin.bridge.available.useNetRequest();
 
 	const availableCrewSizes = availableStations
 		.map((station) => station.stationCount)
@@ -284,6 +287,38 @@ function ShipConfig({
 						<p>{pickedShip?.description}</p>
 					</div>
 				</button>
+			)}
+			{availableBridges.length > 0 && (
+				<Select
+					label="Bridge"
+					className="mt-4"
+					placeholder="Default"
+					items={[
+						{ id: "__default__", label: "Default" },
+						...availableBridges.map((b) => ({
+							id: `${b.pluginId}:${b.bridgeId}`,
+							label: b.label,
+						})),
+					]}
+					selected={
+						ship.bridgeId
+							? `${ship.bridgeId.pluginId}:${ship.bridgeId.bridgeId}`
+							: null
+					}
+					setSelected={(val) =>
+						dispatch({
+							type: "bridgeId",
+							id: ship.id,
+							bridgeId:
+								val === "__default__" || !val
+									? undefined
+									: {
+											pluginId: val.split(":")[0],
+											bridgeId: val.split(":").slice(1).join(":"),
+										},
+						})
+					}
+				/>
 			)}
 		</div>
 	);

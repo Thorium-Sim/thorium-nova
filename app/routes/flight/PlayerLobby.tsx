@@ -39,13 +39,21 @@ function PlayerStationSelection() {
 								/>
 							))}
 							{/* TODO April 23, 2022 - Hide this when the ship is configured to not have a flight director */}
-							{staticStations.map((station) => (
-								<PlayerStationItem
-									key={station.name}
-									shipId={ship.id}
-									station={station}
-								/>
-							))}
+							{staticStations
+								.filter(
+									(s) =>
+										s.name !== "Viewscreen" ||
+										!ship.stations.some((st) =>
+											st.cards.some((c) => c.component === "Viewscreen"),
+										),
+								)
+								.map((station) => (
+									<PlayerStationItem
+										key={station.name}
+										shipId={ship.id}
+										station={station}
+									/>
+								))}
 						</ul>
 					</div>
 				))}

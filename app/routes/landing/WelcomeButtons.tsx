@@ -32,9 +32,26 @@ export const WelcomeButtons = ({ className }: { className?: string }) => {
 function FlightButtons() {
 	const [flight] = q.flight.active.useNetRequest();
 
-	return flight ? (
+	return flight ? <ActiveFlightButtons /> : <ClientButtons />;
+}
+
+function ActiveFlightButtons() {
+	const [client] = q.client.get.useNetRequest({ clientId });
+
+	const hasStation = client.shipId && client.stationId;
+	const isFlightDirector = client.stationId === "Flight Director";
+	return (
 		<>
-			<NavLink className="btn btn-primary btn-outline" to="/flight">
+			{isFlightDirector ? (
+				<NavLink className="btn btn-primary btn-outline" to="/flight/core">
+					Go To Core
+				</NavLink>
+			) : hasStation ? (
+				<NavLink className="btn btn-primary btn-outline" to="/flight/station">
+					Go To Station
+				</NavLink>
+			) : null}
+			<NavLink className="btn btn-notice btn-outline" to="/flight/lobby">
 				Go To Flight Lobby
 			</NavLink>
 			{process.env.NODE_ENV !== "production" && (
@@ -49,8 +66,6 @@ function FlightButtons() {
 				Stop Flight
 			</Button>
 		</>
-	) : (
-		<ClientButtons />
 	);
 }
 

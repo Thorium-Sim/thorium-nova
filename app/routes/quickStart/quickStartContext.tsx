@@ -20,6 +20,7 @@ export interface FlightConfigState {
 		shipId: { pluginId: string; shipId: string };
 		name: string;
 		crewCount: number;
+		bridgeId?: { pluginId: string; bridgeId: string };
 	}[];
 	missionId?: { pluginId: string; missionId: string };
 	startingPointId?: FlightStartingPoint;
@@ -50,6 +51,11 @@ export type FlightConfigAction =
 	| {
 			type: "mode";
 			mode: "nova" | "legacy";
+	  }
+	| {
+			type: "bridgeId";
+			id: string;
+			bridgeId: { pluginId: string; bridgeId: string } | undefined;
 	  };
 
 function quickStartReducer(
@@ -127,6 +133,13 @@ function quickStartReducer(
 					action.mode === "legacy" ? true : state.hasFlightDirector,
 				missionId: undefined,
 			};
+		case "bridgeId":
+			return produce(state, (draft) => {
+				const ship = draft.ships.find((ship) => ship.id === action.id);
+				if (ship) {
+					ship.bridgeId = action.bridgeId;
+				}
+			});
 		default:
 			return state;
 	}

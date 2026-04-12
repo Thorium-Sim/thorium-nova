@@ -168,7 +168,7 @@ export const bunDataStoreProps: DataStoreOperations = {
 			this.id = newName;
 		}
 		this.name = newName;
-		this.meta.filePath = path.join(newPath, "manifest.yml");
+		this.meta.filePath = path.join(newPath, path.basename(this.meta.filePath));
 
 		await this.write(true);
 	},

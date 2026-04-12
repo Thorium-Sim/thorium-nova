@@ -12,6 +12,7 @@ import type {
 } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
 import { ServerClient } from "@thorium/utils/live-query/.server/ServerClient";
 import { router } from "@thorium/.server/init/router";
+import { claimBridgeFlightClient } from "@thorium/.server/init/bridgeAutoAssign";
 import z from "zod";
 import type { ClientSettings } from "@thorium/.server/data";
 
@@ -155,6 +156,11 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 		return { id, name, settings };
 	}
 	connectionOpened(): void {
+		// Auto-assign if this client's name matches a bridge assignment
+		const ctx = getDataContext(this.id);
+		if (ctx?.flight) {
+			claimBridgeFlightClient(ctx, this.id);
+		}
 		pubsub.publish.client.get({ clientId: this.id });
 		pubsub.publish.client.all();
 	}

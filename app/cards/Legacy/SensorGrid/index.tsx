@@ -18,7 +18,7 @@ export function LegacySensorGrid() {
 	const { isWidget } = useCardContext();
 
 	const layout =
-		station.name === "Viewscreen"
+		station.cards.some((c) => c.component === "Viewscreen")
 			? "viewscreen"
 			: isWidget ||
 					station.cards.some((c) => c.component === "LegacySensorScans")
