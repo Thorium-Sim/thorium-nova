@@ -667,6 +667,21 @@ export const bridge = t.router({
 			if (typeof input.stationName === "string" && el.type === "station") {
 				el.stationName = input.stationName;
 				el.label = input.stationName || "";
+				// Persist element-station mapping for the active complement
+				const activeKey = complementKey(b.stationComplementRef);
+				if (activeKey) {
+					if (!b.stationAssignments[activeKey]) {
+						b.stationAssignments[activeKey] = {
+							clientAssignments: [],
+							elementStations: {},
+						};
+					}
+					if (input.stationName) {
+						b.stationAssignments[activeKey].elementStations[el.id] = input.stationName;
+					} else {
+						delete b.stationAssignments[activeKey].elementStations[el.id];
+					}
+				}
 			}
 			if (typeof input.clientName === "string") {
 				const oldClientName = el.clientName;
@@ -712,6 +727,10 @@ export const bridge = t.router({
 						(v) => v.id === removed.viewscreenId,
 					);
 					if (vsIdx >= 0) b.viewscreens.splice(vsIdx, 1);
+				}
+				// Clean up elementStations for this element across all complements
+				for (const sa of Object.values(b.stationAssignments)) {
+					delete sa.elementStations[removed.id];
 				}
 				floor.elements.splice(idx, 1);
 			}

@@ -9,7 +9,10 @@ import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { spawnShip } from "@thorium/.server/spawners/ship";
 import type BasePlugin from "@thorium/.server/classes/Plugins";
 import type BridgePlugin from "@thorium/.server/classes/Plugins/Bridge";
-import type { BridgeMapViewscreen } from "@thorium/.server/classes/Plugins/Bridge";
+import {
+	type BridgeMapViewscreen,
+	complementKey,
+} from "@thorium/.server/classes/Plugins/Bridge";
 import type StationComplementPlugin from "@thorium/.server/classes/Plugins/StationComplement";
 import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
@@ -239,31 +242,44 @@ export async function startFlight(
 			: null;
 
 		if (bridgeConfig) {
-			// Derive client assignments from floor elements — each element
-			// pairs a clientName with a station (stationName or viewscreen name).
+			// Resolve client-to-station assignments for the active complement
+			// using the per-complement elementStations mapping.
+			const key = complementKey(
+				stationComplement
+					? {
+							pluginId: stationComplement.pluginName,
+							stationComplementId: stationComplement.name,
+						}
+					: undefined,
+			);
+			const elementStations = key
+				? bridgeConfig.stationAssignments[key]?.elementStations
+				: undefined;
 			const derived: Array<{
 				clientName: string;
 				stationId: string;
 				isSoundPlayer: boolean;
 			}> = [];
-			for (const floor of bridgeConfig.floors) {
-				for (const el of floor.elements) {
-					if (!el.clientName) continue;
-					let stationId: string | undefined;
-					if (el.type === "station" && el.stationName) {
-						stationId = el.stationName;
-					} else if (el.type === "viewscreen" && el.viewscreenId) {
-						const vs = bridgeConfig.viewscreens.find(
-							(v) => v.id === el.viewscreenId,
-						);
-						if (vs) stationId = vs.name;
-					}
-					if (stationId) {
-						derived.push({
-							clientName: el.clientName,
-							stationId,
-							isSoundPlayer: false,
-						});
+			if (elementStations) {
+				for (const floor of bridgeConfig.floors) {
+					for (const el of floor.elements) {
+						if (!el.clientName) continue;
+						let stationId: string | undefined;
+						if (el.type === "station") {
+							stationId = elementStations[el.id];
+						} else if (el.type === "viewscreen" && el.viewscreenId) {
+							const vs = bridgeConfig.viewscreens.find(
+								(v) => v.id === el.viewscreenId,
+							);
+							if (vs) stationId = vs.name;
+						}
+						if (stationId) {
+							derived.push({
+								clientName: el.clientName,
+								stationId,
+								isSoundPlayer: false,
+							});
+						}
 					}
 				}
 			}
