@@ -20,11 +20,7 @@ export const bunDataStoreProps: DataStoreOperations = {
 		let data: any;
 		try {
 			const fileData = await fs.readFile(filePath, "utf8");
-			if (filePath.endsWith('.json')) {
-				data = JSON.parse(fileData);
-			} else {
-				data = loadYml(fileData);
-			}
+			data = loadYml(fileData);
 		} catch (err: any) {
 			if (err.code === "EACCES") {
 				err.message +=
@@ -67,14 +63,9 @@ export const bunDataStoreProps: DataStoreOperations = {
 			const jsonData = this.toJSON();
 			jsonData.dataLoaded = undefined;
 
-			let data: string;
-			if (filePath.endsWith('.json')) {
-				data = JSON.stringify(jsonData, null, 2);
-			} else {
-				data = dump(jsonData, {
-					skipInvalid: true,
-				});
-			}
+			const data = dump(jsonData, {
+				skipInvalid: true,
+			});
 			await fs.writeFile(filePath, data, { mode: 0o0600 });
 		} catch (e: any) {
 			e.message = `db-fs: Error writing file:\n${e.message}`;
@@ -136,14 +127,12 @@ export const bunDataStoreProps: DataStoreOperations = {
 		>,
 	) {
 		const glob = new Bun.Glob(
-			path.join(thoriumPath, "plugins", this.id, "*", "**", "manifest.{yml,json}"),
+			path.join(thoriumPath, "plugins", this.id, "*", "**", "manifest.yml"),
 		);
 		for await (const filePath of glob.scan({ onlyFiles: true })) {
 			try {
 				const fileData = await Bun.file(filePath).text();
-				const aspectData = filePath.endsWith('.json')
-					? JSON.parse(fileData)
-					: loadYml(fileData);
+				const aspectData = loadYml(fileData);
 				const kind = aspectData.kind as keyof AspectsMap;
 				const className =
 					aspectData.kind === "shipSystems" ? aspectData.type : aspectData.kind;

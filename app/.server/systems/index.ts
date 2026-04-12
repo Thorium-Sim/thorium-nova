@@ -43,7 +43,6 @@ import { WaypointRemoveSystem } from "./WaypointRemoveSystem";
 import { FacingWaypointSystem } from "./FacingWaypointSystem";
 import { CollisionWarningSystem } from "./CollisionWarningSystem";
 import { CommSatelliteSystem } from "@thorium/.server/systems/CommSatelliteSystem";
-import { ViewscreenDamageSystem } from "@thorium/.server/systems/ViewscreenDamageSystem";
 import { LongRangeCommPowerSystem } from "@thorium/.server/systems/LongRangeCommPowerSystem";
 
 const systems = [
@@ -84,7 +83,6 @@ const systems = [
 	HeatToCoolantSystem,
 	HeatDispersionSystem,
 	DamageCheckSystem,
-	ViewscreenDamageSystem,
 	SpontaneousFailureSystem,
 	IsDestroyedSystem,
 	// We slot the legacy systems in right before these two shared systems

@@ -10,7 +10,7 @@ import { MapCanvas } from "./mapEditor/MapCanvas";
 import type {
 	BridgeClientAssignment,
 	BridgeViewscreen,
-	BridgeLevel,
+	BridgeFloor,
 } from "@thorium/.server/classes/Plugins/Bridge";
 
 interface BridgeData {
@@ -19,7 +19,8 @@ interface BridgeData {
 	stationComplementRef?: { pluginId: string; stationComplementId: string };
 	clientAssignments: BridgeClientAssignment[];
 	viewscreens: BridgeViewscreen[];
-	levels: BridgeLevel[];
+	elementScale?: number;
+	floors: BridgeFloor[];
 }
 
 type Tab = "details" | "map";
@@ -162,7 +163,6 @@ function DetailsTab({
 					})
 				}
 			/>
-
 		</div>
 	);
 }
@@ -178,18 +178,17 @@ function MapTab({
 }) {
 	const prompt = usePrompt();
 	const confirm = useConfirm();
-	const [activeLevelId, setActiveLevelId] = useState<string | null>(
-		item.levels[0]?.id ?? null,
+	const [activeFloorId, setActiveFloorId] = useState<string | null>(
+		item.floors[0]?.id ?? null,
 	);
-	const activeLevel = item.levels.find((f) => f.id === activeLevelId) ?? null;
+	const activeFloor = item.floors.find((f) => f.id === activeFloorId) ?? null;
 
 	const [complements] = q.plugin.bridge.allStationComplements.useNetRequest({
 		pluginId,
 	});
-	const complementList = (complements ?? []) as {
-		pluginId: string;
-		stationComplementId: string;
-		label: string;
+	const complementGroups = (complements ?? []) as {
+		header: string;
+		items: { id: string; label: string }[];
 	}[];
 	const selectedComplement = item.stationComplementRef
 		? `${item.stationComplementRef.pluginId}:${item.stationComplementRef.stationComplementId}`
@@ -200,32 +199,37 @@ function MapTab({
 			pluginId,
 			bridgeId,
 		});
-	const stations = ((stationNames ?? []) as string[]).slice().sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+	const stations = ((stationNames ?? []) as string[])
+		.slice()
+		.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
-	// Collect all station names that have been assigned to a client element across all levels
+	// Collect all station names that have been assigned to a client element across all floors
 	const assignedStations = new Set<string>();
-	for (const level of item.levels) {
-		for (const el of level.elements) {
+	for (const floor of item.floors) {
+		for (const el of floor.elements) {
 			if (el.type === "station" && el.stationName) {
 				assignedStations.add(el.stationName);
 			}
 		}
 	}
 
+	const effectiveScale =
+		item.elementScale ?? (activeFloor?.widthPixels ?? 800) * 0.075;
+
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	async function handleBackgroundUpload(file: File) {
-		if (!activeLevel) return;
+		if (!activeFloor) return;
 
 		const dimensions = await getImageDimensions(file);
 
-		await q.plugin.bridge.uploadLevelBackground.netSend({
+		await q.plugin.bridge.uploadFloorBackground.netSend({
 			pluginId,
 			bridgeId,
-			levelId: activeLevel.id,
+			floorId: activeFloor.id,
 			file,
-			imageWidth: dimensions.width,
-			imageHeight: dimensions.height,
+			widthPixels: dimensions.width,
+			heightPixels: dimensions.height,
 		});
 	}
 
@@ -236,13 +240,7 @@ function MapTab({
 				<Select
 					label="Station Complement"
 					className="w-64"
-					items={[
-						{ id: "__none__", label: "None" },
-						...complementList.map((c) => ({
-							id: `${c.pluginId}:${c.stationComplementId}`,
-							label: c.label,
-						})),
-					]}
+					items={[{ id: "__none__", label: "None" }, ...complementGroups]}
 					selected={selectedComplement}
 					setSelected={(val) => {
 						if (!val || val === "__none__") {
@@ -295,51 +293,51 @@ function MapTab({
 				)}
 			</div>
 
-			{/* Level tabs */}
+			{/* Floor tabs */}
 			<div className="flex gap-2 items-center flex-wrap">
-				{item.levels.map((level) => (
+				{item.floors.map((floor) => (
 					<button
-						key={level.id}
+						key={floor.id}
 						type="button"
 						className={`px-3 py-1 text-sm rounded ${
-							activeLevelId === level.id
+							activeFloorId === floor.id
 								? "bg-blue-600 text-white"
 								: "bg-white/10 text-gray-300 hover:bg-white/20"
 						}`}
-						onClick={() => setActiveLevelId(level.id)}
+						onClick={() => setActiveFloorId(floor.id)}
 					>
-						{level.name}
+						{floor.name}
 					</button>
 				))}
 				<Button
 					className="btn-success btn-xs"
 					onClick={async () => {
-						const name = await prompt({ header: "Level name" });
+						const name = await prompt({ header: "Floor name" });
 						if (typeof name !== "string") return;
-						const result = await q.plugin.bridge.addLevel.netSend({
+						const result = await q.plugin.bridge.addFloor.netSend({
 							pluginId,
 							bridgeId,
 							name,
 						});
-						setActiveLevelId(result.levelId);
+						setActiveFloorId(result.floorId);
 					}}
 				>
-					+ Level
+					+ Floor
 				</Button>
-				{activeLevel && (
+				{activeFloor && (
 					<>
 						<Button
 							className="btn-warning btn-xs"
 							onClick={async () => {
 								const name = await prompt({
-									header: "Rename level",
-									defaultValue: activeLevel.name,
+									header: "Rename floor",
+									defaultValue: activeFloor.name,
 								});
 								if (typeof name !== "string") return;
-								await q.plugin.bridge.updateLevel.netSend({
+								await q.plugin.bridge.updateFloor.netSend({
 									pluginId,
 									bridgeId,
-									levelId: activeLevel.id,
+									floorId: activeFloor.id,
 									name,
 								});
 							}}
@@ -351,16 +349,16 @@ function MapTab({
 							onClick={async () => {
 								if (
 									!(await confirm({
-										header: `Delete level "${activeLevel.name}"?`,
+										header: `Delete floor "${activeFloor.name}"?`,
 									}))
 								)
 									return;
-								await q.plugin.bridge.removeLevel.netSend({
+								await q.plugin.bridge.removeFloor.netSend({
 									pluginId,
 									bridgeId,
-									levelId: activeLevel.id,
+									floorId: activeFloor.id,
 								});
-								setActiveLevelId(item.levels[0]?.id ?? null);
+								setActiveFloorId(item.floors[0]?.id ?? null);
 							}}
 						>
 							Delete
@@ -370,7 +368,7 @@ function MapTab({
 			</div>
 
 			{/* Background management */}
-			{activeLevel && (
+			{activeFloor && (
 				<div className="flex gap-2 items-center">
 					<input
 						ref={fileInputRef}
@@ -387,18 +385,20 @@ function MapTab({
 						className="btn-primary btn-xs"
 						onClick={() => fileInputRef.current?.click()}
 					>
-						{activeLevel.backgroundUrl ? "Replace Background" : "Upload Background"}
+						{activeFloor.backgroundUrl
+							? "Replace Background"
+							: "Upload Background"}
 					</Button>
-					{activeLevel.backgroundUrl && (
+					{activeFloor.backgroundUrl && (
 						<Button
 							className="btn-ghost btn-xs"
 							onClick={async () => {
 								if (!(await confirm({ header: "Remove background image?" })))
 									return;
-								await q.plugin.bridge.removeLevelBackground.netSend({
+								await q.plugin.bridge.removeFloorBackground.netSend({
 									pluginId,
 									bridgeId,
-									levelId: activeLevel.id,
+									floorId: activeFloor.id,
 								});
 							}}
 						>
@@ -408,20 +408,62 @@ function MapTab({
 				</div>
 			)}
 
+			{/* Element Scale */}
+			{activeFloor && (
+				<div className="flex items-center gap-2 text-sm">
+					<label className="text-gray-300 whitespace-nowrap">
+						Element Scale
+						<input
+							type="range"
+							min={4}
+							max={Math.round((activeFloor?.widthPixels ?? 800) * 0.5)}
+							value={Math.round(effectiveScale)}
+							onChange={(e) =>
+								q.plugin.bridge.update.netSend({
+									pluginId,
+									bridgeId,
+									elementScale: Number(e.target.value),
+								})
+							}
+							className="w-32"
+						/>
+					</label>
+					<input
+						type="number"
+						min={4}
+						max={Math.round((activeFloor?.widthPixels ?? 800) * 0.5)}
+						value={Math.round(effectiveScale)}
+						onChange={(e) => {
+							const val = Number(e.target.value);
+							if (val > 0) {
+								q.plugin.bridge.update.netSend({
+									pluginId,
+									bridgeId,
+									elementScale: val,
+								});
+							}
+						}}
+						className="w-16 bg-gray-800 border border-white/20 rounded px-1 py-0.5 text-xs text-white"
+					/>
+					<span className="text-xs text-gray-500">px</span>
+				</div>
+			)}
+
 			{/* Canvas */}
-			{activeLevel ? (
+			{activeFloor ? (
 				<MapCanvas
 					pluginId={pluginId}
 					bridgeId={bridgeId}
-					level={activeLevel}
+					floor={activeFloor}
 					viewscreens={item.viewscreens}
 					stationNames={stations}
 					clientAssignments={item.clientAssignments}
 					assignedStations={assignedStations}
+					elementScale={effectiveScale}
 				/>
 			) : (
 				<div className="flex-1 flex items-center justify-center text-gray-500">
-					Add a level to start building the bridge map.
+					Add a floor to start building the bridge map.
 				</div>
 			)}
 		</div>
@@ -429,7 +471,9 @@ function MapTab({
 }
 
 /** Read image dimensions client-side using an Image element */
-function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+function getImageDimensions(
+	file: File,
+): Promise<{ width: number; height: number }> {
 	return new Promise((resolve) => {
 		const url = URL.createObjectURL(file);
 		const img = new Image();

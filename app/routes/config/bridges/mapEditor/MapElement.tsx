@@ -1,12 +1,18 @@
 import type { BridgeMapElement } from "@thorium/.server/classes/Plugins/Bridge";
-import { href as iconsHref } from "@thorium/ui/Icon";
+import { SvgIcon } from "@thorium/ui/Icon";
 
 /** Inline SVG filter for drop shadow. Render once inside the parent SVG via <MapElementDefs />. */
 export function MapElementDefs() {
 	return (
 		<defs>
 			<filter id="element-shadow" x="-20%" y="-20%" width="140%" height="140%">
-				<feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#000" floodOpacity="0.6" />
+				<feDropShadow
+					dx="0"
+					dy="1"
+					stdDeviation="2"
+					floodColor="#000"
+					floodOpacity="0.6"
+				/>
 			</filter>
 		</defs>
 	);
@@ -18,12 +24,14 @@ export function MapElementRenderer({
 	onMouseDown,
 	isMainViewscreen,
 	viewscreenName,
+	elementScale,
 }: {
 	element: BridgeMapElement;
 	selected: boolean;
 	onMouseDown: (e: React.MouseEvent) => void;
 	isMainViewscreen?: boolean;
 	viewscreenName?: string;
+	elementScale: number;
 }) {
 	const strokeWidth = selected ? 2 : 1;
 
@@ -31,8 +39,9 @@ export function MapElementRenderer({
 		case "station": {
 			const assigned = Boolean(element.stationName);
 			const stroke = selected ? "#60a5fa" : assigned ? "#4ade80" : "#9ca3af";
-			const w = element.width ?? 20;
-			const h = element.height ?? 20;
+			const w = element.widthPixels ?? elementScale;
+			const h = element.heightPixels ?? elementScale;
+			const fontSize = w * 0.14;
 			const iconSize = Math.min(w, h) * 0.7;
 			return (
 				<g
@@ -52,27 +61,20 @@ export function MapElementRenderer({
 						strokeWidth={strokeWidth}
 						rx={2}
 					/>
-					{/* laptop icon */}
-					<svg
+					<SvgIcon
+						name="laptop"
 						x={-iconSize / 2}
 						y={-iconSize / 2}
 						width={iconSize}
 						height={iconSize}
-						viewBox="0 0 24 24"
-						fill="none"
 						stroke="#93c5fd"
-						strokeWidth={2}
-						strokeLinecap="round"
-						strokeLinejoin="round"
-					>
-						<use href={`${iconsHref}#laptop`} />
-					</svg>
+					/>
 					{element.label && (
 						<text
 							textAnchor="middle"
-							dy={-(h / 2 + w * 0.08)}
+							dy={-(h / 2 + fontSize * 0.5)}
 							fill="white"
-							fontSize={w * 0.16}
+							fontSize={fontSize}
 						>
 							{element.label}
 						</text>
@@ -80,9 +82,9 @@ export function MapElementRenderer({
 					{element.clientName && (
 						<text
 							textAnchor="middle"
-							dy={h / 2 + w * 0.18}
+							dy={h / 2 + fontSize * 1.2}
 							fill="white"
-							fontSize={w * 0.14}
+							fontSize={fontSize}
 						>
 							{element.clientName}
 						</text>
@@ -92,8 +94,9 @@ export function MapElementRenderer({
 		}
 		case "viewscreen": {
 			const stroke = selected ? "#60a5fa" : "#9ca3af";
-			const w = element.width ?? 80;
-			const h = element.height ?? 10;
+			const w = element.widthPixels ?? elementScale;
+			const h = element.heightPixels ?? elementScale;
+			const fontSize = w * 0.14;
 			const iconSize = Math.min(w, h) * 0.35;
 			const gap = iconSize * 0.1;
 			const totalH = iconSize * 2 + gap;
@@ -117,42 +120,30 @@ export function MapElementRenderer({
 						rx={2}
 					/>
 					{/* video icon on top, rotated to point behind the display */}
-					<svg
+					<SvgIcon
+						name="video"
 						x={-iconSize / 2}
 						y={topY}
 						width={iconSize}
 						height={iconSize}
-						viewBox="0 0 24 24"
-						fill="none"
 						stroke="#c084fc"
-						strokeWidth={2}
-						strokeLinecap="round"
-						strokeLinejoin="round"
 						transform={`rotate(270, ${0}, ${topY + iconSize / 2})`}
-					>
-						<use href={`${iconsHref}#video`} />
-					</svg>
+					/>
 					{/* tv-minimal icon below */}
-					<svg
+					<SvgIcon
+						name="tv-minimal"
 						x={-iconSize / 2}
 						y={topY + iconSize + gap}
 						width={iconSize}
 						height={iconSize}
-						viewBox="0 0 24 24"
-						fill="none"
 						stroke="#c084fc"
-						strokeWidth={2}
-						strokeLinecap="round"
-						strokeLinejoin="round"
-					>
-						<use href={`${iconsHref}#tv-minimal`} />
-					</svg>
+					/>
 					{viewscreenName && (
 						<text
 							textAnchor="middle"
-							dy={h / 2 + w * 0.18}
+							dy={h / 2 + fontSize * 1.2}
 							fill="white"
-							fontSize={w * 0.16}
+							fontSize={fontSize}
 						>
 							{viewscreenName}
 						</text>

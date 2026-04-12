@@ -22,12 +22,12 @@ export class DamageCheckSystem extends System {
 					return;
 				}
 				// Bring the system back online
-				damageComponent.offline = false;
+				entity.updateComponent("damage", { offline: false }, true);
 			} else {
 				if (damageComponent.offlineDamage > aggregateDamage) {
 					return;
 				}
-				damageComponent.offline = true;
+				entity.updateComponent("damage", { offline: true }, true);
 
 				this.checkIfCascadeOccurs(entity, elapsed);
 			}

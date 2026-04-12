@@ -108,7 +108,7 @@ function ClientAssignment() {
 					selectedItem={selectedClient}
 					setSelectedItem={({ id }) => setSelectedClient(id)}
 					items={clients
-						.filter((c) => (c.shipId === null || c.shipId === undefined) && !c.bridgeAssigned)
+						.filter((c) => c.shipId === null || c.shipId === undefined)
 						.map((c) => ({
 							id: c.clientId,
 							label: c.name,
@@ -131,18 +131,22 @@ function ClientAssignment() {
 							))}
 							{flight?.hasFlightDirector
 								? staticStations
-									.filter((s) => s.name !== "Viewscreen" || !ship.stations.some(
-										(st) => st.cards.some((c) => c.component === "Viewscreen"),
-									))
-									.map((station) => (
-										<HostStationItem
-											key={station.name}
-											shipId={ship.id}
-											station={station}
-											selectedClient={selectedClient}
-											setSelectedClient={setSelectedClient}
-										/>
-									))
+										.filter(
+											(s) =>
+												s.name !== "Viewscreen" ||
+												!ship.stations.some((st) =>
+													st.cards.some((c) => c.component === "Viewscreen"),
+												),
+										)
+										.map((station) => (
+											<HostStationItem
+												key={station.name}
+												shipId={ship.id}
+												station={station}
+												selectedClient={selectedClient}
+												setSelectedClient={setSelectedClient}
+											/>
+										))
 								: null}
 						</ul>
 					</div>
@@ -202,30 +206,26 @@ function HostStationItem({
 					<li
 						key={client.clientId}
 						className={`list-group-item list-group-item-small ${
-							!client.bridgeAssigned && selectedClient === client.clientId ? "selected" : ""
+							selectedClient === client.clientId ? "selected" : ""
 						}`}
 						onClick={() => {
-							if (!client.bridgeAssigned) setSelectedClient(client.clientId);
+							setSelectedClient(client.clientId);
 						}}
 					>
 						<div className="pl-4 flex items-center justify-between">
 							{client.name}{" "}
-							{client.bridgeAssigned ? (
-								<span className="text-xs text-blue-400">Auto-assigned</span>
-							) : (
-								<Icon
-									name="ban"
-									className="text-red-600 cursor-pointer"
-									onClick={(e) => {
-										e.stopPropagation();
-										e.preventDefault();
-										q.client.setStation.netSend({
-											shipId: null,
-											clientId: client.clientId,
-										});
-									}}
-								/>
-							)}
+							<Icon
+								name="ban"
+								className="text-red-600 cursor-pointer"
+								onClick={(e) => {
+									e.stopPropagation();
+									e.preventDefault();
+									q.client.setStation.netSend({
+										shipId: null,
+										clientId: client.clientId,
+									});
+								}}
+							/>
 						</div>
 					</li>
 				))}

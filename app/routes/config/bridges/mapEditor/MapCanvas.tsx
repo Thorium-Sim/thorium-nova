@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import PanZoom from "@thorium/components/ui/PanZoom";
 import type {
-	BridgeLevel,
+	BridgeFloor,
 	BridgeViewscreen,
 	BridgeClientAssignment,
 	BridgeMapElementType,
@@ -10,18 +10,19 @@ import { q } from "@thorium/context/AppContext";
 import { MapToolbar, type MapTool } from "./MapToolbar";
 import { MapElementRenderer, MapElementDefs } from "./MapElement";
 import { MapElementEditor } from "./MapElementEditor";
-import {
-	GRID_SIZE_PX,
-	DEFAULT_CANVAS_SIZE,
-	STATION_SIZE_FRACTION,
-	VIEWSCREEN_SIZE_FRACTION,
-} from "./constants";
+import { GRID_SIZE_PX, DEFAULT_CANVAS_SIZE } from "./constants";
 import type { BridgeMapElement } from "@thorium/.server/classes/Plugins/Bridge";
 
 const ROTATION_HANDLE_OFFSET = 30;
 
-function getElementBounds(el: BridgeMapElement): { w: number; h: number; ox: number; oy: number } {
-	return { w: el.width ?? 20, h: el.height ?? 20, ox: 0, oy: 0 };
+function getElementBounds(
+	el: BridgeMapElement,
+	elementScale: number,
+): { w: number; h: number } {
+	return {
+		w: el.widthPixels ?? elementScale,
+		h: el.heightPixels ?? elementScale,
+	};
 }
 
 interface PanState {
@@ -30,28 +31,26 @@ interface PanState {
 	scale: number;
 }
 
-type DragMode = "move" | "rotate" | "scale" | null;
-
-const HANDLE_SIZE = 6;
-
-type ScaleCorner = 0 | 1 | 2 | 3;
+type DragMode = "move" | "rotate" | null;
 
 export function MapCanvas({
 	pluginId,
 	bridgeId,
-	level,
+	floor,
 	viewscreens,
 	stationNames,
 	clientAssignments,
 	assignedStations,
+	elementScale,
 }: {
 	pluginId: string;
 	bridgeId: string;
-	level: BridgeLevel;
+	floor: BridgeFloor;
 	viewscreens: BridgeViewscreen[];
 	stationNames: string[];
 	clientAssignments: BridgeClientAssignment[];
 	assignedStations: Set<string>;
+	elementScale: number;
 }) {
 	const [activeTool, setActiveTool] = useState<MapTool>("select");
 	const panState = useRef<PanState>({ x: 0, y: 0, scale: 1 });
@@ -59,8 +58,12 @@ export function MapCanvas({
 	const activeToolRef = useRef(activeTool);
 	activeToolRef.current = activeTool;
 
-	const canvasWidth = level.backgroundUrl ? level.imageWidth : DEFAULT_CANVAS_SIZE;
-	const canvasHeight = level.backgroundUrl ? level.imageHeight : DEFAULT_CANVAS_SIZE;
+	const canvasWidth = floor.backgroundUrl
+		? floor.widthPixels
+		: DEFAULT_CANVAS_SIZE;
+	const canvasHeight = floor.backgroundUrl
+		? floor.heightPixels
+		: DEFAULT_CANVAS_SIZE;
 
 	// Intercept wheel events: stop outer scroll and force zoom behavior
 	const canvasWrapperRef = useRef<HTMLDivElement>(null);
@@ -95,24 +98,36 @@ export function MapCanvas({
 	const dragStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 	const dragElementStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 	const dragStartRotation = useRef<number>(0);
-	const scaleCorner = useRef<ScaleCorner>(0);
-	const dragElementSize = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
-	const [isDragging, setIsDragging] = useState(false);
+	// Live drag preview — never mutate floor.elements (it's React Query cache).
+	const [dragPreview, setDragPreview] = useState<{
+		id: string;
+		x: number;
+		y: number;
+		rotation: number;
+	} | null>(null);
 
 	const [selectedId, setSelectedId] = useState<string | null>(null);
-	const selectedElement = level.elements.find((e) => e.id === selectedId);
+	const baseSelectedElement = floor.elements.find((e) => e.id === selectedId);
+	const selectedElement =
+		baseSelectedElement &&
+		dragPreview &&
+		dragPreview.id === baseSelectedElement.id
+			? {
+					...baseSelectedElement,
+					x: dragPreview.x,
+					y: dragPreview.y,
+					rotation: dragPreview.rotation,
+				}
+			: baseSelectedElement;
 
-	const getSvgPoint = useCallback(
-		(clientX: number, clientY: number) => {
-			const svg = svgRef.current;
-			if (!svg) return { x: 0, y: 0 };
-			const rect = svg.getBoundingClientRect();
-			const x = (clientX - rect.left) / panState.current.scale;
-			const y = (clientY - rect.top) / panState.current.scale;
-			return { x, y };
-		},
-		[],
-	);
+	const getSvgPoint = useCallback((clientX: number, clientY: number) => {
+		const svg = svgRef.current;
+		if (!svg) return { x: 0, y: 0 };
+		const rect = svg.getBoundingClientRect();
+		const x = (clientX - rect.left) / panState.current.scale;
+		const y = (clientY - rect.top) / panState.current.scale;
+		return { x, y };
+	}, []);
 
 	const handleElementMouseDown = useCallback(
 		(elementId: string, e: React.MouseEvent) => {
@@ -123,16 +138,21 @@ export function MapCanvas({
 			}
 			setSelectedId(elementId);
 
-			const el = level.elements.find((el) => el.id === elementId);
+			const el = floor.elements.find((el) => el.id === elementId);
 			if (!el) return;
 
 			dragMode.current = "move";
 			dragElementId.current = elementId;
 			dragStart.current = getSvgPoint(e.clientX, e.clientY);
 			dragElementStart.current = { x: el.x, y: el.y };
-			setIsDragging(true);
+			setDragPreview({
+				id: elementId,
+				x: el.x,
+				y: el.y,
+				rotation: el.rotation,
+			});
 		},
-		[activeTool, level.elements, getSvgPoint],
+		[activeTool, floor.elements, getSvgPoint],
 	);
 
 	const handleRotateMouseDown = useCallback(
@@ -146,28 +166,12 @@ export function MapCanvas({
 			dragStart.current = getSvgPoint(e.clientX, e.clientY);
 			dragStartRotation.current = selectedElement.rotation;
 			dragElementStart.current = { x: selectedElement.x, y: selectedElement.y };
-			setIsDragging(true);
-		},
-		[selectedElement, getSvgPoint],
-	);
-
-	const handleScaleMouseDown = useCallback(
-		(corner: ScaleCorner, e: React.MouseEvent) => {
-			if (!selectedElement) return;
-			e.stopPropagation();
-			e.preventDefault();
-
-			dragMode.current = "scale";
-			dragElementId.current = selectedElement.id;
-			scaleCorner.current = corner;
-			dragStart.current = getSvgPoint(e.clientX, e.clientY);
-			dragElementStart.current = { x: selectedElement.x, y: selectedElement.y };
-			const bounds = getElementBounds(selectedElement);
-			dragElementSize.current = {
-				width: bounds.w,
-				height: bounds.h,
-			};
-			setIsDragging(true);
+			setDragPreview({
+				id: selectedElement.id,
+				x: selectedElement.x,
+				y: selectedElement.y,
+				rotation: selectedElement.rotation,
+			});
 		},
 		[selectedElement, getSvgPoint],
 	);
@@ -176,111 +180,74 @@ export function MapCanvas({
 		(e: React.MouseEvent<SVGSVGElement>) => {
 			if (!dragMode.current || !dragElementId.current) return;
 			const pt = getSvgPoint(e.clientX, e.clientY);
-			const el = level.elements.find((el) => el.id === dragElementId.current);
+			const el = floor.elements.find((el) => el.id === dragElementId.current);
 			if (!el) return;
 
 			if (dragMode.current === "move") {
 				const dx = pt.x - dragStart.current.x;
 				const dy = pt.y - dragStart.current.y;
-				el.x = dragElementStart.current.x + dx;
-				el.y = dragElementStart.current.y + dy;
-				setIsDragging((v) => !v);
+				setDragPreview({
+					id: el.id,
+					x: dragElementStart.current.x + dx,
+					y: dragElementStart.current.y + dy,
+					rotation: el.rotation,
+				});
 			} else if (dragMode.current === "rotate") {
-				const angle = Math.atan2(
-					pt.y - el.y,
-					pt.x - el.x,
-				);
+				// Rotation pivots around the element's static position.
+				const angle = Math.atan2(pt.y - el.y, pt.x - el.x);
 				const startAngle = Math.atan2(
 					dragStart.current.y - el.y,
 					dragStart.current.x - el.x,
 				);
 				const delta = ((angle - startAngle) * 180) / Math.PI;
-				el.rotation = Math.round(dragStartRotation.current + delta);
-				setIsDragging((v) => !v);
-			} else if (dragMode.current === "scale") {
-				const rad = (el.rotation * Math.PI) / 180;
-				const cos = Math.cos(rad);
-				const sin = Math.sin(rad);
-				const rawDx = pt.x - dragStart.current.x;
-				const rawDy = pt.y - dragStart.current.y;
-				const localDx = rawDx * cos + rawDy * sin;
-				const localDy = -rawDx * sin + rawDy * cos;
-
-				const origW = dragElementSize.current.width;
-				const origH = dragElementSize.current.height;
-				const origX = dragElementStart.current.x;
-				const origY = dragElementStart.current.y;
-
-				const corner = scaleCorner.current;
-				const signX = corner === 0 || corner === 3 ? -1 : 1;
-				const signY = corner === 0 || corner === 1 ? -1 : 1;
-
-				const newW = Math.max(4, origW + localDx * signX);
-				const newH = Math.max(4, origH + localDy * signY);
-
-				const dw = newW - origW;
-				const dh = newH - origH;
-				const shiftLocalX = (dw * signX) / 2;
-				const shiftLocalY = (dh * signY) / 2;
-				el.x = origX + shiftLocalX * cos - shiftLocalY * sin;
-				el.y = origY + shiftLocalX * sin + shiftLocalY * cos;
-				el.width = newW;
-				el.height = newH;
-				setIsDragging((v) => !v);
+				setDragPreview({
+					id: el.id,
+					x: el.x,
+					y: el.y,
+					rotation: Math.round(dragStartRotation.current + delta),
+				});
 			}
 		},
-		[level.elements, getSvgPoint],
+		[floor.elements, getSvgPoint],
 	);
 
 	const handleCanvasMouseUp = useCallback(
 		async (e: React.MouseEvent<SVGSVGElement>) => {
 			// Finish element drag
 			if (dragMode.current && dragElementId.current) {
-				const el = level.elements.find((el) => el.id === dragElementId.current);
-				if (el) {
-					const updateParams: any = {
-						pluginId,
-						bridgeId,
-						levelId: level.id,
-						elementId: el.id,
-						x: el.x,
-						y: el.y,
-						rotation: el.rotation,
-					};
-					if (el.width !== undefined) updateParams.width = el.width;
-					if (el.height !== undefined) updateParams.height = el.height;
-					await q.plugin.bridge.updateElement.netSend(updateParams);
-				}
+				const elementId = dragElementId.current;
+				const preview = dragPreview;
 				dragMode.current = null;
 				dragElementId.current = null;
-				setIsDragging(false);
+				setDragPreview(null);
+				if (preview) {
+					await q.plugin.bridge.updateElement.netSend({
+						pluginId,
+						bridgeId,
+						floorId: floor.id,
+						elementId,
+						x: preview.x,
+						y: preview.y,
+						rotation: preview.rotation,
+					});
+				}
 				return;
 			}
 
 			// Place discrete element
 			if (activeTool !== "select") {
 				const pt = getSvgPoint(e.clientX, e.clientY);
-				const defaultSize = canvasWidth * STATION_SIZE_FRACTION;
-				const params: any = {
+				await q.plugin.bridge.addElement.netSend({
 					pluginId,
 					bridgeId,
-					levelId: level.id,
+					floorId: floor.id,
 					type: activeTool as BridgeMapElementType,
 					x: pt.x,
 					y: pt.y,
-				};
-				if (activeTool === "station") {
-					params.width = defaultSize;
-					params.height = defaultSize;
-				} else if (activeTool === "viewscreen") {
-					const vsSize = canvasWidth * VIEWSCREEN_SIZE_FRACTION;
-					params.width = vsSize;
-					params.height = vsSize;
-				}
-				await q.plugin.bridge.addElement.netSend(params);
+				});
 			}
 		},
-		[activeTool, pluginId, bridgeId, level.id, level.elements, getSvgPoint, canvasWidth],
+		[activeTool, pluginId, bridgeId, floor.id, getSvgPoint, dragPreview],
 	);
 
 	const handleDeleteElement = useCallback(async () => {
@@ -288,11 +255,11 @@ export function MapCanvas({
 		await q.plugin.bridge.removeElement.netSend({
 			pluginId,
 			bridgeId,
-			levelId: level.id,
+			floorId: floor.id,
 			elementId: selectedId,
 		});
 		setSelectedId(null);
-	}, [selectedId, pluginId, bridgeId, level.id]);
+	}, [selectedId, pluginId, bridgeId, floor.id]);
 
 	useEffect(() => {
 		const handler = (e: KeyboardEvent) => {
@@ -359,61 +326,83 @@ export function MapCanvas({
 								{ length: Math.floor(canvasWidth / GRID_SIZE_PX) + 1 },
 								(_, i) => {
 									const pos = i * GRID_SIZE_PX;
-									return <line key={`v${i}`} x1={pos} y1={0} x2={pos} y2={canvasHeight} />;
+									return (
+										<line
+											key={`v${i}`}
+											x1={pos}
+											y1={0}
+											x2={pos}
+											y2={canvasHeight}
+										/>
+									);
 								},
 							)}
 							{Array.from(
 								{ length: Math.floor(canvasHeight / GRID_SIZE_PX) + 1 },
 								(_, i) => {
 									const pos = i * GRID_SIZE_PX;
-									return <line key={`h${i}`} x1={0} y1={pos} x2={canvasWidth} y2={pos} />;
+									return (
+										<line
+											key={`h${i}`}
+											x1={0}
+											y1={pos}
+											x2={canvasWidth}
+											y2={pos}
+										/>
+									);
 								},
 							)}
 						</g>
 						{/* Background image */}
-						{level.backgroundUrl && (
+						{floor.backgroundUrl && (
 							<image
-								href={level.backgroundUrl}
+								href={floor.backgroundUrl}
 								width={canvasWidth}
 								height={canvasHeight}
 							/>
 						)}
 
 						{/* Elements */}
-						{level.elements.map((el) => {
-						const linkedVs = el.type === "viewscreen" && el.viewscreenId
-							? viewscreens.find((v) => v.id === el.viewscreenId)
-							: null;
-						return (
-							<MapElementRenderer
-								key={el.id}
-								element={el}
-								selected={selectedId === el.id}
-								onMouseDown={(e) => handleElementMouseDown(el.id, e)}
-								isMainViewscreen={linkedVs?.isMainViewscreen}
-								viewscreenName={linkedVs?.name}
-							/>
-						);
-					})}
-
-						{/* Selection overlay: scale handles + rotation handle */}
-						{selectedElement && activeTool === "select" && (() => {
-							const el = selectedElement;
-							const { w, h, ox, oy } = getElementBounds(el);
-							const hw = w / 2;
-							const hh = h / 2;
-							const corners: [number, number, ScaleCorner, string][] = [
-								[-hw, -hh, 0, "nwse-resize"],
-								[hw, -hh, 1, "nesw-resize"],
-								[hw, hh, 2, "nwse-resize"],
-								[-hw, hh, 3, "nesw-resize"],
-							];
+						{floor.elements.map((el) => {
+							const linkedVs =
+								el.type === "viewscreen" && el.viewscreenId
+									? viewscreens.find((v) => v.id === el.viewscreenId)
+									: null;
+							const renderEl =
+								dragPreview && dragPreview.id === el.id
+									? {
+											...el,
+											x: dragPreview.x,
+											y: dragPreview.y,
+											rotation: dragPreview.rotation,
+										}
+									: el;
 							return (
-								<g
-									transform={`translate(${el.x}, ${el.y}) rotate(${el.rotation})`}
-									pointerEvents="all"
-								>
-									<g transform={`translate(${ox}, ${oy})`}>
+								<MapElementRenderer
+									key={el.id}
+									element={renderEl}
+									selected={selectedId === el.id}
+									onMouseDown={(e) => handleElementMouseDown(el.id, e)}
+									isMainViewscreen={linkedVs?.isMainViewscreen}
+									viewscreenName={linkedVs?.name}
+									elementScale={elementScale}
+								/>
+							);
+						})}
+
+						{/* Selection overlay: bounding box + rotation handle */}
+						{selectedElement &&
+							activeTool === "select" &&
+							(() => {
+								const el = selectedElement;
+								const { w, h } = getElementBounds(el, elementScale);
+								const hw = w / 2;
+								const hh = h / 2;
+								return (
+									<g
+										transform={`translate(${el.x}, ${el.y}) rotate(${el.rotation})`}
+										pointerEvents="all"
+									>
 										<rect
 											x={-hw}
 											y={-hh}
@@ -425,20 +414,6 @@ export function MapCanvas({
 											strokeDasharray="3,3"
 											pointerEvents="none"
 										/>
-										{corners.map(([cx, cy, corner, cursor]) => (
-											<rect
-												key={corner}
-												x={cx - HANDLE_SIZE / 2}
-												y={cy - HANDLE_SIZE / 2}
-												width={HANDLE_SIZE}
-												height={HANDLE_SIZE}
-												fill="white"
-												stroke="#60a5fa"
-												strokeWidth={1}
-												style={{ cursor }}
-												onMouseDown={(e) => handleScaleMouseDown(corner, e)}
-											/>
-										))}
 										<line
 											x1={0}
 											y1={-hh}
@@ -460,9 +435,8 @@ export function MapCanvas({
 											onMouseDown={handleRotateMouseDown}
 										/>
 									</g>
-								</g>
-							);
-						})()}
+								);
+							})()}
 					</svg>
 				</PanZoom>
 
@@ -473,10 +447,11 @@ export function MapCanvas({
 						element={selectedElement}
 						pluginId={pluginId}
 						bridgeId={bridgeId}
-						levelId={level.id}
+						floorId={floor.id}
 						viewscreens={viewscreens}
 						stationNames={stationNames}
 						assignedStations={assignedStations}
+						elementScale={elementScale}
 						onDelete={handleDeleteElement}
 					/>
 				)}

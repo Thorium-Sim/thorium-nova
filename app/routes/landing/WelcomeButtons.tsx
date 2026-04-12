@@ -40,8 +40,6 @@ function ActiveFlightButtons() {
 
 	const hasStation = client.shipId && client.stationId;
 	const isFlightDirector = client.stationId === "Flight Director";
-	const isBridgeAssigned = client.bridgeAssigned;
-
 	return (
 		<>
 			{isFlightDirector ? (
@@ -53,14 +51,9 @@ function ActiveFlightButtons() {
 					Go To Station
 				</NavLink>
 			) : null}
-			{!isBridgeAssigned && (
-				<NavLink
-					className={`btn btn-outline ${hasStation || isFlightDirector ? "btn-secondary" : "btn-primary"}`}
-					to="/flight/lobby"
-				>
-					Go To Flight Lobby
-				</NavLink>
-			)}
+			<NavLink className="btn btn-notice btn-outline" to="/flight/lobby">
+				Go To Flight Lobby
+			</NavLink>
 			{process.env.NODE_ENV !== "production" && (
 				<NavLink className="btn btn-info btn-outline" to="/cards">
 					Go To Card Development

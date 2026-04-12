@@ -1,5 +1,5 @@
 import { q } from "@thorium/context/AppContext";
-import { useState } from "react";
+import { useStation } from "@thorium/routes/station/useStation";
 
 const brokenModeLabels: Record<string, string> = {
 	fullyBroken: "Fully Breakable",
@@ -8,31 +8,15 @@ const brokenModeLabels: Record<string, string> = {
 };
 
 export function ViewscreenCore() {
-	const [playerShips] = q.ship.players.useNetRequest();
-	const [selectedShipId, setSelectedShipId] = useState<number | null>(null);
+	const { shipId } = useStation();
 
-	const shipId = selectedShipId ?? playerShips[0]?.id ?? null;
+	if (!shipId) {
+		return <p className="text-gray-400 p-2 text-sm">No ship selected</p>;
+	}
 
 	return (
 		<div className="flex flex-col gap-2 p-2 text-sm">
-			{playerShips.length > 1 && (
-				<select
-					className="select select-xs bg-gray-800 text-white"
-					value={shipId ?? ""}
-					onChange={(e) => setSelectedShipId(Number(e.target.value))}
-				>
-					{playerShips.map((ship) => (
-						<option key={ship.id} value={ship.id}>
-							{ship.name}
-						</option>
-					))}
-				</select>
-			)}
-			{shipId !== null ? (
-				<ViewscreenList shipId={shipId} />
-			) : (
-				<p className="text-gray-400">No ships available</p>
-			)}
+			<ViewscreenList shipId={shipId} />
 		</div>
 	);
 }

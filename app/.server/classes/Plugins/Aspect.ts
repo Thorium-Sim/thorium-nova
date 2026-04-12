@@ -16,18 +16,18 @@ export abstract class Aspect extends DataStore {
 	plugin: BasePlugin;
 	constructor(
 		params: { name: string },
-		aspectConfig: { kind: AspectKinds; subPath?: `/${string}`; manifestFile?: string },
+		aspectConfig: { kind: AspectKinds; subPath?: `/${string}` },
 		plugin: BasePlugin,
 		options: DataStoreOptions,
 	) {
-		const { kind, subPath = "/", manifestFile = "manifest.yml" } = aspectConfig;
+		const { kind, subPath = "/" } = aspectConfig;
 		const name = generateIncrementedName(
 			params.name || `New ${kind}`,
 			plugin.aspects[kind].map((aspect) => aspect.name),
 		);
 		super(params, {
 			meta: {
-				filePath: `/plugins/${plugin.id}/${kind}${subPath}${name}/${manifestFile}`,
+				filePath: `/plugins/${plugin.id}/${kind}${subPath}${name}/manifest.yml`,
 			},
 			...options,
 		});

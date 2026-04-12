@@ -10,7 +10,7 @@ import { selectAvailableTimelines } from "@thorium/utils/.server/executeBlocks";
 import type { Entity } from "@thorium/utils/ecs";
 import { z } from "zod";
 import MarkdownIt from "markdown-it";
-import { tryBridgeAutoAssign } from "@thorium/.server/init/bridgeAutoAssign";
+import { claimBridgeFlightClient } from "@thorium/.server/init/bridgeAutoAssign";
 const md = MarkdownIt();
 
 export const client = t.router({
@@ -55,14 +55,25 @@ export const client = t.router({
 		.input(z.object({ clientId: z.string(), name: z.string().min(1) }))
 		.send(({ ctx, input }) => {
 			const client = ctx.getClient(input.clientId);
+
+			// Un-claim current bridge entity if exists
+			if (ctx.flight) {
+				const flightClient = ctx.getFlightClient(client.id);
+				if (flightClient?.components.flightClient?.bridgeAssigned) {
+					flightClient.updateComponent("flightClient", { clientId: "" });
+					ctx.flight.flightClientIndex.delete(client.id);
+				}
+			}
+
 			client.name = input.name;
+
+			// Try to claim a bridge entity matching the new name
+			if (ctx.flight) {
+				claimBridgeFlightClient(ctx, client.id);
+			}
+
 			pubsub.publish.client.all();
 			pubsub.publish.client.get({ clientId: client.id });
-
-			// Auto-assign if the new name matches a bridge assignment
-			if (ctx.flight) {
-				tryBridgeAutoAssign(ctx, client.id);
-			}
 
 			return { clientId: client.id, name: client.name };
 		}),
@@ -83,16 +94,12 @@ export const client = t.router({
 				throw new Error("No flight has been started.");
 			}
 
-			// Prevent reassignment of bridge-assigned clients
-			if (flightClient.components.flightClient?.bridgeAssigned) {
-				throw new Error("Cannot reassign a bridge-assigned client");
-			}
-
 			// If shipId is null, we're removing ourselves from the flight.
 			if (input.shipId === null) {
 				flightClient.updateComponent("flightClient", {
 					stationId: null,
 					shipId: null,
+					bridgeAssigned: false,
 				});
 				const clientId = flightClient.components.flightClient!.clientId;
 				pubsub.publish.client.all();
@@ -106,9 +113,10 @@ export const client = t.router({
 			if (!ship?.components.isShip) {
 				throw new Error("No ship with that ID exists.");
 			}
-			const complementStations = ship.components.stationComplement?.stations || [];
-			const hasViewscreenStations = complementStations.some(
-				(s) => s.cards.some((c) => c.component === "Viewscreen"),
+			const complementStations =
+				ship.components.stationComplement?.stations || [];
+			const hasViewscreenStations = complementStations.some((s) =>
+				s.cards.some((c) => c.component === "Viewscreen"),
 			);
 			const filteredStatic = hasViewscreenStations
 				? staticStations.filter((s) => s.name !== "Viewscreen")

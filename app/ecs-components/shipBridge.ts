@@ -2,7 +2,13 @@ import z from "zod";
 
 export const shipBridge = z
 	.object({
-		pluginId: z.string(),
-		bridgeId: z.string(),
+		clientAssignments: z
+			.object({
+				clientName: z.string(),
+				stationId: z.string(),
+				isSoundPlayer: z.boolean().default(false),
+			})
+			.array()
+			.default([]),
 	})
 	.optional();

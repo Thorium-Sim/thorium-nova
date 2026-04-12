@@ -36,6 +36,39 @@ const childrenSizeClassName = {
  * you need to wrap the icon and text in a common parent and set the parent to
  * display "flex" (or "inline-flex") with "items-center" and a reasonable gap.
  */
+/** Icon for use inside an SVG context. Renders a nested `<svg>` with a `<use>` reference. */
+export function SvgIcon({
+	name,
+	x,
+	y,
+	width,
+	height,
+	...props
+}: Omit<SVGProps<SVGSVGElement>, "viewBox" | "fill"> & {
+	name: IconName;
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+}) {
+	return (
+		<svg
+			x={x}
+			y={y}
+			width={width}
+			height={height}
+			viewBox="0 0 24 24"
+			fill="none"
+			strokeWidth={2}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			{...props}
+		>
+			<use href={`${href}#${name}`} />
+		</svg>
+	);
+}
+
 export function Icon({
 	name,
 	size = "font",

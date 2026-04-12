@@ -21,10 +21,10 @@ export const viewscreen = t.router({
 		}),
 	viewscreenConfig: t.procedure
 		.input(z.object({ clientId: z.string() }))
-		.autoPublish(["isViewscreen"], () => null)
+		.autoPublish(["isViewscreen", "damage"], () => null)
 		.request(({ ctx, input }) => {
-			const flightClient =
-				ctx.getFlightClient(input.clientId)?.components.flightClient;
+			const flightClient = ctx.getFlightClient(input.clientId)?.components
+				.flightClient;
 			if (!flightClient?.shipId || !flightClient?.stationId) return null;
 
 			const viewscreenEntities =
@@ -38,17 +38,25 @@ export const viewscreen = t.router({
 					vs.shipId === flightClient.shipId &&
 					vs.name === flightClient.stationId
 				) {
+					const parentEntity = vs.viewscreenSystemId
+						? ctx.flight?.ecs.getEntityById(vs.viewscreenSystemId)
+						: undefined;
+					const damageBroken =
+						vs.brokenMode === "invincible"
+							? false
+							: (parentEntity?.components.damage?.offline ?? false);
+
 					return {
 						cameraYaw: vs.cameraYaw,
 						cameraPitch: vs.cameraPitch,
 						cameraFov: vs.cameraFov,
 						showGizmos: vs.showGizmos,
 						showLayout: vs.showLayout,
-						isMainViewscreen: vs.isMainViewscreen,
+						isMainViewscreen: vs.tags.includes("main-viewscreen"),
 						name: vs.name,
 						brokenMode: vs.brokenMode,
 						camerasOffline: vs.camerasOffline,
-						damageBroken: vs.damageBroken,
+						damageBroken,
 					};
 				}
 			}
@@ -63,7 +71,8 @@ export const viewscreen = t.router({
 		.request(({ ctx, input }) => {
 			const viewscreenEntities =
 				ctx.flight?.ecs.componentCache.get("isViewscreen");
-			if (!viewscreenEntities) return { viewscreens: [], viewscreenSystemOffline: false };
+			if (!viewscreenEntities)
+				return { viewscreens: [], viewscreenSystemOffline: false };
 
 			let viewscreenSystemOffline = false;
 			const results: Array<{
@@ -77,14 +86,18 @@ export const viewscreen = t.router({
 				const vs = entity.components.isViewscreen;
 				if (vs && vs.shipId === input.shipId) {
 					if (!viewscreenSystemOffline && vs.viewscreenSystemId) {
-						const parentEntity = ctx.flight?.ecs.getEntityById(vs.viewscreenSystemId);
-						viewscreenSystemOffline = parentEntity?.components.damage?.offline ?? false;
+						const parentEntity = ctx.flight?.ecs.getEntityById(
+							vs.viewscreenSystemId,
+						);
+						viewscreenSystemOffline =
+							parentEntity?.components.damage?.offline ?? false;
 					}
 					results.push({
 						entityId: entity.id,
 						name: vs.name,
 						camerasOffline: vs.camerasOffline,
-						damageBroken: vs.damageBroken,
+						damageBroken:
+							vs.brokenMode === "invincible" ? false : viewscreenSystemOffline,
 						brokenMode: vs.brokenMode,
 					});
 				}
@@ -101,10 +114,16 @@ export const viewscreen = t.router({
 		.send(({ ctx, input }) => {
 			const entity = ctx.flight?.ecs.getEntityById(input.entityId);
 			if (!entity?.components.isViewscreen) return;
-			entity.updateComponent("isViewscreen", {
-				camerasOffline: input.camerasOffline,
-			}, true);
-			pubsub.publish.viewscreen.allViewscreens({ shipId: entity.components.isViewscreen.shipId });
+			entity.updateComponent(
+				"isViewscreen",
+				{
+					camerasOffline: input.camerasOffline,
+				},
+				true,
+			);
+			pubsub.publish.viewscreen.allViewscreens({
+				shipId: entity.components.isViewscreen.shipId,
+			});
 		}),
 	setAllCamerasOffline: t.procedure
 		.input(
@@ -120,9 +139,13 @@ export const viewscreen = t.router({
 			for (const entity of viewscreenEntities) {
 				const vs = entity.components.isViewscreen;
 				if (vs && vs.shipId === input.shipId) {
-					entity.updateComponent("isViewscreen", {
-						camerasOffline: input.camerasOffline,
-					}, true);
+					entity.updateComponent(
+						"isViewscreen",
+						{
+							camerasOffline: input.camerasOffline,
+						},
+						true,
+					);
 				}
 			}
 			pubsub.publish.viewscreen.allViewscreens({ shipId: input.shipId });
@@ -143,7 +166,9 @@ export const viewscreen = t.router({
 			if (!viewscreenEntities) return;
 
 			// Find the parent system entity from any viewscreen on this ship
-			let parentEntity: ReturnType<NonNullable<typeof ctx.flight>["ecs"]["getEntityById"]> | undefined;
+			let parentEntity:
+				| ReturnType<NonNullable<typeof ctx.flight>["ecs"]["getEntityById"]>
+				| undefined;
 			for (const entity of viewscreenEntities) {
 				const vs = entity.components.isViewscreen;
 				if (vs && vs.shipId === input.shipId && vs.viewscreenSystemId) {
@@ -153,18 +178,7 @@ export const viewscreen = t.router({
 			}
 			if (!parentEntity?.components.damage) return;
 
-			parentEntity.updateComponent("damage", { offline: input.offline });
-
-			// Force-propagate damageBroken to all child viewscreens immediately
-			for (const entity of viewscreenEntities) {
-				const vs = entity.components.isViewscreen;
-				if (vs && vs.shipId === input.shipId) {
-					const shouldBeBroken = vs.brokenMode === "invincible" ? false : input.offline;
-					if (vs.damageBroken !== shouldBeBroken) {
-						entity.updateComponent("isViewscreen", { damageBroken: shouldBeBroken }, true);
-					}
-				}
-			}
+			parentEntity.updateComponent("damage", { offline: input.offline }, true);
 			pubsub.publish.viewscreen.allViewscreens({ shipId: input.shipId });
 		}),
 	stream: t.procedure
