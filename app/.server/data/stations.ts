@@ -27,10 +27,21 @@ export const station = t.router({
 			const filteredStatic = hasViewscreenStations
 				? staticStations.filter((s) => s.name !== "Viewscreen")
 				: staticStations;
-			const station = filteredStatic
-				.concat(complementStations)
-				.find((s) => s.name === flightClient?.stationId) as unknown as Station;
-			return station || null;
+			const stations = [...complementStations];
+			for (const staticStation of filteredStatic) {
+				stations.push({
+					cards: staticStation.cards,
+					description: "",
+					logo: "",
+					messageGroups: [],
+					name: staticStation.name,
+					tags: [],
+					theme: "",
+					widgets: [],
+				});
+			}
+			const station = stations.find((s) => s.name === flightClient?.stationId)!;
+			return station;
 		}),
 	available: t.procedure
 		.autoPublish([], () => null)

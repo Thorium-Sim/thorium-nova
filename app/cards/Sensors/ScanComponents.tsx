@@ -8,9 +8,9 @@ import {
 	starScanTypes,
 } from "@thorium/utils/flags/scanTypes";
 import { capitalCase } from "change-case";
-import type { z } from "zod";
 import type { ReactNode } from "react";
 import { Button } from "react-aria-components";
+import type { z } from "zod";
 
 export const ScanComponents = {
 	shields: ShieldsResults,
@@ -30,7 +30,10 @@ export const ScanComponents = {
 export function ScanResults({
 	objectId,
 	type,
-}: { objectId: number; type: string }) {
+}: {
+	objectId: number;
+	type: string;
+}) {
 	const scans =
 		type === "ship"
 			? shipScanTypes

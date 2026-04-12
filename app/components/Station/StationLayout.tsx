@@ -102,7 +102,7 @@ const StationLayout = () => {
 					</div>
 					<FlightStatus />
 				</div>
-				<div className="widgets flex items-center gap-2 absolute bottom-8 right-[calc(2rem+50px)]">
+				<div className="widgets flex items-center gap-2 absolute bottom-8 right-20.5">
 					<Widgets />
 				</div>
 				{client.training ? (
@@ -198,7 +198,7 @@ function FlightStatus() {
 	return (
 		<div
 			className={cn(
-				"absolute z-[500] inset-0 bg-black/50 backdrop-blur transition-all opacity-0 pointer-events-none flex items-center justify-center",
+				"absolute z-500 inset-0 bg-black/50 backdrop-blur transition-all opacity-0 pointer-events-none flex items-center justify-center",
 				{
 					"opacity-100 pointer-events-auto":
 						flight?.state !== "in-progress" ||

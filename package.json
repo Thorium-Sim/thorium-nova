@@ -145,7 +145,7 @@
 		"vite-plugin-icons-spritesheet": "^2.2.1",
 		"vite-plugin-inspect": "^11.3.3",
 		"vite-tsconfig-paths": "^5.1.4",
-		"vitest": "^4.0.16"
+		"vitest": "^4.1.2"
 	},
 	"publishConfig": {
 		"access": "restricted"

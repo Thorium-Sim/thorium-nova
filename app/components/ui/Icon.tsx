@@ -92,7 +92,12 @@ export function Icon({
 	return (
 		<svg
 			{...props}
-			className={cn(sizeClassName[size], "inline self-center", className)}
+			className={cn(
+				sizeClassName[size],
+				"inline self-center",
+				`icon-${name}`,
+				className,
+			)}
 		>
 			<use href={`${href}#${name}`} />
 		</svg>

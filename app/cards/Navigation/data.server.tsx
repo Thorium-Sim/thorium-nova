@@ -3,7 +3,7 @@ import { type ECS, Entity } from "@thorium/utils/ecs";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { matchSorter } from "match-sorter";
 import { t } from "@thorium/.server/init/t";
-import { z } from "zod";
+import z from "zod";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import {
 	getCompletePositionFromOrbit,
@@ -13,7 +13,11 @@ import {
 import type { DataContext } from "@thorium/.server/DataContext";
 import { getClassification } from "@thorium/cards/Navigation/getObjectClassification.server";
 
-function isWaypointLocked(ecs: ECS, waypointId: number, shipId: number): boolean {
+function isWaypointLocked(
+	ecs: ECS,
+	waypointId: number,
+	shipId: number,
+): boolean {
 	const ship = ecs.getEntityById(shipId);
 	return ship?.components.autopilot?.destinationWaypointId === waypointId;
 }

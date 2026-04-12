@@ -4,7 +4,7 @@ import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
 import { Entity } from "@thorium/utils/ecs";
 import { produce } from "immer";
-import { z } from "zod";
+import z from "zod";
 import PDFDocument from "pdfkit";
 import { Writable } from "node:stream";
 import path from "node:path";

@@ -1,26 +1,29 @@
-import React from "react";
-import { Group, type Mesh, Vector3 } from "three";
-import SystemLabel from "./SystemLabel";
-import SystemCircle, { DraggableSystemCircle } from "./SystemCircle";
-import { useFrame, type ElementProps } from "@react-three/fiber";
-import { useGetStarmapStore } from "../starmapStore";
+import { type ElementProps, useFrame } from "@react-three/fiber";
 import { setCursor } from "@thorium/utils/setCursor";
 import { lightYearToLightMinute } from "@thorium/utils/unitTypes";
-const SystemMarker: React.FC<
-	{
-		systemId: string | number;
-		name: string;
-		position: [number, number, number];
-		draggable?: boolean;
-		commSatelliteRadius: number | null;
-		onPointerDown?: () => void;
-	} & ElementProps<typeof Mesh>
-> = ({
+import React from "react";
+import { Group, type Mesh, Vector3 } from "three";
+import { useGetStarmapStore } from "../starmapStore";
+import SystemCircle from "./SystemCircle";
+import SystemLabel from "./SystemLabel";
+
+interface SystemMarkerProps extends ElementProps<typeof Mesh> {
+	systemId: string | number;
+	name: string;
+	position: [number, number, number];
+	draggable?: boolean;
+	commSatelliteRadius: number | null;
+	commSatelliteColor?: number | null;
+	onPointerDown?: () => void;
+}
+
+const SystemMarker: React.FC<SystemMarkerProps> = ({
 	systemId,
 	name,
 	position,
 	draggable,
 	commSatelliteRadius,
+	commSatelliteColor,
 	...props
 }) => {
 	const group = React.useRef<Group>(new Group());
@@ -28,6 +31,9 @@ const SystemMarker: React.FC<
 
 	const direction = React.useRef(0);
 	const cameraView = useStarmapStore((state) => state.cameraView);
+	const showSatelliteRange = useStarmapStore(
+		(state) => state.showSatelliteRange,
+	);
 
 	useFrame(({ camera }) => {
 		const zoom = group.current?.position
@@ -46,7 +52,7 @@ const SystemMarker: React.FC<
 	if (cameraView === "2d") positionVector.setY(0);
 	return (
 		<>
-			{commSatelliteRadius ? (
+			{showSatelliteRange && commSatelliteRadius ? (
 				<mesh
 					position={positionVector}
 					scale={[
@@ -57,7 +63,7 @@ const SystemMarker: React.FC<
 				>
 					<sphereGeometry args={[lightYearToLightMinute(1), 16, 16]} />
 					<meshBasicMaterial
-						color={0xff8800}
+						color={commSatelliteColor ?? 0xff8800}
 						transparent
 						opacity={0.2}
 						depthTest={false}

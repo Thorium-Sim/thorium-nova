@@ -1,22 +1,23 @@
+import { initWebsocket } from "@thorium/.server/init/liveQuery";
 import type { ProcedureCallOptions } from "@thorium/utils/live-query/.server/procedure";
 import {
-	callProcedure,
 	type AnyRouter,
+	callProcedure,
 } from "@thorium/utils/live-query/.server/router";
 import type {
 	inferRouterContext,
 	MaybePromise,
 } from "@thorium/utils/live-query/.server/types";
-import type { Context, HonoRequest, Next } from "hono";
-import { createMiddleware } from "hono/factory";
+import { SystemStabilityError } from "@thorium/utils/live-query/client/client";
 import {
 	NETREQUEST_PATH,
 	NETSEND_PATH,
 } from "@thorium/utils/live-query/constants";
-import { ZodError } from "zod";
-import type { UpgradeWebSocket } from "hono/ws";
 import EventEmitter from "eventemitter3";
-import { initWebsocket } from "@thorium/.server/init/liveQuery";
+import type { Context, HonoRequest, Next } from "hono";
+import { createMiddleware } from "hono/factory";
+import type { UpgradeWebSocket } from "hono/ws";
+import { ZodError } from "zod";
 
 export type CreateContextOpts<TContext> = {
 	clientId: string;
@@ -108,6 +109,9 @@ export async function liveQueryPlugin<TRouter extends AnyRouter, TContext>({
 						},
 						{ status: 400 },
 					);
+				}
+				if (err instanceof SystemStabilityError) {
+					return Response.json(err, { status: 400 });
 				}
 				// null indicates that there was no query data to begin with.
 				if (err === null) {

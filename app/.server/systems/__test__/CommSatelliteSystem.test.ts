@@ -142,7 +142,7 @@ describe("CommSatelliteSystem", () => {
 			ecs.update(16);
 		}
 
-		expect(message.components.isLongRangeMessage?.state).toEqual("sent");
+		expect(message.components.isLongRangeMessage?.state).toEqual("delivered");
 	});
 	it("should send a message and be intercepted by the player ship satellite", () => {
 		const message = new Entity();
@@ -225,7 +225,7 @@ describe("CommSatelliteSystem", () => {
 			ecs.update(16);
 		}
 
-		expect(message.components.isLongRangeMessage?.state).toEqual("sent");
+		expect(message.components.isLongRangeMessage?.state).toEqual("delivered");
 	});
 	it("should fail to send a message if the destination is outside the satellite network", () => {
 		destinationShip.updateComponent("position", { x: 100 });

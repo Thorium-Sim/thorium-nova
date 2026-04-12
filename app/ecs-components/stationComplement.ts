@@ -5,6 +5,7 @@ const card = z.object({
 	component: z.string().default("Login"),
 	config: z.any().optional(),
 	icon: z.string().nullable().optional(),
+	highlight: z.boolean().default(false).optional(),
 });
 
 const widget = z.object({
@@ -14,6 +15,7 @@ const widget = z.object({
 	icon: z.string().nullable().optional(),
 	size: z.enum(["sm", "md", "lg", "xl"]).default("md").optional(),
 	resize: z.boolean().default(false).optional(),
+	highlight: z.boolean().default(false).optional(),
 });
 
 const station = z.object({

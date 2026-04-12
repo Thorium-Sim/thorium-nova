@@ -1,4 +1,4 @@
-import { z } from "zod";
+import z from "zod";
 export const isDocument = z
 	.object({
 		shipId: z.number().default(-1),

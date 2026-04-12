@@ -5,7 +5,7 @@ import { useNavigate } from "react-router";
 import Input from "@thorium/ui/Input";
 import randomWords from "@thorium/utils/random-words";
 import debounce from "lodash.debounce";
-import { PaletteDisclosure } from "../SolarSystemMap";
+import { PaletteDisclosure } from "./PaletteDisclosure";
 import { useSystemIds } from "../useSystemIds";
 import { q } from "@thorium/context/AppContext";
 import { Icon } from "@thorium/ui/Icon";

@@ -1,23 +1,24 @@
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { z } from "zod";
-import {
-	getShipSystem,
-	getShipSystems,
-} from "@thorium/utils/.server/ship/getShipSystem";
-import {
-	calculateCargoUsed,
-	getRoomBySystem,
-} from "../CargoControl/data.server";
-import { getInventoryTemplates } from "@thorium/utils/.server/getInventoryTemplates";
-import { randomFromList } from "@thorium/utils/operations/randomFromList";
+import { t } from "@thorium/.server/init/t";
 import { spawnTorpedo } from "@thorium/.server/spawners/torpedo";
-import type { ECS, Entity } from "@thorium/utils/ecs";
 import { getCurrentTarget } from "@thorium/.server/systems/PhasersSystem";
+import { getInventoryTemplates } from "@thorium/utils/.server/getInventoryTemplates";
 import {
 	cancelLoopingSound,
 	playShipSound,
 } from "@thorium/utils/.server/playRangedSound";
+import { checkSystemStability } from "@thorium/utils/.server/ship/checkSystemStability";
+import {
+	getShipSystem,
+	getShipSystems,
+} from "@thorium/utils/.server/ship/getShipSystem";
+import type { ECS, Entity } from "@thorium/utils/ecs";
+import { randomFromList } from "@thorium/utils/operations/randomFromList";
+import z from "zod";
+import {
+	calculateCargoUsed,
+	getRoomBySystem,
+} from "../CargoControl/data.server";
 
 export const targeting = t.router({
 	targetedContact: t.procedure
@@ -145,6 +146,9 @@ export const targeting = t.router({
 				const launcher = ctx.ecs.getEntityById(input.launcherId);
 				if (!launcher?.components.isTorpedoLauncher)
 					throw new Error("System is not a torpedo launcher");
+
+				checkSystemStability(launcher, "Failed to load torpedo");
+
 				if (
 					input.torpedoId &&
 					launcher.components.isTorpedoLauncher.status !== "ready"
@@ -192,6 +196,9 @@ export const targeting = t.router({
 
 				if (!launcher?.components.isTorpedoLauncher)
 					throw new Error("System is not a torpedo launcher");
+
+				checkSystemStability(launcher, "Failed to fire torpedo");
+
 				if (launcher.components.isTorpedoLauncher.status !== "loaded") {
 					throw new Error("Torpedo launcher is not loaded");
 				}
@@ -456,6 +463,9 @@ export const targeting = t.router({
 				});
 				if (!phaser.components.isPhasers)
 					throw new Error("System is not a phaser");
+
+				checkSystemStability(phaser, "Failed to set phaser arc");
+
 				phaser.updateComponent("isPhasers", {
 					arc: input.arc,
 				});
@@ -476,6 +486,8 @@ export const targeting = t.router({
 				});
 				if (!phaser.components.isPhasers)
 					throw new Error("System is not a phaser");
+
+				checkSystemStability(phaser, "Failed to fire phaser");
 
 				// TODO: Check if the phaser has sufficient power
 				// to be able to fire at the requested power level

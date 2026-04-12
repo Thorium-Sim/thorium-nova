@@ -13,6 +13,8 @@ import type {
 import { ServerClient } from "@thorium/utils/live-query/.server/ServerClient";
 import { router } from "@thorium/.server/init/router";
 import { claimBridgeFlightClient } from "@thorium/.server/init/bridgeAutoAssign";
+import z from "zod";
+import type { ClientSettings } from "@thorium/.server/data";
 
 type InitWebsocketReturnType = ReturnType<InitWebsocket>;
 const dataContextCache = new Map<string, DataContext>();
@@ -62,7 +64,12 @@ export type Context = inferAsyncReturnType<typeof createContext>;
 
 export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 	name: string = randomNameGenerator();
-
+	settings: ClientSettings = {
+		soundPlayer: true,
+		ambiancePlayer: true,
+		musicPlayer: true,
+		dialoguePlayer: true,
+	};
 	public async sendDataStream() {
 		const context = getDataContext(this.id);
 
@@ -145,8 +152,8 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 		this.send(snapshot);
 	}
 	toJSON() {
-		const { id, name } = this;
-		return { id, name };
+		const { id, name, settings } = this;
+		return { id, name, settings };
 	}
 	connectionOpened(): void {
 		// Auto-assign if this client's name matches a bridge assignment

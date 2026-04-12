@@ -2,7 +2,7 @@ import { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
 import type ShipPlugin from "@thorium/.server/classes/Plugins/Ship";
 import { spawnSolarSystem } from "@thorium/.server/spawners/solarSystem";
 import { type ECS, Entity } from "@thorium/utils/ecs";
-import { z } from "zod";
+import z from "zod";
 import type { position as positionComponent } from "@thorium/ecs-components/position";
 import { Vector3 } from "three";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";

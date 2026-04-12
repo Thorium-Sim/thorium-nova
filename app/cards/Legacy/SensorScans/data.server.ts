@@ -5,7 +5,7 @@ import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
 import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { Entity } from "@thorium/utils/ecs";
 import { produce } from "immer";
-import { z } from "zod";
+import z from "zod";
 
 export const sensorScans = t.router({
 	sensors: t.procedure
@@ -129,9 +129,7 @@ export const sensorScans = t.router({
 
 				for (const station of stations) {
 					pubsub.publish.effects.sub({
-						clientId: null,
-						effect: "flash",
-						config: {},
+						effect: { type: "flash" },
 						shipId: input.shipId,
 						station: station.name,
 					});

@@ -1,6 +1,6 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
-import { z } from "zod";
+import z from "zod";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import randomWords from "@thorium/utils/random-words";
@@ -143,7 +143,7 @@ export const flight = t.router({
 	resume: t.procedure.send(({ ctx }) => {
 		if (ctx.flight) {
 			ctx.flight.paused = false;
-			ctx.ecs.lastUpdate = performance.now();
+			ctx.ecs.lastUpdate = ctx.ecs.now();
 			ctx.flight.state = "in-progress";
 			ctx.flight.stateReason = "";
 			pubsub.publish.flight.active();

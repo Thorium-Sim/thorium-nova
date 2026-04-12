@@ -1,4 +1,4 @@
-import { z } from "zod";
+import z from "zod";
 import { t } from "@thorium/.server/init/t";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
 import { Entity } from "@thorium/utils/ecs";

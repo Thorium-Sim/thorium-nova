@@ -1,11 +1,12 @@
-import { z } from "zod";
-import { t } from "@thorium/.server/init/t";
-import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
-import { type scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";
-import { Entity } from "@thorium/utils/ecs";
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { fromDate } from "dot-beat-time";
+import { t } from "@thorium/.server/init/t";
 import { generateScanResults } from "@thorium/.server/systems/SensorScanSystem";
+import { checkSystemStability } from "@thorium/utils/.server/ship/checkSystemStability";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import { Entity } from "@thorium/utils/ecs";
+import { type scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";
+import { fromDate } from "dot-beat-time";
+import z from "zod";
 
 export const sensors = t.router({
 	get: t.procedure
@@ -107,6 +108,12 @@ export const sensors = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
+			const sensorsSystem = getShipSystem(ctx.ecs, {
+				systemType: "sensors",
+				shipId: input.shipId,
+			});
+			checkSystemStability(sensorsSystem, "Failed to start scanning");
+
 			const scanEntity = new Entity();
 			scanEntity.addComponent("scan", {
 				type: input.type,
@@ -127,6 +134,13 @@ export const sensors = t.router({
 		.send(({ ctx, input }) => {
 			const shipId = ctx.ecs.getEntityById(input.scanId)?.components.scan
 				?.parentId;
+			if (shipId) {
+				const sensorsSystem = getShipSystem(ctx.ecs, {
+					systemType: "sensors",
+					shipId,
+				});
+				checkSystemStability(sensorsSystem, "Failed to cancel scanning");
+			}
 			ctx.flight?.ecs.removeEntityById(input.scanId);
 			if (shipId) {
 				pubsub.publish.sensors.scans({ shipId });

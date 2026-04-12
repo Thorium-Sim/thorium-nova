@@ -248,7 +248,21 @@ export function parseSchema(
 ): ParsedSchema {
 	if (!schema) return [];
 	const { shape } = schema;
-	if (!shape) return [];
+	if (!shape) {
+		if (schema._def.typeName === "ZodIntersection") {
+			const left = parseSchema(schema._def.left, overrides, nestedName);
+			const right = parseSchema(schema._def.right, overrides, nestedName);
+
+			return [...left, ...right];
+		}
+
+		if (schema._def.typeName === "ZodUnion") {
+			return schema._def.options.flatMap((option: any) =>
+				parseSchema(option, overrides, nestedName),
+			);
+		}
+		return [];
+	}
 	return Object.keys(shape).flatMap((name) => {
 		let output: ParsedSchema = [];
 		const item = getItemFromShape(shape, name);

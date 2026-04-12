@@ -1,7 +1,7 @@
 import { t } from "@thorium/.server/init/t";
 import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
-import { z } from "zod";
+import z from "zod";
 
 export const reactorControl = t.router({
 	reactors: t.procedure

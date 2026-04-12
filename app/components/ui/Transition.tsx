@@ -5,7 +5,6 @@ import {
 	useState,
 	type DetailedHTMLProps,
 	type HTMLAttributes,
-	type ReactNode,
 	type RefObject,
 } from "react";
 import { flushSync } from "react-dom";

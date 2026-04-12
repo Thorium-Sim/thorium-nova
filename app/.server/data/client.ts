@@ -8,10 +8,20 @@ import type { TrainingVariables } from "@thorium/routes/config/trainings/trainin
 import { triggerStep } from "@thorium/utils/.server/evaluateEntityQuery";
 import { selectAvailableTimelines } from "@thorium/utils/.server/executeBlocks";
 import type { Entity } from "@thorium/utils/ecs";
-import { z } from "zod";
+import z from "zod";
 import MarkdownIt from "markdown-it";
 import { claimBridgeFlightClient } from "@thorium/.server/init/bridgeAutoAssign";
+import { applyCardHighlight } from "@thorium/utils/.server/applyCardHighlight";
 const md = MarkdownIt();
+
+const clientSettings = z.object({
+	soundPlayer: z.boolean(),
+	ambiancePlayer: z.boolean(),
+	musicPlayer: z.boolean(),
+	dialoguePlayer: z.boolean(),
+});
+
+export type ClientSettings = z.infer<typeof clientSettings>;
 
 export const client = t.router({
 	get: t.procedure
@@ -27,13 +37,14 @@ export const client = t.router({
 				: null,
 		)
 		.request(({ ctx, input }) => {
-			const { id, name, connected } = ctx.server.clients[input.clientId];
+			const { id, name, connected, settings } =
+				ctx.server.clients[input.clientId];
 			const {
 				officersLog,
 				clientId: _id,
 				...flightClient
 			} = ctx.getFlightClient(input.clientId)?.components.flightClient || {};
-			return { id, name, connected, ...flightClient };
+			return { id, name, connected, settings, ...flightClient };
 		}),
 	all: t.procedure
 		.autoPublish(["flightClient"], () => null)
@@ -45,6 +56,7 @@ export const client = t.router({
 					return {
 						name: client.name,
 						connected: client.connected,
+						settings: client.settings,
 						...flightClient?.components.flightClient!,
 					};
 				})
@@ -165,16 +177,40 @@ export const client = t.router({
 			const flightClient = getFlightClient(ctx, input);
 			flightClient.updateComponent("flightClient", { currentCard: input.card });
 
+			// Turn off the highlight for this card
+			applyCardHighlight(
+				ctx.ecs,
+				flightClient.components.flightClient?.shipId || -1,
+				flightClient.components.flightClient?.stationId,
+				[input.card],
+				false,
+			);
+
+			const clientId = flightClient.components.flightClient?.clientId || "";
 			pubsub.publish.client.all();
 			pubsub.publish.client.get({
-				clientId: flightClient.components.flightClient?.clientId || "",
+				clientId,
+			});
+			pubsub.publish.station.get({
+				clientId,
 			});
 			return {
 				card: input.card,
-				clientId: flightClient.components.flightClient?.clientId,
+				clientId,
 				station: flightClient.components.flightClient?.stationId,
 				shipId: flightClient.components.flightClient?.shipId,
 			};
+		}),
+	setSettings: t.procedure
+		.input(z.object({ clientId: z.string(), settings: clientSettings }))
+		.send(({ ctx, input }) => {
+			const client = ctx.getClient(input.clientId);
+
+			client.settings = input.settings;
+			pubsub.publish.client.all();
+			pubsub.publish.client.get({
+				clientId: input.clientId,
+			});
 		}),
 	startTraining: t.procedure
 		.input(z.object({ clientId: z.string() }))

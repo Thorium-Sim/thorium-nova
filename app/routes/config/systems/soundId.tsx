@@ -1,9 +1,8 @@
 import { q } from "@thorium/context/AppContext";
 import Input from "@thorium/ui/Input";
 import { type ReactNode, useContext, useId, useReducer, useState } from "react";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
-import { OverrideResetButton } from "./OverrideResetButton";
 import { Navigate } from "@thorium/components/Navigate";
 import Button from "@thorium/ui/Button";
 import type { Sound } from "@thorium/ecs-components/sound";
@@ -18,17 +17,6 @@ import {
 	removeAllSounds,
 	stopLooping,
 } from "@thorium/utils/sounds/playSound";
-import {
-	MenuTrigger,
-	Button as RAButton,
-	Popover,
-	Menu,
-	SubmenuTrigger,
-} from "react-aria-components";
-import {
-	popoverClass,
-	StyledMenuItem,
-} from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { FilesMenu } from "@thorium/ui/FilesMenu";
 export default function Sounds() {
 	const [rekey, setRekey] = useReducer(() => Math.random(), Math.random());
@@ -105,7 +93,12 @@ function SoundConfig({
 	index,
 	soundCount,
 	ambiance,
-}: { sound: Sound; index: number; soundCount: number; ambiance?: boolean }) {
+}: {
+	sound: Sound;
+	index: number;
+	soundCount: number;
+	ambiance?: boolean;
+}) {
 	const {
 		pluginId,
 		systemId,

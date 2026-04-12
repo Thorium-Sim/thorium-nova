@@ -1,7 +1,7 @@
 import { q, clientId } from "@thorium/context/AppContext";
 import Menubar, { useMenubar } from "@thorium/ui/Menubar";
 import { WaitingForFlight } from "./WaitingForFlight";
-import { Link, NavLink, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import Button from "@thorium/ui/Button";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import SearchableList from "@thorium/ui/SearchableList";
@@ -11,6 +11,9 @@ import { Icon } from "@thorium/ui/Icon";
 import { staticStations } from "./staticStations";
 import { LobbyHeader } from "./LobbyHeader";
 import { cn } from "@thorium/utils/cn";
+import { Header, Button as RAButton } from "react-aria-components";
+import { Menu, MenuItem, MenuTrigger } from "@thorium/ui/Menu";
+import type { ClientSettings as IClientSettings } from "@thorium/.server/data";
 
 export function HostLobby() {
 	const [flight] = q.flight.active.useNetRequest();
@@ -118,7 +121,56 @@ function ClientAssignment() {
 			<div className="flex flex-wrap justify-center">
 				{playerShips.map((ship) => (
 					<div key={ship.id}>
-						<h3 className="text-xl font-bold">{ship.name}</h3>
+						<div className="flex gap-2">
+							<h3 className="text-xl font-bold">{ship.name}</h3>
+							<MenuTrigger>
+								<RAButton className="cursor-pointer">
+									<Icon name="settings"></Icon>
+								</RAButton>
+								<Menu>
+									<MenuItem
+										onAction={async () => {
+											for (const client of clients) {
+												if (client.shipId === ship.id) {
+													await q.client.setSettings.netSend({
+														clientId: client.clientId,
+														settings: {
+															...client.settings,
+															ambiancePlayer: false,
+															dialoguePlayer: false,
+															musicPlayer: false,
+															soundPlayer: false,
+														},
+													});
+												}
+											}
+										}}
+									>
+										Deactivate All Client Audio
+									</MenuItem>
+									<MenuItem
+										onAction={async () => {
+											for (const client of clients) {
+												if (client.shipId === ship.id) {
+													await q.client.setSettings.netSend({
+														clientId: client.clientId,
+														settings: {
+															...client.settings,
+															ambiancePlayer: true,
+															dialoguePlayer: true,
+															musicPlayer: true,
+															soundPlayer: true,
+														},
+													});
+												}
+											}
+										}}
+									>
+										Activate All Client Audio
+									</MenuItem>
+								</Menu>
+							</MenuTrigger>
+						</div>
 						<ul>
 							{ship.stations.map((station) => (
 								<HostStationItem
@@ -167,7 +219,6 @@ function HostStationItem({
 	setSelectedClient: Dispatch<SetStateAction<string>>;
 }) {
 	const [clients] = q.client.all.useNetRequest();
-
 	return (
 		<>
 			<li className="list-group-item" key={station.name}>
@@ -200,6 +251,7 @@ function HostStationItem({
 					<InfoTip>{station.description}</InfoTip>
 				</span>
 			</li>
+
 			{clients
 				.filter((c) => c.shipId === shipId && c.stationId === station.name)
 				.map((client) => (
@@ -212,10 +264,10 @@ function HostStationItem({
 							setSelectedClient(client.clientId);
 						}}
 					>
-						<div className="pl-4 flex items-center justify-between">
-							{client.name}{" "}
-							<Icon
-								name="ban"
+						<div className="pl-4 flex items-center gap-2">
+							{client.name} <div className="grow" />
+							<ClientSettings client={client} />
+							<button
 								className="text-red-600 cursor-pointer"
 								onClick={(e) => {
 									e.stopPropagation();
@@ -225,10 +277,67 @@ function HostStationItem({
 										clientId: client.clientId,
 									});
 								}}
-							/>
+							>
+								<Icon name="ban" />
+							</button>
 						</div>
 					</li>
 				))}
 		</>
+	);
+}
+
+function ClientSettings({
+	client,
+}: {
+	client: { clientId: string; settings: IClientSettings };
+}) {
+	return (
+		<MenuTrigger>
+			<RAButton className="cursor-pointer">
+				<Icon name="settings"></Icon>
+			</RAButton>
+			<Menu
+				selectionMode="multiple"
+				selectedKeys={(
+					[
+						"soundPlayer",
+						"ambiancePlayer",
+						"musicPlayer",
+						"dialoguePlayer",
+					] as const
+				).filter((key) => client.settings[key])}
+				onSelectionChange={(keys) => {
+					const selection =
+						keys === "all"
+							? new Set([
+									"soundPlayer",
+									"ambiancePlayer",
+									"musicPlayer",
+									"dialoguePlayer",
+								])
+							: keys;
+					q.client.setSettings.netSend({
+						clientId: client.clientId,
+						settings: {
+							...client.settings,
+							soundPlayer: selection.has("soundPlayer"),
+							ambiancePlayer: selection.has("ambiancePlayer"),
+							musicPlayer: selection.has("musicPlayer"),
+							dialoguePlayer: selection.has("dialoguePlayer"),
+						},
+					});
+				}}
+			>
+				<Header className="font-bold px-2">Settings</Header>
+				<MenuItem id="soundPlayer">Sound Player</MenuItem>
+				{/* TODO March 26, 2026 — some day we'll make it so different ambiance tracks
+										play on different clients, so the bridge has different ambiance than the engineering
+										or sickbay rooms on the set. */}
+				<MenuItem id="ambiancePlayer">Ambiance Player</MenuItem>
+				<MenuItem id="musicPlayer">Music Player</MenuItem>
+				<MenuItem id="dialoguePlayer">Dialogue Player</MenuItem>
+			</Menu>
+		</MenuTrigger>
 	);
 }

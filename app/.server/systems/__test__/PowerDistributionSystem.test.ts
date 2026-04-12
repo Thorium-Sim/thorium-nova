@@ -319,8 +319,8 @@ describe("PowerDistributionSystem", () => {
 			return system;
 		});
 
-		const time = performance.now();
+		const time = ecs.now();
 		ecs.update(16);
-		expect(performance.now() - time).toBeLessThan(1);
+		expect(ecs.now() - time).toBeLessThan(1);
 	});
 });

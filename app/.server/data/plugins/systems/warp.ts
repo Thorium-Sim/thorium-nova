@@ -2,7 +2,7 @@ import type WarpEnginesPlugin from "@thorium/.server/classes/Plugins/ShipSystems
 import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
+import z from "zod";
 import {
 	getShipSystem,
 	getShipSystemForInput,

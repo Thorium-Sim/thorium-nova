@@ -1,59 +1,28 @@
-import { Duration } from "luxon";
 import { type Entity, System } from "@thorium/utils/ecs";
+import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 
-function subtractTimer(timer: string) {
-	const [hours = "0", minutes = "0", seconds = "0"] = timer.split(":");
-	const dur = Duration.fromObject({
-		hours: Number.parseInt(hours, 10),
-		minutes: Number.parseInt(minutes, 10),
-		seconds: Number.parseInt(seconds, 10),
-	})
-		.minus(1000)
-		.normalize()
-		.toFormat("hh:mm:ss");
-
-	if (Number.parseInt(seconds, 10) < 0) {
-		throw new Error("Seconds has gone negative");
-	}
-	return dur;
-}
 export class TimerSystem extends System {
 	static flightMode = ["nova", "legacy"];
-	timeCount = 0;
 	test(entity: Entity) {
 		return !!entity.components.timer;
 	}
-	preUpdate(elapsed: number) {
-		this.timeCount += elapsed;
-	}
 	update(entity: Entity, elapsed: number) {
-		if (
-			entity.components.timer &&
-			this.timeCount >= 1000 &&
-			!entity.components.timer?.paused
-		) {
-			try {
-				entity.updateComponent("timer", {
-					time: subtractTimer(entity.components.timer.time),
-				});
-				if (entity.components.timer.time === "00:00:00") {
-					this.ecs.removeEntityById(entity.id);
-				}
-			} catch (err: unknown) {
-				if (
-					err instanceof Error &&
-					err?.message === "Seconds has gone negative"
-				) {
-					// Remove the entity
-					this.ecs.removeEntityById(entity.id);
-				}
+		if (entity.components.timer && !entity.components.timer?.paused) {
+			entity.updateComponent("timer", {
+				remainingDurationMs:
+					entity.components.timer.remainingDurationMs - elapsed,
+			});
+			if (entity.components.timer.remainingDurationMs <= 0) {
+				this.complete(entity);
 			}
 		}
 	}
-	postUpdate() {
-		if (this.timeCount >= 1000) {
-			this.timeCount = 0;
-			// pubsub.publish("timer");
-		}
+	complete(entity: Entity) {
+		const completeBlocks = entity.components.timer?.completeBlocks || [];
+		const blockMetadata = entity.components.timer?.blockMetadata || {};
+
+		executeBlocks(this.ecs, completeBlocks, blockMetadata);
+
+		this.ecs.removeEntityById(entity.id);
 	}
 }

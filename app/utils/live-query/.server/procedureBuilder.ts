@@ -151,7 +151,17 @@ export interface ProcedureBuilder<TParams extends ProcedureParams> {
 	/**
 	 * Add a meta data to the procedure.
 	 */
-	meta(meta: TParams["_meta"]): ProcedureBuilder<TParams>;
+	meta<$Meta>(meta: $Meta): ProcedureBuilder<{
+		_config: TParams["_config"];
+		_meta: $Meta;
+		_publish: TParams["_publish"];
+		_entity: TParams["_entity"];
+		_ctx_out: TParams["_ctx_out"];
+		_input_in: TParams["_input_in"];
+		_input_out: TParams["_input_out"];
+		_output_in: TParams["_output_in"];
+		_output_out: TParams["_output_out"];
+	}>;
 	/**
 	 * Automatically trigger a publish call when these components change on entities.
 	 */

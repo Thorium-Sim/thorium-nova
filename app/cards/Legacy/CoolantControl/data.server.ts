@@ -1,7 +1,7 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
-import { z } from "zod";
+import z from "zod";
 
 const legacyCoolantSystemTypes = [
 	"impulseEngines",

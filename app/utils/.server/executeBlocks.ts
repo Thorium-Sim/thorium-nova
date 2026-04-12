@@ -10,28 +10,35 @@ import { Entity, type ECS } from "@thorium/utils/ecs";
 import { produce } from "immer";
 import { evaluateTriggerCondition } from "@thorium/utils/.server/evaluateEntityQuery";
 import { interpolateText } from "@thorium/utils/interpolationEngine";
+import { scheduleBlocks } from "./scheduleAction";
+import uniqid from "../uniqid";
+import type { DataContext } from "@thorium/.server/DataContext";
 
 export class TimelineAvailability {
 	constructor(public isAvailable: boolean) {}
 }
 
+export interface BlockMetadata {
+	stepId?: number;
+	localVariables?: Record<string, any>;
+	theResult?: any;
+	executionType?: "prerequisite" | "main";
+	callReturnBlocks?: TimelineBlock[];
+}
+
 export async function executeBlocks(
 	ecs: ECS,
 	blocks: TimelineBlock[],
-	{
+	blockMetadata: BlockMetadata = {},
+) {
+	let {
 		stepId,
 		localVariables = {},
 		theResult = null,
 		executionType = "main",
 		callReturnBlocks,
-	}: {
-		stepId?: number;
-		localVariables?: Record<string, any>;
-		theResult?: any;
-		executionType?: "prerequisite" | "main";
-		callReturnBlocks?: TimelineBlock[];
-	} = {},
-) {
+	} = blockMetadata;
+	let blockIndex = 0;
 	for (const block of blocks) {
 		switch (block.type) {
 			case "Wait": {
@@ -43,7 +50,25 @@ export async function executeBlocks(
 							? 60 * 1000
 							: 1);
 
-				await new Promise((res) => setTimeout(res, timer));
+				scheduleBlocks(
+					ecs,
+					[
+						{ id: uniqid("blk-"), type: "WaitComplete" },
+						...blocks.slice(blockIndex + 1),
+					],
+					{
+						stepId,
+						localVariables,
+						theResult,
+						executionType,
+						callReturnBlocks,
+					},
+					timer,
+				);
+
+				return;
+			}
+			case "WaitComplete": {
 				// If the timeline step is already marked as completed
 				// then we should skip executing the rest of the blocks
 				if (
@@ -418,6 +443,7 @@ export async function executeBlocks(
 				block satisfies never;
 				break;
 		}
+		blockIndex++;
 	}
 }
 
