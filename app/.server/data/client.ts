@@ -133,9 +133,20 @@ export const client = t.router({
 			const filteredStatic = hasViewscreenStations
 				? staticStations.filter((s) => s.name !== "Viewscreen")
 				: staticStations;
-			const station = filteredStatic
-				.concat(complementStations)
-				.find((station) => station.name === input.stationId);
+			const stations = [...complementStations];
+			for (const staticStation of filteredStatic) {
+				stations.push({
+					cards: staticStation.cards,
+					description: "",
+					logo: "",
+					messageGroups: [],
+					name: staticStation.name,
+					tags: [],
+					theme: "",
+					widgets: [],
+				});
+			}
+			const station = stations.find((station) => station.name === input.stationId);
 
 			if (!station) {
 				throw new Error("No station with that ID exists.");
