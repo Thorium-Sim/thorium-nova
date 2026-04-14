@@ -377,7 +377,7 @@ const quotes = [
 	// Benjamin Brewster, via Dan Abramov
 	"In theory, there is no difference between theory and practice, but in practice there is.",
 	// E.B. White
-	"I arise in the morning torn between a desire to improve save the world and a desire to savor the world. This makes it hard to plan the day.",
+	"I arise in the morning torn between a desire to save the world and a desire to savor the world. This makes it hard to plan the day.",
 	// Winnie the Pooh
 	"Rivers know this: there is no hurry. We shall get there someday.",
 	"People say nothing is impossible, but I do nothing every day.",

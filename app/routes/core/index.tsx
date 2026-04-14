@@ -77,7 +77,7 @@ function ShipSelector() {
 	const [ship] = q.ship.get.useNetRequest({ clientId });
 
 	const id = ship?.id;
-	const name = ship?.components.identity?.name;
+	const name = ship?.name;
 	return (
 		<ComboBox
 			aria-label="ship"

@@ -22,8 +22,7 @@ export function Messaging() {
 	);
 	const [ship] = q.ship.get.useNetRequest({ shipId });
 
-	const stations =
-		ship?.components.stationComplement?.stations.map((s) => s.name) || [];
+	const stations = ship?.stations.map((s) => s.name) || [];
 
 	// Group messages by participant and timestamps 5 minutes or more apart
 	const groupedMessages: {

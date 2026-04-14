@@ -23,8 +23,7 @@ export function MessagingCore() {
 	const [sender, setSender] = useState("");
 	const [alertSender, setAlertSender] = useState(false);
 
-	const stations =
-		ship?.components.stationComplement?.stations.map((s) => s.name) || [];
+	const stations = ship?.stations.map((s) => s.name) || [];
 
 	const conversations = useConversations();
 
@@ -172,8 +171,7 @@ export function useConversations(station?: string) {
 	const [messages] = q.messaging.messages.useNetRequest({ shipId, station });
 	const [ship] = q.ship.get.useNetRequest({ shipId });
 
-	const stations =
-		ship?.components.stationComplement?.stations.map((s) => s.name) || [];
+	const stations = ship?.stations.map((s) => s.name) || [];
 
 	const conversations = useMemo(() => {
 		const conversations = new Map<string, Conversation>();

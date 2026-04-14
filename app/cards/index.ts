@@ -17,3 +17,4 @@ export * from "./CodeCyphers";
 export * from "./Messaging";
 export * from "./Documents";
 export * from "./LongRangeComm";
+export * from "./ShortRangeComm";

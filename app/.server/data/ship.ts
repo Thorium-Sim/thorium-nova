@@ -55,17 +55,46 @@ export const ship = t.router({
 			}
 		})
 		.request(({ ctx, input }) => {
-			// TODO February 28, 2025 - Replace this with a more carefully crafted object
-			const ship =
-				ctx.ecs
-					.getEntityById(
-						"shipId" in input
-							? input.shipId
-							: ctx.getFlightClient(input.clientId)?.components.flightClient
-									?.shipId || -1,
-					)
-					?.toJSON() || null;
-			return ship;
+			const shipId =
+				"shipId" in input
+					? input.shipId
+					: ctx.getFlightClient(input.clientId)?.components.flightClient
+							?.shipId || -1;
+			const ship = ctx.ecs?.getEntityById(shipId)?.toJSON() || null;
+			if (!ship)
+				return {
+					id: shipId,
+					isShip: false,
+					name: "",
+					registry: "",
+					currentSystem: null,
+					alertLevel: "5",
+					systemPosition: {
+						parentId: null,
+						type: "interstellar",
+						x: 0,
+						y: 0,
+						z: 0,
+					},
+					stations: [],
+				};
+			const systemId = ship.components.position?.parentId;
+			const systemPosition = systemId
+				? ctx.flight?.ecs.getEntityById(systemId)?.components.position || null
+				: null;
+			const assets = ship.components.isShip!.assets;
+			return {
+				id: ship.id,
+				isShip: true,
+				name: ship.components.identity!.name,
+				registry: ship.components.isShip!.registry,
+				alertLevel: ship.components.isShip!.alertLevel,
+				currentSystem: systemId || null,
+				systemPosition,
+				assets,
+				isDestroyed: ship.components.isDestroyed,
+				stations: ship.components.stationComplement?.stations || [],
+			};
 		}),
 	players: t.procedure
 		.autoPublish(["isPlayerShip"], () => null)

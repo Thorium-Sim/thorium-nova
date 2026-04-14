@@ -259,9 +259,9 @@ function ShipView({ ref }: { ref: Ref<ShipViewRef> }) {
 		}
 	});
 
-	const model = useGLTF(ship?.components.isShip?.assets?.model || "", false);
+	const model = useGLTF(ship?.assets?.model || "", false);
 
-	if (!ship?.components.isShip) return null;
+	if (!ship?.isShip) return null;
 
 	model.scene.traverse((object) => {
 		if (object instanceof Mesh) {

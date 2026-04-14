@@ -26,7 +26,7 @@ export class DataContext {
 		this.database.flight = flight;
 	}
 	get ecs() {
-		return this.database.flight!.ecs;
+		return this.database.flight?.ecs!;
 	}
 	readFile = DataStore.operations.getStore()?.readAsset!;
 	uploadFile = DataStore.operations.getStore()?.uploadAsset!;
