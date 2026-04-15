@@ -221,7 +221,7 @@ export const StarmapCoreContextMenu = ({
 						if (!position) return;
 
 						await q.ship.spawn.netSend({
-							template: { name: template.id, pluginId: template.pluginName },
+							template: { name: template.name, pluginId: template.pluginName },
 							position: {
 								x: position.x,
 								y: useStarmapStore.getState().yDimensionIndex,

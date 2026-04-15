@@ -346,7 +346,7 @@ export const starmapCore = t.router({
 			})
 				.slice(0, 10)
 				.map(({ pluginName, name, category, assets: { vanity } }) => ({
-					id: name,
+					id: `${name}-${pluginName}`,
 					pluginName,
 					name,
 					category,

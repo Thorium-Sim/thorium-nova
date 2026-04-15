@@ -1,7 +1,6 @@
 import type StationComplementPlugin from "@thorium/.server/classes/Plugins/StationComplement";
-import type Station from "@thorium/.server/classes/Station";
-import { staticStations } from "@thorium/.server/classes/Station";
 import { t } from "@thorium/.server/init/t";
+import { staticStations } from "@thorium/routes/flight/staticStations";
 import z from "zod";
 export const station = t.router({
 	get: t.procedure
@@ -20,7 +19,9 @@ export const station = t.router({
 				.flightClient;
 			const ship = ctx.getPlayerShip(input.clientId);
 			if (flightClient?.stationOverride) return flightClient.stationOverride;
-			const stations = ship?.components.stationComplement?.stations || [];
+			const stations = [
+				...(ship?.components.stationComplement?.stations || []),
+			];
 			for (const staticStation of staticStations) {
 				stations.push({
 					cards: staticStation.cards,

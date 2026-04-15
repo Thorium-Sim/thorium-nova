@@ -57,6 +57,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { type PerspectiveCamera, Plane, Vector3 } from "three";
 import { FiringPhasers } from "./FiringPhasers";
 import { StarmapCoreContextMenu } from "./StarmapCoreContextMenu";
+import Select from "@thorium/ui/Select";
 
 export class SelectStarmapEntityEvent extends Event {
 	static name = "select-starmap-entity";
@@ -678,7 +679,9 @@ function ShipControls() {
 function StarmapCoreMenubar() {
 	const useStarmapStore = useGetStarmapStore();
 	const [playerShips] = q.ship.players.useNetRequest();
-
+	const [shipTemplates] = q.starmapCore.spawnSearch.useNetRequest({
+		query: "",
+	});
 	const playerShip = playerShips[0];
 	useEffect(() => {
 		useStarmapStore.setState({
@@ -707,41 +710,22 @@ function StarmapCoreMenubar() {
 					<Icon name="arrow-left" />
 				</Button>
 			)}
-			<SearchableInput<{
-				id: string;
-				pluginName: string;
-				name: string;
-				category: string;
-				vanity: string;
-			}>
-				inputClassName="input-xs"
-				queryKey="spawn"
-				getOptions={async ({ queryKey, signal }) => {
-					const result = await q.starmapCore.spawnSearch.netRequest(
-						{ query: queryKey[1] },
-						{ signal },
-					);
-					return result;
-				}}
-				ResultLabel={({ active, result, selected }) => (
-					<DefaultResultLabel active={active} selected={selected}>
-						<div className="flex gap-4">
-							<img src={result.vanity} alt="" className="w-8 h-8" />
-							<div>
-								<p className="m-0 leading-none">{result.name}</p>
-								<p className="m-0 leading-none">
-									<small>{result.category}</small>
-								</p>
-							</div>
-						</div>
-					</DefaultResultLabel>
-				)}
-				setSelected={(item) =>
-					useStarmapStore.setState({ spawnShipTemplate: item })
-				}
-				selected={selectedSpawn}
+			<Select
+				label="Ship Template"
+				labelHidden
+				size="xs"
 				placeholder="Ship Spawn Search..."
-			/>
+				buttonClassName="whitespace-nowrap"
+				items={shipTemplates.map((s) => ({ id: s.id, label: s.name }))}
+				selected={selectedSpawn?.id || null}
+				setSelected={(value) =>
+					useStarmapStore.setState({
+						spawnShipTemplate:
+							shipTemplates.find((s) => s.id === value) || null,
+					})
+				}
+			></Select>
+
 			<Button
 				title="Follow selected entity"
 				disabled={selectedObjectIds.length === 0}

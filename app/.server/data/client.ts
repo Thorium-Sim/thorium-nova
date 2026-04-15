@@ -1,5 +1,4 @@
 import type TrainingPlugin from "@thorium/.server/classes/Plugins/Training";
-import { staticStations } from "@thorium/.server/classes/Station";
 import type { DataContext } from "@thorium/.server/DataContext";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
@@ -11,6 +10,7 @@ import type { Entity } from "@thorium/utils/ecs";
 import z from "zod";
 import MarkdownIt from "markdown-it";
 import { applyCardHighlight } from "@thorium/utils/.server/applyCardHighlight";
+import { staticStations } from "@thorium/routes/flight/staticStations";
 const md = MarkdownIt();
 
 const clientSettings = z.object({
@@ -107,9 +107,10 @@ export const client = t.router({
 			if (!ship?.components.isShip) {
 				throw new Error("No ship with that ID exists.");
 			}
-			const station = staticStations
-				.concat(ship.components.stationComplement?.stations || [])
-				.find((station) => station.name === input.stationId);
+			const station = [
+				...staticStations,
+				...(ship.components.stationComplement?.stations || []),
+			].find((station) => station.name === input.stationId);
 
 			if (!station) {
 				throw new Error("No station with that ID exists.");
