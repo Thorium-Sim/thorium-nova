@@ -53,6 +53,7 @@ export default function SearchableInput<T extends { id: any }>({
 	placeholder,
 	inputClassName,
 	className,
+	label = "Search",
 }: {
 	queryKey?: string;
 	displayValue?: (item: T) => string;
@@ -71,6 +72,7 @@ export default function SearchableInput<T extends { id: any }>({
 	placeholder?: string;
 	inputClassName?: string;
 	className?: string;
+	label?: string;
 }) {
 	const list = useAsyncList<T>({
 		async load({ signal, cursor, filterText = "" }) {
@@ -101,6 +103,7 @@ export default function SearchableInput<T extends { id: any }>({
 			}}
 			menuTrigger="focus"
 			className={className}
+			aria-label={label}
 		>
 			<div className="relative mt-1">
 				<div className="relative w-full cursor-default overflow-hidden rounded-lg text-left focus:outline-none sm:text-sm">
