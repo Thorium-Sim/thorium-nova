@@ -155,7 +155,7 @@ export class PowerDrawSystem extends System {
 			case "shortRangeComm": {
 				// Pretty much just the antenna gain affects power, but only when calling or connected
 				if (
-					["calling", "connected"].includes(
+					["hailing", "connected"].includes(
 						entity.components.isShortRangeComm?.state || "",
 					)
 				) {

@@ -44,6 +44,7 @@ export const shortRangeComm = t.router({
 				currentPower: srcomm.components.power?.powerSources.length || 0,
 				frequency: srcomm.components.isShortRangeComm.antennaFrequency,
 				gain: srcomm.components.isShortRangeComm.antennaGain,
+				actualGain: srcomm.components.isShortRangeComm.actualGain,
 				minRadius: srcomm.components.isShortRangeComm.minRadius,
 				maxRadius: srcomm.components.isShortRangeComm.maxRadius,
 			};
@@ -137,7 +138,10 @@ export const shortRangeComm = t.router({
 			});
 			if (!srcomm?.components.isShortRangeComm)
 				throw new Error("No Short Range Comm System");
-			srcomm.updateComponent("isShortRangeComm", { antennaGain: input.gain });
+
+			srcomm.updateComponent("isShortRangeComm", {
+				antennaGain: Math.max(0, Math.min(1, input.gain)),
+			});
 			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
 		}),
 	/**

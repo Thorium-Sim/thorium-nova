@@ -1,17 +1,14 @@
 import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
 import SineWave from "@thorium/ui/SineWave";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
 import throttle from "lodash.throttle";
-import { Suspense, useCallback, useRef, useState } from "react";
+import { Suspense, useCallback, useMemo, useRef, useState } from "react";
 import {
 	CircleGrid,
 	CircleGridTiltButton,
 	GridCanvas,
 } from "@thorium/cards/Pilot/CircleGrid";
-import { cn } from "@thorium/utils/cn";
 import { ObjectData } from "@thorium/cards/Navigation/ObjectDetails";
 import {
 	CircleGridStoreProvider,
@@ -19,11 +16,11 @@ import {
 } from "@thorium/cards/Pilot/useCircleGridStore";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import { PilotZoomSlider } from "@thorium/cards/Pilot/PilotZoomSlider";
+import { BufferGeometry, Path } from "three";
 
 export function ShortRangeComm() {
 	const { shipId } = useStation();
 	const { cardLoaded } = useCardContext();
-	const { interpolate } = useLiveQuery();
 	const [shortRangeComm] = q.shortRangeComm.get.useNetRequest(
 		{ shipId },
 		{
@@ -42,19 +39,17 @@ export function ShortRangeComm() {
 	);
 	const [gain, setGainValue] = useState(shortRangeComm.gain || 1);
 
-	q.longRangeComm.systemStream.useDataStream({ shipId });
-
 	const shadeCountRef = useRef(0);
 
 	const setFrequencyNetSend = useCallback(
 		throttle((value: number) => {
-			q.longRangeComm.setFrequency.netSend({ shipId, frequency: value });
+			q.shortRangeComm.setFrequency.netSend({ shipId, frequency: value });
 		}, 100),
 		[],
 	);
 	const setGainNetSend = useCallback(
 		throttle((value: number) => {
-			q.longRangeComm.setGain.netSend({ shipId, gain: value });
+			q.shortRangeComm.setGain.netSend({ shipId, gain: value });
 		}, 100),
 		[],
 	);
@@ -68,30 +63,37 @@ export function ShortRangeComm() {
 	}
 	const clickRef = useRef(false);
 
+	const gainRadius =
+		shortRangeComm.minRadius +
+		gain * (shortRangeComm.maxRadius - shortRangeComm.minRadius);
+	const { maxRadius, minRadius } = shortRangeComm;
 	return (
-		<CircleGridStoreProvider zoomMax={shortRangeComm.maxRadius}>
-			<div className="w-full h-full grid grid-cols-[1fr_auto_1fr] overflow-hidden gap-8">
-				<div className="flex flex-col h-full row-span-2 min-h-0"></div>
-
-				<Suspense fallback={null}>
-					<GridCanvas
-						shouldRender={cardLoaded}
-						onBackgroundClick={() => {
-							if (clickRef.current === true) {
-								clickRef.current = false;
-								return;
-							}
-							setSelectedContact(null);
-						}}
-					>
-						<CircleGrid>
-							<ShortRangeConversationContacts
-								selectedContactId={selectedContactId}
-							/>
-						</CircleGrid>
-					</GridCanvas>
-				</Suspense>
-
+		<CircleGridStoreProvider
+			zoomMin={minRadius}
+			zoomMax={maxRadius}
+			defaultZoom={(Math.E * 100) / maxRadius}
+		>
+			<div className="w-full h-full grid grid-cols-[1fr_auto] overflow-hidden gap-8">
+				<div className="h-full aspect-square self-center justify-self-center-safe overflow-hidden">
+					<Suspense fallback={null}>
+						<GridCanvas
+							shouldRender={cardLoaded}
+							onBackgroundClick={() => {
+								if (clickRef.current === true) {
+									clickRef.current = false;
+									return;
+								}
+								setSelectedContact(null);
+							}}
+						>
+							<CircleGrid fixedChildren={<GainRange radius={gainRadius} />}>
+								<ShortRangeConversationContacts
+									selectedContactId={selectedContactId}
+								/>
+							</CircleGrid>
+						</GridCanvas>
+					</Suspense>
+				</div>
 				<div className="row-span-2 flex flex-col gap-4 max-h-full  min-h-0">
 					<div className="panel panel-primary">
 						{selectedContactId ? (
@@ -104,7 +106,9 @@ export function ShortRangeComm() {
 							<h3 className="text-2xl p-2 text-center">No Object Selected</h3>
 						)}
 					</div>
-					<PilotZoomSlider />
+					<div>
+						<PilotZoomSlider />
+					</div>
 					<CircleGridTiltButton />
 					<div className="w-full aspect-16/7 panel panel-neutral panel-opaque">
 						<SineWave
@@ -112,40 +116,16 @@ export function ShortRangeComm() {
 							shouldRender={cardLoaded}
 							waves={[
 								{
-									amplitude: gain * 0.15,
-									frequency: frequency / 10,
+									amplitude: gain * 0.15 + 0.02,
+									frequency: (350 - frequency + 100) / 20,
 									phase: Math.PI / 2,
 								},
 							]}
-							callFrame={(ctx, width, height) => {
-								const widthDivisor = 4;
-								const shadeCount = shadeCountRef.current;
-								const shade_grad = ctx.createLinearGradient(
-									shadeCount,
-									0,
-									shadeCount + width / widthDivisor,
-									height / widthDivisor,
-								);
-								shade_grad.addColorStop(0, "rgba(255,255,255,1)");
-								shade_grad.addColorStop(0.1, `rgba(255,255,255,${0.5 - gain})`);
-								shade_grad.addColorStop(0.9, `rgba(255,255,255,${0.5 - gain})`);
-								shade_grad.addColorStop(1, "rgba(255,255,255,1)");
-
-								ctx.fillStyle = shade_grad;
-								// new opaque pixels "erase" previous content
-								ctx.globalCompositeOperation = "destination-out";
-								ctx.fillRect(0, 0, width, height);
-
-								shadeCountRef.current = shadeCount + 3;
-								if (shadeCountRef.current > width * 1.2) {
-									shadeCountRef.current = -width / widthDivisor;
-								}
-							}}
 						/>
 					</div>
 					<div>
-						<label htmlFor="frequency" className="block">
-							Frequency
+						<label htmlFor="frequency" className="block tabular-nums">
+							Frequency ({frequency.toFixed(2)}MHz)
 						</label>
 						<input
 							id="frequency"
@@ -154,7 +134,6 @@ export function ShortRangeComm() {
 							min={100}
 							max={350}
 							step={0.25}
-							dir="rtl"
 							value={frequency}
 							onPointerDown={() => {
 								draggingRef.current = true;
@@ -179,7 +158,7 @@ export function ShortRangeComm() {
 							className="range range-error w-full block"
 							min={0}
 							max={1}
-							step={0.01}
+							step={0.001}
 							value={gain}
 							onPointerDown={() => {
 								draggingRef.current = true;
@@ -233,6 +212,36 @@ function ShortRangeConversationContacts({
 				/>
 			))}
 		</group>
+	);
+}
+
+function GainRange({ radius }: { radius: number }) {
+	const circleGeometry = useMemo(() => {
+		const path = new Path();
+		path.absarc(0, 0, 1, 0, Math.PI * 2, false);
+		const points = path.getPoints(120);
+		return new BufferGeometry().setFromPoints(points);
+	}, []);
+
+	return (
+		<>
+			<lineLoop
+				geometry={circleGeometry}
+				rotation={[Math.PI / 2, 0, 0]}
+				scale={radius}
+			>
+				<lineBasicMaterial color={0x2288ff} transparent opacity={0.8} />
+			</lineLoop>
+			<mesh scale={radius}>
+				<sphereGeometry />
+				<meshBasicMaterial
+					transparent
+					opacity={0.2}
+					color={0x2288ff}
+					depthWrite={false}
+				/>
+			</mesh>
+		</>
 	);
 }
 

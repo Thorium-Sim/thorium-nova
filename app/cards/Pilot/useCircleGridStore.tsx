@@ -1,17 +1,14 @@
 import { create } from "zustand";
-import {
-	type ReactNode,
-	createContext,
-	useContext,
-	useState,
-} from "react";
+import { type ReactNode, createContext, useContext, useState } from "react";
 
 function createCircleGridStore({
 	zoomMin = 0.01,
 	zoomMax = 10000,
+	zoom = 100,
 }: {
 	zoomMin?: number;
 	zoomMax?: number;
+	zoom?: number;
 }) {
 	return create<{
 		zoom: number;
@@ -21,7 +18,7 @@ function createCircleGridStore({
 		width: number;
 		height: number;
 	}>((set) => ({
-		zoom: 100,
+		zoom,
 		zoomMin,
 		zoomMax,
 		tilt: 0,
@@ -37,14 +34,16 @@ export const CircleGirdStoreContext = createContext<ReturnType<
 export function CircleGridStoreProvider({
 	zoomMin = 0.01,
 	zoomMax = 10000,
+	defaultZoom = 100,
 	children,
 }: {
 	zoomMin?: number;
 	zoomMax?: number;
+	defaultZoom?: number;
 	children: ReactNode;
 }) {
 	const [useCircleGridStore] = useState(() =>
-		createCircleGridStore({ zoomMin, zoomMax }),
+		createCircleGridStore({ zoomMin, zoomMax, zoom: defaultZoom }),
 	);
 	return (
 		<CircleGirdStoreContext.Provider value={useCircleGridStore}>

@@ -400,6 +400,8 @@ const quotes = [
 	"What's the best thing I can do as an individual? Stop being an individual.",
 	// Rebecca Solnit
 	"Optimism and pessimism all assume we know the future, and therefore nothing is required from us. I think the future is radically uncertain, and therefore much is required of us.",
+	// Random Tumblr
+	"It feels good to hate, but we know hate is not allowed. So when someone tells us that we're allowed to hate someone else, we get so excited we forget that we're supposed to love everyone.",
 ];
 
 const QuoteOfTheDay = () => {

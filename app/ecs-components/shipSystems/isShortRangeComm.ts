@@ -3,7 +3,10 @@ import z from "zod";
 export const isShortRangeComm = z
 	.object({
 		antennaFrequency: z.number().default(276.25),
+		/** The gain that the player wants to have */
 		antennaGain: z.number().default(0.1),
+		/** The actual gain based on the current power */
+		actualGain: z.number().default(0.1),
 		/** The minimum comm radius in Kilometers at minimum power */
 		minRadius: z.number().default(10_000),
 		/** The minimum comm radius in Kilometers at maximum power */
