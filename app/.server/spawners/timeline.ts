@@ -45,6 +45,24 @@ export function spawnTimeline(
 	});
 	addEntity(timelineEntity);
 
+	// Spawn all of the conversation templates
+	for (const conversation of timeline.plugin.aspects.conversations) {
+		if (
+			conversation.timelineId === timeline.name &&
+			conversation.pluginName === timeline.pluginName
+		) {
+			const conversationEntity = new Entity();
+			conversationEntity.addComponent("isConversationTemplate", {
+				inkFilePath: conversation.assets.conversation,
+			});
+			conversationEntity.addComponent("identity", {
+				name: conversation.name,
+				description: conversation.description,
+			});
+			conversationEntity.addComponent("tags", { tags: conversation.tags });
+			addEntity(conversationEntity);
+		}
+	}
 	// August 25, 2023 - Send the necessary pubsub updates
 	return timelineEntity;
 }

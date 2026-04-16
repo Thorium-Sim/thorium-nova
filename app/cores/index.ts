@@ -19,3 +19,4 @@ export { ActionsCore } from "./ActionsCore";
 export { LoginCore } from "./LoginCore";
 export { StarmapCore } from "./StarmapCore";
 export { TrainingCore } from "./TrainingCore";
+export { ShortRangeCommCore } from "../cards/ShortRangeComm/core";

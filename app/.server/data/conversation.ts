@@ -26,6 +26,26 @@ export const conversation = t.router({
 				currentDialogue: convo.currentDialogue,
 			};
 		}),
+	conversationTemplates: t.procedure
+		.autoPublish(["isConversationTemplate"], () => null)
+		.request(({ ctx, input }) => {
+			const templates = [];
+			for (const template of ctx.ecs.componentCache.get(
+				"isConversationTemplate",
+			) || []) {
+				if (
+					!template.components.identity?.name ||
+					!template.components.isConversationTemplate
+				)
+					continue;
+				templates.push({
+					id: template.id,
+					name: template.components.identity.name,
+					inkFilePath: template.components.isConversationTemplate.inkFilePath,
+				});
+			}
+			return templates;
+		}),
 	divert: t.procedure
 		.input(z.object({ conversationId: z.number(), divert: z.string() }))
 		.send(async ({ ctx, input }) => {

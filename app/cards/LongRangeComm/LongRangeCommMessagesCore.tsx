@@ -286,9 +286,7 @@ function SenderInput({
 
 	return (
 		<>
-			<p className="text-xs">
-				Sender <InfoTip>Use the Starmap core to select a sender</InfoTip>
-			</p>
+			<p className="text-xs">Sender</p>
 			<div className="flex">
 				{/* TODO March 10, 2026 - This should support both picking from the starmap AND searching through the ship's address book */}
 				<OutputField

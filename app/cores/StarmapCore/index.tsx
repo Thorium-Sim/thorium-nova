@@ -58,6 +58,17 @@ import { type PerspectiveCamera, Plane, Vector3 } from "three";
 import { FiringPhasers } from "./FiringPhasers";
 import { StarmapCoreContextMenu } from "./StarmapCoreContextMenu";
 import Select from "@thorium/ui/Select";
+import {
+	CoreShortRangeHailerEvent,
+	CoreShortRangePickHailerEvent,
+	CoreShortRangePickTargetEvent,
+	CoreShortRangeTargetEvent,
+} from "@thorium/cards/ShortRangeComm/events";
+import { OutputField } from "@thorium/ui/Core";
+import {
+	ShortRangeCommEditor,
+	usePickShortRangeComm,
+} from "@thorium/cores/StarmapCore/ShortRangeCommEditor";
 
 export class SelectStarmapEntityEvent extends Event {
 	static name = "select-starmap-entity";
@@ -208,6 +219,11 @@ function EditorProperties({ id }: { id: number }) {
 						id={id}
 						name={starmapObject?.components.identity?.name || ""}
 					/>
+				</EditorDisclosure>
+			) : null}
+			{starmapObject?.id !== shipId ? (
+				<EditorDisclosure title="Short Range Comm">
+					<ShortRangeCommEditor id={id} />
 				</EditorDisclosure>
 			) : null}
 		</>
@@ -524,9 +540,9 @@ export function EditorDisclosure({
 						className={cn(
 							"pb-2 px-2",
 							"relative scale-100 ease-out",
-							"data-[closed]:opacity-0 data-[closed]:scale-95",
-							"data-[enter]:duration-100",
-							"data-[leave]:duration-75",
+							"data-closed:opacity-0 data-closed:scale-95",
+							"data-enter:duration-100",
+							"data-leave:duration-75",
 						)}
 					>
 						<Suspense>{children}</Suspense>
@@ -698,6 +714,7 @@ function StarmapCoreMenubar() {
 	const sensorsHidden = useStarmapStore((store) => store.sensorsHidden);
 
 	usePickLongRangeComm();
+	usePickShortRangeComm();
 
 	return (
 		<>

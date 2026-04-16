@@ -7,6 +7,7 @@ export default class ConversationPlugin extends Aspect {
 	name: string;
 	description: string;
 	timelineId?: string;
+	tags: string[];
 	assets: {
 		conversation: string;
 		files: string[];
@@ -26,23 +27,25 @@ export default class ConversationPlugin extends Aspect {
 			timelineType = "reports";
 		}
 
+		const filePath = `/plugins/${plugin.id}/${timelineType}/${params.timelineId}/conversations/${name}`;
 		super({ name, ...params }, { kind: "conversations" }, plugin, {
 			// Nest the conversation in the same folder as the timeline that it is used with
 			// To prevent naming collisions between conversations from different timelines
 			meta: params.timelineId
 				? {
-						filePath: `/plugins/${plugin.id}/${timelineType}/${params.timelineId}/conversations/${name}/manifest.yml`,
+						filePath: `${filePath}/manifest.yml`,
 					}
 				: undefined,
 		});
 		this.name = name;
 
 		this.assets = params.assets || {
-			conversation: "conversation.ink",
+			conversation: `${filePath}/conversation.ink`,
 			files: [],
 		};
 		this.timelineId = params.timelineId;
 		this.description = params.description || "";
+		this.tags = params.tags || [];
 	}
 
 	async removeAsset(assetPath: string) {

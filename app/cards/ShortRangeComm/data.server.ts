@@ -1,5 +1,6 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
+import { spawnShipSystem } from "@thorium/.server/spawners/shipSystem";
 import { loadInkStory } from "@thorium/utils/.server/ink/loadInkStory";
 import {
 	doForEachConversationPartner,
@@ -12,7 +13,7 @@ import {
 import { scheduleAction } from "@thorium/utils/.server/scheduleAction";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { triggerAction } from "@thorium/utils/.server/triggerAction";
-import { Entity } from "@thorium/utils/ecs";
+import { type ECS, Entity } from "@thorium/utils/ecs";
 import type { Story } from "inkjs";
 import z from "zod";
 
@@ -31,23 +32,30 @@ export const shortRangeComm = t.router({
 				],
 		)
 		.request(({ input, ctx }) => {
-			const srcomm = getShipSystem(ctx.ecs, {
-				systemType: "shortRangeComm",
-				shipId: input.shipId,
-			});
-			if (!srcomm?.components.isShortRangeComm)
-				throw new Error("No Short Range Comm System");
-			return {
-				id: srcomm.id,
-				requiredPower: srcomm.components.power?.powerLevels[0] || 0,
-				maxSafePower: srcomm.components.power?.powerLevels.at(-1) || 1,
-				currentPower: srcomm.components.power?.powerSources.length || 0,
-				frequency: srcomm.components.isShortRangeComm.antennaFrequency,
-				gain: srcomm.components.isShortRangeComm.antennaGain,
-				actualGain: srcomm.components.isShortRangeComm.actualGain,
-				minRadius: srcomm.components.isShortRangeComm.minRadius,
-				maxRadius: srcomm.components.isShortRangeComm.maxRadius,
-			};
+			try {
+				const srcomm = getShipSystem(ctx.ecs, {
+					systemType: "shortRangeComm",
+					shipId: input.shipId,
+				});
+				if (!srcomm?.components.isShortRangeComm)
+					throw new Error("No Short Range Comm");
+				return {
+					id: srcomm.id,
+					requiredPower: srcomm.components.power?.powerLevels[0] || 0,
+					maxSafePower: srcomm.components.power?.powerLevels.at(-1) || 1,
+					currentPower: srcomm.components.power?.powerSources.length || 0,
+					frequency: srcomm.components.isShortRangeComm.antennaFrequency,
+					gain: srcomm.components.isShortRangeComm.antennaGain,
+					actualGain: srcomm.components.isShortRangeComm.actualGain,
+					minRadius: srcomm.components.isShortRangeComm.minRadius,
+					maxRadius: srcomm.components.isShortRangeComm.maxRadius,
+					state: srcomm.components.isShortRangeComm.state,
+					templateConversationId:
+						srcomm.components.isShortRangeComm.templateConversationId,
+				};
+			} catch {
+				return null;
+			}
 		}),
 	/**
 	 * Get all of the conversations happening in the solar system.
@@ -156,15 +164,19 @@ export const shortRangeComm = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
-			const srcomm = getShipSystem(ctx.ecs, {
-				systemType: "shortRangeComm",
-				shipId: input.shipId,
-			});
-			if (!srcomm?.components.isShortRangeComm)
-				throw new Error("No Short Range Comm System");
+			let srcomm: Entity;
+			try {
+				srcomm = getShipSystem(ctx.ecs, {
+					systemType: "shortRangeComm",
+					shipId: input.shipId,
+				});
+			} catch {
+				srcomm = spawnShortRangeComm(input.shipId, ctx.ecs, ctx.flight!.mode);
+			}
 			srcomm.updateComponent("isShortRangeComm", {
 				templateConversationId: input.templateConversationId,
 			});
+			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
 		}),
 	/**
 	 * Creating a new conversation between two ships
@@ -180,17 +192,24 @@ export const shortRangeComm = t.router({
 		)
 		.output(z.object({ conversationId: z.number() }))
 		.send(({ ctx, input }) => {
-			const srcomm = getShipSystem(ctx.ecs, {
+			let srcomm = getShipSystem(ctx.ecs, {
 				systemType: "shortRangeComm",
 				shipId: input.shipId,
 			});
-			if (!srcomm?.components.isShortRangeComm)
-				throw new Error("No Short Range Comm System");
+			if (!srcomm?.components.isShortRangeComm) {
+				srcomm = spawnShortRangeComm(input.shipId, ctx.ecs, ctx.flight!.mode);
+			}
 
 			const targetSrComm = getShipSystem(ctx.ecs, {
 				systemType: "shortRangeComm",
 				shipId: input.targetId,
 			});
+
+			if (!targetSrComm.components.isShortRangeComm) {
+				throw new Error(
+					"Unable to hail: target has no short range communications system",
+				);
+			}
 
 			const conversationTemplateId =
 				input.conversationTemplateId ||
@@ -203,7 +222,7 @@ export const shortRangeComm = t.router({
 			conversation.addComponent("isShortRangeCommConversation", {
 				hostId: input.shipId,
 				targetId: input.targetId,
-				frequency: srcomm.components.isShortRangeComm.antennaFrequency,
+				frequency: srcomm.components.isShortRangeComm?.antennaFrequency,
 				conversationTemplateId: input.conversationTemplateId,
 				allowAdditionalParticipants: input.allowOtherParticipants || false,
 			});
@@ -236,7 +255,11 @@ export const shortRangeComm = t.router({
 			const targetShip = ctx.ecs.getEntityById(input.targetId || -1);
 
 			// If an NPC has no conversation template, the hail will be rejected after a few seconds
-			if (!conversationTemplate?.components.isConversationTemplate) {
+			// unless there is a Flight Director on the flight
+			if (
+				!conversationTemplate?.components.isConversationTemplate &&
+				!ctx.flight?.hasFlightDirector
+			) {
 				// Swap the target and ship, since in this case, the target is the one doing the rejecting
 				scheduleAction(
 					ctx.ecs,
@@ -484,3 +507,33 @@ export const shortRangeComm = t.router({
 			return { shipId: input.shipId, previousState };
 		}),
 });
+
+function spawnShortRangeComm(
+	shipId: number,
+	ecs: ECS,
+	flightMode: "nova" | "legacy",
+) {
+	const shipEntity = ecs.getEntityById(shipId);
+	if (!shipEntity) throw new Error("Ship not found");
+	// If we're intentionally setting a template conversation on an object,
+	// that means that entity should have a short range comm system. Let's
+	// add one.
+	const [entity] = spawnShipSystem(
+		shipId,
+		{ name: "Short Range Comm", tags: ["generated"], type: "shortRangeComm" },
+		flightMode,
+		false,
+		{},
+	);
+
+	// We'll remove power, heat, and damage for simplicity
+	entity.removeComponent("power");
+	entity.removeComponent("heat");
+	entity.removeComponent("damage");
+	ecs.addEntity(entity);
+	if (!shipEntity.components.shipSystems) {
+		shipEntity.addComponent("shipSystems");
+	}
+	shipEntity.components.shipSystems?.shipSystems.set(entity.id, {});
+	return entity;
+}
