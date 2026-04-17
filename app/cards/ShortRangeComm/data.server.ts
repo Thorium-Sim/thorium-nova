@@ -186,17 +186,22 @@ export const shortRangeComm = t.router({
 			z.object({
 				shipId: z.number(),
 				targetId: z.number(),
-				conversationTemplateId: z.number().optional(),
+				conversationTemplateId: z.number().nullable().optional(),
 				allowOtherParticipants: z.boolean().optional(),
 			}),
 		)
 		.output(z.object({ conversationId: z.number() }))
 		.send(({ ctx, input }) => {
-			let srcomm = getShipSystem(ctx.ecs, {
-				systemType: "shortRangeComm",
-				shipId: input.shipId,
-			});
-			if (!srcomm?.components.isShortRangeComm) {
+			let srcomm: Entity;
+			try {
+				srcomm = getShipSystem(ctx.ecs, {
+					systemType: "shortRangeComm",
+					shipId: input.shipId,
+				});
+				if (!srcomm?.components.isShortRangeComm) {
+					throw new Error("No Short Range Comm");
+				}
+			} catch {
 				srcomm = spawnShortRangeComm(input.shipId, ctx.ecs, ctx.flight!.mode);
 			}
 

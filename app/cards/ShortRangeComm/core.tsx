@@ -6,9 +6,13 @@ import {
 } from "@thorium/cards/ShortRangeComm/events";
 import { q } from "@thorium/context/AppContext";
 import useEventListener from "@thorium/hooks/useEventListener";
+import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
+import Checkbox from "@thorium/ui/Checkbox";
 import { OutputField } from "@thorium/ui/Core";
+import InfoTip from "@thorium/ui/InfoTip";
+import Select from "@thorium/ui/Select";
 import { cn } from "@thorium/utils/cn";
 import { startTransition, Suspense, useState } from "react";
 
@@ -16,7 +20,13 @@ export function ShortRangeCommCore() {
 	const { shipId } = useStation();
 	const [hailerId, setHailerId] = useState<number>();
 	const [targetId, setTargetId] = useState<number>();
-
+	const [conversationTemplateId, setConversationTemplateId] = useState<
+		number | null
+	>(null);
+	const [{ allowOtherParticipants }, setAllowOtherParticipants] =
+		useLocalStorage("core-short-range-allow-other-participants", {
+			allowOtherParticipants: false,
+		});
 	useEventListener<CoreShortRangeHailerEvent>(
 		CoreShortRangeHailerEvent.name,
 		(event) => {
@@ -50,6 +60,46 @@ export function ShortRangeCommCore() {
 					setTargetId={setTargetId}
 				/>
 			</Suspense>
+			<Suspense>
+				<ConversationSelect
+					selected={conversationTemplateId}
+					setSelected={setConversationTemplateId}
+				/>
+			</Suspense>
+			<Checkbox
+				label={
+					<>
+						Allow Other Participants
+						<InfoTip>
+							Allow another participant to join the conversation after it is
+							connected.
+						</InfoTip>
+					</>
+				}
+				checked={allowOtherParticipants}
+				onChange={(event) =>
+					setAllowOtherParticipants({
+						allowOtherParticipants: event.currentTarget.checked,
+					})
+				}
+			/>
+			<Button
+				className="btn-xs btn-info w-full"
+				onClick={() => {
+					if (!hailerId || !targetId) return;
+					console.log(allowOtherParticipants);
+					q.shortRangeComm.hail.netSend({
+						shipId: hailerId,
+						targetId: targetId,
+						allowOtherParticipants,
+						conversationTemplateId,
+					});
+				}}
+				disabled={!hailerId || !targetId}
+			>
+				Hail
+			</Button>
+			<p>Active Hails</p>
 		</div>
 	);
 }
@@ -144,5 +194,28 @@ function TargetInput({
 				)}
 			</div>
 		</>
+	);
+}
+
+function ConversationSelect({
+	selected,
+	setSelected,
+}: {
+	selected: number | null;
+	setSelected: (value: number | null) => void;
+}) {
+	const [conversationTemplates] =
+		q.conversation.conversationTemplates.useNetRequest();
+
+	return (
+		<Select
+			size="xs"
+			items={conversationTemplates
+				.map((c) => ({ id: c.id, label: c.name }))
+				.concat({ id: null as any, label: "None" })}
+			label="Conversation Template"
+			selected={selected}
+			setSelected={(value) => setSelected(value)}
+		/>
 	);
 }
