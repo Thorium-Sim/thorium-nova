@@ -40,6 +40,7 @@ export const iconNames = [
   "speaker",
   "send",
   "play",
+  "scan",
   "siren",
   "battery-output",
   "shield-half",

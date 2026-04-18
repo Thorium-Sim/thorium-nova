@@ -1,10 +1,5 @@
-import {
-	CoreShortRangeHailerEvent,
-	CoreShortRangePickHailerEvent,
-	CoreShortRangePickTargetEvent,
-	CoreShortRangeTargetEvent,
-} from "@thorium/cards/ShortRangeComm/events";
 import { q } from "@thorium/context/AppContext";
+import { pickStarmapShip } from "@thorium/cores/StarmapCore/pickShip";
 import useEventListener from "@thorium/hooks/useEventListener";
 import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
 import { useStation } from "@thorium/routes/station/useStation";
@@ -27,22 +22,6 @@ export function ShortRangeCommCore() {
 		useLocalStorage("core-short-range-allow-other-participants", {
 			allowOtherParticipants: false,
 		});
-	useEventListener<CoreShortRangeHailerEvent>(
-		CoreShortRangeHailerEvent.name,
-		(event) => {
-			startTransition(() => {
-				setHailerId(event.hailerId);
-			});
-		},
-	);
-	useEventListener<CoreShortRangeTargetEvent>(
-		CoreShortRangeTargetEvent.name,
-		(event) => {
-			startTransition(() => {
-				setTargetId(event.targetId);
-			});
-		},
-	);
 
 	return (
 		<div className="text-sm h-full">
@@ -133,7 +112,11 @@ function HailerInput({
 						"rounded-r-none": targetId !== shipId,
 					})}
 					onClick={() => {
-						window.dispatchEvent(new CoreShortRangePickHailerEvent());
+						pickStarmapShip("Choose a ship to send the hail.", (hailerId) =>
+							startTransition(() => {
+								setHailerId(hailerId);
+							}),
+						);
 					}}
 				>
 					Pick from Starmap
@@ -179,7 +162,11 @@ function TargetInput({
 						"rounded-r-none": hailerId !== shipId,
 					})}
 					onClick={() => {
-						window.dispatchEvent(new CoreShortRangePickTargetEvent());
+						pickStarmapShip("Choose a ship to receive the hail.", (targetId) =>
+							startTransition(() => {
+								setTargetId(targetId);
+							}),
+						);
 					}}
 				>
 					Pick from Starmap

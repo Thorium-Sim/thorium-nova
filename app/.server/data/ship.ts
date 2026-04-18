@@ -118,17 +118,18 @@ export const ship = t.router({
 		}),
 	player: t.procedure
 		.input(
-			z.object({ clientId: z.string(), playerShipId: z.number().optional() }),
+			z.union([
+				z.object({ clientId: z.string() }),
+				z.object({ shipId: z.number() }),
+			]),
 		)
 		.filter((publish: { shipId: number }, { ctx, input }) => {
-			const shipId = ctx.getFlightClient(input.clientId)?.components
-				.flightClient?.shipId;
-			if (
-				publish &&
-				publish.shipId !== shipId &&
-				publish.shipId !== input?.playerShipId
-			)
-				return false;
+			const shipId =
+				"shipId" in input
+					? input.shipId
+					: ctx.getFlightClient(input.clientId)?.components.flightClient
+							?.shipId;
+			if (publish && publish.shipId !== shipId) return false;
 			return true;
 		})
 		.autoPublish(["position", "isShip"], (entity) =>
@@ -136,18 +137,20 @@ export const ship = t.router({
 		)
 		.request(({ ctx, input }) => {
 			const ship = ctx.flight?.ecs.getEntityById(
-				input?.playerShipId ||
-					ctx.getFlightClient(input.clientId)?.components.flightClient
-						?.shipId ||
-					-1,
+				"shipId" in input
+					? input.shipId
+					: ctx.getFlightClient(input.clientId)?.components.flightClient
+							?.shipId || -1,
 			);
 			if (!ship)
 				return {
-					id: input?.playerShipId || -1,
+					id: -1,
 					name: "",
 					registry: "",
 					currentSystem: null,
 					alertLevel: "5",
+					category: "",
+					shipClass: "",
 					systemPosition: {
 						parentId: null,
 						type: "interstellar",
@@ -160,12 +163,14 @@ export const ship = t.router({
 			const systemPosition = systemId
 				? ctx.flight?.ecs.getEntityById(systemId)?.components.position || null
 				: null;
-			const assets = ship.components.isShip!.assets;
+			const assets = ship.components.isShip?.assets || {};
 			return {
 				id: ship.id,
-				name: ship.components.identity!.name,
-				registry: ship.components.isShip!.registry,
-				alertLevel: ship.components.isShip!.alertLevel,
+				name: ship.components.identity?.name || "Unnamed",
+				registry: ship.components.isShip?.registry || "",
+				alertLevel: ship.components.isShip?.alertLevel || "5",
+				category: ship.components.isShip?.category || "",
+				shipClass: ship.components.isShip?.shipClass || "",
 				currentSystem: systemId || null,
 				systemPosition,
 				assets,

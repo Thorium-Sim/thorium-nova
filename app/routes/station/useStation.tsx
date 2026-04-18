@@ -19,7 +19,9 @@ export function StationData({
 }) {
 	const [client] = q.client.get.useNetRequest({ clientId });
 	const [station] = q.station.get.useNetRequest({ clientId });
-	const [ship] = q.ship.player.useNetRequest({ clientId });
+	const [ship] = q.ship.player.useNetRequest(
+		shipId ? { shipId } : { clientId },
+	);
 
 	return (
 		<StationContext

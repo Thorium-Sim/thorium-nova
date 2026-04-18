@@ -1,8 +1,6 @@
 import type { AppRouter } from "@thorium/.server/init/router";
-import { rotateCharacters } from "@thorium/cards/LongRangeComm/events";
-import type {
-	inferProcedureInput,
-} from "@thorium/utils/live-query/.server/types";
+import { rotateCharacters } from "@thorium/cards/LongRangeComm/shared";
+import type { inferProcedureInput } from "@thorium/utils/live-query/.server/types";
 
 export function RotationDecoder({
 	rotation,

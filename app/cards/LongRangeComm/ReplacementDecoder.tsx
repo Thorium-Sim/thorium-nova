@@ -1,8 +1,6 @@
 import type { AppRouter } from "@thorium/.server/init/router";
-import { replaceCharacters } from "@thorium/cards/LongRangeComm/events";
-import type {
-	inferProcedureInput,
-} from "@thorium/utils/live-query/.server/types";
+import { replaceCharacters } from "@thorium/cards/LongRangeComm/shared";
+import type { inferProcedureInput } from "@thorium/utils/live-query/.server/types";
 import { cn } from "@thorium/utils/cn";
 
 export function ReplacementDecoder({

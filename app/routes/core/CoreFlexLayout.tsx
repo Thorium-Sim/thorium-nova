@@ -16,7 +16,7 @@ export const CoreFlexLayout = forwardRef<Layout>((_, ref) => {
 	useEffect(() => {
 		setTimeout(() => {
 			setState({});
-		}, 100);
+		}, 500);
 	}, []);
 	return (
 		<Layout

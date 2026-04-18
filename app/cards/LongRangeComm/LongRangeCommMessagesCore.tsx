@@ -1,14 +1,8 @@
 import { keepPreviousData } from "@tanstack/react-query";
-import {
-	CoreLongRangeMessageDestinationEvent,
-	CoreLongRangeMessagePickDestinationEvent,
-	CoreLongRangeMessagePickSenderEvent,
-	CoreLongRangeMessageSenderEvent,
-	lrmStateMap,
-} from "@thorium/cards/LongRangeComm/events";
+import { lrmStateMap } from "@thorium/cards/LongRangeComm/shared";
 import { q } from "@thorium/context/AppContext";
 import { SelectStarmapEntityEvent } from "@thorium/cores/StarmapCore";
-import useEventListener from "@thorium/hooks/useEventListener";
+import { pickStarmapShip } from "@thorium/cores/StarmapCore/pickShip";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { InputField, OutputField, TypingField } from "@thorium/ui/Core";
@@ -98,23 +92,6 @@ export function LongRangeCommComposerCore() {
 	const [encoding, setEncoding] = useState<
 		"decoded" | "waves" | "replacement" | "rotation"
 	>("decoded");
-
-	useEventListener<CoreLongRangeMessageSenderEvent>(
-		CoreLongRangeMessageSenderEvent.name,
-		(event) => {
-			startTransition(() => {
-				setSenderId(event.senderId);
-			});
-		},
-	);
-	useEventListener<CoreLongRangeMessageDestinationEvent>(
-		CoreLongRangeMessageDestinationEvent.name,
-		(event) => {
-			startTransition(() => {
-				setDestinationId(event.destinationId);
-			});
-		},
-	);
 
 	return (
 		<div className="flex flex-col text-sm h-full">
@@ -312,7 +289,14 @@ function SenderInput({
 						"rounded-r-none": destinationId !== shipId,
 					})}
 					onClick={() => {
-						window.dispatchEvent(new CoreLongRangeMessagePickSenderEvent());
+						pickStarmapShip(
+							"Choose a ship to send the long range message.",
+							(senderId) => {
+								startTransition(() => {
+									setSenderId(senderId);
+								});
+							},
+						);
 					}}
 				>
 					Pick from Starmap
@@ -388,8 +372,13 @@ function DestinationInput({
 						"rounded-r-none": senderId !== shipId,
 					})}
 					onClick={() => {
-						window.dispatchEvent(
-							new CoreLongRangeMessagePickDestinationEvent(),
+						pickStarmapShip(
+							"Choose a ship to receive the long range message.",
+							(destinationId) => {
+								startTransition(() => {
+									setDestinationId(destinationId);
+								});
+							},
 						);
 					}}
 				>

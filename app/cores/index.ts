@@ -20,3 +20,5 @@ export { LoginCore } from "./LoginCore";
 export { StarmapCore } from "./StarmapCore";
 export { TrainingCore } from "./TrainingCore";
 export { ShortRangeCommCore } from "../cards/ShortRangeComm/core";
+export { ShipCore } from "./ShipCore";
+export { ReputationCore } from "./ReputationCore";

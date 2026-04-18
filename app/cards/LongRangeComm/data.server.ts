@@ -19,7 +19,7 @@ import {
 import {
 	replaceCharacters,
 	rotateCharacters,
-} from "@thorium/cards/LongRangeComm/events";
+} from "@thorium/cards/LongRangeComm/shared";
 
 const encodingSchema = z.union([
 	z.object({

@@ -147,7 +147,7 @@ export function CircleGridWaypoints() {
 	);
 }
 
-const onError = (err: Error) => console.error(err);
+const onError = (err: unknown) => console.error(err);
 const fallback = () => <Fragment />;
 const zeroVector = new Vector3();
 const upVector = new Vector3(0, 1, 0);

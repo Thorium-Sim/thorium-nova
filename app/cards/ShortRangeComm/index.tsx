@@ -25,7 +25,7 @@ export function ShortRangeComm() {
 		{ shipId },
 		{
 			callback: (data) => {
-				if (draggingRef.current) return;
+				if (draggingRef.current || !data) return;
 				setFrequencyValue(data.frequency);
 				setGainValue(data.gain);
 			},
@@ -35,9 +35,9 @@ export function ShortRangeComm() {
 	const [selectedContactId, setSelectedContact] = useState<null | number>(null);
 	const draggingRef = useRef(false);
 	const [frequency, setFrequencyValue] = useState(
-		shortRangeComm.frequency || 276.25,
+		shortRangeComm?.frequency || 276.25,
 	);
-	const [gain, setGainValue] = useState(shortRangeComm.gain || 1);
+	const [gain, setGainValue] = useState(shortRangeComm?.gain || 1);
 
 	const shadeCountRef = useRef(0);
 
@@ -62,6 +62,10 @@ export function ShortRangeComm() {
 		setGainNetSend(value);
 	}
 	const clickRef = useRef(false);
+
+	if (!shortRangeComm) {
+		return "No Short Range Comm System";
+	}
 
 	const gainRadius =
 		shortRangeComm.minRadius +

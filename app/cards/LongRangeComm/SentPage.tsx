@@ -1,4 +1,4 @@
-import { lrmStateMap } from "@thorium/cards/LongRangeComm/events";
+import { lrmStateMap } from "@thorium/cards/LongRangeComm/shared";
 import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import InfoTip from "@thorium/ui/InfoTip";
