@@ -50,6 +50,7 @@ export const shortRangeComm = t.router({
 					minRadius: srcomm.components.isShortRangeComm.minRadius,
 					maxRadius: srcomm.components.isShortRangeComm.maxRadius,
 					state: srcomm.components.isShortRangeComm.state,
+					conversationId: srcomm.components.isShortRangeComm.conversationId,
 					templateConversationId:
 						srcomm.components.isShortRangeComm.templateConversationId,
 				};
@@ -104,7 +105,7 @@ export const shortRangeComm = t.router({
 			return conversations;
 		}),
 	conversation: t.procedure
-		.input(z.object({ conversationId: z.number() }))
+		.input(z.object({ conversationId: z.number().nullish() }))
 		.filter((publish: { conversationId: number }, { ctx, input }) => {
 			if (publish && publish.conversationId !== input.conversationId)
 				return false;
@@ -114,14 +115,80 @@ export const shortRangeComm = t.router({
 			{ conversationId: entity.id },
 		])
 		.request(({ ctx, input }) => {
-			const conversation = ctx.ecs.getEntityById(input.conversationId);
+			const conversation = ctx.ecs.getEntityById(input.conversationId || -1);
 			const srConvo = conversation?.components.isShortRangeCommConversation;
-			if (!srConvo) throw new Error("Conversation not found.");
+			if (!srConvo) return null;
+			const participants: { id: number; name: string }[] = [];
+			let hasTarget = false;
+			doForEachConversationPartner(conversation, (srComm, shipId) => {
+				if (srComm.components.isShortRangeComm?.state !== "connected") return;
+				const ship = ctx.ecs.getEntityById(shipId);
+				participants.push({
+					id: shipId,
+					name: ship?.components.identity?.name || "Unknown",
+				});
+				if (shipId === srConvo.targetId) hasTarget = true;
+			});
+
+			if (!hasTarget) {
+				const targetName =
+					ctx.ecs.getEntityById(srConvo.targetId)?.components.identity?.name ||
+					"Target";
+				participants.push({ id: srConvo.targetId, name: targetName });
+			}
+
 			return {
 				id: conversation.id,
 				frequency: srConvo.frequency,
 				hostId: srConvo.hostId,
+				targetId: srConvo.targetId,
+				participants,
 			};
+		}),
+	incomingHailConversations: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.filter((publish: { shipId: number }, { ctx, input }) => {
+			if (publish && publish.shipId !== input.shipId) return false;
+			return true;
+		})
+		.autoPublish(["isShortRangeCommConversation"], (entity) => [
+			{ shipId: entity.components.isShortRangeCommConversation?.hostId || -1 },
+			{
+				shipId: entity.components.isShortRangeCommConversation?.targetId || -1,
+			},
+		])
+		.request(({ ctx, input }) => {
+			const conversations: {
+				id: number;
+				hostId: number;
+				hostName: string;
+				frequency: number;
+			}[] = [];
+			for (const conversation of ctx.ecs.componentCache.get(
+				"isShortRangeCommConversation",
+			) || []) {
+				const convo = conversation.components.isShortRangeCommConversation;
+
+				const hostId = convo?.hostId;
+				if (!convo || !hostId || convo.targetId !== input.shipId) continue;
+				const hostShortRange = getShipSystem(ctx.ecs, {
+					systemType: "shortRangeComm",
+					shipId: hostId,
+				});
+				const hostName =
+					ctx.ecs.getEntityById(convo.hostId)?.components.identity?.name ||
+					"Host";
+				if (hostShortRange.components.isShortRangeComm?.state === "hailing") {
+					conversations.push({
+						id: conversation.id,
+						frequency: convo.frequency,
+						hostId: convo.hostId,
+						hostName,
+					});
+				}
+			}
+
+			return conversations;
 		}),
 	setFrequency: t.procedure
 		.input(z.object({ shipId: z.number(), frequency: z.number() }))
@@ -205,14 +272,17 @@ export const shortRangeComm = t.router({
 				srcomm = spawnShortRangeComm(input.shipId, ctx.ecs, ctx.flight!.mode);
 			}
 
-			const targetSrComm = getShipSystem(ctx.ecs, {
-				systemType: "shortRangeComm",
-				shipId: input.targetId,
-			});
-
-			if (!targetSrComm.components.isShortRangeComm) {
-				throw new Error(
-					"Unable to hail: target has no short range communications system",
+			let targetSrComm: Entity;
+			try {
+				targetSrComm = getShipSystem(ctx.ecs, {
+					systemType: "shortRangeComm",
+					shipId: input.targetId,
+				});
+			} catch {
+				targetSrComm = spawnShortRangeComm(
+					input.targetId,
+					ctx.ecs,
+					ctx.flight!.mode,
 				);
 			}
 
@@ -275,7 +345,10 @@ export const shortRangeComm = t.router({
 			}
 
 			// Automatically have the NPC connect the hail
-			else if (!targetShip?.components.isPlayerShip) {
+			else if (
+				!ctx.flight?.hasFlightDirector &&
+				!targetShip?.components.isPlayerShip
+			) {
 				scheduleAction(
 					ctx.ecs,
 					"shortRangeComm.connect",
@@ -305,18 +378,26 @@ export const shortRangeComm = t.router({
 			});
 			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
 			pubsub.publish.shortRangeComm.get({ shipId: input.targetId });
-
+			pubsub.publish.shortRangeComm.incomingHailConversations({
+				shipId: input.shipId,
+			});
+			pubsub.publish.shortRangeComm.incomingHailConversations({
+				shipId: input.targetId,
+			});
 			return { conversationId: conversation.id };
 		}),
 	reject: t.procedure
-		.input(z.object({ shipId: z.number(), conversationId: z.number() }))
+		.input(
+			z.object({ shipId: z.number().optional(), conversationId: z.number() }),
+		)
 		.send(({ ctx, input }) => {
-			const srcomm = getShipSystem(ctx.ecs, {
-				systemType: "shortRangeComm",
-				shipId: input.shipId,
-			});
 			const conversation = ctx.ecs.getEntityById(input.conversationId);
 			const srConvo = conversation?.components.isShortRangeCommConversation;
+			const shipId = input.shipId || srConvo?.targetId || -1;
+			const srcomm = getShipSystem(ctx.ecs, {
+				systemType: "shortRangeComm",
+				shipId,
+			});
 
 			if (!conversation || !srConvo || !srcomm.components.isShortRangeComm)
 				throw new Error("Unable to reject");
@@ -335,7 +416,7 @@ export const shortRangeComm = t.router({
 				}
 			}
 
-			const rejectingShip = ctx.ecs.getEntityById(input.shipId);
+			const rejectingShip = ctx.ecs.getEntityById(shipId);
 			cancelLoopingSound(srcomm, "incomingHail");
 			if (rejectingShip) {
 				playShipSound(srcomm, rejectingShip, "rejected");
@@ -352,26 +433,36 @@ export const shortRangeComm = t.router({
 			pubsub.publish.conversation.conversation({
 				conversationId: conversation.id,
 			});
-			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
+			pubsub.publish.shortRangeComm.get({ shipId });
 			if (hostShip) {
 				pubsub.publish.shortRangeComm.conversationContacts({
 					systemId: hostShip.components.position?.parentId || null,
 				});
 				pubsub.publish.shortRangeComm.get({ shipId: hostShip.id });
+				pubsub.publish.shortRangeComm.incomingHailConversations({
+					shipId: hostShip.id,
+				});
 			}
+			pubsub.publish.shortRangeComm.incomingHailConversations({
+				shipId,
+			});
 		}),
 	connect: t.procedure
-		.input(z.object({ shipId: z.number(), conversationId: z.number() }))
+		.input(
+			z.object({ shipId: z.number().optional(), conversationId: z.number() }),
+		)
 		.send(async ({ ctx, input }) => {
-			const srcomm = getShipSystem(ctx.ecs, {
-				systemType: "shortRangeComm",
-				shipId: input.shipId,
-			});
-
 			// Only connect if the conversation still exists
 			const conversation = ctx.ecs.getEntityById(input.conversationId);
 			const srConvo = conversation?.components.isShortRangeCommConversation;
 			const convo = conversation?.components.isConversation;
+
+			const shipId = input.shipId || srConvo?.targetId || -1;
+
+			const srcomm = getShipSystem(ctx.ecs, {
+				systemType: "shortRangeComm",
+				shipId,
+			});
 
 			if (
 				!convo ||
@@ -395,7 +486,7 @@ export const shortRangeComm = t.router({
 
 			// If the conversation has no Ink story, instantiate it
 			let story = convo.inkStory as Story;
-			if (!story) {
+			if (!story && convo.inkFilePath) {
 				const hostShip = ctx.ecs.getEntityById(srConvo.hostId);
 				const targetShip = ctx.ecs.getEntityById(srConvo.targetId);
 				const playerShip = hostShip?.components.isPlayerShip
@@ -414,15 +505,17 @@ export const shortRangeComm = t.router({
 					inkStory: story,
 				});
 			}
-			// Run the story, executing any actions and events until we get to some actual dialogue.
-			await runInkStory(conversation);
+			if (story) {
+				// Run the story, executing any actions and events until we get to some actual dialogue.
+				await runInkStory(conversation);
+			}
 
 			srcomm.updateComponent("isShortRangeComm", {
 				conversationId: conversation.id,
 				state: "connected",
 			});
 			cancelLoopingSound(srcomm, "incomingHail");
-			const targetShip = ctx.ecs.getEntityById(input.shipId);
+			const targetShip = ctx.ecs.getEntityById(shipId);
 			if (targetShip) {
 				playShipSound(srcomm, targetShip, "connected");
 			}
@@ -440,6 +533,8 @@ export const shortRangeComm = t.router({
 				cancelLoopingSound(entity, "incomingHail");
 
 				entity.updateComponent("isShortRangeComm", { state: "connected" });
+				pubsub.publish.shortRangeComm.get({ shipId });
+				pubsub.publish.shortRangeComm.incomingHailConversations({ shipId });
 			});
 
 			pubsub.publish.shortRangeComm.conversation({
@@ -448,7 +543,6 @@ export const shortRangeComm = t.router({
 			pubsub.publish.conversation.conversation({
 				conversationId: conversation.id,
 			});
-			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
 		}),
 	disconnect: t.procedure
 		.input(z.object({ shipId: z.number() }))
@@ -469,9 +563,12 @@ export const shortRangeComm = t.router({
 			// Play the disconnect sound for all ships connected to this conversation
 			// to indicate that another ship disconnected
 			if (srcomm.components.isShortRangeComm?.state === "hailing") {
-				const targetSrComm = ctx.ecs.getEntityById(
-					conversation?.components.isShortRangeCommConversation?.targetId || -1,
-				);
+				const targetShipId =
+					conversation?.components.isShortRangeCommConversation?.targetId || -1;
+				const targetSrComm = getShipSystem(ctx.ecs, {
+					systemType: "shortRangeComm",
+					shipId: targetShipId,
+				});
 				const ship = ctx.ecs.getEntityById(input.shipId);
 
 				cancelLoopingSound(srcomm, "outgoingHail");
@@ -487,6 +584,12 @@ export const shortRangeComm = t.router({
 						playShipSound(targetSrComm, targetShip, "cancelled");
 					}
 				}
+				pubsub.publish.shortRangeComm.incomingHailConversations({
+					shipId: input.shipId,
+				});
+				pubsub.publish.shortRangeComm.incomingHailConversations({
+					shipId: targetShipId,
+				});
 			} else if (srcomm.components.isShortRangeComm.state === "connected") {
 				if (conversation) {
 					doForEachConversationPartner(conversation, (entity, shipId) => {

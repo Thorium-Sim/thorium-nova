@@ -5,7 +5,7 @@ import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
 import { cn } from "@thorium/utils/cn";
 interface DialogI {
-	header: string;
+	header: React.ReactNode;
 	body?: string;
 	defaultValue?: string;
 	type: "alert" | "confirm" | "prompt";
@@ -27,7 +27,7 @@ const DialogContext = React.createContext<
 
 export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 	const [isOpen, setIsOpen] = React.useState(false);
-	const [header, setHeader] = React.useState("");
+	const [header, setHeader] = React.useState<React.ReactNode>("");
 	const [body, setBody] = React.useState("");
 	const [type, setType] = React.useState<"alert" | "confirm" | "prompt">(
 		"alert",
@@ -230,7 +230,7 @@ export function usePrompt() {
 		input:
 			| string
 			| {
-					header: string;
+					header: React.ReactNode;
 					body?: string;
 					defaultValue?: string;
 					inputProps?: React.DetailedHTMLProps<

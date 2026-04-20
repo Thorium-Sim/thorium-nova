@@ -6,6 +6,7 @@ import { useRightClick } from "@thorium/hooks/useRightClick";
 import { type RefObject, useState } from "react";
 import { q } from "@thorium/context/AppContext";
 import { Portal } from "@thorium/ui/Portal";
+import { pickStarmapShip } from "@thorium/cores/StarmapCore/pickShip";
 
 function makeVirtualEl({ x: X, y: Y }: { x: number; y: number }) {
 	const virtualEl = {
@@ -26,7 +27,7 @@ function makeVirtualEl({ x: X, y: Y }: { x: number; y: number }) {
 }
 
 const menuItemClass =
-	"px-2 py-1 text-left cursor-pointer hover:bg-purple-700/50 focus:outline-none focus:ring transition-all";
+	"px-1 py-0.5 text-left cursor-pointer hover:bg-purple-700/50 focus:outline-none focus:ring transition-all";
 
 export const StarmapCoreContextMenu = ({
 	parentRef,
@@ -94,7 +95,7 @@ export const StarmapCoreContextMenu = ({
 					top: y ?? "",
 					left: x ?? "",
 				}}
-				className="text-white bg-black/50 border border-white/25 rounded-sm divide-y divide-purple-500/25 flex flex-col"
+				className="text-white bg-black/50 border border-white/25 text-xs rounded-sm divide-y divide-purple-500/25 flex flex-col"
 			>
 				{/* TODO March 11, 2024: Add commands for when right clicking on another object, such as following or attacking the target */}
 				{selectedShips.length > 0 ? (
@@ -201,6 +202,52 @@ export const StarmapCoreContextMenu = ({
 							Follow Ship
 						</button>
 					) : null
+				) : null}
+				{object ? (
+					<>
+						<button
+							className={menuItemClass}
+							onClick={async () => {
+								if (!object) return;
+								const objectId = object.id;
+								const objectDetails = await q.starmapCore.object.netRequest({
+									objectId,
+								});
+								pickStarmapShip(
+									`Choose a ship to hail ${objectDetails?.components.identity?.name || "this object."}`,
+									(picked) => {
+										q.shortRangeComm.hail.netSend({
+											shipId: picked,
+											targetId: objectId,
+										});
+									},
+								);
+							}}
+						>
+							Hail to...
+						</button>
+						<button
+							className={menuItemClass}
+							onClick={async () => {
+								if (!object) return;
+								const objectId = object.id;
+								const objectDetails = await q.starmapCore.object.netRequest({
+									objectId,
+								});
+								pickStarmapShip(
+									`Choose a ship for ${objectDetails?.components.identity?.name || "this object"} to hail.`,
+									(picked) => {
+										q.shortRangeComm.hail.netSend({
+											targetId: picked,
+											shipId: objectId,
+										});
+									},
+								);
+							}}
+						>
+							Hail from...
+						</button>
+					</>
 				) : null}
 				<button
 					className={menuItemClass}

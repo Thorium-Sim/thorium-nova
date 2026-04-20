@@ -3,6 +3,7 @@ import { cn } from "@thorium/utils/cn";
 import type {
 	DetailedHTMLProps,
 	HTMLAttributes,
+	ReactNode,
 	TextareaHTMLAttributes,
 } from "react";
 
@@ -19,7 +20,7 @@ export function InputField({
 	"onClick"
 > & {
 	promptValue?: string | number;
-	prompt: string;
+	prompt: ReactNode;
 	alert?: boolean;
 	onClick: (value: string) => void;
 }) {

@@ -5,45 +5,55 @@ import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import Checkbox from "@thorium/ui/Checkbox";
-import { OutputField } from "@thorium/ui/Core";
+import { InputField, OutputField } from "@thorium/ui/Core";
 import InfoTip from "@thorium/ui/InfoTip";
 import Select from "@thorium/ui/Select";
-import { cn } from "@thorium/utils/cn";
-import { startTransition, Suspense, useState } from "react";
-
+import { Suspense, useState } from "react";
+import { shortRangeStateMap } from "./shared";
+import { keepPreviousData } from "@tanstack/react-query";
 export function ShortRangeCommCore() {
 	const { shipId } = useStation();
-	const [hailerId, setHailerId] = useState<number>();
-	const [targetId, setTargetId] = useState<number>();
-	const [conversationTemplateId, setConversationTemplateId] = useState<
-		number | null
-	>(null);
+	const [shortRangeComm] = q.shortRangeComm.get.useNetRequest({ shipId });
 	const [{ allowOtherParticipants }, setAllowOtherParticipants] =
 		useLocalStorage("core-short-range-allow-other-participants", {
 			allowOtherParticipants: false,
 		});
 
+	if (!shortRangeComm)
+		return <div className="text-sm">No Short Range Comm</div>;
 	return (
 		<div className="text-sm h-full">
+			<div className="flex">
+				<OutputField className="flex-1" alert={shortRangeComm.state !== "idle"}>
+					{shortRangeStateMap[shortRangeComm.state]}
+					<Suspense>
+						<ConversationName conversationId={shortRangeComm.conversationId} />
+					</Suspense>
+				</OutputField>
+				<InputField
+					className="px-2 tabular-nums"
+					prompt={
+						<>
+							What would you like to set the frequency to?
+							<br />
+							100 - 350
+						</>
+					}
+					onClick={(value) => {
+						if (Number.isNaN(Number(value))) return;
+						q.shortRangeComm.setFrequency.netSend({
+							shipId,
+							frequency: Math.min(350, Math.max(100, Number(value))),
+						});
+					}}
+					promptValue={shortRangeComm.frequency}
+				>
+					{shortRangeComm.frequency.toFixed(2)} MHz
+				</InputField>
+			</div>
+
 			<Suspense>
-				<HailerInput
-					targetId={targetId}
-					hailerId={hailerId}
-					setHailerId={setHailerId}
-				/>
-			</Suspense>
-			<Suspense>
-				<TargetInput
-					targetId={targetId}
-					hailerId={hailerId}
-					setTargetId={setTargetId}
-				/>
-			</Suspense>
-			<Suspense>
-				<ConversationSelect
-					selected={conversationTemplateId}
-					setSelected={setConversationTemplateId}
-				/>
+				<ConversationSelect />
 			</Suspense>
 			<Checkbox
 				label={
@@ -62,137 +72,97 @@ export function ShortRangeCommCore() {
 					})
 				}
 			/>
-			<Button
-				className="btn-xs btn-info w-full"
-				onClick={() => {
-					if (!hailerId || !targetId) return;
-					console.log(allowOtherParticipants);
-					q.shortRangeComm.hail.netSend({
-						shipId: hailerId,
-						targetId: targetId,
-						allowOtherParticipants,
-						conversationTemplateId,
-					});
-				}}
-				disabled={!hailerId || !targetId}
-			>
-				Hail
-			</Button>
-			<p>Active Hails</p>
+			{shortRangeComm.state === "idle" ? (
+				<Button
+					className="btn-xs btn-info w-full"
+					onClick={() => {
+						pickStarmapShip("Pick a ship to hail.", (targetId) => {
+							if (!targetId || targetId === shipId) return;
+							q.shortRangeComm.hail.netSend({
+								shipId,
+								targetId,
+								allowOtherParticipants,
+								conversationTemplateId: shortRangeComm.templateConversationId,
+							});
+						});
+					}}
+				>
+					Hail...
+				</Button>
+			) : shortRangeComm.state === "hailing" ? (
+				<div className="flex">
+					<Button
+						className="btn-xs btn-warning flex-auto rounded-r-none"
+						onClick={() => q.shortRangeComm.disconnect.netSend({ shipId })}
+					>
+						Cancel
+					</Button>
+					<Button
+						className="btn-xs btn-error flex-auto rounded-none"
+						onClick={() => {
+							if (shortRangeComm.conversationId) {
+								q.shortRangeComm.reject.netSend({
+									conversationId: shortRangeComm.conversationId,
+								});
+							}
+						}}
+					>
+						Reject
+					</Button>
+					<Button
+						className="btn-xs btn-success flex-auto rounded-l-none"
+						onClick={() => {
+							if (shortRangeComm.conversationId) {
+								q.shortRangeComm.connect.netSend({
+									conversationId: shortRangeComm.conversationId,
+								});
+							}
+						}}
+					>
+						Connect
+					</Button>
+				</div>
+			) : (
+				<Button
+					className="btn-xs btn-error w-full"
+					onClick={() => q.shortRangeComm.disconnect.netSend({ shipId })}
+				>
+					Disconnect
+				</Button>
+			)}
+			<IncomingHails />
 		</div>
 	);
 }
 
-function HailerInput({
-	targetId,
-	hailerId,
-	setHailerId,
+function ConversationName({
+	conversationId,
 }: {
-	targetId: number | undefined;
-	hailerId: number | undefined;
-	setHailerId: (id: number | undefined) => void;
+	conversationId: number | null | undefined;
 }) {
 	const { shipId } = useStation();
-
-	const [hailerObject] = q.starmapCore.object.useNetRequest({
-		objectId: hailerId,
-	});
-
-	return (
-		<>
-			<p className="text-xs">Hail From</p>
-			<div className="flex">
-				<OutputField className="flex-auto">
-					{hailerId
-						? hailerObject?.components.identity?.name || `Entity ID ${hailerId}`
-						: ""}
-				</OutputField>
-				<Button
-					className={cn("btn-xs btn-info", {
-						"rounded-r-none": targetId !== shipId,
-					})}
-					onClick={() => {
-						pickStarmapShip("Choose a ship to send the hail.", (hailerId) =>
-							startTransition(() => {
-								setHailerId(hailerId);
-							}),
-						);
-					}}
-				>
-					Pick from Starmap
-				</Button>
-				{targetId !== shipId && (
-					<Button
-						className="btn-xs btn-success rounded-l-none"
-						onClick={() => setHailerId(shipId)}
-					>
-						Player Ship
-					</Button>
-				)}
-			</div>
-		</>
+	const [conversation] = q.shortRangeComm.conversation.useNetRequest(
+		{ conversationId },
+		{ placeholderData: keepPreviousData },
 	);
-}
-function TargetInput({
-	targetId,
-	hailerId,
-	setTargetId,
-}: {
-	targetId: number | undefined;
-	hailerId: number | undefined;
-	setTargetId: (id: number | undefined) => void;
-}) {
-	const { shipId } = useStation();
-
-	const [targetObject] = q.starmapCore.object.useNetRequest({
-		objectId: targetId,
-	});
 
 	return (
 		<>
-			<p className="text-xs">Hail To</p>
-			<div className="flex">
-				<OutputField className="flex-auto">
-					{targetId
-						? targetObject?.components.identity?.name || `Entity ID ${targetId}`
-						: ""}
-				</OutputField>
-				<Button
-					className={cn("btn-xs btn-info", {
-						"rounded-r-none": hailerId !== shipId,
-					})}
-					onClick={() => {
-						pickStarmapShip("Choose a ship to receive the hail.", (targetId) =>
-							startTransition(() => {
-								setTargetId(targetId);
-							}),
-						);
-					}}
-				>
-					Pick from Starmap
-				</Button>
-				{hailerId !== shipId && (
-					<Button
-						className="btn-xs btn-success rounded-l-none"
-						onClick={() => setTargetId(shipId)}
-					>
-						Player Ship
-					</Button>
-				)}
-			</div>
+			{conversation
+				? `: ${conversation.participants
+						.filter((p) => p.id !== shipId)
+						.map((p) => p.name)
+						.join(", ")}`
+				: ""}
 		</>
 	);
 }
 
-function ConversationSelect({
-	selected,
-	setSelected,
-}: {
-	selected: number | null;
-	setSelected: (value: number | null) => void;
-}) {
+function ConversationSelect() {
+	const { shipId } = useStation();
 	const [conversationTemplates] =
 		q.conversation.conversationTemplates.useNetRequest();
+	const [shortRangeComm] = q.shortRangeComm.get.useNetRequest({ shipId });
 
 	return (
 		<Select
@@ -201,8 +171,49 @@ function ConversationSelect({
 				.map((c) => ({ id: c.id, label: c.name }))
 				.concat({ id: null as any, label: "None" })}
 			label="Conversation Template"
-			selected={selected}
-			setSelected={(value) => setSelected(value)}
+			selected={shortRangeComm?.templateConversationId || null}
+			setSelected={(value) =>
+				q.shortRangeComm.setTemplateConversation.netSend({
+					shipId,
+					templateConversationId: typeof value === "string" ? null : value,
+				})
+			}
 		/>
+	);
+}
+
+function IncomingHails() {
+	const { shipId } = useStation();
+	const [incomingHails] =
+		q.shortRangeComm.incomingHailConversations.useNetRequest({ shipId });
+
+	if (incomingHails.length === 0) return null;
+	return (
+		<div>
+			<p>Incoming Hails</p>
+			{incomingHails.map((c) => (
+				<div className="flex" key={c.id}>
+					<span className="flex-auto">
+						{c.hostName} ({c.frequency}MHz){" "}
+					</span>
+					<Button
+						className="btn-xs btn-error rounded-r-none"
+						onClick={() =>
+							q.shortRangeComm.reject.netSend({ conversationId: c.id, shipId })
+						}
+					>
+						Reject
+					</Button>
+					<Button
+						className="btn-xs btn-success rounded-l-none"
+						onClick={() =>
+							q.shortRangeComm.connect.netSend({ conversationId: c.id, shipId })
+						}
+					>
+						Connect
+					</Button>
+				</div>
+			))}
+		</div>
 	);
 }

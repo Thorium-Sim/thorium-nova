@@ -624,6 +624,8 @@ export function SolarSystemWrapper() {
 							}
 							onClick={(event) => event.stopPropagation()}
 							onPointerDown={(event) => {
+								// Ignore right clicks so we can show the context menu
+								if (event.button === 2) return;
 								event.stopPropagation();
 								const clickAction = useStarmapStore.getState().clickAction;
 								if (clickAction) {

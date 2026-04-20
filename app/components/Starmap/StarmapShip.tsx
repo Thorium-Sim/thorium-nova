@@ -19,6 +19,7 @@ import type { Line2 } from "three-stdlib";
 import { PhasersVisualization } from "./PhasersVisualization";
 import { ShipSprite } from "./ShipSprite";
 import { useGetStarmapStore } from "./starmapStore";
+import { ErrorBoundary } from "react-error-boundary";
 
 export function StarmapShip({
 	id,
@@ -67,7 +68,6 @@ export function StarmapShip({
 	const group = useRef<Group>(null);
 	const dragging = useRef<Group>(null);
 	const shipMesh = useRef<Group>(null);
-	const phasersRef = useRef<Group>(null);
 	const shipSprite = useRef<Group>(null);
 	const { interpolate } = useLiveQuery();
 	const lineRef = useRef<Line2>(null);
@@ -90,12 +90,6 @@ export function StarmapShip({
 			dragging.current.visible = false;
 		}
 		shipMesh.current?.quaternion.set(
-			state.r.x,
-			state.r.y,
-			state.r.z,
-			state.r.w,
-		);
-		phasersRef.current?.quaternion.set(
 			state.r.x,
 			state.r.y,
 			state.r.z,
@@ -174,37 +168,11 @@ export function StarmapShip({
 				)}
 			</group>
 			<group ref={group}>
-				{/* Ship sensor range */}
-				{!isCore || sensorsHidden ? null : isSelected ? (
-					<group rotation={[0, Math.PI, 0]}>
-						{/* Pilot Range */}
-						<mesh>
-							<icosahedronGeometry args={[10_000, 1]} />
-							<meshBasicMaterial
-								color="#0088ff"
-								transparent
-								opacity={0.2}
-								wireframe
-							/>
-						</mesh>
-						{/* Weapons Range */}
-						<mesh>
-							<icosahedronGeometry args={[25_000, 1]} />
-							<meshBasicMaterial
-								color="#ff0000"
-								transparent
-								opacity={0.2}
-								wireframe
-							/>
-						</mesh>
-						<group ref={phasersRef}>
-							<Suspense>
-								<PhasersVisualization shipId={id} />
-							</Suspense>
-						</group>
-						{/* TODO: Add Sensors range */}
-					</group>
-				) : null}
+				{!isCore || sensorsHidden || !isSelected ? null : (
+					<Suspense>
+						<SensorRanges id={id} />
+					</Suspense>
+				)}
 				<group
 					onPointerOver={() => {
 						// set the cursor to pointer
@@ -247,6 +215,102 @@ export function StarmapShip({
 				</group>
 			</group>
 		</group>
+	);
+}
+
+function SensorRanges({ id }: { id: number }) {
+	const phasersRef = useRef<Group>(null);
+	const { interpolate } = useLiveQuery();
+
+	useFrame(() => {
+		const state = interpolate(id);
+		if (!state) return;
+		phasersRef.current?.quaternion.set(
+			state.r.x,
+			state.r.y,
+			state.r.z,
+			state.r.w,
+		);
+	});
+
+	return (
+		<group rotation={[0, Math.PI, 0]}>
+			{/* Pilot Range */}
+			<mesh>
+				<icosahedronGeometry args={[10_000, 1]} />
+				<meshBasicMaterial
+					color="#0088ff"
+					transparent
+					opacity={0.2}
+					wireframe
+				/>
+			</mesh>
+			{/* Weapons Range */}
+			<mesh>
+				<icosahedronGeometry args={[25_000, 1]} />
+				<meshBasicMaterial
+					color="#ff0000"
+					transparent
+					opacity={0.2}
+					wireframe
+				/>
+			</mesh>
+			<ErrorBoundary fallback={null}>
+				<Suspense>
+					<SensorsRange shipId={id} />
+				</Suspense>
+			</ErrorBoundary>
+			<ErrorBoundary fallback={null}>
+				<Suspense>
+					<CommunicationsRange shipId={id} />
+				</Suspense>
+			</ErrorBoundary>
+			<group ref={phasersRef}>
+				<Suspense>
+					<PhasersVisualization shipId={id} />
+				</Suspense>
+			</group>
+		</group>
+	);
+}
+
+function SensorsRange({ shipId }: { shipId: number }) {
+	const [sensors] = q.sensors.get.useNetRequest({ shipId });
+
+	return (
+		<>
+			<mesh>
+				<icosahedronGeometry args={[sensors.passiveRange, 1]} />
+				<meshBasicMaterial
+					color="#0bd0bb"
+					transparent
+					opacity={0.2}
+					wireframe
+				/>
+			</mesh>
+			<mesh>
+				<icosahedronGeometry args={[sensors.activeRange, 1]} />
+				<meshBasicMaterial
+					color="#0bd0bb"
+					transparent
+					opacity={0.2}
+					wireframe
+				/>
+			</mesh>
+		</>
+	);
+}
+
+function CommunicationsRange({ shipId }: { shipId: number }) {
+	const [shortRangeComm] = q.shortRangeComm.get.useNetRequest({ shipId });
+	if (!shortRangeComm) return null;
+	const { maxRadius, minRadius, gain } = shortRangeComm;
+	const gainRadius = minRadius + gain * (maxRadius - minRadius);
+	return (
+		<mesh>
+			<icosahedronGeometry args={[gainRadius, 1]} />
+			<meshBasicMaterial color="#ff8800" transparent opacity={0.2} wireframe />
+		</mesh>
 	);
 }
 

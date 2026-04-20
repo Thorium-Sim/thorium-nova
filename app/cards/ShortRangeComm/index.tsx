@@ -67,10 +67,8 @@ export function ShortRangeComm() {
 		return "No Short Range Comm System";
 	}
 
-	const gainRadius =
-		shortRangeComm.minRadius +
-		gain * (shortRangeComm.maxRadius - shortRangeComm.minRadius);
 	const { maxRadius, minRadius } = shortRangeComm;
+	const gainRadius = minRadius + gain * (maxRadius - minRadius);
 	return (
 		<CircleGridStoreProvider
 			zoomMin={minRadius}
