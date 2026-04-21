@@ -102,9 +102,10 @@ export function ShortRangeComm() {
 									<GainRange radius={gainRadius} state={shortRangeComm.state} />
 								}
 							>
-								<ShortRangeConversationContacts
+								<></>
+								{/* <ShortRangeConversationContacts
 									selectedContactId={selectedContactId}
-								/>
+								/> */}
 							</CircleGrid>
 						</GridCanvas>
 					</Suspense>
@@ -204,32 +205,6 @@ export function ShortRangeComm() {
 	);
 }
 
-function ShortRangeConversationContacts({
-	selectedContactId,
-}: {
-	selectedContactId: number | null;
-}) {
-	const store = useCircleGridStore();
-	const tilted = store((store) => store.tilt > 0);
-	const useStarmapStore = useGetStarmapStore();
-	const systemId = useStarmapStore((store) => store.currentSystem);
-
-	const [conversationContacts] =
-		q.shortRangeComm.conversationContacts.useNetRequest({ systemId });
-
-	return (
-		<group>
-			{conversationContacts.map((c) => (
-				<ConversationEntity
-					key={`${c.id}-${c.shipId}`}
-					{...c}
-					isSelected={selectedContactId === c.id}
-				/>
-			))}
-		</group>
-	);
-}
-
 const quatNone = new Quaternion(Math.SQRT1_2, 0, 0, Math.SQRT1_2);
 const quatHalf = new Quaternion().setFromEuler(
 	new Euler((Math.PI / 4) * 3, 0, 0),
@@ -293,15 +268,4 @@ function GainRange({
 			</mesh>
 		</>
 	);
-}
-
-function ConversationEntity({
-	isSelected,
-}: {
-	id: number;
-	frequency: number;
-	shipId: number;
-	isSelected: boolean;
-}) {
-	return <group />;
 }

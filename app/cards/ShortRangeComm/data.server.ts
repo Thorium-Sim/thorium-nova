@@ -65,52 +65,6 @@ export const shortRangeComm = t.router({
 			if (entity.components.position?.parentId === input.systemId) return true;
 			return false;
 		}),
-	/**
-	 * Get all of the conversations happening in the solar system.
-	 * We'll filter them client-side based on the position of the ship
-	 * and use these to connect to existing conversations between two other ships
-	 */
-	conversationContacts: t.procedure
-		.input(z.object({ systemId: z.number().nullable() }))
-		.filter((publish: { systemId: number | null }, { ctx, input }) => {
-			if (publish && publish.systemId !== input.systemId) return false;
-			return true;
-		})
-		.autoPublish(
-			["isShortRangeCommConversation"],
-			(entity) =>
-				entity.components.position && [
-					{ systemId: entity.components.position.parentId },
-				],
-		)
-		.request(({ input, ctx }) => {
-			const conversations: { id: number; shipId: number; frequency: number }[] =
-				[];
-			for (const conversation of ctx.ecs.componentCache.get(
-				"isShortRangeCommConversation",
-			) || []) {
-				const convo = conversation.components.isShortRangeCommConversation;
-				const host = ctx.ecs.getEntityById(convo?.hostId || -1);
-				// Create a contact for every entity that is connected to this conversation
-				if (convo && host?.components.position?.parentId === input.systemId) {
-					doForEachConversationPartner(conversation, (commEntity, shipId) => {
-						if (
-							commEntity.components.isShortRangeComm &&
-							["hailing", "connected"].includes(
-								commEntity.components.isShortRangeComm.state,
-							)
-						) {
-							conversations.push({
-								id: conversation.id,
-								frequency: convo.frequency,
-								shipId: shipId,
-							});
-						}
-					});
-				}
-			}
-			return conversations;
-		}),
 	conversation: t.procedure
 		.input(z.object({ conversationId: z.number().nullish() }))
 		.filter((publish: { conversationId: number }, { ctx, input }) => {
@@ -380,9 +334,6 @@ export const shortRangeComm = t.router({
 			pubsub.publish.conversation.conversation({
 				conversationId: conversation.id,
 			});
-			pubsub.publish.shortRangeComm.conversationContacts({
-				systemId: hostShip?.components.position?.parentId || null,
-			});
 			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
 			pubsub.publish.shortRangeComm.get({ shipId: input.targetId });
 			pubsub.publish.shortRangeComm.incomingHailConversations({
@@ -442,9 +393,6 @@ export const shortRangeComm = t.router({
 			});
 			pubsub.publish.shortRangeComm.get({ shipId });
 			if (hostShip) {
-				pubsub.publish.shortRangeComm.conversationContacts({
-					systemId: hostShip.components.position?.parentId || null,
-				});
 				pubsub.publish.shortRangeComm.get({ shipId: hostShip.id });
 				pubsub.publish.shortRangeComm.incomingHailConversations({
 					shipId: hostShip.id,

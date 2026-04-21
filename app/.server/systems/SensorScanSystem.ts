@@ -1,7 +1,11 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { getPhaserCharge } from "@thorium/.server/systems/PhasersSystem";
 import { getClassification } from "@thorium/cards/Navigation/getObjectClassification.server";
-import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
+import { shortRangeStateMap } from "@thorium/cards/ShortRangeComm/shared";
+import {
+	getShipSystem,
+	getShipSystems,
+} from "@thorium/utils/.server/ship/getShipSystem";
 import { type ECS, type Entity, System } from "@thorium/utils/ecs";
 import type { scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
@@ -337,9 +341,20 @@ export function generateScanResults(
 			break;
 		}
 		case "communications": {
-			// TODO March 31: Implement
+			const shortRangeSystem = getShipSystem(ecs, {
+				shipId: object.id,
+				systemType: "shortRangeComm",
+			});
 			currentResults.communications = {
 				scanTime: Date.now(),
+				status: shortRangeSystem.components.isShortRangeComm
+					? shortRangeStateMap[
+							shortRangeSystem.components.isShortRangeComm.state
+						]
+					: "Unknown",
+				frequency: shortRangeSystem.components.isShortRangeComm
+					? `${shortRangeSystem.components.isShortRangeComm.antennaFrequency} MHz`
+					: "N/A",
 			};
 			break;
 		}

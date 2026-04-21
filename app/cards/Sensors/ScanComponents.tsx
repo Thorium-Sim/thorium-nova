@@ -22,7 +22,7 @@ export const ScanComponents = {
 	weapons: WeaponsResults,
 	engines: null,
 	damage: DamageResults,
-	communications: null,
+	communications: CommunicationsResults,
 	life: LifeResults,
 	atmosphere: AtmosphereResults,
 	temperature: TemperatureResults,
@@ -230,6 +230,19 @@ function ShieldsResults({ objectId }: { objectId: number }) {
 					? `${Math.round(results.shields.strength * 100)}%`
 					: "0%"}
 			</div>
+		</div>
+	);
+}
+function CommunicationsResults({ objectId }: { objectId: number }) {
+	const { shipId } = useStation();
+
+	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
+
+	if (!results.communications) return null;
+
+	return (
+		<div className="tabular-nums">
+			{results.communications.status} — {results.communications.frequency}
 		</div>
 	);
 }
