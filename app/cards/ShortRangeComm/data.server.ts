@@ -58,6 +58,13 @@ export const shortRangeComm = t.router({
 				return null;
 			}
 		}),
+	stream: t.procedure
+		.input(z.object({ systemId: z.number().nullable() }))
+		.dataStream(({ entity, input }) => {
+			if (!entity) return false;
+			if (entity.components.position?.parentId === input.systemId) return true;
+			return false;
+		}),
 	/**
 	 * Get all of the conversations happening in the solar system.
 	 * We'll filter them client-side based on the position of the ship

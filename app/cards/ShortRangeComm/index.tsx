@@ -16,10 +16,18 @@ import {
 } from "@thorium/cards/Pilot/useCircleGridStore";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import { PilotZoomSlider } from "@thorium/cards/Pilot/PilotZoomSlider";
-import { BufferGeometry, Path } from "three";
+import {
+	BufferGeometry,
+	Euler,
+	type Line,
+	type MeshBasicMaterial,
+	Path,
+	Quaternion,
+} from "three";
+import { useFrame } from "@react-three/fiber";
 
 export function ShortRangeComm() {
-	const { shipId } = useStation();
+	const { shipId, ship } = useStation();
 	const { cardLoaded } = useCardContext();
 	const [shortRangeComm] = q.shortRangeComm.get.useNetRequest(
 		{ shipId },
@@ -31,6 +39,9 @@ export function ShortRangeComm() {
 			},
 		},
 	);
+	q.shortRangeComm.stream.useDataStream({
+		systemId: ship.currentSystem,
+	});
 
 	const [selectedContactId, setSelectedContact] = useState<null | number>(null);
 	const draggingRef = useRef(false);
@@ -38,8 +49,6 @@ export function ShortRangeComm() {
 		shortRangeComm?.frequency || 276.25,
 	);
 	const [gain, setGainValue] = useState(shortRangeComm?.gain || 1);
-
-	const shadeCountRef = useRef(0);
 
 	const setFrequencyNetSend = useCallback(
 		throttle((value: number) => {
@@ -88,7 +97,11 @@ export function ShortRangeComm() {
 								setSelectedContact(null);
 							}}
 						>
-							<CircleGrid fixedChildren={<GainRange radius={gainRadius} />}>
+							<CircleGrid
+								fixedChildren={
+									<GainRange radius={gainRadius} state={shortRangeComm.state} />
+								}
+							>
 								<ShortRangeConversationContacts
 									selectedContactId={selectedContactId}
 								/>
@@ -217,7 +230,19 @@ function ShortRangeConversationContacts({
 	);
 }
 
-function GainRange({ radius }: { radius: number }) {
+const quatNone = new Quaternion(Math.SQRT1_2, 0, 0, Math.SQRT1_2);
+const quatHalf = new Quaternion().setFromEuler(
+	new Euler((Math.PI / 4) * 3, 0, 0),
+);
+const quatFull = new Quaternion(1, 0, 0, 0);
+
+function GainRange({
+	radius,
+	state,
+}: {
+	radius: number;
+	state: "idle" | "hailing" | "connected";
+}) {
 	const circleGeometry = useMemo(() => {
 		const path = new Path();
 		path.absarc(0, 0, 1, 0, Math.PI * 2, false);
@@ -225,20 +250,43 @@ function GainRange({ radius }: { radius: number }) {
 		return new BufferGeometry().setFromPoints(points);
 	}, []);
 
+	const materialRef = useRef<MeshBasicMaterial>(null);
+
+	const lineRef = useRef<Line>(null);
+	useFrame(({ clock }) => {
+		if (!materialRef.current) return;
+		if (state === "idle") {
+			materialRef.current.opacity = 0.1;
+		} else if (state === "hailing") {
+			materialRef.current.opacity =
+				((Math.sin(clock.getElapsedTime() * Math.PI * 2) + 1) / 2) * 0.2 + 0.1;
+		} else if (state === "connected") {
+			materialRef.current.opacity = 0.4;
+		}
+	});
+	const store = useCircleGridStore();
+	const tilt = store((store) => store.tilt);
+	useFrame(() => {
+		if (!lineRef.current) return;
+		const quat = tilt === 0 ? quatNone : tilt === 0.5 ? quatHalf : quatFull;
+		lineRef.current.quaternion.slerp(quat, 0.05);
+	});
+
 	return (
 		<>
 			<lineLoop
+				ref={lineRef}
 				geometry={circleGeometry}
-				rotation={[Math.PI / 2, 0, 0]}
 				scale={radius}
+				quaternion={quatNone}
 			>
 				<lineBasicMaterial color={0x2288ff} transparent opacity={0.8} />
 			</lineLoop>
 			<mesh scale={radius}>
 				<sphereGeometry />
 				<meshBasicMaterial
+					ref={materialRef}
 					transparent
-					opacity={0.2}
 					color={0x2288ff}
 					depthWrite={false}
 				/>

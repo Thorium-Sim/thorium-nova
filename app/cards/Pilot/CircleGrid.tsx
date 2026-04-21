@@ -46,7 +46,7 @@ import { StationContext, useStation } from "@thorium/routes/station/useStation";
 
 const CameraEffects = () => {
 	const store = useCircleGridStore();
-	const { camera, size, internal } = useThree();
+	const { camera, size } = useThree();
 	useEffect(() => {
 		store.setState({
 			width: size.width,
@@ -96,7 +96,7 @@ export function CircleGrid({
 	const { interpolate } = useLiveQuery();
 	useFrame((props) => {
 		const playerShip = interpolate(id);
-
+		console.log(id, playerShip);
 		if (playerShip && circleGroup.current) {
 			const { r } = playerShip;
 			circleGroup.current.position.set(0, 0, 0);

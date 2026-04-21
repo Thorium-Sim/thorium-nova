@@ -99,9 +99,11 @@ class Entity {
 					loadInkStory(
 						this.components.isConversation!.inkFilePath,
 						this.components.isConversation?.conversationState,
-					).then((story) => {
-						this.components.isConversation!.inkStory = story;
-					});
+					)
+						.then((story) => {
+							this.components.isConversation!.inkStory = story;
+						})
+						.catch(() => {});
 				}
 			} catch (err) {
 				console.error("Error initializing component:", componentId, err);
