@@ -1,7 +1,9 @@
 import z from "zod";
 import { t } from "../init/t";
-import { runInkStory } from "@thorium/utils/.server/ink/runInkStory";
-import type { Story } from "inkjs";
+import {
+	lazyLoadInkStory,
+	runInkStory,
+} from "@thorium/utils/.server/ink/runInkStory";
 import { produce } from "immer";
 import { pubsub } from "../init/pubsub";
 
@@ -49,13 +51,10 @@ export const conversation = t.router({
 	divert: t.procedure
 		.input(z.object({ conversationId: z.number(), divert: z.string() }))
 		.send(async ({ ctx, input }) => {
-			const conversation = ctx.ecs.getEntityById(input.conversationId);
-			if (!conversation?.components.isConversation?.inkStory)
-				throw new Error("Conversation not found");
+			const conversation = ctx.ecs.getEntityById(input.conversationId)!;
+			const inkStory = await lazyLoadInkStory(conversation);
 
-			conversation.components.isConversation.inkStory.ChoosePathString(
-				input.divert,
-			);
+			inkStory.ChoosePathString(input.divert);
 			await runInkStory(conversation);
 
 			pubsub.publish.conversation.conversation({
@@ -65,9 +64,8 @@ export const conversation = t.router({
 	continue: t.procedure
 		.input(z.object({ conversationId: z.number() }))
 		.send(async ({ ctx, input }) => {
-			const conversation = ctx.ecs.getEntityById(input.conversationId);
-			if (!conversation?.components.isConversation?.inkStory)
-				throw new Error("Conversation not found");
+			const conversation = ctx.ecs.getEntityById(input.conversationId)!;
+
 			await runInkStory(conversation);
 			pubsub.publish.conversation.conversation({
 				conversationId: conversation.id,
@@ -82,22 +80,23 @@ export const conversation = t.router({
 			}),
 		)
 		.send(async ({ ctx, input }) => {
-			const conversation = ctx.ecs.getEntityById(input.conversationId);
-			const convo = conversation?.components.isConversation;
-			const story = convo?.inkStory as Story;
-			if (!story || !convo) throw new Error("Conversation not found");
+			const conversation = ctx.ecs.getEntityById(input.conversationId)!;
+			const inkStory = await lazyLoadInkStory(conversation);
 
-			const choiceIndex = story.currentChoices.findIndex(
+			const choiceIndex = inkStory.currentChoices.findIndex(
 				(choice) => choice.text === input.choice,
 			);
 
 			if (choiceIndex === -1) throw new Error("Invalid choice");
 
-			story.ChooseChoiceIndex(choiceIndex);
+			inkStory.ChooseChoiceIndex(choiceIndex);
 			conversation.updateComponent("isConversation", {
-				currentChoices: produce(convo.currentChoices, (choices) => {
-					choices[choiceIndex].selected = true;
-				}),
+				currentChoices: produce(
+					conversation.components.isConversation?.currentChoices || [],
+					(choices) => {
+						choices[choiceIndex].selected = true;
+					},
+				),
 			});
 
 			await runInkStory(conversation);

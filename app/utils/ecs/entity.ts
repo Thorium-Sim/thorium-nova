@@ -93,18 +93,6 @@ class Entity {
 				this.components[componentId as ComponentIds] = component.parse(
 					data,
 				) as any;
-
-				if (componentId === "isConversation") {
-					// Reinstantiate the Ink story
-					loadInkStory(
-						this.components.isConversation!.inkFilePath,
-						this.components.isConversation?.conversationState,
-					)
-						.then((story) => {
-							this.components.isConversation!.inkStory = story;
-						})
-						.catch(() => {});
-				}
 			} catch (err) {
 				console.error("Error initializing component:", componentId, err);
 			}

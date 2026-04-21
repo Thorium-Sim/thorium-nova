@@ -8,13 +8,13 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import { measureAudioDurationMs } from "./measureAudioDuration";
 import { scheduleAction } from "../scheduleAction";
 import type { Story } from "inkjs";
-import { keyboard } from "@testing-library/user-event/dist/cjs/keyboard/index.js";
 import { getValueReference } from "../executeBlocks";
 import { interpolateText } from "@thorium/utils/interpolationEngine";
+import { loadInkStory } from "@thorium/utils/.server/ink/loadInkStory";
 
 export async function runInkStory(conversation: Entity) {
 	const convo = conversation.components.isConversation;
-	const story = convo?.inkStory as Story;
+	const story = await lazyLoadInkStory(conversation);
 	if (!convo || !story) return;
 
 	// Clear out any non-persisted triggers for this conversation
@@ -207,4 +207,20 @@ export function doForEachConversationPartner(
 			callback(entity, entity.components.isShipSystem.shipId);
 		}
 	}
+}
+
+export async function lazyLoadInkStory(conversation: Entity) {
+	if (!conversation?.components.isConversation?.inkFilePath)
+		throw new Error("Conversation not found");
+
+	if (!conversation.components.isConversation.inkStory) {
+		conversation.updateComponent("isConversation", {
+			inkStory: await loadInkStory(
+				conversation.components.isConversation.inkFilePath,
+				conversation.components.isConversation.conversationState,
+			),
+		});
+	}
+
+	return conversation.components.isConversation.inkStory as Story;
 }
