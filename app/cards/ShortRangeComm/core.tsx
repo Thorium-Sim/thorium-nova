@@ -11,6 +11,7 @@ import Select from "@thorium/ui/Select";
 import { Suspense, useState } from "react";
 import { shortRangeStateMap } from "./shared";
 import { keepPreviousData } from "@tanstack/react-query";
+import { cn } from "@thorium/utils/cn";
 export function ShortRangeCommCore() {
 	const { shipId } = useStation();
 	const [shortRangeComm] = q.shortRangeComm.get.useNetRequest({ shipId });
@@ -89,39 +90,11 @@ export function ShortRangeCommCore() {
 				>
 					Hail...
 				</Button>
-			) : shortRangeComm.state === "hailing" ? (
-				<div className="flex">
-					<Button
-						className="btn-xs btn-warning flex-auto rounded-r-none"
-						onClick={() => q.shortRangeComm.disconnect.netSend({ shipId })}
-					>
-						Cancel
-					</Button>
-					<Button
-						className="btn-xs btn-error flex-auto rounded-none"
-						onClick={() => {
-							if (shortRangeComm.conversationId) {
-								q.shortRangeComm.reject.netSend({
-									conversationId: shortRangeComm.conversationId,
-								});
-							}
-						}}
-					>
-						Reject
-					</Button>
-					<Button
-						className="btn-xs btn-success flex-auto rounded-l-none"
-						onClick={() => {
-							if (shortRangeComm.conversationId) {
-								q.shortRangeComm.connect.netSend({
-									conversationId: shortRangeComm.conversationId,
-								});
-							}
-						}}
-					>
-						Connect
-					</Button>
-				</div>
+			) : shortRangeComm.state === "hailing" &&
+				shortRangeComm.conversationId ? (
+				<Suspense>
+					<HailingButtons conversationId={shortRangeComm.conversationId} />
+				</Suspense>
 			) : (
 				<Button
 					className="btn-xs btn-error w-full"
@@ -155,6 +128,52 @@ function ConversationName({
 						.join(", ")}`
 				: ""}
 		</>
+	);
+}
+
+function HailingButtons({ conversationId }: { conversationId: number }) {
+	const { shipId } = useStation();
+
+	const [conversation] = q.shortRangeComm.conversation.useNetRequest({
+		conversationId,
+	});
+
+	return (
+		<div className="flex">
+			<Button
+				className={cn("btn-xs btn-warning flex-auto", {
+					"rounded-r-none": conversation?.targetId,
+				})}
+				onClick={() => q.shortRangeComm.disconnect.netSend({ shipId })}
+			>
+				Cancel
+			</Button>
+			{conversation?.targetId ? (
+				<>
+					<Button
+						className="btn-xs btn-error flex-auto rounded-none"
+						onClick={() => {
+							q.shortRangeComm.reject.netSend({
+								conversationId,
+							});
+						}}
+					>
+						Reject
+					</Button>
+					<Button
+						className="btn-xs btn-success flex-auto rounded-l-none"
+						onClick={() => {
+							q.shortRangeComm.connect.netSend({
+								conversationId,
+								shipId: conversation.targetId,
+							});
+						}}
+					>
+						Connect
+					</Button>
+				</>
+			) : null}
+		</div>
 	);
 }
 

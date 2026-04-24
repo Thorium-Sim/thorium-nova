@@ -96,7 +96,6 @@ export function CircleGrid({
 	const { interpolate } = useLiveQuery();
 	useFrame((props) => {
 		const playerShip = interpolate(id);
-		console.log(id, playerShip);
 		if (playerShip && circleGroup.current) {
 			const { r } = playerShip;
 			circleGroup.current.position.set(0, 0, 0);

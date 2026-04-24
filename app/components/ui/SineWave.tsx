@@ -55,10 +55,11 @@ export function getSinePoint(
 		frequency: number;
 		phase: number;
 	}[],
+	progress: number = 0,
 ) {
 	let point = 0;
 	for (const { frequency, phase, amplitude } of waves) {
-		point += Math.sin(i / 2 / frequency + phase) * amplitude;
+		point += Math.sin(i / 2 / frequency + phase + progress) * amplitude;
 	}
 	return point;
 }
@@ -72,6 +73,7 @@ const SineWave = ({
 	color = "red",
 	strokeWidth = 2,
 	orientation = "horizontal",
+	shouldProgress,
 	shouldRender,
 }: {
 	waves: { amplitude: number; frequency: number; phase: number }[];
@@ -84,15 +86,19 @@ const SineWave = ({
 	color?: string;
 	strokeWidth?: number;
 	orientation?: "vertical" | "horizontal";
+	shouldProgress?: boolean;
 	shouldRender?: boolean;
 }) => {
 	const [ref, { width, height }] = useMeasure<HTMLDivElement>();
 	const canvasRef = useRef<HTMLCanvasElement>(null);
-
+	const progressRef = useRef(0);
 	useAnimationFrame(() => {
 		const ctx = canvasRef.current?.getContext("2d");
 		if (!canvasRef.current || !ctx) return;
 
+		if (shouldProgress) {
+			progressRef.current -= 0.3;
+		}
 		canvasRef.current.width = width * window.devicePixelRatio;
 		canvasRef.current.height = height * window.devicePixelRatio;
 		ctx.clearRect(
@@ -105,11 +111,11 @@ const SineWave = ({
 		ctx.beginPath();
 		ctx.moveTo(
 			orientation === "vertical"
-				? getSinePoint(0, waves) * width + width / 2
+				? getSinePoint(0, waves, progressRef.current) * width + width / 2
 				: 0,
 			orientation === "vertical"
 				? 0
-				: getSinePoint(0, waves) * height + height / 2,
+				: getSinePoint(0, waves, progressRef.current) * height + height / 2,
 		);
 		for (
 			let i = -10;
@@ -120,23 +126,23 @@ const SineWave = ({
 		) {
 			ctx.lineTo(
 				orientation === "vertical"
-					? getSinePoint(i, waves) * width + width / 2
+					? getSinePoint(i, waves, progressRef.current) * width + width / 2
 					: i / 2,
 				orientation === "vertical"
 					? i / 2
-					: getSinePoint(i, waves) * height + height / 2,
+					: getSinePoint(i, waves, progressRef.current) * height + height / 2,
 			);
 		}
-
+		ctx.lineWidth = strokeWidth;
 		ctx.strokeStyle = color;
 		ctx.stroke();
-		ctx.lineWidth = 2;
+		ctx.lineWidth = strokeWidth * 2;
 		ctx.strokeStyle = chroma(color).alpha(0.3).hex();
 		ctx.stroke();
-		ctx.lineWidth = 3;
+		ctx.lineWidth = strokeWidth * 3;
 		ctx.strokeStyle = chroma(color).alpha(0.2).hex();
 		ctx.stroke();
-		ctx.lineWidth = 4;
+		ctx.lineWidth = strokeWidth * 4;
 		ctx.strokeStyle = chroma(color).alpha(0.1).hex();
 		ctx.stroke();
 

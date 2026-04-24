@@ -123,6 +123,8 @@ export class InterstellarTransitionSystem extends System {
 				// }
 				pubsub.publish.starmapCore.ships({ systemId: system.id });
 				pubsub.publish.starmapCore.ships({ systemId: null });
+				pubsub.publish.shortRangeComm.hailableEntities({ systemId: null });
+				pubsub.publish.shortRangeComm.hailableEntities({ systemId: system.id });
 				pubsub.publish.starmapCore.ship({ shipId: entity.id });
 
 				if (entity.components.isPlayerShip) {
@@ -223,6 +225,10 @@ export class InterstellarTransitionSystem extends System {
 				}
 				pubsub.publish.starmapCore.ships({ systemId: destinationSystem.id });
 				pubsub.publish.starmapCore.ships({ systemId: null });
+				pubsub.publish.shortRangeComm.hailableEntities({ systemId: null });
+				pubsub.publish.shortRangeComm.hailableEntities({
+					systemId: destinationSystem.id,
+				});
 				pubsub.publish.starmapCore.ship({ shipId: entity.id });
 
 				if (entity.components.isPlayerShip) {

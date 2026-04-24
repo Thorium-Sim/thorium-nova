@@ -11,6 +11,7 @@ import type { Story } from "inkjs";
 import { getValueReference } from "../executeBlocks";
 import { interpolateText } from "@thorium/utils/interpolationEngine";
 import { loadInkStory } from "@thorium/utils/.server/ink/loadInkStory";
+import path from "node:path";
 
 export async function runInkStory(conversation: Entity) {
 	const convo = conversation.components.isConversation;
@@ -137,14 +138,28 @@ export async function runInkStory(conversation: Entity) {
 					) {
 						let hasDialoguePlayer = false;
 
+						let audioFilepath = tag.trim();
+						if (
+							!audioFilepath.startsWith("/") &&
+							conversation.components.isConversation?.inkFilePath
+						) {
+							// Relative path based on the conversation's ink file
+							audioFilepath = path.join(
+								path.dirname(
+									conversation.components.isConversation.inkFilePath,
+								),
+								tag.trim(),
+							);
+						}
 						// Play any audio dialogue associated with this conversation line
-
 						doForEachConversationPartner(conversation, (entity, shipId) => {
+							// It doesn't matter if this is sent to NPC ships — they shouldn't
+							// have clients assigned to them anyway
 							pubsub.publish.effects.dialogue({
 								type: "dialogue",
 								conversationId: conversation.id,
 								shipId,
-								audioFilepath: tag,
+								audioFilepath,
 							});
 							hasDialoguePlayer = true;
 						});

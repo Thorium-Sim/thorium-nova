@@ -91,6 +91,10 @@ export const conversation = t.router({
 
 			inkStory.ChooseChoiceIndex(choiceIndex);
 			conversation.updateComponent("isConversation", {
+				currentDialogue: [
+					...(conversation.components.isConversation?.currentDialogue || []),
+					{ speakerId: input.shipId, text: input.choice },
+				],
 				currentChoices: produce(
 					conversation.components.isConversation?.currentChoices || [],
 					(choices) => {

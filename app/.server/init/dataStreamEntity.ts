@@ -68,6 +68,15 @@ export function dataStreamEntity(e: Entity) {
 			c: e.components.legacyCoolant?.coolant || 0,
 		};
 	}
+	if (e.components.isShortRangeComm) {
+		return {
+			id: e.id.toString(),
+			f: e.components.isShortRangeComm.antennaFrequency,
+			y: e.components.power?.currentPower,
+			z: e.components.heat?.heat || 0,
+			c: e.components.legacyCoolant?.coolant || 0,
+		};
+	}
 	if (e.components.power) {
 		return {
 			id: e.id.toString(),

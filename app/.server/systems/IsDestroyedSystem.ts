@@ -55,6 +55,7 @@ function deleteShip(entity: Entity) {
 		pubsub.publish.starmapCore.ships({
 			systemId,
 		});
+		pubsub.publish.shortRangeComm.hailableEntities({ systemId });
 	}
 }
 

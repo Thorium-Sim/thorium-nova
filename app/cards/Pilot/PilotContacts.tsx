@@ -55,12 +55,16 @@ export function CircleGridContacts({
 	targetedContactId,
 	selectedContactId,
 	onContactOcclusion,
+	includeEntityIds,
+	hideTorpedos,
 }: {
 	onContactClick?: (id: number) => void;
 	onPlanetClick?: (id: number) => void;
 	onContactOcclusion?: (id: number, occluded: boolean) => void;
 	targetedContactId?: number;
 	selectedContactId?: number | null;
+	includeEntityIds?: number[];
+	hideTorpedos?: boolean;
 }) {
 	const store = useCircleGridStore();
 	const tilted = store((store) => store.tilt > 0);
@@ -90,7 +94,12 @@ export function CircleGridContacts({
 				);
 			})}
 			{ships.map(({ id, modelUrl, logoUrl, size }) => {
-				if (!modelUrl || !logoUrl) return null;
+				if (
+					!modelUrl ||
+					!logoUrl ||
+					(includeEntityIds && !includeEntityIds.includes(id))
+				)
+					return null;
 				return (
 					<Suspense key={id} fallback={null}>
 						<ErrorBoundary FallbackComponent={fallback} onError={onError}>
@@ -110,18 +119,19 @@ export function CircleGridContacts({
 					</Suspense>
 				);
 			})}
-			{torpedos.map(({ id, color, isDestroyed }) => {
-				return (
-					<Suspense key={id} fallback={null}>
-						<TorpedoEntity
-							id={id}
-							color={color}
-							tilted={tilted}
-							isDestroyed={isDestroyed}
-						/>
-					</Suspense>
-				);
-			})}
+			{!hideTorpedos &&
+				torpedos.map(({ id, color, isDestroyed }) => {
+					return (
+						<Suspense key={id} fallback={null}>
+							<TorpedoEntity
+								id={id}
+								color={color}
+								tilted={tilted}
+								isDestroyed={isDestroyed}
+							/>
+						</Suspense>
+					);
+				})}
 		</group>
 	);
 }

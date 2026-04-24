@@ -31,6 +31,8 @@ function parseParams(value: any) {
 			)
 		: [];
 }
+
+const fileAccept = /(image|audio)\/.*/gi;
 export default function Conversations({
 	params: { pluginId, timelineId, conversationId },
 }: Route.ComponentProps) {
@@ -91,13 +93,16 @@ export default function Conversations({
 							fileUrls={conversation.assets.files}
 							handleUpload={async (files) => {
 								if (!files.length) return;
-								const file = files[0];
-								await q.plugin.timeline.conversations.uploadFile.netSend({
-									pluginId,
-									conversationId,
-									file,
-									fileName: file.name,
-								});
+								for (let i = 0; i < files.length; i++) {
+									const file = files.item(i);
+									if (!file) continue;
+									q.plugin.timeline.conversations.uploadFile.netSend({
+										pluginId,
+										conversationId,
+										file,
+										fileName: file.name,
+									});
+								}
 							}}
 							remove={async (file) => {
 								await q.plugin.timeline.conversations.removeFile.netSend({
@@ -106,6 +111,8 @@ export default function Conversations({
 									file,
 								});
 							}}
+							acceptString="audio/*, image/*"
+							accept={fileAccept}
 						/>
 					</div>
 				</Activity>

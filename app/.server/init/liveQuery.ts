@@ -71,7 +71,6 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 	};
 	public async sendDataStream() {
 		const context = getDataContext(this.id);
-
 		if (!context?.flight || !this.connected) return;
 		/**
 		 * All we care about are

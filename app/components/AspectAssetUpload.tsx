@@ -9,15 +9,19 @@ export function AspectAssetUpload({
 	fileUrls,
 	handleUpload,
 	remove,
+	accept = /(image|font)\/.*/gi,
+	acceptString = "image/*, font/*,.ttf,.eot,.woff,.woff2",
+	formatCopy,
 }: {
 	fileUrls: string[];
 	handleUpload: (files: FileList) => Promise<void>;
 	remove: (file: string) => Promise<void>;
+	acceptString?: string;
+	accept?: RegExp;
+	formatCopy?: (text: string) => string;
 }) {
 	const [dragging, setDragging] = useState(false);
 
-	const accept = /(image|font)\/.*/gi;
-	const acceptString = "image/*, font/*,.ttf,.eot,.woff,.woff2";
 	// Drag and drop is hard to test
 	/* istanbul ignore next */
 	function handleDragEnter(e: React.DragEvent) {
@@ -80,6 +84,7 @@ export function AspectAssetUpload({
 							fileUrl={file}
 							key={file}
 							remove={() => remove(file)}
+							formatCopy={formatCopy}
 						/>
 					);
 				})}
@@ -90,10 +95,10 @@ export function AspectAssetUpload({
 					type="file"
 					hidden
 					accept={acceptString}
-					multiple={false}
+					multiple={true}
 					value={""}
 					onChange={(e) => {
-						if (e.target?.files?.length === 1) {
+						if (e.target.files && e.target.files.length > 0) {
 							handleUpload(e.target.files);
 						}
 					}}
@@ -133,6 +138,7 @@ function UploadedFile({
 }: {
 	fileUrl: string;
 	remove?: () => void | Promise<void>;
+	formatCopy?: (text: string) => string;
 }) {
 	const confirm = useConfirm();
 	const { copy, state } = useClipboard();

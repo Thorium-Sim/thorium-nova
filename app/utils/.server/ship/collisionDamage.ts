@@ -233,6 +233,7 @@ export function destroyShip(entity: Entity) {
 	pubsub.publish.starmapCore.ships({
 		systemId,
 	});
+	pubsub.publish.shortRangeComm.hailableEntities({ systemId });
 }
 export function applySystemDamage(
 	system: Entity,
