@@ -3,6 +3,7 @@ import { t } from "@thorium/.server/init/t";
 import { spawnShipSystem } from "@thorium/.server/spawners/shipSystem";
 import { loadInkStory } from "@thorium/utils/.server/ink/loadInkStory";
 import {
+	bindInkFunctions,
 	doForEachConversationPartner,
 	runInkStory,
 } from "@thorium/utils/.server/ink/runInkStory";
@@ -555,6 +556,7 @@ export const shortRangeComm = t.router({
 					npcShipId: npcShip?.id || -1,
 					conversationId: conversation.id,
 				});
+				bindInkFunctions(story, conversation);
 				conversation.updateComponent("isConversation", {
 					inkStory: story,
 				});

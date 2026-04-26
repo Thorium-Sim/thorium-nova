@@ -24,6 +24,10 @@ export const isConversation = z
 		inkStory: z.any().default(null),
 		/** The saved conversation state from Ink */
 		conversationState: z.string().default(""),
+		/** Which paths have been visited in order */
+		executedPaths: z.string().array().default([]),
+		/** Which actions have already been executed, so we don't re-run actions */
+		executedActions: z.string().array().default([]),
 		/** The lines of dialogue that have been delivered, from first to last */
 		currentDialogue: z
 			.object({

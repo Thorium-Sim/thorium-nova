@@ -67,6 +67,7 @@ export const conversation = t.router({
 					conversation.ecs.removeEntityById(trigger.id);
 				}
 			}
+			conversation.updateComponent("isConversation", { currentChoices: [] });
 
 			await runInkStory(conversation);
 

@@ -13,26 +13,30 @@ import { interpolateText } from "@thorium/utils/interpolationEngine";
 import { loadInkStory } from "@thorium/utils/.server/ink/loadInkStory";
 import path from "node:path";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
+import { convertArray } from "three/src/animation/AnimationUtils.js";
 
 export async function runInkStory(conversation: Entity) {
 	const convo = conversation.components.isConversation;
-	console.trace();
 	const story = await lazyLoadInkStory(conversation);
 	if (!convo || !story) return;
 
+	const pathStrings = [];
 	while (story.canContinue) {
 		const line = story.Continue();
 		if (!line) continue;
+
 		const pathString =
 			story.state.currentPathString
 				?.split(".")
 				.filter((f) => Number(f).toString() !== f)
 				.join(".") || "";
+		pathStrings.push(pathString);
 
 		const lineAction = parseConversationLine(line, story.currentTags || []);
 		switch (lineAction.type) {
 			case "action":
 				{
+					// TODO April 25, 2026: Don't re-run actions when replaying parts of the conversation
 					const localVariables = {};
 					const values = Object.fromEntries(
 						Object.entries(lineAction.params).map(([key, value]) => {
@@ -58,6 +62,13 @@ export async function runInkStory(conversation: Entity) {
 							return [key, val];
 						}),
 					);
+					conversation.updateComponent("isConversation", {
+						executedActions: [
+							...(conversation.components.isConversation?.executedActions ||
+								[]),
+							pathString,
+						],
+					});
 					await triggerAction(lineAction.action, values);
 				}
 				break;
@@ -171,6 +182,9 @@ export async function runInkStory(conversation: Entity) {
 								duration,
 							);
 							// Cease running the story until the dialogue is complete
+							conversation.updateComponent("isConversation", {
+								executedPaths: [...convo.executedPaths, ...pathStrings],
+							});
 							return;
 						}
 					}
@@ -179,6 +193,9 @@ export async function runInkStory(conversation: Entity) {
 			}
 		}
 	}
+	conversation.updateComponent("isConversation", {
+		executedPaths: [...convo.executedPaths, ...pathStrings],
+	});
 	// Put the choices into the conversation entity
 	const choices = story.currentChoices.map((c) => {
 		const colonSplit = c.text.split(":");
@@ -226,13 +243,26 @@ export async function lazyLoadInkStory(conversation: Entity) {
 		throw new Error("Conversation not found");
 
 	if (!conversation.components.isConversation.inkStory) {
+		const inkStory = await loadInkStory(
+			conversation.components.isConversation.inkFilePath,
+			conversation.components.isConversation.conversationState,
+		);
+		bindInkFunctions(inkStory, conversation);
 		conversation.updateComponent("isConversation", {
-			inkStory: await loadInkStory(
-				conversation.components.isConversation.inkFilePath,
-				conversation.components.isConversation.conversationState,
-			),
+			inkStory,
 		});
 	}
 
 	return conversation.components.isConversation.inkStory as Story;
+}
+
+export function bindInkFunctions(story: Story, conversation: Entity) {
+	story.BindExternalFunction("getLastPath", () => {
+		console.log(conversation.components.isConversation?.executedPaths.at(-2));
+		return (
+			story.KnotContainerWithName(
+				conversation.components.isConversation?.executedPaths.at(-2) || "",
+			)?.path || story.variablesState.lastPath
+		);
+	});
 }
