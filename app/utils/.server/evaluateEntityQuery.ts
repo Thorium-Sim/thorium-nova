@@ -198,12 +198,7 @@ export function evaluateTriggerCondition(
 				if (condition.values) {
 					for (const key in condition.values) {
 						let conditionValue = condition.values[key];
-						console.log(
-							key,
-							conditionValue,
-							event.values[key], // biome-ignore lint/suspicious/noDoubleEquals: We want this to coerce
-							event.values[key] != conditionValue,
-						);
+
 						if (
 							conditionValue &&
 							typeof conditionValue === "object" &&
@@ -493,7 +488,6 @@ export async function processTriggers(
 			trigger.components.isTrigger;
 		const match = evaluateTriggerCondition(ecs, conditions, event);
 		if (match) {
-			console.log("Processing Trigger", event?.event, conditions);
 			await executeBlocks(
 				ecs,
 				blocks.map((action) => {

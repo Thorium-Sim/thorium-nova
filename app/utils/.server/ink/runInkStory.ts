@@ -28,7 +28,6 @@ export async function runInkStory(conversation: Entity) {
 				?.split(".")
 				.filter((f) => Number(f).toString() !== f)
 				.join(".") || "";
-		console.log(pathString, story.state.VisitCountAtPathString(pathString));
 
 		const lineAction = parseConversationLine(line, story.currentTags || []);
 		switch (lineAction.type) {
@@ -90,7 +89,6 @@ export async function runInkStory(conversation: Entity) {
 					}),
 				);
 
-				console.log("Spawning Trigger", lineAction.event, values);
 				const triggerEntity = spawnTrigger({
 					trigger: {
 						active: true,

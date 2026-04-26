@@ -263,7 +263,6 @@ function Conversation({ conversationId }: { conversationId: number }) {
 
 	const hasSelectedChoice = conversation.currentChoices.some((c) => c.selected);
 
-	console.log(conversation);
 	return (
 		<div className="flex flex-col overflow-y-hidden h-full col-span-3 gap-8 py-8">
 			<div

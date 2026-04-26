@@ -64,10 +64,6 @@ export const conversation = t.router({
 					!trigger.components.isTrigger?.persist &&
 					trigger.components.isTrigger?.stepId === conversation.id
 				) {
-					console.log(
-						"Removing trigger",
-						trigger.components.isTrigger.conditions,
-					);
 					conversation.ecs.removeEntityById(trigger.id);
 				}
 			}
@@ -131,10 +127,6 @@ export const conversation = t.router({
 					!trigger.components.isTrigger?.persist &&
 					trigger.components.isTrigger?.stepId === conversation.id
 				) {
-					console.log(
-						"Removing trigger",
-						trigger.components.isTrigger.conditions,
-					);
 					conversation.ecs.removeEntityById(trigger.id);
 				}
 			}
