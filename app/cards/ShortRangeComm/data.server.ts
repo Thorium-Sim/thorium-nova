@@ -526,7 +526,6 @@ export const shortRangeComm = t.router({
 			)
 				throw new Error("Unable to connect");
 
-			console.log(input, srConvo);
 			// If the connecting ship is neither the host nor the target, only allow the connection
 			// if the conversation allows connections
 			if (
@@ -560,15 +559,17 @@ export const shortRangeComm = t.router({
 					inkStory: story,
 				});
 			}
-			if (story) {
-				// Run the story, executing any actions and events until we get to some actual dialogue.
-				await runInkStory(conversation);
-			}
 
 			srcomm.updateComponent("isShortRangeComm", {
 				conversationId: conversation.id,
 				state: "connected",
 			});
+
+			if (story) {
+				// Run the story, executing any actions and events until we get to some actual dialogue.
+				await runInkStory(conversation);
+			}
+
 			cancelLoopingSound(srcomm, "incomingHail");
 			const targetShip = ctx.ecs.getEntityById(shipId);
 			if (targetShip) {
@@ -655,6 +656,11 @@ export const shortRangeComm = t.router({
 						if (ship) {
 							playShipSound(entity, ship, "disconnected");
 						}
+						pubsub.publish.effects.dialogue({
+							type: "stopDialogue",
+							conversationId: conversation.id,
+							shipId,
+						});
 					});
 				}
 			}
@@ -671,6 +677,29 @@ export const shortRangeComm = t.router({
 			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
 
 			return { shipId: input.shipId, previousState };
+		}),
+	disconnectConversation: t.procedure
+		.input(z.object({ conversationId: z.number() }))
+		.send(({ ctx, input }) => {
+			const conversation = ctx.ecs.getEntityById(input.conversationId);
+
+			if (!conversation) throw new Error("Conversation not found.");
+			doForEachConversationPartner(conversation, (entity, shipId) => {
+				const ship = ctx.ecs.getEntityById(shipId);
+				if (ship) {
+					playShipSound(entity, ship, "disconnected");
+				}
+				entity.updateComponent("isShortRangeComm", {
+					conversationId: null,
+					state: "idle",
+				});
+				pubsub.publish.shortRangeComm.get({ shipId });
+				pubsub.publish.effects.dialogue({
+					type: "stopDialogue",
+					conversationId: conversation.id,
+					shipId,
+				});
+			});
 		}),
 });
 

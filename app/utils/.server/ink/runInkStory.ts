@@ -12,26 +12,24 @@ import { getValueReference } from "../executeBlocks";
 import { interpolateText } from "@thorium/utils/interpolationEngine";
 import { loadInkStory } from "@thorium/utils/.server/ink/loadInkStory";
 import path from "node:path";
+import { thoriumPath } from "@thorium/utils/.server/appPaths";
 
 export async function runInkStory(conversation: Entity) {
 	const convo = conversation.components.isConversation;
+	console.trace();
 	const story = await lazyLoadInkStory(conversation);
 	if (!convo || !story) return;
-
-	// Clear out any non-persisted triggers for this conversation
-	for (const trigger of conversation.ecs.componentCache.get("isTrigger") ||
-		[]) {
-		if (
-			!trigger.components.isTrigger?.persist &&
-			trigger.components.isTrigger?.stepId === conversation.id
-		) {
-			conversation.ecs.removeEntityById(trigger.id);
-		}
-	}
 
 	while (story.canContinue) {
 		const line = story.Continue();
 		if (!line) continue;
+		const pathString =
+			story.state.currentPathString
+				?.split(".")
+				.filter((f) => Number(f).toString() !== f)
+				.join(".") || "";
+		console.log(pathString, story.state.VisitCountAtPathString(pathString));
+
 		const lineAction = parseConversationLine(line, story.currentTags || []);
 		switch (lineAction.type) {
 			case "action":
@@ -44,9 +42,11 @@ export async function runInkStory(conversation: Entity) {
 								localVariables,
 								conversation.ecs,
 							);
-							// Special handling for certain keys we know are entity id references
-							if (key === "shipId" || key === "entityId") {
+							// Special handling for numbers
+							if (Number(val).toString() === val) {
 								val = Number(val);
+							} else if (val === "null") {
+								val = null;
 							} else if (typeof val === "string") {
 								// Other values get interpolated automatically
 								val = interpolateText(
@@ -72,48 +72,45 @@ export async function runInkStory(conversation: Entity) {
 						divert: lineAction.divert,
 					},
 				};
-				const blocks: TimelineBlock[] = [];
-				if (Object.keys(lineAction.params).length > 0) {
-					// Put all of the params into blocks
-					for (const key in lineAction.params) {
-						blocks.push({
-							type: "ResultPropertyIntoVariable",
-							id: uniqid("ink"),
-							property: key,
-							variable: key,
-						});
-					}
-					// Then add the if condition
-					blocks.push({
-						type: "IfCondition",
-						id: uniqid("ink-"),
-						triggerBlocks: [actionBlock],
-						conditions: Object.entries(lineAction.params).map(
-							([key, value]) => ({
-								comparison: "=",
-								value1: `$${key}`,
-								value2: value,
-							}),
-						),
-					});
-				} else {
-					blocks.push(actionBlock);
-				}
+				const localVariables = {};
+
+				const values = Object.fromEntries(
+					Object.entries(lineAction.params).map(([key, value]) => {
+						let val = value;
+						// Special handling for numbers
+						if (Number(val).toString() === val) {
+							val = Number(val);
+						} else if (val === "null") {
+							val = null;
+						} else if (typeof val === "string") {
+							// Other values get interpolated automatically
+							val = interpolateText(val, localVariables, conversation.ecs.rng);
+						}
+						return [key, val];
+					}),
+				);
+
+				console.log("Spawning Trigger", lineAction.event, values);
 				const triggerEntity = spawnTrigger({
 					trigger: {
 						active: true,
-						conditions: [{ type: "eventListener", event: lineAction.event }],
+						conditions: [
+							{
+								type: "eventListener",
+								event: lineAction.event,
+								values,
+							},
+						],
 						multiple: false,
 						persist: lineAction.persist,
 						triggeredAt: null,
-						blocks,
+						blocks: [actionBlock],
 						localVariables: {},
 						// We'll use this to indicate the conversation
 						stepId: conversation.id,
 					},
 				});
 				conversation.ecs.addEntity(triggerEntity);
-
 				break;
 			}
 			case "dialogue": {
@@ -125,7 +122,7 @@ export async function runInkStory(conversation: Entity) {
 				conversation.updateComponent("isConversation", {
 					currentDialogue: [
 						...convo.currentDialogue,
-						{ speakerId, text: lineAction.dialogue },
+						{ id: uniqid("dlg-"), speakerId, text: lineAction.dialogue },
 					],
 				});
 				// TODO April 6, 2026 — find some way to look up any dialogue files that might be coming in the future and
@@ -166,7 +163,9 @@ export async function runInkStory(conversation: Entity) {
 						if (hasDialoguePlayer) {
 							// We stop evaluating the story here until the line of
 							// audio dialogue is delivered
-							const duration = await measureAudioDurationMs(tag);
+							const duration = await measureAudioDurationMs(
+								path.join(thoriumPath, audioFilepath),
+							);
 							scheduleAction(
 								conversation.ecs,
 								"conversation.continue",
@@ -186,7 +185,7 @@ export async function runInkStory(conversation: Entity) {
 	const choices = story.currentChoices.map((c) => {
 		const colonSplit = c.text.split(":");
 		const speakerId = findSpeakerId(conversation.ecs, colonSplit[0]);
-		return { text: c.text, speakerId, selected: false };
+		return { id: uniqid("chs-"), text: c.text, speakerId, selected: false };
 	});
 
 	conversation.updateComponent("isConversation", { currentChoices: choices });

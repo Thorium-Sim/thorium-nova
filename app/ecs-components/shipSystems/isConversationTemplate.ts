@@ -27,6 +27,7 @@ export const isConversation = z
 		/** The lines of dialogue that have been delivered, from first to last */
 		currentDialogue: z
 			.object({
+				id: z.string(),
 				text: z.string(),
 				/** For more than one speakers in the conversation, this is the ID of the conversation partner delivering the dialogue */
 				speakerId: z.number(),
@@ -36,6 +37,7 @@ export const isConversation = z
 		/** The choices that are available for the player ships to choose from */
 		currentChoices: z
 			.object({
+				id: z.string(),
 				text: z.string(),
 				/** For more than one player ship in the conversation, this is the ID of the conversation partner that is able to deliver this line of dialogue.
 				 * If null, any player ship may deliver the line.

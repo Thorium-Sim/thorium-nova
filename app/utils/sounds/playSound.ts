@@ -8,7 +8,12 @@ import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { useAudioSettingsStore } from "./audioSettingsStore";
 import { useStation } from "@thorium/routes/station/useStation";
 
-export type SoundType = "ambiance" | "soundEffect" | "ui" | "music";
+export type SoundType =
+	| "ambiance"
+	| "soundEffect"
+	| "ui"
+	| "music"
+	| "dialogue";
 
 const GainNode =
 	typeof window === "undefined"
@@ -19,20 +24,21 @@ const GainNode =
 		: window.GainNode;
 
 const volume = useAudioSettingsStore.getState();
+const mainGainNode = new GainNode(audioContext, { gain: volume.mainVolume });
 const gainNodes = {
-	main: new GainNode(audioContext, { gain: volume.mainVolume }),
 	ambiance: new GainNode(audioContext, { gain: volume.ambianceVolume }),
 	soundEffect: new GainNode(audioContext, { gain: volume.soundEffectVolume }),
 	ui: new GainNode(audioContext, { gain: volume.uiVolume }),
 	music: new GainNode(audioContext, { gain: volume.musicVolume }),
+	dialogue: new GainNode(audioContext, { gain: volume.dialogueVolume }),
 };
 
 if (typeof window !== "undefined") {
-	gainNodes.main.connect(audioContext.destination);
-	gainNodes.ambiance.connect(gainNodes.main);
-	gainNodes.soundEffect.connect(gainNodes.main);
-	gainNodes.ui.connect(gainNodes.main);
-	gainNodes.music.connect(gainNodes.main);
+	mainGainNode.connect(audioContext.destination);
+	for (const node in gainNodes) {
+		// @ts-expect-error
+		gainNodes[node].connect(mainGainNode);
+	}
 }
 
 useAudioSettingsStore.subscribe(
@@ -43,7 +49,7 @@ useAudioSettingsStore.subscribe(
 		soundEffectVolume,
 		uiVolume,
 	}) => {
-		gainNodes.main.gain.setValueAtTime(mainVolume, audioContext.currentTime);
+		mainGainNode.gain.setValueAtTime(mainVolume, audioContext.currentTime);
 		gainNodes.ambiance.gain.setValueAtTime(
 			ambianceVolume,
 			audioContext.currentTime,
@@ -54,6 +60,7 @@ useAudioSettingsStore.subscribe(
 			audioContext.currentTime,
 		);
 		gainNodes.ui.gain.setValueAtTime(uiVolume, audioContext.currentTime);
+		gainNodes.dialogue.gain.setValueAtTime(uiVolume, audioContext.currentTime);
 	},
 );
 
@@ -264,60 +271,55 @@ export function SoundPlayer() {
 	const { shipId } = useStation();
 	const { interpolate } = useLiveQuery();
 
-	q.effects.sounds.useNetRequest(
-		{ clientId },
-		{
-			callback: (data) => {
-				if (!data) return;
-				switch (data.type) {
-					case "sound": {
-						const shipPosition = interpolate(shipId);
-						const { sounds, range } = data.sound;
-						// Calculate a volume multiplier based on the distance from the sound source.
-						const volumeMultiplier =
-							range && shipPosition
-								? Math.max(
-										0,
-										1 -
-											(Math.hypot(
-												range.position.x - shipPosition.x,
-												range.position.y - shipPosition.y,
-												range.position.z - shipPosition.z,
-											) /
-												range.distance) *
-												1.1,
-									)
-								: 1;
+	q.effects.sounds.useNetSubscribe({ clientId }, (data) => {
+		if (!data) return;
+		switch (data.type) {
+			case "sound": {
+				const shipPosition = interpolate(shipId);
+				const { sounds, range } = data.sound;
+				// Calculate a volume multiplier based on the distance from the sound source.
+				const volumeMultiplier =
+					range && shipPosition
+						? Math.max(
+								0,
+								1 -
+									(Math.hypot(
+										range.position.x - shipPosition.x,
+										range.position.y - shipPosition.y,
+										range.position.z - shipPosition.z,
+									) /
+										range.distance) *
+										1.1,
+							)
+						: 1;
 
-						if (volumeMultiplier <= 0) return;
+				if (volumeMultiplier <= 0) return;
 
-						sounds.forEach((sound) => {
-							playSound({
-								...sound,
-								type: "soundEffect",
-								id: data.sound.id,
-								volume: [
-									sound.volume[0] * volumeMultiplier,
-									sound.volume[1] * volumeMultiplier,
-								],
-							});
-						});
+				sounds.forEach((sound) => {
+					playSound({
+						...sound,
+						type: "soundEffect",
+						id: data.sound.id,
+						volume: [
+							sound.volume[0] * volumeMultiplier,
+							sound.volume[1] * volumeMultiplier,
+						],
+					});
+				});
 
-						break;
-					}
-					case "cancelLooping":
-						stopLooping(data.soundId);
-						break;
-					case "stop":
-						removeSound(data.soundId);
-						break;
-					case "stopAll":
-						removeAllSounds();
-						break;
-				}
-			},
-		},
-	);
+				break;
+			}
+			case "cancelLooping":
+				stopLooping(data.soundId);
+				break;
+			case "stop":
+				removeSound(data.soundId);
+				break;
+			case "stopAll":
+				removeAllSounds();
+				break;
+		}
+	});
 
 	return null;
 }

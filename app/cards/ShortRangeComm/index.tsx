@@ -4,8 +4,9 @@ import { useCardContext } from "@thorium/context/CardContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import SineWave from "@thorium/ui/SineWave";
+import { cn } from "@thorium/utils/cn";
 import throttle from "lodash.throttle";
-import { useCallback, useRef, useState } from "react";
+import { Suspense, useCallback, useRef, useState } from "react";
 
 const frequencyMin = 100;
 const frequencyMax = 350;
@@ -77,9 +78,9 @@ export function ShortRangeComm() {
 	const gainRadius = minRadius + gain * (maxRadius - minRadius);
 	return (
 		<div className="w-full h-full grid grid-cols-4 grid-rows-[1fr_auto_auto] overflow-hidden gap-8">
-			<div className="col-span-3 self-center">
+			<Suspense>
 				{incomingHails.length > 0 ? (
-					<>
+					<div className="col-span-3 self-center">
 						<h1 className="text-4xl text-center font-bold">
 							Status: Incoming{" "}
 							{pluralRules.select(incomingHails.length) === "one"
@@ -91,13 +92,19 @@ export function ShortRangeComm() {
 								{h.hostName} — {h.frequency} MHz
 							</p>
 						))}
-					</>
+					</div>
+				) : shortRangeComm.state === "connected" &&
+					shortRangeComm.conversationId ? (
+					<Conversation conversationId={shortRangeComm.conversationId} />
 				) : (
-					<h1 className="text-4xl text-center font-bold">
-						Status: {shortRangeStateMap[shortRangeComm.state]}
-					</h1>
+					<div className="col-span-3 self-center">
+						<h1 className="text-4xl text-center font-bold">
+							Status: {shortRangeStateMap[shortRangeComm.state]}
+						</h1>
+					</div>
 				)}
-			</div>
+			</Suspense>
+
 			<div className="col-span-3">
 				<label htmlFor="frequency" className="block tabular-nums">
 					Frequency ({frequency.toFixed(2)} MHz)
@@ -242,6 +249,59 @@ export function ShortRangeComm() {
 					>
 						Disconnect
 					</Button>
+				)}
+			</div>
+		</div>
+	);
+}
+
+function Conversation({ conversationId }: { conversationId: number }) {
+	const { shipId } = useStation();
+	const [conversation] = q.conversation.conversation.useNetRequest({
+		conversationId,
+	});
+
+	const hasSelectedChoice = conversation.currentChoices.some((c) => c.selected);
+
+	console.log(conversation);
+	return (
+		<div className="flex flex-col overflow-y-hidden h-full col-span-3 gap-8 py-8">
+			<div
+				className="overflow-y-auto flex flex-col-reverse gap-8 flex-auto faded-scroll-top pt-32 max-h-3/4"
+				// @ts-expect-error
+				style={{ "--fade-distance": "8rem" }}
+			>
+				{[...conversation.currentDialogue].reverse().map((d) => (
+					<div
+						key={d.id}
+						className={cn("text-balance text-2xl", {
+							"text-secondary": shipId === d.speakerId,
+						})}
+					>
+						{d.text}
+					</div>
+				))}
+			</div>
+			<div className="flex justify-around gap-4 flex-wrap">
+				{conversation.currentChoices.flatMap((c) =>
+					(c.speakerId === -1 || c.speakerId === shipId) &&
+					c.text.split(": ").slice(1).length > 0 ? (
+						<Button
+							key={c.id}
+							className="btn-alert"
+							disabled={hasSelectedChoice && !c.selected}
+							onClick={() => {
+								if (hasSelectedChoice) return;
+								q.conversation.selectChoice.netSend({
+									shipId,
+									conversationId,
+									choice: c.text,
+								});
+							}}
+						>
+							{c.text.split(": ").slice(1).join(": ")}
+						</Button>
+					) : null,
 				)}
 			</div>
 		</div>

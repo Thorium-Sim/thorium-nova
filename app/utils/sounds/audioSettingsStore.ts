@@ -8,6 +8,7 @@ export const useAudioSettingsStore = create(
 		soundEffectVolume: number;
 		ambianceVolume: number;
 		musicVolume: number;
+		dialogueVolume: number;
 	}>(
 		(set, get) => ({
 			mainVolume: 1,
@@ -15,6 +16,7 @@ export const useAudioSettingsStore = create(
 			soundEffectVolume: 1,
 			ambianceVolume: 1,
 			musicVolume: 1,
+			dialogueVolume: 1,
 		}),
 		{
 			name: "audio-store",

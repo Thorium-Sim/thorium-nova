@@ -8,6 +8,7 @@ import type { EffectPayload } from "@thorium/utils/flags/effects";
 import { useAmbiance } from "@thorium/utils/sounds/Ambiance/useAmbiance";
 import { toast } from "@thorium/context/ToastContext";
 import { useStation } from "@thorium/routes/station/useStation";
+import { useDialogue } from "@thorium/utils/sounds/useDialogue";
 
 let synth: SpeechSynthesis | undefined;
 try {
@@ -73,6 +74,7 @@ const Effects = () => {
 	const { doSpark, sparks } = useSpark();
 	const { station } = useStation();
 	useAmbiance();
+	useDialogue();
 
 	const doEffect = useCallback(
 		(payload: EffectPayload) => {

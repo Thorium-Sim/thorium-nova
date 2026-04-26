@@ -198,7 +198,14 @@ export function evaluateTriggerCondition(
 				if (condition.values) {
 					for (const key in condition.values) {
 						let conditionValue = condition.values[key];
+						console.log(
+							key,
+							conditionValue,
+							event.values[key], // biome-ignore lint/suspicious/noDoubleEquals: We want this to coerce
+							event.values[key] != conditionValue,
+						);
 						if (
+							conditionValue &&
 							typeof conditionValue === "object" &&
 							"query" in conditionValue &&
 							typeof conditionValue.query === "object" &&
@@ -224,7 +231,9 @@ export function evaluateTriggerCondition(
 						}
 					}
 				}
-				match = event.values;
+				if (match) {
+					match = event.values;
+				}
 			} else {
 				match = false;
 				break;
@@ -475,37 +484,36 @@ export async function processTriggers(
 	ecs: ECS,
 	event?: { event: string; values: any },
 ) {
-	const triggers = ecs.componentCache.get("isTrigger");
+	const triggers = [...(ecs.componentCache.get("isTrigger") || [])];
 	if (!triggers) return;
-	await Promise.all(
-		Array.from(triggers).map(async (trigger) => {
-			if (!trigger.components.isTrigger || !trigger.components.isTrigger.active)
-				return false;
-			const { conditions, blocks, stepId, localVariables, callReturnBlocks } =
-				trigger.components.isTrigger;
-			const match = evaluateTriggerCondition(ecs, conditions, event);
-			if (match) {
-				await executeBlocks(
-					ecs,
-					blocks.map((action) => {
-						if (action.action === "timeline.advance") {
-							return {
-								...action,
-								values: {
-									...action.values,
-									stepId: stepId,
-								},
-							};
-						}
-						return action;
-					}),
-					{ stepId, localVariables, theResult: match, callReturnBlocks },
-				);
-				trigger.updateComponent("isTrigger", {
-					triggeredAt: new Date(),
-					...(trigger.components.isTrigger.multiple ? {} : { active: false }),
-				});
-			}
-		}),
-	);
+	for (const trigger of triggers) {
+		if (!trigger.components.isTrigger || !trigger.components.isTrigger.active)
+			continue;
+		const { conditions, blocks, stepId, localVariables, callReturnBlocks } =
+			trigger.components.isTrigger;
+		const match = evaluateTriggerCondition(ecs, conditions, event);
+		if (match) {
+			console.log("Processing Trigger", event?.event, conditions);
+			await executeBlocks(
+				ecs,
+				blocks.map((action) => {
+					if (action.action === "timeline.advance") {
+						return {
+							...action,
+							values: {
+								...action.values,
+								stepId: stepId,
+							},
+						};
+					}
+					return action;
+				}),
+				{ stepId, localVariables, theResult: match, callReturnBlocks },
+			);
+			trigger.updateComponent("isTrigger", {
+				triggeredAt: new Date(),
+				...(trigger.components.isTrigger.multiple ? {} : { active: false }),
+			});
+		}
+	}
 }

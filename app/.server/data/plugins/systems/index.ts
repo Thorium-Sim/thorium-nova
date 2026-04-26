@@ -272,28 +272,25 @@ export const systems = t.router({
 			if (!shipSystem || "soundEffects" in shipSystem === false) {
 				return;
 			}
-			if (typeof input.file === "string") {
-				const filePath = path.basename(input.file);
-				const url = await ctx.uploadFile.call(
-					system,
-					input.file,
-					input.fileName || filePath,
-				);
-				if (!Array.isArray(shipSystem.soundEffects[input.soundEffect])) {
-					shipSystem.soundEffects[input.soundEffect] = [];
-				}
-				shipSystem.soundEffects[input.soundEffect].push({
-					url,
-					channel: null,
-					volume: [1, 1],
-					loop: false,
-					delay: 0,
-					gap: 0,
-					playbackRate: [1, 1],
-					loopEnd: null,
-					loopStart: null,
-				});
+			const url = await ctx.uploadFile.call(
+				system,
+				input.file,
+				input.fileName || input.file.name,
+			);
+			if (!Array.isArray(shipSystem.soundEffects[input.soundEffect])) {
+				shipSystem.soundEffects[input.soundEffect] = [];
 			}
+			shipSystem.soundEffects[input.soundEffect].push({
+				url,
+				channel: null,
+				volume: [1, 1],
+				loop: false,
+				delay: 0,
+				gap: 0,
+				playbackRate: [1, 1],
+				loopEnd: null,
+				loopStart: null,
+			});
 
 			pubsub.publish.plugin.systems.all({ pluginId: input.pluginId });
 			pubsub.publish.plugin.systems.get({

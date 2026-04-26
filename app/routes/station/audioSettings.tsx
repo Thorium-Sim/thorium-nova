@@ -4,7 +4,7 @@ import { useAudioSettingsStore } from "@thorium/utils/sounds/audioSettingsStore"
 export default function AudioSettings() {
 	const store = useAudioSettingsStore();
 	return (
-		<div>
+		<div className="flex flex-col gap-4">
 			<Slider
 				label="Main"
 				minValue={0}
@@ -62,6 +62,18 @@ export default function AudioSettings() {
 				onChange={(value) =>
 					!Array.isArray(value) &&
 					useAudioSettingsStore.setState({ musicVolume: value })
+				}
+				formatOptions={{ style: "percent" }}
+			/>
+			<Slider
+				label="Dialogue"
+				minValue={0}
+				maxValue={1}
+				step={0.01}
+				defaultValue={store.dialogueVolume}
+				onChange={(value) =>
+					!Array.isArray(value) &&
+					useAudioSettingsStore.setState({ dialogueVolume: value })
 				}
 				formatOptions={{ style: "percent" }}
 			/>

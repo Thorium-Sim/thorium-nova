@@ -21,7 +21,11 @@ export function ShortRangeCommCore() {
 		});
 
 	if (!shortRangeComm)
-		return <div className="text-sm">No Short Range Comm</div>;
+		return (
+			<div className="text-sm">
+				No Short Range Comm <ConversationSelect />
+			</div>
+		);
 	return (
 		<div className="text-sm h-full">
 			<div className="flex">

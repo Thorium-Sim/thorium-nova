@@ -6,6 +6,7 @@ import {
 } from "@thorium/utils/.server/ink/runInkStory";
 import { produce } from "immer";
 import { pubsub } from "../init/pubsub";
+import uniqid from "@thorium/utils/uniqid";
 
 export const conversation = t.router({
 	conversation: t.procedure
@@ -55,6 +56,22 @@ export const conversation = t.router({
 			const inkStory = await lazyLoadInkStory(conversation);
 
 			inkStory.ChoosePathString(input.divert);
+
+			// Clear out any non-persisted triggers for this conversation
+			for (const trigger of conversation.ecs.componentCache.get("isTrigger") ||
+				[]) {
+				if (
+					!trigger.components.isTrigger?.persist &&
+					trigger.components.isTrigger?.stepId === conversation.id
+				) {
+					console.log(
+						"Removing trigger",
+						trigger.components.isTrigger.conditions,
+					);
+					conversation.ecs.removeEntityById(trigger.id);
+				}
+			}
+
 			await runInkStory(conversation);
 
 			pubsub.publish.conversation.conversation({
@@ -93,7 +110,11 @@ export const conversation = t.router({
 			conversation.updateComponent("isConversation", {
 				currentDialogue: [
 					...(conversation.components.isConversation?.currentDialogue || []),
-					{ speakerId: input.shipId, text: input.choice },
+					{
+						id: uniqid("dlg-"),
+						speakerId: input.shipId,
+						text: input.choice.split(": ").slice(1).join(": "),
+					},
 				],
 				currentChoices: produce(
 					conversation.components.isConversation?.currentChoices || [],
@@ -103,6 +124,20 @@ export const conversation = t.router({
 				),
 			});
 
+			// Clear out any non-persisted triggers for this conversation
+			for (const trigger of conversation.ecs.componentCache.get("isTrigger") ||
+				[]) {
+				if (
+					!trigger.components.isTrigger?.persist &&
+					trigger.components.isTrigger?.stepId === conversation.id
+				) {
+					console.log(
+						"Removing trigger",
+						trigger.components.isTrigger.conditions,
+					);
+					conversation.ecs.removeEntityById(trigger.id);
+				}
+			}
 			await runInkStory(conversation);
 			pubsub.publish.conversation.conversation({
 				conversationId: conversation.id,

@@ -24,3 +24,12 @@
 		transparent 100%
 	);
 }
+
+@utility faded-scroll-top {
+	mask-image: linear-gradient(
+		to bottom,
+		transparent 0px,
+		#fff var(--fade-distance, 10px),
+		#fff 100%
+	);
+}
