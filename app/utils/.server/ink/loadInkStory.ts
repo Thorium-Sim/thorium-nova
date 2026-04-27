@@ -12,7 +12,7 @@ export async function loadInkStory(
 		const inkText = await DataStore.operations
 			.getStore()
 			?.readAsset(path.join(thoriumPath, inkFilePath));
-		if (!inkText) throw new Error();
+		if (!inkText) throw new Error("No ink text at path");
 		const story = new Compiler(inkText).Compile();
 		if (state) {
 			story.state.LoadJson(state);
@@ -31,6 +31,7 @@ export async function loadInkStory(
 
 		return story;
 	} catch (error) {
+		console.log(inkFilePath, error);
 		throw new Error(
 			`Unable to read ink story ${inkFilePath}: ${error instanceof Error ? error.message : error}`,
 		);

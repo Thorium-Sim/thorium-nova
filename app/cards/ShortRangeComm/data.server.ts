@@ -282,7 +282,7 @@ export const shortRangeComm = t.router({
 			}),
 		)
 		.output(z.object({ conversationId: z.number() }))
-		.send(({ ctx, input }) => {
+		.send(async ({ ctx, input }) => {
 			let srcomm: Entity;
 			try {
 				srcomm = getShipSystem(ctx.ecs, {
@@ -375,17 +375,16 @@ export const shortRangeComm = t.router({
 				conversationId: conversation.id,
 			});
 
-			// When hailing an NPC, if that NPC is already in a conversation, reject it immediately.
+			// When hailing an NPC, if that NPC is already in a conversation, connect to the conversation
 			if (
 				targetSrComm?.components.isShortRangeComm?.conversationId &&
 				targetSrComm?.components.isShortRangeComm.state === "connected"
 			) {
-				// Swap the target and ship, since in this case, the target is the one doing the rejecting
-				triggerAction("shortRangeComm.reject", {
-					shipId: targetId,
+				await triggerAction("shortRangeComm.connect", {
+					shipId: input.shipId,
 					conversationId: conversation.id,
 				});
-				return { conversationId: -1 };
+				return { conversationId: conversation.id };
 			}
 
 			const hostShip = ctx.ecs.getEntityById(input.shipId || -1);

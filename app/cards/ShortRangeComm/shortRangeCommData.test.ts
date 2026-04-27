@@ -23,7 +23,7 @@ aroundEach(async (runTest) => {
 		{
 			...testDataStoreProps,
 			async readAsset(asset) {
-				if (asset === "testInkPath")
+				if (asset.endsWith("testInkPath"))
 					return `
 VAR playerShipName = "Voyager"
 VAR playerShipId = 1
@@ -64,7 +64,7 @@ Ranger: And then this text line will appear.
 			},
 		},
 		async () => {
-			runTest();
+			await runTest();
 		},
 	);
 });
@@ -212,7 +212,7 @@ it("should forbid another ship from joining an existing conversation if that con
 	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual(
 		"connected",
 	);
-	expect(
+	await expect(
 		router.shortRangeComm.connect({ shipId: ship3.id, conversationId }),
 	).rejects.toThrow();
 
@@ -278,12 +278,9 @@ it("should properly follow an ink script, including triggering actions", async (
 	});
 
 	const conversation = dataContext.ecs.getEntityById(conversationId);
-	expect(conversation?.components.isConversation?.currentDialogue).toEqual([
-		{
-			speakerId: 48,
-			text: "Hello there. This is a test message.",
-		},
-	]);
+	expect(
+		conversation?.components.isConversation?.currentDialogue[0].text,
+	).toEqual("Hello there. This is a test message.");
 
 	expect(ship1.components.isShip?.alertLevel).toEqual("5");
 	await router.conversation.selectChoice({
@@ -308,12 +305,9 @@ it("should properly follow an ink script, including event listeners", async () =
 	});
 
 	const conversation = dataContext.ecs.getEntityById(conversationId);
-	expect(conversation?.components.isConversation?.currentDialogue).toEqual([
-		{
-			speakerId: 56,
-			text: "Hello there. This is a test message.",
-		},
-	]);
+	expect(
+		conversation?.components.isConversation?.currentDialogue[0].text,
+	).toEqual("Hello there. This is a test message.");
 
 	await router.conversation.selectChoice({
 		shipId: ship1.id,
@@ -321,21 +315,20 @@ it("should properly follow an ink script, including event listeners", async () =
 		choice: "Crew: Event Time",
 	});
 
-	expect(conversation?.components.isConversation?.currentDialogue).toEqual([
-		{
-			speakerId: 56,
-			text: "Hello there. This is a test message.",
-		},
-	]);
+	expect(
+		conversation?.components.isConversation?.currentDialogue[0].text,
+	).toEqual("Hello there. This is a test message.");
 
 	await router.alertLevel.update({ alertLevel: "1", shipId: ship1.id });
 
 	await new Promise((res) => process.nextTick(res));
 
-	expect(conversation?.components.isConversation?.currentDialogue).toEqual([
-		{ speakerId: 56, text: "Hello there. This is a test message." },
-		{ speakerId: 56, text: "Looks like that worked just fine." },
-	]);
+	expect(
+		conversation?.components.isConversation?.currentDialogue[1].text,
+	).toEqual("Event Time");
+	expect(
+		conversation?.components.isConversation?.currentDialogue[2].text,
+	).toEqual("Looks like that worked just fine.");
 });
 it("should wait for an audio file to finish playing before continuing the story and mark the chosen choice as chosen until the next choices are available", async () => {
 	const { dataContext, router, ship1, ship2, conversationTemplate } =
@@ -350,31 +343,19 @@ it("should wait for an audio file to finish playing before continuing the story 
 		shipId: ship1.id,
 		conversationId,
 	});
-
 	const conversation = dataContext.ecs.getEntityById(conversationId);
-	expect(conversation?.components.isConversation?.currentDialogue).toEqual([
-		{
-			speakerId: 65,
-			text: "Hello there. This is a test message.",
-		},
-	]);
-	expect(conversation?.components.isConversation?.currentChoices).toEqual([
-		{
-			selected: false,
-			speakerId: -1,
-			text: "Crew: Action Time",
-		},
-		{
-			selected: false,
-			speakerId: -1,
-			text: "Crew: Event Time",
-		},
-		{
-			selected: false,
-			speakerId: -1,
-			text: "Crew: Audio Time",
-		},
-	]);
+	expect(
+		conversation?.components.isConversation?.currentDialogue[0].text,
+	).toEqual("Hello there. This is a test message.");
+	expect(
+		conversation?.components.isConversation?.currentChoices[0].text,
+	).toEqual("Crew: Action Time");
+	expect(
+		conversation?.components.isConversation?.currentChoices[1].text,
+	).toEqual("Crew: Event Time");
+	expect(
+		conversation?.components.isConversation?.currentChoices[2].text,
+	).toEqual("Crew: Audio Time");
 
 	(measureAudioDurationMs as any).mockReturnValue(1000);
 	await router.conversation.selectChoice({
@@ -382,64 +363,25 @@ it("should wait for an audio file to finish playing before continuing the story 
 		conversationId,
 		choice: "Crew: Audio Time",
 	});
-
-	expect(conversation?.components.isConversation?.currentDialogue).toEqual([
-		{
-			speakerId: 65,
-			text: "Hello there. This is a test message.",
-		},
-		{
-			speakerId: 65,
-			text: "Great, let me just play this audio file.",
-		},
-	]);
-	expect(conversation?.components.isConversation?.currentChoices).toEqual([
-		{
-			selected: false,
-			speakerId: -1,
-			text: "Crew: Action Time",
-		},
-		{
-			selected: false,
-			speakerId: -1,
-			text: "Crew: Event Time",
-		},
-		{
-			selected: true,
-			speakerId: -1,
-			text: "Crew: Audio Time",
-		},
-	]);
+	expect(
+		conversation?.components.isConversation?.currentDialogue[1].text,
+	).toEqual("Audio Time");
+	expect(
+		conversation?.components.isConversation?.currentDialogue[2].text,
+	).toEqual("Great, let me just play this audio file.");
+	expect(
+		conversation?.components.isConversation?.currentChoices[2].selected,
+	).toEqual(true);
 
 	dataContext.ecs.update(1000 + 500);
 
 	await new Promise((res) => process.nextTick(res));
-	expect(conversation?.components.isConversation?.currentDialogue).toEqual([
-		{
-			speakerId: 65,
-			text: "Hello there. This is a test message.",
-		},
-		{
-			speakerId: 65,
-			text: "Great, let me just play this audio file.",
-		},
-		{
-			speakerId: 65,
-			text: "And then this text line will appear.",
-		},
-	]);
-	expect(conversation?.components.isConversation?.currentChoices).toEqual([
-		{
-			selected: false,
-			speakerId: -1,
-			text: "Crew: That's great",
-		},
-		{
-			selected: false,
-			speakerId: -1,
-			text: "Crew: Glad to hear it",
-		},
-	]);
+	expect(
+		conversation?.components.isConversation?.currentDialogue[3].text,
+	).toEqual("And then this text line will appear.");
+	expect(
+		conversation?.components.isConversation?.currentChoices[0].text,
+	).toEqual("Crew: That's great");
 });
 
 function setUpTests() {

@@ -87,7 +87,6 @@ export async function liveQueryPlugin<TRouter extends AnyRouter, TContext>({
 					context: extraContext,
 				})) || {};
 			const { path, ...params } = await processBody(c.req);
-
 			try {
 				const response = await callProcedure({
 					procedures: router._def.procedures,

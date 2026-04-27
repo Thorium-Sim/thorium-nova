@@ -46,7 +46,7 @@ export async function runInkStory(conversation: Entity) {
 								conversation.ecs,
 							);
 							// Special handling for numbers
-							if (Number(val).toString() === val) {
+							if (Number(val).toString() === val && key !== "alertLevel") {
 								val = Number(val);
 							} else if (val === "null") {
 								val = null;

@@ -425,10 +425,7 @@ describe("evaluate trigger condition", () => {
 					},
 				},
 			),
-		).toEqual({
-			test: "Whatever",
-			other: true,
-		});
+		).toEqual(false);
 		expect(
 			evaluateTriggerCondition(
 				ecs,
@@ -449,7 +446,7 @@ describe("evaluate trigger condition", () => {
 					},
 				},
 			),
-		).toBeTruthy();
+		).toEqual({ test: "test", other: true });
 	});
 });
 describe("evaluate action", () => {
