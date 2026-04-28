@@ -1,17 +1,8 @@
-import prand, { type RandomGenerator } from "pure-rand";
+import { uniformInt } from "pure-rand/distribution/uniformInt";
+import { mersenne } from "pure-rand/generator/mersenne";
+import { type JumpableRandomGenerator } from "pure-rand/types/JumpableRandomGenerator";
+import { skipN } from "pure-rand/utils/skipN";
 const maxNum = 0xffffffff;
-
-export { prand };
-
-export function skipN(rng: RNG, num: number): RNG {
-	let cur = rng.rng;
-	for (let idx = 0; idx !== num; ++idx) {
-		const nextOut = cur.next();
-		cur = nextOut[1];
-	}
-	rng.setRNG(cur);
-	return rng;
-}
 
 export interface RNG {
 	/**
@@ -27,8 +18,8 @@ export interface RNG {
 	nextBoolean: () => boolean;
 	nextChar: (input?: string) => string;
 	nextString: (length?: number, input?: string) => string;
-	setRNG: (rng: RandomGenerator) => void;
-	rng: RandomGenerator;
+	setRNG: (rng: JumpableRandomGenerator) => void;
+	rng: JumpableRandomGenerator;
 	iterationCount: number;
 	seed: string | number;
 }
@@ -63,18 +54,17 @@ function hashCode(str: string): number {
  */
 export function createRNG(seed: number | string, skip = 0): RNG {
 	const newSeed = typeof seed === "string" ? hashCode(seed) : seed;
-	let rng = prand.mersenne(newSeed);
-	rng = prand.skipN(rng, skip);
+	let rng = mersenne(newSeed);
+	skipN(rng, skip);
 	return {
 		rng,
 		iterationCount: skip,
 		seed,
-		setRNG: function setRNG(newRng: RandomGenerator) {
+		setRNG: function setRNG(newRng: JumpableRandomGenerator) {
 			rng = newRng;
 		},
 		next: function next() {
-			const [value, next] = rng.next();
-			rng = next;
+			const value = rng.next();
 			this.iterationCount++;
 			return value / maxNum;
 		},
@@ -82,8 +72,7 @@ export function createRNG(seed: number | string, skip = 0): RNG {
 			return this.next() + 0.5;
 		},
 		nextInt: function nextInt(min, max) {
-			const [value, next] = prand.uniformIntDistribution(min, max)(rng);
-			rng = next;
+			const value = uniformInt(rng, min, max);
 			this.iterationCount++;
 			return value;
 		},

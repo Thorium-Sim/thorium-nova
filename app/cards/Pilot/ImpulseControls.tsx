@@ -280,7 +280,6 @@ export const ImpulseControls = ({
 									style={{
 										transform: y?.to((y) => `translate3d(0px,${y}px,0)`),
 									}}
-									// @ts-expect-error
 									className="z-10 h-10 w-10 cursor-pointer touch-none rounded-full border-2 border-black/50 bg-gray-500 shadow-md"
 								/>
 							</div>

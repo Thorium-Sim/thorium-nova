@@ -1,6 +1,6 @@
-import { Buffer } from "node:buffer";
-/* eslint-disable @typescript-eslint/no-this-alias */
 // @ts-nocheck
+/* eslint-disable @typescript-eslint/no-this-alias */
+import { Buffer } from "node:buffer";
 import { dirname, sep } from "node:path";
 
 import {

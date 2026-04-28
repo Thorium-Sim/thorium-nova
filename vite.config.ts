@@ -10,7 +10,6 @@ import remarkFrontmatter from "remark-frontmatter";
 import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import { defineConfig } from "vite";
 import { iconsSpritesheet } from "vite-plugin-icons-spritesheet";
-import tsconfigPaths from "vite-tsconfig-paths";
 
 import { componentDocs } from "./scripts/componentDocs";
 import remarkMdxImages from "./scripts/remark-mdx-images";
@@ -22,6 +21,9 @@ setDefaultResultOrder("ipv4first");
 const port = Number(process.env.PORT) || 3000;
 
 export default defineConfig({
+	resolve: {
+		tsconfigPaths: true,
+	},
 	plugins: [
 		tailwindcss(),
 		// Inspect(),
@@ -44,14 +46,11 @@ export default defineConfig({
 			outputDir: "app/components/ui/icons",
 			// Output path for the generated type file, defaults to types.ts in outputDir
 			typesOutputFile: "app/components/ui/icons/name.d.ts",
-			// What formatter to use to format the generated files, prettier or biome, defaults to no formatter
-			// formatter: "biome",
 			// The path to the formatter config file, defaults to no path
 			// pathToFormatterConfig: "./biome.json",
 			iconNameTransformer: (name) => name,
 		}),
 		reactRouter(),
-		tsconfigPaths(),
 		componentDocs(),
 	],
 	build: {

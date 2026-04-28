@@ -55,7 +55,6 @@ export const Joystick = ({
 					style={{
 						transform: xy?.to((x, y) => `translate3d(${x}px,${y}px,0)`),
 					}}
-					// @ts-expect-error
 					className="z-10 aspect-square w-1/12 cursor-pointer touch-none rounded-full border-2 border-black/50 bg-gray-500 shadow-md"
 				/>
 				{children}
@@ -112,7 +111,6 @@ export const LinearJoystick = ({
 				data-testid={id}
 				{...eventHandlers}
 				style={{ transform: xy?.to((x, y) => `translate3d(${x}px,${y}px,0)`) }}
-				// @ts-expect-error
 				className="z-10 h-10 w-10 cursor-pointer touch-none rounded-full border-2 border-black/50 bg-gray-500 shadow-md"
 			/>
 			{children}

@@ -50,7 +50,7 @@ export default function StarMap() {
 		children: (
 			<>
 				{!systemId && <InterstellarMenuButtons sceneRef={sceneRef} />}
-				{systemId && <SolarSystemMenuButtons sceneRef={sceneRef} />}
+				{systemId && <SolarSystemMenuButtons />}
 			</>
 		),
 	});

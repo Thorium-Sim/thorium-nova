@@ -1,6 +1,7 @@
+import { skipN } from "pure-rand/utils/skipN";
 import { describe, expect, it } from "vitest";
 
-import { createRNG, skipN } from ".";
+import { createRNG } from ".";
 
 describe("rng", () => {
 	it("should generate a series of random numbers", () => {
@@ -36,7 +37,7 @@ describe("rng", () => {
 		}
 		expect(num1).toEqual(num2);
 		let rng3 = createRNG(1);
-		rng3 = skipN(rng3, 10);
+		skipN(rng3.rng, 10);
 		num2 = rng3.next();
 		expect(num1).toEqual(num2);
 	});
