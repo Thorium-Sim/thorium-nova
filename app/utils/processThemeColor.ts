@@ -34,18 +34,12 @@ function hslToHex(h: number, s: number, l: number): string {
  * Reads the border-color of a themed button class directly from the loaded
  * processed.css stylesheet rules. No DOM elements are created.
  */
-export function getThemeButtonBorderColor(
-	btnClass: string,
-	fallback: string,
-): string {
+export function getThemeButtonBorderColor(btnClass: string, fallback: string): string {
 	const selector = `.theme-container .btn.${btnClass}`;
 	for (const sheet of document.styleSheets) {
 		try {
 			for (const rule of sheet.cssRules) {
-				if (
-					rule instanceof CSSStyleRule &&
-					rule.selectorText === selector
-				) {
+				if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
 					const border = rule.style.getPropertyValue("border");
 					const match = border.match(/#[0-9a-fA-F]{6}/);
 					if (match) return match[0];

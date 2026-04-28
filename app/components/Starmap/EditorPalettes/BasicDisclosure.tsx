@@ -1,14 +1,15 @@
-import * as React from "react";
-import { useGetStarmapStore } from "../starmapStore";
+import { q } from "@thorium/context/AppContext";
 import Button from "@thorium/ui/Button";
-import { useNavigate } from "react-router";
+import { Icon } from "@thorium/ui/Icon";
 import Input from "@thorium/ui/Input";
 import randomWords from "@thorium/utils/random-words";
 import debounce from "lodash.debounce";
-import { PaletteDisclosure } from "./PaletteDisclosure";
+import * as React from "react";
+import { useNavigate } from "react-router";
+
+import { useGetStarmapStore } from "../starmapStore";
 import { useSystemIds } from "../useSystemIds";
-import { q } from "@thorium/context/AppContext";
-import { Icon } from "@thorium/ui/Icon";
+import { PaletteDisclosure } from "./PaletteDisclosure";
 
 export function BasicDisclosure({
 	object,
@@ -32,8 +33,7 @@ export function BasicDisclosure({
 						name,
 					};
 					if (type === "system") {
-						const result =
-							await q.plugin.starmap.solarSystem.update.netSend(body);
+						const result = await q.plugin.starmap.solarSystem.update.netSend(body);
 						navigate(result.solarSystemId);
 						useStarmapStore.setState({
 							selectedObjectIds: [result.solarSystemId],

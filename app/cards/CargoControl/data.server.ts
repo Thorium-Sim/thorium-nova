@@ -1,26 +1,22 @@
-import { t } from "@thorium/.server/init/t";
-import { pubsub } from "@thorium/.server/init/pubsub";
-import { matchSorter } from "match-sorter";
-import type { ECS, Entity } from "@thorium/utils/ecs";
-import z from "zod";
-import type { shipMap } from "@thorium/ecs-components/shipMap";
-import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
-import {
-	calculateShipMapPath,
-	createShipMapGraph,
-} from "@thorium/utils/.server/ship/shipMapPathfinder";
+import type { DataContext } from "@thorium/.server/DataContext";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
+import { findClosestNode } from "@thorium/.server/systems/PassengerMovementSystem";
+import type { shipMap } from "@thorium/ecs-components/shipMap";
 import {
 	getInventoryTemplates,
 	getPluginInventoryTemplates,
 } from "@thorium/utils/.server/getInventoryTemplates";
-import { findClosestNode } from "@thorium/.server/systems/PassengerMovementSystem";
-import type { DataContext } from "@thorium/.server/DataContext";
 import {
-	nodeFlags,
-	nodeFlagsSchema,
-	type NodeFlag,
-} from "@thorium/utils/flags/DeckNode";
+	calculateShipMapPath,
+	createShipMapGraph,
+} from "@thorium/utils/.server/ship/shipMapPathfinder";
+import type { ECS, Entity } from "@thorium/utils/ecs";
+import { nodeFlags, nodeFlagsSchema, type NodeFlag } from "@thorium/utils/flags/DeckNode";
+import { randomFromList } from "@thorium/utils/operations/randomFromList";
+import { matchSorter } from "match-sorter";
+import z from "zod";
 
 type ShipMapDeckNode = z.infer<typeof shipMap>["deckNodes"][number];
 
@@ -32,10 +28,7 @@ const transferId = z.object({
 
 const cargoRoomsCache = new Map<Entity, ShipMapDeckNode[]>();
 
-const shipMapGraphCache = new Map<
-	number,
-	ReturnType<typeof createShipMapGraph>
->();
+const shipMapGraphCache = new Map<number, ReturnType<typeof createShipMapGraph>>();
 
 function getGraph(entity: Entity) {
 	if (!shipMapGraphCache.has(entity.id)) {
@@ -58,7 +51,7 @@ export const cargoControl = t.router({
 			for (const system of ctx.ecs.systems) {
 				if (system.constructor.name === "FilterInventorySystem") {
 					return Object.fromEntries(
-						Array.from(system?.entities.entries()).map(([id, entity]) => [
+						Array.from(system?.entities.entries()).map(([_, entity]) => [
 							entity.components.identity?.name,
 							{
 								...entity.components.identity,
@@ -77,10 +70,7 @@ export const cargoControl = t.router({
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
-		.autoPublish(
-			["shipMap"],
-			(entity) => entity.components.shipMap && { shipId: entity.id },
-		)
+		.autoPublish(["shipMap"], (entity) => entity.components.shipMap && { shipId: entity.id })
 		.request(({ ctx, input }) => {
 			const ship = ctx.ecs.getEntityById(input.shipId);
 			if (!ship) throw new Error("No ship selected");
@@ -105,9 +95,7 @@ export const cargoControl = t.router({
 		)
 		.request(({ ctx, input }) => {
 			const inventoryTemplates = getInventoryTemplates(ctx.ecs);
-			const matchEntities = [
-				...(ctx.ecs.componentCache.get("cargoContainer") || []),
-			];
+			const matchEntities = [...(ctx.ecs.componentCache.get("cargoContainer") || [])];
 			return (
 				matchEntities
 					.filter(
@@ -119,13 +107,10 @@ export const cargoControl = t.router({
 					)
 					.map((entity) => {
 						const entityState: "idle" | "enRoute" =
-							entity.components.passengerMovement?.nodePath.length === 0
-								? "idle"
-								: "enRoute";
+							entity.components.passengerMovement?.nodePath.length === 0 ? "idle" : "enRoute";
 						return {
 							id: entity.id,
-							name:
-								entity.components.identity?.name || `Container ${entity.id}`,
+							name: entity.components.identity?.name || `Container ${entity.id}`,
 							position: entity.components.position,
 							contents: entity.components.cargoContainer?.contents || {},
 							used: calculateCargoUsed(
@@ -133,8 +118,7 @@ export const cargoControl = t.router({
 								inventoryTemplates,
 							),
 							volume: entity.components.cargoContainer?.volume || 0,
-							destinationNode:
-								entity.components.passengerMovement?.destinationNode || null,
+							destinationNode: entity.components.passengerMovement?.destinationNode || null,
 							entityState,
 						};
 					}) || []
@@ -200,16 +184,14 @@ export const cargoControl = t.router({
 
 			return matchSorter(output, input.query, { keys: ["name"] }).slice(0, 10);
 		}),
-	stream: t.procedure
-		.input(z.object({ shipId: z.number() }))
-		.dataStream(({ entity, input, ctx }) => {
-			if (!entity) return false;
-			return Boolean(
-				entity.components.cargoContainer &&
-					entity.components.position?.parentId === input.shipId &&
-					entity.components.passengerMovement,
-			);
-		}),
+	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ entity, input }) => {
+		if (!entity) return false;
+		return Boolean(
+			entity.components.cargoContainer &&
+			entity.components.position?.parentId === input.shipId &&
+			entity.components.passengerMovement,
+		);
+	}),
 	containerSummon: t.procedure
 		.input(
 			z.object({
@@ -223,18 +205,14 @@ export const cargoControl = t.router({
 			if (!ship) throw new Error("No ship selected");
 			if (!ship.components.shipMap) throw new Error("Invalid ship map.");
 			const graph = getGraph(ship);
-			const room = ship.components.shipMap?.deckNodes.find(
-				(d) => d.id === input.roomId,
-			);
+			const room = ship.components.shipMap?.deckNodes.find((d) => d.id === input.roomId);
 			if (!room) throw new Error("No room found");
 
 			let container: Entity | null | undefined;
 			if (typeof input.containerId === "number") {
 				container = ctx.flight?.ecs.getEntityById(input.containerId);
 			} else {
-				const matchEntities = [
-					...(ctx.ecs.componentCache.get("cargoContainer") || []),
-				];
+				const matchEntities = [...(ctx.ecs.componentCache.get("cargoContainer") || [])];
 				// Find the closest container.
 				container = matchEntities.reduce((acc: Entity | null, entity) => {
 					if (
@@ -250,10 +228,8 @@ export const cargoControl = t.router({
 
 					// Prioritize entities that are close to the target deck, but not busy.
 					if (
-						Math.abs(
-							room.deckIndex -
-								(acc.components.position?.z ?? Number.POSITIVE_INFINITY),
-						) < Math.abs(room.deckIndex - entity.components.position.z)
+						Math.abs(room.deckIndex - (acc.components.position?.z ?? Number.POSITIVE_INFINITY)) <
+						Math.abs(room.deckIndex - entity.components.position.z)
 					) {
 						// If the acc entity is not busy, use it.
 						return acc;
@@ -275,8 +251,7 @@ export const cargoControl = t.router({
 				}, null);
 			}
 
-			if (!container?.components.position)
-				throw new Error("No container available.");
+			if (!container?.components.position) throw new Error("No container available.");
 
 			const closestNode = findClosestNode(
 				ship.components.shipMap.deckNodes,
@@ -284,11 +259,7 @@ export const cargoControl = t.router({
 			);
 			if (!closestNode) throw new Error("No container available.");
 
-			const nodePath = calculateShipMapPath(
-				graph,
-				closestNode.id,
-				input.roomId,
-			);
+			const nodePath = calculateShipMapPath(graph, closestNode.id, input.roomId);
 
 			if (nodePath) {
 				container.updateComponent("passengerMovement", {
@@ -326,10 +297,7 @@ export const cargoControl = t.router({
 			let destinationVolume = toContainer.volume || 0;
 			// First loop to see if there are any errors
 			input.transfers.forEach(({ item, count }) => {
-				if (
-					!fromContainer.contents[item] ||
-					fromContainer.contents[item].count < count
-				) {
+				if (!fromContainer.contents[item] || fromContainer.contents[item].count < count) {
 					itemCounts[item] = fromContainer.contents[item].count;
 				}
 				const destinationUsedSpace = calculateCargoUsed(
@@ -343,20 +311,11 @@ export const cargoControl = t.router({
 
 				if (destinationUsedSpace + movedVolume > destinationVolume) {
 					const volumeLeft = destinationVolume - destinationUsedSpace;
-					const singleVolume = calculateCargoUsed(
-						{ [item]: { count: 1 } },
-						inventoryTemplates,
-					);
-					const cargoItemsThatFitInVolumeLeft = Math.floor(
-						volumeLeft / singleVolume,
-					);
+					const singleVolume = calculateCargoUsed({ [item]: { count: 1 } }, inventoryTemplates);
+					const cargoItemsThatFitInVolumeLeft = Math.floor(volumeLeft / singleVolume);
 
-					itemCounts[item] = Math.min(
-						itemCounts[item] || count,
-						cargoItemsThatFitInVolumeLeft,
-					);
-					if (itemCounts[item] <= 0)
-						throw new Error("Not enough space in destination.");
+					itemCounts[item] = Math.min(itemCounts[item] || count, cargoItemsThatFitInVolumeLeft);
+					if (itemCounts[item] <= 0) throw new Error("Not enough space in destination.");
 				}
 				const actualMovedVolume = calculateCargoUsed(
 					{ [item]: { count: itemCounts[item] || count } },
@@ -380,8 +339,7 @@ export const cargoControl = t.router({
 				const C2 = itemCounts[item] || count;
 
 				toContainer.contents[item].count += C2;
-				toContainer.contents[item].temperature =
-					(T1 * C1 + T2 * C2) / (C1 + C2);
+				toContainer.contents[item].temperature = (T1 * C1 + T2 * C2) / (C1 + C2);
 			});
 
 			pubsub.publish.cargoControl.containers({
@@ -441,11 +399,9 @@ export const cargoControl = t.router({
 			const room = getRoomFromFlagsAndSystems(ship, input.flags, input.systems);
 
 			const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
-			const inventoryItem =
-				input.item || randomFromList(Object.keys(inventoryTemplates));
+			const inventoryItem = input.item || randomFromList(Object.keys(inventoryTemplates));
 
-			if (!inventoryTemplates[inventoryItem])
-				throw new Error("Inventory item not found.");
+			if (!inventoryTemplates[inventoryItem]) throw new Error("Inventory item not found.");
 
 			if (!room.contents[inventoryItem])
 				room.contents[inventoryItem] = { count: 0, temperature: 295.37 };
@@ -499,11 +455,9 @@ export const cargoControl = t.router({
 			const room = getRoomFromFlagsAndSystems(ship, input.flags, input.systems);
 
 			const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
-			const inventoryItem =
-				input.item || randomFromList(Object.keys(inventoryTemplates));
+			const inventoryItem = input.item || randomFromList(Object.keys(inventoryTemplates));
 
-			if (!inventoryTemplates[inventoryItem])
-				throw new Error("Inventory item not found.");
+			if (!inventoryTemplates[inventoryItem]) throw new Error("Inventory item not found.");
 
 			if (!room.contents[inventoryItem])
 				room.contents[inventoryItem] = { count: 0, temperature: 295.37 };
@@ -555,8 +509,7 @@ export const cargoControl = t.router({
 
 			const room = getRoomFromFlagsAndSystems(ship, input.flags, input.systems);
 
-			if (!room.contents[input.item])
-				throw new Error("Item not found in room.");
+			if (!room.contents[input.item]) throw new Error("Item not found in room.");
 
 			room.contents[input.item].count -= input.count;
 			if (room.contents[input.item].count <= 0) {
@@ -636,9 +589,7 @@ export function getCargoContents(
 		return { volume: container.volume, contents: container.contents };
 	}
 	if (type === "room") {
-		const room = ecs
-			.getEntityById(shipId)
-			?.components.shipMap?.deckNodes.find((d) => d.id === id);
+		const room = ecs.getEntityById(shipId)?.components.shipMap?.deckNodes.find((d) => d.id === id);
 		if (!room) return null;
 		return { volume: room.volume, contents: room.contents };
 	}
@@ -696,11 +647,7 @@ export function getRoomBySystem(ship: Entity | null, system: string) {
 	return rooms.filter((room) => room.systems?.includes(system));
 }
 
-function getRoomFromFlagsAndSystems(
-	ship: Entity,
-	flags?: NodeFlag[],
-	systems?: string[],
-) {
+function getRoomFromFlagsAndSystems(ship: Entity, flags?: NodeFlag[], systems?: string[]) {
 	if (!ship.components.shipMap && ship.components.cargoContainer) {
 		return ship.components.cargoContainer;
 	}

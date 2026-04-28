@@ -13,21 +13,11 @@ export function arrival(position: Vector3, target: Vector3, maxSpeed: number) {
 	const speed = distance / maxSpeed;
 	return seek(position, target).multiplyScalar(speed);
 }
-export function pursue(
-	position: Vector3,
-	target: Vector3,
-	targetVelocity: Vector3,
-	t: number,
-) {
+export function pursue(position: Vector3, target: Vector3, targetVelocity: Vector3, t: number) {
 	const futurePosition = estimateFuturePosition(target, targetVelocity, t);
 	return seek(position, futurePosition);
 }
-export function evade(
-	position: Vector3,
-	target: Vector3,
-	targetVelocity: Vector3,
-	t: number,
-) {
+export function evade(position: Vector3, target: Vector3, targetVelocity: Vector3, t: number) {
 	const futurePosition = estimateFuturePosition(target, targetVelocity, t);
 	return flee(position, futurePosition);
 }
@@ -40,10 +30,7 @@ export function wander(
 	wanderRadius: number,
 	{ lat, lon }: { lat: number; lon: number },
 ) {
-	const wanderPoint = velocity
-		.normalize()
-		.multiplyScalar(wanderDistance)
-		.add(position);
+	const wanderPoint = velocity.normalize().multiplyScalar(wanderDistance).add(position);
 
 	const displaceRange = 0.2;
 	lat += Math.random() * displaceRange - displaceRange / 2;
@@ -57,10 +44,6 @@ export function wander(
 	return { desiredVelocity: seek(position, wanderPoint), offset: { lat, lon } };
 }
 
-function estimateFuturePosition(
-	position: Vector3,
-	velocity: Vector3,
-	time: number,
-) {
+function estimateFuturePosition(position: Vector3, velocity: Vector3, time: number) {
 	return position.clone().add(velocity.clone().multiplyScalar(time));
 }

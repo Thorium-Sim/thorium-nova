@@ -1,9 +1,6 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
-import {
-	cancelLoopingSound,
-	playShipSound,
-} from "@thorium/utils/.server/playRangedSound";
+import { cancelLoopingSound, playShipSound } from "@thorium/utils/.server/playRangedSound";
 import { checkSystemStability } from "@thorium/utils/.server/ship/checkSystemStability";
 import {
 	clearAutopilotState,
@@ -37,18 +34,15 @@ export const pilot = t.router({
 					systemType: "impulseEngines",
 					shipId,
 				});
-				const targetSpeed =
-					impulseEngines.components.isImpulseEngines?.targetSpeed || 0;
-				const cruisingSpeed =
-					impulseEngines.components.isImpulseEngines?.cruisingSpeed || 1;
+				const targetSpeed = impulseEngines.components.isImpulseEngines?.targetSpeed || 0;
+				const cruisingSpeed = impulseEngines.components.isImpulseEngines?.cruisingSpeed || 1;
 
 				return {
 					id: impulseEngines.id,
 					name: impulseEngines.components.identity?.name || "Impulse",
 					targetSpeed,
 					cruisingSpeed,
-					emergencySpeed:
-						impulseEngines.components.isImpulseEngines?.emergencySpeed || 1,
+					emergencySpeed: impulseEngines.components.isImpulseEngines?.emergencySpeed || 1,
 					speeds: impulseEngines.components.isImpulseEngines?.speeds || [],
 				};
 			}),
@@ -57,7 +51,6 @@ export const pilot = t.router({
 			.autoPublish(["isImpulseEngines"], () => null)
 
 			.request(({ ctx, input: { shipId } }) => {
-				ctx.clientId;
 				const engine = getShipSystem(ctx.ecs, {
 					systemType: "impulseEngines",
 					shipId,
@@ -103,8 +96,7 @@ export const pilot = t.router({
 							shipId,
 						});
 
-				if (!system.components.isImpulseEngines)
-					throw new Error("System is not a impulse engine");
+				if (!system.components.isImpulseEngines) throw new Error("System is not a impulse engine");
 
 				checkSystemStability(system, "Failed to set impulse speed");
 
@@ -148,14 +140,10 @@ export const pilot = t.router({
 				return {
 					id: warpEngines.id,
 					maxVelocity: warpEngines.components.isWarpEngines?.maxVelocity || 0,
-					currentWarpFactor:
-						warpEngines.components.isWarpEngines?.currentWarpFactor || 0,
+					currentWarpFactor: warpEngines.components.isWarpEngines?.currentWarpFactor || 0,
 					interstellarCruisingSpeed:
-						warpEngines.components.isWarpEngines?.interstellarCruisingSpeed ||
-						599600000000,
-					solarCruisingSpeed:
-						warpEngines.components.isWarpEngines?.solarCruisingSpeed ||
-						29980000,
+						warpEngines.components.isWarpEngines?.interstellarCruisingSpeed || 599600000000,
+					solarCruisingSpeed: warpEngines.components.isWarpEngines?.solarCruisingSpeed || 29980000,
 					speeds: warpEngines.components.isWarpEngines?.speeds || [],
 				};
 			}),
@@ -184,8 +172,7 @@ export const pilot = t.router({
 							systemType: "warpEngines",
 							shipId,
 						});
-				if (!system.components.isWarpEngines)
-					throw new Error("System is not a warp engine");
+				if (!system.components.isWarpEngines) throw new Error("System is not a warp engine");
 
 				checkSystemStability(system, "Failed to set warp engine factor");
 
@@ -224,16 +211,13 @@ export const pilot = t.router({
 				if (typeof waypointId === "number") {
 					waypoint = ctx.flight?.ecs.getEntityById(waypointId);
 					destinationName =
-						waypoint?.components.identity?.name
-							.replace(" Waypoint", "")
-							.trim() || "";
+						waypoint?.components.identity?.name.replace(" Waypoint", "").trim() || "";
 				}
 				const waypointParentId = waypoint?.components.position?.parentId;
 
 				const waypointSystemPosition =
 					typeof waypointParentId === "number"
-						? ctx.flight?.ecs.getEntityById(waypointParentId)?.components
-								.position || null
+						? ctx.flight?.ecs.getEntityById(waypointParentId)?.components.position || null
 						: null;
 
 				return {
@@ -376,8 +360,7 @@ export const pilot = t.router({
 							systemType: "thrusters",
 							shipId,
 						});
-				if (!system.components.isThrusters)
-					throw new Error("System is not thrusters");
+				if (!system.components.isThrusters) throw new Error("System is not thrusters");
 
 				checkSystemStability(system, "Failed to set thruster direction");
 
@@ -401,11 +384,7 @@ export const pilot = t.router({
 					cancelLoopingSound(system, "thrust");
 				} else if (system.components.soundEffects?.soundBank.thrust) {
 					// Only play one instance of the sound
-					if (
-						!system.components.soundEffects.looping.some(
-							(s) => s.key === "thrust",
-						)
-					) {
+					if (!system.components.soundEffects.looping.some((s) => s.key === "thrust")) {
 						const ship = ctx.ecs.getEntityById(shipId);
 						playShipSound(system, ship!, "thrust");
 					}
@@ -446,8 +425,7 @@ export const pilot = t.router({
 							systemType: "thrusters",
 							shipId,
 						});
-				if (!system.components.isThrusters)
-					throw new Error("System is not thrusters");
+				if (!system.components.isThrusters) throw new Error("System is not thrusters");
 
 				checkSystemStability(system, "Failed to rotate");
 
@@ -469,11 +447,7 @@ export const pilot = t.router({
 					cancelLoopingSound(system, "thrust");
 				} else if (system.components.soundEffects?.soundBank.thrust) {
 					// Only play one instance of the sound
-					if (
-						!system.components.soundEffects.looping.some(
-							(s) => s.key === "thrust",
-						)
-					) {
+					if (!system.components.soundEffects.looping.some((s) => s.key === "thrust")) {
 						const ship = ctx.ecs.getEntityById(shipId);
 						playShipSound(system, ship!, "thrust");
 					}
@@ -492,15 +466,13 @@ export const pilot = t.router({
 				return false;
 			}
 			if (
-				(entity.components.isImpulseEngines ||
-					entity.components.isWarpEngines) &&
+				(entity.components.isImpulseEngines || entity.components.isWarpEngines) &&
 				ship?.components.shipSystems?.shipSystems.has(entity.id)
 			) {
 				return true;
 			}
 			return Boolean(
-				entity.components.position &&
-					entity.components.position.parentId === systemId,
+				entity.components.position && entity.components.position.parentId === systemId,
 			);
 		}),
 });

@@ -1,8 +1,10 @@
+import { cn } from "@thorium/utils/cn";
 import type { SVGProps } from "react";
+
 // Configure this path in your tsconfig.json
 import type { IconName } from "@/icon-name";
+
 import href from "./icons/sprite.svg";
-import { cn } from "@thorium/utils/cn";
 
 export { href };
 
@@ -48,9 +50,7 @@ export function Icon({
 }) {
 	if (children) {
 		return (
-			<span
-				className={`inline-flex items-center ${childrenSizeClassName[size]}`}
-			>
+			<span className={`inline-flex items-center ${childrenSizeClassName[size]}`}>
 				<Icon name={name} size={size} className={className} {...props} />
 				{children}
 			</span>
@@ -59,12 +59,7 @@ export function Icon({
 	return (
 		<svg
 			{...props}
-			className={cn(
-				sizeClassName[size],
-				"inline self-center",
-				`icon-${name}`,
-				className,
-			)}
+			className={cn(sizeClassName[size], "inline self-center", `icon-${name}`, className)}
 		>
 			<use href={`${href}#${name}`} />
 		</svg>

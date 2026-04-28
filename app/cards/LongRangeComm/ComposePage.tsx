@@ -1,9 +1,7 @@
 import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
-import SearchableInput, {
-	DefaultResultLabel,
-} from "@thorium/ui/SearchableInput";
+import SearchableInput, { DefaultResultLabel } from "@thorium/ui/SearchableInput";
 import { useState } from "react";
 import { Label, TextArea } from "react-aria-components";
 
@@ -14,15 +12,15 @@ export function ComposePage() {
 	const [contactId, setContactId] = useState(-1);
 	const [message, setMessage] = useState("");
 	return (
-		<div className="w-full max-w-xl mx-auto flex flex-col">
-			<div className="w-full flex items-center gap-2">
+		<div className="mx-auto flex w-full max-w-xl flex-col">
+			<div className="flex w-full items-center gap-2">
 				<Label className="text-xl">To:</Label>
 				<SearchableInput
 					className="w-full"
 					inputClassName="input-lg"
 					queryKey="address-book"
 					placeholder="Search Address Book"
-					getOptions={async ({ queryKey, signal }) => {
+					getOptions={async () => {
 						return addressBook;
 					}}
 					ResultLabel={({ active, result, selected }) => (
@@ -39,15 +37,15 @@ export function ComposePage() {
 				/>
 			</div>
 
-			<Label className="text-xl mt-4">Message:</Label>
+			<Label className="mt-4 text-xl">Message:</Label>
 			<TextArea
-				className="textarea resize-none flex-1 w-full"
+				className="textarea w-full flex-1 resize-none"
 				value={message}
 				onChange={(e) => setMessage(e.currentTarget.value)}
 			/>
-			<div className="flex gap-2 mt-4">
+			<div className="mt-4 flex gap-2">
 				<Button
-					className="flex-1 btn-warning"
+					className="btn-warning flex-1"
 					onClick={() => {
 						setContactId(-1);
 						setMessage("");
@@ -58,7 +56,7 @@ export function ComposePage() {
 				{/* TODO February 18, 2026 - Make this work once we have the concept of files */}
 				{/* <Button className="flex-1 btn-info">Attach...</Button> */}
 				<Button
-					className="flex-1 btn-success"
+					className="btn-success flex-1"
 					onClick={() => {
 						q.longRangeComm.composeMessage.netSend({
 							senderId: shipId,

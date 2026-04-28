@@ -3,9 +3,7 @@ import { type Entity, System } from "@thorium/utils/ecs";
 import type { Kelvin } from "@thorium/utils/unitTypes";
 
 type DeckNodeMap = {
-	[key: number]: NonNullable<
-		Entity["components"]["shipMap"]
-	>["deckNodes"][number] & {
+	[key: number]: NonNullable<Entity["components"]["shipMap"]>["deckNodes"][number] & {
 		deckIndex: number;
 		contents: {
 			[inventoryTemplateName: string]: { count: number; temperature: Kelvin };
@@ -18,9 +16,7 @@ const deckNodeCache = new Map<number, DeckNodeMap>();
 export class PassengerMovementSystem extends System {
 	static flightMode = ["nova"];
 	test(entity: Entity) {
-		return !!(
-			entity.components.passengerMovement && entity.components.position
-		);
+		return !!(entity.components.passengerMovement && entity.components.position);
 	}
 	frequency = 5;
 	update(entity: Entity, elapsed: number) {
@@ -50,9 +46,7 @@ export class PassengerMovementSystem extends System {
 		const distanceToNext = Math.hypot(x - nextNode?.x, y - nextNode?.y); // Increment to the next node
 		if (distanceToNext <= 0.1 && z === nextNode.deckIndex) {
 			passengerMovement.nextNodeIndex++;
-			if (
-				passengerMovement.nextNodeIndex >= passengerMovement.nodePath.length
-			) {
+			if (passengerMovement.nextNodeIndex >= passengerMovement.nodePath.length) {
 				// We've reached the end of the path, so we're done.
 				entity.updateComponent("passengerMovement", {
 					nodePath: [],
@@ -66,10 +60,7 @@ export class PassengerMovementSystem extends System {
 					z: nextNode.deckIndex,
 				});
 
-				if (
-					entity.components.cargoContainer &&
-					entity.components.position?.parentId
-				) {
+				if (entity.components.cargoContainer && entity.components.position?.parentId) {
 					pubsub.publish.cargoControl.containers({
 						shipId: entity.components.position.parentId,
 					});
@@ -79,14 +70,8 @@ export class PassengerMovementSystem extends System {
 		}
 		// Move towards the next node
 		const direction = Math.atan2(nextNode?.y - y, nextNode?.x - x);
-		const velocity = Math.min(
-			passengerMovement.movementMaxVelocity.x,
-			distanceToNext,
-		);
-		const zVelocity = Math.min(
-			passengerMovement.movementMaxVelocity.z,
-			nextNode.deckIndex - z,
-		);
+		const velocity = Math.min(passengerMovement.movementMaxVelocity.x, distanceToNext);
+		const zVelocity = Math.min(passengerMovement.movementMaxVelocity.z, nextNode.deckIndex - z);
 		const newX = x + velocity * Math.cos(direction) * elapsedRatio;
 		const newY = y + velocity * Math.sin(direction) * elapsedRatio;
 		let newZ = z + zVelocity * elapsedRatio;

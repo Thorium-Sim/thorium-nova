@@ -1,12 +1,9 @@
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import { q } from "@thorium/context/AppContext";
+import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { ZoomSlider } from "@thorium/ui/Slider";
-import { useEffect, useRef } from "react";
-import { SOLAR_SYSTEM_MAX_DISTANCE } from "@thorium/components/Starmap/SolarSystemMap";
-import { INTERSTELLAR_MAX_DISTANCE } from "@thorium/components/Starmap/InterstellarMap";
-import { lightYearToLightMinute } from "@thorium/utils/unitTypes";
-import { useStation } from "@thorium/routes/station/useStation";
+import { useEffect } from "react";
 
 export function MapControls() {
 	const { shipId } = useStation();
@@ -22,18 +19,16 @@ export function MapControls() {
 
 	useEffect(() => {
 		if (useStarmapStore.getState().followEntityId === ship.id) {
-			useStarmapStore
-				.getState()
-				.setCurrentSystem(ship.position?.parentId || null);
+			useStarmapStore.getState().setCurrentSystem(ship.position?.parentId || null);
 		}
 	}, [ship.position?.parentId, useStarmapStore, ship.id]);
 
 	return (
-		<div className="self-end max-w-sm space-y-2">
+		<div className="max-w-sm space-y-2 self-end">
 			<ZoomSliderComp />
 			{systemId !== null && (
 				<Button
-					className="w-full btn-primary pointer-events-auto"
+					className="btn-primary pointer-events-auto w-full"
 					onClick={() => {
 						useStarmapStore.setState({
 							currentSystem: null,
@@ -45,17 +40,13 @@ export function MapControls() {
 				</Button>
 			)}
 			<Button
-				className="w-full btn-warning pointer-events-auto"
+				className="btn-warning pointer-events-auto w-full"
 				onClick={() => {
 					useStarmapStore.setState({
 						followEntityId: ship.id,
 						currentSystem: ship.position?.parentId || null,
 					});
-					const currentSystem = useStarmapStore.getState().currentSystem;
-					const y =
-						currentSystem === null
-							? lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE)
-							: SOLAR_SYSTEM_MAX_DISTANCE;
+
 					if (ship.position) {
 						useStarmapStore.getState().setCameraFocus(ship.position);
 					}

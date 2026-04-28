@@ -1,9 +1,9 @@
-import * as React from "react";
-
-import Button from "./Button";
-import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
 import { cn } from "@thorium/utils/cn";
+import * as React from "react";
+import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
+
+import Button from "./Button";
 interface DialogI {
 	header: React.ReactNode;
 	body?: string;
@@ -16,22 +16,14 @@ interface DialogI {
 }
 
 const DialogContext = React.createContext<
-	({
-		header,
-		body,
-		defaultValue,
-		type,
-		inputProps,
-	}: DialogI) => Promise<boolean | string>
+	({ header, body, defaultValue, type, inputProps }: DialogI) => Promise<boolean | string>
 >(async () => false);
 
 export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 	const [isOpen, setIsOpen] = React.useState(false);
 	const [header, setHeader] = React.useState<React.ReactNode>("");
 	const [body, setBody] = React.useState("");
-	const [type, setType] = React.useState<"alert" | "confirm" | "prompt">(
-		"alert",
-	);
+	const [type, setType] = React.useState<"alert" | "confirm" | "prompt">("alert");
 	const [input, setInput] = React.useState("");
 	const [inputProps, setInputProps] = React.useState<React.DetailedHTMLProps<
 		React.InputHTMLAttributes<HTMLInputElement>,
@@ -59,10 +51,6 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 		[isOpen],
 	);
 
-	function close() {
-		setIsOpen(false);
-		resolveRef.current?.(false);
-	}
 	// const [inputEl, setInputEl] = React.useState<HTMLInputElement>();
 
 	// const inputRef = React.useCallback(node => {
@@ -117,7 +105,7 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 				<Modal className={`theme-container ${popoverTransitionClasses} w-full`}>
 					<Dialog
 						role="alertdialog"
-						className="alert-dialog bg-gray-900 text-gray-50 border border-white/20 rounded max-w-sm w-full mx-auto p-4 shadow-lg"
+						className="alert-dialog mx-auto w-full max-w-sm rounded border border-white/20 bg-gray-900 p-4 text-gray-50 shadow-lg"
 					>
 						{({ close }) => (
 							<>
@@ -130,7 +118,7 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 											<input
 												{...inputProps}
 												ref={inputEl}
-												className="input block w-full mt-4"
+												className="input mt-4 block w-full"
 												autoFocus
 												value={input}
 												onChange={(e) => setInput(e.currentTarget.value)}
@@ -140,13 +128,9 @@ export const AlertDialog = ({ children }: { children: React.ReactNode }) => {
 								) : (
 									<p>{body}</p>
 								)}
-								<div className="flex justify-end mt-4 space-x-4">
+								<div className="mt-4 flex justify-end space-x-4">
 									{type !== "alert" && (
-										<Button
-											ref={cancelRef}
-											className="btn btn-error"
-											onClick={close}
-										>
+										<Button ref={cancelRef} className="btn btn-error" onClick={close}>
 											Cancel
 										</Button>
 									)}
@@ -254,12 +238,6 @@ export function usePrompt() {
 }
 export function useAlert() {
 	const dialog = React.useContext(DialogContext);
-	return ({
-		header,
-		body,
-	}: {
-		header: string;
-		body?: string;
-	}): Promise<string> =>
+	return ({ header, body }: { header: string; body?: string }): Promise<string> =>
 		dialog({ header, body, type: "alert" }) as Promise<string>;
 }

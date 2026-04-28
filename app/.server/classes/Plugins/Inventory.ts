@@ -1,8 +1,9 @@
-import type { Liter } from "@thorium/utils/unitTypes";
-import type BasePlugin from ".";
-import { Aspect } from "./Aspect";
 import type { InventoryFlags } from "@thorium/utils/flags/InventoryFlags";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+import type { Liter } from "@thorium/utils/unitTypes";
+
+import type BasePlugin from ".";
+import { Aspect } from "./Aspect";
 
 export default class InventoryPlugin extends Aspect {
 	apiVersion = "inventory/v1" as const;

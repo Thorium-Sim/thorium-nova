@@ -1,4 +1,3 @@
-import { AddBlockMenu } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import {
 	ValueInput,
 	MadLibSelect,
@@ -12,11 +11,11 @@ import { produce } from "immer";
 export function IfCondition({
 	conditions,
 	update,
-	definedVariables = [],
+	definedVariables,
 }: BlockProps<"IfCondition"> & { definedVariables: string[] }) {
 	return (
 		<>
-			<div className="absolute left-0 top-0">
+			<div className="absolute top-0 left-0">
 				<InfoTip>
 					<p>The following variables are available:</p>
 					<ul className="ml-4">
@@ -54,17 +53,7 @@ export function IfCondition({
 										}),
 									)
 								}
-								options={[
-									"=",
-									"!=",
-									">",
-									">=",
-									"<",
-									"<=",
-									"contains",
-									"is empty",
-									"is not empty",
-								]}
+								options={["=", "!=", ">", ">=", "<", "<=", "contains", "is empty", "is not empty"]}
 							/>{" "}
 							{["is empty", "is not empty"].includes(comparison) ? null : (
 								<ValueInput
@@ -81,7 +70,7 @@ export function IfCondition({
 							)}
 							{i === conditions.length - 1 ? (
 								<Button
-									className="btn-circle btn-success btn-xs !text-lg !p-0"
+									className="btn-circle btn-success btn-xs !p-0 !text-lg"
 									onClick={() =>
 										update("conditions", [
 											...conditions,
@@ -98,7 +87,7 @@ export function IfCondition({
 								<>
 									<div className="flex-1" />
 									<Button
-										className="btn-circle btn-error btn-xs !text-lg !p-0"
+										className="btn-circle btn-error btn-xs !p-0 !text-lg"
 										onClick={() =>
 											update(
 												"conditions",

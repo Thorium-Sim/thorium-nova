@@ -2,7 +2,7 @@ import { ComponentDemo } from "@thorium/cards/ComponentDemo";
 
 export default function Components() {
 	return (
-		<div className="bg-gray-900 h-full overflow-y-auto">
+		<div className="h-full overflow-y-auto bg-gray-900">
 			<div className="p-8">
 				<ComponentDemo />
 			</div>

@@ -1,4 +1,5 @@
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+
 import type BasePlugin from ".";
 import type Station from "../Station";
 import { Aspect } from "./Aspect";

@@ -5,19 +5,15 @@ export async function loadWebSocket() {
 	const protocol = window.location.protocol;
 	try {
 		const port =
-			process.env.NODE_ENV === "production"
-				? Number(window.location.port) || 4444
-				: 3001;
+			process.env.NODE_ENV === "production" ? Number(window.location.port) || 4444 : 3001;
 
-		const socketUrl = `${
-			protocol === "https:" ? "wss" : "ws"
-		}://${hostname}:${port}/ws`;
+		const socketUrl = `${protocol === "https:" ? "wss" : "ws"}://${hostname}:${port}/ws`;
 
 		const socket = new ReconnectingWebSocket(socketUrl, [], {
 			minReconnectionDelay: 500,
 		});
 
-		await new Promise<ReconnectingWebSocket>((res, rej) => {
+		await new Promise<ReconnectingWebSocket>((res) => {
 			socket.onopen = () => res(socket);
 		});
 		return socket;

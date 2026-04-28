@@ -1,10 +1,11 @@
+import { Navigate } from "@thorium/components/Navigate";
 import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
 import Input from "@thorium/ui/Input";
 import { useContext, useReducer } from "react";
 import { useParams } from "react-router";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+
 import { OverrideResetButton } from "./OverrideResetButton";
-import { Navigate } from "@thorium/components/Navigate";
 
 export default function Heat() {
 	const [rekey, setRekey] = useReducer(() => Math.random(), Math.random());
@@ -30,7 +31,7 @@ export default function Heat() {
 		<fieldset key={key} className="flex-1 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Power to Heat Ratio"
@@ -50,13 +51,9 @@ export default function Heat() {
 								});
 							}}
 						/>
-						<OverrideResetButton
-							property="powerToHeat"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="powerToHeat" setRekey={setRekey} className="mt-6" />
 					</div>
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Heat Dissipation Rate"
@@ -83,7 +80,7 @@ export default function Heat() {
 						/>
 					</div>
 
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Nominal Heat"
@@ -103,14 +100,10 @@ export default function Heat() {
 								});
 							}}
 						/>
-						<OverrideResetButton
-							property="nominalHeat"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="nominalHeat" setRekey={setRekey} className="mt-6" />
 					</div>
 
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Max Safe Heat"
@@ -130,14 +123,10 @@ export default function Heat() {
 								});
 							}}
 						/>
-						<OverrideResetButton
-							property="maxSafeHeat"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="maxSafeHeat" setRekey={setRekey} className="mt-6" />
 					</div>
 
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Max Heat"
@@ -157,14 +146,10 @@ export default function Heat() {
 								});
 							}}
 						/>
-						<OverrideResetButton
-							property="maxHeat"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="maxHeat" setRekey={setRekey} className="mt-6" />
 					</div>
 					<p>Legacy Settings</p>
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Coolant Transfer Rate"
@@ -190,7 +175,7 @@ export default function Heat() {
 							className="mt-6"
 						/>
 					</div>
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Coolant Consumption Rate"

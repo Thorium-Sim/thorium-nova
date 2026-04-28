@@ -1,13 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import type { Coordinates } from "@thorium/utils/unitTypes";
 import type CameraControls from "camera-controls";
-import {
-	createContext,
-	type MutableRefObject,
-	type ReactNode,
-	useContext,
-	useState,
-} from "react";
+import { createContext, type MutableRefObject, type ReactNode, useContext, useState } from "react";
 import { type Plane, Vector3 } from "three";
 import { create } from "zustand";
 
@@ -53,8 +47,7 @@ const createStarmapStore = () =>
 		viewingMode: "editor",
 		selectedObjectIds: [],
 		cameraControlsEnabled: true,
-		setCameraControlsEnabled: (enabled: boolean) =>
-			set({ cameraControlsEnabled: enabled }),
+		setCameraControlsEnabled: (enabled: boolean) => set({ cameraControlsEnabled: enabled }),
 		hoveredPosition: null,
 		cameraView: "3d",
 		setCameraView: (view: "2d" | "3d") => set({ cameraView: view }),
@@ -65,7 +58,7 @@ const createStarmapStore = () =>
 				get().currentSystemSet?.(null);
 			}
 
-			let currentSystemSet = (value: any) => {};
+			let currentSystemSet = (value: any) => value;
 			const promise = new Promise((res) => {
 				currentSystemSet = res;
 			});
@@ -107,13 +100,11 @@ const useStarmapStore = createStarmapStore();
 export const StarmapStoreContext = createContext(useStarmapStore);
 
 export const StarmapStoreProvider = ({ children }: { children: ReactNode }) => {
-	const [useStarmapStore] = useState<ReturnType<typeof createStarmapStore>>(
-		() => createStarmapStore(),
+	const [useStarmapStore] = useState<ReturnType<typeof createStarmapStore>>(() =>
+		createStarmapStore(),
 	);
 	return (
-		<StarmapStoreContext.Provider value={useStarmapStore}>
-			{children}
-		</StarmapStoreContext.Provider>
+		<StarmapStoreContext.Provider value={useStarmapStore}>{children}</StarmapStoreContext.Provider>
 	);
 };
 
@@ -125,9 +116,7 @@ const distanceVector = new Vector3();
 export function useCalculateVerticalDistance() {
 	const useStarmapStore = useGetStarmapStore();
 	useFrame(({ camera }) => {
-		useStarmapStore
-			.getState()
-			.cameraControls?.current?.getTarget(distanceVector);
+		useStarmapStore.getState().cameraControls?.current?.getTarget(distanceVector);
 		const distance = camera.position.distanceTo(distanceVector);
 		useStarmapStore.setState({
 			cameraObjectDistance: distance,

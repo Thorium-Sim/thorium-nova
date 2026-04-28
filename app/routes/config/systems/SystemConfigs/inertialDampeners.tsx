@@ -1,11 +1,12 @@
-import { useParams } from "react-router";
-import Input from "@thorium/ui/Input";
-import { toast } from "@thorium/context/ToastContext";
-import { useContext, useReducer } from "react";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
-import { OverrideResetButton } from "../OverrideResetButton";
-import { q } from "@thorium/context/AppContext";
 import { Navigate } from "@thorium/components/Navigate";
+import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+import { toast } from "@thorium/context/ToastContext";
+import Input from "@thorium/ui/Input";
+import { useContext, useReducer } from "react";
+import { useParams } from "react-router";
+
+import { OverrideResetButton } from "../OverrideResetButton";
 
 export default function InertialDampenersConfig() {
 	const { pluginId, systemId, shipId } = useParams() as {
@@ -29,7 +30,7 @@ export default function InertialDampenersConfig() {
 		<fieldset key={key} className="flex-1 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -41,8 +42,7 @@ export default function InertialDampenersConfig() {
 							}
 							defaultValue={system.dampening}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.inertialDampeners.update.netSend({
 										pluginId,
@@ -62,11 +62,7 @@ export default function InertialDampenersConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="dampening"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="dampening" setRekey={setRekey} className="mt-6" />
 					</div>
 				</div>
 			</div>

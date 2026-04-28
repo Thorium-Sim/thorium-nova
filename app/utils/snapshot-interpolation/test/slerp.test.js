@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { expect, test } from "vitest";
+
 import { quatSlerp } from "../src/slerp";
 
 const quatIsEqual = (q1, q2) => {

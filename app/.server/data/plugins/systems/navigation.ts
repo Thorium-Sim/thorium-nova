@@ -1,14 +1,10 @@
+import type NavigationPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Navigation";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import z from "zod";
-import {
-	getShipSystem,
-	getShipSystemForInput,
-	pluginFilter,
-	systemInput,
-} from "../utils";
-import type NavigationPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Navigation";
+
+import { getShipSystem, getShipSystemForInput, pluginFilter, systemInput } from "../utils";
 
 export const navigation = t.router({
 	get: t.procedure
@@ -17,8 +13,7 @@ export const navigation = t.router({
 		.request(({ ctx, input }) => {
 			const system = getShipSystem({ input, ctx });
 
-			if (system.type !== "navigation")
-				throw new Error("System is not Navigation");
+			if (system.type !== "navigation") throw new Error("System is not Navigation");
 
 			return system as NavigationPlugin;
 		}),
@@ -43,10 +38,7 @@ export const navigation = t.router({
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
-			const [system, override] = getShipSystemForInput<"navigation">(
-				ctx,
-				input,
-			);
+			const [system, override] = getShipSystemForInput<"navigation">(ctx, input);
 			const shipSystem = override || system;
 
 			if (typeof input.calculate !== "undefined") {

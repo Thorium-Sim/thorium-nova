@@ -1,17 +1,17 @@
+import path from "node:path";
+
+import { getPlugin } from "@thorium/.server/data/plugins/utils";
+import { traverseFiles } from "@thorium/.server/data/traverseFiles";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { router, type AllSends } from "@thorium/.server/init/router";
 import { t } from "@thorium/.server/init/t";
-import { actionItem } from "@thorium/utils/flags/actionSchema";
 import { selectValueQuery } from "@thorium/utils/.server/evaluateEntityQuery";
 import { triggerAction } from "@thorium/utils/.server/triggerAction";
+import { Entity } from "@thorium/utils/ecs";
+import { actionItem } from "@thorium/utils/flags/actionSchema";
 import { capitalCase } from "change-case";
 import z from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
-
-import path from "node:path";
-import { getPlugin } from "@thorium/.server/data/plugins/utils";
-import { traverseFiles } from "@thorium/.server/data/traverseFiles";
-import { Entity } from "@thorium/utils/ecs";
 
 export type ActionOverrides = {
 	name?: string;
@@ -33,7 +33,7 @@ export const thorium = t.router({
 		.request(function getActions({ ctx }) {
 			const actions = Object.entries(router._def.procedures)
 				// @ts-expect-error This does have the meta type
-				.filter(([name, p]) => p._def.meta?.action)
+				.filter(([, p]) => p._def.meta?.action)
 				.map(([name, p]) => {
 					// @ts-expect-error This does have the meta type
 					const meta = p._def.meta;
@@ -81,9 +81,7 @@ export const thorium = t.router({
 		.input(z.object({ actions: actionItem.array() }))
 		.send(async ({ input, ctx }) => {
 			await Promise.all(
-				input.actions.map((action) =>
-					triggerAction(action.action as AllSends, action.values, ctx),
-				),
+				input.actions.map((action) => triggerAction(action.action as AllSends, action.values, ctx)),
 			);
 		}),
 	note: t.procedure
@@ -95,7 +93,7 @@ export const thorium = t.router({
 		.request(function getEvents() {
 			const events = Object.entries(router._def.procedures)
 				// @ts-expect-error This does have the meta type
-				.filter(([name, p]) => p._def.meta?.event)
+				.filter(([_, p]) => p._def.meta?.event)
 				.map(([name, p]) => {
 					// @ts-expect-error This does have the input type
 					let input = p._def.inputs[0];
@@ -204,9 +202,7 @@ export const thorium = t.router({
 				.object({
 					pluginId: z.string().optional(),
 					extensions: z.string().array().optional(),
-					aspect: z
-						.object({ type: z.string(), aspectId: z.string() })
-						.optional(),
+					aspect: z.object({ type: z.string(), aspectId: z.string() }).optional(),
 				})
 				.optional(),
 		)
@@ -230,20 +226,13 @@ export const thorium = t.router({
 					files: await traverseFiles(basePath, assetUrl, input?.extensions),
 				};
 
-				const aspectType = (input?.aspect?.type ||
-					"") as keyof typeof plugin.aspects;
+				const aspectType = (input?.aspect?.type || "") as keyof typeof plugin.aspects;
 				if (aspectType in plugin.aspects) {
 					const aspectObject = plugin.aspects[aspectType]?.find(
 						(aspect) => aspect.name === input?.aspect?.aspectId,
 					);
 					if (aspectObject) {
-						const basePath = path.join(
-							assetUrl,
-							"plugins",
-							plugin.id,
-							aspectObject.name,
-							"assets",
-						);
+						const basePath = path.join(assetUrl, "plugins", plugin.id, aspectObject.name, "assets");
 						output[aspectObject.name] = {
 							basePath,
 							files: await traverseFiles(basePath, assetUrl, input?.extensions),
@@ -265,11 +254,7 @@ export const thorium = t.router({
 		)
 		.send(async ({ input, ctx }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
-			const assetPath = await ctx.uploadFile.call(
-				plugin,
-				input.asset,
-				input.assetPath,
-			);
+			const assetPath = await ctx.uploadFile.call(plugin, input.asset, input.assetPath);
 			pubsub.publish.thorium.pluginAssets({});
 			return { asset: assetPath };
 		}),

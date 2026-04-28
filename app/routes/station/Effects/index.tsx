@@ -1,14 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import uuid from "@thorium/utils/uniqid";
-import Spark from "./spark";
-import "./effects.css";
 import { clientId, q } from "@thorium/context/AppContext";
-import { useNavigate } from "react-router";
-import type { EffectPayload } from "@thorium/utils/flags/effects";
-import { useAmbiance } from "@thorium/utils/sounds/Ambiance/useAmbiance";
 import { toast } from "@thorium/context/ToastContext";
 import { useStation } from "@thorium/routes/station/useStation";
+
+import "./effects.css";
+import type { EffectPayload } from "@thorium/utils/flags/effects";
+import { useAmbiance } from "@thorium/utils/sounds/Ambiance/useAmbiance";
 import { useDialogue } from "@thorium/utils/sounds/useDialogue";
+import uuid from "@thorium/utils/uniqid";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
+
+import Spark from "./spark";
 
 let synth: SpeechSynthesis | undefined;
 try {
@@ -93,8 +95,7 @@ const Effects = () => {
 						if (!effect?.message) return;
 						const words = new SpeechSynthesisUtterance(effect.message);
 						if (words) {
-							const voice =
-								voices.find((v) => v.name === effect.voice) || voices[0];
+							const voice = voices.find((v) => v.name === effect.voice) || voices[0];
 							if (voice) {
 								words.voice = voice;
 							}

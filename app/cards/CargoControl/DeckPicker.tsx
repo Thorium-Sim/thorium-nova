@@ -8,7 +8,7 @@ export function DeckPicker({ decks }: { decks: { name: string }[] }) {
 				<li
 					key={deck.name}
 					onClick={() => useShipMapStore.setState({ deckIndex: index })}
-					className={`pointer-events-auto cursor-pointer list-group-item ${
+					className={`list-group-item pointer-events-auto cursor-pointer ${
 						index === deckIndex ? "selected" : ""
 					}`}
 				>

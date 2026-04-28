@@ -1,10 +1,7 @@
 import type { isLongRangeMessage } from "@thorium/ecs-components/shipSystems";
 import type z from "zod";
 
-export const lrmStateMap: Record<
-	z.infer<typeof isLongRangeMessage>["state"],
-	string
-> = {
+export const lrmStateMap: Record<z.infer<typeof isLongRangeMessage>["state"], string> = {
 	deleted: "Deleted",
 	delivered: "Delivered",
 	failing: "Failing",

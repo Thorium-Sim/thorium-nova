@@ -32,9 +32,9 @@ const Toast = ({
 								: color === "notice"
 									? "alert-notice"
 									: ""
-			} block! m-4 min-h-16 max-w-md ${
+			} m-4 block! min-h-16 max-w-md ${
 				action ? "cursor-pointer" : "pointer-events-none"
-			} duration-500 transition-all entering:opacity-0 data-entered:opacity-100! exiting:opacity-0 exiting:pointer-events-none data-exited:hidden`}
+			} entering:opacity-0 exiting:opacity-0 exiting:pointer-events-none transition-all duration-500 data-entered:opacity-100! data-exited:hidden`}
 			onClick={() => {
 				action?.();
 				dismiss();
@@ -43,10 +43,10 @@ const Toast = ({
 			onMouseLeave={() => resume()}
 			afterLeave={() => dismiss()}
 		>
-			<div className="w-full flex items-center justify-between">
-				<h5 className="font-bold text-xl whitespace-pre-wrap">{title}</h5>
+			<div className="flex w-full items-center justify-between">
+				<h5 className="text-xl font-bold whitespace-pre-wrap">{title}</h5>
 				<button
-					className="close p-1 rounded-full hover:bg-white/30 transition-colors pointer-events-auto ml-2"
+					className="close pointer-events-auto ml-2 rounded-full p-1 transition-colors hover:bg-white/30"
 					aria-label="close"
 					onClick={() => dismiss()}
 				>
@@ -84,9 +84,9 @@ function toastReducer(state: Notification[], action: Notification | string) {
 	}
 	return [...state, action];
 }
-export let toast = (
+export let toast: (
 	notification: Omit<Notification, "id" | "visible" | "pause" | "resume">,
-) => {};
+) => void = () => {};
 
 export default function ToastContainer() {
 	const [toasts, dispatch] = useReducer(toastReducer, []);
@@ -95,14 +95,8 @@ export default function ToastContainer() {
 
 	useEffect(() => {
 		const timeouts: Record<string, ReturnType<typeof setTimeout>> = {};
-		toast = (
-			notification: Omit<Notification, "id" | "visible" | "pause" | "resume">,
-		) => {
-			if (
-				toastsRef.current.some(
-					(t) => t.visible && t.title === notification.title,
-				)
-			) {
+		toast = (notification: Omit<Notification, "id" | "visible" | "pause" | "resume">) => {
+			if (toastsRef.current.some((t) => t.visible && t.title === notification.title)) {
 				return;
 			}
 

@@ -7,7 +7,7 @@ import { aroundEach, describe, expect, it } from "vitest";
 
 aroundEach(async (runTest) => {
 	await DataStore.operations.run(testDataStoreProps, async () => {
-		runTest();
+		await runTest();
 	});
 });
 

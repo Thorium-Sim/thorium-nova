@@ -1,7 +1,7 @@
 import { type Entity, System } from "@thorium/utils/ecs";
 import { getCompletePositionFromOrbit } from "@thorium/utils/starmap/position";
 import { solarRadiusToKilometers } from "@thorium/utils/unitTypes";
-import { Mesh, type Object3D, SphereGeometry, Vector3 } from "three";
+import { Vector3 } from "three";
 
 /** Key is the solar system ID */
 export const solarSystemsObjects = new Map<number, Map<number, Sphere>>();
@@ -21,8 +21,7 @@ export class SolarSystemPositionSystem extends System {
 	update(entity: Entity) {
 		// TODO January 2025: This will explode when moons become a thing
 		const solarSystemId =
-			entity.components.position?.parentId ||
-			entity.components.satellite?.parentId;
+			entity.components.position?.parentId || entity.components.satellite?.parentId;
 		if (!solarSystemId || objectSystem.get(entity.id) !== solarSystemId) {
 			// Remove the object from the system it is a part of, if any
 			const solarSystemId = objectSystem.get(entity.id) || -1;
@@ -40,9 +39,7 @@ export class SolarSystemPositionSystem extends System {
 		if (entity.components.isPlanet) {
 			radiusInKilometers = entity.components.isPlanet.radius;
 		} else if (entity.components.isStar) {
-			radiusInKilometers = solarRadiusToKilometers(
-				entity.components.isStar.radius,
-			);
+			radiusInKilometers = solarRadiusToKilometers(entity.components.isStar.radius);
 		} else if (entity.components.size) {
 			const { width, height, length } = entity.components.size;
 			// Convert meters to kilometers

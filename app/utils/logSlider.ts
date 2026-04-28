@@ -1,9 +1,4 @@
-export function logslider(
-	zoomMin: number,
-	zoomMax: number,
-	position: number,
-	reverse?: boolean,
-) {
+export function logslider(zoomMin: number, zoomMax: number, position: number, reverse?: boolean) {
 	// position will be between 0 and 100
 	const minP = 0;
 	const maxP = 100;

@@ -97,9 +97,7 @@ export function createRNG(seed: number | string, skip = 0): RNG {
 			const value = this.next();
 			return value > 0.5;
 		},
-		nextChar(
-			chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-		): string {
+		nextChar(chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"): string {
 			return chars.substr(this.nextInt(0, chars.length - 1), 1);
 		},
 		nextString(

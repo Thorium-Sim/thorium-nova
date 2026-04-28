@@ -1,24 +1,19 @@
-import z from "zod";
-import { t } from "../init/t";
-import {
-	lazyLoadInkStory,
-	runInkStory,
-} from "@thorium/utils/.server/ink/runInkStory";
-import { produce } from "immer";
-import { pubsub } from "../init/pubsub";
+import { lazyLoadInkStory, runInkStory } from "@thorium/utils/.server/ink/runInkStory";
 import uniqid from "@thorium/utils/uniqid";
+import { produce } from "immer";
+import z from "zod";
+
+import { pubsub } from "../init/pubsub";
+import { t } from "../init/t";
 
 export const conversation = t.router({
 	conversation: t.procedure
 		.input(z.object({ conversationId: z.number() }))
-		.filter((publish: { conversationId: number }, { ctx, input }) => {
-			if (publish && publish.conversationId !== input.conversationId)
-				return false;
+		.filter((publish: { conversationId: number }, { input }) => {
+			if (publish && publish.conversationId !== input.conversationId) return false;
 			return true;
 		})
-		.autoPublish(["isConversation"], (entity) => [
-			{ conversationId: entity.id },
-		])
+		.autoPublish(["isConversation"], (entity) => [{ conversationId: entity.id }])
 		.request(({ ctx, input }) => {
 			const conversation = ctx.ecs.getEntityById(input.conversationId);
 			const convo = conversation?.components.isConversation;
@@ -31,15 +26,10 @@ export const conversation = t.router({
 		}),
 	conversationTemplates: t.procedure
 		.autoPublish(["isConversationTemplate"], () => null)
-		.request(({ ctx, input }) => {
+		.request(({ ctx }) => {
 			const templates = [];
-			for (const template of ctx.ecs.componentCache.get(
-				"isConversationTemplate",
-			) || []) {
-				if (
-					!template.components.identity?.name ||
-					!template.components.isConversationTemplate
-				)
+			for (const template of ctx.ecs.componentCache.get("isConversationTemplate") || []) {
+				if (!template.components.identity?.name || !template.components.isConversationTemplate)
 					continue;
 				templates.push({
 					id: template.id,
@@ -58,8 +48,7 @@ export const conversation = t.router({
 			inkStory.ChoosePathString(input.divert);
 
 			// Clear out any non-persisted triggers for this conversation
-			for (const trigger of conversation.ecs.componentCache.get("isTrigger") ||
-				[]) {
+			for (const trigger of conversation.ecs.componentCache.get("isTrigger") || []) {
 				if (
 					!trigger.components.isTrigger?.persist &&
 					trigger.components.isTrigger?.stepId === conversation.id
@@ -122,8 +111,7 @@ export const conversation = t.router({
 			});
 
 			// Clear out any non-persisted triggers for this conversation
-			for (const trigger of conversation.ecs.componentCache.get("isTrigger") ||
-				[]) {
+			for (const trigger of conversation.ecs.componentCache.get("isTrigger") || []) {
 				if (
 					!trigger.components.isTrigger?.persist &&
 					trigger.components.isTrigger?.stepId === conversation.id

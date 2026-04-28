@@ -1,12 +1,9 @@
-import type {
-	KiloNewtons,
-	MetersPerSecond,
-	RotationsPerMinute,
-} from "@thorium/utils/unitTypes";
+import type { Sound } from "@thorium/ecs-components/sound";
+import type { KiloNewtons, MetersPerSecond, RotationsPerMinute } from "@thorium/utils/unitTypes";
+
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
-import type { Sound } from "@thorium/ecs-components/sound";
 
 // TODO March 16, 2022: Add the necessary sound effects
 export default class ThrustersPlugin extends BaseShipSystemPlugin {

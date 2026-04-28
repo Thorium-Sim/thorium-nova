@@ -1,16 +1,11 @@
-import React, {
-	createContext,
-	type ReactNode,
-	Suspense,
-	useContext,
-	useMemo,
-} from "react";
-import { useDataConnection } from "./useDataConnection";
-import type { ClientSocket } from "./clientSocket";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import type { InterpolatedSnapshot } from "@thorium/utils/snapshot-interpolation/src/types";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import type { InterpolatedSnapshot } from "@thorium/utils/snapshot-interpolation/src/types";
+import React, { createContext, type ReactNode, Suspense, useContext, useMemo } from "react";
+
+import type { ClientSocket } from "./clientSocket";
+import { useDataConnection } from "./useDataConnection";
 import { useDataResponse } from "./useDataResponse";
 
 export const LiveQueryContext = createContext<ILiveQueryContext | null>(null);
@@ -35,9 +30,7 @@ type EntityValues = {
 
 const interpolationCache: Record<string, EntityValues> = {};
 
-export function processInterpolation(
-	snapshot: InterpolatedSnapshot | undefined,
-) {
+export function processInterpolation(snapshot: InterpolatedSnapshot | undefined) {
 	if (!snapshot) return {};
 	return snapshot.state.forEach((entity) => {
 		interpolationCache[entity.id] = {
@@ -68,8 +61,7 @@ export function LiveQueryProvider({
 	const { socket, reconnectionState } = useDataConnection(getRequestContext);
 
 	useAnimationFrame(
-		() =>
-			processInterpolation(socket?.SI.calcInterpolation("x y z f c r(quat)")),
+		() => processInterpolation(socket?.SI.calcInterpolation("x y z f c r(quat)")),
 		!isTestEnv,
 	);
 	const value: ILiveQueryContext = useMemo(() => {

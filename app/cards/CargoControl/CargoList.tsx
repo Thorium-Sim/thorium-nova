@@ -1,5 +1,6 @@
 import { q } from "@thorium/context/AppContext";
 import type { Kelvin } from "@thorium/utils/unitTypes";
+
 import { cargoSort } from "./cargoSort";
 
 export function CargoList({
@@ -32,15 +33,12 @@ export function CargoList({
 					.map(([key, value]) => {
 						if (value.count === 0) return null;
 						const inventoryType = inventoryTypes[key];
-						const itemVolume = Math.max(
-							Math.round(inventoryType.volume * 1000) / 1000,
-							0.0001,
-						);
+						const itemVolume = Math.max(Math.round(inventoryType.volume * 1000) / 1000, 0.0001);
 
 						return (
 							<li
 								key={key}
-								className={`px-4 py-2 select-none block w-full border border-solid bg-black border-white/50 pointer-events-auto ${
+								className={`pointer-events-auto block w-full border border-solid border-white/50 bg-black px-4 py-2 select-none ${
 									enRouteContainer?.id === selectedContainerId &&
 									enRouteContainer?.entityState === "idle"
 										? "cursor-pointer hover:bg-black/50 active:bg-white/20"
@@ -48,7 +46,7 @@ export function CargoList({
 								}`}
 								onClick={() => onClick(key)}
 							>
-								<div className="flex justify-between flex-wrap">
+								<div className="flex flex-wrap justify-between">
 									<span className="font-bold">
 										{key} {inventoryType ? `(${itemVolume} / unit)` : ""}
 									</span>

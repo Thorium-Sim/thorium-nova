@@ -11,15 +11,11 @@ export function SentPage() {
 		filter: "sent",
 		shipId,
 	});
-	const [selectedMessageId, setSelectedMessageId] = useState<number | null>(
-		null,
-	);
-	const selectedMessage = outgoingMessages.find(
-		(o) => o.id === selectedMessageId,
-	);
+	const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
+	const selectedMessage = outgoingMessages.find((o) => o.id === selectedMessageId);
 	return (
-		<div className="w-full h-full grid grid-cols-[16rem_1fr] gap-8">
-			<div className="flex flex-col h-full">
+		<div className="grid h-full w-full grid-cols-[16rem_1fr] gap-8">
+			<div className="flex h-full flex-col">
 				<h3>Sent Messages</h3>
 				<ul className="panel flex-auto">
 					{outgoingMessages.map((o) => (
@@ -37,7 +33,7 @@ export function SentPage() {
 				</ul>
 			</div>
 			{selectedMessage ? (
-				<div className="grid gap-x-2 gap-y-4 grid-cols-[auto_1fr] grid-rows-[auto_auto_auto_1fr]">
+				<div className="grid grid-cols-[auto_1fr] grid-rows-[auto_auto_auto_1fr] gap-x-2 gap-y-4">
 					<p className="text-xl">To:</p>
 					<p className="text-xl">{selectedMessage.destinationShipName}</p>
 					<p className="text-xl">From:</p>
@@ -49,7 +45,7 @@ export function SentPage() {
 							<InfoTip>{selectedMessage.failureReason}</InfoTip>
 						) : null}
 					</p>
-					<p className="col-span-2 panel p-4">{selectedMessage.message}</p>
+					<p className="panel col-span-2 p-4">{selectedMessage.message}</p>
 				</div>
 			) : null}
 		</div>

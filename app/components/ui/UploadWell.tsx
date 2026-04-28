@@ -1,5 +1,6 @@
 import { cn } from "@thorium/utils/cn";
 import React, { type ReactNode } from "react";
+
 import { Icon } from "./Icon";
 
 const UploadWell: React.FC<{
@@ -9,15 +10,7 @@ const UploadWell: React.FC<{
 	onChange?: (files: FileList) => void;
 	children?: ReactNode;
 	className?: string;
-}> = ({
-	id,
-	children,
-	disabled,
-	accept,
-	className,
-	onChange = (files) => {},
-	...props
-}) => {
+}> = ({ id, children, disabled, accept, className, onChange = () => {}, ...props }) => {
 	const [dragging, setDragging] = React.useState(false);
 
 	// Drag and drop is hard to test
@@ -76,9 +69,9 @@ const UploadWell: React.FC<{
 			{disabled || children ? (
 				children
 			) : (
-				<div className="flex items-center justify-center flex-col h-full w-full p-4">
+				<div className="flex h-full w-full flex-col items-center justify-center p-4">
 					<Icon name="file-up" className="text-6xl" />
-					<p className="text-center text-2xl mt-4">Click or Drop files here</p>
+					<p className="mt-4 text-center text-2xl">Click or Drop files here</p>
 				</div>
 			)}
 			<input

@@ -71,16 +71,17 @@ the client is assigned to, though it could filter based on any other criteria.
 ```ts
 // /app/cards/Pilot/data.server.ts
 export const pilot = t.router({
-  impulseEngines: t.router({
-    get: t.input(z.object({shipId:z.number()})).procedure
-      .filter((publish: {shipId: number; systemId: number} | null, {input}) => {
-        if (publish && publish.shipId !== input.shipId) return false;
-        return true;
-      })
-      .request(({ctx}) => {
-        // ...
-      }),
-  }),
+	impulseEngines: t.router({
+		get: t
+			.input(z.object({ shipId: z.number() }))
+			.procedure.filter((publish: { shipId: number; systemId: number } | null, { input }) => {
+				if (publish && publish.shipId !== input.shipId) return false;
+				return true;
+			})
+			.request(({ ctx }) => {
+				// ...
+			}),
+	}),
 });
 ```
 
@@ -102,29 +103,30 @@ entities associated with the ship the client is assigned to.
 ```ts
 // /app/cards/Pilot/data.server.ts
 export const pilot = t.router({
-  impulseEngines: t.router({
-   get: t.input(z.object({shipId:z.number()})).procedure
-      .filter((publish: {shipId: number; systemId: number} | null, {input}) => {
-        // ...
-      })
-      .request(({ctx, input}) => {
-        const {
-          impulseEngines: {
-            id,
-            components: {isImpulseEngines},
-          },
-        } = getShipSystem(ctx, {
-          systemType: "impulseEngines",
-          shipId: input.shipId
-        });
-        return {
-          id: impulseEngines.id,
-          targetSpeed: isImpulseEngines?.targetSpeed || 0,
-          cruisingSpeed: isImpulseEngines?.cruisingSpeed || 1,
-          emergencySpeed: isImpulseEngines?.emergencySpeed || 1,
-        };
-      }),
-  }),
+	impulseEngines: t.router({
+		get: t
+			.input(z.object({ shipId: z.number() }))
+			.procedure.filter((publish: { shipId: number; systemId: number } | null, { input }) => {
+				// ...
+			})
+			.request(({ ctx, input }) => {
+				const {
+					impulseEngines: {
+						id,
+						components: { isImpulseEngines },
+					},
+				} = getShipSystem(ctx, {
+					systemType: "impulseEngines",
+					shipId: input.shipId,
+				});
+				return {
+					id: impulseEngines.id,
+					targetSpeed: isImpulseEngines?.targetSpeed || 0,
+					cruisingSpeed: isImpulseEngines?.cruisingSpeed || 1,
+					emergencySpeed: isImpulseEngines?.emergencySpeed || 1,
+				};
+			}),
+	}),
 });
 ```
 
@@ -185,17 +187,16 @@ parameters and should return `true` if the entity should be sent to the client.
 ```ts
 // /app/cards/Pilot/data.server.ts
 export const pilot = t.router({
-  // ...
-  stream: t.procedure
+	// ...
+	stream: t.procedure
 		.input(z.object({ systemId: z.number().nullable() }))
 		.dataStream(({ ctx, input, entity }) => {
 			if (!entity) return false;
 			return Boolean(
-				entity.components.position &&
-					entity.components.position.parentId === input.systemId,
+				entity.components.position && entity.components.position.parentId === input.systemId,
 			);
 		}),
-})
+});
 ```
 
 Data Streams will only be active when `useDataStream` is called somewhere in the
@@ -204,14 +205,14 @@ at the top of the card component.
 
 ```ts
 export const cargoControl = t.router({
-  stream: t.procedure.dataStream(({entity, ctx}) => {
-    if (!entity) return false;
-    return Boolean(
-      entity.components.cargoContainer &&
-        entity.components.position?.parentId === ctx.ship?.id &&
-        entity.components.passengerMovement
-    );
-  }),
+	stream: t.procedure.dataStream(({ entity, ctx }) => {
+		if (!entity) return false;
+		return Boolean(
+			entity.components.cargoContainer &&
+			entity.components.position?.parentId === ctx.ship?.id &&
+			entity.components.passengerMovement,
+		);
+	}),
 });
 ```
 

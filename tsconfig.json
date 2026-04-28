@@ -24,15 +24,11 @@
 		"module": "esnext",
 		"moduleResolution": "bundler",
 		"jsx": "react-jsx",
-		"baseUrl": ".",
 		"rootDirs": [".", "./.react-router/types"],
 		"paths": {
 			"@thorium/ui/*": ["./app/components/ui/*"],
 			"@thorium/*": ["./app/*"],
-			"@/icon-name": [
-				"./app/components/ui/icons/name.d.ts",
-				"./types/icon-name.d.ts"
-			]
+			"@/icon-name": ["./app/components/ui/icons/name.d.ts", "./types/icon-name.d.ts"]
 		},
 		"esModuleInterop": true,
 		"resolveJsonModule": true

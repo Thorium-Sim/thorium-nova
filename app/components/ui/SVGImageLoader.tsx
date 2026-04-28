@@ -1,11 +1,4 @@
-import {
-	type ComponentPropsWithoutRef,
-	forwardRef,
-	type Ref,
-	useEffect,
-	useLayoutEffect,
-	useRef,
-} from "react";
+import { type ComponentPropsWithoutRef, type Ref, useEffect, useLayoutEffect, useRef } from "react";
 import { suspend } from "suspend-react";
 
 export function SVGImageLoader({
@@ -39,15 +32,7 @@ export function SVGImageLoader({
 		}
 	}, [data]);
 	if (data) {
-		return (
-			<div
-				role="img"
-				{...props}
-				// biome-ignore lint/security/noDangerouslySetInnerHtml: Necessary for rendering the loaded SVG
-				dangerouslySetInnerHTML={{ __html: data }}
-				ref={ref}
-			/>
-		);
+		return <div role="img" {...props} dangerouslySetInnerHTML={{ __html: data }} ref={ref} />;
 	}
 	return (
 		<img

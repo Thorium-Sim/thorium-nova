@@ -1,26 +1,18 @@
-import { AddBlockMenu } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import {
 	ComponentPropertySelect,
 	MadLibSelect,
 	type BlockProps,
 } from "@thorium/components/timelineBuilder/BlockInputs";
-import { BlockWrapper } from "@thorium/components/timelineBuilder/BlockWrapper";
 import Checkbox from "@thorium/ui/Checkbox";
 import { Icon } from "@thorium/ui/Icon";
 import InfoTip from "@thorium/ui/InfoTip";
 import { produce } from "immer";
-import { useState } from "react";
 import { Button } from "react-aria-components";
 
-export function EntityCondition({
-	checks,
-	match,
-	persist,
-	update,
-}: BlockProps<"EntityCondition">) {
+export function EntityCondition({ checks, match, persist, update }: BlockProps<"EntityCondition">) {
 	return (
 		<>
-			<div className="flex gap-1 items-center">
+			<div className="flex items-center gap-1">
 				Wait until{" "}
 				<MadLibSelect
 					value={match}
@@ -71,7 +63,7 @@ export function EntityCondition({
 							/>
 							{i === checks.length - 1 ? (
 								<Button
-									className="btn-circle btn-success btn-xs !text-lg !p-0"
+									className="btn-circle btn-success btn-xs !p-0 !text-lg"
 									onPress={() =>
 										update(
 											"checks",
@@ -90,7 +82,7 @@ export function EntityCondition({
 								<>
 									<div className="flex-1" />
 									<Button
-										className="btn-circle btn-error btn-xs !text-lg !p-0"
+										className="btn-circle btn-error btn-xs !p-0 !text-lg"
 										onPress={() =>
 											update(
 												"checks",
@@ -114,10 +106,9 @@ export function EntityCondition({
 						<>
 							Persist{" "}
 							<InfoTip>
-								Whether this trigger condition will continue to exist after the
-								timeline step has proceeded. Set this to true if you want the
-								trigger remain active. It will still automatically deactivate
-								once it has been triggered once.
+								Whether this trigger condition will continue to exist after the timeline step has
+								proceeded. Set this to true if you want the trigger remain active. It will still
+								automatically deactivate once it has been triggered once.
 							</InfoTip>
 						</>
 					}

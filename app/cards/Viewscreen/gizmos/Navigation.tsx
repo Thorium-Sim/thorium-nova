@@ -1,7 +1,4 @@
-import {
-	formatSpeed,
-	useForwardVelocity,
-} from "@thorium/cards/Pilot/ImpulseControls";
+import { formatSpeed, useForwardVelocity } from "@thorium/cards/Pilot/ImpulseControls";
 import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
@@ -26,15 +23,8 @@ export function NavigationGizmo({ className }: { className?: string }) {
 	}, cardLoaded);
 
 	return (
-		<div
-			className={cn(
-				"flex flex-col items-start text-left text-base",
-				className,
-			)}
-		>
-			{autopilot.destinationName ? (
-				<div>Destination: {autopilot.destinationName}</div>
-			) : null}
+		<div className={cn("flex flex-col items-start text-left text-base", className)}>
+			{autopilot.destinationName ? <div>Destination: {autopilot.destinationName}</div> : null}
 			<div className="tabular-nums" ref={forwardRef} />
 		</div>
 	);

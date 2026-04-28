@@ -1,11 +1,12 @@
 import { Line, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { clientId, q } from "@thorium/context/AppContext";
+import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { setCursor } from "@thorium/utils/setCursor";
 import type { Meter } from "@thorium/utils/unitTypes";
 import { type RefObject, Suspense, useMemo, useRef } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import {
 	Color,
 	FrontSide,
@@ -16,10 +17,10 @@ import {
 	type Vector3,
 } from "three";
 import type { Line2 } from "three-stdlib";
+
 import { PhasersVisualization } from "./PhasersVisualization";
 import { ShipSprite } from "./ShipSprite";
 import { useGetStarmapStore } from "./starmapStore";
-import { ErrorBoundary } from "react-error-boundary";
 
 export function StarmapShip({
 	id,
@@ -47,9 +48,7 @@ export function StarmapShip({
 	const model = useShipModel(modelUrl);
 
 	const useStarmapStore = useGetStarmapStore();
-	const isSelected = useStarmapStore(
-		(store) => store.selectedObjectIds,
-	).includes(id);
+	const isSelected = useStarmapStore((store) => store.selectedObjectIds).includes(id);
 	const systemId = useStarmapStore((store) => store.currentSystem);
 
 	const [autopilotData] = q.starmapCore.autopilot.useNetRequest(
@@ -60,9 +59,7 @@ export function StarmapShip({
 	const shipAutopilot = autopilotData[id];
 	const { shipId, ship } = useStation();
 
-	const isNotViewscreen = useStarmapStore(
-		(store) => store.viewingMode !== "viewscreen",
-	);
+	const isNotViewscreen = useStarmapStore((store) => store.viewingMode !== "viewscreen");
 	const isCore = useStarmapStore((store) => store.viewingMode === "core");
 	const sensorsHidden = useStarmapStore((store) => store.sensorsHidden);
 	const group = useRef<Group>(null);
@@ -81,20 +78,13 @@ export function StarmapShip({
 		group.current.visible = true;
 		group.current.position.set(state.x, state.y, state.z);
 		if (dragging.current && dragMovement?.current) {
-			dragging.current.position
-				.set(state.x, state.y, state.z)
-				.add(dragMovement.current);
+			dragging.current.position.set(state.x, state.y, state.z).add(dragMovement.current);
 			dragging.current.visible = true;
 		}
 		if (dragging.current && !dragMovement?.current) {
 			dragging.current.visible = false;
 		}
-		shipMesh.current?.quaternion.set(
-			state.r.x,
-			state.r.y,
-			state.r.z,
-			state.r.w,
-		);
+		shipMesh.current?.quaternion.set(state.r.x, state.r.y, state.r.z, state.r.w);
 		if (shipMesh.current) {
 			if (!isNotViewscreen && shipId === id) {
 				shipMesh.current.visible = false;
@@ -117,8 +107,7 @@ export function StarmapShip({
 						: [
 								ship.currentSystem
 									? shipAutopilot.destinationPosition
-									: shipAutopilot.destinationSystemPosition ||
-										shipAutopilot.destinationPosition,
+									: shipAutopilot.destinationSystemPosition || shipAutopilot.destinationPosition,
 							];
 
 				lineRef.current.geometry.setPositions([
@@ -225,12 +214,7 @@ function SensorRanges({ id }: { id: number }) {
 	useFrame(() => {
 		const state = interpolate(id);
 		if (!state) return;
-		phasersRef.current?.quaternion.set(
-			state.r.x,
-			state.r.y,
-			state.r.z,
-			state.r.w,
-		);
+		phasersRef.current?.quaternion.set(state.r.x, state.r.y, state.r.z, state.r.w);
 	});
 
 	return (
@@ -238,22 +222,12 @@ function SensorRanges({ id }: { id: number }) {
 			{/* Pilot Range */}
 			<mesh>
 				<icosahedronGeometry args={[10_000, 1]} />
-				<meshBasicMaterial
-					color="#0088ff"
-					transparent
-					opacity={0.2}
-					wireframe
-				/>
+				<meshBasicMaterial color="#0088ff" transparent opacity={0.2} wireframe />
 			</mesh>
 			{/* Weapons Range */}
 			<mesh>
 				<icosahedronGeometry args={[25_000, 1]} />
-				<meshBasicMaterial
-					color="#ff0000"
-					transparent
-					opacity={0.2}
-					wireframe
-				/>
+				<meshBasicMaterial color="#ff0000" transparent opacity={0.2} wireframe />
 			</mesh>
 			<ErrorBoundary fallback={null}>
 				<Suspense>
@@ -281,21 +255,11 @@ function SensorsRange({ shipId }: { shipId: number }) {
 		<>
 			<mesh>
 				<icosahedronGeometry args={[sensors.passiveRange, 1]} />
-				<meshBasicMaterial
-					color="#0bd0bb"
-					transparent
-					opacity={0.2}
-					wireframe
-				/>
+				<meshBasicMaterial color="#0bd0bb" transparent opacity={0.2} wireframe />
 			</mesh>
 			<mesh>
 				<icosahedronGeometry args={[sensors.activeRange, 1]} />
-				<meshBasicMaterial
-					color="#0bd0bb"
-					transparent
-					opacity={0.2}
-					wireframe
-				/>
+				<meshBasicMaterial color="#0bd0bb" transparent opacity={0.2} wireframe />
 			</mesh>
 		</>
 	);
@@ -316,7 +280,6 @@ function CommunicationsRange({ shipId }: { shipId: number }) {
 
 export function useShipModel(modelAsset: string | undefined) {
 	const model = useGLTF(modelAsset || "/assets/Empty.glb", false);
-	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to update when modelAsset changes
 	const scene = useMemo(() => {
 		if (!model) return new Object3D();
 

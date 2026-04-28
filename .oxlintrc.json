@@ -1,0 +1,19 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["typescript", "unicorn", "oxc"],
+	"categories": {
+		"correctness": "error"
+	},
+	"rules": {
+		"typescript/unbound-method": "off",
+		"typescript/no-floating-promises": "off",
+		"typescript/no-misused-spread": "off"
+	},
+	"env": {
+		"builtin": true
+	},
+	"options": {
+		"typeAware": true
+	},
+	"ignorePatterns": ["app/utils/FlexLayout/**/*", "app/utils/.server/loadGltf/GLTFLoader.ts"]
+}

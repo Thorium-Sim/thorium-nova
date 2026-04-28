@@ -1,18 +1,9 @@
 import { initWebsocket } from "@thorium/.server/init/liveQuery";
 import type { ProcedureCallOptions } from "@thorium/utils/live-query/.server/procedure";
-import {
-	type AnyRouter,
-	callProcedure,
-} from "@thorium/utils/live-query/.server/router";
-import type {
-	inferRouterContext,
-	MaybePromise,
-} from "@thorium/utils/live-query/.server/types";
+import { type AnyRouter, callProcedure } from "@thorium/utils/live-query/.server/router";
+import type { inferRouterContext, MaybePromise } from "@thorium/utils/live-query/.server/types";
 import { SystemStabilityError } from "@thorium/utils/live-query/client/client";
-import {
-	NETREQUEST_PATH,
-	NETSEND_PATH,
-} from "@thorium/utils/live-query/constants";
+import { NETREQUEST_PATH, NETSEND_PATH } from "@thorium/utils/live-query/constants";
 import EventEmitter from "eventemitter3";
 import type { Context, HonoRequest, Next } from "hono";
 import { createMiddleware } from "hono/factory";
@@ -48,10 +39,7 @@ export interface HonoHandlerOptions<TRouter extends AnyRouter, TContext> {
 	initWebsocket?: InitWebsocket;
 	upgradeWebSocket: UpgradeWebSocket;
 	extraContext: TContext;
-	onCall?: (
-		opts: ProcedureCallOptions,
-		result: unknown,
-	) => void | Promise<void>;
+	onCall?: (opts: ProcedureCallOptions, result: unknown) => void | Promise<void>;
 }
 
 async function processBody(req: HonoRequest) {
@@ -116,7 +104,7 @@ export async function liveQueryPlugin<TRouter extends AnyRouter, TContext>({
 				if (err === null) {
 					return new Response(null, { status: 204 });
 				}
-				let message = err;
+				let message: string = JSON.stringify(err);
 				if (err instanceof Error) {
 					message = err.message;
 				}
@@ -132,61 +120,57 @@ export async function liveQueryPlugin<TRouter extends AnyRouter, TContext>({
 		};
 	}
 
-	const liveQueryMiddleware = createMiddleware(
-		async (c: Context, next: Next) => {
-			const url = new URL(c.req.url);
-			if (url.pathname === netSendPath) {
-				return requestHandler("send")(c);
-			}
-			if (url.pathname === netRequestPath) {
-				return requestHandler("request")(c);
-			}
-			if (url.pathname === webSocketPath) {
-				return upgradeWebSocket((c) => {
-					const socketEmitter = new EventEmitter();
+	const liveQueryMiddleware = createMiddleware(async (c: Context, next: Next) => {
+		const url = new URL(c.req.url);
+		if (url.pathname === netSendPath) {
+			return requestHandler("send")(c);
+		}
+		if (url.pathname === netRequestPath) {
+			return requestHandler("request")(c);
+		}
+		if (url.pathname === webSocketPath) {
+			return upgradeWebSocket(() => {
+				const socketEmitter = new EventEmitter();
 
-					return {
-						onClose() {
-							socketEmitter.emit("close");
-						},
-						onError() {
-							socketEmitter.emit("error");
-						},
-						onMessage(evt) {
-							socketEmitter.emit("message", evt.data);
-						},
-						async onOpen(_, ws) {
-							socketEmitter.emit("open");
+				return {
+					onClose() {
+						socketEmitter.emit("close");
+					},
+					onError() {
+						socketEmitter.emit("error");
+					},
+					onMessage(evt) {
+						socketEmitter.emit("message", evt.data);
+					},
+					async onOpen(_, ws) {
+						socketEmitter.emit("open");
 
-							const result = await Promise.race<string>([
-								new Promise<string>((res) => {
-									const handleConnection = (data: any) => {
-										const { type, ...message } = JSON.parse(data.toString());
-										if (type === "clientConnect") {
-											const id = message.id;
-											socketEmitter.off("message", handleConnection);
-											res(id);
-										}
-									};
-									socketEmitter.on("message", handleConnection);
-								}),
-								new Promise((res, rej) =>
-									setTimeout(() => rej(`Client Connect Timeout`), 60 * 1000),
-								),
-							]);
-							initWebsocket({
-								clientId: result,
-								send: (data) => ws.send(data),
-								socketEmitter,
-								extraContext,
-							});
-						},
-					};
-				})(c, next);
-			}
-			await next();
-		},
-	);
+						const result = await Promise.race<string>([
+							new Promise<string>((res) => {
+								const handleConnection = (data: any) => {
+									const { type, ...message } = JSON.parse(data.toString());
+									if (type === "clientConnect") {
+										const id = message.id;
+										socketEmitter.off("message", handleConnection);
+										res(id);
+									}
+								};
+								socketEmitter.on("message", handleConnection);
+							}),
+							new Promise((res, rej) => setTimeout(() => rej(`Client Connect Timeout`), 60 * 1000)),
+						]);
+						initWebsocket({
+							clientId: result,
+							send: (data) => ws.send(data),
+							socketEmitter,
+							extraContext,
+						});
+					},
+				};
+			})(c, next);
+		}
+		await next();
+	});
 
 	return liveQueryMiddleware;
 }

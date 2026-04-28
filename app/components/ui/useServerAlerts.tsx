@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
-import type { ReactNode } from "react";
 import { q } from "@thorium/context/AppContext";
-import { CollisionCountdown } from "@thorium/ui/CollisionCountdown";
 import { useCardContext } from "@thorium/context/CardContext";
 import type { ShipAlert } from "@thorium/ecs-components/shipAlerts";
+import { CollisionCountdown } from "@thorium/ui/CollisionCountdown";
+import { useEffect, useRef } from "react";
+import type { ReactNode } from "react";
 
 function renderAlertContent(alert: ShipAlert, cardLoaded: boolean): ReactNode {
 	switch (alert.type) {

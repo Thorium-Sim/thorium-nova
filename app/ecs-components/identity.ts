@@ -10,9 +10,7 @@ export const identity = z
 		description: z
 			.string()
 			.default("")
-			.describe(
-				"Should only be used for information provided by the Flight Director.",
-			)
+			.describe("Should only be used for information provided by the Flight Director.")
 			.optional(),
 	})
 	.default({});

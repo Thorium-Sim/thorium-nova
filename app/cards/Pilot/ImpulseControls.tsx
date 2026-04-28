@@ -2,10 +2,7 @@ import { animated as a, useSpring } from "@react-spring/web";
 import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
-import {
-	useGamepadPress,
-	useGamepadValue,
-} from "@thorium/hooks/useGamepadStore";
+import { useGamepadPress, useGamepadValue } from "@thorium/hooks/useGamepadStore";
 import useMeasure from "@thorium/hooks/useMeasure";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
@@ -42,22 +39,15 @@ export function useForwardVelocity() {
 	const [{ id: impulseId }] = q.pilot.impulseEngines.get.useNetRequest({
 		shipId,
 	});
-	const [{ id: warpId, currentWarpFactor }] =
-		q.pilot.warpEngines.get.useNetRequest({ shipId });
+	const [{ id: warpId, currentWarpFactor }] = q.pilot.warpEngines.get.useNetRequest({ shipId });
 	const [ship] = q.navigation.ship.useNetRequest({ shipId });
 	const { interpolate } = useLiveQuery();
 
-	return function getForwardVelocity(): [
-		KilometerPerSecond,
-		KilometerPerSecond,
-	] {
+	return function getForwardVelocity(): [KilometerPerSecond, KilometerPerSecond] {
 		const id = currentWarpFactor ? warpId : impulseId;
 		const { f: forwardVelocity } = interpolate(ship.id) || { f: 0 };
 		const { x: targetSpeed } = interpolate(id) || { x: 0 };
-		return [forwardVelocity, targetSpeed] as [
-			KilometerPerSecond,
-			KilometerPerSecond,
-		];
+		return [forwardVelocity, targetSpeed] as [KilometerPerSecond, KilometerPerSecond];
 	};
 }
 const ForwardVelocity = () => {
@@ -79,25 +69,15 @@ const ForwardVelocity = () => {
 	return (
 		<>
 			<div className="panel flex items-center px-4">
-				<div className="max-w-min text-right leading-tight">
-					Forward Velocity
-				</div>
-				<div
-					className="w-full text-right font-bold text-2xl my-2 tabular-nums"
-					ref={forwardRef}
-				>
+				<div className="max-w-min text-right leading-tight">Forward Velocity</div>
+				<div className="my-2 w-full text-right text-2xl font-bold tabular-nums" ref={forwardRef}>
 					{formatSpeed(0)}
 				</div>
 			</div>
 			<div className="panel flex items-center px-4">
-				<div className="max-w-min text-right leading-tight">
-					Target Velocity
-				</div>
+				<div className="max-w-min text-right leading-tight">Target Velocity</div>
 
-				<p
-					className="w-full text-right font-bold text-2xl my-2 tabular-nums"
-					ref={targetRef}
-				>
+				<p className="my-2 w-full text-right text-2xl font-bold tabular-nums" ref={targetRef}>
 					{formatSpeed(0)}
 				</p>
 			</div>
@@ -117,11 +97,12 @@ export const ImpulseControls = ({
 	forwardAutopilot?: boolean;
 }) => {
 	const { shipId } = useStation();
-	const [{ targetSpeed, cruisingSpeed, emergencySpeed, name, speeds }] =
+	const [{ targetSpeed, cruisingSpeed, emergencySpeed, speeds }] =
 		q.pilot.impulseEngines.get.useNetRequest({ shipId });
 
-	const [{ currentWarpFactor, speeds: warpSpeeds }] =
-		q.pilot.warpEngines.get.useNetRequest({ shipId });
+	const [{ currentWarpFactor, speeds: warpSpeeds }] = q.pilot.warpEngines.get.useNetRequest({
+		shipId,
+	});
 	const downRef = useRef(false);
 	const [ref, measurement, getMeasurements] = useMeasure<HTMLDivElement>();
 	const [{ y }, set] = useSpring(() => ({
@@ -131,12 +112,12 @@ export const ImpulseControls = ({
 
 	const callback = useRef(
 		throttle((speed: number) => {
-			q.pilot.impulseEngines.setSpeed.netSend({
+			void q.pilot.impulseEngines.setSpeed.netSend({
 				speed: Math.min(emergencySpeed, Math.max(0, speed)),
 				shipId,
 			});
 			if (speed === 0) {
-				q.pilot.warpEngines.setWarpFactor.netSend({ factor: 0, shipId });
+				void q.pilot.warpEngines.setWarpFactor.netSend({ factor: 0, shipId });
 			}
 		}, 100),
 	);
@@ -149,10 +130,7 @@ export const ImpulseControls = ({
 				y: yVal,
 				immediate: down,
 			});
-			const normalizedValue = Math.min(
-				1,
-				Math.abs(1 - yVal) / (measurement.height - KNOB_HEIGHT),
-			);
+			const normalizedValue = Math.min(1, Math.abs(1 - yVal) / (measurement.height - KNOB_HEIGHT));
 
 			const speedValue =
 				normalizedValue < 0.005
@@ -173,7 +151,7 @@ export const ImpulseControls = ({
 	);
 
 	const height = measurement.height;
-	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to re-run this when the card re-loads
+
 	useEffect(() => {
 		if (downRef.current) return;
 		getMeasurements();
@@ -187,15 +165,7 @@ export const ImpulseControls = ({
 		set({
 			y,
 		});
-	}, [
-		targetSpeed,
-		cruisingSpeed,
-		emergencySpeed,
-		set,
-		height,
-		getMeasurements,
-		cardLoaded,
-	]);
+	}, [targetSpeed, cruisingSpeed, emergencySpeed, set, height, getMeasurements, cardLoaded]);
 
 	useGamepadValue("impulse-speed", (value) => {
 		const throttleValue = (value + 1) / 2;
@@ -212,10 +182,8 @@ export const ImpulseControls = ({
 	useAnimationFrame(
 		() => {
 			const adjust =
-				Math.min(
-					Math.abs(impulseAdjustVelocity.current),
-					Math.abs(impulseAdjust),
-				) * Math.sign(impulseAdjust);
+				Math.min(Math.abs(impulseAdjustVelocity.current), Math.abs(impulseAdjust)) *
+				Math.sign(impulseAdjust);
 			callback.current(targetSpeed + adjust);
 			impulseAdjustVelocity.current += impulseAdjust / 500;
 		},
@@ -229,10 +197,7 @@ export const ImpulseControls = ({
 		setWarpFocus(
 			Math.max(
 				0,
-				Math.min(
-					warpSpeeds.length + 1,
-					Math.round(((value + 1) / 2) * (warpSpeeds.length + 1)),
-				),
+				Math.min(warpSpeeds.length + 1, Math.round(((value + 1) / 2) * (warpSpeeds.length + 1))),
 			),
 		);
 	});
@@ -245,7 +210,7 @@ export const ImpulseControls = ({
 	});
 	useGamepadPress("warp-engage", {
 		onDown: () => {
-			q.pilot.warpEngines.setWarpFactor.netSend({
+			void q.pilot.warpEngines.setWarpFactor.netSend({
 				factor: warpFocus,
 				shipId,
 			});
@@ -259,19 +224,19 @@ export const ImpulseControls = ({
 		},
 	});
 	return (
-		<div className="select-none flex-1">
+		<div className="flex-1 select-none">
 			<div>
-				<div className="flex flex-col gap-1 forward-velocity">
+				<div className="forward-velocity flex flex-col gap-1">
 					<ForwardVelocity />
 				</div>
 				{/* TODO: Include heat indicator here eventually. */}
 
-				<div className="flex mt-2">
+				<div className="mt-2 flex">
 					<div className="flex-1">
 						<div className="flex">
-							<div className="flex flex-1 justify-around flex-col-reverse text-right gap-1 impulse-speeds">
+							<div className="impulse-speeds flex flex-1 flex-col-reverse justify-around gap-1 text-right">
 								<Button
-									className="btn-notice w-full full-stop"
+									className="btn-notice full-stop w-full"
 									onClick={() => {
 										onFlightControlInteraction?.();
 										callback.current(0);
@@ -286,7 +251,7 @@ export const ImpulseControls = ({
 											: cruisingSpeed * ((i + 1) / (speeds.length - 1));
 									return (
 										<Button
-											key={`${speed}${i}`}
+											key={`${speed.number}${i}`}
 											onClick={() => {
 												onFlightControlInteraction?.();
 												callback.current(buttonSpeed);
@@ -316,7 +281,7 @@ export const ImpulseControls = ({
 										transform: y?.to((y) => `translate3d(0px,${y}px,0)`),
 									}}
 									// @ts-expect-error
-									className="z-10 w-10 h-10 rounded-full border-black/50 border-2 bg-gray-500 shadow-md cursor-pointer touch-none"
+									className="z-10 h-10 w-10 cursor-pointer touch-none rounded-full border-2 border-black/50 bg-gray-500 shadow-md"
 								/>
 							</div>
 						</div>
@@ -324,12 +289,9 @@ export const ImpulseControls = ({
 					<div className="w-1" />
 					<div className="flex-1">
 						<div
-							className={cn(
-								"grid h-full max-h-56 gap-1 flex-wrap warp-speeds",
-								{
-									"grid-cols-2": warpSpeeds.length > 6,
-								},
-							)}
+							className={cn("grid h-full max-h-56 gap-1 flex-wrap warp-speeds", {
+								"grid-cols-2": warpSpeeds.length > 6,
+							})}
 						>
 							{warpSpeeds
 								.slice()
@@ -346,7 +308,7 @@ export const ImpulseControls = ({
 											}`}
 											onClick={() => {
 												onFlightControlInteraction?.();
-												q.pilot.warpEngines.setWarpFactor.netSend({
+												void q.pilot.warpEngines.setWarpFactor.netSend({
 													factor: warpFactor,
 													shipId,
 												});

@@ -37,59 +37,54 @@ sense.
 Take a look at this example which includes both a request and a send:
 
 ```ts
-import {t} from "@thorium/.server/init/t";
-import {pubsub} from "@thorium/.server/init/pubsub";
-import {getShipSystem} from "@thorium/utils/.server/ship/getShipSystem";
-import {z} from "zod";
+import { t } from "@thorium/.server/init/t";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import { z } from "zod";
 
 export const pilot = t.router({
-  impulseEngines: t.router({
-    get: t.procedure
-      .input(z.object({shipId:z.number()}))
-      .filter((publish: {shipId: number; systemId: number}, {input}) => {
-        if (publish && publish.shipId !== input.shipId) return false;
-        return true;
-      })
-      .request(({ctx, input}) => {
-        // Currently only support one impulse engines
-        const impulseEngines = getShipSystem(ctx.ecs, {
-          systemType: "impulseEngines",
-          shipId:input.shipId
-        });
-        return {
-          id: impulseEngines.id,
-          targetSpeed:
-            impulseEngines.components.isImpulseEngines?.targetSpeed || 0,
-          cruisingSpeed:
-            impulseEngines.components.isImpulseEngines?.cruisingSpeed || 1,
-          emergencySpeed:
-            impulseEngines.components.isImpulseEngines?.emergencySpeed || 1,
-        };
-      }),
-    setSpeed: t.procedure
-      .input(z.object({shipId: z.number(), systemId: z.number().optional(), speed: z.number()}))
-      .send(({ctx, input}) => {
+	impulseEngines: t.router({
+		get: t.procedure
+			.input(z.object({ shipId: z.number() }))
+			.filter((publish: { shipId: number; systemId: number }, { input }) => {
+				if (publish && publish.shipId !== input.shipId) return false;
+				return true;
+			})
+			.request(({ ctx, input }) => {
+				// Currently only support one impulse engines
+				const impulseEngines = getShipSystem(ctx.ecs, {
+					systemType: "impulseEngines",
+					shipId: input.shipId,
+				});
+				return {
+					id: impulseEngines.id,
+					targetSpeed: impulseEngines.components.isImpulseEngines?.targetSpeed || 0,
+					cruisingSpeed: impulseEngines.components.isImpulseEngines?.cruisingSpeed || 1,
+					emergencySpeed: impulseEngines.components.isImpulseEngines?.emergencySpeed || 1,
+				};
+			}),
+		setSpeed: t.procedure
+			.input(z.object({ shipId: z.number(), systemId: z.number().optional(), speed: z.number() }))
+			.send(({ ctx, input }) => {
+				const system = getShipSystem(ctx.ecs, {
+					systemId: input.systemId,
+					systemType: "impulseEngines",
+					shipId: input.shipId,
+				});
 
-        const system = getShipSystem(ctx.ecs, {
-          systemId: input.systemId,
-          systemType: "impulseEngines",
-          shipId: input.shipId
-        });
+				if (!system.components.isImpulseEngines) throw new Error("System is not a impulse engine");
 
-        if (!system.components.isImpulseEngines)
-          throw new Error("System is not a impulse engine");
+				system.updateComponent("isImpulseEngines", {
+					targetSpeed: input.speed,
+				});
 
-        system.updateComponent("isImpulseEngines", {
-          targetSpeed: input.speed,
-        });
-
-        pubsub.publish.pilot.impulseEngines.get({
-          shipId: input.shipId,
-          systemId: system.id,
-        });
-        return system;
-      }),
-  }),
+				pubsub.publish.pilot.impulseEngines.get({
+					shipId: input.shipId,
+					systemId: system.id,
+				});
+				return system;
+			}),
+	}),
 });
 ```
 
@@ -139,8 +134,7 @@ other data. The data will automatically be updated when new data is published
 from the server.
 
 ```ts
-const [{id: impulseId, targetSpeed}] =
-  q.pilot.impulseEngines.get.useNetRequest();
+const [{ id: impulseId, targetSpeed }] = q.pilot.impulseEngines.get.useNetRequest();
 ```
 
 Behind the scenes, this uses React Suspense to fall back on a suspense component
@@ -155,7 +149,7 @@ field, you can instead use the `netRequest` chain, which takes the request input
 and returns a promise that resolves to the requested data.
 
 ```ts
-const result = await q.cargoControl.search.netRequest({query: "Phasers"});
+const result = await q.cargoControl.search.netRequest({ query: "Phasers" });
 ```
 
 ## Using NetSends
@@ -199,32 +193,28 @@ the directory exists with `fs.mkdir`, and then move the file with `fs.rename`.
 
 ```ts
 export const plugin = t.router({
-  update: t.procedure
-    .input(
-      z.object({
-        pluginId: z.string(),
-        coverImage: z.union([z.string(), z.instanceof(File)]).optional(),
-      })
-    )
-    .send(async ({ctx, input}) => {
-      inputAuth(ctx);
-      const plugin = getPlugin(ctx, input.pluginId);
+	update: t.procedure
+		.input(
+			z.object({
+				pluginId: z.string(),
+				coverImage: z.union([z.string(), z.instanceof(File)]).optional(),
+			}),
+		)
+		.send(async ({ ctx, input }) => {
+			inputAuth(ctx);
+			const plugin = getPlugin(ctx, input.pluginId);
 
-      if (typeof input.coverImage === "string") {
-        const ext = path.extname(input.coverImage);
-        const coverImagePath = path.join(
-          thoriumPath,
-          plugin.pluginPath,
-          `assets/coverImage${ext}`
-        );
+			if (typeof input.coverImage === "string") {
+				const ext = path.extname(input.coverImage);
+				const coverImagePath = path.join(thoriumPath, plugin.pluginPath, `assets/coverImage${ext}`);
 
-        await fs.mkdir(path.dirname(coverImagePath), {recursive: true});
-        await fs.rename(input.coverImage, coverImagePath);
-        plugin.coverImage = `${plugin.pluginPath}/assets/coverImage${ext}`;
-      }
-      publish(plugin.id);
-      return {pluginId: plugin.id};
-    }),
+				await fs.mkdir(path.dirname(coverImagePath), { recursive: true });
+				await fs.rename(input.coverImage, coverImagePath);
+				plugin.coverImage = `${plugin.pluginPath}/assets/coverImage${ext}`;
+			}
+			publish(plugin.id);
+			return { pluginId: plugin.id };
+		}),
 });
 ```
 
@@ -233,28 +223,28 @@ merely by including it as a param. The `netSend` function will take care of
 packaging it up properly.
 
 ```tsx
-const PluginCoverImage = plugin => {
-  // ...
-  return (
-    <UploadWell
-      accept="image/*"
-      onChange={(files: FileList) => {
-        if (!plugin) return;
-        q.plugin.update.netSend({
-          pluginId: plugin.id,
-          coverImage: files[0],
-        });
-      }}
-    >
-      {plugin?.coverImage && (
-        <img
-          src={`${plugin.coverImage}?${new Date().getTime()}`}
-          className="w-[90%] h-[90%] object-cover"
-          alt="Cover"
-        />
-      )}
-    </UploadWell>
-  );
+const PluginCoverImage = (plugin) => {
+	// ...
+	return (
+		<UploadWell
+			accept="image/*"
+			onChange={(files: FileList) => {
+				if (!plugin) return;
+				q.plugin.update.netSend({
+					pluginId: plugin.id,
+					coverImage: files[0],
+				});
+			}}
+		>
+			{plugin?.coverImage && (
+				<img
+					src={`${plugin.coverImage}?${new Date().getTime()}`}
+					className="w-[90%] h-[90%] object-cover"
+					alt="Cover"
+				/>
+			)}
+		</UploadWell>
+	);
 };
 ```
 

@@ -14,10 +14,7 @@ if (typeof window !== "undefined") {
 	requestAnimationFrame(loop);
 }
 
-const useAnimationFrame = (
-	callback: (delta: number) => void,
-	active = true,
-) => {
+const useAnimationFrame = (callback: (delta: number) => void, active = true) => {
 	const callbackRef = useRef(callback);
 
 	useLayoutEffect(() => {

@@ -1,18 +1,9 @@
-import { type ReactElement, type ReactNode, useEffect } from "react";
-import { type QueryFunctionContext, useQuery } from "@tanstack/react-query";
-import { LoadingSpinner } from "./LoadingSpinner";
-import { Icon } from "./Icon";
-import {
-	Button,
-	Collection,
-	ComboBox,
-	Input,
-	ListBox,
-	ListBoxItem,
-	Popover,
-} from "react-aria-components";
 import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
+import { type ReactElement, type ReactNode, useEffect } from "react";
+import { Button, ComboBox, Input, ListBox, ListBoxItem, Popover } from "react-aria-components";
 import { useAsyncList } from "react-stately";
+
+import { Icon } from "./Icon";
 
 export function DefaultResultLabel({
 	children,
@@ -25,9 +16,7 @@ export function DefaultResultLabel({
 }) {
 	return (
 		<>
-			<span
-				className={`block truncate ${selected ? "font-medium" : "font-normal"}`}
-			>
+			<span className={`block truncate ${selected ? "font-medium" : "font-normal"}`}>
 				{children}
 			</span>
 			{selected ? (
@@ -75,7 +64,7 @@ export default function SearchableInput<T extends { id: any }>({
 	label?: string;
 }) {
 	const list = useAsyncList<T>({
-		async load({ signal, cursor, filterText = "" }) {
+		async load({ signal, filterText = "" }) {
 			const result = await getOptions({
 				signal,
 				queryKey: [queryKey, filterText],
@@ -109,32 +98,24 @@ export default function SearchableInput<T extends { id: any }>({
 				<div className="relative w-full cursor-default overflow-hidden rounded-lg text-left focus:outline-none sm:text-sm">
 					<Input
 						aria-label="Search"
-						className={`input w-full pointer-events-auto ${
-							inputClassName || ""
-						}`}
+						className={`input pointer-events-auto w-full ${inputClassName || ""}`}
 						placeholder={placeholder}
 					/>
-					<Button className="absolute pointer-events-auto inset-y-0 right-0 flex items-center pr-2">
-						<Icon
-							name="chevrons-up-down"
-							className="h-5 w-5 text-gray-400"
-							aria-hidden="true"
-						/>
+					<Button className="pointer-events-auto absolute inset-y-0 right-0 flex items-center pr-2">
+						<Icon name="chevrons-up-down" className="h-5 w-5 text-gray-400" aria-hidden="true" />
 					</Button>
 				</div>
 				<Popover className={popoverTransitionClasses}>
 					<ListBox
 						items={list.items}
-						className=" mt-1 max-h-60 w-[--trigger-width] overflow-auto panel !bg-black/90"
-						renderEmptyState={() => (
-							<div className="my-item">No results found</div>
-						)}
+						className="panel mt-1 max-h-60 w-[--trigger-width] overflow-auto !bg-black/90"
+						renderEmptyState={() => <div className="my-item">No results found</div>}
 					>
 						{(item) => (
 							<ListBoxItem
 								id={item.id}
 								className={({ isFocused }) =>
-									`relative cursor-default select-none py-2 pl-2 pr-4 ${
+									`relative cursor-default py-2 pr-4 pl-2 select-none ${
 										isFocused ? "bg-primary text-white" : "text-gray-200"
 									}`
 								}

@@ -62,10 +62,7 @@ export const TransformMatrix = (
 };
 
 const applyTransformMatrix =
-	(
-		transformationParameters: TransformationParameters,
-		centerCoordinates: Coordinates,
-	) =>
+	(transformationParameters: TransformationParameters, centerCoordinates: Coordinates) =>
 	(x: number, y: number): [number, number] => {
 		const {
 			a,
@@ -88,10 +85,7 @@ export const getTransformedBoundingBox = (
 		y: height / 2,
 	};
 
-	const getTransformedCoordinates = applyTransformMatrix(
-		transformationParameters,
-		center,
-	);
+	const getTransformedCoordinates = applyTransformMatrix(transformationParameters, center);
 
 	const [x1, y1] = getTransformedCoordinates(left, top);
 	const [x2, y2] = getTransformedCoordinates(left + width, top);

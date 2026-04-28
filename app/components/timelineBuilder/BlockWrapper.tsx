@@ -8,7 +8,11 @@ export function BlockWrapper({
 	children,
 	onRemove,
 	className,
-}: { children: ReactNode; onRemove: () => void; className?: string }) {
+}: {
+	children: ReactNode;
+	onRemove: () => void;
+	className?: string;
+}) {
 	const listeners = useSortableListener();
 	return (
 		<div
@@ -17,22 +21,22 @@ export function BlockWrapper({
 				className,
 			)}
 		>
-			<div className="bg-black/80 backdrop-blur-md p-4 rounded flex flex-col items-start relative group w-fit">
+			<div className="group relative flex w-fit flex-col items-start rounded bg-black/80 p-4 backdrop-blur-md">
 				{children}
-				<div className="group-hover:opacity-100 group-focus-within:opacity-100 opacity-0 absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+				<div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100">
 					<button
 						aria-label="Rearrange"
 						{...listeners}
-						className="flex rounded-full w-4 h-4 cursor-pointer bg-black/20 hover:bg-white/20 hover:backdrop-brightness-200 hover:backdrop-saturate-200 border border-white/50 items-center justify-center"
+						className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full border border-white/50 bg-black/20 hover:bg-white/20 hover:backdrop-brightness-200 hover:backdrop-saturate-200"
 					>
 						<Icon name="grip-vertical" size="xs" />
 					</button>
 				</div>
 
-				<div className="group-hover:opacity-100 group-focus-within:opacity-100 opacity-0 absolute p-3 top-0 right-0 translate-x-1/2 -translate-y-1/2 ">
+				<div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 p-3 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100">
 					<Button
 						aria-label="Delete block"
-						className="flex rounded-full w-4 h-4 cursor-pointer bg-black/20 hover:bg-white/20 hover:backdrop-brightness-200 hover:backdrop-saturate-200 border border-white/50  items-center justify-center"
+						className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full border border-white/50 bg-black/20 hover:bg-white/20 hover:backdrop-brightness-200 hover:backdrop-saturate-200"
 						onPress={onRemove}
 					>
 						<Icon name="x" size="xs" />

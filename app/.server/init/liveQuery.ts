@@ -1,19 +1,19 @@
+import type { ClientSettings } from "@thorium/.server/data";
+import { router } from "@thorium/.server/init/router";
 import { isDatabaseContext } from "@thorium/typeguards/isDatabaseContext";
-import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
 import type { inferAsyncReturnType } from "@thorium/utils/live-query/.server";
-import type { AnyRouter } from "@thorium/utils/live-query/.server/router";
-import { DataContext } from "../DataContext";
-import { pubsub } from "./pubsub";
-import { dataStreamEntity } from "./dataStreamEntity";
 import type {
 	CreateContextOpts,
 	InitWebsocket,
 	InitWebsocketParams,
 } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
+import type { AnyRouter } from "@thorium/utils/live-query/.server/router";
 import { ServerClient } from "@thorium/utils/live-query/.server/ServerClient";
-import { router } from "@thorium/.server/init/router";
-import z from "zod";
-import type { ClientSettings } from "@thorium/.server/data";
+import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
+
+import { DataContext } from "../DataContext";
+import { dataStreamEntity } from "./dataStreamEntity";
+import { pubsub } from "./pubsub";
 
 type InitWebsocketReturnType = ReturnType<InitWebsocket>;
 const dataContextCache = new Map<string, DataContext>();
@@ -21,10 +21,7 @@ const dataContextCache = new Map<string, DataContext>();
 export function getDataContext(id: string) {
 	return dataContextCache.get(id) || null;
 }
-export function createContext<TContext>({
-	clientId,
-	context,
-}: CreateContextOpts<TContext>) {
+export function createContext<TContext>({ clientId, context }: CreateContextOpts<TContext>) {
 	let dataContext = dataContextCache.get(clientId);
 	if (!dataContext) {
 		if (!isDatabaseContext(context)) {
@@ -85,14 +82,12 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 		if (!ship) return;
 		entities.push(dataStreamEntity(ship));
 
-		for (const nearbyShipId of ship.components.nearbyObjects?.objects?.keys() ||
-			[]) {
+		for (const nearbyShipId of ship.components.nearbyObjects?.objects?.keys() || []) {
 			const entity = context.ecs.getEntityById(nearbyShipId);
 			if (entity) entities.push(dataStreamEntity(entity));
 		}
 
-		for (const systemId of ship?.components.shipSystems?.shipSystems.keys() ||
-			[]) {
+		for (const systemId of ship?.components.shipSystems?.shipSystems.keys() || []) {
 			const entity = context.ecs.getEntityById(systemId);
 			if (entity) entities.push(dataStreamEntity(entity));
 		}
@@ -106,9 +101,7 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 			}
 		}
 
-		for (const diagnosticEntity of context.ecs.componentCache.get(
-			"diagnostic",
-		) || []) {
+		for (const diagnosticEntity of context.ecs.componentCache.get("diagnostic") || []) {
 			if (
 				diagnosticEntity.components.diagnostic?.shipId === ship.id &&
 				diagnosticEntity.components.diagnostic.progress < 1
@@ -117,19 +110,13 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 			}
 		}
 
-		for (const torpedoEntity of context.ecs.componentCache.get("isTorpedo") ||
-			[]) {
-			if (
-				torpedoEntity.components.position?.parentId ===
-				ship.components.position?.parentId
-			) {
+		for (const torpedoEntity of context.ecs.componentCache.get("isTorpedo") || []) {
+			if (torpedoEntity.components.position?.parentId === ship.components.position?.parentId) {
 				entities.push(dataStreamEntity(torpedoEntity));
 			}
 		}
 
-		for (const legacySensorContact of context.ecs.componentCache.get(
-			"isSensorContact",
-		) || []) {
+		for (const legacySensorContact of context.ecs.componentCache.get("isSensorContact") || []) {
 			if (
 				legacySensorContact.components.isSensorContact?.shipId === ship.id &&
 				!legacySensorContact.components.isArmyContact
@@ -138,9 +125,7 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 			}
 		}
 
-		for (const passengerEntity of context.ecs.componentCache.get(
-			"passengerMovement",
-		) || []) {
+		for (const passengerEntity of context.ecs.componentCache.get("passengerMovement") || []) {
 			if (passengerEntity.components.position?.parentId === ship.id) {
 				entities.push(dataStreamEntity(passengerEntity));
 			}

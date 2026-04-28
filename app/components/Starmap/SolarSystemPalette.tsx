@@ -1,19 +1,19 @@
-import { useEffect } from "react";
-import { Box3, Vector3 } from "three";
-import type StarPlugin from "@thorium/.server/classes/Plugins/Universe/Star";
 import type PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
 import type SolarSystemPlugin from "@thorium/.server/classes/Plugins/Universe/SolarSystem";
+import type StarPlugin from "@thorium/.server/classes/Plugins/Universe/Star";
 import { q } from "@thorium/context/AppContext";
-import { solarRadiusToKilometers } from "@thorium/utils/unitTypes";
-import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
-import Button from "../ui/Button";
-import Input from "@thorium/ui/Input";
 import Checkbox from "@thorium/ui/Checkbox";
+import Input from "@thorium/ui/Input";
+import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
+import { solarRadiusToKilometers } from "@thorium/utils/unitTypes";
+import { Box3, Vector3 } from "three";
+
+import Button from "../ui/Button";
 import { BasicDisclosure } from "./EditorPalettes/BasicDisclosure";
-import { PlanetDisclosure } from "./EditorPalettes/PlanetDisclosure";
 import { OrbitDisclosure } from "./EditorPalettes/OrbitDisclosure";
-import { PlanetAssetDisclosure } from "./EditorPalettes/PlanetAssetDisclosure";
 import { PaletteDisclosure } from "./EditorPalettes/PaletteDisclosure";
+import { PlanetAssetDisclosure } from "./EditorPalettes/PlanetAssetDisclosure";
+import { PlanetDisclosure } from "./EditorPalettes/PlanetDisclosure";
 import { useGetStarmapStore } from "./starmapStore";
 import { useSystemIds } from "./useSystemIds";
 
@@ -32,16 +32,12 @@ function useSelectedObject() {
 		return { type: "system" as const, object: systemData };
 	}
 
-	const star = systemData?.stars.find((star) =>
-		selectedObjectIds.includes(star.name),
-	);
+	const star = systemData?.stars.find((star) => selectedObjectIds.includes(star.name));
 	if (star) {
 		return { type: "star" as const, object: star };
 	}
 
-	const planet = systemData?.planets.find((planet) =>
-		selectedObjectIds.includes(planet.name),
-	);
+	const planet = systemData?.planets.find((planet) => selectedObjectIds.includes(planet.name));
 	if (planet) {
 		return { type: "planet" as const, object: planet };
 	}
@@ -49,11 +45,7 @@ function useSelectedObject() {
 	return null;
 }
 
-function ZoomToObject({
-	object,
-}: {
-	object: StarPlugin | PlanetPlugin | SolarSystemPlugin;
-}) {
+function ZoomToObject({ object }: { object: StarPlugin | PlanetPlugin | SolarSystemPlugin }) {
 	const useStarmapStore = useGetStarmapStore();
 
 	if (!("satellite" in object)) {
@@ -73,16 +65,8 @@ function ZoomToObject({
 				}
 
 				const box = new Box3(
-					new Vector3(
-						position.x - radius,
-						position.y - radius,
-						position.z - radius,
-					),
-					new Vector3(
-						position.x + radius,
-						position.y + radius,
-						position.z + radius,
-					),
+					new Vector3(position.x - radius, position.y - radius, position.z - radius),
+					new Vector3(position.x + radius, position.y + radius, position.z + radius),
 				);
 				useStarmapStore.getState().cameraControls?.current?.fitToBox(box, true);
 			}}
@@ -207,7 +191,7 @@ export function SolarSystemPalette() {
 	if (!results || !results.object) return null;
 	return (
 		<div
-			className="w-full h-full overflow-y-auto overflow-x-hidden text-white"
+			className="h-full w-full overflow-x-hidden overflow-y-auto text-white"
 			key={results.object.name}
 		>
 			<ZoomToObject object={results.object} />

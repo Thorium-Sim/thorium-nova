@@ -29,19 +29,15 @@ export class LegacyReactorHeatSystem extends System {
 			return;
 		}
 
-		const ship = this.ecs.getEntityById(
-			entity.components.isShipSystem?.shipId || -1,
-		);
+		const ship = this.ecs.getEntityById(entity.components.isShipSystem?.shipId || -1);
 		if (!ship) return;
 		if (!this.shipSystemPower.has(ship.id)) {
 			this.shipSystemPower.set(ship.id, 0);
-			for (const systemId of ship?.components.shipSystems?.shipSystems.keys() ||
-				[]) {
+			for (const systemId of ship?.components.shipSystems?.shipSystems.keys() || []) {
 				const system = this.ecs.getEntityById(systemId);
 				this.shipSystemPower.set(
 					ship.id,
-					(this.shipSystemPower.get(ship.id) || 0) +
-						(system?.components.power?.currentPower || 0),
+					(this.shipSystemPower.get(ship.id) || 0) + (system?.components.power?.currentPower || 0),
 				);
 			}
 		}
@@ -65,18 +61,12 @@ export class LegacyReactorHeatSystem extends System {
 		const unblanaceHeat =
 			Math.abs(
 				Math.cbrt(
-					(this.shipReactorPower.get(ship.id) || 0) -
-						(this.shipSystemPower.get(ship.id) || 0),
+					(this.shipReactorPower.get(ship.id) || 0) - (this.shipSystemPower.get(ship.id) || 0),
 				),
 			) / 5000;
 
 		entity.updateComponent("heat", {
-			heat:
-				heat +
-				(standardHeat + unblanaceHeat) *
-					legacyHeatRate *
-					heatAdjustment *
-					elapsedRatio,
+			heat: heat + (standardHeat + unblanaceHeat) * legacyHeatRate * heatAdjustment * elapsedRatio,
 		});
 	}
 

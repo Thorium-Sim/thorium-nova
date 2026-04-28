@@ -38,15 +38,8 @@ export function TriggerAction({
 				</div>
 			) : null}
 			<div className={minimal ? "" : "mt-4"}>
-				{minimal ? null : (
-					<h3 className="text-xl font-semibold">Action Inputs</h3>
-				)}
-				<ActionInput
-					action={action}
-					dispatch={dispatch}
-					input={input}
-					path={path}
-				/>
+				{minimal ? null : <h3 className="text-xl font-semibold">Action Inputs</h3>}
+				<ActionInput action={action} dispatch={dispatch} input={input} path={path} />
 				<CustomInputs action={action} dispatch={dispatch} path={path} />
 			</div>
 		</>
@@ -55,8 +48,6 @@ export function TriggerAction({
 
 function CustomInputs({
 	action,
-	dispatch,
-	path,
 }: {
 	action: ActionState;
 	dispatch: (input: ActionAction) => void;

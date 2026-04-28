@@ -1,9 +1,10 @@
+import type { EngineSpeed } from "@thorium/ecs-components/shipSystems/engineSpeeds";
+import type { Sound } from "@thorium/ecs-components/sound";
 import type { KilometerPerSecond, KiloNewtons } from "@thorium/utils/unitTypes";
+
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
-import type { Sound } from "@thorium/ecs-components/sound";
-import type { EngineSpeed } from "@thorium/ecs-components/shipSystems/engineSpeeds";
 
 export default class ImpulseEnginesPlugin extends BaseShipSystemPlugin {
 	static flags: ShipSystemFlags[] = ["damage", "heat", "power", "sounds"];

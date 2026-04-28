@@ -1,10 +1,10 @@
+import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { spawnTimeline } from "@thorium/.server/spawners/timeline";
+import { applyDamageReportMetrics } from "@thorium/utils/.server/applyDamageReportMetrics";
+import { triggerStep } from "@thorium/utils/.server/evaluateEntityQuery";
 import type { Entity } from "@thorium/utils/ecs";
 import z from "zod";
-import { triggerStep } from "@thorium/utils/.server/evaluateEntityQuery";
-import { applyDamageReportMetrics } from "@thorium/utils/.server/applyDamageReportMetrics";
-import { pubsub } from "@thorium/.server/init/pubsub";
 
 export const timeline = t.router({
 	activate: t.procedure
@@ -15,14 +15,10 @@ export const timeline = t.router({
 			const timeline =
 				ctx.server.plugins
 					.find((plugin) => plugin.id === input.pluginId)
-					?.aspects.missions.find(
-						(timeline) => timeline.name === input.timelineId,
-					) ||
+					?.aspects.missions.find((timeline) => timeline.name === input.timelineId) ||
 				ctx.server.plugins
 					.find((plugin) => plugin.id === input.pluginId)
-					?.aspects.reports.find(
-						(timeline) => timeline.name === input.timelineId,
-					);
+					?.aspects.reports.find((timeline) => timeline.name === input.timelineId);
 			if (!timeline) return;
 			const timelineEntity = spawnTimeline(timeline, (entity: Entity) => {
 				ctx.flight?.ecs.addEntity(entity);
@@ -30,9 +26,7 @@ export const timeline = t.router({
 
 			// Trigger the first step
 			await triggerStep(
-				ctx.flight.ecs.getEntityById(
-					timelineEntity.components.isTimeline?.steps[0] || -1,
-				)!,
+				ctx.flight.ecs.getEntityById(timelineEntity.components.isTimeline?.steps[0] || -1)!,
 			);
 		}),
 	advance: t.procedure
@@ -63,9 +57,7 @@ export const timeline = t.router({
 			if (input.timelineId !== undefined) {
 				timeline = ctx.flight?.ecs.getEntityById(input.timelineId);
 			} else if (typeof input.stepId === "number") {
-				const timelines = Array.from(
-					ctx.flight?.ecs.componentCache.get("isTimeline") || [],
-				);
+				const timelines = Array.from(ctx.flight?.ecs.componentCache.get("isTimeline") || []);
 				timeline = timelines?.find((timeline) =>
 					timeline.components.isTimeline?.steps.includes(input.stepId!),
 				);
@@ -89,12 +81,8 @@ export const timeline = t.router({
 				}
 				if (timeline.components.isTimeline?.type === "training") {
 					let clientId = "";
-					for (const client of ctx.ecs.componentCache.get("flightClient") ||
-						[]) {
-						if (
-							client.components.flightClient?.training?.timelineId ===
-							timeline.id
-						) {
+					for (const client of ctx.ecs.componentCache.get("flightClient") || []) {
+						if (client.components.flightClient?.training?.timelineId === timeline.id) {
 							client.updateComponent("flightClient", { training: null });
 							clientId = client.components.flightClient.clientId;
 						}
@@ -129,9 +117,7 @@ export const timeline = t.router({
 				timelineId: z
 					.number()
 					.optional()
-					.describe(
-						"Leave blank to use the timeline associated with the step.",
-					),
+					.describe("Leave blank to use the timeline associated with the step."),
 				stepId: z.number(),
 			}),
 		)
@@ -140,9 +126,7 @@ export const timeline = t.router({
 			if (input.timelineId !== undefined) {
 				timeline = ctx.flight?.ecs.getEntityById(input.timelineId);
 			} else if (typeof input.stepId === "number") {
-				const timelines = Array.from(
-					ctx.flight?.ecs.componentCache.get("isTimeline") || [],
-				);
+				const timelines = Array.from(ctx.flight?.ecs.componentCache.get("isTimeline") || []);
 				timeline = timelines?.find((timeline) =>
 					timeline.components.isTimeline?.steps.includes(input.stepId!),
 				);

@@ -1,10 +1,11 @@
 import * as React from "react";
+
+import { Actions } from "../model/Actions";
+import { BorderNode } from "../model/BorderNode";
 import type { TabNode } from "../model/TabNode";
 import { TabSetNode } from "../model/TabSetNode";
 import { CLASSES } from "../Types";
 import type { LayoutInternal } from "./Layout";
-import { BorderNode } from "../model/BorderNode";
-import { Actions } from "../model/Actions";
 
 /** @internal */
 export interface ITabProps {
@@ -23,7 +24,6 @@ export const Tab = (props: ITabProps) => {
 	const parentNode = node.getParent() as TabSetNode | BorderNode;
 	const rect = parentNode.getContentRect()!;
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: We don't mess around with FlexLayout
 	React.useLayoutEffect(() => {
 		const element = node.getMoveableElement()!;
 		selfRef.current!.appendChild(element);
@@ -61,9 +61,7 @@ export const Tab = (props: ITabProps) => {
 		const parent = node.getParent()!; // cannot use parentNode here since will be out of date
 		if (parent instanceof TabSetNode) {
 			if (!parent.isActive()) {
-				layout.doAction(
-					Actions.setActiveTabset(parent.getId(), layout.getWindowId()),
-				);
+				layout.doAction(Actions.setActiveTabset(parent.getId(), layout.getWindowId()));
 			}
 		}
 	};
@@ -81,12 +79,7 @@ export const Tab = (props: ITabProps) => {
 		if (document.hidden && node.isEnablePopoutOverlay()) {
 			const overlayStyle: Record<string, any> = {};
 			rect.styleWithPosition(overlayStyle);
-			overlay = (
-				<div
-					style={overlayStyle}
-					className={cm(CLASSES.FLEXLAYOUT__TAB_OVERLAY)}
-				/>
-			);
+			overlay = <div style={overlayStyle} className={cm(CLASSES.FLEXLAYOUT__TAB_OVERLAY)} />;
 		}
 	} else {
 		style.display = "none";
@@ -94,9 +87,7 @@ export const Tab = (props: ITabProps) => {
 	}
 
 	if (parentNode instanceof TabSetNode) {
-		if (
-			node.getModel().getMaximizedTabset(layout.getWindowId()) !== undefined
-		) {
+		if (node.getModel().getMaximizedTabset(layout.getWindowId()) !== undefined) {
 			if (parentNode.isMaximized()) {
 				style.zIndex = 10;
 			} else {
@@ -114,9 +105,7 @@ export const Tab = (props: ITabProps) => {
 	let className = cm(CLASSES.FLEXLAYOUT__TAB);
 	if (parentNode instanceof BorderNode) {
 		className += ` ${cm(CLASSES.FLEXLAYOUT__TAB_BORDER)}`;
-		className += ` ${cm(
-			CLASSES.FLEXLAYOUT__TAB_BORDER_ + parentNode.getLocation().getName(),
-		)}`;
+		className += ` ${cm(CLASSES.FLEXLAYOUT__TAB_BORDER_ + parentNode.getLocation().getName())}`;
 	}
 
 	if (node.getContentClassName() !== undefined) {
@@ -127,12 +116,7 @@ export const Tab = (props: ITabProps) => {
 		<>
 			{overlay}
 
-			<div
-				ref={selfRef}
-				style={style}
-				className={className}
-				data-layout-path={path}
-			/>
+			<div ref={selfRef} style={style} className={className} data-layout-path={path} />
 		</>
 	);
 };

@@ -10,7 +10,7 @@ export function ReputationCore() {
 	const [reputation] = q.starmapCore.reputation.useNetRequest({ entityId: id });
 	const prompt = usePrompt();
 	return (
-		<div className="px-2 mt-1">
+		<div className="mt-1 px-2">
 			{reputation.length === 0 ? (
 				<p>No reputation</p>
 			) : (
@@ -20,11 +20,7 @@ export function ReputationCore() {
 							<label className="flex-1" htmlFor={`reputation-${targetId}`}>
 								{name}
 							</label>
-							<input
-								id={`reputation-${targetId}`}
-								className="input input-xs w-24"
-								value={value}
-							/>
+							<input id={`reputation-${targetId}`} className="input input-xs w-24" value={value} />
 							<Button
 								className="btn-xs btn-warning"
 								onClick={async () => {
@@ -51,45 +47,39 @@ export function ReputationCore() {
 					);
 				})
 			)}
-			<div className="flex gap-1 justify-between mt-1">
+			<div className="mt-1 flex justify-between gap-1">
 				<Button
-					className="flex-1 btn-xs btn-primary"
+					className="btn-xs btn-primary flex-1"
 					onClick={() =>
-						pickStarmapShip(
-							"Choose a ship or faction to become friends with.",
-							(object) => {
-								if (object === id) return;
-								q.starmapCore.setReputation.netSend({
-									entityId: id,
-									targetId: object,
-									value: 1000,
-								});
-							},
-						)
+						pickStarmapShip("Choose a ship or faction to become friends with.", (object) => {
+							if (object === id) return;
+							q.starmapCore.setReputation.netSend({
+								entityId: id,
+								targetId: object,
+								value: 1000,
+							});
+						})
 					}
 				>
 					Friend
 				</Button>
 				<Button
-					className="flex-1 btn-xs btn-error"
+					className="btn-xs btn-error flex-1"
 					onClick={() =>
-						pickStarmapShip(
-							"Choose a ship or faction to become enemies with.",
-							(object) => {
-								if (object === id) return;
-								q.starmapCore.setReputation.netSend({
-									entityId: id,
-									targetId: object,
-									value: -1000,
-								});
-							},
-						)
+						pickStarmapShip("Choose a ship or faction to become enemies with.", (object) => {
+							if (object === id) return;
+							q.starmapCore.setReputation.netSend({
+								entityId: id,
+								targetId: object,
+								value: -1000,
+							});
+						})
 					}
 				>
 					Enemy
 				</Button>
 				<Button
-					className="flex-1 btn-xs btn-info"
+					className="btn-xs btn-info flex-1"
 					onClick={() =>
 						pickStarmapShip(
 							"Choose a ship or faction to set a reputation value with.",

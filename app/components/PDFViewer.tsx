@@ -1,11 +1,13 @@
-import { pdfjs } from "react-pdf";
+import { AnnotationsLayer } from "@thorium/components/AnnotationsLayer";
+
 import "react-pdf/dist/Page/TextLayer.css";
 import "react-pdf/dist/Page/AnnotationLayer.css";
-import { useState } from "react";
-import { Document, Page } from "react-pdf";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
-import { AnnotationsLayer } from "@thorium/components/AnnotationsLayer";
+import { useState } from "react";
+import { pdfjs } from "react-pdf";
+import { Document, Page } from "react-pdf";
+
 import "./PDFViewer.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -21,10 +23,7 @@ export function PDFViewer({
 }: {
 	url: string;
 	annotations: [number, number, number][][][];
-	onNewAnnotation: (
-		points: [number, number, number][],
-		page: number,
-	) => Promise<void>;
+	onNewAnnotation: (points: [number, number, number][], page: number) => Promise<void>;
 	onClearAnnotations: (page: number) => void;
 }) {
 	const [numPages, setNumPages] = useState<number>();
@@ -50,28 +49,20 @@ export function PDFViewer({
 				</Button>
 			) : null}
 
-			<div className="flex flex-col items-center h-full min-h-0 pdf-viewer">
+			<div className="pdf-viewer flex h-full min-h-0 flex-col items-center">
 				<div
 					className="relative flex-1 overflow-hidden"
 					ref={(node) => {
 						const rect = node?.getBoundingClientRect();
 						if (!rect) return;
-						if (
-							rect.height !== dims.height ||
-							rect.left !== dims.left ||
-							rect.top !== dims.top
-						) {
+						if (rect.height !== dims.height || rect.left !== dims.left || rect.top !== dims.top) {
 							const { height, left, top } = rect;
 							setDims({ height, left, top });
 						}
 					}}
 				>
 					{dims.height && (
-						<Document
-							file={url}
-							onLoadSuccess={onDocumentLoadSuccess}
-							loading=""
-						>
+						<Document file={url} onLoadSuccess={onDocumentLoadSuccess} loading="">
 							<Page
 								canvasBackground="white"
 								pageNumber={pageNumber}
@@ -88,11 +79,8 @@ export function PDFViewer({
 						}}
 					/>
 				</div>
-				<div className="flex justify-between items-center gap-4">
-					<Button
-						className="btn-sm"
-						onClick={() => setPageNumber((page) => Math.max(1, page - 1))}
-					>
+				<div className="flex items-center justify-between gap-4">
+					<Button className="btn-sm" onClick={() => setPageNumber((page) => Math.max(1, page - 1))}>
 						<Icon name="arrow-left" />
 					</Button>
 					<span>
@@ -100,9 +88,7 @@ export function PDFViewer({
 					</span>
 					<Button
 						className="btn-sm"
-						onClick={() =>
-							setPageNumber((page) => Math.min(numPages || 1, page + 1))
-						}
+						onClick={() => setPageNumber((page) => Math.min(numPages || 1, page + 1))}
 					>
 						<Icon name="arrow-right" />
 					</Button>

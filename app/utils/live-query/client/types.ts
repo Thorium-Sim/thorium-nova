@@ -1,4 +1,11 @@
 import type {
+	UseQueryOptions,
+	UseQueryResult,
+	UseMutationOptions,
+	UseMutationResult,
+} from "@tanstack/react-query";
+
+import type {
 	AnyDataStreamProcedure,
 	AnyProcedure,
 	AnyRequestProcedure,
@@ -11,12 +18,6 @@ import type {
 	inferTransformedProcedureOutput,
 	MaybePromise,
 } from "../.server/types";
-import type {
-	UseQueryOptions,
-	UseQueryResult,
-	UseMutationOptions,
-	UseMutationResult,
-} from "@tanstack/react-query";
 
 type Resolver<TProcedure extends AnyProcedure> = (
 	...args: ProcedureArgs<TProcedure["_def"]>
@@ -35,12 +36,7 @@ type DecorateProcedure<
 			>(
 				input: inferProcedureInput<TProcedure>,
 				opts?: Omit<
-					UseQueryOptions<
-						TQueryFnData,
-						TData,
-						Error,
-						[TPath, inferProcedureInput<TProcedure>]
-					>,
+					UseQueryOptions<TQueryFnData, TData, Error, [TPath, inferProcedureInput<TProcedure>]>,
 					"queryKey"
 				> & { callback?: (data: TData) => void },
 			) => [TData, UseQueryResult<TData, Error>];
@@ -70,9 +66,7 @@ type DecorateProcedure<
 			}
 		: TProcedure extends AnyDataStreamProcedure
 			? {
-					useDataStream: (
-						input: inferProcedureInput<TProcedure>,
-					) => MaybePromise<void>;
+					useDataStream: (input: inferProcedureInput<TProcedure>) => MaybePromise<void>;
 				}
 			: never;
 
@@ -84,14 +78,12 @@ export type DecoratedProcedureRecord<
 	TPath extends string = "",
 > = {
 	[TKey in keyof TProcedures]: TProcedures[TKey] extends AnyRouter
-		? DecoratedProcedureRecord<
-				TProcedures[TKey]["_def"]["record"],
-				`${TPath}${TKey & string}.`
-			>
+		? DecoratedProcedureRecord<TProcedures[TKey]["_def"]["record"], `${TPath}${TKey & string}.`>
 		: TProcedures[TKey] extends AnyProcedure
 			? DecorateProcedure<TProcedures[TKey], `${TPath}${TKey & string}`>
 			: never;
 };
 
-export type CreateLiveQueryReact<TRouter extends AnyRouter> =
-	DecoratedProcedureRecord<TRouter["_def"]["record"]>;
+export type CreateLiveQueryReact<TRouter extends AnyRouter> = DecoratedProcedureRecord<
+	TRouter["_def"]["record"]
+>;

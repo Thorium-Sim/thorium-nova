@@ -1,16 +1,14 @@
-import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useLiveQuery } from "./liveQueryContext";
-import { getQueryKey } from "./getQueryKey";
+import { useEffect } from "react";
+
 import { getArrayQueryKey } from "./getArrayQueryKey";
+import { getQueryKey } from "./getQueryKey";
+import { useLiveQuery } from "./liveQueryContext";
 import type { NetResponseData } from "./useDataConnection";
 
 const dataCallbacks: Map<string, Set<(data: any) => void>> = new Map();
 
-export function addDataCallback<TData>(
-	queryKey: string,
-	callback: (data: TData) => void,
-) {
+export function addDataCallback<TData>(queryKey: string, callback: (data: TData) => void) {
 	if (callback) {
 		let callbackSet = dataCallbacks.get(queryKey);
 		if (!callbackSet) {
@@ -32,22 +30,18 @@ export function useDataResponse() {
 		if (socket) {
 			function handleNetRequestData(data: NetResponseData) {
 				if (typeof data !== "object") {
-					throw new Error(`netResponse data must be an object. Got "${data}"`);
+					throw new Error(`netResponse data must be an object. Got "${JSON.stringify(data)}"`);
 				}
 				if (!("id" in data && ("data" in data || "error" in data))) {
 					const dataString = JSON.stringify(data, null, 2);
-					throw new Error(
-						`netResponse data must include an id and a response. Got ${dataString}`,
-					);
+					throw new Error(`netResponse data must include an id and a response. Got ${dataString}`);
 				}
 
 				const [path, params] = JSON.parse(data.id);
 				const queryKey = getArrayQueryKey(getQueryKey(path, params));
 
 				if ("error" in data) {
-					const query = queryClient
-						.getQueryCache()
-						.build(queryClient, { queryKey });
+					const query = queryClient.getQueryCache().build(queryClient, { queryKey });
 					const state = queryClient.getQueryState(queryKey);
 					if (state) {
 						query.setState({

@@ -1,4 +1,4 @@
-import z, { ZodEnum } from "zod";
+import z from "zod";
 
 export const isReactor = z
 	.object({

@@ -1,8 +1,5 @@
 import { decode } from "@msgpack/msgpack";
-import {
-	SnapshotInterpolation,
-	type Types,
-} from "@thorium/utils/snapshot-interpolation/src";
+import { SnapshotInterpolation, type Types } from "@thorium/utils/snapshot-interpolation/src";
 import EventEmitter from "eventemitter3";
 import type ReconnectingWebSocket from "reconnecting-websocket";
 
@@ -17,9 +14,7 @@ export class ClientSocket extends EventEmitter {
 		socket.addEventListener("message", (event) => {
 			if (event.data instanceof Blob) {
 				event.data.arrayBuffer().then((result) => {
-					const data = decode(result) as
-						| { type: string; data: any }
-						| Types.Snapshot;
+					const data = decode(result) as { type: string; data: any } | Types.Snapshot;
 					if ("type" in data) {
 						this.emit(data.type, data.data);
 					} else {

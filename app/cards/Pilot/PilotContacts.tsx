@@ -17,19 +17,10 @@ import { setCursor } from "@thorium/utils/setCursor";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { isObjectOccludedBySphere } from "@thorium/utils/starmap/isObjectOccludedBySphere";
 import { degToRad, solarRadiusToKilometers } from "@thorium/utils/unitTypes";
-import {
-	Fragment,
-	memo,
-	type RefObject,
-	Suspense,
-	useImperativeHandle,
-	useMemo,
-	useRef,
-} from "react";
+import { Fragment, memo, type RefObject, Suspense, useMemo, useRef } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import {
 	type BufferAttribute,
-	type Camera,
 	CylinderGeometry,
 	DoubleSide,
 	type Group,
@@ -46,6 +37,7 @@ import {
 } from "three";
 import type { Line2 } from "three-stdlib";
 import type z from "zod";
+
 import { useCircleGridStore } from "./useCircleGridStore";
 import { WaypointEntity } from "./Waypoint";
 
@@ -94,11 +86,7 @@ export function CircleGridContacts({
 				);
 			})}
 			{ships.map(({ id, modelUrl, logoUrl, size }) => {
-				if (
-					!modelUrl ||
-					!logoUrl ||
-					(includeEntityIds && !includeEntityIds.includes(id))
-				)
+				if (!modelUrl || !logoUrl || (includeEntityIds && !includeEntityIds.includes(id)))
 					return null;
 				return (
 					<Suspense key={id} fallback={null}>
@@ -123,12 +111,7 @@ export function CircleGridContacts({
 				torpedos.map(({ id, color, isDestroyed }) => {
 					return (
 						<Suspense key={id} fallback={null}>
-							<TorpedoEntity
-								id={id}
-								color={color}
-								tilted={tilted}
-								isDestroyed={isDestroyed}
-							/>
+							<TorpedoEntity id={id} color={color} tilted={tilted} isDestroyed={isDestroyed} />
 						</Suspense>
 					);
 				})}
@@ -201,16 +184,14 @@ export const ShipEntity = ({
 	// TODO: Use useGLTF.preload outside of this to preload the asset
 	const model = useGLTF(modelUrl || "", false);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: No need for over-rendering
 	const scene = useMemo(() => {
 		const scene: Object3D = model.scene.clone(true);
 		if (scene.traverse) {
 			scene.traverse((object: Object3D | Mesh) => {
 				if ("material" in object) {
-					(Array.isArray(object.material)
-						? object.material
-						: [object.material]
-					).forEach((mat) => mat.dispose());
+					(Array.isArray(object.material) ? object.material : [object.material]).forEach((mat) =>
+						mat.dispose(),
+					);
 					object.material = new MeshBasicMaterial({
 						color: "white",
 						wireframe: true,
@@ -318,11 +299,7 @@ export const ShipEntity = ({
 			}
 			isOccludedRef.current = false;
 
-			position.set(
-				ship.x - playerPosition.x,
-				ship.y - playerPosition.y,
-				ship.z - playerPosition.z,
-			);
+			position.set(ship.x - playerPosition.x, ship.y - playerPosition.y, ship.z - playerPosition.z);
 			// Since the sensor grid needs to be oriented at 0,0,0
 			// to properly tilt, we reposition the contacts relative
 			// to the player ship's position.
@@ -336,39 +313,19 @@ export const ShipEntity = ({
 			arrowRef.current?.scale.setScalar((dx * 20) / 1000);
 			if (ship.r) {
 				if (shipRef.current) {
-					shipRef.current?.quaternion.set(
-						ship.r.x,
-						ship.r.y,
-						ship.r.z,
-						ship.r.w,
-					);
+					shipRef.current?.quaternion.set(ship.r.x, ship.r.y, ship.r.z, ship.r.w);
 				}
-				arrowRef.current?.quaternion.set(
-					ship.r.x,
-					ship.r.y,
-					ship.r.z,
-					ship.r.w,
-				);
+				arrowRef.current?.quaternion.set(ship.r.x, ship.r.y, ship.r.z, ship.r.w);
 			}
 
 			// Draw the vertical line from the sensor plane to the ship
 			if (playerShip.r && mesh.current?.position) {
-				playerQuaternion.set(
-					playerShip.r.x,
-					playerShip.r.y,
-					playerShip.r.z,
-					playerShip.r.w,
-				);
+				playerQuaternion.set(playerShip.r.x, playerShip.r.y, playerShip.r.z, playerShip.r.w);
 
-				const planeVector = upVector
-					.set(0, 1, 0)
-					.applyQuaternion(playerQuaternion);
+				const planeVector = upVector.set(0, 1, 0).applyQuaternion(playerQuaternion);
 				plane.set(planeVector, 0);
 				plane.projectPoint(position, mesh.current.position);
-				const positions = [
-					...position.toArray(),
-					...mesh.current.position.toArray(),
-				];
+				const positions = [...position.toArray(), ...mesh.current.position.toArray()];
 				line.current?.geometry.setPositions(positions);
 				if (mesh.current && line.current) {
 					if (tilted) {
@@ -384,23 +341,14 @@ export const ShipEntity = ({
 		sprite.current?.scale.setScalar(dx * 3 * scale);
 		reticle.current?.scale.setScalar(dx * 4 * scale);
 		bracket.current?.children.forEach((child, i) => {
-			const bracketPosition = getBracketPosition(
-				size / 1000,
-				i,
-				playerQuaternion,
-			);
+			const bracketPosition = getBracketPosition(size / 1000, i, playerQuaternion);
 			child.position.copy(position).add(bracketPosition);
 			child.scale.setScalar(dx / 15);
 		});
 
 		mesh.current?.scale.setScalar(dx * 3);
 		if (playerShip.r) {
-			mesh.current?.quaternion.set(
-				playerShip.r.x,
-				playerShip.r.y,
-				playerShip.r.z,
-				playerShip.r.w,
-			);
+			mesh.current?.quaternion.set(playerShip.r.x, playerShip.r.y, playerShip.r.z, playerShip.r.w);
 			mesh.current?.rotateX(Math.PI / 2);
 		}
 	});
@@ -461,11 +409,7 @@ export const ShipEntity = ({
 					/>
 					<mesh ref={mesh}>
 						<planeGeometry args={[0.01, 0.01]} attach="geometry" />
-						<meshBasicMaterial
-							attach="material"
-							color="white"
-							side={DoubleSide}
-						/>
+						<meshBasicMaterial attach="material" color="white" side={DoubleSide} />
 					</mesh>
 				</Fragment>
 			)}
@@ -482,23 +426,12 @@ interface PlanetaryEntityProps {
 }
 
 export const PlanetaryEntity = memo(
-	({
-		id,
-		satellite,
-		isPlanet,
-		isStar,
-		onClick,
-		isSelected,
-	}: PlanetaryEntityProps) => {
+	({ id, satellite, isPlanet, isStar, onClick, isSelected }: PlanetaryEntityProps) => {
 		const { shipId } = useStation();
 		const { interpolate } = useLiveQuery();
 
 		const bracket = useRef<Group>(null);
-		const size = isPlanet
-			? isPlanet.radius
-			: isStar
-				? solarRadiusToKilometers(isStar.radius)
-				: 0;
+		const size = isPlanet ? isPlanet.radius : isStar ? solarRadiusToKilometers(isStar.radius) : 0;
 		const position = getOrbitPosition({
 			semiMajorAxis: satellite.semiMajorAxis,
 			eccentricity: satellite.eccentricity,
@@ -524,21 +457,12 @@ export const PlanetaryEntity = memo(
 				position.z - playerShip.z,
 			);
 			if (playerShip.r) {
-				playerQuaternion.set(
-					playerShip.r.x,
-					playerShip.r.y,
-					playerShip.r.z,
-					playerShip.r.w,
-				);
+				playerQuaternion.set(playerShip.r.x, playerShip.r.y, playerShip.r.z, playerShip.r.w);
 			}
 			bracket.current?.children.forEach((child, i) => {
 				const bracketPosition = getBracketPosition(size, i, playerQuaternion);
 				child.position
-					.set(
-						position.x - playerShip.x,
-						position.y - playerShip.y,
-						position.z - playerShip.z,
-					)
+					.set(position.x - playerShip.x, position.y - playerShip.y, position.z - playerShip.z)
 					.add(bracketPosition);
 				child.scale.setScalar(dx / 15);
 			});
@@ -554,12 +478,12 @@ export const PlanetaryEntity = memo(
 				>
 					<mesh
 						onPointerDown={() => onClick?.(id)}
-						onPointerOver={(e) => {
+						onPointerOver={() => {
 							if (onClick) {
 								setCursor("pointer");
 							}
 						}}
-						onPointerOut={(e) => {
+						onPointerOut={() => {
 							setCursor("auto");
 						}}
 					>
@@ -570,12 +494,7 @@ export const PlanetaryEntity = memo(
 				</group>
 				<SensorsBracket bracket={bracket} isSelected={isSelected} />
 				{isPlanet ? (
-					<OcclusionCone
-						size={size}
-						id={id}
-						sensorRange={sensorRange}
-						satellite={satellite}
-					/>
+					<OcclusionCone size={size} id={id} sensorRange={sensorRange} satellite={satellite} />
 				) : null}
 			</>
 		);
@@ -586,7 +505,6 @@ const position1 = new Vector3();
 const position2 = new Vector3();
 const direction = new Vector3();
 function OcclusionCone({
-	id,
 	size,
 	sensorRange,
 	satellite: sat,
@@ -621,8 +539,7 @@ function OcclusionCone({
 		upVector.set(0, -1, 0);
 		ref.current?.quaternion.setFromUnitVectors(upVector, direction);
 
-		const distantRadius =
-			(sensorRange * Math.sin(Math.atan2(size, distance))) / size;
+		const distantRadius = (sensorRange * Math.sin(Math.atan2(size, distance))) / size;
 		const geometry = new CylinderGeometry(
 			1, // radius at top
 			distantRadius, // radius at bottom
@@ -636,41 +553,23 @@ function OcclusionCone({
 	}, cardLoaded);
 	return (
 		<group ref={ref} scale={[size, size, size]}>
-			<mesh
-				position={[0, -sensorRange / size / 2, 0]}
-				renderOrder={-1}
-				ref={cylinderRef}
-			>
+			<mesh position={[0, -sensorRange / size / 2, 0]} renderOrder={-1} ref={cylinderRef}>
 				<cylinderGeometry args={[1, 1, sensorRange / size, 8]} />
-				<meshBasicMaterial
-					color={0x333333}
-					depthTest={false}
-					side={DoubleSide}
-				/>
+				<meshBasicMaterial color={0x333333} depthTest={false} side={DoubleSide} />
 			</mesh>
 			<mesh position={[0, 0, 0]} renderOrder={-1}>
 				<sphereGeometry args={[1]} />
-				<meshBasicMaterial
-					color={0x333333}
-					depthTest={false}
-					side={DoubleSide}
-				/>
+				<meshBasicMaterial color={0x333333} depthTest={false} side={DoubleSide} />
 			</mesh>
 		</group>
 	);
 }
 
-function getBracketPosition(
-	positionScalar: number,
-	index: number,
-	quaternion: Quaternion,
-) {
+function getBracketPosition(positionScalar: number, index: number, quaternion: Quaternion) {
 	return [
 		new Vector3(positionScalar, 0, positionScalar).applyQuaternion(quaternion),
 		new Vector3(positionScalar, 0, -positionScalar).applyQuaternion(quaternion),
-		new Vector3(-positionScalar, 0, -positionScalar).applyQuaternion(
-			quaternion,
-		),
+		new Vector3(-positionScalar, 0, -positionScalar).applyQuaternion(quaternion),
 		new Vector3(-positionScalar, 0, positionScalar).applyQuaternion(quaternion),
 	][index];
 }
@@ -687,10 +586,7 @@ const SensorsBracket = ({
 	const scaleScalar = 0.15;
 	return (
 		<group ref={bracket} visible={isSelected}>
-			<sprite
-				scale={scaleScalar}
-				position={[positionScalar, 0, positionScalar]}
-			>
+			<sprite scale={scaleScalar} position={[positionScalar, 0, positionScalar]}>
 				<spriteMaterial
 					depthTest={false}
 					attach="material"
@@ -700,10 +596,7 @@ const SensorsBracket = ({
 					depthWrite={false}
 				/>
 			</sprite>
-			<sprite
-				scale={scaleScalar}
-				position={[positionScalar, 0, -positionScalar]}
-			>
+			<sprite scale={scaleScalar} position={[positionScalar, 0, -positionScalar]}>
 				<spriteMaterial
 					rotation={Math.PI / 2}
 					depthTest={false}
@@ -714,10 +607,7 @@ const SensorsBracket = ({
 					depthWrite={false}
 				/>
 			</sprite>
-			<sprite
-				scale={scaleScalar}
-				position={[-positionScalar, 0, -positionScalar]}
-			>
+			<sprite scale={scaleScalar} position={[-positionScalar, 0, -positionScalar]}>
 				<spriteMaterial
 					rotation={Math.PI}
 					depthTest={false}
@@ -728,10 +618,7 @@ const SensorsBracket = ({
 					depthWrite={false}
 				/>
 			</sprite>
-			<sprite
-				scale={scaleScalar}
-				position={[-positionScalar, 0, positionScalar]}
-			>
+			<sprite scale={scaleScalar} position={[-positionScalar, 0, positionScalar]}>
 				<spriteMaterial
 					rotation={-Math.PI / 2}
 					depthTest={false}
@@ -815,12 +702,7 @@ export function TorpedoEntity({
 				torpedo.z - playerPosition.z,
 			);
 			if (torpedo.r) {
-				ref.current?.quaternion.set(
-					torpedo.r.x,
-					torpedo.r.y,
-					torpedo.r.z,
-					torpedo.r.w,
-				);
+				ref.current?.quaternion.set(torpedo.r.x, torpedo.r.y, torpedo.r.z, torpedo.r.w);
 			}
 			if (
 				explosionRef.current &&
@@ -842,19 +724,11 @@ export function TorpedoEntity({
 				const planeVector = upVector
 					.set(0, 1, 0)
 					.applyQuaternion(
-						playerQuaternion.set(
-							playerShip.r.x,
-							playerShip.r.y,
-							playerShip.r.z,
-							playerShip.r.w,
-						),
+						playerQuaternion.set(playerShip.r.x, playerShip.r.y, playerShip.r.z, playerShip.r.w),
 					);
 				plane.set(planeVector, 0);
 				plane.projectPoint(ref.current.position, mesh.current.position);
-				const positions = [
-					...ref.current.position.toArray(),
-					...mesh.current.position.toArray(),
-				];
+				const positions = [...ref.current.position.toArray(), ...mesh.current.position.toArray()];
 				line.current?.geometry.setPositions(positions);
 				if (mesh.current && line.current)
 					if (tilted) {

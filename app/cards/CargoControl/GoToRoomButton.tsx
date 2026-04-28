@@ -1,6 +1,7 @@
-import { Tooltip } from "@thorium/ui/Tooltip";
-import { useShipMapStore } from "./useShipMapStore";
 import { Icon } from "@thorium/ui/Icon";
+import { Tooltip } from "@thorium/ui/Tooltip";
+
+import { useShipMapStore } from "./useShipMapStore";
 
 export function GoToRoomButton({
 	decks,
@@ -16,7 +17,7 @@ export function GoToRoomButton({
 	return (
 		<Tooltip content="Go To Room">
 			<button
-				className="px-4 cursor-pointer"
+				className="cursor-pointer px-4"
 				onClick={() => {
 					useShipMapStore.setState({ deckIndex });
 				}}

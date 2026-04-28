@@ -43,21 +43,11 @@ describe.skip("applyDamage", () => {
 		applyDamage(ship, 1, new Vector3(0, 0, -1));
 		expect(systems.shields.components.damage?.failureRisk).toBeCloseTo(0.002);
 		expect(systems.shields.components.damage?.cascadeRisk).toBeCloseTo(0.1654);
-		expect(systems.coolantTank.components.damage?.efficiency).toBeCloseTo(
-			0.731,
-		);
-		expect(systems.coolantTank.components.damage?.failureRisk).toBeCloseTo(
-			0.001,
-		);
-		expect(systems.mainComputer.components.damage?.efficiency).toBeCloseTo(
-			0.9812,
-		);
-		expect(systems.mainComputer.components.damage?.instability).toBeCloseTo(
-			0.000807,
-		);
-		expect(systems.mainComputer.components.damage?.failureRisk).toBeCloseTo(
-			0.0017,
-		);
+		expect(systems.coolantTank.components.damage?.efficiency).toBeCloseTo(0.731);
+		expect(systems.coolantTank.components.damage?.failureRisk).toBeCloseTo(0.001);
+		expect(systems.mainComputer.components.damage?.efficiency).toBeCloseTo(0.9812);
+		expect(systems.mainComputer.components.damage?.instability).toBeCloseTo(0.000807);
+		expect(systems.mainComputer.components.damage?.failureRisk).toBeCloseTo(0.0017);
 	});
 	// Note that the same systems were affected, thanks to the RNG, but the
 	// effect is much smaller due to the shields
@@ -68,21 +58,11 @@ describe.skip("applyDamage", () => {
 
 		expect(systems.shields.components.damage?.failureRisk).toBeCloseTo(0.002);
 		expect(systems.shields.components.damage?.cascadeRisk).toBeCloseTo(0.0045);
-		expect(systems.coolantTank.components.damage?.efficiency).toBeCloseTo(
-			0.9925,
-		);
-		expect(systems.coolantTank.components.damage?.failureRisk).toBeCloseTo(
-			0.001,
-		);
-		expect(systems.mainComputer.components.damage?.efficiency).toBeCloseTo(
-			0.999,
-		);
-		expect(systems.mainComputer.components.damage?.instability).toBeCloseTo(
-			0.0004,
-		);
-		expect(systems.mainComputer.components.damage?.failureRisk).toBeCloseTo(
-			0.0017,
-		);
+		expect(systems.coolantTank.components.damage?.efficiency).toBeCloseTo(0.9925);
+		expect(systems.coolantTank.components.damage?.failureRisk).toBeCloseTo(0.001);
+		expect(systems.mainComputer.components.damage?.efficiency).toBeCloseTo(0.999);
+		expect(systems.mainComputer.components.damage?.instability).toBeCloseTo(0.0004);
+		expect(systems.mainComputer.components.damage?.failureRisk).toBeCloseTo(0.0017);
 	});
 	// Targeting took more damage than normal, shields took less
 	it("should apply extra damage to systems that are weak to the damage type", () => {
@@ -98,21 +78,11 @@ describe.skip("applyDamage", () => {
 
 		expect(systems.shields.components.damage?.failureRisk).toBeCloseTo(0.002);
 		expect(systems.shields.components.damage?.cascadeRisk).toBeCloseTo(0.2481);
-		expect(systems.coolantTank.components.damage?.efficiency).toBeCloseTo(
-			0.798,
-		);
-		expect(systems.coolantTank.components.damage?.failureRisk).toBeCloseTo(
-			0.001,
-		);
-		expect(systems.mainComputer.components.damage?.efficiency).toBeCloseTo(
-			0.9812,
-		);
-		expect(systems.mainComputer.components.damage?.instability).toBeCloseTo(
-			0.000807,
-		);
-		expect(systems.mainComputer.components.damage?.failureRisk).toBeCloseTo(
-			0.0017,
-		);
+		expect(systems.coolantTank.components.damage?.efficiency).toBeCloseTo(0.798);
+		expect(systems.coolantTank.components.damage?.failureRisk).toBeCloseTo(0.001);
+		expect(systems.mainComputer.components.damage?.efficiency).toBeCloseTo(0.9812);
+		expect(systems.mainComputer.components.damage?.instability).toBeCloseTo(0.000807);
+		expect(systems.mainComputer.components.damage?.failureRisk).toBeCloseTo(0.0017);
 	});
 	it("should apply extra damage to systems that are vulnerable", () => {
 		systems.thrusters.updateComponent("damage", {
@@ -124,9 +94,7 @@ describe.skip("applyDamage", () => {
 		expect(systems.targeting.components.damage?.cascadeRisk).toEqual(0);
 
 		expect(systems.thrusters.components.damage?.failureRisk).toBeCloseTo(0.002);
-		expect(systems.thrusters.components.damage?.cascadeRisk).toBeCloseTo(
-			0.1654,
-		);
+		expect(systems.thrusters.components.damage?.cascadeRisk).toBeCloseTo(0.1654);
 	});
 	it("should apply no damage to systems that are invulnerable", () => {
 		systems.shields.updateComponent("damage", {

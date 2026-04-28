@@ -31,10 +31,9 @@ export function spawnShipSystem(
 	if (template.type) {
 		entity.addComponent("isShipSystem", { type: template.type, shipId });
 
-		const componentName =
-			`is${template.type[0].toUpperCase()}${template.type.slice(
-				1,
-			)}` as `is${Capitalize<typeof template.type>}`;
+		const componentName = `is${template.type[0].toUpperCase()}${template.type.slice(
+			1,
+		)}` as `is${Capitalize<typeof template.type>}`;
 
 		const flags = ShipSystemTypes[template.type].flags;
 
@@ -84,8 +83,7 @@ export function spawnShipSystem(
 			if (flags.includes("heat")) {
 				entity.addComponent("heat", {
 					powerToHeat: overrides.powerToHeat || powerToHeat,
-					heatDissipationRate:
-						overrides.heatDissipationRate || heatDissipationRate,
+					heatDissipationRate: overrides.heatDissipationRate || heatDissipationRate,
 					maxHeat: overrides.maxHeat || maxHeat,
 					maxSafeHeat: overrides.maxSafeHeat || maxSafeHeat,
 					nominalHeat: overrides.nominalHeat || nominalHeat,
@@ -93,19 +91,15 @@ export function spawnShipSystem(
 				});
 				if (flightMode === "legacy") {
 					entity.addComponent("legacyCoolant", {
-						coolantConsumptionRate:
-							overrides.coolantConsumptionRate || coolantConsumptionRate,
-						coolantTransferRate:
-							overrides.coolantTransferRate || coolantTransferRate,
+						coolantConsumptionRate: overrides.coolantConsumptionRate || coolantConsumptionRate,
+						coolantTransferRate: overrides.coolantTransferRate || coolantTransferRate,
 					});
 				}
 			}
 			if (flightMode === "legacy" && template.type === "coolantTank") {
 				entity.addComponent("legacyCoolant", {
-					coolantConsumptionRate:
-						overrides.coolantConsumptionRate || coolantConsumptionRate,
-					coolantTransferRate:
-						overrides.coolantTransferRate || coolantTransferRate,
+					coolantConsumptionRate: overrides.coolantConsumptionRate || coolantConsumptionRate,
+					coolantTransferRate: overrides.coolantTransferRate || coolantTransferRate,
 				});
 			}
 

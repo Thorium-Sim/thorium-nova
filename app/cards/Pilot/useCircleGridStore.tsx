@@ -1,5 +1,5 @@
-import { create } from "zustand";
 import { type ReactNode, createContext, useContext, useState } from "react";
+import { create } from "zustand";
 
 function createCircleGridStore({
 	zoomMin = 0.01,
@@ -17,7 +17,7 @@ function createCircleGridStore({
 		tilt: number;
 		width: number;
 		height: number;
-	}>((set) => ({
+	}>(() => ({
 		zoom,
 		zoomMin,
 		zoomMax,
@@ -55,9 +55,7 @@ export function CircleGridStoreProvider({
 export function useCircleGridStore() {
 	const store = useContext(CircleGirdStoreContext);
 	if (!store) {
-		throw new Error(
-			"useCircleGridStore must be used within a CircleGridStoreProvider",
-		);
+		throw new Error("useCircleGridStore must be used within a CircleGridStoreProvider");
 	}
 	return store;
 }

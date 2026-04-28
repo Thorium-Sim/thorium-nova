@@ -22,7 +22,7 @@ export function DocViewer({
 	switch (ext) {
 		case "glb":
 		case "gltf":
-			return <GlbLivePreview url={filePath} className="w-32 h-32 bg-black" />;
+			return <GlbLivePreview url={filePath} className="h-32 w-32 bg-black" />;
 		case "mov":
 		case "mp4":
 		case "ogv":
@@ -66,9 +66,7 @@ export function DocViewer({
 		case "gif":
 		case "webp":
 		case "avif":
-			return (
-				<ImagePreview id={id} filePath={filePath} annotations={annotations} />
-			);
+			return <ImagePreview id={id} filePath={filePath} annotations={annotations} />;
 		default:
 			return null;
 	}
@@ -87,20 +85,13 @@ function ImagePreview({
 			{annotations[0] && annotations[0].length > 0 ? (
 				<Button
 					className="btn-warning btn-sm absolute top-2 right-2"
-					onClick={() =>
-						q.documents.clearAnnotations.netSend({ documentId: id, page: 0 })
-					}
+					onClick={() => q.documents.clearAnnotations.netSend({ documentId: id, page: 0 })}
 				>
 					Clear Annotations
 				</Button>
 			) : null}
-			<div className="h-full relative w-fit mx-auto">
-				<img
-					src={filePath}
-					draggable={false}
-					className="object-cover h-full bg-blue-500"
-					alt=""
-				/>
+			<div className="relative mx-auto h-full w-fit">
+				<img src={filePath} draggable={false} className="h-full bg-blue-500 object-cover" alt="" />
 				<AnnotationsLayer
 					points={annotations[0]}
 					onNewAnnotation={async (points) => {
@@ -120,7 +111,7 @@ function AudioPlayer({ src }: { src: string }) {
 	const [playing, setPlaying] = useState(false);
 	const audioRef = useRef<HTMLAudioElement>(null);
 	return (
-		<div className="w-full h-full relative group flex items-center justify-center">
+		<div className="group relative flex h-full w-full items-center justify-center">
 			<audio
 				src={src}
 				ref={audioRef}
@@ -164,11 +155,11 @@ function VideoPlayer({ src }: { src: string }) {
 		};
 	});
 	return (
-		<div className="w-full h-full relative group flex items-center justify-center">
+		<div className="group relative flex h-full w-full items-center justify-center">
 			<video
 				ref={videoRef}
 				src={src}
-				className="max-w-full max-h-full object-contain rounded-lg"
+				className="max-h-full max-w-full rounded-lg object-contain"
 				onPlay={() => setPlaying(true)}
 				onPause={() => setPlaying(false)}
 				onPointerMove={() => {
@@ -177,10 +168,7 @@ function VideoPlayer({ src }: { src: string }) {
 					}
 					setButtonShown(true);
 					if (playing) {
-						disappearRef.current = setTimeout(
-							() => setButtonShown(false),
-							1000,
-						);
+						disappearRef.current = setTimeout(() => setButtonShown(false), 1000);
 					}
 				}}
 				onPointerOut={() => {

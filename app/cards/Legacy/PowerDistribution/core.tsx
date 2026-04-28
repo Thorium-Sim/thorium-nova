@@ -18,10 +18,7 @@ export function LegacySystemsCore() {
 
 	const reactorPower = reactors.reduce(
 		(prev, reactor) =>
-			prev +
-			Math.round(
-				reactor.maxOutput * reactor.efficiency * (reactor.offline ? 0 : 1),
-			),
+			prev + Math.round(reactor.maxOutput * reactor.efficiency * (reactor.offline ? 0 : 1)),
 		0,
 	);
 
@@ -42,9 +39,7 @@ export function LegacySystemsCore() {
 					<tr key={sys.id} className="border-b border-white/20">
 						<td
 							className={cn("text-left", {
-								"text-orange-300":
-									sys.currentPower >=
-									sys.powerLevels[sys.powerLevels.length - 1],
+								"text-orange-300": sys.currentPower >= sys.powerLevels[sys.powerLevels.length - 1],
 								"text-gray-400": sys.currentPower < sys.powerLevels[0],
 								"text-red-500": sys.offline,
 							})}
@@ -53,8 +48,7 @@ export function LegacySystemsCore() {
 									? "Damaged"
 									: sys.currentPower < sys.powerLevels[0]
 										? "Insufficient Power"
-										: sys.currentPower >=
-												sys.powerLevels[sys.powerLevels.length - 1]
+										: sys.currentPower >= sys.powerLevels[sys.powerLevels.length - 1]
 											? "Overloaded Power"
 											: ""
 							}
@@ -94,7 +88,7 @@ export function LegacySystemsCore() {
 						<td className="">
 							<div className="flex justify-center">
 								<Button
-									className="btn-warning btn-xs !min-h-4 !h-4"
+									className="btn-warning btn-xs !h-4 !min-h-4"
 									title="Flux System Power"
 									onClick={() =>
 										q.legacy.powerDistribution.fluxSystemPower.netSend({
@@ -171,10 +165,7 @@ export function LegacySystemsCore() {
 				<tr className="border-t-2 border-t-white/80">
 					<td>Total</td>
 					<td>
-						<OutputField
-							title="System Power Consumption"
-							alert={systemsPower > reactorPower}
-						>
+						<OutputField title="System Power Consumption" alert={systemsPower > reactorPower}>
 							{systemsPower}
 						</OutputField>
 					</td>

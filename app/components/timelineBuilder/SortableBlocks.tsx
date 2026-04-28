@@ -1,8 +1,3 @@
-import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
-import { useSortable } from "@dnd-kit/sortable";
-
-import { CSS } from "@dnd-kit/utilities";
-
 import {
 	DndContext,
 	closestCenter,
@@ -13,16 +8,19 @@ import {
 	type DragEndEvent,
 	type Over,
 } from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { useSortable } from "@dnd-kit/sortable";
 import {
 	SortableContext,
 	sortableKeyboardCoordinates,
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { cn } from "@thorium/utils/cn";
+import { CSS } from "@dnd-kit/utilities";
 import { RenderBlock } from "@thorium/components/timelineBuilder/blocks";
-import type { ReactNode } from "react";
 import { SortableListenerContext } from "@thorium/components/timelineBuilder/SortableListenerContext";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
+import { cn } from "@thorium/utils/cn";
+import type { ReactNode } from "react";
 
 export function SortableBlocks({
 	parentBlock,
@@ -74,7 +72,7 @@ export function SortableBlocks({
 	}
 
 	return (
-		<div className="relative flex flex-col flex-1 gap-2 py-2 pr-2">
+		<div className="relative flex flex-1 flex-col gap-2 py-2 pr-2">
 			<DndContext
 				sensors={sensors}
 				collisionDetection={closestCenter}
@@ -106,14 +104,11 @@ export function SortableBlocks({
 								onRemove={onRemove}
 								macro={macro}
 								previousActionBlock={
-									blocks.reduceRight(
-										(prev: TimelineBlock | undefined, next, i) => {
-											if (prev) return prev;
-											if (i < index && next.type === "Action") return next;
-											return prev;
-										},
-										undefined,
-									) || parentBlock
+									blocks.reduceRight((prev: TimelineBlock | undefined, next, i) => {
+										if (prev) return prev;
+										if (i < index && next.type === "Action") return next;
+										return prev;
+									}, undefined) || parentBlock
 								}
 							/>
 						</SortableBlock>
@@ -125,14 +120,9 @@ export function SortableBlocks({
 }
 
 function SortableBlock({ id, children }: { id: string; children: ReactNode }) {
-	const {
-		attributes,
-		listeners,
-		setNodeRef,
-		transform,
-		transition,
-		isDragging,
-	} = useSortable({ id: id });
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+		id: id,
+	});
 	const style = {
 		transform: CSS.Transform.toString(transform),
 		transition,
@@ -144,10 +134,8 @@ function SortableBlock({ id, children }: { id: string; children: ReactNode }) {
 			{...attributes}
 			className={cn(isDragging ? "isolate" : "", "w-fit relative")}
 		>
-			<div className={`block  ${isDragging ? "pointer-events-none" : ""}`}>
-				<SortableListenerContext value={listeners}>
-					{children}
-				</SortableListenerContext>
+			<div className={`block ${isDragging ? "pointer-events-none" : ""}`}>
+				<SortableListenerContext value={listeners}>{children}</SortableListenerContext>
 			</div>
 		</div>
 	);

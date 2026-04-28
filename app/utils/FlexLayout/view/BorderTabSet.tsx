@@ -1,15 +1,16 @@
 import * as React from "react";
+
 import { DockLocation } from "../DockLocation";
+import { I18nLabel } from "../I18nLabel";
+import { Actions } from "../model/Actions";
 import type { BorderNode } from "../model/BorderNode";
 import type { TabNode } from "../model/TabNode";
+import { Orientation } from "../Orientation";
+import { CLASSES } from "../Types";
 import { BorderButton } from "./BorderButton";
 import type { LayoutInternal, ITabSetRenderValues } from "./Layout";
 import { showPopup } from "./PopupMenu";
-import { Actions } from "../model/Actions";
-import { I18nLabel } from "../I18nLabel";
 import { useTabOverflow } from "./TabOverflowHook";
-import { Orientation } from "../Orientation";
-import { CLASSES } from "../Types";
 import { isAuxMouseEvent } from "./Utils";
 
 /** @internal */
@@ -53,9 +54,7 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 		layout.getClassName(CLASSES.FLEXLAYOUT__BORDER_BUTTON),
 	);
 
-	const onAuxMouseClick = (
-		event: React.MouseEvent<HTMLElement, MouseEvent>,
-	) => {
+	const onAuxMouseClick = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
 		if (isAuxMouseEvent(event)) {
 			layout.auxMouseClick(border, event);
 		}
@@ -69,9 +68,7 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 		event.stopPropagation();
 	};
 
-	const onOverflowClick = (
-		event: React.MouseEvent<HTMLElement, MouseEvent>,
-	) => {
+	const onOverflowClick = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
 		const callback = layout.getShowOverflowMenu();
 		const items = hiddenTabs.map((h) => {
 			return { index: h, node: border.getChildren()[h] as TabNode };
@@ -91,9 +88,7 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 	};
 
 	const onPopoutTab = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
-		const selectedTabNode = border.getChildren()[
-			border.getSelected()
-		] as TabNode;
+		const selectedTabNode = border.getChildren()[border.getSelected()] as TabNode;
 		if (selectedTabNode !== undefined) {
 			layout.doAction(Actions.popoutTab(selectedTabNode.getId()));
 		}
@@ -121,10 +116,7 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 		);
 		if (i < border.getChildren().length - 1) {
 			tabButtons.push(
-				<div
-					key={`divider${i}`}
-					className={cm(CLASSES.FLEXLAYOUT__BORDER_TAB_DIVIDER)}
-				/>,
+				<div key={`divider${i}`} className={cm(CLASSES.FLEXLAYOUT__BORDER_TAB_DIVIDER)} />,
 			);
 		}
 	};
@@ -167,9 +159,7 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 					onDragStart={(e) => {
 						e.preventDefault();
 					}}
-					className={cm(
-						CLASSES.FLEXLAYOUT__TAB_TOOLBAR_STICKY_BUTTONS_CONTAINER,
-					)}
+					className={cm(CLASSES.FLEXLAYOUT__TAB_TOOLBAR_STICKY_BUTTONS_CONTAINER)}
 				>
 					{stickyButtons}
 				</div>,
@@ -205,8 +195,7 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 				className={`${cm(CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON)} ${cm(
 					CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_OVERFLOW,
 				)} ${cm(
-					CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_OVERFLOW_ +
-						border.getLocation().getName(),
+					CLASSES.FLEXLAYOUT__BORDER_TOOLBAR_BUTTON_OVERFLOW_ + border.getLocation().getName(),
 				)}`}
 				title={overflowTitle}
 				onClick={onOverflowClick}
@@ -236,9 +225,7 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 					onClick={onPopoutTab}
 					onPointerDown={onInterceptPointerDown}
 				>
-					{typeof icons.popout === "function"
-						? icons.popout(selectedTabNode)
-						: icons.popout}
+					{typeof icons.popout === "function" ? icons.popout(selectedTabNode) : icons.popout}
 				</button>,
 			);
 		}
@@ -285,8 +272,7 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 			ref={selfRef}
 			style={{
 				display: "flex",
-				flexDirection:
-					border.getOrientation() === Orientation.VERT ? "row" : "column",
+				flexDirection: border.getOrientation() === Orientation.VERT ? "row" : "column",
 			}}
 			className={borderClasses}
 			data-layout-path={border.getPath()}
@@ -306,11 +292,8 @@ export const BorderTabSet = (props: IBorderTabSetProps) => {
 				>
 					<div
 						style={innerStyle}
-						className={`${cm(
-							CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER,
-						)} ${cm(
-							CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER_ +
-								border.getLocation().getName(),
+						className={`${cm(CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER)} ${cm(
+							CLASSES.FLEXLAYOUT__BORDER_INNER_TAB_CONTAINER_ + border.getLocation().getName(),
 						)}`}
 					>
 						{tabButtons}

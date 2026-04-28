@@ -1,6 +1,5 @@
-import { Fragment, type ReactNode } from "react";
-
-import { Icon } from "./Icon";
+import { cn } from "@thorium/utils/cn";
+import { type ReactNode } from "react";
 import {
 	Button,
 	Menu,
@@ -9,7 +8,8 @@ import {
 	Popover,
 	type MenuItemProps,
 } from "react-aria-components";
-import { cn } from "@thorium/utils/cn";
+
+import { Icon } from "./Icon";
 
 type Origins =
 	| "left"
@@ -29,25 +29,17 @@ type DropdownProps = TriggerProps & {
 	origin?: `origin-${Origins}`;
 	children: ReactNode;
 };
-export default function Dropdown({
-	triggerLabel,
-	triggerEl,
-	children,
-}: DropdownProps) {
+export default function Dropdown({ triggerLabel, triggerEl, children }: DropdownProps) {
 	return (
 		<MenuTrigger>
 			{triggerEl || (
-				<Button className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-xs px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
+				<Button className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-xs hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 focus:outline-none">
 					{triggerLabel}
-					<Icon
-						name="chevron-down"
-						className="-mr-1 ml-2 h-5 w-5"
-						aria-hidden="true"
-					/>
+					<Icon name="chevron-down" className="-mr-1 ml-2 h-5 w-5" aria-hidden="true" />
 				</Button>
 			)}
 			<Popover className={popoverTransitionClasses}>
-				<Menu className="mt-2 w-56 text-base bg-gray-900/90 text-white border-gray-400 border rounded-md shadow-lg max-h-60 ring-1 ring-black/5 focus:outline-none sm:text-sm overflow-y-auto overflow-x-hidden">
+				<Menu className="mt-2 max-h-60 w-56 overflow-x-hidden overflow-y-auto rounded-md border border-gray-400 bg-gray-900/90 text-base text-white shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
 					{children}
 				</Menu>
 			</Popover>

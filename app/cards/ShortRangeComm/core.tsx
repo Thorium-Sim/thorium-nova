@@ -1,6 +1,6 @@
+import { keepPreviousData } from "@tanstack/react-query";
 import { q } from "@thorium/context/AppContext";
 import { pickStarmapShip } from "@thorium/cores/StarmapCore/pickShip";
-import useEventListener from "@thorium/hooks/useEventListener";
 import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
@@ -8,17 +8,19 @@ import Checkbox from "@thorium/ui/Checkbox";
 import { InputField, OutputField } from "@thorium/ui/Core";
 import InfoTip from "@thorium/ui/InfoTip";
 import Select from "@thorium/ui/Select";
-import { Suspense, useState } from "react";
-import { shortRangeStateMap } from "./shared";
-import { keepPreviousData } from "@tanstack/react-query";
 import { cn } from "@thorium/utils/cn";
+import { Suspense } from "react";
+
+import { shortRangeStateMap } from "./shared";
 export function ShortRangeCommCore() {
 	const { shipId } = useStation();
 	const [shortRangeComm] = q.shortRangeComm.get.useNetRequest({ shipId });
-	const [{ allowOtherParticipants }, setAllowOtherParticipants] =
-		useLocalStorage("core-short-range-allow-other-participants", {
+	const [{ allowOtherParticipants }, setAllowOtherParticipants] = useLocalStorage(
+		"core-short-range-allow-other-participants",
+		{
 			allowOtherParticipants: false,
-		});
+		},
+	);
 
 	if (!shortRangeComm)
 		return (
@@ -27,7 +29,7 @@ export function ShortRangeCommCore() {
 			</div>
 		);
 	return (
-		<div className="text-sm h-full">
+		<div className="h-full text-sm">
 			<div className="flex">
 				<OutputField className="flex-1" alert={shortRangeComm.state !== "idle"}>
 					{shortRangeStateMap[shortRangeComm.state]}
@@ -65,8 +67,7 @@ export function ShortRangeCommCore() {
 					<>
 						Allow Other Participants
 						<InfoTip>
-							Allow another participant to join the conversation after it is
-							connected.
+							Allow another participant to join the conversation after it is connected.
 						</InfoTip>
 					</>
 				}
@@ -94,8 +95,7 @@ export function ShortRangeCommCore() {
 				>
 					Hail...
 				</Button>
-			) : shortRangeComm.state === "hailing" &&
-				shortRangeComm.conversationId ? (
+			) : shortRangeComm.state === "hailing" && shortRangeComm.conversationId ? (
 				<Suspense>
 					<HailingButtons conversationId={shortRangeComm.conversationId} />
 				</Suspense>
@@ -112,11 +112,7 @@ export function ShortRangeCommCore() {
 	);
 }
 
-function ConversationName({
-	conversationId,
-}: {
-	conversationId: number | null | undefined;
-}) {
+function ConversationName({ conversationId }: { conversationId: number | null | undefined }) {
 	const { shipId } = useStation();
 	const [conversation] = q.shortRangeComm.conversation.useNetRequest(
 		{ conversationId },
@@ -183,8 +179,7 @@ function HailingButtons({ conversationId }: { conversationId: number }) {
 
 function ConversationSelect() {
 	const { shipId } = useStation();
-	const [conversationTemplates] =
-		q.conversation.conversationTemplates.useNetRequest();
+	const [conversationTemplates] = q.conversation.conversationTemplates.useNetRequest();
 	const [shortRangeComm] = q.shortRangeComm.get.useNetRequest({ shipId });
 
 	return (
@@ -207,8 +202,7 @@ function ConversationSelect() {
 
 function IncomingHails() {
 	const { shipId } = useStation();
-	const [incomingHails] =
-		q.shortRangeComm.incomingHailConversations.useNetRequest({ shipId });
+	const [incomingHails] = q.shortRangeComm.incomingHailConversations.useNetRequest({ shipId });
 
 	if (incomingHails.length === 0) return null;
 	return (
@@ -221,17 +215,13 @@ function IncomingHails() {
 					</span>
 					<Button
 						className="btn-xs btn-error rounded-r-none"
-						onClick={() =>
-							q.shortRangeComm.reject.netSend({ conversationId: c.id, shipId })
-						}
+						onClick={() => q.shortRangeComm.reject.netSend({ conversationId: c.id, shipId })}
 					>
 						Reject
 					</Button>
 					<Button
 						className="btn-xs btn-success rounded-l-none"
-						onClick={() =>
-							q.shortRangeComm.connect.netSend({ conversationId: c.id, shipId })
-						}
+						onClick={() => q.shortRangeComm.connect.netSend({ conversationId: c.id, shipId })}
 					>
 						Connect
 					</Button>

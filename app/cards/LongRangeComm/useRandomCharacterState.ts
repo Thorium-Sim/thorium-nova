@@ -4,11 +4,7 @@ export function useRandomCharacterState(defaultMessage: string = "") {
 	const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
 	const [encodedMessage, setEncodedMessage] = useState(defaultMessage);
 
-	function setMessage(
-		previousMessage: string,
-		nextMessage: string,
-		immediate?: boolean,
-	) {
+	function setMessage(previousMessage: string, nextMessage: string, immediate?: boolean) {
 		for (const timeout of timeouts.current) {
 			clearTimeout(timeout);
 		}
@@ -29,9 +25,7 @@ export function useRandomCharacterState(defaultMessage: string = "") {
 			for (let j = 0; j < i; j++) {
 				const index = randomOrder[j];
 				message =
-					message.slice(0, Math.max(index - 1, 0)) +
-					nextMessage[index] +
-					message.slice(index);
+					message.slice(0, Math.max(index - 1, 0)) + nextMessage[index] + message.slice(index);
 			}
 			timeouts.current.push(
 				setTimeout(() => {

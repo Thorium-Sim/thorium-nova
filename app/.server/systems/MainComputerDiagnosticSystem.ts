@@ -16,12 +16,8 @@ export class MainComputerDiagnosticSystem extends System {
 			const parentId = diagnostic.components.diagnostic?.shipId;
 			if (!diagnostic.components.diagnostic || !parentId) continue;
 			if (diagnostic.components.diagnostic.progress >= 1) continue;
-			if (!this.diagnosticCount.has(parentId))
-				this.diagnosticCount.set(parentId, 0);
-			this.diagnosticCount.set(
-				parentId,
-				(this.diagnosticCount.get(parentId) || 0) + 1,
-			);
+			if (!this.diagnosticCount.has(parentId)) this.diagnosticCount.set(parentId, 0);
+			this.diagnosticCount.set(parentId, (this.diagnosticCount.get(parentId) || 0) + 1);
 		}
 	}
 	update(entity: Entity, elapsedMs: number): void {
@@ -34,9 +30,7 @@ export class MainComputerDiagnosticSystem extends System {
 		const allMainComputers = this.ecs.componentCache.get("isMainComputer");
 		let mainComputer: Entity | null = null;
 		for (const mainComputerEntity of allMainComputers || []) {
-			if (
-				mainComputerEntity.components.isShipSystem?.shipId === diagnostic.shipId
-			) {
+			if (mainComputerEntity.components.isShipSystem?.shipId === diagnostic.shipId) {
 				mainComputer = mainComputerEntity;
 				break;
 			}
@@ -51,15 +45,13 @@ export class MainComputerDiagnosticSystem extends System {
 		if (!diagnosticCount) return;
 
 		// Increase the diagnostic progress
-		const { maxDiagnosticEnergyCost, minDiagnosticEnergyCost } =
-			mainComputerSystem;
+		const { maxDiagnosticEnergyCost, minDiagnosticEnergyCost } = mainComputerSystem;
 
 		let totalRequiredEnergy: KiloWattHour = Number.POSITIVE_INFINITY;
 		const level = Number(diagnostic.level);
 		totalRequiredEnergy =
 			// Divide by three, since the minimum is what a level 1 diagnostic costs anyway
-			((maxDiagnosticEnergyCost - minDiagnosticEnergyCost) / 3) **
-				(level - 0.5) +
+			((maxDiagnosticEnergyCost - minDiagnosticEnergyCost) / 3) ** (level - 0.5) +
 			minDiagnosticEnergyCost;
 
 		// Fudge it for non-player ships
@@ -69,13 +61,11 @@ export class MainComputerDiagnosticSystem extends System {
 				: mainComputer.components.power?.defaultPower) || 0;
 		const powerProvided = currentPower / diagnosticCount;
 		// The energy provided in kilowatt hours, by converting from megawatts
-		const energyProvided: KiloWattHour =
-			powerProvided * elapsedTimeHours * 1000;
+		const energyProvided: KiloWattHour = powerProvided * elapsedTimeHours * 1000;
 
 		const progress = Math.min(
 			1,
-			diagnostic.progress +
-				energyProvided / (totalRequiredEnergy || Number.EPSILON),
+			diagnostic.progress + energyProvided / (totalRequiredEnergy || Number.EPSILON),
 		);
 		entity.updateComponent("diagnostic", { progress });
 

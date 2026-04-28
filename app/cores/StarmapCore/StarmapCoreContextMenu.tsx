@@ -1,12 +1,12 @@
 import { autoPlacement, useFloating } from "@floating-ui/react";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
+import { q } from "@thorium/context/AppContext";
 import { toast } from "@thorium/context/ToastContext";
+import { pickStarmapShip } from "@thorium/cores/StarmapCore/pickShip";
 import useEventListener from "@thorium/hooks/useEventListener";
 import { useRightClick } from "@thorium/hooks/useRightClick";
-import { type RefObject, useState } from "react";
-import { q } from "@thorium/context/AppContext";
 import { Portal } from "@thorium/ui/Portal";
-import { pickStarmapShip } from "@thorium/cores/StarmapCore/pickShip";
+import { type RefObject, useState } from "react";
 
 function makeVirtualEl({ x: X, y: Y }: { x: number; y: number }) {
 	const virtualEl = {
@@ -63,9 +63,7 @@ export const StarmapCoreContextMenu = ({
 		const object = useStarmapStore
 			.getState()
 			.getObjectsUnderCursor?.()
-			.filter(
-				(o) => o.userData.type && o.userData.id !== undefined,
-			)[0]?.userData;
+			.filter((o) => o.userData.type && o.userData.id !== undefined)[0]?.userData;
 
 		setOpen({ x: e.clientX, y: e.clientY, object });
 		const virtualEl = makeVirtualEl({ x: e.clientX, y: e.clientY });
@@ -95,7 +93,7 @@ export const StarmapCoreContextMenu = ({
 					top: y ?? "",
 					left: x ?? "",
 				}}
-				className="text-white bg-black/50 border border-white/25 text-xs rounded-sm divide-y divide-purple-500/25 flex flex-col"
+				className="flex flex-col divide-y divide-purple-500/25 rounded-sm border border-white/25 bg-black/50 text-xs text-white"
 			>
 				{/* TODO March 11, 2024: Add commands for when right clicking on another object, such as following or attacking the target */}
 				{selectedShips.length > 0 ? (
@@ -105,9 +103,7 @@ export const StarmapCoreContextMenu = ({
 								className={menuItemClass}
 								onClick={() => {
 									if (selectedShips.length > 0) {
-										const position = useStarmapStore
-											.getState()
-											.translate2DTo3D?.(x, y);
+										const position = useStarmapStore.getState().translate2DTo3D?.(x, y);
 										if (!position) return;
 
 										q.starmapCore.setDestinations.netSend({
@@ -131,9 +127,7 @@ export const StarmapCoreContextMenu = ({
 								className={menuItemClass}
 								onClick={() => {
 									if (selectedShips.length > 0) {
-										const position = useStarmapStore
-											.getState()
-											.translate2DTo3D?.(x, y);
+										const position = useStarmapStore.getState().translate2DTo3D?.(x, y);
 										if (!position) return;
 										q.starmapCore.fireTorpedo.netSend({
 											objectId: selectedShips[0] as number,
@@ -157,8 +151,7 @@ export const StarmapCoreContextMenu = ({
 							onClick={() => {
 								if (selectedShips.length > 0) {
 									q.starmapCore.setOrbit.netSend({
-										ships: useStarmapStore.getState()
-											.selectedObjectIds as number[],
+										ships: useStarmapStore.getState().selectedObjectIds as number[],
 										objectId: object.id,
 									});
 									setOpen(false);
@@ -173,8 +166,7 @@ export const StarmapCoreContextMenu = ({
 							onClick={() => {
 								if (selectedShips.length > 0) {
 									q.starmapCore.setOrbit.netSend({
-										ships: useStarmapStore.getState()
-											.selectedObjectIds as number[],
+										ships: useStarmapStore.getState().selectedObjectIds as number[],
 										objectId: object.id,
 									});
 									setOpen(false);
@@ -189,8 +181,7 @@ export const StarmapCoreContextMenu = ({
 							onClick={() => {
 								if (selectedShips.length > 0) {
 									q.starmapCore.setFollowShip.netSend({
-										ships: useStarmapStore.getState()
-											.selectedObjectIds as number[],
+										ships: useStarmapStore.getState().selectedObjectIds as number[],
 										objectId: object.id,
 										// TODO: March 15, 2024 - This should change based on the current objective of the ship
 										objective: "defend",

@@ -1,19 +1,19 @@
-import { parseConversationLine } from "./parseConversationLine";
-import { triggerAction } from "../triggerAction";
-import { spawnTrigger } from "@thorium/.server/spawners/trigger";
-import type { ECS, Entity } from "@thorium/utils/ecs";
-import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
-import uniqid from "@thorium/utils/uniqid";
-import { pubsub } from "@thorium/.server/init/pubsub";
-import { measureAudioDurationMs } from "./measureAudioDuration";
-import { scheduleAction } from "../scheduleAction";
-import type { Story } from "inkjs";
-import { getValueReference } from "../executeBlocks";
-import { interpolateText } from "@thorium/utils/interpolationEngine";
-import { loadInkStory } from "@thorium/utils/.server/ink/loadInkStory";
 import path from "node:path";
+
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { spawnTrigger } from "@thorium/.server/spawners/trigger";
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
-import { convertArray } from "three/src/animation/AnimationUtils.js";
+import { loadInkStory } from "@thorium/utils/.server/ink/loadInkStory";
+import type { ECS, Entity } from "@thorium/utils/ecs";
+import { interpolateText } from "@thorium/utils/interpolationEngine";
+import uniqid from "@thorium/utils/uniqid";
+import type { Story } from "inkjs";
+
+import { getValueReference } from "../executeBlocks";
+import { scheduleAction } from "../scheduleAction";
+import { triggerAction } from "../triggerAction";
+import { measureAudioDurationMs } from "./measureAudioDuration";
+import { parseConversationLine } from "./parseConversationLine";
 
 export async function runInkStory(conversation: Entity) {
 	const convo = conversation.components.isConversation;
@@ -40,11 +40,7 @@ export async function runInkStory(conversation: Entity) {
 					const localVariables = {};
 					const values = Object.fromEntries(
 						Object.entries(lineAction.params).map(([key, value]) => {
-							let val = getValueReference(
-								value,
-								localVariables,
-								conversation.ecs,
-							);
+							let val = getValueReference(value, localVariables, conversation.ecs);
 							// Special handling for numbers
 							if (Number(val).toString() === val && key !== "alertLevel") {
 								val = Number(val);
@@ -52,11 +48,7 @@ export async function runInkStory(conversation: Entity) {
 								val = null;
 							} else if (typeof val === "string") {
 								// Other values get interpolated automatically
-								val = interpolateText(
-									val,
-									localVariables,
-									conversation.ecs.rng,
-								);
+								val = interpolateText(val, localVariables, conversation.ecs.rng);
 							}
 
 							return [key, val];
@@ -64,8 +56,7 @@ export async function runInkStory(conversation: Entity) {
 					);
 					conversation.updateComponent("isConversation", {
 						executedActions: [
-							...(conversation.components.isConversation?.executedActions ||
-								[]),
+							...(conversation.components.isConversation?.executedActions || []),
 							pathString,
 						],
 					});
@@ -124,10 +115,7 @@ export async function runInkStory(conversation: Entity) {
 			}
 			case "dialogue": {
 				// Find the entity that spoke the line, default to the non-player participant
-				const speakerId = findSpeakerId(
-					conversation.ecs,
-					lineAction.speakerName,
-				);
+				const speakerId = findSpeakerId(conversation.ecs, lineAction.speakerName);
 				conversation.updateComponent("isConversation", {
 					currentDialogue: [
 						...convo.currentDialogue,
@@ -151,9 +139,7 @@ export async function runInkStory(conversation: Entity) {
 						) {
 							// Relative path based on the conversation's ink file
 							audioFilepath = path.join(
-								path.dirname(
-									conversation.components.isConversation.inkFilePath,
-								),
+								path.dirname(conversation.components.isConversation.inkFilePath),
 								tag.trim(),
 							);
 						}
@@ -172,9 +158,7 @@ export async function runInkStory(conversation: Entity) {
 						if (hasDialoguePlayer) {
 							// We stop evaluating the story here until the line of
 							// audio dialogue is delivered
-							const duration = await measureAudioDurationMs(
-								path.join(thoriumPath, audioFilepath),
-							);
+							const duration = await measureAudioDurationMs(path.join(thoriumPath, audioFilepath));
 							scheduleAction(
 								conversation.ecs,
 								"conversation.continue",
@@ -209,10 +193,7 @@ export async function runInkStory(conversation: Entity) {
 function findSpeakerId(ecs: ECS, speakerName: string) {
 	let speakerId: number = -1;
 	for (const entity of ecs.componentCache.get("identity") || []) {
-		if (
-			entity.components.identity?.name.toLowerCase() ===
-			speakerName.toLowerCase()
-		) {
+		if (entity.components.identity?.name.toLowerCase() === speakerName.toLowerCase()) {
 			speakerId = entity.id;
 			break;
 		}
@@ -226,9 +207,7 @@ export function doForEachConversationPartner(
 	conversation: Entity,
 	callback: (shortRangeCommEntity: Entity, shipId: number) => void,
 ) {
-	for (const entity of conversation.ecs.componentCache.get(
-		"isShortRangeComm",
-	) || []) {
+	for (const entity of conversation.ecs.componentCache.get("isShortRangeComm") || []) {
 		if (
 			entity.components.isShortRangeComm?.conversationId === conversation.id &&
 			entity.components.isShipSystem?.shipId

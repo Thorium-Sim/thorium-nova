@@ -3,18 +3,16 @@ import {
 	type ActionState,
 	type ActionAction,
 } from "@thorium/components/Config/ActionBuilder";
-import { Suspense, useReducer, useState } from "react";
-import { produce } from "immer";
-
-import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
-import { Tooltip } from "@thorium/ui/Tooltip";
-import { Icon } from "@thorium/ui/Icon";
-import type { DragEndEvent } from "@dnd-kit/core";
-import Button from "@thorium/ui/Button";
 import { q } from "@thorium/context/AppContext";
-import { ErrorBoundary } from "react-error-boundary";
 import { actionReducer } from "@thorium/cores/ActionsCore/actionReducer";
 import { TriggerAction } from "@thorium/cores/ActionsCore/TriggerAction";
+import Button from "@thorium/ui/Button";
+import { Icon } from "@thorium/ui/Icon";
+import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
+import { Tooltip } from "@thorium/ui/Tooltip";
+import { produce } from "immer";
+import { Suspense, useReducer, useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
 type ActionsState = (ActionState & { id: string })[];
 function actionsReducer(
@@ -59,10 +57,7 @@ function actionsReducer(
 }
 
 export function ActionsCore() {
-	const [actionsList, dispatch] = useReducer(
-		actionsReducer,
-		[] as ActionsState,
-	);
+	const [actionsList, dispatch] = useReducer(actionsReducer, [] as ActionsState);
 
 	const [selectedAction, setSelectedAction] = useState<string | undefined>();
 
@@ -102,19 +97,9 @@ export function ActionsCore() {
 		),
 	}));
 
-	async function handleDragEnd({
-		active,
-		overIndex,
-	}: {
-		active: DragEndEvent["active"];
-		overIndex: number;
-	}) {
-		dispatch({ type: "moveAction", actionId: active.id as string, overIndex });
-	}
-
 	return (
 		<>
-			{/* For some reason, rendering the actions in a sortable list messed up 
+			{/* For some reason, rendering the actions in a sortable list messed up
 		using space bar in input fields, probably because of the a11y of sorting using keyboard shortcuts */}
 			{/* <SortableList
 				items={actions}
@@ -139,13 +124,13 @@ export function ActionsCore() {
 			</Suspense>
 			<div className="flex gap-2">
 				<Button
-					className="flex-1 btn-outline btn-warning btn-xs"
+					className="btn-outline btn-warning btn-xs flex-1"
 					onClick={() => dispatch({ type: "clear" })}
 				>
 					Clear
 				</Button>
 				<Button
-					className="flex-1 btn-outline btn-primary btn-xs"
+					className="btn-outline btn-primary btn-xs flex-1"
 					onClick={async () => {
 						await q.thorium.executeActions.netSend({ actions: actionsList });
 						dispatch({ type: "clear" });

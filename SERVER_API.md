@@ -26,8 +26,8 @@ payload that includes an error `message` property.
 
 ```json
 {
-  "input": "clientSetName",
-  "name": "New Client Name"
+	"input": "clientSetName",
+	"name": "New Client Name"
 }
 ```
 

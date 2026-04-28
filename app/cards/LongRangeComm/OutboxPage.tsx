@@ -10,6 +10,7 @@ import { cn } from "@thorium/utils/cn";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import throttle from "lodash.throttle";
 import { useCallback, useRef, useState } from "react";
+
 import { SatelliteMap } from "./SatelliteMap";
 import { useRandomCharacterState } from "./useRandomCharacterState";
 
@@ -33,20 +34,12 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 	});
 
 	const draggingRef = useRef(false);
-	const [frequency, setFrequencyValue] = useState(
-		longRangeComm.frequency || 276.25,
-	);
+	const [frequency, setFrequencyValue] = useState(longRangeComm.frequency || 276.25);
 	const [gain, setGainValue] = useState(longRangeComm.gain || 1);
-	const [selectedMessageId, setSelectedMessageId] = useState<number | null>(
-		null,
-	);
-	const [selectedSatellite, setSelectedSatellite] = useState<number | null>(
-		null,
-	);
+	const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
+	const [selectedSatellite, setSelectedSatellite] = useState<number | null>(null);
 
-	const selectedMessage = outgoingMessages.find(
-		(m) => m.id === selectedMessageId,
-	);
+	const selectedMessage = outgoingMessages.find((m) => m.id === selectedMessageId);
 
 	q.longRangeComm.systemStream.useDataStream({ shipId });
 
@@ -91,8 +84,8 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 	const [encodedMessage, setEncodedMessage] = useRandomCharacterState();
 
 	return (
-		<div className="w-full h-full grid grid-cols-[16rem_auto_1fr] overflow-hidden gap-8">
-			<div className="flex flex-col h-full row-span-2 min-h-0">
+		<div className="grid h-full w-full grid-cols-[16rem_auto_1fr] gap-8 overflow-hidden">
+			<div className="row-span-2 flex h-full min-h-0 flex-col">
 				<h3>Outgoing Messages</h3>
 				<ul className="panel panel-alert flex-auto overflow-y-auto">
 					{outgoingMessages.map((o) => (
@@ -113,7 +106,7 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 				</ul>
 			</div>
 			<SatelliteMap
-				className="w-full panel panel-black panel-opaque aspect-square rounded-full"
+				className="panel panel-black panel-opaque aspect-square w-full rounded-full"
 				radius={gain * longRangeComm.maxSatelliteRange}
 				shouldRender={cardLoaded && pageLoaded}
 				frequency={frequency}
@@ -122,8 +115,8 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 				setSelectedSatellite={setSelectedSatellite}
 			/>
 
-			<div className="row-span-2 flex flex-col gap-4 max-h-full  min-h-0">
-				<div className="w-full aspect-16/7 panel panel-neutral panel-opaque">
+			<div className="row-span-2 flex max-h-full min-h-0 flex-col gap-4">
+				<div className="panel panel-neutral panel-opaque aspect-16/7 w-full">
 					<SineWave
 						className="faded-scroll-x"
 						shouldRender={cardLoaded && pageLoaded}
@@ -177,7 +170,7 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 					<input
 						id="frequency"
 						type="range"
-						className="range range-primary w-full block"
+						className="range range-primary block w-full"
 						min={100}
 						max={350}
 						step={0.25}
@@ -203,7 +196,7 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 					<input
 						id="amplitude"
 						type="range"
-						className="range range-error w-full block"
+						className="range range-error block w-full"
 						min={0}
 						max={1}
 						step={0.01}
@@ -231,11 +224,11 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 				</div>
 				<div>
 					<p className="whitespace-nowrap">Power Level</p>
-					<div className="flex gap-2 h-4">
-						<div className="flex-auto w-full panel rounded-none panel-neutral relative overflow-hidden">
+					<div className="flex h-4 gap-2">
+						<div className="panel panel-neutral relative w-full flex-auto overflow-hidden rounded-none">
 							<Tooltip content="Required Power">
 								<div
-									className="absolute h-full border-green-400 border border-dashed z-10 translate-x-1/2 transition-all"
+									className="absolute z-10 h-full translate-x-1/2 border border-dashed border-green-400 transition-all"
 									style={{
 										left: `${(longRangeComm.requiredPower / longRangeComm.maxSafePower) * 100}%`,
 									}}
@@ -243,7 +236,7 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 							</Tooltip>
 							<Tooltip content="Alloted Power">
 								<div
-									className="absolute h-full border-warning border border-dashed z-10 translate-x-1/2 transition-all"
+									className="border-warning absolute z-10 h-full translate-x-1/2 border border-dashed transition-all"
 									style={{
 										left: `${(longRangeComm.currentPower / longRangeComm.maxSafePower) * 100}%`,
 									}}
@@ -251,14 +244,14 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 							</Tooltip>
 
 							<div
-								className="absolute h-full w-1/2 bottom-0  striped-gradient-horizontal striped-gradient-yellow-300 transition-all"
+								className="striped-gradient-horizontal striped-gradient-yellow-300 absolute bottom-0 h-full w-1/2 transition-all"
 								ref={powerBarRef}
 							></div>
 						</div>
 					</div>
 				</div>
 
-				<div className="panel panel-alert p-4 flex-auto whitespace-pre-line overflow-y-auto hyphens-auto wrap-anywhere">
+				<div className="panel panel-alert flex-auto overflow-y-auto p-4 wrap-anywhere hyphens-auto whitespace-pre-line">
 					{encodedMessage}
 				</div>
 				<Select
@@ -270,11 +263,10 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 					selected={selectedMessage?.encodingType || "decoded"}
 					setSelected={async (value) => {
 						if (!value || !selectedMessage?.id) return;
-						const { encodedMessage } =
-							await q.longRangeComm.setMessageEncoding.netSend({
-								messageId: selectedMessage.id,
-								encoding: value,
-							});
+						const { encodedMessage } = await q.longRangeComm.setMessageEncoding.netSend({
+							messageId: selectedMessage.id,
+							encoding: value,
+						});
 						setEncodedMessage(selectedMessage.message, encodedMessage);
 					}}
 					items={[
@@ -297,7 +289,7 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 					]}
 				/>
 				<Button
-					className="w-full btn-lg btn-info"
+					className="btn-lg btn-info w-full"
 					disabled={!selectedMessage || selectedSatellite === null}
 					onClick={() => {
 						if (!selectedMessage || selectedSatellite === null) return;
@@ -312,10 +304,7 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 					Send Message
 				</Button>
 			</div>
-			<p
-				className="mt-4 text-4xl text-center font-bold col-start-2"
-				ref={scanningTextRef}
-			>
+			<p className="col-start-2 mt-4 text-center text-4xl font-bold" ref={scanningTextRef}>
 				Scanning For Satellites
 			</p>
 		</div>

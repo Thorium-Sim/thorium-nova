@@ -1,5 +1,6 @@
-import Entity from "../entity";
 import { describe, expect, it } from "vitest";
+
+import Entity from "../entity";
 
 describe("Entity", () => {
 	it("should initialize", () => {

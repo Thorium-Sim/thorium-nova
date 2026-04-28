@@ -1,24 +1,22 @@
-import type ShipPlugin from "@thorium/.server/classes/Plugins/Ship";
-import { t } from "@thorium/.server/init/t";
-import { pubsub } from "@thorium/.server/init/pubsub";
-import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-import inputAuth from "@thorium/utils/.server/inputAuth";
-import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
-import z from "zod";
-import { getPlugin } from "./utils";
 import path from "node:path";
-import uniqid from "@thorium/utils/uniqid";
+
+import type ShipPlugin from "@thorium/.server/classes/Plugins/Ship";
 import { DeckEdge, DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
-import { nodeFlagsSchema } from "@thorium/utils/flags/DeckNode";
-import { edgeFlagsSchema } from "@thorium/utils/flags/DeckEdge";
 import type { DataContext } from "@thorium/.server/DataContext";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
+import inputAuth from "@thorium/utils/.server/inputAuth";
+import { edgeFlagsSchema } from "@thorium/utils/flags/DeckEdge";
+import { nodeFlagsSchema } from "@thorium/utils/flags/DeckNode";
+import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
+import uniqid from "@thorium/utils/uniqid";
+import z from "zod";
+
+import { getPlugin } from "./utils";
 function getDeck(
 	context: DataContext,
-	{
-		pluginId,
-		shipId,
-		deckId,
-	}: { pluginId: string; shipId: string; deckId: string },
+	{ pluginId, shipId, deckId }: { pluginId: string; shipId: string; deckId: string },
 ) {
 	const plugin = getPlugin(context, pluginId);
 	const ship = plugin.aspects.ships.find((ship) => ship.name === shipId);
@@ -29,9 +27,7 @@ function getDeck(
 	return { ship, deck };
 }
 function getNextDeckId(ship: ShipPlugin) {
-	const deckIds = ship.decks.flatMap((deck) =>
-		deck.nodes.map((node) => node.id),
-	);
+	const deckIds = ship.decks.flatMap((deck) => deck.nodes.map((node) => node.id));
 	return Math.max(0, ...deckIds) + 1;
 }
 function getNextEdgeId(ship: ShipPlugin) {
@@ -45,9 +41,7 @@ export const deck = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const ship = plugin.aspects.ships.find(
-				(ship) => ship.name === input.shipId,
-			);
+			const ship = plugin.aspects.ships.find((ship) => ship.name === input.shipId);
 			if (!ship) return null;
 
 			const deckIndex = ship.addDeck({});
@@ -69,14 +63,10 @@ export const deck = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const ship = plugin.aspects.ships.find(
-				(ship) => ship.name === input.shipId,
-			);
+			const ship = plugin.aspects.ships.find((ship) => ship.name === input.shipId);
 			if (!ship) return;
 
-			const deckIndex = ship.decks.findIndex(
-				(deck) => deck.name === input.deckId,
-			);
+			const deckIndex = ship.decks.findIndex((deck) => deck.name === input.deckId);
 			ship.removeDeck(deckIndex);
 
 			pubsub.publish.plugin.ship.get({
@@ -106,9 +96,7 @@ export const deck = t.router({
 			inputAuth(ctx);
 			const { ship, deck } = getDeck(ctx, input);
 
-			const deckIndex = ship.decks.findIndex(
-				(deck) => deck.name === input.deckId,
-			);
+			const deckIndex = ship.decks.findIndex((deck) => deck.name === input.deckId);
 			if ("generateName" in input) {
 				deck.name = generateIncrementedName(
 					input.generateName,
@@ -278,9 +266,7 @@ export const deck = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const ship = plugin.aspects.ships.find(
-				(ship) => ship.name === input.shipId,
-			);
+			const ship = plugin.aspects.ships.find((ship) => ship.name === input.shipId);
 			if (!ship) throw new Error("Ship not found");
 
 			const edge = new DeckEdge({
@@ -307,17 +293,13 @@ export const deck = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const ship = plugin.aspects.ships.find(
-				(ship) => ship.name === input.shipId,
-			);
+			const ship = plugin.aspects.ships.find((ship) => ship.name === input.shipId);
 			if (!ship) throw new Error("Ship not found");
 
 			const edge = ship.deckEdges.find((edge) => edge.id === input.edgeId);
 			if (!edge) return;
 
-			ship.deckEdges = ship.deckEdges.filter(
-				(edge) => edge.id !== input.edgeId,
-			);
+			ship.deckEdges = ship.deckEdges.filter((edge) => edge.id !== input.edgeId);
 
 			pubsub.publish.plugin.ship.get({
 				pluginId: input.pluginId,
@@ -332,18 +314,13 @@ export const deck = t.router({
 					shipId: z.string(),
 					edgeId: z.number(),
 				}),
-				z.union([
-					z.object({ weight: z.number() }),
-					z.object({ flags: edgeFlagsSchema.array() }),
-				]),
+				z.union([z.object({ weight: z.number() }), z.object({ flags: edgeFlagsSchema.array() })]),
 			),
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const ship = plugin.aspects.ships.find(
-				(ship) => ship.name === input.shipId,
-			);
+			const ship = plugin.aspects.ships.find((ship) => ship.name === input.shipId);
 			if (!ship) throw new Error("Ship not found");
 
 			const edge = ship.deckEdges.find((edge) => edge.id === input.edgeId);

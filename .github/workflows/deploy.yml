@@ -25,7 +25,6 @@ jobs:
           name: build
           path: build
 
-
   release:
     needs: build
     permissions:
@@ -34,18 +33,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: 'macos-latest' # for Arm based macs (M1 and above).
-            args: '--target aarch64-apple-darwin'
-            arch: 'aarch64-apple-darwin'
-          - platform: 'macos-latest' # for Intel based macs.
-            args: '--target x86_64-apple-darwin'
-            arch: 'x86_64-apple-darwin'
-          - platform: 'ubuntu-24.04' # for Tauri v1 you could replace this with ubuntu-20.04.
-            args: ''
-            arch: 'x86_64-unknown-linux-gnu'
-          - platform: 'windows-latest'
-            args: ''
-            arch: 'x86_64-pc-windows-msvc'
+          - platform: "macos-latest" # for Arm based macs (M1 and above).
+            args: "--target aarch64-apple-darwin"
+            arch: "aarch64-apple-darwin"
+          - platform: "macos-latest" # for Intel based macs.
+            args: "--target x86_64-apple-darwin"
+            arch: "x86_64-apple-darwin"
+          - platform: "ubuntu-24.04" # for Tauri v1 you could replace this with ubuntu-20.04.
+            args: ""
+            arch: "x86_64-unknown-linux-gnu"
+          - platform: "windows-latest"
+            args: ""
+            arch: "x86_64-pc-windows-msvc"
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Check out Git repository
@@ -63,7 +62,6 @@ jobs:
         with:
           # Those targets are only used on macos runners so it's in an `if` to slightly speed up windows and linux builds.
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
-
 
       - uses: oven-sh/setup-bun@v2
         with:
@@ -107,7 +105,7 @@ jobs:
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: './kiosk/src-tauri -> target'
+          workspaces: "./kiosk/src-tauri -> target"
       - name: Fix Tauri Version
         id: get-version
         working-directory: ./app
@@ -145,7 +143,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p ./kiosk/src-tauri/binaries
-          cp -rf ./app/binaries/. ./kiosk/src-tauri/binaries 
+          cp -rf ./app/binaries/. ./kiosk/src-tauri/binaries
 
       - name: Install Tauri CLI
         run: |

@@ -21,34 +21,20 @@ export function getWaypointRelativePosition(
 		if (playerSystem === null && entitySystemPosition) {
 			// The ship is in interstellar space
 			// Just use the waypoint's interstellar position
-			waypointVector.set(
-				entitySystemPosition.x,
-				entitySystemPosition.y,
-				entitySystemPosition.z,
-			);
+			waypointVector.set(entitySystemPosition.x, entitySystemPosition.y, entitySystemPosition.z);
 		} else if (entitySystemPosition && playerSystemPosition) {
 			// The waypoint is in a different system or
 			// The waypoint is in interstellar space
 			// Position the waypoint such that it is at a distant point along the vector
 			// from this system's position to the waypoint's interstellar position
-			dirVector1.set(
-				playerSystemPosition.x,
-				playerSystemPosition.y,
-				playerSystemPosition.z,
-			);
-			dirVector2.set(
-				entitySystemPosition.x,
-				entitySystemPosition.y,
-				entitySystemPosition.z,
-			);
+			dirVector1.set(playerSystemPosition.x, playerSystemPosition.y, playerSystemPosition.z);
+			dirVector2.set(entitySystemPosition.x, entitySystemPosition.y, entitySystemPosition.z);
 			waypointVector
 				.subVectors(dirVector2, dirVector1)
 				.normalize()
 				.multiplyScalar(HELIOPAUSE_DISTANCE_KM);
 		} else {
-			console.error(
-				"For some reason, we do not have positions for placing a waypoint",
-			);
+			console.error("For some reason, we do not have positions for placing a waypoint");
 		}
 	}
 }

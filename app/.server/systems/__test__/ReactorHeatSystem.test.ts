@@ -1,18 +1,19 @@
 import { DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
+import { DataStore } from "@thorium/utils/.server/db-fs";
+import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { ECS, Entity } from "@thorium/utils/ecs";
+import { aroundEach, beforeEach, describe, expect, it } from "vitest";
+
 import { FilterInventorySystem } from "../FilterInventorySystem";
 import { FilterShipsWithReactors } from "../FilterShipsWithReactors";
 import { HeatDispersionSystem } from "../HeatDispersionSystem";
 import { HeatToCoolantSystem } from "../HeatToCoolantSystem";
 import { ReactorHeatSystem } from "../ReactorHeatSystem";
-import { aroundEach, beforeEach, describe, expect, it } from "vitest";
-import { DataStore } from "@thorium/utils/.server/db-fs";
-import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 
 aroundEach(async (runTest) => {
 	await DataStore.operations.run(testDataStoreProps, async () => {
-		runTest();
+		await runTest();
 	});
 });
 

@@ -4,6 +4,7 @@ import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { cn } from "@thorium/utils/cn";
+
 import type { Pages } from "./longRangeCommPages";
 
 export function Sidebar({
@@ -37,7 +38,7 @@ export function Sidebar({
 				>
 					<Icon name="inbox" />
 					{inboxLabel > 0 ? (
-						<div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 badge badge-error rounded-full">
+						<div className="badge badge-error absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 rounded-full">
 							{inboxLabel}
 						</div>
 					) : null}
@@ -63,7 +64,7 @@ export function Sidebar({
 					<Icon name="archive" />
 
 					{outboxLabel > 0 ? (
-						<div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 badge badge-error rounded-full">
+						<div className="badge badge-error absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 rounded-full">
 							{outboxLabel}
 						</div>
 					) : null}

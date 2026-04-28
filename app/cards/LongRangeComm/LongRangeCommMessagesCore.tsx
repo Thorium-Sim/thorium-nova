@@ -17,16 +17,12 @@ export function LongRangeCommMessagesCore() {
 		shipId,
 		filter: "all",
 	});
-	const [selectedMessageId, setSelectedMessageId] = useState<null | number>(
-		null,
-	);
-	const selectedMessage = outgoingMessages.find(
-		(o) => o.id === selectedMessageId,
-	);
+	const [selectedMessageId, setSelectedMessageId] = useState<null | number>(null);
+	const selectedMessage = outgoingMessages.find((o) => o.id === selectedMessageId);
 
 	return (
-		<div className="flex flex-auto h-full">
-			<ul className="max-w-56 overflow-y-auto border border-white/30 rounded">
+		<div className="flex h-full flex-auto">
+			<ul className="max-w-56 overflow-y-auto rounded border border-white/30">
 				{outgoingMessages.map((message) => (
 					<li
 						key={message.id}
@@ -46,32 +42,29 @@ export function LongRangeCommMessagesCore() {
 				))}
 			</ul>
 
-			<div className="text-sm flex-auto flex flex-col">
+			<div className="flex flex-auto flex-col text-sm">
 				{selectedMessage && (
 					<>
 						<div>
 							Sender:{" "}
-							<OutputField className="ml-1 px-2 inline">
+							<OutputField className="ml-1 inline px-2">
 								{selectedMessage.senderStation}
 							</OutputField>
 						</div>
 						<div>
 							State:
-							<OutputField className="ml-1 px-2 inline">
+							<OutputField className="ml-1 inline px-2">
 								{lrmStateMap[selectedMessage.state]}
 							</OutputField>
 						</div>
 						<div>
 							Destination:
-							<OutputField className="ml-1 px-2 inline">
+							<OutputField className="ml-1 inline px-2">
 								{selectedMessage.destinationShipName}
 							</OutputField>
 						</div>
 						<div>Message:</div>
-						<TypingField
-							readOnly
-							className="flex-auto w-full text-left px-2 overflow-y-auto"
-						>
+						<TypingField readOnly className="w-full flex-auto overflow-y-auto px-2 text-left">
 							{selectedMessage.message}
 						</TypingField>
 					</>
@@ -89,12 +82,12 @@ export function LongRangeCommComposerCore() {
 	const [addressBookName, setAddressBookName] = useState("");
 	const [destinationId, setDestinationId] = useState<number>();
 	const [message, setMessage] = useState("");
-	const [encoding, setEncoding] = useState<
-		"decoded" | "waves" | "replacement" | "rotation"
-	>("decoded");
+	const [encoding, setEncoding] = useState<"decoded" | "waves" | "replacement" | "rotation">(
+		"decoded",
+	);
 
 	return (
-		<div className="flex flex-col text-sm h-full">
+		<div className="flex h-full flex-col text-sm">
 			<Suspense>
 				<SenderInput
 					destinationId={destinationId}
@@ -126,13 +119,13 @@ export function LongRangeCommComposerCore() {
 			</Suspense>
 
 			<TypingField
-				className="w-full flex-auto text-sm text-left px-2"
+				className="w-full flex-auto px-2 text-left text-sm"
 				value={message}
 				onChange={(e) => setMessage(e.currentTarget.value)}
 			/>
 			<div className="flex flex-wrap items-center gap-1">
 				<Button
-					className="flex-auto btn-xs btn-error"
+					className="btn-xs btn-error flex-auto"
 					onClick={() => {
 						setSenderId(undefined);
 						setDestinationId(undefined);
@@ -157,7 +150,7 @@ export function LongRangeCommComposerCore() {
 					setSelected={(value) => setEncoding(value || "decoded")}
 				/>
 				<Button
-					className="flex-auto btn-xs btn-info"
+					className="btn-xs btn-info flex-auto"
 					disabled={
 						(senderId === shipId && !senderStation) ||
 						!destinationId ||
@@ -165,12 +158,7 @@ export function LongRangeCommComposerCore() {
 						!message.trim()
 					}
 					onClick={() => {
-						if (
-							(senderId === shipId && !senderStation) ||
-							!destinationId ||
-							!senderId ||
-							!message
-						)
+						if ((senderId === shipId && !senderStation) || !destinationId || !senderId || !message)
 							return;
 						q.longRangeComm.composeMessage.netSend({
 							senderId,
@@ -190,7 +178,7 @@ export function LongRangeCommComposerCore() {
 					Queue
 				</Button>
 				<Button
-					className="flex-auto btn-xs btn-success"
+					className="btn-xs btn-success flex-auto"
 					disabled={
 						(senderId === shipId && !senderStation) ||
 						!destinationId ||
@@ -198,12 +186,7 @@ export function LongRangeCommComposerCore() {
 						!message.trim()
 					}
 					onClick={() => {
-						if (
-							(senderId === shipId && !senderStation) ||
-							!destinationId ||
-							!senderId ||
-							!message
-						)
+						if ((senderId === shipId && !senderStation) || !destinationId || !senderId || !message)
 							return;
 						q.longRangeComm.composeMessage.netSend({
 							senderId,
@@ -256,10 +239,7 @@ function SenderInput({
 	const addressBookEntry = addressBook.find((a) => a.id === senderId);
 
 	const isNewAddressBookEntry =
-		!!senderId &&
-		!addressBookEntry &&
-		senderId !== shipId &&
-		destinationId === shipId;
+		!!senderId && !addressBookEntry && senderId !== shipId && destinationId === shipId;
 
 	return (
 		<>
@@ -269,11 +249,7 @@ function SenderInput({
 				<OutputField
 					className="flex-auto"
 					alert={isNewAddressBookEntry}
-					title={
-						isNewAddressBookEntry
-							? "Sender will be added to the ship's address book"
-							: ""
-					}
+					title={isNewAddressBookEntry ? "Sender will be added to the ship's address book" : ""}
 				>
 					{senderId
 						? addressBookEntry?.name ||
@@ -289,23 +265,17 @@ function SenderInput({
 						"rounded-r-none": destinationId !== shipId,
 					})}
 					onClick={() => {
-						pickStarmapShip(
-							"Choose a ship to send the long range message.",
-							(senderId) => {
-								startTransition(() => {
-									setSenderId(senderId);
-								});
-							},
-						);
+						pickStarmapShip("Choose a ship to send the long range message.", (senderId) => {
+							startTransition(() => {
+								setSenderId(senderId);
+							});
+						});
 					}}
 				>
 					Pick from Starmap
 				</Button>
 				{destinationId !== shipId && (
-					<Button
-						className="btn-xs btn-success rounded-l-none"
-						onClick={() => setSenderId(shipId)}
-					>
+					<Button className="btn-xs btn-success rounded-l-none" onClick={() => setSenderId(shipId)}>
 						Player Ship
 					</Button>
 				)}
@@ -315,8 +285,8 @@ function SenderInput({
 					<p className="text-xs">
 						Address Book Name{" "}
 						<InfoTip>
-							Name used for this sender when added to the ship's address book.
-							Leave blank to use the sender's actual name.
+							Name used for this sender when added to the ship's address book. Leave blank to use
+							the sender's actual name.
 						</InfoTip>
 					</p>
 					<InputField
@@ -372,14 +342,11 @@ function DestinationInput({
 						"rounded-r-none": senderId !== shipId,
 					})}
 					onClick={() => {
-						pickStarmapShip(
-							"Choose a ship to receive the long range message.",
-							(destinationId) => {
-								startTransition(() => {
-									setDestinationId(destinationId);
-								});
-							},
-						);
+						pickStarmapShip("Choose a ship to receive the long range message.", (destinationId) => {
+							startTransition(() => {
+								setDestinationId(destinationId);
+							});
+						});
 					}}
 				>
 					Pick from Starmap
@@ -402,8 +369,8 @@ export function LongRangeCommAddressBookCore() {
 	const [addressBook] = q.longRangeComm.addressBook.useNetRequest({ shipId });
 	const [selectedContact, setSelectedContact] = useState<number | null>(null);
 	return (
-		<div className="flex flex-col h-full">
-			<ul className="flex-auto overflow-y-auto border border-white/30 rounded">
+		<div className="flex h-full flex-col">
+			<ul className="flex-auto overflow-y-auto rounded border border-white/30">
 				{addressBook.map((contact) => (
 					<li
 						key={contact.id}

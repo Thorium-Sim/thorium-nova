@@ -1,6 +1,7 @@
-import type { Kelvin, Kilometer, TerranMass, Year } from "../unitTypes";
 import type { Range } from "@thorium/utils/operations/randomFromRange";
 import z from "zod";
+
+import type { Kelvin, Kilometer, TerranMass, Year } from "../unitTypes";
 
 export const planetClasses = z.union([
 	z.literal("A"),
@@ -221,11 +222,7 @@ export const planetTypes: PlanetType[] = [
 		ageRange: { min: 4000000000, max: 10000000000 },
 		atmosphericComposition: [],
 		habitable: false,
-		lifeforms: [
-			"None",
-			"Primitive single-celled organisms",
-			"Draught-resistant plants",
-		],
+		lifeforms: ["None", "Primitive single-celled organisms", "Draught-resistant plants"],
 		population: 0,
 		radiusRange: { min: 4000, max: 7500 },
 		zone: ["hot"],
@@ -249,11 +246,7 @@ export const planetTypes: PlanetType[] = [
 		ageRange: { min: 2000000000, max: 10000000000 },
 		atmosphericComposition: [],
 		habitable: false,
-		lifeforms: [
-			"None",
-			"Floating single-celled lifeforms",
-			"Hydrocarbon-based gas bag animals",
-		],
+		lifeforms: ["None", "Floating single-celled lifeforms", "Hydrocarbon-based gas bag animals"],
 		population: 0,
 		radiusRange: { min: 70000, max: 5000000 },
 		zone: ["cold"],
@@ -281,11 +274,7 @@ export const planetTypes: PlanetType[] = [
 		ageRange: { min: 2000000000, max: 10000000000 },
 		atmosphericComposition: [],
 		habitable: false,
-		lifeforms: [
-			"None",
-			"Floating single-celled lifeforms",
-			"Hydrocarbon-based gas bag animals",
-		],
+		lifeforms: ["None", "Floating single-celled lifeforms", "Hydrocarbon-based gas bag animals"],
 		population: 0,
 		radiusRange: { min: 25000, max: 70000 },
 		zone: ["cold"],
@@ -347,9 +336,7 @@ export const planetTypes: PlanetType[] = [
 		terranMassRange: { min: 0.1, max: 1.5 },
 		hasClouds: 0.4,
 		hasRings: 0.3,
-		possibleTextureMaps: [
-			"/plugins/Thorium Default/assets/planets/Martian.jpg",
-		],
+		possibleTextureMaps: ["/plugins/Thorium Default/assets/planets/Martian.jpg"],
 		possibleCloudMaps: [
 			"/plugins/Thorium Default/assets/clouds/Clouds1.png",
 			"/plugins/Thorium Default/assets/clouds/clouds_textureSoft.png",

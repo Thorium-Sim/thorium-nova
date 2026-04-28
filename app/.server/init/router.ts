@@ -1,16 +1,17 @@
-import { t } from "./t";
 import * as client from "@thorium/.server/data";
 import * as cards from "@thorium/cards/data.server";
 import * as cores from "@thorium/cores/data.server";
 import type { ComponentIds } from "@thorium/ecs-components";
 import type { Entity } from "@thorium/utils/ecs";
 
+import { t } from "./t";
+
 // @ts-expect-error TypeScript's being too helpful
 const { default: _, ...allCards } = cards;
 // @ts-expect-error TypeScript's being too helpful
 const { default: __, ...allCores } = cores;
 // @ts-expect-error TypeScript's being too helpful
-const { default: ___, plugin, publish, ...allClient } = client;
+const { default: ___, plugin, publish: ____, ...allClient } = client;
 
 export const router = t.router({
 	plugin,
@@ -21,7 +22,7 @@ export const router = t.router({
 
 export const componentEntityMaps = new Map<
 	ComponentIds,
-	Set<{ procedure: string; entityMap: (entity: Entity) => any | any[] }>
+	Set<{ procedure: string; entityMap: (entity: Entity) => any }>
 >();
 
 // Activate the auto-publish behavior

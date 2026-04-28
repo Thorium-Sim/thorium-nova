@@ -1,15 +1,15 @@
-import { sensorsSpeeds, useSensorsStore } from "./useSensorsStore";
+import { Explosion } from "@thorium/cards/Legacy/SensorGrid/Explosion";
 import { q } from "@thorium/context/AppContext";
-import { useStation } from "@thorium/routes/station/useStation";
-import { cn } from "@thorium/utils/cn";
 import { useCardContext } from "@thorium/context/CardContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import { useStation } from "@thorium/routes/station/useStation";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
+import { cn } from "@thorium/utils/cn";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
+import chroma from "chroma-js";
 import {
 	Suspense,
 	useEffect,
-	useImperativeHandle,
 	useRef,
 	useState,
 	type DetailedHTMLProps,
@@ -18,11 +18,11 @@ import {
 	type RefObject,
 } from "react";
 import { Menu, MenuItem, Popover, Separator } from "react-aria-components";
+
 import maskUrl from "./mask.svg?url";
-import { Explosion } from "@thorium/cards/Legacy/SensorGrid/Explosion";
-import chroma from "chroma-js";
+import { sensorsSpeeds, useSensorsStore } from "./useSensorsStore";
+
 import "./style.css";
-import { useQueryClient } from "@tanstack/react-query";
 
 export function SensorGrid({
 	gridRef,
@@ -74,25 +74,19 @@ export function SensorGrid({
 
 	return (
 		<div
-			className={cn(
-				"aspect-square max-h-full max-w-full rounded-full",
-				className,
-			)}
+			className={cn("aspect-square max-h-full max-w-full rounded-full", className)}
 			onClick={() => useSensorsStore.setState({ selectedContact: null })}
 		>
 			<div
-				className={cn(
-					"aspect-square relative max-h-full max-w-full rounded-full",
-					{
-						"sonar-background": sensors.pingActive,
-						"is-core": isCore,
-					},
-				)}
+				className={cn("aspect-square relative max-h-full max-w-full rounded-full", {
+					"sonar-background": sensors.pingActive,
+					"is-core": isCore,
+				})}
 				ref={gridRef}
 				onPointerMove={onGridHover}
 			>
-				<div className="absolute flex items-center justify-center w-full h-full z-20  pointer-events-none">
-					<div ref={draggingRef} className="absolute w-full h-full">
+				<div className="pointer-events-none absolute z-20 flex h-full w-full items-center justify-center">
+					<div ref={draggingRef} className="absolute h-full w-full">
 						{dragging && draggingContact ? (
 							<ContactImage
 								color={draggingContact.color}
@@ -105,7 +99,7 @@ export function SensorGrid({
 				</div>
 				<div
 					ref={contactsRef}
-					className="absolute flex items-center justify-center w-full h-full z-0 pointer-events-none sensor-contacts"
+					className="sensor-contacts pointer-events-none absolute z-0 flex h-full w-full items-center justify-center"
 				>
 					<SensorContacts gridRef={gridRef} onContactHover={onContactHover} />
 				</div>
@@ -278,10 +272,7 @@ function SensorContact({
 		const iconDimensions = iconRef.current?.getBoundingClientRect();
 		if (!iconDimensions) return;
 
-		const offset = [
-			iconDimensions.left - event.clientX,
-			iconDimensions.top - event.clientY,
-		];
+		const offset = [iconDimensions.left - event.clientX, iconDimensions.top - event.clientY];
 		const abortController = new AbortController();
 		const dimensions = gridRef.current?.getBoundingClientRect();
 
@@ -290,19 +281,12 @@ function SensorContact({
 		document.addEventListener(
 			"pointermove",
 			(moveEvent) => {
-				if (
-					Math.hypot(
-						moveEvent.clientX - event.clientX,
-						moveEvent.clientY - event.clientY,
-					) < 2
-				) {
+				if (Math.hypot(moveEvent.clientX - event.clientX, moveEvent.clientY - event.clientY) < 2) {
 					return;
 				}
 				draggingRef.current = true;
-				const x =
-					(moveEvent.clientX + offset[0] - dimensions.left) / dimensions.width;
-				const y =
-					(moveEvent.clientY + offset[1] - dimensions.top) / dimensions.height;
+				const x = (moveEvent.clientX + offset[0] - dimensions.left) / dimensions.width;
+				const y = (moveEvent.clientY + offset[1] - dimensions.top) / dimensions.height;
 				if (iconRef.current) {
 					iconRef.current.style.transform = `translate(${x * 100}%, ${y * 100}%)`;
 				}
@@ -314,26 +298,17 @@ function SensorContact({
 			async (upEvent) => {
 				abortController.abort();
 
-				if (
-					Math.hypot(
-						upEvent.clientX - event.clientX,
-						upEvent.clientY - event.clientY,
-					) < 2
-				) {
+				if (Math.hypot(upEvent.clientX - event.clientX, upEvent.clientY - event.clientY) < 2) {
 					useSensorsStore.setState({ selectedContact: id });
 					draggingRef.current = false;
 					return;
 				}
-				const x =
-					(upEvent.clientX + offset[0] - dimensions.left) / dimensions.width;
-				const y =
-					(upEvent.clientY + offset[1] - dimensions.top) / dimensions.height;
+				const x = (upEvent.clientX + offset[0] - dimensions.left) / dimensions.width;
+				const y = (upEvent.clientY + offset[1] - dimensions.top) / dimensions.height;
 
 				// Check if the contact is within the sensor grid area
-				const gridParentDimensions =
-					gridRef.current?.parentElement?.getBoundingClientRect();
-				const draggingDimensions =
-					iconRef.current?.children[0]?.getBoundingClientRect();
+				const gridParentDimensions = gridRef.current?.parentElement?.getBoundingClientRect();
+				const draggingDimensions = iconRef.current?.children[0]?.getBoundingClientRect();
 				if (
 					draggingDimensions &&
 					gridParentDimensions &&
@@ -372,7 +347,7 @@ function SensorContact({
 		<>
 			{frozenState?.new ? null : (
 				<div
-					className="absolute w-full h-full pointer-events-none select-none opacity-0"
+					className="pointer-events-none absolute h-full w-full opacity-0 select-none"
 					ref={contactRef}
 					style={{
 						transform: `translate(${position.x * 100}%, ${position.y * 100}%)`,
@@ -380,38 +355,33 @@ function SensorContact({
 				>
 					{destroyed ? (
 						<Explosion
-							className="w-[5%] h-[5%]"
+							className="h-[5%] w-[5%]"
 							style={{ transform: `translate(-50%, -50%) scale(${size})` }}
 						/>
 					) : (
-						<ContactImage
-							size={size}
-							isGhost={isCore}
-							{...props}
-							onPointerMove={onPointerMove}
-						/>
+						<ContactImage size={size} isGhost={isCore} {...props} onPointerMove={onPointerMove} />
 					)}
 				</div>
 			)}
 			{isCore && !destroyed ? (
 				<div
-					className="absolute w-full h-full pointer-events-none select-none opacity-0"
+					className="pointer-events-none absolute h-full w-full opacity-0 select-none"
 					ref={iconRef}
 				>
 					{sensorsStore.showContactLabels && (
-						<p className="w-min text-nowrap select-none absolute border-white/20 border bg-black text-xs px-1 pointer-events-none z-10 left-1 top-1">
+						<p className="pointer-events-none absolute top-1 left-1 z-10 w-min border border-white/20 bg-black px-1 text-xs text-nowrap select-none">
 							{frozenState?.name ?? name}
 						</p>
 					)}
 					{sensorsStore.selectedContact === id ? (
 						<div
-							className="absolute top-0 left-0 w-[2.5%] h-[2.5%] origin-top-left"
+							className="absolute top-0 left-0 h-[2.5%] w-[2.5%] origin-top-left"
 							style={{ transform: `scale(${frozenState?.size ?? size})` }}
 						>
-							<div className="absolute border-t-2 border-l-2 w-full h-full border-blue-500 -translate-x-[120%] -translate-y-[120%]" />
-							<div className="absolute border-b-2 border-l-2 w-full h-full border-blue-500 -translate-x-[120%] translate-y-[20%]" />
-							<div className="absolute border-b-2 border-r-2 w-full h-full border-blue-500 translate-x-[20%] translate-y-[20%]" />
-							<div className="absolute border-t-2 border-r-2 w-full h-full border-blue-500 translate-x-[20%] -translate-y-[120%]" />
+							<div className="absolute h-full w-full -translate-x-[120%] -translate-y-[120%] border-t-2 border-l-2 border-blue-500" />
+							<div className="absolute h-full w-full -translate-x-[120%] translate-y-[20%] border-b-2 border-l-2 border-blue-500" />
+							<div className="absolute h-full w-full translate-x-[20%] translate-y-[20%] border-r-2 border-b-2 border-blue-500" />
+							<div className="absolute h-full w-full translate-x-[20%] -translate-y-[120%] border-t-2 border-r-2 border-blue-500" />
 						</div>
 					) : null}
 					<ContactImage
@@ -430,7 +400,7 @@ function SensorContact({
 						}}
 						crossOffset={100}
 					>
-						<Menu className="text-xs text-white bg-gray-900">
+						<Menu className="bg-gray-900 text-xs text-white">
 							{sensorsSpeeds.map((speed) => (
 								<MenuItem key={speed.id} onAction={() => pickSpeed(speed.id)}>
 									{speed.label}
@@ -505,19 +475,14 @@ export function ContactImage({
 					ref={ref}
 					{...props}
 					onLoad={() => {}}
-					className={cn(
-						"w-[5%] h-[5%] object-contain cursor-pointer pointer-events-auto",
-						{
-							"opacity-50": isGhost,
-							"drop-shadow-[0_0_3px_red]": hostile,
-						},
-					)}
+					className={cn("w-[5%] h-[5%] object-contain cursor-pointer pointer-events-auto", {
+						"opacity-50": isGhost,
+						"drop-shadow-[0_0_3px_red]": hostile,
+					})}
 					style={{
 						color: color,
 						transform: `translate(-50%, -50%) scale(${size})`,
-						...(disabled
-							? { maskImage: `url("${maskUrl}")`, maskSize: `${2 / size}px` }
-							: {}),
+						...(disabled ? { maskImage: `url("${maskUrl}")`, maskSize: `${2 / size}px` } : {}),
 					}}
 				/>
 			</Suspense>
@@ -571,7 +536,7 @@ export function ContactImage({
 function SensorPing({ color, size }: { color: string; size: number }) {
 	return (
 		<div
-			className="sensors-ping h-full w-full rounded-full duration-[3s] transition-all bg-transparent"
+			className="sensors-ping h-full w-full rounded-full bg-transparent transition-all duration-[3s]"
 			style={{
 				// @ts-expect-error
 				"--scale": size,
@@ -597,7 +562,7 @@ export function GridLines({
 				.map((_, i, array) => (
 					<div
 						key={`ring-${i}`}
-						className="z-10 border border-white/20 rounded-full pointer-events-none absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2"
+						className="pointer-events-none absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20"
 						style={{
 							width: `${((i + 1) / array.length) * 100}%`,
 							height: `${((i + 1) / array.length) * 100}%`,
@@ -609,11 +574,9 @@ export function GridLines({
 				.map((_, i, array) => (
 					<div
 						key={`line-${i}`}
-						className="z-10 bg-white/10 w-full h-px pointer-events-none absolute top-1/2 -translate-y-1/2"
+						className="pointer-events-none absolute top-1/2 z-10 h-px w-full -translate-y-1/2 bg-white/10"
 						style={{
-							transform: `rotate(${
-								((i + (aligned ? 0 : 0.5)) / array.length) * 360
-							}deg)`,
+							transform: `rotate(${((i + (aligned ? 0 : 0.5)) / array.length) * 360}deg)`,
 						}}
 					/>
 				))}
@@ -693,10 +656,7 @@ export function GridSegments({
 	const [sensors] = q.legacy.sensorGrid.sensors.useNetRequest({ shipId });
 	const segments = sensors.segments;
 	return (
-		<svg
-			viewBox="0 0 100 100"
-			className={cn("w-full pointer-events-none", { absolute: !isCore })}
-		>
+		<svg viewBox="0 0 100 100" className={cn("w-full pointer-events-none", { absolute: !isCore })}>
 			{Array.from({ length: rings }).map((_, i) =>
 				Array.from({ length: lines }).map((_, ii) => (
 					<path

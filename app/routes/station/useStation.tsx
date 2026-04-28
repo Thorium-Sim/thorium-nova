@@ -10,23 +10,13 @@ export const StationContext = createContext<{
 	shipId: number;
 } | null>(null);
 
-export function StationData({
-	children,
-	shipId,
-}: {
-	children: ReactNode;
-	shipId?: number;
-}) {
+export function StationData({ children, shipId }: { children: ReactNode; shipId?: number }) {
 	const [client] = q.client.get.useNetRequest({ clientId });
 	const [station] = q.station.get.useNetRequest({ clientId });
-	const [ship] = q.ship.player.useNetRequest(
-		shipId ? { shipId } : { clientId },
-	);
+	const [ship] = q.ship.player.useNetRequest(shipId ? { shipId } : { clientId });
 
 	return (
-		<StationContext
-			value={{ client, station, ship, shipId: shipId || client.shipId! }}
-		>
+		<StationContext value={{ client, station, ship, shipId: shipId || client.shipId! }}>
 			{children}
 		</StationContext>
 	);
@@ -34,7 +24,6 @@ export function StationData({
 
 export function useStation() {
 	const data = use(StationContext);
-	if (!data)
-		throw new Error("useStation must be used inside a station context");
+	if (!data) throw new Error("useStation must be used inside a station context");
 	return data;
 }

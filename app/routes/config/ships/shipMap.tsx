@@ -1,10 +1,10 @@
+import type { DragEndEvent } from "@dnd-kit/core";
+import { useQueryClient } from "@tanstack/react-query";
+import { SortableList } from "@thorium/components/ui/SortableItem";
+import { q } from "@thorium/context/AppContext";
+import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import { useNavigate, useParams, Outlet } from "react-router";
-import type { DragEndEvent } from "@dnd-kit/core";
-import { q } from "@thorium/context/AppContext";
-import { SortableList } from "@thorium/components/ui/SortableItem";
-import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function ShipMap() {
 	const { pluginId, shipId, deckName } = useParams() as {
@@ -38,7 +38,7 @@ export default function ShipMap() {
 
 	return (
 		<>
-			<div className="w-72 flex flex-col">
+			<div className="flex w-72 flex-col">
 				<SortableList
 					items={data.decks.map((d) => ({ id: d.name, children: d.name }))}
 					onDragEnd={handleDragEnd}
@@ -46,7 +46,7 @@ export default function ShipMap() {
 					className="mb-2"
 				/>
 				<Button
-					className="btn-success w-full btn-sm"
+					className="btn-success btn-sm w-full"
 					onClick={async () => {
 						const deck = await q.plugin.ship.deck.create.netSend({
 							pluginId,
@@ -58,15 +58,11 @@ export default function ShipMap() {
 				>
 					Add Deck
 				</Button>
-				<div className="grid gap-2 grid-cols-2 mt-2">
+				<div className="mt-2 grid grid-cols-2 gap-2">
 					<Button
 						className="btn-sm"
 						disabled={!(deckName && deckName.length > 0)}
-						title={
-							deckName && deckName.length > 0
-								? ""
-								: "Select a deck to be able to rename it"
-						}
+						title={deckName && deckName.length > 0 ? "" : "Select a deck to be able to rename it"}
 						onClick={async (event) => {
 							event.preventDefault();
 							event.stopPropagation();

@@ -1,5 +1,6 @@
-import * as allComponents from "./list";
 import type z from "zod";
+
+import * as allComponents from "./list";
 
 type AllComponents = typeof allComponents;
 export type ComponentIds = keyof AllComponents;

@@ -1,9 +1,10 @@
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { router } from "@thorium/.server/init/router";
 import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
+import randomWords from "@thorium/utils/random-words";
+
 import { Client } from "../init/liveQuery";
 import type BasePlugin from "./Plugins";
-import { router } from "@thorium/.server/init/router";
-import { pubsub } from "@thorium/.server/init/pubsub";
-import randomWords from "@thorium/utils/random-words";
 export class ServerDataModel extends DataStore {
 	clients!: Record<string, Client<any>>;
 	thoriumId!: string;
@@ -44,7 +45,7 @@ export class ServerDataModel extends DataStore {
 			throw new Error("Thorium Nova requires at least one plugin to run.");
 	}
 	toJSON() {
-		const { plugins, clients, ...data } = this;
+		const { plugins: _, clients, ...data } = this;
 		return {
 			...data,
 			clients: Object.fromEntries(

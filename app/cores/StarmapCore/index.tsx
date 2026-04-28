@@ -7,26 +7,25 @@ import { SolarSystemMap } from "@thorium/components/Starmap/SolarSystemMap";
 import StarEntity from "@thorium/components/Starmap/Star";
 import StarmapCanvas from "@thorium/components/Starmap/StarmapCanvas";
 import { StarmapShip } from "@thorium/components/Starmap/StarmapShip";
-import SystemMarker from "@thorium/components/Starmap/SystemMarker";
 import {
 	StarmapStoreProvider,
 	useCalculateVerticalDistance,
 	useGetStarmapStore,
 } from "@thorium/components/Starmap/starmapStore";
+import SystemMarker from "@thorium/components/Starmap/SystemMarker";
 import { Torpedo } from "@thorium/components/Starmap/Torpedo";
 import { useCancelFollow } from "@thorium/components/Starmap/useCancelFollow";
 import { useFollowEntity } from "@thorium/components/Starmap/useFollowEntity";
 import { q } from "@thorium/context/AppContext";
-import useDragSelect, {
-	DragSelection,
-	get3dSelectedObjects,
-} from "@thorium/hooks/useDragSelect";
+import { usePickStarmapShip } from "@thorium/cores/StarmapCore/pickShip";
+import useDragSelect, { DragSelection, get3dSelectedObjects } from "@thorium/hooks/useDragSelect";
 import useEventListener from "@thorium/hooks/useEventListener";
 import { useTranslate2DTo3D } from "@thorium/hooks/useTranslate2DTo3D";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
 import Input from "@thorium/ui/Input";
+import Select from "@thorium/ui/Select";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
@@ -35,10 +34,9 @@ import clsx from "clsx";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { type PerspectiveCamera, Plane, Vector3 } from "three";
+
 import { FiringPhasers } from "./FiringPhasers";
 import { StarmapCoreContextMenu } from "./StarmapCoreContextMenu";
-import Select from "@thorium/ui/Select";
-import { usePickStarmapShip } from "@thorium/cores/StarmapCore/pickShip";
 
 export class SelectStarmapEntityEvent extends Event {
 	static name = "select-starmap-entity";
@@ -51,18 +49,18 @@ export function StarmapCore() {
 	const ref = useRef<HTMLDivElement>(null);
 
 	return (
-		<div className="h-[calc(100%-2rem)] relative" ref={ref}>
+		<div className="relative h-[calc(100%-2rem)]" ref={ref}>
 			<StarmapStoreProvider>
 				<StarmapCoreContextMenu parentRef={ref} />
-				<div className="border-b border-b-white/20 pb-0.5 px-2 flex gap-2 items-baseline">
+				<div className="flex items-baseline gap-2 border-b border-b-white/20 px-2 pb-0.5">
 					<Suspense>
 						<StarmapCoreMenubar />
 					</Suspense>
 				</div>
-				<div className="h-full relative overflow-hidden">
+				<div className="relative h-full overflow-hidden">
 					<CanvasWrapper />
 				</div>
-				<div className="absolute left-4 bottom-0 flex gap-2 items-end">
+				<div className="absolute bottom-0 left-4 flex items-end gap-2">
 					<div className="w-96">
 						<ZoomSliderComp />
 					</div>
@@ -77,9 +75,7 @@ export function StarmapCore() {
 
 function ShipControls() {
 	const useStarmapStore = useGetStarmapStore();
-	const selectedObjectIds = useStarmapStore(
-		(store) => store.selectedObjectIds,
-	) as number[];
+	const selectedObjectIds = useStarmapStore((store) => store.selectedObjectIds) as number[];
 
 	const firstObject = selectedObjectIds[0];
 	const [starmapShip] = q.starmapCore.ship.useNetRequest(
@@ -93,7 +89,7 @@ function ShipControls() {
 	return (
 		<>
 			{clickAction ? (
-				<p className="absolute bottom-16 text-center pointer-events-none w-full">
+				<p className="pointer-events-none absolute bottom-16 w-full text-center">
 					{clickAction.label}{" "}
 					<Button
 						onClick={() => useStarmapStore.setState({ clickAction: undefined })}
@@ -231,8 +227,7 @@ function StarmapCoreMenubar() {
 				selected={selectedSpawn?.id || null}
 				setSelected={(value) =>
 					useStarmapStore.setState({
-						spawnShipTemplate:
-							shipTemplates.find((s) => s.id === value) || null,
+						spawnShipTemplate: shipTemplates.find((s) => s.id === value) || null,
 					})
 				}
 			></Select>
@@ -274,11 +269,7 @@ function StarmapCoreMenubar() {
 					}))
 				}
 			>
-				{sensorsHidden ? (
-					<Icon name="circle-dot" />
-				) : (
-					<Icon name="circle-off" />
-				)}
+				{sensorsHidden ? <Icon name="circle-dot" /> : <Icon name="circle-off" />}
 			</Button>
 			<YDimensionInput />
 		</>
@@ -305,7 +296,7 @@ function YDimensionInput() {
 			inputMode="numeric"
 			pattern="[0-9]*"
 			value={yDimensionState}
-			onBlur={(e) => {
+			onBlur={() => {
 				setYDimensionState(yDimension.toString());
 			}}
 			onChange={(e) => {
@@ -320,8 +311,6 @@ function YDimensionInput() {
 	);
 }
 
-const vec = new Vector3();
-const vec2 = new Vector3();
 function StarmapCoreCanvasHooks() {
 	useCancelFollow();
 	useFollowEntity();
@@ -334,22 +323,17 @@ function StarmapCoreCanvasHooks() {
 function useSelectEntityEvent() {
 	const useStarmapStore = useGetStarmapStore();
 
-	useEventListener<SelectStarmapEntityEvent>(
-		SelectStarmapEntityEvent.name,
-		async (event) => {
-			const starmapObject = await q.starmapCore.object.netRequest({
-				objectId: event.entityId,
-			});
+	useEventListener<SelectStarmapEntityEvent>(SelectStarmapEntityEvent.name, async (event) => {
+		const starmapObject = await q.starmapCore.object.netRequest({
+			objectId: event.entityId,
+		});
 
-			useStarmapStore.setState({ selectedObjectIds: [event.entityId] });
-			if (starmapObject) {
-				await useStarmapStore
-					.getState()
-					.setCurrentSystem(starmapObject.position.parentId);
-				useStarmapStore.getState().setCameraFocus(starmapObject.position);
-			}
-		},
-	);
+		useStarmapStore.setState({ selectedObjectIds: [event.entityId] });
+		if (starmapObject) {
+			await useStarmapStore.getState().setCurrentSystem(starmapObject.position.parentId);
+			useStarmapStore.getState().setCameraFocus(starmapObject.position);
+		}
+	});
 }
 
 const startPoint = new Vector3();
@@ -369,20 +353,17 @@ function CanvasWrapper() {
 
 	const cameraRef = useRef<PerspectiveCamera>(undefined);
 
-	const [dragRef, dragPosition, node] = useDragSelect<HTMLCanvasElement>({
+	const [dragRef, dragPosition] = useDragSelect<HTMLCanvasElement>({
 		setSelectionBounds: ({ x1, x2, y1, y2 }) => {
 			if (cameraRef.current) {
 				const selectedObjectIds = get3dSelectedObjects(
-					starmapShips.reduce(
-						(acc: { id: number; position: Coordinates<number> }[], ship) => {
-							const position = interpolate(ship.id);
-							if (position) {
-								return acc.concat({ id: ship.id, position });
-							}
-							return acc;
-						},
-						[],
-					),
+					starmapShips.reduce((acc: { id: number; position: Coordinates<number> }[], ship) => {
+						const position = interpolate(ship.id);
+						if (position) {
+							return acc.concat({ id: ship.id, position });
+						}
+						return acc;
+					}, []),
 					cameraRef.current,
 					startPoint.set(x1 * 2 - 1, -(y1 * 2 - 1), 0.5),
 					endPoint.set(x2 * 2 - 1, -(y2 * 2 - 1), 0.5),
@@ -390,8 +371,7 @@ function CanvasWrapper() {
 				useStarmapStore.setState({ selectedObjectIds });
 			}
 		},
-		onDragStart: () =>
-			useStarmapStore.getState().setCameraControlsEnabled(false),
+		onDragStart: () => useStarmapStore.getState().setCameraControlsEnabled(false),
 		onDragEnd: () => useStarmapStore.getState().setCameraControlsEnabled(true),
 	});
 
@@ -457,11 +437,7 @@ export function InterstellarWrapper() {
 								systemId={sys.id}
 								commSatelliteRadius={null}
 								position={
-									[sys.position.x, sys.position.y, sys.position.z] as [
-										number,
-										number,
-										number,
-									]
+									[sys.position.x, sys.position.y, sys.position.z] as [number, number, number]
 								}
 								name={sys.identity.name}
 								onClick={() => {
@@ -471,18 +447,13 @@ export function InterstellarWrapper() {
 										useStarmapStore.getState().setCameraFocus(sys.position);
 									}
 								}}
-								onDoubleClick={() =>
-									useStarmapStore.getState().setCurrentSystem(sys.id)
-								}
+								onDoubleClick={() => useStarmapStore.getState().setCurrentSystem(sys.id)}
 							/>
 						) : null,
 					)}
 			{starmapShips.map((ship) => (
 				<Suspense key={ship.id} fallback={null}>
-					<ErrorBoundary
-						FallbackComponent={() => <></>}
-						onError={(err) => console.error(err)}
-					>
+					<ErrorBoundary FallbackComponent={() => <></>} onError={(err) => console.error(err)}>
 						<StarmapShip {...ship} />
 					</ErrorBoundary>
 				</Suspense>
@@ -529,9 +500,7 @@ export function SolarSystemWrapper() {
 	const translate = useTranslate2DTo3D();
 	const pointerMovement = useRef<Vector3 | null>(null);
 	return (
-		<SolarSystemMap
-			skyboxKey={system?.components.isSolarSystem?.skyboxKey || "Blank"}
-		>
+		<SolarSystemMap skyboxKey={system?.components.isSolarSystem?.skyboxKey || "Blank"}>
 			<ambientLight intensity={0.5} />
 			{starmapEntities.map((entity) => {
 				if (planetsHidden) return null;
@@ -539,10 +508,7 @@ export function SolarSystemWrapper() {
 					if (!entity.components.satellite) return null;
 					return (
 						<Suspense key={entity.id} fallback={null}>
-							<ErrorBoundary
-								FallbackComponent={() => <></>}
-								onError={(err) => console.error(err)}
-							>
+							<ErrorBoundary FallbackComponent={() => <></>} onError={(err) => console.error(err)}>
 								<StarEntity
 									star={{
 										id: entity.id,
@@ -561,10 +527,7 @@ export function SolarSystemWrapper() {
 
 					return (
 						<Suspense key={entity.id} fallback={null}>
-							<ErrorBoundary
-								FallbackComponent={() => <></>}
-								onError={(err) => console.error(err)}
-							>
+							<ErrorBoundary FallbackComponent={() => <></>} onError={(err) => console.error(err)}>
 								<Planet
 									onClick={() => {
 										const clickAction = useStarmapStore.getState().clickAction;
@@ -575,9 +538,7 @@ export function SolarSystemWrapper() {
 										if (viewingMode === "viewscreen") return;
 										useStarmapStore
 											.getState()
-											.setCameraFocus(
-												getOrbitPosition(entity.components.satellite!),
-											);
+											.setCameraFocus(getOrbitPosition(entity.components.satellite!));
 										useStarmapStore.setState({
 											selectedObjectIds: [entity.id],
 										});
@@ -609,19 +570,12 @@ export function SolarSystemWrapper() {
 					))}
 			{starmapShips.map((ship) => (
 				<Suspense key={ship.id} fallback={null}>
-					<ErrorBoundary
-						FallbackComponent={() => <></>}
-						onError={(err) => console.error(err)}
-					>
+					<ErrorBoundary FallbackComponent={() => <></>} onError={(err) => console.error(err)}>
 						<StarmapShip
 							{...ship}
-							dragMovement={
-								selectedObjectIds.includes(ship.id) ? pointerMovement : null
-							}
+							dragMovement={selectedObjectIds.includes(ship.id) ? pointerMovement : null}
 							// TODO September 10, 2022 - This should use the faction color, or display the color scheme the flight director chooses
-							spriteColor={
-								selectedObjectIds.includes(ship.id) ? "#0088ff" : "white"
-							}
+							spriteColor={selectedObjectIds.includes(ship.id) ? "#0088ff" : "white"}
 							onClick={(event) => event.stopPropagation()}
 							onPointerDown={(event) => {
 								// Ignore right clicks so we can show the context menu
@@ -655,33 +609,20 @@ export function SolarSystemWrapper() {
 											pointerMovement.current = new Vector3();
 										}
 
-										const camera =
-											useStarmapStore.getState().cameraControls?.current
-												?.camera;
+										const camera = useStarmapStore.getState().cameraControls?.current?.camera;
 										const shipPosition = interpolate(ship.id);
 										if (!shipPosition) return;
 										if (camera) {
-											center.set(
-												shipPosition.x,
-												shipPosition.y,
-												shipPosition.z,
-											);
+											center.set(shipPosition.x, shipPosition.y, shipPosition.z);
 											camera.getWorldDirection(forward);
 											plane.setFromNormalAndCoplanarPoint(forward, center);
 										} else {
 											plane.setComponents(1, 0, 0, 0);
 										}
 
-										const position3d = translate(
-											event.clientX,
-											event.clientY,
-											plane,
-										);
+										const position3d = translate(event.clientX, event.clientY, plane);
 
-										pointerMovement.current.subVectors(
-											position3d,
-											shipPosition,
-										);
+										pointerMovement.current.subVectors(position3d, shipPosition);
 									},
 									{ signal: abortController.signal },
 								);
@@ -694,8 +635,7 @@ export function SolarSystemWrapper() {
 										abortController.abort();
 										q.starmapCore.shipsSetPosition.netSend({
 											ships: selectedObjectIds.flatMap((id) => {
-												if (typeof id === "string" || !pointerMovement.current)
-													return [];
+												if (typeof id === "string" || !pointerMovement.current) return [];
 												const shipPosition = interpolate(id);
 												if (!shipPosition) return [];
 

@@ -10,14 +10,7 @@ import { q } from "@thorium/context/AppContext";
 import { EditorPalette } from "@thorium/ui/EditorPalette";
 import { useMenubar } from "@thorium/ui/Menubar";
 import { lightMinuteToLightYear } from "@thorium/utils/unitTypes";
-import {
-	forwardRef,
-	Suspense,
-	useCallback,
-	useEffect,
-	useImperativeHandle,
-	useRef,
-} from "react";
+import { forwardRef, Suspense, useCallback, useEffect, useImperativeHandle, useRef } from "react";
 import { Outlet, useMatch, useParams } from "react-router";
 import { ClientOnly } from "remix-utils/client-only";
 import type { Camera } from "three";
@@ -53,9 +46,7 @@ export default function StarMap() {
 	const systemId = useSystemId();
 
 	useMenubar({
-		backTo: systemId
-			? `/config/${pluginId}/starmap`
-			: `/config/${pluginId}/list`,
+		backTo: systemId ? `/config/${pluginId}/starmap` : `/config/${pluginId}/list`,
 		children: (
 			<>
 				{!systemId && <InterstellarMenuButtons sceneRef={sceneRef} />}
@@ -73,7 +64,7 @@ export default function StarMap() {
 					{systemId ? <SolarSystemPalette /> : <InterstellarPaletteWrapper />}
 				</Suspense>
 			</EditorPalette>
-			<div className="h-[calc(100%-2rem)]  relative bg-black">
+			<div className="relative h-[calc(100%-2rem)] bg-black">
 				<Suspense fallback={null}>
 					<StarmapCanvas>
 						<StarmapScene ref={sceneRef} />
@@ -111,7 +102,7 @@ export function StatusBar() {
 
 	const hoveredPosition = useStarmapStore((s) => s.hoveredPosition);
 	return (
-		<div className="absolute bottom-0 w-full text-white z-20 flex justify-end select-none">
+		<div className="absolute bottom-0 z-20 flex w-full justify-end text-white select-none">
 			{hoveredPosition && (
 				<span>
 					{Math.round(lightMinuteToLightYear(hoveredPosition[0]) * 100) / 100},{" "}

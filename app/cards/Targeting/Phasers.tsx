@@ -1,7 +1,7 @@
 import { Edges, Line } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useQueryClient } from "@tanstack/react-query";
-import { clientId, q } from "@thorium/context/AppContext";
+import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
@@ -37,7 +37,6 @@ export function ConeVisualization({
 	pitch,
 	maxArc,
 	maxRange,
-	id,
 }: {
 	id: number;
 	arc: number;
@@ -49,11 +48,7 @@ export function ConeVisualization({
 	const [height, radius, angle, rotation] = useMemo(() => {
 		const range = maxRange - maxRange * (arc / (maxArc + 1));
 
-		const rotation = new Euler(
-			pitch * (Math.PI / 180),
-			heading * (Math.PI / 180),
-			0,
-		);
+		const rotation = new Euler(pitch * (Math.PI / 180), heading * (Math.PI / 180), 0);
 		const angle = arc * (Math.PI / 180);
 
 		const radius = range * Math.tan(angle / 2);
@@ -71,8 +66,7 @@ export function ConeVisualization({
 			.projectOnPlane(planeVector.set(0, 1, 0))
 			.normalize();
 
-		const angle =
-			Math.atan2(cameraProjection.x, cameraProjection.y) + rotation.y;
+		const angle = Math.atan2(cameraProjection.x, cameraProjection.y) + rotation.y;
 		if (coneRef.current) {
 			coneRef.current.rotation.y = angle + Math.PI / 2;
 		}
@@ -86,19 +80,9 @@ export function ConeVisualization({
 		<group ref={groupRef}>
 			<mesh position={[0, -height / 2, 0]}>
 				<coneGeometry args={[radius, height, 32, 1, true]} />
-				<meshStandardMaterial
-					depthTest={false}
-					opacity={0}
-					transparent
-					side={DoubleSide}
-				/>
+				<meshStandardMaterial depthTest={false} opacity={0} transparent side={DoubleSide} />
 				<Edges threshold={30} scale={1} renderOrder={1000} color="orange">
-					<meshBasicMaterial
-						transparent
-						opacity={0.4}
-						color="orange"
-						depthTest={false}
-					/>
+					<meshBasicMaterial transparent opacity={0.4} color="orange" depthTest={false} />
 				</Edges>
 			</mesh>
 			<Line
@@ -140,19 +124,14 @@ export function BeamVisualization() {
 			const target = interpolate(phaser.targetId);
 			if (!ship || !target) return;
 			points.push(ship.x - player.x, ship.y - player.y, ship.z - player.z);
-			points.push(
-				target.x - player.x,
-				target.y - player.y,
-				target.z - player.z,
-			);
+			points.push(target.x - player.x, target.y - player.y, target.z - player.z);
 		});
 		if (points.length === 0) {
 			lineRef.current.visible = false;
 		} else {
 			lineRef.current.visible = true;
 			lineRef.current?.geometry.setPositions(points);
-			lineRef.current.material.linewidth =
-				5 * Math.max(...firingPhasers.map((p) => p.firePercent));
+			lineRef.current.material.linewidth = 5 * Math.max(...firingPhasers.map((p) => p.firePercent));
 		}
 	});
 
@@ -221,8 +200,7 @@ function PhaserControl({
 		}
 		if (heatRef.current) {
 			// Scale the heat value
-			heatRef.current.value =
-				(heat - nominalHeat) / (maxSafeHeat - nominalHeat);
+			heatRef.current.value = (heat - nominalHeat) / (maxSafeHeat - nominalHeat);
 		}
 		// Check if the target is in range
 		let inCone = false;
@@ -288,7 +266,7 @@ function PhaserControl({
 	return (
 		<div className="grid grid-cols-[auto_1fr]">
 			<Icon name="atomic-slashes" size="sm" />
-			<progress className="progress progress-warning " ref={chargeRef} />
+			<progress className="progress progress-warning" ref={chargeRef} />
 			<Icon name="flame" size="sm" />
 			<progress className="progress progress-error" ref={heatRef} />
 			<Slider
@@ -297,53 +275,35 @@ function PhaserControl({
 				maxValue={maxArc}
 				step={1}
 				value={arc}
-				className="slider w-full col-span-2 "
+				className="slider col-span-2 w-full"
 				onChange={(val: number | number[]) => {
 					// Manually update the local cache with the arc value so it looks really smooth
-					cache.setQueryData(
-						q.targeting.phasers.list.getQueryKey({ shipId }),
-						(data: any[]) => {
-							if (!data) return data;
-							return data.map((phaser) => {
-								if (phaser.id === id) {
-									return { ...phaser, arc: val as number };
-								}
-								return phaser;
-							});
-						},
-					);
+					cache.setQueryData(q.targeting.phasers.list.getQueryKey({ shipId }), (data: any[]) => {
+						if (!data) return data;
+						return data.map((phaser) => {
+							if (phaser.id === id) {
+								return { ...phaser, arc: val as number };
+							}
+							return phaser;
+						});
+					});
 					q.targeting.phasers.setArc.netSend({
 						phaserId: id,
 						arc: val as number,
 					});
 				}}
 			/>
-			<div
-				className="col-span-2 flex gap-1 btn-container"
-				ref={buttonContainerRef}
-			>
-				<Button
-					className="btn-xs btn-warning mt-2"
-					onPointerDown={getFirePhasers(0.25)}
-				>
+			<div className="btn-container col-span-2 flex gap-1" ref={buttonContainerRef}>
+				<Button className="btn-xs btn-warning mt-2" onPointerDown={getFirePhasers(0.25)}>
 					25%
 				</Button>
-				<Button
-					className="btn-xs btn-warning mt-2"
-					onPointerDown={getFirePhasers(0.5)}
-				>
+				<Button className="btn-xs btn-warning mt-2" onPointerDown={getFirePhasers(0.5)}>
 					50%
 				</Button>
-				<Button
-					className="btn-xs btn-warning mt-2"
-					onPointerDown={getFirePhasers(0.75)}
-				>
+				<Button className="btn-xs btn-warning mt-2" onPointerDown={getFirePhasers(0.75)}>
 					75%
 				</Button>
-				<Button
-					className="flex-1 btn-xs btn-error mt-2"
-					onPointerDown={getFirePhasers(1)}
-				>
+				<Button className="btn-xs btn-error mt-2 flex-1" onPointerDown={getFirePhasers(1)}>
 					Full
 				</Button>
 			</div>

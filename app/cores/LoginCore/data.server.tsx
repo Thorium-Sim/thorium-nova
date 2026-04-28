@@ -8,8 +8,7 @@ export const loginCore = t.router({
 			const serverClients = Object.values(ctx.server.clients);
 			const clients = serverClients
 				.map((client) => {
-					const flightClient = ctx.getFlightClient(client.id)?.components
-						.flightClient;
+					const flightClient = ctx.getFlightClient(client.id)?.components.flightClient;
 					return { ...flightClient, name: client.name };
 				})
 				.filter((client) => client.stationId);

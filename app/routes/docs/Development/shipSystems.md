@@ -11,7 +11,7 @@ Ship Systems are entities which are associated with a ship and provide capabilit
 
 ## Ship System Class
 
-The definition for ship system plugin data is stored in  the `/server/src/classes/Plugins/ShipSystems` folder. Duplicate the `Generic.ts` ship system class and edit it as necessary for your ship system.
+The definition for ship system plugin data is stored in the `/server/src/classes/Plugins/ShipSystems` folder. Duplicate the `Generic.ts` ship system class and edit it as necessary for your ship system.
 
 - Be sure to rename it something unique, both the class, the classes `type` instance property, and where `registerSystem` is called below.
 - Adjust the flags that apply to your ship system.
@@ -23,7 +23,7 @@ You'll notice that TypeScript is giving you warnings about your type. Each ship 
 
 If your ship system can be configured, eg. if your ship system class has properties, you need to create the UI for configuring that ship system in `/client/app/routes/config+/$pluginId.system+/SystemConfigs`. The README in that folder includes some basic instructions. You can use one of the other components as a template.
 
-You will also need to create an API router for getting and updating the data for your system. Those are stored in `/client/app/data/plugins/systems/{systemType}.ts`. Typically these include a `get` request for getting the specific system properties, and an `update` send for updating those properties. 
+You will also need to create an API router for getting and updating the data for your system. Those are stored in `/client/app/data/plugins/systems/{systemType}.ts`. Typically these include a `get` request for getting the specific system properties, and an `update` send for updating those properties.
 
 The `update` function should call `getShipSystemForInput`, which makes it possible for a ship to override specific properties of a ship system that is assigned to that ship. Like above, it's probably best to duplicate an existing API router and modify it for your ship system.
 

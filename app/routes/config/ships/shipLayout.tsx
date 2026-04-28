@@ -1,17 +1,9 @@
+import { Navigate } from "@thorium/components/Navigate";
 import { q } from "@thorium/context/AppContext";
 import { useConfirm } from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
-import {
-	Outlet,
-	useLocation,
-	useParams,
-	useNavigate,
-	useMatch,
-	Link,
-} from "react-router";
-import { Navigate } from "@thorium/components/Navigate";
-import { Suspense } from "react";
 import { useMenubar } from "@thorium/ui/Menubar";
+import { Outlet, useLocation, useParams, useNavigate, useMatch, Link } from "react-router";
 
 export default function ShipLayout() {
 	const { pathname } = useLocation();
@@ -28,10 +20,10 @@ export default function ShipLayout() {
 	if (!decodeURIComponent(pathname).endsWith(shipId)) {
 		return (
 			<>
-				<div className="h-full flex flex-col">
+				<div className="flex h-full flex-col">
 					<SettingsList />
 					<Button
-						className="w-full btn-outline btn-error"
+						className="btn-outline btn-error w-full"
 						disabled={!shipId}
 						onClick={async () => {
 							if (
@@ -89,16 +81,11 @@ const links = {
 };
 
 function SettingsList() {
-	const setting = useMatch("config/:pluginId/ships/:shipId/:setting/*")?.params
-		.setting;
+	const setting = useMatch("config/:pluginId/ships/:shipId/:setting/*")?.params.setting;
 	return (
 		<div className="mb-2 w-72 overflow-y-auto">
 			{Object.entries(links).map(([key, value]) => (
-				<Link
-					key={key}
-					to={key}
-					className={`list-group-item ${setting === key ? "selected" : ""}`}
-				>
+				<Link key={key} to={key} className={`list-group-item ${setting === key ? "selected" : ""}`}>
 					{value}
 				</Link>
 			))}

@@ -1,5 +1,5 @@
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
 import z from "zod";
 
 export const officersLog = t.router({
@@ -17,10 +17,7 @@ export const officersLog = t.router({
 				},
 		)
 		.request(({ ctx, input }) => {
-			return (
-				ctx.getFlightClient(input.clientId)?.components.flightClient
-					?.officersLog || []
-			);
+			return ctx.getFlightClient(input.clientId)?.components.flightClient?.officersLog || [];
 		}),
 	add: t.procedure
 		.input(
@@ -31,14 +28,13 @@ export const officersLog = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
-			const { message, timestamp = Date.now() } = input;
+			const { message, timestamp } = input;
 			const flightClientEntity = ctx.getFlightClient(input.clientId);
 			flightClientEntity?.updateComponent("flightClient", {
-				officersLog:
-					flightClientEntity?.components.flightClient?.officersLog.concat({
-						message,
-						timestamp,
-					}) || [{ message, timestamp }],
+				officersLog: flightClientEntity?.components.flightClient?.officersLog.concat({
+					message,
+					timestamp,
+				}) || [{ message, timestamp }],
 			});
 			pubsub.publish.officersLog.get({ clientId: input.clientId });
 		}),

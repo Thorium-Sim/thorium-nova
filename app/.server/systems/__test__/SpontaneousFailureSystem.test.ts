@@ -1,14 +1,15 @@
-import { applySystemDamage } from "@thorium/utils/.server/ship/collisionDamage";
-import { type ECS, Entity } from "@thorium/utils/ecs";
-import { aroundEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SpontaneousFailureSystem } from "../SpontaneousFailureSystem";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
 import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
+import { applySystemDamage } from "@thorium/utils/.server/ship/collisionDamage";
+import { type ECS, Entity } from "@thorium/utils/ecs";
+import { aroundEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { SpontaneousFailureSystem } from "../SpontaneousFailureSystem";
 
 aroundEach(async (runTest) => {
 	await DataStore.operations.run(testDataStoreProps, async () => {
-		runTest();
+		await runTest();
 	});
 });
 
@@ -83,7 +84,7 @@ describe("SpontaneousFailureSystem", () => {
 		});
 
 		it("applies damage if randomRoll < failureRisk", () => {
-			const entity = makeEntity(ecs, {
+			makeEntity(ecs, {
 				offline: false,
 				failureRisk: 0.5,
 				offlineDamage: 20,

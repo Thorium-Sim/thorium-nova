@@ -1,3 +1,15 @@
+import { UNSAFE_PortalProvider } from "@react-aria/overlays";
+import { useQueries } from "@tanstack/react-query";
+import { NoMatch } from "@thorium/components/NotFound";
+import AppContext, { clientId, liveQueryClient, q } from "@thorium/context/AppContext";
+import Button from "@thorium/ui/Button";
+import { Icon } from "@thorium/ui/Icon";
+import { getBackground } from "@thorium/utils/getBackground";
+
+import "./styles/tailwind.css";
+// @ts-expect-error
+import "@fontsource-variable/outfit";
+import { useRef } from "react";
 import {
 	isRouteErrorResponse,
 	Links,
@@ -7,23 +19,10 @@ import {
 	ScrollRestoration,
 	type MetaFunction,
 } from "react-router";
-import { Icon, href as iconsHref } from "@thorium/ui/Icon";
-import { UNSAFE_PortalProvider } from "@react-aria/overlays";
-import { getBackground } from "@thorium/utils/getBackground";
-import Button from "@thorium/ui/Button";
 import { ClientOnly } from "remix-utils/client-only";
-import { NoMatch } from "@thorium/components/NotFound";
-import "./styles/tailwind.css";
-import "@fontsource-variable/outfit";
+
+import type { Route } from "./+types/root";
 import icon from "./images/logo.svg?url";
-import type { Route } from ".react-router/types/app/+types/root";
-import AppContext, {
-	clientId,
-	liveQueryClient,
-	q,
-} from "@thorium/context/AppContext";
-import { useRef } from "react";
-import { useQueries, useQueryClient } from "@tanstack/react-query";
 
 export const meta: MetaFunction = () => {
 	return [{ title: "Thorium Nova" }, {}];
@@ -37,7 +36,7 @@ function Background() {
 	const bg = getBackground();
 	return (
 		<div
-			className="fixed inset-0 -z-10 bg-center bg-cover"
+			className="fixed inset-0 -z-10 bg-cover bg-center"
 			style={{
 				backgroundImage: `linear-gradient(
 135deg,
@@ -65,9 +64,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 			<body>
 				<ClientOnly>{() => <Background />}</ClientOnly>
 				<UNSAFE_PortalProvider getContainer={() => container.current}>
-					<div className="z-0 absolute top-0  w-full h-full text-white">
-						{children}
-					</div>
+					<div className="absolute top-0 z-0 h-full w-full text-white">{children}</div>
 				</UNSAFE_PortalProvider>
 				<div ref={container} />
 				<Snapshot />
@@ -84,13 +81,7 @@ function Preload() {
 		refetchOnReconnect: false,
 		refetchOnWindowFocus: false,
 		staleTime: Number.POSITIVE_INFINITY,
-		queryFn: ({
-			signal,
-			queryKey: [pathKey, input],
-		}: {
-			signal: any;
-			queryKey: any;
-		}) => {
+		queryFn: ({ signal, queryKey: [pathKey, input] }: { signal: any; queryKey: any }) => {
 			const path = pathKey.join(".");
 			return liveQueryClient.netRequest({ path, ...input, signal });
 		},
@@ -138,11 +129,11 @@ export function ErrorBoundary({ error }: { error: Error }) {
 	}
 
 	return (
-		<main className="pt-16 p-4 container mx-auto">
+		<main className="container mx-auto p-4 pt-16">
 			<h1>{message}</h1>
 			<p>{details}</p>
 			{stack && (
-				<pre className="w-full p-4 overflow-x-auto">
+				<pre className="w-full overflow-x-auto p-4">
 					<code>{stack}</code>
 				</pre>
 			)}
@@ -154,7 +145,7 @@ function Snapshot() {
 	if (process.env.NODE_ENV === "production") return null;
 	return (
 		<Button
-			className="btn-circle btn-sm fixed bottom-2 left-2 bg-neutral/20 backdrop-blur z-50 "
+			className="btn-circle btn-sm bg-neutral/20 fixed bottom-2 left-2 z-50 backdrop-blur"
 			onClick={() => {
 				q.server.snapshot.netSend();
 			}}

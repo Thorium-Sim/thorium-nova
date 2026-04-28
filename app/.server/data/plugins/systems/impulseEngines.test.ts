@@ -21,8 +21,7 @@ describe("impulse engines plugin input", () => {
 			expect(created).toBeTruthy();
 			expect(created.shipSystemId).toEqual("Test Impulse Engine");
 			const system = dataContext.server.plugins[0].aspects.shipSystems[0];
-			if (!(system instanceof ImpulseEnginesPlugin))
-				throw new Error("Not impulse engines");
+			if (!(system instanceof ImpulseEnginesPlugin)) throw new Error("Not impulse engines");
 			expect(system.type).toEqual("impulseEngines");
 			expect(system.cruisingSpeed).toEqual(1500);
 		});
@@ -31,7 +30,7 @@ describe("impulse engines plugin input", () => {
 		await DataStore.operations.run(testDataStoreProps, async () => {
 			const dataContext = createMockDataContext();
 			const router = createMockRouter(dataContext);
-			const created = await router.plugin.systems.create({
+			await router.plugin.systems.create({
 				pluginId: "Test Plugin",
 				type: "impulseEngines",
 				name: "Test Impulse Engine",
@@ -43,8 +42,7 @@ describe("impulse engines plugin input", () => {
 				systemId: "Test Impulse Engine",
 				cruisingSpeed: 2000,
 			});
-			if (!(system instanceof ImpulseEnginesPlugin))
-				throw new Error("Not impulse engines");
+			if (!(system instanceof ImpulseEnginesPlugin)) throw new Error("Not impulse engines");
 			expect(system.cruisingSpeed).toEqual(2000);
 
 			expect(system.emergencySpeed).toEqual(2000);

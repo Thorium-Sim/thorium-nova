@@ -1,8 +1,9 @@
 import type * as React from "react";
+
 import type { Node } from "../model/Node";
 import { TabNode } from "../model/TabNode";
-import type { LayoutInternal } from "./Layout";
 import { TabSetNode } from "../model/TabSetNode";
+import type { LayoutInternal } from "./Layout";
 
 /** @internal */
 export function isDesktop() {
@@ -13,11 +14,7 @@ export function isDesktop() {
 	return desktop;
 }
 /** @internal */
-export function getRenderStateEx(
-	layout: LayoutInternal,
-	node: TabNode,
-	iconAngle?: number,
-) {
+export function getRenderStateEx(layout: LayoutInternal, node: TabNode, iconAngle?: number) {
 	let leadingContent: any;
 	const titleContent: React.ReactNode = node.getName();
 	const name = node.getName();
@@ -40,11 +37,7 @@ export function getRenderStateEx(
 			);
 		} else {
 			leadingContent = (
-				<img
-					style={{ width: "1em", height: "1em" }}
-					src={node.getIcon()}
-					alt="leadingContent"
-				/>
+				<img style={{ width: "1em", height: "1em" }} src={node.getIcon()} alt="leadingContent" />
 			);
 		}
 	}
@@ -67,9 +60,7 @@ export function getRenderStateEx(
 
 /** @internal */
 export function isAuxMouseEvent(
-	event:
-		| React.MouseEvent<HTMLElement, MouseEvent>
-		| React.TouchEvent<HTMLElement>,
+	event: React.MouseEvent<HTMLElement, MouseEvent> | React.TouchEvent<HTMLElement>,
 ) {
 	let auxEvent = false;
 	if (event.nativeEvent instanceof MouseEvent) {
@@ -86,10 +77,7 @@ export function isAuxMouseEvent(
 	return auxEvent;
 }
 
-export function enablePointerOnIFrames(
-	enable: boolean,
-	currentDocument: Document,
-) {
+export function enablePointerOnIFrames(enable: boolean, currentDocument: Document) {
 	const iframes = [
 		...getElementsByTagName("iframe", currentDocument),
 		...getElementsByTagName("webview", currentDocument),
@@ -100,10 +88,7 @@ export function enablePointerOnIFrames(
 	}
 }
 
-export function getElementsByTagName(
-	tag: string,
-	currentDocument: Document,
-): Element[] {
+export function getElementsByTagName(tag: string, currentDocument: Document): Element[] {
 	return [...currentDocument.getElementsByTagName(tag)];
 }
 
@@ -152,10 +137,7 @@ export function canDockToWindow(node: Node) {
 	return false;
 }
 
-export function copyInlineStyles(
-	source: HTMLElement,
-	target: HTMLElement,
-): boolean {
+export function copyInlineStyles(source: HTMLElement, target: HTMLElement): boolean {
 	// Get the inline style attribute from the source element
 	const sourceStyle = source.getAttribute("style");
 	const targetStyle = target.getAttribute("style");
@@ -174,8 +156,6 @@ export function copyInlineStyles(
 export function isSafari() {
 	const userAgent = navigator.userAgent;
 	return (
-		userAgent.includes("Safari") &&
-		!userAgent.includes("Chrome") &&
-		!userAgent.includes("Chromium")
+		userAgent.includes("Safari") && !userAgent.includes("Chrome") && !userAgent.includes("Chromium")
 	);
 }

@@ -1,11 +1,6 @@
 import { usePrompt } from "@thorium/ui/AlertDialog";
 import { cn } from "@thorium/utils/cn";
-import type {
-	DetailedHTMLProps,
-	HTMLAttributes,
-	ReactNode,
-	TextareaHTMLAttributes,
-} from "react";
+import type { DetailedHTMLProps, HTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react";
 
 export function InputField({
 	children,
@@ -15,10 +10,7 @@ export function InputField({
 	onClick,
 	className,
 	...props
-}: Omit<
-	DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>,
-	"onClick"
-> & {
+}: Omit<DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>, "onClick"> & {
 	promptValue?: string | number;
 	prompt: ReactNode;
 	alert?: boolean;
@@ -37,9 +29,7 @@ export function InputField({
 			{...props}
 			onClick={async () => {
 				const childrenValue =
-					typeof children === "string" || typeof children === "number"
-						? children
-						: null;
+					typeof children === "string" || typeof children === "number" ? children : null;
 				const value = await prompt({
 					header: inputPrompt,
 					defaultValue: String(promptValue || childrenValue || ""),
@@ -86,10 +76,9 @@ export function TypingField({
 	alert,
 	className,
 	...props
-}: DetailedHTMLProps<
-	TextareaHTMLAttributes<HTMLTextAreaElement>,
-	HTMLTextAreaElement
-> & { alert?: boolean }) {
+}: DetailedHTMLProps<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement> & {
+	alert?: boolean;
+}) {
 	return (
 		<textarea
 			{...props}

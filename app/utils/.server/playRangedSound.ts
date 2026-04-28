@@ -4,12 +4,7 @@ import type { Entity } from "@thorium/utils/ecs";
 import uniqid from "@thorium/utils/uniqid";
 
 /** Play a sound effect originating from a ship */
-export function playShipSound(
-	entity: Entity,
-	ship: Entity,
-	soundKey: string,
-	distance?: number,
-) {
+export function playShipSound(entity: Entity, ship: Entity, soundKey: string, distance?: number) {
 	if (!entity.components.soundEffects?.soundBank[soundKey]) return;
 
 	const range =
@@ -55,11 +50,7 @@ export function playShipSound(
 	return sound;
 }
 
-export function playServerSound(
-	ship: Entity,
-	sound: Sound,
-	stations?: string[],
-) {
+export function playServerSound(ship: Entity, sound: Sound, stations?: string[]) {
 	const playStations = stations
 		? stations.map((s) => ({ shipId: ship.id, station: s }))
 		: [{ shipId: ship.id }];

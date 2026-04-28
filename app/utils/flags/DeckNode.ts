@@ -18,7 +18,5 @@ export const nodeFlagsSchema = z.union([
 	z.literal("science"),
 ]);
 
-export const nodeFlags = nodeFlagsSchema._def.options.map(
-	(flag) => flag._def.value,
-);
+export const nodeFlags = nodeFlagsSchema._def.options.map((flag) => flag._def.value);
 export type NodeFlag = z.infer<typeof nodeFlagsSchema>;

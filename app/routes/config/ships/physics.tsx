@@ -1,8 +1,8 @@
-import { useParams } from "react-router";
-import { useState } from "react";
-import Input from "@thorium/ui/Input";
-import { q } from "@thorium/context/AppContext";
 import { Navigate } from "@thorium/components/Navigate";
+import { q } from "@thorium/context/AppContext";
+import Input from "@thorium/ui/Input";
+import { useState } from "react";
+import { useParams } from "react-router";
 
 export default function Physics() {
 	const [massError, setMassError] = useState(false);
@@ -16,7 +16,7 @@ export default function Physics() {
 	const ship = ships.find((d) => d.name === shipId);
 	if (!ship) return <Navigate to={`/config/${pluginId}/ships`} />;
 	return (
-		<fieldset key={shipId} className="flex-1 overflow-y-auto  max-w-3xl">
+		<fieldset key={shipId} className="max-w-3xl flex-1 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
 					<div className="pb-4">
@@ -42,8 +42,8 @@ export default function Physics() {
 							}}
 						/>
 						<small>
-							Mass is measured in kilograms and is used to calculate
-							acceleration, movement from impact, and gravitational forces.
+							Mass is measured in kilograms and is used to calculate acceleration, movement from
+							impact, and gravitational forces.
 						</small>
 					</div>
 					<div className="pb-4">
@@ -68,10 +68,9 @@ export default function Physics() {
 							}}
 						/>
 						<small>
-							The length of the ship in meters. This is used to scale the 3D
-							model which is used for determining the width and height of the
-							ship. This determines the size on the viewscreen and the collision
-							hitbox.
+							The length of the ship in meters. This is used to scale the 3D model which is used for
+							determining the width and height of the ship. This determines the size on the
+							viewscreen and the collision hitbox.
 						</small>
 					</div>
 				</div>

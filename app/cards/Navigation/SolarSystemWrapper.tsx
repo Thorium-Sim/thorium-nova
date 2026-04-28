@@ -1,26 +1,24 @@
-import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
-import { useEffect, useRef } from "react";
-import { SolarSystemMap } from "@thorium/components/Starmap/SolarSystemMap";
-import { Suspense } from "react";
-import { Color, type Group, type Vector3 } from "three";
-import { degToRad, solarRadiusToKilometers } from "@thorium/utils/unitTypes";
-import { StarSprite } from "@thorium/components/Starmap/Star/StarMesh";
-import OrbitContainer, {
-	OrbitLine,
-} from "@thorium/components/Starmap/OrbitContainer";
-import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
+import { useFrame } from "@react-three/fiber";
+import { keepPreviousData } from "@tanstack/react-query";
 import type PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
+import OrbitContainer, { OrbitLine } from "@thorium/components/Starmap/OrbitContainer";
 import { planetSpriteScale } from "@thorium/components/Starmap/Planet";
 import { PlanetSprite } from "@thorium/components/Starmap/Planet";
-import SystemLabel from "@thorium/components/Starmap/SystemMarker/SystemLabel";
-import { useFrame } from "@react-three/fiber";
-import { ErrorBoundary } from "react-error-boundary";
+import { SolarSystemMap } from "@thorium/components/Starmap/SolarSystemMap";
+import { StarSprite } from "@thorium/components/Starmap/Star/StarMesh";
 import { StarmapShip } from "@thorium/components/Starmap/StarmapShip";
+import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
+import SystemLabel from "@thorium/components/Starmap/SystemMarker/SystemLabel";
 import { WaypointEntity } from "@thorium/components/Starmap/WaypointEntity";
 import { q } from "@thorium/context/AppContext";
-import { keepPreviousData } from "@tanstack/react-query";
-import { setCursor } from "@thorium/utils/setCursor";
 import { useStation } from "@thorium/routes/station/useStation";
+import { setCursor } from "@thorium/utils/setCursor";
+import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
+import { degToRad, solarRadiusToKilometers } from "@thorium/utils/unitTypes";
+import { useEffect, useRef } from "react";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import { Color, type Group, type Vector3 } from "three";
 
 export function SolarSystemWrapper() {
 	const { shipId } = useStation();
@@ -69,28 +67,22 @@ export function SolarSystemWrapper() {
 						<OrbitContainer key={entity.id} {...entity.components.satellite}>
 							<group
 								scale={[size, size, size]}
-								onPointerOver={(e) => {
+								onPointerOver={() => {
 									setCursor("pointer");
 								}}
-								onPointerOut={(e) => {
+								onPointerOut={() => {
 									setCursor("auto");
 								}}
 								onClick={() => {
 									if (entity.components.satellite) {
-										const position = getOrbitPosition(
-											entity.components.satellite,
-										);
+										const position = getOrbitPosition(entity.components.satellite);
 										useStarmapStore.getState().setCameraFocus(position);
 									}
 
 									useStarmapStore.setState({ selectedObjectIds: [entity.id] });
 								}}
 							>
-								<StarSprite
-									size={size}
-									color1={color}
-									userData={{ type: "star", id: entity.id }}
-								/>
+								<StarSprite size={size} color1={color} userData={{ type: "star", id: entity.id }} />
 							</group>
 						</OrbitContainer>
 					);
@@ -100,8 +92,7 @@ export function SolarSystemWrapper() {
 					const position = getOrbitPosition(entity.components.satellite);
 					const size = entity.components.isPlanet?.radius;
 					const satellites: PlanetPlugin[] = [];
-					const { semiMajorAxis, eccentricity, inclination } =
-						entity.components.satellite;
+					const { semiMajorAxis, eccentricity, inclination } = entity.components.satellite;
 					const radiusY = semiMajorAxis - semiMajorAxis * eccentricity;
 
 					return (
@@ -125,26 +116,20 @@ export function SolarSystemWrapper() {
 			})}
 			{ship.position?.parentId === currentSystem && (
 				<Suspense key={ship.id} fallback={null}>
-					<ErrorBoundary
-						FallbackComponent={() => <></>}
-						onError={(err) => console.error(err)}
-					>
-						<StarmapShip
-							id={ship.id}
-							logoUrl={ship.icon}
-							size={ship.size}
-							spriteColor={0x0088ff}
-						/>
+					<ErrorBoundary FallbackComponent={() => <></>} onError={(err) => console.error(err)}>
+						<StarmapShip id={ship.id} logoUrl={ship.icon} size={ship.size} spriteColor={0x0088ff} />
 					</ErrorBoundary>
 				</Suspense>
 			)}
 			{waypoints.map((waypoint) => (
 				<Suspense key={waypoint.id}>
-					<ErrorBoundary
-						FallbackComponent={() => <></>}
-						onError={(err) => console.error(err)}
-					>
-						<WaypointEntity position={waypoint.position} isActive={waypoint.isActive} isFacing={waypoint.id === autopilot.facingWaypointIds[0]} isLocked={waypoint.id === autopilot.destinationWaypointId} />
+					<ErrorBoundary FallbackComponent={() => <></>} onError={(err) => console.error(err)}>
+						<WaypointEntity
+							position={waypoint.position}
+							isActive={waypoint.isActive}
+							isFacing={waypoint.id === autopilot.facingWaypointIds[0]}
+							isLocked={waypoint.id === autopilot.destinationWaypointId}
+						/>
 					</ErrorBoundary>
 				</Suspense>
 			))}
@@ -156,8 +141,6 @@ function PlanetRenderer({
 	name,
 	position,
 	semiMajorAxis,
-	size,
-	satellites,
 	inclination,
 	radiusY,
 	onClick,
@@ -191,10 +174,10 @@ function PlanetRenderer({
 				<Suspense fallback={null}>
 					<group
 						scale={[planetSpriteScale, planetSpriteScale, planetSpriteScale]}
-						onPointerOver={(e) => {
+						onPointerOver={() => {
 							setCursor("pointer");
 						}}
-						onPointerOut={(e) => {
+						onPointerOut={() => {
 							setCursor("auto");
 						}}
 						onClick={onClick}

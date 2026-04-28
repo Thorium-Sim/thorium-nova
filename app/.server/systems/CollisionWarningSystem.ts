@@ -1,18 +1,9 @@
-import { Quaternion, Vector3 } from "three";
-import { type Entity, System } from "@thorium/utils/ecs";
-import {
-	getCompletePositionFromOrbit,
-	getObjectSystem,
-} from "@thorium/utils/starmap/position";
-import {
-	setShipAlert,
-	clearShipAlert,
-} from "@thorium/utils/.server/ship/shipAlertHelpers";
-import {
-	solarRadiusToKilometers,
-	type SolarRadius,
-} from "@thorium/utils/unitTypes";
 import { COLLISION_WARNING_SECONDS } from "@thorium/ecs-components/shipAlerts";
+import { setShipAlert, clearShipAlert } from "@thorium/utils/.server/ship/shipAlertHelpers";
+import { type Entity, System } from "@thorium/utils/ecs";
+import { getCompletePositionFromOrbit, getObjectSystem } from "@thorium/utils/starmap/position";
+import { solarRadiusToKilometers, type SolarRadius } from "@thorium/utils/unitTypes";
+import { Quaternion, Vector3 } from "three";
 
 const COLLISION_ALERT_ID = "collision";
 const MIN_SPEED_THRESHOLD = 0.5; // km/s
@@ -41,8 +32,7 @@ export class CollisionWarningSystem extends System {
 	}
 
 	update(entity: Entity) {
-		const { position, rotation, velocity, shipAlerts, autopilot } =
-			entity.components;
+		const { position, rotation, velocity, shipAlerts, autopilot } = entity.components;
 		if (!position || !rotation || !velocity || !shipAlerts) return;
 
 		// Skip if autopilot is handling navigation
@@ -114,20 +104,15 @@ export class CollisionWarningSystem extends System {
 			(a: { id: string }) => a.id === COLLISION_ALERT_ID,
 		);
 		const prevObjectId =
-			(existingAlert && "objectId" in existingAlert
-				? existingAlert.objectId
-				: null) ?? null;
+			(existingAlert && "objectId" in existingAlert ? existingAlert.objectId : null) ?? null;
 		const prevTTC =
-			(existingAlert && "timeToCollision" in existingAlert
-				? existingAlert.timeToCollision
-				: 0) ?? 0;
+			(existingAlert && "timeToCollision" in existingAlert ? existingAlert.timeToCollision : 0) ??
+			0;
 
 		const hasNewThreat = closestId !== null;
 		const idChanged = closestId !== prevObjectId;
 		const ttcShifted =
-			hasNewThreat &&
-			prevObjectId !== null &&
-			Math.abs(closestTTC - prevTTC) > 0.5;
+			hasNewThreat && prevObjectId !== null && Math.abs(closestTTC - prevTTC) > 0.5;
 
 		if (hasNewThreat && (idChanged || ttcShifted)) {
 			setShipAlert(entity, {
@@ -241,9 +226,7 @@ export class CollisionWarningSystem extends System {
 			return candidate.components.isPlanet.radius;
 		}
 		if (candidate.components.isStar) {
-			return solarRadiusToKilometers(
-				candidate.components.isStar.radius as SolarRadius,
-			);
+			return solarRadiusToKilometers(candidate.components.isStar.radius as SolarRadius);
 		}
 		if (candidate.components.size) {
 			// Ships and starbases: size is in meters, convert to km
@@ -292,8 +275,7 @@ export class CollisionWarningSystem extends System {
 		const ttc = Math.max(0, entryDistance) / currentSpeed;
 
 		if (ttc <= COLLISION_WARNING_SECONDS) {
-			const name =
-				candidate.components.identity?.name || "Unknown Object";
+			const name = candidate.components.identity?.name || "Unknown Object";
 			onCandidate(candidate.id, name, ttc);
 		}
 	}

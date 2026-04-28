@@ -4,6 +4,7 @@ import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStorePr
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import { Entity } from "@thorium/utils/ecs";
 import { expect, it, aroundEach } from "vitest";
+
 import { scheduleAction } from "./scheduleAction";
 
 aroundEach(async (runTest) => {
@@ -212,12 +213,7 @@ it("should perform simple actions", async () => {
 	expect(ship.components.isShip?.alertLevel).toEqual("2");
 
 	// Properly test scheduleAction
-	scheduleAction(
-		ecs,
-		"alertLevel.update",
-		{ alertLevel: "1", shipId: 1 },
-		1000,
-	);
+	scheduleAction(ecs, "alertLevel.update", { alertLevel: "1", shipId: 1 }, 1000);
 	expect(ship.components.isShip?.alertLevel).toEqual("2");
 	ecs.update(1000);
 	await new Promise((res) => process.nextTick(res));

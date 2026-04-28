@@ -9,11 +9,10 @@ import { cn } from "@thorium/utils/cn";
 export function LegacyEngineControl() {
 	const { shipId } = useStation();
 
-	const [{ warpEngines, impulseEngines }] =
-		q.legacy.engineControl.get.useNetRequest({ shipId });
+	const [{ warpEngines, impulseEngines }] = q.legacy.engineControl.get.useNetRequest({ shipId });
 
 	return (
-		<div className="w-full h-full flex flex-col">
+		<div className="flex h-full w-full flex-col">
 			<div className="flex gap-4">
 				{impulseEngines ? (
 					<SpeedControl
@@ -47,7 +46,7 @@ export function LegacyEngineControl() {
 					/>
 				) : null}
 			</div>
-			<div className="flex justify-center  mt-4">
+			<div className="mt-4 flex justify-center">
 				<Button
 					className="btn-alert w-1/4"
 					onClick={() =>
@@ -59,7 +58,7 @@ export function LegacyEngineControl() {
 					Full Stop
 				</Button>
 			</div>
-			<div className="grid grid-cols-5 mt-4 gap-4 flex-auto">
+			<div className="mt-4 grid flex-auto grid-cols-5 gap-4">
 				{impulseEngines ? (
 					<>
 						<div className="space-y-2">
@@ -145,16 +144,13 @@ function SpeedControl({
 
 	const powerWidth = Math.min(
 		1,
-		Math.max(
-			0,
-			getMaxSpeedIndex(power.powerLevels || [], power.currentPower || 0),
-		),
+		Math.max(0, getMaxSpeedIndex(power.powerLevels || [], power.currentPower || 0)),
 	);
 	return (
 		<div className="w-full">
 			<p className="text-lg">{name}</p>
 
-			<div className="flex w-full items-center relative overflow-hidden">
+			<div className="relative flex w-full items-center overflow-hidden">
 				{speeds.map((speed, i) => (
 					<button
 						key={speed.label}
@@ -168,13 +164,13 @@ function SpeedControl({
 					</button>
 				))}
 				<div
-					className="absolute bg-gradient-to-l from-green-600 to-green-800  top-0 left-0 h-7 w-full transition-transform ease-in-out duration-300"
+					className="absolute top-0 left-0 h-7 w-full bg-gradient-to-l from-green-600 to-green-800 transition-transform duration-300 ease-in-out"
 					style={{
 						transform: `translate(calc(-100% + ${powerWidth * 100}%), 0px)`,
 					}}
 				/>
 				<div
-					className="absolute bg-gradient-to-b from-yellow-300 to-yellow-300 via-yellow-950 bg-[length:3px_3px] bottom-0 left-0 h-8 w-full transition-transform ease-in-out duration-300"
+					className="absolute bottom-0 left-0 h-8 w-full bg-gradient-to-b from-yellow-300 via-yellow-950 to-yellow-300 bg-[length:3px_3px] transition-transform duration-300 ease-in-out"
 					style={{
 						transform: `translate(calc(-100% + ${(speedIndex / speeds.length) * 100}%), 0px)`,
 					}}

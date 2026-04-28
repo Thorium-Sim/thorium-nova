@@ -1,4 +1,3 @@
-import Button from "@thorium/ui/Button";
 import { cn } from "@thorium/utils/cn";
 import { produce } from "immer";
 import { useState } from "react";
@@ -7,7 +6,11 @@ export function LightsOut({
 	rows = 5,
 	difficulty = 4,
 	onComplete,
-}: { rows?: number; difficulty?: number; onComplete?: () => void }) {
+}: {
+	rows?: number;
+	difficulty?: number;
+	onComplete?: () => void;
+}) {
 	const [cells, setCells] = useState(() => {
 		let cells = Array.from({ length: rows ** 2 }).fill(false) as boolean[];
 
@@ -51,18 +54,15 @@ export function LightsOut({
 	return (
 		<div>
 			<div
-				className="grid gap-1 w-fit place-self-center"
+				className="grid w-fit gap-1 place-self-center"
 				style={{ gridTemplateColumns: `repeat(${rows}, 1fr)` }}
 			>
 				{cells.map((cell, i) => (
 					<button
 						key={i}
-						className={cn(
-							"panel aspect-square w-16 h-16 shadow-inner shadow-blue-800",
-							{
-								"!bg-white shadow-yellow-200": cell,
-							},
-						)}
+						className={cn("panel aspect-square w-16 h-16 shadow-inner shadow-blue-800", {
+							"!bg-white shadow-yellow-200": cell,
+						})}
 						onClick={() => clickCell(i)}
 					/>
 				))}

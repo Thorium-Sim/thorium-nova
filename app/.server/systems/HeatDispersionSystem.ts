@@ -1,9 +1,6 @@
-import {
-	type MeterSquared,
-	StephanBoltzmannConstant,
-} from "@thorium/utils/unitTypes";
-import { type Entity, System } from "@thorium/utils/ecs";
 import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInventory";
+import { type Entity, System } from "@thorium/utils/ecs";
+import { type MeterSquared, StephanBoltzmannConstant } from "@thorium/utils/unitTypes";
 
 // W = A * a * T^5
 // W = Watts
@@ -38,20 +35,13 @@ export class HeatDispersionSystem extends System {
 		for (const item of inventory) {
 			if (!item.flags?.coolant) continue;
 			const temp = item.temperature;
-			const wattsDispersed =
-				RADIATOR_AREA * StephanBoltzmannConstant * temp ** 5;
+			const wattsDispersed = RADIATOR_AREA * StephanBoltzmannConstant * temp ** 5;
 
 			const tempDrop =
 				(wattsDispersed * elapsedInSeconds) /
-				(item.flags.coolant.heatCapacity *
-					item.flags.coolant.massPerUnit *
-					1000 *
-					item.count);
+				(item.flags.coolant.heatCapacity * item.flags.coolant.massPerUnit * 1000 * item.count);
 			if (item.room) {
-				item.room.contents[item.name].temperature = Math.max(
-					2.7,
-					temp - tempDrop,
-				);
+				item.room.contents[item.name].temperature = Math.max(2.7, temp - tempDrop);
 			}
 		}
 	}

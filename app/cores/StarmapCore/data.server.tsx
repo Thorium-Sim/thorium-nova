@@ -1,23 +1,20 @@
-import { t } from "@thorium/.server/init/t";
-import { pubsub } from "@thorium/.server/init/pubsub";
-import { matchSorter } from "match-sorter";
 import type ShipPlugin from "@thorium/.server/classes/Plugins/Ship";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
+import type { ComponentIds, ComponentProperties } from "@thorium/ecs-components";
+import type { isDestroyed } from "@thorium/ecs-components/isDestroyed";
 import { Entity } from "@thorium/utils/ecs";
-import type { Coordinates } from "@thorium/utils/unitTypes";
-import z from "zod";
+import { shipObjectives } from "@thorium/utils/flags/shipObjectives";
+import { pathfinder } from "@thorium/utils/starmap/pathfinder.server";
 import {
 	getCompletePositionFromOrbit,
 	getObjectOffsetPosition,
 	getObjectSystem,
 } from "@thorium/utils/starmap/position";
-import type { isDestroyed } from "@thorium/ecs-components/isDestroyed";
+import type { Coordinates } from "@thorium/utils/unitTypes";
+import { matchSorter } from "match-sorter";
 import { Vector3 } from "three";
-import type {
-	ComponentIds,
-	ComponentProperties,
-} from "@thorium/ecs-components";
-import { pathfinder } from "@thorium/utils/starmap/pathfinder.server";
-import { shipObjectives } from "@thorium/utils/flags/shipObjectives";
+import z from "zod";
 
 type IsDestroyed = z.infer<typeof isDestroyed>;
 
@@ -47,13 +44,11 @@ export const starmapCore = t.router({
 		.request(({ ctx }) => {
 			if (!ctx.flight) return [];
 
-			return [...(ctx.ecs.componentCache.get("isSolarSystem") || [])].map(
-				(e) => ({
-					id: e.id,
-					position: e.components.position,
-					identity: e.components.identity,
-				}),
-			);
+			return [...(ctx.ecs.componentCache.get("isSolarSystem") || [])].map((e) => ({
+				id: e.id,
+				position: e.components.position,
+				identity: e.components.identity,
+			}));
 		}),
 	system: t.procedure
 		.input(z.object({ systemId: z.number().nullish() }))
@@ -63,8 +58,7 @@ export const starmapCore = t.router({
 			if (input?.systemId === null || input?.systemId === undefined)
 				throw new Error("No system id provided");
 			const data = ctx.flight.ecs.getEntityById(input.systemId);
-			if (!data?.components.isSolarSystem)
-				throw new Error("Not a solar system");
+			if (!data?.components.isSolarSystem) throw new Error("Not a solar system");
 			return { id: data.id, components: data.components };
 		}),
 	/** Includes all the things in a system that isn't a ship */
@@ -124,8 +118,7 @@ export const starmapCore = t.router({
 					components.isShip &&
 					((typeof input?.systemId === "number" &&
 						components.position?.parentId === input.systemId) ||
-						(input?.systemId == null &&
-							components.position?.type === "interstellar"))
+						(input?.systemId == null && components.position?.type === "interstellar"))
 				) {
 					data.push({
 						id,
@@ -184,8 +177,7 @@ export const starmapCore = t.router({
 
 		.request(({ ctx, input }) => {
 			if (!ctx.flight) return [];
-			const torpedoEntities =
-				ctx.flight.ecs.componentCache.get("isTorpedo") || [];
+			const torpedoEntities = ctx.flight.ecs.componentCache.get("isTorpedo") || [];
 			const data: {
 				id: number;
 				color: string;
@@ -196,8 +188,7 @@ export const starmapCore = t.router({
 					components.isTorpedo &&
 					((typeof input?.systemId === "number" &&
 						components.position?.parentId === input.systemId) ||
-						(input?.systemId == null &&
-							components.position?.type === "interstellar"))
+						(input?.systemId == null && components.position?.type === "interstellar"))
 				) {
 					if (
 						typeof components.isDestroyed?.timeToDestroy === "number" &&
@@ -222,10 +213,7 @@ export const starmapCore = t.router({
 
 			return true;
 		})
-		.autoPublish(
-			["isShip"],
-			(entity) => entity.components.position && { shipId: entity.id },
-		)
+		.autoPublish(["isShip"], (entity) => entity.components.position && { shipId: entity.id })
 
 		.request(({ ctx, input }) => {
 			if (!input.shipId) return null;
@@ -257,14 +245,11 @@ export const starmapCore = t.router({
 			const system = getObjectSystem(entity);
 			return {
 				id: entity.id,
-				components: objectDetailsComponents.reduce(
-					(acc: Partial<ComponentProperties>, key) => {
-						// @ts-expect-error
-						acc[key] = entity.components[key];
-						return acc;
-					},
-					{},
-				),
+				components: objectDetailsComponents.reduce((acc: Partial<ComponentProperties>, key) => {
+					// @ts-expect-error
+					acc[key] = entity.components[key];
+					return acc;
+				}, {}),
 				position: {
 					x: position.x,
 					y: position.y,
@@ -333,9 +318,7 @@ export const starmapCore = t.router({
 		.request(({ ctx, input }) => {
 			if (!input.allPlugins && !ctx.flight) return [];
 			const shipTemplates = ctx.server.plugins
-				.filter((p) =>
-					input.allPlugins ? true : ctx.flight?.pluginIds.includes(p.id),
-				)
+				.filter((p) => (input.allPlugins ? true : ctx.flight?.pluginIds.includes(p.id)))
 				.reduce((acc: ShipPlugin[], plugin) => {
 					return acc.concat(plugin.aspects.ships);
 				}, []);
@@ -371,7 +354,7 @@ export const starmapCore = t.router({
 			const ships: Entity[] = [];
 			for (const system of ctx.ecs.systems) {
 				if (system.constructor.name === "AutoThrustSystem") {
-					for (const [id, entity] of system.entities) {
+					for (const [_, entity] of system.entities) {
 						if (entity?.components.position?.parentId === input.systemId) {
 							ships.push(entity);
 						}
@@ -396,23 +379,19 @@ export const starmapCore = t.router({
 					if (typeof waypointId === "number") {
 						waypoint = ctx.flight?.ecs.getEntityById(waypointId);
 						destinationName =
-							waypoint?.components.identity?.name
-								.replace(" Waypoint", "")
-								.trim() || "";
+							waypoint?.components.identity?.name.replace(" Waypoint", "").trim() || "";
 					}
 					const waypointParentId = waypoint?.components.position?.parentId;
 
 					const waypointSystemPosition =
 						typeof waypointParentId === "number"
-							? ctx.flight?.ecs.getEntityById(waypointParentId)?.components
-									.position || null
+							? ctx.flight?.ecs.getEntityById(waypointParentId)?.components.position || null
 							: null;
 
 					acc[ship.id] = {
 						forwardAutopilot: !!ship.components.autopilot?.forwardAutopilot,
 						destinationName,
-						destinationPosition:
-							ship.components.autopilot?.desiredCoordinates || null,
+						destinationPosition: ship.components.autopilot?.desiredCoordinates || null,
 						destinationSystemPosition: waypointSystemPosition,
 						locked: !!ship.components.autopilot?.desiredCoordinates,
 						path: ship.components.autopilot?.path || [],
@@ -439,12 +418,8 @@ export const starmapCore = t.router({
 			input.ships.forEach((ship) => {
 				const entity = ctx.flight?.ecs.getEntityById(ship.id);
 				const path =
-					ship.systemId === entity?.components.position?.parentId &&
-					ship.systemId
-						? pathfinder(
-								entity,
-								new Vector3(ship.position.x, ship.position.y, ship.position.z),
-							)
+					ship.systemId === entity?.components.position?.parentId && ship.systemId
+						? pathfinder(entity, new Vector3(ship.position.x, ship.position.y, ship.position.z))
 						: [];
 				const nextCoordinates = path?.shift();
 				entity?.updateComponent("autopilot", {
@@ -491,8 +466,7 @@ export const starmapCore = t.router({
 					},
 					entityId: {
 						name: "Nearby Entity",
-						helper:
-							"Send the ship somewhere near this entity. This option is preferred.",
+						helper: "Send the ship somewhere near this entity. This option is preferred.",
 					},
 				};
 			},
@@ -504,10 +478,7 @@ export const starmapCore = t.router({
 				position: z
 					.object({
 						parentId: z
-							.union([
-								z.number(),
-								z.object({ name: z.string(), pluginId: z.string() }),
-							])
+							.union([z.number(), z.object({ name: z.string(), pluginId: z.string() })])
 							.nullable(),
 						x: z.number(),
 						y: z.number(),
@@ -550,8 +521,7 @@ export const starmapCore = t.router({
 				if (parentId && typeof parentId === "object") {
 					// This waypoint is probably defined in a timeline action, so we need
 					// to find which system matches the name.
-					const solarSystems =
-						ctx.flight?.ecs.componentCache.get("isSolarSystem") || [];
+					const solarSystems = ctx.flight?.ecs.componentCache.get("isSolarSystem") || [];
 					for (const entity of solarSystems) {
 						if (entity.components.identity?.name === parentId.name) {
 							systemId = entity.id;
@@ -618,8 +588,7 @@ export const starmapCore = t.router({
 				const targetPosition = {
 					parentId: targetParentId,
 					type: targetParentId ? "solar" : "interstellar",
-					...(entity.components.position ||
-						getCompletePositionFromOrbit(entity)),
+					...(entity.components.position || getCompletePositionFromOrbit(entity)),
 				} as const;
 				const position = getObjectOffsetPosition(
 					orbitedObject,
@@ -671,9 +640,7 @@ export const starmapCore = t.router({
 			const followedObject = ctx.flight?.ecs.getEntityById(input.objectId);
 			if (!followedObject) return;
 
-			for (const shipId of Array.isArray(input.ships)
-				? input.ships
-				: [input.ships]) {
+			for (const shipId of Array.isArray(input.ships) ? input.ships : [input.ships]) {
 				const entity = ctx.flight?.ecs.getEntityById(shipId);
 				if (!entity) continue;
 
@@ -767,9 +734,7 @@ export const starmapCore = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
-			const ids = Array.isArray(input.shipIds)
-				? input.shipIds
-				: [input.shipIds];
+			const ids = Array.isArray(input.shipIds) ? input.shipIds : [input.shipIds];
 			ids.forEach((shipId) => {
 				const entity = ctx.flight?.ecs.getEntityById(shipId);
 				entity?.updateComponent("shipBehavior", {
@@ -822,10 +787,7 @@ export const starmapCore = t.router({
 		.input(z.object({ systemId: z.number().nullable() }))
 		.dataStream(({ entity, input }) => {
 			if (!entity) return false;
-			if (
-				(entity.components.isShip || entity.components.isTorpedo) &&
-				entity.components.position
-			) {
+			if ((entity.components.isShip || entity.components.isTorpedo) && entity.components.position) {
 				if (
 					entity.components.position.type === "interstellar" &&
 					(input.systemId === null || input.systemId === undefined)

@@ -1,8 +1,6 @@
 import type { AppRouter } from "@thorium/.server/init/router";
 import SineWave, { getSinePoint } from "@thorium/ui/SineWave";
-import type {
-	inferProcedureInput,
-} from "@thorium/utils/live-query/.server/types";
+import type { inferProcedureInput } from "@thorium/utils/live-query/.server/types";
 import { useRef, useState } from "react";
 
 export function WavesDecoder({
@@ -19,22 +17,20 @@ export function WavesDecoder({
 	}[];
 	updateMessageDecoding: (
 		decoding: Extract<
-			inferProcedureInput<
-				AppRouter["longRangeComm"]["updateMessageDecoding"]
-			>["decoding"],
+			inferProcedureInput<AppRouter["longRangeComm"]["updateMessageDecoding"]>["decoding"],
 			{ type: "waves" }
 		>,
 	) => Promise<void>;
 }) {
 	const waveWidthPercent = 0.25;
 	const waveAnimationRef = useRef(0);
-	const [selectedWaveIndex, setSelectedWave] = useState(0);
+	const [selectedWaveIndex] = useState(0);
 	const selectedWave = waves[selectedWaveIndex];
 
 	return (
-		<div className="py-4 h-full grid grid-cols-[auto_1fr] grid-rows-[1fr_auto_auto_auto] gap-2">
+		<div className="grid h-full grid-cols-[auto_1fr] grid-rows-[1fr_auto_auto_auto] gap-2 py-4">
 			<SineWave
-				className="flex-auto col-span-2"
+				className="col-span-2 flex-auto"
 				waves={waves}
 				callFrame={(ctx, width, height) => {
 					const requiredWaves = waves.map(
@@ -48,16 +44,10 @@ export function WavesDecoder({
 
 					for (
 						let i = -10 + waveAnimationRef.current;
-						i <
-						width * window.devicePixelRatio * waveWidthPercent +
-							10 +
-							waveAnimationRef.current;
+						i < width * window.devicePixelRatio * waveWidthPercent + 10 + waveAnimationRef.current;
 						i += 1
 					) {
-						ctx.lineTo(
-							i / 2,
-							getSinePoint(i, requiredWaves) * height + height / 2,
-						);
+						ctx.lineTo(i / 2, getSinePoint(i, requiredWaves) * height + height / 2);
 					}
 					ctx.lineWidth = 1;
 					ctx.strokeStyle = "#ffff00";
@@ -79,9 +69,7 @@ export function WavesDecoder({
 						updateMessageDecoding({
 							type: "waves",
 							waves: waves.map((w, i) =>
-								i === selectedWaveIndex
-									? { ...w, frequency: Number(e.currentTarget.value) }
-									: w,
+								i === selectedWaveIndex ? { ...w, frequency: Number(e.currentTarget.value) } : w,
 							),
 						});
 					}}
@@ -100,9 +88,7 @@ export function WavesDecoder({
 						updateMessageDecoding({
 							type: "waves",
 							waves: waves.map((w, i) =>
-								i === selectedWaveIndex
-									? { ...w, amplitude: Number(e.currentTarget.value) }
-									: w,
+								i === selectedWaveIndex ? { ...w, amplitude: Number(e.currentTarget.value) } : w,
 							),
 						});
 					}}
@@ -118,9 +104,7 @@ export function WavesDecoder({
 						updateMessageDecoding({
 							type: "waves",
 							waves: waves.map((w, i) =>
-								i === selectedWaveIndex
-									? { ...w, phase: Number(e.currentTarget.value) }
-									: w,
+								i === selectedWaveIndex ? { ...w, phase: Number(e.currentTarget.value) } : w,
 							),
 						});
 					}}

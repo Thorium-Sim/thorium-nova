@@ -1,18 +1,19 @@
-import { createContext, type ReactNode, StrictMode, use } from "react";
+import type { AppRouter } from "@thorium/.server/init/router";
 import { AlertDialog } from "@thorium/ui/AlertDialog";
-import useEasterEgg from "../hooks/useEasterEgg";
-import ToastContainer from "./ToastContext";
-import { IssueTrackerProvider } from "../components/IssueTracker";
 import {
 	createLiveQueryReact,
 	LiveQueryProvider,
 	useLiveQuery,
 } from "@thorium/utils/live-query/client";
-import type { AppRouter } from "@thorium/.server/init/router";
-import { ThoriumAccountContextProvider } from "./ThoriumAccountContext";
-import { Disconnected, Reconnecting } from "./ConnectionStatus";
-import { TabIdCoordinator } from "browser-tab-id";
 import { createRNG } from "@thorium/utils/rng";
+import { TabIdCoordinator } from "browser-tab-id";
+import { type ReactNode } from "react";
+
+import { IssueTrackerProvider } from "../components/IssueTracker";
+import useEasterEgg from "../hooks/useEasterEgg";
+import { Disconnected, Reconnecting } from "./ConnectionStatus";
+import { ThoriumAccountContextProvider } from "./ThoriumAccountContext";
+import ToastContainer from "./ToastContext";
 
 export let clientId = "";
 if (typeof window !== "undefined") {

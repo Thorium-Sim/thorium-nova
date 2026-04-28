@@ -1,11 +1,12 @@
 import * as React from "react";
+
 import { I18nLabel } from "../I18nLabel";
 import { Actions } from "../model/Actions";
+import { ICloseType } from "../model/ICloseType";
 import type { TabNode } from "../model/TabNode";
 import type { TabSetNode } from "../model/TabSetNode";
-import type { LayoutInternal } from "./Layout";
-import { ICloseType } from "../model/ICloseType";
 import { CLASSES } from "../Types";
+import type { LayoutInternal } from "./Layout";
 import { getRenderStateEx, isAuxMouseEvent } from "./Utils";
 
 /** @internal */
@@ -43,9 +44,7 @@ export const TabButton = (props: ITabButtonProps) => {
 		layout.clearDragMain();
 	};
 
-	const onAuxMouseClick = (
-		event: React.MouseEvent<HTMLElement, MouseEvent>,
-	) => {
+	const onAuxMouseClick = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
 		if (isAuxMouseEvent(event)) {
 			layout.auxMouseClick(node, event);
 		}
@@ -68,16 +67,12 @@ export const TabButton = (props: ITabButtonProps) => {
 
 	const onRename = () => {
 		layout.setEditingTab(node);
-		layout
-			.getCurrentDocument()!
-			.body.addEventListener("pointerdown", onEndEdit);
+		layout.getCurrentDocument()!.body.addEventListener("pointerdown", onEndEdit);
 	};
 
 	const onEndEdit = (event: Event) => {
 		if (event.target !== contentRef.current!) {
-			layout
-				.getCurrentDocument()!
-				.body.removeEventListener("pointerdown", onEndEdit);
+			layout.getCurrentDocument()!.body.removeEventListener("pointerdown", onEndEdit);
 			layout.setEditingTab(undefined);
 		}
 	};
@@ -107,9 +102,7 @@ export const TabButton = (props: ITabButtonProps) => {
 		event.stopPropagation();
 	};
 
-	const onTextBoxPointerDown = (
-		event: React.PointerEvent<HTMLInputElement>,
-	) => {
+	const onTextBoxPointerDown = (event: React.PointerEvent<HTMLInputElement>) => {
 		event.stopPropagation();
 	};
 
@@ -120,21 +113,14 @@ export const TabButton = (props: ITabButtonProps) => {
 		} else if (event.code === "Enter") {
 			// enter
 			layout.setEditingTab(undefined);
-			layout.doAction(
-				Actions.renameTab(
-					node.getId(),
-					(event.target as HTMLInputElement).value,
-				),
-			);
+			layout.doAction(Actions.renameTab(node.getId(), (event.target as HTMLInputElement).value));
 		}
 	};
 
 	const cm = layout.getClassName;
 	const parentNode = node.getParent() as TabSetNode;
 
-	const isStretch =
-		parentNode.isEnableSingleTabStretch() &&
-		parentNode.getChildren().length === 1;
+	const isStretch = parentNode.isEnableSingleTabStretch() && parentNode.getChildren().length === 1;
 	const baseClassName = isStretch
 		? CLASSES.FLEXLAYOUT__TAB_BUTTON_STRETCH
 		: CLASSES.FLEXLAYOUT__TAB_BUTTON;
@@ -156,15 +142,11 @@ export const TabButton = (props: ITabButtonProps) => {
 	const renderState = getRenderStateEx(layout, node);
 
 	let content = renderState.content ? (
-		<div className={cm(CLASSES.FLEXLAYOUT__TAB_BUTTON_CONTENT)}>
-			{renderState.content}
-		</div>
+		<div className={cm(CLASSES.FLEXLAYOUT__TAB_BUTTON_CONTENT)}>{renderState.content}</div>
 	) : null;
 
 	const leading = renderState.leading ? (
-		<div className={cm(CLASSES.FLEXLAYOUT__TAB_BUTTON_LEADING)}>
-			{renderState.leading}
-		</div>
+		<div className={cm(CLASSES.FLEXLAYOUT__TAB_BUTTON_LEADING)}>{renderState.leading}</div>
 	) : null;
 
 	if (layout.getEditingTab() === node) {

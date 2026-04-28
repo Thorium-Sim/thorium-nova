@@ -1,7 +1,8 @@
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+
 import type BasePlugin from ".";
 import { Aspect } from "./Aspect";
-import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 
 export class MacroPlugin extends Aspect {
 	apiVersion = "ships/v1" as const;

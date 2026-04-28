@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useRef, type Ref } from "react";
+import { useImperativeHandle, useRef, type Ref } from "react";
 
 export default function RadialDial({
 	label,
@@ -20,18 +20,16 @@ export default function RadialDial({
 	ref?: Ref<{ setValue: (value: number) => void }>;
 }) {
 	const divRef = useRef<HTMLDivElement>(null);
-	useImperativeHandle(
-		ref,
-		() => {
-			return {
-				setValue(value: number) {
-					if (!divRef.current) return;
-					const endAngle = value / max;
-					divRef.current.style.setProperty("--end-angle", `${endAngle * 100}%`);
+	useImperativeHandle(ref, () => {
+		return {
+			setValue(value: number) {
+				if (!divRef.current) return;
+				const endAngle = value / max;
+				divRef.current.style.setProperty("--end-angle", `${endAngle * 100}%`);
 
-					divRef.current.style.setProperty(
-						"background",
-						`conic-gradient(
+				divRef.current.style.setProperty(
+					"background",
+					`conic-gradient(
     var(--radial-color, #fff000) 0%,
 		${
 			marker && marker < endAngle
@@ -55,12 +53,10 @@ export default function RadialDial({
 		}
     var(--radial-background) 100%
   )`,
-					);
-				},
-			};
-		},
-		[max, marker],
-	);
+				);
+			},
+		};
+	}, [max, marker]);
 
 	return (
 		<div className="radial-dial">

@@ -13,21 +13,17 @@ export function RemoteAccessCore() {
 						title={`${code.station} - ${code.time}`}
 						value={code.code}
 						readOnly
-						className="flex-1 font-mono bg-transparent border-white/20 border px-2 rounded"
+						className="flex-1 rounded border border-white/20 bg-transparent px-2 font-mono"
 					/>
 					<button
 						className="btn btn-xs btn-error"
-						onClick={() =>
-							q.remoteAccess.deny.netSend({ remoteAccessCodeId: code.id })
-						}
+						onClick={() => q.remoteAccess.deny.netSend({ remoteAccessCodeId: code.id })}
 					>
 						Deny
 					</button>
 					<button
 						className="btn btn-xs btn-success"
-						onClick={() =>
-							q.remoteAccess.accept.netSend({ remoteAccessCodeId: code.id })
-						}
+						onClick={() => q.remoteAccess.accept.netSend({ remoteAccessCodeId: code.id })}
 					>
 						Accept
 					</button>

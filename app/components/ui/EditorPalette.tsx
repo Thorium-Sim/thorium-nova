@@ -1,9 +1,10 @@
-import * as React from "react";
-import { useDrag } from "@use-gesture/react";
 import { animated } from "@react-spring/web";
 import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
-import { Icon } from "./Icon";
 import { Portal } from "@thorium/ui/Portal";
+import { useDrag } from "@use-gesture/react";
+import * as React from "react";
+
+import { Icon } from "./Icon";
 
 export function EditorPalette({
 	isOpen,
@@ -33,22 +34,21 @@ export function EditorPalette({
 
 	return (
 		<Portal>
-			{/* @ts-expect-error */}
 			<animated.div
-				className="w-64 max-h-96 flex flex-col bg-gray-900 shadow-lg rounded-lg fixed left-[calc(50%-6rem)] top-[calc(50%-8rem)]"
+				className="fixed top-[calc(50%-8rem)] left-[calc(50%-6rem)] flex max-h-96 w-64 flex-col rounded-lg bg-gray-900 shadow-lg"
 				style={{
 					x,
 					y,
 				}}
 			>
 				<div
-					className={`w-full h-8 bg-gray-800 text-white font-bold flex items-center justify-between select-none touch-none cursor-grab active:cursor-grabbing rounded-t-lg ${
+					className={`flex h-8 w-full cursor-grab touch-none items-center justify-between rounded-t-lg bg-gray-800 font-bold text-white select-none active:cursor-grabbing ${
 						minimized ? "rounded-b-lg" : ""
 					}`}
 					{...bind()}
 				>
 					<button
-						className="p-1 ml-1 rounded-full hover:bg-white/10 cursor-pointer"
+						className="ml-1 cursor-pointer rounded-full p-1 hover:bg-white/10"
 						onClick={onClose}
 						aria-label="Close"
 					>
@@ -56,7 +56,7 @@ export function EditorPalette({
 					</button>
 					<span className="flex-1 text-center">Editor</span>
 					<button
-						className="p-1 mr-1 rounded-full hover:bg-white/10 cursor-pointer"
+						className="mr-1 cursor-pointer rounded-full p-1 hover:bg-white/10"
 						onClick={() => setMinimized((s) => !s)}
 						aria-label="Minimize"
 					>

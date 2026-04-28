@@ -1,7 +1,8 @@
 import React from "react";
-import useMeasure from "./useMeasure";
-import useEventListener from "./useEventListener";
 import { Frustum, type PerspectiveCamera, Vector3 } from "three";
+
+import useEventListener from "./useEventListener";
+import useMeasure from "./useMeasure";
 
 type Box = { x: number; y: number; width: number; height: number };
 export default function useDragSelect<DOMElement extends HTMLElement>({
@@ -9,12 +10,7 @@ export default function useDragSelect<DOMElement extends HTMLElement>({
 	onDragEnd,
 	onDragStart,
 }: {
-	setSelectionBounds?: (param: {
-		x1: number;
-		x2: number;
-		y1: number;
-		y2: number;
-	}) => void;
+	setSelectionBounds?: (param: { x1: number; x2: number; y1: number; y2: number }) => void;
 	onDragStart?: () => void;
 	onDragEnd?: () => void;
 }) {
@@ -110,7 +106,7 @@ export const DragSelection = ({
 }) => {
 	return (
 		<div
-			className={`absolute bg-blue-500/10 border border-blue-500 w-8 h-8 left-0 top-0 ${className}`}
+			className={`absolute top-0 left-0 h-8 w-8 border border-blue-500 bg-blue-500/10 ${className}`}
 			style={{
 				width,
 				height,

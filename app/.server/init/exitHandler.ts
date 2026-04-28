@@ -4,10 +4,7 @@ export function exitHandler() {
 	if (process.env.NODE_ENV === "production") {
 		process.stdin.resume(); //so the program will not close instantly
 
-		async function exitHandler(
-			options: { cleanup?: boolean; exit?: boolean },
-			exitCode: number,
-		) {
+		async function exitHandler(options: { cleanup?: boolean; exit?: boolean }) {
 			if (options.cleanup) {
 				await snapshot();
 			}

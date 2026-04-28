@@ -1,15 +1,11 @@
 import type WarpEnginesPlugin from "@thorium/.server/classes/Plugins/ShipSystems/warpEngines";
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
+import { engineSpeeds } from "@thorium/ecs-components/shipSystems/engineSpeeds";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import z from "zod";
-import {
-	getShipSystem,
-	getShipSystemForInput,
-	pluginFilter,
-	systemInput,
-} from "../utils";
-import { engineSpeeds } from "@thorium/ecs-components/shipSystems/engineSpeeds";
+
+import { getShipSystem, getShipSystemForInput, pluginFilter, systemInput } from "../utils";
 
 export const warp = t.router({
 	get: t.procedure
@@ -18,8 +14,7 @@ export const warp = t.router({
 		.request(({ ctx, input }) => {
 			const system = getShipSystem({ input, ctx });
 
-			if (system.type !== "warpEngines")
-				throw new Error("System is not Warp Engine");
+			if (system.type !== "warpEngines") throw new Error("System is not Warp Engine");
 
 			return system as WarpEnginesPlugin;
 		}),
@@ -38,16 +33,12 @@ export const warp = t.router({
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
-			const [system, override] = getShipSystemForInput<"warpEngines">(
-				ctx,
-				input,
-			);
+			const [system, override] = getShipSystemForInput<"warpEngines">(ctx, input);
 
 			const shipSystem = override || system;
 
 			if (typeof input.minSpeedMultiplier === "number") {
-				if (input.minSpeedMultiplier < 0)
-					throw new Error("minSpeedMultiplier must be >= 0");
+				if (input.minSpeedMultiplier < 0) throw new Error("minSpeedMultiplier must be >= 0");
 				shipSystem.minSpeedMultiplier = input.minSpeedMultiplier;
 			}
 			if (typeof input.interstellarCruisingSpeed === "number") {

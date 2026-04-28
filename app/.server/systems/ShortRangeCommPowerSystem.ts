@@ -15,10 +15,7 @@ export class ShortRangeCommPowerSystem extends System {
 		const requiredPower = power.powerLevels[0];
 		const maxSafePower = power.powerLevels.at(-1)!;
 		// Make sure the gain is set below its max
-		const maxGain = Math.max(
-			0,
-			(currentPower - requiredPower) / (maxSafePower - requiredPower),
-		);
+		const maxGain = Math.max(0, (currentPower - requiredPower) / (maxSafePower - requiredPower));
 
 		if (["hailing", "connected"].includes(shortRangeComm.state)) {
 			if (shortRangeComm.actualGain > maxGain) {

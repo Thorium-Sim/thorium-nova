@@ -1,25 +1,24 @@
-import { q } from "@thorium/context/AppContext";
-import { Fragment, useEffect, useState } from "react";
-import { parseSchema as parseJsonSchema } from "json-schema-to-zod";
-import z from "zod";
-import { parseSchema } from "@thorium/utils/zodAutoForm";
-import { ValueInput } from "@thorium/components/Config/EntityQueryBuilder";
-import type { components } from "@thorium/ecs-components";
 import type { ValueQuery } from "@thorium/.server/classes/Plugins/TimelineStep";
-import { matchSorter } from "match-sorter";
-import { cn } from "@thorium/utils/cn";
+import { ValueInput } from "@thorium/components/Config/EntityQueryBuilder";
+import { q } from "@thorium/context/AppContext";
+import type { components } from "@thorium/ecs-components";
 import { Icon } from "@thorium/ui/Icon";
+import { cn } from "@thorium/utils/cn";
+import { parseSchema } from "@thorium/utils/zodAutoForm";
+import { parseSchema as parseJsonSchema } from "json-schema-to-zod";
+import { matchSorter } from "match-sorter";
+import { Fragment, useState } from "react";
 import {
 	Button,
 	ComboBox,
 	Group,
 	Input,
-	Label,
 	ListBox,
 	ListBoxItem,
 	Popover,
 } from "react-aria-components";
 import type { Key } from "react-aria-components";
+import z from "zod";
 
 declare global {
 	interface Window {
@@ -53,7 +52,6 @@ export function ActionCombobox({
 	value,
 	onChange,
 	placeholder = "Actions",
-	className,
 }: {
 	value: {
 		name: string;
@@ -85,22 +83,22 @@ export function ActionCombobox({
 			}}
 			aria-label={placeholder}
 		>
-			<Group className="flex rounded-lg border-success border transition shadow-md ring-1 min-h-6 h-6 ring-black/10 focus-visible:ring-2 focus-visible:ring-black">
+			<Group className="border-success flex h-6 min-h-6 rounded-lg border shadow-md ring-1 ring-black/10 transition focus-visible:ring-2 focus-visible:ring-black">
 				<Input
 					placeholder={value?.name || placeholder}
-					className="flex-1 w-full min-w-56 border-none py-2 px-3 leading-5 placeholder:text-success placeholder:font-semibold text-success bg-transparent outline-none focus:ring-0 pl-3 pr-0 text-xs "
+					className="placeholder:text-success text-success w-full min-w-56 flex-1 border-none bg-transparent px-3 py-2 pr-0 pl-3 text-xs leading-5 outline-none placeholder:font-semibold focus:ring-0"
 				/>
-				<Button className="px-3 flex items-center text-success transition border-0 border-solid border-l border-l-success rounded-r-lg pressed:bg-success/50 bg-success/20 hover:bg-success/50 cursor-pointer">
+				<Button className="text-success border-l-success pressed:bg-success/50 bg-success/20 hover:bg-success/50 flex cursor-pointer items-center rounded-r-lg border-0 border-l border-solid px-3 transition">
 					<Icon name="chevrons-up-down" />
 				</Button>
 			</Group>
-			<Popover className="max-h-60 w-(--trigger-width) overflow-auto rounded-md bg-gray-900/90 border-gray-400 border text-base shadow-lg ring-1 ring-black/5 entering:animate-in entering:fade-in exiting:animate-out exiting:fade-out">
-				<ListBox className="outline-hidden p-1" items={filteredActions}>
+			<Popover className="entering:animate-in entering:fade-in exiting:animate-out exiting:fade-out max-h-60 w-(--trigger-width) overflow-auto rounded-md border border-gray-400 bg-gray-900/90 text-base shadow-lg ring-1 ring-black/5">
+				<ListBox className="p-1 outline-hidden" items={filteredActions}>
 					{(item) => (
 						<ListBoxItem
 							textValue={item.name}
 							key={item.key}
-							className="group flex items-center gap-0.5 cursor-default select-none outline-hidden rounded-sm text-gray-900 focus:bg-sky-600 focus:text-white"
+							className="group flex cursor-default items-center gap-0.5 rounded-sm text-gray-900 outline-hidden select-none focus:bg-sky-600 focus:text-white"
 						>
 							{({ isFocusVisible, isHovered }) => (
 								<>
@@ -141,16 +139,14 @@ export function ActionInput({
 	input = input || actionDef?.input;
 	const overrides = actionDef?.actionOverrides || {};
 	const actionSchema = action
-		? // biome-ignore lint/security/noGlobalEval: Necessary
+		? // oxlint-disable-next-line no-eval
 			parseSchema(eval(parseJsonSchema(input)), overrides)
 		: [];
 
 	const inputs = [];
 	const queryInputs: string[] = [];
 	for (const item of actionSchema) {
-		const value = item.key
-			.split(".")
-			.reduce((acc: any, key) => acc?.[key], action.values);
+		const value = item.key.split(".").reduce((acc: any, key) => acc?.[key], action.values);
 
 		if (value && typeof value === "object" && "query" in value) {
 			queryInputs.push(item.key);

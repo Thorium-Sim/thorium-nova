@@ -1,8 +1,5 @@
 import { type Entity, System } from "@thorium/utils/ecs";
-import {
-	getCompletePositionFromOrbit,
-	getObjectSystem,
-} from "@thorium/utils/starmap/position";
+import { getCompletePositionFromOrbit, getObjectSystem } from "@thorium/utils/starmap/position";
 
 export class NearbyObjectsSystem extends System {
 	static flightMode = ["nova"];
@@ -20,8 +17,7 @@ export class NearbyObjectsSystem extends System {
 		});
 	}
 	update(entity: Entity) {
-		const position =
-			entity.components.position || getCompletePositionFromOrbit(entity);
+		const position = entity.components.position || getCompletePositionFromOrbit(entity);
 		const systemId = getObjectSystem(entity)?.id || null;
 
 		// We'll clear our work every update.
@@ -30,8 +26,7 @@ export class NearbyObjectsSystem extends System {
 			const objectSystemId = getObjectSystem(object)?.id || null;
 			if (objectSystemId !== systemId) continue;
 
-			const objectPosition =
-				object.components.position || getCompletePositionFromOrbit(object);
+			const objectPosition = object.components.position || getCompletePositionFromOrbit(object);
 
 			const distance = Math.hypot(
 				position.x - objectPosition.x,

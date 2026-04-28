@@ -18,8 +18,9 @@ export function MessagingCore() {
 	const { shipId } = useStation();
 	const [messageGroups] = q.messaging.messageGroups.useNetRequest({ shipId });
 	const [ship] = q.ship.get.useNetRequest({ shipId });
-	const [selectedConversationDestination, setSelectedConversationDestination] =
-		useState<string | null>(null);
+	const [selectedConversationDestination, setSelectedConversationDestination] = useState<
+		string | null
+	>(null);
 	const [sender, setSender] = useState("");
 	const [alertSender, setAlertSender] = useState(false);
 
@@ -32,7 +33,7 @@ export function MessagingCore() {
 	);
 
 	return (
-		<div className="grid grid-cols-3 text-sm h-full">
+		<div className="grid h-full grid-cols-3 text-sm">
 			<div className="flex flex-col">
 				<ul className="list-group flex-1">
 					{conversations.map((c) => (
@@ -80,19 +81,16 @@ export function MessagingCore() {
 					setSelected={(value) => setSelectedConversationDestination(value)}
 				/>
 			</div>
-			<div className="flex flex-col col-span-2">
-				<div className="flex-auto flex flex-col justify-end">
+			<div className="col-span-2 flex flex-col">
+				<div className="flex flex-auto flex-col justify-end">
 					{!selectedConversationDestination ? null : !selectedConversation ||
-						selectedConversation.messages.length === 0 ? (
-						<div className="self-center py-1 px-2 rounded-lg bg-gray-800 mb-4">
+					  selectedConversation.messages.length === 0 ? (
+						<div className="mb-4 self-center rounded-lg bg-gray-800 px-2 py-1">
 							Start of Conversation with {selectedConversationDestination}
 						</div>
 					) : (
 						selectedConversation.messages.map((m) => (
-							<div
-								key={m.timestamp}
-								title={new Date(m.timestamp).toLocaleTimeString()}
-							>
+							<div key={m.timestamp} title={new Date(m.timestamp).toLocaleTimeString()}>
 								<span className="font-bold">{m.sender}:</span> {m.content}
 							</div>
 						))
@@ -142,11 +140,7 @@ export function MessagingCore() {
 							labelHidden
 							name="message"
 						/>
-						<Button
-							disabled={!selectedConversationDestination}
-							className="btn-xs"
-							type="submit"
-						>
+						<Button disabled={!selectedConversationDestination} className="btn-xs" type="submit">
 							Send
 						</Button>
 					</form>
@@ -154,9 +148,7 @@ export function MessagingCore() {
 						prompt="What is the name of the sender?"
 						promptValue={sender}
 						alert={alertSender}
-						onClick={(value) =>
-							typeof value === "string" ? setSender(value) : null
-						}
+						onClick={(value) => (typeof value === "string" ? setSender(value) : null)}
 					>
 						{sender || <>&nbsp;</>}
 					</InputField>
@@ -177,19 +169,14 @@ export function useConversations(station?: string) {
 		const conversations = new Map<string, Conversation>();
 		for (const message of messages) {
 			const key =
-				stations.includes(message.sender) &&
-				stations.includes(message.destination)
+				stations.includes(message.sender) && stations.includes(message.destination)
 					? [message.sender, message.destination].sort().join("")
 					: stations.includes(message.destination)
 						? message.destination
 						: message.sender;
 			const conversation = conversations.get(key) || {
-				sender: stations.includes(message.sender)
-					? message.destination
-					: message.sender,
-				recipient: stations.includes(message.sender)
-					? message.sender
-					: message.destination,
+				sender: stations.includes(message.sender) ? message.destination : message.sender,
+				recipient: stations.includes(message.sender) ? message.sender : message.destination,
 				messages: [],
 				lastTimestamp: 0,
 			};
@@ -199,10 +186,7 @@ export function useConversations(station?: string) {
 				sender: message.sender,
 				timestamp: message.timestamp,
 			});
-			conversation.lastTimestamp = Math.max(
-				conversation.lastTimestamp,
-				message.timestamp,
-			);
+			conversation.lastTimestamp = Math.max(conversation.lastTimestamp, message.timestamp);
 			conversation.sender = stations.includes(message.sender)
 				? message.destination
 				: message.sender;

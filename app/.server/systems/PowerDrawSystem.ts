@@ -37,14 +37,12 @@ export class PowerDrawSystem extends System {
 				const warpFactorCount = speeds.length - 1;
 				if (currentWarpFactor === 0) break;
 				const warpEngineUse = currentWarpFactor / warpFactorCount;
-				powerDraw =
-					(maxSafePower - requiredPower) * warpEngineUse + requiredPower;
+				powerDraw = (maxSafePower - requiredPower) * warpEngineUse + requiredPower;
 				break;
 			}
 			case "impulseEngines": {
 				if (!entity.components.isImpulseEngines) return;
-				const { cruisingSpeed, targetSpeed } =
-					entity.components.isImpulseEngines;
+				const { cruisingSpeed, targetSpeed } = entity.components.isImpulseEngines;
 				// If we're going faster than the cruising speed,
 				// draw as much power as possible
 				if (targetSpeed > cruisingSpeed) {
@@ -54,33 +52,19 @@ export class PowerDrawSystem extends System {
 				if (targetSpeed === 0) break;
 				// We divide the target speed in four, but we can't go below 1/4th
 				// So we scale it where 0.25 is 0, and 1 is 1
-				const impulseEngineUse = Math.max(
-					0,
-					(targetSpeed / cruisingSpeed - 0.25) * (4 / 3),
-				);
-				powerDraw =
-					(maxSafePower - requiredPower) * impulseEngineUse + requiredPower;
+				const impulseEngineUse = Math.max(0, (targetSpeed / cruisingSpeed - 0.25) * (4 / 3));
+				powerDraw = (maxSafePower - requiredPower) * impulseEngineUse + requiredPower;
 
 				break;
 			}
 			case "thrusters": {
 				if (!entity.components.isThrusters) return;
 				const { direction, rotationDelta } = entity.components.isThrusters;
-				const directionOutput = Math.hypot(
-					direction.x,
-					direction.y,
-					direction.z,
-				);
-				const rotationOutput = Math.hypot(
-					rotationDelta.x,
-					rotationDelta.y,
-					rotationDelta.z,
-				);
+				const directionOutput = Math.hypot(direction.x, direction.y, direction.z);
+				const rotationOutput = Math.hypot(rotationDelta.x, rotationDelta.y, rotationDelta.z);
 				const overloadPercent = Math.min(1, requestedPower / maxSafePower);
-				const totalOutput =
-					(directionOutput + rotationOutput) * overloadPercent;
-				powerDraw =
-					(maxSafePower - requiredPower) * totalOutput + requiredPower;
+				const totalOutput = (directionOutput + rotationOutput) * overloadPercent;
+				powerDraw = (maxSafePower - requiredPower) * totalOutput + requiredPower;
 				break;
 			}
 			case "shields": {
@@ -98,11 +82,7 @@ export class PowerDrawSystem extends System {
 			case "torpedoLauncher": {
 				if (!entity.components.isTorpedoLauncher) return;
 				const { status } = entity.components.isTorpedoLauncher;
-				if (
-					status === "loading" ||
-					status === "loaded" ||
-					status === "firing"
-				) {
+				if (status === "loading" || status === "loaded" || status === "firing") {
 					powerDraw = requestedPower;
 				} else {
 					powerDraw = 0;
@@ -115,9 +95,7 @@ export class PowerDrawSystem extends System {
 					powerDraw = 0;
 					break;
 				}
-				powerDraw =
-					power.powerSources.length *
-					(entity.components.isPhasers?.firePercent || 0);
+				powerDraw = power.powerSources.length * (entity.components.isPhasers?.firePercent || 0);
 
 				break;
 			}
@@ -134,16 +112,11 @@ export class PowerDrawSystem extends System {
 			case "mainComputer": {
 				// If there is an active scan, just draw the full amount of power
 				let activeDiagnostic = false;
-				for (const diagnostic of this.ecs.componentCache.get("diagnostic") ||
-					[]) {
-					if (diagnostic.components.diagnostic?.shipId === ship.id)
-						activeDiagnostic = true;
+				for (const diagnostic of this.ecs.componentCache.get("diagnostic") || []) {
+					if (diagnostic.components.diagnostic?.shipId === ship.id) activeDiagnostic = true;
 					break;
 				}
-				powerDraw = Math.max(
-					power.powerLevels[0],
-					activeDiagnostic ? requestedPower : 0,
-				);
+				powerDraw = Math.max(power.powerLevels[0], activeDiagnostic ? requestedPower : 0);
 				break;
 			}
 			case "longRangeComm": {
@@ -154,11 +127,7 @@ export class PowerDrawSystem extends System {
 			}
 			case "shortRangeComm": {
 				// Pretty much just the antenna gain affects power, but only when calling or connected
-				if (
-					["hailing", "connected"].includes(
-						entity.components.isShortRangeComm?.state || "",
-					)
-				) {
+				if (["hailing", "connected"].includes(entity.components.isShortRangeComm?.state || "")) {
 					const gain = entity.components.isShortRangeComm?.antennaGain || 0;
 					powerDraw = (maxSafePower - requiredPower) * gain + requiredPower;
 				}

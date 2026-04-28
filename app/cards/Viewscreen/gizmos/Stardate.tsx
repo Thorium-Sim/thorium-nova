@@ -5,10 +5,7 @@ import { useRef } from "react";
 
 export function StardateGizmo(
 	props: Omit<
-		React.DetailedHTMLProps<
-			React.HTMLAttributes<HTMLSpanElement>,
-			HTMLSpanElement
-		>,
+		React.DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>,
 		"children"
 	>,
 ) {
@@ -23,10 +20,7 @@ export function StardateGizmo(
 		<span
 			ref={ref}
 			{...props}
-			className={cn(
-				"gizmo-stardate text-base tabular-nums font-mono",
-				props.className,
-			)}
+			className={cn("gizmo-stardate text-base tabular-nums font-mono", props.className)}
 		>
 			{now()}
 		</span>

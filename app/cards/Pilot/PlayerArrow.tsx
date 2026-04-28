@@ -1,11 +1,6 @@
 import { useFrame, type ThreeElements } from "@react-three/fiber";
 import { type FC, useMemo, useRef } from "react";
-import {
-	BufferGeometry,
-	type Mesh,
-	type OrthographicCamera,
-	Vector3,
-} from "three";
+import { BufferGeometry, type Mesh, type OrthographicCamera, Vector3 } from "three";
 
 const arrowVertices = [
 	new Vector3(0, 0, -0.75),
@@ -50,13 +45,7 @@ export const PlayerArrow: FC<ThreeElements["object3D"]> = (props) => {
 		return geo;
 	}, []);
 	return (
-		<mesh
-			ref={ref}
-			rotation={[0, 0, 0]}
-			scale={[0.3, 0.3, 0.3]}
-			{...props}
-			geometry={geometry}
-		>
+		<mesh ref={ref} rotation={[0, 0, 0]} scale={[0.3, 0.3, 0.3]} {...props} geometry={geometry}>
 			<meshBasicMaterial wireframe color={0xffffff} attach="material" />
 		</mesh>
 	);

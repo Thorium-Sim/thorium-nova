@@ -1,31 +1,16 @@
-import type * as React from "react";
-import { useConfirm } from "@thorium/ui/AlertDialog";
-import Button from "../ui/Button";
 import { q } from "@thorium/context/AppContext";
-import { Icon } from "@thorium/ui/Icon";
-import { starTypes } from "@thorium/utils/flags/starTypes";
-import { planetTypes } from "@thorium/utils/flags/planetTypes";
-import type { Camera } from "three";
-import {
-	Menu,
-	MenuItem,
-	MenuTrigger,
-	Popover,
-	Button as RAButton,
-} from "react-aria-components";
+import { useConfirm } from "@thorium/ui/AlertDialog";
 import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
+import { Icon } from "@thorium/ui/Icon";
+import { planetTypes } from "@thorium/utils/flags/planetTypes";
+import { starTypes } from "@thorium/utils/flags/starTypes";
+import { Menu, MenuItem, MenuTrigger, Popover, Button as RAButton } from "react-aria-components";
+
+import Button from "../ui/Button";
 import { useGetStarmapStore } from "./starmapStore";
 import { useSystemIds } from "./useSystemIds";
 
-interface SceneRef {
-	camera: () => Camera;
-}
-
-export function SolarSystemMenuButtons({
-	sceneRef,
-}: {
-	sceneRef: React.MutableRefObject<SceneRef | undefined>;
-}) {
+export function SolarSystemMenuButtons() {
 	const [pluginId, solarSystemId] = useSystemIds();
 	const useStarmapStore = useGetStarmapStore();
 
@@ -62,9 +47,7 @@ export function SolarSystemMenuButtons({
 		<>
 			<Button
 				className="btn-info btn-outline btn-xs"
-				onClick={() =>
-					useStarmapStore.setState({ selectedObjectIds: [solarSystemId] })
-				}
+				onClick={() => useStarmapStore.setState({ selectedObjectIds: [solarSystemId] })}
 			>
 				Edit System
 			</Button>
@@ -80,11 +63,7 @@ export function SolarSystemMenuButtons({
 			</Button>
 			<Button
 				className="btn-notice btn-outline btn-xs"
-				onClick={() =>
-					useStarmapStore
-						.getState()
-						.setCameraView(cameraView === "2d" ? "3d" : "2d")
-				}
+				onClick={() => useStarmapStore.getState().setCameraView(cameraView === "2d" ? "3d" : "2d")}
 			>
 				Go to {cameraView === "2d" ? "3D" : "2D"}
 			</Button>
@@ -100,21 +79,17 @@ function AddStarMenu() {
 		<MenuTrigger>
 			<RAButton className="btn btn-error btn-outline btn-xs">
 				Add Star
-				<Icon
-					name="chevron-down"
-					className="w-5 h-5 ml-2 -mr-1"
-					aria-hidden="true"
-				/>
+				<Icon name="chevron-down" className="-mr-1 ml-2 h-5 w-5" aria-hidden="true" />
 			</RAButton>
 			<Popover className={popoverTransitionClasses}>
-				<Menu className="w-56 mt-2 origin-top-right bg-gray-900 divide-y divide-gray-800 rounded-md shadow-lg ring-1 ring-white/5 focus:outline-none">
+				<Menu className="mt-2 w-56 origin-top-right divide-y divide-gray-800 rounded-md bg-gray-900 shadow-lg ring-1 ring-white/5 focus:outline-none">
 					{starTypes.map((starType) => (
 						<MenuItem
 							key={starType.spectralType}
 							className={({ isFocused }) =>
 								`${
 									isFocused ? "bg-violet-900 text-white" : "text-gray-200"
-								} group flex items-center w-full px-2 py-2 text-sm`
+								} group flex w-full items-center px-2 py-2 text-sm`
 							}
 							onAction={async () => {
 								const result = await q.plugin.starmap.star.create.netSend({
@@ -146,22 +121,18 @@ function AddPlanetMenu() {
 			<div>
 				<RAButton className="btn btn-primary btn-outline btn-xs">
 					Add Planet
-					<Icon
-						name="chevron-down"
-						className="w-5 h-5 ml-2 -mr-1"
-						aria-hidden="true"
-					/>
+					<Icon name="chevron-down" className="-mr-1 ml-2 h-5 w-5" aria-hidden="true" />
 				</RAButton>
 			</div>
 			<Popover className={popoverTransitionClasses}>
-				<Menu className="w-56 mt-2 origin-top-right bg-gray-900 divide-y divide-gray-800 rounded-md shadow-lg ring-1 ring-white/5 focus:outline-none">
+				<Menu className="mt-2 w-56 origin-top-right divide-y divide-gray-800 rounded-md bg-gray-900 shadow-lg ring-1 ring-white/5 focus:outline-none">
 					{planetTypes.map((planetType) => (
 						<MenuItem
 							key={planetType.classification}
 							className={({ isFocused }) =>
 								`${
 									isFocused ? "bg-violet-900 text-white" : "text-gray-200"
-								} group flex items-center w-full px-2 py-2 text-sm`
+								} group flex w-full items-center px-2 py-2 text-sm`
 							}
 							onAction={async () => {
 								const result = await q.plugin.starmap.planet.create.netSend({

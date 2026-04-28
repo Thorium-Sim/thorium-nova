@@ -1,9 +1,10 @@
+import { Navigate } from "@thorium/components/Navigate";
+import { q } from "@thorium/context/AppContext";
+import { useConfirm } from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import { Outlet, useParams, useNavigate, useLocation } from "react-router";
-import { useConfirm } from "@thorium/ui/AlertDialog";
+
 import { SettingsList } from "./SettingsList";
-import { q } from "@thorium/context/AppContext";
-import { Navigate } from "@thorium/components/Navigate";
 
 export default function SystemLayout() {
 	const { pathname } = useLocation();
@@ -14,8 +15,7 @@ export default function SystemLayout() {
 	const navigate = useNavigate();
 	const confirm = useConfirm();
 	const data = q.plugin.systems.get.useNetRequest({ pluginId, systemId });
-	if (!systemId || !data)
-		return <Navigate to={`/config/${pluginId}/systems`} />;
+	if (!systemId || !data) return <Navigate to={`/config/${pluginId}/systems`} />;
 
 	if (decodeURI(pathname).endsWith(systemId)) return <Navigate to={`basic`} />;
 
@@ -24,7 +24,7 @@ export default function SystemLayout() {
 			<div>
 				<SettingsList />
 				<Button
-					className="w-full btn-outline btn-error btn-sm"
+					className="btn-outline btn-error btn-sm w-full"
 					disabled={!systemId}
 					onClick={async () => {
 						if (
@@ -35,11 +35,11 @@ export default function SystemLayout() {
 							}))
 						)
 							return;
-						q.plugin.systems.delete.netSend({
+						void q.plugin.systems.delete.netSend({
 							pluginId,
 							shipSystemId: systemId,
 						});
-						navigate(`/config/${pluginId}/systems`);
+						void navigate(`/config/${pluginId}/systems`);
 					}}
 				>
 					Delete System

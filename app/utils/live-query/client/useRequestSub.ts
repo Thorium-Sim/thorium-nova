@@ -1,19 +1,16 @@
 import uniqid from "@thorium/utils/uniqid";
 import { useEffect, useState } from "react";
-import { stableValueHash } from "./stableValueHash";
+
 import { useLiveQuery } from "./liveQueryContext";
+import { stableValueHash } from "./stableValueHash";
 
 const requestMap = new Map<string, Set<string>>();
 
-export function useRequestSub(
-	requestParams: { path: string; params?: any },
-	mockData?: any,
-) {
+export function useRequestSub(requestParams: { path: string; params?: any }, mockData?: any) {
 	const id = stableValueHash([requestParams.path, requestParams.params]);
 	const [hookId] = useState(uniqid());
 	const { socket, reconnectionState } = useLiveQuery();
 	const isConnected = reconnectionState === "connected";
-	// biome-ignore lint/correctness/useExhaustiveDependencies: We don't need to update when mockData changes
 	useEffect(() => {
 		if (!socket || !isConnected || mockData) return;
 		if (!requestMap.has(id)) {

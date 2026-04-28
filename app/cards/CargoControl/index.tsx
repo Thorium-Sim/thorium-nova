@@ -1,25 +1,25 @@
-import Button from "@thorium/ui/Button";
+import type { CardProps } from "@thorium/cards/CardProps";
+
 import "./style.css";
+import { q } from "@thorium/context/AppContext";
 import { toast } from "@thorium/context/ToastContext";
-import { ContainerLabel } from "./ContainerLabel";
-import { CargoSearchInput } from "./CargoSearchInput";
-import { useTransferAmount } from "./useTransferAmount";
+import { useStation } from "@thorium/routes/station/useStation";
+import Button from "@thorium/ui/Button";
+
 import { CargoContainerList } from "./CargoContainerList";
 import { CargoList } from "./CargoList";
+import { CargoSearchInput } from "./CargoSearchInput";
+import { ContainerLabel } from "./ContainerLabel";
+import { DeckPicker } from "./DeckPicker";
 import { GoToRoomButton } from "./GoToRoomButton";
 import { ShipView } from "./ShipView";
 import { useShipMapStore } from "./useShipMapStore";
-import { q } from "@thorium/context/AppContext";
-import { DeckPicker } from "./DeckPicker";
-import type { CardProps } from "@thorium/cards/CardProps";
-import { useStation } from "@thorium/routes/station/useStation";
+import { useTransferAmount } from "./useTransferAmount";
 
 export function CargoControl(props: CardProps) {
 	const { shipId } = useStation();
 	const selectedRoomId = useShipMapStore((state) => state.selectedRoomId);
-	const selectedContainerId = useShipMapStore(
-		(state) => state.selectedContainerId,
-	);
+	const selectedContainerId = useShipMapStore((state) => state.selectedContainerId);
 	const deckIndex = useShipMapStore((state) => state.deckIndex);
 
 	const [cargoRooms] = q.cargoControl.rooms.useNetRequest({ shipId });
@@ -28,38 +28,34 @@ export function CargoControl(props: CardProps) {
 	const { rooms, decks } = cargoRooms;
 
 	const selectedRoom = rooms.find((r) => r.id === selectedRoomId);
-	const selectedContainer = cargoContainers.find(
-		(c) => c.id === selectedContainerId,
-	);
+	const selectedContainer = cargoContainers.find((c) => c.id === selectedContainerId);
 
 	const enRouteContainer = cargoContainers.find(
-		(container) =>
-			selectedRoomId && container.destinationNode === selectedRoomId,
+		(container) => selectedRoomId && container.destinationNode === selectedRoomId,
 	);
 
 	const transferAmount = useTransferAmount();
 	const maxDeckName = Math.max(...decks.map((d) => d.name.length));
 	return (
 		<div
-			className="mx-auto h-full relative grid grid-rows-2 gap-8"
+			className="relative mx-auto grid h-full grid-rows-2 gap-8"
 			style={{
 				gridTemplateColumns: `calc(${maxDeckName}ch + 1.25rem) 1fr 30% 50px`,
 			}}
 		>
 			<DeckPicker decks={decks} />
 			<div className="row-span-2">
-				<div className="w-1/3 mx-auto z-10">
+				<div className="z-10 mx-auto w-1/3">
 					<CargoSearchInput />
 				</div>
 				<ShipView deckIndex={deckIndex} cardLoaded={props.cardLoaded} />
 			</div>
-			<div className="h-full flex flex-col ">
+			<div className="flex h-full flex-col">
 				<h3 className="text-xl">
 					{selectedRoom ? (
 						<span className="flex justify-between">
 							<span>
-								{selectedRoom.name} ({selectedRoom.used} / {selectedRoom.volume}
-								)
+								{selectedRoom.name} ({selectedRoom.used} / {selectedRoom.volume})
 							</span>
 							<GoToRoomButton
 								decks={decks}
@@ -99,19 +95,17 @@ export function CargoControl(props: CardProps) {
 						}
 					}}
 				/>
-				<div className="h-10 w-full flex items-center justify-center">
+				<div className="flex h-10 w-full items-center justify-center">
 					{enRouteContainer?.entityState === "enRoute" ? (
-						<Button className="w-full btn-disabled" disabled>
+						<Button className="btn-disabled w-full" disabled>
 							{enRouteContainer.name} En Route
 						</Button>
 					) : enRouteContainer?.entityState === "idle" &&
-						enRouteContainer.id === selectedContainerId ? (
+					  enRouteContainer.id === selectedContainerId ? (
 						<p>Click cargo line to transfer {transferAmount} item</p>
 					) : (
 						<Button
-							className={`w-full ${
-								!selectedRoomId ? "btn-disabled" : "btn-primary"
-							}`}
+							className={`w-full ${!selectedRoomId ? "btn-disabled" : "btn-primary"}`}
 							disabled={!selectedRoomId}
 							onClick={async () => {
 								if (typeof selectedRoomId === "number") {
@@ -139,7 +133,7 @@ export function CargoControl(props: CardProps) {
 			</div>
 
 			<CargoContainerList />
-			<div className="h-full flex flex-col ">
+			<div className="flex h-full flex-col">
 				<ContainerLabel />
 				<CargoList
 					selectedRoom={selectedContainer}
@@ -184,10 +178,7 @@ export function CargoControl(props: CardProps) {
 						!selectedContainer
 					}
 					onClick={async () => {
-						if (
-							typeof selectedRoomId === "number" &&
-							typeof selectedContainerId === "number"
-						) {
+						if (typeof selectedRoomId === "number" && typeof selectedContainerId === "number") {
 							try {
 								await q.cargoControl.containerSummon.netSend({
 									roomId: selectedRoomId,

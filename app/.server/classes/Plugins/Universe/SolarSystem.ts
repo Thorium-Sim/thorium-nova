@@ -1,12 +1,13 @@
+import { UNIVERSE_RADIUS } from "@thorium/utils/constants";
+import SystemNames from "@thorium/utils/flags/systemNames";
+import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import type { AstronomicalUnit, LightMinute } from "@thorium/utils/unitTypes";
+
 import type BasePlugin from "..";
 import { Aspect } from "../Aspect";
 import PlanetPlugin from "./Planet";
 import StarPlugin from "./Star";
-import SystemNames from "@thorium/utils/flags/systemNames";
-import { randomFromList } from "@thorium/utils/operations/randomFromList";
-import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-import { UNIVERSE_RADIUS } from "@thorium/utils/constants";
 
 export default class SolarSystemPlugin extends Aspect {
 	apiVersion = "solarSystem/v1" as const;
@@ -47,9 +48,7 @@ export default class SolarSystemPlugin extends Aspect {
 		let name = params.name;
 		if (!name) {
 			const starNames = plugin.aspects.solarSystems.map((s) => s.name);
-			const availableNames = SystemNames.filter(
-				(val) => !starNames.includes(val),
-			);
+			const availableNames = SystemNames.filter((val) => !starNames.includes(val));
 
 			name = randomFromList(availableNames) || "Bob"; // If this happens, I'll laugh very hard.
 		}
@@ -74,10 +73,8 @@ export default class SolarSystemPlugin extends Aspect {
 		this.habitableZoneOuter = params.habitableZoneOuter || 3.0;
 		this.skyboxKey = params.skyboxKey || "Random Key";
 
-		this.stars ??=
-			params.stars?.map((star) => new StarPlugin(star, this)) ?? [];
-		this.planets ??=
-			params.planets?.map((planet) => new PlanetPlugin(planet)) ?? [];
+		this.stars ??= params.stars?.map((star) => new StarPlugin(star, this)) ?? [];
+		this.planets ??= params.planets?.map((planet) => new PlanetPlugin(planet)) ?? [];
 
 		this.commSatellite = params.commSatellite || null;
 	}

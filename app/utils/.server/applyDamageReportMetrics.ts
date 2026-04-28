@@ -9,12 +9,9 @@ export function applyDamageReportMetrics(damageReport: Entity) {
 		if (!entity) continue;
 		const damageUpdates: Record<string, number> = {};
 		for (const [key, value] of Object.entries(system.effects)) {
-			const originalValue =
-				Number(
-					entity.components.damage?.[
-						key as keyof typeof entity.components.damage
-					],
-				) ?? 0;
+			const originalValue = Number(
+				entity.components.damage?.[key as keyof typeof entity.components.damage] ?? 0,
+			);
 			if (typeof value === "number") {
 				damageUpdates[key] = originalValue + value;
 			}

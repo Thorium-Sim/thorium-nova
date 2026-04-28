@@ -18,9 +18,9 @@ export function DocumentsCore() {
 
 	const prompt = usePrompt();
 	return (
-		<div className="grid grid-cols-3 h-full overflow-hidden">
-			<div className="h-full flex flex-col min-h-0">
-				<ul className="flex-1 overflow-y">
+		<div className="grid h-full grid-cols-3 overflow-hidden">
+			<div className="flex h-full min-h-0 flex-col">
+				<ul className="overflow-y flex-1">
 					{documents.map((doc) => (
 						<li
 							key={doc.id}
@@ -53,7 +53,7 @@ export function DocumentsCore() {
 						root="Documents"
 						canUpload
 					>
-						<RAButton className="flex-1 btn btn-xs text-left justify-start">
+						<RAButton className="btn btn-xs flex-1 justify-start text-left">
 							{selectedFile?.split("/").at(-1) || "Pick File"}
 						</RAButton>
 					</FilesMenu>
@@ -77,7 +77,7 @@ export function DocumentsCore() {
 					</Button>
 				</div>
 			</div>
-			<div className="col-span-2 overflow-hidden relative">
+			<div className="relative col-span-2 overflow-hidden">
 				{doc ? <DocViewer {...doc} /> : null}
 			</div>
 		</div>

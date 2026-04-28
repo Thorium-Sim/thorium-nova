@@ -1,19 +1,15 @@
-import { audioContext } from "./audioContext";
-import { downMixBuffer } from "./downmixBuffer";
-import { createRNG, type RNG } from "@thorium/utils/rng";
-import type { Sound as SoundComponent } from "@thorium/ecs-components/sound";
-import { AudioLoopWithGap } from "./AudioLoopWithGap";
 import { clientId, q } from "@thorium/context/AppContext";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { useAudioSettingsStore } from "./audioSettingsStore";
+import type { Sound as SoundComponent } from "@thorium/ecs-components/sound";
 import { useStation } from "@thorium/routes/station/useStation";
+import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { createRNG, type RNG } from "@thorium/utils/rng";
 
-export type SoundType =
-	| "ambiance"
-	| "soundEffect"
-	| "ui"
-	| "music"
-	| "dialogue";
+import { audioContext } from "./audioContext";
+import { AudioLoopWithGap } from "./AudioLoopWithGap";
+import { useAudioSettingsStore } from "./audioSettingsStore";
+import { downMixBuffer } from "./downmixBuffer";
+
+export type SoundType = "ambiance" | "soundEffect" | "ui" | "music" | "dialogue";
 
 const GainNode =
 	typeof window === "undefined"
@@ -42,23 +38,11 @@ if (typeof window !== "undefined") {
 }
 
 useAudioSettingsStore.subscribe(
-	({
-		mainVolume,
-		ambianceVolume,
-		musicVolume,
-		soundEffectVolume,
-		uiVolume,
-	}) => {
+	({ mainVolume, ambianceVolume, musicVolume, soundEffectVolume, uiVolume }) => {
 		mainGainNode.gain.setValueAtTime(mainVolume, audioContext.currentTime);
-		gainNodes.ambiance.gain.setValueAtTime(
-			ambianceVolume,
-			audioContext.currentTime,
-		);
+		gainNodes.ambiance.gain.setValueAtTime(ambianceVolume, audioContext.currentTime);
 		gainNodes.music.gain.setValueAtTime(musicVolume, audioContext.currentTime);
-		gainNodes.soundEffect.gain.setValueAtTime(
-			soundEffectVolume,
-			audioContext.currentTime,
-		);
+		gainNodes.soundEffect.gain.setValueAtTime(soundEffectVolume, audioContext.currentTime);
 		gainNodes.ui.gain.setValueAtTime(uiVolume, audioContext.currentTime);
 		gainNodes.dialogue.gain.setValueAtTime(uiVolume, audioContext.currentTime);
 	},
@@ -115,10 +99,7 @@ export function updateSound(
 	if (typeof volume === "number") {
 		sound.volume = volume;
 		if (sound.gain) {
-			sound.gain.gain.setValueAtTime(
-				sound.gain.gain.value,
-				audioContext.currentTime,
-			);
+			sound.gain.gain.setValueAtTime(sound.gain.gain.value, audioContext.currentTime);
 
 			sound.gain.gain.linearRampToValueAtTime(
 				Math.max(volume * volume, Number.EPSILON),
@@ -153,8 +134,7 @@ export async function playSound(
 	}
 	// If the sound was removed before the delay is over, don't play it.
 
-	audioContext.destination.channelCount =
-		audioContext.destination.maxChannelCount;
+	audioContext.destination.channelCount = audioContext.destination.maxChannelCount;
 	// Connect the sound source to the volume control.
 	// Create a buffer from the response ArrayBuffer.
 	let buffer = await new Promise<AudioBuffer>((resolve, reject) =>
@@ -214,14 +194,8 @@ export function removeSound(id: string, force?: boolean) {
 	if (sound?.source) {
 		if (force) {
 			// Setting the value immediately before ramping the value helps avoid popping.
-			sound.gain?.gain.setValueAtTime(
-				sound.gain.gain.value,
-				audioContext.currentTime,
-			);
-			sound.gain?.gain.linearRampToValueAtTime(
-				0.001,
-				audioContext.currentTime + fadeOutTime,
-			);
+			sound.gain?.gain.setValueAtTime(sound.gain.gain.value, audioContext.currentTime);
+			sound.gain?.gain.linearRampToValueAtTime(0.001, audioContext.currentTime + fadeOutTime);
 
 			setTimeout(() => {
 				sound.source?.stop();
@@ -296,14 +270,11 @@ export function SoundPlayer() {
 				if (volumeMultiplier <= 0) return;
 
 				sounds.forEach((sound) => {
-					playSound({
+					void playSound({
 						...sound,
 						type: "soundEffect",
 						id: data.sound.id,
-						volume: [
-							sound.volume[0] * volumeMultiplier,
-							sound.volume[1] * volumeMultiplier,
-						],
+						volume: [sound.volume[0] * volumeMultiplier, sound.volume[1] * volumeMultiplier],
 					});
 				});
 

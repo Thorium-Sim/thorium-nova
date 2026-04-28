@@ -1,6 +1,6 @@
-import type { MegaWatt, MegaWattHour } from "@thorium/utils/unitTypes";
-import { type Entity, System } from "@thorium/utils/ecs";
 import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInventory";
+import { type Entity, System } from "@thorium/utils/ecs";
+import type { MegaWatt, MegaWattHour } from "@thorium/utils/unitTypes";
 
 export function getPowerSupplierPowerNeeded(entity: Entity) {
 	if (!entity.components.isReactor && !entity.components.isBattery) return 0;
@@ -65,8 +65,7 @@ export class ReactorFuelSystem extends System {
 		let energyProvided = unusedFuelEnergy;
 		if (energyNeeded - energyProvided < 0) {
 			entity.components.isReactor.unusedFuel.amount =
-				Math.abs(energyNeeded - energyProvided) /
-				entity.components.isReactor.unusedFuel.density;
+				Math.abs(energyNeeded - energyProvided) / entity.components.isReactor.unusedFuel.density;
 			entity.updateComponent("isReactor", { currentOutput: powerNeeded });
 			return;
 		}
@@ -77,28 +76,19 @@ export class ReactorFuelSystem extends System {
 			},
 		});
 
-		const fuel =
-			getReactorInventory(entity)?.filter((item) => item.flags.fuel) || [];
+		const fuel = getReactorInventory(entity)?.filter((item) => item.flags.fuel) || [];
 
 		// // Pick the fuel item with the highest energy density
 		const toBurn = fuel.reduce((prev: null | (typeof fuel)[0], next) => {
-			if (
-				(next.flags.fuel?.fuelDensity || -1) >
-				(prev?.flags.fuel?.fuelDensity || -1)
-			)
-				return next;
+			if ((next.flags.fuel?.fuelDensity || -1) > (prev?.flags.fuel?.fuelDensity || -1)) return next;
 			return prev;
 		}, null);
 
 		// More Fuel!
 		if (toBurn?.flags.fuel?.fuelDensity && toBurn?.count) {
-			entity.components.isReactor.unusedFuel.density =
-				toBurn.flags.fuel.fuelDensity;
-			let fuelUnitsNeeded = Math.ceil(
-				energyNeeded / toBurn.flags.fuel.fuelDensity,
-			);
-			let fuelRemaining =
-				(toBurn.room?.contents[toBurn.name].count || 0) - fuelUnitsNeeded;
+			entity.components.isReactor.unusedFuel.density = toBurn.flags.fuel.fuelDensity;
+			let fuelUnitsNeeded = Math.ceil(energyNeeded / toBurn.flags.fuel.fuelDensity);
+			let fuelRemaining = (toBurn.room?.contents[toBurn.name].count || 0) - fuelUnitsNeeded;
 
 			if (fuelRemaining < 0) {
 				fuelUnitsNeeded = toBurn.room?.contents[toBurn.name].count || 0;
@@ -112,15 +102,13 @@ export class ReactorFuelSystem extends System {
 
 			if (energyNeeded - energyProvided < 0) {
 				entity.components.isReactor.unusedFuel.amount =
-					Math.abs(energyNeeded - energyProvided) /
-					entity.components.isReactor.unusedFuel.density;
+					Math.abs(energyNeeded - energyProvided) / entity.components.isReactor.unusedFuel.density;
 				entity.updateComponent("isReactor", { currentOutput: powerNeeded });
 				return;
 			}
 		}
 		// Figure out the current power output based on how much power has been provided
-		const powerProvided: MegaWatt =
-			energyProvided / elapsedTimeHours / outputBonus;
+		const powerProvided: MegaWatt = energyProvided / elapsedTimeHours / outputBonus;
 
 		entity.updateComponent("isReactor", { currentOutput: powerProvided });
 	}

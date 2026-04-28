@@ -17,11 +17,9 @@ export const Reconnecting = () => {
 	if (!timeoutPassed) return null;
 
 	return (
-		<div className="fixed inset-0 z-30 bg-black/70 flex flex-col items-center justify-center space-y-8">
-			<h2 className="text-6xl font-bold text-error">
-				Reconnecting to Server...
-			</h2>
-			<Icon name="loader" className="text-white text-6xl animate-spin-step" />
+		<div className="fixed inset-0 z-30 flex flex-col items-center justify-center space-y-8 bg-black/70">
+			<h2 className="text-error text-6xl font-bold">Reconnecting to Server...</h2>
+			<Icon name="loader" className="animate-spin-step text-6xl text-white" />
 			<Button
 				className="btn btn-primary btn-lg"
 				onClick={() => {
@@ -35,8 +33,8 @@ export const Reconnecting = () => {
 };
 export const Disconnected = () => {
 	return (
-		<div className="fixed inset-0 z-30 bg-black/70 flex flex-col items-center justify-center">
-			<h2 className="text-6xl font-bold drop-shadow-md filter text-error">
+		<div className="fixed inset-0 z-30 flex flex-col items-center justify-center bg-black/70">
+			<h2 className="text-error text-6xl font-bold drop-shadow-md filter">
 				Disconnected from Server
 			</h2>
 			<Button

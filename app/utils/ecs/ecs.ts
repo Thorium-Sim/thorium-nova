@@ -2,14 +2,15 @@
  * Entity Component System module
  */
 
-import type Entity from "./entity";
-import type System from "./system";
-import performance from "./performance";
-import { type RNG, createRNG } from "@thorium/utils/rng";
 import type { ColliderDesc, World } from "@thorium-sim/rapier3d-node";
-import type { ComponentIds } from "@thorium/ecs-components";
-import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
 import RAPIER from "@thorium-sim/rapier3d-node";
+import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
+import type { ComponentIds } from "@thorium/ecs-components";
+import { type RNG, createRNG } from "@thorium/utils/rng";
+
+import type Entity from "./entity";
+import performance from "./performance";
+import type System from "./system";
 
 class ECS {
 	/**
@@ -75,9 +76,7 @@ class ECS {
 		}
 
 		Object.keys(entity.components).forEach((componentName) => {
-			const componentCache = this.componentCache.get(
-				componentName as ComponentIds,
-			);
+			const componentCache = this.componentCache.get(componentName as ComponentIds);
 			if (!componentCache) return;
 			componentCache.forEach((e) => {
 				if (e.id === entity.id) {

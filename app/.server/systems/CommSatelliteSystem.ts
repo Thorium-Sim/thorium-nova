@@ -18,11 +18,7 @@ export class CommSatelliteSystem extends System {
 		const elapsedRatio = elapsed / 1000;
 		const { position, isLongRangeMessage } = entity.components;
 		if (!position || !isLongRangeMessage) return;
-		if (
-			isLongRangeMessage.state !== "sending" &&
-			isLongRangeMessage.state !== "failing"
-		)
-			return;
+		if (isLongRangeMessage.state !== "sending" && isLongRangeMessage.state !== "failing") return;
 		const shipId = isLongRangeMessage.senderId;
 
 		const { x, y, z } = position;
@@ -30,25 +26,14 @@ export class CommSatelliteSystem extends System {
 		const currentNode = this.ecs.getEntityById(isLongRangeMessage.nextNodeId);
 		if (!currentNode) return;
 		const nodePosition =
-			getObjectSystem(currentNode)?.components.position ||
-			currentNode.components.position;
+			getObjectSystem(currentNode)?.components.position || currentNode.components.position;
 		if (!nodePosition) return;
 
-		const velocity =
-			lightYearToLightMinute(isLongRangeMessage.transmissionSpeed) *
-			elapsedRatio;
-		const direction = new Vector3(
-			nodePosition.x - x,
-			nodePosition.y - y,
-			nodePosition.z - z,
-		)
+		const velocity = lightYearToLightMinute(isLongRangeMessage.transmissionSpeed) * elapsedRatio;
+		const direction = new Vector3(nodePosition.x - x, nodePosition.y - y, nodePosition.z - z)
 			.normalize()
 			.multiplyScalar(velocity);
-		const currentDistance = Math.hypot(
-			x - nodePosition.x,
-			y - nodePosition.y,
-			z - nodePosition.z,
-		);
+		const currentDistance = Math.hypot(x - nodePosition.x, y - nodePosition.y, z - nodePosition.z);
 
 		const newX = x + direction.x;
 		const newY = y + direction.y;
@@ -70,20 +55,14 @@ export class CommSatelliteSystem extends System {
 			});
 
 			entity.updateComponent("isLongRangeMessage", {
-				visitedNodeIds: [
-					...isLongRangeMessage.visitedNodeIds,
-					isLongRangeMessage.nextNodeId,
-				],
+				visitedNodeIds: [...isLongRangeMessage.visitedNodeIds, isLongRangeMessage.nextNodeId],
 			});
 
 			// We'll do some special handling to hold intercepted messages
 			const currentNode = this.ecs.getEntityById(
 				entity.components.isLongRangeMessage?.nextNodeId || -1,
 			);
-			if (
-				currentNode?.components.isPlayerShip &&
-				!isLongRangeMessage.interceptorId
-			) {
+			if (currentNode?.components.isPlayerShip && !isLongRangeMessage.interceptorId) {
 				entity.updateComponent("isLongRangeMessage", {
 					interceptorId: currentNode.id,
 					state: "intercepted",
@@ -98,21 +77,15 @@ export class CommSatelliteSystem extends System {
 			}
 
 			// Regular comm satellites just send it along to the next satellite
-			const satellites = Array.from(
-				this.ecs.componentCache.get("isCommSatellite") || [],
-			);
-			const destination = this.ecs.getEntityById(
-				isLongRangeMessage.destinationId,
-			);
+			const satellites = Array.from(this.ecs.componentCache.get("isCommSatellite") || []);
+			const destination = this.ecs.getEntityById(isLongRangeMessage.destinationId);
 			if (!destination) {
 				fail("Unable to determine destination");
 				return;
 			}
 			const closestEndNode = findClosestSatellite(satellites, destination);
 			if (!closestEndNode) {
-				fail(
-					"Unable to find route to destination through communications network",
-				);
+				fail("Unable to find route to destination through communications network");
 				return;
 			}
 
@@ -125,21 +98,16 @@ export class CommSatelliteSystem extends System {
 				}
 
 				// But if the destination entity isn't in range, then we need to mark the message as failing
-				const destinationEntity = this.ecs.getEntityById(
-					isLongRangeMessage.destinationId,
-				);
+				const destinationEntity = this.ecs.getEntityById(isLongRangeMessage.destinationId);
 				const finalNode = this.ecs.getEntityById(isLongRangeMessage.nextNodeId);
 				if (!finalNode || !destinationEntity) {
-					fail(
-						"Unable to find route to destination through communications network",
-					);
+					fail("Unable to find route to destination through communications network");
 					return;
 				}
 
 				// Get the position of the final satellite and the ship the message is supposed to go to
 				const nodePosition =
-					getObjectSystem(finalNode)?.components.position ||
-					finalNode.components.position;
+					getObjectSystem(finalNode)?.components.position || finalNode.components.position;
 				const destinationPosition =
 					getObjectSystem(destinationEntity)?.components.position ||
 					destinationEntity?.components.position;

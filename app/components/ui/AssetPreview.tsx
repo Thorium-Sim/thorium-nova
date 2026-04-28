@@ -1,9 +1,6 @@
 import { Icon } from "./Icon";
 
-export const AssetPreview: React.FC<{ url: string; className?: string }> = ({
-	url,
-	className,
-}) => {
+export const AssetPreview: React.FC<{ url: string; className?: string }> = ({ url, className }) => {
 	const ext1 = url.match(/\..{3,5}$/gi);
 	const ext = ext1 ? ext1[0].replace(".", "").toLowerCase() : "";
 	if (["mov", "mp4", "ogv", "webm", "m4v"].indexOf(ext) > -1) {

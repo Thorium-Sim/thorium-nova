@@ -93,22 +93,12 @@ export class DockLocation {
 	split(rect: Rect, size: number) {
 		if (this === DockLocation.TOP) {
 			const r1 = new Rect(rect.x, rect.y, rect.width, size);
-			const r2 = new Rect(
-				rect.x,
-				rect.y + size,
-				rect.width,
-				rect.height - size,
-			);
+			const r2 = new Rect(rect.x, rect.y + size, rect.width, rect.height - size);
 			return { start: r1, end: r2 };
 		}
 		if (this === DockLocation.LEFT) {
 			const r1 = new Rect(rect.x, rect.y, size, rect.height);
-			const r2 = new Rect(
-				rect.x + size,
-				rect.y,
-				rect.width - size,
-				rect.height,
-			);
+			const r2 = new Rect(rect.x + size, rect.y, rect.width - size, rect.height);
 			return { start: r1, end: r2 };
 		}
 		if (this === DockLocation.RIGHT) {

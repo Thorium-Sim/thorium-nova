@@ -9,14 +9,11 @@ import { measureAudioDurationMs } from "@thorium/utils/.server/ink/measureAudioD
 import { Entity } from "@thorium/utils/ecs";
 import { it, aroundEach, expect, vi } from "vitest";
 
-vi.mock(
-	"@thorium/utils/.server/ink/measureAudioDuration",
-	async (importOriginal) => {
-		return {
-			measureAudioDurationMs: vi.fn(),
-		};
-	},
-);
+vi.mock("@thorium/utils/.server/ink/measureAudioDuration", async () => {
+	return {
+		measureAudioDurationMs: vi.fn(),
+	};
+});
 
 aroundEach(async (runTest) => {
 	await DataStore.operations.run(
@@ -89,41 +86,24 @@ it("should auto-connect hails if the target is an NPC with a template conversati
 
 	await router.shortRangeComm.hail({ shipId: ship1.id, targetId: ship2.id });
 	expect(shortRangeComm1.components.isShortRangeComm?.state).toEqual("hailing");
-	expect(
-		shortRangeComm1.components.isShortRangeComm?.conversationId,
-	).toBeTruthy();
+	expect(shortRangeComm1.components.isShortRangeComm?.conversationId).toBeTruthy();
 	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual("idle");
 
 	const conversation = dataContext.ecs.getEntityById(
 		shortRangeComm1.components.isShortRangeComm?.conversationId || -1,
 	);
-	expect(conversation?.components.isShortRangeCommConversation?.hostId).toEqual(
-		ship1.id,
-	);
-	expect(
-		conversation?.components.isShortRangeCommConversation?.targetId,
-	).toEqual(ship2.id);
+	expect(conversation?.components.isShortRangeCommConversation?.hostId).toEqual(ship1.id);
+	expect(conversation?.components.isShortRangeCommConversation?.targetId).toEqual(ship2.id);
 
 	// Wait for the conversation to connect
 	dataContext.ecs.update(3000 + 4000);
 
 	await new Promise((res) => process.nextTick(res));
-	expect(shortRangeComm1.components.isShortRangeComm?.state).toEqual(
-		"connected",
-	);
-	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual(
-		"connected",
-	);
+	expect(shortRangeComm1.components.isShortRangeComm?.state).toEqual("connected");
+	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual("connected");
 });
 it("should auto-reject hails if the target is an NPC with no template conversation", async () => {
-	const {
-		dataContext,
-		router,
-		ship1,
-		shortRangeComm1,
-		ship2,
-		shortRangeComm2,
-	} = setUpTests();
+	const { dataContext, router, ship1, shortRangeComm1, ship2, shortRangeComm2 } = setUpTests();
 
 	expect(shortRangeComm1.components.isShortRangeComm?.state).toEqual("idle");
 	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual("idle");
@@ -131,9 +111,7 @@ it("should auto-reject hails if the target is an NPC with no template conversati
 	await router.shortRangeComm.hail({ shipId: ship1.id, targetId: ship2.id });
 
 	expect(shortRangeComm1.components.isShortRangeComm?.state).toEqual("hailing");
-	expect(
-		shortRangeComm1.components.isShortRangeComm?.conversationId,
-	).toBeTruthy();
+	expect(shortRangeComm1.components.isShortRangeComm?.conversationId).toBeTruthy();
 	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual("idle");
 
 	// Wait for the conversation to reject
@@ -168,16 +146,10 @@ it("should allow another ship to join an existing conversation", async () => {
 	// Wait for the conversation to connect
 	dataContext.ecs.update(3000 + 4000);
 	await new Promise((res) => process.nextTick(res));
-	expect(shortRangeComm1.components.isShortRangeComm?.state).toEqual(
-		"connected",
-	);
-	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual(
-		"connected",
-	);
+	expect(shortRangeComm1.components.isShortRangeComm?.state).toEqual("connected");
+	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual("connected");
 	await router.shortRangeComm.connect({ shipId: ship3.id, conversationId });
-	expect(shortRangeComm3.components.isShortRangeComm?.state).toEqual(
-		"connected",
-	);
+	expect(shortRangeComm3.components.isShortRangeComm?.state).toEqual("connected");
 	expect(shortRangeComm3.components.isShortRangeComm?.conversationId).toEqual(
 		shortRangeComm2.components.isShortRangeComm?.conversationId,
 	);
@@ -206,30 +178,18 @@ it("should forbid another ship from joining an existing conversation if that con
 	// Wait for the conversation to connect
 	dataContext.ecs.update(3000 + 4000);
 	await new Promise((res) => process.nextTick(res));
-	expect(shortRangeComm1.components.isShortRangeComm?.state).toEqual(
-		"connected",
-	);
-	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual(
-		"connected",
-	);
+	expect(shortRangeComm1.components.isShortRangeComm?.state).toEqual("connected");
+	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual("connected");
 	await expect(
 		router.shortRangeComm.connect({ shipId: ship3.id, conversationId }),
 	).rejects.toThrow();
 
 	expect(shortRangeComm3.components.isShortRangeComm?.state).toEqual("idle");
-	expect(shortRangeComm3.components.isShortRangeComm?.conversationId).toEqual(
-		null,
-	);
+	expect(shortRangeComm3.components.isShortRangeComm?.conversationId).toEqual(null);
 });
 it("should work when an NPC hails a player ship", async () => {
-	const {
-		router,
-		ship1,
-		shortRangeComm1,
-		ship2,
-		shortRangeComm2,
-		conversationTemplate,
-	} = setUpTests();
+	const { router, ship1, shortRangeComm1, ship2, shortRangeComm2, conversationTemplate } =
+		setUpTests();
 
 	const { conversationId } = await router.shortRangeComm.hail({
 		shipId: ship2.id,
@@ -238,34 +198,23 @@ it("should work when an NPC hails a player ship", async () => {
 	});
 
 	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual("hailing");
-	expect(shortRangeComm2.components.isShortRangeComm?.conversationId).toEqual(
-		conversationId,
-	);
+	expect(shortRangeComm2.components.isShortRangeComm?.conversationId).toEqual(conversationId);
 	expect(shortRangeComm1.components.isShortRangeComm?.state).toEqual("idle");
 
 	await router.shortRangeComm.connect({
 		shipId: ship1.id,
 		conversationId,
 	});
-	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual(
-		"connected",
-	);
-	expect(shortRangeComm1.components.isShortRangeComm?.state).toEqual(
-		"connected",
-	);
+	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual("connected");
+	expect(shortRangeComm1.components.isShortRangeComm?.state).toEqual("connected");
 
 	await router.shortRangeComm.disconnect({ shipId: ship1.id });
-	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual(
-		"connected",
-	);
+	expect(shortRangeComm2.components.isShortRangeComm?.state).toEqual("connected");
 	expect(shortRangeComm1.components.isShortRangeComm?.state).toEqual("idle");
-	expect(shortRangeComm1.components.isShortRangeComm?.conversationId).toEqual(
-		null,
-	);
+	expect(shortRangeComm1.components.isShortRangeComm?.conversationId).toEqual(null);
 });
 it("should properly follow an ink script, including triggering actions", async () => {
-	const { dataContext, router, ship1, ship2, conversationTemplate } =
-		setUpTests();
+	const { dataContext, router, ship1, ship2, conversationTemplate } = setUpTests();
 
 	const { conversationId } = await router.shortRangeComm.hail({
 		shipId: ship2.id,
@@ -278,9 +227,9 @@ it("should properly follow an ink script, including triggering actions", async (
 	});
 
 	const conversation = dataContext.ecs.getEntityById(conversationId);
-	expect(
-		conversation?.components.isConversation?.currentDialogue[0].text,
-	).toEqual("Hello there. This is a test message.");
+	expect(conversation?.components.isConversation?.currentDialogue[0].text).toEqual(
+		"Hello there. This is a test message.",
+	);
 
 	expect(ship1.components.isShip?.alertLevel).toEqual("5");
 	await router.conversation.selectChoice({
@@ -291,8 +240,7 @@ it("should properly follow an ink script, including triggering actions", async (
 	expect(ship1.components.isShip?.alertLevel).toEqual("2");
 });
 it("should properly follow an ink script, including event listeners", async () => {
-	const { dataContext, router, ship1, ship2, conversationTemplate } =
-		setUpTests();
+	const { dataContext, router, ship1, ship2, conversationTemplate } = setUpTests();
 
 	const { conversationId } = await router.shortRangeComm.hail({
 		shipId: ship2.id,
@@ -305,9 +253,9 @@ it("should properly follow an ink script, including event listeners", async () =
 	});
 
 	const conversation = dataContext.ecs.getEntityById(conversationId);
-	expect(
-		conversation?.components.isConversation?.currentDialogue[0].text,
-	).toEqual("Hello there. This is a test message.");
+	expect(conversation?.components.isConversation?.currentDialogue[0].text).toEqual(
+		"Hello there. This is a test message.",
+	);
 
 	await router.conversation.selectChoice({
 		shipId: ship1.id,
@@ -315,24 +263,21 @@ it("should properly follow an ink script, including event listeners", async () =
 		choice: "Crew: Event Time",
 	});
 
-	expect(
-		conversation?.components.isConversation?.currentDialogue[0].text,
-	).toEqual("Hello there. This is a test message.");
+	expect(conversation?.components.isConversation?.currentDialogue[0].text).toEqual(
+		"Hello there. This is a test message.",
+	);
 
 	await router.alertLevel.update({ alertLevel: "1", shipId: ship1.id });
 
 	await new Promise((res) => process.nextTick(res));
 
-	expect(
-		conversation?.components.isConversation?.currentDialogue[1].text,
-	).toEqual("Event Time");
-	expect(
-		conversation?.components.isConversation?.currentDialogue[2].text,
-	).toEqual("Looks like that worked just fine.");
+	expect(conversation?.components.isConversation?.currentDialogue[1].text).toEqual("Event Time");
+	expect(conversation?.components.isConversation?.currentDialogue[2].text).toEqual(
+		"Looks like that worked just fine.",
+	);
 });
 it("should wait for an audio file to finish playing before continuing the story and mark the chosen choice as chosen until the next choices are available", async () => {
-	const { dataContext, router, ship1, ship2, conversationTemplate } =
-		setUpTests();
+	const { dataContext, router, ship1, ship2, conversationTemplate } = setUpTests();
 
 	const { conversationId } = await router.shortRangeComm.hail({
 		shipId: ship2.id,
@@ -344,18 +289,18 @@ it("should wait for an audio file to finish playing before continuing the story 
 		conversationId,
 	});
 	const conversation = dataContext.ecs.getEntityById(conversationId);
-	expect(
-		conversation?.components.isConversation?.currentDialogue[0].text,
-	).toEqual("Hello there. This is a test message.");
-	expect(
-		conversation?.components.isConversation?.currentChoices[0].text,
-	).toEqual("Crew: Action Time");
-	expect(
-		conversation?.components.isConversation?.currentChoices[1].text,
-	).toEqual("Crew: Event Time");
-	expect(
-		conversation?.components.isConversation?.currentChoices[2].text,
-	).toEqual("Crew: Audio Time");
+	expect(conversation?.components.isConversation?.currentDialogue[0].text).toEqual(
+		"Hello there. This is a test message.",
+	);
+	expect(conversation?.components.isConversation?.currentChoices[0].text).toEqual(
+		"Crew: Action Time",
+	);
+	expect(conversation?.components.isConversation?.currentChoices[1].text).toEqual(
+		"Crew: Event Time",
+	);
+	expect(conversation?.components.isConversation?.currentChoices[2].text).toEqual(
+		"Crew: Audio Time",
+	);
 
 	(measureAudioDurationMs as any).mockReturnValue(1000);
 	await router.conversation.selectChoice({
@@ -363,25 +308,21 @@ it("should wait for an audio file to finish playing before continuing the story 
 		conversationId,
 		choice: "Crew: Audio Time",
 	});
-	expect(
-		conversation?.components.isConversation?.currentDialogue[1].text,
-	).toEqual("Audio Time");
-	expect(
-		conversation?.components.isConversation?.currentDialogue[2].text,
-	).toEqual("Great, let me just play this audio file.");
-	expect(
-		conversation?.components.isConversation?.currentChoices[2].selected,
-	).toEqual(true);
+	expect(conversation?.components.isConversation?.currentDialogue[1].text).toEqual("Audio Time");
+	expect(conversation?.components.isConversation?.currentDialogue[2].text).toEqual(
+		"Great, let me just play this audio file.",
+	);
+	expect(conversation?.components.isConversation?.currentChoices[2].selected).toEqual(true);
 
 	dataContext.ecs.update(1000 + 500);
 
 	await new Promise((res) => process.nextTick(res));
-	expect(
-		conversation?.components.isConversation?.currentDialogue[3].text,
-	).toEqual("And then this text line will appear.");
-	expect(
-		conversation?.components.isConversation?.currentChoices[0].text,
-	).toEqual("Crew: That's great");
+	expect(conversation?.components.isConversation?.currentDialogue[3].text).toEqual(
+		"And then this text line will appear.",
+	);
+	expect(conversation?.components.isConversation?.currentChoices[0].text).toEqual(
+		"Crew: That's great",
+	);
 });
 
 function setUpTests() {
@@ -391,13 +332,11 @@ function setUpTests() {
 			const ecs = dataContext?.ecs;
 			if (!ecs || opts.type !== "send") return;
 
-			processTriggers(ecs, {
+			void processTriggers(ecs, {
 				event: opts.path,
 				values: {
 					...(opts.rawInput as any),
-					...(typeof result === "object" && !Array.isArray(result)
-						? result
-						: {}),
+					...(typeof result === "object" && !Array.isArray(result) ? result : {}),
 				},
 			});
 		},

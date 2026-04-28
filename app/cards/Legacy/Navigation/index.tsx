@@ -1,19 +1,14 @@
-import {
-	useEffect,
-	useImperativeHandle,
-	useRef,
-	useState,
-	type RefObject,
-} from "react";
-import stars from "./stars.avif?url";
-import { cn } from "@thorium/utils/cn";
-import Input from "@thorium/ui/Input";
-import Button from "@thorium/ui/Button";
-import { useStation } from "@thorium/routes/station/useStation";
-import { q } from "@thorium/context/AppContext";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import Keypad from "@thorium/cards/Legacy/Navigation/Keypad";
+import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
+import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import { useStation } from "@thorium/routes/station/useStation";
+import Button from "@thorium/ui/Button";
+import Input from "@thorium/ui/Input";
+import { cn } from "@thorium/utils/cn";
+import { useEffect, useImperativeHandle, useRef, useState, type RefObject } from "react";
+
+import stars from "./stars.avif?url";
 export function LegacyNavigation() {
 	const { shipId } = useStation();
 	const { cardLoaded } = useCardContext();
@@ -45,9 +40,7 @@ export function LegacyNavigation() {
 	const yRef = useRef<HTMLParagraphElement>(null);
 	const zRef = useRef<HTMLParagraphElement>(null);
 
-	const [selectedField, setSelectedField] = useState<"x" | "y" | "z" | null>(
-		null,
-	);
+	const [selectedField, setSelectedField] = useState<"x" | "y" | "z" | null>(null);
 	const [enteredCourse, setEnteredCourse] = useState(navigation.currentCourse);
 
 	const scannerRef = useRef<{ scan: () => void }>(null);
@@ -66,8 +59,8 @@ export function LegacyNavigation() {
 		}
 	}, navigation.scanning && cardLoaded);
 	return (
-		<div className="h-full grid grid-cols-5 gap-8">
-			<div className="flex flex-col gap-8 col-span-2">
+		<div className="grid h-full grid-cols-5 gap-8">
+			<div className="col-span-2 flex flex-col gap-8">
 				<form
 					onSubmit={(event) => {
 						event.preventDefault();
@@ -107,66 +100,54 @@ export function LegacyNavigation() {
 				<Scanner
 					ref={scannerRef}
 					scanning={navigation.scanning}
-					className="flex-1 panel panel-alert"
+					className="panel panel-alert flex-1"
 				/>
 			</div>
-			<div className="flex flex-col h-full justify-around">
+			<div className="flex h-full flex-col justify-around">
 				{navigation.calculate ? (
-					<div className="row-span-2 panel panel p-4 grid grid-cols-[auto_1fr] items-center gap-4">
-						<p className="text-xl font-bold col-span-2">Calculated Course</p>
+					<div className="panel panel row-span-2 grid grid-cols-[auto_1fr] items-center gap-4 p-4">
+						<p className="col-span-2 text-xl font-bold">Calculated Course</p>
 						<p className="text-right">{navigation.thrusters ? "Yaw:" : "X:"}</p>
-						<p
-							className="text-xl text-center p-2 panel panel-alert tabular-nums"
-							ref={xRef}
-						>
+						<p className="panel panel-alert p-2 text-center text-xl tabular-nums" ref={xRef}>
 							{navigation.calculatedCourse.x}
 							<span>&nbsp;</span>
 						</p>
 						<p>{navigation.thrusters ? "Pitch:" : "Y:"}</p>
-						<p
-							className="text-xl text-center p-2 panel panel-alert tabular-nums"
-							ref={yRef}
-						>
+						<p className="panel panel-alert p-2 text-center text-xl tabular-nums" ref={yRef}>
 							{navigation.calculatedCourse.y}
 							<span>&nbsp;</span>
 						</p>
 						<p>{navigation.thrusters ? "Roll:" : "Z:"}</p>
-						<p
-							className="text-xl text-center p-2 panel panel-alert tabular-nums"
-							ref={zRef}
-						>
+						<p className="panel panel-alert p-2 text-center text-xl tabular-nums" ref={zRef}>
 							{navigation.calculatedCourse.z}
 							<span>&nbsp;</span>
 						</p>
 					</div>
 				) : null}
 				{navigation.thrusters ? null : (
-					<div className="row-span-2 panel panel p-4 grid grid-cols-[auto_1fr] items-center gap-4">
-						<p className="text-xl font-bold col-span-2">Current Course</p>
+					<div className="panel panel row-span-2 grid grid-cols-[auto_1fr] items-center gap-4 p-4">
+						<p className="col-span-2 text-xl font-bold">Current Course</p>
 						<p className="text-right">X:</p>
 						<p
-							className={cn(
-								"text-xl text-center p-2 panel panel-alert tabular-nums",
-								{ "brightness-200": selectedField === "x" },
-							)}
+							className={cn("text-xl text-center p-2 panel panel-alert tabular-nums", {
+								"brightness-200": selectedField === "x",
+							})}
 						>
 							{enteredCourse.x}&nbsp;
 						</p>
 						<p>Y:</p>
 						<p
-							className={cn(
-								"text-xl text-center p-2 panel panel-alert tabular-nums",
-								{ "brightness-200": selectedField === "y" },
-							)}
+							className={cn("text-xl text-center p-2 panel panel-alert tabular-nums", {
+								"brightness-200": selectedField === "y",
+							})}
 						>
 							{enteredCourse.y}&nbsp;
 						</p>
 						<p>Z:</p>
 						<p
-							className={cn(
-								"text-xl text-center p-2 panel panel-alert tabular-nums",
-								{ "brightness-200": selectedField === "z" },
-							)}
+							className={cn("text-xl text-center p-2 panel panel-alert tabular-nums", {
+								"brightness-200": selectedField === "z",
+							})}
 						>
 							{enteredCourse.z}&nbsp;
 						</p>
@@ -184,8 +165,7 @@ export function LegacyNavigation() {
 						});
 					} else {
 						setEnteredCourse((course) => {
-							if (key === "." && course[selectedField]?.includes("."))
-								return course;
+							if (key === "." && course[selectedField]?.includes(".")) return course;
 							return {
 								...course,
 								[selectedField]: `${course[selectedField]}${key}`.slice(0, 10),
@@ -200,10 +180,7 @@ export function LegacyNavigation() {
 					} else {
 						setEnteredCourse((course) => ({
 							...course,
-							[selectedField]: course[selectedField]?.slice(
-								0,
-								course[selectedField].length - 1,
-							),
+							[selectedField]: course[selectedField]?.slice(0, course[selectedField].length - 1),
 						}));
 					}
 				}}
@@ -261,10 +238,7 @@ function Scanner({
 					setBack([Math.random(), Math.random()]);
 				}
 			}}
-			className={cn(
-				"relative overflow-hidden border border-gray-500",
-				className,
-			)}
+			className={cn("relative overflow-hidden border border-gray-500", className)}
 			style={{
 				backgroundImage: `url(${stars})`,
 				backgroundSize: "150%",
@@ -273,25 +247,25 @@ function Scanner({
 			}}
 		>
 			<div
-				className="absolute w-full h-full transition-transform duration-[5s] ease-linear"
+				className="absolute h-full w-full transition-transform duration-[5s] ease-linear"
 				style={{
 					transform: `translate(${lineX * 100}%, 50%)`,
 				}}
 			>
-				<div className="w-1 h-full absolute backdrop-brightness-200 -translate-x-1/2 -translate-y-1/2" />
-				<div className="w-px h-full absolute bg-gray-500 -translate-x-1/2 -translate-y-1/2" />
+				<div className="absolute h-full w-1 -translate-x-1/2 -translate-y-1/2 backdrop-brightness-200" />
+				<div className="absolute h-full w-px -translate-x-1/2 -translate-y-1/2 bg-gray-500" />
 			</div>
 			<div
-				className="absolute w-full h-full transition-transform duration-[5s] ease-linear"
+				className="absolute h-full w-full transition-transform duration-[5s] ease-linear"
 				style={{
 					transform: `translate(50%, ${lineY * 100}%)`,
 				}}
 			>
-				<div className="h-1 w-full absolute backdrop-brightness-200 -translate-x-1/2 -translate-y-1/2" />
-				<div className="h-px w-full absolute bg-gray-500 -translate-x-1/2 -translate-y-1/2" />
+				<div className="absolute h-1 w-full -translate-x-1/2 -translate-y-1/2 backdrop-brightness-200" />
+				<div className="absolute h-px w-full -translate-x-1/2 -translate-y-1/2 bg-gray-500" />
 			</div>
 			<div
-				className="absolute w-full h-full transition-transform duration-[5s] ease-linear"
+				className="absolute h-full w-full transition-transform duration-[5s] ease-linear"
 				style={{
 					transform: `translate(${lineX * 100}%, ${lineY * 100}%)`,
 				}}
@@ -302,11 +276,11 @@ function Scanner({
 					}
 				}}
 			>
-				<div className="relative grid grid-cols-2 gap-4 max-w-fit max-h-fit -translate-x-1/2 -translate-y-1/2">
-					<div className="w-4 h-4 border-t-2 border-l-2 rounded-tl-full border-white/30" />
-					<div className="w-4 h-4 border-t-2 border-r-2 rounded-tr-full border-white/30" />
-					<div className="w-4 h-4 border-b-2 border-l-2 rounded-bl-full border-white/30" />
-					<div className="w-4 h-4 border-b-2 border-r-2 rounded-br-full border-white/30" />
+				<div className="relative grid max-h-fit max-w-fit -translate-x-1/2 -translate-y-1/2 grid-cols-2 gap-4">
+					<div className="h-4 w-4 rounded-tl-full border-t-2 border-l-2 border-white/30" />
+					<div className="h-4 w-4 rounded-tr-full border-t-2 border-r-2 border-white/30" />
+					<div className="h-4 w-4 rounded-bl-full border-b-2 border-l-2 border-white/30" />
+					<div className="h-4 w-4 rounded-br-full border-r-2 border-b-2 border-white/30" />
 				</div>
 			</div>
 		</div>

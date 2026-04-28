@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
-import { Loader } from "three";
+
 import { toByteArray } from "base64-js";
+import { Loader } from "three";
 
 const loading: {
 	[key: string]: {
@@ -54,7 +55,7 @@ export class FileLoader extends Loader {
 		let result: string | ArrayBuffer;
 
 		try {
-			if (!/^https?:\/\//.test(url) && !/^data:/.test(url)) {
+			if (!/^https?:\/\//.test(url) && !url.startsWith("data:")) {
 				const buffer = readFileSync(url);
 				switch (responseType) {
 					case "arraybuffer": {
@@ -82,7 +83,7 @@ export class FileLoader extends Loader {
 						result = buffer.toString();
 						break;
 				}
-			} else if (/^data:application\/octet-stream;base64,/.test(url)) {
+			} else if (url.startsWith("data:application/octet-stream;base64,")) {
 				const base64 = url.split(";base64,").pop() || "";
 				const buffer = toByteArray(base64);
 
@@ -140,9 +141,7 @@ export class FileLoader extends Loader {
 									const exec = re.exec(mimeType);
 									const label = exec?.[1]?.toLowerCase();
 									const decoder = new TextDecoder(label);
-									return response
-										.arrayBuffer()
-										.then((ab) => decoder.decode(ab));
+									return response.arrayBuffer().then((ab) => decoder.decode(ab));
 								}
 						}
 					});

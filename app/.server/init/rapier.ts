@@ -1,14 +1,10 @@
 import RAPIER, { type World } from "@thorium-sim/rapier3d-node";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
-import type { ECS, Entity } from "../../utils/ecs";
+import { degToRad, solarMassToKilograms, terranMassToKilograms } from "@thorium/utils/unitTypes";
 import { Euler, Quaternion, Vector3 } from "three";
 
-import {
-	degToRad,
-	solarMassToKilograms,
-	terranMassToKilograms,
-} from "@thorium/utils/unitTypes";
-import { COLLISION_PHYSICS_LIMIT, SECTOR_GRID_SIZE } from "./rapierConsts";
+import type { ECS, Entity } from "../../utils/ecs";
+import { SECTOR_GRID_SIZE } from "./rapierConsts";
 
 export { RAPIER };
 
@@ -17,11 +13,7 @@ const worldVector = new Vector3();
 /**
  * Given a position vector, return the origin point of the world that contains that point.
  */
-export function getWorldPosition(entityPosition: {
-	x: number;
-	y: number;
-	z: number;
-}) {
+export function getWorldPosition(entityPosition: { x: number; y: number; z: number }) {
 	// World positions snap to the center of grid segments.
 	const x = Math.floor(entityPosition.x / SECTOR_GRID_SIZE) * SECTOR_GRID_SIZE;
 	const y = Math.floor(entityPosition.y / SECTOR_GRID_SIZE) * SECTOR_GRID_SIZE;
@@ -100,9 +92,11 @@ export function generateRigidBody(
 			const worldPosition = getWorldPosition(position);
 			universeToWorld(position, worldPosition);
 
-			const bodyDesc = new RAPIER.RigidBodyDesc(
-				RAPIER.RigidBodyType.Fixed,
-			).setTranslation(position.x, position.y, position.z);
+			const bodyDesc = new RAPIER.RigidBodyDesc(RAPIER.RigidBodyType.Fixed).setTranslation(
+				position.x,
+				position.y,
+				position.z,
+			);
 
 			const body = world.createRigidBody(bodyDesc);
 			body.userData = { entityId: entity.id };
@@ -157,16 +151,16 @@ export function generateRigidBody(
 			const torpedoRadius = 0.02;
 			const torpedoMass = entity.components.mass?.mass || 1500;
 
-			const bodyDesc = new RAPIER.RigidBodyDesc(
-				RAPIER.RigidBodyType.Dynamic,
-			).setTranslation(tempVector.x, tempVector.y, tempVector.z);
+			const bodyDesc = new RAPIER.RigidBodyDesc(RAPIER.RigidBodyType.Dynamic).setTranslation(
+				tempVector.x,
+				tempVector.y,
+				tempVector.z,
+			);
 			const body = world.createRigidBody(bodyDesc);
 			body.userData = { entityId: entity.id };
 			body.enableCcd(true);
 
-			const colliderDesc = new RAPIER.ColliderDesc(
-				new RAPIER.Ball(torpedoRadius),
-			)
+			const colliderDesc = new RAPIER.ColliderDesc(new RAPIER.Ball(torpedoRadius))
 				.setMass(torpedoMass)
 				.setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS);
 			world.createCollider(colliderDesc, body);

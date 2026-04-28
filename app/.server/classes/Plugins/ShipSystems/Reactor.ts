@@ -1,4 +1,5 @@
 import type { Sound } from "@thorium/ecs-components/sound";
+
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
@@ -6,15 +7,7 @@ import type { ShipSystemFlags } from "./shipSystemTypes";
 type LegacySetting = {
 	name: string;
 	efficiency: number | null;
-	color:
-		| "primary"
-		| "secondary"
-		| "success"
-		| "warning"
-		| "error"
-		| "accent"
-		| "info"
-		| "notice";
+	color: "primary" | "secondary" | "success" | "warning" | "error" | "accent" | "info" | "notice";
 };
 
 const defaultLegacySettings: LegacySetting[] = [
@@ -95,8 +88,7 @@ export default class ReactorPlugin extends BaseShipSystemPlugin {
 		this.optimalOutputPercent = params.optimalOutputPercent || 0.7;
 		this.reactorCount = params.reactorCount || 4;
 		this.powerMultiplier = params.powerMultiplier || 1;
-		this.legacySettings =
-			params.legacySettings || structuredClone(defaultLegacySettings);
+		this.legacySettings = params.legacySettings || structuredClone(defaultLegacySettings);
 		this.soundEffects = params.soundEffects || {
 			ambiance: [],
 			overheatAlert: [],

@@ -8,7 +8,7 @@ import { aroundEach, beforeEach, describe, expect, it } from "vitest";
 
 aroundEach(async (runTest) => {
 	await DataStore.operations.run(testDataStoreProps, async () => {
-		runTest();
+		await runTest();
 	});
 });
 
@@ -201,18 +201,14 @@ describe("PowerDistributionSystem", () => {
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
-		expect(battery.components.isBattery?.storage).toMatchInlineSnapshot(
-			"0.0002666666666666669",
-		);
+		expect(battery.components.isBattery?.storage).toMatchInlineSnapshot("0.0002666666666666669");
 		system.updateComponent("power", {
 			powerSources: [battery.id, battery.id],
 		});
 		for (let i = 0; i < 30; i++) {
 			ecs.update(16);
 		}
-		expect(battery.components.isBattery?.storage).toMatchInlineSnapshot(
-			"0.0001333333333333334",
-		);
+		expect(battery.components.isBattery?.storage).toMatchInlineSnapshot("0.0001333333333333334");
 
 		system.updateComponent("power", {
 			powerSources: [],
@@ -244,9 +240,7 @@ describe("PowerDistributionSystem", () => {
 		for (let i = 0; i < 60 * 60 * 32; i++) {
 			ecs.update(16);
 		}
-		expect(battery.components.isBattery?.storage).toEqual(
-			battery.components.isBattery?.capacity,
-		);
+		expect(battery.components.isBattery?.storage).toEqual(battery.components.isBattery?.capacity);
 
 		// It should take about 21 minutes to fully discharge a battery at this rate.
 		expect(battery.components.isBattery?.storage).toEqual(2);
@@ -293,10 +287,7 @@ describe("PowerDistributionSystem", () => {
 			}).forEach(() => {
 				const reactor = randomFromList(reactors);
 				battery.updateComponent("isBattery", {
-					powerSources: [
-						...(battery.components.isBattery?.powerSources || []),
-						reactor.id,
-					],
+					powerSources: [...(battery.components.isBattery?.powerSources || []), reactor.id],
 				});
 			});
 			ship.components.shipSystems?.shipSystems.set(battery.id, {});
@@ -317,10 +308,7 @@ describe("PowerDistributionSystem", () => {
 			for (let i = 0; i < (system.components.power?.powerDraw || 0); i++) {
 				const powerSource = randomFromList(reactorsAndBatteries);
 				system.updateComponent("isBattery", {
-					powerSources: [
-						...(system.components.power?.powerSources || []),
-						powerSource.id,
-					],
+					powerSources: [...(system.components.power?.powerSources || []), powerSource.id],
 				});
 			}
 

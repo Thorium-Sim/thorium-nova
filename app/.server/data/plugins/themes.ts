@@ -1,10 +1,12 @@
+import path from "node:path";
+
 import ThemePlugin from "@thorium/.server/classes/Plugins/Theme";
+import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import z from "zod";
+
 import { getPlugin } from "./utils";
-import { pubsub } from "@thorium/.server/init/pubsub";
-import path from "node:path";
 
 export const theme = t.router({
 	all: t.procedure
@@ -19,10 +21,7 @@ export const theme = t.router({
 			return Promise.all(
 				plugin.aspects.themes.map(async (theme) => {
 					const assetPath = await theme.getAssetUrl();
-					const rawCSS = await ctx.readFile.call(
-						theme,
-						path.join(assetPath, theme.assets.rawCSS),
-					);
+					const rawCSS = await ctx.readFile.call(theme, path.join(assetPath, theme.assets.rawCSS));
 
 					return {
 						...theme,
@@ -33,29 +32,18 @@ export const theme = t.router({
 		}),
 	get: t.procedure
 		.input(z.object({ pluginId: z.string(), themeId: z.string() }))
-		.filter(
-			(publish: { pluginId: string; themeId: string } | null, { input }) => {
-				if (
-					publish &&
-					(input.pluginId !== publish.pluginId ||
-						input.themeId !== publish.themeId)
-				)
-					return false;
-				return true;
-			},
-		)
+		.filter((publish: { pluginId: string; themeId: string } | null, { input }) => {
+			if (publish && (input.pluginId !== publish.pluginId || input.themeId !== publish.themeId))
+				return false;
+			return true;
+		})
 		.request(async ({ ctx, input }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
-			const theme = plugin.aspects.themes.find(
-				(theme) => theme.name === input.themeId,
-			);
+			const theme = plugin.aspects.themes.find((theme) => theme.name === input.themeId);
 			if (!theme) throw new Error("Theme not found");
 			const assetPath = await theme.getAssetUrl();
 
-			const rawCSS = await ctx.readFile.call(
-				theme,
-				path.join(assetPath, theme.assets.rawCSS),
-			);
+			const rawCSS = await ctx.readFile.call(theme, path.join(assetPath, theme.assets.rawCSS));
 
 			return {
 				...theme,
@@ -63,17 +51,14 @@ export const theme = t.router({
 			};
 		}),
 	available: t.procedure.request(({ ctx }) => {
-		return ctx.server.plugins.reduce(
-			(themes: { themeId: string; pluginId: string }[], plugin) => {
-				return themes.concat(
-					plugin.aspects.themes.map((theme) => ({
-						themeId: theme.name,
-						pluginId: plugin.id,
-					})),
-				);
-			},
-			[],
-		);
+		return ctx.server.plugins.reduce((themes: { themeId: string; pluginId: string }[], plugin) => {
+			return themes.concat(
+				plugin.aspects.themes.map((theme) => ({
+					themeId: theme.name,
+					pluginId: plugin.id,
+				})),
+			);
+		}, []);
 	}),
 	create: t.procedure
 		.input(z.object({ pluginId: z.string(), name: z.string() }))
@@ -91,9 +76,7 @@ export const theme = t.router({
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const theme = plugin.aspects.themes.find(
-				(theme) => theme.name === input.themeId,
-			);
+			const theme = plugin.aspects.themes.find((theme) => theme.name === input.themeId);
 			if (!theme) throw new Error("Theme not found.");
 			plugin.aspects.themes.splice(plugin.aspects.themes.indexOf(theme), 1);
 
@@ -105,18 +88,13 @@ export const theme = t.router({
 		.input(
 			z.intersection(
 				z.object({ pluginId: z.string(), themeId: z.string() }),
-				z.union([
-					z.object({ name: z.string() }),
-					z.object({ rawCSS: z.string() }),
-				]),
+				z.union([z.object({ name: z.string() }), z.object({ rawCSS: z.string() })]),
 			),
 		)
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const theme = plugin.aspects.themes.find(
-				(theme) => theme.name === input.themeId,
-			);
+			const theme = plugin.aspects.themes.find((theme) => theme.name === input.themeId);
 			if (!theme) throw new Error("Theme not found.");
 			if ("rawCSS" in input) {
 				theme.assets.rawCSS = await ctx.uploadFile.call(
@@ -139,15 +117,11 @@ export const theme = t.router({
 			};
 		}),
 	duplicate: t.procedure
-		.input(
-			z.object({ pluginId: z.string(), themeId: z.string(), name: z.string() }),
-		)
+		.input(z.object({ pluginId: z.string(), themeId: z.string(), name: z.string() }))
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const theme = plugin.aspects.themes.find(
-				(theme) => theme.name === input.themeId,
-			);
+			const theme = plugin.aspects.themes.find((theme) => theme.name === input.themeId);
 			if (!theme) throw new Error("Theme not found.");
 			const themeCopy = await theme.duplicate(input.name);
 			pubsub.publish.plugin.theme.all({ pluginId: input.pluginId });
@@ -165,14 +139,10 @@ export const theme = t.router({
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const theme = plugin.aspects.themes.find(
-				(theme) => theme.name === input.themeId,
-			);
+			const theme = plugin.aspects.themes.find((theme) => theme.name === input.themeId);
 			if (!theme) throw new Error("Theme not found.");
 
-			theme.assets.files.push(
-				await ctx.uploadFile.call(theme, input.file, input.fileName),
-			);
+			theme.assets.files.push(await ctx.uploadFile.call(theme, input.file, input.fileName));
 
 			pubsub.publish.plugin.theme.all({ pluginId: input.pluginId });
 			pubsub.publish.plugin.theme.get({
@@ -192,9 +162,7 @@ export const theme = t.router({
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const theme = plugin.aspects.themes.find(
-				(theme) => theme.name === input.themeId,
-			);
+			const theme = plugin.aspects.themes.find((theme) => theme.name === input.themeId);
 			if (!theme) throw new Error("Theme not found.");
 			if (typeof input.file !== "string") throw new Error("Invalid file.");
 			await theme.removeAsset(input.file);

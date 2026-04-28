@@ -1,25 +1,25 @@
-import OfficersLog from ".";
-import { render } from "@thorium/utils/react-test-utils";
 import userEvent from "@testing-library/user-event";
+import { render } from "@thorium/utils/react-test-utils";
 import { expect, test } from "vitest";
 
+import OfficersLog from ".";
+
 test("it should render without error", async () => {
-	const { findByText, queryByText, findByRole, netSendSpy, debug } =
-		await render(<OfficersLog />, {
-			netRequestData: {
-				officersLog: {
-					get: [
-						{
-							message: "This is a test log entry",
-							timestamp: 1639484836855,
-						},
-					],
-				},
+	const { findByText, queryByText, findByRole, netSendSpy } = await render(<OfficersLog />, {
+		netRequestData: {
+			officersLog: {
+				get: [
+					{
+						message: "This is a test log entry",
+						timestamp: 1639484836855,
+					},
+				],
 			},
-		});
+		},
+	});
 	const logEl = await findByText("@560.60", {}, { timeout: 5000 });
 	expect(logEl).toBeDefined();
-	userEvent.click(logEl);
+	await userEvent.click(logEl);
 	expect(await findByText("This is a test log entry")).toBeDefined();
 	await userEvent.click(await findByText("Clear"));
 	expect(queryByText("This is a test log entry")).toBeNull();

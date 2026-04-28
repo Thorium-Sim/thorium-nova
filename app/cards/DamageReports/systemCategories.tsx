@@ -8,10 +8,7 @@ export const systemFilterValues = [
 	"Science",
 	"Misc.",
 ] as const;
-export const systemCategories: Record<
-	ShipSystemTypes,
-	(typeof systemFilterValues)[number]
-> = {
+export const systemCategories: Record<ShipSystemTypes, (typeof systemFilterValues)[number]> = {
 	battery: "Power",
 	coolantTank: "Misc.",
 	generic: "Misc.",

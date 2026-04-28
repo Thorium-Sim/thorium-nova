@@ -1,10 +1,7 @@
 import type { Sound } from "@thorium/ecs-components/sound";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-import type {
-	Kelvin,
-	KelvinPerSecond,
-	MegaWatt,
-} from "@thorium/utils/unitTypes";
+import type { Kelvin, KelvinPerSecond, MegaWatt } from "@thorium/utils/unitTypes";
+
 import type BasePlugin from "..";
 import { Aspect } from "../Aspect";
 import type { ShipSystemFlags, ShipSystemTypes } from "./shipSystemTypes";
@@ -132,7 +129,6 @@ export default class BaseShipSystemPlugin extends Aspect {
 		this.coolantConsumptionRate = params.coolantConsumptionRate || 1;
 		if (this.constructor.name === "BaseShipSystemPlugin") {
 			if (systemPlugins[this.type]) {
-				// biome-ignore lint/correctness/noConstructorReturn: Necessary
 				return new systemPlugins[this.type](params, plugin);
 			}
 		}

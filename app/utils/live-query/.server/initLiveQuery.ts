@@ -31,27 +31,20 @@ type CreateRootConfigTypes<TGenerics extends RootConfigTypes> = TGenerics;
 
 type CreateRootConfigTypesFromPartial<TTypes extends Partial<RootConfigTypes>> =
 	CreateRootConfigTypes<{
-		// biome-ignore lint/complexity/noBannedTypes: Necessary for these types to work
 		ctx: TTypes["ctx"] extends RootConfigTypes["ctx"] ? TTypes["ctx"] : {};
-		// biome-ignore lint/complexity/noBannedTypes: Necessary for these types to work
 		meta: TTypes["meta"] extends RootConfigTypes["meta"] ? TTypes["meta"] : {};
-		entity: TTypes["entity"] extends RootConfigTypes["entity"]
-			? TTypes["entity"]
-			: // biome-ignore lint/complexity/noBannedTypes: Necessary for these types to work
-				{};
+		entity: TTypes["entity"] extends RootConfigTypes["entity"] ? TTypes["entity"] : {};
 	}>;
 
 /**
  * @internal
  */
-type ValidateShape<TActualShape, TExpectedShape> =
-	TActualShape extends TExpectedShape
-		? Exclude<keyof TActualShape, keyof TExpectedShape> extends never
-			? TActualShape
-			: TExpectedShape
-		: never;
+type ValidateShape<TActualShape, TExpectedShape> = TActualShape extends TExpectedShape
+	? Exclude<keyof TActualShape, keyof TExpectedShape> extends never
+		? TActualShape
+		: TExpectedShape
+	: never;
 
-// biome-ignore lint/complexity/noBannedTypes: Necessary for these types to work
 class LiveQueryBuilder<TParams extends Partial<RootConfigTypes> = {}> {
 	context<TNewContext extends RootConfigTypes["ctx"]>() {
 		return new LiveQueryBuilder<FlatOverwrite<TParams, { ctx: TNewContext }>>();
@@ -60,12 +53,10 @@ class LiveQueryBuilder<TParams extends Partial<RootConfigTypes> = {}> {
 		return new LiveQueryBuilder<FlatOverwrite<TParams, { meta: TNewMeta }>>();
 	}
 	dataStreamEntity<TNewEntity extends RootConfigTypes["entity"]>() {
-		return new LiveQueryBuilder<
-			FlatOverwrite<TParams, { entity: TNewEntity }>
-		>();
+		return new LiveQueryBuilder<FlatOverwrite<TParams, { entity: TNewEntity }>>();
 	}
 	create<TOptions extends Partial<RuntimeConfig>>(
-		options?: ValidateShape<TOptions, Partial<RuntimeConfig>> | undefined,
+		options?: ValidateShape<TOptions, Partial<RuntimeConfig>>,
 	) {
 		return createTRPCInner<TParams>()<TOptions>(options);
 	}
@@ -80,9 +71,7 @@ export const initLiveQuery = new LiveQueryBuilder();
  * The default check to see if we're in a server
  */
 const isServerDefault: boolean =
-	typeof window === "undefined" ||
-	"Deno" in window ||
-	globalThis.process?.env?.NODE_ENV === "test";
+	typeof window === "undefined" || "Deno" in window || globalThis.process?.env?.NODE_ENV === "test";
 
 function createTRPCInner<TParams extends Partial<RootConfigTypes>>() {
 	type $Generics = CreateRootConfigTypesFromPartial<TParams>;
@@ -102,17 +91,14 @@ function createTRPCInner<TParams extends Partial<RootConfigTypes>>() {
 		}>;
 
 		const config: $Config = {
-			isDev:
-				runtime?.isDev ?? globalThis.process?.env?.NODE_ENV !== "production",
+			isDev: runtime?.isDev ?? globalThis.process?.env?.NODE_ENV !== "production",
 			allowOutsideOfServer: runtime?.allowOutsideOfServer ?? false,
 			isServer: runtime?.isServer ?? isServerDefault,
 			/**
 			 * @internal
 			 */
 			$types: createFlatProxy((key) => {
-				throw new Error(
-					`Tried to access "$types.${key}" which is not available at runtime`,
-				);
+				throw new Error(`Tried to access "$types.${key}" which is not available at runtime`);
 			}),
 		};
 

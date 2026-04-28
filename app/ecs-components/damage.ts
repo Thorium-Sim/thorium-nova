@@ -6,9 +6,7 @@ export const damage = z
 		 * Affects how the system is damaged. Vulnerable systems are biased towards getting damaged more.
 		 * Invulnerable systems cannot be damaged.
 		 **/
-		vulnerability: z
-			.enum(["normal", "vulnerable", "invulnerable"])
-			.default("normal"),
+		vulnerability: z.enum(["normal", "vulnerable", "invulnerable"]).default("normal"),
 		/** Whether the system is not operable. */
 		offline: z.boolean().default(false),
 		/** How high the aggregate damage must get before the system goes offline */

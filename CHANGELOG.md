@@ -5,252 +5,228 @@ All notable changes to this project will be documented in this file. See
 
 # [1.0.0-alpha.19](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.18...1.0.0-alpha.19) (2025-05-28)
 
-
 ### Bug Fixes
 
-* Address an issue with clicking the yaw or forward/reverse thruster controls. ([6f7c0b5](https://github.com/Thorium-Sim/thorium-nova/commit/6f7c0b554da3de9df41886844159e388c4afaac4))
-* Attempt to fix the issues preventing Thorium Nova from loading on Windows. ([d3e1958](https://github.com/Thorium-Sim/thorium-nova/commit/d3e1958ec103939d80e8283516d901fbb0e6b9ad))
-* Distances now display using tabular nums so they don't jump around as they change value. ([cea7bfb](https://github.com/Thorium-Sim/thorium-nova/commit/cea7bfbcf70478e799e35974bd5fe47e98a803e0))
-* Fix cargo containers not moving ([33b3a5e](https://github.com/Thorium-Sim/thorium-nova/commit/33b3a5e9098b1211d66621d6397abcd090cb0d9b))
-* Improve layout and rendering of widgets ([9924ff4](https://github.com/Thorium-Sim/thorium-nova/commit/9924ff4948f25037169733872e4ced80456d3c00))
-* Improve layout and UX of Cargo Control screen ([11a2977](https://github.com/Thorium-Sim/thorium-nova/commit/11a2977ac73af3c71ba6a5a1cd9fcb3fe5808e34))
-* Improve the layout and behavior of the Objectives core ([d5c7fd7](https://github.com/Thorium-Sim/thorium-nova/commit/d5c7fd76438a87a0db778f072b84e07188b4072e))
-* Improve the way ships move between physics blocks ([bc3ba3f](https://github.com/Thorium-Sim/thorium-nova/commit/bc3ba3fe6b625859fce4c187e8a5598e70c48b22))
-* It is not not possible to transfer cargo to a container before it arrives at the room. ([e5f12fd](https://github.com/Thorium-Sim/thorium-nova/commit/e5f12fdf3401c9bf1f2895ea777e4f65a762c03a))
-* NPCs un-target ships when they cease being hostile. ([943584e](https://github.com/Thorium-Sim/thorium-nova/commit/943584e40f0c5d60545f72fdb1481c0d5221b74c))
-* Phasers beams now properly disappear from the targeting screen when the crew ceases firing them ([4d53d29](https://github.com/Thorium-Sim/thorium-nova/commit/4d53d296da901dc443a57c3abc0c8b72042eda73))
-* Properly display phaser scan results ([2ccc0f7](https://github.com/Thorium-Sim/thorium-nova/commit/2ccc0f79e8dc58470c6230952d5e427e5824ac56))
-* Remove the battery numbering from the Systems Monitor card ([c1f9bef](https://github.com/Thorium-Sim/thorium-nova/commit/c1f9befc701ba3abf96f3a6aaa3505eb7f4bad95))
-* Torpedos will no longer teleport back and forth between two points in space. ([e06b9aa](https://github.com/Thorium-Sim/thorium-nova/commit/e06b9aa0b55838c3a56c3b6095a8509a471a61fd))
-
+- Address an issue with clicking the yaw or forward/reverse thruster controls. ([6f7c0b5](https://github.com/Thorium-Sim/thorium-nova/commit/6f7c0b554da3de9df41886844159e388c4afaac4))
+- Attempt to fix the issues preventing Thorium Nova from loading on Windows. ([d3e1958](https://github.com/Thorium-Sim/thorium-nova/commit/d3e1958ec103939d80e8283516d901fbb0e6b9ad))
+- Distances now display using tabular nums so they don't jump around as they change value. ([cea7bfb](https://github.com/Thorium-Sim/thorium-nova/commit/cea7bfbcf70478e799e35974bd5fe47e98a803e0))
+- Fix cargo containers not moving ([33b3a5e](https://github.com/Thorium-Sim/thorium-nova/commit/33b3a5e9098b1211d66621d6397abcd090cb0d9b))
+- Improve layout and rendering of widgets ([9924ff4](https://github.com/Thorium-Sim/thorium-nova/commit/9924ff4948f25037169733872e4ced80456d3c00))
+- Improve layout and UX of Cargo Control screen ([11a2977](https://github.com/Thorium-Sim/thorium-nova/commit/11a2977ac73af3c71ba6a5a1cd9fcb3fe5808e34))
+- Improve the layout and behavior of the Objectives core ([d5c7fd7](https://github.com/Thorium-Sim/thorium-nova/commit/d5c7fd76438a87a0db778f072b84e07188b4072e))
+- Improve the way ships move between physics blocks ([bc3ba3f](https://github.com/Thorium-Sim/thorium-nova/commit/bc3ba3fe6b625859fce4c187e8a5598e70c48b22))
+- It is not not possible to transfer cargo to a container before it arrives at the room. ([e5f12fd](https://github.com/Thorium-Sim/thorium-nova/commit/e5f12fdf3401c9bf1f2895ea777e4f65a762c03a))
+- NPCs un-target ships when they cease being hostile. ([943584e](https://github.com/Thorium-Sim/thorium-nova/commit/943584e40f0c5d60545f72fdb1481c0d5221b74c))
+- Phasers beams now properly disappear from the targeting screen when the crew ceases firing them ([4d53d29](https://github.com/Thorium-Sim/thorium-nova/commit/4d53d296da901dc443a57c3abc0c8b72042eda73))
+- Properly display phaser scan results ([2ccc0f7](https://github.com/Thorium-Sim/thorium-nova/commit/2ccc0f79e8dc58470c6230952d5e427e5824ac56))
+- Remove the battery numbering from the Systems Monitor card ([c1f9bef](https://github.com/Thorium-Sim/thorium-nova/commit/c1f9befc701ba3abf96f3a6aaa3505eb7f4bad95))
+- Torpedos will no longer teleport back and forth between two points in space. ([e06b9aa](https://github.com/Thorium-Sim/thorium-nova/commit/e06b9aa0b55838c3a56c3b6095a8509a471a61fd))
 
 ### Features
 
-* Better NPC combat movement and behaviors. ([3c4424c](https://github.com/Thorium-Sim/thorium-nova/commit/3c4424cb512cdd7ea2e2eed0732fa2fa4487b8e5))
-* Improve torpedo core visualization. ([ce81f60](https://github.com/Thorium-Sim/thorium-nova/commit/ce81f60378286541d70d9b3dc1a6402680568116))
-* NPC entities now charge phasers, load torpedoes, and move to an aggressive position when ordered to attack. ([904c954](https://github.com/Thorium-Sim/thorium-nova/commit/904c954c5f8c694934f7b7301a7987cdc8bde539))
-* NPCs now fire phasers when ordered to attack ([9443fcd](https://github.com/Thorium-Sim/thorium-nova/commit/9443fcd632dd905bd96560a15f6d5edd95bb03a8))
-* Visualize weapons and phaser range on Starmap Core ([e983bcb](https://github.com/Thorium-Sim/thorium-nova/commit/e983bcb7dcc72d20aeedafa1696b844ec91d72fd))
+- Better NPC combat movement and behaviors. ([3c4424c](https://github.com/Thorium-Sim/thorium-nova/commit/3c4424cb512cdd7ea2e2eed0732fa2fa4487b8e5))
+- Improve torpedo core visualization. ([ce81f60](https://github.com/Thorium-Sim/thorium-nova/commit/ce81f60378286541d70d9b3dc1a6402680568116))
+- NPC entities now charge phasers, load torpedoes, and move to an aggressive position when ordered to attack. ([904c954](https://github.com/Thorium-Sim/thorium-nova/commit/904c954c5f8c694934f7b7301a7987cdc8bde539))
+- NPCs now fire phasers when ordered to attack ([9443fcd](https://github.com/Thorium-Sim/thorium-nova/commit/9443fcd632dd905bd96560a15f6d5edd95bb03a8))
+- Visualize weapons and phaser range on Starmap Core ([e983bcb](https://github.com/Thorium-Sim/thorium-nova/commit/e983bcb7dcc72d20aeedafa1696b844ec91d72fd))
 
 # [1.0.0-alpha.18](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.17...1.0.0-alpha.18) (2025-05-08)
 
-
 ### Bug Fixes
 
-* Starmap Core Drag Selection improvements ([53f8222](https://github.com/Thorium-Sim/thorium-nova/commit/53f82223a11ce993c33803a4b5245a06c544c047))
-* Starmap core ship logos are no longer hidden when the starmap first loads. ([407bfd5](https://github.com/Thorium-Sim/thorium-nova/commit/407bfd51d3197e72a8cb260902314ba3fa8ecd9f))
-
+- Starmap Core Drag Selection improvements ([53f8222](https://github.com/Thorium-Sim/thorium-nova/commit/53f82223a11ce993c33803a4b5245a06c544c047))
+- Starmap core ship logos are no longer hidden when the starmap first loads. ([407bfd5](https://github.com/Thorium-Sim/thorium-nova/commit/407bfd51d3197e72a8cb260902314ba3fa8ecd9f))
 
 ### Features
 
-* Drag contacts to instantly move them around the 3D canvas. ([ee4294a](https://github.com/Thorium-Sim/thorium-nova/commit/ee4294ab7e720e25e05839373f403bee7c018ae6))
-* Make it possible to spawn multiple player ships when starting flights. ([0e1c59d](https://github.com/Thorium-Sim/thorium-nova/commit/0e1c59dccd669bea0344354bd710ed82236d0296))
-* Make the "Use Flight Director Controls" checkbox actually do something. ([f4986b4](https://github.com/Thorium-Sim/thorium-nova/commit/f4986b4b3953b2bdbfedc8ddd9280a53905c76ee))
+- Drag contacts to instantly move them around the 3D canvas. ([ee4294a](https://github.com/Thorium-Sim/thorium-nova/commit/ee4294ab7e720e25e05839373f403bee7c018ae6))
+- Make it possible to spawn multiple player ships when starting flights. ([0e1c59d](https://github.com/Thorium-Sim/thorium-nova/commit/0e1c59dccd669bea0344354bd710ed82236d0296))
+- Make the "Use Flight Director Controls" checkbox actually do something. ([f4986b4](https://github.com/Thorium-Sim/thorium-nova/commit/f4986b4b3953b2bdbfedc8ddd9280a53905c76ee))
 
 # [1.0.0-alpha.17](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.16...1.0.0-alpha.17) (2025-03-26)
 
-
 ### Bug Fixes
 
-* Autopilot improvements ([9c8ad05](https://github.com/Thorium-Sim/thorium-nova/commit/9c8ad056a6070b3934477f2b6f49ade20042e87f))
-* Improvements to how warp and impulse autopilot is implemented. ([7b6343a](https://github.com/Thorium-Sim/thorium-nova/commit/7b6343adc3831eb54543bfc442d51d7c31088ba7))
-* IP Address on the client app now copies properly ([a3cc357](https://github.com/Thorium-Sim/thorium-nova/commit/a3cc35746b592b64be3233a8712591994318501a))
-* Make gamepad hat code work for more gamepads. ([a10eda4](https://github.com/Thorium-Sim/thorium-nova/commit/a10eda423ec81e72a1be4c10fc2202862da36143))
-* Plugins now load in the correct order. ([6b9dec4](https://github.com/Thorium-Sim/thorium-nova/commit/6b9dec46b080ea08daffee38bd83fd9a94046879))
-* Ship image uploads now appear correctly ([0f0d422](https://github.com/Thorium-Sim/thorium-nova/commit/0f0d42247efcefbe3f2589c2d65aef855c5306ce))
-* Widget alignment ([5f856e8](https://github.com/Thorium-Sim/thorium-nova/commit/5f856e88ab25e79393423d3444a6a5d5f19c94f4))
-
+- Autopilot improvements ([9c8ad05](https://github.com/Thorium-Sim/thorium-nova/commit/9c8ad056a6070b3934477f2b6f49ade20042e87f))
+- Improvements to how warp and impulse autopilot is implemented. ([7b6343a](https://github.com/Thorium-Sim/thorium-nova/commit/7b6343adc3831eb54543bfc442d51d7c31088ba7))
+- IP Address on the client app now copies properly ([a3cc357](https://github.com/Thorium-Sim/thorium-nova/commit/a3cc35746b592b64be3233a8712591994318501a))
+- Make gamepad hat code work for more gamepads. ([a10eda4](https://github.com/Thorium-Sim/thorium-nova/commit/a10eda423ec81e72a1be4c10fc2202862da36143))
+- Plugins now load in the correct order. ([6b9dec4](https://github.com/Thorium-Sim/thorium-nova/commit/6b9dec46b080ea08daffee38bd83fd9a94046879))
+- Ship image uploads now appear correctly ([0f0d422](https://github.com/Thorium-Sim/thorium-nova/commit/0f0d42247efcefbe3f2589c2d65aef855c5306ce))
+- Widget alignment ([5f856e8](https://github.com/Thorium-Sim/thorium-nova/commit/5f856e88ab25e79393423d3444a6a5d5f19c94f4))
 
 ### Features
 
-* Add a pathfinding algorithm for navigating around objects. ([923b922](https://github.com/Thorium-Sim/thorium-nova/commit/923b92260114e2dfa6761e17f4b67dbe54531f52))
-* Add a small direction indicator to sensor contacts. ([e347ded](https://github.com/Thorium-Sim/thorium-nova/commit/e347ded8ad41800ea8c2d7eb98b3da84d543f659))
-* Add nav waypoint to ships on sensors. ([b90ba8c](https://github.com/Thorium-Sim/thorium-nova/commit/b90ba8c77038f5212a8ddda86754409120760fed))
-* Autopilot can now follow predetermined paths. ([efe4865](https://github.com/Thorium-Sim/thorium-nova/commit/efe4865fc8bc092c1b7cd7520cc8369ee3e5a4f9))
-* Makes it possible to click anywhere on the Pilot joysticks to control thrusters. ([ac395a1](https://github.com/Thorium-Sim/thorium-nova/commit/ac395a197e5cbf320cbdb2d5cdd2ec46e1b8e69b))
-* New App Architecture ([71d2ea4](https://github.com/Thorium-Sim/thorium-nova/commit/71d2ea481e57ba7e6d149881a034cb750e4af5fb))
-* Objects appear as generic icons when not identified by Sensors ([6a45da9](https://github.com/Thorium-Sim/thorium-nova/commit/6a45da9d77343baad872d0715699cd521c513261))
-* Pilot sensor array has better affordance for rotation and lateral movement ([e8cf755](https://github.com/Thorium-Sim/thorium-nova/commit/e8cf7558317161a72b0f637acca7fc1caf2dab19))
-* Sensors Card and Scanning system ([201f83d](https://github.com/Thorium-Sim/thorium-nova/commit/201f83dab67f891702359df211f3ff70a9bf22ce))
+- Add a pathfinding algorithm for navigating around objects. ([923b922](https://github.com/Thorium-Sim/thorium-nova/commit/923b92260114e2dfa6761e17f4b67dbe54531f52))
+- Add a small direction indicator to sensor contacts. ([e347ded](https://github.com/Thorium-Sim/thorium-nova/commit/e347ded8ad41800ea8c2d7eb98b3da84d543f659))
+- Add nav waypoint to ships on sensors. ([b90ba8c](https://github.com/Thorium-Sim/thorium-nova/commit/b90ba8c77038f5212a8ddda86754409120760fed))
+- Autopilot can now follow predetermined paths. ([efe4865](https://github.com/Thorium-Sim/thorium-nova/commit/efe4865fc8bc092c1b7cd7520cc8369ee3e5a4f9))
+- Makes it possible to click anywhere on the Pilot joysticks to control thrusters. ([ac395a1](https://github.com/Thorium-Sim/thorium-nova/commit/ac395a197e5cbf320cbdb2d5cdd2ec46e1b8e69b))
+- New App Architecture ([71d2ea4](https://github.com/Thorium-Sim/thorium-nova/commit/71d2ea481e57ba7e6d149881a034cb750e4af5fb))
+- Objects appear as generic icons when not identified by Sensors ([6a45da9](https://github.com/Thorium-Sim/thorium-nova/commit/6a45da9d77343baad872d0715699cd521c513261))
+- Pilot sensor array has better affordance for rotation and lateral movement ([e8cf755](https://github.com/Thorium-Sim/thorium-nova/commit/e8cf7558317161a72b0f637acca7fc1caf2dab19))
+- Sensors Card and Scanning system ([201f83d](https://github.com/Thorium-Sim/thorium-nova/commit/201f83dab67f891702359df211f3ff70a9bf22ce))
 
 # [1.0.0-alpha.17](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.16...1.0.0-alpha.17) (2025-01-26)
 
-
 ### Bug Fixes
 
-* Autopilot improvements ([9c8ad05](https://github.com/Thorium-Sim/thorium-nova/commit/9c8ad056a6070b3934477f2b6f49ade20042e87f))
-* Improvements to how warp and impulse autopilot is implemented. ([7b6343a](https://github.com/Thorium-Sim/thorium-nova/commit/7b6343adc3831eb54543bfc442d51d7c31088ba7))
-* IP Address on the client app now copies properly ([a3cc357](https://github.com/Thorium-Sim/thorium-nova/commit/a3cc35746b592b64be3233a8712591994318501a))
-* Make gamepad hat code work for more gamepads. ([a10eda4](https://github.com/Thorium-Sim/thorium-nova/commit/a10eda423ec81e72a1be4c10fc2202862da36143))
-
+- Autopilot improvements ([9c8ad05](https://github.com/Thorium-Sim/thorium-nova/commit/9c8ad056a6070b3934477f2b6f49ade20042e87f))
+- Improvements to how warp and impulse autopilot is implemented. ([7b6343a](https://github.com/Thorium-Sim/thorium-nova/commit/7b6343adc3831eb54543bfc442d51d7c31088ba7))
+- IP Address on the client app now copies properly ([a3cc357](https://github.com/Thorium-Sim/thorium-nova/commit/a3cc35746b592b64be3233a8712591994318501a))
+- Make gamepad hat code work for more gamepads. ([a10eda4](https://github.com/Thorium-Sim/thorium-nova/commit/a10eda423ec81e72a1be4c10fc2202862da36143))
 
 ### Features
 
-* Add a pathfinding algorithm for navigating around objects. ([923b922](https://github.com/Thorium-Sim/thorium-nova/commit/923b92260114e2dfa6761e17f4b67dbe54531f52))
-* Autopilot can now follow predetermined paths. ([efe4865](https://github.com/Thorium-Sim/thorium-nova/commit/efe4865fc8bc092c1b7cd7520cc8369ee3e5a4f9))
-* New App Architecture ([71d2ea4](https://github.com/Thorium-Sim/thorium-nova/commit/71d2ea481e57ba7e6d149881a034cb750e4af5fb))
+- Add a pathfinding algorithm for navigating around objects. ([923b922](https://github.com/Thorium-Sim/thorium-nova/commit/923b92260114e2dfa6761e17f4b67dbe54531f52))
+- Autopilot can now follow predetermined paths. ([efe4865](https://github.com/Thorium-Sim/thorium-nova/commit/efe4865fc8bc092c1b7cd7520cc8369ee3e5a4f9))
+- New App Architecture ([71d2ea4](https://github.com/Thorium-Sim/thorium-nova/commit/71d2ea481e57ba7e6d149881a034cb750e4af5fb))
 
 # [1.0.0-alpha.16](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.15...1.0.0-alpha.16) (2024-10-19)
 
-
 ### Bug Fixes
 
-* Fix an issue where impulse engine speed isn't calculated correctly. ([dc46d8c](https://github.com/Thorium-Sim/thorium-nova/commit/dc46d8ccf966e213bebb3735e65d97d2833d681b))
-* Fix issues with shield power. ([d7c2864](https://github.com/Thorium-Sim/thorium-nova/commit/d7c28643518080384de4affe05e411185100db2e))
-* Fix issues with the ship sizing algorithm. ([31e1524](https://github.com/Thorium-Sim/thorium-nova/commit/31e15242549086a5390096ffd3b4925eff882d42))
-* Fix issues with torpedos not hitting their targets. ([9be6c21](https://github.com/Thorium-Sim/thorium-nova/commit/9be6c21e0e3faecea9ba5a8370d0e0a79b4b8423))
-* Fix warp engine movement ([60e6a6c](https://github.com/Thorium-Sim/thorium-nova/commit/60e6a6cfa7fb087a5c8ecdf96705c938723cbe7a))
-
+- Fix an issue where impulse engine speed isn't calculated correctly. ([dc46d8c](https://github.com/Thorium-Sim/thorium-nova/commit/dc46d8ccf966e213bebb3735e65d97d2833d681b))
+- Fix issues with shield power. ([d7c2864](https://github.com/Thorium-Sim/thorium-nova/commit/d7c28643518080384de4affe05e411185100db2e))
+- Fix issues with the ship sizing algorithm. ([31e1524](https://github.com/Thorium-Sim/thorium-nova/commit/31e15242549086a5390096ffd3b4925eff882d42))
+- Fix issues with torpedos not hitting their targets. ([9be6c21](https://github.com/Thorium-Sim/thorium-nova/commit/9be6c21e0e3faecea9ba5a8370d0e0a79b4b8423))
+- Fix warp engine movement ([60e6a6c](https://github.com/Thorium-Sim/thorium-nova/commit/60e6a6cfa7fb087a5c8ecdf96705c938723cbe7a))
 
 ### Features
 
-* Phasers ([15fe864](https://github.com/Thorium-Sim/thorium-nova/commit/15fe8640fa4960de71421111a132159a48b580c0))
+- Phasers ([15fe864](https://github.com/Thorium-Sim/thorium-nova/commit/15fe8640fa4960de71421111a132159a48b580c0))
 
 # [1.0.0-alpha.15](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.14...1.0.0-alpha.15) (2024-09-06)
 
-
 ### Bug Fixes
 
-* Address issues with loading the server on Windows ([8964ba7](https://github.com/Thorium-Sim/thorium-nova/commit/8964ba700a9b59a38ec6fcf7e17c0bd373a692b9))
-* Adjust the background of the Flight Director screen to show the blurred picture of the day image. ([a7a281d](https://github.com/Thorium-Sim/thorium-nova/commit/a7a281d4405bb89f3144f775f60d5651c42bc176))
-* Improve the styling and behavior of select dropdown components ([bcde46e](https://github.com/Thorium-Sim/thorium-nova/commit/bcde46ef7d2f9e89c7a568bb345b01558def75d7))
-* It is not possible to use the space bar in text fields in the Actions Core. ([8f28a34](https://github.com/Thorium-Sim/thorium-nova/commit/8f28a3442bf8001fc0c1b179482b335f0383d40f))
-
+- Address issues with loading the server on Windows ([8964ba7](https://github.com/Thorium-Sim/thorium-nova/commit/8964ba700a9b59a38ec6fcf7e17c0bd373a692b9))
+- Adjust the background of the Flight Director screen to show the blurred picture of the day image. ([a7a281d](https://github.com/Thorium-Sim/thorium-nova/commit/a7a281d4405bb89f3144f775f60d5651c42bc176))
+- Improve the styling and behavior of select dropdown components ([bcde46e](https://github.com/Thorium-Sim/thorium-nova/commit/bcde46ef7d2f9e89c7a568bb345b01558def75d7))
+- It is not possible to use the space bar in text fields in the Actions Core. ([8f28a34](https://github.com/Thorium-Sim/thorium-nova/commit/8f28a3442bf8001fc0c1b179482b335f0383d40f))
 
 ### Features
 
-* Add shields system. ([32ad64d](https://github.com/Thorium-Sim/thorium-nova/commit/32ad64d536133b8647e18edfd7364d0424c02f60))
-* Mission Objectives card and core ([c42af97](https://github.com/Thorium-Sim/thorium-nova/commit/c42af9730c6f884f3ae5dc7efec79a029ea72602))
-* Replace the Power Grid card with simpler Systems Monitor card ([f8e6623](https://github.com/Thorium-Sim/thorium-nova/commit/f8e6623b86aabcf22f71eee92bf9317891075d65))
+- Add shields system. ([32ad64d](https://github.com/Thorium-Sim/thorium-nova/commit/32ad64d536133b8647e18edfd7364d0424c02f60))
+- Mission Objectives card and core ([c42af97](https://github.com/Thorium-Sim/thorium-nova/commit/c42af9730c6f884f3ae5dc7efec79a029ea72602))
+- Replace the Power Grid card with simpler Systems Monitor card ([f8e6623](https://github.com/Thorium-Sim/thorium-nova/commit/f8e6623b86aabcf22f71eee92bf9317891075d65))
 
 # [1.0.0-alpha.14](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.13...1.0.0-alpha.14) (2024-07-25)
 
-
 ### Bug Fixes
 
-* Address an issue which causes the viewscreen to not load ([c34f3ef](https://github.com/Thorium-Sim/thorium-nova/commit/c34f3ef4e5f0e6dcfbda3d3027db7389dff968ca))
-* Disable scaling the browser viewport on mobile devices. ([d728b94](https://github.com/Thorium-Sim/thorium-nova/commit/d728b94ded31e1c6d1c91234fc7082c5dbd1d4b4))
-* Dynamically reposition widget popovers when content changes size ([9e68ba9](https://github.com/Thorium-Sim/thorium-nova/commit/9e68ba9724d7c5b12e75c343f9b46469038542e6)), closes [#617](https://github.com/Thorium-Sim/thorium-nova/issues/617)
-* Fix an issue where two devices accessing the same Thorium server have the same client ID. ([2d4040b](https://github.com/Thorium-Sim/thorium-nova/commit/2d4040b71e8cb3216eda8c644941f7970bb7ad2e))
-* Fix issues with autopilot rotation. ([e94fd0d](https://github.com/Thorium-Sim/thorium-nova/commit/e94fd0d45f5477a931bce453b32c14da911b7421))
-* Fix the appearance of orbit lines on some graphics cards ([3a4b2e4](https://github.com/Thorium-Sim/thorium-nova/commit/3a4b2e4ce22e72aa0461b5455e5ecc36fe166541))
-* Improvements to the officers log widget. ([9c82aeb](https://github.com/Thorium-Sim/thorium-nova/commit/9c82aeb14dc33ef7a7b7e109dba5fc673d2800c3))
-* Label of Cargo Container Volume input field should be Litres ([e7ec8f2](https://github.com/Thorium-Sim/thorium-nova/commit/e7ec8f2f2d49645655f9bf2629b468439997b2b3)), closes [#623](https://github.com/Thorium-Sim/thorium-nova/issues/623)
-* Malformatted plugins no longer crash the entire server on load. ([ce5cebd](https://github.com/Thorium-Sim/thorium-nova/commit/ce5cebd3e734a71fa7b9c1ed5bffe18028f2fab4))
-* Navigation to Deck URL no longer fails. ([32d7338](https://github.com/Thorium-Sim/thorium-nova/commit/32d7338227404fc9d2e0bdc2a7e2100abd977745)), closes [#622](https://github.com/Thorium-Sim/thorium-nova/issues/622)
-* Switching away from the ship class input field no longer navigates away from the basic form ([c10ba26](https://github.com/Thorium-Sim/thorium-nova/commit/c10ba26ab61f79f99acfd198ddaad444f39587a6)), closes [#616](https://github.com/Thorium-Sim/thorium-nova/issues/616)
-
+- Address an issue which causes the viewscreen to not load ([c34f3ef](https://github.com/Thorium-Sim/thorium-nova/commit/c34f3ef4e5f0e6dcfbda3d3027db7389dff968ca))
+- Disable scaling the browser viewport on mobile devices. ([d728b94](https://github.com/Thorium-Sim/thorium-nova/commit/d728b94ded31e1c6d1c91234fc7082c5dbd1d4b4))
+- Dynamically reposition widget popovers when content changes size ([9e68ba9](https://github.com/Thorium-Sim/thorium-nova/commit/9e68ba9724d7c5b12e75c343f9b46469038542e6)), closes [#617](https://github.com/Thorium-Sim/thorium-nova/issues/617)
+- Fix an issue where two devices accessing the same Thorium server have the same client ID. ([2d4040b](https://github.com/Thorium-Sim/thorium-nova/commit/2d4040b71e8cb3216eda8c644941f7970bb7ad2e))
+- Fix issues with autopilot rotation. ([e94fd0d](https://github.com/Thorium-Sim/thorium-nova/commit/e94fd0d45f5477a931bce453b32c14da911b7421))
+- Fix the appearance of orbit lines on some graphics cards ([3a4b2e4](https://github.com/Thorium-Sim/thorium-nova/commit/3a4b2e4ce22e72aa0461b5455e5ecc36fe166541))
+- Improvements to the officers log widget. ([9c82aeb](https://github.com/Thorium-Sim/thorium-nova/commit/9c82aeb14dc33ef7a7b7e109dba5fc673d2800c3))
+- Label of Cargo Container Volume input field should be Litres ([e7ec8f2](https://github.com/Thorium-Sim/thorium-nova/commit/e7ec8f2f2d49645655f9bf2629b468439997b2b3)), closes [#623](https://github.com/Thorium-Sim/thorium-nova/issues/623)
+- Malformatted plugins no longer crash the entire server on load. ([ce5cebd](https://github.com/Thorium-Sim/thorium-nova/commit/ce5cebd3e734a71fa7b9c1ed5bffe18028f2fab4))
+- Navigation to Deck URL no longer fails. ([32d7338](https://github.com/Thorium-Sim/thorium-nova/commit/32d7338227404fc9d2e0bdc2a7e2100abd977745)), closes [#622](https://github.com/Thorium-Sim/thorium-nova/issues/622)
+- Switching away from the ship class input field no longer navigates away from the basic form ([c10ba26](https://github.com/Thorium-Sim/thorium-nova/commit/c10ba26ab61f79f99acfd198ddaad444f39587a6)), closes [#616](https://github.com/Thorium-Sim/thorium-nova/issues/616)
 
 ### Features
 
-* Delete decks from the ship map configuration ([de6f502](https://github.com/Thorium-Sim/thorium-nova/commit/de6f502e7fd8c8d4463a914e1ddfafd7d493c4a9))
+- Delete decks from the ship map configuration ([de6f502](https://github.com/Thorium-Sim/thorium-nova/commit/de6f502e7fd8c8d4463a914e1ddfafd7d493c4a9))
 
 # [1.0.0-alpha.13](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.12...1.0.0-alpha.13) (2024-04-16)
 
-
 ### Bug Fixes
 
-* Add new icons and update power grid components ([51bace4](https://github.com/Thorium-Sim/thorium-nova/commit/51bace44bdf793422459d6a065622ffecb9b9b57)), closes [#610](https://github.com/Thorium-Sim/thorium-nova/issues/610)
-* Add some default power connections to the power grid. ([8640193](https://github.com/Thorium-Sim/thorium-nova/commit/86401934cc180237d15a8005659ec6e5e43b3725)), closes [#613](https://github.com/Thorium-Sim/thorium-nova/issues/613)
-* Fixes to the Pilot card UI ([0668941](https://github.com/Thorium-Sim/thorium-nova/commit/0668941e4233dace228d143a9f5e1546bfbf1495))
-* Improve how the ship physics system works. ([86d4f9f](https://github.com/Thorium-Sim/thorium-nova/commit/86d4f9f1f5095cd21b6731beba4572677f20f9a4))
-* Improvements to giving orders on the Flight Director screen ([abe697b](https://github.com/Thorium-Sim/thorium-nova/commit/abe697bf39df22a3808222d452cb0b43e8005a1d))
-* Navigation and Cargo searchable inputs no longer fill in with ID when selected ([3720913](https://github.com/Thorium-Sim/thorium-nova/commit/372091327e057f050ddbb867cd0ccbf8b161ce80)), closes [#607](https://github.com/Thorium-Sim/thorium-nova/issues/607)
-* Planet graphics appear correctly on the Navigation card ([558dd64](https://github.com/Thorium-Sim/thorium-nova/commit/558dd64cd4acc274c9cb64ac25467fa5b43b6265)), closes [#608](https://github.com/Thorium-Sim/thorium-nova/issues/608)
-* Starmap Core Travel to Here points at the correct place on the canvas. ([e4e91c3](https://github.com/Thorium-Sim/thorium-nova/commit/e4e91c3b4b6ce86b4c23c4db359ba0d908306ee3)), closes [#612](https://github.com/Thorium-Sim/thorium-nova/issues/612)
-
+- Add new icons and update power grid components ([51bace4](https://github.com/Thorium-Sim/thorium-nova/commit/51bace44bdf793422459d6a065622ffecb9b9b57)), closes [#610](https://github.com/Thorium-Sim/thorium-nova/issues/610)
+- Add some default power connections to the power grid. ([8640193](https://github.com/Thorium-Sim/thorium-nova/commit/86401934cc180237d15a8005659ec6e5e43b3725)), closes [#613](https://github.com/Thorium-Sim/thorium-nova/issues/613)
+- Fixes to the Pilot card UI ([0668941](https://github.com/Thorium-Sim/thorium-nova/commit/0668941e4233dace228d143a9f5e1546bfbf1495))
+- Improve how the ship physics system works. ([86d4f9f](https://github.com/Thorium-Sim/thorium-nova/commit/86d4f9f1f5095cd21b6731beba4572677f20f9a4))
+- Improvements to giving orders on the Flight Director screen ([abe697b](https://github.com/Thorium-Sim/thorium-nova/commit/abe697bf39df22a3808222d452cb0b43e8005a1d))
+- Navigation and Cargo searchable inputs no longer fill in with ID when selected ([3720913](https://github.com/Thorium-Sim/thorium-nova/commit/372091327e057f050ddbb867cd0ccbf8b161ce80)), closes [#607](https://github.com/Thorium-Sim/thorium-nova/issues/607)
+- Planet graphics appear correctly on the Navigation card ([558dd64](https://github.com/Thorium-Sim/thorium-nova/commit/558dd64cd4acc274c9cb64ac25467fa5b43b6265)), closes [#608](https://github.com/Thorium-Sim/thorium-nova/issues/608)
+- Starmap Core Travel to Here points at the correct place on the canvas. ([e4e91c3](https://github.com/Thorium-Sim/thorium-nova/commit/e4e91c3b4b6ce86b4c23c4db359ba0d908306ee3)), closes [#612](https://github.com/Thorium-Sim/thorium-nova/issues/612)
 
 ### Features
 
-* Add a NearbyObjects system, to keep track of objects close to ships. Useful for avoiding collisions. ([3efece9](https://github.com/Thorium-Sim/thorium-nova/commit/3efece9a73eb4745d5bf36135d8ca85ad5ae53b4))
-* Add the wander ship behavior. ([25fc634](https://github.com/Thorium-Sim/thorium-nova/commit/25fc6345d704a68080deaf5dc0891c3e5067fc0d))
+- Add a NearbyObjects system, to keep track of objects close to ships. Useful for avoiding collisions. ([3efece9](https://github.com/Thorium-Sim/thorium-nova/commit/3efece9a73eb4745d5bf36135d8ca85ad5ae53b4))
+- Add the wander ship behavior. ([25fc634](https://github.com/Thorium-Sim/thorium-nova/commit/25fc6345d704a68080deaf5dc0891c3e5067fc0d))
 
 # [1.0.0-alpha.12](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.11...1.0.0-alpha.12) (2024-03-06)
 
-
 ### Bug Fixes
 
-* Fixes an issue where the client would error out when opening the Flight Director screen. ([8fb683d](https://github.com/Thorium-Sim/thorium-nova/commit/8fb683dbebd25ca01ff57ddd7cb7cb6024fcf8a1))
-* Improve rendering and transitioning the nebula background. ([7d5cb7b](https://github.com/Thorium-Sim/thorium-nova/commit/7d5cb7bc0abbefa279fdf144331ea697a9cc83ba))
-* Restore the editor viewing mode when using the starmap editor. ([f210f1e](https://github.com/Thorium-Sim/thorium-nova/commit/f210f1e5abd11eba29814066b486d82e0b25f37a))
-
+- Fixes an issue where the client would error out when opening the Flight Director screen. ([8fb683d](https://github.com/Thorium-Sim/thorium-nova/commit/8fb683dbebd25ca01ff57ddd7cb7cb6024fcf8a1))
+- Improve rendering and transitioning the nebula background. ([7d5cb7b](https://github.com/Thorium-Sim/thorium-nova/commit/7d5cb7bc0abbefa279fdf144331ea697a9cc83ba))
+- Restore the editor viewing mode when using the starmap editor. ([f210f1e](https://github.com/Thorium-Sim/thorium-nova/commit/f210f1e5abd11eba29814066b486d82e0b25f37a))
 
 ### Features
 
-* Add the event engine and timeline authoring UI. ([acde588](https://github.com/Thorium-Sim/thorium-nova/commit/acde58816601643036c9e044cacd6094769773bd))
-* Implement the collision physics engine for the starmap ([7f6efbd](https://github.com/Thorium-Sim/thorium-nova/commit/7f6efbdb10549aa667b18d6df59bbc80049dbe49))
+- Add the event engine and timeline authoring UI. ([acde588](https://github.com/Thorium-Sim/thorium-nova/commit/acde58816601643036c9e044cacd6094769773bd))
+- Implement the collision physics engine for the starmap ([7f6efbd](https://github.com/Thorium-Sim/thorium-nova/commit/7f6efbdb10549aa667b18d6df59bbc80049dbe49))
 
 # [1.0.0-alpha.11](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.10...1.0.0-alpha.11) (2023-04-03)
 
-
 ### Bug Fixes
 
-* Both development servers now start in parallel. ([54f649a](https://github.com/Thorium-Sim/thorium-nova/commit/54f649a4bb070b71f07def4c355c0d81a566a7c6))
-* Improves inventory template lookup performance. ([1584170](https://github.com/Thorium-Sim/thorium-nova/commit/15841709ff814ff7f6605bf2f5b07e20c3e4446a))
-* Optimize and speed up fetching deck nodes. ([2fa1694](https://github.com/Thorium-Sim/thorium-nova/commit/2fa1694614b22faeb2defc346ff0572c4311eb03))
-
+- Both development servers now start in parallel. ([54f649a](https://github.com/Thorium-Sim/thorium-nova/commit/54f649a4bb070b71f07def4c355c0d81a566a7c6))
+- Improves inventory template lookup performance. ([1584170](https://github.com/Thorium-Sim/thorium-nova/commit/15841709ff814ff7f6605bf2f5b07e20c3e4446a))
+- Optimize and speed up fetching deck nodes. ([2fa1694](https://github.com/Thorium-Sim/thorium-nova/commit/2fa1694614b22faeb2defc346ff0572c4311eb03))
 
 ### Features
 
-* Add a card for managing the power grid. ([b58a208](https://github.com/Thorium-Sim/thorium-nova/commit/b58a208f713b559070745a924372162f1f58073f))
-* Add a simulation for automatically decreasing efficiency when a system is overloaded. ([0ef62cd](https://github.com/Thorium-Sim/thorium-nova/commit/0ef62cd1aa523b84f49784be041a5aef8ced1bb5))
-* Add a simulation for calculating the power used by a ship system. ([8630ae6](https://github.com/Thorium-Sim/thorium-nova/commit/8630ae659caeefda3c8516d39043da9b11bef519))
-* Add a simulation for distributing power through the power grid. ([51001bf](https://github.com/Thorium-Sim/thorium-nova/commit/51001bfb85bd1eacbc2882e5329bd331de1b2968))
-* Automatically remove waypoints after reaching the destination. ([958a621](https://github.com/Thorium-Sim/thorium-nova/commit/958a62199633ecd762445504e64f57187a4b8e83))
-* Have thrusters respond to the power supplied to them. ([37e6b67](https://github.com/Thorium-Sim/thorium-nova/commit/37e6b6771fed427e6371fb90df8a5248044ea70f))
-* Simulate impulse engine power consumption. ([31e7f4d](https://github.com/Thorium-Sim/thorium-nova/commit/31e7f4d5cee27d385b39141de5e454d3f9834e49))
+- Add a card for managing the power grid. ([b58a208](https://github.com/Thorium-Sim/thorium-nova/commit/b58a208f713b559070745a924372162f1f58073f))
+- Add a simulation for automatically decreasing efficiency when a system is overloaded. ([0ef62cd](https://github.com/Thorium-Sim/thorium-nova/commit/0ef62cd1aa523b84f49784be041a5aef8ced1bb5))
+- Add a simulation for calculating the power used by a ship system. ([8630ae6](https://github.com/Thorium-Sim/thorium-nova/commit/8630ae659caeefda3c8516d39043da9b11bef519))
+- Add a simulation for distributing power through the power grid. ([51001bf](https://github.com/Thorium-Sim/thorium-nova/commit/51001bfb85bd1eacbc2882e5329bd331de1b2968))
+- Automatically remove waypoints after reaching the destination. ([958a621](https://github.com/Thorium-Sim/thorium-nova/commit/958a62199633ecd762445504e64f57187a4b8e83))
+- Have thrusters respond to the power supplied to them. ([37e6b67](https://github.com/Thorium-Sim/thorium-nova/commit/37e6b6771fed427e6371fb90df8a5248044ea70f))
+- Simulate impulse engine power consumption. ([31e7f4d](https://github.com/Thorium-Sim/thorium-nova/commit/31e7f4d5cee27d385b39141de5e454d3f9834e49))
 
 # [1.0.0-alpha.10](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.9...1.0.0-alpha.10) (2023-02-23)
 
-
 ### Bug Fixes
 
-* Add back in the "Reconnect to Server" dialogs ([7f34e1c](https://github.com/Thorium-Sim/thorium-nova/commit/7f34e1cfce0619209b3496c29cdba2b59f6f7915))
-* Auto-claim host when first connecting. ([52b4d75](https://github.com/Thorium-Sim/thorium-nova/commit/52b4d757daac0ebd940df30d30e6c1635a019828))
-* Config UX improvements. ([e5bd455](https://github.com/Thorium-Sim/thorium-nova/commit/e5bd4554fe8134dcd2a49ee30aa32860c28ea870))
-* Darken the background when configuring plugins. ([d20f426](https://github.com/Thorium-Sim/thorium-nova/commit/d20f426cfb9085ac6fef40d08dbab90dc189d6b7))
-* Flight Director right-click to spawn and order ships. ([4cbcb0e](https://github.com/Thorium-Sim/thorium-nova/commit/4cbcb0e33d98ea8095a687e0f580d0125257da84))
-* If a ship doesn't have a theme assigned to it, only automatically assign themes marked as default. ([004c954](https://github.com/Thorium-Sim/thorium-nova/commit/004c954cd17724f212bdbf0b15f632ea713b04c6))
-* Interstellar viewscreen no longer shows the Flight Director view. ([e8c9840](https://github.com/Thorium-Sim/thorium-nova/commit/e8c98403190a7674b2d5e52767226af370353bb1))
-* Navigation no longer crashes when transitioning to interstellar space. ([acab5f5](https://github.com/Thorium-Sim/thorium-nova/commit/acab5f5dcf66e142037ab9afdb08c01ef4f7e248))
-* Properly save flights periodically while the app is open and when it closes. ([55ca019](https://github.com/Thorium-Sim/thorium-nova/commit/55ca0199ef2c666c6f5b687f0eb5c3036373f942))
-* Refactor inventory to use liters instead of cubic meters. ([6d0e95f](https://github.com/Thorium-Sim/thorium-nova/commit/6d0e95f31f14c37b0313ea674018d45a90107849))
-* Resolves backend errors when visiting plugin config page. ([be8fb36](https://github.com/Thorium-Sim/thorium-nova/commit/be8fb3696e50c58ff38c1f63b477b123c75ef3ef))
-* Send initial data stream when a client first requests it. ([9a94fc2](https://github.com/Thorium-Sim/thorium-nova/commit/9a94fc2c6aff13cabe34fd7e09ce92e1a208377d))
-* System specific config overrides ([1bb73da](https://github.com/Thorium-Sim/thorium-nova/commit/1bb73da04059652465d859d1f5a872bf86a0622b))
-
+- Add back in the "Reconnect to Server" dialogs ([7f34e1c](https://github.com/Thorium-Sim/thorium-nova/commit/7f34e1cfce0619209b3496c29cdba2b59f6f7915))
+- Auto-claim host when first connecting. ([52b4d75](https://github.com/Thorium-Sim/thorium-nova/commit/52b4d757daac0ebd940df30d30e6c1635a019828))
+- Config UX improvements. ([e5bd455](https://github.com/Thorium-Sim/thorium-nova/commit/e5bd4554fe8134dcd2a49ee30aa32860c28ea870))
+- Darken the background when configuring plugins. ([d20f426](https://github.com/Thorium-Sim/thorium-nova/commit/d20f426cfb9085ac6fef40d08dbab90dc189d6b7))
+- Flight Director right-click to spawn and order ships. ([4cbcb0e](https://github.com/Thorium-Sim/thorium-nova/commit/4cbcb0e33d98ea8095a687e0f580d0125257da84))
+- If a ship doesn't have a theme assigned to it, only automatically assign themes marked as default. ([004c954](https://github.com/Thorium-Sim/thorium-nova/commit/004c954cd17724f212bdbf0b15f632ea713b04c6))
+- Interstellar viewscreen no longer shows the Flight Director view. ([e8c9840](https://github.com/Thorium-Sim/thorium-nova/commit/e8c98403190a7674b2d5e52767226af370353bb1))
+- Navigation no longer crashes when transitioning to interstellar space. ([acab5f5](https://github.com/Thorium-Sim/thorium-nova/commit/acab5f5dcf66e142037ab9afdb08c01ef4f7e248))
+- Properly save flights periodically while the app is open and when it closes. ([55ca019](https://github.com/Thorium-Sim/thorium-nova/commit/55ca0199ef2c666c6f5b687f0eb5c3036373f942))
+- Refactor inventory to use liters instead of cubic meters. ([6d0e95f](https://github.com/Thorium-Sim/thorium-nova/commit/6d0e95f31f14c37b0313ea674018d45a90107849))
+- Resolves backend errors when visiting plugin config page. ([be8fb36](https://github.com/Thorium-Sim/thorium-nova/commit/be8fb3696e50c58ff38c1f63b477b123c75ef3ef))
+- Send initial data stream when a client first requests it. ([9a94fc2](https://github.com/Thorium-Sim/thorium-nova/commit/9a94fc2c6aff13cabe34fd7e09ce92e1a208377d))
+- System specific config overrides ([1bb73da](https://github.com/Thorium-Sim/thorium-nova/commit/1bb73da04059652465d859d1f5a872bf86a0622b))
 
 ### Features
 
-* Add a button to restore the default plugin, which will also update the default plugin contents with new Thorium Nova versions. ([82388a8](https://github.com/Thorium-Sim/thorium-nova/commit/82388a8e6ca5cd4d298d0a4e200748e1b9aa1c03))
-* Enable snapping network data instead of smoothly interpolating. ([2ab84d8](https://github.com/Thorium-Sim/thorium-nova/commit/2ab84d89a6c9ac6363743d9e11ec16b005e0dd55))
-* Improve the behavior of autopilot rotation. ([0ca5723](https://github.com/Thorium-Sim/thorium-nova/commit/0ca57238f4a3e61d824dec5d03a355e29d2520a1))
-* Randomly cycle through backgrounds. ([945dd22](https://github.com/Thorium-Sim/thorium-nova/commit/945dd2240ecefb69eed894ff95c4d13d2d615a7e))
+- Add a button to restore the default plugin, which will also update the default plugin contents with new Thorium Nova versions. ([82388a8](https://github.com/Thorium-Sim/thorium-nova/commit/82388a8e6ca5cd4d298d0a4e200748e1b9aa1c03))
+- Enable snapping network data instead of smoothly interpolating. ([2ab84d8](https://github.com/Thorium-Sim/thorium-nova/commit/2ab84d89a6c9ac6363743d9e11ec16b005e0dd55))
+- Improve the behavior of autopilot rotation. ([0ca5723](https://github.com/Thorium-Sim/thorium-nova/commit/0ca57238f4a3e61d824dec5d03a355e29d2520a1))
+- Randomly cycle through backgrounds. ([945dd22](https://github.com/Thorium-Sim/thorium-nova/commit/945dd2240ecefb69eed894ff95c4d13d2d615a7e))
 
 # [1.0.0-alpha.9](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.8...1.0.0-alpha.9) (2023-02-08)
 
-
 ### Bug Fixes
 
-* Fixes the theme editor. ([36ae7a1](https://github.com/Thorium-Sim/thorium-nova/commit/36ae7a1ae7996b1854428bd4093cf6ce2ab98272))
-
+- Fixes the theme editor. ([36ae7a1](https://github.com/Thorium-Sim/thorium-nova/commit/36ae7a1ae7996b1854428bd4093cf6ce2ab98272))
 
 ### Features
 
-* Add configuration options for Reactor systems. ([694bdcf](https://github.com/Thorium-Sim/thorium-nova/commit/694bdcfb980200cf708a3e3634e26c7e8053e9ff))
-* Add Reactor fuel system. ([9e1898a](https://github.com/Thorium-Sim/thorium-nova/commit/9e1898a946d6e0dafcb451dee33a5c86ded3c171))
-* Add support for gamepads and joysticks to the Pilot card ([2d945e2](https://github.com/Thorium-Sim/thorium-nova/commit/2d945e2007c9de64c3d17a2a41abf75e32fdf8a8))
-* Alert Condition Card. Thanks Tanner ([f59f2ab](https://github.com/Thorium-Sim/thorium-nova/commit/f59f2ab98e8fdc53f6106050180183b140c7a3af))
-* Always show the Thorium account option in the menubar when the user is logged in. ([75ec53a](https://github.com/Thorium-Sim/thorium-nova/commit/75ec53a5e4981baf69d40526509ae564ecd9cbf7))
-* Configuration for battery ship systems. ([23b9776](https://github.com/Thorium-Sim/thorium-nova/commit/23b97767f00b73bd984c597c36dc01be0b7f353f))
-* Configure power settings on ship systems. ([186ca25](https://github.com/Thorium-Sim/thorium-nova/commit/186ca2542651c75eb876076c6a0e4aa94bf6ec12))
-* ECS Components fro representing reactors, batteries, power nodes, and power connections. ([0c8c847](https://github.com/Thorium-Sim/thorium-nova/commit/0c8c847c71593f1901f619e6c2aaf01bc9060cc6))
-* Generate inventory for ships that don't have a deck map. ([1d0acd5](https://github.com/Thorium-Sim/thorium-nova/commit/1d0acd5f6c0081b651a33a88f51409c5379ebffa))
-* Make it possible to assign multiples of the same type of ship system to a ship. ([8250417](https://github.com/Thorium-Sim/thorium-nova/commit/8250417edad651f9f457b9d589d05c3bc462bdbb))
-* Make it possible to assign system types to rooms. ([1bd0a39](https://github.com/Thorium-Sim/thorium-nova/commit/1bd0a39867d945326cfef8f263b85af88c8c5a6c))
-* Model and simulate the transfer of heat. ([04462f4](https://github.com/Thorium-Sim/thorium-nova/commit/04462f463cf308f3693e9e8fbee9f46286cc6a7a))
-* Ships spawn with reactors and power nodes. ([9bd1e58](https://github.com/Thorium-Sim/thorium-nova/commit/9bd1e58dbbe13d632349f5e53b0e12c50108adbd))
-* System heat configuration ([c6d75a3](https://github.com/Thorium-Sim/thorium-nova/commit/c6d75a3d719fd6f543d1e2becbe37cb561d29a2d))
+- Add configuration options for Reactor systems. ([694bdcf](https://github.com/Thorium-Sim/thorium-nova/commit/694bdcfb980200cf708a3e3634e26c7e8053e9ff))
+- Add Reactor fuel system. ([9e1898a](https://github.com/Thorium-Sim/thorium-nova/commit/9e1898a946d6e0dafcb451dee33a5c86ded3c171))
+- Add support for gamepads and joysticks to the Pilot card ([2d945e2](https://github.com/Thorium-Sim/thorium-nova/commit/2d945e2007c9de64c3d17a2a41abf75e32fdf8a8))
+- Alert Condition Card. Thanks Tanner ([f59f2ab](https://github.com/Thorium-Sim/thorium-nova/commit/f59f2ab98e8fdc53f6106050180183b140c7a3af))
+- Always show the Thorium account option in the menubar when the user is logged in. ([75ec53a](https://github.com/Thorium-Sim/thorium-nova/commit/75ec53a5e4981baf69d40526509ae564ecd9cbf7))
+- Configuration for battery ship systems. ([23b9776](https://github.com/Thorium-Sim/thorium-nova/commit/23b97767f00b73bd984c597c36dc01be0b7f353f))
+- Configure power settings on ship systems. ([186ca25](https://github.com/Thorium-Sim/thorium-nova/commit/186ca2542651c75eb876076c6a0e4aa94bf6ec12))
+- ECS Components fro representing reactors, batteries, power nodes, and power connections. ([0c8c847](https://github.com/Thorium-Sim/thorium-nova/commit/0c8c847c71593f1901f619e6c2aaf01bc9060cc6))
+- Generate inventory for ships that don't have a deck map. ([1d0acd5](https://github.com/Thorium-Sim/thorium-nova/commit/1d0acd5f6c0081b651a33a88f51409c5379ebffa))
+- Make it possible to assign multiples of the same type of ship system to a ship. ([8250417](https://github.com/Thorium-Sim/thorium-nova/commit/8250417edad651f9f457b9d589d05c3bc462bdbb))
+- Make it possible to assign system types to rooms. ([1bd0a39](https://github.com/Thorium-Sim/thorium-nova/commit/1bd0a39867d945326cfef8f263b85af88c8c5a6c))
+- Model and simulate the transfer of heat. ([04462f4](https://github.com/Thorium-Sim/thorium-nova/commit/04462f463cf308f3693e9e8fbee9f46286cc6a7a))
+- Ships spawn with reactors and power nodes. ([9bd1e58](https://github.com/Thorium-Sim/thorium-nova/commit/9bd1e58dbbe13d632349f5e53b0e12c50108adbd))
+- System heat configuration ([c6d75a3](https://github.com/Thorium-Sim/thorium-nova/commit/c6d75a3d719fd6f543d1e2becbe37cb561d29a2d))
 
 # [1.0.0-alpha.8](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.7...1.0.0-alpha.8) (2023-01-19)
 

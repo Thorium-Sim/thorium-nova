@@ -1,4 +1,3 @@
-import { CodeList } from "./CodeList";
 import Printable from "@thorium/components/printable";
 import { q } from "@thorium/context/AppContext";
 import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
@@ -12,6 +11,8 @@ import { Tooltip } from "@thorium/ui/Tooltip";
 import { cn } from "@thorium/utils/cn";
 import { Fragment } from "react";
 import { flushSync } from "react-dom";
+
+import { CodeList } from "./CodeList";
 
 export function CodeCyphersCore() {
 	const { shipId } = useStation();
@@ -35,7 +36,7 @@ export function CodeCyphersCore() {
 		message: "",
 	});
 	return (
-		<div className="text-sm flex flex-col h-full">
+		<div className="flex h-full flex-col text-sm">
 			<div className="sticky top-0">
 				<Button
 					className={cn("btn-xs", { "btn-active": page === "codes" })}
@@ -57,9 +58,7 @@ export function CodeCyphersCore() {
 							<span>{c.name}</span>
 							<Tooltip
 								content={
-									<span style={{ fontFamily: c.name }}>
-										the quick fox jumps over the lazy dog.
-									</span>
+									<span style={{ fontFamily: c.name }}>the quick fox jumps over the lazy dog.</span>
 								}
 							>
 								<span>{c.code}</span>
@@ -89,10 +88,8 @@ export function CodeCyphersCore() {
 						</Fragment>
 					))}
 					<Printable>
-						<div className="cypher-printing col-span-2 grid grid-cols-4 code-list">
-							<h1 className="col-span-4 text-center font-medium text-lg">
-								=== Code Cypher ===
-							</h1>
+						<div className="cypher-printing code-list col-span-2 grid grid-cols-4">
+							<h1 className="col-span-4 text-center text-lg font-medium">=== Code Cypher ===</h1>
 							<CodeList font={selectedCypher || ""} />
 						</div>
 					</Printable>
@@ -109,9 +106,7 @@ export function CodeCyphersCore() {
 					<TypingField
 						className="w-full flex-1 text-left"
 						value={message}
-						onChange={(event) =>
-							setMessage({ message: event.currentTarget.value })
-						}
+						onChange={(event) => setMessage({ message: event.currentTarget.value })}
 					/>
 					<div className="flex">
 						<Select
@@ -120,9 +115,7 @@ export function CodeCyphersCore() {
 							label="Code Cypher"
 							labelHidden
 							selected={selectedCypher}
-							setSelected={(value) =>
-								setSelectedCypher({ selectedCypher: value })
-							}
+							setSelected={(value) => setSelectedCypher({ selectedCypher: value })}
 							items={cyphers.map((c) => ({
 								id: c.name,
 								label: `${c.code} - ${c.name} ${c.active ? "✅" : "🚫"}`,
@@ -154,9 +147,9 @@ export function CodeCyphersCore() {
 						</Button>
 						<Printable>
 							<div>
-								<h1 className="text-center font-medium text-lg">{heading}</h1>
+								<h1 className="text-center text-lg font-medium">{heading}</h1>
 								<div
-									className="!text-left mt-8 print:leading-[3] text-2xl whitespace-pre-wrap"
+									className="mt-8 !text-left text-2xl whitespace-pre-wrap print:leading-[3]"
 									style={{ fontFamily: selectedCypher || "" }}
 								>
 									{message}

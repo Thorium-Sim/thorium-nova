@@ -1,19 +1,20 @@
-import type { ServerDataModel } from "../ServerDataModel";
-import { generateIncrementedName } from "../../../utils/generateIncrementedName";
-import ShipPlugin from "./Ship";
+import ConversationPlugin from "@thorium/.server/classes/Plugins/Conversation";
+import ReportPlugin from "@thorium/.server/classes/Plugins/Report";
+import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
+import TrainingPlugin from "@thorium/.server/classes/Plugins/Training";
+import { pubsub } from "@thorium/.server/init/pubsub";
 import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
+
+import { generateIncrementedName } from "../../../utils/generateIncrementedName";
+import type { ServerDataModel } from "../ServerDataModel";
+import InventoryPlugin from "./Inventory";
+import { MacroPlugin } from "./Macro";
+import MissionPlugin from "./Mission";
+import ShipPlugin from "./Ship";
+import BaseShipSystemPlugin from "./ShipSystems/BaseSystem";
 import StationComplementPlugin from "./StationComplement";
 import ThemePlugin from "./Theme";
 import SolarSystemPlugin from "./Universe/SolarSystem";
-import BaseShipSystemPlugin from "./ShipSystems/BaseSystem";
-import InventoryPlugin from "./Inventory";
-import { pubsub } from "@thorium/.server/init/pubsub";
-import { MacroPlugin } from "./Macro";
-import ReportPlugin from "@thorium/.server/classes/Plugins/Report";
-import MissionPlugin from "./Mission";
-import TrainingPlugin from "@thorium/.server/classes/Plugins/Training";
-import ConversationPlugin from "@thorium/.server/classes/Plugins/Conversation";
-import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
 
 export function pluginPublish(plugin: BasePlugin) {
 	pubsub.publish.plugin.all();
@@ -50,7 +51,7 @@ const pluginAspects = new WeakMap<BasePlugin, AspectsMap>();
 export default class BasePlugin extends DataStore {
 	id!: string;
 	name!: string;
-	kind: "plugins" = "plugins";
+	kind = "plugins" as const;
 	author!: string;
 	description!: string;
 	default!: boolean;
@@ -60,19 +61,12 @@ export default class BasePlugin extends DataStore {
 		this: BasePlugin,
 		aspectClasses: Record<
 			string,
-			new (
-				manifest: { name: string } & Record<string, any>,
-				plugin: BasePlugin,
-			) => unknown
+			new (manifest: { name: string } & Record<string, any>, plugin: BasePlugin) => unknown
 		>,
 	) => Promise<void>;
 	#getDataPromise: Promise<void>;
 	tags!: string[];
-	constructor(
-		params: Partial<BasePlugin>,
-		server: ServerDataModel,
-		options: DataStoreOptions,
-	) {
+	constructor(params: Partial<BasePlugin>, server: ServerDataModel, options: DataStoreOptions) {
 		const name = generateIncrementedName(
 			params.name || "New Plugin",
 			server.plugins.map((p) => p.name),

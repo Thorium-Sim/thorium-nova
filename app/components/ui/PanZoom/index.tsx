@@ -1,4 +1,5 @@
 import * as React from "react";
+
 import type {
 	Coordinates,
 	BoundCoordinates,
@@ -46,10 +47,7 @@ type Props = {
 	minZoom: number;
 	maxZoom: number;
 	preventPan: (
-		event:
-			| React.MouseEvent<HTMLDivElement>
-			| React.TouchEvent<HTMLDivElement>
-			| MouseEvent,
+		event: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement> | MouseEvent,
 		x: number,
 		y: number,
 	) => boolean;
@@ -80,9 +78,7 @@ type State = {
 	angle: number;
 };
 
-const getTransformMatrixString = (
-	transformationMatrix: TransformationMatrix,
-) => {
+const getTransformMatrixString = (transformationMatrix: TransformationMatrix) => {
 	const { a, b, c, d, x, y } = transformationMatrix;
 	return `matrix(${a}, ${b}, ${c}, ${d}, ${x}, ${y})`;
 };
@@ -166,12 +162,7 @@ class PanZoom extends React.Component<Props, State> {
 			d,
 			x: transformX,
 			y: transformY,
-		} = this.getTransformMatrix(
-			this.state.x,
-			this.state.y,
-			this.state.scale,
-			this.state.angle,
-		);
+		} = this.getTransformMatrix(this.state.x, this.state.y, this.state.scale, this.state.angle);
 		const { boundX, boundY } = this.getBoundCoordinates(
 			{ x: transformX, y: transformY },
 			{
@@ -194,10 +185,7 @@ class PanZoom extends React.Component<Props, State> {
 	}
 
 	componentDidUpdate(prevProps: Props, prevState: State): void {
-		if (
-			prevProps.autoCenter !== this.props.autoCenter &&
-			this.props.autoCenter
-		) {
+		if (prevProps.autoCenter !== this.props.autoCenter && this.props.autoCenter) {
 			this.autoCenter(this.props.autoCenterZoomLevel);
 		}
 		if (
@@ -226,8 +214,7 @@ class PanZoom extends React.Component<Props, State> {
 	}
 
 	onDoubleClick = (e: React.MouseEvent<HTMLDivElement> | MouseEvent) => {
-		const { onDoubleClick, disableDoubleClickZoom, doubleZoomSpeed } =
-			this.props;
+		const { onDoubleClick, disableDoubleClickZoom, doubleZoomSpeed } = this.props;
 
 		if (typeof onDoubleClick === "function") {
 			onDoubleClick(e);
@@ -259,8 +246,7 @@ class PanZoom extends React.Component<Props, State> {
 			return false;
 		}
 
-		const isLeftButton =
-			(e.button === 1 && window.event !== null) || e.button === 0;
+		const isLeftButton = (e.button === 1 && window.event !== null) || e.button === 0;
 		if (!isLeftButton) {
 			return;
 		}
@@ -328,8 +314,7 @@ class PanZoom extends React.Component<Props, State> {
 	};
 
 	onWheel = (e: WheelEvent) => {
-		const { disableScrollZoom, disabled, zoomSpeed, noStateUpdate } =
-			this.props;
+		const { disableScrollZoom, disabled, zoomSpeed, noStateUpdate } = this.props;
 		if (disableScrollZoom || disabled) {
 			return;
 		}
@@ -403,8 +388,7 @@ class PanZoom extends React.Component<Props, State> {
 
 		if (
 			this.prevPanPosition &&
-			(this.prevPanPosition.x !== this.state.x ||
-				this.prevPanPosition.y !== this.state.y)
+			(this.prevPanPosition.x !== this.state.x || this.prevPanPosition.y !== this.state.y)
 		) {
 			this.setState({ x: this.prevPanPosition.x, y: this.prevPanPosition.y });
 		}
@@ -444,10 +428,7 @@ class PanZoom extends React.Component<Props, State> {
 			this.setTouchListeners();
 		} else if (e.touches.length === 2) {
 			// pinch
-			this.pinchZoomLength = this.getPinchZoomLength(
-				e.touches[0],
-				e.touches[1],
-			);
+			this.pinchZoomLength = this.getPinchZoomLength(e.touches[0], e.touches[1]);
 			this.touchInProgress = true;
 			this.setTouchListeners();
 		}
@@ -580,11 +561,7 @@ class PanZoom extends React.Component<Props, State> {
 			| TouchEvent,
 	) => {
 		const { onPanStart } = this.props;
-		if (
-			!this.panStartTriggered &&
-			onPanStart &&
-			typeof onPanStart === "function"
-		) {
+		if (!this.panStartTriggered && onPanStart && typeof onPanStart === "function") {
 			onPanStart(e);
 		}
 		this.panStartTriggered = true;
@@ -617,15 +594,10 @@ class PanZoom extends React.Component<Props, State> {
 		}
 	};
 
-	getPinchZoomLength = (
-		finger1: React.Touch | Touch,
-		finger2: React.Touch | Touch,
-	): number => {
+	getPinchZoomLength = (finger1: React.Touch | Touch, finger2: React.Touch | Touch): number => {
 		return Math.sqrt(
-			(finger1.clientX - finger2.clientX) *
-				(finger1.clientX - finger2.clientX) +
-				(finger1.clientY - finger2.clientY) *
-					(finger1.clientY - finger2.clientY),
+			(finger1.clientX - finger2.clientX) * (finger1.clientX - finger2.clientX) +
+				(finger1.clientY - finger2.clientY) * (finger1.clientY - finger2.clientY),
 		);
 	};
 
@@ -756,9 +728,7 @@ class PanZoom extends React.Component<Props, State> {
 			};
 
 			// only apply intermediate animation if it is different from the end result
-			if (
-				this.intermediateTransformMatrixString !== this.transformMatrixString
-			) {
+			if (this.intermediateTransformMatrixString !== this.transformMatrixString) {
 				this.intermediateFrameAnimation = window.requestAnimationFrame(
 					this.applyIntermediateTransform,
 				);
@@ -820,16 +790,9 @@ class PanZoom extends React.Component<Props, State> {
 
 	centeredZoom = (delta: number, zoomSpeed?: number) => {
 		const container = this.getContainer();
-		const scaleMultiplier = getScaleMultiplier(
-			delta,
-			zoomSpeed || this.props.zoomSpeed,
-		);
+		const scaleMultiplier = getScaleMultiplier(delta, zoomSpeed || this.props.zoomSpeed);
 		const containerRect = container.getBoundingClientRect();
-		this.zoomTo(
-			containerRect.width / 2,
-			containerRect.height / 2,
-			scaleMultiplier,
-		);
+		this.zoomTo(containerRect.width / 2, containerRect.height / 2, scaleMultiplier);
 	};
 
 	zoomIn = (zoomSpeed?: number) => {
@@ -871,10 +834,7 @@ class PanZoom extends React.Component<Props, State> {
 		const centerX = clientWidth / 2;
 		const centerY = clientHeight / 2;
 
-		return TransformMatrix(
-			{ angle, scale, offsetX: x, offsetY: y },
-			{ x: centerX, y: centerY },
-		);
+		return TransformMatrix({ angle, scale, offsetX: x, offsetY: y }, { x: centerX, y: centerY });
 	};
 
 	// Apply transform through rAF
@@ -885,8 +845,7 @@ class PanZoom extends React.Component<Props, State> {
 
 	// Apply intermediate transform through rAF
 	applyIntermediateTransform = () => {
-		this.getDragContainer().style.transform =
-			this.intermediateTransformMatrixString;
+		this.getDragContainer().style.transform = this.intermediateTransformMatrixString;
 		this.intermediateFrameAnimation = 0;
 	};
 
@@ -895,12 +854,8 @@ class PanZoom extends React.Component<Props, State> {
 		transformationParameters: TransformationParameters,
 	): BoundCoordinates => {
 		const { x, y } = coordinates;
-		const {
-			enableBoundingBox,
-			boundaryRatioVertical,
-			boundaryRatioHorizontal,
-		} = this.props;
-		const { offsetX = 0, offsetY = 0 } = transformationParameters;
+		const { enableBoundingBox, boundaryRatioVertical, boundaryRatioHorizontal } = this.props;
+		const { offsetX, offsetY } = transformationParameters;
 
 		if (!enableBoundingBox) {
 			return {
@@ -911,10 +866,8 @@ class PanZoom extends React.Component<Props, State> {
 			};
 		}
 
-		const { height: containerHeight, width: containerWidth } =
-			this.getContainerBoundingRect();
-		const { clientTop, clientLeft, clientWidth, clientHeight } =
-			this.getDragContainer();
+		const { height: containerHeight, width: containerWidth } = this.getContainerBoundingRect();
+		const { clientTop, clientLeft, clientWidth, clientHeight } = this.getDragContainer();
 		const clientBoundingBox = {
 			top: clientTop,
 			left: clientLeft,
@@ -937,47 +890,21 @@ class PanZoom extends React.Component<Props, State> {
 	render() {
 		const {
 			children,
-			autoCenter,
-			autoCenterZoomLevel,
-			zoomSpeed,
-			doubleZoomSpeed,
 			disabled,
-			disableDoubleClickZoom,
-			disableScrollZoom,
 			disableKeyInteraction,
-			realPinch,
-			keyMapping,
-			minZoom,
-			maxZoom,
-			enableBoundingBox,
-			boundaryRatioVertical,
-			boundaryRatioHorizontal,
-			noStateUpdate,
-			onPanStart,
-			onPan,
-			onPanEnd,
-			preventPan,
+			className,
 			style,
 			onDoubleClick,
 			onMouseDown,
 			onKeyDown,
 			onKeyUp,
 			onTouchStart,
-			onStateChange,
-			initialX,
-			initialY,
-			...restPassThroughProps
 		} = this.props;
 		const { x, y, scale, angle } = this.state;
-		const transform = getTransformMatrixString(
-			this.getTransformMatrix(x, y, scale, angle),
-		);
+		const transform = getTransformMatrixString(this.getTransformMatrix(x, y, scale, angle));
 
 		if (process.env.NODE_ENV !== "production") {
-			function warning(
-				invariant: boolean,
-				...args: Parameters<typeof console.warn>
-			) {
+			function warning(invariant: boolean, ...args: Parameters<typeof console.warn>) {
 				if (!invariant) console.warn(...args);
 			}
 			warning(
@@ -1028,7 +955,7 @@ class PanZoom extends React.Component<Props, State> {
 				onKeyUp={this.onKeyUp}
 				onTouchStart={this.onTouchStart}
 				style={{ cursor: disabled ? "initial" : "pointer", ...style }}
-				{...restPassThroughProps}
+				className={className}
 			>
 				<div
 					ref={this.dragContainer}

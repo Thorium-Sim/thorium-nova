@@ -1,4 +1,5 @@
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+
 import { Aspect } from "./Aspect";
 import type BasePlugin from "./index";
 export default class ConversationPlugin extends Aspect {

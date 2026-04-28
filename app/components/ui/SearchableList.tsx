@@ -1,7 +1,7 @@
+import deepEqual from "fast-deep-equal";
 import { matchSorter } from "match-sorter";
 import { Fragment, type CSSProperties, type ReactNode } from "react";
 import { useMemo, useState } from "react";
-import deepEqual from "fast-deep-equal";
 
 const capitalCase = (str: string) => {
 	return str[0].toUpperCase() + str.slice(1);
@@ -9,10 +9,7 @@ const capitalCase = (str: string) => {
 
 type OnlyString<T> = T extends string ? T : never;
 
-interface SearchableListProps<
-	ID extends string | number = string,
-	L extends ListItem = ListItem,
-> {
+interface SearchableListProps<ID extends string | number = string, L extends ListItem = ListItem> {
 	items: L[];
 	selectedItem?: ID | null;
 	selectedItems?: ID[];
@@ -53,10 +50,7 @@ function SearchableList<
 }: SearchableListProps<ID, Item>) {
 	const [search, setSearch] = useState<string>("");
 	const filteredObjects = useMemo(
-		() =>
-			search
-				? matchSorter(items, search, { keys: searchKeys })
-				: items,
+		() => (search ? matchSorter(items, search, { keys: searchKeys }) : items),
 		[items, search, searchKeys],
 	);
 	const sortedIntoCategories = filteredObjects.reduce(
@@ -96,7 +90,10 @@ function SearchableList<
 									<li
 										key={JSON.stringify(c.id)}
 										className={`list-group-item ${
-											deepEqual(c.id, selectedItem) || selectedItems?.some(id => deepEqual(c.id, id)) ? "selected" : ""
+											deepEqual(c.id, selectedItem) ||
+											selectedItems?.some((id) => deepEqual(c.id, id))
+												? "selected"
+												: ""
 										} ${getItemClassName?.(c) ?? ""}`}
 										style={getItemStyle?.(c)}
 										onClick={() => {

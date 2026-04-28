@@ -1,5 +1,5 @@
-import type { InventoryFlags } from "@thorium/utils/flags/InventoryFlags";
 import { type Entity, System } from "@thorium/utils/ecs";
+import type { InventoryFlags } from "@thorium/utils/flags/InventoryFlags";
 
 export class FilterInventorySystem extends System {
 	static flightMode = ["nova"];
@@ -25,7 +25,7 @@ export class FilterInventorySystem extends System {
 	private cacheInventoryTemplates() {
 		this.inventoryTemplates =
 			Object.fromEntries(
-				Array.from(this.entities.entries()).map(([id, entity]) => [
+				Array.from(this.entities.entries()).map(([_, entity]) => [
 					entity.components.identity?.name,
 					{
 						...entity.components.identity,
@@ -45,8 +45,7 @@ export class FilterInventorySystem extends System {
 		this.invalidated = true;
 	}
 	getInventoryTemplates() {
-		if (!this.inventoryTemplates || this.invalidated)
-			this.cacheInventoryTemplates();
+		if (!this.inventoryTemplates || this.invalidated) this.cacheInventoryTemplates();
 		return this.inventoryTemplates;
 	}
 }

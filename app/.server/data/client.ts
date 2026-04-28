@@ -4,13 +4,13 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { spawnTimeline } from "@thorium/.server/spawners/timeline";
 import type { TrainingVariables } from "@thorium/routes/config/trainings/trainingAvailableVariables";
+import { staticStations } from "@thorium/routes/flight/staticStations";
+import { applyCardHighlight } from "@thorium/utils/.server/applyCardHighlight";
 import { triggerStep } from "@thorium/utils/.server/evaluateEntityQuery";
 import { selectAvailableTimelines } from "@thorium/utils/.server/executeBlocks";
 import type { Entity } from "@thorium/utils/ecs";
-import z from "zod";
 import MarkdownIt from "markdown-it";
-import { applyCardHighlight } from "@thorium/utils/.server/applyCardHighlight";
-import { staticStations } from "@thorium/routes/flight/staticStations";
+import z from "zod";
 const md = MarkdownIt();
 
 const clientSettings = z.object({
@@ -36,10 +36,9 @@ export const client = t.router({
 				: null,
 		)
 		.request(({ ctx, input }) => {
-			const { id, name, connected, settings } =
-				ctx.server.clients[input.clientId];
+			const { id, name, connected, settings } = ctx.server.clients[input.clientId];
 			const {
-				officersLog,
+				officersLog: _,
 				clientId: _id,
 				...flightClient
 			} = ctx.getFlightClient(input.clientId)?.components.flightClient || {};
@@ -193,10 +192,8 @@ export const client = t.router({
 		.send(async ({ ctx, input }) => {
 			if (!ctx.flight) throw new Error("Flight has not started.");
 			const flightClient = ctx.getFlightClient(input.clientId);
-			if (!flightClient?.components.flightClient)
-				throw new Error("Invalid flight client");
-			const { shipId, stationId, currentCard } =
-				flightClient.components.flightClient;
+			if (!flightClient?.components.flightClient) throw new Error("Invalid flight client");
+			const { shipId, stationId, currentCard } = flightClient.components.flightClient;
 			if (!shipId) throw new Error("Invalid flight client");
 			const ship = ctx.ecs.getEntityById(shipId);
 
@@ -224,11 +221,7 @@ export const client = t.router({
 			if (!timeline) throw new Error("No training available.");
 
 			// This automatically adds the timeline entity to ECS
-			const training = spawnTimeline(
-				timeline,
-				(entity) => ctx.ecs.addEntity(entity),
-				shipId,
-			);
+			const training = spawnTimeline(timeline, (entity) => ctx.ecs.addEntity(entity), shipId);
 
 			training.addComponent("variables", {
 				variables: [
@@ -253,9 +246,7 @@ export const client = t.router({
 			});
 			// Trigger the first step
 			await triggerStep(
-				ctx.flight.ecs.getEntityById(
-					training.components.isTimeline?.steps[0] || -1,
-				)!,
+				ctx.flight.ecs.getEntityById(training.components.isTimeline?.steps[0] || -1)!,
 			);
 			pubsub.publish.client.all();
 			pubsub.publish.client.get({
@@ -286,8 +277,7 @@ export const client = t.router({
 					inputProps: { rows: 5 },
 				},
 				card: {
-					helper:
-						"Which card the training will automatically move the crew to.",
+					helper: "Which card the training will automatically move the crew to.",
 				},
 				selector: {
 					type: "tags",
@@ -300,15 +290,13 @@ export const client = t.router({
 				},
 				allowAdvance: {
 					type: "checkbox",
-					helper:
-						"Whether the crew member can advance the training on their own.",
+					helper: "Whether the crew member can advance the training on their own.",
 				},
 			}),
 		})
 		.send(({ ctx, input }) => {
 			const flightClient = getFlightClient(ctx, input);
-			const selector =
-				typeof input.selector === "string" ? [input.selector] : input.selector;
+			const selector = typeof input.selector === "string" ? [input.selector] : input.selector;
 			flightClient.updateComponent("flightClient", {
 				training:
 					input.text === null
@@ -345,20 +333,18 @@ export const client = t.router({
 			pubsub.publish.client.get({ clientId: input.clientId });
 			return { clientId: input.clientId, name: input.name };
 		}),
-	logout: t.procedure
-		.input(z.object({ clientId: z.string() }))
-		.send(({ ctx, input }) => {
-			const flightClient = ctx.getFlightClient(input.clientId);
-			if (flightClient) {
-				flightClient.updateComponent("flightClient", {
-					loginName: "",
-				});
+	logout: t.procedure.input(z.object({ clientId: z.string() })).send(({ ctx, input }) => {
+		const flightClient = ctx.getFlightClient(input.clientId);
+		if (flightClient) {
+			flightClient.updateComponent("flightClient", {
+				loginName: "",
+			});
 
-				pubsub.publish.client.all();
-				pubsub.publish.client.get({ clientId: input.clientId });
-			}
-			return null;
-		}),
+			pubsub.publish.client.all();
+			pubsub.publish.client.get({ clientId: input.clientId });
+		}
+		return null;
+	}),
 	testStation: t.procedure
 		.input(z.object({ clientId: z.string(), component: z.string().nullable() }))
 		.send(({ ctx, input }) => {

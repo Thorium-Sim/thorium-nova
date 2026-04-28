@@ -1,17 +1,16 @@
+import { Navigate } from "@thorium/components/Navigate";
+import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
+import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
 import { q } from "@thorium/context/AppContext";
 import { toast } from "@thorium/context/ToastContext";
+import { reportVariableNames } from "@thorium/routes/config/reports/reportAvailableVariables";
 import Checkbox from "@thorium/ui/Checkbox";
 import InfoTip from "@thorium/ui/InfoTip";
 import Input from "@thorium/ui/Input";
 import TagInput from "@thorium/ui/TagInput";
-import UploadWell from "@thorium/ui/UploadWell";
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router";
-import { Navigate } from "@thorium/components/Navigate";
-import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { Button } from "react-aria-components";
-import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
-import { reportVariableNames } from "@thorium/routes/config/reports/reportAvailableVariables";
+import { useNavigate, useParams } from "react-router";
 
 export default function ReportDetails() {
 	const { pluginId, timelineId } = useParams() as {
@@ -31,7 +30,7 @@ export default function ReportDetails() {
 	return (
 		<fieldset
 			key={timelineId}
-			className="flex-1 overflow-y-auto px-1 grid grid-cols-2 grid-rows-[auto_1fr] gap-4"
+			className="grid flex-1 grid-cols-2 grid-rows-[auto_1fr] gap-4 overflow-y-auto px-1"
 		>
 			<div>
 				<div className="pb-4">
@@ -140,15 +139,14 @@ export default function ReportDetails() {
 				)}
 			</div>
 			<div className="col-span-2 flex flex-col">
-				<h3 className="text-lg font-medium flex items-center">
+				<h3 className="flex items-center text-lg font-medium">
 					Prerequisites{" "}
 					<InfoTip>
-						These blocks will be executed immediately, including any checks, to
-						evaluate if the timeline is available to be used. Leave blank to
-						always include this timeline.
+						These blocks will be executed immediately, including any checks, to evaluate if the
+						timeline is available to be used. Leave blank to always include this timeline.
 					</InfoTip>
 				</h3>
-				<div className="flex-1 overflow-y-auto overflow-x-hidden">
+				<div className="flex-1 overflow-x-hidden overflow-y-auto">
 					{prerequisiteBlocks.length === 0 ? (
 						<div>
 							<p>No prerequisite blocks.</p>
@@ -164,9 +162,7 @@ export default function ReportDetails() {
 									});
 								}}
 							>
-								<Button className="btn btn-sm btn-outline btn-success">
-									Add Block
-								</Button>
+								<Button className="btn btn-sm btn-outline btn-success">Add Block</Button>
 							</AddBlockButton>
 						</div>
 					) : (
@@ -184,7 +180,7 @@ export default function ReportDetails() {
 								})
 							}
 							onUpdate={(block, property, value) => {
-								const { id, type, ...properties } = block;
+								const { id: _, type: __, ...properties } = block;
 								q.plugin.timeline.prerequisiteBlock.update.netSend({
 									pluginId,
 									timelineId,
@@ -225,9 +221,7 @@ export default function ReportDetails() {
 						});
 					}}
 				>
-					<Button className="btn btn-sm btn-outline btn-success">
-						Add Block
-					</Button>
+					<Button className="btn btn-sm btn-outline btn-success">Add Block</Button>
 				</AddBlockButton>
 			</div>
 		</fieldset>

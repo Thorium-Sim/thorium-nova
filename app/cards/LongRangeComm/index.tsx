@@ -1,4 +1,5 @@
 import { Activity, useState } from "react";
+
 import { ComposePage } from "./ComposePage";
 import { InboxPage } from "./InboxPage";
 import type { Pages } from "./longRangeCommPages";
@@ -10,7 +11,7 @@ export function LongRangeComm() {
 	const [currentPage, setCurrentPage] = useState<Pages>("inbox");
 
 	return (
-		<div className="flex gap-4 h-full">
+		<div className="flex h-full gap-4">
 			<Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
 			<Activity mode={currentPage === "inbox" ? "visible" : "hidden"}>
 				<InboxPage />
@@ -21,13 +22,7 @@ export function LongRangeComm() {
 			<Activity mode={currentPage === "sent" ? "visible" : "hidden"}>
 				<SentPage />
 			</Activity>
-			<div
-				className={
-					currentPage === "outbox"
-						? "h-full w-full"
-						: "sr-only pointer-events-none"
-				}
-			>
+			<div className={currentPage === "outbox" ? "h-full w-full" : "pointer-events-none sr-only"}>
 				<OutboxPage pageLoaded={currentPage === "outbox"} />
 			</div>
 		</div>

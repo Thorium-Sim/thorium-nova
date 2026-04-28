@@ -1,6 +1,6 @@
 import { InterstellarMap } from "@thorium/components/Starmap/InterstellarMap";
-import SystemMarker from "@thorium/components/Starmap/SystemMarker";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
+import SystemMarker from "@thorium/components/Starmap/SystemMarker";
 import { q } from "@thorium/context/AppContext";
 import { computeNetworkColors } from "@thorium/routes/config/starmap/starmapUtils";
 import { useMemo } from "react";
@@ -8,7 +8,6 @@ import { href, useNavigate, useParams } from "react-router";
 
 export default function InterstellarWrapper({
 	draggable = true,
-	onDoubleClick,
 	children,
 }: {
 	draggable?: boolean;

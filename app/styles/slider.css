@@ -49,11 +49,9 @@ input[type="range"].slider.zoom::-webkit-slider-thumb {
 	margin-top: 0px;
 	cursor: pointer;
 	/* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
-	--tw-shadow:
-		0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	--tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 	box-shadow:
-		var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000),
-		var(--tw-shadow);
+		var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 input[type="range"].slider.zoom::-webkit-slider-runnable-track {
 	width: 100%;

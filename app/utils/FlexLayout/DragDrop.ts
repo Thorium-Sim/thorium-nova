@@ -1,4 +1,5 @@
 import type * as React from "react";
+
 import { Rect } from "./Rect";
 
 /** @internal */
@@ -20,9 +21,7 @@ export class DragDrop {
 	/** @internal */
 	private _fDragMove: ((event: React.MouseEvent<Element>) => void) | undefined;
 	/** @internal */
-	private _fDragStart:
-		| ((pos: { clientX: number; clientY: number }) => boolean)
-		| undefined;
+	private _fDragStart: ((pos: { clientX: number; clientY: number }) => boolean) | undefined;
 	/** @internal */
 	private _fDragCancel: ((wasDragging: boolean) => void) | undefined;
 
@@ -131,10 +130,7 @@ export class DragDrop {
 	hideGlass() {
 		if (this._glassShowing) {
 			this._document!.body.removeChild(this._glass!);
-			this._document!.defaultView?.removeEventListener(
-				"resize",
-				this.resizeGlass,
-			);
+			this._document!.defaultView?.removeEventListener("resize", this.resizeGlass);
 			this._glassShowing = false;
 			this._document = undefined;
 			this._rootElement = undefined;
@@ -144,8 +140,7 @@ export class DragDrop {
 
 	/** @internal */
 	_updateGlassCursor() {
-		this._glass!.style.cursor =
-			this._glassCursorOverride ?? this._defaultGlassCursor;
+		this._glass!.style.cursor = this._glassCursorOverride ?? this._defaultGlassCursor;
 	}
 
 	/** @internal */
@@ -166,14 +161,12 @@ export class DragDrop {
 			| React.TouchEvent<HTMLDivElement>
 			| React.DragEvent<Element>
 			| undefined,
-		fDragStart:
-			| ((pos: { clientX: number; clientY: number }) => boolean)
-			| undefined,
+		fDragStart: ((pos: { clientX: number; clientY: number }) => boolean) | undefined,
 		fDragMove: ((event: React.MouseEvent<Element>) => void) | undefined,
 		fDragEnd: ((event: Event) => void) | undefined,
-		fDragCancel?: ((wasDragging: boolean) => void) | undefined,
-		fClick?: ((event: Event) => void) | undefined,
-		fDblClick?: ((event: Event) => void) | undefined,
+		fDragCancel?: (wasDragging: boolean) => void,
+		fClick?: (event: Event) => void,
+		fDblClick?: (event: Event) => void,
 		currentDocument?: Document,
 		rootElement?: HTMLDivElement,
 	) {
@@ -212,9 +205,7 @@ export class DragDrop {
 			this._startX = posEvent.clientX;
 			this._startY = posEvent.clientY;
 			if (!window.matchMedia || window.matchMedia("(pointer: fine)").matches) {
-				this._setDefaultGlassCursor(
-					getComputedStyle(event.target as Element).cursor,
-				);
+				this._setDefaultGlassCursor(getComputedStyle(event.target as Element).cursor);
 			}
 			this._stopPropagation(event);
 			this._preventDefault(event);

@@ -21,9 +21,7 @@ export function useManageCard() {
 		},
 		[currentCard, station?.cards],
 	);
-	const card =
-		station?.cards.find((c) => c.component === currentCard) ||
-		station?.cards[0];
+	const card = station?.cards.find((c) => c.component === currentCard) || station?.cards[0];
 
 	return [card, changeCard] as const;
 }

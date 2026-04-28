@@ -92,7 +92,7 @@ export function dataStreamEntity(e: Entity) {
 		};
 	}
 	if (e.components.isTorpedo) {
-		const { parentId, type, ...position } = e.components.position || {};
+		const { parentId: _, type: __, ...position } = e.components.position || {};
 		const { x, y, z } = e.components.velocity || { x: 0, y: 0, z: 0 };
 		const shouldSnap = e.components.snapInterpolation ? 1 : 0;
 		e.removeComponent("snapInterpolation");
@@ -119,7 +119,7 @@ export function dataStreamEntity(e: Entity) {
 		};
 	}
 
-	const { parentId, type, ...position } = e.components.position || {};
+	const { parentId: _, type: __, ...position } = e.components.position || {};
 	const shouldSnap = e.components.snapInterpolation ? 1 : 0;
 	e.removeComponent("snapInterpolation");
 	return {

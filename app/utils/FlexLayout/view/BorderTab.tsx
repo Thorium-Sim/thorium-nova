@@ -1,11 +1,12 @@
 import * as React from "react";
-import { Orientation } from "../Orientation";
-import type { LayoutInternal } from "./Layout";
-import type { BorderNode } from "../model/BorderNode";
-import { Rect } from "../Rect";
-import { Splitter } from "./Splitter";
+
 import { DockLocation } from "../DockLocation";
+import type { BorderNode } from "../model/BorderNode";
+import { Orientation } from "../Orientation";
+import { Rect } from "../Rect";
 import { CLASSES } from "../Types";
+import type { LayoutInternal } from "./Layout";
+import { Splitter } from "./Splitter";
 
 /** @internal */
 export interface IBorderTabProps {
@@ -20,9 +21,7 @@ export function BorderTab(props: IBorderTabProps) {
 
 	React.useLayoutEffect(() => {
 		const outerRect = layout.getBoundingClientRect(selfRef.current!);
-		const contentRect = Rect.getContentRect(selfRef.current!).relativeTo(
-			layout.getDomRect()!,
-		);
+		const contentRect = Rect.getContentRect(selfRef.current!).relativeTo(layout.getDomRect()!);
 		if (outerRect.width > 0) {
 			border.setOuterRect(outerRect);
 			if (!border.getContentRect().equals(contentRect)) {
@@ -48,38 +47,19 @@ export function BorderTab(props: IBorderTabProps) {
 
 	style.display = show ? "flex" : "none";
 
-	const className = layout.getClassName(
-		CLASSES.FLEXLAYOUT__BORDER_TAB_CONTENTS,
-	);
+	const className = layout.getClassName(CLASSES.FLEXLAYOUT__BORDER_TAB_CONTENTS);
 
-	if (
-		border.getLocation() === DockLocation.LEFT ||
-		border.getLocation() === DockLocation.TOP
-	) {
+	if (border.getLocation() === DockLocation.LEFT || border.getLocation() === DockLocation.TOP) {
 		return (
 			<>
 				<div ref={selfRef} style={style} className={className} />
-				{show && (
-					<Splitter
-						layout={layout}
-						node={border}
-						index={0}
-						horizontal={horizontal}
-					/>
-				)}
+				{show && <Splitter layout={layout} node={border} index={0} horizontal={horizontal} />}
 			</>
 		);
 	}
 	return (
 		<>
-			{show && (
-				<Splitter
-					layout={layout}
-					node={border}
-					index={0}
-					horizontal={horizontal}
-				/>
-			)}
+			{show && <Splitter layout={layout} node={border} index={0} horizontal={horizontal} />}
 			<div ref={selfRef} style={style} className={className} />
 		</>
 	);

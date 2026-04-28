@@ -1,14 +1,6 @@
 import { createRecursiveProxy } from "../proxy";
-import type {
-	AnyProcedure,
-	ProcedureArgs,
-	ProcedureCallOptions,
-} from "./procedure";
-import {
-	type AnyRootConfig,
-	type ProcedureType,
-	procedureTypes,
-} from "./types";
+import type { AnyProcedure, ProcedureArgs, ProcedureCallOptions } from "./procedure";
+import { type AnyRootConfig, type ProcedureType, procedureTypes } from "./types";
 
 /** @internal **/
 export type ProcedureRecord = Record<string, AnyProcedure>;
@@ -17,8 +9,7 @@ export interface ProcedureRouterRecord {
 	[key: string]: AnyProcedure | AnyRouter;
 }
 
-export type AnyRouterDef<TConfig extends AnyRootConfig = AnyRootConfig> =
-	RouterDef<TConfig, any>;
+export type AnyRouterDef<TConfig extends AnyRootConfig = AnyRootConfig> = RouterDef<TConfig, any>;
 
 type DecorateProcedure<TProcedure extends AnyProcedure> = (
 	input: ProcedureArgs<TProcedure["_def"]>[0],
@@ -41,10 +32,7 @@ type DecoratedProcedureRecord<TProcedures extends ProcedureRouterRecord> = {
 export type RouterCaller<TDef extends AnyRouterDef> = (
 	ctx: TDef["_config"]["$types"]["ctx"],
 	opts: {
-		onCall?: (
-			opts: ProcedureCallOptions,
-			result: unknown,
-		) => void | Promise<void>;
+		onCall?: (opts: ProcedureCallOptions, result: unknown) => void | Promise<void>;
 	},
 ) => DecoratedProcedureRecord<TDef["record"]>;
 
@@ -55,10 +43,7 @@ export interface Router<TDef extends AnyRouterDef> {
 
 export type AnyRouter = Router<AnyRouterDef>;
 
-export interface RouterDef<
-	TConfig extends AnyRootConfig,
-	TRecord extends ProcedureRouterRecord,
-> {
+export interface RouterDef<TConfig extends AnyRootConfig, TRecord extends ProcedureRouterRecord> {
 	_config: TConfig;
 	router: true;
 	procedures: TRecord;
@@ -69,9 +54,7 @@ export interface RouterDef<
  * Create an object without inheriting anything from `Object.prototype`
  * @internal
  */
-export function omitPrototype<TObj extends Record<string, unknown>>(
-	obj: TObj,
-): TObj {
+export function omitPrototype<TObj extends Record<string, unknown>>(obj: TObj): TObj {
 	return Object.assign(Object.create(null), obj);
 }
 
@@ -94,9 +77,7 @@ export type CreateRouterInner<
 	TProcRouterRecord extends ProcedureRouterRecord,
 > = Router<RouterDef<TConfig, TProcRouterRecord>> & TProcRouterRecord;
 
-function isRouter(
-	procedureOrRouter: AnyProcedure | AnyRouter,
-): procedureOrRouter is AnyRouter {
+function isRouter(procedureOrRouter: AnyProcedure | AnyRouter): procedureOrRouter is AnyRouter {
 	return "router" in procedureOrRouter._def;
 }
 
@@ -110,12 +91,8 @@ const emptyRouter = {
 /**
  * @internal
  */
-export function createRouterFactory<TConfig extends AnyRootConfig>(
-	config: TConfig,
-) {
-	return function createRouterInner<
-		TProcRouterRecord extends ProcedureRouterRecord,
-	>(
+export function createRouterFactory<TConfig extends AnyRootConfig>(config: TConfig) {
+	return function createRouterInner<TProcRouterRecord extends ProcedureRouterRecord>(
 		procedures: TProcRouterRecord,
 	): CreateRouterInner<TConfig, TProcRouterRecord> {
 		const reservedWordsUsed = new Set(
@@ -123,9 +100,7 @@ export function createRouterFactory<TConfig extends AnyRootConfig>(
 		);
 		if (reservedWordsUsed.size > 0) {
 			throw new Error(
-				`Reserved words used in \`router({})\` call: ${Array.from(
-					reservedWordsUsed,
-				).join(", ")}`,
+				`Reserved words used in \`router({})\` call: ${Array.from(reservedWordsUsed).join(", ")}`,
 			);
 		}
 
@@ -162,18 +137,12 @@ export function createRouterFactory<TConfig extends AnyRootConfig>(
 			createCaller(
 				ctx,
 				opts: {
-					onCall?: (
-						opts: ProcedureCallOptions,
-						result: unknown,
-					) => void | Promise<void>;
+					onCall?: (opts: ProcedureCallOptions, result: unknown) => void | Promise<void>;
 				} = {},
 			) {
 				const proxy = createRecursiveProxy(async ({ path, args }) => {
 					// interop mode
-					if (
-						path.length === 1 &&
-						procedureTypes.includes(path[0] as ProcedureType)
-					) {
+					if (path.length === 1 && procedureTypes.includes(path[0] as ProcedureType)) {
 						const procedureOpts = {
 							path: args[0] as string,
 							rawInput: args[1],

@@ -8,7 +8,7 @@ export function ClientButton() {
 	const prompt = usePrompt();
 	return (
 		<div className="flex items-center gap-4">
-			<h2 className="text-white font-bold">Client Name:</h2>
+			<h2 className="font-bold text-white">Client Name:</h2>
 			<Button
 				className="btn-primary btn-sm m-0"
 				onClick={async () => {
@@ -16,7 +16,7 @@ export function ClientButton() {
 						header: "What is the new client name?",
 					});
 					if (typeof name === "string") {
-						const result = await q.client.setName.netSend({ name, clientId });
+						await q.client.setName.netSend({ name, clientId });
 					}
 				}}
 			>

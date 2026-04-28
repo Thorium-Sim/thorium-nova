@@ -1,6 +1,11 @@
 import * as Cards from "@thorium/cards";
 import { q, clientId } from "@thorium/context/AppContext";
+import CardProvider from "@thorium/context/CardContext";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
+import { Icon, type IconName } from "@thorium/ui/Icon";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
+import { cn } from "@thorium/utils/cn";
+import { pascalCase } from "change-case";
 import {
 	type ComponentType,
 	type FC,
@@ -9,13 +14,8 @@ import {
 	Suspense,
 	useState,
 } from "react";
-import { Icon, type IconName } from "@thorium/ui/Icon";
-import { cn } from "@thorium/utils/cn";
-import { useNavigate } from "react-router";
-import CardProvider from "@thorium/context/CardContext";
 import { Button, Dialog, DialogTrigger, Popover } from "react-aria-components";
-import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
-import { pascalCase } from "change-case";
+import { useNavigate } from "react-router";
 
 type IconType = IconName | ReactElement;
 
@@ -33,10 +33,7 @@ export const Widgets = () => {
 						name={widget.name}
 						key={widget.component}
 						icon={
-							<SVGImageLoader
-								className="widget-icon w-6 h-6 cursor-pointer"
-								url={widget.icon}
-							/>
+							<SVGImageLoader className="widget-icon h-6 w-6 cursor-pointer" url={widget.icon} />
 						}
 						component={WidgetComp}
 						size={widget.size}
@@ -44,10 +41,7 @@ export const Widgets = () => {
 				);
 			})}
 			<SettingsWidget />
-			<ClickWidget
-				icon="log-out"
-				onClick={() => q.client.logout.netSend({ clientId })}
-			/>
+			<ClickWidget icon="log-out" onClick={() => q.client.logout.netSend({ clientId })} />
 		</>
 	);
 };
@@ -104,11 +98,7 @@ export const Widget: FC<{
 						)}
 					>
 						<CardProvider cardLoaded={isOpen} cardName={name} isWidget>
-							<Component
-								cardLoaded={isOpen}
-								isOpen={isOpen}
-								onClose={() => setIsOpen(false)}
-							/>
+							<Component cardLoaded={isOpen} isOpen={isOpen} onClose={() => setIsOpen(false)} />
 						</CardProvider>
 					</Dialog>
 				</Popover>
@@ -120,10 +110,6 @@ export const Widget: FC<{
 function SettingsWidget() {
 	const navigate = useNavigate();
 	return (
-		<ClickWidget
-			icon="settings"
-			className="widget-Settings"
-			onClick={() => navigate("settings")}
-		/>
+		<ClickWidget icon="settings" className="widget-Settings" onClick={() => navigate("settings")} />
 	);
 }

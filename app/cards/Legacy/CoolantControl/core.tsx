@@ -26,7 +26,7 @@ export function LegacyHeatCore() {
 	return (
 		<table className="w-full text-xs">
 			<thead>
-				<tr className="border-b border-white-/40">
+				<tr className="border-white-/40 border-b">
 					<th>System</th>
 					<th>Heat</th>
 					<th>Heat Rate</th>

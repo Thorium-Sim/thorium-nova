@@ -1,20 +1,18 @@
+import { CameraControls } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
+import { q } from "@thorium/context/AppContext";
+import { astronomicalUnitToKilometer, type Kilometer } from "@thorium/utils/unitTypes";
+import CameraControlsClass from "camera-controls";
 import * as React from "react";
 import { Suspense, useEffect } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
-import { useExternalCameraControl } from "./CameraControls";
-import { useGetStarmapStore } from "./starmapStore";
-import CameraControlsClass from "camera-controls";
-import {
-	astronomicalUnitToKilometer,
-	type Kilometer,
-} from "@thorium/utils/unitTypes";
+import { useParams } from "react-router";
 import { Box3, Vector3 } from "three";
+
+import { useExternalCameraControl } from "./CameraControls";
 import Disc from "./Disc";
 import { PolarGrid } from "./PolarGrid";
+import { useGetStarmapStore } from "./starmapStore";
 import { useSystemIds } from "./useSystemIds";
-import { useParams } from "react-router";
-import { q } from "@thorium/context/AppContext";
-import { CameraControls } from "@react-three/drei";
 
 const ACTION = CameraControlsClass.ACTION;
 
@@ -29,7 +27,7 @@ function HabitableZone({ systemId }: { systemId: string }) {
 	});
 	const scaleUnit = astronomicalUnitToKilometer(1);
 	if (!system) return null;
-	const { habitableZoneInner = 0, habitableZoneOuter = 3, stars } = system;
+	const { habitableZoneInner, habitableZoneOuter, stars } = system;
 	return stars.length > 0 ? (
 		<Disc
 			habitableZoneInner={habitableZoneInner}
@@ -39,10 +37,9 @@ function HabitableZone({ systemId }: { systemId: string }) {
 	) : null;
 }
 
-const vec = new Vector3();
 export function SolarSystemMap({
 	systemId,
-	skyboxKey = "Basic",
+	skyboxKey,
 	children,
 	minDistance = 1,
 	maxDistance = SOLAR_SYSTEM_MAX_DISTANCE,
@@ -65,7 +62,6 @@ export function SolarSystemMap({
 		useStarmapStore.setState({ skyboxKey: skyboxKey || "blank" });
 	}, [skyboxKey, useStarmapStore]);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to update when the camera changes
 	useEffect(() => {
 		// Set the initial camera position
 		orbitControls.current?.setPosition(0, 50_000, 0);

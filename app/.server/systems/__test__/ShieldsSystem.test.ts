@@ -1,9 +1,10 @@
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
-import { ECS, Entity } from "@thorium/utils/ecs";
-import { afterEach, aroundEach, describe, expect, it } from "vitest";
-import { ShieldsSystem } from "../ShieldsSystem";
 import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
+import { ECS, Entity } from "@thorium/utils/ecs";
+import { aroundEach, describe, expect, it } from "vitest";
+
+import { ShieldsSystem } from "../ShieldsSystem";
 
 aroundEach(async (runTest) => {
 	await DataStore.operations.run(testDataStoreProps, async () => {

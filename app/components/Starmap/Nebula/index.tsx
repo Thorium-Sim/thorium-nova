@@ -1,12 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import React, { forwardRef, memo, useEffect, useRef, useState } from "react";
-import {
-	BackSide,
-	BoxGeometry,
-	type Mesh,
-	type ShaderMaterial,
-	CubeTexture,
-} from "three";
+import { BackSide, BoxGeometry, type Mesh, type ShaderMaterial, CubeTexture } from "three";
+
 import { useGetStarmapStore } from "../starmapStore";
 import NebulaWorker from "./generateNebulaMap?worker";
 
@@ -14,8 +9,7 @@ const radius = 1e20;
 const CANVAS_WIDTH = 2048;
 let nebulaWorker: Worker | null = null;
 
-const canvas =
-	typeof window === "undefined" ? null : document.createElement("canvas");
+const canvas = typeof window === "undefined" ? null : document.createElement("canvas");
 if (canvas && "transferControlToOffscreen" in canvas) {
 	nebulaWorker = new NebulaWorker();
 }
@@ -36,13 +30,7 @@ function Nebula() {
 		mesh.current?.position.copy(camera.position);
 	});
 	return (
-		<mesh
-			ref={mesh}
-			geometry={nebulaGeometry}
-			scale={radius}
-			renderOrder={-100}
-			dispose={null}
-		>
+		<mesh ref={mesh} geometry={nebulaGeometry} scale={radius} renderOrder={-100} dispose={null}>
 			{/* TODO: Throw a nice default skybox in here for browsers that don't support the worker. */}
 			{canvas && "transferControlToOffscreen" in canvas ? (
 				<NebulaShader skyboxKey={skyboxKey} />
@@ -60,7 +48,7 @@ function NebulaShader({ skyboxKey }: { skyboxKey: string }) {
 		const secondary = [];
 		const offscreenSecondary = [];
 
-		for (const side of sides) {
+		for (const _ of sides) {
 			const canvas = document.createElement("canvas");
 			canvas.width = canvas.height = CANVAS_WIDTH;
 			const offscreenCanvas = canvas.transferControlToOffscreen();
@@ -69,7 +57,7 @@ function NebulaShader({ skyboxKey }: { skyboxKey: string }) {
 			primary.push(canvas);
 			offscreenPrimary.push(offscreenCanvas);
 		}
-		for (const side of sides) {
+		for (const _ of sides) {
 			const canvas = document.createElement("canvas");
 			canvas.width = canvas.height = CANVAS_WIDTH;
 
@@ -83,12 +71,7 @@ function NebulaShader({ skyboxKey }: { skyboxKey: string }) {
 		const secondaryCube = new CubeTexture(secondary);
 		primaryCube.needsUpdate = true;
 		secondaryCube.needsUpdate = true;
-		return [
-			primaryCube,
-			secondaryCube,
-			offscreenPrimary,
-			offscreenSecondary,
-		] as const;
+		return [primaryCube, secondaryCube, offscreenPrimary, offscreenSecondary] as const;
 	});
 	const activeCanvas = useRef<0 | 1>(0);
 	const shaderMaterial = useRef<ShaderMaterial>(null);
@@ -159,12 +142,7 @@ const InnerShaderMat = memo(
 	forwardRef<
 		ShaderMaterial,
 		{
-			canvases: readonly [
-				CubeTexture,
-				CubeTexture,
-				OffscreenCanvas[],
-				OffscreenCanvas[],
-			];
+			canvases: readonly [CubeTexture, CubeTexture, OffscreenCanvas[], OffscreenCanvas[]];
 		}
 	>(({ canvases }, ref) => {
 		return (

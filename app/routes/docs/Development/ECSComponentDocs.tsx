@@ -1,6 +1,6 @@
+import { Fragment } from "react";
 // @ts-expect-error
 import { docs } from "virtual:ecs-component-docs";
-import { Fragment } from "react";
 
 export function ECSComponentDocs() {
 	return Object.values(docs)

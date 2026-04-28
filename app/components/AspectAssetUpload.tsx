@@ -57,14 +57,12 @@ export function AspectAssetUpload({
 
 	return (
 		<>
-			<div className="flex mt-4">
-				<h3 className="font-bold text-2xl">Assets</h3>
-				<InfoTip>
-					Click on an asset to copy the asset URL to your clipboard.
-				</InfoTip>
+			<div className="mt-4 flex">
+				<h3 className="text-2xl font-bold">Assets</h3>
+				<InfoTip>Click on an asset to copy the asset URL to your clipboard.</InfoTip>
 			</div>
 			<div
-				className={`flex-1 relative overflow-y-auto rounded-lg transition-colors ${
+				className={`relative flex-1 overflow-y-auto rounded-lg transition-colors ${
 					dragging ? "bg-black/80" : "bg-black/50"
 				}`}
 				onDragEnter={handleDragEnter}
@@ -74,8 +72,8 @@ export function AspectAssetUpload({
 				onDrop={handleDrop}
 			>
 				{dragging && (
-					<div className="absolute h-full w-full bg-black/50 flex items-center justify-center pointer-events-none">
-						<span className="font-bold text-4xl">Drag file to upload.</span>
+					<div className="pointer-events-none absolute flex h-full w-full items-center justify-center bg-black/50">
+						<span className="text-4xl font-bold">Drag file to upload.</span>
 					</div>
 				)}
 				{fileUrls.map((file) => {
@@ -89,7 +87,7 @@ export function AspectAssetUpload({
 					);
 				})}
 			</div>
-			<label className="w-full btn btn-info">
+			<label className="btn btn-info w-full">
 				Upload Asset
 				<input
 					type="file"
@@ -145,12 +143,10 @@ function UploadedFile({
 
 	return (
 		<li key={fileUrl} className="list-group-item" onClick={() => copy(fileUrl)}>
-			<div className="flex items-center justify-between w-full">
+			<div className="flex w-full items-center justify-between">
 				<AssetPreview url={fileUrl} className="max-h-8 text-2xl" />
-				<span className=" mx-2 flex-1 overflow-x-hidden text-ellipsis">
-					{state === "copied"
-						? "Copied!"
-						: fileUrl.split("/")[fileUrl.split("/").length - 1]}
+				<span className="mx-2 flex-1 overflow-x-hidden text-ellipsis">
+					{state === "copied" ? "Copied!" : fileUrl.split("/")[fileUrl.split("/").length - 1]}
 				</span>
 				{remove ? (
 					<Button

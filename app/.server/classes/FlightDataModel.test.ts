@@ -1,16 +1,12 @@
+import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
 import {
 	createMockDataContext,
 	createMockRouter,
-	MockDataContext,
 } from "@thorium/utils/.server/createMockDataContext";
-import {
-	DataStore,
-	type DataStoreOperations,
-} from "@thorium/utils/.server/db-fs";
-import { aroundEach, expect, test } from "vitest";
+import { DataStore, type DataStoreOperations } from "@thorium/utils/.server/db-fs";
 import { Entity } from "@thorium/utils/ecs";
 import { dump } from "js-yaml";
-import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
+import { aroundEach, expect, test } from "vitest";
 
 const fileMap = new Map<string, string>();
 const testDataStoreProps: DataStoreOperations = {
@@ -28,26 +24,26 @@ const testDataStoreProps: DataStoreOperations = {
 	},
 	async remove() {},
 	async removeAsset() {},
-	async uploadAsset(asset, fileName) {
+	async uploadAsset() {
 		return "";
 	},
-	async write(force, name) {
+	async write(_, name) {
 		fileMap.set(name || this.meta.flightName, JSON.stringify(this.toJSON()));
 	},
-	async loadAllAspects(aspectClasses) {},
-	async rename(newName, otherNames) {},
+	async loadAllAspects() {},
+	async rename() {},
 
 	async getFlights() {
 		return [];
 	},
-	async getFlightSnapshots(flightName) {
+	async getFlightSnapshots() {
 		return Array.from(fileMap.keys());
 	},
 };
 
 aroundEach(async (runTest) => {
 	await DataStore.operations.run(testDataStoreProps, async () => {
-		runTest();
+		await runTest();
 	});
 });
 

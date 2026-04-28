@@ -1,22 +1,20 @@
-import { type ReactNode, Suspense, useEffect } from "react";
-import {
-	UNSAFE_FrameworkContext,
-	UNSAFE_LocationContext,
-	UNSAFE_NavigationContext,
-	UNSAFE_RouteContext,
-} from "react-router";
-import { Canvas, type CanvasProps } from "@react-three/fiber";
-
 import { useContextBridge } from "@react-three/drei";
-
+import { Canvas, type CanvasProps } from "@react-three/fiber";
 import { useQueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { StarmapStoreContext, useGetStarmapStore } from "./starmapStore";
 import {
 	useGetObjectsAtScreenPoint as useGetObjectsUnderCursor,
 	useTranslate2DTo3D,
 } from "@thorium/hooks/useTranslate2DTo3D";
-import { LiveQueryContext } from "@thorium/utils/live-query/client/liveQueryContext";
 import { StationContext } from "@thorium/routes/station/useStation";
+import { LiveQueryContext } from "@thorium/utils/live-query/client/liveQueryContext";
+import { type ReactNode, Suspense, useEffect } from "react";
+import {
+	UNSAFE_LocationContext,
+	UNSAFE_NavigationContext,
+	UNSAFE_RouteContext,
+} from "react-router";
+
+import { StarmapStoreContext, useGetStarmapStore } from "./starmapStore";
 
 const FAR = 1e27;
 

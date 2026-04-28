@@ -9,15 +9,13 @@ export function RotationDecoder({
 	rotation: number;
 	updateMessageDecoding: (
 		decoding: Extract<
-			inferProcedureInput<
-				AppRouter["longRangeComm"]["updateMessageDecoding"]
-			>["decoding"],
+			inferProcedureInput<AppRouter["longRangeComm"]["updateMessageDecoding"]>["decoding"],
 			{ type: "rotation" }
 		>,
 	) => Promise<void>;
 }) {
 	return (
-		<div className="flex flex-col justify-center h-full gap-8">
+		<div className="flex h-full flex-col justify-center gap-8">
 			<div
 				className="grid text-xl"
 				style={{
@@ -26,25 +24,16 @@ export function RotationDecoder({
 			>
 				<div className="contents">
 					{rotateCharacters.split("").map((l) => (
-						<span
-							key={l}
-							className="not-last:border-r border-white/50 text-center"
-						>
+						<span key={l} className="border-white/50 text-center not-last:border-r">
 							{l}
 						</span>
 					))}
 				</div>
 				<div className="contents">
-					{(
-						rotateCharacters.slice(rotation) +
-						rotateCharacters.slice(0, rotation)
-					)
+					{(rotateCharacters.slice(rotation) + rotateCharacters.slice(0, rotation))
 						.split("")
 						.map((l) => (
-							<span
-								key={l}
-								className="not-last:border-r border-white/50 text-center"
-							>
+							<span key={l} className="border-white/50 text-center not-last:border-r">
 								{l}
 							</span>
 						))}
@@ -60,8 +49,7 @@ export function RotationDecoder({
 				onInput={async (event) =>
 					updateMessageDecoding({
 						type: "rotation",
-						rotation:
-							rotateCharacters.length - Number(event.currentTarget.value),
+						rotation: rotateCharacters.length - Number(event.currentTarget.value),
 					})
 				}
 			/>

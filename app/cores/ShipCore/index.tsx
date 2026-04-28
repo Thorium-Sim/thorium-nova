@@ -12,11 +12,7 @@ export function ShipCore() {
 			<Input label="Name" className="input-xs" defaultValue={ship.name} />
 			<Input label="Class" className="input-xs" defaultValue={ship.shipClass} />
 
-			<Input
-				label="Registry"
-				className="input-xs"
-				defaultValue={ship.registry}
-			/>
+			<Input label="Registry" className="input-xs" defaultValue={ship.registry} />
 			<span>Alert Level</span>
 			<div className="flex gap-1">
 				<AlertLevelButton
@@ -50,11 +46,7 @@ export function ShipCore() {
 					shipId={shipId}
 				/>
 			</div>
-			<Input
-				label="Category"
-				className="input-xs"
-				defaultValue={ship.category}
-			/>
+			<Input label="Category" className="input-xs" defaultValue={ship.category} />
 		</>
 	);
 }

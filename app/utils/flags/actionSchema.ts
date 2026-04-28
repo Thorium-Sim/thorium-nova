@@ -13,9 +13,7 @@ export const valueQuery = z.object({
 		.object({
 			component: z.string(),
 			property: z.string(),
-			matchType: z
-				.union([z.literal("all"), z.literal("first"), z.literal("random")])
-				.optional(),
+			matchType: z.union([z.literal("all"), z.literal("first"), z.literal("random")]).optional(),
 		})
 		.optional(),
 });
@@ -48,8 +46,4 @@ const entityMatch = z.object({
 	matchCount: z.union([z.literal("any"), z.literal("one"), z.literal("no")]),
 });
 
-export const conditionSchema = z.discriminatedUnion("type", [
-	eventListener,
-	distance,
-	entityMatch,
-]);
+export const conditionSchema = z.discriminatedUnion("type", [eventListener, distance, entityMatch]);

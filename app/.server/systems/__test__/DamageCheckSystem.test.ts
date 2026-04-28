@@ -1,15 +1,16 @@
+import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
+import { DataStore } from "@thorium/utils/.server/db-fs";
+import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { applyDamage } from "@thorium/utils/.server/ship/collisionDamage";
 import { ECS, Entity } from "@thorium/utils/ecs";
 import { getAggregateDamage } from "@thorium/utils/flags/damageTypes";
 import { aroundEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { DamageCheckSystem } from "../DamageCheckSystem";
-import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
-import { DataStore } from "@thorium/utils/.server/db-fs";
-import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 
 aroundEach(async (runTest) => {
 	await DataStore.operations.run(testDataStoreProps, async () => {
-		runTest();
+		await runTest();
 	});
 });
 

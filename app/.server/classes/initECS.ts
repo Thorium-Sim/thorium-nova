@@ -20,9 +20,6 @@ export function initECS(ecs: ECS, entities: Entity[], mode: "nova" | "legacy") {
 		const e = new Entity(id, components);
 		ecs.addEntity(e);
 	});
-	const maxId = entities.reduce(
-		(acc, { id }) => Math.max(acc, id),
-		DefaultUIDGenerator.uid,
-	);
+	const maxId = entities.reduce((acc, { id }) => Math.max(acc, id), DefaultUIDGenerator.uid);
 	DefaultUIDGenerator.uid = maxId + 1;
 }

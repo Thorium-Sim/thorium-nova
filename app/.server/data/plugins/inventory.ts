@@ -1,10 +1,12 @@
+import path from "node:path";
+
 import InventoryPlugin from "@thorium/.server/classes/Plugins/Inventory";
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import z from "zod";
+
 import { getPlugin } from "./utils";
-import path from "node:path";
 
 export const inventory = t.router({
 	all: t.procedure
@@ -22,15 +24,10 @@ export const inventory = t.router({
 		}),
 	get: t.procedure
 		.input(z.object({ pluginId: z.string(), inventoryId: z.string() }))
-		.filter(
-			(
-				publish: { pluginId: string; inventoryId: string } | null,
-				{ input },
-			) => {
-				if (publish && input.pluginId !== publish.pluginId) return false;
-				return true;
-			},
-		)
+		.filter((publish: { pluginId: string; inventoryId: string } | null, { input }) => {
+			if (publish && input.pluginId !== publish.pluginId) return false;
+			return true;
+		})
 		.request(({ ctx, input }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
 			const inventory = plugin.aspects.inventory.find(
@@ -69,10 +66,7 @@ export const inventory = t.router({
 				(inventory) => inventory.name === input.inventoryId,
 			);
 			if (!inventory) return;
-			plugin.aspects.inventory.splice(
-				plugin.aspects.inventory.indexOf(inventory),
-				1,
-			);
+			plugin.aspects.inventory.splice(plugin.aspects.inventory.indexOf(inventory), 1);
 
 			await inventory?.remove();
 			pubsub.publish.plugin.inventory.all({ pluginId: input.pluginId });
@@ -105,26 +99,19 @@ export const inventory = t.router({
 				(inventory) => inventory.name === input.inventoryId,
 			);
 			if (!inventory) return { inventoryId: "" };
-			if (typeof input.description === "string")
-				inventory.description = input.description;
+			if (typeof input.description === "string") inventory.description = input.description;
 			if (input.tags) inventory.tags = input.tags;
 			if (typeof input.volume === "number") inventory.volume = input.volume;
-			if (typeof input.continuous === "boolean")
-				inventory.continuous = input.continuous;
+			if (typeof input.continuous === "boolean") inventory.continuous = input.continuous;
 			if (input.flags) inventory.flags = input.flags;
 			if (typeof input.plural === "string") inventory.plural = input.plural;
-			if (typeof input.durability === "number")
-				inventory.durability = input.durability;
+			if (typeof input.durability === "number") inventory.durability = input.durability;
 			if (input.name !== inventory.name && input.name) {
 				await inventory?.rename(input.name);
 			}
 			if (typeof input.image === "string") {
 				const ext = path.extname(input.image);
-				inventory.assets.image = await ctx.uploadFile.call(
-					inventory,
-					input.image,
-					`image${ext}`,
-				);
+				inventory.assets.image = await ctx.uploadFile.call(inventory, input.image, `image${ext}`);
 			}
 
 			if (input.name !== inventory.name && input.name) {

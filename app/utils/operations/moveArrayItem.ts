@@ -1,8 +1,4 @@
-export function moveArrayItem<T>(
-	array: T[],
-	old_index: number,
-	new_index: number,
-) {
+export function moveArrayItem<T>(array: T[], old_index: number, new_index: number) {
 	if (new_index >= array.length) {
 		let k = new_index - array.length;
 		while (k-- + 1) {

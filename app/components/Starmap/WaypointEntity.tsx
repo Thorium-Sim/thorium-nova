@@ -7,6 +7,7 @@ import {
 import type { Coordinates } from "@thorium/utils/unitTypes";
 import { useMemo, useRef } from "react";
 import type { Group } from "three";
+
 import WaypointSvg from "./Waypoint.svg";
 import WaypointStroke from "./WaypointStroke.svg";
 
@@ -31,11 +32,7 @@ export const WaypointEntity = ({
 		const noticeFocus = deriveDarkerThemeColor(notice);
 		return {
 			color: isFacingOrLocked ? primary : isActive ? warning : notice,
-			strokeColor: isFacingOrLocked
-				? primaryFocus
-				: isActive
-					? warningFocus
-					: noticeFocus,
+			strokeColor: isFacingOrLocked ? primaryFocus : isActive ? warningFocus : noticeFocus,
 		};
 	}, [isFacingOrLocked, isActive]);
 	const spriteMap = useShipSprite(WaypointSvg);

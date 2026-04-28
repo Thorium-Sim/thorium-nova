@@ -15,19 +15,13 @@ import { type Entity, System } from "@thorium/utils/ecs";
 export class ImpulseSystem extends System {
 	static flightMode = ["nova"];
 	test(entity: Entity) {
-		return !!(
-			entity.components.isImpulseEngines && entity.components.isShipSystem
-		);
+		return !!(entity.components.isImpulseEngines && entity.components.isShipSystem);
 	}
 	update(entity: Entity) {
-		const ship = this.ecs.getEntityById(
-			entity.components.isShipSystem?.shipId || -1,
-		);
-		if (!ship || !ship.components.isShip || !entity.components.isImpulseEngines)
-			return;
+		const ship = this.ecs.getEntityById(entity.components.isShipSystem?.shipId || -1);
+		if (!ship || !ship.components.isShip || !entity.components.isImpulseEngines) return;
 
-		let { thrust, targetSpeed, cruisingSpeed } =
-			entity.components.isImpulseEngines;
+		let { thrust, targetSpeed, cruisingSpeed } = entity.components.isImpulseEngines;
 
 		if (entity.components.power) {
 			const { currentPower, powerLevels } = entity.components.power || {};

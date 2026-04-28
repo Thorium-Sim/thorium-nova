@@ -248,11 +248,7 @@ export class BorderNode extends Node implements IDropTarget {
 	}
 
 	/** @internal */
-	canDrop(
-		dragNode: Node & IDraggable,
-		x: number,
-		y: number,
-	): DropInfo | undefined {
+	canDrop(dragNode: Node & IDraggable, x: number, y: number): DropInfo | undefined {
 		if (!(dragNode instanceof TabNode)) {
 			return undefined;
 		}
@@ -276,12 +272,7 @@ export class BorderNode extends Node implements IDropTarget {
 						childRect = (child as TabNode).getTabRect()!;
 						childCenter = childRect.x + childRect.width / 2;
 						if (x >= pos && x < childCenter) {
-							const outlineRect = new Rect(
-								childRect.x - 2,
-								childY,
-								3,
-								childHeight,
-							);
+							const outlineRect = new Rect(childRect.x - 2, childY, 3, childHeight);
 							dropInfo = new DropInfo(
 								this,
 								outlineRect,
@@ -294,12 +285,7 @@ export class BorderNode extends Node implements IDropTarget {
 						pos = childCenter;
 					}
 					if (dropInfo == null) {
-						const outlineRect = new Rect(
-							childRect.getRight() - 2,
-							childY,
-							3,
-							childHeight,
-						);
+						const outlineRect = new Rect(childRect.getRight() - 2, childY, 3, childHeight);
 						dropInfo = new DropInfo(
 							this,
 							outlineRect,
@@ -309,12 +295,7 @@ export class BorderNode extends Node implements IDropTarget {
 						);
 					}
 				} else {
-					const outlineRect = new Rect(
-						this.tabHeaderRect!.x + 1,
-						this.tabHeaderRect!.y + 2,
-						3,
-						18,
-					);
+					const outlineRect = new Rect(this.tabHeaderRect!.x + 1, this.tabHeaderRect!.y + 2, 3, 18);
 					dropInfo = new DropInfo(
 						this,
 						outlineRect,
@@ -337,12 +318,7 @@ export class BorderNode extends Node implements IDropTarget {
 						childRect = (child as TabNode).getTabRect()!;
 						childCenter = childRect.y + childRect.height / 2;
 						if (y >= pos && y < childCenter) {
-							const outlineRect = new Rect(
-								childX,
-								childRect.y - 2,
-								childWidth,
-								3,
-							);
+							const outlineRect = new Rect(childX, childRect.y - 2, childWidth, 3);
 							dropInfo = new DropInfo(
 								this,
 								outlineRect,
@@ -355,12 +331,7 @@ export class BorderNode extends Node implements IDropTarget {
 						pos = childCenter;
 					}
 					if (dropInfo == null) {
-						const outlineRect = new Rect(
-							childX,
-							childRect.getBottom() - 2,
-							childWidth,
-							3,
-						);
+						const outlineRect = new Rect(childX, childRect.getBottom() - 2, childWidth, 3);
 						dropInfo = new DropInfo(
 							this,
 							outlineRect,
@@ -370,12 +341,7 @@ export class BorderNode extends Node implements IDropTarget {
 						);
 					}
 				} else {
-					const outlineRect = new Rect(
-						this.tabHeaderRect!.x + 2,
-						this.tabHeaderRect!.y + 1,
-						18,
-						3,
-					);
+					const outlineRect = new Rect(this.tabHeaderRect!.x + 2, this.tabHeaderRect!.y + 1, 18, 3);
 					dropInfo = new DropInfo(
 						this,
 						outlineRect,
@@ -406,12 +372,7 @@ export class BorderNode extends Node implements IDropTarget {
 	}
 
 	/** @internal */
-	drop(
-		dragNode: Node & IDraggable,
-		location: DockLocation,
-		index: number,
-		select?: boolean,
-	): void {
+	drop(dragNode: Node & IDraggable, location: DockLocation, index: number, select?: boolean): void {
 		let fromIndex = 0;
 		const dragParent = dragNode.getParent() as BorderNode | TabSetNode;
 		if (dragParent !== undefined) {
@@ -429,12 +390,7 @@ export class BorderNode extends Node implements IDropTarget {
 		}
 
 		// if dropping a tab back to same tabset and moving to forward position then reduce insertion index
-		if (
-			dragNode instanceof TabNode &&
-			dragParent === this &&
-			fromIndex < index &&
-			index > 0
-		) {
+		if (dragNode instanceof TabNode && dragParent === this && fromIndex < index && index > 0) {
 			index--;
 		}
 
@@ -496,10 +452,7 @@ export class BorderNode extends Node implements IDropTarget {
 	/** @internal */
 	calculateSplit(splitter: BorderNode, splitterPos: number) {
 		const pBounds = this.getSplitterBounds(splitterPos);
-		if (
-			this.location === DockLocation.BOTTOM ||
-			this.location === DockLocation.RIGHT
-		) {
+		if (this.location === DockLocation.BOTTOM || this.location === DockLocation.RIGHT) {
 			return Math.max(0, pBounds[1] - splitterPos);
 		}
 		return Math.max(0, splitterPos - pBounds[0]);
@@ -518,17 +471,12 @@ export class BorderNode extends Node implements IDropTarget {
 	/** @internal */
 	private static createAttributeDefinitions(): AttributeDefinitions {
 		const attributeDefinitions = new AttributeDefinitions();
-		attributeDefinitions
-			.add("type", BorderNode.TYPE, true)
-			.setType(Attribute.STRING)
-			.setFixed();
+		attributeDefinitions.add("type", BorderNode.TYPE, true).setType(Attribute.STRING).setFixed();
 
 		attributeDefinitions
 			.add("selected", -1)
 			.setType(Attribute.NUMBER)
-			.setDescription(
-				`index of selected/visible tab in border; -1 means no tab selected`,
-			);
+			.setDescription(`index of selected/visible tab in border; -1 means no tab selected`);
 		attributeDefinitions
 			.add("show", true)
 			.setType(Attribute.BOOLEAN)
@@ -549,9 +497,7 @@ export class BorderNode extends Node implements IDropTarget {
 		attributeDefinitions
 			.addInherited("autoSelectTabWhenOpen", "borderAutoSelectTabWhenOpen")
 			.setType(Attribute.BOOLEAN)
-			.setDescription(
-				`whether to select new/moved tabs in border when the border is already open`,
-			);
+			.setDescription(`whether to select new/moved tabs in border when the border is already open`);
 		attributeDefinitions
 			.addInherited("autoSelectTabWhenClosed", "borderAutoSelectTabWhenClosed")
 			.setType(Attribute.BOOLEAN)

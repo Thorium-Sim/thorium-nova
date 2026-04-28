@@ -1,19 +1,16 @@
-import { pubsub } from "@thorium/.server/init/pubsub";
-import type { Entity } from "@thorium/utils/ecs";
-import { clearAutopilotState } from "@thorium/utils/.server/ship/clearAutopilotState";
-import { Vector3 } from "three";
-import {
-	gigaJouleToMegaWattHour,
-	megaWattHourToGigaJoule,
-} from "@thorium/utils/unitTypes";
 import { getWhichShield } from "@thorium/.server/classes/Plugins/ShipSystems/Shields";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { clearAutopilotState } from "@thorium/utils/.server/ship/clearAutopilotState";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import type { Entity } from "@thorium/utils/ecs";
 import {
 	damageEffects,
 	getDamageMetricMultipliers,
 	type damageTypes as damageType,
 } from "@thorium/utils/flags/damageTypes";
+import { gigaJouleToMegaWattHour, megaWattHourToGigaJoule } from "@thorium/utils/unitTypes";
+import { Vector3 } from "three";
 import type z from "zod";
-import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 
 export function handleCollisionDamage(
 	entity: Entity | null,
@@ -29,24 +26,15 @@ export function handleCollisionDamage(
 	// But I've condensed it a bit.
 	const kineticEnergyInJoules = (elapsed ** 2 * force ** 2) / (2 * m);
 	// Convert the kinetic energy to gigajoules
-	applyDamage(entity, kineticEnergyInJoules / 1e9, direction, [
-		"Structural",
-		"Fatigue",
-	]);
+	applyDamage(entity, kineticEnergyInJoules / 1e9, direction, ["Structural", "Fatigue"]);
 }
 
-export function handleTorpedoDamage(
-	torpedo: Entity,
-	other: Entity,
-	direction: Vector3,
-) {
+export function handleTorpedoDamage(torpedo: Entity, other: Entity, direction: Vector3) {
 	const torpedoYield = torpedo.components.isTorpedo?.yield || 0;
 	// Yield is in megawatt hours, convert to gigajoules
 	const damage = megaWattHourToGigaJoule(torpedoYield);
 
-	applyDamage(other, damage, direction, [
-		torpedo.components.isTorpedo?.damageType || "Structural",
-	]);
+	applyDamage(other, damage, direction, [torpedo.components.isTorpedo?.damageType || "Structural"]);
 
 	const vector3 = new Vector3();
 	const otherVector = new Vector3();
@@ -72,13 +60,7 @@ export function handleTorpedoDamage(
 		torpedo.addComponent("snapInterpolation", {});
 	}
 	const explosion =
-		torpedoYield > 6
-			? "large"
-			: torpedoYield > 3
-				? "medium"
-				: torpedoYield > 0
-					? "small"
-					: "none";
+		torpedoYield > 6 ? "large" : torpedoYield > 3 ? "medium" : torpedoYield > 0 ? "small" : "none";
 	torpedo.addComponent("isDestroyed", {
 		destroyedTimestamp: Date.now(),
 		timeToDestroy: explosion !== "none" ? 5000 : 0,
@@ -101,26 +83,19 @@ export function applyDamage(
 	let remainingDamage = damageInGigajoules;
 	let systemDamage = damageInGigajoules;
 	if (!ignoreShields) {
-		const afterShields = applyShieldDamage(
-			entity,
-			damageInGigajoules,
-			direction,
-		);
+		const afterShields = applyShieldDamage(entity, damageInGigajoules, direction);
 		remainingDamage = afterShields.remainingDamage;
 		systemDamage = afterShields.systemDamage;
 	}
 	// Apply system damage
-	const damagableSystems = [
-		...(entity.components.shipSystems?.shipSystems.keys() || []),
-	].flatMap((id) => {
-		const sys = entity.ecs.getEntityById(id);
-		if (
-			sys?.components.damage &&
-			sys.components.damage.vulnerability !== "invulnerable"
-		)
-			return sys;
-		return [];
-	});
+	const damagableSystems = [...(entity.components.shipSystems?.shipSystems.keys() || [])].flatMap(
+		(id) => {
+			const sys = entity.ecs.getEntityById(id);
+			if (sys?.components.damage && sys.components.damage.vulnerability !== "invulnerable")
+				return sys;
+			return [];
+		},
+	);
 	const vulnerableSystems = damagableSystems.filter(
 		(d) => d.components.damage?.vulnerability === "vulnerable",
 	);
@@ -170,13 +145,9 @@ export function applyDamage(
 
 export function destroyShip(entity: Entity) {
 	const mass = entity.components.mass?.mass || 1;
-	const explosion =
-		mass > 1_000_000_000 ? "large" : mass > 100_000_000 ? "medium" : "small";
+	const explosion = mass > 1_000_000_000 ? "large" : mass > 100_000_000 ? "medium" : "small";
 
-	const flightEntity = entity.ecs.componentCache
-		.get("isFlight")
-		?.values()
-		.next().value;
+	const flightEntity = entity.ecs.componentCache.get("isFlight")?.values().next().value;
 
 	entity.addComponent("isDestroyed", {
 		destroyedTimestamp: Date.now(),
@@ -244,11 +215,7 @@ export function applySystemDamage(
 
 	const damageMultiplier =
 		damageTypes?.reduce((prev, next, i, arr) => {
-			return (
-				prev +
-				(system?.components.damage?.damageTypeMultipliers[next] || 1) /
-					arr.length
-			);
+			return prev + (system?.components.damage?.damageTypeMultipliers[next] || 1) / arr.length;
 		}, 1) || 1;
 
 	const appliedDamage = damage * damageMultiplier;
@@ -296,8 +263,7 @@ function applyShieldDamage(
 		z: size.length,
 	});
 	let shieldSystem: Entity | null = null;
-	for (const systemId of entity.components.shipSystems?.shipSystems.keys() ||
-		[]) {
+	for (const systemId of entity.components.shipSystems?.shipSystems.keys() || []) {
 		const system = entity.ecs?.getEntityById(systemId);
 		if (system?.components.isShields?.direction === shieldDirection) {
 			shieldSystem = system;
@@ -310,9 +276,7 @@ function applyShieldDamage(
 	const damageMultiplier =
 		damageTypes?.reduce((prev, next, i, arr) => {
 			return (
-				prev +
-				(shieldSystem?.components.damage?.damageTypeMultipliers[next] || 1) /
-					arr.length
+				prev + (shieldSystem?.components.damage?.damageTypeMultipliers[next] || 1) / arr.length
 			);
 		}, 1) || 1;
 
@@ -320,20 +284,17 @@ function applyShieldDamage(
 		// TODO August 22, 2024: Have the shield frequency affect the damage
 		const { strength, maxStrength, deflectionEfficiencyMultiplier } =
 			shieldSystem.components.isShields;
-		let shieldStrength =
-			strength - gigaJouleToMegaWattHour(damageInGigajoules) * damageMultiplier;
+		let shieldStrength = strength - gigaJouleToMegaWattHour(damageInGigajoules) * damageMultiplier;
 
 		if (shieldStrength < 0) {
-			remainingDamage =
-				-megaWattHourToGigaJoule(shieldStrength) * damageMultiplier;
+			remainingDamage = -1 * megaWattHourToGigaJoule(shieldStrength) * damageMultiplier;
 			shieldStrength = 0;
 		}
 		shieldSystem.updateComponent("isShields", {
 			strength: shieldStrength,
 		});
 
-		systemDamageMultiplier =
-			(1 - shieldStrength / maxStrength) * deflectionEfficiencyMultiplier;
+		systemDamageMultiplier = (1 - shieldStrength / maxStrength) * deflectionEfficiencyMultiplier;
 	} else {
 		remainingDamage = damageInGigajoules;
 		systemDamageMultiplier = 1;

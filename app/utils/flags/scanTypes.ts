@@ -150,7 +150,5 @@ export const scanRecord = z.object({
 			),
 		})
 		.optional(),
-	temperature: z
-		.object({ scanTime: z.number(), temperature: z.number() })
-		.optional(),
+	temperature: z.object({ scanTime: z.number(), temperature: z.number() }).optional(),
 });

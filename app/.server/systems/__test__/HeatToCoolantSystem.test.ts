@@ -1,16 +1,17 @@
 import { DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
+import { DataStore } from "@thorium/utils/.server/db-fs";
+import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { ECS, Entity } from "@thorium/utils/ecs";
+import { describe, expect, it, beforeEach, aroundEach } from "vitest";
+
 import { FilterInventorySystem } from "../FilterInventorySystem";
 import { FilterShipsWithReactors } from "../FilterShipsWithReactors";
 import { HeatToCoolantSystem } from "../HeatToCoolantSystem";
-import { describe, expect, it, beforeEach, aroundEach } from "vitest";
-import { DataStore } from "@thorium/utils/.server/db-fs";
-import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 
 aroundEach(async (runTest) => {
 	await DataStore.operations.run(testDataStoreProps, async () => {
-		runTest();
+		await runTest();
 	});
 });
 
@@ -103,16 +104,12 @@ describe("HeatToCoolantSystem", () => {
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
-		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(
-			`1191.9922564707272`,
-		);
+		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(`1191.9922564707272`);
 		expect(water?.temperature).toMatchInlineSnapshot(`391.2153039905101`);
 		for (let i = 0; i < 60 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(
-			`1127.424395170057`,
-		);
+		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(`1127.424395170057`);
 		expect(water?.temperature).toMatchInlineSnapshot(`1126.7005346336514`);
 	});
 	it("should bring the water temperature down to the reactor's temperature", () => {
@@ -129,16 +126,12 @@ describe("HeatToCoolantSystem", () => {
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
-		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(
-			`308.00774352927226`,
-		);
+		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(`308.00774352927226`);
 		expect(water?.temperature).toMatchInlineSnapshot(`1108.78469600949`);
 		for (let i = 0; i < 60 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(
-			`372.5756048299453`,
-		);
+		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(`372.5756048299453`);
 		expect(water?.temperature).toMatchInlineSnapshot(`373.2994653663502`);
 	});
 	it("more water should lower the reactor's heat faster", () => {
@@ -154,9 +147,7 @@ describe("HeatToCoolantSystem", () => {
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
-		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(
-			`1199.0351698356333`,
-		);
+		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(`1199.0351698356333`);
 		expect(water?.temperature).toMatchInlineSnapshot(`1199.0271656452544`);
 		if (water) {
 			water.count = 1000;
@@ -168,9 +159,7 @@ describe("HeatToCoolantSystem", () => {
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
-		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(
-			`1189.7420382472358`,
-		);
+		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(`1189.7420382472358`);
 		expect(water?.temperature).toMatchInlineSnapshot(`111.68472861525993`);
 	});
 });

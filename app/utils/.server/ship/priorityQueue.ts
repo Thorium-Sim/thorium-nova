@@ -41,8 +41,7 @@ export class PriorityQueue<T> {
 	 */
 	set(key: T, value: number): number {
 		const priority = Number(value);
-		if (Number.isNaN(priority))
-			throw new TypeError('"priority" must be a number');
+		if (Number.isNaN(priority)) throw new TypeError('"priority" must be a number');
 
 		if (!this.keys.has(key)) {
 			// Insert a new entry if the key is not already in the queue

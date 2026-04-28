@@ -1,8 +1,9 @@
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
-import { zip } from "@thorium/utils/.server/zip";
 import { exec, type ExecException } from "node:child_process";
 import { mkdir, rm } from "node:fs/promises";
 import path from "node:path";
+
+import { thoriumPath } from "@thorium/utils/.server/appPaths";
+import { zip } from "@thorium/utils/.server/zip";
 
 const ignoreFiles = [".git", ".DS_Store"];
 
@@ -31,7 +32,7 @@ for await (const filename of glob.scan({
 	writer.write(contentLength);
 	writer.write(await file.arrayBuffer());
 }
-writer.end();
+await writer.end();
 
 console.info("Bundling server");
 const platformMap = {
@@ -45,11 +46,7 @@ const platformMap = {
 };
 
 const targetArch =
-	process.arch === "arm64"
-		? "aarch64"
-		: process.arch === "x64"
-			? "x86_64"
-			: "unknown";
+	process.arch === "arm64" ? "aarch64" : process.arch === "x64" ? "x86_64" : "unknown";
 const targetPlatform =
 	process.platform === "darwin"
 		? "apple-darwin"
@@ -71,9 +68,8 @@ if (!target) {
 	);
 }
 await new Promise<void>((res, rej) =>
-	exec(
-		command.replace("TARGET", target).replace("ARCH", arch),
-		(err: ExecException | null) => (err ? rej(err) : res()),
+	exec(command.replace("TARGET", target).replace("ARCH", arch), (err: ExecException | null) =>
+		err ? rej(err) : res(),
 	),
 );
 

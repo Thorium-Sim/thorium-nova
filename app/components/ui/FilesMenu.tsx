@@ -1,4 +1,15 @@
+import { OrbitControls } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
+import type { FileOrFolder } from "@thorium/.server/data";
+import { useShipModel } from "@thorium/components/Starmap/StarmapShip";
+import { popoverClass, StyledMenuItem } from "@thorium/components/timelineBuilder/AddBlockMenu";
+import { q } from "@thorium/context/AppContext";
+import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
+import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
+import { cn } from "@thorium/utils/cn";
+import { playSound } from "@thorium/utils/sounds/playSound";
+import { Suspense, useRef, type ReactNode } from "react";
 import {
 	Popover,
 	Menu,
@@ -8,21 +19,7 @@ import {
 	MenuSection,
 	Header,
 } from "react-aria-components";
-import {
-	popoverClass,
-	StyledMenuItem,
-} from "@thorium/components/timelineBuilder/AddBlockMenu";
-import { q } from "@thorium/context/AppContext";
-import Button from "@thorium/ui/Button";
-import { playSound } from "@thorium/utils/sounds/playSound";
-import { cn } from "@thorium/utils/cn";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import { useShipModel } from "@thorium/components/Starmap/StarmapShip";
-import { Suspense, useRef, type ReactNode } from "react";
 import type { Group } from "three";
-import type { FileOrFolder } from "@thorium/.server/data";
-import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 
 export function FilesMenu({
 	value,
@@ -43,21 +40,19 @@ export function FilesMenu({
 }) {
 	const extensions: string[] = [];
 	if (types.includes("models")) {
-		extensions.push(...["glb", "gltf"]);
+		extensions.push("glb", "gltf");
 	}
 	if (types.includes("videos")) {
-		extensions.push(...["mov", "mp4", "ogv", "webm", "m4v"]);
+		extensions.push("mov", "mp4", "ogv", "webm", "m4v");
 	}
 	if (types.includes("sounds")) {
-		extensions.push(...["m4a", "wav", "mp3", "ogg", "aiff", "aif"]);
+		extensions.push("m4a", "wav", "mp3", "ogg", "aiff", "aif");
 	}
 	if (types.includes("images")) {
-		extensions.push(
-			...["svg", "jpg", "jpeg", "png", "apng", "gif", "webp", "avif"],
-		);
+		extensions.push("svg", "jpg", "jpeg", "png", "apng", "gif", "webp", "avif");
 	}
 	if (types.includes("pdf")) {
-		extensions.push(...["pdf"]);
+		extensions.push("pdf");
 	}
 	const [flightFiles] = q.flight.assets.useNetRequest();
 	const [files] = q.thorium.pluginAssets.useNetRequest({
@@ -66,9 +61,7 @@ export function FilesMenu({
 	});
 
 	const fileRef = useRef<HTMLInputElement>(null);
-	const pickResolve = useRef<(value: File | Promise<File> | null) => void>(
-		() => {},
-	);
+	const pickResolve = useRef<(value: File | Promise<File> | null) => void>(() => {});
 
 	async function pickFile() {
 		const pickPromise = new Promise<File | null>((res) => {
@@ -82,7 +75,7 @@ export function FilesMenu({
 		<>
 			<MenuTrigger>
 				{children || (
-					<RAButton className="flex-1 btn btn-sm text-left justify-start w-full">
+					<RAButton className="btn btn-sm w-full flex-1 justify-start text-left">
 						{value || "Pick File"}
 					</RAButton>
 				)}
@@ -94,8 +87,7 @@ export function FilesMenu({
 								<NestedFilesMenu
 									files={
 										root
-											? flightFiles.find((file) => file.name === root)
-													?.contents || flightFiles
+											? flightFiles.find((file) => file.name === root)?.contents || flightFiles
 											: flightFiles
 									}
 									onAction={(path) => setValue?.(path)}
@@ -116,8 +108,7 @@ export function FilesMenu({
 								<NestedFilesMenu
 									files={
 										root
-											? files.files.find((file) => file.name === root)
-													?.contents || files.files
+											? files.files.find((file) => file.name === root)?.contents || files.files
 											: files.files
 									}
 									onAction={(path) => setValue?.(path)}
@@ -141,7 +132,7 @@ export function FilesMenu({
 					type="file"
 					ref={fileRef}
 					multiple={false}
-					className="w-0 h-0 opacity-0"
+					className="h-0 w-0 opacity-0"
 					value=""
 					onChange={(e) => {
 						const file = e.target.files?.[0];
@@ -234,7 +225,7 @@ function FilePreview({ url }: { url: string }) {
 	switch (ext) {
 		case "glb":
 		case "gltf":
-			return <GlbLivePreview url={url} className="w-32 h-32 bg-black" />;
+			return <GlbLivePreview url={url} className="h-32 w-32 bg-black" />;
 		case "mov":
 		case "mp4":
 		case "ogv":
@@ -292,13 +283,7 @@ function FilePreview({ url }: { url: string }) {
 	}
 }
 
-export function GlbLivePreview({
-	url,
-	className,
-}: {
-	url: string;
-	className?: string;
-}) {
+export function GlbLivePreview({ url, className }: { url: string; className?: string }) {
 	return (
 		<div className={className}>
 			<Canvas camera={{ position: [0, 0, 2] }}>

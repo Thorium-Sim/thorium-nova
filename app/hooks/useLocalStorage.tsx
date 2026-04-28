@@ -8,11 +8,9 @@ export function useLocalStorageReducer<R extends Reducer<I, A>, I, A>(
 	const init = useCallback(() => {
 		let preloadedState: any;
 		try {
-			preloadedState = JSON.parse(
-				window.localStorage.getItem(storageKey) || "",
-			);
+			preloadedState = JSON.parse(window.localStorage.getItem(storageKey) || "");
 			// validate preloadedState if necessary
-		} catch (e) {
+		} catch {
 			// ignore
 		}
 		if (typeof preloadedState === "string") return preloadedState;
@@ -31,9 +29,5 @@ export function useLocalStorageReducer<R extends Reducer<I, A>, I, A>(
 }
 
 export function useLocalStorage<T>(storageKey: string, defaultValue: T) {
-	return useLocalStorageReducer(
-		(state: T, action: any) => action,
-		defaultValue,
-		storageKey,
-	);
+	return useLocalStorageReducer((state: T, action: any) => action, defaultValue, storageKey);
 }

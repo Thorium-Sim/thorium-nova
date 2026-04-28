@@ -1,8 +1,3 @@
-import { Link } from "react-router";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { cn } from "@thorium/utils/cn";
-import { type ReactNode, useEffect, useState } from "react";
 import {
 	DndContext,
 	closestCenter,
@@ -12,12 +7,17 @@ import {
 	useSensors,
 	type DragEndEvent,
 } from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { useSortable } from "@dnd-kit/sortable";
 import {
 	SortableContext,
 	sortableKeyboardCoordinates,
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { CSS } from "@dnd-kit/utilities";
+import { cn } from "@thorium/utils/cn";
+import { type ReactNode } from "react";
+import { Link } from "react-router";
 
 export function SortableItem({
 	id,
@@ -30,14 +30,9 @@ export function SortableItem({
 	className?: string;
 	onClick?: () => void;
 }) {
-	const {
-		attributes,
-		listeners,
-		setNodeRef,
-		transform,
-		transition,
-		isDragging,
-	} = useSortable({ id: id });
+	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+		id: id,
+	});
 
 	const style = {
 		transform: CSS.Transform.toString(transform),
@@ -51,17 +46,15 @@ export function SortableItem({
 			{...attributes}
 			{...listeners}
 			className={cn(
-				`list-group-item transition-[border-radius] touch-none ${
-					isDragging ? "!border !rounded isolate" : ""
+				`list-group-item touch-none transition-[border-radius] ${
+					isDragging ? "isolate !rounded !border" : ""
 				}`,
 				className,
 			)}
 			onClick={onClick}
 		>
 			{onClick ? (
-				<span className={`block ${isDragging ? "pointer-events-none" : ""}`}>
-					{children}
-				</span>
+				<span className={`block ${isDragging ? "pointer-events-none" : ""}`}>{children}</span>
 			) : (
 				<Link
 					to={id || "#"}
@@ -116,12 +109,7 @@ export function SortableList({
 	}
 
 	return (
-		<div
-			className={cn(
-				"relative overflow-y-auto overflow-x-hidden",
-				outerClassName,
-			)}
-		>
+		<div className={cn("relative overflow-y-auto overflow-x-hidden", outerClassName)}>
 			<ul className={cn("relative", className)}>
 				<DndContext
 					sensors={sensors}
@@ -140,10 +128,7 @@ export function SortableList({
 							<SortableItem
 								key={item.id}
 								id={item.id}
-								className={cn(
-									item.className,
-									selectedItem === item.id ? "selected" : "",
-								)}
+								className={cn(item.className, selectedItem === item.id ? "selected" : "")}
 								onClick={onClick ? () => onClick?.(item.id, index) : undefined}
 							>
 								{item.children}

@@ -42,10 +42,8 @@ export const navigation = t.router({
 			});
 			if (!navigation) throw new Error("Navigation system not found.");
 			navigation.updateComponent("isNavigation", {
-				calculate:
-					input.calculate ?? navigation.components.isNavigation?.calculate,
-				thrusters:
-					input.thrusters ?? navigation.components.isNavigation?.thrusters,
+				calculate: input.calculate ?? navigation.components.isNavigation?.calculate,
+				thrusters: input.thrusters ?? navigation.components.isNavigation?.thrusters,
 			});
 
 			pubsub.publish.legacy.navigation.navigation({ shipId: input.shipId });
@@ -65,26 +63,24 @@ export const navigation = t.router({
 
 			pubsub.publish.legacy.navigation.navigation({ shipId: input.shipId });
 		}),
-	cancelScan: t.procedure
-		.input(z.object({ shipId: z.number() }))
-		.send(({ ctx, input }) => {
-			const navigation = getShipSystem(ctx.ecs, {
-				systemType: "navigation",
-				shipId: input.shipId,
-			});
-			if (!navigation) throw new Error("Navigation system not found.");
-			navigation.updateComponent("isNavigation", {
-				scanning: false,
-				destination: "",
-				calculatedCourse: {
-					x: "",
-					y: "",
-					z: "",
-				},
-			});
+	cancelScan: t.procedure.input(z.object({ shipId: z.number() })).send(({ ctx, input }) => {
+		const navigation = getShipSystem(ctx.ecs, {
+			systemType: "navigation",
+			shipId: input.shipId,
+		});
+		if (!navigation) throw new Error("Navigation system not found.");
+		navigation.updateComponent("isNavigation", {
+			scanning: false,
+			destination: "",
+			calculatedCourse: {
+				x: "",
+				y: "",
+				z: "",
+			},
+		});
 
-			pubsub.publish.legacy.navigation.navigation({ shipId: input.shipId });
-		}),
+		pubsub.publish.legacy.navigation.navigation({ shipId: input.shipId });
+	}),
 	courseResult: t.procedure
 		.input(
 			z.object({

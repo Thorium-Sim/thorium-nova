@@ -1,10 +1,11 @@
 import * as React from "react";
+
 import { I18nLabel } from "../I18nLabel";
 import { Actions } from "../model/Actions";
-import type { TabNode } from "../model/TabNode";
-import type { IIcons, LayoutInternal } from "./Layout";
 import { ICloseType } from "../model/ICloseType";
+import type { TabNode } from "../model/TabNode";
 import { CLASSES } from "../Types";
+import type { IIcons, LayoutInternal } from "./Layout";
 import { getRenderStateEx, isAuxMouseEvent } from "./Utils";
 
 /** @internal */
@@ -37,9 +38,7 @@ export const BorderButton = (props: IBorderButtonProps) => {
 		layout.clearDragMain();
 	};
 
-	const onAuxMouseClick = (
-		event: React.MouseEvent<HTMLElement, MouseEvent>,
-	) => {
+	const onAuxMouseClick = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
 		if (isAuxMouseEvent(event)) {
 			layout.auxMouseClick(node, event);
 		}
@@ -66,9 +65,7 @@ export const BorderButton = (props: IBorderButtonProps) => {
 
 	const onEndEdit = (event: Event) => {
 		if (event.target !== contentRef.current!) {
-			layout
-				.getCurrentDocument()!
-				.body.removeEventListener("pointerdown", onEndEdit);
+			layout.getCurrentDocument()!.body.removeEventListener("pointerdown", onEndEdit);
 			layout.setEditingTab(undefined);
 		}
 	};
@@ -105,9 +102,7 @@ export const BorderButton = (props: IBorderButtonProps) => {
 		}
 	});
 
-	const onTextBoxPointerDown = (
-		event: React.PointerEvent<HTMLInputElement>,
-	) => {
+	const onTextBoxPointerDown = (event: React.PointerEvent<HTMLInputElement>) => {
 		event.stopPropagation();
 	};
 
@@ -118,12 +113,7 @@ export const BorderButton = (props: IBorderButtonProps) => {
 		} else if (event.code === "Enter") {
 			// enter
 			layout.setEditingTab(undefined);
-			layout.doAction(
-				Actions.renameTab(
-					node.getId(),
-					(event.target as HTMLInputElement).value,
-				),
-			);
+			layout.doAction(Actions.renameTab(node.getId(), (event.target as HTMLInputElement).value));
 		}
 	};
 
@@ -154,15 +144,11 @@ export const BorderButton = (props: IBorderButtonProps) => {
 	const renderState = getRenderStateEx(layout, node, iconAngle);
 
 	let content = renderState.content ? (
-		<div className={cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON_CONTENT)}>
-			{renderState.content}
-		</div>
+		<div className={cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON_CONTENT)}>{renderState.content}</div>
 	) : null;
 
 	const leading = renderState.leading ? (
-		<div className={cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON_LEADING)}>
-			{renderState.leading}
-		</div>
+		<div className={cm(CLASSES.FLEXLAYOUT__BORDER_BUTTON_LEADING)}>{renderState.leading}</div>
 	) : null;
 
 	if (layout.getEditingTab() === node) {

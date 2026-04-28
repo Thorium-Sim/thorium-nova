@@ -1,7 +1,7 @@
 import { InterstellarMap } from "@thorium/components/Starmap/InterstellarMap";
 import { StarmapShip } from "@thorium/components/Starmap/StarmapShip";
-import SystemMarker from "@thorium/components/Starmap/SystemMarker";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
+import SystemMarker from "@thorium/components/Starmap/SystemMarker";
 import { WaypointEntity } from "@thorium/components/Starmap/WaypointEntity";
 import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
@@ -47,20 +47,14 @@ export function InterstellarWrapper() {
 			)}
 			{ship.position?.parentId === null && (
 				<Suspense key={ship.id} fallback={null}>
-					<ErrorBoundary
-						FallbackComponent={() => <></>}
-						onError={(err) => console.error(err)}
-					>
+					<ErrorBoundary FallbackComponent={() => <></>} onError={(err) => console.error(err)}>
 						<StarmapShip id={ship.id} size={ship.size} logoUrl={ship.icon} />
 					</ErrorBoundary>
 				</Suspense>
 			)}
 			{waypoints.map((waypoint) => (
 				<Suspense key={waypoint.id}>
-					<ErrorBoundary
-						FallbackComponent={() => <></>}
-						onError={(err) => console.error(err)}
-					>
+					<ErrorBoundary FallbackComponent={() => <></>} onError={(err) => console.error(err)}>
 						<WaypointEntity
 							position={waypoint.position}
 							isActive={waypoint.isActive}

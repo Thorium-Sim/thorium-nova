@@ -8,6 +8,7 @@ import {
 	useHover,
 } from "@floating-ui/react";
 import { useState } from "react";
+
 import { useShipMapStore } from "./useShipMapStore";
 
 export function RoomDot({
@@ -39,23 +40,21 @@ export function RoomDot({
 	return (
 		<>
 			<div
-				className="absolute w-4 h-4 cursor-pointer flex"
+				className="absolute flex h-4 w-4 cursor-pointer"
 				style={{
 					transform: `translate(calc(${position.x}px - 0.5rem), calc(${position.y}px - 0.5rem))`,
 				}}
 			>
 				<div
-					className={`w-4 h-4 ${
-						isSelected
-							? "bg-sky-400 ring-2 ring-sky-300 shadow-md"
-							: "bg-green-300"
-					} rounded-full pointer-events-auto`}
+					className={`h-4 w-4 ${
+						isSelected ? "bg-sky-400 shadow-md ring-2 ring-sky-300" : "bg-green-300"
+					} pointer-events-auto rounded-full`}
 					ref={refs.setReference}
 					onClick={() => useShipMapStore.setState({ selectedRoomId: id })}
 					{...getReferenceProps()}
 				/>
 				{isSelected && (
-					<span className="animate-ping absolute inline-flex h-4 w-4 rounded-full bg-sky-400" />
+					<span className="absolute inline-flex h-4 w-4 animate-ping rounded-full bg-sky-400" />
 				)}
 			</div>
 			{open && (
@@ -66,7 +65,7 @@ export function RoomDot({
 						top: y ?? 0,
 						left: x ?? 0,
 					}}
-					className="z-50 text-white text-2xl drop-shadow-xl bg-black/90 border-white/50 border-2 rounded px-2 py-1"
+					className="z-50 rounded border-2 border-white/50 bg-black/90 px-2 py-1 text-2xl text-white drop-shadow-xl"
 					{...getFloatingProps()}
 				>
 					{name}

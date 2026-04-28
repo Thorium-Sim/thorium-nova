@@ -26,7 +26,7 @@ export function computeNetworkColors(stars: StarEntry[]): Map<string, number> {
 
 	// Union-Find with path compression and union by rank
 	const parent = commStars.map((_, i) => i);
-	const rank = new Array<number>(commStars.length).fill(0);
+	const rank = Array.from<number>({ length: commStars.length }).fill(0);
 
 	function find(i: number): number {
 		if (parent[i] !== i) parent[i] = find(parent[i]);
@@ -46,9 +46,7 @@ export function computeNetworkColors(stars: StarEntry[]): Map<string, number> {
 	}
 
 	// Build edges: two satellites are connected if distance ≤ either radius
-	const radiiLM = commStars.map((s) =>
-		lightYearToLightMinute(s.commSatelliteRadius!),
-	);
+	const radiiLM = commStars.map((s) => lightYearToLightMinute(s.commSatelliteRadius!));
 	for (let i = 0; i < commStars.length; i++) {
 		for (let j = i + 1; j < commStars.length; j++) {
 			const dist = Math.hypot(

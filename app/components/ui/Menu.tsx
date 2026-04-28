@@ -15,6 +15,7 @@ import {
 	Popover,
 	Text,
 } from "react-aria-components";
+
 import "./Menu.css";
 
 export function MenuTrigger(props: MenuTriggerProps) {
@@ -44,22 +45,15 @@ export function Menu<T extends object>(props: MenuProps<T>) {
 	);
 }
 
-export function MenuItem(
-	props: Omit<MenuItemProps, "children"> & { children?: React.ReactNode },
-) {
+export function MenuItem(props: Omit<MenuItemProps, "children"> & { children?: React.ReactNode }) {
 	const textValue =
-		props.textValue ||
-		(typeof props.children === "string" ? props.children : undefined);
+		props.textValue || (typeof props.children === "string" ? props.children : undefined);
 	return (
 		<AriaMenuItem {...props} textValue={textValue}>
 			{({ hasSubmenu, isSelected, selectionMode }) => (
 				<>
-					{isSelected && selectionMode === "multiple" ? (
-						<Icon name="check" />
-					) : null}
-					{isSelected && selectionMode === "single" ? (
-						<Icon name="circle-dot" />
-					) : null}
+					{isSelected && selectionMode === "multiple" ? <Icon name="check" /> : null}
+					{isSelected && selectionMode === "single" ? <Icon name="circle-dot" /> : null}
 					{typeof props.children === "string" ? (
 						<Text slot="label">{props.children}</Text>
 					) : (

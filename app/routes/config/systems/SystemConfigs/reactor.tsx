@@ -1,12 +1,13 @@
+import { Navigate } from "@thorium/components/Navigate";
 import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
 import { toast } from "@thorium/context/ToastContext";
 import InfoTip from "@thorium/ui/InfoTip";
 import Input from "@thorium/ui/Input";
 import { useContext, useReducer } from "react";
 import { useParams } from "react-router";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+
 import { OverrideResetButton } from "../OverrideResetButton";
-import { Navigate } from "@thorium/components/Navigate";
 
 export default function ReactorsConfig() {
 	const { pluginId, systemId, shipId } = useParams() as {
@@ -30,7 +31,7 @@ export default function ReactorsConfig() {
 		<fieldset key={key} className="flex-1 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
-					<div className="pb-2 flex items-start">
+					<div className="flex items-start pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -42,8 +43,7 @@ export default function ReactorsConfig() {
 							}
 							defaultValue={system.optimalOutputPercent}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.reactor.update.netSend({
 										pluginId,
@@ -70,22 +70,19 @@ export default function ReactorsConfig() {
 						/>
 						<InfoTip>
 							<p className="mb-2">
-								If the optimal output percent is set to 0.7 (70%) and the
-								reactor is set to run at 100% output, it will produce more
-								energy, but consume fuel at about 1.5x per unit of power
-								produced.
+								If the optimal output percent is set to 0.7 (70%) and the reactor is set to run at
+								100% output, it will produce more energy, but consume fuel at about 1.5x per unit of
+								power produced.
 							</p>
 							<p className="mb-2">
-								Likewise, if the reactor is producing 50% of the possible power,
-								it would only consume 0.7x the fuel per unit of power produced,
-								which would make the fuel last longer.
+								Likewise, if the reactor is producing 50% of the possible power, it would only
+								consume 0.7x the fuel per unit of power produced, which would make the fuel last
+								longer.
 							</p>
-							<p className="mb-2">
-								This value is the default setting for the reactors.
-							</p>
+							<p className="mb-2">This value is the default setting for the reactors.</p>
 						</InfoTip>
 					</div>
-					<div className="pb-2 flex items-start">
+					<div className="flex items-start pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -97,8 +94,7 @@ export default function ReactorsConfig() {
 							}
 							defaultValue={system.reactorCount}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.reactor.update.netSend({
 										pluginId,
@@ -118,22 +114,17 @@ export default function ReactorsConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="reactorCount"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="reactorCount" setRekey={setRekey} className="mt-6" />
 						<InfoTip>
 							<p className="mb-2">
-								Reactor's power output is automatically determined when a flight
-								starts based on the power requirements of the systems associated
-								with the ship. Adding more reactors allows each to have
-								different power outputs, changes in heat, efficiency, damage,
+								Reactor's power output is automatically determined when a flight starts based on the
+								power requirements of the systems associated with the ship. Adding more reactors
+								allows each to have different power outputs, changes in heat, efficiency, damage,
 								etc. and provides some degree of redundancy.
 							</p>
 						</InfoTip>
 					</div>
-					<div className="pb-2 flex items-start">
+					<div className="flex items-start pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -145,8 +136,7 @@ export default function ReactorsConfig() {
 							}
 							defaultValue={system.powerMultiplier}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.reactor.update.netSend({
 										pluginId,
@@ -166,11 +156,7 @@ export default function ReactorsConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="powerMultiplier"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="powerMultiplier" setRekey={setRekey} className="mt-6" />
 					</div>
 				</div>
 			</div>

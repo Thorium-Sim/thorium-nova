@@ -1,9 +1,10 @@
-import type BasePlugin from "./index";
-import { Aspect } from "./Aspect";
-import uniqid from "@thorium/utils/uniqid";
-import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import type { TimelineStep } from "@thorium/.server/classes/Plugins/TimelineStep";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
+import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+import uniqid from "@thorium/utils/uniqid";
+
+import { Aspect } from "./Aspect";
+import type BasePlugin from "./index";
 
 export default class ReportPlugin extends Aspect {
 	apiVersion = "timeline/v1" as const;
@@ -29,8 +30,7 @@ export default class ReportPlugin extends Aspect {
 		);
 		super({ name, ...params }, { kind: "reports" }, plugin, {});
 		this.name = name;
-		this.description =
-			params.description || "A report for repairing damaged systems.";
+		this.description = params.description || "A report for repairing damaged systems.";
 
 		this.category = params.category || "";
 		this.tags = params.tags || [];

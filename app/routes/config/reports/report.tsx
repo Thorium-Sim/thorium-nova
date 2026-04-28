@@ -1,18 +1,11 @@
-import { q } from "@thorium/context/AppContext";
 import type { DragEndEvent } from "@dnd-kit/core";
+import { Navigate } from "@thorium/components/Navigate";
+import { q } from "@thorium/context/AppContext";
 import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
-import { SortableList } from "@thorium/ui/SortableItem";
-import {
-	Link,
-	Outlet,
-	useLocation,
-	useMatch,
-	useNavigate,
-	useParams,
-} from "react-router";
-import { Navigate } from "@thorium/components/Navigate";
 import { useMenubar } from "@thorium/ui/Menubar";
+import { SortableList } from "@thorium/ui/SortableItem";
+import { Link, Outlet, useLocation, useMatch, useNavigate, useParams } from "react-router";
 
 export default function ReportLayout() {
 	const { pathname } = useLocation();
@@ -36,13 +29,11 @@ export default function ReportLayout() {
 		timelineType: "reports",
 	});
 
-	const match = useMatch("config/:pluginId/reports/:timelineId/:stepId/*")
-		?.params.stepId;
+	const match = useMatch("config/:pluginId/reports/:timelineId/:stepId/*")?.params.stepId;
 
 	const stepId = match === "details" ? undefined : match;
 
-	if (!timelineId || !item)
-		return <Navigate to={`/config/${pluginId}/reports`} />;
+	if (!timelineId || !item) return <Navigate to={`/config/${pluginId}/reports`} />;
 
 	const steps = item.steps.map((s) => ({ id: s.id, children: s.name }));
 
@@ -67,15 +58,10 @@ export default function ReportLayout() {
 
 	if (!pathname.endsWith(timelineId)) {
 		return (
-			<div className="p-8 h-[calc(100%-2rem)] flex gap-8">
-				<div className="h-full w-72 flex flex-col">
-					<h1 className="font-bold text-white text-xl mb-2">{item.name}</h1>
-					<Link
-						to="details"
-						className={`list-group-item ${
-							match === "details" ? "selected" : ""
-						}`}
-					>
+			<div className="flex h-[calc(100%-2rem)] gap-8 p-8">
+				<div className="flex h-full w-72 flex-col">
+					<h1 className="mb-2 text-xl font-bold text-white">{item.name}</h1>
+					<Link to="details" className={`list-group-item ${match === "details" ? "selected" : ""}`}>
 						Report Details
 					</Link>
 					<hr className="my-2" />
@@ -85,9 +71,9 @@ export default function ReportLayout() {
 						selectedItem={stepId}
 						className="mb-2"
 					/>
-					<div className="flex mb-2">
+					<div className="mb-2 flex">
 						<Button
-							className="flex-grow btn-xs btn-success"
+							className="btn-xs btn-success flex-grow"
 							onClick={async () => {
 								const name = await prompt("What is the new step name?");
 								if (!name) return;
@@ -103,7 +89,7 @@ export default function ReportLayout() {
 							Add Step
 						</Button>
 						<Button
-							className="flex-grow btn-xs btn-warning"
+							className="btn-xs btn-warning flex-grow"
 							disabled={!stepId}
 							onClick={async () => {
 								const name = await prompt("What is the new step name?");
@@ -121,7 +107,7 @@ export default function ReportLayout() {
 							Insert Step
 						</Button>
 						<Button
-							className="flex-grow btn-xs btn-info"
+							className="btn-xs btn-info flex-grow"
 							disabled={!stepId}
 							onClick={async () => {
 								if (!stepId) return;
@@ -137,17 +123,16 @@ export default function ReportLayout() {
 							Duplicate
 						</Button>
 						<Button
-							className="flex-grow btn-xs btn-error"
+							className="btn-xs btn-error flex-grow"
 							disabled={!stepId}
 							onClick={async () => {
 								if (!stepId) return;
-								const { alternateStep } =
-									await q.plugin.timeline.step.delete.netSend({
-										pluginId,
-										timelineId,
-										timelineType: "reports",
-										stepId,
-									});
+								const { alternateStep } = await q.plugin.timeline.step.delete.netSend({
+									pluginId,
+									timelineId,
+									timelineType: "reports",
+									stepId,
+								});
 								if (alternateStep) {
 									navigate(alternateStep);
 								} else {
@@ -159,7 +144,7 @@ export default function ReportLayout() {
 						</Button>
 					</div>
 					<Button
-						className="w-full btn-outline btn-error"
+						className="btn-outline btn-error w-full"
 						disabled={!timelineId}
 						onClick={async () => {
 							if (

@@ -1,19 +1,16 @@
-import { spawnTrigger } from "@thorium/.server/spawners/trigger";
-import type { ComponentProperties } from "@thorium/ecs-components";
-import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
-import { triggerAction } from "./triggerAction";
-import {
-	getShipSystem,
-	getShipSystems,
-} from "@thorium/utils/.server/ship/getShipSystem";
-import { Entity, type ECS } from "@thorium/utils/ecs";
-import { produce } from "immer";
-import { evaluateTriggerCondition } from "@thorium/utils/.server/evaluateEntityQuery";
-import { interpolateText } from "@thorium/utils/interpolationEngine";
-import { scheduleBlocks } from "./scheduleAction";
-import uniqid from "../uniqid";
-import type { DataContext } from "@thorium/.server/DataContext";
 import type { AllSends } from "@thorium/.server/init/router";
+import { spawnTrigger } from "@thorium/.server/spawners/trigger";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
+import type { ComponentProperties } from "@thorium/ecs-components";
+import { evaluateTriggerCondition } from "@thorium/utils/.server/evaluateEntityQuery";
+import { getShipSystem, getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
+import { Entity, type ECS } from "@thorium/utils/ecs";
+import { interpolateText } from "@thorium/utils/interpolationEngine";
+import { produce } from "immer";
+
+import uniqid from "../uniqid";
+import { scheduleBlocks } from "./scheduleAction";
+import { triggerAction } from "./triggerAction";
 
 export class TimelineAvailability {
 	constructor(public isAvailable: boolean) {}
@@ -44,19 +41,11 @@ export async function executeBlocks(
 		switch (block.type) {
 			case "Wait": {
 				const timer =
-					block.time *
-					(block.unit === "seconds"
-						? 1000
-						: block.unit === "minutes"
-							? 60 * 1000
-							: 1);
+					block.time * (block.unit === "seconds" ? 1000 : block.unit === "minutes" ? 60 * 1000 : 1);
 
 				scheduleBlocks(
 					ecs,
-					[
-						{ id: uniqid("blk-"), type: "WaitComplete" },
-						...blocks.slice(blockIndex + 1),
-					],
+					[{ id: uniqid("blk-"), type: "WaitComplete" }, ...blocks.slice(blockIndex + 1)],
 					{
 						stepId,
 						localVariables,
@@ -72,45 +61,29 @@ export async function executeBlocks(
 			case "WaitComplete": {
 				// If the timeline step is already marked as completed
 				// then we should skip executing the rest of the blocks
-				if (
-					ecs.getEntityById(stepId || -1)?.components.isTimelineStep?.state ===
-					"executed"
-				) {
+				if (ecs.getEntityById(stepId || -1)?.components.isTimelineStep?.state === "executed") {
 					return;
 				}
 				break;
 			}
 			case "VariableIntoVariable": {
-				const entity = getEntityReference(
-					block.entity,
-					ecs,
-					stepId,
-					localVariables,
-				);
+				const entity = getEntityReference(block.entity, ecs, stepId, localVariables);
 				if (!entity)
 					throw new Error(
 						`Attempted to put an entity variable "${block.entity}" into a local variable, but the entity wasn't found.`,
 					);
-				localVariables[block.variable] =
-					entity.components.variables?.variables.find(
-						(v) => v.name === block.getVariable,
-					)?.value;
+				localVariables[block.variable] = entity.components.variables?.variables.find(
+					(v) => v.name === block.getVariable,
+				)?.value;
 				break;
 			}
 			case "EntityPropertyIntoVariable": {
-				const entity = getEntityReference(
-					block.entity,
-					ecs,
-					stepId,
-					localVariables,
-				);
+				const entity = getEntityReference(block.entity, ecs, stepId, localVariables);
 				let value: any = "";
 				if (block.component === "id") {
 					value = entity?.id;
 				} else {
-					const component = entity?.components[
-						block.component as keyof ComponentProperties
-					] as any;
+					const component = entity?.components[block.component as keyof ComponentProperties] as any;
 					value = component?.[block.property];
 				}
 				localVariables[block.variable] = value;
@@ -141,44 +114,28 @@ export async function executeBlocks(
 			}
 			case "SetVariable": {
 				const value = getValueReference(block.value, localVariables, ecs);
-				if (
-					block.entity.toLowerCase() === "this step" ||
-					block.entity.toLowerCase() === "step"
-				) {
+				if (block.entity.toLowerCase() === "this step" || block.entity.toLowerCase() === "step") {
 					localVariables[block.variable] = value;
 					break;
 				}
-				const entity = getEntityReference(
-					block.entity,
-					ecs,
-					stepId,
-					localVariables,
-				);
+				const entity = getEntityReference(block.entity, ecs, stepId, localVariables);
 
 				entity?.updateComponent("variables", {
-					variables: produce(
-						entity.components.variables?.variables || [],
-						(draft) => {
-							const variable = draft.find((d) => d.name === block.variable);
-							if (variable) variable.value = value;
-							else
-								draft.push({
-									name: block.variable,
-									type: "any",
-									value: value,
-								});
-						},
-					),
+					variables: produce(entity.components.variables?.variables || [], (draft) => {
+						const variable = draft.find((d) => d.name === block.variable);
+						if (variable) variable.value = value;
+						else
+							draft.push({
+								name: block.variable,
+								type: "any",
+								value: value,
+							});
+					}),
 				});
 				break;
 			}
 			case "ShipSystemGetter": {
-				const entity = getEntityReference(
-					block.entity,
-					ecs,
-					stepId,
-					localVariables,
-				);
+				const entity = getEntityReference(block.entity, ecs, stepId, localVariables);
 				if (!entity) return;
 				if (block.count === "one") {
 					localVariables[block.variable] = getShipSystem(ecs, {
@@ -194,18 +151,8 @@ export async function executeBlocks(
 				break;
 			}
 			case "DistanceCondition": {
-				const entityA = getEntityReference(
-					block.entity1,
-					ecs,
-					stepId,
-					localVariables,
-				);
-				const entityB = getEntityReference(
-					block.entity2,
-					ecs,
-					stepId,
-					localVariables,
-				);
+				const entityA = getEntityReference(block.entity1, ecs, stepId, localVariables);
+				const entityB = getEntityReference(block.entity2, ecs, stepId, localVariables);
 				if (!entityA || !entityB) return;
 				const conditions = [
 					{
@@ -338,30 +285,20 @@ export async function executeBlocks(
 				break;
 			}
 			case "RandomIntoVariable": {
-				const number1 = Number(
-					getValueReference(block.number1, localVariables, ecs),
-				);
-				const number2 = Number(
-					getValueReference(block.number2, localVariables, ecs),
-				);
+				const number1 = Number(getValueReference(block.number1, localVariables, ecs));
+				const number2 = Number(getValueReference(block.number2, localVariables, ecs));
 				const min = number1 < number2 ? number1 : number2;
 				const max = number1 < number2 ? number2 : number1;
 				if (block.numberType === "integer") {
 					localVariables[block.variable] = ecs.rng.nextInt(min, max).toString();
 				} else {
-					localVariables[block.variable] = String(
-						ecs.rng.next() * (max - min) + min,
-					);
+					localVariables[block.variable] = String(ecs.rng.next() * (max - min) + min);
 				}
 				break;
 			}
 			case "MathIntoVariable": {
-				const num1 = Number(
-					getValueReference(block.number1, localVariables, ecs),
-				);
-				const num2 = Number(
-					getValueReference(block.number2, localVariables, ecs),
-				);
+				const num1 = Number(getValueReference(block.number1, localVariables, ecs));
+				const num2 = Number(getValueReference(block.number2, localVariables, ecs));
 				switch (block.operation) {
 					case "+":
 						localVariables[block.variable] = String(num1 + num2);
@@ -380,11 +317,7 @@ export async function executeBlocks(
 				break;
 			}
 			case "ForEachEntity": {
-				const entityIds = getEntitiesReference(
-					block.entity,
-					localVariables,
-					ecs,
-				);
+				const entityIds = getEntitiesReference(block.entity, localVariables, ecs);
 				for (const entityId of entityIds) {
 					localVariables[block.variable] = entityId;
 					await executeBlocks(ecs, block.triggerBlocks, {
@@ -466,22 +399,15 @@ function evaluateCondition(
 			if (typeof val2 === "boolean") return Boolean(val1) === val2;
 
 			// Handle matching entity IDs to entities
-			if (val2 instanceof Entity && typeof val1 === "number")
-				return val1 === val2.id;
-			if (val1 instanceof Entity && typeof val2 === "number")
-				return val2 === val1.id;
-			if (val2 instanceof Entity && typeof val1 === "string")
-				return Number(val1) === val2.id;
-			if (val1 instanceof Entity && typeof val2 === "string")
-				return Number(val2) === val1.id;
-			if (val1 instanceof Entity && val2 instanceof Entity)
-				return val1.id === val2.id;
+			if (val2 instanceof Entity && typeof val1 === "number") return val1 === val2.id;
+			if (val1 instanceof Entity && typeof val2 === "number") return val2 === val1.id;
+			if (val2 instanceof Entity && typeof val1 === "string") return Number(val1) === val2.id;
+			if (val1 instanceof Entity && typeof val2 === "string") return Number(val2) === val1.id;
+			if (val1 instanceof Entity && val2 instanceof Entity) return val1.id === val2.id;
 
-			// biome-ignore lint/suspicious/noDoubleEquals: Necessary for this fuzzy comparison
 			return val1 == val2;
 		}
 		case "!=": {
-			// biome-ignore lint/suspicious/noDoubleEquals: Necessary for this fuzzy comparison
 			return val1 != val2;
 		}
 		case ">": {
@@ -501,24 +427,18 @@ function evaluateCondition(
 		}
 		case "is not empty": {
 			if (typeof val1 === "undefined" || val1 === null) return false;
-			if (typeof val1 === "string" || Array.isArray(val1))
-				return val1.length > 0;
+			if (typeof val1 === "string" || Array.isArray(val1)) return val1.length > 0;
 			return true;
 		}
 		case "is empty":
 			if (typeof val1 === "undefined" || val1 === null) return true;
-			if (typeof val1 === "string" || Array.isArray(val1))
-				return val1.length < 0;
+			if (typeof val1 === "string" || Array.isArray(val1)) return val1.length < 0;
 			return false;
 	}
 	return false;
 }
 
-function getEntitiesReference(
-	ref: string,
-	variables: Record<string, any>,
-	ecs: ECS,
-) {
+function getEntitiesReference(ref: string, variables: Record<string, any>, ecs: ECS) {
 	const entityIds: number[] = [];
 	// Entity Tags
 	if (ref.startsWith("#") && !ref.includes(" ")) {
@@ -547,9 +467,8 @@ function getEntitiesReference(
 				const [propName, value] = property.split("=");
 				const valueRef = getValueReference(value, variables, ecs);
 				// @ts-expect-error
-				if (entity.components[component]?.[propName] === valueRef)
-					entityIds.push(entity.id);
-				entity;
+				if (entity.components[component]?.[propName] === valueRef) entityIds.push(entity.id);
+
 				continue;
 			}
 			entityIds.push(entity.id);
@@ -567,11 +486,7 @@ function getEntitiesReference(
 	return entityIds;
 }
 
-export function getValueReference(
-	ref: string,
-	variables: Record<string, any>,
-	ecs: ECS,
-): any {
+export function getValueReference(ref: string, variables: Record<string, any>, ecs: ECS): any {
 	if (typeof ref === "string") {
 		// Local variables
 		if (ref.startsWith("$")) {
@@ -596,10 +511,7 @@ function getEntityReference(
 	if (typeof ref === "object" && "id" in ref && "components" in ref) {
 		return ref;
 	}
-	if (
-		typeof ref === "string" &&
-		["this step", "step"].includes(ref.toLowerCase().trim())
-	) {
+	if (typeof ref === "string" && ["this step", "step"].includes(ref.toLowerCase().trim())) {
 		throw new Error(
 			"Attempted to access a step reference, but that logic should be handled in the function that calls getEntityReference. If you're seeing this message, you've found a bug. Hooray!",
 		);
@@ -607,8 +519,7 @@ function getEntityReference(
 	// Getting the timeline itself
 	if (
 		!ref ||
-		(typeof ref === "string" &&
-			["this timeline", "timeline"].includes(ref.toLowerCase().trim()))
+		(typeof ref === "string" && ["this timeline", "timeline"].includes(ref.toLowerCase().trim()))
 	) {
 		if (!stepId) {
 			throw new Error(
@@ -655,12 +566,7 @@ export async function selectAvailableTimelines<
 		tags: string[];
 		flightMode: "nova" | "legacy";
 	},
->(
-	ecs: ECS,
-	timelines: T[],
-	flightMode: "nova" | "legacy",
-	variables: Record<string, any>,
-) {
+>(ecs: ECS, timelines: T[], flightMode: "nova" | "legacy", variables: Record<string, any>) {
 	const availableTimelines = [];
 	for (const t of timelines) {
 		if (t.flightMode !== flightMode) continue;

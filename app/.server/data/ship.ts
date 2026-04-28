@@ -1,4 +1,3 @@
-import type { DataContext } from "@thorium/.server/DataContext";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { spawnShip } from "@thorium/.server/spawners/ship";
@@ -7,45 +6,34 @@ import { destroyShip } from "@thorium/utils/.server/ship/collisionDamage";
 import type { ECS, Entity } from "@thorium/utils/ecs";
 import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
 import type { RNG } from "@thorium/utils/rng";
-import {
-	getCompletePositionFromOrbit,
-	getObjectSystem,
-} from "@thorium/utils/starmap/position";
+import { getCompletePositionFromOrbit, getObjectSystem } from "@thorium/utils/starmap/position";
 import { Vector3 } from "three";
 import z from "zod";
 
 export const ship = t.router({
 	get: t.procedure
-		.input(
-			z.union([
-				z.object({ clientId: z.string() }),
-				z.object({ shipId: z.number() }),
-			]),
-		)
-		.filter(
-			(publish: { shipId: number } | { clientId: string }, { ctx, input }) => {
-				if (!publish) return true;
-				if (
-					"shipId" in publish &&
-					publish.shipId !==
-						("shipId" in input
-							? input.shipId
-							: ctx.getFlightClient(input.clientId)?.components.flightClient
-									?.shipId)
-				)
-					return false;
-				if (
-					"clientId" in publish &&
-					("clientId" in input
-						? publish.clientId !== input.clientId
-						: Object.values(ctx.flight?.clients || {}).some(
-								(c) => c?.components.flightClient?.shipId === input.shipId,
-							))
-				)
-					return false;
-				return true;
-			},
-		)
+		.input(z.union([z.object({ clientId: z.string() }), z.object({ shipId: z.number() })]))
+		.filter((publish: { shipId: number } | { clientId: string }, { ctx, input }) => {
+			if (!publish) return true;
+			if (
+				"shipId" in publish &&
+				publish.shipId !==
+					("shipId" in input
+						? input.shipId
+						: ctx.getFlightClient(input.clientId)?.components.flightClient?.shipId)
+			)
+				return false;
+			if (
+				"clientId" in publish &&
+				("clientId" in input
+					? publish.clientId !== input.clientId
+					: Object.values(ctx.flight?.clients || {}).some(
+							(c) => c?.components.flightClient?.shipId === input.shipId,
+						))
+			)
+				return false;
+			return true;
+		})
 		.autoPublish(["isShip", "flightClient"], (entity) => {
 			if (entity.components.flightClient) {
 				return { clientId: entity.components.flightClient.clientId };
@@ -58,8 +46,7 @@ export const ship = t.router({
 			const shipId =
 				"shipId" in input
 					? input.shipId
-					: ctx.getFlightClient(input.clientId)?.components.flightClient
-							?.shipId || -1;
+					: ctx.getFlightClient(input.clientId)?.components.flightClient?.shipId || -1;
 			const ship = ctx.ecs?.getEntityById(shipId)?.toJSON() || null;
 			if (!ship)
 				return {
@@ -103,8 +90,7 @@ export const ship = t.router({
 				ctx.flight?.playerShips.map((ship) => {
 					const systemId = ship.components.position?.parentId;
 					const systemPosition = systemId
-						? ctx.flight?.ecs.getEntityById(systemId)?.components.position ||
-							null
+						? ctx.flight?.ecs.getEntityById(systemId)?.components.position || null
 						: null;
 					return {
 						id: ship.id,
@@ -117,18 +103,12 @@ export const ship = t.router({
 			);
 		}),
 	player: t.procedure
-		.input(
-			z.union([
-				z.object({ clientId: z.string() }),
-				z.object({ shipId: z.number() }),
-			]),
-		)
+		.input(z.union([z.object({ clientId: z.string() }), z.object({ shipId: z.number() })]))
 		.filter((publish: { shipId: number }, { ctx, input }) => {
 			const shipId =
 				"shipId" in input
 					? input.shipId
-					: ctx.getFlightClient(input.clientId)?.components.flightClient
-							?.shipId;
+					: ctx.getFlightClient(input.clientId)?.components.flightClient?.shipId;
 			if (publish && publish.shipId !== shipId) return false;
 			return true;
 		})
@@ -139,8 +119,7 @@ export const ship = t.router({
 			const ship = ctx.flight?.ecs.getEntityById(
 				"shipId" in input
 					? input.shipId
-					: ctx.getFlightClient(input.clientId)?.components.flightClient
-							?.shipId || -1,
+					: ctx.getFlightClient(input.clientId)?.components.flightClient?.shipId || -1,
 			);
 			if (!ship)
 				return {
@@ -179,7 +158,7 @@ export const ship = t.router({
 		}),
 	spawn: t.procedure
 		.meta({
-			action: (ctx: DataContext) => {
+			action: () => {
 				return {
 					template: {
 						name: "Ship Template",
@@ -194,13 +173,11 @@ export const ship = t.router({
 					},
 					entityId: {
 						name: "Nearby Entity",
-						helper:
-							"Place the ship nearby this entity. This option is preferred.",
+						helper: "Place the ship nearby this entity. This option is preferred.",
 					},
 					distance: {
 						type: "number",
-						helper:
-							"How far to place the ship from the nearby entity in kilometers.",
+						helper: "How far to place the ship from the nearby entity in kilometers.",
 					},
 				};
 			},
@@ -213,10 +190,7 @@ export const ship = t.router({
 				position: z
 					.object({
 						parentId: z
-							.union([
-								z.number(),
-								z.object({ name: z.string(), pluginId: z.string() }),
-							])
+							.union([z.number(), z.object({ name: z.string(), pluginId: z.string() })])
 							.nullable(),
 						x: z.number(),
 						y: z.number(),
@@ -236,16 +210,12 @@ export const ship = t.router({
 
 			if (!shipTemplate) throw new Error("Ship template not found.");
 
-			const { ship: shipEntity, extraEntities } = await spawnShip(
-				ctx,
-				shipTemplate,
-				{
-					// TODO: August 20, 2022 - Generate a name for this ship somehow
-					name: randomNameGenerator(),
-					tags: input.tags,
-					flightMode: ctx.flight.mode,
-				},
-			);
+			const { ship: shipEntity, extraEntities } = await spawnShip(ctx, shipTemplate, {
+				// TODO: August 20, 2022 - Generate a name for this ship somehow
+				name: randomNameGenerator(),
+				tags: input.tags,
+				flightMode: ctx.flight.mode,
+			});
 
 			const { position, systemId } = getPosition(ctx.ecs, input);
 			shipEntity.updateComponent("position", {
@@ -273,8 +243,7 @@ export const ship = t.router({
 				},
 				entityId: {
 					name: "Nearby Entity",
-					helper:
-						"Place the ship nearby this entity. This option is preferred.",
+					helper: "Place the ship nearby this entity. This option is preferred.",
 				},
 			}),
 		})
@@ -285,10 +254,7 @@ export const ship = t.router({
 				position: z
 					.object({
 						parentId: z
-							.union([
-								z.number(),
-								z.object({ name: z.string(), pluginId: z.string() }),
-							])
+							.union([z.number(), z.object({ name: z.string(), pluginId: z.string() })])
 							.nullable(),
 						x: z.number(),
 						y: z.number(),
@@ -403,11 +369,7 @@ function getPosition(
 	return { position, systemId };
 }
 const objectPosition = new Vector3();
-function getNearbyEntityPoint(
-	objectEntity: Entity,
-	rng: RNG,
-	distance?: number,
-) {
+function getNearbyEntityPoint(objectEntity: Entity, rng: RNG, distance?: number) {
 	if (objectEntity.components.position) {
 		objectPosition.set(
 			objectEntity.components.position.x,

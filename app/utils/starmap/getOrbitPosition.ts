@@ -1,4 +1,5 @@
 import { Vector3 } from "three";
+
 import { degToRad } from "../unitTypes";
 
 const axis = new Vector3(0, 0, 1);

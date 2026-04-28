@@ -1,6 +1,6 @@
-import { useRef } from "react";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { COLLISION_WARNING_SECONDS } from "@thorium/ecs-components/shipAlerts";
+import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import { useRef } from "react";
 
 /** Pad width derived from the max warning duration so the display never shifts. */
 const PAD_WIDTH = COLLISION_WARNING_SECONDS.toFixed(1).length;

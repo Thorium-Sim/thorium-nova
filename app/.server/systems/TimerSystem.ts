@@ -1,5 +1,5 @@
-import { type Entity, System } from "@thorium/utils/ecs";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
+import { type Entity, System } from "@thorium/utils/ecs";
 
 export class TimerSystem extends System {
 	static flightMode = ["nova", "legacy"];
@@ -9,8 +9,7 @@ export class TimerSystem extends System {
 	update(entity: Entity, elapsed: number) {
 		if (entity.components.timer && !entity.components.timer?.paused) {
 			entity.updateComponent("timer", {
-				remainingDurationMs:
-					entity.components.timer.remainingDurationMs - elapsed,
+				remainingDurationMs: entity.components.timer.remainingDurationMs - elapsed,
 			});
 			if (entity.components.timer.remainingDurationMs <= 0) {
 				this.complete(entity);

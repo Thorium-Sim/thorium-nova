@@ -1,23 +1,25 @@
-import PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
-import { t } from "@thorium/.server/init/t";
-import { pubsub } from "@thorium/.server/init/pubsub";
-import inputAuth from "@thorium/utils/.server/inputAuth";
-import romanNumerals from "roman-numerals";
-import z from "zod";
-import { getSolarSystem } from "../utils";
 import path from "node:path";
+
+import PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
 import { satellite } from "@thorium/ecs-components/satellite";
-import type { Kelvin, Kilometer, SolarRadius } from "@thorium/utils/unitTypes";
+import inputAuth from "@thorium/utils/.server/inputAuth";
 import {
 	atmosphericComposition,
 	planetClasses,
 	planetTypes,
 	type Zone,
 } from "@thorium/utils/flags/planetTypes";
-import getHabitableZone from "@thorium/utils/starmap/getHabitableZone";
+import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { randomFromRange } from "@thorium/utils/operations/randomFromRange";
-import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+import getHabitableZone from "@thorium/utils/starmap/getHabitableZone";
+import type { Kelvin, Kilometer, SolarRadius } from "@thorium/utils/unitTypes";
+import romanNumerals from "roman-numerals";
+import z from "zod";
+
+import { getSolarSystem } from "../utils";
 
 // Just less than the orbit of Neptune 🥶
 const MAX_PLANET_DISTANCE: Kilometer = 4_000_000_000;
@@ -25,10 +27,7 @@ const MAX_PLANET_DISTANCE: Kilometer = 4_000_000_000;
 // 1/5 the orbit of Mercury 🥵
 const MIN_PLANET_DISTANCE: Kilometer = 10_000_000;
 
-function getSemiMajorAxis(
-	inputZone: Zone,
-	stars: { radius: SolarRadius; temperature: Kelvin }[],
-) {
+function getSemiMajorAxis(inputZone: Zone, stars: { radius: SolarRadius; temperature: Kelvin }[]) {
 	const biggestStar = stars.reduce(
 		(
 			prev: { radius: SolarRadius; temperature: Kelvin } | null,
@@ -43,10 +42,7 @@ function getSemiMajorAxis(
 
 	let habitableZone = { min: MIN_PLANET_DISTANCE, max: MAX_PLANET_DISTANCE };
 	if (biggestStar?.temperature) {
-		const tempZone = getHabitableZone(
-			biggestStar.radius,
-			biggestStar.temperature,
-		);
+		const tempZone = getHabitableZone(biggestStar.radius, biggestStar.temperature);
 		habitableZone = {
 			min: Math.max(tempZone.min, MIN_PLANET_DISTANCE),
 			max: Math.min(tempZone.max, MAX_PLANET_DISTANCE),
@@ -55,17 +51,13 @@ function getSemiMajorAxis(
 	let distance = 0;
 	const zone = randomFromList(inputZone);
 	if (zone === "hot") {
-		distance = Math.round(
-			randomFromRange({ min: MIN_PLANET_DISTANCE, max: habitableZone.min }),
-		);
+		distance = Math.round(randomFromRange({ min: MIN_PLANET_DISTANCE, max: habitableZone.min }));
 	}
 	if (zone === "habitable") {
 		distance = Math.round(randomFromRange(habitableZone));
 	}
 	if (zone === "cold") {
-		distance = Math.round(
-			randomFromRange({ min: habitableZone.max, max: MAX_PLANET_DISTANCE }),
-		);
+		distance = Math.round(randomFromRange({ min: habitableZone.max, max: MAX_PLANET_DISTANCE }));
 	}
 
 	return distance;
@@ -85,9 +77,7 @@ export const planet = t.router({
 			const system = getSolarSystem(ctx, input.pluginId, input.solarSystemId);
 			const childrenPlanets = system.planets;
 
-			const planetType = planetTypes.find(
-				(p) => p.classification === input.planetType,
-			);
+			const planetType = planetTypes.find((p) => p.classification === input.planetType);
 			if (!planetType) {
 				throw new Error(`Invalid planet type: ${input.planetType}`);
 			}

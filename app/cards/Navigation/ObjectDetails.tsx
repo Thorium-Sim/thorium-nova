@@ -1,17 +1,17 @@
-import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
-import { Suspense, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Color, type Group } from "three";
 import { PlanetSphere } from "@thorium/components/Starmap/Planet";
-import Star from "@thorium/components/Starmap/Star/StarMesh";
 import { Clouds } from "@thorium/components/Starmap/Planet/Clouds";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
+import Star from "@thorium/components/Starmap/Star/StarMesh";
+import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import { q } from "@thorium/context/AppContext";
-import { getNavigationDistance } from "@thorium/utils/starmap/getNavigationDistance";
-import { cn } from "@thorium/utils/cn";
-import { useStation } from "@thorium/routes/station/useStation";
 import { useCardContext } from "@thorium/context/CardContext";
+import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import { useStation } from "@thorium/routes/station/useStation";
+import { cn } from "@thorium/utils/cn";
+import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { getNavigationDistance } from "@thorium/utils/starmap/getNavigationDistance";
+import { Suspense, useRef } from "react";
+import { Color, type Group } from "three";
 
 function getDistanceLabel(input: { distance: number; unit: string } | null) {
 	if (!input) return "Unknown";
@@ -26,7 +26,7 @@ export const ObjectDetails = () => {
 	const selectedObjectIds = useStarmapStore((store) => store.selectedObjectIds);
 
 	return (
-		<div className="p-2 panel panel-primary">
+		<div className="panel panel-primary p-2">
 			{selectedObjectIds[0] ? (
 				<Suspense fallback={<h3 className="text-2xl">Accessing...</h3>}>
 					<ObjectData objectId={selectedObjectIds[0]} />
@@ -95,20 +95,13 @@ export function ObjectImage({
 	className,
 }: {
 	objectImage: NonNullable<
-		Awaited<
-			ReturnType<typeof q.sensors.scanResult.netRequest>
-		>["identification"]
+		Awaited<ReturnType<typeof q.sensors.scanResult.netRequest>>["identification"]
 	>["image"];
 	className?: string;
 }) {
 	if (!objectImage) return null;
 	return objectImage.type === "solarSystem" ? null : (
-		<div
-			className={cn(
-				"w-24 h-24 border border-white/30 rounded-xl overflow-hidden",
-				className,
-			)}
-		>
+		<div className={cn("w-24 h-24 border border-white/30 rounded-xl overflow-hidden", className)}>
 			<Suspense>
 				{objectImage.type === "planet" ? (
 					<PlanetCanvas
@@ -117,10 +110,7 @@ export function ObjectImage({
 						ringMapAsset={objectImage.ringMapAsset}
 					/>
 				) : objectImage.type === "star" ? (
-					<StarCanvas
-						hue={objectImage.hue || 30}
-						isWhite={objectImage.isWhite || false}
-					/>
+					<StarCanvas hue={objectImage.hue || 30} isWhite={objectImage.isWhite || false} />
 				) : objectImage.type === "ship" ? (
 					<img draggable="false" alt="" src={objectImage?.vanity} />
 				) : null}
@@ -131,7 +121,6 @@ export function ObjectImage({
 
 const PlanetGroup = ({
 	cloudMapAsset,
-	ringMapAsset,
 	textureMapAsset,
 }: {
 	cloudMapAsset?: string | null;

@@ -43,10 +43,7 @@ export function parseConversationLine(
 			const divert = spaceSplit.at(-1) || "";
 			let persist = false;
 			let paramsLine = lineWithTags
-				.slice(
-					lineWithTags.indexOf(eventName) + eventName.length,
-					lineWithTags.lastIndexOf(divert),
-				)
+				.slice(lineWithTags.indexOf(eventName) + eventName.length, lineWithTags.lastIndexOf(divert))
 				.trim();
 			if (paramsLine.endsWith("persist")) {
 				persist = true;
@@ -82,9 +79,7 @@ function parseParams(paramsLine: string) {
 		const line = paramsSplit.shift();
 		if (!line) continue;
 		params[key] =
-			paramsSplit.length === 0
-				? line.trim()
-				: line.slice(0, line.lastIndexOf(" ")).trim();
+			paramsSplit.length === 0 ? line.trim() : line.slice(0, line.lastIndexOf(" ")).trim();
 		key = line.slice(line.lastIndexOf(" ") + 1);
 	}
 

@@ -1,12 +1,7 @@
 import { Line, Text } from "@react-three/drei";
 import { type ThreeElements, useFrame } from "@react-three/fiber";
 import { type FC, useMemo, useRef } from "react";
-import {
-	EllipseCurve,
-	type Group,
-	type Mesh,
-	type OrthographicCamera,
-} from "three";
+import { EllipseCurve, type Group, type Mesh, type OrthographicCamera } from "three";
 import type { Line2 } from "three-stdlib";
 
 import FONT_URL from "./Teko-Light.ttf";
@@ -48,10 +43,7 @@ export const DistanceCircle: FC<
 				} else if (dx < radius) {
 					groupRef.current.visible = false;
 				} else {
-					const opacity = Math.max(
-						0,
-						Math.min(1, Math.abs(1 - (dx - radius * 3) / radius)),
-					);
+					const opacity = Math.max(0, Math.min(1, Math.abs(1 - (dx - radius * 3) / radius)));
 					if (!Array.isArray(textRef.current.material)) {
 						textRef.current.material.transparent = true;
 						textRef.current.material.opacity = opacity;

@@ -16,17 +16,9 @@ export function randomPointInSphere(radius = 1) {
 }
 
 export function randomPointOnSphere(radius = 1) {
-	const [x, y, z] = [
-		generateGaussian(),
-		generateGaussian(),
-		generateGaussian(),
-	];
+	const [x, y, z] = [generateGaussian(), generateGaussian(), generateGaussian()];
 	const normalized = Math.sqrt(x * x + y * y + z * z);
-	return [
-		(x / normalized) * radius,
-		(y / normalized) * radius,
-		(z / normalized) * radius,
-	] as const;
+	return [(x / normalized) * radius, (y / normalized) * radius, (z / normalized) * radius] as const;
 }
 
 function generateGaussian() {

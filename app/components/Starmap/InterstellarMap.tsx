@@ -2,14 +2,12 @@ import { CameraControls } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import Starfield from "@thorium/components/Starmap/Starfield";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
-import {
-	type LightYear,
-	lightYearToLightMinute,
-} from "@thorium/utils/unitTypes";
+import { type LightYear, lightYearToLightMinute } from "@thorium/utils/unitTypes";
 import CameraControlsClass from "camera-controls";
 import type * as React from "react";
 import { Suspense, useEffect, useRef } from "react";
 import { Box3, Vector3 } from "three";
+
 import { useExternalCameraControl } from "./CameraControls";
 import { PolarGrid } from "./PolarGrid";
 
@@ -27,18 +25,13 @@ export function InterstellarMap({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		// Set the initial camera position
-		orbitControls.current?.setPosition(
-			0,
-			lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE) / 2,
-			0,
-		);
+		orbitControls.current?.setPosition(0, lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE) / 2, 0);
 		const max = lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE) * 0.75;
 		orbitControls.current?.setBoundary(
 			new Box3(new Vector3(-max, -max, -max), new Vector3(max, max, max)),
 		);
 	}, []);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: Update when the camera changes
 	useEffect(() => {
 		if (cameraView === "2d") {
 			orbitControls.current?.rotatePolarTo(0, true);

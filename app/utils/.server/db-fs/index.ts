@@ -1,9 +1,10 @@
 /* istanbul ignore file */
 
+import { AsyncLocalStorage } from "node:async_hooks";
+
 import type BasePlugin from "@thorium/.server/classes/Plugins";
 import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
 import throttle from "lodash.throttle";
-import { AsyncLocalStorage } from "node:async_hooks";
 
 const isProxy = Symbol("isProxy");
 
@@ -24,11 +25,7 @@ export interface DataStoreOperations {
 	remove(this: DataStore, force?: boolean): Promise<void>;
 	getAssetUrl(this: DataStore): Promise<string>;
 	readAsset(asset: string): Promise<string>;
-	uploadAsset(
-		this: DataStore,
-		asset: File | Blob,
-		fileName?: string,
-	): Promise<string>;
+	uploadAsset(this: DataStore, asset: File | Blob, fileName?: string): Promise<string>;
 	removeAsset(assetPath: string): Promise<void>;
 	loadAllAspects(
 		this: BasePlugin,
@@ -42,11 +39,7 @@ export interface DataStoreOperations {
 			) => unknown
 		>,
 	): Promise<void>;
-	rename: (
-		this: DataStore,
-		newName: string,
-		otherNames: string[],
-	) => Promise<void>;
+	rename: (this: DataStore, newName: string, otherNames: string[]) => Promise<void>;
 	getFlights: () => Promise<string[]>;
 	getFlightSnapshots: (flightName: string) => Promise<string[]>;
 }
@@ -103,8 +96,7 @@ export abstract class DataStore {
 	constructor(initialData: unknown, options: DataStoreOptions) {
 		this.initialData = initialData;
 		this.meta = options.meta;
-		this.#throttle =
-			options.throttle || process.env.NODE_ENV === "production" ? 1000 * 30 : 0;
+		this.#throttle = options.throttle || process.env.NODE_ENV === "production" ? 1000 * 30 : 0;
 		this.#safeMode = options.safeMode || false;
 		this.#writeThrottle =
 			process.env.NODE_ENV === "test"
@@ -114,7 +106,7 @@ export abstract class DataStore {
 					});
 
 		const proxy = new Proxy(this, this.#handler);
-		// biome-ignore lint/correctness/noConstructorReturn: We need to have the class become a proxy
+
 		return proxy;
 	}
 	get safeMode() {
@@ -124,9 +116,7 @@ export abstract class DataStore {
 		return this;
 	}
 	async getData<T>(): Promise<T> {
-		const loadedData = (await DataStore.operations
-			.getStore()!
-			.getData.apply(this)) as Promise<T>;
+		const loadedData = (await DataStore.operations.getStore()!.getData.apply(this)) as Promise<T>;
 		this.dataLoaded = true;
 		return loadedData;
 	}

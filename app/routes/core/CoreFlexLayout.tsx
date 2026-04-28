@@ -1,12 +1,12 @@
-import { forwardRef, Suspense, useContext, useEffect, useState } from "react";
-import * as Cores from "@thorium/cores";
 import CardProvider from "@thorium/context/CardContext";
-import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
-import { CoreFlexLayoutContext } from "./CoreFlexLayoutContext";
-
-import { Layout, TabNode } from "@thorium/utils/FlexLayout";
-import { ErrorBoundary, useErrorBoundary } from "react-error-boundary";
+import * as Cores from "@thorium/cores";
 import { useStation } from "@thorium/routes/station/useStation";
+import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
+import { Layout, TabNode } from "@thorium/utils/FlexLayout";
+import { forwardRef, Suspense, useContext, useEffect, useState } from "react";
+import { ErrorBoundary, useErrorBoundary } from "react-error-boundary";
+
+import { CoreFlexLayoutContext } from "./CoreFlexLayoutContext";
 
 export const CoreFlexLayout = forwardRef<Layout>((_, ref) => {
 	const { layoutModel, setInitialModel } = useContext(CoreFlexLayoutContext);

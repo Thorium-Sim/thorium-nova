@@ -13,48 +13,29 @@ import { useLiveQuery } from "@thorium/utils/live-query/client";
 import type { Coordinates } from "@thorium/utils/unitTypes";
 import type { MutableRefObject, ReactNode } from "react";
 import { Fragment, Suspense, useCallback, useEffect, useRef } from "react";
+
 import { CircleGrid, CircleGridTiltButton, GridCanvas } from "./CircleGrid";
 import { ImpulseControls } from "./ImpulseControls";
 import { CircleGridContacts, CircleGridWaypoints } from "./PilotContacts";
 import { PilotZoomSlider } from "./PilotZoomSlider";
 import { CircleGridStoreProvider } from "./useCircleGridStore";
 
-async function rotation({
-	shipId,
-	x,
-	y,
-	z,
-}: { shipId: number } & Partial<Coordinates<number>>) {
+async function rotation({ shipId, x, y, z }: { shipId: number } & Partial<Coordinates<number>>) {
 	await q.pilot.thrusters.setRotationDelta.netSend({
 		shipId,
 		rotation: { x, y, z },
 	});
 }
 
-async function direction({
-	shipId,
-	x,
-	y,
-	z,
-}: { shipId: number } & Partial<Coordinates<number>>) {
+async function direction({ shipId, x, y, z }: { shipId: number } & Partial<Coordinates<number>>) {
 	await q.pilot.thrusters.setDirection.netSend({
 		shipId,
 		direction: { x, y, z },
 	});
 }
 
-function UntouchableLabel({
-	children,
-	className,
-}: {
-	children: ReactNode;
-	className?: string;
-}) {
-	return (
-		<p className={`select-none pointer-events-none absolute ${className}`}>
-			{children}
-		</p>
-	);
+function UntouchableLabel({ children, className }: { children: ReactNode; className?: string }) {
+	return <p className={`pointer-events-none absolute select-none ${className}`}>{children}</p>;
 }
 
 export function Pilot({ cardLoaded }: CardProps) {
@@ -86,11 +67,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 	const prevLockedRef = useRef(autopilot.locked);
 	const prevForwardAutopilotRef = useRef(!!autopilot.forwardAutopilot);
 	useEffect(() => {
-		if (
-			prevLockedRef.current &&
-			!autopilot.locked &&
-			!prevForwardAutopilotRef.current
-		) {
+		if (prevLockedRef.current && !autopilot.locked && !prevForwardAutopilotRef.current) {
 			if (userUnlockedRef.current) {
 				userUnlockedRef.current = false;
 			} else {
@@ -132,15 +109,15 @@ export function Pilot({ cardLoaded }: CardProps) {
 
 	return (
 		<CircleGridStoreProvider>
-			<div className="grid grid-cols-4 grid-rows-1 h-full place-content-center gap-4">
+			<div className="grid h-full grid-cols-4 grid-rows-1 place-content-center gap-4">
 				<div className="flex flex-col justify-between">
 					<ImpulseControls
 						cardLoaded={cardLoaded}
 						onFlightControlInteraction={onFlightControlInteraction}
 						forwardAutopilot={!!autopilot.forwardAutopilot}
 					/>
-					<div className="flex-1 mt-2">
-						<div className="flex items-stretch gap-4 direction-thrusters">
+					<div className="mt-2 flex-1">
+						<div className="direction-thrusters flex items-stretch gap-4">
 							<LinearJoystick
 								id="direction-foreaft"
 								className="h-auto"
@@ -156,7 +133,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 							</LinearJoystick>
 							<Joystick
 								id="direction"
-								className="w-[calc(100%-2.5rem)] h-[calc(100%-2.5rem)]"
+								className="h-[calc(100%-2.5rem)] w-[calc(100%-2.5rem)]"
 								onDrag={({ x, y }) => {
 									onFlightControlInteraction();
 									direction({ shipId, y: -y, x: -x });
@@ -165,15 +142,13 @@ export function Pilot({ cardLoaded }: CardProps) {
 							>
 								<UntouchableLabel className="bottom-1">Down</UntouchableLabel>
 								<UntouchableLabel className="top-1">Up</UntouchableLabel>
-								<UntouchableLabel className="right-1">
-									Starboard
-								</UntouchableLabel>
+								<UntouchableLabel className="right-1">Starboard</UntouchableLabel>
 								<UntouchableLabel className="left-1">Port</UntouchableLabel>
 							</Joystick>
 						</div>
 					</div>
 				</div>
-				<div className="col-span-2 w-full aspect-square self-center pilot-radar">
+				<div className="pilot-radar col-span-2 aspect-square w-full self-center">
 					<Suspense fallback={null}>
 						<GridCanvas shouldRender={cardLoaded}>
 							<CircleGrid>
@@ -184,7 +159,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 					</Suspense>
 				</div>
 
-				<div className="h-full flex flex-col justify-between gap-2">
+				<div className="flex h-full flex-col justify-between gap-2">
 					<LockOnButton userUnlockedRef={userUnlockedRef} />
 					<div>
 						<div className="pilot-slider">
@@ -195,7 +170,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 						</div>
 					</div>
 					<div className="flex-1" />
-					<div className="flex flex-col gap-2 rotation-thrusters">
+					<div className="rotation-thrusters flex flex-col gap-2">
 						<Joystick
 							id="rotation"
 							onDrag={({ x, y }) => {
@@ -204,13 +179,9 @@ export function Pilot({ cardLoaded }: CardProps) {
 							}}
 							gamepadKeys={{ x: "roll", y: "pitch" }}
 						>
-							<UntouchableLabel className="bottom-1">
-								Pitch Down
-							</UntouchableLabel>
+							<UntouchableLabel className="bottom-1">Pitch Down</UntouchableLabel>
 							<UntouchableLabel className="top-1">Pitch Up</UntouchableLabel>
-							<UntouchableLabel className="right-1">
-								Starboard Roll
-							</UntouchableLabel>
+							<UntouchableLabel className="right-1">Starboard Roll</UntouchableLabel>
 							<UntouchableLabel className="left-1">Port Roll</UntouchableLabel>
 						</Joystick>
 						<LinearJoystick
@@ -222,9 +193,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 							gamepadKey="yaw"
 						>
 							<UntouchableLabel className="left-1">Port Yaw</UntouchableLabel>
-							<UntouchableLabel className="right-1">
-								Starboard Yaw
-							</UntouchableLabel>
+							<UntouchableLabel className="right-1">Starboard Yaw</UntouchableLabel>
 						</LinearJoystick>
 					</div>
 				</div>
@@ -256,32 +225,16 @@ function getInterstellarDistance(
 		);
 		if (typeof position1.parentId === "number") unit = "km";
 	} else if (system1 && system2) {
-		value = Math.hypot(
-			system2.x - system1.x,
-			system2.y - system1.y,
-			system2.z - system1.z,
-		);
+		value = Math.hypot(system2.x - system1.x, system2.y - system1.y, system2.z - system1.z);
 	} else if (!system1 && system2) {
-		value = Math.hypot(
-			system2.x - position1.x,
-			system2.y - position1.y,
-			system2.z - position1.z,
-		);
+		value = Math.hypot(system2.x - position1.x, system2.y - position1.y, system2.z - position1.z);
 	} else if (!system2 && system1) {
-		value = Math.hypot(
-			system1.x - position2.x,
-			system1.y - position2.y,
-			system1.z - position2.z,
-		);
+		value = Math.hypot(system1.x - position2.x, system1.y - position2.y, system1.z - position2.z);
 	}
 	return `${value.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${unit}`;
 }
 
-const LockOnButton = ({
-	userUnlockedRef,
-}: {
-	userUnlockedRef: MutableRefObject<boolean>;
-}) => {
+const LockOnButton = ({ userUnlockedRef }: { userUnlockedRef: MutableRefObject<boolean> }) => {
 	const { cardLoaded } = useCardContext();
 	const {
 		shipId,
@@ -329,9 +282,9 @@ const LockOnButton = ({
 
 	return (
 		<Fragment>
-			<div className="text-center panel panel-primary h-24">
+			<div className="panel panel-primary h-24 text-center">
 				<div>Current Course:</div>
-				<div className="font-bold text-3xl my-1 ">
+				<div className="my-1 text-3xl font-bold">
 					{autopilot.destinationName || "No Course Set"}
 				</div>
 				<div className="tabular-nums">
@@ -348,7 +301,7 @@ const LockOnButton = ({
 			<div className="flex gap-2">
 				{autopilot.locked ? (
 					<Button
-						className="flex-auto btn-error"
+						className="btn-error flex-auto"
 						onClick={() => {
 							userUnlockedRef.current = true;
 							q.pilot.autopilot.unlockCourse.netSend({ shipId });
@@ -386,7 +339,7 @@ const LockOnButton = ({
 					</Button>
 				) : (
 					<Button
-						className="flex-auto btn-error deactivate-autopilot"
+						className="btn-error deactivate-autopilot flex-auto"
 						disabled={!autopilot.locked}
 						onClick={() => q.pilot.autopilot.deactivate.netSend({ shipId })}
 					>

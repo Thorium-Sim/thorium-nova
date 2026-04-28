@@ -1,17 +1,18 @@
 import * as React from "react";
+import { createPortal } from "react-dom";
+
 import { I18nLabel } from "../I18nLabel";
 import { Actions } from "../model/Actions";
 import type { TabNode } from "../model/TabNode";
 import type { TabSetNode } from "../model/TabSetNode";
-import { showPopup } from "./PopupMenu";
+import { Orientation } from "../Orientation";
+import { Rect } from "../Rect";
+import { CLASSES } from "../Types";
 import type { LayoutInternal, ITabSetRenderValues } from "./Layout";
+import { showPopup } from "./PopupMenu";
 import { TabButton } from "./TabButton";
 import { useTabOverflow } from "./TabOverflowHook";
-import { Orientation } from "../Orientation";
-import { CLASSES } from "../Types";
 import { isAuxMouseEvent } from "./Utils";
-import { createPortal } from "react-dom";
-import { Rect } from "../Rect";
 
 /** @internal */
 export interface ITabSetProps {
@@ -72,9 +73,7 @@ export const TabSet = (props: ITabSetProps) => {
 		layout.getClassName(CLASSES.FLEXLAYOUT__TAB_BUTTON),
 	);
 
-	const onOverflowClick = (
-		event: React.MouseEvent<HTMLElement, MouseEvent>,
-	) => {
+	const onOverflowClick = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
 		const callback = layout.getShowOverflowMenu();
 		const items = hiddenTabs.map((h) => {
 			return { index: h, node: node.getChildren()[h] as TabNode };
@@ -108,15 +107,11 @@ export const TabSet = (props: ITabSetProps) => {
 
 	const onPointerDown = (event: React.PointerEvent<HTMLElement>) => {
 		if (!isAuxMouseEvent(event)) {
-			layout.doAction(
-				Actions.setActiveTabset(node.getId(), layout.getWindowId()),
-			);
+			layout.doAction(Actions.setActiveTabset(node.getId(), layout.getWindowId()));
 		}
 	};
 
-	const onAuxMouseClick = (
-		event: React.MouseEvent<HTMLElement, MouseEvent>,
-	) => {
+	const onAuxMouseClick = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
 		if (isAuxMouseEvent(event)) {
 			layout.auxMouseClick(node, event);
 		}
@@ -130,9 +125,7 @@ export const TabSet = (props: ITabSetProps) => {
 		event.stopPropagation();
 	};
 
-	const onMaximizeToggle = (
-		event: React.MouseEvent<HTMLElement, MouseEvent>,
-	) => {
+	const onMaximizeToggle = (event: React.MouseEvent<HTMLElement, MouseEvent>) => {
 		if (node.canMaximize()) {
 			layout.maximize(node);
 		}
@@ -185,10 +178,7 @@ export const TabSet = (props: ITabSetProps) => {
 			);
 			if (i < node.getChildren().length - 1) {
 				tabs.push(
-					<div
-						key={`divider${i}`}
-						className={cm(CLASSES.FLEXLAYOUT__TABSET_TAB_DIVIDER)}
-					/>,
+					<div key={`divider${i}`} className={cm(CLASSES.FLEXLAYOUT__TABSET_TAB_DIVIDER)} />,
 				);
 			}
 		}
@@ -207,11 +197,9 @@ export const TabSet = (props: ITabSetProps) => {
 	stickyButtons = renderState.stickyButtons;
 	buttons = renderState.buttons;
 
-	const isTabStretch =
-		node.isEnableSingleTabStretch() && node.getChildren().length === 1;
+	const isTabStretch = node.isEnableSingleTabStretch() && node.getChildren().length === 1;
 	const showClose =
-		(isTabStretch && (node.getChildren()[0] as TabNode).isEnableClose()) ||
-		node.isEnableClose();
+		(isTabStretch && (node.getChildren()[0] as TabNode).isEnableClose()) || node.isEnableClose();
 
 	if (renderState.overflowPosition === undefined) {
 		renderState.overflowPosition = stickyButtons.length;
@@ -229,9 +217,7 @@ export const TabSet = (props: ITabSetProps) => {
 					onDragStart={(e) => {
 						e.preventDefault();
 					}}
-					className={cm(
-						CLASSES.FLEXLAYOUT__TAB_TOOLBAR_STICKY_BUTTONS_CONTAINER,
-					)}
+					className={cm(CLASSES.FLEXLAYOUT__TAB_TOOLBAR_STICKY_BUTTONS_CONTAINER)}
 				>
 					{stickyButtons}
 				</div>,
@@ -296,9 +282,7 @@ export const TabSet = (props: ITabSetProps) => {
 				onClick={onPopoutTab}
 				onPointerDown={onInterceptPointerDown}
 			>
-				{typeof icons.popout === "function"
-					? icons.popout(selectedTabNode)
-					: icons.popout}
+				{typeof icons.popout === "function" ? icons.popout(selectedTabNode) : icons.popout}
 			</button>,
 		);
 	}
@@ -312,8 +296,7 @@ export const TabSet = (props: ITabSetProps) => {
 				data-layout-path={`${path}/button/max`}
 				title={node.isMaximized() ? minTitle : maxTitle}
 				className={`${cm(CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON)} ${cm(
-					CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_ +
-						(node.isMaximized() ? "max" : "min"),
+					CLASSES.FLEXLAYOUT__TAB_TOOLBAR_BUTTON_ + (node.isMaximized() ? "max" : "min"),
 				)}`}
 				onClick={onMaximizeToggle}
 				onPointerDown={onInterceptPointerDown}
@@ -344,9 +327,7 @@ export const TabSet = (props: ITabSetProps) => {
 				onClick={isTabStretch ? onCloseTab : onClose}
 				onPointerDown={onInterceptPointerDown}
 			>
-				{typeof icons.closeTabset === "function"
-					? icons.closeTabset(node)
-					: icons.closeTabset}
+				{typeof icons.closeTabset === "function" ? icons.closeTabset(node) : icons.closeTabset}
 			</button>,
 		);
 	}
@@ -360,9 +341,7 @@ export const TabSet = (props: ITabSetProps) => {
 				title={title}
 				className={cm(CLASSES.FLEXLAYOUT__TAB_TOOLBAR_ICON)}
 			>
-				{typeof icons.activeTabset === "function"
-					? icons.activeTabset(node)
-					: icons.activeTabset}
+				{typeof icons.activeTabset === "function" ? icons.activeTabset(node) : icons.activeTabset}
 			</div>,
 		);
 	}
@@ -387,9 +366,7 @@ export const TabSet = (props: ITabSetProps) => {
 	if (node.getClassNameTabStrip() !== undefined) {
 		tabStripClasses += ` ${node.getClassNameTabStrip()}`;
 	}
-	tabStripClasses += ` ${
-		CLASSES.FLEXLAYOUT__TABSET_TABBAR_OUTER_
-	}${node.getTabLocation()}`;
+	tabStripClasses += ` ${CLASSES.FLEXLAYOUT__TABSET_TABBAR_OUTER_}${node.getTabLocation()}`;
 
 	if (node.isActive()) {
 		tabStripClasses += ` ${cm(CLASSES.FLEXLAYOUT__TABSET_SELECTED)}`;
@@ -458,19 +435,15 @@ export const TabSet = (props: ITabSetProps) => {
 						<div
 							ref={tabStripInnerRef}
 							className={`${cm(CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER)} ${cm(
-								CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_ +
-									node.getTabLocation(),
+								CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_ + node.getTabLocation(),
 							)}`}
 							style={{ overflowX: "auto", overflowY: "hidden" }}
 							onScroll={onScroll}
 						>
 							<div
 								style={{ width: isTabStretch ? "100%" : "none" }}
-								className={`${cm(
-									CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER,
-								)} ${cm(
-									CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER_ +
-										node.getTabLocation(),
+								className={`${cm(CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER)} ${cm(
+									CLASSES.FLEXLAYOUT__TABSET_TABBAR_INNER_TAB_CONTAINER_ + node.getTabLocation(),
 								)}`}
 							>
 								{tabs}
@@ -532,11 +505,7 @@ export const TabSet = (props: ITabSetProps) => {
 	// note: tabset container is needed to allow flexbox to size without border/padding/margin
 	// then inner tabset can have border/padding/margin for styling
 	const tabset = (
-		<div
-			ref={selfRef}
-			className={cm(CLASSES.FLEXLAYOUT__TABSET_CONTAINER)}
-			style={style}
-		>
+		<div ref={selfRef} className={cm(CLASSES.FLEXLAYOUT__TABSET_CONTAINER)} style={style}>
 			<div className={cm(CLASSES.FLEXLAYOUT__TABSET)} data-layout-path={path}>
 				{content}
 			</div>

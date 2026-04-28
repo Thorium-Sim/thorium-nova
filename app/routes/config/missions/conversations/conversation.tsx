@@ -1,17 +1,18 @@
-import type { Route } from "./+types/conversation";
-import { q } from "@thorium/context/AppContext";
-import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
-import { href, useNavigate } from "react-router";
-import debounce from "lodash.debounce";
-import Button from "@thorium/ui/Button";
-import { toast } from "@thorium/context/ToastContext";
-import { AspectAssetUpload } from "@thorium/components/AspectAssetUpload";
 import Editor from "@monaco-editor/react";
+import { AspectAssetUpload } from "@thorium/components/AspectAssetUpload";
+import { registerInkCompletions } from "@thorium/components/ink/inkCompletions";
 import { registerInk } from "@thorium/components/ink/registerInk";
 import { registerInkValidator } from "@thorium/components/ink/validateInk";
-import { Activity, useState } from "react";
+import { q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
+import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
+import Button from "@thorium/ui/Button";
 import { cn } from "@thorium/utils/cn";
-import { registerInkCompletions } from "@thorium/components/ink/inkCompletions";
+import debounce from "lodash.debounce";
+import { Activity, useState } from "react";
+import { href, useNavigate } from "react-router";
+
+import type { Route } from "./+types/conversation";
 
 function parseParams(value: any) {
 	return value.properties
@@ -19,13 +20,11 @@ function parseParams(value: any) {
 				["number", "string", "boolean"].includes((value as any).type)
 					? name
 					: Array.isArray((value as any).type) &&
-							(value as any).type.some((v: any) =>
-								["number", "string", "boolean"].includes(v),
-							)
+						  (value as any).type.some((v: any) => ["number", "string", "boolean"].includes(v))
 						? name
 						: (value as any).anyOf?.some((v: { type: string }) =>
 									["number", "string", "boolean"].includes(v.type),
-								)
+							  )
 							? name
 							: [],
 			)
@@ -88,7 +87,7 @@ export default function Conversations({
 					}}
 				/>
 				<Activity mode={assetsShown ? "visible" : "hidden"}>
-					<div className="flex flex-col h-full w-full top-0 left-0 absolute">
+					<div className="absolute top-0 left-0 flex h-full w-full flex-col">
 						<AspectAssetUpload
 							fileUrls={conversation.assets.files}
 							handleUpload={async (files) => {
@@ -154,21 +153,17 @@ export default function Conversations({
 						});
 						if (!name || typeof name !== "string") return;
 						try {
-							const result =
-								await q.plugin.timeline.conversations.duplicate.netSend({
-									pluginId,
-									conversationId,
-									name,
-								});
+							const result = await q.plugin.timeline.conversations.duplicate.netSend({
+								pluginId,
+								conversationId,
+								name,
+							});
 							navigate(
-								href(
-									"/config/:pluginId/missions/:timelineId/conversations/:conversationId",
-									{
-										pluginId,
-										timelineId,
-										conversationId: result.conversationId,
-									},
-								),
+								href("/config/:pluginId/missions/:timelineId/conversations/:conversationId", {
+									pluginId,
+									timelineId,
+									conversationId: result.conversationId,
+								}),
 							);
 						} catch (err) {
 							if (err instanceof Error) {
@@ -184,10 +179,7 @@ export default function Conversations({
 				>
 					Duplicate Conversation
 				</Button>
-				<Button
-					className="btn-outline btn-info"
-					onClick={() => setAssetsShown((a) => !a)}
-				>
+				<Button className="btn-outline btn-info" onClick={() => setAssetsShown((a) => !a)}>
 					Assets
 				</Button>
 			</div>

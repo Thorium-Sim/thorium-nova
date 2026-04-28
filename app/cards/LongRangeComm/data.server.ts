@@ -1,25 +1,15 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
+import { replaceCharacters, rotateCharacters } from "@thorium/cards/LongRangeComm/shared";
 import type { isLongRangeMessage } from "@thorium/ecs-components/shipSystems";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { calculateShipMapPath } from "@thorium/utils/.server/ship/shipMapPathfinder";
+import { createShipMapGraph } from "@thorium/utils/.server/ship/shipMapPathfinder";
 import { type ECS, Entity } from "@thorium/utils/ecs";
 import type { RNG } from "@thorium/utils/rng";
-import {
-	getCompletePositionFromOrbit,
-	getObjectSystem,
-} from "@thorium/utils/starmap/position";
+import { getObjectSystem } from "@thorium/utils/starmap/position";
+import { lightMinuteToLightYear, lightYearToLightMinute } from "@thorium/utils/unitTypes";
 import z from "zod";
-import { createShipMapGraph } from "@thorium/utils/.server/ship/shipMapPathfinder";
-
-import {
-	lightMinuteToLightYear,
-	lightYearToLightMinute,
-} from "@thorium/utils/unitTypes";
-import {
-	replaceCharacters,
-	rotateCharacters,
-} from "@thorium/cards/LongRangeComm/shared";
 
 const encodingSchema = z.union([
 	z.object({
@@ -38,7 +28,7 @@ const encodingSchema = z.union([
 export const longRangeComm = t.router({
 	get: t.procedure
 		.input(z.object({ shipId: z.number() }))
-		.filter((publish: { shipId: number }, { ctx, input }) => {
+		.filter((publish: { shipId: number }, { input }) => {
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
@@ -54,8 +44,7 @@ export const longRangeComm = t.router({
 				systemType: "longRangeComm",
 				shipId: input.shipId,
 			});
-			if (!lrcomm?.components.isLongRangeComm)
-				throw new Error("No Long Range Comm System");
+			if (!lrcomm?.components.isLongRangeComm) throw new Error("No Long Range Comm System");
 			return {
 				id: lrcomm.id,
 				requiredPower: lrcomm.components.power?.powerLevels[0] || 0,
@@ -68,7 +57,7 @@ export const longRangeComm = t.router({
 			};
 		}),
 	commSatellites: t.procedure
-		.autoPublish(["isCommSatellite"], (entity) => null)
+		.autoPublish(["isCommSatellite"], () => null)
 		.request(({ ctx }) => {
 			const satellites = ctx.ecs.componentCache.get("isCommSatellite") || [];
 			const output: {
@@ -105,8 +94,7 @@ export const longRangeComm = t.router({
 				systemType: "longRangeComm",
 				shipId: input.shipId,
 			});
-			if (!lrcomm?.components.isLongRangeComm)
-				throw new Error("No Long Range Comm System");
+			if (!lrcomm?.components.isLongRangeComm) throw new Error("No Long Range Comm System");
 			lrcomm.updateComponent("isLongRangeComm", {
 				antennaFrequency: input.frequency,
 			});
@@ -119,8 +107,7 @@ export const longRangeComm = t.router({
 				systemType: "longRangeComm",
 				shipId: input.shipId,
 			});
-			if (!lrcomm?.components.isLongRangeComm)
-				throw new Error("No Long Range Comm System");
+			if (!lrcomm?.components.isLongRangeComm) throw new Error("No Long Range Comm System");
 			lrcomm.updateComponent("isLongRangeComm", { antennaGain: input.gain });
 			pubsub.publish.longRangeComm.get({ shipId: input.shipId });
 		}),
@@ -131,13 +118,13 @@ export const longRangeComm = t.router({
 			if (!entity) return false;
 			return Boolean(
 				entity.components.isShipSystem?.shipId === input.shipId &&
-					entity.components.power &&
-					entity.components.isLongRangeComm,
+				entity.components.power &&
+				entity.components.isLongRangeComm,
 			);
 		}),
 	addressBook: t.procedure
 		.input(z.object({ shipId: z.number() }))
-		.filter((publish: { shipId: number }, { ctx, input }) => {
+		.filter((publish: { shipId: number }, { input }) => {
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
@@ -176,7 +163,7 @@ export const longRangeComm = t.router({
 				filter: z.enum(["pending", "sent", "all"]),
 			}),
 		)
-		.filter((publish: { shipId: number }, { ctx, input }) => {
+		.filter((publish: { shipId: number }, { input }) => {
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
@@ -190,12 +177,7 @@ export const longRangeComm = t.router({
 		.request(({ input, ctx }) => {
 			const messages: (Pick<
 				z.infer<typeof isLongRangeMessage>,
-				| "message"
-				| "senderStation"
-				| "state"
-				| "destinationId"
-				| "failureReason"
-				| "timestamp"
+				"message" | "senderStation" | "state" | "destinationId" | "failureReason" | "timestamp"
 			> & {
 				id: number;
 				destinationShipName: string;
@@ -206,31 +188,20 @@ export const longRangeComm = t.router({
 				systemType: "longRangeComm",
 				shipId: input.shipId,
 			});
-			for (const message of ctx.ecs.componentCache.get("isLongRangeMessage") ||
-				[]) {
-				if (message.components.isLongRangeMessage?.senderId !== input.shipId)
+			for (const message of ctx.ecs.componentCache.get("isLongRangeMessage") || []) {
+				if (message.components.isLongRangeMessage?.senderId !== input.shipId) continue;
+				if (input.filter === "sent" && message.components.isLongRangeMessage.state === "pending")
 					continue;
-				if (
-					input.filter === "sent" &&
-					message.components.isLongRangeMessage.state === "pending"
-				)
-					continue;
-				if (
-					input.filter === "pending" &&
-					message.components.isLongRangeMessage.state !== "pending"
-				)
+				if (input.filter === "pending" && message.components.isLongRangeMessage.state !== "pending")
 					continue;
 
-				const destinationId =
-					message.components.isLongRangeMessage.destinationId;
-				let destinationShipName =
-					lrcomm.components.isLongRangeComm?.addressBook.find(
-						(f) => f.contactId === destinationId,
-					)?.name;
+				const destinationId = message.components.isLongRangeMessage.destinationId;
+				let destinationShipName = lrcomm.components.isLongRangeComm?.addressBook.find(
+					(f) => f.contactId === destinationId,
+				)?.name;
 				if (!destinationShipName) {
 					const destination = ctx.ecs.getEntityById(destinationId);
-					destinationShipName =
-						destination?.components.identity?.name || "Unknown";
+					destinationShipName = destination?.components.identity?.name || "Unknown";
 				}
 				messages.push({
 					id: message.id,
@@ -253,7 +224,7 @@ export const longRangeComm = t.router({
 		}),
 	incomingMessages: t.procedure
 		.input(z.object({ shipId: z.number() }))
-		.filter((publish: { shipId: number }, { ctx, input }) => {
+		.filter((publish: { shipId: number }, { input }) => {
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
@@ -279,21 +250,11 @@ export const longRangeComm = t.router({
 				systemType: "longRangeComm",
 				shipId: input.shipId,
 			});
-			for (const longRangeMessage of ctx.ecs.componentCache.get(
-				"isLongRangeMessage",
-			) || []) {
-				const isLongRangeMessage =
-					longRangeMessage.components.isLongRangeMessage;
+			for (const longRangeMessage of ctx.ecs.componentCache.get("isLongRangeMessage") || []) {
+				const isLongRangeMessage = longRangeMessage.components.isLongRangeMessage;
 				if (!isLongRangeMessage) continue;
-				const {
-					destinationId,
-					senderId,
-					interceptorId,
-					timestamp,
-					state,
-					message,
-					encoding,
-				} = isLongRangeMessage;
+				const { destinationId, senderId, interceptorId, timestamp, state, message, encoding } =
+					isLongRangeMessage;
 				if (
 					(destinationId !== input.shipId && interceptorId !== input.shipId) ||
 					!["delivered", "intercepted", "read"].includes(state)
@@ -302,22 +263,19 @@ export const longRangeComm = t.router({
 
 				if (interceptorId === input.shipId && state !== "intercepted") continue;
 
-				let senderShipName =
-					lrcomm.components.isLongRangeComm?.addressBook.find(
-						(f) => f.contactId === senderId,
-					)?.name;
-				let destinationShipName =
-					lrcomm.components.isLongRangeComm?.addressBook.find(
-						(f) => f.contactId === destinationId,
-					)?.name;
+				let senderShipName = lrcomm.components.isLongRangeComm?.addressBook.find(
+					(f) => f.contactId === senderId,
+				)?.name;
+				let destinationShipName = lrcomm.components.isLongRangeComm?.addressBook.find(
+					(f) => f.contactId === destinationId,
+				)?.name;
 				if (!senderShipName) {
 					const sender = ctx.ecs.getEntityById(senderId);
 					senderShipName = sender?.components.identity?.name || "Unknown";
 				}
 				if (!destinationShipName) {
 					const destination = ctx.ecs.getEntityById(destinationId);
-					destinationShipName =
-						destination?.components.identity?.name || "Unknown";
+					destinationShipName = destination?.components.identity?.name || "Unknown";
 				}
 				messages.push({
 					id: longRangeMessage.id,
@@ -384,9 +342,9 @@ export const longRangeComm = t.router({
 				shipId: input.shipId,
 			});
 			lrcomm.updateComponent("isLongRangeComm", {
-				addressBook: (
-					lrcomm.components.isLongRangeComm?.addressBook || []
-				).filter((a) => a.contactId !== input.contactId),
+				addressBook: (lrcomm.components.isLongRangeComm?.addressBook || []).filter(
+					(a) => a.contactId !== input.contactId,
+				),
 			});
 			pubsub.publish.longRangeComm.addressBook({ shipId: input.shipId });
 		}),
@@ -398,9 +356,7 @@ export const longRangeComm = t.router({
 				message: z.string(),
 				state: z.enum(["pending", "sending"]).optional(),
 				senderStation: z.string().optional(),
-				encoding: z
-					.enum(["decoded", "waves", "replacement", "rotation"])
-					.optional(),
+				encoding: z.enum(["decoded", "waves", "replacement", "rotation"]).optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -422,15 +378,12 @@ export const longRangeComm = t.router({
 
 				if (!ship) throw new Error("Invalid Long Range Message");
 				const system = getObjectSystem(ship);
-				const position =
-					system?.components.position || ship.components.position;
+				const position = system?.components.position || ship.components.position;
 				message.addComponent("position", { ...position });
 
 				try {
 					// Find the closest satellite to the position
-					const satellites = Array.from(
-						ctx.ecs.componentCache.get("isCommSatellite") || [],
-					);
+					const satellites = Array.from(ctx.ecs.componentCache.get("isCommSatellite") || []);
 					const satellite = findClosestSatellite(satellites, ship);
 					if (!satellite) throw new Error("First satellite not found");
 					const nextNodeId = pickNextLongRangeMessageNode(
@@ -447,8 +400,7 @@ export const longRangeComm = t.router({
 					message.removeComponent("position");
 					message.updateComponent("isLongRangeMessage", {
 						state: "undelivered",
-						failureReason:
-							"Failed to find route through communications network",
+						failureReason: "Failed to find route through communications network",
 					});
 				}
 			}
@@ -464,8 +416,7 @@ export const longRangeComm = t.router({
 		)
 		.send(({ ctx, input }) => {
 			const message = ctx.ecs.getEntityById(input.messageId);
-			if (!message?.components.isLongRangeMessage)
-				throw new Error("Invalid Long Range Message");
+			if (!message?.components.isLongRangeMessage) throw new Error("Invalid Long Range Message");
 
 			const encoding = getEncodingSettings(input.encoding, ctx.ecs.rng);
 			message.updateComponent("isLongRangeMessage", {
@@ -492,8 +443,7 @@ export const longRangeComm = t.router({
 		)
 		.send(({ ctx, input }) => {
 			const message = ctx.ecs.getEntityById(input.messageId);
-			if (!message?.components.isLongRangeMessage)
-				throw new Error("Invalid Long Range Message");
+			if (!message?.components.isLongRangeMessage) throw new Error("Invalid Long Range Message");
 			const shipId = message.components.isLongRangeMessage.senderId;
 			const ship = ctx.ecs.getEntityById(shipId);
 
@@ -547,18 +497,17 @@ export const longRangeComm = t.router({
 		)
 		.send(({ ctx, input }) => {
 			const message = ctx.ecs.getEntityById(input.messageId);
-			if (!message?.components.isLongRangeMessage)
-				throw new Error("Invalid Long Range Message");
+			if (!message?.components.isLongRangeMessage) throw new Error("Invalid Long Range Message");
 
-			const { type, ...properties } = input.decoding;
+			const { type: _, ...properties } = input.decoding;
 			const newEncoding = {
 				...message.components.isLongRangeMessage.encoding,
-				...("waves" in properties &&
-				message.components.isLongRangeMessage.encoding.type === "waves"
+				...("waves" in properties && message.components.isLongRangeMessage.encoding.type === "waves"
 					? {
-							waves: message.components.isLongRangeMessage.encoding.waves.map(
-								(wave, i) => ({ ...wave, ...properties.waves[i] }),
-							),
+							waves: message.components.isLongRangeMessage.encoding.waves.map((wave, i) => ({
+								...wave,
+								...properties.waves[i],
+							})),
 						}
 					: properties),
 			};
@@ -566,13 +515,11 @@ export const longRangeComm = t.router({
 				message.components.isLongRangeMessage.message,
 				newEncoding,
 			);
-			const { state, message: lrmMessage } =
-				message.components.isLongRangeMessage;
+			const { state, message: lrmMessage } = message.components.isLongRangeMessage;
 			message.updateComponent("isLongRangeMessage", {
 				encoding: newEncoding,
 				state:
-					state !== "intercepted" &&
-					encodedMessage.toLowerCase() === lrmMessage.toLowerCase()
+					state !== "intercepted" && encodedMessage.toLowerCase() === lrmMessage.toLowerCase()
 						? "read"
 						: state,
 			});
@@ -593,8 +540,7 @@ export const longRangeComm = t.router({
 		.input(z.object({ messageId: z.number() }))
 		.send(({ ctx, input }) => {
 			const message = ctx.ecs.getEntityById(input.messageId);
-			if (!message?.components.isLongRangeMessage)
-				throw new Error("Invalid Long Range Message");
+			if (!message?.components.isLongRangeMessage) throw new Error("Invalid Long Range Message");
 			const shipId = message.components.isLongRangeMessage.interceptorId;
 			if (!shipId) throw new Error("Invalid Long Range Message");
 
@@ -647,20 +593,15 @@ function generateEncoding(
 			let requiredLetterMap = "";
 			const requiredLetters = replaceCharacters.split("");
 			while (requiredLetters.length > 0) {
-				const letterIndex = Math.trunc(
-					rng.nextAsPercentage() * requiredLetters.length,
-				);
+				const letterIndex = Math.trunc(rng.nextAsPercentage() * requiredLetters.length);
 				const letter = requiredLetters.splice(letterIndex, 1);
 				requiredLetterMap = `${requiredLetterMap}${letter.join("")}`;
 			}
 			let letterMap = replaceCharacters;
 			for (let i = 0; i < encoding.includedLetters; i++) {
 				const splitLetters = letterMap.split("");
-				const correctLetterIndex = Math.trunc(
-					rng.nextAsPercentage() * splitLetters.length,
-				);
-				splitLetters[correctLetterIndex] =
-					requiredLetterMap[correctLetterIndex];
+				const correctLetterIndex = Math.trunc(rng.nextAsPercentage() * splitLetters.length);
+				splitLetters[correctLetterIndex] = requiredLetterMap[correctLetterIndex];
 				letterMap = splitLetters.join("");
 			}
 			return { type: "replacement", requiredLetterMap, letterMap };
@@ -677,9 +618,7 @@ function generateEncoding(
 					phase: 0,
 					requiredAmplitude: rng.nextAsPercentage() * 18 + 2,
 					requiredFrequency: rng.nextAsPercentage() * 9 + 1,
-					requiredPhase: encoding.hasPhase
-						? rng.nextAsPercentage() * Math.PI
-						: 0,
+					requiredPhase: encoding.hasPhase ? rng.nextAsPercentage() * Math.PI : 0,
 				});
 			}
 			return { type: "waves", waves };
@@ -698,10 +637,7 @@ function generateEncoding(
 	}
 }
 
-function encodeMessage(
-	message: string,
-	encoding: z.infer<typeof isLongRangeMessage>["encoding"],
-) {
+function encodeMessage(message: string, encoding: z.infer<typeof isLongRangeMessage>["encoding"]) {
 	switch (encoding.type) {
 		case "rotation": {
 			const encodedMessage = rotateMessage(
@@ -712,16 +648,8 @@ function encodeMessage(
 			return decodedMessage;
 		}
 		case "replacement": {
-			const encodedMessage = replaceMessage(
-				message,
-				replaceCharacters,
-				encoding.requiredLetterMap,
-			);
-			return replaceMessage(
-				encodedMessage,
-				replaceCharacters,
-				encoding.letterMap,
-			);
+			const encodedMessage = replaceMessage(message, replaceCharacters, encoding.requiredLetterMap);
+			return replaceMessage(encodedMessage, replaceCharacters, encoding.letterMap);
 		}
 		case "waves": {
 			function getWavePoint(
@@ -750,8 +678,7 @@ function encodeMessage(
 							})),
 						) - getWavePoint(i, encoding.waves);
 					const newLetterIndex =
-						Math.round(letterIndex + diff * rotateCharacters.length) %
-						rotateCharacters.length;
+						Math.round(letterIndex + diff * rotateCharacters.length) % rotateCharacters.length;
 					const newLetter = rotateCharacters.split("").at(newLetterIndex);
 					return newLetter;
 				})
@@ -765,8 +692,7 @@ function encodeMessage(
 }
 function rotateMessage(message: string, rotation: number) {
 	let output = "";
-	const rotatedCharacters =
-		rotateCharacters.slice(rotation) + rotateCharacters.slice(0, rotation);
+	const rotatedCharacters = rotateCharacters.slice(rotation) + rotateCharacters.slice(0, rotation);
 
 	for (const letter of message.split("")) {
 		const index = rotateCharacters.indexOf(letter);
@@ -778,11 +704,7 @@ function rotateMessage(message: string, rotation: number) {
 	}
 	return output;
 }
-function replaceMessage(
-	message: string,
-	originalLetterMap: string,
-	letterMap: string,
-) {
+function replaceMessage(message: string, originalLetterMap: string, letterMap: string) {
 	const splitMessage = message.split("");
 	return splitMessage
 		.map((letter) => {
@@ -800,17 +722,12 @@ export function pickNextLongRangeMessageNode(
 	visitedNodeIds: number[],
 ) {
 	// Figure out the closest node to the message's position
-	const satellites = Array.from(
-		ecs.componentCache.get("isCommSatellite") || [],
-	);
+	const satellites = Array.from(ecs.componentCache.get("isCommSatellite") || []);
 	const destination = ecs.getEntityById(destinationId);
-	if (!destination)
-		throw new Error("Unable to send long range message: Invalid Destination");
+	if (!destination) throw new Error("Unable to send long range message: Invalid Destination");
 	const closestEndNode = findClosestSatellite(satellites, destination);
 	if (!closestEndNode)
-		throw new Error(
-			"Unable to send long range message: Unable to find comm satellite route",
-		);
+		throw new Error("Unable to send long range message: Unable to find comm satellite route");
 
 	if (startId === closestEndNode.id) {
 		return startId;
@@ -820,9 +737,7 @@ export function pickNextLongRangeMessageNode(
 	const graph = generateSatelliteGraph(satellites);
 	const nodePath = calculateShipMapPath(graph, startId, closestEndNode.id);
 	if (!nodePath)
-		throw new Error(
-			"Unable to send long range message: Unable to find comm satellite route",
-		);
+		throw new Error("Unable to send long range message: Unable to find comm satellite route");
 
 	for (const nodeId of nodePath) {
 		if (visitedNodeIds.includes(nodeId)) {
@@ -846,17 +761,14 @@ export function generateSatelliteGraph(satellites: Entity[]) {
 	const edgesMap = new Map<string, [number, number]>();
 	for (const satellite of satellites) {
 		const system = getObjectSystem(satellite);
-		const position =
-			system?.components.position || satellite.components.position;
+		const position = system?.components.position || satellite.components.position;
 		if (!position) continue;
 		nodes.push({
 			id: satellite.id,
 			x: position.x,
 			y: position.y,
 			z: position.z,
-			radius: lightYearToLightMinute(
-				satellite.components.isCommSatellite?.radius || 0,
-			),
+			radius: lightYearToLightMinute(satellite.components.isCommSatellite?.radius || 0),
 			// We heavily prioritize player ships so they can intercept messages
 			priorityMultiplier: satellite.components.isPlayerShip ? 0.5 : 1,
 		});
@@ -864,13 +776,9 @@ export function generateSatelliteGraph(satellites: Entity[]) {
 	for (const node of nodes) {
 		for (const node2 of nodes) {
 			if (node === node2) continue;
-			const key = [node.id, node2.id].sort().join(",");
+			const key = [node.id, node2.id].sort((a, b) => a - b).join(",");
 			if (edgesMap.has(key)) continue;
-			const distance = Math.hypot(
-				node.x - node2.x,
-				node.y - node2.y,
-				node.z - node2.z,
-			);
+			const distance = Math.hypot(node.x - node2.x, node.y - node2.y, node.z - node2.z);
 			if (distance <= node.radius || distance <= node2.radius) {
 				edgesMap.set(key, [node.id, node2.id]);
 			}
@@ -889,8 +797,7 @@ export function findClosestSatellite(
 	useRange?: boolean,
 ): { distance: number; id: number } | null {
 	const objectSystem = getObjectSystem(object);
-	const objectPosition =
-		objectSystem?.components.position || object.components.position;
+	const objectPosition = objectSystem?.components.position || object.components.position;
 
 	if (!objectPosition) return null;
 	let minDistance: { distance: number; playerShip: boolean; id: number } = {
@@ -916,9 +823,7 @@ export function findClosestSatellite(
 
 		if (
 			distance < minDistance.distance ||
-			(distance === minDistance.distance &&
-				node.components.isPlayerShip &&
-				!minDistance.playerShip)
+			(distance === minDistance.distance && node.components.isPlayerShip && !minDistance.playerShip)
 		) {
 			minDistance = {
 				distance,

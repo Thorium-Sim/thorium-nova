@@ -14,16 +14,16 @@ export const testDataStoreProps: DataStoreOperations = {
 	},
 	async remove() {},
 	async removeAsset() {},
-	async uploadAsset(asset, fileName) {
+	async uploadAsset() {
 		return "";
 	},
-	async write(force) {},
-	async loadAllAspects(aspectClasses) {},
-	async rename(newName, otherNames) {},
+	async write() {},
+	async loadAllAspects() {},
+	async rename() {},
 	async getFlights() {
 		return [];
 	},
-	async getFlightSnapshots(flightName) {
+	async getFlightSnapshots() {
 		return [];
 	},
 };

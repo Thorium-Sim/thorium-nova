@@ -1,4 +1,5 @@
 import { ZodError } from "zod";
+
 import type { ParseFn } from "./getParseFn";
 import type { ProcedureBuilderMiddleware, ProcedureParams } from "./procedure";
 import type { AnyRootConfig, ProcedureType } from "./types";
@@ -13,8 +14,7 @@ export type MiddlewareResult<TParams extends ProcedureParams> =
 /**
  * @internal
  */
-interface MiddlewareOKResult<_TParams extends ProcedureParams>
-	extends MiddlewareResultBase {
+interface MiddlewareOKResult<_TParams extends ProcedureParams> extends MiddlewareResultBase {
 	ok: true;
 	data: unknown;
 	// this could be extended with `input`/`rawInput` later
@@ -23,8 +23,7 @@ interface MiddlewareOKResult<_TParams extends ProcedureParams>
 /**
  * @internal
  */
-interface MiddlewareErrorResult<_TParams extends ProcedureParams>
-	extends MiddlewareResultBase {
+interface MiddlewareErrorResult<_TParams extends ProcedureParams> extends MiddlewareResultBase {
 	ok: false;
 	error: Error;
 }
@@ -122,11 +121,7 @@ function isPlainObject(obj: unknown) {
  * Please note, `trpc-openapi` uses this function.
  */
 export function createInputMiddleware<TInput>(parse: ParseFn<TInput>) {
-	const inputMiddleware: ProcedureBuilderMiddleware = async ({
-		next,
-		rawInput,
-		input,
-	}) => {
+	const inputMiddleware: ProcedureBuilderMiddleware = async ({ next, rawInput, input }) => {
 		let parsedInput: ReturnType<typeof parse>;
 		try {
 			parsedInput = await parse(rawInput);
@@ -169,7 +164,7 @@ export function createOutputMiddleware<TOutput>(parse: ParseFn<TOutput>) {
 				...result,
 				data,
 			};
-		} catch (cause) {
+		} catch {
 			throw new Error("Output validation failed");
 		}
 	};

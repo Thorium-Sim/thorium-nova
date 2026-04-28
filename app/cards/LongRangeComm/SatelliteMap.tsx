@@ -1,18 +1,12 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { clientId, q } from "@thorium/context/AppContext";
 import { forwardQuaternion } from "@thorium/cards/Pilot/constants";
 import { PlayerArrow } from "@thorium/cards/Pilot/PlayerArrow";
 import { PolarGrid } from "@thorium/components/Starmap/PolarGrid";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { setCursor } from "@thorium/utils/setCursor";
-import {
-	Suspense,
-	useImperativeHandle,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import { Suspense, useImperativeHandle, useMemo, useRef, useState } from "react";
 import type { OrthographicCamera } from "three";
 import { BufferGeometry, type Group, type Mesh, Path, Vector3 } from "three";
 
@@ -69,7 +63,7 @@ export function SatelliteMap({
 					near: 0.01,
 				}}
 				frameloop={shouldRender ? "always" : "demand"}
-				className="rounded-full overflow-hidden"
+				className="overflow-hidden rounded-full"
 			>
 				<SatelliteView
 					gainRadius={radius}
@@ -118,34 +112,26 @@ function SatelliteView({
 	const gainRadiusRef = useRef<Mesh>(null);
 	const pulseProgress = useRef(0);
 	useFrame((props, delta) => {
-		pulseProgress.current =
-			(pulseProgress.current + (delta * 2) / Math.max(gainRadius, 1)) % 1;
+		pulseProgress.current = (pulseProgress.current + (delta * 2) / Math.max(gainRadius, 1)) % 1;
 		const sineProgress = Math.sin(pulseProgress.current * Math.PI);
-		gainRadiusRef.current?.scale.setScalar(
-			gainRadius * (sineProgress > 0 ? sineProgress : 0),
-		);
+		gainRadiusRef.current?.scale.setScalar(gainRadius * (sineProgress > 0 ? sineProgress : 0));
 		const gainRadiusMaterial = gainRadiusRef.current?.material;
 		if (gainRadiusMaterial && !Array.isArray(gainRadiusMaterial)) {
-			gainRadiusMaterial.opacity =
-				0.2 * Math.sin(pulseProgress.current * Math.PI + Math.PI / 2);
+			gainRadiusMaterial.opacity = 0.2 * Math.sin(pulseProgress.current * Math.PI + Math.PI / 2);
 		}
 	});
 
-	useFrame((props, delta) => {
+	useFrame((props) => {
 		if (!fixedRef.current) return;
 		const playerShip = interpolate(shipId);
 		if (!playerShip) return;
 
 		const { x, y, z, r } = playerShip;
 		fixedRef.current.position.set(0, 0, 0);
-		fixedRef.current.quaternion
-			.set(r.x, r.y, r.z, r.w)
-			.multiply(forwardQuaternion);
+		fixedRef.current.quaternion.set(r.x, r.y, r.z, r.w).multiply(forwardQuaternion);
 
 		const camera = props.camera as OrthographicCamera;
-		camera.position
-			.set(0, range, 0)
-			.applyQuaternion(fixedRef.current.quaternion);
+		camera.position.set(0, range, 0).applyQuaternion(fixedRef.current.quaternion);
 
 		camera.quaternion.set(r.x, r.y, r.z, r.w);
 		camera.rotateX(-Math.PI / 2);
@@ -155,18 +141,12 @@ function SatelliteView({
 				.set(systemPosition.x, systemPosition.y, systemPosition.z)
 				.multiplyScalar(1 / LIGHT_YEAR_TO_LIGHT_MINUTE);
 		} else {
-			playerPosition
-				.set(x, y, z)
-				.multiplyScalar(1 / LIGHT_YEAR_TO_LIGHT_MINUTE);
+			playerPosition.set(x, y, z).multiplyScalar(1 / LIGHT_YEAR_TO_LIGHT_MINUTE);
 		}
 		relativeRef.current?.position.copy(playerPosition).negate();
 
 		let inRangeSatellites = 0;
-		for (const {
-			id,
-			position,
-			frequency: satelliteFrequency,
-		} of commSatellites) {
+		for (const { id, position, frequency: satelliteFrequency } of commSatellites) {
 			const shipDistance = Math.hypot(
 				playerPosition.x - position[0],
 				playerPosition.y - position[1],
@@ -175,10 +155,7 @@ function SatelliteView({
 			const inRange = shipDistance <= gainRadius;
 			if (inRange && id !== shipId) inRangeSatellites++;
 			const frequencyDistance = Math.abs(satelliteFrequency - frequency) / 10;
-			const scale = Math.min(
-				0.5,
-				Math.max((1 - frequencyDistance) * (inRange ? 1 : 0), 0),
-			);
+			const scale = Math.min(0.5, Math.max((1 - frequencyDistance) * (inRange ? 1 : 0), 0));
 
 			if ((!inRange || frequencyDistance > 0.75) && selectedSatellite === id) {
 				setSelectedSatellite(null);
@@ -211,19 +188,10 @@ function SatelliteView({
 
 				<mesh scale={0} ref={gainRadiusRef}>
 					<sphereGeometry />
-					<meshBasicMaterial
-						transparent
-						opacity={0.2}
-						color={0x2288ff}
-						depthWrite={false}
-					/>
+					<meshBasicMaterial transparent opacity={0.2} color={0x2288ff} depthWrite={false} />
 				</mesh>
 
-				<lineLoop
-					geometry={circleGeometry}
-					rotation={[Math.PI / 2, 0, 0]}
-					scale={gainRadius}
-				>
+				<lineLoop geometry={circleGeometry} rotation={[Math.PI / 2, 0, 0]} scale={gainRadius}>
 					<lineBasicMaterial color={0x2288ff} transparent opacity={0.8} />
 				</lineLoop>
 				<PolarGrid
@@ -271,18 +239,15 @@ function SatelliteDot({
 			ref={meshRef}
 			scale={[0, 0, 0]}
 			onClick={onClick}
-			onPointerOver={(e) => {
+			onPointerOver={() => {
 				setCursor("pointer");
 			}}
-			onPointerOut={(e) => {
+			onPointerOut={() => {
 				setCursor("auto");
 			}}
 		>
 			<sphereGeometry args={[0.5]} />
-			<meshBasicMaterial
-				color={selected ? 0xff8800 : 0xffffff}
-				depthWrite={false}
-			/>
+			<meshBasicMaterial color={selected ? 0xff8800 : 0xffffff} depthWrite={false} />
 		</mesh>
 	);
 }

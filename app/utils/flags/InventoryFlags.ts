@@ -43,8 +43,7 @@ export const torpedoGuidanceMode = z
 	.default("visual");
 
 export type TorpedoGuidanceMode = z.infer<typeof torpedoGuidanceMode>;
-const torpedoGuidanceModeValues =
-	torpedoGuidanceMode._def.innerType._def.values;
+const torpedoGuidanceModeValues = torpedoGuidanceMode._def.innerType._def.values;
 
 // Turn the type above into a zod schema.
 export const inventoryFlags = z

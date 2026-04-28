@@ -2,7 +2,6 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
-import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { Entity } from "@thorium/utils/ecs";
 import { produce } from "immer";
 import z from "zod";
@@ -54,7 +53,7 @@ export const sensorScans = t.router({
 	scans: t.procedure
 		.input(z.object({ shipId: z.number() }))
 		.filter(shipPubsubFilter)
-		.autoPublish([], (entity) => null)
+		.autoPublish([], () => null)
 		.request(({ ctx, input }) => {
 			const sensorsSys = getShipSystem(ctx.ecs, {
 				systemType: "sensors",
@@ -121,9 +120,7 @@ export const sensorScans = t.router({
 						.getEntityById(input.shipId)
 						?.components.stationComplement?.stations.filter((s) =>
 							s.cards.some(
-								(c) =>
-									c.component === "LegacySensorScans" ||
-									c.component === "LegacySensorGrid",
+								(c) => c.component === "LegacySensorScans" || c.component === "LegacySensorGrid",
 							),
 						) || [];
 
@@ -151,18 +148,14 @@ export const sensorScans = t.router({
 			if (!sensors) throw new Error("Sensors not found");
 
 			sensorsSys.updateComponent("isLegacySensorScanning", {
-				processedData: sensors.processedData.filter(
-					(p) => p.timestamp !== input.timestamp,
-				),
+				processedData: sensors.processedData.filter((p) => p.timestamp !== input.timestamp),
 			});
 
 			pubsub.publish.legacy.sensorScans.sensors({ shipId: input.shipId });
 		}),
 
 	beginScan: t.procedure
-		.input(
-			z.object({ shipId: z.number(), scan: z.string(), scanType: z.string() }),
-		)
+		.input(z.object({ shipId: z.number(), scan: z.string(), scanType: z.string() }))
 		.send(({ ctx, input }) => {
 			if (!input.scan.trim()) throw new Error("Scan request must not be empty");
 
@@ -175,15 +168,12 @@ export const sensorScans = t.router({
 			if (!sensors) throw new Error("Sensors not found");
 			if (
 				sensorsSys.components.power &&
-				sensorsSys.components.power.currentPower <
-					sensorsSys.components.power.powerLevels[0]
+				sensorsSys.components.power.currentPower < sensorsSys.components.power.powerLevels[0]
 			) {
 				throw new Error("Insufficient power to complete sensor scan.");
 			}
 			if (sensorsSys.components.damage?.offline) {
-				throw new Error(
-					"Unable to complete sensor scan while system is damaged.",
-				);
+				throw new Error("Unable to complete sensor scan while system is damaged.");
 			}
 
 			if (!sensors.scanHistory) {
@@ -192,9 +182,7 @@ export const sensorScans = t.router({
 						scan.components.scan?.parentId === input.shipId &&
 						scan.components.scan.progress < 1
 					) {
-						throw new Error(
-							"Unable to complete sensor scan. Another scan is in progress.",
-						);
+						throw new Error("Unable to complete sensor scan. Another scan is in progress.");
 					}
 				}
 			}
@@ -213,17 +201,15 @@ export const sensorScans = t.router({
 
 			return { scanId: scan.id };
 		}),
-	cancelScan: t.procedure
-		.input(z.object({ scanId: z.number() }))
-		.send(({ ctx, input }) => {
-			const scan = ctx.ecs.getEntityById(input.scanId);
-			if (scan?.components.scan) {
-				ctx.ecs.removeEntity(scan);
-				pubsub.publish.legacy.sensorScans.scans({
-					shipId: scan.components.scan.parentId,
-				});
-			}
-		}),
+	cancelScan: t.procedure.input(z.object({ scanId: z.number() })).send(({ ctx, input }) => {
+		const scan = ctx.ecs.getEntityById(input.scanId);
+		if (scan?.components.scan) {
+			ctx.ecs.removeEntity(scan);
+			pubsub.publish.legacy.sensorScans.scans({
+				shipId: scan.components.scan.parentId,
+			});
+		}
+	}),
 	scanResponse: t.procedure
 		.input(z.object({ scanId: z.number(), response: z.string() }))
 		.send(({ ctx, input }) => {

@@ -22,18 +22,11 @@ export function DeckNodeContextProvider({ children }: { children: ReactNode }) {
 		}),
 		[selectedNode, selectedEdge],
 	);
-	return (
-		<DeckNodeContext.Provider value={value}>
-			{children}
-		</DeckNodeContext.Provider>
-	);
+	return <DeckNodeContext.Provider value={value}>{children}</DeckNodeContext.Provider>;
 }
 
 export function useDeckNode() {
 	const value = useContext(DeckNodeContext);
-	if (!value)
-		throw new Error(
-			"useDeckNode must be used within a DeckNodeContextProvider",
-		);
+	if (!value) throw new Error("useDeckNode must be used within a DeckNodeContextProvider");
 	return value;
 }

@@ -30,14 +30,10 @@ export function Transition({
 		}
 	}, [transitionState, beforeEnter, afterLeave]);
 	const propsState = {
-		...(transitionState === "entered"
-			? { "data-entered": true, "data-entering": true }
-			: {}),
+		...(transitionState === "entered" ? { "data-entered": true, "data-entering": true } : {}),
 		...(transitionState === "entering" ? { "data-entering": true } : {}),
 		...(transitionState === "exiting" ? { "data-exiting": true } : {}),
-		...(transitionState === "exited"
-			? { "data-exited": true, "data-exiting": true }
-			: {}),
+		...(transitionState === "exited" ? { "data-exited": true, "data-exiting": true } : {}),
 	};
 
 	return <div ref={ref} {...props} {...propsState} />;
@@ -47,10 +43,7 @@ export function Transition({
  * Provides entering and exiting states which can be used for styling
  * based on whether an animation or transition on an element is in progress
  */
-export function useTransition(
-	ref: RefObject<HTMLElement | null>,
-	isOpen: boolean,
-) {
+export function useTransition(ref: RefObject<HTMLElement | null>, isOpen: boolean) {
 	const [transitionState, setTransitionState] = useState<
 		"entered" | "exited" | "entering" | "exiting"
 	>(isOpen ? "entered" : "exited");
@@ -79,11 +72,7 @@ export function useTransition(
 		transitionState === "entering" || transitionState === "exiting",
 		useCallback(() => {
 			setTransitionState((state) =>
-				state === "entering"
-					? "entered"
-					: state === "exiting"
-						? "exited"
-						: state,
+				state === "entering" ? "entered" : state === "exiting" ? "exited" : state,
 			);
 		}, []),
 	);

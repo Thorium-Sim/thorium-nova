@@ -19,9 +19,7 @@
 	outline: none;
 	display: grid;
 	--check-width: 0;
-	grid-template-columns: var(--spacing-3) var(--check-width) auto 1fr auto var(
-			--spacing-3
-		);
+	grid-template-columns: var(--spacing-3) var(--check-width) auto 1fr auto var(--spacing-3);
 	grid-auto-rows: max-content;
 
 	&:has(> [data-selection-mode]) {
@@ -134,9 +132,7 @@
 	grid-column-start: 1;
 	grid-column-end: -1;
 	--check-width: 0;
-	grid-template-columns: var(--spacing-3) var(--check-width) auto 1fr auto var(
-			--spacing-3
-		);
+	grid-template-columns: var(--spacing-3) var(--check-width) auto 1fr auto var(--spacing-3);
 
 	&:has(> [data-selection-mode]) {
 		--check-width: var(--spacing-6);

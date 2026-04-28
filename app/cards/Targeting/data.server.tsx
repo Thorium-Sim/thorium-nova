@@ -3,22 +3,14 @@ import { t } from "@thorium/.server/init/t";
 import { spawnTorpedo } from "@thorium/.server/spawners/torpedo";
 import { getCurrentTarget } from "@thorium/.server/systems/PhasersSystem";
 import { getInventoryTemplates } from "@thorium/utils/.server/getInventoryTemplates";
-import {
-	cancelLoopingSound,
-	playShipSound,
-} from "@thorium/utils/.server/playRangedSound";
+import { cancelLoopingSound, playShipSound } from "@thorium/utils/.server/playRangedSound";
 import { checkSystemStability } from "@thorium/utils/.server/ship/checkSystemStability";
-import {
-	getShipSystem,
-	getShipSystems,
-} from "@thorium/utils/.server/ship/getShipSystem";
+import { getShipSystem, getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import type { ECS, Entity } from "@thorium/utils/ecs";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import z from "zod";
-import {
-	calculateCargoUsed,
-	getRoomBySystem,
-} from "../CargoControl/data.server";
+
+import { calculateCargoUsed, getRoomBySystem } from "../CargoControl/data.server";
 
 export const targeting = t.router({
 	targetedContact: t.procedure
@@ -51,9 +43,7 @@ export const targeting = t.router({
 				: null;
 		}),
 	setTarget: t.procedure
-		.input(
-			z.object({ shipId: z.number(), target: z.union([z.number(), z.null()]) }),
-		)
+		.input(z.object({ shipId: z.number(), target: z.union([z.number(), z.null()]) }))
 		.output(z.object({ shipId: z.number(), targetId: z.number().nullable() }))
 		.meta({ event: true })
 		.send(({ input, ctx }) => {
@@ -62,8 +52,7 @@ export const targeting = t.router({
 				systemType: "targeting",
 				shipId,
 			});
-			if (!targeting.components.isTargeting)
-				throw new Error("System is not targeting");
+			if (!targeting.components.isTargeting) throw new Error("System is not targeting");
 
 			targeting.updateComponent("isTargeting", { target: input.target });
 			pubsub.publish.targeting.targetedContact({
@@ -100,17 +89,12 @@ export const targeting = t.router({
 				const systems = getShipSystems(ctx.ecs, {
 					systemType: "TorpedoLauncher",
 					shipId,
-				}).filter(
-					(system) => system.components.isShipSystem?.shipId === shipId,
-				);
+				}).filter((system) => system.components.isShipSystem?.shipId === shipId);
 
 				return systems.flatMap((system) => {
 					if (!system.components.isTorpedoLauncher) return [];
-					const torpedoEntity =
-						system.components.isTorpedoLauncher?.torpedoEntity;
-					const torpedo = torpedoEntity
-						? ctx.flight?.ecs.getEntityById(torpedoEntity)
-						: null;
+					const torpedoEntity = system.components.isTorpedoLauncher?.torpedoEntity;
+					const torpedo = torpedoEntity ? ctx.flight?.ecs.getEntityById(torpedoEntity) : null;
 					return {
 						id: system.id,
 						name: system.components.identity?.name || "Torpedo Launcher",
@@ -120,19 +104,12 @@ export const targeting = t.router({
 						torpedo: torpedo
 							? {
 									id: torpedo.id,
-									casingColor:
-										torpedo.components.isInventory?.flags.torpedoCasing?.color,
-									warheadColor:
-										torpedo.components.isInventory?.flags.torpedoWarhead?.color,
+									casingColor: torpedo.components.isInventory?.flags.torpedoCasing?.color,
+									warheadColor: torpedo.components.isInventory?.flags.torpedoWarhead?.color,
 									warheadDamageType:
-										torpedo.components.isInventory?.flags.torpedoWarhead
-											?.damageType,
-									guidanceColor:
-										torpedo.components.isInventory?.flags.torpedoGuidance
-											?.color,
-									guidanceMode:
-										torpedo.components.isInventory?.flags.torpedoGuidance
-											?.guidanceMode,
+										torpedo.components.isInventory?.flags.torpedoWarhead?.damageType,
+									guidanceColor: torpedo.components.isInventory?.flags.torpedoGuidance?.color,
+									guidanceMode: torpedo.components.isInventory?.flags.torpedoGuidance?.guidanceMode,
 								}
 							: null,
 					};
@@ -152,16 +129,10 @@ export const targeting = t.router({
 
 				checkSystemStability(launcher, "Failed to load torpedo");
 
-				if (
-					input.torpedoId &&
-					launcher.components.isTorpedoLauncher.status !== "ready"
-				) {
+				if (input.torpedoId && launcher.components.isTorpedoLauncher.status !== "ready") {
 					throw new Error("Torpedo launcher is not ready");
 				}
-				if (
-					!input.torpedoId &&
-					launcher.components.isTorpedoLauncher.status !== "loaded"
-				) {
+				if (!input.torpedoId && launcher.components.isTorpedoLauncher.status !== "loaded") {
 					throw new Error("Torpedo launcher is not loaded");
 				}
 				const torpedoEntity = adjustTorpedoInventory(input.torpedoId, launcher);
@@ -172,9 +143,7 @@ export const targeting = t.router({
 					torpedoEntity,
 				});
 
-				const ship = ctx.ecs.getEntityById(
-					launcher.components.isShipSystem?.shipId || -1,
-				);
+				const ship = ctx.ecs.getEntityById(launcher.components.isShipSystem?.shipId || -1);
 				if (ship) {
 					pubsub.publish.targeting.torpedoes.launchers({
 						shipId: ship.id,
@@ -227,20 +196,14 @@ export const targeting = t.router({
 					1 /
 					Math.min(
 						1,
-						Math.max(
-							0.05,
-							(currentPower - requiredPower) / (maxSafePower - requiredPower),
-						),
+						Math.max(0.05, (currentPower - requiredPower) / (maxSafePower - requiredPower)),
 					);
 
 				launcher.updateComponent("isTorpedoLauncher", {
 					status: "firing",
-					progress:
-						launcher.components.isTorpedoLauncher.fireTime * powerMultiplier,
+					progress: launcher.components.isTorpedoLauncher.fireTime * powerMultiplier,
 				});
-				const ship = ctx.ecs.getEntityById(
-					launcher.components.isShipSystem?.shipId || -1,
-				);
+				const ship = ctx.ecs.getEntityById(launcher.components.isShipSystem?.shipId || -1);
 				pubsub.publish.starmapCore.torpedos({
 					systemId: torpedo.components.position?.parentId || null,
 				});
@@ -255,7 +218,7 @@ export const targeting = t.router({
 	}),
 	hull: t.procedure
 		.input(z.object({ shipId: z.number() }))
-		.filter((publish: { shipId: number }, { ctx, input }) => {
+		.filter((publish: { shipId: number }, { input }) => {
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
@@ -268,7 +231,7 @@ export const targeting = t.router({
 	shields: t.router({
 		get: t.procedure
 			.input(z.object({ shipId: z.number() }))
-			.filter((publish: { shipId: number }, { ctx, input }) => {
+			.filter((publish: { shipId: number }, { input }) => {
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
@@ -285,9 +248,7 @@ export const targeting = t.router({
 				const systems = getShipSystems(ctx.ecs, {
 					systemType: "Shields",
 					shipId,
-				}).filter(
-					(system) => system.components.isShipSystem?.shipId === shipId,
-				);
+				}).filter((system) => system.components.isShipSystem?.shipId === shipId);
 
 				return systems.flatMap((system) => {
 					if (!system.components.isShields) return [];
@@ -319,8 +280,7 @@ export const targeting = t.router({
 					const shield = getShipSystem(ctx.ecs, {
 						systemId: input.shieldId,
 					});
-					if (!shield.components.isShields)
-						throw new Error("System is not a shield generator");
+					if (!shield.components.isShields) throw new Error("System is not a shield generator");
 					shield.updateComponent("isShields", {
 						state: input.state,
 					});
@@ -333,9 +293,7 @@ export const targeting = t.router({
 					const shields = getShipSystems(ctx.flight.ecs, {
 						systemType: "Shields",
 						shipId,
-					}).filter(
-						(system) => system.components.isShipSystem?.shipId === shipId,
-					);
+					}).filter((system) => system.components.isShipSystem?.shipId === shipId);
 					for (const shield of shields) {
 						shield.updateComponent("isShields", {
 							state: input.state,
@@ -350,7 +308,7 @@ export const targeting = t.router({
 	phasers: t.router({
 		list: t.procedure
 			.input(z.object({ shipId: z.number() }))
-			.filter((publish: { shipId: number }, { ctx, input }) => {
+			.filter((publish: { shipId: number }, { input }) => {
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
@@ -367,9 +325,7 @@ export const targeting = t.router({
 				const systems = getShipSystems(ctx.flight.ecs, {
 					systemType: "Phasers",
 					shipId: input.shipId,
-				}).filter(
-					(system) => system.components.isShipSystem?.shipId === input.shipId,
-				);
+				}).filter((system) => system.components.isShipSystem?.shipId === input.shipId);
 
 				return systems.flatMap((system) => {
 					if (!system.components.isPhasers) return [];
@@ -399,16 +355,14 @@ export const targeting = t.router({
 					systemId: z.number().nullable(),
 				}),
 			)
-			.filter((publish: { systemId: number | null }, { ctx, input }) => {
+			.filter((publish: { systemId: number | null }, { input }) => {
 				if (!publish) return true;
-				if ("systemId" in input && publish.systemId !== input.systemId)
-					return false;
+				if ("systemId" in input && publish.systemId !== input.systemId) return false;
 				return true;
 			})
 			.autoPublish(["isPhasers"], (entity) => {
-				const systemId = entity.ecs.getEntityById(
-					entity.components.isShipSystem?.shipId || -1,
-				)?.components.position?.parentId;
+				const systemId = entity.ecs.getEntityById(entity.components.isShipSystem?.shipId || -1)
+					?.components.position?.parentId;
 				if (systemId) return { systemId };
 				return null;
 			})
@@ -439,9 +393,7 @@ export const targeting = t.router({
 				}
 
 				return firingPhasers.flatMap((phaser) => {
-					const ship = phaser.ecs?.getEntityById(
-						phaser.components.isShipSystem?.shipId || -1,
-					);
+					const ship = phaser.ecs?.getEntityById(phaser.components.isShipSystem?.shipId || -1);
 					if (!ship) return [];
 					const target = getCurrentTarget(ship);
 					if (!target) return [];
@@ -464,8 +416,7 @@ export const targeting = t.router({
 				const phaser = getShipSystem(ctx.ecs, {
 					systemId: input.phaserId,
 				});
-				if (!phaser.components.isPhasers)
-					throw new Error("System is not a phaser");
+				if (!phaser.components.isPhasers) throw new Error("System is not a phaser");
 
 				checkSystemStability(phaser, "Failed to set phaser arc");
 
@@ -487,8 +438,7 @@ export const targeting = t.router({
 				const phaser = getShipSystem(ctx.ecs, {
 					systemId: input.phaserId,
 				});
-				if (!phaser.components.isPhasers)
-					throw new Error("System is not a phaser");
+				if (!phaser.components.isPhasers) throw new Error("System is not a phaser");
 
 				checkSystemStability(phaser, "Failed to fire phaser");
 
@@ -506,9 +456,7 @@ export const targeting = t.router({
 						return acc;
 					}, 0) || 0;
 
-				const ship = ctx.flight?.ecs.getEntityById(
-					phaser.components.isShipSystem?.shipId || -1,
-				);
+				const ship = ctx.flight?.ecs.getEntityById(phaser.components.isShipSystem?.shipId || -1);
 
 				pubsub.publish.targeting.phasers.list({
 					shipId: phaser.components.isShipSystem?.shipId || -1,
@@ -526,32 +474,23 @@ export const targeting = t.router({
 				});
 			}),
 	}),
-	stream: t.procedure
-		.input(z.object({ shipId: z.number() }))
-		.dataStream(({ entity, input }) => {
-			if (!entity) return false;
-			return Boolean(
-				(entity.components.isShields || entity.components.isPhasers) &&
-					entity.components.isShipSystem?.shipId === input.shipId,
-			);
-		}),
+	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ entity, input }) => {
+		if (!entity) return false;
+		return Boolean(
+			(entity.components.isShields || entity.components.isPhasers) &&
+			entity.components.isShipSystem?.shipId === input.shipId,
+		);
+	}),
 });
 
-export function adjustTorpedoInventory(
-	torpedoId: string | null,
-	launcher: Entity,
-) {
+export function adjustTorpedoInventory(torpedoId: string | null, launcher: Entity) {
 	let adjustment = -1;
 	const ecs = launcher.ecs!;
-	const ship = ecs.getEntityById(
-		launcher.components.isShipSystem?.shipId || -1,
-	);
+	const ship = ecs.getEntityById(launcher.components.isShipSystem?.shipId || -1);
 	if (!ship) throw new Error("Torpedo launcher ship not found");
 	if (!torpedoId) {
 		adjustment = 1;
-		const torpedo = ecs.getEntityById(
-			launcher.components.isTorpedoLauncher?.torpedoEntity!,
-		);
+		const torpedo = ecs.getEntityById(launcher.components.isTorpedoLauncher?.torpedoEntity || -1);
 		if (!torpedo) throw new Error("Torpedo not found");
 		torpedoId = torpedo.components.identity?.name || "";
 	}
@@ -594,10 +533,7 @@ export function adjustTorpedoInventory(
 export function getShipTorpedos(ecs: ECS, shipId: number) {
 	const ship = ecs.getEntityById(shipId);
 	const templates = getInventoryTemplates(ecs);
-	const torpedoList: Record<
-		string,
-		{ count: number; yield: number; speed: number }
-	> = {};
+	const torpedoList: Record<string, { count: number; yield: number; speed: number }> = {};
 	function handleContents(
 		contents: Record<
 			string,
@@ -609,12 +545,7 @@ export function getShipTorpedos(ecs: ECS, shipId: number) {
 	) {
 		for (const item in contents) {
 			const template = templates[item];
-			if (
-				!template ||
-				!template.flags.torpedoCasing ||
-				!template.flags.torpedoWarhead
-			)
-				continue;
+			if (!template || !template.flags.torpedoCasing || !template.flags.torpedoWarhead) continue;
 			if (!torpedoList[item]) {
 				torpedoList[item] = {
 					count: 0,

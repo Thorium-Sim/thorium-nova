@@ -1,4 +1,18 @@
+import type {
+	ComponentQuery,
+	EntityQuery,
+	ValueQuery,
+} from "@thorium/.server/classes/Plugins/TimelineStep";
 import { components, type ComponentIds } from "@thorium/ecs-components";
+import { SoundConfigForm } from "@thorium/routes/config/systems/soundId";
+import Checkbox from "@thorium/ui/Checkbox";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
+import { Icon } from "@thorium/ui/Icon";
+import Input from "@thorium/ui/Input";
+import Select from "@thorium/ui/Select";
+import TagInput from "@thorium/ui/TagInput";
+import { Tooltip } from "@thorium/ui/Tooltip";
+import { cn } from "@thorium/utils/cn";
 import {
 	type InputTypes,
 	ZOD_COMPARISONS,
@@ -6,24 +20,9 @@ import {
 	parseSchema,
 	schemaWithoutDefault,
 } from "@thorium/utils/zodAutoForm";
-import Checkbox from "@thorium/ui/Checkbox";
-import Input from "@thorium/ui/Input";
-import Select from "@thorium/ui/Select";
 import { capitalCase } from "change-case";
-import { type Dispatch, Fragment, useId, useState } from "react";
 import { produce } from "immer";
-import { Tooltip } from "@thorium/ui/Tooltip";
-import type {
-	ComponentQuery,
-	EntityQuery,
-	ValueQuery,
-} from "@thorium/.server/classes/Plugins/TimelineStep";
-import TagInput from "@thorium/ui/TagInput";
-import { Icon } from "@thorium/ui/Icon";
-import { cn } from "@thorium/utils/cn";
-import { StarmapCoordinates } from "./StarmapCoordinates";
-import { ShipTemplate } from "./ShipTemplate";
-import { SoundConfigForm } from "@thorium/routes/config/systems/soundId";
+import { type Dispatch, useId } from "react";
 import {
 	Button,
 	ComboBox,
@@ -32,7 +31,9 @@ import {
 	Popover,
 	Input as RAInput,
 } from "react-aria-components";
-import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
+
+import { ShipTemplate } from "./ShipTemplate";
+import { StarmapCoordinates } from "./StarmapCoordinates";
 
 type QueryReducerAction =
 	| { type: "add"; component?: keyof typeof components | ""; path?: string }
@@ -48,10 +49,7 @@ type QueryReducerAction =
 	| { type: "value"; path: string; value: string | ValueQuery }
 	| { type: "matchType"; path: string; value: "all" | "first" | "random" };
 
-export function queryReducer(
-	state: EntityQuery,
-	action: QueryReducerAction,
-): EntityQuery {
+export function queryReducer(state: EntityQuery, action: QueryReducerAction): EntityQuery {
 	switch (action.type) {
 		case "add":
 			return produce(state, (draft) => {
@@ -99,9 +97,7 @@ export function queryReducer(
 
 export function getObject(object: any, path: string | null) {
 	if (!path) return object;
-	const paths = path
-		.split(".")
-		.map((p) => (Number.isNaN(Number(p)) ? p : Number(p)));
+	const paths = path.split(".").map((p) => (Number.isNaN(Number(p)) ? p : Number(p)));
 	const target =
 		paths.reduce((obj, key) => {
 			if (!obj[key]) obj[key] = typeof key === "number" ? [] : {};
@@ -131,14 +127,12 @@ function QueryComponent({
 		showDelete: boolean;
 	}) {
 	const item = component
-		? parseSchema(schemaWithoutDefault(component as ComponentIds)).find(
-				(p) => p.key === property,
-			)
+		? parseSchema(schemaWithoutDefault(component as ComponentIds)).find((p) => p.key === property)
 		: null;
 
 	const isSelect = path.endsWith(".select");
 	return (
-		<div className="flex gap-2 items-end flex-wrap">
+		<div className="flex flex-wrap items-end gap-2">
 			<ComponentCombobox
 				component={component as ComponentIds}
 				onChange={(value) => {
@@ -156,8 +150,7 @@ function QueryComponent({
 							)
 						: null;
 					const comparison =
-						ZOD_COMPARISONS[item?.type as keyof typeof ZOD_COMPARISONS]?.[0] ||
-						null;
+						ZOD_COMPARISONS[item?.type as keyof typeof ZOD_COMPARISONS]?.[0] || null;
 
 					dispatch({ type: "property", path, value, comparison });
 				}}
@@ -175,25 +168,11 @@ function QueryComponent({
 					}}
 				/>
 			) : null}
-			{!isSelect &&
-			property &&
-			comparison &&
-			item?.type !== "ZodBoolean" &&
-			item ? (
+			{!isSelect && property && comparison && item?.type !== "ZodBoolean" && item ? (
 				<>
-					<ValueInput
-						item={item}
-						path={path}
-						value={value}
-						dispatch={dispatch}
-						queryInput
-					/>
-					{item.helper && (
-						<p className="text-xs text-gray-400">{item.helper}</p>
-					)}
-					{showDelete ? (
-						<RemoveButton onClick={() => dispatch({ type: "remove", path })} />
-					) : null}
+					<ValueInput item={item} path={path} value={value} dispatch={dispatch} queryInput />
+					{item.helper && <p className="text-xs text-gray-400">{item.helper}</p>}
+					{showDelete ? <RemoveButton onClick={() => dispatch({ type: "remove", path })} /> : null}
 				</>
 			) : null}
 			{showDelete && (!comparison || !property) ? (
@@ -260,17 +239,8 @@ export function ValueInput({
 		);
 	}
 
-	return !(
-		typeof value === "object" &&
-		"query" in value &&
-		"select" in value
-	) ? (
-		<div
-			className={cn(
-				"flex items-end",
-				item.isNested ? "value-input-is-nested" : "",
-			)}
-		>
+	return !(typeof value === "object" && "query" in value && "select" in value) ? (
+		<div className={cn("flex items-end", item.isNested ? "value-input-is-nested" : "")}>
 			<div className="flex-1">
 				{queryInput ? null : <label htmlFor={id}>{item.name}</label>}
 				<PropertyInput
@@ -342,16 +312,14 @@ export function ValueInput({
 				</Tooltip>
 			</div>
 			<div className="w-full">
-				<div className="rounded p-2 border border-gray-50/20 w-fit">
+				<div className="w-fit rounded border border-gray-50/20 p-2">
 					<p>Entity Query</p>
 					{value.query.map((q, i) => (
 						<QueryComponent
 							key={i}
 							{...q}
 							path={
-								queryInput
-									? `${path}.value.query.${i}`
-									: `${path}.values.${item.key}.query.${i}`
+								queryInput ? `${path}.value.query.${i}` : `${path}.values.${item.key}.query.${i}`
 							}
 							dispatch={dispatch}
 							showDelete={value.query.length > 1}
@@ -362,9 +330,7 @@ export function ValueInput({
 						onClick={() =>
 							dispatch({
 								type: "add",
-								path: queryInput
-									? `${path}.value.query`
-									: `${path}.values.${item.key}.query`,
+								path: queryInput ? `${path}.value.query` : `${path}.values.${item.key}.query`,
 							})
 						}
 					>
@@ -373,11 +339,7 @@ export function ValueInput({
 					<p className="mt-2">ID/Component Select</p>
 					<QueryComponent
 						{...value.select}
-						path={
-							queryInput
-								? `${path}.value.select`
-								: `${path}.values.${item.key}.select`
-						}
+						path={queryInput ? `${path}.value.select` : `${path}.values.${item.key}.select`}
 						dispatch={dispatch}
 						showDelete={false}
 					/>
@@ -392,9 +354,7 @@ export function ValueInput({
 							if (!val || Array.isArray(val)) return;
 							dispatch({
 								type: "matchType",
-								path: queryInput
-									? `${path}.value.select`
-									: `${path}.values.${item.key}.select`,
+								path: queryInput ? `${path}.value.select` : `${path}.values.${item.key}.select`,
 								value: val as any,
 							});
 						}}
@@ -458,30 +418,24 @@ function ComponentCombobox({
 		<ComboBox
 			aria-label="Component"
 			selectedKey={component}
-			onSelectionChange={(selection) =>
-				onChange(selection as keyof typeof components)
-			}
+			onSelectionChange={(selection) => onChange(selection as keyof typeof components)}
 		>
-			<div className="cursor-pointer min-h-6 h-6 leading-5 relative border-secondary border rounded-lg">
-				<RAInput className="w-full bg-transparent placeholder:text-secondary placeholder:font-semibold text-secondary-content border-none outline-none focus:ring-0 pl-3 pr-10 text-xs leading-5" />
-				<Button className="absolute w-10 bg-secondary/20 hover:bg-secondary/50 cursor-pointer rounded inset-y-0 right-0 flex items-center justify-center">
-					<Icon
-						name="chevron-down"
-						className="w-5 h-5 text-secondary-content"
-						aria-hidden="true"
-					/>
+			<div className="border-secondary relative h-6 min-h-6 cursor-pointer rounded-lg border leading-5">
+				<RAInput className="placeholder:text-secondary text-secondary-content w-full border-none bg-transparent pr-10 pl-3 text-xs leading-5 outline-none placeholder:font-semibold focus:ring-0" />
+				<Button className="bg-secondary/20 hover:bg-secondary/50 absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center rounded">
+					<Icon name="chevron-down" className="text-secondary-content h-5 w-5" aria-hidden="true" />
 				</Button>
 			</div>
 			<Popover className={popoverTransitionClasses}>
 				<ListBox
-					className="bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 w-full overflow-auto text-base ring-1 ring-black/5 focus:outline-none sm:text-sm"
+					className="max-h-60 w-full overflow-auto rounded-md border border-gray-400 bg-gray-900/90 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
 					items={[
 						isSelect ? { id: "id" } : [],
 						...Object.keys(components).map((id) => ({ id })),
 					].flat()}
 				>
 					{(item) => (
-						<ListBoxItem className="font-normal truncate cursor-default select-none py-1 px-2 data-[focused]:bg-secondary text-white">
+						<ListBoxItem className="data-[focused]:bg-secondary cursor-default truncate px-2 py-1 font-normal text-white select-none">
 							{capitalCase(item.id)}
 						</ListBoxItem>
 					)}
@@ -508,9 +462,7 @@ export function PropertyCombobox({
 		: [
 				...(onlyShowProperties ? [] : ["isPresent", "isNotPresent"]),
 				...parseSchema(schemaWithoutDefault(component)).map((item) =>
-					ZOD_COMPARISONS[item.type as keyof typeof ZOD_COMPARISONS]
-						? item.key
-						: [],
+					ZOD_COMPARISONS[item.type as keyof typeof ZOD_COMPARISONS] ? item.key : [],
 				),
 			]
 				.flat()
@@ -522,23 +474,19 @@ export function PropertyCombobox({
 			selectedKey={property}
 			onSelectionChange={(selection) => onChange(selection as string)}
 		>
-			<div className="cursor-pointer min-h-6 h-6 leading-5 relative border-secondary border rounded-lg">
-				<RAInput className="w-full bg-transparent placeholder:text-secondary placeholder:font-semibold text-secondary-content border-none outline-none focus:ring-0 pl-3 pr-10 text-xs leading-5" />
-				<Button className="absolute w-10 bg-secondary/20 hover:bg-secondary/50 cursor-pointer rounded inset-y-0 right-0 flex items-center justify-center">
-					<Icon
-						name="chevron-down"
-						className="w-5 h-5 text-secondary-content"
-						aria-hidden="true"
-					/>
+			<div className="border-secondary relative h-6 min-h-6 cursor-pointer rounded-lg border leading-5">
+				<RAInput className="placeholder:text-secondary text-secondary-content w-full border-none bg-transparent pr-10 pl-3 text-xs leading-5 outline-none placeholder:font-semibold focus:ring-0" />
+				<Button className="bg-secondary/20 hover:bg-secondary/50 absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center rounded">
+					<Icon name="chevron-down" className="text-secondary-content h-5 w-5" aria-hidden="true" />
 				</Button>
 			</div>
 			<Popover className={popoverTransitionClasses}>
 				<ListBox
-					className="bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 w-full overflow-auto text-base ring-1 ring-black/5 focus:outline-none sm:text-sm"
+					className="max-h-60 w-full overflow-auto rounded-md border border-gray-400 bg-gray-900/90 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
 					items={properties}
 				>
 					{(item) => (
-						<ListBoxItem className="font-normal truncate cursor-default select-none py-1 px-2 data-[focused]:bg-secondary text-white">
+						<ListBoxItem className="data-[focused]:bg-secondary cursor-default truncate px-2 py-1 font-normal text-white select-none">
 							{capitalCase(item.id)}
 						</ListBoxItem>
 					)}
@@ -629,11 +577,7 @@ export function PropertyInput({
 					label={label}
 					labelHidden
 					tags={value || []}
-					onAdd={(t) =>
-						setValue(
-							[...(value || []), t].filter((a, i, arr) => arr.indexOf(a) === i),
-						)
-					}
+					onAdd={(t) => setValue([...(value || []), t].filter((a, i, arr) => arr.indexOf(a) === i))}
 					onRemove={(t) => setValue(value?.filter((v: any) => v !== t) || [])}
 					{...inputProps}
 				/>
@@ -661,9 +605,7 @@ export function PropertyInput({
 			return (
 				<SoundConfigForm
 					sound={sound}
-					updateSound={(property, value) =>
-						setValue({ ...sound, [property]: value })
-					}
+					updateSound={(property, value) => setValue({ ...sound, [property]: value })}
 				/>
 			);
 		}
@@ -722,10 +664,7 @@ function ComponentsEditor({
 							)
 						: null;
 					return (
-						<div
-							key={`${i}-${component as ComponentIds}`}
-							className="flex w-full"
-						>
+						<div key={`${i}-${component as ComponentIds}`} className="flex w-full">
 							<ComponentCombobox
 								component={component as ComponentIds}
 								onChange={(component) =>
@@ -759,14 +698,10 @@ function ComponentsEditor({
 										item={item}
 										path={i.toString()}
 										value={value}
-										dispatch={(action) =>
-											setValue(queryReducer(components, action))
-										}
+										dispatch={(action) => setValue(queryReducer(components, action))}
 										queryInput
 									/>
-									{item.helper && (
-										<p className="text-xs text-gray-400">{item.helper}</p>
-									)}
+									{item.helper && <p className="text-xs text-gray-400">{item.helper}</p>}
 									{/* {showDelete ? (
 						<RemoveButton onClick={() => dispatch({ type: "remove", path })} />
 					) : null} */}

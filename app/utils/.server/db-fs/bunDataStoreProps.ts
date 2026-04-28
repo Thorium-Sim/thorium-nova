@@ -1,14 +1,15 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { dump } from "js-yaml";
-import type { DataStoreOperations } from "@thorium/utils/.server/db-fs";
+
 import BasePlugin, { type AspectsMap } from "@thorium/.server/classes/Plugins";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
+import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
+import { thoriumPath } from "@thorium/utils/.server/appPaths";
+import type { DataStoreOperations } from "@thorium/utils/.server/db-fs";
+import { loadYml } from "@thorium/utils/.server/db-fs/loadYml";
 import { moveFile } from "@thorium/utils/.server/moveFile";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-import { loadYml } from "@thorium/utils/.server/db-fs/loadYml";
-import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
+import { dump } from "js-yaml";
 
 let basePath = "./";
 export function setBasePath(path: string) {
@@ -25,8 +26,7 @@ export const bunDataStoreProps: DataStoreOperations = {
 			data = loadYml(fileData);
 		} catch (err: any) {
 			if (err.code === "EACCES") {
-				err.message +=
-					"\ndata-store does not have permission to load this file\n";
+				err.message += "\ndata-store does not have permission to load this file\n";
 				throw err;
 			}
 		}
@@ -53,12 +53,7 @@ export const bunDataStoreProps: DataStoreOperations = {
 			}
 			// Named snapshots are only for flights.
 			if (name && this.meta.flightName) {
-				filePath = path.join(
-					basePath,
-					"flights",
-					this.meta.flightName,
-					`${name}.yml`,
-				);
+				filePath = path.join(basePath, "flights", this.meta.flightName, `${name}.yml`);
 			}
 			await fs.mkdir(path.dirname(filePath), { recursive: true });
 			this.initialData = undefined;
@@ -99,15 +94,9 @@ export const bunDataStoreProps: DataStoreOperations = {
 		return Bun.file(assetUrl).text();
 	},
 	async uploadAsset(file, fileName) {
-		await fs.mkdir(
-			path.join(
-				thoriumPath,
-				path.join(path.dirname(this.meta.filePath), "assets"),
-			),
-			{
-				recursive: true,
-			},
-		);
+		await fs.mkdir(path.join(thoriumPath, path.join(path.dirname(this.meta.filePath), "assets")), {
+			recursive: true,
+		});
 		return moveFile(
 			file,
 			// @ts-expect-error Bun adds the file name
@@ -122,10 +111,7 @@ export const bunDataStoreProps: DataStoreOperations = {
 		this: BasePlugin,
 		aspectClasses: Record<
 			string,
-			new (
-				manifest: { name: string } & Record<string, any>,
-				plugin: BasePlugin,
-			) => unknown
+			new (manifest: { name: string } & Record<string, any>, plugin: BasePlugin) => unknown
 		>,
 	) {
 		const glob = new Bun.Glob(
@@ -136,16 +122,14 @@ export const bunDataStoreProps: DataStoreOperations = {
 				const fileData = await Bun.file(filePath).text();
 				const aspectData = loadYml(fileData);
 				const kind = aspectData.kind as keyof AspectsMap;
-				const className =
-					aspectData.kind === "shipSystems" ? aspectData.type : aspectData.kind;
+				const className = aspectData.kind === "shipSystems" ? aspectData.type : aspectData.kind;
 				// Ignore the plugins themselves
 				if (className === "plugins") continue;
 				const aspectClass = aspectClasses[className];
 				if (!aspectClass) {
 					throw new Error(`Invalid aspect class: ${className}`);
 				}
-				if (!this.aspects[kind])
-					throw new Error(`Invalid aspect kind: ${kind}`);
+				if (!this.aspects[kind]) throw new Error(`Invalid aspect kind: ${kind}`);
 				// @ts-expect-error
 				this.aspects[kind].push(new aspectClass(aspectData, this));
 			} catch (error) {
@@ -156,16 +140,10 @@ export const bunDataStoreProps: DataStoreOperations = {
 	async rename(name, otherNames) {
 		if (!("name" in this) || typeof this.name !== "string") return;
 		if (name.trim() === this.name) return;
-		const newName = generateIncrementedName(
-			name.trim() || this.name,
-			otherNames,
-		);
+		const newName = generateIncrementedName(name.trim() || this.name, otherNames);
 		const currentPath = path.dirname(this.meta.filePath);
 		const newPath = path.join(path.dirname(currentPath), newName);
-		await fs.rename(
-			path.join(thoriumPath, currentPath),
-			path.join(thoriumPath, newPath),
-		);
+		await fs.rename(path.join(thoriumPath, currentPath), path.join(thoriumPath, newPath));
 		if ("id" in this) {
 			this.id = newName;
 		}
@@ -198,9 +176,7 @@ export const bunDataStoreProps: DataStoreOperations = {
 };
 
 export async function loadPlugins(this: ServerDataModel) {
-	const plugins = new Bun.Glob(
-		path.join(thoriumPath, "/plugins/*/manifest.yml"),
-	).scan({
+	const plugins = new Bun.Glob(path.join(thoriumPath, "/plugins/*/manifest.yml")).scan({
 		onlyFiles: true,
 	});
 	for await (const plugin of plugins) {
@@ -218,26 +194,4 @@ export async function loadPlugins(this: ServerDataModel) {
 			}
 		}
 	}
-}
-
-function parseTags(tags: string[] | null) {
-	if (!tags) return {};
-	return Object.fromEntries(
-		tags.map((tag) => {
-			const parts = tag.split(":");
-			const key = parts.shift()?.trim();
-			let value: unknown | unknown[] = parseValue(parts.join("").trim());
-			if (typeof value === "string" && value.indexOf(",") !== -1) {
-				value = value.split(",").map((v) => parseValue(v.trim()));
-			}
-			return [key, value];
-		}),
-	);
-}
-
-function parseValue(value: unknown) {
-	if (value === "true") return true;
-	if (value === "false") return false;
-	if (!Number.isNaN(Number(value))) return Number(value);
-	return value;
 }

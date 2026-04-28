@@ -1,8 +1,9 @@
+import type { EngineSpeed } from "@thorium/ecs-components/shipSystems/engineSpeeds";
 import type { KilometerPerSecond } from "@thorium/utils/unitTypes";
+
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
-import type { EngineSpeed } from "@thorium/ecs-components/shipSystems/engineSpeeds";
 
 // TODO May 3, 2022: Add the necessary sound effects
 export default class WarpEnginesPlugin extends BaseShipSystemPlugin {
@@ -17,8 +18,7 @@ export default class WarpEnginesPlugin extends BaseShipSystemPlugin {
 	speeds: EngineSpeed[];
 	constructor(params: Partial<WarpEnginesPlugin>, plugin: BasePlugin) {
 		super(params, plugin);
-		this.interstellarCruisingSpeed =
-			params.interstellarCruisingSpeed || 599_600_000_000;
+		this.interstellarCruisingSpeed = params.interstellarCruisingSpeed || 599_600_000_000;
 		this.solarCruisingSpeed = params.solarCruisingSpeed || 29_980_000;
 		this.minSpeedMultiplier = params.minSpeedMultiplier || 0.01;
 		this.speeds = params.speeds || [

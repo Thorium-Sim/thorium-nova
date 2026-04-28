@@ -1,13 +1,13 @@
-import type { Route } from "./+types/list";
-
-import { useMenubar } from "@thorium/ui/Menubar";
-import { useParams, Outlet, useNavigate, href } from "react-router";
-import { usePrompt } from "@thorium/ui/AlertDialog";
 import { q } from "@thorium/context/AppContext";
-import Button from "@thorium/ui/Button";
 import { toast } from "@thorium/context/ToastContext";
+import { usePrompt } from "@thorium/ui/AlertDialog";
+import Button from "@thorium/ui/Button";
+import { useMenubar } from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
 import { Fragment } from "react";
+import { Outlet, useNavigate, href } from "react-router";
+
+import type { Route } from "./+types/list";
 
 export default function MissionsConfig({
 	params: { pluginId, timelineId, conversationId },
@@ -28,9 +28,9 @@ export default function MissionsConfig({
 	const conversation = data.find((d) => d.name === conversationId);
 
 	return (
-		<div className="pt-10 w-full h-[calc(100%-2rem)]">
-			<div className="grid grid-cols-[14rem_1fr] gap-4 h-[calc(100%-3rem)]">
-				<div className="flex flex-col w-56 h-full row-span-2">
+		<div className="h-[calc(100%-2rem)] w-full pt-10">
+			<div className="grid h-[calc(100%-3rem)] grid-cols-[14rem_1fr] gap-4">
+				<div className="row-span-2 flex h-full w-56 flex-col">
 					<Button
 						className="btn-success btn-sm w-full"
 						onClick={async () => {
@@ -39,21 +39,17 @@ export default function MissionsConfig({
 							});
 							if (typeof name !== "string") return;
 							try {
-								const result =
-									await q.plugin.timeline.conversations.create.netSend({
-										name,
+								const result = await q.plugin.timeline.conversations.create.netSend({
+									name,
+									pluginId,
+									timelineId,
+								});
+								navigate(
+									href("/config/:pluginId/missions/:timelineId/conversations/:conversationId", {
 										pluginId,
 										timelineId,
-									});
-								navigate(
-									href(
-										"/config/:pluginId/missions/:timelineId/conversations/:conversationId",
-										{
-											pluginId,
-											timelineId,
-											conversationId: result.conversationId,
-										},
-									),
+										conversationId: result.conversationId,
+									}),
 								);
 							} catch (err) {
 								if (err instanceof Error) {
@@ -80,7 +76,7 @@ export default function MissionsConfig({
 						selectedItem={conversationId || null}
 						setSelectedItem={({ id }) => navigate(`${id}`)}
 						renderItem={(c) => (
-							<div className="flex justify-between items-center" key={c.id}>
+							<div className="flex items-center justify-between" key={c.id}>
 								<div>{c.name}</div>
 							</div>
 						)}

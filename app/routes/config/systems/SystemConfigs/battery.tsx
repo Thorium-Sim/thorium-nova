@@ -1,11 +1,12 @@
+import { Navigate } from "@thorium/components/Navigate";
 import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
 import { toast } from "@thorium/context/ToastContext";
 import Input from "@thorium/ui/Input";
 import { useContext, useReducer } from "react";
 import { useParams } from "react-router";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+
 import { OverrideResetButton } from "../OverrideResetButton";
-import { Navigate } from "@thorium/components/Navigate";
 
 export default function BatteryConfig() {
 	const { pluginId, systemId, shipId } = useParams() as {
@@ -29,20 +30,17 @@ export default function BatteryConfig() {
 		<fieldset key={key} className="flex-1 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
-					<div className="pb-2 flex items-center">
+					<div className="flex items-center pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
 							pattern="[0-9]*"
 							label="Capacity"
 							placeholder={"50"}
-							helperText={
-								"The amount of power this battery can hold in MegaWatt-Hours"
-							}
+							helperText={"The amount of power this battery can hold in MegaWatt-Hours"}
 							defaultValue={system.capacity}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.battery.update.netSend({
 										pluginId,
@@ -62,13 +60,9 @@ export default function BatteryConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="capacity"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="capacity" setRekey={setRekey} className="mt-6" />
 					</div>
-					<div className="pb-2 flex items-center">
+					<div className="flex items-center pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -80,8 +74,7 @@ export default function BatteryConfig() {
 							}
 							defaultValue={system.chargeRate}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.battery.update.netSend({
 										pluginId,
@@ -101,26 +94,19 @@ export default function BatteryConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="chargeRate"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="chargeRate" setRekey={setRekey} className="mt-6" />
 					</div>
-					<div className="pb-2 flex items-center">
+					<div className="flex items-center pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
 							pattern="[0-9]*"
 							label="Discharge Rate"
 							placeholder={"1"}
-							helperText={
-								"How much energy the battery provides to connected systems."
-							}
+							helperText={"How much energy the battery provides to connected systems."}
 							defaultValue={system.dischargeRate}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.battery.update.netSend({
 										pluginId,
@@ -140,11 +126,7 @@ export default function BatteryConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="dischargeRate"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="dischargeRate" setRekey={setRekey} className="mt-6" />
 					</div>
 				</div>
 			</div>

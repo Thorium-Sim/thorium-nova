@@ -9,7 +9,7 @@ import { aroundEach, beforeEach, describe, expect, it } from "vitest";
 
 aroundEach(async (runTest) => {
 	await DataStore.operations.run(testDataStoreProps, async () => {
-		runTest();
+		await runTest();
 	});
 });
 
@@ -41,11 +41,7 @@ function buildSatelliteEntities(ecs: ECS) {
 	ecs.addEntity(satellite2);
 	const satellite3 = buildSatellite([0, 3, 0], lightMinuteToLightYear(7));
 	ecs.addEntity(satellite3);
-	const satellite4 = buildSatellite(
-		[0, -5, 0],
-		lightMinuteToLightYear(7),
-		true,
-	);
+	const satellite4 = buildSatellite([0, -5, 0], lightMinuteToLightYear(7), true);
 	ecs.addEntity(satellite4);
 	const satellite5 = buildSatellite([4, 0, 0], lightMinuteToLightYear(5));
 	ecs.addEntity(satellite5);
@@ -87,12 +83,7 @@ describe("CommSatelliteSystem", () => {
 	it("should send a message from the sender to the destination", () => {
 		satellites[3].removeComponent("isPlayerShip");
 		const message = new Entity();
-		const nextNodeId = pickNextLongRangeMessageNode(
-			ecs,
-			satellites[0].id,
-			destinationShip.id,
-			[],
-		);
+		const nextNodeId = pickNextLongRangeMessageNode(ecs, satellites[0].id, destinationShip.id, []);
 		message.addComponent("isLongRangeMessage", {
 			destinationId: destinationShip.id,
 			senderId: senderShip.id,
@@ -118,30 +109,22 @@ describe("CommSatelliteSystem", () => {
 		expect(message.components.position?.y).toEqual(0);
 		expect(message.components.position?.z).toEqual(0);
 
-		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(
-			satellites[0].id,
-		);
+		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(satellites[0].id);
 		for (let i = 0; i < 30 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(
-			satellites[1].id,
-		);
+		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(satellites[1].id);
 		for (let i = 0; i < 30 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(
-			satellites[2].id,
-		);
+		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(satellites[2].id);
 		expect(message.components.position?.x).toBeCloseTo(-5.383);
 		expect(message.components.position?.y).toBeCloseTo(0.6926);
 
 		for (let i = 0; i < 90 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(
-			satellites[4].id,
-		);
+		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(satellites[4].id);
 		expect(message.components.position?.x).toBeCloseTo(2.224);
 		expect(message.components.position?.y).toBeCloseTo(1.331);
 		expect(message.components.isLongRangeMessage?.state).toEqual("sending");
@@ -154,12 +137,7 @@ describe("CommSatelliteSystem", () => {
 	});
 	it("should send a message and be intercepted by the player ship satellite", () => {
 		const message = new Entity();
-		const nextNodeId = pickNextLongRangeMessageNode(
-			ecs,
-			satellites[0].id,
-			destinationShip.id,
-			[],
-		);
+		const nextNodeId = pickNextLongRangeMessageNode(ecs, satellites[0].id, destinationShip.id, []);
 		message.addComponent("isLongRangeMessage", {
 			destinationId: destinationShip.id,
 			senderId: senderShip.id,
@@ -185,21 +163,15 @@ describe("CommSatelliteSystem", () => {
 		expect(message.components.position?.y).toEqual(0);
 		expect(message.components.position?.z).toEqual(0);
 
-		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(
-			satellites[0].id,
-		);
+		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(satellites[0].id);
 		for (let i = 0; i < 30 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(
-			satellites[1].id,
-		);
+		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(satellites[1].id);
 		for (let i = 0; i < 30 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(
-			satellites[3].id,
-		);
+		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(satellites[3].id);
 		expect(message.components.position?.x).toBeCloseTo(-5.569);
 		expect(message.components.position?.y).toBeCloseTo(-1.022);
 
@@ -207,9 +179,7 @@ describe("CommSatelliteSystem", () => {
 			ecs.update(16);
 		}
 		expect(message.components.isLongRangeMessage?.state).toEqual("intercepted");
-		expect(message.components.isLongRangeMessage?.interceptorId).toEqual(
-			satellites[3].id,
-		);
+		expect(message.components.isLongRangeMessage?.interceptorId).toEqual(satellites[3].id);
 
 		// Simulate sending the message along after its been intercepted
 		message.updateComponent("isLongRangeMessage", {
@@ -222,9 +192,7 @@ describe("CommSatelliteSystem", () => {
 			ecs.update(16);
 		}
 
-		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(
-			satellites[4].id,
-		);
+		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(satellites[4].id);
 		expect(message.components.position?.x).toBeCloseTo(1.799);
 		expect(message.components.position?.y).toBeCloseTo(-2.751);
 		expect(message.components.isLongRangeMessage?.state).toEqual("sending");
@@ -239,12 +207,7 @@ describe("CommSatelliteSystem", () => {
 		destinationShip.updateComponent("position", { x: 100 });
 		satellites[3].removeComponent("isPlayerShip");
 		const message = new Entity();
-		const nextNodeId = pickNextLongRangeMessageNode(
-			ecs,
-			satellites[0].id,
-			destinationShip.id,
-			[],
-		);
+		const nextNodeId = pickNextLongRangeMessageNode(ecs, satellites[0].id, destinationShip.id, []);
 		message.addComponent("isLongRangeMessage", {
 			destinationId: destinationShip.id,
 			senderId: senderShip.id,
@@ -270,30 +233,22 @@ describe("CommSatelliteSystem", () => {
 		expect(message.components.position?.y).toEqual(0);
 		expect(message.components.position?.z).toEqual(0);
 
-		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(
-			satellites[0].id,
-		);
+		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(satellites[0].id);
 		for (let i = 0; i < 30 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(
-			satellites[1].id,
-		);
+		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(satellites[1].id);
 		for (let i = 0; i < 30 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(
-			satellites[2].id,
-		);
+		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(satellites[2].id);
 		expect(message.components.position?.x).toBeCloseTo(-5.383);
 		expect(message.components.position?.y).toBeCloseTo(0.6926);
 
 		for (let i = 0; i < 90 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(
-			satellites[4].id,
-		);
+		expect(message.components.isLongRangeMessage?.nextNodeId).toEqual(satellites[4].id);
 		expect(message.components.position?.x).toBeCloseTo(2.224);
 		expect(message.components.position?.y).toBeCloseTo(1.331);
 		expect(message.components.isLongRangeMessage?.state).toEqual("sending");

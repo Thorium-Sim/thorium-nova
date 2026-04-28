@@ -1,14 +1,8 @@
-import type {
-	ActionAction,
-	ActionState,
-} from "@thorium/components/Config/ActionBuilder";
+import type { ActionAction, ActionState } from "@thorium/components/Config/ActionBuilder";
 import { getObject } from "@thorium/components/Config/EntityQueryBuilder";
 import { produce } from "immer";
 
-export function actionReducer(
-	state: ActionState,
-	action: ActionAction,
-): ActionState {
+export function actionReducer(state: ActionState, action: ActionAction): ActionState {
 	let path = "";
 	if ("path" in action) {
 		path = action.path?.split(".").filter(Boolean).join(".") || "";
@@ -26,10 +20,7 @@ export function actionReducer(
 		case "remove":
 			return produce(state, (draft) => {
 				path = action.path.split(".").slice(0, -1).filter(Boolean).join(".");
-				let index: number | string | undefined = action.path
-					.split(".")
-					.filter(Boolean)
-					.pop();
+				let index: number | string | undefined = action.path.split(".").filter(Boolean).pop();
 				index = Number.isNaN(Number(index)) ? index : Number(index);
 				getObject(draft, path).splice(index, 1);
 			});

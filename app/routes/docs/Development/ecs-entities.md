@@ -18,17 +18,17 @@ the component data.
 
 ```ts
 const entity = new Entity(null, {
-  identity: {
-    name: "Bob",
-    description: "A nice guy",
-  },
+	identity: {
+		name: "Bob",
+		description: "A nice guy",
+	},
 });
 
 const entity = new Entity(12345, {
-  identity: {
-    name: "Alice",
-    description: "A nice lady",
-  },
+	identity: {
+		name: "Alice",
+		description: "A nice lady",
+	},
 });
 ```
 
@@ -39,11 +39,10 @@ which adds a single component.
 const entity = new Entity();
 
 entity.addComponent("identity", {
-  name: "Bob",
-  description: "A nice guy",
+	name: "Bob",
+	description: "A nice guy",
 });
 ```
-
 
 And, if the need arises, components can be removed from an entity with the
 `removeComponent` method. Removing components both deletes the data in the
@@ -62,31 +61,31 @@ might be helpful to create a factory function to create them.
 ```ts
 // This is not a realistic example, but it shows how to create a spawner
 function planetSpawner({
-  name,
-  description,
-  position,
-  radius,
-  mass,
-  atmosphere,
+	name,
+	description,
+	position,
+	radius,
+	mass,
+	atmosphere,
 }: {
-  name: string;
-  description: string;
-  position: {x: number; y: number; z: number};
-  radius: number;
-  mass: number;
-  atmosphere: boolean;
+	name: string;
+	description: string;
+	position: { x: number; y: number; z: number };
+	radius: number;
+	mass: number;
+	atmosphere: boolean;
 }) {
-  return new Entity(null, {
-    identity: {
-      name,
-      description,
-    },
-    position,
-    isPlanet: {
-      radius,
-      mass,
-      atmosphere,
-    },
-  });
+	return new Entity(null, {
+		identity: {
+			name,
+			description,
+		},
+		position,
+		isPlanet: {
+			radius,
+			mass,
+			atmosphere,
+		},
+	});
 }
 ```

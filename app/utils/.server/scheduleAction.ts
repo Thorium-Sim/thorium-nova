@@ -1,8 +1,9 @@
 import type { AllSends, SendInputs } from "@thorium/.server/init/router";
-import { Entity, type ECS } from "../ecs";
-import type { BlockMetadata } from "./executeBlocks";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
+
+import { Entity, type ECS } from "../ecs";
 import uniqid from "../uniqid";
+import type { BlockMetadata } from "./executeBlocks";
 
 /**
  * Use the ECS Timer System to schedule an action
@@ -16,12 +17,7 @@ export function scheduleAction<A extends AllSends>(
 	inputs: SendInputs<A>,
 	delay: number,
 ) {
-	scheduleBlocks(
-		ecs,
-		[{ id: uniqid("act-"), type: "Action", action, values: inputs }],
-		{},
-		delay,
-	);
+	scheduleBlocks(ecs, [{ id: uniqid("act-"), type: "Action", action, values: inputs }], {}, delay);
 }
 
 /**

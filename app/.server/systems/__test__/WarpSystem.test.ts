@@ -1,13 +1,14 @@
-import { ECS, Entity } from "@thorium/utils/ecs";
-import { WarpSystem } from "../WarpSystem";
-import { aroundEach, beforeEach, describe, expect, it } from "vitest";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
 import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
+import { ECS, Entity } from "@thorium/utils/ecs";
+import { aroundEach, beforeEach, describe, expect, it } from "vitest";
+
+import { WarpSystem } from "../WarpSystem";
 
 aroundEach(async (runTest) => {
 	await DataStore.operations.run(testDataStoreProps, async () => {
-		runTest();
+		await runTest();
 	});
 });
 describe("WarpSystem", () => {
@@ -65,11 +66,7 @@ describe("WarpSystem", () => {
 		for (let i = 0; i < 60 * 3; i++) {
 			ecs.update(16);
 		}
-		expect(engines?.forwardAcceleration).toMatchInlineSnapshot(
-			`-0.0988217916351965`,
-		);
-		expect(engines?.forwardVelocity).toMatchInlineSnapshot(
-			`0.018183209660876158`,
-		);
+		expect(engines?.forwardAcceleration).toMatchInlineSnapshot(`-0.0988217916351965`);
+		expect(engines?.forwardVelocity).toMatchInlineSnapshot(`0.018183209660876158`);
 	});
 });

@@ -1,10 +1,10 @@
-import type BasePlugin from "../index";
-import { Aspect } from "../Aspect";
-
-import DeckPlugin, { DeckEdge } from "./Deck";
-import z from "zod";
-import type { Liter } from "@thorium/utils/unitTypes";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+import type { Liter } from "@thorium/utils/unitTypes";
+import z from "zod";
+
+import { Aspect } from "../Aspect";
+import type BasePlugin from "../index";
+import DeckPlugin, { DeckEdge } from "./Deck";
 
 export const shipCategories = z.union([
 	z.literal("Cruiser"),
@@ -94,8 +94,7 @@ export default class ShipPlugin extends Aspect {
 		);
 		super({ name, ...params }, { kind: "ships" }, plugin, {});
 		this.name = name;
-		this.description =
-			params.description || "Boldly going where no one has gone before.";
+		this.description = params.description || "Boldly going where no one has gone before.";
 		this.category = params.category || "Cruiser";
 		this.tags = params.tags || [];
 		this.assets = params.assets || {

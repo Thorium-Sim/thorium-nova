@@ -243,22 +243,10 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 		this.calculatedMaxWidth = this.getAttrMaxWidth();
 		for (const child of this.children) {
 			const c = child as TabNode;
-			this.calculatedMinWidth = Math.max(
-				this.calculatedMinWidth,
-				c.getMinWidth(),
-			);
-			this.calculatedMinHeight = Math.max(
-				this.calculatedMinHeight,
-				c.getMinHeight(),
-			);
-			this.calculatedMaxWidth = Math.min(
-				this.calculatedMaxWidth,
-				c.getMaxWidth(),
-			);
-			this.calculatedMaxHeight = Math.min(
-				this.calculatedMaxHeight,
-				c.getMaxHeight(),
-			);
+			this.calculatedMinWidth = Math.max(this.calculatedMinWidth, c.getMinWidth());
+			this.calculatedMinHeight = Math.max(this.calculatedMinHeight, c.getMinHeight());
+			this.calculatedMaxWidth = Math.min(this.calculatedMaxWidth, c.getMaxWidth());
+			this.calculatedMaxHeight = Math.min(this.calculatedMaxHeight, c.getMaxHeight());
 		}
 
 		this.calculatedMinHeight += this.tabStripRect.height;
@@ -313,11 +301,7 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 	}
 
 	/** @internal */
-	canDrop(
-		dragNode: Node & IDraggable,
-		x: number,
-		y: number,
-	): DropInfo | undefined {
+	canDrop(dragNode: Node & IDraggable, x: number, y: number): DropInfo | undefined {
 		let dropInfo: DropInfo | undefined;
 
 		if (dragNode === this) {
@@ -330,18 +314,11 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 				-1,
 				CLASSES.FLEXLAYOUT__OUTLINE_RECT,
 			);
-		} else if (
-			this.getWindowId() !== Model.MAIN_WINDOW_ID &&
-			!canDockToWindow(dragNode)
-		) {
+		} else if (this.getWindowId() !== Model.MAIN_WINDOW_ID && !canDockToWindow(dragNode)) {
 			return undefined;
 		} else if (this.contentRect!.contains(x, y)) {
 			let dockLocation = DockLocation.CENTER;
-			if (
-				this.model.getMaximizedTabset(
-					(this.parent as RowNode).getWindowId(),
-				) === undefined
-			) {
+			if (this.model.getMaximizedTabset((this.parent as RowNode).getWindowId()) === undefined) {
 				dockLocation = DockLocation.getLocation(this.contentRect!, x, y);
 			}
 			const outlineRect = dockLocation.getDockRect(this.rect);
@@ -428,12 +405,7 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 	}
 
 	/** @internal */
-	drop(
-		dragNode: Node,
-		location: DockLocation,
-		index: number,
-		select?: boolean,
-	) {
+	drop(dragNode: Node, location: DockLocation, index: number, select?: boolean) {
 		const dockLocation = location;
 
 		if (this === dragNode) {
@@ -446,10 +418,7 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 		if (dragParent !== undefined) {
 			fromIndex = dragParent.removeChild(dragNode);
 			// if selected node in border is being docked into tabset then deselect border tabs
-			if (
-				dragParent instanceof BorderNode &&
-				dragParent.getSelected() === fromIndex
-			) {
+			if (dragParent instanceof BorderNode && dragParent.getSelected() === fromIndex) {
 				dragParent.setSelected(-1);
 			} else {
 				adjustSelectedIndex(dragParent, fromIndex);
@@ -457,12 +426,7 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 		}
 
 		// if dropping a tab back to same tabset and moving to forward position then reduce insertion index
-		if (
-			dragNode instanceof TabNode &&
-			dragParent === this &&
-			fromIndex < index &&
-			index > 0
-		) {
+		if (dragNode instanceof TabNode && dragParent === this && fromIndex < index && index > 0) {
 			index--;
 		}
 
@@ -504,10 +468,7 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 				// create new tabset parent
 
 				const callback = this.model.getOnCreateTabSet();
-				moveNode = new TabSetNode(
-					this.model,
-					callback ? callback(dragNode as TabNode) : {},
-				);
+				moveNode = new TabSetNode(this.model, callback ? callback(dragNode as TabNode) : {});
 				moveNode.addChild(dragNode);
 
 				dragParent = moveNode;
@@ -574,22 +535,15 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 	/** @internal */
 	private static createAttributeDefinitions(): AttributeDefinitions {
 		const attributeDefinitions = new AttributeDefinitions();
-		attributeDefinitions
-			.add("type", TabSetNode.TYPE, true)
-			.setType(Attribute.STRING)
-			.setFixed();
+		attributeDefinitions.add("type", TabSetNode.TYPE, true).setType(Attribute.STRING).setFixed();
 		attributeDefinitions
 			.add("id", undefined)
 			.setType(Attribute.STRING)
-			.setDescription(
-				`the unique id of the tab set, if left undefined a uuid will be assigned`,
-			);
+			.setDescription(`the unique id of the tab set, if left undefined a uuid will be assigned`);
 		attributeDefinitions
 			.add("weight", 100)
 			.setType(Attribute.NUMBER)
-			.setDescription(
-				`relative weight for sizing of this tabset in parent row`,
-			);
+			.setDescription(`relative weight for sizing of this tabset in parent row`);
 		attributeDefinitions
 			.add("selected", 0)
 			.setType(Attribute.NUMBER)
@@ -616,9 +570,7 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 			);
 		attributeDefinitions
 			.addInherited("enableMaximize", "tabSetEnableMaximize")
-			.setDescription(
-				`allow user to maximize tabset to fill view via maximize button`,
-			);
+			.setDescription(`allow user to maximize tabset to fill view via maximize button`);
 		attributeDefinitions
 			.addInherited("enableClose", "tabSetEnableClose")
 			.setDescription(`allow user to close tabset via a close button`);
@@ -633,9 +585,7 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 			.setDescription(`a class name to apply to the tab strip`);
 		attributeDefinitions
 			.addInherited("enableTabStrip", "tabSetEnableTabStrip")
-			.setDescription(
-				`enable tab strip and allow multiple tabs in this tabset`,
-			);
+			.setDescription(`enable tab strip and allow multiple tabs in this tabset`);
 		attributeDefinitions
 			.addInherited("minWidth", "tabSetMinWidth")
 			.setDescription(`minimum width (in px) for this tabset`);
@@ -662,9 +612,7 @@ export class TabSetNode extends Node implements IDraggable, IDropTarget {
 		attributeDefinitions
 			.addInherited("enableActiveIcon", "tabSetEnableActiveIcon")
 			.setType(Attribute.BOOLEAN)
-			.setDescription(
-				`whether the active icon (*) should be displayed when the tabset is active`,
-			);
+			.setDescription(`whether the active icon (*) should be displayed when the tabset is active`);
 
 		attributeDefinitions
 			.addInherited("enableTabScrollbar", "tabSetEnableTabScrollbar")

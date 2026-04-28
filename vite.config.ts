@@ -1,17 +1,19 @@
-import { reactRouter } from "@react-router/dev/vite";
-import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { setDefaultResultOrder } from "node:dns";
+
 import mdx from "@mdx-js/rollup";
-import remarkFrontmatter from "remark-frontmatter";
-import remarkMdxFrontmatter from "remark-mdx-frontmatter";
-import remarkMdxImages from "./scripts/remark-mdx-images";
+import { reactRouter } from "@react-router/dev/vite";
+import rehypeShiki from "@shikijs/rehype";
+import tailwindcss from "@tailwindcss/vite";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
-import rehypeShiki from "@shikijs/rehype";
+import remarkFrontmatter from "remark-frontmatter";
+import remarkMdxFrontmatter from "remark-mdx-frontmatter";
+import { defineConfig } from "vite";
 import { iconsSpritesheet } from "vite-plugin-icons-spritesheet";
+import tsconfigPaths from "vite-tsconfig-paths";
+
 import { componentDocs } from "./scripts/componentDocs";
-import tailwindcss from "@tailwindcss/vite";
+import remarkMdxImages from "./scripts/remark-mdx-images";
 // import { analyzer } from "vite-bundle-analyzer";
 // import Inspect from "vite-plugin-inspect";
 
@@ -31,11 +33,7 @@ export default defineConfig({
 				// @ts-ignore
 				remarkMdxImages,
 			],
-			rehypePlugins: [
-				rehypeSlug,
-				rehypeAutolinkHeadings,
-				[rehypeShiki, { theme: "one-dark-pro" }],
-			],
+			rehypePlugins: [rehypeSlug, rehypeAutolinkHeadings, [rehypeShiki, { theme: "one-dark-pro" }]],
 		}),
 		iconsSpritesheet({
 			// Defaults to false, should it generate TS types for you
@@ -60,7 +58,7 @@ export default defineConfig({
 		outDir: "../build",
 		emptyOutDir: true,
 		rollupOptions: {
-			onwarn: (warning, warn) => {},
+			onwarn: () => {},
 		},
 	},
 

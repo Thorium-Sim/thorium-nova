@@ -3,6 +3,7 @@ import { setCursor } from "@thorium/utils/setCursor";
 import { lightYearToLightMinute } from "@thorium/utils/unitTypes";
 import React from "react";
 import { Group, type Mesh, Vector3 } from "three";
+
 import { useGetStarmapStore } from "../starmapStore";
 import SystemCircle from "./SystemCircle";
 import SystemLabel from "./SystemLabel";
@@ -21,7 +22,7 @@ const SystemMarker: React.FC<SystemMarkerProps> = ({
 	systemId,
 	name,
 	position,
-	draggable,
+	draggable: _,
 	commSatelliteRadius,
 	commSatelliteColor,
 	...props
@@ -31,19 +32,12 @@ const SystemMarker: React.FC<SystemMarkerProps> = ({
 
 	const direction = React.useRef(0);
 	const cameraView = useStarmapStore((state) => state.cameraView);
-	const showSatelliteRange = useStarmapStore(
-		(state) => state.showSatelliteRange,
-	);
+	const showSatelliteRange = useStarmapStore((state) => state.showSatelliteRange);
 
 	useFrame(({ camera }) => {
-		const zoom = group.current?.position
-			? camera.position.distanceTo(group.current?.position)
-			: 1;
+		const zoom = group.current?.position ? camera.position.distanceTo(group.current?.position) : 1;
 
-		const zoomedScale = Math.max(
-			Math.min(zoom ** (1 / 3) * 5000, zoom / 120),
-			zoom / 250,
-		);
+		const zoomedScale = Math.max(Math.min(zoom ** (1 / 3) * 5000, zoom / 120), zoom / 250);
 
 		group.current?.scale.set(zoomedScale, zoomedScale, zoomedScale);
 		group.current?.quaternion.copy(camera.quaternion);
@@ -55,11 +49,7 @@ const SystemMarker: React.FC<SystemMarkerProps> = ({
 			{showSatelliteRange && commSatelliteRadius ? (
 				<mesh
 					position={positionVector}
-					scale={[
-						commSatelliteRadius,
-						commSatelliteRadius,
-						commSatelliteRadius,
-					]}
+					scale={[commSatelliteRadius, commSatelliteRadius, commSatelliteRadius]}
 				>
 					<sphereGeometry args={[lightYearToLightMinute(1), 16, 16]} />
 					<meshBasicMaterial
@@ -106,11 +96,7 @@ const SystemMarker: React.FC<SystemMarkerProps> = ({
 					}}
 				/>
 				{/* )} */}
-				<SystemLabel
-					systemId={systemId}
-					hoveringDirection={direction}
-					name={name}
-				/>
+				<SystemLabel systemId={systemId} hoveringDirection={direction} name={name} />
 			</group>{" "}
 		</>
 	);

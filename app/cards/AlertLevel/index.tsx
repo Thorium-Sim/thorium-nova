@@ -1,9 +1,9 @@
-import * as React from "react";
 import { q } from "@thorium/context/AppContext";
 import type { isShip } from "@thorium/ecs-components/isShip";
 import { useStation } from "@thorium/routes/station/useStation";
-import type z from "zod";
 import { cn } from "@thorium/utils/cn";
+import * as React from "react";
+import type z from "zod";
 
 // TODO March 18, 2026 - When we have internal crew and determine what all of these do, turn them into flags and make it so ships can be configured with fewer alert conditions and customizable colors and descriptions.
 type AlertLevelT = z.infer<typeof isShip>["alertLevel"];
@@ -54,7 +54,7 @@ export function AlertLevel() {
 	};
 
 	return (
-		<ul className="flex flex-col max-w-3xl items-center mx-auto justify-around h-full gap-4 cursor-pointer">
+		<ul className="mx-auto flex h-full max-w-3xl cursor-pointer flex-col items-center justify-around gap-4">
 			{alertLevelText.map((a) => (
 				<li
 					key={a.number}
@@ -68,8 +68,8 @@ export function AlertLevel() {
 						"--alert-bg-color": a.color,
 					}}
 				>
-					<div className="text-xl lg:text-3xl font-bold">{a.label}</div>
-					<div className="text-balance text-base lg:text-lg">{a.text}</div>
+					<div className="text-xl font-bold lg:text-3xl">{a.label}</div>
+					<div className="text-base text-balance lg:text-lg">{a.text}</div>
 				</li>
 			))}
 		</ul>

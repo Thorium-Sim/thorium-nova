@@ -29,15 +29,12 @@ export class LegacySensorProgramSystem extends System {
 		if (isLegacySensors.program.type === "field") {
 			if (
 				this.ecs.rng.next() + 0.5 <
-				isLegacySensors.program.density *
-					(movementVec.length() * 10000) *
-					elapsedRatio
+				isLegacySensors.program.density * (movementVec.length() * 10000) * elapsedRatio
 			) {
 				const armyContact = this.ecs.rng.nextFromList(
-					getArmyContacts(
-						this.ecs,
-						entity.components.isShipSystem?.shipId || -1,
-					).filter((c) => !c.components.isArmyContact?.omitFromProgram),
+					getArmyContacts(this.ecs, entity.components.isShipSystem?.shipId || -1).filter(
+						(c) => !c.components.isArmyContact?.omitFromProgram,
+					),
 				);
 				if (!armyContact) return;
 

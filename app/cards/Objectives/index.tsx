@@ -18,14 +18,12 @@ export function Objectives() {
 		.reverse();
 	return (
 		<div className="h-screen">
-			<h1 className="font-black text-2xl @2xl:text-4xl">Mission Objectives</h1>
-			<div className="@2xl:panel @2xl:panel-alert flex flex-col h-full max-w-screen-md mx-auto gap-4 @2xl:p-4">
+			<h1 className="text-2xl font-black @2xl:text-4xl">Mission Objectives</h1>
+			<div className="@2xl:panel @2xl:panel-alert mx-auto flex h-full max-w-screen-md flex-col gap-4 @2xl:p-4">
 				{sortedObjectives.length === 0 ? (
 					<p>No objectives.</p>
 				) : (
-					sortedObjectives.map((objective) => (
-						<Objective key={objective.id} {...objective} />
-					))
+					sortedObjectives.map((objective) => <Objective key={objective.id} {...objective} />)
 				)}
 			</div>
 		</div>

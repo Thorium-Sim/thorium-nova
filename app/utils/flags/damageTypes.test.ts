@@ -1,8 +1,5 @@
 import { ECS, Entity } from "@thorium/utils/ecs";
-import {
-	getAggregateDamage,
-	getReportEffects,
-} from "@thorium/utils/flags/damageTypes";
+import { getAggregateDamage, getReportEffects } from "@thorium/utils/flags/damageTypes";
 import { it, expect, beforeEach, describe } from "vitest";
 let system: Entity;
 let otherSystem: Entity;

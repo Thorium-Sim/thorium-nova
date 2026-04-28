@@ -1,8 +1,9 @@
-import { interpolateToRange } from "./interpolateToRange";
-import { playSound, updateSound, removeSound } from "../playSound";
+import { clientId, q } from "@thorium/context/AppContext";
 import type { Sound } from "@thorium/ecs-components/sound";
 import { useRef, useEffect } from "react";
-import { clientId, q } from "@thorium/context/AppContext";
+
+import { playSound, updateSound, removeSound } from "../playSound";
+import { interpolateToRange } from "./interpolateToRange";
 
 /** This hook should do the following:
  * - Play ambiance sounds
@@ -26,17 +27,13 @@ export function usePlayAmbiance(
 		if (noAmbiance) return;
 		// Making the useEffect hook dependent on dataUpdatedAt ensures that the
 		// hook runs whenever the data is updated.
-		dataUpdatedAt;
 		for (const entity of entities) {
 			if (entity.ambiance) {
 				for (let i = 0; i < entity.ambiance.length; i++) {
 					const id = `${soundKey}-${entity.id}-ambiance-${i}`;
 					const sound = entity.ambiance[i];
 					const volume = interpolateToRange(sound.volume, entity.volumePercent);
-					const playbackRate = interpolateToRange(
-						sound.playbackRate,
-						entity.playbackRate,
-					);
+					const playbackRate = interpolateToRange(sound.playbackRate, entity.playbackRate);
 					if (!soundsRef.current.has(id)) {
 						playSound({
 							id,

@@ -1,17 +1,16 @@
-import Menubar, { useMenubar } from "@thorium/ui/Menubar";
-import { startTransition, useRef, useState } from "react";
-import { AddCoreCombobox } from "./AddCoreCombobox";
-import { CoreFlexLayout } from "./CoreFlexLayout";
-import { ErrorBoundary } from "react-error-boundary";
-import { CoreFlexLayoutProvider } from "./CoreFlexLayoutContext";
-import { CoreFlexLayoutDropdown } from "./CoreFlexLayoutDropdown";
-import { capitalCase } from "change-case";
-import { Icon } from "@thorium/ui/Icon";
-import type { Layout } from "@thorium/utils/FlexLayout";
-import "@thorium/utils/FlexLayout/dark.css";
-import { StationData } from "@thorium/routes/station/useStation";
 import { clientId, q } from "@thorium/context/AppContext";
+import { pickStarmapShip } from "@thorium/cores/StarmapCore/pickShip";
+import { StationData } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
+import { Icon } from "@thorium/ui/Icon";
+import Menubar, { useMenubar } from "@thorium/ui/Menubar";
+import { cn } from "@thorium/utils/cn";
+import type { Layout } from "@thorium/utils/FlexLayout";
+import { capitalCase } from "change-case";
+
+import "@thorium/utils/FlexLayout/dark.css";
+import { startTransition, useRef, useState } from "react";
 import {
 	ComboBox,
 	Input,
@@ -20,16 +19,19 @@ import {
 	Popover,
 	Button as RAButton,
 } from "react-aria-components";
-import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
-import { pickStarmapShip } from "@thorium/cores/StarmapCore/pickShip";
-import { cn } from "@thorium/utils/cn";
+import { ErrorBoundary } from "react-error-boundary";
+
+import { AddCoreCombobox } from "./AddCoreCombobox";
+import { CoreFlexLayout } from "./CoreFlexLayout";
+import { CoreFlexLayoutProvider } from "./CoreFlexLayoutContext";
+import { CoreFlexLayoutDropdown } from "./CoreFlexLayoutDropdown";
 export default function FlightDirectorLayout() {
 	const layoutRef = useRef<Layout>(null);
 	const [focusShipId, setFocusShipId] = useState<number>();
 	return (
 		<StationData shipId={focusShipId}>
 			<CoreFlexLayoutProvider>
-				<div className="h-full flex flex-col backdrop-blur relative">
+				<div className="relative flex h-full flex-col backdrop-blur">
 					<Menubar>
 						<div className="relative flex-1">
 							<CoreMenubar
@@ -78,14 +80,8 @@ function CoreMenubar({
 				<ErrorBoundary fallback={null}>
 					<CoreFlexLayoutDropdown />
 				</ErrorBoundary>
-				<ShipSelector
-					focusShipId={focusShipId}
-					setFocusShipId={setFocusShipId}
-				/>
-				<Button
-					className="btn-info btn-outline btn-xs"
-					title="Add New Player Ship"
-				>
+				<ShipSelector focusShipId={focusShipId} setFocusShipId={setFocusShipId} />
+				<Button className="btn-info btn-outline btn-xs" title="Add New Player Ship">
 					<Icon name="plus" />
 				</Button>
 				<Button
@@ -98,12 +94,10 @@ function CoreMenubar({
 							setFocusShipId(undefined);
 							return;
 						}
-						pickStarmapShip(
-							"Choose a ship to transfer core control to.",
-							(object) =>
-								startTransition(() => {
-									setFocusShipId(object);
-								}),
+						pickStarmapShip("Choose a ship to transfer core control to.", (object) =>
+							startTransition(() => {
+								setFocusShipId(object);
+							}),
 						);
 					}}
 				>
@@ -135,8 +129,7 @@ function ShipSelector({
 	if (focusShipId) {
 		shipList.push({
 			id: focusShipId,
-			name:
-				focusShip.id === focusShipId ? focusShip.name : `Entity ${focusShipId}`,
+			name: focusShip.id === focusShipId ? focusShip.name : `Entity ${focusShipId}`,
 		});
 	}
 	return (
@@ -152,26 +145,22 @@ function ShipSelector({
 				setFocusShipId(undefined);
 			}}
 		>
-			<div className="cursor-pointer min-h-6 h-6 leading-5 relative border-info border rounded-lg">
+			<div className="border-info relative h-6 min-h-6 cursor-pointer rounded-lg border leading-5">
 				<Input
 					placeholder={name || "Choose Player Ship"}
-					className="w-full bg-transparent placeholder:text-info placeholder:font-semibold text-info border-none outline-none focus:ring-0 pl-3 pr-10 text-xs leading-5"
+					className="placeholder:text-info text-info w-full border-none bg-transparent pr-10 pl-3 text-xs leading-5 outline-none placeholder:font-semibold focus:ring-0"
 				/>
-				<RAButton className="absolute w-10 bg-info/20 hover:bg-info/50 cursor-pointer rounded inset-y-0 right-0 flex items-center justify-center">
-					<Icon
-						name="chevrons-up-down"
-						className="w-5 h-5 text-success"
-						aria-hidden="true"
-					/>
+				<RAButton className="bg-info/20 hover:bg-info/50 absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center rounded">
+					<Icon name="chevrons-up-down" className="text-success h-5 w-5" aria-hidden="true" />
 				</RAButton>
 			</div>
 			<Popover className={popoverTransitionClasses}>
 				<ListBox
-					className="w-full overflow-auto text-base bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 ring-1 ring-black/5 focus:outline-none sm:text-sm"
+					className="max-h-60 w-full overflow-auto rounded-md border border-gray-400 bg-gray-900/90 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
 					items={shipList}
 				>
 					{(item) => (
-						<ListBoxItem className="font-normal truncate cursor-default select-none py-1 px-2 data-focused:bg-info text-white">
+						<ListBoxItem className="data-focused:bg-info cursor-default truncate px-2 py-1 font-normal text-white select-none">
 							{item.name}
 						</ListBoxItem>
 					)}

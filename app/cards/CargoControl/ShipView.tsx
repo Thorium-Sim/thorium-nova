@@ -1,28 +1,23 @@
+import { q } from "@thorium/context/AppContext";
+import { useResizeObserver } from "@thorium/hooks/useResizeObserver";
+import { useStation } from "@thorium/routes/station/useStation";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
+import { pixelRatio } from "@thorium/utils/pixelRatio.client";
 import { useEffect, useState } from "react";
 import { Suspense } from "react";
-import { useResizeObserver } from "@thorium/hooks/useResizeObserver";
-import { useShipMapStore } from "./useShipMapStore";
+
 import { CargoContainerDot } from "./CargoContainerDot";
 import { RoomDot } from "./RoomDot";
-import { q } from "@thorium/context/AppContext";
-import { pixelRatio } from "@thorium/utils/pixelRatio.client";
-import { useStation } from "@thorium/routes/station/useStation";
+import { useShipMapStore } from "./useShipMapStore";
 
-export function ShipView({
-	deckIndex,
-	cardLoaded,
-}: {
-	deckIndex: number;
-	cardLoaded: boolean;
-}) {
+export function ShipView({ deckIndex, cardLoaded }: { deckIndex: number; cardLoaded: boolean }) {
 	const { shipId } = useStation();
 	const [cargoRooms] = q.cargoControl.rooms.useNetRequest({ shipId });
 
 	const { decks, rooms, shipLength } = cargoRooms;
 	const [cargoContainers] = q.cargoControl.containers.useNetRequest({ shipId });
 
-	const [ref, dims, measure] = useResizeObserver();
+	const [ref, dims] = useResizeObserver();
 	const [imgRef, imgDims, imgMeasure] = useResizeObserver();
 
 	const transform = {
@@ -31,7 +26,7 @@ export function ShipView({
 		widthScale: imgDims.width / pixelRatio / shipLength,
 	};
 
-	const [transformationLoaded, setTransformationLoaded] = useState(true);
+	const [transformationLoaded] = useState(true);
 
 	useEffect(() => {
 		if (cardLoaded) {
@@ -41,14 +36,14 @@ export function ShipView({
 	return (
 		<div
 			id="deck-container"
-			className="h-full w-full justify-self-center overflow-hidden relative select-none"
+			className="relative h-full w-full justify-self-center overflow-hidden select-none"
 			ref={ref}
 		>
 			<Suspense fallback={null}>
 				{decks.map((d, i) => (
 					<div
 						id={d.name}
-						className="absolute w-full origin-top pointer-events-none"
+						className="pointer-events-none absolute w-full origin-top"
 						key={d.name}
 						style={{
 							transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
@@ -58,12 +53,8 @@ export function ShipView({
 						ref={i === 0 ? imgRef : null}
 					>
 						<div
-							className={`relative transition-all duration-500  ${
-								deckIndex === i
-									? "deck-on"
-									: deckIndex < i
-										? "deck-before"
-										: "deck-after"
+							className={`relative transition-all duration-500 ${
+								deckIndex === i ? "deck-on" : deckIndex < i ? "deck-before" : "deck-after"
 							}`}
 						>
 							{rooms.map((room) =>
@@ -94,9 +85,7 @@ export function ShipView({
 
 							<SVGImageLoader
 								url={d.backgroundUrl || ""}
-								onClick={() =>
-									useShipMapStore.setState({ selectedRoomId: null })
-								}
+								onClick={() => useShipMapStore.setState({ selectedRoomId: null })}
 								className="pointer-events-auto"
 								onLoad={() => imgMeasure()}
 							/>

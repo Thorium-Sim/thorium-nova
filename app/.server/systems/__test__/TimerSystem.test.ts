@@ -1,6 +1,7 @@
 import { ECS, Entity } from "@thorium/utils/ecs";
-import { TimerSystem } from "../TimerSystem";
 import { beforeEach, describe, expect, it } from "vitest";
+
+import { TimerSystem } from "../TimerSystem";
 
 const server: any = {};
 describe("TimerSystem", () => {
@@ -37,10 +38,7 @@ describe("TimerSystem", () => {
 		ecs.addSystem(timerSystem);
 		ecs.addEntity(entity);
 		ecs.update(16);
-		expect(entity.components.timer?.remainingDurationMs).toBeCloseTo(
-			1000 - 16,
-			0,
-		);
+		expect(entity.components.timer?.remainingDurationMs).toBeCloseTo(1000 - 16, 0);
 		expect(ecs.entities.size).toEqual(1);
 		ecs.update(1000 - 16);
 		expect(entity.components.timer?.remainingDurationMs).toBeCloseTo(0);

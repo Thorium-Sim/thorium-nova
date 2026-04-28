@@ -1,4 +1,3 @@
-import { q, clientId } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import { cn } from "@thorium/utils/cn";
@@ -13,14 +12,8 @@ const CardButton: React.FC<{
 }> = ({ active, highlight, name, component, icon, onClick }) => {
 	const iconUrl = icon || `/assets/cardIcons/${component}.svg`;
 	return (
-		<button
-			className={cn(`card-switcher-button`, { active, highlight })}
-			onClick={onClick}
-		>
-			<SVGImageLoader
-				className="card-switcher-button-icon w-24 h-24"
-				url={iconUrl}
-			/>
+		<button className={cn(`card-switcher-button`, { active, highlight })} onClick={onClick}>
+			<SVGImageLoader className="card-switcher-button-icon h-24 w-24" url={iconUrl} />
 			<span className="card-switcher-button-name">{name}</span>
 			{/* TODO: Figure out some way to switch between static text and a tooltip */}
 		</button>

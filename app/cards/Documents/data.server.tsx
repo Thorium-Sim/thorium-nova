@@ -1,25 +1,22 @@
+import path from "node:path";
+import { Writable } from "node:stream";
+
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
+import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
 import { Entity } from "@thorium/utils/ecs";
 import { produce } from "immer";
-import z from "zod";
 import PDFDocument from "pdfkit";
-import { Writable } from "node:stream";
-import path from "node:path";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
+import z from "zod";
 
 class BlobStream extends Writable {
 	#chunks: Uint8Array<ArrayBuffer>[] = [];
 	#blob: Blob | null = null;
 	length = 0;
 
-	_write(
-		chunk: any,
-		encoding: BufferEncoding,
-		callback: (error?: Error | null) => void,
-	): void {
+	_write(chunk: any, encoding: BufferEncoding, callback: (error?: Error | null) => void): void {
 		if (!(chunk instanceof Uint8Array)) {
 			chunk = new Uint8Array(chunk);
 		}
@@ -38,8 +35,7 @@ class BlobStream extends Writable {
 			this.#chunks = []; // free memory
 		}
 
-		if (this.#blob.type !== type)
-			this.#blob = new Blob([this.#blob], { type: type });
+		if (this.#blob.type !== type) this.#blob = new Blob([this.#blob], { type: type });
 
 		return this.#blob;
 	}
@@ -50,9 +46,7 @@ export const documents = t.router({
 		.input(z.object({ shipId: z.number() }))
 		.filter(shipPubsubFilter)
 		.autoPublish(["isDocument"], (entity) =>
-			entity.components.isDocument
-				? { shipId: entity.components.isDocument?.shipId }
-				: null,
+			entity.components.isDocument ? { shipId: entity.components.isDocument?.shipId } : null,
 		)
 		.request(({ input, ctx }) => {
 			const documents: {
@@ -100,15 +94,13 @@ export const documents = t.router({
 
 			return { id: document.id };
 		}),
-	removeDocument: t.procedure
-		.input(z.object({ documentId: z.number() }))
-		.send(({ input, ctx }) => {
-			const document = ctx.ecs.getEntityById(input.documentId);
-			if (!document) return;
-			const shipId = document.components.isDocument?.shipId || -1;
-			ctx.ecs.removeEntity(document);
-			pubsub.publish.documents.get({ shipId });
-		}),
+	removeDocument: t.procedure.input(z.object({ documentId: z.number() })).send(({ input, ctx }) => {
+		const document = ctx.ecs.getEntityById(input.documentId);
+		if (!document) return;
+		const shipId = document.components.isDocument?.shipId || -1;
+		ctx.ecs.removeEntity(document);
+		pubsub.publish.documents.get({ shipId });
+	}),
 	addAnnotation: t.procedure
 		.input(
 			z.object({
@@ -122,14 +114,11 @@ export const documents = t.router({
 			if (!document) return;
 			const shipId = document.components.isDocument?.shipId || -1;
 
-			const annotations = produce(
-				document.components.isDocument?.annotations || [],
-				(draft) => {
-					if (!draft[input.page]) draft[input.page] = [];
-					const page = draft[input.page];
-					page.push(input.annotation);
-				},
-			);
+			const annotations = produce(document.components.isDocument?.annotations || [], (draft) => {
+				if (!draft[input.page]) draft[input.page] = [];
+				const page = draft[input.page];
+				page.push(input.annotation);
+			});
 			document.updateComponent("isDocument", { annotations });
 
 			pubsub.publish.documents.get({ shipId });
@@ -141,12 +130,9 @@ export const documents = t.router({
 			if (!document) return;
 			const shipId = document.components.isDocument?.shipId || -1;
 
-			const annotations = produce(
-				document.components.isDocument?.annotations || [],
-				(draft) => {
-					draft[input.page] = [];
-				},
-			);
+			const annotations = produce(document.components.isDocument?.annotations || [], (draft) => {
+				draft[input.page] = [];
+			});
 			document.updateComponent("isDocument", { annotations });
 
 			pubsub.publish.documents.get({ shipId });
@@ -198,11 +184,7 @@ export const documents = t.router({
 			const document = new Entity();
 			document.addComponent("isDocument", {
 				shipId: input.shipId,
-				filePath: await ctx.uploadFile.call(
-					ctx.flight,
-					file,
-					`${input.name}.pdf`,
-				),
+				filePath: await ctx.uploadFile.call(ctx.flight, file, `${input.name}.pdf`),
 			});
 			document.addComponent("identity", {
 				name: input.name,

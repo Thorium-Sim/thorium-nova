@@ -1,21 +1,18 @@
-import type { AnyRouter } from "../.server/router";
-import {
-	LiveQueryClient,
-	type HeadersResolver,
-	type LiveQueryClientOptions,
-} from "./client";
-import { createFlatProxy, createRecursiveProxy } from "../proxy";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { useRequestSub } from "./useRequestSub";
-import { getArrayQueryKey } from "./getArrayQueryKey";
-import type { CreateLiveQueryReact } from "./types";
-import { getQueryKey } from "./getQueryKey";
-import { useContext, useEffect, useRef, useState } from "react";
-import { MockNetRequestContext } from "./mockContext";
-import { addDataCallback } from "./useDataResponse";
-import { useLiveQuery } from "./liveQueryContext";
 import uniqid from "@thorium/utils/uniqid";
+import { useContext, useEffect, useRef, useState } from "react";
+
+import type { AnyRouter } from "../.server/router";
+import { createFlatProxy, createRecursiveProxy } from "../proxy";
+import { LiveQueryClient, type HeadersResolver, type LiveQueryClientOptions } from "./client";
+import { getArrayQueryKey } from "./getArrayQueryKey";
+import { getQueryKey } from "./getQueryKey";
+import { useLiveQuery } from "./liveQueryContext";
+import { MockNetRequestContext } from "./mockContext";
 import { stableValueHash } from "./stableValueHash";
+import type { CreateLiveQueryReact } from "./types";
+import { addDataCallback } from "./useDataResponse";
+import { useRequestSub } from "./useRequestSub";
 
 function useQueryCallback(key: string, callback?: (data: unknown) => void) {
 	const callbackRef = useRef<(data: unknown) => void>(callback);
@@ -51,9 +48,7 @@ export function createReactProxyDecoration(name: string, fns: any) {
 	});
 }
 
-function createHooksInternalProxy<TRouter extends AnyRouter>(
-	client: LiveQueryClient,
-) {
+function createHooksInternalProxy<TRouter extends AnyRouter>(client: LiveQueryClient) {
 	const dataStreamMap = new Map<string, Set<string>>();
 
 	type CreateHooksInternalProxy = CreateLiveQueryReact<TRouter>;
@@ -61,10 +56,7 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
 		netRequest: (
 			path: string,
 			input: any,
-			{
-				headers,
-				signal,
-			}: { headers?: HeadersResolver; signal?: AbortSignal } = {},
+			{ headers, signal }: { headers?: HeadersResolver; signal?: AbortSignal } = {},
 		) => {
 			return client.netRequest({ path, input, headers, signal });
 		},
@@ -101,11 +93,7 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
 
 			return [result.data, result];
 		},
-		useNetSubscribe: (
-			path: string,
-			input: any,
-			callback: (data: unknown) => void,
-		) => {
+		useNetSubscribe: (path: string, input: any, callback: (data: unknown) => void) => {
 			const queryKey = getArrayQueryKey(getQueryKey(path, input));
 			const key = JSON.stringify(queryKey);
 
@@ -117,10 +105,7 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
 		netSend: (
 			path: string,
 			input: any,
-			{
-				headers,
-				signal,
-			}: { headers?: HeadersResolver; signal?: AbortSignal } = {},
+			{ headers, signal }: { headers?: HeadersResolver; signal?: AbortSignal } = {},
 		) => client.netSend({ path, input, headers, signal }),
 		useNetSend: (path: string, ...args: unknown[]) =>
 			useMutation({
@@ -138,7 +123,6 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
 			const { socket, reconnectionState } = useLiveQuery();
 			const isConnected = reconnectionState === "connected";
 
-			// biome-ignore lint/correctness/useExhaustiveDependencies: Params is unstable
 			useEffect(() => {
 				if (!socket || !isConnected) return;
 				if (!dataStreamMap.has(id)) {
@@ -181,9 +165,7 @@ function createHooksInternalProxy<TRouter extends AnyRouter>(
 	});
 }
 
-export function createLiveQueryReact<TRouter extends AnyRouter>(
-	opts?: LiveQueryClientOptions,
-) {
+export function createLiveQueryReact<TRouter extends AnyRouter>(opts?: LiveQueryClientOptions) {
 	const client = new LiveQueryClient(opts);
 	const proxy = createHooksInternalProxy<TRouter>(client);
 

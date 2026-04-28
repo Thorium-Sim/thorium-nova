@@ -1,4 +1,5 @@
 import { type RefObject, useEffect, useRef } from "react";
+
 import useEventListener from "./useEventListener";
 
 export function useRightClick(

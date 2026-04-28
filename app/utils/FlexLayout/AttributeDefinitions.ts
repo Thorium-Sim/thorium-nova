@@ -67,7 +67,6 @@ export class AttributeDefinitions {
 
 	update(jsonObj: any, obj: any) {
 		for (const attr of this.attributes) {
-			// biome-ignore lint/suspicious/noPrototypeBuiltins: We don't mess around with FlexLayout
 			if (jsonObj.hasOwnProperty(attr.name)) {
 				const fromValue = jsonObj[attr.name];
 				if (fromValue === undefined) {
@@ -96,10 +95,7 @@ export class AttributeDefinitions {
 		}
 	}
 
-	toTypescriptInterface(
-		name: string,
-		parentAttributes: AttributeDefinitions | undefined,
-	) {
+	toTypescriptInterface(name: string, parentAttributes: AttributeDefinitions | undefined) {
 		const lines = [];
 		const sorted = this.attributes.sort((a, b) => a.name.localeCompare(b.name));
 		// const sorted = this.attributes;

@@ -18,9 +18,7 @@ export const isShields = z
 		 **/
 		deflectionEfficiencyMultiplier: z.number().default(0.5),
 		/** The direction of the shield. Defaults to fore for ships with only one shield system */
-		direction: z
-			.enum(["fore", "aft", "starboard", "port", "dorsal", "ventral"])
-			.default("fore"),
+		direction: z.enum(["fore", "aft", "starboard", "port", "dorsal", "ventral"]).default("fore"),
 	})
 	.default({});
 

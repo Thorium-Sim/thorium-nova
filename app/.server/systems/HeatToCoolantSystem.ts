@@ -1,10 +1,6 @@
-import type {
-	HeatCapacity,
-	Kilograms,
-	MeterSquared,
-} from "@thorium/utils/unitTypes";
-import { type Entity, System } from "@thorium/utils/ecs";
 import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInventory";
+import { type Entity, System } from "@thorium/utils/ecs";
+import type { HeatCapacity, Kilograms, MeterSquared } from "@thorium/utils/unitTypes";
 
 // For transferring the heat of the coolant
 // into watts
@@ -39,8 +35,7 @@ export class HeatToCoolantSystem extends System {
 		// back into temperature and assigning them to their
 		// respective thing.
 		let systemWatts =
-			(HEAT_CAPACITY * MASS * 1000 * entity.components.heat.heat) /
-			elapsedInSeconds;
+			(HEAT_CAPACITY * MASS * 1000 * entity.components.heat.heat) / elapsedInSeconds;
 
 		for (const item of inventory) {
 			if (!item.flags?.coolant) continue;
@@ -53,26 +48,19 @@ export class HeatToCoolantSystem extends System {
 				elapsedInSeconds;
 			const tempDifference = entity.components.heat.heat - item.temperature;
 			const heatTransferRate =
-				-1 *
-				THERMAL_CONDUCTIVITY *
-				COOLANT_AREA *
-				(tempDifference / THERMAL_DISTANCE);
+				-1 * THERMAL_CONDUCTIVITY * COOLANT_AREA * (tempDifference / THERMAL_DISTANCE);
 			systemWatts += heatTransferRate;
 			itemWatts -= heatTransferRate;
 
 			const itemTemp =
 				(itemWatts * elapsedInSeconds) /
-				(item.flags.coolant.heatCapacity *
-					item.flags.coolant.massPerUnit *
-					1000 *
-					item.count);
+				(item.flags.coolant.heatCapacity * item.flags.coolant.massPerUnit * 1000 * item.count);
 			if (item.room) {
 				item.room.contents[item.name].temperature = itemTemp;
 			}
 		}
 
-		const systemTemp =
-			(systemWatts * elapsedInSeconds) / (HEAT_CAPACITY * MASS * 1000);
+		const systemTemp = (systemWatts * elapsedInSeconds) / (HEAT_CAPACITY * MASS * 1000);
 		entity.updateComponent("heat", { heat: systemTemp });
 	}
 }

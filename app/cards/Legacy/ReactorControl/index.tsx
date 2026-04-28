@@ -1,15 +1,16 @@
 import { useGLTF } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
+import { Batteries } from "@thorium/cards/Legacy/PowerDistribution/Batteries";
+import { HeatBars } from "@thorium/cards/Legacy/ReactorControl/HeatBars";
+import { DamageOverlay } from "@thorium/components/DamageOverlay";
+import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
 import { useStation } from "@thorium/routes/station/useStation";
-import modelUrl from "./Reactor.glb?url";
+import Button from "@thorium/ui/Button";
 import { useRef } from "react";
 import type { Object3D } from "three";
-import Button from "@thorium/ui/Button";
-import { Batteries } from "@thorium/cards/Legacy/PowerDistribution/Batteries";
-import { q } from "@thorium/context/AppContext";
-import { DamageOverlay } from "@thorium/components/DamageOverlay";
-import { HeatBars } from "@thorium/cards/Legacy/ReactorControl/HeatBars";
+
+import modelUrl from "./Reactor.glb?url";
 export function LegacyReactorControl() {
 	const { shipId } = useStation();
 
@@ -22,10 +23,7 @@ export function LegacyReactorControl() {
 
 	const reactorPower = reactors.reduce(
 		(prev, reactor) =>
-			prev +
-			Math.round(
-				reactor.maxOutput * reactor.efficiency * (reactor.offline ? 0 : 1),
-			),
+			prev + Math.round(reactor.maxOutput * reactor.efficiency * (reactor.offline ? 0 : 1)),
 		0,
 	);
 	const reactorEfficiency = reactors.reduce(
@@ -35,7 +33,7 @@ export function LegacyReactorControl() {
 	const systemsPower = systems.reduce((acc, sys) => acc + sys.currentPower, 0);
 
 	return (
-		<div className="grid grid-cols-5 grid-rows-3 gap-8 h-full">
+		<div className="grid h-full grid-cols-5 grid-rows-3 gap-8">
 			<HeatBars
 				id={reactors[0].id}
 				nominalHeat={reactors[0].nominalHeat}
@@ -43,7 +41,7 @@ export function LegacyReactorControl() {
 			/>
 			<ReactorModel />
 			<Batteries />
-			<div className="flex flex-row gap-2 col-span-2 flex-wrap justify-between relative p-4">
+			<div className="relative col-span-2 flex flex-row flex-wrap justify-between gap-2 p-4">
 				<DamageOverlay systemId={reactors[0].id} />
 				{reactors[0].settings.map((s) => (
 					<Button
@@ -57,9 +55,7 @@ export function LegacyReactorControl() {
 						}
 					>
 						{s.name}
-						{s.efficiency !== null
-							? `: ${Math.round(s.efficiency * 100)}%`
-							: ""}
+						{s.efficiency !== null ? `: ${Math.round(s.efficiency * 100)}%` : ""}
 					</Button>
 				))}
 			</div>
@@ -68,13 +64,10 @@ export function LegacyReactorControl() {
 					Reactor Setting:{" "}
 					{reactors[0].externalPower
 						? "External Power"
-						: reactors[0].settings.find(
-								(s) => s.efficiency === reactors[0].efficiency,
-							)?.name || "Custom"}
+						: reactors[0].settings.find((s) => s.efficiency === reactors[0].efficiency)?.name ||
+							"Custom"}
 				</div>
-				<div className="text-2xl">
-					Reactor Efficiency: {Math.round(reactorEfficiency * 100)}%
-				</div>
+				<div className="text-2xl">Reactor Efficiency: {Math.round(reactorEfficiency * 100)}%</div>
 				<div className="text-xl">Reactor Output: {reactorPower}</div>
 				<div className="text-xl">Power Used: {systemsPower}</div>
 			</div>
@@ -87,7 +80,7 @@ function ReactorModel() {
 
 	return (
 		<Canvas
-			className="h-full col-span-2 row-span-2"
+			className="col-span-2 row-span-2 h-full"
 			frameloop={cardLoaded ? "always" : "never"}
 			camera={{ position: [0, 0, -2] }}
 		>

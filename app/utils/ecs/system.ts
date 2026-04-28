@@ -73,7 +73,7 @@ class System {
 
 		this.preUpdate(elapsed + this.elapsedAccumulation);
 
-		for (const [id, entity] of this.entities) {
+		for (const [_, entity] of this.entities) {
 			this.update(entity, elapsed + this.elapsedAccumulation);
 		}
 
@@ -85,7 +85,7 @@ class System {
 	 * dispose the system by exiting all the entities
 	 */
 	dispose() {
-		for (const [id, entity] of this.entities) {
+		for (const [_, entity] of this.entities) {
 			entity.removeSystem(this);
 			this.exit(entity);
 		}

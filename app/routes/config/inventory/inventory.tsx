@@ -1,19 +1,18 @@
-import { useConfirm } from "@thorium/ui/AlertDialog";
-import { useParams, useNavigate, Navigate } from "react-router";
-import Button from "@thorium/ui/Button";
-import { toast } from "@thorium/context/ToastContext";
-import { useState } from "react";
-import Input from "@thorium/ui/Input";
-import TagInput from "@thorium/ui/TagInput";
-import Checkbox from "@thorium/ui/Checkbox";
-import UploadWell from "@thorium/ui/UploadWell";
-import { capitalCase } from "change-case";
-import InfoTip from "@thorium/ui/InfoTip";
 import { q } from "@thorium/context/AppContext";
-
+import { toast } from "@thorium/context/ToastContext";
+import { useConfirm } from "@thorium/ui/AlertDialog";
+import Button from "@thorium/ui/Button";
+import Checkbox from "@thorium/ui/Checkbox";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
 import { Icon } from "@thorium/ui/Icon";
+import InfoTip from "@thorium/ui/InfoTip";
+import Input from "@thorium/ui/Input";
 import Select from "@thorium/ui/Select";
+import TagInput from "@thorium/ui/TagInput";
+import UploadWell from "@thorium/ui/UploadWell";
 import { InventoryFlagValues } from "@thorium/utils/flags/InventoryFlags";
+import { capitalCase } from "change-case";
+import { useState } from "react";
 import {
 	Dialog,
 	DialogTrigger,
@@ -21,7 +20,7 @@ import {
 	Popover,
 	Button as RAButton,
 } from "react-aria-components";
-import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
+import { useParams, useNavigate, Navigate } from "react-router";
 
 export default function InventoryLayout() {
 	const { inventoryId, pluginId } = useParams() as {
@@ -38,17 +37,13 @@ export default function InventoryLayout() {
 	});
 	const [error, setError] = useState(false);
 
-	if (!inventoryId || !item)
-		return <Navigate to={`/config/${pluginId}/inventory`} />;
+	if (!inventoryId || !item) return <Navigate to={`/config/${pluginId}/inventory`} />;
 
 	return (
-		<fieldset
-			key={inventoryId}
-			className="flex-1 grid grid-cols-2 overflow-y-auto"
-		>
+		<fieldset key={inventoryId} className="grid flex-1 grid-cols-2 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
-					<div className="pb-4 flex items-end">
+					<div className="flex items-end pb-4">
 						<Input
 							labelHidden={false}
 							isInvalid={error}
@@ -65,9 +60,7 @@ export default function InventoryLayout() {
 										inventoryId,
 										name: e.target.value,
 									});
-									navigate(
-										`/config/${pluginId}/inventory/${result.inventoryId}`,
-									);
+									void navigate(`/config/${pluginId}/inventory/${result.inventoryId}`);
 								} catch (err) {
 									if (err instanceof Error) {
 										toast({
@@ -80,7 +73,7 @@ export default function InventoryLayout() {
 							}}
 						/>
 					</div>
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Plural"
@@ -94,7 +87,7 @@ export default function InventoryLayout() {
 							}
 						/>
 					</div>
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							as="textarea"
 							className="!h-32"
@@ -110,14 +103,14 @@ export default function InventoryLayout() {
 							}
 						/>
 					</div>
-					<div className="pb-4 flex items-end">
+					<div className="flex items-end pb-4">
 						<div className="flex-1">
 							<TagInput
 								label="Tags"
 								tags={item.tags}
 								onAdd={(tag) => {
 									if (item.tags.includes(tag)) return;
-									q.plugin.inventory.update.netSend({
+									void q.plugin.inventory.update.netSend({
 										pluginId,
 										inventoryId,
 										tags: [...item.tags, tag],
@@ -125,7 +118,7 @@ export default function InventoryLayout() {
 								}}
 								onRemove={(tag) => {
 									if (!item.tags.includes(tag)) return;
-									q.plugin.inventory.update.netSend({
+									void q.plugin.inventory.update.netSend({
 										pluginId,
 										inventoryId,
 										tags: item.tags.filter((t) => t !== tag),
@@ -149,24 +142,21 @@ export default function InventoryLayout() {
 									Number.parseFloat(e.target.value) <= 0
 								)
 									return setVolumeError(true);
-								q.plugin.inventory.update.netSend({
+								void q.plugin.inventory.update.netSend({
 									pluginId,
 									inventoryId,
 									volume: Number(e.target.value),
 								});
 							}}
 						/>
-						<small>
-							The amount of space this item takes up in a cargo container or
-							room.
-						</small>
+						<small>The amount of space this item takes up in a cargo container or room.</small>
 					</div>
 					<div className="pb-4">
 						<Checkbox
 							label="Continuous"
 							helperText="If unchecked, this is a discrete item, like a probe casing. When checked, this item can be continuously consumed, like fuel."
 							onChange={(e) => {
-								q.plugin.inventory.update.netSend({
+								void q.plugin.inventory.update.netSend({
 									pluginId,
 									inventoryId,
 									continuous: e.target.checked,
@@ -191,7 +181,7 @@ export default function InventoryLayout() {
 									Number.parseFloat(e.target.value) > 1
 								)
 									return setDurabilityError(true);
-								q.plugin.inventory.update.netSend({
+								void q.plugin.inventory.update.netSend({
 									pluginId,
 									inventoryId,
 									durability: Number(e.target.value),
@@ -199,8 +189,8 @@ export default function InventoryLayout() {
 							}}
 						/>
 						<small>
-							Probability the item will not be consumed when used. 1 means it
-							lasts forever; 0 means it will always be consumed when used.
+							Probability the item will not be consumed when used. 1 means it lasts forever; 0 means
+							it will always be consumed when used.
 						</small>
 					</div>
 				</div>
@@ -223,7 +213,7 @@ export default function InventoryLayout() {
 							<img
 								src={`${item.assets.image}?${Date.now()}`}
 								alt="Inventory Item"
-								className="w-10/12 h-10/12 object-cover"
+								className="h-10/12 w-10/12 object-cover"
 							/>
 						)}
 					</UploadWell>
@@ -242,21 +232,18 @@ export default function InventoryLayout() {
 								name="flags"
 								defaultChecked={defaultValue}
 								onChange={(e) => {
-									q.plugin.inventory.update.netSend({
+									void q.plugin.inventory.update.netSend({
 										pluginId,
 										inventoryId,
 										flags: {
-											...{
-												...item.flags,
-												[key]: e.target.checked ? {} : undefined,
-											},
+											...item.flags,
+											[key]: e.target.checked ? {} : undefined,
 										},
 									});
 								}}
 								label={capitalCase(key)}
 							/>
-							{defaultValue &&
-							Object.keys(value).filter((t) => t !== "info").length > 0 ? (
+							{defaultValue && Object.keys(value).filter((t) => t !== "info").length > 0 ? (
 								<DialogTrigger>
 									<RAButton
 										aria-label="Configure Flag"
@@ -270,20 +257,18 @@ export default function InventoryLayout() {
 												<path d="M0 0 L6 6 L12 0" />
 											</svg>
 										</OverlayArrow>
-										<Dialog className="bg-black/90 border border-white/50 rounded p-2 w-max max-w-lg text-white">
+										<Dialog className="w-max max-w-lg rounded border border-white/50 bg-black/90 p-2 text-white">
 											{Object.entries(value).map(([config, value]) => {
 												if (config === "info") return null;
 												function updateValue(value: any) {
-													q.plugin.inventory.update.netSend({
+													void q.plugin.inventory.update.netSend({
 														pluginId,
 														inventoryId,
 														flags: {
-															...{
-																...item?.flags,
-																[key]: {
-																	...item?.flags[flagKey],
-																	[config]: value,
-																},
+															...item?.flags,
+															[key]: {
+																...item?.flags[flagKey],
+																[config]: value,
 															},
 														},
 													});
@@ -298,23 +283,22 @@ export default function InventoryLayout() {
 															pattern="[0-9]*"
 															defaultValue={
 																// @ts-expect-error Pain to type these literal keys
-																item.flags[flagKey]?.[config] ??
-																value.defaultValue
+																item.flags[flagKey]?.[config] ?? value.defaultValue
 															}
 															helperText={value.info}
 															onChange={(e) => {
-																if (Number.isNaN(Number(e.target.value)))
-																	return;
+																if (Number.isNaN(Number(e.target.value))) return;
 																updateValue(Number(e.target.value));
 															}}
 														/>
 													);
 												if (Array.isArray(value.options)) {
-													const items: { id: string; label: string }[] =
-														value.options.map((o: string) => ({
+													const items: { id: string; label: string }[] = value.options.map(
+														(o: string) => ({
 															id: o,
 															label: capitalCase(o),
-														}));
+														}),
+													);
 													return (
 														<Select
 															key={config}
@@ -339,8 +323,7 @@ export default function InventoryLayout() {
 															type="text"
 															defaultValue={
 																// @ts-expect-error Pain to type these literal keys
-																item.flags[flagKey]?.[config] ??
-																value.defaultValue
+																item.flags[flagKey]?.[config] ?? value.defaultValue
 															}
 															helperText={value.info}
 															onChange={(e) => {
@@ -361,7 +344,7 @@ export default function InventoryLayout() {
 			</div>
 			<div>
 				<Button
-					className="w-full btn-outline btn-error btn-sm"
+					className="btn-outline btn-error btn-sm w-full"
 					disabled={!inventoryId}
 					onClick={async () => {
 						if (
@@ -372,11 +355,11 @@ export default function InventoryLayout() {
 							}))
 						)
 							return;
-						q.plugin.inventory.update.netSend({
+						await q.plugin.inventory.update.netSend({
 							pluginId,
 							inventoryId,
 						});
-						navigate(`/config/${pluginId}/inventory`);
+						await navigate(`/config/${pluginId}/inventory`);
 					}}
 				>
 					Delete Inventory Item

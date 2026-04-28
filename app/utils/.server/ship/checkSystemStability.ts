@@ -11,10 +11,7 @@ import { SystemStabilityError } from "@thorium/utils/live-query/client/client";
  * checkSystemStability(systemEntity); // 50% chance to throw LiveQueryError
  * ```
  */
-export function checkSystemStability(
-	systemEntity: Entity,
-	title: string,
-): void {
+export function checkSystemStability(systemEntity: Entity, title: string): void {
 	const instability = systemEntity.components.damage?.instability ?? 0;
 	if (instability <= 0) return;
 	const roll = systemEntity.ecs.rng.nextAsPercentage();

@@ -1,11 +1,12 @@
-import { useParams } from "react-router";
-import Input from "@thorium/ui/Input";
-import { toast } from "@thorium/context/ToastContext";
-import { useContext, useReducer } from "react";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
-import { OverrideResetButton } from "../OverrideResetButton";
-import { q } from "@thorium/context/AppContext";
 import { Navigate } from "@thorium/components/Navigate";
+import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+import { toast } from "@thorium/context/ToastContext";
+import Input from "@thorium/ui/Input";
+import { useContext, useReducer } from "react";
+import { useParams } from "react-router";
+
+import { OverrideResetButton } from "../OverrideResetButton";
 
 export default function ThrustersConfig() {
 	const { pluginId, systemId, shipId } = useParams() as {
@@ -30,7 +31,7 @@ export default function ThrustersConfig() {
 		<fieldset key={key} className="flex-1 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -40,8 +41,7 @@ export default function ThrustersConfig() {
 							helperText={"In m/s"}
 							defaultValue={system.directionMaxSpeed}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.thrusters.update.netSend({
 										pluginId,
@@ -67,7 +67,7 @@ export default function ThrustersConfig() {
 							className="mt-6"
 						/>
 					</div>
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -77,8 +77,7 @@ export default function ThrustersConfig() {
 							helperText="In Kilo-newtons. Affected by the mass of the ship the thrusters are attached to."
 							defaultValue={system.directionThrust}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.thrusters.update.netSend({
 										pluginId,
@@ -98,13 +97,9 @@ export default function ThrustersConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="directionThrust"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="directionThrust" setRekey={setRekey} className="mt-6" />
 					</div>
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -114,8 +109,7 @@ export default function ThrustersConfig() {
 							helperText={"In revolutions per minute"}
 							defaultValue={system.rotationMaxSpeed}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.thrusters.update.netSend({
 										pluginId,
@@ -135,13 +129,9 @@ export default function ThrustersConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="rotationMaxSpeed"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="rotationMaxSpeed" setRekey={setRekey} className="mt-6" />
 					</div>
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -151,8 +141,7 @@ export default function ThrustersConfig() {
 							helperText="In Kilo-newtons. Affected by the mass of the ship the thrusters are attached to."
 							defaultValue={system.rotationThrust}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.thrusters.update.netSend({
 										pluginId,
@@ -172,11 +161,7 @@ export default function ThrustersConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="rotationThrust"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="rotationThrust" setRekey={setRekey} className="mt-6" />
 					</div>
 				</div>
 			</div>

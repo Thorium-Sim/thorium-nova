@@ -1,17 +1,10 @@
-import { q } from "@thorium/context/AppContext";
-import { Line, OrbitControls } from "@react-three/drei";
+import { Line } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
+import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
+import { q } from "@thorium/context/AppContext";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { useMemo, useRef } from "react";
-import {
-	AdditiveBlending,
-	DoubleSide,
-	type Group,
-	Quaternion,
-	Texture,
-	Vector3,
-} from "three";
-import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
+import { AdditiveBlending, DoubleSide, type Group, Quaternion, Texture, Vector3 } from "three";
 import type { Line2 } from "three-stdlib";
 
 const thickness = 1;
@@ -34,27 +27,16 @@ export function FiringPhasers({ systemId }: { systemId: number }) {
 
 	if (viewingMode === "core") {
 		return firingPhasers.map((phaser) => (
-			<SimplePhasers
-				key={`${phaser.id}`}
-				targetId={phaser.targetId}
-				shipId={phaser.shipId}
-			/>
+			<SimplePhasers key={`${phaser.id}`} targetId={phaser.targetId} shipId={phaser.shipId} />
 		));
 	}
 
 	return firingPhasers.map((phaser) => (
-		<PhaserDisplay
-			key={`${phaser.id}`}
-			targetId={phaser.targetId}
-			shipId={phaser.shipId}
-		/>
+		<PhaserDisplay key={`${phaser.id}`} targetId={phaser.targetId} shipId={phaser.shipId} />
 	));
 }
 
-function SimplePhasers({
-	targetId,
-	shipId,
-}: { targetId: number; shipId: number }) {
+function SimplePhasers({ targetId, shipId }: { targetId: number; shipId: number }) {
 	const { interpolate } = useLiveQuery();
 	const lineRef = useRef<Line2>(null);
 
@@ -63,14 +45,7 @@ function SimplePhasers({
 		const target = interpolate(targetId);
 		if (!ship || !target) return;
 		if (lineRef.current) {
-			lineRef.current.geometry.setPositions([
-				ship.x,
-				ship.y,
-				ship.z,
-				target.x,
-				target.y,
-				target.z,
-			]);
+			lineRef.current.geometry.setPositions([ship.x, ship.y, ship.z, target.x, target.y, target.z]);
 		}
 	});
 
@@ -87,10 +62,7 @@ function SimplePhasers({
 	);
 }
 
-function PhaserDisplay({
-	targetId,
-	shipId,
-}: { targetId: number; shipId: number }) {
+function PhaserDisplay({ targetId, shipId }: { targetId: number; shipId: number }) {
 	const planeTexture = useMemo(() => {
 		const c = document.createElement("canvas").getContext("2d")!;
 
@@ -129,9 +101,7 @@ function PhaserDisplay({
 
 		targetVector.set(target.x, target.y, target.z);
 		const distance = targetVector.distanceTo(shipVector);
-		groupRef.current.position.copy(
-			targetVector.add(shipVector).multiplyScalar(0.5),
-		);
+		groupRef.current.position.copy(targetVector.add(shipVector).multiplyScalar(0.5));
 		direction.subVectors(targetVector, shipVector).normalize();
 		axis.crossVectors(up, direction).normalize();
 		const angle = Math.acos(up.dot(direction));
@@ -143,11 +113,7 @@ function PhaserDisplay({
 	return (
 		<group ref={groupRef}>
 			{Array.from({ length: 20 }).map((_, i) => (
-				<mesh
-					key={i}
-					rotation={[(i * Math.PI) / 20, 0, 0]}
-					scale={[1, thickness, 1]}
-				>
+				<mesh key={i} rotation={[(i * Math.PI) / 20, 0, 0]} scale={[1, thickness, 1]}>
 					<planeGeometry args={[1, 0.1]} />
 					<meshBasicMaterial
 						blending={AdditiveBlending}

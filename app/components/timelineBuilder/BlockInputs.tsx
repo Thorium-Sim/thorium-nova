@@ -4,11 +4,7 @@ import { InterpolateInfo } from "@thorium/routes/config/reports/InterpolateInfo"
 import { Icon } from "@thorium/ui/Icon";
 import InfoTip from "@thorium/ui/InfoTip";
 import { cn } from "@thorium/utils/cn";
-import {
-	parseSchema,
-	schemaWithoutDefault,
-	ZOD_COMPARISONS,
-} from "@thorium/utils/zodAutoForm";
+import { parseSchema, schemaWithoutDefault, ZOD_COMPARISONS } from "@thorium/utils/zodAutoForm";
 import { matchSorter } from "match-sorter";
 import { useEffect, useId, useRef, useState, type ComponentProps } from "react";
 import {
@@ -21,12 +17,8 @@ import {
 	ListBox,
 	ListBoxItem,
 } from "react-aria-components";
-import { flushSync } from "react-dom";
 
-export type BlockProps<T extends TimelineBlock["type"]> = Extract<
-	TimelineBlock,
-	{ type: T }
-> & {
+export type BlockProps<T extends TimelineBlock["type"]> = Extract<TimelineBlock, { type: T }> & {
 	update: <P extends keyof Extract<TimelineBlock, { type: T }>>(
 		property: P,
 		value: Extract<TimelineBlock, { type: T }>[P],
@@ -48,11 +40,7 @@ export function MadLibSelect({
 	onChange: (value: string) => void;
 }) {
 	return (
-		<select
-			className={madLibInput}
-			value={value}
-			onChange={(e) => onChange(e.currentTarget.value)}
-		>
+		<select className={madLibInput} value={value} onChange={(e) => onChange(e.currentTarget.value)}>
 			{options?.map((o) => (
 				<option key={o}>{o}</option>
 			))}
@@ -103,45 +91,39 @@ export function EntityInput({
 				placeholder="Entity"
 				className={madLibInput}
 			/>
-			<InfoTip className="absolute -bottom-4 -right-4">
+			<InfoTip className="absolute -right-4 -bottom-4">
 				You can use the following conventions:
 				<ul className="ml-4 list-disc">
 					<li>
-						<code className="bg-notice rounded">this step</code> - a local
-						variable on the current timeline step
+						<code className="bg-notice rounded">this step</code> - a local variable on the current
+						timeline step
 					</li>
 					<li>
-						<code className="bg-notice rounded">this timeline</code> - a
-						variable on the current timeline
+						<code className="bg-notice rounded">this timeline</code> - a variable on the current
+						timeline
 					</li>
 					<li>
 						<code className="bg-notice rounded">#tag</code> - entity by tag name
 					</li>
 					<li>
-						<code className="bg-notice rounded">$variableName</code> - entity
-						from a local variable
+						<code className="bg-notice rounded">$variableName</code> - entity from a local variable
 					</li>
 					<li>
-						<code className="bg-notice rounded">%component:property=value</code>{" "}
-						- entity based on the name of the component, or optionally if the
-						component's property matches some value. For example,{" "}
-						<code className="bg-notice rounded">%isPlayerShip</code> for any
-						entities with the "isPlayerShip" component, or{" "}
-						<code className="bg-notice rounded">
-							%faction:factionId=$faction
-						</code>{" "}
-						for any entities that have the "faction" component with the
-						"factionId" property that equals the value of the "$faction"
-						variable.
+						<code className="bg-notice rounded">%component:property=value</code> - entity based on
+						the name of the component, or optionally if the component's property matches some value.
+						For example, <code className="bg-notice rounded">%isPlayerShip</code> for any entities
+						with the "isPlayerShip" component, or{" "}
+						<code className="bg-notice rounded">%faction:factionId=$faction</code> for any entities
+						that have the "faction" component with the "factionId" property that equals the value of
+						the "$faction" variable.
 					</li>
 					<li>
-						anything else - entity by its{" "}
-						<code className="bg-notice rounded">identity.name</code> component
-						value
+						anything else - entity by its <code className="bg-notice rounded">identity.name</code>{" "}
+						component value
 					</li>
 				</ul>
 			</InfoTip>
-			<div className="peer-focus-within:block hidden pointer-events-none absolute top-full pt-1 left-1/2 -translate-x-1/2 text-xs whitespace-nowrap text-blue-200">
+			<div className="pointer-events-none absolute top-full left-1/2 hidden -translate-x-1/2 pt-1 text-xs whitespace-nowrap text-blue-200 peer-focus-within:block">
 				{value.toLowerCase() === "this timeline"
 					? "The current timeline"
 					: value.startsWith("#")
@@ -151,7 +133,7 @@ export function EntityInput({
 							: value.startsWith("%")
 								? "Entity by Component"
 								: value.toLowerCase().startsWith("entity") &&
-										!Number.isNaN(Number(value.split(" ").at(-1)?.trim()))
+									  !Number.isNaN(Number(value.split(" ").at(-1)?.trim()))
 									? "Entity by ID"
 									: "Entity by Name"}
 			</div>
@@ -177,10 +159,7 @@ export function ValueInput(
 		}
 		if (value.length === 51) {
 			textareaRef.current?.focus();
-			textareaRef.current?.setSelectionRange(
-				cursor.current[0],
-				cursor.current[1],
-			);
+			textareaRef.current?.setSelectionRange(cursor.current[0], cursor.current[1]);
 		}
 	}, [value]);
 	return (
@@ -192,10 +171,7 @@ export function ValueInput(
 					defaultValue={value}
 					onChange={(e) => {
 						props.onChange(e.currentTarget.value);
-						cursor.current = [
-							e.currentTarget.selectionStart,
-							e.currentTarget.selectionEnd,
-						];
+						cursor.current = [e.currentTarget.selectionStart, e.currentTarget.selectionEnd];
 					}}
 					className={cn(madLibInput, "h-40 w-96 resize-none", props.className)}
 				/>
@@ -207,16 +183,13 @@ export function ValueInput(
 					size={Math.max(value.length + 3, 5)}
 					onChange={(e) => {
 						props.onChange(e.currentTarget.value);
-						cursor.current = [
-							e.currentTarget.selectionStart,
-							e.currentTarget.selectionEnd,
-						];
+						cursor.current = [e.currentTarget.selectionStart, e.currentTarget.selectionEnd];
 					}}
 					className={cn(madLibInput, props.className)}
 				/>
 			)}
 			<InterpolateInfo />
-			<div className="peer-focus-within:block hidden pointer-events-none absolute top-full pt-1 left-1/2 -translate-x-1/2 text-xs whitespace-nowrap text-blue-200">
+			<div className="pointer-events-none absolute top-full left-1/2 hidden -translate-x-1/2 pt-1 text-xs whitespace-nowrap text-blue-200 peer-focus-within:block">
 				{value.startsWith("$") ? "Local Variable" : "Literal Value"}
 			</div>
 		</span>
@@ -247,9 +220,7 @@ export function ComponentPropertySelect({
 	const properties = [
 		...(onlyShowProperties ? [] : ["isPresent", "isNotPresent"]),
 		...propertyItems.flatMap((item) =>
-			ZOD_COMPARISONS[item.type as keyof typeof ZOD_COMPARISONS]
-				? item.key
-				: [],
+			ZOD_COMPARISONS[item.type as keyof typeof ZOD_COMPARISONS] ? item.key : [],
 		),
 	];
 
@@ -262,10 +233,7 @@ export function ComponentPropertySelect({
 				placeholder="Component"
 				value={component}
 				onChange={setComponent}
-				items={[
-					{ id: "id" },
-					...Object.keys(components).map((c) => ({ id: c })),
-				]}
+				items={[{ id: "id" }, ...Object.keys(components).map((c) => ({ id: c }))]}
 			/>
 			{component !== "id" && (
 				<MadLibsCombobox
@@ -284,20 +252,14 @@ export function ComponentPropertySelect({
 				<MadLibDatalist
 					value={comparison!}
 					onChange={setComparison}
-					options={
-						ZOD_COMPARISONS[selectedItem?.type as keyof typeof ZOD_COMPARISONS]
-					}
+					options={ZOD_COMPARISONS[selectedItem?.type as keyof typeof ZOD_COMPARISONS]}
 				/>
 			) : (
 				<>
 					<MadLibSelect
 						value={comparison!}
 						onChange={setComparison}
-						options={
-							ZOD_COMPARISONS[
-								selectedItem?.type as keyof typeof ZOD_COMPARISONS
-							]
-						}
+						options={ZOD_COMPARISONS[selectedItem?.type as keyof typeof ZOD_COMPARISONS]}
 					/>
 					<ValueInput value={value!} onChange={setValue!} />
 				</>
@@ -340,22 +302,22 @@ export function MadLibsCombobox<T extends { id: string }>({
 			}}
 			aria-label={placeholder}
 		>
-			<Group className="flex rounded-lg border-blue-300 border transition shadow-md ring-1 min-h-6 h-6 ring-black/10 focus-visible:ring-2 focus-visible:ring-black">
+			<Group className="flex h-6 min-h-6 rounded-lg border border-blue-300 shadow-md ring-1 ring-black/10 transition focus-visible:ring-2 focus-visible:ring-black">
 				<RAInput
 					placeholder={value?.toString() || placeholder}
-					className="flex-1 w-full border-none py-2 px-3 leading-5 placeholder:text-blue-300 placeholder:font-semibold text-blue-300 bg-transparent outline-none focus:ring-0 pl-3 pr-10 text-xs "
+					className="w-full flex-1 border-none bg-transparent px-3 py-2 pr-10 pl-3 text-xs leading-5 text-blue-300 outline-none placeholder:font-semibold placeholder:text-blue-300 focus:ring-0"
 				/>
-				<RAButton className="px-3 flex items-center text-blue-300 transition border-0 border-solid border-l border-l-blue-300 rounded-r-lg pressed:bg-blue-300/50 bg-blue-300/20 hover:bg-blue-300/50 cursor-pointer">
+				<RAButton className="pressed:bg-blue-300/50 flex cursor-pointer items-center rounded-r-lg border-0 border-l border-solid border-l-blue-300 bg-blue-300/20 px-3 text-blue-300 transition hover:bg-blue-300/50">
 					<Icon name="chevrons-up-down" />
 				</RAButton>
 			</Group>
-			<Popover className="max-h-60 w-(--trigger-width) overflow-auto rounded-md bg-gray-900/90 border-gray-400 border text-base shadow-lg ring-1 ring-black/5 entering:animate-in entering:fade-in exiting:animate-out exiting:fade-out">
-				<ListBox className="outline-hidden p-1" items={filteredItems}>
+			<Popover className="entering:animate-in entering:fade-in exiting:animate-out exiting:fade-out max-h-60 w-(--trigger-width) overflow-auto rounded-md border border-gray-400 bg-gray-900/90 text-base shadow-lg ring-1 ring-black/5">
+				<ListBox className="p-1 outline-hidden" items={filteredItems}>
 					{(item) => (
 						<ListBoxItem
 							textValue={String(item[labelKey])}
 							key={item.id}
-							className="group flex items-center gap-0.5 cursor-default select-none outline-hidden rounded-sm text-gray-900 focus:bg-sky-600 focus:text-white"
+							className="group flex cursor-default items-center gap-0.5 rounded-sm text-gray-900 outline-hidden select-none focus:bg-sky-600 focus:text-white"
 						>
 							{({ isSelected, isFocusVisible, isHovered }) => (
 								<>
@@ -371,7 +333,7 @@ export function MadLibsCombobox<T extends { id: string }>({
 										{String(item[labelKey])}
 									</span>
 									{isSelected && (
-										<span className="w-5 flex items-center text-blue-300 group-focus:text-white">
+										<span className="flex w-5 items-center text-blue-300 group-focus:text-white">
 											<Icon name="check" />
 										</span>
 									)}

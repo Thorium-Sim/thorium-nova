@@ -1,9 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import {
-	type InventoryFlags,
-	InventoryFlagValues,
-} from "../../utils/flags/InventoryFlags";
+
 import { Entity } from "../../../app/utils/ecs";
+import { type InventoryFlags, InventoryFlagValues } from "../../utils/flags/InventoryFlags";
 import { generateShipInventory } from "./inventory";
 let oldRandom: any;
 describe("Inventory Generator", () => {

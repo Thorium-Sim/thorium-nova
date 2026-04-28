@@ -1,49 +1,48 @@
+import type { CardProps } from "@thorium/cards/CardProps";
+import StarmapCanvas from "@thorium/components/Starmap/StarmapCanvas";
 import {
 	StarmapStoreProvider,
 	useCalculateVerticalDistance,
 	useGetStarmapStore,
 } from "@thorium/components/Starmap/starmapStore";
-import { useEffect, useMemo, useRef, useState, Suspense } from "react";
-import StarmapCanvas from "@thorium/components/Starmap/StarmapCanvas";
-import { MapControls } from "./MapControls";
-import { InterstellarWrapper } from "./InterstellarWrapper";
-import { SolarSystemWrapper } from "./SolarSystemWrapper";
-import { ObjectDetails } from "./ObjectDetails";
-import Button from "@thorium/ui/Button";
-import { toast } from "@thorium/context/ToastContext";
-import SearchableInput, {
-	DefaultResultLabel,
-} from "@thorium/ui/SearchableInput";
-import { capitalCase } from "change-case";
-import SearchableList from "@thorium/ui/SearchableList";
-import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
-import { useFollowEntity } from "@thorium/components/Starmap/useFollowEntity";
 import { useCancelFollow } from "@thorium/components/Starmap/useCancelFollow";
+import { useFollowEntity } from "@thorium/components/Starmap/useFollowEntity";
 import { q, clientId } from "@thorium/context/AppContext";
-import { Icon } from "@thorium/ui/Icon";
-import { useConfirm } from "@thorium/ui/AlertDialog";
-import { Switch } from "react-aria-components";
-import type { CardProps } from "@thorium/cards/CardProps";
+import { toast } from "@thorium/context/ToastContext";
 import { useStation } from "@thorium/routes/station/useStation";
+import { useConfirm } from "@thorium/ui/AlertDialog";
+import Button from "@thorium/ui/Button";
+import { Icon } from "@thorium/ui/Icon";
+import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
+import SearchableInput, { DefaultResultLabel } from "@thorium/ui/SearchableInput";
+import SearchableList from "@thorium/ui/SearchableList";
 import { getThemeButtonBorderColor } from "@thorium/utils/processThemeColor";
+import { capitalCase } from "change-case";
+import { useEffect, useMemo, useRef, useState, Suspense } from "react";
+import { Switch } from "react-aria-components";
+
+import { InterstellarWrapper } from "./InterstellarWrapper";
+import { MapControls } from "./MapControls";
+import { ObjectDetails } from "./ObjectDetails";
+import { SolarSystemWrapper } from "./SolarSystemWrapper";
 export function Navigation(props: CardProps) {
 	const { shipId } = useStation();
 	q.navigation.stream.useDataStream({ shipId });
 
 	return (
 		<StarmapStoreProvider>
-			<div className="mx-auto h-full bg-black/70 border border-white/50 relative navigation-card">
+			<div className="navigation-card relative mx-auto h-full border border-white/50 bg-black/70">
 				<Suspense fallback={<LoadingSpinner />}>
 					<CanvasWrapper shouldRender={props.cardLoaded} />
 				</Suspense>
-				<div className="grid grid-cols-2 grid-rows-2 absolute inset-0 pointer-events-none p-4">
-					<div className="max-w-sm navigation-search">
+				<div className="pointer-events-none absolute inset-0 grid grid-cols-2 grid-rows-2 p-4">
+					<div className="navigation-search max-w-sm">
 						<StarmapSearch />
 					</div>
-					<div className="w-96 self-start justify-self-end max-h-min navigation-object">
+					<div className="navigation-object max-h-min w-96 self-start justify-self-end">
 						<Suspense fallback={null}>
 							<ObjectDetails />
-							<div className="flex gap-4 w-full mt-2">
+							<div className="mt-2 flex w-full gap-4">
 								<AddWaypoint />
 								<EnterSystem />
 							</div>
@@ -85,15 +84,23 @@ function Waypoints() {
 	const lockedWaypointId = autopilot.destinationWaypointId;
 
 	return (
-		<div className="self-end justify-self-end w-96 pointer-events-auto waypoints-container">
-			<div className="overflow-hidden w-full mt-2">
-				<div ref={ref} className="flex flex-col h-full max-h-72">
+		<div className="waypoints-container pointer-events-auto w-96 self-end justify-self-end">
+			<div className="mt-2 w-full overflow-hidden">
+				<div ref={ref} className="flex h-full max-h-72 flex-col">
 					<SearchableList
 						showSearchLabel={false}
 						searchPlaceholder="Search Waypoint History..."
 						items={
 							waypoints.length === 0
-								? [{ id: -1, label: "No waypoints set.", isActive: false, isFacingOrLocked: false, isLocked: false }]
+								? [
+										{
+											id: -1,
+											label: "No waypoints set.",
+											isActive: false,
+											isFacingOrLocked: false,
+											isLocked: false,
+										},
+									]
 								: waypoints
 										.map((w) => ({
 											id: w.id,
@@ -120,22 +127,26 @@ function Waypoints() {
 											}}
 											className="group mr-2 flex items-center"
 										>
-												<div
+											<div
 												className="flex h-4 w-7 items-center rounded-full border transition"
 												style={{
-													borderColor: isFacingOrLocked ? colors.primary : isActive ? colors.warning : colors.notice,
+													borderColor: isFacingOrLocked
+														? colors.primary
+														: isActive
+															? colors.warning
+															: colors.notice,
 													backgroundColor: `${isFacingOrLocked ? colors.primary : isActive ? colors.warning : colors.notice}4d`,
 												}}
 											>
-												<span className={`block h-3 w-3 ml-0.5 rounded-full transition-all bg-white ${
-													isFacingOrLocked
-														? "ml-3"
-														: "group-data-[selected]:ml-3"
-												}`} />
+												<span
+													className={`ml-0.5 block h-3 w-3 rounded-full bg-white transition-all ${
+														isFacingOrLocked ? "ml-3" : "group-data-[selected]:ml-3"
+													}`}
+												/>
 											</div>
 										</Switch>
 										<button
-											className="appearance-none flex items-center"
+											className="flex appearance-none items-center"
 											onClick={async (e) => {
 												e.preventDefault();
 												e.stopPropagation();
@@ -151,14 +162,21 @@ function Waypoints() {
 												}
 											}}
 										>
-											<Icon name="ban" className="text-white drop-shadow-[0_0_4px_white] drop-shadow-[0_0_2px_white]" />
+											<Icon
+												name="ban"
+												className="text-white drop-shadow-[0_0_2px_white] drop-shadow-[0_0_4px_white]"
+											/>
 										</button>
 									</>
 								)}
 							</span>
 						)}
 						getItemStyle={({ isActive, isFacingOrLocked }) => {
-							const color = isFacingOrLocked ? colors.primary : isActive ? colors.warning : colors.notice;
+							const color = isFacingOrLocked
+								? colors.primary
+								: isActive
+									? colors.warning
+									: colors.notice;
 							return {
 								borderColor: color,
 								background: `${color}4d`,
@@ -168,18 +186,11 @@ function Waypoints() {
 						setSelectedItem={async ({ id }) => {
 							const waypoint = waypoints.find((w) => w.id === id);
 							if (waypoint) {
-								if (
-									useStarmapStore.getState().currentSystem !==
-									waypoint?.position.parentId
-								) {
-									await useStarmapStore
-										.getState()
-										.setCurrentSystem(waypoint?.position.parentId);
+								if (useStarmapStore.getState().currentSystem !== waypoint?.position.parentId) {
+									await useStarmapStore.getState().setCurrentSystem(waypoint?.position.parentId);
 								}
 								useStarmapStore.setState({
-									selectedObjectIds: waypoint.objectId
-										? [waypoint.objectId]
-										: [],
+									selectedObjectIds: waypoint.objectId ? [waypoint.objectId] : [],
 								});
 								const controls = useStarmapStore.getState().cameraControls;
 								controls?.current?.moveTo(
@@ -194,7 +205,7 @@ function Waypoints() {
 				</div>
 			</div>
 			{waypoints.length > 0 && (
-				<div className="flex gap-2 mt-2">
+				<div className="mt-2 flex gap-2">
 					<Button
 						className="btn-error flex-1"
 						onClick={async () => {
@@ -234,17 +245,16 @@ function AddWaypoint() {
 
 	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
 
-	const existingWaypoint = waypoints.find((w) => w.id === selectedObjectIds[0] || w.objectId === selectedObjectIds[0]);
+	const existingWaypoint = waypoints.find(
+		(w) => w.id === selectedObjectIds[0] || w.objectId === selectedObjectIds[0],
+	);
 	const isLocked = existingWaypoint?.id === autopilot.destinationWaypointId;
 
 	if (!selectedObjectIds[0]) return null;
 
 	if (isLocked) {
 		return (
-			<Button
-				className="pointer-events-auto flex-1 btn-primary"
-				disabled
-			>
+			<Button className="btn-primary pointer-events-auto flex-1" disabled>
 				Waypoint Locked
 			</Button>
 		);
@@ -253,10 +263,8 @@ function AddWaypoint() {
 	if (existingWaypoint?.isActive) {
 		return (
 			<Button
-				className="pointer-events-auto flex-1 btn-notice"
-				onClick={() =>
-					q.waypoints.deactivate.netSend({ waypointId: existingWaypoint.id })
-				}
+				className="btn-notice pointer-events-auto flex-1"
+				onClick={() => q.waypoints.deactivate.netSend({ waypointId: existingWaypoint.id })}
 			>
 				Deactivate Waypoint
 			</Button>
@@ -266,10 +274,8 @@ function AddWaypoint() {
 	if (existingWaypoint) {
 		return (
 			<Button
-				className="pointer-events-auto flex-1 btn-warning"
-				onClick={() =>
-					q.waypoints.activate.netSend({ waypointId: existingWaypoint.id })
-				}
+				className="btn-warning pointer-events-auto flex-1"
+				onClick={() => q.waypoints.activate.netSend({ waypointId: existingWaypoint.id })}
 			>
 				Activate Waypoint
 			</Button>
@@ -278,16 +284,16 @@ function AddWaypoint() {
 
 	return (
 		<Button
-			className="pointer-events-auto flex-1 btn-primary"
+			className="btn-primary pointer-events-auto flex-1"
 			disabled={selectedObjectIds.length === 0}
 			onClick={async () => {
 				try {
-					typeof selectedObjectIds[0] === "number" &&
-						(await q.waypoints.spawn.netSend({
+					if (typeof selectedObjectIds[0] === "number")
+						await q.waypoints.spawn.netSend({
 							entityId: selectedObjectIds[0],
 							shipId,
 							active: false,
-						}));
+						});
 				} catch (error: unknown) {
 					if (error instanceof Error) {
 						toast({ title: error.message, color: "error" });
@@ -315,13 +321,12 @@ function EnterSystem() {
 
 	return (
 		<Button
-			className={`pointer-events-auto flex-1 btn-warning ${
-				!id ? "btn-disabled" : ""
-			}`}
+			className={`btn-warning pointer-events-auto flex-1 ${!id ? "btn-disabled" : ""}`}
 			disabled={!id}
 			onClick={async () => {
-				typeof id === "number" &&
+				if (typeof id === "number") {
 					useStarmapStore.getState().setCurrentSystem(id);
+				}
 				useStarmapStore.setState({ selectedObjectIds: [] });
 			}}
 		>
@@ -336,42 +341,26 @@ function StarmapSearch() {
 		<SearchableInput<{ id: number; name: string; type: string; position: any }>
 			queryKey="nav"
 			getOptions={async ({ queryKey, signal }) => {
-				const result = await q.navigation.search.netRequest(
-					{ query: queryKey[1] },
-					{ signal },
-				);
+				const result = await q.navigation.search.netRequest({ query: queryKey[1] }, { signal });
 				return result;
 			}}
 			ResultLabel={({ active, result, selected }) => (
 				<DefaultResultLabel active={active} selected={selected}>
 					<p>{result.name}</p>
 					<p>
-						<small>
-							{result.type === "solar"
-								? "Solar System"
-								: capitalCase(result.type)}
-						</small>
+						<small>{result.type === "solar" ? "Solar System" : capitalCase(result.type)}</small>
 					</p>
 				</DefaultResultLabel>
 			)}
 			selected={null}
 			setSelected={async (item) => {
 				if (!item) return;
-				if (
-					useStarmapStore.getState().currentSystem !== item?.position.parentId
-				) {
-					await useStarmapStore
-						.getState()
-						.setCurrentSystem(item?.position.parentId);
+				if (useStarmapStore.getState().currentSystem !== item?.position.parentId) {
+					await useStarmapStore.getState().setCurrentSystem(item?.position.parentId);
 				}
 				useStarmapStore.setState({ selectedObjectIds: [item.id] });
 				const controls = useStarmapStore.getState().cameraControls;
-				controls?.current?.moveTo(
-					item.position.x,
-					item.position.y,
-					item.position.z,
-					false,
-				);
+				controls?.current?.moveTo(item.position.x, item.position.y, item.position.z, false);
 				q.thorium.genericEvent.netSend({
 					clientId,
 					eventName: "starmap-selected",
@@ -401,11 +390,7 @@ function CanvasWrapper({ shouldRender }: { shouldRender: boolean }) {
 			<Suspense>
 				<StarmapHooks />
 			</Suspense>
-			{currentSystem === null ? (
-				<InterstellarWrapper />
-			) : (
-				<SolarSystemWrapper />
-			)}
+			{currentSystem === null ? <InterstellarWrapper /> : <SolarSystemWrapper />}
 		</StarmapCanvas>
 	);
 }

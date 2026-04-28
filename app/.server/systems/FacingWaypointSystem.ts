@@ -1,6 +1,6 @@
-import { Quaternion, Vector3, Matrix4 } from "three";
-import { type Entity, System } from "@thorium/utils/ecs";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { type Entity, System } from "@thorium/utils/ecs";
+import { Quaternion, Vector3, Matrix4 } from "three";
 
 const shipPosition = new Vector3();
 const waypointPosition = new Vector3();
@@ -26,7 +26,7 @@ export class FacingWaypointSystem extends System {
 		);
 	}
 
-	update(entity: Entity, elapsed: number) {
+	update(entity: Entity) {
 		const { position, rotation, facingWaypoints } = entity.components;
 		if (!position || !rotation || !facingWaypoints) return;
 
@@ -34,14 +34,11 @@ export class FacingWaypointSystem extends System {
 
 		const facingEntries: { id: number; distance: number }[] = [];
 
-		const shipSystemEntity = position.parentId
-			? this.ecs.getEntityById(position.parentId)
-			: null;
+		const shipSystemEntity = position.parentId ? this.ecs.getEntityById(position.parentId) : null;
 		const shipSystemPosition = shipSystemEntity?.components.position || null;
 
 		for (const waypoint of this.ecs.componentCache.get("isWaypoint") || []) {
-			if (waypoint.components.isWaypoint?.assignedShipId !== entity.id)
-				continue;
+			if (waypoint.components.isWaypoint?.assignedShipId !== entity.id) continue;
 			if (!waypoint.components.isWaypoint.isActive) continue;
 			if (!waypoint.components.position) continue;
 
@@ -53,31 +50,16 @@ export class FacingWaypointSystem extends System {
 				// Same system (or both in interstellar space)
 				waypointPosition.set(wpPosition.x, wpPosition.y, wpPosition.z);
 			} else {
-				const wpSystemEntity = wpParentId
-					? this.ecs.getEntityById(wpParentId)
-					: null;
-				const wpSystemPosition =
-					wpSystemEntity?.components.position || null;
+				const wpSystemEntity = wpParentId ? this.ecs.getEntityById(wpParentId) : null;
+				const wpSystemPosition = wpSystemEntity?.components.position || null;
 
 				if (position.parentId === null && wpSystemPosition) {
 					// Ship is in interstellar space
-					waypointPosition.set(
-						wpSystemPosition.x,
-						wpSystemPosition.y,
-						wpSystemPosition.z,
-					);
+					waypointPosition.set(wpSystemPosition.x, wpSystemPosition.y, wpSystemPosition.z);
 				} else if (wpSystemPosition && shipSystemPosition) {
 					// Cross-system: place at heliopause direction
-					dirVector1.set(
-						shipSystemPosition.x,
-						shipSystemPosition.y,
-						shipSystemPosition.z,
-					);
-					dirVector2.set(
-						wpSystemPosition.x,
-						wpSystemPosition.y,
-						wpSystemPosition.z,
-					);
+					dirVector1.set(shipSystemPosition.x, shipSystemPosition.y, shipSystemPosition.z);
+					dirVector2.set(wpSystemPosition.x, wpSystemPosition.y, wpSystemPosition.z);
 					waypointPosition
 						.subVectors(dirVector2, dirVector1)
 						.normalize()
@@ -91,9 +73,7 @@ export class FacingWaypointSystem extends System {
 			// the check is roll-agnostic (only yaw/pitch matter for locking on).
 			rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
 			up.set(0, 1, 0).applyQuaternion(rotationQuat);
-			matrix
-				.lookAt(shipPosition, waypointPosition, up)
-				.multiply(rotationMatrix);
+			matrix.lookAt(shipPosition, waypointPosition, up).multiply(rotationMatrix);
 			desiredRotationQuat.setFromRotationMatrix(matrix);
 
 			const angle = Math.abs(rotationQuat.angleTo(desiredRotationQuat));

@@ -1,9 +1,4 @@
-import type {
-	AnyProcedure,
-	Procedure,
-	ProcedureArgs,
-	ProcedureParams,
-} from "./procedure";
+import type { AnyProcedure, Procedure, ProcedureArgs, ProcedureParams } from "./procedure";
 import type { BuildProcedure } from "./procedureBuilder";
 import type { AnyRouter, AnyRouterDef, Router } from "./router";
 
@@ -43,8 +38,7 @@ export interface RuntimeConfig {
  * Combination of `InitTOptions` + `InitGenerics`
  * @internal
  */
-export interface RootConfig<TGenerics extends RootConfigTypes>
-	extends RuntimeConfig {
+export interface RootConfig<TGenerics extends RootConfigTypes> extends RuntimeConfig {
 	$types: TGenerics;
 }
 
@@ -81,22 +75,19 @@ export type Overwrite<TType, TWith> = Omit<TType, keyof TWith> & TWith;
  */
 export type MaybePromise<TType> = TType | Promise<TType>;
 
-export type InferOptional<TType, TKeys extends keyof TType> = Partial<
-	Pick<TType, TKeys>
-> &
+export type InferOptional<TType, TKeys extends keyof TType> = Partial<Pick<TType, TKeys>> &
 	Omit<TType, TKeys>;
 
 export type UndefinedKeys<TType> = {
 	[K in keyof TType]: undefined extends TType[K] ? K : never;
 }[keyof TType];
 
-export type inferRouterDef<TRouter extends AnyRouter> = TRouter extends Router<
-	infer TParams
->
-	? TParams extends AnyRouterDef<any>
-		? TParams
-		: never
-	: never;
+export type inferRouterDef<TRouter extends AnyRouter> =
+	TRouter extends Router<infer TParams>
+		? TParams extends AnyRouterDef<any>
+			? TParams
+			: never
+		: never;
 
 export type inferRouterContext<TRouter extends AnyRouter> =
 	inferRouterDef<TRouter>["_config"]["$types"]["ctx"];
@@ -108,20 +99,16 @@ export type inferRouterEntity<TRouter extends AnyRouter> =
 /**
  * @public
  */
-export type inferAsyncReturnType<TFunction extends (...args: any) => any> =
-	ThenArg<ReturnType<TFunction>>;
+export type inferAsyncReturnType<TFunction extends (...args: any) => any> = ThenArg<
+	ReturnType<TFunction>
+>;
 
 /**
  * @internal
  */
-export type ThenArg<TType> = TType extends PromiseLike<infer U>
-	? ThenArg<U>
-	: TType;
+export type ThenArg<TType> = TType extends PromiseLike<infer U> ? ThenArg<U> : TType;
 
-type GetInferenceHelpers<
-	TType extends "input" | "output",
-	TRouter extends AnyRouter,
-> = {
+type GetInferenceHelpers<TType extends "input" | "output", TRouter extends AnyRouter> = {
 	[TKey in keyof TRouter["_def"]["record"]]: TRouter["_def"]["record"][TKey] extends infer TRouterOrProcedure
 		? TRouterOrProcedure extends AnyRouter
 			? GetInferenceHelpers<TType, TRouterOrProcedure>
@@ -133,22 +120,15 @@ type GetInferenceHelpers<
 		: never;
 };
 
-export type inferRouterInputs<TRouter extends AnyRouter> = GetInferenceHelpers<
-	"input",
-	TRouter
->;
+export type inferRouterInputs<TRouter extends AnyRouter> = GetInferenceHelpers<"input", TRouter>;
 
-export type inferRouterOutputs<TRouter extends AnyRouter> = GetInferenceHelpers<
-	"output",
-	TRouter
->;
+export type inferRouterOutputs<TRouter extends AnyRouter> = GetInferenceHelpers<"output", TRouter>;
 
 export type inferHandlerInput<TProcedure extends AnyProcedure> = ProcedureArgs<
 	inferProcedureParams<TProcedure>
 >;
 
-export type inferProcedureInput<TProcedure extends AnyProcedure> =
-	inferHandlerInput<TProcedure>[0];
+export type inferProcedureInput<TProcedure extends AnyProcedure> = inferHandlerInput<TProcedure>[0];
 
 export type inferProcedureParams<TProcedure> = TProcedure extends AnyProcedure
 	? TProcedure["_def"]
@@ -161,22 +141,16 @@ export type inferTransformedProcedureOutput<TProcedure extends AnyProcedure> =
 	TProcedure["_def"]["_output_out"];
 
 export type RouterRequests<TRouter extends AnyRouter> = {
-	[P in keyof TRouter as TRouter[P] extends
-		| BuildProcedure<"request", any, any>
-		| AnyRouter
+	[P in keyof TRouter as TRouter[P] extends BuildProcedure<"request", any, any> | AnyRouter
 		? P
 		: never]: TRouter[P] extends Procedure<"request", ProcedureParams>
-		? (
-				params: TRouter[P]["_def"]["_input_in"],
-			) => TRouter[P]["_def"]["_output_out"]
+		? (params: TRouter[P]["_def"]["_input_in"]) => TRouter[P]["_def"]["_output_out"]
 		: TRouter[P] extends AnyRouter
 			? RouterRequests<TRouter[P]>
 			: never;
 };
 export type RouterSends<TRouter extends AnyRouter> = {
-	[P in keyof TRouter as TRouter[P] extends
-		| BuildProcedure<"send", any, any>
-		| AnyRouter
+	[P in keyof TRouter as TRouter[P] extends BuildProcedure<"send", any, any> | AnyRouter
 		? P
 		: never]: TRouter[P] extends Procedure<"send", ProcedureParams>
 		? TRouter[P]

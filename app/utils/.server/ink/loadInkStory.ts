@@ -1,7 +1,9 @@
-import { Compiler, Story } from "inkjs/full";
-import { DataStore } from "../db-fs";
 import path from "node:path";
+
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
+import { Compiler } from "inkjs/full";
+
+import { DataStore } from "../db-fs";
 
 export async function loadInkStory(
 	inkFilePath: string,
@@ -23,7 +25,7 @@ export async function loadInkStory(
 					story.variablesState[varName] = variables[varName];
 				} catch (error) {
 					console.error(
-						`Unable to assign variable ${varName}: ${error instanceof Error ? error.message : error}`,
+						`Unable to assign variable ${varName}: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
 					);
 				}
 			}
@@ -33,7 +35,7 @@ export async function loadInkStory(
 	} catch (error) {
 		console.log(inkFilePath, error);
 		throw new Error(
-			`Unable to read ink story ${inkFilePath}: ${error instanceof Error ? error.message : error}`,
+			`Unable to read ink story ${inkFilePath}: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
 		);
 	}
 }

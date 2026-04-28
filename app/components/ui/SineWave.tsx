@@ -1,52 +1,8 @@
-import { useEffect, useRef } from "react";
-import useMeasure from "../../hooks/useMeasure";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import chroma from "chroma-js";
-const sinePoints = ({
-	waves,
-	width,
-	height,
-	orientation,
-}: {
-	waves: {
-		amplitude: number;
-		frequency: number;
-		phase: number;
-	}[];
-	width: number;
-	height: number;
-	orientation: "vertical" | "horizontal";
-}) => {
-	const points = [];
-	if (orientation === "horizontal") {
-		const sinWidth = width * 2 * 2;
-		for (let i = 0; i < sinWidth; i++) {
-			if (i % 2 === 0) points.push(i / 2);
-			else {
-				let point = 0;
-				for (const { frequency, phase, amplitude } of waves) {
-					point +=
-						Math.sin(i / 2 / frequency + phase) * ((amplitude * height) / 2);
-				}
-				points.push(point + height / 2);
-			}
-		}
-	} else {
-		const sinHeight = height * 2 * 2;
-		for (let i = 0; i < sinHeight; i++) {
-			if (i % 2 === 1) points.push(i / 2);
-			else {
-				let point = 0;
-				for (const { frequency, phase, amplitude } of waves) {
-					point +=
-						Math.sin(i / 2 / frequency + phase) * ((amplitude * width) / 2);
-				}
-				points.push(point + width / 2);
-			}
-		}
-	}
-	return points;
-};
+import { useRef } from "react";
+
+import useMeasure from "../../hooks/useMeasure";
 
 export function getSinePoint(
 	i: number,
@@ -64,8 +20,6 @@ export function getSinePoint(
 	return point;
 }
 
-const colors = ["red", "orange", "yellow", "#0f0", "cyan", "blue", "purple"];
-
 const SineWave = ({
 	waves,
 	className = "",
@@ -77,11 +31,7 @@ const SineWave = ({
 	shouldRender,
 }: {
 	waves: { amplitude: number; frequency: number; phase: number }[];
-	callFrame?: (
-		ctx: CanvasRenderingContext2D,
-		width: number,
-		height: number,
-	) => void;
+	callFrame?: (ctx: CanvasRenderingContext2D, width: number, height: number) => void;
 	className?: string;
 	color?: string;
 	strokeWidth?: number;
@@ -101,12 +51,7 @@ const SineWave = ({
 		}
 		canvasRef.current.width = width * window.devicePixelRatio;
 		canvasRef.current.height = height * window.devicePixelRatio;
-		ctx.clearRect(
-			0,
-			0,
-			width * window.devicePixelRatio,
-			height * window.devicePixelRatio,
-		);
+		ctx.clearRect(0, 0, width * window.devicePixelRatio, height * window.devicePixelRatio);
 		ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 		ctx.beginPath();
 		ctx.moveTo(
@@ -119,9 +64,7 @@ const SineWave = ({
 		);
 		for (
 			let i = -10;
-			i <
-			(orientation === "vertical" ? height : width) * window.devicePixelRatio +
-				10;
+			i < (orientation === "vertical" ? height : width) * window.devicePixelRatio + 10;
 			i += window.devicePixelRatio
 		) {
 			ctx.lineTo(
@@ -149,8 +92,8 @@ const SineWave = ({
 		callFrame?.(ctx, width, height);
 	}, shouldRender !== false);
 	return (
-		<div ref={ref} className={`w-full h-full ${className}`}>
-			<canvas ref={canvasRef} className="w-full h-full" />
+		<div ref={ref} className={`h-full w-full ${className}`}>
+			<canvas ref={canvasRef} className="h-full w-full" />
 		</div>
 	);
 };

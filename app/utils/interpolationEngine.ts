@@ -13,56 +13,51 @@ export function interpolateText(
 		return rng.nextFromList(options.split(",").map((o) => o.trim()));
 	});
 	// 1) evaluate all switches like {key|A:out;k=v|B:out2;...|default:...}
-	template = template.replace(
-		/\[(\w+)\|([^\]]+)\]/g,
-		(string, key, body: string) => {
-			const value = ctx[key] ?? "";
+	template = template.replace(/\[(\w+)\|([^\]]+)\]/g, (string, key, body: string) => {
+		const value = ctx[key] ?? "";
 
-			const parts = body.split("|").map((p) => p.trim());
+		const parts = body.split("|").map((p) => p.trim());
 
-			if (body.indexOf(":") === -1) {
-				// This is a simple ternary switch.
-				return value ? ctx[parts[0]] || parts[0] : ctx[parts[1]] || parts[1];
-			}
+		if (body.indexOf(":") === -1) {
+			// This is a simple ternary switch.
+			return value ? ctx[parts[0]] || parts[0] : ctx[parts[1]] || parts[1];
+		}
 
-			for (const part of parts) {
-				const colonIdx = part.indexOf(":");
-				if (colonIdx === -1) continue;
-				const branchKey = part.slice(0, colonIdx).trim();
-				const branchBody = part.slice(colonIdx + 1).trim();
+		for (const part of parts) {
+			const colonIdx = part.indexOf(":");
+			if (colonIdx === -1) continue;
+			const branchKey = part.slice(0, colonIdx).trim();
+			const branchBody = part.slice(colonIdx + 1).trim();
 
-				const isMatch = branchKey.toLowerCase() === value.toLowerCase();
-				const isDefault = branchKey.toLowerCase() === "default";
+			const isMatch = branchKey.toLowerCase() === value.toLowerCase();
+			const isDefault = branchKey.toLowerCase() === "default";
 
-				if (
-					isMatch ||
-					(isDefault &&
-						!parts.some(
-							(p) =>
-								p.slice(0, p.indexOf(":")).trim().toLowerCase() ===
-								value.toLowerCase(),
-						))
-				) {
-					const segments = branchBody
-						.split(";")
-						.map((s) => s.trim())
-						.filter(Boolean);
-					const out = segments.shift() || "";
+			if (
+				isMatch ||
+				(isDefault &&
+					!parts.some(
+						(p) => p.slice(0, p.indexOf(":")).trim().toLowerCase() === value.toLowerCase(),
+					))
+			) {
+				const segments = branchBody
+					.split(";")
+					.map((s) => s.trim())
+					.filter(Boolean);
+				const out = segments.shift() || "";
 
-					// parse assignments like k=v
-					for (const assign of segments) {
-						const eq = assign.indexOf("=");
-						if (eq === -1) continue;
-						const k = assign.slice(0, eq).trim();
-						const v = assign.slice(eq + 1).trim();
-						ctx[k] = v;
-					}
-					return out;
+				// parse assignments like k=v
+				for (const assign of segments) {
+					const eq = assign.indexOf("=");
+					if (eq === -1) continue;
+					const k = assign.slice(0, eq).trim();
+					const v = assign.slice(eq + 1).trim();
+					ctx[k] = v;
 				}
+				return out;
 			}
-			return ""; // no match (and no default)
-		},
-	);
+		}
+		return ""; // no match (and no default)
+	});
 
 	// 2) replace simple variables {name}
 	template = template.replace(/\{\s*(\w+)\s*\}/g, (_, name) => {
@@ -74,12 +69,7 @@ export function interpolateText(
 		/(RANDOM|CAPITALIZE|LOWERCASE|UPPERCASE|PLURALIZE)\((.+?)\)/g,
 		(
 			_,
-			functionName:
-				| "RANDOM"
-				| "CAPITALIZE"
-				| "LOWERCASE"
-				| "UPPERCASE"
-				| "PLURALIZE",
+			functionName: "RANDOM" | "CAPITALIZE" | "LOWERCASE" | "UPPERCASE" | "PLURALIZE",
 			input: string,
 		) => {
 			switch (functionName) {

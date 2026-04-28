@@ -5,15 +5,12 @@ import { type Entity, System } from "@thorium/utils/ecs";
 export class LegacyEngineHeatPowerSystem extends System {
 	static flightMode = ["legacy"];
 	test(entity: Entity) {
-		return !!(
-			entity.components.isWarpEngines || entity.components.isImpulseEngines
-		);
+		return !!(entity.components.isWarpEngines || entity.components.isImpulseEngines);
 	}
 	update(entity: Entity, elapsed: number) {
 		const elapsedRatio = elapsed / 1000;
 
-		const engine =
-			entity.components.isWarpEngines || entity.components.isImpulseEngines;
+		const engine = entity.components.isWarpEngines || entity.components.isImpulseEngines;
 		const heat = entity.components.heat;
 		const power = entity.components.power;
 		const currentPower = power?.currentPower || 0;
@@ -22,19 +19,13 @@ export class LegacyEngineHeatPowerSystem extends System {
 		const speed =
 			"currentWarpFactor" in engine
 				? engine.currentWarpFactor
-				: Math.trunc(
-						(engine.targetSpeed / engine.cruisingSpeed) *
-							(engine.speeds.length - 1),
-					);
+				: Math.trunc((engine.targetSpeed / engine.cruisingSpeed) * (engine.speeds.length - 1));
 
 		const speedVal = speed || -4;
 		if (heat && !entity.components.legacyCoolant?.cooling) {
 			const newHeat = Math.min(
 				heat.maxHeat,
-				Math.max(
-					heat.nominalHeat,
-					heat.heat + speedVal * heat.legacyHeatRate * elapsedRatio,
-				),
+				Math.max(heat.nominalHeat, heat.heat + speedVal * heat.legacyHeatRate * elapsedRatio),
 			);
 			entity.updateComponent("heat", { heat: newHeat });
 		}
@@ -44,9 +35,7 @@ export class LegacyEngineHeatPowerSystem extends System {
 			const maxIndex = getMaxSpeedIndex(power?.powerLevels || [], currentPower);
 			const speedCount = engine.speeds.length || 0;
 			if ("currentWarpFactor" in engine) {
-				const maxWarpFactor = Math.trunc(
-					Math.min(Math.max(0, maxIndex * speedCount)),
-				);
+				const maxWarpFactor = Math.trunc(Math.min(Math.max(0, maxIndex * speedCount)));
 				if (engine.currentWarpFactor > maxWarpFactor) {
 					entity.updateComponent("isWarpEngines", {
 						currentWarpFactor: maxWarpFactor,

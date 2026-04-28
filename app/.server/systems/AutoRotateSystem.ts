@@ -1,10 +1,10 @@
-import { Quaternion, Vector3, Matrix4 } from "three";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { clearAutopilotState } from "@thorium/utils/.server/ship/clearAutopilotState";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { autopilotGetCoordinates } from "@thorium/utils/starmap/autopilotGetCoordinates";
-import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
-import { clearAutopilotState } from "@thorium/utils/.server/ship/clearAutopilotState";
 import { KM_TO_LY, lightYearToLightMinute } from "@thorium/utils/unitTypes";
-import { pubsub } from "@thorium/.server/init/pubsub";
+import { Quaternion, Vector3, Matrix4 } from "three";
 
 const rotationQuat = new Quaternion();
 const desiredRotationQuat = new Quaternion();
@@ -63,8 +63,11 @@ export class AutoRotateSystem extends System {
 			? this.ecs.getEntityById(entity.components.autopilot.desiredSolarSystemId)
 			: null;
 
-		const { nextDestination, positionVec, isInInterstellar } =
-			autopilotGetCoordinates(entity, entitySystem, destinationSystem);
+		const { nextDestination, positionVec, isInInterstellar } = autopilotGetCoordinates(
+			entity,
+			entitySystem,
+			destinationSystem,
+		);
 		desiredRotationQuat.identity();
 
 		if (autopilot.desiredCoordinates) {
@@ -74,14 +77,10 @@ export class AutoRotateSystem extends System {
 			// next waypoint, matching AutoThrustSystem's approach. This prevents
 			// chaotic rotation at warp when the ship overshoots closely-spaced
 			// intermediate waypoints.
-			const currentSpeed =
-				entity.components.velocity?.forwardVelocity || 0;
+			const currentSpeed = entity.components.velocity?.forwardVelocity || 0;
 			const distanceToNext = positionVec.distanceTo(nextDestination);
 			const distanceToNextInKM =
-				distanceToNext *
-				(isInInterstellar
-					? 1 / lightYearToLightMinute(KM_TO_LY)
-					: 1);
+				distanceToNext * (isInInterstellar ? 1 / lightYearToLightMinute(KM_TO_LY) : 1);
 			const distanceThreshold = currentSpeed * 2;
 
 			// Check if the ship has passed the waypoint by testing if it's behind
@@ -90,26 +89,17 @@ export class AutoRotateSystem extends System {
 			rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
 			forward.set(0, 0, 1).applyQuaternion(rotationQuat);
 			toWaypoint.copy(nextDestination).sub(positionVec);
-			const waypointIsBehind =
-				distanceToNext > 0.001 && toWaypoint.dot(forward) < 0;
+			const waypointIsBehind = distanceToNext > 0.001 && toWaypoint.dot(forward) < 0;
 
-			if (
-				distanceToNextInKM < Math.max(1, distanceThreshold) ||
-				waypointIsBehind
-			) {
+			if (distanceToNextInKM < Math.max(1, distanceThreshold) || waypointIsBehind) {
 				// Check if we're already at the final leg of the journey (no intermediate
 				// waypoints left). If nextCoordinates was null and path is empty,
 				// autopilotGetCoordinates used desiredDestination as nextDestination.
-				const wasAtFinalLeg =
-					!autopilot.nextCoordinates && autopilot.path.length === 0;
+				const wasAtFinalLeg = !autopilot.nextCoordinates && autopilot.path.length === 0;
 
 				autopilot.nextCoordinates = autopilot.path.shift()!;
 				if (!autopilot.nextCoordinates) {
-					if (
-						wasAtFinalLeg &&
-						!autopilot.forwardAutopilot &&
-						waypointIsBehind
-					) {
+					if (wasAtFinalLeg && !autopilot.forwardAutopilot && waypointIsBehind) {
 						// Ship has blown past the final destination while using manual
 						// engine controls. Deactivate autopilot and unlock the course,
 						// similar to arriving normally via WaypointRemoveSystem.
@@ -147,9 +137,7 @@ export class AutoRotateSystem extends System {
 				rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
 				up.set(0, 1, 0).applyQuaternion(rotationQuat);
 
-				matrix
-					.lookAt(positionVec, nextDestination, up)
-					.multiply(rotationMatrix);
+				matrix.lookAt(positionVec, nextDestination, up).multiply(rotationMatrix);
 				// Use the thrusters to adjust the rotation of the ship to point towards the desired destination.
 				// First, determine the angle to the destination.
 				desiredRotationQuat.setFromRotationMatrix(matrix);

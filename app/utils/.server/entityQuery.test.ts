@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { ECS, Entity } from "../ecs";
 import {
 	evaluateAction,

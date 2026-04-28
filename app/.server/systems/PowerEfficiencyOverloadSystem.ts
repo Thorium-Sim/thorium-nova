@@ -1,7 +1,4 @@
-import {
-	applyDamage,
-	applySystemDamage,
-} from "@thorium/utils/.server/ship/collisionDamage";
+import { applySystemDamage } from "@thorium/utils/.server/ship/collisionDamage";
 import { type Entity, System } from "@thorium/utils/ecs";
 
 export class PowerEfficiencyOverloadSystem extends System {
@@ -18,13 +15,9 @@ export class PowerEfficiencyOverloadSystem extends System {
 
 		const entropy = Math.abs(this.ecs.rng.next()) * damage.entropyMultiplier;
 		const maxSafePower = power.powerLevels[power.powerLevels.length - 1];
-		const overloadPercent = Math.max(
-			0,
-			(power.currentPower - maxSafePower) / maxSafePower,
-		);
+		const overloadPercent = Math.max(0, (power.currentPower - maxSafePower) / maxSafePower);
 		const overloadDecrease =
-			(overloadPercent * damage.overloadDamageMultiplier + entropy) *
-			elapsedRatio;
+			(overloadPercent * damage.overloadDamageMultiplier + entropy) * elapsedRatio;
 		applySystemDamage(entity, overloadDecrease, ["Fatigue"]);
 	}
 }

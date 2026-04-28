@@ -1,20 +1,18 @@
-import { clientId, q } from "@thorium/context/AppContext";
 import { useFrame } from "@react-three/fiber";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { CircleGridStoreProvider } from "@thorium/cards/Pilot/useCircleGridStore";
 import Nebula from "@thorium/components/Starmap/Nebula";
 import StarmapCanvas from "@thorium/components/Starmap/StarmapCanvas";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
-import {
-	InterstellarWrapper,
-	SolarSystemWrapper,
-} from "@thorium/cores/StarmapCore";
+import { clientId, q } from "@thorium/context/AppContext";
+import { InterstellarWrapper, SolarSystemWrapper } from "@thorium/cores/StarmapCore";
+import { useStation } from "@thorium/routes/station/useStation";
+import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { Suspense, useEffect, useState } from "react";
 import { Quaternion } from "three";
+
 import { Fuzz } from "./Fuzz";
-import { WarpStars } from "./WarpStars";
-import { CircleGridStoreProvider } from "@thorium/cards/Pilot/useCircleGridStore";
-import { useStation } from "@thorium/routes/station/useStation";
 import { Gizmos } from "./gizmos";
+import { WarpStars } from "./WarpStars";
 
 const forwardQuaternion = new Quaternion(0, 1, 0, 0);
 
@@ -61,7 +59,7 @@ export function Viewscreen() {
 	q.viewscreen.stream.useDataStream({ shipId });
 
 	return (
-		<div className="w-full h-full flex items-center justify-center text-white text-6xl">
+		<div className="flex h-full w-full items-center justify-center text-6xl text-white">
 			<CircleGridStoreProvider>
 				<StarmapCanvas>
 					<ViewscreenEffects onDone={() => setInitialized(true)} />
@@ -77,11 +75,7 @@ export function Viewscreen() {
 							<Suspense fallback={null}>
 								<Nebula />
 							</Suspense>
-							{currentSystem === null ? (
-								<InterstellarWrapper />
-							) : (
-								<SolarSystemWrapper />
-							)}
+							{currentSystem === null ? <InterstellarWrapper /> : <SolarSystemWrapper />}
 						</>
 					) : null}
 				</StarmapCanvas>

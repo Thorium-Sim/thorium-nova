@@ -29,14 +29,8 @@ export class LegacySensorContactMovementSystem extends System {
 		const sensors = sensorsSys?.components.isLegacySensors;
 		if (!sensors) return;
 		const maxDistance =
-			isSensorContact.type === "planet"
-				? (entity.components.size?.length || 1) / 2
-				: 0.03;
-		const {
-			x: movementX,
-			y: movementY,
-			thrustersSystem,
-		} = getSensorGridMovement(sensorsSys);
+			isSensorContact.type === "planet" ? (entity.components.size?.length || 1) / 2 : 0.03;
+		const { x: movementX, y: movementY, thrustersSystem } = getSensorGridMovement(sensorsSys);
 
 		// Rotate contact based on the thruster yaw
 		const elapsedMinutes = elapsedRatio / 60;
@@ -51,10 +45,7 @@ export class LegacySensorContactMovementSystem extends System {
 				position.x = newPosition.x;
 				position.y = newPosition.y;
 
-				const newDestination = rotatePoint(
-					isSensorContact.destination,
-					yawDiff,
-				);
+				const newDestination = rotatePoint(isSensorContact.destination, yawDiff);
 				entity.updateComponent("isSensorContact", {
 					destination: newDestination,
 				});
@@ -85,17 +76,11 @@ export class LegacySensorContactMovementSystem extends System {
 				destination: {
 					x: Math.max(
 						-1 * maxDistance,
-						Math.min(
-							1 + maxDistance,
-							isSensorContact.destination.x + movementX,
-						),
+						Math.min(1 + maxDistance, isSensorContact.destination.x + movementX),
 					),
 					y: Math.max(
 						-1 * maxDistance,
-						Math.min(
-							1 + maxDistance,
-							isSensorContact.destination.y + movementY,
-						),
+						Math.min(1 + maxDistance, isSensorContact.destination.y + movementY),
 					),
 				},
 			});
@@ -103,15 +88,9 @@ export class LegacySensorContactMovementSystem extends System {
 		}
 
 		positionVec.set(position.x, position.y);
-		destinationVec.set(
-			isSensorContact.destination.x,
-			isSensorContact.destination.y,
-		);
+		destinationVec.set(isSensorContact.destination.x, isSensorContact.destination.y);
 		const distance = destinationVec.distanceToSquared(positionVec);
-		if (
-			isSensorContact.speed > 500 ||
-			distance / isSensorContact.speed <= 0.001
-		) {
+		if (isSensorContact.speed > 500 || distance / isSensorContact.speed <= 0.001) {
 			entity.updateComponent("position", {
 				x: isSensorContact.destination.x,
 				y: isSensorContact.destination.y,
@@ -126,14 +105,8 @@ export class LegacySensorContactMovementSystem extends System {
 				.multiplyScalar(isSensorContact.speed * elapsedRatio);
 
 			entity.updateComponent("position", {
-				x: Math.max(
-					-1 * maxDistance,
-					Math.min(1 + maxDistance, position.x + directionVec.x),
-				),
-				y: Math.max(
-					-1 * maxDistance,
-					Math.min(1 + maxDistance, position.y + directionVec.y),
-				),
+				x: Math.max(-1 * maxDistance, Math.min(1 + maxDistance, position.x + directionVec.x)),
+				y: Math.max(-1 * maxDistance, Math.min(1 + maxDistance, position.y + directionVec.y)),
 			});
 		}
 
@@ -185,10 +158,8 @@ export function getSensorGridMovement(sensors: Entity) {
 	if (sensors.components.isLegacySensors.autoThrusters) {
 		if (thrustersSystem?.components.isThrusters) {
 			const maxSpeed = thrustersSystem.components.isThrusters.directionMaxSpeed;
-			movementX +=
-				(thrustersSystem.components.isThrusters.direction.x * maxSpeed) / 1000;
-			movementY +=
-				(thrustersSystem.components.isThrusters.direction.z * maxSpeed) / 1000;
+			movementX += (thrustersSystem.components.isThrusters.direction.x * maxSpeed) / 1000;
+			movementY += (thrustersSystem.components.isThrusters.direction.z * maxSpeed) / 1000;
 		}
 	}
 	return { x: movementX, y: movementY, thrustersSystem };

@@ -1,12 +1,12 @@
-import SearchableList from "@thorium/ui/SearchableList";
-import { Outlet, useNavigate, useParams } from "react-router";
-import Button from "@thorium/ui/Button";
-import { useState } from "react";
-import { capitalCase } from "change-case";
-import { Suspense } from "react";
 import { q } from "@thorium/context/AppContext";
-import { Icon } from "@thorium/ui/Icon";
 import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+import Button from "@thorium/ui/Button";
+import { Icon } from "@thorium/ui/Icon";
+import SearchableList from "@thorium/ui/SearchableList";
+import { capitalCase } from "change-case";
+import { useState } from "react";
+import { Suspense } from "react";
+import { Outlet, useNavigate, useParams } from "react-router";
 
 export default function Systems() {
 	const { pluginId, shipId } = useParams() as {
@@ -30,7 +30,7 @@ export default function Systems() {
 	const navigate = useNavigate();
 	return (
 		<>
-			<div className="w-72 flex flex-col">
+			<div className="flex w-72 flex-col">
 				{/* TODO April 27 2022 - Figure out some way to define and determine the maximum number of
         one type of system that can be assigned to a ship. Ex. only one impulse engine should be assignable. */}
 				<h3 className="text-2xl font-bold">Available Systems</h3>
@@ -76,28 +76,22 @@ export default function Systems() {
 					)}
 				/>
 				{!allPlugins && (
-					<Button
-						className="mt-4 btn-info btn-sm w-full"
-						onClick={() => setAllPlugins(true)}
-					>
+					<Button className="btn-info btn-sm mt-4 w-full" onClick={() => setAllPlugins(true)}>
 						Include Other Plugins
 					</Button>
 				)}
 				{allPlugins && (
-					<Button
-						className="btn-warning mt-4 btn-sm w-full"
-						onClick={() => setAllPlugins(false)}
-					>
+					<Button className="btn-warning btn-sm mt-4 w-full" onClick={() => setAllPlugins(false)}>
 						Exclude Other Plugins
 					</Button>
 				)}
 			</div>
-			<div className="w-72 flex flex-col">
+			<div className="flex w-72 flex-col">
 				<h3 className="text-2xl font-bold">Assigned Systems</h3>
 				<SearchableList
 					showSearchLabel={false}
 					selectedItem={null}
-					setSelectedItem={(item) => {}}
+					setSelectedItem={() => {}}
 					items={ship.shipSystems
 						.map((c) => {
 							const system = allSystems.find(

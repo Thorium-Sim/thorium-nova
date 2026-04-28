@@ -1,19 +1,19 @@
-import { Euler, Object3D, Quaternion, Vector3 } from "three";
-import { type Entity, System } from "@thorium/utils/ecs";
-import { getSectorNumber, getWorldPosition, RAPIER } from "../init/rapier";
-import { KM_TO_LM, M_TO_KM } from "@thorium/utils/unitTypes";
 import {
 	generateRigidBody,
 	getEntityWorld,
 	universeToWorld,
 	worldToUniverse,
 } from "@thorium/.server/init/rapier";
-import type { World } from "@thorium-sim/rapier3d-node";
 import {
 	handleCollisionDamage,
 	handleTorpedoDamage,
 } from "@thorium/utils/.server/ship/collisionDamage";
+import { type Entity, System } from "@thorium/utils/ecs";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
+import { KM_TO_LM, M_TO_KM } from "@thorium/utils/unitTypes";
+import { Euler, Object3D, Quaternion, Vector3 } from "three";
+
+import { getSectorNumber, getWorldPosition, RAPIER } from "../init/rapier";
 
 const tempObj = new Object3D();
 const tempVector = new Vector3();
@@ -43,7 +43,7 @@ export class PhysicsMovementSystem extends System {
 	test(entity: Entity) {
 		return Boolean(
 			(entity.components.position && entity.components.velocity) ||
-				(entity.components.rotation && entity.components.rotationVelocity),
+			(entity.components.rotation && entity.components.rotationVelocity),
 		);
 	}
 	preUpdate(): void {
@@ -72,16 +72,10 @@ export class PhysicsMovementSystem extends System {
 			if (sys) systems.push(sys);
 		});
 
-		const inertialDampener = systems.find(
-			(sys) => sys.components.isInertialDampeners,
-		);
-		const dampening =
-			inertialDampener?.components.isInertialDampeners?.dampening || 0;
-		const impulseEngines = systems.find(
-			(sys) => sys.components.isImpulseEngines,
-		);
-		const forwardImpulse =
-			impulseEngines?.components.isImpulseEngines?.forwardImpulse || 0;
+		const inertialDampener = systems.find((sys) => sys.components.isInertialDampeners);
+		const dampening = inertialDampener?.components.isInertialDampeners?.dampening || 0;
+		const impulseEngines = systems.find((sys) => sys.components.isImpulseEngines);
+		const forwardImpulse = impulseEngines?.components.isImpulseEngines?.forwardImpulse || 0;
 		const thrusters = systems.find((sys) => sys.components.isThrusters);
 		// We don't do collision when traveling at high warp speed
 		// Let's say half of solar cruising speed
@@ -89,8 +83,7 @@ export class PhysicsMovementSystem extends System {
 		const isHighSpeed =
 			(warpEngines?.components.isWarpEngines?.forwardVelocity || 0) >
 			(warpEngines?.components.isWarpEngines?.solarCruisingSpeed || 0) / 2;
-		const isInterstellarSpace =
-			entity.components.position?.type === "interstellar";
+		const isInterstellarSpace = entity.components.position?.type === "interstellar";
 
 		if (entity.components.rotation) {
 			const { x, y, z, w } = entity.components.rotation;
@@ -151,11 +144,7 @@ export class PhysicsMovementSystem extends System {
 				 */
 				if (warpEngines?.components.isWarpEngines) {
 					const warpVelocity = tempObj.localToWorld(
-						tempVector.set(
-							0,
-							0,
-							warpEngines.components.isWarpEngines.forwardVelocity,
-						),
+						tempVector.set(0, 0, warpEngines.components.isWarpEngines.forwardVelocity),
 					);
 					if (warpVelocity.lengthSq() > 0) {
 						body.setLinvel(
@@ -186,8 +175,7 @@ export class PhysicsMovementSystem extends System {
 				 */
 				if (thrusters?.components.isThrusters) {
 					{
-						const { x, y, z } =
-							thrusters.components.isThrusters.directionImpulse;
+						const { x, y, z } = thrusters.components.isThrusters.directionImpulse;
 						tempVector.set(x, y, z);
 						body.applyImpulse(tempObj.localToWorld(tempVector), true);
 					}
@@ -195,16 +183,12 @@ export class PhysicsMovementSystem extends System {
 					// Set the max rotation velocity
 					const { x, y, z } = body.angvel();
 					tempVector.set(x, y, z);
-					if (
-						tempVector.lengthSq() >
-						thrusters.components.isThrusters.rotationMaxSpeed
-					) {
+					if (tempVector.lengthSq() > thrusters.components.isThrusters.rotationMaxSpeed) {
 						tempVector.multiplyScalar(BRAKE_CONSTANT);
 						const { x, y, z } = tempVector;
 						body.setAngvel({ x, y, z }, true);
 					} else {
-						const { x, y, z } =
-							thrusters.components.isThrusters.rotationImpulse;
+						const { x, y, z } = thrusters.components.isThrusters.rotationImpulse;
 
 						tempVector.set(x, y, z);
 						body.applyTorqueImpulse(tempObj.localToWorld(tempVector), true);
@@ -247,11 +231,7 @@ export class PhysicsMovementSystem extends System {
 			if (warpEngines?.components.isWarpEngines?.forwardVelocity) {
 				velocityVector.copy(
 					tempObj.localToWorld(
-						tempVector.set(
-							0,
-							0,
-							warpEngines.components.isWarpEngines.forwardVelocity,
-						),
+						tempVector.set(0, 0, warpEngines.components.isWarpEngines.forwardVelocity),
 					),
 				);
 			}
@@ -260,10 +240,7 @@ export class PhysicsMovementSystem extends System {
 			 */
 			velocityVector.add(
 				tempObj.localToWorld(
-					tempVector
-						.set(0, 0, forwardImpulse)
-						.divideScalar(mass)
-						.multiplyScalar(elapsedRatio),
+					tempVector.set(0, 0, forwardImpulse).divideScalar(mass).multiplyScalar(elapsedRatio),
 				),
 			);
 			/**
@@ -277,19 +254,14 @@ export class PhysicsMovementSystem extends System {
 				}
 
 				// Set the max rotation velocity
-				if (
-					rotationVelocityVector.lengthSq() >
-					thrusters.components.isThrusters.rotationMaxSpeed
-				) {
+				if (rotationVelocityVector.lengthSq() > thrusters.components.isThrusters.rotationMaxSpeed) {
 					rotationVelocityVector.multiplyScalar(BRAKE_CONSTANT);
 				} else {
 					const { x, y, z } = thrusters.components.isThrusters.rotationImpulse;
 
 					tempVector.set(x, y, z);
 
-					rotationVelocityVector.add(
-						tempVector.divideScalar(mass).multiplyScalar(elapsedRatio),
-					);
+					rotationVelocityVector.add(tempVector.divideScalar(mass).multiplyScalar(elapsedRatio));
 				}
 			}
 			/**
@@ -363,12 +335,8 @@ export class PhysicsMovementSystem extends System {
 				if (entity1?.components.isTorpedo || entity2?.components.isTorpedo) {
 					const entity = entity1?.components.isTorpedo ? entity1 : entity2;
 					const otherEntity = entity1?.components.isTorpedo ? entity2 : entity1;
-					const launcher = this.ecs.getEntityById(
-						entity?.components.isTorpedo?.launcherId || -1,
-					);
-					const ship = this.ecs.getEntityById(
-						launcher?.components.isShipSystem?.shipId || -1,
-					);
+					const launcher = this.ecs.getEntityById(entity?.components.isTorpedo?.launcherId || -1);
+					const ship = this.ecs.getEntityById(launcher?.components.isShipSystem?.shipId || -1);
 					if (ship?.id !== undefined && ship.id === otherEntity?.id) {
 						event.free();
 						return;
@@ -380,21 +348,10 @@ export class PhysicsMovementSystem extends System {
 					body1?.translation().y,
 					body1?.translation().z,
 				)
-					.sub(
-						new Vector3(
-							body2?.translation().x,
-							body2?.translation().y,
-							body2?.translation().z,
-						),
-					)
+					.sub(new Vector3(body2?.translation().x, body2?.translation().y, body2?.translation().z))
 					.normalize();
 
-				handleCollisionDamage(
-					entity1,
-					event.totalForceMagnitude(),
-					direction,
-					elapsedSeconds,
-				);
+				handleCollisionDamage(entity1, event.totalForceMagnitude(), direction, elapsedSeconds);
 				handleCollisionDamage(
 					entity2,
 					event.totalForceMagnitude(),
@@ -403,15 +360,9 @@ export class PhysicsMovementSystem extends System {
 				);
 
 				if (entity1?.components.isTorpedo || entity2?.components.isTorpedo) {
-					const torpedoEntity = entity1?.components.isTorpedo
-						? entity1
-						: entity2;
+					const torpedoEntity = entity1?.components.isTorpedo ? entity1 : entity2;
 					const otherEntity = entity1?.components.isTorpedo ? entity2 : entity1;
-					if (
-						torpedoEntity &&
-						otherEntity &&
-						!torpedoEntity.components.isDestroyed
-					) {
+					if (torpedoEntity && otherEntity && !torpedoEntity.components.isDestroyed) {
 						handleTorpedoDamage(torpedoEntity, otherEntity, direction);
 					}
 				}
@@ -436,9 +387,7 @@ export class PhysicsMovementSystem extends System {
 			if (!world) continue;
 			const worldPosition = getWorldPosition(position);
 
-			const bodyHandle = entity.components.physicsHandles?.handles.get(
-				getSectorNumber(position),
-			);
+			const bodyHandle = entity.components.physicsHandles?.handles.get(getSectorNumber(position));
 			const body = world.bodies.get(bodyHandle);
 			if (!body) continue;
 			// No need to update fixed bodies.

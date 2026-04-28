@@ -1,16 +1,14 @@
-import { useParams } from "react-router";
-import { lazy } from "react";
 import { q } from "@thorium/context/AppContext";
+import { lazy } from "react";
+import { useParams } from "react-router";
 
 export const systemConfigs = Object.fromEntries(
-	Object.entries(import.meta.glob("./SystemConfigs/*.tsx")).map(
-		([path, mod]) => {
-			const pathRegx = /\.\/SystemConfigs\/(.*)\.tsx/g;
-			const [, name] = pathRegx.exec(path)!;
+	Object.entries(import.meta.glob("./SystemConfigs/*.tsx")).map(([path, mod]) => {
+		const pathRegx = /\.\/SystemConfigs\/(.*)\.tsx/g;
+		const [, name] = pathRegx.exec(path)!;
 
-			return [name, lazy(mod as any)];
-		},
-	),
+		return [name, lazy(mod as any)];
+	}),
 );
 
 export default function SystemConfig() {
@@ -20,11 +18,6 @@ export default function SystemConfig() {
 	};
 	const [system] = q.plugin.systems.get.useNetRequest({ pluginId, systemId });
 	const Comp = systemConfigs[system.type];
-	if (!Comp)
-		return (
-			<h3 className="text-center text-xl">
-				No configuration for this system type.
-			</h3>
-		);
+	if (!Comp) return <h3 className="text-center text-xl">No configuration for this system type.</h3>;
 	return <Comp />;
 }

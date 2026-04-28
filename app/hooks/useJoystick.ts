@@ -1,7 +1,8 @@
-import throttle from "lodash.throttle";
 import { useSpring } from "@react-spring/web";
 import { useDrag } from "@use-gesture/react";
+import throttle from "lodash.throttle";
 import { useImperativeHandle, useRef } from "react";
+
 import { type GamepadKey, useGamepadValue } from "./useGamepadStore";
 
 function distance(x1: number, y1: number, x2 = 0, y2 = 0) {
@@ -58,9 +59,7 @@ export function useJoystick({
 	const bind = useDrag(({ down, first, movement: [x, y] }) => {
 		if (first) {
 			maxDistance.current =
-				(containerRef.current?.getBoundingClientRect()[
-					axis === "y" ? "height" : "width"
-				] || 0) / 2;
+				(containerRef.current?.getBoundingClientRect()[axis === "y" ? "height" : "width"] || 0) / 2;
 		}
 		dragDown.current = down;
 		x += offsetRef.current[0];
@@ -83,17 +82,11 @@ export function useJoystick({
 		}
 		if (!down && sticky) return;
 		set({
-			xy: down
-				? axis
-					? [axis === "x" ? x : 0, axis === "y" ? y : 0]
-					: [x, y]
-				: [0, 0],
+			xy: down ? (axis ? [axis === "x" ? x : 0, axis === "y" ? y : 0] : [x, y]) : [0, 0],
 			immediate: down,
 		});
 		callback.current?.(
-			down
-				? { x: x / maxDistance.current, y: y / maxDistance.current }
-				: { x: 0, y: 0 },
+			down ? { x: x / maxDistance.current, y: y / maxDistance.current } : { x: 0, y: 0 },
 			down,
 		);
 	});
@@ -104,9 +97,7 @@ export function useJoystick({
 		if (dragDown.current) return;
 		if (!maxDistance.current) {
 			maxDistance.current =
-				(containerRef.current?.getBoundingClientRect()[
-					axis === "y" ? "height" : "width"
-				] || 0) / 2;
+				(containerRef.current?.getBoundingClientRect()[axis === "y" ? "height" : "width"] || 0) / 2;
 		}
 		let [x, y] = gamepadValues.current;
 		x *= maxDistance.current;

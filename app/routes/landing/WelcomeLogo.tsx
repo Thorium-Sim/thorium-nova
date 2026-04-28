@@ -1,10 +1,11 @@
-import { Link } from "react-router";
-import Logo from "@thorium/images/logo.svg?url";
-import packageJson from "../../../package.json" with { type: "json" };
 import { ClientButton } from "@thorium/components/ClientButton";
+import Logo from "@thorium/images/logo.svg?url";
 import { Suspense, useEffect, useState } from "react";
-import { IPAddress } from "./IPAddress";
 import { ErrorBoundary } from "react-error-boundary";
+import { Link } from "react-router";
+
+import packageJson from "../../../package.json" with { type: "json" };
+import { IPAddress } from "./IPAddress";
 
 export const WelcomeLogo = ({ className }: { className?: string }) => {
 	const [updateText, setUpdateText] = useState("");
@@ -18,23 +19,15 @@ export const WelcomeLogo = ({ className }: { className?: string }) => {
 	}, []);
 	return (
 		<div className={className}>
-			<div className="flex items-end self-start ">
-				<img
-					draggable={false}
-					src={Logo}
-					alt="Thorium Logo"
-					className="max-h-32"
-				/>
-				<h1 className="text-4xl ml-3 min-w-[12ch] text-white">Thorium Nova</h1>
+			<div className="flex items-end self-start">
+				<img draggable={false} src={Logo} alt="Thorium Logo" className="max-h-32" />
+				<h1 className="ml-3 min-w-[12ch] text-4xl text-white">Thorium Nova</h1>
 			</div>
-			<h2 className="text-2xl mt-2">
+			<h2 className="mt-2 text-2xl">
 				{updateText ? (
 					updateText
 				) : (
-					<Link
-						className="text-purple-300 hover:text-purple-500"
-						to="/releases"
-					>
+					<Link className="text-purple-300 hover:text-purple-500" to="/releases">
 						Version {packageJson.version}
 					</Link>
 				)}

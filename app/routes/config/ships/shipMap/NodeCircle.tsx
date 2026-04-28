@@ -1,33 +1,23 @@
-import {
-	useEffect,
-	useLayoutEffect,
-	useRef,
-	useState,
-	type RefObject,
-} from "react";
-import Button from "@thorium/ui/Button";
-import { useConfirm } from "@thorium/ui/AlertDialog";
-import type { DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
-import { useDrag } from "@use-gesture/react";
 import { autoUpdate, offset, shift, useFloating } from "@floating-ui/react-dom";
-import Input from "@thorium/ui/Input";
-import Checkbox from "@thorium/ui/Checkbox";
+import type { DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
+import { q } from "@thorium/context/AppContext";
 import useOnClickOutside from "@thorium/hooks/useClickOutside";
+import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
+import { useConfirm } from "@thorium/ui/AlertDialog";
+import Button from "@thorium/ui/Button";
+import Checkbox from "@thorium/ui/Checkbox";
+import { Icon } from "@thorium/ui/Icon";
+import InfoTip from "@thorium/ui/InfoTip";
+import Input from "@thorium/ui/Input";
+import { Portal } from "@thorium/ui/Portal";
+import { nodeFlags } from "@thorium/utils/flags/DeckNode";
+import { useDrag } from "@use-gesture/react";
+import { capitalCase } from "change-case";
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { Disclosure, DisclosurePanel, Heading, Button as RAButton } from "react-aria-components";
+
 import type { PanStateI, updateNodeParams } from "./deckConfig";
 import { useTriggerEdgeRender } from "./EdgeContextProvider";
-import { capitalCase } from "change-case";
-import InfoTip from "@thorium/ui/InfoTip";
-import { q } from "@thorium/context/AppContext";
-import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
-import { Icon } from "@thorium/ui/Icon";
-import { nodeFlags } from "@thorium/utils/flags/DeckNode";
-import {
-	Disclosure,
-	DisclosurePanel,
-	Heading,
-	Button as RAButton,
-} from "react-aria-components";
-import { Portal } from "@thorium/ui/Portal";
 
 const pixelRatio = typeof window === "undefined" ? 1 : window.devicePixelRatio;
 
@@ -74,29 +64,22 @@ function NodeDisclosure({
 		<Disclosure defaultExpanded={isDefaultOpen}>
 			{({ isExpanded }) => (
 				<>
-					<HandleIsOpen
-						open={isExpanded}
-						title={title}
-						scrollRef={disclosureRef}
-					/>
-					<div className="w-full px-2 sticky z-10 -top-1" ref={disclosureRef}>
+					<HandleIsOpen open={isExpanded} title={title} scrollRef={disclosureRef} />
+					<div className="sticky -top-1 z-10 w-full px-2" ref={disclosureRef}>
 						<Heading>
-							<RAButton
-								slot="trigger"
-								className="btn btn-notice btn-sm justify-between btn-block"
-							>
+							<RAButton slot="trigger" className="btn btn-notice btn-sm btn-block justify-between">
 								<span>{title}</span>
 								<Icon
 									name="chevron-up"
 									className={` transition-transform${
-										isExpanded ? "transform rotate-180" : ""
-									} w-5 h-5`}
+										isExpanded ? "rotate-180 transform" : ""
+									} h-5 w-5`}
 								/>
 							</RAButton>
 						</Heading>
 					</div>
 
-					<DisclosurePanel className="px-2 pt-2 border-b border-b-gray-700">
+					<DisclosurePanel className="border-b border-b-gray-700 px-2 pt-2">
 						{children}
 					</DisclosurePanel>
 				</>
@@ -115,7 +98,6 @@ export function NodeCircle({
 	flags,
 	systems,
 	name,
-	icon,
 	selected,
 	panState,
 	updateNode,
@@ -183,7 +165,7 @@ export function NodeCircle({
 				ref={refs.setReference}
 				className={`rounded-full ${
 					selected ? (addingEdges ? "bg-purple-400" : "bg-primary") : "bg-white"
-				} w-2 h-2 absolute -top-1 -left-1 cursor-grab touch-none ${
+				} absolute -top-1 -left-1 h-2 w-2 cursor-grab touch-none ${
 					hasCrossDeckConnection ? "ring-1" : ""
 				} ring-white ring-offset-1 ring-offset-black`}
 				onMouseDown={(e) => {
@@ -199,7 +181,7 @@ export function NodeCircle({
 				}}
 			>
 				<div
-					className="absolute rounded-full bg-white/10 pointer-events-none"
+					className="pointer-events-none absolute rounded-full bg-white/10"
 					style={{
 						width: `${radiusValue * 2 * pixelRatio}px`,
 						height: `${radiusValue * 2 * pixelRatio}px`,
@@ -212,7 +194,7 @@ export function NodeCircle({
 				{selected && !addingEdges && (
 					<div
 						ref={refs.setFloating}
-						className="rounded min-w-max w-52 max-h-96 overflow-y-auto p-2 bg-black/60 backdrop-blur shadow-lg z-10 text-white space-y-4"
+						className="z-10 max-h-96 w-52 min-w-max space-y-4 overflow-y-auto rounded bg-black/60 p-2 text-white shadow-lg backdrop-blur"
 						style={{
 							position: strategy,
 							top: floatingY ?? "",
@@ -286,9 +268,7 @@ export function NodeCircle({
 							onChange={(e) => setRadiusValue(e.target.valueAsNumber)}
 							onMouseUp={(e) =>
 								updateNode({
-									radius: Number(
-										(e.target as EventTarget & HTMLInputElement).value,
-									),
+									radius: Number((e.target as EventTarget & HTMLInputElement).value),
 								})
 							}
 						/>

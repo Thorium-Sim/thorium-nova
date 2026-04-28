@@ -1,15 +1,11 @@
+import Checkbox from "@thorium/ui/Checkbox";
+import Input from "@thorium/ui/Input";
+import type { LightMinute } from "@thorium/utils/unitTypes";
+import { lightMinuteToLightYear, lightYearToLightMinute } from "@thorium/utils/unitTypes";
+import debounce from "lodash.debounce";
 import * as React from "react";
 import { useEffect } from "react";
-import debounce from "lodash.debounce";
-import type {
-	LightMinute,
-} from "@thorium/utils/unitTypes";
-import {
-	lightMinuteToLightYear,
-	lightYearToLightMinute,
-} from "@thorium/utils/unitTypes";
-import Input from "@thorium/ui/Input";
-import Checkbox from "@thorium/ui/Checkbox";
+
 import { useGetStarmapStore } from "./starmapStore";
 
 export const InterstellarPalette = ({
@@ -40,9 +36,7 @@ export const InterstellarPalette = ({
 	}, [selectedStar, useStarmapStore]);
 
 	const [name, setName] = React.useState(selectedStar?.name || "");
-	const [description, setDescription] = React.useState(
-		selectedStar?.description || "",
-	);
+	const [description, setDescription] = React.useState(selectedStar?.description || "");
 
 	const debouncedUpdate = React.useMemo(
 		() => debounce(update, 500, { maxWait: 2000, trailing: true }),
@@ -56,10 +50,7 @@ export const InterstellarPalette = ({
 	}, [selectedStar, selectedStar?.name, selectedStar?.description]);
 
 	return (
-		<div
-			className="w-full h-full overflow-y-auto p-2 text-white"
-			key={selectedStar?.name}
-		>
+		<div className="h-full w-full overflow-y-auto p-2 text-white" key={selectedStar?.name}>
 			<Input
 				label="Name"
 				value={name}
@@ -81,7 +72,6 @@ export const InterstellarPalette = ({
 				}}
 				name="description"
 			/>
-			{/** biome-ignore lint/a11y/noLabelWithoutControl: Multiple inputs for this label */}
 			<label>Position</label>
 			<div className="flex gap-0.5">
 				<input

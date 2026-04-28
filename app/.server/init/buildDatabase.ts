@@ -1,8 +1,7 @@
-import { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
-import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
-import randomWords from "@thorium/utils/random-words";
 import { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
+import { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
 import { DataStore } from "@thorium/utils/.server/db-fs";
+import randomWords from "@thorium/utils/random-words";
 
 export const databaseName =
 	process.env.NODE_ENV === "production"
@@ -13,9 +12,7 @@ export const databaseName =
 			: /* istanbul ignore next */
 				"db-dev.yml";
 
-export async function buildDatabase(
-	loadPlugins: (this: ServerDataModel) => Promise<void>,
-) {
+export async function buildDatabase(loadPlugins: (this: ServerDataModel) => Promise<void>) {
 	// Create the primary database
 	// This is for any user data that is persisted between flights
 	// but that isn't part of a plugin. Not much goes in here.

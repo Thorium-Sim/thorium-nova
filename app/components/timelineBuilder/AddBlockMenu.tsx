@@ -1,4 +1,9 @@
+import type { MacroPlugin } from "@thorium/.server/classes/Plugins/Macro";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
+import { q } from "@thorium/context/AppContext";
 import { Icon } from "@thorium/ui/Icon";
+import { cn } from "@thorium/utils/cn";
+import type { ReactNode } from "react";
 import {
 	Popover,
 	Button,
@@ -10,11 +15,6 @@ import {
 	MenuItem,
 	SubmenuTrigger,
 } from "react-aria-components";
-import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
-import type { ReactNode } from "react";
-import { cn } from "@thorium/utils/cn";
-import { q } from "@thorium/context/AppContext";
-import type { MacroPlugin } from "@thorium/.server/classes/Plugins/Macro";
 
 export function StyledMenuItem(props: MenuItemProps) {
 	return (
@@ -40,9 +40,7 @@ export function AddBlockButton({
 }: {
 	onAddBlock: <T extends TimelineBlock["type"]>(
 		blockType: T,
-		initParams?: Partial<
-			Omit<Extract<TimelineBlock, { type: T }>, "id" | "type">
-		>,
+		initParams?: Partial<Omit<Extract<TimelineBlock, { type: T }>, "id" | "type">>,
 	) => void;
 	children: ReactNode;
 	omitBlocks?: boolean;
@@ -51,14 +49,11 @@ export function AddBlockButton({
 }) {
 	const [macros] = q.plugin.macro.all.useNetRequest({ type: "macro" });
 
-	const groupedMacros = macros.reduce(
-		(prev: Record<string, MacroPlugin[]>, next) => {
-			if (!prev[next.category]) prev[next.category] = [];
-			prev[next.category].push(next);
-			return prev;
-		},
-		{},
-	);
+	const groupedMacros = macros.reduce((prev: Record<string, MacroPlugin[]>, next) => {
+		if (!prev[next.category]) prev[next.category] = [];
+		prev[next.category].push(next);
+		return prev;
+	}, {});
 
 	return (
 		<MenuTrigger>
@@ -67,14 +62,8 @@ export function AddBlockButton({
 				<Menu>
 					{executionType.includes("main") ? (
 						<>
-							<StyledMenuItem onAction={() => onAddBlock("Action")}>
-								Action
-							</StyledMenuItem>
-							<StyledMenuItem
-								onAction={() =>
-									onAddBlock("Action", { action: "timeline.advance" })
-								}
-							>
+							<StyledMenuItem onAction={() => onAddBlock("Action")}>Action</StyledMenuItem>
+							<StyledMenuItem onAction={() => onAddBlock("Action", { action: "timeline.advance" })}>
 								Advance Timeline
 							</StyledMenuItem>
 						</>
@@ -116,32 +105,22 @@ export function AddBlockButton({
 						</Popover>
 					</SubmenuTrigger>
 					{macro && (
-						<StyledMenuItem onAction={() => onAddBlock("MacroSlot")}>
-							Macro Slot
-						</StyledMenuItem>
+						<StyledMenuItem onAction={() => onAddBlock("MacroSlot")}>Macro Slot</StyledMenuItem>
 					)}
-					<StyledMenuItem onAction={() => onAddBlock("Note")}>
-						Note
-					</StyledMenuItem>
+					<StyledMenuItem onAction={() => onAddBlock("Note")}>Note</StyledMenuItem>
 					<MenuSection>
-						<Header className="font-bold pl-2">Control Flow</Header>
+						<Header className="pl-2 font-bold">Control Flow</Header>
 
 						{executionType.includes("main") ? (
-							<StyledMenuItem onAction={() => onAddBlock("Wait")}>
-								Wait
-							</StyledMenuItem>
+							<StyledMenuItem onAction={() => onAddBlock("Wait")}>Wait</StyledMenuItem>
 						) : null}
 						<StyledMenuItem onAction={() => onAddBlock("ForEachEntity")}>
 							For Each Entity
 						</StyledMenuItem>
-						<StyledMenuItem
-							onAction={() => onAddBlock("ResultPropertyIntoVariable")}
-						>
+						<StyledMenuItem onAction={() => onAddBlock("ResultPropertyIntoVariable")}>
 							Save Property from Result as Variable
 						</StyledMenuItem>
-						<StyledMenuItem
-							onAction={() => onAddBlock("EntityPropertyIntoVariable")}
-						>
+						<StyledMenuItem onAction={() => onAddBlock("EntityPropertyIntoVariable")}>
 							Save Property from Entity as Variable
 						</StyledMenuItem>
 						<StyledMenuItem onAction={() => onAddBlock("ShipSystemGetter")}>
@@ -168,7 +147,7 @@ export function AddBlockButton({
 						</MenuSection>
 					) : (
 						<MenuSection>
-							<Header className="font-bold pl-2">Checks</Header>
+							<Header className="pl-2 font-bold">Checks</Header>
 							<StyledMenuItem onAction={() => onAddBlock("DistanceCondition")}>
 								Distance Condition
 							</StyledMenuItem>
@@ -197,23 +176,17 @@ export function AddBlockMenu({
 }: {
 	onAddBlock: <T extends TimelineBlock["type"]>(
 		blockType: T,
-		initParams?: Partial<
-			Omit<Extract<TimelineBlock, { type: T }>, "id" | "type">
-		>,
+		initParams?: Partial<Omit<Extract<TimelineBlock, { type: T }>, "id" | "type">>,
 	) => void;
 	macro?: boolean;
 	executionType: ("main" | "prerequisite")[];
 }) {
 	return (
-		<div className="absolute p-2 bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-10">
-			<AddBlockButton
-				onAddBlock={onAddBlock}
-				macro={macro}
-				executionType={executionType}
-			>
+		<div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2 translate-y-1/2 p-2">
+			<AddBlockButton onAddBlock={onAddBlock} macro={macro} executionType={executionType}>
 				<Button
 					aria-label="Add block"
-					className="flex rounded-full w-6 h-6 cursor-pointer bg-black/20 hover:bg-white/20 hover:backdrop-brightness-200 hover:backdrop-saturate-200 border border-white/50  items-center justify-center"
+					className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-white/50 bg-black/20 hover:bg-white/20 hover:backdrop-brightness-200 hover:backdrop-saturate-200"
 				>
 					<Icon name="plus" />
 				</Button>

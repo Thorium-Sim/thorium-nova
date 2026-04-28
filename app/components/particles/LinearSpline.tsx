@@ -5,22 +5,16 @@ import { Vector3, Color } from "three";
 const lerpVector = new Vector3();
 const lerpColor = new Color();
 function defaultLerp<T>(a: T, b: T, t: number) {
-	if (typeof a === "number" && typeof b === "number")
-		return (a + t * (b - a)) as T;
-	if (a instanceof Vector3 && b instanceof Vector3)
-		return lerpVector.lerpVectors(a, b, t) as T;
-	if (a instanceof Color && b instanceof Color)
-		return lerpColor.lerpColors(a, b, t) as T;
+	if (typeof a === "number" && typeof b === "number") return (a + t * (b - a)) as T;
+	if (a instanceof Vector3 && b instanceof Vector3) return lerpVector.lerpVectors(a, b, t) as T;
+	if (a instanceof Color && b instanceof Color) return lerpColor.lerpColors(a, b, t) as T;
 
 	throw new Error("No lerp function provided");
 }
 export class LinearSpline<T> {
 	private points: [number, T][];
 	private lerp: (a: T, b: T, t: number) => T;
-	constructor({
-		points,
-		lerp,
-	}: { points?: [number, T][]; lerp?: (a: T, b: T, t: number) => T }) {
+	constructor({ points, lerp }: { points?: [number, T][]; lerp?: (a: T, b: T, t: number) => T }) {
 		this.points = points || [];
 		this.lerp = lerp!;
 		if (!this.lerp) {

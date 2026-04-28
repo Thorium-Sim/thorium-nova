@@ -9,9 +9,7 @@ export function generateIncrementedName(name: string, names: string[]) {
 			if (!match) return -1;
 			return Number.parseInt(match[2], 10) || 0;
 		})
-		.filter(
-			(val) => typeof val === "number" && !Number.isNaN(val) && val !== -1,
-		);
+		.filter((val) => typeof val === "number" && !Number.isNaN(val) && val !== -1);
 
 	if (matchingNames.length === 0) return name;
 	const max = Math.max(...matchingNames);

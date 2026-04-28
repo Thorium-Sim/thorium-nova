@@ -5,7 +5,7 @@ export class ThrusterSystem extends System {
 	test(entity: Entity) {
 		return !!(entity.components.isThrusters && entity.components.isShipSystem);
 	}
-	update(entity: Entity, elapsed: number) {
+	update(entity: Entity) {
 		if (!entity.components.isThrusters) return;
 
 		const { direction, directionThrust, rotationDelta, rotationThrust } =
@@ -18,10 +18,8 @@ export class ThrusterSystem extends System {
 
 		const powerRatio = currentPower / maxSafePower;
 
-		const directionImpulse =
-			currentPower >= requiredPower ? directionThrust * powerRatio : 0;
-		const rotationImpulse =
-			currentPower >= requiredPower ? rotationThrust * powerRatio : 0;
+		const directionImpulse = currentPower >= requiredPower ? directionThrust * powerRatio : 0;
+		const rotationImpulse = currentPower >= requiredPower ? rotationThrust * powerRatio : 0;
 		entity.updateComponent("isThrusters", {
 			directionImpulse: {
 				x: direction.x * directionImpulse,

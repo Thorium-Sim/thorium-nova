@@ -1,15 +1,16 @@
-import { t } from "@thorium/.server/init/t";
-import z from "zod";
-import { getPlugin } from "./utils";
-import inputAuth from "@thorium/utils/.server/inputAuth";
+import { MacroPlugin } from "@thorium/.server/classes/Plugins/Macro";
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
-import uniqid from "@thorium/utils/uniqid";
+import { t } from "@thorium/.server/init/t";
 import {
 	timelineBlockDefaults,
 	timelineBlockTypes,
 } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
-import { MacroPlugin } from "@thorium/.server/classes/Plugins/Macro";
+import inputAuth from "@thorium/utils/.server/inputAuth";
+import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
+import uniqid from "@thorium/utils/uniqid";
+import z from "zod";
+
+import { getPlugin } from "./utils";
 
 const block = t.router({
 	add: t.procedure
@@ -25,9 +26,7 @@ const block = t.router({
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
 			if (!input.macroId) throw new Error("Macro ID is required");
-			const macro = plugin.aspects.macros.find(
-				(macro) => macro.name === input.macroId,
-			);
+			const macro = plugin.aspects.macros.find((macro) => macro.name === input.macroId);
 			if (!macro) throw new Error("Macro not found");
 			const id = uniqid("blo-");
 			const blockDefault = timelineBlockDefaults[input.blockType] as any;
@@ -56,13 +55,9 @@ const block = t.router({
 		.send(({ ctx, input }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
 			if (!input.macroId) throw new Error("Macro ID is required");
-			const macro = plugin.aspects.macros.find(
-				(macro) => macro.name === input.macroId,
-			);
+			const macro = plugin.aspects.macros.find((macro) => macro.name === input.macroId);
 			if (!macro) throw new Error("Macro not found");
-			const blockIndex = macro.blocks.findIndex(
-				(action) => action.id === input.blockId,
-			);
+			const blockIndex = macro.blocks.findIndex((action) => action.id === input.blockId);
 			moveArrayItem(macro.blocks, blockIndex, input.newIndex);
 			pubsub.publish.plugin.macro.get({
 				pluginId: input.pluginId,
@@ -81,13 +76,9 @@ const block = t.router({
 		.send(({ ctx, input }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
 			if (!input.macroId) throw new Error("Macro ID is required");
-			const macro = plugin.aspects.macros.find(
-				(macro) => macro.name === input.macroId,
-			);
+			const macro = plugin.aspects.macros.find((macro) => macro.name === input.macroId);
 			if (!macro) throw new Error("Macro not found");
-			const blockIndex = macro.blocks.findIndex(
-				(action) => action.id === input.blockId,
-			);
+			const blockIndex = macro.blocks.findIndex((action) => action.id === input.blockId);
 			macro.blocks.splice(blockIndex, 1);
 			pubsub.publish.plugin.macro.get({
 				pluginId: input.pluginId,
@@ -108,9 +99,7 @@ const block = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const macro = plugin.aspects.macros.find(
-				(macro) => macro.name === input.macroId,
-			);
+			const macro = plugin.aspects.macros.find((macro) => macro.name === input.macroId);
 			if (!macro) throw new Error("Macro not found");
 			const block = macro.blocks.find((action) => action.id === input.blockId);
 			if (!block) throw new Error("Block not found");
@@ -133,13 +122,9 @@ const block = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const macro = plugin.aspects.macros.find(
-				(macro) => macro.name === input.macroId,
-			);
+			const macro = plugin.aspects.macros.find((macro) => macro.name === input.macroId);
 			if (!macro) throw new Error("Macro not found");
-			const block = macro.blocks.findIndex(
-				(action) => action.id === input.blockId,
-			);
+			const block = macro.blocks.findIndex((action) => action.id === input.blockId);
 			if (block === -1) throw new Error("Block not found");
 			macro.blocks.splice(block, 1, ...input.blocks);
 			pubsub.publish.plugin.macro.get({
@@ -168,24 +153,18 @@ export const macro = t.router({
 				return plugin.aspects.macros.filter((t) => t.type === input.type);
 			}
 			return ctx.server.plugins.reduce((prev: MacroPlugin[], next) => {
-				return prev.concat(
-					next.aspects.macros.filter((t) => t.type === input.type),
-				);
+				return prev.concat(next.aspects.macros.filter((t) => t.type === input.type));
 			}, []);
 		}),
 	get: t.procedure
 		.input(z.object({ pluginId: z.string(), macroId: z.string() }))
-		.filter(
-			(publish: { pluginId: string; macroId: string } | null, { input }) => {
-				if (!publish || publish.pluginId === input.pluginId) return true;
-				return false;
-			},
-		)
+		.filter((publish: { pluginId: string; macroId: string } | null, { input }) => {
+			if (!publish || publish.pluginId === input.pluginId) return true;
+			return false;
+		})
 		.request(({ ctx, input }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
-			const macro = plugin.aspects.macros.find(
-				(macro) => macro.name === input.macroId,
-			);
+			const macro = plugin.aspects.macros.find((macro) => macro.name === input.macroId);
 			if (!macro) throw null;
 			return macro;
 		}),
@@ -200,10 +179,7 @@ export const macro = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const macro = new MacroPlugin(
-				{ name: input.name, type: input.type },
-				plugin,
-			);
+			const macro = new MacroPlugin({ name: input.name, type: input.type }, plugin);
 			plugin.aspects.macros.push(macro);
 
 			pubsub.publish.plugin.macro.all({ pluginId: input.pluginId });
@@ -218,9 +194,7 @@ export const macro = t.router({
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const macro = plugin.aspects.macros.find(
-				(macro) => macro.name === input.macroId,
-			);
+			const macro = plugin.aspects.macros.find((macro) => macro.name === input.macroId);
 			if (!macro) return;
 			plugin.aspects.macros.splice(plugin.aspects.macros.indexOf(macro), 1);
 
@@ -243,9 +217,7 @@ export const macro = t.router({
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
 			if (!input.macroId) throw new Error("Macro ID is required");
-			const macro = plugin.aspects.macros.find(
-				(macro) => macro.name === input.macroId,
-			);
+			const macro = plugin.aspects.macros.find((macro) => macro.name === input.macroId);
 			if (!macro) return { macroId: "" };
 			if (input.category) macro.category = input.category;
 			if (input.description) macro.description = input.description;

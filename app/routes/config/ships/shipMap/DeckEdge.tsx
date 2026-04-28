@@ -1,11 +1,12 @@
-import Button from "@thorium/ui/Button";
-import { useConfirm } from "@thorium/ui/AlertDialog";
 import { offset, shift, useFloating } from "@floating-ui/react-dom";
+import type { DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
+import { useConfirm } from "@thorium/ui/AlertDialog";
+import Button from "@thorium/ui/Button";
+import { Portal } from "@thorium/ui/Portal";
+import type { EdgeFlag } from "@thorium/utils/flags/DeckEdge";
+
 import { useDeckNode } from "./DeckNodeContext";
 import { useEdgeRerender } from "./EdgeContextProvider";
-import type { DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
-import type { EdgeFlag } from "@thorium/utils/flags/DeckEdge";
-import { Portal } from "@thorium/ui/Portal";
 
 const pixelRatio = typeof window === "undefined" ? 1 : window.devicePixelRatio;
 export function DeckEdge({
@@ -14,7 +15,7 @@ export function DeckEdge({
 	to,
 	allNodes,
 	removeEdge,
-	updateEdge,
+	updateEdge: _,
 }: {
 	id: number;
 	from: number;
@@ -47,15 +48,9 @@ export function DeckEdge({
 		if (refs.reference.current instanceof SVGPathElement) {
 			const ref = refs.reference.current;
 			if (nodeId === from) {
-				ref.setAttribute(
-					"d",
-					`M ${x} ${y} L ${toX * pixelRatio} ${toY * pixelRatio}`,
-				);
+				ref.setAttribute("d", `M ${x} ${y} L ${toX * pixelRatio} ${toY * pixelRatio}`);
 			} else if (nodeId === to) {
-				ref.setAttribute(
-					"d",
-					`M ${fromX * pixelRatio} ${fromY * pixelRatio} L ${x} ${y}`,
-				);
+				ref.setAttribute("d", `M ${fromX * pixelRatio} ${fromY * pixelRatio} L ${x} ${y}`);
 			}
 		}
 	});
@@ -82,7 +77,7 @@ export function DeckEdge({
 				{selectedEdge === id && (
 					<div
 						ref={refs.setFloating}
-						className="rounded min-w-max w-44 p-2 bg-black/60 backdrop-blur shadow-lg z-10 text-white space-y-4"
+						className="z-10 w-44 min-w-max space-y-4 rounded bg-black/60 p-2 text-white shadow-lg backdrop-blur"
 						style={{
 							position: strategy,
 							top: floatingY ?? "",

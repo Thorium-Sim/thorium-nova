@@ -9,9 +9,7 @@ export class LegacyThrustersSystem extends System {
 	}
 	update(entity: Entity, elapsed: number) {
 		const elapsedMinutes = elapsed / 1000 / 60;
-		const ship = this.ecs.getEntityById(
-			entity.components.isShipSystem?.shipId || -1,
-		);
+		const ship = this.ecs.getEntityById(entity.components.isShipSystem?.shipId || -1);
 		const rotation = ship?.components.rotation;
 
 		const isThrusters = entity.components.isThrusters;
@@ -20,22 +18,16 @@ export class LegacyThrustersSystem extends System {
 			!isThrusters ||
 			entity.components.damage?.offline ||
 			(entity.components.power &&
-				entity.components.power.currentPower <
-					entity.components.power.powerLevels[0])
+				entity.components.power.currentPower < entity.components.power.powerLevels[0])
 		)
 			return;
 		let { yaw, pitch, roll } = rotation;
 
 		const { rotationDelta, rotationMaxSpeed } = isThrusters;
 
-		yaw =
-			(yaw + rotationDelta.y * (rotationMaxSpeed * 360) * elapsedMinutes) % 360;
-		pitch =
-			(pitch + rotationDelta.x * (rotationMaxSpeed * 360) * elapsedMinutes) %
-			360;
-		roll =
-			(roll + rotationDelta.z * (rotationMaxSpeed * 360) * elapsedMinutes) %
-			360;
+		yaw = (yaw + rotationDelta.y * (rotationMaxSpeed * 360) * elapsedMinutes) % 360;
+		pitch = (pitch + rotationDelta.x * (rotationMaxSpeed * 360) * elapsedMinutes) % 360;
+		roll = (roll + rotationDelta.z * (rotationMaxSpeed * 360) * elapsedMinutes) % 360;
 
 		if (yaw < 0) yaw += 360;
 		if (pitch < 0) pitch += 360;

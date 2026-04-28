@@ -24,18 +24,15 @@ export function ShortRangeComm() {
 			},
 		},
 	);
-	const [incomingHails] =
-		q.shortRangeComm.incomingHailConversations.useNetRequest({
-			shipId,
-		});
+	const [incomingHails] = q.shortRangeComm.incomingHailConversations.useNetRequest({
+		shipId,
+	});
 	q.shortRangeComm.stream.useDataStream({
 		systemId: ship.currentSystem,
 	});
 
 	const draggingRef = useRef(false);
-	const [frequency, setFrequencyValue] = useState(
-		shortRangeComm?.frequency || 276.25,
-	);
+	const [frequency, setFrequencyValue] = useState(shortRangeComm?.frequency || 276.25);
 	const [gain, setGainValue] = useState(shortRangeComm?.gain || 1);
 
 	const setFrequencyNetSend = useCallback(
@@ -53,8 +50,7 @@ export function ShortRangeComm() {
 	const detentRange = 2;
 	function snapToDetent(value: number) {
 		for (const entity of incomingHails) {
-			if (Math.abs(value - entity.frequency) < detentRange)
-				return entity.frequency;
+			if (Math.abs(value - entity.frequency) < detentRange) return entity.frequency;
 		}
 		return value;
 	}
@@ -77,28 +73,25 @@ export function ShortRangeComm() {
 	const { maxRadius, minRadius } = shortRangeComm;
 	const gainRadius = minRadius + gain * (maxRadius - minRadius);
 	return (
-		<div className="w-full h-full grid grid-cols-4 grid-rows-[1fr_auto_auto] overflow-hidden gap-8">
+		<div className="grid h-full w-full grid-cols-4 grid-rows-[1fr_auto_auto] gap-8 overflow-hidden">
 			<Suspense>
 				{incomingHails.length > 0 ? (
 					<div className="col-span-3 self-center">
-						<h1 className="text-4xl text-center font-bold">
+						<h1 className="text-center text-4xl font-bold">
 							Status: Incoming{" "}
-							{pluralRules.select(incomingHails.length) === "one"
-								? "Hail"
-								: "Hails"}
+							{pluralRules.select(incomingHails.length) === "one" ? "Hail" : "Hails"}
 						</h1>
 						{incomingHails.map((h) => (
-							<p key={h.id} className="text-xl text-center">
+							<p key={h.id} className="text-center text-xl">
 								{h.hostName} — {h.frequency} MHz
 							</p>
 						))}
 					</div>
-				) : shortRangeComm.state === "connected" &&
-					shortRangeComm.conversationId ? (
+				) : shortRangeComm.state === "connected" && shortRangeComm.conversationId ? (
 					<Conversation conversationId={shortRangeComm.conversationId} />
 				) : (
 					<div className="col-span-3 self-center">
-						<h1 className="text-4xl text-center font-bold">
+						<h1 className="text-center text-4xl font-bold">
 							Status: {shortRangeStateMap[shortRangeComm.state]}
 						</h1>
 					</div>
@@ -113,7 +106,7 @@ export function ShortRangeComm() {
 					<input
 						id="frequency"
 						type="range"
-						className="range range-primary w-full block"
+						className="range range-primary block w-full"
 						min={100}
 						max={350}
 						step={0.25}
@@ -132,7 +125,7 @@ export function ShortRangeComm() {
 						onInput={(e) => setFrequency(Number(e.currentTarget.value))}
 					/>
 					<div
-						className="absolute top-0 left-0 h-full pointer-events-none"
+						className="pointer-events-none absolute top-0 left-0 h-full"
 						style={{
 							width: `calc(100% - var(--size-selector) * 6)`,
 							left: `calc(var(--size-selector) * 2)`,
@@ -142,7 +135,7 @@ export function ShortRangeComm() {
 							return (
 								<div
 									key={h.id}
-									className="absolute top-1/2 w-2 h-2 bg-accent rounded-full"
+									className="bg-accent absolute top-1/2 h-2 w-2 rounded-full"
 									style={{
 										left: `${((h.frequency - frequencyMin) / (frequencyMax - frequencyMin)) * 100}%`,
 										transform: `translate(calc(-50% + var(--size-selector)), -50%)`,
@@ -152,7 +145,7 @@ export function ShortRangeComm() {
 						})}
 						{shortRangeComm.state === "connected" ? (
 							<div
-								className="absolute top-1/2 w-2 h-2 bg-warning-highlight rounded-full"
+								className="bg-warning-highlight absolute top-1/2 h-2 w-2 rounded-full"
 								style={{
 									left: `${((shortRangeComm.frequency - frequencyMin) / (frequencyMax - frequencyMin)) * 100}%`,
 									transform: `translate(calc(-50% + var(--size-selector)), -50%)`,
@@ -169,7 +162,7 @@ export function ShortRangeComm() {
 				<input
 					id="amplitude"
 					type="range"
-					className="range range-error w-full block"
+					className="range range-error block w-full"
 					min={0}
 					max={1}
 					step={0.001}
@@ -196,8 +189,8 @@ export function ShortRangeComm() {
 					}}
 				/>
 			</div>
-			<div className="h-full flex flex-col gap-4 col-start-4 row-start-1 row-span-3">
-				<div className="w-full flex-auto panel panel-neutral panel-opaque">
+			<div className="col-start-4 row-span-3 row-start-1 flex h-full flex-col gap-4">
+				<div className="panel panel-neutral panel-opaque w-full flex-auto">
 					<SineWave
 						className="faded-scroll-y"
 						shouldRender={cardLoaded}
@@ -264,9 +257,9 @@ function Conversation({ conversationId }: { conversationId: number }) {
 	const hasSelectedChoice = conversation.currentChoices.some((c) => c.selected);
 
 	return (
-		<div className="flex flex-col overflow-y-hidden h-full col-span-3 gap-8 py-8">
+		<div className="col-span-3 flex h-full flex-col gap-8 overflow-y-hidden py-8">
 			<div
-				className="overflow-y-auto flex flex-col-reverse gap-8 flex-auto faded-scroll-top pt-32 max-h-3/4"
+				className="faded-scroll-top flex max-h-3/4 flex-auto flex-col-reverse gap-8 overflow-y-auto pt-32"
 				// @ts-expect-error
 				style={{ "--fade-distance": "8rem" }}
 			>
@@ -281,7 +274,7 @@ function Conversation({ conversationId }: { conversationId: number }) {
 					</div>
 				))}
 			</div>
-			<div className="flex justify-around gap-4 flex-wrap">
+			<div className="flex flex-wrap justify-around gap-4">
 				{conversation.currentChoices.flatMap((c) =>
 					(c.speakerId === -1 || c.speakerId === shipId) &&
 					c.text.split(": ").slice(1).length > 0 ? (

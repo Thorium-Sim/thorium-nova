@@ -1,25 +1,26 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
+
 import { DockLocation } from "../DockLocation";
 import type { DropInfo } from "../DropInfo";
 import { I18nLabel } from "../I18nLabel";
-import { Orientation } from "../Orientation";
-import { Rect } from "../Rect";
-import { CLASSES } from "../Types";
 import type { Action } from "../model/Action";
 import { Actions } from "../model/Actions";
 import { BorderNode } from "../model/BorderNode";
 import type { IDraggable } from "../model/IDraggable";
 import type { IJsonTabNode } from "../model/IJsonModel";
+import type { LayoutWindow } from "../model/LayoutWindow";
 import { Model } from "../model/Model";
 import type { Node } from "../model/Node";
 import { TabNode } from "../model/TabNode";
 import { TabSetNode } from "../model/TabSetNode";
+import { Orientation } from "../Orientation";
+import { Rect } from "../Rect";
+import { CLASSES } from "../Types";
 import { BorderTab } from "./BorderTab";
 import { BorderTabSet } from "./BorderTabSet";
 import { DragContainer } from "./DragContainer";
-import { PopoutWindow } from "./PopoutWindow";
 import {
 	AsterickIcon,
 	CloseIcon,
@@ -30,17 +31,12 @@ import {
 	RestoreIcon,
 } from "./Icons";
 import { Overlay } from "./Overlay";
+import { PopoutWindow } from "./PopoutWindow";
 import { Row } from "./Row";
-import { Tab } from "./Tab";
-import {
-	copyInlineStyles,
-	enablePointerOnIFrames,
-	isDesktop,
-	isSafari,
-} from "./Utils";
-import type { LayoutWindow } from "../model/LayoutWindow";
-import { TabButtonStamp } from "./TabButtonStamp";
 import { SizeTracker } from "./SizeTracker";
+import { Tab } from "./Tab";
+import { TabButtonStamp } from "./TabButtonStamp";
+import { copyInlineStyles, enablePointerOnIFrames, isDesktop, isSafari } from "./Utils";
 
 export interface ILayoutProps {
 	/** the model for this layout */
@@ -169,12 +165,7 @@ export class Layout extends React.Component<ILayoutProps> {
 	 * @param x the x position of the drag cursor on the image
 	 * @param y the x position of the drag cursor on the image
 	 */
-	setDragComponent(
-		event: DragEvent,
-		component: React.ReactNode,
-		x: number,
-		y: number,
-	) {
+	setDragComponent(event: DragEvent, component: React.ReactNode, x: number, y: number) {
 		this.selfRef.current!.setDragComponent(event, component, x, y);
 	}
 
@@ -185,13 +176,7 @@ export class Layout extends React.Component<ILayoutProps> {
 
 	/** @internal */
 	render() {
-		return (
-			<LayoutInternal
-				ref={this.selfRef}
-				{...this.props}
-				renderRevision={this.revision++}
-			/>
-		);
+		return <LayoutInternal ref={this.selfRef} {...this.props} renderRevision={this.revision++} />;
 	}
 }
 
@@ -218,10 +203,7 @@ interface ILayoutInternalState {
 }
 
 /** @internal */
-export class LayoutInternal extends React.Component<
-	ILayoutInternalProps,
-	ILayoutInternalState
-> {
+export class LayoutInternal extends React.Component<ILayoutInternalProps, ILayoutInternalState> {
 	public static dragState: DragState | undefined = undefined;
 
 	private selfRef: React.RefObject<HTMLDivElement | null>;
@@ -261,9 +243,7 @@ export class LayoutInternal extends React.Component<
 		this.findBorderBarSizeRef = React.createRef<HTMLDivElement>();
 
 		this.supportsPopout =
-			props.supportsPopout !== undefined
-				? props.supportsPopout
-				: defaultSupportsPopout;
+			props.supportsPopout !== undefined ? props.supportsPopout : defaultSupportsPopout;
 		this.popoutURL = props.popoutURL ? props.popoutURL : "popout.html";
 		this.icons = { ...defaultIcons, ...props.icons };
 		this.windowId = props.windowId ? props.windowId : Model.MAIN_WINDOW_ID;
@@ -352,9 +332,7 @@ export class LayoutInternal extends React.Component<
 				}
 				this.props.model.getwindowsMap().get(this.windowId)!.layout = this;
 				this.props.model.addChangeListener(this.onModelChange);
-				this.layoutWindow = this.props.model
-					.getwindowsMap()
-					.get(this.windowId)!;
+				this.layoutWindow = this.props.model.getwindowsMap().get(this.windowId)!;
 				this.layoutWindow.layout = this;
 				this.layoutWindow.toScreenRectFunction = (r) => this.getScreenRect(r);
 				this.previousModel = this.props.model;
@@ -376,10 +354,7 @@ export class LayoutInternal extends React.Component<
 		// first render will be used to find the size (via selfRef)
 		if (!this.selfRef.current) {
 			return (
-				<div
-					ref={this.selfRef}
-					className={this.getClassName(CLASSES.FLEXLAYOUT__LAYOUT)}
-				>
+				<div ref={this.selfRef} className={this.getClassName(CLASSES.FLEXLAYOUT__LAYOUT)}>
 					<div
 						ref={this.moveablesRef}
 						key="__moveables__"
@@ -435,11 +410,7 @@ export class LayoutInternal extends React.Component<
 					className={this.getClassName(CLASSES.FLEXLAYOUT__LAYOUT_MOVEABLES)}
 				/>
 				{metricElements}
-				<Overlay
-					key="__overlay__"
-					layout={this}
-					show={this.state.showOverlay}
-				/>
+				<Overlay key="__overlay__" layout={this} show={this.state.showOverlay} />
 				{outer}
 				{reorderedTabs}
 				{tabMoveables}
@@ -460,18 +431,14 @@ export class LayoutInternal extends React.Component<
 				</div>
 			);
 			const borderSetComponents = new Map<DockLocation, React.ReactNode>();
-			const borderSetContentComponents = new Map<
-				DockLocation,
-				React.ReactNode
-			>();
+			const borderSetContentComponents = new Map<DockLocation, React.ReactNode>();
 			for (const [_, location] of DockLocation.values) {
 				const border = borders.get(location)!;
 				const showBorder =
 					border?.isShowing() &&
 					(!border.isAutoHide() ||
 						(border.isAutoHide() &&
-							(border.getChildren().length > 0 ||
-								this.state.showHiddenBorder === location)));
+							(border.getChildren().length > 0 || this.state.showHiddenBorder === location)));
 				if (showBorder) {
 					borderSetComponents.set(
 						location,
@@ -483,21 +450,13 @@ export class LayoutInternal extends React.Component<
 					);
 					borderSetContentComponents.set(
 						location,
-						<BorderTab
-							layout={this}
-							border={border}
-							show={border.getSelected() !== -1}
-						/>,
+						<BorderTab layout={this} border={border} show={border.getSelected() !== -1} />,
 					);
 				}
 			}
 
-			const classBorderOuter = this.getClassName(
-				CLASSES.FLEXLAYOUT__LAYOUT_BORDER_CONTAINER,
-			);
-			const classBorderInner = this.getClassName(
-				CLASSES.FLEXLAYOUT__LAYOUT_BORDER_CONTAINER_INNER,
-			);
+			const classBorderOuter = this.getClassName(CLASSES.FLEXLAYOUT__LAYOUT_BORDER_CONTAINER);
+			const classBorderInner = this.getClassName(CLASSES.FLEXLAYOUT__LAYOUT_BORDER_CONTAINER_INNER);
 
 			if (this.props.model.getBorderSet().getLayoutHorizontal()) {
 				const innerWithBorderTabs = (
@@ -569,11 +528,7 @@ export class LayoutInternal extends React.Component<
 	renderLayout() {
 		return (
 			<>
-				<Row
-					key="__row__"
-					layout={this}
-					node={this.props.model.getRoot(this.windowId)}
-				/>
+				<Row key="__row__" layout={this} node={this.props.model.getRoot(this.windowId)} />
 				{this.renderEdgeIndicators()}
 			</>
 		);
@@ -600,9 +555,7 @@ export class LayoutInternal extends React.Component<
 						borderBottomLeftRadius: radius,
 						borderBottomRightRadius: radius,
 					}}
-					className={`${className} ${this.getClassName(
-						CLASSES.FLEXLAYOUT__EDGE_RECT_TOP,
-					)}`}
+					className={`${className} ${this.getClassName(CLASSES.FLEXLAYOUT__EDGE_RECT_TOP)}`}
 				>
 					<div style={{ transform: "rotate(180deg)" }}>{arrowIcon}</div>
 				</div>,
@@ -618,9 +571,7 @@ export class LayoutInternal extends React.Component<
 						borderTopRightRadius: radius,
 						borderBottomRightRadius: radius,
 					}}
-					className={`${className} ${this.getClassName(
-						CLASSES.FLEXLAYOUT__EDGE_RECT_LEFT,
-					)}`}
+					className={`${className} ${this.getClassName(CLASSES.FLEXLAYOUT__EDGE_RECT_LEFT)}`}
 				>
 					<div style={{ transform: "rotate(90deg)" }}>{arrowIcon}</div>
 				</div>,
@@ -636,9 +587,7 @@ export class LayoutInternal extends React.Component<
 						borderTopLeftRadius: radius,
 						borderTopRightRadius: radius,
 					}}
-					className={`${className} ${this.getClassName(
-						CLASSES.FLEXLAYOUT__EDGE_RECT_BOTTOM,
-					)}`}
+					className={`${className} ${this.getClassName(CLASSES.FLEXLAYOUT__EDGE_RECT_BOTTOM)}`}
 				>
 					<div>{arrowIcon}</div>
 				</div>,
@@ -654,9 +603,7 @@ export class LayoutInternal extends React.Component<
 						borderTopLeftRadius: radius,
 						borderBottomLeftRadius: radius,
 					}}
-					className={`${className} ${this.getClassName(
-						CLASSES.FLEXLAYOUT__EDGE_RECT_RIGHT,
-					)}`}
+					className={`${className} ${this.getClassName(CLASSES.FLEXLAYOUT__EDGE_RECT_RIGHT)}`}
 				>
 					<div style={{ transform: "rotate(-90deg)" }}>{arrowIcon}</div>
 				</div>,
@@ -684,11 +631,7 @@ export class LayoutInternal extends React.Component<
 							onCloseWindow={this.onCloseWindow}
 						>
 							<div className={this.props.popoutClassName}>
-								<LayoutInternal
-									{...this.props}
-									windowId={windowId}
-									mainLayout={this}
-								/>
+								<LayoutInternal {...this.props} windowId={windowId} mainLayout={this} />
 							</div>
 						</PopoutWindow>,
 					);
@@ -708,21 +651,15 @@ export class LayoutInternal extends React.Component<
 				const element = this.getMoveableElement(child.getId());
 				child.setMoveableElement(element);
 				const selected = child.isSelected();
-				const rect = (
-					child.getParent() as BorderNode | TabSetNode
-				).getContentRect();
+				const rect = (child.getParent() as BorderNode | TabSetNode).getContentRect();
 
 				// only render first time if size >0
 				const renderTab =
 					child.isRendered() ||
-					((selected || !child.isEnableRenderOnDemand()) &&
-						rect.width > 0 &&
-						rect.height > 0);
+					((selected || !child.isEnableRenderOnDemand()) && rect.width > 0 && rect.height > 0);
 
 				if (renderTab) {
-					const key =
-						child.getId() +
-						(child.isEnableWindowReMount() ? child.getWindowId() : "");
+					const key = child.getId() + (child.isEnableWindowReMount() ? child.getWindowId() : "");
 					tabMoveables.push(
 						createPortal(
 							<SizeTracker
@@ -755,9 +692,7 @@ export class LayoutInternal extends React.Component<
 				const child = node as TabNode;
 
 				// what the tab should look like when dragged (since images need to have been loaded before drag image can be taken)
-				tabStamps.push(
-					<DragContainer key={child.getId()} layout={this} node={child} />,
-				);
+				tabStamps.push(<DragContainer key={child.getId()} layout={this} node={child} />);
 			}
 		});
 
@@ -772,8 +707,7 @@ export class LayoutInternal extends React.Component<
 				const selected = child.isSelected();
 				const path = child.getPath();
 
-				const renderTab =
-					child.isRendered() || selected || !child.isEnableRenderOnDemand();
+				const renderTab = child.isRendered() || selected || !child.isEnableRenderOnDemand();
 
 				if (renderTab) {
 					// const rect = (child.getParent() as BorderNode | TabSetNode).getContentRect();
@@ -782,13 +716,7 @@ export class LayoutInternal extends React.Component<
 					tabs.set(
 						child.getId(),
 						// <SizeTracker rect={rect} forceRevision={this.state.forceRevision} key={key}>
-						<Tab
-							key={child.getId()}
-							layout={this}
-							path={path}
-							node={child}
-							selected={selected}
-						/>,
+						<Tab key={child.getId()} layout={this} path={path} node={child} selected={selected} />,
 						// </SizeTracker>
 					);
 				}
@@ -820,10 +748,7 @@ export class LayoutInternal extends React.Component<
 			this.props.model.isEnableEdgeDock() &&
 			this.state.showHiddenBorder === DockLocation.CENTER
 		) {
-			if (
-				(y > c.y - offset && y < c.y + offset) ||
-				(x > c.x - offset && x < c.x + offset)
-			) {
+			if ((y > c.y - offset && y < c.y + offset) || (x > c.x - offset && x < c.x + offset)) {
 				overEdge = true;
 			}
 		}
@@ -848,8 +773,7 @@ export class LayoutInternal extends React.Component<
 
 	updateLayoutMetrics = () => {
 		if (this.findBorderBarSizeRef.current) {
-			const borderBarSize =
-				this.findBorderBarSizeRef.current.getBoundingClientRect().height;
+			const borderBarSize = this.findBorderBarSizeRef.current.getBoundingClientRect().height;
 			if (borderBarSize !== this.state.calculatedBorderBarSize) {
 				this.setState({ calculatedBorderBarSize: borderBarSize });
 			}
@@ -932,11 +856,7 @@ export class LayoutInternal extends React.Component<
 
 	updateRect = () => {
 		const rect = this.getDomRect();
-		if (
-			!rect.equals(this.state.rect) &&
-			rect.width !== 0 &&
-			rect.height !== 0
-		) {
+		if (!rect.equals(this.state.rect) && rect.width !== 0 && rect.height !== 0) {
 			this.setState({ rect });
 			if (this.windowId !== Model.MAIN_WINDOW_ID) {
 				this.redrawInternal("rect updated");
@@ -1064,9 +984,7 @@ export class LayoutInternal extends React.Component<
 	addTabToTabSet(tabsetId: string, json: IJsonTabNode): TabNode | undefined {
 		const tabsetNode = this.props.model.getNodeById(tabsetId);
 		if (tabsetNode !== undefined) {
-			const node = this.doAction(
-				Actions.addNode(json, tabsetId, DockLocation.CENTER, -1),
-			);
+			const node = this.doAction(Actions.addNode(json, tabsetId, DockLocation.CENTER, -1));
 			return node as TabNode;
 		}
 		return undefined;
@@ -1097,9 +1015,7 @@ export class LayoutInternal extends React.Component<
 	};
 
 	maximize(tabsetNode: TabSetNode) {
-		this.doAction(
-			Actions.maximizeToggle(tabsetNode.getId(), this.getWindowId()),
-		);
+		this.doAction(Actions.maximizeToggle(tabsetNode.getId(), this.getWindowId()));
 	}
 
 	customizeTab(tabNode: TabNode, renderValues: ITabRenderValues) {
@@ -1108,10 +1024,7 @@ export class LayoutInternal extends React.Component<
 		}
 	}
 
-	customizeTabSet(
-		tabSetNode: TabSetNode | BorderNode,
-		renderValues: ITabSetRenderValues,
-	) {
+	customizeTabSet(tabSetNode: TabSetNode | BorderNode, renderValues: ITabSetRenderValues) {
 		if (this.props.onRenderTabSet) {
 			this.props.onRenderTabSet(tabSetNode, renderValues);
 		}
@@ -1207,11 +1120,7 @@ export class LayoutInternal extends React.Component<
 				);
 			}
 			if (this.props.onRenderDragRect) {
-				const dragComponent = this.props.onRenderDragRect(
-					content,
-					node,
-					undefined,
-				);
+				const dragComponent = this.props.onRenderDragRect(content, node, undefined);
 				if (dragComponent) {
 					this.setDragComponent(event, dragComponent, 10, 10);
 					rendered = true;
@@ -1234,18 +1143,8 @@ export class LayoutInternal extends React.Component<
 
 			let rendered = false;
 			if (this.props.onRenderDragRect) {
-				const content = (
-					<TabButtonStamp
-						key={node.getId()}
-						layout={this}
-						node={node as TabNode}
-					/>
-				);
-				const dragComponent = this.props.onRenderDragRect(
-					content,
-					node,
-					undefined,
-				);
+				const content = <TabButtonStamp key={node.getId()} layout={this} node={node as TabNode} />;
+				const dragComponent = this.props.onRenderDragRect(content, node, undefined);
 				if (dragComponent) {
 					this.setDragComponent(event, dragComponent, x, y);
 					rendered = true;
@@ -1261,22 +1160,13 @@ export class LayoutInternal extends React.Component<
 						y,
 					);
 				} else {
-					event.dataTransfer!.setDragImage(
-						(node as TabNode).getTabStamp()!,
-						x,
-						y,
-					);
+					event.dataTransfer!.setDragImage((node as TabNode).getTabStamp()!, x, y);
 				}
 			}
 		}
 	};
 
-	public setDragComponent(
-		event: DragEvent,
-		component: React.ReactNode,
-		x: number,
-		y: number,
-	) {
+	public setDragComponent(event: DragEvent, component: React.ReactNode, x: number, y: number) {
 		const dragElement = (
 			<div
 				style={{ position: "unset" }}
@@ -1361,11 +1251,7 @@ export class LayoutInternal extends React.Component<
 			// not internal dragging
 			const externalDrag = this.props.onExternalDrag!(event);
 			if (externalDrag) {
-				const tempNode = TabNode.fromJson(
-					externalDrag.json,
-					this.props.model,
-					false,
-				);
+				const tempNode = TabNode.fromJson(externalDrag.json, this.props.model, false);
 				LayoutInternal.dragState = new DragState(
 					this.mainLayout,
 					DragSource.External,
@@ -1393,9 +1279,7 @@ export class LayoutInternal extends React.Component<
 			this.dropInfo = undefined;
 			const rootdiv = this.selfRef.current;
 			this.outlineDiv = this.currentDocument!.createElement("div");
-			this.outlineDiv.className = this.getClassName(
-				CLASSES.FLEXLAYOUT__OUTLINE_RECT,
-			);
+			this.outlineDiv.className = this.getClassName(CLASSES.FLEXLAYOUT__OUTLINE_RECT);
 			this.outlineDiv.style.visibility = "hidden";
 			const speed = this.props.model.getAttribute("tabDragSpeed") as number;
 			this.outlineDiv.style.transition = `top ${speed}s, left ${speed}s, width ${speed}s, height ${speed}s`;
@@ -1413,12 +1297,7 @@ export class LayoutInternal extends React.Component<
 			}
 
 			const clientRect = this.selfRef.current?.getBoundingClientRect()!;
-			const r = new Rect(
-				event.clientX - clientRect.left,
-				event.clientY - clientRect.top,
-				1,
-				1,
-			);
+			const r = new Rect(event.clientX - clientRect.left, event.clientY - clientRect.top, 1, 1);
 			r.positionElement(this.outlineDiv);
 		}
 	};
@@ -1555,9 +1434,7 @@ export interface IIcons {
 				hiddenTabs: { node: TabNode; index: number }[],
 		  ) => React.ReactNode);
 	edgeArrow?: React.ReactNode;
-	activeTabset?:
-		| React.ReactNode
-		| ((tabSetNode: TabSetNode) => React.ReactNode);
+	activeTabset?: React.ReactNode | ((tabSetNode: TabSetNode) => React.ReactNode);
 }
 
 const defaultIcons = {
@@ -1600,9 +1477,7 @@ class DragState {
 		dragSource: DragSource,
 		dragNode: (Node & IDraggable) | undefined,
 		dragJson: IJsonTabNode | undefined,
-		fnNewNodeDropped:
-			| ((node?: Node, event?: React.DragEvent<HTMLElement>) => void)
-			| undefined,
+		fnNewNodeDropped: ((node?: Node, event?: React.DragEvent<HTMLElement>) => void) | undefined,
 	) {
 		this.mainLayout = mainLayout;
 		this.dragSource = dragSource;

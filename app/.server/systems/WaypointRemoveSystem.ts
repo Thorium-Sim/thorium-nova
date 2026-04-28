@@ -1,6 +1,6 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { type Entity, System } from "@thorium/utils/ecs";
 import { clearAutopilotState } from "@thorium/utils/.server/ship/clearAutopilotState";
+import { type Entity, System } from "@thorium/utils/ecs";
 
 export class WaypointRemoveSystem extends System {
 	static flightMode = ["nova"];
@@ -8,9 +8,7 @@ export class WaypointRemoveSystem extends System {
 		return !!entity.components.isWaypoint;
 	}
 	update(entity: Entity) {
-		const ship = this.ecs.getEntityById(
-			entity.components.isWaypoint?.assignedShipId || -1,
-		);
+		const ship = this.ecs.getEntityById(entity.components.isWaypoint?.assignedShipId || -1);
 
 		if (!ship) return;
 
@@ -18,10 +16,7 @@ export class WaypointRemoveSystem extends System {
 		if (ship.components.autopilot?.destinationWaypointId !== entity.id) return;
 
 		if (!ship.components.position || !entity.components.position) return;
-		if (
-			ship.components.position?.parentId ===
-			entity.components.position?.parentId
-		) {
+		if (ship.components.position?.parentId === entity.components.position?.parentId) {
 			const distance = Math.hypot(
 				ship.components.position.x - entity.components.position.x,
 				ship.components.position.y - entity.components.position.y,
@@ -29,9 +24,9 @@ export class WaypointRemoveSystem extends System {
 			);
 
 			// TODO April 5, 2025 - Make it so the desired rotation is set to point the ship towards the object
-			const object = this.ecs.getEntityById(
-				entity.components.isWaypoint?.attachedObjectId || -1,
-			);
+			// const object = this.ecs.getEntityById(
+			// 	entity.components.isWaypoint?.attachedObjectId || -1,
+			// );
 
 			if (distance < 5) {
 				clearAutopilotState(ship);

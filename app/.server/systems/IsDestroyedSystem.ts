@@ -27,10 +27,7 @@ export class IsDestroyedSystem extends System {
 
 function deleteShip(entity: Entity) {
 	// Remove the entity from any physics worlds it is a part of
-	const handles = entity.components.physicsHandles?.handles as Map<
-		string,
-		number
-	>;
+	const handles = entity.components.physicsHandles?.handles as Map<string, number>;
 	for (const [worldKey, handle] of handles.entries()) {
 		const world = entity.ecs.getWorld(worldKey);
 		if (!world) continue;
@@ -70,8 +67,7 @@ function respawnShip(entity: Entity) {
 	});
 
 	// Repair the ship systems
-	for (const systemId of entity.components.shipSystems?.shipSystems.keys() ||
-		[]) {
+	for (const systemId of entity.components.shipSystems?.shipSystems.keys() || []) {
 		const system = entity.ecs.getEntityById(systemId);
 		if (!system?.components.isShipSystem || !system.components.damage) continue;
 		if (system.components.damage.vulnerability === "vulnerable") continue;
@@ -90,20 +86,14 @@ function respawnShip(entity: Entity) {
 	let closestPlanet: Entity | null = null;
 	let previousDistance = Number.POSITIVE_INFINITY;
 	for (const e of entity.ecs.componentCache.get("position") || []) {
-		if (
-			e.components.position?.parentId === entity.components.position?.parentId
-		) {
+		if (e.components.position?.parentId === entity.components.position?.parentId) {
 			if (e.components.isPlanet || e.components.isStarbase) {
 				if (!closestPlanet) {
 					closestPlanet = e;
 					continue;
 				}
 				const p = getCompletePositionFromOrbit(e);
-				const distance = Math.hypot(
-					position.x - p.x,
-					position.y - p.y,
-					position.z - p.z,
-				);
+				const distance = Math.hypot(position.x - p.x, position.y - p.y, position.z - p.z);
 				if (distance < previousDistance) {
 					previousDistance = distance;
 					closestPlanet = e;

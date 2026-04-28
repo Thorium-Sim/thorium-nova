@@ -1,14 +1,15 @@
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
-import { ECS, Entity } from "@thorium/utils/ecs";
-import { PowerEfficiencyOverloadSystem } from "../PowerEfficiencyOverloadSystem";
-import { describe, expect, it, beforeEach, aroundEach } from "vitest";
-import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { DataStore } from "@thorium/utils/.server/db-fs";
+import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
+import { ECS, Entity } from "@thorium/utils/ecs";
 import { getAggregateDamage } from "@thorium/utils/flags/damageTypes";
+import { describe, expect, it, beforeEach, aroundEach } from "vitest";
+
+import { PowerEfficiencyOverloadSystem } from "../PowerEfficiencyOverloadSystem";
 
 aroundEach(async (runTest) => {
 	await DataStore.operations.run(testDataStoreProps, async () => {
-		runTest();
+		await runTest();
 	});
 });
 
@@ -33,17 +34,13 @@ describe("PowerEfficiencyOverloadSystem", () => {
 			ecs.update(16);
 		}
 
-		expect(system.components.damage?.efficiency).toMatchInlineSnapshot(
-			`0.999959304016354`,
-		);
+		expect(system.components.damage?.efficiency).toMatchInlineSnapshot(`0.999959304016354`);
 
 		// The average mission length
 		for (let i = 0; i < 60 * 60 * 60 * 2; i++) {
 			ecs.update(16);
 		}
-		expect(system.components.damage?.efficiency).toMatchInlineSnapshot(
-			`0.7527000312104539`,
-		);
+		expect(system.components.damage?.efficiency).toMatchInlineSnapshot(`0.7527000312104539`);
 	});
 	it("should decrease when power is above maxSafePower", () => {
 		expect(Math.max(...system.components.power!.powerLevels)).toEqual(20);

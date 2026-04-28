@@ -25,21 +25,15 @@ export function createShipMapGraph(
 		const toNode = nodeMap.get(edge.to);
 		let distance = 1;
 		if (fromNode && toNode) {
-			distance = Math.hypot(
-				fromNode.x - toNode.x,
-				fromNode.y - toNode.y,
-				fromNode.z - toNode.z,
-			);
+			distance = Math.hypot(fromNode.x - toNode.x, fromNode.y - toNode.y, fromNode.z - toNode.z);
 		}
-		const multiplier =
-			(fromNode?.priorityMultiplier || 1) * (toNode?.priorityMultiplier || 1);
+		const multiplier = (fromNode?.priorityMultiplier || 1) * (toNode?.priorityMultiplier || 1);
 		nodes.get(edge.from)?.set(edge.to, distance * multiplier);
 		nodes.get(edge.to)?.set(edge.from, distance * multiplier);
 	});
 	// Verify that every node has at least one input and one output.
 	for (const node of nodes.keys()) {
-		if (nodes.get(node)?.size === 0)
-			throw new Error("Node has no outgoing edges");
+		if (nodes.get(node)?.size === 0) throw new Error("Node has no outgoing edges");
 		// Check to find another node that links to this one
 		const otherNode = Array.from(nodes.values()).find((val) => val.has(node));
 		if (!otherNode) throw new Error("Node has no incoming edges");

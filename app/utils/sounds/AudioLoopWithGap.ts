@@ -65,11 +65,7 @@ export class AudioLoopWithGap {
 			source.start(this.nextStartTime, 0, this.loopEnd);
 		} else {
 			// Schedule this iteration
-			source.start(
-				this.nextStartTime,
-				this.loopStart,
-				this.loopEnd - this.loopStart,
-			);
+			source.start(this.nextStartTime, this.loopStart, this.loopEnd - this.loopStart);
 		}
 		source.stop(this.nextStartTime + (this.loopEnd - this.loopStart));
 
@@ -80,8 +76,7 @@ export class AudioLoopWithGap {
 		this.nextStartTime += this.cycleDuration;
 
 		// Schedule the next iteration slightly before it's needed
-		const scheduleAheadTime =
-			this.nextStartTime - this.context.currentTime - 0.1;
+		const scheduleAheadTime = this.nextStartTime - this.context.currentTime - 0.1;
 		if (this.loop) {
 			this.timeout = setTimeout(
 				() => this.scheduleNextLoop(),

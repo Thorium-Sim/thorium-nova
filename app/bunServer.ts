@@ -1,33 +1,35 @@
-import { buildDatabase } from "@thorium/.server/init/buildDatabase";
-import { initDefaultPlugin } from "@thorium/.server/init/initDefaultPlugin";
-import { router } from "@thorium/.server/init/router";
-import { createContext, initWebsocket } from "@thorium/.server/init/liveQuery";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
-import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
-import { liveQueryPlugin } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
-import { exitHandler, snapshot } from "@thorium/.server/init/exitHandler";
-import { serveStatic } from "hono/bun";
-import { Hono } from "hono";
-import { createBunWebSocket } from "hono/bun";
 import { readdir } from "node:fs/promises";
-import { vanity } from "@thorium/utils/.server/vanity";
-import { getMimeType } from "hono/utils/mime";
-import { getClientBundleFile } from "@thorium/utils/.server/getClientBundleFile";
-import { embeddedFiles, type ServerWebSocket } from "bun";
+
+import type LongRangeCommPlugin from "@thorium/.server/classes/Plugins/ShipSystems/LongRangeComm";
+import { buildDatabase } from "@thorium/.server/init/buildDatabase";
+import { exitHandler, snapshot } from "@thorium/.server/init/exitHandler";
+import { initDefaultPlugin } from "@thorium/.server/init/initDefaultPlugin";
+import { createContext, initWebsocket } from "@thorium/.server/init/liveQuery";
+import { router } from "@thorium/.server/init/router";
+import { thoriumPath } from "@thorium/utils/.server/appPaths";
+import { DataStore } from "@thorium/utils/.server/db-fs";
 import {
 	bunDataStoreProps,
 	loadPlugins,
 	setBasePath,
 } from "@thorium/utils/.server/db-fs/bunDataStoreProps";
-import { DataStore } from "@thorium/utils/.server/db-fs";
-import type LongRangeCommPlugin from "@thorium/.server/classes/Plugins/ShipSystems/LongRangeComm";
+import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
+import { getClientBundleFile } from "@thorium/utils/.server/getClientBundleFile";
+import { vanity } from "@thorium/utils/.server/vanity";
+import { liveQueryPlugin } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
 import type { ProcedureCallOptions } from "@thorium/utils/live-query/.server/procedure";
+import { embeddedFiles, type ServerWebSocket } from "bun";
+import { Hono } from "hono";
+import { serveStatic } from "hono/bun";
+import { createBunWebSocket } from "hono/bun";
+import { getMimeType } from "hono/utils/mime";
+
 import { isObject } from "./typeguards/isObject";
 
 const { upgradeWebSocket, websocket } = createBunWebSocket<ServerWebSocket>();
 try {
 	console.info(`Starting Thorium...`);
-	DataStore.operations.run(bunDataStoreProps, async () => {
+	await DataStore.operations.run(bunDataStoreProps, async () => {
 		setBasePath(thoriumPath);
 		let inited = false;
 		try {
@@ -51,13 +53,11 @@ try {
 				const ecs = database?.flight?.ecs;
 				if (!ecs || opts.type !== "send") return;
 				const rawInputObj = isObject(opts.rawInput) ? opts.rawInput : {};
-				processTriggers(ecs, {
+				void processTriggers(ecs, {
 					event: opts.path,
 					values: {
 						...rawInputObj,
-						...(typeof result === "object" && !Array.isArray(result)
-							? result
-							: {}),
+						...(typeof result === "object" && !Array.isArray(result) ? result : {}),
 					},
 				});
 			},
@@ -92,9 +92,7 @@ try {
 		);
 
 		app.get("/plugins/:pluginId/:systemId/cypher.css", ({ req }) => {
-			const plugin = database.server.plugins.find(
-				(p) => p.id === req.param("pluginId"),
-			);
+			const plugin = database.server.plugins.find((p) => p.id === req.param("pluginId"));
 			const system = plugin?.aspects.shipSystems.find(
 				(p) => p.name === req.param("systemId"),
 			) as LongRangeCommPlugin;

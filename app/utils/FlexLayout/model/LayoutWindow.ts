@@ -1,10 +1,10 @@
 import { Rect } from "../Rect";
+import type { LayoutInternal } from "../view/Layout";
 import type { IJsonPopout } from "./IJsonModel";
 import type { Model } from "./Model";
-import { RowNode } from "./RowNode";
 import type { Node } from "./Node";
+import { RowNode } from "./RowNode";
 import type { TabSetNode } from "./TabSetNode";
-import type { LayoutInternal } from "../view/Layout";
 
 export class LayoutWindow {
 	private _windowId: string;
@@ -108,22 +108,14 @@ export class LayoutWindow {
 		return { layout: this.root!.toJson(), rect: this.rect.toJson() };
 	}
 
-	static fromJson(
-		windowJson: IJsonPopout,
-		model: Model,
-		windowId: string,
-	): LayoutWindow {
+	static fromJson(windowJson: IJsonPopout, model: Model, windowId: string): LayoutWindow {
 		const count = model.getwindowsMap().size;
 		const rect = windowJson.rect
 			? Rect.fromJson(windowJson.rect)
 			: new Rect(50 + 50 * count, 50 + 50 * count, 600, 400);
 		rect.snap(10); // snapping prevents issue where window moves 1 pixel per save/restore on Chrome
 		const layoutWindow = new LayoutWindow(windowId, rect);
-		layoutWindow.root = RowNode.fromJson(
-			windowJson.layout,
-			model,
-			layoutWindow,
-		);
+		layoutWindow.root = RowNode.fromJson(windowJson.layout, model, layoutWindow);
 		return layoutWindow;
 	}
 }

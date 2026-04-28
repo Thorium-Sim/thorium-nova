@@ -1,6 +1,6 @@
+import type { DataContext } from "@thorium/.server/DataContext";
 import { FilterInventorySystem } from "@thorium/.server/systems/FilterInventorySystem";
 import type { ECS } from "@thorium/utils/ecs";
-import type { DataContext } from "@thorium/.server/DataContext";
 
 export function getInventoryTemplates(ecs?: ECS | null) {
 	for (const system of ecs?.systems || []) {

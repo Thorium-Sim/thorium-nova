@@ -16,10 +16,10 @@
 This project uses a number of tools to maintain code quality.
 
 - **TypeScript** - a superset of JavaScript that provides static type checking.
-- **Biome** - checks code to make sure that good programming practices are
+- **oxlint** - checks code to make sure that good programming practices are
   followed. The config is very open to change and interpretation. A frustrating
   linter is worse than no linter at all.
-- **Biome** - Automatically formats code. Applies code style standards so we
+- **oxfmt** - Automatically formats code. Applies code style standards so we
   don't have to think or argue about it.
 - **Semantic Release** and **Conventional Commits** - Release management and
   changelog generation. When code is merged into `main`, Semantic Release will
@@ -30,7 +30,7 @@ This project uses a number of tools to maintain code quality.
 
 All of these tools will validate the code for every pull request, and pull
 requests won't be merged until they are all passing. Using an IDE like VS Code
-will help you catch TypeScript and Biome lint issues, and automatically run Biome format
+will help you catch TypeScript and oxlint lint issues, and automatically run oxfmt format
 when you save. It's still on the developer to run tests before they push their
 code.
 
@@ -73,7 +73,7 @@ using HTTP and WebSockets.
 
 A Flight is a single instance of a game, usually coupled with a specific crew
 and flight director. The flight runs the ECS world, encapsulates the game state
-for the flight, and executes any systems in the simulation. 
+for the flight, and executes any systems in the simulation.
 
 When a flight is started or loaded from a save file, it starts up the HTTP
 server, which allows other clients to connect and start playing. A single server

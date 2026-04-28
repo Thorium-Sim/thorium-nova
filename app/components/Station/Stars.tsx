@@ -1,11 +1,9 @@
-import type { ReactNode } from "react";
-import "./stars.css";
 import { cn } from "@thorium/utils/cn";
 
-const Stars = ({
-	children,
-	className,
-}: { children?: ReactNode; className?: string }) => {
+import "./stars.css";
+import type { ReactNode } from "react";
+
+const Stars = ({ children, className }: { children?: ReactNode; className?: string }) => {
 	return (
 		<div
 			className={cn(
@@ -13,7 +11,7 @@ const Stars = ({
 				className,
 			)}
 		>
-			<div className="absolute left-0 top-0 pointer-events-none">
+			<div className="pointer-events-none absolute top-0 left-0">
 				<div id="stars" />
 				<div id="stars2" />
 				<div id="stars3" />

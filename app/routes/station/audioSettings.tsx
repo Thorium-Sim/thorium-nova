@@ -12,8 +12,7 @@ export default function AudioSettings() {
 				step={0.01}
 				defaultValue={store.mainVolume}
 				onChange={(value) =>
-					!Array.isArray(value) &&
-					useAudioSettingsStore.setState({ mainVolume: value })
+					!Array.isArray(value) && useAudioSettingsStore.setState({ mainVolume: value })
 				}
 				formatOptions={{ style: "percent" }}
 			/>
@@ -24,8 +23,7 @@ export default function AudioSettings() {
 				step={0.01}
 				defaultValue={store.uiVolume}
 				onChange={(value) =>
-					!Array.isArray(value) &&
-					useAudioSettingsStore.setState({ uiVolume: value })
+					!Array.isArray(value) && useAudioSettingsStore.setState({ uiVolume: value })
 				}
 				formatOptions={{ style: "percent" }}
 			/>
@@ -36,8 +34,7 @@ export default function AudioSettings() {
 				step={0.01}
 				defaultValue={store.soundEffectVolume}
 				onChange={(value) =>
-					!Array.isArray(value) &&
-					useAudioSettingsStore.setState({ soundEffectVolume: value })
+					!Array.isArray(value) && useAudioSettingsStore.setState({ soundEffectVolume: value })
 				}
 				formatOptions={{ style: "percent" }}
 			/>
@@ -48,8 +45,7 @@ export default function AudioSettings() {
 				step={0.01}
 				defaultValue={store.ambianceVolume}
 				onChange={(value) =>
-					!Array.isArray(value) &&
-					useAudioSettingsStore.setState({ ambianceVolume: value })
+					!Array.isArray(value) && useAudioSettingsStore.setState({ ambianceVolume: value })
 				}
 				formatOptions={{ style: "percent" }}
 			/>
@@ -60,8 +56,7 @@ export default function AudioSettings() {
 				step={0.01}
 				defaultValue={store.musicVolume}
 				onChange={(value) =>
-					!Array.isArray(value) &&
-					useAudioSettingsStore.setState({ musicVolume: value })
+					!Array.isArray(value) && useAudioSettingsStore.setState({ musicVolume: value })
 				}
 				formatOptions={{ style: "percent" }}
 			/>
@@ -72,8 +67,7 @@ export default function AudioSettings() {
 				step={0.01}
 				defaultValue={store.dialogueVolume}
 				onChange={(value) =>
-					!Array.isArray(value) &&
-					useAudioSettingsStore.setState({ dialogueVolume: value })
+					!Array.isArray(value) && useAudioSettingsStore.setState({ dialogueVolume: value })
 				}
 				formatOptions={{ style: "percent" }}
 			/>

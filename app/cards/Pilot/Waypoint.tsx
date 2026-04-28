@@ -3,7 +3,6 @@ import type { AppRouter } from "@thorium/.server/init/router";
 import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
 import WaypointTexture from "@thorium/components/Starmap/Waypoint.svg";
 import StrokeTexture from "@thorium/components/Starmap/WaypointStroke.svg";
-import { clientId, q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import type { inferTransformedProcedureOutput } from "@thorium/utils/live-query/.server/types";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
@@ -23,11 +22,10 @@ import {
 	type Sprite,
 	Vector3,
 } from "three";
+
 import { getWaypointRelativePosition } from "./getWaypointRelativePosition";
 
-type WaypointItem = inferTransformedProcedureOutput<
-	AppRouter["waypoints"]["all"]
->[0];
+type WaypointItem = inferTransformedProcedureOutput<AppRouter["waypoints"]["all"]>[0];
 
 const playerVector = new Vector3();
 const waypointVector = new Vector3();
@@ -57,19 +55,14 @@ export const WaypointEntity = ({
 	const stroke = useRef<Sprite>(null);
 	const scale = 1 / 40;
 
-	const { primaryHex, primaryFocusHex, warningHex, warningFocusHex } =
-		useMemo(() => {
-			return {
-				primaryHex: getThemeButtonBorderColor("btn-primary", "#65abc4"),
-				warningHex: getThemeButtonBorderColor("btn-warning", "#c7935e"),
-				primaryFocusHex: deriveDarkerThemeColor(
-					getThemeButtonBorderColor("btn-primary", "#65abc4"),
-				),
-				warningFocusHex: deriveDarkerThemeColor(
-					getThemeButtonBorderColor("btn-warning", "#c7935e"),
-				),
-			};
-		}, []);
+	const { primaryHex, primaryFocusHex, warningHex, warningFocusHex } = useMemo(() => {
+		return {
+			primaryHex: getThemeButtonBorderColor("btn-primary", "#65abc4"),
+			warningHex: getThemeButtonBorderColor("btn-warning", "#c7935e"),
+			primaryFocusHex: deriveDarkerThemeColor(getThemeButtonBorderColor("btn-primary", "#65abc4")),
+			warningFocusHex: deriveDarkerThemeColor(getThemeButtonBorderColor("btn-warning", "#c7935e")),
+		};
+	}, []);
 
 	const { id, currentSystem: playerSystem, systemPosition } = useStation().ship;
 
@@ -102,10 +95,7 @@ export const WaypointEntity = ({
 				const scale = 0.03;
 				group.current?.scale.setScalar(scale);
 				frustum.setFromProjectionMatrix(
-					matrix.multiplyMatrices(
-						camera.projectionMatrix,
-						camera.matrixWorldInverse,
-					),
+					matrix.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse),
 				);
 
 				showOutOfBoundsArrow = !frustum.containsPoint(waypointVector);
@@ -153,8 +143,7 @@ export const WaypointEntity = ({
 							.normalize()
 							.multiplyScalar(dx * 0.9);
 						screenPosition = group.current.position.clone().project(camera);
-						const yPos =
-							(screenPosition.y * size.height) / 2 / (size.height / 2);
+						const yPos = (screenPosition.y * size.height) / 2 / (size.height / 2);
 						const xPos = (screenPosition.x * size.width) / 2 / (size.width / 2);
 
 						const angle = Math.atan2(yPos, xPos);

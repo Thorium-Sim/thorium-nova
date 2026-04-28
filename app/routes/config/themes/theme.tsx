@@ -1,19 +1,19 @@
+import { AspectAssetUpload } from "@thorium/components/AspectAssetUpload";
+import { Editor } from "@thorium/components/MonacoEditor";
+import StationLayout from "@thorium/components/Station/StationLayout";
+import { q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
+import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
+import colorLogo from "@thorium/images/logo-color.svg?url";
+import normalLogo from "@thorium/images/logo.svg?url";
+import { StationData } from "@thorium/routes/station/useStation";
 import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
-import { Navigate, Outlet, useParams, useNavigate } from "react-router";
-import { toast } from "@thorium/context/ToastContext";
-import { useState } from "react";
-import { Editor } from "@thorium/components/MonacoEditor";
-import debounce from "lodash.debounce";
-import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
 import Input from "@thorium/ui/Input";
-import normalLogo from "@thorium/images/logo.svg?url";
-import colorLogo from "@thorium/images/logo-color.svg?url";
-import { q } from "@thorium/context/AppContext";
 import { MockNetRequestContext } from "@thorium/utils/live-query/client/mockContext";
-import StationLayout from "@thorium/components/Station/StationLayout";
-import { StationData } from "@thorium/routes/station/useStation";
-import { AspectAssetUpload } from "@thorium/components/AspectAssetUpload";
+import debounce from "lodash.debounce";
+import { useState } from "react";
+import { Navigate, Outlet, useParams, useNavigate } from "react-router";
 
 export default function ThemeLayout() {
 	const { themeId, pluginId } = useParams() as {
@@ -25,18 +25,9 @@ export default function ThemeLayout() {
 	const prompt = usePrompt();
 	const [theme] = q.plugin.theme.get.useNetRequest({ pluginId, themeId });
 
-	const [shipName, setShipName] = useLocalStorage(
-		"theme-ship-name",
-		"USS Testing",
-	);
-	const [stationName, setStationName] = useLocalStorage(
-		"theme-station-name",
-		"Command",
-	);
-	const [alertLevel, setAlertLevel] = useLocalStorage(
-		"theme-notice-level",
-		"5",
-	);
+	const [shipName, setShipName] = useLocalStorage("theme-ship-name", "USS Testing");
+	const [stationName, setStationName] = useLocalStorage("theme-station-name", "Command");
+	const [alertLevel, setAlertLevel] = useLocalStorage("theme-notice-level", "5");
 
 	const [previewViewscreen, setPreviewViewscreen] = useState(false);
 
@@ -44,7 +35,7 @@ export default function ThemeLayout() {
 	return (
 		<>
 			<div className="flex w-full gap-8">
-				<div className="flex-col grow flex gap-2 h-full">
+				<div className="flex h-full grow flex-col gap-2">
 					<Editor
 						className="flex-1"
 						defaultValue={theme.rawCSS}
@@ -81,8 +72,8 @@ export default function ThemeLayout() {
 									}))
 								)
 									return;
-								q.plugin.theme.delete.netSend({ pluginId, themeId });
-								navigate(`/config/${pluginId}/themes`);
+								void q.plugin.theme.delete.netSend({ pluginId, themeId });
+								void navigate(`/config/${pluginId}/themes`);
 							}}
 						>
 							Delete Theme
@@ -102,7 +93,7 @@ export default function ThemeLayout() {
 										themeId,
 										name,
 									});
-									navigate(`/config/${pluginId}/themes/${result.themeId}`);
+									void navigate(`/config/${pluginId}/themes/${result.themeId}`);
 								} catch (err) {
 									if (err instanceof Error) {
 										toast({
@@ -126,21 +117,20 @@ export default function ThemeLayout() {
 						</Button>
 					</div>
 				</div>
-				<div className="flex-1 flex grow-0 flex-col w-[384px]">
+				<div className="flex w-[384px] flex-1 grow-0 flex-col">
 					<div
-						className="border border-white bg-black w-[384px] overflow-hidden relative z-10 transition-transform transform hover:scale-[3] origin-top-right"
+						className="relative z-10 w-[384px] origin-top-right transform overflow-hidden border border-white bg-black transition-transform hover:scale-[3]"
 						style={{
 							aspectRatio: "16/9",
 						}}
 					>
 						<div
-							className="w-[1920px] h-[1080px] absolute left-0 top-0 bg-gray-800"
+							className="absolute top-0 left-0 h-[1080px] w-[1920px] bg-gray-800"
 							style={{
 								transform: `scale(0.2) translate(-200%, -200%)`,
 							}}
 						>
 							<style
-								// biome-ignore lint/security/noDangerouslySetInnerHtml: Required to render the CSS
 								dangerouslySetInnerHTML={{
 									__html: theme.rawCSS,
 								}}
@@ -193,12 +183,9 @@ export default function ThemeLayout() {
 											},
 											assets: {
 												logo: normalLogo,
-												model:
-													"/plugins/Thorium Default/ships/Astra Frigate/assets/model.glb",
-												vanity:
-													"/plugins/Thorium Default/ships/Astra Frigate/assets/vanity.png",
-												topView:
-													"/plugins/Thorium Default/ships/Astra Frigate/assets/topView.png",
+												model: "/plugins/Thorium Default/ships/Astra Frigate/assets/model.glb",
+												vanity: "/plugins/Thorium Default/ships/Astra Frigate/assets/vanity.png",
+												topView: "/plugins/Thorium Default/ships/Astra Frigate/assets/topView.png",
 												sideView:
 													"/plugins/Thorium Default/ships/Astra Frigate/assets/sideView.png",
 											},
@@ -257,7 +244,7 @@ export default function ThemeLayout() {
 						<select
 							value={alertLevel}
 							onChange={(e) => setAlertLevel(e.target.value)}
-							className="w-32 select select-sm block"
+							className="select select-sm block w-32"
 						>
 							<option>5</option>
 							<option>4</option>

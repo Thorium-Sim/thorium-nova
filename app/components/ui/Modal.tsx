@@ -1,7 +1,6 @@
-import { Fragment, type ReactNode } from "react";
-import Button from "./Button";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
 import { cn } from "@thorium/utils/cn";
-import { Icon } from "./Icon";
+import { type ReactNode } from "react";
 import {
 	Dialog,
 	ModalOverlay,
@@ -9,14 +8,14 @@ import {
 	Button as RAButton,
 	Heading,
 } from "react-aria-components";
-import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
+
+import { Icon } from "./Icon";
 
 export default function Modal({
 	title,
 	isOpen,
 	setIsOpen,
 	children,
-	className = "",
 	panelClassName = "",
 }: {
 	title: string;
@@ -38,11 +37,11 @@ export default function Modal({
 			<RAModal className={`theme-container ${popoverTransitionClasses}`}>
 				<Dialog
 					className={cn(
-						`inline-block align-bottom bg-gray-900/50 backdrop-filter backdrop-blur text-white rounded-lg px-4 pt-5 pb-4 text-left shadow-xl transform transition-all sm:my-8 sm:align-middle m:w-full sm:p-6 mx-8 `,
+						`m:w-full mx-8 inline-block transform rounded-lg bg-gray-900/50 px-4 pt-5 pb-4 text-left align-bottom text-white shadow-xl backdrop-blur backdrop-filter transition-all sm:my-8 sm:p-6 sm:align-middle`,
 						panelClassName,
 					)}
 				>
-					<div className="hidden sm:block absolute top-0 right-0 pt-4 pr-4">
+					<div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
 						<RAButton slot="close" type="button" className="btn btn-ghost">
 							<span className="sr-only">Close</span>
 							<Icon name="x" className="h-6 w-6" aria-hidden="true" />

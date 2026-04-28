@@ -15,12 +15,8 @@ export const isLegacySensors = z
 
 		frozen: z.boolean().default(false),
 		interference: z.number().default(0),
-		movement: z
-			.object({ x: z.number(), y: z.number() })
-			.default({ x: 0, y: 0 }),
-		thrusterMovement: z
-			.object({ x: z.number(), y: z.number() })
-			.default({ x: 0, y: 0 }),
+		movement: z.object({ x: z.number(), y: z.number() }).default({ x: 0, y: 0 }),
+		thrusterMovement: z.object({ x: z.number(), y: z.number() }).default({ x: 0, y: 0 }),
 
 		segments: z.record(z.boolean()).default({}),
 

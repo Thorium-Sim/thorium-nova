@@ -5,10 +5,7 @@ import { Vector3 } from "three";
 import type z from "zod";
 
 const targetPoint = new Vector3();
-export function getTargetPoint(
-	ecs: ECS,
-	target: z.infer<typeof shipBehavior>["behaviorTarget"],
-) {
+export function getTargetPoint(ecs: ECS, target: z.infer<typeof shipBehavior>["behaviorTarget"]) {
 	if (!target) return targetPoint;
 	if (typeof target === "object") {
 		targetPoint.set(target.x, target.y, target.z);

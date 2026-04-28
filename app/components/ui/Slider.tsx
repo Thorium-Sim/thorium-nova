@@ -1,8 +1,6 @@
+import type { NumberFormatOptions } from "@internationalized/number";
 import { logslider } from "@thorium/utils/logSlider";
 import React from "react";
-
-import { type SliderState, useSliderState } from "react-stately";
-
 import {
 	mergeProps,
 	useFocusRing,
@@ -13,8 +11,7 @@ import {
 	type AriaSliderProps,
 	type AriaSliderThumbOptions,
 } from "react-aria";
-
-import type { NumberFormatOptions } from "@internationalized/number";
+import { type SliderState, useSliderState } from "react-stately";
 
 function Slider(
 	props: AriaSliderProps & {
@@ -25,11 +22,7 @@ function Slider(
 	const trackRef = React.useRef(null);
 	const numberFormatter = useNumberFormatter(props.formatOptions);
 	const state = useSliderState({ ...props, numberFormatter });
-	const { groupProps, trackProps, labelProps, outputProps } = useSlider(
-		props,
-		state,
-		trackRef,
-	);
+	const { groupProps, trackProps, labelProps, outputProps } = useSlider(props, state, trackRef);
 
 	return (
 		<div
@@ -44,20 +37,14 @@ function Slider(
 				</div>
 			)}
 			{/* The track element holds the visible track line and the thumb. */}
-			<div
-				{...trackProps}
-				ref={trackRef}
-				className={`track ${state.isDisabled ? "disabled" : ""}`}
-			>
+			<div {...trackProps} ref={trackRef} className={`track ${state.isDisabled ? "disabled" : ""}`}>
 				<Thumb index={0} state={state} trackRef={trackRef} />
 			</div>
 		</div>
 	);
 }
 
-function Thumb(
-	props: { state: SliderState } & Omit<AriaSliderThumbOptions, "inputRef">,
-) {
+function Thumb(props: { state: SliderState } & Omit<AriaSliderThumbOptions, "inputRef">) {
 	const { state, trackRef, index } = props;
 	const inputRef = React.useRef(null);
 	const { thumbProps, inputProps, isDragging } = useSliderThumb(
@@ -73,9 +60,7 @@ function Thumb(
 	return (
 		<div
 			{...thumbProps}
-			className={`thumb ${isFocusVisible ? "focus" : ""} ${
-				isDragging ? "dragging" : ""
-			}`}
+			className={`thumb ${isFocusVisible ? "focus" : ""} ${isDragging ? "dragging" : ""}`}
 		>
 			<VisuallyHidden>
 				<input
@@ -111,9 +96,7 @@ export const ZoomSlider = ({
 			step={step}
 			value={logslider(zoomMin, zoomMax, value, true) || 0}
 			className="slider zoom"
-			onChange={(val: number | number[]) =>
-				setValue(logslider(zoomMin, zoomMax, val as number))
-			}
+			onChange={(val: number | number[]) => setValue(logslider(zoomMin, zoomMax, val as number))}
 		/>
 	);
 };

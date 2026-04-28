@@ -1,15 +1,11 @@
 import type ImpulseEnginesPlugin from "@thorium/.server/classes/Plugins/ShipSystems/ImpulseEngines";
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
+import { engineSpeeds } from "@thorium/ecs-components/shipSystems/engineSpeeds";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import z from "zod";
-import {
-	getShipSystem,
-	getShipSystemForInput,
-	pluginFilter,
-	systemInput,
-} from "../utils";
-import { engineSpeeds } from "@thorium/ecs-components/shipSystems/engineSpeeds";
+
+import { getShipSystem, getShipSystemForInput, pluginFilter, systemInput } from "../utils";
 
 export const impulse = t.router({
 	get: t.procedure
@@ -18,8 +14,7 @@ export const impulse = t.router({
 		.request(({ ctx, input }) => {
 			const system = getShipSystem({ input, ctx });
 
-			if (system.type !== "impulseEngines")
-				throw new Error("System is not Impulse Engine");
+			if (system.type !== "impulseEngines") throw new Error("System is not Impulse Engine");
 
 			return system as ImpulseEnginesPlugin;
 		}),
@@ -38,10 +33,7 @@ export const impulse = t.router({
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
-			const [system, override] = getShipSystemForInput<"impulseEngines">(
-				ctx,
-				input,
-			);
+			const [system, override] = getShipSystemForInput<"impulseEngines">(ctx, input);
 			const shipSystem = override || system;
 
 			if (typeof input.cruisingSpeed === "number") {

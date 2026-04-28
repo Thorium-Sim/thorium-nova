@@ -41,32 +41,19 @@ export const inkLanguage = {
 			[/\bTODO:.*$/, "keyword.other.todo"],
 
 			// INCLUDE statements
-			[
-				/^(\s*)(INCLUDE)\b/,
-				["", { token: "keyword.control.include", next: "@include" }],
-			],
+			[/^(\s*)(INCLUDE)\b/, ["", { token: "keyword.control.include", next: "@include" }]],
 
 			// VAR / CONST / LIST declarations
-			[
-				/^(\s*)(VAR|CONST|LIST)\b/,
-				["", { token: "storage.type", next: "@declaration" }],
-			],
+			[/^(\s*)(VAR|CONST|LIST)\b/, ["", { token: "storage.type", next: "@declaration" }]],
 
 			// Knot / stitch declarations  (=== knot_name ===)
-			[
-				/^(\s*)(=+)/,
-				["", { token: "keyword.other.knot", next: "@knotDeclaration" }],
-			],
+			[/^(\s*)(=+)/, ["", { token: "keyword.other.knot", next: "@knotDeclaration" }]],
 
 			// Tilde logic lines  (~ expression)
 			[/~/, { token: "keyword.other.tilde", next: "@tildeLogic" }],
 
 			// Labelled gathers/choices  - (label)  or  * (label)
-			[
-				/^(\s*)([-*+])(\s*[-*+])*\s*(?=\()/,
-				"keyword.other.gather",
-				"@labelledItem",
-			],
+			[/^(\s*)([-*+])(\s*[-*+])*\s*(?=\()/, "keyword.other.gather", "@labelledItem"],
 
 			// Choices  * or + (possibly nested)
 			[/^(\s*)([*+]\s*)+/, "keyword.other.choice"],
@@ -75,10 +62,7 @@ export const inkLanguage = {
 			[/^(\s*)-(?!\s*>)(\s*-)*/, "keyword.other.gather"],
 
 			// Conditional / multiline blocks: opening {
-			[
-				/\{/,
-				{ token: "keyword.other.brackets.conditional", next: "@openBrace" },
-			],
+			[/\{/, { token: "keyword.other.brackets.conditional", next: "@openBrace" }],
 
 			// Glue
 			[/<>/, "keyword.other.glue"],
@@ -101,20 +85,14 @@ export const inkLanguage = {
 		afterDivert: [
 			[/\s+/, ""],
 			[/\b(END|DONE)\b/, { token: "keyword.control.return", next: "@pop" }],
-			[
-				/[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)?/,
-				{ token: "entity.name.function.divert", next: "@pop" },
-			],
+			[/[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)?/, { token: "entity.name.function.divert", next: "@pop" }],
 			[/$/, "", "@pop"],
 		],
 
 		// ─── After <- ───────────────────────────────────────────────────────────
 		afterThread: [
 			[/\s+/, ""],
-			[
-				/[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)?/,
-				{ token: "entity.name.function.thread", next: "@pop" },
-			],
+			[/[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)?/, { token: "entity.name.function.thread", next: "@pop" }],
 			[/$/, "", "@pop"],
 		],
 
@@ -131,10 +109,7 @@ export const inkLanguage = {
 		],
 
 		// ─── Parameter list (knot/function args) ────────────────────────────────
-		paramList: [
-			[/\)/, { token: "delimiter.parenthesis", next: "@pop" }],
-			{ include: "@logic" },
-		],
+		paramList: [[/\)/, { token: "delimiter.parenthesis", next: "@pop" }], { include: "@logic" }],
 
 		// ─── Labelled gather / choice  (label) ──────────────────────────────────
 		labelledItem: [
@@ -150,7 +125,7 @@ export const inkLanguage = {
 		// ─── INCLUDE path ────────────────────────────────────────────────────────
 		include: [
 			[/\s+/, ""],
-			[/[a-zA-Z0-9_./\-]+(?:\.ink)?/, "string.unquoted.filename"],
+			[/[a-zA-Z0-9_./-]+(?:\.ink)?/, "string.unquoted.filename"],
 			[/$/, "", "@pop"],
 		],
 
@@ -175,10 +150,7 @@ export const inkLanguage = {
 		// ─── Tag content  # … ────────────────────────────────────────────────────
 		tag: [
 			[/$/, "", "@pop"],
-			[
-				/\{/,
-				{ token: "keyword.other.brackets.conditional", next: "@openBrace" },
-			],
+			[/\{/, { token: "keyword.other.brackets.conditional", next: "@openBrace" }],
 			[/./, "punctuation.definition.tag"],
 		],
 
@@ -211,10 +183,7 @@ export const inkLanguage = {
 		braceBody: [
 			[/\}/, { token: "keyword.other.brackets.conditional", next: "@pop" }],
 			// Nested brace
-			[
-				/\{/,
-				{ token: "keyword.other.brackets.conditional", next: "@openBrace" },
-			],
+			[/\{/, { token: "keyword.other.brackets.conditional", next: "@openBrace" }],
 			// Pipe (alternative separator)
 			[/(?<!\\)\|/, "keyword.other.alternative"],
 			// Colon (condition separator in conditional text  { cond: text })
@@ -241,10 +210,7 @@ export const inkLanguage = {
 			[/<>/, "keyword.other.glue"],
 			[/->/, { token: "keyword.other.divert", next: "@afterDivert" }],
 			[/<-/, { token: "keyword.other.thread", next: "@afterThread" }],
-			[
-				/\{/,
-				{ token: "keyword.other.brackets.conditional", next: "@openBrace" },
-			],
+			[/\{/, { token: "keyword.other.brackets.conditional", next: "@openBrace" }],
 			[/./, ""],
 		],
 
@@ -300,10 +266,7 @@ export const inkLanguage = {
 			[/"/, { token: "string.quoted.double", next: "@pop" }],
 			[/\\./, "constant.character.escape"],
 			// Embedded { } inside strings
-			[
-				/\{/,
-				{ token: "keyword.other.brackets.conditional", next: "@openBrace" },
-			],
+			[/\{/, { token: "keyword.other.brackets.conditional", next: "@openBrace" }],
 			[/[^"\\{]+/, "string.quoted.double"],
 		],
 	},

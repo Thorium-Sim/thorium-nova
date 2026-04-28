@@ -8,9 +8,7 @@
 	touch-action: manipulation;
 	border-color: var(--input-color);
 	box-shadow:
-		0 1px
-		color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000)
-		inset,
+		0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000) inset,
 		0 -1px oklch(100% 0 0 / calc(var(--depth) * 0.1)) inset;
 	--input-color: color-mix(in oklab, var(--color-base-content) 20%, #0000);
 	textarea {
@@ -26,8 +24,7 @@
 	&:focus,
 	&:focus-within {
 		--input-color: var(--color-base-content);
-		box-shadow: 0 1px
-			color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000);
+		box-shadow: 0 1px color-mix(in oklab, var(--input-color) calc(var(--depth) * 10%), #0000);
 		outline: 2px solid var(--input-color);
 		outline-offset: 2px;
 		isolation: isolate;

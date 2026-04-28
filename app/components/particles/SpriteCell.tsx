@@ -1,8 +1,9 @@
 import { useFrame, type ThreeElements } from "@react-three/fiber";
 import { useRef } from "react";
 import type { Group } from "three";
-import { useParticles } from "./useParticles";
+
 import type { CellProps } from "./types";
+import { useParticles } from "./useParticles";
 
 export function SpriteCell({
 	birthRatePerSecond = 1,

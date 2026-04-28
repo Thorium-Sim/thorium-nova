@@ -12,10 +12,7 @@ export type MeterSquared = Flavor<number, "metersquared">;
 export type MetersPerSecond = Flavor<number, "metersPerSecond">;
 export type KilometerPerSecond = Flavor<number, "kilometerPerSecond">;
 export type MetersPerSecondSquared = Flavor<number, "metersPerSecondSquared">;
-export type KilometerPerSecondSquared = Flavor<
-	number,
-	"kilometerPerSecondSquared"
->;
+export type KilometerPerSecondSquared = Flavor<number, "kilometerPerSecondSquared">;
 export type KiloNewtons = Flavor<number, "kiloNewtons">;
 
 export const KM_TO_LY = 1 / 9460730777119.56;
@@ -101,9 +98,7 @@ export type MegaWatt = Flavor<number, "megawatt">;
 export type GigaWattHour = Flavor<number, "gigawatthour">;
 export type GigaWatt = Flavor<number, "gigawatt">;
 
-export function megaWattHourToMegaWattSecond(
-	input: MegaWattHour,
-): MegaWattSecond {
+export function megaWattHourToMegaWattSecond(input: MegaWattHour): MegaWattSecond {
 	return input * 60 * 60;
 }
 

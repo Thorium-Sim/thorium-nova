@@ -7,6 +7,7 @@ import { ToggleButton } from "react-aria-components";
 import { useParams } from "react-router";
 import type { Camera } from "three";
 import { Vector3 } from "three";
+
 import Button from "../ui/Button";
 import { useGetStarmapStore } from "./starmapStore";
 
@@ -30,11 +31,7 @@ export function InterstellarMenuButtons({
 	const confirm = useConfirm();
 	async function deleteObject() {
 		const selectedObjectIds = useStarmapStore.getState().selectedObjectIds;
-		if (
-			selectedObjectIds.length === 0 ||
-			typeof selectedObjectIds[0] === "number"
-		)
-			return;
+		if (selectedObjectIds.length === 0 || typeof selectedObjectIds[0] === "number") return;
 
 		const doRemove = await confirm({
 			header: "Are you sure you want to remove this object?",
@@ -91,27 +88,18 @@ export function InterstellarMenuButtons({
 			>
 				Delete
 			</Button>
-			<Button
-				className="btn-primary btn-outline btn-xs"
-				disabled={!selectedObjectIds}
-			>
+			<Button className="btn-primary btn-outline btn-xs" disabled={!selectedObjectIds}>
 				Edit
 			</Button>
 			<Button
 				className="btn-notice btn-outline btn-xs"
-				onClick={() =>
-					useStarmapStore
-						.getState()
-						.setCameraView(cameraView === "2d" ? "3d" : "2d")
-				}
+				onClick={() => useStarmapStore.getState().setCameraView(cameraView === "2d" ? "3d" : "2d")}
 			>
 				Go to {cameraView === "2d" ? "3D" : "2D"}
 			</Button>
 			<ToggleButton
 				isSelected={showSatelliteRange}
-				onChange={(selected) =>
-					useStarmapStore.setState({ showSatelliteRange: selected })
-				}
+				onChange={(selected) => useStarmapStore.setState({ showSatelliteRange: selected })}
 				className="btn btn-xs btn-outline btn-info selected:btn-accent"
 			>
 				Satellite Range

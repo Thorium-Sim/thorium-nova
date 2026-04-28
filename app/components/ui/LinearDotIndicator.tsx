@@ -32,15 +32,11 @@ export default function LinearDotIndicator({
 					return (
 						<div
 							key={`dot-${i}`}
-							className={`w-2 h-2 rounded-full`}
+							className={`h-2 w-2 rounded-full`}
 							style={{
 								["--dot-color" as any]: `rgba(${calcColor(i).rgba()})`,
-								["--dot-highlight" as any]: `rgba(${calcColor(i)
-									.brighten(0.1)
-									.rgba()})`,
-								["--dot-border" as any]: `rgba(${calcColor(i)
-									.alpha(0.25)
-									.rgba()})`,
+								["--dot-highlight" as any]: `rgba(${calcColor(i).brighten(0.1).rgba()})`,
+								["--dot-border" as any]: `rgba(${calcColor(i).alpha(0.25).rgba()})`,
 								background: `radial-gradient(ellipse at center, var(--dot-color) 0%,var(--dot-border) 90%)`,
 								// boxShadow: `0px 0px 5px var(--dot-highlight)`,
 							}}

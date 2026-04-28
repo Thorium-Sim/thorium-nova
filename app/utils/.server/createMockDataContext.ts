@@ -1,20 +1,17 @@
-import type { InventoryFlags } from "@thorium/utils/flags/InventoryFlags";
-import { Client } from "@thorium/.server/init/liveQuery";
-import { pubsub } from "@thorium/.server/init/pubsub";
-import { router } from "@thorium/.server/init/router";
+import { AsyncLocalStorage } from "node:async_hooks";
+
 import type { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
 import type BasePlugin from "@thorium/.server/classes/Plugins";
 import ShipPlugin from "@thorium/.server/classes/Plugins/Ship";
 import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
-import systems from "@thorium/.server/systems";
 import type { DataContext } from "@thorium/.server/DataContext";
+import { Client } from "@thorium/.server/init/liveQuery";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { router } from "@thorium/.server/init/router";
+import systems from "@thorium/.server/systems";
+import { DataStore, type DataStoreOperations } from "@thorium/utils/.server/db-fs";
+
 import { ECS, Entity } from "../ecs";
-import {
-	DataStore,
-	type DataStoreOperations,
-} from "@thorium/utils/.server/db-fs";
-import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
-import { AsyncLocalStorage } from "node:async_hooks";
 import type { ProcedureCallOptions } from "../live-query/.server/procedure";
 
 class MockServerDataModel {
@@ -51,7 +48,7 @@ class MockServerDataModel {
 		return null;
 	}
 	toJSON() {
-		const { plugins, ...data } = this;
+		const { plugins: _, ...data } = this;
 		return data;
 	}
 }
@@ -110,9 +107,7 @@ class MockFlightDataModel {
 	}
 	get availableShips() {
 		const allShips = this.pluginIds.reduce((prev: ShipPlugin[], next) => {
-			const plugin = this.serverDataModel.plugins.find(
-				(plugin) => plugin.id === next,
-			);
+			const plugin = this.serverDataModel.plugins.find((plugin) => plugin.id === next);
 			if (!plugin) return prev;
 			return prev.concat(plugin.aspects.ships);
 		}, []);
@@ -160,9 +155,7 @@ class MockFlightDataModel {
 		return DataStore.operations.getStore()!.write.call(this, force, name);
 	}
 	getSnapshots() {
-		return DataStore.operations
-			.getStore()!
-			.getFlightSnapshots.call(this, this.name);
+		return DataStore.operations.getStore()!.getFlightSnapshots.call(this, this.name);
 	}
 	getAssetUrl = async () => "";
 }
@@ -178,7 +171,7 @@ export class MockDataContext {
 			initialLoad: true,
 			entities: [],
 		}) as any as FlightDataModel;
-		this.flight?.initEcs(this.server);
+		void this.flight?.initEcs(this.server);
 	}
 	get flight() {
 		return this.database.flight;
@@ -194,9 +187,7 @@ export class MockDataContext {
 	}
 	getPlayerShip(clientId: string) {
 		return this.flight?.playerShips.find(
-			(s) =>
-				s.id ===
-				this.getFlightClient(clientId)?.components.flightClient?.shipId,
+			(s) => s.id === this.getFlightClient(clientId)?.components.flightClient?.shipId,
 		);
 	}
 	getClient(clientId: string) {
@@ -239,10 +230,7 @@ export function createMockDataContext() {
 export function createMockRouter(
 	context: DataContext,
 	opts: {
-		onCall?: (
-			opts: ProcedureCallOptions,
-			result: unknown,
-		) => void | Promise<void>;
+		onCall?: (opts: ProcedureCallOptions, result: unknown) => void | Promise<void>;
 	} = {},
 ) {
 	return router.createCaller(context, opts);

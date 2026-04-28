@@ -1,34 +1,25 @@
-import Dropdown, { DropdownItem } from "@thorium/ui/Dropdown";
-import LinearDotIndicator from "@thorium/ui/LinearDotIndicator";
-import RadialDial from "@thorium/ui/RadialDial";
-import Select from "@thorium/ui/Select";
-import SineWave from "@thorium/ui/SineWave";
-import Modal from "@thorium/ui/Modal";
-import { type ReactNode, useRef, useState } from "react";
-import SearchableList from "@thorium/ui/SearchableList";
-import InfoTip from "@thorium/ui/InfoTip";
-import TagInput from "@thorium/ui/TagInput";
-import Button from "@thorium/ui/Button";
-import SearchableInput, {
-	DefaultResultLabel,
-} from "@thorium/ui/SearchableInput";
-import { Icon } from "@thorium/ui/Icon";
-import { Button as RAButton, type Selection } from "react-aria-components";
-import { useTransition } from "@thorium/ui/Transition";
-import { cn } from "@thorium/utils/cn";
 import { useAlert, useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
+import Button from "@thorium/ui/Button";
 import Checkbox from "@thorium/ui/Checkbox";
 import { InputField, OutputField, TypingField } from "@thorium/ui/Core";
+import Dropdown, { DropdownItem } from "@thorium/ui/Dropdown";
+import { Icon } from "@thorium/ui/Icon";
+import InfoTip from "@thorium/ui/InfoTip";
+import LinearDotIndicator from "@thorium/ui/LinearDotIndicator";
 import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
-import { ScanDoodad } from "@thorium/ui/ScanDoodad";
 import { Menu, MenuItem, MenuTrigger } from "@thorium/ui/Menu";
-const ModalDemo = ({
-	title,
-	children,
-}: {
-	title: string;
-	children: ReactNode;
-}) => {
+import Modal from "@thorium/ui/Modal";
+import RadialDial from "@thorium/ui/RadialDial";
+import SearchableInput, { DefaultResultLabel } from "@thorium/ui/SearchableInput";
+import SearchableList from "@thorium/ui/SearchableList";
+import Select from "@thorium/ui/Select";
+import SineWave from "@thorium/ui/SineWave";
+import TagInput from "@thorium/ui/TagInput";
+import { useTransition } from "@thorium/ui/Transition";
+import { cn } from "@thorium/utils/cn";
+import { type ReactNode, useRef, useState } from "react";
+import { Button as RAButton, type Selection } from "react-aria-components";
+const ModalDemo = ({ title, children }: { title: string; children: ReactNode }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	return (
 		<div>
@@ -95,13 +86,9 @@ const TagInputDemo = () => {
 	);
 };
 
-async function searchableInputQuery({
-	queryKey,
-}: {
-	queryKey: [string, string];
-}) {
+async function searchableInputQuery({ queryKey }: { queryKey: [string, string] }) {
 	await new Promise((res) => setTimeout(res, 1000 + Math.random() * 500));
-	const [key, query] = queryKey;
+	const [_, query] = queryKey;
 	const people = [
 		{ id: 1, name: "Wade Cooper" },
 		{ id: 2, name: "Arlene Mccoy" },
@@ -125,9 +112,7 @@ async function searchableInputQuery({
 }
 
 export function ComponentDemo() {
-	const [selected, setSelected] = useState<null | { id: number; name: string }>(
-		null,
-	);
+	const [selected, setSelected] = useState<null | { id: number; name: string }>(null);
 
 	const ref = useRef<HTMLDivElement>(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -139,12 +124,10 @@ export function ComponentDemo() {
 
 	const lineRef = useRef(0);
 
-	const [menuSelected, setMenuSelected] = useState<Selection>(
-		new Set(["rulers"]),
-	);
+	const [menuSelected, setMenuSelected] = useState<Selection>(new Set(["rulers"]));
 
 	return (
-		<div className="flex flex-col gap-8 text-white h-full overflow-y-auto p-4">
+		<div className="flex h-full flex-col gap-8 overflow-y-auto p-4 text-white">
 			<MenuTrigger>
 				<RAButton className="btn w-min whitespace-nowrap">Open Menu</RAButton>
 				<Menu
@@ -162,29 +145,27 @@ export function ComponentDemo() {
 				</Menu>
 			</MenuTrigger>
 			<div className="flex gap-4">
-				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-default">
+				<div className="bg-accent text-accent-content cursor-default rounded px-4 py-2">
 					cursor-default
 				</div>
-				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-pointer">
+				<div className="bg-accent text-accent-content cursor-pointer rounded px-4 py-2">
 					cursor-pointer
 				</div>
-				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-text">
+				<div className="bg-accent text-accent-content cursor-text rounded px-4 py-2">
 					cursor-text
 				</div>
-				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-progress ">
+				<div className="bg-accent text-accent-content cursor-progress rounded px-4 py-2">
 					cursor-progress{" "}
 				</div>
-				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-not-allowed">
+				<div className="bg-accent text-accent-content cursor-not-allowed rounded px-4 py-2">
 					cursor-not-allowed
 				</div>
-				<div className="px-4 py-2 bg-accent text-accent-content rounded cursor-wait">
+				<div className="bg-accent text-accent-content cursor-wait rounded px-4 py-2">
 					cursor-wait
 				</div>
 			</div>
 			<div className="flex gap-4">
-				<Button onClick={() => alert({ header: "This is an alert" })}>
-					Alert
-				</Button>
+				<Button onClick={() => alert({ header: "This is an alert" })}>Alert</Button>
 				<Button
 					onClick={() =>
 						prompt({
@@ -195,11 +176,7 @@ export function ComponentDemo() {
 				>
 					Prompt
 				</Button>
-				<Button
-					onClick={() =>
-						confirm({ header: "Yes or no?", body: "Choose carefully." })
-					}
-				>
+				<Button onClick={() => confirm({ header: "Yes or no?", body: "Choose carefully." })}>
 					Confirm
 				</Button>
 			</div>
@@ -272,7 +249,7 @@ export function ComponentDemo() {
 			</div>
 			<div>
 				<h2 className="text-3xl">Buttons</h2>
-				<div className="flex gap-4 w-full flex-wrap">
+				<div className="flex w-full flex-wrap gap-4">
 					<Button>Button</Button>
 					<Button className="btn-primary">Primary</Button>
 					<Button className="btn-secondary">Secondary</Button>
@@ -285,7 +262,7 @@ export function ComponentDemo() {
 					<Button className="btn-alert">Alert</Button>
 					<Button className="btn-link">Link</Button>
 				</div>
-				<div className="flex gap-4 w-full flex-wrap">
+				<div className="flex w-full flex-wrap gap-4">
 					<Button className="btn-active">Button</Button>
 					<Button className="btn-active btn-primary">Primary</Button>
 					<Button className="btn-active btn-secondary">Secondary</Button>
@@ -298,7 +275,7 @@ export function ComponentDemo() {
 					<Button className="btn-active btn-alert">Alert</Button>
 					<Button className="btn-active btn-link">Link</Button>
 				</div>
-				<div className="flex gap-4 w-full flex-wrap">
+				<div className="flex w-full flex-wrap gap-4">
 					<Button disabled>Button</Button>
 					<Button disabled className="btn-primary">
 						Primary
@@ -334,7 +311,7 @@ export function ComponentDemo() {
 			</div>
 			<div>
 				<h2 className="text-3xl">Outline Buttons</h2>
-				<div className="flex gap-4 w-full flex-wrap">
+				<div className="flex w-full flex-wrap gap-4">
 					<Button className="btn-outline">Button</Button>
 					<Button className="btn-outline btn-primary">Primary</Button>
 					<Button className="btn-outline btn-secondary">Secondary</Button>
@@ -350,7 +327,7 @@ export function ComponentDemo() {
 			</div>
 			<div>
 				<h2 className="text-3xl">Dash Buttons</h2>
-				<div className="flex gap-4 w-full flex-wrap">
+				<div className="flex w-full flex-wrap gap-4">
 					<Button className="btn-dash">Button</Button>
 					<Button className="btn-dash btn-primary">Primary</Button>
 					<Button className="btn-dash btn-secondary">Secondary</Button>
@@ -387,7 +364,7 @@ export function ComponentDemo() {
 			</div>
 			<div className="w-full">
 				<h2 className="text-3xl">Form Input</h2>
-				<div className="flex gap-4 flex-wrap">
+				<div className="flex flex-wrap gap-4">
 					<div className="form-control">
 						<label className="label" htmlFor="Input">
 							Input
@@ -404,11 +381,7 @@ export function ComponentDemo() {
 						<label className="label" htmlFor="Secondary">
 							Secondary
 						</label>
-						<input
-							type="text"
-							className="input input-secondary"
-							id="Secondary"
-						/>
+						<input type="text" className="input input-secondary" id="Secondary" />
 					</div>
 					<div className="form-control">
 						<label className="label" htmlFor="Accent">
@@ -450,7 +423,7 @@ export function ComponentDemo() {
 			</div>
 			<div>
 				<h2 className="text-3xl">Form Textarea</h2>
-				<div className="flex gap-4 flex-wrap">
+				<div className="flex flex-wrap gap-4">
 					<div className="form-control">
 						<label className="label" htmlFor="textarea-Textarea">
 							Textarea
@@ -461,28 +434,19 @@ export function ComponentDemo() {
 						<label className="label" htmlFor="textarea-Primary">
 							Primary
 						</label>
-						<textarea
-							className="textarea textarea-primary"
-							id="textarea-Primary"
-						/>
+						<textarea className="textarea textarea-primary" id="textarea-Primary" />
 					</div>
 					<div className="form-control">
 						<label className="label" htmlFor="textarea-Secondary">
 							Secondary
 						</label>
-						<textarea
-							className="textarea textarea-secondary"
-							id="textarea-Secondary"
-						/>
+						<textarea className="textarea textarea-secondary" id="textarea-Secondary" />
 					</div>
 					<div className="form-control">
 						<label className="label" htmlFor="textarea-Accent">
 							Accent
 						</label>
-						<textarea
-							className="textarea textarea-accent"
-							id="textarea-Accent"
-						/>
+						<textarea className="textarea textarea-accent" id="textarea-Accent" />
 					</div>
 					<div className="form-control">
 						<label className="label" htmlFor="textarea-Info">
@@ -494,19 +458,13 @@ export function ComponentDemo() {
 						<label className="label" htmlFor="textarea-Success">
 							Success
 						</label>
-						<textarea
-							className="textarea textarea-success"
-							id="textarea-Success"
-						/>
+						<textarea className="textarea textarea-success" id="textarea-Success" />
 					</div>
 					<div className="form-control">
 						<label className="label" htmlFor="textarea-Warning">
 							Warning
 						</label>
-						<textarea
-							className="textarea textarea-warning"
-							id="textarea-Warning"
-						/>
+						<textarea className="textarea textarea-warning" id="textarea-Warning" />
 					</div>
 					<div className="form-control">
 						<label className="label" htmlFor="textarea-Error">
@@ -518,10 +476,7 @@ export function ComponentDemo() {
 						<label className="label" htmlFor="textarea-Notice">
 							Notice
 						</label>
-						<textarea
-							className="textarea textarea-notice"
-							id="textarea-Notice"
-						/>
+						<textarea className="textarea textarea-notice" id="textarea-Notice" />
 					</div>
 				</div>
 			</div>
@@ -550,11 +505,7 @@ export function ComponentDemo() {
 				<h2 className="text-3xl">Colored Bar</h2>
 				<progress className="progress progress-accent" value={50} max={100} />
 				<progress className="progress progress-primary" value={50} max={100} />
-				<progress
-					className="progress progress-secondary"
-					value={50}
-					max={100}
-				/>
+				<progress className="progress progress-secondary" value={50} max={100} />
 				<progress className="progress progress-accent" value={50} max={100} />
 				<progress className="progress progress-info" value={50} max={100} />
 				<progress className="progress progress-success" value={50} max={100} />
@@ -568,12 +519,7 @@ export function ComponentDemo() {
 				<div className="flex gap-4">
 					<RadialDial label="Dial 1" count={50} />
 					<RadialDial label="Dial 2" color="var(--primary)" count={75} />
-					<RadialDial
-						label="Dial 3"
-						color="var(--accent)"
-						count={75}
-						max={200}
-					/>
+					<RadialDial label="Dial 3" color="var(--accent)" count={75} max={200} />
 				</div>
 			</div>
 			<div>
@@ -611,7 +557,7 @@ export function ComponentDemo() {
 			<div>
 				<h2 className="text-3xl">Sine Wave</h2>
 				<div className="flex flex-wrap">
-					<div className="w-[250px] h-48 bg-gray-800">
+					<div className="h-48 w-[250px] bg-gray-800">
 						<SineWave
 							waves={[
 								{
@@ -630,7 +576,7 @@ export function ComponentDemo() {
 							}}
 						/>
 					</div>
-					<div className="w-48 h-[250px] bg-gray-800">
+					<div className="h-[250px] w-48 bg-gray-800">
 						<SineWave
 							color="blue"
 							waves={[
@@ -716,7 +662,7 @@ export function ComponentDemo() {
 						.map((_, i) => (
 							<div
 								key={`item-${i}`}
-								className="h-32 w-32 rounded mx-4 bg-neutral flex justify-center items-center"
+								className="bg-neutral mx-4 flex h-32 w-32 items-center justify-center rounded"
 							>
 								Item {i}
 							</div>
@@ -726,13 +672,13 @@ export function ComponentDemo() {
 			<div>
 				<h2 className="text-3xl">Info Tooltip</h2>
 				<InfoTip>
-					This is some helpful info that you can see if you hover your cursor
-					over me or focus on me.
+					This is some helpful info that you can see if you hover your cursor over me or focus on
+					me.
 				</InfoTip>
 			</div>
 			<div>
 				<h2 className="text-3xl">Dotted Linear Indicators</h2>
-				<div className="flex flex-col gap-4 max-w-md mt-4">
+				<div className="mt-4 flex max-w-md flex-col gap-4">
 					<LinearDotIndicator />
 					<LinearDotIndicator reverse={true} />
 					<LinearDotIndicator color="blue" level={0.5} />
@@ -741,7 +687,7 @@ export function ComponentDemo() {
 			</div>
 			<div>
 				<h2 className="text-3xl">Core Inputs</h2>
-				<div className="text-xs w-sm">
+				<div className="w-sm text-xs">
 					<InputField onClick={() => {}} prompt="Testing">
 						Testing
 					</InputField>

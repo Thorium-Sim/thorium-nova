@@ -1,19 +1,17 @@
+import { useLoader } from "@react-three/fiber";
+import { Emitter } from "@thorium/components/particles/Emitter";
 import { LinearSpline } from "@thorium/components/particles/LinearSpline";
 import { SpriteCell } from "@thorium/components/particles/SpriteCell";
-import { useLoader } from "@react-three/fiber";
 import { AdditiveBlending, Color, TextureLoader } from "three";
+
 import blob from "./blob.png?url";
-import { Emitter } from "@thorium/components/particles/Emitter";
 
 export default function Explosion() {
 	const texture = useLoader(TextureLoader, blob);
 
 	return (
 		<>
-			<Emitter
-				rotation={[0, Math.PI / 2, 0]}
-				emissionAngleRange={{ latitude: 0, longitude: 180 }}
-			>
+			<Emitter rotation={[0, Math.PI / 2, 0]} emissionAngleRange={{ latitude: 0, longitude: 180 }}>
 				<SpriteCell
 					map={texture}
 					blending={AdditiveBlending}
@@ -46,10 +44,7 @@ export default function Explosion() {
 					}
 				/>
 			</Emitter>
-			<Emitter
-				rotation={[0, Math.PI / 2, 0]}
-				emissionAngleRange={{ latitude: 90, longitude: 180 }}
-			>
+			<Emitter rotation={[0, Math.PI / 2, 0]} emissionAngleRange={{ latitude: 90, longitude: 180 }}>
 				<SpriteCell
 					map={texture}
 					blending={AdditiveBlending}

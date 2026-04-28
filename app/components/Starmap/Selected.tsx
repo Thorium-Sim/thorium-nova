@@ -26,12 +26,7 @@ const Selected: React.FC = React.memo(() => {
 	return (
 		<>
 			<lineLoop ref={ref1} geometry={geometry}>
-				<lineBasicMaterial
-					color={0xfac79e}
-					transparent
-					opacity={0.5}
-					attach="material"
-				/>
+				<lineBasicMaterial color={0xfac79e} transparent opacity={0.5} attach="material" />
 			</lineLoop>
 			<lineLoop
 				ref={ref2}
@@ -39,12 +34,7 @@ const Selected: React.FC = React.memo(() => {
 				rotation={[Math.random(), Math.random(), Math.random()]}
 				scale={[1.1, 1.1, 1.1]}
 			>
-				<lineBasicMaterial
-					color={0xfafa9a}
-					transparent
-					opacity={0.5}
-					attach="material"
-				/>
+				<lineBasicMaterial color={0xfafa9a} transparent opacity={0.5} attach="material" />
 			</lineLoop>
 		</>
 	);

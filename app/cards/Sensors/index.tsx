@@ -1,20 +1,13 @@
 import { useQueryClient } from "@tanstack/react-query";
 import type { CardProps } from "@thorium/cards/CardProps";
-import {
-	CircleGrid,
-	CircleGridTiltButton,
-	GridCanvas,
-} from "@thorium/cards/Pilot/CircleGrid";
+import { CircleGrid, CircleGridTiltButton, GridCanvas } from "@thorium/cards/Pilot/CircleGrid";
 import { DistanceCircle } from "@thorium/cards/Pilot/DistanceCircle";
 import { CircleGridContacts } from "@thorium/cards/Pilot/PilotContacts";
 import { PilotZoomSlider } from "@thorium/cards/Pilot/PilotZoomSlider";
 import { CircleGridStoreProvider } from "@thorium/cards/Pilot/useCircleGridStore";
-import {
-	ScanComponents,
-	ScanResults,
-} from "@thorium/cards/Sensors/ScanComponents";
+import { ScanComponents, ScanResults } from "@thorium/cards/Sensors/ScanComponents";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
-import { clientId, q } from "@thorium/context/AppContext";
+import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
@@ -25,12 +18,7 @@ import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { capitalCase } from "change-case";
 import { Suspense, useEffect, useRef, useState } from "react";
-import {
-	Button,
-	Disclosure,
-	DisclosureGroup,
-	DisclosurePanel,
-} from "react-aria-components";
+import { Button, Disclosure, DisclosureGroup, DisclosurePanel } from "react-aria-components";
 import type { z } from "zod";
 
 /**
@@ -48,29 +36,25 @@ import type { z } from "zod";
  */
 export function Sensors({ cardLoaded }: CardProps) {
 	const { shipId } = useStation();
-	const [{ activeRange, passiveRange, selectedContact }] =
-		q.sensors.get.useNetRequest({
-			shipId,
-		});
+	const [{ activeRange, passiveRange, selectedContact }] = q.sensors.get.useNetRequest({
+		shipId,
+	});
 	const [occludedContacts, setOccludedContacts] = useState<number[]>([]);
 	const clickRef = useRef(false);
 
 	return (
 		<CircleGridStoreProvider zoomMax={passiveRange}>
-			<div className="grid grid-cols-4 grid-rows-[100%] h-full place-content-center gap-4">
+			<div className="grid h-full grid-cols-4 grid-rows-[100%] place-content-center gap-4">
 				<div className="flex flex-col justify-between">
 					<Suspense>
-						<SensorsShipList
-							selectedId={selectedContact}
-							occludedContacts={occludedContacts}
-						/>
+						<SensorsShipList selectedId={selectedContact} occludedContacts={occludedContacts} />
 					</Suspense>
 					<div>
 						<PilotZoomSlider />
 						<CircleGridTiltButton />
 					</div>
 				</div>
-				<div className="col-span-2 max-w-full max-h-full w-full justify-self-center aspect-square self-center">
+				<div className="col-span-2 aspect-square max-h-full w-full max-w-full self-center justify-self-center">
 					<Suspense fallback={null}>
 						<GridCanvas
 							shouldRender={cardLoaded}
@@ -83,13 +67,7 @@ export function Sensors({ cardLoaded }: CardProps) {
 							}}
 						>
 							<CircleGrid
-								fixedChildren={
-									<DistanceCircle
-										color={0x0088ff}
-										radius={activeRange}
-										label=" "
-									/>
-								}
+								fixedChildren={<DistanceCircle color={0x0088ff} radius={activeRange} label=" " />}
 							>
 								<CircleGridContacts
 									selectedContactId={selectedContact}
@@ -139,7 +117,7 @@ function Scans({ cardLoaded }: { cardLoaded: boolean }) {
 	const [scans] = q.sensors.scans.useNetRequest({ shipId });
 	if (scans.length === 0) return null;
 	return (
-		<div className="panel panel-alert divide-y divide-white/50 overflow-y-auto max-h-full">
+		<div className="panel panel-alert max-h-full divide-y divide-white/50 overflow-y-auto">
 			{scans.map((s) => (
 				<Suspense key={s.id}>
 					<Scan {...s} cardLoaded={cardLoaded} />
@@ -153,8 +131,6 @@ function Scan({
 	id,
 	type,
 	progress,
-	repeatInterval,
-	intervalTime,
 	target,
 	cardLoaded,
 	time,
@@ -191,7 +167,7 @@ function Scan({
 
 	const ScanComponent = ScanComponents[type];
 	return (
-		<div className="p-2 w-full">
+		<div className="w-full p-2">
 			<div className="flex w-full justify-between">
 				<div>
 					<div>
@@ -209,7 +185,7 @@ function Scan({
 				)}
 			</div>
 			{progress < 1 ? (
-				<div className="flex gap-2 items-center">
+				<div className="flex items-center gap-2">
 					<progress
 						ref={progressRef}
 						className="progress progress-info flex-auto"
@@ -252,14 +228,8 @@ function SensorsShipList({
 			id: orb.id,
 			position:
 				orb.components.position ||
-				(orb.components.satellite
-					? getOrbitPosition(orb.components.satellite)
-					: undefined),
-			type: orb.components.isPlanet
-				? "planet"
-				: orb.components.isStar
-					? "star"
-					: "unknown",
+				(orb.components.satellite ? getOrbitPosition(orb.components.satellite) : undefined),
+			type: orb.components.isPlanet ? "planet" : orb.components.isStar ? "star" : "unknown",
 		})),
 	];
 	// Preload all of the scan results
@@ -272,15 +242,12 @@ function SensorsShipList({
 					objectId: object.id,
 				}),
 				queryFn: ({ signal }) =>
-					q.sensors.scanResult.netRequest(
-						{ shipId, objectId: object.id },
-						{ signal },
-					),
+					q.sensors.scanResult.netRequest({ shipId, objectId: object.id }, { signal }),
 			});
 		}
 	});
 	if (scannableObjects.length === 0) {
-		return <h3 className="text-2xl p-2 text-center">No Objects in Range</h3>;
+		return <h3 className="p-2 text-center text-2xl">No Objects in Range</h3>;
 	}
 	return (
 		<DisclosureGroup
@@ -332,7 +299,7 @@ function SensorsScannableObject({
 				shipPosition.z - position.z,
 			);
 			const units = currentSystem ? "km" : "LY";
-			distanceRef.current.innerHTML = `${(distance).toLocaleString("en", {
+			distanceRef.current.innerHTML = `${distance.toLocaleString("en", {
 				minimumFractionDigits: 1,
 				maximumFractionDigits: 1,
 			})} ${units}`;
@@ -358,21 +325,19 @@ function SensorsScannableObject({
 		<Disclosure id={id} className={cn("group", inRange ? "block" : "hidden")}>
 			<Button
 				slot="trigger"
-				className="w-full outline-none focus-within:bg-white/20 px-2 group-data-[expanded]:border-b group-data-[expanded]:mb-2 border-white/50"
+				className="w-full border-white/50 px-2 outline-none group-data-[expanded]:mb-2 group-data-[expanded]:border-b focus-within:bg-white/20"
 			>
 				<div className="flex justify-between tabular-nums">
 					{results.identification?.name || `Unknown ${id}`}
 					<span ref={distanceRef} />
 				</div>
 			</Button>
-			<DisclosurePanel className="group-data-[expanded]:pb-2 px-2">
+			<DisclosurePanel className="px-2 group-data-[expanded]:pb-2">
 				<ScanResults objectId={id} type={type} />
 				{hasWaypoint ? null : (
 					<Button
 						className="btn btn-xs btn-info w-full"
-						onPress={() =>
-							q.waypoints.spawn.netSend({ shipId, entityId: id, active: false })
-						}
+						onPress={() => q.waypoints.spawn.netSend({ shipId, entityId: id, active: false })}
 					>
 						Add Waypoint
 					</Button>

@@ -11,7 +11,7 @@ import z from "zod";
 export const sensors = t.router({
 	get: t.procedure
 		.input(z.object({ shipId: z.number() }))
-		.filter((publish: { shipId: number; systemId: number }, { ctx, input }) => {
+		.filter((publish: { shipId: number; systemId: number }, { input }) => {
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
@@ -40,10 +40,7 @@ export const sensors = t.router({
 	scanResult: t.procedure
 		.input(z.object({ shipId: z.number(), objectId: z.number() }))
 		.filter((publish: { objectId: number; shipId: number }, { input }) => {
-			if (
-				publish &&
-				(publish.objectId !== input.objectId || publish.shipId !== input.shipId)
-			)
+			if (publish && (publish.objectId !== input.objectId || publish.shipId !== input.shipId))
 				return false;
 			return true;
 		})
@@ -76,9 +73,7 @@ export const sensors = t.router({
 			return true;
 		})
 		.autoPublish(["scan"], (entity) => {
-			return (
-				entity.components.scan && { shipId: entity.components.scan?.parentId }
-			);
+			return entity.components.scan && { shipId: entity.components.scan?.parentId };
 		})
 		.request(({ ctx, input }) => {
 			const scans = [];
@@ -132,8 +127,7 @@ export const sensors = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
-			const shipId = ctx.ecs.getEntityById(input.scanId)?.components.scan
-				?.parentId;
+			const shipId = ctx.ecs.getEntityById(input.scanId)?.components.scan?.parentId;
 			if (shipId) {
 				const sensorsSystem = getShipSystem(ctx.ecs, {
 					systemType: "sensors",
@@ -167,16 +161,13 @@ export const sensors = t.router({
 		.dataStream(({ ctx, input, entity }) => {
 			if (!entity) return false;
 			const systemId =
-				input.systemId ||
-				ctx.ecs.getEntityById(input.shipId)?.components.position?.parentId;
+				input.systemId || ctx.ecs.getEntityById(input.shipId)?.components.position?.parentId;
 			if (typeof systemId === "undefined") {
 				return false;
 			}
 			return Boolean(
-				(entity.components.position &&
-					entity.components.position.parentId === systemId) ||
-					(entity.components.scan &&
-						entity.components.scan.parentId === input.shipId),
+				(entity.components.position && entity.components.position.parentId === systemId) ||
+				(entity.components.scan && entity.components.scan.parentId === input.shipId),
 			);
 		}),
 });

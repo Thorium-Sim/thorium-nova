@@ -1,5 +1,5 @@
-import type { Entity } from "@thorium/utils/ecs";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import type { Entity } from "@thorium/utils/ecs";
 
 /**
  * Resets all autopilot navigation state on a ship entity.

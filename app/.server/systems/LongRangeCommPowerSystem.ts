@@ -15,10 +15,7 @@ export class LongRangeCommPowerSystem extends System {
 		const requiredPower = power.powerLevels[0];
 		const maxSafePower = power.powerLevels.at(-1)!;
 		// Make sure the gain is set below its max
-		const maxGain = Math.max(
-			0,
-			(currentPower - requiredPower) / (maxSafePower - requiredPower),
-		);
+		const maxGain = Math.max(0, (currentPower - requiredPower) / (maxSafePower - requiredPower));
 
 		if (longRangeComm.antennaGain > maxGain) {
 			entity.updateComponent("isLongRangeComm", { antennaGain: maxGain });

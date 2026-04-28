@@ -1,14 +1,14 @@
-import ShipPlugin, {
-	shipCategories,
-} from "@thorium/.server/classes/Plugins/Ship";
-import { t } from "@thorium/.server/init/t";
-import { pubsub } from "@thorium/.server/init/pubsub";
-import inputAuth from "@thorium/utils/.server/inputAuth";
-import z from "zod";
-import { getPlugin } from "./utils";
-import { deck } from "./deck";
-import uniqid from "@thorium/utils/uniqid";
 import path from "node:path";
+
+import ShipPlugin, { shipCategories } from "@thorium/.server/classes/Plugins/Ship";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
+import inputAuth from "@thorium/utils/.server/inputAuth";
+import uniqid from "@thorium/utils/uniqid";
+import z from "zod";
+
+import { deck } from "./deck";
+import { getPlugin } from "./utils";
 
 export const ship = t.router({
 	deck,
@@ -24,17 +24,13 @@ export const ship = t.router({
 		}),
 	get: t.procedure
 		.input(z.object({ pluginId: z.string(), shipId: z.string() }))
-		.filter(
-			(publish: { pluginId: string; shipId: string } | null, { input }) => {
-				if (!publish || publish.pluginId === input.pluginId) return true;
-				return false;
-			},
-		)
+		.filter((publish: { pluginId: string; shipId: string } | null, { input }) => {
+			if (!publish || publish.pluginId === input.pluginId) return true;
+			return false;
+		})
 		.request(({ ctx, input }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
-			const ship = plugin.aspects.ships.find(
-				(ship) => ship.name === input.shipId,
-			);
+			const ship = plugin.aspects.ships.find((ship) => ship.name === input.shipId);
 			if (!ship) throw null;
 			return ship;
 		}),
@@ -73,9 +69,7 @@ export const ship = t.router({
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const ship = plugin.aspects.ships.find(
-				(ship) => ship.name === input.shipId,
-			);
+			const ship = plugin.aspects.ships.find((ship) => ship.name === input.shipId);
 			if (!ship) return;
 			plugin.aspects.ships.splice(plugin.aspects.ships.indexOf(ship), 1);
 
@@ -98,9 +92,7 @@ export const ship = t.router({
 				top: z.instanceof(Blob).optional(),
 				side: z.instanceof(Blob).optional(),
 				vanity: z.instanceof(Blob).optional(),
-				theme: z
-					.object({ themeId: z.string(), pluginId: z.string() })
-					.optional(),
+				theme: z.object({ themeId: z.string(), pluginId: z.string() }).optional(),
 				cargoContainers: z.number().optional(),
 				cargoContainerVolume: z.number().optional(),
 			}),
@@ -109,9 +101,7 @@ export const ship = t.router({
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
 			if (!input.shipId) throw new Error("Ship ID is required");
-			const ship = plugin.aspects.ships.find(
-				(ship) => ship.name === input.shipId,
-			);
+			const ship = plugin.aspects.ships.find((ship) => ship.name === input.shipId);
 			if (!ship) return { shipId: "" };
 			if (input.category) ship.category = input.category;
 			if (input.description) ship.description = input.description;
@@ -130,39 +120,17 @@ export const ship = t.router({
 			}
 
 			if (typeof input.logo !== "undefined") {
-				const ext = path.extname(
-					typeof input.logo === "string" ? input.logo : input.logo.name,
-				);
-				ship.assets.logo = await ctx.uploadFile.call(
-					ship,
-					input.logo,
-					`logo${ext}`,
-				);
+				const ext = path.extname(typeof input.logo === "string" ? input.logo : input.logo.name);
+				ship.assets.logo = await ctx.uploadFile.call(ship, input.logo, `logo${ext}`);
 			}
 			if (typeof input.model !== "undefined")
-				ship.assets.model = await ctx.uploadFile.call(
-					ship,
-					input.model,
-					"model.glb",
-				);
+				ship.assets.model = await ctx.uploadFile.call(ship, input.model, "model.glb");
 			if (typeof input.top !== "undefined")
-				ship.assets.topView = await ctx.uploadFile.call(
-					ship,
-					input.top,
-					"top.png",
-				);
+				ship.assets.topView = await ctx.uploadFile.call(ship, input.top, "top.png");
 			if (typeof input.side !== "undefined")
-				ship.assets.sideView = await ctx.uploadFile.call(
-					ship,
-					input.side,
-					"side.png",
-				);
+				ship.assets.sideView = await ctx.uploadFile.call(ship, input.side, "side.png");
 			if (typeof input.vanity !== "undefined")
-				ship.assets.vanity = await ctx.uploadFile.call(
-					ship,
-					input.vanity,
-					"vanity.png",
-				);
+				ship.assets.vanity = await ctx.uploadFile.call(ship, input.vanity, "vanity.png");
 
 			if (input.theme) {
 				const themePlugin = getPlugin(ctx, input.theme.pluginId);
@@ -180,13 +148,8 @@ export const ship = t.router({
 				ship.cargoContainers = input.cargoContainers;
 			}
 			if (typeof input.cargoContainerVolume === "number") {
-				if (
-					Number.isNaN(input.cargoContainerVolume) ||
-					input.cargoContainerVolume <= 0
-				) {
-					throw new Error(
-						"Cargo Container Volume must be a number greater than 0",
-					);
+				if (Number.isNaN(input.cargoContainerVolume) || input.cargoContainerVolume <= 0) {
+					throw new Error("Cargo Container Volume must be a number greater than 0");
 				}
 				ship.cargoContainerVolume = input.cargoContainerVolume;
 			}
@@ -213,9 +176,7 @@ export const ship = t.router({
 		.send(({ ctx, input }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
 			if (!input.shipId) throw new Error("Ship ID is required");
-			const ship = plugin.aspects.ships.find(
-				(ship) => ship.name === input.shipId,
-			);
+			const ship = plugin.aspects.ships.find((ship) => ship.name === input.shipId);
 			if (!ship) return { shipId: "" };
 
 			const systemPlugin = getPlugin(ctx, input.systemPlugin);
@@ -251,16 +212,13 @@ export const ship = t.router({
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
 			if (!input.shipId) throw new Error("Ship ID is required");
-			const ship = plugin.aspects.ships.find(
-				(ship) => ship.name === input.shipId,
-			);
+			const ship = plugin.aspects.ships.find((ship) => ship.name === input.shipId);
 			if (!ship) return { shipId: "" };
 
 			const existingSystem = ship.shipSystems.findIndex(
 				(system) =>
 					system.id === input.systemId ||
-					(system.systemId === input.systemId &&
-						system.pluginId === input.systemPlugin),
+					(system.systemId === input.systemId && system.pluginId === input.systemPlugin),
 			);
 
 			if (existingSystem > -1) {

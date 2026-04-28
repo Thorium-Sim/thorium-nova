@@ -1,19 +1,20 @@
-import { q, clientId } from "@thorium/context/AppContext";
-import Menubar, { useMenubar } from "@thorium/ui/Menubar";
-import { WaitingForFlight } from "./WaitingForFlight";
-import { Link, useNavigate } from "react-router";
-import Button from "@thorium/ui/Button";
-import { type Dispatch, type SetStateAction, useState } from "react";
-import SearchableList from "@thorium/ui/SearchableList";
-import InfoTip from "@thorium/ui/InfoTip";
-import { toast } from "@thorium/context/ToastContext";
-import { Icon } from "@thorium/ui/Icon";
-import { staticStations } from "./staticStations";
-import { LobbyHeader } from "./LobbyHeader";
-import { cn } from "@thorium/utils/cn";
-import { Header, Button as RAButton } from "react-aria-components";
-import { Menu, MenuItem, MenuTrigger } from "@thorium/ui/Menu";
 import type { ClientSettings as IClientSettings } from "@thorium/.server/data";
+import { q, clientId } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
+import Button from "@thorium/ui/Button";
+import { Icon } from "@thorium/ui/Icon";
+import InfoTip from "@thorium/ui/InfoTip";
+import { Menu, MenuItem, MenuTrigger } from "@thorium/ui/Menu";
+import Menubar, { useMenubar } from "@thorium/ui/Menubar";
+import SearchableList from "@thorium/ui/SearchableList";
+import { cn } from "@thorium/utils/cn";
+import { type Dispatch, type SetStateAction, useState } from "react";
+import { Header, Button as RAButton } from "react-aria-components";
+import { Link, useNavigate } from "react-router";
+
+import { LobbyHeader } from "./LobbyHeader";
+import { staticStations } from "./staticStations";
+import { WaitingForFlight } from "./WaitingForFlight";
 
 export function HostLobby() {
 	const [flight] = q.flight.active.useNetRequest();
@@ -21,9 +22,9 @@ export function HostLobby() {
 
 	return (
 		<Menubar>
-			<div className="h-full p-4 bg-black/50 backdrop-filter backdrop-blur flex">
+			<div className="flex h-full bg-black/50 p-4 backdrop-blur backdrop-filter">
 				<LobbyHeader />
-				<div className="flex-1 flex flex-col pt-16">
+				<div className="flex flex-1 flex-col pt-16">
 					{flight ? <ClientAssignment /> : <WaitingForFlight />}
 				</div>
 				{client.stationId === "Flight Director" ? (
@@ -103,7 +104,7 @@ function ClientAssignment() {
 	const [flight] = q.flight.active.useNetRequest();
 
 	return (
-		<div className="flex justify-around gap-4 w-full">
+		<div className="flex w-full justify-around gap-4">
 			<div>
 				<h3 className="text-xl font-bold">Unassigned Clients</h3>
 				<SearchableList
@@ -217,12 +218,10 @@ function HostStationItem({
 				<span className="flex justify-between gap-2">
 					<span className="flex-1">{station.name}</span>{" "}
 					<Button
-						className={`btn-xs btn-success ${
-							!selectedClient ? "btn-disabled" : ""
-						}`}
+						className={`btn-xs btn-success ${!selectedClient ? "btn-disabled" : ""}`}
 						onClick={async () => {
 							try {
-								const result = await q.client.setStation.netSend({
+								await q.client.setStation.netSend({
 									shipId: shipId,
 									stationId: station.name,
 									clientId: selectedClient,
@@ -254,11 +253,11 @@ function HostStationItem({
 						}`}
 						onClick={() => setSelectedClient(client.clientId)}
 					>
-						<div className="pl-4 flex items-center gap-2">
+						<div className="flex items-center gap-2 pl-4">
 							{client.name} <div className="grow" />
 							<ClientSettings client={client} />
 							<button
-								className="text-red-600 cursor-pointer"
+								className="cursor-pointer text-red-600"
 								onClick={(e) => {
 									e.stopPropagation();
 									e.preventDefault();
@@ -277,11 +276,7 @@ function HostStationItem({
 	);
 }
 
-function ClientSettings({
-	client,
-}: {
-	client: { clientId: string; settings: IClientSettings };
-}) {
+function ClientSettings({ client }: { client: { clientId: string; settings: IClientSettings } }) {
 	return (
 		<MenuTrigger>
 			<RAButton className="cursor-pointer">
@@ -290,22 +285,12 @@ function ClientSettings({
 			<Menu
 				selectionMode="multiple"
 				selectedKeys={(
-					[
-						"soundPlayer",
-						"ambiancePlayer",
-						"musicPlayer",
-						"dialoguePlayer",
-					] as const
+					["soundPlayer", "ambiancePlayer", "musicPlayer", "dialoguePlayer"] as const
 				).filter((key) => client.settings[key])}
 				onSelectionChange={(keys) => {
 					const selection =
 						keys === "all"
-							? new Set([
-									"soundPlayer",
-									"ambiancePlayer",
-									"musicPlayer",
-									"dialoguePlayer",
-								])
+							? new Set(["soundPlayer", "ambiancePlayer", "musicPlayer", "dialoguePlayer"])
 							: keys;
 					q.client.setSettings.netSend({
 						clientId: client.clientId,
@@ -319,7 +304,7 @@ function ClientSettings({
 					});
 				}}
 			>
-				<Header className="font-bold px-2">Settings</Header>
+				<Header className="px-2 font-bold">Settings</Header>
 				<MenuItem id="soundPlayer">Sound Player</MenuItem>
 				{/* TODO March 26, 2026 — some day we'll make it so different ambiance tracks
 										play on different clients, so the bridge has different ambiance than the engineering
