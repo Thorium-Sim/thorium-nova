@@ -258,6 +258,33 @@ export const thorium = t.router({
 			pubsub.publish.thorium.pluginAssets({});
 			return { asset: assetPath };
 		}),
+	httpRequest: t.procedure
+		.input(
+			z.object({
+				url: z.string(),
+				method: z.enum(["get", "post", "put", "delete"]).default("get").optional(),
+				headers: z.record(z.string()),
+				responseType: z.enum(["text", "json", "ignore"]).default("text").optional(),
+			}),
+		)
+		.meta({ action: true })
+		.send(async ({ input }) => {
+			const response = await fetch(input.url, { method: input.method, headers: input.headers });
+
+			if (!response.ok) {
+				throw new Error(
+					`Error ${response.status} making ${input.method} HTTP request to ${input.url}: ${await response.text()}`,
+				);
+			}
+			if (input.responseType === "text") {
+				return { response: await response.text() };
+			}
+			if (input.responseType === "json") {
+				return { response: await response.json() };
+			}
+
+			return { response: null };
+		}),
 	debug: t.procedure
 		.meta({ action: true })
 		.input(z.object({ message: z.string() }))
